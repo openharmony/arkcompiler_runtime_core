@@ -64,9 +64,9 @@ TEST_F(SessionManagerTest, Test)
     std::vector<PtThread> pt_threads = {PtThread::NONE, PtThread::NONE, PtThread::NONE,
                                         PtThread(ManagedThread::GetCurrent())};
 
-    std::thread thread0(RunMThread, &sync_flag0, &pt_threads[0]);
-    std::thread thread1(RunMThread, &sync_flag1, &pt_threads[1]);
-    std::thread thread2(RunMThread, &sync_flag2, &pt_threads[2]);
+    std::thread thread0(RunMThread, &sync_flag0, &pt_threads[0U]);
+    std::thread thread1(RunMThread, &sync_flag1, &pt_threads[1U]);
+    std::thread thread2(RunMThread, &sync_flag2, &pt_threads[2U]);
 
     while (!sync_flag0 || !sync_flag1 || !sync_flag2) {
         ;
@@ -86,14 +86,14 @@ TEST_F(SessionManagerTest, Test)
         sessions++;
         ASSERT_NE(std::find(pt_threads.begin(), pt_threads.end(), thread), pt_threads.end());
     });
-    ASSERT_EQ(sessions, 4);
+    ASSERT_EQ(sessions, 4UL);
 
     sm_.RemoveSession(sm_.GetSessionIdByThread(pt_threads[0]));
     sm_.EnumerateSessions([&sessions, &pt_threads](auto, auto thread) {
         sessions++;
         ASSERT_NE(std::find(pt_threads.begin(), pt_threads.end(), thread), pt_threads.end());
     });
-    ASSERT_EQ(sessions, 7);
+    ASSERT_EQ(sessions, 7UL);
 
     sync_flag0 = false;
     sync_flag1 = false;

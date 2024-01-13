@@ -58,9 +58,9 @@ public:
             return std::nullopt;
         }
         auto id = std::to_string(offset);
-        auto it = prog_->literalarray_table.find(id);
-        ASSERT(it != prog_->literalarray_table.end());
-        return it != prog_->literalarray_table.end() ? std::optional<std::string>(id) : std::nullopt;
+        auto it = prog_->literalarrayTable.find(id);
+        ASSERT(it != prog_->literalarrayTable.end());
+        return it != prog_->literalarrayTable.end() ? std::optional<std::string>(id) : std::nullopt;
     }
 
     virtual std::string GetTypeIdByOffset(uint32_t offset) const
@@ -81,37 +81,37 @@ public:
 
     std::unordered_map<size_t, pandasm::Ins *> *GetPcInsMap()
     {
-        return &pc_ins_map_;
+        return &pcInsMap_;
     }
 
     size_t GetLineNumberByPc(size_t pc) const
     {
-        if (pc == compiler::INVALID_PC || pc_ins_map_.empty()) {
+        if (pc == compiler::INVALID_PC || pcInsMap_.empty()) {
             return 0;
         }
-        auto iter = pc_ins_map_.find(pc);
-        if (iter == pc_ins_map_.end()) {
+        auto iter = pcInsMap_.find(pc);
+        if (iter == pcInsMap_.end()) {
             return 0;
         }
-        return iter->second->ins_debug.line_number;
+        return iter->second->insDebug.lineNumber;
     }
 
     uint32_t GetColumnNumberByPc(size_t pc) const
     {
-        if (pc == compiler::INVALID_PC || pc_ins_map_.empty()) {
+        if (pc == compiler::INVALID_PC || pcInsMap_.empty()) {
             return compiler::INVALID_COLUMN_NUM;
         }
-        auto iter = pc_ins_map_.find(pc);
-        if (iter == pc_ins_map_.end()) {
+        auto iter = pcInsMap_.find(pc);
+        if (iter == pcInsMap_.end()) {
             return compiler::INVALID_COLUMN_NUM;
         }
 
-        return iter->second->ins_debug.column_number;
+        return iter->second->insDebug.columnNumber;
     }
 
     void ClearPcInsMap()
     {
-        pc_ins_map_.clear();
+        pcInsMap_.clear();
     }
 
     void StoreLiteralArray(const std::string &id, pandasm::LiteralArray &&literalarray)
@@ -120,7 +120,7 @@ public:
         if (prog_ == nullptr) {
             return;
         }
-        prog_->literalarray_table.emplace(id, std::move(literalarray));
+        prog_->literalarrayTable.emplace(id, std::move(literalarray));
     }
 
     size_t GetLiteralArrayTableSize() const
@@ -129,7 +129,7 @@ public:
         if (prog_ == nullptr) {
             return 0;
         }
-        return prog_->literalarray_table.size();
+        return prog_->literalarrayTable.size();
     }
 
     bool IsMapsSet() const
@@ -145,7 +145,7 @@ public:
 private:
     pandasm::Program *prog_ {nullptr};
     const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps_ {nullptr};
-    std::unordered_map<size_t, pandasm::Ins *> pc_ins_map_;
+    std::unordered_map<size_t, pandasm::Ins *> pcInsMap_;
 };
 }  // namespace panda::bytecodeopt
 

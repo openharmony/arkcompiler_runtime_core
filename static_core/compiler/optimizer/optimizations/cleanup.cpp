@@ -44,28 +44,28 @@ bool Cleanup::RunImpl()
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
     // Two vectors to store basic blocks lists
-    auto empty_blocks = &empty1_;
-    auto new_empty_blocks = &empty2_;
+    auto emptyBlocks = &empty1_;
+    auto newEmptyBlocks = &empty2_;
 
-    bool modified = (light_mode_ ? PhiCheckerLight() : PhiChecker());
+    bool modified = (lightMode_ ? PhiCheckerLight() : PhiChecker());
 
     for (auto bb : GetGraph()->GetVectorBlocks()) {
         if (!SkipBasicBlock(bb) && bb->IsEmpty()) {
-            empty_blocks->insert(bb);
+            emptyBlocks->insert(bb);
         }
     }
 
-    bool first_run = true;
+    bool firstRun = true;
     do {
-        modified |= RunOnce(empty_blocks, new_empty_blocks, !first_run);
-        first_run = false;
+        modified |= RunOnce(emptyBlocks, newEmptyBlocks, !firstRun);
+        firstRun = false;
         // Swap vectors pointers
-        auto temp = empty_blocks;
-        empty_blocks = new_empty_blocks;
-        new_empty_blocks = temp;
+        auto temp = emptyBlocks;
+        emptyBlocks = newEmptyBlocks;
+        newEmptyBlocks = temp;
         // Clean the "new" list
-        new_empty_blocks->clear();
-    } while (!empty_blocks->empty());
+        newEmptyBlocks->clear();
+    } while (!emptyBlocks->empty());
 
     empty1_.clear();
     empty2_.clear();
@@ -99,13 +99,13 @@ bool Cleanup::RunImpl()
     return modified;
 }
 
-bool Cleanup::RunOnce(ArenaSet<BasicBlock *> *empty_blocks, ArenaSet<BasicBlock *> *new_empty_blocks, bool simple_dce)
+bool Cleanup::RunOnce(ArenaSet<BasicBlock *> *emptyBlocks, ArenaSet<BasicBlock *> *newEmptyBlocks, bool simpleDce)
 {
     bool modified = false;
-    auto marker_holder = MarkerHolder(GetGraph());
-    auto dead_mrk = marker_holder.GetMarker();
+    auto markerHolder = MarkerHolder(GetGraph());
+    auto deadMrk = markerHolder.GetMarker();
     // Check all basic blocks in "old" list
-    for (auto bb : *empty_blocks) {
+    for (auto bb : *emptyBlocks) {
         // In some tricky cases block may be already deleted in previous iteration
         if (bb->GetGraph() == nullptr) {
             continue;
@@ -123,22 +123,22 @@ bool Cleanup::RunOnce(ArenaSet<BasicBlock *> *empty_blocks, ArenaSet<BasicBlock 
         // all 'bb' Phi(s) must have user only in successor Phis
         if (succ->GetPredsBlocks().size() > 1) {
             for (auto phi : bb->PhiInsts()) {
-                for (auto &user_item : phi->GetUsers()) {
-                    auto user = user_item.GetInst();
+                for (auto &userItem : phi->GetUsers()) {
+                    auto user = userItem.GetInst();
                     ASSERT((user->GetBasicBlock() == succ && user->IsPhi()) || user->IsCatchPhi());
                 }
             }
         }
 #endif
-        modified |= ProcessBB(bb, dead_mrk, new_empty_blocks);
+        modified |= ProcessBB(bb, deadMrk, newEmptyBlocks);
     }
 
-    if (simple_dce) {
-        modified |= SimpleDce(dead_mrk, new_empty_blocks);
-    } else if (light_mode_) {
-        modified |= Dce<true>(dead_mrk, new_empty_blocks);
+    if (simpleDce) {
+        modified |= SimpleDce(deadMrk, newEmptyBlocks);
+    } else if (lightMode_) {
+        modified |= Dce<true>(deadMrk, newEmptyBlocks);
     } else {
-        modified |= Dce<false>(dead_mrk, new_empty_blocks);
+        modified |= Dce<false>(deadMrk, newEmptyBlocks);
     }
     dead_.clear();
 
@@ -164,29 +164,29 @@ bool Cleanup::CheckSpecialTriangle(BasicBlock *bb)
         }
         // Checking all Phis
         for (auto phi : succ->PhiInsts()) {
-            size_t index_bb = phi->CastToPhi()->GetPredBlockIndex(bb);
-            size_t index_pred = phi->CastToPhi()->GetPredBlockIndex(pred);
-            ASSERT(index_bb != index_pred);
+            size_t indexBb = phi->CastToPhi()->GetPredBlockIndex(bb);
+            size_t indexPred = phi->CastToPhi()->GetPredBlockIndex(pred);
+            ASSERT(indexBb != indexPred);
 
-            auto inst_pred = phi->GetInput(index_pred).GetInst();
-            auto inst_bb = phi->GetInput(index_bb).GetInst();
+            auto instPred = phi->GetInput(indexPred).GetInst();
+            auto instBb = phi->GetInput(indexBb).GetInst();
             // If phi input is in 'bb', check input of that phi instead
-            if (inst_bb->GetBasicBlock() == bb) {
-                ASSERT(inst_bb->IsPhi());
-                inst_bb = inst_bb->CastToPhi()->GetInput(i).GetInst();
+            if (instBb->GetBasicBlock() == bb) {
+                ASSERT(instBb->IsPhi());
+                instBb = instBb->CastToPhi()->GetInput(i).GetInst();
             }
-            if (inst_bb != inst_pred) {
+            if (instBb != instPred) {
                 return true;
             }
         }
         // Would fully remove 'straight' pred->succ edge, and second one would stay after 'bb' removal
-        saved_preds_.push_back(pred);
+        savedPreds_.push_back(pred);
         i++;
     }
     return false;
 }
 
-void Cleanup::RemoveDeadPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *new_empty_blocks)
+void Cleanup::RemoveDeadPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *newEmptyBlocks)
 {
     for (auto phi : bb->PhiInstsSafe()) {
         if (!phi->GetUsers().Empty()) {
@@ -199,22 +199,22 @@ void Cleanup::RemoveDeadPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *new_empty_bl
         for (auto pred : bb->GetPredsBlocks()) {
             if (pred->IsEmpty() && !SkipBasicBlock(pred)) {
                 COMPILER_LOG(DEBUG, CLEANUP) << "Would re-check empty block " << pred->GetId();
-                new_empty_blocks->insert(pred);
+                newEmptyBlocks->insert(pred);
             }
         }
     }
 }
 
-bool Cleanup::ProcessBB(BasicBlock *bb, Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks)
+bool Cleanup::ProcessBB(BasicBlock *bb, Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks)
 {
     auto succ = bb->GetSuccessor(0);
     if (CheckSpecialTriangle(bb)) {
         return false;
     }
     // Remove dead Phi(s)
-    RemoveDeadPhi(bb, new_empty_blocks);
+    RemoveDeadPhi(bb, newEmptyBlocks);
     // Process saved predecessors
-    for (auto pred : saved_preds_) {
+    for (auto pred : savedPreds_) {
         ASSERT(pred->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
         constexpr auto PREDS_BLOCK_NUM = 2;
         ASSERT(succ->GetPredsBlocks().size() >= PREDS_BLOCK_NUM);
@@ -222,7 +222,7 @@ bool Cleanup::ProcessBB(BasicBlock *bb, Marker dead_mrk, ArenaSet<BasicBlock *> 
         auto last = pred->GetLastInst();
         if (last->GetOpcode() == Opcode::If || last->GetOpcode() == Opcode::IfImm ||
             last->GetOpcode() == Opcode::AddOverflow || last->GetOpcode() == Opcode::SubOverflow) {
-            last->SetMarker(dead_mrk);
+            last->SetMarker(deadMrk);
             dead_.push_back(last);
         } else {
             ASSERT(last->GetOpcode() == Opcode::Try);
@@ -230,24 +230,24 @@ bool Cleanup::ProcessBB(BasicBlock *bb, Marker dead_mrk, ArenaSet<BasicBlock *> 
         pred->RemoveSucc(succ);
         if (succ->GetPredsBlocks().size() == PREDS_BLOCK_NUM) {
             for (auto phi : succ->PhiInstsSafe()) {
-                auto rm_index = phi->CastToPhi()->GetPredBlockIndex(pred);
-                auto remaining_inst = phi->GetInputs()[1 - rm_index].GetInst();
-                phi->ReplaceUsers(remaining_inst);
+                auto rmIndex = phi->CastToPhi()->GetPredBlockIndex(pred);
+                auto remainingInst = phi->GetInputs()[1 - rmIndex].GetInst();
+                phi->ReplaceUsers(remainingInst);
                 succ->RemoveInst(phi);
             }
         } else {  // more than 2 predecessors
             for (auto phi : succ->PhiInstsSafe()) {
-                auto rm_index = phi->CastToPhi()->GetPredBlockIndex(pred);
-                phi->CastToPhi()->RemoveInput(rm_index);
+                auto rmIndex = phi->CastToPhi()->GetPredBlockIndex(pred);
+                phi->CastToPhi()->RemoveInput(rmIndex);
             }
         }
         succ->RemovePred(pred);
         // Fixing LoopAnalysis or DomTree is no necessary here, because there would be another edge
     }
-    saved_preds_.clear();
-    bool bad_loop = bb->GetLoop()->IsIrreducible();
-    GetGraph()->RemoveEmptyBlockWithPhis(bb, bad_loop);
-    if (bad_loop) {
+    savedPreds_.clear();
+    bool badLoop = bb->GetLoop()->IsIrreducible();
+    GetGraph()->RemoveEmptyBlockWithPhis(bb, badLoop);
+    if (badLoop) {
         GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
         GetGraph()->RunPass<LoopAnalyzer>();
     }
@@ -255,24 +255,24 @@ bool Cleanup::ProcessBB(BasicBlock *bb, Marker dead_mrk, ArenaSet<BasicBlock *> 
     return true;
 }
 
-void Cleanup::MarkInlinedCaller(Marker live_mrk, Inst *save_state)
+void Cleanup::MarkInlinedCaller(Marker liveMrk, Inst *saveState)
 {
-    if (!save_state->IsSaveState()) {
+    if (!saveState->IsSaveState()) {
         return;
     }
-    auto caller = static_cast<SaveStateInst *>(save_state)->GetCallerInst();
+    auto caller = static_cast<SaveStateInst *>(saveState)->GetCallerInst();
     // if caller->IsInlined() is false, graph is being inlined and caller is not in the graph
-    if (caller != nullptr && !caller->IsMarked(live_mrk) && caller->IsInlined()) {
-        MarkLiveRec<false>(live_mrk, caller);
+    if (caller != nullptr && !caller->IsMarked(liveMrk) && caller->IsInlined()) {
+        MarkLiveRec<false>(liveMrk, caller);
     }
 }
 
 bool Cleanup::IsRemovableCall(Inst *inst)
 {
     if (inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) {
-        for (auto &ss_user : inst->GetSaveState()->GetUsers()) {
-            if (ss_user.GetInst()->GetOpcode() == Opcode::ReturnInlined &&
-                ss_user.GetInst()->GetFlag(inst_flags::MEM_BARRIER)) {
+        for (auto &ssUser : inst->GetSaveState()->GetUsers()) {
+            if (ssUser.GetInst()->GetOpcode() == Opcode::ReturnInlined &&
+                ssUser.GetInst()->GetFlag(inst_flags::MEM_BARRIER)) {
                 return false;
             }
         }
@@ -284,45 +284,45 @@ bool Cleanup::IsRemovableCall(Inst *inst)
 // Mark instructions that have the NOT_REMOVABLE property
 // and recursively mark all their inputs
 template <bool LIGHT_MODE>
-void Cleanup::MarkLiveRec(Marker live_mrk, Inst *inst)
+void Cleanup::MarkLiveRec(Marker liveMrk, Inst *inst)
 {
     // No recursion for one-input case, otherwise got stackoverflow on TSAN job
     bool marked = false;
     while (inst->GetInputsCount() == 1) {
-        marked = inst->SetMarker(live_mrk);
+        marked = inst->SetMarker(liveMrk);
         if (marked) {
             break;
         }
         if constexpr (!LIGHT_MODE) {
-            MarkInlinedCaller(live_mrk, inst);
+            MarkInlinedCaller(liveMrk, inst);
         }
         inst = inst->GetInput(0).GetInst();
     }
-    if (!marked && !inst->SetMarker(live_mrk)) {
+    if (!marked && !inst->SetMarker(liveMrk)) {
         if constexpr (!LIGHT_MODE) {
-            MarkInlinedCaller(live_mrk, inst);
+            MarkInlinedCaller(liveMrk, inst);
         }
         for (auto input : inst->GetInputs()) {
-            MarkLiveRec<LIGHT_MODE>(live_mrk, input.GetInst());
+            MarkLiveRec<LIGHT_MODE>(liveMrk, input.GetInst());
         }
     }
 }
 
 template <bool LIGHT_MODE>
-void Cleanup::MarkLiveInstructions(Marker dead_mrk, Marker live_mrk)
+void Cleanup::MarkLiveInstructions(Marker deadMrk, Marker liveMrk)
 {
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInsts()) {
             if constexpr (LIGHT_MODE) {
-                if (inst->IsNotRemovable() && !inst->IsMarked(dead_mrk)) {
-                    MarkLiveRec<true>(live_mrk, inst);
+                if (inst->IsNotRemovable() && !inst->IsMarked(deadMrk)) {
+                    MarkLiveRec<true>(liveMrk, inst);
                 }
             } else {
                 if (inst->GetOpcode() == Opcode::ReturnInlined) {
                     // SaveState input of ReturnInlined will be marked as live through CallInlined if needed
-                    inst->SetMarker(live_mrk);
-                } else if (inst->IsNotRemovable() && !inst->IsMarked(dead_mrk) && !IsRemovableCall(inst)) {
-                    MarkLiveRec<false>(live_mrk, inst);
+                    inst->SetMarker(liveMrk);
+                } else if (inst->IsNotRemovable() && !inst->IsMarked(deadMrk) && !IsRemovableCall(inst)) {
+                    MarkLiveRec<false>(liveMrk, inst);
                 }
             }
         }
@@ -330,130 +330,130 @@ void Cleanup::MarkLiveInstructions(Marker dead_mrk, Marker live_mrk)
 }
 
 template <bool LIGHT_MODE>
-bool Cleanup::Dce(Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks)
+bool Cleanup::Dce(Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks)
 {
     bool modified = false;
-    auto marker_holder = MarkerHolder(GetGraph());
-    auto live_mrk = marker_holder.GetMarker();
-    MarkLiveInstructions<LIGHT_MODE>(dead_mrk, live_mrk);
+    auto markerHolder = MarkerHolder(GetGraph());
+    auto liveMrk = markerHolder.GetMarker();
+    MarkLiveInstructions<LIGHT_MODE>(deadMrk, liveMrk);
 
     // Remove non-live instructions
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInstsSafe()) {
-            if (inst->IsMarked(live_mrk)) {
+            if (inst->IsMarked(liveMrk)) {
                 if (LIGHT_MODE ||
                     !(inst->GetOpcode() == Opcode::ReturnInlined && inst->GetSaveState()->GetBasicBlock() == nullptr)) {
                     continue;
                 }
             }
             if (!LIGHT_MODE && inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) {
-                auto caller_ss = inst->GetSaveState();
-                for (auto &user : caller_ss->GetUsers()) {
-                    auto user_inst = user.GetInst();
+                auto callerSs = inst->GetSaveState();
+                for (auto &user : callerSs->GetUsers()) {
+                    auto userInst = user.GetInst();
                     // we mark all ReturnInlined as live initially to reduce number of IsDominate checks
                     // IsDominate check is needed because several pairs of Call/Return inlined can share SaveState
-                    if (user_inst->GetOpcode() == Opcode::ReturnInlined && inst->IsDominate(user_inst)) {
-                        user_inst->ResetMarker(live_mrk);
+                    if (userInst->GetOpcode() == Opcode::ReturnInlined && inst->IsDominate(userInst)) {
+                        userInst->ResetMarker(liveMrk);
                     }
                 }
             }
-            bool is_phi = inst->IsPhi();
+            bool isPhi = inst->IsPhi();
             bb->RemoveInst(inst);
             COMPILER_LOG(DEBUG, CLEANUP) << "Dead instruction " << inst->GetId();
             GetGraph()->GetEventWriter().EventCleanup(inst->GetId(), inst->GetPc());
             modified = true;
 
-            if (is_phi) {
+            if (isPhi) {
                 for (auto pred : bb->GetPredsBlocks()) {
                     if (pred->IsEmpty() && !SkipBasicBlock(pred)) {
                         COMPILER_LOG(DEBUG, CLEANUP) << "Would re-check empty block " << pred->GetId();
-                        new_empty_blocks->insert(pred);
+                        newEmptyBlocks->insert(pred);
                     }
                 }
             } else if (bb->IsEmpty() && !SkipBasicBlock(bb)) {
                 COMPILER_LOG(DEBUG, CLEANUP) << "No more non-Phi instructions in block " << bb->GetId();
-                new_empty_blocks->insert(bb);
+                newEmptyBlocks->insert(bb);
             }
         }
     }
     return modified;
 }
 
-void Cleanup::SetLiveRec(Inst *inst, Marker mrk, Marker live_mrk)
+void Cleanup::SetLiveRec(Inst *inst, Marker mrk, Marker liveMrk)
 {
-    for (auto input_item : inst->GetInputs()) {
-        auto input = input_item.GetInst();
-        if (!input->IsMarked(live_mrk) && input->IsMarked(mrk)) {
+    for (auto inputItem : inst->GetInputs()) {
+        auto input = inputItem.GetInst();
+        if (!input->IsMarked(liveMrk) && input->IsMarked(mrk)) {
             input->ResetMarker(mrk);
-            input->SetMarker(live_mrk);
-            SetLiveRec(input, mrk, live_mrk);
+            input->SetMarker(liveMrk);
+            SetLiveRec(input, mrk, liveMrk);
         }
     }
 }
 
-void Cleanup::LiveUserSearchRec(Inst *inst, Marker mrk, Marker live_mrk, Marker dead_mrk)
+void Cleanup::LiveUserSearchRec(Inst *inst, Marker mrk, Marker liveMrk, Marker deadMrk)
 {
     ASSERT(!inst->IsMarked(mrk));
-    ASSERT(!inst->IsMarked(dead_mrk));
-    if (inst->IsMarked(live_mrk)) {
-        SetLiveRec(inst, mrk, live_mrk);
+    ASSERT(!inst->IsMarked(deadMrk));
+    if (inst->IsMarked(liveMrk)) {
+        SetLiveRec(inst, mrk, liveMrk);
         return;
     }
     if (inst->IsNotRemovable()) {
-        inst->SetMarker(live_mrk);
-        SetLiveRec(inst, mrk, live_mrk);
+        inst->SetMarker(liveMrk);
+        SetLiveRec(inst, mrk, liveMrk);
         return;
     }
     inst->SetMarker(mrk);
     temp_.push_back(inst);
     bool unknown = false;
-    for (auto &user_item : inst->GetUsers()) {
-        auto user = user_item.GetInst();
+    for (auto &userItem : inst->GetUsers()) {
+        auto user = userItem.GetInst();
         if (user->IsMarked(mrk)) {
             unknown = true;
             continue;
         }
-        if (user->IsMarked(dead_mrk)) {
+        if (user->IsMarked(deadMrk)) {
             continue;
         }
-        LiveUserSearchRec(user, mrk, live_mrk, dead_mrk);
-        if (user->IsMarked(live_mrk)) {
-            ASSERT(!inst->IsMarked(mrk) && inst->IsMarked(live_mrk));
+        LiveUserSearchRec(user, mrk, liveMrk, deadMrk);
+        if (user->IsMarked(liveMrk)) {
+            ASSERT(!inst->IsMarked(mrk) && inst->IsMarked(liveMrk));
             return;
         }
         ASSERT(inst->IsMarked(mrk));
         if (user->IsMarked(mrk)) {
-            ASSERT(!user->IsMarked(live_mrk) && !user->IsMarked(dead_mrk));
+            ASSERT(!user->IsMarked(liveMrk) && !user->IsMarked(deadMrk));
             unknown = true;
         } else {
-            ASSERT(user->IsMarked(dead_mrk));
+            ASSERT(user->IsMarked(deadMrk));
         }
     }
     if (!unknown) {
         inst->ResetMarker(mrk);
-        inst->SetMarker(dead_mrk);
+        inst->SetMarker(deadMrk);
         dead_.push_back(inst);
     }
 }
 
-void Cleanup::Marking(Marker dead_mrk, Marker mrk, Marker live_mrk)
+void Cleanup::Marking(Marker deadMrk, Marker mrk, Marker liveMrk)
 {
     size_t i = 0;
     while (i < dead_.size()) {
         auto inst = dead_.at(i);
-        for (auto input_item : inst->GetInputs()) {
-            auto input = input_item.GetInst();
-            if (input->IsMarked(dead_mrk) || input->IsMarked(mrk)) {
+        for (auto inputItem : inst->GetInputs()) {
+            auto input = inputItem.GetInst();
+            if (input->IsMarked(deadMrk) || input->IsMarked(mrk)) {
                 continue;
             }
-            LiveUserSearchRec(input, mrk, live_mrk, dead_mrk);
+            LiveUserSearchRec(input, mrk, liveMrk, deadMrk);
             for (auto temp : temp_) {
                 if (!temp->IsMarked(mrk)) {
                     continue;
                 }
-                ASSERT(!temp->IsMarked(live_mrk) && !temp->IsMarked(dead_mrk));
+                ASSERT(!temp->IsMarked(liveMrk) && !temp->IsMarked(deadMrk));
                 inst->ResetMarker(mrk);
-                inst->SetMarker(dead_mrk);
+                inst->SetMarker(deadMrk);
                 dead_.push_back(inst);
             }
             temp_.clear();
@@ -462,7 +462,7 @@ void Cleanup::Marking(Marker dead_mrk, Marker mrk, Marker live_mrk)
     }
 }
 
-bool Cleanup::Removal(ArenaSet<BasicBlock *> *new_empty_blocks)
+bool Cleanup::Removal(ArenaSet<BasicBlock *> *newEmptyBlocks)
 {
     bool modified = false;
 
@@ -481,38 +481,38 @@ bool Cleanup::Removal(ArenaSet<BasicBlock *> *new_empty_blocks)
             for (auto pred : bb->GetPredsBlocks()) {
                 if (pred->IsEmpty() && !SkipBasicBlock(pred)) {
                     COMPILER_LOG(DEBUG, CLEANUP) << "Would re-check empty block " << pred->GetId();
-                    new_empty_blocks->insert(pred);
+                    newEmptyBlocks->insert(pred);
                 }
             }
         } else {
             if (bb->IsEmpty() && !SkipBasicBlock(bb)) {
                 COMPILER_LOG(DEBUG, CLEANUP) << "No more non-Phi instructions in block " << bb->GetId();
-                new_empty_blocks->insert(bb);
+                newEmptyBlocks->insert(bb);
             }
         }
     }
     return modified;
 }
 
-bool Cleanup::SimpleDce(Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks)
+bool Cleanup::SimpleDce(Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks)
 {
-    auto marker_holder = MarkerHolder(GetGraph());
-    auto mrk = marker_holder.GetMarker();
-    auto live_marker_holder = MarkerHolder(GetGraph());
-    auto live_mrk = live_marker_holder.GetMarker();
+    auto markerHolder = MarkerHolder(GetGraph());
+    auto mrk = markerHolder.GetMarker();
+    auto liveMarkerHolder = MarkerHolder(GetGraph());
+    auto liveMrk = liveMarkerHolder.GetMarker();
 
     // Step 1. Marking
-    Marking(dead_mrk, mrk, live_mrk);
+    Marking(deadMrk, mrk, liveMrk);
 
     // Step 2. Removal
-    return Removal(new_empty_blocks);
+    return Removal(newEmptyBlocks);
 }
 
 void Cleanup::BuildDominators()
 {
     size_t amount = 0;
-    fake_root_ = reinterpret_cast<Inst *>(sizeof(Inst *));
-    map_.insert({fake_root_, amount});
+    fakeRoot_ = reinterpret_cast<Inst *>(sizeof(Inst *));
+    map_.insert({fakeRoot_, amount});
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->PhiInsts()) {
             amount++;
@@ -527,16 +527,16 @@ void Cleanup::BuildDominators()
         }
     }
     Init(amount + 1);
-    SetVertex(0, fake_root_);
+    SetVertex(0, fakeRoot_);
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->Insts()) {
             if (map_.count(inst) > 0 && GetSemi(inst) == DEFAULT_DFS_VAL) {
-                SetParent(inst, fake_root_);
+                SetParent(inst, fakeRoot_);
                 DfsNumbering(inst);
             }
         }
     }
-    ASSERT(static_cast<size_t>(dfs_num_) == amount);
+    ASSERT(static_cast<size_t>(dfsNum_) == amount);
 
     for (size_t i = amount; i > 0; i--) {
         ComputeImmediateDominators(GetVertex(i));
@@ -578,7 +578,7 @@ void Cleanup::ComputeImmediateDominators(Inst *inst)
             }
         }
     } else {
-        auto eval = fake_root_;
+        auto eval = fakeRoot_;
         if (GetSemi(eval) < GetSemi(inst)) {
             SetSemi(inst, GetSemi(eval));
         }
@@ -624,13 +624,13 @@ void Cleanup::Compress(Inst *inst)
  */
 void Cleanup::DfsNumbering(Inst *inst)
 {
-    ASSERT(inst != nullptr || inst != fake_root_);
-    dfs_num_++;
-    ASSERT_PRINT(static_cast<size_t>(dfs_num_) < vertices_.size(), "DFS-number overflow");
+    ASSERT(inst != nullptr || inst != fakeRoot_);
+    dfsNum_++;
+    ASSERT_PRINT(static_cast<size_t>(dfsNum_) < vertices_.size(), "DFS-number overflow");
 
-    SetVertex(dfs_num_, inst);
+    SetVertex(dfsNum_, inst);
     SetLabel(inst, inst);
-    SetSemi(inst, dfs_num_);
+    SetSemi(inst, dfsNum_);
     SetAncestor(inst, nullptr);
 
     for (auto &user : inst->GetUsers()) {
@@ -685,7 +685,7 @@ void Cleanup::Init(size_t count)
     for (auto &bucket : buckets_) {
         bucket.clear();
     }
-    dfs_num_ = DEFAULT_DFS_VAL;
+    dfsNum_ = DEFAULT_DFS_VAL;
 }
 
 // Remove only phi with same inputs
@@ -694,15 +694,15 @@ bool Cleanup::PhiCheckerLight() const
     bool modified = false;
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto phi : bb->PhiInstsSafe()) {
-            bool same_inputs = true;
+            bool sameInputs = true;
             auto input = phi->GetInput(0).GetInst();
             for (size_t i = 1; i < phi->GetInputsCount(); i++) {
                 if (input != phi->GetInput(i).GetInst()) {
-                    same_inputs = false;
+                    sameInputs = false;
                     break;
                 }
             }
-            if (same_inputs) {
+            if (sameInputs) {
                 phi->ReplaceUsers(input);
                 bb->RemoveInst(phi);
                 modified = true;
@@ -733,15 +733,15 @@ bool Cleanup::PhiChecker()
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto phi : bb->PhiInstsSafe()) {
             auto change = GetIdom(phi);
-            if (change == fake_root_) {
+            if (change == fakeRoot_) {
                 continue;
             }
-            while (GetIdom(change) != fake_root_) {
+            while (GetIdom(change) != fakeRoot_) {
                 change = GetIdom(change);
             }
-            auto basic_block = phi->GetBasicBlock();
+            auto basicBlock = phi->GetBasicBlock();
             phi->ReplaceUsers(change);
-            basic_block->RemoveInst(phi);
+            basicBlock->RemoveInst(phi);
             modified = true;
         }
     }

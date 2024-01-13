@@ -37,8 +37,8 @@ public:
     NO_COPY_SEMANTIC(MallocProxyAllocator);
     NO_MOVE_SEMANTIC(MallocProxyAllocator);
 
-    explicit MallocProxyAllocator(MemStatsType *mem_stats, SpaceType type_allocation = SpaceType::SPACE_TYPE_INTERNAL)
-        : type_allocation_(type_allocation), mem_stats_ {mem_stats}
+    explicit MallocProxyAllocator(MemStatsType *memStats, SpaceType typeAllocation = SpaceType::SPACE_TYPE_INTERNAL)
+        : typeAllocation_(typeAllocation), memStats_ {memStats}
     {
     }
 
@@ -56,9 +56,9 @@ public:
 
 private:
     static constexpr bool DUMMY_ALLOC_CONFIG = std::is_same<AllocConfigT, EmptyMemoryConfig>::value;
-    std::unordered_map<void *, size_t> allocated_memory_;
-    SpaceType type_allocation_;
-    MemStatsType *mem_stats_;
+    std::unordered_map<void *, size_t> allocatedMemory_;
+    SpaceType typeAllocation_;
+    MemStatsType *memStats_;
     os::memory::Mutex lock_;
 };
 

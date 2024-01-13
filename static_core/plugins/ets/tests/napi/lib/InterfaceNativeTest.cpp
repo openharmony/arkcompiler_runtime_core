@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include <cstdio>
 #include <string>
@@ -44,12 +45,12 @@ ETS_EXPORT ets_int ETS_CALL ETS_InterfaceNativeTest_testFloat(EtsEnv *env, ets_c
         return -1;
     }
 
-    float tmp[3];
-    tmp[0] = f1;
-    tmp[1] = f2;
-    tmp[2] = f3;
+    float tmp[3U];
+    tmp[0U] = f1;
+    tmp[1U] = f2;
+    tmp[2U] = f3;
     method = env->GetStaticp_method(cls, "staticFloatMethod", "I:F");
-    for (int i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3U; i++) {
         ets_float res = env->CallStaticFloatMethod(cls, method, i);
         if (res != tmp[i]) {
             return -1;
@@ -66,7 +67,7 @@ ETS_EXPORT ets_int ETS_CALL ETS_InterfaceNativeTest_testNewObject(EtsEnv *env, e
     }
 
     ets_value arr[1];
-    arr[0].i = 7;
+    arr[0].i = 7_I;
     ets_object etsobj = env->NewObjectArray(cls, method, arr);
     if (etsobj == nullptr) {
         return -1;
@@ -104,14 +105,14 @@ ETS_EXPORT ets_int ETS_CALL ETS_InterfaceNativeTest_testGetStrUTF(EtsEnv *env, [
                                                                   ets_string str)
 {
     std::string expected = {"HELLO WORLD!"};
-    char buf1[6] = {};
-    char buf2[6] = {};
-    env->GetStringUTFRegion(str, 0, 6, buf1);
-    env->GetStringUTFRegion(str, 6, 6, buf2);
-    for (int i = 0; i < 6; i++) {
-        if (buf1[i] != expected[i] || buf2[i] != expected[i + 6]) {
+    char buf1[6U] = {};
+    char buf2[6U] = {};
+    env->GetStringUTFRegion(str, 0, 6U, buf1);
+    env->GetStringUTFRegion(str, 6U, 6U, buf2);
+    for (size_t i = 0; i < 6U; i++) {
+        if (buf1[i] != expected[i] || buf2[i] != expected[i + 6U]) {
             printf("error: buf1[%i] = '%c', buf2[%i] = '%c', expected '%c' and '%c'", i, buf1[i], i, buf2[i],
-                   expected[i], expected[i + 6]);
+                   expected[i], expected[i + 6U]);
             return -1;
         }
     }

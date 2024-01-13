@@ -30,7 +30,7 @@ struct TestData {
     uint8_t data[10U];
 };
 
-static std::vector<TestData<uint64_t>> UNSIGNED_TEST_DATA {
+static std::vector<TestData<uint64_t>> g_unsignedTestData {
     {0x00U, 1U, {0x00U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {0x7fU, 1U, {0x7fU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {0xffU, 2U, {0xffU, 0x01U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
@@ -45,11 +45,11 @@ static std::vector<TestData<uint64_t>> UNSIGNED_TEST_DATA {
     {0x80c1011592d7fU, 8U, {0xffU, 0xdaU, 0xe4U, 0x8aU, 0x81U, 0x82U, 0x83U, 0x04U, 0x80U, 0x80U}},
     {0xffffffffffffffffU, 10U, {0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0x01U}}};
 
-static std::vector<TestData<uint64_t>> UNSIGNED_PARTIAL_DECODING_TEST_DATA {
+static std::vector<TestData<uint64_t>> g_unsignedPartialDecodingTestData {
     {0xffffffffffffffffU, 10U, {0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0x03U}},
 };
 
-static std::vector<TestData<int8_t>> SIGNED_TEST_DATA8 {
+static std::vector<TestData<int8_t>> g_signedTestDatA8 {
     {0x00U, 1U, {0x00U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {0x01U, 1U, {0x01U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {-1L, 1U, {0x7fU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
@@ -57,7 +57,7 @@ static std::vector<TestData<int8_t>> SIGNED_TEST_DATA8 {
     {static_cast<int8_t>(0x80U), 2U, {0x80U, 0x7fU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {-0x40L, 1U, {0x40U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}}};
 
-static std::vector<TestData<int16_t>> SIGNED_TEST_DATA16 {
+static std::vector<TestData<int16_t>> g_signedTestDatA16 {
     {0x00U, 1U, {0x00U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {0x0102U, 2U, {0x82U, 0x02U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {-1L, 1U, {0x7fU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
@@ -65,7 +65,7 @@ static std::vector<TestData<int16_t>> SIGNED_TEST_DATA16 {
     {static_cast<int16_t>(0x8000U), 3U, {0x80U, 0x80U, 0x7eU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {static_cast<int16_t>(0x4001U), 3U, {0x81U, 0x80U, 0x01U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}}};
 
-static std::vector<TestData<int32_t>> SIGNED_TEST_DATA32 {
+static std::vector<TestData<int32_t>> g_signedTestDatA32 {
     {0x00U, 1U, {0x00U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {0x01020304U, 4U, {0x84U, 0x86U, 0x88U, 0x08U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {-1L, 1U, {0x7fU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
@@ -73,17 +73,17 @@ static std::vector<TestData<int32_t>> SIGNED_TEST_DATA32 {
     {static_cast<int32_t>(0x80000000U), 5U, {0x80U, 0x80U, 0x80U, 0x80U, 0x78U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {static_cast<int32_t>(0x40000001U), 5U, {0x81U, 0x80U, 0x80U, 0x80U, 0x04U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}}};
 
-static std::vector<TestData<int8_t>> SIGNED_PARTIAL_DECODING_TEST_DATA8 {
+static std::vector<TestData<int8_t>> g_signedPartialDecodingTestDatA8 {
     {1U, 10U, {0x81U, 0x82U, 0x83U, 0x84U, 0x85U, 0x86U, 0x87U, 0x88U, 0x89U, 0x8aU}}};
 
-static std::vector<TestData<int16_t>> SIGNED_PARTIAL_DECODING_TEST_DATA16 {
+static std::vector<TestData<int16_t>> g_signedPartialDecodingTestDatA16 {
     {-0x3effL, 10U, {0x81U, 0x82U, 0x83U, 0x84U, 0x85U, 0x86U, 0x87U, 0x88U, 0x89U, 0x8aU}}};
 
-static std::vector<TestData<int32_t>> SIGNED_PARTIAL_DECODING_TEST_DATA32 {
+static std::vector<TestData<int32_t>> g_signedPartialDecodingTestDatA32 {
     {0x5080c101U, 10U, {0x81U, 0x82U, 0x83U, 0x84U, 0x85U, 0x86U, 0x87U, 0x88U, 0x89U, 0x8aU}}};
 
 // clang-format off
-static std::vector<TestData<int64_t>> SIGNED_TEST_DATA64 {
+static std::vector<TestData<int64_t>> g_signedTestDatA64 {
     {0x00U, 1U, {0x00U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {0x40U, 2U, {0xc0U, 0x00U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {0x7fU, 2U, {0xffU, 0x00U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
@@ -95,14 +95,14 @@ static std::vector<TestData<int64_t>> SIGNED_TEST_DATA64 {
     {-0x40L, 1U, {0x40U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}},
     {-0x1122L, 2U, {0xdeU, 0x5dU, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U}}};
 
-static std::vector<TestData<int64_t>> SIGNED_PARTIAL_DECODING_TEST_DATA64 {
+static std::vector<TestData<int64_t>> g_signedPartialDecodingTestDatA64 {
     {0x9101c305080c101U, 10U, {0x81U, 0x82U, 0x83U, 0x84U, 0x85U, 0x86U, 0x87U, 0x88U, 0x89U, 0x8aU}},
     {static_cast<int64_t>(0x8000000000000000U), 10U,
     {0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x80U, 0x5fU}}};
 // clang-format on
 
 template <class T>
-static void TestDecodeUnsigned(const std::vector<TestData<uint64_t>> &data, bool is_partial = false)
+static void TestDecodeUnsigned(const std::vector<TestData<uint64_t>> &data, bool isPartial = false)
 {
     for (auto &t : data) {
         std::ostringstream ss;
@@ -114,7 +114,7 @@ static void TestDecodeUnsigned(const std::vector<TestData<uint64_t>> &data, bool
         constexpr size_t BITWIDTH = std::numeric_limits<T>::digits;
 
         auto [value, size, is_full] = DecodeUnsigned<T>(t.data);
-        EXPECT_EQ(is_full, MinimumBitsToStore(t.value) <= BITWIDTH && !is_partial) << ss.str();
+        EXPECT_EQ(is_full, MinimumBitsToStore(t.value) <= BITWIDTH && !isPartial) << ss.str();
         EXPECT_EQ(size, is_full ? t.size : (BITWIDTH + 6U) / 7U) << ss.str();
         EXPECT_EQ(value, static_cast<T>(t.value)) << ss.str();
     }
@@ -122,15 +122,15 @@ static void TestDecodeUnsigned(const std::vector<TestData<uint64_t>> &data, bool
 
 TEST(Leb128, DecodeUnsigned)
 {
-    TestDecodeUnsigned<uint8_t>(UNSIGNED_TEST_DATA);
-    TestDecodeUnsigned<uint16_t>(UNSIGNED_TEST_DATA);
-    TestDecodeUnsigned<uint32_t>(UNSIGNED_TEST_DATA);
-    TestDecodeUnsigned<uint64_t>(UNSIGNED_TEST_DATA);
-    TestDecodeUnsigned<uint64_t>(UNSIGNED_PARTIAL_DECODING_TEST_DATA, true);
+    TestDecodeUnsigned<uint8_t>(g_unsignedTestData);
+    TestDecodeUnsigned<uint16_t>(g_unsignedTestData);
+    TestDecodeUnsigned<uint32_t>(g_unsignedTestData);
+    TestDecodeUnsigned<uint64_t>(g_unsignedTestData);
+    TestDecodeUnsigned<uint64_t>(g_unsignedPartialDecodingTestData, true);
 }
 
 template <class T>
-static void TestDecodeSigned(const std::vector<TestData<T>> &data, bool is_partial = false)
+static void TestDecodeSigned(const std::vector<TestData<T>> &data, bool isPartial = false)
 {
     for (auto &t : data) {
         std::ostringstream ss;
@@ -142,7 +142,7 @@ static void TestDecodeSigned(const std::vector<TestData<T>> &data, bool is_parti
         constexpr size_t BITWIDTH = std::numeric_limits<std::make_unsigned_t<T>>::digits;
 
         auto [value, size, is_full] = DecodeSigned<T>(t.data);
-        EXPECT_EQ(is_full, !is_partial) << ss.str();
+        EXPECT_EQ(is_full, !isPartial) << ss.str();
         EXPECT_EQ(size, is_full ? t.size : (BITWIDTH + 6U) / 7U) << ss.str();
         EXPECT_EQ(value, t.value) << ss.str();
     }
@@ -150,20 +150,20 @@ static void TestDecodeSigned(const std::vector<TestData<T>> &data, bool is_parti
 
 TEST(Leb128, DecodeSigned)
 {
-    TestDecodeSigned(SIGNED_TEST_DATA8);
-    TestDecodeSigned(SIGNED_TEST_DATA16);
-    TestDecodeSigned(SIGNED_TEST_DATA32);
-    TestDecodeSigned(SIGNED_TEST_DATA64);
+    TestDecodeSigned(g_signedTestDatA8);
+    TestDecodeSigned(g_signedTestDatA16);
+    TestDecodeSigned(g_signedTestDatA32);
+    TestDecodeSigned(g_signedTestDatA64);
 
-    TestDecodeSigned(SIGNED_PARTIAL_DECODING_TEST_DATA8, true);
-    TestDecodeSigned(SIGNED_PARTIAL_DECODING_TEST_DATA16, true);
-    TestDecodeSigned(SIGNED_PARTIAL_DECODING_TEST_DATA32, true);
-    TestDecodeSigned(SIGNED_PARTIAL_DECODING_TEST_DATA64, true);
+    TestDecodeSigned(g_signedPartialDecodingTestDatA8, true);
+    TestDecodeSigned(g_signedPartialDecodingTestDatA16, true);
+    TestDecodeSigned(g_signedPartialDecodingTestDatA32, true);
+    TestDecodeSigned(g_signedPartialDecodingTestDatA64, true);
 }
 
 TEST(Leb128, EncodeUnsigned)
 {
-    for (auto &t : UNSIGNED_TEST_DATA) {
+    for (auto &t : g_unsignedTestData) {
         std::ostringstream ss;
         ss << "Test unsigned encoding ";
         ss << std::hex << t.value;
@@ -177,9 +177,9 @@ TEST(Leb128, EncodeUnsigned)
 }
 
 template <class T>
-void TestEncodeSigned(const std::vector<TestData<T>> &data_vec)
+void TestEncodeSigned(const std::vector<TestData<T>> &dataVec)
 {
-    for (auto &t : data_vec) {
+    for (auto &t : dataVec) {
         std::ostringstream ss;
         ss << "Test signed encoding ";
         ss << std::hex << static_cast<int64_t>(t.value);
@@ -194,10 +194,10 @@ void TestEncodeSigned(const std::vector<TestData<T>> &data_vec)
 
 TEST(Leb128, EncodeSigned)
 {
-    TestEncodeSigned(SIGNED_TEST_DATA8);
-    TestEncodeSigned(SIGNED_TEST_DATA16);
-    TestEncodeSigned(SIGNED_TEST_DATA32);
-    TestEncodeSigned(SIGNED_TEST_DATA64);
+    TestEncodeSigned(g_signedTestDatA8);
+    TestEncodeSigned(g_signedTestDatA16);
+    TestEncodeSigned(g_signedTestDatA32);
+    TestEncodeSigned(g_signedTestDatA64);
 }
 
 // NOLINTEND(readability-magic-numbers,fuchsia-statically-constructed-objects)

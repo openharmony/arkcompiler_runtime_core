@@ -18,6 +18,7 @@ panda_target_link_libraries(ets_interop_js_gtest gtest)
 set_target_properties(ets_interop_js_gtest PROPERTIES POSITION_INDEPENDENT_CODE ON)
 panda_target_include_directories(ets_interop_js_gtest
     PUBLIC ${PANDA_ETS_PLUGIN_SOURCE}/tests/interop_js/gtest_plugin
+    PUBLIC ${PANDA_ROOT}
 )
 if(PANDA_TARGET_OHOS)
     panda_target_link_libraries(ets_interop_js_gtest ace_napi.z)

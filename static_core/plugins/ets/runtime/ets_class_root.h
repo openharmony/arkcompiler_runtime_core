@@ -47,14 +47,14 @@ enum class EtsClassRoot {
     STRING_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_STRING),
 };
 
-inline ClassRoot ToCoreClassRoot(EtsClassRoot ets_class_root)
+inline ClassRoot ToCoreClassRoot(EtsClassRoot etsClassRoot)
 {
-    return static_cast<ClassRoot>(ets_class_root);
+    return static_cast<ClassRoot>(etsClassRoot);
 }
 
-inline EtsClassRoot ToEtsClassRoot(ClassRoot class_root)
+inline EtsClassRoot ToEtsClassRoot(ClassRoot classRoot)
 {
-    switch (class_root) {
+    switch (classRoot) {
         // Primitives types
         case ClassRoot::V:
             return EtsClassRoot::VOID;
@@ -105,7 +105,7 @@ inline EtsClassRoot ToEtsClassRoot(ClassRoot class_root)
         case ClassRoot::ARRAY_CLASS:
             return EtsClassRoot::STRING_ARRAY;
         default:
-            LOG(FATAL, ETS) << "Unsupporeted class_root: " << helpers::ToUnderlying(class_root);
+            LOG(FATAL, ETS) << "Unsupporeted class_root: " << helpers::ToUnderlying(classRoot);
     }
 
     UNREACHABLE();

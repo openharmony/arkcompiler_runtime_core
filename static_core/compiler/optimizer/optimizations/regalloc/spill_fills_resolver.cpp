@@ -23,27 +23,27 @@ SpillFillsResolver::SpillFillsResolver(Graph *graph)
 {
 }
 
-SpillFillsResolver::SpillFillsResolver(Graph *graph, Register resolver, size_t regs_count, size_t vregs_count)
+SpillFillsResolver::SpillFillsResolver(Graph *graph, Register resolver, size_t regsCount, size_t vregsCount)
     : graph_(graph),
-      moves_table_(graph->GetLocalAllocator()->Adapter()),
-      loads_count_(graph->GetLocalAllocator()->Adapter()),
-      pre_moves_(graph->GetLocalAllocator()->Adapter()),
-      post_moves_(graph->GetLocalAllocator()->Adapter()),
+      movesTable_(graph->GetLocalAllocator()->Adapter()),
+      loadsCount_(graph->GetLocalAllocator()->Adapter()),
+      preMoves_(graph->GetLocalAllocator()->Adapter()),
+      postMoves_(graph->GetLocalAllocator()->Adapter()),
       resolver_(resolver),
-      vregs_table_offset_(regs_count),
-      slots_table_offset_(vregs_table_offset_ + vregs_count),
-      parameter_slots_offset_(slots_table_offset_ + graph->GetStackSlotsCount()),
-      locations_count_(parameter_slots_offset_ + graph->GetParametersSlotsCount()),
-      reg_write_(graph->GetLocalAllocator()->Adapter()),
-      stack_write_(graph->GetLocalAllocator()->Adapter())
+      vregsTableOffset_(regsCount),
+      slotsTableOffset_(vregsTableOffset_ + vregsCount),
+      parameterSlotsOffset_(slotsTableOffset_ + graph->GetStackSlotsCount()),
+      locationsCount_(parameterSlotsOffset_ + graph->GetParametersSlotsCount()),
+      regWrite_(graph->GetLocalAllocator()->Adapter()),
+      stackWrite_(graph->GetLocalAllocator()->Adapter())
 {
-    ASSERT_PRINT(std::numeric_limits<LocationIndex>::max() > locations_count_,
+    ASSERT_PRINT(std::numeric_limits<LocationIndex>::max() > locationsCount_,
                  "Summary amount of registers and slots overflow. Change LocationIndex type");
 
-    reg_write_.resize(slots_table_offset_);
-    stack_write_.resize(locations_count_ - slots_table_offset_);
-    moves_table_.resize(locations_count_);
-    loads_count_.resize(locations_count_);
+    regWrite_.resize(slotsTableOffset_);
+    stackWrite_.resize(locationsCount_ - slotsTableOffset_);
+    movesTable_.resize(locationsCount_);
+    loadsCount_.resize(locationsCount_);
 }
 
 void SpillFillsResolver::Run()
@@ -51,16 +51,16 @@ void SpillFillsResolver::Run()
     VisitGraph();
 }
 
-void SpillFillsResolver::Resolve(SpillFillInst *spill_fill_inst)
+void SpillFillsResolver::Resolve(SpillFillInst *spillFillInst)
 {
-    CollectSpillFillsData(spill_fill_inst);
-    Reorder(spill_fill_inst);
+    CollectSpillFillsData(spillFillInst);
+    Reorder(spillFillInst);
 }
 
-void SpillFillsResolver::ResolveIfRequired(SpillFillInst *spill_fill_inst)
+void SpillFillsResolver::ResolveIfRequired(SpillFillInst *spillFillInst)
 {
-    if (NeedToResolve(spill_fill_inst->GetSpillFills())) {
-        Resolve(spill_fill_inst);
+    if (NeedToResolve(spillFillInst->GetSpillFills())) {
+        Resolve(spillFillInst);
     }
 }
 
@@ -77,62 +77,62 @@ const ArenaVector<BasicBlock *> &SpillFillsResolver::GetBlocksToVisit() const
 void SpillFillsResolver::VisitSpillFill(GraphVisitor *visitor, Inst *inst)
 {
     auto resolver = static_cast<SpillFillsResolver *>(visitor);
-    auto spill_fill_inst = inst->CastToSpillFill();
-    if (resolver->NeedToResolve(spill_fill_inst->GetSpillFills())) {
-        resolver->Resolve(spill_fill_inst);
+    auto spillFillInst = inst->CastToSpillFill();
+    if (resolver->NeedToResolve(spillFillInst->GetSpillFills())) {
+        resolver->Resolve(spillFillInst);
     } else {
 #ifndef NDEBUG
         // Verify spill_fill_inst
-        resolver->CollectSpillFillsData(spill_fill_inst);
+        resolver->CollectSpillFillsData(spillFillInst);
 #endif
     }
 }
 
-static void MarkRegWrite(Location location, ArenaVector<bool> *reg_write, bool paired, size_t offset)
+static void MarkRegWrite(Location location, ArenaVector<bool> *regWrite, bool paired, size_t offset)
 {
     auto reg = location.IsFpRegister() ? location.GetValue() + offset : location.GetValue();
-    ASSERT(reg < reg_write->size());
-    (*reg_write)[reg] = true;
+    ASSERT(reg < regWrite->size());
+    (*regWrite)[reg] = true;
     if (paired) {
-        (*reg_write)[reg + 1] = true;
+        (*regWrite)[reg + 1] = true;
     }
 }
 
-static bool IsRegWrite(Location location, ArenaVector<bool> *reg_write, bool paired, size_t offset)
+static bool IsRegWrite(Location location, ArenaVector<bool> *regWrite, bool paired, size_t offset)
 {
     auto reg = location.IsFpRegister() ? location.GetValue() + offset : location.GetValue();
-    ASSERT(reg < reg_write->size());
-    return (*reg_write)[reg] || (paired && (*reg_write)[reg + 1]);
+    ASSERT(reg < regWrite->size());
+    return (*regWrite)[reg] || (paired && (*regWrite)[reg + 1]);
 }
 
-static void MarkStackWrite(Location location, ArenaVector<bool> *stack_write, size_t offset)
+static void MarkStackWrite(Location location, ArenaVector<bool> *stackWrite, size_t offset)
 {
     auto slot = location.IsStackParameter() ? location.GetValue() + offset : location.GetValue();
-    ASSERT(slot < stack_write->size());
-    (*stack_write)[slot] = true;
+    ASSERT(slot < stackWrite->size());
+    (*stackWrite)[slot] = true;
 }
 
-static bool IsStackWrite(Location location, ArenaVector<bool> *stack_write, size_t offset)
+static bool IsStackWrite(Location location, ArenaVector<bool> *stackWrite, size_t offset)
 {
     auto slot = location.IsStackParameter() ? location.GetValue() + offset : location.GetValue();
-    ASSERT(slot < stack_write->size());
-    return (*stack_write)[slot];
+    ASSERT(slot < stackWrite->size());
+    return (*stackWrite)[slot];
 }
 
 /*
  * Find if there are conflicts between reading/writing registers
  */
-bool SpillFillsResolver::NeedToResolve(const ArenaVector<SpillFillData> &spill_fills)
+bool SpillFillsResolver::NeedToResolve(const ArenaVector<SpillFillData> &spillFills)
 {
-    if (spill_fills.size() < 2U) {
+    if (spillFills.size() < 2U) {
         return false;
     }
 
-    std::fill(reg_write_.begin(), reg_write_.end(), false);
-    std::fill(stack_write_.begin(), stack_write_.end(), false);
-    auto param_slot_offset = parameter_slots_offset_ - slots_table_offset_;
+    std::fill(regWrite_.begin(), regWrite_.end(), false);
+    std::fill(stackWrite_.begin(), stackWrite_.end(), false);
+    auto paramSlotOffset = parameterSlotsOffset_ - slotsTableOffset_;
 
-    for (const auto &sf : spill_fills) {
+    for (const auto &sf : spillFills) {
         if (sf.DstType() == sf.SrcType() && sf.DstValue() == sf.SrcValue()) {
             continue;
         }
@@ -140,24 +140,24 @@ bool SpillFillsResolver::NeedToResolve(const ArenaVector<SpillFillData> &spill_f
         bool paired = IsPairedReg(GetGraph()->GetArch(), sf.GetType());
         // set registers, that are rewrited
         if (sf.GetDst().IsAnyRegister()) {
-            MarkRegWrite(sf.GetDst(), &reg_write_, paired, vregs_table_offset_);
+            MarkRegWrite(sf.GetDst(), &regWrite_, paired, vregsTableOffset_);
         }
 
         // if register was rewrited previously - that is a conflict
         if (sf.GetSrc().IsAnyRegister()) {
-            if (IsRegWrite(sf.GetSrc(), &reg_write_, paired, vregs_table_offset_)) {
+            if (IsRegWrite(sf.GetSrc(), &regWrite_, paired, vregsTableOffset_)) {
                 return true;
             }
         }
 
         // set stack slots, that are rewrited
         if (sf.DstType() == LocationType::STACK || sf.DstType() == LocationType::STACK_PARAMETER) {
-            MarkStackWrite(sf.GetDst(), &stack_write_, param_slot_offset);
+            MarkStackWrite(sf.GetDst(), &stackWrite_, paramSlotOffset);
         }
 
         // if stack slot was rewrited previously - that is a conflict
         if (sf.SrcType() == LocationType::STACK || sf.SrcType() == LocationType::STACK_PARAMETER) {
-            if (IsStackWrite(sf.GetSrc(), &stack_write_, param_slot_offset)) {
+            if (IsStackWrite(sf.GetSrc(), &stackWrite_, paramSlotOffset)) {
                 return true;
             }
         }
@@ -168,36 +168,36 @@ bool SpillFillsResolver::NeedToResolve(const ArenaVector<SpillFillData> &spill_f
 /*
  * Parse spill-fills and populate `moves_table_` and `loads_count_`
  */
-void SpillFillsResolver::CollectSpillFillsData(SpillFillInst *spill_fill_inst)
+void SpillFillsResolver::CollectSpillFillsData(SpillFillInst *spillFillInst)
 {
-    std::fill(moves_table_.begin(), moves_table_.end(), MoveInfo {INVALID_LOCATION_INDEX, DataType::NO_TYPE});
-    std::fill(loads_count_.begin(), loads_count_.end(), 0);
-    pre_moves_.clear();
-    post_moves_.clear();
+    std::fill(movesTable_.begin(), movesTable_.end(), MoveInfo {INVALID_LOCATION_INDEX, DataType::NO_TYPE});
+    std::fill(loadsCount_.begin(), loadsCount_.end(), 0);
+    preMoves_.clear();
+    postMoves_.clear();
 
-    for (const auto &sf : spill_fill_inst->GetSpillFills()) {
+    for (const auto &sf : spillFillInst->GetSpillFills()) {
         if (sf.DstType() == sf.SrcType() && sf.DstValue() == sf.SrcValue()) {
             continue;
         }
 
         if (sf.SrcType() == LocationType::IMMEDIATE) {
-            post_moves_.push_back(sf);
+            postMoves_.push_back(sf);
             continue;
         }
 
         if (sf.DstType() == LocationType::STACK_ARGUMENT) {
-            pre_moves_.push_back(sf);
+            preMoves_.push_back(sf);
             continue;
         }
 
-        auto src_index = Map(sf.GetSrc());
-        auto dest_index = Map(sf.GetDst());
-        ASSERT(dest_index < locations_count_);
-        ASSERT(src_index < locations_count_);
-        ASSERT(moves_table_[dest_index].src == INVALID_LOCATION_INDEX);
-        moves_table_[dest_index].src = src_index;
-        moves_table_[dest_index].reg_type = sf.GetType();
-        loads_count_[src_index]++;
+        auto srcIndex = Map(sf.GetSrc());
+        auto destIndex = Map(sf.GetDst());
+        ASSERT(destIndex < locationsCount_);
+        ASSERT(srcIndex < locationsCount_);
+        ASSERT(movesTable_[destIndex].src == INVALID_LOCATION_INDEX);
+        movesTable_[destIndex].src = srcIndex;
+        movesTable_[destIndex].regType = sf.GetType();
+        loadsCount_[srcIndex]++;
     }
 }
 
@@ -206,34 +206,34 @@ void SpillFillsResolver::CollectSpillFillsData(SpillFillInst *spill_fill_inst)
  * - dst-reg is NOT used as src-reg in the other spill-fills
  * - dst-reg is in the cyclically dependent chain of moves: (R1->R2, R2->R1)
  */
-void SpillFillsResolver::Reorder(SpillFillInst *spill_fill_inst)
+void SpillFillsResolver::Reorder(SpillFillInst *spillFillInst)
 {
-    spill_fill_inst->ClearSpillFills();
-    ArenaVector<LocationIndex> remap(locations_count_, INVALID_LOCATION_INDEX,
+    spillFillInst->ClearSpillFills();
+    ArenaVector<LocationIndex> remap(locationsCount_, INVALID_LOCATION_INDEX,
                                      GetGraph()->GetLocalAllocator()->Adapter());
 
-    for (auto &sf : pre_moves_) {
-        spill_fill_inst->AddSpillFill(sf);
+    for (auto &sf : preMoves_) {
+        spillFillInst->AddSpillFill(sf);
     }
 
     // First we process chains which have tails
-    for (LocationIndex dst_reg = 0; dst_reg < static_cast<LocationIndex>(locations_count_); ++dst_reg) {
-        if (loads_count_[dst_reg] == 0 && moves_table_[dst_reg].src != INVALID_LOCATION_INDEX) {
-            AddMovesChain<false>(dst_reg, &remap, spill_fill_inst);
+    for (LocationIndex dstReg = 0; dstReg < static_cast<LocationIndex>(locationsCount_); ++dstReg) {
+        if (loadsCount_[dstReg] == 0 && movesTable_[dstReg].src != INVALID_LOCATION_INDEX) {
+            AddMovesChain<false>(dstReg, &remap, spillFillInst);
         }
     }
 
     // And than only loops should left
-    for (LocationIndex dst_reg = 0; dst_reg < static_cast<LocationIndex>(locations_count_); ++dst_reg) {
-        if (moves_table_[dst_reg].src != INVALID_LOCATION_INDEX) {
-            ASSERT(loads_count_[dst_reg] > 0);
-            auto temp_reg = CheckAndResolveCyclicDependency(dst_reg);
-            AddMovesChain<true>(temp_reg, &remap, spill_fill_inst);
+    for (LocationIndex dstReg = 0; dstReg < static_cast<LocationIndex>(locationsCount_); ++dstReg) {
+        if (movesTable_[dstReg].src != INVALID_LOCATION_INDEX) {
+            ASSERT(loadsCount_[dstReg] > 0);
+            auto tempReg = CheckAndResolveCyclicDependency(dstReg);
+            AddMovesChain<true>(tempReg, &remap, spillFillInst);
         }
     }
 
-    for (auto &sf : post_moves_) {
-        spill_fill_inst->AddSpillFill(sf);
+    for (auto &sf : postMoves_) {
+        spillFillInst->AddSpillFill(sf);
     }
 }
 
@@ -242,24 +242,24 @@ void SpillFillsResolver::Reorder(SpillFillInst *spill_fill_inst)
  * (R1->temp, R3->R1, R2->R3, temp->R2)
  */
 
-SpillFillsResolver::LocationIndex SpillFillsResolver::CheckAndResolveCyclicDependency(LocationIndex dst_first)
+SpillFillsResolver::LocationIndex SpillFillsResolver::CheckAndResolveCyclicDependency(LocationIndex dstFirst)
 {
-    auto dst_reg = dst_first;
-    auto src_reg = moves_table_[dst_reg].src;
+    auto dstReg = dstFirst;
+    auto srcReg = movesTable_[dstReg].src;
 
-    [[maybe_unused]] size_t moves_counter = 0;
-    while (src_reg != dst_first) {
-        dst_reg = src_reg;
-        src_reg = moves_table_[dst_reg].src;
-        ASSERT(src_reg != INVALID_LOCATION_INDEX);
-        ASSERT_PRINT(moves_counter++ < moves_table_.size(), "Unresolved cyclic dependency");
+    [[maybe_unused]] size_t movesCounter = 0;
+    while (srcReg != dstFirst) {
+        dstReg = srcReg;
+        srcReg = movesTable_[dstReg].src;
+        ASSERT(srcReg != INVALID_LOCATION_INDEX);
+        ASSERT_PRINT(movesCounter++ < movesTable_.size(), "Unresolved cyclic dependency");
     }
 
-    auto resolver = GetResolver(moves_table_[dst_first].reg_type);
-    moves_table_[resolver].src = dst_first;
-    moves_table_[dst_reg].src = resolver;
-    loads_count_[resolver]++;
-    moves_table_[resolver].reg_type = moves_table_[dst_reg].reg_type;
+    auto resolver = GetResolver(movesTable_[dstFirst].regType);
+    movesTable_[resolver].src = dstFirst;
+    movesTable_[dstReg].src = resolver;
+    loadsCount_[resolver]++;
+    movesTable_[resolver].regType = movesTable_[dstReg].regType;
     return resolver;
 }
 
@@ -274,41 +274,41 @@ SpillFillsResolver::LocationIndex SpillFillsResolver::CheckAndResolveCyclicDepen
  */
 template <bool IS_CYCLIC>
 void SpillFillsResolver::AddMovesChain(LocationIndex dst, ArenaVector<LocationIndex> *remap,
-                                       SpillFillInst *spill_fill_inst)
+                                       SpillFillInst *spillFillInst)
 {
-    [[maybe_unused]] auto first_dst = dst;
-    ASSERT(first_dst != INVALID_LOCATION_INDEX);
-    ASSERT(remap->at(first_dst) == INVALID_LOCATION_INDEX);
+    [[maybe_unused]] auto firstDst = dst;
+    ASSERT(firstDst != INVALID_LOCATION_INDEX);
+    ASSERT(remap->at(firstDst) == INVALID_LOCATION_INDEX);
 
-    auto src = moves_table_[dst].src;
-    [[maybe_unused]] auto first_src = src;
-    ASSERT(first_src != INVALID_LOCATION_INDEX);
+    auto src = movesTable_[dst].src;
+    [[maybe_unused]] auto firstSrc = src;
+    ASSERT(firstSrc != INVALID_LOCATION_INDEX);
 
     // Make a chain of spill-fills
     while (src != INVALID_LOCATION_INDEX) {
         auto re = remap->at(src);
-        auto type = moves_table_[dst].reg_type;
+        auto type = movesTable_[dst].regType;
         if (re == INVALID_LOCATION_INDEX) {
-            spill_fill_inst->AddSpillFill(ToLocation(src), ToLocation(dst), type);
+            spillFillInst->AddSpillFill(ToLocation(src), ToLocation(dst), type);
             remap->at(src) = dst;
         } else {
-            spill_fill_inst->AddSpillFill(ToLocation(re), ToLocation(dst), type);
+            spillFillInst->AddSpillFill(ToLocation(re), ToLocation(dst), type);
         }
-        ASSERT(loads_count_[src] > 0);
-        loads_count_[src]--;
-        moves_table_[dst].src = INVALID_LOCATION_INDEX;
+        ASSERT(loadsCount_[src] > 0);
+        loadsCount_[src]--;
+        movesTable_[dst].src = INVALID_LOCATION_INDEX;
         dst = src;
-        src = moves_table_[dst].src;
+        src = movesTable_[dst].src;
     }
 
     // Fixup temp register remapping
     // NOLINTNEXTLINE(readability-braces-around-statements,bugprone-suspicious-semicolon)
     if constexpr (IS_CYCLIC) {
-        ASSERT(dst == first_dst);
-        auto re = remap->at(first_dst);
+        ASSERT(dst == firstDst);
+        auto re = remap->at(firstDst);
         ASSERT(re != INVALID_LOCATION_INDEX);
-        remap->at(first_src) = re;
-        remap->at(first_dst) = INVALID_LOCATION_INDEX;
+        remap->at(firstSrc) = re;
+        remap->at(firstDst) = INVALID_LOCATION_INDEX;
     }
 }
 
@@ -327,14 +327,14 @@ SpillFillsResolver::LocationIndex SpillFillsResolver::GetResolver(DataType::Type
     }
 
     if (DataType::IsFloatType(type)) {
-        auto resolver_reg = GetGraph()->GetArchTempVReg();
-        ASSERT(resolver_reg != INVALID_REG);
-        return resolver_reg + vregs_table_offset_;
+        auto resolverReg = GetGraph()->GetArchTempVReg();
+        ASSERT(resolverReg != INVALID_REG);
+        return resolverReg + vregsTableOffset_;
     }
 
-    auto resolver_reg = GetGraph()->GetArchTempReg();
-    ASSERT(resolver_reg != INVALID_REG);
-    return resolver_reg;
+    auto resolverReg = GetGraph()->GetArchTempReg();
+    ASSERT(resolverReg != INVALID_REG);
+    return resolverReg;
 }
 
 }  // namespace panda::compiler

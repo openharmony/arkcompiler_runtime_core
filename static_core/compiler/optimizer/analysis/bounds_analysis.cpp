@@ -42,7 +42,7 @@ static bool IsLenArray(const Inst *inst)
 }
 
 BoundsRange::BoundsRange(int64_t left, int64_t right, const Inst *inst, [[maybe_unused]] DataType::Type type)
-    : left_(left), right_(right), len_array_(inst)
+    : left_(left), right_(right), lenArray_(inst)
 {
     ASSERT(inst == nullptr || IsLenArray(inst));
     ASSERT(left <= right);
@@ -53,7 +53,7 @@ BoundsRange::BoundsRange(int64_t left, int64_t right, const Inst *inst, [[maybe_
 void BoundsRange::SetLenArray(const Inst *inst)
 {
     ASSERT(inst != nullptr && IsLenArray(inst));
-    len_array_ = inst;
+    lenArray_ = inst;
 }
 
 int64_t BoundsRange::GetLeft() const
@@ -113,10 +113,10 @@ BoundsRange BoundsRange::Add(const BoundsRange &range) const
  */
 BoundsRange BoundsRange::Sub(const BoundsRange &range) const
 {
-    auto neg_right = (range.GetRight() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetRight());
-    auto left = AddWithOverflowCheck(left_, neg_right);
-    auto neg_left = (range.GetLeft() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetLeft());
-    auto right = AddWithOverflowCheck(right_, neg_left);
+    auto negRight = (range.GetRight() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetRight());
+    auto left = AddWithOverflowCheck(left_, negRight);
+    auto negLeft = (range.GetLeft() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetLeft());
+    auto right = AddWithOverflowCheck(right_, negLeft);
     return BoundsRange(left, right);
 }
 
@@ -159,20 +159,20 @@ BoundsRange BoundsRange::Div(const BoundsRange &range) const
 /* static */
 BoundsRange BoundsRange::Mod(const BoundsRange &range)
 {
-    int64_t max_mod = 0;
+    int64_t maxMod = 0;
     if (range.GetRight() > 0) {
-        max_mod = range.GetRight() - 1;
+        maxMod = range.GetRight() - 1;
     }
     if (range.GetLeft() == MIN_RANGE_VALUE) {
-        max_mod = MAX_RANGE_VALUE;
+        maxMod = MAX_RANGE_VALUE;
     } else if (range.GetLeft() < 0) {
-        max_mod = std::max(max_mod, -range.GetLeft() - 1);
+        maxMod = std::max(maxMod, -range.GetLeft() - 1);
     }
-    if (max_mod == 0) {
+    if (maxMod == 0) {
         return BoundsRange();
     }
-    auto left = left_ < 0 ? std::max(left_, -max_mod) : 0;
-    auto right = right_ > 0 ? std::min(right_, max_mod) : 0;
+    auto left = left_ < 0 ? std::max(left_, -maxMod) : 0;
+    auto right = right_ > 0 ? std::min(right_, maxMod) : 0;
     return BoundsRange(left, right);
 }
 
@@ -182,8 +182,8 @@ BoundsRange BoundsRange::Shr(const BoundsRange &range, DataType::Type type)
     if (!range.IsConst() || range.IsNegative()) {
         return BoundsRange();
     }
-    uint64_t size_mask = DataType::GetTypeSize(type, Arch::NONE) - 1;
-    auto n = static_cast<uint64_t>(range.GetLeft()) & size_mask;
+    uint64_t sizeMask = DataType::GetTypeSize(type, Arch::NONE) - 1;
+    auto n = static_cast<uint64_t>(range.GetLeft()) & sizeMask;
     auto narrowed = BoundsRange(*this).FitInType(type);
     // for fixed n > 0 (x Shr n) is increasing on [MIN_RANGE_VALUE, -1] and
     // on [0, MAX_RANGE_VALUE], but (-1 Shr n) > (0 Shr n)
@@ -202,8 +202,8 @@ BoundsRange BoundsRange::AShr(const BoundsRange &range, DataType::Type type)
     if (!range.IsConst() || range.IsNegative()) {
         return BoundsRange();
     }
-    uint64_t size_mask = DataType::GetTypeSize(type, Arch::NONE) - 1;
-    auto n = static_cast<uint64_t>(range.GetLeft()) & size_mask;
+    uint64_t sizeMask = DataType::GetTypeSize(type, Arch::NONE) - 1;
+    auto n = static_cast<uint64_t>(range.GetLeft()) & sizeMask;
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
     return BoundsRange(left_ >> n, right_ >> n);
 }
@@ -214,12 +214,12 @@ BoundsRange BoundsRange::Shl(const BoundsRange &range, DataType::Type type)
     if (!range.IsConst() || range.IsNegative()) {
         return BoundsRange();
     }
-    uint64_t size_mask = DataType::GetTypeSize(type, Arch::NONE) - 1;
-    auto n = static_cast<uint64_t>(range.GetLeft()) & size_mask;
+    uint64_t sizeMask = DataType::GetTypeSize(type, Arch::NONE) - 1;
+    auto n = static_cast<uint64_t>(range.GetLeft()) & sizeMask;
     if (n > 0) {
-        auto max_bits = BITS_PER_UINT64 - n - 1;
-        auto max_value = static_cast<int64_t>(static_cast<uint64_t>(1) << max_bits);
-        if (left_ < -max_value || right_ >= max_value) {
+        auto maxBits = BITS_PER_UINT64 - n - 1;
+        auto maxValue = static_cast<int64_t>(static_cast<uint64_t>(1) << maxBits);
+        if (left_ < -maxValue || right_ >= maxValue) {
             // shift can overflow
             return BoundsRange();
         }
@@ -268,7 +268,7 @@ bool BoundsRange::IsLess(const Inst *inst) const
     if (!IsLenArray(inst)) {
         return false;
     }
-    return inst == len_array_;
+    return inst == lenArray_;
 }
 
 bool BoundsRange::IsMore(const BoundsRange &range) const
@@ -377,10 +377,10 @@ int64_t BoundsRange::GetMax(DataType::Type type)
 
 BoundsRange BoundsRange::FitInType(DataType::Type type) const
 {
-    auto type_min = BoundsRange::GetMin(type);
-    auto type_max = BoundsRange::GetMax(type);
-    if (left_ < type_min || left_ > type_max || right_ < type_min || right_ > type_max) {
-        return BoundsRange(type_min, type_max);
+    auto typeMin = BoundsRange::GetMin(type);
+    auto typeMax = BoundsRange::GetMax(type);
+    if (left_ < typeMin || left_ > typeMax || right_ < typeMin || right_ > typeMax) {
+        return BoundsRange(typeMin, typeMax);
     }
     return *this;
 }
@@ -607,9 +607,9 @@ int64_t BoundsRange::MulWithOverflowCheck(int64_t left, int64_t right)
     if (left == 0 || right == 0) {
         return 0;
     }
-    int64_t left_abs = (left == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(left));
-    int64_t right_abs = (right == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(right));
-    if (left_abs <= (MAX_RANGE_VALUE / right_abs)) {
+    int64_t leftAbs = (left == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(left));
+    int64_t rightAbs = (right == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(right));
+    if (leftAbs <= (MAX_RANGE_VALUE / rightAbs)) {
         // No overflow.
         return left * right;
     }
@@ -643,9 +643,9 @@ BoundsRange BoundsRangeInfo::FindBoundsRange(const BasicBlock *block, const Inst
         return BoundsRange(1, BoundsRange::GetMax(DataType::REFERENCE));
     }
     while (block != nullptr) {
-        if (bounds_range_info_.find(block) != bounds_range_info_.end() &&
-            bounds_range_info_.at(block).find(inst) != bounds_range_info_.at(block).end()) {
-            return bounds_range_info_.at(block).at(inst);
+        if (boundsRangeInfo_.find(block) != boundsRangeInfo_.end() &&
+            boundsRangeInfo_.at(block).find(inst) != boundsRangeInfo_.at(block).end()) {
+            return boundsRangeInfo_.at(block).at(inst);
         }
         block = block->GetDominator();
     }
@@ -657,17 +657,17 @@ BoundsRange BoundsRangeInfo::FindBoundsRange(const BasicBlock *block, const Inst
     }
     if (IsLenArray(inst)) {
         ASSERT(inst->GetType() == DataType::INT32);
-        auto max_length = INT32_MAX;
+        auto maxLength = INT32_MAX;
         if (inst->GetOpcode() == Opcode::LenArray) {
-            auto array_inst = inst->CastToLenArray()->GetDataFlowInput(0);
-            auto type_info = array_inst->GetObjectTypeInfo();
-            if (type_info) {
-                auto klass = type_info.GetClass();
+            auto arrayInst = inst->CastToLenArray()->GetDataFlowInput(0);
+            auto typeInfo = arrayInst->GetObjectTypeInfo();
+            if (typeInfo) {
+                auto klass = typeInfo.GetClass();
                 auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
-                max_length = runtime->GetMaxArrayLength(klass);
+                maxLength = runtime->GetMaxArrayLength(klass);
             }
         }
-        return BoundsRange(0, max_length, nullptr, inst->GetType());
+        return BoundsRange(0, maxLength, nullptr, inst->GetType());
     }
     // if we know nothing about inst return the complete range of type
     return BoundsRange(inst->GetType());
@@ -686,24 +686,24 @@ void BoundsRangeInfo::SetBoundsRange(const BasicBlock *block, const Inst *inst, 
     ASSERT(range.GetLeft() >= BoundsRange::GetMin(inst->GetType()));
     ASSERT(range.GetRight() <= BoundsRange::GetMax(inst->GetType()));
     if (!range.IsMaxRange() || range.GetLenArray() != nullptr) {
-        if (bounds_range_info_.find(block) == bounds_range_info_.end()) {
-            auto it1 = bounds_range_info_.emplace(block, aa_.Adapter());
+        if (boundsRangeInfo_.find(block) == boundsRangeInfo_.end()) {
+            auto it1 = boundsRangeInfo_.emplace(block, aa_.Adapter());
             ASSERT(it1.second);
             it1.first->second.emplace(inst, range);
-        } else if (bounds_range_info_.at(block).find(inst) == bounds_range_info_.at(block).end()) {
-            bounds_range_info_.at(block).emplace(inst, range);
+        } else if (boundsRangeInfo_.at(block).find(inst) == boundsRangeInfo_.at(block).end()) {
+            boundsRangeInfo_.at(block).emplace(inst, range);
         } else {
-            bounds_range_info_.at(block).at(inst) = range;
+            boundsRangeInfo_.at(block).at(inst) = range;
         }
     }
 }
 
-BoundsAnalysis::BoundsAnalysis(Graph *graph) : Analysis(graph), bounds_range_info_(graph->GetAllocator()) {}
+BoundsAnalysis::BoundsAnalysis(Graph *graph) : Analysis(graph), boundsRangeInfo_(graph->GetAllocator()) {}
 
 bool BoundsAnalysis::RunImpl()
 {
     ASSERT(!GetGraph()->IsBytecodeOptimizer());
-    bounds_range_info_.Clear();
+    boundsRangeInfo_.Clear();
 
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
@@ -792,37 +792,37 @@ void BoundsAnalysis::VisitShr(GraphVisitor *v, Inst *inst)
 // Note: div can be replaced by ashr + shr + add + ashr in Peepholes::TryReplaceDivByShrAndAshr
 void BoundsAnalysis::VisitAShr(GraphVisitor *v, Inst *inst)
 {
-    auto type_size = DataType::GetTypeSize(inst->GetType(), inst->GetBasicBlock()->GetGraph()->GetArch());
-    bool is_div = true;
+    auto typeSize = DataType::GetTypeSize(inst->GetType(), inst->GetBasicBlock()->GetGraph()->GetArch());
+    bool isDiv = true;
     uint64_t n = 0;
     Inst *x = nullptr;
     auto add = inst->GetInput(0).GetInst();
     auto cnst = inst->GetInput(1).GetInst();
-    is_div &= cnst->IsConst() && add->GetOpcode() == Opcode::Add;
-    if (is_div) {
+    isDiv &= cnst->IsConst() && add->GetOpcode() == Opcode::Add;
+    if (isDiv) {
         n = cnst->CastToConstant()->GetInt64Value();
         auto shr = add->GetInput(0).GetInst();
         x = add->GetInput(1).GetInst();
-        is_div &= shr->GetOpcode() == Opcode::Shr;
-        if (is_div) {
+        isDiv &= shr->GetOpcode() == Opcode::Shr;
+        if (isDiv) {
             auto ashr = shr->GetInput(0).GetInst();
             cnst = shr->GetInput(1).GetInst();
-            is_div &= ashr->GetOpcode() == Opcode::AShr && cnst->IsConst() &&
-                      cnst->CastToConstant()->GetInt64Value() == (type_size - n);
-            if (is_div) {
-                is_div &= ashr->GetInput(0).GetInst() == x;
+            isDiv &= ashr->GetOpcode() == Opcode::AShr && cnst->IsConst() &&
+                     cnst->CastToConstant()->GetInt64Value() == (typeSize - n);
+            if (isDiv) {
+                isDiv &= ashr->GetInput(0).GetInst() == x;
                 cnst = ashr->GetInput(1).GetInst();
-                is_div &= cnst->IsConst() && cnst->CastToConstant()->GetInt64Value() == (type_size - 1U);
+                isDiv &= cnst->IsConst() && cnst->CastToConstant()->GetInt64Value() == (typeSize - 1U);
             }
         }
     }
-    if (is_div) {
+    if (isDiv) {
         auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
         auto range = bri->FindBoundsRange(inst->GetBasicBlock(), x);
-        auto len_array = range.GetLenArray();
+        auto lenArray = range.GetLenArray();
         auto res = range.Div(BoundsRange(1U << n));
-        if (range.IsNotNegative() && len_array != nullptr) {
-            res.SetLenArray(len_array);
+        if (range.IsNotNegative() && lenArray != nullptr) {
+            res.SetLenArray(lenArray);
         }
         bri->SetBoundsRange(inst->GetBasicBlock(), inst, res);
         return;
@@ -837,16 +837,16 @@ void BoundsAnalysis::VisitShl(GraphVisitor *v, Inst *inst)
 
 void BoundsAnalysis::VisitIfImm(GraphVisitor *v, Inst *inst)
 {
-    auto if_inst = inst->CastToIfImm();
-    if (if_inst->GetOperandsType() != DataType::BOOL) {
+    auto ifInst = inst->CastToIfImm();
+    if (ifInst->GetOperandsType() != DataType::BOOL) {
         return;
     }
-    ASSERT(if_inst->GetCc() == ConditionCode::CC_NE || if_inst->GetCc() == ConditionCode::CC_EQ);
-    ASSERT(if_inst->GetImm() == 0);
+    ASSERT(ifInst->GetCc() == ConditionCode::CC_NE || ifInst->GetCc() == ConditionCode::CC_EQ);
+    ASSERT(ifInst->GetImm() == 0);
 
     auto input = inst->GetInput(0).GetInst();
     if (input->GetOpcode() == Opcode::IsInstance) {
-        CalcNewBoundsRangeForIsInstanceInput(v, input->CastToIsInstance(), if_inst);
+        CalcNewBoundsRangeForIsInstanceInput(v, input->CastToIsInstance(), ifInst);
         return;
     }
     if (input->GetOpcode() != Opcode::Compare) {
@@ -865,21 +865,21 @@ void BoundsAnalysis::VisitIfImm(GraphVisitor *v, Inst *inst)
 
     auto cc = compare->GetCc();
     auto block = inst->GetBasicBlock();
-    BasicBlock *true_block;
-    BasicBlock *false_block;
-    if (if_inst->GetCc() == ConditionCode::CC_NE) {
+    BasicBlock *trueBlock;
+    BasicBlock *falseBlock;
+    if (ifInst->GetCc() == ConditionCode::CC_NE) {
         // Corresponds to Compare result
-        true_block = block->GetTrueSuccessor();
-        false_block = block->GetFalseSuccessor();
-    } else if (if_inst->GetCc() == ConditionCode::CC_EQ) {
+        trueBlock = block->GetTrueSuccessor();
+        falseBlock = block->GetFalseSuccessor();
+    } else if (ifInst->GetCc() == ConditionCode::CC_EQ) {
         // Corresponds to inversion of Compare result
-        true_block = block->GetFalseSuccessor();
-        false_block = block->GetTrueSuccessor();
+        trueBlock = block->GetFalseSuccessor();
+        falseBlock = block->GetTrueSuccessor();
     } else {
         UNREACHABLE();
     }
-    CalcNewBoundsRangeForCompare(v, block, cc, op0, op1, true_block);
-    CalcNewBoundsRangeForCompare(v, block, GetInverseConditionCode(cc), op0, op1, false_block);
+    CalcNewBoundsRangeForCompare(v, block, cc, op0, op1, trueBlock);
+    CalcNewBoundsRangeForCompare(v, block, GetInverseConditionCode(cc), op0, op1, falseBlock);
 }
 
 void BoundsAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
@@ -893,12 +893,12 @@ void BoundsAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
     if (inst->GetType() != DataType::REFERENCE && ProcessCountableLoop(phi, bri)) {
         return;
     }
-    auto phi_block = phi->GetBasicBlock();
-    ArenaVector<BoundsRange> ranges(phi_block->GetGraph()->GetLocalAllocator()->Adapter());
-    for (auto &block : phi_block->GetPredsBlocks()) {
+    auto phiBlock = phi->GetBasicBlock();
+    ArenaVector<BoundsRange> ranges(phiBlock->GetGraph()->GetLocalAllocator()->Adapter());
+    for (auto &block : phiBlock->GetPredsBlocks()) {
         ranges.emplace_back(bri->FindBoundsRange(block, phi->GetPhiInput(block)));
     }
-    bri->SetBoundsRange(phi_block, phi, BoundsRange::Union(ranges).FitInType(phi->GetType()));
+    bri->SetBoundsRange(phiBlock, phi, BoundsRange::Union(ranges).FitInType(phi->GetType()));
 }
 
 void BoundsAnalysis::VisitNullCheck(GraphVisitor *v, Inst *inst)
@@ -908,84 +908,84 @@ void BoundsAnalysis::VisitNullCheck(GraphVisitor *v, Inst *inst)
 
 bool BoundsAnalysis::ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri)
 {
-    auto phi_block = phi->GetBasicBlock();
-    auto phi_type = phi->GetType();
-    auto loop = phi_block->GetLoop();
-    auto loop_parser = CountableLoopParser(*loop);
-    auto loop_info = loop_parser.Parse();
+    auto phiBlock = phi->GetBasicBlock();
+    auto phiType = phi->GetType();
+    auto loop = phiBlock->GetLoop();
+    auto loopParser = CountableLoopParser(*loop);
+    auto loopInfo = loopParser.Parse();
     // check that loop is countable and phi is index
-    if (!loop_info || phi != loop_info->index) {
+    if (!loopInfo || phi != loopInfo->index) {
         return false;
     }
-    auto loop_info_value = loop_info.value();
-    ASSERT(loop_info_value.update->IsAddSub());
-    auto lower = loop_info_value.init;
-    auto upper = loop_info_value.test;
-    auto cc = loop_info_value.normalized_cc;
+    auto loopInfoValue = loopInfo.value();
+    ASSERT(loopInfoValue.update->IsAddSub());
+    auto lower = loopInfoValue.init;
+    auto upper = loopInfoValue.test;
+    auto cc = loopInfoValue.normalizedCc;
     ASSERT(cc == CC_LE || cc == CC_LT || cc == CC_GE || cc == CC_GT);
-    if (!loop_info_value.is_inc) {
-        lower = loop_info_value.test;
-        upper = loop_info_value.init;
+    if (!loopInfoValue.isInc) {
+        lower = loopInfoValue.test;
+        upper = loopInfoValue.init;
     }
-    auto lower_range = bri->FindBoundsRange(phi_block, lower);
-    auto upper_range = bri->FindBoundsRange(phi_block, upper);
+    auto lowerRange = bri->FindBoundsRange(phiBlock, lower);
+    auto upperRange = bri->FindBoundsRange(phiBlock, upper);
     if (cc == CC_GT) {
-        lower_range = lower_range.Add(BoundsRange(1));
+        lowerRange = lowerRange.Add(BoundsRange(1));
     } else if (cc == CC_LT) {
-        upper_range = upper_range.Sub(BoundsRange(1));
+        upperRange = upperRange.Sub(BoundsRange(1));
         if (IsLenArray(upper)) {
-            upper_range.SetLenArray(upper);
+            upperRange.SetLenArray(upper);
         }
     }
-    if (lower_range.GetLeft() > upper_range.GetRight()) {
+    if (lowerRange.GetLeft() > upperRange.GetRight()) {
         return false;
     }
-    auto left = lower_range.GetLeft();
-    auto right = upper_range.GetRight();
-    auto len_array = upper_range.GetLenArray();
-    auto is_head_loop_exit = loop_info_value.if_imm->GetBasicBlock() == loop->GetHeader();
-    if (!upper_range.IsMoreOrEqual(lower_range) && !is_head_loop_exit) {
+    auto left = lowerRange.GetLeft();
+    auto right = upperRange.GetRight();
+    auto lenArray = upperRange.GetLenArray();
+    auto isHeadLoopExit = loopInfoValue.ifImm->GetBasicBlock() == loop->GetHeader();
+    if (!upperRange.IsMoreOrEqual(lowerRange) && !isHeadLoopExit) {
         return false;
     }
-    if (!upper_range.IsMoreOrEqual(lower_range) && !CountableLoopParser::HasPreHeaderCompare(loop, loop_info_value)) {
-        ASSERT(phi_block == loop->GetHeader());
-        if (loop_info_value.if_imm->GetBasicBlock() == phi_block) {
-            auto next_loop_block = phi_block->GetTrueSuccessor();
-            if (next_loop_block->GetLoop() != loop && !next_loop_block->GetLoop()->IsInside(loop)) {
-                next_loop_block = phi_block->GetFalseSuccessor();
-                ASSERT(next_loop_block->GetLoop() == loop || next_loop_block->GetLoop()->IsInside(loop));
+    if (!upperRange.IsMoreOrEqual(lowerRange) && !CountableLoopParser::HasPreHeaderCompare(loop, loopInfoValue)) {
+        ASSERT(phiBlock == loop->GetHeader());
+        if (loopInfoValue.ifImm->GetBasicBlock() == phiBlock) {
+            auto nextLoopBlock = phiBlock->GetTrueSuccessor();
+            if (nextLoopBlock->GetLoop() != loop && !nextLoopBlock->GetLoop()->IsInside(loop)) {
+                nextLoopBlock = phiBlock->GetFalseSuccessor();
+                ASSERT(nextLoopBlock->GetLoop() == loop || nextLoopBlock->GetLoop()->IsInside(loop));
             }
-            if (next_loop_block != phi_block) {
-                auto range = BoundsRange(left, right, len_array);
-                bri->SetBoundsRange(next_loop_block, phi, range.FitInType(phi_type));
+            if (nextLoopBlock != phiBlock) {
+                auto range = BoundsRange(left, right, lenArray);
+                bri->SetBoundsRange(nextLoopBlock, phi, range.FitInType(phiType));
             }
         }
         // index can be more (less) than loop bound on first iteration
         if (cc == CC_LE || cc == CC_LT) {
-            right = std::max(right, lower_range.GetRight());
-            len_array = nullptr;
+            right = std::max(right, lowerRange.GetRight());
+            lenArray = nullptr;
         } else {
-            left = std::min(left, upper_range.GetLeft());
+            left = std::min(left, upperRange.GetLeft());
         }
     }
-    auto range = BoundsRange(left, right, len_array);
-    bri->SetBoundsRange(phi_block, phi, range.FitInType(phi_type));
+    auto range = BoundsRange(left, right, lenArray);
+    bri->SetBoundsRange(phiBlock, phi, range.FitInType(phiType));
     return true;
 }
 
-bool BoundsAnalysis::CheckTriangleCase(const BasicBlock *block, const BasicBlock *tgt_block)
+bool BoundsAnalysis::CheckTriangleCase(const BasicBlock *block, const BasicBlock *tgtBlock)
 {
-    auto &preds_blocks = tgt_block->GetPredsBlocks();
-    auto loop = tgt_block->GetLoop();
-    auto &back_edges = loop->GetBackEdges();
-    if (preds_blocks.size() == 1) {
+    auto &predsBlocks = tgtBlock->GetPredsBlocks();
+    auto loop = tgtBlock->GetLoop();
+    auto &backEdges = loop->GetBackEdges();
+    if (predsBlocks.size() == 1) {
         return true;
     }
-    if (!loop->IsRoot() && back_edges.size() == 1 && preds_blocks.size() == 2U) {
-        if (preds_blocks[0] == block && preds_blocks[1] == back_edges[0]) {
+    if (!loop->IsRoot() && backEdges.size() == 1 && predsBlocks.size() == 2U) {
+        if (predsBlocks[0] == block && predsBlocks[1] == backEdges[0]) {
             return true;
         }
-        if (preds_blocks[1] == block && preds_blocks[0] == back_edges[0]) {
+        if (predsBlocks[1] == block && predsBlocks[0] == backEdges[0]) {
             return true;
         }
         return false;
@@ -993,39 +993,38 @@ bool BoundsAnalysis::CheckTriangleCase(const BasicBlock *block, const BasicBlock
     return false;
 }
 
-void BoundsAnalysis::ProcessNullCheck(GraphVisitor *v, const Inst *check_inst, const Inst *ref_input)
+void BoundsAnalysis::ProcessNullCheck(GraphVisitor *v, const Inst *checkInst, const Inst *refInput)
 {
-    ASSERT(check_inst->IsNullCheck() || check_inst->GetOpcode() == Opcode::DeoptimizeIf);
-    ASSERT(ref_input->GetType() == DataType::REFERENCE);
+    ASSERT(checkInst->IsNullCheck() || checkInst->GetOpcode() == Opcode::DeoptimizeIf);
+    ASSERT(refInput->GetType() == DataType::REFERENCE);
     auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
-    auto block = check_inst->GetBasicBlock();
+    auto block = checkInst->GetBasicBlock();
     auto range = BoundsRange(1, BoundsRange::GetMax(DataType::REFERENCE));
-    for (auto dom_block : block->GetDominatedBlocks()) {
-        bri->SetBoundsRange(dom_block, ref_input, range);
+    for (auto domBlock : block->GetDominatedBlocks()) {
+        bri->SetBoundsRange(domBlock, refInput, range);
     }
 }
 
-void BoundsAnalysis::CalcNewBoundsRangeForIsInstanceInput(GraphVisitor *v, IsInstanceInst *is_instance,
-                                                          IfImmInst *if_imm)
+void BoundsAnalysis::CalcNewBoundsRangeForIsInstanceInput(GraphVisitor *v, IsInstanceInst *isInstance, IfImmInst *ifImm)
 {
-    ASSERT(is_instance == if_imm->GetInput(0).GetInst());
-    auto block = if_imm->GetBasicBlock();
-    auto true_block = if_imm->GetEdgeIfInputTrue();
-    if (CheckTriangleCase(block, true_block)) {
+    ASSERT(isInstance == ifImm->GetInput(0).GetInst());
+    auto block = ifImm->GetBasicBlock();
+    auto trueBlock = ifImm->GetEdgeIfInputTrue();
+    if (CheckTriangleCase(block, trueBlock)) {
         auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
-        auto ref = is_instance->GetInput(0).GetInst();
+        auto ref = isInstance->GetInput(0).GetInst();
         // if IsInstance evaluates to True, its input is not null
         auto range = BoundsRange(1, BoundsRange::GetMax(DataType::REFERENCE));
-        bri->SetBoundsRange(true_block, ref, range);
+        bri->SetBoundsRange(trueBlock, ref, range);
     }
 }
 
 void BoundsAnalysis::CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *block, ConditionCode cc, Inst *left,
-                                                  Inst *right, BasicBlock *tgt_block)
+                                                  Inst *right, BasicBlock *tgtBlock)
 {
     auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
-    auto left_range = bri->FindBoundsRange(block, left);
-    auto right_range = bri->FindBoundsRange(block, right);
+    auto leftRange = bri->FindBoundsRange(block, left);
+    auto rightRange = bri->FindBoundsRange(block, right);
     // try to skip triangle:
     /* [block]
      *    |  \
@@ -1035,19 +1034,19 @@ void BoundsAnalysis::CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *b
      *    |  /
      * [tgt_block]
      */
-    if (CheckTriangleCase(block, tgt_block)) {
-        auto ranges = BoundsRange::TryNarrowBoundsByCC(cc, {left_range, right_range});
+    if (CheckTriangleCase(block, tgtBlock)) {
+        auto ranges = BoundsRange::TryNarrowBoundsByCC(cc, {leftRange, rightRange});
         if (cc == ConditionCode::CC_LT && IsLenArray(right)) {
             ranges.first.SetLenArray(right);
         } else if (cc == ConditionCode::CC_GT && IsLenArray(left)) {
             ranges.second.SetLenArray(left);
-        } else if (left_range.GetLenArray() != nullptr) {
-            ranges.first.SetLenArray(left_range.GetLenArray());
-        } else if (right_range.GetLenArray() != nullptr) {
-            ranges.second.SetLenArray(right_range.GetLenArray());
+        } else if (leftRange.GetLenArray() != nullptr) {
+            ranges.first.SetLenArray(leftRange.GetLenArray());
+        } else if (rightRange.GetLenArray() != nullptr) {
+            ranges.second.SetLenArray(rightRange.GetLenArray());
         }
-        bri->SetBoundsRange(tgt_block, left, ranges.first.FitInType(left->GetType()));
-        bri->SetBoundsRange(tgt_block, right, ranges.second.FitInType(right->GetType()));
+        bri->SetBoundsRange(tgtBlock, left, ranges.first.FitInType(left->GetType()));
+        bri->SetBoundsRange(tgtBlock, right, ranges.second.FitInType(right->GetType()));
     }
 }
 
@@ -1086,16 +1085,16 @@ void BoundsAnalysis::CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst)
     auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
     auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
     auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
-    auto len_array0 = range0.GetLenArray();
-    auto len_array1 = range1.GetLenArray();
+    auto lenArray0 = range0.GetLenArray();
+    auto lenArray1 = range1.GetLenArray();
     BoundsRange range;
     if constexpr (OPC == Opcode::Add) {  // NOLINT
         range = range0.Add(range1);
         if (!range.IsMaxRange(inst->GetType())) {
-            if (BoundsRange(0).IsMoreOrEqual(range1) && len_array0 != nullptr) {
-                range.SetLenArray(len_array0);
-            } else if (BoundsRange(0).IsMoreOrEqual(range0) && len_array1 != nullptr) {
-                range.SetLenArray(len_array1);
+            if (BoundsRange(0).IsMoreOrEqual(range1) && lenArray0 != nullptr) {
+                range.SetLenArray(lenArray0);
+            } else if (BoundsRange(0).IsMoreOrEqual(range0) && lenArray1 != nullptr) {
+                range.SetLenArray(lenArray1);
             } else if (IsLenArray(input0) && range1.IsNegative()) {
                 range.SetLenArray(input0);
             } else if (IsLenArray(input1) && range0.IsNegative()) {
@@ -1105,19 +1104,19 @@ void BoundsAnalysis::CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst)
     } else if constexpr (OPC == Opcode::Sub) {  // NOLINT
         range = range0.Sub(range1);
         if (!range.IsMaxRange(inst->GetType())) {
-            if (range1.IsNotNegative() && len_array0 != nullptr) {
-                range.SetLenArray(len_array0);
+            if (range1.IsNotNegative() && lenArray0 != nullptr) {
+                range.SetLenArray(lenArray0);
             } else if (IsLenArray(input0) && range1.IsMore(BoundsRange(0))) {
                 range.SetLenArray(input0);
             }
         }
     } else if constexpr (OPC == Opcode::Mod) {  // NOLINT
         range = range0.Mod(range1);
-        if (len_array1 != nullptr && range1.IsNotNegative()) {
-            range.SetLenArray(len_array1);
-        } else if (len_array0 != nullptr) {
+        if (lenArray1 != nullptr && range1.IsNotNegative()) {
+            range.SetLenArray(lenArray1);
+        } else if (lenArray0 != nullptr) {
             // a % b always has the same sign as a, so if a < LenArray, then (a % b) < LenArray
-            range.SetLenArray(len_array0);
+            range.SetLenArray(lenArray0);
         } else if (IsLenArray(input1)) {
             range.SetLenArray(input1);
         }
@@ -1127,18 +1126,18 @@ void BoundsAnalysis::CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst)
         }
     } else if constexpr (OPC == Opcode::Div) {  // NOLINT
         range = range0.Div(range1);
-        if (range0.IsNotNegative() && range1.IsNotNegative() && len_array0 != nullptr) {
-            range.SetLenArray(len_array0);
+        if (range0.IsNotNegative() && range1.IsNotNegative() && lenArray0 != nullptr) {
+            range.SetLenArray(lenArray0);
         }
     } else if constexpr (OPC == Opcode::Shr) {  // NOLINT
         range = range0.Shr(range1, inst->GetType());
-        if (range0.IsNotNegative() && len_array0 != nullptr) {
-            range.SetLenArray(len_array0);
+        if (range0.IsNotNegative() && lenArray0 != nullptr) {
+            range.SetLenArray(lenArray0);
         }
     } else if constexpr (OPC == Opcode::AShr) {  // NOLINT
         range = range0.AShr(range1, inst->GetType());
-        if (len_array0 != nullptr) {
-            range.SetLenArray(len_array0);
+        if (lenArray0 != nullptr) {
+            range.SetLenArray(lenArray0);
         }
     } else if constexpr (OPC == Opcode::Shl) {  // NOLINT
         range = range0.Shl(range1, inst->GetType());

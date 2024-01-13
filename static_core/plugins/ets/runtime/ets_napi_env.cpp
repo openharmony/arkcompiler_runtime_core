@@ -23,19 +23,19 @@ namespace panda::ets {
 Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *coroutine,
                                                                                  mem::InternalAllocatorPtr allocator)
 {
-    auto ets_vm = coroutine->GetVM();
-    auto reference_storage = MakePandaUnique<EtsReferenceStorage>(ets_vm->GetGlobalObjectStorage(), allocator, false);
-    if (!reference_storage || !reference_storage->GetAsReferenceStorage()->Init()) {
+    auto etsVm = coroutine->GetVM();
+    auto referenceStorage = MakePandaUnique<EtsReferenceStorage>(etsVm->GetGlobalObjectStorage(), allocator, false);
+    if (!referenceStorage || !referenceStorage->GetAsReferenceStorage()->Init()) {
         return Unexpected("Cannot allocate EtsReferenceStorage");
     }
 
     // Do not use PandaUniquePtr here as the environment could be accessed from daemon threads after destroy of runtime
-    auto ets_napi_env = std::make_unique<PandaEtsNapiEnv>(coroutine, std::move(reference_storage));
-    if (!ets_napi_env) {
+    auto etsNapiEnv = std::make_unique<PandaEtsNapiEnv>(coroutine, std::move(referenceStorage));
+    if (!etsNapiEnv) {
         return Unexpected("Cannot allocate PandaEtsNapiEnv");
     }
 
-    return Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *>(std::move(ets_napi_env));
+    return Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *>(std::move(etsNapiEnv));
 }
 
 PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
@@ -43,8 +43,8 @@ PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
     return EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
 }
 
-PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> reference_storage)
-    : EtsEnv {napi::GetNativeInterface()}, coroutine_(coroutine), reference_storage_(std::move(reference_storage))
+PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
+    : EtsEnv {napi::GetNativeInterface()}, coroutine_(coroutine), referenceStorage_(std::move(referenceStorage))
 {
 }
 
@@ -55,7 +55,7 @@ PandaEtsVM *PandaEtsNapiEnv::GetEtsVM() const
 
 void PandaEtsNapiEnv::FreeInternalMemory()
 {
-    reference_storage_.reset();
+    referenceStorage_.reset();
 }
 
 void PandaEtsNapiEnv::SetException(EtsThrowable *thr)

@@ -42,8 +42,8 @@ bool ConstFoldingSqrt(Inst *inst);
 // NB: casting may be required to create constants of the desired array type for creating LiteralArrays (in Bytecode
 // Optimizer ConstArrayResolver pass) If a constant is used to initialize an array (is_literal_data == true), it must be
 // able to be cast to the appropriate types
-ConstantInst *ConstFoldingCastConst(Inst *inst, Inst *input, bool is_literal_data = false);
+ConstantInst *ConstFoldingCastConst(Inst *inst, Inst *input, bool isLiteralData = false);
 
-ConstantInst *ConstFoldingCreateIntConst(Inst *inst, uint64_t value, bool is_literal_data = false);
+ConstantInst *ConstFoldingCreateIntConst(Inst *inst, uint64_t value, bool isLiteralData = false);
 }  // namespace panda::compiler
 #endif  // CONST_FOLDING_H

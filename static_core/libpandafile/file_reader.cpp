@@ -45,12 +45,12 @@ public:
         return cont_->GetOrCreateStringItem(s);
     }
 
-    BaseClassItem *GetType(File::EntityId type_id, const std::string &type_name)
+    BaseClassItem *GetType(File::EntityId typeId, const std::string &typeName)
     {
-        if (GetFile()->IsExternal(type_id)) {
-            return cont_->GetOrCreateForeignClassItem(type_name);
+        if (GetFile()->IsExternal(typeId)) {
+            return cont_->GetOrCreateForeignClassItem(typeName);
         }
-        return cont_->GetOrCreateClassItem(type_name);
+        return cont_->GetOrCreateClassItem(typeName);
     }
 
 private:
@@ -58,10 +58,10 @@ private:
 };
 }  // namespace
 
-bool FileReader::ReadContainer(bool should_rebuild_indices)
+bool FileReader::ReadContainer(bool shouldRebuildIndices)
 {
     const File::Header *header = file_->GetHeader();
-    LOG_IF(header->quickened_flag, FATAL, PANDAFILE) << "File " << file_->GetFullFileName() << " is already quickened";
+    LOG_IF(header->quickenedFlag, FATAL, PANDAFILE) << "File " << file_->GetFullFileName() << " is already quickened";
 
     if (!ReadClasses()) {
         return false;
@@ -73,7 +73,7 @@ bool FileReader::ReadContainer(bool should_rebuild_indices)
         return false;
     }
 
-    if (should_rebuild_indices) {
+    if (shouldRebuildIndices) {
         ComputeLayoutAndUpdateIndices();
     }
 
@@ -81,32 +81,31 @@ bool FileReader::ReadContainer(bool should_rebuild_indices)
 }
 
 /* static */
-bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *lit_array_accessor, File::EntityId array_id,
-                                        uint32_t index)
+bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, File::EntityId arrayId, uint32_t index)
 {
-    auto it = items_done_.find(array_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(arrayId);
+    if (it != itemsDone_.end()) {
         return true;
     }
 
     LiteralArrayItem *item = container_.GetOrCreateLiteralArrayItem(std::to_string(index));
-    items_done_.insert({array_id, static_cast<BaseItem *>(item)});
+    itemsDone_.insert({arrayId, static_cast<BaseItem *>(item)});
 
-    std::vector<panda_file::LiteralItem> literal_array;
+    std::vector<panda_file::LiteralItem> literalArray;
 
-    lit_array_accessor->EnumerateLiteralVals(
-        array_id, [&literal_array, this](const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                         const panda_file::LiteralTag &tag) {
-            literal_array.emplace_back(static_cast<uint8_t>(tag));
+    litArrayAccessor->EnumerateLiteralVals(
+        arrayId, [&literalArray, this](const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                       const panda_file::LiteralTag &tag) {
+            literalArray.emplace_back(static_cast<uint8_t>(tag));
             switch (tag) {
                 case panda_file::LiteralTag::BOOL: {
-                    literal_array.emplace_back(static_cast<uint8_t>(std::get<bool>(value)));
+                    literalArray.emplace_back(static_cast<uint8_t>(std::get<bool>(value)));
                     break;
                 }
                 case panda_file::LiteralTag::TAGVALUE:
                 case panda_file::LiteralTag::ACCESSOR:
                 case panda_file::LiteralTag::NULLVALUE: {
-                    literal_array.emplace_back(std::get<uint8_t>(value));
+                    literalArray.emplace_back(std::get<uint8_t>(value));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_U1:
@@ -115,10 +114,10 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *lit_array_accessor,
                     File::EntityId id(std::get<uint32_t>(value));
                     auto sp = file_->GetSpanFromId(id);
                     auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literal_array.emplace_back(len);
+                    literalArray.emplace_back(len);
                     for (size_t i = 0; i < len; i++) {
                         auto v = helpers::Read<sizeof(uint8_t)>(&sp);
-                        literal_array.emplace_back(v);
+                        literalArray.emplace_back(v);
                     }
                     break;
                 }
@@ -127,15 +126,15 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *lit_array_accessor,
                     File::EntityId id(std::get<uint32_t>(value));
                     auto sp = file_->GetSpanFromId(id);
                     auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literal_array.emplace_back(len);
+                    literalArray.emplace_back(len);
                     for (size_t i = 0; i < len; i++) {
                         auto v = helpers::Read<sizeof(uint16_t)>(&sp);
-                        literal_array.emplace_back(v);
+                        literalArray.emplace_back(v);
                     }
                     break;
                 }
                 case panda_file::LiteralTag::INTEGER: {
-                    literal_array.emplace_back(std::get<uint32_t>(value));
+                    literalArray.emplace_back(std::get<uint32_t>(value));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_I32:
@@ -144,10 +143,10 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *lit_array_accessor,
                     File::EntityId id(std::get<uint32_t>(value));
                     auto sp = file_->GetSpanFromId(id);
                     auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literal_array.emplace_back(len);
+                    literalArray.emplace_back(len);
                     for (size_t i = 0; i < len; i++) {
                         auto v = helpers::Read<sizeof(uint32_t)>(&sp);
-                        literal_array.emplace_back(v);
+                        literalArray.emplace_back(v);
                     }
                     break;
                 }
@@ -157,40 +156,40 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *lit_array_accessor,
                     File::EntityId id(std::get<uint32_t>(value));
                     auto sp = file_->GetSpanFromId(id);
                     auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literal_array.emplace_back(len);
+                    literalArray.emplace_back(len);
                     for (size_t i = 0; i < len; i++) {
                         auto v = helpers::Read<sizeof(uint64_t)>(&sp);
-                        literal_array.emplace_back(v);
+                        literalArray.emplace_back(v);
                     }
                     break;
                 }
                 case panda_file::LiteralTag::FLOAT: {
-                    literal_array.emplace_back(bit_cast<uint32_t>(std::get<float>(value)));
+                    literalArray.emplace_back(bit_cast<uint32_t>(std::get<float>(value)));
                     break;
                 }
                 case panda_file::LiteralTag::DOUBLE: {
-                    literal_array.emplace_back(bit_cast<uint64_t>(std::get<double>(value)));
+                    literalArray.emplace_back(bit_cast<uint64_t>(std::get<double>(value)));
                     break;
                 }
                 case panda_file::LiteralTag::STRING: {
                     File::EntityId id(std::get<uint32_t>(value));
                     auto data = file_->GetStringData(id);
-                    std::string item_str(utf::Mutf8AsCString(data.data));
-                    auto *string_item = container_.GetOrCreateStringItem(item_str);
-                    literal_array.emplace_back(string_item);
+                    std::string itemStr(utf::Mutf8AsCString(data.data));
+                    auto *stringItem = container_.GetOrCreateStringItem(itemStr);
+                    literalArray.emplace_back(stringItem);
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_STRING: {
                     File::EntityId id(std::get<uint32_t>(value));
                     auto sp = file_->GetSpanFromId(id);
                     auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literal_array.emplace_back(len);
+                    literalArray.emplace_back(len);
                     for (size_t i = 0; i < len; i++) {
-                        File::EntityId str_id(helpers::Read<sizeof(uint32_t)>(&sp));
-                        auto data = file_->GetStringData(str_id);
-                        std::string item_str(utf::Mutf8AsCString(data.data));
-                        auto *string_item = container_.GetOrCreateStringItem(item_str);
-                        literal_array.emplace_back(string_item);
+                        File::EntityId strId(helpers::Read<sizeof(uint32_t)>(&sp));
+                        auto data = file_->GetStringData(strId);
+                        std::string itemStr(utf::Mutf8AsCString(data.data));
+                        auto *stringItem = container_.GetOrCreateStringItem(itemStr);
+                        literalArray.emplace_back(stringItem);
                     }
                     break;
                 }
@@ -198,13 +197,13 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *lit_array_accessor,
                 case panda_file::LiteralTag::GENERATORMETHOD:
                 case panda_file::LiteralTag::ASYNCMETHOD:
                 case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
-                    File::EntityId method_id(std::get<uint32_t>(value));
-                    MethodDataAccessor method_acc(*file_, method_id);
-                    auto name = method_acc.GetName();
+                    File::EntityId methodId(std::get<uint32_t>(value));
+                    MethodDataAccessor methodAcc(*file_, methodId);
+                    auto name = methodAcc.GetName();
                     (void)name;
-                    File::EntityId class_id(method_acc.GetClassId());
-                    auto *class_item = CreateClassItem(class_id);
-                    literal_array.emplace_back(CreateMethodItem(class_item, method_id));
+                    File::EntityId classId(methodAcc.GetClassId());
+                    auto *classItem = CreateClassItem(classId);
+                    literalArray.emplace_back(CreateMethodItem(classItem, methodId));
                     break;
                 }
                 default:
@@ -212,115 +211,115 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *lit_array_accessor,
             }
         });
 
-    item->AddItems(literal_array);
+    item->AddItems(literalArray);
 
     return true;
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-AnnotationItem *FileReader::CreateAnnotationItem(File::EntityId ann_id)
+AnnotationItem *FileReader::CreateAnnotationItem(File::EntityId annId)
 {
-    auto it = items_done_.find(ann_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(annId);
+    if (it != itemsDone_.end()) {
         return static_cast<AnnotationItem *>(it->second);
     }
 
-    AnnotationDataAccessor ann_acc(*file_, ann_id);
-    File::EntityId ann_class_id {ann_acc.GetClassId()};
-    AnnotationItem *ann_item = nullptr;
+    AnnotationDataAccessor annAcc(*file_, annId);
+    File::EntityId annClassId {annAcc.GetClassId()};
+    AnnotationItem *annItem = nullptr;
 
-    if (!file_->IsExternal(ann_class_id)) {
-        auto *ann_class_item = CreateClassItem(ann_class_id);
-        ann_item = container_.CreateItem<AnnotationItem>(ann_class_item, std::vector<AnnotationItem::Elem>(),
-                                                         std::vector<AnnotationItem::Tag>());
+    if (!file_->IsExternal(annClassId)) {
+        auto *annClassItem = CreateClassItem(annClassId);
+        annItem = container_.CreateItem<AnnotationItem>(annClassItem, std::vector<AnnotationItem::Elem>(),
+                                                        std::vector<AnnotationItem::Tag>());
     } else {
-        auto *ann_class_item = CreateForeignClassItem(ann_class_id);
-        ann_item = container_.CreateItem<AnnotationItem>(ann_class_item, std::vector<AnnotationItem::Elem>(),
-                                                         std::vector<AnnotationItem::Tag>());
+        auto *annClassItem = CreateForeignClassItem(annClassId);
+        annItem = container_.CreateItem<AnnotationItem>(annClassItem, std::vector<AnnotationItem::Elem>(),
+                                                        std::vector<AnnotationItem::Tag>());
     }
 
-    ASSERT(ann_item != nullptr);
+    ASSERT(annItem != nullptr);
 
-    items_done_.insert({ann_id, static_cast<BaseItem *>(ann_item)});
+    itemsDone_.insert({annId, static_cast<BaseItem *>(annItem)});
 
-    std::vector<AnnotationItem::Elem> item_elements;
-    std::vector<AnnotationItem::Tag> tag_elements;
+    std::vector<AnnotationItem::Elem> itemElements;
+    std::vector<AnnotationItem::Tag> tagElements;
 
-    for (size_t i = 0; i < ann_acc.GetCount(); i++) {
-        AnnotationDataAccessor::Tag ann_tag = ann_acc.GetTag(i);
-        AnnotationDataAccessor::Elem ann_elem = ann_acc.GetElement(i);
-        ValueItem *elem_value_item = nullptr;
-        switch (ann_tag.GetItem()) {
+    for (size_t i = 0; i < annAcc.GetCount(); i++) {
+        AnnotationDataAccessor::Tag annTag = annAcc.GetTag(i);
+        AnnotationDataAccessor::Elem annElem = annAcc.GetElement(i);
+        ValueItem *elemValueItem = nullptr;
+        switch (annTag.GetItem()) {
             case '1':
             case '2':
             case '3': {
-                auto scalar = ann_elem.GetScalarValue();
-                elem_value_item = container_.GetOrCreateIntegerValueItem(scalar.Get<uint8_t>());
+                auto scalar = annElem.GetScalarValue();
+                elemValueItem = container_.GetOrCreateIntegerValueItem(scalar.Get<uint8_t>());
                 break;
             }
             case '4':
             case '5': {
-                auto scalar = ann_elem.GetScalarValue();
-                elem_value_item = container_.GetOrCreateIntegerValueItem(scalar.Get<uint16_t>());
+                auto scalar = annElem.GetScalarValue();
+                elemValueItem = container_.GetOrCreateIntegerValueItem(scalar.Get<uint16_t>());
                 break;
             }
             case '6':
             case '7': {
-                auto scalar = ann_elem.GetScalarValue();
-                elem_value_item = container_.GetOrCreateIntegerValueItem(scalar.Get<uint32_t>());
+                auto scalar = annElem.GetScalarValue();
+                elemValueItem = container_.GetOrCreateIntegerValueItem(scalar.Get<uint32_t>());
                 break;
             }
             case '8':
             case '9': {
-                auto scalar = ann_elem.GetScalarValue();
-                elem_value_item = container_.GetOrCreateLongValueItem(scalar.Get<uint64_t>());
+                auto scalar = annElem.GetScalarValue();
+                elemValueItem = container_.GetOrCreateLongValueItem(scalar.Get<uint64_t>());
                 break;
             }
             case 'A': {
-                auto scalar = ann_elem.GetScalarValue();
-                elem_value_item = container_.GetOrCreateFloatValueItem(scalar.Get<float>());
+                auto scalar = annElem.GetScalarValue();
+                elemValueItem = container_.GetOrCreateFloatValueItem(scalar.Get<float>());
                 break;
             }
             case 'B': {
-                auto scalar = ann_elem.GetScalarValue();
-                elem_value_item = container_.GetOrCreateDoubleValueItem(scalar.Get<double>());
+                auto scalar = annElem.GetScalarValue();
+                elemValueItem = container_.GetOrCreateDoubleValueItem(scalar.Get<double>());
                 break;
             }
             case 'C': {
-                auto scalar = ann_elem.GetScalarValue();
-                const File::EntityId str_id(scalar.Get<uint32_t>());
-                auto data = file_->GetStringData(str_id);
-                std::string item_str(utf::Mutf8AsCString(data.data));
-                auto *str_item = container_.GetOrCreateStringItem(item_str);
-                elem_value_item = container_.GetOrCreateIdValueItem(str_item);
+                auto scalar = annElem.GetScalarValue();
+                const File::EntityId strId(scalar.Get<uint32_t>());
+                auto data = file_->GetStringData(strId);
+                std::string itemStr(utf::Mutf8AsCString(data.data));
+                auto *strItem = container_.GetOrCreateStringItem(itemStr);
+                elemValueItem = container_.GetOrCreateIdValueItem(strItem);
                 break;
             }
             case 'D': {
-                auto scalar = ann_elem.GetScalarValue();
-                const File::EntityId class_id {scalar.Get<uint32_t>()};
-                elem_value_item = container_.GetOrCreateIdValueItem(CreateGenericClassItem(class_id));
+                auto scalar = annElem.GetScalarValue();
+                const File::EntityId classId {scalar.Get<uint32_t>()};
+                elemValueItem = container_.GetOrCreateIdValueItem(CreateGenericClassItem(classId));
                 break;
             }
             case 'E': {
-                auto scalar = ann_elem.GetScalarValue();
-                const File::EntityId method_id {scalar.Get<uint32_t>()};
-                MethodDataAccessor method_acc(*file_, method_id);
-                auto *cls_item = CreateGenericClassItem(method_acc.GetClassId());
-                elem_value_item = container_.GetOrCreateIdValueItem(CreateGenericMethodItem(cls_item, method_id));
+                auto scalar = annElem.GetScalarValue();
+                const File::EntityId methodId {scalar.Get<uint32_t>()};
+                MethodDataAccessor methodAcc(*file_, methodId);
+                auto *clsItem = CreateGenericClassItem(methodAcc.GetClassId());
+                elemValueItem = container_.GetOrCreateIdValueItem(CreateGenericMethodItem(clsItem, methodId));
                 break;
             }
             case 'F': {
-                auto scalar = ann_elem.GetScalarValue();
-                const File::EntityId field_id {scalar.Get<uint32_t>()};
-                FieldDataAccessor field_acc(*file_, field_id);
-                auto *cls_item = CreateGenericClassItem(field_acc.GetClassId());
-                elem_value_item = container_.GetOrCreateIdValueItem(CreateGenericFieldItem(cls_item, field_id));
+                auto scalar = annElem.GetScalarValue();
+                const File::EntityId fieldId {scalar.Get<uint32_t>()};
+                FieldDataAccessor fieldAcc(*file_, fieldId);
+                auto *clsItem = CreateGenericClassItem(fieldAcc.GetClassId());
+                elemValueItem = container_.GetOrCreateIdValueItem(CreateGenericFieldItem(clsItem, fieldId));
                 break;
             }
             case 'G': {
-                auto scalar = ann_elem.GetScalarValue();
-                const File::EntityId ann_item_id {scalar.Get<uint32_t>()};
-                elem_value_item = container_.GetOrCreateIdValueItem(CreateAnnotationItem(ann_item_id));
+                auto scalar = annElem.GetScalarValue();
+                const File::EntityId annItemId {scalar.Get<uint32_t>()};
+                elemValueItem = container_.GetOrCreateIdValueItem(CreateAnnotationItem(annItemId));
                 break;
             }
             case 'J': {
@@ -328,202 +327,202 @@ AnnotationItem *FileReader::CreateAnnotationItem(File::EntityId ann_id)
                 break;
             }
             case '*': {
-                elem_value_item = container_.GetOrCreateIntegerValueItem(0);
+                elemValueItem = container_.GetOrCreateIntegerValueItem(0);
                 break;
             }
             case 'K': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U1), std::move(items)));
                 break;
             }
             case 'L': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I8), std::move(items)));
                 break;
             }
             case 'M': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U8), std::move(items)));
                 break;
             }
             case 'N': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint16_t>(j)));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I16), std::move(items)));
                 break;
             }
             case 'O': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint16_t>(j)));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U16), std::move(items)));
                 break;
             }
             case 'P': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(array.Get<uint32_t>(j));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I32), std::move(items)));
                 break;
             }
             case 'Q': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(array.Get<uint32_t>(j));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U32), std::move(items)));
                 break;
             }
             case 'R': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(array.Get<uint64_t>(j));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I64), std::move(items)));
                 break;
             }
             case 'S': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(array.Get<uint64_t>(j));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U64), std::move(items)));
                 break;
             }
             case 'T': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(array.Get<float>(j));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::F32), std::move(items)));
                 break;
             }
             case 'U': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
                     ScalarValueItem scalar(array.Get<double>(j));
                     items.emplace_back(std::move(scalar));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::F64), std::move(items)));
                 break;
             }
             case 'V': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId str_id(array.Get<uint32_t>(j));
-                    auto data = file_->GetStringData(str_id);
-                    std::string item_str(utf::Mutf8AsCString(data.data));
-                    items.emplace_back(ScalarValueItem(container_.GetOrCreateStringItem(item_str)));
+                    const File::EntityId strId(array.Get<uint32_t>(j));
+                    auto data = file_->GetStringData(strId);
+                    std::string itemStr(utf::Mutf8AsCString(data.data));
+                    items.emplace_back(ScalarValueItem(container_.GetOrCreateStringItem(itemStr)));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
                 break;
             }
             case 'W': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId class_id {array.Get<uint32_t>(j)};
-                    BaseClassItem *cls_item = nullptr;
-                    if (file_->IsExternal(class_id)) {
-                        cls_item = CreateForeignClassItem(class_id);
+                    const File::EntityId classId {array.Get<uint32_t>(j)};
+                    BaseClassItem *clsItem = nullptr;
+                    if (file_->IsExternal(classId)) {
+                        clsItem = CreateForeignClassItem(classId);
                     } else {
-                        cls_item = CreateClassItem(class_id);
+                        clsItem = CreateClassItem(classId);
                     }
-                    ASSERT(cls_item != nullptr);
-                    items.emplace_back(ScalarValueItem(cls_item));
+                    ASSERT(clsItem != nullptr);
+                    items.emplace_back(ScalarValueItem(clsItem));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
                 break;
             }
             case 'X': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId method_id {array.Get<uint32_t>(j)};
-                    MethodDataAccessor method_acc(*file_, method_id);
-                    auto *cls_item = CreateGenericClassItem(method_acc.GetClassId());
-                    items.emplace_back(ScalarValueItem(CreateGenericMethodItem(cls_item, method_id)));
+                    const File::EntityId methodId {array.Get<uint32_t>(j)};
+                    MethodDataAccessor methodAcc(*file_, methodId);
+                    auto *clsItem = CreateGenericClassItem(methodAcc.GetClassId());
+                    items.emplace_back(ScalarValueItem(CreateGenericMethodItem(clsItem, methodId)));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
                 break;
             }
             case 'Y': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId field_id {array.Get<uint32_t>(j)};
-                    FieldDataAccessor field_acc(*file_, field_id);
-                    auto *cls_item = CreateGenericClassItem(field_acc.GetClassId());
-                    items.emplace_back(ScalarValueItem(CreateGenericFieldItem(cls_item, field_id)));
+                    const File::EntityId fieldId {array.Get<uint32_t>(j)};
+                    FieldDataAccessor fieldAcc(*file_, fieldId);
+                    auto *clsItem = CreateGenericClassItem(fieldAcc.GetClassId());
+                    items.emplace_back(ScalarValueItem(CreateGenericFieldItem(clsItem, fieldId)));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
                 break;
             }
             case 'H': {
                 // ARRAY can appear for empty arrays only
-                ASSERT(ann_elem.GetArrayValue().GetCount() == 0);
-                elem_value_item = static_cast<ValueItem *>(
+                ASSERT(annElem.GetArrayValue().GetCount() == 0);
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::VOID), std::vector<ScalarValueItem>()));
                 break;
             }
             case 'Z': {
-                auto array = ann_elem.GetArrayValue();
+                auto array = annElem.GetArrayValue();
                 std::vector<ScalarValueItem> items;
                 for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId ann_item_id {array.Get<uint32_t>(j)};
-                    items.emplace_back(CreateAnnotationItem(ann_item_id));
+                    const File::EntityId annItemId {array.Get<uint32_t>(j)};
+                    items.emplace_back(CreateAnnotationItem(annItemId));
                 }
-                elem_value_item = static_cast<ValueItem *>(
+                elemValueItem = static_cast<ValueItem *>(
                     container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
                 break;
             }
@@ -539,295 +538,296 @@ AnnotationItem *FileReader::CreateAnnotationItem(File::EntityId ann_id)
                 UNREACHABLE();
         }
 
-        ASSERT(elem_value_item != nullptr);
+        ASSERT(elemValueItem != nullptr);
 
-        tag_elements.emplace_back(AnnotationItem::Tag(static_cast<char>(ann_tag.GetItem())));
-        File::EntityId name_id(ann_elem.GetNameId());
-        std::string annot_name_str(utf::Mutf8AsCString(file_->GetStringData(name_id).data));
-        auto elem_name_item = container_.GetOrCreateStringItem(annot_name_str);
-        item_elements.emplace_back(AnnotationItem::Elem(elem_name_item, elem_value_item));
+        tagElements.emplace_back(AnnotationItem::Tag(static_cast<char>(annTag.GetItem())));
+        File::EntityId nameId(annElem.GetNameId());
+        std::string annotNameStr(utf::Mutf8AsCString(file_->GetStringData(nameId).data));
+        auto elemNameItem = container_.GetOrCreateStringItem(annotNameStr);
+        itemElements.emplace_back(AnnotationItem::Elem(elemNameItem, elemValueItem));
     }
 
-    ann_item->SetElements(std::move(item_elements));
-    ann_item->SetTags(std::move(tag_elements));
+    annItem->SetElements(std::move(itemElements));
+    annItem->SetTags(std::move(tagElements));
 
-    return ann_item;
+    return annItem;
 }
 
-TypeItem *FileReader::CreateParamTypeItem(ProtoDataAccessor *proto_acc, size_t param_num, size_t reference_num)
+TypeItem *FileReader::CreateParamTypeItem(ProtoDataAccessor *protoAcc, size_t paramNum, size_t referenceNum)
 {
-    Type param_type = proto_acc->GetArgType(param_num);
-    TypeItem *param_type_item = nullptr;
-    if (param_type.IsPrimitive()) {
-        param_type_item = container_.GetOrCreatePrimitiveTypeItem(param_type);
+    Type paramType = protoAcc->GetArgType(paramNum);
+    TypeItem *paramTypeItem = nullptr;
+    if (paramType.IsPrimitive()) {
+        paramTypeItem = container_.GetOrCreatePrimitiveTypeItem(paramType);
     } else {
-        const File::EntityId type_cls_id = proto_acc->GetReferenceType(reference_num);
-        if (file_->IsExternal(type_cls_id)) {
-            param_type_item = CreateForeignClassItem(type_cls_id);
+        const File::EntityId typeClsId = protoAcc->GetReferenceType(referenceNum);
+        if (file_->IsExternal(typeClsId)) {
+            paramTypeItem = CreateForeignClassItem(typeClsId);
         } else {
-            param_type_item = CreateClassItem(type_cls_id);
+            paramTypeItem = CreateClassItem(typeClsId);
         }
     }
 
-    ASSERT(param_type_item != nullptr);
+    ASSERT(paramTypeItem != nullptr);
 
-    return param_type_item;
+    return paramTypeItem;
 }
 
-std::vector<MethodParamItem> FileReader::CreateMethodParamItems(ProtoDataAccessor *proto_acc,
-                                                                MethodDataAccessor *method_acc, size_t reference_num)
+std::vector<MethodParamItem> FileReader::CreateMethodParamItems(ProtoDataAccessor *protoAcc,
+                                                                MethodDataAccessor *methodAcc, size_t referenceNum)
 {
-    std::vector<MethodParamItem> param_items;
+    std::vector<MethodParamItem> paramItems;
 
-    for (size_t i = 0; i < proto_acc->GetNumArgs(); i++) {
-        TypeItem *param_type_item = CreateParamTypeItem(proto_acc, i, reference_num);
-        if (param_type_item->GetType().IsReference()) {
-            reference_num++;
+    for (size_t i = 0; i < protoAcc->GetNumArgs(); i++) {
+        TypeItem *paramTypeItem = CreateParamTypeItem(protoAcc, i, referenceNum);
+        if (paramTypeItem->GetType().IsReference()) {
+            referenceNum++;
         }
-        param_items.emplace_back(MethodParamItem(param_type_item));
+        paramItems.emplace_back(MethodParamItem(paramTypeItem));
     }
 
-    auto param_ann_id = method_acc->GetParamAnnotationId();
-    if (param_ann_id) {
-        ParamAnnotationsDataAccessor param_acc(*file_, param_ann_id.value());
-        for (size_t i = 0; i < proto_acc->GetNumArgs(); i++) {
-            ParamAnnotationsDataAccessor::AnnotationArray ann_arr = param_acc.GetAnnotationArray(i);
-            ann_arr.EnumerateAnnotations([&](File::EntityId ann_id) {
-                auto ann_item = CreateAnnotationItem(ann_id);
-                param_items[i].AddAnnotation(ann_item);
+    auto paramAnnId = methodAcc->GetParamAnnotationId();
+    if (paramAnnId) {
+        ParamAnnotationsDataAccessor paramAcc(*file_, paramAnnId.value());
+        for (size_t i = 0; i < protoAcc->GetNumArgs(); i++) {
+            ParamAnnotationsDataAccessor::AnnotationArray annArr = paramAcc.GetAnnotationArray(i);
+            annArr.EnumerateAnnotations([this, &paramItems, &i](File::EntityId annId) {
+                auto annItem = CreateAnnotationItem(annId);
+                paramItems[i].AddAnnotation(annItem);
             });
         }
     }
 
-    auto runtime_param_ann_id = method_acc->GetRuntimeParamAnnotationId();
-    if (runtime_param_ann_id) {
-        ParamAnnotationsDataAccessor param_acc(*file_, runtime_param_ann_id.value());
-        for (size_t i = 0; i < proto_acc->GetNumArgs(); i++) {
-            ParamAnnotationsDataAccessor::AnnotationArray ann_arr = param_acc.GetAnnotationArray(i);
-            ann_arr.EnumerateAnnotations([&](File::EntityId ann_id) {
-                auto ann_item = CreateAnnotationItem(ann_id);
-                param_items[i].AddRuntimeAnnotation(ann_item);
+    auto runtimeParamAnnId = methodAcc->GetRuntimeParamAnnotationId();
+    if (runtimeParamAnnId) {
+        ParamAnnotationsDataAccessor paramAcc(*file_, runtimeParamAnnId.value());
+        for (size_t i = 0; i < protoAcc->GetNumArgs(); i++) {
+            ParamAnnotationsDataAccessor::AnnotationArray annArr = paramAcc.GetAnnotationArray(i);
+            annArr.EnumerateAnnotations([this, &paramItems, &i](File::EntityId annId) {
+                auto annItem = CreateAnnotationItem(annId);
+                paramItems[i].AddRuntimeAnnotation(annItem);
             });
         }
     }
 
-    return param_items;
+    return paramItems;
 }
 
-DebugInfoItem *FileReader::CreateDebugInfoItem(File::EntityId debug_info_id)
+DebugInfoItem *FileReader::CreateDebugInfoItem(File::EntityId debugInfoId)
 {
-    auto it = items_done_.find(debug_info_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(debugInfoId);
+    if (it != itemsDone_.end()) {
         return static_cast<DebugInfoItem *>(it->second);
     }
 
-    panda_file::DebugInfoDataAccessor debug_acc(*file_, debug_info_id);
+    panda_file::DebugInfoDataAccessor debugAcc(*file_, debugInfoId);
 
-    const auto lnp_id = file_->GetIdFromPointer(debug_acc.GetLineNumberProgram());
+    const auto lnpId = file_->GetIdFromPointer(debugAcc.GetLineNumberProgram());
 
-    LineNumberProgramItem *lnp_item;
+    LineNumberProgramItem *lnpItem;
 
-    if (auto old_lnp = items_done_.find(lnp_id); old_lnp != items_done_.end()) {
-        ASSERT(old_lnp->second->GetItemType() == ItemTypes::LINE_NUMBER_PROGRAM_ITEM);
-        lnp_item = static_cast<LineNumberProgramItem *>(old_lnp->second);
-        container_.IncRefLineNumberProgramItem(lnp_item);
+    if (auto oldLnp = itemsDone_.find(lnpId); oldLnp != itemsDone_.end()) {
+        ASSERT(oldLnp->second->GetItemType() == ItemTypes::LINE_NUMBER_PROGRAM_ITEM);
+        lnpItem = static_cast<LineNumberProgramItem *>(oldLnp->second);
+        container_.IncRefLineNumberProgramItem(lnpItem);
     } else {
-        lnp_item = container_.CreateLineNumberProgramItem();
-        items_done_.emplace(lnp_id, lnp_item);
+        lnpItem = container_.CreateLineNumberProgramItem();
+        itemsDone_.emplace(lnpId, lnpItem);
     }
 
-    auto *debug_info_item = container_.CreateItem<DebugInfoItem>(lnp_item);
-    items_done_.insert({debug_info_id, static_cast<BaseItem *>(debug_info_item)});
+    auto *debugInfoItem = container_.CreateItem<DebugInfoItem>(lnpItem);
+    itemsDone_.insert({debugInfoId, static_cast<BaseItem *>(debugInfoItem)});
 
-    debug_info_item->SetLineNumber(debug_acc.GetLineStart());
-    debug_acc.EnumerateParameters([&](File::EntityId param_id) {
-        auto data = file_->GetStringData(param_id);
-        std::string item_str(utf::Mutf8AsCString(data.data));
-        auto *string_item = container_.GetOrCreateStringItem(item_str);
-        debug_info_item->AddParameter(string_item);
+    debugInfoItem->SetLineNumber(debugAcc.GetLineStart());
+    debugAcc.EnumerateParameters([this, &debugInfoItem](File::EntityId paramId) {
+        auto data = file_->GetStringData(paramId);
+        std::string itemStr(utf::Mutf8AsCString(data.data));
+        auto *stringItem = container_.GetOrCreateStringItem(itemStr);
+        debugInfoItem->AddParameter(stringItem);
     });
 
-    return debug_info_item;
+    return debugInfoItem;
 }
 
-MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId method_id)
+MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId methodId)
 {
-    auto it = items_done_.find(method_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(methodId);
+    if (it != itemsDone_.end()) {
         return static_cast<MethodItem *>(it->second);
     }
 
-    MethodDataAccessor method_acc(*file_, method_id);
-    auto data = file_->GetStringData(method_acc.GetNameId());
-    std::string method_name(utf::Mutf8AsCString(data.data));
-    auto *method_str_item = container_.GetOrCreateStringItem(method_name);
+    MethodDataAccessor methodAcc(*file_, methodId);
+    auto data = file_->GetStringData(methodAcc.GetNameId());
+    std::string methodName(utf::Mutf8AsCString(data.data));
+    auto *methodStrItem = container_.GetOrCreateStringItem(methodName);
 
-    ProtoDataAccessor proto_acc(*file_, method_acc.GetProtoId());
-    Type ret_type = proto_acc.GetReturnType();
-    size_t reference_num = 0;
-    TypeItem *ret_type_item = nullptr;
-    if (ret_type.IsPrimitive()) {
-        ret_type_item = container_.GetOrCreatePrimitiveTypeItem(ret_type);
+    ProtoDataAccessor protoAcc(*file_, methodAcc.GetProtoId());
+    Type retType = protoAcc.GetReturnType();
+    size_t referenceNum = 0;
+    TypeItem *retTypeItem = nullptr;
+    if (retType.IsPrimitive()) {
+        retTypeItem = container_.GetOrCreatePrimitiveTypeItem(retType);
     } else {
-        const File::EntityId type_cls_id = proto_acc.GetReferenceType(reference_num);
-        if (file_->IsExternal(type_cls_id)) {
-            ret_type_item = CreateForeignClassItem(type_cls_id);
+        const File::EntityId typeClsId = protoAcc.GetReferenceType(referenceNum);
+        if (file_->IsExternal(typeClsId)) {
+            retTypeItem = CreateForeignClassItem(typeClsId);
         } else {
-            ret_type_item = CreateClassItem(type_cls_id);
+            retTypeItem = CreateClassItem(typeClsId);
         }
-        reference_num++;
+        referenceNum++;
     }
-    ASSERT(ret_type_item != nullptr);
-    auto param_items = CreateMethodParamItems(&proto_acc, &method_acc, reference_num);
+    ASSERT(retTypeItem != nullptr);
+    auto paramItems = CreateMethodParamItems(&protoAcc, &methodAcc, referenceNum);
     // Double check if we done this method while computing params
-    auto it_check = items_done_.find(method_id);
-    if (it_check != items_done_.end()) {
-        return static_cast<MethodItem *>(it_check->second);
+    auto itCheck = itemsDone_.find(methodId);
+    if (itCheck != itemsDone_.end()) {
+        return static_cast<MethodItem *>(itCheck->second);
     }
-    auto *proto_item = container_.GetOrCreateProtoItem(ret_type_item, param_items);
+    auto *protoItem = container_.GetOrCreateProtoItem(retTypeItem, paramItems);
 
-    auto *method_item =
-        cls->AddMethod(method_str_item, proto_item, method_acc.GetAccessFlags(), std::move(param_items));
+    auto *methodItem = cls->AddMethod(methodStrItem, protoItem, methodAcc.GetAccessFlags(), std::move(paramItems));
 
-    if (method_item->HasRuntimeParamAnnotations()) {
-        container_.CreateItem<ParamAnnotationsItem>(method_item, true);
-    }
-
-    if (method_item->HasParamAnnotations()) {
-        container_.CreateItem<ParamAnnotationsItem>(method_item, false);
+    if (methodItem->HasRuntimeParamAnnotations()) {
+        container_.CreateItem<ParamAnnotationsItem>(methodItem, true);
     }
 
-    items_done_.insert({method_id, static_cast<BaseItem *>(method_item)});
+    if (methodItem->HasParamAnnotations()) {
+        container_.CreateItem<ParamAnnotationsItem>(methodItem, false);
+    }
 
-    method_acc.EnumerateAnnotations(
-        [&](File::EntityId ann_id) { method_item->AddAnnotation(CreateAnnotationItem(ann_id)); });
+    itemsDone_.insert({methodId, static_cast<BaseItem *>(methodItem)});
 
-    method_acc.EnumerateRuntimeAnnotations(
-        [&](File::EntityId ann_id) { method_item->AddRuntimeAnnotation(CreateAnnotationItem(ann_id)); });
+    methodAcc.EnumerateAnnotations(
+        [this, &methodItem](File::EntityId annId) { methodItem->AddAnnotation(CreateAnnotationItem(annId)); });
 
-    method_acc.EnumerateTypeAnnotations(
-        [&](File::EntityId ann_id) { method_item->AddTypeAnnotation(CreateAnnotationItem(ann_id)); });
+    methodAcc.EnumerateRuntimeAnnotations(
+        [this, &methodItem](File::EntityId annId) { methodItem->AddRuntimeAnnotation(CreateAnnotationItem(annId)); });
 
-    method_acc.EnumerateRuntimeTypeAnnotations(
-        [&](File::EntityId ann_id) { method_item->AddRuntimeTypeAnnotation(CreateAnnotationItem(ann_id)); });
+    methodAcc.EnumerateTypeAnnotations(
+        [this, &methodItem](File::EntityId annId) { methodItem->AddTypeAnnotation(CreateAnnotationItem(annId)); });
 
-    auto code_id = method_acc.GetCodeId();
-    if (code_id) {
-        CodeDataAccessor code_acc(*file_, code_id.value());
-        std::vector<uint8_t> instructions(code_acc.GetCodeSize());
+    methodAcc.EnumerateRuntimeTypeAnnotations([this, &methodItem](File::EntityId annId) {
+        methodItem->AddRuntimeTypeAnnotation(CreateAnnotationItem(annId));
+    });
+
+    auto codeId = methodAcc.GetCodeId();
+    if (codeId) {
+        CodeDataAccessor codeAcc(*file_, codeId.value());
+        std::vector<uint8_t> instructions(codeAcc.GetCodeSize());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        instructions.assign(code_acc.GetInstructions(), code_acc.GetInstructions() + code_acc.GetCodeSize());
-        auto *code_item =
-            container_.CreateItem<CodeItem>(code_acc.GetNumVregs(), code_acc.GetNumArgs(), std::move(instructions));
+        instructions.assign(codeAcc.GetInstructions(), codeAcc.GetInstructions() + codeAcc.GetCodeSize());
+        auto *codeItem =
+            container_.CreateItem<CodeItem>(codeAcc.GetNumVregs(), codeAcc.GetNumArgs(), std::move(instructions));
 
-        code_acc.EnumerateTryBlocks([&](CodeDataAccessor::TryBlock &try_block) {
-            std::vector<CodeItem::CatchBlock> catch_blocks;
-            try_block.EnumerateCatchBlocks([&](CodeDataAccessor::CatchBlock &catch_block) {
-                BaseClassItem *catch_type_item = nullptr;
-                auto type_idx = catch_block.GetTypeIdx();
-                if (type_idx != panda_file::INVALID_INDEX) {
-                    File::EntityId catch_cls_id = file_->ResolveClassIndex(method_id, catch_block.GetTypeIdx());
-                    if (file_->IsExternal(catch_cls_id)) {
-                        catch_type_item = CreateForeignClassItem(catch_cls_id);
-                    } else {
-                        catch_type_item = CreateClassItem(catch_cls_id);
+        codeAcc.EnumerateTryBlocks([this, &methodItem, &methodId, &codeItem](CodeDataAccessor::TryBlock &tryBlock) {
+            std::vector<CodeItem::CatchBlock> catchBlocks;
+            tryBlock.EnumerateCatchBlocks(
+                [this, &methodItem, &methodId, &catchBlocks](CodeDataAccessor::CatchBlock &catchBlock) {
+                    BaseClassItem *catchTypeItem = nullptr;
+                    auto typeIdx = catchBlock.GetTypeIdx();
+                    if (typeIdx != panda_file::INVALID_INDEX) {
+                        File::EntityId catchClsId = file_->ResolveClassIndex(methodId, catchBlock.GetTypeIdx());
+                        if (file_->IsExternal(catchClsId)) {
+                            catchTypeItem = CreateForeignClassItem(catchClsId);
+                        } else {
+                            catchTypeItem = CreateClassItem(catchClsId);
+                        }
+                        methodItem->AddIndexDependency(catchTypeItem);
                     }
-                    method_item->AddIndexDependency(catch_type_item);
-                }
-                catch_blocks.emplace_back(CodeItem::CatchBlock(method_item, catch_type_item, catch_block.GetHandlerPc(),
-                                                               catch_block.GetCodeSize()));
-                return true;
-            });
-            code_item->AddTryBlock(
-                CodeItem::TryBlock(try_block.GetStartPc(), try_block.GetLength(), std::move(catch_blocks)));
+                    catchBlocks.emplace_back(CodeItem::CatchBlock(methodItem, catchTypeItem, catchBlock.GetHandlerPc(),
+                                                                  catchBlock.GetCodeSize()));
+                    return true;
+                });
+            codeItem->AddTryBlock(
+                CodeItem::TryBlock(tryBlock.GetStartPc(), tryBlock.GetLength(), std::move(catchBlocks)));
             return true;
         });
 
-        method_item->SetCode(code_item);
+        methodItem->SetCode(codeItem);
     }
 
-    auto debug_info_id = method_acc.GetDebugInfoId();
-    if (debug_info_id) {
-        method_item->SetDebugInfo(CreateDebugInfoItem(debug_info_id.value()));
+    auto debugInfoId = methodAcc.GetDebugInfoId();
+    if (debugInfoId) {
+        methodItem->SetDebugInfo(CreateDebugInfoItem(debugInfoId.value()));
     }
 
-    auto source_lang = method_acc.GetSourceLang();
-    if (source_lang) {
-        method_item->SetSourceLang(source_lang.value());
+    auto sourceLang = methodAcc.GetSourceLang();
+    if (sourceLang) {
+        methodItem->SetSourceLang(sourceLang.value());
     }
 
-    return method_item;
+    return methodItem;
 }
 
-MethodHandleItem *FileReader::CreateMethodHandleItem(File::EntityId mh_id)
+MethodHandleItem *FileReader::CreateMethodHandleItem(File::EntityId mhId)
 {
-    (void)mh_id;
+    (void)mhId;
     ASSERT(false);
     return nullptr;  // STUB
 }
 
-FieldItem *FileReader::CreateFieldItem(ClassItem *cls, File::EntityId field_id)
+FieldItem *FileReader::CreateFieldItem(ClassItem *cls, File::EntityId fieldId)
 {
-    auto it = items_done_.find(field_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(fieldId);
+    if (it != itemsDone_.end()) {
         return static_cast<FieldItem *>(it->second);
     }
 
-    FieldDataAccessor field_acc(*file_, field_id);
+    FieldDataAccessor fieldAcc(*file_, fieldId);
 
-    auto data = file_->GetStringData(field_acc.GetNameId());
-    std::string string_name(utf::Mutf8AsCString(data.data));
-    auto *field_name = container_.GetOrCreateStringItem(string_name);
-    Type field_type = Type::GetTypeFromFieldEncoding(field_acc.GetType());
+    auto data = file_->GetStringData(fieldAcc.GetNameId());
+    std::string stringName(utf::Mutf8AsCString(data.data));
+    auto *fieldName = container_.GetOrCreateStringItem(stringName);
+    Type fieldType = Type::GetTypeFromFieldEncoding(fieldAcc.GetType());
 
-    TypeItem *field_type_item = nullptr;
-    if (field_type.IsReference()) {
-        File::EntityId type_id(field_acc.GetType());
-        if (file_->IsExternal(type_id)) {
-            field_type_item = CreateForeignClassItem(type_id);
+    TypeItem *fieldTypeItem = nullptr;
+    if (fieldType.IsReference()) {
+        File::EntityId typeId(fieldAcc.GetType());
+        if (file_->IsExternal(typeId)) {
+            fieldTypeItem = CreateForeignClassItem(typeId);
         } else {
-            field_type_item = CreateClassItem(type_id);
+            fieldTypeItem = CreateClassItem(typeId);
             // Double check if we done this field while generated class item
-            auto it_check = items_done_.find(field_id);
-            if (it_check != items_done_.end()) {
-                return static_cast<FieldItem *>(it_check->second);
+            auto itCheck = itemsDone_.find(fieldId);
+            if (itCheck != itemsDone_.end()) {
+                return static_cast<FieldItem *>(itCheck->second);
             }
         }
     } else {
-        field_type_item = container_.GetOrCreatePrimitiveTypeItem(field_type.GetId());
+        fieldTypeItem = container_.GetOrCreatePrimitiveTypeItem(fieldType.GetId());
     }
 
-    ASSERT(field_type_item != nullptr);
+    ASSERT(fieldTypeItem != nullptr);
 
-    FieldItem *field_item = cls->AddField(field_name, field_type_item, field_acc.GetAccessFlags());
-    items_done_.insert({field_id, static_cast<BaseItem *>(field_item)});
+    FieldItem *fieldItem = cls->AddField(fieldName, fieldTypeItem, fieldAcc.GetAccessFlags());
+    itemsDone_.insert({fieldId, static_cast<BaseItem *>(fieldItem)});
 
-    switch (field_type.GetId()) {
+    switch (fieldType.GetId()) {
         case Type::TypeId::U1:
         case Type::TypeId::I8:
         case Type::TypeId::U8:
-            SetIntegerFieldValue<uint8_t>(&field_acc, field_item);
+            SetIntegerFieldValue<uint8_t>(&fieldAcc, fieldItem);
             break;
         case Type::TypeId::I16:
         case Type::TypeId::U16:
-            SetIntegerFieldValue<uint16_t>(&field_acc, field_item);
+            SetIntegerFieldValue<uint16_t>(&fieldAcc, fieldItem);
             break;
         case Type::TypeId::I32:
         case Type::TypeId::U32:
-            SetIntegerFieldValue<uint32_t>(&field_acc, field_item);
+            SetIntegerFieldValue<uint32_t>(&fieldAcc, fieldItem);
             break;
         case Type::TypeId::I64:
         case Type::TypeId::U64:
-            SetIntegerFieldValue<uint64_t>(&field_acc, field_item);
+            SetIntegerFieldValue<uint64_t>(&fieldAcc, fieldItem);
             break;
         case Type::TypeId::F32:
-            SetFloatFieldValue<float>(&field_acc, field_item);
+            SetFloatFieldValue<float>(&fieldAcc, fieldItem);
             break;
         case Type::TypeId::F64:
-            SetFloatFieldValue<double>(&field_acc, field_item);
+            SetFloatFieldValue<double>(&fieldAcc, fieldItem);
             break;
         case Type::TypeId::REFERENCE:
-            SetStringFieldValue(&field_acc, field_item);
+            SetStringFieldValue(&fieldAcc, fieldItem);
             break;
         case Type::TypeId::TAGGED:
         default:
@@ -835,197 +835,197 @@ FieldItem *FileReader::CreateFieldItem(ClassItem *cls, File::EntityId field_id)
             break;
     }
 
-    field_acc.EnumerateAnnotations(
-        [&](File::EntityId ann_id) { field_item->AddAnnotation(CreateAnnotationItem(ann_id)); });
+    fieldAcc.EnumerateAnnotations(
+        [this, &fieldItem](File::EntityId annId) { fieldItem->AddAnnotation(CreateAnnotationItem(annId)); });
 
-    field_acc.EnumerateRuntimeAnnotations(
-        [&](File::EntityId ann_id) { field_item->AddRuntimeAnnotation(CreateAnnotationItem(ann_id)); });
+    fieldAcc.EnumerateRuntimeAnnotations(
+        [this, &fieldItem](File::EntityId annId) { fieldItem->AddRuntimeAnnotation(CreateAnnotationItem(annId)); });
 
-    field_acc.EnumerateRuntimeTypeAnnotations(
-        [&](File::EntityId ann_id) { field_item->AddRuntimeTypeAnnotation(CreateAnnotationItem(ann_id)); });
+    fieldAcc.EnumerateRuntimeTypeAnnotations(
+        [this, &fieldItem](File::EntityId annId) { fieldItem->AddRuntimeTypeAnnotation(CreateAnnotationItem(annId)); });
 
-    field_acc.EnumerateTypeAnnotations(
-        [&](File::EntityId ann_id) { field_item->AddTypeAnnotation(CreateAnnotationItem(ann_id)); });
+    fieldAcc.EnumerateTypeAnnotations(
+        [this, &fieldItem](File::EntityId annId) { fieldItem->AddTypeAnnotation(CreateAnnotationItem(annId)); });
 
-    return field_item;
+    return fieldItem;
 }
 
-ForeignMethodItem *FileReader::CreateForeignMethodItem(BaseClassItem *fcls, File::EntityId method_id)
+ForeignMethodItem *FileReader::CreateForeignMethodItem(BaseClassItem *fcls, File::EntityId methodId)
 {
-    auto it = items_done_.find(method_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(methodId);
+    if (it != itemsDone_.end()) {
         return static_cast<ForeignMethodItem *>(it->second);
     }
 
-    MethodDataAccessor method_acc(*file_, method_id);
-    auto data = file_->GetStringData(method_acc.GetNameId());
-    std::string method_name(utf::Mutf8AsCString(data.data));
-    auto *method_str_item = container_.GetOrCreateStringItem(method_name);
+    MethodDataAccessor methodAcc(*file_, methodId);
+    auto data = file_->GetStringData(methodAcc.GetNameId());
+    std::string methodName(utf::Mutf8AsCString(data.data));
+    auto *methodStrItem = container_.GetOrCreateStringItem(methodName);
 
-    ProtoDataAccessor proto_acc(*file_, method_acc.GetProtoId());
-    Type ret_type = proto_acc.GetReturnType();
-    size_t reference_num = 0;
-    TypeItem *ret_type_item = nullptr;
-    if (ret_type.IsPrimitive()) {
-        ret_type_item = container_.GetOrCreatePrimitiveTypeItem(ret_type);
+    ProtoDataAccessor protoAcc(*file_, methodAcc.GetProtoId());
+    Type retType = protoAcc.GetReturnType();
+    size_t referenceNum = 0;
+    TypeItem *retTypeItem = nullptr;
+    if (retType.IsPrimitive()) {
+        retTypeItem = container_.GetOrCreatePrimitiveTypeItem(retType);
     } else {
-        const File::EntityId type_cls_id = proto_acc.GetReferenceType(reference_num);
-        if (file_->IsExternal(type_cls_id)) {
-            ret_type_item = CreateForeignClassItem(type_cls_id);
+        const File::EntityId typeClsId = protoAcc.GetReferenceType(referenceNum);
+        if (file_->IsExternal(typeClsId)) {
+            retTypeItem = CreateForeignClassItem(typeClsId);
         } else {
-            ret_type_item = CreateClassItem(type_cls_id);
+            retTypeItem = CreateClassItem(typeClsId);
         }
-        reference_num++;
+        referenceNum++;
     }
-    ASSERT(ret_type_item != nullptr);
-    auto param_items = CreateMethodParamItems(&proto_acc, &method_acc, reference_num);
+    ASSERT(retTypeItem != nullptr);
+    auto paramItems = CreateMethodParamItems(&protoAcc, &methodAcc, referenceNum);
     // Double check if we done this method while computing params
-    auto it_check = items_done_.find(method_id);
-    if (it_check != items_done_.end()) {
-        return static_cast<ForeignMethodItem *>(it_check->second);
+    auto itCheck = itemsDone_.find(methodId);
+    if (itCheck != itemsDone_.end()) {
+        return static_cast<ForeignMethodItem *>(itCheck->second);
     }
-    auto *proto_item = container_.GetOrCreateProtoItem(ret_type_item, param_items);
+    auto *protoItem = container_.GetOrCreateProtoItem(retTypeItem, paramItems);
 
-    auto *method_item =
-        container_.CreateItem<ForeignMethodItem>(fcls, method_str_item, proto_item, method_acc.GetAccessFlags());
+    auto *methodItem =
+        container_.CreateItem<ForeignMethodItem>(fcls, methodStrItem, protoItem, methodAcc.GetAccessFlags());
 
-    items_done_.insert({method_id, static_cast<BaseItem *>(method_item)});
+    itemsDone_.insert({methodId, static_cast<BaseItem *>(methodItem)});
 
-    return method_item;
+    return methodItem;
 }
 
-ForeignFieldItem *FileReader::CreateForeignFieldItem(BaseClassItem *fcls, File::EntityId field_id)
+ForeignFieldItem *FileReader::CreateForeignFieldItem(BaseClassItem *fcls, File::EntityId fieldId)
 {
-    auto it = items_done_.find(field_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(fieldId);
+    if (it != itemsDone_.end()) {
         return static_cast<ForeignFieldItem *>(it->second);
     }
 
-    FieldDataAccessor field_acc(*file_, field_id);
+    FieldDataAccessor fieldAcc(*file_, fieldId);
 
-    auto data = file_->GetStringData(field_acc.GetNameId());
-    std::string string_name(utf::Mutf8AsCString(data.data));
-    auto *field_name = container_.GetOrCreateStringItem(string_name);
-    Type field_type = Type::GetTypeFromFieldEncoding(field_acc.GetType());
-    TypeItem *field_type_item = nullptr;
-    if (field_type.IsReference()) {
-        File::EntityId type_id(field_acc.GetType());
-        if (file_->IsExternal(type_id)) {
-            field_type_item = CreateForeignClassItem(type_id);
+    auto data = file_->GetStringData(fieldAcc.GetNameId());
+    std::string stringName(utf::Mutf8AsCString(data.data));
+    auto *fieldName = container_.GetOrCreateStringItem(stringName);
+    Type fieldType = Type::GetTypeFromFieldEncoding(fieldAcc.GetType());
+    TypeItem *fieldTypeItem = nullptr;
+    if (fieldType.IsReference()) {
+        File::EntityId typeId(fieldAcc.GetType());
+        if (file_->IsExternal(typeId)) {
+            fieldTypeItem = CreateForeignClassItem(typeId);
         } else {
-            field_type_item = CreateClassItem(type_id);
+            fieldTypeItem = CreateClassItem(typeId);
             // Double check if we done this field while generated class item
-            auto it_check = items_done_.find(field_id);
-            if (it_check != items_done_.end()) {
-                return static_cast<ForeignFieldItem *>(it_check->second);
+            auto itCheck = itemsDone_.find(fieldId);
+            if (itCheck != itemsDone_.end()) {
+                return static_cast<ForeignFieldItem *>(itCheck->second);
             }
         }
     } else {
-        field_type_item = container_.GetOrCreatePrimitiveTypeItem(field_type.GetId());
+        fieldTypeItem = container_.GetOrCreatePrimitiveTypeItem(fieldType.GetId());
     }
 
-    ASSERT(field_type_item != nullptr);
+    ASSERT(fieldTypeItem != nullptr);
 
-    auto *field_item = container_.CreateItem<ForeignFieldItem>(fcls, field_name, field_type_item);
-    items_done_.insert({field_id, static_cast<BaseItem *>(field_item)});
+    auto *fieldItem = container_.CreateItem<ForeignFieldItem>(fcls, fieldName, fieldTypeItem);
+    itemsDone_.insert({fieldId, static_cast<BaseItem *>(fieldItem)});
 
-    return field_item;
+    return fieldItem;
 }
 
-ForeignClassItem *FileReader::CreateForeignClassItem(File::EntityId class_id)
+ForeignClassItem *FileReader::CreateForeignClassItem(File::EntityId classId)
 {
-    auto it = items_done_.find(class_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(classId);
+    if (it != itemsDone_.end()) {
         return static_cast<ForeignClassItem *>(it->second);
     }
 
-    std::string class_name(utf::Mutf8AsCString(file_->GetStringData(class_id).data));
-    auto *class_item = container_.GetOrCreateForeignClassItem(class_name);
+    std::string className(utf::Mutf8AsCString(file_->GetStringData(classId).data));
+    auto *classItem = container_.GetOrCreateForeignClassItem(className);
 
-    items_done_.insert({class_id, static_cast<BaseItem *>(class_item)});
+    itemsDone_.insert({classId, static_cast<BaseItem *>(classItem)});
 
-    return class_item;
+    return classItem;
 }
 
-ClassItem *FileReader::CreateClassItem(File::EntityId class_id)
+ClassItem *FileReader::CreateClassItem(File::EntityId classId)
 {
-    auto it = items_done_.find(class_id);
-    if (it != items_done_.end()) {
+    auto it = itemsDone_.find(classId);
+    if (it != itemsDone_.end()) {
         return static_cast<ClassItem *>(it->second);
     }
-    ClassDataAccessor class_acc(*file_, class_id);
+    ClassDataAccessor classAcc(*file_, classId);
 
-    std::string class_name(utf::Mutf8AsCString(file_->GetStringData(class_id).data));
-    auto *class_item = container_.GetOrCreateClassItem(class_name);
+    std::string className(utf::Mutf8AsCString(file_->GetStringData(classId).data));
+    auto *classItem = container_.GetOrCreateClassItem(className);
 
-    items_done_.insert({class_id, static_cast<BaseItem *>(class_item)});
+    itemsDone_.insert({classId, static_cast<BaseItem *>(classItem)});
 
-    class_item->SetAccessFlags(class_acc.GetAccessFlags());
+    classItem->SetAccessFlags(classAcc.GetAccessFlags());
 
-    auto source_lang_opt = class_acc.GetSourceLang();
-    if (source_lang_opt) {
-        class_item->SetSourceLang(source_lang_opt.value());
+    auto sourceLangOpt = classAcc.GetSourceLang();
+    if (sourceLangOpt) {
+        classItem->SetSourceLang(sourceLangOpt.value());
     }
 
-    auto super_class_id = class_acc.GetSuperClassId();
+    auto superClassId = classAcc.GetSuperClassId();
 
-    if (super_class_id.GetOffset() != 0) {
-        if (super_class_id.GetOffset() == class_id.GetOffset()) {
-            LOG(FATAL, PANDAFILE) << "Class " << class_name << " has cyclic inheritance";
+    if (superClassId.GetOffset() != 0) {
+        if (superClassId.GetOffset() == classId.GetOffset()) {
+            LOG(FATAL, PANDAFILE) << "Class " << className << " has cyclic inheritance";
         }
 
-        if (file_->IsExternal(super_class_id)) {
-            auto *super_class_item = CreateForeignClassItem(super_class_id);
-            class_item->SetSuperClass(super_class_item);
+        if (file_->IsExternal(superClassId)) {
+            auto *superClassItem = CreateForeignClassItem(superClassId);
+            classItem->SetSuperClass(superClassItem);
         } else {
-            auto *super_class_item = CreateClassItem(super_class_id);
-            class_item->SetSuperClass(super_class_item);
+            auto *superClassItem = CreateClassItem(superClassId);
+            classItem->SetSuperClass(superClassItem);
         }
     }
 
-    class_acc.EnumerateInterfaces([&](File::EntityId iface_id) {
-        if (file_->IsExternal(iface_id)) {
-            class_item->AddInterface(CreateForeignClassItem(iface_id));
+    classAcc.EnumerateInterfaces([this, &classItem](File::EntityId ifaceId) {
+        if (file_->IsExternal(ifaceId)) {
+            classItem->AddInterface(CreateForeignClassItem(ifaceId));
         } else {
-            class_item->AddInterface(CreateClassItem(iface_id));
+            classItem->AddInterface(CreateClassItem(ifaceId));
         }
     });
 
-    class_acc.EnumerateAnnotations(
-        [&](File::EntityId ann_id) { class_item->AddAnnotation(CreateAnnotationItem(ann_id)); });
+    classAcc.EnumerateAnnotations(
+        [this, &classItem](File::EntityId annId) { classItem->AddAnnotation(CreateAnnotationItem(annId)); });
 
-    class_acc.EnumerateRuntimeAnnotations(
-        [&](File::EntityId ann_id) { class_item->AddRuntimeAnnotation(CreateAnnotationItem(ann_id)); });
+    classAcc.EnumerateRuntimeAnnotations(
+        [this, &classItem](File::EntityId annId) { classItem->AddRuntimeAnnotation(CreateAnnotationItem(annId)); });
 
-    class_acc.EnumerateTypeAnnotations(
-        [&](File::EntityId ann_id) { class_item->AddTypeAnnotation(CreateAnnotationItem(ann_id)); });
+    classAcc.EnumerateTypeAnnotations(
+        [this, &classItem](File::EntityId annId) { classItem->AddTypeAnnotation(CreateAnnotationItem(annId)); });
 
-    class_acc.EnumerateFields(
-        [&](FieldDataAccessor &field_acc) { CreateFieldItem(class_item, field_acc.GetFieldId()); });
+    classAcc.EnumerateFields(
+        [this, &classItem](FieldDataAccessor &fieldAcc) { CreateFieldItem(classItem, fieldAcc.GetFieldId()); });
 
-    class_acc.EnumerateMethods(
-        [&](MethodDataAccessor &method_acc) { CreateMethodItem(class_item, method_acc.GetMethodId()); });
+    classAcc.EnumerateMethods(
+        [this, &classItem](MethodDataAccessor &methodAcc) { CreateMethodItem(classItem, methodAcc.GetMethodId()); });
 
-    auto source_file_id = class_acc.GetSourceFileId();
-    if (source_file_id) {
-        std::string source_file = utf::Mutf8AsCString(file_->GetStringData(source_file_id.value()).data);
-        class_item->SetSourceFile(container_.GetOrCreateStringItem(source_file));
+    auto sourceFileId = classAcc.GetSourceFileId();
+    if (sourceFileId) {
+        std::string sourceFile = utf::Mutf8AsCString(file_->GetStringData(sourceFileId.value()).data);
+        classItem->SetSourceFile(container_.GetOrCreateStringItem(sourceFile));
     }
 
-    ASSERT(class_item != nullptr);
+    ASSERT(classItem != nullptr);
 
-    return class_item;
+    return classItem;
 }
 
 bool FileReader::ReadLiteralArrayItems()
 {
-    const auto lit_arrays_id = file_->GetLiteralArraysId();
-    LiteralDataAccessor lit_array_accessor(*file_, lit_arrays_id);
-    size_t num_litarrays = lit_array_accessor.GetLiteralNum();
+    const auto litArraysId = file_->GetLiteralArraysId();
+    LiteralDataAccessor litArrayAccessor(*file_, litArraysId);
+    size_t numLitarrays = litArrayAccessor.GetLiteralNum();
 
-    for (size_t i = 0; i < num_litarrays; i++) {
-        auto id = lit_array_accessor.GetLiteralArrayId(i);
-        if (!CreateLiteralArrayItem(&lit_array_accessor, id, i)) {
+    for (size_t i = 0; i < numLitarrays; i++) {
+        auto id = litArrayAccessor.GetLiteralArrayId(i);
+        if (!CreateLiteralArrayItem(&litArrayAccessor, id, i)) {
             return false;
         }
     }
@@ -1035,46 +1035,46 @@ bool FileReader::ReadLiteralArrayItems()
 
 bool FileReader::ReadRegionHeaders()
 {
-    auto index_headers = file_->GetRegionHeaders();
-    for (const auto &header : index_headers) {
-        auto method_index = file_->GetMethodIndex(&header);
-        for (auto method_id : method_index) {
-            MethodDataAccessor method_acc(*file_, method_id);
-            File::EntityId class_id(method_acc.GetClassId());
-            if (file_->IsExternal(class_id)) {
-                auto *fclass_item = CreateForeignClassItem(class_id);
-                ASSERT(file_->IsExternal(method_id));
-                if (CreateForeignMethodItem(fclass_item, method_id) == nullptr) {
+    auto indexHeaders = file_->GetRegionHeaders();
+    for (const auto &header : indexHeaders) {
+        auto methodIndex = file_->GetMethodIndex(&header);
+        for (auto methodId : methodIndex) {
+            MethodDataAccessor methodAcc(*file_, methodId);
+            File::EntityId classId(methodAcc.GetClassId());
+            if (file_->IsExternal(classId)) {
+                auto *fclassItem = CreateForeignClassItem(classId);
+                ASSERT(file_->IsExternal(methodId));
+                if (CreateForeignMethodItem(fclassItem, methodId) == nullptr) {
                     return false;
                 }
             } else {
-                auto *class_item = CreateClassItem(class_id);
-                if (file_->IsExternal(method_id)) {
-                    if (CreateForeignMethodItem(class_item, method_id) == nullptr) {
+                auto *classItem = CreateClassItem(classId);
+                if (file_->IsExternal(methodId)) {
+                    if (CreateForeignMethodItem(classItem, methodId) == nullptr) {
                         return false;
                     }
-                } else if (CreateMethodItem(class_item, method_id) == nullptr) {
+                } else if (CreateMethodItem(classItem, methodId) == nullptr) {
                     return false;
                 }
             }
         }
-        auto field_index = file_->GetFieldIndex(&header);
-        for (auto field_id : field_index) {
-            FieldDataAccessor field_acc(*file_, field_id);
-            File::EntityId class_id(field_acc.GetClassId());
-            if (file_->IsExternal(class_id)) {
-                ASSERT(file_->IsExternal(field_id));
-                auto *fclass_item = CreateForeignClassItem(field_acc.GetClassId());
-                if (CreateForeignFieldItem(fclass_item, field_id) == nullptr) {
+        auto fieldIndex = file_->GetFieldIndex(&header);
+        for (auto fieldId : fieldIndex) {
+            FieldDataAccessor fieldAcc(*file_, fieldId);
+            File::EntityId classId(fieldAcc.GetClassId());
+            if (file_->IsExternal(classId)) {
+                ASSERT(file_->IsExternal(fieldId));
+                auto *fclassItem = CreateForeignClassItem(fieldAcc.GetClassId());
+                if (CreateForeignFieldItem(fclassItem, fieldId) == nullptr) {
                     return false;
                 }
             } else {
-                auto *class_item = CreateClassItem(field_acc.GetClassId());
-                if (file_->IsExternal(field_id)) {
-                    if (CreateForeignFieldItem(class_item, field_id) == nullptr) {
+                auto *classItem = CreateClassItem(fieldAcc.GetClassId());
+                if (file_->IsExternal(fieldId)) {
+                    if (CreateForeignFieldItem(classItem, fieldId) == nullptr) {
                         return false;
                     }
-                } else if (CreateFieldItem(class_item, field_id) == nullptr) {
+                } else if (CreateFieldItem(classItem, fieldId) == nullptr) {
                     return false;
                 }
             }
@@ -1085,9 +1085,9 @@ bool FileReader::ReadRegionHeaders()
 
 bool FileReader::ReadClasses()
 {
-    const auto class_idx = file_->GetClasses();
+    const auto classIdx = file_->GetClasses();
 
-    for (unsigned int id : class_idx) {
+    for (unsigned int id : classIdx) {
         File::EntityId eid(id);
         if (file_->IsExternal(eid)) {
             CreateForeignClassItem(eid);
@@ -1099,76 +1099,76 @@ bool FileReader::ReadClasses()
     return true;
 }
 
-void FileReader::UpdateDebugInfoDependecies(File::EntityId debug_info_id)
+void FileReader::UpdateDebugInfoDependecies(File::EntityId debugInfoId)
 {
     auto updater = FileReaderDebugInfoUpdater(file_.get(), &container_);
-    updater.Scrap(debug_info_id);
+    updater.Scrap(debugInfoId);
 }
 
-void FileReader::UpdateDebugInfo(DebugInfoItem *debug_info_item, File::EntityId debug_info_id)
+void FileReader::UpdateDebugInfo(DebugInfoItem *debugInfoItem, File::EntityId debugInfoId)
 {
     auto updater = FileReaderDebugInfoUpdater(file_.get(), &container_);
-    updater.Emit(debug_info_item, debug_info_id);
+    updater.Emit(debugInfoItem, debugInfoId);
 }
 
-void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverse_done)
+void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverseDone)
 {
     using Flags = panda::BytecodeInst<panda::BytecodeInstMode::FAST>::Flags;
 
-    auto *class_map = container_.GetClassMap();
+    auto *classMap = container_.GetClassMap();
 
     // First pass, add dependencies bytecode -> new items
-    for (const auto &it : *class_map) {
-        auto *base_class_item = it.second;
-        if (base_class_item->IsForeign()) {
+    for (const auto &it : *classMap) {
+        auto *baseClassItem = it.second;
+        if (baseClassItem->IsForeign()) {
             continue;
         }
-        auto *class_item = static_cast<ClassItem *>(base_class_item);
-        class_item->VisitMethods([this, &reverse_done](BaseItem *param_item) {
-            auto *method_item = static_cast<MethodItem *>(param_item);
-            auto *code_item = method_item->GetCode();
-            if (code_item == nullptr) {
+        auto *classItem = static_cast<ClassItem *>(baseClassItem);
+        classItem->VisitMethods([this, &reverseDone](BaseItem *paramItem) {
+            auto *methodItem = static_cast<MethodItem *>(paramItem);
+            auto *codeItem = methodItem->GetCode();
+            if (codeItem == nullptr) {
                 return true;
             }
 
-            auto *debug_info_item = method_item->GetDebugInfo();
-            if (debug_info_item != nullptr) {
-                UpdateDebugInfoDependecies(reverse_done.find(debug_info_item)->second);
+            auto *debugInfoItem = methodItem->GetDebugInfo();
+            if (debugInfoItem != nullptr) {
+                UpdateDebugInfoDependecies(reverseDone.find(debugInfoItem)->second);
             }
 
             size_t offset = 0;
-            BytecodeInstruction inst(code_item->GetInstructions()->data());
-            while (offset < code_item->GetCodeSize()) {
+            BytecodeInstruction inst(codeItem->GetInstructions()->data());
+            while (offset < codeItem->GetCodeSize()) {
                 if (inst.HasFlag(Flags::TYPE_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveClassIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    method_item->AddIndexDependency(idx_item);
+                    BytecodeId bId = inst.GetId();
+                    File::Index idx = bId.AsIndex();
+                    File::EntityId methodId = reverseDone.find(methodItem)->second;
+                    File::EntityId oldId = file_->ResolveClassIndex(methodId, idx);
+                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+                    methodItem->AddIndexDependency(idxItem);
                 } else if (inst.HasFlag(Flags::METHOD_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveMethodIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    method_item->AddIndexDependency(idx_item);
+                    BytecodeId bId = inst.GetId();
+                    File::Index idx = bId.AsIndex();
+                    File::EntityId methodId = reverseDone.find(methodItem)->second;
+                    File::EntityId oldId = file_->ResolveMethodIndex(methodId, idx);
+                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+                    methodItem->AddIndexDependency(idxItem);
                 } else if (inst.HasFlag(Flags::FIELD_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveFieldIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    method_item->AddIndexDependency(idx_item);
+                    BytecodeId bId = inst.GetId();
+                    File::Index idx = bId.AsIndex();
+                    File::EntityId methodId = reverseDone.find(methodItem)->second;
+                    File::EntityId oldId = file_->ResolveFieldIndex(methodId, idx);
+                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+                    methodItem->AddIndexDependency(idxItem);
                 } else if (inst.HasFlag(Flags::STRING_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::EntityId old_id = b_id.AsFileId();
-                    auto data = file_->GetStringData(old_id);
-                    std::string item_str(utf::Mutf8AsCString(data.data));
-                    container_.GetOrCreateStringItem(item_str);
+                    BytecodeId bId = inst.GetId();
+                    File::EntityId oldId = bId.AsFileId();
+                    auto data = file_->GetStringData(oldId);
+                    std::string itemStr(utf::Mutf8AsCString(data.data));
+                    container_.GetOrCreateStringItem(itemStr);
                 }
 
                 offset += inst.GetSize();
@@ -1183,34 +1183,34 @@ void FileReader::ComputeLayoutAndUpdateIndices()
 {
     using Flags = panda::BytecodeInst<panda::BytecodeInstMode::FAST>::Flags;
 
-    std::map<BaseItem *, File::EntityId> reverse_done;
-    for (const auto &it : items_done_) {
-        reverse_done.insert({it.second, it.first});
+    std::map<BaseItem *, File::EntityId> reverseDone;
+    for (const auto &it : itemsDone_) {
+        reverseDone.insert({it.second, it.first});
     }
 
-    auto *class_map = container_.GetClassMap();
+    auto *classMap = container_.GetClassMap();
 
-    UpdateCodeAndDebugInfoDependencies(reverse_done);
+    UpdateCodeAndDebugInfoDependencies(reverseDone);
 
     container_.ComputeLayout();
 
     // Second pass, update debug info
-    for (const auto &it : *class_map) {
-        auto *base_class_item = it.second;
-        if (base_class_item->IsForeign()) {
+    for (const auto &it : *classMap) {
+        auto *baseClassItem = it.second;
+        if (baseClassItem->IsForeign()) {
             continue;
         }
-        auto *class_item = static_cast<ClassItem *>(base_class_item);
-        class_item->VisitMethods([this, &reverse_done](BaseItem *param_item) {
-            auto *method_item = static_cast<MethodItem *>(param_item);
-            auto *code_item = method_item->GetCode();
-            if (code_item == nullptr) {
+        auto *classItem = static_cast<ClassItem *>(baseClassItem);
+        classItem->VisitMethods([this, &reverseDone](BaseItem *paramItem) {
+            auto *methodItem = static_cast<MethodItem *>(paramItem);
+            auto *codeItem = methodItem->GetCode();
+            if (codeItem == nullptr) {
                 return true;
             }
 
-            auto *debug_info_item = method_item->GetDebugInfo();
-            if (debug_info_item != nullptr) {
-                UpdateDebugInfo(debug_info_item, reverse_done.find(debug_info_item)->second);
+            auto *debugInfoItem = methodItem->GetDebugInfo();
+            if (debugInfoItem != nullptr) {
+                UpdateDebugInfo(debugInfoItem, reverseDone.find(debugInfoItem)->second);
             }
 
             return true;
@@ -1220,68 +1220,68 @@ void FileReader::ComputeLayoutAndUpdateIndices()
     container_.DeduplicateItems(false);
     container_.ComputeLayout();
 
-    std::unordered_set<CodeItem *> code_items_done;
+    std::unordered_set<CodeItem *> codeItemsDone;
 
     // Third pass, update bytecode indices
-    for (const auto &it : *class_map) {
-        auto *base_class_item = it.second;
-        if (base_class_item->IsForeign()) {
+    for (const auto &it : *classMap) {
+        auto *baseClassItem = it.second;
+        if (baseClassItem->IsForeign()) {
             continue;
         }
-        auto *class_item = static_cast<ClassItem *>(base_class_item);
-        class_item->VisitMethods([this, &reverse_done, &code_items_done](BaseItem *param_item) {
-            auto *method_item = static_cast<MethodItem *>(param_item);
-            auto *code_item = method_item->GetCode();
+        auto *classItem = static_cast<ClassItem *>(baseClassItem);
+        classItem->VisitMethods([this, &reverseDone, &codeItemsDone](BaseItem *paramItem) {
+            auto *methodItem = static_cast<MethodItem *>(paramItem);
+            auto *codeItem = methodItem->GetCode();
 
-            auto code_it = code_items_done.find(code_item);
-            if (code_item == nullptr || code_it != code_items_done.end()) {
+            auto codeIt = codeItemsDone.find(codeItem);
+            if (codeItem == nullptr || codeIt != codeItemsDone.end()) {
                 return true;
             }
 
             size_t offset = 0;
-            BytecodeInstruction inst(code_item->GetInstructions()->data());
-            while (offset < code_item->GetCodeSize()) {
+            BytecodeInstruction inst(codeItem->GetInstructions()->data());
+            while (offset < codeItem->GetCodeSize()) {
                 if (inst.HasFlag(Flags::TYPE_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveClassIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    uint32_t index = idx_item->GetIndex(method_item);
+                    BytecodeId bId = inst.GetId();
+                    File::Index idx = bId.AsIndex();
+                    File::EntityId methodId = reverseDone.find(methodItem)->second;
+                    File::EntityId oldId = file_->ResolveClassIndex(methodId, idx);
+                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+                    uint32_t index = idxItem->GetIndex(methodItem);
                     inst.UpdateId(BytecodeId(index));
                 } else if (inst.HasFlag(Flags::METHOD_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveMethodIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    uint32_t index = idx_item->GetIndex(method_item);
+                    BytecodeId bId = inst.GetId();
+                    File::Index idx = bId.AsIndex();
+                    File::EntityId methodId = reverseDone.find(methodItem)->second;
+                    File::EntityId oldId = file_->ResolveMethodIndex(methodId, idx);
+                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+                    uint32_t index = idxItem->GetIndex(methodItem);
                     inst.UpdateId(BytecodeId(index));
                 } else if (inst.HasFlag(Flags::FIELD_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveFieldIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    uint32_t index = idx_item->GetIndex(method_item);
+                    BytecodeId bId = inst.GetId();
+                    File::Index idx = bId.AsIndex();
+                    File::EntityId methodId = reverseDone.find(methodItem)->second;
+                    File::EntityId oldId = file_->ResolveFieldIndex(methodId, idx);
+                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+                    uint32_t index = idxItem->GetIndex(methodItem);
                     inst.UpdateId(BytecodeId(index));
                 } else if (inst.HasFlag(Flags::STRING_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::EntityId old_id = b_id.AsFileId();
-                    auto data = file_->GetStringData(old_id);
-                    std::string item_str(utf::Mutf8AsCString(data.data));
-                    auto *string_item = container_.GetOrCreateStringItem(item_str);
-                    inst.UpdateId(BytecodeId(string_item->GetFileId().GetOffset()));
+                    BytecodeId bId = inst.GetId();
+                    File::EntityId oldId = bId.AsFileId();
+                    auto data = file_->GetStringData(oldId);
+                    std::string itemStr(utf::Mutf8AsCString(data.data));
+                    auto *stringItem = container_.GetOrCreateStringItem(itemStr);
+                    inst.UpdateId(BytecodeId(stringItem->GetFileId().GetOffset()));
                 }
 
                 offset += inst.GetSize();
                 inst = inst.GetNext();
             }
 
-            code_items_done.insert(code_item);
+            codeItemsDone.insert(codeItem);
 
             return true;
         });

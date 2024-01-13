@@ -143,12 +143,12 @@ public:
 
     bool &InStatic()
     {
-        return in_static_;
+        return inStatic_;
     }
 
 private:
     std::optional<std::string> error_;
-    bool in_static_ = false;
+    bool inStatic_ = false;
 };
 
 class EtsMethodVisitor {
@@ -157,12 +157,12 @@ public:
 
     virtual void VisitMethod()
     {
-        ref_arg_idx_ = 0;
-        auto exclude_this = static_cast<uint32_t>(!method_->IsStatic());
-        auto num_args = method_->GetNumArgs() - exclude_this;
+        refArgIdx_ = 0;
+        auto excludeThis = static_cast<uint32_t>(!method_->IsStatic());
+        auto numArgs = method_->GetNumArgs() - excludeThis;
         VisitReturn();
         TYPEVIS_ABRUPT_ON_ERROR();
-        for (uint32_t i = 0; i < num_args; ++i) {
+        for (uint32_t i = 0; i < numArgs; ++i) {
             VisitArgument(i);
             TYPEVIS_ABRUPT_ON_ERROR();
         }
@@ -170,13 +170,13 @@ public:
 
     virtual void VisitArgs()
     {
-        ref_arg_idx_ = 0;
-        auto exclude_this = static_cast<uint32_t>(!method_->IsStatic());
-        auto num_args = method_->GetNumArgs() - exclude_this;
+        refArgIdx_ = 0;
+        auto excludeThis = static_cast<uint32_t>(!method_->IsStatic());
+        auto numArgs = method_->GetNumArgs() - excludeThis;
         if (!method_->GetReturnType().IsPrimitive()) {
-            ref_arg_idx_++;
+            refArgIdx_++;
         }
-        for (uint32_t i = 0; i < num_args; ++i) {
+        for (uint32_t i = 0; i < numArgs; ++i) {
             VisitArgument(i);
             TYPEVIS_ABRUPT_ON_ERROR();
         }
@@ -184,7 +184,7 @@ public:
 
     virtual void VisitReturn()
     {
-        ref_arg_idx_ = 0;
+        refArgIdx_ = 0;
         VisitReturnImpl();
     }
 
@@ -214,14 +214,14 @@ private:
         return VisitReturn(ResolveRefClass());
     }
 
-    void VisitArgument(uint32_t arg_idx)
+    void VisitArgument(uint32_t argIdx)
     {
-        auto exclude_this = static_cast<uint32_t>(!method_->IsStatic());
-        panda_file::Type type = method_->GetArgType(arg_idx + exclude_this);
+        auto excludeThis = static_cast<uint32_t>(!method_->IsStatic());
+        panda_file::Type type = method_->GetArgType(argIdx + excludeThis);
         if (type.IsPrimitive()) {
-            return VisitArgument(arg_idx, type);
+            return VisitArgument(argIdx, type);
         }
-        return VisitArgument(arg_idx, ResolveRefClass());
+        return VisitArgument(argIdx, ResolveRefClass());
     }
 
     panda::Class *ResolveRefClass()
@@ -229,16 +229,16 @@ private:
         auto pf = method_->GetPandaFile();
         panda_file::MethodDataAccessor mda(*pf, method_->GetFileId());
         panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
-        auto class_linker = panda::Runtime::GetCurrent()->GetClassLinker();
+        auto classLinker = panda::Runtime::GetCurrent()->GetClassLinker();
         auto ctx = method_->GetClass()->GetLoadContext();
 
-        auto klass_id = pda.GetReferenceType(ref_arg_idx_++);
-        auto klass = class_linker->GetClass(*pf, klass_id, ctx);
+        auto klassId = pda.GetReferenceType(refArgIdx_++);
+        auto klass = classLinker->GetClass(*pf, klassId, ctx);
         return klass;
     }
 
     panda::Method *method_ {};
-    uint32_t ref_arg_idx_ {};
+    uint32_t refArgIdx_ {};
     std::optional<std::string> error_;
 };
 
@@ -248,11 +248,11 @@ public:
     using ValVariant = std::variant<panda::Value, ObjRoot>;
 
     EtsConvertorRef() = default;
-    explicit EtsConvertorRef(ValVariant *data_ptr)
+    explicit EtsConvertorRef(ValVariant *dataPtr)
     {
-        u_.data_ptr = data_ptr;  // NOLINT(cppcoreguidelines-pro-type-union-access)
+        u_.dataPtr = dataPtr;  // NOLINT(cppcoreguidelines-pro-type-union-access)
     }
-    EtsConvertorRef(ObjRoot obj, size_t offs) : is_field_(true)
+    EtsConvertorRef(ObjRoot obj, size_t offs) : isField_(true)
     {
         u_.field.obj = obj;    // NOLINT(cppcoreguidelines-pro-type-union-access)
         u_.field.offs = offs;  // NOLINT(cppcoreguidelines-pro-type-union-access)
@@ -261,38 +261,38 @@ public:
     template <typename T>
     T LoadPrimitive() const
     {
-        if (is_field_) {
+        if (isField_) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             return (*u_.field.obj)->GetFieldPrimitive<T>(u_.field.offs);
         }
-        return std::get<panda::Value>(*u_.data_ptr).GetAs<T>();  // NOLINT(cppcoreguidelines-pro-type-union-access)
+        return std::get<panda::Value>(*u_.dataPtr).GetAs<T>();  // NOLINT(cppcoreguidelines-pro-type-union-access)
     }
 
     panda::ObjectHeader *LoadReference() const
     {
-        if (is_field_) {
+        if (isField_) {
             return (*u_.field.obj)->GetFieldObject(u_.field.offs);  // NOLINT(cppcoreguidelines-pro-type-union-access)
         }
-        return *std::get<ObjRoot>(*u_.data_ptr);  // NOLINT(cppcoreguidelines-pro-type-union-access)
+        return *std::get<ObjRoot>(*u_.dataPtr);  // NOLINT(cppcoreguidelines-pro-type-union-access)
     }
 
     template <typename T>
     void StorePrimitive(T val)
     {
-        if (is_field_) {
+        if (isField_) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             (*u_.field.obj)->SetFieldPrimitive<T>(u_.field.offs, val);
         } else {
-            *u_.data_ptr = panda::Value(val);  // NOLINT(cppcoreguidelines-pro-type-union-access)
+            *u_.dataPtr = panda::Value(val);  // NOLINT(cppcoreguidelines-pro-type-union-access)
         }
     }
 
     void StoreReference(ObjRoot val)
     {
-        if (is_field_) {
+        if (isField_) {
             (*u_.field.obj)->SetFieldObject(u_.field.offs, *val);  // NOLINT(cppcoreguidelines-pro-type-union-access)
         } else {
-            *u_.data_ptr = val;  // NOLINT(cppcoreguidelines-pro-type-union-access)
+            *u_.dataPtr = val;  // NOLINT(cppcoreguidelines-pro-type-union-access)
         }
     }
 
@@ -304,13 +304,13 @@ private:
         };
 
         FieldSlot field;
-        ValVariant *data_ptr = nullptr;  // handle or primitive slot
+        ValVariant *dataPtr = nullptr;  // handle or primitive slot
 
         USlot() {}  // NOLINT(modernize-use-equals-default)
     };
 
     USlot u_ {};
-    bool is_field_ = false;
+    bool isField_ = false;
 };
 
 }  // namespace panda::ets::interop::js

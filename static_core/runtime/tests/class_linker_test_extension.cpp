@@ -21,23 +21,23 @@
 namespace panda::test {
 
 // Runtime::GetCurrent() can not be used in .h files
-bool ClassLinkerTestExtension::InitializeImpl([[maybe_unused]] bool compressed_string_enabled)
+bool ClassLinkerTestExtension::InitializeImpl([[maybe_unused]] bool compressedStringEnabled)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(GetLanguage());
 
-    auto *class_class = CreateClass(ctx.GetClassClassDescriptor(), GetClassVTableSize(ClassRoot::CLASS),
-                                    GetClassIMTSize(ClassRoot::CLASS), GetClassSize(ClassRoot::CLASS));
-    coretypes::Class::FromRuntimeClass(class_class)->SetClass(class_class);
-    class_class->SetState(Class::State::LOADED);
+    auto *classClass = CreateClass(ctx.GetClassClassDescriptor(), GetClassVTableSize(ClassRoot::CLASS),
+                                   GetClassIMTSize(ClassRoot::CLASS), GetClassSize(ClassRoot::CLASS));
+    coretypes::Class::FromRuntimeClass(classClass)->SetClass(classClass);
+    classClass->SetState(Class::State::LOADED);
 
-    auto *obj_class = CreateClass(ctx.GetObjectClassDescriptor(), GetClassVTableSize(ClassRoot::OBJECT),
-                                  GetClassIMTSize(ClassRoot::OBJECT), GetClassSize(ClassRoot::OBJECT));
-    obj_class->SetObjectSize(ObjectHeader::ObjectHeaderSize());
-    class_class->SetBase(obj_class);
-    obj_class->SetState(Class::State::LOADED);
+    auto *objClass = CreateClass(ctx.GetObjectClassDescriptor(), GetClassVTableSize(ClassRoot::OBJECT),
+                                 GetClassIMTSize(ClassRoot::OBJECT), GetClassSize(ClassRoot::OBJECT));
+    objClass->SetObjectSize(ObjectHeader::ObjectHeaderSize());
+    classClass->SetBase(objClass);
+    objClass->SetState(Class::State::LOADED);
 
-    GetClassLinker()->AddClassRoot(ClassRoot::OBJECT, obj_class);
-    GetClassLinker()->AddClassRoot(ClassRoot::CLASS, class_class);
+    GetClassLinker()->AddClassRoot(ClassRoot::OBJECT, objClass);
+    GetClassLinker()->AddClassRoot(ClassRoot::CLASS, classClass);
 
     return true;
 }

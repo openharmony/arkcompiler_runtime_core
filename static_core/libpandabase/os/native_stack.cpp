@@ -17,15 +17,15 @@
 
 namespace panda::os::native_stack {
 #if !defined(PANDA_TARGET_UNIX)
-void DumpUnattachedThread::AddTid([[maybe_unused]] pid_t tid_thread) {}
+void DumpUnattachedThread::AddTid([[maybe_unused]] pid_t tidThread) {}
 
 bool DumpUnattachedThread::InitKernelTidLists()
 {
     return true;
 }
 
-void DumpUnattachedThread::Dump([[maybe_unused]] std::ostream &os, [[maybe_unused]] bool dump_native_crash,
-                                [[maybe_unused]] FuncUnwindstack call_unwindstack)
+void DumpUnattachedThread::Dump([[maybe_unused]] std::ostream &os, [[maybe_unused]] bool dumpNativeCrash,
+                                [[maybe_unused]] FuncUnwindstack callUnwindstack)
 {
 }
 void DumpKernelStack([[maybe_unused]] std::ostream &os, [[maybe_unused]] pid_t tid, [[maybe_unused]] const char *tag,

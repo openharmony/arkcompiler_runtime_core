@@ -27,10 +27,13 @@ extern "C" int SumEightElements(int, int, int, int, int, int, int, int);
 
 ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSumEightElements([[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class)
 {
-    for (int j = 0; j < 200; j++) {
-        for (int i = 0; i < 10'000'000; ++i) {
-            int val = SumEightElements(i, i + 1, i + 2, i + 3, i + 4, i + 5, i + 6, i + 7);
-            if (val != 8 * i + 28) {
+    constexpr int MULT = 8;
+    constexpr int OFF = 28;
+    constexpr int ITERS = 10000000;
+    for (size_t j = 0; j < 200U; j++) {
+        for (int i = 0; i < ITERS; ++i) {
+            int val = SumEightElements(i, i + 1U, i + 2U, i + 3U, i + 4U, i + 5U, i + 6U, i + 7U);
+            if (val != MULT * i + OFF) {
                 std::cerr << val << std::endl;
                 return 1;
             }

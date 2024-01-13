@@ -19,115 +19,113 @@
 
 namespace panda::mem {
 
-GCAdaptiveStack::GCAdaptiveStack(GC *gc, size_t stack_size_limit, size_t new_task_stack_size_limit,
-                                 GCWorkersTaskTypes task, uint64_t time_limit_for_new_task_creation,
-                                 PandaDeque<ObjectHeader *> *stack_src)
-    : stack_size_limit_(stack_size_limit),
-      new_task_stack_size_limit_(new_task_stack_size_limit),
-      time_limit_for_new_task_creation_(time_limit_for_new_task_creation),
-      task_type_(task),
+GCAdaptiveStack::GCAdaptiveStack(GC *gc, size_t stackSizeLimit, size_t newTaskStackSizeLimit, GCWorkersTaskTypes task,
+                                 uint64_t timeLimitForNewTaskCreation, PandaDeque<ObjectHeader *> *stackSrc)
+    : stackSizeLimit_(stackSizeLimit),
+      newTaskStackSizeLimit_(newTaskStackSizeLimit),
+      timeLimitForNewTaskCreation_(timeLimitForNewTaskCreation),
+      taskType_(task),
       gc_(gc)
 {
-    initial_stack_size_limit_ = stack_size_limit_;
+    initialStackSizeLimit_ = stackSizeLimit_;
     auto allocator = gc_->GetInternalAllocator();
-    ASSERT((stack_size_limit == 0) || (gc->GetWorkersTaskPool() != nullptr));
-    if (stack_src != nullptr) {
-        stack_src_ = stack_src;
+    ASSERT((stackSizeLimit == 0) || (gc->GetWorkersTaskPool() != nullptr));
+    if (stackSrc != nullptr) {
+        stackSrc_ = stackSrc;
     } else {
-        stack_src_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
+        stackSrc_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
     }
-    stack_dst_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
+    stackDst_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
 }
 
 GCAdaptiveStack::~GCAdaptiveStack()
 {
-    gc_->GetInternalAllocator()->Delete(stack_src_);
-    gc_->GetInternalAllocator()->Delete(stack_dst_);
+    gc_->GetInternalAllocator()->Delete(stackSrc_);
+    gc_->GetInternalAllocator()->Delete(stackDst_);
 }
 
 bool GCAdaptiveStack::Empty()
 {
-    return stack_src_->empty() && stack_dst_->empty();
+    return stackSrc_->empty() && stackDst_->empty();
 }
 
 size_t GCAdaptiveStack::Size()
 {
-    return stack_src_->size() + stack_dst_->size();
+    return stackSrc_->size() + stackDst_->size();
 }
 
 PandaDeque<ObjectHeader *> *GCAdaptiveStack::MoveStacksPointers()
 {
-    ASSERT(stack_src_ != nullptr);
-    PandaDeque<ObjectHeader *> *return_value = stack_src_;
-    stack_src_ = nullptr;
-    return return_value;
+    ASSERT(stackSrc_ != nullptr);
+    PandaDeque<ObjectHeader *> *returnValue = stackSrc_;
+    stackSrc_ = nullptr;
+    return returnValue;
 }
 
-void GCAdaptiveStack::PushToStack(const ObjectHeader *from_object, ObjectHeader *object)
+void GCAdaptiveStack::PushToStack(const ObjectHeader *fromObject, ObjectHeader *object)
 {
     LOG(DEBUG, GC) << "Add object to stack: " << GetDebugInfoAboutObject(object)
-                   << " accessed from object: " << from_object;
-    ValidateObject(from_object, object);
+                   << " accessed from object: " << fromObject;
+    ValidateObject(fromObject, object);
     PushToStack(object);
 }
 
-void GCAdaptiveStack::PushToStack(RootType root_type, ObjectHeader *object)
+void GCAdaptiveStack::PushToStack(RootType rootType, ObjectHeader *object)
 {
-    LOG(DEBUG, GC) << "Add object to stack: " << GetDebugInfoAboutObject(object)
-                   << " accessed as a root: " << root_type;
-    ValidateObject(root_type, object);
+    LOG(DEBUG, GC) << "Add object to stack: " << GetDebugInfoAboutObject(object) << " accessed as a root: " << rootType;
+    ValidateObject(rootType, object);
     PushToStack(object);
 }
 
 void GCAdaptiveStack::PushToStack(ObjectHeader *element)
 {
     ASSERT_PRINT(IsAddressInObjectsHeap(element), element);
-    if ((stack_size_limit_ > 0) && ((stack_dst_->size() + 1) == stack_size_limit_)) {
+    if ((stackSizeLimit_ > 0) && ((stackDst_->size() + 1) == stackSizeLimit_)) {
         // Try to create a new task only once
         // Create a new stack and send a new task to GC
-        LOG(DEBUG, GC) << "GCAdaptiveStack: Try to add new task " << GCWorkersTaskTypesToString(task_type_)
+        LOG(DEBUG, GC) << "GCAdaptiveStack: Try to add new task " << GCWorkersTaskTypesToString(taskType_)
                        << " for worker";
         ASSERT(gc_->GetWorkersTaskPool() != nullptr);
-        ASSERT(task_type_ != GCWorkersTaskTypes::TASK_EMPTY);
+        ASSERT(taskType_ != GCWorkersTaskTypes::TASK_EMPTY);
         auto allocator = gc_->GetInternalAllocator();
         // New tasks will be created with the same new_task_stack_size_limit_ and stack_size_limit_
-        auto *new_stack = allocator->New<GCAdaptiveStack>(gc_, new_task_stack_size_limit_, new_task_stack_size_limit_,
-                                                          task_type_, time_limit_for_new_task_creation_, stack_dst_);
-        if (gc_->GetWorkersTaskPool()->AddTask(GCMarkWorkersTask(task_type_, new_stack))) {
-            LOG(DEBUG, GC) << "GCAdaptiveStack: Successfully add new task " << GCWorkersTaskTypesToString(task_type_)
+        auto *newStack = allocator->New<GCAdaptiveStack>(gc_, newTaskStackSizeLimit_, newTaskStackSizeLimit_, taskType_,
+                                                         timeLimitForNewTaskCreation_, stackDst_);
+        if (gc_->GetWorkersTaskPool()->AddTask(GCMarkWorkersTask(taskType_, newStack))) {
+            LOG(DEBUG, GC) << "GCAdaptiveStack: Successfully add new task " << GCWorkersTaskTypesToString(taskType_)
                            << " for worker";
-            stack_dst_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
+            stackDst_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
         } else {
             // We will try to create a new task later
-            stack_size_limit_ += stack_size_limit_;
-            LOG(DEBUG, GC) << "GCAdaptiveStack: Failed to add new task " << GCWorkersTaskTypesToString(task_type_)
+            stackSizeLimit_ += stackSizeLimit_;
+            LOG(DEBUG, GC) << "GCAdaptiveStack: Failed to add new task " << GCWorkersTaskTypesToString(taskType_)
                            << " for worker";
-            [[maybe_unused]] auto src_stack = new_stack->MoveStacksPointers();
-            ASSERT(src_stack == stack_dst_);
-            allocator->Delete(new_stack);
+            [[maybe_unused]] auto srcStack = newStack->MoveStacksPointers();
+            ASSERT(srcStack == stackDst_);
+            allocator->Delete(newStack);
         }
         if (IsHighTaskCreationRate()) {
-            stack_size_limit_ += stack_size_limit_;
+            stackSizeLimit_ += stackSizeLimit_;
         }
     }
-    stack_dst_->push_back(element);
+    stackDst_->push_back(element);
 }
 
 bool GCAdaptiveStack::IsHighTaskCreationRate()
 {
-    if (created_tasks_ == 0) {
-        start_time_ = panda::os::time::GetClockTimeInThreadCpuTime();
+    if (createdTasks_ == 0) {
+        startTime_ = panda::os::time::GetClockTimeInThreadCpuTime();
     }
-    created_tasks_++;
-    if (tasks_for_time_check_ == created_tasks_) {
-        uint64_t cur_time = panda::os::time::GetClockTimeInThreadCpuTime();
-        ASSERT(cur_time >= start_time_);
-        uint64_t total_time_consumed = cur_time - start_time_;
-        uint64_t one_task_consumed = total_time_consumed / created_tasks_;
-        LOG(DEBUG, GC) << "Created " << created_tasks_ << " tasks in " << Timing::PrettyTimeNs(total_time_consumed);
-        if (one_task_consumed < time_limit_for_new_task_creation_) {
-            created_tasks_ = 0;
-            start_time_ = 0;
+    createdTasks_++;
+    if (tasksForTimeCheck_ == createdTasks_) {
+        uint64_t curTime = panda::os::time::GetClockTimeInThreadCpuTime();
+        ASSERT(curTime >= startTime_);
+        uint64_t totalTimeConsumed = curTime - startTime_;
+        uint64_t oneTaskConsumed = totalTimeConsumed / createdTasks_;
+        LOG(DEBUG, GC) << "Created " << createdTasks_ << " tasks in " << Timing::PrettyTimeNs(totalTimeConsumed);
+        if (oneTaskConsumed < timeLimitForNewTaskCreation_) {
+            createdTasks_ = 0;
+            startTime_ = 0;
             return true;
         }
     }
@@ -136,19 +134,19 @@ bool GCAdaptiveStack::IsHighTaskCreationRate()
 
 ObjectHeader *GCAdaptiveStack::PopFromStack()
 {
-    if (stack_src_->empty()) {
-        ASSERT(!stack_dst_->empty());
-        auto temp = stack_src_;
-        stack_src_ = stack_dst_;
-        stack_dst_ = temp;
-        if (stack_size_limit_ != 0) {
+    if (stackSrc_->empty()) {
+        ASSERT(!stackDst_->empty());
+        auto temp = stackSrc_;
+        stackSrc_ = stackDst_;
+        stackDst_ = temp;
+        if (stackSizeLimit_ != 0) {
             // We may increase the current limit, so return it to the default value
-            stack_size_limit_ = initial_stack_size_limit_;
+            stackSizeLimit_ = initialStackSizeLimit_;
         }
     }
-    ASSERT(!stack_src_->empty());
-    ObjectHeader *element = stack_src_->back();
-    stack_src_->pop_back();
+    ASSERT(!stackSrc_->empty());
+    ObjectHeader *element = stackSrc_->back();
+    stackSrc_->pop_back();
     return element;
 }
 
@@ -157,45 +155,45 @@ GCAdaptiveStack::MarkedObjects GCAdaptiveStack::TraverseObjects(const GCAdaptive
     // We need this to avoid allocation of new stack and fragmentation
     static constexpr size_t BUCKET_SIZE = 16;
     auto allocator = gc_->GetInternalAllocator();
-    MarkedObjects marked_objects;
-    PandaDeque<ObjectHeader *> *tail_marked_objects =
+    MarkedObjects markedObjects;
+    PandaDeque<ObjectHeader *> *tailMarkedObjects =
         allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
-    if (stack_src_->empty()) {
-        std::swap(stack_src_, stack_dst_);
+    if (stackSrc_->empty()) {
+        std::swap(stackSrc_, stackDst_);
     }
     while (!Empty()) {
-        [[maybe_unused]] auto stack_src_size = stack_src_->size();
-        for (auto *object : *stack_src_) {
+        [[maybe_unused]] auto stackSrcSize = stackSrc_->size();
+        for (auto *object : *stackSrc_) {
             visitor(object);
             // visitor mustn't pop from stack
-            ASSERT(stack_src_size == stack_src_->size());
+            ASSERT(stackSrcSize == stackSrc_->size());
         }
-        if (LIKELY(stack_src_->size() > BUCKET_SIZE)) {
-            marked_objects.push_back(stack_src_);
-            stack_src_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
+        if (LIKELY(stackSrc_->size() > BUCKET_SIZE)) {
+            markedObjects.push_back(stackSrc_);
+            stackSrc_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
         } else {
-            tail_marked_objects->insert(tail_marked_objects->end(), stack_src_->begin(), stack_src_->end());
-            stack_src_->clear();
+            tailMarkedObjects->insert(tailMarkedObjects->end(), stackSrc_->begin(), stackSrc_->end());
+            stackSrc_->clear();
         }
-        std::swap(stack_src_, stack_dst_);
+        std::swap(stackSrc_, stackDst_);
     }
-    if (!tail_marked_objects->empty()) {
-        marked_objects.push_back(tail_marked_objects);
+    if (!tailMarkedObjects->empty()) {
+        markedObjects.push_back(tailMarkedObjects);
     } else {
-        allocator->Delete(tail_marked_objects);
+        allocator->Delete(tailMarkedObjects);
     }
-    return marked_objects;
+    return markedObjects;
 }
 
 bool GCAdaptiveStack::IsWorkersTaskSupported()
 {
-    return task_type_ != GCWorkersTaskTypes::TASK_EMPTY;
+    return taskType_ != GCWorkersTaskTypes::TASK_EMPTY;
 }
 
 void GCAdaptiveStack::Clear()
 {
-    *stack_src_ = PandaDeque<ObjectHeader *>();
-    *stack_dst_ = PandaDeque<ObjectHeader *>();
+    *stackSrc_ = PandaDeque<ObjectHeader *>();
+    *stackDst_ = PandaDeque<ObjectHeader *>();
 }
 
 }  // namespace panda::mem

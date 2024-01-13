@@ -39,39 +39,39 @@ protected:
 
     size_t GetCurrentMaxSize() const
     {
-        return heap_space_->GetCurrentSize();
+        return heapSpace_->GetCurrentSize();
     }
 
     size_t GetCurrentYoungMaxSize() const
     {
-        return gen_spaces_->GetCurrentYoungSize();
+        return genSpaces_->GetCurrentYoungSize();
     }
 
     size_t GetCurrentTenuredMaxSize() const
     {
-        return gen_spaces_->GetCurrentSize();
+        return genSpaces_->GetCurrentSize();
     }
 
     struct HeapSpaceHolder {
         NO_COPY_SEMANTIC(HeapSpaceHolder);
         NO_MOVE_SEMANTIC(HeapSpaceHolder);
 
-        explicit HeapSpaceHolder(size_t initial_heap_size = DEFAULT_TEST_HEAP_SIZE,
-                                 size_t max_heap_size = DEFAULT_TEST_HEAP_SIZE,
-                                 uint32_t min_percentage = DEFAULT_MIN_PERCENTAGE,
-                                 uint32_t max_percentage = DEFAULT_MAX_PERCENTAGE)
+        explicit HeapSpaceHolder(size_t initialHeapSize = DEFAULT_TEST_HEAP_SIZE,
+                                 size_t maxHeapSize = DEFAULT_TEST_HEAP_SIZE,
+                                 uint32_t minPercentage = DEFAULT_MIN_PERCENTAGE,
+                                 uint32_t maxPercentage = DEFAULT_MAX_PERCENTAGE)
         {
-            MemConfig::Initialize(max_heap_size, 0_MB, 0_MB, 0_MB, 0_MB, 0_MB, initial_heap_size);
+            MemConfig::Initialize(maxHeapSize, 0_MB, 0_MB, 0_MB, 0_MB, 0_MB, initialHeapSize);
             PoolManager::Initialize();
-            HeapSpaceTest::heap_space_ = new HeapSpace();
-            HeapSpaceTest::heap_space_->Initialize(MemConfig::GetInitialHeapSizeLimit(), MemConfig::GetHeapSizeLimit(),
-                                                   min_percentage, max_percentage);
+            HeapSpaceTest::heapSpace_ = new HeapSpace();
+            HeapSpaceTest::heapSpace_->Initialize(MemConfig::GetInitialHeapSizeLimit(), MemConfig::GetHeapSizeLimit(),
+                                                  minPercentage, maxPercentage);
         }
 
         ~HeapSpaceHolder() noexcept
         {
-            delete HeapSpaceTest::heap_space_;
-            HeapSpaceTest::heap_space_ = nullptr;
+            delete HeapSpaceTest::heapSpace_;
+            HeapSpaceTest::heapSpace_ = nullptr;
             PoolManager::Finalize();
             MemConfig::Finalize();
         }
@@ -81,92 +81,92 @@ protected:
         NO_COPY_SEMANTIC(GenerationalSpacesHolder);
         NO_MOVE_SEMANTIC(GenerationalSpacesHolder);
 
-        explicit GenerationalSpacesHolder(size_t init_young_size = DEFAULT_TEST_YOUNG_SIZE,
-                                          size_t young_size = DEFAULT_TEST_YOUNG_SIZE,
-                                          size_t initial_heap_size = DEFAULT_TEST_HEAP_SIZE,
-                                          size_t max_heap_size = DEFAULT_TEST_HEAP_SIZE, uint32_t min_percentage = 0U,
-                                          uint32_t max_percentage = PERCENT_100_U32)
+        explicit GenerationalSpacesHolder(size_t initYoungSize = DEFAULT_TEST_YOUNG_SIZE,
+                                          size_t youngSize = DEFAULT_TEST_YOUNG_SIZE,
+                                          size_t initialHeapSize = DEFAULT_TEST_HEAP_SIZE,
+                                          size_t maxHeapSize = DEFAULT_TEST_HEAP_SIZE, uint32_t minPercentage = 0U,
+                                          uint32_t maxPercentage = PERCENT_100_U32)
         {
-            MemConfig::Initialize(max_heap_size, 0_MB, 0_MB, 0_MB, 0_MB, 0_MB, initial_heap_size);
+            MemConfig::Initialize(maxHeapSize, 0_MB, 0_MB, 0_MB, 0_MB, 0_MB, initialHeapSize);
             PoolManager::Initialize();
-            HeapSpaceTest::gen_spaces_ = new GenerationalSpaces();
-            HeapSpaceTest::gen_spaces_->Initialize(init_young_size, true, young_size, true,
-                                                   MemConfig::GetInitialHeapSizeLimit(), MemConfig::GetHeapSizeLimit(),
-                                                   min_percentage, max_percentage);
+            HeapSpaceTest::genSpaces_ = new GenerationalSpaces();
+            HeapSpaceTest::genSpaces_->Initialize(initYoungSize, true, youngSize, true,
+                                                  MemConfig::GetInitialHeapSizeLimit(), MemConfig::GetHeapSizeLimit(),
+                                                  minPercentage, maxPercentage);
         }
 
         ~GenerationalSpacesHolder() noexcept
         {
-            delete HeapSpaceTest::gen_spaces_;
-            HeapSpaceTest::gen_spaces_ = nullptr;
+            delete HeapSpaceTest::genSpaces_;
+            HeapSpaceTest::genSpaces_ = nullptr;
             PoolManager::Finalize();
             MemConfig::Finalize();
         }
     };
 
-    static HeapSpace *heap_space_;
-    static GenerationalSpaces *gen_spaces_;
+    static HeapSpace *heapSpace_;
+    static GenerationalSpaces *genSpaces_;
 };
 
-HeapSpace *HeapSpaceTest::heap_space_ = nullptr;
-GenerationalSpaces *HeapSpaceTest::gen_spaces_ = nullptr;
+HeapSpace *HeapSpaceTest::heapSpace_ = nullptr;
+GenerationalSpaces *HeapSpaceTest::genSpaces_ = nullptr;
 
 TEST_F(HeapSpaceTest, AllocFreeAndCheckSizesTest)
 {
     HeapSpaceHolder hsh;
 
-    auto pool_1 =
-        heap_space_->TryAllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_NE(pool_1, NULLPOOL);
-    auto pool_2 =
-        heap_space_->TryAllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_NE(pool_2, NULLPOOL);
+    auto pool1 =
+        heapSpace_->TryAllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_NE(pool1, NULLPOOL);
+    auto pool2 =
+        heapSpace_->TryAllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_NE(pool2, NULLPOOL);
 
-    ASSERT_EQ(heap_space_->GetHeapSize(), 10_MB);
+    ASSERT_EQ(heapSpace_->GetHeapSize(), 10_MB);
 
-    heap_space_->FreePool(pool_1.GetMem(), pool_1.GetSize());
-    ASSERT_EQ(heap_space_->GetHeapSize(), 6_MB);
-    auto *arena_1 =
-        heap_space_->TryAllocArena(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_NE(arena_1, nullptr);
-    ASSERT_EQ(heap_space_->GetHeapSize(), 12_MB);
-    heap_space_->FreePool(pool_2.GetMem(), pool_2.GetSize());
-    ASSERT_EQ(heap_space_->GetHeapSize(), 6_MB);
-    heap_space_->FreeArena(arena_1);
-    ASSERT_EQ(heap_space_->GetHeapSize(), 0_MB);
+    heapSpace_->FreePool(pool1.GetMem(), pool1.GetSize());
+    ASSERT_EQ(heapSpace_->GetHeapSize(), 6_MB);
+    auto *arena1 =
+        heapSpace_->TryAllocArena(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_NE(arena1, nullptr);
+    ASSERT_EQ(heapSpace_->GetHeapSize(), 12_MB);
+    heapSpace_->FreePool(pool2.GetMem(), pool2.GetSize());
+    ASSERT_EQ(heapSpace_->GetHeapSize(), 6_MB);
+    heapSpace_->FreeArena(arena1);
+    ASSERT_EQ(heapSpace_->GetHeapSize(), 0_MB);
 }
 
 TEST_F(HeapSpaceTest, EmulateAllocBeforeAndAfterSTWGCTest)
 {
     static constexpr size_t INIT_HEAP_SIZE = 4_MB;
-    static constexpr size_t FIRST_POOL_SIZE = INIT_HEAP_SIZE / 2;
-    static constexpr size_t SECOND_POOL_SIZE = INIT_HEAP_SIZE * 3 / 4;
-    HeapSpaceHolder hsh(INIT_HEAP_SIZE, 2 * INIT_HEAP_SIZE, 0U, PERCENT_100_U32);
+    static constexpr size_t FIRST_POOL_SIZE = INIT_HEAP_SIZE / 2U;
+    static constexpr size_t SECOND_POOL_SIZE = INIT_HEAP_SIZE * 3U / 4U;
+    HeapSpaceHolder hsh(INIT_HEAP_SIZE, 2U * INIT_HEAP_SIZE, 0U, PERCENT_100_U32);
 
     ASSERT_EQ(GetCurrentMaxSize(), INIT_HEAP_SIZE) << "Current heap limit must be equal initial heap size";
-    auto pool_1 = heap_space_->TryAllocPool(FIRST_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                            AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_NE(pool_1, NULLPOOL);
+    auto pool1 = heapSpace_->TryAllocPool(FIRST_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                          AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_NE(pool1, NULLPOOL);
     // -- Emulate simple GC
-    heap_space_->ComputeNewSize();
+    heapSpace_->ComputeNewSize();
     ASSERT_EQ(GetCurrentMaxSize(), INIT_HEAP_SIZE);
     // --
-    auto pool_2 = heap_space_->TryAllocPool(SECOND_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                            AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_EQ(pool_2, NULLPOOL) << "We now can't allocate pool";
+    auto pool2 = heapSpace_->TryAllocPool(SECOND_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                          AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_EQ(pool2, NULLPOOL) << "We now can't allocate pool";
     // -- Emulate simple GC
-    heap_space_->ComputeNewSize();
+    heapSpace_->ComputeNewSize();
     ASSERT_EQ(GetCurrentMaxSize(), FIRST_POOL_SIZE + SECOND_POOL_SIZE);
     // --
-    pool_2 = heap_space_->TryAllocPool(SECOND_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                       AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_NE(pool_2, NULLPOOL);
-    heap_space_->FreePool(pool_1.GetMem(), pool_1.GetSize());
+    pool2 = heapSpace_->TryAllocPool(SECOND_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR,
+                                     nullptr);
+    ASSERT_NE(pool2, NULLPOOL);
+    heapSpace_->FreePool(pool1.GetMem(), pool1.GetSize());
     // -- Emulate simple GC
-    heap_space_->ComputeNewSize();
+    heapSpace_->ComputeNewSize();
     ASSERT_EQ(GetCurrentMaxSize(), FIRST_POOL_SIZE + SECOND_POOL_SIZE);
     // --
-    heap_space_->FreePool(pool_2.GetMem(), pool_2.GetSize());
+    heapSpace_->FreePool(pool2.GetMem(), pool2.GetSize());
 }
 
 TEST_F(HeapSpaceTest, EmulateAllocBeforeAndDuringGenGCTest)
@@ -174,45 +174,45 @@ TEST_F(HeapSpaceTest, EmulateAllocBeforeAndDuringGenGCTest)
     static constexpr size_t INIT_HEAP_SIZE = 16_MB;
     static constexpr size_t FIRST_POOL_SIZE = 4_MB;
     static constexpr size_t SECOND_POOL_SIZE = 10_MB;
-    GenerationalSpacesHolder gsh(DEFAULT_TEST_YOUNG_SIZE, DEFAULT_TEST_YOUNG_SIZE, INIT_HEAP_SIZE, INIT_HEAP_SIZE * 2);
-    auto young_pool = gen_spaces_->AllocAlonePoolForYoung(SpaceType::SPACE_TYPE_OBJECT,
-                                                          AllocatorType::BUMP_ALLOCATOR_WITH_TLABS, nullptr);
+    GenerationalSpacesHolder gsh(DEFAULT_TEST_YOUNG_SIZE, DEFAULT_TEST_YOUNG_SIZE, INIT_HEAP_SIZE, INIT_HEAP_SIZE * 2U);
+    auto youngPool = genSpaces_->AllocAlonePoolForYoung(SpaceType::SPACE_TYPE_OBJECT,
+                                                        AllocatorType::BUMP_ALLOCATOR_WITH_TLABS, nullptr);
     // Check young pool allocation
-    ASSERT_NE(young_pool, NULLPOOL);
-    ASSERT_EQ(young_pool.GetSize(), DEFAULT_TEST_YOUNG_SIZE);
+    ASSERT_NE(youngPool, NULLPOOL);
+    ASSERT_EQ(youngPool.GetSize(), DEFAULT_TEST_YOUNG_SIZE);
     // Check current heap space sizes before "runtime work"
     ASSERT_EQ(GetCurrentYoungMaxSize(), DEFAULT_TEST_YOUNG_SIZE);
     ASSERT_EQ(GetCurrentTenuredMaxSize(), INIT_HEAP_SIZE - DEFAULT_TEST_YOUNG_SIZE);
 
-    auto pool_1 = gen_spaces_->TryAllocPoolForYoung(FIRST_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                                    AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_EQ(pool_1, NULLPOOL);
+    auto pool1 = genSpaces_->TryAllocPoolForYoung(FIRST_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                                  AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_EQ(pool1, NULLPOOL);
     // -- Emulate simple GC
-    gen_spaces_->SetIsWorkGC(true);
-    pool_1 = gen_spaces_->TryAllocPoolForTenured(FIRST_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                                 AllocatorType::RUNSLOTS_ALLOCATOR, nullptr);
-    ASSERT_EQ(pool_1.GetSize(), FIRST_POOL_SIZE);
-    gen_spaces_->ComputeNewSize();
+    genSpaces_->SetIsWorkGC(true);
+    pool1 = genSpaces_->TryAllocPoolForTenured(FIRST_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                               AllocatorType::RUNSLOTS_ALLOCATOR, nullptr);
+    ASSERT_EQ(pool1.GetSize(), FIRST_POOL_SIZE);
+    genSpaces_->ComputeNewSize();
     ASSERT_EQ(GetCurrentYoungMaxSize(), DEFAULT_TEST_YOUNG_SIZE);
     ASSERT_EQ(GetCurrentTenuredMaxSize(), INIT_HEAP_SIZE - DEFAULT_TEST_YOUNG_SIZE);
     // --
     // Try too big pool, now no space for such pool
-    auto pool_2 = gen_spaces_->TryAllocPoolForTenured(SECOND_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                                      AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_EQ(pool_2, NULLPOOL) << "Now no space for such pool, so we must have NULLPOOL";
+    auto pool2 = genSpaces_->TryAllocPoolForTenured(SECOND_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                                    AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_EQ(pool2, NULLPOOL) << "Now no space for such pool, so we must have NULLPOOL";
     // -- Emulate simple GC
-    gen_spaces_->SetIsWorkGC(true);
-    ASSERT_TRUE(gen_spaces_->CanAllocInSpace(false, SECOND_POOL_SIZE)) << "We can allocate pool during GC";
-    pool_2 = gen_spaces_->TryAllocPoolForTenured(SECOND_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                                 AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_EQ(pool_2.GetSize(), SECOND_POOL_SIZE) << "We can allocate pool during GC";
+    genSpaces_->SetIsWorkGC(true);
+    ASSERT_TRUE(genSpaces_->CanAllocInSpace(false, SECOND_POOL_SIZE)) << "We can allocate pool during GC";
+    pool2 = genSpaces_->TryAllocPoolForTenured(SECOND_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                               AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_EQ(pool2.GetSize(), SECOND_POOL_SIZE) << "We can allocate pool during GC";
     ASSERT_EQ(GetCurrentTenuredMaxSize(), FIRST_POOL_SIZE + SECOND_POOL_SIZE);
-    gen_spaces_->ComputeNewSize();
-    ASSERT_EQ(GetCurrentTenuredMaxSize(), FIRST_POOL_SIZE + 2 * SECOND_POOL_SIZE);
+    genSpaces_->ComputeNewSize();
+    ASSERT_EQ(GetCurrentTenuredMaxSize(), FIRST_POOL_SIZE + 2U * SECOND_POOL_SIZE);
     // --
-    gen_spaces_->FreePool(pool_2.GetMem(), pool_2.GetSize());
-    gen_spaces_->FreePool(pool_1.GetMem(), pool_1.GetSize());
-    gen_spaces_->FreeYoungPool(young_pool.GetMem(), young_pool.GetSize());
+    genSpaces_->FreePool(pool2.GetMem(), pool2.GetSize());
+    genSpaces_->FreePool(pool1.GetMem(), pool1.GetSize());
+    genSpaces_->FreeYoungPool(youngPool.GetMem(), youngPool.GetSize());
 }
 
 TEST_F(HeapSpaceTest, SharedPoolTest)
@@ -224,27 +224,27 @@ TEST_F(HeapSpaceTest, SharedPoolTest)
     static constexpr size_t REGION_SIZE = 1_MB;
     static constexpr bool IS_YOUNG = true;
     GenerationalSpacesHolder gsh(INIT_YOUNG_SIZE, MAX_YOUNG_SIZE, INIT_HEAP_SIZE);
-    auto shared_pool = gen_spaces_->AllocSharedPool(SHARED_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                                    AllocatorType::REGION_ALLOCATOR, nullptr);
-    ASSERT_EQ(shared_pool.GetSize(), SHARED_POOL_SIZE);
+    auto sharedPool = genSpaces_->AllocSharedPool(SHARED_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                                  AllocatorType::REGION_ALLOCATOR, nullptr);
+    ASSERT_EQ(sharedPool.GetSize(), SHARED_POOL_SIZE);
     ASSERT_EQ(GetCurrentYoungMaxSize(), INIT_YOUNG_SIZE);
     ASSERT_EQ(GetCurrentTenuredMaxSize(), INIT_HEAP_SIZE - INIT_YOUNG_SIZE);
-    ASSERT_TRUE(gen_spaces_->CanAllocInSpace(IS_YOUNG, INIT_YOUNG_SIZE));
-    ASSERT_TRUE(gen_spaces_->CanAllocInSpace(!IS_YOUNG, INIT_YOUNG_SIZE));
-    gen_spaces_->IncreaseYoungOccupiedInSharedPool(REGION_SIZE);
-    gen_spaces_->IncreaseTenuredOccupiedInSharedPool(REGION_SIZE);
-    ASSERT_FALSE(gen_spaces_->CanAllocInSpace(IS_YOUNG, INIT_YOUNG_SIZE));
-    ASSERT_TRUE(gen_spaces_->CanAllocInSpace(!IS_YOUNG, INIT_YOUNG_SIZE));
-    auto pool_1 = gen_spaces_->TryAllocPoolForTenured(REGION_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                                      AllocatorType::REGION_ALLOCATOR, nullptr);
-    ASSERT_EQ(pool_1.GetSize(), REGION_SIZE);
-    gen_spaces_->ReduceYoungOccupiedInSharedPool(REGION_SIZE);
-    ASSERT_TRUE(gen_spaces_->CanAllocInSpace(IS_YOUNG, INIT_YOUNG_SIZE));
-    gen_spaces_->ReduceTenuredOccupiedInSharedPool(REGION_SIZE);
-    ASSERT_TRUE(gen_spaces_->CanAllocInSpace(IS_YOUNG, INIT_YOUNG_SIZE));
-    ASSERT_TRUE(gen_spaces_->CanAllocInSpace(!IS_YOUNG, INIT_YOUNG_SIZE));
-    gen_spaces_->FreeTenuredPool(pool_1.GetMem(), pool_1.GetSize());
-    gen_spaces_->FreeSharedPool(shared_pool.GetMem(), shared_pool.GetSize());
+    ASSERT_TRUE(genSpaces_->CanAllocInSpace(IS_YOUNG, INIT_YOUNG_SIZE));
+    ASSERT_TRUE(genSpaces_->CanAllocInSpace(!IS_YOUNG, INIT_YOUNG_SIZE));
+    genSpaces_->IncreaseYoungOccupiedInSharedPool(REGION_SIZE);
+    genSpaces_->IncreaseTenuredOccupiedInSharedPool(REGION_SIZE);
+    ASSERT_FALSE(genSpaces_->CanAllocInSpace(IS_YOUNG, INIT_YOUNG_SIZE));
+    ASSERT_TRUE(genSpaces_->CanAllocInSpace(!IS_YOUNG, INIT_YOUNG_SIZE));
+    auto pool1 = genSpaces_->TryAllocPoolForTenured(REGION_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                                    AllocatorType::REGION_ALLOCATOR, nullptr);
+    ASSERT_EQ(pool1.GetSize(), REGION_SIZE);
+    genSpaces_->ReduceYoungOccupiedInSharedPool(REGION_SIZE);
+    ASSERT_TRUE(genSpaces_->CanAllocInSpace(IS_YOUNG, INIT_YOUNG_SIZE));
+    genSpaces_->ReduceTenuredOccupiedInSharedPool(REGION_SIZE);
+    ASSERT_TRUE(genSpaces_->CanAllocInSpace(IS_YOUNG, INIT_YOUNG_SIZE));
+    ASSERT_TRUE(genSpaces_->CanAllocInSpace(!IS_YOUNG, INIT_YOUNG_SIZE));
+    genSpaces_->FreeTenuredPool(pool1.GetMem(), pool1.GetSize());
+    genSpaces_->FreeSharedPool(sharedPool.GetMem(), sharedPool.GetSize());
 }
 
 TEST_F(HeapSpaceTest, ClampNewMaxSizeTest)
@@ -252,29 +252,29 @@ TEST_F(HeapSpaceTest, ClampNewMaxSizeTest)
     // NOLINTNEXTLINE(readability-magic-numbers)
     HeapSpaceHolder hsh(10_MB, DEFAULT_TEST_HEAP_SIZE, 0U, PERCENT_100_U32);
 
-    auto pool_1 =
-        heap_space_->TryAllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_NE(pool_1, NULLPOOL);
-    auto pool_2 =
-        heap_space_->TryAllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_NE(pool_2, NULLPOOL);
+    auto pool1 =
+        heapSpace_->TryAllocPool(4_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_NE(pool1, NULLPOOL);
+    auto pool2 =
+        heapSpace_->TryAllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_NE(pool2, NULLPOOL);
 
-    ASSERT_EQ(heap_space_->GetHeapSize(), 10_MB);
+    ASSERT_EQ(heapSpace_->GetHeapSize(), 10_MB);
 
-    heap_space_->ClampCurrentMaxHeapSize();
-    heap_space_->SetIsWorkGC(true);
+    heapSpace_->ClampCurrentMaxHeapSize();
+    heapSpace_->SetIsWorkGC(true);
 
-    auto pool_3 =
-        heap_space_->TryAllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_EQ(pool_3, NULLPOOL);
+    auto pool3 =
+        heapSpace_->TryAllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_EQ(pool3, NULLPOOL);
 
-    pool_3 = heap_space_->TryAllocPool(PANDA_DEFAULT_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
-                                       AllocatorType::FREELIST_ALLOCATOR, nullptr);
-    ASSERT_NE(pool_3, NULLPOOL);
+    pool3 = heapSpace_->TryAllocPool(PANDA_DEFAULT_POOL_SIZE, SpaceType::SPACE_TYPE_OBJECT,
+                                     AllocatorType::FREELIST_ALLOCATOR, nullptr);
+    ASSERT_NE(pool3, NULLPOOL);
 
-    heap_space_->FreePool(pool_1.GetMem(), pool_1.GetSize());
-    heap_space_->FreePool(pool_2.GetMem(), pool_2.GetSize());
-    heap_space_->FreePool(pool_3.GetMem(), pool_3.GetSize());
+    heapSpace_->FreePool(pool1.GetMem(), pool1.GetSize());
+    heapSpace_->FreePool(pool2.GetMem(), pool2.GetSize());
+    heapSpace_->FreePool(pool3.GetMem(), pool3.GetSize());
 }
 
 }  // namespace panda::mem::test

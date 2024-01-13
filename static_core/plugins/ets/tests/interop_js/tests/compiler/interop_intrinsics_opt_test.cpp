@@ -40,23 +40,23 @@ BlockPos operator|(BlockPos lhs, BlockPos rhs)
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class InteropIntrnsicsOptTest : public GraphTest, public testing::WithParamInterface<uint8_t> {
 public:
-    bool BlockEnabled(BlockPos block_pos)
+    bool BlockEnabled(BlockPos blockPos)
     {
-        return (GetParam() & block_pos) != 0;
+        return (GetParam() & blockPos) != 0;
     }
 };
 
 std::string GetTestName(const testing::TestParamInfo<InteropIntrnsicsOptTest::ParamType> &info)
 {
-    static std::array<std::string_view, 4U> block_pos_names {"Pred", "Left", "Right", "Next"};
+    static std::array<std::string_view, 4U> blockPosNames {"Pred", "Left", "Right", "Next"};
     auto param = info.param;
     if (param == BlockPos::NONE) {
         return "None";
     }
     std::stringstream res;
-    for (size_t i = 0; i < block_pos_names.size(); ++i) {
+    for (size_t i = 0; i < blockPosNames.size(); ++i) {
         if ((param & (1U << i)) != 0U) {
-            res << block_pos_names[i];
+            res << blockPosNames[i];
         }
     }
     return res.str();
@@ -444,7 +444,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocks,
         }
     }
     Graph *graph = CreateEmptyGraph();
-    int js_val {};
+    int jsVal {};
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
@@ -461,7 +461,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocks,
             INTRINSIC(5U, COMPILER_CREATE_LOCAL_SCOPE).v0id().InputsAutoType(4U);
             if (BlockEnabled(BlockPos::PRED)) {
                 INTRINSIC(7U, COMPILER_JS_CALL_FUNCTION).ptr().InputsAutoType(1U, 2U, 23U, 4U);
-                js_val = 7;
+                jsVal = 7;
             } else {
                 INTRINSIC(8U, JS_RUNTIME_GET_UNDEFINED).ref().InputsAutoType(4U);
             }
@@ -472,9 +472,9 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocks,
             INST(24U, Opcode::SaveState).Inputs(8U).SrcVregs({0U}).CleanupInputs();
             if (!BlockEnabled(BlockPos::PRED)) {
                 INTRINSIC(27U, COMPILER_CONVERT_JS_VALUE_TO_LOCAL).ptr().InputsAutoType(8U, 24U);
-                js_val = 27;
+                jsVal = 27;
             }
-            INTRINSIC(28U, COMPILER_JS_CALL_FUNCTION).ptr().InputsAutoType(1U, 32U, 3U, js_val, 24U);
+            INTRINSIC(28U, COMPILER_JS_CALL_FUNCTION).ptr().InputsAutoType(1U, 32U, 3U, jsVal, 24U);
             INTRINSIC(29U, COMPILER_CONVERT_LOCAL_TO_JS_VALUE).ref().InputsAutoType(28U, 24U);
             if (!BlockEnabled(BlockPos::NEXT)) {
                 INST(30U, Opcode::SaveState).Inputs(8U, 29U).SrcVregs({0U, 1U}).CleanupInputs();
@@ -487,9 +487,9 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocks,
             if (BlockEnabled(BlockPos::RIGHT)) {
                 if (!BlockEnabled(BlockPos::PRED)) {
                     INTRINSIC(35U, COMPILER_CONVERT_JS_VALUE_TO_LOCAL).ptr().InputsAutoType(8U, 33U);
-                    js_val = 35;
+                    jsVal = 35;
                 }
-                INTRINSIC(36U, COMPILER_JS_CALL_FUNCTION).ptr().InputsAutoType(1U, 2U, 3U, js_val, 33U);
+                INTRINSIC(36U, COMPILER_JS_CALL_FUNCTION).ptr().InputsAutoType(1U, 2U, 3U, jsVal, 33U);
                 INTRINSIC(37U, COMPILER_CONVERT_LOCAL_TO_JS_VALUE).ref().InputsAutoType(36U, 33U);
                 if (!BlockEnabled(BlockPos::NEXT)) {
                     INST(38U, Opcode::SaveState).Inputs(8U, 37U).SrcVregs({0U, 1U}).CleanupInputs();
@@ -506,12 +506,12 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocks,
                 INST(12U, Opcode::SaveState).Inputs(8U, 40U).SrcVregs({0U, 2U}).CleanupInputs();
                 if (!BlockEnabled(BlockPos::PRED)) {
                     INTRINSIC(14U, COMPILER_CONVERT_JS_VALUE_TO_LOCAL).ptr().InputsAutoType(8U, 12U);
-                    js_val = 14;
+                    jsVal = 14;
                 }
                 // NOTE(aefremov): unwrap of Phi inputs and wrap of Phi may be removed
                 // in a way similar to PhiTypeResolving pass
                 INTRINSIC(15U, COMPILER_CONVERT_JS_VALUE_TO_LOCAL).ptr().InputsAutoType(40U, 12U);
-                INTRINSIC(16U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 2U, 42U, js_val, 15U, 12U);
+                INTRINSIC(16U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 2U, 42U, jsVal, 15U, 12U);
                 INTRINSIC(17U, COMPILER_DESTROY_LOCAL_SCOPE).v0id().InputsAutoType(12U);
                 INST(41U, Opcode::ReturnVoid).v0id();
             } else {
@@ -537,7 +537,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocksRepeatedWraps,
                              BlockPos::LEFT | BlockPos::NEXT, BlockPos::PRED | BlockPos::NEXT, BlockPos::NEXT),
            GetTestName)
 {
-    int js_val {};
+    int jsVal {};
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).s32();
@@ -552,12 +552,12 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocksRepeatedWraps,
             INTRINSIC(5U, COMPILER_CREATE_LOCAL_SCOPE).v0id().InputsAutoType(4U);
             if (BlockEnabled(BlockPos::PRED)) {
                 INTRINSIC(8U, COMPILER_CONVERT_I32_TO_LOCAL).ref().InputsAutoType(0U, 4U);
-                js_val = 8;
+                jsVal = 8;
             } else {
                 INTRINSIC(9U, JS_RUNTIME_GET_UNDEFINED).ref().InputsAutoType(4U);
-                js_val = 9;
+                jsVal = 9;
             }
-            INTRINSIC(7U, COMPILER_JS_CALL_FUNCTION).ptr().InputsAutoType(1U, 2U, 3U, js_val, 4U);
+            INTRINSIC(7U, COMPILER_JS_CALL_FUNCTION).ptr().InputsAutoType(1U, 2U, 3U, jsVal, 4U);
             INTRINSIC(10U, COMPILER_DESTROY_LOCAL_SCOPE).v0id().InputsAutoType(4U);
             INST(11U, Opcode::IfImm).CC(compiler::CC_EQ).Imm(0U).Inputs(0U);
         }
@@ -601,7 +601,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocksRepeatedWraps,
     }
 
     Graph *graph = CreateEmptyGraph();
-    bool wrap_in_pred = GetParam() != (BlockPos::LEFT | BlockPos::RIGHT) && GetParam() != BlockPos::NEXT;
+    bool wrapInPred = GetParam() != (BlockPos::LEFT | BlockPos::RIGHT) && GetParam() != BlockPos::NEXT;
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
@@ -614,15 +614,15 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocksRepeatedWraps,
         {
             INST(4U, Opcode::SaveState).NoVregs();
             INTRINSIC(5U, COMPILER_CREATE_LOCAL_SCOPE).v0id().InputsAutoType(4U);
-            if (wrap_in_pred) {
+            if (wrapInPred) {
                 INTRINSIC(8U, COMPILER_CONVERT_I32_TO_LOCAL).ref().InputsAutoType(0U, 4U);
-                js_val = 8;
+                jsVal = 8;
             }
             if (!BlockEnabled(BlockPos::PRED)) {
                 INTRINSIC(9U, JS_RUNTIME_GET_UNDEFINED).ref().InputsAutoType(4U);
-                js_val = 9;
+                jsVal = 9;
             }
-            INTRINSIC(7U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 2U, 3U, js_val, 4U);
+            INTRINSIC(7U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 2U, 3U, jsVal, 4U);
             INST(11U, Opcode::IfImm).CC(compiler::CC_EQ).Imm(0U).Inputs(0U);
         }
         BASIC_BLOCK(3U, 5U)
@@ -630,34 +630,34 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocksRepeatedWraps,
             INST(24U, Opcode::SaveState).Inputs(8U).SrcVregs({VirtualRegister::BRIDGE}).CleanupInputs();
             if (!BlockEnabled(BlockPos::LEFT)) {
                 INTRINSIC(27U, JS_RUNTIME_GET_UNDEFINED).ref().InputsAutoType(24U);
-                js_val = 27;
-            } else if (wrap_in_pred) {
-                js_val = 8;
+                jsVal = 27;
+            } else if (wrapInPred) {
+                jsVal = 8;
             } else {
                 INTRINSIC(27U, COMPILER_CONVERT_I32_TO_LOCAL).ref().InputsAutoType(0U, 24U);
-                js_val = 27;
+                jsVal = 27;
             }
-            INTRINSIC(28U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 32U, 3U, js_val, 24U);
+            INTRINSIC(28U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 32U, 3U, jsVal, 24U);
         }
         BASIC_BLOCK(4U, 5U)
         {
             INST(33U, Opcode::SaveState).Inputs(8U).SrcVregs({VirtualRegister::BRIDGE}).CleanupInputs();
             if (!BlockEnabled(BlockPos::RIGHT)) {
                 INTRINSIC(35U, JS_RUNTIME_GET_UNDEFINED).ref().InputsAutoType(33U);
-                js_val = 35;
-            } else if (wrap_in_pred) {
-                js_val = 8;
+                jsVal = 35;
+            } else if (wrapInPred) {
+                jsVal = 8;
             } else {
                 INTRINSIC(35U, COMPILER_CONVERT_I32_TO_LOCAL).ref().InputsAutoType(0U, 33U);
-                js_val = 35;
+                jsVal = 35;
             }
-            INTRINSIC(36U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 2U, 3U, js_val, 33U);
+            INTRINSIC(36U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 2U, 3U, jsVal, 33U);
         }
         BASIC_BLOCK(5U, -1L)
         {
-            if (BlockEnabled(BlockPos::NEXT) && wrap_in_pred) {
+            if (BlockEnabled(BlockPos::NEXT) && wrapInPred) {
                 INST(12U, Opcode::SaveState).Inputs(8U).SrcVregs({VirtualRegister::BRIDGE});
-                js_val = 8;
+                jsVal = 8;
             } else {
                 INST(12U, Opcode::SaveState).NoVregs();
                 if (BlockEnabled(BlockPos::NEXT)) {
@@ -665,9 +665,9 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocksRepeatedWraps,
                 } else {
                     INTRINSIC(14U, JS_RUNTIME_GET_UNDEFINED).ref().InputsAutoType(12U);
                 }
-                js_val = 14;
+                jsVal = 14;
             }
-            INTRINSIC(15U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 2U, 3U, js_val, 12U);
+            INTRINSIC(15U, COMPILER_JS_CALL_VOID_FUNCTION).v0id().InputsAutoType(1U, 2U, 3U, jsVal, 12U);
             INTRINSIC(16U, COMPILER_DESTROY_LOCAL_SCOPE).v0id().InputsAutoType(12U);
             INST(17U, Opcode::ReturnVoid).v0id();
         }

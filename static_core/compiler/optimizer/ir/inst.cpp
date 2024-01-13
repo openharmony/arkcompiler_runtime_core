@@ -40,8 +40,8 @@ Inst *User::GetInst()
     auto p = reinterpret_cast<uintptr_t>(this);
     p += (GetIndex() + 1) * sizeof(User);
 
-    auto inputs_count {SizeField::Decode(properties_)};
-    p += (inputs_count + Input::GetPadding(RUNTIME_ARCH, inputs_count)) * sizeof(Input);
+    auto inputsCount {SizeField::Decode(properties_)};
+    p += (inputsCount + Input::GetPadding(RUNTIME_ARCH, inputsCount)) * sizeof(Input);
     return reinterpret_cast<Inst *>(p);
 }
 
@@ -63,49 +63,49 @@ uint32_t Inst::GetInliningDepth() const
     return ss == nullptr ? 0 : ss->GetInliningDepth();
 }
 
-void DynamicOperands::Reallocate([[maybe_unused]] size_t new_capacity /* =0 */)
+void DynamicOperands::Reallocate([[maybe_unused]] size_t newCapacity /* =0 */)
 {
-    if (new_capacity == 0) {
+    if (newCapacity == 0) {
         constexpr auto IMM_2 = 2;
-        new_capacity = (((capacity_ != 0U) ? capacity_ : 1U) << 1U) + IMM_2;
-    } else if (new_capacity <= capacity_) {
+        newCapacity = (((capacity_ != 0U) ? capacity_ : 1U) << 1U) + IMM_2;
+    } else if (newCapacity <= capacity_) {
         return;
     }
-    auto size = new_capacity * (sizeof(User) + sizeof(Inst *)) + sizeof(Inst *);
-    auto new_stor = reinterpret_cast<uintptr_t>(allocator_->Alloc(size));
+    auto size = newCapacity * (sizeof(User) + sizeof(Inst *)) + sizeof(Inst *);
+    auto newStor = reinterpret_cast<uintptr_t>(allocator_->Alloc(size));
 
-    auto owner_inst {GetOwnerInst()};
+    auto ownerInst {GetOwnerInst()};
     // Set pointer to owned instruction into new storage NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    *reinterpret_cast<Inst **>(reinterpret_cast<User *>(new_stor) + new_capacity) = owner_inst;
+    *reinterpret_cast<Inst **>(reinterpret_cast<User *>(newStor) + newCapacity) = ownerInst;
 
     if (users_ == nullptr) {
-        users_ = reinterpret_cast<User *>(new_stor);
-        capacity_ = new_capacity;
+        users_ = reinterpret_cast<User *>(newStor);
+        capacity_ = newCapacity;
         return;
     }
-    Input *old_inputs = Inputs();
+    Input *oldInputs = Inputs();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto *new_inputs = reinterpret_cast<Input *>(new_stor + sizeof(User) * new_capacity) + 1;
+    auto *newInputs = reinterpret_cast<Input *>(newStor + sizeof(User) * newCapacity) + 1;
 
     for (size_t i = 0; i < size_; i++) {
-        Inst *old_input = old_inputs[i].GetInst();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        ASSERT(old_input);
+        Inst *oldInput = oldInputs[i].GetInst();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        ASSERT(oldInput);
         // Initialize new User in container. Since users are placed from end of array, i.e. zero index element
         // will be at the end of array, we need to add capacity and substitute index.
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        User *new_user = new (reinterpret_cast<User *>(new_stor) + new_capacity - i - 1) User(false, i, new_capacity);
-        auto old_user {GetUser(i)};
-        if (owner_inst->IsSaveState()) {
-            new_user->SetVirtualRegister(old_user->GetVirtualRegister());
-        } else if (owner_inst->IsPhi()) {
-            new_user->SetBbNum(old_user->GetBbNum());
+        User *newUser = new (reinterpret_cast<User *>(newStor) + newCapacity - i - 1) User(false, i, newCapacity);
+        auto oldUser {GetUser(i)};
+        if (ownerInst->IsSaveState()) {
+            newUser->SetVirtualRegister(oldUser->GetVirtualRegister());
+        } else if (ownerInst->IsPhi()) {
+            newUser->SetBbNum(oldUser->GetBbNum());
         }
-        old_input->RemoveUser(old_user);
-        old_input->AddUser(new_user);
-        new_inputs[i] = Input(old_input);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        oldInput->RemoveUser(oldUser);
+        oldInput->AddUser(newUser);
+        newInputs[i] = Input(oldInput);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-    capacity_ = new_capacity;
-    users_ = reinterpret_cast<User *>(new_stor);
+    capacity_ = newCapacity;
+    users_ = reinterpret_cast<User *>(newStor);
 }
 
 unsigned DynamicOperands::Append(Inst *inst)
@@ -128,128 +128,128 @@ unsigned DynamicOperands::Append(Inst *inst)
 void DynamicOperands::Remove(unsigned index)
 {
     size_--;
-    auto *curr_input = GetInput(index)->GetInst();
-    if (curr_input->GetBasicBlock() != nullptr && curr_input->HasUsers()) {
-        curr_input->RemoveUser(GetUser(index));
+    auto *currInput = GetInput(index)->GetInst();
+    if (currInput->GetBasicBlock() != nullptr && currInput->HasUsers()) {
+        currInput->RemoveUser(GetUser(index));
     }
 
-    auto bb_num {GetUser(index)->GetBbNum()};
-    auto owner_inst {GetOwnerInst()};
+    auto bbNum {GetUser(index)->GetBbNum()};
+    auto ownerInst {GetOwnerInst()};
 
     if (index != size_) {
-        auto *last_input = GetInput(size_)->GetInst();
-        if (last_input->HasUsers()) {
-            last_input->RemoveUser(GetUser(size_));
-            last_input->AddUser(GetUser(index));
+        auto *lastInput = GetInput(size_)->GetInst();
+        if (lastInput->HasUsers()) {
+            lastInput->RemoveUser(GetUser(size_));
+            lastInput->AddUser(GetUser(index));
         }
         SetInput(index, *GetInput(size_));
-        if (owner_inst->IsSaveState()) {
+        if (ownerInst->IsSaveState()) {
             GetUser(index)->SetVirtualRegister(GetUser(size_)->GetVirtualRegister());
-        } else if (owner_inst->IsPhi()) {
+        } else if (ownerInst->IsPhi()) {
             GetUser(index)->SetBbNum(GetUser(size_)->GetBbNum());
         }
     }
 
-    if (owner_inst->IsPhi()) {
+    if (ownerInst->IsPhi()) {
         for (size_t i {0}; i < size_; ++i) {
             if (GetUser(i)->GetBbNum() == size_) {
-                GetUser(i)->SetBbNum(bb_num);
+                GetUser(i)->SetBbNum(bbNum);
                 break;
             }
         }
     }
 }
 
-void GetAnyTypeNameInst::SetVnObject(VnObject *vn_obj)
+void GetAnyTypeNameInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint32_t>(GetAnyType()));
+    vnObj->Add(static_cast<uint32_t>(GetAnyType()));
 }
 
-void CompareAnyTypeInst::SetVnObject(VnObject *vn_obj)
+void CompareAnyTypeInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint32_t>(GetAnyType()));
+    vnObj->Add(static_cast<uint32_t>(GetAnyType()));
 }
 
-void BinaryImmOperation::SetVnObject(VnObject *vn_obj)
+void BinaryImmOperation::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(GetImm());
+    vnObj->Add(GetImm());
 }
 
-void BinaryShiftedRegisterOperation::SetVnObject(VnObject *vn_obj)
+void BinaryShiftedRegisterOperation::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(GetImm());
-    vn_obj->Add(static_cast<uint32_t>(GetShiftType()));
+    vnObj->Add(GetImm());
+    vnObj->Add(static_cast<uint32_t>(GetShiftType()));
 }
 
-void UnaryShiftedRegisterOperation::SetVnObject(VnObject *vn_obj)
+void UnaryShiftedRegisterOperation::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(GetImm());
-    vn_obj->Add(static_cast<uint32_t>(GetShiftType()));
+    vnObj->Add(GetImm());
+    vnObj->Add(static_cast<uint32_t>(GetShiftType()));
 }
 
-void CompareInst::SetVnObject(VnObject *vn_obj)
+void CompareInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint32_t>(GetCc()));
+    vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void SelectInst::SetVnObject(VnObject *vn_obj)
+void SelectInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint32_t>(GetCc()));
+    vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void IfInst::SetVnObject(VnObject *vn_obj)
+void IfInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint32_t>(GetCc()));
+    vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void IfImmInst::SetVnObject(VnObject *vn_obj)
+void IfImmInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint32_t>(GetCc()));
+    vnObj->Add(static_cast<uint32_t>(GetCc()));
 }
 
-void UnaryOperation::SetVnObject(VnObject *vn_obj)
+void UnaryOperation::SetVnObject(VnObject *vnObj)
 {
     if (GetOpcode() == Opcode::Cast) {
-        vn_obj->Add(static_cast<uint32_t>(GetInput(0).GetInst()->GetType()));
+        vnObj->Add(static_cast<uint32_t>(GetInput(0).GetInst()->GetType()));
     }
 }
 
-void CmpInst::SetVnObject(VnObject *vn_obj)
+void CmpInst::SetVnObject(VnObject *vnObj)
 {
     if (DataType::IsFloatType(GetOperandsType())) {
-        vn_obj->Add(static_cast<uint32_t>(IsFcmpg()));
+        vnObj->Add(static_cast<uint32_t>(IsFcmpg()));
     }
-    vn_obj->Add(static_cast<uint32_t>(GetInputType(0)));
+    vnObj->Add(static_cast<uint32_t>(GetInputType(0)));
 }
 
-void LoadFromPoolDynamic::SetVnObject(VnObject *vn_obj)
+void LoadFromPoolDynamic::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(GetTypeId());
+    vnObj->Add(GetTypeId());
 }
 
-void CastInst::SetVnObject(VnObject *vn_obj)
+void CastInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint32_t>(GetInputType(0)));
+    vnObj->Add(static_cast<uint32_t>(GetInputType(0)));
 }
 
-void LoadImmediateInst::SetVnObject(VnObject *vn_obj)
+void LoadImmediateInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(reinterpret_cast<uint64_t>(GetObject()));
+    vnObj->Add(reinterpret_cast<uint64_t>(GetObject()));
 }
 
-void RuntimeClassInst::SetVnObject(VnObject *vn_obj)
+void RuntimeClassInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(reinterpret_cast<uint64_t>(GetClass()));
+    vnObj->Add(reinterpret_cast<uint64_t>(GetClass()));
 }
 
-void LoadObjFromConstInst::SetVnObject(VnObject *vn_obj)
+void LoadObjFromConstInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint64_t>(GetObjPtr()));
+    vnObj->Add(static_cast<uint64_t>(GetObjPtr()));
 }
 
-void FunctionImmediateInst::SetVnObject(VnObject *vn_obj)
+void FunctionImmediateInst::SetVnObject(VnObject *vnObj)
 {
-    vn_obj->Add(static_cast<uint64_t>(GetFunctionPtr()));
+    vnObj->Add(static_cast<uint64_t>(GetFunctionPtr()));
 }
 
 bool CastInst::IsDynamicCast() const
@@ -272,9 +272,9 @@ BasicBlock *PhiInst::GetPhiInputBb(unsigned index)
 {
     ASSERT(index < GetInputsCount());
 
-    auto bb_num {GetPhiInputBbNum(index)};
-    ASSERT(bb_num < GetBasicBlock()->GetPredsBlocks().size());
-    return GetBasicBlock()->GetPredsBlocks()[bb_num];
+    auto bbNum {GetPhiInputBbNum(index)};
+    ASSERT(bbNum < GetBasicBlock()->GetPredsBlocks().size());
+    return GetBasicBlock()->GetPredsBlocks()[bbNum];
 }
 
 Inst *PhiInst::GetPhiInput(BasicBlock *bb)
@@ -302,13 +302,13 @@ size_t PhiInst::GetPredBlockIndex(const BasicBlock *block) const
 }
 
 template <Opcode OPC, size_t INPUT_IDX>
-Inst *SkipInstructions(Inst *input_inst)
+Inst *SkipInstructions(Inst *inputInst)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (Opcode opcode = input_inst->GetOpcode(); opcode == OPC; opcode = input_inst->GetOpcode()) {
-        input_inst = input_inst->GetInput(INPUT_IDX).GetInst();
+    for (Opcode opcode = inputInst->GetOpcode(); opcode == OPC; opcode = inputInst->GetOpcode()) {
+        inputInst = inputInst->GetInput(INPUT_IDX).GetInst();
     }
-    return input_inst;
+    return inputInst;
 }
 /*
  * For instructions LoadArray, StoreArray, LoadArrayPair, StoreArrayPair, LoadArrayI, StoreArrayI, LoadArrayPairI,
@@ -318,45 +318,45 @@ Inst *SkipInstructions(Inst *input_inst)
  * array index, which is the second input of BoundsCheck instruction
  * For instructions Div and Mod with ZeroCheck input the dataflow user is the first input of ZeroCheck
  */
-Inst *Inst::GetDataFlowInput(Inst *input_inst)
+Inst *Inst::GetDataFlowInput(Inst *inputInst)
 {
-    auto opcode = input_inst->GetOpcode();
+    auto opcode = inputInst->GetOpcode();
     if (opcode == Opcode::NullCheck) {
-        return SkipInstructions<Opcode::NullCheck, 0>(input_inst);
+        return SkipInstructions<Opcode::NullCheck, 0>(inputInst);
     }
     if (opcode == Opcode::BoundsCheck) {
-        return SkipInstructions<Opcode::BoundsCheck, 1>(input_inst);
+        return SkipInstructions<Opcode::BoundsCheck, 1>(inputInst);
     }
     if (opcode == Opcode::BoundsCheckI) {
-        return SkipInstructions<Opcode::BoundsCheckI, 0>(input_inst);
+        return SkipInstructions<Opcode::BoundsCheckI, 0>(inputInst);
     }
     if (opcode == Opcode::ZeroCheck) {
-        return SkipInstructions<Opcode::ZeroCheck, 0>(input_inst);
+        return SkipInstructions<Opcode::ZeroCheck, 0>(inputInst);
     }
     if (opcode == Opcode::NegativeCheck) {
-        return SkipInstructions<Opcode::NegativeCheck, 0>(input_inst);
+        return SkipInstructions<Opcode::NegativeCheck, 0>(inputInst);
     }
     if (opcode == Opcode::NotPositiveCheck) {
-        return SkipInstructions<Opcode::NotPositiveCheck, 0>(input_inst);
+        return SkipInstructions<Opcode::NotPositiveCheck, 0>(inputInst);
     }
     if (opcode == Opcode::AnyTypeCheck) {
-        return SkipInstructions<Opcode::AnyTypeCheck, 0>(input_inst);
+        return SkipInstructions<Opcode::AnyTypeCheck, 0>(inputInst);
     }
     if (opcode == Opcode::ObjByIndexCheck) {
-        return SkipInstructions<Opcode::ObjByIndexCheck, 0>(input_inst);
+        return SkipInstructions<Opcode::ObjByIndexCheck, 0>(inputInst);
     }
     if (opcode == Opcode::HclassCheck) {
-        input_inst = SkipInstructions<Opcode::HclassCheck, 0>(input_inst);
-        return SkipInstructions<Opcode::LoadObject, 0>(input_inst);
+        inputInst = SkipInstructions<Opcode::HclassCheck, 0>(inputInst);
+        return SkipInstructions<Opcode::LoadObject, 0>(inputInst);
     }
     if (opcode == Opcode::RefTypeCheck) {
-        input_inst = SkipInstructions<Opcode::RefTypeCheck, 1>(input_inst);
-        if (input_inst->GetOpcode() == Opcode::NullCheck) {
-            return SkipInstructions<Opcode::NullCheck, 0>(input_inst);
+        inputInst = SkipInstructions<Opcode::RefTypeCheck, 1>(inputInst);
+        if (inputInst->GetOpcode() == Opcode::NullCheck) {
+            return SkipInstructions<Opcode::NullCheck, 0>(inputInst);
         }
-        return input_inst;
+        return inputInst;
     }
-    return input_inst;
+    return inputInst;
 }
 
 bool Inst::IsPrecedingInSameBlock(const Inst *other) const
@@ -381,9 +381,9 @@ bool Inst::IsDominate(const Inst *other) const
     if (this == other) {
         return true;
     }
-    auto this_bb = GetBasicBlock();
-    auto other_bb = other->GetBasicBlock();
-    return this_bb == other_bb ? IsPrecedingInSameBlock(other) : this_bb->IsDominate(other_bb);
+    auto thisBb = GetBasicBlock();
+    auto otherBb = other->GetBasicBlock();
+    return thisBb == otherBb ? IsPrecedingInSameBlock(other) : thisBb->IsDominate(otherBb);
 }
 
 bool Inst::InSameBlockOrDominate(const Inst *other) const
@@ -391,11 +391,11 @@ bool Inst::InSameBlockOrDominate(const Inst *other) const
     return GetBasicBlock() == other->GetBasicBlock() || IsDominate(other);
 }
 
-Inst *Inst::Clone(const Graph *target_graph) const
+Inst *Inst::Clone(const Graph *targetGraph) const
 {
-    ASSERT(target_graph != nullptr);
-    auto clone = target_graph->CreateInst(GetOpcode());
-    clone->bit_fields_ = GetAllFields();
+    ASSERT(targetGraph != nullptr);
+    auto clone = targetGraph->CreateInst(GetOpcode());
+    clone->bitFields_ = GetAllFields();
     clone->pc_ = GetPc();
 #ifndef NDEBUG
     clone->SetDstReg(GetDstReg());
@@ -410,9 +410,9 @@ Inst *Inst::Clone(const Graph *target_graph) const
 }
 
 template <size_t N>
-Inst *FixedInputsInst<N>::Clone(const Graph *target_graph) const
+Inst *FixedInputsInst<N>::Clone(const Graph *targetGraph) const
 {
-    auto clone = static_cast<FixedInputsInst *>(Inst::Clone(target_graph));
+    auto clone = static_cast<FixedInputsInst *>(Inst::Clone(targetGraph));
 #ifndef NDEBUG
     for (size_t i = 0; i < INPUT_COUNT; ++i) {
         clone->SetSrcReg(i, GetSrcReg(i));
@@ -429,115 +429,115 @@ template class FixedInputsInst<3U>;
 template class FixedInputsInst<4U>;
 #endif
 
-Inst *CallInst::Clone(const Graph *target_graph) const
+Inst *CallInst::Clone(const Graph *targetGraph) const
 {
-    ASSERT(target_graph != nullptr);
-    auto inst_clone = Inst::Clone(target_graph);
-    auto call_clone = static_cast<CallInst *>(inst_clone);
-    call_clone->SetCallMethodId(GetCallMethodId());
-    call_clone->SetCallMethod(GetCallMethod());
-    call_clone->SetCanNativeException(GetCanNativeException());
-    CloneTypes(target_graph->GetAllocator(), call_clone);
-    return inst_clone;
+    ASSERT(targetGraph != nullptr);
+    auto instClone = Inst::Clone(targetGraph);
+    auto callClone = static_cast<CallInst *>(instClone);
+    callClone->SetCallMethodId(GetCallMethodId());
+    callClone->SetCallMethod(GetCallMethod());
+    callClone->SetCanNativeException(GetCanNativeException());
+    CloneTypes(targetGraph->GetAllocator(), callClone);
+    return instClone;
 }
 
-Inst *CallIndirectInst::Clone(const Graph *target_graph) const
+Inst *CallIndirectInst::Clone(const Graph *targetGraph) const
 {
-    auto clone = Inst::Clone(target_graph)->CastToCallIndirect();
-    CloneTypes(target_graph->GetAllocator(), clone);
+    auto clone = Inst::Clone(targetGraph)->CastToCallIndirect();
+    CloneTypes(targetGraph->GetAllocator(), clone);
     return clone;
 }
 
-Inst *IntrinsicInst::Clone(const Graph *target_graph) const
+Inst *IntrinsicInst::Clone(const Graph *targetGraph) const
 {
-    ASSERT(target_graph != nullptr);
-    auto intrinsic_clone = (GetOpcode() == Opcode::Intrinsic ? Inst::Clone(target_graph)->CastToIntrinsic()
-                                                             : Inst::Clone(target_graph)->CastToBuiltin());
-    intrinsic_clone->SetIntrinsicId(GetIntrinsicId());
-    CloneTypes(target_graph->GetAllocator(), intrinsic_clone);
+    ASSERT(targetGraph != nullptr);
+    auto intrinsicClone = (GetOpcode() == Opcode::Intrinsic ? Inst::Clone(targetGraph)->CastToIntrinsic()
+                                                            : Inst::Clone(targetGraph)->CastToBuiltin());
+    intrinsicClone->SetIntrinsicId(GetIntrinsicId());
+    CloneTypes(targetGraph->GetAllocator(), intrinsicClone);
     if (HasImms()) {
         for (auto imm : GetImms()) {
-            intrinsic_clone->AddImm(target_graph->GetAllocator(), imm);
+            intrinsicClone->AddImm(targetGraph->GetAllocator(), imm);
         }
     }
-    intrinsic_clone->SetMethod(GetMethod());
-    return intrinsic_clone;
+    intrinsicClone->SetMethod(GetMethod());
+    return intrinsicClone;
 }
 
-Inst *ConstantInst::Clone(const Graph *target_graph) const
+Inst *ConstantInst::Clone(const Graph *targetGraph) const
 {
-    Inst *new_cnst = nullptr;
-    bool is_support_int32 = GetBasicBlock()->GetGraph()->IsBytecodeOptimizer();
+    Inst *newCnst = nullptr;
+    bool isSupportInt32 = GetBasicBlock()->GetGraph()->IsBytecodeOptimizer();
     switch (GetType()) {
         case DataType::INT32:
-            new_cnst = target_graph->CreateInstConstant(static_cast<int32_t>(GetIntValue()), is_support_int32);
+            newCnst = targetGraph->CreateInstConstant(static_cast<int32_t>(GetIntValue()), isSupportInt32);
             break;
         case DataType::INT64:
-            new_cnst = target_graph->CreateInstConstant(GetIntValue(), is_support_int32);
+            newCnst = targetGraph->CreateInstConstant(GetIntValue(), isSupportInt32);
             break;
         case DataType::FLOAT32:
-            new_cnst = target_graph->CreateInstConstant(GetFloatValue(), is_support_int32);
+            newCnst = targetGraph->CreateInstConstant(GetFloatValue(), isSupportInt32);
             break;
         case DataType::FLOAT64:
-            new_cnst = target_graph->CreateInstConstant(GetDoubleValue(), is_support_int32);
+            newCnst = targetGraph->CreateInstConstant(GetDoubleValue(), isSupportInt32);
             break;
         case DataType::ANY:
-            new_cnst = target_graph->CreateInstConstant(GetRawValue(), is_support_int32);
-            new_cnst->SetType(DataType::ANY);
+            newCnst = targetGraph->CreateInstConstant(GetRawValue(), isSupportInt32);
+            newCnst->SetType(DataType::ANY);
             break;
         default:
             UNREACHABLE();
     }
 #ifndef NDEBUG
-    new_cnst->SetDstReg(GetDstReg());
+    newCnst->SetDstReg(GetDstReg());
 #endif
-    return new_cnst;
+    return newCnst;
 }
 
-Inst *ParameterInst::Clone(const Graph *target_graph) const
+Inst *ParameterInst::Clone(const Graph *targetGraph) const
 {
-    auto clone = Inst::Clone(target_graph)->CastToParameter();
+    auto clone = Inst::Clone(targetGraph)->CastToParameter();
     clone->SetArgNumber(GetArgNumber());
     clone->SetLocationData(GetLocationData());
     return clone;
 }
 
-Inst *SaveStateInst::Clone(const Graph *target_graph) const
+Inst *SaveStateInst::Clone(const Graph *targetGraph) const
 {
-    auto clone = static_cast<SaveStateInst *>(Inst::Clone(target_graph));
+    auto clone = static_cast<SaveStateInst *>(Inst::Clone(targetGraph));
     if (GetImmediatesCount() > 0) {
-        clone->AllocateImmediates(target_graph->GetAllocator(), GetImmediatesCount());
+        clone->AllocateImmediates(targetGraph->GetAllocator(), GetImmediatesCount());
         std::copy(immediates_->begin(), immediates_->end(), clone->immediates_->begin());
     }
     clone->method_ = method_;
-    clone->caller_inst_ = caller_inst_;
-    clone->inlining_depth_ = inlining_depth_;
+    clone->callerInst_ = callerInst_;
+    clone->inliningDepth_ = inliningDepth_;
     return clone;
 }
 
-Inst *BinaryShiftedRegisterOperation::Clone(const Graph *target_graph) const
+Inst *BinaryShiftedRegisterOperation::Clone(const Graph *targetGraph) const
 {
-    auto clone = static_cast<BinaryShiftedRegisterOperation *>(FixedInputsInst::Clone(target_graph));
+    auto clone = static_cast<BinaryShiftedRegisterOperation *>(FixedInputsInst::Clone(targetGraph));
     clone->SetImm(GetImm());
     clone->SetShiftType(GetShiftType());
     return clone;
 }
 
-Inst *UnaryShiftedRegisterOperation::Clone(const Graph *target_graph) const
+Inst *UnaryShiftedRegisterOperation::Clone(const Graph *targetGraph) const
 {
-    auto clone = static_cast<UnaryShiftedRegisterOperation *>(FixedInputsInst::Clone(target_graph));
+    auto clone = static_cast<UnaryShiftedRegisterOperation *>(FixedInputsInst::Clone(targetGraph));
     clone->SetImm(GetImm());
     clone->SetShiftType(GetShiftType());
     return clone;
 }
 
-void SaveStateInst::AppendImmediate(uint64_t imm, uint16_t vreg, DataType::Type type, VRegType vreg_type)
+void SaveStateInst::AppendImmediate(uint64_t imm, uint16_t vreg, DataType::Type type, VRegType vregType)
 {
     if (immediates_ == nullptr) {
         ASSERT(GetBasicBlock() != nullptr);
         AllocateImmediates(GetBasicBlock()->GetGraph()->GetAllocator(), 0);
     }
-    immediates_->emplace_back(SaveStateImm {imm, vreg, type, vreg_type});
+    immediates_->emplace_back(SaveStateImm {imm, vreg, type, vregType});
 }
 
 void SaveStateInst::AllocateImmediates(ArenaAllocator *allocator, size_t size)
@@ -546,58 +546,57 @@ void SaveStateInst::AllocateImmediates(ArenaAllocator *allocator, size_t size)
     immediates_->resize(size);
 }
 
-void TryInst::AppendCatchTypeId(uint32_t id, uint32_t catch_edge_index)
+void TryInst::AppendCatchTypeId(uint32_t id, uint32_t catchEdgeIndex)
 {
-    if (catch_type_ids_ == nullptr) {
-        ASSERT(catch_edge_indexes_ == nullptr);
+    if (catchTypeIds_ == nullptr) {
+        ASSERT(catchEdgeIndexes_ == nullptr);
         ASSERT(GetBasicBlock() != nullptr);
         auto allocator = GetBasicBlock()->GetGraph()->GetAllocator();
-        catch_type_ids_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
-        catch_edge_indexes_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
+        catchTypeIds_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
+        catchEdgeIndexes_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
     }
-    catch_type_ids_->push_back(id);
-    catch_edge_indexes_->push_back(catch_edge_index);
+    catchTypeIds_->push_back(id);
+    catchEdgeIndexes_->push_back(catchEdgeIndex);
 }
 
 void CatchPhiInst::AppendThrowableInst(const Inst *inst)
 {
-    if (throw_insts_ == nullptr) {
+    if (throwInsts_ == nullptr) {
         ASSERT(GetBasicBlock() != nullptr);
         auto allocator = GetBasicBlock()->GetGraph()->GetAllocator();
-        throw_insts_ = allocator->New<ArenaVector<const Inst *>>(allocator->Adapter());
+        throwInsts_ = allocator->New<ArenaVector<const Inst *>>(allocator->Adapter());
     }
-    throw_insts_->push_back(inst);
+    throwInsts_->push_back(inst);
 }
 
-void CatchPhiInst::ReplaceThrowableInst(const Inst *old_inst, const Inst *new_inst)
+void CatchPhiInst::ReplaceThrowableInst(const Inst *oldInst, const Inst *newInst)
 {
-    auto index = GetThrowableInstIndex(old_inst);
-    throw_insts_->at(index) = new_inst;
+    auto index = GetThrowableInstIndex(oldInst);
+    throwInsts_->at(index) = newInst;
 }
 
 void CatchPhiInst::RemoveInput(unsigned index)
 {
     Inst::RemoveInput(index);
-    if (throw_insts_ != nullptr) {
-        throw_insts_->at(index) = throw_insts_->back();
-        throw_insts_->pop_back();
+    if (throwInsts_ != nullptr) {
+        throwInsts_->at(index) = throwInsts_->back();
+        throwInsts_->pop_back();
     }
 }
 
-Inst *TryInst::Clone(const Graph *target_graph) const
+Inst *TryInst::Clone(const Graph *targetGraph) const
 {
-    auto clone = FixedInputsInst::Clone(target_graph)->CastToTry();
-    if (auto ids_count = this->GetCatchTypeIdsCount(); ids_count > 0) {
-        if (clone->catch_type_ids_ == nullptr) {
-            auto allocator = target_graph->GetAllocator();
-            clone->catch_type_ids_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
-            clone->catch_edge_indexes_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
+    auto clone = FixedInputsInst::Clone(targetGraph)->CastToTry();
+    if (auto idsCount = this->GetCatchTypeIdsCount(); idsCount > 0) {
+        if (clone->catchTypeIds_ == nullptr) {
+            auto allocator = targetGraph->GetAllocator();
+            clone->catchTypeIds_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
+            clone->catchEdgeIndexes_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
         }
-        clone->catch_type_ids_->resize(ids_count);
-        clone->catch_edge_indexes_->resize(ids_count);
-        std::copy(this->catch_type_ids_->begin(), this->catch_type_ids_->end(), clone->catch_type_ids_->begin());
-        std::copy(this->catch_edge_indexes_->begin(), this->catch_edge_indexes_->end(),
-                  clone->catch_edge_indexes_->begin());
+        clone->catchTypeIds_->resize(idsCount);
+        clone->catchEdgeIndexes_->resize(idsCount);
+        std::copy(this->catchTypeIds_->begin(), this->catchTypeIds_->end(), clone->catchTypeIds_->begin());
+        std::copy(this->catchEdgeIndexes_->begin(), this->catchEdgeIndexes_->end(), clone->catchEdgeIndexes_->begin());
     }
     return clone;
 }
@@ -633,7 +632,7 @@ bool Inst::IsPropagateLiveness() const
 bool Inst::RequireRegMap() const
 {
     if (GetOpcode() == Opcode::SafePoint) {
-        return OPTIONS.IsCompilerSafePointsRequireRegMap();
+        return g_options.IsCompilerSafePointsRequireRegMap();
     }
     return GetOpcode() == Opcode::SaveStateOsr || IsPropagateLiveness();
 }
@@ -672,12 +671,12 @@ bool Inst::IsReferenceOrAny() const
             default:
                 break;
         }
-        auto any_type = GetAnyType();
-        if (any_type == AnyBaseType::UNDEFINED_TYPE) {
+        auto anyType = GetAnyType();
+        if (anyType == AnyBaseType::UNDEFINED_TYPE) {
             return true;
         }
-        auto data_type = AnyBaseTypeToDataType(any_type);
-        return data_type == DataType::REFERENCE;
+        auto dataType = AnyBaseTypeToDataType(anyType);
+        return dataType == DataType::REFERENCE;
     }
     return GetType() == DataType::REFERENCE;
 }
@@ -715,10 +714,10 @@ bool Inst::IsMovableObject() const
     }
 }
 
-TryInst *GetTryBeginInst(const BasicBlock *try_begin_bb)
+TryInst *GetTryBeginInst(const BasicBlock *tryBeginBb)
 {
-    ASSERT(try_begin_bb != nullptr && try_begin_bb->IsTryBegin());
-    for (auto inst : try_begin_bb->AllInsts()) {
+    ASSERT(tryBeginBb != nullptr && tryBeginBb->IsTryBegin());
+    for (auto inst : tryBeginBb->AllInsts()) {
         if (inst->GetOpcode() == Opcode::Try) {
             return inst->CastToTry();
         }
@@ -735,26 +734,26 @@ bool IntrinsicInst::IsNativeCall() const
 {
     ASSERT(GetBasicBlock() != nullptr);
     ASSERT(GetBasicBlock()->GetGraph() != nullptr);
-    if (IsFastpathIntrinsic(intrinsic_id_)) {
+    if (IsFastpathIntrinsic(intrinsicId_)) {
         return false;
     }
 #ifdef PANDA_WITH_IRTOC
-    if (IsIrtocIntrinsic(intrinsic_id_)) {
-        return intrinsic_id_ == RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY;
+    if (IsIrtocIntrinsic(intrinsicId_)) {
+        return intrinsicId_ == RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY;
     }
 #endif
     auto graph = GetBasicBlock()->GetGraph();
     auto arch = graph->GetArch();
     auto runtime = graph->GetRuntime();
-    return !EncodesBuiltin(runtime, intrinsic_id_, arch) || IsRuntimeCall();
+    return !EncodesBuiltin(runtime, intrinsicId_, arch) || IsRuntimeCall();
 }
 
 DeoptimizeType AnyTypeCheckInst::GetDeoptimizeType() const
 {
     auto graph = GetBasicBlock()->GetGraph();
-    auto custom_deoptimize = graph->IsAotMode() || graph->GetRuntime()->GetMethodProfile(graph->GetMethod(), true) !=
-                                                       profiling::INVALID_PROFILE;
-    if (!custom_deoptimize) {
+    auto customDeoptimize = graph->IsAotMode() || graph->GetRuntime()->GetMethodProfile(graph->GetMethod(), true) !=
+                                                      profiling::INVALID_PROFILE;
+    if (!customDeoptimize) {
         return DeoptimizeType::ANY_TYPE_CHECK;
     }
     switch (AnyBaseTypeToDataType(GetAnyType())) {

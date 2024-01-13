@@ -37,13 +37,13 @@ public:
         EXPECT_EQ(result, excepct);
     }
 
-    void CheckVectorEqualBlocksIdSet(ArenaVector<BasicBlock *> blocks, std::vector<int> &&bb_ids)
+    void CheckVectorEqualBlocksIdSet(ArenaVector<BasicBlock *> blocks, std::vector<int> &&bbIds)
     {
-        std::set<BasicBlock *> bb_set;
-        for (auto id : bb_ids) {
-            bb_set.insert(&BB(id));
+        std::set<BasicBlock *> bbSet;
+        for (auto id : bbIds) {
+            bbSet.insert(&BB(id));
         }
-        CheckVectorEqualSet(std::move(blocks), std::move(bb_set));
+        CheckVectorEqualSet(std::move(blocks), std::move(bbSet));
     }
 
     void CheckPhiInputs(BasicBlock *block)
@@ -58,8 +58,8 @@ public:
     void CollectLoopsDFS(ArenaVector<Loop *> *loops, Loop *loop)
     {
         loops->push_back(loop);
-        for (auto inner_loop : loop->GetInnerLoops()) {
-            CollectLoopsDFS(loops, inner_loop);
+        for (auto innerLoop : loop->GetInnerLoops()) {
+            CollectLoopsDFS(loops, innerLoop);
         }
     }
 
@@ -182,7 +182,7 @@ TEST_F(LoopAnalyzerTest, LoopAnalyzer)
     auto loop1 = BB(4U).GetLoop();
     auto loop2 = BB(8U).GetLoop();
     auto loop3 = BB(3U).GetLoop();
-    auto root_loop = GetGraph()->GetRootLoop();
+    auto rootLoop = GetGraph()->GetRootLoop();
 
     ASSERT_NE(loop1, nullptr);
     ASSERT_NE(loop2, nullptr);
@@ -209,12 +209,12 @@ TEST_F(LoopAnalyzerTest, LoopAnalyzer)
     CheckVectorEqualBlocksIdSet(loop3->GetBackEdges(), {14U, 17U, 19U});
     CheckVectorEqualBlocksIdSet(loop3->GetBlocks(), {3U, 7U, 12U, 13U, 14U, 15U, 16U, 17U, 18U, 19U});
     CheckVectorEqualSet(loop3->GetInnerLoops(), {loop1, loop2});
-    EXPECT_EQ(loop3->GetOuterLoop(), root_loop);
+    EXPECT_EQ(loop3->GetOuterLoop(), rootLoop);
     EXPECT_EQ(loop3->IsIrreducible(), false);
 
-    EXPECT_EQ(BB(2U).GetLoop(), root_loop);
-    EXPECT_EQ(BB(20U).GetLoop(), root_loop);
-    CheckVectorEqualSet(root_loop->GetInnerLoops(), {loop3});
+    EXPECT_EQ(BB(2U).GetLoop(), rootLoop);
+    EXPECT_EQ(BB(20U).GetLoop(), rootLoop);
+    CheckVectorEqualSet(rootLoop->GetInnerLoops(), {loop3});
 }
 
 /*
@@ -312,15 +312,15 @@ TEST_F(LoopAnalyzerTest, PreheaderInsert)
     EXPECT_EQ(loop->GetHeader(), &BB(6U));
     CheckVectorEqualBlocksIdSet(loop->GetBackEdges(), {8U});
 
-    auto pre_header = loop->GetPreHeader();
-    ASSERT_EQ(pre_header->GetLoop(), loop->GetOuterLoop());
-    CheckVectorEqualBlocksIdSet(pre_header->GetPredsBlocks(), {4U, 5U});
-    CheckVectorEqualBlocksIdSet(pre_header->GetSuccsBlocks(), {6U});
-    EXPECT_EQ(loop->GetHeader()->GetDominator(), pre_header);
-    CheckVectorEqualBlocksIdSet(pre_header->GetDominatedBlocks(), {6U});
+    auto preHeader = loop->GetPreHeader();
+    ASSERT_EQ(preHeader->GetLoop(), loop->GetOuterLoop());
+    CheckVectorEqualBlocksIdSet(preHeader->GetPredsBlocks(), {4U, 5U});
+    CheckVectorEqualBlocksIdSet(preHeader->GetSuccsBlocks(), {6U});
+    EXPECT_EQ(loop->GetHeader()->GetDominator(), preHeader);
+    CheckVectorEqualBlocksIdSet(preHeader->GetDominatedBlocks(), {6U});
 
     CheckPhiInputs(&BB(6U));
-    CheckPhiInputs(pre_header);
+    CheckPhiInputs(preHeader);
 }
 
 /*
@@ -429,8 +429,8 @@ TEST_F(LoopAnalyzerTest, CountableLoopTest)
         }
     }
     auto loop = BB(3U).GetLoop();
-    auto loop_parser = CountableLoopParser(*loop);
-    ASSERT_EQ(loop_parser.Parse(), std::nullopt);
+    auto loopParser = CountableLoopParser(*loop);
+    ASSERT_EQ(loopParser.Parse(), std::nullopt);
 }
 
 TEST_F(LoopAnalyzerTest, CountableLoopTestNegativeStep)
@@ -464,18 +464,18 @@ TEST_F(LoopAnalyzerTest, CountableLoopTestNegativeStep)
         }
     }
     auto loop = BB(3U).GetLoop();
-    auto loop_parser = CountableLoopParser(*loop);
-    auto loop_info = loop_parser.Parse();
-    ASSERT_NE(loop_info, std::nullopt);
-    auto loop_info_value = loop_info.value();
-    ASSERT_EQ(loop_info_value.if_imm, &INS(14U));
-    ASSERT_EQ(loop_info_value.init, &INS(16U));
-    ASSERT_EQ(loop_info_value.test, &INS(0U));
-    ASSERT_EQ(loop_info_value.update, &INS(10U));
-    ASSERT_EQ(loop_info_value.index, &INS(4U));
-    ASSERT_EQ(loop_info_value.const_step, 1U);
-    ASSERT_EQ(loop_info_value.normalized_cc, ConditionCode::CC_GT);
-    ASSERT_FALSE(loop_info_value.is_inc);
+    auto loopParser = CountableLoopParser(*loop);
+    auto loopInfo = loopParser.Parse();
+    ASSERT_NE(loopInfo, std::nullopt);
+    auto loopInfoValue = loopInfo.value();
+    ASSERT_EQ(loopInfoValue.ifImm, &INS(14U));
+    ASSERT_EQ(loopInfoValue.init, &INS(16U));
+    ASSERT_EQ(loopInfoValue.test, &INS(0U));
+    ASSERT_EQ(loopInfoValue.update, &INS(10U));
+    ASSERT_EQ(loopInfoValue.index, &INS(4U));
+    ASSERT_EQ(loopInfoValue.constStep, 1U);
+    ASSERT_EQ(loopInfoValue.normalizedCc, ConditionCode::CC_GT);
+    ASSERT_FALSE(loopInfoValue.isInc);
 }
 
 TEST_F(LoopAnalyzerTest, CountableLoopTestIndexInInnerLoop)
@@ -509,8 +509,8 @@ TEST_F(LoopAnalyzerTest, CountableLoopTestIndexInInnerLoop)
         }
     }
     auto loop = BB(3U).GetLoop();
-    auto loop_parser = CountableLoopParser(*loop);
-    ASSERT_EQ(loop_parser.Parse(), std::nullopt);
+    auto loopParser = CountableLoopParser(*loop);
+    ASSERT_EQ(loopParser.Parse(), std::nullopt);
 }
 
 TEST_F(LoopAnalyzerTest, CountableLoopTest1)
@@ -541,8 +541,8 @@ TEST_F(LoopAnalyzerTest, CountableLoopTest1)
         }
     }
     auto loop = BB(2U).GetLoop();
-    auto loop_parser = CountableLoopParser(*loop);
-    ASSERT_EQ(loop_parser.Parse(), std::nullopt);
+    auto loopParser = CountableLoopParser(*loop);
+    ASSERT_EQ(loopParser.Parse(), std::nullopt);
 }
 
 TEST_F(LoopAnalyzerTest, CountableLoopTest2)
@@ -571,18 +571,18 @@ TEST_F(LoopAnalyzerTest, CountableLoopTest2)
         }
     }
     auto loop = BB(2U).GetLoop();
-    auto loop_parser = CountableLoopParser(*loop);
-    auto loop_info = loop_parser.Parse();
-    ASSERT_NE(loop_info, std::nullopt);
-    auto loop_info_value = loop_info.value();
-    ASSERT_EQ(loop_info_value.if_imm, &INS(4U));
-    ASSERT_EQ(loop_info_value.init, &INS(0U));
-    ASSERT_EQ(loop_info_value.test, &INS(10U));
-    ASSERT_EQ(loop_info_value.update, &INS(7U));
-    ASSERT_EQ(loop_info_value.index, &INS(2U));
-    ASSERT_EQ(loop_info_value.const_step, 1U);
-    ASSERT_EQ(loop_info_value.normalized_cc, ConditionCode::CC_LT);
-    ASSERT_TRUE(loop_info_value.is_inc);
+    auto loopParser = CountableLoopParser(*loop);
+    auto loopInfo = loopParser.Parse();
+    ASSERT_NE(loopInfo, std::nullopt);
+    auto loopInfoValue = loopInfo.value();
+    ASSERT_EQ(loopInfoValue.ifImm, &INS(4U));
+    ASSERT_EQ(loopInfoValue.init, &INS(0U));
+    ASSERT_EQ(loopInfoValue.test, &INS(10U));
+    ASSERT_EQ(loopInfoValue.update, &INS(7U));
+    ASSERT_EQ(loopInfoValue.index, &INS(2U));
+    ASSERT_EQ(loopInfoValue.constStep, 1U);
+    ASSERT_EQ(loopInfoValue.normalizedCc, ConditionCode::CC_LT);
+    ASSERT_TRUE(loopInfoValue.isInc);
 }
 /**
  * Check infinite loop
@@ -762,21 +762,21 @@ TEST_F(LoopAnalyzerTest, LoopDepth)
     }
 
     static constexpr unsigned MAX_DEPTH = 3;
-    ArenaVector<Loop *> all_loops(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaVector<Loop *> allLoops(GetGraph()->GetLocalAllocator()->Adapter());
     // Count loops number of each depth
-    ArenaVector<unsigned> loops_depth_counters(MAX_DEPTH + 1U, 0U, GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaVector<unsigned> loopsDepthCounters(MAX_DEPTH + 1U, 0U, GetGraph()->GetLocalAllocator()->Adapter());
 
-    CollectLoopsDFS(&all_loops, GetGraph()->GetRootLoop());
-    for (auto loop : all_loops) {
+    CollectLoopsDFS(&allLoops, GetGraph()->GetRootLoop());
+    for (auto loop : allLoops) {
         EXPECT_LE(loop->GetDepth(), MAX_DEPTH);
-        loops_depth_counters[loop->GetDepth()]++;
+        loopsDepthCounters[loop->GetDepth()]++;
     }
     // Root loop should be zero-depth
     EXPECT_EQ(GetGraph()->GetRootLoop()->GetDepth(), 0U);
-    EXPECT_EQ(loops_depth_counters[0U], 1U);
-    EXPECT_EQ(loops_depth_counters[1U], 2U);
-    EXPECT_EQ(loops_depth_counters[2U], 1U);
-    EXPECT_EQ(loops_depth_counters[3U], 3U);
+    EXPECT_EQ(loopsDepthCounters[0U], 1U);
+    EXPECT_EQ(loopsDepthCounters[1U], 2U);
+    EXPECT_EQ(loopsDepthCounters[2U], 1U);
+    EXPECT_EQ(loopsDepthCounters[3U], 3U);
 }
 // NOLINTEND(readability-magic-numbers)
 

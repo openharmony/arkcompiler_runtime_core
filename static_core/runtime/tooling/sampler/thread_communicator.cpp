@@ -20,37 +20,37 @@ namespace panda::tooling::sampler {
 
 bool ThreadCommunicator::IsPipeEmpty() const
 {
-    ASSERT(listener_pipe_[PIPE_READ_ID] != 0 && listener_pipe_[PIPE_WRITE_ID] != 0);
+    ASSERT(listenerPipe_[PIPE_READ_ID] != 0 && listenerPipe_[PIPE_WRITE_ID] != 0);
 
-    struct pollfd poll_fd = {listener_pipe_[PIPE_READ_ID], POLLIN, 0};
-    return poll(&poll_fd, 1, 0) == 0;
+    struct pollfd pollFd = {listenerPipe_[PIPE_READ_ID], POLLIN, 0};
+    return poll(&pollFd, 1, 0) == 0;
 }
 
 bool ThreadCommunicator::SendSample(const SampleInfo &sample) const
 {
-    ASSERT(listener_pipe_[PIPE_READ_ID] != 0 && listener_pipe_[PIPE_WRITE_ID] != 0);
+    ASSERT(listenerPipe_[PIPE_READ_ID] != 0 && listenerPipe_[PIPE_WRITE_ID] != 0);
 
     const void *buffer = reinterpret_cast<const void *>(&sample);
-    ssize_t syscall_result = write(listener_pipe_[PIPE_WRITE_ID], buffer, sizeof(SampleInfo));
-    if (syscall_result == -1) {
+    ssize_t syscallResult = write(listenerPipe_[PIPE_WRITE_ID], buffer, sizeof(SampleInfo));
+    if (syscallResult == -1) {
         return false;
     }
-    ASSERT(syscall_result == sizeof(SampleInfo));
+    ASSERT(syscallResult == sizeof(SampleInfo));
     return true;
 }
 
 bool ThreadCommunicator::ReadSample(SampleInfo *sample) const
 {
-    ASSERT(listener_pipe_[PIPE_READ_ID] != 0 && listener_pipe_[PIPE_WRITE_ID] != 0);
+    ASSERT(listenerPipe_[PIPE_READ_ID] != 0 && listenerPipe_[PIPE_WRITE_ID] != 0);
 
     void *buffer = reinterpret_cast<void *>(sample);
 
     // NOTE(m.strizhak): optimize by reading several samples by one call
-    ssize_t syscall_result = read(listener_pipe_[PIPE_READ_ID], buffer, sizeof(SampleInfo));
-    if (syscall_result == -1) {
+    ssize_t syscallResult = read(listenerPipe_[PIPE_READ_ID], buffer, sizeof(SampleInfo));
+    if (syscallResult == -1) {
         return false;
     }
-    ASSERT(syscall_result == sizeof(SampleInfo));
+    ASSERT(syscallResult == sizeof(SampleInfo));
     return true;
 }
 

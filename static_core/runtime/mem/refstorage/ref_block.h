@@ -34,10 +34,10 @@ class RefBlock {
     using SlotBitMap = uint64_t;
 
     class Iterator {
-        RefBlock *ref_block_;
+        RefBlock *refBlock_;
 
     public:
-        explicit Iterator(RefBlock *ref_block) : ref_block_(ref_block) {}
+        explicit Iterator(RefBlock *refBlock) : refBlock_(refBlock) {}
 
         ~Iterator() = default;
 
@@ -46,12 +46,12 @@ class RefBlock {
 
         RefBlock *operator*() const
         {
-            return ref_block_;
+            return refBlock_;
         }
 
         Iterator &operator++()
         {
-            ref_block_ = ref_block_->GetPrev();
+            refBlock_ = refBlock_->GetPrev();
             return *this;
         }
 
@@ -64,12 +64,12 @@ class RefBlock {
 
         friend bool operator==(const Iterator &a, const Iterator &b)
         {
-            return a.ref_block_ == b.ref_block_;
+            return a.refBlock_ == b.refBlock_;
         }
 
         friend bool operator!=(const Iterator &a, const Iterator &b)
         {
-            return a.ref_block_ != b.ref_block_;
+            return a.refBlock_ != b.refBlock_;
         }
     };
 
@@ -84,7 +84,7 @@ class RefBlock {
     // slots in the array. slot is free - bit=1, slot is busy - bit=0
     SlotBitMap slots_ {START_VALUE};
 
-    RefBlock *prev_block_ {nullptr};
+    RefBlock *prevBlock_ {nullptr};
 
 public:
     explicit RefBlock(RefBlock *prev);
@@ -114,10 +114,10 @@ public:
 
     RefBlock *GetPrev() const
     {
-        return prev_block_;
+        return prevBlock_;
     }
 
-    void VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType root_type);
+    void VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType);
 
     void UpdateMovedRefs();
 

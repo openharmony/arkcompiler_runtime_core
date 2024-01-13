@@ -47,7 +47,7 @@ inline void DestroyProfile([[maybe_unused]] ProfileContainer profile,
 
 inline ProfileType FindMethodInProfile([[maybe_unused]] ProfileContainer profile,
                                        [[maybe_unused]] panda::panda_file::SourceLang lang,
-                                       [[maybe_unused]] const std::string &method_name)
+                                       [[maybe_unused]] const std::string &methodName)
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {

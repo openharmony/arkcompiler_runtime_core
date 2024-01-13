@@ -36,8 +36,8 @@ class InternalAllocatorTest;
 class MmapPool {
 public:
     using FreePoolsIter = std::multimap<size_t, MmapPool *>::iterator;
-    explicit MmapPool(Pool pool, FreePoolsIter free_pools_iter, bool returned_to_os = true)
-        : pool_(pool), returned_to_os_(returned_to_os), free_pools_iter_(free_pools_iter)
+    explicit MmapPool(Pool pool, FreePoolsIter freePoolsIter, bool returnedToOs = true)
+        : pool_(pool), returnedToOs_(returnedToOs), freePoolsIter_(freePoolsIter)
     {
     }
 
@@ -53,12 +53,12 @@ public:
 
     bool IsReturnedToOS() const
     {
-        return returned_to_os_;
+        return returnedToOs_;
     }
 
     void SetReturnedToOS(bool value)
     {
-        returned_to_os_ = value;
+        returnedToOs_ = value;
     }
 
     void SetSize(size_t size)
@@ -73,26 +73,26 @@ public:
 
     // A free pool will be store in the free_pools_, and it's iterator will be recorded in the free_pools_iter_.
     // If the free_pools_iter_ is equal to the end of free_pools_, the pool is used.
-    bool IsUsed(FreePoolsIter end_iter)
+    bool IsUsed(FreePoolsIter endIter)
     {
-        return free_pools_iter_ == end_iter;
+        return freePoolsIter_ == endIter;
     }
 
     FreePoolsIter GetFreePoolsIter()
     {
-        return free_pools_iter_;
+        return freePoolsIter_;
     }
 
-    void SetFreePoolsIter(FreePoolsIter free_pools_iter)
+    void SetFreePoolsIter(FreePoolsIter freePoolsIter)
     {
-        free_pools_iter_ = free_pools_iter;
+        freePoolsIter_ = freePoolsIter;
     }
 
 private:
     Pool pool_;
-    bool returned_to_os_;
+    bool returnedToOs_;
     // record the iterator of the pool in the multimap
-    FreePoolsIter free_pools_iter_;
+    FreePoolsIter freePoolsIter_;
 };
 
 class MmapPoolMap {
@@ -101,7 +101,7 @@ public:
 
     ~MmapPoolMap()
     {
-        for (auto &pool : pool_map_) {
+        for (auto &pool : poolMap_) {
             delete pool.second;
         }
     }
@@ -137,11 +137,11 @@ public:
      * @param pool_size the size of the pool we need
      * @return true if we can make sure that we have enough space in free pools to alloc pools we need
      */
-    bool HaveEnoughFreePools(size_t pools_num, size_t pool_size) const;
+    bool HaveEnoughFreePools(size_t poolsNum, size_t poolSize) const;
 
 private:
-    std::map<void *, MmapPool *> pool_map_;
-    std::multimap<size_t, MmapPool *> free_pools_;
+    std::map<void *, MmapPool *> poolMap_;
+    std::multimap<size_t, MmapPool *> freePools_;
 };
 
 class MmapMemPool : public MemPool<MmapMemPool> {
@@ -157,7 +157,7 @@ public:
      */
     uintptr_t GetMinObjectAddress() const
     {
-        return min_object_memory_addr_;
+        return minObjectMemoryAddr_;
     }
 
     /**
@@ -166,12 +166,12 @@ public:
      */
     uintptr_t GetMaxObjectAddress() const
     {
-        return min_object_memory_addr_ + mmaped_object_memory_size_;
+        return minObjectMemoryAddr_ + mmapedObjectMemorySize_;
     }
 
     size_t GetTotalObjectSize() const
     {
-        return mmaped_object_memory_size_;
+        return mmapedObjectMemorySize_;
     }
 
     /**
@@ -187,7 +187,7 @@ public:
     size_t GetObjectSpaceFreeBytes() const;
 
     // To check if we can alloc enough pools in object space
-    bool HaveEnoughPoolsInObjectSpace(size_t pools_num, size_t pool_size) const;
+    bool HaveEnoughPoolsInObjectSpace(size_t poolsNum, size_t poolSize) const;
 
     /// Release pages in all cached free pools
     void IterateOverFreePools();
@@ -198,7 +198,7 @@ public:
 
 private:
     template <class ArenaT = Arena, OSPagesAllocPolicy OS_ALLOC_POLICY>
-    ArenaT *AllocArenaImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
+    ArenaT *AllocArenaImpl(size_t size, SpaceType spaceType, AllocatorType allocatorType, const void *allocatorAddr);
     template <class ArenaT = Arena, OSPagesPolicy OS_PAGES_POLICY>
     void FreeArenaImpl(ArenaT *arena);
 
@@ -210,7 +210,7 @@ private:
     void FreeRawMemImpl(void *mem, size_t size);
 
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-    Pool AllocPoolImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
+    Pool AllocPoolImpl(size_t size, SpaceType spaceType, AllocatorType allocatorType, const void *allocatorAddr);
     template <OSPagesPolicy OS_PAGES_POLICY>
     void FreePoolImpl(void *mem, size_t size);
 
@@ -219,12 +219,12 @@ private:
     PANDA_PUBLIC_API void *GetStartAddrPoolForAddrImpl(const void *addr) const;
 
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-    Pool AllocPoolUnsafe(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
+    Pool AllocPoolUnsafe(size_t size, SpaceType spaceType, AllocatorType allocatorType, const void *allocatorAddr);
     template <OSPagesPolicy OS_PAGES_POLICY>
     void FreePoolUnsafe(void *mem, size_t size);
 
-    void AddToNonObjectPoolsMap(std::tuple<Pool, AllocatorInfo, SpaceType> pool_info);
-    void RemoveFromNonObjectPoolsMap(void *pool_addr);
+    void AddToNonObjectPoolsMap(std::tuple<Pool, AllocatorInfo, SpaceType> poolInfo);
+    void RemoveFromNonObjectPoolsMap(void *poolAddr);
     std::tuple<Pool, AllocatorInfo, SpaceType> FindAddrInNonObjectPoolsMap(const void *addr) const;
 
     MmapMemPool();
@@ -232,100 +232,100 @@ private:
     // A super class for raw memory allocation for spaces.
     class SpaceMemory {
     public:
-        void Initialize(uintptr_t min_addr, size_t max_size)
+        void Initialize(uintptr_t minAddr, size_t maxSize)
         {
-            min_address_ = min_addr;
-            max_size_ = max_size;
-            cur_alloc_offset_ = 0U;
-            unreturned_to_os_size_ = 0U;
+            minAddress_ = minAddr;
+            maxSize_ = maxSize;
+            curAllocOffset_ = 0U;
+            unreturnedToOsSize_ = 0U;
         }
 
         uintptr_t GetMinAddress() const
         {
-            return min_address_;
+            return minAddress_;
         }
 
         size_t GetMaxSize() const
         {
-            return max_size_;
+            return maxSize_;
         }
 
         size_t GetOccupiedMemorySize() const
         {
-            return cur_alloc_offset_;
+            return curAllocOffset_;
         }
 
         inline size_t GetFreeSpace() const
         {
-            ASSERT(max_size_ >= cur_alloc_offset_);
-            return max_size_ - cur_alloc_offset_;
+            ASSERT(maxSize_ >= curAllocOffset_);
+            return maxSize_ - curAllocOffset_;
         }
 
         template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-        void *AllocRawMem(size_t size, MmapPoolMap *pool_map)
+        void *AllocRawMem(size_t size, MmapPoolMap *poolMap)
         {
             if (UNLIKELY(GetFreeSpace() < size)) {
                 return nullptr;
             }
-            void *mem = ToVoidPtr(min_address_ + cur_alloc_offset_);
-            cur_alloc_offset_ += size;
-            size_t memory_to_clear = 0;
-            if (unreturned_to_os_size_ >= size) {
-                unreturned_to_os_size_ -= size;
-                memory_to_clear = size;
+            void *mem = ToVoidPtr(minAddress_ + curAllocOffset_);
+            curAllocOffset_ += size;
+            size_t memoryToClear = 0;
+            if (unreturnedToOsSize_ >= size) {
+                unreturnedToOsSize_ -= size;
+                memoryToClear = size;
             } else {
-                memory_to_clear = unreturned_to_os_size_;
-                unreturned_to_os_size_ = 0;
+                memoryToClear = unreturnedToOsSize_;
+                unreturnedToOsSize_ = 0;
             }
-            if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY && memory_to_clear != 0) {
-                uintptr_t pool_start = ToUintPtr(mem);
-                os::mem::ReleasePages(pool_start, pool_start + memory_to_clear);
+            if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY && memoryToClear != 0) {
+                uintptr_t poolStart = ToUintPtr(mem);
+                os::mem::ReleasePages(poolStart, poolStart + memoryToClear);
             }
-            pool_map->AddNewPool(Pool(size, mem));
+            poolMap->AddNewPool(Pool(size, mem));
             return mem;
         }
 
         Pool GetAndClearUnreturnedToOSMemory()
         {
-            void *mem = ToVoidPtr(min_address_ + cur_alloc_offset_);
-            size_t size = unreturned_to_os_size_;
-            unreturned_to_os_size_ = 0;
+            void *mem = ToVoidPtr(minAddress_ + curAllocOffset_);
+            size_t size = unreturnedToOsSize_;
+            unreturnedToOsSize_ = 0;
             return Pool(size, mem);
         }
 
-        void FreeMem(size_t size, OSPagesPolicy pages_policy)
+        void FreeMem(size_t size, OSPagesPolicy pagesPolicy)
         {
-            ASSERT(cur_alloc_offset_ >= size);
-            cur_alloc_offset_ -= size;
-            if ((pages_policy == OSPagesPolicy::NO_RETURN) || (unreturned_to_os_size_ != 0)) {
-                unreturned_to_os_size_ += size;
-                ASSERT(unreturned_to_os_size_ <= max_size_);
+            ASSERT(curAllocOffset_ >= size);
+            curAllocOffset_ -= size;
+            if ((pagesPolicy == OSPagesPolicy::NO_RETURN) || (unreturnedToOsSize_ != 0)) {
+                unreturnedToOsSize_ += size;
+                ASSERT(unreturnedToOsSize_ <= maxSize_);
             }
         }
 
     private:
-        uintptr_t min_address_ {0U};         ///< Min address for the space
-        size_t max_size_ {0U};               ///< Max size in bytes for the space
-        size_t cur_alloc_offset_ {0U};       ///< A value of occupied memory from the min_address_
-        size_t unreturned_to_os_size_ {0U};  ///< A value of unreturned memory from the min_address_ + cur_alloc_offset_
+        uintptr_t minAddress_ {0U};       ///< Min address for the space
+        size_t maxSize_ {0U};             ///< Max size in bytes for the space
+        size_t curAllocOffset_ {0U};      ///< A value of occupied memory from the min_address_
+        size_t unreturnedToOsSize_ {0U};  ///< A value of unreturned memory from the min_address_ + cur_alloc_offset_
     };
 
-    uintptr_t min_object_memory_addr_ {0U};  ///< Minimal address of the mmaped object memory
-    size_t mmaped_object_memory_size_ {0U};  ///< Size of whole the mmaped object memory
+    uintptr_t minObjectMemoryAddr_ {0U};  ///< Minimal address of the mmaped object memory
+    size_t mmapedObjectMemorySize_ {0U};  ///< Size of whole the mmaped object memory
 
-    SpaceMemory common_space_;
+    SpaceMemory commonSpace_;
 
     /// Pool map for object pools with all required information for quick search
-    PoolMap pool_map_;
+    PoolMap poolMap_;
 
-    MmapPoolMap common_space_pools_;
+    MmapPoolMap commonSpacePools_;
 
-    std::array<size_t, SPACE_TYPE_SIZE> non_object_spaces_current_size_;
+    std::array<size_t, SPACE_TYPE_SIZE> nonObjectSpacesCurrentSize_;
 
-    std::array<size_t, SPACE_TYPE_SIZE> non_object_spaces_max_size_;
+    std::array<size_t, SPACE_TYPE_SIZE> nonObjectSpacesMaxSize_;
 
     /// Map for non object pools allocated via mmap
-    std::map<const void *, std::tuple<Pool, AllocatorInfo, SpaceType>> non_object_mmaped_pools_;
+    std::map<const void *, std::tuple<Pool, AllocatorInfo, SpaceType>> nonObjectMmapedPools_;
     // AllocRawMem is called both from alloc and externally
     mutable os::memory::RecursiveMutex lock_;
 

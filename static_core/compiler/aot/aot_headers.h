@@ -29,53 +29,53 @@ struct AotHeader {
     alignas(alignof(uint32_t)) std::array<char, AOT_HEADER_MAGIC_SIZE> magic;
     alignas(alignof(uint32_t)) std::array<char, AOT_HEADER_VERSION_SIZE> version;
     uint32_t checksum;
-    uint32_t environment_checksum;
+    uint32_t environmentChecksum;
     uint32_t arch;
-    uint32_t gc_type;
-    uint32_t files_count;
-    uint32_t files_offset;
-    uint32_t class_hash_tables_offset;
-    uint32_t classes_offset;
-    uint32_t methods_offset;
-    uint32_t bitmap_offset;
-    uint32_t strtab_offset;
-    uint32_t file_name_str;
-    uint32_t cmdline_str;
-    uint32_t boot_aot;
-    uint32_t with_cha;
-    uint32_t class_ctx_str;
+    uint32_t gcType;
+    uint32_t filesCount;
+    uint32_t filesOffset;
+    uint32_t classHashTablesOffset;
+    uint32_t classesOffset;
+    uint32_t methodsOffset;
+    uint32_t bitmapOffset;
+    uint32_t strtabOffset;
+    uint32_t fileNameStr;
+    uint32_t cmdlineStr;
+    uint32_t bootAot;
+    uint32_t withCha;
+    uint32_t classCtxStr;
 };
 
 static_assert((sizeof(AotHeader) % sizeof(uint32_t)) == 0);
 static_assert(alignof(AotHeader) == alignof(uint32_t));
 
 struct PandaFileHeader {
-    uint32_t class_hash_table_size;
-    uint32_t class_hash_table_offset;
-    uint32_t classes_count;
-    uint32_t classes_offset;
-    uint32_t methods_count;
-    uint32_t methods_offset;
-    uint32_t file_checksum;
-    uint32_t file_offset;
-    uint32_t file_name_str;
+    uint32_t classHashTableSize;
+    uint32_t classHashTableOffset;
+    uint32_t classesCount;
+    uint32_t classesOffset;
+    uint32_t methodsCount;
+    uint32_t methodsOffset;
+    uint32_t fileChecksum;
+    uint32_t fileOffset;
+    uint32_t fileNameStr;
 };
 
 struct ClassHeader {
-    uint32_t class_id;
-    uint32_t pab_offset;
-    uint32_t methods_count;
-    uint32_t methods_offset;
+    uint32_t classId;
+    uint32_t pabOffset;
+    uint32_t methodsCount;
+    uint32_t methodsOffset;
     // Offset to the methods bitmap (aligned as uint32_t)
-    uint32_t methods_bitmap_offset;
+    uint32_t methodsBitmapOffset;
     // Size of bitmap in bits
-    uint32_t methods_bitmap_size;
+    uint32_t methodsBitmapSize;
 };
 
 struct MethodHeader {
-    uint32_t method_id;
-    uint32_t code_offset;
-    uint32_t code_size;
+    uint32_t methodId;
+    uint32_t codeOffset;
+    uint32_t codeSize;
 };
 
 }  // namespace panda::compiler

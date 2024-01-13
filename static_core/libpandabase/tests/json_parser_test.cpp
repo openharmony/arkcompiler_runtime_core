@@ -57,31 +57,31 @@ TEST(JsonParser, DISABLED_Arrays)
     ASSERT_TRUE(obj.IsValid());
 
     ASSERT_NE(obj.GetValue<JsonObject::ArrayT>("key_0"), nullptr);
-    auto &main_array = *obj.GetValue<JsonObject::ArrayT>("key_0");
+    auto &mainArray = *obj.GetValue<JsonObject::ArrayT>("key_0");
 
     // Check [0]:
-    ASSERT_NE(main_array[0U].Get<JsonObject::StringT>(), nullptr);
-    ASSERT_EQ(*main_array[0U].Get<JsonObject::StringT>(), "elem0");
+    ASSERT_NE(mainArray[0U].Get<JsonObject::StringT>(), nullptr);
+    ASSERT_EQ(*mainArray[0U].Get<JsonObject::StringT>(), "elem0");
 
     // Check [1]:
-    ASSERT_NE(main_array[1U].Get<JsonObject::ArrayT>(), nullptr);
-    auto &inner_array = *main_array[1U].Get<JsonObject::ArrayT>();
+    ASSERT_NE(mainArray[1U].Get<JsonObject::ArrayT>(), nullptr);
+    auto &innerArray = *mainArray[1U].Get<JsonObject::ArrayT>();
 
-    ASSERT_NE(inner_array[0U].Get<JsonObject::StringT>(), nullptr);
-    ASSERT_EQ(*inner_array[0U].Get<JsonObject::StringT>(), "elem1.0");
+    ASSERT_NE(innerArray[0U].Get<JsonObject::StringT>(), nullptr);
+    ASSERT_EQ(*innerArray[0U].Get<JsonObject::StringT>(), "elem1.0");
 
-    ASSERT_NE(inner_array[1U].Get<JsonObject::StringT>(), nullptr);
-    ASSERT_EQ(*inner_array[1U].Get<JsonObject::StringT>(), "elem1.1");
+    ASSERT_NE(innerArray[1U].Get<JsonObject::StringT>(), nullptr);
+    ASSERT_EQ(*innerArray[1U].Get<JsonObject::StringT>(), "elem1.1");
 
     // Check [2]:
-    ASSERT_NE(main_array[2U].Get<JsonObject::StringT>(), nullptr);
-    ASSERT_EQ(*main_array[2U].Get<JsonObject::StringT>(), "elem2");
+    ASSERT_NE(mainArray[2U].Get<JsonObject::StringT>(), nullptr);
+    ASSERT_EQ(*mainArray[2U].Get<JsonObject::StringT>(), "elem2");
 
     ASSERT_NE(obj.GetValue<JsonObject::ArrayT>("key_1"), nullptr);
-    auto &empty_array = *obj.GetValue<JsonObject::ArrayT>("key_1");
+    auto &emptyArray = *obj.GetValue<JsonObject::ArrayT>("key_1");
 
     // Check [3]:
-    ASSERT_EQ(empty_array.size(), 0U);
+    ASSERT_EQ(emptyArray.size(), 0U);
 }
 
 // Issue: #14733
@@ -115,21 +115,21 @@ TEST(JsonParser, DISABLED_NestedObject)
 
     // Inner object:
     ASSERT_NE(obj.GetValue<JsonObject::JsonObjPointer>("key_1"), nullptr);
-    const auto *inner_obj = obj.GetValue<JsonObject::JsonObjPointer>("key_1")->get();
-    ASSERT_NE(inner_obj, nullptr);
-    ASSERT_TRUE(inner_obj->IsValid());
+    const auto *innerObj = obj.GetValue<JsonObject::JsonObjPointer>("key_1")->get();
+    ASSERT_NE(innerObj, nullptr);
+    ASSERT_TRUE(innerObj->IsValid());
 
     // Check key_0.0:
-    ASSERT_NE(inner_obj->GetValue<JsonObject::StringT>("key_0.0"), nullptr);
-    ASSERT_EQ(*inner_obj->GetValue<JsonObject::StringT>("key_0.0"), "key_0.0.value");
+    ASSERT_NE(innerObj->GetValue<JsonObject::StringT>("key_0.0"), nullptr);
+    ASSERT_EQ(*innerObj->GetValue<JsonObject::StringT>("key_0.0"), "key_0.0.value");
 
     // Check repeated_key_1:
-    ASSERT_NE(inner_obj->GetValue<JsonObject::StringT>("repeated_key_1"), nullptr);
-    ASSERT_EQ(*inner_obj->GetValue<JsonObject::StringT>("repeated_key_1"), "repeated_key_1.value1");
+    ASSERT_NE(innerObj->GetValue<JsonObject::StringT>("repeated_key_1"), nullptr);
+    ASSERT_EQ(*innerObj->GetValue<JsonObject::StringT>("repeated_key_1"), "repeated_key_1.value1");
 
     // Check repeated_key_2:
-    ASSERT_NE(inner_obj->GetValue<JsonObject::StringT>("repeated_key_2"), nullptr);
-    ASSERT_EQ(*inner_obj->GetValue<JsonObject::StringT>("repeated_key_2"), "repeated_key_2.value0");
+    ASSERT_NE(innerObj->GetValue<JsonObject::StringT>("repeated_key_2"), nullptr);
+    ASSERT_EQ(*innerObj->GetValue<JsonObject::StringT>("repeated_key_2"), "repeated_key_2.value0");
 
     // Check repeated_key_2 (in main obj):
     ASSERT_NE(obj.GetValue<JsonObject::StringT>("repeated_key_2"), nullptr);
@@ -137,10 +137,10 @@ TEST(JsonParser, DISABLED_NestedObject)
 
     // Check empty inner object (key_2):
     ASSERT_NE(obj.GetValue<JsonObject::JsonObjPointer>("key_2"), nullptr);
-    const auto *empty_obj = obj.GetValue<JsonObject::JsonObjPointer>("key_2")->get();
-    ASSERT_NE(empty_obj, nullptr);
-    ASSERT_TRUE(empty_obj->IsValid());
-    ASSERT_EQ(empty_obj->GetSize(), 0U);
+    const auto *emptyObj = obj.GetValue<JsonObject::JsonObjPointer>("key_2")->get();
+    ASSERT_NE(emptyObj, nullptr);
+    ASSERT_TRUE(emptyObj->IsValid());
+    ASSERT_EQ(emptyObj->GetSize(), 0U);
 }
 
 // Issue: #14733
@@ -216,14 +216,14 @@ TEST(JsonParser, Boolean)
 
 TEST(JsonParser, InvalidJson)
 {
-    auto repeated_keys = R"(
+    auto repeatedKeys = R"(
     {
         "key_0" : "key_0.value0",
         "key_0" : "key_0.value1",
     }
     )";
 
-    JsonObject obj(repeated_keys);
+    JsonObject obj(repeatedKeys);
     ASSERT_FALSE(obj.IsValid());
 }
 

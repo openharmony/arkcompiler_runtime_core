@@ -22,7 +22,7 @@ namespace panda::mem {
 
 constexpr int64_t NANOSECONDS_PER_MILLISEC = 1000000;
 
-PandaUniquePtr<GCTask> GCQueueWithTime::GetTask(bool need_wait_task)
+PandaUniquePtr<GCTask> GCQueueWithTime::GetTask(bool needWaitTask)
 {
     os::memory::LockHolder lock(lock_);
     while (queue_.empty()) {
@@ -30,29 +30,29 @@ PandaUniquePtr<GCTask> GCQueueWithTime::GetTask(bool need_wait_task)
             LOG(DEBUG, GC) << "GetTask() Return INVALID_CAUSE";
             return nullptr;
         }
-        if (need_wait_task) {
-            LOG(DEBUG, GC) << "Empty " << queue_name_ << ", waiting...";
-            cond_var_.Wait(&lock_);
+        if (needWaitTask) {
+            LOG(DEBUG, GC) << "Empty " << queueName_ << ", waiting...";
+            condVar_.Wait(&lock_);
         } else {
-            LOG(DEBUG, GC) << "Empty " << queue_name_ << ", return nullptr";
+            LOG(DEBUG, GC) << "Empty " << queueName_ << ", return nullptr";
             return nullptr;
         }
     }
     GCTask *task = queue_.top().get();
-    auto current_time = time::GetCurrentTimeInNanos();
-    while (gc_->IsGCRunning() && (task->GetTargetTime() >= current_time)) {
-        auto delta = task->GetTargetTime() - current_time;
+    auto currentTime = time::GetCurrentTimeInNanos();
+    while (gc_->IsGCRunning() && (task->GetTargetTime() >= currentTime)) {
+        auto delta = task->GetTargetTime() - currentTime;
         uint64_t ms = delta / NANOSECONDS_PER_MILLISEC;
         uint64_t ns = delta % NANOSECONDS_PER_MILLISEC;
         LOG(DEBUG, GC) << "GetTask TimedWait";
-        cond_var_.TimedWait(&lock_, ms, ns);
+        condVar_.TimedWait(&lock_, ms, ns);
         task = queue_.top().get();
-        current_time = time::GetCurrentTimeInNanos();
+        currentTime = time::GetCurrentTimeInNanos();
     }
-    PandaUniquePtr<GCTask> returned_task = std::move(*const_cast<PandaUniquePtr<GCTask> *>(&queue_.top()));
+    PandaUniquePtr<GCTask> returnedTask = std::move(*const_cast<PandaUniquePtr<GCTask> *>(&queue_.top()));
     queue_.pop();
-    LOG(DEBUG, GC) << "Extract a task from a " << queue_name_;
-    return returned_task;
+    LOG(DEBUG, GC) << "Extract a task from a " << queueName_;
+    return returnedTask;
 }
 
 bool GCQueueWithTime::AddTask(PandaUniquePtr<GCTask> task)
@@ -62,15 +62,15 @@ bool GCQueueWithTime::AddTask(PandaUniquePtr<GCTask> task)
     }
     os::memory::LockHolder lock(lock_);
     if (!queue_.empty()) {
-        auto *last_elem = queue_.top().get();
-        if (last_elem->reason == task->reason) {
+        auto *lastElem = queue_.top().get();
+        if (lastElem->reason == task->reason) {
             // do not duplicate GC task with the same reason.
             return false;
         }
     }
-    LOG(DEBUG, GC) << "Add task to a " << queue_name_;
+    LOG(DEBUG, GC) << "Add task to a " << queueName_;
     queue_.push(std::move(task));
-    cond_var_.Signal();
+    condVar_.Signal();
     return true;
 }
 

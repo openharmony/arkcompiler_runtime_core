@@ -94,7 +94,7 @@ public:
 
     private:
         Runtime &runtime_;
-        bool is_jit_enabled_;
+        bool isJitEnabled_;
         os::memory::LockHolder<os::memory::Mutex> lock_;
         PandaUniquePtr<tooling::DebugInterface> debugger_;
 
@@ -104,14 +104,14 @@ public:
 
     using DebugSessionHandle = std::shared_ptr<DebugSession>;
 
-    LanguageContext GetLanguageContext(const std::string &runtime_type);
+    LanguageContext GetLanguageContext(const std::string &runtimeType);
     LanguageContext GetLanguageContext(const Method &method);
     LanguageContext GetLanguageContext(const Class &cls);
     LanguageContext GetLanguageContext(const BaseClass &cls);
     LanguageContext GetLanguageContext(panda_file::ClassDataAccessor *cda);
     LanguageContext GetLanguageContext(panda_file::SourceLang lang);
 
-    static bool CreateInstance(const RuntimeOptions &options, mem::InternalAllocatorPtr internal_allocator);
+    static bool CreateInstance(const RuntimeOptions &options, mem::InternalAllocatorPtr internalAllocator);
 
     static bool Create(const RuntimeOptions &options);
 
@@ -138,12 +138,12 @@ public:
 
     ClassLinker *GetClassLinker() const
     {
-        return class_linker_;
+        return classLinker_;
     }
 
     RuntimeNotificationManager *GetNotificationManager() const
     {
-        return notification_manager_;
+        return notificationManager_;
     }
 
     static const RuntimeOptions &GetOptions()
@@ -153,19 +153,19 @@ public:
 
     void SetZygoteNoThreadSection(bool val)
     {
-        zygote_no_threads_ = val;
+        zygoteNoThreads_ = val;
     }
 
-    static void SetTaskScheduler(taskmanager::TaskScheduler *task_scheduler)
+    static void SetTaskScheduler(taskmanager::TaskScheduler *taskScheduler)
     {
-        ASSERT(task_scheduler_ == nullptr);
-        ASSERT(task_scheduler != nullptr);
-        task_scheduler_ = task_scheduler;
+        ASSERT(taskScheduler_ == nullptr);
+        ASSERT(taskScheduler != nullptr);
+        taskScheduler_ = taskScheduler;
     }
 
     static taskmanager::TaskScheduler *GetTaskScheduler()
     {
-        return task_scheduler_;
+        return taskScheduler_;
     }
 
     coretypes::String *ResolveString(PandaVM *vm, const Method &caller, panda_file::File::EntityId id);
@@ -192,45 +192,45 @@ public:
 
     void PostZygoteFork();
 
-    Expected<int, Error> ExecutePandaFile(std::string_view filename, std::string_view entry_point,
+    Expected<int, Error> ExecutePandaFile(std::string_view filename, std::string_view entryPoint,
                                           const std::vector<std::string> &args);
 
-    int StartDProfiler(std::string_view app_name);
+    int StartDProfiler(std::string_view appName);
 
-    int StartMemAllocDumper(const PandaString &dump_file);
+    int StartMemAllocDumper(const PandaString &dumpFile);
 
-    Expected<int, Error> Execute(std::string_view entry_point, const std::vector<std::string> &args);
+    Expected<int, Error> Execute(std::string_view entryPoint, const std::vector<std::string> &args);
 
-    int StartDProfiler(const PandaString &app_name);
+    int StartDProfiler(const PandaString &appName);
 
     bool IsDebugMode() const
     {
-        return is_debug_mode_;
+        return isDebugMode_;
     }
 
-    void SetDebugMode(bool is_debug_mode)
+    void SetDebugMode(bool isDebugMode)
     {
-        is_debug_mode_ = is_debug_mode;
+        isDebugMode_ = isDebugMode;
     }
 
     bool IsDebuggerConnected() const
     {
-        return is_debugger_connected_;
+        return isDebuggerConnected_;
     }
 
-    void SetDebuggerConnected(bool dbg_connected_state)
+    void SetDebuggerConnected(bool dbgConnectedState)
     {
-        is_debugger_connected_ = dbg_connected_state;
+        isDebuggerConnected_ = dbgConnectedState;
     }
 
     bool IsProfileableFromShell() const
     {
-        return is_profileable_from_shell_;
+        return isProfileableFromShell_;
     }
 
-    void SetProfileableFromShell(bool profileable_from_shell)
+    void SetProfileableFromShell(bool profileableFromShell)
     {
-        is_profileable_from_shell_ = profileable_from_shell;
+        isProfileableFromShell_ = profileableFromShell;
     }
 
     PandaVector<PandaString> GetBootPandaFiles();
@@ -242,57 +242,57 @@ public:
 
     const std::string &GetProcessPackageName() const
     {
-        return process_package_name_;
+        return processPackageName_;
     }
 
-    void SetProcessPackageName(const char *package_name)
+    void SetProcessPackageName(const char *packageName)
     {
-        if (package_name == nullptr) {
-            process_package_name_.clear();
+        if (packageName == nullptr) {
+            processPackageName_.clear();
         } else {
-            process_package_name_ = package_name;
+            processPackageName_ = packageName;
         }
     }
 
     const std::string &GetProcessDataDirectory() const
     {
-        return process_data_directory_;
+        return processDataDirectory_;
     }
 
-    void SetProcessDataDirectory(const char *data_dir)
+    void SetProcessDataDirectory(const char *dataDir)
     {
-        if (data_dir == nullptr) {
-            process_data_directory_.clear();
+        if (dataDir == nullptr) {
+            processDataDirectory_.clear();
         } else {
-            process_data_directory_ = data_dir;
+            processDataDirectory_ = dataDir;
         }
     }
 
     std::string GetPandaPath()
     {
-        return panda_path_string_;
+        return pandaPathString_;
     }
 
     static const std::string &GetRuntimeType()
     {
-        return runtime_type_;
+        return runtimeType_;
     }
 
     void UpdateProcessState(int state);
 
     bool IsZygote() const
     {
-        return is_zygote_;
+        return isZygote_;
     }
 
     bool IsInitialized() const
     {
-        return is_initialized_;
+        return isInitialized_;
     }
 
     // NOTE(00510180): lack NativeBridgeAction action
-    void InitNonZygoteOrPostFork(bool is_system_server, const char *isa, const std::function<void()> &init_hook = {},
-                                 bool profile_system_server = false);
+    void InitNonZygoteOrPostFork(bool isSystemServer, const char *isa, const std::function<void()> &initHook = {},
+                                 bool profileSystemServer = false);
 
     static const char *GetVersion()
     {
@@ -302,26 +302,26 @@ public:
 
     PandaString GetFingerprint()
     {
-        return finger_print_;
+        return fingerPrint_;
     }
 
     [[noreturn]] static void Halt(int32_t status);
 
-    void SetExitHook(ExitHook exit_hook)
+    void SetExitHook(ExitHook exitHook)
     {
         ASSERT(exit_ == nullptr);
-        exit_ = exit_hook;
+        exit_ = exitHook;
     }
 
-    void SetAbortHook(AbortHook abort_hook)
+    void SetAbortHook(AbortHook abortHook)
     {
         ASSERT(abort_ == nullptr);
-        abort_ = abort_hook;
+        abort_ = abortHook;
     }
 
     [[noreturn]] static void Abort(const char *message = nullptr);
 
-    Expected<Method *, Error> ResolveEntryPoint(std::string_view entry_point);
+    Expected<Method *, Error> ResolveEntryPoint(std::string_view entryPoint);
 
     void RegisterSensitiveThread() const;
 
@@ -330,7 +330,7 @@ public:
     // the first VM. It is undeterminated which VM will be first.
     PandaVM *GetPandaVM() const
     {
-        return panda_vm_;
+        return pandaVm_;
     }
 
     ClassHierarchyAnalysis *GetCha() const
@@ -340,104 +340,104 @@ public:
 
     panda::verifier::Config const *GetVerificationConfig() const
     {
-        return verifier_config_;
+        return verifierConfig_;
     }
 
     panda::verifier::Config *GetVerificationConfig()
     {
-        return verifier_config_;
+        return verifierConfig_;
     }
 
     panda::verifier::Service *GetVerifierService()
     {
-        return verifier_service_;
+        return verifierService_;
     }
 
     bool IsDebuggerAttached()
     {
-        return debug_session_.use_count() > 0;
+        return debugSession_.use_count() > 0;
     }
 
     void DumpForSigQuit(std::ostream &os);
 
     bool IsDumpNativeCrash()
     {
-        return is_dump_native_crash_;
+        return isDumpNativeCrash_;
     }
 
     bool IsChecksSuspend() const
     {
-        return checks_suspend_;
+        return checksSuspend_;
     }
 
     bool IsChecksStack() const
     {
-        return checks_stack_;
+        return checksStack_;
     }
 
     bool IsChecksNullptr() const
     {
-        return checks_nullptr_;
+        return checksNullptr_;
     }
 
     bool IsStacktrace() const
     {
-        return is_stacktrace_;
+        return isStacktrace_;
     }
 
     bool IsJitEnabled() const
     {
-        return is_jit_enabled_;
+        return isJitEnabled_;
     }
 
     void ForceEnableJit()
     {
-        is_jit_enabled_ = true;
+        isJitEnabled_ = true;
     }
 
     void ForceDisableJit()
     {
-        is_jit_enabled_ = false;
+        isJitEnabled_ = false;
     }
 
 #ifndef PANDA_TARGET_WINDOWS
     SignalManager *GetSignalManager()
     {
-        return signal_manager_;
+        return signalManager_;
     }
 #endif
 
     static mem::GCType GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang);
 
-    static void SetDaemonMemoryLeakThreshold(uint32_t daemon_memory_leak_threshold);
+    static void SetDaemonMemoryLeakThreshold(uint32_t daemonMemoryLeakThreshold);
 
-    static void SetDaemonThreadsCount(uint32_t daemon_threads_cnt);
+    static void SetDaemonThreadsCount(uint32_t daemonThreadsCnt);
 
     DebugSessionHandle StartDebugSession();
 
     mem::InternalAllocatorPtr GetInternalAllocator() const
     {
-        return internal_allocator_;
+        return internalAllocator_;
     }
 
     PandaString GetMemoryStatistics();
     PandaString GetFinalStatistics();
 
-    Expected<LanguageContext, Error> ExtractLanguageContext(const panda_file::File *pf, std::string_view entry_point);
+    Expected<LanguageContext, Error> ExtractLanguageContext(const panda_file::File *pf, std::string_view entryPoint);
 
     UnwindStackFn GetUnwindStackFn() const
     {
-        return unwind_stack_fn_;
+        return unwindStackFn_;
     }
 
-    void SetUnwindStackFn(UnwindStackFn unwind_stack_fn)
+    void SetUnwindStackFn(UnwindStackFn unwindStackFn)
     {
-        unwind_stack_fn_ = unwind_stack_fn;
+        unwindStackFn_ = unwindStackFn;
     }
 
     RelayoutProfiler *GetRelayoutProfiler()
     {
-        return relayout_profiler_;
+        return relayoutProfiler_;
     }
 
     inline tooling::Tools &GetTools()
@@ -448,11 +448,11 @@ public:
 private:
     void NotifyAboutLoadedModules();
 
-    std::optional<Error> CreateApplicationClassLinkerContext(std::string_view filename, std::string_view entry_point);
+    std::optional<Error> CreateApplicationClassLinkerContext(std::string_view filename, std::string_view entryPoint);
 
     bool LoadVerificationConfig();
 
-    bool CreatePandaVM(std::string_view runtime_type);
+    bool CreatePandaVM(std::string_view runtimeType);
 
     bool InitializePandaVM();
 
@@ -472,7 +472,7 @@ private:
 
     bool Shutdown();
 
-    bool LoadBootPandaFiles(panda_file::File::OpenMode open_mode);
+    bool LoadBootPandaFiles(panda_file::File::OpenMode openMode);
 
     void CheckBootPandaFiles();
 
@@ -484,78 +484,78 @@ private:
 
     inline void InitializeVerifierRuntime();
 
-    Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr internal_allocator);
+    Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr internalAllocator);
 
     ~Runtime();
 
     static Runtime *instance_;
     static RuntimeOptions options_;
-    static std::string runtime_type_;
+    static std::string runtimeType_;
     static os::memory::Mutex mutex_;
-    static taskmanager::TaskScheduler *task_scheduler_;
+    static taskmanager::TaskScheduler *taskScheduler_;
 
     // NOTE(dtrubenk): put all of it in the permanent space
-    mem::InternalAllocatorPtr internal_allocator_;
-    RuntimeNotificationManager *notification_manager_;
-    ClassLinker *class_linker_;
+    mem::InternalAllocatorPtr internalAllocator_;
+    RuntimeNotificationManager *notificationManager_;
+    ClassLinker *classLinker_;
     ClassHierarchyAnalysis *cha_;
     DProfiler *dprofiler_ = nullptr;
-    tooling::MemoryAllocationDumper *mem_alloc_dumper_ = nullptr;
+    tooling::MemoryAllocationDumper *memAllocDumper_ = nullptr;
 
-    PandaVM *panda_vm_ = nullptr;
+    PandaVM *pandaVm_ = nullptr;
 
 #ifndef PANDA_TARGET_WINDOWS
-    SignalManager *signal_manager_ {nullptr};
+    SignalManager *signalManager_ {nullptr};
 #endif
 
     // For IDE is real connected.
-    bool is_debug_mode_ {false};
-    bool is_debugger_connected_ {false};
-    bool is_profileable_from_shell_ {false};
-    os::memory::Mutex debug_session_creation_mutex_ {};
-    os::memory::Mutex debug_session_uniqueness_mutex_ {};
-    DebugSessionHandle debug_session_ {};
+    bool isDebugMode_ {false};
+    bool isDebuggerConnected_ {false};
+    bool isProfileableFromShell_ {false};
+    os::memory::Mutex debugSessionCreationMutex_ {};
+    os::memory::Mutex debugSessionUniquenessMutex_ {};
+    DebugSessionHandle debugSession_ {};
 
     // Additional VMInfo
-    std::string process_package_name_;
-    std::string process_data_directory_;
+    std::string processPackageName_;
+    std::string processDataDirectory_;
 
     // For saving class path.
-    std::string panda_path_string_;
+    std::string pandaPathString_;
 
     AbortHook abort_ = nullptr;
     ExitHook exit_ = nullptr;
 
-    bool zygote_no_threads_ {false};
-    bool is_zygote_;
-    bool is_initialized_ {false};
+    bool zygoteNoThreads_ {false};
+    bool isZygote_;
+    bool isInitialized_ {false};
 
-    bool save_profiling_info_;
+    bool saveProfilingInfo_;
 
-    bool checks_suspend_ {false};
-    bool checks_stack_ {true};
-    bool checks_nullptr_ {true};
-    bool is_stacktrace_ {false};
-    bool is_jit_enabled_ {false};
+    bool checksSuspend_ {false};
+    bool checksStack_ {true};
+    bool checksNullptr_ {true};
+    bool isStacktrace_ {false};
+    bool isJitEnabled_ {false};
 
-    bool is_dump_native_crash_ {true};
+    bool isDumpNativeCrash_ {true};
 
-    PandaString finger_print_ = "unknown";
+    PandaString fingerPrint_ = "unknown";
 
     // Verification
-    panda::verifier::Config *verifier_config_ = nullptr;
-    panda::verifier::Service *verifier_service_ = nullptr;
+    panda::verifier::Config *verifierConfig_ = nullptr;
+    panda::verifier::Service *verifierService_ = nullptr;
 
     struct AppContext {
         ClassLinkerContext *ctx {nullptr};
         std::optional<panda_file::SourceLang> lang;
     };
-    AppContext app_context_ {};
+    AppContext appContext_ {};
 
-    RuntimeController *runtime_controller_ {nullptr};
-    UnwindStackFn unwind_stack_fn_ {nullptr};
+    RuntimeController *runtimeController_ {nullptr};
+    UnwindStackFn unwindStackFn_ {nullptr};
 
-    RelayoutProfiler *relayout_profiler_ {nullptr};
+    RelayoutProfiler *relayoutProfiler_ {nullptr};
     tooling::Tools tools_;
 
     NO_COPY_SEMANTIC(Runtime);

@@ -45,10 +45,10 @@ public:
         options.SetLoadRuntimes({"core"});
         options.SetGcType("epsilon");
         options.SetGcTriggerType("debug-never");
-        auto exec_path = panda::os::file::File::GetExecutablePath();
-        std::string panda_std_lib =
-            exec_path.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
-        options.SetBootPandaFiles({panda_std_lib});
+        auto execPath = panda::os::file::File::GetExecutablePath();
+        std::string pandaStdLib =
+            execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
+        options.SetBootPandaFiles({pandaStdLib});
 
         Runtime::Create(options);
     }
@@ -76,16 +76,16 @@ public:
             return nullptr;
         }
 
-        ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        class_linker->AddPandaFile(std::move(pf));
-        auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        classLinker->AddPandaFile(std::move(pf));
+        auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
         {
             ScopedManagedCodeThread s(GetThread());
             PandaString descriptor;
             Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("Test"), &descriptor));
             EXPECT_NE(nullptr, klass);
             if (klass != nullptr) {
-                EXPECT_TRUE(class_linker->InitializeClass(GetThread(), klass));
+                EXPECT_TRUE(classLinker->InitializeClass(GetThread(), klass));
             }
             return klass;
         }
@@ -119,10 +119,10 @@ public:
     {
         Runtime *runtime = Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT;
+        SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT;
         auto *klass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
         ScopedManagedCodeThread s(GetThread());
-        return coretypes::Array::Create(klass, length, space_type);
+        return coretypes::Array::Create(klass, length, spaceType);
     }
 };
 
@@ -137,7 +137,7 @@ TEST_F(StaticObjectHelpersTest, TestPrimitiveField)
     ASSERT_NE(nullptr, klass);
     bool found = false;
     auto handler = [&found]([[maybe_unused]] ObjectHeader *obj, [[maybe_unused]] ObjectHeader *ref,
-                            [[maybe_unused]] uint32_t offset, [[maybe_unused]] bool is_volatile) {
+                            [[maybe_unused]] uint32_t offset, [[maybe_unused]] bool isVolatile) {
         found = true;
         return true;
     };
@@ -162,12 +162,12 @@ TEST_F(StaticObjectHelpersTest, TestStaticRefField)
     ObjectAccessor::SetFieldObject<false>(klass, *field, expected);
 
     size_t count = 0;
-    auto handler = [klass, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool is_volatile) {
+    auto handler = [klass, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool isVolatile) {
         ++count;
         EXPECT_EQ(obj, klass->GetManagedObject());
         EXPECT_EQ(expected, ref);
         EXPECT_EQ(ref, ObjectAccessor::GetObject<false>(obj, offset));
-        EXPECT_FALSE(is_volatile);
+        EXPECT_FALSE(isVolatile);
         return true;
     };
     GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(klass->GetManagedObject(), handler);
@@ -191,12 +191,12 @@ TEST_F(StaticObjectHelpersTest, TestStaticVolatileRefField)
     ObjectAccessor::SetFieldObject<false>(klass, *field, expected);
 
     size_t count = 0;
-    auto handler = [klass, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool is_volatile) {
+    auto handler = [klass, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool isVolatile) {
         ++count;
         EXPECT_EQ(obj, klass->GetManagedObject());
         EXPECT_EQ(expected, ref);
         EXPECT_EQ(ref, ObjectAccessor::GetObject<true>(obj, offset));
-        EXPECT_TRUE(is_volatile);
+        EXPECT_TRUE(isVolatile);
         return true;
     };
     GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(klass->GetManagedObject(), handler);
@@ -222,12 +222,12 @@ TEST_F(StaticObjectHelpersTest, TestInstanceRefField)
     ObjectAccessor::SetFieldObject<false>(object, *field, expected);
 
     size_t count = 0;
-    auto handler = [object, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool is_volatile) {
+    auto handler = [object, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool isVolatile) {
         ++count;
         EXPECT_EQ(object, obj);
         EXPECT_EQ(expected, ref);
         EXPECT_EQ(ref, ObjectAccessor::GetObject<false>(obj, offset));
-        EXPECT_FALSE(is_volatile);
+        EXPECT_FALSE(isVolatile);
         return true;
     };
     GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(object, handler);
@@ -253,12 +253,12 @@ TEST_F(StaticObjectHelpersTest, TestVolatileInstanceRefField)
     ObjectAccessor::SetFieldObject<false>(object, *field, expected);
 
     size_t count = 0;
-    auto handler = [object, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool is_volatile) {
+    auto handler = [object, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool isVolatile) {
         ++count;
         EXPECT_EQ(object, obj);
         EXPECT_EQ(expected, ref);
         EXPECT_EQ(ref, ObjectAccessor::GetObject<true>(obj, offset));
-        EXPECT_TRUE(is_volatile);
+        EXPECT_TRUE(isVolatile);
         return true;
     };
     GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(object, handler);
@@ -274,12 +274,12 @@ TEST_F(StaticObjectHelpersTest, TestArray)
     array->Set(0, expected);
 
     size_t count = 0;
-    auto handler = [array, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool is_volatile) {
+    auto handler = [array, &count, expected](ObjectHeader *obj, ObjectHeader *ref, uint32_t offset, bool isVolatile) {
         ++count;
         EXPECT_EQ(array, obj);
         EXPECT_EQ(expected, ref);
         EXPECT_EQ(ref, ObjectAccessor::GetObject<true>(obj, offset));
-        EXPECT_FALSE(is_volatile);
+        EXPECT_FALSE(isVolatile);
         return true;
     };
     GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(array, handler);

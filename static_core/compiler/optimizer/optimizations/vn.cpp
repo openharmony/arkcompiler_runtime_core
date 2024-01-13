@@ -42,10 +42,10 @@ static bool AddClassInst(Inst *inst, VnObject *obj)
     }
 
     obj->Add(static_cast<VnObject::ObjType>(Opcode::InitClass));
-    auto class_inst = static_cast<ClassInst *>(inst);
-    auto klass = class_inst->GetClass();
+    auto classInst = static_cast<ClassInst *>(inst);
+    auto klass = classInst->GetClass();
     if (klass == nullptr) {
-        obj->Add(class_inst->GetTypeId());
+        obj->Add(classInst->GetTypeId());
     } else {
         obj->Add(reinterpret_cast<VnObject::DoubleObjType>(klass));
     }
@@ -76,8 +76,8 @@ static bool AddSelectImmInst(Inst *inst, VnObject *obj)
              static_cast<VnObject::HalfObjType>(inst->CastToSelectImm()->GetCc()));
 
     for (auto input : inst->GetInputs()) {
-        auto input_inst = inst->GetDataFlowInput(input.GetInst());
-        auto vn = input_inst->GetVN();
+        auto inputInst = inst->GetDataFlowInput(input.GetInst());
+        auto vn = inputInst->GetVN();
         ASSERT(vn != INVALID_VN);
         obj->Add(vn);
     }
@@ -132,9 +132,9 @@ static void AddSpecialTraits(Inst *inst, VnObject *obj)
     }
 }
 
-static bool IsIrreducibleClassInst(Inst *inst, Inst *equiv_inst)
+static bool IsIrreducibleClassInst(Inst *inst, Inst *equivInst)
 {
-    return equiv_inst->GetOpcode() == Opcode::LoadClass &&
+    return equivInst->GetOpcode() == Opcode::LoadClass &&
            (inst->GetOpcode() == Opcode::InitClass || inst->GetOpcode() == Opcode::LoadAndInitClass);
 }
 
@@ -145,9 +145,9 @@ static bool AddResolver(Inst *inst, VnObject *obj)
     }
 
     for (auto input : inst->GetInputs()) {
-        auto input_inst = inst->GetDataFlowInput(input.GetInst());
-        if (!input_inst->IsSaveState()) {
-            auto vn = input_inst->GetVN();
+        auto inputInst = inst->GetDataFlowInput(input.GetInst());
+        if (!inputInst->IsSaveState()) {
+            auto vn = inputInst->GetVN();
             ASSERT(vn != INVALID_VN);
             obj->Add(vn);
         }
@@ -197,9 +197,9 @@ void VnObject::Add(Inst *inst)
     }
 
     for (auto input : inst->GetInputs()) {
-        auto input_inst = inst->GetDataFlowInput(input.GetInst());
-        if (!input_inst->IsSaveState()) {
-            auto vn = input_inst->GetVN();
+        auto inputInst = inst->GetDataFlowInput(input.GetInst());
+        if (!inputInst->IsSaveState()) {
+            auto vn = inputInst->GetVN();
             ASSERT(vn != INVALID_VN);
             Add(vn);
         }
@@ -210,26 +210,26 @@ void VnObject::Add(Inst *inst)
 
 void VnObject::Add(HalfObjType obj1, HalfObjType obj2)
 {
-    ASSERT(size_objs_ < MAX_ARRAY_SIZE);
+    ASSERT(sizeObjs_ < MAX_ARRAY_SIZE);
     static constexpr HalfObjType SHIFT16 = 16;
     ObjType obj = static_cast<ObjType>(obj1) << SHIFT16;
     obj |= static_cast<ObjType>(obj2);
-    objs_[size_objs_++] = obj;
+    objs_[sizeObjs_++] = obj;
 }
 
 void VnObject::Add(ObjType obj)
 {
-    ASSERT(size_objs_ < MAX_ARRAY_SIZE);
-    objs_[size_objs_++] = obj;
+    ASSERT(sizeObjs_ < MAX_ARRAY_SIZE);
+    objs_[sizeObjs_++] = obj;
 }
 
 void VnObject::Add(DoubleObjType obj)
 {
-    ASSERT(size_objs_ < MAX_ARRAY_SIZE);
+    ASSERT(sizeObjs_ < MAX_ARRAY_SIZE);
     static constexpr DoubleObjType MASK32 = std::numeric_limits<uint32_t>::max();
     static constexpr DoubleObjType SHIFT32 = 32;
-    objs_[size_objs_++] = static_cast<ObjType>(obj & MASK32);
-    objs_[size_objs_++] = static_cast<ObjType>(obj >> SHIFT32);
+    objs_[sizeObjs_++] = static_cast<ObjType>(obj & MASK32);
+    objs_[sizeObjs_++] = static_cast<ObjType>(obj >> SHIFT32);
 }
 
 bool VnObject::Compare(VnObject *obj)
@@ -246,12 +246,12 @@ bool VnObject::Compare(VnObject *obj)
     return true;
 }
 
-ValNum::ValNum(Graph *graph) : Optimization(graph), map_insts_(GetGraph()->GetLocalAllocator()->Adapter()) {}
+ValNum::ValNum(Graph *graph) : Optimization(graph), mapInsts_(GetGraph()->GetLocalAllocator()->Adapter()) {}
 
 inline void ValNum::SetInstValNum(Inst *inst)
 {
-    COMPILER_LOG(DEBUG, VN_OPT) << " Set VN " << curr_vn_ << " for inst " << inst->GetId();
-    inst->SetVN(curr_vn_++);
+    COMPILER_LOG(DEBUG, VN_OPT) << " Set VN " << currVn_ << " for inst " << inst->GetId();
+    inst->SetVN(currVn_++);
 }
 
 void ValNum::InvalidateAnalyses()
@@ -260,28 +260,28 @@ void ValNum::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
 }
 
-bool ValNum::TryToApplyCse(Inst *inst, InstVector *equiv_insts)
+bool ValNum::TryToApplyCse(Inst *inst, InstVector *equivInsts)
 {
-    ASSERT(!equiv_insts->empty());
-    inst->SetVN((*equiv_insts)[0]->GetVN());
+    ASSERT(!equivInsts->empty());
+    inst->SetVN((*equivInsts)[0]->GetVN());
     COMPILER_LOG(DEBUG, VN_OPT) << " Set VN " << inst->GetVN() << " for inst " << inst->GetId();
-    for (auto equiv_inst : *equiv_insts) {
-        COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions are found, id " << equiv_inst->GetId();
-        if (IsIrreducibleClassInst(inst, equiv_inst)) {
+    for (auto equivInst : *equivInsts) {
+        COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions are found, id " << equivInst->GetId();
+        if (IsIrreducibleClassInst(inst, equivInst)) {
             continue;
         }
-        if (IsInstInDifferentBlocks(inst, equiv_inst)) {
-            if (!equiv_inst->IsDominate(inst) || (inst->IsResolver() && HasTryBlockBetween(equiv_inst, inst)) ||
-                HasOsrEntryBetween(equiv_inst, inst)) {
+        if (IsInstInDifferentBlocks(inst, equivInst)) {
+            if (!equivInst->IsDominate(inst) || (inst->IsResolver() && HasTryBlockBetween(equivInst, inst)) ||
+                HasOsrEntryBetween(equivInst, inst)) {
                 continue;
             }
         }
-        if (IsAddressArithmeticInst(inst) && HasSaveStateBetween<IsSaveStateCanTriggerGc>(equiv_inst, inst)) {
+        if (IsAddressArithmeticInst(inst) && HasSaveStateBetween<IsSaveStateCanTriggerGc>(equivInst, inst)) {
             continue;
         }
         // Check bridges
         if (inst->IsMovableObject()) {
-            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), equiv_inst, inst);
+            ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), equivInst, inst);
         } else {
             // check result can be moved by GC, but checks have no_cse flag
             ASSERT(!inst->IsCheck());
@@ -289,19 +289,19 @@ bool ValNum::TryToApplyCse(Inst *inst, InstVector *equiv_insts)
         }
 
         COMPILER_LOG(DEBUG, VN_OPT) << " CSE is applied for inst with id " << inst->GetId();
-        GetGraph()->GetEventWriter().EventGvn(inst->GetId(), inst->GetPc(), equiv_inst->GetId(), equiv_inst->GetPc());
-        inst->ReplaceUsers(equiv_inst);
-        if (equiv_inst->GetOpcode() == Opcode::InitClass &&
+        GetGraph()->GetEventWriter().EventGvn(inst->GetId(), inst->GetPc(), equivInst->GetId(), equivInst->GetPc());
+        inst->ReplaceUsers(equivInst);
+        if (equivInst->GetOpcode() == Opcode::InitClass &&
             (inst->GetOpcode() == Opcode::LoadClass || inst->GetOpcode() == Opcode::LoadAndInitClass)) {
-            equiv_inst->SetOpcode(Opcode::LoadAndInitClass);
-            equiv_inst->SetType(DataType::REFERENCE);
+            equivInst->SetOpcode(Opcode::LoadAndInitClass);
+            equivInst->SetType(DataType::REFERENCE);
         }
 
         // IsInstance, InitClass, LoadClass and LoadAndInitClass have attribute NO_DCE,
         // so they can't be removed by DCE pass. But we can remove the instructions after VN
         // because there is dominate equal instruction.
         inst->ClearFlag(compiler::inst_flags::NO_DCE);
-        cse_is_applied_ = true;
+        cseIsApplied_ = true;
         return true;
     }
 
@@ -319,19 +319,19 @@ void ValNum::FindEqualVnOrCreateNew(Inst *inst)
     auto obj = GetGraph()->GetLocalAllocator()->New<VnObject>();
     obj->Add(inst);
     COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions are searched for inst with id " << inst->GetId();
-    auto it = map_insts_.find(obj);
-    if (it == map_insts_.cend()) {
+    auto it = mapInsts_.find(obj);
+    if (it == mapInsts_.cend()) {
         COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions aren't found";
         SetInstValNum(inst);
-        InstVector equiv_insts(GetGraph()->GetLocalAllocator()->Adapter());
-        equiv_insts.push_back(inst);
-        map_insts_.insert({obj, std::move(equiv_insts)});
+        InstVector equivInsts(GetGraph()->GetLocalAllocator()->Adapter());
+        equivInsts.push_back(inst);
+        mapInsts_.insert({obj, std::move(equivInsts)});
         return;
     }
 
-    auto &equiv_insts = it->second;
-    if (!TryToApplyCse(inst, &equiv_insts)) {
-        equiv_insts.push_back(inst);
+    auto &equivInsts = it->second;
+    if (!TryToApplyCse(inst, &equivInsts)) {
+        equivInsts.push_back(inst);
     }
 }
 
@@ -348,6 +348,6 @@ bool ValNum::RunImpl()
             FindEqualVnOrCreateNew(inst);
         }
     }
-    return cse_is_applied_;
+    return cseIsApplied_;
 }
 }  // namespace panda::compiler

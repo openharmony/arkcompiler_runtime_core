@@ -54,13 +54,13 @@ void ClassLinker::AddPandaFile(std::unique_ptr<const panda_file::File> &&pf, Cla
     SCOPED_TRACE_STREAM << __FUNCTION__ << " " << file->GetFilename();
 
     {
-        os::memory::LockHolder lock {panda_files_lock_};
-        panda_files_.push_back({context, std::forward<std::unique_ptr<const panda_file::File>>(pf)});
+        os::memory::LockHolder lock {pandaFilesLock_};
+        pandaFiles_.push_back({context, std::forward<std::unique_ptr<const panda_file::File>>(pf)});
     }
 
     if (context == nullptr || context->IsBootContext()) {
-        os::memory::LockHolder lock {boot_panda_files_lock_};
-        boot_panda_files_.push_back(file);
+        os::memory::LockHolder lock {bootPandaFilesLock_};
+        bootPandaFiles_.push_back(file);
     }
 
     if (Runtime::GetCurrent()->IsInitialized()) {
@@ -71,15 +71,15 @@ void ClassLinker::AddPandaFile(std::unique_ptr<const panda_file::File> &&pf, Cla
     tooling::DebugInf::AddCodeMetaInfo(file);
 }
 
-void ClassLinker::FreeClassData(Class *class_ptr)
+void ClassLinker::FreeClassData(Class *classPtr)
 {
-    Span<Field> fields = class_ptr->GetFields();
+    Span<Field> fields = classPtr->GetFields();
     if (fields.Size() > 0) {
         allocator_->Free(fields.begin());
-        class_ptr->SetFields(Span<Field>(), 0);
+        classPtr->SetFields(Span<Field>(), 0);
     }
-    Span<Method> methods = class_ptr->GetMethods();
-    size_t n = methods.Size() + class_ptr->GetNumCopiedMethods();
+    Span<Method> methods = classPtr->GetMethods();
+    size_t n = methods.Size() + classPtr->GetNumCopiedMethods();
     if (n > 0) {
         mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
         for (auto &method : methods) {
@@ -88,11 +88,11 @@ void ClassLinker::FreeClassData(Class *class_ptr)
             allocator->Free(method.GetProfilingData());
         }
         allocator_->Free(methods.begin());
-        class_ptr->SetMethods(Span<Method>(), 0, 0);
+        classPtr->SetMethods(Span<Method>(), 0, 0);
     }
-    bool has_own_itable = !class_ptr->IsArrayClass();
-    auto itable = class_ptr->GetITable().Get();
-    if (has_own_itable && !itable.Empty()) {
+    bool hasOwnItable = !classPtr->IsArrayClass();
+    auto itable = classPtr->GetITable().Get();
+    if (hasOwnItable && !itable.Empty()) {
         for (size_t i = 0; i < itable.Size(); i++) {
             Span<Method *> imethods = itable[i].GetMethods();
             if (!imethods.Empty()) {
@@ -100,31 +100,31 @@ void ClassLinker::FreeClassData(Class *class_ptr)
             }
         }
         allocator_->Free(itable.begin());
-        class_ptr->SetITable(ITable());
+        classPtr->SetITable(ITable());
     }
-    Span<Class *> interfaces = class_ptr->GetInterfaces();
+    Span<Class *> interfaces = classPtr->GetInterfaces();
     if (!interfaces.Empty()) {
         allocator_->Free(interfaces.begin());
-        class_ptr->SetInterfaces(Span<Class *>());
+        classPtr->SetInterfaces(Span<Class *>());
     }
 }
 
-void ClassLinker::FreeClass(Class *class_ptr)
+void ClassLinker::FreeClass(Class *classPtr)
 {
-    FreeClassData(class_ptr);
-    GetExtension(class_ptr->GetSourceLang())->FreeClass(class_ptr);
+    FreeClassData(classPtr);
+    GetExtension(classPtr->GetSourceLang())->FreeClass(classPtr);
 }
 
 ClassLinker::~ClassLinker()
 {
-    for (auto &copied_name : copied_names_) {
-        allocator_->Free(reinterpret_cast<void *>(const_cast<uint8_t *>(copied_name)));
+    for (auto &copiedName : copiedNames_) {
+        allocator_->Free(reinterpret_cast<void *>(const_cast<uint8_t *>(copiedName)));
     }
 }
 
 ClassLinker::ClassLinker(mem::InternalAllocatorPtr allocator,
                          std::vector<std::unique_ptr<ClassLinkerExtension>> &&extensions)
-    : allocator_(allocator), aot_manager_(MakePandaUnique<AotManager>()), copied_names_(allocator->Adapter())
+    : allocator_(allocator), aotManager_(MakePandaUnique<AotManager>()), copiedNames_(allocator->Adapter())
 {
     for (auto &ext : extensions) {
         extensions_[panda::panda_file::GetLangArrIndex(ext->GetLanguage())] = std::move(ext);
@@ -143,9 +143,9 @@ static T *InitializeMemory(T *mem, Args... args)
     return new (mem) T(std::forward<Args>(args)...);
 }
 
-bool ClassLinker::Initialize(bool compressed_string_enabled)
+bool ClassLinker::Initialize(bool compressedStringEnabled)
 {
-    if (is_initialized_) {
+    if (isInitialized_) {
         return true;
     }
 
@@ -154,12 +154,12 @@ bool ClassLinker::Initialize(bool compressed_string_enabled)
             continue;
         }
 
-        if (!ext->Initialize(this, compressed_string_enabled)) {
+        if (!ext->Initialize(this, compressedStringEnabled)) {
             return false;
         }
     }
 
-    is_initialized_ = true;
+    isInitialized_ = true;
 
     return true;
 }
@@ -182,12 +182,12 @@ bool ClassLinker::InitializeRoots(ManagedThread *thread)
 using ClassEntry = std::pair<panda_file::File::EntityId, const panda_file::File *>;
 using PandaFiles = PandaVector<const panda_file::File *>;
 
-static ClassEntry FindClassInPandaFiles(const uint8_t *descriptor, const PandaFiles &panda_files)
+static ClassEntry FindClassInPandaFiles(const uint8_t *descriptor, const PandaFiles &pandaFiles)
 {
-    for (auto *pf : panda_files) {
-        auto class_id = pf->GetClassId(descriptor);
-        if (class_id.IsValid() && !pf->IsExternal(class_id)) {
-            return {class_id, pf};
+    for (auto *pf : pandaFiles) {
+        auto classId = pf->GetClassId(descriptor);
+        if (classId.IsValid() && !pf->IsExternal(classId)) {
+            return {classId, pf};
         }
     }
 
@@ -201,48 +201,47 @@ Class *ClassLinker::FindLoadedClass(const uint8_t *descriptor, ClassLinkerContex
 }
 
 template <class ClassDataAccessorT>
-static size_t GetClassSize(ClassDataAccessorT data_accessor, size_t vtable_size, size_t imt_size,
-                           size_t *out_num_sfields)
+static size_t GetClassSize(ClassDataAccessorT dataAccessor, size_t vtableSize, size_t imtSize, size_t *outNumSfields)
 {
-    size_t num_8bit_sfields = 0;
-    size_t num_16bit_sfields = 0;
-    size_t num_32bit_sfields = 0;
-    size_t num_64bit_sfields = 0;
-    size_t num_ref_sfields = 0;
-    size_t num_tagged_sfields = 0;
+    size_t num8bitSfields = 0;
+    size_t num16bitSfields = 0;
+    size_t num32bitSfields = 0;
+    size_t num64bitSfields = 0;
+    size_t numRefSfields = 0;
+    size_t numTaggedSfields = 0;
 
-    size_t num_sfields = 0;
+    size_t numSfields = 0;
 
-    data_accessor.template EnumerateStaticFieldTypes([&num_8bit_sfields, &num_16bit_sfields, &num_32bit_sfields,
-                                                      &num_64bit_sfields, &num_ref_sfields, &num_tagged_sfields,
-                                                      &num_sfields](Type field_type) {
-        ++num_sfields;
+    dataAccessor.template EnumerateStaticFieldTypes([&num8bitSfields, &num16bitSfields, &num32bitSfields,
+                                                     &num64bitSfields, &numRefSfields, &numTaggedSfields,
+                                                     &numSfields](Type fieldType) {
+        ++numSfields;
 
-        switch (field_type.GetId()) {
+        switch (fieldType.GetId()) {
             case Type::TypeId::U1:
             case Type::TypeId::I8:
             case Type::TypeId::U8:
-                ++num_8bit_sfields;
+                ++num8bitSfields;
                 break;
             case Type::TypeId::I16:
             case Type::TypeId::U16:
-                ++num_16bit_sfields;
+                ++num16bitSfields;
                 break;
             case Type::TypeId::I32:
             case Type::TypeId::U32:
             case Type::TypeId::F32:
-                ++num_32bit_sfields;
+                ++num32bitSfields;
                 break;
             case Type::TypeId::I64:
             case Type::TypeId::U64:
             case Type::TypeId::F64:
-                ++num_64bit_sfields;
+                ++num64bitSfields;
                 break;
             case Type::TypeId::REFERENCE:
-                ++num_ref_sfields;
+                ++numRefSfields;
                 break;
             case Type::TypeId::TAGGED:
-                ++num_tagged_sfields;
+                ++numTaggedSfields;
                 break;
             default:
                 UNREACHABLE();
@@ -250,23 +249,23 @@ static size_t GetClassSize(ClassDataAccessorT data_accessor, size_t vtable_size,
         }
     });
 
-    *out_num_sfields = num_sfields;
+    *outNumSfields = numSfields;
 
-    return Class::ComputeClassSize(vtable_size, imt_size, num_8bit_sfields, num_16bit_sfields, num_32bit_sfields,
-                                   num_64bit_sfields, num_ref_sfields, num_tagged_sfields);
+    return Class::ComputeClassSize(vtableSize, imtSize, num8bitSfields, num16bitSfields, num32bitSfields,
+                                   num64bitSfields, numRefSfields, numTaggedSfields);
 }
 
 class ClassDataAccessorWrapper {
 public:
-    explicit ClassDataAccessorWrapper(panda_file::ClassDataAccessor *data_accessor = nullptr)
-        : data_accessor_(data_accessor)
+    explicit ClassDataAccessorWrapper(panda_file::ClassDataAccessor *dataAccessor = nullptr)
+        : dataAccessor_(dataAccessor)
     {
     }
 
     template <class Callback>
     void EnumerateStaticFieldTypes(const Callback &cb) const
     {
-        data_accessor_->EnumerateFields([cb](panda_file::FieldDataAccessor &fda) {
+        dataAccessor_->EnumerateFields([cb](panda_file::FieldDataAccessor &fda) {
             if (!fda.IsStatic()) {
                 return;
             }
@@ -281,28 +280,28 @@ public:
     DEFAULT_MOVE_SEMANTIC(ClassDataAccessorWrapper);
 
 private:
-    panda_file::ClassDataAccessor *data_accessor_;
+    panda_file::ClassDataAccessor *dataAccessor_;
 };
 
-ClassLinker::ClassInfo ClassLinker::GetClassInfo(panda_file::ClassDataAccessor *data_accessor, Class *base,
+ClassLinker::ClassInfo ClassLinker::GetClassInfo(panda_file::ClassDataAccessor *dataAccessor, Class *base,
                                                  Span<Class *> interfaces, ClassLinkerContext *context)
 {
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(data_accessor);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(dataAccessor);
 
-    auto vtable_builder = ctx.CreateVTableBuilder();
-    auto itable_builder = ctx.CreateITableBuilder();
-    auto imtable_builder = ctx.CreateIMTableBuilder();
+    auto vtableBuilder = ctx.CreateVTableBuilder();
+    auto itableBuilder = ctx.CreateITableBuilder();
+    auto imtableBuilder = ctx.CreateIMTableBuilder();
 
-    itable_builder->Build(this, base, interfaces, data_accessor->IsInterface());
-    vtable_builder->Build(data_accessor, base, itable_builder->GetITable(), context);
-    imtable_builder->Build(data_accessor, itable_builder->GetITable());
+    itableBuilder->Build(this, base, interfaces, dataAccessor->IsInterface());
+    vtableBuilder->Build(dataAccessor, base, itableBuilder->GetITable(), context);
+    imtableBuilder->Build(dataAccessor, itableBuilder->GetITable());
 
-    ClassDataAccessorWrapper data_accessor_wrapper(data_accessor);
-    size_t num_sfields = 0;
-    size_t size = GetClassSize(data_accessor_wrapper, vtable_builder->GetVTableSize(), imtable_builder->GetIMTSize(),
-                               &num_sfields);
+    ClassDataAccessorWrapper dataAccessorWrapper(dataAccessor);
+    size_t numSfields = 0;
+    size_t size =
+        GetClassSize(dataAccessorWrapper, vtableBuilder->GetVTableSize(), imtableBuilder->GetIMTSize(), &numSfields);
 
-    return {size, num_sfields, std::move(vtable_builder), std::move(itable_builder), std::move(imtable_builder)};
+    return {size, numSfields, std::move(vtableBuilder), std::move(itableBuilder), std::move(imtableBuilder)};
 }
 
 class ClassDataAccessor {
@@ -331,87 +330,86 @@ private:
 };
 
 ClassLinker::ClassInfo ClassLinker::GetClassInfo(Span<Method> methods, Span<Field> fields, Class *base,
-                                                 Span<Class *> interfaces, bool is_interface)
+                                                 Span<Class *> interfaces, bool isInterface)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*base);
 
-    auto vtable_builder = ctx.CreateVTableBuilder();
-    auto itable_builder = ctx.CreateITableBuilder();
-    auto imtable_builder = ctx.CreateIMTableBuilder();
+    auto vtableBuilder = ctx.CreateVTableBuilder();
+    auto itableBuilder = ctx.CreateITableBuilder();
+    auto imtableBuilder = ctx.CreateIMTableBuilder();
 
-    itable_builder->Build(this, base, interfaces, is_interface);
-    vtable_builder->Build(methods, base, itable_builder->GetITable(), is_interface);
-    imtable_builder->Build(itable_builder->GetITable(), is_interface);
+    itableBuilder->Build(this, base, interfaces, isInterface);
+    vtableBuilder->Build(methods, base, itableBuilder->GetITable(), isInterface);
+    imtableBuilder->Build(itableBuilder->GetITable(), isInterface);
 
-    ClassDataAccessor data_accessor(fields);
-    size_t num_sfields = 0;
-    size_t size =
-        GetClassSize(data_accessor, vtable_builder->GetVTableSize(), imtable_builder->GetIMTSize(), &num_sfields);
+    ClassDataAccessor dataAccessor(fields);
+    size_t numSfields = 0;
+    size_t size = GetClassSize(dataAccessor, vtableBuilder->GetVTableSize(), imtableBuilder->GetIMTSize(), &numSfields);
 
-    return {size, num_sfields, std::move(vtable_builder), std::move(itable_builder), std::move(imtable_builder)};
+    return {size, numSfields, std::move(vtableBuilder), std::move(itableBuilder), std::move(imtableBuilder)};
 }
 
-static void LoadMethod(Method *method, panda_file::MethodDataAccessor *method_data_accessor, Class *klass,
+static void LoadMethod(Method *method, panda_file::MethodDataAccessor *methodDataAccessor, Class *klass,
                        const LanguageContext &ctx, const ClassLinkerExtension *ext)
 {
-    const auto &pf = method_data_accessor->GetPandaFile();
-    panda_file::ProtoDataAccessor pda(pf, method_data_accessor->GetProtoId());
+    const auto &pf = methodDataAccessor->GetPandaFile();
+    panda_file::ProtoDataAccessor pda(pf, methodDataAccessor->GetProtoId());
 
-    uint32_t access_flags = method_data_accessor->GetAccessFlags();
+    uint32_t accessFlags = methodDataAccessor->GetAccessFlags();
 
-    auto *method_name = pf.GetStringData(method_data_accessor->GetNameId()).data;
-    if (utf::IsEqual(method_name, ctx.GetCtorName()) || utf::IsEqual(method_name, ctx.GetCctorName())) {
-        access_flags |= ACC_CONSTRUCTOR;
+    auto *methodName = pf.GetStringData(methodDataAccessor->GetNameId()).data;
+    if (utf::IsEqual(methodName, ctx.GetCtorName()) || utf::IsEqual(methodName, ctx.GetCctorName())) {
+        accessFlags |= ACC_CONSTRUCTOR;
     }
 
-    auto code_id = method_data_accessor->GetCodeId();
-    size_t num_args = (method_data_accessor->IsStatic()) ? pda.GetNumArgs() : (pda.GetNumArgs() + 1);
+    auto codeId = methodDataAccessor->GetCodeId();
+    size_t numArgs = (methodDataAccessor->IsStatic()) ? pda.GetNumArgs() : (pda.GetNumArgs() + 1);
 
-    if (!code_id.has_value()) {
-        InitializeMemory(method, klass, &pf, method_data_accessor->GetMethodId(), panda_file::File::EntityId(0),
-                         access_flags, num_args, reinterpret_cast<const uint16_t *>(pda.GetShorty().Data()));
+    if (!codeId.has_value()) {
+        InitializeMemory(method, klass, &pf, methodDataAccessor->GetMethodId(), panda_file::File::EntityId(0),
+                         accessFlags, numArgs, reinterpret_cast<const uint16_t *>(pda.GetShorty().Data()));
 
-        if (method_data_accessor->IsNative()) {
+        if (methodDataAccessor->IsNative()) {
             method->SetCompiledEntryPoint(ext->GetNativeEntryPointFor(method));
         } else {
             method->SetInterpreterEntryPoint();
         }
     } else {
-        InitializeMemory(method, klass, &pf, method_data_accessor->GetMethodId(), code_id.value(), access_flags,
-                         num_args, reinterpret_cast<const uint16_t *>(pda.GetShorty().Data()));
+        InitializeMemory(method, klass, &pf, methodDataAccessor->GetMethodId(), codeId.value(), accessFlags, numArgs,
+                         reinterpret_cast<const uint16_t *>(pda.GetShorty().Data()));
         method->SetCompiledEntryPoint(GetCompiledCodeToInterpreterBridge(method));
     }
 }
 
-void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &aot_class, size_t method_index)
+void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &aotClass, size_t methodIndex)
 {
-    ASSERT(aot_class.IsValid());
+    ASSERT(aotClass.IsValid());
     if (method->IsIntrinsic()) {
         return;
     }
-    auto entry = aot_class.FindMethodCodeEntry(method_index);
+    auto entry = aotClass.FindMethodCodeEntry(methodIndex);
     if (entry != nullptr) {
         method->SetCompiledEntryPoint(entry);
         LOG(INFO, AOT) << "Found AOT entrypoint ["
-                       << reinterpret_cast<const void *>(aot_class.FindMethodCodeSpan(method_index).data()) << ":"
-                       << reinterpret_cast<const void *>(aot_class.FindMethodCodeSpan(method_index).end())
+                       << reinterpret_cast<const void *>(aotClass.FindMethodCodeSpan(methodIndex).data()) << ":"
+                       << reinterpret_cast<const void *>(aotClass.FindMethodCodeSpan(methodIndex).end())
                        << "] for method: " << method->GetFullName();
 
         EVENT_AOT_ENTRYPOINT_FOUND(method->GetFullName());
-        ASSERT(aot_class.FindMethodHeader(method_index)->method_id == method->GetFileId().GetOffset());
+        ASSERT(aotClass.FindMethodHeader(methodIndex)->methodId == method->GetFileId().GetOffset());
     }
 }
 
-bool ClassLinker::LoadMethods(Class *klass, ClassInfo *class_info, panda_file::ClassDataAccessor *data_accessor,
-                              [[maybe_unused]] ClassLinkerErrorHandler *error_handler)
+bool ClassLinker::LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::ClassDataAccessor *dataAccessor,
+                              [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
-    uint32_t num_methods = data_accessor->GetMethodsNumber();
+    uint32_t numMethods = dataAccessor->GetMethodsNumber();
 
-    uint32_t num_vmethods = klass->GetNumVirtualMethods();
-    uint32_t num_smethods = num_methods - num_vmethods;
+    uint32_t numVmethods = klass->GetNumVirtualMethods();
+    uint32_t numSmethods = numMethods - numVmethods;
 
-    auto &copied_methods = class_info->vtable_builder->GetCopiedMethods();
-    uint32_t n = num_methods + copied_methods.size();
+    auto &copiedMethods = classInfo->vtableBuilder->GetCopiedMethods();
+    uint32_t n = numMethods + copiedMethods.size();
 
     if (n == 0) {
         return true;
@@ -419,76 +417,76 @@ bool ClassLinker::LoadMethods(Class *klass, ClassInfo *class_info, panda_file::C
 
     Span<Method> methods {allocator_->AllocArray<Method>(n), n};
 
-    size_t smethod_idx = num_vmethods;
-    size_t vmethod_idx = 0;
+    size_t smethodIdx = numVmethods;
+    size_t vmethodIdx = 0;
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*klass);
     auto *ext = GetExtension(ctx);
     ASSERT(ext != nullptr);
 
-    auto aot_pfile = aot_manager_->FindPandaFile(klass->GetPandaFile()->GetFullFileName());
-    if (aot_pfile != nullptr) {
-        EVENT_AOT_LOADED_FOR_CLASS(PandaString(aot_pfile->GetFileName()), PandaString(klass->GetName()));
+    auto aotPfile = aotManager_->FindPandaFile(klass->GetPandaFile()->GetFullFileName());
+    if (aotPfile != nullptr) {
+        EVENT_AOT_LOADED_FOR_CLASS(PandaString(aotPfile->GetFileName()), PandaString(klass->GetName()));
     }
 
-    compiler::AotClass aot_class =
-        (aot_pfile != nullptr) ? aot_pfile->GetClass(klass->GetFileId().GetOffset()) : compiler::AotClass::Invalid();
+    compiler::AotClass aotClass =
+        (aotPfile != nullptr) ? aotPfile->GetClass(klass->GetFileId().GetOffset()) : compiler::AotClass::Invalid();
 
-    size_t method_index = 0;
-    data_accessor->EnumerateMethods([klass, &smethod_idx, &vmethod_idx, &methods, aot_class, ctx, ext,
-                                     &method_index](panda_file::MethodDataAccessor &method_data_accessor) {
-        Method *method = method_data_accessor.IsStatic() ? &methods[smethod_idx++] : &methods[vmethod_idx++];
-        LoadMethod(method, &method_data_accessor, klass, ctx, ext);
-        if (aot_class.IsValid()) {
-            MaybeLinkMethodToAotCode(method, aot_class, method_index);
+    size_t methodIndex = 0;
+    dataAccessor->EnumerateMethods([klass, &smethodIdx, &vmethodIdx, &methods, aotClass, ctx, ext,
+                                    &methodIndex](panda_file::MethodDataAccessor &methodDataAccessor) {
+        Method *method = methodDataAccessor.IsStatic() ? &methods[smethodIdx++] : &methods[vmethodIdx++];
+        LoadMethod(method, &methodDataAccessor, klass, ctx, ext);
+        if (aotClass.IsValid()) {
+            MaybeLinkMethodToAotCode(method, aotClass, methodIndex);
         }
         // Instead of checking if the method is abstract before every virtual call
         // the special stub throwing AbstractMethodError is registered as compiled entry point.
         if (method->IsAbstract()) {
             method->SetCompiledEntryPoint(GetAbstractMethodStub());
         }
-        method_index++;
+        methodIndex++;
     });
 
-    for (size_t i = 0; i < copied_methods.size(); i++) {
-        size_t idx = num_methods + i;
-        InitializeMemory(&methods[idx], copied_methods[i].method);
+    for (size_t i = 0; i < copiedMethods.size(); i++) {
+        size_t idx = numMethods + i;
+        InitializeMemory(&methods[idx], copiedMethods[i].method);
         methods[idx].SetIsDefaultInterfaceMethod();
-        if (copied_methods[i].default_abstract) {
+        if (copiedMethods[i].defaultAbstract) {
             methods[idx].SetCompiledEntryPoint(GetAbstractMethodStub());
         }
-        if (copied_methods[i].default_conflict) {
+        if (copiedMethods[i].defaultConflict) {
             methods[idx].SetCompiledEntryPoint(GetDefaultConflictMethodStub());
         }
     }
 
-    klass->SetMethods(methods, num_vmethods, num_smethods);
+    klass->SetMethods(methods, numVmethods, numSmethods);
 
     return true;
 }
 
-bool ClassLinker::LoadFields(Class *klass, panda_file::ClassDataAccessor *data_accessor,
-                             [[maybe_unused]] ClassLinkerErrorHandler *error_handler)
+bool ClassLinker::LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor,
+                             [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
-    uint32_t num_fields = data_accessor->GetFieldsNumber();
-    if (num_fields == 0) {
+    uint32_t numFields = dataAccessor->GetFieldsNumber();
+    if (numFields == 0) {
         return true;
     }
 
-    uint32_t num_sfields = klass->GetNumStaticFields();
+    uint32_t numSfields = klass->GetNumStaticFields();
 
-    Span<Field> fields {allocator_->AllocArray<Field>(num_fields), num_fields};
+    Span<Field> fields {allocator_->AllocArray<Field>(numFields), numFields};
 
-    size_t sfields_idx = 0;
-    size_t ifields_idx = num_sfields;
-    data_accessor->EnumerateFields(
-        [klass, &sfields_idx, &ifields_idx, &fields](panda_file::FieldDataAccessor &field_data_accessor) {
-            Field *field = field_data_accessor.IsStatic() ? &fields[sfields_idx++] : &fields[ifields_idx++];
-            InitializeMemory(field, klass, field_data_accessor.GetFieldId(), field_data_accessor.GetAccessFlags(),
-                             panda_file::Type::GetTypeFromFieldEncoding(field_data_accessor.GetType()));
+    size_t sfieldsIdx = 0;
+    size_t ifieldsIdx = numSfields;
+    dataAccessor->EnumerateFields(
+        [klass, &sfieldsIdx, &ifieldsIdx, &fields](panda_file::FieldDataAccessor &fieldDataAccessor) {
+            Field *field = fieldDataAccessor.IsStatic() ? &fields[sfieldsIdx++] : &fields[ifieldsIdx++];
+            InitializeMemory(field, klass, fieldDataAccessor.GetFieldId(), fieldDataAccessor.GetAccessFlags(),
+                             panda_file::Type::GetTypeFromFieldEncoding(fieldDataAccessor.GetType()));
         });
 
-    klass->SetFields(fields, num_sfields);
+    klass->SetFields(fields, numSfields);
 
     return true;
 }
@@ -496,14 +494,14 @@ bool ClassLinker::LoadFields(Class *klass, panda_file::ClassDataAccessor *data_a
 template <bool REVERSE_LAYOUT = false>
 static void LayoutFieldsWithoutAlignment(size_t size, size_t *offset, size_t *space, PandaVector<Field *> *fields)
 {
-    auto last_proceeded_element = fields->end();
+    auto lastProceededElement = fields->end();
     // Iterating from beginning to end and erasing elements from the beginning of a vector
     // is required for correct field layout between language class representation in C++ code
     // and generated by methods in class linker.
     // (e.g. class String should have length field before hash field, not vice versa)
     for (auto i = fields->begin(); i != fields->end(); i++) {
         if (!(space == nullptr || *space >= size)) {
-            last_proceeded_element = i;
+            lastProceededElement = i;
             break;
         }
         Field *field = *i;
@@ -520,16 +518,16 @@ static void LayoutFieldsWithoutAlignment(size_t size, size_t *offset, size_t *sp
             *space -= size;
         }
     }
-    fields->erase(fields->begin(), last_proceeded_element);
+    fields->erase(fields->begin(), lastProceededElement);
 }
 
 static uint32_t LayoutReferenceFields(size_t size, size_t *offset, const PandaVector<Field *> &fields)
 {
-    uint32_t volatile_fields_num = 0;
+    uint32_t volatileFieldsNum = 0;
     // layout volatile fields firstly
     for (auto *field : fields) {
         if (field->IsVolatile()) {
-            volatile_fields_num++;
+            volatileFieldsNum++;
             field->SetOffset(*offset);
             *offset += size;
         }
@@ -540,13 +538,13 @@ static uint32_t LayoutReferenceFields(size_t size, size_t *offset, const PandaVe
             *offset += size;
         }
     }
-    return volatile_fields_num;
+    return volatileFieldsNum;
 }
 
-static size_t LayoutFieldsInBaseClassPadding(Class *klass, PandaVector<Field *> *tagged_fields,
+static size_t LayoutFieldsInBaseClassPadding(Class *klass, PandaVector<Field *> *taggedFields,
                                              PandaVector<Field *> *fields64, PandaVector<Field *> *fields32,
                                              PandaVector<Field *> *fields16, PandaVector<Field *> *fields8,
-                                             PandaVector<Field *> *ref_fields, bool is_static)
+                                             PandaVector<Field *> *refFields, bool isStatic)
 {
     constexpr size_t SIZE_64 = sizeof(uint64_t);
     constexpr size_t SIZE_32 = sizeof(uint32_t);
@@ -555,55 +553,55 @@ static size_t LayoutFieldsInBaseClassPadding(Class *klass, PandaVector<Field *> 
 
     size_t offset;
 
-    if (is_static) {
+    if (isStatic) {
         offset = klass->GetStaticFieldsOffset();
     } else {
         offset = (klass->GetBase() != nullptr) ? klass->GetBase()->GetObjectSize() : ObjectHeader::ObjectHeaderSize();
     }
 
-    size_t align_offset = offset;
-    if (!ref_fields->empty()) {
-        align_offset = AlignUp(offset, ClassHelper::OBJECT_POINTER_SIZE);
-    } else if (!(fields64->empty()) || !(tagged_fields->empty())) {
-        align_offset = AlignUp(offset, SIZE_64);
+    size_t alignOffset = offset;
+    if (!refFields->empty()) {
+        alignOffset = AlignUp(offset, ClassHelper::OBJECT_POINTER_SIZE);
+    } else if (!(fields64->empty()) || !(taggedFields->empty())) {
+        alignOffset = AlignUp(offset, SIZE_64);
     } else if (!fields32->empty()) {
-        align_offset = AlignUp(offset, SIZE_32);
+        alignOffset = AlignUp(offset, SIZE_32);
     } else if (!fields16->empty()) {
-        align_offset = AlignUp(offset, SIZE_16);
+        alignOffset = AlignUp(offset, SIZE_16);
     }
-    if (align_offset != offset) {
-        size_t end_offset = align_offset;
-        size_t padding = end_offset - offset;
+    if (alignOffset != offset) {
+        size_t endOffset = alignOffset;
+        size_t padding = endOffset - offset;
         // try to put short fields of child class at end of free space of base class
-        LayoutFieldsWithoutAlignment<true>(SIZE_32, &end_offset, &padding, fields32);
-        LayoutFieldsWithoutAlignment<true>(SIZE_16, &end_offset, &padding, fields16);
-        LayoutFieldsWithoutAlignment<true>(SIZE_8, &end_offset, &padding, fields8);
+        LayoutFieldsWithoutAlignment<true>(SIZE_32, &endOffset, &padding, fields32);
+        LayoutFieldsWithoutAlignment<true>(SIZE_16, &endOffset, &padding, fields16);
+        LayoutFieldsWithoutAlignment<true>(SIZE_8, &endOffset, &padding, fields8);
     }
-    return align_offset;
+    return alignOffset;
 }
 
-static size_t LayoutFields(Class *klass, PandaVector<Field *> *tagged_fields, PandaVector<Field *> *fields64,
+static size_t LayoutFields(Class *klass, PandaVector<Field *> *taggedFields, PandaVector<Field *> *fields64,
                            PandaVector<Field *> *fields32, PandaVector<Field *> *fields16,
-                           PandaVector<Field *> *fields8, PandaVector<Field *> *ref_fields, bool is_static)
+                           PandaVector<Field *> *fields8, PandaVector<Field *> *refFields, bool isStatic)
 {
     constexpr size_t SIZE_64 = sizeof(uint64_t);
     constexpr size_t SIZE_32 = sizeof(uint32_t);
     constexpr size_t SIZE_16 = sizeof(uint16_t);
     constexpr size_t SIZE_8 = sizeof(uint8_t);
 
-    size_t offset = LayoutFieldsInBaseClassPadding(klass, tagged_fields, fields64, fields32, fields16, fields8,
-                                                   ref_fields, is_static);
-    if (!ref_fields->empty()) {
+    size_t offset =
+        LayoutFieldsInBaseClassPadding(klass, taggedFields, fields64, fields32, fields16, fields8, refFields, isStatic);
+    if (!refFields->empty()) {
         offset = AlignUp(offset, ClassHelper::OBJECT_POINTER_SIZE);
-        klass->SetRefFieldsNum(ref_fields->size(), is_static);
-        klass->SetRefFieldsOffset(offset, is_static);
-        auto volatile_num = LayoutReferenceFields(ClassHelper::OBJECT_POINTER_SIZE, &offset, *ref_fields);
-        klass->SetVolatileRefFieldsNum(volatile_num, is_static);
+        klass->SetRefFieldsNum(refFields->size(), isStatic);
+        klass->SetRefFieldsOffset(offset, isStatic);
+        auto volatileNum = LayoutReferenceFields(ClassHelper::OBJECT_POINTER_SIZE, &offset, *refFields);
+        klass->SetVolatileRefFieldsNum(volatileNum, isStatic);
     }
 
     static_assert(coretypes::TaggedValue::TaggedTypeSize() == SIZE_64,
                   "Please fix alignment of the fields of type \"TaggedValue\"");
-    if (!IsAligned<SIZE_64>(offset) && (!fields64->empty() || !tagged_fields->empty())) {
+    if (!IsAligned<SIZE_64>(offset) && (!fields64->empty() || !taggedFields->empty())) {
         size_t padding = AlignUp(offset, SIZE_64) - offset;
 
         LayoutFieldsWithoutAlignment(SIZE_32, &offset, &padding, fields32);
@@ -613,7 +611,7 @@ static size_t LayoutFields(Class *klass, PandaVector<Field *> *tagged_fields, Pa
         offset += padding;
     }
 
-    LayoutFieldsWithoutAlignment(coretypes::TaggedValue::TaggedTypeSize(), &offset, nullptr, tagged_fields);
+    LayoutFieldsWithoutAlignment(coretypes::TaggedValue::TaggedTypeSize(), &offset, nullptr, taggedFields);
     LayoutFieldsWithoutAlignment(SIZE_64, &offset, nullptr, fields64);
 
     if (!IsAligned<SIZE_32>(offset) && !fields32->empty()) {
@@ -643,28 +641,28 @@ static size_t LayoutFields(Class *klass, PandaVector<Field *> *tagged_fields, Pa
 }
 
 /* static */
-bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool is_static,
-                               [[maybe_unused]] ClassLinkerErrorHandler *error_handler)
+bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool isStatic,
+                               [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
     // These containers must be optimized
-    PandaVector<Field *> tagged_fields;
+    PandaVector<Field *> taggedFields;
     PandaVector<Field *> fields64;
     PandaVector<Field *> fields32;
     PandaVector<Field *> fields16;
     PandaVector<Field *> fields8;
-    PandaVector<Field *> ref_fields;
-    tagged_fields.reserve(fields.size());
+    PandaVector<Field *> refFields;
+    taggedFields.reserve(fields.size());
     fields64.reserve(fields.size());
     fields32.reserve(fields.size());
     fields16.reserve(fields.size());
     fields8.reserve(fields.size());
-    ref_fields.reserve(fields.size());
+    refFields.reserve(fields.size());
 
     for (auto &field : fields) {
         auto type = field.GetType();
 
         if (!type.IsPrimitive()) {
-            ref_fields.push_back(&field);
+            refFields.push_back(&field);
             continue;
         }
 
@@ -689,7 +687,7 @@ bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool is_static,
                 fields64.push_back(&field);
                 break;
             case Type::TypeId::TAGGED:
-                tagged_fields.push_back(&field);
+                taggedFields.push_back(&field);
                 break;
             default:
                 UNREACHABLE();
@@ -698,34 +696,34 @@ bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool is_static,
     }
 
     size_t size =
-        panda::LayoutFields(klass, &tagged_fields, &fields64, &fields32, &fields16, &fields8, &ref_fields, is_static);
+        panda::LayoutFields(klass, &taggedFields, &fields64, &fields32, &fields16, &fields8, &refFields, isStatic);
 
-    if (!is_static && !klass->IsVariableSize()) {
+    if (!isStatic && !klass->IsVariableSize()) {
         klass->SetObjectSize(size);
     }
 
     return true;
 }
 
-bool ClassLinker::LinkMethods(Class *klass, ClassInfo *class_info,
-                              [[maybe_unused]] ClassLinkerErrorHandler *error_handler)
+bool ClassLinker::LinkMethods(Class *klass, ClassInfo *classInfo,
+                              [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
-    class_info->vtable_builder->UpdateClass(klass);
-    class_info->itable_builder->Resolve(klass);
-    class_info->itable_builder->UpdateClass(klass);
-    class_info->imtable_builder->UpdateClass(klass);
+    classInfo->vtableBuilder->UpdateClass(klass);
+    classInfo->itableBuilder->Resolve(klass);
+    classInfo->itableBuilder->UpdateClass(klass);
+    classInfo->imtableBuilder->UpdateClass(klass);
 
     return true;
 }
 
-bool ClassLinker::LinkFields(Class *klass, ClassLinkerErrorHandler *error_handler)
+bool ClassLinker::LinkFields(Class *klass, ClassLinkerErrorHandler *errorHandler)
 {
-    if (!LayoutFields(klass, klass->GetStaticFields(), true, error_handler)) {
+    if (!LayoutFields(klass, klass->GetStaticFields(), true, errorHandler)) {
         LOG(ERROR, CLASS_LINKER) << "Cannot layout static fields of class '" << klass->GetName() << "'";
         return false;
     }
 
-    if (!LayoutFields(klass, klass->GetInstanceFields(), false, error_handler)) {
+    if (!LayoutFields(klass, klass->GetInstanceFields(), false, errorHandler)) {
         LOG(ERROR, CLASS_LINKER) << "Cannot layout instance fields of class '" << klass->GetName() << "'";
         return false;
     }
@@ -734,45 +732,44 @@ bool ClassLinker::LinkFields(Class *klass, ClassLinkerErrorHandler *error_handle
 }
 
 Class *ClassLinker::LoadBaseClass(panda_file::ClassDataAccessor *cda, const LanguageContext &ctx,
-                                  ClassLinkerContext *context, ClassLinkerErrorHandler *error_handler)
+                                  ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler)
 {
-    auto base_class_id = cda->GetSuperClassId();
+    auto baseClassId = cda->GetSuperClassId();
     auto *ext = GetExtension(ctx);
     ASSERT(ext != nullptr);
-    if (base_class_id.GetOffset() == 0) {
+    if (baseClassId.GetOffset() == 0) {
         return ext->GetClassRoot(ClassRoot::OBJECT);
     }
 
     auto &pf = cda->GetPandaFile();
-    auto *base_class = ext->GetClass(pf, base_class_id, context, error_handler);
-    if (base_class == nullptr) {
-        LOG(INFO, CLASS_LINKER) << "Cannot find base class '"
-                                << utf::Mutf8AsCString(pf.GetStringData(base_class_id).data) << "' of class '"
-                                << utf::Mutf8AsCString(pf.GetStringData(cda->GetClassId()).data) << "' in ctx "
-                                << context;
+    auto *baseClass = ext->GetClass(pf, baseClassId, context, errorHandler);
+    if (baseClass == nullptr) {
+        LOG(INFO, CLASS_LINKER) << "Cannot find base class '" << utf::Mutf8AsCString(pf.GetStringData(baseClassId).data)
+                                << "' of class '" << utf::Mutf8AsCString(pf.GetStringData(cda->GetClassId()).data)
+                                << "' in ctx " << context;
         return nullptr;
     }
 
-    return base_class;
+    return baseClass;
 }
 
 std::optional<Span<Class *>> ClassLinker::LoadInterfaces(panda_file::ClassDataAccessor *cda,
                                                          ClassLinkerContext *context,
-                                                         ClassLinkerErrorHandler *error_handler)
+                                                         ClassLinkerErrorHandler *errorHandler)
 {
     ASSERT(context != nullptr);
-    size_t ifaces_num = cda->GetIfacesNumber();
+    size_t ifacesNum = cda->GetIfacesNumber();
 
-    if (ifaces_num == 0) {
-        return Span<Class *>(nullptr, ifaces_num);
+    if (ifacesNum == 0) {
+        return Span<Class *>(nullptr, ifacesNum);
     }
 
-    Span<Class *> ifaces {allocator_->AllocArray<Class *>(ifaces_num), ifaces_num};
+    Span<Class *> ifaces {allocator_->AllocArray<Class *>(ifacesNum), ifacesNum};
 
-    for (size_t i = 0; i < ifaces_num; i++) {
+    for (size_t i = 0; i < ifacesNum; i++) {
         auto id = cda->GetInterfaceId(i);
         auto &pf = cda->GetPandaFile();
-        auto *iface = GetClass(pf, id, context, error_handler);
+        auto *iface = GetClass(pf, id, context, errorHandler);
         if (iface == nullptr) {
             LOG(INFO, CLASS_LINKER) << "Cannot find interface '" << utf::Mutf8AsCString(pf.GetStringData(id).data)
                                     << "' of class '" << utf::Mutf8AsCString(pf.GetStringData(cda->GetClassId()).data)
@@ -794,15 +791,15 @@ using ClassLoadingSet = std::unordered_set<uint64_t>;
 class ClassScopeStaticSetAutoCleaner {
 public:
     ClassScopeStaticSetAutoCleaner() = default;
-    explicit ClassScopeStaticSetAutoCleaner(ClassLoadingSet *set_ptr, ClassLoadingSet **tl_set_ptr)
-        : set_ptr_(set_ptr), tl_set_ptr_(tl_set_ptr)
+    explicit ClassScopeStaticSetAutoCleaner(ClassLoadingSet *setPtr, ClassLoadingSet **tlSetPtr)
+        : setPtr_(setPtr), tlSetPtr_(tlSetPtr)
     {
     }
     ~ClassScopeStaticSetAutoCleaner()
     {
-        set_ptr_->clear();
-        if (tl_set_ptr_ != nullptr) {
-            *tl_set_ptr_ = nullptr;
+        setPtr_->clear();
+        if (tlSetPtr_ != nullptr) {
+            *tlSetPtr_ = nullptr;
         }
     }
 
@@ -810,66 +807,66 @@ public:
     NO_MOVE_SEMANTIC(ClassScopeStaticSetAutoCleaner);
 
 private:
-    ClassLoadingSet *set_ptr_;
-    ClassLoadingSet **tl_set_ptr_;
+    ClassLoadingSet *setPtr_;
+    ClassLoadingSet **tlSetPtr_;
 };
 
-static uint64_t GetClassUniqueHash(uint32_t panda_file_hash, uint32_t class_id)
+static uint64_t GetClassUniqueHash(uint32_t pandaFileHash, uint32_t classId)
 {
-    const uint8_t bits_to_shuffle = 32;
-    return (static_cast<uint64_t>(panda_file_hash) << bits_to_shuffle) | static_cast<uint64_t>(class_id);
+    const uint8_t bitsToShuffle = 32;
+    return (static_cast<uint64_t>(pandaFileHash) << bitsToShuffle) | static_cast<uint64_t>(classId);
 }
 
-Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *class_data_accessor, const uint8_t *descriptor,
-                              Class *base_class, Span<Class *> interfaces, ClassLinkerContext *context,
-                              ClassLinkerExtension *ext, ClassLinkerErrorHandler *error_handler)
+Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, const uint8_t *descriptor,
+                              Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
+                              ClassLinkerExtension *ext, ClassLinkerErrorHandler *errorHandler)
 {
     ASSERT(context != nullptr);
-    ClassInfo class_info = GetClassInfo(class_data_accessor, base_class, interfaces, context);
+    ClassInfo classInfo = GetClassInfo(classDataAccessor, baseClass, interfaces, context);
 
-    auto *klass = ext->CreateClass(descriptor, class_info.vtable_builder->GetVTableSize(),
-                                   class_info.imtable_builder->GetIMTSize(), class_info.size);
+    auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
+                                   classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
 
     if (UNLIKELY(klass == nullptr)) {
         return nullptr;
     }
 
     klass->SetLoadContext(context);
-    klass->SetBase(base_class);
+    klass->SetBase(baseClass);
     klass->SetInterfaces(interfaces);
-    klass->SetFileId(class_data_accessor->GetClassId());
-    klass->SetPandaFile(&class_data_accessor->GetPandaFile());
-    klass->SetAccessFlags(class_data_accessor->GetAccessFlags());
+    klass->SetFileId(classDataAccessor->GetClassId());
+    klass->SetPandaFile(&classDataAccessor->GetPandaFile());
+    klass->SetAccessFlags(classDataAccessor->GetAccessFlags());
 
-    auto &pf = class_data_accessor->GetPandaFile();
-    auto class_id = class_data_accessor->GetClassId();
-    klass->SetClassIndex(pf.GetClassIndex(class_id));
-    klass->SetMethodIndex(pf.GetMethodIndex(class_id));
-    klass->SetFieldIndex(pf.GetFieldIndex(class_id));
+    auto &pf = classDataAccessor->GetPandaFile();
+    auto classId = classDataAccessor->GetClassId();
+    klass->SetClassIndex(pf.GetClassIndex(classId));
+    klass->SetMethodIndex(pf.GetMethodIndex(classId));
+    klass->SetFieldIndex(pf.GetFieldIndex(classId));
 
-    klass->SetNumVirtualMethods(class_info.vtable_builder->GetNumVirtualMethods());
-    klass->SetNumCopiedMethods(class_info.vtable_builder->GetCopiedMethods().size());
-    klass->SetNumStaticFields(class_info.num_sfields);
+    klass->SetNumVirtualMethods(classInfo.vtableBuilder->GetNumVirtualMethods());
+    klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
+    klass->SetNumStaticFields(classInfo.numSfields);
 
-    if (!LoadMethods(klass, &class_info, class_data_accessor, error_handler)) {
+    if (!LoadMethods(klass, &classInfo, classDataAccessor, errorHandler)) {
         FreeClass(klass);
         LOG(ERROR, CLASS_LINKER) << "Cannot load methods of class '" << descriptor << "'";
         return nullptr;
     }
 
-    if (!LoadFields(klass, class_data_accessor, error_handler)) {
+    if (!LoadFields(klass, classDataAccessor, errorHandler)) {
         FreeClass(klass);
         LOG(ERROR, CLASS_LINKER) << "Cannot load fields of class '" << descriptor << "'";
         return nullptr;
     }
 
-    if (!LinkMethods(klass, &class_info, error_handler)) {
+    if (!LinkMethods(klass, &classInfo, errorHandler)) {
         FreeClass(klass);
         LOG(ERROR, CLASS_LINKER) << "Cannot link methods of class '" << descriptor << "'";
         return nullptr;
     }
 
-    if (!LinkFields(klass, error_handler)) {
+    if (!LinkFields(klass, errorHandler)) {
         FreeClass(klass);
         LOG(ERROR, CLASS_LINKER) << "Cannot link fields of class '" << descriptor << "'";
         return nullptr;
@@ -880,29 +877,29 @@ Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *class_data_accessor
 
 Class *ClassLinker::LoadClass(const panda_file::File *pf, const uint8_t *descriptor, panda_file::SourceLang lang)
 {
-    panda_file::File::EntityId class_id = pf->GetClassId(descriptor);
-    if (!class_id.IsValid() || pf->IsExternal(class_id)) {
+    panda_file::File::EntityId classId = pf->GetClassId(descriptor);
+    if (!classId.IsValid() || pf->IsExternal(classId)) {
         return nullptr;
     }
     ClassLinkerContext *context = GetExtension(lang)->GetBootContext();
-    return LoadClass(pf, class_id, descriptor, context, nullptr);
+    return LoadClass(pf, classId, descriptor, context, nullptr);
 }
 
-Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::EntityId class_id,
-                              const uint8_t *descriptor, ClassLinkerContext *context,
-                              ClassLinkerErrorHandler *error_handler, bool add_to_runtime /* = true */)
+Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::EntityId classId, const uint8_t *descriptor,
+                              ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler,
+                              bool addToRuntime /* = true */)
 {
-    ASSERT(!pf->IsExternal(class_id));
+    ASSERT(!pf->IsExternal(classId));
     ASSERT(context != nullptr);
-    panda_file::ClassDataAccessor class_data_accessor(*pf, class_id);
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&class_data_accessor);
+    panda_file::ClassDataAccessor classDataAccessor(*pf, classId);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&classDataAccessor);
 
     if (ctx.GetLanguage() != context->GetSourceLang()) {
-        LanguageContext current_ctx = Runtime::GetCurrent()->GetLanguageContext(context->GetSourceLang());
+        LanguageContext currentCtx = Runtime::GetCurrent()->GetLanguageContext(context->GetSourceLang());
         PandaStringStream ss;
-        ss << "Cannot load " << ctx << " class " << descriptor << " into " << current_ctx << " context";
+        ss << "Cannot load " << ctx << " class " << descriptor << " into " << currentCtx << " context";
         LOG(ERROR, CLASS_LINKER) << ss.str();
-        OnError(error_handler, Error::CLASS_NOT_FOUND, ss.str());
+        OnError(errorHandler, Error::CLASS_NOT_FOUND, ss.str());
         return nullptr;
     }
 
@@ -910,48 +907,47 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
         PandaStringStream ss;
         ss << "Cannot load class '" << descriptor << "' as class linker hasn't " << ctx << " language extension";
         LOG(ERROR, CLASS_LINKER) << ss.str();
-        OnError(error_handler, Error::CLASS_NOT_FOUND, ss.str());
+        OnError(errorHandler, Error::CLASS_NOT_FOUND, ss.str());
         return nullptr;
     }
 
     // This set is used to find out if the class is its own superclass
-    ClassLoadingSet loading_set;
-    static thread_local ClassLoadingSet *thread_local_set = nullptr;
-    ClassLoadingSet **thread_local_set_ptr = nullptr;
-    if (thread_local_set == nullptr) {
-        thread_local_set = &loading_set;
-        thread_local_set_ptr = &thread_local_set;
+    ClassLoadingSet loadingSet;
+    static thread_local ClassLoadingSet *threadLocalSet = nullptr;
+    ClassLoadingSet **threadLocalSetPtr = nullptr;
+    if (threadLocalSet == nullptr) {
+        threadLocalSet = &loadingSet;
+        threadLocalSetPtr = &threadLocalSet;
     }
-    ClassScopeStaticSetAutoCleaner class_set_auto_cleaner_on_return(thread_local_set, thread_local_set_ptr);
+    ClassScopeStaticSetAutoCleaner classSetAutoCleanerOnReturn(threadLocalSet, threadLocalSetPtr);
 
     auto *ext = GetExtension(ctx);
-    Class *base_class = nullptr;
-    bool need_load_base = IsInitialized() || !utf::IsEqual(ctx.GetObjectClassDescriptor(), descriptor);
-    if (need_load_base) {
-        uint32_t class_id_int = class_id.GetOffset();
-        uint32_t panda_file_hash = pf->GetFilenameHash();
-        if (!thread_local_set->insert(GetClassUniqueHash(panda_file_hash, class_id_int)).second) {
-            const PandaString &class_name =
-                utf::Mutf8AsCString(pf->GetStringData(class_data_accessor.GetClassId()).data);
-            PandaString msg = "Class or interface \"" + class_name + "\" is its own superclass or superinterface";
-            OnError(error_handler, Error::CLASS_CIRCULARITY, msg);
+    Class *baseClass = nullptr;
+    bool needLoadBase = IsInitialized() || !utf::IsEqual(ctx.GetObjectClassDescriptor(), descriptor);
+    if (needLoadBase) {
+        uint32_t classIdInt = classId.GetOffset();
+        uint32_t pandaFileHash = pf->GetFilenameHash();
+        if (!threadLocalSet->insert(GetClassUniqueHash(pandaFileHash, classIdInt)).second) {
+            const PandaString &className = utf::Mutf8AsCString(pf->GetStringData(classDataAccessor.GetClassId()).data);
+            PandaString msg = "Class or interface \"" + className + "\" is its own superclass or superinterface";
+            OnError(errorHandler, Error::CLASS_CIRCULARITY, msg);
             return nullptr;
         }
 
-        base_class = LoadBaseClass(&class_data_accessor, ctx, context, error_handler);
-        if (base_class == nullptr) {
+        baseClass = LoadBaseClass(&classDataAccessor, ctx, context, errorHandler);
+        if (baseClass == nullptr) {
             LOG(INFO, CLASS_LINKER) << "Cannot load base class of class '" << descriptor << "'";
             return nullptr;
         }
     }
 
-    auto res = LoadInterfaces(&class_data_accessor, context, error_handler);
+    auto res = LoadInterfaces(&classDataAccessor, context, errorHandler);
     if (!res) {
         LOG(INFO, CLASS_LINKER) << "Cannot load interfaces of class '" << descriptor << "'";
         return nullptr;
     }
 
-    auto *klass = LoadClass(&class_data_accessor, descriptor, base_class, res.value(), context, ext, error_handler);
+    auto *klass = LoadClass(&classDataAccessor, descriptor, baseClass, res.value(), context, ext, errorHandler);
     if (klass == nullptr) {
         return nullptr;
     }
@@ -967,14 +963,14 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
         klass->SetState(Class::State::LOADED);
     }
 
-    if (LIKELY(add_to_runtime)) {
+    if (LIKELY(addToRuntime)) {
         Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
 
-        auto *other_klass = context->InsertClass(klass);
-        if (other_klass != nullptr) {
+        auto *otherKlass = context->InsertClass(klass);
+        if (otherKlass != nullptr) {
             // Someone has created the class in the other thread (increase the critical section?)
             FreeClass(klass);
-            return other_klass;
+            return otherKlass;
         }
 
         RemoveCreatedClassInExtension(klass);
@@ -991,43 +987,43 @@ static const uint8_t *CopyMutf8String(mem::InternalAllocatorPtr allocator, const
     return ptr;
 }
 
-Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool need_copy_descriptor, uint32_t access_flags,
-                               Span<Method> methods, Span<Field> fields, Class *base_class, Span<Class *> interfaces,
-                               ClassLinkerContext *context, bool is_interface)
+Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
+                               Span<Method> methods, Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
+                               ClassLinkerContext *context, bool isInterface)
 {
     ASSERT(context != nullptr);
-    if (need_copy_descriptor) {
+    if (needCopyDescriptor) {
         descriptor = CopyMutf8String(allocator_, descriptor);
-        os::memory::LockHolder lock(copied_names_lock_);
-        copied_names_.push_front(descriptor);
+        os::memory::LockHolder lock(copiedNamesLock_);
+        copiedNames_.push_front(descriptor);
     }
 
-    auto *ext = GetExtension(base_class->GetSourceLang());
+    auto *ext = GetExtension(baseClass->GetSourceLang());
     ASSERT(ext != nullptr);
 
-    ClassInfo class_info = GetClassInfo(methods, fields, base_class, interfaces, is_interface);
+    ClassInfo classInfo = GetClassInfo(methods, fields, baseClass, interfaces, isInterface);
 
     // Need to protect ArenaAllocator and loaded_classes_
-    auto *klass = ext->CreateClass(descriptor, class_info.vtable_builder->GetVTableSize(),
-                                   class_info.imtable_builder->GetIMTSize(), class_info.size);
+    auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
+                                   classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
 
     if (UNLIKELY(klass == nullptr)) {
         return nullptr;
     }
 
     klass->SetLoadContext(context);
-    klass->SetBase(base_class);
+    klass->SetBase(baseClass);
     klass->SetInterfaces(interfaces);
-    klass->SetAccessFlags(access_flags);
+    klass->SetAccessFlags(accessFlags);
 
-    klass->SetNumVirtualMethods(class_info.vtable_builder->GetNumVirtualMethods());
-    klass->SetNumCopiedMethods(class_info.vtable_builder->GetCopiedMethods().size());
-    klass->SetNumStaticFields(class_info.num_sfields);
+    klass->SetNumVirtualMethods(classInfo.vtableBuilder->GetNumVirtualMethods());
+    klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
+    klass->SetNumStaticFields(classInfo.numSfields);
 
     ASSERT(klass->GetNumCopiedMethods() == 0);
 
-    size_t num_smethods = methods.size() - klass->GetNumVirtualMethods();
-    klass->SetMethods(methods, klass->GetNumVirtualMethods(), num_smethods);
+    size_t numSmethods = methods.size() - klass->GetNumVirtualMethods();
+    klass->SetMethods(methods, klass->GetNumVirtualMethods(), numSmethods);
     klass->SetFields(fields, klass->GetNumStaticFields());
 
     for (auto &method : methods) {
@@ -1038,7 +1034,7 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool need_copy_descrip
         field.SetClass(klass);
     }
 
-    if (!LinkMethods(klass, &class_info, ext->GetErrorHandler())) {
+    if (!LinkMethods(klass, &classInfo, ext->GetErrorHandler())) {
         LOG(ERROR, CLASS_LINKER) << "Cannot link class methods '" << descriptor << "'";
         return nullptr;
     }
@@ -1058,11 +1054,11 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool need_copy_descrip
 
     Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
 
-    auto *other_klass = context->InsertClass(klass);
-    if (other_klass != nullptr) {
+    auto *otherKlass = context->InsertClass(klass);
+    if (otherKlass != nullptr) {
         // Someone has created the class in the other thread (increase the critical section?)
         FreeClass(klass);
-        return other_klass;
+        return otherKlass;
     }
 
     RemoveCreatedClassInExtension(klass);
@@ -1071,87 +1067,87 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool need_copy_descrip
     return klass;
 }
 
-Class *ClassLinker::CreateArrayClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool need_copy_descriptor,
-                                     Class *component_class)
+Class *ClassLinker::CreateArrayClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,
+                                     Class *componentClass)
 {
-    if (need_copy_descriptor) {
+    if (needCopyDescriptor) {
         descriptor = CopyMutf8String(allocator_, descriptor);
-        os::memory::LockHolder lock(copied_names_lock_);
-        copied_names_.push_front(descriptor);
+        os::memory::LockHolder lock(copiedNamesLock_);
+        copiedNames_.push_front(descriptor);
     }
 
-    auto *array_class = ext->CreateClass(descriptor, ext->GetArrayClassVTableSize(), ext->GetArrayClassIMTSize(),
-                                         ext->GetArrayClassSize());
+    auto *arrayClass = ext->CreateClass(descriptor, ext->GetArrayClassVTableSize(), ext->GetArrayClassIMTSize(),
+                                        ext->GetArrayClassSize());
 
-    if (UNLIKELY(array_class == nullptr)) {
+    if (UNLIKELY(arrayClass == nullptr)) {
         return nullptr;
     }
 
-    array_class->SetLoadContext(component_class->GetLoadContext());
+    arrayClass->SetLoadContext(componentClass->GetLoadContext());
 
-    if (UNLIKELY(!ext->InitializeArrayClass(array_class, component_class))) {
+    if (UNLIKELY(!ext->InitializeArrayClass(arrayClass, componentClass))) {
         return nullptr;
     }
 
-    return array_class;
+    return arrayClass;
 }
 
-Class *ClassLinker::LoadArrayClass(const uint8_t *descriptor, bool need_copy_descriptor, ClassLinkerContext *context,
-                                   ClassLinkerErrorHandler *error_handler)
+Class *ClassLinker::LoadArrayClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                                   ClassLinkerErrorHandler *errorHandler)
 {
     Span<const uint8_t> sp(descriptor, 1);
 
-    Class *component_class = GetClass(sp.cend(), need_copy_descriptor, context, error_handler);
+    Class *componentClass = GetClass(sp.cend(), needCopyDescriptor, context, errorHandler);
 
-    if (component_class == nullptr) {
+    if (componentClass == nullptr) {
         return nullptr;
     }
 
-    if (UNLIKELY(component_class->GetType().GetId() == panda_file::Type::TypeId::VOID)) {
-        OnError(error_handler, Error::NO_CLASS_DEF, "Try to create array with void component type");
+    if (UNLIKELY(componentClass->GetType().GetId() == panda_file::Type::TypeId::VOID)) {
+        OnError(errorHandler, Error::NO_CLASS_DEF, "Try to create array with void component type");
         return nullptr;
     }
 
-    auto *ext = GetExtension(component_class->GetSourceLang());
+    auto *ext = GetExtension(componentClass->GetSourceLang());
     ASSERT(ext != nullptr);
 
-    auto *component_class_context = component_class->GetLoadContext();
-    ASSERT(component_class_context != nullptr);
-    if (component_class_context != context) {
-        auto *loaded_class = FindLoadedClass(descriptor, component_class_context);
-        if (loaded_class != nullptr) {
-            return loaded_class;
+    auto *componentClassContext = componentClass->GetLoadContext();
+    ASSERT(componentClassContext != nullptr);
+    if (componentClassContext != context) {
+        auto *loadedClass = FindLoadedClass(descriptor, componentClassContext);
+        if (loadedClass != nullptr) {
+            return loadedClass;
         }
     }
 
-    auto *array_class = CreateArrayClass(ext, descriptor, need_copy_descriptor, component_class);
+    auto *arrayClass = CreateArrayClass(ext, descriptor, needCopyDescriptor, componentClass);
 
-    if (UNLIKELY(array_class == nullptr)) {
+    if (UNLIKELY(arrayClass == nullptr)) {
         return nullptr;
     }
 
-    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(array_class);
+    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(arrayClass);
 
-    auto *other_klass = component_class_context->InsertClass(array_class);
-    if (other_klass != nullptr) {
-        FreeClass(array_class);
-        return other_klass;
+    auto *otherKlass = componentClassContext->InsertClass(arrayClass);
+    if (otherKlass != nullptr) {
+        FreeClass(arrayClass);
+        return otherKlass;
     }
 
-    RemoveCreatedClassInExtension(array_class);
-    Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(array_class);
+    RemoveCreatedClassInExtension(arrayClass);
+    Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(arrayClass);
 
-    return array_class;
+    return arrayClass;
 }
 
-static PandaString PandaFilesToString(const PandaVector<const panda_file::File *> &panda_files)
+static PandaString PandaFilesToString(const PandaVector<const panda_file::File *> &pandaFiles)
 {
     PandaStringStream ss;
     ss << "[";
 
-    size_t n = panda_files.size();
+    size_t n = pandaFiles.size();
     for (size_t i = 0; i < n; i++) {
-        ss << panda_files[i]->GetFilename();
+        ss << pandaFiles[i]->GetFilename();
 
         if (i < n - 1) {
             ss << ", ";
@@ -1162,8 +1158,8 @@ static PandaString PandaFilesToString(const PandaVector<const panda_file::File *
     return ss.str();
 }
 
-Class *ClassLinker::GetClass(const uint8_t *descriptor, bool need_copy_descriptor, ClassLinkerContext *context,
-                             ClassLinkerErrorHandler *error_handler /* = nullptr */)
+Class *ClassLinker::GetClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                             ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     ASSERT(context != nullptr);
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
@@ -1175,39 +1171,39 @@ Class *ClassLinker::GetClass(const uint8_t *descriptor, bool need_copy_descripto
     }
 
     if (ClassHelper::IsArrayDescriptor(descriptor)) {
-        return LoadArrayClass(descriptor, need_copy_descriptor, context, error_handler);
+        return LoadArrayClass(descriptor, needCopyDescriptor, context, errorHandler);
     }
 
     if (context->IsBootContext()) {
-        panda_file::File::EntityId class_id;
-        const panda_file::File *panda_file {nullptr};
+        panda_file::File::EntityId classId;
+        const panda_file::File *pandaFile {nullptr};
         {
             {
-                os::memory::LockHolder lock {boot_panda_files_lock_};
-                std::tie(class_id, panda_file) = FindClassInPandaFiles(descriptor, boot_panda_files_);
+                os::memory::LockHolder lock {bootPandaFilesLock_};
+                std::tie(classId, pandaFile) = FindClassInPandaFiles(descriptor, bootPandaFiles_);
             }
 
-            if (!class_id.IsValid()) {
+            if (!classId.IsValid()) {
                 PandaStringStream ss;
                 {
                     // can't make a wider scope for lock here - will get recursion
-                    os::memory::LockHolder lock {boot_panda_files_lock_};
+                    os::memory::LockHolder lock {bootPandaFilesLock_};
                     ss << "Cannot find class " << descriptor
-                       << " in boot panda files: " << PandaFilesToString(boot_panda_files_);
+                       << " in boot panda files: " << PandaFilesToString(bootPandaFiles_);
                 }
-                OnError(error_handler, Error::CLASS_NOT_FOUND, ss.str());
+                OnError(errorHandler, Error::CLASS_NOT_FOUND, ss.str());
                 return nullptr;
             }
         }
 
-        return LoadClass(panda_file, class_id, panda_file->GetStringData(class_id).data, context, error_handler);
+        return LoadClass(pandaFile, classId, pandaFile->GetStringData(classId).data, context, errorHandler);
     }
 
-    return context->LoadClass(descriptor, need_copy_descriptor, error_handler);
+    return context->LoadClass(descriptor, needCopyDescriptor, errorHandler);
 }
 
 Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *context,
-                             ClassLinkerErrorHandler *error_handler /* = nullptr */)
+                             ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     ASSERT(context != nullptr);
     ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
@@ -1226,7 +1222,7 @@ Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::Entit
     }
 
     if (ClassHelper::IsArrayDescriptor(descriptor)) {
-        cls = LoadArrayClass(descriptor, false, context, error_handler);
+        cls = LoadArrayClass(descriptor, false, context, errorHandler);
         if (LIKELY(cls != nullptr)) {
             pf.GetPandaCache()->SetClassCache(id, cls);
         }
@@ -1234,51 +1230,51 @@ Class *ClassLinker::GetClass(const panda_file::File &pf, panda_file::File::Entit
     }
 
     if (context->IsBootContext()) {
-        const panda_file::File *pf_ptr = nullptr;
-        panda_file::File::EntityId ext_id;
+        const panda_file::File *pfPtr = nullptr;
+        panda_file::File::EntityId extId;
         {
-            os::memory::LockHolder lock {boot_panda_files_lock_};
-            std::tie(ext_id, pf_ptr) = FindClassInPandaFiles(descriptor, boot_panda_files_);
+            os::memory::LockHolder lock {bootPandaFilesLock_};
+            std::tie(extId, pfPtr) = FindClassInPandaFiles(descriptor, bootPandaFiles_);
         }
 
-        if (!ext_id.IsValid()) {
+        if (!extId.IsValid()) {
             PandaStringStream ss;
             {
                 // can't make a wider scope for lock here - will get recursion
-                os::memory::LockHolder lock {boot_panda_files_lock_};
+                os::memory::LockHolder lock {bootPandaFilesLock_};
                 ss << "Cannot find class " << descriptor
-                   << " in boot panda files: " << PandaFilesToString(boot_panda_files_);
+                   << " in boot panda files: " << PandaFilesToString(bootPandaFiles_);
             }
-            OnError(error_handler, Error::CLASS_NOT_FOUND, ss.str());
+            OnError(errorHandler, Error::CLASS_NOT_FOUND, ss.str());
             return nullptr;
         }
 
-        cls = LoadClass(pf_ptr, ext_id, descriptor, context, error_handler);
+        cls = LoadClass(pfPtr, extId, descriptor, context, errorHandler);
         if (LIKELY(cls != nullptr)) {
             pf.GetPandaCache()->SetClassCache(id, cls);
         }
         return cls;
     }
 
-    return context->LoadClass(descriptor, false, error_handler);
+    return context->LoadClass(descriptor, false, errorHandler);
 }
 
 Method *ClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::EntityId id,
                                ClassLinkerContext *context /* = nullptr */,
-                               ClassLinkerErrorHandler *error_handler /* = nullptr */)
+                               ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     Method *method = pf.GetPandaCache()->GetMethodFromCache(id);
     if (method != nullptr) {
         return method;
     }
-    panda_file::MethodDataAccessor method_data_accessor(pf, id);
+    panda_file::MethodDataAccessor methodDataAccessor(pf, id);
 
-    auto class_id = method_data_accessor.GetClassId();
+    auto classId = methodDataAccessor.GetClassId();
     if (context == nullptr) {
-        panda_file::ClassDataAccessor class_data_accessor(pf, class_id);
-        auto lang = class_data_accessor.GetSourceLang();
+        panda_file::ClassDataAccessor classDataAccessor(pf, classId);
+        auto lang = classDataAccessor.GetSourceLang();
         if (!lang) {
-            LOG(INFO, CLASS_LINKER) << "Cannot resolve language context for class_id " << class_id << " in file "
+            LOG(INFO, CLASS_LINKER) << "Cannot resolve language context for class_id " << classId << " in file "
                                     << pf.GetFilename();
             return nullptr;
         }
@@ -1286,14 +1282,14 @@ Method *ClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::Ent
         context = extension->GetBootContext();
     }
 
-    Class *klass = GetClass(pf, class_id, context, error_handler);
+    Class *klass = GetClass(pf, classId, context, errorHandler);
 
     if (klass == nullptr) {
-        auto class_name = pf.GetStringData(class_id).data;
-        LOG(INFO, CLASS_LINKER) << "Cannot find class '" << class_name << "' in ctx " << context;
+        auto className = pf.GetStringData(classId).data;
+        LOG(INFO, CLASS_LINKER) << "Cannot find class '" << className << "' in ctx " << context;
         return nullptr;
     }
-    method = GetMethod(klass, method_data_accessor, error_handler);
+    method = GetMethod(klass, methodDataAccessor, errorHandler);
     if (LIKELY(method != nullptr)) {
         pf.GetPandaCache()->SetMethodCache(id, method);
     }
@@ -1301,7 +1297,7 @@ Method *ClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::Ent
 }
 
 Method *ClassLinker::GetMethod(const Method &caller, panda_file::File::EntityId id,
-                               ClassLinkerErrorHandler *error_handler /* = nullptr */)
+                               ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     auto *pf = caller.GetPandaFile();
     Method *method = pf->GetPandaCache()->GetMethodFromCache(id);
@@ -1309,62 +1305,61 @@ Method *ClassLinker::GetMethod(const Method &caller, panda_file::File::EntityId 
         return method;
     }
 
-    panda_file::MethodDataAccessor method_data_accessor(*pf, id);
-    auto class_id = method_data_accessor.GetClassId();
+    panda_file::MethodDataAccessor methodDataAccessor(*pf, id);
+    auto classId = methodDataAccessor.GetClassId();
 
     auto *context = caller.GetClass()->GetLoadContext();
     auto *ext = GetExtension(caller.GetClass()->GetSourceLang());
-    Class *klass = ext->GetClass(*pf, class_id, context, error_handler);
+    Class *klass = ext->GetClass(*pf, classId, context, errorHandler);
 
     if (klass == nullptr) {
-        auto class_name = pf->GetStringData(class_id).data;
-        LOG(INFO, CLASS_LINKER) << "Cannot find class '" << class_name << "' in ctx " << context;
+        auto className = pf->GetStringData(classId).data;
+        LOG(INFO, CLASS_LINKER) << "Cannot find class '" << className << "' in ctx " << context;
         return nullptr;
     }
 
-    method =
-        GetMethod(klass, method_data_accessor, (error_handler == nullptr) ? ext->GetErrorHandler() : error_handler);
+    method = GetMethod(klass, methodDataAccessor, (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
     if (LIKELY(method != nullptr)) {
         pf->GetPandaCache()->SetMethodCache(id, method);
     }
     return method;
 }
 
-Method *ClassLinker::GetMethod(const Class *klass, const panda_file::MethodDataAccessor &method_data_accessor,
-                               ClassLinkerErrorHandler *error_handler)
+Method *ClassLinker::GetMethod(const Class *klass, const panda_file::MethodDataAccessor &methodDataAccessor,
+                               ClassLinkerErrorHandler *errorHandler)
 {
     Method *method;
-    auto id = method_data_accessor.GetMethodId();
-    const auto &pf = method_data_accessor.GetPandaFile();
+    auto id = methodDataAccessor.GetMethodId();
+    const auto &pf = methodDataAccessor.GetPandaFile();
 
-    bool is_static = method_data_accessor.IsStatic();
-    if (!method_data_accessor.IsExternal() && klass->GetPandaFile() == &pf) {
+    bool isStatic = methodDataAccessor.IsStatic();
+    if (!methodDataAccessor.IsExternal() && klass->GetPandaFile() == &pf) {
         if (klass->IsInterface()) {
-            method = is_static ? klass->GetStaticInterfaceMethod(id) : klass->GetVirtualInterfaceMethod(id);
+            method = isStatic ? klass->GetStaticInterfaceMethod(id) : klass->GetVirtualInterfaceMethod(id);
         } else {
-            method = is_static ? klass->GetStaticClassMethod(id) : klass->GetVirtualClassMethod(id);
+            method = isStatic ? klass->GetStaticClassMethod(id) : klass->GetVirtualClassMethod(id);
         }
 
         if (method == nullptr) {
-            Method::Proto proto(pf, method_data_accessor.GetProtoId());
+            Method::Proto proto(pf, methodDataAccessor.GetProtoId());
             PandaStringStream ss;
-            ss << "Cannot find method '" << method_data_accessor.GetName().data << " " << proto.GetSignature(true)
+            ss << "Cannot find method '" << methodDataAccessor.GetName().data << " " << proto.GetSignature(true)
                << "' in class '" << klass->GetName() << "'";
-            OnError(error_handler, Error::METHOD_NOT_FOUND, ss.str());
+            OnError(errorHandler, Error::METHOD_NOT_FOUND, ss.str());
             return nullptr;
         }
 
         return method;
     }
 
-    auto name = method_data_accessor.GetName();
-    Method::Proto proto(pf, method_data_accessor.GetProtoId());
+    auto name = methodDataAccessor.GetName();
+    Method::Proto proto(pf, methodDataAccessor.GetProtoId());
     if (klass->IsInterface()) {
-        method = is_static ? klass->GetStaticInterfaceMethodByName(name, proto)
-                           : klass->GetVirtualInterfaceMethodByName(name, proto);
+        method = isStatic ? klass->GetStaticInterfaceMethodByName(name, proto)
+                          : klass->GetVirtualInterfaceMethodByName(name, proto);
     } else {
-        method = is_static ? klass->GetStaticClassMethodByName(name, proto)
-                           : klass->GetVirtualClassMethodByName(name, proto);
+        method =
+            isStatic ? klass->GetStaticClassMethodByName(name, proto) : klass->GetVirtualClassMethodByName(name, proto);
         if (method == nullptr && klass->IsAbstract()) {
             method = klass->GetInterfaceMethod(name, proto);
         }
@@ -1372,33 +1367,33 @@ Method *ClassLinker::GetMethod(const Class *klass, const panda_file::MethodDataA
 
     if (method == nullptr) {
         PandaStringStream ss;
-        ss << "Cannot find method '" << method_data_accessor.GetName().data << " " << proto.GetSignature(true)
+        ss << "Cannot find method '" << methodDataAccessor.GetName().data << " " << proto.GetSignature(true)
            << "' in class '" << klass->GetName() << "'";
-        OnError(error_handler, Error::METHOD_NOT_FOUND, ss.str());
+        OnError(errorHandler, Error::METHOD_NOT_FOUND, ss.str());
         return nullptr;
     }
 
-    LOG_IF(method->IsStatic() != method_data_accessor.IsStatic(), FATAL, CLASS_LINKER)
+    LOG_IF(method->IsStatic() != methodDataAccessor.IsStatic(), FATAL, CLASS_LINKER)
         << "Expected ACC_STATIC for method " << name.data << " in class " << klass->GetName()
         << " does not match loaded value";
 
     return method;
 }
 
-Field *ClassLinker::GetFieldById(Class *klass, const panda_file::FieldDataAccessor &field_data_accessor,
-                                 ClassLinkerErrorHandler *error_handler)
+Field *ClassLinker::GetFieldById(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
+                                 ClassLinkerErrorHandler *errorHandler)
 {
-    bool is_static = field_data_accessor.IsStatic();
-    auto &pf = field_data_accessor.GetPandaFile();
-    auto id = field_data_accessor.GetFieldId();
+    bool isStatic = fieldDataAccessor.IsStatic();
+    auto &pf = fieldDataAccessor.GetPandaFile();
+    auto id = fieldDataAccessor.GetFieldId();
 
-    Field *field = is_static ? klass->FindStaticFieldById(id) : klass->FindInstanceFieldById(id);
+    Field *field = isStatic ? klass->FindStaticFieldById(id) : klass->FindInstanceFieldById(id);
 
     if (field == nullptr) {
         PandaStringStream ss;
-        ss << "Cannot find field '" << pf.GetStringData(field_data_accessor.GetNameId()).data << "' in class '"
+        ss << "Cannot find field '" << pf.GetStringData(fieldDataAccessor.GetNameId()).data << "' in class '"
            << klass->GetName() << "'";
-        OnError(error_handler, Error::FIELD_NOT_FOUND, ss.str());
+        OnError(errorHandler, Error::FIELD_NOT_FOUND, ss.str());
         return nullptr;
     }
 
@@ -1406,16 +1401,16 @@ Field *ClassLinker::GetFieldById(Class *klass, const panda_file::FieldDataAccess
     return field;
 }
 
-Field *ClassLinker::GetFieldBySignature(Class *klass, const panda_file::FieldDataAccessor &field_data_accessor,
-                                        ClassLinkerErrorHandler *error_handler)
+Field *ClassLinker::GetFieldBySignature(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
+                                        ClassLinkerErrorHandler *errorHandler)
 {
-    auto &pf = field_data_accessor.GetPandaFile();
-    auto id = field_data_accessor.GetFieldId();
-    auto field_name = pf.GetStringData(field_data_accessor.GetNameId());
-    auto field_type = panda_file::Type::GetTypeFromFieldEncoding(field_data_accessor.GetType());
-    Field *field = klass->FindField([&](const Field &fld) {
-        if (field_type == fld.GetType() && field_name == fld.GetName()) {
-            if (!field_type.IsReference()) {
+    auto &pf = fieldDataAccessor.GetPandaFile();
+    auto id = fieldDataAccessor.GetFieldId();
+    auto fieldName = pf.GetStringData(fieldDataAccessor.GetNameId());
+    auto fieldType = panda_file::Type::GetTypeFromFieldEncoding(fieldDataAccessor.GetType());
+    Field *field = klass->FindField([&fieldDataAccessor, &fieldType, &fieldName, &id, &pf](const Field &fld) {
+        if (fieldType == fld.GetType() && fieldName == fld.GetName()) {
+            if (!fieldType.IsReference()) {
                 return true;
             }
 
@@ -1423,9 +1418,9 @@ Field *ClassLinker::GetFieldBySignature(Class *klass, const panda_file::FieldDat
             if (&pf == fld.GetPandaFile() && id == fld.GetFileId()) {
                 return true;
             }
-            auto type_id = panda_file::FieldDataAccessor::GetTypeId(*fld.GetPandaFile(), fld.GetFileId());
-            if (pf.GetStringData(panda_file::File::EntityId(field_data_accessor.GetType())) ==
-                fld.GetPandaFile()->GetStringData(type_id)) {
+            auto typeId = panda_file::FieldDataAccessor::GetTypeId(*fld.GetPandaFile(), fld.GetFileId());
+            if (pf.GetStringData(panda_file::File::EntityId(fieldDataAccessor.GetType())) ==
+                fld.GetPandaFile()->GetStringData(typeId)) {
                 return true;
             }
         }
@@ -1434,8 +1429,8 @@ Field *ClassLinker::GetFieldBySignature(Class *klass, const panda_file::FieldDat
 
     if (field == nullptr) {
         PandaStringStream ss;
-        ss << "Cannot find field '" << field_name.data << "' in class '" << klass->GetName() << "'";
-        OnError(error_handler, Error::FIELD_NOT_FOUND, ss.str());
+        ss << "Cannot find field '" << fieldName.data << "' in class '" << klass->GetName() << "'";
+        OnError(errorHandler, Error::FIELD_NOT_FOUND, ss.str());
         return nullptr;
     }
 
@@ -1445,26 +1440,26 @@ Field *ClassLinker::GetFieldBySignature(Class *klass, const panda_file::FieldDat
 
 Field *ClassLinker::GetField(const panda_file::File &pf, panda_file::File::EntityId id,
                              ClassLinkerContext *context /* = nullptr */,
-                             ClassLinkerErrorHandler *error_handler /* = nullptr */)
+                             ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     Field *field = pf.GetPandaCache()->GetFieldFromCache(id);
     if (field != nullptr) {
         return field;
     }
-    panda_file::FieldDataAccessor field_data_accessor(pf, id);
+    panda_file::FieldDataAccessor fieldDataAccessor(pf, id);
 
-    Class *klass = GetClass(pf, field_data_accessor.GetClassId(), context, error_handler);
+    Class *klass = GetClass(pf, fieldDataAccessor.GetClassId(), context, errorHandler);
 
     if (klass == nullptr) {
-        auto class_name = pf.GetStringData(field_data_accessor.GetClassId()).data;
-        LOG(INFO, CLASS_LINKER) << "Cannot find class '" << class_name << "' in ctx " << context;
+        auto className = pf.GetStringData(fieldDataAccessor.GetClassId()).data;
+        LOG(INFO, CLASS_LINKER) << "Cannot find class '" << className << "' in ctx " << context;
         return nullptr;
     }
 
-    if (!field_data_accessor.IsExternal() && klass->GetPandaFile() == &pf) {
-        field = GetFieldById(klass, field_data_accessor, error_handler);
+    if (!fieldDataAccessor.IsExternal() && klass->GetPandaFile() == &pf) {
+        field = GetFieldById(klass, fieldDataAccessor, errorHandler);
     } else {
-        field = GetFieldBySignature(klass, field_data_accessor, error_handler);
+        field = GetFieldBySignature(klass, fieldDataAccessor, errorHandler);
     }
     return field;
 }
@@ -1505,15 +1500,15 @@ void ClassLinker::VisitLoadedClasses(size_t flag)
     }
 }
 
-void ClassLinker::OnError(ClassLinkerErrorHandler *error_handler, ClassLinker::Error error, const PandaString &msg)
+void ClassLinker::OnError(ClassLinkerErrorHandler *errorHandler, ClassLinker::Error error, const PandaString &msg)
 {
-    if (error_handler != nullptr) {
-        error_handler->OnError(error, msg);
+    if (errorHandler != nullptr) {
+        errorHandler->OnError(error, msg);
     }
 }
 
 Field *ClassLinker::GetField(const Method &caller, panda_file::File::EntityId id,
-                             ClassLinkerErrorHandler *error_handler /* = nullptr */)
+                             ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
     Field *field = caller.GetPandaFile()->GetPandaCache()->GetFieldFromCache(id);
     if (field != nullptr) {
@@ -1521,7 +1516,7 @@ Field *ClassLinker::GetField(const Method &caller, panda_file::File::EntityId id
     }
     auto *ext = GetExtension(caller.GetClass()->GetSourceLang());
     field = GetField(*caller.GetPandaFile(), id, caller.GetClass()->GetLoadContext(),
-                     (error_handler == nullptr) ? ext->GetErrorHandler() : error_handler);
+                     (errorHandler == nullptr) ? ext->GetErrorHandler() : errorHandler);
     if (LIKELY(field != nullptr)) {
         caller.GetPandaFile()->GetPandaCache()->SetFieldCache(id, field);
     }

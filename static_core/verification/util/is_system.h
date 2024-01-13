@@ -24,10 +24,10 @@ inline bool IsSystemFile(const panda_file::File &file)
 {
     const std::string &name = file.GetFilename();
     const RuntimeOptions &options = Runtime::GetCurrent()->GetOptions();
-    const auto &boot_panda_files = options.GetBootPandaFiles();
-    size_t files_len = options.GetPandaFiles().empty() ? boot_panda_files.size() - 1 : boot_panda_files.size();
-    for (size_t i = 0; i < files_len; i++) {
-        if (name == boot_panda_files[i]) {
+    const auto &bootPandaFiles = options.GetBootPandaFiles();
+    size_t filesLen = options.GetPandaFiles().empty() ? bootPandaFiles.size() - 1 : bootPandaFiles.size();
+    for (size_t i = 0; i < filesLen; i++) {
+        if (name == bootPandaFiles[i]) {
             return true;
         }
     }

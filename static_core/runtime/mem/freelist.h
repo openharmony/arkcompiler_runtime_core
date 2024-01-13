@@ -27,11 +27,11 @@ namespace panda::mem::freelist {
 class MemoryBlockHeader {
 public:
     ATTRIBUTE_NO_SANITIZE_ADDRESS
-    void Initialize(size_t size, MemoryBlockHeader *prev_header)
+    void Initialize(size_t size, MemoryBlockHeader *prevHeader)
     {
         ASSERT((std::numeric_limits<size_t>::max() >> STATUS_BITS_SIZE) >= size);
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
-        prev_header_ = prev_header;
+        prevHeader_ = prevHeader;
         size_ = size << STATUS_BITS_SIZE;
         ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
     }
@@ -71,9 +71,9 @@ public:
     {
         ASSERT(!IsPaddingHeader());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
-        bool is_last_block_in_pool = !((size_ & LAST_BLOCK_IN_POOL_BIT_MASK_IN_PLACE) == 0x0);
+        bool isLastBlockInPool = !((size_ & LAST_BLOCK_IN_POOL_BIT_MASK_IN_PLACE) == 0x0);
         ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
-        return is_last_block_in_pool;
+        return isLastBlockInPool;
     }
 
     ATTRIBUTE_NO_SANITIZE_ADDRESS
@@ -91,9 +91,9 @@ public:
     bool IsPaddingHeader()
     {
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
-        bool is_padding_header = GetPaddingStatus(size_) == PADDING_STATUS_PADDING_HEADER;
+        bool isPaddingHeader = GetPaddingStatus(size_) == PADDING_STATUS_PADDING_HEADER;
         ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
-        return is_padding_header;
+        return isPaddingHeader;
     }
 
     ATTRIBUTE_NO_SANITIZE_ADDRESS
@@ -146,8 +146,8 @@ public:
         ASSERT(IsPaddingSizeStoredAfterHeader());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
         ASAN_UNPOISON_MEMORY_REGION(GetRawMemory(), sizeof(size_t));
-        auto size_pointer = static_cast<size_t *>(GetRawMemory());
-        size_t size = *size_pointer;
+        auto sizePointer = static_cast<size_t *>(GetRawMemory());
+        size_t size = *sizePointer;
         ASAN_UNPOISON_MEMORY_REGION(GetRawMemory(), sizeof(size_t));
         ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
         return size;
@@ -197,7 +197,7 @@ public:
     MemoryBlockHeader *GetPrevHeader()
     {
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
-        MemoryBlockHeader *prev = prev_header_;
+        MemoryBlockHeader *prev = prevHeader_;
         ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
         return prev;
     }
@@ -248,7 +248,7 @@ public:
     void SetPrevHeader(MemoryBlockHeader *header)
     {
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
-        prev_header_ = header;
+        prevHeader_ = header;
         ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryBlockHeader));
     }
 
@@ -271,14 +271,14 @@ public:
 
     void *GetMemory()
     {
-        void *mem_pointer = GetRawMemory();
+        void *memPointer = GetRawMemory();
         if (IsPaddingHeaderStoredAfterHeader()) {
-            return ToVoidPtr(ToUintPtr(mem_pointer) + sizeof(MemoryBlockHeader));
+            return ToVoidPtr(ToUintPtr(memPointer) + sizeof(MemoryBlockHeader));
         }
         if (IsPaddingSizeStoredAfterHeader()) {
-            return ToVoidPtr(ToUintPtr(mem_pointer) + GetPaddingSize());
+            return ToVoidPtr(ToUintPtr(memPointer) + GetPaddingSize());
         }
-        return mem_pointer;
+        return memPointer;
     }
 
 private:
@@ -332,7 +332,7 @@ private:
     }
 
     size_t size_ {0};
-    MemoryBlockHeader *prev_header_ {nullptr};
+    MemoryBlockHeader *prevHeader_ {nullptr};
 };
 
 class FreeListHeader : public MemoryBlockHeader {
@@ -342,9 +342,9 @@ public:
     {
         ASSERT(!IsUsed());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
-        FreeListHeader *next_free = next_free_;
+        FreeListHeader *nextFree = nextFree_;
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
-        return next_free;
+        return nextFree;
     }
 
     ATTRIBUTE_NO_SANITIZE_ADDRESS
@@ -352,9 +352,9 @@ public:
     {
         ASSERT(!IsUsed());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
-        FreeListHeader *prev_free = prev_free_;
+        FreeListHeader *prevFree = prevFree_;
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
-        return prev_free;
+        return prevFree;
     }
 
     ATTRIBUTE_NO_SANITIZE_ADDRESS
@@ -364,7 +364,7 @@ public:
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
         // Potentially, TSAN finds false data race (due to full memory barrier in Array::Create)
         TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-        next_free_ = link;
+        nextFree_ = link;
         TSAN_ANNOTATE_IGNORE_WRITES_END();
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
     }
@@ -376,7 +376,7 @@ public:
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
         // TSAN finds false data race (due to full memory barrier in Array::Create
         TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
-        prev_free_ = link;
+        prevFree_ = link;
         TSAN_ANNOTATE_IGNORE_WRITES_END();
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
     }
@@ -388,12 +388,12 @@ public:
         ASSERT(link != nullptr);
         ASSERT(!link->IsUsed());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
-        if (prev_free_ != nullptr) {
-            prev_free_->SetNextFree(link);
+        if (prevFree_ != nullptr) {
+            prevFree_->SetNextFree(link);
         }
         link->SetNextFree(this);
-        link->SetPrevFree(prev_free_);
-        prev_free_ = link;
+        link->SetPrevFree(prevFree_);
+        prevFree_ = link;
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
     }
 
@@ -404,12 +404,12 @@ public:
         ASSERT(link != nullptr);
         ASSERT(!link->IsUsed());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
-        if (next_free_ != nullptr) {
-            next_free_->SetPrevFree(link);
+        if (nextFree_ != nullptr) {
+            nextFree_->SetPrevFree(link);
         }
-        link->SetNextFree(next_free_);
+        link->SetNextFree(nextFree_);
         link->SetPrevFree(this);
-        next_free_ = link;
+        nextFree_ = link;
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
     }
 
@@ -418,18 +418,18 @@ public:
     {
         ASSERT(!IsUsed());
         ASAN_UNPOISON_MEMORY_REGION(this, sizeof(FreeListHeader));
-        if (next_free_ != nullptr) {
-            next_free_->SetPrevFree(prev_free_);
+        if (nextFree_ != nullptr) {
+            nextFree_->SetPrevFree(prevFree_);
         }
-        if (prev_free_ != nullptr) {
-            prev_free_->SetNextFree(next_free_);
+        if (prevFree_ != nullptr) {
+            prevFree_->SetNextFree(nextFree_);
         }
         ASAN_POISON_MEMORY_REGION(this, sizeof(FreeListHeader));
     }
 
 private:
-    FreeListHeader *next_free_ {nullptr};
-    FreeListHeader *prev_free_ {nullptr};
+    FreeListHeader *nextFree_ {nullptr};
+    FreeListHeader *prevFree_ {nullptr};
 };
 
 }  // namespace panda::mem::freelist

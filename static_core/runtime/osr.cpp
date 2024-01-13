@@ -38,40 +38,39 @@ static void UnpoisonAsanStack([[maybe_unused]] void *ptr)
 }
 
 #if EVENT_OSR_ENTRY_ENABLED
-void WriteOsrEventError(Frame *frame, FrameKind kind, uintptr_t loop_head_bc)
+void WriteOsrEventError(Frame *frame, FrameKind kind, uintptr_t loopHeadBc)
 {
-    events::OsrEntryKind osr_kind;
+    events::OsrEntryKind osrKind;
     switch (kind) {
         case FrameKind::INTERPRETER:
-            osr_kind = events::OsrEntryKind::AFTER_IFRAME;
+            osrKind = events::OsrEntryKind::AFTER_IFRAME;
             break;
         case FrameKind::COMPILER:
-            osr_kind = events::OsrEntryKind::AFTER_CFRAME;
+            osrKind = events::OsrEntryKind::AFTER_CFRAME;
             break;
         case FrameKind::NONE:
-            osr_kind = events::OsrEntryKind::TOP_FRAME;
+            osrKind = events::OsrEntryKind::TOP_FRAME;
             break;
         default:
             UNREACHABLE();
     }
-    EVENT_OSR_ENTRY(std::string(frame->GetMethod()->GetFullName()), loop_head_bc, osr_kind,
-                    events::OsrEntryResult::ERROR);
+    EVENT_OSR_ENTRY(std::string(frame->GetMethod()->GetFullName()), loopHeadBc, osrKind, events::OsrEntryResult::ERROR);
 }
 #endif  // EVENT_OSR_ENTRY_ENABLED
 
 static size_t GetStackParamsSize(const Frame *frame);
 
-bool OsrEntry(uintptr_t loop_head_bc, const void *osr_code)
+bool OsrEntry(uintptr_t loopHeadBc, const void *osrCode)
 {
     auto stack = StackWalker::Create(ManagedThread::GetCurrent());
     Frame *frame = stack.GetIFrame();
-    LOG(DEBUG, INTEROP) << "OSR entry in method '" << stack.GetMethod()->GetFullName() << "': " << osr_code;
-    CodeInfo code_info(CodeInfo::GetCodeOriginFromEntryPoint(osr_code));
-    auto stackmap = code_info.FindOsrStackMap(loop_head_bc);
+    LOG(DEBUG, INTEROP) << "OSR entry in method '" << stack.GetMethod()->GetFullName() << "': " << osrCode;
+    CodeInfo codeInfo(CodeInfo::GetCodeOriginFromEntryPoint(osrCode));
+    auto stackmap = codeInfo.FindOsrStackMap(loopHeadBc);
 
     if (!stackmap.IsValid()) {
 #if EVENT_OSR_ENTRY_ENABLED
-        WriteOsrEventError(frame, stack.GetPreviousFrameKind(), loop_head_bc);
+        WriteOsrEventError(frame, stack.GetPreviousFrameKind(), loopHeadBc);
 #endif  // EVENT_OSR_ENTRY_ENABLED
         return false;
     }
@@ -79,32 +78,32 @@ bool OsrEntry(uintptr_t loop_head_bc, const void *osr_code)
     switch (stack.GetPreviousFrameKind()) {
         case FrameKind::INTERPRETER:
             LOG(DEBUG, INTEROP) << "OSR: after interpreter frame";
-            EVENT_OSR_ENTRY(std::string(frame->GetMethod()->GetFullName()), loop_head_bc,
+            EVENT_OSR_ENTRY(std::string(frame->GetMethod()->GetFullName()), loopHeadBc,
                             events::OsrEntryKind::AFTER_IFRAME, events::OsrEntryResult::SUCCESS);
-            OsrEntryAfterIFrame(frame, loop_head_bc, osr_code, code_info.GetFrameSize(), GetStackParamsSize(frame));
+            OsrEntryAfterIFrame(frame, loopHeadBc, osrCode, codeInfo.GetFrameSize(), GetStackParamsSize(frame));
             break;
         case FrameKind::COMPILER:
             if (frame->IsDynamic() && frame->GetNumActualArgs() < frame->GetMethod()->GetNumArgs()) {
                 frame->DisableOsr();
                 // We need to adjust slot arguments space from previous compiled frame.
 #if EVENT_OSR_ENTRY_ENABLED
-                WriteOsrEventError(frame, stack.GetPreviousFrameKind(), loop_head_bc);
+                WriteOsrEventError(frame, stack.GetPreviousFrameKind(), loopHeadBc);
 #endif  // EVENT_OSR_ENTRY_ENABLED
                 LOG(DEBUG, INTEROP) << "OSR: after compiled frame, fail: num_actual_args < num_args";
                 return false;
             }
             UnpoisonAsanStack(frame->GetPrevFrame());
             LOG(DEBUG, INTEROP) << "OSR: after compiled frame";
-            EVENT_OSR_ENTRY(std::string(frame->GetMethod()->GetFullName()), loop_head_bc,
+            EVENT_OSR_ENTRY(std::string(frame->GetMethod()->GetFullName()), loopHeadBc,
                             events::OsrEntryKind::AFTER_CFRAME, events::OsrEntryResult::SUCCESS);
-            OsrEntryAfterCFrame(frame, loop_head_bc, osr_code, code_info.GetFrameSize());
+            OsrEntryAfterCFrame(frame, loopHeadBc, osrCode, codeInfo.GetFrameSize());
             UNREACHABLE();
             break;
         case FrameKind::NONE:
             LOG(DEBUG, INTEROP) << "OSR: after no frame";
-            EVENT_OSR_ENTRY(std::string(frame->GetMethod()->GetFullName()), loop_head_bc,
-                            events::OsrEntryKind::TOP_FRAME, events::OsrEntryResult::SUCCESS);
-            OsrEntryTopFrame(frame, loop_head_bc, osr_code, code_info.GetFrameSize(), GetStackParamsSize(frame));
+            EVENT_OSR_ENTRY(std::string(frame->GetMethod()->GetFullName()), loopHeadBc, events::OsrEntryKind::TOP_FRAME,
+                            events::OsrEntryResult::SUCCESS);
+            OsrEntryTopFrame(frame, loopHeadBc, osrCode, codeInfo.GetFrameSize(), GetStackParamsSize(frame));
             break;
         default:
             break;
@@ -112,35 +111,35 @@ bool OsrEntry(uintptr_t loop_head_bc, const void *osr_code)
     return true;
 }
 
-extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bc_offset, const void *osr_code, void *cframe_ptr,
-                                 uintptr_t *reg_buffer, uintptr_t *fp_reg_buffer)
+extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const void *osrCode, void *cframePtr,
+                                 uintptr_t *regBuffer, uintptr_t *fpRegBuffer)
 {
-    CodeInfo code_info(CodeInfo::GetCodeOriginFromEntryPoint(osr_code));
-    CFrame cframe(cframe_ptr);
-    auto stackmap = code_info.FindOsrStackMap(bc_offset);
+    CodeInfo codeInfo(CodeInfo::GetCodeOriginFromEntryPoint(osrCode));
+    CFrame cframe(cframePtr);
+    auto stackmap = codeInfo.FindOsrStackMap(bcOffset);
 
-    ASSERT(stackmap.IsValid() && osr_code != nullptr);
+    ASSERT(stackmap.IsValid() && osrCode != nullptr);
 
     cframe.SetMethod(iframe->GetMethod());
     cframe.SetFrameKind(CFrameLayout::FrameKind::OSR);
-    cframe.SetHasFloatRegs(code_info.HasFloatRegs());
+    cframe.SetHasFloatRegs(codeInfo.HasFloatRegs());
 
     auto *thread {ManagedThread::GetCurrent()};
     ASSERT(thread != nullptr);
 
     auto *vm {thread->GetVM()};
 
-    auto num_slots {[](size_t bytes) -> size_t {
+    auto numSlots {[](size_t bytes) -> size_t {
         ASSERT(IsAligned(bytes, ArchTraits<RUNTIME_ARCH>::POINTER_SIZE));
         return bytes / ArchTraits<RUNTIME_ARCH>::POINTER_SIZE;
     }};
 
-    Span param_slots(reinterpret_cast<uintptr_t *>(cframe.GetStackArgsStart()), num_slots(GetStackParamsSize(iframe)));
+    Span paramSlots(reinterpret_cast<uintptr_t *>(cframe.GetStackArgsStart()), numSlots(GetStackParamsSize(iframe)));
 
     auto ctx {vm->GetLanguageContext()};
-    ctx.InitializeOsrCframeSlots(param_slots);
+    ctx.InitializeOsrCframeSlots(paramSlots);
 
-    for (auto vreg : code_info.GetVRegList(stackmap, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime())) {
+    for (auto vreg : codeInfo.GetVRegList(stackmap, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime())) {
         if (!vreg.IsLive()) {
             continue;
         }
@@ -163,10 +162,10 @@ extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bc_offset, const
                 cframe.SetVRegValue(vreg, value, nullptr);
                 break;
             case VRegInfo::Location::REGISTER:
-                reg_buffer[vreg.GetValue()] = value;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                regBuffer[vreg.GetValue()] = value;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 break;
             case VRegInfo::Location::FP_REGISTER:
-                fp_reg_buffer[vreg.GetValue()] = value;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                fpRegBuffer[vreg.GetValue()] = value;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 break;
             // NOLINTNEXTLINE(bugprone-branch-clone)
             case VRegInfo::Location::CONSTANT:
@@ -176,10 +175,10 @@ extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bc_offset, const
         }
     }
 
-    thread->SetCurrentFrame(reinterpret_cast<Frame *>(cframe_ptr));
+    thread->SetCurrentFrame(reinterpret_cast<Frame *>(cframePtr));
     thread->SetCurrentFrameIsCompiled(true);
 
-    return bit_cast<void *>(bit_cast<uintptr_t>(osr_code) + stackmap.GetNativePcUnpacked());
+    return bit_cast<void *>(bit_cast<uintptr_t>(osrCode) + stackmap.GetNativePcUnpacked());
 }
 
 extern "C" void SetOsrResult(Frame *frame, uint64_t uval, double fval)
@@ -232,9 +231,9 @@ static size_t GetStackParamsSize(const Frame *frame)
     constexpr auto SLOT_SIZE {ArchTraits<RUNTIME_ARCH>::POINTER_SIZE};
     auto *method {frame->GetMethod()};
     if (frame->IsDynamic()) {
-        auto num_args {std::max(method->GetNumArgs(), frame->GetNumActualArgs())};
-        auto arg_size {std::max(sizeof(coretypes::TaggedType), SLOT_SIZE)};
-        return RoundUp(num_args * arg_size, 2U * SLOT_SIZE);
+        auto numArgs {std::max(method->GetNumArgs(), frame->GetNumActualArgs())};
+        auto argSize {std::max(sizeof(coretypes::TaggedType), SLOT_SIZE)};
+        return RoundUp(numArgs * argSize, 2U * SLOT_SIZE);
     }
 
     arch::ArgCounter<RUNTIME_ARCH> counter;

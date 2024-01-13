@@ -26,15 +26,15 @@ static constexpr size_t INST_LIMIT_FOR_GRAPH_COLORING = 5000;
 
 bool IsGraphColoringEnable(const Graph *graph)
 {
-    if (graph->GetArch() == Arch::AARCH32 || !graph->IsAotMode() || !OPTIONS.IsCompilerAotRa()) {
+    if (graph->GetArch() == Arch::AARCH32 || !graph->IsAotMode() || !g_options.IsCompilerAotRa()) {
         return false;
     }
 
-    size_t inst_count = 0;
+    size_t instCount = 0;
     for (auto bb : graph->GetBlocksRPO()) {
-        inst_count += bb->CountInsts();
+        instCount += bb->CountInsts();
     }
-    return inst_count < INST_LIMIT_FOR_GRAPH_COLORING;
+    return instCount < INST_LIMIT_FOR_GRAPH_COLORING;
 }
 
 bool ShouldSkipAllocation(Graph *graph)
@@ -53,19 +53,19 @@ bool RegAlloc(Graph *graph)
         return false;
     }
 
-    bool ra_passed = false;
+    bool raPassed = false;
 
     if (graph->IsBytecodeOptimizer()) {
         RegAllocResolver(graph).ResolveCatchPhis();
-        ra_passed = graph->RunPass<RegAllocGraphColoring>(VIRTUAL_FRAME_SIZE);
+        raPassed = graph->RunPass<RegAllocGraphColoring>(VIRTUAL_FRAME_SIZE);
     } else if (IsGraphColoringEnable(graph)) {
-        ra_passed = graph->RunPass<RegAllocGraphColoring>();
+        raPassed = graph->RunPass<RegAllocGraphColoring>();
     } else {
-        ra_passed = graph->RunPass<RegAllocLinearScan>();
+        raPassed = graph->RunPass<RegAllocLinearScan>();
     }
-    if (ra_passed) {
+    if (raPassed) {
         CleanupEmptyBlocks(graph);
     }
-    return ra_passed;
+    return raPassed;
 }
 }  // namespace panda::compiler

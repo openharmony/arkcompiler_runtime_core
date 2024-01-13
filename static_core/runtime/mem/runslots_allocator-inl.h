@@ -27,9 +27,8 @@ namespace panda::mem {
 #define LOG_RUNSLOTS_ALLOCATOR(level) LOG(level, ALLOC) << "RunSlotsAllocator: "
 
 template <typename AllocConfigT, typename LockConfigT>
-inline RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsAllocator(MemStatsType *mem_stats,
-                                                                       SpaceType type_allocation)
-    : type_allocation_(type_allocation), mem_stats_(mem_stats)
+inline RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsAllocator(MemStatsType *memStats, SpaceType typeAllocation)
+    : typeAllocation_(typeAllocation), memStats_(memStats)
 {
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Initializing RunSlotsAllocator";
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Initializing RunSlotsAllocator finished";
@@ -53,74 +52,74 @@ inline void *RunSlotsAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Al
         return nullptr;
     }
     // NOTE(aemelenko): Do smth more memory flexible with alignment
-    size_t alignment_size = GetAlignmentInBytes(align);
-    if (alignment_size > size) {
-        LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Change size of allocation to " << alignment_size
+    size_t alignmentSize = GetAlignmentInBytes(align);
+    if (alignmentSize > size) {
+        LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Change size of allocation to " << alignmentSize
                                       << " bytes because of alignment";
-        size = alignment_size;
+        size = alignmentSize;
     }
     if (size > RunSlotsType::MaxSlotSize()) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Failed to allocate - size of object is too big";
         return nullptr;
     }
-    size_t slot_size_power_of_two = RunSlotsType::ConvertToPowerOfTwoUnsafe(size);
-    size_t array_index = slot_size_power_of_two;
-    const size_t run_slot_size = 1UL << slot_size_power_of_two;
+    size_t slotSizePowerOfTwo = RunSlotsType::ConvertToPowerOfTwoUnsafe(size);
+    size_t arrayIndex = slotSizePowerOfTwo;
+    const size_t runSlotSize = 1UL << slotSizePowerOfTwo;
     RunSlotsType *runslots = nullptr;
-    bool used_from_freed_runslots_list = false;
+    bool usedFromFreedRunslotsList = false;
     {
-        os::memory::LockHolder<ListLock, NEED_LOCK> list_lock(*runslots_[array_index].GetLock());
-        runslots = runslots_[array_index].PopFromHead();
+        os::memory::LockHolder<ListLock, NEED_LOCK> listLock(*runslots_[arrayIndex].GetLock());
+        runslots = runslots_[arrayIndex].PopFromHead();
     }
     if (runslots == nullptr) {
-        LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "We don't have free RunSlots for size " << run_slot_size
+        LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "We don't have free RunSlots for size " << runSlotSize
                                       << ". Try to get new one.";
         if (DISABLE_USE_FREE_RUNSLOTS) {
             return nullptr;
         }
         {
-            os::memory::LockHolder<ListLock, NEED_LOCK> list_lock(*free_runslots_.GetLock());
-            runslots = free_runslots_.PopFromHead();
+            os::memory::LockHolder<ListLock, NEED_LOCK> listLock(*freeRunslots_.GetLock());
+            runslots = freeRunslots_.PopFromHead();
         }
         if (runslots != nullptr) {
-            used_from_freed_runslots_list = true;
+            usedFromFreedRunslotsList = true;
             LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Get RunSlots from free list";
         } else {
             LOG_RUNSLOTS_ALLOCATOR(DEBUG)
                 << "Failed to get new RunSlots from free list, try to allocate one from memory";
-            runslots = CreateNewRunSlotsFromMemory(run_slot_size);
+            runslots = CreateNewRunSlotsFromMemory(runSlotSize);
             if (runslots == nullptr) {
                 LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Failed to allocate an object, couldn't create RunSlots";
                 return nullptr;
             }
         }
     }
-    void *allocated_mem = nullptr;
+    void *allocatedMem = nullptr;
     {
-        os::memory::LockHolder<typename LockConfigT::RunSlotsLock, NEED_LOCK> runslots_lock(*runslots->GetLock());
-        if (used_from_freed_runslots_list) {
+        os::memory::LockHolder<typename LockConfigT::RunSlotsLock, NEED_LOCK> runslotsLock(*runslots->GetLock());
+        if (usedFromFreedRunslotsList) {
             // NOTE(aemelenko): if we allocate and free two different size objects,
             //                  we will have a perf issue here. Maybe it is better to delete free_runslots_?
-            if (runslots->GetSlotsSize() != run_slot_size) {
-                runslots->Initialize(run_slot_size, runslots->GetPoolPointer(), false);
+            if (runslots->GetSlotsSize() != runSlotSize) {
+                runslots->Initialize(runSlotSize, runslots->GetPoolPointer(), false);
             }
         }
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Used runslots with addr " << std::hex << runslots;
-        allocated_mem = static_cast<void *>(runslots->PopFreeSlot());
-        if (allocated_mem == nullptr) {
+        allocatedMem = static_cast<void *>(runslots->PopFreeSlot());
+        if (allocatedMem == nullptr) {
             UNREACHABLE();
         }
-        LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Allocate a memory at address " << std::hex << allocated_mem;
+        LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Allocate a memory at address " << std::hex << allocatedMem;
         if (!runslots->IsFull()) {
-            os::memory::LockHolder<ListLock, NEED_LOCK> list_lock(*runslots_[array_index].GetLock());
+            os::memory::LockHolder<ListLock, NEED_LOCK> listLock(*runslots_[arrayIndex].GetLock());
             // We didn't take the last free slot from this RunSlots
-            runslots_[array_index].PushToTail(runslots);
+            runslots_[arrayIndex].PushToTail(runslots);
         }
-        ASAN_UNPOISON_MEMORY_REGION(allocated_mem, size);
-        AllocConfigT::OnAlloc(run_slot_size, type_allocation_, mem_stats_);
-        AllocConfigT::MemoryInit(allocated_mem);
+        ASAN_UNPOISON_MEMORY_REGION(allocatedMem, size);
+        AllocConfigT::OnAlloc(runSlotSize, typeAllocation_, memStats_);
+        AllocConfigT::MemoryInit(allocatedMem);
     }
-    return allocated_mem;
+    return allocatedMem;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -133,17 +132,17 @@ template <typename AllocConfigT, typename LockConfigT>
 inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::ReleaseEmptyRunSlotsPagesUnsafe()
 {
     // Iterate over free_runslots list:
-    RunSlotsType *cur_free_runslots = nullptr;
+    RunSlotsType *curFreeRunslots = nullptr;
     {
-        os::memory::LockHolder list_lock(*free_runslots_.GetLock());
-        cur_free_runslots = free_runslots_.PopFromHead();
+        os::memory::LockHolder listLock(*freeRunslots_.GetLock());
+        curFreeRunslots = freeRunslots_.PopFromHead();
     }
-    while (cur_free_runslots != nullptr) {
-        memory_pool_.ReturnAndReleaseRunSlotsMemory(cur_free_runslots);
+    while (curFreeRunslots != nullptr) {
+        memoryPool_.ReturnAndReleaseRunSlotsMemory(curFreeRunslots);
 
         {
-            os::memory::LockHolder list_lock(*free_runslots_.GetLock());
-            cur_free_runslots = free_runslots_.PopFromHead();
+            os::memory::LockHolder listLock(*freeRunslots_.GetLock());
+            curFreeRunslots = freeRunslots_.PopFromHead();
         }
     }
 }
@@ -151,41 +150,41 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::ReleaseEmptyRunSlotsPa
 template <typename AllocConfigT, typename LockConfigT>
 inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::FreeUnsafeInternal(RunSlotsType *runslots, void *mem)
 {
-    bool need_to_add_to_free_list = false;
+    bool needToAddToFreeList = false;
     // NOTE(aemelenko): Here can be a performance issue when we allocate/deallocate one object.
-    const size_t run_slot_size = runslots->GetSlotsSize();
-    size_t array_index = RunSlotsType::ConvertToPowerOfTwoUnsafe(run_slot_size);
-    bool runslots_was_full = runslots->IsFull();
+    const size_t runSlotSize = runslots->GetSlotsSize();
+    size_t arrayIndex = RunSlotsType::ConvertToPowerOfTwoUnsafe(runSlotSize);
+    bool runslotsWasFull = runslots->IsFull();
     runslots->PushFreeSlot(static_cast<FreeSlot *>(mem));
     /**
      * RunSlotsAllocator doesn't know this real size which we use in slot, so we record upper bound - size of the
      * slot.
      */
-    AllocConfigT::OnFree(run_slot_size, type_allocation_, mem_stats_);
-    ASAN_POISON_MEMORY_REGION(mem, run_slot_size);
-    ASSERT(!(runslots_was_full && runslots->IsEmpty()));  // Runslots has more that one slot inside.
-    if (runslots_was_full) {
+    AllocConfigT::OnFree(runSlotSize, typeAllocation_, memStats_);
+    ASAN_POISON_MEMORY_REGION(mem, runSlotSize);
+    ASSERT(!(runslotsWasFull && runslots->IsEmpty()));  // Runslots has more that one slot inside.
+    if (runslotsWasFull) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "This RunSlots was full and now we must add it to the RunSlots list";
 
-        os::memory::LockHolder list_lock(*runslots_[array_index].GetLock());
+        os::memory::LockHolder listLock(*runslots_[arrayIndex].GetLock());
 #if PANDA_ENABLE_SLOW_DEBUG
-        ASSERT(!runslots_[array_index].IsInThisList(runslots));
+        ASSERT(!runslots_[arrayIndex].IsInThisList(runslots));
 #endif
-        runslots_[array_index].PushToTail(runslots);
+        runslots_[arrayIndex].PushToTail(runslots);
     } else if (runslots->IsEmpty()) {
-        os::memory::LockHolder list_lock(*runslots_[array_index].GetLock());
+        os::memory::LockHolder listLock(*runslots_[arrayIndex].GetLock());
         // Check that we may took this runslots from list on alloc
         // and waiting for lock
         if ((runslots->GetNextRunSlots() != nullptr) || (runslots->GetPrevRunSlots() != nullptr) ||
-            (runslots_[array_index].GetHead() == runslots)) {
+            (runslots_[arrayIndex].GetHead() == runslots)) {
             LOG_RUNSLOTS_ALLOCATOR(DEBUG)
                 << "This RunSlots is empty. Pop it from runslots list and push it to free_runslots_";
-            runslots_[array_index].PopFromList(runslots);
-            need_to_add_to_free_list = true;
+            runslots_[arrayIndex].PopFromList(runslots);
+            needToAddToFreeList = true;
         }
     }
 
-    return need_to_add_to_free_list;
+    return needToAddToFreeList;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -206,8 +205,8 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
 
     // Now we 100% sure that this object was allocated by RunSlots allocator.
     // We can just do alignment for this address and get a pointer to RunSlots header
-    uintptr_t runslots_addr = (ToUintPtr(mem) >> RUNSLOTS_ALIGNMENT) << RUNSLOTS_ALIGNMENT;
-    auto runslots = static_cast<RunSlotsType *>(ToVoidPtr(runslots_addr));
+    uintptr_t runslotsAddr = (ToUintPtr(mem) >> RUNSLOTS_ALIGNMENT) << RUNSLOTS_ALIGNMENT;
+    auto runslots = static_cast<RunSlotsType *>(ToVoidPtr(runslotsAddr));
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "It is RunSlots with addr " << std::hex << static_cast<void *>(runslots);
 
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
@@ -215,29 +214,29 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
         runslots->GetLock()->Lock();
     }
 
-    bool need_to_add_to_free_list = FreeUnsafeInternal(runslots, mem);
+    bool needToAddToFreeList = FreeUnsafeInternal(runslots, mem);
 
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (LOCK_RUN_SLOTS) {
         runslots->GetLock()->Unlock();
     }
 
-    if (need_to_add_to_free_list) {
-        os::memory::LockHolder list_lock(*free_runslots_.GetLock());
-        free_runslots_.PushToTail(runslots);
+    if (needToAddToFreeList) {
+        os::memory::LockHolder listLock(*freeRunslots_.GetLock());
+        freeRunslots_.PushToTail(runslots);
     }
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Freed object at address " << std::hex << mem;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::Collect(const GCObjectVisitor &death_checker_fn)
+inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::Collect(const GCObjectVisitor &deathCheckerFn)
 {
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Collecting for RunSlots allocator started";
-    IterateOverObjects([&](ObjectHeader *object_header) {
-        LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "  iterate over " << std::hex << object_header;
-        if (death_checker_fn(object_header) == ObjectStatus::DEAD_OBJECT) {
-            LOG(DEBUG, GC) << "DELETE OBJECT " << GetDebugInfoAboutObject(object_header);
-            FreeUnsafe<false>(object_header);
+    IterateOverObjects([this, &deathCheckerFn](ObjectHeader *objectHeader) {
+        LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "  iterate over " << std::hex << objectHeader;
+        if (deathCheckerFn(objectHeader) == ObjectStatus::DEAD_OBJECT) {
+            LOG(DEBUG, GC) << "DELETE OBJECT " << GetDebugInfoAboutObject(objectHeader);
+            FreeUnsafe<false>(objectHeader);
         }
     });
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Collecting for RunSlots allocator finished";
@@ -245,10 +244,10 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::Collect(const GCObject
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename ObjectVisitor>
-void RunSlotsAllocator<AllocConfigT, LockConfigT>::IterateOverObjects(const ObjectVisitor &object_visitor)
+void RunSlotsAllocator<AllocConfigT, LockConfigT>::IterateOverObjects(const ObjectVisitor &objectVisitor)
 {
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Iteration over objects started";
-    memory_pool_.IterateOverObjects(object_visitor);
+    memoryPool_.IterateOverObjects(objectVisitor);
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Iteration over objects finished";
 }
 
@@ -262,15 +261,15 @@ template <typename AllocConfigT, typename LockConfigT>
 bool RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocatedByRunSlotsAllocatorUnsafe(void *object)
 {
     // NOTE(aemelenko): Add more complex and optimized solution for this method
-    return memory_pool_.IsInMemPools(object);
+    return memoryPool_.IsInMemPools(object);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool NEED_LOCK>
 inline typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
-RunSlotsAllocator<AllocConfigT, LockConfigT>::CreateNewRunSlotsFromMemory(size_t slots_size)
+RunSlotsAllocator<AllocConfigT, LockConfigT>::CreateNewRunSlotsFromMemory(size_t slotsSize)
 {
-    RunSlotsType *runslots = memory_pool_.template GetNewRunSlots<NEED_LOCK>(slots_size);
+    RunSlotsType *runslots = memoryPool_.template GetNewRunSlots<NEED_LOCK>(slotsSize);
     if (runslots != nullptr) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Take " << RUNSLOTS_SIZE << " bytes of memory for new RunSlots instance from "
                                       << std::hex << runslots;
@@ -297,7 +296,7 @@ inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::AddMemoryPool(void *me
             << "Can't add new memory pool to this allocator because the memory size is equal to " << MIN_POOL_SIZE;
         return false;
     }
-    if (!memory_pool_.AddNewMemoryPool(mem, size)) {
+    if (!memoryPool_.AddNewMemoryPool(mem, size)) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG)
             << "Can't add new memory pool to this allocator. Maybe we already added too much memory pools.";
         return false;
@@ -307,52 +306,51 @@ inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::AddMemoryPool(void *me
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void RunSlotsAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveAllPools(const MemVisitor &mem_visitor)
+void RunSlotsAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveAllPools(const MemVisitor &memVisitor)
 {
     // We call this method and return pools to the system.
     // Therefore, delete all objects to clear all external dependences
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Clear all objects inside the allocator";
-    memory_pool_.VisitAllPools(mem_visitor);
+    memoryPool_.VisitAllPools(memVisitor);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void RunSlotsAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveFreePools(const MemVisitor &mem_visitor)
+void RunSlotsAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveFreePools(const MemVisitor &memVisitor)
 {
     ReleaseEmptyRunSlotsPagesUnsafe();
     // We need to remove RunSlots from RunSlotsList
     // All of them must be inside free_runslots_ list.
-    memory_pool_.VisitAndRemoveFreePools(mem_visitor);
+    memoryPool_.VisitAndRemoveFreePools(memVisitor);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void RunSlotsAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange(const MemVisitor &mem_visitor,
-                                                                             void *left_border, void *right_border)
+void RunSlotsAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange(const MemVisitor &memVisitor,
+                                                                             void *leftBorder, void *rightBorder)
 {
-    LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange for range [" << std::hex << left_border << ", "
-                                  << right_border << "]";
-    ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
-    if (!AllocatedByRunSlotsAllocatorUnsafe(left_border)) {
+    LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange for range [" << std::hex << leftBorder << ", "
+                                  << rightBorder << "]";
+    ASSERT(ToUintPtr(rightBorder) >= ToUintPtr(leftBorder));
+    if (!AllocatedByRunSlotsAllocatorUnsafe(leftBorder)) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "This memory range is not covered by this allocator";
         return;
     }
     // NOTE(aemelenko): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
-    ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
-           (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
-    ASSERT((ToUintPtr(right_border) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))) ==
-           (ToUintPtr(left_border) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))));
+    ASSERT(ToUintPtr(rightBorder) - ToUintPtr(leftBorder) == (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
+    ASSERT((ToUintPtr(rightBorder) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))) ==
+           (ToUintPtr(leftBorder) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))));
     // Now we 100% sure that this left_border was allocated by RunSlots allocator.
     // We can just do alignment for this address and get a pointer to RunSlots header
-    uintptr_t runslots_addr = (ToUintPtr(left_border) >> RUNSLOTS_ALIGNMENT) << RUNSLOTS_ALIGNMENT;
-    while (runslots_addr < ToUintPtr(right_border)) {
-        auto runslots = static_cast<RunSlotsType *>(ToVoidPtr(runslots_addr));
-        os::memory::LockHolder runslots_lock(*runslots->GetLock());
+    uintptr_t runslotsAddr = (ToUintPtr(leftBorder) >> RUNSLOTS_ALIGNMENT) << RUNSLOTS_ALIGNMENT;
+    while (runslotsAddr < ToUintPtr(rightBorder)) {
+        auto runslots = static_cast<RunSlotsType *>(ToVoidPtr(runslotsAddr));
+        os::memory::LockHolder runslotsLock(*runslots->GetLock());
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange, It is RunSlots with addr " << std::hex
                                       << static_cast<void *>(runslots);
-        runslots->IterateOverOccupiedSlots(mem_visitor);
-        runslots_addr += RUNSLOTS_SIZE;
+        runslots->IterateOverOccupiedSlots(memVisitor);
+        runslotsAddr += RUNSLOTS_SIZE;
     }
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "IterateOverObjectsInRange finished";
 }
@@ -360,19 +358,19 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange(con
 template <typename AllocConfigT, typename LockConfigT>
 size_t RunSlotsAllocator<AllocConfigT, LockConfigT>::VerifyAllocator()
 {
-    size_t fail_cnt = 0;
+    size_t failCnt = 0;
     for (size_t i = 0; i < SLOTS_SIZES_VARIANTS; i++) {
         RunSlotsType *runslots = nullptr;
         {
-            os::memory::LockHolder list_lock(*runslots_[i].GetLock());
+            os::memory::LockHolder listLock(*runslots_[i].GetLock());
             runslots = runslots_[i].GetHead();
         }
         if (runslots != nullptr) {
-            os::memory::LockHolder runslots_lock(*runslots->GetLock());
-            fail_cnt += runslots->VerifyRun();
+            os::memory::LockHolder runslotsLock(*runslots->GetLock());
+            failCnt += runslots->VerifyRun();
         }
     }
-    return fail_cnt;
+    return failCnt;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -385,8 +383,8 @@ template <typename AllocConfigT, typename LockConfigT>
 bool RunSlotsAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader *obj)
 {
     ASSERT(ContainObject(obj));
-    uintptr_t runslots_addr = ToUintPtr(obj) >> RUNSLOTS_ALIGNMENT << RUNSLOTS_ALIGNMENT;
-    auto run = static_cast<RunSlotsType *>(ToVoidPtr(runslots_addr));
+    uintptr_t runslotsAddr = ToUintPtr(obj) >> RUNSLOTS_ALIGNMENT << RUNSLOTS_ALIGNMENT;
+    auto run = static_cast<RunSlotsType *>(ToVoidPtr(runslotsAddr));
     if (run->IsEmpty()) {
         return false;
     }
@@ -397,15 +395,15 @@ template <typename AllocConfigT, typename LockConfigT>
 void RunSlotsAllocator<AllocConfigT, LockConfigT>::TrimUnsafe()
 {
     // release page in free runslots list
-    auto head = free_runslots_.GetHead();
+    auto head = freeRunslots_.GetHead();
     while (head != nullptr) {
         auto next = head->GetNextRunSlots();
         os::mem::ReleasePages(ToUintPtr(head), ToUintPtr(head) + RUNSLOTS_SIZE);
         head = next;
     }
 
-    memory_pool_.VisitAllPoolsWithOccupiedSize([](void *mem, size_t used_size, size_t size) {
-        uintptr_t start = AlignUp(ToUintPtr(mem) + used_size, panda::os::mem::GetPageSize());
+    memoryPool_.VisitAllPoolsWithOccupiedSize([](void *mem, size_t usedSize, size_t size) {
+        uintptr_t start = AlignUp(ToUintPtr(mem) + usedSize, panda::os::mem::GetPageSize());
         uintptr_t end = ToUintPtr(mem) + size;
         if (end >= start + panda::os::mem::GetPageSize()) {
             os::mem::ReleasePages(start, end);
@@ -440,9 +438,9 @@ RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromHead()
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "      List is empty, nothing to pop";
         return nullptr;
     }
-    RunSlotsType *head_runslots = head_;
-    LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "     popped from head RunSlots " << std::hex << head_runslots;
-    head_ = head_runslots->GetNextRunSlots();
+    RunSlotsType *headRunslots = head_;
+    LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "     popped from head RunSlots " << std::hex << headRunslots;
+    head_ = headRunslots->GetNextRunSlots();
     if (head_ == nullptr) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "     Now list is empty";
         // We pop the last element in the list
@@ -450,8 +448,8 @@ RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromHead()
     } else {
         head_->SetPrevRunSlots(nullptr);
     }
-    head_runslots->SetNextRunSlots(nullptr);
-    return head_runslots;
+    headRunslots->SetNextRunSlots(nullptr);
+    return headRunslots;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -463,9 +461,9 @@ RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromTail()
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "      List is empty, nothing to pop";
         return nullptr;
     }
-    RunSlotsType *tail_runslots = tail_;
-    LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "     popped from tail RunSlots " << std::hex << tail_runslots;
-    tail_ = tail_runslots->GetPrevRunSlots();
+    RunSlotsType *tailRunslots = tail_;
+    LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "     popped from tail RunSlots " << std::hex << tailRunslots;
+    tail_ = tailRunslots->GetPrevRunSlots();
     if (tail_ == nullptr) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "     Now list is empty";
         // We pop the last element in the list
@@ -473,8 +471,8 @@ RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromTail()
     } else {
         tail_->SetNextRunSlots(nullptr);
     }
-    tail_runslots->SetPrevRunSlots(nullptr);
-    return tail_runslots;
+    tailRunslots->SetPrevRunSlots(nullptr);
+    return tailRunslots;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -496,13 +494,13 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromL
     }
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Remove RunSlots from the list.";
     ASSERT(runslots != nullptr);
-    RunSlotsType *next_runslots = runslots->GetNextRunSlots();
-    RunSlotsType *previous_runslots = runslots->GetPrevRunSlots();
-    ASSERT(next_runslots != nullptr);
-    ASSERT(previous_runslots != nullptr);
+    RunSlotsType *nextRunslots = runslots->GetNextRunSlots();
+    RunSlotsType *previousRunslots = runslots->GetPrevRunSlots();
+    ASSERT(nextRunslots != nullptr);
+    ASSERT(previousRunslots != nullptr);
 
-    next_runslots->SetPrevRunSlots(previous_runslots);
-    previous_runslots->SetNextRunSlots(next_runslots);
+    nextRunslots->SetPrevRunSlots(previousRunslots);
+    previousRunslots->SetNextRunSlots(nextRunslots);
     runslots->SetNextRunSlots(nullptr);
     runslots->SetPrevRunSlots(nullptr);
 }
@@ -510,62 +508,62 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromL
 template <typename AllocConfigT, typename LockConfigT>
 inline RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::MemPoolManager()
 {
-    occupied_tail_ = nullptr;
-    free_tail_ = nullptr;
-    partially_occupied_head_ = nullptr;
+    occupiedTail_ = nullptr;
+    freeTail_ = nullptr;
+    partiallyOccupiedHead_ = nullptr;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool NEED_LOCK>
 inline typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
-RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::GetNewRunSlots(size_t slots_size)
+RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::GetNewRunSlots(size_t slotsSize)
 {
     os::memory::WriteLockHolder<typename LockConfigT::PoolLock, NEED_LOCK> wlock(lock_);
-    RunSlotsType *new_runslots = nullptr;
-    if (partially_occupied_head_ != nullptr) {
-        new_runslots = partially_occupied_head_->GetMemoryForRunSlots(slots_size);
-        ASSERT(new_runslots != nullptr);
-        if (UNLIKELY(!partially_occupied_head_->HasMemoryForRunSlots())) {
-            partially_occupied_head_ = partially_occupied_head_->GetNext();
-            ASSERT((partially_occupied_head_ == nullptr) || (partially_occupied_head_->HasMemoryForRunSlots()));
+    RunSlotsType *newRunslots = nullptr;
+    if (partiallyOccupiedHead_ != nullptr) {
+        newRunslots = partiallyOccupiedHead_->GetMemoryForRunSlots(slotsSize);
+        ASSERT(newRunslots != nullptr);
+        if (UNLIKELY(!partiallyOccupiedHead_->HasMemoryForRunSlots())) {
+            partiallyOccupiedHead_ = partiallyOccupiedHead_->GetNext();
+            ASSERT((partiallyOccupiedHead_ == nullptr) || (partiallyOccupiedHead_->HasMemoryForRunSlots()));
         }
-    } else if (free_tail_ != nullptr) {
+    } else if (freeTail_ != nullptr) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG)
             << "MemPoolManager: occupied_tail_ doesn't have memory for RunSlots, get new pool from free pools";
-        PoolListElement *free_element = free_tail_;
-        free_tail_ = free_tail_->GetPrev();
+        PoolListElement *freeElement = freeTail_;
+        freeTail_ = freeTail_->GetPrev();
 
-        free_element->PopFromList();
-        free_element->SetPrev(occupied_tail_);
+        freeElement->PopFromList();
+        freeElement->SetPrev(occupiedTail_);
 
-        if (occupied_tail_ != nullptr) {
-            ASSERT(occupied_tail_->GetNext() == nullptr);
-            occupied_tail_->SetNext(free_element);
+        if (occupiedTail_ != nullptr) {
+            ASSERT(occupiedTail_->GetNext() == nullptr);
+            occupiedTail_->SetNext(freeElement);
         }
-        occupied_tail_ = free_element;
+        occupiedTail_ = freeElement;
 
-        if (partially_occupied_head_ == nullptr) {
-            partially_occupied_head_ = occupied_tail_;
-            ASSERT(partially_occupied_head_->HasMemoryForRunSlots());
+        if (partiallyOccupiedHead_ == nullptr) {
+            partiallyOccupiedHead_ = occupiedTail_;
+            ASSERT(partiallyOccupiedHead_->HasMemoryForRunSlots());
         }
 
-        ASSERT(occupied_tail_->GetNext() == nullptr);
-        new_runslots = occupied_tail_->GetMemoryForRunSlots(slots_size);
-        ASSERT(new_runslots != nullptr);
+        ASSERT(occupiedTail_->GetNext() == nullptr);
+        newRunslots = occupiedTail_->GetMemoryForRunSlots(slotsSize);
+        ASSERT(newRunslots != nullptr);
     }
-    return new_runslots;
+    return newRunslots;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::AddNewMemoryPool(void *mem, size_t size)
 {
     os::memory::WriteLockHolder wlock(lock_);
-    PoolListElement *new_pool = PoolListElement::Create(mem, size, free_tail_);
-    if (free_tail_ != nullptr) {
-        ASSERT(free_tail_->GetNext() == nullptr);
-        free_tail_->SetNext(new_pool);
+    PoolListElement *newPool = PoolListElement::Create(mem, size, freeTail_);
+    if (freeTail_ != nullptr) {
+        ASSERT(freeTail_->GetNext() == nullptr);
+        freeTail_->SetNext(newPool);
     }
-    free_tail_ = new_pool;
+    freeTail_ = newPool;
     ASAN_POISON_MEMORY_REGION(mem, size);
     // To not unpoison it every time at access.
     ASAN_UNPOISON_MEMORY_REGION(mem, sizeof(PoolListElement));
@@ -579,33 +577,33 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::Return
     os::memory::WriteLockHolder wlock(lock_);
     auto pool = static_cast<PoolListElement *>(ToVoidPtr(runslots->GetPoolPointer()));
     if (!pool->HasMemoryForRunSlots()) {
-        ASSERT(partially_occupied_head_ != pool);
+        ASSERT(partiallyOccupiedHead_ != pool);
         // We should add move this pool to the end of a occupied list
-        if (pool != occupied_tail_) {
+        if (pool != occupiedTail_) {
             pool->PopFromList();
-            pool->SetPrev(occupied_tail_);
-            if (UNLIKELY(occupied_tail_ == nullptr)) {
+            pool->SetPrev(occupiedTail_);
+            if (UNLIKELY(occupiedTail_ == nullptr)) {
                 UNREACHABLE();
             }
-            occupied_tail_->SetNext(pool);
-            occupied_tail_ = pool;
+            occupiedTail_->SetNext(pool);
+            occupiedTail_ = pool;
         } else {
-            ASSERT(partially_occupied_head_ == nullptr);
+            ASSERT(partiallyOccupiedHead_ == nullptr);
         }
-        if (partially_occupied_head_ == nullptr) {
-            partially_occupied_head_ = occupied_tail_;
+        if (partiallyOccupiedHead_ == nullptr) {
+            partiallyOccupiedHead_ = occupiedTail_;
         }
     }
 
     pool->AddFreedRunSlots(runslots);
-    ASSERT(partially_occupied_head_->HasMemoryForRunSlots());
+    ASSERT(partiallyOccupiedHead_->HasMemoryForRunSlots());
 
     // Start address from which we can release pages
-    uintptr_t start_addr = AlignUp(ToUintPtr(runslots), os::mem::GetPageSize());
+    uintptr_t startAddr = AlignUp(ToUintPtr(runslots), os::mem::GetPageSize());
     // End address before which we can release pages
-    uintptr_t end_addr = os::mem::AlignDownToPageSize(ToUintPtr(runslots) + RUNSLOTS_SIZE);
-    if (start_addr < end_addr) {
-        os::mem::ReleasePages(start_addr, end_addr);
+    uintptr_t endAddr = os::mem::AlignDownToPageSize(ToUintPtr(runslots) + RUNSLOTS_SIZE);
+    if (startAddr < endAddr) {
+        os::mem::ReleasePages(startAddr, endAddr);
     }
 }
 
@@ -613,7 +611,7 @@ template <typename AllocConfigT, typename LockConfigT>
 bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::IsInMemPools(void *object)
 {
     os::memory::ReadLockHolder rlock(lock_);
-    PoolListElement *current = occupied_tail_;
+    PoolListElement *current = occupiedTail_;
     while (current != nullptr) {
         if (current->IsInUsedMemory(object)) {
             return true;
@@ -626,98 +624,98 @@ bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::IsInMemPools(
 template <typename AllocConfigT, typename LockConfigT>
 template <typename ObjectVisitor>
 void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::IterateOverObjects(
-    const ObjectVisitor &object_visitor)
+    const ObjectVisitor &objectVisitor)
 {
-    PoolListElement *current_pool = nullptr;
+    PoolListElement *currentPool = nullptr;
     {
         os::memory::ReadLockHolder rlock(lock_);
-        current_pool = occupied_tail_;
+        currentPool = occupiedTail_;
     }
-    while (current_pool != nullptr) {
-        current_pool->IterateOverRunSlots([&](RunSlotsType *runslots) {
-            os::memory::LockHolder runslots_lock(*runslots->GetLock());
-            ASSERT(runslots->GetPoolPointer() == ToUintPtr(current_pool));
-            runslots->IterateOverOccupiedSlots(object_visitor);
+    while (currentPool != nullptr) {
+        currentPool->IterateOverRunSlots([&currentPool, &objectVisitor](RunSlotsType *runslots) {
+            os::memory::LockHolder runslotsLock(*runslots->GetLock());
+            UNUSED_VAR(currentPool);  // For release build
+            ASSERT(runslots->GetPoolPointer() == ToUintPtr(currentPool));
+            runslots->IterateOverOccupiedSlots(objectVisitor);
             return true;
         });
         {
             os::memory::ReadLockHolder rlock(lock_);
-            current_pool = current_pool->GetPrev();
+            currentPool = currentPool->GetPrev();
         }
     }
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAllPools(const MemVisitor &mem_visitor)
+void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAllPools(const MemVisitor &memVisitor)
 {
     os::memory::WriteLockHolder wlock(lock_);
-    PoolListElement *current_pool = occupied_tail_;
-    while (current_pool != nullptr) {
+    PoolListElement *currentPool = occupiedTail_;
+    while (currentPool != nullptr) {
         // Use tmp in case if visitor with side effects
-        PoolListElement *tmp = current_pool->GetPrev();
-        mem_visitor(current_pool->GetPoolMemory(), current_pool->GetSize());
-        current_pool = tmp;
+        PoolListElement *tmp = currentPool->GetPrev();
+        memVisitor(currentPool->GetPoolMemory(), currentPool->GetSize());
+        currentPool = tmp;
     }
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
 void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAllPoolsWithOccupiedSize(
-    const MemVisitor &mem_visitor)
+    const MemVisitor &memVisitor)
 {
     os::memory::WriteLockHolder wlock(lock_);
-    PoolListElement *current_pool = occupied_tail_;
-    while (current_pool != nullptr) {
+    PoolListElement *currentPool = occupiedTail_;
+    while (currentPool != nullptr) {
         // Use tmp in case if visitor with side effects
-        PoolListElement *tmp = current_pool->GetPrev();
-        mem_visitor(current_pool->GetPoolMemory(), current_pool->GetOccupiedSize(), current_pool->GetSize());
-        current_pool = tmp;
+        PoolListElement *tmp = currentPool->GetPrev();
+        memVisitor(currentPool->GetPoolMemory(), currentPool->GetOccupiedSize(), currentPool->GetSize());
+        currentPool = tmp;
     }
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAndRemoveFreePools(
-    const MemVisitor &mem_visitor)
+void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAndRemoveFreePools(const MemVisitor &memVisitor)
 {
     os::memory::WriteLockHolder wlock(lock_);
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "VisitAllFreePools inside RunSlotsAllocator";
     // First, iterate over totally free pools:
-    PoolListElement *current_pool = free_tail_;
-    while (current_pool != nullptr) {
+    PoolListElement *currentPool = freeTail_;
+    while (currentPool != nullptr) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "VisitAllFreePools: Visit free pool with addr " << std::hex
-                                      << current_pool->GetPoolMemory() << " and size " << std::dec
-                                      << current_pool->GetSize();
+                                      << currentPool->GetPoolMemory() << " and size " << std::dec
+                                      << currentPool->GetSize();
         // Use tmp in case if visitor with side effects
-        PoolListElement *tmp = current_pool->GetPrev();
-        mem_visitor(current_pool->GetPoolMemory(), current_pool->GetSize());
-        current_pool = tmp;
+        PoolListElement *tmp = currentPool->GetPrev();
+        memVisitor(currentPool->GetPoolMemory(), currentPool->GetSize());
+        currentPool = tmp;
     }
-    free_tail_ = nullptr;
+    freeTail_ = nullptr;
     // Second, try to find free pool in occupied:
-    current_pool = occupied_tail_;
-    while (current_pool != nullptr) {
+    currentPool = occupiedTail_;
+    while (currentPool != nullptr) {
         // Use tmp in case if visitor with side effects
-        PoolListElement *tmp = current_pool->GetPrev();
-        if (!current_pool->HasUsedMemory()) {
+        PoolListElement *tmp = currentPool->GetPrev();
+        if (!currentPool->HasUsedMemory()) {
             LOG_RUNSLOTS_ALLOCATOR(DEBUG)
-                << "VisitAllFreePools: Visit occupied pool with addr " << std::hex << current_pool->GetPoolMemory()
-                << " and size " << std::dec << current_pool->GetSize();
+                << "VisitAllFreePools: Visit occupied pool with addr " << std::hex << currentPool->GetPoolMemory()
+                << " and size " << std::dec << currentPool->GetSize();
             // This Pool doesn't have any occupied memory in RunSlots
             // Therefore, we can free it
-            if (occupied_tail_ == current_pool) {
+            if (occupiedTail_ == currentPool) {
                 LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "VisitAllFreePools: Update occupied_tail_";
-                occupied_tail_ = current_pool->GetPrev();
+                occupiedTail_ = currentPool->GetPrev();
             }
-            if (current_pool == partially_occupied_head_) {
-                partially_occupied_head_ = partially_occupied_head_->GetNext();
-                ASSERT((partially_occupied_head_ == nullptr) || (partially_occupied_head_->HasMemoryForRunSlots()));
+            if (currentPool == partiallyOccupiedHead_) {
+                partiallyOccupiedHead_ = partiallyOccupiedHead_->GetNext();
+                ASSERT((partiallyOccupiedHead_ == nullptr) || (partiallyOccupiedHead_->HasMemoryForRunSlots()));
             }
-            current_pool->PopFromList();
-            mem_visitor(current_pool->GetPoolMemory(), current_pool->GetSize());
+            currentPool->PopFromList();
+            memVisitor(currentPool->GetPoolMemory(), currentPool->GetSize());
         }
-        current_pool = tmp;
+        currentPool = tmp;
     }
 }
 
@@ -725,27 +723,27 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::VisitAndRemov
 template <typename AllocConfigT, typename LockConfigT>
 inline RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::PoolListElement()
 {
-    start_mem_ = 0;
-    pool_mem_ = 0;
+    startMem_ = 0;
+    poolMem_ = 0;
     size_ = 0;
-    free_ptr_ = 0;
-    prev_pool_ = nullptr;
-    next_pool_ = nullptr;
-    freeded_runslots_count_ = 0;
-    memset_s(storage_for_bitmap_.data(), sizeof(BitMapStorageType), 0, sizeof(BitMapStorageType));
+    freePtr_ = 0;
+    prevPool_ = nullptr;
+    nextPool_ = nullptr;
+    freededRunslotsCount_ = 0;
+    memset_s(storageForBitmap_.data(), sizeof(BitMapStorageType), 0, sizeof(BitMapStorageType));
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::PopFromList()
 {
-    if (next_pool_ != nullptr) {
-        next_pool_->SetPrev(prev_pool_);
+    if (nextPool_ != nullptr) {
+        nextPool_->SetPrev(prevPool_);
     }
-    if (prev_pool_ != nullptr) {
-        prev_pool_->SetNext(next_pool_);
+    if (prevPool_ != nullptr) {
+        prevPool_->SetNext(nextPool_);
     }
-    next_pool_ = nullptr;
-    prev_pool_ = nullptr;
+    nextPool_ = nullptr;
+    prevPool_ = nullptr;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -757,55 +755,55 @@ uintptr_t RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolList
 
 template <typename AllocConfigT, typename LockConfigT>
 inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::Initialize(
-    void *pool_mem, uintptr_t unoccupied_mem, size_t size, PoolListElement *prev)
+    void *poolMem, uintptr_t unoccupiedMem, size_t size, PoolListElement *prev)
 {
-    start_mem_ = unoccupied_mem;
-    pool_mem_ = ToUintPtr(pool_mem);
+    startMem_ = unoccupiedMem;
+    poolMem_ = ToUintPtr(poolMem);
     size_ = size;
     // Atomic with release order reason: data race with free_ptr_ with dependecies on writes before the store which
     // should become visible acquire
-    free_ptr_.store(GetFirstRunSlotsBlock(start_mem_), std::memory_order_release);
-    prev_pool_ = prev;
-    next_pool_ = nullptr;
-    freeded_runslots_count_ = 0;
-    freed_runslots_bitmap_.ReInitializeMemoryRange(pool_mem);
-    ASSERT(freed_runslots_bitmap_.FindFirstMarkedChunks() == nullptr);
+    freePtr_.store(GetFirstRunSlotsBlock(startMem_), std::memory_order_release);
+    prevPool_ = prev;
+    nextPool_ = nullptr;
+    freededRunslotsCount_ = 0;
+    freedRunslotsBitmap_.ReInitializeMemoryRange(poolMem);
+    ASSERT(freedRunslotsBitmap_.FindFirstMarkedChunks() == nullptr);
     // Atomic with acquire order reason: data race with free_ptr_ with dependecies on reads after the load which should
     // become visible
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "PoolMemory: first free RunSlots block = " << std::hex
-                                  << free_ptr_.load(std::memory_order_acquire);
+                                  << freePtr_.load(std::memory_order_acquire);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 inline typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
-RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::GetMemoryForRunSlots(size_t slots_size)
+RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::GetMemoryForRunSlots(size_t slotsSize)
 {
     if (!HasMemoryForRunSlots()) {
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "PoolMemory: There is no free memory for RunSlots";
         return nullptr;
     }
-    RunSlotsType *runslots = GetFreedRunSlots(slots_size);
+    RunSlotsType *runslots = GetFreedRunSlots(slotsSize);
     if (runslots == nullptr) {
         // Atomic with acquire order reason: data race with free_ptr_ with dependecies on reads after the load which
         // should become visible
-        uintptr_t old_mem = free_ptr_.load(std::memory_order_acquire);
-        ASSERT(pool_mem_ + size_ >= old_mem + RUNSLOTS_SIZE);
+        uintptr_t oldMem = freePtr_.load(std::memory_order_acquire);
+        ASSERT(poolMem_ + size_ >= oldMem + RUNSLOTS_SIZE);
 
         // Initialize it firstly before updating free ptr
         // because it will be visible outside after that.
-        runslots = static_cast<RunSlotsType *>(ToVoidPtr(old_mem));
-        runslots->Initialize(slots_size, ToUintPtr(this), true);
+        runslots = static_cast<RunSlotsType *>(ToVoidPtr(oldMem));
+        runslots->Initialize(slotsSize, ToUintPtr(this), true);
         // Atomic with acq_rel order reason: data race with free_ptr_ with dependecies on reads after the load and on
         // writes before the store
-        free_ptr_.fetch_add(RUNSLOTS_SIZE, std::memory_order_acq_rel);
+        freePtr_.fetch_add(RUNSLOTS_SIZE, std::memory_order_acq_rel);
         // Atomic with acquire order reason: data race with free_ptr_ with dependecies on reads after the load which
         // should become visible
-        ASSERT(free_ptr_.load(std::memory_order_acquire) == (old_mem + RUNSLOTS_SIZE));
+        ASSERT(freePtr_.load(std::memory_order_acquire) == (oldMem + RUNSLOTS_SIZE));
         LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "PoolMemory: Took memory for RunSlots from addr " << std::hex
-                                      << ToVoidPtr(old_mem)
+                                      << ToVoidPtr(oldMem)
                                       // Atomic with acquire order reason: data race with free_ptr_
                                       << ". New first free RunSlots block = "
-                                      << ToVoidPtr(free_ptr_.load(std::memory_order_acquire));
+                                      << ToVoidPtr(freePtr_.load(std::memory_order_acquire));
     }
     ASSERT(runslots != nullptr);
     return runslots;
@@ -814,24 +812,24 @@ RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::G
 template <typename AllocConfigT, typename LockConfigT>
 template <typename RunSlotsVisitor>
 void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::IterateOverRunSlots(
-    const RunSlotsVisitor &runslots_visitor)
+    const RunSlotsVisitor &runslotsVisitor)
 {
-    LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Iterating over runslots inside pool with address" << std::hex << pool_mem_
+    LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Iterating over runslots inside pool with address" << std::hex << poolMem_
                                   << " with size " << std::dec << size_ << " bytes";
-    uintptr_t current_runslot = GetFirstRunSlotsBlock(start_mem_);
+    uintptr_t currentRunslot = GetFirstRunSlotsBlock(startMem_);
     // Atomic with acquire order reason: data race with free_ptr_ with dependecies on reads after the load which should
     // become visible
-    uintptr_t last_runslot = free_ptr_.load(std::memory_order_acquire);
-    while (current_runslot < last_runslot) {
-        ASSERT(start_mem_ <= current_runslot);
-        if (!freed_runslots_bitmap_.AtomicTest(ToVoidPtr(current_runslot))) {
-            auto cur_rs = static_cast<RunSlotsType *>(ToVoidPtr(current_runslot));
-            LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Iterating. Process RunSlots " << std::hex << cur_rs;
-            if (!runslots_visitor(cur_rs)) {
+    uintptr_t lastRunslot = freePtr_.load(std::memory_order_acquire);
+    while (currentRunslot < lastRunslot) {
+        ASSERT(startMem_ <= currentRunslot);
+        if (!freedRunslotsBitmap_.AtomicTest(ToVoidPtr(currentRunslot))) {
+            auto curRs = static_cast<RunSlotsType *>(ToVoidPtr(currentRunslot));
+            LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Iterating. Process RunSlots " << std::hex << curRs;
+            if (!runslotsVisitor(curRs)) {
                 return;
             }
         }
-        current_runslot += RUNSLOTS_SIZE;
+        currentRunslot += RUNSLOTS_SIZE;
     }
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Iterating runslots inside this pool finished";
 }
@@ -839,17 +837,17 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListEleme
 template <typename AllocConfigT, typename LockConfigT>
 bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::HasUsedMemory()
 {
-    uintptr_t current_runslot = GetFirstRunSlotsBlock(start_mem_);
+    uintptr_t currentRunslot = GetFirstRunSlotsBlock(startMem_);
     // Atomic with acquire order reason: data race with free_ptr_ with dependecies on reads after the load which should
     // become visible
-    uintptr_t last_runslot = free_ptr_.load(std::memory_order_acquire);
-    while (current_runslot < last_runslot) {
-        ASSERT(start_mem_ <= current_runslot);
-        if (!freed_runslots_bitmap_.AtomicTest(ToVoidPtr(current_runslot))) {
+    uintptr_t lastRunslot = freePtr_.load(std::memory_order_acquire);
+    while (currentRunslot < lastRunslot) {
+        ASSERT(startMem_ <= currentRunslot);
+        if (!freedRunslotsBitmap_.AtomicTest(ToVoidPtr(currentRunslot))) {
             // We have runslots instance which is in use somewhere.
             return true;
         }
-        current_runslot += RUNSLOTS_SIZE;
+        currentRunslot += RUNSLOTS_SIZE;
     }
     return false;
 }
@@ -862,39 +860,39 @@ size_t RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListEle
     }
     // Atomic with acquire order reason: data race with free_ptr_ with dependecies on reads after the load which should
     // become visible
-    return free_ptr_.load(std::memory_order_acquire) - pool_mem_;
+    return freePtr_.load(std::memory_order_acquire) - poolMem_;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::IsInUsedMemory(void *object)
 {
-    uintptr_t mem_pointer = start_mem_;
-    ASSERT(!((ToUintPtr(object) < GetFirstRunSlotsBlock(mem_pointer)) && (ToUintPtr(object) >= mem_pointer)));
+    uintptr_t memPointer = startMem_;
+    ASSERT(!((ToUintPtr(object) < GetFirstRunSlotsBlock(memPointer)) && (ToUintPtr(object) >= memPointer)));
     // Atomic with acquire order reason: data race with free_ptr_ with dependecies on reads after the load which should
     // become visible
-    bool is_in_allocated_memory = (ToUintPtr(object) < free_ptr_.load(std::memory_order_acquire)) &&
-                                  (ToUintPtr(object) >= GetFirstRunSlotsBlock(mem_pointer));
-    return is_in_allocated_memory && !IsInFreedRunSlots(object);
+    bool isInAllocatedMemory = (ToUintPtr(object) < freePtr_.load(std::memory_order_acquire)) &&
+                               (ToUintPtr(object) >= GetFirstRunSlotsBlock(memPointer));
+    return isInAllocatedMemory && !IsInFreedRunSlots(object);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
-RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::GetFreedRunSlots(size_t slots_size)
+RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::GetFreedRunSlots(size_t slotsSize)
 {
-    auto slots = static_cast<RunSlotsType *>(freed_runslots_bitmap_.FindFirstMarkedChunks());
+    auto slots = static_cast<RunSlotsType *>(freedRunslotsBitmap_.FindFirstMarkedChunks());
     if (slots == nullptr) {
-        ASSERT(freeded_runslots_count_ == 0);
+        ASSERT(freededRunslotsCount_ == 0);
         return nullptr;
     }
 
     // Initialize it firstly before updating bitmap
     // because it will be visible outside after that.
-    slots->Initialize(slots_size, ToUintPtr(this), true);
+    slots->Initialize(slotsSize, ToUintPtr(this), true);
 
-    ASSERT(freeded_runslots_count_ > 0);
-    [[maybe_unused]] bool old_val = freed_runslots_bitmap_.AtomicTestAndClear(slots);
-    ASSERT(old_val);
-    freeded_runslots_count_--;
+    ASSERT(freededRunslotsCount_ > 0);
+    [[maybe_unused]] bool oldVal = freedRunslotsBitmap_.AtomicTestAndClear(slots);
+    ASSERT(oldVal);
+    freededRunslotsCount_--;
 
     return slots;
 }
@@ -907,10 +905,10 @@ bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListEleme
     }
     // Atomic with acquire order reason: data race with free_ptr_ with dependecies on reads after the load which should
     // become visible
-    bool has_free_memory = (free_ptr_.load(std::memory_order_acquire) + RUNSLOTS_SIZE) <= (pool_mem_ + size_);
-    bool has_freed_runslots = (freeded_runslots_count_ > 0);
-    ASSERT(has_freed_runslots == (freed_runslots_bitmap_.FindFirstMarkedChunks() != nullptr));
-    return has_free_memory || has_freed_runslots;
+    bool hasFreeMemory = (freePtr_.load(std::memory_order_acquire) + RUNSLOTS_SIZE) <= (poolMem_ + size_);
+    bool hasFreedRunslots = (freededRunslotsCount_ > 0);
+    ASSERT(hasFreedRunslots == (freedRunslotsBitmap_.FindFirstMarkedChunks() != nullptr));
+    return hasFreeMemory || hasFreedRunslots;
 }
 
 #undef LOG_RUNSLOTS_ALLOCATOR

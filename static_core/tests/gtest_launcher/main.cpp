@@ -51,9 +51,9 @@ void HandleTimeout(int sig)
         // Child
         std::stringstream out;
         out << getppid();
-        std::string ppid_str = out.str();
+        std::string ppidStr = out.str();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        execlp(GDB_PATH_STR, "-q", "--batch", "-p", ppid_str.c_str(), "-ex", "info threads", "-ex",
+        execlp(GDB_PATH_STR, "-q", "--batch", "-p", ppidStr.c_str(), "-ex", "info threads", "-ex",
                "thread apply all bt", "-ex", "kill", nullptr);
     }
 }

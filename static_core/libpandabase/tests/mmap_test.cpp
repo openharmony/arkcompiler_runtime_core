@@ -30,9 +30,9 @@ public:
 protected:
     void FillMemory(void *start, size_t size)
     {
-        size_t it_end = size / sizeof(uint64_t);
+        size_t itEnd = size / sizeof(uint64_t);
         auto *pointer = static_cast<uint64_t *>(start);
-        for (size_t i = 0; i < it_end; i++) {
+        for (size_t i = 0; i < itEnd; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             pointer[i] = MAGIC_VALUE;
         }
@@ -40,9 +40,9 @@ protected:
 
     bool IsZeroMemory(void *start, size_t size)
     {
-        size_t it_end = size / sizeof(uint64_t);
+        size_t itEnd = size / sizeof(uint64_t);
         auto *pointer = static_cast<uint64_t *>(start);
-        for (size_t i = 0; i < it_end; i++) {
+        for (size_t i = 0; i < itEnd; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             if (pointer[i] != 0U) {
                 return false;
@@ -124,37 +124,37 @@ TEST_F(MMapFixedTest, MMapAsanTsanTest)
 {
     static constexpr size_t OFFSET = 4_KB;
     static constexpr size_t MMAP_ALLOC_SIZE = OFFSET * 2U;
-    size_t page_size = panda::os::mem::GetPageSize();
+    size_t pageSize = panda::os::mem::GetPageSize();
     static_assert(OFFSET < panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS);
     static_assert(MMAP_ALLOC_SIZE > OFFSET);
-    ASSERT_TRUE((MMAP_ALLOC_SIZE % page_size) == 0U);
-    uintptr_t cur_addr = panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS - OFFSET;
-    cur_addr = AlignUp(cur_addr, page_size);
-    ASSERT_TRUE((cur_addr % page_size) == 0U);
-    uintptr_t end_addr = panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS;
-    end_addr = AlignUp(end_addr, sizeof(uint64_t));
+    ASSERT_TRUE((MMAP_ALLOC_SIZE % pageSize) == 0U);
+    uintptr_t curAddr = panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS - OFFSET;
+    curAddr = AlignUp(curAddr, pageSize);
+    ASSERT_TRUE((curAddr % pageSize) == 0U);
+    uintptr_t endAddr = panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS;
+    endAddr = AlignUp(endAddr, sizeof(uint64_t));
     void *result =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        mmap(ToVoidPtr(cur_addr), MMAP_ALLOC_SIZE, MMAP_PROT_READ | MMAP_PROT_WRITE,
+        mmap(ToVoidPtr(curAddr), MMAP_ALLOC_SIZE, MMAP_PROT_READ | MMAP_PROT_WRITE,
              MMAP_FLAG_PRIVATE | MMAP_FLAG_ANONYMOUS | MMAP_FLAG_FIXED, -1L, 0U);
     ASSERT_TRUE(result != nullptr);
 
 #if (defined(PANDA_TSAN_ON) || defined(USE_THREAD_SANITIZER)) && defined(PANDA_TARGET_ARM64)
     // TSAN+Aarch64 stores its data near the address,
     // mmap cannot return the same address, as it is used by TSAN,
-    // so the result should differ from a hint (curr_addr)
-    ASSERT_NE(ToUintPtr(result), cur_addr);
+    // so the result should differ from a hint (currAddr)
+    ASSERT_NE(ToUintPtr(result), curAddr);
 #else
-    ASSERT_TRUE(ToUintPtr(result) == cur_addr);
-    while (cur_addr < end_addr) {
-        DeathWrite64(cur_addr);
-        cur_addr += sizeof(uint64_t);
+    ASSERT_TRUE(ToUintPtr(result) == curAddr);
+    while (curAddr < endAddr) {
+        DeathWrite64(curAddr);
+        curAddr += sizeof(uint64_t);
     }
 #if defined(PANDA_ASAN_ON)
     // Check Death:
-    EXPECT_DEATH(DeathWrite64(end_addr), "");
+    EXPECT_DEATH(DeathWrite64(endAddr), "");
 #else
     // Writing must be finished successfully
-    DeathWrite64(end_addr);
+    DeathWrite64(endAddr);
 #endif
 #endif
     munmap(result, MMAP_ALLOC_SIZE);

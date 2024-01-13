@@ -19,10 +19,10 @@ namespace panda::taskmanager {
 
 TaskStatistics::TaskStatistics()
 {
-    for (TaskType task_type : ALL_TASK_TYPES) {
-        for (VMType vm_type : ALL_VM_TYPES) {
-            for (TaskExecutionMode execution_mode : ALL_TASK_EXECUTION_MODES) {
-                all_task_properties_.emplace_back(task_type, vm_type, execution_mode);
+    for (TaskType taskType : ALL_TASK_TYPES) {
+        for (VMType vmType : ALL_VM_TYPES) {
+            for (TaskExecutionMode executionMode : ALL_TASK_EXECUTION_MODES) {
+                allTaskProperties_.emplace_back(taskType, vmType, executionMode);
             }
         }
     }

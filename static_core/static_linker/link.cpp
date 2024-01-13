@@ -23,9 +23,9 @@
 
 namespace {
 
-int PrintHelp(const panda::PandArgParser &pa_parser)
+int PrintHelp(const panda::PandArgParser &paParser)
 {
-    const auto a = pa_parser.GetErrorString();
+    const auto a = paParser.GetErrorString();
     if (!a.empty()) {
         std::cerr << "Error: " << a << std::endl;
     }
@@ -33,7 +33,7 @@ int PrintHelp(const panda::PandArgParser &pa_parser)
     std::cerr << "Usage:" << std::endl;
     std::cerr << "ark_link [OPTIONS] -- FILES..." << std::endl << std::endl;
     std::cerr << "Supported options:" << std::endl << std::endl;
-    std::cerr << pa_parser.GetHelpString() << std::endl;
+    std::cerr << paParser.GetHelpString() << std::endl;
     return 1;
 }
 
@@ -48,13 +48,13 @@ std::string MangleClass(std::string s)
 
 int main(int argc, const char *argv[])
 {
-    panda::PandArgParser pa_parser;
+    panda::PandArgParser paParser;
     panda::static_linker::Options options {*argv};
-    options.AddOptions(&pa_parser);
-    pa_parser.EnableRemainder();
+    options.AddOptions(&paParser);
+    paParser.EnableRemainder();
 
-    if (!pa_parser.Parse(argc, argv)) {
-        return PrintHelp(pa_parser);
+    if (!paParser.Parse(argc, argv)) {
+        return PrintHelp(paParser);
     }
 
     panda::Logger::InitializeStdLogging(panda::Logger::LevelFromString(options.GetLogLevel()),
@@ -62,11 +62,11 @@ int main(int argc, const char *argv[])
                                             .set(panda::Logger::Component::STATIC_LINKER)
                                             .set(panda::Logger::Component::PANDAFILE));
 
-    const auto files = pa_parser.GetRemainder();
+    const auto files = paParser.GetRemainder();
 
     if (files.empty()) {
         std::cerr << "must have at least one file" << std::endl;
-        return PrintHelp(pa_parser);
+        return PrintHelp(paParser);
     }
 
     if (options.GetOutput().empty()) {
@@ -76,15 +76,15 @@ int main(int argc, const char *argv[])
 
     auto conf = panda::static_linker::DefaultConfig();
 
-    conf.strip_debug_info = options.IsStripDebugInfo();
+    conf.stripDebugInfo = options.IsStripDebugInfo();
 
-    auto classes_vec_to_set = [](const std::vector<std::string> &v, std::set<std::string> &s) {
+    auto classesVecToSet = [](const std::vector<std::string> &v, std::set<std::string> &s) {
         s.clear();
         std::transform(v.begin(), v.end(), std::inserter(s, s.begin()), MangleClass);
     };
 
-    classes_vec_to_set(options.GetParitalClasses(), conf.partial);
-    classes_vec_to_set(options.GetRemainsPartialClasses(), conf.remains_partial);
+    classesVecToSet(options.GetParitalClasses(), conf.partial);
+    classesVecToSet(options.GetRemainsPartialClasses(), conf.remainsPartial);
 
     auto res = panda::static_linker::Link(conf, options.GetOutput(), files);
 
@@ -98,6 +98,6 @@ int main(int argc, const char *argv[])
         std::cout << "stats:\n" << res.stats << std::endl;
     }
 
-    const auto was_error = !res.errors.empty();
-    return static_cast<int>(was_error);
+    const auto wasError = !res.errors.empty();
+    return static_cast<int>(wasError);
 }

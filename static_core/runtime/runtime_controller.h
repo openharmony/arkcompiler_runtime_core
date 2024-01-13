@@ -31,25 +31,25 @@ public:
 
     bool IsZidaneApp() const
     {
-        return is_zidane_app_;
+        return isZidaneApp_;
     }
 
-    void SetZidaneApp(bool is_zidane_app)
+    void SetZidaneApp(bool isZidaneApp)
     {
-        is_zidane_app_ = is_zidane_app;
+        isZidaneApp_ = isZidaneApp;
     }
 
     bool IsMultiFramework() const
     {
-        return is_multi_framework_;
+        return isMultiFramework_;
     }
 
-    void SetMultiFramework(bool is_multi_framework)
+    void SetMultiFramework(bool isMultiFramework)
     {
-        is_multi_framework_ = is_multi_framework;
+        isMultiFramework_ = isMultiFramework;
     }
 
-    PANDA_PUBLIC_API bool CanLoadPandaFileInternal(std::string_view real_path) const;
+    PANDA_PUBLIC_API bool CanLoadPandaFileInternal(std::string_view realPath) const;
 
     bool CanLoadPandaFile(const std::string &path) const;
 
@@ -57,8 +57,8 @@ public:
     NO_MOVE_SEMANTIC(RuntimeController);
 
 private:
-    bool is_zidane_app_ {false};
-    bool is_multi_framework_ {false};
+    bool isZidaneApp_ {false};
+    bool isMultiFramework_ {false};
 };
 
 }  // namespace panda

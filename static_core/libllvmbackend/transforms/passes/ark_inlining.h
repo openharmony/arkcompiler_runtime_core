@@ -35,7 +35,7 @@ public:
     static constexpr llvm::StringRef ARG_NAME = "irtoc-inline-check";
 
     static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
-    void CheckShouldInline(llvm::CallBase *call_base);
+    void CheckShouldInline(llvm::CallBase *callBase);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     llvm::PreservedAnalyses run(llvm::LazyCallGraph::SCC &component, llvm::CGSCCAnalysisManager & /*unused*/,
@@ -43,18 +43,17 @@ public:
 };
 
 class InlinePrepare : public llvm::PassInfoMixin<InlinePrepare> {
-    llvm::InlineParams inline_params_;
+    llvm::InlineParams inlineParams_;
 
 public:
     static constexpr llvm::StringRef ARG_NAME = "inline-prepare";
 
-    explicit InlinePrepare(llvm::InlineParams inline_params) : inline_params_ {inline_params} {}
+    explicit InlinePrepare(llvm::InlineParams inlineParams) : inlineParams_ {inlineParams} {}
     static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
-    static InlinePrepare Create(LLVMArkInterface *ark_interface,
-                                const panda::llvmbackend::LLVMCompilerOptions *options);
+    static InlinePrepare Create(LLVMArkInterface *arkInterface, const panda::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
-    llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &module_am);
+    llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &moduleAm);
 };
 
 }  // namespace panda::llvmbackend::passes

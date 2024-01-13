@@ -60,12 +60,12 @@ std::ostream &operator<<(std::ostream &os, const Class::State &state)
     return os;
 }
 
-Class::UniqId Class::CalcUniqId(const panda_file::File *file, panda_file::File::EntityId file_id)
+Class::UniqId Class::CalcUniqId(const panda_file::File *file, panda_file::File::EntityId fileId)
 {
     constexpr uint64_t HALF = 32ULL;
     uint64_t uid = file->GetUniqId();
     uid <<= HALF;
-    uid |= file_id.GetOffset();
+    uid |= fileId.GetOffset();
     return uid;
 }
 
@@ -81,25 +81,25 @@ Class::UniqId Class::CalcUniqId(const uint8_t *descriptor)
 
 Class::UniqId Class::CalcUniqId() const
 {
-    if (panda_file_ != nullptr) {
-        return CalcUniqId(panda_file_, file_id_);
+    if (pandaFile_ != nullptr) {
+        return CalcUniqId(pandaFile_, fileId_);
     }
     return CalcUniqId(descriptor_);
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-Class::Class(const uint8_t *descriptor, panda_file::SourceLang lang, uint32_t vtable_size, uint32_t imt_size,
+Class::Class(const uint8_t *descriptor, panda_file::SourceLang lang, uint32_t vtableSize, uint32_t imtSize,
              uint32_t size)
-    : BaseClass(lang), descriptor_(descriptor), vtable_size_(vtable_size), imt_size_(imt_size), class_size_(size)
+    : BaseClass(lang), descriptor_(descriptor), vtableSize_(vtableSize), imtSize_(imtSize), classSize_(size)
 {
     state_ = State::INITIAL;
     // Initializa all static fields with 0 value.
-    auto statics_offset = GetStaticFieldsOffset();
+    auto staticsOffset = GetStaticFieldsOffset();
     auto sp = GetClassSpan();
-    ASSERT(sp.size() >= statics_offset);
-    auto size_to_set = sp.size() - statics_offset;
-    if (size_to_set > 0) {
-        memset_s(&sp[statics_offset], size_to_set, 0, size_to_set);
+    ASSERT(sp.size() >= staticsOffset);
+    auto sizeToSet = sp.size() - staticsOffset;
+    if (sizeToSet > 0) {
+        memset_s(&sp[staticsOffset], sizeToSet, 0, sizeToSet);
     }
 }
 void Class::SetState(Class::State state)
@@ -137,19 +137,19 @@ void Class::DumpClass(std::ostream &os, size_t flags)
     if (IsArrayClass()) {
         os << "  componentType=" << GetComponentType() << "\n";
     }
-    size_t num_direct_interfaces = this->num_ifaces_;
-    if (num_direct_interfaces > 0) {
-        os << "  interfaces (" << num_direct_interfaces << "):\n";
+    size_t numDirectInterfaces = this->numIfaces_;
+    if (numDirectInterfaces > 0) {
+        os << "  interfaces (" << numDirectInterfaces << "):\n";
     }
     if (!IsLoaded()) {
         os << "  class not yet loaded";
     } else {
         os << "  vtable (" << this->GetVTable().size() << " entries)\n";
-        if (this->num_sfields_ > 0) {
-            os << "  static fields (" << this->num_sfields_ << " entries)\n";
+        if (this->numSfields_ > 0) {
+            os << "  static fields (" << this->numSfields_ << " entries)\n";
         }
-        if (this->num_fields_ - this->num_sfields_ > 0) {
-            os << "  instance fields (" << this->num_fields_ - this->num_sfields_ << " entries)\n";
+        if (this->numFields_ - this->numSfields_ > 0) {
+            os << "  instance fields (" << this->numFields_ - this->numSfields_ << " entries)\n";
         }
     }
 }

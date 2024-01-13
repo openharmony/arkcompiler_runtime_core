@@ -21,8 +21,8 @@ extern "C" void PreWrbFuncEntrypoint(void *);
 
 namespace panda::mem {
 template <class LanguageConfig>
-EpsilonG1GC<LanguageConfig>::EpsilonG1GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
-    : G1GC<LanguageConfig>(object_allocator, settings)
+EpsilonG1GC<LanguageConfig>::EpsilonG1GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
+    : G1GC<LanguageConfig>(objectAllocator, settings)
 {
     this->SetType(GCType::EPSILON_G1_GC);
 }
@@ -49,38 +49,38 @@ void EpsilonG1GC<LanguageConfig>::InitializeImpl()
     this->CreateCardTable(allocator, PoolManager::GetMmapMemPool()->GetMinObjectAddress(),
                           PoolManager::GetMmapMemPool()->GetTotalObjectSize());
 
-    auto barrier_set =
+    auto barrierSet =
         allocator->New<GCG1BarrierSet>(allocator, &PreWrbFuncEntrypoint, &PostWrbUpdateCardFuncEntrypoint,
                                        panda::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
-                                       this->GetCardTable(), this->updated_refs_queue_, &this->queue_lock_);
-    ASSERT(barrier_set != nullptr);
-    this->SetGCBarrierSet(barrier_set);
+                                       this->GetCardTable(), this->updatedRefsQueue_, &this->queueLock_);
+    ASSERT(barrierSet != nullptr);
+    this->SetGCBarrierSet(barrierSet);
 
     LOG(DEBUG, GC) << "EpsilonG1 GC initialized...";
 }
 
 template <class LanguageConfig>
 void EpsilonG1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread,
-                                                    [[maybe_unused]] mem::BuffersKeepingFlag keep_buffers)
+                                                    [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
 {
     LOG(DEBUG, GC) << "Call OnThreadTerminate";
     // Clearing buffers to remove memory leaks in internal allocator
 
-    auto pre_buff = thread->MovePreBuff();
-    ASSERT(pre_buff != nullptr);
-    this->GetInternalAllocator()->Delete(pre_buff);
+    auto preBuff = thread->MovePreBuff();
+    ASSERT(preBuff != nullptr);
+    this->GetInternalAllocator()->Delete(preBuff);
 
-    auto *local_buffer = thread->GetG1PostBarrierBuffer();
+    auto *localBuffer = thread->GetG1PostBarrierBuffer();
     thread->ResetG1PostBarrierBuffer();
-    ASSERT(local_buffer != nullptr);
-    this->GetInternalAllocator()->Delete(local_buffer);
+    ASSERT(localBuffer != nullptr);
+    this->GetInternalAllocator()->Delete(localBuffer);
 }
 
 template <class LanguageConfig>
 void EpsilonG1GC<LanguageConfig>::RunPhasesImpl([[maybe_unused]] GCTask &task)
 {
     LOG(DEBUG, GC) << "EpsilonG1 GC RunPhases...";
-    GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats());
+    GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
 }
 
 template <class LanguageConfig>
@@ -90,7 +90,7 @@ bool EpsilonG1GC<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 }
 
 template <class LanguageConfig>
-void EpsilonG1GC<LanguageConfig>::InitGCBits([[maybe_unused]] panda::ObjectHeader *obj_header)
+void EpsilonG1GC<LanguageConfig>::InitGCBits([[maybe_unused]] panda::ObjectHeader *objHeader)
 {
 }
 
@@ -102,7 +102,7 @@ bool EpsilonG1GC<LanguageConfig>::Trigger([[maybe_unused]] PandaUniquePtr<GCTask
 
 template <class LanguageConfig>
 void EpsilonG1GC<LanguageConfig>::MarkReferences([[maybe_unused]] GCMarkingStackType *references,
-                                                 [[maybe_unused]] GCPhase gc_phase)
+                                                 [[maybe_unused]] GCPhase gcPhase)
 {
 }
 

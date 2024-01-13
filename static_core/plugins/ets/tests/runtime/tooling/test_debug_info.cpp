@@ -29,12 +29,12 @@ public:
 protected:
     std::string_view GetTestFile()
     {
-        auto test_file = std::getenv("TEST_FILE");
-        if (test_file == nullptr) {
+        auto testFile = std::getenv("TEST_FILE");
+        if (testFile == nullptr) {
             std::cerr << "Environment variable 'TEST_FILE' must be set" << std::endl;
             std::abort();
         }
-        return test_file;
+        return testFile;
     }
 };
 
@@ -44,9 +44,9 @@ TEST_F(DebugInfoTest, GetSourceFile)
     panda_file::DebugInfoExtractor extractor(file.get());
     auto methods = extractor.GetMethodIdList();
     ASSERT_FALSE(methods.empty());
-    auto source_file_path = extractor.GetSourceFile(methods[0]);
-    ASSERT_TRUE(os::IsFileExists(source_file_path));
-    ASSERT_TRUE(os::GetAbsolutePath(source_file_path) == source_file_path);
+    auto sourceFilePath = extractor.GetSourceFile(methods[0]);
+    ASSERT_TRUE(os::IsFileExists(sourceFilePath));
+    ASSERT_TRUE(os::GetAbsolutePath(sourceFilePath) == sourceFilePath);
 }
 
 }  // namespace panda::test

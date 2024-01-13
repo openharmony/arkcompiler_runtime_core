@@ -39,10 +39,10 @@
 namespace panda::mem {
 
 #ifndef NDEBUG
-static bool IsCardTableClear(CardTable *card_table)
+static bool IsCardTableClear(CardTable *cardTable)
 {
     bool clear = true;
-    card_table->VisitMarked(
+    cardTable->VisitMarked(
         [&clear](const MemRange &range) {
             LOG(ERROR, GC) << "Card [" << ToVoidPtr(range.GetStartAddress()) << " - "
                            << ToVoidPtr(range.GetEndAddress()) << "] is not clear";
@@ -57,25 +57,25 @@ static inline GCG1BarrierSet *GetG1BarrierSet()
 {
     Thread *thread = Thread::GetCurrent();
     ASSERT(thread != nullptr);
-    GCBarrierSet *barrier_set = thread->GetBarrierSet();
-    ASSERT(barrier_set != nullptr);
-    return static_cast<GCG1BarrierSet *>(barrier_set);
+    GCBarrierSet *barrierSet = thread->GetBarrierSet();
+    ASSERT(barrierSet != nullptr);
+    return static_cast<GCG1BarrierSet *>(barrierSet);
 }
 
-extern "C" void PreWrbFuncEntrypoint(void *old_value)
+extern "C" void PreWrbFuncEntrypoint(void *oldValue)
 {
     // The cast below is needed to truncate high 32bits from 64bit pointer
     // in case object pointers have 32bit.
-    old_value = ToVoidPtr(ToObjPtr(old_value));
-    ASSERT(IsAddressInObjectsHeap(old_value));
-    ASSERT(IsAddressInObjectsHeap(static_cast<const ObjectHeader *>(old_value)->ClassAddr<BaseClass>()));
-    LOG(DEBUG, GC) << "G1GC pre barrier val = " << std::hex << old_value;
+    oldValue = ToVoidPtr(ToObjPtr(oldValue));
+    ASSERT(IsAddressInObjectsHeap(oldValue));
+    ASSERT(IsAddressInObjectsHeap(static_cast<const ObjectHeader *>(oldValue)->ClassAddr<BaseClass>()));
+    LOG(DEBUG, GC) << "G1GC pre barrier val = " << std::hex << oldValue;
     auto *thread = ManagedThread::GetCurrent();
     // thread can't be null here because pre-barrier is called only in concurrent-mark, but we don't process
     // weak-references in concurrent mark
     ASSERT(thread != nullptr);
-    auto buffer_vec = thread->GetPreBuff();
-    buffer_vec->push_back(static_cast<ObjectHeader *>(old_value));
+    auto bufferVec = thread->GetPreBuff();
+    bufferVec->push_back(static_cast<ObjectHeader *>(oldValue));
 }
 
 // PostWrbUpdateCardFuncEntrypoint
@@ -88,13 +88,13 @@ extern "C" void PostWrbUpdateCardFuncEntrypoint(const void *from, const void *to
     from = ToVoidPtr(ToObjPtr(from));
     GCG1BarrierSet *barriers = GetG1BarrierSet();
     ASSERT(barriers != nullptr);
-    auto card_table = barriers->GetCardTable();
-    ASSERT(card_table != nullptr);
+    auto cardTable = barriers->GetCardTable();
+    ASSERT(cardTable != nullptr);
     // No need to keep remsets for young->young
     // NOTE(dtrubenkov): add assert that we do not have young -> young reference here
-    auto *card = card_table->GetCardPtr(ToUintPtr(from));
+    auto *card = cardTable->GetCardPtr(ToUintPtr(from));
     LOG(DEBUG, GC) << "G1GC post queue add ref: " << std::hex << from << " -> " << ToVoidPtr(ToObjPtr(to))
-                   << " from_card: " << card_table->GetMemoryRange(card);
+                   << " from_card: " << cardTable->GetMemoryRange(card);
     // NOTE(dtrubenkov): remove !card->IsYoung() after it will be encoded in compiler barrier
     if ((card->IsClear()) && (!card->IsYoung())) {
         // NOTE(dtrubenkov): either encode this in compiler barrier or remove from Interpreter barrier (if move to
@@ -106,45 +106,45 @@ extern "C" void PostWrbUpdateCardFuncEntrypoint(const void *from, const void *to
 
 /* static */
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *base_klass)
+void G1GC<LanguageConfig>::CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass)
 {
     Region *region = ObjectToRegion(object);
-    size_t object_size = GetAlignedObjectSize(object->ObjectSize<LanguageConfig::LANG_TYPE>(base_klass));
-    region->AddLiveBytes<true>(object_size);
+    size_t objectSize = GetAlignedObjectSize(object->ObjectSize<LanguageConfig::LANG_TYPE>(baseKlass));
+    region->AddLiveBytes<true>(objectSize);
 }
 
 /* static */
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *base_klass)
+void G1GC<LanguageConfig>::CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass)
 {
     Region *region = ObjectToRegion(object);
-    size_t object_size = GetAlignedObjectSize(object->ObjectSize<LanguageConfig::LANG_TYPE>(base_klass));
-    region->AddLiveBytes<false>(object_size);
+    size_t objectSize = GetAlignedObjectSize(object->ObjectSize<LanguageConfig::LANG_TYPE>(baseKlass));
+    region->AddLiveBytes<false>(objectSize);
 }
 
 template <class LanguageConfig>
-G1GC<LanguageConfig>::G1GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
-    : GenerationalGC<LanguageConfig>(object_allocator, settings),
+G1GC<LanguageConfig>::G1GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
+    : GenerationalGC<LanguageConfig>(objectAllocator, settings),
       marker_(this),
-      conc_marker_(this),
-      mixed_marker_(this),
-      concurrent_marking_stack_(this),
-      number_of_mixed_tenured_regions_(settings.GetG1NumberOfTenuredRegionsAtMixedCollection()),
-      region_garbage_rate_threshold_(settings.G1RegionGarbageRateThreshold()),
-      g1_promotion_region_alive_rate_(settings.G1PromotionRegionAliveRate()),
-      g1_track_freed_objects_(settings.G1TrackFreedObjects()),
-      is_explicit_concurrent_gc_enabled_(settings.IsExplicitConcurrentGcEnabled()),
-      region_size_bits_(panda::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize())),
-      g1_pause_tracker_(settings.GetG1GcPauseIntervalInMillis(), settings.GetG1MaxGcPauseInMillis()),
+      concMarker_(this),
+      mixedMarker_(this),
+      concurrentMarkingStack_(this),
+      numberOfMixedTenuredRegions_(settings.GetG1NumberOfTenuredRegionsAtMixedCollection()),
+      regionGarbageRateThreshold_(settings.G1RegionGarbageRateThreshold()),
+      g1PromotionRegionAliveRate_(settings.G1PromotionRegionAliveRate()),
+      g1TrackFreedObjects_(settings.G1TrackFreedObjects()),
+      isExplicitConcurrentGcEnabled_(settings.IsExplicitConcurrentGcEnabled()),
+      regionSizeBits_(panda::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize())),
+      g1PauseTracker_(settings.GetG1GcPauseIntervalInMillis(), settings.GetG1MaxGcPauseInMillis()),
       analytics_(panda::time::GetCurrentTimeInNanos())
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     this->SetType(GCType::G1_GC);
     this->SetTLABsSupported();
-    updated_refs_queue_ = allocator->New<GCG1BarrierSet::ThreadLocalCardQueues>();
-    auto *first_ref_vector = allocator->New<RefVector>();
-    first_ref_vector->reserve(MAX_REFS);
-    unique_refs_from_remsets_.push_back(first_ref_vector);
+    updatedRefsQueue_ = allocator->New<GCG1BarrierSet::ThreadLocalCardQueues>();
+    auto *firstRefVector = allocator->New<RefVector>();
+    firstRefVector->reserve(MAX_REFS);
+    uniqueRefsFromRemsets_.push_back(firstRefVector);
     GetG1ObjectAllocator()->ReserveRegionIfNeeded();
 }
 
@@ -153,31 +153,31 @@ G1GC<LanguageConfig>::~G1GC()
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     {
-        for (auto obj_vector : satb_buff_list_) {
-            allocator->Delete(obj_vector);
+        for (auto objVector : satbBuffList_) {
+            allocator->Delete(objVector);
         }
     }
-    allocator->Delete(updated_refs_queue_);
-    ASSERT(unique_refs_from_remsets_.size() == 1);
-    allocator->Delete(unique_refs_from_remsets_.front());
-    unique_refs_from_remsets_.clear();
-    this->GetInternalAllocator()->Delete(update_remset_worker_);
+    allocator->Delete(updatedRefsQueue_);
+    ASSERT(uniqueRefsFromRemsets_.size() == 1);
+    allocator->Delete(uniqueRefsFromRemsets_.front());
+    uniqueRefsFromRemsets_.clear();
+    this->GetInternalAllocator()->Delete(updateRemsetWorker_);
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::InitGCBits(panda::ObjectHeader *obj_header)
+void G1GC<LanguageConfig>::InitGCBits(panda::ObjectHeader *objHeader)
 {
     // The mutator may create a new object during concurrent marking phase.
     // In this case GC may don't mark it (for example only vregs may contain reference to the new object)
     // and collect. To avoid such situations add objects to a special buffer which
     // will be processed at remark stage.
-    if (this->GetCardTable()->GetCardPtr(ToUintPtr(obj_header))->IsYoung() ||
+    if (this->GetCardTable()->GetCardPtr(ToUintPtr(objHeader))->IsYoung() ||
         // Atomic with acquire order reason: read variable modified in GC thread
-        !concurrent_marking_flag_.load(std::memory_order_acquire)) {
+        !concurrentMarkingFlag_.load(std::memory_order_acquire)) {
         return;
     }
-    os::memory::LockHolder lock(satb_and_newobj_buf_lock_);
-    newobj_buffer_.push_back(obj_header);
+    os::memory::LockHolder lock(satbAndNewobjBufLock_);
+    newobjBuffer_.push_back(objHeader);
 }
 
 template <class LanguageConfig>
@@ -188,50 +188,50 @@ void G1GC<LanguageConfig>::PreStartupImp()
 
 template <class LanguageConfig>
 template <RegionFlag REGION_TYPE, bool FULL_GC>
-void G1GC<LanguageConfig>::DoRegionCompacting(Region *region, bool use_gc_workers,
-                                              PandaVector<PandaVector<ObjectHeader *> *> *moved_objects_vector)
+void G1GC<LanguageConfig>::DoRegionCompacting(Region *region, bool useGcWorkers,
+                                              PandaVector<PandaVector<ObjectHeader *> *> *movedObjectsVector)
 {
-    auto internal_allocator = this->GetInternalAllocator();
-    ObjectVisitor moved_object_saver;
+    auto internalAllocator = this->GetInternalAllocator();
+    ObjectVisitor movedObjectSaver;
     if constexpr (FULL_GC) {
-        PandaVector<ObjectHeader *> *moved_objects;
-        if (use_gc_workers) {
-            moved_objects = internal_allocator->template New<PandaVector<ObjectHeader *>>();
-            moved_objects_vector->push_back(moved_objects);
-            size_t move_size = region->GetAllocatedBytes();
-            moved_objects->reserve(move_size / GetMinimalObjectSize());
+        PandaVector<ObjectHeader *> *movedObjects;
+        if (useGcWorkers) {
+            movedObjects = internalAllocator->template New<PandaVector<ObjectHeader *>>();
+            movedObjectsVector->push_back(movedObjects);
+            size_t moveSize = region->GetAllocatedBytes();
+            movedObjects->reserve(moveSize / GetMinimalObjectSize());
         } else {
-            ASSERT(moved_objects_vector->size() == 1);
-            moved_objects = moved_objects_vector->back();
+            ASSERT(movedObjectsVector->size() == 1);
+            movedObjects = movedObjectsVector->back();
         }
-        moved_object_saver = [moved_objects](ObjectHeader *object) { moved_objects->push_back(object); };
+        movedObjectSaver = [movedObjects](ObjectHeader *object) { movedObjects->push_back(object); };
     } else {
-        moved_object_saver = []([[maybe_unused]] const ObjectHeader *object) {};
+        movedObjectSaver = []([[maybe_unused]] const ObjectHeader *object) {};
     }
 
-    if (use_gc_workers) {
+    if (useGcWorkers) {
         auto *storage =
-            internal_allocator->template New<GCRegionCompactWorkersTask::RegionDataType>(region, moved_object_saver);
+            internalAllocator->template New<GCRegionCompactWorkersTask::RegionDataType>(region, movedObjectSaver);
         if (!this->GetWorkersTaskPool()->AddTask(GCRegionCompactWorkersTask(storage))) {
             // We couldn't send a task to workers. Therefore, do it here.
-            internal_allocator->Delete(storage);
-            RegionCompactingImpl<true, REGION_TYPE>(region, moved_object_saver);
+            internalAllocator->Delete(storage);
+            RegionCompactingImpl<true, REGION_TYPE>(region, movedObjectSaver);
         }
     } else {
-        RegionCompactingImpl<false, REGION_TYPE>(region, moved_object_saver);
+        RegionCompactingImpl<false, REGION_TYPE>(region, movedObjectSaver);
     }
 }
 
 class ScopedRegionCollectionInfo {
 public:
-    ScopedRegionCollectionInfo(const GC *gc, const char *title, const Region *region, bool is_young,
-                               const size_t &moved_size)
+    ScopedRegionCollectionInfo(const GC *gc, const char *title, const Region *region, bool isYoung,
+                               const size_t &movedSize)
         : gc_(gc),
           title_(title),
           region_(region),
-          is_young_(is_young),
-          moved_size_(moved_size),
-          start_time_ns_(time::GetCurrentTimeInNanos())
+          isYoung_(isYoung),
+          movedSize_(movedSize),
+          startTimeNs_(time::GetCurrentTimeInNanos())
     {
     }
 
@@ -249,72 +249,72 @@ private:
     const GC *gc_;
     const char *title_;
     const Region *region_;
-    bool is_young_;
-    const size_t &moved_size_;
-    uint64_t start_time_ns_;
+    bool isYoung_;
+    const size_t &movedSize_;
+    uint64_t startTimeNs_;
 
-    friend std::ostream &operator<<(std::ostream &log, const ScopedRegionCollectionInfo &region_info)
+    friend std::ostream &operator<<(std::ostream &log, const ScopedRegionCollectionInfo &regionInfo)
     {
-        auto region = region_info.region_;
-        log << '[' << region_info.gc_->GetCounter() << "] " << region_info.title_ << ": ";
+        auto region = regionInfo.region_;
+        log << '[' << regionInfo.gc_->GetCounter() << "] " << regionInfo.title_ << ": ";
         // Need to use saved is_young_ flag since region flags can be changed during region promotion
-        if (region_info.is_young_) {
+        if (regionInfo.isYoung_) {
             log << 'Y';
         } else {
             log << 'T';
         }
         DumpRegionRange(log, *region) << " A " << panda::helpers::MemoryConverter(region->GetAllocatedBytes()) << " L ";
-        if (region_info.is_young_) {
+        if (regionInfo.isYoung_) {
             log << '-';
         } else {
             log << panda::helpers::MemoryConverter(region->GetLiveBytes());
         }
-        log << " RS " << region->GetRemSetSize() << " M " << panda::helpers::MemoryConverter(region_info.moved_size_)
-            << " D " << panda::helpers::TimeConverter(time::GetCurrentTimeInNanos() - region_info.start_time_ns_);
+        log << " RS " << region->GetRemSetSize() << " M " << panda::helpers::MemoryConverter(regionInfo.movedSize_)
+            << " D " << panda::helpers::TimeConverter(time::GetCurrentTimeInNanos() - regionInfo.startTimeNs_);
         return log;
     }
 };
 
 template <class LanguageConfig>
 template <bool ATOMIC>
-void G1GC<LanguageConfig>::RegionPromotionImpl(Region *region, const ObjectVisitor &moved_object_saver)
+void G1GC<LanguageConfig>::RegionPromotionImpl(Region *region, const ObjectVisitor &movedObjectSaver)
 {
-    size_t move_size = region->GetAllocatedBytes();
-    size_t alive_move_count = 0;
-    size_t dead_move_count = 0;
-    auto object_allocator = this->GetG1ObjectAllocator();
-    auto promotion_move_checker = [&alive_move_count, &moved_object_saver](ObjectHeader *src) {
-        ++alive_move_count;
+    size_t moveSize = region->GetAllocatedBytes();
+    size_t aliveMoveCount = 0;
+    size_t deadMoveCount = 0;
+    auto objectAllocator = this->GetG1ObjectAllocator();
+    auto promotionMoveChecker = [&aliveMoveCount, &movedObjectSaver](ObjectHeader *src) {
+        ++aliveMoveCount;
         LOG_DEBUG_OBJECT_EVENTS << "PROMOTE YOUNG object " << src;
         ASSERT(ObjectToRegion(src)->HasFlag(RegionFlag::IS_EDEN));
-        moved_object_saver(src);
+        movedObjectSaver(src);
     };
-    auto promotion_death_checker = [this, &dead_move_count](ObjectHeader *object_header) {
-        if (IsMarked(object_header)) {
+    auto promotionDeathChecker = [this, &deadMoveCount](ObjectHeader *objectHeader) {
+        if (IsMarked(objectHeader)) {
             return ObjectStatus::ALIVE_OBJECT;
         }
-        ++dead_move_count;
-        LOG_DEBUG_OBJECT_EVENTS << "PROMOTE DEAD YOUNG object " << object_header;
+        ++deadMoveCount;
+        LOG_DEBUG_OBJECT_EVENTS << "PROMOTE DEAD YOUNG object " << objectHeader;
         return ObjectStatus::DEAD_OBJECT;
     };
-    ScopedRegionCollectionInfo collection_info(this, "Region promoted", region, true, move_size);
-    if (g1_track_freed_objects_) {
+    ScopedRegionCollectionInfo collectionInfo(this, "Region promoted", region, true, moveSize);
+    if (g1TrackFreedObjects_) {
         // We want to track all moved objects (including), therefore, iterate over all objects in region.
-        object_allocator->template PromoteYoungRegion<false>(region, promotion_death_checker, promotion_move_checker);
+        objectAllocator->template PromoteYoungRegion<false>(region, promotionDeathChecker, promotionMoveChecker);
     } else {
-        object_allocator->template PromoteYoungRegion<true>(region, promotion_death_checker, promotion_move_checker);
-        ASSERT(dead_move_count == 0);
+        objectAllocator->template PromoteYoungRegion<true>(region, promotionDeathChecker, promotionMoveChecker);
+        ASSERT(deadMoveCount == 0);
     }
     region->RmvFlag(RegionFlag::IS_COLLECTION_SET);
-    this->mem_stats_.template RecordSizeMovedYoung<ATOMIC>(move_size);
-    this->mem_stats_.template RecordCountMovedYoung<ATOMIC>(alive_move_count + dead_move_count);
+    this->memStats_.template RecordSizeMovedYoung<ATOMIC>(moveSize);
+    this->memStats_.template RecordCountMovedYoung<ATOMIC>(aliveMoveCount + deadMoveCount);
     analytics_.ReportPromotedRegion();
-    analytics_.ReportLiveObjects(alive_move_count);
+    analytics_.ReportLiveObjects(aliveMoveCount);
 }
 
 template <class LanguageConfig>
 template <typename Handler>
-void G1GC<LanguageConfig>::IterateOverRefsInMemRange(const MemRange &mem_range, Region *region, Handler &refs_handler)
+void G1GC<LanguageConfig>::IterateOverRefsInMemRange(const MemRange &memRange, Region *region, Handler &refsHandler)
 {
     MarkBitmap *bitmap = nullptr;
     if (region->IsEden()) {
@@ -323,59 +323,59 @@ void G1GC<LanguageConfig>::IterateOverRefsInMemRange(const MemRange &mem_range, 
     } else {
         bitmap = region->GetLiveBitmap();
     }
-    auto *start_address = ToVoidPtr(mem_range.GetStartAddress());
-    auto *end_address = ToVoidPtr(mem_range.GetEndAddress());
-    auto visitor = [&refs_handler, start_address, end_address](void *mem) {
+    auto *startAddress = ToVoidPtr(memRange.GetStartAddress());
+    auto *endAddress = ToVoidPtr(memRange.GetEndAddress());
+    auto visitor = [&refsHandler, startAddress, endAddress](void *mem) {
         ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(
-            static_cast<ObjectHeader *>(mem), refs_handler, start_address, end_address);
+            static_cast<ObjectHeader *>(mem), refsHandler, startAddress, endAddress);
     };
     if (region->HasFlag(RegionFlag::IS_LARGE_OBJECT)) {
         bitmap->CallForMarkedChunkInHumongousRegion<false>(ToVoidPtr(region->Begin()), visitor);
     } else {
-        bitmap->IterateOverMarkedChunkInRange(start_address, end_address, visitor);
+        bitmap->IterateOverMarkedChunkInRange(startAddress, endAddress, visitor);
     }
 }
 
 template <class LanguageConfig, bool CONCURRENTLY, bool COLLECT_CLASSES>
 class NonRegularObjectsDeathChecker {
 public:
-    NonRegularObjectsDeathChecker(size_t *delete_size, size_t *delete_count)
-        : delete_size_(delete_size), delete_count_(delete_count)
+    NonRegularObjectsDeathChecker(size_t *deleteSize, size_t *deleteCount)
+        : deleteSize_(deleteSize), deleteCount_(deleteCount)
     {
     }
 
     ~NonRegularObjectsDeathChecker() = default;
 
-    ObjectStatus operator()(ObjectHeader *object_header)
+    ObjectStatus operator()(ObjectHeader *objectHeader)
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (CONCURRENTLY) {
             // We may face a newly created object without live bitmap initialization.
-            if (object_header->template ClassAddr<BaseClass>() == nullptr) {
+            if (objectHeader->template ClassAddr<BaseClass>() == nullptr) {
                 return ObjectStatus::ALIVE_OBJECT;
             }
         }
-        Region *region = ObjectToRegion(object_header);
-        auto live_bitmap = region->GetLiveBitmap();
-        if (live_bitmap->AtomicTest(object_header)) {
+        Region *region = ObjectToRegion(objectHeader);
+        auto liveBitmap = region->GetLiveBitmap();
+        if (liveBitmap->AtomicTest(objectHeader)) {
             return ObjectStatus::ALIVE_OBJECT;
         }
         if constexpr (!COLLECT_CLASSES) {
-            if (ObjectHelpers<LanguageConfig::LANG_TYPE>::IsClassObject(object_header)) {
-                LOG_DEBUG_OBJECT_EVENTS << "DELETE NON MOVABLE class object " << object_header
+            if (ObjectHelpers<LanguageConfig::LANG_TYPE>::IsClassObject(objectHeader)) {
+                LOG_DEBUG_OBJECT_EVENTS << "DELETE NON MOVABLE class object " << objectHeader
                                         << " but don't free memory";
                 return ObjectStatus::ALIVE_OBJECT;
             }
         }
 
         if (region->HasFlag(RegionFlag::IS_LARGE_OBJECT)) {
-            LOG_DEBUG_OBJECT_EVENTS << "DELETE HUMONGOUS object " << object_header;
+            LOG_DEBUG_OBJECT_EVENTS << "DELETE HUMONGOUS object " << objectHeader;
             // humongous allocator increases size by region size
-            *delete_size_ += region->Size();
-            ++(*delete_count_);
+            *deleteSize_ += region->Size();
+            ++(*deleteCount_);
         } else {
             ASSERT(region->HasFlag(RegionFlag::IS_NONMOVABLE));
-            LOG_DEBUG_OBJECT_EVENTS << "DELETE NON MOVABLE object " << object_header;
+            LOG_DEBUG_OBJECT_EVENTS << "DELETE NON MOVABLE object " << objectHeader;
         }
         return ObjectStatus::DEAD_OBJECT;
     }
@@ -384,17 +384,17 @@ public:
     DEFAULT_MOVE_SEMANTIC(NonRegularObjectsDeathChecker);
 
 private:
-    size_t *delete_size_;
-    size_t *delete_count_;
+    size_t *deleteSize_;
+    size_t *deleteCount_;
 };
 
 template <class LanguageConfig>
 template <bool ATOMIC, bool CONCURRENTLY>
-void G1GC<LanguageConfig>::CollectEmptyRegions(GCTask &task, PandaVector<Region *> *empty_tenured_regions)
+void G1GC<LanguageConfig>::CollectEmptyRegions(GCTask &task, PandaVector<Region *> *emptyTenuredRegions)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     CollectNonRegularObjects<ATOMIC, CONCURRENTLY>();
-    ClearEmptyTenuredMovableRegions<ATOMIC, CONCURRENTLY>(empty_tenured_regions);
+    ClearEmptyTenuredMovableRegions<ATOMIC, CONCURRENTLY>(emptyTenuredRegions);
     task.UpdateGCCollectionType(GCCollectionType::TENURED);
 }
 
@@ -403,66 +403,66 @@ template <bool ATOMIC, bool CONCURRENTLY>
 void G1GC<LanguageConfig>::CollectNonRegularObjects()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    size_t delete_size = 0;
-    size_t delete_count = 0;
+    size_t deleteSize = 0;
+    size_t deleteCount = 0;
     // Don't collect classes if --g1-track-free-objects is enabled.
     // We need to know size of objects while iterating over all objects in the collected region.
-    auto death_checker =
-        g1_track_freed_objects_
+    auto deathChecker =
+        g1TrackFreedObjects_
             ? GCObjectVisitor(
-                  NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, false>(&delete_size, &delete_count))
+                  NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, false>(&deleteSize, &deleteCount))
             : GCObjectVisitor(
-                  NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, true>(&delete_size, &delete_count));
-    auto region_visitor = [this](PandaVector<Region *> &regions) {
+                  NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, true>(&deleteSize, &deleteCount));
+    auto regionVisitor = [this](PandaVector<Region *> &regions) {
         if constexpr (CONCURRENTLY) {
-            update_remset_worker_->InvalidateRegions(&regions);
+            updateRemsetWorker_->InvalidateRegions(&regions);
         } else {
-            update_remset_worker_->GCInvalidateRegions(&regions);
+            updateRemsetWorker_->GCInvalidateRegions(&regions);
         }
     };
-    this->GetG1ObjectAllocator()->CollectNonRegularRegions(region_visitor, death_checker);
-    this->mem_stats_.template RecordCountFreedTenured<ATOMIC>(delete_count);
-    this->mem_stats_.template RecordSizeFreedTenured<ATOMIC>(delete_size);
+    this->GetG1ObjectAllocator()->CollectNonRegularRegions(regionVisitor, deathChecker);
+    this->memStats_.template RecordCountFreedTenured<ATOMIC>(deleteCount);
+    this->memStats_.template RecordSizeFreedTenured<ATOMIC>(deleteSize);
 }
 
 PandaVector<Region *> GetEmptyTenuredRegularRegionsFromQueue(
-    PandaPriorityQueue<std::pair<uint32_t, Region *>> garbage_regions)
+    PandaPriorityQueue<std::pair<uint32_t, Region *>> garbageRegions)
 {
-    PandaVector<Region *> empty_tenured_regions;
-    while (!garbage_regions.empty()) {
-        auto *top_region = garbage_regions.top().second;
-        if (top_region->GetLiveBytes() == 0U) {
-            empty_tenured_regions.push_back(top_region);
+    PandaVector<Region *> emptyTenuredRegions;
+    while (!garbageRegions.empty()) {
+        auto *topRegion = garbageRegions.top().second;
+        if (topRegion->GetLiveBytes() == 0U) {
+            emptyTenuredRegions.push_back(topRegion);
         }
-        garbage_regions.pop();
+        garbageRegions.pop();
     }
-    return empty_tenured_regions;
+    return emptyTenuredRegions;
 }
 
 template <class LanguageConfig>
 template <bool ATOMIC, bool CONCURRENTLY>
-void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *> *empty_tenured_regions)
+void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *> *emptyTenuredRegions)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     {
         ScopedTiming t1("Region Invalidation", *this->GetTiming());
         if constexpr (CONCURRENTLY) {
-            update_remset_worker_->InvalidateRegions(empty_tenured_regions);
+            updateRemsetWorker_->InvalidateRegions(emptyTenuredRegions);
         } else {
-            update_remset_worker_->GCInvalidateRegions(empty_tenured_regions);
+            updateRemsetWorker_->GCInvalidateRegions(emptyTenuredRegions);
         }
     }
-    size_t delete_size = 0;
-    size_t delete_count = 0;
-    auto death_visitor = [](ObjectHeader *object_header) {
-        LOG_DEBUG_OBJECT_EVENTS << "DELETE tenured object " << object_header;
+    size_t deleteSize = 0;
+    size_t deleteCount = 0;
+    auto deathVisitor = [](ObjectHeader *objectHeader) {
+        LOG_DEBUG_OBJECT_EVENTS << "DELETE tenured object " << objectHeader;
     };
-    for (auto i : *empty_tenured_regions) {
-        delete_count += i->GetAllocatedObjects();
-        delete_size += i->GetAllocatedBytes();
+    for (auto i : *emptyTenuredRegions) {
+        deleteCount += i->GetAllocatedObjects();
+        deleteSize += i->GetAllocatedBytes();
         ASSERT(i->GetLiveBitmap()->FindFirstMarkedChunks() == nullptr);
-        if (g1_track_freed_objects_) {
-            i->IterateOverObjects(death_visitor);
+        if (g1TrackFreedObjects_) {
+            i->IterateOverObjects(deathVisitor);
         }
     }
     {
@@ -471,15 +471,15 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
             this->GetG1ObjectAllocator()
                 ->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
                                         OSPagesPolicy::IMMEDIATE_RETURN, true, PandaVector<Region *>>(
-                    *empty_tenured_regions);
+                    *emptyTenuredRegions);
         } else {
             this->GetG1ObjectAllocator()
                 ->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::Release,
-                                        OSPagesPolicy::NO_RETURN, false, PandaVector<Region *>>(*empty_tenured_regions);
+                                        OSPagesPolicy::NO_RETURN, false, PandaVector<Region *>>(*emptyTenuredRegions);
         }
     }
-    this->mem_stats_.template RecordCountFreedTenured<ATOMIC>(delete_count);
-    this->mem_stats_.template RecordSizeFreedTenured<ATOMIC>(delete_size);
+    this->memStats_.template RecordCountFreedTenured<ATOMIC>(deleteCount);
+    this->memStats_.template RecordSizeFreedTenured<ATOMIC>(deleteSize);
 }
 
 template <class LanguageConfig>
@@ -489,10 +489,10 @@ bool G1GC<LanguageConfig>::NeedToPromote(const Region *region) const
     if (region->HasPinnedObjects()) {
         return true;
     }
-    if ((g1_promotion_region_alive_rate_ < PERCENT_100_D) && !this->IsFullGC()) {
-        size_t alive_bytes = region->GetLiveBytes();
-        double alive_percentage = static_cast<double>(alive_bytes) / region->Size() * PERCENT_100_D;
-        if (alive_percentage >= g1_promotion_region_alive_rate_) {
+    if ((g1PromotionRegionAliveRate_ < PERCENT_100_D) && !this->IsFullGC()) {
+        size_t aliveBytes = region->GetLiveBytes();
+        double alivePercentage = static_cast<double>(aliveBytes) / region->Size() * PERCENT_100_D;
+        if (alivePercentage >= g1PromotionRegionAliveRate_) {
             return true;
         }
     }
@@ -501,131 +501,129 @@ bool G1GC<LanguageConfig>::NeedToPromote(const Region *region) const
 
 template <class LanguageConfig>
 template <bool ATOMIC, RegionFlag REGION_TYPE>
-void G1GC<LanguageConfig>::RegionCompactingImpl(Region *region, const ObjectVisitor &moved_object_saver)
+void G1GC<LanguageConfig>::RegionCompactingImpl(Region *region, const ObjectVisitor &movedObjectSaver)
 {
-    auto object_allocator = this->GetG1ObjectAllocator();
+    auto objectAllocator = this->GetG1ObjectAllocator();
     // Calculated live bytes in region for all marked objects during MixedMark
-    size_t move_size = region->GetLiveBytes();
-    size_t move_count = 0;
-    size_t allocated_size = region->GetAllocatedBytes();
-    ASSERT(move_size <= allocated_size);
-    size_t delete_size = allocated_size - move_size;
-    size_t delete_count = 0;
+    size_t moveSize = region->GetLiveBytes();
+    size_t moveCount = 0;
+    size_t allocatedSize = region->GetAllocatedBytes();
+    ASSERT(moveSize <= allocatedSize);
+    size_t deleteSize = allocatedSize - moveSize;
+    size_t deleteCount = 0;
 
-    auto move_checker = [this, &move_count, &moved_object_saver](ObjectHeader *src, ObjectHeader *dst) {
+    auto moveChecker = [this, &moveCount, &movedObjectSaver](ObjectHeader *src, ObjectHeader *dst) {
         LOG_DEBUG_OBJECT_EVENTS << "MOVE object " << src << " -> " << dst;
         ASSERT(ObjectToRegion(dst)->HasFlag(RegionFlag::IS_OLD));
         this->SetForwardAddress(src, dst);
-        ++move_count;
-        moved_object_saver(dst);
+        ++moveCount;
+        movedObjectSaver(dst);
     };
 
-    auto death_checker = [this, &delete_count](ObjectHeader *object_header) {
-        if (IsMarked(object_header)) {
+    auto deathChecker = [this, &deleteCount](ObjectHeader *objectHeader) {
+        if (IsMarked(objectHeader)) {
             return ObjectStatus::ALIVE_OBJECT;
         }
-        ++delete_count;
+        ++deleteCount;
         if constexpr (REGION_TYPE == RegionFlag::IS_EDEN) {
-            LOG_DEBUG_OBJECT_EVENTS << "DELETE YOUNG object " << object_header;
+            LOG_DEBUG_OBJECT_EVENTS << "DELETE YOUNG object " << objectHeader;
         } else {
             ASSERT(REGION_TYPE == RegionFlag::IS_OLD);
-            LOG_DEBUG_OBJECT_EVENTS << "DELETE TENURED object " << object_header;
+            LOG_DEBUG_OBJECT_EVENTS << "DELETE TENURED object " << objectHeader;
         }
         return ObjectStatus::DEAD_OBJECT;
     };
     if constexpr (REGION_TYPE == RegionFlag::IS_EDEN) {
         if (!this->NeedToPromote(region)) {
-            ScopedRegionCollectionInfo collection_info(this, "Region compacted", region, true, move_size);
-            if (g1_track_freed_objects_) {
+            ScopedRegionCollectionInfo collectionInfo(this, "Region compacted", region, true, moveSize);
+            if (g1TrackFreedObjects_) {
                 // We want to track all freed objects, therefore, iterate over all objects in region.
-                object_allocator->template CompactRegion<RegionFlag::IS_EDEN, false>(region, death_checker,
-                                                                                     move_checker);
+                objectAllocator->template CompactRegion<RegionFlag::IS_EDEN, false>(region, deathChecker, moveChecker);
             } else {
-                object_allocator->template CompactRegion<RegionFlag::IS_EDEN, true>(region, death_checker,
-                                                                                    move_checker);
+                objectAllocator->template CompactRegion<RegionFlag::IS_EDEN, true>(region, deathChecker, moveChecker);
                 // delete_count is equal to 0 because we don't track allocation in TLABs by a default.
                 // We will do it only with PANDA_TRACK_TLAB_ALLOCATIONS key
-                ASSERT(delete_count == 0);
+                ASSERT(deleteCount == 0);
             }
-            this->mem_stats_.template RecordSizeMovedYoung<ATOMIC>(move_size);
-            this->mem_stats_.template RecordCountMovedYoung<ATOMIC>(move_count);
-            this->mem_stats_.template RecordSizeFreedYoung<ATOMIC>(delete_size);
-            this->mem_stats_.template RecordCountFreedYoung<ATOMIC>(delete_count);
-            analytics_.ReportEvacuatedBytes(move_size);
-            analytics_.ReportLiveObjects(move_count);
+            this->memStats_.template RecordSizeMovedYoung<ATOMIC>(moveSize);
+            this->memStats_.template RecordCountMovedYoung<ATOMIC>(moveCount);
+            this->memStats_.template RecordSizeFreedYoung<ATOMIC>(deleteSize);
+            this->memStats_.template RecordCountFreedYoung<ATOMIC>(deleteCount);
+            analytics_.ReportEvacuatedBytes(moveSize);
+            analytics_.ReportLiveObjects(moveCount);
         } else {
-            RegionPromotionImpl<ATOMIC>(region, moved_object_saver);
+            RegionPromotionImpl<ATOMIC>(region, movedObjectSaver);
         }
     } else {
-        ScopedRegionCollectionInfo collection_info(this, "Region compacted", region, false, move_size);
+        ScopedRegionCollectionInfo collectionInfo(this, "Region compacted", region, false, moveSize);
         ASSERT(region->HasFlag(RegionFlag::IS_OLD));
         ASSERT(!region->HasFlag(RegionFlag::IS_NONMOVABLE) && !region->HasFlag(RegionFlag::IS_LARGE_OBJECT));
-        if (g1_track_freed_objects_) {
+        if (g1TrackFreedObjects_) {
             // We want to track all freed objects, therefore, iterate over all objects in region.
-            object_allocator->template CompactRegion<RegionFlag::IS_OLD, false>(region, death_checker, move_checker);
+            objectAllocator->template CompactRegion<RegionFlag::IS_OLD, false>(region, deathChecker, moveChecker);
         } else {
-            object_allocator->template CompactRegion<RegionFlag::IS_OLD, true>(region, death_checker, move_checker);
-            size_t allocated_objects = region->GetAllocatedObjects();
-            ASSERT(move_count <= allocated_objects);
-            ASSERT(delete_count == 0);
-            delete_count = allocated_objects - move_count;
+            objectAllocator->template CompactRegion<RegionFlag::IS_OLD, true>(region, deathChecker, moveChecker);
+            size_t allocatedObjects = region->GetAllocatedObjects();
+            ASSERT(moveCount <= allocatedObjects);
+            ASSERT(deleteCount == 0);
+            deleteCount = allocatedObjects - moveCount;
         }
-        this->mem_stats_.template RecordSizeMovedTenured<ATOMIC>(move_size);
-        this->mem_stats_.template RecordCountMovedTenured<ATOMIC>(move_count);
-        this->mem_stats_.template RecordSizeFreedTenured<ATOMIC>(delete_size);
-        this->mem_stats_.template RecordCountFreedTenured<ATOMIC>(delete_count);
+        this->memStats_.template RecordSizeMovedTenured<ATOMIC>(moveSize);
+        this->memStats_.template RecordCountMovedTenured<ATOMIC>(moveCount);
+        this->memStats_.template RecordSizeFreedTenured<ATOMIC>(deleteSize);
+        this->memStats_.template RecordCountFreedTenured<ATOMIC>(deleteCount);
     }
 }
 
 template <class LanguageConfig, typename RefUpdater, bool FULL_GC>
-void DoUpdateReferencesToMovedObjectsRange(typename GCUpdateRefsWorkersTask<FULL_GC>::MovedObjectsRange *moved_objects,
-                                           RefUpdater &ref_updater)
+void DoUpdateReferencesToMovedObjectsRange(typename GCUpdateRefsWorkersTask<FULL_GC>::MovedObjectsRange *movedObjects,
+                                           RefUpdater &refUpdater)
 {
-    for (auto *obj : *moved_objects) {
+    for (auto *obj : *movedObjects) {
         if constexpr (!FULL_GC) {
             obj = obj->IsForwarded() ? GetForwardAddress(obj) : obj;
         }
-        ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(obj, ref_updater);
+        ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(obj, refUpdater);
     }
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unused]] void *worker_data)
+void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unused]] void *workerData)
 {
     switch (task->GetType()) {
         case GCWorkersTaskTypes::TASK_MARKING: {
-            auto objects_stack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
-            MarkStackMixed(objects_stack);
-            ASSERT(objects_stack->Empty());
-            this->GetInternalAllocator()->Delete(objects_stack);
+            auto objectsStack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
+            MarkStackMixed(objectsStack);
+            ASSERT(objectsStack->Empty());
+            this->GetInternalAllocator()->Delete(objectsStack);
             break;
         }
         case GCWorkersTaskTypes::TASK_REMARK: {
-            auto *objects_stack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
-            this->MarkStack(&marker_, objects_stack, CalcLiveBytesMarkPreprocess);
-            ASSERT(objects_stack->Empty());
-            this->GetInternalAllocator()->Delete(objects_stack);
+            auto *objectsStack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
+            this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess);
+            ASSERT(objectsStack->Empty());
+            this->GetInternalAllocator()->Delete(objectsStack);
             break;
         }
         case GCWorkersTaskTypes::TASK_FULL_MARK: {
-            const ReferenceCheckPredicateT &ref_enable_pred = []([[maybe_unused]] const ObjectHeader *obj) {
+            const ReferenceCheckPredicateT &refEnablePred = []([[maybe_unused]] const ObjectHeader *obj) {
                 // process all refs
                 return true;
             };
-            auto *objects_stack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
-            this->MarkStack(&marker_, objects_stack, CalcLiveBytesMarkPreprocess, ref_enable_pred);
-            ASSERT(objects_stack->Empty());
-            this->GetInternalAllocator()->Delete(objects_stack);
+            auto *objectsStack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
+            this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess, refEnablePred);
+            ASSERT(objectsStack->Empty());
+            this->GetInternalAllocator()->Delete(objectsStack);
             break;
         }
         case GCWorkersTaskTypes::TASK_REGION_COMPACTING: {
             auto *data = task->Cast<GCRegionCompactWorkersTask>()->GetRegionData();
             Region *region = data->first;
-            const ObjectVisitor &moved_objects_saver = data->second;
+            const ObjectVisitor &movedObjectsSaver = data->second;
             if (region->HasFlag(RegionFlag::IS_EDEN)) {
-                RegionCompactingImpl<true, RegionFlag::IS_EDEN>(region, moved_objects_saver);
+                RegionCompactingImpl<true, RegionFlag::IS_EDEN>(region, movedObjectsSaver);
             } else if (region->HasFlag(RegionFlag::IS_OLD)) {
-                RegionCompactingImpl<true, RegionFlag::IS_OLD>(region, moved_objects_saver);
+                RegionCompactingImpl<true, RegionFlag::IS_OLD>(region, movedObjectsSaver);
             } else {
                 LOG(FATAL, GC) << "Unsupported region type";
             }
@@ -637,20 +635,20 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             break;
         }
         case GCWorkersTaskTypes::TASK_ENQUEUE_REMSET_REFS: {
-            auto *moved_objects_range = task->Cast<GCUpdateRefsWorkersTask<false>>()->GetMovedObjectsRange();
-            auto *task_updated_refs_queue =
+            auto *movedObjectsRange = task->Cast<GCUpdateRefsWorkersTask<false>>()->GetMovedObjectsRange();
+            auto *taskUpdatedRefsQueue =
                 this->GetInternalAllocator()->template New<GCG1BarrierSet::ThreadLocalCardQueues>();
-            EnqueueRemsetRefUpdater<LanguageConfig> ref_updater(this->GetCardTable(), task_updated_refs_queue,
-                                                                region_size_bits_);
-            DoUpdateReferencesToMovedObjectsRange<LanguageConfig, decltype(ref_updater), false>(moved_objects_range,
-                                                                                                ref_updater);
+            EnqueueRemsetRefUpdater<LanguageConfig> refUpdater(this->GetCardTable(), taskUpdatedRefsQueue,
+                                                               regionSizeBits_);
+            DoUpdateReferencesToMovedObjectsRange<LanguageConfig, decltype(refUpdater), false>(movedObjectsRange,
+                                                                                               refUpdater);
             {
-                os::memory::LockHolder lock(gc_worker_queue_lock_);
-                updated_refs_queue_->insert(updated_refs_queue_->end(), task_updated_refs_queue->begin(),
-                                            task_updated_refs_queue->end());
+                os::memory::LockHolder lock(gcWorkerQueueLock_);
+                updatedRefsQueue_->insert(updatedRefsQueue_->end(), taskUpdatedRefsQueue->begin(),
+                                          taskUpdatedRefsQueue->end());
             }
-            this->GetInternalAllocator()->Delete(moved_objects_range);
-            this->GetInternalAllocator()->Delete(task_updated_refs_queue);
+            this->GetInternalAllocator()->Delete(movedObjectsRange);
+            this->GetInternalAllocator()->Delete(taskUpdatedRefsQueue);
             break;
         }
         default:
@@ -660,10 +658,10 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::UpdateCollectionSet(const CollectionSet &collectible_regions)
+void G1GC<LanguageConfig>::UpdateCollectionSet(const CollectionSet &collectibleRegions)
 {
-    collection_set_ = collectible_regions;
-    for (auto r : collection_set_) {
+    collectionSet_ = collectibleRegions;
+    for (auto r : collectionSet_) {
         // we don't need to reset flag, because we don't reuse collection_set region
         r->AddFlag(RegionFlag::IS_COLLECTION_SET);
         LOG_DEBUG_GC << "dump region: " << *r;
@@ -671,15 +669,15 @@ void G1GC<LanguageConfig>::UpdateCollectionSet(const CollectionSet &collectible_
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunPhasesForRegions(panda::GCTask &task, const CollectionSet &collectible_regions)
+void G1GC<LanguageConfig>::RunPhasesForRegions(panda::GCTask &task, const CollectionSet &collectibleRegions)
 {
-    if (collectible_regions.empty()) {
+    if (collectibleRegions.empty()) {
         LOG_DEBUG_GC << "No regions specified for collection " << task.reason;
     }
-    ASSERT(concurrent_marking_stack_.Empty());
+    ASSERT(concurrentMarkingStack_.Empty());
     this->GetObjectGenAllocator()->InvalidateSpaceData();
     this->GetObjectGenAllocator()->UpdateSpaceData();
-    RunGC(task, collectible_regions);
+    RunGC(task, collectibleRegions);
 }
 
 template <class LanguageConfig>
@@ -700,18 +698,18 @@ bool G1GC<LanguageConfig>::NeedFullGC(const panda::GCTask &task)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
 {
-    SuspendUpdateRemsetWorkerScope stop_update_remset_worker_scope(update_remset_worker_);
-    interrupt_concurrent_flag_ = false;
+    SuspendUpdateRemsetWorkerScope stopUpdateRemsetWorkerScope(updateRemsetWorker_);
+    interruptConcurrentFlag_ = false;
     LOG_DEBUG_GC << "G1GC start, reason: " << task.reason;
     LOG_DEBUG_GC << "Footprint before GC: " << this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     task.UpdateGCCollectionType(GCCollectionType::YOUNG);
 
-    size_t bytes_in_heap_before_move = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
+    size_t bytesInHeapBeforeMove = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     {
         ScopedTiming t("G1 GC", *this->GetTiming());
         {
-            GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats());
-            this->mem_stats_.Reset();
+            GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
+            this->memStats_.Reset();
             if (NeedToRunGC(task)) {
                 // Check there is no concurrent mark running by another thread.
                 [[maybe_unused]] auto callback = [](ManagedThread *thread) {
@@ -720,32 +718,32 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
                 ASSERT(this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback));
 
                 if (NeedFullGC(task)) {
-                    task.collection_type = GCCollectionType::FULL;
+                    task.collectionType = GCCollectionType::FULL;
                     RunFullGC(task);
                 } else {
-                    bool is_mixed = false;
-                    if (task.reason == GCTaskCause::MIXED && !interrupt_concurrent_flag_) {
-                        region_garbage_rate_threshold_ = 0;
-                        is_mixed = true;
+                    bool isMixed = false;
+                    if (task.reason == GCTaskCause::MIXED && !interruptConcurrentFlag_) {
+                        regionGarbageRateThreshold_ = 0;
+                        isMixed = true;
                     } else {
                         // Atomic with acquire order reason: to see changes made by GC thread (which do concurrent
                         // marking and than set is_mixed_gc_required_) in mutator thread which waits for the end of
                         // concurrent marking.
-                        is_mixed = is_mixed_gc_required_.load(std::memory_order_acquire);
+                        isMixed = isMixedGcRequired_.load(std::memory_order_acquire);
                     }
-                    if (is_mixed) {
-                        task.collection_type = GCCollectionType::MIXED;
+                    if (isMixed) {
+                        task.collectionType = GCCollectionType::MIXED;
                     } else {
-                        task.collection_type = GCCollectionType::YOUNG;
+                        task.collectionType = GCCollectionType::YOUNG;
                     }
-                    auto collectible_regions = GetCollectibleRegions(task, is_mixed);
-                    if (!collectible_regions.empty() && HaveEnoughSpaceToMove(collectible_regions)) {
+                    auto collectibleRegions = GetCollectibleRegions(task, isMixed);
+                    if (!collectibleRegions.empty() && HaveEnoughSpaceToMove(collectibleRegions)) {
                         // Ordinary collection flow
-                        RunMixedGC(task, collectible_regions);
+                        RunMixedGC(task, collectibleRegions);
                     } else {
                         LOG_DEBUG_GC << "Failed to run gc: "
-                                     << (collectible_regions.empty() ? "nothing to collect in movable space"
-                                                                     : "not enough free regions to move");
+                                     << (collectibleRegions.empty() ? "nothing to collect in movable space"
+                                                                    : "not enough free regions to move");
                     }
                 }
             }
@@ -753,7 +751,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
         if (task.reason == GCTaskCause::MIXED) {
             // There was forced a mixed GC. This GC type sets specific settings.
             // So we need to restore them.
-            region_garbage_rate_threshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
+            regionGarbageRateThreshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
         }
         if (ScheduleMixedGCAndConcurrentMark(task)) {
             RunConcurrentMark(task);
@@ -761,7 +759,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
     }
     // Update global and GC memstats based on generational memstats information
     // We will update tenured stats and record allocations, so set 'true' values
-    this->UpdateMemStats(bytes_in_heap_before_move, true, true);
+    this->UpdateMemStats(bytesInHeapBeforeMove, true, true);
 
     LOG_DEBUG_GC << "Footprint after GC: " << this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     this->SetFullGC(false);
@@ -780,24 +778,24 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
         // After release reserved region we always have minimum 1 region for tenured collection
         ASSERT(HaveEnoughRegionsToMove(1));
     }
-    CollectionSet collection_set = GetFullCollectionSet();
-    PrepareYoungRegionsForFullGC(collection_set);
-    auto cur_region_it = collection_set.Tenured().begin();
-    auto end_region_it = collection_set.Tenured().end();
-    while (cur_region_it != end_region_it) {
+    CollectionSet collectionSet = GetFullCollectionSet();
+    PrepareYoungRegionsForFullGC(collectionSet);
+    auto curRegionIt = collectionSet.Tenured().begin();
+    auto endRegionIt = collectionSet.Tenured().end();
+    while (curRegionIt != endRegionIt) {
         ASSERT(HaveEnoughRegionsToMove(1));
         CollectionSet cs;
-        while ((cur_region_it != end_region_it) && (HaveEnoughRegionsToMove(cs.Movable().size() + 1))) {
-            Region *region = *cur_region_it;
-            cur_region_it++;
+        while ((curRegionIt != endRegionIt) && (HaveEnoughRegionsToMove(cs.Movable().size() + 1))) {
+            Region *region = *curRegionIt;
+            curRegionIt++;
             if (region->GetGarbageBytes() == 0) {
-                double region_fragmentation = region->GetFragmentation();
-                if (region_fragmentation < this->GetSettings()->G1FullGCRegionFragmentationRate()) {
+                double regionFragmentation = region->GetFragmentation();
+                if (regionFragmentation < this->GetSettings()->G1FullGCRegionFragmentationRate()) {
                     LOG_DEBUG_GC << "Skip region " << *region << " because it has no garbage inside";
                     continue;
                 }
                 LOG_DEBUG_GC << "Add region " << *region
-                             << " to a collection set because it has a big fragmentation = " << region_fragmentation;
+                             << " to a collection set because it has a big fragmentation = " << regionFragmentation;
             } else {
                 LOG_DEBUG_GC << "Add region " << *region << " to a collection set";
             }
@@ -809,8 +807,8 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
     }
     // Reserve a region to prevent OOM in case a lot of garbage in tenured space
     GetG1ObjectAllocator()->ReserveRegionIfNeeded();
-    if (!collection_set.Young().empty()) {
-        CollectionSet cs(collection_set.Young());
+    if (!collectionSet.Young().empty()) {
+        CollectionSet cs(collectionSet.Young());
         if (HaveEnoughSpaceToMove(cs)) {
             LOG_DEBUG_GC << "Iterative full GC. Collecting " << cs.size() << " young regions";
             UpdateCollectionSet(cs);
@@ -823,9 +821,9 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
         }
     }
     {
-        ScopedTiming release_pages("Release Pages in Free Pools", *this->GetTiming());
-        bool use_gc_workers = this->GetSettings()->GCWorkersCount() != 0;
-        if (use_gc_workers) {
+        ScopedTiming releasePages("Release Pages in Free Pools", *this->GetTiming());
+        bool useGcWorkers = this->GetSettings()->GCWorkersCount() != 0;
+        if (useGcWorkers) {
             if (!this->GetWorkersTaskPool()->AddTask(GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS)) {
                 PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
             }
@@ -834,22 +832,22 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
         }
     }
     this->SetFullGC(false);
-    collection_set_.clear();
+    collectionSet_.clear();
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunMixedGC(panda::GCTask &task, const CollectionSet &collection_set)
+void G1GC<LanguageConfig>::RunMixedGC(panda::GCTask &task, const CollectionSet &collectionSet)
 {
-    auto start_time = panda::time::GetCurrentTimeInNanos();
-    analytics_.ReportCollectionStart(start_time);
-    LOG_DEBUG_GC << "Collect regions size:" << collection_set.size();
-    UpdateCollectionSet(collection_set);
-    RunPhasesForRegions(task, collection_set);
-    auto end_time = panda::time::GetCurrentTimeInNanos();
-    this->GetStats()->AddTimeValue(end_time - start_time, TimeTypeStats::YOUNG_TOTAL_TIME);
-    g1_pause_tracker_.AddPauseInNanos(start_time, end_time);
-    analytics_.ReportCollectionEnd(end_time, collection_set);
-    collection_set_.clear();
+    auto startTime = panda::time::GetCurrentTimeInNanos();
+    analytics_.ReportCollectionStart(startTime);
+    LOG_DEBUG_GC << "Collect regions size:" << collectionSet.size();
+    UpdateCollectionSet(collectionSet);
+    RunPhasesForRegions(task, collectionSet);
+    auto endTime = panda::time::GetCurrentTimeInNanos();
+    this->GetStats()->AddTimeValue(endTime - startTime, TimeTypeStats::YOUNG_TOTAL_TIME);
+    g1PauseTracker_.AddPauseInNanos(startTime, endTime);
+    analytics_.ReportCollectionEnd(endTime, collectionSet);
+    collectionSet_.clear();
 }
 
 template <class LanguageConfig>
@@ -857,39 +855,39 @@ bool G1GC<LanguageConfig>::ScheduleMixedGCAndConcurrentMark(panda::GCTask &task)
 {
     // Atomic with acquire order reason: to see changes made by GC thread (which do concurrent marking and than set
     // is_mixed_gc_required_) in mutator thread which waits for the end of concurrent marking.
-    if (is_mixed_gc_required_.load(std::memory_order_acquire)) {
+    if (isMixedGcRequired_.load(std::memory_order_acquire)) {
         if (!HaveGarbageRegions()) {
             // Atomic with release order reason: to see changes made by GC thread (which do concurrent marking and
             // than set is_mixed_gc_required_) in mutator thread which waits for the end of concurrent marking.
-            is_mixed_gc_required_.store(false, std::memory_order_release);
+            isMixedGcRequired_.store(false, std::memory_order_release);
         }
         return false;  // don't run concurrent mark
     }
-    concurrent_marking_flag_ = !interrupt_concurrent_flag_ && this->ShouldRunTenuredGC(task);
+    concurrentMarkingFlag_ = !interruptConcurrentFlag_ && this->ShouldRunTenuredGC(task);
     // Atomic with relaxed order reason: read variable modified in the same thread
-    return concurrent_marking_flag_.load(std::memory_order_relaxed);
+    return concurrentMarkingFlag_.load(std::memory_order_relaxed);
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunConcurrentMark(panda::GCTask &task)
 {
-    ASSERT(collection_set_.empty());
+    ASSERT(collectionSet_.empty());
     // Init concurrent marking
     auto addr = this->GetBarrierSet()->GetBarrierOperand(panda::mem::BarrierPosition::BARRIER_POSITION_PRE,
                                                          "STORE_IN_BUFF_TO_MARK_FUNC");
-    auto pre_wrb_entrypoint = std::get<void (*)(void *)>(addr.GetValue());
-    auto callback = [&pre_wrb_entrypoint](ManagedThread *thread) {
+    auto preWrbEntrypoint = std::get<void (*)(void *)>(addr.GetValue());
+    auto callback = [&preWrbEntrypoint](ManagedThread *thread) {
         ASSERT(thread->GetPreWrbEntrypoint() == nullptr);
-        thread->SetPreWrbEntrypoint(reinterpret_cast<void *>(pre_wrb_entrypoint));
+        thread->SetPreWrbEntrypoint(reinterpret_cast<void *>(preWrbEntrypoint));
         return true;
     };
     this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback);
 
     if (this->GetSettings()->BeforeG1ConcurrentHeapVerification()) {
-        trace::ScopedTrace post_heap_verifier_trace("PostGCHeapVeriFier before concurrent");
-        size_t fail_count = this->VerifyHeap();
-        if (this->GetSettings()->FailOnHeapVerification() && fail_count > 0) {
-            LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << fail_count << " corruptions";
+        trace::ScopedTrace postHeapVerifierTrace("PostGCHeapVeriFier before concurrent");
+        size_t failCount = this->VerifyHeap();
+        if (this->GetSettings()->FailOnHeapVerification() && failCount > 0) {
+            LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << failCount << " corruptions";
         }
     }
     ConcurrentMarking(task);
@@ -909,16 +907,16 @@ bool G1GC<LanguageConfig>::HaveGarbageRegions(const PandaPriorityQueue<std::pair
     if (regions.empty()) {
         return false;
     }
-    auto *top_region = regions.top().second;
-    double garbage_rate = static_cast<double>(top_region->GetGarbageBytes()) / top_region->Size();
-    return garbage_rate >= region_garbage_rate_threshold_;
+    auto *topRegion = regions.top().second;
+    double garbageRate = static_cast<double>(topRegion->GetGarbageBytes()) / topRegion->Size();
+    return garbageRate >= regionGarbageRateThreshold_;
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::ProcessDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    update_remset_worker_->GCProcessCards();
+    updateRemsetWorker_->GCProcessCards();
 }
 
 template <class LanguageConfig>
@@ -926,20 +924,20 @@ void G1GC<LanguageConfig>::CreateUpdateRemsetWorker()
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     // to make TSAN happy because we access updated_refs_queue_ inside constructor of UpdateRemsetWorker
-    os::memory::LockHolder lock(queue_lock_);
+    os::memory::LockHolder lock(queueLock_);
     if (this->GetSettings()->UseThreadPoolForGC()) {
-        update_remset_worker_ = allocator->template New<UpdateRemsetThread<LanguageConfig>>(
-            this, updated_refs_queue_, &queue_lock_, this->GetG1ObjectAllocator()->GetRegionSize(),
+        updateRemsetWorker_ = allocator->template New<UpdateRemsetThread<LanguageConfig>>(
+            this, updatedRefsQueue_, &queueLock_, this->GetG1ObjectAllocator()->GetRegionSize(),
             this->GetSettings()->G1EnableConcurrentUpdateRemset(),
             this->GetSettings()->G1MinConcurrentCardsToProcess());
     } else {
         ASSERT(this->GetSettings()->UseTaskManagerForGC());
-        update_remset_worker_ = allocator->template New<UpdateRemsetTaskQueue<LanguageConfig>>(
-            this, updated_refs_queue_, &queue_lock_, this->GetG1ObjectAllocator()->GetRegionSize(),
+        updateRemsetWorker_ = allocator->template New<UpdateRemsetTaskQueue<LanguageConfig>>(
+            this, updatedRefsQueue_, &queueLock_, this->GetG1ObjectAllocator()->GetRegionSize(),
             this->GetSettings()->G1EnableConcurrentUpdateRemset(),
             this->GetSettings()->G1MinConcurrentCardsToProcess());
     }
-    ASSERT(update_remset_worker_ != nullptr);
+    ASSERT(updateRemsetWorker_ != nullptr);
 }
 
 template <class LanguageConfig>
@@ -950,12 +948,12 @@ void G1GC<LanguageConfig>::InitializeImpl()
     this->CreateCardTable(allocator, PoolManager::GetMmapMemPool()->GetMinObjectAddress(),
                           PoolManager::GetMmapMemPool()->GetTotalObjectSize());
 
-    auto barrier_set =
+    auto barrierSet =
         allocator->New<GCG1BarrierSet>(allocator, &PreWrbFuncEntrypoint, &PostWrbUpdateCardFuncEntrypoint,
                                        panda::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
-                                       this->GetCardTable(), updated_refs_queue_, &queue_lock_);
-    ASSERT(barrier_set != nullptr);
-    this->SetGCBarrierSet(barrier_set);
+                                       this->GetCardTable(), updatedRefsQueue_, &queueLock_);
+    ASSERT(barrierSet != nullptr);
+    this->SetGCBarrierSet(barrierSet);
 
     this->CreateWorkersTaskPool();
     CreateUpdateRemsetWorker();
@@ -973,7 +971,7 @@ bool G1GC<LanguageConfig>::MarkObjectIfNotMarked(ObjectHeader *object)
 {
     ASSERT(object != nullptr);
     if (this->GetGCPhase() == GCPhase::GC_PHASE_MARK_YOUNG) {
-        return mixed_marker_.MarkIfNotMarked(object);
+        return mixedMarker_.MarkIfNotMarked(object);
     }
     return marker_.MarkIfNotMarked(object);
 }
@@ -994,28 +992,28 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::MarkStackMixed(GCMarkingStackType *stack)
 {
     ASSERT(stack != nullptr);
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
-    auto ref_pred = [this](const ObjectHeader *obj) { return InGCSweepRange(obj); };
-    auto visitor = [this, stack, &ref_pred](const ObjectHeader *object) {
-        ASSERT(mixed_marker_.IsMarked(object));
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    auto refPred = [this](const ObjectHeader *obj) { return InGCSweepRange(obj); };
+    auto visitor = [this, stack, &refPred](const ObjectHeader *object) {
+        ASSERT(mixedMarker_.IsMarked(object));
         ValidateObject(nullptr, object);
-        auto *object_class = object->template ClassAddr<BaseClass>();
+        auto *objectClass = object->template ClassAddr<BaseClass>();
         // We need annotation here for the FullMemoryBarrier used in InitializeClassByIdEntrypoint
-        TSAN_ANNOTATE_HAPPENS_AFTER(object_class);
+        TSAN_ANNOTATE_HAPPENS_AFTER(objectClass);
         LOG_DEBUG_GC << "Current object: " << GetDebugInfoAboutObject(object);
 
         ASSERT(!object->IsForwarded());
         ASSERT(InGCSweepRange(object));
-        CalcLiveBytesMarkPreprocess(object, object_class);
-        mixed_marker_.MarkInstance(stack, object, object_class, ref_pred);
+        CalcLiveBytesMarkPreprocess(object, objectClass);
+        mixedMarker_.MarkInstance(stack, object, objectClass, refPred);
     };
     {
-        auto marked_objects = stack->TraverseObjects(visitor);
-        os::memory::LockHolder lh(mixed_marked_objects_mutex_);
-        if (mixed_marked_objects_.empty()) {
-            mixed_marked_objects_ = std::move(marked_objects);
+        auto markedObjects = stack->TraverseObjects(visitor);
+        os::memory::LockHolder lh(mixedMarkedObjectsMutex_);
+        if (mixedMarkedObjects_.empty()) {
+            mixedMarkedObjects_ = std::move(markedObjects);
         } else {
-            mixed_marked_objects_.insert(mixed_marked_objects_.end(), marked_objects.begin(), marked_objects.end());
+            mixedMarkedObjects_.insert(mixedMarkedObjects_.end(), markedObjects.begin(), markedObjects.end());
         }
     }
 }
@@ -1027,20 +1025,20 @@ void G1GC<LanguageConfig>::MarkStackFull(GCMarkingStackType *stack)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::MarkReferences(GCMarkingStackType *references, GCPhase gc_phase)
+void G1GC<LanguageConfig>::MarkReferences(GCMarkingStackType *references, GCPhase gcPhase)
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG_DEBUG_GC << "Start marking " << references->Size() << " references";
     // mark refs only on mixed-gc and on full_gc. On concurrent mark we don't handle any references
-    if (gc_phase == GCPhase::GC_PHASE_MARK_YOUNG) {
+    if (gcPhase == GCPhase::GC_PHASE_MARK_YOUNG) {
         MarkStackMixed(references);
     } else if (this->IsFullGC()) {
         MarkStackFull(references);
-    } else if (gc_phase == GCPhase::GC_PHASE_INITIAL_MARK || gc_phase == GCPhase::GC_PHASE_MARK ||
-               gc_phase == GCPhase::GC_PHASE_REMARK) {
+    } else if (gcPhase == GCPhase::GC_PHASE_INITIAL_MARK || gcPhase == GCPhase::GC_PHASE_MARK ||
+               gcPhase == GCPhase::GC_PHASE_REMARK) {
         // nothing
     } else {
-        LOG_DEBUG_GC << "phase: " << GCScopedPhase::GetPhaseName(gc_phase);
+        LOG_DEBUG_GC << "phase: " << GCScopedPhase::GetPhaseName(gcPhase);
         UNREACHABLE();
     }
 }
@@ -1048,11 +1046,11 @@ void G1GC<LanguageConfig>::MarkReferences(GCMarkingStackType *references, GCPhas
 template <class LanguageConfig>
 bool G1GC<LanguageConfig>::InGCSweepRange(const ObjectHeader *object) const
 {
-    ASSERT_DO(!this->collection_set_.empty() || this->IsFullGC(),
+    ASSERT_DO(!this->collectionSet_.empty() || this->IsFullGC(),
               std::cerr << "Incorrect phase in InGCSweepRange: " << static_cast<size_t>(this->GetGCPhase()) << "\n");
     ASSERT(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(object)));
-    Region *obj_region = ObjectToRegion(object);
-    return obj_region->IsInCollectionSet();
+    Region *objRegion = ObjectToRegion(object);
+    return objRegion->IsInCollectionSet();
 }
 
 static bool RemsetRegionPredicate(const Region *r)
@@ -1062,38 +1060,38 @@ static bool RemsetRegionPredicate(const Region *r)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectible_regions)
+void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleRegions)
 {
     ASSERT(!this->IsFullGC());
-    GCScope<TRACE_TIMING> scoped_trace(__FUNCTION__, this);
+    GCScope<TRACE_TIMING> scopedTrace(__FUNCTION__, this);
     LOG_DEBUG_GC << "GC start";
-    uint64_t young_pause_time;
+    uint64_t youngPauseTime;
     {
-        time::Timer timer(&young_pause_time, true);
+        time::Timer timer(&youngPauseTime, true);
         HandlePendingDirtyCards();
-        MemRange dirty_cards_range = MixedMarkAndCacheRefs(task, collectible_regions);
-        ClearDirtyAndYoungCards(dirty_cards_range);
-        CollectAndMove<false>(collectible_regions);
+        MemRange dirtyCardsRange = MixedMarkAndCacheRefs(task, collectibleRegions);
+        ClearDirtyAndYoungCards(dirtyCardsRange);
+        CollectAndMove<false>(collectibleRegions);
         ReenqueueDirtyCards();
         ClearRefsFromRemsetsCache();
         this->GetObjectGenAllocator()->InvalidateSpaceData();
     }
-    if (young_pause_time > 0) {
-        this->GetStats()->AddTimeValue(young_pause_time, TimeTypeStats::YOUNG_PAUSED_TIME);
+    if (youngPauseTime > 0) {
+        this->GetStats()->AddTimeValue(youngPauseTime, TimeTypeStats::YOUNG_PAUSED_TIME);
     }
     LOG_DEBUG_GC << "G1GC RunGC end";
 }
 
 template <class LanguageConfig>
-MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectible_regions)
+MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions)
 {
-    GCScope<TRACE_TIMING_PHASE> scoped_trace(__FUNCTION__, this, GCPhase::GC_PHASE_MARK_YOUNG);
-    bool use_gc_workers = this->GetSettings()->ParallelMarkingEnabled();
-    GCMarkingStackType objects_stack(this, use_gc_workers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
-                                     use_gc_workers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
-                                     GCWorkersTaskTypes::TASK_MARKING,
-                                     this->GetSettings()->GCMarkingStackNewTasksFrequency());
-    for (Region *region : collectible_regions) {
+    GCScope<TRACE_TIMING_PHASE> scopedTrace(__FUNCTION__, this, GCPhase::GC_PHASE_MARK_YOUNG);
+    bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
+    GCMarkingStackType objectsStack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
+                                    useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
+                                    GCWorkersTaskTypes::TASK_MARKING,
+                                    this->GetSettings()->GCMarkingStackNewTasksFrequency());
+    for (Region *region : collectibleRegions) {
         region->GetMarkBitmap()->ClearAllBits();
         // Calculate live bytes during marking phase
         region->SetLiveBytes(0U);
@@ -1105,100 +1103,100 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
     // Note: We need to process only tenured -> young refs,
     // since we reach this by graph from tenured roots,
     // because we will process all young regions at young GC we will find all required references
-    RefCacheBuilder<LanguageConfig> builder(this, &unique_refs_from_remsets_, region_size_bits_, &objects_stack);
-    auto refs_checker = [this, &builder](const MemRange &mem_range, Region *region) {
-        IterateOverRefsInMemRange(mem_range, region, builder);
+    RefCacheBuilder<LanguageConfig> builder(this, &uniqueRefsFromRemsets_, regionSizeBits_, &objectsStack);
+    auto refsChecker = [this, &builder](const MemRange &memRange, Region *region) {
+        IterateOverRefsInMemRange(memRange, region, builder);
         return builder.AllCrossRegionRefsProcessed();
     };
-    MemRange dirty_cards_range = CacheRefsFromRemsets(refs_checker);
+    MemRange dirtyCardsRange = CacheRefsFromRemsets(refsChecker);
 
-    auto ref_pred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
-    GCRootVisitor gc_mark_collection_set = [&objects_stack, this, &ref_pred](const GCRoot &gc_root) {
-        ObjectHeader *root_object = gc_root.GetObjectHeader();
-        ObjectHeader *from_object = gc_root.GetFromObjectHeader();
-        LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(root_object) << " from: " << gc_root.GetType();
-        if (UNLIKELY(from_object != nullptr) &&
-            this->IsReference(from_object->NotAtomicClassAddr<BaseClass>(), from_object, ref_pred)) {
-            LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(from_object) << " to stack";
-            mixed_marker_.Mark(from_object);
-            this->ProcessReference(&objects_stack, from_object->NotAtomicClassAddr<BaseClass>(), from_object,
+    auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+    GCRootVisitor gcMarkCollectionSet = [&objectsStack, this, &refPred](const GCRoot &gcRoot) {
+        ObjectHeader *rootObject = gcRoot.GetObjectHeader();
+        ObjectHeader *fromObject = gcRoot.GetFromObjectHeader();
+        LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(rootObject) << " from: " << gcRoot.GetType();
+        if (UNLIKELY(fromObject != nullptr) &&
+            this->IsReference(fromObject->NotAtomicClassAddr<BaseClass>(), fromObject, refPred)) {
+            LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(fromObject) << " to stack";
+            mixedMarker_.Mark(fromObject);
+            this->ProcessReference(&objectsStack, fromObject->NotAtomicClassAddr<BaseClass>(), fromObject,
                                    GC::EmptyReferenceProcessPredicate);
         } else {
             // Skip non-collection-set roots
-            auto root_object_ptr = gc_root.GetObjectHeader();
-            ASSERT(root_object_ptr != nullptr);
-            if (mixed_marker_.MarkIfNotMarked(root_object_ptr)) {
-                ASSERT(this->InGCSweepRange(root_object_ptr));
-                LOG_DEBUG_GC << "root " << GetDebugInfoAboutObject(root_object_ptr);
-                objects_stack.PushToStack(gc_root.GetType(), root_object_ptr);
+            auto rootObjectPtr = gcRoot.GetObjectHeader();
+            ASSERT(rootObjectPtr != nullptr);
+            if (mixedMarker_.MarkIfNotMarked(rootObjectPtr)) {
+                ASSERT(this->InGCSweepRange(rootObjectPtr));
+                LOG_DEBUG_GC << "root " << GetDebugInfoAboutObject(rootObjectPtr);
+                objectsStack.PushToStack(gcRoot.GetType(), rootObjectPtr);
             } else {
-                LOG_DEBUG_GC << "Skip root for young mark: " << std::hex << root_object_ptr;
+                LOG_DEBUG_GC << "Skip root for young mark: " << std::hex << rootObjectPtr;
             }
         }
     };
 
     analytics_.ReportMarkingStart(panda::time::GetCurrentTimeInNanos());
     {
-        GCScope<TRACE_TIMING> marking_collection_set_roots_trace("Marking roots collection-set", this);
+        GCScope<TRACE_TIMING> markingCollectionSetRootsTrace("Marking roots collection-set", this);
 
-        this->VisitRoots(gc_mark_collection_set, VisitGCRootFlags::ACCESS_ROOT_NONE);
+        this->VisitRoots(gcMarkCollectionSet, VisitGCRootFlags::ACCESS_ROOT_NONE);
     }
     {
-        GCScope<TRACE_TIMING> mark_stack_timing("MarkStack", this);
-        this->MarkStackMixed(&objects_stack);
-        ASSERT(objects_stack.Empty());
-        if (use_gc_workers) {
+        GCScope<TRACE_TIMING> markStackTiming("MarkStack", this);
+        this->MarkStackMixed(&objectsStack);
+        ASSERT(objectsStack.Empty());
+        if (useGcWorkers) {
             this->GetWorkersTaskPool()->WaitUntilTasksEnd();
         }
     }
 
-    auto ref_clear_pred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
-    this->GetPandaVm()->HandleReferences(task, ref_clear_pred);
+    auto refClearPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+    this->GetPandaVm()->HandleReferences(task, refClearPred);
 
     analytics_.ReportMarkingEnd(panda::time::GetCurrentTimeInNanos());
 
     // HandleReferences could write a new barriers - so we need to handle them before moving
     ProcessDirtyCards();
-    return dirty_cards_range;
+    return dirtyCardsRange;
 }
 
 template <class LanguageConfig>
-HeapVerifierIntoGC<LanguageConfig> G1GC<LanguageConfig>::CollectVerificationInfo(const CollectionSet &collection_set)
+HeapVerifierIntoGC<LanguageConfig> G1GC<LanguageConfig>::CollectVerificationInfo(const CollectionSet &collectionSet)
 {
-    HeapVerifierIntoGC<LanguageConfig> collect_verifier(this->GetPandaVm()->GetHeapManager());
+    HeapVerifierIntoGC<LanguageConfig> collectVerifier(this->GetPandaVm()->GetHeapManager());
     if (this->GetSettings()->IntoGCHeapVerification()) {
-        ScopedTiming collect_verification_timing(__FUNCTION__, *this->GetTiming());
-        PandaVector<MemRange> mem_ranges;
-        mem_ranges.reserve(collection_set.size());
-        std::for_each(collection_set.begin(), collection_set.end(),
-                      [&mem_ranges](const Region *region) { mem_ranges.emplace_back(region->Begin(), region->End()); });
-        collect_verifier.CollectVerificationInfo(std::move(mem_ranges));
+        ScopedTiming collectVerificationTiming(__FUNCTION__, *this->GetTiming());
+        PandaVector<MemRange> memRanges;
+        memRanges.reserve(collectionSet.size());
+        std::for_each(collectionSet.begin(), collectionSet.end(),
+                      [&memRanges](const Region *region) { memRanges.emplace_back(region->Begin(), region->End()); });
+        collectVerifier.CollectVerificationInfo(std::move(memRanges));
     }
-    return collect_verifier;
+    return collectVerifier;
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfig> &&collect_verifier,
-                                                const CollectionSet &collection_set)
+void G1GC<LanguageConfig>::VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfig> &&collectVerifier,
+                                                const CollectionSet &collectionSet)
 {
     if (this->GetSettings()->IntoGCHeapVerification()) {
-        ScopedTiming verification_timing(__FUNCTION__, *this->GetTiming());
-        PandaVector<MemRange> alive_mem_range;
-        std::for_each(collection_set.begin(), collection_set.end(), [&alive_mem_range](const Region *region) {
+        ScopedTiming verificationTiming(__FUNCTION__, *this->GetTiming());
+        PandaVector<MemRange> aliveMemRange;
+        std::for_each(collectionSet.begin(), collectionSet.end(), [&aliveMemRange](const Region *region) {
             if (region->HasFlag(RegionFlag::IS_PROMOTED)) {
-                alive_mem_range.emplace_back(region->Begin(), region->End());
+                aliveMemRange.emplace_back(region->Begin(), region->End());
             }
         });
-        size_t fails_count = collect_verifier.VerifyAll(std::move(alive_mem_range));
-        if (this->GetSettings()->FailOnHeapVerification() && fails_count > 0U) {
-            PandaStringStream log_stream;
-            log_stream << "Collection set size: " << collection_set.size() << "\n";
-            for (const auto r : collection_set) {
-                log_stream << *r << (r->HasFlag(RegionFlag::IS_PROMOTED) ? " was promoted\n" : "\n");
+        size_t failsCount = collectVerifier.VerifyAll(std::move(aliveMemRange));
+        if (this->GetSettings()->FailOnHeapVerification() && failsCount > 0U) {
+            PandaStringStream logStream;
+            logStream << "Collection set size: " << collectionSet.size() << "\n";
+            for (const auto r : collectionSet) {
+                logStream << *r << (r->HasFlag(RegionFlag::IS_PROMOTED) ? " was promoted\n" : "\n");
             }
-            LOG(FATAL, GC) << "Heap was corrupted during CollectAndMove GC phase, HeapVerifier found " << fails_count
+            LOG(FATAL, GC) << "Heap was corrupted during CollectAndMove GC phase, HeapVerifier found " << failsCount
                            << " corruptions\n"
-                           << log_stream.str();
+                           << logStream.str();
         }
     }
 }
@@ -1206,91 +1204,91 @@ void G1GC<LanguageConfig>::VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfi
 template <class LanguageConfig>
 template <bool FULL_GC>
 // NOLINTNEXTLINE(readability-function-size)
-bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collection_set)
+bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collectionSet)
 {
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE);
     LOG_DEBUG_GC << "== G1GC CollectAndMove start ==";
-    auto internal_allocator = this->GetInternalAllocator();
-    bool use_gc_workers = this->GetSettings()->ParallelCompactingEnabled();
+    auto internalAllocator = this->GetInternalAllocator();
+    bool useGcWorkers = this->GetSettings()->ParallelCompactingEnabled();
 
-    PandaVector<PandaVector<ObjectHeader *> *> moved_objects_vector;
-    HeapVerifierIntoGC<LanguageConfig> collect_verifier = this->CollectVerificationInfo(collection_set);
+    PandaVector<PandaVector<ObjectHeader *> *> movedObjectsVector;
+    HeapVerifierIntoGC<LanguageConfig> collectVerifier = this->CollectVerificationInfo(collectionSet);
     {
-        GCScope<TRACE_TIMING> compact_regions("CompactRegions", this);
+        GCScope<TRACE_TIMING> compactRegions("CompactRegions", this);
         analytics_.ReportEvacuationStart(panda::time::GetCurrentTimeInNanos());
         if constexpr (FULL_GC) {
-            if (!use_gc_workers) {
-                auto vector = internal_allocator->template New<PandaVector<ObjectHeader *>>();
-                moved_objects_vector.push_back(vector);
+            if (!useGcWorkers) {
+                auto vector = internalAllocator->template New<PandaVector<ObjectHeader *>>();
+                movedObjectsVector.push_back(vector);
             }
         }
-        for (auto r : collection_set.Young()) {
-            this->DoRegionCompacting<RegionFlag::IS_EDEN, FULL_GC>(r, use_gc_workers, &moved_objects_vector);
+        for (auto r : collectionSet.Young()) {
+            this->DoRegionCompacting<RegionFlag::IS_EDEN, FULL_GC>(r, useGcWorkers, &movedObjectsVector);
         }
-        for (auto r : collection_set.Tenured()) {
-            this->DoRegionCompacting<RegionFlag::IS_OLD, FULL_GC>(r, use_gc_workers, &moved_objects_vector);
+        for (auto r : collectionSet.Tenured()) {
+            this->DoRegionCompacting<RegionFlag::IS_OLD, FULL_GC>(r, useGcWorkers, &movedObjectsVector);
         }
 
-        if (use_gc_workers) {
+        if (useGcWorkers) {
             this->GetWorkersTaskPool()->WaitUntilTasksEnd();
         }
 
         analytics_.ReportEvacuationEnd(panda::time::GetCurrentTimeInNanos());
     }
 
-    MovedObjectsContainer<FULL_GC> *moved_objects_container = nullptr;
+    MovedObjectsContainer<FULL_GC> *movedObjectsContainer = nullptr;
     if constexpr (FULL_GC) {
-        moved_objects_container = &moved_objects_vector;
+        movedObjectsContainer = &movedObjectsVector;
     } else {
-        moved_objects_container = &mixed_marked_objects_;
+        movedObjectsContainer = &mixedMarkedObjects_;
     }
 
     {
-        os::memory::LockHolder lock(queue_lock_);
+        os::memory::LockHolder lock(queueLock_);
         analytics_.ReportUpdateRefsStart(panda::time::GetCurrentTimeInNanos());
         if (this->GetSettings()->ParallelRefUpdatingEnabled()) {
-            UpdateRefsToMovedObjects<FULL_GC, true>(moved_objects_container);
+            UpdateRefsToMovedObjects<FULL_GC, true>(movedObjectsContainer);
         } else {
-            UpdateRefsToMovedObjects<FULL_GC, false>(moved_objects_container);
+            UpdateRefsToMovedObjects<FULL_GC, false>(movedObjectsContainer);
         }
         analytics_.ReportUpdateRefsEnd(panda::time::GetCurrentTimeInNanos());
         ActualizeRemSets();
     }
 
-    VerifyCollectAndMove(std::move(collect_verifier), collection_set);
+    VerifyCollectAndMove(std::move(collectVerifier), collectionSet);
     SweepRegularVmRefs();
 
-    auto object_allocator = this->GetG1ObjectAllocator();
-    if (!collection_set.Young().empty()) {
-        object_allocator->ResetYoungAllocator();
+    auto objectAllocator = this->GetG1ObjectAllocator();
+    if (!collectionSet.Young().empty()) {
+        objectAllocator->ResetYoungAllocator();
     }
     {
-        GCScope<TRACE_TIMING> reset_regions("ResetRegions", this);
+        GCScope<TRACE_TIMING> resetRegions("ResetRegions", this);
         if (!this->IsFullGC()) {
-            object_allocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
-                                                    OSPagesPolicy::IMMEDIATE_RETURN, false>(collection_set.Tenured());
+            objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
+                                                   OSPagesPolicy::IMMEDIATE_RETURN, false>(collectionSet.Tenured());
         } else {
-            object_allocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::Release,
-                                                    OSPagesPolicy::NO_RETURN, false>(collection_set.Tenured());
+            objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::Release,
+                                                   OSPagesPolicy::NO_RETURN, false>(collectionSet.Tenured());
         }
     }
     {
         // Don't forget to delete all temporary elements
-        GCScope<TRACE_TIMING> clear_moved_objects("ClearMovedObjects", this);
+        GCScope<TRACE_TIMING> clearMovedObjects("ClearMovedObjects", this);
         if constexpr (FULL_GC) {
-            if (use_gc_workers) {
-                for (auto r : moved_objects_vector) {
-                    internal_allocator->Delete(r);
+            if (useGcWorkers) {
+                for (auto r : movedObjectsVector) {
+                    internalAllocator->Delete(r);
                 }
             } else {
-                ASSERT(moved_objects_vector.size() == 1);
-                internal_allocator->Delete(moved_objects_vector.back());
+                ASSERT(movedObjectsVector.size() == 1);
+                internalAllocator->Delete(movedObjectsVector.back());
             }
         } else {
-            for (auto r : mixed_marked_objects_) {
-                internal_allocator->Delete(r);
+            for (auto r : mixedMarkedObjects_) {
+                internalAllocator->Delete(r);
             }
-            mixed_marked_objects_.clear();
+            mixedMarkedObjects_.clear();
         }
     }
 
@@ -1301,57 +1299,57 @@ bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collection_set)
 template <class LanguageConfig>
 template <bool FULL_GC, bool NEED_LOCK>
 std::conditional_t<FULL_GC, UpdateRemsetRefUpdater<LanguageConfig, NEED_LOCK>, EnqueueRemsetRefUpdater<LanguageConfig>>
-G1GC<LanguageConfig>::CreateRefUpdater([[maybe_unused]] GCG1BarrierSet::ThreadLocalCardQueues *updated_ref_queue) const
+G1GC<LanguageConfig>::CreateRefUpdater([[maybe_unused]] GCG1BarrierSet::ThreadLocalCardQueues *updatedRefQueue) const
 {
     if constexpr (FULL_GC) {
-        return UpdateRemsetRefUpdater<LanguageConfig, NEED_LOCK>(region_size_bits_);
+        return UpdateRemsetRefUpdater<LanguageConfig, NEED_LOCK>(regionSizeBits_);
     } else {
-        return EnqueueRemsetRefUpdater<LanguageConfig>(this->GetCardTable(), updated_ref_queue, region_size_bits_);
+        return EnqueueRemsetRefUpdater<LanguageConfig>(this->GetCardTable(), updatedRefQueue, regionSizeBits_);
     }
 }
 
 template <class LanguageConfig>
 template <bool FULL_GC, bool USE_WORKERS>
-void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_GC> *moved_objects_container)
+void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_GC> *movedObjectsContainer)
 {
     GCScope<TRACE_TIMING> scope(__FUNCTION__, this);
     // Currently lock for RemSet too much influences for pause, so don't use workers on FULL-GC
     constexpr bool ENABLE_WORKERS = USE_WORKERS && !FULL_GC;
-    auto internal_allocator = this->GetInternalAllocator();
-    auto *updated_ref_queue = (ENABLE_WORKERS)
-                                  ? internal_allocator->template New<GCG1BarrierSet::ThreadLocalCardQueues>()
-                                  : updated_refs_queue_;
-    auto ref_updater = this->CreateRefUpdater<FULL_GC, /* NEED_LOCK */ ENABLE_WORKERS>(updated_ref_queue);
+    auto internalAllocator = this->GetInternalAllocator();
+    auto *updatedRefQueue =
+        (ENABLE_WORKERS) ? internalAllocator->template New<GCG1BarrierSet::ThreadLocalCardQueues>() : updatedRefsQueue_;
+    // NEED_LOCK is true <=> when ENABLE_WORKERS is true
+    auto refUpdater = this->CreateRefUpdater<FULL_GC, ENABLE_WORKERS>(updatedRefQueue);
     //  update reference from objects which were moved while garbage collection
     LOG_DEBUG_GC << "=== Update ex-cset -> ex-cset references. START. ===";
     {
         ScopedTiming t("UpdateMovedObjectsReferences", *this->GetTiming());
-        for (auto *moved_objects : *moved_objects_container) {
+        for (auto *movedObjects : *movedObjectsContainer) {
             if constexpr (ENABLE_WORKERS) {
-                auto range_begin = moved_objects->begin();
-                auto range_end = range_begin;
-                while (range_begin != moved_objects->end()) {
-                    if (std::distance(range_begin, moved_objects->end()) < GCUpdateRefsWorkersTask<false>::RANGE_SIZE) {
-                        range_end = moved_objects->end();
+                auto rangeBegin = movedObjects->begin();
+                auto rangeEnd = rangeBegin;
+                while (rangeBegin != movedObjects->end()) {
+                    if (std::distance(rangeBegin, movedObjects->end()) < GCUpdateRefsWorkersTask<false>::RANGE_SIZE) {
+                        rangeEnd = movedObjects->end();
                     } else {
-                        std::advance(range_end, GCUpdateRefsWorkersTask<false>::RANGE_SIZE);
+                        std::advance(rangeEnd, GCUpdateRefsWorkersTask<false>::RANGE_SIZE);
                     }
-                    auto *moved_objects_range =
-                        internal_allocator->template New<typename GCUpdateRefsWorkersTask<false>::MovedObjectsRange>(
-                            range_begin, range_end);
-                    range_begin = range_end;
-                    GCUpdateRefsWorkersTask<false> gc_worker_task(moved_objects_range);
-                    if (this->GetWorkersTaskPool()->AddTask(GCUpdateRefsWorkersTask<false>(gc_worker_task))) {
+                    auto *movedObjectsRange =
+                        internalAllocator->template New<typename GCUpdateRefsWorkersTask<false>::MovedObjectsRange>(
+                            rangeBegin, rangeEnd);
+                    rangeBegin = rangeEnd;
+                    GCUpdateRefsWorkersTask<false> gcWorkerTask(movedObjectsRange);
+                    if (this->GetWorkersTaskPool()->AddTask(GCUpdateRefsWorkersTask<false>(gcWorkerTask))) {
                         continue;
                     }
                     // Couldn't add new task, so do task processing immediately
-                    this->WorkerTaskProcessing(&gc_worker_task, nullptr);
+                    this->WorkerTaskProcessing(&gcWorkerTask, nullptr);
                 }
             } else {  // GC workers are not used
-                typename GCUpdateRefsWorkersTask<FULL_GC>::MovedObjectsRange moved_objects_range(moved_objects->begin(),
-                                                                                                 moved_objects->end());
-                DoUpdateReferencesToMovedObjectsRange<LanguageConfig, decltype(ref_updater), FULL_GC>(
-                    &moved_objects_range, ref_updater);
+                typename GCUpdateRefsWorkersTask<FULL_GC>::MovedObjectsRange movedObjectsRange(movedObjects->begin(),
+                                                                                               movedObjects->end());
+                DoUpdateReferencesToMovedObjectsRange<LanguageConfig, decltype(refUpdater), FULL_GC>(&movedObjectsRange,
+                                                                                                     refUpdater);
             }
         }
     }
@@ -1360,17 +1358,16 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
     // update references from objects which are not part of collection set
     LOG_DEBUG_GC << "=== Update non ex-cset -> ex-cset references. START. ===";
     if constexpr (FULL_GC) {
-        UpdateRefsFromRemSets(ref_updater);
+        UpdateRefsFromRemSets(refUpdater);
     } else {
-        VisitRemSets(ref_updater);
+        VisitRemSets(refUpdater);
     }
     LOG_DEBUG_GC << "=== Update non ex-cset -> ex-cset references. END. ===";
     if constexpr (ENABLE_WORKERS) {
         {
-            os::memory::LockHolder lock(gc_worker_queue_lock_);
-            updated_refs_queue_->insert(updated_refs_queue_->end(), updated_ref_queue->begin(),
-                                        updated_ref_queue->end());
-            this->GetInternalAllocator()->Delete(updated_ref_queue);
+            os::memory::LockHolder lock(gcWorkerQueueLock_);
+            updatedRefsQueue_->insert(updatedRefsQueue_->end(), updatedRefQueue->begin(), updatedRefQueue->end());
+            this->GetInternalAllocator()->Delete(updatedRefQueue);
         }
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
@@ -1378,21 +1375,21 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
 }
 
 template <class LanguageConfig>
-NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::OnPauseMark(GCTask &task, GCMarkingStackType *objects_stack,
-                                                                 bool use_gc_workers)
+NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::OnPauseMark(GCTask &task, GCMarkingStackType *objectsStack,
+                                                                 bool useGcWorkers)
 {
     GCScope<TRACE_TIMING> scope(__FUNCTION__, this);
     LOG_DEBUG_GC << "OnPause marking started";
-    auto *object_allocator = GetG1ObjectAllocator();
+    auto *objectAllocator = GetG1ObjectAllocator();
     this->MarkImpl(
-        &marker_, objects_stack, CardTableVisitFlag::VISIT_DISABLED,
+        &marker_, objectsStack, CardTableVisitFlag::VISIT_DISABLED,
         // process references on FULL-GC
         GC::EmptyReferenceProcessPredicate,
         // non-young mem-range checker
-        [object_allocator](MemRange &mem_range) { return !object_allocator->IsIntersectedWithYoung(mem_range); },
+        [objectAllocator](MemRange &memRange) { return !objectAllocator->IsIntersectedWithYoung(memRange); },
         // mark predicate
         CalcLiveBytesMarkPreprocess);
-    if (use_gc_workers) {
+    if (useGcWorkers) {
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
     /**
@@ -1401,39 +1398,39 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::OnPauseMark(GCTask &task, G
      * can traverse over non-reachable object (in CacheRefsFromRemsets) and visit DEAD object in
      * tenured space (was delete on young-collection or in Iterative-full-gc phase.
      */
-    auto ref_clear_pred = []([[maybe_unused]] const ObjectHeader *obj) { return true; };
-    this->GetPandaVm()->HandleReferences(task, ref_clear_pred);
+    auto refClearPred = []([[maybe_unused]] const ObjectHeader *obj) { return true; };
+    this->GetPandaVm()->HandleReferences(task, refClearPred);
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::FullMarking(panda::GCTask &task)
 {
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
-    auto *object_allocator = GetG1ObjectAllocator();
-    bool use_gc_workers = this->GetSettings()->ParallelMarkingEnabled();
+    auto *objectAllocator = GetG1ObjectAllocator();
+    bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
 
-    GCMarkingStackType full_collection_stack(
-        this, use_gc_workers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
-        use_gc_workers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0, GCWorkersTaskTypes::TASK_FULL_MARK,
-        this->GetSettings()->GCMarkingStackNewTasksFrequency());
+    GCMarkingStackType fullCollectionStack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
+                                           useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
+                                           GCWorkersTaskTypes::TASK_FULL_MARK,
+                                           this->GetSettings()->GCMarkingStackNewTasksFrequency());
 
-    InitialMark(full_collection_stack);
+    InitialMark(fullCollectionStack);
 
-    this->OnPauseMark(task, &full_collection_stack, use_gc_workers);
+    this->OnPauseMark(task, &fullCollectionStack, useGcWorkers);
     // We will sweep VM refs in tenured space during mixed collection, but only for non empty regions.
     // therefore, sweep it here only for NonMovable, Humongous objects, and empty movable regions:
     SweepNonRegularVmRefs();
-    auto all_regions = object_allocator->GetAllRegions();
-    for (auto *r : all_regions) {
+    auto allRegions = objectAllocator->GetAllRegions();
+    for (auto *r : allRegions) {
         if (r->GetLiveBitmap() != nullptr) {
             r->CloneMarkBitmapToLiveBitmap();
         }
     }
     // Force card updater here, after swapping bitmap, to skip dead objects
     ProcessDirtyCards();
-    auto garbage_regions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-    auto empty_tenured_regions = GetEmptyTenuredRegularRegionsFromQueue(std::move(garbage_regions));
-    CollectEmptyRegions<false, false>(task, &empty_tenured_regions);
+    auto garbageRegions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
+    auto emptyTenuredRegions = GetEmptyTenuredRegularRegionsFromQueue(std::move(garbageRegions));
+    CollectEmptyRegions<false, false>(task, &emptyTenuredRegions);
 }
 
 template <class LanguageConfig>
@@ -1441,66 +1438,66 @@ void G1GC<LanguageConfig>::ConcurrentMarking(panda::GCTask &task)
 {
     {
         PauseTimeGoalDelay();
-        auto scoped_tracker = g1_pause_tracker_.CreateScope();
-        GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
-        InitialMark(concurrent_marking_stack_);
+        auto scopedTracker = g1PauseTracker_.CreateScope();
+        GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::COMMON_PAUSE);
+        InitialMark(concurrentMarkingStack_);
     }
 
     LOG_DEBUG_GC << "Concurrent marking started";
-    ConcurrentMark(&concurrent_marking_stack_);
+    ConcurrentMark(&concurrentMarkingStack_);
     PauseTimeGoalDelay();
     // weak refs shouldn't be added to the queue on concurrent-mark
     ASSERT(this->GetReferenceProcessor()->GetReferenceQueueSize() == 0);
 
-    auto set_entrypoint = [](ManagedThread *thread) {
+    auto setEntrypoint = [](ManagedThread *thread) {
         ASSERT(thread->GetPreWrbEntrypoint() != nullptr);
         thread->SetPreWrbEntrypoint(nullptr);
         return true;
     };
-    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(set_entrypoint);
-    concurrent_marking_flag_ = false;
-    if (!interrupt_concurrent_flag_) {
+    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(setEntrypoint);
+    concurrentMarkingFlag_ = false;
+    if (!interruptConcurrentFlag_) {
         Remark(task);
         // Enable mixed GC
-        auto garbage_regions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-        if (HaveGarbageRegions(garbage_regions)) {
+        auto garbageRegions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
+        if (HaveGarbageRegions(garbageRegions)) {
             // Atomic with release order reason: to see changes made by GC thread (which do concurrent marking
             // and than set is_mixed_gc_required_) in mutator thread which waits for the end of concurrent
             // marking.
-            is_mixed_gc_required_.store(true, std::memory_order_release);
+            isMixedGcRequired_.store(true, std::memory_order_release);
         }
 
         {
             ScopedTiming t("Concurrent Sweep", *this->GetTiming());
-            ConcurrentScope concurrent_scope(this);
-            auto empty_tenured_regions = GetEmptyTenuredRegularRegionsFromQueue(std::move(garbage_regions));
+            ConcurrentScope concurrentScope(this);
+            auto emptyTenuredRegions = GetEmptyTenuredRegularRegionsFromQueue(std::move(garbageRegions));
             if (this->IsConcurrencyAllowed()) {
-                CollectEmptyRegions<true, true>(task, &empty_tenured_regions);
+                CollectEmptyRegions<true, true>(task, &emptyTenuredRegions);
             } else {
-                CollectEmptyRegions<false, false>(task, &empty_tenured_regions);
+                CollectEmptyRegions<false, false>(task, &emptyTenuredRegions);
             }
         }
     } else {
-        concurrent_marking_stack_.Clear();
+        concurrentMarkingStack_.Clear();
         ClearSatb();
     }
-    ASSERT(concurrent_marking_stack_.Empty());
+    ASSERT(concurrentMarkingStack_.Empty());
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PauseTimeGoalDelay()
 {
-    if (this->GetSettings()->G1EnablePauseTimeGoal() && !interrupt_concurrent_flag_) {
+    if (this->GetSettings()->G1EnablePauseTimeGoal() && !interruptConcurrentFlag_) {
         auto start = panda::time::GetCurrentTimeInMicros();
         // Instead of max pause it should be estimated to calculate delay
-        auto remained = g1_pause_tracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros());
+        auto remained = g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros());
         if (remained > 0) {
-            ConcurrentScope concurrent_scope(this);
-            os::memory::LockHolder lh(concurrent_mark_mutex_);
-            while (!interrupt_concurrent_flag_ && remained > 0) {
+            ConcurrentScope concurrentScope(this);
+            os::memory::LockHolder lh(concurrentMarkMutex_);
+            while (!interruptConcurrentFlag_ && remained > 0) {
                 auto ms = remained / panda::os::time::MILLIS_TO_MICRO;
                 auto ns = (remained - ms * panda::os::time::MILLIS_TO_MICRO) * panda::os::time::MICRO_TO_NANO;
-                concurrent_mark_cond_var_.TimedWait(&concurrent_mark_mutex_, ms, ns);
+                concurrentMarkCondVar_.TimedWait(&concurrentMarkMutex_, ms, ns);
                 remained -= panda::time::GetCurrentTimeInMicros() - start;
             }
         }
@@ -1508,14 +1505,14 @@ void G1GC<LanguageConfig>::PauseTimeGoalDelay()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::InitialMark(GCMarkingStackType &marking_stack)
+void G1GC<LanguageConfig>::InitialMark(GCMarkingStackType &markingStack)
 {
     {
         // First we need to unmark all heap
-        GCScope<TRACE_TIMING> un_mark_scope("UnMark", this);
+        GCScope<TRACE_TIMING> unMarkScope("UnMark", this);
         LOG_DEBUG_GC << "Start unmark all heap before mark";
-        auto all_region = GetG1ObjectAllocator()->GetAllRegions();
-        for (Region *r : all_region) {
+        auto allRegion = GetG1ObjectAllocator()->GetAllRegions();
+        for (Region *r : allRegion) {
             auto *bitmap = r->GetMarkBitmap();
             // Calculate live bytes during mark-phase
             r->SetLiveBytes(0U);
@@ -1530,28 +1527,28 @@ void G1GC<LanguageConfig>::InitialMark(GCMarkingStackType &marking_stack)
     ASSERT(this->GetReferenceProcessor()->GetReferenceQueueSize() ==
            0);  // all references should be processed on mixed-gc
     {
-        GCScope<TRACE_TIMING_PHASE> initial_mark_scope("InitialMark", this, GCPhase::GC_PHASE_INITIAL_MARK);
+        GCScope<TRACE_TIMING_PHASE> initialMarkScope("InitialMark", this, GCPhase::GC_PHASE_INITIAL_MARK);
         // Collect non-heap roots.
         // Mark the whole heap by using only these roots.
         // The interregion roots will be processed at pause
 
         // InitialMark. STW
-        GCRootVisitor gc_mark_roots = [this, &marking_stack](const GCRoot &gc_root) {
-            ValidateObject(gc_root.GetType(), gc_root.GetObjectHeader());
-            if (marker_.MarkIfNotMarked(gc_root.GetObjectHeader())) {
-                marking_stack.PushToStack(gc_root.GetType(), gc_root.GetObjectHeader());
+        GCRootVisitor gcMarkRoots = [this, &markingStack](const GCRoot &gcRoot) {
+            ValidateObject(gcRoot.GetType(), gcRoot.GetObjectHeader());
+            if (marker_.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
+                markingStack.PushToStack(gcRoot.GetType(), gcRoot.GetObjectHeader());
             }
         };
-        this->VisitRoots(gc_mark_roots, VisitGCRootFlags::ACCESS_ROOT_ALL);
+        this->VisitRoots(gcMarkRoots, VisitGCRootFlags::ACCESS_ROOT_ALL);
     }
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::ConcurrentMark(GCMarkingStackType *objects_stack)
+void G1GC<LanguageConfig>::ConcurrentMark(GCMarkingStackType *objectsStack)
 {
-    ConcurrentScope concurrent_scope(this);
+    ConcurrentScope concurrentScope(this);
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
-    this->ConcurentMarkImpl(objects_stack);
+    this->ConcurentMarkImpl(objectsStack);
 }
 
 template <class LanguageConfig>
@@ -1561,14 +1558,14 @@ void G1GC<LanguageConfig>::Remark(panda::GCTask const &task)
      * Make remark on pause to have all marked objects in tenured space, it gives possibility to check objects in
      * remsets. If they are not marked - we don't process this object, because it's dead already
      */
-    auto scoped_tracker = g1_pause_tracker_.CreateScope();
-    GCScope<TIMING_PHASE> gc_scope(__FUNCTION__, this, GCPhase::GC_PHASE_REMARK);
-    GCScopedPauseStats scoped_pause_stats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::REMARK_PAUSE);
+    auto scopedTracker = g1PauseTracker_.CreateScope();
+    GCScope<TIMING_PHASE> gcScope(__FUNCTION__, this, GCPhase::GC_PHASE_REMARK);
+    GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::REMARK_PAUSE);
     {
         ScopedTiming t("Stack Remarking", *this->GetTiming());
-        bool use_gc_workers = this->GetSettings()->ParallelMarkingEnabled();
-        GCMarkingStackType stack(this, use_gc_workers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
-                                 use_gc_workers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
+        bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
+        GCMarkingStackType stack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
+                                 useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
                                  GCWorkersTaskTypes::TASK_REMARK,
                                  this->GetSettings()->GCMarkingStackNewTasksFrequency());
 
@@ -1577,25 +1574,25 @@ void G1GC<LanguageConfig>::Remark(panda::GCTask const &task)
         DrainSatb(&stack);
         this->MarkStack(&marker_, &stack, CalcLiveBytesMarkPreprocess);
 
-        if (use_gc_workers) {
+        if (useGcWorkers) {
             this->GetWorkersTaskPool()->WaitUntilTasksEnd();
         }
 
         // ConcurrentMark doesn't visit young objects - so we can't clear references which are in young-space because we
         // don't know which objects are marked. We will process them on young/mixed GC separately later, here we process
         // only refs in tenured-space
-        auto ref_clear_pred = []([[maybe_unused]] const ObjectHeader *obj) {
+        auto refClearPred = []([[maybe_unused]] const ObjectHeader *obj) {
             return !ObjectToRegion(obj)->HasFlag(RegionFlag::IS_EDEN);
         };
-        this->GetPandaVm()->HandleReferences(task, ref_clear_pred);
+        this->GetPandaVm()->HandleReferences(task, refClearPred);
     }
 
     // We will sweep VM refs in tenured space during mixed collection,
     // therefore, sweep it here only for NonMovable and Humongous objects:
     SweepNonRegularVmRefs();
-    auto g1_allocator = this->GetG1ObjectAllocator();
-    auto all_regions = g1_allocator->GetAllRegions();
-    for (const auto &region : all_regions) {
+    auto g1Allocator = this->GetG1ObjectAllocator();
+    auto allRegions = g1Allocator->GetAllRegions();
+    for (const auto &region : allRegions) {
         if (region->HasFlag(IS_OLD) || region->HasFlag(IS_NONMOVABLE)) {
             region->SwapMarkBitmap();
         }
@@ -1607,16 +1604,16 @@ void G1GC<LanguageConfig>::Remark(panda::GCTask const &task)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::SweepNonRegularVmRefs()
 {
-    ScopedTiming scoped_timing(__FUNCTION__, *this->GetTiming());
+    ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
 
     this->GetPandaVm()->SweepVmRefs([this](ObjectHeader *object) {
         Region *region = ObjectToRegion(object);
         if (region->HasFlag(RegionFlag::IS_EDEN)) {
             return ObjectStatus::ALIVE_OBJECT;
         }
-        bool non_regular_object =
+        bool nonRegularObject =
             region->HasFlag(RegionFlag::IS_NONMOVABLE) || region->HasFlag(RegionFlag::IS_LARGE_OBJECT);
-        if (!non_regular_object) {
+        if (!nonRegularObject) {
             ASSERT(region->GetLiveBytes() != 0U || !this->IsMarked(object));
             return region->GetLiveBytes() == 0U ? ObjectStatus::DEAD_OBJECT : ObjectStatus::ALIVE_OBJECT;
         }
@@ -1638,110 +1635,108 @@ void G1GC<LanguageConfig>::SweepRegularVmRefs()
 }
 
 template <class LanguageConfig>
-CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(panda::GCTask const &task, bool is_mixed)
+CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(panda::GCTask const &task, bool isMixed)
 {
     ASSERT(!this->IsFullGC());
-    ScopedTiming scoped_timing(__FUNCTION__, *this->GetTiming());
-    auto g1_allocator = this->GetG1ObjectAllocator();
-    LOG_DEBUG_GC << "Start GetCollectibleRegions is_mixed: " << is_mixed << " reason: " << task.reason;
-    CollectionSet collection_set(g1_allocator->GetYoungRegions());
-    if (is_mixed) {
+    ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
+    auto g1Allocator = this->GetG1ObjectAllocator();
+    LOG_DEBUG_GC << "Start GetCollectibleRegions is_mixed: " << isMixed << " reason: " << task.reason;
+    CollectionSet collectionSet(g1Allocator->GetYoungRegions());
+    if (isMixed) {
         if (!this->GetSettings()->G1EnablePauseTimeGoal()) {
-            AddOldRegionsMaxAllowed(collection_set);
+            AddOldRegionsMaxAllowed(collectionSet);
         } else {
-            AddOldRegionsAccordingPauseTimeGoal(collection_set);
+            AddOldRegionsAccordingPauseTimeGoal(collectionSet);
         }
     }
-    LOG_DEBUG_GC << "collectible_regions size: " << collection_set.size() << " young " << collection_set.Young().size()
-                 << " old " << std::distance(collection_set.Young().end(), collection_set.end())
-                 << " reason: " << task.reason << " is_mixed: " << is_mixed;
-    return collection_set;
+    LOG_DEBUG_GC << "collectible_regions size: " << collectionSet.size() << " young " << collectionSet.Young().size()
+                 << " old " << std::distance(collectionSet.Young().end(), collectionSet.end())
+                 << " reason: " << task.reason << " is_mixed: " << isMixed;
+    return collectionSet;
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::AddOldRegionsMaxAllowed(CollectionSet &collection_set)
+void G1GC<LanguageConfig>::AddOldRegionsMaxAllowed(CollectionSet &collectionSet)
 {
     auto regions = this->GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-    for (size_t i = 0; i < number_of_mixed_tenured_regions_ && !regions.empty(); i++) {
-        auto *garbage_region = regions.top().second;
+    for (size_t i = 0; i < numberOfMixedTenuredRegions_ && !regions.empty(); i++) {
+        auto *garbageRegion = regions.top().second;
         regions.pop();
-        ASSERT(!garbage_region->HasFlag(IS_EDEN));
-        ASSERT(!garbage_region->HasPinnedObjects());
-        ASSERT(!garbage_region->HasFlag(IS_RESERVED));
-        ASSERT(garbage_region->GetAllocatedBytes() != 0U);
-        double garbage_rate =
-            static_cast<double>(garbage_region->GetGarbageBytes()) / garbage_region->GetAllocatedBytes();
-        if (garbage_rate >= region_garbage_rate_threshold_) {
-            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbage_region << " region = " << std::dec
-                         << garbage_rate << " %, add to collection set";
-            collection_set.AddRegion(garbage_region);
+        ASSERT(!garbageRegion->HasFlag(IS_EDEN));
+        ASSERT(!garbageRegion->HasPinnedObjects());
+        ASSERT(!garbageRegion->HasFlag(IS_RESERVED));
+        ASSERT(garbageRegion->GetAllocatedBytes() != 0U);
+        double garbageRate = static_cast<double>(garbageRegion->GetGarbageBytes()) / garbageRegion->GetAllocatedBytes();
+        if (garbageRate >= regionGarbageRateThreshold_) {
+            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec
+                         << garbageRate << " %, add to collection set";
+            collectionSet.AddRegion(garbageRegion);
         } else {
-            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbage_region << " region = " << std::dec
-                         << garbage_rate << " %, don't add to collection set";
+            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec
+                         << garbageRate << " %, don't add to collection set";
             break;
         }
     }
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collection_set)
+void G1GC<LanguageConfig>::AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet)
 {
-    auto gc_pause_time_budget =
+    auto gcPauseTimeBudget =
         static_cast<int64_t>(this->GetSettings()->GetG1MaxGcPauseInMillis() * panda::os::time::MILLIS_TO_MICRO);
     auto regions = this->GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
     // add at least one old region to guarantee a progress in mixed collection
-    auto *top_region = regions.top().second;
-    collection_set.AddRegion(top_region);
-    auto expected_top_region_collection_time = analytics_.PredictOldCollectionTimeInMicros(top_region);
-    if (gc_pause_time_budget < expected_top_region_collection_time) {
+    auto *topRegion = regions.top().second;
+    collectionSet.AddRegion(topRegion);
+    auto expectedTopRegionCollectionTime = analytics_.PredictOldCollectionTimeInMicros(topRegion);
+    if (gcPauseTimeBudget < expectedTopRegionCollectionTime) {
         LOG_DEBUG_GC << "Not enough budget to add more than one old region";
         return;
     }
-    gc_pause_time_budget -= expected_top_region_collection_time;
-    auto prediction_error = analytics_.EstimatePredictionErrorInMicros();
-    if (gc_pause_time_budget < prediction_error) {
+    gcPauseTimeBudget -= expectedTopRegionCollectionTime;
+    auto predictionError = analytics_.EstimatePredictionErrorInMicros();
+    if (gcPauseTimeBudget < predictionError) {
         LOG_DEBUG_GC << "Not enough budget to add old regions";
         return;
     }
-    gc_pause_time_budget -= prediction_error;
-    auto expected_young_collection_time = analytics_.PredictYoungCollectionTimeInMicros(collection_set.Young().size());
-    if (gc_pause_time_budget < expected_young_collection_time) {
+    gcPauseTimeBudget -= predictionError;
+    auto expectedYoungCollectionTime = analytics_.PredictYoungCollectionTimeInMicros(collectionSet.Young().size());
+    if (gcPauseTimeBudget < expectedYoungCollectionTime) {
         LOG_DEBUG_GC << "Not enough budget to add old regions";
         return;
     }
-    gc_pause_time_budget -= expected_young_collection_time;
+    gcPauseTimeBudget -= expectedYoungCollectionTime;
 
     regions.pop();
     while (!regions.empty()) {
-        auto &score_and_region = regions.top();
-        auto *garbage_region = score_and_region.second;
-        ASSERT(!garbage_region->HasFlag(IS_EDEN));
-        ASSERT(!garbage_region->HasPinnedObjects());
-        ASSERT(!garbage_region->HasFlag(IS_RESERVED));
-        ASSERT(garbage_region->GetAllocatedBytes() != 0U);
+        auto &scoreAndRegion = regions.top();
+        auto *garbageRegion = scoreAndRegion.second;
+        ASSERT(!garbageRegion->HasFlag(IS_EDEN));
+        ASSERT(!garbageRegion->HasPinnedObjects());
+        ASSERT(!garbageRegion->HasFlag(IS_RESERVED));
+        ASSERT(garbageRegion->GetAllocatedBytes() != 0U);
 
         regions.pop();
 
-        double garbage_rate =
-            static_cast<double>(garbage_region->GetGarbageBytes()) / garbage_region->GetAllocatedBytes();
-        if (garbage_rate < region_garbage_rate_threshold_) {
-            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbage_region << " region = " << std::dec
-                         << garbage_rate << " %, don't add to collection set";
+        double garbageRate = static_cast<double>(garbageRegion->GetGarbageBytes()) / garbageRegion->GetAllocatedBytes();
+        if (garbageRate < regionGarbageRateThreshold_) {
+            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec
+                         << garbageRate << " %, don't add to collection set";
             break;
         }
 
-        auto expected_region_collection_time = analytics_.PredictOldCollectionTimeInMicros(garbage_region);
+        auto expectedRegionCollectionTime = analytics_.PredictOldCollectionTimeInMicros(garbageRegion);
 
-        if (gc_pause_time_budget < expected_region_collection_time) {
+        if (gcPauseTimeBudget < expectedRegionCollectionTime) {
             LOG_DEBUG_GC << "Not enough budget to add old regions anymore";
             break;
         }
 
-        gc_pause_time_budget -= expected_region_collection_time;
+        gcPauseTimeBudget -= expectedRegionCollectionTime;
 
-        LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbage_region << " region = " << std::dec
-                     << garbage_rate << " %, add to collection set";
-        collection_set.AddRegion(garbage_region);
+        LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec << garbageRate
+                     << " %, add to collection set";
+        collectionSet.AddRegion(garbageRegion);
     }
 }
 
@@ -1750,15 +1745,15 @@ CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet()
 {
     ASSERT(this->IsFullGC());
     // FillRemSet should be always finished before GetCollectibleRegions
-    ASSERT(update_remset_worker_->GetQueueSize() == 0);
-    auto g1_allocator = this->GetG1ObjectAllocator();
-    g1_allocator->ClearCurrentTenuredRegion();
-    CollectionSet collection_set(g1_allocator->GetYoungRegions());
-    auto movable_garbage_regions = g1_allocator->template GetTopGarbageRegions<true>();
+    ASSERT(updateRemsetWorker_->GetQueueSize() == 0);
+    auto g1Allocator = this->GetG1ObjectAllocator();
+    g1Allocator->ClearCurrentTenuredRegion();
+    CollectionSet collectionSet(g1Allocator->GetYoungRegions());
+    auto movableGarbageRegions = g1Allocator->template GetTopGarbageRegions<true>();
     LOG_DEBUG_GC << "Regions for FullGC:";
-    while (!movable_garbage_regions.empty()) {
-        auto *region = movable_garbage_regions.top().second;
-        movable_garbage_regions.pop();
+    while (!movableGarbageRegions.empty()) {
+        auto *region = movableGarbageRegions.top().second;
+        movableGarbageRegions.pop();
         if (region->HasFlag(IS_EDEN) || region->HasPinnedObjects()) {
             LOG_DEBUG_GC << (region->HasFlags(IS_EDEN) ? "Young regions" : "Region with pinned objects") << " ("
                          << *region << ") is not added to collection set";
@@ -1767,15 +1762,15 @@ CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet()
         LOG_DEBUG_GC << *region;
         ASSERT(!region->HasFlag(IS_NONMOVABLE) && !region->HasFlag(IS_LARGE_OBJECT));
         ASSERT(region->HasFlag(IS_OLD));
-        collection_set.AddRegion(region);
+        collectionSet.AddRegion(region);
     }
-    return collection_set;
+    return collectionSet;
 }
 
 template <class LanguageConfig>
-bool G1GC<LanguageConfig>::HaveEnoughSpaceToMove(const CollectionSet &collectible_regions)
+bool G1GC<LanguageConfig>::HaveEnoughSpaceToMove(const CollectionSet &collectibleRegions)
 {
-    return HaveEnoughRegionsToMove(collectible_regions.Movable().size());
+    return HaveEnoughRegionsToMove(collectibleRegions.Movable().size());
 }
 
 template <class LanguageConfig>
@@ -1785,36 +1780,36 @@ bool G1GC<LanguageConfig>::HaveEnoughRegionsToMove(size_t num)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keep_buffers)
+void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers)
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     // The method must be called while the lock which guards thread/coroutine list is hold
     LOG(DEBUG, GC) << "Call OnThreadTerminate";
-    PandaVector<ObjectHeader *> *pre_buff = nullptr;
-    if (keep_buffers == mem::BuffersKeepingFlag::KEEP) {
-        pre_buff = allocator->New<PandaVector<ObjectHeader *>>(*thread->GetPreBuff());
+    PandaVector<ObjectHeader *> *preBuff = nullptr;
+    if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
+        preBuff = allocator->New<PandaVector<ObjectHeader *>>(*thread->GetPreBuff());
         thread->GetPreBuff()->clear();
     } else {  // keep_buffers == mem::BuffersKeepingFlag::DELETE
-        pre_buff = thread->MovePreBuff();
+        preBuff = thread->MovePreBuff();
     }
-    ASSERT(pre_buff != nullptr);
+    ASSERT(preBuff != nullptr);
     {
-        os::memory::LockHolder lock(satb_and_newobj_buf_lock_);
-        satb_buff_list_.push_back(pre_buff);
+        os::memory::LockHolder lock(satbAndNewobjBufLock_);
+        satbBuffList_.push_back(preBuff);
     }
     {
-        auto *local_buffer = thread->GetG1PostBarrierBuffer();
-        ASSERT(local_buffer != nullptr);
-        if (!local_buffer->IsEmpty()) {
-            auto *temp_buffer = allocator->New<PandaVector<mem::CardTable::CardPtr>>();
-            while (!local_buffer->IsEmpty()) {
-                temp_buffer->push_back(local_buffer->Pop());
+        auto *localBuffer = thread->GetG1PostBarrierBuffer();
+        ASSERT(localBuffer != nullptr);
+        if (!localBuffer->IsEmpty()) {
+            auto *tempBuffer = allocator->New<PandaVector<mem::CardTable::CardPtr>>();
+            while (!localBuffer->IsEmpty()) {
+                tempBuffer->push_back(localBuffer->Pop());
             }
-            update_remset_worker_->AddPostBarrierBuffer(temp_buffer);
+            updateRemsetWorker_->AddPostBarrierBuffer(tempBuffer);
         }
-        if (keep_buffers == mem::BuffersKeepingFlag::DELETE) {
+        if (keepBuffers == mem::BuffersKeepingFlag::DELETE) {
             thread->ResetG1PostBarrierBuffer();
-            allocator->Delete(local_buffer);
+            allocator->Delete(localBuffer);
         }
     }
 }
@@ -1825,9 +1820,9 @@ void G1GC<LanguageConfig>::PreZygoteFork()
     GC::PreZygoteFork();
     this->DestroyWorkersTaskPool();
     this->DisableWorkerThreads();
-    update_remset_worker_->DestroyWorker();
+    updateRemsetWorker_->DestroyWorker();
     // don't use thread while we are in zygote
-    update_remset_worker_->SetUpdateConcurrent(false);
+    updateRemsetWorker_->SetUpdateConcurrent(false);
 }
 
 template <class LanguageConfig>
@@ -1837,117 +1832,117 @@ void G1GC<LanguageConfig>::PostZygoteFork()
     this->CreateWorkersTaskPool();
     GC::PostZygoteFork();
     // use concurrent-option after zygote
-    update_remset_worker_->SetUpdateConcurrent(this->GetSettings()->G1EnableConcurrentUpdateRemset());
-    update_remset_worker_->CreateWorker();
+    updateRemsetWorker_->SetUpdateConcurrent(this->GetSettings()->G1EnableConcurrentUpdateRemset());
+    updateRemsetWorker_->CreateWorker();
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveStack *object_stack)
+void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveStack *objectStack)
 {
-    ScopedTiming scoped_timing(__FUNCTION__, *this->GetTiming());
+    ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
     // Process satb buffers of the active threads
-    auto callback = [this, object_stack](ManagedThread *thread) {
+    auto callback = [this, objectStack](ManagedThread *thread) {
         // Acquire lock here to avoid data races with the threads
         // which are terminating now.
         // Data race is happens in thread.pre_buf_. The terminating thread may
         // release own pre_buf_ while GC thread iterates over threads and gets theirs
         // pre_buf_.
-        os::memory::LockHolder lock(satb_and_newobj_buf_lock_);
-        auto pre_buff = thread->GetPreBuff();
-        if (pre_buff == nullptr) {
+        os::memory::LockHolder lock(satbAndNewobjBufLock_);
+        auto preBuff = thread->GetPreBuff();
+        if (preBuff == nullptr) {
             // This can happens when the thread gives us own satb_buffer but
             // doesn't unregister from ThreadManaged.
             // At this perion GC can happen and we get pre_buff null here.
             return true;
         }
-        for (auto obj : *pre_buff) {
+        for (auto obj : *preBuff) {
             if (marker_.MarkIfNotMarked(obj)) {
-                object_stack->PushToStack(RootType::SATB_BUFFER, obj);
+                objectStack->PushToStack(RootType::SATB_BUFFER, obj);
             }
         }
-        pre_buff->clear();
+        preBuff->clear();
         return true;
     };
     this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback);
 
     // Process satb buffers of the terminated threads
-    os::memory::LockHolder lock(satb_and_newobj_buf_lock_);
-    for (auto obj_vector : satb_buff_list_) {
-        ASSERT(obj_vector != nullptr);
-        for (auto obj : *obj_vector) {
+    os::memory::LockHolder lock(satbAndNewobjBufLock_);
+    for (auto objVector : satbBuffList_) {
+        ASSERT(objVector != nullptr);
+        for (auto obj : *objVector) {
             if (marker_.MarkIfNotMarked(obj)) {
-                object_stack->PushToStack(RootType::SATB_BUFFER, obj);
+                objectStack->PushToStack(RootType::SATB_BUFFER, obj);
             }
         }
-        this->GetInternalAllocator()->Delete(obj_vector);
+        this->GetInternalAllocator()->Delete(objVector);
     }
-    satb_buff_list_.clear();
-    for (auto obj : newobj_buffer_) {
+    satbBuffList_.clear();
+    for (auto obj : newobjBuffer_) {
         if (marker_.MarkIfNotMarked(obj)) {
-            object_stack->PushToStack(RootType::SATB_BUFFER, obj);
+            objectStack->PushToStack(RootType::SATB_BUFFER, obj);
         }
     }
-    newobj_buffer_.clear();
+    newobjBuffer_.clear();
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::HandlePendingDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    update_remset_worker_->DrainAllCards(&dirty_cards_);
-    std::for_each(dirty_cards_.cbegin(), dirty_cards_.cend(), [](auto card) { card->Clear(); });
+    updateRemsetWorker_->DrainAllCards(&dirtyCards_);
+    std::for_each(dirtyCards_.cbegin(), dirtyCards_.cend(), [](auto card) { card->Clear(); });
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::ReenqueueDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    os::memory::LockHolder lock(queue_lock_);
-    std::for_each(dirty_cards_.cbegin(), dirty_cards_.cend(), [this](auto card) {
+    os::memory::LockHolder lock(queueLock_);
+    std::for_each(dirtyCards_.cbegin(), dirtyCards_.cend(), [this](auto card) {
         card->Mark();
-        updated_refs_queue_->push_back(card);
+        updatedRefsQueue_->push_back(card);
     });
-    dirty_cards_.clear();
+    dirtyCards_.clear();
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::ClearSatb()
 {
-    ScopedTiming scoped_timing(__FUNCTION__, *this->GetTiming());
+    ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
     // Acquire lock here to avoid data races with the threads
     // which are terminating now.
     // Data race is happens in thread.pre_buf_. The terminating thread may
     // release own pre_buf_ while GC thread iterates over threads and gets theirs
     // pre_buf_.
-    os::memory::LockHolder lock(satb_and_newobj_buf_lock_);
+    os::memory::LockHolder lock(satbAndNewobjBufLock_);
     // Process satb buffers of the active threads
-    auto thread_callback = [](ManagedThread *thread) {
-        auto pre_buff = thread->GetPreBuff();
-        if (pre_buff != nullptr) {
-            pre_buff->clear();
+    auto threadCallback = [](ManagedThread *thread) {
+        auto preBuff = thread->GetPreBuff();
+        if (preBuff != nullptr) {
+            preBuff->clear();
         }
         return true;
     };
-    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(thread_callback);
+    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(threadCallback);
 
     // Process satb buffers of the terminated threads
-    for (auto obj_vector : satb_buff_list_) {
-        this->GetInternalAllocator()->Delete(obj_vector);
+    for (auto objVector : satbBuffList_) {
+        this->GetInternalAllocator()->Delete(objVector);
     }
-    satb_buff_list_.clear();
-    newobj_buffer_.clear();
+    satbBuffList_.clear();
+    newobjBuffer_.clear();
 }
 
 template <class LanguageConfig>
 template <class Visitor>
 void G1GC<LanguageConfig>::VisitRemSets(const Visitor &visitor)
 {
-    GCScope<TRACE_TIMING> visit_remset_scope(__FUNCTION__, this);
+    GCScope<TRACE_TIMING> visitRemsetScope(__FUNCTION__, this);
 
-    ASSERT(unique_cards_initialized_);
+    ASSERT(uniqueCardsInitialized_);
     // Iterate over stored references to the collection set
-    for (auto &entry_vector : unique_refs_from_remsets_) {
-        for (auto &entry : *entry_vector) {
+    for (auto &entryVector : uniqueRefsFromRemsets_) {
+        for (auto &entry : *entryVector) {
             ObjectHeader *object = entry.GetObject();
             uint32_t offset = entry.GetReferenceOffset();
             visitor(object, ObjectAccessor::GetObject(object, offset), offset);
@@ -1959,56 +1954,56 @@ template <class LanguageConfig>
 template <class Visitor>
 void G1GC<LanguageConfig>::UpdateRefsFromRemSets(const Visitor &visitor)
 {
-    auto field_visitor = [this, &visitor](ObjectHeader *object, ObjectHeader *field, uint32_t offset,
-                                          [[maybe_unused]] bool is_volatile) {
+    auto fieldVisitor = [this, &visitor](ObjectHeader *object, ObjectHeader *field, uint32_t offset,
+                                         [[maybe_unused]] bool isVolatile) {
         if (!InGCSweepRange(field)) {
             return true;
         }
         visitor(object, ObjectAccessor::GetObject(object, offset), offset);
         return true;
     };
-    auto refs_checker = [this, &field_visitor](const MemRange &mem_range, Region *region) {
-        IterateOverRefsInMemRange(mem_range, region, field_visitor);
+    auto refsChecker = [this, &fieldVisitor](const MemRange &memRange, Region *region) {
+        IterateOverRefsInMemRange(memRange, region, fieldVisitor);
         return true;
     };
-    MemRange dirty_cards = CacheRefsFromRemsets(refs_checker);
-    ClearDirtyAndYoungCards(dirty_cards);
+    MemRange dirtyCards = CacheRefsFromRemsets(refsChecker);
+    ClearDirtyAndYoungCards(dirtyCards);
 }
 
 template <class LanguageConfig>
-MemRange G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &refs_checker)
+MemRange G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &refsChecker)
 {
-    GCScope<TRACE_TIMING> cache_refs_from_remset_scope(__FUNCTION__, this);
+    GCScope<TRACE_TIMING> cacheRefsFromRemsetScope(__FUNCTION__, this);
     // Collect only unique objects to not proceed them more than once.
-    ASSERT(!unique_cards_initialized_);
-    CardTable *card_table = this->GetCardTable();
-    uintptr_t min_dirty_addr = card_table->GetMinAddress() + card_table->GetCardsCount() * card_table->GetCardSize();
-    uintptr_t max_dirty_addr = card_table->GetMinAddress();
+    ASSERT(!uniqueCardsInitialized_);
+    CardTable *cardTable = this->GetCardTable();
+    uintptr_t minDirtyAddr = cardTable->GetMinAddress() + cardTable->GetCardsCount() * cardTable->GetCardSize();
+    uintptr_t maxDirtyAddr = cardTable->GetMinAddress();
 
-    ASSERT(IsCardTableClear(card_table));
-    auto visitor = [card_table, &min_dirty_addr, &max_dirty_addr, &refs_checker](Region *r, const MemRange &range) {
+    ASSERT(IsCardTableClear(cardTable));
+    auto visitor = [cardTable, &minDirtyAddr, &maxDirtyAddr, &refsChecker](Region *r, const MemRange &range) {
         // Use the card table to mark the ranges we already processed.
         // Each card is uint8_t. Use it as a bitmap. Set bit means the corresponding memory
         // range is processed.
-        CardTable::CardPtr card = card_table->GetCardPtr(range.GetStartAddress());
-        uintptr_t card_addr = card_table->GetCardStartAddress(card);
-        size_t mem_size = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
-        size_t bit_idx = (range.GetStartAddress() - card_addr) / mem_size;
-        if ((card->GetCard() & (1U << bit_idx)) == 0) {
-            card->SetCard(card->GetCard() | (1U << bit_idx));
-            if (min_dirty_addr > card_addr) {
-                min_dirty_addr = card_addr;
+        CardTable::CardPtr card = cardTable->GetCardPtr(range.GetStartAddress());
+        uintptr_t cardAddr = cardTable->GetCardStartAddress(card);
+        size_t memSize = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
+        size_t bitIdx = (range.GetStartAddress() - cardAddr) / memSize;
+        if ((card->GetCard() & (1U << bitIdx)) == 0) {
+            card->SetCard(card->GetCard() | (1U << bitIdx));
+            if (minDirtyAddr > cardAddr) {
+                minDirtyAddr = cardAddr;
             }
-            if (max_dirty_addr < card_addr + card_table->GetCardSize()) {
-                max_dirty_addr = card_addr + card_table->GetCardSize();
+            if (maxDirtyAddr < cardAddr + cardTable->GetCardSize()) {
+                maxDirtyAddr = cardAddr + cardTable->GetCardSize();
             }
-            return refs_checker(range, r);
+            return refsChecker(range, r);
         }
         // some cross region refs might be not processed
         return false;
     };
     analytics_.ReportScanRemsetStart(panda::time::GetCurrentTimeInNanos());
-    for (auto region : collection_set_) {
+    for (auto region : collectionSet_) {
         region->GetRemSet()->Iterate(RemsetRegionPredicate, visitor);
     }
     analytics_.ReportScanRemsetEnd(panda::time::GetCurrentTimeInNanos());
@@ -2016,13 +2011,13 @@ MemRange G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &r
     if (!this->IsFullGC()) {
         CacheRefsFromDirtyCards(visitor);
 #ifndef NDEBUG
-        unique_cards_initialized_ = true;
+        uniqueCardsInitialized_ = true;
 #endif  // NDEBUG
     }
-    if (min_dirty_addr > max_dirty_addr) {
-        min_dirty_addr = max_dirty_addr;
+    if (minDirtyAddr > maxDirtyAddr) {
+        minDirtyAddr = maxDirtyAddr;
     }
-    return MemRange(min_dirty_addr, max_dirty_addr);
+    return MemRange(minDirtyAddr, maxDirtyAddr);
 }
 
 template <class LanguageConfig>
@@ -2030,29 +2025,29 @@ template <typename Visitor>
 void G1GC<LanguageConfig>::CacheRefsFromDirtyCards(Visitor visitor)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    auto card_table = this->GetCardTable();
+    auto cardTable = this->GetCardTable();
     constexpr size_t MEM_SIZE = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
-    for (auto it = dirty_cards_.cbegin(); it != dirty_cards_.cend();) {
-        auto range = card_table->GetMemoryRange(*it);
+    for (auto it = dirtyCards_.cbegin(); it != dirtyCards_.cend();) {
+        auto range = cardTable->GetMemoryRange(*it);
         auto addr = range.GetStartAddress();
         ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(ToVoidPtr(addr))),
                   std::cerr << "Invalid space type for the " << addr << std::endl);
-        auto end_addr = range.GetEndAddress();
+        auto endAddr = range.GetEndAddress();
         auto region = panda::mem::AddrToRegion(ToVoidPtr(addr));
         if (!RemsetRegionPredicate(region)) {
-            it = dirty_cards_.erase(it);
+            it = dirtyCards_.erase(it);
             continue;
         }
 
-        auto all_cross_region_refs_processed = true;
-        while (addr < end_addr) {
+        auto allCrossRegionRefsProcessed = true;
+        while (addr < endAddr) {
             if (!visitor(region, MemRange(addr, addr + MEM_SIZE))) {
-                all_cross_region_refs_processed = false;
+                allCrossRegionRefsProcessed = false;
             }
             addr += MEM_SIZE;
         }
-        if (all_cross_region_refs_processed) {
-            it = dirty_cards_.erase(it);
+        if (allCrossRegionRefsProcessed) {
+            it = dirtyCards_.erase(it);
             continue;
         }
         ++it;
@@ -2060,47 +2055,47 @@ void G1GC<LanguageConfig>::CacheRefsFromDirtyCards(Visitor visitor)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RestoreYoungCards(const CollectionSet &collection_set)
+void G1GC<LanguageConfig>::RestoreYoungCards(const CollectionSet &collectionSet)
 {
-    CardTable *card_table = this->GetCardTable();
-    for (Region *region : collection_set.Young()) {
-        card_table->MarkCardsAsYoung(MemRange(region->Begin(), region->End()));
+    CardTable *cardTable = this->GetCardTable();
+    for (Region *region : collectionSet.Young()) {
+        cardTable->MarkCardsAsYoung(MemRange(region->Begin(), region->End()));
     }
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::ClearYoungCards(const CollectionSet &collection_set)
+void G1GC<LanguageConfig>::ClearYoungCards(const CollectionSet &collectionSet)
 {
-    CardTable *card_table = this->GetCardTable();
-    for (Region *region : collection_set.Young()) {
-        card_table->ClearCardRange(ToUintPtr(region), ToUintPtr(region) + DEFAULT_REGION_SIZE);
+    CardTable *cardTable = this->GetCardTable();
+    for (Region *region : collectionSet.Young()) {
+        cardTable->ClearCardRange(ToUintPtr(region), ToUintPtr(region) + DEFAULT_REGION_SIZE);
     }
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::ClearDirtyAndYoungCards(const MemRange &dirty_cards_range)
+void G1GC<LanguageConfig>::ClearDirtyAndYoungCards(const MemRange &dirtyCardsRange)
 {
-    CardTable *card_table = this->GetCardTable();
-    ClearYoungCards(collection_set_);
-    card_table->ClearCardRange(dirty_cards_range.GetStartAddress(), dirty_cards_range.GetEndAddress());
+    CardTable *cardTable = this->GetCardTable();
+    ClearYoungCards(collectionSet_);
+    cardTable->ClearCardRange(dirtyCardsRange.GetStartAddress(), dirtyCardsRange.GetEndAddress());
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::ClearRefsFromRemsetsCache()
 {
-    ASSERT(!unique_refs_from_remsets_.empty());
+    ASSERT(!uniqueRefsFromRemsets_.empty());
     // Resize list of unique refs from remset to 1, to reduce memory usage
-    size_t elemets_to_remove = unique_refs_from_remsets_.size() - 1;
-    for (size_t i = 0; i < elemets_to_remove; i++) {
-        RefVector *entry = unique_refs_from_remsets_.back();
+    size_t elemetsToRemove = uniqueRefsFromRemsets_.size() - 1;
+    for (size_t i = 0; i < elemetsToRemove; i++) {
+        RefVector *entry = uniqueRefsFromRemsets_.back();
         this->GetInternalAllocator()->Delete(entry);
-        unique_refs_from_remsets_.pop_back();
+        uniqueRefsFromRemsets_.pop_back();
     }
-    ASSERT(unique_refs_from_remsets_.size() == 1);
-    unique_refs_from_remsets_.front()->clear();
-    ASSERT(unique_refs_from_remsets_.front()->capacity() == MAX_REFS);
+    ASSERT(uniqueRefsFromRemsets_.size() == 1);
+    uniqueRefsFromRemsets_.front()->clear();
+    ASSERT(uniqueRefsFromRemsets_.front()->capacity() == MAX_REFS);
 #ifndef NDEBUG
-    unique_cards_initialized_ = false;
+    uniqueCardsInitialized_ = false;
 #endif  // NDEBUG
 }
 
@@ -2110,14 +2105,14 @@ void G1GC<LanguageConfig>::ActualizeRemSets()
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
 
     // Invalidate regions from collection set in all remsets
-    for (Region *region : collection_set_.Young()) {
+    for (Region *region : collectionSet_.Young()) {
         if (!region->HasFlag(RegionFlag::IS_PROMOTED)) {
             RemSet<>::template InvalidateRegion<false>(region);
         } else {
             region->RmvFlag(RegionFlag::IS_PROMOTED);
         }
     }
-    for (Region *region : collection_set_.Tenured()) {
+    for (Region *region : collectionSet_.Tenured()) {
         RemSet<>::template InvalidateRegion<false>(region);
     }
 }
@@ -2134,10 +2129,10 @@ void G1GC<LanguageConfig>::OnWaitForIdleFail()
 {
     if (this->GetGCPhase() == GCPhase::GC_PHASE_MARK) {
         // Atomic with release order reason: write to this variable should become visible in concurrent marker check
-        interrupt_concurrent_flag_.store(true, std::memory_order_release);
+        interruptConcurrentFlag_.store(true, std::memory_order_release);
         if (this->GetSettings()->G1EnablePauseTimeGoal()) {
-            os::memory::LockHolder lh(concurrent_mark_mutex_);
-            concurrent_mark_cond_var_.Signal();
+            os::memory::LockHolder lh(concurrentMarkMutex_);
+            concurrentMarkCondVar_.Signal();
         }
     }
 }
@@ -2145,17 +2140,17 @@ void G1GC<LanguageConfig>::OnWaitForIdleFail()
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PostponeGCStart()
 {
-    region_garbage_rate_threshold_ = 0;
-    g1_promotion_region_alive_rate_ = 0;
+    regionGarbageRateThreshold_ = 0;
+    g1PromotionRegionAliveRate_ = 0;
     GC::PostponeGCStart();
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PostponeGCEnd()
 {
-    ASSERT(!this->IsPostponeEnabled() || (region_garbage_rate_threshold_ == 0 && g1_promotion_region_alive_rate_ == 0));
-    region_garbage_rate_threshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
-    g1_promotion_region_alive_rate_ = this->GetSettings()->G1PromotionRegionAliveRate();
+    ASSERT(!this->IsPostponeEnabled() || (regionGarbageRateThreshold_ == 0 && g1PromotionRegionAliveRate_ == 0));
+    regionGarbageRateThreshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
+    g1PromotionRegionAliveRate_ = this->GetSettings()->G1PromotionRegionAliveRate();
     GC::PostponeGCEnd();
 }
 
@@ -2168,21 +2163,21 @@ bool G1GC<LanguageConfig>::IsPostponeGCSupported() const
 template <class LanguageConfig>
 size_t G1GC<LanguageConfig>::GetMaxMixedRegionsCount()
 {
-    return this->GetG1ObjectAllocator()->GetMaxYoungRegionsCount() + number_of_mixed_tenured_regions_;
+    return this->GetG1ObjectAllocator()->GetMaxYoungRegionsCount() + numberOfMixedTenuredRegions_;
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::PrepareYoungRegionsForFullGC(const CollectionSet &collection_set)
+void G1GC<LanguageConfig>::PrepareYoungRegionsForFullGC(const CollectionSet &collectionSet)
 {
-    BuildCrossYoungRemSets(collection_set.Young());
-    ClearYoungCards(collection_set);
+    BuildCrossYoungRemSets(collectionSet.Young());
+    ClearYoungCards(collectionSet);
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RestoreYoungRegionsAfterFullGC(const CollectionSet &collection_set)
+void G1GC<LanguageConfig>::RestoreYoungRegionsAfterFullGC(const CollectionSet &collectionSet)
 {
-    RestoreYoungCards(collection_set);
-    for (Region *region : collection_set.Young()) {
+    RestoreYoungCards(collectionSet);
+    for (Region *region : collectionSet.Young()) {
         RemSet<>::template InvalidateRefsFromRegion<false>(region);
     }
 }
@@ -2191,21 +2186,21 @@ template <class LanguageConfig>
 template <typename Container>
 void G1GC<LanguageConfig>::BuildCrossYoungRemSets(const Container &young)
 {
-    ScopedTiming scoped_timing(__FUNCTION__, *this->GetTiming());
+    ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
     ASSERT(this->IsFullGC());
     auto allocator = this->GetG1ObjectAllocator();
-    size_t region_size_bits = panda::helpers::math::GetIntLog2(allocator->GetRegionSize());
-    auto update_remsets = [region_size_bits](ObjectHeader *object, ObjectHeader *ref, size_t offset,
-                                             [[maybe_unused]] bool is_volatile) {
-        if (!IsSameRegion(object, ref, region_size_bits) && !ObjectToRegion(ref)->IsYoung()) {
+    size_t regionSizeBits = panda::helpers::math::GetIntLog2(allocator->GetRegionSize());
+    auto updateRemsets = [regionSizeBits](ObjectHeader *object, ObjectHeader *ref, size_t offset,
+                                          [[maybe_unused]] bool isVolatile) {
+        if (!IsSameRegion(object, ref, regionSizeBits) && !ObjectToRegion(ref)->IsYoung()) {
             RemSet<>::AddRefWithAddr<false>(object, offset, ref);
         }
         return true;
     };
     for (Region *region : young) {
-        region->GetMarkBitmap()->IterateOverMarkedChunks([&update_remsets](void *addr) {
+        region->GetMarkBitmap()->IterateOverMarkedChunks([&updateRemsets](void *addr) {
             ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(
-                reinterpret_cast<ObjectHeader *>(addr), update_remsets);
+                reinterpret_cast<ObjectHeader *>(addr), updateRemsets);
         });
     }
 }
@@ -2213,25 +2208,24 @@ void G1GC<LanguageConfig>::BuildCrossYoungRemSets(const Container &young)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::StartConcurrentScopeRoutine() const
 {
-    update_remset_worker_->ResumeWorkerAfterGCPause();
+    updateRemsetWorker_->ResumeWorkerAfterGCPause();
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::EndConcurrentScopeRoutine() const
 {
-    update_remset_worker_->SuspendWorkerForGCPause();
+    updateRemsetWorker_->SuspendWorkerForGCPause();
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::ComputeNewSize()
 {
     if (this->GetSettings()->G1EnablePauseTimeGoal()) {
-        auto desired_eden_length_by_pause_delay = CalculateDesiredEdenLengthByPauseDelay();
-        auto desired_eden_length_by_pause_duration = CalculateDesiredEdenLengthByPauseDuration();
-        auto desired_eden_length = std::max(desired_eden_length_by_pause_delay, desired_eden_length_by_pause_duration);
-        GetG1ObjectAllocator()->GetHeapSpace()->UpdateSize(desired_eden_length *
-                                                           GetG1ObjectAllocator()->GetRegionSize());
-        GetG1ObjectAllocator()->SetDesiredEdenLength(desired_eden_length);
+        auto desiredEdenLengthByPauseDelay = CalculateDesiredEdenLengthByPauseDelay();
+        auto desiredEdenLengthByPauseDuration = CalculateDesiredEdenLengthByPauseDuration();
+        auto desiredEdenLength = std::max(desiredEdenLengthByPauseDelay, desiredEdenLengthByPauseDuration);
+        GetG1ObjectAllocator()->GetHeapSpace()->UpdateSize(desiredEdenLength * GetG1ObjectAllocator()->GetRegionSize());
+        GetG1ObjectAllocator()->SetDesiredEdenLength(desiredEdenLength);
     } else {
         GenerationalGC<LanguageConfig>::ComputeNewSize();
     }
@@ -2240,8 +2234,8 @@ void G1GC<LanguageConfig>::ComputeNewSize()
 template <class LanguageConfig>
 size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDelay()
 {
-    auto delay_before_pause = g1_pause_tracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros());
-    return static_cast<size_t>(ceil(analytics_.PredictAllocationRate() * delay_before_pause));
+    auto delayBeforePause = g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros());
+    return static_cast<size_t>(ceil(analytics_.PredictAllocationRate() * delayBeforePause));
 }
 
 template <class LanguageConfig>
@@ -2249,86 +2243,86 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
 {
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
     // on other reads or writes
-    if (is_mixed_gc_required_.load(std::memory_order_relaxed)) {
+    if (isMixedGcRequired_.load(std::memory_order_relaxed)) {
         // Schedule next mixed collections as often as possible to maximize old regions collection
         return 1;
     }
 
     // Calculate desired_eden_size according to pause time goal
-    size_t min_eden_length = 1;
-    size_t max_eden_length =
+    size_t minEdenLength = 1;
+    size_t maxEdenLength =
         GetG1ObjectAllocator()->GetHeapSpace()->GetMaxYoungSize() / GetG1ObjectAllocator()->GetRegionSize();
 
-    auto prediction_error = analytics_.EstimatePredictionErrorInMicros();
-    auto max_pause =
+    auto predictionError = analytics_.EstimatePredictionErrorInMicros();
+    auto maxPause =
         static_cast<int64_t>(this->GetSettings()->GetG1MaxGcPauseInMillis() * panda::os::time::MILLIS_TO_MICRO);
-    auto eden_length_predicate = [this, prediction_error, max_pause](size_t eden_length) {
-        if (!HaveEnoughRegionsToMove(eden_length)) {
+    auto edenLengthPredicate = [this, predictionError, maxPause](size_t edenLength) {
+        if (!HaveEnoughRegionsToMove(edenLength)) {
             return false;
         }
-        auto pause_time = prediction_error + analytics_.PredictYoungCollectionTimeInMicros(eden_length);
-        return pause_time <= max_pause;
+        auto pauseTime = predictionError + analytics_.PredictYoungCollectionTimeInMicros(edenLength);
+        return pauseTime <= maxPause;
     };
 
-    if (!eden_length_predicate(min_eden_length)) {
-        return min_eden_length;
+    if (!edenLengthPredicate(minEdenLength)) {
+        return minEdenLength;
     }
 
-    if (eden_length_predicate(max_eden_length)) {
-        return max_eden_length;
+    if (edenLengthPredicate(maxEdenLength)) {
+        return maxEdenLength;
     }
-    auto delta = (max_eden_length - min_eden_length) / 2;
+    auto delta = (maxEdenLength - minEdenLength) / 2U;
     while (delta > 0) {
-        auto eden_length = min_eden_length + delta;
-        if (eden_length_predicate(eden_length)) {
-            min_eden_length = eden_length;
+        auto edenLength = minEdenLength + delta;
+        if (edenLengthPredicate(edenLength)) {
+            minEdenLength = edenLength;
         } else {
-            max_eden_length = eden_length;
+            maxEdenLength = edenLength;
         }
-        ASSERT(min_eden_length < max_eden_length);
-        delta = (max_eden_length - min_eden_length) / 2;
+        ASSERT(minEdenLength < maxEdenLength);
+        delta = (maxEdenLength - minEdenLength) / 2U;
     }
-    return min_eden_length;
+    return minEdenLength;
 }
 
 template <class LanguageConfig>
-NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurentMarkImpl(GCMarkingStackType *objects_stack)
+NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurentMarkImpl(GCMarkingStackType *objectsStack)
 {
     {
         ScopedTiming t("VisitClassRoots", *this->GetTiming());
-        this->VisitClassRoots([this, objects_stack](const GCRoot &gc_root) {
-            if (conc_marker_.MarkIfNotMarked(gc_root.GetObjectHeader())) {
-                ASSERT(gc_root.GetObjectHeader() != nullptr);
-                objects_stack->PushToStack(RootType::ROOT_CLASS, gc_root.GetObjectHeader());
+        this->VisitClassRoots([this, objectsStack](const GCRoot &gcRoot) {
+            if (concMarker_.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
+                ASSERT(gcRoot.GetObjectHeader() != nullptr);
+                objectsStack->PushToStack(RootType::ROOT_CLASS, gcRoot.GetObjectHeader());
             } else {
-                LOG_DEBUG_GC << "Skip root: " << gc_root.GetObjectHeader();
+                LOG_DEBUG_GC << "Skip root: " << gcRoot.GetObjectHeader();
             }
         });
     }
     {
         ScopedTiming t("VisitInternalStringTable", *this->GetTiming());
         this->GetPandaVm()->VisitStringTable(
-            [this, objects_stack](ObjectHeader *str) {
-                if (conc_marker_.MarkIfNotMarked(str)) {
+            [this, objectsStack](ObjectHeader *str) {
+                if (concMarker_.MarkIfNotMarked(str)) {
                     ASSERT(str != nullptr);
-                    objects_stack->PushToStack(RootType::STRING_TABLE, str);
+                    objectsStack->PushToStack(RootType::STRING_TABLE, str);
                 }
             },
             VisitGCRootFlags::ACCESS_ROOT_ALL | VisitGCRootFlags::START_RECORDING_NEW_ROOT);
     }
     // Atomic with acquire order reason: load to this variable should become visible
-    while (!objects_stack->Empty() && !interrupt_concurrent_flag_.load(std::memory_order_acquire)) {
-        auto *object = this->PopObjectFromStack(objects_stack);
-        ASSERT(conc_marker_.IsMarked(object));
+    while (!objectsStack->Empty() && !interruptConcurrentFlag_.load(std::memory_order_acquire)) {
+        auto *object = this->PopObjectFromStack(objectsStack);
+        ASSERT(concMarker_.IsMarked(object));
         ValidateObject(nullptr, object);
-        auto *object_class = object->template ClassAddr<BaseClass>();
+        auto *objectClass = object->template ClassAddr<BaseClass>();
         // We need annotation here for the FullMemoryBarrier used in InitializeClassByIdEntrypoint
-        TSAN_ANNOTATE_HAPPENS_AFTER(object_class);
+        TSAN_ANNOTATE_HAPPENS_AFTER(objectClass);
         LOG_DEBUG_GC << "Current object: " << GetDebugInfoAboutObject(object);
 
         ASSERT(!object->IsForwarded());
-        CalcLiveBytesNotAtomicallyMarkPreprocess(object, object_class);
-        conc_marker_.MarkInstance(objects_stack, object, object_class);
+        CalcLiveBytesNotAtomicallyMarkPreprocess(object, objectClass);
+        concMarker_.MarkInstance(objectsStack, object, objectClass);
     }
 }
 
@@ -2336,7 +2330,7 @@ template <class LanguageConfig>
 bool G1GC<LanguageConfig>::Trigger(PandaUniquePtr<GCTask> task)
 {
     if (this->GetSettings()->G1EnablePauseTimeGoal() &&
-        g1_pause_tracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros()) > 0) {
+        g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros()) > 0) {
         return false;
     }
     return GenerationalGC<LanguageConfig>::Trigger(std::move(task));

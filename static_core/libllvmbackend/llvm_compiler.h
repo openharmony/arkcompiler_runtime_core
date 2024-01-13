@@ -57,7 +57,7 @@ protected:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    std::shared_ptr<llvm::TargetMachine> target_machine_;
+    std::shared_ptr<llvm::TargetMachine> targetMachine_;
 
 private:
     Arch arch_;

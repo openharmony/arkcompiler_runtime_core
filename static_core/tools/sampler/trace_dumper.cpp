@@ -21,39 +21,39 @@ void TraceDumper::DumpTraces(const SampleInfo &sample, size_t count)
 {
     std::ofstream &stream = ResolveStream(sample);
 
-    for (size_t i = sample.stack_info.managed_stack_size; i-- > 0;) {
-        uintptr_t pf_id = sample.stack_info.managed_stack[i].panda_file_ptr;
-        uint64_t file_id = sample.stack_info.managed_stack[i].file_id;
+    for (size_t i = sample.stackInfo.managedStackSize; i-- > 0;) {
+        uintptr_t pfId = sample.stackInfo.managedStack[i].pandaFilePtr;
+        uint64_t fileId = sample.stackInfo.managedStack[i].fileId;
 
-        std::string full_method_name;
-        if (pf_id == helpers::ToUnderlying(FrameKind::BRIDGE)) {
-            full_method_name = "System_Frame";
+        std::string fullMethodName;
+        if (pfId == helpers::ToUnderlying(FrameKind::BRIDGE)) {
+            fullMethodName = "System_Frame";
         } else {
             const panda_file::File *pf = nullptr;
-            auto it = modules_map_->find(pf_id);
-            if (it != modules_map_->end()) {
+            auto it = modulesMap_->find(pfId);
+            if (it != modulesMap_->end()) {
                 pf = it->second.get();
             }
 
-            full_method_name = ResolveName(pf, file_id);
+            fullMethodName = ResolveName(pf, fileId);
         }
-        stream << full_method_name << "; ";
+        stream << fullMethodName << "; ";
     }
     stream << count << "\n";
 }
 
 /* static */
-void TraceDumper::WriteThreadId(std::ofstream &stream, uint32_t thread_id)
+void TraceDumper::WriteThreadId(std::ofstream &stream, uint32_t threadId)
 {
-    stream << "thread_id = " << thread_id << "; ";
+    stream << "thread_id = " << threadId << "; ";
 }
 
 /* static */
-void TraceDumper::WriteThreadStatus(std::ofstream &stream, SampleInfo::ThreadStatus thread_status)
+void TraceDumper::WriteThreadStatus(std::ofstream &stream, SampleInfo::ThreadStatus threadStatus)
 {
     stream << "status = ";
 
-    switch (thread_status) {
+    switch (threadStatus) {
         case SampleInfo::ThreadStatus::RUNNING: {
             stream << "active; ";
             break;
@@ -68,28 +68,28 @@ void TraceDumper::WriteThreadStatus(std::ofstream &stream, SampleInfo::ThreadSta
     }
 }
 
-std::string TraceDumper::ResolveName(const panda_file::File *pf, uint64_t file_id) const
+std::string TraceDumper::ResolveName(const panda_file::File *pf, uint64_t fileId) const
 {
     if (pf == nullptr) {
-        return std::string("__unknown_module::" + std::to_string(file_id));
+        return std::string("__unknown_module::" + std::to_string(fileId));
     }
 
-    auto it = methods_map_->find(pf);
-    if (it != methods_map_->end()) {
-        return it->second.at(file_id);
+    auto it = methodsMap_->find(pf);
+    if (it != methodsMap_->end()) {
+        return it->second.at(fileId);
     }
 
-    return pf->GetFilename() + "::__unknown_" + std::to_string(file_id);
+    return pf->GetFilename() + "::__unknown_" + std::to_string(fileId);
 }
 
 /* override */
 std::ofstream &SingleCSVDumper::ResolveStream(const SampleInfo &sample)
 {
     if (option_ == DumpType::THREAD_SEPARATION_BY_TID) {
-        WriteThreadId(stream_, sample.thread_info.thread_id);
+        WriteThreadId(stream_, sample.threadInfo.threadId);
     }
-    if (build_cold_graph_) {
-        WriteThreadStatus(stream_, sample.thread_info.thread_status);
+    if (buildColdGraph_) {
+        WriteThreadStatus(stream_, sample.threadInfo.threadStatus);
     }
     return stream_;
 }
@@ -97,42 +97,41 @@ std::ofstream &SingleCSVDumper::ResolveStream(const SampleInfo &sample)
 /* override */
 std::ofstream &MultipleCSVDumper::ResolveStream(const SampleInfo &sample)
 {
-    auto it = thread_id_map_.find(sample.thread_info.thread_id);
-    if (it == thread_id_map_.end()) {
-        std::string filename_with_thread_id = AddThreadIdToFilename(filename_, sample.thread_info.thread_id);
+    auto it = threadIdMap_.find(sample.threadInfo.threadId);
+    if (it == threadIdMap_.end()) {
+        std::string filenameWithThreadId = AddThreadIdToFilename(filename_, sample.threadInfo.threadId);
 
-        auto return_pair =
-            thread_id_map_.insert({sample.thread_info.thread_id, std::ofstream(filename_with_thread_id)});
-        it = return_pair.first;
+        auto returnPair = threadIdMap_.insert({sample.threadInfo.threadId, std::ofstream(filenameWithThreadId)});
+        it = returnPair.first;
 
-        auto is_success_insert = return_pair.second;
-        if (!is_success_insert) {
+        auto isSuccessInsert = returnPair.second;
+        if (!isSuccessInsert) {
             LOG(FATAL, PROFILER) << "Failed while insert in unordored_map";
         }
     }
 
-    WriteThreadId(it->second, sample.thread_info.thread_id);
+    WriteThreadId(it->second, sample.threadInfo.threadId);
 
-    if (build_cold_graph_) {
-        WriteThreadStatus(it->second, sample.thread_info.thread_status);
+    if (buildColdGraph_) {
+        WriteThreadStatus(it->second, sample.threadInfo.threadStatus);
     }
 
     return it->second;
 }
 
 /* static */
-std::string MultipleCSVDumper::AddThreadIdToFilename(const std::string &filename, uint32_t thread_id)
+std::string MultipleCSVDumper::AddThreadIdToFilename(const std::string &filename, uint32_t threadId)
 {
-    std::string filename_with_thread_id(filename);
+    std::string filenameWithThreadId(filename);
 
-    std::size_t pos = filename_with_thread_id.find("csv");
+    std::size_t pos = filenameWithThreadId.find("csv");
     if (pos == std::string::npos) {
         LOG(FATAL, PROFILER) << "Incorrect output filename, *.csv format expected";
     }
 
-    filename_with_thread_id.insert(pos - 1, std::to_string(thread_id));
+    filenameWithThreadId.insert(pos - 1, std::to_string(threadId));
 
-    return filename_with_thread_id;
+    return filenameWithThreadId;
 }
 
 }  // namespace panda::tooling::sampler

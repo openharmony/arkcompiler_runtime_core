@@ -23,7 +23,7 @@
 namespace panda::compiler {
 void Cse::LocalCse()
 {
-    deleted_insts_.clear();
+    deletedInsts_.clear();
     candidates_.clear();
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         candidates_.clear();
@@ -34,9 +34,9 @@ void Cse::LocalCse()
             // match the insts in candidates
             Exp exp = GetExp(inst);
             if (AllNotIn(candidates_, inst)) {
-                InstVector empty_tmp(GetGraph()->GetLocalAllocator()->Adapter());
-                empty_tmp.emplace_back(inst);
-                candidates_.emplace(exp, std::move(empty_tmp));
+                InstVector emptyTmp(GetGraph()->GetLocalAllocator()->Adapter());
+                emptyTmp.emplace_back(inst);
+                candidates_.emplace(exp, std::move(emptyTmp));
                 continue;
             }
             if (NotIn(candidates_, exp)) {
@@ -47,18 +47,18 @@ void Cse::LocalCse()
             auto iter = std::find_if(cntainer.begin(), cntainer.end(), Finder(inst));
             if (iter != cntainer.end()) {
                 inst->ReplaceUsers(*iter);
-                deleted_insts_.emplace_back(inst);
+                deletedInsts_.emplace_back(inst);
             } else {
                 cntainer.emplace_back(inst);
             }
         }
     }
-    RemoveInstsIn(&deleted_insts_);
+    RemoveInstsIn(&deletedInsts_);
 }
 
 void Cse::CollectTreeForest()
 {
-    replace_pair_.clear();
+    replacePair_.clear();
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         if (bb->IsEndBlock()) {
             continue;
@@ -91,7 +91,7 @@ void Cse::CollectTreeForest()
                 auto &cntainer = candidates_.at(exp);
                 auto iter = std::find_if(cntainer.begin(), cntainer.end(), Finder(inst));
                 if (iter != cntainer.end()) {
-                    replace_pair_.emplace_back(inst, *iter);
+                    replacePair_.emplace_back(inst, *iter);
                 }
             }
         }
@@ -101,62 +101,62 @@ void Cse::CollectTreeForest()
 /// Convert the tree-forest structure of replace_pair into star-forest structure
 void Cse::ConvertTreeForestToStarForest()
 {
-    min_replace_star_.clear();
-    for (auto rpair : replace_pair_) {
+    minReplaceStar_.clear();
+    for (auto rpair : replacePair_) {
         Inst *temp = rpair.second;
-        auto it = replace_pair_.begin();
+        auto it = replacePair_.begin();
         do {
-            it = replace_pair_.begin();
-            while (it != replace_pair_.end() && it->first != temp) {
+            it = replacePair_.begin();
+            while (it != replacePair_.end() && it->first != temp) {
                 it++;
             }
-            if (it != replace_pair_.end()) {
+            if (it != replacePair_.end()) {
                 temp = it->second;
             }
-        } while (it != replace_pair_.end());
+        } while (it != replacePair_.end());
 
-        min_replace_star_.emplace_back(temp, rpair.first);
+        minReplaceStar_.emplace_back(temp, rpair.first);
     }
 }
 
 void Cse::EliminateAlongDomTree()
 {
     // Eliminate along Dominator tree (based on star structure)
-    deleted_insts_.clear();
-    for (auto pair : min_replace_star_) {
+    deletedInsts_.clear();
+    for (auto pair : minReplaceStar_) {
         pair.second->ReplaceUsers(pair.first);
-        deleted_insts_.emplace_back(pair.second);
+        deletedInsts_.emplace_back(pair.second);
     }
-    RemoveInstsIn(&deleted_insts_);
+    RemoveInstsIn(&deletedInsts_);
 }
 
 void Cse::BuildSetOfPairs(BasicBlock *block)
 {
-    same_exp_pair_.clear();
+    sameExpPair_.clear();
     auto bbl = block->GetPredsBlocks()[0];
     auto bbr = block->GetPredsBlocks()[1];
     for (auto instl : bbl->Insts()) {
-        if (!IsLegalExp(instl) || InVector(deleted_insts_, instl)) {
+        if (!IsLegalExp(instl) || InVector(deletedInsts_, instl)) {
             continue;
         }
         Exp expl = GetExp(instl);
-        if (!NotIn(same_exp_pair_, expl)) {
-            auto &pair = same_exp_pair_.at(expl);
+        if (!NotIn(sameExpPair_, expl)) {
+            auto &pair = sameExpPair_.at(expl);
             pair.first.emplace_back(instl);
             continue;
         }
-        if (!AllNotIn(same_exp_pair_, instl)) {
-            auto &pair = same_exp_pair_.at(GetExpCommutative(instl));
+        if (!AllNotIn(sameExpPair_, instl)) {
+            auto &pair = sameExpPair_.at(GetExpCommutative(instl));
             pair.first.emplace_back(instl);
             continue;
         }
         for (auto instr : bbr->Insts()) {
             if (!IsLegalExp(instr) || (NotSameExp(GetExp(instr), expl) && NotSameExp(GetExpCommutative(instr), expl)) ||
-                InVector(deleted_insts_, instr)) {
+                InVector(deletedInsts_, instr)) {
                 continue;
             }
-            if (!NotIn(same_exp_pair_, expl)) {
-                auto &pair = same_exp_pair_.at(expl);
+            if (!NotIn(sameExpPair_, expl)) {
+                auto &pair = sameExpPair_.at(expl);
                 pair.second.emplace_back(instr);
                 continue;
             }
@@ -164,7 +164,7 @@ void Cse::BuildSetOfPairs(BasicBlock *block)
             emptyl.emplace_back(instl);
             InstVector emptyr(GetGraph()->GetLocalAllocator()->Adapter());
             emptyr.emplace_back(instr);
-            same_exp_pair_.emplace(expl, std::make_pair(std::move(emptyl), std::move(emptyr)));
+            sameExpPair_.emplace(expl, std::make_pair(std::move(emptyl), std::move(emptyr)));
         }
     }
 }
@@ -183,8 +183,8 @@ void Cse::GlobalCse()
         return;
     }
 
-    deleted_insts_.clear();
-    matched_tuple_.clear();
+    deletedInsts_.clear();
+    matchedTuple_.clear();
     static constexpr size_t TWO_PREDS = 2;
     // Find out redundant insts
     for (auto bb : GetGraph()->GetBlocksRPO()) {
@@ -192,29 +192,29 @@ void Cse::GlobalCse()
             continue;
         }
         BuildSetOfPairs(bb);
-        if (same_exp_pair_.empty()) {
+        if (sameExpPair_.empty()) {
             continue;
         }
         // Build the set of matched insts
         for (auto inst : bb->Insts()) {
-            if (!IsLegalExp(inst) || AllNotIn(same_exp_pair_, inst)) {
+            if (!IsLegalExp(inst) || AllNotIn(sameExpPair_, inst)) {
                 continue;
             }
-            Exp exp = NotIn(same_exp_pair_, GetExp(inst)) ? GetExpCommutative(inst) : GetExp(inst);
-            auto &pair = same_exp_pair_.find(exp)->second;
+            Exp exp = NotIn(sameExpPair_, GetExp(inst)) ? GetExpCommutative(inst) : GetExp(inst);
+            auto &pair = sameExpPair_.find(exp)->second;
             for (auto instl : pair.first) {
                 // If one decides to enable Cse in OSR mode then
                 // ensure that inst's basic block is not OsrEntry.
-                deleted_insts_.emplace_back(inst);
+                deletedInsts_.emplace_back(inst);
                 auto lrpair = std::make_pair(instl, *(pair.second.begin()));
-                matched_tuple_.emplace_back(inst, std::move(lrpair));
+                matchedTuple_.emplace_back(inst, std::move(lrpair));
                 break;
             }
         }
     }
     // Add phi instruction
-    matched_tuple_.shrink_to_fit();
-    for (auto tuple : matched_tuple_) {
+    matchedTuple_.shrink_to_fit();
+    for (auto tuple : matchedTuple_) {
         auto inst = tuple.first;
         auto phi = GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
         inst->ReplaceUsers(phi);
@@ -223,7 +223,7 @@ void Cse::GlobalCse()
         phi->AppendInput(pair.first);
         phi->AppendInput(pair.second);
     }
-    RemoveInstsIn(&deleted_insts_);
+    RemoveInstsIn(&deletedInsts_);
 }
 
 bool Cse::RunImpl()
@@ -231,9 +231,9 @@ bool Cse::RunImpl()
     LocalCse();
     DomTreeCse();
     GlobalCse();
-    if (!is_applied_) {
+    if (!isApplied_) {
         COMPILER_LOG(DEBUG, CSE_OPT) << "Cse does not find duplicate insts";
     }
-    return is_applied_;
+    return isApplied_;
 }
 }  // namespace panda::compiler

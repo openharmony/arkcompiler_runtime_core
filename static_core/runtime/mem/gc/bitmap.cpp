@@ -33,62 +33,62 @@ void Bitmap::ClearBitsInRange(size_t begin, size_t end)
         return;
     }
 
-    auto begin_roundup = RoundUp(begin, BITSPERWORD);
-    auto fn_rounddown = [](BitmapWordType val) -> BitmapWordType {
+    auto beginRoundup = RoundUp(begin, BITSPERWORD);
+    auto fnRounddown = [](BitmapWordType val) -> BitmapWordType {
         constexpr BitmapWordType MASK = ~((static_cast<BitmapWordType>(1) << LOG_BITSPERWORD) - 1);
         return val & MASK;
     };
-    auto end_rounddown = fn_rounddown(end);
-    ClearRangeWithinWord(begin, begin_roundup);
-    ClearWords(GetWordIdx(begin_roundup), GetWordIdx(end_rounddown));
-    ClearRangeWithinWord(end_rounddown, end);
+    auto endRounddown = fnRounddown(end);
+    ClearRangeWithinWord(begin, beginRoundup);
+    ClearWords(GetWordIdx(beginRoundup), GetWordIdx(endRounddown));
+    ClearRangeWithinWord(endRounddown, end);
 }
 
-bool Bitmap::AtomicTestAndSetBit(size_t bit_offset)
+bool Bitmap::AtomicTestAndSetBit(size_t bitOffset)
 {
-    CheckBitOffset(bit_offset);
-    auto word_idx = GetWordIdx(bit_offset);
-    auto *word_addr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[word_idx]);
-    auto mask = GetBitMask(bit_offset);
-    BitmapWordType old_word;
+    CheckBitOffset(bitOffset);
+    auto wordIdx = GetWordIdx(bitOffset);
+    auto *wordAddr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[wordIdx]);
+    auto mask = GetBitMask(bitOffset);
+    BitmapWordType oldWord;
     do {
         // Atomic with acquire order reason: data race with word_addr with dependecies on reads after the load which
         // should become visible
-        old_word = word_addr->load(std::memory_order_acquire);
-        if ((old_word & mask) != 0) {
+        oldWord = wordAddr->load(std::memory_order_acquire);
+        if ((oldWord & mask) != 0) {
             return true;
         }
-    } while (!word_addr->compare_exchange_weak(old_word, old_word | mask, std::memory_order_seq_cst));
+    } while (!wordAddr->compare_exchange_weak(oldWord, oldWord | mask, std::memory_order_seq_cst));
     return false;
 }
 
-bool Bitmap::AtomicTestAndClearBit(size_t bit_offset)
+bool Bitmap::AtomicTestAndClearBit(size_t bitOffset)
 {
-    CheckBitOffset(bit_offset);
-    auto word_idx = GetWordIdx(bit_offset);
-    auto *word_addr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[word_idx]);
-    auto mask = GetBitMask(bit_offset);
-    BitmapWordType old_word;
+    CheckBitOffset(bitOffset);
+    auto wordIdx = GetWordIdx(bitOffset);
+    auto *wordAddr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[wordIdx]);
+    auto mask = GetBitMask(bitOffset);
+    BitmapWordType oldWord;
     do {
         // Atomic with acquire order reason: data race with word_addr with dependecies on reads after the load which
         // should become visible
-        old_word = word_addr->load(std::memory_order_acquire);
-        if ((old_word & mask) == 0) {
+        oldWord = wordAddr->load(std::memory_order_acquire);
+        if ((oldWord & mask) == 0) {
             return false;
         }
-    } while (!word_addr->compare_exchange_weak(old_word, old_word & (~mask), std::memory_order_seq_cst));
+    } while (!wordAddr->compare_exchange_weak(oldWord, oldWord & (~mask), std::memory_order_seq_cst));
     return true;
 }
 
-bool Bitmap::AtomicTestBit(size_t bit_offset)
+bool Bitmap::AtomicTestBit(size_t bitOffset)
 {
-    CheckBitOffset(bit_offset);
-    auto word_idx = GetWordIdx(bit_offset);
-    auto *word_addr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[word_idx]);
-    auto mask = GetBitMask(bit_offset);
+    CheckBitOffset(bitOffset);
+    auto wordIdx = GetWordIdx(bitOffset);
+    auto *wordAddr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[wordIdx]);
+    auto mask = GetBitMask(bitOffset);
     // Atomic with acquire order reason: data race with word_addr with dependecies on reads after the load which should
     // become visible
-    BitmapWordType word = word_addr->load(std::memory_order_acquire);
+    BitmapWordType word = wordAddr->load(std::memory_order_acquire);
     return (word & mask) != 0;
 }
 

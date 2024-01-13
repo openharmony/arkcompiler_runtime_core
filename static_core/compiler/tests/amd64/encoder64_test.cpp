@@ -24,6 +24,7 @@
 #include "mem/pool_manager.h"
 #include "target/amd64/target.h"
 #include "mem/base_mem_stats.h"
+#include "libpandabase/utils/utils.h"
 
 template <typename T>
 const char *TypeName();
@@ -59,7 +60,7 @@ const uint64_t ITERATION = 40;
 const uint64_t ITERATION = 4000;
 #endif
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
-static inline auto RANDOM_GENERATOR = std::mt19937_64(SEED);
+static inline auto g_randomGenerator = std::mt19937_64(SEED);
 
 // Max and min exponent on the basus of two float and double
 static const float MIN_EXP_BASE2_FLOAT = std::log2(FLT_MIN);
@@ -75,7 +76,7 @@ static const uint64_t MASK_DENORMAL_DOUBLE = 0x800FFFFFFFFFFFFF;
 template <typename T>
 static T RandomGen()
 {
-    auto gen {RANDOM_GENERATOR()};
+    auto gen {g_randomGenerator()};
 
     if constexpr (std::is_integral_v<T>) {
         return gen;
@@ -102,14 +103,14 @@ static T RandomGen()
         }
 
         // Uniform distribution floating value
-        std::uniform_real_distribution<T> dis_num(1.0, 2.0);
-        int8_t sign = (gen % 2) == 0 ? 1 : -1;
+        std::uniform_real_distribution<T> disNum(1.0F, 2.0F);
+        int8_t sign = (gen % 2U) == 0 ? 1 : -1;
         if constexpr (std::is_same_v<T, float>) {
             std::uniform_real_distribution<float> dis(MIN_EXP_BASE2_FLOAT, MAX_EXP_BASE2_FLOAT);
-            return sign * dis_num(RANDOM_GENERATOR) * std::pow(2.0F, dis(RANDOM_GENERATOR));
+            return sign * disNum(g_randomGenerator) * std::pow(2.0F, dis(g_randomGenerator));
         } else if constexpr (std::is_same_v<T, double>) {
             std::uniform_real_distribution<double> dis(MIN_EXP_BASE2_DOUBLE, MAX_EXP_BASE2_DOUBLE);
-            return sign * dis_num(RANDOM_GENERATOR) * std::pow(2.0, dis(RANDOM_GENERATOR));
+            return sign * disNum(g_randomGenerator) * std::pow(2.0F, dis(g_randomGenerator));
         }
 
         UNREACHABLE();
@@ -129,16 +130,16 @@ public:
         regfile_ = RegistersDescription::Create(allocator_, Arch::X86_64);
         callconv_ = CallingConvention::Create(allocator_, encoder_, regfile_, Arch::X86_64);
         encoder_->SetRegfile(regfile_);
-        mem_stats_ = new BaseMemStats();
-        code_alloc_ = new (std::nothrow) CodeAllocator(mem_stats_);
+        memStats_ = new BaseMemStats();
+        codeAlloc_ = new (std::nothrow) CodeAllocator(memStats_);
     }
     ~Encoder64Test() override
     {
         Logger::Destroy();
         encoder_->~Encoder();
         delete allocator_;
-        delete code_alloc_;
-        delete mem_stats_;
+        delete codeAlloc_;
+        delete memStats_;
         PoolManager::Finalize();
         panda::mem::MemConfig::Finalize();
     }
@@ -155,15 +156,15 @@ public:
 
     CodeAllocator *GetCodeAllocator()
     {
-        return code_alloc_;
+        return codeAlloc_;
     }
 
     void ResetCodeAllocator(void *ptr, size_t size)
     {
-        os::mem::MapRange<std::byte> mem_range(static_cast<std::byte *>(ptr), size);
-        mem_range.MakeReadWrite();
-        delete code_alloc_;
-        code_alloc_ = new (std::nothrow) CodeAllocator(mem_stats_);
+        os::mem::MapRange<std::byte> memRange(static_cast<std::byte *>(ptr), size);
+        memRange.MakeReadWrite();
+        delete codeAlloc_;
+        codeAlloc_ = new (std::nothrow) CodeAllocator(memStats_);
     }
 
     ArenaAllocator *GetAllocator()
@@ -188,7 +189,7 @@ public:
 
     size_t GetCursor()
     {
-        return curr_cursor_;
+        return currCursor_;
     }
 
     // Warning! Do not use multiply times with different types!
@@ -204,7 +205,7 @@ public:
     void PreWork()
     {
         // Curor need to encode multiply tests due one execution
-        curr_cursor_ = 0;
+        currCursor_ = 0;
         encoder_->SetCursorOffset(0);
         callconv_->GeneratePrologue(FrameInfo::FullPrologue());
     }
@@ -214,8 +215,8 @@ public:
     {
         if constexpr (std::is_integral_v<T>) {
             auto param = Target::Current().GetParamReg(0);
-            auto return_reg = Target::Current().GetReturnReg();
-            GetEncoder()->EncodeMov(return_reg, param);
+            auto returnReg = Target::Current().GetReturnReg();
+            GetEncoder()->EncodeMov(returnReg, param);
         }
 
         callconv_->GenerateEpilogue(FrameInfo::FullPrologue(), []() {});
@@ -225,8 +226,8 @@ public:
     void Dump(bool enabled)
     {
         if (enabled) {
-            auto size = callconv_->GetCodeSize() - curr_cursor_;
-            for (uint32_t i = curr_cursor_; i < curr_cursor_ + size;) {
+            auto size = callconv_->GetCodeSize() - currCursor_;
+            for (uint32_t i = currCursor_; i < currCursor_ + size;) {
                 i = encoder_->DisasmInstr(std::cout, i, 0);
                 std::cout << std::endl;
             }
@@ -242,23 +243,23 @@ public:
         using UExp = typename std::conditional<(sizeof(U) * BYTE_SIZE) >= WORD_SIZE, U, uint32_t>::type;
         using TExp = typename std::conditional<(sizeof(T) * BYTE_SIZE) >= WORD_SIZE, T, uint32_t>::type;
         using FunctPtr = UExp (*)(TExp data);
-        auto size = callconv_->GetCodeSize() - curr_cursor_;
+        auto size = callconv_->GetCodeSize() - currCursor_;
         void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
-        void *ptr = code_alloc_->AllocateCode(size, offset);
+        void *ptr = codeAlloc_->AllocateCode(size, offset);
         auto func = reinterpret_cast<FunctPtr>(ptr);
         // Extend types less then 32bit (i8, i16)
-        const UExp curr_result = func(static_cast<TExp>(param));
+        const UExp currResult = func(static_cast<TExp>(param));
         ResetCodeAllocator(ptr, size);
         bool ret = false;
         if constexpr (std::is_floating_point_v<T> || std::is_floating_point_v<U>) {
-            ret = (curr_result == result && std::signbit(curr_result) == std::signbit(result)) ||
-                  (std::isnan(curr_result) && std::isnan(result));
+            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) ||
+                  (std::isnan(currResult) && std::isnan(result));
         } else {
-            ret = (curr_result - result == 0);
+            ret = (currResult - result == 0);
         }
         if (!ret) {
             std::cerr << std::hex << "Failed CallCode for param=" << param << " and result=" << result
-                      << " current_reslt=" << curr_result << "\n";
+                      << " current_reslt=" << currResult << "\n";
             if constexpr (std::is_floating_point_v<T> || std::is_floating_point_v<U>) {
                 std::cerr << "In binary :";
                 if constexpr (std::is_same<double, T>::value) {
@@ -268,10 +269,10 @@ public:
                 }
                 if constexpr (std::is_same<double, U>::value) {
                     std::cerr << " reslt=" << bit_cast<uint64_t>(result);
-                    std::cerr << " current_reslt=" << bit_cast<uint64_t>(curr_result);
+                    std::cerr << " current_reslt=" << bit_cast<uint64_t>(currResult);
                 } else if constexpr (std::is_same<float, U>::value) {
                     std::cerr << " result=" << bit_cast<uint32_t>(result);
-                    std::cerr << " current_reslt=" << bit_cast<uint32_t>(curr_result);
+                    std::cerr << " current_reslt=" << bit_cast<uint32_t>(currResult);
                 }
                 std::cerr << "\n";
             }
@@ -286,22 +287,22 @@ public:
         using UExp = typename std::conditional<(sizeof(U) * BYTE_SIZE) >= WORD_SIZE, U, uint32_t>::type;
         using TExp = typename std::conditional<(sizeof(T) * BYTE_SIZE) >= WORD_SIZE, T, uint32_t>::type;
         using FunctPtr = UExp (*)(TExp param1, TExp param2);
-        auto size = callconv_->GetCodeSize() - curr_cursor_;
+        auto size = callconv_->GetCodeSize() - currCursor_;
         void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
-        void *ptr = code_alloc_->AllocateCode(size, offset);
+        void *ptr = codeAlloc_->AllocateCode(size, offset);
         auto func = reinterpret_cast<FunctPtr>(ptr);
-        const UExp curr_result = func(static_cast<TExp>(param1), static_cast<TExp>(param2));
+        const UExp currResult = func(static_cast<TExp>(param1), static_cast<TExp>(param2));
         ResetCodeAllocator(ptr, size);
         bool ret = false;
         if constexpr (std::is_same<float, T>::value || std::is_same<double, T>::value) {
-            ret = (curr_result == result && std::signbit(curr_result) == std::signbit(result)) ||
-                  (std::isnan(curr_result) && std::isnan(result));
+            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) ||
+                  (std::isnan(currResult) && std::isnan(result));
         } else {
-            ret = (curr_result - result == 0);
+            ret = (currResult - result == 0);
         }
         if (!ret) {
             std::cerr << "Failed CallCode for param1=" << param1 << " param2=" << param2 << " and result=" << result
-                      << " current_result=" << curr_result << "\n";
+                      << " current_result=" << currResult << "\n";
             if constexpr (std::is_floating_point_v<T> || std::is_floating_point_v<U>) {
                 std::cerr << "In binary :";
                 if constexpr (std::is_same<double, T>::value) {
@@ -311,10 +312,10 @@ public:
                 }
                 if constexpr (std::is_same<double, U>::value) {
                     std::cerr << " reslt=" << bit_cast<uint64_t>(result);
-                    std::cerr << " current_reslt=" << bit_cast<uint64_t>(curr_result);
+                    std::cerr << " current_reslt=" << bit_cast<uint64_t>(currResult);
                 } else if constexpr (std::is_same<float, U>::value) {
                     std::cerr << " result=" << bit_cast<uint32_t>(result);
-                    std::cerr << " current_result=" << bit_cast<uint32_t>(curr_result);
+                    std::cerr << " current_result=" << bit_cast<uint32_t>(currResult);
                 }
                 std::cerr << "\n";
             }
@@ -328,31 +329,31 @@ public:
     {
         using TExp = typename std::conditional<(sizeof(T) * BYTE_SIZE) >= WORD_SIZE, T, uint32_t>::type;
         using FunctPtr = TExp (*)(TExp data);
-        auto size = callconv_->GetCodeSize() - curr_cursor_;
+        auto size = callconv_->GetCodeSize() - currCursor_;
         void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
-        void *ptr = code_alloc_->AllocateCode(size, offset);
+        void *ptr = codeAlloc_->AllocateCode(size, offset);
         auto func = reinterpret_cast<FunctPtr>(ptr);
-        const TExp curr_result = func(static_cast<TExp>(param));
+        const TExp currResult = func(static_cast<TExp>(param));
         ResetCodeAllocator(ptr, size);
         bool ret = false;
         if constexpr (std::is_same<float, T>::value || std::is_same<double, T>::value) {
-            ret = (curr_result == result && std::signbit(curr_result) == std::signbit(result)) ||
-                  (std::isnan(curr_result) && std::isnan(result));
+            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) ||
+                  (std::isnan(currResult) && std::isnan(result));
         } else {
-            ret = (curr_result - result == 0);
+            ret = (currResult - result == 0);
         }
         if (!ret) {
             std::cerr << std::hex << "Failed CallCode for param=" << param << " and result=" << result
-                      << " current_result=" << curr_result << "\n";
+                      << " current_result=" << currResult << "\n";
             if constexpr (std::is_floating_point_v<T>) {
                 std::cerr << "In binary :";
                 if constexpr (std::is_same<double, T>::value) {
                     std::cerr << " param=" << bit_cast<uint64_t>(param);
                     std::cerr << " reslt=" << bit_cast<uint64_t>(result);
-                    std::cerr << " curr_reslt=" << bit_cast<uint64_t>(curr_result);
+                    std::cerr << " curr_reslt=" << bit_cast<uint64_t>(currResult);
                 } else if constexpr (std::is_same<float, T>::value) {
                     std::cerr << " param=" << bit_cast<uint32_t>(param);
-                    std::cerr << " curr_result=" << bit_cast<uint32_t>(curr_result);
+                    std::cerr << " curr_result=" << bit_cast<uint32_t>(currResult);
                 }
                 std::cerr << "\n";
             }
@@ -366,32 +367,32 @@ public:
     {
         using TExp = typename std::conditional<(sizeof(T) * BYTE_SIZE) >= WORD_SIZE, T, uint32_t>::type;
         using FunctPtr = TExp (*)(TExp param1, TExp param2);
-        auto size = callconv_->GetCodeSize() - curr_cursor_;
+        auto size = callconv_->GetCodeSize() - currCursor_;
         void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
-        void *ptr = code_alloc_->AllocateCode(size, offset);
+        void *ptr = codeAlloc_->AllocateCode(size, offset);
         auto func = reinterpret_cast<FunctPtr>(ptr);
-        const TExp curr_result = func(static_cast<TExp>(param1), static_cast<TExp>(param2));
+        const TExp currResult = func(static_cast<TExp>(param1), static_cast<TExp>(param2));
         ResetCodeAllocator(ptr, size);
         bool ret = false;
         if constexpr (std::is_same<float, T>::value || std::is_same<double, T>::value) {
-            ret = (curr_result == result && std::signbit(curr_result) == std::signbit(result)) ||
-                  (std::isnan(curr_result) && std::isnan(result));
+            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) ||
+                  (std::isnan(currResult) && std::isnan(result));
         } else {
-            ret = (curr_result - result == 0);
+            ret = (currResult - result == 0);
         }
         if (!ret) {
             std::cerr << "Failed CallCode for param1=" << param1 << " param2=" << param2 << " and result=" << result
-                      << " curr_result=" << curr_result << "\n";
+                      << " curr_result=" << currResult << "\n";
             if constexpr (std::is_floating_point_v<T>) {
                 std::cerr << "In binary :";
                 if constexpr (std::is_same<double, T>::value) {
                     std::cerr << " param1=" << bit_cast<uint64_t>(param1) << " param2=" << bit_cast<uint64_t>(param2);
                     std::cerr << " reslt=" << bit_cast<uint64_t>(result)
-                              << " curr_result=" << bit_cast<uint64_t>(curr_result);
+                              << " curr_result=" << bit_cast<uint64_t>(currResult);
                 } else if constexpr (std::is_same<float, T>::value) {
                     std::cerr << " param1=" << bit_cast<uint32_t>(param1) << " param2=" << bit_cast<uint32_t>(param2);
                     std::cerr << " result=" << bit_cast<uint32_t>(result)
-                              << " curr_result=" << bit_cast<uint32_t>(curr_result);
+                              << " curr_result=" << bit_cast<uint32_t>(currResult);
                 }
                 std::cerr << "\n";
             }
@@ -404,26 +405,26 @@ public:
     T CallCodeStore(uint64_t address, T param)
     {
         using FunctPtr = T (*)(uint64_t param1, T param2);
-        auto size = callconv_->GetCodeSize() - curr_cursor_;
+        auto size = callconv_->GetCodeSize() - currCursor_;
         void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
-        void *ptr = code_alloc_->AllocateCode(size, offset);
+        void *ptr = codeAlloc_->AllocateCode(size, offset);
         auto func = reinterpret_cast<FunctPtr>(ptr);
-        const T curr_result = func(address, param);
+        const T currResult = func(address, param);
         ResetCodeAllocator(ptr, size);
-        return curr_result;
+        return currResult;
     }
 
     template <typename T, typename U>
     U CallCodeCall(T param1, T param2)
     {
         using FunctPtr = U (*)(T param1, T param2);
-        auto size = callconv_->GetCodeSize() - curr_cursor_;
+        auto size = callconv_->GetCodeSize() - currCursor_;
         void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
-        void *ptr = code_alloc_->AllocateCode(size, offset);
+        void *ptr = codeAlloc_->AllocateCode(size, offset);
         auto func = reinterpret_cast<FunctPtr>(ptr);
-        const U curr_result = func(param1, param2);
+        const U currResult = func(param1, param2);
         ResetCodeAllocator(ptr, size);
-        return curr_result;
+        return currResult;
     }
 
 private:
@@ -431,9 +432,9 @@ private:
     Encoder *encoder_ {nullptr};
     RegistersDescription *regfile_ {nullptr};
     CallingConvention *callconv_ {nullptr};
-    CodeAllocator *code_alloc_ {nullptr};
-    BaseMemStats *mem_stats_ {nullptr};
-    size_t curr_cursor_ {0};
+    CodeAllocator *codeAlloc_ {nullptr};
+    BaseMemStats *memStats_ {nullptr};
+    size_t currCursor_ {0};
 };
 
 template <typename T>
@@ -607,8 +608,8 @@ bool TestMov2(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<Src>) {
         Src nan = std::numeric_limits<Src>::quiet_NaN();
-        Dst dst_nan = bit_cast<Dst>(nan);
-        if (!test->CallCode<Src, Dst>(nan, dst_nan)) {
+        Dst dstNan = bit_cast<Dst>(nan);
+        if (!test->CallCode<Src, Dst>(nan, dstNan)) {
             return false;
         }
     }
@@ -700,7 +701,7 @@ bool TestBitTestAndBranch(Encoder64Test *test, T value, int pos, uint32_t expect
 {
     test->PreWork();
     auto param = test->GetParameter(TypeInfo(T(0)));
-    auto ret_val = Target::Current().GetParamReg(0);
+    auto retVal = Target::Current().GetParamReg(0);
     auto label = test->GetEncoder()->CreateLabel();
     auto end = test->GetEncoder()->CreateLabel();
 
@@ -709,11 +710,11 @@ bool TestBitTestAndBranch(Encoder64Test *test, T value, int pos, uint32_t expect
     } else {
         test->GetEncoder()->EncodeBitTestAndBranch(label, param, pos, false);
     }
-    test->GetEncoder()->EncodeMov(ret_val, Imm(1));
+    test->GetEncoder()->EncodeMov(retVal, Imm(1));
     test->GetEncoder()->EncodeJump(end);
 
     test->GetEncoder()->BindLabel(label);
-    test->GetEncoder()->EncodeMov(ret_val, Imm(0));
+    test->GetEncoder()->EncodeMov(retVal, Imm(0));
     test->GetEncoder()->BindLabel(end);
 
     test->PostWork<T>();
@@ -737,8 +738,8 @@ bool TestBitTestAndBranch(Encoder64Test *test, T value, int pos, uint32_t expect
 template <typename T, bool NOT_ZERO = false>
 bool TestBitTestAndBranch(Encoder64Test *test)
 {
-    size_t max_pos = std::is_same<uint64_t, T>::value ? 64 : 32;
-    for (size_t i = 0; i < max_pos; i++) {
+    size_t maxPos = std::is_same<uint64_t, T>::value ? 64 : 32;
+    for (size_t i = 0; i < maxPos; i++) {
         T value = static_cast<T>(1) << i;
         if (!TestBitTestAndBranch<T, NOT_ZERO>(test, value, i, NOT_ZERO ? 0 : 1)) {
             return false;
@@ -756,18 +757,18 @@ bool TestAddOverflow(Encoder64Test *test, T value1, T value2, T expected)
     test->PreWork();
     auto param1 = test->GetParameter(TypeInfo(T(0)), 0);
     auto param2 = test->GetParameter(TypeInfo(T(0)), 1);
-    auto ret_val = Target::Current().GetParamReg(0, TypeInfo(T(0)));
+    auto retVal = Target::Current().GetParamReg(0, TypeInfo(T(0)));
     auto label = test->GetEncoder()->CreateLabel();
     auto end = test->GetEncoder()->CreateLabel();
 
     if (IS_EQUAL) {
-        test->GetEncoder()->EncodeAddOverflow(label, ret_val, param1, param2, Condition::VS);
+        test->GetEncoder()->EncodeAddOverflow(label, retVal, param1, param2, Condition::VS);
         test->GetEncoder()->EncodeJump(end);
         test->GetEncoder()->BindLabel(label);
-        test->GetEncoder()->EncodeMov(ret_val, Imm(0));
+        test->GetEncoder()->EncodeMov(retVal, Imm(0));
     } else {
-        test->GetEncoder()->EncodeAddOverflow(end, ret_val, param1, param2, Condition::VC);
-        test->GetEncoder()->EncodeMov(ret_val, Imm(0));
+        test->GetEncoder()->EncodeAddOverflow(end, retVal, param1, param2, Condition::VC);
+        test->GetEncoder()->EncodeMov(retVal, Imm(0));
     }
 
     test->GetEncoder()->BindLabel(end);
@@ -822,18 +823,18 @@ bool TestSubOverflow(Encoder64Test *test, T value1, T value2, T expected)
     test->PreWork();
     auto param1 = test->GetParameter(TypeInfo(T(0)), 0);
     auto param2 = test->GetParameter(TypeInfo(T(0)), 1);
-    auto ret_val = Target::Current().GetParamReg(0, TypeInfo(T(0)));
+    auto retVal = Target::Current().GetParamReg(0, TypeInfo(T(0)));
     auto label = test->GetEncoder()->CreateLabel();
     auto end = test->GetEncoder()->CreateLabel();
 
     if (IS_EQUAL) {
-        test->GetEncoder()->EncodeSubOverflow(label, ret_val, param1, param2, Condition::VS);
+        test->GetEncoder()->EncodeSubOverflow(label, retVal, param1, param2, Condition::VS);
         test->GetEncoder()->EncodeJump(end);
         test->GetEncoder()->BindLabel(label);
-        test->GetEncoder()->EncodeMov(ret_val, Imm(0));
+        test->GetEncoder()->EncodeMov(retVal, Imm(0));
     } else {
-        test->GetEncoder()->EncodeSubOverflow(end, ret_val, param1, param2, Condition::VC);
-        test->GetEncoder()->EncodeMov(ret_val, Imm(0));
+        test->GetEncoder()->EncodeSubOverflow(end, retVal, param1, param2, Condition::VC);
+        test->GetEncoder()->EncodeMov(retVal, Imm(0));
     }
 
     test->GetEncoder()->BindLabel(end);
@@ -915,25 +916,25 @@ bool TestJumpCCMainLoop(Encoder64Test *test)
 template <typename T, Condition CC>
 bool TestJumpCC(Encoder64Test *test)
 {
-    bool is_signed = std::is_signed<T>::value;
+    bool isSigned = std::is_signed<T>::value;
     // Initialize
     test->PreWork();
     // First type-dependency
     auto param = test->GetParameter(TypeInfo(T(0)));
     // Main test call
-    auto ret_val = Target::Current().GetParamReg(0);
+    auto retVal = Target::Current().GetParamReg(0);
 
     auto tsucc = test->GetEncoder()->CreateLabel();
     auto end = test->GetEncoder()->CreateLabel();
 
     test->GetEncoder()->EncodeJump(tsucc, param, CC);
     test->GetEncoder()->EncodeMov(param, Imm(0x0));
-    test->GetEncoder()->EncodeMov(ret_val, Imm(0x1));
+    test->GetEncoder()->EncodeMov(retVal, Imm(0x1));
     test->GetEncoder()->EncodeJump(end);
 
     test->GetEncoder()->BindLabel(tsucc);
     test->GetEncoder()->EncodeMov(param, Imm(0x0));
-    test->GetEncoder()->EncodeMov(ret_val, Imm(0x0));
+    test->GetEncoder()->EncodeMov(retVal, Imm(0x0));
     test->GetEncoder()->BindLabel(end);
     // test->GetEncoder()->EncodeReturn(); < encoded in PostWork
 
@@ -1008,7 +1009,7 @@ TEST_F(Encoder64Test, SubOverflow)
 template <typename T>
 bool TestLdr(Encoder64Test *test)
 {
-    bool is_signed = std::is_signed<T>::value;
+    bool isSigned = std::is_signed<T>::value;
     // Initialize
     test->PreWork();
     // First type-dependency
@@ -1016,10 +1017,10 @@ bool TestLdr(Encoder64Test *test)
 
     auto param = Target::Current().GetParamReg(0);
     // But return value is cutted by loaded value
-    auto ret_val = test->GetParameter(TypeInfo(T(0)));
+    auto retVal = test->GetParameter(TypeInfo(T(0)));
 
     auto mem = MemRef(param);
-    test->GetEncoder()->EncodeLdr(ret_val, is_signed, mem);
+    test->GetEncoder()->EncodeLdr(retVal, isSigned, mem);
 
     // Finalize
     test->PostWork<T>();
@@ -1070,13 +1071,13 @@ bool TestStr(Encoder64Test *test)
     // First type-dependency
     auto param = test->GetParameter(TypeInfo(int64_t(0)), 0);
     // Data to be stored:
-    auto stored_value = test->GetParameter(TypeInfo(T(0)), 1);
+    auto storedValue = test->GetParameter(TypeInfo(T(0)), 1);
     if constexpr ((std::is_same<float, T>::value) || std::is_same<double, T>::value) {
-        stored_value = test->GetParameter(TypeInfo(T(0)), 0);
+        storedValue = test->GetParameter(TypeInfo(T(0)), 0);
     }
 
     auto mem = MemRef(param);
-    test->GetEncoder()->EncodeStr(stored_value, mem);
+    test->GetEncoder()->EncodeStr(storedValue, mem);
     // Finalize
     test->PostWork<T>();
 
@@ -1092,16 +1093,16 @@ bool TestStr(Encoder64Test *test)
     for (uint64_t i = 0; i < ITERATION; ++i) {
         // Second type-dependency
         T tmp = RandomGen<T>();
-        T ret_data = 0;
-        T *ptr = &ret_data;
+        T retData = 0;
+        T *ptr = &retData;
 
         // Test : param - Pointer to value
         //        return - value (loaded by ptr)
         // Value is resulting type, but call is ptr_type
         auto result = test->CallCodeStore<T>(reinterpret_cast<int64_t>(ptr), tmp);
         // Store must change ret_data value
-        if (!(ret_data == tmp || (std::is_floating_point_v<T> && std::isnan(ret_data) && std::isnan(tmp)))) {
-            std::cerr << std::hex << "Ldr test fail " << tmp << " ret_data = " << ret_data << "\n";
+        if (!(retData == tmp || (std::is_floating_point_v<T> && std::isnan(retData) && std::isnan(tmp)))) {
+            std::cerr << std::hex << "Ldr test fail " << tmp << " ret_data = " << retData << "\n";
             return false;
         }
     }
@@ -1142,7 +1143,7 @@ bool Foo(uint32_t param1, uint32_t param2)
 
 using FunctPtr = bool (*)(uint32_t param1, uint32_t param2);
 
-FunctPtr FOO_PTR = &Foo;
+FunctPtr g_fooPtr = &Foo;
 
 // Call Test
 TEST_F(Encoder64Test, CallTest)
@@ -1150,7 +1151,7 @@ TEST_F(Encoder64Test, CallTest)
     PreWork();
 
     // Call foo
-    GetEncoder()->MakeCall(reinterpret_cast<void *>(FOO_PTR));
+    GetEncoder()->MakeCall(reinterpret_cast<void *>(g_fooPtr));
 
     // return value - moved to return value
     PostWork<float>();
@@ -1181,14 +1182,14 @@ TEST_F(Encoder64Test, CallTest)
 
         // first template arg - parameter type, second - return type
         auto result = CallCodeCall<uint32_t, bool>(tmp1, tmp2);
-        auto ret_data = (tmp1 == tmp2);
+        auto retData = (tmp1 == tmp2);
 
         // Store must change ret_data value
-        if (result != ret_data) {
-            std::cerr << std::hex << "Call test fail tmp1=" << tmp1 << " tmp2=" << tmp2 << " ret_data = " << ret_data
+        if (result != retData) {
+            std::cerr << std::hex << "Call test fail tmp1=" << tmp1 << " tmp2=" << tmp2 << " ret_data = " << retData
                       << " result =" << result << "\n";
         }
-        EXPECT_EQ(result, ret_data);
+        EXPECT_EQ(result, retData);
     }
 }
 
@@ -2205,7 +2206,7 @@ bool TestCmp(Encoder64Test *test)
 }
 
 template <typename T>
-bool TestFcmp(Encoder64Test *test, bool is_fcmpg)
+bool TestFcmp(Encoder64Test *test, bool isFcmpg)
 {
     static_assert(std::is_floating_point_v<T>);
     // Initialize
@@ -2217,7 +2218,7 @@ bool TestFcmp(Encoder64Test *test, bool is_fcmpg)
     auto param2 = test->GetParameter(TypeInfo(T(0)), 1);
 
     // Main test call
-    test->GetEncoder()->EncodeCmp(output, param1, param2, is_fcmpg ? Condition::MI : Condition::LT);
+    test->GetEncoder()->EncodeCmp(output, param1, param2, isFcmpg ? Condition::MI : Condition::LT);
 
     // Finalize
     test->PostWork<int>();
@@ -2241,7 +2242,7 @@ bool TestFcmp(Encoder64Test *test, bool is_fcmpg)
 
         int32_t result {0};
         if (std::isnan(tmp1) || std::isnan(tmp2)) {
-            result = is_fcmpg ? 1 : -1;
+            result = isFcmpg ? 1 : -1;
         } else {
             result = compare(tmp1, tmp2);
         }
@@ -2255,13 +2256,13 @@ bool TestFcmp(Encoder64Test *test, bool is_fcmpg)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-        if (!test->CallCode<T, int32_t>(nan, 5.0, is_fcmpg ? 1 : -1)) {
+        if (!test->CallCode<T, int32_t>(nan, 5.0_D, isFcmpg ? 1 : -1)) {
             return false;
         }
-        if (!test->CallCode<T, int32_t>(5.0, nan, is_fcmpg ? 1 : -1)) {
+        if (!test->CallCode<T, int32_t>(5.0_D, nan, isFcmpg ? 1 : -1)) {
             return false;
         }
-        if (!test->CallCode<T, int32_t>(nan, nan, is_fcmpg ? 1 : -1)) {
+        if (!test->CallCode<T, int32_t>(nan, nan, isFcmpg ? 1 : -1)) {
             return false;
         }
     }
@@ -2343,10 +2344,10 @@ bool TestCompare(Encoder64Test *test)
     // First type-dependency
     auto param1 = test->GetParameter(TypeInfo(T(0)), 0);
     auto param2 = test->GetParameter(TypeInfo(T(0)), 1);
-    auto ret_val = std::is_floating_point_v<T> ? Target::Current().GetReturnReg() : Target::Current().GetParamReg(0);
+    auto retVal = std::is_floating_point_v<T> ? Target::Current().GetReturnReg() : Target::Current().GetParamReg(0);
 
     // Main test call
-    test->GetEncoder()->EncodeCompare(ret_val, param1, param2, std::is_signed_v<T> ? Condition::GE : Condition::HS);
+    test->GetEncoder()->EncodeCompare(retVal, param1, param2, std::is_signed_v<T> ? Condition::GE : Condition::HS);
 
     // Finalize
     test->PostWork<T>();
@@ -2474,17 +2475,17 @@ bool TestCast(Encoder64Test *test)
         DstExt dst {};
 
         if (std::is_floating_point<Src>() && !std::is_floating_point<Dst>()) {
-            auto min_int = std::numeric_limits<Dst>::min();
-            auto max_int = std::numeric_limits<Dst>::max();
-            auto float_min_int = static_cast<Src>(min_int);
-            auto float_max_int = static_cast<Src>(max_int);
+            auto minInt = std::numeric_limits<Dst>::min();
+            auto maxInt = std::numeric_limits<Dst>::max();
+            auto floatMinInt = static_cast<Src>(minInt);
+            auto floatMaxInt = static_cast<Src>(maxInt);
 
-            if (src > float_min_int) {
-                dst = src < float_max_int ? static_cast<Dst>(src) : max_int;
+            if (src > floatMinInt) {
+                dst = src < floatMaxInt ? static_cast<Dst>(src) : maxInt;
             } else if (std::isnan(src)) {
                 dst = 0;
             } else {
-                dst = min_int;
+                dst = minInt;
             }
         } else {
             dst = static_cast<DstExt>(static_cast<Dst>(src));
@@ -2634,16 +2635,16 @@ TEST_F(Encoder64Test, CastTest)
 template <typename T>
 bool TestDiv(Encoder64Test *test)
 {
-    bool is_signed = std::is_signed<T>::value;
+    bool isSigned = std::is_signed<T>::value;
 
     test->PreWork();
 
     // First type-dependency
-    auto param_1 = test->GetParameter(TypeInfo(T(0)), 0);
-    auto param_2 = test->GetParameter(TypeInfo(T(0)), 1);
+    auto param1 = test->GetParameter(TypeInfo(T(0)), 0);
+    auto param2 = test->GetParameter(TypeInfo(T(0)), 1);
 
     // Main test call
-    test->GetEncoder()->EncodeDiv(param_1, is_signed, param_1, param_2);
+    test->GetEncoder()->EncodeDiv(param1, isSigned, param1, param2);
 
     // Finalize
     test->PostWork<T>();
@@ -2706,16 +2707,16 @@ TEST_F(Encoder64Test, DivTest)
 template <typename T>
 bool TestMod(Encoder64Test *test)
 {
-    bool is_signed = std::is_signed<T>::value;
+    bool isSigned = std::is_signed<T>::value;
 
     test->PreWork();
 
     // First type-dependency
-    auto param_1 = test->GetParameter(TypeInfo(T(0)), 0);
-    auto param_2 = test->GetParameter(TypeInfo(T(0)), 1);
+    auto param1 = test->GetParameter(TypeInfo(T(0)), 0);
+    auto param2 = test->GetParameter(TypeInfo(T(0)), 1);
 
     // Main test call
-    test->GetEncoder()->EncodeMod(param_1, is_signed, param_1, param_2);
+    test->GetEncoder()->EncodeMod(param1, isSigned, param1, param2);
 
     // Finalize
     test->PostWork<T>();
@@ -2803,37 +2804,37 @@ bool TestParamMainLoop(FunctionPtr func)
     // Main test loop:
     for (uint64_t i = 0; i < ITERATION; ++i) {
         // Second type-dependency
-        auto param_0 = RandomGen<uint32_t>();
-        auto param_1 = RandomGen<uint64_t>();
-        auto param_2 = RandomGen<int32_t>();
-        auto param_3 = RandomGen<int64_t>();
-        auto param_4 = RandomGen<int32_t>();
-        auto param_5 = RandomGen<int32_t>();
+        auto param0 = RandomGen<uint32_t>();
+        auto param1 = RandomGen<uint64_t>();
+        auto param2 = RandomGen<int32_t>();
+        auto param3 = RandomGen<int64_t>();
+        auto param4 = RandomGen<int32_t>();
+        auto param5 = RandomGen<int32_t>();
 
         // Main check - compare parameter and
         // return value
-        const T curr_result = func(param_0, param_1, param_2, param_3, param_4, param_5);
+        const T currResult = func(param0, param1, param2, param3, param4, param5);
         T result;
         if constexpr (ID == 0) {
-            result = param_0;
+            result = param0;
         }
         if constexpr (ID == 1) {
-            result = param_1;
+            result = param1;
         }
         if constexpr (ID == 2) {
-            result = param_2;
+            result = param2;
         }
         if constexpr (ID == 3) {
-            result = param_3;
+            result = param3;
         }
         if constexpr (ID == 4) {
-            result = param_4;
+            result = param4;
         }
         if constexpr (ID == 5) {
-            result = param_5;
+            result = param5;
         }
 
-        if (curr_result != result) {
+        if (currResult != result) {
             return false;
         };
     }
@@ -2843,28 +2844,28 @@ bool TestParamMainLoop(FunctionPtr func)
 template <int ID, typename T>
 bool TestParam(Encoder64Test *test)
 {
-    bool is_signed = std::is_signed<T>::value;
+    bool isSigned = std::is_signed<T>::value;
 
     constexpr std::array<TypeInfo, 6> PARAMS {INT32_TYPE, INT64_TYPE, INT32_TYPE, INT64_TYPE, INT32_TYPE, INT32_TYPE};
-    TypeInfo curr_param = PARAMS[ID];
+    TypeInfo currParam = PARAMS[ID];
 
-    auto param_info = test->GetCallconv()->GetParameterInfo(0);
-    auto par = param_info->GetNativeParam(PARAMS[0]);
+    auto paramInfo = test->GetCallconv()->GetParameterInfo(0);
+    auto par = paramInfo->GetNativeParam(PARAMS[0]);
     // First ret value geted
     for (int i = 1; i <= ID; ++i) {
-        par = param_info->GetNativeParam(PARAMS[i]);
+        par = paramInfo->GetNativeParam(PARAMS[i]);
     }
 
     test->PreWork();
 
-    auto ret_reg = test->GetParameter(curr_param, 0);
+    auto retReg = test->GetParameter(currParam, 0);
 
     // Main test call
     if (std::holds_alternative<Reg>(par)) {
-        test->GetEncoder()->EncodeMov(ret_reg, std::get<Reg>(par));
+        test->GetEncoder()->EncodeMov(retReg, std::get<Reg>(par));
     } else {
         auto mem = MemRef(Target::Current().GetStackReg(), std::get<uint8_t>(par) * sizeof(uint32_t));
-        test->GetEncoder()->EncodeLdr(ret_reg, is_signed, mem);
+        test->GetEncoder()->EncodeLdr(retReg, isSigned, mem);
     }
 
     // If encode unsupported - now print error
@@ -2993,7 +2994,7 @@ bool TestSelectTest(Encoder64Test *test)
     auto param1 = test->GetParameter(TypeInfo(T(0)), 1);
     auto param2 = test->GetParameter(TypeInfo(uint32_t(0)), 2);
     auto param3 = test->GetParameter(TypeInfo(uint32_t(0)), 3);
-    [[maybe_unused]] T imm_value = RandomGen<T>();
+    [[maybe_unused]] T immValue = RandomGen<T>();
 
     // Main test call
     test->GetEncoder()->EncodeMov(param2, Imm(1));
@@ -3001,7 +3002,7 @@ bool TestSelectTest(Encoder64Test *test)
 
     if constexpr (IS_IMM) {
         test->GetEncoder()->EncodeSelectTest(Reg(param0.GetId(), TypeInfo(uint32_t(0))), param2, param3, param0,
-                                             Imm(imm_value), CC);
+                                             Imm(immValue), CC);
     } else {
         test->GetEncoder()->EncodeSelectTest(Reg(param0.GetId(), TypeInfo(uint32_t(0))), param2, param3, param0, param1,
                                              CC);
@@ -3024,13 +3025,13 @@ bool TestSelectTest(Encoder64Test *test)
         T tmp1;
 
         if constexpr (IS_IMM) {
-            tmp1 = imm_value;
+            tmp1 = immValue;
         } else {
             tmp1 = RandomGen<T>();
         }
 
-        T and_res = tmp0 & tmp1;                                           // NOLINT(hicpp-signed-bitwise)
-        bool res = CC == Condition::TST_EQ ? and_res == 0 : and_res != 0;  // NOLINT(hicpp-signed-bitwise)
+        T andRes = tmp0 & tmp1;                                          // NOLINT(hicpp-signed-bitwise)
+        bool res = CC == Condition::TST_EQ ? andRes == 0 : andRes != 0;  // NOLINT(hicpp-signed-bitwise)
 
         // Main check - compare parameter and return value
         if (!test->CallCode<T, bool>(tmp0, tmp1, res)) {
@@ -3127,23 +3128,23 @@ bool TestJumpTest(Encoder64Test *test)
     // First type-dependency
     auto param0 = test->GetParameter(TypeInfo(T(0)), 0);
     auto param1 = test->GetParameter(TypeInfo(T(0)), 1);
-    auto ret_val = Target::Current().GetParamReg(0);
+    auto retVal = Target::Current().GetParamReg(0);
 
-    auto true_branch = test->GetEncoder()->CreateLabel();
+    auto trueBranch = test->GetEncoder()->CreateLabel();
     auto end = test->GetEncoder()->CreateLabel();
-    [[maybe_unused]] T imm_value = RandomGen<T>();
+    [[maybe_unused]] T immValue = RandomGen<T>();
 
     // Main test call
     if constexpr (IS_IMM) {
-        test->GetEncoder()->EncodeJumpTest(true_branch, param0, Imm(imm_value), CC);
+        test->GetEncoder()->EncodeJumpTest(trueBranch, param0, Imm(immValue), CC);
     } else {
-        test->GetEncoder()->EncodeJumpTest(true_branch, param0, param1, CC);
+        test->GetEncoder()->EncodeJumpTest(trueBranch, param0, param1, CC);
     }
-    test->GetEncoder()->EncodeMov(ret_val, Imm(0));
+    test->GetEncoder()->EncodeMov(retVal, Imm(0));
     test->GetEncoder()->EncodeJump(end);
 
-    test->GetEncoder()->BindLabel(true_branch);
-    test->GetEncoder()->EncodeMov(ret_val, Imm(1));
+    test->GetEncoder()->BindLabel(trueBranch);
+    test->GetEncoder()->EncodeMov(retVal, Imm(1));
 
     test->GetEncoder()->BindLabel(end);
     // Finalize
@@ -3163,7 +3164,7 @@ bool TestJumpTest(Encoder64Test *test)
         T tmp1 = RandomGen<T>();
         T tmp2;
         if constexpr (IS_IMM) {
-            tmp2 = imm_value;
+            tmp2 = immValue;
         } else {
             tmp2 = RandomGen<T>();
         }

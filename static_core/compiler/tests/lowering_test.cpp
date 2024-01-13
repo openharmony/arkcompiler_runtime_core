@@ -14,6 +14,7 @@
  */
 
 #include "unit_test.h"
+#include "libpandabase/utils/utils.h"
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/optimizations/cleanup.h"
@@ -324,26 +325,26 @@ TEST_F(LoweringTest, SaveStateTest)
     EXPECT_FALSE(INS(4U).HasUsers());
     EXPECT_TRUE(INS(5U).HasUsers());
 
-    auto save_state = INS(8U).CastToSaveState();
-    auto safe_point = INS(11U).CastToSafePoint();
+    auto saveState = INS(8U).CastToSaveState();
+    auto safePoint = INS(11U).CastToSafePoint();
 
-    EXPECT_EQ(save_state->GetInputsCount(), 2U);
-    EXPECT_EQ(save_state->GetImmediatesCount(), 4U);
-    EXPECT_EQ((*save_state->GetImmediates())[0U].value, (bit_cast<uint64_t, uint64_t>(0U)));
-    EXPECT_EQ((*save_state->GetImmediates())[1U].value, (bit_cast<uint64_t, uint64_t>(1U)));
-    EXPECT_EQ((*save_state->GetImmediates())[2U].value, (bit_cast<uint64_t, double>(0.5)));
-    EXPECT_EQ((*save_state->GetImmediates())[3U].value, (bit_cast<uint64_t, uint64_t>(50U)));
-    EXPECT_EQ(save_state->GetInput(0U).GetInst(), &INS(0U));
-    EXPECT_EQ(save_state->GetInput(1U).GetInst(), &INS(5U));
-    EXPECT_EQ(save_state->GetVirtualRegister(0U).Value(), 10U);
-    EXPECT_EQ(save_state->GetVirtualRegister(1U).Value(), 15U);
+    EXPECT_EQ(saveState->GetInputsCount(), 2U);
+    EXPECT_EQ(saveState->GetImmediatesCount(), 4U);
+    EXPECT_EQ((*saveState->GetImmediates())[0U].value, (bit_cast<uint64_t, uint64_t>(0U)));
+    EXPECT_EQ((*saveState->GetImmediates())[1U].value, (bit_cast<uint64_t, uint64_t>(1U)));
+    EXPECT_EQ((*saveState->GetImmediates())[2U].value, (bit_cast<uint64_t, double>(0.5_D)));
+    EXPECT_EQ((*saveState->GetImmediates())[3U].value, (bit_cast<uint64_t, uint64_t>(50U)));
+    EXPECT_EQ(saveState->GetInput(0U).GetInst(), &INS(0U));
+    EXPECT_EQ(saveState->GetInput(1U).GetInst(), &INS(5U));
+    EXPECT_EQ(saveState->GetVirtualRegister(0U).Value(), 10U);
+    EXPECT_EQ(saveState->GetVirtualRegister(1U).Value(), 15U);
 
-    EXPECT_EQ(safe_point->GetInputsCount(), 2U);
-    EXPECT_EQ(safe_point->GetImmediatesCount(), 4U);
-    EXPECT_EQ(safe_point->GetInput(0U).GetInst(), &INS(0U));
-    EXPECT_EQ(safe_point->GetInput(1U).GetInst(), &INS(5U));
-    EXPECT_EQ(safe_point->GetVirtualRegister(0U).Value(), 10U);
-    EXPECT_EQ(safe_point->GetVirtualRegister(1U).Value(), 15U);
+    EXPECT_EQ(safePoint->GetInputsCount(), 2U);
+    EXPECT_EQ(safePoint->GetImmediatesCount(), 4U);
+    EXPECT_EQ(safePoint->GetInput(0U).GetInst(), &INS(0U));
+    EXPECT_EQ(safePoint->GetInput(1U).GetInst(), &INS(5U));
+    EXPECT_EQ(safePoint->GetVirtualRegister(0U).Value(), 10U);
+    EXPECT_EQ(safePoint->GetVirtualRegister(1U).Value(), 15U);
 
     GetGraph()->RunPass<LoopAnalyzer>();
     RegAlloc(GetGraph());
@@ -469,8 +470,8 @@ TEST_F(LoweringTest, If)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_if = CreateEmptyGraph();
-        GRAPH(graph_if)
+        auto graphIf = CreateEmptyGraph();
+        GRAPH(graphIf)
         {
             PARAMETER(0U, 0U).u64();
             PARAMETER(1U, 1U).u64();
@@ -487,7 +488,7 @@ TEST_F(LoweringTest, If)
                 INST(4U, Opcode::ReturnI).b().Imm(0U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
     }
 }
 
@@ -531,8 +532,8 @@ TEST_F(LoweringTest, If1)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_if = CreateEmptyGraph();
-        GRAPH(graph_if)
+        auto graphIf = CreateEmptyGraph();
+        GRAPH(graphIf)
         {
             PARAMETER(0U, 0U).u64();
             PARAMETER(1U, 1U).u64();
@@ -557,7 +558,7 @@ TEST_F(LoweringTest, If1)
                 INST(6U, Opcode::ReturnI).s32().Imm(2U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
     }
 }
 
@@ -603,8 +604,8 @@ TEST_F(LoweringTest, If2)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_if = CreateEmptyGraph();
-        GRAPH(graph_if)
+        auto graphIf = CreateEmptyGraph();
+        GRAPH(graphIf)
         {
             PARAMETER(0U, 0U).u64();
             PARAMETER(1U, 1U).u64();
@@ -632,7 +633,7 @@ TEST_F(LoweringTest, If2)
                 INST(9U, Opcode::ReturnI).s32().Imm(2U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
     }
 }
 
@@ -669,8 +670,8 @@ TEST_F(LoweringTest, IfRef)
 
     EXPECT_TRUE(graph->RunPass<Lowering>());
 
-    auto graph_if = CreateEmptyGraph();
-    GRAPH(graph_if)
+    auto graphIf = CreateEmptyGraph();
+    GRAPH(graphIf)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(1U, 0U);
@@ -697,7 +698,7 @@ TEST_F(LoweringTest, IfRef)
             INST(10U, Opcode::ReturnI).s32().Imm(1U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
 }
 
 TEST_F(LoweringTest, IfFcmpl)
@@ -731,8 +732,8 @@ TEST_F(LoweringTest, IfFcmpl)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_if = CreateEmptyGraph();
-        GRAPH(graph_if)
+        auto graphIf = CreateEmptyGraph();
+        GRAPH(graphIf)
         {
             PARAMETER(0U, 0U).f64();
             PARAMETER(1U, 1U).f64();
@@ -751,7 +752,7 @@ TEST_F(LoweringTest, IfFcmpl)
             }
         }
 
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
     }
 }
 
@@ -786,8 +787,8 @@ TEST_F(LoweringTest, IfFcmplNoJoin)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_if = CreateEmptyGraph();
-        GRAPH(graph_if)
+        auto graphIf = CreateEmptyGraph();
+        GRAPH(graphIf)
         {
             PARAMETER(0U, 0U).f64();
             PARAMETER(1U, 1U).f64();
@@ -807,7 +808,7 @@ TEST_F(LoweringTest, IfFcmplNoJoin)
             }
         }
 
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
     }
 }
 
@@ -843,8 +844,8 @@ TEST_F(LoweringTest, IfFcmplNoJoin2)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_if = CreateEmptyGraph();
-        GRAPH(graph_if)
+        auto graphIf = CreateEmptyGraph();
+        GRAPH(graphIf)
         {
             PARAMETER(0U, 0U).f64();
             PARAMETER(1U, 1U).f64();
@@ -865,7 +866,7 @@ TEST_F(LoweringTest, IfFcmplNoJoin2)
             }
         }
 
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
     }
 }
 
@@ -900,8 +901,8 @@ TEST_F(LoweringTest, IfFcmpg)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_if = CreateEmptyGraph();
-        GRAPH(graph_if)
+        auto graphIf = CreateEmptyGraph();
+        GRAPH(graphIf)
         {
             PARAMETER(0U, 0U).f64();
             PARAMETER(1U, 1U).f64();
@@ -920,7 +921,7 @@ TEST_F(LoweringTest, IfFcmpg)
             }
         }
 
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
     }
 }
 
@@ -954,8 +955,8 @@ TEST_F(LoweringTest, IfAnd)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_if = CreateEmptyGraph();
-        GRAPH(graph_if)
+        auto graphIf = CreateEmptyGraph();
+        GRAPH(graphIf)
         {
             PARAMETER(0U, 0U).b();
             PARAMETER(1U, 1U).b();
@@ -972,7 +973,7 @@ TEST_F(LoweringTest, IfAnd)
                 INST(4U, Opcode::ReturnI).b().Imm(0U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_if));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphIf));
     }
 }
 
@@ -982,14 +983,14 @@ TEST_F(LoweringTest, MultiplyAddInteger)
         GTEST_SKIP() << "multiply-add instruction is only supported on Aarch64";
     }
 
-    std::initializer_list<std::array<DataType::Type, 4U>> type_combinations = {
+    std::initializer_list<std::array<DataType::Type, 4U>> typeCombinations = {
         {DataType::UINT32, DataType::UINT32, DataType::UINT32, DataType::UINT32},
         {DataType::INT32, DataType::INT32, DataType::INT32, DataType::INT32},
         {DataType::INT32, DataType::INT16, DataType::INT8, DataType::INT16},
         {DataType::UINT64, DataType::UINT64, DataType::UINT64, DataType::UINT64},
         {DataType::INT64, DataType::INT64, DataType::INT64, DataType::INT64}};
 
-    for (auto &types : type_combinations) {
+    for (auto &types : typeCombinations) {
         auto type = types[0U];
         auto graph = CreateEmptyLowLevelGraph();
         GRAPH(graph)
@@ -1022,8 +1023,8 @@ TEST_F(LoweringTest, MultiplyAddInteger)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_madd = CreateEmptyGraph();
-        GRAPH(graph_madd)
+        auto graphMadd = CreateEmptyGraph();
+        GRAPH(graphMadd)
         {
             PARAMETER(0U, 0U).type(types[1U]);
             PARAMETER(1U, 1U).type(types[2U]);
@@ -1044,7 +1045,7 @@ TEST_F(LoweringTest, MultiplyAddInteger)
             }
         }
 
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_madd));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphMadd));
     }
 }
 
@@ -1079,12 +1080,12 @@ TEST_F(LoweringTest, MultiplySubInteger)
         GTEST_SKIP() << "multiply-subtract instruction is only supported on Aarch64";
     }
 
-    std::initializer_list<std::array<DataType::Type, 4U>> type_combinations = {
+    std::initializer_list<std::array<DataType::Type, 4U>> typeCombinations = {
         {DataType::INT32, DataType::INT32, DataType::INT32, DataType::INT32},
         {DataType::INT32, DataType::INT16, DataType::INT8, DataType::INT16},
         {DataType::INT64, DataType::INT64, DataType::INT64, DataType::INT64}};
 
-    for (auto &types : type_combinations) {
+    for (auto &types : typeCombinations) {
         auto type = types[0U];
         auto graph = CreateEmptyLowLevelGraph();
         GRAPH(graph)
@@ -1129,8 +1130,8 @@ TEST_F(LoweringTest, MultiplySubInteger)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_msub = CreateEmptyGraph();
-        GRAPH(graph_msub)
+        auto graphMsub = CreateEmptyGraph();
+        GRAPH(graphMsub)
         {
             PARAMETER(0U, 0U).type(types[1U]);
             PARAMETER(1U, 1U).type(types[2U]);
@@ -1156,7 +1157,7 @@ TEST_F(LoweringTest, MultiplySubInteger)
             }
         }
 
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_msub));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphMsub));
     }
 }
 
@@ -1246,14 +1247,14 @@ TEST_F(LoweringTest, MultiplyNegate)
         GTEST_SKIP() << "multiply-negate instruction is only supported on Aarch64";
     }
 
-    std::initializer_list<std::array<DataType::Type, 3U>> type_combinations = {
+    std::initializer_list<std::array<DataType::Type, 3U>> typeCombinations = {
         {DataType::FLOAT32, DataType::FLOAT32, DataType::FLOAT32},
         {DataType::FLOAT64, DataType::FLOAT64, DataType::FLOAT64},
         {DataType::INT32, DataType::INT32, DataType::INT32},
         {DataType::INT32, DataType::INT16, DataType::INT8},
         {DataType::INT64, DataType::INT64, DataType::INT64}};
 
-    for (auto &types : type_combinations) {
+    for (auto &types : typeCombinations) {
         auto type = types[0U];
         auto graph = CreateEmptyLowLevelGraph();
         GRAPH(graph)
@@ -1296,8 +1297,8 @@ TEST_F(LoweringTest, MultiplyNegate)
         EXPECT_TRUE(graph->RunPass<Lowering>());
         EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graph_expected = CreateEmptyGraph();
-        GRAPH(graph_expected)
+        auto graphExpected = CreateEmptyGraph();
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).type(types[1U]);
             PARAMETER(1U, 1U).type(types[2U]);
@@ -1322,7 +1323,7 @@ TEST_F(LoweringTest, MultiplyNegate)
             }
         }
 
-        ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
     }
 }
 
@@ -1383,13 +1384,13 @@ TEST_F(LoweringTest, BitwiseBinaryOpWithInvertedOperand)
 
     std::initializer_list<std::pair<Opcode, Opcode>> opcodes = {
         {Opcode::And, Opcode::AndNot}, {Opcode::Or, Opcode::OrNot}, {Opcode::Xor, Opcode::XorNot}};
-    std::initializer_list<std::array<DataType::Type, 3U>> type_combinations = {
+    std::initializer_list<std::array<DataType::Type, 3U>> typeCombinations = {
         {DataType::INT32, DataType::INT32, DataType::INT32},
         {DataType::UINT32, DataType::UINT32, DataType::UINT32},
         {DataType::UINT32, DataType::UINT16, DataType::UINT8},
         {DataType::INT64, DataType::INT64, DataType::INT64},
         {DataType::UINT64, DataType::UINT64, DataType::UINT64}};
-    for (auto &types : type_combinations) {
+    for (auto &types : typeCombinations) {
         for (auto &ops : opcodes) {
             auto type = types[0U];
             auto graph = CreateEmptyLowLevelGraph();
@@ -1420,8 +1421,8 @@ TEST_F(LoweringTest, BitwiseBinaryOpWithInvertedOperand)
             EXPECT_TRUE(graph->RunPass<Lowering>());
             EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-            auto graph_expected = CreateEmptyGraph();
-            GRAPH(graph_expected)
+            auto graphExpected = CreateEmptyGraph();
+            GRAPH(graphExpected)
             {
                 PARAMETER(0U, 0U).type(types[1U]);
                 PARAMETER(1U, 1U).type(types[2U]);
@@ -1440,7 +1441,7 @@ TEST_F(LoweringTest, BitwiseBinaryOpWithInvertedOperand)
                 }
             }
 
-            ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+            ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
         }
     }
 }
@@ -1495,19 +1496,19 @@ TEST_F(LoweringTest, CommutativeBinaryOpWithShiftedOperand)
                                                                 {Opcode::Or, Opcode::OrSR},
                                                                 {Opcode::Xor, Opcode::XorSR}};
 
-    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, Opcode::ShlI, ShiftType::LSL},
         {Opcode::Shr, Opcode::ShrI, ShiftType::LSR},
         {Opcode::AShr, Opcode::AShrI, ShiftType::ASR}};
-    std::initializer_list<std::array<DataType::Type, 3U>> type_combinations = {
+    std::initializer_list<std::array<DataType::Type, 3U>> typeCombinations = {
         {DataType::INT32, DataType::INT32, DataType::INT32},
         {DataType::UINT32, DataType::UINT32, DataType::UINT32},
         {DataType::UINT32, DataType::UINT16, DataType::UINT8},
         {DataType::INT64, DataType::INT64, DataType::INT64},
         {DataType::UINT64, DataType::UINT64, DataType::UINT64}};
 
-    for (auto &types : type_combinations) {
-        for (auto &shift_op : shift_ops) {
+    for (auto &types : typeCombinations) {
+        for (auto &shiftOp : shiftOps) {
             for (auto &ops : opcodes) {
                 auto type = types[0U];
                 auto graph = CreateEmptyLowLevelGraph();
@@ -1520,16 +1521,16 @@ TEST_F(LoweringTest, CommutativeBinaryOpWithShiftedOperand)
 
                     BASIC_BLOCK(2U, -1L)
                     {
-                        INST(4U, std::get<0U>(shift_op)).type(type).Inputs(0U, 2U);
+                        INST(4U, std::get<0U>(shiftOp)).type(type).Inputs(0U, 2U);
                         INST(5U, ops.first).type(type).Inputs(1U, 4U);
 
-                        INST(6U, std::get<0U>(shift_op)).type(type).Inputs(1U, 2U);
+                        INST(6U, std::get<0U>(shiftOp)).type(type).Inputs(1U, 2U);
                         INST(7U, ops.first).type(type).Inputs(6U, 1U);
 
-                        INST(8U, std::get<0U>(shift_op)).type(type).Inputs(1U, 2U);
+                        INST(8U, std::get<0U>(shiftOp)).type(type).Inputs(1U, 2U);
                         INST(9U, ops.first).type(type).Inputs(8U, 3U);
 
-                        INST(10U, std::get<0U>(shift_op)).type(type).Inputs(0U, 2U);
+                        INST(10U, std::get<0U>(shiftOp)).type(type).Inputs(0U, 2U);
                         INST(11U, ops.first).type(type).Inputs(1U, 10U);
 
                         INST(12U, Opcode::Max).type(type).Inputs(5U, 7U);
@@ -1543,8 +1544,8 @@ TEST_F(LoweringTest, CommutativeBinaryOpWithShiftedOperand)
                 EXPECT_TRUE(graph->RunPass<Lowering>());
                 EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-                auto graph_expected = CreateEmptyGraph();
-                GRAPH(graph_expected)
+                auto graphExpected = CreateEmptyGraph();
+                GRAPH(graphExpected)
                 {
                     PARAMETER(0U, 0U).type(types[1U]);
                     PARAMETER(1U, 1U).type(types[2U]);
@@ -1552,11 +1553,11 @@ TEST_F(LoweringTest, CommutativeBinaryOpWithShiftedOperand)
 
                     BASIC_BLOCK(2U, -1L)
                     {
-                        INST(3U, ops.second).Shift(std::get<2U>(shift_op), 5U).type(type).Inputs(1U, 0U);
-                        INST(4U, ops.second).Shift(std::get<2U>(shift_op), 5U).type(type).Inputs(1U, 1U);
-                        INST(5U, ops.second).Shift(std::get<2U>(shift_op), 5U).type(type).Inputs(2U, 1U);
+                        INST(3U, ops.second).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(1U, 0U);
+                        INST(4U, ops.second).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(1U, 1U);
+                        INST(5U, ops.second).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(2U, 1U);
 
-                        INST(6U, std::get<1U>(shift_op)).Imm(5U).type(type).Inputs(0U);
+                        INST(6U, std::get<1U>(shiftOp)).Imm(5U).type(type).Inputs(0U);
                         INST(7U, ops.first).type(type).Inputs(1U, 6U);
 
                         INST(8U, Opcode::Max).type(type).Inputs(3U, 4U);
@@ -1567,7 +1568,7 @@ TEST_F(LoweringTest, CommutativeBinaryOpWithShiftedOperand)
                     }
                 }
 
-                ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+                ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
             }
         }
     }
@@ -1581,11 +1582,11 @@ TEST_F(LoweringTest, CommutativeBinaryOpWithShiftedOperandWithIncompatibleInstru
 
     std::initializer_list<Opcode> opcodes = {Opcode::Add, Opcode::And, Opcode::Or, Opcode::Xor};
 
-    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, Opcode::ShlI, ShiftType::LSL},
         {Opcode::Shr, Opcode::ShrI, ShiftType::LSR},
         {Opcode::AShr, Opcode::AShrI, ShiftType::ASR}};
-    for (auto &shift_op : shift_ops) {
+    for (auto &shiftOp : shiftOps) {
         for (auto &ops : opcodes) {
             auto graph = CreateEmptyLowLevelGraph();
             GRAPH(graph)
@@ -1597,16 +1598,16 @@ TEST_F(LoweringTest, CommutativeBinaryOpWithShiftedOperandWithIncompatibleInstru
 
                 BASIC_BLOCK(2U, -1L)
                 {
-                    INST(4U, std::get<0U>(shift_op)).s16().Inputs(0U, 2U);
+                    INST(4U, std::get<0U>(shiftOp)).s16().Inputs(0U, 2U);
                     INST(5U, ops).s32().Inputs(1U, 4U);
 
-                    INST(6U, std::get<0U>(shift_op)).s16().Inputs(1U, 2U);
+                    INST(6U, std::get<0U>(shiftOp)).s16().Inputs(1U, 2U);
                     INST(7U, ops).s32().Inputs(6U, 1U);
 
-                    INST(8U, std::get<0U>(shift_op)).s16().Inputs(1U, 2U);
+                    INST(8U, std::get<0U>(shiftOp)).s16().Inputs(1U, 2U);
                     INST(9U, ops).s32().Inputs(8U, 3U);
 
-                    INST(10U, std::get<0U>(shift_op)).s16().Inputs(0U, 2U);
+                    INST(10U, std::get<0U>(shiftOp)).s16().Inputs(0U, 2U);
                     INST(11U, ops).s32().Inputs(1U, 10U);
 
                     INST(12U, Opcode::Max).s32().Inputs(5U, 7U);
@@ -1630,19 +1631,19 @@ TEST_F(LoweringTest, SubWithShiftedOperand)
         GTEST_SKIP() << "instructions with shifted operands are only supported on Aarch64";
     }
 
-    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, Opcode::ShlI, ShiftType::LSL},
         {Opcode::Shr, Opcode::ShrI, ShiftType::LSR},
         {Opcode::AShr, Opcode::AShrI, ShiftType::ASR}};
-    std::initializer_list<std::array<DataType::Type, 3U>> type_combinations = {
+    std::initializer_list<std::array<DataType::Type, 3U>> typeCombinations = {
         {DataType::INT32, DataType::INT32, DataType::INT32},
         {DataType::UINT32, DataType::UINT32, DataType::UINT32},
         {DataType::UINT32, DataType::UINT16, DataType::UINT8},
         {DataType::INT64, DataType::INT64, DataType::INT64},
         {DataType::UINT64, DataType::UINT64, DataType::UINT64}};
 
-    for (auto &types : type_combinations) {
-        for (auto &shift_op : shift_ops) {
+    for (auto &types : typeCombinations) {
+        for (auto &shiftOp : shiftOps) {
             auto type = types[0U];
             auto graph = CreateEmptyLowLevelGraph();
             GRAPH(graph)
@@ -1654,16 +1655,16 @@ TEST_F(LoweringTest, SubWithShiftedOperand)
 
                 BASIC_BLOCK(2U, -1L)
                 {
-                    INST(4U, std::get<0U>(shift_op)).type(type).Inputs(0U, 2U);
+                    INST(4U, std::get<0U>(shiftOp)).type(type).Inputs(0U, 2U);
                     INST(5U, Opcode::Sub).type(type).Inputs(1U, 4U);
 
-                    INST(6U, std::get<0U>(shift_op)).type(type).Inputs(1U, 2U);
+                    INST(6U, std::get<0U>(shiftOp)).type(type).Inputs(1U, 2U);
                     INST(7U, Opcode::Sub).type(type).Inputs(6U, 1U);
 
-                    INST(8U, std::get<0U>(shift_op)).type(type).Inputs(0U, 2U);
+                    INST(8U, std::get<0U>(shiftOp)).type(type).Inputs(0U, 2U);
                     INST(9U, Opcode::Sub).type(type).Inputs(1U, 8U);
 
-                    INST(10U, std::get<0U>(shift_op)).type(type).Inputs(0U, 2U);
+                    INST(10U, std::get<0U>(shiftOp)).type(type).Inputs(0U, 2U);
                     INST(11U, Opcode::Sub).type(type).Inputs(3U, 10U);
 
                     INST(12U, Opcode::Max).type(type).Inputs(5U, 7U);
@@ -1677,8 +1678,8 @@ TEST_F(LoweringTest, SubWithShiftedOperand)
             EXPECT_TRUE(graph->RunPass<Lowering>());
             EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-            auto graph_expected = CreateEmptyGraph();
-            GRAPH(graph_expected)
+            auto graphExpected = CreateEmptyGraph();
+            GRAPH(graphExpected)
             {
                 PARAMETER(0U, 0U).type(types[1U]);
                 PARAMETER(1U, 1U).type(types[2U]);
@@ -1686,12 +1687,12 @@ TEST_F(LoweringTest, SubWithShiftedOperand)
 
                 BASIC_BLOCK(2U, -1L)
                 {
-                    INST(3U, Opcode::SubSR).Shift(std::get<2U>(shift_op), 5U).type(type).Inputs(1U, 0U);
-                    INST(4U, std::get<1U>(shift_op)).Imm(5U).type(type).Inputs(1U);
+                    INST(3U, Opcode::SubSR).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(1U, 0U);
+                    INST(4U, std::get<1U>(shiftOp)).Imm(5U).type(type).Inputs(1U);
                     INST(5U, Opcode::Sub).type(type).Inputs(4U, 1U);
-                    INST(6U, std::get<1U>(shift_op)).Imm(5U).type(type).Inputs(0U);
+                    INST(6U, std::get<1U>(shiftOp)).Imm(5U).type(type).Inputs(0U);
                     INST(7U, Opcode::Sub).type(type).Inputs(1U, 6U);
-                    INST(8U, Opcode::SubSR).Shift(std::get<2U>(shift_op), 5U).type(type).Inputs(2U, 0U);
+                    INST(8U, Opcode::SubSR).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(2U, 0U);
 
                     INST(9U, Opcode::Max).type(type).Inputs(3U, 5U);
                     INST(10U, Opcode::Max).type(type).Inputs(9U, 6U);
@@ -1701,7 +1702,7 @@ TEST_F(LoweringTest, SubWithShiftedOperand)
                 }
             }
 
-            ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+            ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
         }
     }
 }
@@ -1712,12 +1713,12 @@ TEST_F(LoweringTest, SubWithShiftedOperandWithIncompatibleTypes)
         GTEST_SKIP() << "instructions with shifted operands are only supported on Aarch64";
     }
 
-    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, Opcode::ShlI, ShiftType::LSL},
         {Opcode::Shr, Opcode::ShrI, ShiftType::LSR},
         {Opcode::AShr, Opcode::AShrI, ShiftType::ASR}};
 
-    for (auto &shift_op : shift_ops) {
+    for (auto &shiftOp : shiftOps) {
         auto graph = CreateEmptyLowLevelGraph();
         GRAPH(graph)
         {
@@ -1728,16 +1729,16 @@ TEST_F(LoweringTest, SubWithShiftedOperandWithIncompatibleTypes)
 
             BASIC_BLOCK(2U, -1L)
             {
-                INST(4U, std::get<0U>(shift_op)).s16().Inputs(0U, 2U);
+                INST(4U, std::get<0U>(shiftOp)).s16().Inputs(0U, 2U);
                 INST(5U, Opcode::Sub).s32().Inputs(1U, 4U);
 
-                INST(6U, std::get<0U>(shift_op)).s16().Inputs(1U, 2U);
+                INST(6U, std::get<0U>(shiftOp)).s16().Inputs(1U, 2U);
                 INST(7U, Opcode::Sub).s32().Inputs(6U, 1U);
 
-                INST(8U, std::get<0U>(shift_op)).s16().Inputs(0U, 2U);
+                INST(8U, std::get<0U>(shiftOp)).s16().Inputs(0U, 2U);
                 INST(9U, Opcode::Sub).s32().Inputs(1U, 8U);
 
-                INST(10U, std::get<0U>(shift_op)).s16().Inputs(0U, 2U);
+                INST(10U, std::get<0U>(shiftOp)).s16().Inputs(0U, 2U);
                 INST(11U, Opcode::Sub).s32().Inputs(3U, 10U);
 
                 INST(12U, Opcode::Max).s32().Inputs(5U, 7U);
@@ -1765,19 +1766,19 @@ TEST_F(LoweringTest, NonCommutativeBinaryOpWithShiftedOperand)
                                                                 {Opcode::OrNot, Opcode::OrNotSR},
                                                                 {Opcode::XorNot, Opcode::XorNotSR}};
 
-    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, Opcode::ShlI, ShiftType::LSL},
         {Opcode::Shr, Opcode::ShrI, ShiftType::LSR},
         {Opcode::AShr, Opcode::AShrI, ShiftType::ASR}};
-    std::initializer_list<std::array<DataType::Type, 3U>> type_combinations = {
+    std::initializer_list<std::array<DataType::Type, 3U>> typeCombinations = {
         {DataType::INT32, DataType::INT32, DataType::INT32},
         {DataType::UINT32, DataType::UINT32, DataType::UINT32},
         {DataType::UINT32, DataType::UINT16, DataType::UINT8},
         {DataType::INT64, DataType::INT64, DataType::INT64},
         {DataType::UINT64, DataType::UINT64, DataType::UINT64}};
 
-    for (auto &types : type_combinations) {
-        for (auto &shift_op : shift_ops) {
+    for (auto &types : typeCombinations) {
+        for (auto &shiftOp : shiftOps) {
             auto type = types[0U];
             for (auto &ops : opcodes) {
                 auto graph = CreateEmptyLowLevelGraph();
@@ -1789,13 +1790,13 @@ TEST_F(LoweringTest, NonCommutativeBinaryOpWithShiftedOperand)
 
                     BASIC_BLOCK(2U, -1L)
                     {
-                        INST(3U, std::get<0U>(shift_op)).type(type).Inputs(0U, 2U);
+                        INST(3U, std::get<0U>(shiftOp)).type(type).Inputs(0U, 2U);
                         INST(4U, ops.first).type(type).Inputs(1U, 3U);
 
-                        INST(5U, std::get<0U>(shift_op)).type(type).Inputs(1U, 2U);
+                        INST(5U, std::get<0U>(shiftOp)).type(type).Inputs(1U, 2U);
                         INST(6U, ops.first).type(type).Inputs(5U, 1U);
 
-                        INST(7U, std::get<0U>(shift_op)).type(type).Inputs(0U, 2U);
+                        INST(7U, std::get<0U>(shiftOp)).type(type).Inputs(0U, 2U);
                         INST(8U, ops.first).type(type).Inputs(1U, 7U);
 
                         INST(9U, Opcode::Max).type(type).Inputs(4U, 6U);
@@ -1808,18 +1809,18 @@ TEST_F(LoweringTest, NonCommutativeBinaryOpWithShiftedOperand)
                 EXPECT_TRUE(graph->RunPass<Lowering>());
                 EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-                auto graph_expected = CreateEmptyGraph();
-                GRAPH(graph_expected)
+                auto graphExpected = CreateEmptyGraph();
+                GRAPH(graphExpected)
                 {
                     PARAMETER(0U, 0U).type(types[1U]);
                     PARAMETER(1U, 1U).type(types[2U]);
 
                     BASIC_BLOCK(2U, -1L)
                     {
-                        INST(2U, ops.second).Shift(std::get<2U>(shift_op), 5U).type(type).Inputs(1U, 0U);
-                        INST(3U, std::get<1U>(shift_op)).Imm(5U).type(type).Inputs(1U);
+                        INST(2U, ops.second).Shift(std::get<2U>(shiftOp), 5U).type(type).Inputs(1U, 0U);
+                        INST(3U, std::get<1U>(shiftOp)).Imm(5U).type(type).Inputs(1U);
                         INST(4U, ops.first).type(type).Inputs(3U, 1U);
-                        INST(5U, std::get<1U>(shift_op)).Imm(5U).type(type).Inputs(0U);
+                        INST(5U, std::get<1U>(shiftOp)).Imm(5U).type(type).Inputs(0U);
                         INST(6U, ops.first).type(type).Inputs(1U, 5U);
 
                         INST(7U, Opcode::Max).type(type).Inputs(2U, 4U);
@@ -1829,7 +1830,7 @@ TEST_F(LoweringTest, NonCommutativeBinaryOpWithShiftedOperand)
                     }
                 }
 
-                ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+                ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
             }
         }
     }
@@ -1843,12 +1844,12 @@ TEST_F(LoweringTest, NonCommutativeBinaryOpWithShiftedOperandWithIncompatibleIns
 
     std::initializer_list<Opcode> opcodes = {Opcode::Sub, Opcode::AndNot, Opcode::OrNot, Opcode::XorNot};
 
-    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::tuple<Opcode, Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, Opcode::ShlI, ShiftType::LSL},
         {Opcode::Shr, Opcode::ShrI, ShiftType::LSR},
         {Opcode::AShr, Opcode::AShrI, ShiftType::ASR}};
 
-    for (auto &shift_op : shift_ops) {
+    for (auto &shiftOp : shiftOps) {
         for (auto &ops : opcodes) {
             auto graph = CreateEmptyLowLevelGraph();
             GRAPH(graph)
@@ -1859,13 +1860,13 @@ TEST_F(LoweringTest, NonCommutativeBinaryOpWithShiftedOperandWithIncompatibleIns
 
                 BASIC_BLOCK(2U, -1L)
                 {
-                    INST(3U, std::get<0U>(shift_op)).s16().Inputs(0U, 2U);
+                    INST(3U, std::get<0U>(shiftOp)).s16().Inputs(0U, 2U);
                     INST(4U, ops).s32().Inputs(1U, 3U);
 
-                    INST(5U, std::get<0U>(shift_op)).s16().Inputs(1U, 2U);
+                    INST(5U, std::get<0U>(shiftOp)).s16().Inputs(1U, 2U);
                     INST(6U, ops).s32().Inputs(5U, 1U);
 
-                    INST(7U, std::get<0U>(shift_op)).s16().Inputs(0U, 2U);
+                    INST(7U, std::get<0U>(shiftOp)).s16().Inputs(0U, 2U);
                     INST(8U, ops).s32().Inputs(1U, 7U);
 
                     INST(9U, Opcode::Max).s32().Inputs(4U, 6U);
@@ -1891,18 +1892,18 @@ TEST_F(LoweringTest, BitwiseInstructionsWithInvertedShiftedOperand)
     std::initializer_list<std::pair<Opcode, Opcode>> opcodes = {
         {Opcode::And, Opcode::AndNotSR}, {Opcode::Or, Opcode::OrNotSR}, {Opcode::Xor, Opcode::XorNotSR}};
 
-    std::initializer_list<std::pair<Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::pair<Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, ShiftType::LSL}, {Opcode::Shr, ShiftType::LSR}, {Opcode::AShr, ShiftType::ASR}};
 
-    std::initializer_list<std::array<DataType::Type, 3U>> type_combinations = {
+    std::initializer_list<std::array<DataType::Type, 3U>> typeCombinations = {
         {DataType::INT32, DataType::INT32, DataType::INT32},
         {DataType::UINT32, DataType::UINT32, DataType::UINT32},
         {DataType::UINT32, DataType::UINT16, DataType::UINT8},
         {DataType::INT64, DataType::INT64, DataType::INT64},
         {DataType::UINT64, DataType::UINT64, DataType::UINT64}};
 
-    for (auto &types : type_combinations) {
-        for (auto &shift_op : shift_ops) {
+    for (auto &types : typeCombinations) {
+        for (auto &shiftOp : shiftOps) {
             auto type = types[0U];
             for (auto &ops : opcodes) {
                 auto graph = CreateEmptyLowLevelGraph();
@@ -1914,7 +1915,7 @@ TEST_F(LoweringTest, BitwiseInstructionsWithInvertedShiftedOperand)
 
                     BASIC_BLOCK(2U, -1L)
                     {
-                        INST(3U, shift_op.first).type(type).Inputs(0U, 2U);
+                        INST(3U, shiftOp.first).type(type).Inputs(0U, 2U);
                         INST(4U, Opcode::Not).type(type).Inputs(3U);
                         INST(5U, ops.first).type(type).Inputs(1U, 4U);
                         INST(6U, Opcode::Return).type(type).Inputs(5U);
@@ -1924,20 +1925,20 @@ TEST_F(LoweringTest, BitwiseInstructionsWithInvertedShiftedOperand)
                 EXPECT_TRUE(graph->RunPass<Lowering>());
                 EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-                auto graph_expected = CreateEmptyGraph();
-                GRAPH(graph_expected)
+                auto graphExpected = CreateEmptyGraph();
+                GRAPH(graphExpected)
                 {
                     PARAMETER(0U, 0U).type(types[1U]);
                     PARAMETER(1U, 1U).type(types[2U]);
 
                     BASIC_BLOCK(2U, -1L)
                     {
-                        INST(2U, ops.second).Shift(shift_op.second, 5U).type(type).Inputs(1U, 0U);
+                        INST(2U, ops.second).Shift(shiftOp.second, 5U).type(type).Inputs(1U, 0U);
                         INST(3U, Opcode::Return).type(type).Inputs(2U);
                     }
                 }
 
-                ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+                ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
             }
         }
     }
@@ -1951,10 +1952,10 @@ TEST_F(LoweringTest, BitwiseInstructionsWithInvertedShiftedOperandWithIncompatib
 
     std::initializer_list<Opcode> opcodes = {Opcode::And, Opcode::Or, Opcode::Xor};
 
-    std::initializer_list<std::pair<Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::pair<Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, ShiftType::LSL}, {Opcode::Shr, ShiftType::LSR}, {Opcode::AShr, ShiftType::ASR}};
 
-    for (auto &shift_op : shift_ops) {
+    for (auto &shiftOp : shiftOps) {
         for (auto &ops : opcodes) {
             auto graph = CreateEmptyLowLevelGraph();
             GRAPH(graph)
@@ -1965,7 +1966,7 @@ TEST_F(LoweringTest, BitwiseInstructionsWithInvertedShiftedOperandWithIncompatib
 
                 BASIC_BLOCK(2U, -1L)
                 {
-                    INST(3U, shift_op.first).s16().Inputs(0U, 2U);
+                    INST(3U, shiftOp.first).s16().Inputs(0U, 2U);
                     INST(4U, Opcode::Not).s16().Inputs(3U);
                     INST(5U, ops).s32().Inputs(1U, 4U);
                     INST(6U, Opcode::Return).s32().Inputs(5U);
@@ -1985,16 +1986,16 @@ TEST_F(LoweringTest, NegWithShiftedOperand)
         GTEST_SKIP() << "instructions with shifted operand are only supported on Aarch64";
     }
 
-    std::initializer_list<std::pair<Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::pair<Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, ShiftType::LSL}, {Opcode::Shr, ShiftType::LSR}, {Opcode::AShr, ShiftType::ASR}};
-    std::initializer_list<std::pair<DataType::Type, DataType::Type>> type_combinations = {
+    std::initializer_list<std::pair<DataType::Type, DataType::Type>> typeCombinations = {
         {DataType::INT32, DataType::INT32},
         {DataType::UINT32, DataType::UINT32},
         {DataType::UINT32, DataType::UINT16},
         {DataType::INT64, DataType::INT64},
         {DataType::UINT64, DataType::UINT64}};
-    for (auto &types : type_combinations) {
-        for (auto &shift_op : shift_ops) {
+    for (auto &types : typeCombinations) {
+        for (auto &shiftOp : shiftOps) {
             auto type = types.first;
             auto graph = CreateEmptyLowLevelGraph();
             GRAPH(graph)
@@ -2004,7 +2005,7 @@ TEST_F(LoweringTest, NegWithShiftedOperand)
 
                 BASIC_BLOCK(2U, -1L)
                 {
-                    INST(2U, shift_op.first).type(type).Inputs(0U, 1U);
+                    INST(2U, shiftOp.first).type(type).Inputs(0U, 1U);
                     INST(3U, Opcode::Neg).type(type).Inputs(2U);
                     INST(4U, Opcode::Return).type(type).Inputs(3U);
                 }
@@ -2013,19 +2014,19 @@ TEST_F(LoweringTest, NegWithShiftedOperand)
             EXPECT_TRUE(graph->RunPass<Lowering>());
             EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-            auto graph_expected = CreateEmptyGraph();
-            GRAPH(graph_expected)
+            auto graphExpected = CreateEmptyGraph();
+            GRAPH(graphExpected)
             {
                 PARAMETER(0U, 0U).type(types.second);
 
                 BASIC_BLOCK(2U, -1L)
                 {
-                    INST(1U, Opcode::NegSR).Shift(shift_op.second, 5U).type(type).Inputs(0U);
+                    INST(1U, Opcode::NegSR).Shift(shiftOp.second, 5U).type(type).Inputs(0U);
                     INST(2U, Opcode::Return).type(type).Inputs(1U);
                 }
             }
 
-            ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+            ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
         }
     }
 }
@@ -2036,10 +2037,10 @@ TEST_F(LoweringTest, NegWithShiftedOperandWithIncompatibleInstructionTypes)
         GTEST_SKIP() << "instructions with shifted operand are only supported on Aarch64";
     }
 
-    std::initializer_list<std::pair<Opcode, ShiftType>> shift_ops = {
+    std::initializer_list<std::pair<Opcode, ShiftType>> shiftOps = {
         {Opcode::Shl, ShiftType::LSL}, {Opcode::Shr, ShiftType::LSR}, {Opcode::AShr, ShiftType::ASR}};
 
-    for (auto &shift_op : shift_ops) {
+    for (auto &shiftOp : shiftOps) {
         auto graph = CreateEmptyLowLevelGraph();
         GRAPH(graph)
         {
@@ -2048,7 +2049,7 @@ TEST_F(LoweringTest, NegWithShiftedOperandWithIncompatibleInstructionTypes)
 
             BASIC_BLOCK(2U, -1L)
             {
-                INST(2U, shift_op.first).s16().Inputs(0U, 1U);
+                INST(2U, shiftOp.first).s16().Inputs(0U, 1U);
                 INST(3U, Opcode::Neg).s32().Inputs(2U);
                 INST(4U, Opcode::Return).s32().Inputs(3U);
             }
@@ -2076,8 +2077,8 @@ TEST_F(LoweringTest, AddSwapInputs)
     EXPECT_TRUE(GetGraph()->RunPass<Lowering>());
     EXPECT_TRUE(GetGraph()->RunPass<Cleanup>());
 
-    auto graph_expected = CreateEmptyGraph();
-    GRAPH(graph_expected)
+    auto graphExpected = CreateEmptyGraph();
+    GRAPH(graphExpected)
     {
         PARAMETER(0U, 0U).s64();
         BASIC_BLOCK(2U, -1L)
@@ -2087,7 +2088,7 @@ TEST_F(LoweringTest, AddSwapInputs)
         }
     }
 
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_expected));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphExpected));
 }
 
 // Not applied, sub isn't commutative inst
@@ -2196,9 +2197,9 @@ TEST_F(LoweringTest, DeoptimizeCompareImmDoesNotFit)
     ASSERT_TRUE(graph->RunPass<Lowering>());
     ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-    auto graph_expected = CreateEmptyGraph(graph->GetArch());
-    if (graph_expected->GetArch() == Arch::AARCH32 || graph_expected->GetArch() == Arch::AARCH64) {
-        GRAPH(graph_expected)
+    auto graphExpected = CreateEmptyGraph(graph->GetArch());
+    if (graphExpected->GetArch() == Arch::AARCH32 || graphExpected->GetArch() == Arch::AARCH64) {
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).ref();
             PARAMETER(1U, 1U).s32();
@@ -2212,8 +2213,8 @@ TEST_F(LoweringTest, DeoptimizeCompareImmDoesNotFit)
                 INST(10U, Opcode::Return).ref().Inputs(5U);
             }
         }
-    } else if (graph_expected->GetArch() == Arch::X86_64) {
-        GRAPH(graph_expected)
+    } else if (graphExpected->GetArch() == Arch::X86_64) {
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).ref();
             PARAMETER(1U, 1U).s32();
@@ -2231,7 +2232,7 @@ TEST_F(LoweringTest, DeoptimizeCompareImmDoesNotFit)
     } else {
         UNREACHABLE();
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
 }
 
 TEST_F(LoweringTest, LowerMoveScaleInLoadStore)
@@ -2281,9 +2282,9 @@ TEST_F(LoweringTest, LowerMoveScaleInLoadStore)
     EXPECT_TRUE(graph->RunPass<Lowering>());
     EXPECT_TRUE(graph->RunPass<Cleanup>());
 
-    auto graph_expected = CreateEmptyFastpathGraph(RUNTIME_ARCH);
+    auto graphExpected = CreateEmptyFastpathGraph(RUNTIME_ARCH);
     if (graph->GetArch() == Arch::AARCH64) {
-        GRAPH(graph_expected)
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).ptr();
             PARAMETER(1U, 1U).ptr();
@@ -2316,7 +2317,7 @@ TEST_F(LoweringTest, LowerMoveScaleInLoadStore)
         }
     } else {
         ASSERT(graph->GetArch() == Arch::X86_64);
-        GRAPH(graph_expected)
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).ptr();
             PARAMETER(1U, 1U).ptr();
@@ -2346,7 +2347,7 @@ TEST_F(LoweringTest, LowerMoveScaleInLoadStore)
             }
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
 
     EXPECT_TRUE(RegAlloc(graph));
     EXPECT_TRUE(graph->RunPass<Codegen>());
@@ -2382,9 +2383,9 @@ TEST_F(LoweringTest, LowerUnsignedCast)
         }
     }
 
-    auto graph_expected = CreateEmptyFastpathGraph(RUNTIME_ARCH);
+    auto graphExpected = CreateEmptyFastpathGraph(RUNTIME_ARCH);
     if (graph->GetArch() == Arch::AARCH64) {
-        GRAPH(graph_expected)
+        GRAPH(graphExpected)
         {
             PARAMETER(0U, 0U).ptr();
             PARAMETER(1U, 1U).u64();
@@ -2407,7 +2408,7 @@ TEST_F(LoweringTest, LowerUnsignedCast)
             }
         }
     } else {
-        graph_expected = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
+        graphExpected = GraphCloner(graph, graph->GetAllocator(), graph->GetLocalAllocator()).CloneGraph();
     }
     EXPECT_TRUE(graph->RunPass<Lowering>());
     if (graph->GetArch() == Arch::AARCH64) {
@@ -2415,7 +2416,7 @@ TEST_F(LoweringTest, LowerUnsignedCast)
     } else {
         EXPECT_FALSE(graph->RunPass<Cleanup>());
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, graph_expected));
+    ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
 
     EXPECT_TRUE(RegAlloc(graph));
     EXPECT_TRUE(graph->RunPass<Codegen>());
@@ -2521,8 +2522,8 @@ TEST_F(LoweringTest, CompareBoolConstZero)
             graph->RunPass<Cleanup>();
 
             if (code == ConditionCode::CC_EQ) {
-                auto graph_final = CreateEmptyGraph();
-                GRAPH(graph_final)
+                auto graphFinal = CreateEmptyGraph();
+                GRAPH(graphFinal)
                 {
                     BASIC_BLOCK(2U, 1U)
                     {
@@ -2532,11 +2533,11 @@ TEST_F(LoweringTest, CompareBoolConstZero)
                         INST(5U, Opcode::Return).b().Inputs(8U);
                     }
                 }
-                ASSERT_TRUE(GraphComparator().Compare(graph, graph_final));
+                ASSERT_TRUE(GraphComparator().Compare(graph, graphFinal));
             } else {
-                auto clear_graph =
+                auto clearGraph =
                     GraphCloner(graph, GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
-                ASSERT_TRUE(GraphComparator().Compare(graph, clear_graph));
+                ASSERT_TRUE(GraphComparator().Compare(graph, clearGraph));
             }
         }
     }

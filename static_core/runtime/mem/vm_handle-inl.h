@@ -29,8 +29,8 @@ inline VMHandle<T>::VMHandle(const LocalObjectHandle<P> &other) : HandleBase(oth
 }
 
 template <typename T>
-inline VMHandle<T>::VMHandle(mem::GlobalObjectStorage *global_storage, mem::Reference *reference)
-    : HandleBase(global_storage->GetAddressForRef(reference))
+inline VMHandle<T>::VMHandle(mem::GlobalObjectStorage *globalStorage, mem::Reference *reference)
+    : HandleBase(globalStorage->GetAddressForRef(reference))
 {
     ASSERT(reference != nullptr);
 }

@@ -33,14 +33,14 @@ static void ReplaceCheck(compiler::Inst *inst)
 
 static void MarkLenArray(compiler::Inst *inst)
 {
-    bool no_dce = !inst->HasUsers();
+    bool noDce = !inst->HasUsers();
     for (const auto &usr : inst->GetUsers()) {
         if (!CheckResolver::IsCheck(usr.GetInst())) {
-            no_dce = true;
+            noDce = true;
             break;
         }
     }
-    if (no_dce) {
+    if (noDce) {
         inst->SetFlag(compiler::inst_flags::NO_DCE);
     }
     inst->SetFlag(compiler::inst_flags::NO_HOIST);

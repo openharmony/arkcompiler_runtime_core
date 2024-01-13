@@ -43,7 +43,7 @@ namespace panda::mem {
  */
 class GlobalObjectStorage {
 public:
-    explicit GlobalObjectStorage(mem::InternalAllocatorPtr allocator, size_t max_size, bool enable_size_check);
+    explicit GlobalObjectStorage(mem::InternalAllocatorPtr allocator, size_t maxSize, bool enableSizeCheck);
 
     ~GlobalObjectStorage();
 
@@ -64,11 +64,11 @@ public:
         AssertType(type);
         ObjectHeader *result = nullptr;
         if (type == Reference::ObjectType::GLOBAL) {
-            result = global_storage_->Get(reference);
+            result = globalStorage_->Get(reference);
         } else if (type == Reference::ObjectType::WEAK) {
-            result = weak_storage_->Get(reference);
+            result = weakStorage_->Get(reference);
         } else {
-            result = global_fixed_storage_->Get(reference);
+            result = globalFixedStorage_->Get(reference);
         }
         return result;
     }
@@ -81,11 +81,11 @@ public:
         AssertType(type);
         uintptr_t result = 0;
         if (type == Reference::ObjectType::GLOBAL) {
-            result = global_storage_->GetAddressForRef(reference);
+            result = globalStorage_->GetAddressForRef(reference);
         } else if (type == Reference::ObjectType::WEAK) {
-            result = weak_storage_->GetAddressForRef(reference);
+            result = weakStorage_->GetAddressForRef(reference);
         } else {
-            result = global_fixed_storage_->GetAddressForRef(reference);
+            result = globalFixedStorage_->GetAddressForRef(reference);
         }
         return result;
     }
@@ -96,7 +96,7 @@ public:
     /// Get all objects from storage. Used by debugging.
     PandaVector<ObjectHeader *> GetAllObjects();
 
-    void VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType root_type);
+    void VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType);
 
     /// Update pointers to moved Objects in global storage.
     // NOTE(alovkov): take a closure from gc
@@ -117,9 +117,9 @@ private:
     static constexpr size_t GLOBAL_REF_SIZE_WARNING_LINE = 20;
 
     mem::InternalAllocatorPtr allocator_;
-    ArrayStorage *global_storage_;
-    ArrayStorage *global_fixed_storage_;
-    ArrayStorage *weak_storage_;
+    ArrayStorage *globalStorage_;
+    ArrayStorage *globalFixedStorage_;
+    ArrayStorage *weakStorage_;
 
     static void AssertType([[maybe_unused]] Reference::ObjectType type)
     {
@@ -164,28 +164,28 @@ private:
 
         PandaVector<uintptr_t> storage_ GUARDED_BY(mutex_) {};
         /// Index of first available block in list
-        uintptr_t first_available_block_;
+        uintptr_t firstAvailableBlock_;
         /// How many blocks are available in current storage (can be increased if size less than max size)
-        size_t blocks_available_;
+        size_t blocksAvailable_;
 
-        bool enable_size_check_;
-        bool is_fixed_;
-        size_t max_size_;
+        bool enableSizeCheck_;
+        bool isFixed_;
+        size_t maxSize_;
 
         mutable os::memory::RWLock mutex_;
         mem::InternalAllocatorPtr allocator_;
 
     public:
-        explicit ArrayStorage(mem::InternalAllocatorPtr allocator, size_t max_size, bool enable_size_check,
-                              bool is_fixed = false)
-            : enable_size_check_(enable_size_check), is_fixed_(is_fixed), max_size_(max_size), allocator_(allocator)
+        explicit ArrayStorage(mem::InternalAllocatorPtr allocator, size_t maxSize, bool enableSizeCheck,
+                              bool isFixed = false)
+            : enableSizeCheck_(enableSizeCheck), isFixed_(isFixed), maxSize_(maxSize), allocator_(allocator)
         {
-            ASSERT(max_size < (std::numeric_limits<uintptr_t>::max() >> (BITS_FOR_TYPE)));
+            ASSERT(maxSize < (std::numeric_limits<uintptr_t>::max() >> (BITS_FOR_TYPE)));
 
-            blocks_available_ = is_fixed ? max_size : INITIAL_SIZE;
-            first_available_block_ = 0;
+            blocksAvailable_ = isFixed ? maxSize : INITIAL_SIZE;
+            firstAvailableBlock_ = 0;
 
-            storage_.resize(blocks_available_);
+            storage_.resize(blocksAvailable_);
             for (size_t i = 0; i < storage_.size() - 1; i++) {
                 storage_[i] = EncodeNextIndex(i + 1);
             }
@@ -202,8 +202,8 @@ private:
             ASSERT(object != nullptr);
             os::memory::WriteLockHolder lk(mutex_);
 
-            if (blocks_available_ == 0) {
-                if (storage_.size() * ENSURE_CAPACITY_MULTIPLIER <= max_size_ && !is_fixed_) {
+            if (blocksAvailable_ == 0) {
+                if (storage_.size() * ENSURE_CAPACITY_MULTIPLIER <= maxSize_ && !isFixed_) {
                     EnsureCapacity();
                 } else {
                     LOG(ERROR, GC) << "Global reference storage is full";
@@ -211,19 +211,19 @@ private:
                     return nullptr;
                 }
             }
-            ASSERT(blocks_available_ != 0);
-            auto next_block = DecodeIndex(storage_[first_available_block_]);
-            auto current_index = first_available_block_;
-            AssertIndex(current_index);
+            ASSERT(blocksAvailable_ != 0);
+            auto nextBlock = DecodeIndex(storage_[firstAvailableBlock_]);
+            auto currentIndex = firstAvailableBlock_;
+            AssertIndex(currentIndex);
 
             auto addr = reinterpret_cast<uintptr_t>(object);
-            [[maybe_unused]] uintptr_t last_bit = BitField<uintptr_t, FREE_INDEX_BIT>::Get(addr);
-            ASSERT(last_bit == 0);  // every object should be alignmented
+            [[maybe_unused]] uintptr_t lastBit = BitField<uintptr_t, FREE_INDEX_BIT>::Get(addr);
+            ASSERT(lastBit == 0);  // every object should be alignmented
 
-            storage_[current_index] = addr;
-            auto ref = IndexToReference(current_index);
-            first_available_block_ = next_block;
-            blocks_available_--;
+            storage_[currentIndex] = addr;
+            auto ref = IndexToReference(currentIndex);
+            firstAvailableBlock_ = nextBlock;
+            blocksAvailable_--;
 
             CheckAlmostOverflow();
             return ref;
@@ -231,23 +231,23 @@ private:
 
         void EnsureCapacity() REQUIRES(mutex_)
         {
-            auto prev_length = storage_.size();
-            size_t new_length = storage_.size() * ENSURE_CAPACITY_MULTIPLIER;
-            blocks_available_ = first_available_block_ = prev_length;
-            storage_.resize(new_length);
-            for (size_t i = prev_length; i < new_length - 1; i++) {
+            auto prevLength = storage_.size();
+            size_t newLength = storage_.size() * ENSURE_CAPACITY_MULTIPLIER;
+            blocksAvailable_ = firstAvailableBlock_ = prevLength;
+            storage_.resize(newLength);
+            for (size_t i = prevLength; i < newLength - 1; i++) {
                 storage_[i] = EncodeNextIndex(i + 1);
             }
             storage_[storage_.size() - 1] = 0;
-            LOG(DEBUG, GC) << "Increase global storage from: " << prev_length << " to: " << new_length;
+            LOG(DEBUG, GC) << "Increase global storage from: " << prevLength << " to: " << newLength;
         }
 
         void CheckAlmostOverflow() REQUIRES_SHARED(mutex_)
         {
-            size_t now_size = GetSize();
-            if (enable_size_check_ && now_size >= max_size_ - GLOBAL_REF_SIZE_WARNING_LINE) {
-                LOG(INFO, GC) << "Global reference storage almost overflow. now size: " << now_size
-                              << ", max size: " << max_size_;
+            size_t nowSize = GetSize();
+            if (enableSizeCheck_ && nowSize >= maxSize_ - GLOBAL_REF_SIZE_WARNING_LINE) {
+                LOG(INFO, GC) << "Global reference storage almost overflow. now size: " << nowSize
+                              << ", max size: " << maxSize_;
                 // NOTE(xucheng): Dump global reference storage info now. May use Thread::Dump() when it can be used.
                 Dump();
             }
@@ -263,7 +263,7 @@ private:
         uintptr_t GetAddressForRef(const Reference *ref) const
         {
             os::memory::ReadLockHolder lk(mutex_);
-            ASSERT(is_fixed_);
+            ASSERT(isFixed_);
             auto index = ReferenceToIndex(ref);
             return reinterpret_cast<uintptr_t>(&storage_[index]);
         }
@@ -272,9 +272,9 @@ private:
         {
             os::memory::WriteLockHolder lk(mutex_);
             auto index = ReferenceToIndex(ref);
-            storage_[index] = EncodeNextIndex(first_available_block_);
-            first_available_block_ = index;
-            blocks_available_++;
+            storage_[index] = EncodeNextIndex(firstAvailableBlock_);
+            firstAvailableBlock_ = index;
+            blocksAvailable_++;
         }
 
         void UpdateMovedRefs()
@@ -286,15 +286,15 @@ private:
                 if (IsBusy(ref)) {
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
                     if (obj != nullptr && obj->IsForwarded()) {
-                        auto new_addr = reinterpret_cast<ObjectHeader *>(GetForwardAddress(obj));
-                        LOG(DEBUG, GC) << "Global ref update from: " << obj << " to: " << new_addr;
-                        storage_[index] = ToUintPtr(new_addr);
+                        auto newAddr = reinterpret_cast<ObjectHeader *>(GetForwardAddress(obj));
+                        LOG(DEBUG, GC) << "Global ref update from: " << obj << " to: " << newAddr;
+                        storage_[index] = ToUintPtr(newAddr);
                     }
                 }
             }
         }
 
-        void VisitObjects(const GCRootVisitor &gc_root_visitor, mem::RootType root_type)
+        void VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType)
         {
             os::memory::ReadLockHolder lk(mutex_);
 
@@ -303,7 +303,7 @@ private:
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
                     if (obj != nullptr) {
                         LOG(DEBUG, GC) << " Found root from global storage: " << mem::GetDebugInfoAboutObject(obj);
-                        gc_root_visitor({root_type, obj});
+                        gcRootVisitor({rootType, obj});
                     }
                 }
             }
@@ -388,12 +388,12 @@ private:
 
         size_t GetSize() const REQUIRES_SHARED(mutex_)
         {
-            return storage_.size() - blocks_available_;
+            return storage_.size() - blocksAvailable_;
         }
 
         size_t GetSizeWithLock() const
         {
-            os::memory::ReadLockHolder global_lock(mutex_);
+            os::memory::ReadLockHolder globalLock(mutex_);
             return GetSize();
         }
 
@@ -404,8 +404,8 @@ private:
 
         bool IsFreeValue(uintptr_t value)
         {
-            uintptr_t last_bit = BitField<uintptr_t, FREE_INDEX_BIT>::Get(value);
-            return last_bit == 1;
+            uintptr_t lastBit = BitField<uintptr_t, FREE_INDEX_BIT>::Get(value);
+            return lastBit == 1;
         }
 
         bool IsBusy(uintptr_t value)
@@ -421,9 +421,9 @@ private:
 
         static uintptr_t EncodeNextIndex(uintptr_t index)
         {
-            uintptr_t shifted_index = EncodeObjectIndex(index);
-            BitField<uintptr_t, FREE_INDEX_BIT>::Set(1, &shifted_index);
-            return shifted_index;
+            uintptr_t shiftedIndex = EncodeObjectIndex(index);
+            BitField<uintptr_t, FREE_INDEX_BIT>::Set(1, &shiftedIndex);
+            return shiftedIndex;
         }
 
         static uintptr_t DecodeIndex(uintptr_t index)
@@ -435,10 +435,10 @@ private:
          * We need to add 1 to not return nullptr to distinct it from situation when we couldn't create a reference.
          * Shift by 2 is needed because every Reference stores type in lowest 2 bits.
          */
-        Reference *IndexToReference(uintptr_t encoded_index) const REQUIRES_SHARED(mutex_)
+        Reference *IndexToReference(uintptr_t encodedIndex) const REQUIRES_SHARED(mutex_)
         {
-            AssertIndex(DecodeIndex(encoded_index));
-            return reinterpret_cast<Reference *>((encoded_index + 1) << BITS_FOR_TYPE);
+            AssertIndex(DecodeIndex(encodedIndex));
+            return reinterpret_cast<Reference *>((encodedIndex + 1) << BITS_FOR_TYPE);
         }
 
         template <bool CHECK_ASSERT = true>
@@ -452,8 +452,8 @@ private:
 
         void AssertIndex(const Reference *ref) const REQUIRES_SHARED(mutex_)
         {
-            auto decoded_index = (reinterpret_cast<uintptr_t>(ref) >> BITS_FOR_TYPE) - 1;
-            AssertIndex(DecodeIndex(decoded_index));
+            auto decodedIndex = (reinterpret_cast<uintptr_t>(ref) >> BITS_FOR_TYPE) - 1;
+            AssertIndex(DecodeIndex(decodedIndex));
         }
 
         void AssertIndex([[maybe_unused]] uintptr_t index) const REQUIRES_SHARED(mutex_)

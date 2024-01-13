@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/tests/mock/mock_test_helper.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
@@ -26,230 +27,230 @@ namespace panda::ets::test {
 class CallingMethodsTestBase : public MockEtsNapiTestBaseClass {
 protected:
     CallingMethodsTestBase() = default;
-    explicit CallingMethodsTestBase(const char *test_bin_file_name) : MockEtsNapiTestBaseClass(test_bin_file_name) {};
+    explicit CallingMethodsTestBase(const char *testBinFileName) : MockEtsNapiTestBaseClass(testBinFileName) {};
 };
 
-[[maybe_unused]] static void CallVoidMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static void CallVoidMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    env->CallVoidMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    env->CallVoidMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_object CallObjectMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_object CallObjectMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallObjectMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallObjectMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_boolean CallBooleanMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_boolean CallBooleanMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallBooleanMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallBooleanMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_byte CallByteMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_byte CallByteMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallByteMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallByteMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_char CallCharMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_char CallCharMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallCharMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallCharMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_short CallShortMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_short CallShortMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallShortMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallShortMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_int CallIntMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_int CallIntMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallIntMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallIntMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_long CallLongMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_long CallLongMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallLongMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallLongMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_float CallFloatMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_float CallFloatMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallFloatMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallFloatMethodList(obj, methodId, args);
 }
 
-[[maybe_unused]] static ets_double CallDoubleMethodListHelper(EtsEnv *env, ets_object obj, ets_method method_id, ...)
+[[maybe_unused]] static ets_double CallDoubleMethodListHelper(EtsEnv *env, ets_object obj, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallDoubleMethodList(obj, method_id, args);
+    va_start(args, methodId);
+    return env->CallDoubleMethodList(obj, methodId, args);
 }
 
 [[maybe_unused]] static void CallNonvirtualVoidMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                ets_method method_id, ...)
+                                                                ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    env->CallNonvirtualVoidMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    env->CallNonvirtualVoidMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_object CallNonvirtualObjectMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                        ets_method method_id, ...)
+                                                                        ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualObjectMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualObjectMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_boolean CallNonvirtualBooleanMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                          ets_method method_id, ...)
+                                                                          ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualBooleanMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualBooleanMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_byte CallNonvirtualByteMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                    ets_method method_id, ...)
+                                                                    ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualByteMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualByteMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_char CallNonvirtualCharMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                    ets_method method_id, ...)
+                                                                    ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualCharMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualCharMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_short CallNonvirtualShortMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                      ets_method method_id, ...)
+                                                                      ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualShortMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualShortMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_int CallNonvirtualIntMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                  ets_method method_id, ...)
+                                                                  ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualIntMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualIntMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_long CallNonvirtualLongMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                    ets_method method_id, ...)
+                                                                    ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualLongMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualLongMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_float CallNonvirtualFloatMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                      ets_method method_id, ...)
+                                                                      ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualFloatMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualFloatMethodList(obj, cls, methodId, args);
 }
 
 [[maybe_unused]] static ets_double CallNonvirtualDoubleMethodListHelper(EtsEnv *env, ets_object obj, ets_class cls,
-                                                                        ets_method method_id, ...)
+                                                                        ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallNonvirtualDoubleMethodList(obj, cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallNonvirtualDoubleMethodList(obj, cls, methodId, args);
 }
 
-[[maybe_unused]] static void CallStaticVoidMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+[[maybe_unused]] static void CallStaticVoidMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    env->CallStaticVoidMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    env->CallStaticVoidMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_object CallStaticObjectMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id,
+[[maybe_unused]] static ets_object CallStaticObjectMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId,
                                                                     ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticObjectMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticObjectMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_boolean CallStaticBooleanMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id,
+[[maybe_unused]] static ets_boolean CallStaticBooleanMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId,
                                                                       ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticBooleanMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticBooleanMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_byte CallStaticByteMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+[[maybe_unused]] static ets_byte CallStaticByteMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticByteMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticByteMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_char CallStaticCharMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+[[maybe_unused]] static ets_char CallStaticCharMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticCharMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticCharMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_short CallStaticShortMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+[[maybe_unused]] static ets_short CallStaticShortMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticShortMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticShortMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_int CallStaticIntMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+[[maybe_unused]] static ets_int CallStaticIntMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticIntMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticIntMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_long CallStaticLongMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+[[maybe_unused]] static ets_long CallStaticLongMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticLongMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticLongMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_float CallStaticFloatMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id, ...)
+[[maybe_unused]] static ets_float CallStaticFloatMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId, ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticFloatMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticFloatMethodList(cls, methodId, args);
 }
 
-[[maybe_unused]] static ets_double CallStaticDoubleMethodListHelper(EtsEnv *env, ets_class cls, ets_method method_id,
+[[maybe_unused]] static ets_double CallStaticDoubleMethodListHelper(EtsEnv *env, ets_class cls, ets_method methodId,
                                                                     ...)
 {
     std::va_list args;
-    va_start(args, method_id);
-    return env->CallStaticDoubleMethodList(cls, method_id, args);
+    va_start(args, methodId);
+    return env->CallStaticDoubleMethodList(cls, methodId, args);
 }
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 

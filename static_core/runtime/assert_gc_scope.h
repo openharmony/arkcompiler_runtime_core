@@ -44,14 +44,14 @@ public:
     {
         // Atomic with relaxed order reason: data race with gc_flag with no synchronization or ordering constraints
         // imposed on other reads or writes
-        AssertGCScopeT::gc_flag_.fetch_add(1, std::memory_order_relaxed);
+        AssertGCScopeT::gcFlag_.fetch_add(1, std::memory_order_relaxed);
     }
 
     ~AssertGCScopeT()
     {
         // Atomic with relaxed order reason: data race with gc_flag with no synchronization or ordering constraints
         // imposed on other reads or writes
-        AssertGCScopeT::gc_flag_.fetch_sub(1, std::memory_order_relaxed);
+        AssertGCScopeT::gcFlag_.fetch_sub(1, std::memory_order_relaxed);
     }
 
     static bool IsAllowed();
@@ -60,7 +60,7 @@ public:
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(AssertGCScopeT);
 
 private:
-    static std::atomic<int> gc_flag_;
+    static std::atomic<int> gcFlag_;
 };
 
 using DisallowGarbageCollection = AssertGCScopeT<IS_GC_ALLOW_CHECK>;

@@ -21,25 +21,25 @@ template <typename T>
 EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
 {
     auto *ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
-    Class *box_class = nullptr;
+    Class *boxClass = nullptr;
     if constexpr (std::is_same<T, EtsBoolean>::value) {
-        box_class = ext->GetBoxBooleanClass();
+        boxClass = ext->GetBoxBooleanClass();
     } else if constexpr (std::is_same<T, EtsByte>::value) {
-        box_class = ext->GetBoxByteClass();
+        boxClass = ext->GetBoxByteClass();
     } else if constexpr (std::is_same<T, EtsChar>::value) {
-        box_class = ext->GetBoxCharClass();
+        boxClass = ext->GetBoxCharClass();
     } else if constexpr (std::is_same<T, EtsShort>::value) {
-        box_class = ext->GetBoxShortClass();
+        boxClass = ext->GetBoxShortClass();
     } else if constexpr (std::is_same<T, EtsInt>::value) {
-        box_class = ext->GetBoxIntClass();
+        boxClass = ext->GetBoxIntClass();
     } else if constexpr (std::is_same<T, EtsLong>::value) {
-        box_class = ext->GetBoxLongClass();
+        boxClass = ext->GetBoxLongClass();
     } else if constexpr (std::is_same<T, EtsFloat>::value) {
-        box_class = ext->GetBoxFloatClass();
+        boxClass = ext->GetBoxFloatClass();
     } else if constexpr (std::is_same<T, EtsDouble>::value) {
-        box_class = ext->GetBoxDoubleClass();
+        boxClass = ext->GetBoxDoubleClass();
     }
-    auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, box_class));
+    auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, boxClass));
     instance->SetValue(value);
     return instance;
 }

@@ -26,7 +26,7 @@ class BaseMemStats;
 
 class CodeAllocator {
 public:
-    PANDA_PUBLIC_API explicit CodeAllocator(BaseMemStats *mem_stats);
+    PANDA_PUBLIC_API explicit CodeAllocator(BaseMemStats *memStats);
     PANDA_PUBLIC_API ~CodeAllocator();
     NO_COPY_SEMANTIC(CodeAllocator);
     NO_MOVE_SEMANTIC(CodeAllocator);
@@ -37,7 +37,7 @@ public:
      * @param codeBuff
      * @return
      */
-    [[nodiscard]] PANDA_PUBLIC_API void *AllocateCode(size_t size, const void *code_buff);
+    [[nodiscard]] PANDA_PUBLIC_API void *AllocateCode(size_t size, const void *codeBuff);
 
     /**
      * @brief Allocates @param size bytes of non-protected memory
@@ -50,7 +50,7 @@ public:
      * Make memory \mem_range executable
      * @param mem_range
      */
-    PANDA_PUBLIC_API static void ProtectCode(os::mem::MapRange<std::byte> mem_range);
+    PANDA_PUBLIC_API static void ProtectCode(os::mem::MapRange<std::byte> memRange);
 
     /// Fast check if the given program counter belongs to JIT code
     PANDA_PUBLIC_API bool InAllocatedCodeRange(const void *pc);
@@ -62,11 +62,11 @@ private:
     static const Alignment PAGE_LOG_ALIGN;
 
     // NOTE(dtrubenkov): Remove when some CodeCache space will be implemented, currently used for avoid memleak noise
-    ArenaAllocator arena_allocator_;
-    BaseMemStats *mem_stats_;
-    os::memory::RWLock code_range_lock_;
-    void *code_range_start_ {nullptr};
-    void *code_range_end_ {nullptr};
+    ArenaAllocator arenaAllocator_;
+    BaseMemStats *memStats_;
+    os::memory::RWLock codeRangeLock_;
+    void *codeRangeStart_ {nullptr};
+    void *codeRangeEnd_ {nullptr};
 };
 
 }  // namespace panda

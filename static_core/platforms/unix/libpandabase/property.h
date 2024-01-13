@@ -26,7 +26,7 @@ namespace panda::os::unix::property {
 static const char ARK_DFX_PROP[] = "ark.dfx.options";     // NOLINT(modernize-avoid-c-arrays)
 static const char ARK_TRACE_PROP[] = "ark.trace.enable";  // NOLINT(modernize-avoid-c-arrays)
 
-PANDA_PUBLIC_API bool GetPropertyBuffer(const char *ark_prop, std::string &out);  // NOLINT(google-runtime-references)
+PANDA_PUBLIC_API bool GetPropertyBuffer(const char *arkProp, std::string &out);  // NOLINT(google-runtime-references)
 
 }  // namespace panda::os::unix::property
 

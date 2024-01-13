@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 
@@ -70,23 +71,23 @@ TEST_F(FinalFieldNativeTest, FinalFieldTest)
 
     field = env->GetStaticp_field(testClass, "byte_value_final", "B");
     ASSERT_NE(field, nullptr);
-    ASSERT_EQ(env->GetStaticByteField(testClass, field), 2);
+    ASSERT_EQ(env->GetStaticByteField(testClass, field), 2_I);
 
     field = env->GetStaticp_field(testClass, "short_value_final", "S");
     ASSERT_NE(field, nullptr);
-    ASSERT_EQ(env->GetStaticShortField(testClass, field), 256);
+    ASSERT_EQ(env->GetStaticShortField(testClass, field), 256_I);
 
     field = env->GetStaticp_field(testClass, "char_value_final", "C");
     ASSERT_NE(field, nullptr);
-    ASSERT_EQ(env->GetStaticCharField(testClass, field), 32767);
+    ASSERT_EQ(env->GetStaticCharField(testClass, field), 32767U);
 
     field = env->GetStaticp_field(testClass, "int_value_final", "I");
     ASSERT_NE(field, nullptr);
-    ASSERT_EQ(env->GetStaticIntField(testClass, field), 65536);
+    ASSERT_EQ(env->GetStaticIntField(testClass, field), 65536_I);
 
     field = env->GetStaticp_field(testClass, "long_value_final", "J");
     ASSERT_NE(field, nullptr);
-    ASSERT_EQ(env->GetStaticLongField(testClass, field), 4294967296);
+    ASSERT_EQ(env->GetStaticLongField(testClass, field), 4294967296L);
 
     field = env->GetStaticp_field(testClass, "float_value_final", "F");
     ASSERT_NE(field, nullptr);
@@ -94,7 +95,7 @@ TEST_F(FinalFieldNativeTest, FinalFieldTest)
 
     field = env->GetStaticp_field(testClass, "double_value_final", "D");
     ASSERT_NE(field, nullptr);
-    ASSERT_EQ(env->GetStaticDoubleField(testClass, field), 2.0);
+    ASSERT_EQ(env->GetStaticDoubleField(testClass, field), 2.0_D);
 
     field = env->GetStaticp_field(testClass, "string_value_final", "Lstd/core/String;");
     ASSERT_NE(field, nullptr);

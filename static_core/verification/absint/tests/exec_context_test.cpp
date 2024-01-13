@@ -36,11 +36,11 @@ TEST_F(VerifierTest, AbsIntExecContext)
 {
     using Builtin = Type::Builtin;
     auto *config = NewConfig();
-    RuntimeOptions runtime_opts;
-    Runtime::Create(runtime_opts);
+    RuntimeOptions runtimeOpts;
+    Runtime::Create(runtimeOpts);
     auto *service = CreateService(config, Runtime::GetCurrent()->GetInternalAllocator(),
                                   Runtime::GetCurrent()->GetClassLinker(), "");
-    TypeSystem type_system(service->verifier_service);
+    TypeSystem typeSystem(service->verifierService);
     Variables variables;
 
     auto i16 = Type {Builtin::I16};
@@ -55,14 +55,14 @@ TEST_F(VerifierTest, AbsIntExecContext)
     AbstractTypedValue av3 {u16, nv()};
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    uint8_t instructions[128];
+    uint8_t instructions[128U];
 
-    ExecContext exec_ctx {&instructions[0], &instructions[127], &type_system};
+    ExecContext execCtx {&instructions[0], &instructions[127U], &typeSystem};
 
-    std::array<const uint8_t *, 6> cp = {&instructions[8],  &instructions[17], &instructions[23],
-                                         &instructions[49], &instructions[73], &instructions[103]};
+    std::array<const uint8_t *, 6> cp = {&instructions[8U],  &instructions[17U], &instructions[23U],
+                                         &instructions[49U], &instructions[73U], &instructions[103U]};
 
-    exec_ctx.SetCheckPoints(ConstLazyFetch(cp));
+    execCtx.SetCheckPoints(ConstLazyFetch(cp));
 
     // 1 1 1 1 1 1
     // C I C I C I
@@ -79,62 +79,62 @@ TEST_F(VerifierTest, AbsIntExecContext)
 
     ctx3[-1] = av3;  // incompat with 1
 
-    exec_ctx.CurrentRegContext() = ctx1;
+    execCtx.CurrentRegContext() = ctx1;
 
-    exec_ctx.StoreCurrentRegContextForAddr(cp[0]);
-    exec_ctx.StoreCurrentRegContextForAddr(cp[1]);
-    exec_ctx.StoreCurrentRegContextForAddr(cp[2]);
-    exec_ctx.StoreCurrentRegContextForAddr(cp[3]);
-    exec_ctx.StoreCurrentRegContextForAddr(cp[4]);
-    exec_ctx.StoreCurrentRegContextForAddr(cp[5]);
+    execCtx.StoreCurrentRegContextForAddr(cp[0U]);
+    execCtx.StoreCurrentRegContextForAddr(cp[1U]);
+    execCtx.StoreCurrentRegContextForAddr(cp[2U]);
+    execCtx.StoreCurrentRegContextForAddr(cp[3U]);
+    execCtx.StoreCurrentRegContextForAddr(cp[4U]);
+    execCtx.StoreCurrentRegContextForAddr(cp[5U]);
 
-    exec_ctx.AddEntryPoint(cp[1], EntryPointType::METHOD_BODY);
-    exec_ctx.AddEntryPoint(cp[4], EntryPointType::METHOD_BODY);
+    execCtx.AddEntryPoint(cp[1U], EntryPointType::METHOD_BODY);
+    execCtx.AddEntryPoint(cp[4U], EntryPointType::METHOD_BODY);
 
     const uint8_t *ep = &instructions[0];
     EntryPointType ept;
 
-    exec_ctx.CurrentRegContext() = ctx2;
-    while (ep != cp[0]) {
-        exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.CurrentRegContext() = ctx2;
+    while (ep != cp[0U]) {
+        execCtx.StoreCurrentRegContextForAddr(ep++);
     }
-    exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.StoreCurrentRegContextForAddr(ep++);
 
-    exec_ctx.CurrentRegContext() = ctx3;
-    while (ep != cp[1]) {
-        exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.CurrentRegContext() = ctx3;
+    while (ep != cp[1U]) {
+        execCtx.StoreCurrentRegContextForAddr(ep++);
     }
-    exec_ctx.StoreCurrentRegContextForAddr(ep);
+    execCtx.StoreCurrentRegContextForAddr(ep);
 
-    exec_ctx.CurrentRegContext() = ctx2;
-    while (ep != cp[2]) {
-        exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.CurrentRegContext() = ctx2;
+    while (ep != cp[2U]) {
+        execCtx.StoreCurrentRegContextForAddr(ep++);
     }
-    exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.StoreCurrentRegContextForAddr(ep++);
 
-    exec_ctx.CurrentRegContext() = ctx3;
-    while (ep != cp[3]) {
-        exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.CurrentRegContext() = ctx3;
+    while (ep != cp[3U]) {
+        execCtx.StoreCurrentRegContextForAddr(ep++);
     }
-    exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.StoreCurrentRegContextForAddr(ep++);
 
-    exec_ctx.CurrentRegContext() = ctx2;
-    while (ep != cp[4]) {
-        exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.CurrentRegContext() = ctx2;
+    while (ep != cp[4U]) {
+        execCtx.StoreCurrentRegContextForAddr(ep++);
     }
-    exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.StoreCurrentRegContextForAddr(ep++);
 
-    exec_ctx.CurrentRegContext() = ctx3;
-    while (ep != cp[5]) {
-        exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.CurrentRegContext() = ctx3;
+    while (ep != cp[5U]) {
+        execCtx.StoreCurrentRegContextForAddr(ep++);
     }
-    exec_ctx.StoreCurrentRegContextForAddr(ep++);
+    execCtx.StoreCurrentRegContextForAddr(ep++);
 
-    exec_ctx.GetEntryPointForChecking(&ep, &ept);
+    execCtx.GetEntryPointForChecking(&ep, &ept);
 
-    exec_ctx.GetEntryPointForChecking(&ep, &ept);
+    execCtx.GetEntryPointForChecking(&ep, &ept);
 
-    auto status = exec_ctx.GetEntryPointForChecking(&ep, &ept);
+    auto status = execCtx.GetEntryPointForChecking(&ep, &ept);
 
     EXPECT_EQ(status, ExecContext::Status::ALL_DONE);
 

@@ -44,50 +44,50 @@ TEST(libpandargs, TestAPI)
     // NOLINTNEXTLINE(readability-magic-numbers)
     PandArg<uint64_t> paur64("ruint64", REF_DEF_UINT64, "uint64 argument with range", 0U, 100000000000U);
 
-    PandArgParser pa_parser;
-    EXPECT_TRUE(pa_parser.Add(&pab));
-    EXPECT_TRUE(pa_parser.Add(&pai));
-    EXPECT_TRUE(pa_parser.Add(&pad));
-    EXPECT_TRUE(pa_parser.Add(&pas));
-    EXPECT_TRUE(pa_parser.Add(&pau32));
-    EXPECT_TRUE(pa_parser.Add(&pau64));
-    EXPECT_TRUE(pa_parser.Add(&pald));
-    EXPECT_TRUE(pa_parser.Add(&pal));
-    EXPECT_TRUE(pa_parser.Add(&pair));
-    EXPECT_TRUE(pa_parser.Add(&paur32));
-    EXPECT_TRUE(pa_parser.Add(&paur64));
+    PandArgParser paParser;
+    EXPECT_TRUE(paParser.Add(&pab));
+    EXPECT_TRUE(paParser.Add(&pai));
+    EXPECT_TRUE(paParser.Add(&pad));
+    EXPECT_TRUE(paParser.Add(&pas));
+    EXPECT_TRUE(paParser.Add(&pau32));
+    EXPECT_TRUE(paParser.Add(&pau64));
+    EXPECT_TRUE(paParser.Add(&pald));
+    EXPECT_TRUE(paParser.Add(&pal));
+    EXPECT_TRUE(paParser.Add(&pair));
+    EXPECT_TRUE(paParser.Add(&paur32));
+    EXPECT_TRUE(paParser.Add(&paur64));
 
-    PandArg<bool> t_pab("tail_bool", REF_DEF_BOOL, "Sample tail boolean argument");
-    PandArg<int> t_pai("tail_int", REF_DEF_INT, "Sample tail integer argument");
-    PandArg<double> t_pad("tail_double", REF_DEF_DOUBLE, "Sample tail rational argument");
-    PandArg<std::string> t_pas("tail_string", REF_DEF_STRING, "Sample tail string argument");
-    PandArg<uint32_t> t_pau32("tail_uint32", REF_DEF_UINT32, "Sample tail uint32 argument");
-    PandArg<uint64_t> t_pau64("tail_uint64", REF_DEF_UINT64, "Sample tail uint64 argument");
+    PandArg<bool> tPab("tail_bool", REF_DEF_BOOL, "Sample tail boolean argument");
+    PandArg<int> tPai("tail_int", REF_DEF_INT, "Sample tail integer argument");
+    PandArg<double> tPad("tail_double", REF_DEF_DOUBLE, "Sample tail rational argument");
+    PandArg<std::string> tPas("tail_string", REF_DEF_STRING, "Sample tail string argument");
+    PandArg<uint32_t> tPau32("tail_uint32", REF_DEF_UINT32, "Sample tail uint32 argument");
+    PandArg<uint64_t> tPau64("tail_uint64", REF_DEF_UINT64, "Sample tail uint64 argument");
 
     // expect all arguments are set in parser
     {
-        EXPECT_TRUE(pa_parser.IsArgSet(&pab));
-        EXPECT_TRUE(pa_parser.IsArgSet(pab.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&pai));
-        EXPECT_TRUE(pa_parser.IsArgSet(pai.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&pad));
-        EXPECT_TRUE(pa_parser.IsArgSet(pad.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&pas));
-        EXPECT_TRUE(pa_parser.IsArgSet(pas.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&pau32));
-        EXPECT_TRUE(pa_parser.IsArgSet(pau32.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&pau64));
-        EXPECT_TRUE(pa_parser.IsArgSet(pau64.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&pald));
-        EXPECT_TRUE(pa_parser.IsArgSet(pald.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&pal));
-        EXPECT_TRUE(pa_parser.IsArgSet(pal.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&pair));
-        EXPECT_TRUE(pa_parser.IsArgSet(pair.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&paur32));
-        EXPECT_TRUE(pa_parser.IsArgSet(paur32.GetName()));
-        EXPECT_TRUE(pa_parser.IsArgSet(&paur64));
-        EXPECT_TRUE(pa_parser.IsArgSet(paur64.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pab));
+        EXPECT_TRUE(paParser.IsArgSet(pab.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pai));
+        EXPECT_TRUE(paParser.IsArgSet(pai.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pad));
+        EXPECT_TRUE(paParser.IsArgSet(pad.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pas));
+        EXPECT_TRUE(paParser.IsArgSet(pas.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pau32));
+        EXPECT_TRUE(paParser.IsArgSet(pau32.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pau64));
+        EXPECT_TRUE(paParser.IsArgSet(pau64.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pald));
+        EXPECT_TRUE(paParser.IsArgSet(pald.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pal));
+        EXPECT_TRUE(paParser.IsArgSet(pal.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&pair));
+        EXPECT_TRUE(paParser.IsArgSet(pair.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&paur32));
+        EXPECT_TRUE(paParser.IsArgSet(paur32.GetName()));
+        EXPECT_TRUE(paParser.IsArgSet(&paur64));
+        EXPECT_TRUE(paParser.IsArgSet(paur64.GetName()));
     }
 
     // expect default values and types are consistent
@@ -139,85 +139,85 @@ TEST(libpandargs, TestAPI)
 
     // expect false on duplicate argument
     {
-        PandArg<int> pai_dup("int", 0U, "Integer number 0");
-        EXPECT_TRUE(pa_parser.IsArgSet(pai_dup.GetName()));
-        EXPECT_FALSE(pa_parser.Add(&pai_dup));
+        PandArg<int> paiDup("int", 0U, "Integer number 0");
+        EXPECT_TRUE(paParser.IsArgSet(paiDup.GetName()));
+        EXPECT_FALSE(paParser.Add(&paiDup));
     }
 
     // add tail argument, expect false on duplicate
     // erase tail, expect 0 tail size
     {
-        EXPECT_EQ(pa_parser.GetTailSize(), 0U);
-        EXPECT_TRUE(pa_parser.PushBackTail(&t_pai));
-        EXPECT_EQ(pa_parser.GetTailSize(), 1U);
-        EXPECT_FALSE(pa_parser.PushBackTail(&t_pai));
-        pa_parser.PopBackTail();
-        EXPECT_EQ(pa_parser.GetTailSize(), 0U);
+        EXPECT_EQ(paParser.GetTailSize(), 0U);
+        EXPECT_TRUE(paParser.PushBackTail(&tPai));
+        EXPECT_EQ(paParser.GetTailSize(), 1U);
+        EXPECT_FALSE(paParser.PushBackTail(&tPai));
+        paParser.PopBackTail();
+        EXPECT_EQ(paParser.GetTailSize(), 0U);
     }
 
     // expect help string formed right
     {
-        std::string ref_string = "--" + pab.GetName() + ": " + pab.GetDesc() + "\n";
-        ref_string += "--" + pald.GetName() + ": " + pald.GetDesc() + "\n";
-        ref_string += "--" + pad.GetName() + ": " + pad.GetDesc() + "\n";
-        ref_string += "--" + pai.GetName() + ": " + pai.GetDesc() + "\n";
-        ref_string += "--" + pal.GetName() + ": " + pal.GetDesc() + "\n";
-        ref_string += "--" + pair.GetName() + ": " + pair.GetDesc() + "\n";
-        ref_string += "--" + paur32.GetName() + ": " + paur32.GetDesc() + "\n";
-        ref_string += "--" + paur64.GetName() + ": " + paur64.GetDesc() + "\n";
-        ref_string += "--" + pas.GetName() + ": " + pas.GetDesc() + "\n";
-        ref_string += "--" + pau32.GetName() + ": " + pau32.GetDesc() + "\n";
-        ref_string += "--" + pau64.GetName() + ": " + pau64.GetDesc() + "\n";
-        EXPECT_EQ(pa_parser.GetHelpString(), ref_string);
+        std::string refString = "--" + pab.GetName() + ": " + pab.GetDesc() + "\n";
+        refString += "--" + pald.GetName() + ": " + pald.GetDesc() + "\n";
+        refString += "--" + pad.GetName() + ": " + pad.GetDesc() + "\n";
+        refString += "--" + pai.GetName() + ": " + pai.GetDesc() + "\n";
+        refString += "--" + pal.GetName() + ": " + pal.GetDesc() + "\n";
+        refString += "--" + pair.GetName() + ": " + pair.GetDesc() + "\n";
+        refString += "--" + paur32.GetName() + ": " + paur32.GetDesc() + "\n";
+        refString += "--" + paur64.GetName() + ": " + paur64.GetDesc() + "\n";
+        refString += "--" + pas.GetName() + ": " + pas.GetDesc() + "\n";
+        refString += "--" + pau32.GetName() + ": " + pau32.GetDesc() + "\n";
+        refString += "--" + pau64.GetName() + ": " + pau64.GetDesc() + "\n";
+        EXPECT_EQ(paParser.GetHelpString(), refString);
     }
 
     // expect regular args list formed right
     {
-        arg_list_t ref_arg_dlist = pald.GetValue();
-        arg_list_t ref_arg_list = pal.GetValue();
-        std::string ref_string = "--" + pab.GetName() + "=" + std::to_string(static_cast<int>(pab.GetValue())) + "\n";
-        ref_string += "--" + pald.GetName() + "=";
-        for (const auto &i : ref_arg_dlist) {
-            ref_string += i + ", ";
+        arg_list_t refArgDlist = pald.GetValue();
+        arg_list_t refArgList = pal.GetValue();
+        std::string refString = "--" + pab.GetName() + "=" + std::to_string(static_cast<int>(pab.GetValue())) + "\n";
+        refString += "--" + pald.GetName() + "=";
+        for (const auto &i : refArgDlist) {
+            refString += i + ", ";
         }
-        ref_string += "\n";
-        ref_string += "--" + pad.GetName() + "=" + std::to_string(pad.GetValue()) + "\n";
-        ref_string += "--" + pai.GetName() + "=" + std::to_string(pai.GetValue()) + "\n";
-        ref_string += "--" + pal.GetName() + "=";
-        for (const auto &i : ref_arg_list) {
-            ref_string += i + ", ";
+        refString += "\n";
+        refString += "--" + pad.GetName() + "=" + std::to_string(pad.GetValue()) + "\n";
+        refString += "--" + pai.GetName() + "=" + std::to_string(pai.GetValue()) + "\n";
+        refString += "--" + pal.GetName() + "=";
+        for (const auto &i : refArgList) {
+            refString += i + ", ";
         }
-        ref_string += "\n";
-        ref_string += "--" + pair.GetName() + "=" + std::to_string(pair.GetValue()) + "\n";
-        ref_string += "--" + paur32.GetName() + "=" + std::to_string(paur32.GetValue()) + "\n";
-        ref_string += "--" + paur64.GetName() + "=" + std::to_string(paur64.GetValue()) + "\n";
-        ref_string += "--" + pas.GetName() + "=" + pas.GetValue() + "\n";
-        ref_string += "--" + pau32.GetName() + "=" + std::to_string(pau32.GetValue()) + "\n";
-        ref_string += "--" + pau64.GetName() + "=" + std::to_string(pau64.GetValue()) + "\n";
-        EXPECT_EQ(pa_parser.GetRegularArgs(), ref_string);
+        refString += "\n";
+        refString += "--" + pair.GetName() + "=" + std::to_string(pair.GetValue()) + "\n";
+        refString += "--" + paur32.GetName() + "=" + std::to_string(paur32.GetValue()) + "\n";
+        refString += "--" + paur64.GetName() + "=" + std::to_string(paur64.GetValue()) + "\n";
+        refString += "--" + pas.GetName() + "=" + pas.GetValue() + "\n";
+        refString += "--" + pau32.GetName() + "=" + std::to_string(pau32.GetValue()) + "\n";
+        refString += "--" + pau64.GetName() + "=" + std::to_string(pau64.GetValue()) + "\n";
+        EXPECT_EQ(paParser.GetRegularArgs(), refString);
     }
 
     // NOLINTBEGIN(modernize-avoid-c-arrays)
     // expect all boolean values processed right
     {
-        static const char *true_values[] = {"true", "on", "1"};
-        static const char *false_values[] = {"false", "off", "0"};
+        static const char *trueValues[] = {"true", "on", "1"};
+        static const char *falseValues[] = {"false", "off", "0"};
         static const int ARGC_BOOL_ONLY = 3;
-        static const char *argv_bool_only[ARGC_BOOL_ONLY];
-        argv_bool_only[0U] = "gtest_app";
+        static const char *argvBoolOnly[ARGC_BOOL_ONLY];
+        argvBoolOnly[0U] = "gtest_app";
         std::string s = "--" + pab.GetName();
-        argv_bool_only[1U] = s.c_str();
+        argvBoolOnly[1U] = s.c_str();
 
         // NOLINTNEXTLINE(modernize-loop-convert)
         for (size_t i = 0; i < 3U; i++) {
-            argv_bool_only[2U] = true_values[i];
-            EXPECT_TRUE(pa_parser.Parse(ARGC_BOOL_ONLY, argv_bool_only));
+            argvBoolOnly[2U] = trueValues[i];
+            EXPECT_TRUE(paParser.Parse(ARGC_BOOL_ONLY, argvBoolOnly));
             EXPECT_TRUE(pab.GetValue());
         }
         // NOLINTNEXTLINE(modernize-loop-convert)
         for (size_t i = 0; i < 3U; i++) {
-            argv_bool_only[2U] = false_values[i];
-            EXPECT_TRUE(pa_parser.Parse(ARGC_BOOL_ONLY, argv_bool_only));
+            argvBoolOnly[2U] = falseValues[i];
+            EXPECT_TRUE(paParser.Parse(ARGC_BOOL_ONLY, argvBoolOnly));
             EXPECT_FALSE(pab.GetValue());
         }
     }
@@ -225,21 +225,21 @@ TEST(libpandargs, TestAPI)
     // expect wrong boolean arguments with "=" processed right
     {
         static const int ARGC_BOOL_ONLY = 2;
-        static const char *argv_bool_only[ARGC_BOOL_ONLY];
-        argv_bool_only[0U] = "gtest_app";
+        static const char *argvBoolOnly[ARGC_BOOL_ONLY];
+        argvBoolOnly[0U] = "gtest_app";
         std::string s = "--" + pab.GetName() + "=";
-        argv_bool_only[1U] = s.c_str();
-        EXPECT_FALSE(pa_parser.Parse(ARGC_BOOL_ONLY, argv_bool_only));
+        argvBoolOnly[1U] = s.c_str();
+        EXPECT_FALSE(paParser.Parse(ARGC_BOOL_ONLY, argvBoolOnly));
     }
 
     // expect boolean at the end of arguments line is true
     {
         static const int ARGC_BOOL_ONLY = 2;
-        static const char *argv_bool_only[ARGC_BOOL_ONLY];
-        argv_bool_only[0U] = "gtest_app";
+        static const char *argvBoolOnly[ARGC_BOOL_ONLY];
+        argvBoolOnly[0U] = "gtest_app";
         std::string s = "--" + pab.GetName();
-        argv_bool_only[1U] = s.c_str();
-        EXPECT_TRUE(pa_parser.Parse(ARGC_BOOL_ONLY, argv_bool_only));
+        argvBoolOnly[1U] = s.c_str();
+        EXPECT_TRUE(paParser.Parse(ARGC_BOOL_ONLY, argvBoolOnly));
         EXPECT_TRUE(pab.GetValue());
     }
 
@@ -248,15 +248,15 @@ TEST(libpandargs, TestAPI)
         static const int REF_INT_POS = 42422424;
         static const int REF_INT_NEG = -42422424;
         static const int ARGC_INT_ONLY = 3;
-        static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0U] = "gtest_app";
+        static const char *argvIntOnly[ARGC_INT_ONLY];
+        argvIntOnly[0U] = "gtest_app";
         std::string s = "--" + pai.GetName();
-        argv_int_only[1U] = s.c_str();
-        argv_int_only[2U] = "42422424";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[1U] = s.c_str();
+        argvIntOnly[2U] = "42422424";
+        EXPECT_TRUE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
         EXPECT_EQ(pai.GetValue(), REF_INT_POS);
-        argv_int_only[2U] = "-42422424";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[2U] = "-42422424";
+        EXPECT_TRUE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
         EXPECT_EQ(pai.GetValue(), REF_INT_NEG);
     }
 
@@ -265,15 +265,15 @@ TEST(libpandargs, TestAPI)
         static const double REF_DOUBLE_POS = 4242.2424;
         static const double REF_DOUBLE_NEG = -4242.2424;
         static const int ARGC_DOUBLE_ONLY = 3;
-        static const char *argv_double_only[ARGC_DOUBLE_ONLY];
-        argv_double_only[0U] = "gtest_app";
+        static const char *argvDoubleOnly[ARGC_DOUBLE_ONLY];
+        argvDoubleOnly[0U] = "gtest_app";
         std::string s = "--" + pad.GetName();
-        argv_double_only[1U] = s.c_str();
-        argv_double_only[2U] = "4242.2424";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_DOUBLE_ONLY, argv_double_only));
+        argvDoubleOnly[1U] = s.c_str();
+        argvDoubleOnly[2U] = "4242.2424";
+        EXPECT_TRUE(paParser.Parse(ARGC_DOUBLE_ONLY, argvDoubleOnly));
         EXPECT_EQ(pad.GetValue(), REF_DOUBLE_POS);
-        argv_double_only[2U] = "-4242.2424";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_DOUBLE_ONLY, argv_double_only));
+        argvDoubleOnly[2U] = "-4242.2424";
+        EXPECT_TRUE(paParser.Parse(ARGC_DOUBLE_ONLY, argvDoubleOnly));
         EXPECT_EQ(pad.GetValue(), REF_DOUBLE_NEG);
     }
 
@@ -282,15 +282,15 @@ TEST(libpandargs, TestAPI)
         static const uint64_t REF_UINT64 = 274877906959;
         static const int REF_INT = 64;
         static const int ARGC_UINT64_INT = 3;
-        static const char *argv_uint64_int[ARGC_UINT64_INT];
-        argv_uint64_int[0U] = "gtest_app";
+        static const char *argvUint64Int[ARGC_UINT64_INT];
+        argvUint64Int[0U] = "gtest_app";
         std::string s = "--" + pau64.GetName();
-        argv_uint64_int[1U] = s.c_str();
-        argv_uint64_int[2U] = "0x400000000f";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_INT, argv_uint64_int));
+        argvUint64Int[1U] = s.c_str();
+        argvUint64Int[2U] = "0x400000000f";
+        EXPECT_TRUE(paParser.Parse(ARGC_UINT64_INT, argvUint64Int));
         EXPECT_EQ(pau64.GetValue(), REF_UINT64);
-        argv_uint64_int[2U] = "0x40";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_INT, argv_uint64_int));
+        argvUint64Int[2U] = "0x40";
+        EXPECT_TRUE(paParser.Parse(ARGC_UINT64_INT, argvUint64Int));
         EXPECT_EQ(pau64.GetValue(), REF_INT);
     }
 
@@ -298,12 +298,12 @@ TEST(libpandargs, TestAPI)
     {
         static const uint32_t REF_UINT32_POS = 4242422424;
         static const int ARGC_UINT32_ONLY = 3;
-        static const char *argv_uint32_only[ARGC_UINT32_ONLY];
-        argv_uint32_only[0U] = "gtest_app";
+        static const char *argvUint32Only[ARGC_UINT32_ONLY];
+        argvUint32Only[0U] = "gtest_app";
         std::string s = "--" + pau32.GetName();
-        argv_uint32_only[1U] = s.c_str();
-        argv_uint32_only[2U] = "4242422424";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_UINT32_ONLY, argv_uint32_only));
+        argvUint32Only[1U] = s.c_str();
+        argvUint32Only[2U] = "4242422424";
+        EXPECT_TRUE(paParser.Parse(ARGC_UINT32_ONLY, argvUint32Only));
         EXPECT_EQ(pau32.GetValue(), REF_UINT32_POS);
     }
 
@@ -311,12 +311,12 @@ TEST(libpandargs, TestAPI)
     {
         static const uint64_t REF_UINT64_POS = 424242422424;
         static const int ARGC_UINT64_ONLY = 3;
-        static const char *argv_uint64_only[ARGC_UINT64_ONLY];
-        argv_uint64_only[0U] = "gtest_app";
+        static const char *argvUint64Only[ARGC_UINT64_ONLY];
+        argvUint64Only[0U] = "gtest_app";
         std::string s = "--" + pau64.GetName();
-        argv_uint64_only[1U] = s.c_str();
-        argv_uint64_only[2U] = "424242422424";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_ONLY, argv_uint64_only));
+        argvUint64Only[1U] = s.c_str();
+        argvUint64Only[2U] = "424242422424";
+        EXPECT_TRUE(paParser.Parse(ARGC_UINT64_ONLY, argvUint64Only));
         EXPECT_EQ(pau64.GetValue(), REF_UINT64_POS);
     }
 
@@ -325,67 +325,67 @@ TEST(libpandargs, TestAPI)
         static const uint64_t REF_UINT64 = 274877906944;
         static const int REF_INT = 64;
         static const int ARGC_UINT64_INT = 3;
-        static const char *argv_uint64_int[ARGC_UINT64_INT];
-        argv_uint64_int[0U] = "gtest_app";
+        static const char *argvUint64Int[ARGC_UINT64_INT];
+        argvUint64Int[0U] = "gtest_app";
         std::string s = "--" + pau64.GetName();
-        argv_uint64_int[1U] = s.c_str();
-        argv_uint64_int[2U] = "0x4000000000";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_INT, argv_uint64_int));
+        argvUint64Int[1U] = s.c_str();
+        argvUint64Int[2U] = "0x4000000000";
+        EXPECT_TRUE(paParser.Parse(ARGC_UINT64_INT, argvUint64Int));
         EXPECT_EQ(pau64.GetValue(), REF_UINT64);
-        argv_uint64_int[2U] = "0x40";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_UINT64_INT, argv_uint64_int));
+        argvUint64Int[2U] = "0x40";
+        EXPECT_TRUE(paParser.Parse(ARGC_UINT64_INT, argvUint64Int));
         EXPECT_EQ(pau64.GetValue(), REF_INT);
     }
 
     // expect out of range uint32_t values processed right
     {
         static const int ARGC_UINT32_ONLY = 3;
-        static const char *argv_uint32_only[ARGC_UINT32_ONLY];
-        argv_uint32_only[0U] = "gtest_app";
+        static const char *argvUint32Only[ARGC_UINT32_ONLY];
+        argvUint32Only[0U] = "gtest_app";
         std::string s = "--" + pau32.GetName();
-        argv_uint32_only[1U] = s.c_str();
-        argv_uint32_only[2U] = "424224244242242442422424";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_UINT32_ONLY, argv_uint32_only));
-        argv_uint32_only[2U] = "0xffffffffffffffffffffffffff";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_UINT32_ONLY, argv_uint32_only));
+        argvUint32Only[1U] = s.c_str();
+        argvUint32Only[2U] = "424224244242242442422424";
+        EXPECT_FALSE(paParser.Parse(ARGC_UINT32_ONLY, argvUint32Only));
+        argvUint32Only[2U] = "0xffffffffffffffffffffffffff";
+        EXPECT_FALSE(paParser.Parse(ARGC_UINT32_ONLY, argvUint32Only));
     }
 
     // expect out of range uint64_t values processed right
     {
         static const int ARGC_UINT64_ONLY = 3;
-        static const char *argv_uint64_only[ARGC_UINT64_ONLY];
-        argv_uint64_only[0U] = "gtest_app";
+        static const char *argvUint64Only[ARGC_UINT64_ONLY];
+        argvUint64Only[0U] = "gtest_app";
         std::string s = "--" + pau64.GetName();
-        argv_uint64_only[1U] = s.c_str();
-        argv_uint64_only[2U] = "424224244242242442422424";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_UINT64_ONLY, argv_uint64_only));
-        argv_uint64_only[2U] = "0xffffffffffffffffffffffffff";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_UINT64_ONLY, argv_uint64_only));
+        argvUint64Only[1U] = s.c_str();
+        argvUint64Only[2U] = "424224244242242442422424";
+        EXPECT_FALSE(paParser.Parse(ARGC_UINT64_ONLY, argvUint64Only));
+        argvUint64Only[2U] = "0xffffffffffffffffffffffffff";
+        EXPECT_FALSE(paParser.Parse(ARGC_UINT64_ONLY, argvUint64Only));
     }
 
     // expect string argument of one word and multiple word processed right
     {
         static const std::string REF_ONE_STRING = "string";
         static const std::string REF_MULTIPLE_STRING = "this is a string";
-        static const char *str_argname = "--string";
+        static const char *strArgname = "--string";
         static const int ARGC_ONE_STRING = 3;
-        static const char *argv_one_string[ARGC_ONE_STRING] = {"gtest_app", str_argname, "string"};
+        static const char *argvOneString[ARGC_ONE_STRING] = {"gtest_app", strArgname, "string"};
         static const int ARGC_MULTIPLE_STRING = 3;
-        static const char *argv_multiple_string[ARGC_MULTIPLE_STRING] = {"gtest_app", str_argname, "this is a string"};
-        EXPECT_TRUE(pa_parser.Parse(ARGC_MULTIPLE_STRING, argv_multiple_string));
+        static const char *argvMultipleString[ARGC_MULTIPLE_STRING] = {"gtest_app", strArgname, "this is a string"};
+        EXPECT_TRUE(paParser.Parse(ARGC_MULTIPLE_STRING, argvMultipleString));
         EXPECT_EQ(pas.GetValue(), REF_MULTIPLE_STRING);
-        EXPECT_TRUE(pa_parser.Parse(ARGC_ONE_STRING, argv_one_string));
+        EXPECT_TRUE(paParser.Parse(ARGC_ONE_STRING, argvOneString));
         EXPECT_EQ(pas.GetValue(), REF_ONE_STRING);
     }
 
     // expect string at the end of line is an empty string
     {
         static const int ARGC_STRING_ONLY = 2;
-        static const char *argv_string_only[ARGC_STRING_ONLY];
-        argv_string_only[0U] = "gtest_app";
+        static const char *argvStringOnly[ARGC_STRING_ONLY];
+        argvStringOnly[0U] = "gtest_app";
         std::string s = "--" + pas.GetName();
-        argv_string_only[1U] = s.c_str();
-        EXPECT_TRUE(pa_parser.Parse(ARGC_STRING_ONLY, argv_string_only));
+        argvStringOnly[1U] = s.c_str();
+        EXPECT_TRUE(paParser.Parse(ARGC_STRING_ONLY, argvStringOnly));
         EXPECT_EQ(pas.GetValue(), "");
     }
 
@@ -394,11 +394,11 @@ TEST(libpandargs, TestAPI)
         pald.ResetDefaultValue();
         static const arg_list_t REF_LIST = {"list1", "list2", "list3"};
         std::string s = "--" + pald.GetName();
-        static const char *list_argname = s.c_str();
+        static const char *listArgname = s.c_str();
         static const int ARGC_LIST_ONLY = 7;
-        static const char *argv_list_only[ARGC_LIST_ONLY] = {"gtest_app", list_argname, "list1", list_argname,
-                                                             "list2",     list_argname, "list3"};
-        EXPECT_TRUE(pa_parser.Parse(ARGC_LIST_ONLY, argv_list_only));
+        static const char *argvListOnly[ARGC_LIST_ONLY] = {"gtest_app", listArgname, "list1", listArgname,
+                                                           "list2",     listArgname, "list3"};
+        EXPECT_TRUE(paParser.Parse(ARGC_LIST_ONLY, argvListOnly));
         ASSERT_EQ(pald.GetValue().size(), REF_LIST.size());
         for (std::size_t i = 0; i < REF_LIST.size(); ++i) {
             EXPECT_EQ(pald.GetValue()[i], REF_LIST[i]);
@@ -410,11 +410,11 @@ TEST(libpandargs, TestAPI)
         pal.ResetDefaultValue();
         static const arg_list_t REF_LIST = {"list1", "list2", "list3", "list4"};
         std::string s = "--" + pal.GetName();
-        static const char *list_argname = s.c_str();
+        static const char *listArgname = s.c_str();
         static const int ARGC_LIST_ONLY = 9;
-        static const char *argv_list_only[ARGC_LIST_ONLY] = {
-            "gtest_app", list_argname, "list1", list_argname, "list2", list_argname, "list3", list_argname, "list4"};
-        EXPECT_TRUE(pa_parser.Parse(ARGC_LIST_ONLY, argv_list_only));
+        static const char *argvListOnly[ARGC_LIST_ONLY] = {"gtest_app", listArgname, "list1",     listArgname, "list2",
+                                                           listArgname, "list3",     listArgname, "list4"};
+        EXPECT_TRUE(paParser.Parse(ARGC_LIST_ONLY, argvListOnly));
         ASSERT_EQ(pal.GetValue().size(), REF_LIST.size());
         for (std::size_t i = 0; i < REF_LIST.size(); ++i) {
             EXPECT_EQ(pal.GetValue()[i], REF_LIST[i]);
@@ -426,10 +426,10 @@ TEST(libpandargs, TestAPI)
         pald.ResetDefaultValue();
         static const arg_list_t REF_DLIST = {"dlist1", "dlist2", "dlist3"};
         std::string s = "--" + pald.GetName();
-        static const char *list_argname = s.c_str();
+        static const char *listArgname = s.c_str();
         static const int ARGC_DLIST_ONLY = 3;
-        static const char *argv_dlist_only[ARGC_DLIST_ONLY] = {"gtest_app", list_argname, "dlist1:dlist2:dlist3"};
-        EXPECT_TRUE(pa_parser.Parse(ARGC_DLIST_ONLY, argv_dlist_only));
+        static const char *argvDlistOnly[ARGC_DLIST_ONLY] = {"gtest_app", listArgname, "dlist1:dlist2:dlist3"};
+        EXPECT_TRUE(paParser.Parse(ARGC_DLIST_ONLY, argvDlistOnly));
         ASSERT_EQ(pald.GetValue().size(), REF_DLIST.size());
         for (std::size_t i = 0; i < REF_DLIST.size(); ++i) {
             EXPECT_EQ(pald.GetValue()[i], REF_DLIST[i]);
@@ -441,11 +441,11 @@ TEST(libpandargs, TestAPI)
         pald.ResetDefaultValue();
         static const arg_list_t REF_LIST = {"dlist1", "dlist2", "list1", "list2", "dlist3", "dlist4"};
         std::string s = "--" + pald.GetName();
-        static const char *list_argname = s.c_str();
+        static const char *listArgname = s.c_str();
         static const int ARGC_LIST = 9;
-        static const char *argv_list[ARGC_LIST] = {"gtest_app",  list_argname, "dlist1:dlist2", list_argname,   "list1",
-                                                   list_argname, "list2",      list_argname,    "dlist3:dlist4"};
-        EXPECT_TRUE(pa_parser.Parse(ARGC_LIST, argv_list));
+        static const char *argvList[ARGC_LIST] = {"gtest_app", listArgname, "dlist1:dlist2", listArgname,    "list1",
+                                                  listArgname, "list2",     listArgname,     "dlist3:dlist4"};
+        EXPECT_TRUE(paParser.Parse(ARGC_LIST, argvList));
         ASSERT_EQ(pald.GetValue().size(), REF_LIST.size());
         for (std::size_t i = 0; i < REF_LIST.size(); ++i) {
             EXPECT_EQ(pald.GetValue()[i], REF_LIST[i]);
@@ -457,15 +457,15 @@ TEST(libpandargs, TestAPI)
         static const int REF_INT_POS = 99;
         static const int REF_INT_NEG = -99;
         static const int ARGC_INT_ONLY = 3;
-        static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0U] = "gtest_app";
+        static const char *argvIntOnly[ARGC_INT_ONLY];
+        argvIntOnly[0U] = "gtest_app";
         std::string s = "--" + pair.GetName();
-        argv_int_only[1U] = s.c_str();
-        argv_int_only[2U] = "99";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[1U] = s.c_str();
+        argvIntOnly[2U] = "99";
+        EXPECT_TRUE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
         EXPECT_EQ(pair.GetValue(), REF_INT_POS);
-        argv_int_only[2U] = "-99";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[2U] = "-99";
+        EXPECT_TRUE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
         EXPECT_EQ(pair.GetValue(), REF_INT_NEG);
     }
 
@@ -474,14 +474,14 @@ TEST(libpandargs, TestAPI)
         static const int REF_INT_POS = 101;
         static const int REF_INT_NEG = -101;
         static const int ARGC_INT_ONLY = 3;
-        static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0U] = "gtest_app";
+        static const char *argvIntOnly[ARGC_INT_ONLY];
+        argvIntOnly[0U] = "gtest_app";
         std::string s = "--" + pair.GetName();
-        argv_int_only[1U] = s.c_str();
-        argv_int_only[2U] = "101";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
-        argv_int_only[2U] = "-101";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[1U] = s.c_str();
+        argvIntOnly[2U] = "101";
+        EXPECT_FALSE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
+        argvIntOnly[2U] = "-101";
+        EXPECT_FALSE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
     }
 
     // expect uint32_t values with range processed right
@@ -489,15 +489,15 @@ TEST(libpandargs, TestAPI)
         static const uint32_t REF_INT_MIN = 1;
         static const uint32_t REF_INT_MAX = 990000000;
         static const int ARGC_INT_ONLY = 3;
-        static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0U] = "gtest_app";
+        static const char *argvIntOnly[ARGC_INT_ONLY];
+        argvIntOnly[0U] = "gtest_app";
         std::string s = "--" + paur32.GetName();
-        argv_int_only[1U] = s.c_str();
-        argv_int_only[2U] = "1";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[1U] = s.c_str();
+        argvIntOnly[2U] = "1";
+        EXPECT_TRUE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
         EXPECT_EQ(paur32.GetValue(), REF_INT_MIN);
-        argv_int_only[2U] = "990000000";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[2U] = "990000000";
+        EXPECT_TRUE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
         EXPECT_EQ(paur32.GetValue(), REF_INT_MAX);
     }
 
@@ -506,14 +506,14 @@ TEST(libpandargs, TestAPI)
         static const uint32_t REF_INT_MIN = -1;
         static const uint32_t REF_INT_MAX = 1000000001;
         static const int ARGC_INT_ONLY = 3;
-        static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0U] = "gtest_app";
+        static const char *argvIntOnly[ARGC_INT_ONLY];
+        argvIntOnly[0U] = "gtest_app";
         std::string s = "--" + paur32.GetName();
-        argv_int_only[1U] = s.c_str();
-        argv_int_only[2U] = "-1";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
-        argv_int_only[2U] = "1000000001";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[1U] = s.c_str();
+        argvIntOnly[2U] = "-1";
+        EXPECT_FALSE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
+        argvIntOnly[2U] = "1000000001";
+        EXPECT_FALSE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
     }
 
     // expect uint64_t values with range processed right
@@ -521,15 +521,15 @@ TEST(libpandargs, TestAPI)
         static const uint64_t REF_INT_MIN = 1;
         static const uint64_t REF_INT_MAX = 99000000000;
         static const int ARGC_INT_ONLY = 3;
-        static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0U] = "gtest_app";
+        static const char *argvIntOnly[ARGC_INT_ONLY];
+        argvIntOnly[0U] = "gtest_app";
         std::string s = "--" + paur64.GetName();
-        argv_int_only[1U] = s.c_str();
-        argv_int_only[2U] = "1";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[1U] = s.c_str();
+        argvIntOnly[2U] = "1";
+        EXPECT_TRUE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
         EXPECT_EQ(paur64.GetValue(), REF_INT_MIN);
-        argv_int_only[2U] = "99000000000";
-        EXPECT_TRUE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[2U] = "99000000000";
+        EXPECT_TRUE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
         EXPECT_EQ(paur64.GetValue(), REF_INT_MAX);
     }
 
@@ -538,14 +538,14 @@ TEST(libpandargs, TestAPI)
         static const uint64_t REF_INT_MIN = -1;
         static const uint64_t REF_INT_MAX = 100000000001;
         static const int ARGC_INT_ONLY = 3;
-        static const char *argv_int_only[ARGC_INT_ONLY];
-        argv_int_only[0U] = "gtest_app";
+        static const char *argvIntOnly[ARGC_INT_ONLY];
+        argvIntOnly[0U] = "gtest_app";
         std::string s = "--" + paur64.GetName();
-        argv_int_only[1U] = s.c_str();
-        argv_int_only[2U] = "-1";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
-        argv_int_only[2U] = "100000000001";
-        EXPECT_FALSE(pa_parser.Parse(ARGC_INT_ONLY, argv_int_only));
+        argvIntOnly[1U] = s.c_str();
+        argvIntOnly[2U] = "-1";
+        EXPECT_FALSE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
+        argvIntOnly[2U] = "100000000001";
+        EXPECT_FALSE(paParser.Parse(ARGC_INT_ONLY, argvIntOnly));
     }
 
     // expect list at the end of line is a list with empty string
@@ -553,86 +553,86 @@ TEST(libpandargs, TestAPI)
         pald.ResetDefaultValue();
         static const arg_list_t REF_LIST = {""};
         static const int ARGC_LIST_ONLY = 2;
-        static const char *argv_list_only[ARGC_LIST_ONLY];
-        argv_list_only[0U] = "gtest_app";
+        static const char *argvListOnly[ARGC_LIST_ONLY];
+        argvListOnly[0U] = "gtest_app";
         std::string s = "--" + pald.GetName();
-        argv_list_only[1U] = s.c_str();
-        EXPECT_TRUE(pa_parser.Parse(ARGC_LIST_ONLY, argv_list_only));
+        argvListOnly[1U] = s.c_str();
+        EXPECT_TRUE(paParser.Parse(ARGC_LIST_ONLY, argvListOnly));
         EXPECT_EQ(pald.GetValue(), REF_LIST);
     }
 
     // expect true on IsTailEnabled when tail is enabled, false otherwise
     {
-        pa_parser.EnableTail();
-        EXPECT_TRUE(pa_parser.IsTailEnabled());
-        pa_parser.DisableTail();
-        EXPECT_FALSE(pa_parser.IsTailEnabled());
+        paParser.EnableTail();
+        EXPECT_TRUE(paParser.IsTailEnabled());
+        paParser.DisableTail();
+        EXPECT_FALSE(paParser.IsTailEnabled());
     }
 
     // expect tail only argument is consistent
     {
         static const int ARGC_TAIL_ONLY = 2;
-        static const char *argv_tail_only[] = {"gtest_app", "tail1"};
+        static const char *argvTailOnly[] = {"gtest_app", "tail1"};
         static const std::string REF_STR_TAIL = "tail1";
-        pa_parser.EnableTail();
-        pa_parser.PushBackTail(&t_pas);
-        EXPECT_TRUE(pa_parser.Parse(ARGC_TAIL_ONLY, argv_tail_only));
-        ASSERT_EQ(t_pas.GetValue(), REF_STR_TAIL);
-        pa_parser.DisableTail();
-        pa_parser.EraseTail();
+        paParser.EnableTail();
+        paParser.PushBackTail(&tPas);
+        EXPECT_TRUE(paParser.Parse(ARGC_TAIL_ONLY, argvTailOnly));
+        ASSERT_EQ(tPas.GetValue(), REF_STR_TAIL);
+        paParser.DisableTail();
+        paParser.EraseTail();
     }
 
     // expect multiple tail only argument is consistent
     {
         static const int ARGC_TAIL_ONLY = 7;
-        static const char *argv_tail_only[] = {"gtest_app", "str_tail", "off", "-4", "3.14", "2", "4"};
+        static const char *argvTailOnly[] = {"gtest_app", "str_tail", "off", "-4", "3.14", "2", "4"};
         static const std::string STR_REF = "str_tail";
         static const bool BOOL_REF = false;
         static const int INT_REF = -4;
         static const double DOUBLE_REF = 3.14;
         static const uint32_t UINT32_REF = 2;
         static const uint64_t UINT64_REF = 4;
-        pa_parser.EnableTail();
-        pa_parser.PushBackTail(&t_pas);
-        pa_parser.PushBackTail(&t_pab);
-        pa_parser.PushBackTail(&t_pai);
-        pa_parser.PushBackTail(&t_pad);
-        pa_parser.PushBackTail(&t_pau32);
-        pa_parser.PushBackTail(&t_pau64);
-        EXPECT_EQ(pa_parser.GetTailSize(), 6U);
-        EXPECT_TRUE(pa_parser.Parse(ARGC_TAIL_ONLY, argv_tail_only));
-        EXPECT_EQ(t_pas.GetValue(), STR_REF);
-        EXPECT_EQ(t_pab.GetValue(), BOOL_REF);
-        EXPECT_EQ(t_pai.GetValue(), INT_REF);
-        EXPECT_DOUBLE_EQ(t_pad.GetValue(), DOUBLE_REF);
-        EXPECT_EQ(t_pau32.GetValue(), UINT32_REF);
-        EXPECT_EQ(t_pau64.GetValue(), UINT64_REF);
-        pa_parser.DisableTail();
-        pa_parser.EraseTail();
-        EXPECT_EQ(pa_parser.GetTailSize(), 0U);
+        paParser.EnableTail();
+        paParser.PushBackTail(&tPas);
+        paParser.PushBackTail(&tPab);
+        paParser.PushBackTail(&tPai);
+        paParser.PushBackTail(&tPad);
+        paParser.PushBackTail(&tPau32);
+        paParser.PushBackTail(&tPau64);
+        EXPECT_EQ(paParser.GetTailSize(), 6U);
+        EXPECT_TRUE(paParser.Parse(ARGC_TAIL_ONLY, argvTailOnly));
+        EXPECT_EQ(tPas.GetValue(), STR_REF);
+        EXPECT_EQ(tPab.GetValue(), BOOL_REF);
+        EXPECT_EQ(tPai.GetValue(), INT_REF);
+        EXPECT_DOUBLE_EQ(tPad.GetValue(), DOUBLE_REF);
+        EXPECT_EQ(tPau32.GetValue(), UINT32_REF);
+        EXPECT_EQ(tPau64.GetValue(), UINT64_REF);
+        paParser.DisableTail();
+        paParser.EraseTail();
+        EXPECT_EQ(paParser.GetTailSize(), 0U);
     }
 
     // expect parse fail on wrong tail argument type
     {
-        pa_parser.EnableTail();
+        paParser.EnableTail();
         static const int ARGC_TAIL_ONLY = 3;
         // boolean value instead of integer
-        static const char *argv_tail_only[] = {"gtest_app", "str_tail", "off"};
+        static const char *argvTailOnly[] = {"gtest_app", "str_tail", "off"};
         static const std::string STR_REF = "str_tail";
-        pa_parser.PushBackTail(&t_pas);
-        pa_parser.PushBackTail(&t_pai);
-        EXPECT_EQ(pa_parser.GetTailSize(), 2U);
-        EXPECT_FALSE(pa_parser.Parse(ARGC_TAIL_ONLY, argv_tail_only));
-        EXPECT_EQ(t_pas.GetValue(), STR_REF);
-        pa_parser.DisableTail();
-        pa_parser.EraseTail();
-        EXPECT_EQ(pa_parser.GetTailSize(), 0U);
+        paParser.PushBackTail(&tPas);
+        paParser.PushBackTail(&tPai);
+        EXPECT_EQ(paParser.GetTailSize(), 2U);
+        EXPECT_FALSE(paParser.Parse(ARGC_TAIL_ONLY, argvTailOnly));
+        EXPECT_EQ(tPas.GetValue(), STR_REF);
+        paParser.DisableTail();
+        paParser.EraseTail();
+        EXPECT_EQ(paParser.GetTailSize(), 0U);
     }
 
     // expect right tail argument processing after preceiding string argument
     {
-        pa_parser.EnableTail();
-        static const char *str_argname = "--string";
+        paParser.EnableTail();
+        static const char *strArgname = "--string";
         static const std::string REF_STRING = "this is a reference string";
         static const std::string REF_T_STR = "string";
         static const double REF_T_DOUBLE = 0.1;
@@ -640,29 +640,29 @@ TEST(libpandargs, TestAPI)
         static const uint32_t REF_T_UINT32 = 32;
         static const uint64_t REF_T_UINT64 = 64;
         static const int ARGC_TAIL_STRING = 8;
-        static const char *argv_tail_string[] = {
-            "gtest_app", str_argname, "this is a reference string", "string", ".1", "on", "32", "64"};
-        pa_parser.PushBackTail(&t_pas);
-        pa_parser.PushBackTail(&t_pad);
-        pa_parser.PushBackTail(&t_pab);
-        pa_parser.PushBackTail(&t_pau32);
-        pa_parser.PushBackTail(&t_pau64);
-        EXPECT_TRUE(pa_parser.Parse(ARGC_TAIL_STRING, argv_tail_string));
+        static const char *argvTailString[] = {
+            "gtest_app", strArgname, "this is a reference string", "string", ".1", "on", "32", "64"};
+        paParser.PushBackTail(&tPas);
+        paParser.PushBackTail(&tPad);
+        paParser.PushBackTail(&tPab);
+        paParser.PushBackTail(&tPau32);
+        paParser.PushBackTail(&tPau64);
+        EXPECT_TRUE(paParser.Parse(ARGC_TAIL_STRING, argvTailString));
         EXPECT_EQ(pas.GetValue(), REF_STRING);
-        EXPECT_EQ(t_pas.GetValue(), REF_T_STR);
-        EXPECT_EQ(t_pad.GetValue(), REF_T_DOUBLE);
-        EXPECT_EQ(t_pab.GetValue(), REF_T_BOOL);
-        EXPECT_EQ(t_pau32.GetValue(), REF_T_UINT32);
-        EXPECT_EQ(t_pau64.GetValue(), REF_T_UINT64);
-        pa_parser.DisableTail();
-        pa_parser.EraseTail();
+        EXPECT_EQ(tPas.GetValue(), REF_T_STR);
+        EXPECT_EQ(tPad.GetValue(), REF_T_DOUBLE);
+        EXPECT_EQ(tPab.GetValue(), REF_T_BOOL);
+        EXPECT_EQ(tPau32.GetValue(), REF_T_UINT32);
+        EXPECT_EQ(tPau64.GetValue(), REF_T_UINT64);
+        paParser.DisableTail();
+        paParser.EraseTail();
     }
 
     // expect right tail argument processing after preceiding list argument
     {
         pald.ResetDefaultValue();
-        pa_parser.EnableTail();
-        static const char *list_argname = "--dlist";
+        paParser.EnableTail();
+        static const char *listArgname = "--dlist";
         static const arg_list_t REF_LIST = {"list1", "list2", "list3", "list4", "list5"};
         static const double REF_T_DOUBLE = -7;
         static const bool REF_T_BOOL = true;
@@ -670,107 +670,107 @@ TEST(libpandargs, TestAPI)
         static const uint32_t REF_T_UINT32 = 32;
         static const uint64_t REF_T_UINT64 = 64;
         static const int ARGC_TAIL_LIST = 16;
-        static const char *argv_tail_list[] = {"gtest_app", list_argname, "list1", list_argname, "list2", list_argname,
-                                               "list3",     list_argname, "list4", list_argname, "list5", "true",
-                                               "255",       "-7",         "32",    "64"};
-        pa_parser.PushBackTail(&t_pab);
-        pa_parser.PushBackTail(&t_pai);
-        pa_parser.PushBackTail(&t_pad);
-        pa_parser.PushBackTail(&t_pau32);
-        pa_parser.PushBackTail(&t_pau64);
-        EXPECT_TRUE(pa_parser.Parse(ARGC_TAIL_LIST, argv_tail_list));
+        static const char *argvTailList[] = {"gtest_app", listArgname, "list1", listArgname, "list2", listArgname,
+                                             "list3",     listArgname, "list4", listArgname, "list5", "true",
+                                             "255",       "-7",        "32",    "64"};
+        paParser.PushBackTail(&tPab);
+        paParser.PushBackTail(&tPai);
+        paParser.PushBackTail(&tPad);
+        paParser.PushBackTail(&tPau32);
+        paParser.PushBackTail(&tPau64);
+        EXPECT_TRUE(paParser.Parse(ARGC_TAIL_LIST, argvTailList));
         ASSERT_EQ(pald.GetValue().size(), REF_LIST.size());
         for (std::size_t i = 0; i < REF_LIST.size(); i++) {
             EXPECT_EQ(pald.GetValue()[i], REF_LIST[i]);
         }
-        EXPECT_EQ(t_pab.GetValue(), REF_T_BOOL);
-        EXPECT_EQ(t_pai.GetValue(), REF_T_INT);
-        EXPECT_DOUBLE_EQ(t_pad.GetValue(), REF_T_DOUBLE);
-        EXPECT_EQ(t_pau32.GetValue(), REF_T_UINT32);
-        EXPECT_EQ(t_pau64.GetValue(), REF_T_UINT64);
+        EXPECT_EQ(tPab.GetValue(), REF_T_BOOL);
+        EXPECT_EQ(tPai.GetValue(), REF_T_INT);
+        EXPECT_DOUBLE_EQ(tPad.GetValue(), REF_T_DOUBLE);
+        EXPECT_EQ(tPau32.GetValue(), REF_T_UINT32);
+        EXPECT_EQ(tPau64.GetValue(), REF_T_UINT64);
 
-        pa_parser.DisableTail();
-        pa_parser.EraseTail();
+        paParser.DisableTail();
+        paParser.EraseTail();
     }
 
     // expect right tail argument processing after noparam boolean argument
     {
-        pa_parser.EnableTail();
-        PandArg<std::string> t_pas0("tail_string0", REF_DEF_STRING, "Sample tail string argument 0");
-        PandArg<std::string> t_pas1("tail_string1", REF_DEF_STRING, "Sample tail string argument 1");
+        paParser.EnableTail();
+        PandArg<std::string> tPas0("tail_string0", REF_DEF_STRING, "Sample tail string argument 0");
+        PandArg<std::string> tPas1("tail_string1", REF_DEF_STRING, "Sample tail string argument 1");
         static const std::string REF_T_STR1 = "offtail1";
         static const std::string REF_T_STR2 = "offtail2";
         static const std::string REF_T_STR3 = "offtail3";
         static const int ARGC_TAIL_BOOL = 5;
-        static const char *argv_tail_bool[] = {"gtest_app", "--bool", "offtail1", "offtail2", "offtail3"};
-        pa_parser.PushBackTail(&t_pas);
-        pa_parser.PushBackTail(&t_pas0);
-        pa_parser.PushBackTail(&t_pas1);
-        EXPECT_TRUE(pa_parser.Parse(ARGC_TAIL_BOOL, argv_tail_bool));
+        static const char *argvTailBool[] = {"gtest_app", "--bool", "offtail1", "offtail2", "offtail3"};
+        paParser.PushBackTail(&tPas);
+        paParser.PushBackTail(&tPas0);
+        paParser.PushBackTail(&tPas1);
+        EXPECT_TRUE(paParser.Parse(ARGC_TAIL_BOOL, argvTailBool));
         EXPECT_TRUE(pab.GetValue());
-        EXPECT_EQ(t_pas.GetValue(), REF_T_STR1);
-        EXPECT_EQ(t_pas0.GetValue(), REF_T_STR2);
-        EXPECT_EQ(t_pas1.GetValue(), REF_T_STR3);
-        pa_parser.DisableTail();
-        pa_parser.EraseTail();
+        EXPECT_EQ(tPas.GetValue(), REF_T_STR1);
+        EXPECT_EQ(tPas0.GetValue(), REF_T_STR2);
+        EXPECT_EQ(tPas1.GetValue(), REF_T_STR3);
+        paParser.DisableTail();
+        paParser.EraseTail();
     }
 
     // expect fail on amount of tail arguments more then pa_parser may have
     {
-        pa_parser.EnableTail();
+        paParser.EnableTail();
         static const int ARGC_TAIL = 5;
-        static const char *argv_tail[] = {"gtest_app", "gdb", "--args", "file.bin", "entry"};
+        static const char *argvTail[] = {"gtest_app", "gdb", "--args", "file.bin", "entry"};
 
-        PandArg<std::string> t_pas1("tail_string1", REF_DEF_STRING, "Sample tail string argument 1");
-        pa_parser.PushBackTail(&t_pas);
-        pa_parser.PushBackTail(&t_pas1);
+        PandArg<std::string> tPas1("tail_string1", REF_DEF_STRING, "Sample tail string argument 1");
+        paParser.PushBackTail(&tPas);
+        paParser.PushBackTail(&tPas1);
 
-        EXPECT_EQ(pa_parser.GetTailSize(), 2U);
-        EXPECT_FALSE(pa_parser.Parse(ARGC_TAIL, argv_tail));
-        pa_parser.DisableTail();
-        pa_parser.EraseTail();
+        EXPECT_EQ(paParser.GetTailSize(), 2U);
+        EXPECT_FALSE(paParser.Parse(ARGC_TAIL, argvTail));
+        paParser.DisableTail();
+        paParser.EraseTail();
     }
 
     // expect remainder arguments only parsed as expected
     {
-        pa_parser.EnableRemainder();
+        paParser.EnableRemainder();
         static const arg_list_t REF_REM = {"rem1", "rem2", "rem3"};
-        static int argc_rem = 5;
-        static const char *argv_rem[] = {"gtest_app", "--", "rem1", "rem2", "rem3"};
-        pa_parser.Parse(argc_rem, argv_rem);
-        arg_list_t remainder = pa_parser.GetRemainder();
+        static int argcRem = 5;
+        static const char *argvRem[] = {"gtest_app", "--", "rem1", "rem2", "rem3"};
+        paParser.Parse(argcRem, argvRem);
+        arg_list_t remainder = paParser.GetRemainder();
         EXPECT_EQ(remainder.size(), REF_REM.size());
         for (std::size_t i = 0; i < remainder.size(); i++) {
             EXPECT_EQ(remainder[i], REF_REM[i]);
         }
-        pa_parser.DisableRemainder();
+        paParser.DisableRemainder();
     }
 
     // expect regular argument before remainder parsed right
     {
-        pa_parser.EnableRemainder();
+        paParser.EnableRemainder();
         static const arg_list_t REF_REM = {"rem1", "rem2", "rem3"};
-        std::string bool_name = "--" + pab.GetName();
-        static int argc_rem = 6;
-        static const char *argv_rem[] = {"gtest_app", bool_name.c_str(), "--", "rem1", "rem2", "rem3"};
-        pa_parser.Parse(argc_rem, argv_rem);
+        std::string boolName = "--" + pab.GetName();
+        static int argcRem = 6;
+        static const char *argvRem[] = {"gtest_app", boolName.c_str(), "--", "rem1", "rem2", "rem3"};
+        paParser.Parse(argcRem, argvRem);
         EXPECT_TRUE(pab.GetValue());
-        arg_list_t remainder = pa_parser.GetRemainder();
+        arg_list_t remainder = paParser.GetRemainder();
         EXPECT_EQ(remainder.size(), REF_REM.size());
         for (std::size_t i = 0; i < remainder.size(); i++) {
             EXPECT_EQ(remainder[i], REF_REM[i]);
         }
-        pa_parser.DisableRemainder();
+        paParser.DisableRemainder();
     }
 
     // expect that all arguments parsed as expected
     {
         pald.ResetDefaultValue();
-        pa_parser.EnableTail();
-        pa_parser.EnableRemainder();
+        paParser.EnableTail();
+        paParser.EnableRemainder();
         static const arg_list_t REF_REM = {"rem1", "rem2", "rem3"};
-        PandArg<std::string> t_pas0("tail_string0", REF_DEF_STRING, "Sample tail string argument 0");
-        PandArg<std::string> t_pas1("tail_string1", REF_DEF_STRING, "Sample tail string argument 1");
+        PandArg<std::string> tPas0("tail_string0", REF_DEF_STRING, "Sample tail string argument 0");
+        PandArg<std::string> tPas1("tail_string1", REF_DEF_STRING, "Sample tail string argument 1");
         static const bool REF_BOOL = true;
         static const int REF_INT = 42;
         static const arg_list_t REF_DLIST = {"dlist1", "dlist2", "dlist3", "dlist4"};
@@ -784,32 +784,32 @@ TEST(libpandargs, TestAPI)
         static const uint64_t REF_UINT64 = std::numeric_limits<std::uint64_t>::max();
         static const uint64_t REF_UINT64R = 99000000000;
         // NOLINTNEXTLINE(readability-magic-numbers)
-        static int argc_consistent = 21;
-        static const char *argv_consistent[] = {"gtest_app",
-                                                "--bool",
-                                                "on",
-                                                "--int=42",
-                                                "--string",
-                                                "this is a string",
-                                                "--double",
-                                                ".42",
-                                                "--uint32=4294967295",
-                                                "--uint64=18446744073709551615",
-                                                "--dlist=dlist1:dlist2:dlist3:dlist4",
-                                                "--rint=42",
-                                                "--ruint32=990000000",
-                                                "--ruint64=99000000000",
-                                                "tail1",
-                                                "tail2 tail3",
-                                                "tail4",
-                                                "--",
-                                                "rem1",
-                                                "rem2",
-                                                "rem3"};
-        pa_parser.PushBackTail(&t_pas);
-        pa_parser.PushBackTail(&t_pas0);
-        pa_parser.PushBackTail(&t_pas1);
-        EXPECT_TRUE(pa_parser.Parse(argc_consistent, argv_consistent));
+        static int argcConsistent = 21;
+        static const char *argvConsistent[] = {"gtest_app",
+                                               "--bool",
+                                               "on",
+                                               "--int=42",
+                                               "--string",
+                                               "this is a string",
+                                               "--double",
+                                               ".42",
+                                               "--uint32=4294967295",
+                                               "--uint64=18446744073709551615",
+                                               "--dlist=dlist1:dlist2:dlist3:dlist4",
+                                               "--rint=42",
+                                               "--ruint32=990000000",
+                                               "--ruint64=99000000000",
+                                               "tail1",
+                                               "tail2 tail3",
+                                               "tail4",
+                                               "--",
+                                               "rem1",
+                                               "rem2",
+                                               "rem3"};
+        paParser.PushBackTail(&tPas);
+        paParser.PushBackTail(&tPas0);
+        paParser.PushBackTail(&tPas1);
+        EXPECT_TRUE(paParser.Parse(argcConsistent, argvConsistent));
         EXPECT_EQ(pab.GetValue(), REF_BOOL);
         EXPECT_EQ(pai.GetValue(), REF_INT);
         EXPECT_EQ(pas.GetValue(), REF_STR);
@@ -823,124 +823,124 @@ TEST(libpandargs, TestAPI)
         EXPECT_EQ(pair.GetValue(), REF_INT);
         EXPECT_EQ(paur32.GetValue(), REF_UINT32R);
         EXPECT_EQ(paur64.GetValue(), REF_UINT64R);
-        EXPECT_EQ(t_pas.GetValue(), REF_T_STR1);
-        EXPECT_EQ(t_pas0.GetValue(), REF_T_STR2);
-        EXPECT_EQ(t_pas1.GetValue(), REF_T_STR3);
-        arg_list_t remainder = pa_parser.GetRemainder();
+        EXPECT_EQ(tPas.GetValue(), REF_T_STR1);
+        EXPECT_EQ(tPas0.GetValue(), REF_T_STR2);
+        EXPECT_EQ(tPas1.GetValue(), REF_T_STR3);
+        arg_list_t remainder = paParser.GetRemainder();
         EXPECT_EQ(remainder.size(), REF_REM.size());
         for (std::size_t i = 0; i < remainder.size(); i++) {
             EXPECT_EQ(remainder[i], REF_REM[i]);
         }
-        pa_parser.DisableRemainder();
-        pa_parser.DisableTail();
-        pa_parser.EraseTail();
+        paParser.DisableRemainder();
+        paParser.DisableTail();
+        paParser.EraseTail();
     }
 }
 
 TEST(libpandargs, CompoundArgs)
 {
-    PandArg<bool> sub_bool_arg("bool", false, "Sample boolean argument");
+    PandArg<bool> subBoolArg("bool", false, "Sample boolean argument");
     // NOLINTNEXTLINE(readability-magic-numbers)
-    PandArg<int> sub_int_arg("int", 12U, "Sample integer argument");
+    PandArg<int> subIntArg("int", 12U, "Sample integer argument");
     // NOLINTNEXTLINE(readability-magic-numbers)
-    PandArg<double> sub_double_arg("double", 123.45, "Sample rational argument");
-    PandArg<std::string> sub_string_arg("string", "Hello", "Sample string argument");
+    PandArg<double> subDoubleArg("double", 123.45, "Sample rational argument");
+    PandArg<std::string> subStringArg("string", "Hello", "Sample string argument");
     // NOLINTNEXTLINE(readability-magic-numbers)
-    PandArg<int> int_arg("global_int", 123U, "Global integer argument");
+    PandArg<int> intArg("global_int", 123U, "Global integer argument");
     PandArgCompound parent("compound", "Sample boolean argument",
-                           {&sub_bool_arg, &sub_int_arg, &sub_double_arg, &sub_string_arg});
+                           {&subBoolArg, &subIntArg, &subDoubleArg, &subStringArg});
 
-    PandArgParser pa_parser;
-    ASSERT_TRUE(pa_parser.Add(&int_arg));
-    ASSERT_TRUE(pa_parser.Add(&parent));
+    PandArgParser paParser;
+    ASSERT_TRUE(paParser.Add(&intArg));
+    ASSERT_TRUE(paParser.Add(&parent));
 
     /* Should work well with no sub arguments */
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--compound"};
-        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(sub_bool_arg.GetValue(), false);
-        ASSERT_EQ(sub_int_arg.GetValue(), 12U);
-        ASSERT_EQ(sub_double_arg.GetValue(), 123.45);
-        ASSERT_EQ(sub_string_arg.GetValue(), "Hello");
+        ASSERT_EQ(subBoolArg.GetValue(), false);
+        ASSERT_EQ(subIntArg.GetValue(), 12U);
+        ASSERT_EQ(subDoubleArg.GetValue(), 123.45);
+        ASSERT_EQ(subStringArg.GetValue(), "Hello");
     }
 
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--compound:bool,int=2,double=54.321,string=World"};
-        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(sub_bool_arg.GetValue(), true);
-        ASSERT_EQ(sub_int_arg.GetValue(), 2U);
-        ASSERT_EQ(sub_double_arg.GetValue(), 54.321);
-        ASSERT_EQ(sub_string_arg.GetValue(), "World");
+        ASSERT_EQ(subBoolArg.GetValue(), true);
+        ASSERT_EQ(subIntArg.GetValue(), 2U);
+        ASSERT_EQ(subDoubleArg.GetValue(), 54.321);
+        ASSERT_EQ(subStringArg.GetValue(), "World");
     }
 
     /* ResetDefaultValue should reset all sub arguments */
     {
         parent.ResetDefaultValue();
         ASSERT_EQ(parent.GetValue(), false);
-        ASSERT_EQ(sub_bool_arg.GetValue(), false);
-        ASSERT_EQ(sub_int_arg.GetValue(), 12U);
-        ASSERT_EQ(sub_double_arg.GetValue(), 123.45);
-        ASSERT_EQ(sub_string_arg.GetValue(), "Hello");
+        ASSERT_EQ(subBoolArg.GetValue(), false);
+        ASSERT_EQ(subIntArg.GetValue(), 12U);
+        ASSERT_EQ(subDoubleArg.GetValue(), 123.45);
+        ASSERT_EQ(subStringArg.GetValue(), "Hello");
     }
 
     {
         static const char *argv[] = {"gtest_app", "--compound:bool=true"};
-        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(sub_bool_arg.GetValue(), true);
+        ASSERT_EQ(subBoolArg.GetValue(), true);
     }
 
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--compound:bool"};
-        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(sub_bool_arg.GetValue(), true);
+        ASSERT_EQ(subBoolArg.GetValue(), true);
     }
 
     {
         static const char *argv[] = {"gtest_app", "--compound:bool=false"};
-        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(sub_bool_arg.GetValue(), false);
+        ASSERT_EQ(subBoolArg.GetValue(), false);
     }
 
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--global_int=321"};
-        ASSERT_TRUE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), false);
-        ASSERT_EQ(int_arg.GetValue(), 321U);
+        ASSERT_EQ(intArg.GetValue(), 321U);
     }
 
     {
         parent.ResetDefaultValue();
         static const char *argv[] = {"gtest_app", "--compound", "--global_int", "321"};
-        ASSERT_TRUE(pa_parser.Parse(4U, argv)) << pa_parser.GetErrorString();
+        ASSERT_TRUE(paParser.Parse(4U, argv)) << paParser.GetErrorString();
         ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(int_arg.GetValue(), 321U);
+        ASSERT_EQ(intArg.GetValue(), 321U);
     }
 
     /* Test that sub arguments are not visible in the global space */
     {
         static const char *argv[] = {"gtest_app", "--bool"};
-        ASSERT_FALSE(pa_parser.Parse(2U, argv));
+        ASSERT_FALSE(paParser.Parse(2U, argv));
     }
     {
         static const char *argv[] = {"gtest_app", "--int=2"};
-        ASSERT_FALSE(pa_parser.Parse(2U, argv));
+        ASSERT_FALSE(paParser.Parse(2U, argv));
     }
     {
         static const char *argv[] = {"gtest_app", "--double=54.321"};
-        ASSERT_FALSE(pa_parser.Parse(2U, argv));
+        ASSERT_FALSE(paParser.Parse(2U, argv));
     }
     {
         static const char *argv[] = {"gtest_app", "--string=World"};
-        ASSERT_FALSE(pa_parser.Parse(2U, argv));
+        ASSERT_FALSE(paParser.Parse(2U, argv));
     }
 }
 
@@ -949,13 +949,13 @@ TEST(libpandargs, IncorrectCompoundArgs)
     static const arg_list_t REF_DEF_LIST = arg_list_t();
     PandArg<arg_list_t> pal("list", REF_DEF_LIST, "Sample list argument");
 
-    PandArgParser pa_parser;
-    EXPECT_TRUE(pa_parser.Add(&pal));
+    PandArgParser paParser;
+    EXPECT_TRUE(paParser.Add(&pal));
     pal.ResetDefaultValue();
 
     /* Test that incorrect using of compound argument syntax for non-compound argument produces error*/
     static const char *argv[] = {"gtest_app", "--list:list_arg1:list_arg2"};
-    ASSERT_FALSE(pa_parser.Parse(2U, argv)) << pa_parser.GetErrorString();
+    ASSERT_FALSE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
 }
 
 // NOLINTEND(modernize-avoid-c-arrays)

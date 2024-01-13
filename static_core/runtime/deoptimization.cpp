@@ -37,7 +37,7 @@ namespace panda {
  * @param callee_regs  Pointer to a callee-saved registers buffer from StackWalker
  */
 extern "C" [[noreturn]] void DeoptimizeAfterCFrame(ManagedThread *thread, const uint8_t *pc, Frame *frame,
-                                                   void *cframe_fp, Frame *last_frame, void *callee_regs);
+                                                   void *cframeFp, Frame *lastFrame, void *calleeRegs);
 /**
  * @brief Deoptimize CFrame that lies after interpreter frame.
  * @param thread       Pointer to thread
@@ -50,7 +50,7 @@ extern "C" [[noreturn]] void DeoptimizeAfterCFrame(ManagedThread *thread, const 
  * @param callee_regs  Pointer to a callee-saved registers buffer from StackWalker
  */
 extern "C" [[noreturn]] void DeoptimizeAfterIFrame(ManagedThread *thread, const uint8_t *pc, Frame *frame,
-                                                   void *cframe_fp, Frame *last_frame, void *callee_regs);
+                                                   void *cframeFp, Frame *lastFrame, void *calleeRegs);
 /**
  * @brief Drop given CFrame and return to its caller.
  * Drop means that we set stack pointer to the top of given CFrame, restores its return address and invoke `return`
@@ -58,7 +58,7 @@ extern "C" [[noreturn]] void DeoptimizeAfterIFrame(ManagedThread *thread, const 
  * @param cframe_fp    Pointer to Cframe to be dropped
  * @param callee_regs  Pointer to a callee-saved registers buffer from StackWalker
  */
-extern "C" [[noreturn]] void DropCompiledFrameAndReturn(void *cframe_fp, void *callee_vregs);
+extern "C" [[noreturn]] void DropCompiledFrameAndReturn(void *cframeFp, void *calleeVregs);
 
 static void UnpoisonAsanStack([[maybe_unused]] void *ptr)
 {
@@ -69,17 +69,17 @@ static void UnpoisonAsanStack([[maybe_unused]] void *ptr)
 }
 
 // NO_THREAD_SAFETY_ANALYSIS because it doesn't know about mutator_lock status in this scope
-void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha) NO_THREAD_SAFETY_ANALYSIS
+void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha) NO_THREAD_SAFETY_ANALYSIS
 {
     PandaVM *vm = Thread::GetCurrent()->GetVM();
     ScopedSuspendAllThreadsRunning ssat(vm->GetRendezvous());
     // NOTE(msherstennikov): remove this loop and check `methods` contains frame's method in stack traversing
     for (const auto &method : methods) {
 #ifdef PANDA_EVENTS_ENABLED
-        size_t in_stack_count = 0;
-        vm->GetThreadManager()->EnumerateThreads([method, &in_stack_count, is_cha](ManagedThread *thread) {
+        size_t inStackCount = 0;
+        vm->GetThreadManager()->EnumerateThreads([method, &inStackCount, isCha](ManagedThread *thread) {
 #else
-        vm->GetThreadManager()->EnumerateThreads([method, is_cha](ManagedThread *thread) {
+        vm->GetThreadManager()->EnumerateThreads([method, isCha](ManagedThread *thread) {
 #endif
             ASSERT(thread != nullptr);
             // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
@@ -88,7 +88,7 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
                     auto &cframe = stack.GetCFrame();
                     cframe.SetShouldDeoptimize(true);
                     cframe.SetDeoptCodeEntry(stack.GetCompiledCodeEntry());
-                    if (is_cha) {
+                    if (isCha) {
                         LOG(DEBUG, CLASS_LINKER)
                             << "[CHA]   Set ShouldDeoptimize for method: " << cframe.GetMethod()->GetFullName();
                     } else {
@@ -96,14 +96,14 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
                             << "[IC]   Set ShouldDeoptimize for method: " << cframe.GetMethod()->GetFullName();
                     }
 #ifdef PANDA_EVENTS_ENABLED
-                    in_stack_count++;
+                    inStackCount++;
 #endif
                 }
             }
             return true;
         });
-        if (is_cha) {
-            EVENT_CHA_DEOPTIMIZE(std::string(method->GetFullName()), in_stack_count);
+        if (isCha) {
+            EVENT_CHA_DEOPTIMIZE(std::string(method->GetFullName()), inStackCount);
         }
         // NOTE (Trubenkov)  clean up compiled code(See issue 1706)
         method->SetInterpreterEntryPoint();
@@ -115,8 +115,8 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
     }
 }
 
-[[noreturn]] NO_ADDRESS_SANITIZE void Deoptimize(StackWalker *stack, const uint8_t *pc, bool has_exception,
-                                                 Method *destroy_method)
+[[noreturn]] NO_ADDRESS_SANITIZE void Deoptimize(StackWalker *stack, const uint8_t *pc, bool hasException,
+                                                 Method *destroyMethod)
 {
     ASSERT(stack != nullptr);
     auto *thread = ManagedThread::GetCurrent();
@@ -139,27 +139,27 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
     auto context = thread->GetVM()->GetLanguageContext();
     // We must run InvalidateCompiledEntryPoint before we convert the frame, because GC is already may be in the
     // collecting phase and it can move some object in the deoptimized frame.
-    if (destroy_method != nullptr) {
-        LOG(DEBUG, INTEROP) << "Destroy compiled method: " << destroy_method->GetFullName();
-        destroy_method->SetDestroyed();
-        PandaSet<Method *> destroy_methods;
-        destroy_methods.insert(destroy_method);
-        InvalidateCompiledEntryPoint(destroy_methods, false);
+    if (destroyMethod != nullptr) {
+        LOG(DEBUG, INTEROP) << "Destroy compiled method: " << destroyMethod->GetFullName();
+        destroyMethod->SetDestroyed();
+        PandaSet<Method *> destroyMethods;
+        destroyMethods.insert(destroyMethod);
+        InvalidateCompiledEntryPoint(destroyMethods, false);
     }
 
-    FrameKind prev_frame_kind;
+    FrameKind prevFrameKind;
     // We need to execute(find catch block) in all inlined methods. For this we calculate the number of inlined method
     // Else we can execute previus interpreter frames and we will FreeFrames in incorrect order
-    uint32_t num_inlined_methods = 0;
-    Frame *iframe = stack->ConvertToIFrame(&prev_frame_kind, &num_inlined_methods);
+    uint32_t numInlinedMethods = 0;
+    Frame *iframe = stack->ConvertToIFrame(&prevFrameKind, &numInlinedMethods);
     ASSERT(iframe != nullptr);
 
-    Frame *last_iframe = iframe;
-    while (num_inlined_methods-- != 0) {
+    Frame *lastIframe = iframe;
+    while (numInlinedMethods-- != 0) {
         EVENT_METHOD_EXIT(last_iframe->GetMethod()->GetFullName() + "(deopt)", events::MethodExitKind::INLINED,
                           thread->RecordMethodExit());
-        last_iframe = last_iframe->GetPrevFrame();
-        ASSERT(!StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(last_iframe));
+        lastIframe = lastIframe->GetPrevFrame();
+        ASSERT(!StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(lastIframe));
     }
 
     EVENT_METHOD_EXIT(last_iframe->GetMethod()->GetFullName() + "(deopt)", events::MethodExitKind::COMPILED,
@@ -171,13 +171,13 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
         context.SetExceptionToVReg(iframe->GetAcc(), thread->GetException());
     }
 
-    if (!has_exception) {
+    if (!hasException) {
         thread->ClearException();
     } else {
         ASSERT(thread->HasPendingException());
     }
 
-    switch (prev_frame_kind) {
+    switch (prevFrameKind) {
         case FrameKind::COMPILER:
             LOG(DEBUG, INTEROP) << "Deoptimize after cframe";
             EVENT_DEOPTIMIZATION(std::string(cframe.GetMethod()->GetFullName()),
@@ -197,16 +197,16 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
             //          |
             //      Deoptimize
             thread->SetCurrentFrameIsCompiled(true);
-            DeoptimizeAfterCFrame(thread, pc, iframe, cframe.GetFrameOrigin(), last_iframe,
+            DeoptimizeAfterCFrame(thread, pc, iframe, cframe.GetFrameOrigin(), lastIframe,
                                   stack->GetCalleeRegsForDeoptimize().end());
         case FrameKind::NONE:
         case FrameKind::INTERPRETER:
             EVENT_DEOPTIMIZATION(std::string(cframe.GetMethod()->GetFullName()),
                                  pc - stack->GetMethod()->GetInstructions(),
-                                 prev_frame_kind == FrameKind::NONE ? events::DeoptimizationAfter::TOP
-                                                                    : events::DeoptimizationAfter::IFRAME);
+                                 prevFrameKind == FrameKind::NONE ? events::DeoptimizationAfter::TOP
+                                                                  : events::DeoptimizationAfter::IFRAME);
             LOG(DEBUG, INTEROP) << "Deoptimize after iframe";
-            DeoptimizeAfterIFrame(thread, pc, iframe, cframe.GetFrameOrigin(), last_iframe,
+            DeoptimizeAfterIFrame(thread, pc, iframe, cframe.GetFrameOrigin(), lastIframe,
                                   stack->GetCalleeRegsForDeoptimize().end());
     }
     UNREACHABLE();
@@ -215,11 +215,11 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool is_cha
 [[noreturn]] void DropCompiledFrame(StackWalker *stack)
 {
     LOG(DEBUG, INTEROP) << "Drop compiled frame: " << stack->GetMethod()->GetFullName();
-    auto cframe_fp = stack->GetCFrame().GetFrameOrigin();
+    auto cframeFp = stack->GetCFrame().GetFrameOrigin();
     EVENT_METHOD_EXIT(stack->GetMethod()->GetFullName() + "(drop)", events::MethodExitKind::COMPILED,
                       ManagedThread::GetCurrent()->RecordMethodExit());
-    UnpoisonAsanStack(cframe_fp);
-    DropCompiledFrameAndReturn(cframe_fp, stack->GetCalleeRegsForDeoptimize().end());
+    UnpoisonAsanStack(cframeFp);
+    DropCompiledFrameAndReturn(cframeFp, stack->GetCalleeRegsForDeoptimize().end());
     UNREACHABLE();
 }
 

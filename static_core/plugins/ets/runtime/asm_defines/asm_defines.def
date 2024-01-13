@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+// NOLINTBEGIN(readability-identifier-naming)
 DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, panda::ets::EtsCoroutine::GetTlsPromiseClassPointerOffset())
 DEFINE_VALUE(ETS_COROUTINE_UNDEFINED_OBJECT_OFFSET, panda::ets::EtsCoroutine::GetTlsUndefinedObjectOffset())
+// NOLINTEND(readability-identifier-naming)

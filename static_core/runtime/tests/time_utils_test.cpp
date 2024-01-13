@@ -19,6 +19,7 @@
 #include <random>
 #include <thread>
 
+#include "libpandabase/utils/utils.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/time_utils.h"
@@ -62,17 +63,17 @@ TEST_F(TimeTest, TimerTest)
     {
         Timer timer(&duration);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        std::this_thread::sleep_for(std::chrono::nanoseconds(10));
+        std::this_thread::sleep_for(std::chrono::nanoseconds(10_I));
     }
     ASSERT_GT(duration, 0);
 
-    uint64_t last_duration = duration;
+    uint64_t lastDuration = duration;
     {
         Timer timer(&duration);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        std::this_thread::sleep_for(std::chrono::nanoseconds(10));
+        std::this_thread::sleep_for(std::chrono::nanoseconds(10_I));
     }
-    ASSERT_GT(duration, last_duration);
+    ASSERT_GT(duration, lastDuration);
 
     {
         Timer timer(&duration, true);
@@ -89,10 +90,10 @@ TEST_F(TimeTest, CurrentTimeStringTest)
         "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}";
     for (size_t i = 0; i < ITERATION; i++) {
         auto date = GetCurrentTimeString();
-        ASSERT_EQ(date.size(), 19);
+        ASSERT_EQ(date.size(), 19U);
         ASSERT_THAT(date.c_str(), ::testing::MatchesRegex(PATTERN));
         // NOLINTNEXTLINE(readability-magic-numbers)
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10_I));
     }
 }
 

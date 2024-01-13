@@ -46,11 +46,11 @@ public:
     NO_MOVE_SEMANTIC(FrameAllocatorTest);
     NO_COPY_SEMANTIC(FrameAllocatorTest);
 
-    void SmallAllocateTest(bool use_malloc) const
+    void SmallAllocateTest(bool useMalloc) const
     {
         constexpr size_t ITERATIONS = 32;
         constexpr size_t FRAME_SIZE = 256;
-        FrameAllocator<> alloc(use_malloc);
+        FrameAllocator<> alloc(useMalloc);
         std::array<void *, ITERATIONS + 1> array {nullptr};
         for (size_t i = 1; i <= ITERATIONS; i++) {
             array[i] = alloc.Alloc(FRAME_SIZE);
@@ -63,14 +63,14 @@ public:
         }
     }
 
-    void CornerAllocationSizeTest(bool use_malloc) const
+    void CornerAllocationSizeTest(bool useMalloc) const
     {
         constexpr size_t FIRST_FRAME_SIZE = FrameAllocator<>::FIRST_ARENA_SIZE;
         constexpr size_t SECOND_FRAME_SIZE = FrameAllocator<>::ARENA_SIZE_GREW_LEVEL;
         constexpr size_t THIRD_FRAME_SIZE = FIRST_FRAME_SIZE + SECOND_FRAME_SIZE;
-        FrameAllocator<> alloc1(use_malloc);
-        FrameAllocator<> alloc2(use_malloc);
-        FrameAllocator<> alloc3(use_malloc);
+        FrameAllocator<> alloc1(useMalloc);
+        FrameAllocator<> alloc2(useMalloc);
+        FrameAllocator<> alloc3(useMalloc);
         {
             void *mem = alloc1.Alloc(FIRST_FRAME_SIZE);
             ASSERT_NE(mem, nullptr);
@@ -101,9 +101,9 @@ public:
     }
 
     template <Alignment ALIGNMENT>
-    void AlignmentTest(bool use_malloc) const
+    void AlignmentTest(bool useMalloc) const
     {
-        FrameAllocator<ALIGNMENT> alloc(use_malloc);
+        FrameAllocator<ALIGNMENT> alloc(useMalloc);
         constexpr size_t MAX_SIZE = 256;
         std::array<void *, MAX_SIZE + 1> array {nullptr};
         for (size_t i = 1; i <= MAX_SIZE; i++) {
@@ -124,13 +124,13 @@ public:
         }
     }
 
-    void CycledAllocateFreeForHugeFramesTest(bool use_malloc)
+    void CycledAllocateFreeForHugeFramesTest(bool useMalloc)
     {
         constexpr size_t ITERATIONS = 1024;
         constexpr size_t FRAME_SIZE = 512;
         constexpr int CYCLE_COUNT = 16;
 
-        FrameAllocator<> alloc(use_malloc);
+        FrameAllocator<> alloc(useMalloc);
         std::vector<std::pair<void *, size_t>> vec;
 
         for (int j = 0; j < CYCLE_COUNT; j++) {
@@ -141,75 +141,75 @@ public:
                 vec.emplace_back(mem, SetBytesFromByteArray(mem, FRAME_SIZE));
             }
             for (size_t i = 1; i <= ITERATIONS / 2; i++) {
-                std::pair<void *, size_t> last_pair = vec.back();
-                ASSERT_TRUE(CompareBytesWithByteArray(last_pair.first, FRAME_SIZE, last_pair.second))
-                    << "iteration: " << i << ", size: " << FRAME_SIZE << ", address: " << std::hex << last_pair.first
-                    << ", index in byte array: " << last_pair.second << ", seed: " << seed_;
-                alloc.Free(last_pair.first);
+                std::pair<void *, size_t> lastPair = vec.back();
+                ASSERT_TRUE(CompareBytesWithByteArray(lastPair.first, FRAME_SIZE, lastPair.second))
+                    << "iteration: " << i << ", size: " << FRAME_SIZE << ", address: " << std::hex << lastPair.first
+                    << ", index in byte array: " << lastPair.second << ", seed: " << seed_;
+                alloc.Free(lastPair.first);
                 vec.pop_back();
             }
         }
         while (!vec.empty()) {
-            std::pair<void *, size_t> last_pair = vec.back();
-            ASSERT_TRUE(CompareBytesWithByteArray(last_pair.first, FRAME_SIZE, last_pair.second))
+            std::pair<void *, size_t> lastPair = vec.back();
+            ASSERT_TRUE(CompareBytesWithByteArray(lastPair.first, FRAME_SIZE, lastPair.second))
                 << "vector size: " << vec.size() << ", size: " << FRAME_SIZE << ", address: " << std::hex
-                << last_pair.first << ", index in byte array: " << last_pair.second << ", seed: " << seed_;
-            alloc.Free(last_pair.first);
+                << lastPair.first << ", index in byte array: " << lastPair.second << ", seed: " << seed_;
+            alloc.Free(lastPair.first);
             vec.pop_back();
         }
     }
 
-    void ValidateArenaGrownPolicy(bool use_malloc) const
+    void ValidateArenaGrownPolicy(bool useMalloc) const
     {
         constexpr size_t ITERATIONS = 16;
-        FrameAllocator<> alloc(use_malloc);
-        size_t last_alloc_arena_size = 0;
+        FrameAllocator<> alloc(useMalloc);
+        size_t lastAllocArenaSize = 0;
         for (size_t i = 0; i < ITERATIONS; i++) {
-            size_t new_arena_size = AllocNewArena(&alloc);
-            ASSERT_EQ(new_arena_size > last_alloc_arena_size, true);
-            last_alloc_arena_size = new_arena_size;
+            size_t newArenaSize = AllocNewArena(&alloc);
+            ASSERT_EQ(newArenaSize > lastAllocArenaSize, true);
+            lastAllocArenaSize = newArenaSize;
         }
 
         for (size_t i = 0; i < ITERATIONS; i++) {
             DeallocateLastArena(&alloc);
         }
 
-        size_t new_arena_size = AllocNewArena(&alloc);
-        ASSERT_EQ(new_arena_size == last_alloc_arena_size, true);
+        size_t newArenaSize = AllocNewArena(&alloc);
+        ASSERT_EQ(newArenaSize == lastAllocArenaSize, true);
     }
 
-    void CheckAddrInsideAllocator(bool use_malloc) const
+    void CheckAddrInsideAllocator(bool useMalloc) const
     {
         constexpr size_t ITERATIONS = 16;
         static constexpr size_t FRAME_SIZE = 256;
         static constexpr size_t MALLOC_ALLOC_SIZE = 10;
         // NOLINTNEXTLINE(cppcoreguidelines-no-malloc)
-        void *invalid_addr = std::malloc(MALLOC_ALLOC_SIZE);
+        void *invalidAddr = std::malloc(MALLOC_ALLOC_SIZE);
 
-        FrameAllocator<> alloc(use_malloc);
+        FrameAllocator<> alloc(useMalloc);
         // NOLINTNEXTLINE(clang-analyzer-unix.Malloc)
-        ASSERT_FALSE(alloc.Contains(invalid_addr));
+        ASSERT_FALSE(alloc.Contains(invalidAddr));
         for (size_t i = 0; i < ITERATIONS; i++) {
             AllocNewArena(&alloc);
         }
-        void *addr1_inside = alloc.Alloc(FRAME_SIZE);
-        ASSERT_TRUE(alloc.Contains(addr1_inside));
-        ASSERT_FALSE(alloc.Contains(invalid_addr));
+        void *addr1Inside = alloc.Alloc(FRAME_SIZE);
+        ASSERT_TRUE(alloc.Contains(addr1Inside));
+        ASSERT_FALSE(alloc.Contains(invalidAddr));
 
-        alloc.Free(addr1_inside);
-        ASSERT_FALSE(alloc.Contains(addr1_inside));
-        ASSERT_FALSE(alloc.Contains(invalid_addr));
+        alloc.Free(addr1Inside);
+        ASSERT_FALSE(alloc.Contains(addr1Inside));
+        ASSERT_FALSE(alloc.Contains(invalidAddr));
 
-        addr1_inside = alloc.Alloc(FRAME_SIZE);
+        addr1Inside = alloc.Alloc(FRAME_SIZE);
         for (size_t i = 0; i < ITERATIONS; i++) {
             AllocNewArena(&alloc);
         }
-        auto *addr2_inside = alloc.Alloc(FRAME_SIZE * 2);
-        ASSERT_TRUE(alloc.Contains(addr1_inside));
-        ASSERT_TRUE(alloc.Contains(addr2_inside));
-        ASSERT_FALSE(alloc.Contains(invalid_addr));
+        auto *addr2Inside = alloc.Alloc(FRAME_SIZE * 2);
+        ASSERT_TRUE(alloc.Contains(addr1Inside));
+        ASSERT_TRUE(alloc.Contains(addr2Inside));
+        ASSERT_FALSE(alloc.Contains(invalidAddr));
         // NOLINTNEXTLINE(cppcoreguidelines-no-malloc)
-        free(invalid_addr);
+        free(invalidAddr);
     }
 
 protected:
@@ -234,7 +234,7 @@ protected:
     {
         std::cout << "Print at index:  ";
         ASSERT(idx + size < BYTE_ARRAY_SIZE);
-        Span<uint8_t> memory(static_cast<uint8_t *>(&byte_array_[idx]), size);
+        Span<uint8_t> memory(static_cast<uint8_t *>(&byteArray_[idx]), size);
         for (size_t i = 0; i < size; i++) {
             std::cout << memory[i];
         }
@@ -253,9 +253,9 @@ protected:
 
     size_t AllocNewArena(FrameAllocator<> *alloc) const
     {
-        bool is_allocated = alloc->TryAllocateNewArena();
-        ASSERT(is_allocated);
-        return is_allocated ? alloc->biggest_arena_size_ : 0;
+        bool isAllocated = alloc->TryAllocateNewArena();
+        ASSERT(isAllocated);
+        return isAllocated ? alloc->biggestArenaSize_ : 0;
     }
 
     void DeallocateLastArena(FrameAllocator<> *alloc) const

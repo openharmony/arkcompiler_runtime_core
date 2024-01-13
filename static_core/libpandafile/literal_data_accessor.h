@@ -60,7 +60,7 @@ enum class LiteralTag : uint8_t {
 
 class LiteralDataAccessor {
 public:
-    LiteralDataAccessor(const File &panda_file, File::EntityId literal_data_id);
+    LiteralDataAccessor(const File &pandaFile, File::EntityId literalDataId);
 
     template <class Callback>
     void EnumerateObjectLiterals(size_t index, const Callback &cb);
@@ -75,24 +75,24 @@ public:
 
     uint32_t GetLiteralNum() const
     {
-        return literal_num_;
+        return literalNum_;
     }
 
     const File &GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     File::EntityId GetLiteralDataId() const
     {
-        return literal_data_id_;
+        return literalDataId_;
     }
 
     File::EntityId GetLiteralArrayId(size_t index) const
     {
-        ASSERT(index < literal_num_);
-        auto l_sp = literal_data_sp_.SubSpan(index * ID_SIZE);
-        return File::EntityId(static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&l_sp)));
+        ASSERT(index < literalNum_);
+        auto lSp = literalDataSp_.SubSpan(index * ID_SIZE);
+        return File::EntityId(static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&lSp)));
     }
 
     size_t ResolveLiteralArrayIndex(File::EntityId id) const
@@ -100,9 +100,9 @@ public:
         auto offset = id.GetOffset();
 
         size_t index = 0;
-        while (index < literal_num_) {
-            auto array_offset = helpers::Read<sizeof(uint32_t)>(literal_data_sp_.SubSpan(index * ID_SIZE));
-            if (array_offset == offset) {
+        while (index < literalNum_) {
+            auto arrayOffset = helpers::Read<sizeof(uint32_t)>(literalDataSp_.SubSpan(index * ID_SIZE));
+            if (arrayOffset == offset) {
                 break;
             }
             index++;
@@ -115,10 +115,10 @@ public:
 private:
     static constexpr size_t LEN_SIZE = sizeof(uint32_t);
 
-    const File &panda_file_;
-    File::EntityId literal_data_id_;
-    uint32_t literal_num_;
-    Span<const uint8_t> literal_data_sp_ {nullptr, nullptr};
+    const File &pandaFile_;
+    File::EntityId literalDataId_;
+    uint32_t literalNum_;
+    Span<const uint8_t> literalDataSp_ {nullptr, nullptr};
 };
 
 }  // namespace panda::panda_file

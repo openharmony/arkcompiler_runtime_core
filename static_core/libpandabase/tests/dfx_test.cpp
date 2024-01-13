@@ -22,37 +22,37 @@
 
 namespace panda::test {
 
-void MapDfxOption(std::map<DfxOptionHandler::DfxOption, uint8_t> &option_map, DfxOptionHandler::DfxOption option)
+void MapDfxOption(std::map<DfxOptionHandler::DfxOption, uint8_t> &optionMap, DfxOptionHandler::DfxOption option)
 {
     switch (option) {
 #ifdef PANDA_TARGET_UNIX
         case DfxOptionHandler::COMPILER_NULLCHECK:
-            option_map[DfxOptionHandler::COMPILER_NULLCHECK] = 1;
+            optionMap[DfxOptionHandler::COMPILER_NULLCHECK] = 1;
             break;
         case DfxOptionHandler::SIGNAL_CATCHER:
-            option_map[DfxOptionHandler::SIGNAL_CATCHER] = 1;
+            optionMap[DfxOptionHandler::SIGNAL_CATCHER] = 1;
             break;
         case DfxOptionHandler::SIGNAL_HANDLER:
-            option_map[DfxOptionHandler::SIGNAL_HANDLER] = 1;
+            optionMap[DfxOptionHandler::SIGNAL_HANDLER] = 1;
             break;
         case DfxOptionHandler::ARK_SIGQUIT:
-            option_map[DfxOptionHandler::ARK_SIGQUIT] = 1;
+            optionMap[DfxOptionHandler::ARK_SIGQUIT] = 1;
             break;
         case DfxOptionHandler::ARK_SIGUSR1:
-            option_map[DfxOptionHandler::ARK_SIGUSR1] = 1;
+            optionMap[DfxOptionHandler::ARK_SIGUSR1] = 1;
             break;
         case DfxOptionHandler::ARK_SIGUSR2:
-            option_map[DfxOptionHandler::ARK_SIGUSR2] = 1;
+            optionMap[DfxOptionHandler::ARK_SIGUSR2] = 1;
             break;
         case DfxOptionHandler::MOBILE_LOG:
-            option_map[DfxOptionHandler::MOBILE_LOG] = 1;
+            optionMap[DfxOptionHandler::MOBILE_LOG] = 1;
             break;
 #endif  // PANDA_TARGET_UNIX
         case DfxOptionHandler::REFERENCE_DUMP:
-            option_map[DfxOptionHandler::REFERENCE_DUMP] = 1;
+            optionMap[DfxOptionHandler::REFERENCE_DUMP] = 1;
             break;
         case DfxOptionHandler::DFXLOG:
-            option_map[DfxOptionHandler::DFXLOG] = 0;
+            optionMap[DfxOptionHandler::DFXLOG] = 0;
             break;
         default:
             break;
@@ -72,13 +72,13 @@ TEST(DfxController, Initialization)
     DfxController::Destroy();
     EXPECT_FALSE(DfxController::IsInitialized());
 
-    std::map<DfxOptionHandler::DfxOption, uint8_t> option_map;
+    std::map<DfxOptionHandler::DfxOption, uint8_t> optionMap;
     for (auto option = DfxOptionHandler::DfxOption(0); option < DfxOptionHandler::END_FLAG;
          option = DfxOptionHandler::DfxOption(option + 1)) {
-        MapDfxOption(option_map, option);
+        MapDfxOption(optionMap, option);
     }
 
-    DfxController::Initialize(option_map);
+    DfxController::Initialize(optionMap);
     EXPECT_TRUE(DfxController::IsInitialized());
 
     DfxController::Destroy();

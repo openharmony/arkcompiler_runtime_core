@@ -84,14 +84,14 @@ public:
             graph_->CreateEndBlock(0U);
         }
         ASSERT(graph_->GetVectorBlocks().size() == 2U);
-        bb_map_.clear();
-        bb_map_[ID_ENTRY_BB] = graph_->GetStartBlock();
-        bb_map_[ID_EXIT_BB] = graph_->GetEndBlock();
-        bb_succs_map_.clear();
-        inst_map_.clear();
-        inst_inputs_map_.clear();
-        save_state_inst_vregs_map_.clear();
-        phi_inst_inputs_map_.clear();
+        bbMap_.clear();
+        bbMap_[ID_ENTRY_BB] = graph_->GetStartBlock();
+        bbMap_[ID_EXIT_BB] = graph_->GetEndBlock();
+        bbSuccsMap_.clear();
+        instMap_.clear();
+        instInputsMap_.clear();
+        saveStateInstVregsMap_.clear();
+        phiInstInputsMap_.clear();
         return *this;
     }
 
@@ -99,7 +99,7 @@ public:
     IrConstructor &NewBlock()
     {
         ASSERT(ID != ID_ENTRY_BB && ID != ID_EXIT_BB);
-        ASSERT(bb_map_.count(ID) == 0);
+        ASSERT(bbMap_.count(ID) == 0);
         ASSERT(CurrentBb() == nullptr);
         auto bb = graph_->GetAllocator()->New<BasicBlock>(graph_);
         bb->SetGuestPc(0U);
@@ -108,10 +108,10 @@ public:
 #else
         graph_->AddBlock(bb, ID);
 #endif
-        current_bb_ = {ID, bb};
-        bb_map_[ID] = bb;
+        currentBb_ = {ID, bb};
+        bbMap_[ID] = bb;
         // add connection the first custom block with entry
-        if (bb_succs_map_.empty()) {
+        if (bbSuccsMap_.empty()) {
             graph_->GetStartBlock()->AddSucc(bb);
         }
         return *this;
@@ -120,15 +120,15 @@ public:
     template <typename... Args>
     IrConstructor &NewInst(size_t id, Args &&...args)
     {
-        ASSERT_DO(inst_map_.find(id) == inst_map_.end(),
+        ASSERT_DO(instMap_.find(id) == instMap_.end(),
                   std::cerr << "Instruction with same Id " << id << " already exists");
         auto inst = graph_->CreateInst(std::forward<Args>(args)...);
         inst->SetId(id);
         for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
             inst->SetSrcReg(i, INVALID_REG);
         }
-        current_inst_ = {id, inst};
-        inst_map_[id] = inst;
+        currentInst_ = {id, inst};
+        instMap_[id] = inst;
         auto block = CurrentBb();
         if (block == nullptr) {
             block = graph_->GetStartBlock();
@@ -154,19 +154,19 @@ public:
     template <typename T>
     IrConstructor &NewConstant(size_t id, [[maybe_unused]] T value)
     {
-        ASSERT_DO(inst_map_.find(id) == inst_map_.end(),
+        ASSERT_DO(instMap_.find(id) == instMap_.end(),
                   std::cerr << "Instruction with same Id " << id << "already exists");
         Inst *inst = nullptr;
-        auto to_start_bb = (CurrentBbIndex() == 0) || (CurrentBbIndex() == -1);
+        auto toStartBb = (CurrentBbIndex() == 0) || (CurrentBbIndex() == -1);
         if constexpr (std::is_same<T, std::nullptr_t>()) {
-            if (to_start_bb) {
+            if (toStartBb) {
                 inst = graph_->GetOrCreateNullPtr();
             } else {
                 inst = graph_->CreateInstNullPtr(DataType::REFERENCE);
                 CurrentBb()->AppendInst(inst);
             }
         } else {  // NOLINT(readability-misleading-indentation)
-            if (to_start_bb) {
+            if (toStartBb) {
                 inst = graph_->FindOrCreateConstant(value);
             } else {
                 inst = graph_->CreateInstConstant(value, graph_->IsBytecodeOptimizer());
@@ -174,36 +174,36 @@ public:
             }
         }
         inst->SetId(id);
-        inst_map_[id] = inst;
-        current_inst_ = {id, inst};
+        instMap_[id] = inst;
+        currentInst_ = {id, inst};
         return *this;
     }
 
-    IrConstructor &NewParameter(int id, uint16_t arg_number)
+    IrConstructor &NewParameter(int id, uint16_t argNumber)
     {
-        ASSERT_DO(inst_map_.find(id) == inst_map_.end(),
+        ASSERT_DO(instMap_.find(id) == instMap_.end(),
                   std::cerr << "Instruction with same Id " << id << "already exists");
-        auto inst = graph_->AddNewParameter(arg_number);
+        auto inst = graph_->AddNewParameter(argNumber);
         inst->SetId(id);
-        inst_map_[id] = inst;
-        current_inst_ = {id, inst};
+        instMap_[id] = inst;
+        currentInst_ = {id, inst};
         return *this;
     }
 
     IrConstructor &AddNullptrInst(int id)
     {
-        ASSERT_DO(inst_map_.find(id) == inst_map_.end(),
+        ASSERT_DO(instMap_.find(id) == instMap_.end(),
                   std::cerr << "Instruction with same Id " << id << "already exists");
         auto inst = graph_->GetOrCreateNullPtr();
         inst->SetId(id);
-        inst_map_[id] = inst;
-        current_inst_ = {id, inst};
+        instMap_[id] = inst;
+        currentInst_ = {id, inst};
         return *this;
     }
 
     IrConstructor &Succs(std::vector<int> succs)
     {
-        bb_succs_map_.emplace_back(CurrentBbIndex(), std::move(succs));
+        bbSuccsMap_.emplace_back(CurrentBbIndex(), std::move(succs));
         return *this;
     }
 
@@ -215,7 +215,7 @@ public:
     IrConstructor &Inputs(Args... inputs)
     {
         ASSERT(!CurrentInst()->IsCall() && !CurrentInst()->IsIntrinsic());
-        inst_inputs_map_[CurrentInstIndex()].reserve(sizeof...(inputs));
+        instInputsMap_[CurrentInstIndex()].reserve(sizeof...(inputs));
         // NOLINTNEXTLINE(bugprone-suspicious-semicolon)
         if constexpr (sizeof...(inputs) != 0) {
             AddInput(inputs...);
@@ -234,9 +234,9 @@ public:
         ASSERT(CurrentInst()->IsPhi() || CurrentInst()->IsCall() || CurrentInst()->IsInitObject() ||
                CurrentInst()->IsIntrinsic());
         if (CurrentInst()->IsPhi()) {
-            phi_inst_inputs_map_[CurrentInstIndex()].reserve(inputs.size());
+            phiInstInputsMap_[CurrentInstIndex()].reserve(inputs.size());
             for (const auto &input : inputs) {
-                phi_inst_inputs_map_[CurrentInstIndex()].push_back(input);
+                phiInstInputsMap_[CurrentInstIndex()].push_back(input);
             }
         } else {
             auto opc = CurrentInst()->GetOpcode();
@@ -261,11 +261,11 @@ public:
                     break;
             }
 
-            inst_inputs_map_[CurrentInstIndex()].reserve(inputs.size());
+            instInputsMap_[CurrentInstIndex()].reserve(inputs.size());
             types->AllocateInputTypes(graph_->GetAllocator(), inputs.size());
             for (const auto &input : inputs) {
                 types->AddInputType(static_cast<DataType::Type>(input.first));
-                inst_inputs_map_[CurrentInstIndex()].push_back(input.second);
+                instInputsMap_[CurrentInstIndex()].push_back(input.second);
             }
         }
         return *this;
@@ -294,8 +294,8 @@ public:
         }
         types->AllocateInputTypes(graph_->GetAllocator(), sizeof...(inputs));
         ((types->AddInputType(GetInst(inputs).GetType())), ...);
-        inst_inputs_map_[CurrentInstIndex()].reserve(sizeof...(inputs));
-        ((inst_inputs_map_[CurrentInstIndex()].push_back(inputs)), ...);
+        instInputsMap_[CurrentInstIndex()].reserve(sizeof...(inputs));
+        ((instInputsMap_[CurrentInstIndex()].push_back(inputs)), ...);
         return *this;
     }
 
@@ -460,10 +460,10 @@ public:
     {
         auto inst = CurrentInst();
         ASSERT(inst->GetOpcode() == Opcode::SaveState);
-        auto call_inst = &GetInst(index);
-        ASSERT(call_inst->GetOpcode() == Opcode::CallStatic || call_inst->GetOpcode() == Opcode::CallVirtual ||
-               call_inst->GetOpcode() == Opcode::CallDynamic);
-        inst->CastToSaveState()->SetCallerInst(static_cast<CallInst *>(call_inst));
+        auto callInst = &GetInst(index);
+        ASSERT(callInst->GetOpcode() == Opcode::CallStatic || callInst->GetOpcode() == Opcode::CallVirtual ||
+               callInst->GetOpcode() == Opcode::CallDynamic);
+        inst->CastToSaveState()->SetCallerInst(static_cast<CallInst *>(callInst));
         return *this;
     }
 
@@ -542,7 +542,7 @@ public:
         return *this;
     }
 
-    IrConstructor &Shift(ShiftType shift_type, uint64_t imm)
+    IrConstructor &Shift(ShiftType shiftType, uint64_t imm)
     {
         auto inst = CurrentInst();
         switch (inst->GetOpcode()) {
@@ -554,11 +554,11 @@ public:
             case Opcode::XorNotSR:
             case Opcode::AddSR:
             case Opcode::SubSR:
-                static_cast<BinaryShiftedRegisterOperation *>(inst)->SetShiftType(shift_type);
+                static_cast<BinaryShiftedRegisterOperation *>(inst)->SetShiftType(shiftType);
                 static_cast<BinaryShiftedRegisterOperation *>(inst)->SetImm(imm);
                 break;
             case Opcode::NegSR:
-                static_cast<UnaryShiftedRegisterOperation *>(inst)->SetShiftType(shift_type);
+                static_cast<UnaryShiftedRegisterOperation *>(inst)->SetShiftType(shiftType);
                 static_cast<UnaryShiftedRegisterOperation *>(inst)->SetImm(imm);
                 break;
             default:
@@ -696,10 +696,10 @@ public:
         CurrentInst()->SetType(type);
         return *this;
     }
-    IrConstructor &AnyType(AnyBaseType any_type)
+    IrConstructor &AnyType(AnyBaseType anyType)
     {
         auto *atm = static_cast<AnyTypeMixin<FixedInputsInst1> *>(CurrentInst());
-        atm->SetAnyType(any_type);
+        atm->SetAnyType(anyType);
         return *this;
     }
     IrConstructor &v0id()  // NOLINT(readability-identifier-naming)
@@ -744,78 +744,78 @@ public:
         return *this;
     }
 
-    IrConstructor &TypeId(uint32_t type_id)
+    IrConstructor &TypeId(uint32_t typeId)
     {
         auto inst = CurrentInst();
         switch (inst->GetOpcode()) {
             case Opcode::Call:
-                inst->CastToCall()->SetCallMethodId(type_id);
+                inst->CastToCall()->SetCallMethodId(typeId);
                 break;
             case Opcode::LoadString:
-                inst->CastToLoadString()->SetTypeId(type_id);
+                inst->CastToLoadString()->SetTypeId(typeId);
                 break;
             case Opcode::LoadType:
-                inst->CastToLoadType()->SetTypeId(type_id);
+                inst->CastToLoadType()->SetTypeId(typeId);
                 break;
             case Opcode::UnresolvedLoadType:
-                inst->CastToUnresolvedLoadType()->SetTypeId(type_id);
+                inst->CastToUnresolvedLoadType()->SetTypeId(typeId);
                 break;
             case Opcode::LoadFromConstantPool:
-                inst->CastToLoadFromConstantPool()->SetTypeId(type_id);
+                inst->CastToLoadFromConstantPool()->SetTypeId(typeId);
                 break;
             case Opcode::StoreStatic:
-                inst->CastToStoreStatic()->SetTypeId(type_id);
+                inst->CastToStoreStatic()->SetTypeId(typeId);
                 break;
             case Opcode::UnresolvedStoreStatic:
-                inst->CastToUnresolvedStoreStatic()->SetTypeId(type_id);
+                inst->CastToUnresolvedStoreStatic()->SetTypeId(typeId);
                 break;
             case Opcode::ResolveObjectField:
-                inst->CastToResolveObjectField()->SetTypeId(type_id);
+                inst->CastToResolveObjectField()->SetTypeId(typeId);
                 break;
             case Opcode::ResolveObjectFieldStatic:
-                inst->CastToResolveObjectFieldStatic()->SetTypeId(type_id);
+                inst->CastToResolveObjectFieldStatic()->SetTypeId(typeId);
                 break;
             case Opcode::StoreResolvedObjectField:
-                inst->CastToStoreResolvedObjectField()->SetTypeId(type_id);
+                inst->CastToStoreResolvedObjectField()->SetTypeId(typeId);
                 break;
             case Opcode::StoreResolvedObjectFieldStatic:
-                inst->CastToStoreResolvedObjectFieldStatic()->SetTypeId(type_id);
+                inst->CastToStoreResolvedObjectFieldStatic()->SetTypeId(typeId);
                 break;
             case Opcode::LoadStatic:
-                inst->CastToLoadStatic()->SetTypeId(type_id);
+                inst->CastToLoadStatic()->SetTypeId(typeId);
                 break;
             case Opcode::LoadObject:
-                inst->CastToLoadObject()->SetTypeId(type_id);
+                inst->CastToLoadObject()->SetTypeId(typeId);
                 break;
             case Opcode::StoreObject:
-                inst->CastToStoreObject()->SetTypeId(type_id);
+                inst->CastToStoreObject()->SetTypeId(typeId);
                 break;
             case Opcode::NewObject:
-                inst->CastToNewObject()->SetTypeId(type_id);
+                inst->CastToNewObject()->SetTypeId(typeId);
                 break;
             case Opcode::InitObject:
-                inst->CastToInitObject()->SetCallMethodId(type_id);
+                inst->CastToInitObject()->SetCallMethodId(typeId);
                 break;
             case Opcode::NewArray:
-                inst->CastToNewArray()->SetTypeId(type_id);
+                inst->CastToNewArray()->SetTypeId(typeId);
                 break;
             case Opcode::CheckCast:
-                inst->CastToCheckCast()->SetTypeId(type_id);
+                inst->CastToCheckCast()->SetTypeId(typeId);
                 break;
             case Opcode::IsInstance:
-                inst->CastToIsInstance()->SetTypeId(type_id);
+                inst->CastToIsInstance()->SetTypeId(typeId);
                 break;
             case Opcode::InitClass:
-                inst->CastToInitClass()->SetTypeId(type_id);
+                inst->CastToInitClass()->SetTypeId(typeId);
                 break;
             case Opcode::LoadClass:
-                inst->CastToLoadClass()->SetTypeId(type_id);
+                inst->CastToLoadClass()->SetTypeId(typeId);
                 break;
             case Opcode::LoadAndInitClass:
-                inst->CastToLoadAndInitClass()->SetTypeId(type_id);
+                inst->CastToLoadAndInitClass()->SetTypeId(typeId);
                 break;
             case Opcode::UnresolvedLoadAndInitClass:
-                inst->CastToUnresolvedLoadAndInitClass()->SetTypeId(type_id);
+                inst->CastToUnresolvedLoadAndInitClass()->SetTypeId(typeId);
                 break;
             default:
                 UNREACHABLE();
@@ -845,15 +845,15 @@ public:
         return *this;
     }
 
-    IrConstructor &ObjectType(ObjectType obj_type)
+    IrConstructor &ObjectType(ObjectType objType)
     {
         auto inst = CurrentInst();
         switch (inst->GetOpcode()) {
             case Opcode::LoadObject:
-                inst->CastToLoadObject()->SetObjectType(obj_type);
+                inst->CastToLoadObject()->SetObjectType(objType);
                 break;
             case Opcode::StoreObject:
-                inst->CastToStoreObject()->SetObjectType(obj_type);
+                inst->CastToStoreObject()->SetObjectType(objType);
                 break;
             default:
                 UNREACHABLE();
@@ -861,11 +861,11 @@ public:
         return *this;
     }
 
-    IrConstructor &ObjectTypeLoadImm(LoadImmediateInst::ObjectType obj_type)
+    IrConstructor &ObjectTypeLoadImm(LoadImmediateInst::ObjectType objType)
     {
         auto inst = CurrentInst();
         ASSERT(inst->GetOpcode() == Opcode::LoadImmediate);
-        inst->CastToLoadImmediate()->SetObjectType(obj_type);
+        inst->CastToLoadImmediate()->SetObjectType(objType);
         return *this;
     }
 
@@ -890,30 +890,30 @@ public:
         return *this;
     }
 
-    IrConstructor &SetNeedBarrier(bool need_barrier)
+    IrConstructor &SetNeedBarrier(bool needBarrier)
     {
         auto inst = CurrentInst();
         switch (inst->GetOpcode()) {
             case Opcode::Store:
-                inst->CastToStore()->SetNeedBarrier(need_barrier);
+                inst->CastToStore()->SetNeedBarrier(needBarrier);
                 break;
             case Opcode::StoreI:
-                inst->CastToStoreI()->SetNeedBarrier(need_barrier);
+                inst->CastToStoreI()->SetNeedBarrier(needBarrier);
                 break;
             case Opcode::StoreObject:
-                inst->CastToStoreObject()->SetNeedBarrier(need_barrier);
+                inst->CastToStoreObject()->SetNeedBarrier(needBarrier);
                 break;
             case Opcode::StoreArray:
-                inst->CastToStoreArray()->SetNeedBarrier(need_barrier);
+                inst->CastToStoreArray()->SetNeedBarrier(needBarrier);
                 break;
             case Opcode::StoreArrayI:
-                inst->CastToStoreArrayI()->SetNeedBarrier(need_barrier);
+                inst->CastToStoreArrayI()->SetNeedBarrier(needBarrier);
                 break;
             case Opcode::StoreArrayPair:
-                inst->CastToStoreArrayPair()->SetNeedBarrier(need_barrier);
+                inst->CastToStoreArrayPair()->SetNeedBarrier(needBarrier);
                 break;
             case Opcode::StoreArrayPairI:
-                inst->CastToStoreArrayPairI()->SetNeedBarrier(need_barrier);
+                inst->CastToStoreArrayPairI()->SetNeedBarrier(needBarrier);
                 break;
             default:
                 UNREACHABLE();
@@ -928,8 +928,8 @@ public:
             graph_->SetVRegsCount(
                 std::max<size_t>(graph_->GetVRegsCount(), *std::max_element(vregs.begin(), vregs.end())));
         }
-        if (save_state_inst_vregs_map_.count(CurrentInstIndex()) == 0) {
-            save_state_inst_vregs_map_.emplace(CurrentInstIndex(), std::move(vregs));
+        if (saveStateInstVregsMap_.count(CurrentInstIndex()) == 0) {
+            saveStateInstVregsMap_.emplace(CurrentInstIndex(), std::move(vregs));
         }
         return *this;
     }
@@ -944,10 +944,10 @@ public:
     IrConstructor &CleanupInputs()
     {
         ASSERT(CurrentInst()->IsSaveState());
-        auto &inputs = inst_inputs_map_[CurrentInstIndex()];
-        auto &vregs = save_state_inst_vregs_map_[CurrentInstIndex()];
+        auto &inputs = instInputsMap_[CurrentInstIndex()];
+        auto &vregs = saveStateInstVregsMap_[CurrentInstIndex()];
         for (int i = inputs.size() - 1; i >= 0; i--) {
-            if (inst_map_.count(inputs[i]) == 0) {
+            if (instMap_.count(inputs[i]) == 0) {
                 inputs.erase(inputs.begin() + i);
                 vregs.erase(vregs.begin() + i);
             }
@@ -959,9 +959,9 @@ public:
     {
         auto inst = CurrentInst();
         ASSERT(inst->GetOpcode() == Opcode::Try);
-        auto try_inst = inst->CastToTry();
+        auto tryInst = inst->CastToTry();
         for (auto id : ids) {
-            try_inst->AppendCatchTypeId(id, 0);
+            tryInst->AppendCatchTypeId(id, 0);
         }
         return *this;
     }
@@ -970,10 +970,10 @@ public:
     {
         auto inst = CurrentInst();
         ASSERT(inst->GetOpcode() == Opcode::CatchPhi);
-        auto catch_phi = inst->CastToCatchPhi();
+        auto catchPhi = inst->CastToCatchPhi();
         for (auto id : ids) {
-            ASSERT(inst_map_.count(id) > 0);
-            catch_phi->AppendThrowableInst(inst_map_.at(id));
+            ASSERT(instMap_.count(id) > 0);
+            catchPhi->AppendThrowableInst(instMap_.at(id));
         }
         return *this;
     }
@@ -1105,12 +1105,12 @@ public:
         return *this;
     }
 
-    IrConstructor &Loc([[maybe_unused]] uint32_t dir_number, [[maybe_unused]] uint32_t file_number,
-                       [[maybe_unused]] uint32_t line_number)
+    IrConstructor &Loc([[maybe_unused]] uint32_t dirNumber, [[maybe_unused]] uint32_t fileNumber,
+                       [[maybe_unused]] uint32_t lineNumber)
     {
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        auto debug_info = graph_->GetAllocator()->New<InstDebugInfo>(dir_number, file_number, line_number);
-        CurrentInst()->SetDebugInfo(debug_info);
+        auto debugInfo = graph_->GetAllocator()->New<InstDebugInfo>(dirNumber, fileNumber, lineNumber);
+        CurrentInst()->SetDebugInfo(debugInfo);
 #endif
         return *this;
     }
@@ -1179,11 +1179,11 @@ public:
 #endif
     }
 
-    void CheckInputType(Inst *inst, Inst *input_inst, size_t input_idx)
+    void CheckInputType(Inst *inst, Inst *inputInst, size_t inputIdx)
     {
-        auto type = input_inst->GetType();
-        auto prev_type = inst->GetInputType(input_idx);
-        if (prev_type == DataType::Type::NO_TYPE) {
+        auto type = inputInst->GetType();
+        auto prevType = inst->GetInputType(inputIdx);
+        if (prevType == DataType::Type::NO_TYPE) {
             switch (inst->GetOpcode()) {
                 case Opcode::Cmp:
                     inst->CastToCmp()->SetOperandsType(type);
@@ -1209,70 +1209,69 @@ public:
         } else {
             // Disable check for Negation (Neg+Add), we can't add deeper verification,
             // because the graph has not been built yet
-            if (input_inst->GetOpcode() == Opcode::Add) {
+            if (inputInst->GetOpcode() == Opcode::Add) {
                 return;
             }
-            CHECK_EQ(type, prev_type);
+            CHECK_EQ(type, prevType);
         }
     }
 
     void ConstructControlFlow()
     {
-        for (auto [bbi, succs] : bb_succs_map_) {
-            auto bb = bb_map_.at(bbi);
+        for (auto [bbi, succs] : bbSuccsMap_) {
+            auto bb = bbMap_.at(bbi);
             for (auto succ : succs) {
-                bb->AddSucc(bb_map_.at(succ == -1 ? 1 : succ));
+                bb->AddSucc(bbMap_.at(succ == -1 ? 1 : succ));
             }
             if (succs.size() > 1 && bb->IsEmpty()) {
                 bb->SetTryEnd(true);
             }
         }
-        auto end_block = graph_->GetEndBlock();
-        if (end_block->GetPredsBlocks().empty()) {
-            graph_->EraseBlock(end_block);
+        auto endBlock = graph_->GetEndBlock();
+        if (endBlock->GetPredsBlocks().empty()) {
+            graph_->EraseBlock(endBlock);
             graph_->SetEndBlock(nullptr);
         }
     }
 
     void ConstructDataFlow()
     {
-        for (auto [insti, inputs] : inst_inputs_map_) {
-            auto inst = inst_map_.at(insti);
-            const auto &vregs {inst->IsSaveState() ? save_state_inst_vregs_map_[insti] : std::vector<int> {}};
+        for (auto [insti, inputs] : instInputsMap_) {
+            auto inst = instMap_.at(insti);
+            const auto &vregs {inst->IsSaveState() ? saveStateInstVregsMap_[insti] : std::vector<int> {}};
             ASSERT(!inst->IsSaveState() || inputs.size() == vregs.size());
             size_t idx = 0;
             if (inst->IsOperandsDynamic()) {
                 inst->ReserveInputs(inputs.size());
             }
-            for (auto input_idx : inputs) {
-                ASSERT_DO(inst_map_.find(input_idx) != inst_map_.end(),
-                          std::cerr << "Input with Id " << input_idx << " isn't found, inst: " << *inst << std::endl);
-                auto input_inst = inst_map_.at(input_idx);
+            for (auto inputIdx : inputs) {
+                ASSERT_DO(instMap_.find(inputIdx) != instMap_.end(),
+                          std::cerr << "Input with Id " << inputIdx << " isn't found, inst: " << *inst << std::endl);
+                auto inputInst = instMap_.at(inputIdx);
                 auto op = inst->GetOpcode();
-                if (!input_inst->IsConst() &&
-                    (op == Opcode::Cmp || op == Opcode::Compare || op == Opcode::If || op == Opcode::IfImm ||
-                     op == Opcode::Select || op == Opcode::SelectImm)) {
-                    CheckInputType(inst, input_inst, idx);
+                if (!inputInst->IsConst() && (op == Opcode::Cmp || op == Opcode::Compare || op == Opcode::If ||
+                                              op == Opcode::IfImm || op == Opcode::Select || op == Opcode::SelectImm)) {
+                    CheckInputType(inst, inputInst, idx);
                 }
                 if (inst->IsOperandsDynamic()) {
-                    inst->AppendInput(input_inst);
+                    inst->AppendInput(inputInst);
                     if (inst->IsSaveState()) {
                         static_cast<SaveStateInst *>(inst)->SetVirtualRegister(
                             idx, VirtualRegister(vregs[idx], VRegType::VREG));
                     }
                 } else {
-                    inst->SetInput(idx, input_inst);
+                    inst->SetInput(idx, inputInst);
                 }
                 ++idx;
             }
         }
 
-        for (auto [insti, inputs] : phi_inst_inputs_map_) {
-            auto inst = inst_map_.at(insti);
+        for (auto [insti, inputs] : phiInstInputsMap_) {
+            auto inst = instMap_.at(insti);
             for (auto input : inputs) {
-                auto input_inst = inst_map_.at(input.second);
-                size_t idx = inst->GetBasicBlock()->GetPredBlockIndex(bb_map_.at(input.first));
-                auto i {inst->AppendInput(input_inst)};
+                auto inputInst = instMap_.at(input.second);
+                size_t idx = inst->GetBasicBlock()->GetPredBlockIndex(bbMap_.at(input.first));
+                auto i {inst->AppendInput(inputInst)};
                 inst->CastToPhi()->SetPhiInputBbNum(i, idx);
             }
         }
@@ -1313,8 +1312,8 @@ public:
 
     void UpdateSpecialFlags()
     {
-        int max_id = graph_->GetCurrentInstructionId();
-        for (auto pair : inst_map_) {
+        int maxId = graph_->GetCurrentInstructionId();
+        for (auto pair : instMap_) {
             auto id = pair.first;
             auto inst = pair.second;
             UpdateSpecialFlagsForReference(inst);
@@ -1329,24 +1328,24 @@ public:
             if (inst->GetOpcode() == Opcode::SaveStateOsr) {
                 inst->GetBasicBlock()->SetOsrEntry(true);
             }
-            if (id >= max_id) {
-                max_id = id + 1;
+            if (id >= maxId) {
+                maxId = id + 1;
             }
         }
-        graph_->SetCurrentInstructionId(max_id);
+        graph_->SetCurrentInstructionId(maxId);
     }
 
     // Create SaveState instructions thet weren't explicitly constructed in the test
     void CreateSaveStates()
     {
-        for (auto [insti, inputs] : inst_inputs_map_) {
-            auto inst = inst_map_.at(insti);
+        for (auto [insti, inputs] : instInputsMap_) {
+            auto inst = instMap_.at(insti);
             if (!inst->IsOperandsDynamic() && inst->RequireState() && inst->GetInputsCount() > inputs.size()) {
-                auto save_state = graph_->CreateInstSaveState();
-                save_state->SetId(static_cast<int>(graph_->GetCurrentInstructionId()) + 1);
-                graph_->SetCurrentInstructionId(save_state->GetId() + 1);
-                inst->GetBasicBlock()->InsertBefore(save_state, inst);
-                inst->SetSaveState(save_state);
+                auto saveState = graph_->CreateInstSaveState();
+                saveState->SetId(static_cast<int>(graph_->GetCurrentInstructionId()) + 1);
+                graph_->SetCurrentInstructionId(saveState->GetId() + 1);
+                inst->GetBasicBlock()->InsertBefore(saveState, inst);
+                inst->SetSaveState(saveState);
             }
         }
     }
@@ -1356,10 +1355,10 @@ public:
         graph_->ResetParameterInfo();
         // Count number of parameters (needed for bytecode optimizer) in first cycle and set SpillFillData for each
         // parameter in second cycle
-        uint32_t num_args = 0;
+        uint32_t numArgs = 0;
         for (auto inst : graph_->GetStartBlock()->Insts()) {
             if (inst->GetOpcode() == Opcode::Parameter) {
-                ++num_args;
+                ++numArgs;
             }
         }
         uint32_t i = 0;
@@ -1369,7 +1368,7 @@ public:
             }
 
             auto type = inst->GetType();
-            InstBuilder::SetParamSpillFill(graph_, static_cast<ParameterInst *>(inst), num_args, i++, type);
+            InstBuilder::SetParamSpillFill(graph_, static_cast<ParameterInst *>(inst), numArgs, i++, type);
         }
     }
 
@@ -1384,25 +1383,25 @@ public:
         ResetCurrentInst();
         graph_->RunPass<LoopAnalyzer>();
         PropagateRegisters();
-        if (enable_graph_checker_) {
+        if (enableGraphChecker_) {
             GraphChecker(graph_).Check();
         }
     }
 
     Inst &GetInst(unsigned index)
     {
-        ASSERT_DO(inst_map_.find(index) != inst_map_.end(), std::cerr << "Inst with Id " << index << " isn't found\n");
-        return *inst_map_.at(index);
+        ASSERT_DO(instMap_.find(index) != instMap_.end(), std::cerr << "Inst with Id " << index << " isn't found\n");
+        return *instMap_.at(index);
     }
 
     BasicBlock &GetBlock(unsigned index)
     {
-        return *bb_map_.at(index);
+        return *bbMap_.at(index);
     }
 
     void EnableGraphChecker(bool value)
     {
-        enable_graph_checker_ = value;
+        enableGraphChecker_ = value;
     }
 
 private:
@@ -1410,49 +1409,49 @@ private:
     void AddInput(T v)
     {
         static_assert(std::is_integral_v<T>);
-        inst_inputs_map_[CurrentInstIndex()].push_back(v);
+        instInputsMap_[CurrentInstIndex()].push_back(v);
     }
 
     template <typename T, typename... Args>
     void AddInput(T v, Args... args)
     {
-        inst_inputs_map_[CurrentInstIndex()].push_back(v);
+        instInputsMap_[CurrentInstIndex()].push_back(v);
         AddInput(args...);
     }
 
     BasicBlock *GetBbByIndex(int index)
     {
-        return bb_map_.at(index);
+        return bbMap_.at(index);
     }
 
     BasicBlock *CurrentBb()
     {
-        return current_bb_.second;
+        return currentBb_.second;
     }
 
     int CurrentBbIndex()
     {
-        return current_bb_.first;
+        return currentBb_.first;
     }
 
     Inst *CurrentInst()
     {
-        return current_inst_.second;
+        return currentInst_.second;
     }
 
     int CurrentInstIndex()
     {
-        return current_inst_.first;
+        return currentInst_.first;
     }
 
     void ResetCurrentBb()
     {
-        current_bb_ = {-1, nullptr};
+        currentBb_ = {-1, nullptr};
     }
 
     void ResetCurrentInst()
     {
-        current_inst_ = {-1, nullptr};
+        currentInst_ = {-1, nullptr};
     }
 
     void PropagateRegisters()
@@ -1472,15 +1471,15 @@ private:
 private:
     Graph *graph_ {nullptr};
     ArenaAllocator aa_;
-    std::pair<int, BasicBlock *> current_bb_;
-    std::pair<int, Inst *> current_inst_;
-    ArenaUnorderedMap<int, BasicBlock *> bb_map_ {aa_.Adapter()};
-    ArenaVector<std::pair<int, std::vector<int>>> bb_succs_map_ {aa_.Adapter()};
-    ArenaUnorderedMap<int, Inst *> inst_map_ {aa_.Adapter()};
-    ArenaUnorderedMap<int, std::vector<int>> inst_inputs_map_ {aa_.Adapter()};
-    ArenaUnorderedMap<int, std::vector<int>> save_state_inst_vregs_map_ {aa_.Adapter()};
-    ArenaUnorderedMap<int, std::vector<std::pair<int, int>>> phi_inst_inputs_map_ {aa_.Adapter()};
-    bool enable_graph_checker_ {true};
+    std::pair<int, BasicBlock *> currentBb_;
+    std::pair<int, Inst *> currentInst_;
+    ArenaUnorderedMap<int, BasicBlock *> bbMap_ {aa_.Adapter()};
+    ArenaVector<std::pair<int, std::vector<int>>> bbSuccsMap_ {aa_.Adapter()};
+    ArenaUnorderedMap<int, Inst *> instMap_ {aa_.Adapter()};
+    ArenaUnorderedMap<int, std::vector<int>> instInputsMap_ {aa_.Adapter()};
+    ArenaUnorderedMap<int, std::vector<int>> saveStateInstVregsMap_ {aa_.Adapter()};
+    ArenaUnorderedMap<int, std::vector<std::pair<int, int>>> phiInstInputsMap_ {aa_.Adapter()};
+    bool enableGraphChecker_ {true};
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

@@ -101,7 +101,7 @@ public:
     void InitializeGC() override;
     void StartGC() override;
     void StopGC() override;
-    void SweepVmRefs(const GCObjectVisitor &gc_object_visitor) override;
+    void SweepVmRefs(const GCObjectVisitor &gcObjectVisitor) override;
     void VisitVmRoots(const GCRootVisitor &visitor) override;
     void UpdateVmRefs() override;
     void UninitializeThreads() override;
@@ -174,7 +174,7 @@ public:
 
     EtsClassLinker *GetClassLinker() const
     {
-        return class_linker_.get();
+        return classLinker_.get();
     }
 
     mem::GlobalObjectStorage *GetGlobalObjectStorage() const override
@@ -183,24 +183,24 @@ public:
         return mm_->GetGlobalObjectStorage();
     }
 
-    void DeleteGlobalRef(ets_object global_ref);
+    void DeleteGlobalRef(ets_object globalRef);
 
-    void DeleteWeakGlobalRef(ets_weak weak_ref);
+    void DeleteWeakGlobalRef(ets_weak weakRef);
 
     mem::ReferenceProcessor *GetReferenceProcessor() const override
     {
-        ASSERT(reference_processor_ != nullptr);
-        return reference_processor_;
+        ASSERT(referenceProcessor_ != nullptr);
+        return referenceProcessor_;
     }
 
     StringTable *GetStringTable() const override
     {
-        return string_table_;
+        return stringTable_;
     }
 
     MonitorPool *GetMonitorPool() const override
     {
-        return monitor_pool_;
+        return monitorPool_;
     }
 
     ManagedThread *GetAssociatedThread() const override
@@ -210,7 +210,7 @@ public:
 
     ThreadManager *GetThreadManager() const override
     {
-        return coroutine_manager_;
+        return coroutineManager_;
     }
 
     CoroutineManager *GetCoroutineManager() const
@@ -234,7 +234,7 @@ public:
 
     compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
     {
-        return runtime_iface_;
+        return runtimeIface_;
     }
 
     bool LoadNativeLibrary(EtsEnv *env, const PandaString &name);
@@ -252,29 +252,29 @@ public:
 
     void *GetExternalData()
     {
-        return external_data_.data;
+        return externalData_.data;
     }
 
-    static PandaEtsVM *FromExternalData(void *external_data)
+    static PandaEtsVM *FromExternalData(void *externalData)
     {
-        ASSERT(external_data != nullptr);
-        return reinterpret_cast<PandaEtsVM *>(ToUintPtr(external_data) - MEMBER_OFFSET(PandaEtsVM, external_data_));
+        ASSERT(externalData != nullptr);
+        return reinterpret_cast<PandaEtsVM *>(ToUintPtr(externalData) - MEMBER_OFFSET(PandaEtsVM, externalData_));
     }
 
-    struct alignas(16) ExternalData {  // NOLINT(readability-magic-numbers)
+    struct alignas(16U) ExternalData {  // NOLINT(readability-magic-numbers)
         static constexpr size_t SIZE = 512U;
         uint8_t data[SIZE];  // NOLINT(modernize-avoid-c-arrays)
     };
 
     JobQueue *GetJobQueue()
     {
-        return job_queue_.get();
+        return jobQueue_.get();
     }
 
-    void InitJobQueue(JobQueue *job_queue)
+    void InitJobQueue(JobQueue *jobQueue)
     {
-        ASSERT(job_queue_ == nullptr);
-        job_queue_.reset(job_queue);
+        ASSERT(jobQueue_ == nullptr);
+        jobQueue_.reset(jobQueue);
     }
 
     PANDA_PUBLIC_API void AddPromiseListener(EtsPromise *promise, PandaUniquePtr<PromiseListener> &&listener);
@@ -283,8 +283,8 @@ public:
 
     std::mt19937 &GetRandomEngine()
     {
-        ASSERT(random_engine_);
-        return *random_engine_;
+        ASSERT(randomEngine_);
+        return *randomEngine_;
     }
 
     bool IsStaticProfileEnabled() const override
@@ -294,19 +294,19 @@ public:
 
     void SetClearInteropHandleScopesFunction(const std::function<void(Frame *)> &func)
     {
-        clear_interop_handle_scopes_ = func;
+        clearInteropHandleScopes_ = func;
     }
 
     void ClearInteropHandleScopes(Frame *frame) override
     {
-        if (clear_interop_handle_scopes_) {
-            clear_interop_handle_scopes_(frame);
+        if (clearInteropHandleScopes_) {
+            clearInteropHandleScopes_(frame);
         }
     }
 
     os::memory::Mutex &GetAtomicsMutex()
     {
-        return atomics_mutex_;
+        return atomicsMutex_;
     }
 
 protected:
@@ -326,9 +326,9 @@ private:
 
     void InitializeRandomEngine()
     {
-        ASSERT(!random_engine_);
+        ASSERT(!randomEngine_);
         std::random_device rd;
-        random_engine_.emplace(rd());
+        randomEngine_.emplace(rd());
     }
 
     class PromiseListenerInfo {
@@ -355,31 +355,31 @@ private:
 
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
-    PandaUniquePtr<EtsClassLinker> class_linker_;
-    mem::ReferenceProcessor *reference_processor_ {nullptr};
-    PandaVector<ObjectHeader *> gc_roots_;
+    PandaUniquePtr<EtsClassLinker> classLinker_;
+    mem::ReferenceProcessor *referenceProcessor_ {nullptr};
+    PandaVector<ObjectHeader *> gcRoots_;
     Rendezvous *rendezvous_ {nullptr};
     CompilerInterface *compiler_ {nullptr};
-    StringTable *string_table_ {nullptr};
-    MonitorPool *monitor_pool_ {nullptr};
-    CoroutineManager *coroutine_manager_ {nullptr};
-    mem::Reference *oom_obj_ref_ {nullptr};
-    compiler::RuntimeInterface *runtime_iface_ {nullptr};
-    mem::Reference *undefined_obj_ref_ {nullptr};
-    NativeLibraryProvider native_library_provider_;
-    os::memory::Mutex finalization_queue_lock_;
-    PandaList<EtsObject *> registered_finalization_queue_instances_ GUARDED_BY(finalization_queue_lock_);
-    PandaUniquePtr<JobQueue> job_queue_;
-    os::memory::Mutex promise_listeners_lock_;
+    StringTable *stringTable_ {nullptr};
+    MonitorPool *monitorPool_ {nullptr};
+    CoroutineManager *coroutineManager_ {nullptr};
+    mem::Reference *oomObjRef_ {nullptr};
+    compiler::RuntimeInterface *runtimeIface_ {nullptr};
+    mem::Reference *undefinedObjRef_ {nullptr};
+    NativeLibraryProvider nativeLibraryProvider_;
+    os::memory::Mutex finalizationQueueLock_;
+    PandaList<EtsObject *> registeredFinalizationQueueInstances_ GUARDED_BY(finalizationQueueLock_);
+    PandaUniquePtr<JobQueue> jobQueue_;
+    os::memory::Mutex promiseListenersLock_;
     // NOTE(audovichenko) Should be refactored #12030
-    PandaList<PromiseListenerInfo> promise_listeners_ GUARDED_BY(promise_listeners_lock_);
+    PandaList<PromiseListenerInfo> promiseListeners_ GUARDED_BY(promiseListenersLock_);
     // optional for lazy initialization
-    std::optional<std::mt19937> random_engine_;
-    std::function<void(Frame *)> clear_interop_handle_scopes_;
+    std::optional<std::mt19937> randomEngine_;
+    std::function<void(Frame *)> clearInteropHandleScopes_;
     // for JS Atomics
-    os::memory::Mutex atomics_mutex_;
+    os::memory::Mutex atomicsMutex_;
 
-    ExternalData external_data_ {};
+    ExternalData externalData_ {};
 
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);

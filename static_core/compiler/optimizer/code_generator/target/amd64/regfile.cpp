@@ -24,24 +24,24 @@ Reserve registers.
 
 namespace panda::compiler::amd64 {
 Amd64RegisterDescription::Amd64RegisterDescription(ArenaAllocator *allocator)
-    : RegistersDescription(allocator, Arch::X86_64), used_regs_(allocator->Adapter())
+    : RegistersDescription(allocator, Arch::X86_64), usedRegs_(allocator->Adapter())
 {
 }
 
-bool Amd64RegisterDescription::IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg)
+bool Amd64RegisterDescription::IsRegUsed(ArenaVector<Reg> vecReg, Reg reg)
 {
     auto equality = [reg](Reg in) { return (reg.GetId() == in.GetId()) && (reg.GetType() == in.GetType()); };
-    return (std::find_if(vec_reg.begin(), vec_reg.end(), equality) != vec_reg.end());
+    return (std::find_if(vecReg.begin(), vecReg.end(), equality) != vecReg.end());
 }
 
 ArenaVector<Reg> Amd64RegisterDescription::GetCalleeSaved()
 {
     ArenaVector<Reg> out(GetAllocator()->Adapter());
     for (uint32_t i = 0; i < MAX_NUM_REGS; ++i) {
-        if (callee_saved_.Has(i)) {
+        if (calleeSaved_.Has(i)) {
             out.emplace_back(Reg(i, INT64_TYPE));
         }
-        if (callee_savedv_.Has(i)) {
+        if (calleeSavedv_.Has(i)) {
             out.emplace_back(Reg(i, FLOAT64_TYPE));
         }
     }
@@ -50,54 +50,54 @@ ArenaVector<Reg> Amd64RegisterDescription::GetCalleeSaved()
 
 void Amd64RegisterDescription::SetCalleeSaved(const ArenaVector<Reg> &regs)
 {
-    callee_saved_ = RegList(GetCalleeRegsMask(Arch::X86_64, false).GetValue());
-    callee_savedv_ = RegList(GetCalleeRegsMask(Arch::X86_64, true).GetValue());  // empty
+    calleeSaved_ = RegList(GetCalleeRegsMask(Arch::X86_64, false).GetValue());
+    calleeSavedv_ = RegList(GetCalleeRegsMask(Arch::X86_64, true).GetValue());  // empty
 
     for (uint32_t i = 0; i < MAX_NUM_REGS; ++i) {
-        bool scalar_used = IsRegUsed(regs, Reg(i, INT64_TYPE));
-        if (scalar_used) {
-            callee_saved_.Add(i);
+        bool scalarUsed = IsRegUsed(regs, Reg(i, INT64_TYPE));
+        if (scalarUsed) {
+            calleeSaved_.Add(i);
         } else {
-            callee_saved_.Remove(i);
+            calleeSaved_.Remove(i);
         }
-        bool vector_used = IsRegUsed(regs, Reg(i, FLOAT64_TYPE));
-        if (vector_used) {
-            callee_savedv_.Add(i);
+        bool vectorUsed = IsRegUsed(regs, Reg(i, FLOAT64_TYPE));
+        if (vectorUsed) {
+            calleeSavedv_.Add(i);
         } else {
-            callee_savedv_.Remove(i);
+            calleeSavedv_.Remove(i);
         }
     }
     // Remove return-value from callee
-    callee_saved_.Remove(ConvertRegNumber(asmjit::x86::rax.id()));
+    calleeSaved_.Remove(ConvertRegNumber(asmjit::x86::rax.id()));
 }
 
 void Amd64RegisterDescription::SetUsedRegs(const ArenaVector<Reg> &regs)
 {
-    used_regs_ = regs;
+    usedRegs_ = regs;
 
     // Update current lists - to do not use old data
-    callee_saved_ = RegList(GetCalleeRegsMask(Arch::X86_64, false).GetValue());
-    caller_saved_ = RegList(GetCallerRegsMask(Arch::X86_64, false).GetValue());
+    calleeSaved_ = RegList(GetCalleeRegsMask(Arch::X86_64, false).GetValue());
+    callerSaved_ = RegList(GetCallerRegsMask(Arch::X86_64, false).GetValue());
 
-    callee_savedv_ = RegList(GetCalleeRegsMask(Arch::X86_64, true).GetValue());  // empty
-    caller_savedv_ = RegList(GetCallerRegsMask(Arch::X86_64, true).GetValue());
+    calleeSavedv_ = RegList(GetCalleeRegsMask(Arch::X86_64, true).GetValue());  // empty
+    callerSavedv_ = RegList(GetCallerRegsMask(Arch::X86_64, true).GetValue());
 
     for (uint32_t i = 0; i < MAX_NUM_REGS; ++i) {
         // IsRegUsed use used_regs_ variable
-        bool scalar_used = IsRegUsed(used_regs_, Reg(i, INT64_TYPE));
-        if (!scalar_used && callee_saved_.Has(i)) {
-            callee_saved_.Remove(i);
+        bool scalarUsed = IsRegUsed(usedRegs_, Reg(i, INT64_TYPE));
+        if (!scalarUsed && calleeSaved_.Has(i)) {
+            calleeSaved_.Remove(i);
         }
-        if (!scalar_used && caller_saved_.Has(i)) {
-            caller_saved_.Remove(i);
+        if (!scalarUsed && callerSaved_.Has(i)) {
+            callerSaved_.Remove(i);
         }
 
-        bool vector_used = IsRegUsed(used_regs_, Reg(i, FLOAT64_TYPE));
-        if (!vector_used && callee_savedv_.Has(i)) {
-            callee_savedv_.Remove(i);
+        bool vectorUsed = IsRegUsed(usedRegs_, Reg(i, FLOAT64_TYPE));
+        if (!vectorUsed && calleeSavedv_.Has(i)) {
+            calleeSavedv_.Remove(i);
         }
-        if (!vector_used && caller_savedv_.Has(i)) {
-            caller_savedv_.Remove(i);
+        if (!vectorUsed && callerSavedv_.Has(i)) {
+            callerSavedv_.Remove(i);
         }
     }
 }

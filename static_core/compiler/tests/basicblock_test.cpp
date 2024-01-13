@@ -33,27 +33,27 @@ public:
         EXPECT_EQ(result, excepct);
     }
 
-    void CheckVectorEqualBlocksIdSet(ArenaVector<BasicBlock *> blocks, std::vector<int> &&bb_ids)
+    void CheckVectorEqualBlocksIdSet(ArenaVector<BasicBlock *> blocks, std::vector<int> &&bbIds)
     {
-        std::set<BasicBlock *> bb_set;
-        for (auto id : bb_ids) {
-            bb_set.insert(&BB(id));
+        std::set<BasicBlock *> bbSet;
+        for (auto id : bbIds) {
+            bbSet.insert(&BB(id));
         }
-        CheckVectorEqualSet(std::move(blocks), std::move(bb_set));
+        CheckVectorEqualSet(std::move(blocks), std::move(bbSet));
     }
 
     /*
      * Check if block's false-successor is placed in the next position of the rpo vector or the block `NeedsJump()`
      */
-    void CheckBlockFalseSuccessorPosition(BasicBlock *block, const ArenaVector<BasicBlock *> &blocks_vector)
+    void CheckBlockFalseSuccessorPosition(BasicBlock *block, const ArenaVector<BasicBlock *> &blocksVector)
     {
-        auto block_rpo_it = std::find(blocks_vector.begin(), blocks_vector.end(), block);
-        auto false_block_it = std::find(blocks_vector.begin(), blocks_vector.end(), block->GetFalseSuccessor());
-        ASSERT_NE(block_rpo_it, blocks_vector.end());
-        ASSERT_NE(false_block_it, blocks_vector.end());
-        auto block_rpo_index = std::distance(blocks_vector.begin(), block_rpo_it);
-        auto false_block_rpo_index = std::distance(blocks_vector.begin(), false_block_it);
-        EXPECT_TRUE((block_rpo_index + 1 == false_block_rpo_index) || (block->NeedsJump()));
+        auto blockRpoIt = std::find(blocksVector.begin(), blocksVector.end(), block);
+        auto falseBlockIt = std::find(blocksVector.begin(), blocksVector.end(), block->GetFalseSuccessor());
+        ASSERT_NE(blockRpoIt, blocksVector.end());
+        ASSERT_NE(falseBlockIt, blocksVector.end());
+        auto blockRpoIndex = std::distance(blocksVector.begin(), blockRpoIt);
+        auto falseBlockRpoIndex = std::distance(blocksVector.begin(), falseBlockIt);
+        EXPECT_TRUE((blockRpoIndex + 1 == falseBlockRpoIndex) || (block->NeedsJump()));
     }
 };
 
@@ -186,15 +186,15 @@ TEST_F(BasicBlockTest, RemoveEmptyBlock)
     }
     ASSERT_EQ(BB(2U).GetTrueSuccessor(), &BB(3U));
     ASSERT_EQ(BB(2U).GetFalseSuccessor(), &BB(4U));
-    auto bb5_pred3_idx = BB(5U).GetPredBlockIndex(&BB(3U));
-    auto bb5_pred4_idx = BB(5U).GetPredBlockIndex(&BB(4U));
+    auto bb5Pred3Idx = BB(5U).GetPredBlockIndex(&BB(3U));
+    auto bb5Pred4Idx = BB(5U).GetPredBlockIndex(&BB(4U));
     GetGraph()->RemoveEmptyBlockWithPhis(&BB(3U));
     ASSERT_EQ(BB(2U).GetTrueSuccessor(), &BB(5U));
     ASSERT_EQ(BB(2U).GetFalseSuccessor(), &BB(4U));
     ASSERT_TRUE(BB(3U).GetSuccsBlocks().empty());
     ASSERT_TRUE(BB(3U).GetPredsBlocks().empty());
-    ASSERT_EQ(BB(5U).GetPredBlockIndex(&BB(2U)), bb5_pred3_idx);
-    ASSERT_EQ(BB(5U).GetPredBlockIndex(&BB(4U)), bb5_pred4_idx);
+    ASSERT_EQ(BB(5U).GetPredBlockIndex(&BB(2U)), bb5Pred3Idx);
+    ASSERT_EQ(BB(5U).GetPredBlockIndex(&BB(4U)), bb5Pred4Idx);
 }
 
 TEST_F(BasicBlockTest, MissBBId)
@@ -367,19 +367,19 @@ TEST_F(BasicBlockTest, Split)
     }
     ASSERT_EQ(BB(2U).GetTrueSuccessor(), &BB(3U));
     ASSERT_EQ(BB(2U).GetFalseSuccessor(), &BB(4U));
-    auto new_bb = BB(2U).SplitBlockAfterInstruction(&INS(2U), true);
+    auto newBb = BB(2U).SplitBlockAfterInstruction(&INS(2U), true);
     GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(BB(2U).GetTrueSuccessor(), new_bb);
-    ASSERT_EQ(new_bb->GetPredsBlocks().size(), 1U);
-    ASSERT_EQ(new_bb->GetPredsBlocks().front(), &BB(2U));
-    ASSERT_EQ(new_bb->GetFirstInst(), &INS(3U));
-    ASSERT_EQ(new_bb->GetFirstInst()->GetNext(), &INS(4U));
-    ASSERT_EQ(new_bb->GetFirstInst()->GetNext()->GetNext(), &INS(5U));
-    ASSERT_EQ(BB(3U).GetPredsBlocks().front(), new_bb);
-    ASSERT_EQ(BB(4U).GetPredsBlocks().front(), new_bb);
-    ASSERT_EQ(new_bb->GetGuestPc(), INS(3U).GetPc());
-    ASSERT_EQ(new_bb->GetTrueSuccessor(), &BB(3U));
-    ASSERT_EQ(new_bb->GetFalseSuccessor(), &BB(4U));
+    ASSERT_EQ(BB(2U).GetTrueSuccessor(), newBb);
+    ASSERT_EQ(newBb->GetPredsBlocks().size(), 1U);
+    ASSERT_EQ(newBb->GetPredsBlocks().front(), &BB(2U));
+    ASSERT_EQ(newBb->GetFirstInst(), &INS(3U));
+    ASSERT_EQ(newBb->GetFirstInst()->GetNext(), &INS(4U));
+    ASSERT_EQ(newBb->GetFirstInst()->GetNext()->GetNext(), &INS(5U));
+    ASSERT_EQ(BB(3U).GetPredsBlocks().front(), newBb);
+    ASSERT_EQ(BB(4U).GetPredsBlocks().front(), newBb);
+    ASSERT_EQ(newBb->GetGuestPc(), INS(3U).GetPc());
+    ASSERT_EQ(newBb->GetTrueSuccessor(), &BB(3U));
+    ASSERT_EQ(newBb->GetFalseSuccessor(), &BB(4U));
 }
 
 TEST_F(BasicBlockTest, SplitByPhi1)

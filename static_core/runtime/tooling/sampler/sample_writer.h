@@ -74,22 +74,22 @@ public:
          * It may lead to format invalidation
          * This class wasn't made thread safe for performance reason
          */
-        write_stream_ptr_ = std::make_unique<std::ofstream>(filename, std::ios::binary);
-        ASSERT(write_stream_ptr_ != nullptr);
+        writeStreamPtr_ = std::make_unique<std::ofstream>(filename, std::ios::binary);
+        ASSERT(writeStreamPtr_ != nullptr);
     }
 
     ~StreamWriter()
     {
-        write_stream_ptr_->flush();
-        write_stream_ptr_->close();
+        writeStreamPtr_->flush();
+        writeStreamPtr_->close();
     };
 
-    PANDA_PUBLIC_API void WriteModule(const FileInfo &module_info);
+    PANDA_PUBLIC_API void WriteModule(const FileInfo &moduleInfo);
     PANDA_PUBLIC_API void WriteSample(const SampleInfo &sample) const;
 
-    bool IsModuleWritten(const FileInfo &module_info) const
+    bool IsModuleWritten(const FileInfo &moduleInfo) const
     {
-        return written_modules_.find(module_info) != written_modules_.end();
+        return writtenModules_.find(moduleInfo) != writtenModules_.end();
     }
 
     NO_COPY_SEMANTIC(StreamWriter);
@@ -98,8 +98,8 @@ public:
     static constexpr uintptr_t MODULE_INDICATOR_VALUE = 0xFFFFFFFF;
 
 private:
-    std::unique_ptr<std::ofstream> write_stream_ptr_;
-    std::unordered_set<FileInfo> written_modules_;
+    std::unique_ptr<std::ofstream> writeStreamPtr_;
+    std::unordered_set<FileInfo> writtenModules_;
 };
 
 }  // namespace panda::tooling::sampler

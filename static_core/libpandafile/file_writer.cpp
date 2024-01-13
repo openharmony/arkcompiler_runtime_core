@@ -18,7 +18,7 @@
 
 namespace panda::panda_file {
 
-FileWriter::FileWriter(const std::string &file_name) : checksum_(adler32(0, nullptr, 0))
+FileWriter::FileWriter(const std::string &fileName) : checksum_(adler32(0, nullptr, 0))
 {
 #ifdef PANDA_TARGET_WINDOWS
     constexpr char const *MODE = "wb";
@@ -26,7 +26,7 @@ FileWriter::FileWriter(const std::string &file_name) : checksum_(adler32(0, null
     constexpr char const *MODE = "wbe";
 #endif
 
-    file_ = fopen(file_name.c_str(), MODE);
+    file_ = fopen(fileName.c_str(), MODE);
 }
 
 FileWriter::~FileWriter()
@@ -51,7 +51,7 @@ bool FileWriter::WriteBytes(const std::vector<uint8_t> &bytes)
         return true;
     }
 
-    if (count_checksum_) {
+    if (countChecksum_) {
         checksum_ = adler32(checksum_, bytes.data(), bytes.size());
     }
 

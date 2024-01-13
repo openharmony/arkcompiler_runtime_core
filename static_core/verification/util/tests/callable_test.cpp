@@ -16,6 +16,7 @@
 #include "util/callable.h"
 
 #include "util/tests/verifier_test.h"
+#include "libpandabase/utils/utils.h"
 
 #include <gtest/gtest.h>
 
@@ -29,11 +30,11 @@ int Func(int x, int y)
 struct Obj final {
     int operator()(int x, int y) const
     {
-        return 2 * x + y;
+        return 2_I * x + y;
     }
     int SomeMethod(int x, int y) const
     {
-        return x + y + 5;
+        return x + y + 5_I;
     }
 };
 
@@ -43,14 +44,14 @@ TEST_F(VerifierTest, callable)
     EXPECT_FALSE(cal);
     cal = Func;
     ASSERT_TRUE(cal);
-    EXPECT_EQ(cal(3, 7), 10);
-    Obj obj_example;
-    cal = obj_example;
+    EXPECT_EQ(cal(3_I, 7_I), 10_I);
+    Obj objExample;
+    cal = objExample;
     ASSERT_TRUE(cal);
-    EXPECT_EQ(cal(3, 7), 13);
-    cal = callable<int(int, int)> {obj_example, &Obj::SomeMethod};
+    EXPECT_EQ(cal(3_I, 7_I), 13_I);
+    cal = callable<int(int, int)> {objExample, &Obj::SomeMethod};
     ASSERT_TRUE(cal);
-    EXPECT_EQ(cal(3, 7), 15);
+    EXPECT_EQ(cal(3_I, 7_I), 15_I);
 }
 
 }  // namespace panda::verifier::test

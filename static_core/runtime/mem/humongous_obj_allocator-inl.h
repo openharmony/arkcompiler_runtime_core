@@ -25,9 +25,9 @@ namespace panda::mem {
 #define LOG_HUMONGOUS_OBJ_ALLOCATOR(level) LOG(level, ALLOC) << "HumongousObjAllocator: "
 
 template <typename AllocConfigT, typename LockConfigT>
-HumongousObjAllocator<AllocConfigT, LockConfigT>::HumongousObjAllocator(MemStatsType *mem_stats,
-                                                                        SpaceType type_allocation)
-    : type_allocation_(type_allocation), mem_stats_(mem_stats)
+HumongousObjAllocator<AllocConfigT, LockConfigT>::HumongousObjAllocator(MemStatsType *memStats,
+                                                                        SpaceType typeAllocation)
+    : typeAllocation_(typeAllocation), memStats_(memStats)
 {
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Initializing HumongousObjAllocator";
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Initializing HumongousObjAllocator finished";
@@ -44,7 +44,7 @@ template <typename AllocConfigT, typename LockConfigT>
 template <bool NEED_LOCK>
 void *HumongousObjAllocator<AllocConfigT, LockConfigT>::Alloc(const size_t size, const Alignment align)
 {
-    os::memory::WriteLockHolder<LockConfigT, NEED_LOCK> wlock(alloc_free_lock_);
+    os::memory::WriteLockHolder<LockConfigT, NEED_LOCK> wlock(allocFreeLock_);
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Try to allocate memory with size " << size;
 
     // Check that we can get a memory header for the memory pointer by using PAGE_SIZE_MASK mask
@@ -57,48 +57,48 @@ void *HumongousObjAllocator<AllocConfigT, LockConfigT>::Alloc(const size_t size,
     // NOTE(aemelenko): this is quite raw approximation.
     // We can save about sizeof(MemoryPoolHeader) / 2 bytes here
     // (BTW, it is not so much for MB allocations)
-    size_t aligned_size = size + sizeof(MemoryPoolHeader) + GetAlignmentInBytes(align);
+    size_t alignedSize = size + sizeof(MemoryPoolHeader) + GetAlignmentInBytes(align);
 
     void *mem = nullptr;
 
-    if (UNLIKELY(aligned_size > HUMONGOUS_OBJ_ALLOCATOR_MAX_SIZE)) {
+    if (UNLIKELY(alignedSize > HUMONGOUS_OBJ_ALLOCATOR_MAX_SIZE)) {
         // the size is too big
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "The size is too big for this allocator. Return nullptr.";
         return nullptr;
     }
 
     // First try to find suitable block in Reserved pools
-    MemoryPoolHeader *mem_header = reserved_pools_list_.FindSuitablePool(aligned_size);
-    if (mem_header != nullptr) {
-        LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Find reserved memory block with size " << mem_header->GetPoolSize();
-        reserved_pools_list_.Pop(mem_header);
-        mem_header->Alloc(size, align);
-        mem = mem_header->GetMemory();
+    MemoryPoolHeader *memHeader = reservedPoolsList_.FindSuitablePool(alignedSize);
+    if (memHeader != nullptr) {
+        LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Find reserved memory block with size " << memHeader->GetPoolSize();
+        reservedPoolsList_.Pop(memHeader);
+        memHeader->Alloc(size, align);
+        mem = memHeader->GetMemory();
     } else {
-        mem_header = free_pools_list_.FindSuitablePool(aligned_size);
-        if (mem_header != nullptr) {
-            LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Find free memory block with size " << mem_header->GetPoolSize();
-            free_pools_list_.Pop(mem_header);
-            mem_header->Alloc(size, align);
-            mem = mem_header->GetMemory();
+        memHeader = freePoolsList_.FindSuitablePool(alignedSize);
+        if (memHeader != nullptr) {
+            LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Find free memory block with size " << memHeader->GetPoolSize();
+            freePoolsList_.Pop(memHeader);
+            memHeader->Alloc(size, align);
+            mem = memHeader->GetMemory();
         } else {
             LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Can't find memory for this size";
             return nullptr;
         }
     }
-    occupied_pools_list_.Insert(mem_header);
+    occupiedPoolsList_.Insert(memHeader);
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Allocated memory at addr " << std::hex << mem;
-    AllocConfigT::OnAlloc(mem_header->GetPoolSize(), type_allocation_, mem_stats_);
+    AllocConfigT::OnAlloc(memHeader->GetPoolSize(), typeAllocation_, memStats_);
     ASAN_UNPOISON_MEMORY_REGION(mem, size);
     AllocConfigT::MemoryInit(mem);
-    ReleaseUnusedPagesOnAlloc(mem_header, size);
+    ReleaseUnusedPagesOnAlloc(memHeader, size);
     return mem;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 void HumongousObjAllocator<AllocConfigT, LockConfigT>::Free(void *mem)
 {
-    os::memory::WriteLockHolder wlock(alloc_free_lock_);
+    os::memory::WriteLockHolder wlock(allocFreeLock_);
     FreeUnsafe(mem);
 }
 
@@ -118,24 +118,24 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
 #endif  // !NDEBUG
 
     // Each memory pool is PAGE_SIZE aligned, so to get a header we need just to align a pointer
-    auto mem_header = static_cast<MemoryPoolHeader *>(ToVoidPtr(ToUintPtr(mem) & PAGE_SIZE_MASK));
-    LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "It is a MemoryPoolHeader with addr " << std::hex << mem_header
-                                       << " and size " << std::dec << mem_header->GetPoolSize();
-    occupied_pools_list_.Pop(mem_header);
-    AllocConfigT::OnFree(mem_header->GetPoolSize(), type_allocation_, mem_stats_);
-    ASAN_POISON_MEMORY_REGION(mem_header, mem_header->GetPoolSize());
-    InsertPool(mem_header);
+    auto memHeader = static_cast<MemoryPoolHeader *>(ToVoidPtr(ToUintPtr(mem) & PAGE_SIZE_MASK));
+    LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "It is a MemoryPoolHeader with addr " << std::hex << memHeader << " and size "
+                                       << std::dec << memHeader->GetPoolSize();
+    occupiedPoolsList_.Pop(memHeader);
+    AllocConfigT::OnFree(memHeader->GetPoolSize(), typeAllocation_, memStats_);
+    ASAN_POISON_MEMORY_REGION(memHeader, memHeader->GetPoolSize());
+    InsertPool(memHeader);
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Freed memory at addr " << std::hex << mem;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-void HumongousObjAllocator<AllocConfigT, LockConfigT>::Collect(const GCObjectVisitor &death_checker_fn)
+void HumongousObjAllocator<AllocConfigT, LockConfigT>::Collect(const GCObjectVisitor &deathCheckerFn)
 {
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Collecting started";
-    IterateOverObjects([&](ObjectHeader *object_header) {
-        if (death_checker_fn(object_header) == ObjectStatus::DEAD_OBJECT) {
-            LOG(DEBUG, GC) << "DELETE OBJECT " << GetDebugInfoAboutObject(object_header);
-            FreeUnsafe(object_header);
+    IterateOverObjects([this, &deathCheckerFn](ObjectHeader *objectHeader) {
+        if (deathCheckerFn(objectHeader) == ObjectStatus::DEAD_OBJECT) {
+            LOG(DEBUG, GC) << "DELETE OBJECT " << GetDebugInfoAboutObject(objectHeader);
+            FreeUnsafe(objectHeader);
         }
     });
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Collecting finished";
@@ -143,20 +143,20 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::Collect(const GCObjectVis
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename ObjectVisitor>
-void HumongousObjAllocator<AllocConfigT, LockConfigT>::IterateOverObjects(const ObjectVisitor &object_visitor)
+void HumongousObjAllocator<AllocConfigT, LockConfigT>::IterateOverObjects(const ObjectVisitor &objectVisitor)
 {
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Iterating over objects started";
-    MemoryPoolHeader *current_pool = nullptr;
+    MemoryPoolHeader *currentPool = nullptr;
     {
-        os::memory::ReadLockHolder rlock(alloc_free_lock_);
-        current_pool = occupied_pools_list_.GetListHead();
+        os::memory::ReadLockHolder rlock(allocFreeLock_);
+        currentPool = occupiedPoolsList_.GetListHead();
     }
-    while (current_pool != nullptr) {
-        os::memory::WriteLockHolder wlock(alloc_free_lock_);
-        LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "  check pool at addr " << std::hex << current_pool;
-        MemoryPoolHeader *next = current_pool->GetNext();
-        object_visitor(static_cast<ObjectHeader *>(current_pool->GetMemory()));
-        current_pool = next;
+    while (currentPool != nullptr) {
+        os::memory::WriteLockHolder wlock(allocFreeLock_);
+        LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "  check pool at addr " << std::hex << currentPool;
+        MemoryPoolHeader *next = currentPool->GetNext();
+        objectVisitor(static_cast<ObjectHeader *>(currentPool->GetMemory()));
+        currentPool = next;
     }
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Iterating over objects finished";
 }
@@ -164,32 +164,32 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::IterateOverObjects(const 
 template <typename AllocConfigT, typename LockConfigT>
 bool HumongousObjAllocator<AllocConfigT, LockConfigT>::AddMemoryPool(void *mem, size_t size)
 {
-    os::memory::WriteLockHolder wlock(alloc_free_lock_);
+    os::memory::WriteLockHolder wlock(allocFreeLock_);
     ASSERT(mem != nullptr);
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Add memory pool to HumongousObjAllocator from  " << std::hex << mem
                                        << " with size " << std::dec << size;
     if (AlignUp(ToUintPtr(mem), PAGE_SIZE) != ToUintPtr(mem)) {
         return false;
     }
-    auto mempool_header = static_cast<MemoryPoolHeader *>(mem);
-    mempool_header->Initialize(size, nullptr, nullptr);
-    InsertPool(mempool_header);
+    auto mempoolHeader = static_cast<MemoryPoolHeader *>(mem);
+    mempoolHeader->Initialize(size, nullptr, nullptr);
+    InsertPool(mempoolHeader);
     ASAN_POISON_MEMORY_REGION(mem, size);
     return true;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-void HumongousObjAllocator<AllocConfigT, LockConfigT>::ReleaseUnusedPagesOnAlloc(MemoryPoolHeader *memory_pool,
-                                                                                 size_t alloc_size)
+void HumongousObjAllocator<AllocConfigT, LockConfigT>::ReleaseUnusedPagesOnAlloc(MemoryPoolHeader *memoryPool,
+                                                                                 size_t allocSize)
 {
-    ASSERT(memory_pool != nullptr);
-    uintptr_t alloc_addr = ToUintPtr(memory_pool->GetMemory());
-    uintptr_t pool_addr = ToUintPtr(memory_pool);
-    size_t pool_size = memory_pool->GetPoolSize();
-    uintptr_t first_free_page = AlignUp(alloc_addr + alloc_size, os::mem::GetPageSize());
-    uintptr_t end_of_last_free_page = os::mem::AlignDownToPageSize(pool_addr + pool_size);
-    if (first_free_page < end_of_last_free_page) {
-        os::mem::ReleasePages(first_free_page, end_of_last_free_page);
+    ASSERT(memoryPool != nullptr);
+    uintptr_t allocAddr = ToUintPtr(memoryPool->GetMemory());
+    uintptr_t poolAddr = ToUintPtr(memoryPool);
+    size_t poolSize = memoryPool->GetPoolSize();
+    uintptr_t firstFreePage = AlignUp(allocAddr + allocSize, os::mem::GetPageSize());
+    uintptr_t endOfLastFreePage = os::mem::AlignDownToPageSize(poolAddr + poolSize);
+    if (firstFreePage < endOfLastFreePage) {
+        os::mem::ReleasePages(firstFreePage, endOfLastFreePage);
     }
 }
 
@@ -199,8 +199,8 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::InsertPool(MemoryPoolHead
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Try to insert pool with size " << header->GetPoolSize()
                                        << " in Reserved memory";
     // Try to insert it into ReservedMemoryPools
-    MemoryPoolHeader *mem_header = reserved_pools_list_.TryToInsert(header);
-    if (mem_header == nullptr) {
+    MemoryPoolHeader *memHeader = reservedPoolsList_.TryToInsert(header);
+    if (memHeader == nullptr) {
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Successfully inserted in Reserved memory";
         // We successfully insert header into ReservedMemoryPools
         return;
@@ -208,75 +208,74 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::InsertPool(MemoryPoolHead
     // We have a crowded out pool or the "header" argument in mem_header
     // Insert it into free_pools
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Couldn't insert into Reserved memory. Insert in free pools";
-    free_pools_list_.Insert(mem_header);
+    freePoolsList_.Insert(memHeader);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void HumongousObjAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveAllPools(const MemVisitor &mem_visitor)
+void HumongousObjAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveAllPools(const MemVisitor &memVisitor)
 {
     // We call this method and return pools to the system.
     // Therefore, delete all objects to clear all external dependences
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Clear all objects inside the allocator";
-    os::memory::WriteLockHolder wlock(alloc_free_lock_);
-    occupied_pools_list_.IterateAndPopOverPools(mem_visitor);
-    reserved_pools_list_.IterateAndPopOverPools(mem_visitor);
-    free_pools_list_.IterateAndPopOverPools(mem_visitor);
+    os::memory::WriteLockHolder wlock(allocFreeLock_);
+    occupiedPoolsList_.IterateAndPopOverPools(memVisitor);
+    reservedPoolsList_.IterateAndPopOverPools(memVisitor);
+    freePoolsList_.IterateAndPopOverPools(memVisitor);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void HumongousObjAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveFreePools(const MemVisitor &mem_visitor)
+void HumongousObjAllocator<AllocConfigT, LockConfigT>::VisitAndRemoveFreePools(const MemVisitor &memVisitor)
 {
-    os::memory::WriteLockHolder wlock(alloc_free_lock_);
-    free_pools_list_.IterateAndPopOverPools(mem_visitor);
+    os::memory::WriteLockHolder wlock(allocFreeLock_);
+    freePoolsList_.IterateAndPopOverPools(memVisitor);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
-void HumongousObjAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange(const MemVisitor &mem_visitor,
-                                                                                 void *left_border, void *right_border)
+void HumongousObjAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange(const MemVisitor &memVisitor,
+                                                                                 void *leftBorder, void *rightBorder)
 {
     // NOTE: Current implementation doesn't look at PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER flag
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "HumongousObjAllocator::IterateOverObjectsInRange for range [" << std::hex
-                                       << left_border << ", " << right_border << "]";
-    ASSERT(ToUintPtr(right_border) >= ToUintPtr(left_border));
+                                       << leftBorder << ", " << rightBorder << "]";
+    ASSERT(ToUintPtr(rightBorder) >= ToUintPtr(leftBorder));
     // NOTE(aemelenko): These are temporary asserts because we can't do anything
     // if the range crosses different allocators memory pools
-    ASSERT(ToUintPtr(right_border) - ToUintPtr(left_border) ==
-           (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
-    ASSERT((ToUintPtr(right_border) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))) ==
-           (ToUintPtr(left_border) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))));
+    ASSERT(ToUintPtr(rightBorder) - ToUintPtr(leftBorder) == (CrossingMapSingleton::GetCrossingMapGranularity() - 1U));
+    ASSERT((ToUintPtr(rightBorder) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))) ==
+           (ToUintPtr(leftBorder) & (~(CrossingMapSingleton::GetCrossingMapGranularity() - 1U))));
 
     // Try to find a pool with this range
-    MemoryPoolHeader *discovered_pool = nullptr;
-    MemoryPoolHeader *current_pool = nullptr;
+    MemoryPoolHeader *discoveredPool = nullptr;
+    MemoryPoolHeader *currentPool = nullptr;
     {
-        os::memory::ReadLockHolder rlock(alloc_free_lock_);
-        current_pool = occupied_pools_list_.GetListHead();
+        os::memory::ReadLockHolder rlock(allocFreeLock_);
+        currentPool = occupiedPoolsList_.GetListHead();
     }
-    while (current_pool != nullptr) {
+    while (currentPool != nullptr) {
         // Use current pool here because it is page aligned
-        uintptr_t current_pool_start = ToUintPtr(current_pool);
-        uintptr_t current_pool_end = ToUintPtr(current_pool->GetMemory()) + current_pool->GetPoolSize();
-        if (current_pool_start <= ToUintPtr(left_border)) {
+        uintptr_t currentPoolStart = ToUintPtr(currentPool);
+        uintptr_t currentPoolEnd = ToUintPtr(currentPool->GetMemory()) + currentPool->GetPoolSize();
+        if (currentPoolStart <= ToUintPtr(leftBorder)) {
             // Check that this range is located in the same pool
-            if (current_pool_end >= ToUintPtr(right_border)) {
-                discovered_pool = current_pool;
+            if (currentPoolEnd >= ToUintPtr(rightBorder)) {
+                discoveredPool = currentPool;
                 break;
             }
         }
         {
-            os::memory::ReadLockHolder rlock(alloc_free_lock_);
-            current_pool = current_pool->GetNext();
+            os::memory::ReadLockHolder rlock(allocFreeLock_);
+            currentPool = currentPool->GetNext();
         }
     }
 
-    if (discovered_pool != nullptr) {
+    if (discoveredPool != nullptr) {
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG)
-            << "HumongousObjAllocator: It is a MemoryPoolHeader with addr " << std::hex << discovered_pool
-            << " and size " << std::dec << discovered_pool->GetPoolSize();
-        mem_visitor(static_cast<ObjectHeader *>(discovered_pool->GetMemory()));
+            << "HumongousObjAllocator: It is a MemoryPoolHeader with addr " << std::hex << discoveredPool
+            << " and size " << std::dec << discoveredPool->GetPoolSize();
+        memVisitor(static_cast<ObjectHeader *>(discoveredPool->GetMemory()));
     } else {
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG)
             << "HumongousObjAllocator This memory range is not covered by this allocator";
@@ -287,19 +286,19 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::IterateOverObjectsInRange
 template <typename AllocConfigT, typename LockConfigT>
 bool HumongousObjAllocator<AllocConfigT, LockConfigT>::AllocatedByHumongousObjAllocator(void *mem)
 {
-    os::memory::ReadLockHolder rlock(alloc_free_lock_);
+    os::memory::ReadLockHolder rlock(allocFreeLock_);
     return AllocatedByHumongousObjAllocatorUnsafe(mem);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 bool HumongousObjAllocator<AllocConfigT, LockConfigT>::AllocatedByHumongousObjAllocatorUnsafe(void *mem)
 {
-    MemoryPoolHeader *current_pool = occupied_pools_list_.GetListHead();
-    while (current_pool != nullptr) {
-        if (current_pool->GetMemory() == mem) {
+    MemoryPoolHeader *currentPool = occupiedPoolsList_.GetListHead();
+    while (currentPool != nullptr) {
+        if (currentPool->GetMemory() == mem) {
             return true;
         }
-        current_pool = current_pool->GetNext();
+        currentPool = currentPool->GetNext();
     }
     return false;
 }
@@ -309,10 +308,10 @@ ATTRIBUTE_NO_SANITIZE_ADDRESS void HumongousObjAllocator<AllocConfigT, LockConfi
     size_t size, MemoryPoolHeader *prev, MemoryPoolHeader *next)
 {
     ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryPoolHeader));
-    pool_size_ = size;
+    poolSize_ = size;
     prev_ = prev;
     next_ = next;
-    mem_addr_ = nullptr;
+    memAddr_ = nullptr;
     ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryPoolHeader));
 }
 
@@ -322,8 +321,8 @@ ATTRIBUTE_NO_SANITIZE_ADDRESS void HumongousObjAllocator<AllocConfigT, LockConfi
 {
     (void)size;
     ASAN_UNPOISON_MEMORY_REGION(this, sizeof(MemoryPoolHeader));
-    mem_addr_ = ToVoidPtr(AlignUp(ToUintPtr(this) + sizeof(MemoryPoolHeader), GetAlignmentInBytes(align)));
-    ASSERT(ToUintPtr(mem_addr_) + size <= ToUintPtr(this) + pool_size_);
+    memAddr_ = ToVoidPtr(AlignUp(ToUintPtr(this) + sizeof(MemoryPoolHeader), GetAlignmentInBytes(align)));
+    ASSERT(ToUintPtr(memAddr_) + size <= ToUintPtr(this) + poolSize_);
     ASAN_POISON_MEMORY_REGION(this, sizeof(MemoryPoolHeader));
 }
 
@@ -377,42 +376,42 @@ typename HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolHeader *
 HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::FindSuitablePool(size_t size)
 {
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Try to find suitable pool for memory with size " << size;
-    MemoryPoolHeader *cur_pool = head_;
-    while (cur_pool != nullptr) {
-        if (cur_pool->GetPoolSize() >= size) {
+    MemoryPoolHeader *curPool = head_;
+    while (curPool != nullptr) {
+        if (curPool->GetPoolSize() >= size) {
             break;
         }
-        cur_pool = cur_pool->GetNext();
+        curPool = curPool->GetNext();
     }
-    LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Found a pool with addr " << std::hex << cur_pool;
-    return cur_pool;
+    LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Found a pool with addr " << std::hex << curPool;
+    return curPool;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 bool HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::IsInThisList(MemoryPoolHeader *pool)
 {
     // NOTE(aemelenko): Do it only in debug build
-    MemoryPoolHeader *cur_pool = head_;
-    while (cur_pool != nullptr) {
-        if (cur_pool == pool) {
+    MemoryPoolHeader *curPool = head_;
+    while (curPool != nullptr) {
+        if (curPool == pool) {
             break;
         }
-        cur_pool = cur_pool->GetNext();
+        curPool = curPool->GetNext();
     }
-    return cur_pool != nullptr;
+    return curPool != nullptr;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <typename MemVisitor>
 void HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::IterateAndPopOverPools(
-    const MemVisitor &mem_visitor)
+    const MemVisitor &memVisitor)
 {
-    MemoryPoolHeader *current_pool = head_;
-    while (current_pool != nullptr) {
-        MemoryPoolHeader *tmp = current_pool->GetNext();
-        this->Pop(current_pool);
-        mem_visitor(current_pool, current_pool->GetPoolSize());
-        current_pool = tmp;
+    MemoryPoolHeader *currentPool = head_;
+    while (currentPool != nullptr) {
+        MemoryPoolHeader *tmp = currentPool->GetNext();
+        this->Pop(currentPool);
+        memVisitor(currentPool, currentPool->GetPoolSize());
+        currentPool = tmp;
     }
 }
 
@@ -426,53 +425,53 @@ HumongousObjAllocator<AllocConfigT, LockConfigT>::ReservedMemoryPools::TryToInse
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "It is too big for Reserved memory";
         return pool;
     }
-    if (elements_count_ < MAX_POOLS_AMOUNT) {
+    if (elementsCount_ < MAX_POOLS_AMOUNT) {
         // We can insert the memory pool to Reserved
         SortedInsert(pool);
-        elements_count_++;
+        elementsCount_++;
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "We don't have max amount of elements in Reserved list. Just insert.";
         return nullptr;
     }
     // We have the max amount of elements in the Reserved pools list
     // Try to swap the smallest pool (which is the first because it is ordered list)
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "We have max amount of elements in Reserved list.";
-    MemoryPoolHeader *smallest_pool = this->GetListHead();
-    if (smallest_pool == nullptr) {
+    MemoryPoolHeader *smallestPool = this->GetListHead();
+    if (smallestPool == nullptr) {
         // It is the only variant when smallest_pool can be equal to nullptr.
         ASSERT(MAX_POOLS_AMOUNT == 0);
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "MAX_POOLS_AMOUNT for Reserved list is equal to zero. Do nothing";
         return pool;
     }
-    ASSERT(smallest_pool != nullptr);
-    if (smallest_pool->GetPoolSize() >= pool->GetPoolSize()) {
+    ASSERT(smallestPool != nullptr);
+    if (smallestPool->GetPoolSize() >= pool->GetPoolSize()) {
         LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "The pool is too small. Do not insert it";
         return pool;
     }
     // Just pop this element from the list. Do not update elements_count_ value
-    MemoryPoolList::Pop(smallest_pool);
+    MemoryPoolList::Pop(smallestPool);
     SortedInsert(pool);
     LOG_HUMONGOUS_OBJ_ALLOCATOR(DEBUG) << "Swap the smallest element in Reserved list with addr " << std::hex
-                                       << smallest_pool;
-    return smallest_pool;
+                                       << smallestPool;
+    return smallestPool;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 void HumongousObjAllocator<AllocConfigT, LockConfigT>::ReservedMemoryPools::SortedInsert(MemoryPoolHeader *pool)
 {
-    size_t pool_size = pool->GetPoolSize();
-    MemoryPoolHeader *list_head = this->GetListHead();
-    if (list_head == nullptr) {
+    size_t poolSize = pool->GetPoolSize();
+    MemoryPoolHeader *listHead = this->GetListHead();
+    if (listHead == nullptr) {
         this->Insert(pool);
         return;
     }
-    if (list_head->GetPoolSize() >= pool_size) {
+    if (listHead->GetPoolSize() >= poolSize) {
         // Do this comparison to not update head_ in this method
         this->Insert(pool);
         return;
     }
-    MemoryPoolHeader *cur = list_head;
+    MemoryPoolHeader *cur = listHead;
     while (cur != nullptr) {
-        if (cur->GetPoolSize() >= pool_size) {
+        if (cur->GetPoolSize() >= poolSize) {
             pool->SetNext(cur);
             pool->SetPrev(cur->GetPrev());
             cur->GetPrev()->SetNext(pool);
@@ -500,10 +499,10 @@ template <typename AllocConfigT, typename LockConfigT>
 bool HumongousObjAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader *obj)
 {
     ASSERT(ContainObject(obj));
-    auto *mem_header = static_cast<MemoryPoolHeader *>(ToVoidPtr(ToUintPtr(obj) & PAGE_SIZE_MASK));
+    auto *memHeader = static_cast<MemoryPoolHeader *>(ToVoidPtr(ToUintPtr(obj) & PAGE_SIZE_MASK));
     ASSERT(PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(
-               static_cast<void *>(const_cast<ObjectHeader *>(obj))) == static_cast<void *>(mem_header));
-    return mem_header->GetMemory() == static_cast<void *>(const_cast<ObjectHeader *>(obj));
+               static_cast<void *>(const_cast<ObjectHeader *>(obj))) == static_cast<void *>(memHeader));
+    return memHeader->GetMemory() == static_cast<void *>(const_cast<ObjectHeader *>(obj));
 }
 
 #undef LOG_HUMONGOUS_OBJ_ALLOCATOR

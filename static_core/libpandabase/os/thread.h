@@ -40,15 +40,15 @@ WEAK_FOR_LTO_START
 
 PANDA_PUBLIC_API ThreadId GetCurrentThreadId();
 PANDA_PUBLIC_API int GetPid();
-PANDA_PUBLIC_API int SetThreadName(NativeHandleType pthread_handle, const char *name);
+PANDA_PUBLIC_API int SetThreadName(NativeHandleType pthreadHandle, const char *name);
 PANDA_PUBLIC_API NativeHandleType GetNativeHandle();
 PANDA_PUBLIC_API void Yield();
 PANDA_PUBLIC_API void NativeSleep(unsigned int ms);
 PANDA_PUBLIC_API void NativeSleepUS(std::chrono::microseconds us);
-PANDA_PUBLIC_API void ThreadDetach(NativeHandleType pthread_handle);
+PANDA_PUBLIC_API void ThreadDetach(NativeHandleType pthreadHandle);
 PANDA_PUBLIC_API void ThreadExit(void *ret);
-PANDA_PUBLIC_API void ThreadJoin(NativeHandleType pthread_handle, void **ret);
-PANDA_PUBLIC_API void ThreadSendSignal(NativeHandleType pthread_handle, int sig);
+PANDA_PUBLIC_API void ThreadJoin(NativeHandleType pthreadHandle, void **ret);
+PANDA_PUBLIC_API void ThreadSendSignal(NativeHandleType pthreadHandle, int sig);
 
 WEAK_FOR_LTO_END
 
@@ -64,10 +64,9 @@ using SharedPtrToSharedPtrStruct = std::shared_ptr<SharedPtrStruct<T>>;
 
 template <typename T>
 struct SharedPtrStruct {
-    SharedPtrToSharedPtrStruct<T> this_ptr;  // NOLINT(misc-non-private-member-variables-in-classes)
-    T data;                                  // NOLINT(misc-non-private-member-variables-in-classes)
-    SharedPtrStruct(SharedPtrToSharedPtrStruct<T> ptr_in, T data_in)
-        : this_ptr(std::move(ptr_in)), data(std::move(data_in))
+    SharedPtrToSharedPtrStruct<T> thisPtr;  // NOLINT(misc-non-private-member-variables-in-classes)
+    T data;                                 // NOLINT(misc-non-private-member-variables-in-classes)
+    SharedPtrStruct(SharedPtrToSharedPtrStruct<T> ptrIn, T dataIn) : thisPtr(std::move(ptrIn)), data(std::move(dataIn))
     {
     }
 };
@@ -101,17 +100,17 @@ static void *ProxyFunc(void *args)
 {
     // Parse pointer and move args to local tuple.
     // We need this pointer to be destroyed by the time function starts to avoid memleak on thread  termination
-    Tuple args_tuple;
+    Tuple argsTuple;
     {
-        auto args_ptr = static_cast<SharedPtrStruct<Tuple> *>(args);
+        auto argsPtr = static_cast<SharedPtrStruct<Tuple> *>(args);
         SharedPtrToSharedPtrStruct<Tuple> local;
         // This breaks shared pointer loop
-        local.swap(args_ptr->this_ptr);
+        local.swap(argsPtr->thisPtr);
         // This moves tuple data to local variable
-        args_tuple = args_ptr->data;
+        argsTuple = argsPtr->data;
     }
-    Func *func = std::get<0>(args_tuple);
-    CallFunc<Func, Tuple, N>(*func, args_tuple);
+    Func *func = std::get<0>(argsTuple);
+    CallFunc<Func, Tuple, N>(*func, argsTuple);
     return nullptr;
 }
 
@@ -125,17 +124,17 @@ NativeHandleType ThreadStart(Func *func, Args... args)
 #else
     pthread_t tid;
 #endif
-    auto args_tuple = std::make_tuple(func, std::move(args)...);
-    internal::SharedPtrStruct<decltype(args_tuple)> *ptr = nullptr;
+    auto argsTuple = std::make_tuple(func, std::move(args)...);
+    internal::SharedPtrStruct<decltype(argsTuple)> *ptr = nullptr;
     {
-        auto shared_ptr = std::make_shared<internal::SharedPtrStruct<decltype(args_tuple)>>(nullptr, args_tuple);
-        ptr = shared_ptr.get();
+        auto sharedPtr = std::make_shared<internal::SharedPtrStruct<decltype(argsTuple)>>(nullptr, argsTuple);
+        ptr = sharedPtr.get();
         // Make recursive ref to prevent from shared pointer being destroyed until child thread acquires it.
-        ptr->this_ptr = shared_ptr;
+        ptr->thisPtr = sharedPtr;
         // Leave scope to make sure that local shared_ptr was destroyed before thread creation
     }
     pthread_create(&tid, nullptr,
-                   &internal::ProxyFunc<Func, decltype(args_tuple), std::tuple_size<decltype(args_tuple)>::value>,
+                   &internal::ProxyFunc<Func, decltype(argsTuple), std::tuple_size<decltype(argsTuple)>::value>,
                    static_cast<void *>(ptr));
 #ifdef PANDA_TARGET_UNIX
     return tid;
@@ -145,8 +144,8 @@ NativeHandleType ThreadStart(Func *func, Args... args)
 }
 
 WEAK_FOR_LTO_START
-PANDA_PUBLIC_API int ThreadGetStackInfo(NativeHandleType thread, void **stack_addr, size_t *stack_size,
-                                        size_t *guard_size);
+PANDA_PUBLIC_API int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackSize,
+                                        size_t *guardSize);
 WEAK_FOR_LTO_END
 
 inline bool IsSetPriorityError(int res)

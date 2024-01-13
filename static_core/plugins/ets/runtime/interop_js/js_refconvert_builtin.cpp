@@ -36,9 +36,9 @@ public:
         return Conv::Wrap(ctx->GetJSEnv(), FromEtsObject<ObjType>(obj));
     }
 
-    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value js_value)
+    EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue)
     {
-        auto res = Conv::Unwrap(ctx, ctx->GetJSEnv(), js_value);
+        auto res = Conv::Unwrap(ctx, ctx->GetJSEnv(), jsValue);
         if (!res) {
             return nullptr;
         }
@@ -55,25 +55,25 @@ static inline void RegisterBuiltinRefConvertor(JSRefConvertCache *cache, Class *
 }
 
 static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
-    InteropCtx *ctx, std::string_view descriptor, char const *js_builtin_name = nullptr,
+    InteropCtx *ctx, std::string_view descriptor, char const *jsBuiltinName = nullptr,
     const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr)
 {
     auto coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
-    EtsClassLinker *ets_class_linker = vm->GetClassLinker();
-    auto ets_class = ets_class_linker->GetClass(descriptor.data());
-    if (UNLIKELY(ets_class == nullptr)) {
+    EtsClassLinker *etsClassLinker = vm->GetClassLinker();
+    auto etsClass = etsClassLinker->GetClass(descriptor.data());
+    if (UNLIKELY(etsClass == nullptr)) {
         ctx->Fatal(std::string("nonexisting class ") + descriptor.data());
     }
 
     // create ets_proxy bound to js builtin-constructor
     ets_proxy::EtsClassWrappersCache *cache = ctx->GetEtsClassWrappersCache();
     std::unique_ptr<ets_proxy::EtsClassWrapper> wrapper =
-        ets_proxy::EtsClassWrapper::Create(ctx, ets_class, js_builtin_name, overloads);
+        ets_proxy::EtsClassWrapper::Create(ctx, etsClass, jsBuiltinName, overloads);
     if (UNLIKELY(wrapper == nullptr)) {
-        ctx->Fatal(std::string("ets_proxy creation failed for ") + ets_class->GetDescriptor());
+        ctx->Fatal(std::string("ets_proxy creation failed for ") + etsClass->GetDescriptor());
     }
-    return cache->Insert(ets_class, std::move(wrapper));
+    return cache->Insert(etsClass, std::move(wrapper));
 }
 
 // NOLINTNEXTLINE(readability-function-size)
@@ -84,17 +84,17 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
 
     namespace descriptors = panda_file_items::class_descriptors;
 
-    auto not_implemented = [](char const *name) __attribute__((noreturn, noinline))
+    auto notImplemented = [](char const *name) __attribute__((noreturn, noinline))
     {
         InteropCtx::Fatal(std::string("compat.") + name + " box is not implemented");
     };
-    auto not_assignable = [](char const *name) __attribute__((noinline))->EtsObject *
+    auto notAssignable = [](char const *name) __attribute__((noinline))->EtsObject *
     {
         JSConvertTypeCheckFailed(name);
         return nullptr;
     };
 
-    auto std_ctor_ref = [](InteropCtx *ctxx, char const *name) {
+    auto stdCtorRef = [](InteropCtx *ctxx, char const *name) {
         napi_env env = ctxx->GetJSEnv();
         napi_value val;
         NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), name, &val));
@@ -103,36 +103,36 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
         NAPI_CHECK_FATAL(napi_create_reference(env, val, 1, &ref));
         return ref;
     };
-    auto check_instanceof = [](napi_env env, napi_value val, napi_ref ctor_ref) {
+    auto checkInstanceof = [](napi_env env, napi_value val, napi_ref ctorRef) {
         bool result;
-        NAPI_CHECK_FATAL(napi_instanceof(env, val, GetReferenceValue(env, ctor_ref), &result));
+        NAPI_CHECK_FATAL(napi_instanceof(env, val, GetReferenceValue(env, ctorRef), &result));
         return result;
     };
 
-    auto builtin_convert = [](auto conv_tag, InteropCtx *ctxx, napi_env env, napi_value js_value) -> EtsObject * {
-        auto res = decltype(conv_tag)::type::UnwrapImpl(ctxx, env, js_value);
+    auto builtinConvert = [](auto convTag, InteropCtx *ctxx, napi_env env, napi_value jsValue) -> EtsObject * {
+        auto res = decltype(convTag)::type::UnwrapImpl(ctxx, env, jsValue);
         if (UNLIKELY(!res.has_value())) {
             return nullptr;
         }
         return AsEtsObject(res.value());
     };
 
-    napi_value js_global_ets;
+    napi_value jsGlobalEts;
     {
         auto env = ctx->GetJSEnv();
-        NAPI_CHECK_FATAL(napi_create_object(env, &js_global_ets));
-        NAPI_CHECK_FATAL(napi_set_named_property(env, GetGlobal(env), "ets", js_global_ets));
+        NAPI_CHECK_FATAL(napi_create_object(env, &jsGlobalEts));
+        NAPI_CHECK_FATAL(napi_set_named_property(env, GetGlobal(env), "ets", jsGlobalEts));
     }
 
-    auto register_class = [ctx, js_global_ets](std::string_view descriptor, char const *js_builtin_name = nullptr,
-                                               const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr) {
-        ets_proxy::EtsClassWrapper *wclass = RegisterEtsProxyForStdClass(ctx, descriptor, js_builtin_name, overloads);
+    auto registerClass = [ctx, jsGlobalEts](std::string_view descriptor, char const *jsBuiltinName = nullptr,
+                                            const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr) {
+        ets_proxy::EtsClassWrapper *wclass = RegisterEtsProxyForStdClass(ctx, descriptor, jsBuiltinName, overloads);
         auto env = ctx->GetJSEnv();
         auto name = wclass->GetEtsClass()->GetRuntimeClass()->GetName();
-        auto js_ctor = wclass->GetJsCtor(env);
-        NAPI_CHECK_FATAL(napi_set_named_property(env, js_global_ets, name.c_str(), js_ctor));
-        if (js_builtin_name != nullptr) {
-            NAPI_CHECK_FATAL(napi_set_named_property(env, js_global_ets, js_builtin_name, js_ctor));
+        auto jsCtor = wclass->GetJsCtor(env);
+        NAPI_CHECK_FATAL(napi_set_named_property(env, jsGlobalEts, name.c_str(), jsCtor));
+        if (jsBuiltinName != nullptr) {
+            NAPI_CHECK_FATAL(napi_set_named_property(env, jsGlobalEts, jsBuiltinName, jsCtor));
         }
         return wclass;
     };
@@ -143,12 +143,12 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
     /******************************************************************************/
     // Definitions for StdClasses
 
-    auto w_object = register_class(descriptors::OBJECT, "Object");
+    auto wObject = registerClass(descriptors::OBJECT, "Object");
 
     static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS {
         {utf::CStringAsMutf8("<ctor>"), "Lstd/core/String;:V"}};
-    auto w_error = register_class(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
-    register_class(descriptors::EXCEPTION, nullptr, &W_ERROR_OVERLOADS);
+    auto wError = registerClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
+    registerClass(descriptors::EXCEPTION, nullptr, &W_ERROR_OVERLOADS);
 
     static const std::array STD_EXCEPTIONS_LIST = {
         // Errors
@@ -174,7 +174,7 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
         std::make_tuple("Lstd/core/InvalidDate;", NO_MIRROR, NO_OVERLOADS),
     };
     for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
-        register_class(descr, mirror, ovl);
+        registerClass(descr, mirror, ovl);
     }
 
     static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
@@ -217,104 +217,104 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
          "LFunctionalInterface-std-core-Object-f64-std-core-Object-0;:Lescompat/Array;"},
         {utf::CStringAsMutf8("toLocaleString"), ":Lstd/core/String;"},
     };
-    auto w_array = register_class(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
+    auto wArray = registerClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
 
-    NAPI_CHECK_FATAL(napi_object_seal(ctx->GetJSEnv(), js_global_ets));
+    NAPI_CHECK_FATAL(napi_object_seal(ctx->GetJSEnv(), jsGlobalEts));
     /******************************************************************************/
     // JS built-in matchers for StdClasses
 
-    auto m_array = [=](InteropCtx *ctxx, napi_value js_value, bool verified = true) -> EtsObject * {
+    auto mArray = [=](InteropCtx *ctxx, napi_value jsValue, bool verified = true) -> EtsObject * {
         napi_env env = ctxx->GetJSEnv();
-        bool is_instanceof;
+        bool isInstanceof;
         if (!verified) {
-            NAPI_CHECK_FATAL(napi_is_array(env, js_value, &is_instanceof));
-            if (!is_instanceof) {
-                return not_assignable("Array");
+            NAPI_CHECK_FATAL(napi_is_array(env, jsValue, &isInstanceof));
+            if (!isInstanceof) {
+                return notAssignable("Array");
             }
         }
-        return w_array->CreateJSBuiltinProxy(ctxx, js_value);
+        return wArray->CreateJSBuiltinProxy(ctxx, jsValue);
     };
-    w_array->SetJSBuiltinMatcher(m_array);
+    wArray->SetJSBuiltinMatcher(mArray);
 
     // NOTE(vpukhov): compat: obtain from class wrappers when implemented
-    napi_ref ctor_typeerror = std_ctor_ref(ctx, "TypeError");
-    napi_ref ctor_rangeerror = std_ctor_ref(ctx, "RangeError");
-    napi_ref ctor_referenceerror = std_ctor_ref(ctx, "ReferenceError");
+    napi_ref ctorTypeerror = stdCtorRef(ctx, "TypeError");
+    napi_ref ctorRangeerror = stdCtorRef(ctx, "RangeError");
+    napi_ref ctorReferenceerror = stdCtorRef(ctx, "ReferenceError");
 
-    auto m_error = [=](InteropCtx *ctxx, napi_value js_value, bool verified = true) -> EtsObject * {
+    auto mError = [=](InteropCtx *ctxx, napi_value jsValue, bool verified = true) -> EtsObject * {
         napi_env env = ctxx->GetJSEnv();
-        bool is_instanceof;
+        bool isInstanceof;
         if (!verified) {
-            NAPI_CHECK_FATAL(napi_is_error(env, js_value, &is_instanceof));
-            if (!is_instanceof) {
-                return not_assignable("Error");
+            NAPI_CHECK_FATAL(napi_is_error(env, jsValue, &isInstanceof));
+            if (!isInstanceof) {
+                return notAssignable("Error");
             }
         }
         // NOTE(vpukhov): compat: remove when compat/Error is implemented
-        return builtin_convert(helpers::TypeIdentity<JSConvertJSError>(), ctxx, env, js_value);
+        return builtinConvert(helpers::TypeIdentity<JSConvertJSError>(), ctxx, env, jsValue);
 
-        if (check_instanceof(env, js_value, ctor_typeerror)) {
-            not_implemented("TypeError");
+        if (checkInstanceof(env, jsValue, ctorTypeerror)) {
+            notImplemented("TypeError");
         }
-        if (check_instanceof(env, js_value, ctor_rangeerror)) {
-            not_implemented("RangeError");
+        if (checkInstanceof(env, jsValue, ctorRangeerror)) {
+            notImplemented("RangeError");
         }
-        if (check_instanceof(env, js_value, ctor_referenceerror)) {
-            not_implemented("ReferenceError");
+        if (checkInstanceof(env, jsValue, ctorReferenceerror)) {
+            notImplemented("ReferenceError");
         }
-        not_implemented("Error");
+        notImplemented("Error");
     };
-    w_error->SetJSBuiltinMatcher(m_error);
+    wError->SetJSBuiltinMatcher(mError);
 
-    auto m_object_object = [=](InteropCtx *ctxx, napi_value js_value) -> EtsObject * {
+    auto mObjectObject = [=](InteropCtx *ctxx, napi_value jsValue) -> EtsObject * {
         napi_env env = ctxx->GetJSEnv();
-        bool is_instanceof;
-        NAPI_CHECK_FATAL(napi_is_array(env, js_value, &is_instanceof));
-        if (is_instanceof) {
-            return m_array(ctxx, js_value);
+        bool isInstanceof;
+        NAPI_CHECK_FATAL(napi_is_array(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            return mArray(ctxx, jsValue);
         }
-        NAPI_CHECK_FATAL(napi_is_arraybuffer(env, js_value, &is_instanceof));
-        if (is_instanceof) {
-            return builtin_convert(helpers::TypeIdentity<JSConvertArrayBuffer>(), ctxx, env, js_value);
+        NAPI_CHECK_FATAL(napi_is_arraybuffer(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            return builtinConvert(helpers::TypeIdentity<JSConvertArrayBuffer>(), ctxx, env, jsValue);
         }
-        NAPI_CHECK_FATAL(napi_is_typedarray(env, js_value, &is_instanceof));
-        if (is_instanceof) {
-            not_implemented("TypedArray");
+        NAPI_CHECK_FATAL(napi_is_typedarray(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            notImplemented("TypedArray");
         }
-        NAPI_CHECK_FATAL(napi_is_promise(env, js_value, &is_instanceof));
-        if (is_instanceof) {
-            return builtin_convert(helpers::TypeIdentity<JSConvertPromise>(), ctxx, env, js_value);
+        NAPI_CHECK_FATAL(napi_is_promise(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            return builtinConvert(helpers::TypeIdentity<JSConvertPromise>(), ctxx, env, jsValue);
         }
-        NAPI_CHECK_FATAL(napi_is_error(env, js_value, &is_instanceof));
-        if (is_instanceof) {
-            return m_error(ctxx, js_value);
+        NAPI_CHECK_FATAL(napi_is_error(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            return mError(ctxx, jsValue);
         }
-        NAPI_CHECK_FATAL(napi_is_date(env, js_value, &is_instanceof));
-        if (is_instanceof) {
-            not_implemented("Date");
+        NAPI_CHECK_FATAL(napi_is_date(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            notImplemented("Date");
         }
-        NAPI_CHECK_FATAL(napi_is_dataview(env, js_value, &is_instanceof));
-        if (is_instanceof) {
-            not_implemented("DataView");
+        NAPI_CHECK_FATAL(napi_is_dataview(env, jsValue, &isInstanceof));
+        if (isInstanceof) {
+            notImplemented("DataView");
         }
         // NOTE(vpukhov): Boolean, Number...
-        return builtin_convert(helpers::TypeIdentity<JSConvertJSValue>(), ctxx, env, js_value);
+        return builtinConvert(helpers::TypeIdentity<JSConvertJSValue>(), ctxx, env, jsValue);
     };
 
-    auto m_object = [=](InteropCtx *ctxx, napi_value js_value, bool verified = true) -> EtsObject * {
+    auto mObject = [=](InteropCtx *ctxx, napi_value jsValue, bool verified = true) -> EtsObject * {
         napi_env env = ctxx->GetJSEnv();
         (void)verified;  // ignored for Object
 
-        napi_valuetype js_type = GetValueType(env, js_value);
-        switch (js_type) {
+        napi_valuetype jsType = GetValueType(env, jsValue);
+        switch (jsType) {
             case napi_boolean:
-                return builtin_convert(helpers::TypeIdentity<JSConvertStdlibBoolean>(), ctxx, env, js_value);
+                return builtinConvert(helpers::TypeIdentity<JSConvertStdlibBoolean>(), ctxx, env, jsValue);
             case napi_number:
-                return builtin_convert(helpers::TypeIdentity<JSConvertStdlibDouble>(), ctxx, env, js_value);
+                return builtinConvert(helpers::TypeIdentity<JSConvertStdlibDouble>(), ctxx, env, jsValue);
             case napi_string:
-                return builtin_convert(helpers::TypeIdentity<JSConvertString>(), ctxx, env, js_value);
+                return builtinConvert(helpers::TypeIdentity<JSConvertString>(), ctxx, env, jsValue);
             case napi_object:
-                return m_object_object(ctx, js_value);
+                return mObjectObject(ctx, jsValue);
             case napi_symbol:
                 [[fallthrough]];
             case napi_function:
@@ -322,13 +322,13 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
             case napi_external:
                 [[fallthrough]];
             case napi_bigint:
-                return builtin_convert(helpers::TypeIdentity<JSConvertJSValue>(), ctxx, env, js_value);
+                return builtinConvert(helpers::TypeIdentity<JSConvertJSValue>(), ctxx, env, jsValue);
             default:
-                ASSERT(!IsNullOrUndefined(env, js_value));
-                InteropCtx::Fatal("Bad js_type in Object value matcher");
+                ASSERT(!IsNullOrUndefined(env, jsValue));
+                InteropCtx::Fatal("Bad jsType in Object value matcher");
         };
     };
-    w_object->SetJSBuiltinMatcher(m_object);
+    wObject->SetJSBuiltinMatcher(mObject);
 }
 
 void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
@@ -336,7 +336,7 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     auto cache = ctx->GetRefConvertCache();
     auto coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
-    EtsClassLinkerExtension *linker_ext = vm->GetClassLinker()->GetEtsClassLinkerExtension();
+    EtsClassLinkerExtension *linkerExt = vm->GetClassLinker()->GetEtsClassLinkerExtension();
 
     RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, ctx->GetJSValueClass());
     RegisterBuiltinRefConvertor<JSConvertJSError>(cache, ctx->GetJSErrorClass());
@@ -345,21 +345,21 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterBuiltinRefConvertor<JSConvertArrayBuffer>(cache, ctx->GetArrayBufferClass());
     RegisterBuiltinRefConvertor<JSConvertEtsVoid>(cache, ctx->GetVoidClass());
 
-    RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, linker_ext->GetBoxBooleanClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, linker_ext->GetBoxByteClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibChar>(cache, linker_ext->GetBoxCharClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibShort>(cache, linker_ext->GetBoxShortClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibInt>(cache, linker_ext->GetBoxIntClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibLong>(cache, linker_ext->GetBoxLongClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibFloat>(cache, linker_ext->GetBoxFloatClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibDouble>(cache, linker_ext->GetBoxDoubleClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, linkerExt->GetBoxBooleanClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, linkerExt->GetBoxByteClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibChar>(cache, linkerExt->GetBoxCharClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibShort>(cache, linkerExt->GetBoxShortClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibInt>(cache, linkerExt->GetBoxIntClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibLong>(cache, linkerExt->GetBoxLongClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibFloat>(cache, linkerExt->GetBoxFloatClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibDouble>(cache, linkerExt->GetBoxDoubleClass());
 
-    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_U1, JSConvertU1>(cache, linker_ext);
-    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_I32, JSConvertI32>(cache, linker_ext);
-    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_F32, JSConvertF32>(cache, linker_ext);
-    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_I64, JSConvertI64>(cache, linker_ext);
-    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_F64, JSConvertF64>(cache, linker_ext);
-    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_STRING, JSConvertString>(cache, linker_ext);
+    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_U1, JSConvertU1>(cache, linkerExt);
+    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_I32, JSConvertI32>(cache, linkerExt);
+    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_F32, JSConvertF32>(cache, linkerExt);
+    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_I64, JSConvertI64>(cache, linkerExt);
+    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_F64, JSConvertF64>(cache, linkerExt);
+    RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_STRING, JSConvertString>(cache, linkerExt);
     // NOTE(vpukhov): jsvalue[] specialization, currently uses JSRefConvertArrayRef
 
     RegisterCompatConvertors(ctx);

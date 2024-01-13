@@ -32,15 +32,15 @@ namespace panda::mem {
 GCRoot::GCRoot(RootType type, ObjectHeader *obj)
 {
     type_ = type;
-    from_object_ = nullptr;
+    fromObject_ = nullptr;
     object_ = obj;
 }
 
-GCRoot::GCRoot(RootType type, ObjectHeader *from_object, ObjectHeader *obj)
+GCRoot::GCRoot(RootType type, ObjectHeader *fromObject, ObjectHeader *obj)
 {
-    ASSERT((from_object != nullptr && type == RootType::ROOT_TENURED) || type != RootType::ROOT_TENURED);
+    ASSERT((fromObject != nullptr && type == RootType::ROOT_TENURED) || type != RootType::ROOT_TENURED);
     type_ = type;
-    from_object_ = from_object;
+    fromObject_ = fromObject;
     object_ = obj;
 }
 
@@ -56,8 +56,8 @@ ObjectHeader *GCRoot::GetObjectHeader() const
 
 ObjectHeader *GCRoot::GetFromObjectHeader() const
 {
-    ASSERT((from_object_ != nullptr && type_ == RootType::ROOT_TENURED) || type_ != RootType::ROOT_TENURED);
-    return from_object_;
+    ASSERT((fromObject_ != nullptr && type_ == RootType::ROOT_TENURED) || type_ != RootType::ROOT_TENURED);
+    return fromObject_;
 }
 
 std::ostream &operator<<(std::ostream &os, const GCRoot &root)
@@ -94,114 +94,112 @@ std::ostream &operator<<(std::ostream &os, const GCRoot &root)
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitNonHeapRoots(const GCRootVisitor &gc_root_visitor, VisitGCRootFlags flags) const
+void RootManager<LanguageConfig>::VisitNonHeapRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const
 {
-    VisitLocalRoots(gc_root_visitor);
-    VisitClassRoots(gc_root_visitor, flags);
-    VisitAotStringRoots(gc_root_visitor, flags);
-    VisitClassLinkerContextRoots(gc_root_visitor);
-    VisitVmRoots(gc_root_visitor);
+    VisitLocalRoots(gcRootVisitor);
+    VisitClassRoots(gcRootVisitor, flags);
+    VisitAotStringRoots(gcRootVisitor, flags);
+    VisitClassLinkerContextRoots(gcRootVisitor);
+    VisitVmRoots(gcRootVisitor);
     auto *storage = vm_->GetGlobalObjectStorage();
     if (storage != nullptr) {
-        storage->VisitObjects(gc_root_visitor, mem::RootType::ROOT_NATIVE_GLOBAL);
+        storage->VisitObjects(gcRootVisitor, mem::RootType::ROOT_NATIVE_GLOBAL);
     }
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *card_table, ObjectAllocatorBase *allocator,
-                                                      GCRootVisitor root_visitor, MemRangeChecker range_checker,
-                                                      ObjectChecker range_object_checker,
-                                                      ObjectChecker from_object_checker, uint32_t processed_flag) const
+void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *cardTable, ObjectAllocatorBase *allocator,
+                                                      GCRootVisitor rootVisitor, MemRangeChecker rangeChecker,
+                                                      ObjectChecker rangeObjectChecker, ObjectChecker fromObjectChecker,
+                                                      uint32_t processedFlag) const
 {
-    card_table->VisitMarked(
-        [&allocator, &root_visitor, &range_checker, &range_object_checker, &from_object_checker,
-         &card_table](MemRange mem_range) {
-            if (range_checker(mem_range)) {
-                auto objects_in_range_visitor = [&root_visitor, &range_object_checker,
-                                                 &from_object_checker](ObjectHeader *object_header) {
-                    auto traverse_object_in_range = [&root_visitor, &range_object_checker](
-                                                        ObjectHeader *from_object, ObjectHeader *object_to_traverse) {
-                        if (range_object_checker(object_to_traverse)) {
+    cardTable->VisitMarked(
+        [&allocator, &rootVisitor, &rangeChecker, &rangeObjectChecker, &fromObjectChecker,
+         &cardTable](MemRange memRange) {
+            if (rangeChecker(memRange)) {
+                auto objectsInRangeVisitor = [&rootVisitor, &rangeObjectChecker,
+                                              &fromObjectChecker](ObjectHeader *objectHeader) {
+                    auto traverseObjectInRange = [&rootVisitor, &rangeObjectChecker](ObjectHeader *fromObject,
+                                                                                     ObjectHeader *objectToTraverse) {
+                        if (rangeObjectChecker(objectToTraverse)) {
                             // The weak references from dynobjects should not be regarded as roots.
-                            TaggedValue value(object_to_traverse);
+                            TaggedValue value(objectToTraverse);
                             if (!value.IsWeak()) {
-                                root_visitor(GCRoot(RootType::ROOT_TENURED, from_object, object_to_traverse));
+                                rootVisitor(GCRoot(RootType::ROOT_TENURED, fromObject, objectToTraverse));
                             }
                         }
                     };
-                    if (object_header->ClassAddr<BaseClass>() != nullptr && from_object_checker(object_header)) {
+                    if (objectHeader->ClassAddr<BaseClass>() != nullptr && fromObjectChecker(objectHeader)) {
                         // The class may be null in the situation when a new object is allocated in the card
                         // we are visiting now, but the class is not set yet.
-                        ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(object_header,
-                                                                                     traverse_object_in_range);
+                        ObjectHelpers<LanguageConfig::LANG_TYPE>::TraverseAllObjects(objectHeader,
+                                                                                     traverseObjectInRange);
                     }
                 };
-                allocator->IterateOverObjectsInRange(mem_range, objects_in_range_visitor);
+                allocator->IterateOverObjectsInRange(memRange, objectsInRangeVisitor);
             } else {
-                card_table->MarkCard(mem_range.GetStartAddress());
+                cardTable->MarkCard(memRange.GetStartAddress());
             }
         },
-        processed_flag);
+        processedFlag);
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gc_root_visitor) const
+void RootManager<LanguageConfig>::VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor) const
 {
     LOG(DEBUG, GC) << "Start collecting roots for thread " << thread->GetId();
 
-    thread->VisitGCRoots([&gc_root_visitor](ObjectHeader *obj) {
+    thread->VisitGCRoots([&gcRootVisitor](ObjectHeader *obj) {
         LOG(DEBUG, GC) << " Found root for thread" << GetDebugInfoAboutObject(obj);
-        gc_root_visitor({RootType::ROOT_THREAD, obj});
+        gcRootVisitor({RootType::ROOT_THREAD, obj});
     });
     LOG(DEBUG, GC) << "Finish collecting roots for thread " << thread->GetId();
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitLocalRoots(const GCRootVisitor &gc_root_visitor) const
+void RootManager<LanguageConfig>::VisitLocalRoots(const GCRootVisitor &gcRootVisitor) const
 {
-    auto thread_visitor = [this, &gc_root_visitor](ManagedThread *thread) {
-        VisitRootsForThread(thread, gc_root_visitor);
+    auto threadVisitor = [this, &gcRootVisitor](ManagedThread *thread) {
+        VisitRootsForThread(thread, gcRootVisitor);
         for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
             LOG(DEBUG, GC) << " VisitRoots frame " << std::hex << stack.GetFp();
-            stack.IterateObjects([this, &gc_root_visitor](auto &vreg) {
-                this->VisitRegisterRoot(vreg, gc_root_visitor);
+            stack.IterateObjects([this, &gcRootVisitor](auto &vreg) {
+                this->VisitRegisterRoot(vreg, gcRootVisitor);
                 return true;
             });
         }
         return true;
     };
-    vm_->GetThreadManager()->EnumerateThreads(thread_visitor);
+    vm_->GetThreadManager()->EnumerateThreads(threadVisitor);
 }
 
 template <class LanguageConfig>
 template <class VRegRef>
-void RootManager<LanguageConfig>::VisitRegisterRoot(const VRegRef &v_register,
-                                                    const GCRootVisitor &gc_root_visitor) const
+void RootManager<LanguageConfig>::VisitRegisterRoot(const VRegRef &vRegister, const GCRootVisitor &gcRootVisitor) const
 {
-    if (UNLIKELY(v_register.HasObject())) {
-        ObjectHeader *object_header = v_register.GetReference();
-        if (object_header != nullptr) {
-            LOG(DEBUG, GC) << " Found root for register" << GetDebugInfoAboutObject(object_header);
-            gc_root_visitor({RootType::ROOT_FRAME, object_header});
+    if (UNLIKELY(vRegister.HasObject())) {
+        ObjectHeader *objectHeader = vRegister.GetReference();
+        if (objectHeader != nullptr) {
+            LOG(DEBUG, GC) << " Found root for register" << GetDebugInfoAboutObject(objectHeader);
+            gcRootVisitor({RootType::ROOT_FRAME, objectHeader});
         }
     }
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitVmRoots(const GCRootVisitor &gc_root_visitor) const
+void RootManager<LanguageConfig>::VisitVmRoots(const GCRootVisitor &gcRootVisitor) const
 {
-    vm_->VisitVmRoots(gc_root_visitor);
+    vm_->VisitVmRoots(gcRootVisitor);
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitAotStringRoots(const GCRootVisitor &gc_root_visitor,
-                                                      VisitGCRootFlags flags) const
+void RootManager<LanguageConfig>::VisitAotStringRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, GC) << "Start collecting AOT string slot roots";
     Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->VisitAotStringRoots(
-        [&gc_root_visitor](ObjectHeader **slot) {
-            gc_root_visitor({RootType::ROOT_AOT_STRING_SLOT, *slot});
+        [&gcRootVisitor](ObjectHeader **slot) {
+            gcRootVisitor({RootType::ROOT_AOT_STRING_SLOT, *slot});
         },
         (flags & VisitGCRootFlags::ACCESS_ROOT_AOT_STRINGS_ONLY_YOUNG) != 0);
     LOG(DEBUG, GC) << "Finish collecting AOT string slot roots";
@@ -210,14 +208,14 @@ void RootManager<LanguageConfig>::VisitAotStringRoots(const GCRootVisitor &gc_ro
 template <class LanguageConfig>
 void RootManager<LanguageConfig>::UpdateAotStringRoots()
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, GC) << "=== AOT string slot roots update. BEGIN ===";
     auto hm = vm_->GetHeapManager();
     Runtime::GetCurrent()->GetClassLinker()->GetAotManager()->UpdateAotStringRoots(
         [](ObjectHeader **root) {
-            auto root_value = *root;
-            if (root_value->IsForwarded()) {
-                *root = ::panda::mem::GetForwardAddress(root_value);
+            auto rootValue = *root;
+            if (rootValue->IsForwarded()) {
+                *root = ::panda::mem::GetForwardAddress(rootValue);
             }
         },
         [&hm](const ObjectHeader *root) { return hm->IsObjectInYoungSpace(root); });
@@ -233,24 +231,24 @@ void RootManager<LanguageConfig>::UpdateVmRefs()
 template <class LanguageConfig>
 void RootManager<LanguageConfig>::UpdateGlobalObjectStorage()
 {
-    auto global_storage = vm_->GetGlobalObjectStorage();
-    if (global_storage != nullptr) {
-        global_storage->UpdateMovedRefs();
+    auto globalStorage = vm_->GetGlobalObjectStorage();
+    if (globalStorage != nullptr) {
+        globalStorage->UpdateMovedRefs();
     }
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitClassRoots(const GCRootVisitor &gc_root_visitor, VisitGCRootFlags flags) const
+void RootManager<LanguageConfig>::VisitClassRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const
 {
     LOG(DEBUG, GC) << "Start collecting roots for classes";
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-    auto class_root_visitor = [&gc_root_visitor](Class *cls) {
-        gc_root_visitor({RootType::ROOT_CLASS, cls->GetManagedObject()});
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto classRootVisitor = [&gcRootVisitor](Class *cls) {
+        gcRootVisitor({RootType::ROOT_CLASS, cls->GetManagedObject()});
         LOG(DEBUG, GC) << " Found class root " << GetDebugInfoAboutObject(cls->GetManagedObject());
         return true;
     };
-    auto *extension = class_linker->GetExtension(LanguageConfig::LANG);
-    extension->EnumerateClasses(class_root_visitor, flags);
+    auto *extension = classLinker->GetExtension(LanguageConfig::LANG);
+    extension->EnumerateClasses(classRootVisitor, flags);
 
     LOG(DEBUG, GC) << "Finish collecting roots for classes";
 }
@@ -267,15 +265,15 @@ void RootManager<LanguageConfig>::UpdateThreadLocals()
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitClassLinkerContextRoots(const GCRootVisitor &gc_root_visitor) const
+void RootManager<LanguageConfig>::VisitClassLinkerContextRoots(const GCRootVisitor &gcRootVisitor) const
 {
     LOG(DEBUG, GC) << "Start collecting roots for class linker contexts";
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-    auto *extension = class_linker->GetExtension(LanguageConfig::LANG);
-    extension->EnumerateContexts([&gc_root_visitor](ClassLinkerContext *ctx) {
-        ctx->VisitGCRoots([&gc_root_visitor](ObjectHeader *obj) {
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto *extension = classLinker->GetExtension(LanguageConfig::LANG);
+    extension->EnumerateContexts([&gcRootVisitor](ClassLinkerContext *ctx) {
+        ctx->VisitGCRoots([&gcRootVisitor](ObjectHeader *obj) {
             LOG(DEBUG, GC) << " Found root for class linker context " << GetDebugInfoAboutObject(obj);
-            gc_root_visitor({RootType::ROOT_CLASS_LINKER, obj});
+            gcRootVisitor({RootType::ROOT_CLASS_LINKER, obj});
         });
         return true;
     });
@@ -285,8 +283,8 @@ void RootManager<LanguageConfig>::VisitClassLinkerContextRoots(const GCRootVisit
 template <class LanguageConfig>
 void RootManager<LanguageConfig>::UpdateClassLinkerContextRoots()
 {
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-    auto *extension = class_linker->GetExtension(LanguageConfig::LANG);
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto *extension = classLinker->GetExtension(LanguageConfig::LANG);
     extension->EnumerateContexts([](ClassLinkerContext *ctx) {
         ctx->UpdateGCRoots();
         return true;

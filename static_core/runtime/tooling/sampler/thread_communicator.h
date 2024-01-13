@@ -41,7 +41,7 @@ public:
 
     ~ThreadCommunicator()
     {
-        for (int fd : listener_pipe_) {
+        for (int fd : listenerPipe_) {
             if (fd != -1) {
                 LOG_IF(PANDA_FAILURE_RETRY(::close(fd)) != 0, FATAL, PROFILER) << "Cannot close fd: " << fd;
             }
@@ -50,10 +50,10 @@ public:
 
     bool Init()
     {
-        if (listener_pipe_[PIPE_READ_ID] != -1) {
+        if (listenerPipe_[PIPE_READ_ID] != -1) {
             return true;
         }
-        return pipe2(listener_pipe_.data(), O_CLOEXEC) != -1;
+        return pipe2(listenerPipe_.data(), O_CLOEXEC) != -1;
     }
 
     bool IsPipeEmpty() const;
@@ -64,7 +64,7 @@ public:
     NO_MOVE_SEMANTIC(ThreadCommunicator);
 
 private:
-    std::array<int, 2> listener_pipe_ {-1, -1};
+    std::array<int, 2U> listenerPipe_ {-1, -1};
 
     friend class test::SamplerTest;
 };

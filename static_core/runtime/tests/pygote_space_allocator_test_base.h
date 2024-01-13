@@ -93,186 +93,184 @@ protected:
 
 inline void PygoteSpaceAllocatorTest::InitAllocTest()
 {
-    [[maybe_unused]] auto pygote_space_allocator = GetPygoteSpaceAllocator();
+    [[maybe_unused]] auto pygoteSpaceAllocator = GetPygoteSpaceAllocator();
     auto cls = GetObjectClass();
 
-    auto non_movable_header = panda::ObjectHeader::CreateNonMovable(cls);
-    ASSERT_NE(non_movable_header, nullptr);
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
+    auto nonMovableHeader = panda::ObjectHeader::CreateNonMovable(cls);
+    ASSERT_NE(nonMovableHeader, nullptr);
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
 
-    auto movable_header = panda::ObjectHeader::Create(cls);
-    ASSERT_NE(non_movable_header, nullptr);
-    ASSERT_FALSE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(movable_header)));
+    auto movableHeader = panda::ObjectHeader::Create(cls);
+    ASSERT_NE(nonMovableHeader, nullptr);
+    ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movableHeader)));
 
-    pygote_space_allocator->Free(non_movable_header);
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_FALSE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
+    pygoteSpaceAllocator->Free(nonMovableHeader);
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_FALSE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
 }
 
 inline void PygoteSpaceAllocatorTest::ForkedAllocTest()
 {
-    [[maybe_unused]] auto pygote_space_allocator = GetPygoteSpaceAllocator();
+    [[maybe_unused]] auto pygoteSpaceAllocator = GetPygoteSpaceAllocator();
     auto cls = GetObjectClass();
 
     PygoteFork();
 
-    auto non_movable_header = panda::ObjectHeader::CreateNonMovable(cls);
-    ASSERT_NE(non_movable_header, nullptr);
-    ASSERT_FALSE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
+    auto nonMovableHeader = panda::ObjectHeader::CreateNonMovable(cls);
+    ASSERT_NE(nonMovableHeader, nullptr);
+    ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
 
-    auto movable_header = panda::ObjectHeader::Create(cls);
-    ASSERT_NE(movable_header, nullptr);
-    ASSERT_FALSE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(movable_header)));
+    auto movableHeader = panda::ObjectHeader::Create(cls);
+    ASSERT_NE(movableHeader, nullptr);
+    ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movableHeader)));
 }
 
 inline void PygoteSpaceAllocatorTest::NonMovableLiveObjectAllocTest()
 {
-    [[maybe_unused]] auto pygote_space_allocator = GetPygoteSpaceAllocator();
+    [[maybe_unused]] auto pygoteSpaceAllocator = GetPygoteSpaceAllocator();
     auto cls = GetObjectClass();
-    auto global_object_storage = thread_->GetVM()->GetGlobalObjectStorage();
+    auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
-    auto non_movable_header = panda::ObjectHeader::CreateNonMovable(cls);
-    ASSERT_NE(non_movable_header, nullptr);
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
-    [[maybe_unused]] auto *ref =
-        global_object_storage->Add(non_movable_header, panda::mem::Reference::ObjectType::GLOBAL);
+    auto nonMovableHeader = panda::ObjectHeader::CreateNonMovable(cls);
+    ASSERT_NE(nonMovableHeader, nullptr);
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
+    [[maybe_unused]] auto *ref = globalObjectStorage->Add(nonMovableHeader, panda::mem::Reference::ObjectType::GLOBAL);
 
     PygoteFork();
 
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
 
     TriggerGc();
 
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
 
-    pygote_space_allocator->Free(non_movable_header);
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_FALSE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
+    pygoteSpaceAllocator->Free(nonMovableHeader);
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_FALSE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
 }
 
 inline void PygoteSpaceAllocatorTest::NonMovableUnliveObjectAllocTest()
 {
-    [[maybe_unused]] auto pygote_space_allocator = GetPygoteSpaceAllocator();
+    [[maybe_unused]] auto pygoteSpaceAllocator = GetPygoteSpaceAllocator();
     auto cls = GetObjectClass();
-    auto global_object_storage = thread_->GetVM()->GetGlobalObjectStorage();
+    auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
-    auto non_movable_header = panda::ObjectHeader::CreateNonMovable(cls);
-    ASSERT_NE(non_movable_header, nullptr);
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
-    [[maybe_unused]] auto *ref =
-        global_object_storage->Add(non_movable_header, panda::mem::Reference::ObjectType::GLOBAL);
+    auto nonMovableHeader = panda::ObjectHeader::CreateNonMovable(cls);
+    ASSERT_NE(nonMovableHeader, nullptr);
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
+    [[maybe_unused]] auto *ref = globalObjectStorage->Add(nonMovableHeader, panda::mem::Reference::ObjectType::GLOBAL);
 
     PygoteFork();
 
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
-    global_object_storage->Remove(ref);
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
+    globalObjectStorage->Remove(ref);
 
     TriggerGc();
 
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movable_header)));
-    ASSERT_FALSE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movable_header)));
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
+    ASSERT_FALSE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
 }
 
 inline void PygoteSpaceAllocatorTest::MovableLiveObjectAllocTest()
 {
-    [[maybe_unused]] auto pygote_space_allocator = GetPygoteSpaceAllocator();
+    [[maybe_unused]] auto pygoteSpaceAllocator = GetPygoteSpaceAllocator();
     auto cls = GetObjectClass();
-    auto global_object_storage = thread_->GetVM()->GetGlobalObjectStorage();
+    auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
-    auto movable_header = panda::ObjectHeader::Create(cls);
-    ASSERT_NE(movable_header, nullptr);
-    ASSERT_FALSE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(movable_header)));
-    [[maybe_unused]] auto *ref = global_object_storage->Add(movable_header, panda::mem::Reference::ObjectType::GLOBAL);
+    auto movableHeader = panda::ObjectHeader::Create(cls);
+    ASSERT_NE(movableHeader, nullptr);
+    ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movableHeader)));
+    [[maybe_unused]] auto *ref = globalObjectStorage->Add(movableHeader, panda::mem::Reference::ObjectType::GLOBAL);
 
     PygoteFork();
 
-    auto obj = global_object_storage->Get(ref);
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(obj)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(obj)));
+    auto obj = globalObjectStorage->Get(ref);
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(obj)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(obj)));
 
     TriggerGc();
 
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(obj)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(obj)));
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(obj)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(obj)));
 }
 
 inline void PygoteSpaceAllocatorTest::MovableUnliveObjectAllocTest()
 {
-    [[maybe_unused]] auto pygote_space_allocator = GetPygoteSpaceAllocator();
+    [[maybe_unused]] auto pygoteSpaceAllocator = GetPygoteSpaceAllocator();
     auto cls = GetObjectClass();
-    auto global_object_storage = thread_->GetVM()->GetGlobalObjectStorage();
+    auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
-    auto movable_header = panda::ObjectHeader::Create(cls);
-    ASSERT_NE(movable_header, nullptr);
-    ASSERT_FALSE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(movable_header)));
-    [[maybe_unused]] auto *ref = global_object_storage->Add(movable_header, panda::mem::Reference::ObjectType::GLOBAL);
+    auto movableHeader = panda::ObjectHeader::Create(cls);
+    ASSERT_NE(movableHeader, nullptr);
+    ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movableHeader)));
+    [[maybe_unused]] auto *ref = globalObjectStorage->Add(movableHeader, panda::mem::Reference::ObjectType::GLOBAL);
 
     PygoteFork();
 
-    auto obj = global_object_storage->Get(ref);
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(obj)));
-    ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(obj)));
-    global_object_storage->Remove(ref);
+    auto obj = globalObjectStorage->Get(ref);
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(obj)));
+    ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(obj)));
+    globalObjectStorage->Remove(ref);
 
     TriggerGc();
 
-    ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(obj)));
-    ASSERT_FALSE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(obj)));
+    ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(obj)));
+    ASSERT_FALSE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(obj)));
 }
 
 inline void PygoteSpaceAllocatorTest::MuchObjectAllocTest()
 {
-    [[maybe_unused]] auto pygote_space_allocator = GetPygoteSpaceAllocator();
+    [[maybe_unused]] auto pygoteSpaceAllocator = GetPygoteSpaceAllocator();
     auto cls = GetObjectClass();
-    auto global_object_storage = thread_->GetVM()->GetGlobalObjectStorage();
+    auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
     static constexpr size_t OBJ_NUM = 1024;
 
-    PandaVector<Reference *> movable_refs;
-    PandaVector<Reference *> non_movable_refs;
+    PandaVector<Reference *> movableRefs;
+    PandaVector<Reference *> nonMovableRefs;
     for (size_t i = 0; i < OBJ_NUM; i++) {
         auto movable = panda::ObjectHeader::Create(cls);
-        movable_refs.push_back(global_object_storage->Add(movable, panda::mem::Reference::ObjectType::GLOBAL));
-        auto non_movable = panda::ObjectHeader::CreateNonMovable(cls);
-        non_movable_refs.push_back(global_object_storage->Add(non_movable, panda::mem::Reference::ObjectType::GLOBAL));
+        movableRefs.push_back(globalObjectStorage->Add(movable, panda::mem::Reference::ObjectType::GLOBAL));
+        auto nonMovable = panda::ObjectHeader::CreateNonMovable(cls);
+        nonMovableRefs.push_back(globalObjectStorage->Add(nonMovable, panda::mem::Reference::ObjectType::GLOBAL));
     }
 
     PygoteFork();
 
-    PandaVector<ObjectHeader *> movable_objs;
-    PandaVector<ObjectHeader *> non_movable_objs;
-    for (auto movalbe_ref : movable_refs) {
-        auto obj = global_object_storage->Get(movalbe_ref);
-        ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(obj)));
-        ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(obj)));
-        global_object_storage->Remove(movalbe_ref);
-        movable_objs.push_back(obj);
+    PandaVector<ObjectHeader *> movableObjs;
+    PandaVector<ObjectHeader *> nonMovableObjs;
+    for (auto movalbeRef : movableRefs) {
+        auto obj = globalObjectStorage->Get(movalbeRef);
+        ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(obj)));
+        ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(obj)));
+        globalObjectStorage->Remove(movalbeRef);
+        movableObjs.push_back(obj);
     }
 
-    for (auto non_movalbe_ref : non_movable_refs) {
-        auto obj = global_object_storage->Get(non_movalbe_ref);
-        ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(obj)));
-        ASSERT_TRUE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(obj)));
-        global_object_storage->Remove(non_movalbe_ref);
-        non_movable_objs.push_back(obj);
+    for (auto nonMovalbeRef : nonMovableRefs) {
+        auto obj = globalObjectStorage->Get(nonMovalbeRef);
+        ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(obj)));
+        ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(obj)));
+        globalObjectStorage->Remove(nonMovalbeRef);
+        nonMovableObjs.push_back(obj);
     }
 
     TriggerGc();
 
-    for (auto movalbe_obj : movable_objs) {
-        ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(movalbe_obj)));
-        ASSERT_FALSE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(movalbe_obj)));
+    for (auto movalbeObj : movableObjs) {
+        ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movalbeObj)));
+        ASSERT_FALSE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(movalbeObj)));
     }
 
-    for (auto non_movalbe_obj : non_movable_objs) {
-        ASSERT_TRUE(pygote_space_allocator->ContainObject(static_cast<ObjectHeader *>(non_movalbe_obj)));
-        ASSERT_FALSE(pygote_space_allocator->IsLive(static_cast<ObjectHeader *>(non_movalbe_obj)));
+    for (auto nonMovalbeObj : nonMovableObjs) {
+        ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovalbeObj)));
+        ASSERT_FALSE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovalbeObj)));
     }
 }
 

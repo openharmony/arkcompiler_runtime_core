@@ -61,7 +61,7 @@ class InternalAllocator {
 #endif
 
 public:
-    explicit InternalAllocator(MemStatsType *mem_stats);
+    explicit InternalAllocator(MemStatsType *memStats);
 
     NO_COPY_SEMANTIC(InternalAllocator);
     NO_MOVE_SEMANTIC(InternalAllocator);
@@ -109,7 +109,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename MemVisitor>
-    void VisitAndRemoveAllPools(MemVisitor mem_visitor);
+    void VisitAndRemoveAllPools(MemVisitor memVisitor);
 
     /**
      * @brief Visit memory pools that can be returned to the system in this allocator
@@ -118,7 +118,7 @@ public:
      * @param mem_visitor - function pointer or functor
      */
     template <typename MemVisitor>
-    void VisitAndRemoveFreePools(MemVisitor mem_visitor);
+    void VisitAndRemoveFreePools(MemVisitor memVisitor);
 
     using LocalSmallObjectAllocator = RunSlotsAllocator<InternalAllocConfigT, RunSlotsAllocatorLockConfig::DummyLock>;
 
@@ -134,14 +134,14 @@ public:
      * @param allocator - a pointer to the allocator which was used for local allocator instance storage
      * @param local_allocator - a pointer to the local internal allocator instance
      */
-    static void FinalizeLocalInternalAllocator(LocalSmallObjectAllocator *local_allocator, Allocator *allocator);
+    static void FinalizeLocalInternalAllocator(LocalSmallObjectAllocator *localAllocator, Allocator *allocator);
 
     /**
      * @brief Return free memory pools to the system in local internal allocator
      * and remove them from the allocator structure.
      * @param local_allocator - a pointer to a local internal allocator instance
      */
-    static void RemoveFreePoolsForLocalInternalAllocator(LocalSmallObjectAllocator *local_allocator);
+    static void RemoveFreePoolsForLocalInternalAllocator(LocalSmallObjectAllocator *localAllocator);
 
     static void InitInternalAllocatorFromRuntime(Allocator *allocator);
 
@@ -162,11 +162,11 @@ private:
     template <AllocScope ALLOC_SCOPE_T>
     void *AllocViaPandaAllocators(size_t size, Alignment align);
     void FreeViaPandaAllocators(void *ptr);
-    RunSlotsAllocatorT *runslots_allocator_ {nullptr};
-    FreeListAllocatorT *freelist_allocator_ {nullptr};
-    HumongousObjAllocatorT *humongous_allocator_ {nullptr};
-    MallocProxyAllocatorT *malloc_allocator_ {nullptr};
-    static Allocator *allocator_from_runtime_;
+    RunSlotsAllocatorT *runslotsAllocator_ {nullptr};
+    FreeListAllocatorT *freelistAllocator_ {nullptr};
+    HumongousObjAllocatorT *humongousAllocator_ {nullptr};
+    MallocProxyAllocatorT *mallocAllocator_ {nullptr};
+    static Allocator *allocatorFromRuntime_;
 
     friend class test::InternalAllocatorTest;
 };

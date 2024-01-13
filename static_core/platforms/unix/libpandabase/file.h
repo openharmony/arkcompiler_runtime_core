@@ -153,10 +153,10 @@ public:
         return (pos != std::string::npos) ? std::string(buffer.data()).substr(0, pos) : std::string("");
     }
 
-    static Expected<std::string, Error> GetAbsolutePath(std::string_view relative_path)
+    static Expected<std::string, Error> GetAbsolutePath(std::string_view relativePath)
     {
         std::array<char, PATH_MAX> buffer = {0};
-        auto fp = realpath(relative_path.data(), buffer.data());
+        auto fp = realpath(relativePath.data(), buffer.data());
 
         if (fp == nullptr) {
             return Unexpected(Error(errno));
@@ -212,9 +212,9 @@ public:
         return lseek(fd_, 0, SEEK_END) == 0;
     }
 
-    static void GetEndLine(std::ostream &os, const std::size_t number_of_end_lines = 1)
+    static void GetEndLine(std::ostream &os, const std::size_t numberOfEndLines = 1)
     {
-        for (std::size_t i = 0; i < number_of_end_lines; i++) {
+        for (std::size_t i = 0; i < numberOfEndLines; i++) {
             os << "\n";
         }
     }

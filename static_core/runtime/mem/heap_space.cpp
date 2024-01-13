@@ -21,91 +21,88 @@
 
 namespace panda::mem {
 
-void HeapSpace::Initialize(size_t initial_size, size_t max_size, uint32_t min_free_percentage,
-                           uint32_t max_free_percentage)
+void HeapSpace::Initialize(size_t initialSize, size_t maxSize, uint32_t minFreePercentage, uint32_t maxFreePercentage)
 {
-    ASSERT(!is_initialized_);
-    mem_space_.Initialize(initial_size, max_size);
-    InitializePercentages(min_free_percentage, max_free_percentage);
-    is_initialized_ = true;
+    ASSERT(!isInitialized_);
+    memSpace_.Initialize(initialSize, maxSize);
+    InitializePercentages(minFreePercentage, maxFreePercentage);
+    isInitialized_ = true;
 }
 
-void HeapSpace::InitializePercentages(uint32_t min_free_percentage, uint32_t max_free_percentage)
+void HeapSpace::InitializePercentages(uint32_t minFreePercentage, uint32_t maxFreePercentage)
 {
-    min_free_percentage_ = static_cast<double>(std::min(min_free_percentage, MAX_FREE_PERCENTAGE)) / PERCENT_100_U32;
-    max_free_percentage_ = static_cast<double>(std::min(max_free_percentage, MAX_FREE_PERCENTAGE)) / PERCENT_100_U32;
+    minFreePercentage_ = static_cast<double>(std::min(minFreePercentage, MAX_FREE_PERCENTAGE)) / PERCENT_100_U32;
+    maxFreePercentage_ = static_cast<double>(std::min(maxFreePercentage, MAX_FREE_PERCENTAGE)) / PERCENT_100_U32;
 }
 
-void HeapSpace::ObjectMemorySpace::Initialize(size_t initial_size, size_t max_size)
+void HeapSpace::ObjectMemorySpace::Initialize(size_t initialSize, size_t maxSize)
 {
-    min_size_ = initial_size;
-    max_size_ = max_size;
-    ASSERT(min_size_ <= max_size_);
+    minSize_ = initialSize;
+    maxSize_ = maxSize;
+    ASSERT(minSize_ <= maxSize_);
     // Set current space size as initial_size
-    current_size_ = min_size_;
+    currentSize_ = minSize_;
 }
 
-void HeapSpace::ObjectMemorySpace::ClampNewMaxSize(size_t new_max_size)
+void HeapSpace::ObjectMemorySpace::ClampNewMaxSize(size_t newMaxSize)
 {
-    ASSERT(new_max_size >= current_size_);
-    max_size_ = std::min(new_max_size, max_size_);
+    ASSERT(newMaxSize >= currentSize_);
+    maxSize_ = std::min(newMaxSize, maxSize_);
 }
 
 inline void HeapSpace::ObjectMemorySpace::IncreaseBy(uint64_t bytes)
 {
-    current_size_ =
-        std::min(AlignUp(current_size_ + bytes, DEFAULT_ALIGNMENT_IN_BYTES), static_cast<uint64_t>(max_size_));
+    currentSize_ = std::min(AlignUp(currentSize_ + bytes, DEFAULT_ALIGNMENT_IN_BYTES), static_cast<uint64_t>(maxSize_));
 }
 
 inline void HeapSpace::ObjectMemorySpace::ReduceBy(size_t bytes)
 {
-    ASSERT(current_size_ >= bytes);
-    current_size_ = AlignUp(current_size_ - bytes, DEFAULT_ALIGNMENT_IN_BYTES);
-    current_size_ = std::max(current_size_, min_size_);
+    ASSERT(currentSize_ >= bytes);
+    currentSize_ = AlignUp(currentSize_ - bytes, DEFAULT_ALIGNMENT_IN_BYTES);
+    currentSize_ = std::max(currentSize_, minSize_);
 }
 
-void HeapSpace::ObjectMemorySpace::ComputeNewSize(size_t free_bytes, double min_free_percentage,
-                                                  double max_free_percentage)
+void HeapSpace::ObjectMemorySpace::ComputeNewSize(size_t freeBytes, double minFreePercentage, double maxFreePercentage)
 {
-    ASSERT(free_bytes <= current_size_);
+    ASSERT(freeBytes <= currentSize_);
     // How many bytes are used in space now
-    size_t used_bytes = current_size_ - free_bytes;
+    size_t usedBytes = currentSize_ - freeBytes;
 
-    uint64_t min_needed_bytes = static_cast<double>(used_bytes) / (1.0 - min_free_percentage);
-    if (current_size_ < min_needed_bytes) {
-        IncreaseBy(min_needed_bytes - current_size_);
+    uint64_t minNeededBytes = static_cast<double>(usedBytes) / (1.0 - minFreePercentage);
+    if (currentSize_ < minNeededBytes) {
+        IncreaseBy(minNeededBytes - currentSize_);
         return;
     }
 
-    uint64_t max_needed_bytes = static_cast<double>(used_bytes) / (1.0 - max_free_percentage);
-    if (current_size_ > max_needed_bytes) {
-        ReduceBy(current_size_ - max_needed_bytes);
+    uint64_t maxNeededBytes = static_cast<double>(usedBytes) / (1.0 - maxFreePercentage);
+    if (currentSize_ > maxNeededBytes) {
+        ReduceBy(currentSize_ - maxNeededBytes);
     }
 }
 
-inline size_t HeapSpace::GetCurrentFreeBytes(size_t bytes_not_in_this_space) const
+inline size_t HeapSpace::GetCurrentFreeBytes(size_t bytesNotInThisSpace) const
 {
-    ASSERT(is_initialized_);
-    size_t used_bytes = PoolManager::GetMmapMemPool()->GetObjectUsedBytes();
-    ASSERT(used_bytes >= bytes_not_in_this_space);
-    size_t used_bytes_in_current_space = used_bytes - bytes_not_in_this_space;
-    ASSERT(GetCurrentSize() >= used_bytes_in_current_space);
-    return GetCurrentSize() - used_bytes_in_current_space;
+    ASSERT(isInitialized_);
+    size_t usedBytes = PoolManager::GetMmapMemPool()->GetObjectUsedBytes();
+    ASSERT(usedBytes >= bytesNotInThisSpace);
+    size_t usedBytesInCurrentSpace = usedBytes - bytesNotInThisSpace;
+    ASSERT(GetCurrentSize() >= usedBytesInCurrentSpace);
+    return GetCurrentSize() - usedBytesInCurrentSpace;
 }
 
 void HeapSpace::ComputeNewSize()
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    mem_space_.ComputeNewSize(GetCurrentFreeBytes(), min_free_percentage_, max_free_percentage_);
+    os::memory::WriteLockHolder lock(heapLock_);
+    memSpace_.ComputeNewSize(GetCurrentFreeBytes(), minFreePercentage_, maxFreePercentage_);
     // Get current free bytes count after computing new size
-    size_t current_free_bytes_in_space = GetCurrentFreeBytes();
+    size_t currentFreeBytesInSpace = GetCurrentFreeBytes();
     // If saved pool size was very big and such pool can not be allocate after GC
     // then we increase space to allocate this pool
-    if (mem_space_.saved_pool_size > current_free_bytes_in_space) {
-        mem_space_.IncreaseBy(mem_space_.saved_pool_size - current_free_bytes_in_space);
-        mem_space_.saved_pool_size = 0;
+    if (memSpace_.savedPoolSize > currentFreeBytesInSpace) {
+        memSpace_.IncreaseBy(memSpace_.savedPoolSize - currentFreeBytesInSpace);
+        memSpace_.savedPoolSize = 0;
         // Free bytes after increase space for new pool will = 0, so yet increase space
-        mem_space_.ComputeNewSize(0, min_free_percentage_, max_free_percentage_);
+        memSpace_.ComputeNewSize(0, minFreePercentage_, maxFreePercentage_);
     }
     // ComputeNewSize is called on GC end
     SetIsWorkGC(false);
@@ -116,12 +113,12 @@ size_t HeapSpace::GetHeapSize() const
     return PoolManager::GetMmapMemPool()->GetObjectUsedBytes();
 }
 
-inline std::optional<size_t> HeapSpace::WillAlloc(size_t pool_size, size_t current_free_bytes_in_space,
-                                                  const ObjectMemorySpace *mem_space) const
+inline std::optional<size_t> HeapSpace::WillAlloc(size_t poolSize, size_t currentFreeBytesInSpace,
+                                                  const ObjectMemorySpace *memSpace) const
 {
-    ASSERT(is_initialized_);
+    ASSERT(isInitialized_);
     // If can allocate pool (from free pool map or non-used memory) then just do it
-    if (LIKELY(pool_size <= current_free_bytes_in_space)) {
+    if (LIKELY(poolSize <= currentFreeBytesInSpace)) {
         // We have enough memory for allocation, no need to increase heap
         return {0};
     }
@@ -129,11 +126,11 @@ inline std::optional<size_t> HeapSpace::WillAlloc(size_t pool_size, size_t curre
     if (IsWorkGC()) {
         // if requested pool size greater free bytes in current heap space and non occupied memory then we can not
         // allocate such pool, so we need to trigger GC
-        if (current_free_bytes_in_space + mem_space->GetCurrentNonOccupiedSize() < pool_size) {
+        if (currentFreeBytesInSpace + memSpace->GetCurrentNonOccupiedSize() < poolSize) {
             return std::nullopt;
         }
         // In this case we need increase space for allocate new pool
-        return {pool_size - current_free_bytes_in_space};
+        return {poolSize - currentFreeBytesInSpace};
     }
     // Otherwise we need to trigger GC
     return std::nullopt;
@@ -141,138 +138,137 @@ inline std::optional<size_t> HeapSpace::WillAlloc(size_t pool_size, size_t curre
 
 size_t HeapSpace::GetCurrentSize() const
 {
-    return mem_space_.GetCurrentSize();
+    return memSpace_.GetCurrentSize();
 }
 
 void HeapSpace::ClampCurrentMaxHeapSize()
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    mem_space_.ClampNewMaxSize(
-        AlignUp(mem_space_.GetCurrentSize() + PANDA_DEFAULT_POOL_SIZE, PANDA_POOL_ALIGNMENT_IN_BYTES));
+    os::memory::WriteLockHolder lock(heapLock_);
+    memSpace_.ClampNewMaxSize(
+        AlignUp(memSpace_.GetCurrentSize() + PANDA_DEFAULT_POOL_SIZE, PANDA_POOL_ALIGNMENT_IN_BYTES));
     PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
 }
 
-inline Pool HeapSpace::TryAllocPoolBase(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                        void *allocator_ptr, size_t current_free_bytes_in_space,
-                                        ObjectMemorySpace *mem_space, OSPagesAllocPolicy alloc_policy)
+inline Pool HeapSpace::TryAllocPoolBase(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                        void *allocatorPtr, size_t currentFreeBytesInSpace, ObjectMemorySpace *memSpace,
+                                        OSPagesAllocPolicy allocPolicy)
 {
-    auto increase_bytes_or_not_alloc = WillAlloc(pool_size, current_free_bytes_in_space, mem_space);
+    auto increaseBytesOrNotAlloc = WillAlloc(poolSize, currentFreeBytesInSpace, memSpace);
     // Increase heap space if needed and allocate pool
-    if (increase_bytes_or_not_alloc) {
-        mem_space->IncreaseBy(increase_bytes_or_not_alloc.value());
-        if (alloc_policy == OSPagesAllocPolicy::NO_POLICY) {
+    if (increaseBytesOrNotAlloc) {
+        memSpace->IncreaseBy(increaseBytesOrNotAlloc.value());
+        if (allocPolicy == OSPagesAllocPolicy::NO_POLICY) {
             return PoolManager::GetMmapMemPool()->template AllocPool<OSPagesAllocPolicy::NO_POLICY>(
-                pool_size, space_type, allocator_type, allocator_ptr);
+                poolSize, spaceType, allocatorType, allocatorPtr);
         }
         return PoolManager::GetMmapMemPool()->template AllocPool<OSPagesAllocPolicy::ZEROED_MEMORY>(
-            pool_size, space_type, allocator_type, allocator_ptr);
+            poolSize, spaceType, allocatorType, allocatorPtr);
     }
     // Save pool size for computing new space size
-    mem_space->saved_pool_size = pool_size;
+    memSpace->savedPoolSize = poolSize;
     return NULLPOOL;
 }
 
-Pool HeapSpace::TryAllocPool(size_t pool_size, SpaceType space_type, AllocatorType allocator_type, void *allocator_ptr)
+Pool HeapSpace::TryAllocPool(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType, void *allocatorPtr)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    return TryAllocPoolBase(pool_size, space_type, allocator_type, allocator_ptr, GetCurrentFreeBytes(), &mem_space_);
+    os::memory::WriteLockHolder lock(heapLock_);
+    return TryAllocPoolBase(poolSize, spaceType, allocatorType, allocatorPtr, GetCurrentFreeBytes(), &memSpace_);
 }
 
-inline Arena *HeapSpace::TryAllocArenaBase(size_t arena_size, SpaceType space_type, AllocatorType allocator_type,
-                                           void *allocator_ptr, size_t current_free_bytes_in_space,
-                                           ObjectMemorySpace *mem_space)
+inline Arena *HeapSpace::TryAllocArenaBase(size_t arenaSize, SpaceType spaceType, AllocatorType allocatorType,
+                                           void *allocatorPtr, size_t currentFreeBytesInSpace,
+                                           ObjectMemorySpace *memSpace)
 {
-    auto increase_bytes_or_not_alloc = WillAlloc(arena_size, current_free_bytes_in_space, mem_space);
+    auto increaseBytesOrNotAlloc = WillAlloc(arenaSize, currentFreeBytesInSpace, memSpace);
     // Increase heap space if needed and allocate arena
-    if (increase_bytes_or_not_alloc.has_value()) {
-        mem_space->IncreaseBy(increase_bytes_or_not_alloc.value());
-        return PoolManager::AllocArena(arena_size, space_type, allocator_type, allocator_ptr);
+    if (increaseBytesOrNotAlloc.has_value()) {
+        memSpace->IncreaseBy(increaseBytesOrNotAlloc.value());
+        return PoolManager::AllocArena(arenaSize, spaceType, allocatorType, allocatorPtr);
     }
     // Save arena size for computing new space size
-    mem_space->saved_pool_size = arena_size;
+    memSpace->savedPoolSize = arenaSize;
     return nullptr;
 }
 
-Arena *HeapSpace::TryAllocArena(size_t arena_size, SpaceType space_type, AllocatorType allocator_type,
-                                void *allocator_ptr)
+Arena *HeapSpace::TryAllocArena(size_t arenaSize, SpaceType spaceType, AllocatorType allocatorType, void *allocatorPtr)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    return TryAllocArenaBase(arena_size, space_type, allocator_type, allocator_ptr, GetCurrentFreeBytes(), &mem_space_);
+    os::memory::WriteLockHolder lock(heapLock_);
+    return TryAllocArenaBase(arenaSize, spaceType, allocatorType, allocatorPtr, GetCurrentFreeBytes(), &memSpace_);
 }
 
-void HeapSpace::FreePool(void *pool_mem, size_t pool_size, bool release_pages)
+void HeapSpace::FreePool(void *poolMem, size_t poolSize, bool releasePages)
 {
-    os::memory::ReadLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
+    os::memory::ReadLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
     // Just free pool
-    if (release_pages) {
-        PoolManager::GetMmapMemPool()->FreePool<OSPagesPolicy::IMMEDIATE_RETURN>(pool_mem, pool_size);
+    if (releasePages) {
+        PoolManager::GetMmapMemPool()->FreePool<OSPagesPolicy::IMMEDIATE_RETURN>(poolMem, poolSize);
     } else {
-        PoolManager::GetMmapMemPool()->FreePool<OSPagesPolicy::NO_RETURN>(pool_mem, pool_size);
+        PoolManager::GetMmapMemPool()->FreePool<OSPagesPolicy::NO_RETURN>(poolMem, poolSize);
     }
 }
 
 void HeapSpace::FreeArena(Arena *arena)
 {
-    os::memory::ReadLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
+    os::memory::ReadLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
     // Just free arena
     PoolManager::FreeArena(arena);
 }
 
-void GenerationalSpaces::Initialize(size_t initial_young_size, bool was_set_initial_young_size, size_t max_young_size,
-                                    bool was_set_max_young_size, size_t initial_total_size, size_t max_total_size,
-                                    uint32_t min_free_percentage, uint32_t max_free_percentage)
+void GenerationalSpaces::Initialize(size_t initialYoungSize, bool wasSetInitialYoungSize, size_t maxYoungSize,
+                                    bool wasSetMaxYoungSize, size_t initialTotalSize, size_t maxTotalSize,
+                                    uint32_t minFreePercentage, uint32_t maxFreePercentage)
 {
     // Temporary save total heap size parameters and set percetages
-    HeapSpace::Initialize(initial_total_size, max_total_size, min_free_percentage, max_free_percentage);
+    HeapSpace::Initialize(initialTotalSize, maxTotalSize, minFreePercentage, maxFreePercentage);
 
-    if (!was_set_initial_young_size && was_set_max_young_size) {
-        initial_young_size = max_young_size;
-    } else if (initial_young_size > max_young_size) {
-        LOG_IF(was_set_initial_young_size && was_set_max_young_size, WARNING, RUNTIME)
-            << "Initial young size(init-young-space-size=" << initial_young_size
-            << ") is larger than maximum young size (young-space-size=" << max_young_size
-            << "). Set maximum young size to " << initial_young_size;
-        max_young_size = initial_young_size;
+    if (!wasSetInitialYoungSize && wasSetMaxYoungSize) {
+        initialYoungSize = maxYoungSize;
+    } else if (initialYoungSize > maxYoungSize) {
+        LOG_IF(wasSetInitialYoungSize && wasSetMaxYoungSize, WARNING, RUNTIME)
+            << "Initial young size(init-young-space-size=" << initialYoungSize
+            << ") is larger than maximum young size (young-space-size=" << maxYoungSize
+            << "). Set maximum young size to " << initialYoungSize;
+        maxYoungSize = initialYoungSize;
     }
-    young_space_.Initialize(initial_young_size, max_young_size);
-    ASSERT(young_space_.GetCurrentSize() <= mem_space_.GetCurrentSize());
-    ASSERT(young_space_.GetMaxSize() <= mem_space_.GetMaxSize());
+    youngSpace_.Initialize(initialYoungSize, maxYoungSize);
+    ASSERT(youngSpace_.GetCurrentSize() <= memSpace_.GetCurrentSize());
+    ASSERT(youngSpace_.GetMaxSize() <= memSpace_.GetMaxSize());
     // Use mem_space_ as tenured space
-    mem_space_.Initialize(mem_space_.GetCurrentSize() - young_space_.GetCurrentSize(),
-                          mem_space_.GetMaxSize() - young_space_.GetMaxSize());
+    memSpace_.Initialize(memSpace_.GetCurrentSize() - youngSpace_.GetCurrentSize(),
+                         memSpace_.GetMaxSize() - youngSpace_.GetMaxSize());
 }
 
 size_t GenerationalSpaces::GetCurrentFreeYoungSize() const
 {
-    os::memory::ReadLockHolder lock(heap_lock_);
+    os::memory::ReadLockHolder lock(heapLock_);
     return GetCurrentFreeYoungSizeUnsafe();
 }
 
 size_t GenerationalSpaces::GetCurrentFreeTenuredSize() const
 {
-    os::memory::ReadLockHolder lock(heap_lock_);
+    os::memory::ReadLockHolder lock(heapLock_);
     return GetCurrentFreeTenuredSizeUnsafe();
 }
 
 size_t GenerationalSpaces::GetCurrentFreeYoungSizeUnsafe() const
 {
-    size_t all_occupied_young_size = young_size_in_separate_pools_ + young_size_in_shared_pools_;
-    ASSERT(young_space_.GetCurrentSize() >= all_occupied_young_size);
-    return young_space_.GetCurrentSize() - all_occupied_young_size;
+    size_t allOccupiedYoungSize = youngSizeInSeparatePools_ + youngSizeInSharedPools_;
+    ASSERT(youngSpace_.GetCurrentSize() >= allOccupiedYoungSize);
+    return youngSpace_.GetCurrentSize() - allOccupiedYoungSize;
 }
 
 size_t GenerationalSpaces::GetCurrentFreeTenuredSizeUnsafe() const
 {
-    ASSERT(shared_pools_size_ >= tenured_size_in_shared_pools_);
+    ASSERT(sharedPoolsSize_ >= tenuredSizeInSharedPools_);
     // bytes_not_in_tenured_space = occupied pools size by young + non-tenured size in shared pool
-    return GetCurrentFreeBytes(young_size_in_separate_pools_ + (shared_pools_size_ - tenured_size_in_shared_pools_));
+    return GetCurrentFreeBytes(youngSizeInSeparatePools_ + (sharedPoolsSize_ - tenuredSizeInSharedPools_));
 }
 
 void GenerationalSpaces::ComputeNewSize()
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
+    os::memory::WriteLockHolder lock(heapLock_);
     ComputeNewYoung();
     ComputeNewTenured();
     SetIsWorkGC(false);
@@ -280,230 +276,230 @@ void GenerationalSpaces::ComputeNewSize()
 
 void GenerationalSpaces::ComputeNewYoung()
 {
-    double min_free_percentage = GetMinFreePercentage();
-    double max_free_percentage = GetMaxFreePercentage();
-    young_space_.ComputeNewSize(GetCurrentFreeYoungSizeUnsafe(), min_free_percentage, max_free_percentage);
+    double minFreePercentage = GetMinFreePercentage();
+    double maxFreePercentage = GetMaxFreePercentage();
+    youngSpace_.ComputeNewSize(GetCurrentFreeYoungSizeUnsafe(), minFreePercentage, maxFreePercentage);
     // Get free bytes count after computing new young size
-    size_t free_young_bytes_after_computing = GetCurrentFreeYoungSizeUnsafe();
+    size_t freeYoungBytesAfterComputing = GetCurrentFreeYoungSizeUnsafe();
     // If saved pool size was very big and such pool can not be allocate in young after GC
     // then we increase young space to allocate this pool
-    if (young_space_.saved_pool_size > free_young_bytes_after_computing) {
-        young_space_.IncreaseBy(young_space_.saved_pool_size - free_young_bytes_after_computing);
-        young_space_.saved_pool_size = 0;
+    if (youngSpace_.savedPoolSize > freeYoungBytesAfterComputing) {
+        youngSpace_.IncreaseBy(youngSpace_.savedPoolSize - freeYoungBytesAfterComputing);
+        youngSpace_.savedPoolSize = 0;
         // Free bytes after increase young space for new pool will = 0, so yet increase young space
-        young_space_.ComputeNewSize(0, min_free_percentage, max_free_percentage);
+        youngSpace_.ComputeNewSize(0, minFreePercentage, maxFreePercentage);
     }
 }
 
-void GenerationalSpaces::UpdateSize(size_t desired_young_size)
+void GenerationalSpaces::UpdateSize(size_t desiredYoungSize)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    UpdateYoungSize(desired_young_size);
+    os::memory::WriteLockHolder lock(heapLock_);
+    UpdateYoungSize(desiredYoungSize);
     ComputeNewTenured();
     SetIsWorkGC(false);
 }
 
-void GenerationalSpaces::UpdateYoungSize(size_t desired_young_size)
+void GenerationalSpaces::UpdateYoungSize(size_t desiredYoungSize)
 {
-    if (desired_young_size < young_space_.GetCurrentSize()) {
-        auto all_occupied_young_size = young_size_in_shared_pools_ + young_size_in_separate_pools_;
+    if (desiredYoungSize < youngSpace_.GetCurrentSize()) {
+        auto allOccupiedYoungSize = youngSizeInSharedPools_ + youngSizeInSeparatePools_;
         // we cannot reduce young size below already occupied
-        auto desired_size = std::max(desired_young_size, all_occupied_young_size);
-        young_space_.ReduceBy(young_space_.GetCurrentSize() - desired_size);
-    } else if (desired_young_size > young_space_.GetCurrentSize()) {
-        young_space_.IncreaseBy(desired_young_size - young_space_.GetCurrentSize());
+        auto desiredSize = std::max(desiredYoungSize, allOccupiedYoungSize);
+        youngSpace_.ReduceBy(youngSpace_.GetCurrentSize() - desiredSize);
+    } else if (desiredYoungSize > youngSpace_.GetCurrentSize()) {
+        youngSpace_.IncreaseBy(desiredYoungSize - youngSpace_.GetCurrentSize());
     }
 }
 
 void GenerationalSpaces::ComputeNewTenured()
 {
-    double min_free_percentage = GetMinFreePercentage();
-    double max_free_percentage = GetMaxFreePercentage();
-    mem_space_.ComputeNewSize(GetCurrentFreeTenuredSizeUnsafe(), min_free_percentage, max_free_percentage);
+    double minFreePercentage = GetMinFreePercentage();
+    double maxFreePercentage = GetMaxFreePercentage();
+    memSpace_.ComputeNewSize(GetCurrentFreeTenuredSizeUnsafe(), minFreePercentage, maxFreePercentage);
     // Get free bytes count after computing new tenured size
-    size_t free_tenured_bytes_after_computing = GetCurrentFreeTenuredSizeUnsafe();
+    size_t freeTenuredBytesAfterComputing = GetCurrentFreeTenuredSizeUnsafe();
     // If saved pool size was very big and such pool can not be allocate in tenured after GC
     // then we increase tenured space to allocate this pool
-    if (mem_space_.saved_pool_size > free_tenured_bytes_after_computing) {
-        mem_space_.IncreaseBy(mem_space_.saved_pool_size - free_tenured_bytes_after_computing);
-        mem_space_.saved_pool_size = 0;
+    if (memSpace_.savedPoolSize > freeTenuredBytesAfterComputing) {
+        memSpace_.IncreaseBy(memSpace_.savedPoolSize - freeTenuredBytesAfterComputing);
+        memSpace_.savedPoolSize = 0;
         // Free bytes after increase tenured space for new pool will = 0, so yet increase tenured space
-        mem_space_.ComputeNewSize(0, min_free_percentage, max_free_percentage);
+        memSpace_.ComputeNewSize(0, minFreePercentage, maxFreePercentage);
     }
 }
 
 size_t GenerationalSpaces::GetHeapSize() const
 {
-    os::memory::ReadLockHolder lock(heap_lock_);
-    size_t used_bytes_in_separate_pools = PoolManager::GetMmapMemPool()->GetObjectUsedBytes() - shared_pools_size_;
-    size_t used_bytes_in_shared_pool = young_size_in_shared_pools_ + tenured_size_in_shared_pools_;
-    return used_bytes_in_separate_pools + used_bytes_in_shared_pool;
+    os::memory::ReadLockHolder lock(heapLock_);
+    size_t usedBytesInSeparatePools = PoolManager::GetMmapMemPool()->GetObjectUsedBytes() - sharedPoolsSize_;
+    size_t usedBytesInSharedPool = youngSizeInSharedPools_ + tenuredSizeInSharedPools_;
+    return usedBytesInSeparatePools + usedBytesInSharedPool;
 }
 
-bool GenerationalSpaces::CanAllocInSpace(bool is_young, size_t chunk_size) const
+bool GenerationalSpaces::CanAllocInSpace(bool isYoung, size_t chunkSize) const
 {
-    os::memory::ReadLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    return is_young ? WillAlloc(chunk_size, GetCurrentFreeYoungSizeUnsafe(), &young_space_).has_value()
-                    : WillAlloc(chunk_size, GetCurrentFreeTenuredSizeUnsafe(), &mem_space_).has_value();
+    os::memory::ReadLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    return isYoung ? WillAlloc(chunkSize, GetCurrentFreeYoungSizeUnsafe(), &youngSpace_).has_value()
+                   : WillAlloc(chunkSize, GetCurrentFreeTenuredSizeUnsafe(), &memSpace_).has_value();
 }
 
 size_t GenerationalSpaces::GetCurrentYoungSize() const
 {
-    os::memory::ReadLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    return young_space_.GetCurrentSize();
+    os::memory::ReadLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    return youngSpace_.GetCurrentSize();
 }
 
 size_t GenerationalSpaces::GetMaxYoungSize() const
 {
-    ASSERT(is_initialized_);
-    return young_space_.GetMaxSize();
+    ASSERT(isInitialized_);
+    return youngSpace_.GetMaxSize();
 }
 
 void GenerationalSpaces::UseFullYoungSpace()
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    young_space_.UseFullSpace();
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    youngSpace_.UseFullSpace();
 }
 
-Pool GenerationalSpaces::AllocSharedPool(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                         void *allocator_ptr)
+Pool GenerationalSpaces::AllocSharedPool(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                         void *allocatorPtr)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    auto shared_pool = PoolManager::GetMmapMemPool()->AllocPool(pool_size, space_type, allocator_type, allocator_ptr);
-    shared_pools_size_ += shared_pool.GetSize();
-    return shared_pool;
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    auto sharedPool = PoolManager::GetMmapMemPool()->AllocPool(poolSize, spaceType, allocatorType, allocatorPtr);
+    sharedPoolsSize_ += sharedPool.GetSize();
+    return sharedPool;
 }
 
-Pool GenerationalSpaces::AllocAlonePoolForYoung(SpaceType space_type, AllocatorType allocator_type, void *allocator_ptr)
+Pool GenerationalSpaces::AllocAlonePoolForYoung(SpaceType spaceType, AllocatorType allocatorType, void *allocatorPtr)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    auto young_pool =
-        PoolManager::GetMmapMemPool()->AllocPool(young_space_.GetMaxSize(), space_type, allocator_type, allocator_ptr);
-    young_size_in_separate_pools_ = young_pool.GetSize();
-    return young_pool;
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    auto youngPool =
+        PoolManager::GetMmapMemPool()->AllocPool(youngSpace_.GetMaxSize(), spaceType, allocatorType, allocatorPtr);
+    youngSizeInSeparatePools_ = youngPool.GetSize();
+    return youngPool;
 }
 
-Pool GenerationalSpaces::TryAllocPoolForYoung(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                              void *allocator_ptr)
+Pool GenerationalSpaces::TryAllocPoolForYoung(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                              void *allocatorPtr)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    auto young_pool = TryAllocPoolBase(pool_size, space_type, allocator_type, allocator_ptr,
-                                       GetCurrentFreeYoungSizeUnsafe(), &young_space_);
-    young_size_in_separate_pools_ += young_pool.GetSize();
-    return young_pool;
+    os::memory::WriteLockHolder lock(heapLock_);
+    auto youngPool = TryAllocPoolBase(poolSize, spaceType, allocatorType, allocatorPtr, GetCurrentFreeYoungSizeUnsafe(),
+                                      &youngSpace_);
+    youngSizeInSeparatePools_ += youngPool.GetSize();
+    return youngPool;
 }
 
-Pool GenerationalSpaces::TryAllocPoolForTenured(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                                void *allocator_ptr, OSPagesAllocPolicy alloc_policy)
+Pool GenerationalSpaces::TryAllocPoolForTenured(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                                void *allocatorPtr, OSPagesAllocPolicy allocPolicy)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    return TryAllocPoolBase(pool_size, space_type, allocator_type, allocator_ptr, GetCurrentFreeTenuredSizeUnsafe(),
-                            &mem_space_, alloc_policy);
+    os::memory::WriteLockHolder lock(heapLock_);
+    return TryAllocPoolBase(poolSize, spaceType, allocatorType, allocatorPtr, GetCurrentFreeTenuredSizeUnsafe(),
+                            &memSpace_, allocPolicy);
 }
 
-Pool GenerationalSpaces::TryAllocPool(size_t pool_size, SpaceType space_type, AllocatorType allocator_type,
-                                      void *allocator_ptr)
+Pool GenerationalSpaces::TryAllocPool(size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
+                                      void *allocatorPtr)
 {
-    return TryAllocPoolForTenured(pool_size, space_type, allocator_type, allocator_ptr);
+    return TryAllocPoolForTenured(poolSize, spaceType, allocatorType, allocatorPtr);
 }
 
-Arena *GenerationalSpaces::TryAllocArenaForTenured(size_t arena_size, SpaceType space_type,
-                                                   AllocatorType allocator_type, void *allocator_ptr)
+Arena *GenerationalSpaces::TryAllocArenaForTenured(size_t arenaSize, SpaceType spaceType, AllocatorType allocatorType,
+                                                   void *allocatorPtr)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    return TryAllocArenaBase(arena_size, space_type, allocator_type, allocator_ptr, GetCurrentFreeTenuredSizeUnsafe(),
-                             &mem_space_);
+    os::memory::WriteLockHolder lock(heapLock_);
+    return TryAllocArenaBase(arenaSize, spaceType, allocatorType, allocatorPtr, GetCurrentFreeTenuredSizeUnsafe(),
+                             &memSpace_);
 }
 
-Arena *GenerationalSpaces::TryAllocArena(size_t arena_size, SpaceType space_type, AllocatorType allocator_type,
-                                         void *allocator_ptr)
+Arena *GenerationalSpaces::TryAllocArena(size_t arenaSize, SpaceType spaceType, AllocatorType allocatorType,
+                                         void *allocatorPtr)
 {
-    return TryAllocArenaForTenured(arena_size, space_type, allocator_type, allocator_ptr);
+    return TryAllocArenaForTenured(arenaSize, spaceType, allocatorType, allocatorPtr);
 }
 
-void GenerationalSpaces::FreeSharedPool(void *pool_mem, size_t pool_size)
+void GenerationalSpaces::FreeSharedPool(void *poolMem, size_t poolSize)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(shared_pools_size_ >= pool_size);
-    shared_pools_size_ -= pool_size;
-    PoolManager::GetMmapMemPool()->FreePool(pool_mem, pool_size);
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(sharedPoolsSize_ >= poolSize);
+    sharedPoolsSize_ -= poolSize;
+    PoolManager::GetMmapMemPool()->FreePool(poolMem, poolSize);
 }
 
-void GenerationalSpaces::FreeYoungPool(void *pool_mem, size_t pool_size, bool release_pages)
+void GenerationalSpaces::FreeYoungPool(void *poolMem, size_t poolSize, bool releasePages)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(young_size_in_separate_pools_ >= pool_size);
-    young_size_in_separate_pools_ -= pool_size;
-    if (release_pages) {
-        PoolManager::GetMmapMemPool()->FreePool<OSPagesPolicy::IMMEDIATE_RETURN>(pool_mem, pool_size);
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(youngSizeInSeparatePools_ >= poolSize);
+    youngSizeInSeparatePools_ -= poolSize;
+    if (releasePages) {
+        PoolManager::GetMmapMemPool()->FreePool<OSPagesPolicy::IMMEDIATE_RETURN>(poolMem, poolSize);
     } else {
-        PoolManager::GetMmapMemPool()->FreePool<OSPagesPolicy::NO_RETURN>(pool_mem, pool_size);
+        PoolManager::GetMmapMemPool()->FreePool<OSPagesPolicy::NO_RETURN>(poolMem, poolSize);
     }
 }
 
-void GenerationalSpaces::PromoteYoungPool(size_t pool_size)
+void GenerationalSpaces::PromoteYoungPool(size_t poolSize)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(young_size_in_separate_pools_ >= pool_size);
-    auto increase_bytes_or_not_alloc = WillAlloc(pool_size, GetCurrentFreeTenuredSizeUnsafe(), &mem_space_);
-    young_size_in_separate_pools_ -= pool_size;
-    ASSERT(increase_bytes_or_not_alloc.has_value());
-    mem_space_.IncreaseBy(increase_bytes_or_not_alloc.value());
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(youngSizeInSeparatePools_ >= poolSize);
+    auto increaseBytesOrNotAlloc = WillAlloc(poolSize, GetCurrentFreeTenuredSizeUnsafe(), &memSpace_);
+    youngSizeInSeparatePools_ -= poolSize;
+    ASSERT(increaseBytesOrNotAlloc.has_value());
+    memSpace_.IncreaseBy(increaseBytesOrNotAlloc.value());
 }
 
-void GenerationalSpaces::FreeTenuredPool(void *pool_mem, size_t pool_size, bool release_pages)
+void GenerationalSpaces::FreeTenuredPool(void *poolMem, size_t poolSize, bool releasePages)
 {
     // For tenured we just free pool
-    HeapSpace::FreePool(pool_mem, pool_size, release_pages);
+    HeapSpace::FreePool(poolMem, poolSize, releasePages);
 }
 
-void GenerationalSpaces::IncreaseYoungOccupiedInSharedPool(size_t chunk_size)
+void GenerationalSpaces::IncreaseYoungOccupiedInSharedPool(size_t chunkSize)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    size_t free_bytes = GetCurrentFreeYoungSizeUnsafe();
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    size_t freeBytes = GetCurrentFreeYoungSizeUnsafe();
     // Here we sure that we must allocate new memory, but if free bytes count less requested size (for example, during
     // GC work) then we increase young space size
-    if (free_bytes < chunk_size) {
-        young_space_.IncreaseBy(chunk_size - free_bytes);
+    if (freeBytes < chunkSize) {
+        youngSpace_.IncreaseBy(chunkSize - freeBytes);
     }
-    young_size_in_shared_pools_ += chunk_size;
-    ASSERT(young_size_in_shared_pools_ + tenured_size_in_shared_pools_ <= shared_pools_size_);
+    youngSizeInSharedPools_ += chunkSize;
+    ASSERT(youngSizeInSharedPools_ + tenuredSizeInSharedPools_ <= sharedPoolsSize_);
 }
 
-void GenerationalSpaces::IncreaseTenuredOccupiedInSharedPool(size_t chunk_size)
+void GenerationalSpaces::IncreaseTenuredOccupiedInSharedPool(size_t chunkSize)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    size_t free_bytes = GetCurrentFreeTenuredSizeUnsafe();
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    size_t freeBytes = GetCurrentFreeTenuredSizeUnsafe();
     // Here we sure that we must allocate new memory, but if free bytes count less requested size (for example, during
     // GC work) then we increase tenured space size
-    if (free_bytes < chunk_size) {
-        mem_space_.IncreaseBy(chunk_size - free_bytes);
+    if (freeBytes < chunkSize) {
+        memSpace_.IncreaseBy(chunkSize - freeBytes);
     }
-    tenured_size_in_shared_pools_ += chunk_size;
-    ASSERT(young_size_in_shared_pools_ + tenured_size_in_shared_pools_ <= shared_pools_size_);
+    tenuredSizeInSharedPools_ += chunkSize;
+    ASSERT(youngSizeInSharedPools_ + tenuredSizeInSharedPools_ <= sharedPoolsSize_);
 }
 
-void GenerationalSpaces::ReduceYoungOccupiedInSharedPool(size_t chunk_size)
+void GenerationalSpaces::ReduceYoungOccupiedInSharedPool(size_t chunkSize)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    ASSERT(young_size_in_shared_pools_ >= chunk_size);
-    young_size_in_shared_pools_ -= chunk_size;
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    ASSERT(youngSizeInSharedPools_ >= chunkSize);
+    youngSizeInSharedPools_ -= chunkSize;
 }
 
-void GenerationalSpaces::ReduceTenuredOccupiedInSharedPool(size_t chunk_size)
+void GenerationalSpaces::ReduceTenuredOccupiedInSharedPool(size_t chunkSize)
 {
-    os::memory::WriteLockHolder lock(heap_lock_);
-    ASSERT(is_initialized_);
-    ASSERT(tenured_size_in_shared_pools_ >= chunk_size);
-    tenured_size_in_shared_pools_ -= chunk_size;
+    os::memory::WriteLockHolder lock(heapLock_);
+    ASSERT(isInitialized_);
+    ASSERT(tenuredSizeInSharedPools_ >= chunkSize);
+    tenuredSizeInSharedPools_ -= chunkSize;
 }
 
 }  // namespace panda::mem

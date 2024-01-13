@@ -118,22 +118,22 @@ protected:
         // Allocations
         srand(seed_);
         for (size_t i = 0; i < ARRAY_SIZE; ++i) {
-            auto random_value = GetRand();
-            size_t rand_align = MIN_LOG_ALIGN_SIZE_T + random_value % (MAX_LOG_ALIGN_SIZE_T - MIN_LOG_ALIGN_SIZE_T);
-            arr[i] = static_cast<T *>(aa.Alloc(sizeof(T), static_cast<Alignment>(rand_align)));
-            *arr[i] = random_value % MaxValue<T>();
+            auto randomValue = GetRand();
+            size_t randAlign = MIN_LOG_ALIGN_SIZE_T + randomValue % (MAX_LOG_ALIGN_SIZE_T - MIN_LOG_ALIGN_SIZE_T);
+            arr[i] = static_cast<T *>(aa.Alloc(sizeof(T), static_cast<Alignment>(randAlign)));
+            *arr[i] = randomValue % MaxValue<T>();
         }
 
         // Allocations checking
         srand(seed_);
         for (size_t i = 0; i < ARRAY_SIZE; ++i) {
-            auto random_value = GetRand();
-            size_t align = MIN_LOG_ALIGN_SIZE_T + random_value % (MAX_LOG_ALIGN_SIZE_T - MIN_LOG_ALIGN_SIZE_T);
+            auto randomValue = GetRand();
+            size_t align = MIN_LOG_ALIGN_SIZE_T + randomValue % (MAX_LOG_ALIGN_SIZE_T - MIN_LOG_ALIGN_SIZE_T);
             size_t mask = GetAlignmentInBytes(static_cast<Alignment>(align)) - 1L;
 
             ASSERT_NE(arr[i], nullptr);
             ASSERT_EQ(reinterpret_cast<size_t>(arr[i]) & mask, 0U) << "value of i: " << i << ", align: " << align;
-            ASSERT_EQ(*arr[i], random_value % MaxValue<T>()) << "value of i: " << i;
+            ASSERT_EQ(*arr[i], randomValue % MaxValue<T>()) << "value of i: " << i;
         }
     }
 
@@ -154,9 +154,9 @@ private:
 
 class ComplexClass final {
 public:
-    ComplexClass() : value_(0U), str_value_("0") {}
-    explicit ComplexClass(size_t value) : value_(value), str_value_(std::to_string(value_)) {}
-    ComplexClass(size_t value, std::string str_value) : value_(value), str_value_(std::move(str_value)) {}
+    ComplexClass() : value_(0U), strValue_("0") {}
+    explicit ComplexClass(size_t value) : value_(value), strValue_(std::to_string(value_)) {}
+    ComplexClass(size_t value, std::string strValue) : value_(value), strValue_(std::move(strValue)) {}
     ComplexClass(const ComplexClass &other) = default;
     ComplexClass(ComplexClass &&other) noexcept = default;
 
@@ -169,20 +169,20 @@ public:
     }
     std::string GetString() const noexcept
     {
-        return str_value_;
+        return strValue_;
     }
 
     void SetValue(size_t value)
     {
         value_ = value;
-        str_value_ = std::to_string(value);
+        strValue_ = std::to_string(value);
     }
 
     ~ComplexClass() = default;
 
 private:
     size_t value_;
-    std::string str_value_;
+    std::string strValue_;
 };
 
 TEST_F(ArenaAllocatorTest, AllocateTest)
@@ -211,9 +211,9 @@ TEST_F(ArenaAllocatorTest, AllocateTest)
     }
     ASSERT_NE(tmp = aa.Alloc(DEFAULT_ARENA_SIZE - AlignUp(sizeof(Arena), GetAlignmentInBytes(DEFAULT_ARENA_ALIGNMENT))),
               nullptr);
-    size_t max_align_drift =
+    size_t maxAlignDrift =
         (DEFAULT_ALIGNMENT_IN_BYTES > alignof(Arena)) ? (DEFAULT_ALIGNMENT_IN_BYTES - alignof(Arena)) : 0U;
-    ASSERT_EQ(tmp = aa.Alloc(DEFAULT_ARENA_SIZE + max_align_drift + 1U), nullptr);
+    ASSERT_EQ(tmp = aa.Alloc(DEFAULT_ARENA_SIZE + maxAlignDrift + 1U), nullptr);
 }
 
 TEST_F(ArenaAllocatorTest, AllocateVectorTest)
@@ -242,14 +242,14 @@ TEST_F(ArenaAllocatorTest, AllocateVectorWithComplexTypeTest)
     constexpr size_t SIZE = 512;
     constexpr size_t MAGIC_CONSTANT_1 = std::numeric_limits<size_t>::max() / (SIZE + 2U);
     srand(GetSeed());
-    size_t magic_constant_2 = GetRand() % SIZE;
+    size_t magicConstant2 = GetRand() % SIZE;
 
     ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
     ArenaVector<ComplexClass> vec(aa.Adapter());
 
     // Allocate SIZE objects
     for (size_t i = 0; i < SIZE; ++i) {
-        vec.emplace_back(i * MAGIC_CONSTANT_1 + magic_constant_2, std::to_string(i));
+        vec.emplace_back(i * MAGIC_CONSTANT_1 + magicConstant2, std::to_string(i));
     }
 
     // Size checking
@@ -257,13 +257,13 @@ TEST_F(ArenaAllocatorTest, AllocateVectorWithComplexTypeTest)
 
     // Allocations checking
     for (size_t i = 0; i < SIZE; ++i) {
-        ASSERT_EQ(vec[i].GetValue(), i * MAGIC_CONSTANT_1 + magic_constant_2) << "value of i: " << i;
+        ASSERT_EQ(vec[i].GetValue(), i * MAGIC_CONSTANT_1 + magicConstant2) << "value of i: " << i;
         ASSERT_EQ(vec[i].GetString(), std::to_string(i)) << i;
     }
-    Span<ComplexClass> data_ptr(vec.data(), SIZE);
+    Span<ComplexClass> dataPtr(vec.data(), SIZE);
     for (size_t i = 0; i < SIZE; ++i) {
-        ASSERT_EQ(data_ptr[i].GetValue(), i * MAGIC_CONSTANT_1 + magic_constant_2) << "value of i: " << i;
-        ASSERT_EQ(data_ptr[i].GetString(), std::to_string(i)) << "value of i: " << i;
+        ASSERT_EQ(dataPtr[i].GetValue(), i * MAGIC_CONSTANT_1 + magicConstant2) << "value of i: " << i;
+        ASSERT_EQ(dataPtr[i].GetString(), std::to_string(i)) << "value of i: " << i;
     }
 
     // Resizing and new elements assignment
@@ -318,7 +318,7 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
     constexpr size_t SIZE = 2048;
     constexpr size_t MAGIC_CONSTANT_1 = std::numeric_limits<size_t>::max() / (SIZE + 2U);
     srand(GetSeed());
-    size_t magic_constant_2 = GetRand() % SIZE;
+    size_t magicConstant2 = GetRand() % SIZE;
 
     size_t i;
 
@@ -327,7 +327,7 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
 
     // Allocate SIZE objects
     for (size_t j = 0; j < SIZE; ++j) {
-        deq.emplace_back(j * MAGIC_CONSTANT_1 + magic_constant_2, std::to_string(j));
+        deq.emplace_back(j * MAGIC_CONSTANT_1 + magicConstant2, std::to_string(j));
     }
 
     // Size checking
@@ -336,7 +336,7 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
     // Allocations checking
     i = 0;
     for (auto it = deq.cbegin(); it != deq.cend(); ++it, ++i) {
-        ASSERT_EQ(it->GetValue(), i * MAGIC_CONSTANT_1 + magic_constant_2) << "value of i: " << i;
+        ASSERT_EQ(it->GetValue(), i * MAGIC_CONSTANT_1 + magicConstant2) << "value of i: " << i;
         ASSERT_EQ(it->GetString(), std::to_string(i)) << "value of i: " << i;
     }
 
@@ -384,9 +384,9 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
 
     // Allocations checking
     i = 0;
-    for (auto t_it = deq.cbegin(); t_it != deq.cend(); ++t_it, ++i) {
-        ASSERT_EQ(t_it->GetValue(), 1U) << "value of i: " << i;
-        ASSERT_EQ(t_it->GetString(), "1") << "value of i: " << i;
+    for (auto tIt = deq.cbegin(); tIt != deq.cend(); ++tIt, ++i) {
+        ASSERT_EQ(tIt->GetValue(), 1U) << "value of i: " << i;
+        ASSERT_EQ(tIt->GetString(), "1") << "value of i: " << i;
     }
 }
 
@@ -414,8 +414,8 @@ TEST_F(ArenaAllocatorTest, LongRandomTest)
     // Allocations checking
     srand(GetSeed());
     i = 0;
-    for (unsigned int &t_it : st) {
-        ASSERT_EQ(t_it, GetRand() % MAX_VAL) << "value of i: " << i;
+    for (unsigned int &tIt : st) {
+        ASSERT_EQ(tIt, GetRand() % MAX_VAL) << "value of i: " << i;
     }
 
     // Decreasing size
@@ -427,8 +427,8 @@ TEST_F(ArenaAllocatorTest, LongRandomTest)
     // Allocations checking
     srand(GetSeed());
     i = 0;
-    for (unsigned int &t_it : st) {
-        ASSERT_EQ(t_it, GetRand() % MAX_VAL) << "value of i: " << i;
+    for (unsigned int &tIt : st) {
+        ASSERT_EQ(tIt, GetRand() % MAX_VAL) << "value of i: " << i;
     }
 
     // Increasing size
@@ -446,15 +446,15 @@ TEST_F(ArenaAllocatorTest, LongRandomTest)
 
     // Change values
     srand(GetSeed() >> 1U);
-    for (unsigned int &t_it : st) {
-        t_it = GetRand() % MAX_VAL;
+    for (unsigned int &tIt : st) {
+        tIt = GetRand() % MAX_VAL;
     }
 
     // Changes checking
     srand(GetSeed() >> 1U);
     i = 0;
-    for (auto t_it = st.cbegin(); t_it != st.cend(); ++t_it, ++i) {
-        ASSERT_EQ(*t_it, GetRand() % MAX_VAL) << "value of i: " << i;
+    for (auto tIt = st.cbegin(); tIt != st.cend(); ++tIt, ++i) {
+        ASSERT_EQ(*tIt, GetRand() % MAX_VAL) << "value of i: " << i;
     }
 }
 
@@ -538,9 +538,9 @@ TEST_F(ArenaAllocatorTest, FunctionNewTest)
     srand(GetSeed());
     for (size_t i = 0; i < ARRAY_SIZE; ++i) {
         ASSERT_NE(arr[i], nullptr);
-        size_t random_value = GetRand() % MaxValue<size_t>();
-        ASSERT_EQ(arr[i]->GetValue(), random_value);
-        ASSERT_EQ(arr[i]->GetString(), std::to_string(random_value));
+        size_t randomValue = GetRand() % MaxValue<size_t>();
+        ASSERT_EQ(arr[i]->GetValue(), randomValue);
+        ASSERT_EQ(arr[i]->GetString(), std::to_string(randomValue));
     }
 
     // Change values
@@ -552,9 +552,9 @@ TEST_F(ArenaAllocatorTest, FunctionNewTest)
     // Changes checking
     srand(GetSeed() >> 1U);
     for (size_t i = 0; i < ARRAY_SIZE; ++i) {
-        size_t random_value = GetRand() % MaxValue<size_t>();
-        ASSERT_EQ(arr[i]->GetValue(), random_value);
-        ASSERT_EQ(arr[i]->GetString(), std::to_string(random_value));
+        size_t randomValue = GetRand() % MaxValue<size_t>();
+        ASSERT_EQ(arr[i]->GetValue(), randomValue);
+        ASSERT_EQ(arr[i]->GetString(), std::to_string(randomValue));
     }
 }
 
@@ -563,24 +563,24 @@ TEST_F(ArenaAllocatorTest, ResizeTest)
     ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
     static constexpr size_t ALLOC_COUNT = 1000;
     static constexpr size_t INIT_VAL = 0xdeadbeef;
-    size_t *first_var = aa.New<size_t>(INIT_VAL);
+    size_t *firstVar = aa.New<size_t>(INIT_VAL);
     {
-        size_t init_size = aa.GetAllocatedSize();
+        size_t initSize = aa.GetAllocatedSize();
         for (size_t i = 0; i < ALLOC_COUNT; i++) {
             [[maybe_unused]] void *tmp = aa.Alloc(sizeof(size_t));
         }
         EXPECT_DEATH(aa.Resize(aa.GetAllocatedSize() + 1U), "");
-        aa.Resize(init_size);
-        ASSERT_EQ(aa.GetAllocatedSize(), init_size);
+        aa.Resize(initSize);
+        ASSERT_EQ(aa.GetAllocatedSize(), initSize);
     }
-    ASSERT_EQ(*first_var, INIT_VAL);
+    ASSERT_EQ(*firstVar, INIT_VAL);
 }
 
 TEST_F(ArenaAllocatorTest, ResizeWrapperTest)
 {
     static constexpr size_t VECTOR_SIZE = 1000;
     ArenaAllocator aa(SpaceType::SPACE_TYPE_INTERNAL);
-    size_t old_size = aa.GetAllocatedSize();
+    size_t oldSize = aa.GetAllocatedSize();
     {
         ArenaResizeWrapper<false> wrapper(&aa);
         ArenaVector<size_t> vector(aa.Adapter());
@@ -588,7 +588,7 @@ TEST_F(ArenaAllocatorTest, ResizeWrapperTest)
             vector.push_back(i);
         }
     }
-    ASSERT_EQ(old_size, aa.GetAllocatedSize());
+    ASSERT_EQ(oldSize, aa.GetAllocatedSize());
 }
 
 }  // namespace panda

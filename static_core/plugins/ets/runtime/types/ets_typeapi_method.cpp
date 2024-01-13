@@ -19,11 +19,11 @@
 
 namespace panda::ets {
 
-EtsTypeAPIMethod *EtsTypeAPIMethod::Create(EtsCoroutine *ets_coroutine)
+EtsTypeAPIMethod *EtsTypeAPIMethod::Create(EtsCoroutine *etsCoroutine)
 {
-    EtsClass *klass = ets_coroutine->GetPandaVM()->GetClassLinker()->GetTypeAPIMethodClass();
-    EtsObject *ets_object = EtsObject::Create(ets_coroutine, klass);
-    return reinterpret_cast<EtsTypeAPIMethod *>(ets_object);
+    EtsClass *klass = etsCoroutine->GetPandaVM()->GetClassLinker()->GetTypeAPIMethodClass();
+    EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
+    return reinterpret_cast<EtsTypeAPIMethod *>(etsObject);
 }
 
 }  // namespace panda::ets

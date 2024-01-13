@@ -67,13 +67,13 @@ public:
     template <typename T>
     typename T::ValueType ReadField() const
     {
-        return T::Decode(bit_fields_);
+        return T::Decode(bitFields_);
     }
 
     template <typename T>
     void WriteField(typename T::ValueType v)
     {
-        T::Set(v, &bit_fields_);
+        T::Set(v, &bitFields_);
     }
 
     NO_MOVE_SEMANTIC(Pass);
@@ -86,7 +86,7 @@ protected:
 
 private:
     Graph *graph_ {nullptr};
-    uint32_t bit_fields_ {0};
+    uint32_t bitFields_ {0};
 };
 
 class Optimization : public Pass {

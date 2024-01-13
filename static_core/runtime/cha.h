@@ -25,18 +25,18 @@ public:
     void AddDependency(Method *callee, Method *caller);
 
 private:
-    void InvalidateMethod(Method *method, PandaSet<Method *> *dependent_methods);
+    void InvalidateMethod(Method *method, PandaSet<Method *> *dependentMethods);
     void InvalidateMethods(const PandaSet<Method *> &methods);
     void UpdateMethod(Method *method);
     bool HasSingleImplementation(Method *method);
-    void SetHasSingleImplementation(Method *method, bool single_implementation);
+    void SetHasSingleImplementation(Method *method, bool singleImplementation);
     auto &GetLock()
     {
         return lock_;
     }
 
 private:
-    PandaMap<Method *, PandaSet<Method *>> dependency_map_;
+    PandaMap<Method *, PandaSet<Method *>> dependencyMap_;
     os::memory::Mutex lock_;
 };
 

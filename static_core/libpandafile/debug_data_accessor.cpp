@@ -18,14 +18,14 @@
 
 namespace panda::panda_file {
 
-DebugInfoDataAccessor::DebugInfoDataAccessor(const File &panda_file, File::EntityId debug_info_id)
-    : panda_file_(panda_file), debug_info_id_(debug_info_id)
+DebugInfoDataAccessor::DebugInfoDataAccessor(const File &pandaFile, File::EntityId debugInfoId)
+    : pandaFile_(pandaFile), debugInfoId_(debugInfoId)
 {
-    auto sp = panda_file_.GetSpanFromId(debug_info_id_);
+    auto sp = pandaFile_.GetSpanFromId(debugInfoId_);
 
-    line_start_ = helpers::ReadULeb128(&sp);
-    num_params_ = helpers::ReadULeb128(&sp);
-    parameters_sp_ = sp;
+    lineStart_ = helpers::ReadULeb128(&sp);
+    numParams_ = helpers::ReadULeb128(&sp);
+    parametersSp_ = sp;
 }
 
 }  // namespace panda::panda_file

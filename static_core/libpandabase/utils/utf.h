@@ -94,30 +94,30 @@ constexpr size_t CONST_12 = 12;
 
 WEAK_FOR_LTO_START
 
-PANDA_PUBLIC_API std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t max_bytes = 4);
+PANDA_PUBLIC_API std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t maxBytes = 4);
 
-PANDA_PUBLIC_API bool IsMUtf8OnlySingleBytes(const uint8_t *mutf8_in);
+PANDA_PUBLIC_API bool IsMUtf8OnlySingleBytes(const uint8_t *mutf8In);
 
-PANDA_PUBLIC_API void ConvertMUtf8ToUtf16(const uint8_t *mutf8_in, size_t mutf8_len, uint16_t *utf16_out);
+PANDA_PUBLIC_API void ConvertMUtf8ToUtf16(const uint8_t *mutf8In, size_t mutf8Len, uint16_t *utf16Out);
 
-PANDA_PUBLIC_API size_t ConvertRegionMUtf8ToUtf16(const uint8_t *mutf8_in, uint16_t *utf16_out, size_t mutf8_len,
-                                                  size_t utf16_len, size_t start);
+PANDA_PUBLIC_API size_t ConvertRegionMUtf8ToUtf16(const uint8_t *mutf8In, uint16_t *utf16Out, size_t mutf8Len,
+                                                  size_t utf16Len, size_t start);
 
-PANDA_PUBLIC_API size_t ConvertRegionUtf16ToMUtf8(const uint16_t *utf16_in, uint8_t *mutf8_out, size_t utf16_len,
-                                                  size_t mutf8_len, size_t start);
+PANDA_PUBLIC_API size_t ConvertRegionUtf16ToMUtf8(const uint16_t *utf16In, uint8_t *mutf8Out, size_t utf16Len,
+                                                  size_t mutf8Len, size_t start);
 
-PANDA_PUBLIC_API int CompareMUtf8ToMUtf8(const uint8_t *mutf8_1, const uint8_t *mutf8_2);
+PANDA_PUBLIC_API int CompareMUtf8ToMUtf8(const uint8_t *mutf81, const uint8_t *mutf82);
 
-PANDA_PUBLIC_API int CompareUtf8ToUtf8(const uint8_t *utf8_1, size_t utf8_1_length, const uint8_t *utf8_2,
-                                       size_t utf8_2_length);
+PANDA_PUBLIC_API int CompareUtf8ToUtf8(const uint8_t *utf81, size_t utf81Length, const uint8_t *utf82,
+                                       size_t utf82Length);
 
-PANDA_PUBLIC_API bool IsEqual(Span<const uint8_t> utf8_1, Span<const uint8_t> utf8_2);
+PANDA_PUBLIC_API bool IsEqual(Span<const uint8_t> utf81, Span<const uint8_t> utf82);
 
-PANDA_PUBLIC_API bool IsEqual(const uint8_t *mutf8_1, const uint8_t *mutf8_2);
+PANDA_PUBLIC_API bool IsEqual(const uint8_t *mutf81, const uint8_t *mutf82);
 
 PANDA_PUBLIC_API size_t MUtf8ToUtf16Size(const uint8_t *mutf8);
 
-PANDA_PUBLIC_API size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8_len);
+PANDA_PUBLIC_API size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8Len);
 
 PANDA_PUBLIC_API size_t Utf16ToMUtf8Size(const uint16_t *mutf16, uint32_t length);
 
@@ -133,15 +133,15 @@ PANDA_PUBLIC_API Utf8Char ConvertUtf16ToUtf8(uint16_t d0, uint16_t d1, bool modi
 
 PANDA_PUBLIC_API size_t Utf16ToUtf8Size(const uint16_t *utf16, uint32_t length, bool modify = true);
 
-PANDA_PUBLIC_API size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16_in, uint8_t *utf8_out, size_t utf16_len,
-                                                 size_t utf8_len, size_t start, bool modify = true);
+PANDA_PUBLIC_API size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len,
+                                                 size_t utf8Len, size_t start, bool modify = true);
 
 PANDA_PUBLIC_API std::pair<uint32_t, size_t> ConvertUtf8ToUtf16Pair(const uint8_t *data, bool combine = false);
 
-PANDA_PUBLIC_API size_t Utf8ToUtf16Size(const uint8_t *utf8, size_t utf8_len);
+PANDA_PUBLIC_API size_t Utf8ToUtf16Size(const uint8_t *utf8, size_t utf8Len);
 
-PANDA_PUBLIC_API size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8_in, uint16_t *utf16_out, size_t utf8_len,
-                                                 size_t utf16_len, size_t start);
+PANDA_PUBLIC_API size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8In, uint16_t *utf16Out, size_t utf8Len,
+                                                 size_t utf16Len, size_t start);
 
 PANDA_PUBLIC_API bool IsUTF16SurrogatePair(uint16_t lead);
 
@@ -175,16 +175,16 @@ struct Mutf8Hash {
 };
 
 struct Mutf8Equal {
-    bool operator()(const uint8_t *mutf8_1, const uint8_t *mutf8_2) const
+    bool operator()(const uint8_t *mutf81, const uint8_t *mutf82) const
     {
-        return IsEqual(mutf8_1, mutf8_2);
+        return IsEqual(mutf81, mutf82);
     }
 };
 
 struct Mutf8Less {
-    bool operator()(const uint8_t *mutf8_1, const uint8_t *mutf8_2) const
+    bool operator()(const uint8_t *mutf81, const uint8_t *mutf82) const
     {
-        return CompareMUtf8ToMUtf8(mutf8_1, mutf8_2) < 0;
+        return CompareMUtf8ToMUtf8(mutf81, mutf82) < 0;
     }
 };
 

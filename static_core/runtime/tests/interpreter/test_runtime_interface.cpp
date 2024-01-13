@@ -17,51 +17,51 @@
 
 namespace panda::interpreter::test {
 
-RuntimeInterface::NullPointerExceptionData RuntimeInterface::npe_data_;
+RuntimeInterface::NullPointerExceptionData RuntimeInterface::npeData_;
 
-RuntimeInterface::ArrayIndexOutOfBoundsExceptionData RuntimeInterface::array_oob_exception_data_;
+RuntimeInterface::ArrayIndexOutOfBoundsExceptionData RuntimeInterface::arrayOobExceptionData_;
 
-RuntimeInterface::NegativeArraySizeExceptionData RuntimeInterface::array_neg_size_exception_data_;
+RuntimeInterface::NegativeArraySizeExceptionData RuntimeInterface::arrayNegSizeExceptionData_;
 
-RuntimeInterface::ArithmeticException RuntimeInterface::arithmetic_exception_data_;
+RuntimeInterface::ArithmeticException RuntimeInterface::arithmeticExceptionData_;
 
-RuntimeInterface::ClassCastExceptionData RuntimeInterface::class_cast_exception_data_;
+RuntimeInterface::ClassCastExceptionData RuntimeInterface::classCastExceptionData_;
 
-RuntimeInterface::AbstractMethodError RuntimeInterface::abstract_method_error_data_;
+RuntimeInterface::AbstractMethodError RuntimeInterface::abstractMethodErrorData_;
 
-RuntimeInterface::ArrayStoreExceptionData RuntimeInterface::array_store_exception_data_;
+RuntimeInterface::ArrayStoreExceptionData RuntimeInterface::arrayStoreExceptionData_;
 
-coretypes::Array *RuntimeInterface::array_object_;
+coretypes::Array *RuntimeInterface::arrayObject_;
 
-Class *RuntimeInterface::array_class_;
+Class *RuntimeInterface::arrayClass_;
 
-uint32_t RuntimeInterface::array_length_;
+uint32_t RuntimeInterface::arrayLength_;
 
-Class *RuntimeInterface::resolved_class_;
+Class *RuntimeInterface::resolvedClass_;
 
 ObjectHeader *RuntimeInterface::object_;
 
-Class *RuntimeInterface::object_class_;
+Class *RuntimeInterface::objectClass_;
 
-uint32_t RuntimeInterface::catch_block_pc_offset_;
+uint32_t RuntimeInterface::catchBlockPcOffset_;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-RuntimeInterface::InvokeMethodHandler RuntimeInterface::invoke_handler_;
+RuntimeInterface::InvokeMethodHandler RuntimeInterface::invokeHandler_;
 
-DummyGC::DummyGC(panda::mem::ObjectAllocatorBase *object_allocator, const panda::mem::GCSettings &settings)
-    : GC(object_allocator, settings)
+DummyGC::DummyGC(panda::mem::ObjectAllocatorBase *objectAllocator, const panda::mem::GCSettings &settings)
+    : GC(objectAllocator, settings)
 {
 }
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-DummyGC RuntimeInterface::dummy_gc_(nullptr, panda::mem::GCSettings());
+DummyGC RuntimeInterface::dummyGc_(nullptr, panda::mem::GCSettings());
 
-Method *RuntimeInterface::resolved_method_;
+Method *RuntimeInterface::resolvedMethod_;
 
-Field *RuntimeInterface::resolved_field_;
+Field *RuntimeInterface::resolvedField_;
 
-const void *RuntimeInterface::entry_point_;
+const void *RuntimeInterface::entryPoint_;
 
-uint32_t RuntimeInterface::jit_threshold_;
+uint32_t RuntimeInterface::jitThreshold_;
 
 }  // namespace panda::interpreter::test

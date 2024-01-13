@@ -40,11 +40,11 @@ public:
 
     Marker NewMarker() const
     {
-        ASSERT_PRINT(current_index_ < MAX_MARKER, "Markers overflow. Please check recursion");
-        ++current_index_;
+        ASSERT_PRINT(currentIndex_ < MAX_MARKER, "Markers overflow. Please check recursion");
+        ++currentIndex_;
         for (uint32_t i = 0; i < MARKERS_NUM; i++) {
             if (!spaces_[i]) {
-                Marker mrk = (current_index_ << MARKERS_SHIFT) | i;
+                Marker mrk = (currentIndex_ << MARKERS_SHIFT) | i;
                 spaces_[i] = true;
                 ASSERT(mrk != UNDEF_MARKER);
                 return mrk;
@@ -60,15 +60,15 @@ public:
 
     uint32_t GetCurrentMarkerIdx()
     {
-        return current_index_;
+        return currentIndex_;
     }
     void SetMaxMarkerIdx(uint32_t ixd)
     {
-        current_index_ = std::max(current_index_, ixd);
+        currentIndex_ = std::max(currentIndex_, ixd);
     }
 
 private:
-    mutable uint32_t current_index_ {0};
+    mutable uint32_t currentIndex_ {0};
     mutable std::bitset<MARKERS_NUM> spaces_ {};
 };
 
@@ -110,10 +110,10 @@ public:
     {
         uint32_t index = mrk & MARKERS_MASK;
         uint32_t value = mrk >> MARKERS_SHIFT;
-        bool was_set = (markers_[index] == value);
+        bool wasSet = (markers_[index] == value);
         ASSERT(index < MARKERS_NUM);
         markers_[index] = UNDEF_MARKER;
-        return was_set;
+        return wasSet;
     }
 
     void ClearMarkers()

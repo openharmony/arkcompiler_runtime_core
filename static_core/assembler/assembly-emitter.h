@@ -43,26 +43,26 @@ public:
     };
 
     struct AsmEntityCollections {
-        std::unordered_map<std::string, panda_file::BaseMethodItem *> method_items;
-        std::unordered_map<std::string, panda_file::BaseFieldItem *> field_items;
-        std::unordered_map<std::string, panda_file::BaseClassItem *> class_items;
-        std::unordered_map<std::string_view, panda_file::StringItem *> string_items;
-        std::unordered_map<std::string, panda_file::LiteralArrayItem *> literalarray_items;
+        std::unordered_map<std::string, panda_file::BaseMethodItem *> methodItems;
+        std::unordered_map<std::string, panda_file::BaseFieldItem *> fieldItems;
+        std::unordered_map<std::string, panda_file::BaseClassItem *> classItems;
+        std::unordered_map<std::string_view, panda_file::StringItem *> stringItems;
+        std::unordered_map<std::string, panda_file::LiteralArrayItem *> literalarrayItems;
     };
 
     PANDA_PUBLIC_API static bool Emit(panda_file::ItemContainer *items, const Program &program,
-                                      PandaFileToPandaAsmMaps *maps = nullptr, bool emit_debug_info = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
+                                      PandaFileToPandaAsmMaps *maps = nullptr, bool emitDebugInfo = true,
+                                      panda::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
     PANDA_PUBLIC_API static bool Emit(panda_file::Writer *writer, const Program &program,
                                       std::map<std::string, size_t> *stat = nullptr,
-                                      PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
+                                      PandaFileToPandaAsmMaps *maps = nullptr, bool debugInfo = true,
+                                      panda::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
     PANDA_PUBLIC_API static bool Emit(const std::string &filename, const Program &program,
                                       std::map<std::string, size_t> *stat = nullptr,
-                                      PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
+                                      PandaFileToPandaAsmMaps *maps = nullptr, bool debugInfo = true,
+                                      panda::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
     PANDA_PUBLIC_API static std::unique_ptr<const panda_file::File> Emit(const Program &program,
                                                                          PandaFileToPandaAsmMaps *maps = nullptr);
@@ -71,7 +71,7 @@ public:
 
     PANDA_PUBLIC_API static std::string GetLastError()
     {
-        return last_error_;
+        return lastError_;
     }
 
 private:
@@ -83,7 +83,7 @@ private:
                                    AsmEntityCollections &entities);
     static bool HandleRecordAsForeign(
         panda_file::ItemContainer *items, const Program &program, AsmEntityCollections &entities,
-        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
+        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
         const std::string &name, const Record &rec);
     static bool HandleBaseRecord(panda_file::ItemContainer *items, const Program &program, const std::string &name,
                                  const Record &rec, panda_file::ClassItem *record);
@@ -91,68 +91,68 @@ private:
                                  const Record &rec, panda_file::ClassItem *record);
     static bool HandleFields(
         panda_file::ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
-        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
+        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
         const std::string &name, const Record &rec, panda_file::ClassItem *record);
     static bool HandleRecord(
         panda_file::ItemContainer *items, const Program &program, AsmEntityCollections &entities,
-        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
+        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
         const std::string &name, const Record &rec);
     static bool MakeRecordItems(
         panda_file::ItemContainer *items, const Program &program, AsmEntityCollections &entities,
-        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types);
+        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes);
     static panda_file::StringItem *GetMethodName(panda_file::ItemContainer *items, const Function &func,
                                                  const std::string &name);
     static bool HandleAreaForInner(panda_file::ItemContainer *items, const Program &program,
-                                   panda_file::ClassItem **area, panda_file::ForeignClassItem **foreign_area,
-                                   const std::string &name, const std::string &record_owner_name);
+                                   panda_file::ClassItem **area, panda_file::ForeignClassItem **foreignArea,
+                                   const std::string &name, const std::string &recordOwnerName);
     static bool HandleRecordOnwer(panda_file::ItemContainer *items, const Program &program,
-                                  panda_file::ClassItem **area, panda_file::ForeignClassItem **foreign_area,
-                                  const std::string &name, const std::string &record_owner_name);
+                                  panda_file::ClassItem **area, panda_file::ForeignClassItem **foreignArea,
+                                  const std::string &name, const std::string &recordOwnerName);
     static bool HandleFunctionParams(
         panda_file::ItemContainer *items, const Program &program, size_t idx, const std::string &name,
         const Function &func,
-        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
+        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
         std::vector<panda_file::MethodParamItem> &params);
     static bool HandleFunctionLocalVariables(panda_file::ItemContainer *items, const Function &func,
                                              const std::string &name);
     static bool CreateMethodItem(panda_file::ItemContainer *items, AsmEmitter::AsmEntityCollections &entities,
-                                 const Function &func, panda_file::TypeItem *type_item, panda_file::ClassItem *area,
-                                 panda_file::ForeignClassItem *foreign_area, uint32_t access_flags,
-                                 panda_file::StringItem *method_name, const std::string &mangled_name,
+                                 const Function &func, panda_file::TypeItem *typeItem, panda_file::ClassItem *area,
+                                 panda_file::ForeignClassItem *foreignArea, uint32_t accessFlags,
+                                 panda_file::StringItem *methodName, const std::string &mangledName,
                                  const std::string &name, std::vector<panda_file::MethodParamItem> &params);
     static bool MakeFunctionItems(
         panda_file::ItemContainer *items, const Program &program, AsmEntityCollections &entities,
-        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
-        bool emit_debug_info);
+        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
+        bool emitDebugInfo);
     static bool MakeRecordAnnotations(panda_file::ItemContainer *items, const Program &program,
                                       const AsmEntityCollections &entities);
     static void SetCodeAndDebugInfo(panda_file::ItemContainer *items, panda_file::MethodItem *method,
-                                    const Function &func, bool emit_debug_info);
+                                    const Function &func, bool emitDebugInfo);
     static void SetMethodSourceLang(const Program &program, panda_file::MethodItem *method, const Function &func,
                                     const std::string &name);
     static bool AddMethodAndParamsAnnotations(panda_file::ItemContainer *items, const Program &program,
                                               const AsmEmitter::AsmEntityCollections &entities,
                                               panda_file::MethodItem *method, const Function &func);
     static bool MakeFunctionDebugInfoAndAnnotations(panda_file::ItemContainer *items, const Program &program,
-                                                    const AsmEntityCollections &entities, bool emit_debug_info);
+                                                    const AsmEntityCollections &entities, bool emitDebugInfo);
     static void FillMap(PandaFileToPandaAsmMaps *maps, AsmEntityCollections &entities);
     static void EmitDebugInfo(panda_file::ItemContainer *items, const Program &program,
                               const std::vector<uint8_t> *bytes, const panda_file::MethodItem *method,
-                              const Function &func, const std::string &name, bool emit_debug_info);
+                              const Function &func, const std::string &name, bool emitDebugInfo);
     static bool EmitFunctions(panda_file::ItemContainer *items, const Program &program,
-                              const AsmEntityCollections &entities, bool emit_debug_info);
+                              const AsmEntityCollections &entities, bool emitDebugInfo);
 
     static panda_file::TypeItem *GetTypeItem(
         panda_file::ItemContainer *items,
-        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
+        const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitiveTypes,
         const Type &type, const Program &program);
 
     PANDA_PUBLIC_API static void SetLastError(const std::string &message)
     {
-        last_error_ = message;
+        lastError_ = message;
     }
 
-    static bool CheckValueType(Value::Type value_type, const Type &type, const Program &program);
+    static bool CheckValueType(Value::Type valueType, const Type &type, const Program &program);
 
     static bool CheckValueEnumCase(const Value *value, const Type &type, const Program &program);
     static bool CheckValueArrayCase(const Value *value, const Type &type, const Program &program);
@@ -241,7 +241,7 @@ private:
 
     // NOTE(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-    PANDA_PUBLIC_API static std::string last_error_;
+    PANDA_PUBLIC_API static std::string lastError_;
 };
 
 std::string GetOwnerName(std::string name);

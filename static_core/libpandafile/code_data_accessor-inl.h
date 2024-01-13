@@ -23,13 +23,13 @@ namespace panda::panda_file {
 template <class Callback>
 inline void CodeDataAccessor::TryBlock::EnumerateCatchBlocks(const Callback &cb)
 {
-    auto sp = catch_blocks_sp_;
-    for (size_t i = 0; i < num_catches_; i++) {
-        CatchBlock catch_block(sp);
-        if (!cb(catch_block)) {
+    auto sp = catchBlocksSp_;
+    for (size_t i = 0; i < numCatches_; i++) {
+        CatchBlock catchBlock(sp);
+        if (!cb(catchBlock)) {
             return;
         }
-        sp = sp.SubSpan(catch_block.GetSize());
+        sp = sp.SubSpan(catchBlock.GetSize());
     }
     size_ = sp.data() - data_.data();
 }
@@ -42,15 +42,15 @@ inline void CodeDataAccessor::TryBlock::SkipCatchBlocks()
 template <class Callback>
 inline void CodeDataAccessor::EnumerateTryBlocks(const Callback &cb)
 {
-    auto sp = try_blocks_sp_;
-    for (size_t i = 0; i < tries_size_; i++) {
-        TryBlock try_block(sp);
-        if (!cb(try_block)) {
+    auto sp = tryBlocksSp_;
+    for (size_t i = 0; i < triesSize_; i++) {
+        TryBlock tryBlock(sp);
+        if (!cb(tryBlock)) {
             return;
         }
-        sp = sp.SubSpan(try_block.GetSize());
+        sp = sp.SubSpan(tryBlock.GetSize());
     }
-    size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - code_id_.GetOffset();
+    size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - codeId_.GetOffset();
 }
 
 inline void CodeDataAccessor::SkipTryBlocks()
@@ -59,18 +59,18 @@ inline void CodeDataAccessor::SkipTryBlocks()
 }
 
 // static
-inline uint32_t CodeDataAccessor::GetNumVregs(const File &pf, File::EntityId code_id)
+inline uint32_t CodeDataAccessor::GetNumVregs(const File &pf, File::EntityId codeId)
 {
-    uint32_t num_vregs;
-    auto sp = pf.GetSpanFromId(code_id);
-    num_vregs = helpers::ReadULeb128(&sp);
-    return num_vregs;
+    uint32_t numVregs;
+    auto sp = pf.GetSpanFromId(codeId);
+    numVregs = helpers::ReadULeb128(&sp);
+    return numVregs;
 }
 
 // static
-inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::EntityId code_id, uint32_t *vregs)
+inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::EntityId codeId, uint32_t *vregs)
 {
-    auto sp = pf.GetSpanFromId(code_id);
+    auto sp = pf.GetSpanFromId(codeId);
     *vregs = helpers::ReadULeb128(&sp);
     helpers::SkipULeb128(&sp);  // num_args
     helpers::SkipULeb128(&sp);  // code_size
@@ -79,14 +79,14 @@ inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::En
 }
 
 // static
-inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::EntityId code_id)
+inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::EntityId codeId)
 {
-    auto sp = pf.GetSpanFromId(code_id);
-    uint32_t data_prefix;
+    auto sp = pf.GetSpanFromId(codeId);
+    uint32_t dataPrefix;
     // with reading *reinterpret_cast<const uint32_t *>(sp.Data()) unaligned read occurs
     // according to decompiler memcpy is optimized to a single load
-    memcpy(&data_prefix, sp.Data(), 4);
-    if (UNLIKELY(data_prefix & 0x80808080)) {
+    memcpy(&dataPrefix, sp.Data(), 4U);
+    if (UNLIKELY(dataPrefix & 0x80808080)) {
         helpers::SkipULeb128(&sp);  // num_vregs
         helpers::SkipULeb128(&sp);  // num_args
         helpers::SkipULeb128(&sp);  // code_size
@@ -94,7 +94,7 @@ inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::En
         return sp.data();
     }
 
-    return sp.SubSpan(4).data();
+    return sp.SubSpan(4U).data();
 }
 
 }  // namespace panda::panda_file

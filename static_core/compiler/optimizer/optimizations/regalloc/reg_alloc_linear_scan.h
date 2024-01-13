@@ -109,7 +109,7 @@ private:
     template <bool IS_FP>
     PendingIntervals &GetIntervals()
     {
-        return IS_FP ? vector_intervals_ : general_intervals_;
+        return IS_FP ? vectorIntervals_ : generalIntervals_;
     }
 
     template <bool IS_FP>
@@ -117,31 +117,31 @@ private:
     template <bool IS_FP>
     void PreprocessPreassignedIntervals();
     template <bool IS_FP>
-    void ExpireIntervals(LifeNumber current_position);
+    void ExpireIntervals(LifeNumber currentPosition);
     template <bool IS_FP>
     void WalkIntervals();
     template <bool IS_FP>
-    bool TryToAssignRegister(LifeIntervals *current_interval);
+    bool TryToAssignRegister(LifeIntervals *currentInterval);
     template <bool IS_FP>
-    void SplitAndSpill(const InstructionsIntervals *intervals, const LifeIntervals *current_interval);
+    void SplitAndSpill(const InstructionsIntervals *intervals, const LifeIntervals *currentInterval);
     template <bool IS_FP>
-    void SplitActiveInterval(LifeIntervals *interval, LifeNumber split_pos);
+    void SplitActiveInterval(LifeIntervals *interval, LifeNumber splitPos);
     template <bool IS_FP>
     void AddToQueue(LifeIntervals *interval);
     template <bool IS_FP>
-    void SplitBeforeUse(LifeIntervals *current_interval, LifeNumber use_pos);
-    bool IsIntervalRegFree(const LifeIntervals *current_interval, Register reg) const;
+    void SplitBeforeUse(LifeIntervals *currentInterval, LifeNumber usePos);
+    bool IsIntervalRegFree(const LifeIntervals *currentInterval, Register reg) const;
     void AssignStackSlot(LifeIntervals *interval);
     void RemapRegallocReg(LifeIntervals *interval);
     void RemapRegistersIntervals();
     template <bool IS_FP>
     void AddFixedIntervalsToWorkingIntervals();
     template <bool IS_FP>
-    void HandleFixedIntervalIntersection(LifeIntervals *current_interval);
+    void HandleFixedIntervalIntersection(LifeIntervals *currentInterval);
 
-    Register GetSuitableRegister(const LifeIntervals *current_interval);
-    Register GetFreeRegister(const LifeIntervals *current_interval);
-    std::pair<Register, LifeNumber> GetBlockedRegister(const LifeIntervals *current_interval);
+    Register GetSuitableRegister(const LifeIntervals *currentInterval);
+    Register GetFreeRegister(const LifeIntervals *currentInterval);
+    std::pair<Register, LifeNumber> GetBlockedRegister(const LifeIntervals *currentInterval);
 
     template <class T, class Callback>
     void IterateIntervalsWithErasion(T &intervals, const Callback &callback) const
@@ -160,7 +160,7 @@ private:
     void EnumerateIntervals(const T &intervals, const Callback &callback) const
     {
         for (const auto &interval : intervals) {
-            if (interval == nullptr || interval->GetReg() >= reg_map_.GetAvailableRegsCount()) {
+            if (interval == nullptr || interval->GetReg() >= regMap_.GetAvailableRegsCount()) {
                 continue;
             }
             callback(interval);
@@ -171,7 +171,7 @@ private:
     void EnumerateIntersectedIntervals(const T &intervals, const LifeIntervals *current, const Callback &callback) const
     {
         for (const auto &interval : intervals) {
-            if (interval == nullptr || interval->GetReg() >= reg_map_.GetAvailableRegsCount()) {
+            if (interval == nullptr || interval->GetReg() >= regMap_.GetAvailableRegsCount()) {
                 continue;
             }
             auto intersection = interval->GetFirstIntersectionWith(current);
@@ -181,18 +181,18 @@ private:
         }
     }
 
-    void BlockOverlappedRegisters(const LifeIntervals *current_interval);
-    void BlockIndirectCallRegisters(const LifeIntervals *current_interval);
+    void BlockOverlappedRegisters(const LifeIntervals *currentInterval);
+    void BlockIndirectCallRegisters(const LifeIntervals *currentInterval);
     bool IsNonSpillableConstInterval(LifeIntervals *interval);
-    void BeforeConstantIntervalSpill(LifeIntervals *interval, LifeNumber split_pos);
+    void BeforeConstantIntervalSpill(LifeIntervals *interval, LifeNumber splitPos);
 
 private:
-    WorkingIntervals working_intervals_;
-    ArenaVector<LifeNumber> regs_use_positions_;
-    PendingIntervals general_intervals_;
-    PendingIntervals vector_intervals_;
-    RegisterMap reg_map_;
-    bool remat_constants_;
+    WorkingIntervals workingIntervals_;
+    ArenaVector<LifeNumber> regsUsePositions_;
+    PendingIntervals generalIntervals_;
+    PendingIntervals vectorIntervals_;
+    RegisterMap regMap_;
+    bool rematConstants_;
     bool success_ {true};
 };
 }  // namespace panda::compiler

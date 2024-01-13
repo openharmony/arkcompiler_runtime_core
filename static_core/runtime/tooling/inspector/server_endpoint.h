@@ -30,31 +30,31 @@ public:
 
     void OnValidate(std::function<void()> &&handler) override
     {
-        on_validate_ = std::move(handler);
+        onValidate_ = std::move(handler);
     }
 
     void OnOpen(std::function<void()> &&handler) override
     {
-        on_open_ = std::move(handler);
+        onOpen_ = std::move(handler);
     }
 
     void OnFail(std::function<void()> &&handler) override
     {
-        on_fail_ = std::move(handler);
+        onFail_ = std::move(handler);
     }
 
     using Server::Call;
-    void Call(const std::string &session_id, const char *method,
+    void Call(const std::string &sessionId, const char *method,
               std::function<void(JsonObjectBuilder &)> &&params) override;
 
     void OnCall(const char *method,
-                std::function<void(const std::string &session_id, JsonObjectBuilder &result, const JsonObject &params)>
+                std::function<void(const std::string &sessionId, JsonObjectBuilder &result, const JsonObject &params)>
                     &&handler) override;
 
 private:
-    std::function<void()> on_validate_ = []() {};
-    std::function<void()> on_open_ = []() {};
-    std::function<void()> on_fail_ = []() {};
+    std::function<void()> onValidate_ = []() {};
+    std::function<void()> onOpen_ = []() {};
+    std::function<void()> onFail_ = []() {};
 };
 }  // namespace panda::tooling::inspector
 

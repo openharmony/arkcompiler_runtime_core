@@ -29,14 +29,14 @@
 namespace panda::compiler {
 struct InlineContext {
     RuntimeInterface::MethodPtr method {};
-    bool cha_devirtualize {false};
-    bool replace_to_static {false};
-    RuntimeInterface::IntrinsicId intrinsic_id {RuntimeInterface::IntrinsicId::INVALID};
+    bool chaDevirtualize {false};
+    bool replaceToStatic {false};
+    RuntimeInterface::IntrinsicId intrinsicId {RuntimeInterface::IntrinsicId::INVALID};
 };
 
 struct InlinedGraph {
     Graph *graph {nullptr};
-    bool has_runtime_calls {false};
+    bool hasRuntimeCalls {false};
 };
 
 class Inlining : public Optimization {
@@ -44,12 +44,12 @@ class Inlining : public Optimization {
 
 public:
     explicit Inlining(Graph *graph) : Inlining(graph, 0, 0, 0) {}
-    Inlining(Graph *graph, bool resolve_wo_inline) : Inlining(graph)
+    Inlining(Graph *graph, bool resolveWoInline) : Inlining(graph)
     {
-        resolve_wo_inline_ = resolve_wo_inline;
+        resolveWoInline_ = resolveWoInline;
     }
 
-    Inlining(Graph *graph, uint32_t instructions_count, uint32_t inline_depth, uint32_t methods_inlined);
+    Inlining(Graph *graph, uint32_t instructionsCount, uint32_t inlineDepth, uint32_t methodsInlined);
 
     NO_MOVE_SEMANTIC(Inlining);
     NO_COPY_SEMANTIC(Inlining);
@@ -59,7 +59,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerInlining();
+        return g_options.IsCompilerInlining();
     }
 
     const char *GetPassName() const override
@@ -72,49 +72,49 @@ public:
 protected:
     virtual void RunOptimizations() const;
     virtual bool IsInstSuitableForInline(Inst *inst) const;
-    virtual bool TryInline(CallInst *call_inst);
-    bool TryInlineWithInlineCaches(CallInst *call_inst);
-    bool TryInlineExternal(CallInst *call_inst, InlineContext *ctx);
-    bool TryInlineExternalAot(CallInst *call_inst, InlineContext *ctx);
+    virtual bool TryInline(CallInst *callInst);
+    bool TryInlineWithInlineCaches(CallInst *callInst);
+    bool TryInlineExternal(CallInst *callInst, InlineContext *ctx);
+    bool TryInlineExternalAot(CallInst *callInst, InlineContext *ctx);
 
-    Inst *GetNewDefAndCorrectDF(Inst *call_inst, Inst *old_def);
+    Inst *GetNewDefAndCorrectDF(Inst *callInst, Inst *oldDef);
 
     bool Do();
-    bool DoInline(CallInst *call_inst, InlineContext *ctx);
-    bool DoInlineMethod(CallInst *call_inst, InlineContext *ctx);
-    bool DoInlineIntrinsic(CallInst *call_inst, InlineContext *ctx);
-    bool DoInlineMonomorphic(CallInst *call_inst, RuntimeInterface::ClassPtr receiver);
-    bool DoInlinePolymorphic(CallInst *call_inst, ArenaVector<RuntimeInterface::ClassPtr> *receivers);
-    void CreateCompareClass(CallInst *call_inst, Inst *get_cls_inst, RuntimeInterface::ClassPtr receiver,
-                            BasicBlock *call_bb);
-    void InsertDeoptimizeInst(CallInst *call_inst, BasicBlock *call_bb,
-                              DeoptimizeType deopt_type = DeoptimizeType::INLINE_IC);
-    void InsertCallInst(CallInst *call_inst, BasicBlock *call_bb, BasicBlock *ret_bb, Inst *phi_inst);
+    bool DoInline(CallInst *callInst, InlineContext *ctx);
+    bool DoInlineMethod(CallInst *callInst, InlineContext *ctx);
+    bool DoInlineIntrinsic(CallInst *callInst, InlineContext *ctx);
+    bool DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPtr receiver);
+    bool DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterface::ClassPtr> *receivers);
+    void CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeInterface::ClassPtr receiver,
+                            BasicBlock *callBb);
+    void InsertDeoptimizeInst(CallInst *callInst, BasicBlock *callBb,
+                              DeoptimizeType deoptType = DeoptimizeType::INLINE_IC);
+    void InsertCallInst(CallInst *callInst, BasicBlock *callBb, BasicBlock *retBb, Inst *phiInst);
 
-    void UpdateDataflow(Graph *graph_inl, Inst *call_inst, std::variant<BasicBlock *, PhiInst *> use,
-                        Inst *new_def = nullptr);
-    void UpdateDataflowForEmptyGraph(Inst *call_inst, std::variant<BasicBlock *, PhiInst *> use, BasicBlock *end_block);
-    void UpdateParameterDataflow(Graph *graph_inl, Inst *call_inst);
-    void UpdateControlflow(Graph *graph_inl, BasicBlock *call_bb, BasicBlock *call_cont_bb);
-    void MoveConstants(Graph *graph_inl);
+    void UpdateDataflow(Graph *graphInl, Inst *callInst, std::variant<BasicBlock *, PhiInst *> use,
+                        Inst *newDef = nullptr);
+    void UpdateDataflowForEmptyGraph(Inst *callInst, std::variant<BasicBlock *, PhiInst *> use, BasicBlock *endBlock);
+    void UpdateParameterDataflow(Graph *graphInl, Inst *callInst);
+    void UpdateControlflow(Graph *graphInl, BasicBlock *callBb, BasicBlock *callContBb);
+    void MoveConstants(Graph *graphInl);
 
     template <bool CHECK_EXTERNAL, bool CHECK_INTRINSICS = false>
-    bool CheckMethodCanBeInlined(const CallInst *call_inst, InlineContext *ctx);
+    bool CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx);
     template <bool CHECK_EXTERNAL>
-    bool CheckTooBigMethodCanBeInlined(const CallInst *call_inst, InlineContext *ctx, bool method_is_too_big);
-    bool ResolveTarget(CallInst *call_inst, InlineContext *ctx);
-    bool CanUseTypeInfo(ObjectTypeInfo type_info, RuntimeInterface::MethodPtr method);
-    void InsertChaGuard(CallInst *call_inst);
+    bool CheckTooBigMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx, bool methodIsTooBig);
+    bool ResolveTarget(CallInst *callInst, InlineContext *ctx);
+    bool CanUseTypeInfo(ObjectTypeInfo typeInfo, RuntimeInterface::MethodPtr method);
+    void InsertChaGuard(CallInst *callInst);
 
-    InlinedGraph BuildGraph(InlineContext *ctx, CallInst *call_inst, CallInst *poly_call_inst = nullptr);
-    bool CheckBytecode(CallInst *call_inst, const InlineContext &ctx, bool *callee_call_runtime);
-    bool CheckInstructionLimit(CallInst *call_inst, InlineContext *ctx, size_t inlined_insts_count);
-    bool TryBuildGraph(const InlineContext &ctx, Graph *graph_inl, CallInst *call_inst, CallInst *poly_call_inst);
-    bool CheckLoops(bool *callee_call_runtime, Graph *graph_inl);
-    static void PropagateObjectInfo(Graph *graph_inl, CallInst *call_inst);
+    InlinedGraph BuildGraph(InlineContext *ctx, CallInst *callInst, CallInst *polyCallInst = nullptr);
+    bool CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool *calleeCallRuntime);
+    bool CheckInstructionLimit(CallInst *callInst, InlineContext *ctx, size_t inlinedInstsCount);
+    bool TryBuildGraph(const InlineContext &ctx, Graph *graphInl, CallInst *callInst, CallInst *polyCallInst);
+    bool CheckLoops(bool *calleeCallRuntime, Graph *graphInl);
+    static void PropagateObjectInfo(Graph *graphInl, CallInst *callInst);
 
-    void ProcessCallReturnInstructions(CallInst *call_inst, BasicBlock *call_cont_bb, bool has_runtime_calls,
-                                       bool need_barriers = false);
+    void ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *callContBb, bool hasRuntimeCalls,
+                                       bool needBarriers = false);
     size_t CalculateInstructionsCount(Graph *graph);
 
     IClassHierarchyAnalysis *GetCha()
@@ -126,12 +126,12 @@ protected:
 
     std::string GetLogIndent() const
     {
-        return std::string(depth_ * 2, ' ');
+        return std::string(depth_ * 2U, ' ');
     }
 
     bool IsIntrinsic(const InlineContext *ctx) const
     {
-        return ctx->intrinsic_id != RuntimeInterface::IntrinsicId::INVALID;
+        return ctx->intrinsicId != RuntimeInterface::IntrinsicId::INVALID;
     }
 
     virtual bool SkipBlock(const BasicBlock *block) const;
@@ -139,16 +139,16 @@ protected:
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     uint32_t depth_ {0};
-    uint32_t methods_inlined_ {0};
-    uint32_t instructions_count_ {0};
-    uint32_t instructions_limit_ {0};
-    ArenaVector<BasicBlock *> return_blocks_;
+    uint32_t methodsInlined_ {0};
+    uint32_t instructionsCount_ {0};
+    uint32_t instructionsLimit_ {0};
+    ArenaVector<BasicBlock *> returnBlocks_;
     ArenaUnorderedSet<std::string> blacklist_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
-    uint32_t vregs_count_ {0};
-    bool resolve_wo_inline_ {false};
+    uint32_t vregsCount_ {0};
+    bool resolveWoInline_ {false};
     IClassHierarchyAnalysis *cha_ {nullptr};
 };
 }  // namespace panda::compiler

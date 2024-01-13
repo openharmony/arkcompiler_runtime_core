@@ -192,23 +192,23 @@ public:
 
     bool NeedsEmit() const
     {
-        return needs_emit_;
+        return needsEmit_;
     }
 
-    void SetNeedsEmit(bool needs_emit)
+    void SetNeedsEmit(bool needsEmit)
     {
-        needs_emit_ = needs_emit;
+        needsEmit_ = needsEmit;
     }
 
     const std::list<IndexedItem *> &GetIndexDependencies() const
     {
-        return index_deps_;
+        return indexDeps_;
     }
 
     void AddIndexDependency(IndexedItem *item)
     {
         ASSERT(item != nullptr);
-        index_deps_.push_back(item);
+        indexDeps_.push_back(item);
     }
 
     void SetOrderIndex(uint32_t order)
@@ -238,38 +238,38 @@ public:
 
     void SetPGORank(uint32_t rank)
     {
-        pgo_rank_ = rank;
+        pgoRank_ = rank;
     }
 
     uint32_t GetPGORank() const
     {
-        return pgo_rank_;
+        return pgoRank_;
     }
 
     void SetOriginalRank(uint32_t rank)
     {
-        original_rank_ = rank;
+        originalRank_ = rank;
     }
 
     uint32_t GetOriginalRank() const
     {
-        return original_rank_;
+        return originalRank_;
     }
 
 private:
-    bool needs_emit_ {true};
+    bool needsEmit_ {true};
     uint32_t offset_ {0};
     uint32_t order_ {INVALID_INDEX};
-    std::list<IndexedItem *> index_deps_;
-    uint32_t pgo_rank_ {0};
-    uint32_t original_rank_ {0};
+    std::list<IndexedItem *> indexDeps_;
+    uint32_t pgoRank_ {0};
+    uint32_t originalRank_ {0};
 };
 
 class IndexedItem : public BaseItem {
 public:
     IndexedItem()
     {
-        item_alloc_id_ = item_alloc_id_next_++;
+        itemAllocId_ = itemAllocIdNext_++;
     }
 
     uint32_t GetIndex(const BaseItem *item) const
@@ -297,18 +297,18 @@ public:
 
     void IncRefCount()
     {
-        ++ref_count_;
+        ++refCount_;
     }
 
     void DecRefCount()
     {
-        ASSERT(ref_count_ != 0);
-        --ref_count_;
+        ASSERT(refCount_ != 0);
+        --refCount_;
     }
 
     size_t GetRefCount() const
     {
-        return ref_count_;
+        return refCount_;
     }
 
     virtual IndexType GetIndexType() const
@@ -318,7 +318,7 @@ public:
 
     size_t GetItemAllocId() const
     {
-        return item_alloc_id_;
+        return itemAllocId_;
     }
 
 private:
@@ -339,9 +339,9 @@ private:
     const Index *FindIndex(const BaseItem *item) const
     {
         ASSERT(item->HasOrderIndex());
-        auto order_idx = item->GetOrderIndex();
+        auto orderIdx = item->GetOrderIndex();
 
-        auto it = std::find_if(indexes_.cbegin(), indexes_.cend(), [order_idx](const Index &idx) {
+        auto it = std::find_if(indexes_.cbegin(), indexes_.cend(), [orderIdx](const Index &idx) {
             if (idx.start == nullptr && idx.end == nullptr) {
                 return true;
             }
@@ -352,26 +352,26 @@ private:
 
             ASSERT(idx.start->HasOrderIndex());
             ASSERT(idx.end->HasOrderIndex());
-            return idx.start->GetOrderIndex() <= order_idx && order_idx < idx.end->GetOrderIndex();
+            return idx.start->GetOrderIndex() <= orderIdx && orderIdx < idx.end->GetOrderIndex();
         });
 
         return it != indexes_.cend() ? &*it : nullptr;
     }
 
     std::vector<Index> indexes_;
-    size_t ref_count_ {1};
-    size_t item_alloc_id_ {0};
+    size_t refCount_ {1};
+    size_t itemAllocId_ {0};
 
     // needed for keeping same layout of panda file after rebuilding it,
     // even if same `IndexedItem` was allocated at different addresses
-    static size_t item_alloc_id_next_;
+    static size_t itemAllocIdNext_;
 };
 
 class TypeItem : public IndexedItem {
 public:
     explicit TypeItem(Type type) : type_(type) {}
 
-    explicit TypeItem(Type::TypeId type_id) : type_(type_id) {}
+    explicit TypeItem(Type::TypeId typeId) : type_(typeId) {}
 
     ~TypeItem() override = default;
 
@@ -396,7 +396,7 @@ class PrimitiveTypeItem : public TypeItem {
 public:
     explicit PrimitiveTypeItem(Type type) : PrimitiveTypeItem(type.GetId()) {}
 
-    explicit PrimitiveTypeItem(Type::TypeId type_id) : TypeItem(type_id)
+    explicit PrimitiveTypeItem(Type::TypeId typeId) : TypeItem(typeId)
     {
         ASSERT(GetType().IsPrimitive());
         SetNeedsEmit(false);
@@ -448,7 +448,7 @@ public:
 
     size_t GetUtf16Len() const
     {
-        return utf16_length_;
+        return utf16Length_;
     }
 
     DEFAULT_MOVE_SEMANTIC(StringItem);
@@ -456,8 +456,8 @@ public:
 
 private:
     std::string str_;
-    size_t utf16_length_;
-    size_t is_ascii_ = 0;
+    size_t utf16Length_;
+    size_t isAscii_ = 0;
 };
 
 class AnnotationItem;
@@ -508,15 +508,15 @@ private:
 
 class FieldItem : public BaseFieldItem {
 public:
-    FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t access_flags);
+    FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags);
 
     ~FieldItem() override = default;
 
     void SetValue(ValueItem *value);
 
-    void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
+    void AddRuntimeAnnotation(AnnotationItem *runtimeAnnotation)
     {
-        runtime_annotations_.push_back(runtime_annotation);
+        runtimeAnnotations_.push_back(runtimeAnnotation);
     }
 
     void AddAnnotation(AnnotationItem *annotation)
@@ -524,14 +524,14 @@ public:
         annotations_.push_back(annotation);
     }
 
-    void AddRuntimeTypeAnnotation(AnnotationItem *runtime_type_annotation)
+    void AddRuntimeTypeAnnotation(AnnotationItem *runtimeTypeAnnotation)
     {
-        runtime_type_annotations_.push_back(runtime_type_annotation);
+        runtimeTypeAnnotations_.push_back(runtimeTypeAnnotation);
     }
 
-    void AddTypeAnnotation(AnnotationItem *type_annotation)
+    void AddTypeAnnotation(AnnotationItem *typeAnnotation)
     {
-        type_annotations_.push_back(type_annotation);
+        typeAnnotations_.push_back(typeAnnotation);
     }
 
     size_t CalculateSize() const override;
@@ -545,7 +545,7 @@ public:
 
     std::vector<AnnotationItem *> *GetRuntimeAnnotations()
     {
-        return &runtime_annotations_;
+        return &runtimeAnnotations_;
     }
 
     std::vector<AnnotationItem *> *GetAnnotations()
@@ -555,17 +555,17 @@ public:
 
     std::vector<AnnotationItem *> *GetTypeAnnotations()
     {
-        return &type_annotations_;
+        return &typeAnnotations_;
     }
 
     std::vector<AnnotationItem *> *GetRuntimeTypeAnnotations()
     {
-        return &runtime_type_annotations_;
+        return &runtimeTypeAnnotations_;
     }
 
     uint32_t GetAccessFlags() const
     {
-        return access_flags_;
+        return accessFlags_;
     }
 
     DEFAULT_MOVE_SEMANTIC(FieldItem);
@@ -578,12 +578,12 @@ private:
 
     bool WriteTaggedData(Writer *writer);
 
-    uint32_t access_flags_;
+    uint32_t accessFlags_;
     ValueItem *value_ {nullptr};
-    std::vector<AnnotationItem *> runtime_annotations_;
+    std::vector<AnnotationItem *> runtimeAnnotations_;
     std::vector<AnnotationItem *> annotations_;
-    std::vector<AnnotationItem *> type_annotations_;
-    std::vector<AnnotationItem *> runtime_type_annotations_;
+    std::vector<AnnotationItem *> typeAnnotations_;
+    std::vector<AnnotationItem *> runtimeTypeAnnotations_;
 };
 
 class ProtoItem;
@@ -613,31 +613,30 @@ public:
 
     void EmitEnd();
 
-    void EmitAdvancePc(std::vector<uint8_t> *constant_pool, uint32_t value);
+    void EmitAdvancePc(std::vector<uint8_t> *constantPool, uint32_t value);
 
-    void EmitAdvanceLine(std::vector<uint8_t> *constant_pool, int32_t value);
+    void EmitAdvanceLine(std::vector<uint8_t> *constantPool, int32_t value);
 
-    void EmitColumn(std::vector<uint8_t> *constant_pool, uint32_t pc_inc, uint32_t column);
+    void EmitColumn(std::vector<uint8_t> *constantPool, uint32_t pcInc, uint32_t column);
 
-    void EmitStartLocal(std::vector<uint8_t> *constant_pool, int32_t register_number, StringItem *name,
-                        StringItem *type);
+    void EmitStartLocal(std::vector<uint8_t> *constantPool, int32_t registerNumber, StringItem *name, StringItem *type);
 
-    void EmitStartLocalExtended(std::vector<uint8_t> *constant_pool, int32_t register_number, StringItem *name,
-                                StringItem *type, StringItem *type_signature);
+    void EmitStartLocalExtended(std::vector<uint8_t> *constantPool, int32_t registerNumber, StringItem *name,
+                                StringItem *type, StringItem *typeSignature);
 
-    void EmitEndLocal(int32_t register_number);
+    void EmitEndLocal(int32_t registerNumber);
 
-    void EmitRestartLocal(int32_t register_number);
+    void EmitRestartLocal(int32_t registerNumber);
 
-    bool EmitSpecialOpcode(uint32_t pc_inc, int32_t line_inc);
+    bool EmitSpecialOpcode(uint32_t pcInc, int32_t lineInc);
 
     void EmitPrologEnd();
 
     void EmitEpilogBegin();
 
-    void EmitSetFile(std::vector<uint8_t> *constant_pool, StringItem *source_file);
+    void EmitSetFile(std::vector<uint8_t> *constantPool, StringItem *sourceFile);
 
-    void EmitSetSourceCode(std::vector<uint8_t> *constant_pool, StringItem *source_code);
+    void EmitSetSourceCode(std::vector<uint8_t> *constantPool, StringItem *sourceCode);
 
     bool Write(Writer *writer) override;
 
@@ -662,7 +661,7 @@ public:
 
 private:
     void EmitOpcode(Opcode opcode);
-    void EmitRegister(int32_t register_number);
+    void EmitRegister(int32_t registerNumber);
 
     static void EmitUleb128(std::vector<uint8_t> *data, uint32_t value);
 
@@ -682,12 +681,12 @@ public:
 
     size_t GetLineNumber() const
     {
-        return line_num_;
+        return lineNum_;
     }
 
-    void SetLineNumber(size_t line_num)
+    void SetLineNumber(size_t lineNum)
     {
-        line_num_ = line_num;
+        lineNum_ = lineNum;
     }
 
     LineNumberProgramItem *GetLineNumberProgram() const
@@ -713,7 +712,7 @@ public:
 
     std::vector<uint8_t> *GetConstantPool()
     {
-        return &constant_pool_;
+        return &constantPool_;
     }
 
     size_t CalculateSize() const override;
@@ -728,9 +727,9 @@ public:
     void Dump(std::ostream &os) const override;
 
 private:
-    size_t line_num_ {0};
+    size_t lineNum_ {0};
     LineNumberProgramItem *program_;
-    std::vector<uint8_t> constant_pool_;
+    std::vector<uint8_t> constantPool_;
     std::vector<StringItem *> parameters_;
 };
 
@@ -743,7 +742,7 @@ public:
 
     bool IsStatic() const
     {
-        return (access_flags_ & ACC_STATIC) != 0;
+        return (accessFlags_ & ACC_STATIC) != 0;
     }
 
     IndexType GetIndexType() const override
@@ -763,7 +762,7 @@ public:
 
     uint32_t GetAccessFlags() const
     {
-        return access_flags_;
+        return accessFlags_;
     }
 
     ~BaseMethodItem() override = default;
@@ -772,7 +771,7 @@ public:
     DEFAULT_COPY_SEMANTIC(BaseMethodItem);
 
 protected:
-    BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags);
+    BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags);
 
     size_t CalculateSize() const override;
 
@@ -782,7 +781,7 @@ private:
     BaseClassItem *class_;
     StringItem *name_;
     ProtoItem *proto_;
-    uint32_t access_flags_;
+    uint32_t accessFlags_;
 };
 
 class MethodParamItem {
@@ -794,9 +793,9 @@ public:
     DEFAULT_MOVE_SEMANTIC(MethodParamItem);
     DEFAULT_COPY_SEMANTIC(MethodParamItem);
 
-    void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
+    void AddRuntimeAnnotation(AnnotationItem *runtimeAnnotation)
     {
-        runtime_annotations_.push_back(runtime_annotation);
+        runtimeAnnotations_.push_back(runtimeAnnotation);
     }
 
     void AddAnnotation(AnnotationItem *annotation)
@@ -804,14 +803,14 @@ public:
         annotations_.push_back(annotation);
     }
 
-    void AddRuntimeTypeAnnotation(AnnotationItem *runtime_type_annotation)
+    void AddRuntimeTypeAnnotation(AnnotationItem *runtimeTypeAnnotation)
     {
-        runtime_type_annotations_.push_back(runtime_type_annotation);
+        runtimeTypeAnnotations_.push_back(runtimeTypeAnnotation);
     }
 
-    void AddTypeAnnotation(AnnotationItem *type_annotation)
+    void AddTypeAnnotation(AnnotationItem *typeAnnotation)
     {
-        type_annotations_.push_back(type_annotation);
+        typeAnnotations_.push_back(typeAnnotation);
     }
 
     TypeItem *GetType() const
@@ -821,7 +820,7 @@ public:
 
     const std::vector<AnnotationItem *> &GetRuntimeAnnotations() const
     {
-        return runtime_annotations_;
+        return runtimeAnnotations_;
     }
 
     const std::vector<AnnotationItem *> &GetAnnotations() const
@@ -831,12 +830,12 @@ public:
 
     const std::vector<AnnotationItem *> &GetRuntimeTypeAnnotations() const
     {
-        return runtime_type_annotations_;
+        return runtimeTypeAnnotations_;
     }
 
     const std::vector<AnnotationItem *> &GetTypeAnnotations() const
     {
-        return type_annotations_;
+        return typeAnnotations_;
     }
 
     bool HasAnnotations() const
@@ -846,15 +845,15 @@ public:
 
     bool HasRuntimeAnnotations() const
     {
-        return !runtime_annotations_.empty();
+        return !runtimeAnnotations_.empty();
     }
 
 private:
     TypeItem *type_;
-    std::vector<AnnotationItem *> runtime_annotations_;
+    std::vector<AnnotationItem *> runtimeAnnotations_;
     std::vector<AnnotationItem *> annotations_;
-    std::vector<AnnotationItem *> type_annotations_;
-    std::vector<AnnotationItem *> runtime_type_annotations_;
+    std::vector<AnnotationItem *> typeAnnotations_;
+    std::vector<AnnotationItem *> runtimeTypeAnnotations_;
 };
 
 class ParamAnnotationsItem;
@@ -862,7 +861,7 @@ class BaseClassItem;
 
 class MethodItem : public BaseMethodItem {
 public:
-    MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags,
+    MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags,
                std::vector<MethodParamItem> params);
 
     ~MethodItem() override = default;
@@ -872,7 +871,7 @@ public:
 
     void SetSourceLang(SourceLang lang)
     {
-        source_lang_ = lang;
+        sourceLang_ = lang;
     }
 
     void SetCode(CodeItem *code)
@@ -880,19 +879,19 @@ public:
         code_ = code;
     }
 
-    void SetDebugInfo(DebugInfoItem *debug_info)
+    void SetDebugInfo(DebugInfoItem *debugInfo)
     {
-        debug_info_ = debug_info;
+        debugInfo_ = debugInfo;
     }
 
     DebugInfoItem *GetDebugInfo()
     {
-        return debug_info_;
+        return debugInfo_;
     }
 
-    void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
+    void AddRuntimeAnnotation(AnnotationItem *runtimeAnnotation)
     {
-        runtime_annotations_.push_back(runtime_annotation);
+        runtimeAnnotations_.push_back(runtimeAnnotation);
     }
 
     void AddAnnotation(AnnotationItem *annotation)
@@ -900,24 +899,24 @@ public:
         annotations_.push_back(annotation);
     }
 
-    void AddRuntimeTypeAnnotation(AnnotationItem *runtime_type_annotation)
+    void AddRuntimeTypeAnnotation(AnnotationItem *runtimeTypeAnnotation)
     {
-        runtime_type_annotations_.push_back(runtime_type_annotation);
+        runtimeTypeAnnotations_.push_back(runtimeTypeAnnotation);
     }
 
-    void AddTypeAnnotation(AnnotationItem *type_annotation)
+    void AddTypeAnnotation(AnnotationItem *typeAnnotation)
     {
-        type_annotations_.push_back(type_annotation);
+        typeAnnotations_.push_back(typeAnnotation);
     }
 
     void SetRuntimeParamAnnotationItem(ParamAnnotationsItem *annotations)
     {
-        runtime_param_annotations_ = annotations;
+        runtimeParamAnnotations_ = annotations;
     }
 
     void SetParamAnnotationItem(ParamAnnotationsItem *annotations)
     {
-        param_annotations_ = annotations;
+        paramAnnotations_ = annotations;
     }
 
     bool HasRuntimeParamAnnotations() const
@@ -939,7 +938,7 @@ public:
 
     DebugInfoItem *GetDebugInfo() const
     {
-        return debug_info_;
+        return debugInfo_;
     }
 
     size_t CalculateSize() const override;
@@ -958,7 +957,7 @@ public:
 
     std::vector<AnnotationItem *> *GetRuntimeAnnotations()
     {
-        return &runtime_annotations_;
+        return &runtimeAnnotations_;
     }
 
     std::vector<AnnotationItem *> *GetAnnotations()
@@ -968,23 +967,23 @@ public:
 
     std::vector<AnnotationItem *> *GetTypeAnnotations()
     {
-        return &type_annotations_;
+        return &typeAnnotations_;
     }
 
     std::vector<AnnotationItem *> *GetRuntimeTypeAnnotations()
     {
-        return &runtime_type_annotations_;
+        return &runtimeTypeAnnotations_;
     }
 
     void SetProfileSize(size_t size)
     {
         ASSERT(size <= MAX_PROFILE_SIZE);
-        profile_size_ = size;
+        profileSize_ = size;
     }
 
     size_t GetProfileSize() const
     {
-        return profile_size_;
+        return profileSize_;
     }
 
 private:
@@ -996,19 +995,19 @@ private:
 
     std::vector<MethodParamItem> params_;
 
-    SourceLang source_lang_ {SourceLang::PANDA_ASSEMBLY};
+    SourceLang sourceLang_ {SourceLang::PANDA_ASSEMBLY};
     CodeItem *code_ {nullptr};
-    DebugInfoItem *debug_info_ {nullptr};
-    std::vector<AnnotationItem *> runtime_annotations_;
+    DebugInfoItem *debugInfo_ {nullptr};
+    std::vector<AnnotationItem *> runtimeAnnotations_;
     std::vector<AnnotationItem *> annotations_;
-    std::vector<AnnotationItem *> type_annotations_;
-    std::vector<AnnotationItem *> runtime_type_annotations_;
-    ParamAnnotationsItem *runtime_param_annotations_ {nullptr};
-    ParamAnnotationsItem *param_annotations_ {nullptr};
-    uint16_t profile_size_ {0};
+    std::vector<AnnotationItem *> typeAnnotations_;
+    std::vector<AnnotationItem *> runtimeTypeAnnotations_;
+    ParamAnnotationsItem *runtimeParamAnnotations_ {nullptr};
+    ParamAnnotationsItem *paramAnnotations_ {nullptr};
+    uint16_t profileSize_ {0};
 
 public:
-    constexpr static auto MAX_PROFILE_SIZE = std::numeric_limits<decltype(profile_size_)>::max();
+    constexpr static auto MAX_PROFILE_SIZE = std::numeric_limits<decltype(profileSize_)>::max();
 };
 
 class BaseClassItem : public TypeItem {
@@ -1047,19 +1046,19 @@ public:
 
     ~ClassItem() override = default;
 
-    void SetAccessFlags(uint32_t access_flags)
+    void SetAccessFlags(uint32_t accessFlags)
     {
-        access_flags_ = access_flags;
+        accessFlags_ = accessFlags;
     }
 
     void SetSourceLang(SourceLang lang)
     {
-        source_lang_ = lang;
+        sourceLang_ = lang;
     }
 
-    void SetSuperClass(BaseClassItem *super_class)
+    void SetSuperClass(BaseClassItem *superClass)
     {
-        super_class_ = super_class;
+        superClass_ = superClass;
     }
 
     void AddInterface(BaseClassItem *iface)
@@ -1068,9 +1067,9 @@ public:
         ifaces_.push_back(iface);
     }
 
-    void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
+    void AddRuntimeAnnotation(AnnotationItem *runtimeAnnotation)
     {
-        runtime_annotations_.push_back(runtime_annotation);
+        runtimeAnnotations_.push_back(runtimeAnnotation);
     }
 
     void AddAnnotation(AnnotationItem *annotation)
@@ -1078,14 +1077,14 @@ public:
         annotations_.push_back(annotation);
     }
 
-    void AddRuntimeTypeAnnotation(AnnotationItem *runtime_type_annotation)
+    void AddRuntimeTypeAnnotation(AnnotationItem *runtimeTypeAnnotation)
     {
-        runtime_type_annotations_.push_back(runtime_type_annotation);
+        runtimeTypeAnnotations_.push_back(runtimeTypeAnnotation);
     }
 
-    void AddTypeAnnotation(AnnotationItem *type_annotation)
+    void AddTypeAnnotation(AnnotationItem *typeAnnotation)
     {
-        type_annotations_.push_back(type_annotation);
+        typeAnnotations_.push_back(typeAnnotation);
     }
 
     template <class... Args>
@@ -1104,12 +1103,12 @@ public:
 
     StringItem *GetSourceFile() const
     {
-        return source_file_;
+        return sourceFile_;
     }
 
     void SetSourceFile(StringItem *item)
     {
-        source_file_ = item;
+        sourceFile_ = item;
     }
 
     size_t CalculateSizeWithoutFieldsAndMethods() const;
@@ -1151,7 +1150,7 @@ public:
 
     std::vector<AnnotationItem *> *GetRuntimeAnnotations()
     {
-        return &runtime_annotations_;
+        return &runtimeAnnotations_;
     }
 
     std::vector<AnnotationItem *> *GetAnnotations()
@@ -1161,27 +1160,27 @@ public:
 
     std::vector<AnnotationItem *> *GetTypeAnnotations()
     {
-        return &type_annotations_;
+        return &typeAnnotations_;
     }
 
     std::vector<AnnotationItem *> *GetRuntimeTypeAnnotations()
     {
-        return &runtime_type_annotations_;
+        return &runtimeTypeAnnotations_;
     }
 
     SourceLang GetSourceLang() const
     {
-        return source_lang_;
+        return sourceLang_;
     }
 
     uint32_t GetAccessFlags() const
     {
-        return access_flags_;
+        return accessFlags_;
     }
 
     BaseClassItem *GetSuperClass() const
     {
-        return super_class_;
+        return superClass_;
     }
 
     const std::vector<BaseClassItem *> &GetInterfaces() const
@@ -1226,15 +1225,15 @@ private:
 
     bool WriteTaggedData(Writer *writer);
 
-    BaseClassItem *super_class_ {nullptr};
-    uint32_t access_flags_ {0};
-    SourceLang source_lang_ {SourceLang::PANDA_ASSEMBLY};
+    BaseClassItem *superClass_ {nullptr};
+    uint32_t accessFlags_ {0};
+    SourceLang sourceLang_ {SourceLang::PANDA_ASSEMBLY};
     std::vector<BaseClassItem *> ifaces_;
-    std::vector<AnnotationItem *> runtime_annotations_;
+    std::vector<AnnotationItem *> runtimeAnnotations_;
     std::vector<AnnotationItem *> annotations_;
-    std::vector<AnnotationItem *> type_annotations_;
-    std::vector<AnnotationItem *> runtime_type_annotations_;
-    StringItem *source_file_ {nullptr};
+    std::vector<AnnotationItem *> typeAnnotations_;
+    std::vector<AnnotationItem *> runtimeTypeAnnotations_;
+    StringItem *sourceFile_ {nullptr};
     std::vector<std::unique_ptr<FieldItem>> fields_;
     std::multiset<std::unique_ptr<MethodItem>, MethodCompByName> methods_;
 
@@ -1289,8 +1288,8 @@ public:
 
 class ForeignMethodItem : public BaseMethodItem {
 public:
-    ForeignMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t access_flags)
-        : BaseMethodItem(cls, name, proto, access_flags)
+    ForeignMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags)
+        : BaseMethodItem(cls, name, proto, accessFlags)
     {
     }
 
@@ -1314,7 +1313,7 @@ class ProtoItem;
 
 class ParamAnnotationsItem : public BaseItem {
 public:
-    ParamAnnotationsItem(MethodItem *method, bool is_runtime_annotations);
+    ParamAnnotationsItem(MethodItem *method, bool isRuntimeAnnotations);
 
     ~ParamAnnotationsItem() override = default;
 
@@ -1336,7 +1335,7 @@ private:
 
 class ProtoItem : public IndexedItem {
 public:
-    ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params);
+    ProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params);
 
     ~ProtoItem() override = default;
 
@@ -1346,7 +1345,7 @@ public:
     size_t CalculateSize() const override
     {
         size_t size = shorty_.size() * sizeof(uint16_t);
-        size += reference_types_.size() * IDX_SIZE;
+        size += referenceTypes_.size() * IDX_SIZE;
         return size;
     }
 
@@ -1374,7 +1373,7 @@ public:
 
     const std::vector<TypeItem *> &GetRefTypes() const
     {
-        return reference_types_;
+        return referenceTypes_;
     }
 
 private:
@@ -1383,15 +1382,15 @@ private:
     void AddType(TypeItem *type, size_t *n);
 
     std::vector<uint16_t> shorty_;
-    std::vector<TypeItem *> reference_types_;
+    std::vector<TypeItem *> referenceTypes_;
 };
 
 class CodeItem : public BaseItem {
 public:
     class CatchBlock : public BaseItem {
     public:
-        CatchBlock(MethodItem *method, BaseClassItem *type, size_t handler_pc, size_t code_size = 0)
-            : method_(method), type_(type), handler_pc_(handler_pc), code_size_(code_size)
+        CatchBlock(MethodItem *method, BaseClassItem *type, size_t handlerPc, size_t codeSize = 0)
+            : method_(method), type_(type), handlerPc_(handlerPc), codeSize_(codeSize)
         {
         }
 
@@ -1412,12 +1411,12 @@ public:
 
         size_t GetHandlerPc() const
         {
-            return handler_pc_;
+            return handlerPc_;
         }
 
         size_t GetCodeSize() const
         {
-            return code_size_;
+            return codeSize_;
         }
 
         size_t CalculateSize() const override;
@@ -1432,14 +1431,14 @@ public:
     private:
         MethodItem *method_;
         BaseClassItem *type_;
-        size_t handler_pc_;
-        size_t code_size_;
+        size_t handlerPc_;
+        size_t codeSize_;
     };
 
     class TryBlock : public BaseItem {
     public:
-        TryBlock(size_t start_pc, size_t length, std::vector<CatchBlock> catch_blocks)
-            : start_pc_(start_pc), length_(length), catch_blocks_(std::move(catch_blocks))
+        TryBlock(size_t startPc, size_t length, std::vector<CatchBlock> catchBlocks)
+            : startPc_(startPc), length_(length), catchBlocks_(std::move(catchBlocks))
         {
         }
 
@@ -1450,7 +1449,7 @@ public:
 
         size_t GetStartPc() const
         {
-            return start_pc_;
+            return startPc_;
         }
 
         size_t GetLength() const
@@ -1460,7 +1459,7 @@ public:
 
         std::vector<CatchBlock> GetCatchBlocks() const
         {
-            return catch_blocks_;
+            return catchBlocks_;
         }
 
         size_t CalculateSizeWithoutCatchBlocks() const;
@@ -1477,13 +1476,13 @@ public:
         }
 
     private:
-        size_t start_pc_;
+        size_t startPc_;
         size_t length_;
-        std::vector<CatchBlock> catch_blocks_;
+        std::vector<CatchBlock> catchBlocks_;
     };
 
-    CodeItem(size_t num_vregs, size_t num_args, std::vector<uint8_t> instructions)
-        : num_vregs_(num_vregs), num_args_(num_args), instructions_(std::move(instructions))
+    CodeItem(size_t numVregs, size_t numArgs, std::vector<uint8_t> instructions)
+        : numVregs_(numVregs), numArgs_(numArgs), instructions_(std::move(instructions))
     {
     }
 
@@ -1491,14 +1490,14 @@ public:
 
     ~CodeItem() override = default;
 
-    void SetNumVregs(size_t num_vregs)
+    void SetNumVregs(size_t numVregs)
     {
-        num_vregs_ = num_vregs;
+        numVregs_ = numVregs;
     }
 
-    void SetNumArgs(size_t num_args)
+    void SetNumArgs(size_t numArgs)
     {
-        num_args_ = num_args;
+        numArgs_ = numArgs;
     }
 
     std::vector<uint8_t> *GetInstructions()
@@ -1506,24 +1505,24 @@ public:
         return &instructions_;
     }
 
-    void SetNumInstructions(size_t num_ins)
+    void SetNumInstructions(size_t numIns)
     {
-        num_ins_ = num_ins;
+        numIns_ = numIns;
     }
 
     size_t GetNumInstructions() const
     {
-        return num_ins_;
+        return numIns_;
     }
 
     std::vector<TryBlock> GetTryBlocks()
     {
-        return try_blocks_;
+        return tryBlocks_;
     }
 
-    void AddTryBlock(const TryBlock &try_block)
+    void AddTryBlock(const TryBlock &tryBlock)
     {
-        try_blocks_.push_back(try_block);
+        tryBlocks_.push_back(tryBlock);
     }
 
     size_t CalculateSizeWithoutTryBlocks() const;
@@ -1553,41 +1552,41 @@ public:
             if (method == nullptr) {
                 continue;
             }
-            std::string class_name;
+            std::string className;
             if (method->GetClassItem() != nullptr) {
-                class_name = method->GetClassItem()->GetNameItem()->GetData();
-                class_name.pop_back();          // remove '\0'
-                ASSERT(class_name.size() > 2);  // 2 - L and ;
-                class_name.erase(0, 1);
-                class_name.pop_back();
-                class_name.append("::");
+                className = method->GetClassItem()->GetNameItem()->GetData();
+                className.pop_back();          // remove '\0'
+                ASSERT(className.size() > 2);  // 2 - L and ;
+                className.erase(0, 1);
+                className.pop_back();
+                className.append("::");
             }
-            class_name.append(method->GetNameItem()->GetData());
-            class_name.pop_back();  // remove '\0'
-            names.emplace_back(class_name);
+            className.append(method->GetNameItem()->GetData());
+            className.pop_back();  // remove '\0'
+            names.emplace_back(className);
         }
         return names;
     }
 
     size_t GetNumVregs()
     {
-        return num_vregs_;
+        return numVregs_;
     }
 
     size_t GetNumArgs()
     {
-        return num_args_;
+        return numArgs_;
     }
 
     DEFAULT_MOVE_SEMANTIC(CodeItem);
     DEFAULT_COPY_SEMANTIC(CodeItem);
 
 private:
-    size_t num_vregs_ {0};
-    size_t num_args_ {0};
-    size_t num_ins_ {0};
+    size_t numVregs_ {0};
+    size_t numArgs_ {0};
+    size_t numIns_ {0};
     std::vector<uint8_t> instructions_;
-    std::vector<TryBlock> try_blocks_;
+    std::vector<TryBlock> tryBlocks_;
     std::vector<BaseMethodItem *> methods_;
 };
 
@@ -1690,8 +1689,8 @@ private:
 
 class ArrayValueItem : public ValueItem {
 public:
-    ArrayValueItem(panda_file::Type component_type, std::vector<ScalarValueItem> items)
-        : ValueItem(Type::ARRAY), component_type_(component_type), items_(std::move(items))
+    ArrayValueItem(panda_file::Type componentType, std::vector<ScalarValueItem> items)
+        : ValueItem(Type::ARRAY), componentType_(componentType), items_(std::move(items))
     {
     }
 
@@ -1708,7 +1707,7 @@ public:
 
     panda_file::Type GetComponentType() const
     {
-        return component_type_;
+        return componentType_;
     }
 
     const std::vector<ScalarValueItem> &GetItems() const
@@ -1719,7 +1718,7 @@ public:
 private:
     size_t GetComponentSize() const;
 
-    panda_file::Type component_type_;
+    panda_file::Type componentType_;
     std::vector<ScalarValueItem> items_;
 };
 

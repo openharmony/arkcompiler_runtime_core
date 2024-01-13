@@ -29,7 +29,7 @@ struct Version {
 const size_t VERSION_FCOUNT = 1;
 
 struct AppInfo {
-    std::string app_name {};
+    std::string appName {};
     uint64_t hash {};
     uint32_t pid {};
 };

@@ -34,11 +34,11 @@ class Cse : public Optimization {
 public:
     explicit Cse(Graph *graph)
         : Optimization(graph),
-          replace_pair_(graph->GetLocalAllocator()->Adapter()),
-          min_replace_star_(graph->GetLocalAllocator()->Adapter()),
-          deleted_insts_(graph->GetLocalAllocator()->Adapter()),
-          same_exp_pair_(graph->GetLocalAllocator()->Adapter()),
-          matched_tuple_(graph->GetLocalAllocator()->Adapter()),
+          replacePair_(graph->GetLocalAllocator()->Adapter()),
+          minReplaceStar_(graph->GetLocalAllocator()->Adapter()),
+          deletedInsts_(graph->GetLocalAllocator()->Adapter()),
+          sameExpPair_(graph->GetLocalAllocator()->Adapter()),
+          matchedTuple_(graph->GetLocalAllocator()->Adapter()),
           candidates_(graph->GetLocalAllocator()->Adapter())
     {
     }
@@ -51,7 +51,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerCse();
+        return g_options.IsCompilerCse();
     }
 
     const char *GetPassName() const override
@@ -246,18 +246,18 @@ private:
         GetGraph()->GetEventWriter().EventCse(inst->GetId(), inst->GetPc());
     }
 
-    void RemoveInstsIn(InstVector *deleted_insts)
+    void RemoveInstsIn(InstVector *deletedInsts)
     {
         // delete redundant insts
-        if (deleted_insts->empty()) {
+        if (deletedInsts->empty()) {
             return;
         }
-        for (auto inst : *deleted_insts) {
+        for (auto inst : *deletedInsts) {
             DeleteInstLog(inst);
             auto bb = inst->GetBasicBlock();
             bb->RemoveInst(inst);
         }
-        is_applied_ = true;
+        isApplied_ = true;
     }
 
     void ConvertTreeForestToStarForest();
@@ -266,12 +266,12 @@ private:
     void BuildSetOfPairs(BasicBlock *block);
 
 private:
-    bool is_applied_ = false;
-    ArenaVector<PairInsts> replace_pair_;
-    ArenaVector<PairInsts> min_replace_star_;
-    InstVector deleted_insts_;
-    ArenaMap<Exp, PairVectorsInsts, Cmpexp> same_exp_pair_;
-    ArenaVector<std::pair<Inst *, PairInsts>> matched_tuple_;
+    bool isApplied_ = false;
+    ArenaVector<PairInsts> replacePair_;
+    ArenaVector<PairInsts> minReplaceStar_;
+    InstVector deletedInsts_;
+    ArenaMap<Exp, PairVectorsInsts, Cmpexp> sameExpPair_;
+    ArenaVector<std::pair<Inst *, PairInsts>> matchedTuple_;
     ArenaMap<Exp, InstVector, Cmpexp> candidates_;
 };
 }  // namespace panda::compiler

@@ -45,11 +45,11 @@ public:
     // access to status might require implementation-dependent synchronization, so we have to store it
     // in the native context
     virtual Coroutine::Status GetStatus() const = 0;
-    virtual void SetStatus(Coroutine::Status new_status) = 0;
+    virtual void SetStatus(Coroutine::Status newStatus) = 0;
 
     virtual void Destroy() = 0;
     virtual void CleanUp() = 0;
-    virtual void RequestSuspend(bool gets_blocked) = 0;
+    virtual void RequestSuspend(bool getsBlocked) = 0;
     virtual void RequestResume() = 0;
     virtual void RequestUnblock() = 0;
 
@@ -57,7 +57,7 @@ public:
      * Writes coroutine stack parameters into the provided stack_addr, stack_size, guard_size variables
      * and returns true on successful operation
      */
-    virtual bool RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size) = 0;
+    virtual bool RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize) = 0;
 
 private:
     Coroutine *co_ = nullptr;

@@ -66,8 +66,8 @@ namespace panda::ets::test {
     return 1;
 }
 [[maybe_unused]] static long SkoalaParagraphParagraphBuilder1nMake(
-    [[maybe_unused]] panda::Method *m, [[maybe_unused]] long paragraph_style_ptr /*KNativePointer*/,
-    [[maybe_unused]] long font_collection_ptr /*KNativePointer*/)
+    [[maybe_unused]] panda::Method *m, [[maybe_unused]] long paragraphStylePtr /*KNativePointer*/,
+    [[maybe_unused]] long fontCollectionPtr /*KNativePointer*/)
 {
     return 1;
 }
@@ -97,7 +97,7 @@ namespace panda::ets::test {
     return 1;
 }
 [[maybe_unused]] static long SkoalaManagedString1nMake([[maybe_unused]] panda::Method *m,
-                                                       [[maybe_unused]] char *text_str /*KStringPtr*/)
+                                                       [[maybe_unused]] char *textStr /*KStringPtr*/)
 {
     return 1;
 }
@@ -166,8 +166,8 @@ namespace panda::ets::test {
 }
 [[maybe_unused]] static void SkoalaCanvas1nDrawDrawable([[maybe_unused]] panda::Method *m,
                                                         [[maybe_unused]] long ptr /*KNativePointer*/,
-                                                        [[maybe_unused]] long drawable_ptr /*KNativePointer*/,
-                                                        [[maybe_unused]] long matrix_arr /*KFloatPtr*/)
+                                                        [[maybe_unused]] long drawablePtr /*KNativePointer*/,
+                                                        [[maybe_unused]] long matrixArr /*KFloatPtr*/)
 {
 }
 [[maybe_unused]] static void SkoalaCanvas1nRestore([[maybe_unused]] panda::Method *m,
@@ -180,26 +180,25 @@ namespace panda::ets::test {
 {
 }
 [[maybe_unused]] static void SkoalaCanvas1nDrawOval([[maybe_unused]] panda::Method *m,
-                                                    [[maybe_unused]] long canvas_ptr /*KNativePointer*/,
+                                                    [[maybe_unused]] long canvasPtr /*KNativePointer*/,
                                                     [[maybe_unused]] float left, [[maybe_unused]] float top,
                                                     [[maybe_unused]] float right, [[maybe_unused]] float bottom,
-                                                    [[maybe_unused]] long paint_ptr /*KNativePointer*/)
+                                                    [[maybe_unused]] long paintPtr /*KNativePointer*/)
 {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraphBuilder1nPushStyle(
     [[maybe_unused]] panda::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/,
-    [[maybe_unused]] long text_style_ptr /*KNativePointer*/)
+    [[maybe_unused]] long textStylePtr /*KNativePointer*/)
 {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraphBuilder1nAddText([[maybe_unused]] panda::Method *m,
                                                                       [[maybe_unused]] long ptr /*KNativePointer*/,
-                                                                      [[maybe_unused]] long text_string /*KStringPtr*/)
+                                                                      [[maybe_unused]] long textString /*KStringPtr*/)
 {
 }
 [[maybe_unused]] static void SkoalaParagraphFontCollection1nSetDefaultFontManager(
     [[maybe_unused]] panda::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/,
-    [[maybe_unused]] long font_manager_ptr /*KNativePointer*/,
-    [[maybe_unused]] long default_family_name_str /*KStringPtr*/)
+    [[maybe_unused]] long fontManagerPtr /*KNativePointer*/, [[maybe_unused]] long defaultFamilyNameStr /*KStringPtr*/)
 {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraph1nLayout([[maybe_unused]] panda::Method *m,
@@ -209,7 +208,7 @@ namespace panda::ets::test {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraph1nPaint([[maybe_unused]] panda::Method *m,
                                                              [[maybe_unused]] long ptr /*KNativePointer*/,
-                                                             [[maybe_unused]] long canvas_ptr /*KNativePointer*/,
+                                                             [[maybe_unused]] long canvasPtr /*KNativePointer*/,
                                                              [[maybe_unused]] float x, [[maybe_unused]] float y)
 {
 }
@@ -229,7 +228,7 @@ namespace panda::ets::test {
 {
 }
 [[maybe_unused]] static void SkoalaEnqueueRun([[maybe_unused]] panda::Method *m,
-                                              [[maybe_unused]] long redrawer_peer_ptr /*KNativePointer*/)
+                                              [[maybe_unused]] long redrawerPeerPtr /*KNativePointer*/)
 {
 }
 // NOLINTEND(google-runtime-int)
@@ -306,22 +305,22 @@ static bool InitExports()
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 TEST(EtsVMConfing, PeasINT)
 {
-    std::string stdlib_abc;
-    std::string path_abc;
+    std::string stdlibAbc;
+    std::string pathAbc;
 
 #if defined(STDLIB_ABC) && defined(PATH_ABC)
 #define ETS_UNIT_STRING_STEP(s) #s
 #define ETS_UNIT_STRING(s) ETS_UNIT_STRING_STEP(s)
-    stdlib_abc = ETS_UNIT_STRING(STDLIB_ABC);
-    path_abc = ETS_UNIT_STRING(PATH_ABC);
+    stdlibAbc = ETS_UNIT_STRING(STDLIB_ABC);
+    pathAbc = ETS_UNIT_STRING(PATH_ABC);
 #undef ETS_UNIT_STRING
 #undef ETS_UNIT_STRING_STEP
 #endif
 
-    ASSERT_FALSE(stdlib_abc.empty());
-    ASSERT_FALSE(path_abc.empty());
+    ASSERT_FALSE(stdlibAbc.empty());
+    ASSERT_FALSE(pathAbc.empty());
 
-    ASSERT_TRUE(panda::ets::CreateRuntime(stdlib_abc, path_abc, false, false));
+    ASSERT_TRUE(panda::ets::CreateRuntime(stdlibAbc, pathAbc, false, false));
     EXPECT_TRUE(InitExports());
     auto res = panda::ets::ExecuteMain();
     EXPECT_TRUE(res.first == true);
@@ -331,22 +330,22 @@ TEST(EtsVMConfing, PeasINT)
 
 TEST(EtsVMConfing, PeasJIT)
 {
-    std::string stdlib_abc;
-    std::string path_abc;
+    std::string stdlibAbc;
+    std::string pathAbc;
 
 #if defined(STDLIB_ABC) && defined(PATH_ABC)
 #define ETS_UNIT_STRING_STEP(s) #s
 #define ETS_UNIT_STRING(s) ETS_UNIT_STRING_STEP(s)
-    stdlib_abc = ETS_UNIT_STRING(STDLIB_ABC);
-    path_abc = ETS_UNIT_STRING(PATH_ABC);
+    stdlibAbc = ETS_UNIT_STRING(STDLIB_ABC);
+    pathAbc = ETS_UNIT_STRING(PATH_ABC);
 #undef ETS_UNIT_STRING
 #undef ETS_UNIT_STRING_STEP
 #endif
 
-    ASSERT_FALSE(stdlib_abc.empty());
-    ASSERT_FALSE(path_abc.empty());
+    ASSERT_FALSE(stdlibAbc.empty());
+    ASSERT_FALSE(pathAbc.empty());
 
-    ASSERT_TRUE(panda::ets::CreateRuntime(stdlib_abc, path_abc, true, false));
+    ASSERT_TRUE(panda::ets::CreateRuntime(stdlibAbc, pathAbc, true, false));
     EXPECT_TRUE(InitExports());
     auto res = panda::ets::ExecuteMain();
     EXPECT_TRUE(res.first == true);
@@ -360,25 +359,25 @@ TEST(EtsVMConfing, PeasAOT)
     GTEST_SKIP();
 #endif
 
-    std::string stdlib_abc;
-    std::string path_abc;
-    std::string path_an;
+    std::string stdlibAbc;
+    std::string pathAbc;
+    std::string pathAn;
 
 #if defined(STDLIB_ABC) && defined(PATH_ABC)
 #define ETS_UNIT_STRING_STEP(s) #s
 #define ETS_UNIT_STRING(s) ETS_UNIT_STRING_STEP(s)
-    stdlib_abc = ETS_UNIT_STRING(STDLIB_ABC);
-    path_abc = ETS_UNIT_STRING(PATH_ABC);
-    path_an = ETS_UNIT_STRING(PATH_AN);
+    stdlibAbc = ETS_UNIT_STRING(STDLIB_ABC);
+    pathAbc = ETS_UNIT_STRING(PATH_ABC);
+    pathAn = ETS_UNIT_STRING(PATH_AN);
 #undef ETS_UNIT_STRING
 #undef ETS_UNIT_STRING_STEP
 #endif
 
-    ASSERT_FALSE(stdlib_abc.empty());
-    ASSERT_FALSE(path_abc.empty());
-    ASSERT_FALSE(path_an.empty());
+    ASSERT_FALSE(stdlibAbc.empty());
+    ASSERT_FALSE(pathAbc.empty());
+    ASSERT_FALSE(pathAn.empty());
 
-    ASSERT_TRUE(panda::ets::CreateRuntime(stdlib_abc, path_abc, false, true));
+    ASSERT_TRUE(panda::ets::CreateRuntime(stdlibAbc, pathAbc, false, true));
     EXPECT_TRUE(InitExports());
     auto res = panda::ets::ExecuteMain();
     EXPECT_TRUE(res.first == true);

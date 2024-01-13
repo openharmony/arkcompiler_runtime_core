@@ -37,7 +37,7 @@ public:
     llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysis_manager);
 
 private:
-    bool InlineCallTree(llvm::Function *function, int32_t level, int32_t max_level);
+    bool InlineCallTree(llvm::Function *function, int32_t level, int32_t maxLevel);
 
 public:
     static constexpr llvm::StringRef ARG_NAME = "mark-always-inline";

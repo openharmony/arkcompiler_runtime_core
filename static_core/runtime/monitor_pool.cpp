@@ -24,15 +24,15 @@ namespace panda {
 
 Monitor *MonitorPool::CreateMonitor(ObjectHeader *obj)
 {
-    os::memory::LockHolder lock(pool_lock_);
+    os::memory::LockHolder lock(poolLock_);
     for (Monitor::MonitorId i = 0; i < MAX_MONITOR_ID; i++) {
-        last_id_ = (last_id_ + 1) % MAX_MONITOR_ID;
-        if (monitors_.count(last_id_) == 0) {
-            auto monitor = allocator_->New<Monitor>(last_id_);
+        lastId_ = (lastId_ + 1) % MAX_MONITOR_ID;
+        if (monitors_.count(lastId_) == 0) {
+            auto monitor = allocator_->New<Monitor>(lastId_);
             if (monitor == nullptr) {
                 return nullptr;
             }
-            monitors_[last_id_] = monitor;
+            monitors_[lastId_] = monitor;
             monitor->SetObject(obj);
             return monitor;
         }
@@ -43,7 +43,7 @@ Monitor *MonitorPool::CreateMonitor(ObjectHeader *obj)
 
 Monitor *MonitorPool::LookupMonitor(Monitor::MonitorId id)
 {
-    os::memory::LockHolder lock(pool_lock_);
+    os::memory::LockHolder lock(poolLock_);
     auto it = monitors_.find(id);
     if (it != monitors_.end()) {
         return it->second;
@@ -53,7 +53,7 @@ Monitor *MonitorPool::LookupMonitor(Monitor::MonitorId id)
 
 void MonitorPool::FreeMonitor(Monitor::MonitorId id)
 {
-    os::memory::LockHolder lock(pool_lock_);
+    os::memory::LockHolder lock(poolLock_);
     auto it = monitors_.find(id);
     if (it != monitors_.end()) {
         auto *monitor = it->second;
@@ -64,21 +64,21 @@ void MonitorPool::FreeMonitor(Monitor::MonitorId id)
 
 void MonitorPool::DeflateMonitors()
 {
-    os::memory::LockHolder lock(pool_lock_);
-    for (auto monitor_iter = monitors_.begin(); monitor_iter != monitors_.end();) {
-        auto monitor = monitor_iter->second;
+    os::memory::LockHolder lock(poolLock_);
+    for (auto monitorIter = monitors_.begin(); monitorIter != monitors_.end();) {
+        auto monitor = monitorIter->second;
         if (monitor->DeflateInternal()) {
-            monitor_iter = monitors_.erase(monitor_iter);
+            monitorIter = monitors_.erase(monitorIter);
             allocator_->Delete(monitor);
         } else {
-            monitor_iter++;
+            monitorIter++;
         }
     }
 }
 
 void MonitorPool::ReleaseMonitors(MTManagedThread *thread)
 {
-    os::memory::LockHolder lock(pool_lock_);
+    os::memory::LockHolder lock(poolLock_);
     for (auto &it : monitors_) {
         auto *monitor = it.second;
         // Recursive lock is possible
@@ -90,15 +90,15 @@ void MonitorPool::ReleaseMonitors(MTManagedThread *thread)
 
 PandaSet<Monitor::MonitorId> MonitorPool::GetEnteredMonitorsIds(MTManagedThread *thread)
 {
-    PandaSet<Monitor::MonitorId> entered_monitors_ids;
-    os::memory::LockHolder lock(pool_lock_);
+    PandaSet<Monitor::MonitorId> enteredMonitorsIds;
+    os::memory::LockHolder lock(poolLock_);
     for (auto &it : monitors_) {
         auto *monitor = it.second;
         if (monitor->GetOwner() == thread) {
-            entered_monitors_ids.insert(monitor->GetId());
+            enteredMonitorsIds.insert(monitor->GetId());
         }
     }
-    return entered_monitors_ids;
+    return enteredMonitorsIds;
 }
 
 }  // namespace panda

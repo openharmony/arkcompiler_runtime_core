@@ -21,10 +21,10 @@
 namespace panda::mem {
 
 template <class LanguageConfig>
-std::ostream &operator<<(std::ostream &os, const RootManager<LanguageConfig> &root_manager)
+std::ostream &operator<<(std::ostream &os, const RootManager<LanguageConfig> &rootManager)
 {
     os << "Dump of roots " << std::endl;
-    root_manager.VisitNonHeapRoots([&os](const GCRoot &gc_root) { os << gc_root; });
+    rootManager.VisitNonHeapRoots([&os](const GCRoot &gcRoot) { os << gcRoot; });
     return os;
 }
 

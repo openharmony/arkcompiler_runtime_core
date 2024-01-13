@@ -20,9 +20,9 @@
 namespace panda::compiler {
 ConditionChainCache::ConditionChainCache(ArenaAllocator *allocator) : cache_(allocator->Adapter()) {}
 
-void ConditionChainCache::Insert(ConditionChain *chain, Inst *phi_inst)
+void ConditionChainCache::Insert(ConditionChain *chain, Inst *phiInst)
 {
-    cache_.insert({chain, phi_inst});
+    cache_.insert({chain, phiInst});
 }
 
 static bool Equal(const ConditionChain *chain0, const ConditionChain *chain1)

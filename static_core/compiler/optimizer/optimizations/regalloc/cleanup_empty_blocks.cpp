@@ -42,9 +42,9 @@ static bool TryRemoveEmptyBlock(BasicBlock *bb)
         return false;
     }
 
-    bool bad_loop = bb->GetLoop()->IsIrreducible();
-    bb->GetGraph()->RemoveEmptyBlockWithPhis(bb, bad_loop);
-    if (bad_loop) {
+    bool badLoop = bb->GetLoop()->IsIrreducible();
+    bb->GetGraph()->RemoveEmptyBlockWithPhis(bb, badLoop);
+    if (badLoop) {
         bb->GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
         bb->GetGraph()->RunPass<LoopAnalyzer>();
     }
@@ -57,17 +57,17 @@ bool CleanupEmptyBlocks(Graph *graph)
     graph->RunPass<LoopAnalyzer>();
 
     auto alloc = graph->GetAllocator();
-    auto empty_blocks = ArenaVector<BasicBlock *>(alloc->Adapter());
+    auto emptyBlocks = ArenaVector<BasicBlock *>(alloc->Adapter());
 
     for (auto bb : graph->GetVectorBlocks()) {
         if (!Cleanup::SkipBasicBlock(bb) && bb->IsEmpty()) {
-            empty_blocks.push_back(bb);
+            emptyBlocks.push_back(bb);
         }
     }
 
     auto modified = false;
 
-    for (auto bb : empty_blocks) {
+    for (auto bb : emptyBlocks) {
         auto succ = bb->GetSuccessor(0);
         // Strange infinite loop with only one empty block, or loop pre-header - lets bail out
         if (succ == bb || succ->GetLoop()->GetPreHeader() == bb) {

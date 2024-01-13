@@ -22,54 +22,54 @@
 
 namespace panda::ets::interop::js::ets_proxy {
 
-napi_value GetETSFunction(napi_env env, std::string_view class_descriptor, std::string_view method_name)
+napi_value GetETSFunction(napi_env env, std::string_view classDescriptor, std::string_view methodName)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
     [[maybe_unused]] EtsJSNapiEnvScope envscope(ctx, env);
-    ScopedManagedCodeThread managed_scope(coro);
+    ScopedManagedCodeThread managedScope(coro);
 
-    EtsClass *ets_class = coro->GetPandaVM()->GetClassLinker()->GetClass(class_descriptor.data());
-    if (UNLIKELY(ets_class == nullptr)) {
-        InteropCtx::ThrowJSError(env, "GetETSFunction: unresolved class " + std::string(class_descriptor));
+    EtsClass *etsClass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data());
+    if (UNLIKELY(etsClass == nullptr)) {
+        InteropCtx::ThrowJSError(env, "GetETSFunction: unresolved class " + std::string(classDescriptor));
         return nullptr;
     }
 
-    EtsMethod *ets_method = ets_class->GetDirectMethod(method_name.data());
-    if (UNLIKELY(ets_method == nullptr)) {
-        InteropCtx::ThrowJSError(env, "GetETSFunction: class " + std::string(class_descriptor) + " doesn't contain " +
-                                          std::string(method_name) + " method");
+    EtsMethod *etsMethod = etsClass->GetDirectMethod(methodName.data());
+    if (UNLIKELY(etsMethod == nullptr)) {
+        InteropCtx::ThrowJSError(env, "GetETSFunction: class " + std::string(classDescriptor) + " doesn't contain " +
+                                          std::string(methodName) + " method");
         return nullptr;
     }
 
-    EtsMethodWrapper *ets_method_wrapper = EtsMethodWrapper::GetFunction(ctx, ets_method);
-    if (UNLIKELY(ets_method_wrapper == nullptr)) {
-        InteropCtx::ThrowJSError(env, "GetETSFunction: cannot get EtsMethodWrapper, class_descriptor=" +
-                                          std::string(class_descriptor) + " method_name=" + std::string(method_name));
+    EtsMethodWrapper *etsMethodWrapper = EtsMethodWrapper::GetFunction(ctx, etsMethod);
+    if (UNLIKELY(etsMethodWrapper == nullptr)) {
+        InteropCtx::ThrowJSError(env, "GetETSFunction: cannot get EtsMethodWrapper, classDescriptor=" +
+                                          std::string(classDescriptor) + " methodName=" + std::string(methodName));
         return nullptr;
     }
-    return ets_method_wrapper->GetJsValue(env);
+    return etsMethodWrapper->GetJsValue(env);
 }
 
-napi_value GetETSClass(napi_env env, std::string_view class_descriptor)
+napi_value GetETSClass(napi_env env, std::string_view classDescriptor)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
     [[maybe_unused]] EtsJSNapiEnvScope envscope(ctx, env);
-    ScopedManagedCodeThread managed_scope(coro);
+    ScopedManagedCodeThread managedScope(coro);
 
-    EtsClass *ets_klass = coro->GetPandaVM()->GetClassLinker()->GetClass(class_descriptor.data());
-    if (UNLIKELY(ets_klass == nullptr)) {
-        InteropCtx::ThrowJSError(env, "GetETSClass: unresolved klass " + std::string(class_descriptor));
+    EtsClass *etsKlass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data());
+    if (UNLIKELY(etsKlass == nullptr)) {
+        InteropCtx::ThrowJSError(env, "GetETSClass: unresolved klass " + std::string(classDescriptor));
         return nullptr;
     }
 
-    EtsClassWrapper *ets_class_wrapper = EtsClassWrapper::Get(ctx, ets_klass);
-    if (UNLIKELY(ets_class_wrapper == nullptr)) {
+    EtsClassWrapper *etsClassWrapper = EtsClassWrapper::Get(ctx, etsKlass);
+    if (UNLIKELY(etsClassWrapper == nullptr)) {
         return nullptr;
     }
 
-    return ets_class_wrapper->GetJsCtor(env);
+    return etsClassWrapper->GetJsCtor(env);
 }
 
 }  // namespace panda::ets::interop::js::ets_proxy

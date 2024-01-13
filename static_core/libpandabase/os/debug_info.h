@@ -42,7 +42,7 @@ public:
     /*
      * Find location (name, source file, line) of the specified pc in source code
      */
-    bool GetSrcLocation(uintptr_t pc, std::string *function, std::string *src_file, uint32_t *line);
+    bool GetSrcLocation(uintptr_t pc, std::string *function, std::string *srcFile, uint32_t *line);
 
     void Destroy();
 
@@ -58,12 +58,12 @@ private:
      */
     class CompUnit {
     public:
-        CompUnit(Dwarf_Die cu_die, Dwarf_Debug dbg) : dbg_(dbg), cu_die_(cu_die) {}
+        CompUnit(Dwarf_Die cuDie, Dwarf_Debug dbg) : dbg_(dbg), cuDie_(cuDie) {}
 
-        CompUnit(CompUnit &&e) : dbg_(e.dbg_), cu_die_(e.cu_die_), line_ctx_(e.line_ctx_)
+        CompUnit(CompUnit &&e) : dbg_(e.dbg_), cuDie_(e.cuDie_), lineCtx_(e.lineCtx_)
         {
-            e.cu_die_ = nullptr;
-            e.line_ctx_ = nullptr;
+            e.cuDie_ = nullptr;
+            e.lineCtx_ = nullptr;
         }
 
         ~CompUnit();
@@ -71,16 +71,16 @@ private:
         CompUnit &operator=(CompUnit &&e)
         {
             dbg_ = e.dbg_;
-            cu_die_ = e.cu_die_;
-            e.cu_die_ = nullptr;
-            line_ctx_ = e.line_ctx_;
-            e.line_ctx_ = nullptr;
+            cuDie_ = e.cuDie_;
+            e.cuDie_ = nullptr;
+            lineCtx_ = e.lineCtx_;
+            e.lineCtx_ = nullptr;
             return *this;
         }
 
         Dwarf_Die GetDie() const
         {
-            return cu_die_;
+            return cuDie_;
         }
 
         Dwarf_Line_Context GetLineContext();
@@ -89,36 +89,36 @@ private:
 
     private:
         Dwarf_Debug dbg_;
-        Dwarf_Die cu_die_;
-        Dwarf_Line_Context line_ctx_ {nullptr};
+        Dwarf_Die cuDie_;
+        Dwarf_Line_Context lineCtx_ {nullptr};
     };
 
     class Range {
     public:
-        Range(Dwarf_Addr low_pc, Dwarf_Addr high_pc, CompUnit *cu = nullptr,
+        Range(Dwarf_Addr lowPc, Dwarf_Addr highPc, CompUnit *cu = nullptr,
               const std::string &function = std::string())  // NOLINT(modernize-pass-by-value)
-            : low_pc_(low_pc), high_pc_(high_pc), cu_(cu), function_(function)
+            : lowPc_(lowPc), highPc_(highPc), cu_(cu), function_(function)
         {
         }
 
         Dwarf_Addr GetLowPc() const
         {
-            return low_pc_;
+            return lowPc_;
         }
 
         Dwarf_Addr GetHighPc() const
         {
-            return high_pc_;
+            return highPc_;
         }
 
         bool Contain(Dwarf_Addr addr) const
         {
-            return low_pc_ <= addr && addr < high_pc_;
+            return lowPc_ <= addr && addr < highPc_;
         }
 
         bool Contain(const Range &r) const
         {
-            return low_pc_ <= r.low_pc_ && r.high_pc_ <= high_pc_;
+            return lowPc_ <= r.lowPc_ && r.highPc_ <= highPc_;
         }
 
         CompUnit *GetCu() const
@@ -138,36 +138,36 @@ private:
 
         bool operator<(const Range &r) const
         {
-            return high_pc_ < r.high_pc_;
+            return highPc_ < r.highPc_;
         }
 
         bool operator==(const Range &r) const
         {
-            return low_pc_ == r.low_pc_ && high_pc_ == r.high_pc_;
+            return lowPc_ == r.lowPc_ && highPc_ == r.highPc_;
         }
 
     private:
-        Dwarf_Addr low_pc_;
-        Dwarf_Addr high_pc_;
+        Dwarf_Addr lowPc_;
+        Dwarf_Addr highPc_;
         CompUnit *cu_ = nullptr;
         std::string function_;
     };
 
 private:
-    bool FindCompUnitByPc(uintptr_t pc, Dwarf_Die *cu_die);
+    bool FindCompUnitByPc(uintptr_t pc, Dwarf_Die *cuDie);
     void TraverseChildren(CompUnit *cu, Dwarf_Die die);
     void TraverseSiblings(CompUnit *cu, Dwarf_Die die);
     void GetFunctionName(Dwarf_Die die, std::string *function);
-    void AddFunction(CompUnit *cu, Dwarf_Addr low_pc, Dwarf_Addr high_pc, const std::string &function);
-    bool GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context line_ctx, std::string *src_file, uint32_t *line);
+    void AddFunction(CompUnit *cu, Dwarf_Addr lowPc, Dwarf_Addr highPc, const std::string &function);
+    bool GetSrcFileAndLine(uintptr_t pc, Dwarf_Line_Context lineCtx, std::string *srcFile, uint32_t *line);
     Dwarf_Line GetLastLineWithPc(Dwarf_Addr pc, Span<Dwarf_Line>::ConstIterator it,
                                  Span<Dwarf_Line>::ConstIterator end);
-    void GetSrcFileAndLine(Dwarf_Line line, std::string *out_src_file, uint32_t *out_line);
+    void GetSrcFileAndLine(Dwarf_Line line, std::string *outSrcFile, uint32_t *outLine);
     bool PcMatches(uintptr_t pc, Dwarf_Die die);
-    bool GetDieRange(Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc);
-    bool GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *out_low_pc, Dwarf_Addr *out_high_pc);
-    bool FindRangeForPc(uintptr_t pc, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr base_addr, Dwarf_Addr *out_low_pc,
-                        Dwarf_Addr *out_high_pc);
+    bool GetDieRange(Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc);
+    bool GetDieRangeForPc(uintptr_t pc, Dwarf_Die die, Dwarf_Addr *outLowPc, Dwarf_Addr *outHighPc);
+    bool FindRangeForPc(uintptr_t pc, const Span<Dwarf_Ranges> &ranges, Dwarf_Addr baseAddr, Dwarf_Addr *outLowPc,
+                        Dwarf_Addr *outHighPc);
 
 private:
     static constexpr int INVALID_FD = -1;
@@ -175,8 +175,8 @@ private:
     int fd_ {INVALID_FD};
     Dwarf_Debug dbg_ {nullptr};
     Dwarf_Arange *aranges_ {nullptr};
-    Dwarf_Signed arange_count_ {0};
-    std::list<CompUnit> cu_list_;
+    Dwarf_Signed arangeCount_ {0};
+    std::list<CompUnit> cuList_;
     std::set<Range> ranges_;
 };
 

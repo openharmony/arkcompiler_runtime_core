@@ -109,12 +109,12 @@ bool ParseConfig(const char *str, Section &cfg)
         return true;
     };
 
-    static P::P section_rec;
+    static P::P sectionRec;
 
-    static const auto SECTION = ~WS >> SECTION_START >> ~WS >> *section_rec >> *ITEM >> SECTION_END >> ~WS |=
+    static const auto SECTION = ~WS >> SECTION_START >> ~WS >> *sectionRec >> *ITEM >> SECTION_END >> ~WS |=
         SECTION_HANDLER;  // NOLINT
 
-    section_rec = SECTION;
+    sectionRec = SECTION;
 
     Context context;
 

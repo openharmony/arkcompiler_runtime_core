@@ -33,9 +33,9 @@ public:
     MethodProperties &operator=(MethodProperties &&) = default;
     ~MethodProperties() = default;
 
-    static MethodProperties *Create(ArenaAllocator *arena_allocator, const Graph *graph)
+    static MethodProperties *Create(ArenaAllocator *arenaAllocator, const Graph *graph)
     {
-        return arena_allocator->New<MethodProperties>(graph);
+        return arenaAllocator->New<MethodProperties>(graph);
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -88,7 +88,7 @@ public:
 
     Inst *GetLastReturn() const
     {
-        return last_return_;
+        return lastReturn_;
     }
 
 #undef MPROP_GET_FIELD
@@ -96,7 +96,7 @@ public:
 #undef MPROP_FIELD
 
 private:
-    Inst *last_return_ {nullptr};
+    Inst *lastReturn_ {nullptr};
     FieldsTy fields_ {0};
 };
 }  // namespace panda::compiler

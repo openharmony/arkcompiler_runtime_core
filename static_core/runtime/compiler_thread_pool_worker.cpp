@@ -21,17 +21,17 @@
 
 namespace panda {
 
-CompilerThreadPoolWorker::CompilerThreadPoolWorker(mem::InternalAllocatorPtr internal_allocator, Compiler *compiler,
-                                                   bool &no_async_jit, const RuntimeOptions &options)
-    : CompilerWorker(internal_allocator, compiler)
+CompilerThreadPoolWorker::CompilerThreadPoolWorker(mem::InternalAllocatorPtr internalAllocator, Compiler *compiler,
+                                                   bool &noAsyncJit, const RuntimeOptions &options)
+    : CompilerWorker(internalAllocator, compiler)
 {
-    queue_ = CreateJITTaskQueue(no_async_jit ? "simple" : options.GetCompilerQueueType(),
+    queue_ = CreateJITTaskQueue(noAsyncJit ? "simple" : options.GetCompilerQueueType(),
                                 options.GetCompilerQueueMaxLength(), options.GetCompilerTaskLifeSpan(),
                                 options.GetCompilerDeathCounterValue(), options.GetCompilerEpochDuration());
     if (queue_ == nullptr) {
         // Because of problems (no memory) in allocator
         LOG(ERROR, COMPILER) << "Cannot create a compiler queue";
-        no_async_jit = true;
+        noAsyncJit = true;
     }
 }
 
@@ -39,24 +39,24 @@ CompilerThreadPoolWorker::~CompilerThreadPoolWorker()
 {
     if (queue_ != nullptr) {
         queue_->Finalize();
-        internal_allocator_->Delete(queue_);
+        internalAllocator_->Delete(queue_);
     }
 }
 
-CompilerQueueInterface *CompilerThreadPoolWorker::CreateJITTaskQueue(const std::string &queue_type, uint64_t max_length,
-                                                                     uint64_t task_life, uint64_t death_counter,
-                                                                     uint64_t epoch_duration)
+CompilerQueueInterface *CompilerThreadPoolWorker::CreateJITTaskQueue(const std::string &queueType, uint64_t maxLength,
+                                                                     uint64_t taskLife, uint64_t deathCounter,
+                                                                     uint64_t epochDuration)
 {
-    LOG(DEBUG, COMPILER) << "Creating " << queue_type << " task queue";
-    if (queue_type == "simple") {
-        return internal_allocator_->New<CompilerQueueSimple>(internal_allocator_);
+    LOG(DEBUG, COMPILER) << "Creating " << queueType << " task queue";
+    if (queueType == "simple") {
+        return internalAllocator_->New<CompilerQueueSimple>(internalAllocator_);
     }
-    if (queue_type == "counter-priority") {
-        return internal_allocator_->New<CompilerPriorityCounterQueue>(internal_allocator_, max_length, task_life);
+    if (queueType == "counter-priority") {
+        return internalAllocator_->New<CompilerPriorityCounterQueue>(internalAllocator_, maxLength, taskLife);
     }
-    if (queue_type == "aged-counter-priority") {
-        return internal_allocator_->New<CompilerPriorityAgedCounterQueue>(internal_allocator_, task_life, death_counter,
-                                                                          epoch_duration);
+    if (queueType == "aged-counter-priority") {
+        return internalAllocator_->New<CompilerPriorityAgedCounterQueue>(internalAllocator_, taskLife, deathCounter,
+                                                                         epochDuration);
     }
     LOG(FATAL, COMPILER) << "Unknown queue type";
     return nullptr;
@@ -70,18 +70,18 @@ bool CompilerProcessor::Process(CompilerTask &&task)
 
 void CompilerProcessor::InPlaceCompileMethod(CompilerTask &&ctx)
 {
-    compiler::InPlaceCompilerTaskRunner task_runner;
-    auto &compiler_ctx = task_runner.GetContext();
-    compiler_ctx.SetMethod(ctx.GetMethod());
-    compiler_ctx.SetOsr(ctx.IsOsr());
-    compiler_ctx.SetVM(ctx.GetVM());
+    compiler::InPlaceCompilerTaskRunner taskRunner;
+    auto &compilerCtx = taskRunner.GetContext();
+    compilerCtx.SetMethod(ctx.GetMethod());
+    compilerCtx.SetOsr(ctx.IsOsr());
+    compilerCtx.SetVM(ctx.GetVM());
 
     // Set current thread to have access to vm during compilation
-    Thread compiler_thread(ctx.GetVM(), Thread::ThreadType::THREAD_TYPE_COMPILER);
-    ScopedCurrentThread sct(&compiler_thread);
+    Thread compilerThread(ctx.GetVM(), Thread::ThreadType::THREAD_TYPE_COMPILER);
+    ScopedCurrentThread sct(&compilerThread);
 
-    if (compiler_ctx.GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
-        compiler_->CompileMethodLocked<compiler::INPLACE_MODE>(std::move(task_runner));
+    if (compilerCtx.GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
+        compiler_->CompileMethodLocked<compiler::INPLACE_MODE>(std::move(taskRunner));
     }
 }
 

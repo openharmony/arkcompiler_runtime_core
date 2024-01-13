@@ -94,10 +94,10 @@ struct fmutex {
     // Other bits: Number of waiters.
     // Unified lock state and waiters count to avoid requirement of double seq_cst memory order on mutex unlock
     // as it's done in RWLock::WriteUnlock
-    ATOMIC_INT state_and_waiters;
-    ATOMIC(THREAD_ID) exclusive_owner;
-    int recursive_count;
-    bool recursive_mutex;
+    ATOMIC_INT stateAndWaiters;
+    ATOMIC(THREAD_ID) exclusiveOwner;
+    int recursiveCount;
+    bool recursiveMutex;
 };
 
 int *GetStateAddr(struct fmutex *m);
@@ -112,7 +112,7 @@ struct CondVar {
 #ifdef MC_ON
     alignas(alignof(uint64_t)) struct fmutex *ATOMIC(mutex_ptr);
 #else
-    alignas(alignof(uint64_t)) ATOMIC(struct fmutex *) mutex_ptr;
+    alignas(alignof(uint64_t)) ATOMIC(struct fmutex *) mutexPtr;
 #endif
     // The value itself is not important, detected only its change
     ATOMIC(int32_t) cond;
@@ -121,10 +121,10 @@ struct CondVar {
 
 __attribute__((visibility("default"))) void ConditionVariableInit(struct CondVar *cond);
 __attribute__((visibility("default"))) void ConditionVariableDestroy(struct CondVar *cond);
-__attribute__((visibility("default"))) void SignalCount(struct CondVar *cond, int32_t to_wake);
+__attribute__((visibility("default"))) void SignalCount(struct CondVar *cond, int32_t toWake);
 __attribute__((visibility("default"))) void Wait(struct CondVar *cond, struct fmutex *m);
 __attribute__((visibility("default"))) bool TimedWait(struct CondVar *cond, struct fmutex *m, uint64_t ms, uint64_t ns,
-                                                      bool is_absolute);
+                                                      bool isAbsolute);
 
 #ifndef MC_ON
 }  // namespace ark::os::unix::memory::futex

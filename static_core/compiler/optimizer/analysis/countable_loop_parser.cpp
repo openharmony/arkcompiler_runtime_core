@@ -37,151 +37,151 @@ std::optional<CountableLoopInfo> CountableLoopParser::Parse()
         loop_.IsRoot() || loop_.IsInfinite()) {
         return std::nullopt;
     }
-    auto loop_exit = FindLoopExitBlock();
-    if (loop_exit->IsEmpty()) {
+    auto loopExit = FindLoopExitBlock();
+    if (loopExit->IsEmpty()) {
         return std::nullopt;
     }
-    if (loop_exit != loop_.GetHeader() && loop_exit != loop_.GetBackEdges()[0]) {
+    if (loopExit != loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0]) {
         return std::nullopt;
     }
-    is_head_loop_exit_ = (loop_exit == loop_.GetHeader() && loop_exit != loop_.GetBackEdges()[0]);
-    loop_info_.if_imm = loop_exit->GetLastInst();
-    if (loop_info_.if_imm->GetOpcode() != Opcode::IfImm && loop_info_.if_imm->GetOpcode() != Opcode::If) {
+    isHeadLoopExit_ = (loopExit == loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0]);
+    loopInfo_.ifImm = loopExit->GetLastInst();
+    if (loopInfo_.ifImm->GetOpcode() != Opcode::IfImm && loopInfo_.ifImm->GetOpcode() != Opcode::If) {
         return std::nullopt;
     }
-    auto loop_exit_cmp = loop_info_.if_imm->GetInput(0).GetInst();
-    if (loop_exit_cmp->GetOpcode() != Opcode::Compare) {
+    auto loopExitCmp = loopInfo_.ifImm->GetInput(0).GetInst();
+    if (loopExitCmp->GetOpcode() != Opcode::Compare) {
         return std::nullopt;
     }
-    if (is_head_loop_exit_ && !loop_exit_cmp->GetInput(0).GetInst()->IsPhi() &&
-        !loop_exit_cmp->GetInput(1).GetInst()->IsPhi()) {
+    if (isHeadLoopExit_ && !loopExitCmp->GetInput(0).GetInst()->IsPhi() &&
+        !loopExitCmp->GetInput(1).GetInst()->IsPhi()) {
         return std::nullopt;
     }
-    auto cmp_type = loop_exit_cmp->CastToCompare()->GetOperandsType();
-    if (DataType::GetCommonType(cmp_type) != DataType::INT64) {
+    auto cmpType = loopExitCmp->CastToCompare()->GetOperandsType();
+    if (DataType::GetCommonType(cmpType) != DataType::INT64) {
         return std::nullopt;
     }
     if (!SetUpdateAndTestInputs()) {
         return std::nullopt;
     }
 
-    if (!IsInstIncOrDec(loop_info_.update)) {
+    if (!IsInstIncOrDec(loopInfo_.update)) {
         return std::nullopt;
     }
     SetIndexAndConstStep();
-    if (loop_info_.index->GetBasicBlock() != loop_.GetHeader()) {
+    if (loopInfo_.index->GetBasicBlock() != loop_.GetHeader()) {
         return std::nullopt;
     }
 
     if (!TryProcessBackEdge()) {
         return std::nullopt;
     }
-    return loop_info_;
+    return loopInfo_;
 }
 
 bool CountableLoopParser::TryProcessBackEdge()
 {
-    ASSERT(loop_info_.index->IsPhi());
-    auto back_edge {loop_.GetBackEdges()[0]};
-    auto back_edge_idx {loop_info_.index->CastToPhi()->GetPredBlockIndex(back_edge)};
-    if (loop_info_.index->GetInput(back_edge_idx).GetInst() != loop_info_.update) {
+    ASSERT(loopInfo_.index->IsPhi());
+    auto backEdge {loop_.GetBackEdges()[0]};
+    auto backEdgeIdx {loopInfo_.index->CastToPhi()->GetPredBlockIndex(backEdge)};
+    if (loopInfo_.index->GetInput(backEdgeIdx).GetInst() != loopInfo_.update) {
         return false;
     }
-    ASSERT(loop_info_.index->GetInputsCount() == MAX_SUCCS_NUM);
-    loop_info_.init = loop_info_.index->GetInput(1 - back_edge_idx).GetInst();
+    ASSERT(loopInfo_.index->GetInputsCount() == MAX_SUCCS_NUM);
+    loopInfo_.init = loopInfo_.index->GetInput(1 - backEdgeIdx).GetInst();
     SetNormalizedConditionCode();
     return IsConditionCodeAcceptable();
 }
 
-bool CountableLoopParser::HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loop_info)
+bool CountableLoopParser::HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loopInfo)
 {
-    auto pre_header = loop->GetPreHeader();
-    auto back_edge = loop->GetBackEdges()[0];
-    if (loop_info.if_imm->GetBasicBlock() != back_edge || pre_header->IsEmpty() ||
-        pre_header->GetLastInst()->GetOpcode() != Opcode::IfImm) {
+    auto preHeader = loop->GetPreHeader();
+    auto backEdge = loop->GetBackEdges()[0];
+    if (loopInfo.ifImm->GetBasicBlock() != backEdge || preHeader->IsEmpty() ||
+        preHeader->GetLastInst()->GetOpcode() != Opcode::IfImm) {
         return false;
     }
-    auto pre_header_if_imm = pre_header->GetLastInst();
-    ASSERT(pre_header_if_imm->GetOpcode() == Opcode::IfImm);
-    auto pre_header_cmp = pre_header_if_imm->GetInput(0).GetInst();
-    if (pre_header_cmp->GetOpcode() != Opcode::Compare) {
+    auto preHeaderIfImm = preHeader->GetLastInst();
+    ASSERT(preHeaderIfImm->GetOpcode() == Opcode::IfImm);
+    auto preHeaderCmp = preHeaderIfImm->GetInput(0).GetInst();
+    if (preHeaderCmp->GetOpcode() != Opcode::Compare) {
         return false;
     }
-    auto back_edge_cmp = loop_info.if_imm->GetInput(0).GetInst();
-    ASSERT(back_edge_cmp->GetOpcode() == Opcode::Compare);
+    auto backEdgeCmp = loopInfo.ifImm->GetInput(0).GetInst();
+    ASSERT(backEdgeCmp->GetOpcode() == Opcode::Compare);
 
     // Compare condition codes
-    if (pre_header_cmp->CastToCompare()->GetCc() != back_edge_cmp->CastToCompare()->GetCc()) {
+    if (preHeaderCmp->CastToCompare()->GetCc() != backEdgeCmp->CastToCompare()->GetCc()) {
         return false;
     }
 
-    if (loop_info.if_imm->CastToIfImm()->GetCc() != pre_header_if_imm->CastToIfImm()->GetCc() ||
-        loop_info.if_imm->CastToIfImm()->GetImm() != pre_header_if_imm->CastToIfImm()->GetImm()) {
+    if (loopInfo.ifImm->CastToIfImm()->GetCc() != preHeaderIfImm->CastToIfImm()->GetCc() ||
+        loopInfo.ifImm->CastToIfImm()->GetImm() != preHeaderIfImm->CastToIfImm()->GetImm()) {
         return false;
     }
 
     // Compare control-flow
-    if (pre_header->GetTrueSuccessor() != back_edge->GetTrueSuccessor() ||
-        pre_header->GetFalseSuccessor() != back_edge->GetFalseSuccessor()) {
+    if (preHeader->GetTrueSuccessor() != backEdge->GetTrueSuccessor() ||
+        preHeader->GetFalseSuccessor() != backEdge->GetFalseSuccessor()) {
         return false;
     }
 
     // Compare test inputs
-    auto test_input_idx = 1;
-    if (back_edge_cmp->GetInput(0) == loop_info.test) {
-        test_input_idx = 0;
+    auto testInputIdx = 1;
+    if (backEdgeCmp->GetInput(0) == loopInfo.test) {
+        testInputIdx = 0;
     } else {
-        ASSERT(back_edge_cmp->GetInput(1) == loop_info.test);
+        ASSERT(backEdgeCmp->GetInput(1) == loopInfo.test);
     }
 
-    return pre_header_cmp->GetInput(test_input_idx).GetInst() == loop_info.test &&
-           pre_header_cmp->GetInput(1 - test_input_idx).GetInst() == loop_info.init;
+    return preHeaderCmp->GetInput(testInputIdx).GetInst() == loopInfo.test &&
+           preHeaderCmp->GetInput(1 - testInputIdx).GetInst() == loopInfo.init;
 }
 
 // Returns exact number of iterations for loop with constant boundaries
 // if its index does not overflow
-std::optional<uint64_t> CountableLoopParser::GetLoopIterations(const CountableLoopInfo &loop_info)
+std::optional<uint64_t> CountableLoopParser::GetLoopIterations(const CountableLoopInfo &loopInfo)
 {
-    if (!loop_info.init->IsConst() || !loop_info.test->IsConst() || loop_info.const_step == 0) {
+    if (!loopInfo.init->IsConst() || !loopInfo.test->IsConst() || loopInfo.constStep == 0) {
         return std::nullopt;
     }
-    uint64_t init_value = loop_info.init->CastToConstant()->GetInt64Value();
-    uint64_t test_value = loop_info.test->CastToConstant()->GetInt64Value();
-    auto type = loop_info.index->GetType();
+    uint64_t initValue = loopInfo.init->CastToConstant()->GetInt64Value();
+    uint64_t testValue = loopInfo.test->CastToConstant()->GetInt64Value();
+    auto type = loopInfo.index->GetType();
 
-    if (loop_info.is_inc) {
-        int64_t max_test = BoundsRange::GetMax(type) - static_cast<int64_t>(loop_info.const_step);
-        if (loop_info.normalized_cc == CC_LE) {
-            max_test--;
+    if (loopInfo.isInc) {
+        int64_t maxTest = BoundsRange::GetMax(type) - static_cast<int64_t>(loopInfo.constStep);
+        if (loopInfo.normalizedCc == CC_LE) {
+            maxTest--;
         }
-        if (static_cast<int64_t>(test_value) > max_test) {
+        if (static_cast<int64_t>(testValue) > maxTest) {
             // index may overflow
             return std::nullopt;
         }
     } else {
-        int64_t min_test = BoundsRange::GetMin(type) + static_cast<int64_t>(loop_info.const_step);
-        if (loop_info.normalized_cc == CC_GE) {
-            min_test++;
+        int64_t minTest = BoundsRange::GetMin(type) + static_cast<int64_t>(loopInfo.constStep);
+        if (loopInfo.normalizedCc == CC_GE) {
+            minTest++;
         }
-        if (static_cast<int64_t>(test_value) < min_test) {
+        if (static_cast<int64_t>(testValue) < minTest) {
             // index may overflow
             return std::nullopt;
         }
-        std::swap(init_value, test_value);
+        std::swap(initValue, testValue);
     }
-    if (static_cast<int64_t>(init_value) > static_cast<int64_t>(test_value)) {
+    if (static_cast<int64_t>(initValue) > static_cast<int64_t>(testValue)) {
         return 0;
     }
-    uint64_t diff = test_value - init_value;
-    uint64_t count = diff + loop_info.const_step;
-    if (diff > std::numeric_limits<uint64_t>::max() - loop_info.const_step) {
+    uint64_t diff = testValue - initValue;
+    uint64_t count = diff + loopInfo.constStep;
+    if (diff > std::numeric_limits<uint64_t>::max() - loopInfo.constStep) {
         // count may overflow
         return std::nullopt;
     }
-    if (loop_info.normalized_cc == CC_LT || loop_info.normalized_cc == CC_GT) {
+    if (loopInfo.normalizedCc == CC_LT || loopInfo.normalizedCc == CC_GT) {
         count--;
     }
-    return count / loop_info.const_step;
+    return count / loopInfo.constStep;
 }
 
 /*
@@ -204,11 +204,11 @@ bool CountableLoopParser::IsInstIncOrDec(Inst *inst)
 // NOTE(a.popov) Suppot 'GetLoopExit()' method in the 'Loop' class
 BasicBlock *CountableLoopParser::FindLoopExitBlock()
 {
-    auto outer_loop = loop_.GetOuterLoop();
+    auto outerLoop = loop_.GetOuterLoop();
     for (auto block : loop_.GetBlocks()) {
         const auto &succs = block->GetSuccsBlocks();
         auto it = std::find_if(succs.begin(), succs.end(),
-                               [&outer_loop](const BasicBlock *bb) { return bb->GetLoop() == outer_loop; });
+                               [&outerLoop](const BasicBlock *bb) { return bb->GetLoop() == outerLoop; });
         if (it != succs.end()) {
             return block;
         }
@@ -219,23 +219,23 @@ BasicBlock *CountableLoopParser::FindLoopExitBlock()
 
 bool CountableLoopParser::SetUpdateAndTestInputs()
 {
-    auto loop_exit_cmp = loop_info_.if_imm->GetInput(0).GetInst();
-    ASSERT(loop_exit_cmp->GetOpcode() == Opcode::Compare);
-    loop_info_.update = loop_exit_cmp->GetInput(0).GetInst();
-    loop_info_.test = loop_exit_cmp->GetInput(1).GetInst();
-    if (is_head_loop_exit_) {
-        if (!loop_info_.update->IsPhi()) {
-            std::swap(loop_info_.update, loop_info_.test);
+    auto loopExitCmp = loopInfo_.ifImm->GetInput(0).GetInst();
+    ASSERT(loopExitCmp->GetOpcode() == Opcode::Compare);
+    loopInfo_.update = loopExitCmp->GetInput(0).GetInst();
+    loopInfo_.test = loopExitCmp->GetInput(1).GetInst();
+    if (isHeadLoopExit_) {
+        if (!loopInfo_.update->IsPhi()) {
+            std::swap(loopInfo_.update, loopInfo_.test);
         }
-        ASSERT(loop_info_.update->IsPhi());
-        if (loop_info_.update->GetBasicBlock() != loop_.GetHeader()) {
+        ASSERT(loopInfo_.update->IsPhi());
+        if (loopInfo_.update->GetBasicBlock() != loop_.GetHeader()) {
             return false;
         }
-        auto back_edge {loop_.GetBackEdges()[0]};
-        loop_info_.update = loop_info_.update->CastToPhi()->GetPhiInput(back_edge);
+        auto backEdge {loop_.GetBackEdges()[0]};
+        loopInfo_.update = loopInfo_.update->CastToPhi()->GetPhiInput(backEdge);
     } else {
-        if (!IsInstIncOrDec(loop_info_.update)) {
-            std::swap(loop_info_.update, loop_info_.test);
+        if (!IsInstIncOrDec(loopInfo_.update)) {
+            std::swap(loopInfo_.update, loopInfo_.test);
         }
     }
 
@@ -244,61 +244,61 @@ bool CountableLoopParser::SetUpdateAndTestInputs()
 
 void CountableLoopParser::SetIndexAndConstStep()
 {
-    loop_info_.index = loop_info_.update->GetInput(0).GetInst();
-    auto const_inst = loop_info_.update->GetInput(1).GetInst();
-    if (loop_info_.index->IsConst()) {
-        loop_info_.index = loop_info_.update->GetInput(1).GetInst();
-        const_inst = loop_info_.update->GetInput(0).GetInst();
+    loopInfo_.index = loopInfo_.update->GetInput(0).GetInst();
+    auto constInst = loopInfo_.update->GetInput(1).GetInst();
+    if (loopInfo_.index->IsConst()) {
+        loopInfo_.index = loopInfo_.update->GetInput(1).GetInst();
+        constInst = loopInfo_.update->GetInput(0).GetInst();
     }
 
-    ASSERT(const_inst->GetType() == DataType::INT64);
-    auto cnst = const_inst->CastToConstant()->GetIntValue();
+    ASSERT(constInst->GetType() == DataType::INT64);
+    auto cnst = constInst->CastToConstant()->GetIntValue();
     const uint64_t mask = (1ULL << 63U);
-    auto is_neg = DataType::IsTypeSigned(loop_info_.update->GetType()) && (cnst & mask) != 0;
-    loop_info_.is_inc = loop_info_.update->IsAdd();
-    if (is_neg) {
+    auto isNeg = DataType::IsTypeSigned(loopInfo_.update->GetType()) && (cnst & mask) != 0;
+    loopInfo_.isInc = loopInfo_.update->IsAdd();
+    if (isNeg) {
         cnst = ~cnst + 1;
-        loop_info_.is_inc = !loop_info_.is_inc;
+        loopInfo_.isInc = !loopInfo_.isInc;
     }
-    loop_info_.const_step = cnst;
+    loopInfo_.constStep = cnst;
 }
 
 void CountableLoopParser::SetNormalizedConditionCode()
 {
-    auto loop_exit = loop_info_.if_imm->GetBasicBlock();
-    ASSERT(loop_exit != nullptr);
-    auto loop_exit_cmp = loop_info_.if_imm->GetInput(0).GetInst();
-    ASSERT(loop_exit_cmp->GetOpcode() == Opcode::Compare);
-    auto cc = loop_exit_cmp->CastToCompare()->GetCc();
-    if (loop_info_.test == loop_exit_cmp->GetInput(0).GetInst()) {
+    auto loopExit = loopInfo_.ifImm->GetBasicBlock();
+    ASSERT(loopExit != nullptr);
+    auto loopExitCmp = loopInfo_.ifImm->GetInput(0).GetInst();
+    ASSERT(loopExitCmp->GetOpcode() == Opcode::Compare);
+    auto cc = loopExitCmp->CastToCompare()->GetCc();
+    if (loopInfo_.test == loopExitCmp->GetInput(0).GetInst()) {
         cc = SwapOperandsConditionCode(cc);
     }
-    ASSERT(loop_info_.if_imm->CastToIfImm()->GetImm() == 0);
-    if (loop_info_.if_imm->CastToIfImm()->GetCc() == CC_EQ) {
+    ASSERT(loopInfo_.ifImm->CastToIfImm()->GetImm() == 0);
+    if (loopInfo_.ifImm->CastToIfImm()->GetCc() == CC_EQ) {
         cc = GetInverseConditionCode(cc);
     } else {
-        ASSERT(loop_info_.if_imm->CastToIfImm()->GetCc() == CC_NE);
+        ASSERT(loopInfo_.ifImm->CastToIfImm()->GetCc() == CC_NE);
     }
-    auto loop = loop_exit->GetLoop();
-    if (loop_exit->GetFalseSuccessor()->GetLoop() == loop ||
-        loop_exit->GetFalseSuccessor()->GetLoop()->GetOuterLoop() == loop) {
+    auto loop = loopExit->GetLoop();
+    if (loopExit->GetFalseSuccessor()->GetLoop() == loop ||
+        loopExit->GetFalseSuccessor()->GetLoop()->GetOuterLoop() == loop) {
         cc = GetInverseConditionCode(cc);
     } else {
-        ASSERT(loop_exit->GetTrueSuccessor()->GetLoop() == loop ||
-               loop_exit->GetTrueSuccessor()->GetLoop()->GetOuterLoop() == loop);
+        ASSERT(loopExit->GetTrueSuccessor()->GetLoop() == loop ||
+               loopExit->GetTrueSuccessor()->GetLoop()->GetOuterLoop() == loop);
     }
-    loop_info_.normalized_cc = cc;
+    loopInfo_.normalizedCc = cc;
 }
 
 bool CountableLoopParser::IsConditionCodeAcceptable()
 {
-    auto cc = loop_info_.normalized_cc;
+    auto cc = loopInfo_.normalizedCc;
     // Condition should be: inc <= test | inc < test
-    if (loop_info_.is_inc && cc != CC_LE && cc != CC_LT) {
+    if (loopInfo_.isInc && cc != CC_LE && cc != CC_LT) {
         return false;
     }
     // Condition should be: dec >= test | dec > test
-    if (!loop_info_.is_inc && cc != CC_GE && cc != CC_GT) {
+    if (!loopInfo_.isInc && cc != CC_GE && cc != CC_GT) {
         return false;
     }
     return true;

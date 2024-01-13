@@ -46,14 +46,14 @@ struct hash<std::pair<T1, T2>> {
 template <typename... T>
 struct hash<std::tuple<T...>> {
     template <size_t N>
-    size_t Helper(size_t tmp_hash, const std::tuple<T...> &tuple) const
+    size_t Helper(size_t tmpHash, const std::tuple<T...> &tuple) const
     {
         if constexpr (N < sizeof...(T)) {
-            size_t tmp_hash1 = panda::MergeHashes(tmp_hash, panda::verifier::StdHash(std::get<N>(tuple)));  // NOLINT
+            size_t tmp_hash1 = panda::MergeHashes(tmpHash, panda::verifier::StdHash(std::get<N>(tuple)));  // NOLINT
             return Helper<N + 1>(tmp_hash1, tuple);
         }
 
-        return tmp_hash;
+        return tmpHash;
     }
 
     size_t operator()(const std::tuple<T...> &tuple) const

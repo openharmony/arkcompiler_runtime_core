@@ -21,41 +21,41 @@
 namespace panda::tooling::test {
 
 // NOLINTBEGIN(fuchsia-statically-constructed-objects)
-TestMap TestUtil::test_map_;
-os::memory::Mutex TestUtil::event_mutex_;
-os::memory::ConditionVariable TestUtil::event_cv_;
-DebugEvent TestUtil::last_event_ = DebugEvent::UNINITIALIZED;
+TestMap TestUtil::testMap_;
+os::memory::Mutex TestUtil::eventMutex_;
+os::memory::ConditionVariable TestUtil::eventCv_;
+DebugEvent TestUtil::lastEvent_ = DebugEvent::UNINITIALIZED;
 bool TestUtil::initialized_ = false;
-os::memory::Mutex TestUtil::suspend_mutex_;
-os::memory::ConditionVariable TestUtil::suspend_cv_;
+os::memory::Mutex TestUtil::suspendMutex_;
+os::memory::ConditionVariable TestUtil::suspendCv_;
 bool TestUtil::suspended_;
-PtThread TestUtil::last_event_thread_ = PtThread(nullptr);
-PtLocation TestUtil::last_event_location_("", EntityId(0), 0);
-TestExtractorFactory *TestUtil::extractor_factory_;
+PtThread TestUtil::lastEventThread_ = PtThread(nullptr);
+PtLocation TestUtil::lastEventLocation_("", EntityId(0), 0);
+TestExtractorFactory *TestUtil::extractorFactory_;
 // NOLINTEND(fuchsia-statically-constructed-objects)
 
-int32_t TestUtil::GetValueRegister(Method *method, const char *var_name, uint32_t offset)
+int32_t TestUtil::GetValueRegister(Method *method, const char *varName, uint32_t offset)
 {
-    auto method_id = method->GetFileId();
+    auto methodId = method->GetFileId();
     auto pf = method->GetPandaFile();
-    PtLocation location(pf->GetFilename().c_str(), method_id, offset);
-    auto extractor = extractor_factory_->MakeTestExtractor(pf);
+    PtLocation location(pf->GetFilename().c_str(), methodId, offset);
+    auto extractor = extractorFactory_->MakeTestExtractor(pf);
 
     auto variables = extractor->GetLocalVariableInfo(location.GetMethodId(), location.GetBytecodeOffset());
     for (const auto &var : variables) {
-        if (var.name == var_name) {
-            return var.reg_number;
+        if (var.name == varName) {
+            return var.regNumber;
         }
     }
 
     auto params = extractor->GetParameterInfo(location.GetMethodId());
-    auto param_reg = method->GetNumVregs();
+    auto paramReg = method->GetNumVregs();
 
     for (const auto &param : params) {
-        if (param.name == var_name) {
-            return param_reg;
+        if (param.name == varName) {
+            return paramReg;
         }
-        param_reg++;
+        paramReg++;
     }
 
     return -2;  // NOTE(maksenov): Replace with invalid register constant;

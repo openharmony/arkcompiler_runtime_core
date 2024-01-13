@@ -26,7 +26,7 @@ std::pair<int8_t, int8_t> EtsSharedMemory::ReadModifyWriteI8(int32_t index, cons
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsSharedMemory> this_handle(coroutine, this);
+    EtsHandle<EtsSharedMemory> thisHandle(coroutine, this);
 
     // NOTE(egor-porsev): add LIKELY(std::try_lock) path to prevent ScopedNativeCodeThread creation if no blocking
     // occurs
@@ -34,11 +34,11 @@ std::pair<int8_t, int8_t> EtsSharedMemory::ReadModifyWriteI8(int32_t index, cons
     os::memory::LockHolder lock(coroutine->GetPandaVM()->GetAtomicsMutex());
     ScopedManagedCodeThread m(coroutine);
 
-    auto old_value = this_handle->GetElement(index);
-    auto new_value = f(old_value);
-    this_handle->SetElement(index, new_value);
+    auto oldValue = thisHandle->GetElement(index);
+    auto newValue = f(oldValue);
+    thisHandle->SetElement(index, newValue);
 
-    return std::pair(old_value, new_value);
+    return std::pair(oldValue, newValue);
 }
 
 }  // namespace panda::ets

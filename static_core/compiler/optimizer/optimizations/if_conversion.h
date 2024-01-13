@@ -27,7 +27,7 @@ class IfConversion : public Optimization {
 public:
     explicit IfConversion(Graph *graph, uint32_t limit = 2) : Optimization(graph), limit_(limit)
     {
-        can_encode_float_select_ = graph->GetEncoder()->CanEncodeFloatSelect();
+        canEncodeFloatSelect_ = graph->GetEncoder()->CanEncodeFloatSelect();
     }
 
     NO_MOVE_SEMANTIC(IfConversion);
@@ -38,7 +38,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerIfConversion();
+        return g_options.IsCompilerIfConversion();
     }
 
     const char *GetPassName() const override
@@ -50,12 +50,12 @@ public:
 
 private:
     uint32_t limit_;
-    bool can_encode_float_select_ {false};
+    bool canEncodeFloatSelect_ {false};
     bool TryTriangle(BasicBlock *bb);
     bool TryDiamond(BasicBlock *bb);
     static bool LoopInvariantPreventConversion(BasicBlock *bb);
-    static bool IsConvertable(BasicBlock *bb, uint32_t *inst_count);
-    bool IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *pred2, uint32_t *phi_count);
+    static bool IsConvertable(BasicBlock *bb, uint32_t *instCount);
+    bool IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *pred2, uint32_t *phiCount);
     static bool IsConditionChainPhi(Inst *phi);
     uint32_t GetIfcLimit(BasicBlock *bb);
 };

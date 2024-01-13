@@ -44,7 +44,7 @@ private:
     bool CheckInputsAnyTypesRec(Inst *phi);
     void PropagateTypeToPhi();
     ArenaVector<Inst *> phis_;
-    AnyBaseType any_type_ {AnyBaseType::UNDEFINED_TYPE};
+    AnyBaseType anyType_ {AnyBaseType::UNDEFINED_TYPE};
 };
 }  // namespace panda::compiler
 

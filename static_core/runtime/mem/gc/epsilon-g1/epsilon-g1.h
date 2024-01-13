@@ -29,7 +29,7 @@ public:
 template <class LanguageConfig>
 class EpsilonG1GC final : public G1GC<LanguageConfig> {
 public:
-    explicit EpsilonG1GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings);
+    explicit EpsilonG1GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
 
     NO_COPY_SEMANTIC(EpsilonG1GC);
     NO_MOVE_SEMANTIC(EpsilonG1GC);
@@ -40,14 +40,14 @@ public:
 
     void RunPhases(GCTask &task);
     bool WaitForGC(GCTask task) override;
-    void InitGCBits(panda::ObjectHeader *obj_header) override;
+    void InitGCBits(panda::ObjectHeader *objHeader) override;
     bool Trigger(PandaUniquePtr<GCTask> task) override;
-    void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keep_buffers) override;
+    void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers) override;
 
 private:
     void InitializeImpl() override;
     void RunPhasesImpl(GCTask &task) override;
-    void MarkReferences(GCMarkingStackType *references, GCPhase gc_phase) override;
+    void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) override;
 };
 
 }  // namespace panda::mem

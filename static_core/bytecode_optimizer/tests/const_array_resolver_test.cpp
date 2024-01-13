@@ -44,7 +44,7 @@ TEST_F(CommonTest, ConstArrayResolverInt64)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "i64[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_TRUE(graph->RunPass<ConstArrayResolver>(&interface));
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
@@ -89,7 +89,7 @@ TEST_F(CommonTest, ConstArrayResolverInt32)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "i32[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_TRUE(graph->RunPass<ConstArrayResolver>(&interface));
 }
 
@@ -121,13 +121,13 @@ TEST_F(CommonTest, ConstArrayResolverOrderInt32)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "i32[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_TRUE(graph->RunPass<ConstArrayResolver>(&interface));
 
-    auto lit_arr = program.literalarray_table["0"];
-    EXPECT_TRUE(std::get<uint32_t>(lit_arr.literals[0U + offset].value) == 1U);
-    EXPECT_TRUE(std::get<uint32_t>(lit_arr.literals[1U + offset].value) == 0U);
-    EXPECT_TRUE(std::get<uint32_t>(lit_arr.literals[2U + offset].value) == 2U);
+    auto litArr = program.literalarrayTable["0"];
+    EXPECT_TRUE(std::get<uint32_t>(litArr.literals[0U + offset].value) == 1U);
+    EXPECT_TRUE(std::get<uint32_t>(litArr.literals[1U + offset].value) == 0U);
+    EXPECT_TRUE(std::get<uint32_t>(litArr.literals[2U + offset].value) == 2U);
 }
 
 TEST_F(CommonTest, ConstArrayResolverFloat32)
@@ -165,7 +165,7 @@ TEST_F(CommonTest, ConstArrayResolverFloat32)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "f32[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_TRUE(graph->RunPass<ConstArrayResolver>(&interface));
 }
 
@@ -177,8 +177,8 @@ TEST_F(CommonTest, ConstArrayResolverFloat64)
         CONSTANT(0U, 0U).s32();
         CONSTANT(1U, 1U).s32();
         CONSTANT(2U, 2U).s32();
-        CONSTANT(3U, 100.0).f64();
-        CONSTANT(4U, 200.0).f64();
+        CONSTANT(3U, 100.0_D).f64();
+        CONSTANT(4U, 200.0_D).f64();
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -195,7 +195,7 @@ TEST_F(CommonTest, ConstArrayResolverFloat64)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "f64[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_TRUE(graph->RunPass<ConstArrayResolver>(&interface));
 }
 
@@ -226,7 +226,7 @@ TEST_F(CommonTest, ConstArrayResolverByteAccess)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "i8[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_TRUE(graph->RunPass<ConstArrayResolver>(&interface));
 
     auto expected = CreateEmptyGraph();
@@ -286,7 +286,7 @@ TEST_F(CommonTest, ConstArrayResolverStringAccess)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "panda/String[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_TRUE(graph->RunPass<ConstArrayResolver>(&interface));
 
     auto expected = CreateEmptyGraph();
@@ -338,7 +338,7 @@ TEST_F(CommonTest, ConstArrayResolverParameterAsArray)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "i64[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_FALSE(graph->RunPass<ConstArrayResolver>(&interface));
 }
 
@@ -373,7 +373,7 @@ TEST_F(CommonTest, ConstArrayResolverDifferentBlocks)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "i64[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_FALSE(graph->RunPass<ConstArrayResolver>(&interface));
 }
 
@@ -400,7 +400,7 @@ TEST_F(CommonTest, ConstArrayResolverArraySizeNotConstant)
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
     maps.classes.emplace(0U, "i64[]");
     IrInterfaceTest interface(&program, &maps);
-    OPTIONS.SetConstArrayResolver(true);
+    g_options.SetConstArrayResolver(true);
     EXPECT_FALSE(graph->RunPass<ConstArrayResolver>(&interface));
 }
 

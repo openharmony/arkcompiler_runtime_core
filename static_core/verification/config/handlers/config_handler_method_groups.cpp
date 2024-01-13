@@ -44,7 +44,7 @@ using panda::verifier::config::Section;
 void RegisterConfigHandlerMethodGroups(Config *dcfg)
 {
     static const auto CONFIG_DEBUG_METHOD_GROUPS_VERIFIER_OPTIONS = [](Config *cfg, const Section &section) {
-        auto &verif_options = cfg->opts;
+        auto &verifOptions = cfg->opts;
 
         for (const auto &item : section.items) {
             struct Context {
@@ -55,18 +55,18 @@ void RegisterConfigHandlerMethodGroups(Config *dcfg)
             using P = Parser<Context, const char, const char *>;
             const auto ws = P::OfCharset(" \t");
 
-            const auto group_handler = [](Context &c, PandaString &&group) {
+            const auto groupHandler = [](Context &c, PandaString &&group) {
                 c.group = std::move(group);
                 return true;
             };
 
-            const auto options_handler = [](Context &c, PandaString &&options) {
+            const auto optionsHandler = [](Context &c, PandaString &&options) {
                 c.options = std::move(options);
                 return true;
             };
 
-            const auto line = ~ws >> MethodGroupParser<P>(group_handler) >> ws >> LiteralParser<P>(options_handler) >>
-                              ~ws >> P::End();
+            const auto line =
+                ~ws >> MethodGroupParser<P>(groupHandler) >> ws >> LiteralParser<P>(optionsHandler) >> ~ws >> P::End();
 
             const char *start = item.c_str();
             const char *end = item.c_str() + item.length();  // NOLINT
@@ -78,7 +78,7 @@ void RegisterConfigHandlerMethodGroups(Config *dcfg)
                 return false;
             }
 
-            if (!verif_options.debug.GetMethodOptions().AddOptionsForGroup(ctx.group, ctx.options)) {
+            if (!verifOptions.debug.GetMethodOptions().AddOptionsForGroup(ctx.group, ctx.options)) {
                 LOG(DEBUG, VERIFIER) << "  Error: cannot set options for method group '" << ctx.group << "', options '"
                                      << ctx.options << "'";
                 return false;

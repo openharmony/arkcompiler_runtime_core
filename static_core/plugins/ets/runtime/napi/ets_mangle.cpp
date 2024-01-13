@@ -58,23 +58,23 @@ std::string MangleString(const std::string &name)
     return res.str();
 }
 
-std::string MangleMethodName(const std::string &class_name, const std::string &method_name)
+std::string MangleMethodName(const std::string &className, const std::string &methodName)
 {
-    std::string name(class_name);
+    std::string name(className);
     if (name[0] == 'L') {
-        name = name.substr(1, name.size() - 2);
+        name = name.substr(1, name.size() - 2U);
     }
     name.append(".");
-    name.append(method_name);
+    name.append(methodName);
     name = MangleString(name);
     name.insert(0, "ETS_");
     return name;
 }
 
-std::string MangleMethodNameWithSignature(const std::string &mangled_name, const std::string &signature)
+std::string MangleMethodNameWithSignature(const std::string &mangledName, const std::string &signature)
 {
     std::stringstream res;
-    res << mangled_name << "__" << MangleString(signature);
+    res << mangledName << "__" << MangleString(signature);
     return res.str();
 }
 

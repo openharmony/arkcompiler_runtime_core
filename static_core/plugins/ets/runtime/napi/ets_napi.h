@@ -177,14 +177,20 @@ typedef enum {
 struct ETS_NativeInterface {
     // NOTE(a.urakov): solve the "Array" naming problem
     ets_int (*GetVersion)(EtsEnv *env);
-    // ets_class (*DefineClass)(EtsEnv *env, const char *name, ets_object loader, const ets_byte *buf, ets_size bufLen);
+#ifdef ETS_NAPI_DESIGN_FINISHED
+    ets_class (*DefineClass)(EtsEnv *env, const char *name, ets_object loader, const ets_byte *buf, ets_size bufLen);
+#endif
     ets_class (*FindClass)(EtsEnv *env, const char *name);
-    // ets_method (*FromReflectedMethod)(EtsEnv *env, ets_object method);
-    // ets_field (*FromReflectedField)(EtsEnv *env, ets_object field);
-    // ets_object (*ToReflectedMethod)(EtsEnv *env, ets_class cls, ets_method p_method, ets_boolean isStatic);
+#ifdef ETS_NAPI_DESIGN_FINISHED    
+    ets_method (*FromReflectedMethod)(EtsEnv *env, ets_object method);
+    ets_field (*FromReflectedField)(EtsEnv *env, ets_object field);
+    ets_object (*ToReflectedMethod)(EtsEnv *env, ets_class cls, ets_method p_method, ets_boolean isStatic);
+#endif    
     ets_class (*GetSuperclass)(EtsEnv *env, ets_class cls);
     ets_boolean (*IsAssignableFrom)(EtsEnv *env, ets_class cls1, ets_class cls2);
-    // ets_object (*ToReflectedField)(EtsEnv *env, ets_class cls, ets_field p_field, ets_boolean isStatic);
+#ifdef ETS_NAPI_DESIGN_FINISHED    
+    ets_object (*ToReflectedField)(EtsEnv *env, ets_class cls, ets_field p_field, ets_boolean isStatic);
+#endif
     ets_int (*ThrowError)(EtsEnv *env, ets_error obj);
     ets_int (*ThrowErrorNew)(EtsEnv *env, ets_class cls, const char *message);
     ets_error (*ErrorOccurred)(EtsEnv *env);
@@ -418,9 +424,11 @@ struct ETS_NativeInterface {
     ets_weak (*NewWeakGlobalRef)(EtsEnv *env, ets_object obj);
     void (*DeleteWeakGlobalRef)(EtsEnv *env, ets_weak obj);
     ets_boolean (*ErrorCheck)(EtsEnv *env);
-    // ets_object (*NewDirectByteBuffer)(EtsEnv *env, void *address, ets_long capacity);
-    // void *(*GetDirectBufferAddress)(EtsEnv *env, ets_object buf);
-    // ets_long (*GetDirectBufferCapacity)(EtsEnv *env, ets_object buf);
+#ifdef ETS_NAPI_DESIGN_FINISHED    
+    ets_object (*NewDirectByteBuffer)(EtsEnv *env, void *address, ets_long capacity);
+    void *(*GetDirectBufferAddress)(EtsEnv *env, ets_object buf);
+    ets_long (*GetDirectBufferCapacity)(EtsEnv *env, ets_object buf);
+#endif    
     ets_objectRefType (*GetObjectRefType)(EtsEnv *env, ets_object obj);
 
     /* 227 methods */
@@ -480,9 +488,9 @@ extern "C" {
 #define ETS_IMPORT
 #define ETS_CALL
 
-ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vm_args);
-ets_int ETS_GetCreatedVMs(EtsVM **vm_buf, ets_size buf_len, ets_size *n_vms);
-ets_int ETS_CreateVM(EtsVM **p_vm, EtsEnv **p_env, EtsVMInitArgs *vm_args);
+ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vmArgs);
+ets_int ETS_GetCreatedVMs(EtsVM **vmBuf, ets_size bufLen, ets_size *nVms);
+ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArgs);
 
 #ifdef __cplusplus
 }
@@ -490,7 +498,7 @@ ets_int ETS_CreateVM(EtsVM **p_vm, EtsEnv **p_env, EtsVMInitArgs *vm_args);
 
 struct ETS_InvokeInterface {
     ets_int (*DestroyEtsVM)(EtsVM *vm);
-    ets_int (*GetEnv)(EtsVM *vm, EtsEnv **p_env, ets_int version);
+    ets_int (*GetEnv)(EtsVM *vm, EtsEnv **pEnv, ets_int version);
 };
 
 struct __EtsVM {
@@ -503,9 +511,9 @@ struct __EtsVM {
         return invoke_interface->DestroyEtsVM(this);
     }
 
-    ets_int GetEnv(EtsEnv **p_env, ets_int version)
+    ets_int GetEnv(EtsEnv **pEnv, ets_int version)
     {
-        return invoke_interface->GetEnv(this, p_env, version);
+        return invoke_interface->GetEnv(this, pEnv, version);
     }
 #endif
 };

@@ -129,8 +129,8 @@ void TestVectorIteration(Vector &vector)
 
     {
         // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
-        const auto const_vector = vector;
-        ASSERT_TRUE(std::equal(const_vector.begin(), const_vector.end(), values.begin()));
+        const auto constVector = vector;
+        ASSERT_TRUE(std::equal(constVector.begin(), constVector.end(), values.begin()));
     }
 
     std::copy(values.begin() + 4U, values.end(), std::back_inserter(vector));

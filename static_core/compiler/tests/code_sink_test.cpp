@@ -44,8 +44,8 @@ TEST_F(CodeSinkTest, OperationPropagation)
             INST(11U, Opcode::Return).s64().Inputs(3U);
         }
     }
-    Graph *sunk_graph = CreateEmptyGraph();
-    GRAPH(sunk_graph)
+    Graph *sunkGraph = CreateEmptyGraph();
+    GRAPH(sunkGraph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -69,7 +69,7 @@ TEST_F(CodeSinkTest, OperationPropagation)
 
     ASSERT_TRUE(GetGraph()->RunPass<CodeSink>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunk_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunkGraph));
 }
 
 /**
@@ -103,8 +103,8 @@ TEST_F(CodeSinkTest, DISABLED_LoadWithOperationPropagation)
             INST(13U, Opcode::Return).s64().Inputs(3U);
         }
     }
-    Graph *sunk_graph = CreateEmptyGraph();
-    GRAPH(sunk_graph)
+    Graph *sunkGraph = CreateEmptyGraph();
+    GRAPH(sunkGraph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -131,14 +131,14 @@ TEST_F(CodeSinkTest, DISABLED_LoadWithOperationPropagation)
 
     ASSERT_TRUE(GetGraph()->RunPass<CodeSink>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunk_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunkGraph));
 }
 
 /// Do not move anything
 TEST_F(CodeSinkTest, NoDomination)
 {
-    std::vector<Graph *> equal_graphs = {GetGraph(), CreateEmptyGraph()};
-    for (auto graph : equal_graphs) {
+    std::vector<Graph *> equalGraphs = {GetGraph(), CreateEmptyGraph()};
+    for (auto graph : equalGraphs) {
         GRAPH(graph)
         {
             PARAMETER(0U, 0U).s64();
@@ -161,16 +161,16 @@ TEST_F(CodeSinkTest, NoDomination)
             }
         }
     }
-    equal_graphs[0U]->RunPass<CodeSink>();
-    GraphChecker(equal_graphs[0U]).Check();
-    ASSERT_TRUE(GraphComparator().Compare(equal_graphs[0U], equal_graphs[1U]));
+    equalGraphs[0U]->RunPass<CodeSink>();
+    GraphChecker(equalGraphs[0U]).Check();
+    ASSERT_TRUE(GraphComparator().Compare(equalGraphs[0U], equalGraphs[1U]));
 }
 
 /// Do not sink loads that may alias further stores in the block
 TEST_F(CodeSinkTest, LoadStoreAliasing)
 {
-    std::vector<Graph *> equal_graphs = {GetGraph(), CreateEmptyGraph()};
-    for (auto graph : equal_graphs) {
+    std::vector<Graph *> equalGraphs = {GetGraph(), CreateEmptyGraph()};
+    for (auto graph : equalGraphs) {
         GRAPH(graph)
         {
             PARAMETER(0U, 0U).ref();
@@ -194,9 +194,9 @@ TEST_F(CodeSinkTest, LoadStoreAliasing)
             }
         }
     }
-    equal_graphs[0U]->RunPass<CodeSink>();
-    GraphChecker(equal_graphs[0U]).Check();
-    ASSERT_TRUE(GraphComparator().Compare(equal_graphs[0U], equal_graphs[1U]));
+    equalGraphs[0U]->RunPass<CodeSink>();
+    GraphChecker(equalGraphs[0U]).Check();
+    ASSERT_TRUE(GraphComparator().Compare(equalGraphs[0U], equalGraphs[1U]));
 }
 
 TEST_F(CodeSinkTest, LoopSinking)
@@ -231,8 +231,8 @@ TEST_F(CodeSinkTest, LoopSinking)
             INST(27U, Opcode::Return).s64().Inputs(26U);
         }
     }
-    Graph *sunk_graph = CreateEmptyGraph();
-    GRAPH(sunk_graph)
+    Graph *sunkGraph = CreateEmptyGraph();
+    GRAPH(sunkGraph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s64();
@@ -263,7 +263,7 @@ TEST_F(CodeSinkTest, LoopSinking)
 
     ASSERT_TRUE(GetGraph()->RunPass<CodeSink>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunk_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunkGraph));
 }
 
 /// Sink instruction over critical edge
@@ -292,8 +292,8 @@ TEST_F(CodeSinkTest, CriticalEdgeSinking)
             INST(15U, Opcode::Return).s32().Inputs(5U);
         }
     }
-    Graph *sunk_graph = CreateEmptyGraph();
-    GRAPH(sunk_graph)
+    Graph *sunkGraph = CreateEmptyGraph();
+    GRAPH(sunkGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -319,7 +319,7 @@ TEST_F(CodeSinkTest, CriticalEdgeSinking)
 
     ASSERT_TRUE(GetGraph()->RunPass<CodeSink>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunk_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunkGraph));
 }
 
 /// Do not sink loads over monitor
@@ -357,8 +357,8 @@ TEST_F(CodeSinkTest, LoadOverMonitor)
             INST(14U, Opcode::Return).s64().Inputs(3U);
         }
     }
-    Graph *sunk_graph = CreateEmptyGraph();
-    GRAPH(sunk_graph)
+    Graph *sunkGraph = CreateEmptyGraph();
+    GRAPH(sunkGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -391,7 +391,7 @@ TEST_F(CodeSinkTest, LoadOverMonitor)
 
     ASSERT_TRUE(GetGraph()->RunPass<CodeSink>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunk_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunkGraph));
 }
 
 /// Reordering of Normal Load and subsequent Volatile Load is allowed
@@ -421,8 +421,8 @@ TEST_F(CodeSinkTest, DISABLED_LoadOverVolatileLoad)
             INST(13U, Opcode::Return).s64().Inputs(3U);
         }
     }
-    Graph *opt_graph = CreateEmptyGraph();
-    GRAPH(opt_graph)
+    Graph *optGraph = CreateEmptyGraph();
+    GRAPH(optGraph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(2U, 2U).ref();
@@ -448,7 +448,7 @@ TEST_F(CodeSinkTest, DISABLED_LoadOverVolatileLoad)
 
     ASSERT_TRUE(GetGraph()->RunPass<CodeSink>());
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), opt_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
 /**
@@ -493,8 +493,8 @@ TEST_F(CodeSinkTest, IntermediateSinking)
             INST(18U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    Graph *sunk_graph = CreateEmptyGraph();
-    GRAPH(sunk_graph)
+    Graph *sunkGraph = CreateEmptyGraph();
+    GRAPH(sunkGraph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -527,14 +527,14 @@ TEST_F(CodeSinkTest, IntermediateSinking)
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunk_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), sunkGraph));
 }
 
 /// Do not sink object allocations
 TEST_F(CodeSinkTest, Allocations)
 {
-    std::vector<Graph *> equal_graphs = {GetGraph(), CreateEmptyGraph()};
-    for (auto graph : equal_graphs) {
+    std::vector<Graph *> equalGraphs = {GetGraph(), CreateEmptyGraph()};
+    for (auto graph : equalGraphs) {
         GRAPH(graph)
         {
             PARAMETER(1U, 1U).s64();
@@ -564,16 +564,16 @@ TEST_F(CodeSinkTest, Allocations)
             }
         }
     }
-    equal_graphs[0U]->RunPass<CodeSink>();
-    GraphChecker(equal_graphs[0U]).Check();
-    ASSERT_TRUE(GraphComparator().Compare(equal_graphs[0U], equal_graphs[1U]));
+    equalGraphs[0U]->RunPass<CodeSink>();
+    GraphChecker(equalGraphs[0U]).Check();
+    ASSERT_TRUE(GraphComparator().Compare(equalGraphs[0U], equalGraphs[1U]));
 }
 
 /// Do not sink over PHI statement
 TEST_F(CodeSinkTest, PhiUsers)
 {
-    std::vector<Graph *> equal_graphs = {GetGraph(), CreateEmptyGraph()};
-    for (auto graph : equal_graphs) {
+    std::vector<Graph *> equalGraphs = {GetGraph(), CreateEmptyGraph()};
+    for (auto graph : equalGraphs) {
         GRAPH(graph)
         {
             PARAMETER(0U, 0U).s64();
@@ -595,9 +595,9 @@ TEST_F(CodeSinkTest, PhiUsers)
             }
         }
     }
-    equal_graphs[0U]->RunPass<CodeSink>();
-    GraphChecker(equal_graphs[0U]).Check();
-    ASSERT_TRUE(GraphComparator().Compare(equal_graphs[0U], equal_graphs[1U]));
+    equalGraphs[0U]->RunPass<CodeSink>();
+    GraphChecker(equalGraphs[0U]).Check();
+    ASSERT_TRUE(GraphComparator().Compare(equalGraphs[0U], equalGraphs[1U]));
 }
 
 /// Do not sink volatile loads because other paths might be broken because of it

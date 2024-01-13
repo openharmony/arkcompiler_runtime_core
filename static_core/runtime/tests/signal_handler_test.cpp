@@ -23,6 +23,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 #include "libpandabase/macros.h"
+#include "libpandabase/utils/utils.h"
 #include "os/thread.h"
 #include "runtime/include/managed_thread.h"
 #include <sys/syscall.h>
@@ -40,13 +41,13 @@ inline std::string Separator()
 #endif
 }
 
-static int COUNTER = 0;
+static int g_counter = 0;
 
 void SigProfSamplingProfilerHandler([[maybe_unused]] int signum)
 {
-    COUNTER++;
-    std::array<volatile int, 100> a {};  // NOLINT(readability-magic-numbers)
-    for (int i = 0; i < 100; i++) {      // NOLINT(readability-magic-numbers)
+    g_counter++;
+    std::array<volatile int, 100UL> a {};  // NOLINT(readability-magic-numbers)
+    for (int i = 0; i < 100_I; i++) {      // NOLINT(readability-magic-numbers)
         a[i] = i;
     }
 }
@@ -58,24 +59,24 @@ public:
 
     bool Start()
     {
-        managed_thread_ = os::thread::GetCurrentThreadId();
-        is_active_ = true;
+        managedThread_ = os::thread::GetCurrentThreadId();
+        isActive_ = true;
 
         // All prepairing actions should be done before this thread is started
-        sampler_thread_ = std::make_unique<std::thread>(&Sampler::SamplerThreadEntry, this);
+        samplerThread_ = std::make_unique<std::thread>(&Sampler::SamplerThreadEntry, this);
         return true;
     }
 
     void Stop()
     {
-        if (!sampler_thread_->joinable()) {
+        if (!samplerThread_->joinable()) {
             LOG(FATAL, PROFILER) << "Sampling profiler thread unexpectedly disappeared";
             UNREACHABLE();
         }
 
-        is_active_ = false;
+        isActive_ = false;
 
-        sampler_thread_->join();
+        samplerThread_->join();
     }
 
 private:
@@ -89,33 +90,33 @@ private:
         // Ignore incoming sigprof if handler isn't completed
         sigaddset(&action.sa_mask, SIGPROF);
 
-        struct sigaction old_action {};
+        struct sigaction oldAction {};
 
-        if (sigaction(SIGPROF, &action, &old_action) == -1) {
+        if (sigaction(SIGPROF, &action, &oldAction) == -1) {
             LOG(FATAL, PROFILER) << "Sigaction failed, can't start profiling";
             UNREACHABLE();
         }
 
         auto pid = getpid();
         // Atomic with relaxed order reason: data race with is_active_
-        while (is_active_.load(std::memory_order_relaxed)) {
+        while (isActive_.load(std::memory_order_relaxed)) {
             {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-                if (syscall(SYS_tgkill, pid, managed_thread_, SIGPROF) != 0) {
+                if (syscall(SYS_tgkill, pid, managedThread_, SIGPROF) != 0) {
                     LOG(ERROR, PROFILER) << "Can't send signal to thread";
                 }
             }
-            os::thread::NativeSleepUS(sample_interval_);
+            os::thread::NativeSleepUS(sampleInterval_);
         }
     }
 
-    std::unique_ptr<std::thread> sampler_thread_ {nullptr};
+    std::unique_ptr<std::thread> samplerThread_ {nullptr};
 
-    std::atomic<bool> is_active_ = false;
+    std::atomic<bool> isActive_ = false;
 
-    std::chrono::microseconds sample_interval_ {200};  // NOLINT(readability-magic-numbers)
+    std::chrono::microseconds sampleInterval_ {200};  // NOLINT(readability-magic-numbers)
 
-    os::thread::ThreadId managed_thread_ = 0;
+    os::thread::ThreadId managedThread_ = 0;
 
     NO_COPY_SEMANTIC(Sampler);
     NO_MOVE_SEMANTIC(Sampler);
@@ -127,10 +128,10 @@ public:
     {
         RuntimeOptions options;
         options.SetLoadRuntimes({"core"});
-        auto exec_path = panda::os::file::File::GetExecutablePath();
-        std::string panda_std_lib =
-            exec_path.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
-        options.SetBootPandaFiles({panda_std_lib});
+        auto execPath = panda::os::file::File::GetExecutablePath();
+        std::string pandaStdLib =
+            execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
+        options.SetBootPandaFiles({pandaStdLib});
         options.SetGcType("epsilon");
         options.SetCompilerEnableJit(false);
         options.SetCompilerEnableOsr(false);
@@ -211,7 +212,7 @@ TEST_F(SignalHandlerTest, CallTest)
 #endif
 
     sp.Stop();
-    ASSERT_NE(COUNTER, 0);
+    ASSERT_NE(g_counter, 0);
 }
 
 }  // namespace panda::test

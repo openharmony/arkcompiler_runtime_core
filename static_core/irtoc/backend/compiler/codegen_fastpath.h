@@ -57,11 +57,11 @@ public:
 
 private:
     RegMask GetCallerRegistersToRestore() const;
-    void CreateTailCall(IntrinsicInst *inst, bool is_fastpath);
+    void CreateTailCall(IntrinsicInst *inst, bool isFastpath);
 
 private:
-    RegMask saved_registers_ {};
-    VRegMask saved_fp_registers_ {};
+    RegMask savedRegisters_ {};
+    VRegMask savedFpRegisters_ {};
 };
 
 }  // namespace panda::compiler

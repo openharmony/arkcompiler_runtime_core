@@ -21,30 +21,30 @@
 
 namespace panda {
 
-coretypes::String *StringTable::GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length,
+coretypes::String *StringTable::GetOrInternString(const uint8_t *mutf8Data, uint32_t utf16Length,
                                                   const LanguageContext &ctx)
 {
-    bool can_be_compressed = coretypes::String::CanBeCompressedMUtf8(mutf8_data);
-    auto *str = internal_table_.GetString(mutf8_data, utf16_length, can_be_compressed, ctx);
+    bool canBeCompressed = coretypes::String::CanBeCompressedMUtf8(mutf8Data);
+    auto *str = internalTable_.GetString(mutf8Data, utf16Length, canBeCompressed, ctx);
     if (str == nullptr) {
-        str = table_.GetOrInternString(mutf8_data, utf16_length, can_be_compressed, ctx);
+        str = table_.GetOrInternString(mutf8Data, utf16Length, canBeCompressed, ctx);
     }
     return str;
 }
 
-coretypes::String *StringTable::GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
+coretypes::String *StringTable::GetOrInternString(const uint16_t *utf16Data, uint32_t utf16Length,
                                                   const LanguageContext &ctx)
 {
-    auto *str = internal_table_.GetString(utf16_data, utf16_length, ctx);
+    auto *str = internalTable_.GetString(utf16Data, utf16Length, ctx);
     if (str == nullptr) {
-        str = table_.GetOrInternString(utf16_data, utf16_length, ctx);
+        str = table_.GetOrInternString(utf16Data, utf16Length, ctx);
     }
     return str;
 }
 
 coretypes::String *StringTable::GetOrInternString(coretypes::String *string, const LanguageContext &ctx)
 {
-    auto *str = internal_table_.GetString(string, ctx);
+    auto *str = internalTable_.GetString(string, ctx);
     if (str == nullptr) {
         str = table_.GetOrInternString(string, ctx);
     }
@@ -58,17 +58,17 @@ coretypes::String *StringTable::GetOrInternInternalString(const panda_file::File
 
     ADD_PROFILE_STRING_ITEM(pf.GetFilename(), utf::Mutf8AsCString(data.data));
 
-    coretypes::String *str = table_.GetString(data.data, data.utf16_length, data.is_ascii, ctx);
+    coretypes::String *str = table_.GetString(data.data, data.utf16Length, data.isAscii, ctx);
     if (str != nullptr) {
         table_.PreBarrierOnGet(str);
         return str;
     }
-    return internal_table_.GetOrInternString(pf, id, ctx);
+    return internalTable_.GetOrInternString(pf, id, ctx);
 }
 
-void StringTable::Sweep(const GCObjectVisitor &gc_object_visitor)
+void StringTable::Sweep(const GCObjectVisitor &gcObjectVisitor)
 {
-    table_.Sweep(gc_object_visitor);
+    table_.Sweep(gcObjectVisitor);
 }
 
 bool StringTable::UpdateMoved()
@@ -78,40 +78,40 @@ bool StringTable::UpdateMoved()
 
 size_t StringTable::Size()
 {
-    return internal_table_.Size() + table_.Size();
+    return internalTable_.Size() + table_.Size();
 }
 
 void StringTable::Table::VisitStrings(const StringVisitor &visitor)
 {
-    os::memory::ReadLockHolder holder(table_lock_);
+    os::memory::ReadLockHolder holder(tableLock_);
     for (auto entry : table_) {
         visitor(entry.second);
     }
 }
 
-coretypes::String *StringTable::Table::GetString(const uint8_t *utf8_data, uint32_t utf16_length,
-                                                 bool can_be_compressed, [[maybe_unused]] const LanguageContext &ctx)
+coretypes::String *StringTable::Table::GetString(const uint8_t *utf8Data, uint32_t utf16Length, bool canBeCompressed,
+                                                 [[maybe_unused]] const LanguageContext &ctx)
 {
-    uint32_t hash_code = coretypes::String::ComputeHashcodeMutf8(utf8_data, utf16_length, can_be_compressed);
-    os::memory::ReadLockHolder holder(table_lock_);
-    for (auto it = table_.find(hash_code); it != table_.end(); it++) {
-        auto found_string = it->second;
-        if (coretypes::String::StringsAreEqualMUtf8(found_string, utf8_data, utf16_length, can_be_compressed)) {
-            return found_string;
+    uint32_t hashCode = coretypes::String::ComputeHashcodeMutf8(utf8Data, utf16Length, canBeCompressed);
+    os::memory::ReadLockHolder holder(tableLock_);
+    for (auto it = table_.find(hashCode); it != table_.end(); it++) {
+        auto foundString = it->second;
+        if (coretypes::String::StringsAreEqualMUtf8(foundString, utf8Data, utf16Length, canBeCompressed)) {
+            return foundString;
         }
     }
     return nullptr;
 }
 
-coretypes::String *StringTable::Table::GetString(const uint16_t *utf16_data, uint32_t utf16_length,
+coretypes::String *StringTable::Table::GetString(const uint16_t *utf16Data, uint32_t utf16Length,
                                                  [[maybe_unused]] const LanguageContext &ctx)
 {
-    uint32_t hash_code = coretypes::String::ComputeHashcodeUtf16(const_cast<uint16_t *>(utf16_data), utf16_length);
-    os::memory::ReadLockHolder holder(table_lock_);
-    for (auto it = table_.find(hash_code); it != table_.end(); it++) {
-        auto found_string = it->second;
-        if (coretypes::String::StringsAreEqualUtf16(found_string, utf16_data, utf16_length)) {
-            return found_string;
+    uint32_t hashCode = coretypes::String::ComputeHashcodeUtf16(const_cast<uint16_t *>(utf16Data), utf16Length);
+    os::memory::ReadLockHolder holder(tableLock_);
+    for (auto it = table_.find(hashCode); it != table_.end(); it++) {
+        auto foundString = it->second;
+        if (coretypes::String::StringsAreEqualUtf16(foundString, utf16Data, utf16Length)) {
+            return foundString;
         }
     }
     return nullptr;
@@ -120,12 +120,12 @@ coretypes::String *StringTable::Table::GetString(const uint16_t *utf16_data, uin
 coretypes::String *StringTable::Table::GetString(coretypes::String *string, [[maybe_unused]] const LanguageContext &ctx)
 {
     ASSERT(string != nullptr);
-    os::memory::ReadLockHolder holder(table_lock_);
+    os::memory::ReadLockHolder holder(tableLock_);
     auto hash = string->GetHashcode();
     for (auto it = table_.find(hash); it != table_.end(); it++) {
-        auto found_string = it->second;
-        if (coretypes::String::StringsAreEqual(found_string, string)) {
-            return found_string;
+        auto foundString = it->second;
+        if (coretypes::String::StringsAreEqual(foundString, string)) {
+            return foundString;
         }
     }
     return nullptr;
@@ -133,7 +133,7 @@ coretypes::String *StringTable::Table::GetString(coretypes::String *string, [[ma
 
 void StringTable::Table::ForceInternString(coretypes::String *string, [[maybe_unused]] const LanguageContext &ctx)
 {
-    os::memory::WriteLockHolder holder(table_lock_);
+    os::memory::WriteLockHolder holder(tableLock_);
     table_.insert(std::pair<uint32_t, coretypes::String *>(string->GetHashcode(), string));
 }
 
@@ -141,16 +141,16 @@ coretypes::String *StringTable::Table::InternString(coretypes::String *string,
                                                     [[maybe_unused]] const LanguageContext &ctx)
 {
     ASSERT(string != nullptr);
-    uint32_t hash_code = string->GetHashcode();
-    os::memory::WriteLockHolder holder(table_lock_);
+    uint32_t hashCode = string->GetHashcode();
+    os::memory::WriteLockHolder holder(tableLock_);
     // Check string is not present before actually creating and inserting
-    for (auto it = table_.find(hash_code); it != table_.end(); it++) {
-        auto found_string = it->second;
-        if (coretypes::String::StringsAreEqual(found_string, string)) {
-            return found_string;
+    for (auto it = table_.find(hashCode); it != table_.end(); it++) {
+        auto foundString = it->second;
+        if (coretypes::String::StringsAreEqual(foundString, string)) {
+            return foundString;
         }
     }
-    table_.insert(std::pair<uint32_t, coretypes::String *>(hash_code, string));
+    table_.insert(std::pair<uint32_t, coretypes::String *>(hashCode, string));
     return string;
 }
 
@@ -159,24 +159,24 @@ void StringTable::Table::PreBarrierOnGet(coretypes::String *str)
     // Need pre barrier if string exists in string table, because this string can be got from the
     // string table (like phoenix) and write to a field during concurrent phase and GC does not see it on Remark
     ASSERT_MANAGED_CODE();
-    auto *pre_wrb = Thread::GetCurrent()->GetPreWrbEntrypoint();
-    if (pre_wrb != nullptr) {
-        reinterpret_cast<mem::ObjRefProcessFunc>(pre_wrb)(str);
+    auto *preWrb = Thread::GetCurrent()->GetPreWrbEntrypoint();
+    if (preWrb != nullptr) {
+        reinterpret_cast<mem::ObjRefProcessFunc>(preWrb)(str);
     }
 }
 
-coretypes::String *StringTable::Table::GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length,
-                                                         bool can_be_compressed, const LanguageContext &ctx)
+coretypes::String *StringTable::Table::GetOrInternString(const uint8_t *mutf8Data, uint32_t utf16Length,
+                                                         bool canBeCompressed, const LanguageContext &ctx)
 {
-    coretypes::String *result = GetString(mutf8_data, utf16_length, can_be_compressed, ctx);
+    coretypes::String *result = GetString(mutf8Data, utf16Length, canBeCompressed, ctx);
     if (result != nullptr) {
         PreBarrierOnGet(result);
         return result;
     }
 
     // Even if this string is not inserted, it should get removed during GC
-    result = coretypes::String::CreateFromMUtf8(mutf8_data, utf16_length, can_be_compressed, ctx,
-                                                Thread::GetCurrent()->GetVM());
+    result =
+        coretypes::String::CreateFromMUtf8(mutf8Data, utf16Length, canBeCompressed, ctx, Thread::GetCurrent()->GetVM());
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
     }
@@ -185,17 +185,17 @@ coretypes::String *StringTable::Table::GetOrInternString(const uint8_t *mutf8_da
     return result;
 }
 
-coretypes::String *StringTable::Table::GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
+coretypes::String *StringTable::Table::GetOrInternString(const uint16_t *utf16Data, uint32_t utf16Length,
                                                          const LanguageContext &ctx)
 {
-    coretypes::String *result = GetString(utf16_data, utf16_length, ctx);
+    coretypes::String *result = GetString(utf16Data, utf16Length, ctx);
     if (result != nullptr) {
         PreBarrierOnGet(result);
         return result;
     }
 
     // Even if this string is not inserted, it should get removed during GC
-    result = coretypes::String::CreateFromUtf16(utf16_data, utf16_length, ctx, Thread::GetCurrent()->GetVM());
+    result = coretypes::String::CreateFromUtf16(utf16Data, utf16Length, ctx, Thread::GetCurrent()->GetVM());
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
     }
@@ -218,16 +218,16 @@ coretypes::String *StringTable::Table::GetOrInternString(coretypes::String *stri
 
 bool StringTable::Table::UpdateMoved()
 {
-    os::memory::WriteLockHolder holder(table_lock_);
+    os::memory::WriteLockHolder holder(tableLock_);
     LOG(DEBUG, GC) << "=== StringTable Update moved. BEGIN ===";
     LOG(DEBUG, GC) << "Iterate over: " << table_.size() << " elements in string table";
     bool updated = false;
     for (auto it = table_.begin(), end = table_.end(); it != end;) {
         auto *object = it->second;
         if (object->IsForwarded()) {
-            ObjectHeader *fwd_string = panda::mem::GetForwardAddress(object);
-            it->second = static_cast<coretypes::String *>(fwd_string);
-            LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwd_string;
+            ObjectHeader *fwdString = panda::mem::GetForwardAddress(object);
+            it->second = static_cast<coretypes::String *>(fwdString);
+            LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwdString;
             updated = true;
         }
         ++it;
@@ -237,20 +237,20 @@ bool StringTable::Table::UpdateMoved()
 }
 
 // NOTE(alovkov): make parallel
-void StringTable::Table::Sweep(const GCObjectVisitor &gc_object_visitor)
+void StringTable::Table::Sweep(const GCObjectVisitor &gcObjectVisitor)
 {
-    os::memory::WriteLockHolder holder(table_lock_);
+    os::memory::WriteLockHolder holder(tableLock_);
     LOG(DEBUG, GC) << "=== StringTable Sweep. BEGIN ===";
     LOG(DEBUG, GC) << "StringTable iterate over: " << table_.size() << " elements in string table";
     for (auto it = table_.begin(), end = table_.end(); it != end;) {
         auto *object = it->second;
         if (object->IsForwarded()) {
-            ASSERT(gc_object_visitor(object) != ObjectStatus::DEAD_OBJECT);
-            ObjectHeader *fwd_string = panda::mem::GetForwardAddress(object);
-            it->second = static_cast<coretypes::String *>(fwd_string);
+            ASSERT(gcObjectVisitor(object) != ObjectStatus::DEAD_OBJECT);
+            ObjectHeader *fwdString = panda::mem::GetForwardAddress(object);
+            it->second = static_cast<coretypes::String *>(fwdString);
             ++it;
-            LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwd_string;
-        } else if (gc_object_visitor(object) == ObjectStatus::DEAD_OBJECT) {
+            LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwdString;
+        } else if (gcObjectVisitor(object) == ObjectStatus::DEAD_OBJECT) {
             LOG(DEBUG, GC) << "StringTable: delete string " << std::hex << object
                            << ", val = " << ConvertToString(object);
             table_.erase(it++);
@@ -264,19 +264,19 @@ void StringTable::Table::Sweep(const GCObjectVisitor &gc_object_visitor)
 
 size_t StringTable::Table::Size()
 {
-    os::memory::ReadLockHolder holder(table_lock_);
+    os::memory::ReadLockHolder holder(tableLock_);
     return table_.size();
 }
 
-coretypes::String *StringTable::InternalTable::GetOrInternString(const uint8_t *mutf8_data, uint32_t utf16_length,
-                                                                 bool can_be_compressed, const LanguageContext &ctx)
+coretypes::String *StringTable::InternalTable::GetOrInternString(const uint8_t *mutf8Data, uint32_t utf16Length,
+                                                                 bool canBeCompressed, const LanguageContext &ctx)
 {
-    coretypes::String *result = GetString(mutf8_data, utf16_length, can_be_compressed, ctx);
+    coretypes::String *result = GetString(mutf8Data, utf16Length, canBeCompressed, ctx);
     if (result != nullptr) {
         return result;
     }
 
-    result = coretypes::String::CreateFromMUtf8(mutf8_data, utf16_length, can_be_compressed, ctx,
+    result = coretypes::String::CreateFromMUtf8(mutf8Data, utf16Length, canBeCompressed, ctx,
                                                 Thread::GetCurrent()->GetVM(), false);
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
@@ -285,15 +285,15 @@ coretypes::String *StringTable::InternalTable::GetOrInternString(const uint8_t *
     return result;
 }
 
-coretypes::String *StringTable::InternalTable::GetOrInternString(const uint16_t *utf16_data, uint32_t utf16_length,
+coretypes::String *StringTable::InternalTable::GetOrInternString(const uint16_t *utf16Data, uint32_t utf16Length,
                                                                  const LanguageContext &ctx)
 {
-    coretypes::String *result = GetString(utf16_data, utf16_length, ctx);
+    coretypes::String *result = GetString(utf16Data, utf16Length, ctx);
     if (result != nullptr) {
         return result;
     }
 
-    result = coretypes::String::CreateFromUtf16(utf16_data, utf16_length, ctx, Thread::GetCurrent()->GetVM(), false);
+    result = coretypes::String::CreateFromUtf16(utf16Data, utf16Length, ctx, Thread::GetCurrent()->GetVM(), false);
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
     }
@@ -316,11 +316,11 @@ coretypes::String *StringTable::InternalTable::GetOrInternString(const panda_fil
                                                                  const LanguageContext &ctx)
 {
     auto data = pf.GetStringData(id);
-    coretypes::String *result = GetString(data.data, data.utf16_length, data.is_ascii, ctx);
+    coretypes::String *result = GetString(data.data, data.utf16Length, data.isAscii, ctx);
     if (result != nullptr) {
         return result;
     }
-    result = coretypes::String::CreateFromMUtf8(data.data, data.utf16_length, data.is_ascii, ctx,
+    result = coretypes::String::CreateFromMUtf8(data.data, data.utf16Length, data.isAscii, ctx,
                                                 Thread::GetCurrent()->GetVM(), false);
     if (UNLIKELY(result == nullptr)) {
         return nullptr;
@@ -329,7 +329,7 @@ coretypes::String *StringTable::InternalTable::GetOrInternString(const panda_fil
     result = InternStringNonMovable(result, ctx);
 
     // Update cache.
-    os::memory::WriteLockHolder lock(maps_lock_);
+    os::memory::WriteLockHolder lock(mapsLock_);
     auto it = maps_.find(&pf);
     if (it != maps_.end()) {
         (it->second)[id] = result;
@@ -343,12 +343,12 @@ coretypes::String *StringTable::InternalTable::GetOrInternString(const panda_fil
 
 coretypes::String *StringTable::InternalTable::GetStringFast(const panda_file::File &pf, panda_file::File::EntityId id)
 {
-    os::memory::ReadLockHolder lock(maps_lock_);
+    os::memory::ReadLockHolder lock(mapsLock_);
     auto it = maps_.find(&pf);
     if (it != maps_.end()) {
-        auto id_it = it->second.find(id);
-        if (id_it != it->second.end()) {
-            return id_it->second;
+        auto idIt = it->second.find(id);
+        if (idIt != it->second.end()) {
+            return idIt->second;
         }
     }
     return nullptr;
@@ -363,29 +363,29 @@ void StringTable::InternalTable::VisitRoots(const StringVisitor &visitor, mem::V
                              mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT)) <= 1);
     // need to set flags before we iterate, because concurrent allocation should be in proper table
     if ((flags & mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT) != 0) {
-        os::memory::WriteLockHolder holder(table_lock_);
-        record_new_string_ = true;
+        os::memory::WriteLockHolder holder(tableLock_);
+        recordNewString_ = true;
     } else if ((flags & mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT) != 0) {
-        os::memory::WriteLockHolder holder(table_lock_);
-        record_new_string_ = false;
+        os::memory::WriteLockHolder holder(tableLock_);
+        recordNewString_ = false;
     }
 
     if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ALL) != 0) {
-        os::memory::ReadLockHolder lock(table_lock_);
+        os::memory::ReadLockHolder lock(tableLock_);
         for (const auto &v : table_) {
             visitor(v.second);
         }
     } else if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW) != 0) {
-        os::memory::ReadLockHolder lock(table_lock_);
-        for (const auto str : new_string_table_) {
+        os::memory::ReadLockHolder lock(tableLock_);
+        for (const auto str : newStringTable_) {
             visitor(str);
         }
     } else {
         LOG(FATAL, RUNTIME) << "Unknown VisitGCRootFlags: " << static_cast<uint32_t>(flags);
     }
     if ((flags & mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT) != 0) {
-        os::memory::WriteLockHolder holder(table_lock_);
-        new_string_table_.clear();
+        os::memory::WriteLockHolder holder(tableLock_);
+        newStringTable_.clear();
     }
 }
 
@@ -393,9 +393,9 @@ coretypes::String *StringTable::InternalTable::InternStringNonMovable(coretypes:
                                                                       const LanguageContext &ctx)
 {
     auto *result = InternString(string, ctx);
-    os::memory::WriteLockHolder holder(table_lock_);
-    if (record_new_string_) {
-        new_string_table_.push_back(result);
+    os::memory::WriteLockHolder holder(tableLock_);
+    if (recordNewString_) {
+        newStringTable_.push_back(result);
     }
     return result;
 }

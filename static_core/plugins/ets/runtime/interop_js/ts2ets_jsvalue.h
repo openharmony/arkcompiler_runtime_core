@@ -26,9 +26,9 @@ inline void InitJSValueExports()
     // do nothing
 }
 
-inline napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool do_clscheck)
+inline napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool doClscheck)
 {
-    return interop::js::InvokeEtsMethodImpl(env, jsargv, jsargc, do_clscheck);
+    return interop::js::InvokeEtsMethodImpl(env, jsargv, jsargc, doClscheck);
 }
 
 namespace GlobalCtx {  // NOLINT(readability-identifier-naming)

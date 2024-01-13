@@ -22,261 +22,259 @@ namespace panda::mem {
 
 GCSettings::GCSettings(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
-    auto runtime_lang = plugins::LangToRuntimeType(lang);
-    is_dump_heap_ = options.IsGcDumpHeap(runtime_lang);
-    is_concurrency_enabled_ = options.IsConcurrentGcEnabled(runtime_lang);
-    is_gc_enable_tracing_ = options.IsGcEnableTracing(runtime_lang);
-    is_explicit_concurrent_gc_enabled_ = options.IsExplicitConcurrentGcEnabled();
-    run_gc_in_place_ = options.IsRunGcInPlace(runtime_lang);
-    full_gc_bombing_frequency_ = options.GetFullGcBombingFrequency(runtime_lang);
-    native_gc_trigger_type_ = NativeGcTriggerTypeFromString(options.GetNativeGcTriggerType(runtime_lang));
-    enable_fast_heap_verifier_ = options.IsEnableFastHeapVerifier(runtime_lang);
-    auto hv_params = options.GetHeapVerifier(runtime_lang);
-    pre_gc_heap_verification_ = std::find(hv_params.begin(), hv_params.end(), "pre") != hv_params.end();
-    into_gc_heap_verification_ = std::find(hv_params.begin(), hv_params.end(), "into") != hv_params.end();
-    post_gc_heap_verification_ = std::find(hv_params.begin(), hv_params.end(), "post") != hv_params.end();
-    before_g1_concurrent_heap_verification_ =
-        std::find(hv_params.begin(), hv_params.end(), "before_g1_concurrent") != hv_params.end();
-    fail_on_heap_verification_ =
-        std::find(hv_params.begin(), hv_params.end(), "fail_on_verification") != hv_params.end();
-    run_gc_every_safepoint_ = options.IsRunGcEverySafepoint();
-    g1_region_garbage_rate_threshold_ = options.GetG1RegionGarbageRateThreshold() / PERCENT_100_D;
-    g1_number_of_tenured_regions_at_mixed_collection_ = options.GetG1NumberOfTenuredRegionsAtMixedCollection();
-    g1_promotion_region_alive_rate_ = options.GetG1PromotionRegionAliveRate();
-    g1_full_gc_region_fragmentation_rate_ = options.GetG1FullGcRegionFragmentationRate() / PERCENT_100_D;
-    g1_track_freed_objects_ = options.IsG1TrackFreedObjects();
-    gc_workers_count_ = options.GetGcWorkersCount();
-    manage_gc_threads_affinity_ = options.IsManageGcThreadsAffinity();
-    use_weak_cpu_for_gc_concurrent_ = options.IsUseWeakCpuForGcConcurrent();
-    use_thread_pool_for_gc_workers_ = Runtime::GetTaskScheduler() == nullptr;
-    gc_marking_stack_new_tasks_frequency_ = options.GetGcMarkingStackNewTasksFrequency();
-    gc_root_marking_stack_max_size_ = options.GetGcRootMarkingStackMaxSize();
-    gc_workers_marking_stack_max_size_ = options.GetGcWorkersMarkingStackMaxSize();
-    young_space_size_ = options.GetYoungSpaceSize();
-    log_detailed_gc_info_enabled_ = options.IsLogDetailedGcInfoEnabled();
-    log_detailed_gc_compaction_info_enabled_ = options.IsLogDetailedGcCompactionInfoEnabled();
-    parallel_marking_enabled_ = options.IsGcParallelMarkingEnabled() && (options.GetGcWorkersCount() != 0);
-    parallel_compacting_enabled_ = options.IsGcParallelCompactingEnabled() && (options.GetGcWorkersCount() != 0);
-    parallel_ref_updating_enabled_ = options.IsGcParallelRefUpdatingEnabled() && (options.GetGcWorkersCount() != 0);
-    g1_enable_concurrent_update_remset_ = options.IsG1EnableConcurrentUpdateRemset();
-    g1_min_concurrent_cards_to_process_ = options.GetG1MinConcurrentCardsToProcess();
-    g1_enable_pause_time_goal_ = options.IsG1PauseTimeGoal();
-    g1_max_gc_pause_ms_ = options.GetG1PauseTimeGoalMaxGcPause();
-    g1_gc_pause_interval_ms_ = options.WasSetG1PauseTimeGoalGcPauseInterval()
-                                   ? options.GetG1PauseTimeGoalGcPauseInterval()
-                                   : g1_max_gc_pause_ms_ + 1;
+    auto runtimeLang = plugins::LangToRuntimeType(lang);
+    isDumpHeap_ = options.IsGcDumpHeap(runtimeLang);
+    isConcurrencyEnabled_ = options.IsConcurrentGcEnabled(runtimeLang);
+    isGcEnableTracing_ = options.IsGcEnableTracing(runtimeLang);
+    isExplicitConcurrentGcEnabled_ = options.IsExplicitConcurrentGcEnabled();
+    runGcInPlace_ = options.IsRunGcInPlace(runtimeLang);
+    fullGcBombingFrequency_ = options.GetFullGcBombingFrequency(runtimeLang);
+    nativeGcTriggerType_ = NativeGcTriggerTypeFromString(options.GetNativeGcTriggerType(runtimeLang));
+    enableFastHeapVerifier_ = options.IsEnableFastHeapVerifier(runtimeLang);
+    auto hvParams = options.GetHeapVerifier(runtimeLang);
+    preGcHeapVerification_ = std::find(hvParams.begin(), hvParams.end(), "pre") != hvParams.end();
+    intoGcHeapVerification_ = std::find(hvParams.begin(), hvParams.end(), "into") != hvParams.end();
+    postGcHeapVerification_ = std::find(hvParams.begin(), hvParams.end(), "post") != hvParams.end();
+    beforeG1ConcurrentHeapVerification_ =
+        std::find(hvParams.begin(), hvParams.end(), "before_g1_concurrent") != hvParams.end();
+    failOnHeapVerification_ = std::find(hvParams.begin(), hvParams.end(), "fail_on_verification") != hvParams.end();
+    runGcEverySafepoint_ = options.IsRunGcEverySafepoint();
+    g1RegionGarbageRateThreshold_ = options.GetG1RegionGarbageRateThreshold() / PERCENT_100_D;
+    g1NumberOfTenuredRegionsAtMixedCollection_ = options.GetG1NumberOfTenuredRegionsAtMixedCollection();
+    g1PromotionRegionAliveRate_ = options.GetG1PromotionRegionAliveRate();
+    g1FullGcRegionFragmentationRate_ = options.GetG1FullGcRegionFragmentationRate() / PERCENT_100_D;
+    g1TrackFreedObjects_ = options.IsG1TrackFreedObjects();
+    gcWorkersCount_ = options.GetGcWorkersCount();
+    manageGcThreadsAffinity_ = options.IsManageGcThreadsAffinity();
+    useWeakCpuForGcConcurrent_ = options.IsUseWeakCpuForGcConcurrent();
+    useThreadPoolForGcWorkers_ = Runtime::GetTaskScheduler() == nullptr;
+    gcMarkingStackNewTasksFrequency_ = options.GetGcMarkingStackNewTasksFrequency();
+    gcRootMarkingStackMaxSize_ = options.GetGcRootMarkingStackMaxSize();
+    gcWorkersMarkingStackMaxSize_ = options.GetGcWorkersMarkingStackMaxSize();
+    youngSpaceSize_ = options.GetYoungSpaceSize();
+    logDetailedGcInfoEnabled_ = options.IsLogDetailedGcInfoEnabled();
+    logDetailedGcCompactionInfoEnabled_ = options.IsLogDetailedGcCompactionInfoEnabled();
+    parallelMarkingEnabled_ = options.IsGcParallelMarkingEnabled() && (options.GetGcWorkersCount() != 0);
+    parallelCompactingEnabled_ = options.IsGcParallelCompactingEnabled() && (options.GetGcWorkersCount() != 0);
+    parallelRefUpdatingEnabled_ = options.IsGcParallelRefUpdatingEnabled() && (options.GetGcWorkersCount() != 0);
+    g1EnableConcurrentUpdateRemset_ = options.IsG1EnableConcurrentUpdateRemset();
+    g1MinConcurrentCardsToProcess_ = options.GetG1MinConcurrentCardsToProcess();
+    g1EnablePauseTimeGoal_ = options.IsG1PauseTimeGoal();
+    g1MaxGcPauseMs_ = options.GetG1PauseTimeGoalMaxGcPause();
+    g1GcPauseIntervalMs_ = options.WasSetG1PauseTimeGoalGcPauseInterval() ? options.GetG1PauseTimeGoalGcPauseInterval()
+                                                                          : g1MaxGcPauseMs_ + 1;
     LOG_IF(FullGCBombingFrequency() && RunGCInPlace(), FATAL, GC)
         << "full-gc-bombimg-frequency and run-gc-in-place options can't be used together";
 }
 
 bool GCSettings::IsGcEnableTracing() const
 {
-    return is_gc_enable_tracing_;
+    return isGcEnableTracing_;
 }
 
 NativeGcTriggerType GCSettings::GetNativeGcTriggerType() const
 {
-    return native_gc_trigger_type_;
+    return nativeGcTriggerType_;
 }
 
 bool GCSettings::IsDumpHeap() const
 {
-    return is_dump_heap_;
+    return isDumpHeap_;
 }
 
 bool GCSettings::IsConcurrencyEnabled() const
 {
-    return is_concurrency_enabled_;
+    return isConcurrencyEnabled_;
 }
 
 bool GCSettings::IsExplicitConcurrentGcEnabled() const
 {
-    return is_explicit_concurrent_gc_enabled_;
+    return isExplicitConcurrentGcEnabled_;
 }
 
 bool GCSettings::RunGCInPlace() const
 {
-    return run_gc_in_place_;
+    return runGcInPlace_;
 }
 
 bool GCSettings::EnableFastHeapVerifier() const
 {
-    return enable_fast_heap_verifier_;
+    return enableFastHeapVerifier_;
 }
 
 bool GCSettings::PreGCHeapVerification() const
 {
-    return pre_gc_heap_verification_;
+    return preGcHeapVerification_;
 }
 
 bool GCSettings::IntoGCHeapVerification() const
 {
-    return into_gc_heap_verification_;
+    return intoGcHeapVerification_;
 }
 
 bool GCSettings::PostGCHeapVerification() const
 {
-    return post_gc_heap_verification_;
+    return postGcHeapVerification_;
 }
 
 bool GCSettings::BeforeG1ConcurrentHeapVerification() const
 {
-    return before_g1_concurrent_heap_verification_;
+    return beforeG1ConcurrentHeapVerification_;
 }
 
 bool GCSettings::FailOnHeapVerification() const
 {
-    return fail_on_heap_verification_;
+    return failOnHeapVerification_;
 }
 
 bool GCSettings::RunGCEverySafepoint() const
 {
-    return run_gc_every_safepoint_;
+    return runGcEverySafepoint_;
 }
 
 double GCSettings::G1RegionGarbageRateThreshold() const
 {
-    return g1_region_garbage_rate_threshold_;
+    return g1RegionGarbageRateThreshold_;
 }
 
 uint32_t GCSettings::FullGCBombingFrequency() const
 {
-    return full_gc_bombing_frequency_;
+    return fullGcBombingFrequency_;
 }
 
 uint32_t GCSettings::GetG1NumberOfTenuredRegionsAtMixedCollection() const
 {
-    return g1_number_of_tenured_regions_at_mixed_collection_;
+    return g1NumberOfTenuredRegionsAtMixedCollection_;
 }
 
 double GCSettings::G1PromotionRegionAliveRate() const
 {
-    return g1_promotion_region_alive_rate_;
+    return g1PromotionRegionAliveRate_;
 }
 
 double GCSettings::G1FullGCRegionFragmentationRate() const
 {
-    return g1_full_gc_region_fragmentation_rate_;
+    return g1FullGcRegionFragmentationRate_;
 }
 
 bool GCSettings::G1TrackFreedObjects() const
 {
-    return g1_track_freed_objects_;
+    return g1TrackFreedObjects_;
 }
 
 size_t GCSettings::GCWorkersCount() const
 {
-    return gc_workers_count_;
+    return gcWorkersCount_;
 }
 
 bool GCSettings::ManageGcThreadsAffinity() const
 {
-    return manage_gc_threads_affinity_;
+    return manageGcThreadsAffinity_;
 }
 
 bool GCSettings::UseWeakCpuForGcConcurrent() const
 {
-    return use_weak_cpu_for_gc_concurrent_;
+    return useWeakCpuForGcConcurrent_;
 }
 
 void GCSettings::SetGCWorkersCount(size_t value)
 {
-    gc_workers_count_ = value;
+    gcWorkersCount_ = value;
 }
 
 bool GCSettings::UseThreadPoolForGC() const
 {
-    return use_thread_pool_for_gc_workers_;
+    return useThreadPoolForGcWorkers_;
 }
 
 bool GCSettings::UseTaskManagerForGC() const
 {
-    return !use_thread_pool_for_gc_workers_;
+    return !useThreadPoolForGcWorkers_;
 }
 
 size_t GCSettings::GCMarkingStackNewTasksFrequency() const
 {
-    return gc_marking_stack_new_tasks_frequency_;
+    return gcMarkingStackNewTasksFrequency_;
 }
 
 size_t GCSettings::GCRootMarkingStackMaxSize() const
 {
-    return gc_root_marking_stack_max_size_;
+    return gcRootMarkingStackMaxSize_;
 }
 
 size_t GCSettings::GCWorkersMarkingStackMaxSize() const
 {
-    return gc_workers_marking_stack_max_size_;
+    return gcWorkersMarkingStackMaxSize_;
 }
 
 uint64_t GCSettings::YoungSpaceSize() const
 {
-    return young_space_size_;
+    return youngSpaceSize_;
 }
 
 bool GCSettings::LogDetailedGCInfoEnabled() const
 {
-    return log_detailed_gc_info_enabled_;
+    return logDetailedGcInfoEnabled_;
 }
 
 bool GCSettings::LogDetailedGCCompactionInfoEnabled() const
 {
-    return log_detailed_gc_compaction_info_enabled_;
+    return logDetailedGcCompactionInfoEnabled_;
 }
 
 bool GCSettings::ParallelMarkingEnabled() const
 {
-    return parallel_marking_enabled_;
+    return parallelMarkingEnabled_;
 }
 
 void GCSettings::SetParallelMarkingEnabled(bool value)
 {
-    parallel_marking_enabled_ = value;
+    parallelMarkingEnabled_ = value;
 }
 
 bool GCSettings::ParallelCompactingEnabled() const
 {
-    return parallel_compacting_enabled_;
+    return parallelCompactingEnabled_;
 }
 
 void GCSettings::SetParallelCompactingEnabled(bool value)
 {
-    parallel_compacting_enabled_ = value;
+    parallelCompactingEnabled_ = value;
 }
 
 bool GCSettings::ParallelRefUpdatingEnabled() const
 {
-    return parallel_ref_updating_enabled_;
+    return parallelRefUpdatingEnabled_;
 }
 
 void GCSettings::SetParallelRefUpdatingEnabled(bool value)
 {
-    parallel_ref_updating_enabled_ = value;
+    parallelRefUpdatingEnabled_ = value;
 }
 
 bool GCSettings::G1EnableConcurrentUpdateRemset() const
 {
-    return g1_enable_concurrent_update_remset_;
+    return g1EnableConcurrentUpdateRemset_;
 }
 
 size_t GCSettings::G1MinConcurrentCardsToProcess() const
 {
-    return g1_min_concurrent_cards_to_process_;
+    return g1MinConcurrentCardsToProcess_;
 }
 
 bool GCSettings::G1EnablePauseTimeGoal() const
 {
-    return g1_enable_pause_time_goal_;
+    return g1EnablePauseTimeGoal_;
 }
 
 uint32_t GCSettings::GetG1MaxGcPauseInMillis() const
 {
-    return g1_max_gc_pause_ms_;
+    return g1MaxGcPauseMs_;
 }
 
 uint32_t GCSettings::GetG1GcPauseIntervalInMillis() const
 {
-    return g1_gc_pause_interval_ms_;
+    return g1GcPauseIntervalMs_;
 }
 
 }  // namespace panda::mem

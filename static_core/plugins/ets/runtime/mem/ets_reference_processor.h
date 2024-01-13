@@ -27,13 +27,13 @@ public:
     NO_MOVE_SEMANTIC(EtsReferenceProcessor);
     ~EtsReferenceProcessor() final = default;
 
-    bool IsReference(const BaseClass *base_cls, const ObjectHeader *ref,
+    bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                      const ReferenceCheckPredicateT &pred) const final;
 
-    void HandleReference(GC *gc, GCMarkingStackType *objects_stack, const BaseClass *cls, const ObjectHeader *object,
+    void HandleReference(GC *gc, GCMarkingStackType *objectsStack, const BaseClass *cls, const ObjectHeader *object,
                          const ReferenceProcessPredicateT &pred) final;
 
-    void ProcessReferences(bool concurrent, bool clear_soft_references, GCPhase gc_phase,
+    void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                            const mem::GC::ReferenceClearPredicateT &pred) final;
 
     panda::mem::Reference *CollectClearedReferences() final
@@ -41,12 +41,12 @@ public:
         return nullptr;
     }
 
-    void ScheduleForEnqueue([[maybe_unused]] Reference *cleared_references) final
+    void ScheduleForEnqueue([[maybe_unused]] Reference *clearedReferences) final
     {
         UNREACHABLE();
     }
 
-    void Enqueue([[maybe_unused]] panda::mem::Reference *cleared_references) final
+    void Enqueue([[maybe_unused]] panda::mem::Reference *clearedReferences) final
     {
         UNREACHABLE();
     }
@@ -55,8 +55,8 @@ public:
     size_t GetReferenceQueueSize() const final;
 
 private:
-    mutable os::memory::Mutex weak_ref_lock_;
-    PandaUnorderedSet<ObjectHeader *> weak_references_ GUARDED_BY(weak_ref_lock_);
+    mutable os::memory::Mutex weakRefLock_;
+    PandaUnorderedSet<ObjectHeader *> weakReferences_ GUARDED_BY(weakRefLock_);
     GC *gc_;
 };
 

@@ -53,8 +53,8 @@ TEST_F(MoveConstantsTest, MoveNullPtrToCommonImmediateDominator)
             INST(8U, Opcode::Return).ref().Inputs(1U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -89,7 +89,7 @@ TEST_F(MoveConstantsTest, MoveNullPtrToCommonImmediateDominator)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MoveToCommonImmediateDominator)
@@ -126,8 +126,8 @@ TEST_F(MoveConstantsTest, MoveToCommonImmediateDominator)
             INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -164,7 +164,7 @@ TEST_F(MoveConstantsTest, MoveToCommonImmediateDominator)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MoveToClosestCommonDominator)
@@ -212,8 +212,8 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator)
             INST(28U, Opcode::Return).u64().Inputs(27U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -261,7 +261,7 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MoveJustBeforeUser)
@@ -297,8 +297,8 @@ TEST_F(MoveConstantsTest, MoveJustBeforeUser)
             INST(12U, Opcode::Return).u64().Inputs(0U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -334,7 +334,7 @@ TEST_F(MoveConstantsTest, MoveJustBeforeUser)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MoveJustBeforeUserSingleBlock)
@@ -371,8 +371,8 @@ TEST_F(MoveConstantsTest, MoveJustBeforeUserSingleBlock)
             INST(15U, Opcode::Return).u64().Inputs(0U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -409,7 +409,7 @@ TEST_F(MoveConstantsTest, MoveJustBeforeUserSingleBlock)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MovePhiInput)
@@ -439,8 +439,8 @@ TEST_F(MoveConstantsTest, MovePhiInput)
             INST(13U, Opcode::Return).u64().Inputs(19U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -470,7 +470,7 @@ TEST_F(MoveConstantsTest, MovePhiInput)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, AvoidMoveToLoop)
@@ -521,8 +521,8 @@ TEST_F(MoveConstantsTest, AvoidMoveToLoop)
             INST(27U, Opcode::Return).u64().Inputs(4U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -573,7 +573,7 @@ TEST_F(MoveConstantsTest, AvoidMoveToLoop)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MoveToClosestCommonDominator2)
@@ -601,8 +601,8 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator2)
             INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
         PARAMETER(1U, 2U).u64();
@@ -630,7 +630,7 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator2)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MoveToClosestCommonDominatorPhi)
@@ -662,8 +662,8 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominatorPhi)
             INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
         PARAMETER(1U, 2U).u64();
@@ -695,7 +695,7 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominatorPhi)
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, WasNotApplied)
@@ -709,8 +709,8 @@ TEST_F(MoveConstantsTest, WasNotApplied)
             INST(3U, Opcode::Return).u64().Inputs(0U);
         }
     }
-    Graph *graph_et = CreateEmptyGraph();
-    GRAPH(graph_et)
+    Graph *graphEt = CreateEmptyGraph();
+    GRAPH(graphEt)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -724,7 +724,7 @@ TEST_F(MoveConstantsTest, WasNotApplied)
     ASSERT_FALSE(result);
 
     GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph_et));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, CatchPhiUser)

@@ -19,27 +19,27 @@
 #include "runtime/mem/rem_set-inl.h"
 
 namespace panda::mem {
-bool CardHandler::Handle(CardTable::CardPtr card_ptr)
+bool CardHandler::Handle(CardTable::CardPtr cardPtr)
 {
     bool result = true;
-    auto *start_address = ToVoidPtr(card_table_->GetCardStartAddress(card_ptr));
-    LOG(DEBUG, GC) << "HandleCard card: " << card_table_->GetMemoryRange(card_ptr);
+    auto *startAddress = ToVoidPtr(cardTable_->GetCardStartAddress(cardPtr));
+    LOG(DEBUG, GC) << "HandleCard card: " << cardTable_->GetMemoryRange(cardPtr);
 
     // clear card before we process it, because parallel mutator thread can make a write and we would miss it
-    card_ptr->Clear();
+    cardPtr->Clear();
 
-    ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(start_address)),
-              std::cerr << "Invalid space type for the " << start_address << std::endl);
-    auto *region = AddrToRegion(start_address);
+    ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(startAddress)),
+              std::cerr << "Invalid space type for the " << startAddress << std::endl);
+    auto *region = AddrToRegion(startAddress);
     ASSERT(region != nullptr);
     ASSERT(region->GetLiveBitmap() != nullptr);
-    auto *end_address = ToVoidPtr(card_table_->GetCardEndAddress(card_ptr));
-    auto visitor = [this, &result, start_address, end_address](void *mem) {
-        auto object_header = static_cast<ObjectHeader *>(mem);
-        if (object_header->ClassAddr<BaseClass>() != nullptr) {
+    auto *endAddress = ToVoidPtr(cardTable_->GetCardEndAddress(cardPtr));
+    auto visitor = [this, &result, startAddress, endAddress](void *mem) {
+        auto objectHeader = static_cast<ObjectHeader *>(mem);
+        if (objectHeader->ClassAddr<BaseClass>() != nullptr) {
             // Class may be null when we are visiting a card and at the same time a new non-movable
             // object is allocated in the memory region covered by the card.
-            result = HandleObject(object_header, start_address, end_address);
+            result = HandleObject(objectHeader, startAddress, endAddress);
             return result;
         }
         return true;
@@ -47,7 +47,7 @@ bool CardHandler::Handle(CardTable::CardPtr card_ptr)
     if (region->HasFlag(RegionFlag::IS_LARGE_OBJECT)) {
         region->GetLiveBitmap()->CallForMarkedChunkInHumongousRegion<true>(ToVoidPtr(region->Begin()), visitor);
     } else {
-        region->GetLiveBitmap()->IterateOverMarkedChunkInRangeInterruptible<true>(start_address, end_address, visitor);
+        region->GetLiveBitmap()->IterateOverMarkedChunkInRangeInterruptible<true>(startAddress, endAddress, visitor);
     }
     return result;
 }

@@ -100,25 +100,25 @@ inline int64_t IntegerNumber(std::string_view p)
         return p[0] - '0';
     }
 
-    size_t minus_shift = 0;
+    size_t minusShift = 0;
     if (p[0] == '-') {
-        minus_shift++;
+        minusShift++;
     }
 
-    if (p.size() == GENERAL_SHIFT && minus_shift != 0) {
+    if (p.size() == GENERAL_SHIFT && minusShift != 0) {
         return -1 * (p[1] - '0');
     }
 
-    if (p[minus_shift + 1] == 'b') {
-        p.remove_prefix(GENERAL_SHIFT + minus_shift);
-        return std::strtoull(p.data(), nullptr, BIN_BASE) * (minus_shift == 0 ? 1 : -1);
+    if (p[minusShift + 1] == 'b') {
+        p.remove_prefix(GENERAL_SHIFT + minusShift);
+        return std::strtoull(p.data(), nullptr, BIN_BASE) * (minusShift == 0 ? 1 : -1);
     }
 
-    if (p[minus_shift + 1] == 'x') {
+    if (p[minusShift + 1] == 'x') {
         return std::strtoull(p.data(), nullptr, HEX_BASE);
     }
 
-    if (p[minus_shift] == '0') {
+    if (p[minusShift] == '0') {
         return std::strtoull(p.data(), nullptr, OCT_BASE);
     }
 
@@ -164,13 +164,13 @@ inline bool ValidateFloat(std::string_view p)
     return !nowexp;
 }
 
-inline double FloatNumber(std::string_view p, bool is_64bit)
+inline double FloatNumber(std::string_view p, bool is64bit)
 {
     constexpr size_t GENERAL_SHIFT = 2;
     // expects a valid number
     if (p.size() > GENERAL_SHIFT && p.substr(0, GENERAL_SHIFT) == "0x") {  // hex literal
         char *end = nullptr;
-        if (is_64bit) {
+        if (is64bit) {
             return bit_cast<double>(strtoull(p.data(), &end, 0));
         }
         return bit_cast<float>(static_cast<uint32_t>(strtoull(p.data(), &end, 0)));

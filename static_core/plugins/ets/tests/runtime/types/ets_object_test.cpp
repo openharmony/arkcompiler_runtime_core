@@ -69,7 +69,7 @@ public:
     }
 
     void SetClassesPandasmSources();
-    EtsClass *GetTestClass(std::string class_name);
+    EtsClass *GetTestClass(std::string className);
 
 private:
     RuntimeOptions options_;
@@ -120,21 +120,21 @@ void EtsObjectTest::SetClassesPandasmSources()
     sources_["Bar"] = source;
 }
 
-EtsClass *EtsObjectTest::GetTestClass(std::string class_name)
+EtsClass *EtsObjectTest::GetTestClass(std::string className)
 {
     std::unordered_map<std::string, const char *> sources = GetSources();
     pandasm::Parser p;
 
-    auto res = p.Parse(sources[class_name]);
+    auto res = p.Parse(sources[className]);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
 
-    class_name.insert(0, 1, 'L');
-    class_name.push_back(';');
+    className.insert(0, 1, 'L');
+    className.push_back(';');
 
-    EtsClass *klass = coroutine_->GetPandaVM()->GetClassLinker()->GetClass(class_name.c_str());
+    EtsClass *klass = coroutine_->GetPandaVM()->GetClassLinker()->GetClass(className.c_str());
     ASSERT(klass);
     return klass;
 }
@@ -176,51 +176,51 @@ TEST_F(EtsObjectTest, IsInstanceOf)
 
 TEST_F(EtsObjectTest, GetAndSetFieldObject)
 {
-    EtsClass *bar_klass = GetTestClass("Bar");
-    EtsClass *foo_klass = GetTestClass("Foo");
+    EtsClass *barKlass = GetTestClass("Bar");
+    EtsClass *fooKlass = GetTestClass("Foo");
 
-    EtsObject *bar_obj = EtsObject::Create(bar_klass);
-    EtsObject *foo_obj1 = EtsObject::Create(foo_klass);
-    EtsObject *foo_obj2 = EtsObject::Create(foo_klass);
+    EtsObject *barObj = EtsObject::Create(barKlass);
+    EtsObject *fooObj1 = EtsObject::Create(fooKlass);
+    EtsObject *fooObj2 = EtsObject::Create(fooKlass);
 
-    EtsField *foo1_field = bar_klass->GetFieldIDByName("foo1");
-    EtsField *foo2_field = bar_klass->GetFieldIDByName("foo2");
+    EtsField *foo1Field = barKlass->GetFieldIDByName("foo1");
+    EtsField *foo2Field = barKlass->GetFieldIDByName("foo2");
 
-    bar_obj->SetFieldObject(foo1_field, foo_obj1);
-    bar_obj->SetFieldObject(foo2_field, foo_obj2);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo1_field), foo_obj1);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo2_field), foo_obj2);
+    barObj->SetFieldObject(foo1Field, fooObj1);
+    barObj->SetFieldObject(foo2Field, fooObj2);
+    ASSERT_EQ(barObj->GetFieldObject(foo1Field), fooObj1);
+    ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj2);
 
-    EtsObject *res = bar_obj->GetAndSetFieldObject(foo2_field->GetOffset(), foo_obj1, std::memory_order_relaxed);
-    ASSERT_EQ(res, foo_obj2);                                  // returned pointer was in foo2_field
-    ASSERT_EQ(bar_obj->GetFieldObject(foo2_field), foo_obj1);  // now in foo2_field is pointer to Foo_obj1
+    EtsObject *res = barObj->GetAndSetFieldObject(foo2Field->GetOffset(), fooObj1, std::memory_order_relaxed);
+    ASSERT_EQ(res, fooObj2);                                // returned pointer was in foo2_field
+    ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj1);  // now in foo2_field is pointer to Foo_obj1
 
-    res = bar_obj->GetAndSetFieldObject(foo1_field->GetOffset(), foo_obj2, std::memory_order_relaxed);
-    ASSERT_EQ(res, foo_obj1);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo1_field), foo_obj2);
+    res = barObj->GetAndSetFieldObject(foo1Field->GetOffset(), fooObj2, std::memory_order_relaxed);
+    ASSERT_EQ(res, fooObj1);
+    ASSERT_EQ(barObj->GetFieldObject(foo1Field), fooObj2);
 }
 
 TEST_F(EtsObjectTest, SetAndGetFieldObject)
 {
-    EtsClass *bar_klass = GetTestClass("Bar");
-    EtsClass *foo_klass = GetTestClass("Foo");
+    EtsClass *barKlass = GetTestClass("Bar");
+    EtsClass *fooKlass = GetTestClass("Foo");
 
-    EtsObject *bar_obj = EtsObject::Create(bar_klass);
-    EtsObject *foo_obj1 = EtsObject::Create(foo_klass);
-    EtsObject *foo_obj2 = EtsObject::Create(foo_klass);
+    EtsObject *barObj = EtsObject::Create(barKlass);
+    EtsObject *fooObj1 = EtsObject::Create(fooKlass);
+    EtsObject *fooObj2 = EtsObject::Create(fooKlass);
 
-    EtsField *foo1_field = bar_klass->GetFieldIDByName("foo1");
-    EtsField *foo2_field = bar_klass->GetFieldIDByName("foo2");
+    EtsField *foo1Field = barKlass->GetFieldIDByName("foo1");
+    EtsField *foo2Field = barKlass->GetFieldIDByName("foo2");
 
-    bar_obj->SetFieldObject(foo1_field, foo_obj1);
-    bar_obj->SetFieldObject(foo2_field, foo_obj2);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo1_field), foo_obj1);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo2_field), foo_obj2);
+    barObj->SetFieldObject(foo1Field, fooObj1);
+    barObj->SetFieldObject(foo2Field, fooObj2);
+    ASSERT_EQ(barObj->GetFieldObject(foo1Field), fooObj1);
+    ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj2);
 
-    bar_obj->SetFieldObject(foo1_field, foo_obj2);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo1_field), foo_obj2);
-    bar_obj->SetFieldObject(foo2_field, foo_obj1);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo2_field), foo_obj1);
+    barObj->SetFieldObject(foo1Field, fooObj2);
+    ASSERT_EQ(barObj->GetFieldObject(foo1Field), fooObj2);
+    barObj->SetFieldObject(foo2Field, fooObj1);
+    ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj1);
 }
 
 TEST_F(EtsObjectTest, SetAndGetFieldPrimitive)
@@ -228,14 +228,14 @@ TEST_F(EtsObjectTest, SetAndGetFieldPrimitive)
     EtsClass *klass = GetTestClass("Rectangle");
     EtsObject *obj = EtsObject::Create(klass);
     EtsField *field = klass->GetFieldIDByName("Width");
-    int32_t test_nmb1 = 77;
-    obj->SetFieldPrimitive<int32_t>(field, test_nmb1);
-    ASSERT_EQ(obj->GetFieldPrimitive<int32_t>(field), test_nmb1);
+    int32_t testNmb1 = 77;
+    obj->SetFieldPrimitive<int32_t>(field, testNmb1);
+    ASSERT_EQ(obj->GetFieldPrimitive<int32_t>(field), testNmb1);
 
     field = klass->GetFieldIDByName("Height");
-    float test_nmb2 = 111.11;
-    obj->SetFieldPrimitive<float>(field, test_nmb2);
-    ASSERT_EQ(obj->GetFieldPrimitive<float>(field), test_nmb2);
+    float testNmb2 = 111.11;
+    obj->SetFieldPrimitive<float>(field, testNmb2);
+    ASSERT_EQ(obj->GetFieldPrimitive<float>(field), testNmb2);
 }
 
 TEST_F(EtsObjectTest, CompareAndSetFieldPrimitive)
@@ -243,37 +243,37 @@ TEST_F(EtsObjectTest, CompareAndSetFieldPrimitive)
     EtsClass *klass = GetTestClass("Rectangle");
     EtsObject *obj = EtsObject::Create(klass);
     EtsField *field = klass->GetFieldIDByName("Width");
-    int32_t fir_nmb = 134;
-    int32_t sec_nmb = 12;
-    obj->SetFieldPrimitive(field, fir_nmb);
-    obj->CompareAndSetFieldPrimitive(field->GetOffset(), fir_nmb, sec_nmb, std::memory_order_relaxed, true);
-    ASSERT_EQ(obj->GetFieldPrimitive<int32_t>(field), sec_nmb);
+    int32_t firNmb = 134;
+    int32_t secNmb = 12;
+    obj->SetFieldPrimitive(field, firNmb);
+    obj->CompareAndSetFieldPrimitive(field->GetOffset(), firNmb, secNmb, std::memory_order_relaxed, true);
+    ASSERT_EQ(obj->GetFieldPrimitive<int32_t>(field), secNmb);
 }
 
 TEST_F(EtsObjectTest, CompareAndSetFieldObject)
 {
-    EtsClass *bar_klass = GetTestClass("Bar");
-    EtsClass *foo_klass = GetTestClass("Foo");
+    EtsClass *barKlass = GetTestClass("Bar");
+    EtsClass *fooKlass = GetTestClass("Foo");
 
-    EtsObject *bar_obj = EtsObject::Create(bar_klass);
-    EtsObject *foo_obj1 = EtsObject::Create(foo_klass);
-    EtsObject *foo_obj2 = EtsObject::Create(foo_klass);
+    EtsObject *barObj = EtsObject::Create(barKlass);
+    EtsObject *fooObj1 = EtsObject::Create(fooKlass);
+    EtsObject *fooObj2 = EtsObject::Create(fooKlass);
 
-    EtsField *foo1_field = bar_klass->GetFieldIDByName("foo1");
-    EtsField *foo2_field = bar_klass->GetFieldIDByName("foo2");
+    EtsField *foo1Field = barKlass->GetFieldIDByName("foo1");
+    EtsField *foo2Field = barKlass->GetFieldIDByName("foo2");
 
-    bar_obj->SetFieldObject(foo1_field, foo_obj1);
-    bar_obj->SetFieldObject(foo2_field, foo_obj2);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo1_field), foo_obj1);
-    ASSERT_EQ(bar_obj->GetFieldObject(foo2_field), foo_obj2);
+    barObj->SetFieldObject(foo1Field, fooObj1);
+    barObj->SetFieldObject(foo2Field, fooObj2);
+    ASSERT_EQ(barObj->GetFieldObject(foo1Field), fooObj1);
+    ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj2);
 
-    ASSERT_TRUE(bar_obj->CompareAndSetFieldObject(foo1_field->GetOffset(), foo_obj1, foo_obj2,
-                                                  std::memory_order_relaxed, false));
-    ASSERT_EQ(bar_obj->GetFieldObject(foo1_field), foo_obj2);
+    ASSERT_TRUE(
+        barObj->CompareAndSetFieldObject(foo1Field->GetOffset(), fooObj1, fooObj2, std::memory_order_relaxed, false));
+    ASSERT_EQ(barObj->GetFieldObject(foo1Field), fooObj2);
 
-    ASSERT_TRUE(bar_obj->CompareAndSetFieldObject(foo2_field->GetOffset(), foo_obj2, foo_obj1,
-                                                  std::memory_order_relaxed, false));
-    ASSERT_EQ(bar_obj->GetFieldObject(foo2_field), foo_obj1);
+    ASSERT_TRUE(
+        barObj->CompareAndSetFieldObject(foo2Field->GetOffset(), fooObj2, fooObj1, std::memory_order_relaxed, false));
+    ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj1);
 }
 
 }  // namespace panda::ets::test

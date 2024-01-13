@@ -84,21 +84,21 @@ private:
         STEP_OVER
     };
 
-    StepKind step_kind_ {StepKind::NONE};
+    StepKind stepKind_ {StepKind::NONE};
 
     // The set of locations has different semantics for various kinds of stepping:
     // - for CONTINUE_TO it contains the set of locations we should reach to end the step;
     // - for STEP_INTO and STEP_OVER it contains the set of locations corresponding to the current line
     //   (then, the locations we should leave to end the step).
-    std::unordered_set<PtLocation, HashLocation> step_locations_;
+    std::unordered_set<PtLocation, HashLocation> stepLocations_;
 
-    bool method_entered_ {false};
+    bool methodEntered_ {false};
 
-    bool breakpoints_active_ {true};
-    BreakpointId next_breakpoint_id_ {0};
-    std::unordered_multimap<PtLocation, BreakpointId, HashLocation> breakpoint_locations_;
+    bool breakpointsActive_ {true};
+    BreakpointId nextBreakpointId_ {0};
+    std::unordered_multimap<PtLocation, BreakpointId, HashLocation> breakpointLocations_;
 
-    PauseOnExceptionsState pause_on_exceptions_state_ {PauseOnExceptionsState::NONE};
+    PauseOnExceptionsState pauseOnExceptionsState_ {PauseOnExceptionsState::NONE};
 
     bool paused_ {false};
 };

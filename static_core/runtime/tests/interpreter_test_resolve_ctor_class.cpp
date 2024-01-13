@@ -91,12 +91,12 @@ TEST_F(InterpreterTestResolveCtorClass, ResolveCtorClass)
     auto pf = panda::panda_file::File::Open("../bin-gtests/pre-build/interpreter_test_resolve_ctor_class.abc");
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R2"), &descriptor));
     ASSERT_NE(klass, nullptr);
 

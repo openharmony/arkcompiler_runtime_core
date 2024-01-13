@@ -52,12 +52,12 @@ namespace panda {
  * ExtractedResolvedClasses
  */
 struct ExtractedMethod {
-    ExtractedMethod(const panda_file::File *file, panda_file::File::EntityId pf_file_id)
-        : panda_file(file), file_id(pf_file_id)
+    ExtractedMethod(const panda_file::File *file, panda_file::File::EntityId pfFileId)
+        : pandaFile(file), fileId(pfFileId)
     {
     }
-    const panda_file::File *panda_file;  // NOLINT(misc-non-private-member-variables-in-classes)
-    panda_file::File::EntityId file_id;  // NOLINT(misc-non-private-member-variables-in-classes)
+    const panda_file::File *pandaFile;  // NOLINT(misc-non-private-member-variables-in-classes)
+    panda_file::File::EntityId fileId;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 struct ExtractedResolvedClasses {
@@ -141,7 +141,7 @@ public:
      * Add the given methods and classes to the current profile object
      */
     bool AddMethodsAndClasses(const PandaVector<ExtractedMethod> &methods,
-                              const PandaSet<ExtractedResolvedClasses> &resolved_classes);
+                              const PandaSet<ExtractedResolvedClasses> &resolvedClasses);
 
     /*
      * Loads and merges profile information from the given file into the current cache
@@ -149,7 +149,7 @@ public:
      *
      * If `force` is true then the save will be forced regardless of bad data or mismatched version.
      */
-    bool MergeAndSave(const PandaString &filename, uint64_t *bytes_written, bool force);
+    bool MergeAndSave(const PandaString &filename, uint64_t *bytesWritten, bool force);
 
     /*
      * Returns the number of methods that were profiled.
@@ -164,12 +164,12 @@ public:
     /*
      * Returns true if the method reference is present in the profiling info.
      */
-    bool ContainsMethod(const ExtractedMethod &method_ref) const;
+    bool ContainsMethod(const ExtractedMethod &methodRef) const;
 
     /*
      * Returns true if the class is present in the profiling info.
      */
-    bool ContainsClass(const panda_file::File &pandafile, uint32_t class_def_idx) const;
+    bool ContainsClass(const panda_file::File &pandafile, uint32_t classDefIdx) const;
 
 private:
     enum ProfileLoadSatus {
@@ -182,9 +182,9 @@ private:
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     struct ProfileLineHeader {
-        PandaString panda_file_location;
-        uint32_t method_set_size;
-        uint32_t class_set_size;
+        PandaString pandaFileLocation;
+        uint32_t methodSetSize;
+        uint32_t classSetSize;
         uint32_t checksum;
     };
 
@@ -195,8 +195,8 @@ private:
         {
             // NOLINTNEXTLINE(modernize-avoid-c-arrays)
             storage_ = MakePandaUnique<uint8_t[]>(size);
-            ptr_current_ = storage_.get();
-            ptr_end_ = ptr_current_ + size;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic
+            ptrCurrent_ = storage_.get();
+            ptrEnd_ = ptrCurrent_ + size;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic
         }
 
         ProfileLoadSatus FillFromFd(int fd, const PandaString &source, PandaString *error);
@@ -204,7 +204,7 @@ private:
         template <typename T>
         T ReadUintAndAdvance();
 
-        bool CompareAndAdvance(const uint8_t *data, size_t data_size);
+        bool CompareAndAdvance(const uint8_t *data, size_t dataSize);
 
         uint8_t *Get()
         {
@@ -213,74 +213,73 @@ private:
 
     private:
         PandaUniquePtr<uint8_t[]> storage_;  // NOLINT(modernize-avoid-c-arrays)
-        uint8_t *ptr_current_;
-        uint8_t *ptr_end_;
+        uint8_t *ptrCurrent_;
+        uint8_t *ptrEnd_;
     };
 
     struct MethodWrapper {
-        explicit MethodWrapper(uint32_t index) : method_id(index) {}
-        uint32_t method_id;  // NOLINT(misc-non-private-member-variables-in-classes)
+        explicit MethodWrapper(uint32_t index) : methodId(index) {}
+        uint32_t methodId;  // NOLINT(misc-non-private-member-variables-in-classes)
 
         bool operator==(const MethodWrapper &other) const
         {
-            return method_id == other.method_id;
+            return methodId == other.methodId;
         }
 
         bool operator<(const MethodWrapper &other) const
         {
-            return method_id < other.method_id;
+            return methodId < other.methodId;
         }
     };
 
     struct ClassWrapper {
-        explicit ClassWrapper(uint32_t index) : class_id(index) {}
-        uint32_t class_id;  // NOLINT(misc-non-private-member-variables-in-classes)
+        explicit ClassWrapper(uint32_t index) : classId(index) {}
+        uint32_t classId;  // NOLINT(misc-non-private-member-variables-in-classes)
 
         bool operator==(const ClassWrapper &other) const
         {
-            return class_id == other.class_id;
+            return classId == other.classId;
         }
 
         bool operator<(const ClassWrapper &other) const
         {
-            return class_id < other.class_id;
+            return classId < other.classId;
         }
     };
 
     struct ProfileLineData {
-        explicit ProfileLineData(uint32_t file_checksum) : checksum(file_checksum) {}
-        uint32_t checksum;                           // NOLINT(misc-non-private-member-variables-in-classes)
-        PandaSet<MethodWrapper> method_wrapper_set;  // NOLINT(misc-non-private-member-variables-in-classes)
-        PandaSet<ClassWrapper> class_wrapper_set;    // NOLINT(misc-non-private-member-variables-in-classes)
+        explicit ProfileLineData(uint32_t fileChecksum) : checksum(fileChecksum) {}
+        uint32_t checksum;                         // NOLINT(misc-non-private-member-variables-in-classes)
+        PandaSet<MethodWrapper> methodWrapperSet;  // NOLINT(misc-non-private-member-variables-in-classes)
+        PandaSet<ClassWrapper> classWrapperSet;    // NOLINT(misc-non-private-member-variables-in-classes)
 
         bool operator==(const ProfileLineData &other) const
         {
-            return checksum == other.checksum && method_wrapper_set == other.method_wrapper_set &&
-                   class_wrapper_set == other.class_wrapper_set;
+            return checksum == other.checksum && methodWrapperSet == other.methodWrapperSet &&
+                   classWrapperSet == other.classWrapperSet;
         }
 
         // NOLINTNEXTLINE(readability-identifier-naming)
         bool empty() const
         {
-            return method_wrapper_set.empty() && class_wrapper_set.empty();
+            return methodWrapperSet.empty() && classWrapperSet.empty();
         }
     };
 
     ProfileLoadSatus LoadInternal(int fd, PandaString *error);
-    ProfileLoadSatus ReadProfileHeader(int fd, uint32_t *number_of_lines, PandaString *error);
-    ProfileLoadSatus ReadProfileLineHeader(int fd, ProfileLineHeader *line_header, PandaString *error);
-    ProfileLoadSatus ReadProfileLine(int fd, const ProfileLineHeader &line_header, PandaString *error);
+    ProfileLoadSatus ReadProfileHeader(int fd, uint32_t *numberOfLines, PandaString *error);
+    ProfileLoadSatus ReadProfileLineHeader(int fd, ProfileLineHeader *lineHeader, PandaString *error);
+    ProfileLoadSatus ReadProfileLine(int fd, const ProfileLineHeader &lineHeader, PandaString *error);
     // NOLINTNEXTLINE(google-runtime-references)
-    bool ProcessLine(SerializerBuffer &line_buffer, uint32_t method_set_size, uint32_t class_set_size,
-                     uint32_t checksum, const PandaString &panda_file_location);
+    bool ProcessLine(SerializerBuffer &lineBuffer, uint32_t methodSetSize, uint32_t classSetSize, uint32_t checksum,
+                     const PandaString &pandaFileLocation);
 
-    bool AddMethodWrapper(const PandaString &panda_file_location, uint32_t checksum,
-                          const MethodWrapper &method_to_add);
-    bool AddClassWrapper(const PandaString &panda_file_location, uint32_t checksum, const ClassWrapper &class_to_add);
+    bool AddMethodWrapper(const PandaString &pandaFileLocation, uint32_t checksum, const MethodWrapper &methodToAdd);
+    bool AddClassWrapper(const PandaString &pandaFileLocation, uint32_t checksum, const ClassWrapper &classToAdd);
     bool AddResolvedClasses(const ExtractedResolvedClasses &classes);
-    ProfileLineData *GetOrAddProfileLineData(const PandaString &panda_file_location, uint32_t checksum);
+    ProfileLineData *GetOrAddProfileLineData(const PandaString &pandaFileLocation, uint32_t checksum);
 
-    PandaMap<const PandaString, ProfileLineData> dump_info_;
+    PandaMap<const PandaString, ProfileLineData> dumpInfo_;
 };
 
 }  // namespace panda

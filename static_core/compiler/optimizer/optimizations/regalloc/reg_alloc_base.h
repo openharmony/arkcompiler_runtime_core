@@ -23,14 +23,14 @@
 
 namespace panda::compiler {
 
-void ConnectIntervals(SpillFillInst *spill_fill, const LifeIntervals *src, const LifeIntervals *dst);
+void ConnectIntervals(SpillFillInst *spillFill, const LifeIntervals *src, const LifeIntervals *dst);
 bool TryToSpillConstant(LifeIntervals *interval, Graph *graph);
 
 class RegAllocBase : public Optimization {
 public:
     explicit RegAllocBase(Graph *graph);
-    RegAllocBase(Graph *graph, size_t regs_count);
-    RegAllocBase(Graph *graph, const RegMask &reg_mask, const VRegMask &vreg_mask, size_t slots_count);
+    RegAllocBase(Graph *graph, size_t regsCount);
+    RegAllocBase(Graph *graph, const RegMask &regMask, const VRegMask &vregMask, size_t slotsCount);
 
     NO_MOVE_SEMANTIC(RegAllocBase);
     NO_COPY_SEMANTIC(RegAllocBase);
@@ -42,46 +42,46 @@ public:
     bool AbortIfFailed() const override;
 
     template <typename T>
-    void SetRegMask(const T &reg_mask)
+    void SetRegMask(const T &regMask)
     {
-        regs_mask_.Init(reg_mask);
+        regsMask_.Init(regMask);
     }
 
     LocationMask &GetRegMask()
     {
-        return regs_mask_;
+        return regsMask_;
     }
 
     const LocationMask &GetRegMask() const
     {
-        return regs_mask_;
+        return regsMask_;
     }
 
     template <typename T>
-    void SetVRegMask(const T &vreg_mask)
+    void SetVRegMask(const T &vregMask)
     {
-        vregs_mask_.Init(vreg_mask);
+        vregsMask_.Init(vregMask);
     }
 
     LocationMask &GetVRegMask()
     {
-        return vregs_mask_;
+        return vregsMask_;
     }
 
     const LocationMask &GetVRegMask() const
     {
-        return vregs_mask_;
+        return vregsMask_;
     }
 
-    void SetSlotsCount(size_t slots_count)
+    void SetSlotsCount(size_t slotsCount)
     {
-        stack_mask_.Resize(slots_count);
-        stack_use_last_positions_.resize(slots_count);
+        stackMask_.Resize(slotsCount);
+        stackUseLastPositions_.resize(slotsCount);
     }
 
     LocationMask &GetStackMask()
     {
-        return stack_mask_;
+        return stackMask_;
     }
 
     void ReserveTempRegisters();
@@ -102,13 +102,13 @@ protected:
                 continue;
             }
 
-            ASSERT(slot < stack_use_last_positions_.size());
-            if (stack_use_last_positions_[slot] > interval->GetBegin()) {
+            ASSERT(slot < stackUseLastPositions_.size());
+            if (stackUseLastPositions_[slot] > interval->GetBegin()) {
                 continue;
             }
 
             GetStackMask().Set(slot);
-            stack_use_last_positions_[slot] = interval->GetEnd();
+            stackUseLastPositions_[slot] = interval->GetEnd();
             return slot;
         }
         return INVALID_STACK_SLOT;
@@ -135,10 +135,10 @@ private:
     size_t GetTotalSlotsCount();
 
 private:
-    LocationMask regs_mask_;
-    LocationMask vregs_mask_;
-    LocationMask stack_mask_;
-    ArenaVector<LifeNumber> stack_use_last_positions_;
+    LocationMask regsMask_;
+    LocationMask vregsMask_;
+    LocationMask stackMask_;
+    ArenaVector<LifeNumber> stackUseLastPositions_;
 };
 
 }  // namespace panda::compiler

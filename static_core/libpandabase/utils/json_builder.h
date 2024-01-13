@@ -52,8 +52,8 @@ public:
 protected:
     void Entry()
     {
-        if (first_entry_) {
-            first_entry_ = false;
+        if (firstEntry_) {
+            firstEntry_ = false;
         } else {
             ss_ << ',';
         }
@@ -104,7 +104,7 @@ protected:
 
 private:
     std::stringstream ss_;
-    bool first_entry_ {true};
+    bool firstEntry_ {true};
 };
 
 class JsonArrayBuilder : public JsonBuilderBase<'[', ']'> {

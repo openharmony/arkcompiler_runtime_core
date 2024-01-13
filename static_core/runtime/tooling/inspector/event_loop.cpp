@@ -28,7 +28,7 @@ void EventLoop::Run()
     ASSERT_PRINT(!running_, "Event loop is already running");
 
     for (running_ = true; running_;) {
-        os::memory::WriteLockHolder lock(task_execution_);
+        os::memory::WriteLockHolder lock(taskExecution_);
         RunOne();
     }
 }

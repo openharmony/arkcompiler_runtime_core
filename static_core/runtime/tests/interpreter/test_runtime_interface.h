@@ -37,15 +37,15 @@ public:
     NO_COPY_SEMANTIC(DummyGC);
     NO_MOVE_SEMANTIC(DummyGC);
 
-    explicit DummyGC(panda::mem::ObjectAllocatorBase *object_allocator, const panda::mem::GCSettings &settings);
+    explicit DummyGC(panda::mem::ObjectAllocatorBase *objectAllocator, const panda::mem::GCSettings &settings);
     ~DummyGC() override = default;
     // NOLINTNEXTLINE(misc-unused-parameters)
     bool WaitForGC([[maybe_unused]] GCTask task) override
     {
         return false;
     }
-    void InitGCBits([[maybe_unused]] panda::ObjectHeader *obj_header) override {}
-    void InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *obj_header) override {}
+    void InitGCBits([[maybe_unused]] panda::ObjectHeader *objHeader) override {}
+    void InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *objHeader) override {}
     bool Trigger([[maybe_unused]] PandaUniquePtr<GCTask> task) override
     {
         return false;
@@ -80,20 +80,20 @@ private:
         return false;
     }
     void MarkReferences([[maybe_unused]] mem::GCMarkingStackType *references,
-                        [[maybe_unused]] panda::mem::GCPhase gc_phase) override
+                        [[maybe_unused]] panda::mem::GCPhase gcPhase) override
     {
     }
-    void VisitRoots([[maybe_unused]] const GCRootVisitor &gc_root_visitor,
+    void VisitRoots([[maybe_unused]] const GCRootVisitor &gcRootVisitor,
                     [[maybe_unused]] mem::VisitGCRootFlags flags) override
     {
     }
-    void VisitClassRoots([[maybe_unused]] const GCRootVisitor &gc_root_visitor) override {}
-    void VisitCardTableRoots([[maybe_unused]] mem::CardTable *card_table,
-                             [[maybe_unused]] const GCRootVisitor &gc_root_visitor,
-                             [[maybe_unused]] const MemRangeChecker &range_checker,
-                             [[maybe_unused]] const ObjectChecker &range_object_checker,
-                             [[maybe_unused]] const ObjectChecker &from_object_checker,
-                             [[maybe_unused]] const uint32_t processed_flag) override
+    void VisitClassRoots([[maybe_unused]] const GCRootVisitor &gcRootVisitor) override {}
+    void VisitCardTableRoots([[maybe_unused]] mem::CardTable *cardTable,
+                             [[maybe_unused]] const GCRootVisitor &gcRootVisitor,
+                             [[maybe_unused]] const MemRangeChecker &rangeChecker,
+                             [[maybe_unused]] const ObjectChecker &rangeObjectChecker,
+                             [[maybe_unused]] const ObjectChecker &fromObjectChecker,
+                             [[maybe_unused]] const uint32_t processedFlag) override
     {
     }
     void CommonUpdateRefsToMovedObjects() override {}
@@ -139,8 +139,8 @@ public:
 
     struct ClassCastExceptionData {
         bool expected {false};
-        Class *dst_type {};
-        Class *src_type {};
+        Class *dstType {};
+        Class *srcType {};
     };
 
     struct AbstractMethodError {
@@ -150,8 +150,8 @@ public:
 
     struct ArrayStoreExceptionData {
         bool expected {false};
-        Class *array_class {};
-        Class *elem_class {};
+        Class *arrayClass {};
+        Class *elemClass {};
     };
 
     static constexpr BytecodeId METHOD_ID {0xaabb};
@@ -171,14 +171,14 @@ public:
                                  BytecodeId id)
     {
         EXPECT_EQ(id, METHOD_ID);
-        return resolved_method_;
+        return resolvedMethod_;
     }
 
     static Field *ResolveField([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] const Method &caller,
                                BytecodeId id)
     {
         EXPECT_EQ(id, FIELD_ID);
-        return resolved_field_;
+        return resolvedField_;
     }
 
     template <bool NEED_INIT>
@@ -186,23 +186,23 @@ public:
                                BytecodeId id)
     {
         EXPECT_EQ(id, TYPE_ID);
-        return resolved_class_;
+        return resolvedClass_;
     }
 
     static uint32_t FindCatchBlock([[maybe_unused]] const Method &method, [[maybe_unused]] ObjectHeader *exception,
                                    [[maybe_unused]] uint32_t pc)
     {
-        return catch_block_pc_offset_;
+        return catchBlockPcOffset_;
     }
 
-    static void SetCatchBlockPcOffset(uint32_t pc_offset)
+    static void SetCatchBlockPcOffset(uint32_t pcOffset)
     {
-        catch_block_pc_offset_ = pc_offset;
+        catchBlockPcOffset_ = pcOffset;
     }
 
     static uint32_t GetCompilerHotnessThreshold()
     {
-        return jit_threshold_;
+        return jitThreshold_;
     }
 
     static bool IsCompilerEnableJit()
@@ -212,12 +212,12 @@ public:
 
     static void SetCompilerHotnessThreshold(uint32_t threshold)
     {
-        jit_threshold_ = threshold;
+        jitThreshold_ = threshold;
     }
 
     static void JITCompileMethod(Method *method)
     {
-        method->SetCompiledEntryPoint(entry_point_);
+        method->SetCompiledEntryPoint(entryPoint_);
     }
 
     static void SetCurrentFrame([[maybe_unused]] ManagedThread *thread, Frame *frame)
@@ -233,62 +233,62 @@ public:
     static void SetupResolvedMethod(Method *method)
     {
         ManagedThread::GetCurrent()->GetInterpreterCache()->Clear();
-        resolved_method_ = method;
+        resolvedMethod_ = method;
     }
 
     static void SetupResolvedField(Field *field)
     {
         ManagedThread::GetCurrent()->GetInterpreterCache()->Clear();
-        resolved_field_ = field;
+        resolvedField_ = field;
     }
 
     static void SetupResolvedClass(Class *klass)
     {
         ManagedThread::GetCurrent()->GetInterpreterCache()->Clear();
-        resolved_class_ = klass;
+        resolvedClass_ = klass;
     }
 
-    static void SetupCatchBlockPcOffset(uint32_t pc_offset)
+    static void SetupCatchBlockPcOffset(uint32_t pcOffset)
     {
-        catch_block_pc_offset_ = pc_offset;
+        catchBlockPcOffset_ = pcOffset;
     }
 
     static void SetupNativeEntryPoint(const void *p)
     {
-        entry_point_ = p;
+        entryPoint_ = p;
     }
 
     static coretypes::Array *CreateArray(Class *klass, coretypes::ArraySizeT length)
     {
-        EXPECT_EQ(klass, array_class_);
-        EXPECT_EQ(length, array_length_);
-        return array_object_;
+        EXPECT_EQ(klass, arrayClass_);
+        EXPECT_EQ(length, arrayLength_);
+        return arrayObject_;
     }
 
     static void SetupArrayClass(Class *klass)
     {
-        array_class_ = klass;
+        arrayClass_ = klass;
     }
 
     static void SetupArrayLength(coretypes::ArraySizeT length)
     {
-        array_length_ = length;
+        arrayLength_ = length;
     }
 
     static void SetupArrayObject(coretypes::Array *obj)
     {
-        array_object_ = obj;
+        arrayObject_ = obj;
     }
 
     static ObjectHeader *CreateObject(Class *klass)
     {
-        EXPECT_EQ(klass, object_class_);
+        EXPECT_EQ(klass, objectClass_);
         return object_;
     }
 
     static void SetupObjectClass(Class *klass)
     {
-        object_class_ = klass;
+        objectClass_ = klass;
     }
 
     static void SetupObject(ObjectHeader *obj)
@@ -298,50 +298,50 @@ public:
 
     static Value InvokeMethod(ManagedThread *thread, Method *method, Value *args)
     {
-        return invoke_handler_(thread, method, args);
+        return invokeHandler_(thread, method, args);
     }
 
     static void SetupInvokeMethodHandler(const InvokeMethodHandler &handler)
     {
-        invoke_handler_ = handler;
+        invokeHandler_ = handler;
     }
 
     // Throw exceptions
 
     static void ThrowNullPointerException()
     {
-        ASSERT_TRUE(npe_data_.expected);
+        ASSERT_TRUE(npeData_.expected);
     }
 
     static void ThrowArrayIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::ArraySizeT length)
     {
-        ASSERT_TRUE(array_oob_exception_data_.expected);
-        ASSERT_EQ(array_oob_exception_data_.idx, idx);
-        ASSERT_EQ(array_oob_exception_data_.length, length);
+        ASSERT_TRUE(arrayOobExceptionData_.expected);
+        ASSERT_EQ(arrayOobExceptionData_.idx, idx);
+        ASSERT_EQ(arrayOobExceptionData_.length, length);
     }
 
     static void ThrowNegativeArraySizeException(coretypes::ArraySsizeT size)
     {
-        ASSERT_TRUE(array_neg_size_exception_data_.expected);
-        ASSERT_EQ(array_neg_size_exception_data_.size, size);
+        ASSERT_TRUE(arrayNegSizeExceptionData_.expected);
+        ASSERT_EQ(arrayNegSizeExceptionData_.size, size);
     }
 
     static void ThrowArithmeticException()
     {
-        ASSERT_TRUE(arithmetic_exception_data_.expected);
+        ASSERT_TRUE(arithmeticExceptionData_.expected);
     }
 
-    static void ThrowClassCastException(Class *dst_type, Class *src_type)
+    static void ThrowClassCastException(Class *dstType, Class *srcType)
     {
-        ASSERT_TRUE(class_cast_exception_data_.expected);
-        ASSERT_EQ(class_cast_exception_data_.dst_type, dst_type);
-        ASSERT_EQ(class_cast_exception_data_.src_type, src_type);
+        ASSERT_TRUE(classCastExceptionData_.expected);
+        ASSERT_EQ(classCastExceptionData_.dstType, dstType);
+        ASSERT_EQ(classCastExceptionData_.srcType, srcType);
     }
 
     static void ThrowAbstractMethodError(Method *method)
     {
-        ASSERT_TRUE(abstract_method_error_data_.expected);
-        ASSERT_EQ(abstract_method_error_data_.method, method);
+        ASSERT_TRUE(abstractMethodErrorData_.expected);
+        ASSERT_EQ(abstractMethodErrorData_.method, method);
     }
 
     static void ThrowIncompatibleClassChangeErrorForMethodConflict([[maybe_unused]] Method *method) {}
@@ -354,70 +354,70 @@ public:
         // ASSERT_EQ verification_of_method_exception_data.msg, msg
     }
 
-    static void ThrowArrayStoreException(Class *array_klass, Class *elem_class)
+    static void ThrowArrayStoreException(Class *arrayKlass, Class *elemClass)
     {
-        ASSERT_TRUE(array_store_exception_data_.expected);
-        ASSERT_EQ(array_store_exception_data_.array_class, array_klass);
-        ASSERT_EQ(array_store_exception_data_.elem_class, elem_class);
+        ASSERT_TRUE(arrayStoreExceptionData_.expected);
+        ASSERT_EQ(arrayStoreExceptionData_.arrayClass, arrayKlass);
+        ASSERT_EQ(arrayStoreExceptionData_.elemClass, elemClass);
     }
 
     static void SetArrayStoreException(ArrayStoreExceptionData data)
     {
-        array_store_exception_data_ = data;
+        arrayStoreExceptionData_ = data;
     }
 
     static void SetNullPointerExceptionData(NullPointerExceptionData data)
     {
-        npe_data_ = data;
+        npeData_ = data;
     }
 
     static void SetArrayIndexOutOfBoundsExceptionData(ArrayIndexOutOfBoundsExceptionData data)
     {
-        array_oob_exception_data_ = data;
+        arrayOobExceptionData_ = data;
     }
 
     static void SetNegativeArraySizeExceptionData(NegativeArraySizeExceptionData data)
     {
-        array_neg_size_exception_data_ = data;
+        arrayNegSizeExceptionData_ = data;
     }
 
     static void SetArithmeticExceptionData(ArithmeticException data)
     {
-        arithmetic_exception_data_ = data;
+        arithmeticExceptionData_ = data;
     }
 
     static void SetClassCastExceptionData(ClassCastExceptionData data)
     {
-        class_cast_exception_data_ = data;
+        classCastExceptionData_ = data;
     }
 
     static void SetAbstractMethodErrorData(AbstractMethodError data)
     {
-        abstract_method_error_data_ = data;
+        abstractMethodErrorData_ = data;
     }
 
     template <bool IS_DYNAMIC = false>
     static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
     {
-        uint32_t ext_sz = EMPTY_EXT_FRAME_DATA_SIZE;
+        uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
         auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
         void *mem =
-            allocator->Allocate(panda::Frame::GetAllocSize(panda::Frame::GetActualSize<IS_DYNAMIC>(nregs), ext_sz),
+            allocator->Allocate(panda::Frame::GetAllocSize(panda::Frame::GetActualSize<IS_DYNAMIC>(nregs), extSz),
                                 GetLogAlignment(8), ManagedThread::GetCurrent());
-        return new (Frame::FromExt(mem, ext_sz)) panda::Frame(mem, method, prev, nregs);
+        return new (Frame::FromExt(mem, extSz)) panda::Frame(mem, method, prev, nregs);
     }
 
-    static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t num_actual_args,
+    static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
                                                    Method *method, Frame *prev)
     {
-        uint32_t ext_sz = EMPTY_EXT_FRAME_DATA_SIZE;
+        uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
         auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
-        void *mem = allocator->Allocate(panda::Frame::GetAllocSize(size, ext_sz), GetLogAlignment(8),
+        void *mem = allocator->Allocate(panda::Frame::GetAllocSize(size, extSz), GetLogAlignment(8),
                                         ManagedThread::GetCurrent());
         if (UNLIKELY(mem == nullptr)) {
             return nullptr;
         }
-        return new (Frame::FromExt(mem, ext_sz)) panda::Frame(mem, method, prev, nregs, num_actual_args);
+        return new (Frame::FromExt(mem, extSz)) panda::Frame(mem, method, prev, nregs, numActualArgs);
     }
 
     static void FreeFrame(ManagedThread *thread, Frame *frame)
@@ -428,20 +428,20 @@ public:
 
     static mem::GC *GetGC()
     {
-        return &panda::interpreter::test::RuntimeInterface::dummy_gc_;
+        return &panda::interpreter::test::RuntimeInterface::dummyGc_;
     }
 
-    static const uint8_t *GetMethodName([[maybe_unused]] Method *caller, [[maybe_unused]] BytecodeId method_id)
+    static const uint8_t *GetMethodName([[maybe_unused]] Method *caller, [[maybe_unused]] BytecodeId methodId)
     {
         return nullptr;
     }
 
-    static Class *GetMethodClass([[maybe_unused]] Method *caller, [[maybe_unused]] BytecodeId method_id)
+    static Class *GetMethodClass([[maybe_unused]] Method *caller, [[maybe_unused]] BytecodeId methodId)
     {
-        return resolved_class_;
+        return resolvedClass_;
     }
 
-    static uint32_t GetMethodArgumentsCount([[maybe_unused]] Method *caller, [[maybe_unused]] BytecodeId method_id)
+    static uint32_t GetMethodArgumentsCount([[maybe_unused]] Method *caller, [[maybe_unused]] BytecodeId methodId)
     {
         return 0;
     }
@@ -456,45 +456,45 @@ public:
     }
 
 private:
-    static ArrayIndexOutOfBoundsExceptionData array_oob_exception_data_;
+    static ArrayIndexOutOfBoundsExceptionData arrayOobExceptionData_;
 
-    static NegativeArraySizeExceptionData array_neg_size_exception_data_;
+    static NegativeArraySizeExceptionData arrayNegSizeExceptionData_;
 
-    static NullPointerExceptionData npe_data_;
+    static NullPointerExceptionData npeData_;
 
-    static ArithmeticException arithmetic_exception_data_;
+    static ArithmeticException arithmeticExceptionData_;
 
-    static ClassCastExceptionData class_cast_exception_data_;
+    static ClassCastExceptionData classCastExceptionData_;
 
-    static AbstractMethodError abstract_method_error_data_;
+    static AbstractMethodError abstractMethodErrorData_;
 
-    static ArrayStoreExceptionData array_store_exception_data_;
+    static ArrayStoreExceptionData arrayStoreExceptionData_;
 
-    static coretypes::Array *array_object_;
+    static coretypes::Array *arrayObject_;
 
-    static Class *array_class_;
+    static Class *arrayClass_;
 
-    static coretypes::ArraySizeT array_length_;
+    static coretypes::ArraySizeT arrayLength_;
 
     static ObjectHeader *object_;
 
-    static Class *object_class_;
+    static Class *objectClass_;
 
-    static Class *resolved_class_;
+    static Class *resolvedClass_;
 
-    static uint32_t catch_block_pc_offset_;
+    static uint32_t catchBlockPcOffset_;
 
-    static Method *resolved_method_;
+    static Method *resolvedMethod_;
 
-    static Field *resolved_field_;
+    static Field *resolvedField_;
 
-    static InvokeMethodHandler invoke_handler_;
+    static InvokeMethodHandler invokeHandler_;
 
-    static const void *entry_point_;
+    static const void *entryPoint_;
 
-    static uint32_t jit_threshold_;
+    static uint32_t jitThreshold_;
 
-    static panda::interpreter::test::DummyGC dummy_gc_;
+    static panda::interpreter::test::DummyGC dummyGc_;
 };
 
 }  // namespace panda::interpreter::test

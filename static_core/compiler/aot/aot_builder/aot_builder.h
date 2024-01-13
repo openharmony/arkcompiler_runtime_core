@@ -44,138 +44,137 @@ struct RoData {
 
 class AotBuilder : public ElfWriter {
 public:
-    void SetGcType(uint32_t gc_type)
+    void SetGcType(uint32_t gcType)
     {
-        gc_type_ = gc_type;
+        gcType_ = gcType;
     }
     uint32_t GetGcType() const
     {
-        return gc_type_;
+        return gcType_;
     }
 
     uint64_t *GetIntfInlineCacheIndex()
     {
-        return &intf_inline_cache_index_;
+        return &intfInlineCacheIndex_;
     }
 
-    int Write(const std::string &cmdline, const std::string &file_name);
+    int Write(const std::string &cmdline, const std::string &fileName);
 
     void StartFile(const std::string &name, uint32_t checksum);
     void EndFile();
 
-    void SetRoDataSections(std::vector<RoData> ro_datas)
+    void SetRoDataSections(std::vector<RoData> roDatas)
     {
-        ro_datas_ = std::move(ro_datas);
+        roDatas_ = std::move(roDatas);
     }
 
     auto *GetGotPlt()
     {
-        return &got_plt_;
+        return &gotPlt_;
     }
 
     auto *GetGotVirtIndexes()
     {
-        return &got_virt_indexes_;
+        return &gotVirtIndexes_;
     }
 
     auto *GetGotClass()
     {
-        return &got_class_;
+        return &gotClass_;
     }
 
     auto *GetGotString()
     {
-        return &got_string_;
+        return &gotString_;
     }
 
     auto *GetGotIntfInlineCache()
     {
-        return &got_intf_inline_cache_;
+        return &gotIntfInlineCache_;
     }
 
     auto *GetGotCommon()
     {
-        return &got_common_;
+        return &gotCommon_;
     }
 
-    void SetBootAot(bool boot_aot)
+    void SetBootAot(bool bootAot)
     {
-        boot_aot_ = boot_aot;
+        bootAot_ = bootAot;
     }
 
-    void SetWithCha(bool with_cha)
+    void SetWithCha(bool withCha)
     {
-        with_cha_ = with_cha;
+        withCha_ = withCha;
     }
 
-    void SetGenerateSymbols(bool generate_symbols)
+    void SetGenerateSymbols(bool generateSymbols)
     {
-        generate_symbols_ = generate_symbols;
+        generateSymbols_ = generateSymbols;
     }
 
-    void AddClassHashTable(const panda_file::File &panda_file);
+    void AddClassHashTable(const panda_file::File &pandaFile);
 
-    void InsertEntityPairHeader(uint32_t class_hash, uint32_t class_id)
+    void InsertEntityPairHeader(uint32_t classHash, uint32_t classId)
     {
-        entity_pair_headers_.emplace_back();
-        auto &entity_pair = entity_pair_headers_.back();
-        entity_pair.descriptor_hash = class_hash;
-        entity_pair.entity_id_offset = class_id;
+        entityPairHeaders_.emplace_back();
+        auto &entityPair = entityPairHeaders_.back();
+        entityPair.descriptorHash = classHash;
+        entityPair.entityIdOffset = classId;
     }
 
     auto *GetEntityPairHeaders() const
     {
-        return &entity_pair_headers_;
+        return &entityPairHeaders_;
     }
 
     void InsertClassHashTableSize(uint32_t size)
     {
-        class_hash_tables_size_.emplace_back(size);
+        classHashTablesSize_.emplace_back(size);
     }
 
     auto *GetClassHashTableSize() const
     {
-        return &class_hash_tables_size_;
+        return &classHashTablesSize_;
     }
 
 protected:
     template <Arch ARCH>
-    int PrepareElfBuilder(ElfBuilder<ARCH> &elf_builder, const std::string &cmdline, const std::string &file_name);
+    int PrepareElfBuilder(ElfBuilder<ARCH> &elfBuilder, const std::string &cmdline, const std::string &fileName);
 
 private:
     template <Arch ARCH>
-    int WriteImpl(const std::string &cmdline, const std::string &file_name);
+    int WriteImpl(const std::string &cmdline, const std::string &fileName);
 
     template <Arch ARCH>
     void GenerateSymbols(ElfBuilder<ARCH> &builder);
 
     template <Arch ARCH>
-    void EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptr_view, size_t got_data_size);
+    void EmitPlt(Span<typename ArchTraits<ARCH>::WordType> ptrView, size_t gotDataSize);
 
-    void FillHeader(const std::string &cmdline, const std::string &file_name);
+    void FillHeader(const std::string &cmdline, const std::string &fileName);
 
-    void ResolveConflictClassHashTable(const panda_file::File &panda_file,
-                                       std::vector<unsigned int> conflict_entity_table, size_t conflict_num,
-                                       std::vector<panda_file::EntityPairHeader> &entity_pairs);
+    void ResolveConflictClassHashTable(const panda_file::File &pandaFile, std::vector<unsigned int> conflictEntityTable,
+                                       size_t conflictNum, std::vector<panda_file::EntityPairHeader> &entityPairs);
 
 private:
-    std::string file_name_;
-    compiler::AotHeader aot_header_ {};
-    uint32_t gc_type_ {static_cast<uint32_t>(mem::GCType::INVALID_GC)};
-    uint64_t intf_inline_cache_index_ {0};
-    std::vector<compiler::RoData> ro_datas_;
-    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> got_plt_;
-    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> got_virt_indexes_;
-    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> got_class_;
-    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> got_string_;
-    std::map<std::pair<const panda_file::File *, uint64_t>, int32_t> got_intf_inline_cache_;
-    std::map<std::pair<const panda_file::File *, uint64_t>, int32_t> got_common_;
-    bool boot_aot_ {false};
-    bool with_cha_ {true};
-    bool generate_symbols_ {false};
+    std::string fileName_;
+    compiler::AotHeader aotHeader_ {};
+    uint32_t gcType_ {static_cast<uint32_t>(mem::GCType::INVALID_GC)};
+    uint64_t intfInlineCacheIndex_ {0};
+    std::vector<compiler::RoData> roDatas_;
+    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> gotPlt_;
+    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> gotVirtIndexes_;
+    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> gotClass_;
+    std::map<std::pair<const panda_file::File *, uint32_t>, int32_t> gotString_;
+    std::map<std::pair<const panda_file::File *, uint64_t>, int32_t> gotIntfInlineCache_;
+    std::map<std::pair<const panda_file::File *, uint64_t>, int32_t> gotCommon_;
+    bool bootAot_ {false};
+    bool withCha_ {true};
+    bool generateSymbols_ {false};
 
-    std::vector<panda_file::EntityPairHeader> entity_pair_headers_;
-    std::vector<uint32_t> class_hash_tables_size_;
+    std::vector<panda_file::EntityPairHeader> entityPairHeaders_;
+    std::vector<uint32_t> classHashTablesSize_;
     friend class CodeDataProvider;
     friend class JitCodeDataProvider;
 };

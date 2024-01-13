@@ -24,7 +24,7 @@ class GCDynamicData : public GCExtensionData {
 public:
     explicit GCDynamicData(InternalAllocatorPtr a) : allocator_(a)
     {
-        dyn_weak_references_ = a->New<PandaStack<coretypes::TaggedType *>>(a->Adapter());
+        dynWeakReferences_ = a->New<PandaStack<coretypes::TaggedType *>>(a->Adapter());
 
 #ifndef NDEBUG
         SetLangType(LANG_TYPE_DYNAMIC);
@@ -33,16 +33,16 @@ public:
 
     ~GCDynamicData() override
     {
-        allocator_->Delete(dyn_weak_references_);
+        allocator_->Delete(dynWeakReferences_);
     }
 
     PandaStack<coretypes::TaggedType *> *GetDynWeakReferences()
     {
-        return dyn_weak_references_;
+        return dynWeakReferences_;
     }
 
 private:
-    PandaStack<coretypes::TaggedType *> *dyn_weak_references_;
+    PandaStack<coretypes::TaggedType *> *dynWeakReferences_;
     InternalAllocatorPtr allocator_;
 
     NO_COPY_SEMANTIC(GCDynamicData);

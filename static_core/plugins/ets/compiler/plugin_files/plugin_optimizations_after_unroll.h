@@ -15,6 +15,6 @@
 
 #ifdef PANDA_ETS_INTEROP_JS
 if (graph->GetLanguage() == panda_file::SourceLang::ETS) {
-    graph->RunPass<InteropIntrinsicOptimization>(OPTIONS.IsCompilerInteropTrySingleScope());
+    graph->RunPass<InteropIntrinsicOptimization>(g_options.IsCompilerInteropTrySingleScope());
 }
 #endif

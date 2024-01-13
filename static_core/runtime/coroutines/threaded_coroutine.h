@@ -48,14 +48,14 @@ public:
 
     void CleanUp() override {}
 
-    bool RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size) override;
+    bool RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize) override;
 
     /**
      * Intended to be called from the context of a running thread that is going to be suspended.
      * Changes status to Status::RUNNABLE or Status::BLOCKED, depending on the suspend
      * reason. The next step for the caller thread is to call WaitUntilResumed() and block on it.
      */
-    void RequestSuspend(bool gets_blocked) override;
+    void RequestSuspend(bool getsBlocked) override;
     /**
      * Resume the suspended coroutine by setting status to Status::RUNNING.
      * Wakes up the thread that is blocked on WaitUntilResumed()
@@ -79,7 +79,7 @@ public:
     Coroutine::Status GetStatus() const override;
 
 protected:
-    void SetStatus(Coroutine::Status new_status) override;
+    void SetStatus(Coroutine::Status newStatus) override;
     os::thread::NativeHandleType GetCoroutineNativeHandle();
     void SetCoroutineNativeHandle(os::thread::NativeHandleType h);
 
@@ -93,8 +93,8 @@ private:
     void InitializationDone();
 
     os::memory::ConditionVariable cv_;
-    os::memory::Mutex cv_mutex_;
-    os::thread::NativeHandleType native_handle_ {};
+    os::memory::Mutex cvMutex_;
+    os::thread::NativeHandleType nativeHandle_ {};
 
     std::atomic<Coroutine::Status> status_ {Coroutine::Status::CREATED};
 };

@@ -92,9 +92,9 @@ struct CodeData {
     std::vector<uint8_t> *code;
     panda_file::MethodItem *omi;
     panda_file::MethodItem *nmi;
-    const panda_file::FileReader *file_reader;
+    const panda_file::FileReader *fileReader;
 
-    bool patch_lnp;
+    bool patchLnp;
 };
 
 class Helpers {
@@ -125,7 +125,7 @@ public:
 
     const std::unordered_map<panda_file::BaseItem *, panda_file::BaseItem *> &GetKnownItems() const
     {
-        return known_items_;
+        return knownItems_;
     }
 
     panda_file::ItemContainer &GetContainer()
@@ -155,21 +155,21 @@ private:
     Result result_;
     panda_file::ItemContainer cont_;
 
-    std::vector<std::function<void()>> deferred_failed_annotations_;
+    std::vector<std::function<void()>> deferredFailedAnnotations_;
 
-    std::vector<CodeData> code_datas_;
+    std::vector<CodeData> codeDatas_;
     CodePatcher patcher_;
 
     std::forward_list<panda_file::FileReader> readers_;
-    std::unordered_map<panda_file::BaseItem *, panda_file::BaseItem *> known_items_;
-    std::multimap<const panda_file::BaseItem *, const panda_file::FileReader *> came_from_;
-    size_t literal_array_id_ {};
+    std::unordered_map<panda_file::BaseItem *, panda_file::BaseItem *> knownItems_;
+    std::multimap<const panda_file::BaseItem *, const panda_file::FileReader *> cameFrom_;
+    size_t literalArrayId_ {};
     std::map<std::tuple<panda_file::BaseClassItem *, panda_file::StringItem *, panda_file::TypeItem *>,
              panda_file::ForeignFieldItem *>
-        foreign_fields_;
+        foreignFields_;
     std::map<std::tuple<panda_file::BaseClassItem *, panda_file::StringItem *, panda_file::ProtoItem *, uint32_t>,
              panda_file::ForeignMethodItem *>
-        foreign_methods_;
+        foreignMethods_;
 
     panda_file::BaseClassItem *ClassFromOld(panda_file::BaseClassItem *old);
 
@@ -201,7 +201,7 @@ private:
         T *ni;
         T *oi;
         size_t from;
-        size_t retries_left;
+        size_t retriesLeft;
     };
 
     template <typename T, typename Getter, typename Adder>
@@ -275,12 +275,12 @@ private:
                const panda_file::FileReader *reader = nullptr);
 
     std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassItem *> TryFindField(
-        panda_file::BaseClassItem *klass, const std::string &name, panda_file::TypeItem *expected_type,
-        std::vector<panda_file::FieldItem *> *bad_candidates);
+        panda_file::BaseClassItem *klass, const std::string &name, panda_file::TypeItem *expectedType,
+        std::vector<panda_file::FieldItem *> *badCandidates);
 
     std::variant<bool, panda_file::MethodItem *> TryFindMethod(panda_file::BaseClassItem *klass,
                                                                panda_file::ForeignMethodItem *fm,
-                                                               std::vector<ErrorDetail> *related_items);
+                                                               std::vector<ErrorDetail> *relatedItems);
 
     std::variant<panda_file::AnnotationItem *, ErrorDetail> AnnotFromOld(panda_file::AnnotationItem *oa);
 

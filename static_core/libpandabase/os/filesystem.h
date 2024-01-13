@@ -33,7 +33,7 @@ namespace panda::os {
 
 PANDA_PUBLIC_API std::string GetAbsolutePath(std::string_view path);
 
-PANDA_PUBLIC_API void CreateDirectories(const std::string &folder_name);
+PANDA_PUBLIC_API void CreateDirectories(const std::string &folderName);
 
 PANDA_PUBLIC_API bool IsFileExists(const std::string &filepath);
 

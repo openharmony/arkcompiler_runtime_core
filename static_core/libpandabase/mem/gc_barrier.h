@@ -42,11 +42,11 @@ constexpr uint8_t BARRIER_POS_OFFSET = 0U;       // offset in bits for encoding 
 constexpr uint8_t BARRIER_WRB_FLAG_OFFSET = 1U;  // offset in bits for WRB flag
 }  // namespace internal
 
-constexpr uint8_t EncodeBarrierType(uint8_t value, BarrierPosition position, BarrierActionType action_type)
+constexpr uint8_t EncodeBarrierType(uint8_t value, BarrierPosition position, BarrierActionType actionType)
 {
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
     return (value << 2U) | (position << internal::BARRIER_POS_OFFSET) |
-           (action_type << internal::BARRIER_WRB_FLAG_OFFSET);
+           (actionType << internal::BARRIER_WRB_FLAG_OFFSET);
 }
 
 /**
@@ -122,28 +122,27 @@ enum BarrierType : uint8_t {
     /* Note: cosider two-level card table for pre-barrier */
 };
 
-constexpr bool IsPreBarrier(BarrierType barrier_type)
+constexpr bool IsPreBarrier(BarrierType barrierType)
 {
-    return BitField<uint8_t, internal::BARRIER_POS_OFFSET, 1>::Get(barrier_type) ==
+    return BitField<uint8_t, internal::BARRIER_POS_OFFSET, 1>::Get(barrierType) ==
            BarrierPosition::BARRIER_POSITION_PRE;
 }
 
-constexpr bool IsPostBarrier(BarrierType barrier_type)
+constexpr bool IsPostBarrier(BarrierType barrierType)
 {
-    return BitField<uint8_t, internal::BARRIER_POS_OFFSET, 1>::Get(barrier_type) ==
+    return BitField<uint8_t, internal::BARRIER_POS_OFFSET, 1>::Get(barrierType) ==
            BarrierPosition::BARRIER_POSITION_POST;
 }
 
-constexpr bool IsWriteBarrier(BarrierType barrier_type)
+constexpr bool IsWriteBarrier(BarrierType barrierType)
 {
-    return BitField<uint8_t, internal::BARRIER_WRB_FLAG_OFFSET, 1>::Get(barrier_type) ==
+    return BitField<uint8_t, internal::BARRIER_WRB_FLAG_OFFSET, 1>::Get(barrierType) ==
            BarrierActionType::WRITE_BARRIER;
 }
 
-constexpr bool IsReadBarrier(BarrierType barrier_type)
+constexpr bool IsReadBarrier(BarrierType barrierType)
 {
-    return BitField<uint8_t, internal::BARRIER_WRB_FLAG_OFFSET, 1>::Get(barrier_type) ==
-           BarrierActionType::READ_BARRIER;
+    return BitField<uint8_t, internal::BARRIER_WRB_FLAG_OFFSET, 1>::Get(barrierType) == BarrierActionType::READ_BARRIER;
 }
 
 static_assert(IsPreBarrier(BarrierType::PRE_SATB_BARRIER));
@@ -153,10 +152,10 @@ static_assert(IsWriteBarrier(BarrierType::POST_INTERGENERATIONAL_BARRIER));
 static_assert(IsPostBarrier(BarrierType::POST_INTERREGION_BARRIER));
 static_assert(IsWriteBarrier(BarrierType::POST_INTERREGION_BARRIER));
 
-constexpr bool IsEmptyBarrier(BarrierType barrier_type)
+constexpr bool IsEmptyBarrier(BarrierType barrierType)
 {
-    return (barrier_type == BarrierType::PRE_WRB_NONE) || (barrier_type == BarrierType::POST_WRB_NONE) ||
-           (barrier_type == BarrierType::PRE_RB_NONE) || (barrier_type == BarrierType::POST_RB_NONE);
+    return (barrierType == BarrierType::PRE_WRB_NONE) || (barrierType == BarrierType::POST_WRB_NONE) ||
+           (barrierType == BarrierType::PRE_RB_NONE) || (barrierType == BarrierType::POST_RB_NONE);
 }
 
 using ObjRefProcessFunc = void (*)(void *);
@@ -178,19 +177,19 @@ using BarrierOperandValue = std::variant<void *, bool *, std::atomic<ObjRefProce
 class BarrierOperand {
 public:
     // NOLINTNEXTLINE(modernize-pass-by-value)
-    BarrierOperand(BarrierOperandType barrier_operand_type, BarrierOperandValue barrier_operand_value)
-        : barrier_operand_type_(barrier_operand_type), barrier_operand_value_(barrier_operand_value)
+    BarrierOperand(BarrierOperandType barrierOperandType, BarrierOperandValue barrierOperandValue)
+        : barrierOperandType_(barrierOperandType), barrierOperandValue_(barrierOperandValue)
     {
     }
 
     inline BarrierOperandType GetType() const
     {
-        return barrier_operand_type_;
+        return barrierOperandType_;
     }
 
     inline BarrierOperandValue GetValue() const
     {
-        return barrier_operand_value_;
+        return barrierOperandValue_;
     }
 
     virtual ~BarrierOperand() = default;
@@ -199,8 +198,8 @@ public:
     DEFAULT_MOVE_SEMANTIC(BarrierOperand);
 
 private:
-    BarrierOperandType barrier_operand_type_;
-    BarrierOperandValue barrier_operand_value_;
+    BarrierOperandType barrierOperandType_;
+    BarrierOperandValue barrierOperandValue_;
 };
 
 }  // namespace panda::mem

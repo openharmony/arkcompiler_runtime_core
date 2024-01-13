@@ -30,14 +30,14 @@ bool DominatorsTree::RunImpl()
 
     Init(GetGraph()->GetVectorBlocks().size());
     DfsNumbering(GetGraph()->GetStartBlock());
-    auto dfs_blocks = static_cast<size_t>(dfs_num_);
-    ASSERT_PRINT(dfs_blocks == (GetGraph()->GetBlocksRPO().size() - 1), "There is an unreachable block");
+    auto dfsBlocks = static_cast<size_t>(dfsNum_);
+    ASSERT_PRINT(dfsBlocks == (GetGraph()->GetBlocksRPO().size() - 1), "There is an unreachable block");
 
-    for (size_t i = dfs_blocks; i > 0; i--) {
+    for (size_t i = dfsBlocks; i > 0; i--) {
         ComputeImmediateDominators(GetVertex(i));
     }
 
-    for (size_t i = 1; i <= dfs_blocks; i++) {
+    for (size_t i = 1; i <= dfsBlocks; i++) {
         AdjustImmediateDominators(GetVertex(i));
     }
     return true;
@@ -113,13 +113,13 @@ void DominatorsTree::Compress(BasicBlock *block)
  */
 void DominatorsTree::DfsNumbering(BasicBlock *block)
 {
-    dfs_num_++;
-    ASSERT_PRINT(static_cast<size_t>(dfs_num_) < vertices_->size(), "DFS-number overflow");
+    dfsNum_++;
+    ASSERT_PRINT(static_cast<size_t>(dfsNum_) < vertices_->size(), "DFS-number overflow");
     ASSERT(block != nullptr);
 
-    SetVertex(dfs_num_, block);
+    SetVertex(dfsNum_, block);
     SetLabel(block, block);
-    SetSemi(block, dfs_num_);
+    SetSemi(block, dfsNum_);
     SetAncestor(block, nullptr);
 
     for (auto succ : block->GetSuccsBlocks()) {
@@ -148,7 +148,7 @@ BasicBlock *DominatorsTree::Eval(BasicBlock *block)
 /*
  * Initialize data structures to start DFS
  */
-void DominatorsTree::Init(size_t blocks_count)
+void DominatorsTree::Init(size_t blocksCount)
 {
     auto allocator = GetGraph()->GetLocalAllocator();
     ancestors_ = allocator->New<BlocksVector>(allocator->Adapter());
@@ -159,22 +159,22 @@ void DominatorsTree::Init(size_t blocks_count)
     semi_ = allocator->New<ArenaVector<int32_t>>(allocator->Adapter());
     vertices_ = allocator->New<BlocksVector>(allocator->Adapter());
 
-    ancestors_->resize(blocks_count);
-    idoms_->resize(blocks_count);
-    labels_->resize(blocks_count);
-    parents_->resize(blocks_count);
-    vertices_->resize(blocks_count);
-    semi_->resize(blocks_count);
+    ancestors_->resize(blocksCount);
+    idoms_->resize(blocksCount);
+    labels_->resize(blocksCount);
+    parents_->resize(blocksCount);
+    vertices_->resize(blocksCount);
+    semi_->resize(blocksCount);
 
     std::fill(vertices_->begin(), vertices_->end(), nullptr);
     std::fill(semi_->begin(), semi_->end(), DEFAULT_DFS_VAL);
 
-    buckets_->resize(blocks_count, BlocksVector(allocator->Adapter()));
+    buckets_->resize(blocksCount, BlocksVector(allocator->Adapter()));
     for (auto &bucket : *buckets_) {
         bucket.clear();
     }
 
-    dfs_num_ = DEFAULT_DFS_VAL;
+    dfsNum_ = DEFAULT_DFS_VAL;
 }
 
 /* static */
@@ -187,11 +187,11 @@ void DominatorsTree::SetDomPair(BasicBlock *dominator, BasicBlock *block)
 /*
  * Check if there is path from `start_block` to `target_block` excluding `exclude_block`
  */
-static bool IsPathBetweenBlocks(BasicBlock *start_block, BasicBlock *target_block, BasicBlock *exclude_block)
+static bool IsPathBetweenBlocks(BasicBlock *startBlock, BasicBlock *targetBlock, BasicBlock *excludeBlock)
 {
-    auto marker_holder = MarkerHolder(target_block->GetGraph());
-    auto marker = marker_holder.GetMarker();
-    return BlocksPathDfsSearch(marker, start_block, target_block, exclude_block);
+    auto markerHolder = MarkerHolder(targetBlock->GetGraph());
+    auto marker = markerHolder.GetMarker();
+    return BlocksPathDfsSearch(marker, startBlock, targetBlock, excludeBlock);
 }
 
 void DominatorsTree::UpdateAfterResolverInsertion(BasicBlock *predecessor, BasicBlock *successor, BasicBlock *resolver)
@@ -200,18 +200,18 @@ void DominatorsTree::UpdateAfterResolverInsertion(BasicBlock *predecessor, Basic
     SetDomPair(predecessor, resolver);
 
     if (successor->GetDominator() == predecessor) {
-        bool resolver_dominate_phi_block = true;
+        bool resolverDominatePhiBlock = true;
         for (auto succ : predecessor->GetSuccsBlocks()) {
             if (succ == resolver) {
                 continue;
             }
             if (IsPathBetweenBlocks(succ, successor, resolver)) {
-                resolver_dominate_phi_block = false;
+                resolverDominatePhiBlock = false;
                 break;
             }
         }
 
-        if (resolver_dominate_phi_block) {
+        if (resolverDominatePhiBlock) {
             predecessor->RemoveDominatedBlock(successor);
             SetDomPair(resolver, successor);
         }

@@ -35,30 +35,30 @@ inline MallocMemPool::MallocMemPool() : MemPool("MallocMemPool")
 }
 
 template <class ArenaT, OSPagesAllocPolicy OS_ALLOC_POLICY>
-inline ArenaT *MallocMemPool::AllocArenaImpl(size_t size, [[maybe_unused]] SpaceType space_type,
-                                             [[maybe_unused]] AllocatorType allocator_type,
-                                             [[maybe_unused]] const void *allocator_addr)
+inline ArenaT *MallocMemPool::AllocArenaImpl(size_t size, [[maybe_unused]] SpaceType spaceType,
+                                             [[maybe_unused]] AllocatorType allocatorType,
+                                             [[maybe_unused]] const void *allocatorAddr)
 {
     LOG_MALLOC_MEM_POOL(DEBUG) << "Try to get new arena with size " << std::dec << size << " for "
-                               << SpaceTypeToString(space_type);
-    size_t max_alignment_drift = 0;
+                               << SpaceTypeToString(spaceType);
+    size_t maxAlignmentDrift = 0;
     if (DEFAULT_ALIGNMENT_IN_BYTES > alignof(ArenaT)) {
-        max_alignment_drift = DEFAULT_ALIGNMENT_IN_BYTES - alignof(ArenaT);
+        maxAlignmentDrift = DEFAULT_ALIGNMENT_IN_BYTES - alignof(ArenaT);
     }
-    size_t max_size = size + sizeof(ArenaT) + max_alignment_drift;
-    auto ret = panda::os::mem::AlignedAlloc(std::max(DEFAULT_ALIGNMENT_IN_BYTES, alignof(ArenaT)), max_size);
+    size_t maxSize = size + sizeof(ArenaT) + maxAlignmentDrift;
+    auto ret = panda::os::mem::AlignedAlloc(std::max(DEFAULT_ALIGNMENT_IN_BYTES, alignof(ArenaT)), maxSize);
     void *buff = reinterpret_cast<char *>(reinterpret_cast<std::uintptr_t>(ret) + sizeof(ArenaT));
-    size_t size_for_buff = max_size - sizeof(ArenaT);
-    buff = std::align(DEFAULT_ALIGNMENT_IN_BYTES, size, buff, size_for_buff);
+    size_t sizeForBuff = maxSize - sizeof(ArenaT);
+    buff = std::align(DEFAULT_ALIGNMENT_IN_BYTES, size, buff, sizeForBuff);
     ASSERT(buff != nullptr);
     ASSERT(reinterpret_cast<std::uintptr_t>(buff) - reinterpret_cast<std::uintptr_t>(ret) >= sizeof(ArenaT));
-    ASSERT(size_for_buff >= size);
-    ret = new (ret) ArenaT(size_for_buff, buff);
-    ASSERT(reinterpret_cast<std::uintptr_t>(ret) + max_size >= reinterpret_cast<std::uintptr_t>(buff) + size);
-    LOG_MALLOC_MEM_POOL(DEBUG) << "Allocated new arena with size " << std::dec << size_for_buff
-                               << " at addr = " << std::hex << buff << " for " << SpaceTypeToString(space_type);
+    ASSERT(sizeForBuff >= size);
+    ret = new (ret) ArenaT(sizeForBuff, buff);
+    ASSERT(reinterpret_cast<std::uintptr_t>(ret) + maxSize >= reinterpret_cast<std::uintptr_t>(buff) + size);
+    LOG_MALLOC_MEM_POOL(DEBUG) << "Allocated new arena with size " << std::dec << sizeForBuff
+                               << " at addr = " << std::hex << buff << " for " << SpaceTypeToString(spaceType);
     if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY && ret != nullptr) {
-        memset_s(ret, size_for_buff, 0, size_for_buff);
+        memset_s(ret, sizeForBuff, 0, sizeForBuff);
     }
     return static_cast<ArenaT *>(ret);
 }
@@ -75,15 +75,15 @@ inline void MallocMemPool::FreeArenaImpl(ArenaT *arena)
 
 /* static */
 template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-inline Pool MallocMemPool::AllocPoolImpl(size_t size, [[maybe_unused]] SpaceType space_type,
-                                         [[maybe_unused]] AllocatorType allocator_type,
-                                         [[maybe_unused]] const void *allocator_addr)
+inline Pool MallocMemPool::AllocPoolImpl(size_t size, [[maybe_unused]] SpaceType spaceType,
+                                         [[maybe_unused]] AllocatorType allocatorType,
+                                         [[maybe_unused]] const void *allocatorAddr)
 {
     LOG_MALLOC_MEM_POOL(DEBUG) << "Try to get new pool with size " << std::dec << size << " for "
-                               << SpaceTypeToString(space_type);
+                               << SpaceTypeToString(spaceType);
     void *mem = std::malloc(size);  // NOLINT(cppcoreguidelines-no-malloc)
     LOG_MALLOC_MEM_POOL(DEBUG) << "Allocated new pool with size " << std::dec << size << " at addr = " << std::hex
-                               << mem << " for " << SpaceTypeToString(space_type);
+                               << mem << " for " << SpaceTypeToString(spaceType);
     if (OS_ALLOC_POLICY == OSPagesAllocPolicy::ZEROED_MEMORY && mem != nullptr) {
         memset_s(mem, size, 0, size);
     }

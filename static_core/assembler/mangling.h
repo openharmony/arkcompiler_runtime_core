@@ -40,24 +40,24 @@ inline std::string DeMangleName(const std::string &name)
 }
 
 inline std::string MangleFunctionName(const std::string &name, const std::vector<pandasm::Function::Parameter> &params,
-                                      const pandasm::Type &return_type)
+                                      const pandasm::Type &returnType)
 {
-    std::string mangle_name {name};
-    mangle_name += MANGLE_BEGIN;
+    std::string mangleName {name};
+    mangleName += MANGLE_BEGIN;
     for (const auto &p : params) {
-        mangle_name += p.type.GetName() + std::string(MANGLE_SEPARATOR);
+        mangleName += p.type.GetName() + std::string(MANGLE_SEPARATOR);
     }
-    mangle_name += return_type.GetName() + std::string(MANGLE_SEPARATOR);
+    mangleName += returnType.GetName() + std::string(MANGLE_SEPARATOR);
 
-    return mangle_name;
+    return mangleName;
 }
 
 inline std::string MangleFieldName(const std::string &name, const pandasm::Type &type)
 {
-    std::string mangle_name {name};
-    mangle_name += MANGLE_BEGIN;
-    mangle_name += type.GetName() + std::string(MANGLE_SEPARATOR);
-    return mangle_name;
+    std::string mangleName {name};
+    mangleName += MANGLE_BEGIN;
+    mangleName += type.GetName() + std::string(MANGLE_SEPARATOR);
+    return mangleName;
 }
 
 inline std::string GetFunctionSignatureFromName(std::string name,

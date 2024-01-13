@@ -28,14 +28,14 @@ bool IsCatch(BasicBlock *bb)
 void ProcessInst(Inst *inst, Marker visited)
 {
     for (auto &input : inst->GetInputs()) {
-        auto input_inst = inst->GetDataFlowInput(input.GetInst());
+        auto inputInst = inst->GetDataFlowInput(input.GetInst());
         // mark only instructions defined in non-catch blocks
-        auto bb = input_inst->GetBasicBlock();
+        auto bb = inputInst->GetBasicBlock();
         if (!IsCatch(bb)) {
-            input_inst->SetFlag(inst_flags::Flags::CATCH_INPUT);
+            inputInst->SetFlag(inst_flags::Flags::CATCH_INPUT);
         }
-        if (input_inst->IsPhi() && !input_inst->SetMarker(visited)) {
-            ProcessInst(input_inst, visited);
+        if (inputInst->IsPhi() && !inputInst->SetMarker(visited)) {
+            ProcessInst(inputInst, visited);
         }
     }
 }

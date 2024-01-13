@@ -20,38 +20,38 @@
 namespace panda::pandasm {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static std::unordered_map<std::string_view, std::string_view> PRIMITIVE_TYPES = {
+static std::unordered_map<std::string_view, std::string_view> g_primitiveTypes = {
     {"u1", "Z"},  {"i8", "B"},  {"u8", "H"},  {"i16", "S"}, {"u16", "C"},  {"i32", "I"}, {"u32", "U"},
     {"f32", "F"}, {"f64", "D"}, {"i64", "J"}, {"u64", "Q"}, {"void", "V"}, {"any", "A"}};
 
-std::string Type::GetDescriptor(bool ignore_primitive) const
+std::string Type::GetDescriptor(bool ignorePrimitive) const
 {
-    if (!ignore_primitive) {
-        auto it = PRIMITIVE_TYPES.find(component_name_);
-        if (it != PRIMITIVE_TYPES.cend()) {
+    if (!ignorePrimitive) {
+        auto it = g_primitiveTypes.find(componentName_);
+        if (it != g_primitiveTypes.cend()) {
             return std::string(rank_, '[') + it->second.data();
         }
     }
 
-    std::string res = std::string(rank_, '[') + "L" + component_name_ + ";";
+    std::string res = std::string(rank_, '[') + "L" + componentName_ + ";";
     std::replace(res.begin(), res.end(), '.', '/');
     return res;
 }
 
 /* static */
-panda_file::Type::TypeId Type::GetId(std::string_view name, bool ignore_primitive)
+panda_file::Type::TypeId Type::GetId(std::string_view name, bool ignorePrimitive)
 {
-    static std::unordered_map<std::string_view, panda_file::Type::TypeId> panda_types = {
+    static std::unordered_map<std::string_view, panda_file::Type::TypeId> pandaTypes = {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PANDATYPE(name, inst_code) {std::string_view(name), panda_file::Type::TypeId::inst_code},
         PANDA_ASSEMBLER_TYPES(PANDATYPE)
 #undef PANDATYPE
     };
 
-    if (!ignore_primitive) {
-        auto iter = panda_types.find(name);
+    if (!ignorePrimitive) {
+        auto iter = pandaTypes.find(name);
 
-        if (iter == panda_types.end()) {
+        if (iter == pandaTypes.end()) {
             return panda_file::Type::TypeId::REFERENCE;
         }
         return iter->second;
@@ -63,23 +63,23 @@ panda_file::Type::TypeId Type::GetId(std::string_view name, bool ignore_primitiv
 /* static */
 pandasm::Type Type::FromPrimitiveId(panda_file::Type::TypeId id)
 {
-    static std::unordered_map<panda_file::Type::TypeId, std::string_view> panda_types = {
+    static std::unordered_map<panda_file::Type::TypeId, std::string_view> pandaTypes = {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PANDATYPE(name, inst_code) {panda_file::Type::TypeId::inst_code, std::string_view(name)},
         PANDA_ASSEMBLER_TYPES(PANDATYPE)
 #undef PANDATYPE
     };
-    auto iter = panda_types.find(id);
-    ASSERT(iter != panda_types.end());
+    auto iter = pandaTypes.find(id);
+    ASSERT(iter != pandaTypes.end());
     pandasm::Type ret {iter->second, 0};
-    ASSERT(ret.type_id_ == id);
+    ASSERT(ret.typeId_ == id);
     return ret;
 }
 
 /* static */
-std::string Type::GetName(std::string_view component_name, size_t rank)
+std::string Type::GetName(std::string_view componentName, size_t rank)
 {
-    std::string name(component_name);
+    std::string name(componentName);
     while (rank-- > 0) {
         name += "[]";
     }
@@ -89,7 +89,7 @@ std::string Type::GetName(std::string_view component_name, size_t rank)
 /* static */
 Type Type::FromDescriptor(std::string_view descriptor)
 {
-    static std::unordered_map<std::string_view, std::string_view> reverse_primitive_types = {
+    static std::unordered_map<std::string_view, std::string_view> reversePrimitiveTypes = {
         {"Z", "u1"},  {"B", "i8"},  {"H", "u8"},  {"S", "i16"}, {"C", "u16"},  {"I", "i32"}, {"U", "u32"},
         {"F", "f32"}, {"D", "f64"}, {"J", "i64"}, {"Q", "u64"}, {"V", "void"}, {"A", "any"}};
 
@@ -99,23 +99,23 @@ Type Type::FromDescriptor(std::string_view descriptor)
     }
 
     size_t rank = i;
-    bool is_ref_type = descriptor[i] == 'L';
-    if (is_ref_type) {
+    bool isRefType = descriptor[i] == 'L';
+    if (isRefType) {
         descriptor.remove_suffix(1); /* Remove semicolon */
         ++i;
     }
 
     descriptor.remove_prefix(i);
 
-    if (is_ref_type) {
+    if (isRefType) {
         return Type(descriptor, rank);
     }
 
-    return Type(reverse_primitive_types[descriptor], rank);
+    return Type(reversePrimitiveTypes[descriptor], rank);
 }
 
 /* static */
-Type Type::FromName(std::string_view name, bool ignore_primitive)
+Type Type::FromName(std::string_view name, bool ignorePrimitive)
 {
     constexpr size_t STEP = 2;
 
@@ -128,21 +128,21 @@ Type Type::FromName(std::string_view name, bool ignore_primitive)
 
     name.remove_suffix(i);
 
-    return Type(name, i / STEP, ignore_primitive);
+    return Type(name, i / STEP, ignorePrimitive);
 }
 
 /* static */
 bool Type::IsStringType(const std::string &name, panda::panda_file::SourceLang lang)
 {
-    auto string_type = Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(lang));
-    return name == string_type.GetName();
+    auto stringType = Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(lang));
+    return name == stringType.GetName();
 }
 
 /* static */
 bool Type::IsPandaPrimitiveType(const std::string &name)
 {
-    auto it = PRIMITIVE_TYPES.find(name);
-    return it != PRIMITIVE_TYPES.cend();
+    auto it = g_primitiveTypes.find(name);
+    return it != g_primitiveTypes.cend();
 }
 
 }  // namespace panda::pandasm

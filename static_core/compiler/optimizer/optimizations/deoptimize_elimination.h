@@ -31,8 +31,8 @@ class DeoptimizeElimination : public Optimization, public GraphVisitor {
 public:
     explicit DeoptimizeElimination(Graph *graph)
         : Optimization(graph),
-          blocks_type_(graph->GetLocalAllocator()->Adapter()),
-          deoptimize_must_throw_(graph->GetLocalAllocator()->Adapter())
+          blocksType_(graph->GetLocalAllocator()->Adapter()),
+          deoptimizeMustThrow_(graph->GetLocalAllocator()->Adapter())
     {
     }
 
@@ -51,7 +51,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerDeoptimizeElimination();
+        return g_options.IsCompilerDeoptimizeElimination();
     }
 
     void ReplaceDeoptimizeIfByUnconditionalDeoptimize();
@@ -73,27 +73,27 @@ public:
 
     void SetApplied()
     {
-        is_applied_ = true;
+        isApplied_ = true;
     }
 
     bool IsApplied() const
     {
-        return is_applied_;
+        return isApplied_;
     }
 
     void SetLoopDeleted()
     {
-        is_loop_deleted_ = true;
+        isLoopDeleted_ = true;
     }
 
     bool IsLoopDeleted() const
     {
-        return is_loop_deleted_;
+        return isLoopDeleted_;
     }
 
     bool HaveCalls()
     {
-        return have_calls_;
+        return haveCalls_;
     }
 
 #include <deoptimize_elimination_call_visitors.inl>
@@ -107,41 +107,41 @@ public:
 private:
     void SetHaveCalls()
     {
-        have_calls_ = true;
+        haveCalls_ = true;
     }
 
     void PushNewDeoptimizeIf(Inst *inst)
     {
-        deoptimize_must_throw_.push_back(inst);
+        deoptimizeMustThrow_.push_back(inst);
     }
 
     void PushNewBlockType(BasicBlock *block, BlockType type)
     {
-        ASSERT(blocks_type_.find(block) == blocks_type_.end());
-        blocks_type_.emplace(block, type);
+        ASSERT(blocksType_.find(block) == blocksType_.end());
+        blocksType_.emplace(block, type);
     }
 
     BlockType GetBlockType(BasicBlock *block)
     {
-        if (blocks_type_.find(block) != blocks_type_.end()) {
-            return blocks_type_.at(block);
+        if (blocksType_.find(block) != blocksType_.end()) {
+            return blocksType_.at(block);
         }
         return BlockType::INVALID;
     }
 
     bool TryToRemoveRedundantSaveState(Inst *inst);
     bool CanRemoveGuard(Inst *guard);
-    bool CanRemoveGuardRec(BasicBlock *block, Inst *guard, const Marker &mrk, const Marker &remove_mrk);
+    bool CanRemoveGuardRec(BasicBlock *block, Inst *guard, const Marker &mrk, const Marker &removeMrk);
     void RemoveGuard(Inst *guard);
     void RemoveDeoptimizeIf(Inst *inst);
     bool RequireRegMap(Inst *inst);
 
 private:
-    bool have_calls_ {false};
-    bool is_applied_ {false};
-    bool is_loop_deleted_ {false};
-    ArenaUnorderedMap<BasicBlock *, BlockType> blocks_type_;
-    InstVector deoptimize_must_throw_;
+    bool haveCalls_ {false};
+    bool isApplied_ {false};
+    bool isLoopDeleted_ {false};
+    ArenaUnorderedMap<BasicBlock *, BlockType> blocksType_;
+    InstVector deoptimizeMustThrow_;
 };
 }  // namespace panda::compiler
 

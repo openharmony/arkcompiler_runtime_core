@@ -17,18 +17,18 @@
 
 namespace panda {
 
-static thread_local Thread *S_CURRENT_THREAD = nullptr;
+static thread_local Thread *g_sCurrentThread = nullptr;
 
 /* static */
 void Thread::SetCurrent(Thread *thread)
 {
-    S_CURRENT_THREAD = thread;
+    g_sCurrentThread = thread;
 }
 
 /* static */
 Thread *Thread::GetCurrent()
 {
-    return S_CURRENT_THREAD;
+    return g_sCurrentThread;
 }
 
 }  // namespace panda

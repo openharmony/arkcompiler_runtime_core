@@ -56,56 +56,56 @@ namespace panda::verifier {
 using TryBlock = panda_file::CodeDataAccessor::TryBlock;
 using CatchBlock = panda_file::CodeDataAccessor::CatchBlock;
 
-VerificationContext PrepareVerificationContext(TypeSystem *type_system, Job const *job)
+VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const *job)
 {
     auto *method = job->JobMethod();
 
     auto *klass = method->GetClass();
 
-    Type method_class_type {klass};
+    Type methodClassType {klass};
 
-    VerificationContext verif_ctx {type_system, job, method_class_type};
+    VerificationContext verifCtx {typeSystem, job, methodClassType};
     // NOTE(vdyadov): ASSERT(cflow_info corresponds method)
 
-    auto &cflow_info = verif_ctx.CflowInfo();
-    auto &exec_ctx = verif_ctx.ExecCtx();
+    auto &cflowInfo = verifCtx.CflowInfo();
+    auto &execCtx = verifCtx.ExecCtx();
 
     LOG_VERIFIER_DEBUG_METHOD_VERIFICATION(method->GetFullName());
 
     /*
-    1. build initial reg_context for the method entry
+    1. build initial regContext for the method entry
     */
-    RegContext &reg_ctx = verif_ctx.ExecCtx().CurrentRegContext();
-    reg_ctx.Clear();
+    RegContext &regCtx = verifCtx.ExecCtx().CurrentRegContext();
+    regCtx.Clear();
 
-    auto num_vregs = method->GetNumVregs();
-    reg_ctx[num_vregs] = AbstractTypedValue {};
+    auto numVregs = method->GetNumVregs();
+    regCtx[numVregs] = AbstractTypedValue {};
 
-    const auto &signature = type_system->GetMethodSignature(method);
+    const auto &signature = typeSystem->GetMethodSignature(method);
 
     for (size_t idx = 0; idx < signature->args.size(); ++idx) {
         Type const &t = signature->args[idx];
-        reg_ctx[num_vregs++] = AbstractTypedValue {t, verif_ctx.NewVar(), AbstractTypedValue::Start {}, idx};
+        regCtx[numVregs++] = AbstractTypedValue {t, verifCtx.NewVar(), AbstractTypedValue::Start {}, idx};
     }
-    LOG_VERIFIER_DEBUG_REGISTERS("registers =", reg_ctx.DumpRegs(type_system));
+    LOG_VERIFIER_DEBUG_REGISTERS("registers =", regCtx.DumpRegs(typeSystem));
 
-    verif_ctx.SetReturnType(&signature->result);
+    verifCtx.SetReturnType(&signature->result);
 
-    LOG_VERIFIER_DEBUG_RESULT(signature->result.ToString(type_system));
+    LOG_VERIFIER_DEBUG_RESULT(signature->result.ToString(typeSystem));
 
     /*
     3. Add checkpoint for exc. handlers
     */
-    method->EnumerateTryBlocks([&](TryBlock const &try_block) {
+    method->EnumerateTryBlocks([&](TryBlock const &tryBlock) {
         uint8_t const *code = method->GetInstructions();
-        uint8_t const *try_start_pc = reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(code) +
-                                                                  static_cast<uintptr_t>(try_block.GetStartPc()));
-        uint8_t const *try_end_pc = reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(try_start_pc) +
-                                                                static_cast<uintptr_t>(try_block.GetLength()));
+        uint8_t const *tryStartPc = reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(code) +
+                                                                static_cast<uintptr_t>(tryBlock.GetStartPc()));
+        uint8_t const *tryEndPc = reinterpret_cast<uint8_t *>(reinterpret_cast<uintptr_t>(tryStartPc) +
+                                                              static_cast<uintptr_t>(tryBlock.GetLength()));
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (uint8_t const *pc = try_start_pc; pc < try_end_pc; pc++) {
-            if (cflow_info.IsFlagSet(pc, CflowMethodInfo::EXCEPTION_SOURCE)) {
-                exec_ctx.SetCheckPoint(pc);
+        for (uint8_t const *pc = tryStartPc; pc < tryEndPc; pc++) {
+            if (cflowInfo.IsFlagSet(pc, CflowMethodInfo::EXCEPTION_SOURCE)) {
+                execCtx.SetCheckPoint(pc);
             }
         }
         return true;
@@ -115,90 +115,90 @@ VerificationContext PrepareVerificationContext(TypeSystem *type_system, Job cons
     3. add Start entry of method
     */
 
-    const uint8_t *method_pc_start_ptr = method->GetInstructions();
+    const uint8_t *methodPcStartPtr = method->GetInstructions();
 
-    verif_ctx.ExecCtx().AddEntryPoint(method_pc_start_ptr, EntryPointType::METHOD_BODY);
-    verif_ctx.ExecCtx().StoreCurrentRegContextForAddr(method_pc_start_ptr);
+    verifCtx.ExecCtx().AddEntryPoint(methodPcStartPtr, EntryPointType::METHOD_BODY);
+    verifCtx.ExecCtx().StoreCurrentRegContextForAddr(methodPcStartPtr);
 
-    return verif_ctx;
+    return verifCtx;
 }
 
 namespace {
 
-VerificationStatus VerifyEntryPoints(VerificationContext &verif_ctx, ExecContext &exec_ctx)
+VerificationStatus VerifyEntryPoints(VerificationContext &verifCtx, ExecContext &execCtx)
 {
-    const auto &debug_opts = GetServiceConfig(verif_ctx.GetJob()->GetService())->opts.debug;
+    const auto &debugOpts = GetServiceConfig(verifCtx.GetJob()->GetService())->opts.debug;
 
     /*
     Start main loop: get entry point with context, process, repeat
     */
 
-    uint8_t const *entry_point = nullptr;
-    EntryPointType entry_type;
-    VerificationStatus worst_so_far = VerificationStatus::OK;
+    uint8_t const *entryPoint = nullptr;
+    EntryPointType entryType;
+    VerificationStatus worstSoFar = VerificationStatus::OK;
 
-    while (exec_ctx.GetEntryPointForChecking(&entry_point, &entry_type) == ExecContext::Status::OK) {
+    while (execCtx.GetEntryPointForChecking(&entryPoint, &entryType) == ExecContext::Status::OK) {
 #ifndef NDEBUG
-        const void *code_start = verif_ctx.GetJob()->JobMethod()->GetInstructions();
+        const void *codeStart = verifCtx.GetJob()->JobMethod()->GetInstructions();
         LOG_VERIFIER_DEBUG_CODE_BLOCK_VERIFICATION(
-            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(entry_point) - reinterpret_cast<uintptr_t>(code_start)),
-            (entry_type == EntryPointType::METHOD_BODY ? "method body" : "exception handler"));
+            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(entryPoint) - reinterpret_cast<uintptr_t>(codeStart)),
+            (entryType == EntryPointType::METHOD_BODY ? "method body" : "exception handler"));
 #endif
-        auto result = AbstractInterpret(verif_ctx, entry_point, entry_type);
-        if (debug_opts.allow.error_in_exception_handler && entry_type == EntryPointType::EXCEPTION_HANDLER &&
+        auto result = AbstractInterpret(verifCtx, entryPoint, entryType);
+        if (debugOpts.allow.errorInExceptionHandler && entryType == EntryPointType::EXCEPTION_HANDLER &&
             result == VerificationStatus::ERROR) {
             result = VerificationStatus::WARNING;
         }
         if (result == VerificationStatus::ERROR) {
             return result;
         }
-        worst_so_far = std::max(worst_so_far, result);
+        worstSoFar = std::max(worstSoFar, result);
     }
 
-    return worst_so_far;
+    return worstSoFar;
 }
 
-bool ComputeRegContext(Method const *method, TryBlock const *try_block, VerificationContext &verif_ctx,
-                       RegContext *reg_context)
+bool ComputeRegContext(Method const *method, TryBlock const *tryBlock, VerificationContext &verifCtx,
+                       RegContext *regContext)
 {
-    auto &cflow_info = verif_ctx.CflowInfo();
-    auto &exec_ctx = verif_ctx.ExecCtx();
-    auto *type_system = verif_ctx.GetTypeSystem();
+    auto &cflowInfo = verifCtx.CflowInfo();
+    auto &execCtx = verifCtx.ExecCtx();
+    auto *typeSystem = verifCtx.GetTypeSystem();
     auto start = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(method->GetInstructions()) +
-                                                   try_block->GetStartPc());
+                                                   tryBlock->GetStartPc());
     auto end = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(method->GetInstructions()) +
-                                                 try_block->GetStartPc() + try_block->GetLength());
+                                                 tryBlock->GetStartPc() + tryBlock->GetLength());
 
-    LOG_VERIFIER_DEBUG_TRY_BLOCK_COMMON_CONTEXT_COMPUTATION(try_block->GetStartPc(),
-                                                            try_block->GetStartPc() + try_block->GetLength());
+    LOG_VERIFIER_DEBUG_TRY_BLOCK_COMMON_CONTEXT_COMPUTATION(tryBlock->GetStartPc(),
+                                                            tryBlock->GetStartPc() + tryBlock->GetLength());
 
     bool first = true;
-    exec_ctx.ForContextsOnCheckPointsInRange(start, end, [&](const uint8_t *pc, const RegContext &ctx) {
-        if (cflow_info.IsFlagSet(pc, CflowMethodInfo::EXCEPTION_SOURCE)) {
-            LOG_VERIFIER_DEBUG_REGISTERS("+", ctx.DumpRegs(type_system));
+    execCtx.ForContextsOnCheckPointsInRange(start, end, [&](const uint8_t *pc, const RegContext &ctx) {
+        if (cflowInfo.IsFlagSet(pc, CflowMethodInfo::EXCEPTION_SOURCE)) {
+            LOG_VERIFIER_DEBUG_REGISTERS("+", ctx.DumpRegs(typeSystem));
             if (first) {
                 first = false;
-                *reg_context = ctx;
+                *regContext = ctx;
             } else {
-                reg_context->UnionWith(&ctx, type_system);
+                regContext->UnionWith(&ctx, typeSystem);
             }
         }
         return true;
     });
-    LOG_VERIFIER_DEBUG_REGISTERS("=", reg_context->DumpRegs(type_system));
+    LOG_VERIFIER_DEBUG_REGISTERS("=", regContext->DumpRegs(typeSystem));
 
     if (first) {
         // return false when the try block does not have instructions to throw exception
         return false;
     }
 
-    reg_context->RemoveInconsistentRegs();
+    regContext->RemoveInconsistentRegs();
 
 #ifndef NDEBUG
-    if (reg_context->HasInconsistentRegs()) {
+    if (regContext->HasInconsistentRegs()) {
         LOG_VERIFIER_COMMON_CONTEXT_INCONSISTENT_REGISTER_HEADER();
-        for (int reg_num : reg_context->InconsistentRegsNums()) {
-            LOG(DEBUG, VERIFIER) << AbsIntInstructionHandler::RegisterName(reg_num);
+        for (int regNum : regContext->InconsistentRegsNums()) {
+            LOG(DEBUG, VERIFIER) << AbsIntInstructionHandler::RegisterName(regNum);
         }
     }
 #endif
@@ -206,94 +206,93 @@ bool ComputeRegContext(Method const *method, TryBlock const *try_block, Verifica
     return true;
 }
 
-VerificationStatus VerifyExcHandler([[maybe_unused]] TryBlock const *try_block, CatchBlock const *catch_block,
-                                    VerificationContext *verif_ctx, RegContext *reg_context)
+VerificationStatus VerifyExcHandler([[maybe_unused]] TryBlock const *tryBlock, CatchBlock const *catchBlock,
+                                    VerificationContext *verifCtx, RegContext *regContext)
 {
-    Method const *method = verif_ctx->GetMethod();
-    auto &exec_ctx = verif_ctx->ExecCtx();
-    auto exception_idx = catch_block->GetTypeIdx();
-    auto lang_ctx = LanguageContext(plugins::GetLanguageContextBase(method->GetClass()->GetSourceLang()));
+    Method const *method = verifCtx->GetMethod();
+    auto &execCtx = verifCtx->ExecCtx();
+    auto exceptionIdx = catchBlock->GetTypeIdx();
+    auto langCtx = LanguageContext(plugins::GetLanguageContextBase(method->GetClass()->GetSourceLang()));
     Class *exception = nullptr;
-    if (exception_idx != panda_file::INVALID_INDEX) {
+    if (exceptionIdx != panda_file::INVALID_INDEX) {
         ScopedChangeThreadStatus st {ManagedThread::GetCurrent(), ThreadStatus::RUNNING};
-        exception = verif_ctx->GetJob()->GetService()->class_linker->GetExtension(lang_ctx)->GetClass(
-            *method->GetPandaFile(), method->GetClass()->ResolveClassIndex(exception_idx));
+        exception = verifCtx->GetJob()->GetService()->classLinker->GetExtension(langCtx)->GetClass(
+            *method->GetPandaFile(), method->GetClass()->ResolveClassIndex(exceptionIdx));
     }
 
-    LOG(DEBUG, VERIFIER) << "Exception handler at " << std::hex << "0x" << catch_block->GetHandlerPc()
+    LOG(DEBUG, VERIFIER) << "Exception handler at " << std::hex << "0x" << catchBlock->GetHandlerPc()
                          << (exception != nullptr
                                  ? PandaString {", for exception '"} + PandaString {exception->GetName()} + "' "
                                  : PandaString {""})
                          << ", try block scope: [ "
-                         << "0x" << try_block->GetStartPc() << ", "
-                         << "0x" << (try_block->GetStartPc() + try_block->GetLength()) << " ]";
+                         << "0x" << tryBlock->GetStartPc() << ", "
+                         << "0x" << (tryBlock->GetStartPc() + tryBlock->GetLength()) << " ]";
 
-    Type exception_type {};
+    Type exceptionType {};
     if (exception != nullptr) {
-        exception_type = Type {exception};
+        exceptionType = Type {exception};
     } else {
-        exception_type = verif_ctx->GetTypeSystem()->Throwable();
+        exceptionType = verifCtx->GetTypeSystem()->Throwable();
     }
 
-    if (exception_type.IsConsistent()) {
+    if (exceptionType.IsConsistent()) {
         const int acc = -1;
-        (*reg_context)[acc] = AbstractTypedValue {exception_type, verif_ctx->NewVar()};
+        (*regContext)[acc] = AbstractTypedValue {exceptionType, verifCtx->NewVar()};
     }
 
-    auto start_pc = reinterpret_cast<uint8_t const *>(
-        reinterpret_cast<uintptr_t>(verif_ctx->GetMethod()->GetInstructions()) + catch_block->GetHandlerPc());
+    auto startPc = reinterpret_cast<uint8_t const *>(
+        reinterpret_cast<uintptr_t>(verifCtx->GetMethod()->GetInstructions()) + catchBlock->GetHandlerPc());
 
-    exec_ctx.CurrentRegContext() = *reg_context;
-    exec_ctx.AddEntryPoint(start_pc, EntryPointType::EXCEPTION_HANDLER);
-    exec_ctx.StoreCurrentRegContextForAddr(start_pc);
+    execCtx.CurrentRegContext() = *regContext;
+    execCtx.AddEntryPoint(startPc, EntryPointType::EXCEPTION_HANDLER);
+    execCtx.StoreCurrentRegContextForAddr(startPc);
 
-    return VerifyEntryPoints(*verif_ctx, exec_ctx);
+    return VerifyEntryPoints(*verifCtx, execCtx);
 }
 
 }  // namespace
 
-VerificationStatus VerifyMethod(VerificationContext &verif_ctx)
+VerificationStatus VerifyMethod(VerificationContext &verifCtx)
 {
-    VerificationStatus worst_so_far = VerificationStatus::OK;
-    auto &exec_ctx = verif_ctx.ExecCtx();
+    VerificationStatus worstSoFar = VerificationStatus::OK;
+    auto &execCtx = verifCtx.ExecCtx();
 
-    worst_so_far = std::max(worst_so_far, VerifyEntryPoints(verif_ctx, exec_ctx));
-    if (worst_so_far == VerificationStatus::ERROR) {
-        return worst_so_far;
+    worstSoFar = std::max(worstSoFar, VerifyEntryPoints(verifCtx, execCtx));
+    if (worstSoFar == VerificationStatus::ERROR) {
+        return worstSoFar;
     }
 
     // Need to have the try blocks sorted!
-    verif_ctx.GetMethod()->EnumerateTryBlocks([&](TryBlock &try_block) {
-        bool try_block_can_throw = true;
-        RegContext reg_context;
-        try_block_can_throw = ComputeRegContext(verif_ctx.GetMethod(), &try_block, verif_ctx, &reg_context);
-        if (!try_block_can_throw) {
+    verifCtx.GetMethod()->EnumerateTryBlocks([&](TryBlock &tryBlock) {
+        bool tryBlockCanThrow = true;
+        RegContext regContext;
+        tryBlockCanThrow = ComputeRegContext(verifCtx.GetMethod(), &tryBlock, verifCtx, &regContext);
+        if (!tryBlockCanThrow) {
             // catch block is unreachable
         } else {
-            try_block.EnumerateCatchBlocks([&](CatchBlock const &catch_block) {
-                worst_so_far =
-                    std::max(worst_so_far, VerifyExcHandler(&try_block, &catch_block, &verif_ctx, &reg_context));
-                return (worst_so_far != VerificationStatus::ERROR);
+            tryBlock.EnumerateCatchBlocks([&](CatchBlock const &catchBlock) {
+                worstSoFar = std::max(worstSoFar, VerifyExcHandler(&tryBlock, &catchBlock, &verifCtx, &regContext));
+                return (worstSoFar != VerificationStatus::ERROR);
             });
         }
         return true;
     });
 
-    if (worst_so_far == VerificationStatus::ERROR) {
-        return worst_so_far;
+    if (worstSoFar == VerificationStatus::ERROR) {
+        return worstSoFar;
     }
 
     // NOTE(vdyadov): account for dead code
-    const uint8_t *dummy_entry_point;
-    EntryPointType dummy_entry_type;
+    const uint8_t *dummyEntryPoint;
+    EntryPointType dummyEntryType;
 
-    if (exec_ctx.GetEntryPointForChecking(&dummy_entry_point, &dummy_entry_type) ==
+    if (execCtx.GetEntryPointForChecking(&dummyEntryPoint, &dummyEntryType) ==
         ExecContext::Status::NO_ENTRY_POINTS_WITH_CONTEXT) {
         // NOTE(vdyadov): log remaining entry points as unreachable
-        worst_so_far = std::max(worst_so_far, VerificationStatus::WARNING);
+        worstSoFar = std::max(worstSoFar, VerificationStatus::WARNING);
     }
 
-    return worst_so_far;
+    return worstSoFar;
 }
 
 }  // namespace panda::verifier

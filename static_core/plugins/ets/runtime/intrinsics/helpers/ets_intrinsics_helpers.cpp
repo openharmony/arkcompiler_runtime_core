@@ -50,7 +50,7 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
         RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
         sign = Sign::NEG;
     }
-    bool ignore_trailing = (flags & flags::IGNORE_TRAILING) != 0;
+    bool ignoreTrailing = (flags & flags::IGNORE_TRAILING) != 0;
 
     // 3. judge Infinity
     static const char INF[] = "Infinity";  // NOLINT(modernize-avoid-c-arrays)
@@ -62,84 +62,84 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
             }
         }
         ++p;
-        if (!ignore_trailing && GotoNonspace(&p, end)) {
+        if (!ignoreTrailing && GotoNonspace(&p, end)) {
             return NAN_VALUE;
         }
         return sign == Sign::NEG ? -POSITIVE_INFINITY : POSITIVE_INFINITY;
     }
 
     // 4. get number radix
-    bool leading_zero = false;
-    bool prefix_radix = false;
+    bool leadingZero = false;
+    bool prefixRadix = false;
     if (*p == '0' && radix == 0) {
         RETURN_IF_CONVERSION_END(++p, end, SignedZero(sign));
         if (*p == 'x' || *p == 'X') {
             if ((flags & flags::ALLOW_HEX) == 0) {
-                return ignore_trailing ? SignedZero(sign) : NAN_VALUE;
+                return ignoreTrailing ? SignedZero(sign) : NAN_VALUE;
             }
             RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
             if (sign != Sign::NONE) {
                 return NAN_VALUE;
             }
-            prefix_radix = true;
+            prefixRadix = true;
             radix = HEXADECIMAL;
         } else if (*p == 'o' || *p == 'O') {
             if ((flags & flags::ALLOW_OCTAL) == 0) {
-                return ignore_trailing ? SignedZero(sign) : NAN_VALUE;
+                return ignoreTrailing ? SignedZero(sign) : NAN_VALUE;
             }
             RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
             if (sign != Sign::NONE) {
                 return NAN_VALUE;
             }
-            prefix_radix = true;
+            prefixRadix = true;
             radix = OCTAL;
         } else if (*p == 'b' || *p == 'B') {
             if ((flags & flags::ALLOW_BINARY) == 0) {
-                return ignore_trailing ? SignedZero(sign) : NAN_VALUE;
+                return ignoreTrailing ? SignedZero(sign) : NAN_VALUE;
             }
             RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
             if (sign != Sign::NONE) {
                 return NAN_VALUE;
             }
-            prefix_radix = true;
+            prefixRadix = true;
             radix = BINARY;
         } else {
-            leading_zero = true;
+            leadingZero = true;
         }
     }
 
     if (radix == 0) {
         radix = DECIMAL;
     }
-    auto p_start = p;
+    auto pStart = p;
     // 5. skip leading '0'
     while (*p == '0') {
         RETURN_IF_CONVERSION_END(++p, end, SignedZero(sign));
-        leading_zero = true;
+        leadingZero = true;
     }
     // 6. parse to number
-    uint64_t int_number = 0;
-    uint64_t number_max = (UINT64_MAX - (radix - 1)) / radix;
+    uint64_t intNumber = 0;
+    uint64_t numberMax = (UINT64_MAX - (radix - 1)) / radix;
     int digits = 0;
     int exponent = 0;
     do {
         uint8_t c = ToDigit(*p);
         if (c >= radix) {
-            if (!prefix_radix || ignore_trailing || (p_start != p && !GotoNonspace(&p, end))) {
+            if (!prefixRadix || ignoreTrailing || (pStart != p && !GotoNonspace(&p, end))) {
                 break;
             }
             // "0b" "0x1.2" "0b1e2" ...
             return NAN_VALUE;
         }
         ++digits;
-        if (int_number < number_max) {
-            int_number = int_number * radix + c;
+        if (intNumber < numberMax) {
+            intNumber = intNumber * radix + c;
         } else {
             ++exponent;
         }
     } while (++p != end);
 
-    auto number = static_cast<double>(int_number);
+    auto number = static_cast<double>(intNumber);
     if (sign == Sign::NEG) {
         if (number == 0) {
             number = -0.0;
@@ -150,7 +150,7 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
 
     // 7. deal with other radix except DECIMAL
     if (p == end || radix != DECIMAL) {
-        if ((digits == 0 && !leading_zero) || (p != end && !ignore_trailing && GotoNonspace(&p, end))) {
+        if ((digits == 0 && !leadingZero) || (p != end && !ignoreTrailing && GotoNonspace(&p, end))) {
             // no digits there, like "0x", "0xh", or error trailing of "0x3q"
             return NAN_VALUE;
         }
@@ -168,38 +168,38 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
             }
         }
     }
-    if (digits == 0 && !leading_zero) {
+    if (digits == 0 && !leadingZero) {
         // no digits there, like ".", "sss", or ".e1"
         return NAN_VALUE;
     }
-    auto p_end = p;
+    auto pEnd = p;
 
     // 9. parse 'e/E' with '+/-'
-    char exponent_sign = '+';
-    int additional_exponent = 0;
+    char exponentSign = '+';
+    int additionalExponent = 0;
     constexpr int MAX_EXPONENT = INT32_MAX / 2;
     if (radix == DECIMAL && (p != end && (*p == 'e' || *p == 'E'))) {
         RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
 
         // 10. parse exponent number
         if (*p == '+' || *p == '-') {
-            exponent_sign = static_cast<char>(*p);
+            exponentSign = static_cast<char>(*p);
             RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
         }
         uint8_t digit;
         while ((digit = ToDigit(*p)) < radix) {
-            if (additional_exponent > static_cast<int>(MAX_EXPONENT / radix)) {
-                additional_exponent = MAX_EXPONENT;
+            if (additionalExponent > static_cast<int>(MAX_EXPONENT / radix)) {
+                additionalExponent = MAX_EXPONENT;
             } else {
-                additional_exponent = additional_exponent * static_cast<int>(radix) + static_cast<int>(digit);
+                additionalExponent = additionalExponent * static_cast<int>(radix) + static_cast<int>(digit);
             }
             if (++p == end) {
                 break;
             }
         }
     }
-    exponent += (exponent_sign == '-' ? -additional_exponent : additional_exponent);
-    if (!ignore_trailing && GotoNonspace(&p, end)) {
+    exponent += (exponentSign == '-' ? -additionalExponent : additionalExponent);
+    if (!ignoreTrailing && GotoNonspace(&p, end)) {
         return NAN_VALUE;
     }
 
@@ -208,7 +208,7 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
     if (sign == Sign::NEG) {
         buffer += "-";
     }
-    for (uint8_t *i = p_start; i < p_end; ++i) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (uint8_t *i = pStart; i < pEnd; ++i) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         if (*i != static_cast<uint8_t>('.')) {
             buffer += *i;
         }
@@ -235,7 +235,7 @@ double StringToDoubleWithRadix(const uint8_t *start, const uint8_t *end, int rad
         RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
     }
     // 3. 0x or 0X
-    bool strip_prefix = true;
+    bool stripPrefix = true;
     // 4. If R != 0, then
     //     a. If R < 2 or R > 36, return NaN.
     //     b. If R != 16, let stripPrefix be false.
@@ -244,13 +244,13 @@ double StringToDoubleWithRadix(const uint8_t *start, const uint8_t *end, int rad
             return NAN_VALUE;
         }
         if (radix != HEXADECIMAL) {
-            strip_prefix = false;
+            stripPrefix = false;
         }
     } else {
         radix = DECIMAL;
     }
     int size = 0;
-    if (strip_prefix) {
+    if (stripPrefix) {
         if (*p == '0') {
             size++;
             if (++p != end && (*p == 'x' || *p == 'X')) {
@@ -261,29 +261,29 @@ double StringToDoubleWithRadix(const uint8_t *start, const uint8_t *end, int rad
     }
 
     double result = 0;
-    bool is_done = false;
+    bool isDone = false;
     do {
         double part = 0;
         uint32_t multiplier = 1;
         for (; p != end; ++p) {
             // The maximum value to ensure that uint32_t will not overflow
-            const uint32_t max_multiper = 0xffffffffU / 36;
+            const uint32_t maxMultiper = 0xffffffffU / 36U;
             uint32_t m = multiplier * static_cast<uint32_t>(radix);
-            if (m > max_multiper) {
+            if (m > maxMultiper) {
                 break;
             }
 
-            int current_bit = static_cast<int>(ToDigit(*p));
-            if (current_bit >= radix) {
-                is_done = true;
+            int currentBit = static_cast<int>(ToDigit(*p));
+            if (currentBit >= radix) {
+                isDone = true;
                 break;
             }
             size++;
-            part = part * radix + current_bit;
+            part = part * radix + currentBit;
             multiplier = m;
         }
         result = result * multiplier + part;
-        if (is_done) {
+        if (isDone) {
             break;
         }
     } while (p != end);
@@ -305,8 +305,8 @@ EtsString *DoubleToExponential(double number, int digit)
     }
     PandaString result = ss.str();
     size_t found = result.find_last_of('e');
-    if (found != PandaString::npos && found < result.size() - 2 && result[found + 2] == '0') {
-        result.erase(found + 2, 1);  // 2:offset of e
+    if (found != PandaString::npos && found < result.size() - 2U && result[found + 2U] == '0') {
+        result.erase(found + 2U, 1);  // 2:offset of e
     }
     if (digit < 0) {
         size_t end = found;
@@ -338,12 +338,12 @@ EtsString *DoubleToPrecision(double number, int digit)
         return DoubleToFixed(number, digit - 1);
     }
     PandaStringStream ss;
-    double positive_number = number > 0 ? number : -number;
-    int log_digit = std::floor(log10(positive_number));
-    int radix_digit = digit - log_digit - 1;
-    const int max_exponent_digit = 6;
-    if ((log_digit >= 0 && radix_digit >= 0) || (log_digit < 0 && radix_digit <= max_exponent_digit)) {
-        return DoubleToFixed(number, std::abs(radix_digit));
+    double positiveNumber = number > 0 ? number : -number;
+    int logDigit = std::floor(log10(positiveNumber));
+    int radixDigit = digit - logDigit - 1;
+    const int maxExponentDigit = 6;
+    if ((logDigit >= 0 && radixDigit >= 0) || (logDigit < 0 && radixDigit <= maxExponentDigit)) {
+        return DoubleToFixed(number, std::abs(radixDigit));
     }
     return DoubleToExponential(number, digit - 1);
 }
@@ -355,11 +355,11 @@ double GetStdDoubleArgument(ObjectHeader *obj)
     // Assume std.core.Double has only one `double` field
     ASSERT(cls->GetInstanceFields().size() == 1);
 
-    Field &field_val = cls->GetInstanceFields()[0];
+    Field &fieldVal = cls->GetInstanceFields()[0];
 
-    ASSERT(field_val.GetTypeId() == panda_file::Type::TypeId::F64);
+    ASSERT(fieldVal.GetTypeId() == panda_file::Type::TypeId::F64);
 
-    size_t offset = field_val.GetOffset();
+    size_t offset = fieldVal.GetOffset();
     return obj->GetFieldPrimitive<double>(offset);
 }
 

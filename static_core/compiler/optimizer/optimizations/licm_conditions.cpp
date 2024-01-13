@@ -22,17 +22,17 @@
 namespace panda::compiler {
 bool LicmConditions::RunImpl()
 {
-    condition_chain_manager_.Reset();
-    MarkerHolder hoistable_inst_mh(GetGraph());
-    MarkerHolder processed_blocks_mh(GetGraph());
-    hoistable_inst_marker_ = hoistable_inst_mh.GetMarker();
-    processed_blocks_marker_ = processed_blocks_mh.GetMarker();
+    conditionChainManager_.Reset();
+    MarkerHolder hoistableInstMh(GetGraph());
+    MarkerHolder processedBlocksMh(GetGraph());
+    hoistableInstMarker_ = hoistableInstMh.GetMarker();
+    processedBlocksMarker_ = processedBlocksMh.GetMarker();
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Run " << GetPassName();
     GetGraph()->RunPass<DominatorsTree>();
     MarkHoistableInst();
     RunLoopsVisitor();
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << GetPassName() << " complete";
-    return is_applied_;
+    return isApplied_;
 }
 
 void LicmConditions::MarkHoistableInst()
@@ -47,13 +47,13 @@ void LicmConditions::MarkHoistableInst()
         }
         for (auto inst : bb->PhiInsts()) {
             if (AllInputsDominate(inst, loop)) {
-                inst->SetMarker(hoistable_inst_marker_);
+                inst->SetMarker(hoistableInstMarker_);
             }
         }
         if (bb->GetSuccsBlocks().size() == MAX_SUCCS_NUM) {
-            auto last_inst = bb->GetLastInst();
-            if (AllInputsDominate(last_inst, loop)) {
-                last_inst->SetMarker(hoistable_inst_marker_);
+            auto lastInst = bb->GetLastInst();
+            if (AllInputsDominate(lastInst, loop)) {
+                lastInst->SetMarker(hoistableInstMarker_);
             }
         }
     }
@@ -61,8 +61,8 @@ void LicmConditions::MarkHoistableInst()
 
 bool LicmConditions::TransformLoop(Loop *loop)
 {
-    same_phi_input_.clear();
-    condition_chains_cache_.Clear();
+    samePhiInput_.clear();
+    conditionChainsCache_.Clear();
     FindHoistableConditionChains(loop);
     HoistConditionChains(loop);
     return true;
@@ -70,42 +70,42 @@ bool LicmConditions::TransformLoop(Loop *loop)
 
 void LicmConditions::FindHoistableConditionChains(Loop *loop)
 {
-    condition_chains_ctx_.clear();
+    conditionChainsCtx_.clear();
     for (auto block : loop->GetBlocks()) {
-        auto chain = condition_chain_manager_.FindConditionChain(block);
+        auto chain = conditionChainManager_.FindConditionChain(block);
         if (chain == nullptr) {
             continue;
         }
-        auto multiple_preds_succ = chain->GetMultiplePredecessorsSuccessor();
-        auto single_pred_succ = chain->GetSinglePredecessorSuccessor();
+        auto multiplePredsSucc = chain->GetMultiplePredecessorsSuccessor();
+        auto singlePredSucc = chain->GetSinglePredecessorSuccessor();
         COMPILER_LOG(DEBUG, LICM_COND_OPT)
             << "Found conditions chain " << chain->GetFirstBlock()->GetId() << "->" << chain->GetLastBlock()->GetId()
-            << ", succs: " << multiple_preds_succ->GetId() << ", " << single_pred_succ->GetId();
+            << ", succs: " << multiplePredsSucc->GetId() << ", " << singlePredSucc->GetId();
         if (!IsHoistable(chain)) {
             COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Skip not hoistable chain";
             continue;
         }
-        auto hoist_phi_available = IsHoistPhiAvailable(chain, multiple_preds_succ->GetPredsBlocks(), single_pred_succ);
-        if (!AllPhiAllowConditionChainHoisting(chain, multiple_preds_succ, hoist_phi_available)) {
+        auto hoistPhiAvailable = IsHoistPhiAvailable(chain, multiplePredsSucc->GetPredsBlocks(), singlePredSucc);
+        if (!AllPhiAllowConditionChainHoisting(chain, multiplePredsSucc, hoistPhiAvailable)) {
             COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Skip not all phi are suitable";
             continue;
         }
-        condition_chains_ctx_.emplace_back(chain, multiple_preds_succ, single_pred_succ, hoist_phi_available);
+        conditionChainsCtx_.emplace_back(chain, multiplePredsSucc, singlePredSucc, hoistPhiAvailable);
     }
-    std::sort(condition_chains_ctx_.begin(), condition_chains_ctx_.end(),
+    std::sort(conditionChainsCtx_.begin(), conditionChainsCtx_.end(),
               [](auto a, auto b) { return a.GetChain()->GetSize() > b.GetChain()->GetSize(); });
 }
 
 bool LicmConditions::IsHoistable(const ConditionChain *chain)
 {
     auto last = chain->GetEnd();
-    for (auto bb_it = chain->GetBegin(); bb_it != last; ++bb_it) {
-        auto bb = *bb_it;
-        auto last_inst = bb->GetLastInst();
-        if (last_inst->GetOpcode() != Opcode::IfImm) {
+    for (auto bbIt = chain->GetBegin(); bbIt != last; ++bbIt) {
+        auto bb = *bbIt;
+        auto lastInst = bb->GetLastInst();
+        if (lastInst->GetOpcode() != Opcode::IfImm) {
             return false;
         }
-        if (!last_inst->IsMarked(hoistable_inst_marker_)) {
+        if (!lastInst->IsMarked(hoistableInstMarker_)) {
             return false;
         }
     }
@@ -125,51 +125,51 @@ bool LicmConditions::AllInputsDominate(const Inst *inst, const Loop *loop)
 }
 
 bool LicmConditions::IsHoistPhiAvailable(const ConditionChain *chain, ArenaVector<BasicBlock *> &preds,
-                                         const BasicBlock *single_pred_succ)
+                                         const BasicBlock *singlePredSucc)
 {
     for (auto pred : preds) {
-        if (!chain->Contains(pred) && pred != single_pred_succ) {
+        if (!chain->Contains(pred) && pred != singlePredSucc) {
             return false;
         }
     }
     return true;
 }
 
-bool LicmConditions::AllPhiAllowConditionChainHoisting(const ConditionChain *chain,
-                                                       const BasicBlock *multiple_preds_succ, bool hoist_phi_available)
+bool LicmConditions::AllPhiAllowConditionChainHoisting(const ConditionChain *chain, const BasicBlock *multiplePredsSucc,
+                                                       bool hoistPhiAvailable)
 {
-    for (auto phi : multiple_preds_succ->PhiInsts()) {
-        if (hoist_phi_available && phi->IsMarked(hoistable_inst_marker_)) {
+    for (auto phi : multiplePredsSucc->PhiInsts()) {
+        if (hoistPhiAvailable && phi->IsMarked(hoistableInstMarker_)) {
             continue;
         }
-        auto same_input = SamePhiInputFromChain(phi, chain);
-        if (same_input == nullptr) {
+        auto sameInput = SamePhiInputFromChain(phi, chain);
+        if (sameInput == nullptr) {
             return false;
         }
-        same_phi_input_.insert({std::make_pair(chain, phi), same_input});
+        samePhiInput_.insert({std::make_pair(chain, phi), sameInput});
     }
     return true;
 }
 
 Inst *LicmConditions::SamePhiInputFromChain(Inst *phi, const ConditionChain *chain)
 {
-    Inst *saved_input = nullptr;
+    Inst *savedInput = nullptr;
     auto bb = phi->GetBasicBlock();
     for (auto pred : bb->GetPredsBlocks()) {
         if (!chain->Contains(pred)) {
             continue;
         }
-        auto pred_index = bb->GetPredBlockIndex(pred);
-        auto input = phi->GetInput(pred_index).GetInst();
-        if (saved_input == nullptr) {
-            saved_input = input;
-        } else if (saved_input != input) {
+        auto predIndex = bb->GetPredBlockIndex(pred);
+        auto input = phi->GetInput(predIndex).GetInst();
+        if (savedInput == nullptr) {
+            savedInput = input;
+        } else if (savedInput != input) {
             return nullptr;
         } else {
             continue;
         }
     }
-    return saved_input;
+    return savedInput;
 }
 
 /*
@@ -221,172 +221,172 @@ Inst *LicmConditions::SamePhiInputFromChain(Inst *phi, const ConditionChain *cha
  */
 void LicmConditions::HoistConditionChains(Loop *loop)
 {
-    auto append_bb = loop->GetPreHeader();
-    for (auto chain_ctx : condition_chains_ctx_) {
-        auto chain = chain_ctx.GetChain();
-        auto chain_first_block = chain->GetFirstBlock();
-        if (chain_first_block->IsMarked(processed_blocks_marker_)) {
+    auto appendBb = loop->GetPreHeader();
+    for (auto chainCtx : conditionChainsCtx_) {
+        auto chain = chainCtx.GetChain();
+        auto chainFirstBlock = chain->GetFirstBlock();
+        if (chainFirstBlock->IsMarked(processedBlocksMarker_)) {
             COMPILER_LOG(DEBUG, LICM_COND_OPT)
-                << "Skip chain with first block #" << chain_first_block->GetId() << ", longer chain was processed";
+                << "Skip chain with first block #" << chainFirstBlock->GetId() << ", longer chain was processed";
             continue;
         }
 
-        auto multiple_preds_succ = chain->GetMultiplePredecessorsSuccessor();
-        auto single_pred_succ = chain->GetSinglePredecessorSuccessor();
+        auto multiplePredsSucc = chain->GetMultiplePredecessorsSuccessor();
+        auto singlePredSucc = chain->GetSinglePredecessorSuccessor();
 
         COMPILER_LOG(DEBUG, LICM_COND_OPT)
-            << "Process conditions chain " << chain_first_block->GetId() << "->" << chain->GetLastBlock()->GetId()
-            << ", succs: " << multiple_preds_succ->GetId() << ", " << single_pred_succ->GetId();
+            << "Process conditions chain " << chainFirstBlock->GetId() << "->" << chain->GetLastBlock()->GetId()
+            << ", succs: " << multiplePredsSucc->GetId() << ", " << singlePredSucc->GetId();
 
         SaveProcessedBlocks(chain);
         SplitChainFirstBasicBlock(chain);
 
         // update chain successors because they can be changed during previous transformations
-        chain_ctx.SetMultiplePredecessorsSuccessor(multiple_preds_succ);
-        chain_ctx.SetSingleSPredecessorSuccessor(single_pred_succ);
+        chainCtx.SetMultiplePredecessorsSuccessor(multiplePredsSucc);
+        chainCtx.SetSingleSPredecessorSuccessor(singlePredSucc);
 
-        append_bb = ReplaceChainWithSingleBlock(append_bb, chain_ctx);
+        appendBb = ReplaceChainWithSingleBlock(appendBb, chainCtx);
 
-        is_applied_ = true;
+        isApplied_ = true;
     }
 }
 
 void LicmConditions::SaveProcessedBlocks(const ConditionChain *chain)
 {
     std::for_each(chain->GetBegin(), chain->GetEnd(),
-                  [this](BasicBlock *bb) { bb->SetMarker(processed_blocks_marker_); });
+                  [this](BasicBlock *bb) { bb->SetMarker(processedBlocksMarker_); });
 }
 
 void LicmConditions::SaveMulitplePredecessorsSuccessorPreds(const BasicBlock *bb)
 {
-    multiple_predecessors_successor_preds_.clear();
+    multiplePredecessorsSuccessorPreds_.clear();
     std::copy(bb->GetPredsBlocks().begin(), bb->GetPredsBlocks().end(),
-              std::back_inserter(multiple_predecessors_successor_preds_));
+              std::back_inserter(multiplePredecessorsSuccessorPreds_));
 }
 
 void LicmConditions::SplitChainFirstBasicBlock(ConditionChain *chain)
 {
-    auto chain_first_bb = chain->GetFirstBlock();
-    auto prelast_inst = chain_first_bb->GetLastInst()->GetPrev();
-    if (prelast_inst == nullptr) {
+    auto chainFirstBb = chain->GetFirstBlock();
+    auto prelastInst = chainFirstBb->GetLastInst()->GetPrev();
+    if (prelastInst == nullptr) {
         return;
     }
-    auto new_first_bb = chain_first_bb->SplitBlockAfterInstruction(prelast_inst, true);
-    chain->SetFirstBlock(new_first_bb);
-    COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Split first chain block " << chain_first_bb->GetId() << "->"
-                                       << new_first_bb->GetId();
+    auto newFirstBb = chainFirstBb->SplitBlockAfterInstruction(prelastInst, true);
+    chain->SetFirstBlock(newFirstBb);
+    COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Split first chain block " << chainFirstBb->GetId() << "->"
+                                       << newFirstBb->GetId();
 }
 
-BasicBlock *LicmConditions::ReplaceChainWithSingleBlock(BasicBlock *append_bb, const ConditionChainContext &chain_ctx)
+BasicBlock *LicmConditions::ReplaceChainWithSingleBlock(BasicBlock *appendBb, const ConditionChainContext &chainCtx)
 {
-    auto chain = chain_ctx.GetChain();
+    auto chain = chainCtx.GetChain();
     // try to find condition chain which is looking like this
-    auto cached_phi = condition_chains_cache_.FindPhi(chain);
-    auto multiple_preds_succ = chain_ctx.GetMultiplePredecessorsSuccessor();
-    auto single_pred_succ = chain_ctx.GetSinglePredecessorSuccessor();
-    SaveMulitplePredecessorsSuccessorPreds(multiple_preds_succ);
+    auto cachedPhi = conditionChainsCache_.FindPhi(chain);
+    auto multiplePredsSucc = chainCtx.GetMultiplePredecessorsSuccessor();
+    auto singlePredSucc = chainCtx.GetSinglePredecessorSuccessor();
+    SaveMulitplePredecessorsSuccessorPreds(multiplePredsSucc);
 
-    auto single_condition_block = GetGraph()->CreateEmptyBlock();
-    AdjustPredecessorEdges(chain->GetFirstBlock(), single_condition_block);
+    auto singleConditionBlock = GetGraph()->CreateEmptyBlock();
+    AdjustPredecessorEdges(chain->GetFirstBlock(), singleConditionBlock);
 
-    single_condition_block->AddSucc(multiple_preds_succ);
+    singleConditionBlock->AddSucc(multiplePredsSucc);
     // NOTE: multiple_preds_succ preds are not fixed
-    auto chain_last_block = chain->GetLastBlock();
-    single_pred_succ->ReplacePred(chain_last_block, single_condition_block);
+    auto chainLastBlock = chain->GetLastBlock();
+    singlePredSucc->ReplacePred(chainLastBlock, singleConditionBlock);
 
-    auto phi_block = GetGraph()->CreateEmptyBlock();
-    auto append_bb_succ = append_bb->GetSuccessor(0);
-    append_bb->ReplaceSucc(append_bb_succ, chain->GetFirstBlock());
-    append_bb_succ->ReplacePred(append_bb, phi_block);
+    auto phiBlock = GetGraph()->CreateEmptyBlock();
+    auto appendBbSucc = appendBb->GetSuccessor(0);
+    appendBb->ReplaceSucc(appendBbSucc, chain->GetFirstBlock());
+    appendBbSucc->ReplacePred(appendBb, phiBlock);
 
-    auto empty_block = GetGraph()->CreateEmptyBlock();
-    chain_last_block->ReplaceSucc(single_pred_succ, empty_block, true);
+    auto emptyBlock = GetGraph()->CreateEmptyBlock();
+    chainLastBlock->ReplaceSucc(singlePredSucc, emptyBlock, true);
 
-    UpdateMultiplePredecessorsSuccessorsPreds(chain_ctx, phi_block, empty_block);
-    UpdatePhis(chain, multiple_preds_succ, phi_block, chain_ctx.IsHoistPhiAvailable());
+    UpdateMultiplePredecessorsSuccessorsPreds(chainCtx, phiBlock, emptyBlock);
+    UpdatePhis(chain, multiplePredsSucc, phiBlock, chainCtx.IsHoistPhiAvailable());
 
-    Inst *phi_inst;
-    if (cached_phi != nullptr) {
-        phi_inst = cached_phi;
+    Inst *phiInst;
+    if (cachedPhi != nullptr) {
+        phiInst = cachedPhi;
     } else {
-        phi_inst = AddPhiInst(phi_block, chain);
-        condition_chains_cache_.Insert(chain, phi_inst);
+        phiInst = AddPhiInst(phiBlock, chain);
+        conditionChainsCache_.Insert(chain, phiInst);
     }
-    AddSingleIfImmInst(single_condition_block, chain, phi_inst);
-    return phi_block;
+    AddSingleIfImmInst(singleConditionBlock, chain, phiInst);
+    return phiBlock;
 }
 
 PhiInst *LicmConditions::AddPhiInst(BasicBlock *bb, const ConditionChain *chain)
 {
     auto graph = bb->GetGraph();
-    auto one_cnst = graph->FindOrCreateConstant(1);
-    auto zero_cnst = graph->FindOrCreateConstant(0);
-    auto phi_inst = graph->CreateInstPhi(DataType::BOOL, INVALID_PC);
-    bb->AppendPhi(phi_inst);
+    auto oneCnst = graph->FindOrCreateConstant(1);
+    auto zeroCnst = graph->FindOrCreateConstant(0);
+    auto phiInst = graph->CreateInstPhi(DataType::BOOL, INVALID_PC);
+    bb->AppendPhi(phiInst);
     for (auto pred : bb->GetPredsBlocks()) {
-        phi_inst->AppendInput(chain->Contains(pred) ? one_cnst : zero_cnst);
+        phiInst->AppendInput(chain->Contains(pred) ? oneCnst : zeroCnst);
     }
-    return phi_inst;
+    return phiInst;
 }
 
 void LicmConditions::AddSingleIfImmInst(BasicBlock *bb, const ConditionChain *chain, Inst *input)
 {
-    auto orig_if_inst = chain->GetLastBlock()->GetLastInst()->CastToIfImm();
-    auto if_inst = bb->GetGraph()->CreateInstIfImm(DataType::NO_TYPE, 0, input, 0, DataType::BOOL, ConditionCode::CC_NE,
-                                                   orig_if_inst->GetMethod());
-    bb->AppendInst(if_inst);
+    auto origIfInst = chain->GetLastBlock()->GetLastInst()->CastToIfImm();
+    auto ifInst = bb->GetGraph()->CreateInstIfImm(DataType::NO_TYPE, 0, input, 0, DataType::BOOL, ConditionCode::CC_NE,
+                                                  origIfInst->GetMethod());
+    bb->AppendInst(ifInst);
 }
 
-void LicmConditions::AdjustPredecessorEdges(BasicBlock *chain_first_bb, BasicBlock *bb)
+void LicmConditions::AdjustPredecessorEdges(BasicBlock *chainFirstBb, BasicBlock *bb)
 {
-    for (auto pred : chain_first_bb->GetPredsBlocks()) {
-        pred->ReplaceSucc(chain_first_bb, bb);
+    for (auto pred : chainFirstBb->GetPredsBlocks()) {
+        pred->ReplaceSucc(chainFirstBb, bb);
     }
-    chain_first_bb->GetPredsBlocks().clear();
+    chainFirstBb->GetPredsBlocks().clear();
 }
 
-void LicmConditions::UpdateMultiplePredecessorsSuccessorsPreds(const ConditionChainContext &chain_ctx,
-                                                               BasicBlock *phi_block, BasicBlock *empty_block)
+void LicmConditions::UpdateMultiplePredecessorsSuccessorsPreds(const ConditionChainContext &chainCtx,
+                                                               BasicBlock *phiBlock, BasicBlock *emptyBlock)
 {
-    auto chain = chain_ctx.GetChain();
-    auto multiple_preds_succ = chain_ctx.GetMultiplePredecessorsSuccessor();
-    auto single_pred_succ = chain_ctx.GetSinglePredecessorSuccessor();
-    multiple_predecessors_successor_removed_pred_indices_.clear();
+    auto chain = chainCtx.GetChain();
+    auto multiplePredsSucc = chainCtx.GetMultiplePredecessorsSuccessor();
+    auto singlePredSucc = chainCtx.GetSinglePredecessorSuccessor();
+    multiplePredecessorsSuccessorRemovedPredIndices_.clear();
     // keep predecessors order in phi_block
-    for (auto bb : multiple_predecessors_successor_preds_) {
+    for (auto bb : multiplePredecessorsSuccessorPreds_) {
         if (chain->Contains(bb)) {
             COMPILER_LOG(DEBUG, LICM_COND_OPT)
-                << "Update chain block " << bb->GetId() << " successor: " << multiple_preds_succ->GetId() << "->"
-                << phi_block->GetId();
-            bb->ReplaceSucc(multiple_preds_succ, phi_block, true);
-            auto pred_index = multiple_preds_succ->GetPredBlockIndex(bb);
-            multiple_preds_succ->RemovePred(pred_index);
-            multiple_predecessors_successor_removed_pred_indices_.push_back(pred_index);
-        } else if (bb == single_pred_succ) {
+                << "Update chain block " << bb->GetId() << " successor: " << multiplePredsSucc->GetId() << "->"
+                << phiBlock->GetId();
+            bb->ReplaceSucc(multiplePredsSucc, phiBlock, true);
+            auto predIndex = multiplePredsSucc->GetPredBlockIndex(bb);
+            multiplePredsSucc->RemovePred(predIndex);
+            multiplePredecessorsSuccessorRemovedPredIndices_.push_back(predIndex);
+        } else if (bb == singlePredSucc) {
             COMPILER_LOG(DEBUG, LICM_COND_OPT)
                 << "Add new edge to phi_block corresponding to edge between chain successors";
-            empty_block->AddSucc(phi_block, true);
+            emptyBlock->AddSucc(phiBlock, true);
         } else {
             COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Skip predecessor " << bb->GetId();
         }
     }
-    if (empty_block->GetSuccsBlocks().empty()) {
+    if (emptyBlock->GetSuccsBlocks().empty()) {
         COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Add last edge to phi_block";
-        empty_block->AddSucc(phi_block, true);
+        emptyBlock->AddSucc(phiBlock, true);
     }
 }
 
-void LicmConditions::UpdatePhis(const ConditionChain *chain, BasicBlock *multiple_preds_succ, BasicBlock *phi_block,
-                                bool hoist_phi_available)
+void LicmConditions::UpdatePhis(const ConditionChain *chain, BasicBlock *multiplePredsSucc, BasicBlock *phiBlock,
+                                bool hoistPhiAvailable)
 {
-    for (auto phi : multiple_preds_succ->PhiInstsSafe()) {
-        if (hoist_phi_available && phi->IsMarked(hoistable_inst_marker_)) {
+    for (auto phi : multiplePredsSucc->PhiInstsSafe()) {
+        if (hoistPhiAvailable && phi->IsMarked(hoistableInstMarker_)) {
             COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Hoist phi " << phi->GetId();
-            multiple_preds_succ->EraseInst(phi);
+            multiplePredsSucc->EraseInst(phi);
             // preds order was preserved
-            phi_block->AppendPhi(phi);
-            if (phi->GetInputsCount() >= phi_block->GetPredsBlocks().size()) {
-                ASSERT(phi->GetInputsCount() == phi_block->GetPredsBlocks().size());
+            phiBlock->AppendPhi(phi);
+            if (phi->GetInputsCount() >= phiBlock->GetPredsBlocks().size()) {
+                ASSERT(phi->GetInputsCount() == phiBlock->GetPredsBlocks().size());
                 continue;
             }
             COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Add dummy input";
@@ -395,13 +395,13 @@ void LicmConditions::UpdatePhis(const ConditionChain *chain, BasicBlock *multipl
             } else {
                 phi->AppendInput(GetGraph()->FindOrCreateConstant(0));
             }
-            ASSERT(phi->GetInputsCount() == phi_block->GetPredsBlocks().size());
+            ASSERT(phi->GetInputsCount() == phiBlock->GetPredsBlocks().size());
         } else {
             COMPILER_LOG(DEBUG, LICM_COND_OPT) << "Update inputs for phi " << phi->GetId();
             auto key = std::make_pair(chain, phi);
-            ASSERT(same_phi_input_.count(key) != 0);
-            phi->AppendInput(same_phi_input_[key]);
-            for (size_t i : multiple_predecessors_successor_removed_pred_indices_) {
+            ASSERT(samePhiInput_.count(key) != 0);
+            phi->AppendInput(samePhiInput_[key]);
+            for (size_t i : multiplePredecessorsSuccessorRemovedPredIndices_) {
                 phi->RemoveInput(i);
             }
         }

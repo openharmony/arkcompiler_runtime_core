@@ -85,7 +85,7 @@ public:
     using StackMap = compiler::StackMap;
 
 public:
-    explicit CFrame(void *frame_data) : fp_(reinterpret_cast<SlotType *>(frame_data)) {}
+    explicit CFrame(void *frameData) : fp_(reinterpret_cast<SlotType *>(frameData)) {}
     ~CFrame() = default;
 
     DEFAULT_COPY_SEMANTIC(CFrame);
@@ -135,9 +135,9 @@ public:
         return *GetPtr<SlotType *>(CFrameLayout::PrevFrameSlot::Start());
     }
 
-    void SetPrevFrame(void *prev_frame)
+    void SetPrevFrame(void *prevFrame)
     {
-        *GetPtr<SlotType>(CFrameLayout::PrevFrameSlot::Start()) = bit_cast<SlotType>(prev_frame);
+        *GetPtr<SlotType>(CFrameLayout::PrevFrameSlot::Start()) = bit_cast<SlotType>(prevFrame);
     }
 
     Method *GetMethod()
@@ -171,10 +171,10 @@ public:
     }
 
     template <typename RegRef>
-    inline void GetVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &code_info, SlotType **callee_stack,
+    inline void GetVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &codeInfo, SlotType **calleeStack,
                              RegRef &&reg)
     {
-        auto val = GetVRegValue<false>(vreg, code_info, callee_stack).GetValue();
+        auto val = GetVRegValue<false>(vreg, codeInfo, calleeStack).GetValue();
         if (vreg.IsObject()) {
             reg.SetReference(reinterpret_cast<ObjectHeader *>(static_cast<ObjectPointerType>(val)));
         } else {
@@ -183,15 +183,15 @@ public:
     }
 
     template <typename RegRef>
-    inline void GetPackVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &code_info, SlotType **callee_stack,
+    inline void GetPackVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &codeInfo, SlotType **calleeStack,
                                  RegRef &&reg)
     {
-        auto val = GetVRegValue<true>(vreg, code_info, callee_stack).GetValue();
+        auto val = GetVRegValue<true>(vreg, codeInfo, calleeStack).GetValue();
         reg.SetPrimitive(val);
     }
 
     template <bool NEED_PACK = false>
-    void SetVRegValue(const VRegInfo &vreg, uint64_t value, SlotType **callee_stack);
+    void SetVRegValue(const VRegInfo &vreg, uint64_t value, SlotType **calleeStack);
 
     uintptr_t GetLr() const
     {
@@ -264,43 +264,43 @@ public:
         *(reinterpret_cast<SlotType *>(GetStackOrigin()) - slot) = value;
     }
 
-    void Dump(const CodeInfo &code_info, std::ostream &os);
+    void Dump(const CodeInfo &codeInfo, std::ostream &os);
 
-    void Dump(std::ostream &os, uint32_t max_slot = 0);
+    void Dump(std::ostream &os, uint32_t maxSlot = 0);
 
     template <bool NEED_PACK>
-    PANDA_PUBLIC_API interpreter::VRegister GetVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &code_info,
-                                                         SlotType **callee_stack) const;
+    PANDA_PUBLIC_API interpreter::VRegister GetVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &codeInfo,
+                                                         SlotType **calleeStack) const;
 
 private:
-    SlotType ReadCalleeSavedRegister(size_t reg, bool is_fp, SlotType **callee_stack) const
+    SlotType ReadCalleeSavedRegister(size_t reg, bool isFp, SlotType **calleeStack) const
     {
-        ASSERT(reg >= GetFirstCalleeReg(ARCH, is_fp));
-        ASSERT(reg <= GetLastCalleeReg(ARCH, is_fp));
-        ASSERT(GetCalleeRegsCount(ARCH, is_fp) != 0);
-        size_t start_slot = GetCalleeRegsMask(ARCH, is_fp).GetDistanceFromTail(reg);
-        if (is_fp) {
-            start_slot += GetCalleeRegsCount(ARCH, false);
+        ASSERT(reg >= GetFirstCalleeReg(ARCH, isFp));
+        ASSERT(reg <= GetLastCalleeReg(ARCH, isFp));
+        ASSERT(GetCalleeRegsCount(ARCH, isFp) != 0);
+        size_t startSlot = GetCalleeRegsMask(ARCH, isFp).GetDistanceFromTail(reg);
+        if (isFp) {
+            startSlot += GetCalleeRegsCount(ARCH, false);
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        ASSERT(callee_stack[start_slot] != nullptr);
+        ASSERT(calleeStack[startSlot] != nullptr);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return *callee_stack[start_slot];
+        return *calleeStack[startSlot];
     }
 
-    void WriteCalleeSavedRegister(size_t reg, SlotType value, bool is_fp, SlotType **callee_stack) const
+    void WriteCalleeSavedRegister(size_t reg, SlotType value, bool isFp, SlotType **calleeStack) const
     {
-        ASSERT(reg >= GetFirstCalleeReg(ARCH, is_fp));
-        ASSERT(reg <= GetLastCalleeReg(ARCH, is_fp));
-        ASSERT(GetCalleeRegsCount(ARCH, is_fp) != 0);
-        size_t start_slot = reg - GetFirstCalleeReg(ARCH, is_fp);
-        if (is_fp) {
-            start_slot += GetCalleeRegsCount(ARCH, false);
+        ASSERT(reg >= GetFirstCalleeReg(ARCH, isFp));
+        ASSERT(reg <= GetLastCalleeReg(ARCH, isFp));
+        ASSERT(GetCalleeRegsCount(ARCH, isFp) != 0);
+        size_t startSlot = reg - GetFirstCalleeReg(ARCH, isFp);
+        if (isFp) {
+            startSlot += GetCalleeRegsCount(ARCH, false);
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        ASSERT(callee_stack[start_slot] != nullptr);
+        ASSERT(calleeStack[startSlot] != nullptr);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        *callee_stack[start_slot] = value;
+        *calleeStack[startSlot] = value;
     }
 
     template <typename T>
@@ -319,18 +319,18 @@ private:
     template <bool NEED_PACK>
     interpreter::VRegister GetVRegValueSlot(const VRegInfo &vreg) const;
     template <bool NEED_PACK>
-    interpreter::VRegister GetVRegValueRegister(const VRegInfo &vreg, SlotType **callee_stack) const;
+    interpreter::VRegister GetVRegValueRegister(const VRegInfo &vreg, SlotType **calleeStack) const;
     template <bool NEED_PACK>
-    interpreter::VRegister GetVRegValueConstant(const VRegInfo &vreg, const compiler::CodeInfo &code_info) const;
+    interpreter::VRegister GetVRegValueConstant(const VRegInfo &vreg, const compiler::CodeInfo &codeInfo) const;
 
     uint64_t GetPackValue(VRegInfo::Type type, uint64_t val) const;
 
     using MemPrinter = void (*)(std::ostream &, void *, std::string_view, uintptr_t);
-    void DumpCalleeRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot);
-    void DumpCalleeFPRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot);
-    void DumpCallerRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot);
-    void DumpCallerFPRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot);
-    void DumpLocals(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot, int32_t max_slot);
+    void DumpCalleeRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot);
+    void DumpCalleeFPRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot);
+    void DumpCallerRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot);
+    void DumpCallerFPRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot);
+    void DumpLocals(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot, int32_t maxSlot);
 
 private:
     SlotType *fp_ {nullptr};

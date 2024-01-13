@@ -63,18 +63,18 @@ class Allocator;
 class MemoryManager {
 public:
     struct HeapOptions {
-        HeapManager::IsObjectFinalizebleFunc is_object_finalizeble_func;
-        HeapManager::RegisterFinalizeReferenceFunc register_finalize_reference_func;
-        uint32_t max_global_ref_size;
-        bool is_global_reference_size_check_enabled;
-        bool is_single_thread;
-        bool is_use_tlab_for_allocations;
-        bool is_start_as_zygote;
+        HeapManager::IsObjectFinalizebleFunc isObjectFinalizebleFunc;
+        HeapManager::RegisterFinalizeReferenceFunc registerFinalizeReferenceFunc;
+        uint32_t maxGlobalRefSize;
+        bool isGlobalReferenceSizeCheckEnabled;
+        bool isSingleThread;
+        bool isUseTlabForAllocations;
+        bool isStartAsZygote;
     };
 
-    static MemoryManager *Create(const LanguageContext &ctx, InternalAllocatorPtr internal_allocator, GCType gc_type,
-                                 const GCSettings &gc_settings, const GCTriggerConfig &gc_trigger_config,
-                                 const HeapOptions &heap_options);
+    static MemoryManager *Create(const LanguageContext &ctx, InternalAllocatorPtr internalAllocator, GCType gcType,
+                                 const GCSettings &gcSettings, const GCTriggerConfig &gcTriggerConfig,
+                                 const HeapOptions &heapOptions);
     static void Destroy(MemoryManager *mm);
 
     NO_COPY_SEMANTIC(MemoryManager);
@@ -91,8 +91,8 @@ public:
 
     HeapManager *GetHeapManager()
     {
-        ASSERT(heap_manager_ != nullptr);
-        return heap_manager_;
+        ASSERT(heapManager_ != nullptr);
+        return heapManager_;
     }
 
     GC *GetGC() const
@@ -103,50 +103,50 @@ public:
 
     GCTrigger *GetGCTrigger()
     {
-        ASSERT(gc_trigger_ != nullptr);
-        return gc_trigger_;
+        ASSERT(gcTrigger_ != nullptr);
+        return gcTrigger_;
     }
 
     GCStats *GetGCStats()
     {
-        ASSERT(gc_stats_ != nullptr);
-        return gc_stats_;
+        ASSERT(gcStats_ != nullptr);
+        return gcStats_;
     }
 
     GlobalObjectStorage *GetGlobalObjectStorage() const
     {
-        ASSERT(global_object_storage_ != nullptr);
-        return global_object_storage_;
+        ASSERT(globalObjectStorage_ != nullptr);
+        return globalObjectStorage_;
     }
 
     MemStatsType *GetMemStats()
     {
-        ASSERT(mem_stats_ != nullptr);
-        return mem_stats_;
+        ASSERT(memStats_ != nullptr);
+        return memStats_;
     }
 
 private:
-    explicit MemoryManager(InternalAllocatorPtr internal_allocator, HeapManager *heap_manager, GC *gc,
-                           GCTrigger *gc_trigger, GCStats *gc_stats, MemStatsType *mem_stats,
-                           GlobalObjectStorage *global_object_storage)
-        : internal_allocator_(internal_allocator),
-          heap_manager_(heap_manager),
+    explicit MemoryManager(InternalAllocatorPtr internalAllocator, HeapManager *heapManager, GC *gc,
+                           GCTrigger *gcTrigger, GCStats *gcStats, MemStatsType *memStats,
+                           GlobalObjectStorage *globalObjectStorage)
+        : internalAllocator_(internalAllocator),
+          heapManager_(heapManager),
           gc_(gc),
-          gc_trigger_(gc_trigger),
-          gc_stats_(gc_stats),
-          global_object_storage_(global_object_storage),
-          mem_stats_(mem_stats)
+          gcTrigger_(gcTrigger),
+          gcStats_(gcStats),
+          globalObjectStorage_(globalObjectStorage),
+          memStats_(memStats)
     {
     }
     ~MemoryManager();
 
-    InternalAllocatorPtr internal_allocator_;
-    HeapManager *heap_manager_;
+    InternalAllocatorPtr internalAllocator_;
+    HeapManager *heapManager_;
     GC *gc_;
-    GCTrigger *gc_trigger_;
-    GCStats *gc_stats_;
-    GlobalObjectStorage *global_object_storage_;
-    MemStatsType *mem_stats_;
+    GCTrigger *gcTrigger_;
+    GCStats *gcStats_;
+    GlobalObjectStorage *globalObjectStorage_;
+    MemStatsType *memStats_;
 
     friend class mem::Allocator;
 };

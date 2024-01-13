@@ -23,14 +23,14 @@ DefaultDebuggerAgent::DefaultDebuggerAgent(os::memory::Mutex &mutex)
 
 bool DefaultDebuggerAgent::Load()
 {
-    debug_session_ = Runtime::GetCurrent()->StartDebugSession();
-    if (!debug_session_) {
+    debugSession_ = Runtime::GetCurrent()->StartDebugSession();
+    if (!debugSession_) {
         LOG(ERROR, RUNTIME) << "Could not start debug session";
         return false;
     }
 
     if (!LibraryAgent::Load()) {
-        debug_session_.reset();
+        debugSession_.reset();
         return false;
     }
 
@@ -40,19 +40,19 @@ bool DefaultDebuggerAgent::Load()
 bool DefaultDebuggerAgent::Unload()
 {
     auto result = LibraryAgent::Unload();
-    debug_session_.reset();
+    debugSession_.reset();
     return result;
 }
 
-bool DefaultDebuggerAgent::CallLoadCallback(void *resolved_function)
+bool DefaultDebuggerAgent::CallLoadCallback(void *resolvedFunction)
 {
-    ASSERT(resolved_function);
-    ASSERT(debug_session_);
+    ASSERT(resolvedFunction);
+    ASSERT(debugSession_);
 
     using StartDebuggerT = int (*)(uint32_t, bool);
     uint32_t port = Runtime::GetOptions().GetDebuggerPort();
-    bool break_on_start = Runtime::GetOptions().IsDebuggerBreakOnStart();
-    int res = reinterpret_cast<StartDebuggerT>(resolved_function)(port, break_on_start);
+    bool breakOnStart = Runtime::GetOptions().IsDebuggerBreakOnStart();
+    int res = reinterpret_cast<StartDebuggerT>(resolvedFunction)(port, breakOnStart);
     if (res != 0) {
         LOG(ERROR, RUNTIME) << "'StartDebugger' has failed with " << res;
         return false;
@@ -61,12 +61,12 @@ bool DefaultDebuggerAgent::CallLoadCallback(void *resolved_function)
     return true;
 }
 
-bool DefaultDebuggerAgent::CallUnloadCallback(void *resolved_function)
+bool DefaultDebuggerAgent::CallUnloadCallback(void *resolvedFunction)
 {
-    ASSERT(resolved_function);
+    ASSERT(resolvedFunction);
 
     using StopDebugger = int (*)();
-    int res = reinterpret_cast<StopDebugger>(resolved_function)();
+    int res = reinterpret_cast<StopDebugger>(resolvedFunction)();
     if (res != 0) {
         LOG(ERROR, RUNTIME) << "'StopDebugger' has failed with " << res;
         return false;

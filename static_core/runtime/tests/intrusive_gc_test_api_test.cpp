@@ -61,8 +61,8 @@ TEST_P(IntrusiveGCTestApiTest, TestMarkQueue)
     PandaVM *vm = Runtime::GetCurrent()->GetPandaVM();
     GC *gc = vm->GetGC();
     ScopedManagedCodeThread s(thread);
-    ObjectAllocator object_allocator;
-    ObjectHeader *object = object_allocator.AllocObjectInYoung();
+    ObjectAllocator objectAllocator;
+    ObjectHeader *object = objectAllocator.AllocObjectInYoung();
     vm->MarkObject(object);
     size_t count = 0;
     bool found = false;
@@ -76,14 +76,14 @@ TEST_P(IntrusiveGCTestApiTest, TestMarkQueue)
     ASSERT_TRUE(found);
 
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<ObjectHeader> obj_handle(thread, object);
+    VMHandle<ObjectHeader> objHandle(thread, object);
     {
         ScopedNativeCodeThread sn(thread);
         GCTask task(GCTaskCause::YOUNG_GC_CAUSE);
         task.Run(*gc);
     }
 
-    object = obj_handle.GetPtr();  // GC may move the object
+    object = objHandle.GetPtr();  // GC may move the object
     found = false;
     vm->IterateOverMarkQueue([&found, object](ObjectHeader *obj) {
         if (object == obj) {

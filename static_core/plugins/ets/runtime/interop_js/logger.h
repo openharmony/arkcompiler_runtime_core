@@ -36,10 +36,10 @@
 
 inline std::string EtsLogMakeString(const char *fmt, ...)
 {
-    va_list ap;       // NOLINT(cppcoreguidelines-pro-type-vararg)
-    va_list ap_copy;  // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_list ap;      // NOLINT(cppcoreguidelines-pro-type-vararg)
+    va_list apCopy;  // NOLINT(cppcoreguidelines-pro-type-vararg)
     va_start(ap, fmt);
-    va_copy(ap_copy, ap);
+    va_copy(apCopy, ap);
 
     int len = vsnprintf(nullptr, 0, fmt, ap);
     if (len < 0) {
@@ -49,17 +49,17 @@ inline std::string EtsLogMakeString(const char *fmt, ...)
 
     std::string res;
     res.resize(static_cast<size_t>(len));
-    vsnprintf(res.data(), len + 1, fmt, ap_copy);
+    vsnprintf(res.data(), len + 1, fmt, apCopy);
 
-    va_end(ap_copy);
+    va_end(apCopy);
     va_end(ap);
     return res;
 }
 
-#define TS2ETS_LOGGER(level, ...)                                      \
-    do {                                                               \
-        std::string msg_ts2ets_logger = EtsLogMakeString(__VA_ARGS__); \
-        LOG(level, ETS) << "interop_js: " << msg_ts2ets_logger;        \
+#define TS2ETS_LOGGER(level, ...)                                    \
+    do {                                                             \
+        std::string msgTs2etsLogger = EtsLogMakeString(__VA_ARGS__); \
+        LOG(level, ETS) << "interop_js: " << msgTs2etsLogger;        \
     } while (0)
 
 #define INTEROP_LOG_DEBUG(msg) TS2ETS_LOGGER(DEBUG, msg)

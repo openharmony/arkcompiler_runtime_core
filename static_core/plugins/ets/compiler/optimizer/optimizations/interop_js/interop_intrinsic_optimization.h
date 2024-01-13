@@ -29,16 +29,16 @@ class InteropIntrinsicOptimization : public Optimization, public GraphVisitor {
     using Optimization::Optimization;
 
 public:
-    explicit InteropIntrinsicOptimization(Graph *graph, bool try_single_scope = false)
+    explicit InteropIntrinsicOptimization(Graph *graph, bool trySingleScope = false)
         : Optimization(graph),
-          try_single_scope_(try_single_scope),
-          scope_object_limit_(OPTIONS.GetCompilerInteropScopeObjectLimit()),
-          forbidden_loops_(GetGraph()->GetLocalAllocator()->Adapter()),
-          block_info_(GetGraph()->GetVectorBlocks().size(), GetGraph()->GetLocalAllocator()->Adapter()),
+          trySingleScope_(trySingleScope),
+          scopeObjectLimit_(g_options.GetCompilerInteropScopeObjectLimit()),
+          forbiddenLoops_(GetGraph()->GetLocalAllocator()->Adapter()),
+          blockInfo_(GetGraph()->GetVectorBlocks().size(), GetGraph()->GetLocalAllocator()->Adapter()),
           components_(GetGraph()->GetLocalAllocator()->Adapter()),
-          current_component_blocks_(GetGraph()->GetLocalAllocator()->Adapter()),
-          scope_for_inst_(GetGraph()->GetLocalAllocator()->Adapter()),
-          blocks_to_process_(GetGraph()->GetLocalAllocator()->Adapter())
+          currentComponentBlocks_(GetGraph()->GetLocalAllocator()->Adapter()),
+          scopeForInst_(GetGraph()->GetLocalAllocator()->Adapter()),
+          blocksToProcess_(GetGraph()->GetLocalAllocator()->Adapter())
     {
     }
 
@@ -50,7 +50,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerEnableFastInterop() && OPTIONS.IsCompilerInteropIntrinsicOptimization();
+        return g_options.IsCompilerEnableFastInterop() && g_options.IsCompilerInteropIntrinsicOptimization();
     }
 
     const char *GetPassName() const override
@@ -60,7 +60,7 @@ public:
 
     bool IsApplied() const
     {
-        return is_applied_;
+        return isApplied_;
     }
 
     const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override
@@ -72,33 +72,33 @@ public:
 
 private:
     struct BlockInfo {
-        Inst *last_scope_start {};
-        int32_t dfs_num_in {DFS_NOT_VISITED};
-        int32_t dfs_num_out {DFS_NOT_VISITED};
-        int32_t dom_tree_in {DFS_NOT_VISITED};
-        int32_t dom_tree_out {DFS_NOT_VISITED};
-        int32_t subgraph_min_num {DFS_NOT_VISITED};
-        int32_t subgraph_max_num {DFS_NOT_VISITED};
-        std::array<int32_t, 2U> block_component {DFS_NOT_VISITED, DFS_NOT_VISITED};
-        int32_t max_chain {};
-        int32_t max_depth {};
+        Inst *lastScopeStart {};
+        int32_t dfsNumIn {DFS_NOT_VISITED};
+        int32_t dfsNumOut {DFS_NOT_VISITED};
+        int32_t domTreeIn {DFS_NOT_VISITED};
+        int32_t domTreeOut {DFS_NOT_VISITED};
+        int32_t subgraphMinNum {DFS_NOT_VISITED};
+        int32_t subgraphMaxNum {DFS_NOT_VISITED};
+        std::array<int32_t, 2U> blockComponent {DFS_NOT_VISITED, DFS_NOT_VISITED};
+        int32_t maxChain {};
+        int32_t maxDepth {};
     };
 
     struct Component {
         int32_t parent {-1};
-        uint32_t object_count {};
-        uint32_t last_used {};
-        bool is_forbidden {};
+        uint32_t objectCount {};
+        uint32_t lastUsed {};
+        bool isForbidden {};
     };
 
     // Mechanism is similar to markers
-    uint32_t GetObjectCountIfUnused(Component &comp, uint32_t used_number)
+    uint32_t GetObjectCountIfUnused(Component &comp, uint32_t usedNumber)
     {
-        if (comp.last_used == used_number + 1) {
+        if (comp.lastUsed == usedNumber + 1) {
             return 0;
         }
-        comp.last_used = used_number + 1;
-        return comp.object_count;
+        comp.lastUsed = usedNumber + 1;
+        return comp.objectCount;
     }
 
     BlockInfo &GetInfo(BasicBlock *block);
@@ -109,8 +109,8 @@ private:
     bool IsForbiddenLoopEntry(BasicBlock *block);
     int32_t GetParentComponent(int32_t component);
     void MergeComponents(int32_t first, int32_t second);
-    void UpdateStatsForMerging(Inst *inst, int32_t other_end_component, uint32_t *scope_switches,
-                               uint32_t *objects_in_block_after_merge);
+    void UpdateStatsForMerging(Inst *inst, int32_t otherEndComponent, uint32_t *scopeSwitches,
+                               uint32_t *objectsInBlockAfterMerge);
     template <bool IS_END>
     void IterateBlockFromBoundary(BasicBlock *block);
     template <bool IS_END>
@@ -125,11 +125,11 @@ private:
     template <void (InteropIntrinsicOptimization::*DFS)(BasicBlock *)>
     void DoDfs();
     bool CreateScopeStartInBlock(BasicBlock *block);
-    void RemoveReachableScopeStarts(BasicBlock *block, BasicBlock *new_start_block);
+    void RemoveReachableScopeStarts(BasicBlock *block, BasicBlock *newStartBlock);
     void HoistScopeStarts();
 
     void InvalidateScopesInSubgraph(BasicBlock *block);
-    void CheckGraphRec(BasicBlock *block, Inst *scope_start);
+    void CheckGraphRec(BasicBlock *block, Inst *scopeStart);
     void CheckGraphAndFindScopes();
 
     void MarkRequireRegMap(Inst *inst);
@@ -139,15 +139,15 @@ private:
     void EliminateCastPairs();
 
     void DomTreeDfs(BasicBlock *block);
-    void MarkPartiallyAnticipated(BasicBlock *block, BasicBlock *stop_block);
+    void MarkPartiallyAnticipated(BasicBlock *block, BasicBlock *stopBlock);
     void CalculateDownSafe(BasicBlock *block);
-    void ReplaceInst(Inst *inst, Inst **new_inst, Inst *insert_after);
+    void ReplaceInst(Inst *inst, Inst **newInst, Inst *insertAfter);
     bool CanHoistTo(BasicBlock *block);
-    void HoistAndEliminateRec(BasicBlock *block, const BlockInfo &start_info, Inst **new_inst, Inst *insert_after);
+    void HoistAndEliminateRec(BasicBlock *block, const BlockInfo &startInfo, Inst **newInst, Inst *insertAfter);
     Inst *FindEliminationCandidate(BasicBlock *block);
-    void HoistAndEliminate(BasicBlock *start_block, Inst *boundary_inst);
-    void DoRedundancyElimination(Inst *input, Inst *scope_start, InstVector &insts);
-    void SaveSiblingForElimination(Inst *sibling, ArenaMap<Inst *, InstVector> &current_insts,
+    void HoistAndEliminate(BasicBlock *startBlock, Inst *boundaryInst);
+    void DoRedundancyElimination(Inst *input, Inst *scopeStart, InstVector &insts);
+    void SaveSiblingForElimination(Inst *sibling, ArenaMap<Inst *, InstVector> &currentInsts,
                                    RuntimeInterface::IntrinsicId id, Marker processed);
     void RedundancyElimination();
 
@@ -156,29 +156,29 @@ private:
     static constexpr int32_t DFS_NOT_VISITED = -1;
     static constexpr int32_t DFS_INVALIDATED = -2;
 
-    bool try_single_scope_;
-    uint32_t scope_object_limit_;
-    Marker start_dfs_ {};
-    Marker can_hoist_to_ {};
+    bool trySingleScope_;
+    uint32_t scopeObjectLimit_;
+    Marker startDfs_ {};
+    Marker canHoistTo_ {};
     Marker visited_ {};
-    Marker inst_anticipated_ {};
-    Marker scope_start_invalidated_ {};
-    Marker elimination_candidate_ {};
-    Marker require_reg_map_ {};
-    bool has_scopes_ {false};
-    bool is_applied_ {false};
-    int32_t dfs_num_ {};
-    int32_t dom_tree_num_ {};
-    int32_t current_component_ {};
-    uint32_t objects_in_scope_after_merge_ {};
-    bool can_merge_ {};
-    bool object_limit_hit_ {false};
-    ArenaUnorderedSet<Loop *> forbidden_loops_;
-    ArenaVector<BlockInfo> block_info_;
+    Marker instAnticipated_ {};
+    Marker scopeStartInvalidated_ {};
+    Marker eliminationCandidate_ {};
+    Marker requireRegMap_ {};
+    bool hasScopes_ {false};
+    bool isApplied_ {false};
+    int32_t dfsNum_ {};
+    int32_t domTreeNum_ {};
+    int32_t currentComponent_ {};
+    uint32_t objectsInScopeAfterMerge_ {};
+    bool canMerge_ {};
+    bool objectLimitHit_ {false};
+    ArenaUnorderedSet<Loop *> forbiddenLoops_;
+    ArenaVector<BlockInfo> blockInfo_;
     ArenaVector<Component> components_;
-    ArenaVector<BasicBlock *> current_component_blocks_;
-    ArenaUnorderedMap<Inst *, Inst *> scope_for_inst_;
-    ArenaVector<BasicBlock *> blocks_to_process_;
+    ArenaVector<BasicBlock *> currentComponentBlocks_;
+    ArenaUnorderedMap<Inst *, Inst *> scopeForInst_;
+    ArenaVector<BasicBlock *> blocksToProcess_;
     SaveStateBridgesBuilder ssb_;
 };
 }  // namespace panda::compiler

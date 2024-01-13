@@ -36,7 +36,7 @@ public:
     template <class Callback>
     void EnumerateMonitors(const Callback &cb)
     {
-        os::memory::LockHolder lock(pool_lock_);
+        os::memory::LockHolder lock(poolLock_);
         for (auto &iter : monitors_) {
             if (!cb(iter.second)) {
                 break;
@@ -47,21 +47,21 @@ public:
     template <class Callback>
     void DeflateMonitorsWithCallBack(const Callback &cb)
     {
-        os::memory::LockHolder lock(pool_lock_);
-        for (auto monitor_iter = monitors_.begin(); monitor_iter != monitors_.end();) {
-            auto monitor = monitor_iter->second;
+        os::memory::LockHolder lock(poolLock_);
+        for (auto monitorIter = monitors_.begin(); monitorIter != monitors_.end();) {
+            auto monitor = monitorIter->second;
             if (cb(monitor) && monitor->DeflateInternal()) {
-                monitor_iter = monitors_.erase(monitor_iter);
+                monitorIter = monitors_.erase(monitorIter);
                 allocator_->Delete(monitor);
             } else {
-                monitor_iter++;
+                monitorIter++;
             }
         }
     }
 
     explicit MonitorPool(mem::InternalAllocatorPtr allocator) : monitors_(allocator->Adapter())
     {
-        last_id_ = 0;
+        lastId_ = 0;
         allocator_ = allocator;
     }
 
@@ -102,10 +102,10 @@ public:
 private:
     mem::InternalAllocatorPtr allocator_;
     // Lock for private data protection.
-    os::memory::Mutex pool_lock_;
+    os::memory::Mutex poolLock_;
 
-    Monitor::MonitorId last_id_ GUARDED_BY(pool_lock_);
-    PandaUnorderedMap<Monitor::MonitorId, Monitor *> monitors_ GUARDED_BY(pool_lock_);
+    Monitor::MonitorId lastId_ GUARDED_BY(poolLock_);
+    PandaUnorderedMap<Monitor::MonitorId, Monitor *> monitors_ GUARDED_BY(poolLock_);
 };
 
 }  // namespace panda

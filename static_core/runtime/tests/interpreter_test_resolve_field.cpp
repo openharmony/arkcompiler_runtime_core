@@ -29,6 +29,7 @@
 #include "assembly-parser.h"
 #include "libpandabase/mem/pool_manager.h"
 #include "libpandabase/utils/utf.h"
+#include "libpandabase/utils/utils.h"
 #include "libpandafile/bytecode_emitter.h"
 #include "libpandafile/file.h"
 #include "libpandafile/file_items.h"
@@ -91,9 +92,9 @@ TEST_F(InterpreterTestResolveField, ResolveField)
     auto pf = panda::panda_file::File::Open("../bin-gtests/pre-build/interpreter_test_resolve_field.abc");
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     PandaString descriptor;
 
@@ -109,7 +110,7 @@ TEST_F(InterpreterTestResolveField, ResolveField)
         ASSERT_FALSE(ManagedThread::GetCurrent()->HasPendingException());
 
         auto ret = v.GetAs<int32_t>();
-        ASSERT_EQ(ret, 10);
+        ASSERT_EQ(ret, 10_I);
     }
 
     {
@@ -124,7 +125,7 @@ TEST_F(InterpreterTestResolveField, ResolveField)
         ASSERT_FALSE(ManagedThread::GetCurrent()->HasPendingException());
 
         auto ret = v.GetAs<int32_t>();
-        ASSERT_EQ(ret, 20);
+        ASSERT_EQ(ret, 20_I);
     }
 }
 

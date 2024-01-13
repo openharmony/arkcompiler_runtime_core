@@ -23,21 +23,21 @@
 namespace panda::dprof {
 class ProfilingData {
 public:
-    ProfilingData(std::string app_name, uint64_t hash, uint32_t pid)
-        : app_name_(std::move(app_name)), hash_(hash), pid_(pid)
+    ProfilingData(std::string appName, uint64_t hash, uint32_t pid)
+        : appName_(std::move(appName)), hash_(hash), pid_(pid)
     {
     }
 
-    bool SetFeatureDate(const std::string &feature_name, std::vector<uint8_t> &&data);
+    bool SetFeatureDate(const std::string &featureName, std::vector<uint8_t> &&data);
     bool DumpAndResetFeatures();
 
 private:
-    std::string app_name_;
+    std::string appName_;
     uint64_t hash_;
     uint32_t pid_;
 
     using FeaturesDataMap = std::unordered_map<std::string, std::vector<uint8_t>>;
-    FeaturesDataMap features_data_map_;
+    FeaturesDataMap featuresDataMap_;
 };
 }  // namespace panda::dprof
 

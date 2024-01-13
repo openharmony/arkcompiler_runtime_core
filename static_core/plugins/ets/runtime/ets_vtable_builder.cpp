@@ -43,18 +43,18 @@ bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const Metho
         sp2 = Span(sp2.cend(), 1);
     }
 
-    bool is_same_package = true;
-    while (sp1[0] != 0 && is_same_package) {
-        is_same_package = sp1[0] != '/';
+    bool isSamePackage = true;
+    while (sp1[0] != 0 && isSamePackage) {
+        isSamePackage = sp1[0] != '/';
         sp1 = Span(sp1.cend(), 1);
     }
 
-    while (sp2[0] != 0 && is_same_package) {
-        is_same_package = sp2[0] != '/';
+    while (sp2[0] != 0 && isSamePackage) {
+        isSamePackage = sp2[0] != '/';
         sp2 = Span(sp2.cend(), 1);
     }
 
-    return is_same_package;
+    return isSamePackage;
 }
 
 }  // namespace panda::ets

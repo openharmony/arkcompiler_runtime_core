@@ -30,58 +30,58 @@
 namespace panda::ets::interop::js::ets_proxy {
 
 template <bool IS_STATIC>
-static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *field_wrapper, EtsCoroutine *coro, InteropCtx *ctx,
-                                         napi_env env, napi_value js_this)
+static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsCoroutine *coro, InteropCtx *ctx,
+                                         napi_env env, napi_value jsThis)
 {
     if constexpr (IS_STATIC) {
-        EtsClass *ets_class = field_wrapper->GetOwner()->GetEtsClass();
-        if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, ets_class))) {
+        EtsClass *etsClass = fieldWrapper->GetOwner()->GetEtsClass();
+        if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, etsClass))) {
             ctx->ForwardEtsException(coro);
             return nullptr;
         }
-        return ets_class->AsObject();
+        return etsClass->AsObject();
     }
 
-    if (UNLIKELY(IsNullOrUndefined(env, js_this))) {
+    if (UNLIKELY(IsNullOrUndefined(env, jsThis))) {
         ctx->ThrowJSTypeError(env, "ets this in set accessor cannot be null or undefined");
         return nullptr;
     }
 
-    EtsObject *ets_this = field_wrapper->GetOwner()->UnwrapEtsProxy(ctx, js_this);
-    if (UNLIKELY(ets_this == nullptr)) {
+    EtsObject *etsThis = fieldWrapper->GetOwner()->UnwrapEtsProxy(ctx, jsThis);
+    if (UNLIKELY(etsThis == nullptr)) {
         if (coro->HasPendingException()) {
             ctx->ForwardEtsException(coro);
         }
         return nullptr;
     }
-    return ets_this;
+    return etsThis;
 }
 
 template <typename FieldAccessor, bool IS_STATIC>
 static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
 {
     size_t argc = 0;
-    napi_value js_this;
+    napi_value jsThis;
     void *data;
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, &js_this, &data));
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, &jsThis, &data));
     if (UNLIKELY(argc != 0)) {
         InteropCtx::ThrowJSError(env, "getter called in wrong context");
         return napi_value {};
     }
 
-    auto ets_field_wrapper = reinterpret_cast<EtsFieldWrapper *>(data);
+    auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
     [[maybe_unused]] EtsJSNapiEnvScope scope(ctx, env);
-    ScopedManagedCodeThread managed_scope(coro);
+    ScopedManagedCodeThread managedScope(coro);
 
-    EtsObject *ets_this = EtsAccessorsHandleThis<IS_STATIC>(ets_field_wrapper, coro, ctx, env, js_this);
-    if (UNLIKELY(ets_this == nullptr)) {
+    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
+    if (UNLIKELY(etsThis == nullptr)) {
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
 
-    napi_value res = FieldAccessor::Getter(ctx, env, ets_this, ets_field_wrapper);
+    napi_value res = FieldAccessor::Getter(ctx, env, etsThis, etsFieldWrapper);
     ASSERT(res != nullptr || ctx->SanityJSExceptionPending());
     return res;
 }
@@ -90,30 +90,30 @@ template <typename FieldAccessor, bool IS_STATIC>
 static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
 {
     size_t argc = 1;
-    napi_value js_value;
-    napi_value js_this;
+    napi_value jsValue;
+    napi_value jsThis;
     void *data;
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, &js_value, &js_this, &data));
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, &jsValue, &jsThis, &data));
     if (UNLIKELY(argc != 1)) {
         InteropCtx::ThrowJSError(env, "setter called in wrong context");
         return napi_value {};
     }
 
-    auto ets_field_wrapper = reinterpret_cast<EtsFieldWrapper *>(data);
+    auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
     [[maybe_unused]] EtsJSNapiEnvScope scope(ctx, env);
-    ScopedManagedCodeThread managed_scope(coro);
+    ScopedManagedCodeThread managedScope(coro);
 
-    EtsObject *ets_this = EtsAccessorsHandleThis<IS_STATIC>(ets_field_wrapper, coro, ctx, env, js_this);
-    if (UNLIKELY(ets_this == nullptr)) {
+    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
+    if (UNLIKELY(etsThis == nullptr)) {
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
 
-    LocalObjectHandle<EtsObject> ets_this_handle(coro, ets_this);
-    auto res = FieldAccessor::Setter(ctx, env, EtsHandle<EtsObject>(VMHandle<EtsObject>(ets_this_handle)),
-                                     ets_field_wrapper, js_value);
+    LocalObjectHandle<EtsObject> etsThisHandle(coro, etsThis);
+    auto res = FieldAccessor::Setter(ctx, env, EtsHandle<EtsObject>(VMHandle<EtsObject>(etsThisHandle)),
+                                     etsFieldWrapper, jsValue);
     if (UNLIKELY(!res)) {
         if (coro->HasPendingException()) {
             ctx->ForwardEtsException(coro);
@@ -124,34 +124,34 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
 }
 
 struct EtsFieldAccessorREFERENCE {
-    static napi_value Getter(InteropCtx *ctx, napi_env env, EtsObject *ets_object, EtsFieldWrapper *ets_field_wrapper)
+    static napi_value Getter(InteropCtx *ctx, napi_env env, EtsObject *etsObject, EtsFieldWrapper *etsFieldWrapper)
     {
-        EtsObject *ets_value = ets_object->GetFieldObject(ets_field_wrapper->GetObjOffset());
-        if (ets_value == nullptr) {
+        EtsObject *etsValue = etsObject->GetFieldObject(etsFieldWrapper->GetObjOffset());
+        if (etsValue == nullptr) {
             return GetNull(env);
         }
-        auto refconv = JSRefConvertResolve(ctx, ets_value->GetClass()->GetRuntimeClass());
+        auto refconv = JSRefConvertResolve(ctx, etsValue->GetClass()->GetRuntimeClass());
         ASSERT(refconv != nullptr);
-        return refconv->Wrap(ctx, ets_value);
+        return refconv->Wrap(ctx, etsValue);
     }
 
-    static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> ets_object,
-                       EtsFieldWrapper *ets_field_wrapper, napi_value js_value)
+    static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject, EtsFieldWrapper *etsFieldWrapper,
+                       napi_value jsValue)
     {
-        EtsObject *ets_value;
-        if (IsNullOrUndefined(env, js_value)) {
-            ets_value = nullptr;
+        EtsObject *etsValue;
+        if (IsNullOrUndefined(env, jsValue)) {
+            etsValue = nullptr;
         } else {
-            JSRefConvert *refconv = ets_field_wrapper->GetRefConvert<true>(ctx);
+            JSRefConvert *refconv = etsFieldWrapper->GetRefConvert<true>(ctx);
             if (UNLIKELY(refconv == nullptr)) {
                 return false;
             }
-            ets_value = refconv->Unwrap(ctx, js_value);
-            if (UNLIKELY(ets_value == nullptr)) {
+            etsValue = refconv->Unwrap(ctx, jsValue);
+            if (UNLIKELY(etsValue == nullptr)) {
                 return false;
             }
         }
-        ets_object->SetFieldObject(ets_field_wrapper->GetObjOffset(), ets_value);
+        etsObject->SetFieldObject(etsFieldWrapper->GetObjOffset(), etsValue);
         return true;
     }
 };
@@ -160,46 +160,45 @@ template <typename Convertor>
 struct EtsFieldAccessorPRIMITIVE {
     using PrimitiveType = typename Convertor::cpptype;
 
-    static napi_value Getter(InteropCtx * /*ctx*/, napi_env env, EtsObject *ets_object,
-                             EtsFieldWrapper *ets_field_wrapper)
+    static napi_value Getter(InteropCtx * /*ctx*/, napi_env env, EtsObject *etsObject, EtsFieldWrapper *etsFieldWrapper)
     {
-        auto ets_value = ets_object->GetFieldPrimitive<PrimitiveType>(ets_field_wrapper->GetObjOffset());
-        return Convertor::Wrap(env, ets_value);
+        auto etsValue = etsObject->GetFieldPrimitive<PrimitiveType>(etsFieldWrapper->GetObjOffset());
+        return Convertor::Wrap(env, etsValue);
     }
 
-    // NOTE(vpukhov): elide ets_object handle
-    static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> ets_object,
-                       EtsFieldWrapper *ets_field_wrapper, napi_value js_value)
+    // NOTE(vpukhov): elide etsObject handle
+    static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject, EtsFieldWrapper *etsFieldWrapper,
+                       napi_value jsValue)
     {
-        std::optional<PrimitiveType> ets_value = Convertor::Unwrap(ctx, env, js_value);
-        if (LIKELY(ets_value.has_value())) {
-            ets_object->SetFieldPrimitive<PrimitiveType>(ets_field_wrapper->GetObjOffset(), ets_value.value());
+        std::optional<PrimitiveType> etsValue = Convertor::Unwrap(ctx, env, jsValue);
+        if (LIKELY(etsValue.has_value())) {
+            etsObject->SetFieldPrimitive<PrimitiveType>(etsFieldWrapper->GetObjOffset(), etsValue.value());
         }
-        return ets_value.has_value();
+        return etsValue.has_value();
     }
 };
 
 template <bool ALLOW_INIT>
 JSRefConvert *EtsFieldWrapper::GetRefConvert(InteropCtx *ctx)
 {
-    if (LIKELY(lazy_refconvert_link_.IsResolved())) {
-        return lazy_refconvert_link_.GetResolved();
+    if (LIKELY(lazyRefconvertLink_.IsResolved())) {
+        return lazyRefconvertLink_.GetResolved();
     }
 
-    const Field *field = lazy_refconvert_link_.GetUnresolved();
+    const Field *field = lazyRefconvertLink_.GetUnresolved();
     ASSERT(field->GetTypeId() == panda_file::Type::TypeId::REFERENCE);
 
-    const auto *panda_file = field->GetPandaFile();
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    Class *field_class =
-        class_linker->GetClass(*panda_file, panda_file::FieldDataAccessor::GetTypeId(*panda_file, field->GetFileId()),
-                               ctx->LinkerCtx(), nullptr);
+    const auto *pandaFile = field->GetPandaFile();
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    Class *fieldClass =
+        classLinker->GetClass(*pandaFile, panda_file::FieldDataAccessor::GetTypeId(*pandaFile, field->GetFileId()),
+                              ctx->LinkerCtx(), nullptr);
 
-    JSRefConvert *refconv = JSRefConvertResolve<ALLOW_INIT>(ctx, field_class);
+    JSRefConvert *refconv = JSRefConvertResolve<ALLOW_INIT>(ctx, fieldClass);
     if (UNLIKELY(refconv == nullptr)) {
         return nullptr;
     }
-    lazy_refconvert_link_.Set(refconv);  // Update link
+    lazyRefconvertLink_.Set(refconv);  // Update link
     return refconv;
 }
 
@@ -219,8 +218,8 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
     // NOTE(vpukhov): apply the same rule to instance fields?
     ASSERT(!IS_STATIC || wrapper->GetOwner()->GetEtsClass()->GetRuntimeClass() == field->GetClass());
 
-    auto setup_accessors = [&](auto accessor_tag) {
-        using Accessor = typename decltype(accessor_tag)::type;
+    auto setupAccessors = [&prop](auto accessorTag) {
+        using Accessor = typename decltype(accessorTag)::type;
         prop.getter = EtsFieldGetter<Accessor, IS_STATIC>;
         prop.setter = EtsFieldSetter<Accessor, IS_STATIC>;
         return prop;
@@ -229,29 +228,29 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
     panda_file::Type type = field->GetType();
     switch (type.GetId()) {
         case panda_file::Type::TypeId::U1:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU1>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU1>>());
         case panda_file::Type::TypeId::I8:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertI8>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertI8>>());
         case panda_file::Type::TypeId::U8:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU8>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU8>>());
         case panda_file::Type::TypeId::I16:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertI16>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertI16>>());
         case panda_file::Type::TypeId::U16:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU16>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU16>>());
         case panda_file::Type::TypeId::I32:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertI32>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertI32>>());
         case panda_file::Type::TypeId::U32:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU32>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU32>>());
         case panda_file::Type::TypeId::I64:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertI64>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertI64>>());
         case panda_file::Type::TypeId::U64:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU64>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertU64>>());
         case panda_file::Type::TypeId::F32:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertF32>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertF32>>());
         case panda_file::Type::TypeId::F64:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertF64>>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorPRIMITIVE<JSConvertF64>>());
         case panda_file::Type::TypeId::REFERENCE:
-            return setup_accessors(helpers::TypeIdentity<EtsFieldAccessorREFERENCE>());
+            return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorREFERENCE>());
         default:
             InteropCtx::Fatal(std::string("ConvertEtsVal: unsupported typeid ") +
                               panda_file::Type::GetSignatureByTypeId(type));

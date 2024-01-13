@@ -21,9 +21,9 @@
 namespace panda::pandasm {
 
 struct MethodHandle {
-    std::string item_name;                     // NOLINT(misc-non-private-member-variables-in-classes)
+    std::string itemName;                      // NOLINT(misc-non-private-member-variables-in-classes)
     panda::panda_file::MethodHandleType type;  // NOLINT(misc-non-private-member-variables-in-classes)
-    MethodHandle(std::string s, panda::panda_file::MethodHandleType t) : item_name(std::move(s)), type(t) {}
+    MethodHandle(std::string s, panda::panda_file::MethodHandleType t) : itemName(std::move(s)), type(t) {}
 };
 
 }  // namespace panda::pandasm

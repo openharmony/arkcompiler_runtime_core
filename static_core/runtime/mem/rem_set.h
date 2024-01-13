@@ -43,20 +43,20 @@ public:
     NO_MOVE_SEMANTIC(RemSet);
 
     template <bool NEED_LOCK = true>
-    void AddRef(const ObjectHeader *from_obj_addr, size_t offset);
+    void AddRef(const ObjectHeader *fromObjAddr, size_t offset);
 
     template <typename RegionPred, typename MemVisitor>
-    void Iterate(const RegionPred &region_pred, const MemVisitor &visitor);
+    void Iterate(const RegionPred &regionPred, const MemVisitor &visitor);
     template <typename Visitor>
     void IterateOverObjects(const Visitor &visitor);
 
     void Clear();
 
     template <bool NEED_LOCK = true>
-    static void InvalidateRegion(Region *invalid_region);
+    static void InvalidateRegion(Region *invalidRegion);
 
     template <bool NEED_LOCK = true>
-    static void InvalidateRefsFromRegion(Region *invalid_region);
+    static void InvalidateRefsFromRegion(Region *invalidRegion);
 
     size_t Size() const
     {
@@ -70,7 +70,7 @@ public:
      * @param value_addr - address of the reference in the field
      */
     template <bool NEED_LOCK = true>
-    static void AddRefWithAddr(const ObjectHeader *obj_addr, size_t offset, const ObjectHeader *value_addr);
+    static void AddRefWithAddr(const ObjectHeader *objAddr, size_t offset, const ObjectHeader *valueAddr);
 
     void Dump(std::ostream &out);
 
@@ -88,26 +88,26 @@ public:
 
         void Set(size_t idx)
         {
-            size_t elem_idx = idx / ELEM_BITS;
-            ASSERT(elem_idx < SIZE);
-            size_t bit_offset = idx - elem_idx * ELEM_BITS;
-            bitmap_[elem_idx] |= 1ULL << bit_offset;
+            size_t elemIdx = idx / ELEM_BITS;
+            ASSERT(elemIdx < SIZE);
+            size_t bitOffset = idx - elemIdx * ELEM_BITS;
+            bitmap_[elemIdx] |= 1ULL << bitOffset;
         }
 
         template <typename Visitor>
         void Iterate(const MemRange &range, const Visitor &visitor) const
         {
-            size_t mem_size = (range.GetEndAddress() - range.GetStartAddress()) / GetNumBits();
-            uintptr_t start_addr = range.GetStartAddress();
+            size_t memSize = (range.GetEndAddress() - range.GetStartAddress()) / GetNumBits();
+            uintptr_t startAddr = range.GetStartAddress();
             for (size_t i = 0; i < SIZE; ++i) {
-                uintptr_t addr = start_addr + i * mem_size * ELEM_BITS;
+                uintptr_t addr = startAddr + i * memSize * ELEM_BITS;
                 uint64_t elem = bitmap_[i];
                 while (elem > 0) {
                     if (elem & 1ULL) {
-                        visitor(MemRange(addr, addr + mem_size));
+                        visitor(MemRange(addr, addr + memSize));
                     }
                     elem >>= 1ULL;
-                    addr += mem_size;
+                    addr += memSize;
                 }
             }
         }
@@ -119,7 +119,7 @@ public:
     };
 
 private:
-    static size_t GetIdxInBitmap(uintptr_t addr, uintptr_t bitmap_begin_addr);
+    static size_t GetIdxInBitmap(uintptr_t addr, uintptr_t bitmapBeginAddr);
     template <bool NEED_LOCK>
     PandaUnorderedSet<Region *> *GetRefRegions();
     template <bool NEED_LOCK>
@@ -129,10 +129,10 @@ private:
     template <bool NEED_LOCK>
     void RemoveRefRegion(Region *region);
 
-    LockConfigT rem_set_lock_;
+    LockConfigT remSetLock_;
     // NOTE(alovkov): make value a Set?
     PandaUnorderedMap<uintptr_t, Bitmap> bitmaps_;
-    PandaUnorderedSet<Region *> ref_regions_;
+    PandaUnorderedSet<Region *> refRegions_;
 
     friend class test::RemSetTest;
 };

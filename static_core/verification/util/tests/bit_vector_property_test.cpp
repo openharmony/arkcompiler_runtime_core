@@ -83,16 +83,16 @@ namespace rc {
 
 constexpr size_t MAX_VALUE = 1024U;
 // NOLINTNEXTLINE(cert-err58-cpp)
-auto VALUE_GEN = gen::inRange<size_t>(0, MAX_VALUE);
+auto g_valueGen = gen::inRange<size_t>(0, MAX_VALUE);
 
 template <>
 struct Arbitrary<BSet> {
     static Gen<BSet> arbitrary()  // NOLINT(readability-identifier-naming)
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        auto set_n_inc = gen::pair(gen::container<std::set<size_t>>(VALUE_GEN), gen::inRange(1, 100));  // N = 100
-        return gen::map(set_n_inc, [](auto param_set_n_inc) {
-            auto &[set, inc] = param_set_n_inc;
+        auto setNInc = gen::pair(gen::container<std::set<size_t>>(g_valueGen), gen::inRange(1, 100));  // N = 100
+        return gen::map(setNInc, [](auto paramSetNInc) {
+            auto &[set, inc] = paramSetNInc;
             size_t size = (set.empty() ? 0 : *set.rbegin()) + inc;
             BitVector bits {size};
             for (const auto &idx : set) {
@@ -107,7 +107,7 @@ template <>
 struct Arbitrary<Range<size_t>> {
     static Gen<Range<size_t>> arbitrary()  // NOLINT(readability-identifier-naming)
     {
-        return gen::map(gen::pair(VALUE_GEN, VALUE_GEN), [](auto pair) {
+        return gen::map(gen::pair(g_valueGen, g_valueGen), [](auto pair) {
             return Range<size_t> {std::min(pair.first, pair.second), std::max(pair.first, pair.second)};
         });
     }
@@ -133,13 +133,13 @@ void ClassifySize(const std::string &name, size_t size, const Intervals &interva
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-err58-cpp)
 const EnvOptions OPTIONS {"VERIFIER_TEST"};
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-err58-cpp,readability-magic-numbers)
-Intervals STAT_INTERVALS = {{0, 10U}, {11U, 50U}, {51U, 100U}, {101U, MAX_VALUE}};
+Intervals g_statIntervals = {{0, 10U}, {11U, 50U}, {51U, 100U}, {101U, MAX_VALUE}};
 
 void Stat(const BSet &bitset)
 {
     if (OPTIONS.Get<bool>("verbose", false)) {
-        ClassifySize("Bits.size() in", bitset.bits.Size(), STAT_INTERVALS);
-        ClassifySize("Indices.size() in", bitset.indices.size(), STAT_INTERVALS);
+        ClassifySize("Bits.size() in", bitset.bits.Size(), g_statIntervals);
+        ClassifySize("Indices.size() in", bitset.indices.size(), g_statIntervals);
     }
 }
 
@@ -182,9 +182,9 @@ RC_GTEST_PROP(TestBitvector, BasicTestSet, (BSet && bset))
 RC_GTEST_PROP(TestBitvector, BasicTestInvert, (BSet && bset))
 {
     Stat(bset);
-    auto zero_bits = bset.bits.Size() - bset.bits.SetBitsCount();
+    auto zeroBits = bset.bits.Size() - bset.bits.SetBitsCount();
     bset.bits.Invert();
-    RC_ASSERT(bset.bits.SetBitsCount() == zero_bits);
+    RC_ASSERT(bset.bits.SetBitsCount() == zeroBits);
 }
 
 RC_GTEST_PROP(TestBitvector, BasicTestClrIdx, (BSet && bset, std::set<size_t> &&indices))
@@ -419,9 +419,9 @@ RC_GTEST_PROP(TestBitvector, PowerOfFoldedBitsetsXor2Arg, (BSet && bset1, BSet &
     auto result = BitVector::PowerOfXor(bset1.bits, bset2.bits);
     auto size = std::min(bset1.bits.Size(), bset2.bits.Size());
     auto universum = Universum(size);
-    auto set_result = SetIntersection(universum, SetDifference(SetUnion(bset1.indices, bset2.indices),
-                                                               SetIntersection(bset1.indices, bset2.indices)));
-    RC_ASSERT(result == set_result.size());
+    auto setResult = SetIntersection(universum, SetDifference(SetUnion(bset1.indices, bset2.indices),
+                                                              SetIntersection(bset1.indices, bset2.indices)));
+    RC_ASSERT(result == setResult.size());
 }
 
 RC_GTEST_PROP(TestBitvector, PowerOfFoldedBitsetsXor3Arg, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -434,8 +434,8 @@ RC_GTEST_PROP(TestBitvector, PowerOfFoldedBitsetsXor3Arg, (BSet && bset1, BSet &
     auto universum = Universum(size);
     auto xor1 = SetDifference(SetUnion(bset1.indices, bset2.indices), SetIntersection(bset1.indices, bset2.indices));
     auto xor2 = SetDifference(SetUnion(xor1, bset3.indices), SetIntersection(xor1, bset3.indices));
-    auto set_result = SetIntersection(universum, xor2);
-    RC_ASSERT(result == set_result.size());
+    auto setResult = SetIntersection(universum, xor2);
+    RC_ASSERT(result == setResult.size());
 }
 
 RC_GTEST_PROP(TestBitvector, PowerOfFoldedBitsetsNot2Arg, (BSet && bset1, BSet &&bset2))
@@ -445,8 +445,8 @@ RC_GTEST_PROP(TestBitvector, PowerOfFoldedBitsetsNot2Arg, (BSet && bset1, BSet &
     auto result = BitVector::PowerOfAndNot(bset1.bits, bset2.bits);
     auto size = std::min(bset1.bits.Size(), bset2.bits.Size());
     auto universum = Universum(size);
-    auto set_result = SetIntersection(universum, SetDifference(bset1.indices, bset2.indices));
-    RC_ASSERT(result == set_result.size());
+    auto setResult = SetIntersection(universum, SetDifference(bset1.indices, bset2.indices));
+    RC_ASSERT(result == setResult.size());
 }
 
 RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsAnd1, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -457,8 +457,8 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsAnd1, (BSet && bset1,
     auto result = ContainerOf<StdSet>(BitVector::LazyAndThenIndicesOf<1>(bset1.bits, bset2.bits, bset3.bits));
     auto size = std::min(std::min(bset1.bits.Size(), bset2.bits.Size()), bset3.bits.Size());
     auto universum = Universum(size);
-    auto set_result = SetIntersection(universum, bset1.indices, bset2.indices, bset3.indices);
-    RC_ASSERT(result == set_result);
+    auto setResult = SetIntersection(universum, bset1.indices, bset2.indices, bset3.indices);
+    RC_ASSERT(result == setResult);
 }
 
 RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsAnd0, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -469,8 +469,8 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsAnd0, (BSet && bset1,
     auto result = ContainerOf<StdSet>(BitVector::LazyAndThenIndicesOf<0>(bset1.bits, bset2.bits, bset3.bits));
     auto size = std::min(std::min(bset1.bits.Size(), bset2.bits.Size()), bset3.bits.Size());
     auto universum = Universum(size);
-    auto set_result = SetDifference(universum, SetIntersection(bset1.indices, bset2.indices, bset3.indices));
-    RC_ASSERT(result == set_result);
+    auto setResult = SetDifference(universum, SetIntersection(bset1.indices, bset2.indices, bset3.indices));
+    RC_ASSERT(result == setResult);
 }
 
 RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsOr1, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -481,8 +481,8 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsOr1, (BSet && bset1, 
     auto result = ContainerOf<StdSet>(BitVector::LazyOrThenIndicesOf<1>(bset1.bits, bset2.bits, bset3.bits));
     auto size = std::min(std::min(bset1.bits.Size(), bset2.bits.Size()), bset3.bits.Size());
     auto universum = Universum(size);
-    auto set_result = SetIntersection(universum, SetUnion(bset1.indices, bset2.indices, bset3.indices));
-    RC_ASSERT(result == set_result);
+    auto setResult = SetIntersection(universum, SetUnion(bset1.indices, bset2.indices, bset3.indices));
+    RC_ASSERT(result == setResult);
 }
 
 RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsOr0, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -493,8 +493,8 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsOr0, (BSet && bset1, 
     auto result = ContainerOf<StdSet>(BitVector::LazyOrThenIndicesOf<0>(bset1.bits, bset2.bits, bset3.bits));
     auto size = std::min(std::min(bset1.bits.Size(), bset2.bits.Size()), bset3.bits.Size());
     auto universum = Universum(size);
-    auto set_result = SetDifference(universum, SetUnion(bset1.indices, bset2.indices, bset3.indices));
-    RC_ASSERT(result == set_result);
+    auto setResult = SetDifference(universum, SetUnion(bset1.indices, bset2.indices, bset3.indices));
+    RC_ASSERT(result == setResult);
 }
 
 RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsXor1, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -507,8 +507,8 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsXor1, (BSet && bset1,
     auto universum = Universum(size);
     auto xor1 = SetDifference(SetUnion(bset1.indices, bset2.indices), SetIntersection(bset1.indices, bset2.indices));
     auto xor2 = SetDifference(SetUnion(xor1, bset3.indices), SetIntersection(xor1, bset3.indices));
-    auto set_result = SetIntersection(universum, xor2);
-    RC_ASSERT(result == set_result);
+    auto setResult = SetIntersection(universum, xor2);
+    RC_ASSERT(result == setResult);
 }
 
 RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsXor0, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -521,8 +521,8 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsXor0, (BSet && bset1,
     auto universum = Universum(size);
     auto xor1 = SetDifference(SetUnion(bset1.indices, bset2.indices), SetIntersection(bset1.indices, bset2.indices));
     auto xor2 = SetDifference(SetUnion(xor1, bset3.indices), SetIntersection(xor1, bset3.indices));
-    auto set_result = SetDifference(universum, xor2);
-    RC_ASSERT(result == set_result);
+    auto setResult = SetDifference(universum, xor2);
+    RC_ASSERT(result == setResult);
 }
 
 RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsNot1, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -533,10 +533,10 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsNot1, (BSet && bset1,
     auto result = ContainerOf<StdSet>(BitVector::LazyAndNotThenIndicesOf<1>(bset1.bits, bset2.bits, bset3.bits));
     auto size = std::min(std::min(bset1.bits.Size(), bset2.bits.Size()), bset3.bits.Size());
     auto universum = Universum(size);
-    auto set_and = SetIntersection(bset1.indices, bset2.indices);
-    auto set_not = SetDifference(universum, bset3.indices);
-    auto set_result = SetIntersection(set_and, set_not);
-    RC_ASSERT(result == set_result);
+    auto setAnd = SetIntersection(bset1.indices, bset2.indices);
+    auto setNot = SetDifference(universum, bset3.indices);
+    auto setResult = SetIntersection(setAnd, setNot);
+    RC_ASSERT(result == setResult);
 }
 
 RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsNot0, (BSet && bset1, BSet &&bset2, BSet &&bset3))
@@ -547,10 +547,10 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsNot0, (BSet && bset1,
     auto result = ContainerOf<StdSet>(BitVector::LazyAndNotThenIndicesOf<0>(bset1.bits, bset2.bits, bset3.bits));
     auto size = std::min(std::min(bset1.bits.Size(), bset2.bits.Size()), bset3.bits.Size());
     auto universum = Universum(size);
-    auto set_and = SetIntersection(bset1.indices, bset2.indices);
-    auto set_not = SetDifference(universum, bset3.indices);
-    auto set_result = SetDifference(universum, SetIntersection(set_and, set_not));
-    RC_ASSERT(result == set_result);
+    auto setAnd = SetIntersection(bset1.indices, bset2.indices);
+    auto setNot = SetDifference(universum, bset3.indices);
+    auto setResult = SetDifference(universum, SetIntersection(setAnd, setNot));
+    RC_ASSERT(result == setResult);
 }
 
 }  // namespace panda::verifier::test

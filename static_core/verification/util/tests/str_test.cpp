@@ -18,6 +18,7 @@
 #include "util/str.h"
 
 #include "util/tests/verifier_test.h"
+#include "libpandabase/utils/utils.h"
 
 #include <gtest/gtest.h>
 
@@ -26,15 +27,15 @@ namespace panda::verifier::test {
 std::string *Generator()
 {
     std::string str = "Generator";
-    static std::string cur_str;
-    static int str_pos = 0;
+    static std::string curStr;
+    static int strPos = 0;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    if (str_pos < 0x9) {
-        cur_str = str[str_pos];
-        str_pos++;
-        return &cur_str;
+    if (strPos < 0x9) {
+        curStr = str[strPos];
+        strPos++;
+        return &curStr;
     }
-    str_pos = 0;
+    strPos = 0;
     return nullptr;
 }
 
@@ -43,7 +44,7 @@ TEST_F(VerifierTest, str)
     EXPECT_EQ(Join<std::string>(Generator), "G, e, n, e, r, a, t, o, r");
     EXPECT_EQ(Join<std::string>(Generator, "."), "G.e.n.e.r.a.t.o.r");
 
-    EXPECT_EQ(NumToStr(-1456), "-1456");
+    EXPECT_EQ(NumToStr(-1456_I), "-1456");
     EXPECT_EQ(NumToStr(0x1C, 0x10), "1c");
 }
 

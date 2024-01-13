@@ -238,18 +238,18 @@ TEST_F(MonitorTest, HeavyMonitorGcTest)
     auto thread = MTManagedThread::GetCurrent();
     auto header = ObjectHeader::Create(cls);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<ObjectHeader> obj_handle(thread, header);
-    Monitor::MonitorEnter(obj_handle.GetPtr());
-    ASSERT_TRUE(obj_handle->AtomicGetMark().GetState() == MarkWord::STATE_LIGHT_LOCKED);
-    ASSERT_TRUE(Monitor::Inflate(obj_handle.GetPtr(), thread));
-    ASSERT_TRUE(obj_handle->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
+    VMHandle<ObjectHeader> objHandle(thread, header);
+    Monitor::MonitorEnter(objHandle.GetPtr());
+    ASSERT_TRUE(objHandle->AtomicGetMark().GetState() == MarkWord::STATE_LIGHT_LOCKED);
+    ASSERT_TRUE(Monitor::Inflate(objHandle.GetPtr(), thread));
+    ASSERT_TRUE(objHandle->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
     thread_->GetVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
-    ASSERT_TRUE(obj_handle->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
-    Monitor::MonitorExit(obj_handle.GetPtr());
-    ASSERT_TRUE(obj_handle->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
+    ASSERT_TRUE(objHandle->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
+    Monitor::MonitorExit(objHandle.GetPtr());
+    ASSERT_TRUE(objHandle->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);
     thread_->GetVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
-    ASSERT_TRUE(obj_handle->AtomicGetMark().GetState() == MarkWord::STATE_UNLOCKED);
-    ASSERT_FALSE(Monitor::HoldsLock(obj_handle.GetPtr()));
+    ASSERT_TRUE(objHandle->AtomicGetMark().GetState() == MarkWord::STATE_UNLOCKED);
+    ASSERT_FALSE(Monitor::HoldsLock(objHandle.GetPtr()));
 }
 
 TEST_F(MonitorTest, MonitorTestLightLockOverflow)
@@ -262,8 +262,8 @@ TEST_F(MonitorTest, MonitorTestLightLockOverflow)
     // Set lock count to MAX-1
     {
         MarkWord mark = header->AtomicGetMark();
-        MarkWord new_mark = mark.DecodeFromLightLock(mark.GetThreadId(), MarkWord::LIGHT_LOCK_LOCK_MAX_COUNT - 1);
-        ASSERT_TRUE(header->AtomicSetMark(mark, new_mark));
+        MarkWord newMark = mark.DecodeFromLightLock(mark.GetThreadId(), MarkWord::LIGHT_LOCK_LOCK_MAX_COUNT - 1);
+        ASSERT_TRUE(header->AtomicSetMark(mark, newMark));
     }
     Monitor::MonitorEnter(header);
     ASSERT_TRUE(header->AtomicGetMark().GetState() == MarkWord::STATE_HEAVY_LOCKED);

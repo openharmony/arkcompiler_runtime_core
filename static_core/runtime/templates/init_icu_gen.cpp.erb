@@ -24,13 +24,13 @@
 void SetIcuDirectory()
 {
     static int status = 0;
-    static std::mutex data_mutex;
-    std::string g_hw_directory = std::string("<%= PANDA_THIRD_PARTY_SOURCES_DIR %>") + std::string("/icu/ohos_icu4j/data");
+    static std::mutex dataMutex;
+    std::string gHwDirectory = std::string("<%= PANDA_THIRD_PARTY_SOURCES_DIR %>") + std::string("/icu/ohos_icu4j/data");
 
-    std::lock_guard<std::mutex> lock(data_mutex);
+    std::lock_guard<std::mutex> lock(dataMutex);
     if (status != 0) {
         return;
     }
-    u_setDataDirectory(g_hw_directory.c_str());
+    u_setDataDirectory(gHwDirectory.c_str());
     status = 1;
 }

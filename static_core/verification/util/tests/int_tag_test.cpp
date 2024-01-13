@@ -24,19 +24,19 @@ namespace panda::verifier::test {
 TEST_F(VerifierTest, IntTag)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    using IntTag1 = TagForInt<int, 3, 9>;
+    using IntTag1 = TagForInt<int, 3U, 9U>;
 
-    ASSERT_EQ(IntTag1::SIZE, 7);
-    EXPECT_EQ(IntTag1::BITS, 3);
-    EXPECT_EQ(IntTag1::GetIndexFor(4), 1);
-    EXPECT_EQ(IntTag1::GetValueFor(3), 6);
+    ASSERT_EQ(IntTag1::SIZE, 7UL);
+    EXPECT_EQ(IntTag1::BITS, 3UL);
+    EXPECT_EQ(IntTag1::GetIndexFor(4UL), 1UL);
+    EXPECT_EQ(IntTag1::GetValueFor(3UL), 6UL);
 
-    using IntTag2 = TagForInt<int, 5, 5>;
+    using IntTag2 = TagForInt<int, 5U, 5U>;
 
-    ASSERT_EQ(IntTag2::SIZE, 1);
-    EXPECT_EQ(IntTag2::BITS, 1);
-    EXPECT_EQ(IntTag2::GetIndexFor(5), 0);
-    EXPECT_EQ(IntTag2::GetValueFor(0), 5);
+    ASSERT_EQ(IntTag2::SIZE, 1UL);
+    EXPECT_EQ(IntTag2::BITS, 1UL);
+    EXPECT_EQ(IntTag2::GetIndexFor(5UL), 0UL);
+    EXPECT_EQ(IntTag2::GetValueFor(0UL), 5UL);
 }
 
 }  // namespace panda::verifier::test

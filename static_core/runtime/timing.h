@@ -39,8 +39,8 @@ public:
 
     class TimeLabel {
     public:
-        TimeLabel(std::string_view name, uint64_t time, uint64_t cpu_time, TimeLabelType type = TimeLabelType::BEGIN)
-            : name_(name), time_(time), cpu_time_(cpu_time), type_(type)
+        TimeLabel(std::string_view name, uint64_t time, uint64_t cpuTime, TimeLabelType type = TimeLabelType::BEGIN)
+            : name_(name), time_(time), cpuTime_(cpuTime), type_(type)
         {
         }
 
@@ -68,12 +68,12 @@ public:
 
         uint64_t GetCPUTime() const
         {
-            return cpu_time_;
+            return cpuTime_;
         }
 
         void SetCPUTime(uint64_t duration)
         {
-            cpu_time_ = duration;
+            cpuTime_ = duration;
         }
 
         DEFAULT_COPY_SEMANTIC(TimeLabel);
@@ -81,8 +81,8 @@ public:
 
     private:
         std::string_view name_;
-        uint64_t time_;      //  After processed, time_ is used to save duration.
-        uint64_t cpu_time_;  //  After processed, cpu_time_ is used to save duration.
+        uint64_t time_;     //  After processed, time_ is used to save duration.
+        uint64_t cpuTime_;  //  After processed, cpu_time_ is used to save duration.
         TimeLabelType type_;
     };
 

@@ -75,8 +75,8 @@ class Encoder {
 public:
     // Main constructor
     explicit Encoder(ArenaAllocator *aa, Arch arch) : Encoder(aa, arch, false) {}
-    Encoder(ArenaAllocator *aa, Arch arch, bool js_number_cast)
-        : allocator_(aa), frame_layout_(arch, 0), target_(arch), js_number_cast_(js_number_cast)
+    Encoder(ArenaAllocator *aa, Arch arch, bool jsNumberCast)
+        : allocator_(aa), frameLayout_(arch, 0), target_(arch), jsNumberCast_(jsNumberCast)
     {
     }
     virtual ~Encoder() = default;
@@ -103,17 +103,17 @@ public:
 
     bool IsJsNumberCast() const
     {
-        return js_number_cast_;
+        return jsNumberCast_;
     }
 
     void SetIsJsNumberCast(bool v)
     {
-        js_number_cast_ = v;
+        jsNumberCast_ = v;
     }
 
     /// Print instruction and return next pc
     virtual size_t DisasmInstr([[maybe_unused]] std::ostream &stream, [[maybe_unused]] size_t pc,
-                               [[maybe_unused]] ssize_t code_offset) const
+                               [[maybe_unused]] ssize_t codeOffset) const
     {
         return 0;
     }
@@ -213,8 +213,8 @@ public:
         SetFalseResult();
     }
 
-    virtual void EncodeCast([[maybe_unused]] Reg dst, [[maybe_unused]] bool dst_signed, [[maybe_unused]] Reg src,
-                            [[maybe_unused]] bool src_signed)
+    virtual void EncodeCast([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] Reg src,
+                            [[maybe_unused]] bool srcSigned)
     {
         SetFalseResult();
     }
@@ -222,22 +222,22 @@ public:
     {
         SetFalseResult();
     }
-    virtual void EncodeMin([[maybe_unused]] Reg dst, [[maybe_unused]] bool dst_signed, [[maybe_unused]] Reg src0,
+    virtual void EncodeMin([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] Reg src0,
                            [[maybe_unused]] Reg src1)
     {
         SetFalseResult();
     }
-    virtual void EncodeDiv([[maybe_unused]] Reg dst, [[maybe_unused]] bool dst_signed, [[maybe_unused]] Reg src0,
+    virtual void EncodeDiv([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] Reg src0,
                            [[maybe_unused]] Reg src1)
     {
         SetFalseResult();
     }
-    virtual void EncodeMod([[maybe_unused]] Reg dst, [[maybe_unused]] bool dst_signed, [[maybe_unused]] Reg src0,
+    virtual void EncodeMod([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] Reg src0,
                            [[maybe_unused]] Reg src1)
     {
         SetFalseResult();
     }
-    virtual void EncodeMax([[maybe_unused]] Reg dst, [[maybe_unused]] bool dst_signed, [[maybe_unused]] Reg src0,
+    virtual void EncodeMax([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] Reg src0,
                            [[maybe_unused]] Reg src1)
     {
         SetFalseResult();
@@ -247,11 +247,11 @@ public:
         SetFalseResult();
     }
 
-    virtual void EncodeLdr([[maybe_unused]] Reg dst, [[maybe_unused]] bool dst_signed, [[maybe_unused]] MemRef mem)
+    virtual void EncodeLdr([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] MemRef mem)
     {
         SetFalseResult();
     }
-    virtual void EncodeLdrAcquire([[maybe_unused]] Reg dst, [[maybe_unused]] bool dst_signed,
+    virtual void EncodeLdrAcquire([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned,
                                   [[maybe_unused]] MemRef mem)
     {
         SetFalseResult();
@@ -283,7 +283,7 @@ public:
     {
         SetFalseResult();
     }
-    virtual void EncodeSti([[maybe_unused]] int64_t src, [[maybe_unused]] uint8_t src_size_bytes,
+    virtual void EncodeSti([[maybe_unused]] int64_t src, [[maybe_unused]] uint8_t srcSizeBytes,
                            [[maybe_unused]] MemRef mem)
     {
         SetFalseResult();
@@ -297,14 +297,14 @@ public:
         SetFalseResult();
     }
     // size must be 8, 16,32 or 64
-    virtual void EncodeMemCopy([[maybe_unused]] MemRef mem_from, [[maybe_unused]] MemRef mem_to,
+    virtual void EncodeMemCopy([[maybe_unused]] MemRef memFrom, [[maybe_unused]] MemRef memTo,
                                [[maybe_unused]] size_t size)
     {
         SetFalseResult();
     }
     // size must be 8, 16,32 or 64
     // zerod high part: [size, 64)
-    virtual void EncodeMemCopyz([[maybe_unused]] MemRef mem_from, [[maybe_unused]] MemRef mem_to,
+    virtual void EncodeMemCopyz([[maybe_unused]] MemRef memFrom, [[maybe_unused]] MemRef memTo,
                                 [[maybe_unused]] size_t size)
     {
         SetFalseResult();
@@ -331,14 +331,14 @@ public:
 
     virtual void EncodeCompressedStringCharAt([[maybe_unused]] Reg dst, [[maybe_unused]] Reg str,
                                               [[maybe_unused]] Reg idx, [[maybe_unused]] Reg length,
-                                              [[maybe_unused]] Reg tmp, [[maybe_unused]] size_t data_offset,
+                                              [[maybe_unused]] Reg tmp, [[maybe_unused]] size_t dataOffset,
                                               [[maybe_unused]] uint32_t shift)
     {
         SetFalseResult();
     }
 
     virtual void EncodeCompressedStringCharAtI([[maybe_unused]] Reg dst, [[maybe_unused]] Reg str,
-                                               [[maybe_unused]] Reg length, [[maybe_unused]] size_t data_offset,
+                                               [[maybe_unused]] Reg length, [[maybe_unused]] size_t dataOffset,
                                                [[maybe_unused]] uint32_t index, [[maybe_unused]] uint32_t shift)
     {
         SetFalseResult();
@@ -387,7 +387,7 @@ public:
     }
 
     virtual void EncodeRotate([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src1, [[maybe_unused]] Reg src2,
-                              [[maybe_unused]] bool is_ror)
+                              [[maybe_unused]] bool isRor)
     {
         SetFalseResult();
     }
@@ -454,7 +454,7 @@ public:
         SetFalseResult();
     }
 
-    virtual void EncodeLdp([[maybe_unused]] Reg dst0, [[maybe_unused]] Reg dst1, [[maybe_unused]] bool dst_signed,
+    virtual void EncodeLdp([[maybe_unused]] Reg dst0, [[maybe_unused]] Reg dst1, [[maybe_unused]] bool dstSigned,
                            [[maybe_unused]] MemRef mem)
     {
         SetFalseResult();
@@ -518,7 +518,7 @@ public:
         success_ = false;
     }
 
-    virtual void EncodeCrc32Update([[maybe_unused]] Reg dst, [[maybe_unused]] Reg crc_reg, [[maybe_unused]] Reg val_reg)
+    virtual void EncodeCrc32Update([[maybe_unused]] Reg dst, [[maybe_unused]] Reg crcReg, [[maybe_unused]] Reg valReg)
     {
         SetFalseResult();
     }
@@ -548,12 +548,12 @@ public:
     }
 
     // Encoder builder - implement in target.cpp
-    static Encoder *Create(ArenaAllocator *arena_allocator, Arch arch, bool print_asm, bool js_number_cast = false);
+    static Encoder *Create(ArenaAllocator *arenaAllocator, Arch arch, bool printAsm, bool jsNumberCast = false);
 
     // For now it is one function for Add/Sub and Cmp, it suits all considered targets (x86, amd64, arm32, arm64).
     // We probably should revisit this if we add new targets, like Thumb-2 or others.
     virtual bool CanEncodeImmAddSubCmp([[maybe_unused]] int64_t imm, [[maybe_unused]] uint32_t size,
-                                       [[maybe_unused]] bool signed_compare)
+                                       [[maybe_unused]] bool signedCompare)
     {
         return false;
     }
@@ -615,7 +615,7 @@ public:
 
     // Check if encoder is capable of encoding operations where an operand is a register with
     // a value shifted by shift operation with specified type by some immediate value.
-    virtual bool CanEncodeShiftedOperand([[maybe_unused]] ShiftOpcode opcode, [[maybe_unused]] ShiftType shift_type)
+    virtual bool CanEncodeShiftedOperand([[maybe_unused]] ShiftOpcode opcode, [[maybe_unused]] ShiftType shiftType)
     {
         return false;
     }
@@ -669,14 +669,14 @@ public:
         return 0;
     }
 
-    virtual void EncodeCompressEightUtf16ToUtf8CharsUsingSimd([[maybe_unused]] Reg src_addr,
-                                                              [[maybe_unused]] Reg dst_addr)
+    virtual void EncodeCompressEightUtf16ToUtf8CharsUsingSimd([[maybe_unused]] Reg srcAddr,
+                                                              [[maybe_unused]] Reg dstAddr)
     {
         SetFalseResult();
     }
 
-    virtual void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd([[maybe_unused]] Reg src_addr,
-                                                                [[maybe_unused]] Reg dst_addr)
+    virtual void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd([[maybe_unused]] Reg srcAddr,
+                                                                [[maybe_unused]] Reg dstAddr)
     {
         SetFalseResult();
     }
@@ -684,12 +684,12 @@ public:
     virtual void SetCursorOffset([[maybe_unused]] size_t offset) {}
 
     virtual void SaveRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] ssize_t slot,
-                               [[maybe_unused]] size_t start_reg, [[maybe_unused]] bool is_fp)
+                               [[maybe_unused]] size_t startReg, [[maybe_unused]] bool isFp)
     {
         SetFalseResult();
     }
     virtual void LoadRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] ssize_t slot,
-                               [[maybe_unused]] size_t start_reg, [[maybe_unused]] bool is_fp)
+                               [[maybe_unused]] size_t startReg, [[maybe_unused]] bool isFp)
     {
         SetFalseResult();
     }
@@ -713,46 +713,46 @@ public:
      * @param base base register
      * @param mask determine memory layout for the registers
      */
-    virtual void SaveRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] bool is_fp,
+    virtual void SaveRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] bool isFp,
                                [[maybe_unused]] ssize_t slot, [[maybe_unused]] Reg base, [[maybe_unused]] RegMask mask)
     {
         SetFalseResult();
     }
-    virtual void LoadRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] bool is_fp,
+    virtual void LoadRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] bool isFp,
                                [[maybe_unused]] ssize_t slot, [[maybe_unused]] Reg base, [[maybe_unused]] RegMask mask)
     {
         SetFalseResult();
     }
 
-    void PushRegisters(RegMask regs, VRegMask fp_regs, bool is_aligned = true)
+    void PushRegisters(RegMask regs, VRegMask fpRegs, bool isAligned = true)
     {
-        ASSERT(GetArch() != Arch::AARCH64 || is_aligned);
+        ASSERT(GetArch() != Arch::AARCH64 || isAligned);
         PushRegisters(regs, false);
-        PushRegisters(fp_regs, true);
+        PushRegisters(fpRegs, true);
 
-        bool is_even {(regs.Count() + fp_regs.Count()) % 2U == 0U};
-        if (GetArch() != Arch::AARCH64 && is_even != is_aligned) {
+        bool isEven {(regs.Count() + fpRegs.Count()) % 2U == 0U};
+        if (GetArch() != Arch::AARCH64 && isEven != isAligned) {
             EncodeSub(GetTarget().GetStackReg(), GetTarget().GetStackReg(), Imm(GetTarget().WordSize()));
         }
     }
 
-    void PopRegisters(RegMask regs, VRegMask fp_regs, bool is_aligned = true)
+    void PopRegisters(RegMask regs, VRegMask fpRegs, bool isAligned = true)
     {
-        bool is_even {(regs.Count() + fp_regs.Count()) % 2U == 0U};
-        if (GetArch() != Arch::AARCH64 && is_even != is_aligned) {
+        bool isEven {(regs.Count() + fpRegs.Count()) % 2U == 0U};
+        if (GetArch() != Arch::AARCH64 && isEven != isAligned) {
             EncodeAdd(GetTarget().GetStackReg(), GetTarget().GetStackReg(), Imm(GetTarget().WordSize()));
         }
 
-        PopRegisters(fp_regs, true);
+        PopRegisters(fpRegs, true);
         PopRegisters(regs, false);
     }
 
-    virtual void PushRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] bool is_fp)
+    virtual void PushRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] bool isFp)
     {
         SetFalseResult();
     }
 
-    virtual void PopRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] bool is_fp)
+    virtual void PopRegisters([[maybe_unused]] RegMask registers, [[maybe_unused]] bool isFp)
     {
         SetFalseResult();
     }
@@ -891,7 +891,7 @@ public:
         SetFalseResult();
     }
 
-    virtual void MakeCall([[maybe_unused]] const void *entry_point)
+    virtual void MakeCall([[maybe_unused]] const void *entryPoint)
     {
         SetFalseResult();
     }
@@ -901,7 +901,7 @@ public:
         SetFalseResult();
     }
 
-    virtual void MakeCall([[maybe_unused]] compiler::MemRef entry_point)
+    virtual void MakeCall([[maybe_unused]] compiler::MemRef entryPoint)
     {
         SetFalseResult();
     }
@@ -985,8 +985,8 @@ public:
     }
 
     virtual void EncodeBitTestAndBranch([[maybe_unused]] compiler::LabelHolder::LabelId id,
-                                        [[maybe_unused]] compiler::Reg reg, [[maybe_unused]] uint32_t bit_pos,
-                                        [[maybe_unused]] bool bit_value)
+                                        [[maybe_unused]] compiler::Reg reg, [[maybe_unused]] uint32_t bitPos,
+                                        [[maybe_unused]] bool bitValue)
     {
         SetFalseResult();
     }
@@ -1003,22 +1003,22 @@ public:
 
     void SetFrameLayout(CFrameLayout fl)
     {
-        frame_layout_ = fl;
+        frameLayout_ = fl;
     }
 
     const CFrameLayout &GetFrameLayout() const
     {
-        return frame_layout_;
+        return frameLayout_;
     }
 
     RegMask GetLiveTmpRegMask()
     {
-        return live_tmp_regs_;
+        return liveTmpRegs_;
     }
 
     VRegMask GetLiveTmpFpRegMask()
     {
-        return live_tmp_fp_regs_;
+        return liveTmpFpRegs_;
     }
 
     void AddRegInLiveMask(Reg reg)
@@ -1027,10 +1027,10 @@ public:
             return;
         }
         if (reg.IsScalar()) {
-            live_tmp_regs_.set(reg.GetId(), true);
+            liveTmpRegs_.set(reg.GetId(), true);
         } else {
             ASSERT(reg.IsFloat());
-            live_tmp_fp_regs_.set(reg.GetId(), true);
+            liveTmpFpRegs_.set(reg.GetId(), true);
         }
     }
 
@@ -1040,31 +1040,31 @@ public:
             return;
         }
         if (reg.IsScalar()) {
-            live_tmp_regs_.set(reg.GetId(), false);
+            liveTmpRegs_.set(reg.GetId(), false);
         } else {
             ASSERT(reg.IsFloat());
-            live_tmp_fp_regs_.set(reg.GetId(), false);
+            liveTmpFpRegs_.set(reg.GetId(), false);
         }
     }
 
     void SetCodeOffset(size_t offset)
     {
-        code_offset_ = offset;
+        codeOffset_ = offset;
     }
 
     size_t GetCodeOffset() const
     {
-        return code_offset_;
+        return codeOffset_;
     }
 
     void EnableLrAsTempReg(bool value)
     {
-        enable_lr_as_temp_reg_ = value;
+        enableLrAsTempReg_ = value;
     }
 
     bool IsLrAsTempRegEnabled() const
     {
-        return enable_lr_as_temp_reg_;
+        return enableLrAsTempReg_;
     }
 
     bool IsLrAsTempRegEnabledAndReleased()
@@ -1078,12 +1078,12 @@ public:
 protected:
     void SetFrameSize(size_t size)
     {
-        frame_size_ = size;
+        frameSize_ = size;
     }
 
     size_t GetFrameSize() const
     {
-        return frame_size_;
+        return frameSize_;
     }
 
     static constexpr size_t INVALID_OFFSET = std::numeric_limits<size_t>::max();
@@ -1102,23 +1102,23 @@ protected:
 private:
     ArenaAllocator *allocator_;
     RegistersDescription *regfile_ {nullptr};
-    size_t frame_size_ {0};
+    size_t frameSize_ {0};
 
-    CFrameLayout frame_layout_;
+    CFrameLayout frameLayout_;
 
-    RegMask live_tmp_regs_;
-    VRegMask live_tmp_fp_regs_;
+    RegMask liveTmpRegs_;
+    VRegMask liveTmpFpRegs_;
 
     // In case of AOT compilation, this variable specifies offset from the start of the AOT file.
     // It is needed for accessing to the entrypoints table and AOT table, that lie right before code.
-    size_t code_offset_ {INVALID_OFFSET};
+    size_t codeOffset_ {INVALID_OFFSET};
 
     Target target_ {Arch::NONE};
 
     bool success_ {true};
-    bool js_number_cast_ {false};
+    bool jsNumberCast_ {false};
     // If true, then ScopedTmpReg can use LR as a temp register.
-    bool enable_lr_as_temp_reg_ {false};
+    bool enableLrAsTempReg_ {false};
 };  // Encoder
 
 /**
@@ -1130,14 +1130,14 @@ template <bool LAZY>
 class ScopedTmpRegImpl {
 public:
     explicit ScopedTmpRegImpl(Encoder *encoder) : ScopedTmpRegImpl(encoder, false) {}
-    ScopedTmpRegImpl(Encoder *encoder, bool with_lr) : encoder_(encoder)
+    ScopedTmpRegImpl(Encoder *encoder, bool withLr) : encoder_(encoder)
     {
         if constexpr (!LAZY) {  // NOLINT
-            auto link_reg = encoder->GetTarget().GetLinkReg();
-            with_lr &= encoder->IsLrAsTempRegEnabled();
-            if (with_lr && encoder->IsScratchRegisterReleased(link_reg)) {
-                reg_ = link_reg;
-                encoder->AcquireScratchRegister(link_reg);
+            auto linkReg = encoder->GetTarget().GetLinkReg();
+            withLr &= encoder->IsLrAsTempRegEnabled();
+            if (withLr && encoder->IsScratchRegisterReleased(linkReg)) {
+                reg_ = linkReg;
+                encoder->AcquireScratchRegister(linkReg);
             } else {
                 reg_ = encoder->AcquireScratchRegister(Is64BitsArch(encoder->GetArch()) ? INT64_TYPE : INT32_TYPE);
             }
@@ -1213,10 +1213,10 @@ public:
     void AcquireWithLr()
     {
         ASSERT(!reg_.IsValid());
-        auto link_reg = encoder_->GetTarget().GetLinkReg();
-        if (encoder_->IsLrAsTempRegEnabled() && encoder_->IsScratchRegisterReleased(link_reg)) {
-            reg_ = link_reg;
-            encoder_->AcquireScratchRegister(link_reg);
+        auto linkReg = encoder_->GetTarget().GetLinkReg();
+        if (encoder_->IsLrAsTempRegEnabled() && encoder_->IsScratchRegisterReleased(linkReg)) {
+            reg_ = linkReg;
+            encoder_->AcquireScratchRegister(linkReg);
         } else {
             reg_ = encoder_->AcquireScratchRegister(Is64BitsArch(encoder_->GetArch()) ? INT64_TYPE : INT32_TYPE);
         }

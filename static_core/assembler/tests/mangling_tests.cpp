@@ -29,10 +29,10 @@ TEST(ManglingTests, MangleFunctionName)
     params.emplace_back(Type {"type2", 0}, language);
     params.emplace_back(Type {"type3", 0}, language);
 
-    auto return_type = Type("type4", 0);
+    auto returnType = Type("type4", 0);
 
     std::string name = "Asm.main";
-    ASSERT_EQ(MangleFunctionName(name, params, return_type), "Asm.main:type1;type2;type3;type4;");
+    ASSERT_EQ(MangleFunctionName(name, params, returnType), "Asm.main:type1;type2;type3;type4;");
 }
 
 TEST(ManglingTests, DeMangleFunctionName)

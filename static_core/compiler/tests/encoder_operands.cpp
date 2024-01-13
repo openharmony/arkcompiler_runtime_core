@@ -23,7 +23,7 @@ const uint64_t ITERATION = 20;
 const uint64_t ITERATION = 4000;
 #endif
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
-static inline auto RANDOM_GEN = std::mt19937_64(SEED);
+static inline auto g_randomGen = std::mt19937_64(SEED);
 
 // Encoder header
 #include "optimizer/code_generator/operands.h"
@@ -166,161 +166,161 @@ TEST(Operands, Imm)
     //  Imm holds same data (static cast for un-signed)
 
     for (uint64_t i = 0; i < ITERATION; ++i) {
-        uint8_t u8 = RANDOM_GEN(), u8_z = 0U, u8_min = std::numeric_limits<uint8_t>::min(),
-                u8_max = std::numeric_limits<uint8_t>::max();
-        uint16_t u16 = RANDOM_GEN(), u16_z = 0U, u16_min = std::numeric_limits<uint16_t>::min(),
-                 u16_max = std::numeric_limits<uint16_t>::max();
-        uint32_t u32 = RANDOM_GEN(), u32_z = 0U, u32_min = std::numeric_limits<uint32_t>::min(),
-                 u32_max = std::numeric_limits<uint32_t>::max();
-        uint64_t u64 = RANDOM_GEN(), u64_z = 0U, u64_min = std::numeric_limits<uint64_t>::min(),
-                 u64_max = std::numeric_limits<uint64_t>::max();
+        uint8_t u8 = g_randomGen(), u8Z = 0U, u8Min = std::numeric_limits<uint8_t>::min(),
+                u8Max = std::numeric_limits<uint8_t>::max();
+        uint16_t u16 = g_randomGen(), u16Z = 0U, u16Min = std::numeric_limits<uint16_t>::min(),
+                 u16Max = std::numeric_limits<uint16_t>::max();
+        uint32_t u32 = g_randomGen(), u32Z = 0U, u32Min = std::numeric_limits<uint32_t>::min(),
+                 u32Max = std::numeric_limits<uint32_t>::max();
+        uint64_t u64 = g_randomGen(), u64Z = 0U, u64Min = std::numeric_limits<uint64_t>::min(),
+                 u64Max = std::numeric_limits<uint64_t>::max();
 
-        int8_t i8 = RANDOM_GEN(), i8_z = 0U, i8_min = std::numeric_limits<int8_t>::min(),
-               i8_max = std::numeric_limits<int8_t>::max();
-        int16_t i16 = RANDOM_GEN(), i16_z = 0U, i16_min = std::numeric_limits<int16_t>::min(),
-                i16_max = std::numeric_limits<int16_t>::max();
-        int32_t i32 = RANDOM_GEN(), i32_z = 0U, i32_min = std::numeric_limits<int32_t>::min(),
-                i32_max = std::numeric_limits<int32_t>::max();
-        int64_t i64 = RANDOM_GEN(), i64_z = 0U, i64_min = std::numeric_limits<int64_t>::min(),
-                i64_max = std::numeric_limits<int64_t>::max();
+        int8_t i8 = g_randomGen(), i8Z = 0U, i8Min = std::numeric_limits<int8_t>::min(),
+               i8Max = std::numeric_limits<int8_t>::max();
+        int16_t i16 = g_randomGen(), i16Z = 0U, i16Min = std::numeric_limits<int16_t>::min(),
+                i16Max = std::numeric_limits<int16_t>::max();
+        int32_t i32 = g_randomGen(), i32Z = 0U, i32Min = std::numeric_limits<int32_t>::min(),
+                i32Max = std::numeric_limits<int32_t>::max();
+        int64_t i64 = g_randomGen(), i64Z = 0U, i64Min = std::numeric_limits<int64_t>::min(),
+                i64Max = std::numeric_limits<int64_t>::max();
 
-        float f32 = RANDOM_GEN(), f32_z = 0.0, f32_min = std::numeric_limits<float>::min(),
-              f32_max = std::numeric_limits<float>::max();
-        double f64 = RANDOM_GEN(), f64_z = 0.0, f64_min = std::numeric_limits<double>::min(),
-               f64_max = std::numeric_limits<double>::max();
+        float f32 = g_randomGen(), f32Z = 0.0, f32Min = std::numeric_limits<float>::min(),
+              f32Max = std::numeric_limits<float>::max();
+        double f64 = g_randomGen(), f64Z = 0.0, f64Min = std::numeric_limits<double>::min(),
+               f64Max = std::numeric_limits<double>::max();
 
         // Unsigned part - check across static_cast
 
-        Imm imm_u8(u8), imm_u8_z(u8_z), imm_u8_min(u8_min), imm_u8_max(u8_max);
-        ASSERT_EQ(imm_u8.GetAsInt(), u8);
-        ASSERT_EQ(imm_u8_min.GetAsInt(), u8_min);
-        ASSERT_EQ(imm_u8_max.GetAsInt(), u8_max);
-        ASSERT_EQ(imm_u8_z.GetAsInt(), u8_z);
+        Imm immU8(u8), immU8Z(u8Z), immU8Min(u8Min), immU8Max(u8Max);
+        ASSERT_EQ(immU8.GetAsInt(), u8);
+        ASSERT_EQ(immU8Min.GetAsInt(), u8Min);
+        ASSERT_EQ(immU8Max.GetAsInt(), u8Max);
+        ASSERT_EQ(immU8Z.GetAsInt(), u8Z);
 
-        TypedImm typed_imm_u8(u8), typed_imm_u8_z(u8_z);
-        ASSERT_EQ(typed_imm_u8_z.GetType(), INT8_TYPE);
-        ASSERT_EQ(typed_imm_u8.GetType(), INT8_TYPE);
-        ASSERT_EQ(typed_imm_u8_z.GetImm().GetAsInt(), u8_z);
-        ASSERT_EQ(typed_imm_u8.GetImm().GetAsInt(), u8);
+        TypedImm typedImmU8(u8), typedImmU8Z(u8Z);
+        ASSERT_EQ(typedImmU8Z.GetType(), INT8_TYPE);
+        ASSERT_EQ(typedImmU8.GetType(), INT8_TYPE);
+        ASSERT_EQ(typedImmU8Z.GetImm().GetAsInt(), u8Z);
+        ASSERT_EQ(typedImmU8.GetImm().GetAsInt(), u8);
 
-        Imm imm_u16(u16), imm_u16_z(u16_z), imm_u16_min(u16_min), imm_u16_max(u16_max);
-        ASSERT_EQ(imm_u16.GetAsInt(), u16);
-        ASSERT_EQ(imm_u16_min.GetAsInt(), u16_min);
-        ASSERT_EQ(imm_u16_max.GetAsInt(), u16_max);
-        ASSERT_EQ(imm_u16_z.GetAsInt(), u16_z);
+        Imm immU16(u16), immU16Z(u16Z), immU16Min(u16Min), immU16Max(u16Max);
+        ASSERT_EQ(immU16.GetAsInt(), u16);
+        ASSERT_EQ(immU16Min.GetAsInt(), u16Min);
+        ASSERT_EQ(immU16Max.GetAsInt(), u16Max);
+        ASSERT_EQ(immU16Z.GetAsInt(), u16Z);
 
-        TypedImm typed_imm_u16(u16), typed_imm_u16_z(u16_z);
-        ASSERT_EQ(typed_imm_u16_z.GetType(), INT16_TYPE);
-        ASSERT_EQ(typed_imm_u16.GetType(), INT16_TYPE);
-        ASSERT_EQ(typed_imm_u16_z.GetImm().GetAsInt(), u16_z);
-        ASSERT_EQ(typed_imm_u16.GetImm().GetAsInt(), u16);
+        TypedImm typedImmU16(u16), typedImmU16Z(u16Z);
+        ASSERT_EQ(typedImmU16Z.GetType(), INT16_TYPE);
+        ASSERT_EQ(typedImmU16.GetType(), INT16_TYPE);
+        ASSERT_EQ(typedImmU16Z.GetImm().GetAsInt(), u16Z);
+        ASSERT_EQ(typedImmU16.GetImm().GetAsInt(), u16);
 
-        Imm imm_u32(u32), imm_u32_z(u32_z), imm_u32_min(u32_min), imm_u32_max(u32_max);
-        ASSERT_EQ(imm_u32.GetAsInt(), u32);
-        ASSERT_EQ(imm_u32_min.GetAsInt(), u32_min);
-        ASSERT_EQ(imm_u32_max.GetAsInt(), u32_max);
-        ASSERT_EQ(imm_u32_z.GetAsInt(), u32_z);
+        Imm immU32(u32), immU32Z(u32Z), immU32Min(u32Min), immU32Max(u32Max);
+        ASSERT_EQ(immU32.GetAsInt(), u32);
+        ASSERT_EQ(immU32Min.GetAsInt(), u32Min);
+        ASSERT_EQ(immU32Max.GetAsInt(), u32Max);
+        ASSERT_EQ(immU32Z.GetAsInt(), u32Z);
 
-        TypedImm typed_imm_u32(u32), typed_imm_u32_z(u32_z);
-        ASSERT_EQ(typed_imm_u32_z.GetType(), INT32_TYPE);
-        ASSERT_EQ(typed_imm_u32.GetType(), INT32_TYPE);
-        ASSERT_EQ(typed_imm_u32_z.GetImm().GetAsInt(), u32_z);
-        ASSERT_EQ(typed_imm_u32.GetImm().GetAsInt(), u32);
+        TypedImm typedImmU32(u32), typedImmU32Z(u32Z);
+        ASSERT_EQ(typedImmU32Z.GetType(), INT32_TYPE);
+        ASSERT_EQ(typedImmU32.GetType(), INT32_TYPE);
+        ASSERT_EQ(typedImmU32Z.GetImm().GetAsInt(), u32Z);
+        ASSERT_EQ(typedImmU32.GetImm().GetAsInt(), u32);
 
-        Imm imm_u64(u64), imm_u64_z(u64_z), imm_u64_min(u64_min), imm_u64_max(u64_max);
-        ASSERT_EQ(imm_u64.GetAsInt(), u64);
-        ASSERT_EQ(imm_u64_min.GetAsInt(), u64_min);
-        ASSERT_EQ(imm_u64_max.GetAsInt(), u64_max);
-        ASSERT_EQ(imm_u64_z.GetAsInt(), u64_z);
+        Imm immU64(u64), immU64Z(u64Z), immU64Min(u64Min), immU64Max(u64Max);
+        ASSERT_EQ(immU64.GetAsInt(), u64);
+        ASSERT_EQ(immU64Min.GetAsInt(), u64Min);
+        ASSERT_EQ(immU64Max.GetAsInt(), u64Max);
+        ASSERT_EQ(immU64Z.GetAsInt(), u64Z);
 
-        TypedImm typed_imm_u64(u64), typed_imm_u64_z(u64_z);
-        ASSERT_EQ(typed_imm_u64_z.GetType(), INT64_TYPE);
-        ASSERT_EQ(typed_imm_u64.GetType(), INT64_TYPE);
-        ASSERT_EQ(typed_imm_u64_z.GetImm().GetAsInt(), u64_z);
-        ASSERT_EQ(typed_imm_u64.GetImm().GetAsInt(), u64);
+        TypedImm typedImmU64(u64), typedImmU64Z(u64Z);
+        ASSERT_EQ(typedImmU64Z.GetType(), INT64_TYPE);
+        ASSERT_EQ(typedImmU64.GetType(), INT64_TYPE);
+        ASSERT_EQ(typedImmU64Z.GetImm().GetAsInt(), u64Z);
+        ASSERT_EQ(typedImmU64.GetImm().GetAsInt(), u64);
 
         // Signed part
 
-        Imm imm_i8(i8), imm_i8_z(i8_z), imm_i8_min(i8_min), imm_i8_max(i8_max);
-        ASSERT_EQ(imm_i8.GetAsInt(), i8);
-        ASSERT_EQ(imm_i8_min.GetAsInt(), i8_min);
-        ASSERT_EQ(imm_i8_max.GetAsInt(), i8_max);
-        ASSERT_EQ(imm_i8_z.GetAsInt(), i8_z);
+        Imm immI8(i8), immI8Z(i8Z), immI8Min(i8Min), immI8Max(i8Max);
+        ASSERT_EQ(immI8.GetAsInt(), i8);
+        ASSERT_EQ(immI8Min.GetAsInt(), i8Min);
+        ASSERT_EQ(immI8Max.GetAsInt(), i8Max);
+        ASSERT_EQ(immI8Z.GetAsInt(), i8Z);
 
-        TypedImm typed_imm_i8(i8), typed_imm_i8_z(i8_z);
-        ASSERT_EQ(typed_imm_i8_z.GetType(), INT8_TYPE);
-        ASSERT_EQ(typed_imm_i8.GetType(), INT8_TYPE);
-        ASSERT_EQ(typed_imm_i8_z.GetImm().GetAsInt(), i8_z);
-        ASSERT_EQ(typed_imm_i8.GetImm().GetAsInt(), i8);
+        TypedImm typedImmI8(i8), typedImmI8Z(i8Z);
+        ASSERT_EQ(typedImmI8Z.GetType(), INT8_TYPE);
+        ASSERT_EQ(typedImmI8.GetType(), INT8_TYPE);
+        ASSERT_EQ(typedImmI8Z.GetImm().GetAsInt(), i8Z);
+        ASSERT_EQ(typedImmI8.GetImm().GetAsInt(), i8);
 
-        Imm imm_i16(i16), imm_i16_z(i16_z), imm_i16_min(i16_min), imm_i16_max(i16_max);
-        ASSERT_EQ(imm_i16.GetAsInt(), i16);
-        ASSERT_EQ(imm_i16_min.GetAsInt(), i16_min);
-        ASSERT_EQ(imm_i16_max.GetAsInt(), i16_max);
-        ASSERT_EQ(imm_i16_z.GetAsInt(), i16_z);
+        Imm immI16(i16), immI16Z(i16Z), immI16Min(i16Min), immI16Max(i16Max);
+        ASSERT_EQ(immI16.GetAsInt(), i16);
+        ASSERT_EQ(immI16Min.GetAsInt(), i16Min);
+        ASSERT_EQ(immI16Max.GetAsInt(), i16Max);
+        ASSERT_EQ(immI16Z.GetAsInt(), i16Z);
 
-        TypedImm typed_imm_i16(i16), typed_imm_i16_z(i16_z);
-        ASSERT_EQ(typed_imm_i16_z.GetType(), INT16_TYPE);
-        ASSERT_EQ(typed_imm_i16.GetType(), INT16_TYPE);
-        ASSERT_EQ(typed_imm_i16_z.GetImm().GetAsInt(), i16_z);
-        ASSERT_EQ(typed_imm_i16.GetImm().GetAsInt(), i16);
+        TypedImm typedImmI16(i16), typedImmI16Z(i16Z);
+        ASSERT_EQ(typedImmI16Z.GetType(), INT16_TYPE);
+        ASSERT_EQ(typedImmI16.GetType(), INT16_TYPE);
+        ASSERT_EQ(typedImmI16Z.GetImm().GetAsInt(), i16Z);
+        ASSERT_EQ(typedImmI16.GetImm().GetAsInt(), i16);
 
-        Imm imm_i32(i32), imm_i32_z(i32_z), imm_i32_min(i32_min), imm_i32_max(i32_max);
-        ASSERT_EQ(imm_i32.GetAsInt(), i32);
-        ASSERT_EQ(imm_i32_min.GetAsInt(), i32_min);
-        ASSERT_EQ(imm_i32_max.GetAsInt(), i32_max);
-        ASSERT_EQ(imm_i32_z.GetAsInt(), i32_z);
+        Imm immI32(i32), immI32Z(i32Z), immI32Min(i32Min), immI32Max(i32Max);
+        ASSERT_EQ(immI32.GetAsInt(), i32);
+        ASSERT_EQ(immI32Min.GetAsInt(), i32Min);
+        ASSERT_EQ(immI32Max.GetAsInt(), i32Max);
+        ASSERT_EQ(immI32Z.GetAsInt(), i32Z);
 
-        TypedImm typed_imm_i32(i32), typed_imm_i32_z(i32_z);
-        ASSERT_EQ(typed_imm_i32_z.GetType(), INT32_TYPE);
-        ASSERT_EQ(typed_imm_i32.GetType(), INT32_TYPE);
-        ASSERT_EQ(typed_imm_i32_z.GetImm().GetAsInt(), i32_z);
-        ASSERT_EQ(typed_imm_i32.GetImm().GetAsInt(), i32);
+        TypedImm typedImmI32(i32), typedImmI32Z(i32Z);
+        ASSERT_EQ(typedImmI32Z.GetType(), INT32_TYPE);
+        ASSERT_EQ(typedImmI32.GetType(), INT32_TYPE);
+        ASSERT_EQ(typedImmI32Z.GetImm().GetAsInt(), i32Z);
+        ASSERT_EQ(typedImmI32.GetImm().GetAsInt(), i32);
 
-        Imm imm_i64(i64), imm_i64_z(i64_z), imm_i64_min(i64_min), imm_i64_max(i64_max);
-        ASSERT_EQ(imm_i64.GetAsInt(), i64);
-        ASSERT_EQ(imm_i64_min.GetAsInt(), i64_min);
-        ASSERT_EQ(imm_i64_max.GetAsInt(), i64_max);
-        ASSERT_EQ(imm_i64_z.GetAsInt(), i64_z);
+        Imm immI64(i64), immI64Z(i64Z), immI64Min(i64Min), immI64Max(i64Max);
+        ASSERT_EQ(immI64.GetAsInt(), i64);
+        ASSERT_EQ(immI64Min.GetAsInt(), i64Min);
+        ASSERT_EQ(immI64Max.GetAsInt(), i64Max);
+        ASSERT_EQ(immI64Z.GetAsInt(), i64Z);
 
-        TypedImm typed_imm_i64(i64), typed_imm_i64_z(i64_z);
-        ASSERT_EQ(typed_imm_i64_z.GetType(), INT64_TYPE);
-        ASSERT_EQ(typed_imm_i64.GetType(), INT64_TYPE);
-        ASSERT_EQ(typed_imm_i64_z.GetImm().GetAsInt(), i64_z);
-        ASSERT_EQ(typed_imm_i64.GetImm().GetAsInt(), i64);
+        TypedImm typedImmI64(i64), typedImmI64Z(i64Z);
+        ASSERT_EQ(typedImmI64Z.GetType(), INT64_TYPE);
+        ASSERT_EQ(typedImmI64.GetType(), INT64_TYPE);
+        ASSERT_EQ(typedImmI64Z.GetImm().GetAsInt(), i64Z);
+        ASSERT_EQ(typedImmI64.GetImm().GetAsInt(), i64);
 
         // Float test:
-        Imm imm_f32(f32), imm_f32_z(f32_z), imm_f32_min(f32_min), imm_f32_max(f32_max);
-        ASSERT_EQ(imm_f32.GetAsFloat(), f32);
-        ASSERT_EQ(imm_f32_min.GetAsFloat(), f32_min);
-        ASSERT_EQ(imm_f32_max.GetAsFloat(), f32_max);
-        ASSERT_EQ(imm_f32_z.GetAsFloat(), f32_z);
-        ASSERT_EQ(bit_cast<float>(static_cast<int32_t>(imm_f32.GetRawValue())), f32);
-        ASSERT_EQ(bit_cast<float>(static_cast<int32_t>(imm_f32_min.GetRawValue())), f32_min);
-        ASSERT_EQ(bit_cast<float>(static_cast<int32_t>(imm_f32_max.GetRawValue())), f32_max);
-        ASSERT_EQ(bit_cast<float>(static_cast<int32_t>(imm_f32_z.GetRawValue())), f32_z);
+        Imm immF32(f32), immF32Z(f32Z), immF32Min(f32Min), immF32Max(f32Max);
+        ASSERT_EQ(immF32.GetAsFloat(), f32);
+        ASSERT_EQ(immF32Min.GetAsFloat(), f32Min);
+        ASSERT_EQ(immF32Max.GetAsFloat(), f32Max);
+        ASSERT_EQ(immF32Z.GetAsFloat(), f32Z);
+        ASSERT_EQ(bit_cast<float>(static_cast<int32_t>(immF32.GetRawValue())), f32);
+        ASSERT_EQ(bit_cast<float>(static_cast<int32_t>(immF32Min.GetRawValue())), f32Min);
+        ASSERT_EQ(bit_cast<float>(static_cast<int32_t>(immF32Max.GetRawValue())), f32Max);
+        ASSERT_EQ(bit_cast<float>(static_cast<int32_t>(immF32Z.GetRawValue())), f32Z);
 
-        TypedImm typed_imm_f32(f32), typed_imm_f32_z(f32_z);
-        ASSERT_EQ(typed_imm_f32_z.GetType(), FLOAT32_TYPE);
-        ASSERT_EQ(typed_imm_f32.GetType(), FLOAT32_TYPE);
-        ASSERT_EQ(typed_imm_f32_z.GetImm().GetAsFloat(), f32_z);
-        ASSERT_EQ(typed_imm_f32.GetImm().GetAsFloat(), f32);
+        TypedImm typedImmF32(f32), typedImmF32Z(f32Z);
+        ASSERT_EQ(typedImmF32Z.GetType(), FLOAT32_TYPE);
+        ASSERT_EQ(typedImmF32.GetType(), FLOAT32_TYPE);
+        ASSERT_EQ(typedImmF32Z.GetImm().GetAsFloat(), f32Z);
+        ASSERT_EQ(typedImmF32.GetImm().GetAsFloat(), f32);
 
-        Imm imm_f64(f64), imm_f64_z(f64_z), imm_f64_min(f64_min), imm_f64_max(f64_max);
-        ASSERT_EQ(imm_f64.GetAsDouble(), f64);
-        ASSERT_EQ(imm_f64_min.GetAsDouble(), f64_min);
-        ASSERT_EQ(imm_f64_max.GetAsDouble(), f64_max);
-        ASSERT_EQ(imm_f64_z.GetAsDouble(), f64_z);
-        ASSERT_EQ(bit_cast<double>(imm_f64.GetRawValue()), f64);
-        ASSERT_EQ(bit_cast<double>(imm_f64_min.GetRawValue()), f64_min);
-        ASSERT_EQ(bit_cast<double>(imm_f64_max.GetRawValue()), f64_max);
-        ASSERT_EQ(bit_cast<double>(imm_f64_z.GetRawValue()), f64_z);
+        Imm immF64(f64), immF64Z(f64Z), immF64Min(f64Min), immF64Max(f64Max);
+        ASSERT_EQ(immF64.GetAsDouble(), f64);
+        ASSERT_EQ(immF64Min.GetAsDouble(), f64Min);
+        ASSERT_EQ(immF64Max.GetAsDouble(), f64Max);
+        ASSERT_EQ(immF64Z.GetAsDouble(), f64Z);
+        ASSERT_EQ(bit_cast<double>(immF64.GetRawValue()), f64);
+        ASSERT_EQ(bit_cast<double>(immF64Min.GetRawValue()), f64Min);
+        ASSERT_EQ(bit_cast<double>(immF64Max.GetRawValue()), f64Max);
+        ASSERT_EQ(bit_cast<double>(immF64Z.GetRawValue()), f64Z);
 
-        TypedImm typed_imm_f64(f64), typed_imm_f64_z(f64_z);
-        ASSERT_EQ(typed_imm_f64_z.GetType(), FLOAT64_TYPE);
-        ASSERT_EQ(typed_imm_f64.GetType(), FLOAT64_TYPE);
-        ASSERT_EQ(typed_imm_f64_z.GetImm().GetAsDouble(), f64_z);
-        ASSERT_EQ(typed_imm_f64.GetImm().GetAsDouble(), f64);
+        TypedImm typedImmF64(f64), typedImmF64Z(f64Z);
+        ASSERT_EQ(typedImmF64Z.GetType(), FLOAT64_TYPE);
+        ASSERT_EQ(typedImmF64.GetType(), FLOAT64_TYPE);
+        ASSERT_EQ(typedImmF64Z.GetImm().GetAsDouble(), f64Z);
+        ASSERT_EQ(typedImmF64.GetImm().GetAsDouble(), f64);
     }
 
 #ifndef NDEBUG
@@ -334,7 +334,7 @@ TEST(Operands, Imm)
 
 TEST(Operands, MemRef)
 {
-    Reg r1(1U, INT64_TYPE), r2(2U, INT64_TYPE), r_i(INVALID_REG_ID, INVALID_TYPE);
+    Reg r1(1U, INT64_TYPE), r2(2U, INT64_TYPE), rI(INVALID_REG_ID, INVALID_TYPE);
     ssize_t i1(0x0U), i2(0x2U);
 
     // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)

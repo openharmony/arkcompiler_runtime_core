@@ -21,10 +21,10 @@
 
 namespace panda::mem {
 
-CardTable::CardTable(InternalAllocatorPtr internal_allocator, uintptr_t min_address, size_t size)
-    : min_address_(min_address),
-      cards_count_((size / CARD_SIZE) + (size % CARD_SIZE != 0 ? 1 : 0)),
-      internal_allocator_(internal_allocator)
+CardTable::CardTable(InternalAllocatorPtr internalAllocator, uintptr_t minAddress, size_t size)
+    : minAddress_(minAddress),
+      cardsCount_((size / CARD_SIZE) + (size % CARD_SIZE != 0 ? 1 : 0)),
+      internalAllocator_(internalAllocator)
 {
     /**
      * We use this assumption in compiler's post barriers in case of store pair.
@@ -39,33 +39,33 @@ CardTable::CardTable(InternalAllocatorPtr internal_allocator, uintptr_t min_addr
      * condition, but if `min_address` is aligned at `card_size`, it may be simplified
      * to `2nd_store_ptr % card_size == 0`.
      */
-    ASSERT(IsAligned<GetCardSize()>(min_address));
+    ASSERT(IsAligned<GetCardSize()>(minAddress));
 }
 
 CardTable::~CardTable()
 {
     ASSERT(cards_ != nullptr);
-    internal_allocator_->Free(cards_);
+    internalAllocator_->Free(cards_);
 }
 
 void CardTable::Initialize()
 {
-    trace::ScopedTrace scoped_trace(__PRETTY_FUNCTION__);
+    trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
     if (cards_ != nullptr) {
         LOG(FATAL, GC) << "try to initialize already initialized CardTable";
     }
-    cards_ = static_cast<CardPtr>(internal_allocator_->Alloc(cards_count_));
-    ClearCards(cards_, cards_count_);
+    cards_ = static_cast<CardPtr>(internalAllocator_->Alloc(cardsCount_));
+    ClearCards(cards_, cardsCount_);
     ASSERT(cards_ != nullptr);
 }
 
-void CardTable::ClearCards(CardPtr start, size_t card_count)
+void CardTable::ClearCards(CardPtr start, size_t cardCount)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    CardPtr end = start + card_count;
+    CardPtr end = start + cardCount;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (auto *cur_card = start; cur_card < end; ++cur_card) {
-        cur_card->Clear();
+    for (auto *curCard = start; curCard < end; ++curCard) {
+        curCard->Clear();
     }
 }
 
@@ -95,25 +95,25 @@ void CardTable::ClearCard(uintptr_t addr)
 
 void CardTable::ClearAll()
 {
-    ClearCards(cards_, cards_count_);
+    ClearCards(cards_, cardsCount_);
 }
 
-void CardTable::ClearCardRange(uintptr_t begin_addr, uintptr_t end_addr)
+void CardTable::ClearCardRange(uintptr_t beginAddr, uintptr_t endAddr)
 {
-    ASSERT((begin_addr - min_address_) % CARD_SIZE == 0);
-    size_t cards_count = (end_addr - begin_addr) / CARD_SIZE;
-    CardPtr start = GetCardPtr(begin_addr);
-    ClearCards(start, cards_count);
+    ASSERT((beginAddr - minAddress_) % CARD_SIZE == 0);
+    size_t cardsCount = (endAddr - beginAddr) / CARD_SIZE;
+    CardPtr start = GetCardPtr(beginAddr);
+    ClearCards(start, cardsCount);
 }
 
 uintptr_t CardTable::GetCardStartAddress(CardPtr card) const
 {
-    return min_address_ + (ToUintPtr(card) - ToUintPtr(cards_)) * CARD_SIZE;
+    return minAddress_ + (ToUintPtr(card) - ToUintPtr(cards_)) * CARD_SIZE;
 }
 
 uintptr_t CardTable::GetCardEndAddress(CardPtr card) const
 {
-    return min_address_ + (ToUintPtr(card + 1) - ToUintPtr(cards_)) * CARD_SIZE - 1;
+    return minAddress_ + (ToUintPtr(card + 1) - ToUintPtr(cards_)) * CARD_SIZE - 1;
 }
 
 MemRange CardTable::GetMemoryRange(CardPtr card) const
@@ -168,20 +168,20 @@ void CardTable::Card::SetYoung()
 
 CardTable::CardPtr CardTable::GetCardPtr(uintptr_t addr) const
 {
-    ASSERT(addr >= min_address_);
-    ASSERT(addr < min_address_ + cards_count_ * CARD_SIZE);
-    auto card = static_cast<CardPtr>(ToVoidPtr(ToUintPtr(cards_) + ((addr - min_address_) >> LOG2_CARD_SIZE)));
+    ASSERT(addr >= minAddress_);
+    ASSERT(addr < minAddress_ + cardsCount_ * CARD_SIZE);
+    auto card = static_cast<CardPtr>(ToVoidPtr(ToUintPtr(cards_) + ((addr - minAddress_) >> LOG2_CARD_SIZE)));
     return card;
 }
 
-void CardTable::MarkCardsAsYoung(const MemRange &mem_range)
+void CardTable::MarkCardsAsYoung(const MemRange &memRange)
 {
-    CardPtrIterator cur_card = CardPtrIterator(GetCardPtr(mem_range.GetStartAddress()));
-    auto end_card = CardPtrIterator(GetCardPtr(mem_range.GetEndAddress() - 1));
-    while (cur_card != end_card) {
-        (*cur_card)->SetYoung();
-        ++cur_card;
+    CardPtrIterator curCard = CardPtrIterator(GetCardPtr(memRange.GetStartAddress()));
+    auto endCard = CardPtrIterator(GetCardPtr(memRange.GetEndAddress() - 1));
+    while (curCard != endCard) {
+        (*curCard)->SetYoung();
+        ++curCard;
     }
-    (*cur_card)->SetYoung();
+    (*curCard)->SetYoung();
 }
 }  // namespace panda::mem

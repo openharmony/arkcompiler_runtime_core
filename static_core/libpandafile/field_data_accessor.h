@@ -29,7 +29,7 @@ namespace panda::panda_file {
 
 class FieldDataAccessor {
 public:
-    FieldDataAccessor(const File &panda_file, File::EntityId field_id);
+    FieldDataAccessor(const File &pandaFile, File::EntityId fieldId);
 
     ~FieldDataAccessor() = default;
 
@@ -37,78 +37,78 @@ public:
     NO_MOVE_SEMANTIC(FieldDataAccessor);
 
     // quick way to get type id
-    static File::EntityId GetTypeId(const File &panda_file, File::EntityId field_id);
+    static File::EntityId GetTypeId(const File &pandaFile, File::EntityId fieldId);
 
-    static File::EntityId GetNameId(const File &panda_file, File::EntityId field_id);
+    static File::EntityId GetNameId(const File &pandaFile, File::EntityId fieldId);
 
     bool IsExternal() const
     {
-        return is_external_;
+        return isExternal_;
     }
 
     File::EntityId GetClassId() const
     {
-        return File::EntityId(class_off_);
+        return File::EntityId(classOff_);
     }
 
     File::EntityId GetNameId() const
     {
-        return File::EntityId(name_off_);
+        return File::EntityId(nameOff_);
     }
 
     uint32_t GetType() const
     {
-        return type_off_;
+        return typeOff_;
     }
 
     uint32_t GetAccessFlags() const
     {
-        return access_flags_;
+        return accessFlags_;
     }
 
     bool IsStatic() const
     {
-        return (access_flags_ & ACC_STATIC) != 0;
+        return (accessFlags_ & ACC_STATIC) != 0;
     }
 
     bool IsVolatile() const
     {
-        return (access_flags_ & ACC_VOLATILE) != 0;
+        return (accessFlags_ & ACC_VOLATILE) != 0;
     }
 
     bool IsPublic() const
     {
-        return (access_flags_ & ACC_PUBLIC) != 0;
+        return (accessFlags_ & ACC_PUBLIC) != 0;
     }
 
     bool IsPrivate() const
     {
-        return (access_flags_ & ACC_PRIVATE) != 0;
+        return (accessFlags_ & ACC_PRIVATE) != 0;
     }
 
     bool IsProtected() const
     {
-        return (access_flags_ & ACC_PROTECTED) != 0;
+        return (accessFlags_ & ACC_PROTECTED) != 0;
     }
 
     bool IsFinal() const
     {
-        return (access_flags_ & ACC_FINAL) != 0;
+        return (accessFlags_ & ACC_FINAL) != 0;
     }
 
     bool IsTransient() const
     {
-        return (access_flags_ & ACC_TRANSIENT) != 0;
+        return (accessFlags_ & ACC_TRANSIENT) != 0;
     }
 
     bool IsSynthetic() const
     {
-        return (access_flags_ & ACC_SYNTHETIC) != 0;
+        return (accessFlags_ & ACC_SYNTHETIC) != 0;
     }
 
     bool IsEnum() const
     {
-        return (access_flags_ & ACC_ENUM) != 0;
+        return (accessFlags_ & ACC_ENUM) != 0;
     }
 
     template <class T>
@@ -143,12 +143,12 @@ public:
 
     const File &GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     File::EntityId GetFieldId() const
     {
-        return field_id_;
+        return fieldId_;
     }
 
     uint32_t GetAnnotationsNumber();
@@ -171,21 +171,21 @@ private:
 
     void SkipTypeAnnotations();
 
-    const File &panda_file_;
-    File::EntityId field_id_;
+    const File &pandaFile_;
+    File::EntityId fieldId_;
 
-    bool is_external_;
+    bool isExternal_;
 
-    uint32_t class_off_;
-    uint32_t type_off_;
-    uint32_t name_off_;
-    uint32_t access_flags_;
+    uint32_t classOff_;
+    uint32_t typeOff_;
+    uint32_t nameOff_;
+    uint32_t accessFlags_;
 
-    Span<const uint8_t> tagged_values_sp_ {nullptr, nullptr};
-    Span<const uint8_t> runtime_annotations_sp_ {nullptr, nullptr};
-    Span<const uint8_t> annotations_sp_ {nullptr, nullptr};
-    Span<const uint8_t> runtime_type_annotations_sp_ {nullptr, nullptr};
-    Span<const uint8_t> type_annotations_sp_ {nullptr, nullptr};
+    Span<const uint8_t> taggedValuesSp_ {nullptr, nullptr};
+    Span<const uint8_t> runtimeAnnotationsSp_ {nullptr, nullptr};
+    Span<const uint8_t> annotationsSp_ {nullptr, nullptr};
+    Span<const uint8_t> runtimeTypeAnnotationsSp_ {nullptr, nullptr};
+    Span<const uint8_t> typeAnnotationsSp_ {nullptr, nullptr};
 
     size_t size_;
 };

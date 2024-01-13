@@ -109,7 +109,7 @@ int LocateFile(ZipArchiveHandle &handle, const char *filename)
 
 int GetCurrentFileInfo(ZipArchiveHandle &handle, EntryFileStat *entry)
 {
-    int err = unzGetCurrentFileInfo(handle, &entry->file_stat, nullptr, 0, nullptr, 0, nullptr, 0);
+    int err = unzGetCurrentFileInfo(handle, &entry->fileStat, nullptr, 0, nullptr, 0, nullptr, 0);
     if (err != UNZ_OK) {
         LOG(ERROR, ZIPARCHIVE) << "unzGetCurrentFileInfo failed!";
         return ZIPARCHIVE_ERR;
@@ -142,9 +142,9 @@ int CloseCurrentFile(ZipArchiveHandle &handle)
     return ZIPARCHIVE_OK;
 }
 
-int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t buf_size)
+int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t bufSize)
 {
-    int size = unzReadCurrentFile(handle, buf, buf_size);
+    int size = unzReadCurrentFile(handle, buf, bufSize);
     if (size < 0) {
         LOG(ERROR, ZIPARCHIVE) << "ExtractToMemory failed!";
         return ZIPARCHIVE_ERR;
@@ -153,7 +153,7 @@ int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t buf_size)
     return ZIPARCHIVE_OK;
 }
 
-int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void *pbuf, size_t buf_size, int append,
+int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void *pbuf, size_t bufSize, int append,
                            int level)
 {
     zipFile zfile = nullptr;
@@ -169,7 +169,7 @@ int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void
         LOG(ERROR, ZIPARCHIVE) << "zipOpenNewFileInZip failed!, zipname is" << zipname << ", filename is " << filename;
         return ZIPARCHIVE_ERR;
     }
-    err = zipWriteInFileInZip(zfile, pbuf, buf_size);
+    err = zipWriteInFileInZip(zfile, pbuf, bufSize);
     if (err != UNZ_OK) {
         LOG(ERROR, ZIPARCHIVE) << "zipWriteInFileInZip failed!, zipname is" << zipname << ", filename is " << filename;
         success = ZIPARCHIVE_ERR;

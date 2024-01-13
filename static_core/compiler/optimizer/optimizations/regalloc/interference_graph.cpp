@@ -24,17 +24,17 @@ namespace panda::compiler {
 bool GraphMatrix::AddEdge(unsigned a, unsigned b)
 {
     auto it = matrix_.begin() + FindEdge(a, b);
-    bool old_val = *it;
+    bool oldVal = *it;
     *it = true;
-    return old_val;
+    return oldVal;
 }
 
 bool GraphMatrix::AddAffinityEdge(unsigned a, unsigned b)
 {
     auto it = matrix_.begin() + FindAffinityEdge(a, b);
-    bool old_val = *it;
+    bool oldVal = *it;
     *it = true;
-    return old_val;
+    return oldVal;
 }
 
 // -------------------------------------------------------
@@ -96,10 +96,10 @@ ArenaVector<unsigned> InterferenceGraph::LexBFS() const
     }
 
     // Control sub-sequences boundaries in stack maner
-    SmallVector<unsigned, DEFAULT_BOUNDARY_STACK> boundary_stack;
-    boundary_stack.reserve(num);
-    boundary_stack.push_back(num);  // Sentinel
-    unsigned pos = 0;               // Initialy we have set S of all elements
+    SmallVector<unsigned, DEFAULT_BOUNDARY_STACK> boundaryStack;
+    boundaryStack.reserve(num);
+    boundaryStack.push_back(num);  // Sentinel
+    unsigned pos = 0;              // Initialy we have set S of all elements
 
     while (true) {
         ASSERT(pos < out.size());
@@ -107,26 +107,26 @@ ArenaVector<unsigned> InterferenceGraph::LexBFS() const
         pos++;
 
         // Check for boundaries colapse
-        ASSERT(!boundary_stack.empty());
-        auto prev_end = boundary_stack.back();
-        ASSERT(pos <= prev_end);
-        if (pos == prev_end) {
+        ASSERT(!boundaryStack.empty());
+        auto prevEnd = boundaryStack.back();
+        ASSERT(pos <= prevEnd);
+        if (pos == prevEnd) {
             if (pos == num) {
                 break;
             }
-            boundary_stack.resize(boundary_stack.size() - 1);
-            ASSERT(!boundary_stack.empty());
-            prev_end = boundary_stack.back();
+            boundaryStack.resize(boundaryStack.size() - 1);
+            ASSERT(!boundaryStack.empty());
+            prevEnd = boundaryStack.back();
         }
 
         // Partition on 2 groups: adjacent and not adjacent(last)
-        ASSERT(pos <= prev_end);
-        auto it = std::stable_partition(out.begin() + pos, out.begin() + prev_end,
+        ASSERT(pos <= prevEnd);
+        auto it = std::stable_partition(out.begin() + pos, out.begin() + prevEnd,
                                         [id, &out, this](unsigned val) { return HasEdge(id, out[val]); });
         auto pivot = static_cast<unsigned>(std::distance(out.begin(), it));
         // Split group if needed
-        if (pivot > pos && pivot != prev_end) {
-            boundary_stack.push_back(pivot);
+        if (pivot > pos && pivot != prevEnd) {
+            boundaryStack.push_back(pivot);
         }
     }
 
@@ -141,8 +141,8 @@ ArenaVector<unsigned> InterferenceGraph::GetOrderedNodesIds() const
     std::iota(out.begin(), out.end(), 0);
     // If spill weights were counted, prefer nodes with higher weight, to increase their chances to be colored
     if (IsUsedSpillWeight()) {
-        std::sort(out.begin(), out.end(), [&](unsigned lhs_id, unsigned rhs_id) {
-            return GetNode(lhs_id).GetSpillWeight() > GetNode(rhs_id).GetSpillWeight();
+        std::sort(out.begin(), out.end(), [&](unsigned lhsId, unsigned rhsId) {
+            return GetNode(lhsId).GetSpillWeight() > GetNode(rhsId).GetSpillWeight();
         });
     }
     return out;
@@ -155,21 +155,21 @@ constexpr size_t DEFAULT_VECTOR_SIZE = 64;
 bool InterferenceGraph::IsChordal() const
 {
     const auto &peo = LexBFS();
-    SmallVector<Register, DEFAULT_VECTOR_SIZE> processed_nbr;
+    SmallVector<Register, DEFAULT_VECTOR_SIZE> processedNbr;
 
     for (size_t i = 0; i < peo.size(); i++) {
-        processed_nbr.clear();
+        processedNbr.clear();
 
         // Collect processed neighbors
         for (size_t j = 0; j < i; j++) {
             if (HasEdge(peo[i], peo[j])) {
-                processed_nbr.push_back(j);
+                processedNbr.push_back(j);
             }
         }
 
         // Check that all processed neighbors in clique
-        for (auto nbr1 : processed_nbr) {
-            for (auto nbr2 : processed_nbr) {
+        for (auto nbr1 : processedNbr) {
+            for (auto nbr2 : processedNbr) {
                 if (nbr1 != nbr2 && !HasEdge(peo[nbr1], peo[nbr2])) {
                     return false;
                 }
@@ -198,12 +198,12 @@ const char *GetNodeShape(const InterferenceGraph &ig, unsigned i)
 }
 }  // namespace
 
-void InterferenceGraph::Dump(const std::string &name, bool skip_physical, std::ostream &out) const
+void InterferenceGraph::Dump(const std::string &name, bool skipPhysical, std::ostream &out) const
 {
-    auto transformed_name = name;
-    std::replace(transformed_name.begin(), transformed_name.end(), ':', '_');
+    auto transformedName = name;
+    std::replace(transformedName.begin(), transformedName.end(), ':', '_');
     out << "Nodes: " << Size() << "\n\n"
-        << "\ngraph " << transformed_name << " {\nnode [colorscheme=spectral9]\n";
+        << "\ngraph " << transformedName << " {\nnode [colorscheme=spectral9]\n";
     auto size = Size();
     if (size == 0) {
         out << "}\n";
@@ -213,18 +213,18 @@ void InterferenceGraph::Dump(const std::string &name, bool skip_physical, std::o
     // Map to colors
     std::array<Register, std::numeric_limits<Register>::max()> colors {};
     colors.fill(INVALID_REG);
-    Register cur_color = 0;
+    Register curColor = 0;
 
     for (auto &node : GetNodes()) {
-        if (!(skip_physical && node.IsPhysical()) && colors[node.GetColor()] == INVALID_REG) {
-            colors[node.GetColor()] = cur_color;
-            cur_color++;
+        if (!(skipPhysical && node.IsPhysical()) && colors[node.GetColor()] == INVALID_REG) {
+            colors[node.GetColor()] = curColor;
+            curColor++;
         }
     }
 
     // Print header
     for (unsigned i = 0; i < size; i++) {
-        if (skip_physical && GetNode(i).IsPhysical()) {
+        if (skipPhysical && GetNode(i).IsPhysical()) {
             continue;
         }
         auto color = GetNode(i).GetColor();
@@ -233,24 +233,24 @@ void InterferenceGraph::Dump(const std::string &name, bool skip_physical, std::o
         out << "\", shape=\"" << GetNodeShape(*this, i) << "\"]\n";
     }
 
-    auto edge_printer = [this, &out, skip_physical](auto node_num) {
-        for (unsigned j = 0; j < node_num; j++) {
-            if (!(skip_physical && GetNode(j).IsPhysical()) && HasEdge(node_num, j)) {
-                if (GetNode(node_num).GetColor() == GetNode(j).GetColor() &&
-                    GetNode(node_num).GetColor() != INVALID_REG) {
+    auto edgePrinter = [this, &out, skipPhysical](auto nodeNum) {
+        for (unsigned j = 0; j < nodeNum; j++) {
+            if (!(skipPhysical && GetNode(j).IsPhysical()) && HasEdge(nodeNum, j)) {
+                if (GetNode(nodeNum).GetColor() == GetNode(j).GetColor() &&
+                    GetNode(nodeNum).GetColor() != INVALID_REG) {
                     out << "Error: Same color\n";
                 }
-                out << node_num << "--" << j << "\n";
+                out << nodeNum << "--" << j << "\n";
             }
         }
     };
 
     // Print edges
     for (unsigned i = 1; i < size; i++) {
-        if (skip_physical && GetNode(i).IsPhysical()) {
+        if (skipPhysical && GetNode(i).IsPhysical()) {
             continue;
         }
-        edge_printer(i);
+        edgePrinter(i);
     }
 
     out << "}\n";

@@ -23,7 +23,7 @@ class GlobalObjectLock {
 public:
     explicit GlobalObjectLock(const ObjectHeader *obj);
 
-    bool Wait(bool ignore_interruption = false) const;
+    bool Wait(bool ignoreInterruption = false) const;
 
     bool TimedWait(uint64_t timeout) const;
 

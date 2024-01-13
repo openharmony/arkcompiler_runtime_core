@@ -71,8 +71,8 @@ extern "C" ets_long SkoalaPictureRecorder1nMake([[maybe_unused]] EtsEnv *env, [[
 }
 extern "C" ets_long SkoalaParagraphParagraphBuilder1nMake(
     [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-    [[maybe_unused]] ets_long paragraph_style_ptr /*KNativePointer*/,
-    [[maybe_unused]] ets_long font_collection_ptr /*KNativePointer*/)
+    [[maybe_unused]] ets_long paragraphStylePtr /*KNativePointer*/,
+    [[maybe_unused]] ets_long fontCollectionPtr /*KNativePointer*/)
 {
     return 1;
 }
@@ -104,7 +104,7 @@ extern "C" ets_long SkoalaParagraphTextStyle1nMake([[maybe_unused]] EtsEnv *env,
     return 1;
 }
 extern "C" ets_long SkoalaManagedString1nMake([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                              [[maybe_unused]] ets_byteArray text_str /*KStringPtr*/)
+                                              [[maybe_unused]] ets_byteArray textStr /*KStringPtr*/)
 {
     return 1;
 }
@@ -180,8 +180,8 @@ extern "C" ets_void SkoalaSetPlatformApi([[maybe_unused]] EtsEnv *env, [[maybe_u
 }
 extern "C" ets_void SkoalaCanvas1nDrawDrawable([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
                                                [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                               [[maybe_unused]] ets_long drawable_ptr /*KNativePointer*/,
-                                               [[maybe_unused]] ets_long matrix_arr /*KFloatPtr*/)
+                                               [[maybe_unused]] ets_long drawablePtr /*KNativePointer*/,
+                                               [[maybe_unused]] ets_long matrixArr /*KFloatPtr*/)
 {
     return ets_void();
 }
@@ -197,30 +197,30 @@ extern "C" ets_void SkoalaPaint1nSetColor([[maybe_unused]] EtsEnv *env, [[maybe_
     return ets_void();
 }
 extern "C" ets_void SkoalaCanvas1nDrawOval([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                           [[maybe_unused]] ets_long canvas_ptr /*KNativePointer*/,
+                                           [[maybe_unused]] ets_long canvasPtr /*KNativePointer*/,
                                            [[maybe_unused]] ets_float left, [[maybe_unused]] ets_float top,
                                            [[maybe_unused]] ets_float right, [[maybe_unused]] ets_float bottom,
-                                           [[maybe_unused]] ets_long paint_ptr /*KNativePointer*/)
+                                           [[maybe_unused]] ets_long paintPtr /*KNativePointer*/)
 {
     return ets_void();
 }
 extern "C" ets_void SkoalaParagraphParagraphBuilder1nPushStyle(
     [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass, [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-    [[maybe_unused]] ets_long text_style_ptr /*KNativePointer*/)
+    [[maybe_unused]] ets_long textStylePtr /*KNativePointer*/)
 {
     return ets_void();
 }
 extern "C" ets_void SkoalaParagraphParagraphBuilder1nAddText([[maybe_unused]] EtsEnv *env,
                                                              [[maybe_unused]] ets_class klass,
                                                              [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                             [[maybe_unused]] ets_long text_string /*KStringPtr*/)
+                                                             [[maybe_unused]] ets_long textString /*KStringPtr*/)
 {
     return ets_void();
 }
 extern "C" ets_void SkoalaParagraphFontCollection1nSetDefaultFontManager(
     [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass, [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-    [[maybe_unused]] ets_long font_manager_ptr /*KNativePointer*/,
-    [[maybe_unused]] ets_long default_family_name_str /*KStringPtr*/)
+    [[maybe_unused]] ets_long fontManagerPtr /*KNativePointer*/,
+    [[maybe_unused]] ets_long defaultFamilyNameStr /*KStringPtr*/)
 {
     return ets_void();
 }
@@ -232,7 +232,7 @@ extern "C" ets_void SkoalaParagraphParagraph1nLayout([[maybe_unused]] EtsEnv *en
 }
 extern "C" ets_void SkoalaParagraphParagraph1nPaint([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
                                                     [[maybe_unused]] ets_long ptr /*KNativePointer*/,
-                                                    [[maybe_unused]] ets_long canvas_ptr /*KNativePointer*/,
+                                                    [[maybe_unused]] ets_long canvasPtr /*KNativePointer*/,
                                                     [[maybe_unused]] ets_float x, [[maybe_unused]] ets_float y)
 {
     return ets_void();
@@ -257,7 +257,7 @@ extern "C" ets_void SkoalaImplManagedInvokeFinalizer([[maybe_unused]] EtsEnv *en
     return ets_void();
 }
 extern "C" ets_void SkoalaEnqueueRun([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
-                                     [[maybe_unused]] ets_long redrawer_peer_ptr /*KNativePointer*/)
+                                     [[maybe_unused]] ets_long redrawerPeerPtr /*KNativePointer*/)
 {
     return ets_void();
 }
@@ -265,18 +265,18 @@ extern "C" ets_void SkoalaEnqueueRun([[maybe_unused]] EtsEnv *env, [[maybe_unuse
 
 class EtsVMConfingNapi : public testing::Test {
 public:
-    bool CreateRuntime(const std::string &stdlib_abc, const std::string &path_abc, bool enable_jit,
-                       const std::string &path_an = "")
+    bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, bool enableJit,
+                       const std::string &pathAn = "")
     {
         std::vector<EtsVMOption> options = {{EtsOptionType::EtsLogLevel, "info"},
-                                            {EtsOptionType::EtsBootFile, stdlib_abc.c_str()},
-                                            {EtsOptionType::EtsBootFile, path_abc.c_str()},
-                                            {EtsOptionType::EtsArkFile, path_abc.c_str()},
+                                            {EtsOptionType::EtsBootFile, stdlibAbc.c_str()},
+                                            {EtsOptionType::EtsBootFile, pathAbc.c_str()},
+                                            {EtsOptionType::EtsArkFile, pathAbc.c_str()},
                                             {EtsOptionType::EtsGcTriggerType, "heap-trigger"},
-                                            {enable_jit ? EtsOptionType::EtsJit : EtsOptionType::EtsNoJit, nullptr}};
-        if (!path_an.empty()) {
+                                            {enableJit ? EtsOptionType::EtsJit : EtsOptionType::EtsNoJit, nullptr}};
+        if (!pathAn.empty()) {
             options.emplace_back(EtsVMOption {EtsOptionType::EtsAot, nullptr});
-            options.emplace_back(EtsVMOption {EtsOptionType::EtsAotFile, path_an.c_str()});
+            options.emplace_back(EtsVMOption {EtsOptionType::EtsAotFile, pathAn.c_str()});
         }
 
         EtsVMInitArgs args = {ETS_NAPI_VERSION_1_0, static_cast<ets_int>(options.size()), options.data()};
@@ -350,12 +350,12 @@ public:
              {"_getEngine", nullptr, reinterpret_cast<void *>(GetEngine)},
              {"_skoala_enqueue_run", nullptr, reinterpret_cast<void *>(SkoalaEnqueueRun)}}};
 
-        auto global_class = env_->FindClass("ETSGLOBAL");
-        if (global_class == nullptr) {
+        auto globalClass = env_->FindClass("ETSGLOBAL");
+        if (globalClass == nullptr) {
             return false;
         }
 
-        return env_->RegisterNatives(global_class, impls.data(), impls.size()) == ETS_OK;
+        return env_->RegisterNatives(globalClass, impls.data(), impls.size()) == ETS_OK;
     }
 
     bool DestroyRuntime() const
@@ -378,22 +378,22 @@ private:
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 TEST_F(EtsVMConfingNapi, PeasINT)
 {
-    std::string stdlib_abc;
-    std::string path_abc;
+    std::string stdlibAbc;
+    std::string pathAbc;
 
 #if defined(STDLIB_ABC) && defined(PATH_ABC)
 #define ETS_UNIT_STRING_STEP(s) #s
 #define ETS_UNIT_STRING(s) ETS_UNIT_STRING_STEP(s)
-    stdlib_abc = ETS_UNIT_STRING(STDLIB_ABC);
-    path_abc = ETS_UNIT_STRING(PATH_ABC);
+    stdlibAbc = ETS_UNIT_STRING(STDLIB_ABC);
+    pathAbc = ETS_UNIT_STRING(PATH_ABC);
 #undef ETS_UNIT_STRING
 #undef ETS_UNIT_STRING_STEP
 #endif
 
-    ASSERT_FALSE(stdlib_abc.empty());
-    ASSERT_FALSE(path_abc.empty());
+    ASSERT_FALSE(stdlibAbc.empty());
+    ASSERT_FALSE(pathAbc.empty());
 
-    ASSERT_TRUE(CreateRuntime(stdlib_abc, path_abc, false));
+    ASSERT_TRUE(CreateRuntime(stdlibAbc, pathAbc, false));
     EXPECT_TRUE(InitExports());
     EXPECT_TRUE(ExecuteMain() == 0);
     ASSERT_TRUE(DestroyRuntime());
@@ -401,22 +401,22 @@ TEST_F(EtsVMConfingNapi, PeasINT)
 
 TEST_F(EtsVMConfingNapi, PeasJIT)
 {
-    std::string stdlib_abc;
-    std::string path_abc;
+    std::string stdlibAbc;
+    std::string pathAbc;
 
 #if defined(STDLIB_ABC) && defined(PATH_ABC)
 #define ETS_UNIT_STRING_STEP(s) #s
 #define ETS_UNIT_STRING(s) ETS_UNIT_STRING_STEP(s)
-    stdlib_abc = ETS_UNIT_STRING(STDLIB_ABC);
-    path_abc = ETS_UNIT_STRING(PATH_ABC);
+    stdlibAbc = ETS_UNIT_STRING(STDLIB_ABC);
+    pathAbc = ETS_UNIT_STRING(PATH_ABC);
 #undef ETS_UNIT_STRING
 #undef ETS_UNIT_STRING_STEP
 #endif
 
-    ASSERT_FALSE(stdlib_abc.empty());
-    ASSERT_FALSE(path_abc.empty());
+    ASSERT_FALSE(stdlibAbc.empty());
+    ASSERT_FALSE(pathAbc.empty());
 
-    ASSERT_TRUE(CreateRuntime(stdlib_abc, path_abc, true));
+    ASSERT_TRUE(CreateRuntime(stdlibAbc, pathAbc, true));
     EXPECT_TRUE(InitExports());
     EXPECT_TRUE(ExecuteMain() == 0);
     ASSERT_TRUE(DestroyRuntime());
@@ -428,25 +428,25 @@ TEST_F(EtsVMConfingNapi, PeasAOT)
     GTEST_SKIP();
 #endif
 
-    std::string stdlib_abc;
-    std::string path_abc;
-    std::string path_an;
+    std::string stdlibAbc;
+    std::string pathAbc;
+    std::string pathAn;
 
 #if defined(STDLIB_ABC) && defined(PATH_ABC)
 #define ETS_UNIT_STRING_STEP(s) #s
 #define ETS_UNIT_STRING(s) ETS_UNIT_STRING_STEP(s)
-    stdlib_abc = ETS_UNIT_STRING(STDLIB_ABC);
-    path_abc = ETS_UNIT_STRING(PATH_ABC);
-    path_an = ETS_UNIT_STRING(PATH_AN);
+    stdlibAbc = ETS_UNIT_STRING(STDLIB_ABC);
+    pathAbc = ETS_UNIT_STRING(PATH_ABC);
+    pathAn = ETS_UNIT_STRING(PATH_AN);
 #undef ETS_UNIT_STRING
 #undef ETS_UNIT_STRING_STEP
 #endif
 
-    ASSERT_FALSE(stdlib_abc.empty());
-    ASSERT_FALSE(path_abc.empty());
-    ASSERT_FALSE(path_an.empty());
+    ASSERT_FALSE(stdlibAbc.empty());
+    ASSERT_FALSE(pathAbc.empty());
+    ASSERT_FALSE(pathAn.empty());
 
-    ASSERT_TRUE(CreateRuntime(stdlib_abc, path_abc, false, path_an));
+    ASSERT_TRUE(CreateRuntime(stdlibAbc, pathAbc, false, pathAn));
     EXPECT_TRUE(InitExports());
     EXPECT_TRUE(ExecuteMain() == 0);
     ASSERT_TRUE(DestroyRuntime());

@@ -36,7 +36,7 @@ bool Peepholes::RunImpl()
 
 void Peepholes::VisitSafePoint(GraphVisitor *v, Inst *inst)
 {
-    if (OPTIONS.IsCompilerSafePointsRequireRegMap()) {
+    if (g_options.IsCompilerSafePointsRequireRegMap()) {
         return;
     }
     if (inst->CastToSafePoint()->RemoveNumericInputs()) {
@@ -51,10 +51,10 @@ void Peepholes::VisitNeg([[maybe_unused]] GraphVisitor *v, Inst *inst)
         return;
     }
     auto input = inst->GetInput(0).GetInst();
-    auto input_opc = input->GetOpcode();
-    auto inst_type = inst->GetType();
-    auto input_type = input->GetType();
-    if (DataType::IsFloatType(inst_type)) {
+    auto inputOpc = input->GetOpcode();
+    auto instType = inst->GetType();
+    auto inputType = input->GetType();
+    if (DataType::IsFloatType(instType)) {
         return;
     }
     // Repeated application of the Neg
@@ -65,7 +65,7 @@ void Peepholes::VisitNeg([[maybe_unused]] GraphVisitor *v, Inst *inst)
     // 1. Some inst -> {vv3 users}
     // 2.i64 neg v1 -> {v3, ...}
     // 3.i64 neg v2
-    if (input_opc == Opcode::Neg && inst_type == input_type) {
+    if (inputOpc == Opcode::Neg && instType == inputType) {
         if (SkipThisPeepholeInOSR(inst, input->GetInput(0).GetInst())) {
             return;
         }
@@ -80,7 +80,7 @@ void Peepholes::VisitNeg([[maybe_unused]] GraphVisitor *v, Inst *inst)
     // 2.i64 sub v0, v1 -> {v3, ...}
     // 3.i64 neg v2 -> {}
     // 4.i64 sub v1, v0 -> {users v3}
-    if (input_opc == Opcode::Sub && inst_type == input_type) {
+    if (inputOpc == Opcode::Sub && instType == inputType) {
         if (SkipThisPeepholeInOSR(inst, input->GetInput(0).GetInst()) ||
             SkipThisPeepholeInOSR(inst, input->GetInput(1).GetInst())) {
             return;
@@ -355,22 +355,22 @@ void Peepholes::VisitSub([[maybe_unused]] GraphVisitor *v, Inst *inst)
     auto input1 = inst->GetInput(1).GetInst();
     // Case 3
     if (input0->GetOpcode() == Opcode::Neg && input1->GetOpcode() == Opcode::Neg) {
-        auto new_input1 = input0->GetInput(0).GetInst();
-        auto new_input0 = input1->GetInput(0).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput1 = input0->GetInput(0).GetInst();
+        auto newInput0 = input1->GetInput(0).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return;
         }
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(visitor, inst);
         return;
     }
     if (input1->GetOpcode() == Opcode::Neg) {
-        auto new_input = input1->GetInput(0).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input)) {
+        auto newInput = input1->GetInput(0).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput)) {
             return;
         }
-        inst->SetInput(1, new_input);
+        inst->SetInput(1, newInput);
         inst->SetOpcode(Opcode::Add);
         PEEPHOLE_IS_APPLIED(visitor, inst);
         return;
@@ -380,12 +380,12 @@ void Peepholes::VisitSub([[maybe_unused]] GraphVisitor *v, Inst *inst)
     visitor->TrySimplifyAddSub<Opcode::Add, 1>(inst, input0, input1);
     // Case 5
     if (input1->GetOpcode() == Opcode::Sub && input1->GetInput(0) == input0) {
-        auto prev_input = input1->GetInput(1).GetInst();
-        if (inst->GetType() == prev_input->GetType()) {
-            if (SkipThisPeepholeInOSR(inst, prev_input)) {
+        auto prevInput = input1->GetInput(1).GetInst();
+        if (inst->GetType() == prevInput->GetType()) {
+            if (SkipThisPeepholeInOSR(inst, prevInput)) {
                 return;
             }
-            inst->ReplaceUsers(prev_input);
+            inst->ReplaceUsers(prevInput);
             PEEPHOLE_IS_APPLIED(visitor, inst);
             return;
         }
@@ -398,8 +398,8 @@ void Peepholes::VisitMulOneConst([[maybe_unused]] GraphVisitor *v, Inst *inst, I
     if (!input1->IsConst()) {
         return;
     }
-    auto const_inst = static_cast<ConstantInst *>(input1);
-    if (const_inst->IsEqualConstAllTypes(1)) {
+    auto constInst = static_cast<ConstantInst *>(input1);
+    if (constInst->IsEqualConstAllTypes(1)) {
         // case 1:
         // 0. Const 1
         // 1. MUL v5, v0 -> {v2, ...}
@@ -413,7 +413,7 @@ void Peepholes::VisitMulOneConst([[maybe_unused]] GraphVisitor *v, Inst *inst, I
         }
         inst->ReplaceUsers(input0);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
-    } else if (const_inst->IsEqualConstAllTypes(-1)) {
+    } else if (constInst->IsEqualConstAllTypes(-1)) {
         // case 2:
         // 0. Const -1
         // 1. MUL v5, v0 -> {v2, ...}
@@ -427,7 +427,7 @@ void Peepholes::VisitMulOneConst([[maybe_unused]] GraphVisitor *v, Inst *inst, I
         // "inst"(mul) and **INST WITHOUT NAME**(neg) are one by one, so we don't should check SaveStateOSR between them
         CreateAndInsertInst(Opcode::Neg, inst, input0);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
-    } else if (const_inst->IsEqualConstAllTypes(2U)) {
+    } else if (constInst->IsEqualConstAllTypes(2U)) {
         // case 3:
         // 0. Const 2
         // 1. MUL v5, v0 -> {v2, ...}
@@ -442,7 +442,7 @@ void Peepholes::VisitMulOneConst([[maybe_unused]] GraphVisitor *v, Inst *inst, I
         CreateAndInsertInst(Opcode::Add, inst, input0, input0);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
     } else if (DataType::GetCommonType(inst->GetType()) == DataType::INT64) {
-        int64_t n = GetPowerOfTwo(const_inst->GetIntValue());
+        int64_t n = GetPowerOfTwo(constInst->GetIntValue());
         if (n != -1) {
             // case 4:
             // 0. Const 2^N
@@ -478,8 +478,8 @@ void Peepholes::VisitMul(GraphVisitor *v, Inst *inst)
     auto input1 = inst->GetInput(1).GetInst();
     if (input1->IsConst()) {
         auto cnst = input1->CastToConstant();
-        bool osr_blocked_peephole = false;
-        if (input0->GetOpcode() == Opcode::Mul && TryCombineMulConst(inst, cnst, &osr_blocked_peephole)) {
+        bool osrBlockedPeephole = false;
+        if (input0->GetOpcode() == Opcode::Mul && TryCombineMulConst(inst, cnst, &osrBlockedPeephole)) {
             // 0. Const 3
             // 1. Const 7
             // 2. ...
@@ -492,7 +492,7 @@ void Peepholes::VisitMul(GraphVisitor *v, Inst *inst)
             PEEPHOLE_IS_APPLIED(visitor, inst);
             return;
         }
-        if (osr_blocked_peephole) {
+        if (osrBlockedPeephole) {
             return;
         }
     }
@@ -511,8 +511,8 @@ void Peepholes::VisitDiv([[maybe_unused]] GraphVisitor *v, Inst *inst)
     auto input0 = inst->GetInput(0).GetInst();
     auto input1 = inst->GetInput(1).GetInst();
     if (input1->IsConst()) {
-        auto const_inst = static_cast<ConstantInst *>(input1);
-        if (const_inst->IsEqualConstAllTypes(1)) {
+        auto constInst = static_cast<ConstantInst *>(input1);
+        if (constInst->IsEqualConstAllTypes(1)) {
             // case 1:
             // 0. Const 1
             // 1. DIV v5, v0 -> {v2, ...}
@@ -526,7 +526,7 @@ void Peepholes::VisitDiv([[maybe_unused]] GraphVisitor *v, Inst *inst)
             }
             inst->ReplaceUsers(input0);
             PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
-        } else if (const_inst->IsEqualConstAllTypes(-1)) {
+        } else if (constInst->IsEqualConstAllTypes(-1)) {
             // case 2:
             // 0. Const -1
             // 1. DIV v5, v0 -> {v2, ...}
@@ -630,18 +630,18 @@ void Peepholes::VisitShr([[maybe_unused]] GraphVisitor *v, Inst *inst)
         ASSERT(DataType::GetTypeSize(inst->GetType(), arch) >= val);
         auto t = static_cast<uint8_t>(DataType::GetTypeSize(inst->GetType(), arch) - val);
         uint64_t mask = (1UL << t) - 1;
-        auto new_cnst = graph->FindOrCreateConstant(mask);
+        auto newCnst = graph->FindOrCreateConstant(mask);
         if (graph->IsBytecodeOptimizer() && IsInt32Bit(inst->GetType())) {
             t = static_cast<uint8_t>(DataType::GetTypeSize(inst->GetType(), arch) - static_cast<uint32_t>(val));
             mask = static_cast<uint32_t>((1U << t) - 1);
-            new_cnst = graph->FindOrCreateConstant<uint32_t>(mask);
+            newCnst = graph->FindOrCreateConstant<uint32_t>(mask);
         }
         // "inst"(shr) and **INST WITHOUT NAME**(and) one by one, so we may check SaveStateOSR only between
         // "inst"(shr) and "op1->GetInput(0).GetInst()"
         if (SkipThisPeepholeInOSR(op1->GetInput(0).GetInst(), inst)) {
             return;
         }
-        CreateAndInsertInst(Opcode::And, inst, op1->GetInput(0).GetInst(), new_cnst);
+        CreateAndInsertInst(Opcode::And, inst, op1->GetInput(0).GetInst(), newCnst);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
     }
 }
@@ -678,20 +678,20 @@ void Peepholes::VisitAShr([[maybe_unused]] GraphVisitor *v, Inst *inst)
     auto op2 = inst->GetInput(1).GetInst();
     if (op1->GetOpcode() == Opcode::Shl && op2->IsConst() && op1->GetInput(1) == op2) {
         ASSERT(inst->GetType() == op1->GetType());
-        const uint64_t offset_in_t8 = 24;
-        const uint64_t offset_in_t16 = 16;
-        const uint64_t offset_in_t32 = 8;
+        const uint64_t offsetInT8 = 24;
+        const uint64_t offsetInT16 = 16;
+        const uint64_t offsetInT32 = 8;
         auto offset = op2->CastToConstant()->GetIntValue();
-        if (offset == offset_in_t16 || offset == offset_in_t8 || offset == offset_in_t32) {
+        if (offset == offsetInT16 || offset == offsetInT8 || offset == offsetInT32) {
             // "inst"(shr) and "cast"(cast) one by one, so we may check SaveStateOSR only between "inst"(shr)
             // and "op1->GetInput(0).GetInst()"(some inst)
             if (SkipThisPeepholeInOSR(op1->GetInput(0).GetInst(), inst)) {
                 return;
             }
             auto cast = CreateAndInsertInst(Opcode::Cast, inst, op1->GetInput(0).GetInst());
-            cast->SetType((offset == offset_in_t8)    ? DataType::INT8
-                          : (offset == offset_in_t16) ? DataType::INT16
-                                                      : DataType::INT32);
+            cast->SetType((offset == offsetInT8)    ? DataType::INT8
+                          : (offset == offsetInT16) ? DataType::INT16
+                                                    : DataType::INT32);
             cast->CastToCast()->SetOperandsType(op1->GetInput(0).GetInst()->GetType());
             PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
         }
@@ -757,16 +757,16 @@ void Peepholes::VisitAnd([[maybe_unused]] GraphVisitor *v, Inst *inst)
         // ===>
         // 5.i64 OR v0, v1
         // 6.i64 not v5
-        auto not_input0 = input0->GetInput(0).GetInst();
-        auto not_input1 = input1->GetInput(0).GetInst();
+        auto notInput0 = input0->GetInput(0).GetInst();
+        auto notInput1 = input1->GetInput(0).GetInst();
         // "inst"(and), "or_inst"(or) and **INST WITHOUT NAME**(not) one by one, so we may check SaveStateOSR only
         // between "inst"(and) and inputs: "not_input0"(some inst), "not_input0"(some inst)
         // and "op1->GetInput(0).GetInst()"
-        if (SkipThisPeepholeInOSR(inst, not_input0) || SkipThisPeepholeInOSR(inst, not_input1)) {
+        if (SkipThisPeepholeInOSR(inst, notInput0) || SkipThisPeepholeInOSR(inst, notInput1)) {
             return;
         }
-        auto or_inst = CreateAndInsertInst(Opcode::Or, inst, not_input0, not_input1);
-        CreateAndInsertInst(Opcode::Not, or_inst, or_inst);
+        auto orInst = CreateAndInsertInst(Opcode::Or, inst, notInput0, notInput1);
+        CreateAndInsertInst(Opcode::Not, orInst, orInst);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
     } else if (ApplyForCastU16(v, inst, input0, input1)) {
         // case 5: IR for cast i64 to u16 is
@@ -840,16 +840,16 @@ void Peepholes::VisitOr([[maybe_unused]] GraphVisitor *v, Inst *inst)
         // ===>
         // 5.i64 AND v0, v1
         // 6.i64 not v5
-        auto not_input0 = input0->GetInput(0).GetInst();
-        auto not_input1 = input1->GetInput(0).GetInst();
+        auto notInput0 = input0->GetInput(0).GetInst();
+        auto notInput1 = input1->GetInput(0).GetInst();
         // "inst"(or), "and_inst"(and) and **INST WITHOUT NAME**(not) one by one, so we may check SaveStateOSR only
         // between "inst"(or) and inputs: "not_input0"(some inst), "not_input0"(some inst)
         // and "op1->GetInput(0).GetInst()"
-        if (SkipThisPeepholeInOSR(inst, not_input0) || SkipThisPeepholeInOSR(inst, not_input1)) {
+        if (SkipThisPeepholeInOSR(inst, notInput0) || SkipThisPeepholeInOSR(inst, notInput1)) {
             return;
         }
-        auto and_inst = CreateAndInsertInst(Opcode::And, inst, not_input0, not_input1);
-        CreateAndInsertInst(Opcode::Not, and_inst, and_inst);
+        auto andInst = CreateAndInsertInst(Opcode::And, inst, notInput0, notInput1);
+        CreateAndInsertInst(Opcode::Not, andInst, andInst);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
     }
 }
@@ -935,7 +935,7 @@ void Peepholes::VisitCompare(GraphVisitor *v, Inst *inst)
 
     /* skip preheader Compare processing until unrolling is done */
     auto graph = inst->GetBasicBlock()->GetGraph();
-    if (!graph->IsBytecodeOptimizer() && OPTIONS.IsCompilerDeferPreheaderTransform() && !graph->IsUnrollComplete()) {
+    if (!graph->IsBytecodeOptimizer() && g_options.IsCompilerDeferPreheaderTransform() && !graph->IsUnrollComplete()) {
         auto bb = inst->GetBasicBlock();
         if (bb->IsLoopPreHeader() && inst->HasSingleUser() && inst->GetFirstUser()->GetInst() == bb->GetLastInst() &&
             bb->GetLastInst()->GetOpcode() == Opcode::IfImm) {
@@ -948,19 +948,19 @@ void Peepholes::VisitCompare(GraphVisitor *v, Inst *inst)
         return;
     }
 
-    bool osr_blocked_peephole = false;
-    if (visitor->TrySimplifyCompareWithBoolInput(inst, &osr_blocked_peephole)) {
-        if (osr_blocked_peephole) {
+    bool osrBlockedPeephole = false;
+    if (visitor->TrySimplifyCompareWithBoolInput(inst, &osrBlockedPeephole)) {
+        if (osrBlockedPeephole) {
             return;
         }
         PEEPHOLE_IS_APPLIED(visitor, inst);
-    } else if (visitor->TrySimplifyCmpCompareWithZero(inst, &osr_blocked_peephole)) {
-        if (osr_blocked_peephole) {
+    } else if (visitor->TrySimplifyCmpCompareWithZero(inst, &osrBlockedPeephole)) {
+        if (osrBlockedPeephole) {
             return;
         }
         PEEPHOLE_IS_APPLIED(visitor, inst);
-    } else if (visitor->TrySimplifyCompareAndZero(inst, &osr_blocked_peephole)) {
-        if (osr_blocked_peephole) {
+    } else if (visitor->TrySimplifyCompareAndZero(inst, &osrBlockedPeephole)) {
+        if (osrBlockedPeephole) {
             return;
         }
         PEEPHOLE_IS_APPLIED(visitor, inst);
@@ -973,7 +973,7 @@ void Peepholes::VisitCompare(GraphVisitor *v, Inst *inst)
 
 bool Peepholes::TrySimplifyCompareAnyTypeCase1(Inst *inst, Inst *input0, Inst *input1)
 {
-    auto cmp_inst = inst->CastToCompare();
+    auto cmpInst = inst->CastToCompare();
 
     // 2.any  CastValueToAnyType BOOLEAN_TYPE v0 -> (v4)
     // 3.any  CastValueToAnyType BOOLEAN_TYPE v1 -> (v4)
@@ -983,36 +983,36 @@ bool Peepholes::TrySimplifyCompareAnyTypeCase1(Inst *inst, Inst *input0, Inst *i
     if (input0->CastToCastValueToAnyType()->GetAnyType() != input1->CastToCastValueToAnyType()->GetAnyType()) {
         return false;
     }
-    if (SkipThisPeepholeInOSR(cmp_inst, input0->GetInput(0).GetInst()) ||
-        SkipThisPeepholeInOSR(cmp_inst, input1->GetInput(0).GetInst())) {
+    if (SkipThisPeepholeInOSR(cmpInst, input0->GetInput(0).GetInst()) ||
+        SkipThisPeepholeInOSR(cmpInst, input1->GetInput(0).GetInst())) {
         return false;
     }
-    cmp_inst->SetOperandsType(DataType::BOOL);
-    cmp_inst->SetInput(0, input0->GetInput(0).GetInst());
-    cmp_inst->SetInput(1, input1->GetInput(0).GetInst());
+    cmpInst->SetOperandsType(DataType::BOOL);
+    cmpInst->SetInput(0, input0->GetInput(0).GetInst());
+    cmpInst->SetInput(1, input1->GetInput(0).GetInst());
     return true;
 }
 
 bool Peepholes::TrySimplifyCompareAnyTypeCase2(Inst *inst, Inst *input0, Inst *input1)
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
-    auto cmp_inst = inst->CastToCompare();
-    auto cc = cmp_inst->GetCc();
-    auto if_imm = input1->CastToConstant()->GetRawValue();
+    auto cmpInst = inst->CastToCompare();
+    auto cc = cmpInst->GetCc();
+    auto ifImm = input1->CastToConstant()->GetRawValue();
     auto runtime = graph->GetRuntime();
-    uint64_t new_const;
+    uint64_t newConst;
 
     // 3.any  CastValueToAnyType BOOLEAN_TYPE v2 -> (v4)
     // 4.     Compare EQ/NE any    v3, DYNAMIC_TRUE/FALSE
     // =======>
     // 4.     Compare EQ/NE bool   v2, 0x1/0x0
-    if (SkipThisPeepholeInOSR(cmp_inst, input0->GetInput(0).GetInst())) {
+    if (SkipThisPeepholeInOSR(cmpInst, input0->GetInput(0).GetInst())) {
         return false;
     }
-    if (if_imm == runtime->GetDynamicPrimitiveFalse()) {
-        new_const = 0;
-    } else if (if_imm == runtime->GetDynamicPrimitiveTrue()) {
-        new_const = 1;
+    if (ifImm == runtime->GetDynamicPrimitiveFalse()) {
+        newConst = 0;
+    } else if (ifImm == runtime->GetDynamicPrimitiveTrue()) {
+        newConst = 1;
     } else {
         // In this case, we are comparing the dynamic boolean type with not boolean constant.
         // So the Compare EQ/NE alwayes false/true.
@@ -1023,12 +1023,12 @@ bool Peepholes::TrySimplifyCompareAnyTypeCase2(Inst *inst, Inst *input0, Inst *i
             return false;
         }
         // We create constant, so we don't need to check SaveStateOSR between insts
-        cmp_inst->ReplaceUsers(graph->FindOrCreateConstant<uint64_t>(cc == CC_NE ? 1 : 0));
+        cmpInst->ReplaceUsers(graph->FindOrCreateConstant<uint64_t>(cc == CC_NE ? 1 : 0));
         return true;
     }
-    cmp_inst->SetOperandsType(DataType::BOOL);
-    cmp_inst->SetInput(0, input0->GetInput(0).GetInst());
-    cmp_inst->SetInput(1, graph->FindOrCreateConstant(new_const));
+    cmpInst->SetOperandsType(DataType::BOOL);
+    cmpInst->SetInput(0, input0->GetInput(0).GetInst());
+    cmpInst->SetInput(1, graph->FindOrCreateConstant(newConst));
     return true;
 }
 
@@ -1038,17 +1038,17 @@ bool Peepholes::TrySimplifyCompareAnyType(Inst *inst)
     if (graph->IsBytecodeOptimizer()) {
         return false;
     }
-    auto cmp_inst = inst->CastToCompare();
-    if (cmp_inst->GetOperandsType() != DataType::ANY) {
+    auto cmpInst = inst->CastToCompare();
+    if (cmpInst->GetOperandsType() != DataType::ANY) {
         return false;
     }
 
-    auto input0 = cmp_inst->GetInput(0).GetInst();
-    auto input1 = cmp_inst->GetInput(1).GetInst();
-    auto cc = cmp_inst->GetCc();
+    auto input0 = cmpInst->GetInput(0).GetInst();
+    auto input1 = cmpInst->GetInput(1).GetInst();
+    auto cc = cmpInst->GetCc();
     if (input0 == input1 && (cc == CC_EQ || cc == CC_NE)) {
         // We create constant, so we don't need to check SaveStateOSR between insts
-        cmp_inst->ReplaceUsers(graph->FindOrCreateConstant<uint64_t>(cc == CC_EQ ? 1 : 0));
+        cmpInst->ReplaceUsers(graph->FindOrCreateConstant<uint64_t>(cc == CC_EQ ? 1 : 0));
         return true;
     }
 
@@ -1081,57 +1081,57 @@ void Peepholes::VisitIf([[maybe_unused]] GraphVisitor *v, Inst *inst)
     if (visitor->GetGraph()->IsBytecodeOptimizer()) {
         return;
     }
-    auto if_imm = inst->CastToIf();
-    if (if_imm->GetCc() != CC_EQ && if_imm->GetCc() != CC_NE) {
+    auto ifImm = inst->CastToIf();
+    if (ifImm->GetCc() != CC_EQ && ifImm->GetCc() != CC_NE) {
         return;
     }
 
-    auto lhs = if_imm->GetInput(0).GetInst();
-    auto rhs = if_imm->GetInput(1).GetInst();
-    Inst *and_input {nullptr};
+    auto lhs = ifImm->GetInput(0).GetInst();
+    auto rhs = ifImm->GetInput(1).GetInst();
+    Inst *andInput {nullptr};
     if (lhs->GetOpcode() == Opcode::And && IsZeroConstantOrNullPtr(rhs)) {
-        and_input = lhs;
+        andInput = lhs;
     } else if (rhs->GetOpcode() == Opcode::And && IsZeroConstantOrNullPtr(lhs)) {
-        and_input = rhs;
+        andInput = rhs;
     } else {
         return;
     }
-    if (!and_input->HasSingleUser()) {
+    if (!andInput->HasSingleUser()) {
         return;
     }
 
-    auto new_input0 = and_input->GetInput(0).GetInst();
-    auto new_input1 = and_input->GetInput(1).GetInst();
-    if (SkipThisPeepholeInOSR(if_imm, new_input0) || SkipThisPeepholeInOSR(if_imm, new_input1)) {
+    auto newInput0 = andInput->GetInput(0).GetInst();
+    auto newInput1 = andInput->GetInput(1).GetInst();
+    if (SkipThisPeepholeInOSR(ifImm, newInput0) || SkipThisPeepholeInOSR(ifImm, newInput1)) {
         return;
     }
-    if_imm->SetCc(if_imm->GetCc() == CC_EQ ? CC_TST_EQ : CC_TST_NE);
-    if_imm->SetInput(0, new_input0);
-    if_imm->SetInput(1, new_input1);
+    ifImm->SetCc(ifImm->GetCc() == CC_EQ ? CC_TST_EQ : CC_TST_NE);
+    ifImm->SetInput(0, newInput0);
+    ifImm->SetInput(1, newInput1);
     PEEPHOLE_IS_APPLIED(visitor, inst);
 }
 
-static bool TryReplaceCompareAnyType(Inst *inst, Inst *dominate_inst)
+static bool TryReplaceCompareAnyType(Inst *inst, Inst *dominateInst)
 {
-    auto inst_type = inst->CastToCompareAnyType()->GetAnyType();
-    auto dominate_type = dominate_inst->GetAnyType();
-    profiling::AnyInputType dominate_allowed_type {};
-    if (dominate_inst->GetOpcode() == Opcode::AnyTypeCheck) {
-        dominate_allowed_type = dominate_inst->CastToAnyTypeCheck()->GetAllowedInputType();
+    auto instType = inst->CastToCompareAnyType()->GetAnyType();
+    auto dominateType = dominateInst->GetAnyType();
+    profiling::AnyInputType dominateAllowedType {};
+    if (dominateInst->GetOpcode() == Opcode::AnyTypeCheck) {
+        dominateAllowedType = dominateInst->CastToAnyTypeCheck()->GetAllowedInputType();
     } else {
-        ASSERT(dominate_inst->GetOpcode() == Opcode::CastValueToAnyType);
+        ASSERT(dominateInst->GetOpcode() == Opcode::CastValueToAnyType);
     }
     ASSERT(inst->CastToCompareAnyType()->GetAllowedInputType() == profiling::AnyInputType::DEFAULT);
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto language = graph->GetRuntime()->GetMethodSourceLanguage(graph->GetMethod());
-    auto res = IsAnyTypeCanBeSubtypeOf(language, inst_type, dominate_type, profiling::AnyInputType::DEFAULT,
-                                       dominate_allowed_type);
+    auto res = IsAnyTypeCanBeSubtypeOf(language, instType, dominateType, profiling::AnyInputType::DEFAULT,
+                                       dominateAllowedType);
     if (!res) {
         // We cannot compare types in compile-time
         return false;
     }
-    auto const_value = res.value();
-    auto cnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(const_value);
+    auto constValue = res.value();
+    auto cnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(constValue);
     // We replace constant, so we don't need to check SaveStateOSR between insts
     inst->ReplaceUsers(cnst);
     return true;
@@ -1158,44 +1158,44 @@ void Peepholes::VisitCompareAnyType(GraphVisitor *v, Inst *inst)
     // to
     //  4. Constant (TYPE1 == TYPE2)  ->(...)
     for (auto &user : input->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst != inst && user_inst->GetOpcode() == Opcode::AnyTypeCheck && user_inst->IsDominate(inst) &&
-            TryReplaceCompareAnyType(inst, user_inst)) {
+        auto userInst = user.GetInst();
+        if (userInst != inst && userInst->GetOpcode() == Opcode::AnyTypeCheck && userInst->IsDominate(inst) &&
+            TryReplaceCompareAnyType(inst, userInst)) {
             PEEPHOLE_IS_APPLIED(visitor, inst);
             return;
         }
     }
 }
 
-static bool IsInputTypeMismatch(Inst *inst, int32_t input_index, Arch arch)
+static bool IsInputTypeMismatch(Inst *inst, int32_t inputIndex, Arch arch)
 {
-    auto input_inst = inst->GetInput(input_index).GetInst();
-    auto input_type_size = DataType::GetTypeSize(input_inst->GetType(), arch);
-    auto inst_input_size = DataType::GetTypeSize(inst->GetInputType(input_index), arch);
-    return (input_type_size > inst_input_size) ||
-           (input_type_size == inst_input_size &&
-            DataType::IsTypeSigned(input_inst->GetType()) != DataType::IsTypeSigned(inst->GetInputType(input_index)));
+    auto inputInst = inst->GetInput(inputIndex).GetInst();
+    auto inputTypeSize = DataType::GetTypeSize(inputInst->GetType(), arch);
+    auto instInputSize = DataType::GetTypeSize(inst->GetInputType(inputIndex), arch);
+    return (inputTypeSize > instInputSize) ||
+           (inputTypeSize == instInputSize &&
+            DataType::IsTypeSigned(inputInst->GetType()) != DataType::IsTypeSigned(inst->GetInputType(inputIndex)));
 }
 
-static bool ApplyForCastJoin(Inst *cast, Inst *input, Inst *orig_inst, Arch arch)
+static bool ApplyForCastJoin(Inst *cast, Inst *input, Inst *origInst, Arch arch)
 {
-    auto input_type_mismatch = IsInputTypeMismatch(cast, 0, arch);
+    auto inputTypeMismatch = IsInputTypeMismatch(cast, 0, arch);
 #ifndef NDEBUG
-    ASSERT(!input_type_mismatch);
+    ASSERT(!inputTypeMismatch);
 #else
-    if (input_type_mismatch) {
+    if (inputTypeMismatch) {
         return false;
     }
 #endif
-    auto input_type = input->GetType();
-    auto input_type_size = DataType::GetTypeSize(input_type, arch);
-    auto curr_type = cast->GetType();
-    auto orig_type = orig_inst->GetType();
-    return DataType::GetCommonType(input_type) == DataType::INT64 &&
-           DataType::GetCommonType(curr_type) == DataType::INT64 &&
-           DataType::GetCommonType(orig_type) == DataType::INT64 &&
-           input_type_size > DataType::GetTypeSize(curr_type, arch) &&
-           DataType::GetTypeSize(orig_type, arch) > input_type_size;
+    auto inputType = input->GetType();
+    auto inputTypeSize = DataType::GetTypeSize(inputType, arch);
+    auto currType = cast->GetType();
+    auto origType = origInst->GetType();
+    return DataType::GetCommonType(inputType) == DataType::INT64 &&
+           DataType::GetCommonType(currType) == DataType::INT64 &&
+           DataType::GetCommonType(origType) == DataType::INT64 &&
+           inputTypeSize > DataType::GetTypeSize(currType, arch) &&
+           DataType::GetTypeSize(origType, arch) > inputTypeSize;
 }
 
 static inline bool IsCastAllowedInBytecode(const Inst *inst)
@@ -1230,17 +1230,17 @@ void Peepholes::VisitCastCase2([[maybe_unused]] GraphVisitor *v, Inst *inst)
     // remove redundant cast, when cast from source to target and back
     // for bytecode optimizer, this operation may cause mistake for float32-converter pass
     auto input = inst->GetInput(0).GetInst();
-    auto prev_type = input->GetType();
-    auto curr_type = inst->GetType();
+    auto prevType = input->GetType();
+    auto currType = inst->GetType();
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto arch = graph->GetArch();
-    auto orig_inst = input->GetInput(0).GetInst();
-    auto orig_type = orig_inst->GetType();
-    if (curr_type == orig_type && DataType::GetTypeSize(prev_type, arch) > DataType::GetTypeSize(curr_type, arch)) {
-        if (SkipThisPeepholeInOSR(inst, orig_inst)) {
+    auto origInst = input->GetInput(0).GetInst();
+    auto origType = origInst->GetType();
+    if (currType == origType && DataType::GetTypeSize(prevType, arch) > DataType::GetTypeSize(currType, arch)) {
+        if (SkipThisPeepholeInOSR(inst, origInst)) {
             return;
         }
-        inst->ReplaceUsers(orig_inst);
+        inst->ReplaceUsers(origInst);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
         return;
     }
@@ -1251,13 +1251,13 @@ void Peepholes::VisitCastCase2([[maybe_unused]] GraphVisitor *v, Inst *inst)
     // cast i32toi16
     // with
     // cast i64toi16
-    if (ApplyForCastJoin(inst, input, orig_inst, arch)) {
+    if (ApplyForCastJoin(inst, input, origInst, arch)) {
         auto cast = inst->CastToCast();
-        if (SkipThisPeepholeInOSR(cast, orig_inst)) {
+        if (SkipThisPeepholeInOSR(cast, origInst)) {
             return;
         }
-        cast->SetOperandsType(orig_inst->GetType());
-        cast->SetInput(0, orig_inst);
+        cast->SetOperandsType(origInst->GetType());
+        cast->SetInput(0, origInst);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
         return;
     }
@@ -1266,7 +1266,7 @@ void Peepholes::VisitCastCase2([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void Peepholes::VisitCastCase3([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     auto input = inst->GetInput(0).GetInst();
-    auto curr_type = inst->GetType();
+    auto currType = inst->GetType();
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto arch = graph->GetArch();
 
@@ -1279,10 +1279,10 @@ void Peepholes::VisitCastCase3([[maybe_unused]] GraphVisitor *v, Inst *inst)
         return;
     }
     auto op1 = input->GetInput(1).GetInst();
-    auto type_size = DataType::GetTypeSize(curr_type, arch);
-    if (op1->IsConst() && type_size < DOUBLE_WORD_SIZE) {
+    auto typeSize = DataType::GetTypeSize(currType, arch);
+    if (op1->IsConst() && typeSize < DOUBLE_WORD_SIZE) {
         auto val = op1->CastToConstant()->GetIntValue();
-        auto mask = (1ULL << type_size) - 1;
+        auto mask = (1ULL << typeSize) - 1;
         if ((val & mask) == mask) {
             if (SkipThisPeepholeInOSR(inst, op0)) {
                 return;
@@ -1302,11 +1302,11 @@ void Peepholes::VisitCast([[maybe_unused]] GraphVisitor *v, Inst *inst)
         return;
     }
     auto input = inst->GetInput(0).GetInst();
-    auto prev_type = input->GetType();
-    auto curr_type = inst->GetType();
+    auto prevType = input->GetType();
+    auto currType = inst->GetType();
     auto graph = inst->GetBasicBlock()->GetGraph();
 
-    if (prev_type == curr_type) {
+    if (prevType == currType) {
         VisitCastCase1(v, inst);
         return;
     }
@@ -1316,7 +1316,7 @@ void Peepholes::VisitCast([[maybe_unused]] GraphVisitor *v, Inst *inst)
         return;
     }
 
-    if (input->GetOpcode() == Opcode::And && DataType::GetCommonType(curr_type) == DataType::INT64) {
+    if (input->GetOpcode() == Opcode::And && DataType::GetCommonType(currType) == DataType::INT64) {
         VisitCastCase3(v, inst);
         return;
     }
@@ -1337,12 +1337,12 @@ void Peepholes::VisitLenArray(GraphVisitor *v, Inst *inst)
     // 3. LenArray v2
     auto input = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
     if (input->GetOpcode() == Opcode::NewArray) {
-        auto array_size = input->GetDataFlowInput(input->GetInput(NewArrayInst::INDEX_SIZE).GetInst());
+        auto arraySize = input->GetDataFlowInput(input->GetInput(NewArrayInst::INDEX_SIZE).GetInst());
         // We can't restore array_size register if it was defined out of OSR loop
-        if (SkipThisPeepholeInOSR(inst, array_size)) {
+        if (SkipThisPeepholeInOSR(inst, arraySize)) {
             return;
         }
-        inst->ReplaceUsers(array_size);
+        inst->ReplaceUsers(arraySize);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
     }
     if (static_cast<Peepholes *>(v)->OptimizeLenArrayForMultiArray(inst, input, 0)) {
@@ -1360,10 +1360,10 @@ void Peepholes::VisitPhi([[maybe_unused]] GraphVisitor *v, Inst *inst)
     if (!inst->GetUsers().Empty()) {
         auto block = inst->GetBasicBlock();
         auto phi = inst->CastToPhi();
-        for (auto other_phi : block->PhiInsts()) {
-            if (IsPhiUnionPossible(phi, other_phi->CastToPhi())) {
+        for (auto otherPhi : block->PhiInsts()) {
+            if (IsPhiUnionPossible(phi, otherPhi->CastToPhi())) {
                 // In check above checked, that phi insts in same BB, so no problem with SaveStateOSR
-                other_phi->ReplaceUsers(phi);
+                otherPhi->ReplaceUsers(phi);
                 PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
             }
         }
@@ -1399,11 +1399,11 @@ void Peepholes::VisitCastAnyTypeValue(GraphVisitor *v, Inst *inst)
     }
 
     auto *cav = inst->CastToCastAnyTypeValue();
-    auto *cav_input = cav->GetDataFlowInput(0);
-    if (cav_input->GetOpcode() == Opcode::CastValueToAnyType) {
-        auto cva = cav_input->CastToCastValueToAnyType();
-        auto value_inst = cva->GetInput(0).GetInst();
-        if (SkipThisPeepholeInOSR(cav, value_inst)) {
+    auto *cavInput = cav->GetDataFlowInput(0);
+    if (cavInput->GetOpcode() == Opcode::CastValueToAnyType) {
+        auto cva = cavInput->CastToCastValueToAnyType();
+        auto valueInst = cva->GetInput(0).GetInst();
+        if (SkipThisPeepholeInOSR(cav, valueInst)) {
             return;
         }
         if (cva->GetAnyType() == cav->GetAnyType()) {
@@ -1418,14 +1418,14 @@ void Peepholes::VisitCastAnyTypeValue(GraphVisitor *v, Inst *inst)
             // 3. AnyTypeCheck v2 -> v3
             // 4. CastAnyTypeValue v3
             // 5. ...
-            cav->ReplaceUsers(value_inst);
+            cav->ReplaceUsers(valueInst);
             PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
             return;
         }
-        auto input_type = value_inst->GetType();
-        auto dst_type = cav->GetType();
-        auto is_double_to_int = dst_type == DataType::INT32 && input_type == DataType::FLOAT64;
-        if (IsTypeNumeric(input_type) && IsTypeNumeric(dst_type) && (!is_double_to_int || cav->IsIntegerWasSeen())) {
+        auto inputType = valueInst->GetType();
+        auto dstType = cav->GetType();
+        auto isDoubleToInt = dstType == DataType::INT32 && inputType == DataType::FLOAT64;
+        if (IsTypeNumeric(inputType) && IsTypeNumeric(dstType) && (!isDoubleToInt || cav->IsIntegerWasSeen())) {
             // 1. .... -> v2
             // 2. CastValueToAnyType v1 -> v3
             // 3. AnyTypeCheck v2 -> v3
@@ -1438,9 +1438,9 @@ void Peepholes::VisitCastAnyTypeValue(GraphVisitor *v, Inst *inst)
             // 4. CastAnyTypeValue v3
             // 6. Cast v1 -> v5
             // 5. ...
-            auto cast = CreateAndInsertInst(Opcode::Cast, cav, value_inst);
-            cast->SetType(dst_type);
-            cast->CastToCast()->SetOperandsType(input_type);
+            auto cast = CreateAndInsertInst(Opcode::Cast, cav, valueInst);
+            cast->SetType(dstType);
+            cast->CastToCast()->SetOperandsType(inputType);
             PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
         }
     }
@@ -1450,15 +1450,15 @@ void Peepholes::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto input = inst->GetInput(0).GetInst();
-    auto any_type = inst->CastToCastValueToAnyType()->GetAnyType();
+    auto anyType = inst->CastToCastValueToAnyType()->GetAnyType();
 
     if (input->GetOpcode() == Opcode::CastAnyTypeValue) {
         auto cav = input->CastToCastAnyTypeValue();
-        auto any_input = cav->GetInput(0).GetInst();
-        if (SkipThisPeepholeInOSR(inst, any_input)) {
+        auto anyInput = cav->GetInput(0).GetInst();
+        if (SkipThisPeepholeInOSR(inst, anyInput)) {
             return;
         }
-        if (any_type == cav->GetAnyType() && cav->GetAllowedInputType() == profiling::AnyInputType::DEFAULT) {
+        if (anyType == cav->GetAnyType() && cav->GetAllowedInputType() == profiling::AnyInputType::DEFAULT) {
             // 1. ... -> v2
             // 2. CastAnyTypeValue v1 -> v3
             // 3. CastValueToAnyType v2 -> v4
@@ -1468,7 +1468,7 @@ void Peepholes::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
             // 2. CastAnyTypeValue v1 -> v3
             // 3. CastValueToAnyType v2
             // 4. ...
-            inst->ReplaceUsers(any_input);
+            inst->ReplaceUsers(anyInput);
             PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
             return;
         }
@@ -1479,9 +1479,9 @@ void Peepholes::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
         return;
     }
 
-    auto base_type = AnyBaseTypeToDataType(any_type);
+    auto baseType = AnyBaseTypeToDataType(anyType);
     // We propogate not INT types in Lowering
-    if (base_type != DataType::INT32) {
+    if (baseType != DataType::INT32) {
         return;
     }
     // from
@@ -1490,18 +1490,18 @@ void Peepholes::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
     //
     // to
     // 3     SaveState                   v1(acc)
-    bool is_applied = false;
+    bool isApplied = false;
     for (auto it = inst->GetUsers().begin(); it != inst->GetUsers().end();) {
-        auto user_inst = it->GetInst();
-        if (user_inst->IsSaveState()) {
-            user_inst->SetInput(it->GetIndex(), input);
+        auto userInst = it->GetInst();
+        if (userInst->IsSaveState()) {
+            userInst->SetInput(it->GetIndex(), input);
             it = inst->GetUsers().begin();
-            is_applied = true;
+            isApplied = true;
         } else {
             ++it;
         }
     }
-    if (is_applied) {
+    if (isApplied) {
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
     }
 }
@@ -1514,31 +1514,31 @@ void Peepholes::EliminateInstPrecedingStore(GraphVisitor *v, Inst *inst)
         return;
     }
     auto arch = graph->GetArch();
-    auto type_size = DataType::GetTypeSize(inst->GetType(), arch);
-    if (DataType::GetCommonType(inst->GetType()) == DataType::INT64 && type_size < DOUBLE_WORD_SIZE) {
-        auto store_value_inst = inst->GetInput(T::STORED_INPUT_INDEX).GetInst();
-        auto mask = (1ULL << type_size) - 1;
+    auto typeSize = DataType::GetTypeSize(inst->GetType(), arch);
+    if (DataType::GetCommonType(inst->GetType()) == DataType::INT64 && typeSize < DOUBLE_WORD_SIZE) {
+        auto storeValueInst = inst->GetInput(T::STORED_INPUT_INDEX).GetInst();
+        auto mask = (1ULL << typeSize) - 1;
         uint64_t imm;
 
-        switch (store_value_inst->GetOpcode()) {
+        switch (storeValueInst->GetOpcode()) {
             case Opcode::And: {
-                auto input_inst1 = store_value_inst->GetInput(1).GetInst();
-                if (!input_inst1->IsConst()) {
+                auto inputInst1 = storeValueInst->GetInput(1).GetInst();
+                if (!inputInst1->IsConst()) {
                     return;
                 }
-                imm = input_inst1->CastToConstant()->GetIntValue();
+                imm = inputInst1->CastToConstant()->GetIntValue();
                 break;
             }
             case Opcode::Cast: {
-                auto size = DataType::GetTypeSize(store_value_inst->GetType(), arch);
+                auto size = DataType::GetTypeSize(storeValueInst->GetType(), arch);
                 if (size >= DOUBLE_WORD_SIZE) {
                     return;
                 }
-                auto input_type_mismatch = IsInputTypeMismatch(store_value_inst, 0, arch);
+                auto inputTypeMismatch = IsInputTypeMismatch(storeValueInst, 0, arch);
 #ifndef NDEBUG
-                ASSERT(!input_type_mismatch);
+                ASSERT(!inputTypeMismatch);
 #else
-                if (input_type_mismatch) {
+                if (inputTypeMismatch) {
                     return;
                 }
 #endif
@@ -1549,16 +1549,16 @@ void Peepholes::EliminateInstPrecedingStore(GraphVisitor *v, Inst *inst)
                 return;
         }
 
-        auto input_inst = store_value_inst->GetInput(0).GetInst();
-        if (DataType::GetCommonType(input_inst->GetType()) != DataType::INT64) {
+        auto inputInst = storeValueInst->GetInput(0).GetInst();
+        if (DataType::GetCommonType(inputInst->GetType()) != DataType::INT64) {
             return;
         }
 
         if ((imm & mask) == mask) {
-            if (SkipThisPeepholeInOSR(inst, input_inst)) {
+            if (SkipThisPeepholeInOSR(inst, inputInst)) {
                 return;
             }
-            inst->ReplaceInput(store_value_inst, input_inst);
+            inst->ReplaceInput(storeValueInst, inputInst);
             PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
         }
     }
@@ -1589,13 +1589,13 @@ static bool CanRemoveOverflowCheck(Inst *inst, Marker marker)
         return true;
     }
     if (inst->GetOpcode() == Opcode::AnyTypeCheck) {
-        auto any_type_check = inst->CastToAnyTypeCheck();
+        auto anyTypeCheck = inst->CastToAnyTypeCheck();
         auto graph = inst->GetBasicBlock()->GetGraph();
         auto language = graph->GetRuntime()->GetMethodSourceLanguage(graph->GetMethod());
-        auto int_any_type = NumericDataTypeToAnyType(DataType::INT32, language);
+        auto intAnyType = NumericDataTypeToAnyType(DataType::INT32, language);
         // Bail out if this AnyTypeCheck can be triggered
-        if (IsAnyTypeCanBeSubtypeOf(language, any_type_check->GetAnyType(), int_any_type,
-                                    any_type_check->GetAllowedInputType()) != true) {
+        if (IsAnyTypeCanBeSubtypeOf(language, anyTypeCheck->GetAnyType(), intAnyType,
+                                    anyTypeCheck->GetAllowedInputType()) != true) {
             return false;
         }
     }
@@ -1621,14 +1621,14 @@ static bool CanRemoveOverflowCheck(Inst *inst, Marker marker)
         // may be used in interpreter after deoptimization
         case Opcode::SaveState:
             for (auto &user : inst->GetUsers()) {
-                auto user_inst = user.GetInst();
-                bool can_remove;
+                auto userInst = user.GetInst();
+                bool canRemove;
                 if (DataType::IsFloatType(inst->GetType())) {
-                    can_remove = user_inst->GetOpcode() == Opcode::Cast && user_inst->CastToCast()->IsDynamicCast();
+                    canRemove = userInst->GetOpcode() == Opcode::Cast && userInst->CastToCast()->IsDynamicCast();
                 } else {
-                    can_remove = CanRemoveOverflowCheck(user_inst, marker);
+                    canRemove = CanRemoveOverflowCheck(userInst, marker);
                 }
-                if (!can_remove) {
+                if (!canRemove) {
                     return false;
                 }
             }
@@ -1641,8 +1641,8 @@ static bool CanRemoveOverflowCheck(Inst *inst, Marker marker)
 void Peepholes::TryRemoveOverflowCheck(Inst *inst)
 {
     auto block = inst->GetBasicBlock();
-    auto marker_holder = MarkerHolder(block->GetGraph());
-    if (CanRemoveOverflowCheck(inst, marker_holder.GetMarker())) {
+    auto markerHolder = MarkerHolder(block->GetGraph());
+    if (CanRemoveOverflowCheck(inst, markerHolder.GetMarker())) {
         PEEPHOLE_IS_APPLIED(this, inst);
         block->RemoveOverflowCheck(inst);
         return;
@@ -1685,8 +1685,8 @@ bool Peepholes::IsPhiUnionPossible(PhiInst *phi1, PhiInst *phi2)
     if (phi1 == phi2 || phi1->GetType() != phi2->GetType()) {
         return false;
     }
-    for (auto pred_block : phi1->GetBasicBlock()->GetPredsBlocks()) {
-        if (phi1->GetPhiDataflowInput(pred_block) != phi2->GetPhiDataflowInput(pred_block)) {
+    for (auto predBlock : phi1->GetBasicBlock()->GetPredsBlocks()) {
+        if (phi1->GetPhiDataflowInput(predBlock) != phi2->GetPhiDataflowInput(predBlock)) {
             return false;
         }
     }
@@ -1718,24 +1718,24 @@ int64_t Peepholes::GetPowerOfTwo(uint64_t n)
 }
 
 // Create new instruction instead of current inst
-Inst *Peepholes::CreateAndInsertInst(Opcode new_opc, Inst *curr_inst, Inst *input0, Inst *input1)
+Inst *Peepholes::CreateAndInsertInst(Opcode newOpc, Inst *currInst, Inst *input0, Inst *input1)
 {
-    auto bb = curr_inst->GetBasicBlock();
+    auto bb = currInst->GetBasicBlock();
     auto graph = bb->GetGraph();
-    auto new_inst = graph->CreateInst(new_opc);
-    new_inst->SetType(curr_inst->GetType());
-    new_inst->SetPc(curr_inst->GetPc());
+    auto newInst = graph->CreateInst(newOpc);
+    newInst->SetType(currInst->GetType());
+    newInst->SetPc(currInst->GetPc());
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    new_inst->SetCurrentMethod(curr_inst->GetCurrentMethod());
+    newInst->SetCurrentMethod(currInst->GetCurrentMethod());
 #endif
     // It is a wrapper, so we don't do logic check for SaveStateOSR
-    curr_inst->ReplaceUsers(new_inst);
-    new_inst->SetInput(0, input0);
+    currInst->ReplaceUsers(newInst);
+    newInst->SetInput(0, input0);
     if (input1 != nullptr) {
-        new_inst->SetInput(1, input1);
+        newInst->SetInput(1, input1);
     }
-    bb->InsertAfter(new_inst, curr_inst);
-    return new_inst;
+    bb->InsertAfter(newInst, currInst);
+    return newInst;
 }
 
 // Try put constant in second input
@@ -1780,26 +1780,26 @@ void Peepholes::TrySimplifyShifts(Inst *inst)
         // ===>
         // 2. shl/shr/ashr v1, const1 -> {...}
         // 3. shl/shr/ashr v1, const2 + const1 -> {...}
-        bool osr_blocked_peephole = false;
-        if (opc == input0->GetOpcode() && TryCombineShiftConst(inst, cnst, &osr_blocked_peephole)) {
+        bool osrBlockedPeephole = false;
+        if (opc == input0->GetOpcode() && TryCombineShiftConst(inst, cnst, &osrBlockedPeephole)) {
             PEEPHOLE_IS_APPLIED(this, inst);
             return;
         }
-        if (osr_blocked_peephole) {
+        if (osrBlockedPeephole) {
             return;
         }
-        uint64_t size_mask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
-        auto cnst_value = cnst->GetIntValue();
+        uint64_t sizeMask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
+        auto cnstValue = cnst->GetIntValue();
         // Shift by a constant greater than the type size
         // 2. shl/shr/ashr v1, big_const -> {...}
         // ===>
         // 2. shl/shr/ashr v1, size_mask & big_const -> {...}
         if (graph->IsBytecodeOptimizer() && IsInt32Bit(inst->GetType())) {
-            size_mask = static_cast<uint32_t>(size_mask);
-            cnst_value = static_cast<uint32_t>(cnst_value);
+            sizeMask = static_cast<uint32_t>(sizeMask);
+            cnstValue = static_cast<uint32_t>(cnstValue);
         }
-        if (size_mask < cnst_value) {
-            ConstantInst *shift = ConstFoldingCreateIntConst(inst, size_mask & cnst_value);
+        if (sizeMask < cnstValue) {
+            ConstantInst *shift = ConstFoldingCreateIntConst(inst, sizeMask & cnstValue);
             inst->SetInput(1, shift);
             PEEPHOLE_IS_APPLIED(this, inst);
             return;
@@ -1807,26 +1807,26 @@ void Peepholes::TrySimplifyShifts(Inst *inst)
     }
 }
 
-void Peepholes::TryReplaceDivByShrAndAshr(Inst *inst, uint64_t unsigned_val, Inst *input0)
+void Peepholes::TryReplaceDivByShrAndAshr(Inst *inst, uint64_t unsignedVal, Inst *input0)
 {
     auto bb = inst->GetBasicBlock();
     auto graph = bb->GetGraph();
-    auto signed_val = static_cast<int64_t>(unsigned_val);
-    int64_t n = GetPowerOfTwo(signed_val < 0 ? -signed_val : signed_val);
+    auto signedVal = static_cast<int64_t>(unsignedVal);
+    int64_t n = GetPowerOfTwo(signedVal < 0 ? -signedVal : signedVal);
     // "inst", "ashr", "shr", "add", "result" one by one, so we need check SaveStateOSR only between "inst" and
     // "input0". "input0" is input of "inst", so we don't need check SaveStateOsr in this case
     if (n != -1) {
-        auto type_size = DataType::GetTypeSize(inst->GetType(), graph->GetArch());
+        auto typeSize = DataType::GetTypeSize(inst->GetType(), graph->GetArch());
         auto ashr =
-            graph->CreateInstAShr(inst->GetType(), INVALID_PC, input0, graph->FindOrCreateConstant(type_size - 1));
+            graph->CreateInstAShr(inst->GetType(), INVALID_PC, input0, graph->FindOrCreateConstant(typeSize - 1));
         bb->InsertAfter(ashr, inst);
-        auto shr = graph->CreateInstShr(inst->GetType(), INVALID_PC, ashr, graph->FindOrCreateConstant(type_size - n));
+        auto shr = graph->CreateInstShr(inst->GetType(), INVALID_PC, ashr, graph->FindOrCreateConstant(typeSize - n));
         bb->InsertAfter(shr, ashr);
         auto add = graph->CreateInstAdd(inst->GetType(), INVALID_PC, shr, input0);
         bb->InsertAfter(add, shr);
         Inst *result = graph->CreateInstAShr(inst->GetType(), INVALID_PC, add, graph->FindOrCreateConstant(n));
         bb->InsertAfter(result, add);
-        if (signed_val < 0) {
+        if (signedVal < 0) {
             auto div = result;
             result = graph->CreateInstNeg(inst->GetType(), INVALID_PC, div);
             bb->InsertAfter(result, div);
@@ -1865,12 +1865,12 @@ bool Peepholes::TrySimplifyAddSubWithConstInput(Inst *inst)
     if (input1->IsConst()) {
         auto cnst = input1->CastToConstant();
         if ((input0->GetOpcode() == Opcode::Add || input0->GetOpcode() == Opcode::Sub)) {
-            bool osr_blocked_peephole = false;
-            if (TryCombineAddSubConst(inst, cnst, &osr_blocked_peephole)) {
+            bool osrBlockedPeephole = false;
+            if (TryCombineAddSubConst(inst, cnst, &osrBlockedPeephole)) {
                 PEEPHOLE_IS_APPLIED(this, inst);
                 return true;
             }
-            if (osr_blocked_peephole) {
+            if (osrBlockedPeephole) {
                 return true;
             }
         }
@@ -1891,12 +1891,12 @@ template <Opcode OPC, int IDX>
 void Peepholes::TrySimplifyAddSub(Inst *inst, Inst *input0, Inst *input1)
 {
     if (input0->GetOpcode() == OPC && input0->GetInput(1 - IDX).GetInst() == input1) {
-        auto prev_input = input0->GetInput(IDX).GetInst();
-        if (inst->GetType() == prev_input->GetType()) {
-            if (SkipThisPeepholeInOSR(inst, prev_input)) {
+        auto prevInput = input0->GetInput(IDX).GetInst();
+        if (inst->GetType() == prevInput->GetType()) {
+            if (SkipThisPeepholeInOSR(inst, prevInput)) {
                 return;
             }
-            inst->ReplaceUsers(prev_input);
+            inst->ReplaceUsers(prevInput);
             PEEPHOLE_IS_APPLIED(this, inst);
             return;
         }
@@ -1907,26 +1907,26 @@ bool Peepholes::TrySimplifyAddSubAdd(Inst *inst, Inst *input0, Inst *input1)
 {
     // (a - b) + (b + c) = a + c
     if (input0->GetInput(1) == input1->GetInput(0)) {
-        auto new_input0 = input0->GetInput(0).GetInst();
-        auto new_input1 = input1->GetInput(1).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput0 = input0->GetInput(0).GetInst();
+        auto newInput1 = input1->GetInput(1).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(this, inst);
         return true;
     }
 
     // (a - b) + (c + b) = a + c
     if (input0->GetInput(1) == input1->GetInput(1)) {
-        auto new_input0 = input0->GetInput(0).GetInst();
-        auto new_input1 = input1->GetInput(0).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput0 = input0->GetInput(0).GetInst();
+        auto newInput1 = input1->GetInput(0).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(this, inst);
         return true;
     }
@@ -1938,29 +1938,29 @@ bool Peepholes::TrySimplifyAddSubSub(Inst *inst, Inst *input0, Inst *input1)
 {
     // (a - b) + (b - c) = a - c
     if (input0->GetInput(1) == input1->GetInput(0)) {
-        auto new_input0 = input0->GetInput(0).GetInst();
-        auto new_input1 = input1->GetInput(1).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput0 = input0->GetInput(0).GetInst();
+        auto newInput1 = input1->GetInput(1).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
 
         inst->SetOpcode(Opcode::Sub);
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(this, inst);
         return true;
     }
 
     // (a - b) + (c - a) = c - b
     if (input0->GetInput(0) == input1->GetInput(1)) {
-        auto new_input0 = input1->GetInput(0).GetInst();
-        auto new_input1 = input0->GetInput(1).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput0 = input1->GetInput(0).GetInst();
+        auto newInput1 = input0->GetInput(1).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
         inst->SetOpcode(Opcode::Sub);
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(this, inst);
         return true;
     }
@@ -1972,52 +1972,52 @@ bool Peepholes::TrySimplifySubAddAdd(Inst *inst, Inst *input0, Inst *input1)
 {
     // (a + b) - (a + c) = b - c
     if (input0->GetInput(0) == input1->GetInput(0)) {
-        auto new_input0 = input0->GetInput(1).GetInst();
-        auto new_input1 = input1->GetInput(1).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput0 = input0->GetInput(1).GetInst();
+        auto newInput1 = input1->GetInput(1).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(this, inst);
         return true;
     }
 
     // (a + b) - (c + a) = b - c
     if (input0->GetInput(0) == input1->GetInput(1)) {
-        auto new_input0 = input0->GetInput(1).GetInst();
-        auto new_input1 = input1->GetInput(0).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput0 = input0->GetInput(1).GetInst();
+        auto newInput1 = input1->GetInput(0).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(this, inst);
         return true;
     }
 
     // (a + b) - (b + c) = a - c
     if (input0->GetInput(1) == input1->GetInput(0)) {
-        auto new_input0 = input0->GetInput(0).GetInst();
-        auto new_input1 = input1->GetInput(1).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput0 = input0->GetInput(0).GetInst();
+        auto newInput1 = input1->GetInput(1).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(this, inst);
         return true;
     }
 
     // (a + b) - (c + b) = a - c
     if (input0->GetInput(1) == input1->GetInput(1)) {
-        auto new_input0 = input0->GetInput(0).GetInst();
-        auto new_input1 = input1->GetInput(0).GetInst();
-        if (SkipThisPeepholeInOSR(inst, new_input0) || SkipThisPeepholeInOSR(inst, new_input1)) {
+        auto newInput0 = input0->GetInput(0).GetInst();
+        auto newInput1 = input1->GetInput(0).GetInst();
+        if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
-        inst->SetInput(0, new_input0);
-        inst->SetInput(1, new_input1);
+        inst->SetInput(0, newInput0);
+        inst->SetInput(1, newInput1);
         PEEPHOLE_IS_APPLIED(this, inst);
         return true;
     }
@@ -2094,19 +2094,19 @@ bool Peepholes::TryReassociateShlShlAddSub(Inst *inst)
         return false;
     }
 
-    Opcode op_input1 = input1->GetOpcode();
-    Opcode op_inst = inst->GetOpcode();
-    if (op_inst == Opcode::Sub && op_input1 == Opcode::Add) {
+    Opcode opInput1 = input1->GetOpcode();
+    Opcode opInst = inst->GetOpcode();
+    if (opInst == Opcode::Sub && opInput1 == Opcode::Add) {
         // input0 - (shl0 + shl1) -> (input0 - shl0) - shl1
-        op_input1 = Opcode::Sub;
-    } else if (op_inst == Opcode::Add && op_input1 == Opcode::Sub) {
+        opInput1 = Opcode::Sub;
+    } else if (opInst == Opcode::Add && opInput1 == Opcode::Sub) {
         // input0 + (shl0 - shl1) -> (input0 + shl0) - shl1
-        op_input1 = Opcode::Add;
-        op_inst = Opcode::Sub;
-    } else if (op_inst == Opcode::Sub && op_input1 == Opcode::Sub) {
+        opInput1 = Opcode::Add;
+        opInst = Opcode::Sub;
+    } else if (opInst == Opcode::Sub && opInput1 == Opcode::Sub) {
         // input0 - (shl0 - shl1) -> (input0 - shl0) + shl1
-        op_inst = Opcode::Add;
-    } else if (op_inst != Opcode::Add && op_input1 != Opcode::Add) {
+        opInst = Opcode::Add;
+    } else if (opInst != Opcode::Add && opInput1 != Opcode::Add) {
         UNREACHABLE();
     }
     // "input1" and "new_input0" one by one, so we don't should to check "SaveStateOSR" between this insts,
@@ -2114,8 +2114,8 @@ bool Peepholes::TryReassociateShlShlAddSub(Inst *inst)
     if (SkipThisPeepholeInOSR(inst, input1)) {
         return true;
     }
-    auto new_input0 = CreateAndInsertInst(op_input1, input1, input0, shl0);
-    CreateAndInsertInst(op_inst, inst, new_input0, shl1);
+    auto newInput0 = CreateAndInsertInst(opInput1, input1, input0, shl0);
+    CreateAndInsertInst(opInst, inst, newInput0, shl1);
     return true;
 }
 
@@ -2149,25 +2149,25 @@ bool Peepholes::TrySimplifyCompareNegation(Inst *inst)
 
     // Case 9: Neg -> Add -> Compare
     bool optimized = false;
-    for (auto &user_add : inst->GetUsers()) {
-        auto suspect_inst = user_add.GetInst();
-        if (suspect_inst->GetOpcode() != Opcode::Compare) {
+    for (auto &userAdd : inst->GetUsers()) {
+        auto suspectInst = userAdd.GetInst();
+        if (suspectInst->GetOpcode() != Opcode::Compare) {
             continue;
         }
-        auto compare_inst = suspect_inst->CastToCompare();
-        if (compare_inst->GetOperandsType() != DataType::BOOL ||
-            (compare_inst->GetCc() != ConditionCode::CC_EQ && compare_inst->GetCc() != ConditionCode::CC_NE)) {
+        auto compareInst = suspectInst->CastToCompare();
+        if (compareInst->GetOperandsType() != DataType::BOOL ||
+            (compareInst->GetCc() != ConditionCode::CC_EQ && compareInst->GetCc() != ConditionCode::CC_NE)) {
             continue;
         }
 
-        unsigned index_cast = compare_inst->GetInput(0).GetInst() == inst ? 0 : 1;
-        auto bool_value = inst->GetInput(0).GetInst()->GetInput(0).GetInst();
-        if (SkipThisPeepholeInOSR(inst, bool_value)) {
+        unsigned indexCast = compareInst->GetInput(0).GetInst() == inst ? 0 : 1;
+        auto boolValue = inst->GetInput(0).GetInst()->GetInput(0).GetInst();
+        if (SkipThisPeepholeInOSR(inst, boolValue)) {
             continue;
         }
-        compare_inst->SetInput(index_cast, bool_value);
-        compare_inst->SetCc(GetInverseConditionCode(compare_inst->GetCc()));
-        PEEPHOLE_IS_APPLIED(this, compare_inst);
+        compareInst->SetInput(indexCast, boolValue);
+        compareInst->SetCc(GetInverseConditionCode(compareInst->GetCc()));
+        PEEPHOLE_IS_APPLIED(this, compareInst);
         optimized = true;
     }
     return optimized;
@@ -2183,7 +2183,7 @@ void Peepholes::TryReplaceDivByShift(Inst *inst)
     auto input0 = inst->GetInput(0).GetInst();
     auto input1 = inst->GetInput(1).GetInst();
     ASSERT(input1->IsConst());
-    uint64_t unsigned_val = input1->CastToConstant()->GetIntValue();
+    uint64_t unsignedVal = input1->CastToConstant()->GetIntValue();
     if (!DataType::IsTypeSigned(inst->GetType())) {
         // case 3:
         // 0.unsigned Parameter
@@ -2195,7 +2195,7 @@ void Peepholes::TryReplaceDivByShift(Inst *inst)
         // 1.i64 Const n -> {v2}
         // 2.un-signed SHR v0, v1 -> {v3}
         // 3.unsigned INST v2
-        int64_t n = GetPowerOfTwo(unsigned_val);
+        int64_t n = GetPowerOfTwo(unsignedVal);
         if (n != -1) {
             auto power = graph->FindOrCreateConstant(n);
             CreateAndInsertInst(Opcode::Shr, inst, input0, power);
@@ -2216,7 +2216,7 @@ void Peepholes::TryReplaceDivByShift(Inst *inst)
         // 6.signed ASHR v5, n -> {v3 or v7}
         // if n < 0 7.signed NEG v6 ->{v3}
         // 3.signed INST v6 or v7
-        TryReplaceDivByShrAndAshr(inst, unsigned_val, input0);
+        TryReplaceDivByShrAndAshr(inst, unsignedVal, input0);
     }
 }
 
@@ -2255,21 +2255,21 @@ bool Peepholes::TrySimplifyCompareCaseInputInv(Inst *inst, Inst *input)
 // 5.b    ### Some abstract expression that return boolean ###
 // 6.b    Compare EQ i32             v5, v4
 // 7.     IfImm EQ b                 v5, 0x0
-bool Peepholes::TrySimplifyCompareWithBoolInput(Inst *inst, bool *is_osr_blocked)
+bool Peepholes::TrySimplifyCompareWithBoolInput(Inst *inst, bool *isOsrBlocked)
 {
-    ASSERT(is_osr_blocked != nullptr);
+    ASSERT(isOsrBlocked != nullptr);
     auto compare = inst->CastToCompare();
     bool swap = false;
     Inst *input = nullptr;
-    ConstantInst *const_input = nullptr;
-    if (!GetInputsOfCompareWithConst(compare, &input, &const_input, &swap)) {
+    ConstantInst *constInput = nullptr;
+    if (!GetInputsOfCompareWithConst(compare, &input, &constInput, &swap)) {
         return false;
     }
     if (input->GetType() != DataType::BOOL) {
         return false;
     }
     ConditionCode cc = swap ? SwapOperandsConditionCode(compare->GetCc()) : compare->GetCc();
-    InputCode code = GetInputCode(const_input, cc);
+    InputCode code = GetInputCode(constInput, cc);
     if (code == INPUT_TRUE || code == INPUT_FALSE) {
         // We create constant, so we don't need to check SaveStateOSR between insts
         compare->ReplaceUsers(ConstFoldingCreateIntConst(compare, code == INPUT_TRUE ? 1 : 0));
@@ -2277,7 +2277,7 @@ bool Peepholes::TrySimplifyCompareWithBoolInput(Inst *inst, bool *is_osr_blocked
     }
     if (code == INPUT_ORIG) {
         if (SkipThisPeepholeInOSR(compare, input)) {
-            *is_osr_blocked = true;
+            *isOsrBlocked = true;
             return true;
         }
         compare->ReplaceUsers(input);
@@ -2297,51 +2297,51 @@ bool Peepholes::TrySimplifyCompareWithBoolInput(Inst *inst, bool *is_osr_blocked
 // 6.i32  Cmp        v5, v1
 // 7.b    Compare    v5, v1
 // 9.     IfImm NE b v7, 0x0
-bool Peepholes::TrySimplifyCmpCompareWithZero(Inst *inst, bool *is_osr_blocked)
+bool Peepholes::TrySimplifyCmpCompareWithZero(Inst *inst, bool *isOsrBlocked)
 {
-    ASSERT(is_osr_blocked != nullptr);
+    ASSERT(isOsrBlocked != nullptr);
     auto compare = inst->CastToCompare();
     if (compare->GetBasicBlock()->GetGraph()->IsBytecodeOptimizer()) {
         return false;
     }
     bool swap = false;
     Inst *input = nullptr;
-    ConstantInst *const_input = nullptr;
-    if (!GetInputsOfCompareWithConst(compare, &input, &const_input, &swap)) {
+    ConstantInst *constInput = nullptr;
+    if (!GetInputsOfCompareWithConst(compare, &input, &constInput, &swap)) {
         return false;
     }
     if (input->GetOpcode() != Opcode::Cmp) {
         return false;
     }
-    if (!const_input->IsEqualConstAllTypes(0)) {
+    if (!constInput->IsEqualConstAllTypes(0)) {
         return false;
     }
-    auto cmp_op_type = input->CastToCmp()->GetOperandsType();
-    if (IsFloatType(cmp_op_type)) {
+    auto cmpOpType = input->CastToCmp()->GetOperandsType();
+    if (IsFloatType(cmpOpType)) {
         return false;
     }
     ConditionCode cc = swap ? SwapOperandsConditionCode(compare->GetCc()) : compare->GetCc();
-    if (!IsTypeSigned(cmp_op_type)) {
+    if (!IsTypeSigned(cmpOpType)) {
         ASSERT(cc == ConditionCode::CC_EQ || cc == ConditionCode::CC_NE || IsSignedConditionCode(cc));
         // If Cmp operands are unsigned then Compare.CC must be converted to unsigned.
         cc = InverseSignednessConditionCode(cc);
     }
     if (SkipThisPeepholeInOSR(compare, input->GetInput(0).GetInst()) ||
         SkipThisPeepholeInOSR(compare, input->GetInput(1).GetInst())) {
-        *is_osr_blocked = true;
+        *isOsrBlocked = true;
         return true;
     }
     compare->SetInput(0, input->GetInput(0).GetInst());
     compare->SetInput(1, input->GetInput(1).GetInst());
-    compare->SetOperandsType(cmp_op_type);
+    compare->SetOperandsType(cmpOpType);
     compare->SetCc(cc);
     return true;
 }
 
 bool Peepholes::TrySimplifyTestEqualInputs(Inst *inst)
 {
-    auto cmp_inst = inst->CastToCompare();
-    if (cmp_inst->GetCc() != ConditionCode::CC_TST_EQ && cmp_inst->GetCc() != ConditionCode::CC_TST_NE) {
+    auto cmpInst = inst->CastToCompare();
+    if (cmpInst->GetCc() != ConditionCode::CC_TST_EQ && cmpInst->GetCc() != ConditionCode::CC_TST_NE) {
         return false;
     }
     auto input0 = inst->GetInput(0).GetInst();
@@ -2349,34 +2349,34 @@ bool Peepholes::TrySimplifyTestEqualInputs(Inst *inst)
     if (input0 != input1) {
         return false;
     }
-    if (cmp_inst->GetCc() == ConditionCode::CC_TST_EQ) {
-        cmp_inst->SetCc(ConditionCode::CC_EQ);
+    if (cmpInst->GetCc() == ConditionCode::CC_TST_EQ) {
+        cmpInst->SetCc(ConditionCode::CC_EQ);
     } else {
-        cmp_inst->SetCc(ConditionCode::CC_NE);
+        cmpInst->SetCc(ConditionCode::CC_NE);
     }
     // We create constant, so we don't need to check SaveStateOSR between insts
-    cmp_inst->SetInput(1, ConstFoldingCreateIntConst(input1, 0));
+    cmpInst->SetInput(1, ConstFoldingCreateIntConst(input1, 0));
     return true;
 }
 
-bool Peepholes::TrySimplifyCompareAndZero(Inst *inst, bool *is_osr_blocked)
+bool Peepholes::TrySimplifyCompareAndZero(Inst *inst, bool *isOsrBlocked)
 {
-    ASSERT(is_osr_blocked != nullptr);
+    ASSERT(isOsrBlocked != nullptr);
     if (inst->GetBasicBlock()->GetGraph()->IsBytecodeOptimizer()) {
         return false;
     }
-    auto cmp_inst = inst->CastToCompare();
-    auto cc = cmp_inst->GetCc();
+    auto cmpInst = inst->CastToCompare();
+    auto cc = cmpInst->GetCc();
     if (cc != CC_EQ && cc != CC_NE) {
         return false;
     }
     bool swap = false;
     Inst *input = nullptr;
-    ConstantInst *const_input = nullptr;
-    if (!GetInputsOfCompareWithConst(cmp_inst, &input, &const_input, &swap)) {
+    ConstantInst *constInput = nullptr;
+    if (!GetInputsOfCompareWithConst(cmpInst, &input, &constInput, &swap)) {
         return false;
     }
-    if (input->GetOpcode() != Opcode::And || !input->HasSingleUser() || !const_input->IsEqualConstAllTypes(0)) {
+    if (input->GetOpcode() != Opcode::And || !input->HasSingleUser() || !constInput->IsEqualConstAllTypes(0)) {
         return false;
     }
     // 2.i32 And                  v0, v1
@@ -2385,13 +2385,13 @@ bool Peepholes::TrySimplifyCompareAndZero(Inst *inst, bool *is_osr_blocked)
     // =======>
     // 4.b   Compare CC_TST_EQ/CC_TST_NE  v0, v1
 
-    if (SkipThisPeepholeInOSR(cmp_inst, input->GetInput(0).GetInst())) {
-        *is_osr_blocked = true;
+    if (SkipThisPeepholeInOSR(cmpInst, input->GetInput(0).GetInst())) {
+        *isOsrBlocked = true;
         return true;
     }
-    cmp_inst->SetCc(cc == CC_EQ ? CC_TST_EQ : CC_TST_NE);
-    cmp_inst->SetInput(0, input->GetInput(0).GetInst());
-    cmp_inst->SetInput(1, input->GetInput(1).GetInst());
+    cmpInst->SetCc(cc == CC_EQ ? CC_TST_EQ : CC_TST_NE);
+    cmpInst->SetInput(0, input->GetInput(0).GetInst());
+    cmpInst->SetInput(1, input->GetInput(1).GetInst());
     return true;
 }
 
@@ -2400,11 +2400,11 @@ bool Peepholes::TrySimplifyCompareLenArrayWithZero(Inst *inst)
     auto compare = inst->CastToCompare();
     bool swap = false;
     Inst *input = nullptr;
-    ConstantInst *const_input = nullptr;
-    if (!GetInputsOfCompareWithConst(compare, &input, &const_input, &swap)) {
+    ConstantInst *constInput = nullptr;
+    if (!GetInputsOfCompareWithConst(compare, &input, &constInput, &swap)) {
         return false;
     }
-    if (input->GetOpcode() != Opcode::LenArray || !const_input->IsEqualConstAllTypes(0)) {
+    if (input->GetOpcode() != Opcode::LenArray || !constInput->IsEqualConstAllTypes(0)) {
         return false;
     }
     ConditionCode cc = swap ? SwapOperandsConditionCode(compare->GetCc()) : compare->GetCc();
@@ -2419,52 +2419,52 @@ bool Peepholes::TrySimplifyCompareLenArrayWithZero(Inst *inst)
 
 // Try to combine constants when arithmetic operations with constants are repeated
 template <typename T>
-bool Peepholes::TryCombineConst(Inst *inst, ConstantInst *cnst1, T combine, bool *is_osr_blocked)
+bool Peepholes::TryCombineConst(Inst *inst, ConstantInst *cnst1, T combine, bool *isOsrBlocked)
 {
-    ASSERT(is_osr_blocked != nullptr);
+    ASSERT(isOsrBlocked != nullptr);
     auto input0 = inst->GetInput(0).GetInst();
     auto previnput1 = input0->GetInput(1).GetInst();
     if (previnput1->IsConst() && inst->GetType() == input0->GetType()) {
         if (SkipThisPeepholeInOSR(inst, input0->GetInput(0).GetInst())) {
-            *is_osr_blocked = true;
+            *isOsrBlocked = true;
             return false;
         }
         auto cnst2 = static_cast<ConstantInst *>(previnput1);
         auto graph = inst->GetBasicBlock()->GetGraph();
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         switch (DataType::GetCommonType(cnst1->GetType())) {
             case DataType::INT64:
-                new_cnst = ConstFoldingCreateIntConst(inst, combine(cnst1->GetIntValue(), cnst2->GetIntValue()));
+                newCnst = ConstFoldingCreateIntConst(inst, combine(cnst1->GetIntValue(), cnst2->GetIntValue()));
                 break;
             case DataType::FLOAT32:
-                new_cnst = graph->FindOrCreateConstant(combine(cnst1->GetFloatValue(), cnst2->GetFloatValue()));
+                newCnst = graph->FindOrCreateConstant(combine(cnst1->GetFloatValue(), cnst2->GetFloatValue()));
                 break;
             case DataType::FLOAT64:
-                new_cnst = graph->FindOrCreateConstant(combine(cnst1->GetDoubleValue(), cnst2->GetDoubleValue()));
+                newCnst = graph->FindOrCreateConstant(combine(cnst1->GetDoubleValue(), cnst2->GetDoubleValue()));
                 break;
             default:
                 UNREACHABLE();
         }
         inst->SetInput(0, input0->GetInput(0).GetInst());
-        inst->SetInput(1, new_cnst);
+        inst->SetInput(1, newCnst);
         return true;
     }
     return false;
 }
 
-bool Peepholes::TryCombineAddSubConst(Inst *inst, ConstantInst *cnst1, bool *is_osr_blocked)
+bool Peepholes::TryCombineAddSubConst(Inst *inst, ConstantInst *cnst1, bool *isOsrBlocked)
 {
-    ASSERT(is_osr_blocked != nullptr);
+    ASSERT(isOsrBlocked != nullptr);
     auto opc = inst->GetOpcode();
     ASSERT(opc == Opcode::Add || opc == Opcode::Sub);
     auto input0 = inst->GetInput(0).GetInst();
     auto combine = [&opc, &input0](auto x, auto y) { return opc == input0->GetOpcode() ? x + y : x - y; };
-    return TryCombineConst(inst, cnst1, combine, is_osr_blocked);
+    return TryCombineConst(inst, cnst1, combine, isOsrBlocked);
 }
 
-bool Peepholes::TryCombineShiftConst(Inst *inst, ConstantInst *cnst1, bool *is_osr_blocked)
+bool Peepholes::TryCombineShiftConst(Inst *inst, ConstantInst *cnst1, bool *isOsrBlocked)
 {
-    ASSERT(is_osr_blocked != nullptr);
+    ASSERT(isOsrBlocked != nullptr);
     auto opc = inst->GetOpcode();
     ASSERT(opc == Opcode::Shl || opc == Opcode::Shr || opc == Opcode::AShr);
 
@@ -2474,94 +2474,94 @@ bool Peepholes::TryCombineShiftConst(Inst *inst, ConstantInst *cnst1, bool *is_o
         return false;
     }
     auto graph = inst->GetBasicBlock()->GetGraph();
-    uint64_t size_mask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
+    uint64_t sizeMask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
     auto cnst2 = static_cast<ConstantInst *>(previnput1);
-    auto new_value = (cnst1->GetIntValue() & size_mask) + (cnst2->GetIntValue() & size_mask);
+    auto newValue = (cnst1->GetIntValue() & sizeMask) + (cnst2->GetIntValue() & sizeMask);
     // If new_value > size_mask, result is always 0 for Shr and Shl,
     // and 0 or -1 (depending on highest bit of input) for AShr
-    if (new_value <= size_mask || opc == Opcode::AShr) {
+    if (newValue <= sizeMask || opc == Opcode::AShr) {
         if (SkipThisPeepholeInOSR(inst, input0->GetInput(0).GetInst())) {
-            *is_osr_blocked = true;
+            *isOsrBlocked = true;
             return false;
         }
-        auto new_cnst = ConstFoldingCreateIntConst(inst, std::min(new_value, size_mask));
+        auto newCnst = ConstFoldingCreateIntConst(inst, std::min(newValue, sizeMask));
         inst->SetInput(0, input0->GetInput(0).GetInst());
-        inst->SetInput(1, new_cnst);
+        inst->SetInput(1, newCnst);
         return true;
     }
-    auto new_cnst = ConstFoldingCreateIntConst(inst, 0);
-    inst->ReplaceUsers(new_cnst);
+    auto newCnst = ConstFoldingCreateIntConst(inst, 0);
+    inst->ReplaceUsers(newCnst);
     return true;
 }
 
-bool Peepholes::TryCombineMulConst(Inst *inst, ConstantInst *cnst1, bool *is_osr_blocked)
+bool Peepholes::TryCombineMulConst(Inst *inst, ConstantInst *cnst1, bool *isOsrBlocked)
 {
-    ASSERT(is_osr_blocked != nullptr);
+    ASSERT(isOsrBlocked != nullptr);
     ASSERT(inst->GetOpcode() == Opcode::Mul);
     auto combine = [](auto x, auto y) { return x * y; };
-    return TryCombineConst(inst, cnst1, combine, is_osr_blocked);
+    return TryCombineConst(inst, cnst1, combine, isOsrBlocked);
 }
 
-bool Peepholes::GetInputsOfCompareWithConst(const Inst *inst, Inst **input, ConstantInst **const_input,
-                                            bool *inputs_swapped)
+bool Peepholes::GetInputsOfCompareWithConst(const Inst *inst, Inst **input, ConstantInst **constInput,
+                                            bool *inputsSwapped)
 {
     if (inst->GetOpcode() == Opcode::Compare || inst->GetOpcode() == Opcode::Cmp) {
         if (inst->GetInput(1).GetInst()->IsConst()) {
             *input = inst->GetInput(0).GetInst();
-            *const_input = inst->GetInput(1).GetInst()->CastToConstant();
-            *inputs_swapped = false;
+            *constInput = inst->GetInput(1).GetInst()->CastToConstant();
+            *inputsSwapped = false;
             return true;
         }
         if (inst->GetInput(0).GetInst()->IsConst()) {
             *input = inst->GetInput(1).GetInst();
-            *const_input = inst->GetInput(0).GetInst()->CastToConstant();
-            *inputs_swapped = true;
+            *constInput = inst->GetInput(0).GetInst()->CastToConstant();
+            *inputsSwapped = true;
             return true;
         }
     }
     return false;
 }
 
-Inst *GenerateXorWithOne(BasicBlock *block, Inst *if_imm_input)
+Inst *GenerateXorWithOne(BasicBlock *block, Inst *ifImmInput)
 {
     auto graph = block->GetGraph();
-    auto xor_inst = graph->CreateInstXor(DataType::BOOL, block->GetGuestPc());
-    xor_inst->SetInput(0, if_imm_input);
-    Inst *one_const = nullptr;
+    auto xorInst = graph->CreateInstXor(DataType::BOOL, block->GetGuestPc());
+    xorInst->SetInput(0, ifImmInput);
+    Inst *oneConst = nullptr;
     if (graph->IsBytecodeOptimizer()) {
-        one_const = graph->FindOrCreateConstant<uint32_t>(1);
+        oneConst = graph->FindOrCreateConstant<uint32_t>(1);
     } else {
-        one_const = graph->FindOrCreateConstant<uint64_t>(1);
+        oneConst = graph->FindOrCreateConstant<uint64_t>(1);
     }
-    xor_inst->SetInput(1, one_const);
+    xorInst->SetInput(1, oneConst);
     // We can add inst "xor" before SaveStateOSR in BasicBlock
-    block->PrependInst(xor_inst);
-    return xor_inst;
+    block->PrependInst(xorInst);
+    return xorInst;
 }
 
-std::optional<bool> IsBoolPhiInverted(PhiInst *phi, IfImmInst *if_imm)
+std::optional<bool> IsBoolPhiInverted(PhiInst *phi, IfImmInst *ifImm)
 {
-    auto phi_input0 = phi->GetInput(0).GetInst();
-    auto phi_input1 = phi->GetInput(1).GetInst();
-    if (!phi_input0->IsBoolConst() || !phi_input1->IsBoolConst()) {
+    auto phiInput0 = phi->GetInput(0).GetInst();
+    auto phiInput1 = phi->GetInput(1).GetInst();
+    if (!phiInput0->IsBoolConst() || !phiInput1->IsBoolConst()) {
         return std::nullopt;
     }
-    auto constant0 = phi_input0->CastToConstant()->GetRawValue();
-    auto constant1 = phi_input1->CastToConstant()->GetRawValue();
+    auto constant0 = phiInput0->CastToConstant()->GetRawValue();
+    auto constant1 = phiInput1->CastToConstant()->GetRawValue();
     if (constant0 == constant1) {
         return std::nullopt;
     }
     // Here constant0 and constant1 are 0 and 1 in some order
 
-    auto inverted_if = IsIfInverted(phi->GetBasicBlock(), if_imm);
-    if (inverted_if == std::nullopt) {
+    auto invertedIf = IsIfInverted(phi->GetBasicBlock(), ifImm);
+    if (invertedIf == std::nullopt) {
         return std::nullopt;
     }
     // constant0 is also index of phi input equal to 0
     if (phi->GetPhiInputBbNum(constant0) == 0) {
-        return !*inverted_if;
+        return !*invertedIf;
     }
-    return inverted_if;
+    return invertedIf;
 }
 
 bool Peepholes::TryEliminatePhi(PhiInst *phi)
@@ -2581,8 +2581,8 @@ bool Peepholes::TryEliminatePhi(PhiInst *phi)
     }
 
     auto graph = dom->GetGraph();
-    auto if_imm = last->CastToIfImm();
-    auto input = if_imm->GetInput(0).GetInst();
+    auto ifImm = last->CastToIfImm();
+    auto input = ifImm->GetInput(0).GetInst();
     // In case of the bytecode optimizer we can not generate Compare therefore we check that Peepholes has eliminated
     // Compare
     if (graph->IsBytecodeOptimizer() && input->GetOpcode() == Opcode::Compare) {
@@ -2592,7 +2592,7 @@ bool Peepholes::TryEliminatePhi(PhiInst *phi)
         GetTypeSize(phi->GetType(), graph->GetArch()) != GetTypeSize(input->GetType(), graph->GetArch())) {
         return false;
     }
-    auto inverted = IsBoolPhiInverted(phi, if_imm);
+    auto inverted = IsBoolPhiInverted(phi, ifImm);
     if (!inverted) {
         return false;
     }
@@ -2637,22 +2637,22 @@ bool Peepholes::TryEliminatePhi(PhiInst *phi)
     return true;
 }
 
-bool Peepholes::SkipThisPeepholeInOSR(Inst *inst, Inst *new_input)
+bool Peepholes::SkipThisPeepholeInOSR(Inst *inst, Inst *newInput)
 {
     auto osr = inst->GetBasicBlock()->GetGraph()->IsOsrMode();
-    return osr && new_input->GetOpcode() != Opcode::Constant && IsInstInDifferentBlocks(inst, new_input);
+    return osr && newInput->GetOpcode() != Opcode::Constant && IsInstInDifferentBlocks(inst, newInput);
 }
 
 void Peepholes::VisitGetInstanceClass(GraphVisitor *v, Inst *inst)
 {
-    auto type_info = inst->GetDataFlowInput(0)->GetObjectTypeInfo();
-    if (type_info && type_info.IsExact()) {
-        auto klass = type_info.GetClass();
+    auto typeInfo = inst->GetDataFlowInput(0)->GetObjectTypeInfo();
+    if (typeInfo && typeInfo.IsExact()) {
+        auto klass = typeInfo.GetClass();
         auto bb = inst->GetBasicBlock();
         auto graph = bb->GetGraph();
-        auto class_imm = graph->CreateInstLoadImmediate(DataType::REFERENCE, inst->GetPc(), klass);
-        inst->ReplaceUsers(class_imm);
-        bb->InsertAfter(class_imm, inst);
+        auto classImm = graph->CreateInstLoadImmediate(DataType::REFERENCE, inst->GetPc(), klass);
+        inst->ReplaceUsers(classImm);
+        bb->InsertAfter(classImm, inst);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
     }
 }
@@ -2666,9 +2666,9 @@ void Peepholes::VisitLoadAndInitClass(GraphVisitor *v, Inst *inst)
     if (klass == nullptr || !graph->GetRuntime()->IsClassInitialized(reinterpret_cast<uintptr_t>(klass))) {
         return;
     }
-    auto class_imm = graph->CreateInstLoadImmediate(DataType::REFERENCE, inst->GetPc(), klass);
-    inst->ReplaceUsers(class_imm);
-    inst->GetBasicBlock()->InsertAfter(class_imm, inst);
+    auto classImm = graph->CreateInstLoadImmediate(DataType::REFERENCE, inst->GetPc(), klass);
+    inst->ReplaceUsers(classImm);
+    inst->GetBasicBlock()->InsertAfter(classImm, inst);
 
     inst->ClearFlag(compiler::inst_flags::NO_DCE);
     PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
@@ -2709,9 +2709,9 @@ void Peepholes::VisitLoadClass(GraphVisitor *v, Inst *inst)
     if (klass == nullptr) {
         return;
     }
-    auto class_imm = graph->CreateInstLoadImmediate(DataType::REFERENCE, inst->GetPc(), klass);
-    inst->ReplaceUsers(class_imm);
-    inst->GetBasicBlock()->InsertAfter(class_imm, inst);
+    auto classImm = graph->CreateInstLoadImmediate(DataType::REFERENCE, inst->GetPc(), klass);
+    inst->ReplaceUsers(classImm);
+    inst->GetBasicBlock()->InsertAfter(classImm, inst);
 
     inst->ClearFlag(compiler::inst_flags::NO_DCE);
     PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
@@ -2724,36 +2724,36 @@ void Peepholes::VisitLoadConstantPool(GraphVisitor *v, Inst *inst)
         return;
     }
     auto func = inst->GetInput(0).GetInst();
-    void *constant_pool = nullptr;
+    void *constantPool = nullptr;
     if (func->IsParameter() && func->CastToParameter()->GetArgNumber() == 0) {
-        constant_pool = graph->GetRuntime()->GetConstantPool(graph->GetMethod());
+        constantPool = graph->GetRuntime()->GetConstantPool(graph->GetMethod());
     } else {
-        CallInst *caller_inst = nullptr;
+        CallInst *callerInst = nullptr;
         for (auto &user : inst->GetUsers()) {
-            auto user_inst = user.GetInst();
-            if (user_inst->GetOpcode() == Opcode::SaveState &&
+            auto userInst = user.GetInst();
+            if (userInst->GetOpcode() == Opcode::SaveState &&
                 user.GetVirtualRegister().GetVRegType() == VRegType::CONST_POOL) {
-                caller_inst = user_inst->CastToSaveState()->GetCallerInst();
-                ASSERT(caller_inst != nullptr);
+                callerInst = userInst->CastToSaveState()->GetCallerInst();
+                ASSERT(callerInst != nullptr);
                 break;
             }
         }
-        if (caller_inst == nullptr) {
+        if (callerInst == nullptr) {
             return;
         }
-        if (auto func_object = caller_inst->GetFunctionObject(); func_object != 0) {
-            constant_pool = graph->GetRuntime()->GetConstantPool(func_object);
+        if (auto funcObject = callerInst->GetFunctionObject(); funcObject != 0) {
+            constantPool = graph->GetRuntime()->GetConstantPool(funcObject);
         } else {
-            constant_pool = graph->GetRuntime()->GetConstantPool(caller_inst->GetCallMethod());
+            constantPool = graph->GetRuntime()->GetConstantPool(callerInst->GetCallMethod());
         }
     }
-    if (constant_pool == nullptr) {
+    if (constantPool == nullptr) {
         return;
     }
-    auto constant_pool_imm = graph->CreateInstLoadImmediate(DataType::ANY, inst->GetPc(), constant_pool,
-                                                            LoadImmediateInst::ObjectType::CONSTANT_POOL);
-    inst->InsertAfter(constant_pool_imm);
-    inst->ReplaceUsers(constant_pool_imm);
+    auto constantPoolImm = graph->CreateInstLoadImmediate(DataType::ANY, inst->GetPc(), constantPool,
+                                                          LoadImmediateInst::ObjectType::CONSTANT_POOL);
+    inst->InsertAfter(constantPoolImm);
+    inst->ReplaceUsers(constantPoolImm);
 
     PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
 }
@@ -2765,13 +2765,13 @@ void Peepholes::VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst)
     if (!graph->IsUnrollComplete()) {
         return;
     }
-    auto constant_pool = inst->GetInput(0).GetInst();
-    if (constant_pool->GetOpcode() != Opcode::LoadImmediate) {
+    auto constantPool = inst->GetInput(0).GetInst();
+    if (constantPool->GetOpcode() != Opcode::LoadImmediate) {
         return;
     }
     auto offset = inst->CastToLoadFromConstantPool()->GetTypeId();
     auto shift = DataType::ShiftByType(DataType::ANY, graph->GetArch());
-    uintptr_t mem = constant_pool->CastToLoadImmediate()->GetConstantPool() +
+    uintptr_t mem = constantPool->CastToLoadImmediate()->GetConstantPool() +
                     graph->GetRuntime()->GetArrayDataOffset(graph->GetArch()) + (offset << shift);
     auto load = graph->CreateInstLoadObjFromConst(DataType::ANY, inst->GetPc(), mem);
     inst->InsertAfter(load);
@@ -2780,17 +2780,17 @@ void Peepholes::VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst)
     PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
 }
 
-bool Peepholes::CreateCompareInsteadOfXorAdd(Inst *old_inst)
+bool Peepholes::CreateCompareInsteadOfXorAdd(Inst *oldInst)
 {
-    ASSERT(old_inst->GetOpcode() == Opcode::Xor || old_inst->GetOpcode() == Opcode::Add);
-    auto input0 = old_inst->GetInput(0).GetInst();
-    [[maybe_unused]] auto input1 = old_inst->GetInput(1).GetInst();
+    ASSERT(oldInst->GetOpcode() == Opcode::Xor || oldInst->GetOpcode() == Opcode::Add);
+    auto input0 = oldInst->GetInput(0).GetInst();
+    [[maybe_unused]] auto input1 = oldInst->GetInput(1).GetInst();
 
-    if (old_inst->GetOpcode() == Opcode::Add) {
+    if (oldInst->GetOpcode() == Opcode::Add) {
         ASSERT(input0->GetOpcode() == Opcode::Neg);
         input0 = input0->GetInput(0).GetInst();
-        for (auto &user_add : old_inst->GetUsers()) {
-            if (SkipThisPeepholeInOSR(user_add.GetInst(), input0)) {
+        for (auto &userAdd : oldInst->GetUsers()) {
+            if (SkipThisPeepholeInOSR(userAdd.GetInst(), input0)) {
                 return false;
             }
         }
@@ -2798,18 +2798,18 @@ bool Peepholes::CreateCompareInsteadOfXorAdd(Inst *old_inst)
 
     // We shouldn't check on OSR with Xor, because old_inst and cmp_inst is placed one by one
     ASSERT(input0->GetType() == DataType::BOOL && input1->IsConst() && input1->CastToConstant()->GetIntValue() == 1U);
-    auto cnst = old_inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(0);
-    auto cmp_inst = CreateAndInsertInst(Opcode::Compare, old_inst, input0, cnst);
-    cmp_inst->SetType(DataType::BOOL);
-    cmp_inst->CastToCompare()->SetCc(ConditionCode::CC_EQ);
-    cmp_inst->CastToCompare()->SetOperandsType(DataType::BOOL);
-    auto type = old_inst->GetType();
+    auto cnst = oldInst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(0);
+    auto cmpInst = CreateAndInsertInst(Opcode::Compare, oldInst, input0, cnst);
+    cmpInst->SetType(DataType::BOOL);
+    cmpInst->CastToCompare()->SetCc(ConditionCode::CC_EQ);
+    cmpInst->CastToCompare()->SetOperandsType(DataType::BOOL);
+    auto type = oldInst->GetType();
     if (type == DataType::UINT64 || type == DataType::INT64) {
-        auto cast = cmp_inst->GetBasicBlock()->GetGraph()->CreateInstCast();
+        auto cast = cmpInst->GetBasicBlock()->GetGraph()->CreateInstCast();
         cast->SetType(type);
-        cmp_inst->InsertAfter(cast);
-        cmp_inst->ReplaceUsers(cast);
-        cast->SetInput(0, cmp_inst);
+        cmpInst->InsertAfter(cast);
+        cmpInst->ReplaceUsers(cast);
+        cast->SetInput(0, cmpInst);
         cast->SetOperandsType(DataType::BOOL);
     }
     return true;
@@ -2845,7 +2845,7 @@ bool Peepholes::CreateCompareInsteadOfXorAdd(Inst *old_inst)
 // 5.ref NullCheck v4, ...
 // 6.s32 LenArray v5
 // 7.    USE      v2
-bool Peepholes::OptimizeLenArrayForMultiArray(Inst *len_array, Inst *inst, size_t index_size)
+bool Peepholes::OptimizeLenArrayForMultiArray(Inst *lenArray, Inst *inst, size_t indexSize)
 {
     if (inst->GetOpcode() == Opcode::MultiArray) {
         // Arguments of MultiArray look like : class, size_0, size_1, ..., size_N, SaveState
@@ -2853,23 +2853,23 @@ bool Peepholes::OptimizeLenArrayForMultiArray(Inst *len_array, Inst *inst, size_
         // number sequential LoadArray with LenArray more than dimension of MultiArrays. So limiting the index_size.
         // Example in unittest PeepholesTest.MultiArrayWithLenArrayOfString
 
-        auto multiarr_dimension = inst->GetInputsCount() - 2;
-        if (!(index_size < multiarr_dimension)) {
+        auto multiarrDimension = inst->GetInputsCount() - 2;
+        if (!(indexSize < multiarrDimension)) {
             return false;
         }
         // MultiArray's sizes starts from index "1", so need add "1" to get absolute index
-        auto value = inst->GetDataFlowInput(index_size + 1);
-        for (auto &it : len_array->GetUsers()) {
+        auto value = inst->GetDataFlowInput(indexSize + 1);
+        for (auto &it : lenArray->GetUsers()) {
             if (SkipThisPeepholeInOSR(it.GetInst(), value)) {
                 return false;
             }
         }
-        len_array->ReplaceUsers(value);
+        lenArray->ReplaceUsers(value);
         return true;
     }
     if (inst->GetOpcode() == Opcode::LoadArray) {
         auto input = inst->GetDataFlowInput(0);
-        return OptimizeLenArrayForMultiArray(len_array, input, index_size + 1);
+        return OptimizeLenArrayForMultiArray(lenArray, input, indexSize + 1);
     }
     return false;
 }
@@ -2898,22 +2898,22 @@ bool Peepholes::TrySimplifyNegationPattern(Inst *inst)
     if (!IsNegationPattern(inst)) {
         return false;
     }
-    auto suspect_inst = inst->GetInput(0).GetInst()->GetInput(0).GetInst();
+    auto suspectInst = inst->GetInput(0).GetInst()->GetInput(0).GetInst();
     // Case 8
     // We sure, that type of Neg's input is Bool. We shue, that Neg has one user
-    if (suspect_inst->GetOpcode() == Opcode::Compare && suspect_inst->HasSingleUser()) {
-        auto compare_inst = suspect_inst->CastToCompare();
-        bool is_possible = true;
+    if (suspectInst->GetOpcode() == Opcode::Compare && suspectInst->HasSingleUser()) {
+        auto compareInst = suspectInst->CastToCompare();
+        bool isPossible = true;
         for (auto &i : inst->GetUsers()) {
-            if (SkipThisPeepholeInOSR(i.GetInst(), compare_inst)) {
-                is_possible = false;
+            if (SkipThisPeepholeInOSR(i.GetInst(), compareInst)) {
+                isPossible = false;
                 break;
             }
         }
-        if (is_possible) {
-            inst->ReplaceUsers(compare_inst);
-            compare_inst->SetCc(GetInverseConditionCode(compare_inst->GetCc()));
-            PEEPHOLE_IS_APPLIED(this, compare_inst);
+        if (isPossible) {
+            inst->ReplaceUsers(compareInst);
+            compareInst->SetCc(GetInverseConditionCode(compareInst->GetCc()));
+            PEEPHOLE_IS_APPLIED(this, compareInst);
             return true;
         }
     }

@@ -30,7 +30,7 @@ class ObjectTypeCheckElimination : public Optimization, public GraphVisitor {
 
 public:
     explicit ObjectTypeCheckElimination(Graph *graph)
-        : Optimization(graph), checks_must_throw_(graph->GetLocalAllocator()->Adapter())
+        : Optimization(graph), checksMustThrow_(graph->GetLocalAllocator()->Adapter())
     {
     }
 
@@ -52,7 +52,7 @@ public:
 
     bool IsApplied() const
     {
-        return is_applied_;
+        return isApplied_;
     }
 
     void InvalidateAnalyses() override;
@@ -74,22 +74,22 @@ public:
 private:
     void PushNewCheckMustThrow(Inst *inst)
     {
-        checks_must_throw_.push_back(inst);
+        checksMustThrow_.push_back(inst);
     }
 
     void ReplaceCheckMustThrowByUnconditionalDeoptimize();
 
-    static bool IsMember(Inst *inst, uint32_t type_id, Inst *ref_user);
-    static bool IsSuccessfulIsInstance(IsInstanceInst *is_instance, uint32_t type_id, Inst *ref_user);
+    static bool IsMember(Inst *inst, uint32_t typeId, Inst *refUser);
+    static bool IsSuccessfulIsInstance(IsInstanceInst *isInstance, uint32_t typeId, Inst *refUser);
 
     void SetApplied()
     {
-        is_applied_ = true;
+        isApplied_ = true;
     }
 
 private:
-    bool is_applied_ {false};
-    InstVector checks_must_throw_;
+    bool isApplied_ {false};
+    InstVector checksMustThrow_;
 };
 }  // namespace panda::compiler
 

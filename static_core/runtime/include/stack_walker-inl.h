@@ -24,13 +24,13 @@ namespace panda {
 
 template <bool OBJECTS, bool WITH_REG_INFO, class VRegRef, typename Func>
 // NOLINTNEXTLINE(google-runtime-references)
-bool InvokeCallback(Func func, [[maybe_unused]] compiler::VRegInfo reg_info, VRegRef &vreg)
+bool InvokeCallback(Func func, [[maybe_unused]] compiler::VRegInfo regInfo, VRegRef &vreg)
 {
     if (OBJECTS && !vreg.HasObject()) {
         return true;
     }
     if constexpr (WITH_REG_INFO) {  // NOLINT
-        if (!func(reg_info, vreg)) {
+        if (!func(regInfo, vreg)) {
             return false;
         }
     } else {  // NOLINT
@@ -46,17 +46,17 @@ bool StackWalker::IterateAllRegsForCFrame(Func func)
 {
     auto &cframe = GetCFrame();
     const auto regs =
-        code_info_.GetVRegList(stackmap_, inline_depth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
+        codeInfo_.GetVRegList(stackmap_, inlineDepth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
 
-    for (auto &reg_info : regs) {
-        if (!reg_info.IsLive()) {
+    for (auto &regInfo : regs) {
+        if (!regInfo.IsLive()) {
             continue;
         }
         interpreter::VRegister vreg0;
         interpreter::VRegister vreg1;
-        interpreter::StaticVRegisterRef res_reg(&vreg0, &vreg1);
-        cframe.GetVRegValue(reg_info, code_info_, callee_stack_.stack.data(), res_reg);
-        if (!InvokeCallback<false, WITH_REG_INFO>(func, reg_info, res_reg)) {
+        interpreter::StaticVRegisterRef resReg(&vreg0, &vreg1);
+        cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+        if (!InvokeCallback<false, WITH_REG_INFO>(func, regInfo, resReg)) {
             return false;
         }
     }
@@ -72,12 +72,12 @@ bool StackWalker::IterateRegsForCFrameStatic(Func func)
     auto &cframe = GetCFrame();
 
     if (cframe.IsNativeMethod()) {
-        for (auto reg_info : CFrameStaticNativeMethodIterator<RUNTIME_ARCH>::MakeRange(&cframe)) {
+        for (auto regInfo : CFrameStaticNativeMethodIterator<RUNTIME_ARCH>::MakeRange(&cframe)) {
             interpreter::VRegister vreg0;
             interpreter::VRegister vreg1;
-            interpreter::StaticVRegisterRef res_reg(&vreg0, &vreg1);
-            cframe.GetVRegValue(reg_info, code_info_, callee_stack_.stack.data(), res_reg);
-            if (!InvokeCallback<OBJECTS, WITH_REG_INFO>(func, reg_info, res_reg)) {
+            interpreter::StaticVRegisterRef resReg(&vreg0, &vreg1);
+            cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+            if (!InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, resReg)) {
                 return false;
             }
         }
@@ -85,12 +85,12 @@ bool StackWalker::IterateRegsForCFrameStatic(Func func)
     }
 
     if (OBJECTS) {
-        code_info_.EnumerateStaticRoots(stackmap_, [this, &cframe, &func](VRegInfo reg_info) {
+        codeInfo_.EnumerateStaticRoots(stackmap_, [this, &cframe, &func](VRegInfo regInfo) {
             interpreter::VRegister vreg0;
             interpreter::VRegister vreg1;
-            interpreter::StaticVRegisterRef res_reg(&vreg0, &vreg1);
-            cframe.GetVRegValue(reg_info, code_info_, callee_stack_.stack.data(), res_reg);
-            return !res_reg.HasObject() || InvokeCallback<OBJECTS, WITH_REG_INFO>(func, reg_info, res_reg);
+            interpreter::StaticVRegisterRef resReg(&vreg0, &vreg1);
+            cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+            return !resReg.HasObject() || InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, resReg);
         });
         return true;
     }
@@ -106,11 +106,11 @@ bool StackWalker::IterateRegsForCFrameDynamic(Func func)
     auto &cframe = GetCFrame();
 
     if (cframe.IsNativeMethod()) {
-        for (auto reg_info : CFrameDynamicNativeMethodIterator<RUNTIME_ARCH>::MakeRange(&cframe)) {
+        for (auto regInfo : CFrameDynamicNativeMethodIterator<RUNTIME_ARCH>::MakeRange(&cframe)) {
             interpreter::VRegister vreg0;
-            interpreter::DynamicVRegisterRef res_reg(&vreg0);
-            cframe.GetVRegValue(reg_info, code_info_, callee_stack_.stack.data(), res_reg);
-            if (!InvokeCallback<OBJECTS, WITH_REG_INFO>(func, reg_info, res_reg)) {
+            interpreter::DynamicVRegisterRef resReg(&vreg0);
+            cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+            if (!InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, resReg)) {
                 return false;
             }
         }
@@ -118,11 +118,11 @@ bool StackWalker::IterateRegsForCFrameDynamic(Func func)
     }
 
     if (OBJECTS) {
-        code_info_.EnumerateDynamicRoots(stackmap_, [this, &cframe, &func](VRegInfo reg_info) {
+        codeInfo_.EnumerateDynamicRoots(stackmap_, [this, &cframe, &func](VRegInfo regInfo) {
             interpreter::VRegister vreg0;
-            interpreter::DynamicVRegisterRef res_reg(&vreg0);
-            cframe.GetVRegValue(reg_info, code_info_, callee_stack_.stack.data(), res_reg);
-            return !res_reg.HasObject() || InvokeCallback<OBJECTS, WITH_REG_INFO>(func, reg_info, res_reg);
+            interpreter::DynamicVRegisterRef resReg(&vreg0);
+            cframe.GetVRegValue(regInfo, codeInfo_, calleeStack_.stack.data(), resReg);
+            return !resReg.HasObject() || InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, resReg);
         });
         return true;
     }
@@ -132,24 +132,24 @@ bool StackWalker::IterateRegsForCFrameDynamic(Func func)
 
 template <bool OBJECTS, bool WITH_REG_INFO, StackWalker::VRegInfo::Type OBJ_TYPE,
           StackWalker::VRegInfo::Type PRIMITIVE_TYPE, class F, typename Func>
-bool StackWalker::IterateRegsForIFrameInternal(F frame_handler, Func func)
+bool StackWalker::IterateRegsForIFrameInternal(F frameHandler, Func func)
 {
-    for (size_t i = 0; i < frame_handler.GetSize(); i++) {
-        auto vreg = frame_handler.GetVReg(i);
+    for (size_t i = 0; i < frameHandler.GetSize(); i++) {
+        auto vreg = frameHandler.GetVReg(i);
         if (OBJECTS && !vreg.HasObject()) {
             continue;
         }
         auto type = vreg.HasObject() ? OBJ_TYPE : PRIMITIVE_TYPE;
-        VRegInfo reg_info(0, VRegInfo::Location::SLOT, type, VRegInfo::VRegType::VREG, i);
-        if (!InvokeCallback<OBJECTS, WITH_REG_INFO>(func, reg_info, vreg)) {
+        VRegInfo regInfo(0, VRegInfo::Location::SLOT, type, VRegInfo::VRegType::VREG, i);
+        if (!InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, vreg)) {
             return false;
         }
     }
 
-    auto acc = frame_handler.GetAccAsVReg();
+    auto acc = frameHandler.GetAccAsVReg();
     auto type = acc.HasObject() ? OBJ_TYPE : PRIMITIVE_TYPE;
-    VRegInfo reg_info(0, VRegInfo::Location::SLOT, type, VRegInfo::VRegType::ACC, 0);
-    return InvokeCallback<OBJECTS, WITH_REG_INFO>(func, reg_info, acc);
+    VRegInfo regInfo(0, VRegInfo::Location::SLOT, type, VRegInfo::VRegType::ACC, 0);
+    return InvokeCallback<OBJECTS, WITH_REG_INFO>(func, regInfo, acc);
 }
 
 template <bool OBJECTS, bool WITH_REG_INFO, typename Func>
@@ -157,14 +157,14 @@ bool StackWalker::IterateRegsForIFrame(Func func)
 {
     auto frame = GetIFrame();
     if (frame->IsDynamic()) {
-        DynamicFrameHandler frame_handler(frame);
+        DynamicFrameHandler frameHandler(frame);
         ASSERT(IsDynamicMethod());
         return IterateRegsForIFrameInternal<OBJECTS, WITH_REG_INFO, VRegInfo::Type::ANY, VRegInfo::Type::ANY>(
-            frame_handler, func);
+            frameHandler, func);
     }
-    StaticFrameHandler frame_handler(frame);
+    StaticFrameHandler frameHandler(frame);
     return IterateRegsForIFrameInternal<OBJECTS, WITH_REG_INFO, VRegInfo::Type::OBJECT, VRegInfo::Type::INT64>(
-        frame_handler, func);
+        frameHandler, func);
 }
 
 template <bool OBJECTS, bool WITH_REG_INFO, typename Func>

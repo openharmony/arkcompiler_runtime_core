@@ -28,9 +28,9 @@ bool TypesAnalysis::RunImpl()
 void TypesAnalysis::MarkedPhiRec(PhiInst *phi, AnyBaseType type)
 {
     if (phi->SetMarker(marker_)) {
-        auto phi_type = phi->GetAnyType();
+        auto phiType = phi->GetAnyType();
         // Phi has 2 inputs or users with different types
-        if (phi_type != type) {
+        if (phiType != type) {
             phi->SetAssumedAnyType(AnyBaseType::UNDEFINED_TYPE);
             return;
         }
@@ -38,9 +38,9 @@ void TypesAnalysis::MarkedPhiRec(PhiInst *phi, AnyBaseType type)
     }
     phi->SetAssumedAnyType(type);
     for (auto &user : phi->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst->GetOpcode() == Opcode::Phi) {
-            MarkedPhiRec(user_inst->CastToPhi(), type);
+        auto userInst = user.GetInst();
+        if (userInst->GetOpcode() == Opcode::Phi) {
+            MarkedPhiRec(userInst->CastToPhi(), type);
         }
     }
 }
@@ -51,9 +51,9 @@ void TypesAnalysis::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
     auto type = inst->CastToCastValueToAnyType()->GetAnyType();
     ASSERT(type != AnyBaseType::UNDEFINED_TYPE);
     for (auto &user : inst->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst->GetOpcode() == Opcode::Phi) {
-            self->MarkedPhiRec(user_inst->CastToPhi(), type);
+        auto userInst = user.GetInst();
+        if (userInst->GetOpcode() == Opcode::Phi) {
+            self->MarkedPhiRec(userInst->CastToPhi(), type);
         }
     }
 }

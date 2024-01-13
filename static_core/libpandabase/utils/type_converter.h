@@ -92,7 +92,7 @@ constexpr std::array<std::string_view, 7> LITERALS_TIME = {"ns", "us", "ms", "s"
  *  Convert time from nanoseconds to readable format
  *  @param time_in_nanos
  */
-PANDA_PUBLIC_API ValueUnit TimeConverter(uint64_t times_in_nanos);
+PANDA_PUBLIC_API ValueUnit TimeConverter(uint64_t timesInNanos);
 
 /**
  *  Convert memory from bytes to readable format

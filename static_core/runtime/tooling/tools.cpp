@@ -29,9 +29,9 @@ void Tools::CreateSamplingProfiler()
     ASSERT(sampler_ == nullptr);
     sampler_ = sampler::Sampler::Create();
 
-    const char *sampler_segv_option = std::getenv("ARK_SAMPLER_DISABLE_SEGV_HANDLER");
-    if (sampler_segv_option != nullptr) {
-        std::string_view option = sampler_segv_option;
+    const char *samplerSegvOption = std::getenv("ARK_SAMPLER_DISABLE_SEGV_HANDLER");
+    if (samplerSegvOption != nullptr) {
+        std::string_view option = samplerSegvOption;
         if (option == "1" || option == "true" || option == "ON") {
             // SEGV handler for sampler is enable by default
             sampler_->SetSegvHandlerStatus(false);
@@ -39,19 +39,18 @@ void Tools::CreateSamplingProfiler()
     }
 }
 
-bool Tools::StartSamplingProfiler(const std::string &aspt_filename, uint32_t interval)
+bool Tools::StartSamplingProfiler(const std::string &asptFilename, uint32_t interval)
 {
     ASSERT(sampler_ != nullptr);
     sampler_->SetSampleInterval(interval);
-    if (aspt_filename.empty()) {
-        std::time_t current_time = std::time(nullptr);
-        std::tm *local_time = std::localtime(&current_time);
-        std::string aspt_filename_time = std::to_string(local_time->tm_hour) + "-" +
-                                         std::to_string(local_time->tm_min) + "-" + std::to_string(local_time->tm_sec) +
-                                         ".aspt";
-        return sampler_->Start(aspt_filename_time.c_str());
+    if (asptFilename.empty()) {
+        std::time_t currentTime = std::time(nullptr);
+        std::tm *localTime = std::localtime(&currentTime);
+        std::string asptFilenameTime = std::to_string(localTime->tm_hour) + "-" + std::to_string(localTime->tm_min) +
+                                       "-" + std::to_string(localTime->tm_sec) + ".aspt";
+        return sampler_->Start(asptFilenameTime.c_str());
     }
-    return sampler_->Start(aspt_filename.c_str());
+    return sampler_->Start(asptFilename.c_str());
 }
 
 void Tools::StopSamplingProfiler()

@@ -47,96 +47,95 @@ public:
 
     const std::vector<OptionsCluster *> *Find(const std::string &method)
     {
-        auto iter = special_options_.find(method);
-        if (iter == special_options_.end()) {
+        auto iter = specialOptions_.find(method);
+        if (iter == specialOptions_.end()) {
             return nullptr;
         }
         LOG_PAOC_CLUSTERS(INFO) << "Found clusters for method `" << method << "`";
         return &iter->second;
     }
 
-    void Init(const JsonObject &obj, PandArgParser *pa_parser)
+    void Init(const JsonObject &obj, PandArgParser *paParser)
     {
-        ASSERT(pa_parser != nullptr);
-        InitClusters(obj, pa_parser);
+        ASSERT(paParser != nullptr);
+        InitClusters(obj, paParser);
         InitClustersMap(obj);
     }
 
-    void InitClusters(const JsonObject &main_obj, PandArgParser *pa_parser)
+    void InitClusters(const JsonObject &mainObj, PandArgParser *paParser)
     {
-        if (main_obj.GetValue<JsonObjPointer>(Key(CLUSTERS_OBJ_NAME)) == nullptr) {
+        if (mainObj.GetValue<JsonObjPointer>(Key(CLUSTERS_OBJ_NAME)) == nullptr) {
             LOG_PAOC_CLUSTERS(FATAL) << "Can't find `" << CLUSTERS_OBJ_NAME << "` object";
         }
-        const auto clusters_json = main_obj.GetValue<JsonObjPointer>(Key(CLUSTERS_OBJ_NAME))->get();
+        const auto clustersJson = mainObj.GetValue<JsonObjPointer>(Key(CLUSTERS_OBJ_NAME))->get();
 
         // Fill clusters_ in order of presence in JSON-obj:
-        size_t n_clusters = clusters_json->GetSize();
-        for (size_t idx = 0; idx < n_clusters; idx++) {
-            const auto cluster_json = clusters_json->GetValue<JsonObjPointer>(idx)->get();
-            if (cluster_json == nullptr) {
+        size_t nClusters = clustersJson->GetSize();
+        for (size_t idx = 0; idx < nClusters; idx++) {
+            const auto clusterJson = clustersJson->GetValue<JsonObjPointer>(idx)->get();
+            if (clusterJson == nullptr) {
                 LOG_PAOC_CLUSTERS(FATAL) << "Can't find a cluster (idx = " << idx << ")";
             }
-            clusters_.emplace_back(clusters_json->GetKeyByIndex(idx));
+            clusters_.emplace_back(clustersJson->GetKeyByIndex(idx));
 
             // Fill current cluster:
-            const auto &options_json = cluster_json->GetUnorderedMap();
+            const auto &optionsJson = clusterJson->GetUnorderedMap();
             // Add option-value pair:
-            for (const auto &p : options_json) {
-                const auto &option_name = p.first;
-                const auto *option_value = cluster_json->GetValueSourceString(option_name);
-                if (option_value == nullptr || option_value->empty()) {
-                    LOG_PAOC_CLUSTERS(FATAL)
-                        << "Can't find option's value (cluster `" << clusters_json->GetKeyByIndex(idx) << "`, option `"
-                        << option_name << "`)";
+            for (const auto &p : optionsJson) {
+                const auto &optionName = p.first;
+                const auto *optionValue = clusterJson->GetValueSourceString(optionName);
+                if (optionValue == nullptr || optionValue->empty()) {
+                    LOG_PAOC_CLUSTERS(FATAL) << "Can't find option's value (cluster `"
+                                             << clustersJson->GetKeyByIndex(idx) << "`, option `" << optionName << "`)";
                 }
 
-                auto *option = pa_parser->GetPandArg(option_name);
+                auto *option = paParser->GetPandArg(optionName);
                 if (option == nullptr) {
-                    LOG_PAOC_CLUSTERS(FATAL) << "Unknown option: `" << option_name << "`";
+                    LOG_PAOC_CLUSTERS(FATAL) << "Unknown option: `" << optionName << "`";
                 }
-                auto value = OptionsCluster::ParseOptionValue(*option_value, option, pa_parser);
+                auto value = OptionsCluster::ParseOptionValue(*optionValue, option, paParser);
                 clusters_.back().GetVector().emplace_back(option, std::move(value));
             }
         }
     }
 
-    void InitClustersMap(const JsonObject &main_obj)
+    void InitClustersMap(const JsonObject &mainObj)
     {
-        if (main_obj.GetValue<JsonObjPointer>(Key(CLUSTERS_MAP_OBJ_NAME)) == nullptr) {
+        if (mainObj.GetValue<JsonObjPointer>(Key(CLUSTERS_MAP_OBJ_NAME)) == nullptr) {
             LOG_PAOC_CLUSTERS(FATAL) << "Can't find `" << CLUSTERS_MAP_OBJ_NAME << "` object";
         }
-        const auto clusters_map_json = main_obj.GetValue<JsonObjPointer>(Key(CLUSTERS_MAP_OBJ_NAME))->get();
+        const auto clustersMapJson = mainObj.GetValue<JsonObjPointer>(Key(CLUSTERS_MAP_OBJ_NAME))->get();
 
         // Fill special_options_:
-        for (const auto &p : clusters_map_json->GetUnorderedMap()) {
-            const auto &method_name = p.first;
-            const auto &clusters_array = p.second;
-            const auto *cur_clusters_json = clusters_array.Get<ArrayT>();
+        for (const auto &p : clustersMapJson->GetUnorderedMap()) {
+            const auto &methodName = p.first;
+            const auto &clustersArray = p.second;
+            const auto *curClustersJson = clustersArray.Get<ArrayT>();
 
-            if (cur_clusters_json == nullptr) {
-                LOG_PAOC_CLUSTERS(FATAL) << "Can't get clusters array for method `" << method_name << "`";
+            if (curClustersJson == nullptr) {
+                LOG_PAOC_CLUSTERS(FATAL) << "Can't get clusters array for method `" << methodName << "`";
             }
-            auto &cur_clusters = special_options_.try_emplace(method_name).first->second;
-            for (const auto &idx : *cur_clusters_json) {
+            auto &curClusters = specialOptions_.try_emplace(methodName).first->second;
+            for (const auto &idx : *curClustersJson) {
                 // Cluster may be referenced by integer number (cluster's order) or string (cluster's name):
-                const auto *num_idx = idx.Get<NumT>();
-                const auto *str_idx = idx.Get<StringT>();
-                size_t cluster_idx = 0;
-                if (num_idx != nullptr) {
-                    cluster_idx = static_cast<size_t>(*num_idx);
-                } else if (str_idx != nullptr) {
-                    const auto clusters_json = main_obj.GetValue<JsonObjPointer>(Key(CLUSTERS_OBJ_NAME))->get();
-                    cluster_idx = static_cast<size_t>(clusters_json->GetIndexByKey(*str_idx));
-                    ASSERT(cluster_idx != static_cast<size_t>(-1));
+                const auto *numIdx = idx.Get<NumT>();
+                const auto *strIdx = idx.Get<StringT>();
+                size_t clusterIdx = 0;
+                if (numIdx != nullptr) {
+                    clusterIdx = static_cast<size_t>(*numIdx);
+                } else if (strIdx != nullptr) {
+                    const auto clustersJson = mainObj.GetValue<JsonObjPointer>(Key(CLUSTERS_OBJ_NAME))->get();
+                    clusterIdx = static_cast<size_t>(clustersJson->GetIndexByKey(*strIdx));
+                    ASSERT(clusterIdx != static_cast<size_t>(-1));
                 } else {
-                    LOG_PAOC_CLUSTERS(FATAL) << "Incorrect reference to a cluster for `" << method_name << "`";
+                    LOG_PAOC_CLUSTERS(FATAL) << "Incorrect reference to a cluster for `" << methodName << "`";
                     UNREACHABLE();
                 }
-                if (cluster_idx >= clusters_.size()) {
-                    LOG_PAOC_CLUSTERS(FATAL) << "Cluster's index out of range for `" << method_name << "`";
+                if (clusterIdx >= clusters_.size()) {
+                    LOG_PAOC_CLUSTERS(FATAL) << "Cluster's index out of range for `" << methodName << "`";
                 }
-                cur_clusters.push_back(&clusters_[cluster_idx]);
-                ASSERT(cur_clusters.back() != nullptr);
+                curClusters.push_back(&clusters_[clusterIdx]);
+                ASSERT(curClusters.back() != nullptr);
             }
         }
     }
@@ -151,45 +150,45 @@ public:
         using ValueVariant = std::variant<std::string, int, double, bool, arg_list_t, uint32_t, uint64_t>;
 
         // NOLINTNEXTLINE(modernize-pass-by-value)
-        explicit OptionsCluster(const std::string &cluster_name) : cluster_name_(cluster_name) {}
+        explicit OptionsCluster(const std::string &clusterName) : clusterName_(clusterName) {}
 
         void Apply()
         {
-            for (auto &pair_option_value : cluster_) {
-                SwapValue(pair_option_value.first, &pair_option_value.second);
+            for (auto &pairOptionValue : cluster_) {
+                SwapValue(pairOptionValue.first, &pairOptionValue.second);
             }
         }
         void Restore()
         {
-            for (auto &pair_option_value : cluster_) {
-                SwapValue(pair_option_value.first, &pair_option_value.second);
+            for (auto &pairOptionValue : cluster_) {
+                SwapValue(pairOptionValue.first, &pairOptionValue.second);
             }
         }
 
-        static ValueVariant ParseOptionValue(const std::string_view &value_string, PandArgBase *option,
-                                             PandArgParser *pa_parser)
+        static ValueVariant ParseOptionValue(const std::string_view &valueString, PandArgBase *option,
+                                             PandArgParser *paParser)
         {
             switch (option->GetType()) {
                 case PandArgType::STRING:
-                    return ParseOptionValue<std::string>(value_string, option, pa_parser);
+                    return ParseOptionValue<std::string>(valueString, option, paParser);
 
                 case PandArgType::INTEGER:
-                    return ParseOptionValue<int>(value_string, option, pa_parser);
+                    return ParseOptionValue<int>(valueString, option, paParser);
 
                 case PandArgType::DOUBLE:
-                    return ParseOptionValue<double>(value_string, option, pa_parser);
+                    return ParseOptionValue<double>(valueString, option, paParser);
 
                 case PandArgType::BOOL:
-                    return ParseOptionValue<bool>(value_string, option, pa_parser);
+                    return ParseOptionValue<bool>(valueString, option, paParser);
 
                 case PandArgType::LIST:
-                    return ParseOptionValue<arg_list_t>(value_string, option, pa_parser);
+                    return ParseOptionValue<arg_list_t>(valueString, option, paParser);
 
                 case PandArgType::UINT32:
-                    return ParseOptionValue<uint32_t>(value_string, option, pa_parser);
+                    return ParseOptionValue<uint32_t>(valueString, option, paParser);
 
                 case PandArgType::UINT64:
-                    return ParseOptionValue<uint64_t>(value_string, option, pa_parser);
+                    return ParseOptionValue<uint64_t>(valueString, option, paParser);
 
                 case PandArgType::NOTYPE:
                 default:
@@ -204,20 +203,20 @@ public:
 
     private:
         template <typename T>
-        static ValueVariant ParseOptionValue(const std::string_view &value_string, PandArgBase *option_base,
-                                             PandArgParser *pa_parser)
+        static ValueVariant ParseOptionValue(const std::string_view &valueString, PandArgBase *optionBase,
+                                             PandArgParser *paParser)
         {
-            ASSERT(option_base != nullptr);
-            auto option = static_cast<PandArg<T> *>(option_base);
-            auto option_copy = *option;
-            pa_parser->ParseSingleArg(&option_copy, value_string);
-            return option_copy.GetValue();
+            ASSERT(optionBase != nullptr);
+            auto option = static_cast<PandArg<T> *>(optionBase);
+            auto optionCopy = *option;
+            paParser->ParseSingleArg(&optionCopy, valueString);
+            return optionCopy.GetValue();
         }
 
         void SwapValue(PandArgBase *option, ValueVariant *value)
         {
-            PandArgType type_id {static_cast<uint8_t>(value->index())};
-            switch (type_id) {
+            PandArgType typeId {static_cast<uint8_t>(value->index())};
+            switch (typeId) {
                 case PandArgType::STRING:
                     SwapValue<std::string>(option, value);
                     return;
@@ -246,9 +245,9 @@ public:
         }
 
         template <typename T>
-        void SwapValue(PandArgBase *option_base, ValueVariant *value)
+        void SwapValue(PandArgBase *optionBase, ValueVariant *value)
         {
-            auto *option = static_cast<PandArg<T> *>(option_base);
+            auto *option = static_cast<PandArg<T> *>(optionBase);
             T temp(option->GetValue());
             ASSERT(std::holds_alternative<T>(*value));
             option->template SetValue<false>(*std::get_if<T>(value));
@@ -256,7 +255,7 @@ public:
         }
 
     private:
-        std::string cluster_name_;
+        std::string clusterName_;
         std::vector<std::pair<PandArgBase *const, ValueVariant>> cluster_;
     };
 
@@ -269,34 +268,34 @@ public:
         NO_COPY_SEMANTIC(ScopedApplySpecialOptions);
         NO_MOVE_SEMANTIC(ScopedApplySpecialOptions);
 
-        explicit ScopedApplySpecialOptions(const std::string &method, PaocClusters *clusters_info)
+        explicit ScopedApplySpecialOptions(const std::string &method, PaocClusters *clustersInfo)
         {
             // Find clusters for required method:
-            current_clusters_ = clusters_info->Find(method);
-            if (current_clusters_ == nullptr) {
+            currentClusters_ = clustersInfo->Find(method);
+            if (currentClusters_ == nullptr) {
                 return;
             }
             // Apply clusters:
-            for (auto cluster : *current_clusters_) {
+            for (auto cluster : *currentClusters_) {
                 cluster->Apply();
             }
         }
         ~ScopedApplySpecialOptions()
         {
-            if (current_clusters_ != nullptr) {
-                for (auto cluster : *current_clusters_) {
+            if (currentClusters_ != nullptr) {
+                for (auto cluster : *currentClusters_) {
                     cluster->Restore();
                 }
             }
         }
 
     private:
-        const std::vector<OptionsCluster *> *current_clusters_ {nullptr};
+        const std::vector<OptionsCluster *> *currentClusters_ {nullptr};
     };
 
 private:
     std::vector<OptionsCluster> clusters_;
-    std::unordered_map<std::string, std::vector<OptionsCluster *>> special_options_;
+    std::unordered_map<std::string, std::vector<OptionsCluster *>> specialOptions_;
 };
 
 #undef LOG_PAOC_CLUSTERS

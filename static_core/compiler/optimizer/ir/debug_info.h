@@ -27,24 +27,24 @@ public:
     static constexpr uint32_t INVALID_FILE_INDEX = std::numeric_limits<uint32_t>::max();
     static constexpr uint32_t INVALID_DIR_INDEX = std::numeric_limits<uint32_t>::max();
 
-    InstDebugInfo(uint32_t dir_index, uint32_t file_index, uint32_t line_number)
-        : dir_index_(dir_index), file_index_(file_index), line_number_(line_number)
+    InstDebugInfo(uint32_t dirIndex, uint32_t fileIndex, uint32_t lineNumber)
+        : dirIndex_(dirIndex), fileIndex_(fileIndex), lineNumber_(lineNumber)
     {
     }
 
     uint32_t GetLineNumber() const
     {
-        return line_number_;
+        return lineNumber_;
     }
 
     uint32_t GetFileIndex() const
     {
-        return file_index_;
+        return fileIndex_;
     }
 
     uint32_t GetDirIndex() const
     {
-        return dir_index_;
+        return dirIndex_;
     }
 
     size_t GetOffset() const
@@ -58,9 +58,9 @@ public:
     }
 
 private:
-    uint32_t dir_index_ {INVALID_DIR_INDEX};
-    uint32_t file_index_ {INVALID_FILE_INDEX};
-    uint32_t line_number_ {INVALID_LINE_NUMBER};
+    uint32_t dirIndex_ {INVALID_DIR_INDEX};
+    uint32_t fileIndex_ {INVALID_FILE_INDEX};
+    uint32_t lineNumber_ {INVALID_LINE_NUMBER};
     size_t offset_ {0};
 };
 

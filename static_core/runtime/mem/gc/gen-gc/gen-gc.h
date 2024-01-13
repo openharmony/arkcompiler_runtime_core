@@ -39,15 +39,15 @@ class GenGC : public GenerationalGC<LanguageConfig> {
 public:
     using ReferenceCheckPredicateT = typename GC::ReferenceCheckPredicateT;
 
-    explicit GenGC(ObjectAllocatorBase *object_allocator, const GCSettings &settings);
+    explicit GenGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
 
     NO_COPY_SEMANTIC(GenGC);
     NO_MOVE_SEMANTIC(GenGC);
     ~GenGC() override = default;
 
-    void InitGCBits(panda::ObjectHeader *obj_header) override;
+    void InitGCBits(panda::ObjectHeader *objHeader) override;
 
-    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *obj_header) override;
+    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader) override;
 
     bool IsPinningSupported() const final
     {
@@ -55,11 +55,11 @@ public:
         return false;
     }
 
-    void MarkReferences(GCMarkingStackType *references, GCPhase gc_phase) override;
+    void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) override;
 
     void MarkObject(ObjectHeader *object) override;
 
-    void UnMarkObject(ObjectHeader *object_header);
+    void UnMarkObject(ObjectHeader *objectHeader);
 
     bool InGCSweepRange(const ObjectHeader *obj) const override;
 
@@ -96,7 +96,7 @@ private:
      */
     void MarkYoung(const GCTask &task);
 
-    void MarkYoungStack(GCMarkingStackType *objects_stack);
+    void MarkYoungStack(GCMarkingStackType *objectsStack);
 
     /**
      * Mark roots and add them to the stack
@@ -104,7 +104,7 @@ private:
      * @param visit_class_roots
      * @param visit_card_table_roots
      */
-    void MarkRoots(GCMarkingStackType *objects_stack, CardTableVisitFlag visit_card_table_roots,
+    void MarkRoots(GCMarkingStackType *objectsStack, CardTableVisitFlag visitCardTableRoots,
                    const ReferenceCheckPredicateT &pred, VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL);
 
     /**
@@ -112,20 +112,20 @@ private:
      * STW
      * @param objects_stack
      */
-    void InitialMark(GCMarkingStackType *objects_stack);
+    void InitialMark(GCMarkingStackType *objectsStack);
 
     /**
      * Concurrently marking all objects
      * @param objects_stack
      */
-    NO_THREAD_SAFETY_ANALYSIS void ConcurrentMark(GCMarkingStackType *objects_stack);
+    NO_THREAD_SAFETY_ANALYSIS void ConcurrentMark(GCMarkingStackType *objectsStack);
 
     /**
      * ReMarks objects after Concurrent marking
      * @param objects_stack
      * @param task gc task for current GC
      */
-    void ReMark(GCMarkingStackType *objects_stack, const GCTask &task);
+    void ReMark(GCMarkingStackType *objectsStack, const GCTask &task);
 
     /**
      * Mark objects for the whole heap on pause
@@ -141,7 +141,7 @@ private:
      * @param young_mem_range young memory region
      * @return instance of verifier to be used to verify for updated references
      */
-    [[nodiscard]] HeapVerifierIntoGC<LanguageConfig> CollectVerificationInfo(const MemRange &young_mem_range);
+    [[nodiscard]] HeapVerifierIntoGC<LanguageConfig> CollectVerificationInfo(const MemRange &youngMemRange);
 
     /**
      * Verify updted references
@@ -150,10 +150,10 @@ private:
      * @see CollectVerificationInfo
      * @see UpdateRefsToMovedObjects
      */
-    void VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfig> &&young_verifier);
+    void VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfig> &&youngVerifier);
 
     /// Update all refs to moved objects
-    void UpdateRefsToMovedObjects(PandaVector<ObjectHeader *> *moved_objects);
+    void UpdateRefsToMovedObjects(PandaVector<ObjectHeader *> *movedObjects);
 
     /// Sweep dead objects in tenured space
     template <bool CONCURRENT>
@@ -172,15 +172,15 @@ private:
      * young space to tenured space
      * @return true if need run full gc or flase - otherwise
      */
-    bool ShouldRunFullGC(const GCTask &task, bool have_enough_space_for_young) const;
+    bool ShouldRunFullGC(const GCTask &task, bool haveEnoughSpaceForYoung) const;
 
     bool HaveEnoughSpaceToMove() const;
 
     DefaultGCMarkerImpl<LanguageConfig> marker_;
     /// Flag indicates if we currently in concurrent marking phase
-    bool concurrent_marking_flag_ {false};
-    PandaUniquePtr<CardTable> card_table_ {nullptr};
-    bool is_explicit_concurrent_gc_enabled_ {false};
+    bool concurrentMarkingFlag_ {false};
+    PandaUniquePtr<CardTable> cardTable_ {nullptr};
+    bool isExplicitConcurrentGcEnabled_ {false};
 };
 
 }  // namespace panda::mem

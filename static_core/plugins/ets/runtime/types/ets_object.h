@@ -28,7 +28,7 @@ class EtsCoroutine;
 // Private inheritance, because need to disallow implicit conversion to core type
 class EtsObject : private ObjectHeader {
 public:
-    PANDA_PUBLIC_API static EtsObject *Create(EtsCoroutine *ets_coroutine, EtsClass *klass);
+    PANDA_PUBLIC_API static EtsObject *Create(EtsCoroutine *etsCoroutine, EtsClass *klass);
     PANDA_PUBLIC_API static EtsObject *CreateNonMovable(EtsClass *klass);
 
     PANDA_PUBLIC_API static EtsObject *Create(EtsClass *klass);
@@ -48,9 +48,9 @@ public:
         return klass->IsAssignableFrom(GetClass());
     }
 
-    EtsObject *GetAndSetFieldObject(size_t offset, EtsObject *value, std::memory_order memory_order)
+    EtsObject *GetAndSetFieldObject(size_t offset, EtsObject *value, std::memory_order memoryOrder)
     {
-        return FromCoreType(GetCoreType()->GetAndSetFieldObject(offset, value->GetCoreType(), memory_order));
+        return FromCoreType(GetCoreType()->GetAndSetFieldObject(offset, value->GetCoreType(), memoryOrder));
     }
 
     template <class T>
@@ -66,12 +66,12 @@ public:
     }
 
     template <class T>
-    T GetFieldPrimitive(int32_t field_offset, bool is_volatile)
+    T GetFieldPrimitive(int32_t fieldOffset, bool isVolatile)
     {
-        if (is_volatile) {
-            return GetCoreType()->GetFieldPrimitive<T, true>(field_offset);
+        if (isVolatile) {
+            return GetCoreType()->GetFieldPrimitive<T, true>(fieldOffset);
         }
-        return GetCoreType()->GetFieldPrimitive<T, false>(field_offset);
+        return GetCoreType()->GetFieldPrimitive<T, false>(fieldOffset);
     }
 
     template <class T>
@@ -81,12 +81,12 @@ public:
     }
 
     template <class T>
-    void SetFieldPrimitive(int32_t field_offset, bool is_volatile, T value)
+    void SetFieldPrimitive(int32_t fieldOffset, bool isVolatile, T value)
     {
-        if (is_volatile) {
-            GetCoreType()->SetFieldPrimitive<T, true>(field_offset, value);
+        if (isVolatile) {
+            GetCoreType()->SetFieldPrimitive<T, true>(fieldOffset, value);
         }
-        GetCoreType()->SetFieldPrimitive<T, false>(field_offset, value);
+        GetCoreType()->SetFieldPrimitive<T, false>(fieldOffset, value);
     }
 
     template <class T, bool IS_VOLATILE = false>
@@ -102,12 +102,12 @@ public:
             GetCoreType()->GetFieldObject<NEED_READ_BARRIER>(*field->GetRuntimeField()));
     }
 
-    EtsObject *GetFieldObject(int32_t field_offset, bool is_volatile) const
+    EtsObject *GetFieldObject(int32_t fieldOffset, bool isVolatile) const
     {
-        if (is_volatile) {
-            return reinterpret_cast<EtsObject *>(GetCoreType()->GetFieldObject<true>(field_offset));
+        if (isVolatile) {
+            return reinterpret_cast<EtsObject *>(GetCoreType()->GetFieldObject<true>(fieldOffset));
         }
-        return reinterpret_cast<EtsObject *>(GetCoreType()->GetFieldObject<false>(field_offset));
+        return reinterpret_cast<EtsObject *>(GetCoreType()->GetFieldObject<false>(fieldOffset));
     }
 
     template <bool IS_VOLATILE = false>
@@ -124,13 +124,13 @@ public:
     }
 
     template <bool NEED_WRITE_BARRIER = true>
-    void SetFieldObject(int32_t field_offset, bool is_volatile, EtsObject *value)
+    void SetFieldObject(int32_t fieldOffset, bool isVolatile, EtsObject *value)
     {
-        if (is_volatile) {
-            GetCoreType()->SetFieldObject<true, NEED_WRITE_BARRIER>(field_offset,
+        if (isVolatile) {
+            GetCoreType()->SetFieldObject<true, NEED_WRITE_BARRIER>(fieldOffset,
                                                                     reinterpret_cast<ObjectHeader *>(value));
         } else {
-            GetCoreType()->SetFieldObject<false, NEED_WRITE_BARRIER>(field_offset,
+            GetCoreType()->SetFieldObject<false, NEED_WRITE_BARRIER>(fieldOffset,
                                                                      reinterpret_cast<ObjectHeader *>(value));
         }
     }
@@ -141,24 +141,22 @@ public:
         GetCoreType()->SetFieldObject<IS_VOLATILE>(offset, reinterpret_cast<ObjectHeader *>(value));
     }
 
-    void SetFieldObject(size_t offset, EtsObject *value, std::memory_order memory_order)
+    void SetFieldObject(size_t offset, EtsObject *value, std::memory_order memoryOrder)
     {
-        GetCoreType()->SetFieldObject(offset, value->GetCoreType(), memory_order);
+        GetCoreType()->SetFieldObject(offset, value->GetCoreType(), memoryOrder);
     }
 
     template <typename T>
-    bool CompareAndSetFieldPrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order,
-                                     bool strong)
+    bool CompareAndSetFieldPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder, bool strong)
     {
-        return GetCoreType()->CompareAndSetFieldPrimitive(offset, old_value, new_value, memory_order, strong);
+        return GetCoreType()->CompareAndSetFieldPrimitive(offset, oldValue, newValue, memoryOrder, strong);
     }
 
-    bool CompareAndSetFieldObject(size_t offset, EtsObject *old_value, EtsObject *new_value,
-                                  std::memory_order memory_order, bool strong)
+    bool CompareAndSetFieldObject(size_t offset, EtsObject *oldValue, EtsObject *newValue,
+                                  std::memory_order memoryOrder, bool strong)
     {
-        return GetCoreType()->CompareAndSetFieldObject(offset, reinterpret_cast<ObjectHeader *>(old_value),
-                                                       reinterpret_cast<ObjectHeader *>(new_value), memory_order,
-                                                       strong);
+        return GetCoreType()->CompareAndSetFieldObject(offset, reinterpret_cast<ObjectHeader *>(oldValue),
+                                                       reinterpret_cast<ObjectHeader *>(newValue), memoryOrder, strong);
     }
 
     EtsObject *Clone() const
@@ -171,14 +169,14 @@ public:
         return static_cast<ObjectHeader *>(const_cast<EtsObject *>(this));
     }
 
-    static constexpr EtsObject *FromCoreType(ObjectHeader *object_header)
+    static constexpr EtsObject *FromCoreType(ObjectHeader *objectHeader)
     {
-        return static_cast<EtsObject *>(object_header);
+        return static_cast<EtsObject *>(objectHeader);
     }
 
-    static constexpr const EtsObject *FromCoreType(const ObjectHeader *object_header)
+    static constexpr const EtsObject *FromCoreType(const ObjectHeader *objectHeader)
     {
-        return static_cast<const EtsObject *>(object_header);
+        return static_cast<const EtsObject *>(objectHeader);
     }
 
     PANDA_PUBLIC_API bool IsStringClass()
@@ -206,21 +204,21 @@ public:
 
     inline void SetInteropHash(uint32_t hash)
     {
-        MarkWord old_mark = AtomicGetMark();
-        ASSERT(old_mark.GetState() == panda::MarkWord::STATE_UNLOCKED);
-        MarkWord new_mark = old_mark.DecodeFromHash(hash);
-        ASSERT(new_mark.GetState() == MarkWord::STATE_HASHED);
-        [[maybe_unused]] bool res = AtomicSetMark(old_mark, new_mark);
+        MarkWord oldMark = AtomicGetMark();
+        ASSERT(oldMark.GetState() == panda::MarkWord::STATE_UNLOCKED);
+        MarkWord newMark = oldMark.DecodeFromHash(hash);
+        ASSERT(newMark.GetState() == MarkWord::STATE_HASHED);
+        [[maybe_unused]] bool res = AtomicSetMark(oldMark, newMark);
         ASSERT(res);  // NOTE(vpukhov): something went wrong
     }
 
     inline void DropInteropHash()
     {
         ASSERT_MANAGED_CODE();
-        MarkWord old_mark = AtomicGetMark();
-        ASSERT(old_mark.GetState() == MarkWord::STATE_HASHED);
-        MarkWord new_mark = old_mark.DecodeFromUnlocked();
-        [[maybe_unused]] bool res = AtomicSetMark(old_mark, new_mark);
+        MarkWord oldMark = AtomicGetMark();
+        ASSERT(oldMark.GetState() == MarkWord::STATE_HASHED);
+        MarkWord newMark = oldMark.DecodeFromUnlocked();
+        [[maybe_unused]] bool res = AtomicSetMark(oldMark, newMark);
         ASSERT(res);  // NOTE(vpukhov): something went wrong
     }
 

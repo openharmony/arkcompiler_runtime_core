@@ -35,10 +35,9 @@ public:
     using ObjectVisitor = std::function<void(const ObjectHeader *)>;
     using MarkedObjects = PandaVector<PandaDeque<ObjectHeader *> *>;
 
-    explicit GCAdaptiveStack(GC *gc, size_t stack_size_limit = 0, size_t new_task_stack_size_limit = 0,
+    explicit GCAdaptiveStack(GC *gc, size_t stackSizeLimit = 0, size_t newTaskStackSizeLimit = 0,
                              GCWorkersTaskTypes task = GCWorkersTaskTypes::TASK_EMPTY,
-                             uint64_t time_limit_for_new_task_creation = 0,
-                             PandaDeque<ObjectHeader *> *stack_src = nullptr);
+                             uint64_t timeLimitForNewTaskCreation = 0, PandaDeque<ObjectHeader *> *stackSrc = nullptr);
 
     ~GCAdaptiveStack();
     NO_COPY_SEMANTIC(GCAdaptiveStack);
@@ -49,14 +48,14 @@ public:
      * @param from_object from which object we found object by reference, nullptr for roots
      * @param object object which will be added to the stack
      */
-    void PushToStack(const ObjectHeader *from_object, ObjectHeader *object);
+    void PushToStack(const ObjectHeader *fromObject, ObjectHeader *object);
 
     /**
      * This method should be used when we find new object as a root
      * @param root_type type of the root which we found
      * @param object object which will be added to the stack
      */
-    void PushToStack(RootType root_type, ObjectHeader *object);
+    void PushToStack(RootType rootType, ObjectHeader *object);
 
     /**
      * @brief Pop an object from source stack.
@@ -105,16 +104,16 @@ private:
     bool IsHighTaskCreationRate();
 
 private:
-    PandaDeque<ObjectHeader *> *stack_src_;
-    PandaDeque<ObjectHeader *> *stack_dst_;
-    size_t stack_size_limit_ {0};
-    size_t initial_stack_size_limit_ {0};
-    size_t new_task_stack_size_limit_ {0};
-    uint64_t start_time_ {0};
-    uint64_t time_limit_for_new_task_creation_ {0};
-    size_t tasks_for_time_check_ {DEFAULT_TASKS_FOR_TIME_CHECK};
-    size_t created_tasks_ {0};
-    GCWorkersTaskTypes task_type_;
+    PandaDeque<ObjectHeader *> *stackSrc_;
+    PandaDeque<ObjectHeader *> *stackDst_;
+    size_t stackSizeLimit_ {0};
+    size_t initialStackSizeLimit_ {0};
+    size_t newTaskStackSizeLimit_ {0};
+    uint64_t startTime_ {0};
+    uint64_t timeLimitForNewTaskCreation_ {0};
+    size_t tasksForTimeCheck_ {DEFAULT_TASKS_FOR_TIME_CHECK};
+    size_t createdTasks_ {0};
+    GCWorkersTaskTypes taskType_;
     GC *gc_;
 };
 

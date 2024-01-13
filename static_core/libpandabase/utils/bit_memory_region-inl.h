@@ -23,14 +23,14 @@
 namespace panda {
 
 template <typename Base>
-void BitMemoryRegion<Base>::DumpVal(std::ostream &os, size_t val, bool &is_zero, int width) const
+void BitMemoryRegion<Base>::DumpVal(std::ostream &os, size_t val, bool &isZero, int width) const
 {
-    if (val != 0 || !is_zero) {
-        if (!is_zero) {
+    if (val != 0 || !isZero) {
+        if (!isZero) {
             os << std::setw(width) << std::setfill('0');
         }
         os << std::hex << val;
-        is_zero = false;
+        isZero = false;
     }
 }
 
@@ -41,17 +41,17 @@ void BitMemoryRegion<Base>::Dump(std::ostream &os) const
     os << "0x";
     static constexpr size_t BITS_PER_WORD = sizeof(size_t) * BITS_PER_BYTE;
     if (Size() >= BITS_PER_WORD) {
-        bool is_zero = true;
+        bool isZero = true;
         size_t width = BITS_PER_WORD - (BITS_PER_HEX_DIGIT - Size() % BITS_PER_HEX_DIGIT);
         for (ssize_t i = Size() - width; i >= 0; i -= width) {
             auto val = Read(i, width);
-            DumpVal(os, val, is_zero, static_cast<int>(width / BITS_PER_HEX_DIGIT));
+            DumpVal(os, val, isZero, static_cast<int>(width / BITS_PER_HEX_DIGIT));
             if (i == 0) {
                 break;
             }
             width = std::min<size_t>(i, BITS_PER_WORD);
         }
-        if (is_zero) {
+        if (isZero) {
             os << '0';
         }
     } else {

@@ -14,6 +14,7 @@
  */
 #include "gtest/gtest.h"
 #include "iostream"
+#include "libpandabase/utils/utils.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
@@ -57,48 +58,48 @@ public:
 
         bool IsJITEnabled() const
         {
-            return static_cast<bool>(jit_cfg_);
+            return static_cast<bool>(jitCfg_);
         }
 
         bool IsTLABEnabled() const
         {
-            return static_cast<bool>(tlab_cfg_);
+            return static_cast<bool>(tlabCfg_);
         }
 
         bool End() const
         {
-            return jit_cfg_ == JITConfig::JIT && tlab_cfg_ == TLABConfig::NO_TLAB;
+            return jitCfg_ == JITConfig::JIT && tlabCfg_ == TLABConfig::NO_TLAB;
         }
 
         Config &operator++()
         {
-            if (jit_cfg_ == JITConfig::NO_JIT) {
-                jit_cfg_ = JITConfig::JIT;
+            if (jitCfg_ == JITConfig::NO_JIT) {
+                jitCfg_ = JITConfig::JIT;
             } else {
-                jit_cfg_ = JITConfig::NO_JIT;
-                if (tlab_cfg_ == TLABConfig::TLAB) {
-                    tlab_cfg_ = TLABConfig::NO_TLAB;
+                jitCfg_ = JITConfig::NO_JIT;
+                if (tlabCfg_ == TLABConfig::TLAB) {
+                    tlabCfg_ = TLABConfig::NO_TLAB;
                 } else {
-                    tlab_cfg_ = TLABConfig::TLAB;
+                    tlabCfg_ = TLABConfig::TLAB;
                 }
             }
             return *this;
         }
 
     private:
-        JITConfig jit_cfg_ {JITConfig::NO_JIT};
-        TLABConfig tlab_cfg_ {TLABConfig::TLAB};
+        JITConfig jitCfg_ {JITConfig::NO_JIT};
+        TLABConfig tlabCfg_ {TLABConfig::TLAB};
     };
 
     class GCCounter : public GCListener {
     public:
-        void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size) override
+        void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) override
         {
             count++;
         }
 
-        void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                        [[maybe_unused]] size_t heap_size) override
+        void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                        [[maybe_unused]] size_t heapSize) override
         {
         }
 
@@ -107,28 +108,28 @@ public:
     };
 
     struct MemOpReport {
-        size_t allocated_count;
-        size_t allocated_bytes;
-        size_t saved_count;
-        size_t saved_bytes;
+        size_t allocatedCount;
+        size_t allocatedBytes;
+        size_t savedCount;
+        size_t savedBytes;
     };
 
     struct RealStatsLocations {
-        uint32_t *young_freed_objects_count;
-        uint64_t *young_freed_objects_size;
-        uint32_t *young_moved_objects_count;
-        uint64_t *young_moved_objects_size;
-        uint32_t *tenured_freed_objects_count;
-        uint64_t *tenured_freed_objects_size;
+        uint32_t *youngFreedObjectsCount;
+        uint64_t *youngFreedObjectsSize;
+        uint32_t *youngMovedObjectsCount;
+        uint64_t *youngMovedObjectsSize;
+        uint32_t *tenuredFreedObjectsCount;
+        uint64_t *tenuredFreedObjectsSize;
     };
 
-    void SetupRuntime(const std::string &gc_type_param, const Config &cfg)
+    void SetupRuntime(const std::string &gcTypeParam, const Config &cfg)
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetUseTlabForAllocations(cfg.IsTLABEnabled());
-        options.SetGcType(gc_type_param);
+        options.SetGcType(gcTypeParam);
         options.SetGcTriggerType("debug-never");
         options.SetRunGcInPlace(true);
         options.SetCompilerEnableJit(cfg.IsJITEnabled());
@@ -137,30 +138,30 @@ public:
         ASSERT(success);
 
         thread = panda::MTManagedThread::GetCurrent();
-        gc_type = Runtime::GetGCType(options, plugins::RuntimeTypeToLang(Runtime::GetRuntimeType()));
-        [[maybe_unused]] auto gc_local = thread->GetVM()->GetGC();
-        ASSERT(gc_local->GetType() == panda::mem::GCTypeFromString(gc_type_param));
-        ASSERT(gc_local->IsGenerational());
+        gcType = Runtime::GetGCType(options, plugins::RuntimeTypeToLang(Runtime::GetRuntimeType()));
+        [[maybe_unused]] auto gcLocal = thread->GetVM()->GetGC();
+        ASSERT(gcLocal->GetType() == panda::mem::GCTypeFromString(gcTypeParam));
+        ASSERT(gcLocal->IsGenerational());
         thread->ManagedCodeBegin();
     }
 
     void ResetRuntime()
     {
         DeleteHandles();
-        internal_allocator->Delete(gccnt);
+        internalAllocator->Delete(gccnt);
         thread->ManagedCodeEnd();
         bool success = Runtime::Destroy();
         ASSERT_TRUE(success) << "Cannot destroy Runtime";
     }
 
     template <typename F, size_t REPEAT, MemStatsGenGCTest::TargetSpace SPACE>
-    ObjVec MakeAllocationsWithRepeats(size_t min_size, size_t max_size, size_t count, size_t *allocated,
-                                      size_t *requested, F space_checker, bool check_oom_in_tenured);
+    ObjVec MakeAllocationsWithRepeats(size_t minSize, size_t maxSize, size_t count, size_t *allocated,
+                                      size_t *requested, F spaceChecker, bool checkOomInTenured);
 
     void InitRoot();
     void MakeObjectsAlive(const ObjVec &objects, int every = 1);
     void MakeObjectsPermAlive(const ObjVec &objects, int every = 1);
-    void MakeObjectsGarbage(size_t start_idx, size_t after_end_idx, int every = 1);
+    void MakeObjectsGarbage(size_t startIdx, size_t afterEndIdx, int every = 1);
     void DumpHandles();
     void DumpAliveObjects();
     void DeleteHandles();
@@ -169,7 +170,7 @@ public:
 
     bool NeedToCheckYoungFreedCount()
     {
-        return (gc_type != GCType::G1_GC) || Runtime::GetOptions().IsG1TrackFreedObjects();
+        return (gcType != GCType::G1_GC) || Runtime::GetOptions().IsG1TrackFreedObjects();
     }
 
     template <class LanguageConfig>
@@ -193,70 +194,70 @@ public:
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     panda::MTManagedThread *thread {};
-    GCType gc_type {};
+    GCType gcType {};
 
     LanguageContext ctx {nullptr};
-    ObjectAllocatorBase *object_allocator {};
-    mem::InternalAllocatorPtr internal_allocator;
+    ObjectAllocatorBase *objectAllocator {};
+    mem::InternalAllocatorPtr internalAllocator;
     PandaVM *vm {};
     GC *gc {};
     std::vector<HanVec> handles;
     MemStatsType *ms {};
-    GCStats *gc_ms {};
+    GCStats *gcMs {};
     coretypes::Array *root = nullptr;
-    size_t root_size = 0;
+    size_t rootSize = 0;
     GCCounter *gccnt {};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 template <typename F, size_t REPEAT, MemStatsGenGCTest::TargetSpace SPACE>
-MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t min_size, size_t max_size, size_t count,
+MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t minSize, size_t maxSize, size_t count,
                                                                         size_t *allocated, size_t *requested,
-                                                                        [[maybe_unused]] F space_checker,
-                                                                        bool check_oom_in_tenured)
+                                                                        [[maybe_unused]] F spaceChecker,
+                                                                        bool checkOomInTenured)
 {
-    ASSERT(min_size <= max_size);
+    ASSERT(minSize <= maxSize);
     *allocated = 0;
     *requested = 0;
     // Create array of object templates based on count and max size
-    PandaVector<PandaString> obj_templates(count);
-    size_t obj_size = sizeof(coretypes::String) + min_size;
+    PandaVector<PandaString> objTemplates(count);
+    size_t objSize = sizeof(coretypes::String) + minSize;
     for (size_t i = 0; i < count; ++i) {
-        PandaString simple_string;
-        simple_string.resize(obj_size - sizeof(coretypes::String));
-        obj_templates[i] = std::move(simple_string);
-        obj_size += (max_size / count + i);  // +i to mess with the alignment
-        if (obj_size > max_size) {
-            obj_size = max_size;
+        PandaString simpleString;
+        simpleString.resize(objSize - sizeof(coretypes::String));
+        objTemplates[i] = std::move(simpleString);
+        objSize += (maxSize / count + i);  // +i to mess with the alignment
+        if (objSize > maxSize) {
+            objSize = maxSize;
         }
     }
     ObjVec result;
     result.reserve(count * REPEAT);
     for (size_t j = 0; j < count; ++j) {
-        size_t size = obj_templates[j].length() + sizeof(coretypes::String);
-        if (check_oom_in_tenured) {
+        size_t size = objTemplates[j].length() + sizeof(coretypes::String);
+        if (checkOomInTenured) {
             // Leaving 5MB in tenured seems OK
             auto free =
-                reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
+                reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
             // NOLINTNEXTLINE(readability-magic-numbers)
             if (size + 5000000 > free) {
                 return result;
             }
         }
         for (size_t i = 0; i < REPEAT; ++i) {
-            coretypes::String *string_obj = coretypes::String::CreateFromMUtf8(
-                reinterpret_cast<const uint8_t *>(&obj_templates[j][0]), obj_templates[j].length(), ctx, vm);
-            ASSERT(string_obj != nullptr);
-            ASSERT(space_checker(ToUintPtr(string_obj)) == true);
-            if (gc_type == GCType::G1_GC && SPACE == TargetSpace::HUMONGOUS) {
+            coretypes::String *stringObj = coretypes::String::CreateFromMUtf8(
+                reinterpret_cast<const uint8_t *>(&objTemplates[j][0]), objTemplates[j].length(), ctx, vm);
+            ASSERT(stringObj != nullptr);
+            ASSERT(spaceChecker(ToUintPtr(stringObj)) == true);
+            if (gcType == GCType::G1_GC && SPACE == TargetSpace::HUMONGOUS) {
                 // for humongous objects in G1 we calculate size of the region instead of just alignment size
-                Region *region = AddrToRegion(string_obj);
+                Region *region = AddrToRegion(stringObj);
                 *allocated += region->Size();
             } else {
                 *allocated += GetAlignedObjectSize(size);
             }
             *requested += size;
-            result.push_back(string_obj);
+            result.push_back(stringObj);
         }
     }
     return result;
@@ -264,12 +265,12 @@ MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t m
 
 void MemStatsGenGCTest::InitRoot()
 {
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    Class *klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
                        ->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
     root = coretypes::Array::Create(klass, ROOT_MAX_SIZE);
-    root_size = 0;
+    rootSize = 0;
     MakeObjectsPermAlive({root});
 }
 
@@ -281,17 +282,17 @@ void MemStatsGenGCTest::MakeObjectsAlive(const ObjVec &objects, int every)
         if (cnt != 0) {
             continue;
         }
-        root->Set(root_size, obj);
-        root_size++;
-        ASSERT(root_size < ROOT_MAX_SIZE);
+        root->Set(rootSize, obj);
+        rootSize++;
+        ASSERT(rootSize < ROOT_MAX_SIZE);
         cnt = every;
     }
 }
 
-void MemStatsGenGCTest::MakeObjectsGarbage(size_t start_idx, size_t after_end_idx, int every)
+void MemStatsGenGCTest::MakeObjectsGarbage(size_t startIdx, size_t afterEndIdx, int every)
 {
     int cnt = every;
-    for (size_t i = start_idx; i < after_end_idx; ++i) {
+    for (size_t i = startIdx; i < afterEndIdx; ++i) {
         cnt--;
         if (cnt != 0) {
             continue;
@@ -311,7 +312,7 @@ void MemStatsGenGCTest::MakeObjectsPermAlive(const ObjVec &objects, int every)
         if (cnt != 0) {
             continue;
         }
-        result.push_back(internal_allocator->New<VMHandle<ObjectHeader *>>(thread, obj));
+        result.push_back(internalAllocator->New<VMHandle<ObjectHeader *>>(thread, obj));
         cnt = every;
     }
     handles.push_back(result);
@@ -330,7 +331,7 @@ void MemStatsGenGCTest::DumpHandles()
 void MemStatsGenGCTest::DumpAliveObjects()
 {
     std::cout << "Alive root array : " << handles[0][0]->GetPtr() << std::endl;
-    for (size_t i = 0; i < root_size; ++i) {
+    for (size_t i = 0; i < rootSize; ++i) {
         if (root->Get<ObjectHeader *>(i) != nullptr) {
             std::cout << "Alive idx " << i << " : " << root->Get<ObjectHeader *>(i) << std::endl;
         }
@@ -341,7 +342,7 @@ void MemStatsGenGCTest::DeleteHandles()
 {
     for (auto &hv : handles) {
         for (auto *handle : hv) {
-            internal_allocator->Delete(handle);
+            internalAllocator->Delete(handle);
         }
     }
     handles.clear();
@@ -353,13 +354,13 @@ void MemStatsGenGCTest::PrepareTest()
     if constexpr (std::is_same<LanguageConfig, panda::PandaAssemblyLanguageConfig>::value) {
         DeleteHandles();
         ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        object_allocator = thread->GetVM()->GetGC()->GetObjectAllocator();
+        objectAllocator = thread->GetVM()->GetGC()->GetObjectAllocator();
         vm = Runtime::GetCurrent()->GetPandaVM();
-        internal_allocator = Runtime::GetCurrent()->GetClassLinker()->GetAllocator();
+        internalAllocator = Runtime::GetCurrent()->GetClassLinker()->GetAllocator();
         gc = vm->GetGC();
         ms = vm->GetMemStats();
-        gc_ms = vm->GetGCStats();
-        gccnt = internal_allocator->New<GCCounter>();
+        gcMs = vm->GetGCStats();
+        gccnt = internalAllocator->New<GCCounter>();
         gc->AddListener(gccnt);
         InitRoot();
     } else {
@@ -371,18 +372,18 @@ template <class LanguageConfig>
 typename GenerationalGC<LanguageConfig>::MemStats *MemStatsGenGCTest::GetGenMemStats()
 {
     // An explicit getter, because the typename has to be template-specialized
-    return &reinterpret_cast<GenerationalGC<LanguageConfig> *>(gc)->mem_stats_;
+    return &reinterpret_cast<GenerationalGC<LanguageConfig> *>(gc)->memStats_;
 }
 
 bool MemStatsGenGCTest::IsInYoung(uintptr_t addr)
 {
-    switch (gc_type) {
+    switch (gcType) {
         case GCType::GEN_GC: {
-            return object_allocator->IsObjectInYoungSpace(reinterpret_cast<ObjectHeader *>(addr));
+            return objectAllocator->IsObjectInYoungSpace(reinterpret_cast<ObjectHeader *>(addr));
         }
         case GCType::G1_GC: {
-            auto mem_pool = PoolManager::GetMmapMemPool();
-            if (mem_pool->GetSpaceTypeForAddr(reinterpret_cast<ObjectHeader *>(addr)) != SpaceType::SPACE_TYPE_OBJECT) {
+            auto memPool = PoolManager::GetMmapMemPool();
+            if (memPool->GetSpaceTypeForAddr(reinterpret_cast<ObjectHeader *>(addr)) != SpaceType::SPACE_TYPE_OBJECT) {
                 return false;
             }
             return AddrToRegion(reinterpret_cast<ObjectHeader *>(addr))->HasFlag(RegionFlag::IS_EDEN);
@@ -396,85 +397,85 @@ bool MemStatsGenGCTest::IsInYoung(uintptr_t addr)
 template <MemStatsGenGCTest::TargetSpace SPACE, bool DO_SAVE, bool IS_SINGLE>
 typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::MakeAllocations()
 {
-    [[maybe_unused]] int gc_cnt = gccnt->count;
+    [[maybe_unused]] int gcCnt = gccnt->count;
     MemStatsGenGCTest::MemOpReport report {};
-    report.allocated_count = 0;
-    report.allocated_bytes = 0;
-    report.saved_count = 0;
-    report.saved_bytes = 0;
+    report.allocatedCount = 0;
+    report.allocatedBytes = 0;
+    report.savedCount = 0;
+    report.savedBytes = 0;
     size_t bytes = 0;
-    [[maybe_unused]] size_t raw_objects_size;  // currently not tracked by memstats
+    [[maybe_unused]] size_t rawObjectsSize;  // currently not tracked by memstats
     size_t count = 0;
-    size_t min_size = 0;
-    size_t max_size = 0;
-    bool check_oom = false;
-    size_t young_size = reinterpret_cast<GenerationalSpaces *>(
-                            reinterpret_cast<ObjectAllocatorGenBase *>(object_allocator)->GetHeapSpace())
-                            ->GetCurrentYoungSize();
-    switch (gc_type) {
+    size_t minSize = 0;
+    size_t maxSize = 0;
+    bool checkOom = false;
+    size_t youngSize = reinterpret_cast<GenerationalSpaces *>(
+                           reinterpret_cast<ObjectAllocatorGenBase *>(objectAllocator)->GetHeapSpace())
+                           ->GetCurrentYoungSize();
+    switch (gcType) {
         case GCType::GEN_GC: {
-            auto gen_alloc = reinterpret_cast<ObjectAllocatorGen<MT_MODE_MULTI> *>(object_allocator);
+            auto genAlloc = reinterpret_cast<ObjectAllocatorGen<MT_MODE_MULTI> *>(objectAllocator);
             // NOLINTNEXTLINE(readability-magic-numbers)
-            count = 15;
+            count = 15U;
             if constexpr (SPACE == TargetSpace::YOUNG) {
-                min_size = 0;
-                max_size = gen_alloc->GetYoungAllocMaxSize();
+                minSize = 0;
+                maxSize = genAlloc->GetYoungAllocMaxSize();
             } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
-                min_size = gen_alloc->GetYoungAllocMaxSize() + 1;
-                max_size = gen_alloc->GetRegularObjectMaxSize();
-                if (min_size >= max_size) {
+                minSize = genAlloc->GetYoungAllocMaxSize() + 1;
+                maxSize = genAlloc->GetRegularObjectMaxSize();
+                if (minSize >= maxSize) {
                     // Allocator configuration disallows allocating directly in this space
                     return report;
                 }
             } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
-                min_size = gen_alloc->GetYoungAllocMaxSize() + 1;
-                min_size = std::max(min_size, gen_alloc->GetRegularObjectMaxSize() + 1);
-                max_size = gen_alloc->GetLargeObjectMaxSize();
-                if (min_size >= max_size) {
+                minSize = genAlloc->GetYoungAllocMaxSize() + 1;
+                minSize = std::max(minSize, genAlloc->GetRegularObjectMaxSize() + 1);
+                maxSize = genAlloc->GetLargeObjectMaxSize();
+                if (minSize >= maxSize) {
                     // Allocator configuration disallows allocating directly in this space
                     return report;
                 }
             } else {
                 ASSERT(SPACE == TargetSpace::HUMONGOUS);
-                count = 3;
-                min_size = gen_alloc->GetYoungAllocMaxSize() + 1;
-                min_size = std::max(min_size, gen_alloc->GetRegularObjectMaxSize() + 1);
-                min_size = std::max(min_size, gen_alloc->GetLargeObjectMaxSize() + 1);
-                max_size = min_size * 3;
-                check_oom = true;
+                count = 3U;
+                minSize = genAlloc->GetYoungAllocMaxSize() + 1;
+                minSize = std::max(minSize, genAlloc->GetRegularObjectMaxSize() + 1);
+                minSize = std::max(minSize, genAlloc->GetLargeObjectMaxSize() + 1);
+                maxSize = minSize * 3U;
+                checkOom = true;
             }
             break;
         }
         case GCType::G1_GC: {
-            auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator);
+            auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
             // NOLINTNEXTLINE(readability-magic-numbers)
-            count = 15;
+            count = 15U;
             if constexpr (SPACE == TargetSpace::YOUNG) {
-                min_size = 0;
-                max_size = g1_alloc->GetYoungAllocMaxSize();
+                minSize = 0;
+                maxSize = g1Alloc->GetYoungAllocMaxSize();
             } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
-                min_size = g1_alloc->GetYoungAllocMaxSize() + 1;
-                max_size = g1_alloc->GetRegularObjectMaxSize();
-                if (min_size >= max_size) {
+                minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
+                maxSize = g1Alloc->GetRegularObjectMaxSize();
+                if (minSize >= maxSize) {
                     // Allocator configuration disallows allocating directly in this space
                     return report;
                 }
             } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
-                min_size = g1_alloc->GetYoungAllocMaxSize() + 1;
-                min_size = std::max(min_size, g1_alloc->GetRegularObjectMaxSize() + 1);
-                max_size = g1_alloc->GetLargeObjectMaxSize();
-                if (min_size >= max_size) {
+                minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
+                minSize = std::max(minSize, g1Alloc->GetRegularObjectMaxSize() + 1);
+                maxSize = g1Alloc->GetLargeObjectMaxSize();
+                if (minSize >= maxSize) {
                     // Allocator configuration disallows allocating directly in this space
                     return report;
                 }
             } else {
                 ASSERT(SPACE == TargetSpace::HUMONGOUS);
-                count = 3;
-                min_size = g1_alloc->GetYoungAllocMaxSize() + 1;
-                min_size = std::max(min_size, g1_alloc->GetRegularObjectMaxSize() + 1);
-                min_size = std::max(min_size, g1_alloc->GetLargeObjectMaxSize() + 1);
-                max_size = min_size * 3;
-                check_oom = true;
+                count = 3U;
+                minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
+                minSize = std::max(minSize, g1Alloc->GetRegularObjectMaxSize() + 1);
+                minSize = std::max(minSize, g1Alloc->GetLargeObjectMaxSize() + 1);
+                maxSize = minSize * 3U;
+                checkOom = true;
             }
             break;
         }
@@ -482,7 +483,7 @@ typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::MakeAllocations()
             UNREACHABLE();
     }
 
-    auto space_check = [&](uintptr_t addr) -> bool {
+    auto spaceCheck = [this](uintptr_t addr) -> bool {
         if constexpr (SPACE == TargetSpace::YOUNG) {
             return IsInYoung(addr);
         } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
@@ -497,83 +498,83 @@ typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::MakeAllocations()
 
     if constexpr (SPACE == TargetSpace::YOUNG) {
         // To prevent Young GC collection while we're allocating
-        max_size = std::min(young_size / (count * 6), max_size);
+        maxSize = std::min(youngSize / (count * 6U), maxSize);
     }
 
     if (IS_SINGLE) {
-        ObjVec ov1 = MakeAllocationsWithRepeats<decltype(space_check), 1, SPACE>(
-            min_size + 1, max_size, 1, &bytes, &raw_objects_size, space_check, check_oom);
-        report.allocated_count += 1;
-        report.allocated_bytes += bytes;
+        ObjVec ov1 = MakeAllocationsWithRepeats<decltype(spaceCheck), 1, SPACE>(minSize + 1, maxSize, 1, &bytes,
+                                                                                &rawObjectsSize, spaceCheck, checkOom);
+        report.allocatedCount += 1;
+        report.allocatedBytes += bytes;
         if constexpr (DO_SAVE) {
             MakeObjectsAlive(ov1, 1);
-            report.saved_count = report.allocated_count;
-            report.saved_bytes = report.allocated_bytes;
+            report.savedCount = report.allocatedCount;
+            report.savedBytes = report.allocatedBytes;
         }
     } else {
-        ObjVec ov1 = MakeAllocationsWithRepeats<decltype(space_check), 3, SPACE>(
-            min_size, max_size, count, &bytes, &raw_objects_size, space_check, check_oom);
-        report.allocated_count += count * 3;
-        report.allocated_bytes += bytes;
-        ObjVec ov2 = MakeAllocationsWithRepeats<decltype(space_check), 3, SPACE>(
-            min_size, max_size, count, &bytes, &raw_objects_size, space_check, check_oom);
-        report.allocated_count += count * 3;
-        report.allocated_bytes += bytes;
+        ObjVec ov1 = MakeAllocationsWithRepeats<decltype(spaceCheck), 3U, SPACE>(minSize, maxSize, count, &bytes,
+                                                                                 &rawObjectsSize, spaceCheck, checkOom);
+        report.allocatedCount += count * 3U;
+        report.allocatedBytes += bytes;
+        ObjVec ov2 = MakeAllocationsWithRepeats<decltype(spaceCheck), 3U, SPACE>(minSize, maxSize, count, &bytes,
+                                                                                 &rawObjectsSize, spaceCheck, checkOom);
+        report.allocatedCount += count * 3U;
+        report.allocatedBytes += bytes;
         if constexpr (DO_SAVE) {
-            MakeObjectsAlive(ov1, 3);
-            MakeObjectsAlive(ov2, 3);
-            report.saved_count = report.allocated_count / 3;
-            report.saved_bytes = report.allocated_bytes / 3;
+            MakeObjectsAlive(ov1, 3_I);
+            MakeObjectsAlive(ov2, 3_I);
+            report.savedCount = report.allocatedCount / 3U;
+            report.savedBytes = report.allocatedBytes / 3U;
         }
     }
 
     // We must not have uncounted GCs
-    ASSERT(gc_cnt == gccnt->count);
+    ASSERT(gcCnt == gccnt->count);
     return report;
 }
 
 typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::HelpAllocTenured()
 {
     MemStatsGenGCTest::MemOpReport report {};
-    report.allocated_count = 0;
-    report.allocated_bytes = 0;
-    report.saved_count = 0;
-    report.saved_bytes = 0;
+    report.allocatedCount = 0;
+    report.allocatedBytes = 0;
+    report.savedCount = 0;
+    report.savedBytes = 0;
 
-    auto old_root_size = root_size;
+    auto oldRootSize = rootSize;
 
     // One way to get objects into tenured space - by promotion
     auto r = MakeAllocations<TargetSpace::YOUNG, true>();
     gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-    MakeObjectsGarbage(old_root_size, old_root_size + (root_size - old_root_size) / 2);
+    MakeObjectsGarbage(oldRootSize, oldRootSize + (rootSize - oldRootSize) / 2U);
 
-    report.allocated_count = r.saved_count;
-    report.allocated_bytes = r.saved_bytes;
-    report.saved_count = r.saved_count / 2;
-    report.saved_bytes = r.saved_bytes / 2;
+    report.allocatedCount = r.savedCount;
+    report.allocatedBytes = r.savedBytes;
+    report.savedCount = r.savedCount / 2U;
+    report.savedBytes = r.savedBytes / 2U;
 
     // Another way - by direct allocation in tenured if possible
     auto r2 = MakeAllocations<TargetSpace::TENURED_REGULAR, true>();
 
-    report.allocated_count += r2.allocated_count;
-    report.allocated_bytes += r2.allocated_bytes;
-    report.saved_count += r2.saved_count;
-    report.saved_bytes += r2.saved_bytes;
+    report.allocatedCount += r2.allocatedCount;
+    report.allocatedBytes += r2.allocatedBytes;
+    report.savedCount += r2.savedCount;
+    report.savedBytes += r2.savedBytes;
 
     // Large objects are also tenured in terms of gen memstats
     auto r3 = MakeAllocations<TargetSpace::TENURED_LARGE, true>();
 
-    report.allocated_count += r3.allocated_count;
-    report.allocated_bytes += r3.allocated_bytes;
-    report.saved_count += r3.saved_count;
-    report.saved_bytes += r3.saved_bytes;
+    report.allocatedCount += r3.allocatedCount;
+    report.allocatedBytes += r3.allocatedBytes;
+    report.savedCount += r3.savedCount;
+    report.savedBytes += r3.savedBytes;
 
     auto r4 = MakeAllocations<TargetSpace::HUMONGOUS, true>();
 
-    report.allocated_count += r4.allocated_count;
-    report.allocated_bytes += r4.allocated_bytes;
-    report.saved_count += r4.saved_count;
-    report.saved_bytes += r4.saved_bytes;
+    report.allocatedCount += r4.allocatedCount;
+    report.allocatedBytes += r4.allocatedBytes;
+    report.savedCount += r4.savedCount;
+    report.savedBytes += r4.savedBytes;
     return report;
 }
 
@@ -581,34 +582,34 @@ template <typename T>
 MemStatsGenGCTest::RealStatsLocations MemStatsGenGCTest::GetGenMemStatsDetails(T gms)
 {
     RealStatsLocations loc {};
-    loc.young_freed_objects_count = &gms->young_free_object_count_;
-    loc.young_freed_objects_size = &gms->young_free_object_size_;
-    loc.young_moved_objects_count = &gms->young_move_object_count_;
-    loc.young_moved_objects_size = &gms->young_move_object_size_;
-    loc.tenured_freed_objects_count = &gms->tenured_free_object_count_;
-    loc.tenured_freed_objects_size = &gms->tenured_free_object_size_;
+    loc.youngFreedObjectsCount = &gms->youngFreeObjectCount_;
+    loc.youngFreedObjectsSize = &gms->youngFreeObjectSize_;
+    loc.youngMovedObjectsCount = &gms->youngMoveObjectCount_;
+    loc.youngMovedObjectsSize = &gms->youngMoveObjectSize_;
+    loc.tenuredFreedObjectsCount = &gms->tenuredFreeObjectCount_;
+    loc.tenuredFreedObjectsSize = &gms->tenuredFreeObjectSize_;
     return loc;
 }
 
 TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
 {
-    for (int gctype_idx = 0; static_cast<GCType>(gctype_idx) <= GCType::GCTYPE_LAST; ++gctype_idx) {
-        auto gc_type_local = static_cast<GCType>(gctype_idx);
-        if (gc_type_local == GCType::EPSILON_G1_GC || gc_type_local == GCType::INVALID_GC) {
+    for (int gctypeIdx = 0; static_cast<GCType>(gctypeIdx) <= GCType::GCTYPE_LAST; ++gctypeIdx) {
+        auto gcTypeLocal = static_cast<GCType>(gctypeIdx);
+        if (gcTypeLocal == GCType::EPSILON_G1_GC || gcTypeLocal == GCType::INVALID_GC) {
             continue;
         }
-        if (!IsGenerationalGCType(gc_type_local)) {
+        if (!IsGenerationalGCType(gcTypeLocal)) {
             continue;
         }
-        std::string gctype = static_cast<std::string>(GCStringFromType(gc_type_local));
+        std::string gctype = static_cast<std::string>(GCStringFromType(gcTypeLocal));
         for (MemStatsGenGCTest::Config cfg; !cfg.End(); ++cfg) {
             SetupRuntime(gctype, cfg);
 
             {
                 HandleScope<ObjectHeader *> scope(thread);
                 PrepareTest<panda::PandaAssemblyLanguageConfig>();
-                auto *gen_ms = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
-                RealStatsLocations loc = GetGenMemStatsDetails<decltype(gen_ms)>(gen_ms);
+                auto *genMs = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
+                RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));  // Heap doesn't have unexpected garbage now
 
@@ -617,75 +618,75 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
                 ASSERT_EQ(2, gccnt->count);
                 if (NeedToCheckYoungFreedCount()) {
-                    ASSERT_EQ(*loc.young_freed_objects_count, r.allocated_count);
+                    ASSERT_EQ(*loc.youngFreedObjectsCount, r.allocatedCount);
                 }
-                ASSERT_EQ(*loc.young_freed_objects_size, r.allocated_bytes);
-                ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, r.allocatedBytes);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, 0);
                 if (NeedToCheckYoungFreedCount()) {
-                    ASSERT_EQ(gc_ms->GetObjectsFreedCount(), r.allocated_count);
+                    ASSERT_EQ(gcMs->GetObjectsFreedCount(), r.allocatedCount);
                 }
                 if (PANDA_TRACK_TLAB_ALLOCATIONS) {
-                    ASSERT_EQ(gc_ms->GetObjectsFreedBytes(), r.allocated_bytes);
+                    ASSERT_EQ(gcMs->GetObjectsFreedBytes(), r.allocatedBytes);
                 }
-                ASSERT_EQ(gc_ms->GetLargeObjectsFreedCount(), 0);
-                ASSERT_EQ(gc_ms->GetLargeObjectsFreedBytes(), 0);
+                ASSERT_EQ(gcMs->GetLargeObjectsFreedCount(), 0);
+                ASSERT_EQ(gcMs->GetLargeObjectsFreedBytes(), 0);
 
                 // Make a trivial allocation of unaligned size and make it alive
                 r = MakeAllocations<TargetSpace::YOUNG, true, true>();
                 gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
                 ASSERT_EQ(3, gccnt->count);
-                ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                ASSERT_EQ(*loc.young_moved_objects_count, r.saved_count);
-                ASSERT_EQ(*loc.young_moved_objects_size, r.saved_bytes);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, r.savedCount);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, r.savedBytes);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, 0);
 
                 // Expecting that r.saved_bytes/count have been promoted into tenured
                 // Make them garbage
-                MakeObjectsGarbage(0, root_size);
+                MakeObjectsGarbage(0, rootSize);
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 ASSERT_EQ(4, gccnt->count);
-                ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, r.saved_count);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, r.saved_bytes);
+                ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, r.savedCount);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, r.savedBytes);
 
                 // Make a trivial allocation of unaligned size in tenured space and make it garbage
                 r = MakeAllocations<TargetSpace::TENURED_REGULAR, false, true>();
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 ASSERT_EQ(5, gccnt->count);
-                ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, r.allocated_count);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, r.allocated_bytes);
+                ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, r.allocatedCount);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, r.allocatedBytes);
 
                 // Make a trivial allocation of unaligned size large object and make it garbage
                 r = MakeAllocations<TargetSpace::TENURED_LARGE, false, true>();
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 ASSERT_EQ(6, gccnt->count);
-                ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, r.allocated_count);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, r.allocated_bytes);
+                ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, r.allocatedCount);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, r.allocatedBytes);
 
                 r = MakeAllocations<TargetSpace::HUMONGOUS, false, true>();
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, r.allocated_count);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, r.allocated_bytes);
+                ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, r.allocatedCount);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, r.allocatedBytes);
             }
 
             ResetRuntime();
@@ -695,23 +696,23 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
 
 TEST_F(MemStatsGenGCTest, YoungStatsGenGcTest)
 {
-    for (int gctype_idx = 0; static_cast<GCType>(gctype_idx) <= GCType::GCTYPE_LAST; ++gctype_idx) {
-        if (static_cast<GCType>(gctype_idx) == GCType::EPSILON_G1_GC ||
-            static_cast<GCType>(gctype_idx) == GCType::INVALID_GC) {
+    for (int gctypeIdx = 0; static_cast<GCType>(gctypeIdx) <= GCType::GCTYPE_LAST; ++gctypeIdx) {
+        if (static_cast<GCType>(gctypeIdx) == GCType::EPSILON_G1_GC ||
+            static_cast<GCType>(gctypeIdx) == GCType::INVALID_GC) {
             continue;
         }
-        if (!IsGenerationalGCType(static_cast<GCType>(gctype_idx))) {
+        if (!IsGenerationalGCType(static_cast<GCType>(gctypeIdx))) {
             continue;
         }
-        std::string gctype = static_cast<std::string>(GCStringFromType(static_cast<GCType>(gctype_idx)));
+        std::string gctype = static_cast<std::string>(GCStringFromType(static_cast<GCType>(gctypeIdx)));
         for (MemStatsGenGCTest::Config cfg; !cfg.End(); ++cfg) {
             SetupRuntime(gctype, cfg);
 
             {
                 HandleScope<ObjectHeader *> scope(thread);
                 PrepareTest<panda::PandaAssemblyLanguageConfig>();
-                auto *gen_ms = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
-                RealStatsLocations loc = GetGenMemStatsDetails<decltype(gen_ms)>(gen_ms);
+                auto *genMs = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
+                RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 // Young shall be empty now.
@@ -719,13 +720,13 @@ TEST_F(MemStatsGenGCTest, YoungStatsGenGcTest)
                 gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
 
                 if (NeedToCheckYoungFreedCount()) {
-                    ASSERT_EQ(*loc.young_freed_objects_count, r.allocated_count - r.saved_count);
+                    ASSERT_EQ(*loc.youngFreedObjectsCount, r.allocatedCount - r.savedCount);
                 }
-                ASSERT_EQ(*loc.young_freed_objects_size, r.allocated_bytes - r.saved_bytes);
-                ASSERT_EQ(*loc.young_moved_objects_count, r.saved_count);
-                ASSERT_EQ(*loc.young_moved_objects_size, r.saved_bytes);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, r.allocatedBytes - r.savedBytes);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, r.savedCount);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, r.savedBytes);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, 0);
             }
 
             ResetRuntime();
@@ -735,70 +736,70 @@ TEST_F(MemStatsGenGCTest, YoungStatsGenGcTest)
 
 TEST_F(MemStatsGenGCTest, TenuredStatsFullGenGcTest)
 {
-    for (int gctype_idx = 0; static_cast<GCType>(gctype_idx) <= GCType::GCTYPE_LAST; ++gctype_idx) {
-        if (static_cast<GCType>(gctype_idx) == GCType::EPSILON_G1_GC ||
-            static_cast<GCType>(gctype_idx) == GCType::INVALID_GC) {
+    for (int gctypeIdx = 0; static_cast<GCType>(gctypeIdx) <= GCType::GCTYPE_LAST; ++gctypeIdx) {
+        if (static_cast<GCType>(gctypeIdx) == GCType::EPSILON_G1_GC ||
+            static_cast<GCType>(gctypeIdx) == GCType::INVALID_GC) {
             continue;
         }
-        if (!IsGenerationalGCType(static_cast<GCType>(gctype_idx))) {
+        if (!IsGenerationalGCType(static_cast<GCType>(gctypeIdx))) {
             continue;
         }
-        std::string gctype = static_cast<std::string>(GCStringFromType(static_cast<GCType>(gctype_idx)));
+        std::string gctype = static_cast<std::string>(GCStringFromType(static_cast<GCType>(gctypeIdx)));
         for (MemStatsGenGCTest::Config cfg; !cfg.End(); ++cfg) {
             SetupRuntime(gctype, cfg);
 
             {
                 HandleScope<ObjectHeader *> scope(thread);
                 PrepareTest<panda::PandaAssemblyLanguageConfig>();
-                auto *gen_ms = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
-                RealStatsLocations loc = GetGenMemStatsDetails<decltype(gen_ms)>(gen_ms);
+                auto *genMs = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
+                RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 // Young shall be empty now.
 
-                uint32_t t_count = 0;
-                uint64_t t_bytes = 0;
+                uint32_t tCount = 0;
+                uint64_t tBytes = 0;
 
                 for (int i = 0; i < FULL_TEST_ALLOC_TIMES; ++i) {
-                    [[maybe_unused]] int gc_cnt = gccnt->count;
+                    [[maybe_unused]] int gcCnt = gccnt->count;
                     auto r = HelpAllocTenured();
                     // HelpAllocTenured shall trigger young gc, which is allowed to be mixed
-                    ASSERT(gc_cnt + 1 == gccnt->count);
-                    auto tfoc_y = *loc.tenured_freed_objects_count;
-                    auto tfos_y = *loc.tenured_freed_objects_size;
-                    ASSERT(r.allocated_count > 0);
+                    ASSERT(gcCnt + 1 == gccnt->count);
+                    auto tfocY = *loc.tenuredFreedObjectsCount;
+                    auto tfosY = *loc.tenuredFreedObjectsSize;
+                    ASSERT(r.allocatedCount > 0);
                     gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                    ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                    ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                    ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                    ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                    ASSERT_EQ(*loc.tenured_freed_objects_count + tfoc_y, r.allocated_count - r.saved_count);
-                    ASSERT_EQ(*loc.tenured_freed_objects_size + tfos_y, r.allocated_bytes - r.saved_bytes);
-                    t_count += r.saved_count;
-                    t_bytes += r.saved_bytes;
+                    ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                    ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                    ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                    ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                    ASSERT_EQ(*loc.tenuredFreedObjectsCount + tfocY, r.allocatedCount - r.savedCount);
+                    ASSERT_EQ(*loc.tenuredFreedObjectsSize + tfosY, r.allocatedBytes - r.savedBytes);
+                    tCount += r.savedCount;
+                    tBytes += r.savedBytes;
                 }
 
                 // Empty everything
                 auto ry = MakeAllocations<TargetSpace::YOUNG, false>();
-                MakeObjectsGarbage(0, root_size);
+                MakeObjectsGarbage(0, rootSize);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 if (NeedToCheckYoungFreedCount()) {
-                    ASSERT_EQ(*loc.young_freed_objects_count, ry.allocated_count);
+                    ASSERT_EQ(*loc.youngFreedObjectsCount, ry.allocatedCount);
                 }
-                ASSERT_EQ(*loc.young_freed_objects_size, ry.allocated_bytes);
-                ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, t_count);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, t_bytes);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, ry.allocatedBytes);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, tCount);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, tBytes);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, 0);
             }
 
             ResetRuntime();
@@ -808,120 +809,120 @@ TEST_F(MemStatsGenGCTest, TenuredStatsFullGenGcTest)
 
 TEST_F(MemStatsGenGCTest, TenuredStatsMixGenGcTest)
 {
-    for (int gctype_idx = 0; static_cast<GCType>(gctype_idx) <= GCType::GCTYPE_LAST; ++gctype_idx) {
-        if (static_cast<GCType>(gctype_idx) == GCType::EPSILON_G1_GC ||
-            static_cast<GCType>(gctype_idx) == GCType::INVALID_GC) {
+    for (int gctypeIdx = 0; static_cast<GCType>(gctypeIdx) <= GCType::GCTYPE_LAST; ++gctypeIdx) {
+        if (static_cast<GCType>(gctypeIdx) == GCType::EPSILON_G1_GC ||
+            static_cast<GCType>(gctypeIdx) == GCType::INVALID_GC) {
             continue;
         }
-        if (!IsGenerationalGCType(static_cast<GCType>(gctype_idx))) {
+        if (!IsGenerationalGCType(static_cast<GCType>(gctypeIdx))) {
             continue;
         }
-        if (static_cast<GCType>(gctype_idx) == GCType::GEN_GC) {
+        if (static_cast<GCType>(gctypeIdx) == GCType::GEN_GC) {
             // Doesn't have mixed GC collection
             continue;
         }
-        std::string gctype = static_cast<std::string>(GCStringFromType(static_cast<GCType>(gctype_idx)));
+        std::string gctype = static_cast<std::string>(GCStringFromType(static_cast<GCType>(gctypeIdx)));
         for (MemStatsGenGCTest::Config cfg; !cfg.End(); ++cfg) {
             SetupRuntime(gctype, cfg);
 
             {
                 HandleScope<ObjectHeader *> scope(thread);
                 PrepareTest<panda::PandaAssemblyLanguageConfig>();
-                GCTaskCause mixed_cause;
-                switch (gc_type) {
+                GCTaskCause mixedCause;
+                switch (gcType) {
                     case GCType::GEN_GC: {
                         UNREACHABLE();  // Doesn't have mixed GC collection
                     }
                     case GCType::G1_GC: {
-                        mixed_cause = MIXED_G1_GC_CAUSE;
+                        mixedCause = MIXED_G1_GC_CAUSE;
                         break;
                     }
                     default:
                         UNREACHABLE();  // NIY
                 }
-                auto *gen_ms = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
-                RealStatsLocations loc = GetGenMemStatsDetails<decltype(gen_ms)>(gen_ms);
+                auto *genMs = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
+                RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 // Young shall be empty now.
 
-                uint32_t t_count = 0;
-                uint64_t t_bytes = 0;
+                uint32_t tCount = 0;
+                uint64_t tBytes = 0;
 
                 {
-                    uint32_t dead_count = 0;
-                    uint64_t dead_bytes = 0;
-                    uint32_t expected_dead_count = 0;
-                    uint64_t expected_dead_bytes = 0;
+                    uint32_t deadCount = 0;
+                    uint64_t deadBytes = 0;
+                    uint32_t expectedDeadCount = 0;
+                    uint64_t expectedDeadBytes = 0;
                     for (int i = 0; i < MIX_TEST_ALLOC_TIMES; ++i) {
-                        [[maybe_unused]] int gc_cnt = gccnt->count;
+                        [[maybe_unused]] int gcCnt = gccnt->count;
                         auto r = HelpAllocTenured();
                         // HelpAllocTenured shall trigger young gc, which is allowed to be mixed
-                        ASSERT(gc_cnt + 1 == gccnt->count);
-                        dead_count += *loc.tenured_freed_objects_count;
-                        dead_bytes += *loc.tenured_freed_objects_size;
+                        ASSERT(gcCnt + 1 == gccnt->count);
+                        deadCount += *loc.tenuredFreedObjectsCount;
+                        deadBytes += *loc.tenuredFreedObjectsSize;
                         // Mixed can free not all the tenured garbage, so run it until it stalls
                         do {
-                            gc->WaitForGCInManaged(GCTask(mixed_cause));
-                            ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                            ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                            ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                            ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                            dead_count += *loc.tenured_freed_objects_count;
-                            dead_bytes += *loc.tenured_freed_objects_size;
-                        } while (*loc.tenured_freed_objects_count != 0);
-                        t_count += r.saved_count;
-                        t_bytes += r.saved_bytes;
-                        expected_dead_count += r.allocated_count - r.saved_count;
-                        expected_dead_bytes += r.allocated_bytes - r.saved_bytes;
+                            gc->WaitForGCInManaged(GCTask(mixedCause));
+                            ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                            ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                            ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                            ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                            deadCount += *loc.tenuredFreedObjectsCount;
+                            deadBytes += *loc.tenuredFreedObjectsSize;
+                        } while (*loc.tenuredFreedObjectsCount != 0);
+                        tCount += r.savedCount;
+                        tBytes += r.savedBytes;
+                        expectedDeadCount += r.allocatedCount - r.savedCount;
+                        expectedDeadBytes += r.allocatedBytes - r.savedBytes;
                     }
                     gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                    ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                    ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                    ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                    ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                    dead_count += *loc.tenured_freed_objects_count;
-                    dead_bytes += *loc.tenured_freed_objects_size;
-                    ASSERT_EQ(dead_count, expected_dead_count);
-                    ASSERT_EQ(dead_bytes, expected_dead_bytes);
+                    ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                    ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                    ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                    ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                    deadCount += *loc.tenuredFreedObjectsCount;
+                    deadBytes += *loc.tenuredFreedObjectsSize;
+                    ASSERT_EQ(deadCount, expectedDeadCount);
+                    ASSERT_EQ(deadBytes, expectedDeadBytes);
                 }
 
                 // Empty everything
                 auto ry = MakeAllocations<TargetSpace::YOUNG, false>();
-                MakeObjectsGarbage(0, root_size);
+                MakeObjectsGarbage(0, rootSize);
                 {
-                    uint32_t dead_count = 0;
-                    uint64_t dead_bytes = 0;
+                    uint32_t deadCount = 0;
+                    uint64_t deadBytes = 0;
                     do {
-                        gc->WaitForGCInManaged(GCTask(mixed_cause));
+                        gc->WaitForGCInManaged(GCTask(mixedCause));
                         if (NeedToCheckYoungFreedCount()) {
-                            ASSERT_EQ(*loc.young_freed_objects_count, ry.allocated_count);
+                            ASSERT_EQ(*loc.youngFreedObjectsCount, ry.allocatedCount);
                         }
-                        ASSERT_EQ(*loc.young_freed_objects_size, ry.allocated_bytes);
-                        ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                        ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                        dead_count += *loc.tenured_freed_objects_count;
-                        dead_bytes += *loc.tenured_freed_objects_size;
-                        ry.allocated_count = 0;
-                        ry.allocated_bytes = 0;
-                    } while (*loc.tenured_freed_objects_count != 0);
+                        ASSERT_EQ(*loc.youngFreedObjectsSize, ry.allocatedBytes);
+                        ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                        ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                        deadCount += *loc.tenuredFreedObjectsCount;
+                        deadBytes += *loc.tenuredFreedObjectsSize;
+                        ry.allocatedCount = 0;
+                        ry.allocatedBytes = 0;
+                    } while (*loc.tenuredFreedObjectsCount != 0);
                     gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                    ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                    ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                    ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                    ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                    dead_count += *loc.tenured_freed_objects_count;
-                    dead_bytes += *loc.tenured_freed_objects_size;
-                    ASSERT_EQ(dead_count, t_count);
-                    ASSERT_EQ(dead_bytes, t_bytes);
+                    ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                    ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                    ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                    ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                    deadCount += *loc.tenuredFreedObjectsCount;
+                    deadBytes += *loc.tenuredFreedObjectsSize;
+                    ASSERT_EQ(deadCount, tCount);
+                    ASSERT_EQ(deadBytes, tBytes);
                 }
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(*loc.young_freed_objects_count, 0);
-                ASSERT_EQ(*loc.young_freed_objects_size, 0);
-                ASSERT_EQ(*loc.young_moved_objects_count, 0);
-                ASSERT_EQ(*loc.young_moved_objects_size, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_count, 0);
-                ASSERT_EQ(*loc.tenured_freed_objects_size, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
+                ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsCount, 0);
+                ASSERT_EQ(*loc.tenuredFreedObjectsSize, 0);
             }
 
             ResetRuntime();

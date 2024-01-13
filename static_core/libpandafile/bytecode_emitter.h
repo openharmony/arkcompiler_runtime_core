@@ -79,8 +79,8 @@ public:
 
     Label CreateLabel()
     {
-        pc_list_.push_front(0);
-        return Label(pc_list_.begin());
+        pcList_.push_front(0);
+        return Label(pcList_.begin());
     }
 
     /// Bind the label with the current place in the final bytecode.
@@ -96,11 +96,11 @@ public:
 
 private:
     ErrorCode ReserveSpaceForOffsets();
-    ErrorCode DoReserveSpaceForOffset(const BytecodeInstruction &insn, uint32_t insn_pc, BitImmSize expected_imm_size,
-                                      size_t *extra_bytes_ptr, uint32_t *target_ptr);
+    ErrorCode DoReserveSpaceForOffset(const BytecodeInstruction &insn, uint32_t insnPc, BitImmSize expectedImmSize,
+                                      size_t *extraBytesPtr, uint32_t *targetPtr);
     ErrorCode UpdateBranches();
     void UpdateLabelTargets(uint32_t pc, size_t bias);
-    int32_t EstimateMaxDistance(uint32_t insn_pc, uint32_t target_pc, uint32_t bias) const;
+    int32_t EstimateMaxDistance(uint32_t insnPc, uint32_t targetPc, uint32_t bias) const;
     ErrorCode CheckLabels();
 
     static size_t GetSizeByOpcode(BytecodeInstruction::Opcode opcode);
@@ -122,7 +122,7 @@ private:
     uint32_t pc_ {0};
     std::map<uint32_t, Label> branches_;
     std::multiset<Label, LabelCmp> targets_;
-    std::list<uint32_t> pc_list_;
+    std::list<uint32_t> pcList_;
     std::vector<uint8_t> bytecode_;
 };
 }  // namespace panda

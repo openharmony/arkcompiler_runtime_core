@@ -54,12 +54,12 @@ class SpillFillsResolver : public GraphVisitor {
 
     struct MoveInfo {
         LocationIndex src;
-        DataType::Type reg_type;
+        DataType::Type regType;
     };
 
 public:
     explicit SpillFillsResolver(Graph *graph);
-    SpillFillsResolver(Graph *graph, Register resolver, size_t regs_count, size_t vregs_count = 0);
+    SpillFillsResolver(Graph *graph, Register resolver, size_t regsCount, size_t vregsCount = 0);
     NO_COPY_SEMANTIC(SpillFillsResolver);
     NO_MOVE_SEMANTIC(SpillFillsResolver);
     ~SpillFillsResolver() override = default;
@@ -68,9 +68,9 @@ public:
 
     void Run();
 
-    void Resolve(SpillFillInst *spill_fill_inst);
+    void Resolve(SpillFillInst *spillFillInst);
 
-    void ResolveIfRequired(SpillFillInst *spill_fill_inst);
+    void ResolveIfRequired(SpillFillInst *spillFillInst);
 
     Graph *GetGraph() const;
 
@@ -78,13 +78,13 @@ protected:
     static void VisitSpillFill(GraphVisitor *v, Inst *inst);
 
 private:
-    bool NeedToResolve(const ArenaVector<SpillFillData> &spill_fills);
-    void ResolveCallSpillFill(SpillFillInst *spill_fill_inst);
-    void CollectSpillFillsData(SpillFillInst *spill_fill_inst);
-    void Reorder(SpillFillInst *spill_fill_inst);
-    LocationIndex CheckAndResolveCyclicDependency(LocationIndex dst_first);
+    bool NeedToResolve(const ArenaVector<SpillFillData> &spillFills);
+    void ResolveCallSpillFill(SpillFillInst *spillFillInst);
+    void CollectSpillFillsData(SpillFillInst *spillFillInst);
+    void Reorder(SpillFillInst *spillFillInst);
+    LocationIndex CheckAndResolveCyclicDependency(LocationIndex dstFirst);
     template <bool CICLYC>
-    void AddMovesChain(LocationIndex dst, ArenaVector<LocationIndex> *remap, SpillFillInst *spill_fill_inst);
+    void AddMovesChain(LocationIndex dst, ArenaVector<LocationIndex> *remap, SpillFillInst *spillFillInst);
     LocationIndex GetResolver(DataType::Type type);
 
     // Get table index by Location type
@@ -94,26 +94,26 @@ private:
             return location.GetValue();
         }
         if (location.IsFpRegister()) {
-            return location.GetValue() + vregs_table_offset_;
+            return location.GetValue() + vregsTableOffset_;
         }
         if (location.IsStack()) {
-            return location.GetValue() + slots_table_offset_;
+            return location.GetValue() + slotsTableOffset_;
         }
         ASSERT(location.IsStackParameter());
-        return location.GetValue() + parameter_slots_offset_;
+        return location.GetValue() + parameterSlotsOffset_;
     }
 
     // Fetch location type and element number inside this location from table index
     Location ToLocation(LocationIndex reg)
     {
-        if (reg >= parameter_slots_offset_) {
-            return Location::MakeStackParameter(reg - parameter_slots_offset_);
+        if (reg >= parameterSlotsOffset_) {
+            return Location::MakeStackParameter(reg - parameterSlotsOffset_);
         }
-        if (reg >= slots_table_offset_) {
-            return Location::MakeStackSlot(reg - slots_table_offset_);
+        if (reg >= slotsTableOffset_) {
+            return Location::MakeStackSlot(reg - slotsTableOffset_);
         }
-        if (reg >= vregs_table_offset_) {
-            return Location::MakeFpRegister(reg - vregs_table_offset_);
+        if (reg >= vregsTableOffset_) {
+            return Location::MakeFpRegister(reg - vregsTableOffset_);
         }
         return Location::MakeRegister(reg);
     }
@@ -125,20 +125,20 @@ private:
 
 private:
     Graph *graph_ {nullptr};
-    ArenaVector<MoveInfo> moves_table_;
-    ArenaVector<uint8_t> loads_count_;
+    ArenaVector<MoveInfo> movesTable_;
+    ArenaVector<uint8_t> loadsCount_;
     // Group of moves which can be safely inserted before all others
-    ArenaVector<SpillFillData> pre_moves_;
+    ArenaVector<SpillFillData> preMoves_;
     // Group of moves which can be safely inserted after all others
-    ArenaVector<SpillFillData> post_moves_;
+    ArenaVector<SpillFillData> postMoves_;
     Register resolver_;
 
-    const size_t vregs_table_offset_;
-    const size_t slots_table_offset_;
-    const size_t parameter_slots_offset_;
-    const size_t locations_count_;
-    ArenaVector<bool> reg_write_;
-    ArenaVector<bool> stack_write_;
+    const size_t vregsTableOffset_;
+    const size_t slotsTableOffset_;
+    const size_t parameterSlotsOffset_;
+    const size_t locationsCount_;
+    ArenaVector<bool> regWrite_;
+    ArenaVector<bool> stackWrite_;
 
 #include "optimizer/ir/visitor.inc"
 };

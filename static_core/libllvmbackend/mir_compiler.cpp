@@ -34,28 +34,28 @@ void InsertingPassManager::add(llvm::Pass *p)
 
 llvm::Expected<std::unique_ptr<CreatedObjectFile>> MIRCompiler::CompileModule(llvm::Module &module)
 {
-    llvm::SmallVector<char, 0> raw_buffer;
+    llvm::SmallVector<char, 0> rawBuffer;
     {
-        llvm::raw_svector_ostream raw_stream(raw_buffer);
+        llvm::raw_svector_ostream rawStream(rawBuffer);
 
         InsertingPassManager manager;
 
-        if (insert_passes_) {
-            insert_passes_(&manager);
+        if (insertPasses_) {
+            insertPasses_(&manager);
         }
         // Some passes from addPassesToEmitMC require TargetTransformInfo
-        manager.add(llvm::createTargetTransformInfoWrapperPass(target_machine_->getTargetIRAnalysis()));
-        if (target_machine_->addPassesToEmitFile(manager, raw_stream, nullptr, llvm::CGFT_ObjectFile)) {
+        manager.add(llvm::createTargetTransformInfoWrapperPass(targetMachine_->getTargetIRAnalysis()));
+        if (targetMachine_->addPassesToEmitFile(manager, rawStream, nullptr, llvm::CGFT_ObjectFile)) {
             return llvm::make_error<llvm::StringError>("Target does not support MC emission",
                                                        llvm::inconvertibleErrorCode());
         }
         manager.run(module);
     }
 
-    auto mem_buffer = std::make_unique<llvm::SmallVectorMemoryBuffer>(std::move(raw_buffer),
-                                                                      module.getModuleIdentifier() + "-object-buffer");
+    auto memBuffer = std::make_unique<llvm::SmallVectorMemoryBuffer>(std::move(rawBuffer),
+                                                                     module.getModuleIdentifier() + "-object-buffer");
 
-    return CreatedObjectFile::CopyOf(mem_buffer->getMemBufferRef(), object_file_post_processor_);
+    return CreatedObjectFile::CopyOf(memBuffer->getMemBufferRef(), objectFilePostProcessor_);
 }
 
 }  // namespace panda::llvmbackend

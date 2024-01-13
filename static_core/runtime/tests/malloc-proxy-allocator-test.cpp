@@ -17,6 +17,7 @@
 
 #include <array>
 
+#include "libpandabase/utils/utils.h"
 #include "runtime/mem/malloc-proxy-allocator-inl.h"
 #include "runtime/tests/allocator_test_base.h"
 
@@ -56,12 +57,11 @@ protected:
 TEST_F(MallocProxyAllocatorTest, SimpleTest)
 {
     static constexpr size_t SIZE = 23;
-    auto *mem_stats = new mem::MemStatsType();
-    MallocProxyNonObjectAllocator allocator(mem_stats);
-    void *a1;
-    a1 = allocator.Alloc(SIZE);
+    auto *memStats = new mem::MemStatsType();
+    MallocProxyNonObjectAllocator allocator(memStats);
+    void *a1 = allocator.Alloc(SIZE);
     allocator.Free(a1);
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(MallocProxyAllocatorTest, AlignedAllocFreeTest)
@@ -72,15 +72,17 @@ TEST_F(MallocProxyAllocatorTest, AlignedAllocFreeTest)
 TEST_F(MallocProxyAllocatorTest, AllocFreeTest)
 {
     static constexpr size_t POOLS_COUNT = 1;
-    AllocateFreeDifferentSizesTest<1, 4 * SIZE_ALLOC>(4 * SIZE_ALLOC, POOLS_COUNT);
+    AllocateFreeDifferentSizesTest<1, 4U * SIZE_ALLOC>(4U * SIZE_ALLOC, POOLS_COUNT);
 }
 
 TEST_F(MallocProxyAllocatorTest, AdapterTest)
 {
-    auto *mem_stats = new mem::MemStatsType();
-    MallocProxyNonObjectAllocator allocator(mem_stats);
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    std::array<int, 20> arr {{12, 14, 3, 5, 43, 12, 22, 42, 89, 10, 89, 32, 43, 12, 43, 12, 54, 89, 27, 84}};
+    auto *memStats = new mem::MemStatsType();
+    MallocProxyNonObjectAllocator allocator(memStats);
+    // NOLINTBEGIN(readability-magic-numbers)
+    std::array<int, 20U> arr {{12_I, 14_I, 3_I,  5_I,  43_I, 12_I, 22_I, 42_I, 89_I, 10_I,
+                               89_I, 32_I, 43_I, 12_I, 43_I, 12_I, 54_I, 89_I, 27_I, 84_I}};
+    // NOLINTEND(readability-magic-numbers)
 
     std::vector<void *> v;
     for (auto i : arr) {
@@ -90,7 +92,7 @@ TEST_F(MallocProxyAllocatorTest, AdapterTest)
     for (auto *mem : v) {
         allocator.Free(mem);
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 }  // namespace panda::mem

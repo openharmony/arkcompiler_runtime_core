@@ -25,30 +25,30 @@ class PtLocation {
 public:
     using EntityId = panda_file::File::EntityId;
 
-    explicit PtLocation(const char *panda_file, EntityId method_id, uint32_t bytecode_offset)
-        : panda_file_(panda_file), method_id_(method_id), bytecode_offset_(bytecode_offset)
+    explicit PtLocation(const char *pandaFile, EntityId methodId, uint32_t bytecodeOffset)
+        : pandaFile_(pandaFile), methodId_(methodId), bytecodeOffset_(bytecodeOffset)
     {
     }
 
     const char *GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     EntityId GetMethodId() const
     {
-        return method_id_;
+        return methodId_;
     }
 
     uint32_t GetBytecodeOffset() const
     {
-        return bytecode_offset_;
+        return bytecodeOffset_;
     }
 
     bool operator==(const PtLocation &location) const
     {
-        return method_id_ == location.method_id_ && bytecode_offset_ == location.bytecode_offset_ &&
-               ::strcmp(panda_file_, location.panda_file_) == 0;
+        return methodId_ == location.methodId_ && bytecodeOffset_ == location.bytecodeOffset_ &&
+               ::strcmp(pandaFile_, location.pandaFile_) == 0;
     }
 
     ~PtLocation() = default;
@@ -57,9 +57,9 @@ public:
     DEFAULT_MOVE_SEMANTIC(PtLocation);
 
 private:
-    const char *panda_file_;
-    EntityId method_id_;
-    uint32_t bytecode_offset_ {0};
+    const char *pandaFile_;
+    EntityId methodId_;
+    uint32_t bytecodeOffset_ {0};
 };
 }  // namespace panda::tooling
 

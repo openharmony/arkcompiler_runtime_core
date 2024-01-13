@@ -18,14 +18,14 @@
 namespace panda {
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-StackWalkerBase::StackWalkerBase(void *fp, bool is_frame_compiled)
+StackWalkerBase::StackWalkerBase(void *fp, bool isFrameCompiled)
 {
-    frame_ = GetTopFrameFromFp(fp, is_frame_compiled);
+    frame_ = GetTopFrameFromFp(fp, isFrameCompiled);
 }
 
-StackWalkerBase::FrameVariant StackWalkerBase::GetTopFrameFromFp(void *ptr, bool is_frame_compiled)
+StackWalkerBase::FrameVariant StackWalkerBase::GetTopFrameFromFp(void *ptr, bool isFrameCompiled)
 {
-    if (is_frame_compiled) {
+    if (isFrameCompiled) {
         if (IsBoundaryFrame<FrameKind::INTERPRETER>(ptr)) {
             auto bp = GetPrevFromBoundary<FrameKind::INTERPRETER>(ptr);
             if (GetBoundaryFrameMethod<FrameKind::COMPILER>(bp) == BYPASS) {
@@ -67,21 +67,21 @@ void StackWalkerBase::NextFromCFrame()
         frame_ = nullptr;
         return;
     }
-    auto frame_method = GetBoundaryFrameMethod<FrameKind::COMPILER>(prev);
-    switch (frame_method) {
+    auto frameMethod = GetBoundaryFrameMethod<FrameKind::COMPILER>(prev);
+    switch (frameMethod) {
         case FrameBridgeKind::INTERPRETER_TO_COMPILED_CODE: {
-            auto prev_frame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
-            if (prev_frame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prev_frame)) {
-                frame_ = CreateCFrameForC2IBridge(prev_frame);
+            auto prevFrame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
+            if (prevFrame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prevFrame)) {
+                frame_ = CreateCFrameForC2IBridge(prevFrame);
                 break;
             }
-            frame_ = reinterpret_cast<Frame *>(prev_frame);
+            frame_ = reinterpret_cast<Frame *>(prevFrame);
             break;
         }
         case FrameBridgeKind::BYPASS: {
-            auto prev_frame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
-            if (prev_frame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prev_frame)) {
-                frame_ = CreateCFrameForC2IBridge(prev_frame);
+            auto prevFrame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
+            if (prevFrame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prevFrame)) {
+                frame_ = CreateCFrameForC2IBridge(prevFrame);
                 break;
             }
             frame_ = CreateCFrame(reinterpret_cast<SlotType *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev)));

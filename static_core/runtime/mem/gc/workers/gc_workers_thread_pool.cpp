@@ -23,46 +23,46 @@ namespace panda::mem {
 
 bool GCWorkersProcessor::Init()
 {
-    return gc_threads_pools_->GetGC()->InitWorker(&worker_data_);
+    return gcThreadsPools_->GetGC()->InitWorker(&workerData_);
 }
 
 bool GCWorkersProcessor::Destroy()
 {
-    gc_threads_pools_->GetGC()->DestroyWorker(worker_data_);
+    gcThreadsPools_->GetGC()->DestroyWorker(workerData_);
     return true;
 }
 
 bool GCWorkersProcessor::Process(GCWorkersTask &&task)
 {
-    gc_threads_pools_->RunGCWorkersTask(&task, worker_data_);
+    gcThreadsPools_->RunGCWorkersTask(&task, workerData_);
     return true;
 }
 
-GCWorkersThreadPool::GCWorkersThreadPool(GC *gc, size_t threads_count)
-    : GCWorkersTaskPool(gc), internal_allocator_(gc->GetInternalAllocator()), threads_count_(threads_count)
+GCWorkersThreadPool::GCWorkersThreadPool(GC *gc, size_t threadsCount)
+    : GCWorkersTaskPool(gc), internalAllocator_(gc->GetInternalAllocator()), threadsCount_(threadsCount)
 {
     ASSERT(gc->GetPandaVm() != nullptr);
-    queue_ = internal_allocator_->New<GCWorkersQueueSimple>(internal_allocator_, QUEUE_SIZE_MAX_SIZE);
-    worker_iface_ = internal_allocator_->New<GCWorkersCreationInterface>(gc->GetPandaVm());
-    thread_pool_ = internal_allocator_->New<ThreadPool<GCWorkersTask, GCWorkersProcessor, GCWorkersThreadPool *>>(
-        internal_allocator_, queue_, this, threads_count, "GC_WORKER",
-        static_cast<WorkerCreationInterface *>(worker_iface_));
+    queue_ = internalAllocator_->New<GCWorkersQueueSimple>(internalAllocator_, QUEUE_SIZE_MAX_SIZE);
+    workerIface_ = internalAllocator_->New<GCWorkersCreationInterface>(gc->GetPandaVm());
+    threadPool_ = internalAllocator_->New<ThreadPool<GCWorkersTask, GCWorkersProcessor, GCWorkersThreadPool *>>(
+        internalAllocator_, queue_, this, threadsCount, "GC_WORKER",
+        static_cast<WorkerCreationInterface *>(workerIface_));
 }
 
 bool GCWorkersThreadPool::TryAddTask(GCWorkersTask &&task)
 {
-    return thread_pool_->TryPutTask(std::forward<GCWorkersTask &&>(task));
+    return threadPool_->TryPutTask(std::forward<GCWorkersTask &&>(task));
 }
 
-static void SetAffinity(GCWorkersProcessor *proc, size_t gc_threads_count)
+static void SetAffinity(GCWorkersProcessor *proc, size_t gcThreadsCount)
 {
     // For first GC, GC-workers can be not started
     if (UNLIKELY(!proc->IsStarted())) {
         return;
     }
-    const auto &best_and_middle = os::CpuAffinityManager::GetBestAndMiddleCpuSet();
-    if (gc_threads_count < best_and_middle.Count()) {
-        os::CpuAffinityManager::SetAffinityForThread(proc->GetTid(), best_and_middle);
+    const auto &bestAndMiddle = os::CpuAffinityManager::GetBestAndMiddleCpuSet();
+    if (gcThreadsCount < bestAndMiddle.Count()) {
+        os::CpuAffinityManager::SetAffinityForThread(proc->GetTid(), bestAndMiddle);
     }
 }
 
@@ -74,25 +74,25 @@ static void UnsetAffinity(GCWorkersProcessor *proc, [[maybe_unused]] size_t data
 void GCWorkersThreadPool::SetAffinityForGCWorkers()
 {
     // Total GC threads count = GC Thread + GC workers
-    thread_pool_->EnumerateProcs(SetAffinity, threads_count_ + 1U);
+    threadPool_->EnumerateProcs(SetAffinity, threadsCount_ + 1U);
 }
 
 void GCWorkersThreadPool::UnsetAffinityForGCWorkers()
 {
-    thread_pool_->EnumerateProcs(UnsetAffinity, 0U);
+    threadPool_->EnumerateProcs(UnsetAffinity, 0U);
 }
 
 GCWorkersThreadPool::~GCWorkersThreadPool()
 {
-    internal_allocator_->Delete(thread_pool_);
-    internal_allocator_->Delete(worker_iface_);
+    internalAllocator_->Delete(threadPool_);
+    internalAllocator_->Delete(workerIface_);
     queue_->Finalize();
-    internal_allocator_->Delete(queue_);
+    internalAllocator_->Delete(queue_);
 }
 
 void GCWorkersThreadPool::RunInCurrentThread()
 {
-    thread_pool_->Help();
+    threadPool_->Help();
 }
 
 }  // namespace panda::mem

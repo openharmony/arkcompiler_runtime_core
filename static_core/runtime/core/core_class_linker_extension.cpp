@@ -57,38 +57,38 @@ void CoreClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, c
     }
 }
 
-bool CoreClassLinkerExtension::InitializeImpl(bool compressed_string_enabled)
+bool CoreClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(GetLanguage());
 
-    auto *class_class = CreateClass(ctx.GetClassClassDescriptor(), GetClassVTableSize(ClassRoot::CLASS),
-                                    GetClassIMTSize(ClassRoot::CLASS), GetClassSize(ClassRoot::CLASS));
-    coretypes::Class::FromRuntimeClass(class_class)->SetClass(class_class);
-    class_class->SetState(Class::State::LOADED);
-    class_class->SetLoadContext(GetBootContext());
-    GetClassLinker()->AddClassRoot(ClassRoot::CLASS, class_class);
+    auto *classClass = CreateClass(ctx.GetClassClassDescriptor(), GetClassVTableSize(ClassRoot::CLASS),
+                                   GetClassIMTSize(ClassRoot::CLASS), GetClassSize(ClassRoot::CLASS));
+    coretypes::Class::FromRuntimeClass(classClass)->SetClass(classClass);
+    classClass->SetState(Class::State::LOADED);
+    classClass->SetLoadContext(GetBootContext());
+    GetClassLinker()->AddClassRoot(ClassRoot::CLASS, classClass);
 
-    auto *obj_class = GetClassLinker()->GetClass(ctx.GetObjectClassDescriptor(), false, GetBootContext());
-    if (obj_class == nullptr) {  // Happens when we work without pandastdlib
-        obj_class = CreateClass(ctx.GetObjectClassDescriptor(), GetClassVTableSize(ClassRoot::OBJECT),
-                                GetClassIMTSize(ClassRoot::OBJECT), GetClassSize(ClassRoot::OBJECT));
-        obj_class->SetObjectSize(ObjectHeader::ObjectHeaderSize());
-        obj_class->SetState(Class::State::LOADED);
-        obj_class->SetLoadContext(GetBootContext());
-        GetClassLinker()->AddClassRoot(ClassRoot::OBJECT, obj_class);
+    auto *objClass = GetClassLinker()->GetClass(ctx.GetObjectClassDescriptor(), false, GetBootContext());
+    if (objClass == nullptr) {  // Happens when we work without pandastdlib
+        objClass = CreateClass(ctx.GetObjectClassDescriptor(), GetClassVTableSize(ClassRoot::OBJECT),
+                               GetClassIMTSize(ClassRoot::OBJECT), GetClassSize(ClassRoot::OBJECT));
+        objClass->SetObjectSize(ObjectHeader::ObjectHeaderSize());
+        objClass->SetState(Class::State::LOADED);
+        objClass->SetLoadContext(GetBootContext());
+        GetClassLinker()->AddClassRoot(ClassRoot::OBJECT, objClass);
     } else {
-        SetClassRoot(ClassRoot::OBJECT, obj_class);
+        SetClassRoot(ClassRoot::OBJECT, objClass);
     }
-    class_class->SetBase(obj_class);
+    classClass->SetBase(objClass);
 
-    auto *string_class = CreateClass(ctx.GetStringClassDescriptor(), GetClassVTableSize(ClassRoot::STRING),
-                                     GetClassIMTSize(ClassRoot::STRING), GetClassSize(ClassRoot::STRING));
-    string_class->SetBase(obj_class);
-    string_class->SetStringClass();
-    coretypes::String::SetCompressedStringsEnabled(compressed_string_enabled);
-    string_class->SetState(Class::State::LOADED);
-    string_class->SetLoadContext(GetBootContext());
-    GetClassLinker()->AddClassRoot(ClassRoot::STRING, string_class);
+    auto *stringClass = CreateClass(ctx.GetStringClassDescriptor(), GetClassVTableSize(ClassRoot::STRING),
+                                    GetClassIMTSize(ClassRoot::STRING), GetClassSize(ClassRoot::STRING));
+    stringClass->SetBase(objClass);
+    stringClass->SetStringClass();
+    coretypes::String::SetCompressedStringsEnabled(compressedStringEnabled);
+    stringClass->SetState(Class::State::LOADED);
+    stringClass->SetLoadContext(GetBootContext());
+    GetClassLinker()->AddClassRoot(ClassRoot::STRING, stringClass);
 
     InitializeArrayClassRoot(ClassRoot::ARRAY_CLASS, ClassRoot::CLASS,
                              utf::Mutf8AsCString(ctx.GetClassArrayClassDescriptor()));
@@ -124,27 +124,27 @@ bool CoreClassLinkerExtension::InitializeImpl(bool compressed_string_enabled)
     return true;
 }
 
-bool CoreClassLinkerExtension::InitializeArrayClass(Class *array_class, Class *component_class)
+bool CoreClassLinkerExtension::InitializeArrayClass(Class *arrayClass, Class *componentClass)
 {
     ASSERT(IsInitialized());
 
-    auto *object_class = GetClassRoot(ClassRoot::OBJECT);
-    array_class->SetBase(object_class);
-    array_class->SetComponentType(component_class);
-    uint32_t access_flags = component_class->GetAccessFlags() & ACC_FILE_MASK;
-    access_flags &= ~ACC_INTERFACE;
-    access_flags |= ACC_FINAL | ACC_ABSTRACT;
-    array_class->SetAccessFlags(access_flags);
-    array_class->SetState(Class::State::INITIALIZED);
+    auto *objectClass = GetClassRoot(ClassRoot::OBJECT);
+    arrayClass->SetBase(objectClass);
+    arrayClass->SetComponentType(componentClass);
+    uint32_t accessFlags = componentClass->GetAccessFlags() & ACC_FILE_MASK;
+    accessFlags &= ~ACC_INTERFACE;
+    accessFlags |= ACC_FINAL | ACC_ABSTRACT;
+    arrayClass->SetAccessFlags(accessFlags);
+    arrayClass->SetState(Class::State::INITIALIZED);
     return true;
 }
 
-void CoreClassLinkerExtension::InitializePrimitiveClass(Class *primitive_class)
+void CoreClassLinkerExtension::InitializePrimitiveClass(Class *primitiveClass)
 {
     ASSERT(IsInitialized());
 
-    primitive_class->SetAccessFlags(ACC_PUBLIC | ACC_FINAL | ACC_ABSTRACT);
-    primitive_class->SetState(Class::State::INITIALIZED);
+    primitiveClass->SetAccessFlags(ACC_PUBLIC | ACC_FINAL | ACC_ABSTRACT);
+    primitiveClass->SetState(Class::State::INITIALIZED);
 }
 
 size_t CoreClassLinkerExtension::GetClassVTableSize(ClassRoot root)
@@ -303,28 +303,27 @@ size_t CoreClassLinkerExtension::GetArrayClassSize()
     return GetClassSize(ClassRoot::OBJECT);
 }
 
-Class *CoreClassLinkerExtension::CreateClass(const uint8_t *descriptor, size_t vtable_size, size_t imt_size,
-                                             size_t size)
+Class *CoreClassLinkerExtension::CreateClass(const uint8_t *descriptor, size_t vtableSize, size_t imtSize, size_t size)
 {
     ASSERT(IsInitialized());
 
     auto vm = Thread::GetCurrent()->GetVM();
-    auto *heap_manager = vm->GetHeapManager();
+    auto *heapManager = vm->GetHeapManager();
 
-    auto *class_root = GetClassRoot(ClassRoot::CLASS);
-    ObjectHeader *object_header;
-    if (class_root == nullptr) {
-        object_header = heap_manager->AllocateNonMovableObject<true>(class_root, coretypes::Class::GetSize(size));
+    auto *classRoot = GetClassRoot(ClassRoot::CLASS);
+    ObjectHeader *objectHeader;
+    if (classRoot == nullptr) {
+        objectHeader = heapManager->AllocateNonMovableObject<true>(classRoot, coretypes::Class::GetSize(size));
     } else {
-        object_header = heap_manager->AllocateNonMovableObject<false>(class_root, coretypes::Class::GetSize(size));
+        objectHeader = heapManager->AllocateNonMovableObject<false>(classRoot, coretypes::Class::GetSize(size));
     }
 
-    if (UNLIKELY(object_header == nullptr)) {
+    if (UNLIKELY(objectHeader == nullptr)) {
         return nullptr;
     }
 
-    auto *res = reinterpret_cast<coretypes::Class *>(object_header);
-    res->InitClass(descriptor, vtable_size, imt_size, size);
+    auto *res = reinterpret_cast<coretypes::Class *>(objectHeader);
+    res->InitClass(descriptor, vtableSize, imtSize, size);
     auto *klass = res->GetRuntimeClass();
     klass->SetManagedObject(res);
     AddCreatedClass(klass);

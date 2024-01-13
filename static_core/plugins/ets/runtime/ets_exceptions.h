@@ -23,16 +23,16 @@ namespace panda::ets {
 
 class EtsCoroutine;
 
-PANDA_PUBLIC_API void ThrowEtsException(EtsCoroutine *coroutine, const char *class_descriptor, const char *msg);
+PANDA_PUBLIC_API void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg);
 
-inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view class_descriptor, const char *msg)
+inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view classDescriptor, const char *msg)
 {
-    ThrowEtsException(coroutine, class_descriptor.data(), msg);
+    ThrowEtsException(coroutine, classDescriptor.data(), msg);
 }
 
-inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view class_descriptor, std::string_view msg)
+inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view classDescriptor, std::string_view msg)
 {
-    ThrowEtsException(coroutine, class_descriptor.data(), msg.data());
+    ThrowEtsException(coroutine, classDescriptor.data(), msg.data());
 }
 
 }  // namespace panda::ets

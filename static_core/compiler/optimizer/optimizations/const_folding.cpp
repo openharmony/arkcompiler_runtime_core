@@ -24,9 +24,9 @@
 
 namespace panda::compiler {
 template <class T>
-uint64_t ConvertIntToInt(T value, DataType::Type target_type)
+uint64_t ConvertIntToInt(T value, DataType::Type targetType)
 {
-    switch (target_type) {
+    switch (targetType) {
         case DataType::BOOL:
             return static_cast<uint64_t>(static_cast<bool>(value));
         case DataType::UINT8:
@@ -51,9 +51,9 @@ uint64_t ConvertIntToInt(T value, DataType::Type target_type)
 }
 
 template <class T>
-T ConvertIntToFloat(uint64_t value, DataType::Type source_type)
+T ConvertIntToFloat(uint64_t value, DataType::Type sourceType)
 {
-    switch (source_type) {
+    switch (sourceType) {
         case DataType::BOOL:
             return static_cast<T>(static_cast<bool>(value));
         case DataType::UINT8:
@@ -84,11 +84,11 @@ To ConvertFloatToInt(From value)
 
     constexpr To MIN_INT = std::numeric_limits<To>::min();
     constexpr To MAX_INT = std::numeric_limits<To>::max();
-    const auto float_min_int = static_cast<From>(MIN_INT);
-    const auto float_max_int = static_cast<From>(MAX_INT);
+    const auto floatMinInt = static_cast<From>(MIN_INT);
+    const auto floatMaxInt = static_cast<From>(MAX_INT);
 
-    if (value > float_min_int) {
-        if (value < float_max_int) {
+    if (value > floatMinInt) {
+        if (value < floatMaxInt) {
             res = static_cast<To>(value);
         } else {
             res = MAX_INT;
@@ -103,10 +103,10 @@ To ConvertFloatToInt(From value)
 }
 
 template <class From>
-uint64_t ConvertFloatToInt(From value, DataType::Type target_type)
+uint64_t ConvertFloatToInt(From value, DataType::Type targetType)
 {
-    ASSERT(DataType::GetCommonType(target_type) == DataType::INT64);
-    switch (target_type) {
+    ASSERT(DataType::GetCommonType(targetType) == DataType::INT64);
+    switch (targetType) {
         case DataType::BOOL:
             return static_cast<uint64_t>(ConvertFloatToInt<bool>(value));
         case DataType::UINT8:
@@ -136,20 +136,20 @@ uint64_t ConvertFloatToIntDyn(From value, RuntimeInterface *runtime, size_t bits
     return runtime->DynamicCastDoubleToInt(static_cast<double>(value), bits);
 }
 
-ConstantInst *ConstFoldingCreateIntConst(Inst *inst, uint64_t value, bool is_literal_data)
+ConstantInst *ConstFoldingCreateIntConst(Inst *inst, uint64_t value, bool isLiteralData)
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
-    if (graph->IsBytecodeOptimizer() && IsInt32Bit(inst->GetType()) && !is_literal_data) {
+    if (graph->IsBytecodeOptimizer() && IsInt32Bit(inst->GetType()) && !isLiteralData) {
         return graph->FindOrCreateConstant<uint32_t>(value);
     }
     return graph->FindOrCreateConstant(value);
 }
 
 template <typename T>
-ConstantInst *ConstFoldingCreateConst(Inst *inst, ConstantInst *cnst, bool is_literal_data = false)
+ConstantInst *ConstFoldingCreateConst(Inst *inst, ConstantInst *cnst, bool isLiteralData = false)
 {
     return ConstFoldingCreateIntConst(inst, ConvertIntToInt(static_cast<T>(cnst->GetIntValue()), inst->GetType()),
-                                      is_literal_data);
+                                      isLiteralData);
 }
 
 ConstantInst *ConstFoldingCastInt2Int(Inst *inst, ConstantInst *cnst)
@@ -178,68 +178,68 @@ ConstantInst *ConstFoldingCastInt2Int(Inst *inst, ConstantInst *cnst)
     }
 }
 
-ConstantInst *ConstFoldingCastIntConst(Graph *graph, Inst *inst, ConstantInst *cnst, bool is_literal_data = false)
+ConstantInst *ConstFoldingCastIntConst(Graph *graph, Inst *inst, ConstantInst *cnst, bool isLiteralData = false)
 {
-    auto inst_type = DataType::GetCommonType(inst->GetType());
-    if (inst_type == DataType::INT64) {
+    auto instType = DataType::GetCommonType(inst->GetType());
+    if (instType == DataType::INT64) {
         // INT -> INT
         return ConstFoldingCastInt2Int(inst, cnst);
     }
-    if (inst_type == DataType::FLOAT32) {
+    if (instType == DataType::FLOAT32) {
         // INT -> FLOAT
-        if (graph->IsBytecodeOptimizer() && !is_literal_data) {
+        if (graph->IsBytecodeOptimizer() && !isLiteralData) {
             return nullptr;
         }
         return graph->FindOrCreateConstant(ConvertIntToFloat<float>(cnst->GetIntValue(), inst->GetInputType(0)));
     }
-    if (inst_type == DataType::FLOAT64) {
+    if (instType == DataType::FLOAT64) {
         // INT -> DOUBLE
         return graph->FindOrCreateConstant(ConvertIntToFloat<double>(cnst->GetIntValue(), inst->GetInputType(0)));
     }
     return nullptr;
 }
 
-ConstantInst *ConstFoldingCastConst(Inst *inst, Inst *input, bool is_literal_data)
+ConstantInst *ConstFoldingCastConst(Inst *inst, Inst *input, bool isLiteralData)
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
     auto cnst = static_cast<ConstantInst *>(input);
-    auto inst_type = DataType::GetCommonType(inst->GetType());
+    auto instType = DataType::GetCommonType(inst->GetType());
     if (cnst->GetType() == DataType::INT32 || cnst->GetType() == DataType::INT64) {
         return ConstFoldingCastIntConst(graph, inst, cnst);
     }
     if (cnst->GetType() == DataType::FLOAT32) {
-        if (graph->IsBytecodeOptimizer() && !is_literal_data) {
+        if (graph->IsBytecodeOptimizer() && !isLiteralData) {
             return nullptr;
         }
-        if (inst_type == DataType::INT64) {
+        if (instType == DataType::INT64) {
             // FLOAT->INT
             return graph->FindOrCreateConstant(ConvertFloatToInt(cnst->GetFloatValue(), inst->GetType()));
         }
-        if (inst_type == DataType::FLOAT32) {
+        if (instType == DataType::FLOAT32) {
             // FLOAT -> FLOAT
             return cnst;
         }
-        if (inst_type == DataType::FLOAT64) {
+        if (instType == DataType::FLOAT64) {
             // FLOAT -> DOUBLE
             return graph->FindOrCreateConstant(static_cast<double>(cnst->GetFloatValue()));
         }
     } else if (cnst->GetType() == DataType::FLOAT64) {
-        if (inst_type == DataType::INT64) {
+        if (instType == DataType::INT64) {
             // DOUBLE->INT/LONG
             uint64_t val = graph->IsDynamicMethod()
                                ? ConvertFloatToIntDyn(cnst->GetDoubleValue(), graph->GetRuntime(),
                                                       DataType::GetTypeSize(inst->GetType(), graph->GetArch()))
                                : ConvertFloatToInt(cnst->GetDoubleValue(), inst->GetType());
-            return ConstFoldingCreateIntConst(inst, val, is_literal_data);
+            return ConstFoldingCreateIntConst(inst, val, isLiteralData);
         }
-        if (inst_type == DataType::FLOAT32) {
+        if (instType == DataType::FLOAT32) {
             // DOUBLE -> FLOAT
-            if (graph->IsBytecodeOptimizer() && !is_literal_data) {
+            if (graph->IsBytecodeOptimizer() && !isLiteralData) {
                 return nullptr;
             }
             return graph->FindOrCreateConstant(static_cast<float>(cnst->GetDoubleValue()));
         }
-        if (inst_type == DataType::FLOAT64) {
+        if (instType == DataType::FLOAT64) {
             // DOUBLE -> DOUBLE
             return cnst;
         }
@@ -252,9 +252,9 @@ bool ConstFoldingCast(Inst *inst)
     ASSERT(inst->GetOpcode() == Opcode::Cast);
     auto input = inst->GetInput(0).GetInst();
     if (input->IsConst()) {
-        ConstantInst *nw_cnst = ConstFoldingCastConst(inst, input);
-        if (nw_cnst != nullptr) {
-            inst->ReplaceUsers(nw_cnst);
+        ConstantInst *nwCnst = ConstFoldingCastConst(inst, input);
+        if (nwCnst != nullptr) {
+            inst->ReplaceUsers(nwCnst);
             return true;
         }
     }
@@ -268,21 +268,21 @@ bool ConstFoldingNeg(Inst *inst)
     auto graph = inst->GetBasicBlock()->GetGraph();
     if (input.GetInst()->IsConst()) {
         auto cnst = static_cast<ConstantInst *>(input.GetInst());
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64:
-                new_cnst = ConstFoldingCreateIntConst(inst, ConvertIntToInt(-cnst->GetIntValue(), inst->GetType()));
+                newCnst = ConstFoldingCreateIntConst(inst, ConvertIntToInt(-cnst->GetIntValue(), inst->GetType()));
                 break;
             case DataType::FLOAT32:
-                new_cnst = graph->FindOrCreateConstant(-cnst->GetFloatValue());
+                newCnst = graph->FindOrCreateConstant(-cnst->GetFloatValue());
                 break;
             case DataType::FLOAT64:
-                new_cnst = graph->FindOrCreateConstant(-cnst->GetDoubleValue());
+                newCnst = graph->FindOrCreateConstant(-cnst->GetDoubleValue());
                 break;
             default:
                 UNREACHABLE();
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -295,29 +295,29 @@ bool ConstFoldingAbs(Inst *inst)
     auto graph = inst->GetBasicBlock()->GetGraph();
     if (input.GetInst()->IsConst()) {
         auto cnst = static_cast<ConstantInst *>(input.GetInst());
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64: {
                 ASSERT(DataType::IsTypeSigned(inst->GetType()));
                 int64_t value = cnst->GetIntValue();
                 if (value == INT64_MIN) {
-                    new_cnst = cnst;
+                    newCnst = cnst;
                     break;
                 }
                 uint64_t uvalue = (value < 0) ? -value : value;
-                new_cnst = ConstFoldingCreateIntConst(inst, ConvertIntToInt(uvalue, inst->GetType()));
+                newCnst = ConstFoldingCreateIntConst(inst, ConvertIntToInt(uvalue, inst->GetType()));
                 break;
             }
             case DataType::FLOAT32:
-                new_cnst = graph->FindOrCreateConstant(std::abs(cnst->GetFloatValue()));
+                newCnst = graph->FindOrCreateConstant(std::abs(cnst->GetFloatValue()));
                 break;
             case DataType::FLOAT64:
-                new_cnst = graph->FindOrCreateConstant(std::abs(cnst->GetDoubleValue()));
+                newCnst = graph->FindOrCreateConstant(std::abs(cnst->GetDoubleValue()));
                 break;
             default:
                 UNREACHABLE();
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -330,8 +330,8 @@ bool ConstFoldingNot(Inst *inst)
     ASSERT(DataType::GetCommonType(inst->GetType()) == DataType::INT64);
     if (input.GetInst()->IsConst()) {
         auto cnst = static_cast<ConstantInst *>(input.GetInst());
-        auto new_cnst = ConstFoldingCreateIntConst(inst, ConvertIntToInt(~cnst->GetIntValue(), inst->GetType()));
-        inst->ReplaceUsers(new_cnst);
+        auto newCnst = ConstFoldingCreateIntConst(inst, ConvertIntToInt(~cnst->GetIntValue(), inst->GetType()));
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -346,22 +346,22 @@ bool ConstFoldingAdd(Inst *inst)
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
         auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64:
-                new_cnst = ConstFoldingCreateIntConst(
+                newCnst = ConstFoldingCreateIntConst(
                     inst, ConvertIntToInt(cnst0->GetIntValue() + cnst1->GetIntValue(), inst->GetType()));
                 break;
             case DataType::FLOAT32:
-                new_cnst = graph->FindOrCreateConstant(cnst0->GetFloatValue() + cnst1->GetFloatValue());
+                newCnst = graph->FindOrCreateConstant(cnst0->GetFloatValue() + cnst1->GetFloatValue());
                 break;
             case DataType::FLOAT64:
-                new_cnst = graph->FindOrCreateConstant(cnst0->GetDoubleValue() + cnst1->GetDoubleValue());
+                newCnst = graph->FindOrCreateConstant(cnst0->GetDoubleValue() + cnst1->GetDoubleValue());
                 break;
             default:
                 UNREACHABLE();
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -376,28 +376,28 @@ bool ConstFoldingSub(Inst *inst)
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
         auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64:
-                new_cnst = ConstFoldingCreateIntConst(
+                newCnst = ConstFoldingCreateIntConst(
                     inst, ConvertIntToInt(cnst0->GetIntValue() - cnst1->GetIntValue(), inst->GetType()));
                 break;
             case DataType::FLOAT32:
-                new_cnst = graph->FindOrCreateConstant(cnst0->GetFloatValue() - cnst1->GetFloatValue());
+                newCnst = graph->FindOrCreateConstant(cnst0->GetFloatValue() - cnst1->GetFloatValue());
                 break;
             case DataType::FLOAT64:
-                new_cnst = graph->FindOrCreateConstant(cnst0->GetDoubleValue() - cnst1->GetDoubleValue());
+                newCnst = graph->FindOrCreateConstant(cnst0->GetDoubleValue() - cnst1->GetDoubleValue());
                 break;
             default:
                 UNREACHABLE();
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     if (input0.GetInst() == input1.GetInst() && DataType::GetCommonType(inst->GetType()) == DataType::INT64) {
         // for floating point values 'x-x -> 0' optimization is not applicable because of NaN/Infinity values
-        auto new_cnst = ConstFoldingCreateIntConst(inst, 0);
-        inst->ReplaceUsers(new_cnst);
+        auto newCnst = ConstFoldingCreateIntConst(inst, 0);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -409,34 +409,34 @@ bool ConstFoldingMul(Inst *inst)
     auto input0 = inst->GetInput(0);
     auto input1 = inst->GetInput(1);
     auto graph = inst->GetBasicBlock()->GetGraph();
-    ConstantInst *new_cnst = nullptr;
+    ConstantInst *newCnst = nullptr;
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
         auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64:
-                new_cnst = ConstFoldingCreateIntConst(
+                newCnst = ConstFoldingCreateIntConst(
                     inst, ConvertIntToInt(cnst0->GetIntValue() * cnst1->GetIntValue(), inst->GetType()));
                 break;
             case DataType::FLOAT32:
-                new_cnst = graph->FindOrCreateConstant(cnst0->GetFloatValue() * cnst1->GetFloatValue());
+                newCnst = graph->FindOrCreateConstant(cnst0->GetFloatValue() * cnst1->GetFloatValue());
                 break;
             case DataType::FLOAT64:
-                new_cnst = graph->FindOrCreateConstant(cnst0->GetDoubleValue() * cnst1->GetDoubleValue());
+                newCnst = graph->FindOrCreateConstant(cnst0->GetDoubleValue() * cnst1->GetDoubleValue());
                 break;
             default:
                 UNREACHABLE();
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     if (input0.GetInst()->IsConst()) {
-        new_cnst = static_cast<ConstantInst *>(input0.GetInst());
+        newCnst = static_cast<ConstantInst *>(input0.GetInst());
     } else if (input1.GetInst()->IsConst()) {
-        new_cnst = static_cast<ConstantInst *>(input1.GetInst());
+        newCnst = static_cast<ConstantInst *>(input1.GetInst());
     }
-    if (new_cnst != nullptr && new_cnst->IsEqualConst(0, graph->IsBytecodeOptimizer())) {
-        inst->ReplaceUsers(new_cnst);
+    if (newCnst != nullptr && newCnst->IsEqualConst(0, graph->IsBytecodeOptimizer())) {
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -480,24 +480,24 @@ bool ConstFoldingDiv(Inst *inst)
     }
     auto cnst0 = input0->CastToConstant();
     auto cnst1 = input1->CastToConstant();
-    ConstantInst *new_cnst = nullptr;
+    ConstantInst *newCnst = nullptr;
     switch (DataType::GetCommonType(inst->GetType())) {
         case DataType::INT64:
-            new_cnst = ConstFoldingDivInt2Int(inst, graph, cnst0, cnst1);
-            if (new_cnst == nullptr) {
+            newCnst = ConstFoldingDivInt2Int(inst, graph, cnst0, cnst1);
+            if (newCnst == nullptr) {
                 return false;
             }
             break;
         case DataType::FLOAT32:
-            new_cnst = graph->FindOrCreateConstant(cnst0->GetFloatValue() / cnst1->GetFloatValue());
+            newCnst = graph->FindOrCreateConstant(cnst0->GetFloatValue() / cnst1->GetFloatValue());
             break;
         case DataType::FLOAT64:
-            new_cnst = graph->FindOrCreateConstant(cnst0->GetDoubleValue() / cnst1->GetDoubleValue());
+            newCnst = graph->FindOrCreateConstant(cnst0->GetDoubleValue() / cnst1->GetDoubleValue());
             break;
         default:
             UNREACHABLE();
     }
-    inst->ReplaceUsers(new_cnst);
+    inst->ReplaceUsers(newCnst);
     return true;
 }
 
@@ -526,24 +526,24 @@ bool ConstFoldingMin(Inst *inst)
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
         auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64:
-                new_cnst = ConstFoldingMinInt(inst, graph, cnst0, cnst1);
-                ASSERT(new_cnst != nullptr);
+                newCnst = ConstFoldingMinInt(inst, graph, cnst0, cnst1);
+                ASSERT(newCnst != nullptr);
                 break;
             case DataType::FLOAT32:
-                new_cnst = graph->FindOrCreateConstant(
+                newCnst = graph->FindOrCreateConstant(
                     panda::helpers::math::Min(cnst0->GetFloatValue(), cnst1->GetFloatValue()));
                 break;
             case DataType::FLOAT64:
-                new_cnst = graph->FindOrCreateConstant(
+                newCnst = graph->FindOrCreateConstant(
                     panda::helpers::math::Min(cnst0->GetDoubleValue(), cnst1->GetDoubleValue()));
                 break;
             default:
                 UNREACHABLE();
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -574,24 +574,24 @@ bool ConstFoldingMax(Inst *inst)
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
         auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64:
-                new_cnst = ConstFoldingMaxInt(inst, graph, cnst0, cnst1);
-                ASSERT(new_cnst != nullptr);
+                newCnst = ConstFoldingMaxInt(inst, graph, cnst0, cnst1);
+                ASSERT(newCnst != nullptr);
                 break;
             case DataType::FLOAT32:
-                new_cnst = graph->FindOrCreateConstant(
+                newCnst = graph->FindOrCreateConstant(
                     panda::helpers::math::Max(cnst0->GetFloatValue(), cnst1->GetFloatValue()));
                 break;
             case DataType::FLOAT64:
-                new_cnst = graph->FindOrCreateConstant(
+                newCnst = graph->FindOrCreateConstant(
                     panda::helpers::math::Max(cnst0->GetDoubleValue(), cnst1->GetDoubleValue()));
                 break;
             default:
                 UNREACHABLE();
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -633,27 +633,27 @@ bool ConstFoldingMod(Inst *inst)
     if (!input0->IsConst() || !input1->IsConst()) {
         return false;
     }
-    ConstantInst *new_cnst = nullptr;
+    ConstantInst *newCnst = nullptr;
     auto cnst0 = input0->CastToConstant();
     auto cnst1 = input1->CastToConstant();
     if (DataType::GetCommonType(inst->GetType()) == DataType::INT64) {
         if (cnst1->GetIntValue() == 0) {
             return false;
         }
-        new_cnst = ConstFoldingModIntConst(graph, inst, cnst0, cnst1);
+        newCnst = ConstFoldingModIntConst(graph, inst, cnst0, cnst1);
     } else if (inst->GetType() == DataType::FLOAT32) {
         if (cnst1->GetFloatValue() == 0) {
             return false;
         }
-        new_cnst =
+        newCnst =
             graph->FindOrCreateConstant(static_cast<float>(fmodf(cnst0->GetFloatValue(), cnst1->GetFloatValue())));
     } else if (inst->GetType() == DataType::FLOAT64) {
         if (cnst1->GetDoubleValue() == 0) {
             return false;
         }
-        new_cnst = graph->FindOrCreateConstant(fmod(cnst0->GetDoubleValue(), cnst1->GetDoubleValue()));
+        newCnst = graph->FindOrCreateConstant(fmod(cnst0->GetDoubleValue(), cnst1->GetDoubleValue()));
     }
-    inst->ReplaceUsers(new_cnst);
+    inst->ReplaceUsers(newCnst);
     return true;
 }
 
@@ -667,16 +667,16 @@ bool ConstFoldingShl(Inst *inst)
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = input0.GetInst()->CastToConstant()->GetIntValue();
         auto cnst1 = input1.GetInst()->CastToConstant()->GetIntValue();
-        ConstantInst *new_cnst = nullptr;
-        uint64_t size_mask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
+        ConstantInst *newCnst = nullptr;
+        uint64_t sizeMask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
         if (graph->IsBytecodeOptimizer() && IsInt32Bit(inst->GetType())) {
-            new_cnst = graph->FindOrCreateConstant<uint32_t>(ConvertIntToInt(
-                static_cast<uint32_t>(cnst0) << (static_cast<uint32_t>(cnst1) & static_cast<uint32_t>(size_mask)),
+            newCnst = graph->FindOrCreateConstant<uint32_t>(ConvertIntToInt(
+                static_cast<uint32_t>(cnst0) << (static_cast<uint32_t>(cnst1) & static_cast<uint32_t>(sizeMask)),
                 inst->GetType()));
         } else {
-            new_cnst = graph->FindOrCreateConstant(ConvertIntToInt(cnst0 << (cnst1 & size_mask), inst->GetType()));
+            newCnst = graph->FindOrCreateConstant(ConvertIntToInt(cnst0 << (cnst1 & sizeMask), inst->GetType()));
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -692,22 +692,22 @@ bool ConstFoldingShr(Inst *inst)
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = input0.GetInst()->CastToConstant()->GetIntValue();
         auto cnst1 = input1.GetInst()->CastToConstant()->GetIntValue();
-        uint64_t size_mask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
+        uint64_t sizeMask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
         // zerod high part of the constant
-        if (size_mask < DataType::GetTypeSize(DataType::INT32, graph->GetArch())) {
+        if (sizeMask < DataType::GetTypeSize(DataType::INT32, graph->GetArch())) {
             // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-            uint64_t type_mask = (1ULL << (size_mask + 1)) - 1;
-            cnst0 = cnst0 & type_mask;
+            uint64_t typeMask = (1ULL << (sizeMask + 1)) - 1;
+            cnst0 = cnst0 & typeMask;
         }
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         if (graph->IsBytecodeOptimizer() && IsInt32Bit(inst->GetType())) {
-            new_cnst = graph->FindOrCreateConstant<uint32_t>(ConvertIntToInt(
-                static_cast<uint32_t>(cnst0) >> (static_cast<uint32_t>(cnst1) & static_cast<uint32_t>(size_mask)),
+            newCnst = graph->FindOrCreateConstant<uint32_t>(ConvertIntToInt(
+                static_cast<uint32_t>(cnst0) >> (static_cast<uint32_t>(cnst1) & static_cast<uint32_t>(sizeMask)),
                 inst->GetType()));
         } else {
-            new_cnst = graph->FindOrCreateConstant(ConvertIntToInt(cnst0 >> (cnst1 & size_mask), inst->GetType()));
+            newCnst = graph->FindOrCreateConstant(ConvertIntToInt(cnst0 >> (cnst1 & sizeMask), inst->GetType()));
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -723,20 +723,20 @@ bool ConstFoldingAShr(Inst *inst)
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         int64_t cnst0 = input0.GetInst()->CastToConstant()->GetIntValue();
         auto cnst1 = input1.GetInst()->CastToConstant()->GetIntValue();
-        uint64_t size_mask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
-        ConstantInst *new_cnst = nullptr;
+        uint64_t sizeMask = DataType::GetTypeSize(inst->GetType(), graph->GetArch()) - 1;
+        ConstantInst *newCnst = nullptr;
         if (graph->IsBytecodeOptimizer() && IsInt32Bit(inst->GetType())) {
-            new_cnst = graph->FindOrCreateConstant<uint32_t>(
+            newCnst = graph->FindOrCreateConstant<uint32_t>(
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
                 ConvertIntToInt(static_cast<int32_t>(cnst0) >>
-                                    (static_cast<uint32_t>(cnst1) & static_cast<uint32_t>(size_mask)),
+                                    (static_cast<uint32_t>(cnst1) & static_cast<uint32_t>(sizeMask)),
                                 inst->GetType()));
         } else {
-            new_cnst = graph->FindOrCreateConstant(
+            newCnst = graph->FindOrCreateConstant(
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                ConvertIntToInt(cnst0 >> (cnst1 & size_mask), inst->GetType()));
+                ConvertIntToInt(cnst0 >> (cnst1 & sizeMask), inst->GetType()));
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -747,23 +747,23 @@ bool ConstFoldingAnd(Inst *inst)
     ASSERT(inst->GetOpcode() == Opcode::And);
     auto input0 = inst->GetInput(0);
     auto input1 = inst->GetInput(1);
-    ConstantInst *new_cnst = nullptr;
+    ConstantInst *newCnst = nullptr;
     ASSERT(DataType::GetCommonType(inst->GetType()) == DataType::INT64);
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
         auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
-        new_cnst = ConstFoldingCreateIntConst(
+        newCnst = ConstFoldingCreateIntConst(
             inst, ConvertIntToInt(cnst0->GetIntValue() & cnst1->GetIntValue(), inst->GetType()));
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     if (input0.GetInst()->IsConst()) {
-        new_cnst = static_cast<ConstantInst *>(input0.GetInst());
+        newCnst = static_cast<ConstantInst *>(input0.GetInst());
     } else if (input1.GetInst()->IsConst()) {
-        new_cnst = static_cast<ConstantInst *>(input1.GetInst());
+        newCnst = static_cast<ConstantInst *>(input1.GetInst());
     }
-    if (new_cnst != nullptr && new_cnst->GetIntValue() == 0) {
-        inst->ReplaceUsers(new_cnst);
+    if (newCnst != nullptr && newCnst->GetIntValue() == 0) {
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -774,23 +774,23 @@ bool ConstFoldingOr(Inst *inst)
     ASSERT(inst->GetOpcode() == Opcode::Or);
     auto input0 = inst->GetInput(0);
     auto input1 = inst->GetInput(1);
-    ConstantInst *new_cnst = nullptr;
+    ConstantInst *newCnst = nullptr;
     ASSERT(DataType::GetCommonType(inst->GetType()) == DataType::INT64);
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
         auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
-        new_cnst = ConstFoldingCreateIntConst(
+        newCnst = ConstFoldingCreateIntConst(
             inst, ConvertIntToInt(cnst0->GetIntValue() | cnst1->GetIntValue(), inst->GetType()));
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     if (input0.GetInst()->IsConst()) {
-        new_cnst = static_cast<ConstantInst *>(input0.GetInst());
+        newCnst = static_cast<ConstantInst *>(input0.GetInst());
     } else if (input1.GetInst()->IsConst()) {
-        new_cnst = static_cast<ConstantInst *>(input1.GetInst());
+        newCnst = static_cast<ConstantInst *>(input1.GetInst());
     }
-    if (new_cnst != nullptr && new_cnst->GetIntValue() == static_cast<uint64_t>(-1)) {
-        inst->ReplaceUsers(new_cnst);
+    if (newCnst != nullptr && newCnst->GetIntValue() == static_cast<uint64_t>(-1)) {
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;
@@ -805,10 +805,10 @@ bool ConstFoldingXor(Inst *inst)
     if (input0->IsConst() && input1->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0);
         auto cnst1 = static_cast<ConstantInst *>(input1);
-        ConstantInst *new_cnst = nullptr;
-        new_cnst = ConstFoldingCreateIntConst(
+        ConstantInst *newCnst = nullptr;
+        newCnst = ConstFoldingCreateIntConst(
             inst, ConvertIntToInt(cnst0->GetIntValue() ^ cnst1->GetIntValue(), inst->GetType()));
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     // A xor A = 0
@@ -841,18 +841,18 @@ int64_t GetResult(T l, T r, [[maybe_unused]] const CmpInst *cmp)
     return 0;
 }
 
-int64_t GetIntResult(ConstantInst *cnst0, ConstantInst *cnst1, DataType::Type input_type, const CmpInst *cmp)
+int64_t GetIntResult(ConstantInst *cnst0, ConstantInst *cnst1, DataType::Type inputType, const CmpInst *cmp)
 {
-    auto l = ConvertIntToInt(cnst0->GetIntValue(), input_type);
-    auto r = ConvertIntToInt(cnst1->GetIntValue(), input_type);
+    auto l = ConvertIntToInt(cnst0->GetIntValue(), inputType);
+    auto r = ConvertIntToInt(cnst1->GetIntValue(), inputType);
     auto graph = cnst0->GetBasicBlock()->GetGraph();
-    if (DataType::IsTypeSigned(input_type)) {
-        if (graph->IsBytecodeOptimizer() && IsInt32Bit(input_type)) {
+    if (DataType::IsTypeSigned(inputType)) {
+        if (graph->IsBytecodeOptimizer() && IsInt32Bit(inputType)) {
             return GetResult(static_cast<int32_t>(l), static_cast<int32_t>(r), cmp);
         }
         return GetResult(static_cast<int64_t>(l), static_cast<int64_t>(r), cmp);
     }
-    if (graph->IsBytecodeOptimizer() && IsInt32Bit(input_type)) {
+    if (graph->IsBytecodeOptimizer() && IsInt32Bit(inputType)) {
         return GetResult(static_cast<uint32_t>(l), static_cast<uint32_t>(r), cmp);
     }
     return GetResult(l, r, cmp);
@@ -864,14 +864,14 @@ bool ConstFoldingCmp(Inst *inst)
     auto input0 = inst->GetInput(0).GetInst();
     auto input1 = inst->GetInput(1).GetInst();
     auto cmp = inst->CastToCmp();
-    auto input_type = cmp->GetInputType(0);
+    auto inputType = cmp->GetInputType(0);
     if (input0->IsConst() && input1->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0);
         auto cnst1 = static_cast<ConstantInst *>(input1);
         int64_t result = 0;
-        switch (DataType::GetCommonType(input_type)) {
+        switch (DataType::GetCommonType(inputType)) {
             case DataType::INT64: {
-                result = GetIntResult(cnst0, cnst1, input_type, cmp);
+                result = GetIntResult(cnst0, cnst1, inputType, cmp);
                 break;
             }
             case DataType::FLOAT32:
@@ -883,11 +883,11 @@ bool ConstFoldingCmp(Inst *inst)
             default:
                 break;
         }
-        auto new_cnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(result);
-        inst->ReplaceUsers(new_cnst);
+        auto newCnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(result);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
-    if (input0 == input1 && DataType::GetCommonType(input_type) == DataType::INT64) {
+    if (input0 == input1 && DataType::GetCommonType(inputType) == DataType::INT64) {
         // for floating point values result may be non-zero if x is NaN
         inst->ReplaceUsers(ConstFoldingCreateIntConst(inst, 0));
         return true;
@@ -904,37 +904,37 @@ ConstantInst *ConstFoldingCompareCreateConst(Inst *inst, bool value)
     return graph->FindOrCreateConstant(static_cast<uint64_t>(value));
 }
 
-ConstantInst *ConstFoldingCompareCreateNewConst(Inst *inst, uint64_t cnst_val0, uint64_t cnst_val1)
+ConstantInst *ConstFoldingCompareCreateNewConst(Inst *inst, uint64_t cnstVal0, uint64_t cnstVal1)
 {
     switch (inst->CastToCompare()->GetCc()) {
         case ConditionCode::CC_EQ:
-            return ConstFoldingCompareCreateConst(inst, (cnst_val0 == cnst_val1));
+            return ConstFoldingCompareCreateConst(inst, (cnstVal0 == cnstVal1));
         case ConditionCode::CC_NE:
-            return ConstFoldingCompareCreateConst(inst, (cnst_val0 != cnst_val1));
+            return ConstFoldingCompareCreateConst(inst, (cnstVal0 != cnstVal1));
         case ConditionCode::CC_LT:
             return ConstFoldingCompareCreateConst(inst,
-                                                  (static_cast<int64_t>(cnst_val0) < static_cast<int64_t>(cnst_val1)));
+                                                  (static_cast<int64_t>(cnstVal0) < static_cast<int64_t>(cnstVal1)));
         case ConditionCode::CC_B:
-            return ConstFoldingCompareCreateConst(inst, (cnst_val0 < cnst_val1));
+            return ConstFoldingCompareCreateConst(inst, (cnstVal0 < cnstVal1));
         case ConditionCode::CC_LE:
             return ConstFoldingCompareCreateConst(inst,
-                                                  (static_cast<int64_t>(cnst_val0) <= static_cast<int64_t>(cnst_val1)));
+                                                  (static_cast<int64_t>(cnstVal0) <= static_cast<int64_t>(cnstVal1)));
         case ConditionCode::CC_BE:
-            return ConstFoldingCompareCreateConst(inst, (cnst_val0 <= cnst_val1));
+            return ConstFoldingCompareCreateConst(inst, (cnstVal0 <= cnstVal1));
         case ConditionCode::CC_GT:
             return ConstFoldingCompareCreateConst(inst,
-                                                  (static_cast<int64_t>(cnst_val0) > static_cast<int64_t>(cnst_val1)));
+                                                  (static_cast<int64_t>(cnstVal0) > static_cast<int64_t>(cnstVal1)));
         case ConditionCode::CC_A:
-            return ConstFoldingCompareCreateConst(inst, (cnst_val0 > cnst_val1));
+            return ConstFoldingCompareCreateConst(inst, (cnstVal0 > cnstVal1));
         case ConditionCode::CC_GE:
             return ConstFoldingCompareCreateConst(inst,
-                                                  (static_cast<int64_t>(cnst_val0) >= static_cast<int64_t>(cnst_val1)));
+                                                  (static_cast<int64_t>(cnstVal0) >= static_cast<int64_t>(cnstVal1)));
         case ConditionCode::CC_AE:
-            return ConstFoldingCompareCreateConst(inst, (cnst_val0 >= cnst_val1));
+            return ConstFoldingCompareCreateConst(inst, (cnstVal0 >= cnstVal1));
         case ConditionCode::CC_TST_EQ:
-            return ConstFoldingCompareCreateConst(inst, ((cnst_val0 & cnst_val1) == 0));
+            return ConstFoldingCompareCreateConst(inst, ((cnstVal0 & cnstVal1) == 0));
         case ConditionCode::CC_TST_NE:
-            return ConstFoldingCompareCreateConst(inst, ((cnst_val0 & cnst_val1) != 0));
+            return ConstFoldingCompareCreateConst(inst, ((cnstVal0 & cnstVal1) != 0));
         default:
             UNREACHABLE();
     }
@@ -945,22 +945,22 @@ bool ConstFoldingCompareEqualInputs(Inst *inst, Inst *input0, Inst *input1)
     if (input0 != input1) {
         return false;
     }
-    auto cmp_inst = inst->CastToCompare();
-    auto common_type = DataType::GetCommonType(input0->GetType());
-    switch (cmp_inst->GetCc()) {
+    auto cmpInst = inst->CastToCompare();
+    auto commonType = DataType::GetCommonType(input0->GetType());
+    switch (cmpInst->GetCc()) {
         case ConditionCode::CC_EQ:
         case ConditionCode::CC_LE:
         case ConditionCode::CC_GE:
         case ConditionCode::CC_BE:
         case ConditionCode::CC_AE:
             // for floating point values result may be non-zero if x is NaN
-            if (common_type == DataType::INT64 || common_type == DataType::POINTER) {
+            if (commonType == DataType::INT64 || commonType == DataType::POINTER) {
                 inst->ReplaceUsers(ConstFoldingCreateIntConst(inst, 1));
                 return true;
             }
             break;
         case ConditionCode::CC_NE:
-            if (common_type == DataType::INT64 || common_type == DataType::POINTER) {
+            if (commonType == DataType::INT64 || commonType == DataType::POINTER) {
                 inst->ReplaceUsers(ConstFoldingCreateIntConst(inst, 0));
                 return true;
             }
@@ -992,16 +992,16 @@ bool ConstFoldingCompare(Inst *inst)
         auto cnst0 = input0->CastToConstant();
         auto cnst1 = input1->CastToConstant();
 
-        ConstantInst *new_cnst = nullptr;
+        ConstantInst *newCnst = nullptr;
         auto type = inst->GetInputType(0);
         if (DataType::GetCommonType(type) == DataType::INT64) {
-            uint64_t cnst_val0 = ConvertIntToInt(cnst0->GetIntValue(), type);
-            uint64_t cnst_val1 = ConvertIntToInt(cnst1->GetIntValue(), type);
-            new_cnst = ConstFoldingCompareCreateNewConst(inst, cnst_val0, cnst_val1);
+            uint64_t cnstVal0 = ConvertIntToInt(cnst0->GetIntValue(), type);
+            uint64_t cnstVal1 = ConvertIntToInt(cnst1->GetIntValue(), type);
+            newCnst = ConstFoldingCompareCreateNewConst(inst, cnstVal0, cnstVal1);
         } else {
             return false;
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     if (input0->GetOpcode() == Opcode::LoadImmediate && input1->GetOpcode() == Opcode::LoadImmediate) {
@@ -1039,14 +1039,14 @@ bool ConstFoldingSqrt(Inst *inst)
     auto input = inst->GetInput(0).GetInst();
     if (input->IsConst()) {
         auto cnst = input->CastToConstant();
-        Inst *new_cnst = nullptr;
+        Inst *newCnst = nullptr;
         if (cnst->GetType() == DataType::FLOAT32) {
-            new_cnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(std::sqrt(cnst->GetFloatValue()));
+            newCnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(std::sqrt(cnst->GetFloatValue()));
         } else {
             ASSERT(cnst->GetType() == DataType::FLOAT64);
-            new_cnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(std::sqrt(cnst->GetDoubleValue()));
+            newCnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(std::sqrt(cnst->GetDoubleValue()));
         }
-        inst->ReplaceUsers(new_cnst);
+        inst->ReplaceUsers(newCnst);
         return true;
     }
     return false;

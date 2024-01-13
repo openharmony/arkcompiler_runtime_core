@@ -52,7 +52,7 @@ void DemangleName(std::ostream &o, std::string_view s)
     }
 
     if (s.front() == 'L' && s.back() == ';') {
-        s = s.substr(1, s.size() - 2);
+        s = s.substr(1, s.size() - 2UL);
         while (!s.empty()) {
             const auto to = s.find('/');
             o << s.substr(0, to);
@@ -75,22 +75,22 @@ void ReprMethod(std::ostream &o, panda_file::StringItem *name, panda_file::BaseC
 {
     auto typs = Helpers::BreakProto(p);
     auto refs = p->GetRefTypes();
-    size_t num_refs = 0;
-    auto repr_type = [&typs, &refs, &num_refs, &o](size_t ii) {
+    size_t numRefs = 0;
+    auto reprType = [&typs, &refs, &numRefs, &o](size_t ii) {
         auto &t = typs[ii];
         if (t.IsPrimitive()) {
             o << t;
         } else {
-            ReprItem(o, refs[num_refs++]);
+            ReprItem(o, refs[numRefs++]);
         }
     };
-    repr_type(0);
+    reprType(0);
     o << " ";
     ReprItem(o, clz);
     o << "." << name->GetData();
     o << "(";
     for (size_t ii = 1; ii < typs.size(); ii++) {
-        repr_type(ii);
+        reprType(ii);
         if (ii + 1 != typs.size()) {
             o << ", ";
         }
@@ -249,8 +249,8 @@ void Context::Write(const std::string &out)
     }
     cont_.Write(&writer, true, false);
 
-    result_.stats.items_count = known_items_.size();
-    result_.stats.class_count = cont_.GetClassMap()->size();
+    result_.stats.itemsCount = knownItems_.size();
+    result_.stats.classCount = cont_.GetClassMap()->size();
 }
 
 void Context::Read(const std::vector<std::string> &input)
@@ -286,7 +286,7 @@ std::ostream &operator<<(std::ostream &o, const static_linker::Context::ErrorToS
             } else {
                 o << ": ";
                 ReprItem(o, v);
-                for (auto [beg, end] = self.ctx_->came_from_.equal_range(v); beg != end; ++beg) {
+                for (auto [beg, end] = self.ctx_->cameFrom_.equal_range(v); beg != end; ++beg) {
                     o << "\n";
                     std::fill_n(std::ostream_iterator<char>(o), self.indent_ + 1, '\t');
                     o << "declared at `" << beg->second->GetFilePtr()->GetFilename() << "`";

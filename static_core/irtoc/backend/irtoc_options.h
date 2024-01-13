@@ -19,6 +19,6 @@
 #include "generated/irtoc_options_gen.h"
 
 namespace panda::irtoc {
-extern Options OPTIONS;
+extern Options g_options;
 }  // namespace panda::irtoc
 #endif  // IRTOC_BACKEND_IRTOC_OPTIONS_H

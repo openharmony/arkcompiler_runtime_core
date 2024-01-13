@@ -40,13 +40,13 @@ public:
 private:
     static void Lock(PCodeMetaInfo *mi);
     static void UnLock(PCodeMetaInfo *mi);
-    static PCodeItem *AddCodeMetaInfoImpl(PCodeMetaInfo *meta_info, Span<const uint8_t> inss);
-    static void DelCodeMetaInfoImpl(PCodeMetaInfo *meta_info, const panda_file::File *file);
+    static PCodeItem *AddCodeMetaInfoImpl(PCodeMetaInfo *metaInfo, Span<const uint8_t> inss);
+    static void DelCodeMetaInfoImpl(PCodeMetaInfo *metaInfo, const panda_file::File *file);
 
 private:
-    static std::map<const std::string, PCodeItem *> aex_item_map_;
-    static panda::os::memory::Mutex jit_item_lock_;
-    static panda::os::memory::Mutex aex_item_lock_;
+    static std::map<const std::string, PCodeItem *> aexItemMap_;
+    static panda::os::memory::Mutex jitItemLock_;
+    static panda::os::memory::Mutex aexItemLock_;
 
     NO_COPY_SEMANTIC(DebugInf);
     NO_MOVE_SEMANTIC(DebugInf);

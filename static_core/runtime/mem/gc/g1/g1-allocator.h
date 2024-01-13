@@ -45,25 +45,25 @@ public:
     NO_MOVE_SEMANTIC(ObjectAllocatorG1);
     NO_COPY_SEMANTIC(ObjectAllocatorG1);
 
-    explicit ObjectAllocatorG1(MemStatsType *mem_stats, bool create_pygote_space_allocator);
+    explicit ObjectAllocatorG1(MemStatsType *memStats, bool createPygoteSpaceAllocator);
 
     ~ObjectAllocatorG1() final = default;
 
     void *Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
-                   ObjMemInitPolicy obj_init) final;
+                   ObjMemInitPolicy objInit) final;
 
     void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
-                             ObjMemInitPolicy obj_init) final;
+                             ObjMemInitPolicy objInit) final;
 
     void PinObject(ObjectHeader *object) final;
 
     void UnpinObject(ObjectHeader *object) final;
 
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor) final;
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor) final;
 
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor) final;
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor) final;
 
-    void IterateOverYoungObjects(const ObjectVisitor &object_visitor) final;
+    void IterateOverYoungObjects(const ObjectVisitor &objectVisitor) final;
 
     size_t GetMaxYoungRegionsCount();
 
@@ -76,24 +76,24 @@ public:
     /// Returns a vector which contains non-movable and humongous regions
     PandaVector<Region *> GetNonRegularRegions();
 
-    void IterateOverTenuredObjects(const ObjectVisitor &object_visitor) final;
+    void IterateOverTenuredObjects(const ObjectVisitor &objectVisitor) final;
 
-    void IterateOverHumongousObjects(const ObjectVisitor &object_visitor);
+    void IterateOverHumongousObjects(const ObjectVisitor &objectVisitor);
 
-    void IterateOverObjects(const ObjectVisitor &object_visitor) final;
+    void IterateOverObjects(const ObjectVisitor &objectVisitor) final;
 
     /// @brief iterates all objects in object allocator
-    void IterateRegularSizeObjects(const ObjectVisitor &object_visitor) final;
+    void IterateRegularSizeObjects(const ObjectVisitor &objectVisitor) final;
 
     /// @brief iterates objects in all allocators except object allocator
-    void IterateNonRegularSizeObjects(const ObjectVisitor &object_visitor) final;
+    void IterateNonRegularSizeObjects(const ObjectVisitor &objectVisitor) final;
 
     void FreeObjectsMovedToPygoteSpace() final;
 
-    void Collect(const GCObjectVisitor &gc_object_visitor, GCCollectMode collect_mode) final
+    void Collect(const GCObjectVisitor &gcObjectVisitor, GCCollectMode collectMode) final
     {
-        (void)gc_object_visitor;
-        (void)collect_mode;
+        (void)gcObjectVisitor;
+        (void)collectMode;
         UNREACHABLE();
     }
 
@@ -101,7 +101,7 @@ public:
      * Collect non regular regions (i.e. remove dead objects from Humongous and NonMovable regions
      * and remove empty regions).
      */
-    void CollectNonRegularRegions(const RegionsVisitor &region_visitor, const GCObjectVisitor &gc_object_visitor);
+    void CollectNonRegularRegions(const RegionsVisitor &regionVisitor, const GCObjectVisitor &gcObjectVisitor);
 
     size_t GetRegularObjectMaxSize() final;
 
@@ -109,7 +109,7 @@ public:
 
     bool IsObjectInYoungSpace(const ObjectHeader *obj) final;
 
-    bool IsIntersectedWithYoung(const MemRange &mem_range) final;
+    bool IsIntersectedWithYoung(const MemRange &memRange) final;
 
     bool HasYoungSpace() final;
 
@@ -118,19 +118,19 @@ public:
     template <bool INCLUDE_CURRENT_REGION>
     PandaPriorityQueue<std::pair<uint32_t, Region *>> GetTopGarbageRegions()
     {
-        return object_allocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>();
+        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>();
     }
 
     std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final;
 
     void ReserveRegionIfNeeded()
     {
-        object_allocator_->ReserveRegionIfNeeded();
+        objectAllocator_->ReserveRegionIfNeeded();
     }
 
     void ReleaseReservedRegion()
     {
-        object_allocator_->ReleaseReservedRegion();
+        objectAllocator_->ReleaseReservedRegion();
     }
 
     void ResetYoungAllocator() final;
@@ -139,8 +139,8 @@ public:
               OSPagesPolicy OS_PAGES_POLICY, bool NEED_LOCK, typename Container>
     void ResetRegions(const Container &regions)
     {
-        object_allocator_
-            ->ResetSeveralSpecificRegions<REGIONS_TYPE, REGIONS_RELEASE_POLICY, OS_PAGES_POLICY, NEED_LOCK>(regions);
+        objectAllocator_->ResetSeveralSpecificRegions<REGIONS_TYPE, REGIONS_RELEASE_POLICY, OS_PAGES_POLICY, NEED_LOCK>(
+            regions);
     }
 
     TLAB *CreateNewTLAB(panda::ManagedThread *thread) final;
@@ -152,7 +152,7 @@ public:
         return true;
     }
 
-    void IterateOverObjectsInRange(MemRange mem_range, const ObjectVisitor &object_visitor) final;
+    void IterateOverObjectsInRange(MemRange memRange, const ObjectVisitor &objectVisitor) final;
 
     bool ContainObject(const ObjectHeader *obj) const final;
 
@@ -175,29 +175,28 @@ public:
 
     void UpdateSpaceData() final;
 
-    void CompactYoungRegions(const GCObjectVisitor &death_checker, const ObjectVisitorEx &move_checker);
+    void CompactYoungRegions(const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveChecker);
 
     template <RegionFlag REGION_TYPE, bool USE_MARKBITMAP = false>
-    void CompactRegion(Region *region, const GCObjectVisitor &death_checker, const ObjectVisitorEx &move_checker)
+    void CompactRegion(Region *region, const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveChecker)
     {
-        object_allocator_->template CompactSpecificRegion<REGION_TYPE, RegionFlag::IS_OLD, USE_MARKBITMAP>(
-            region, death_checker, move_checker);
+        objectAllocator_->template CompactSpecificRegion<REGION_TYPE, RegionFlag::IS_OLD, USE_MARKBITMAP>(
+            region, deathChecker, moveChecker);
     }
 
     template <bool USE_MARKBITMAP>
-    void PromoteYoungRegion(Region *region, const GCObjectVisitor &death_checker,
-                            const ObjectVisitor &promotion_checker)
+    void PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker, const ObjectVisitor &promotionChecker)
     {
         ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
-        object_allocator_->template PromoteYoungRegion<USE_MARKBITMAP>(region, death_checker, promotion_checker);
+        objectAllocator_->template PromoteYoungRegion<USE_MARKBITMAP>(region, deathChecker, promotionChecker);
     }
 
-    void CompactTenuredRegions(const PandaVector<Region *> &regions, const GCObjectVisitor &death_checker,
-                               const ObjectVisitorEx &move_checker);
+    void CompactTenuredRegions(const PandaVector<Region *> &regions, const GCObjectVisitor &deathChecker,
+                               const ObjectVisitorEx &moveChecker);
 
     void ClearCurrentTenuredRegion()
     {
-        object_allocator_->template ClearCurrentRegion<IS_OLD>();
+        objectAllocator_->template ClearCurrentRegion<IS_OLD>();
     }
 
     static constexpr size_t GetRegionSize()
@@ -205,14 +204,14 @@ public:
         return REGION_SIZE;
     }
 
-    bool HaveTenuredSize(size_t num_regions) const
+    bool HaveTenuredSize(size_t numRegions) const
     {
-        return object_allocator_->GetSpace()->GetPool()->HaveTenuredSize(num_regions * ObjectAllocator::REGION_SIZE);
+        return objectAllocator_->GetSpace()->GetPool()->HaveTenuredSize(numRegions * ObjectAllocator::REGION_SIZE);
     }
 
-    bool HaveFreeRegions(size_t num_regions) const
+    bool HaveFreeRegions(size_t numRegions) const
     {
-        return object_allocator_->GetSpace()->GetPool()->HaveFreeRegions(num_regions, ObjectAllocator::REGION_SIZE);
+        return objectAllocator_->GetSpace()->GetPool()->HaveFreeRegions(numRegions, ObjectAllocator::REGION_SIZE);
     }
 
     static constexpr size_t GetYoungAllocMaxSize()
@@ -224,21 +223,21 @@ public:
     template <RegionFlag REGION_TYPE, OSPagesPolicy OS_PAGES_POLICY>
     void ReleaseEmptyRegions()
     {
-        object_allocator_->ReleaseEmptyRegions<REGION_TYPE, OS_PAGES_POLICY>();
+        objectAllocator_->ReleaseEmptyRegions<REGION_TYPE, OS_PAGES_POLICY>();
     }
 
-    void SetDesiredEdenLength(size_t eden_length)
+    void SetDesiredEdenLength(size_t edenLength)
     {
-        object_allocator_->SetDesiredEdenLength(eden_length);
+        objectAllocator_->SetDesiredEdenLength(edenLength);
     }
 
 private:
     Alignment CalculateAllocatorAlignment(size_t align) final;
 
-    PandaUniquePtr<ObjectAllocator> object_allocator_ {nullptr};
-    PandaUniquePtr<NonMovableAllocator> nonmovable_allocator_ {nullptr};
-    PandaUniquePtr<HumongousObjectAllocator> humongous_object_allocator_ {nullptr};
-    MemStatsType *mem_stats_ {nullptr};
+    PandaUniquePtr<ObjectAllocator> objectAllocator_ {nullptr};
+    PandaUniquePtr<NonMovableAllocator> nonmovableAllocator_ {nullptr};
+    PandaUniquePtr<HumongousObjectAllocator> humongousObjectAllocator_ {nullptr};
+    MemStatsType *memStats_ {nullptr};
 
     void *AllocateTenured(size_t size) final;
 

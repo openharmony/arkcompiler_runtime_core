@@ -80,9 +80,9 @@ public:
     // Recursive descent parser:
     class Parser {
     public:
-        explicit Parser(JsonObject *target) : current_obj_(target) {}
+        explicit Parser(JsonObject *target) : currentObj_(target) {}
         PANDA_PUBLIC_API bool Parse(const std::string &text);
-        PANDA_PUBLIC_API bool Parse(std::streambuf *stream_buf);
+        PANDA_PUBLIC_API bool Parse(std::streambuf *streamBuf);
 
         virtual ~Parser() = default;
 
@@ -92,7 +92,7 @@ public:
     private:
         bool Parse();
 
-        bool GetJsonObject(JsonObject *empty_obj);
+        bool GetJsonObject(JsonObject *emptyObj);
         bool GetValue();
         bool GetNull();
         bool GetString(char delim);
@@ -100,7 +100,7 @@ public:
         bool GetNum();
         bool GetBool();
         bool GetArray();
-        bool InsertKeyValuePairIn(JsonObject *empty_obj);
+        bool InsertKeyValuePairIn(JsonObject *emptyObj);
 
         char GetSymbol();
         char PeekSymbol();
@@ -110,11 +110,11 @@ public:
 
     private:
         std::istream istream_ {nullptr};
-        JsonObject *current_obj_ {nullptr};
-        Value parsed_temp_;
-        StringT string_temp_;
+        JsonObject *currentObj_ {nullptr};
+        Value parsedTemp_;
+        StringT stringTemp_;
 
-        size_t log_recursion_level_ {0};
+        size_t logRecursionLevel_ {0};
     };
 
 public:
@@ -126,16 +126,16 @@ public:
     {
         Parser(this).Parse(text);
     }
-    explicit JsonObject(std::streambuf *stream_buf)
+    explicit JsonObject(std::streambuf *streamBuf)
     {
-        Parser(this).Parse(stream_buf);
+        Parser(this).Parse(streamBuf);
     }
 
     size_t GetSize() const
     {
-        ASSERT(values_map_.size() == keys_.size());
-        ASSERT(values_map_.size() == string_map_.size());
-        return values_map_.size();
+        ASSERT(valuesMap_.size() == keys_.size());
+        ASSERT(valuesMap_.size() == stringMap_.size());
+        return valuesMap_.size();
     }
 
     size_t GetIndexByKey(const Key &key) const
@@ -155,36 +155,36 @@ public:
     template <typename T>
     const T *GetValue(const Key &key) const
     {
-        auto iter = values_map_.find(key);
-        return (iter == values_map_.end()) ? nullptr : iter->second.Get<T>();
+        auto iter = valuesMap_.find(key);
+        return (iter == valuesMap_.end()) ? nullptr : iter->second.Get<T>();
     }
     const StringT *GetValueSourceString(const Key &key) const
     {
-        auto iter = string_map_.find(key);
-        return (iter == string_map_.end()) ? nullptr : &iter->second;
+        auto iter = stringMap_.find(key);
+        return (iter == stringMap_.end()) ? nullptr : &iter->second;
     }
     template <typename T>
     const T *GetValue(size_t idx) const
     {
-        auto iter = values_map_.find(GetKeyByIndex(idx));
-        return (iter == values_map_.end()) ? nullptr : iter->second.Get<T>();
+        auto iter = valuesMap_.find(GetKeyByIndex(idx));
+        return (iter == valuesMap_.end()) ? nullptr : iter->second.Get<T>();
     }
 
     const auto &GetUnorderedMap() const
     {
-        return values_map_;
+        return valuesMap_;
     }
 
     bool IsValid() const
     {
-        return is_valid_;
+        return isValid_;
     }
 
 private:
-    bool is_valid_ {false};
-    std::unordered_map<Key, Value> values_map_;
+    bool isValid_ {false};
+    std::unordered_map<Key, Value> valuesMap_;
     // String representation is stored additionally as a "source" of scalar values:
-    std::unordered_map<Key, StringT> string_map_;
+    std::unordered_map<Key, StringT> stringMap_;
 
     // Stores the order in which keys were added (allows to access elements by index):
     std::vector<Key> keys_;

@@ -72,37 +72,37 @@ public:
     using Callback = std::function<void(ContextT &)>;
 
     virtual ContextT &GetContext() = 0;
-    static void StartTask(RunnerT task_runner, TaskFunc task_func);
+    static void StartTask(RunnerT taskRunner, TaskFunc taskFunc);
 
     class TaskCallback {
     public:
         TaskCallback() = default;
         NO_COPY_SEMANTIC(TaskCallback);
         NO_MOVE_OPERATOR(TaskCallback);
-        TaskCallback(TaskCallback &&task_cb)
-            : callback_on_success_(std::move(task_cb.callback_on_success_)),
-              callback_on_fail_(std::move(task_cb.callback_on_fail_))
+        TaskCallback(TaskCallback &&taskCb)
+            : callbackOnSuccess_(std::move(taskCb.callbackOnSuccess_)),
+              callbackOnFail_(std::move(taskCb.callbackOnFail_))
         {
-            task_cb.SetNeedMakeCall(false);
+            taskCb.SetNeedMakeCall(false);
         }
         // NOLINTNEXTLINE(modernize-use-equals-default)
         ~TaskCallback()
         {
-            ASSERT(!need_make_call_);
+            ASSERT(!needMakeCall_);
         }
 
-        void RunOnSuccess(ContextT &task_ctx)
+        void RunOnSuccess(ContextT &taskCtx)
         {
-            if (callback_on_success_) {
-                callback_on_success_(task_ctx);
+            if (callbackOnSuccess_) {
+                callbackOnSuccess_(taskCtx);
             }
             SetNeedMakeCall(false);
         }
 
-        void RunOnFail(ContextT &task_ctx)
+        void RunOnFail(ContextT &taskCtx)
         {
-            if (callback_on_fail_) {
-                callback_on_fail_(task_ctx);
+            if (callbackOnFail_) {
+                callbackOnFail_(taskCtx);
             }
             SetNeedMakeCall(false);
         }
@@ -110,10 +110,10 @@ public:
         template <typename Foo>
         void AddOnSuccess(Foo foo)
         {
-            if (LIKELY(callback_on_success_)) {
-                callback_on_success_ = NextCallback(std::move(callback_on_success_), std::move(foo));
+            if (LIKELY(callbackOnSuccess_)) {
+                callbackOnSuccess_ = NextCallback(std::move(callbackOnSuccess_), std::move(foo));
             } else {
-                callback_on_success_ = std::move(foo);
+                callbackOnSuccess_ = std::move(foo);
             }
             SetNeedMakeCall(true);
         }
@@ -121,18 +121,18 @@ public:
         template <typename Foo>
         void AddOnFail(Foo foo)
         {
-            if (LIKELY(callback_on_fail_)) {
-                callback_on_fail_ = NextCallback(std::move(callback_on_fail_), std::move(foo));
+            if (LIKELY(callbackOnFail_)) {
+                callbackOnFail_ = NextCallback(std::move(callbackOnFail_), std::move(foo));
             } else {
-                callback_on_fail_ = std::move(foo);
+                callbackOnFail_ = std::move(foo);
             }
             SetNeedMakeCall(true);
         }
 
-        void SetNeedMakeCall([[maybe_unused]] bool need_make_call)
+        void SetNeedMakeCall([[maybe_unused]] bool needMakeCall)
         {
 #ifndef NDEBUG
-            need_make_call_ = need_make_call;
+            needMakeCall_ = needMakeCall;
 #endif
         }
 
@@ -140,16 +140,16 @@ public:
         template <typename Foo>
         Callback NextCallback(Callback &&cb, Foo foo)
         {
-            return [cb = std::move(cb), foo = std::move(foo)](ContextT &task_ctx) mutable {
-                foo(task_ctx);
-                cb(task_ctx);
+            return [cb = std::move(cb), foo = std::move(foo)](ContextT &taskCtx) mutable {
+                foo(taskCtx);
+                cb(taskCtx);
             };
         }
 
-        Callback callback_on_success_;
-        Callback callback_on_fail_;
+        Callback callbackOnSuccess_;
+        Callback callbackOnFail_;
 #ifndef NDEBUG
-        bool need_make_call_ {false};
+        bool needMakeCall_ {false};
 #endif
     };
 
@@ -158,48 +158,48 @@ public:
         Task() = default;
         NO_COPY_SEMANTIC(Task);
         NO_MOVE_OPERATOR(Task);
-        Task(Task &&task) : task_func_(std::move(task.task_func_)), has_task_(task.has_task_)
+        Task(Task &&task) : taskFunc_(std::move(task.taskFunc_)), hasTask_(task.hasTask_)
         {
-            task.has_task_ = false;
+            task.hasTask_ = false;
         }
         ~Task() = default;
 
         explicit operator bool() const
         {
-            return has_task_;
+            return hasTask_;
         }
 
         template <typename Foo>
         void SetTaskFunc(Foo foo)
         {
-            ASSERT(!has_task_);
-            task_func_ = std::move(foo);
-            has_task_ = true;
+            ASSERT(!hasTask_);
+            taskFunc_ = std::move(foo);
+            hasTask_ = true;
         }
 
         TaskFunc GetTaskFunc()
         {
-            has_task_ = false;
-            return std::move(task_func_);
+            hasTask_ = false;
+            return std::move(taskFunc_);
         }
 
     private:
-        TaskFunc task_func_;
-        bool has_task_ {false};
+        TaskFunc taskFunc_;
+        bool hasTask_ {false};
     };
 
     /// @brief Starts a chain of callbacks on success
     void RunCallbackOnSuccess()
     {
         auto &context = GetContext();
-        task_cb_.RunOnSuccess(context);
+        taskCb_.RunOnSuccess(context);
     }
 
     /// @brief Starts a chain of callbacks on fail
     void RunCallbackOnFail()
     {
         auto &context = GetContext();
-        task_cb_.RunOnFail(context);
+        taskCb_.RunOnFail(context);
     }
 
     /**
@@ -209,8 +209,8 @@ public:
     template <typename Foo>
     void AddCallbackOnSuccess(Foo foo)
     {
-        ASSERT(!task_on_success_);
-        task_cb_.AddOnSuccess(std::move(foo));
+        ASSERT(!taskOnSuccess_);
+        taskCb_.AddOnSuccess(std::move(foo));
     }
 
     /**
@@ -220,8 +220,8 @@ public:
     template <typename Foo>
     void AddCallbackOnFail(Foo foo)
     {
-        ASSERT(!task_on_fail_);
-        task_cb_.AddOnFail(std::move(foo));
+        ASSERT(!taskOnFail_);
+        taskCb_.AddOnFail(std::move(foo));
     }
 
     /**
@@ -242,8 +242,8 @@ public:
     template <typename Foo>
     void SetTaskOnSuccess(Foo foo)
     {
-        ASSERT(!task_on_success_);
-        task_on_success_.SetTaskFunc(std::move(foo));
+        ASSERT(!taskOnSuccess_);
+        taskOnSuccess_.SetTaskFunc(std::move(foo));
     }
 
     /**
@@ -253,8 +253,8 @@ public:
     template <typename Foo>
     void SetTaskOnFail(Foo foo)
     {
-        ASSERT(!task_on_fail_);
-        task_on_fail_.SetTaskFunc(std::move(foo));
+        ASSERT(!taskOnFail_);
+        taskOnFail_.SetTaskFunc(std::move(foo));
     }
 
     /**
@@ -263,32 +263,32 @@ public:
      * @param task_runner - Current TaskRunner
      * @param success - result of current task
      */
-    static void EndTask(RunnerT task_runner, bool success)
+    static void EndTask(RunnerT taskRunner, bool success)
     {
-        auto &base_runner = static_cast<TaskRunner &>(task_runner);
-        auto task_on_success = std::move(base_runner.task_on_success_);
-        auto task_on_fail = std::move(base_runner.task_on_fail_);
-        ASSERT(!base_runner.task_on_success_ && !base_runner.task_on_fail_);
-        ContextT &task_ctx = task_runner.GetContext();
+        auto &baseRunner = static_cast<TaskRunner &>(taskRunner);
+        auto taskOnSuccess = std::move(baseRunner.taskOnSuccess_);
+        auto taskOnFail = std::move(baseRunner.taskOnFail_);
+        ASSERT(!baseRunner.taskOnSuccess_ && !baseRunner.taskOnFail_);
+        ContextT &taskCtx = taskRunner.GetContext();
         if (success) {
-            if (task_on_success) {
-                RunnerT::StartTask(std::move(task_runner), task_on_success.GetTaskFunc());
+            if (taskOnSuccess) {
+                RunnerT::StartTask(std::move(taskRunner), taskOnSuccess.GetTaskFunc());
                 return;
             }
-            base_runner.task_cb_.RunOnSuccess(task_ctx);
+            baseRunner.taskCb_.RunOnSuccess(taskCtx);
         } else {
-            if (task_on_fail) {
-                RunnerT::StartTask(std::move(task_runner), task_on_fail.GetTaskFunc());
+            if (taskOnFail) {
+                RunnerT::StartTask(std::move(taskRunner), taskOnFail.GetTaskFunc());
                 return;
             }
-            base_runner.task_cb_.RunOnFail(task_ctx);
+            baseRunner.taskCb_.RunOnFail(taskCtx);
         }
     }
 
 private:
-    TaskCallback task_cb_;
-    Task task_on_success_;
-    Task task_on_fail_;
+    TaskCallback taskCb_;
+    Task taskOnSuccess_;
+    Task taskOnFail_;
 };
 
 }  // namespace panda

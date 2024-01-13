@@ -30,7 +30,7 @@ static constexpr size_t STACK_LIKE_ALLOCATOR_DEFAUL_MAX_SIZE = 48_MB;
 template <Alignment ALIGNMENT = DEFAULT_FRAME_ALIGNMENT, size_t MAX_SIZE = STACK_LIKE_ALLOCATOR_DEFAUL_MAX_SIZE>
 class StackLikeAllocator {
 public:
-    explicit StackLikeAllocator(bool use_pool_manager = true, SpaceType space_type = SpaceType::SPACE_TYPE_FRAMES);
+    explicit StackLikeAllocator(bool usePoolManager = true, SpaceType spaceType = SpaceType::SPACE_TYPE_FRAMES);
     ~StackLikeAllocator();
     NO_MOVE_SEMANTIC(StackLikeAllocator);
     NO_COPY_SEMANTIC(StackLikeAllocator);
@@ -50,30 +50,30 @@ public:
 
     size_t GetAllocatedSize() const
     {
-        ASSERT(ToUintPtr(free_pointer_) >= ToUintPtr(start_addr_));
-        return ToUintPtr(free_pointer_) - ToUintPtr(start_addr_);
+        ASSERT(ToUintPtr(freePointer_) >= ToUintPtr(startAddr_));
+        return ToUintPtr(freePointer_) - ToUintPtr(startAddr_);
     }
 
     void SetReservedMemorySize(size_t size)
     {
         ASSERT(GetFullMemorySize() >= size);
-        reserved_end_addr_ = ToVoidPtr(ToUintPtr(start_addr_) + size);
+        reservedEndAddr_ = ToVoidPtr(ToUintPtr(startAddr_) + size);
     }
 
     void UseWholeMemory()
     {
-        end_addr_ = allocated_end_addr_;
+        endAddr_ = allocatedEndAddr_;
     }
 
     void ReserveMemory()
     {
-        ASSERT(reserved_end_addr_ != nullptr);
-        end_addr_ = reserved_end_addr_;
+        ASSERT(reservedEndAddr_ != nullptr);
+        endAddr_ = reservedEndAddr_;
     }
 
     size_t GetFullMemorySize() const
     {
-        return ToUintPtr(allocated_end_addr_) - ToUintPtr(start_addr_);
+        return ToUintPtr(allocatedEndAddr_) - ToUintPtr(startAddr_);
     }
 
 private:
@@ -81,12 +81,12 @@ private:
     static constexpr size_t RELEASE_PAGES_SHIFT = 18;
     static_assert(RELEASE_PAGES_SIZE == (1U << RELEASE_PAGES_SHIFT));
     static_assert(MAX_SIZE % GetAlignmentInBytes(ALIGNMENT) == 0);
-    void *start_addr_ {nullptr};
-    void *end_addr_ {nullptr};
-    void *free_pointer_ {nullptr};
-    bool use_pool_manager_ {false};
-    void *reserved_end_addr_ {nullptr};
-    void *allocated_end_addr_ {nullptr};
+    void *startAddr_ {nullptr};
+    void *endAddr_ {nullptr};
+    void *freePointer_ {nullptr};
+    bool usePoolManager_ {false};
+    void *reservedEndAddr_ {nullptr};
+    void *allocatedEndAddr_ {nullptr};
 };
 }  // namespace panda::mem
 

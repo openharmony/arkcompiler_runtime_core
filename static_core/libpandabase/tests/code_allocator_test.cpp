@@ -63,12 +63,12 @@ TEST_F(CodeAllocatorTest, AllocateBuffTest)
     CodeAllocator ca(&stats);
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     uint8_t buff[] = {0xCCU, 0xCCU};
-    void *code_buff = ca.AllocateCode(sizeof(buff), static_cast<void *>(&buff[0U]));
+    void *codeBuff = ca.AllocateCode(sizeof(buff), static_cast<void *>(&buff[0U]));
     for (size_t i = 0; i < sizeof(buff); i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        ASSERT_EQ(static_cast<uint8_t *>(code_buff)[i], 0xCCU);
+        ASSERT_EQ(static_cast<uint8_t *>(codeBuff)[i], 0xCCU);
     }
-    ASSERT_TRUE(IsAligned(code_buff, 4U * SIZE_1K));
+    ASSERT_TRUE(IsAligned(codeBuff, 4U * SIZE_1K));
 }
 
 // NOLINTEND(readability-magic-numbers)

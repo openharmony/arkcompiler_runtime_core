@@ -85,7 +85,7 @@ public:
 
     StringTable *GetStringTable() const override
     {
-        return string_table_;
+        return stringTable_;
     }
 
     mem::MemStatsType *GetMemStats() const override
@@ -100,12 +100,12 @@ public:
 
     MTThreadManager *GetThreadManager() const override
     {
-        return thread_manager_;
+        return threadManager_;
     }
 
     MonitorPool *GetMonitorPool() const override
     {
-        return monitor_pool_;
+        return monitorPool_;
     }
 
     mem::GlobalObjectStorage *GetGlobalObjectStorage() const override
@@ -115,8 +115,8 @@ public:
 
     panda::mem::ReferenceProcessor *GetReferenceProcessor() const override
     {
-        ASSERT(reference_processor_ != nullptr);
-        return reference_processor_;
+        ASSERT(referenceProcessor_ != nullptr);
+        return referenceProcessor_;
     }
 
     LanguageContext GetLanguageContext() const override
@@ -151,7 +151,7 @@ public:
 
     compiler::RuntimeInterface *GetCompilerRuntimeInterface() const override
     {
-        return runtime_iface_;
+        return runtimeIface_;
     }
 
     bool IsStaticProfileEnabled() const override
@@ -174,16 +174,16 @@ private:
 
     Runtime *runtime_ {nullptr};
     mem::MemoryManager *mm_ {nullptr};
-    mem::ReferenceProcessor *reference_processor_ {nullptr};
-    PandaVector<ObjectHeader *> gc_roots_;
+    mem::ReferenceProcessor *referenceProcessor_ {nullptr};
+    PandaVector<ObjectHeader *> gcRoots_;
     Rendezvous *rendezvous_ {nullptr};
     CompilerInterface *compiler_ {nullptr};
-    MTManagedThread *main_thread_ {nullptr};
-    StringTable *string_table_ {nullptr};
-    MonitorPool *monitor_pool_ {nullptr};
-    MTThreadManager *thread_manager_ {nullptr};
-    panda::mem::Reference *oom_obj_ref_ {nullptr};
-    compiler::RuntimeInterface *runtime_iface_ {nullptr};
+    MTManagedThread *mainThread_ {nullptr};
+    StringTable *stringTable_ {nullptr};
+    MonitorPool *monitorPool_ {nullptr};
+    MTThreadManager *threadManager_ {nullptr};
+    panda::mem::Reference *oomObjRef_ {nullptr};
+    compiler::RuntimeInterface *runtimeIface_ {nullptr};
 
     NO_MOVE_SEMANTIC(PandaCoreVM);
     NO_COPY_SEMANTIC(PandaCoreVM);

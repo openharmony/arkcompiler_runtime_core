@@ -91,21 +91,21 @@ public:
 
     LifeIntervals(ArenaAllocator *allocator, Inst *inst) : LifeIntervals(allocator, inst, {}) {}
 
-    LifeIntervals(ArenaAllocator *allocator, Inst *inst, LiveRange live_range)
+    LifeIntervals(ArenaAllocator *allocator, Inst *inst, LiveRange liveRange)
         : inst_(inst),
-          live_ranges_(allocator->Adapter()),
-          use_positions_(allocator->Adapter()),
+          liveRanges_(allocator->Adapter()),
+          usePositions_(allocator->Adapter()),
           location_(Location::Invalid()),
           type_(DataType::NO_TYPE),
-          is_preassigned_(),
-          is_physical_(),
-          is_split_sibling_()
+          isPreassigned_(),
+          isPhysical_(),
+          isSplitSibling_()
     {
 #ifndef NDEBUG
         finalized_ = 0;
 #endif
-        if (live_range.GetEnd() != 0) {
-            live_ranges_.push_back(live_range);
+        if (liveRange.GetEnd() != 0) {
+            liveRanges_.push_back(liveRange);
         }
     }
 
@@ -120,29 +120,29 @@ public:
      * - extend the first LiveRange
      * - append a new one LiveRange due to lifetime hole
      */
-    void AppendRange(LiveRange live_range)
+    void AppendRange(LiveRange liveRange)
     {
-        ASSERT(live_range.GetEnd() >= live_range.GetBegin());
+        ASSERT(liveRange.GetEnd() >= liveRange.GetBegin());
         // [live_range],[back]
-        if (live_ranges_.empty() || live_range.GetEnd() < live_ranges_.back().GetBegin()) {
-            live_ranges_.push_back(live_range);
+        if (liveRanges_.empty() || liveRange.GetEnd() < liveRanges_.back().GetBegin()) {
+            liveRanges_.push_back(liveRange);
             /*
              * [live_range]
              *         [front]
              * ->
              * [    front    ]
              */
-        } else if (live_range.GetEnd() <= live_ranges_.back().GetEnd()) {
-            live_ranges_.back().SetBegin(live_range.GetBegin());
+        } else if (liveRange.GetEnd() <= liveRanges_.back().GetEnd()) {
+            liveRanges_.back().SetBegin(liveRange.GetBegin());
             /*
              * [ live_range  ]
              * [front]
              * ->
              * [    front    ]
              */
-        } else if (!live_ranges_.back().Contains(live_range)) {
-            ASSERT(live_ranges_.back().GetBegin() == live_range.GetBegin());
-            live_ranges_.back().SetEnd(live_range.GetEnd());
+        } else if (!liveRanges_.back().Contains(liveRange)) {
+            ASSERT(liveRanges_.back().GetBegin() == liveRange.GetBegin());
+            liveRanges_.back().SetEnd(liveRange.GetEnd());
         }
     }
 
@@ -155,33 +155,33 @@ public:
      * Group range extends the first LiveRange, because it is covering the hole group,
      * starting from its header
      */
-    void AppendGroupRange(LiveRange loop_range)
+    void AppendGroupRange(LiveRange loopRange)
     {
-        auto first_range = live_ranges_.back();
-        live_ranges_.pop_back();
-        ASSERT(loop_range.GetBegin() == first_range.GetBegin());
+        auto firstRange = liveRanges_.back();
+        liveRanges_.pop_back();
+        ASSERT(loopRange.GetBegin() == firstRange.GetBegin());
         // extend the first LiveRange
-        first_range.SetEnd(std::max(loop_range.GetEnd(), first_range.GetEnd()));
+        firstRange.SetEnd(std::max(loopRange.GetEnd(), firstRange.GetEnd()));
 
         // resolve overlapping
-        while (!live_ranges_.empty()) {
-            if (first_range.Contains(live_ranges_.back())) {
-                live_ranges_.pop_back();
-            } else if (first_range.Contains(live_ranges_.back().GetBegin())) {
-                ASSERT(live_ranges_.back().GetEnd() > first_range.GetEnd());
-                first_range.SetEnd(live_ranges_.back().GetEnd());
-                live_ranges_.pop_back();
+        while (!liveRanges_.empty()) {
+            if (firstRange.Contains(liveRanges_.back())) {
+                liveRanges_.pop_back();
+            } else if (firstRange.Contains(liveRanges_.back().GetBegin())) {
+                ASSERT(liveRanges_.back().GetEnd() > firstRange.GetEnd());
+                firstRange.SetEnd(liveRanges_.back().GetEnd());
+                liveRanges_.pop_back();
                 break;
             } else {
                 break;
             }
         }
-        live_ranges_.push_back(first_range);
+        liveRanges_.push_back(firstRange);
     }
 
     void Clear()
     {
-        live_ranges_.clear();
+        liveRanges_.clear();
     }
 
     /*
@@ -189,17 +189,17 @@ public:
      */
     void StartFrom(LifeNumber from)
     {
-        if (live_ranges_.empty()) {
+        if (liveRanges_.empty()) {
             AppendRange(from, from + LIFE_NUMBER_GAP);
         } else {
-            ASSERT(live_ranges_.back().GetEnd() >= from);
-            live_ranges_.back().SetBegin(from);
+            ASSERT(liveRanges_.back().GetEnd() >= from);
+            liveRanges_.back().SetBegin(from);
         }
     }
 
     const ArenaVector<LiveRange> &GetRanges() const
     {
-        return live_ranges_;
+        return liveRanges_;
     }
 
     LifeNumber GetBegin() const
@@ -239,14 +239,14 @@ public:
     void SetPreassignedReg(Register reg)
     {
         SetReg(reg);
-        is_preassigned_ = true;
+        isPreassigned_ = true;
     }
 
     void SetPhysicalReg(Register reg, DataType::Type type)
     {
         SetLocation(Location::MakeRegister(reg, type));
         SetType(type);
-        is_physical_ = true;
+        isPhysical_ = true;
     }
 
     Register GetReg() const
@@ -286,7 +286,7 @@ public:
 
     Inst *GetInst() const
     {
-        ASSERT(!is_physical_);
+        ASSERT(!isPhysical_);
         return inst_;
     }
 
@@ -297,29 +297,29 @@ public:
 
     const auto &GetUsePositions() const
     {
-        return use_positions_;
+        return usePositions_;
     }
 
     void AddUsePosition(LifeNumber ln)
     {
         ASSERT(ln != 0 && ln != INVALID_LIFE_NUMBER);
         ASSERT(!finalized_);
-        use_positions_.push_back(ln);
+        usePositions_.push_back(ln);
     }
 
     void PrependUsePosition(LifeNumber ln)
     {
         ASSERT(ln != 0 && ln != INVALID_LIFE_NUMBER);
         ASSERT(finalized_);
-        ASSERT(use_positions_.empty() || ln <= use_positions_.front());
-        use_positions_.insert(use_positions_.begin(), ln);
+        ASSERT(usePositions_.empty() || ln <= usePositions_.front());
+        usePositions_.insert(usePositions_.begin(), ln);
     }
 
     LifeNumber GetNextUsage(LifeNumber pos) const
     {
         ASSERT(finalized_);
-        auto it = std::lower_bound(use_positions_.begin(), use_positions_.end(), pos);
-        if (it != use_positions_.end()) {
+        auto it = std::lower_bound(usePositions_.begin(), usePositions_.end(), pos);
+        if (it != usePositions_.end()) {
             return *it;
         }
         return INVALID_LIFE_NUMBER;
@@ -328,19 +328,19 @@ public:
     LifeNumber GetLastUsageBefore(LifeNumber pos) const
     {
         ASSERT(finalized_);
-        auto it = std::lower_bound(use_positions_.begin(), use_positions_.end(), pos);
-        if (it == use_positions_.begin()) {
+        auto it = std::lower_bound(usePositions_.begin(), usePositions_.end(), pos);
+        if (it == usePositions_.begin()) {
             return INVALID_LIFE_NUMBER;
         }
         it = std::prev(it);
-        return it == use_positions_.end() ? INVALID_LIFE_NUMBER : *it;
+        return it == usePositions_.end() ? INVALID_LIFE_NUMBER : *it;
     }
 
     LifeNumber GetPrevUsage(LifeNumber pos) const
     {
         ASSERT(finalized_);
-        auto it = std::upper_bound(use_positions_.begin(), use_positions_.end(), pos);
-        if (it != use_positions_.begin()) {
+        auto it = std::upper_bound(usePositions_.begin(), usePositions_.end(), pos);
+        if (it != usePositions_.begin()) {
             return *std::prev(it);
         }
         return INVALID_LIFE_NUMBER;
@@ -349,7 +349,7 @@ public:
     bool NoUsageUntil(LifeNumber pos) const
     {
         ASSERT(finalized_);
-        return use_positions_.empty() || (*use_positions_.begin() > pos);
+        return usePositions_.empty() || (*usePositions_.begin() > pos);
     }
 
     bool NoDest() const
@@ -362,12 +362,12 @@ public:
 
     bool IsPreassigned() const
     {
-        return is_preassigned_;
+        return isPreassigned_;
     }
 
     bool IsPhysical() const
     {
-        return is_physical_;
+        return isPhysical_;
     }
 
     template <bool WITH_INST_ID = true>
@@ -414,7 +414,7 @@ public:
 
     bool Intersects(const LiveRange &range) const;
     // Return first point where `this` interval intersects with the `other
-    LifeNumber GetFirstIntersectionWith(const LifeIntervals *other, LifeNumber search_from = 0) const;
+    LifeNumber GetFirstIntersectionWith(const LifeIntervals *other, LifeNumber searchFrom = 0) const;
 
     template <bool OTHER_IS_PHYSICAL = false>
     bool IntersectsWith(const LifeIntervals *other) const
@@ -438,7 +438,7 @@ public:
 
     bool IsSplitSibling() const
     {
-        return is_split_sibling_;
+        return isSplitSibling_;
     }
 
     bool FindRangeCoveringPosition(LifeNumber ln, LiveRange *dst) const;
@@ -449,19 +449,19 @@ public:
         ASSERT(!finalized_);
         finalized_ = true;
 #endif
-        std::sort(use_positions_.begin(), use_positions_.end());
+        std::sort(usePositions_.begin(), usePositions_.end());
     }
 
 private:
     Inst *inst_ {nullptr};
-    ArenaVector<LiveRange> live_ranges_;
+    ArenaVector<LiveRange> liveRanges_;
     LifeIntervals *sibling_ {nullptr};
-    ArenaVector<LifeNumber> use_positions_;
+    ArenaVector<LifeNumber> usePositions_;
     Location location_;
     DataType::Type type_;
-    uint8_t is_preassigned_ : 1;
-    uint8_t is_physical_ : 1;
-    uint8_t is_split_sibling_ : 1;
+    uint8_t isPreassigned_ : 1;
+    uint8_t isPhysical_ : 1;
+    uint8_t isSplitSibling_ : 1;
 #ifndef NDEBUG
     uint8_t finalized_ : 1;
 #endif
@@ -525,18 +525,18 @@ public:
 
     const ArenaVector<BasicBlock *> &GetLinearizedBlocks() const
     {
-        return linear_blocks_;
+        return linearBlocks_;
     }
     LifeIntervals *GetInstLifeIntervals(const Inst *inst) const;
 
     Inst *GetInstByLifeNumber(LifeNumber ln) const
     {
-        return insts_by_life_number_[ln / LIFE_NUMBER_GAP];
+        return instsByLifeNumber_[ln / LIFE_NUMBER_GAP];
     }
 
     BasicBlock *GetBlockCoversPoint(LifeNumber ln) const
     {
-        for (auto bb : linear_blocks_) {
+        for (auto bb : linearBlocks_) {
             if (GetBlockLiveRange(bb).Contains(ln)) {
                 return bb;
             }
@@ -546,7 +546,7 @@ public:
 
     void Cleanup()
     {
-        for (auto *interv : inst_life_intervals_) {
+        for (auto *interv : instLifeIntervals_) {
             if (!interv->IsPhysical() && !interv->IsPreassigned()) {
                 interv->ClearLocation();
             }
@@ -558,10 +558,10 @@ public:
 
     void Finalize()
     {
-        for (auto *interv : inst_life_intervals_) {
+        for (auto *interv : instLifeIntervals_) {
             interv->Finalize();
         }
-        for (auto *interv : intervals_for_temps_) {
+        for (auto *interv : intervalsForTemps_) {
             interv->Finalize();
         }
 #ifndef NDEBUG
@@ -571,7 +571,7 @@ public:
 
     const ArenaVector<LifeIntervals *> &GetLifeIntervals() const
     {
-        return inst_life_intervals_;
+        return instLifeIntervals_;
     }
 
     LiveRange GetBlockLiveRange(const BasicBlock *block) const;
@@ -579,22 +579,22 @@ public:
     template <typename Func>
     void EnumerateLiveIntervalsForInst(Inst *inst, Func func)
     {
-        auto inst_number = GetInstLifeNumber(inst);
+        auto instNumber = GetInstLifeNumber(inst);
         for (auto &li : GetLifeIntervals()) {
             if (!li->HasInst()) {
                 continue;
             }
-            auto li_inst = li->GetInst();
+            auto liInst = li->GetInst();
             // phi-inst could be removed after regalloc
-            if (li_inst->GetBasicBlock() == nullptr) {
-                ASSERT(li_inst->IsPhi());
+            if (liInst->GetBasicBlock() == nullptr) {
+                ASSERT(liInst->IsPhi());
                 continue;
             }
-            if (li_inst == inst || li->NoDest()) {
+            if (liInst == inst || li->NoDest()) {
                 continue;
             }
-            auto sibling = li->FindSiblingAt(inst_number);
-            if (sibling != nullptr && sibling->SplitCover(inst_number)) {
+            auto sibling = li->FindSiblingAt(instNumber);
+            if (sibling != nullptr && sibling->SplitCover(instNumber)) {
                 func(sibling);
             }
         }
@@ -606,12 +606,12 @@ public:
      * - Enumerate instruction's inputs with fixed locations
      */
     template <typename Func>
-    void EnumerateFixedLocationsOverlappingTemp(const LifeIntervals *interval_for_temp, Func func) const
+    void EnumerateFixedLocationsOverlappingTemp(const LifeIntervals *intervalForTemp, Func func) const
     {
-        ASSERT(!interval_for_temp->HasInst());
-        ASSERT(interval_for_temp->GetBegin() + 1 == interval_for_temp->GetEnd());
+        ASSERT(!intervalForTemp->HasInst());
+        ASSERT(intervalForTemp->GetBegin() + 1 == intervalForTemp->GetEnd());
 
-        auto ln = interval_for_temp->GetEnd();
+        auto ln = intervalForTemp->GetEnd();
         auto inst = GetInstByLifeNumber(ln);
         ASSERT(inst != nullptr);
 
@@ -630,7 +630,7 @@ public:
 
     size_t GetBlocksCount() const
     {
-        return block_live_ranges_.size();
+        return blockLiveRanges_.size();
     }
 
     bool IsCallBlockingRegisters(Inst *inst) const;
@@ -640,15 +640,15 @@ public:
 
     const UseTable &GetUseTable() const
     {
-        return use_table_;
+        return useTable_;
     }
 
     LifeIntervals *GetTmpRegInterval(const Inst *inst)
     {
-        auto inst_ln = GetInstLifeNumber(inst);
-        auto it = std::find_if(intervals_for_temps_.begin(), intervals_for_temps_.end(),
-                               [inst_ln](auto li) { return li->GetBegin() == inst_ln - 1; });
-        return it == intervals_for_temps_.end() ? nullptr : *it;
+        auto instLn = GetInstLifeNumber(inst);
+        auto it = std::find_if(intervalsForTemps_.begin(), intervalsForTemps_.end(),
+                               [instLn](auto li) { return li->GetBegin() == instLn - 1; });
+        return it == intervalsForTemps_.end() ? nullptr : *it;
     }
 
 private:
@@ -673,47 +673,47 @@ private:
      */
     void BuildInstLifeNumbers();
     void BuildInstLifeIntervals();
-    void ProcessBlockLiveInstructions(BasicBlock *block, InstLiveSet *live_set);
-    void AdjustInputsLifetime(Inst *inst, LiveRange live_range, InstLiveSet *live_set);
-    void SetInputRange(const Inst *inst, const Inst *input, LiveRange live_range) const;
+    void ProcessBlockLiveInstructions(BasicBlock *block, InstLiveSet *liveSet);
+    void AdjustInputsLifetime(Inst *inst, LiveRange liveRange, InstLiveSet *liveSet);
+    void SetInputRange(const Inst *inst, const Inst *input, LiveRange liveRange) const;
     void CreateLifeIntervals(Inst *inst);
     void CreateIntervalForTemp(LifeNumber ln);
     InstLiveSet *GetInitInstLiveSet(BasicBlock *block);
     LifeNumber GetInstLifeNumber(const Inst *inst) const;
     void SetInstLifeNumber(const Inst *inst, LifeNumber number);
-    void SetBlockLiveRange(BasicBlock *block, LiveRange life_range);
-    void SetBlockLiveSet(BasicBlock *block, InstLiveSet *live_set);
+    void SetBlockLiveRange(BasicBlock *block, LiveRange lifeRange);
+    void SetBlockLiveSet(BasicBlock *block, InstLiveSet *liveSet);
     InstLiveSet *GetBlockLiveSet(BasicBlock *block) const;
     LifeNumber GetLoopEnd(Loop *loop);
-    LiveRange GetPropagatedLiveRange(Inst *inst, LiveRange live_range);
+    LiveRange GetPropagatedLiveRange(Inst *inst, LiveRange liveRange);
     void AdjustCatchPhiInputsLifetime(Inst *inst);
-    void SetUsePositions(Inst *user_inst, LifeNumber life_number);
+    void SetUsePositions(Inst *userInst, LifeNumber lifeNumber);
 
     void BlockFixedRegisters(Inst *inst);
     template <bool IS_FP>
-    void BlockReg(Register reg, LifeNumber block_from, LifeNumber block_to, bool is_use);
+    void BlockReg(Register reg, LifeNumber blockFrom, LifeNumber blockTo, bool isUse);
     template <bool IS_FP>
-    void BlockPhysicalRegisters(LifeNumber block_from);
+    void BlockPhysicalRegisters(LifeNumber blockFrom);
     void BlockFixedLocationRegister(Location location, LifeNumber ln)
     {
         BlockFixedLocationRegister(location, ln, ln + 1U, true);
     }
-    void BlockFixedLocationRegister(Location location, LifeNumber block_from, LifeNumber block_to, bool is_use);
+    void BlockFixedLocationRegister(Location location, LifeNumber blockFrom, LifeNumber blockTo, bool isUse);
 
 private:
     ArenaAllocator *allocator_;
-    ArenaVector<BasicBlock *> linear_blocks_;
-    ArenaVector<LifeNumber> inst_life_numbers_;
-    ArenaVector<LifeIntervals *> inst_life_intervals_;
-    InstVector insts_by_life_number_;
-    ArenaVector<LiveRange> block_live_ranges_;
-    ArenaVector<InstLiveSet *> block_live_sets_;
-    ArenaMultiMap<Inst *, Inst *> pending_catch_phi_inputs_;
-    ArenaVector<LifeIntervals *> physical_general_intervals_;
-    ArenaVector<LifeIntervals *> physical_vector_intervals_;
-    ArenaVector<LifeIntervals *> intervals_for_temps_;
-    UseTable use_table_;
-    bool has_safepoint_during_call_;
+    ArenaVector<BasicBlock *> linearBlocks_;
+    ArenaVector<LifeNumber> instLifeNumbers_;
+    ArenaVector<LifeIntervals *> instLifeIntervals_;
+    InstVector instsByLifeNumber_;
+    ArenaVector<LiveRange> blockLiveRanges_;
+    ArenaVector<InstLiveSet *> blockLiveSets_;
+    ArenaMultiMap<Inst *, Inst *> pendingCatchPhiInputs_;
+    ArenaVector<LifeIntervals *> physicalGeneralIntervals_;
+    ArenaVector<LifeIntervals *> physicalVectorIntervals_;
+    ArenaVector<LifeIntervals *> intervalsForTemps_;
+    UseTable useTable_;
+    bool hasSafepointDuringCall_;
 
     Marker marker_ {UNDEF_MARKER};
 #ifndef NDEBUG

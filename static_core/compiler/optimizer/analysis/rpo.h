@@ -45,49 +45,49 @@ public:
     }
 
 public:
-    void RemoveBasicBlock(BasicBlock *rm_block)
+    void RemoveBasicBlock(BasicBlock *rmBlock)
     {
         ASSERT_PRINT(IsValid(), "RPO is invalid");
-        auto it = std::find(rpo_vector_.begin(), rpo_vector_.end(), rm_block);
-        if (it != rpo_vector_.end()) {
-            rpo_vector_.erase(it);
+        auto it = std::find(rpoVector_.begin(), rpoVector_.end(), rmBlock);
+        if (it != rpoVector_.end()) {
+            rpoVector_.erase(it);
         }
     }
 
-    void AddBasicBlockAfter(BasicBlock *cur_block, BasicBlock *new_block)
+    void AddBasicBlockAfter(BasicBlock *curBlock, BasicBlock *newBlock)
     {
         ASSERT_PRINT(IsValid(), "RPO is invalid");
-        auto it = std::find(rpo_vector_.begin(), rpo_vector_.end(), cur_block);
-        rpo_vector_.insert(it + 1, new_block);
+        auto it = std::find(rpoVector_.begin(), rpoVector_.end(), curBlock);
+        rpoVector_.insert(it + 1, newBlock);
     }
 
-    void AddBasicBlockBefore(BasicBlock *cur_block, BasicBlock *new_block)
+    void AddBasicBlockBefore(BasicBlock *curBlock, BasicBlock *newBlock)
     {
         ASSERT_PRINT(IsValid(), "RPO is invalid");
-        auto it = std::find(rpo_vector_.begin(), rpo_vector_.end(), cur_block);
-        rpo_vector_.insert(it, new_block);
+        auto it = std::find(rpoVector_.begin(), rpoVector_.end(), curBlock);
+        rpoVector_.insert(it, newBlock);
     }
 
-    void AddVectorAfter(BasicBlock *cur_block, const ArenaVector<BasicBlock *> &new_vector)
+    void AddVectorAfter(BasicBlock *curBlock, const ArenaVector<BasicBlock *> &newVector)
     {
         ASSERT_PRINT(IsValid(), "RPO is invalid");
-        auto it = std::find(rpo_vector_.begin(), rpo_vector_.end(), cur_block);
-        rpo_vector_.insert(it + 1, new_vector.begin(), new_vector.end());
+        auto it = std::find(rpoVector_.begin(), rpoVector_.end(), curBlock);
+        rpoVector_.insert(it + 1, newVector.begin(), newVector.end());
     }
 
     const ArenaVector<BasicBlock *> &GetBlocks() const
     {
-        return rpo_vector_;
+        return rpoVector_;
     }
 
 private:
     bool RunImpl() override;
 
-    void DFS(BasicBlock *block, size_t *blocks_count);
+    void DFS(BasicBlock *block, size_t *blocksCount);
 
 private:
     Marker marker_ {UNDEF_MARKER};
-    ArenaVector<BasicBlock *> rpo_vector_;
+    ArenaVector<BasicBlock *> rpoVector_;
 };
 }  // namespace panda::compiler
 

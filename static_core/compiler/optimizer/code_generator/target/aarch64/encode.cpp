@@ -154,9 +154,9 @@ void Aarch64Encoder::EncodeJumpTest(LabelHolder::LabelId id, Reg src, Imm imm, C
         auto label = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(id);
         GetMasm()->B(label, ConvertTest(cc));
     } else {
-        ScopedTmpReg tmp_reg(this, src.GetType());
-        EncodeMov(tmp_reg, imm);
-        EncodeJumpTest(id, src, tmp_reg, cc);
+        ScopedTmpReg tmpReg(this, src.GetType());
+        EncodeMov(tmpReg, imm);
+        EncodeJumpTest(id, src, tmpReg, cc);
     }
 }
 
@@ -220,15 +220,14 @@ void Aarch64Encoder::EncodeJump([[maybe_unused]] RelocationInfo *relocation)
 #endif
 }
 
-void Aarch64Encoder::EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bit_pos,
-                                            bool bit_value)
+void Aarch64Encoder::EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bitPos, bool bitValue)
 {
-    ASSERT(reg.IsScalar() && reg.GetSize() > bit_pos);
+    ASSERT(reg.IsScalar() && reg.GetSize() > bitPos);
     auto label = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(id);
-    if (bit_value) {
-        GetMasm()->Tbnz(VixlReg(reg), bit_pos, label);
+    if (bitValue) {
+        GetMasm()->Tbnz(VixlReg(reg), bitPos, label);
     } else {
-        GetMasm()->Tbz(VixlReg(reg), bit_pos, label);
+        GetMasm()->Tbz(VixlReg(reg), bitPos, label);
     }
 }
 
@@ -251,17 +250,17 @@ void Aarch64Encoder::MakeCall([[maybe_unused]] compiler::RelocationInfo *relocat
 #endif
 }
 
-void Aarch64Encoder::MakeCall(const void *entry_point)
+void Aarch64Encoder::MakeCall(const void *entryPoint)
 {
     ScopedTmpReg tmp(this, true);
-    EncodeMov(tmp, Imm(reinterpret_cast<uintptr_t>(entry_point)));
+    EncodeMov(tmp, Imm(reinterpret_cast<uintptr_t>(entryPoint)));
     GetMasm()->Blr(VixlReg(tmp));
 }
 
-void Aarch64Encoder::MakeCall(MemRef entry_point)
+void Aarch64Encoder::MakeCall(MemRef entryPoint)
 {
     ScopedTmpReg tmp(this, true);
-    EncodeLdr(tmp, false, entry_point);
+    EncodeLdr(tmp, false, entryPoint);
     GetMasm()->Blr(VixlReg(tmp));
 }
 
@@ -276,19 +275,19 @@ void Aarch64Encoder::MakeCall(LabelHolder::LabelId id)
     GetMasm()->Bl(label);
 }
 
-void Aarch64Encoder::LoadPcRelative(Reg reg, intptr_t offset, Reg reg_addr)
+void Aarch64Encoder::LoadPcRelative(Reg reg, intptr_t offset, Reg regAddr)
 {
     ASSERT(GetCodeOffset() != Encoder::INVALID_OFFSET);
-    ASSERT(reg.IsValid() || reg_addr.IsValid());
+    ASSERT(reg.IsValid() || regAddr.IsValid());
 
-    if (!reg_addr.IsValid()) {
-        reg_addr = reg.As(INT64_TYPE);
+    if (!regAddr.IsValid()) {
+        regAddr = reg.As(INT64_TYPE);
     }
 
     if (vixl::IsInt21(offset)) {
-        GetMasm()->adr(VixlReg(reg_addr), offset);
+        GetMasm()->adr(VixlReg(regAddr), offset);
         if (reg != INVALID_REGISTER) {
-            EncodeLdr(reg, false, MemRef(reg_addr));
+            EncodeLdr(reg, false, MemRef(regAddr));
         }
     } else {
         size_t pc = GetCodeOffset() + GetCursorOffset();
@@ -302,18 +301,18 @@ void Aarch64Encoder::LoadPcRelative(Reg reg, intptr_t offset, Reg reg_addr)
             addr = res;
         }
 
-        ssize_t adrp_imm = (addr >> vixl::aarch64::kPageSizeLog2) - (pc >> vixl::aarch64::kPageSizeLog2);
+        ssize_t adrpImm = (addr >> vixl::aarch64::kPageSizeLog2) - (pc >> vixl::aarch64::kPageSizeLog2);
 
-        GetMasm()->adrp(VixlReg(reg_addr), adrp_imm);
+        GetMasm()->adrp(VixlReg(regAddr), adrpImm);
 
         offset = panda::helpers::ToUnsigned(addr) & (vixl::aarch64::kPageSize - 1);
-        if (reg.GetId() != reg_addr.GetId()) {
-            EncodeAdd(reg_addr, reg_addr, Imm(offset));
+        if (reg.GetId() != regAddr.GetId()) {
+            EncodeAdd(regAddr, regAddr, Imm(offset));
             if (reg != INVALID_REGISTER) {
-                EncodeLdr(reg, true, MemRef(reg_addr));
+                EncodeLdr(reg, true, MemRef(regAddr));
             }
         } else {
-            EncodeLdr(reg, true, MemRef(reg_addr, offset));
+            EncodeLdr(reg, true, MemRef(regAddr, offset));
         }
     }
 }
@@ -389,8 +388,8 @@ void Aarch64Encoder::EncodeMov(Reg dst, Reg src)
     // Keeping the option here helps to generate nothing when e.g. src is x0 and dst is w0.
     // Probably, a better solution here is to system-wide checking register size on Encoder level.
     if (src.GetSize() != dst.GetSize()) {
-        auto src_reg = Reg(src.GetId(), dst.GetType());
-        GetMasm()->Mov(VixlReg(dst), VixlReg(src_reg), vixl::aarch64::DiscardMoveMode::kDiscardForSameWReg);
+        auto srcReg = Reg(src.GetId(), dst.GetType());
+        GetMasm()->Mov(VixlReg(dst), VixlReg(srcReg), vixl::aarch64::DiscardMoveMode::kDiscardForSameWReg);
         return;
     }
     GetMasm()->Mov(VixlReg(dst), VixlReg(src), vixl::aarch64::DiscardMoveMode::kDiscardForSameWReg);
@@ -439,8 +438,8 @@ void Aarch64Encoder::EncodeIsInf(Reg dst, Reg src)
     if (src.GetSize() == WORD_SIZE) {
         constexpr uint32_t INF_MASK = 0xff000000;
 
-        ScopedTmpRegU32 tmp_reg(this);
-        auto tmp = VixlReg(tmp_reg);
+        ScopedTmpRegU32 tmpReg(this);
+        auto tmp = VixlReg(tmpReg);
         GetMasm()->Fmov(tmp, VixlVReg(src));
         GetMasm()->Mov(VixlReg(dst).W(), INF_MASK);
         GetMasm()->Lsl(tmp, tmp, 1);
@@ -448,8 +447,8 @@ void Aarch64Encoder::EncodeIsInf(Reg dst, Reg src)
     } else {
         constexpr uint64_t INF_MASK = 0xffe0000000000000;
 
-        ScopedTmpRegU64 tmp_reg(this);
-        auto tmp = VixlReg(tmp_reg);
+        ScopedTmpRegU64 tmpReg(this);
+        auto tmp = VixlReg(tmpReg);
         GetMasm()->Fmov(tmp, VixlVReg(src));
         GetMasm()->Mov(VixlReg(dst).X(), INF_MASK);
         GetMasm()->Lsl(tmp, tmp, 1);
@@ -485,19 +484,19 @@ void Aarch64Encoder::EncodeIsInteger(Reg dst, Reg src)
     ASSERT(dst.IsScalar() && src.IsFloat());
     ASSERT(src.GetSize() == WORD_SIZE || src.GetSize() == DOUBLE_WORD_SIZE);
 
-    auto label_exit = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
-    auto label_inf_or_nan = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelExit = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelInfOrNan = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     EncodeCmpFracWithDelta(src);
-    GetMasm()->B(label_inf_or_nan, vixl::aarch64::Condition::vs);  // Inf or NaN
+    GetMasm()->B(labelInfOrNan, vixl::aarch64::Condition::vs);  // Inf or NaN
     GetMasm()->Cset(VixlReg(dst), vixl::aarch64::Condition::le);
-    GetMasm()->B(label_exit);
+    GetMasm()->B(labelExit);
 
     // IsInteger returns false if src is Inf or NaN
-    GetMasm()->Bind(label_inf_or_nan);
+    GetMasm()->Bind(labelInfOrNan);
     EncodeMov(dst, Imm(false));
 
-    GetMasm()->Bind(label_exit);
+    GetMasm()->Bind(labelExit);
 }
 
 void Aarch64Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
@@ -505,13 +504,13 @@ void Aarch64Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
     ASSERT(dst.IsScalar() && src.IsFloat());
     ASSERT(src.GetSize() == WORD_SIZE || src.GetSize() == DOUBLE_WORD_SIZE);
 
-    auto label_exit = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
-    auto label_false = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelExit = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelFalse = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     // Check if IsInteger
     EncodeCmpFracWithDelta(src);
-    GetMasm()->B(label_false, vixl::aarch64::Condition::vs);  // Inf or NaN
-    GetMasm()->B(label_false, vixl::aarch64::Condition::gt);
+    GetMasm()->B(labelFalse, vixl::aarch64::Condition::vs);  // Inf or NaN
+    GetMasm()->B(labelFalse, vixl::aarch64::Condition::gt);
 
     // Check if it is safe, i.e. src can be represented in float/double without losing precision
     if (src.GetSize() == WORD_SIZE) {
@@ -524,13 +523,13 @@ void Aarch64Encoder::EncodeIsSafeInteger(Reg dst, Reg src)
         GetMasm()->Fcmp(VixlVReg(tmp), MaxIntAsExactDouble());
     }
     GetMasm()->Cset(VixlReg(dst), vixl::aarch64::Condition::le);
-    GetMasm()->B(label_exit);
+    GetMasm()->B(labelExit);
 
     // Return false if src !IsInteger
-    GetMasm()->Bind(label_false);
+    GetMasm()->Bind(labelFalse);
     EncodeMov(dst, Imm(false));
 
-    GetMasm()->Bind(label_exit);
+    GetMasm()->Bind(labelExit);
 }
 
 /* NaN values are needed to be canonicalized */
@@ -555,8 +554,8 @@ void Aarch64Encoder::EncodeFpToBits(Reg dst, Reg src)
 
         constexpr auto DNAN = 0x7ff8000000000000;
 
-        ScopedTmpRegU64 tmp_reg(this);
-        auto tmp = VixlReg(tmp_reg);
+        ScopedTmpRegU64 tmpReg(this);
+        auto tmp = VixlReg(tmpReg);
 
         GetMasm()->Fcmp(VixlVReg(src), VixlVReg(src));
         GetMasm()->Mov(tmp, DNAN);
@@ -577,18 +576,18 @@ void Aarch64Encoder::EncodeMoveBitsRaw(Reg dst, Reg src)
         }
     } else {
         ASSERT(dst.GetSize() == src.GetSize());
-        ScopedTmpReg tmp_reg(this, src.GetType());
-        auto src_reg = src;
+        ScopedTmpReg tmpReg(this, src.GetType());
+        auto srcReg = src;
         auto rzero = GetRegfile()->GetZeroReg();
         if (src.GetId() == rzero.GetId()) {
-            EncodeMov(tmp_reg, Imm(0));
-            src_reg = tmp_reg;
+            EncodeMov(tmpReg, Imm(0));
+            srcReg = tmpReg;
         }
 
-        if (src_reg.GetSize() == WORD_SIZE) {
-            GetMasm()->Fmov(VixlVReg(dst).S(), VixlReg(src_reg).W());
+        if (srcReg.GetSize() == WORD_SIZE) {
+            GetMasm()->Fmov(VixlVReg(dst).S(), VixlReg(srcReg).W());
         } else {
-            GetMasm()->Fmov(VixlVReg(dst), VixlReg(src_reg));
+            GetMasm()->Fmov(VixlVReg(dst), VixlReg(srcReg));
         }
     }
 }
@@ -622,28 +621,28 @@ void Aarch64Encoder::EncodeBitCount(Reg dst, Reg src)
 
     ASSERT(dst.GetSize() == WORD_SIZE);
 
-    ScopedTmpRegF64 tmp_reg0(this);
-    vixl::aarch64::VRegister tmp_reg;
+    ScopedTmpRegF64 tmpReg0(this);
+    vixl::aarch64::VRegister tmpReg;
     if (src.GetSize() == DOUBLE_WORD_SIZE) {
-        tmp_reg = VixlVReg(tmp_reg0).D();
+        tmpReg = VixlVReg(tmpReg0).D();
     } else {
-        tmp_reg = VixlVReg(tmp_reg0).S();
+        tmpReg = VixlVReg(tmpReg0).S();
     }
 
     if (src.GetSize() < WORD_SIZE) {
-        int64_t cut_value = (1ULL << src.GetSize()) - 1;
-        EncodeAnd(src, src, Imm(cut_value));
+        int64_t cutValue = (1ULL << src.GetSize()) - 1;
+        EncodeAnd(src, src, Imm(cutValue));
     }
 
-    GetMasm()->Fmov(tmp_reg, VixlReg(src));
-    GetMasm()->Cnt(tmp_reg.V8B(), tmp_reg.V8B());
-    GetMasm()->Addv(tmp_reg.B(), tmp_reg.V8B());
-    EncodeMov(dst, tmp_reg0);
+    GetMasm()->Fmov(tmpReg, VixlReg(src));
+    GetMasm()->Cnt(tmpReg.V8B(), tmpReg.V8B());
+    GetMasm()->Addv(tmpReg.B(), tmpReg.V8B());
+    EncodeMov(dst, tmpReg0);
 }
 
 /* Since only ROR is supported on AArch64 we do
  * left rotaion as ROR(v, -count) */
-void Aarch64Encoder::EncodeRotate(Reg dst, Reg src1, Reg src2, bool is_ror)
+void Aarch64Encoder::EncodeRotate(Reg dst, Reg src1, Reg src2, bool isRor)
 {
     ASSERT(src1.GetSize() == WORD_SIZE || src1.GetSize() == DOUBLE_WORD_SIZE);
     ASSERT(src1.GetSize() == dst.GetSize());
@@ -654,7 +653,7 @@ void Aarch64Encoder::EncodeRotate(Reg dst, Reg src1, Reg src2, bool is_ror)
     }
     /* as the second parameters is always 32-bits long we have to
      * adjust the counter register for the 64-bits first operand case */
-    if (is_ror) {
+    if (isRor) {
         auto count = (dst.GetSize() == WORD_SIZE ? VixlReg(src2) : VixlReg(src2).X());
         GetMasm()->Ror(VixlReg(dst), VixlReg(src1), count);
     } else {
@@ -753,46 +752,45 @@ void Aarch64Encoder::EncodeRoundToPInf(Reg dst, Reg src)
     GetMasm()->Frinta(VixlVReg(tmp), VixlVReg(src));
     GetMasm()->Fsub(VixlVReg(tmp), VixlVReg(src), VixlVReg(tmp));
     // NOLINTNEXTLINE(readability-magic-numbers)
-    GetMasm()->Fcmp(VixlVReg(tmp), 0.5);
+    GetMasm()->Fcmp(VixlVReg(tmp), 0.5F);
     GetMasm()->Cinc(VixlReg(dst), VixlReg(dst), vixl::aarch64::Condition::eq);
     GetMasm()->Bind(done);
 }
 
-void Aarch64Encoder::EncodeCrc32Update(Reg dst, Reg crc_reg, Reg val_reg)
+void Aarch64Encoder::EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg)
 {
-    auto tmp =
-        dst.GetId() != crc_reg.GetId() && dst.GetId() != val_reg.GetId() ? dst : ScopedTmpReg(this, dst.GetType());
-    GetMasm()->Mvn(VixlReg(tmp), VixlReg(crc_reg));
-    GetMasm()->Crc32b(VixlReg(tmp), VixlReg(tmp), VixlReg(val_reg));
+    auto tmp = dst.GetId() != crcReg.GetId() && dst.GetId() != valReg.GetId() ? dst : ScopedTmpReg(this, dst.GetType());
+    GetMasm()->Mvn(VixlReg(tmp), VixlReg(crcReg));
+    GetMasm()->Crc32b(VixlReg(tmp), VixlReg(tmp), VixlReg(valReg));
     GetMasm()->Mvn(VixlReg(dst), VixlReg(tmp));
 }
 
-void Aarch64Encoder::EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg src_addr, Reg dst_addr)
+void Aarch64Encoder::EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr)
 {
     ScopedTmpReg tmp1(this, FLOAT64_TYPE);
     ScopedTmpReg tmp2(this, FLOAT64_TYPE);
-    auto vixl_vreg1 = vixl::aarch64::VRegister(tmp1.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8B);
-    ASSERT(vixl_vreg1.IsValid());
-    auto vixl_vreg2 = vixl::aarch64::VRegister(tmp2.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8B);
-    ASSERT(vixl_vreg2.IsValid());
-    auto src = vixl::aarch64::MemOperand(VixlReg(src_addr));
-    auto dst = vixl::aarch64::MemOperand(VixlReg(dst_addr));
-    GetMasm()->Ld2(vixl_vreg1, vixl_vreg2, src);
-    GetMasm()->St1(vixl_vreg1, dst);
+    auto vixlVreg1 = vixl::aarch64::VRegister(tmp1.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8B);
+    ASSERT(vixlVreg1.IsValid());
+    auto vixlVreg2 = vixl::aarch64::VRegister(tmp2.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8B);
+    ASSERT(vixlVreg2.IsValid());
+    auto src = vixl::aarch64::MemOperand(VixlReg(srcAddr));
+    auto dst = vixl::aarch64::MemOperand(VixlReg(dstAddr));
+    GetMasm()->Ld2(vixlVreg1, vixlVreg2, src);
+    GetMasm()->St1(vixlVreg1, dst);
 }
 
-void Aarch64Encoder::EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg src_addr, Reg dst_addr)
+void Aarch64Encoder::EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr)
 {
     ScopedTmpReg tmp1(this, FLOAT64_TYPE);
     ScopedTmpReg tmp2(this, FLOAT64_TYPE);
-    auto vixl_vreg1 = vixl::aarch64::VRegister(tmp1.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
-    ASSERT(vixl_vreg1.IsValid());
-    auto vixl_vreg2 = vixl::aarch64::VRegister(tmp2.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
-    ASSERT(vixl_vreg2.IsValid());
-    auto src = vixl::aarch64::MemOperand(VixlReg(src_addr));
-    auto dst = vixl::aarch64::MemOperand(VixlReg(dst_addr));
-    GetMasm()->Ld2(vixl_vreg1, vixl_vreg2, src);
-    GetMasm()->St1(vixl_vreg1, dst);
+    auto vixlVreg1 = vixl::aarch64::VRegister(tmp1.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    ASSERT(vixlVreg1.IsValid());
+    auto vixlVreg2 = vixl::aarch64::VRegister(tmp2.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    ASSERT(vixlVreg2.IsValid());
+    auto src = vixl::aarch64::MemOperand(VixlReg(srcAddr));
+    auto dst = vixl::aarch64::MemOperand(VixlReg(dstAddr));
+    GetMasm()->Ld2(vixlVreg1, vixlVreg2, src);
+    GetMasm()->St1(vixlVreg1, dst);
 }
 
 /* return the power of 2 for the size of the type */
@@ -833,46 +831,46 @@ void Aarch64Encoder::EncodeReverseBits(Reg dst, Reg src)
     GetMasm()->Rbit(VixlReg(dst), VixlReg(src));
 }
 
-void Aarch64Encoder::EncodeCompressedStringCharAt(Reg dst, Reg str, Reg idx, Reg length, Reg tmp, size_t data_offset,
+void Aarch64Encoder::EncodeCompressedStringCharAt(Reg dst, Reg str, Reg idx, Reg length, Reg tmp, size_t dataOffset,
                                                   uint32_t shift)
 {
     ASSERT(dst.GetSize() == HALF_SIZE);
 
-    auto label_not_compressed = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
-    auto label_char_loaded = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
-    auto vixl_tmp = VixlReg(tmp, DOUBLE_WORD_SIZE);
-    auto vixl_dst = VixlReg(dst);
+    auto labelNotCompressed = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCharLoaded = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto vixlTmp = VixlReg(tmp, DOUBLE_WORD_SIZE);
+    auto vixlDst = VixlReg(dst);
 
-    GetMasm()->Tbnz(VixlReg(length), 0, label_not_compressed);
+    GetMasm()->Tbnz(VixlReg(length), 0, labelNotCompressed);
     EncodeAdd(tmp, str, idx);
-    GetMasm()->ldrb(vixl_dst, MemOperand(vixl_tmp, data_offset));
-    GetMasm()->B(label_char_loaded);
-    GetMasm()->Bind(label_not_compressed);
+    GetMasm()->ldrb(vixlDst, MemOperand(vixlTmp, dataOffset));
+    GetMasm()->B(labelCharLoaded);
+    GetMasm()->Bind(labelNotCompressed);
     EncodeAdd(tmp, str, Shift(idx, shift));
-    GetMasm()->ldrh(vixl_dst, MemOperand(vixl_tmp, data_offset));
-    GetMasm()->Bind(label_char_loaded);
+    GetMasm()->ldrh(vixlDst, MemOperand(vixlTmp, dataOffset));
+    GetMasm()->Bind(labelCharLoaded);
 }
 
-void Aarch64Encoder::EncodeCompressedStringCharAtI(Reg dst, Reg str, Reg length, size_t data_offset, uint32_t index,
+void Aarch64Encoder::EncodeCompressedStringCharAtI(Reg dst, Reg str, Reg length, size_t dataOffset, uint32_t index,
                                                    uint32_t shift)
 {
     ASSERT(dst.GetSize() == HALF_SIZE);
 
-    auto label_not_compressed = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
-    auto label_char_loaded = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
-    auto vixl_str = VixlReg(str);
-    auto vixl_dst = VixlReg(dst);
+    auto labelNotCompressed = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCharLoaded = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto vixlStr = VixlReg(str);
+    auto vixlDst = VixlReg(dst);
 
     auto rzero = GetRegfile()->GetZeroReg().GetId();
     if (str.GetId() == rzero) {
         return;
     }
-    GetMasm()->Tbnz(VixlReg(length), 0, label_not_compressed);
-    GetMasm()->Ldrb(vixl_dst, MemOperand(vixl_str, data_offset + index));
-    GetMasm()->B(label_char_loaded);
-    GetMasm()->Bind(label_not_compressed);
-    GetMasm()->Ldrh(vixl_dst, MemOperand(vixl_str, data_offset + (index << shift)));
-    GetMasm()->Bind(label_char_loaded);
+    GetMasm()->Tbnz(VixlReg(length), 0, labelNotCompressed);
+    GetMasm()->Ldrb(vixlDst, MemOperand(vixlStr, dataOffset + index));
+    GetMasm()->B(labelCharLoaded);
+    GetMasm()->Bind(labelNotCompressed);
+    GetMasm()->Ldrh(vixlDst, MemOperand(vixlStr, dataOffset + (index << shift)));
+    GetMasm()->Bind(labelCharLoaded);
 }
 
 /* Unsafe builtins implementation */
@@ -915,7 +913,7 @@ void Aarch64Encoder::EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val
     auto addr = ScopedTmpReg(this, true); /* LR is used */
     auto mem = MemRef(addr);
     auto restart = CreateLabel();
-    auto retry_ldaxr = CreateLabel();
+    auto retryLdaxr = CreateLabel();
 
     /* ldaxr wants [reg]-form of memref (no offset or disp) */
     EncodeAdd(addr, obj, offset);
@@ -928,12 +926,12 @@ void Aarch64Encoder::EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val
     BindLabel(restart);
     EncodeLdrAcquire(last, false, mem);
 
-    BindLabel(retry_ldaxr);
+    BindLabel(retryLdaxr);
     EncodeLdrExclusive(cur, addr, true);
     EncodeJump(restart, cur, last, Condition::NE);
     last.Release();
     EncodeStrExclusive(dst, val, addr, true);
-    EncodeJump(retry_ldaxr, dst, Imm(0), Condition::NE);
+    EncodeJump(retryLdaxr, dst, Imm(0), Condition::NE);
 
     EncodeMov(dst, cur);
 }
@@ -945,7 +943,7 @@ void Aarch64Encoder::EncodeUnsafeGetAndAdd(Reg dst, Reg obj, Reg offset, Reg val
     auto newval = Reg(tmp.GetId(), val.GetType());
 
     auto restart = CreateLabel();
-    auto retry_ldaxr = CreateLabel();
+    auto retryLdaxr = CreateLabel();
 
     /* addr_reg aliases obj, obj reg will be restored bedore exit */
     auto addr = Reg(obj.GetId(), INT64_TYPE);
@@ -963,12 +961,12 @@ void Aarch64Encoder::EncodeUnsafeGetAndAdd(Reg dst, Reg obj, Reg offset, Reg val
     EncodeLdrAcquire(last, false, mem);
     EncodeAdd(newval, last, val);
 
-    BindLabel(retry_ldaxr);
+    BindLabel(retryLdaxr);
     EncodeLdrExclusive(cur, addr, true);
     EncodeJump(restart, cur, last, Condition::NE);
     last.Release();
     EncodeStrExclusive(dst, newval, addr, true);
-    EncodeJump(retry_ldaxr, dst, Imm(0), Condition::NE);
+    EncodeJump(retryLdaxr, dst, Imm(0), Condition::NE);
 
     EncodeSub(obj, addr, offset); /* restore the original value */
     EncodeMov(dst, cur);
@@ -999,7 +997,7 @@ void Aarch64Encoder::EncodeNot(Reg dst, Reg src)
     GetMasm()->Mvn(VixlReg(dst), VixlReg(src));
 }
 
-void Aarch64Encoder::EncodeCastFloat(Reg dst, bool dst_signed, Reg src, bool src_signed)
+void Aarch64Encoder::EncodeCastFloat(Reg dst, bool dstSigned, Reg src, bool srcSigned)
 {
     // We DON'T support casts from float32/64 to int8/16 and bool, because this caste is not declared anywhere
     // in other languages and architecture, we do not know what the behavior should be.
@@ -1010,7 +1008,7 @@ void Aarch64Encoder::EncodeCastFloat(Reg dst, bool dst_signed, Reg src, bool src
     ASSERT(dst.GetSize() >= WORD_SIZE);
 
     if (src.IsFloat() && dst.IsScalar()) {
-        if (dst_signed) {
+        if (dstSigned) {
             GetMasm()->Fcvtzs(VixlReg(dst), VixlVReg(src));
         } else {
             GetMasm()->Fcvtzu(VixlReg(dst), VixlVReg(src));
@@ -1025,7 +1023,7 @@ void Aarch64Encoder::EncodeCastFloat(Reg dst, bool dst_signed, Reg src, bool src
             } else {
                 GetMasm()->Fmov(VixlVReg(dst), 0.0);
             }
-        } else if (src_signed) {
+        } else if (srcSigned) {
             GetMasm()->Scvtf(VixlVReg(dst), VixlReg(src));
         } else {
             GetMasm()->Ucvtf(VixlVReg(dst), VixlReg(src));
@@ -1043,41 +1041,41 @@ void Aarch64Encoder::EncodeCastFloat(Reg dst, bool dst_signed, Reg src, bool src
     UNREACHABLE();
 }
 
-void Aarch64Encoder::EncodeCastFloatWithSmallDst(Reg dst, bool dst_signed, Reg src, bool src_signed)
+void Aarch64Encoder::EncodeCastFloatWithSmallDst(Reg dst, bool dstSigned, Reg src, bool srcSigned)
 {
     // Dst bool type don't supported!
 
     if (src.IsFloat() && dst.IsScalar()) {
-        if (dst_signed) {
+        if (dstSigned) {
             GetMasm()->Fcvtzs(VixlReg(dst), VixlVReg(src));
             if (dst.GetSize() < WORD_SIZE) {
                 constexpr uint32_t TEST_BIT = (1U << (static_cast<uint32_t>(WORD_SIZE) - 1));
-                ScopedTmpReg tmp_reg1(this, dst.GetType());
-                auto tmp1 = VixlReg(tmp_reg1);
-                ScopedTmpReg tmp_reg2(this, dst.GetType());
-                auto tmp2 = VixlReg(tmp_reg2);
+                ScopedTmpReg tmpReg1(this, dst.GetType());
+                auto tmp1 = VixlReg(tmpReg1);
+                ScopedTmpReg tmpReg2(this, dst.GetType());
+                auto tmp2 = VixlReg(tmpReg2);
 
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                int32_t set_bit = (dst.GetSize() == BYTE_SIZE) ? (1UL << (BYTE_SIZE - 1)) : (1UL << (HALF_SIZE - 1));
-                int32_t rem_bit = set_bit - 1;
+                int32_t setBit = (dst.GetSize() == BYTE_SIZE) ? (1UL << (BYTE_SIZE - 1)) : (1UL << (HALF_SIZE - 1));
+                int32_t remBit = setBit - 1;
                 GetMasm()->Ands(tmp1, VixlReg(dst), TEST_BIT);
 
-                GetMasm()->Orr(tmp1, VixlReg(dst), set_bit);
-                GetMasm()->And(tmp2, VixlReg(dst), rem_bit);
+                GetMasm()->Orr(tmp1, VixlReg(dst), setBit);
+                GetMasm()->And(tmp2, VixlReg(dst), remBit);
                 // Select result - if zero set - tmp2, else tmp1
                 GetMasm()->Csel(VixlReg(dst), tmp2, tmp1, vixl::aarch64::eq);
-                EncodeCastScalar(Reg(dst.GetId(), INT32_TYPE), dst_signed, dst, dst_signed);
+                EncodeCastScalar(Reg(dst.GetId(), INT32_TYPE), dstSigned, dst, dstSigned);
             }
             return;
         }
         GetMasm()->Fcvtzu(VixlReg(dst), VixlVReg(src));
         if (dst.GetSize() < WORD_SIZE) {
-            EncodeCastScalar(Reg(dst.GetId(), INT32_TYPE), dst_signed, dst, dst_signed);
+            EncodeCastScalar(Reg(dst.GetId(), INT32_TYPE), dstSigned, dst, dstSigned);
         }
         return;
     }
     if (src.IsScalar() && dst.IsFloat()) {
-        if (src_signed) {
+        if (srcSigned) {
             GetMasm()->Scvtf(VixlVReg(dst), VixlReg(src));
         } else {
             GetMasm()->Ucvtf(VixlVReg(dst), VixlReg(src));
@@ -1097,25 +1095,25 @@ void Aarch64Encoder::EncodeCastFloatWithSmallDst(Reg dst, bool dst_signed, Reg s
 
 void Aarch64Encoder::EncodeCastSigned(Reg dst, Reg src)
 {
-    size_t src_size = src.GetSize();
-    size_t dst_size = dst.GetSize();
-    auto src_r = Reg(src.GetId(), dst.GetType());
+    size_t srcSize = src.GetSize();
+    size_t dstSize = dst.GetSize();
+    auto srcR = Reg(src.GetId(), dst.GetType());
     // Else signed extend
-    if (src_size > dst_size) {
-        src_size = dst_size;
+    if (srcSize > dstSize) {
+        srcSize = dstSize;
     }
-    switch (src_size) {
+    switch (srcSize) {
         case BYTE_SIZE:
-            GetMasm()->Sxtb(VixlReg(dst), VixlReg(src_r));
+            GetMasm()->Sxtb(VixlReg(dst), VixlReg(srcR));
             break;
         case HALF_SIZE:
-            GetMasm()->Sxth(VixlReg(dst), VixlReg(src_r));
+            GetMasm()->Sxth(VixlReg(dst), VixlReg(srcR));
             break;
         case WORD_SIZE:
-            GetMasm()->Sxtw(VixlReg(dst), VixlReg(src_r));
+            GetMasm()->Sxtw(VixlReg(dst), VixlReg(srcR));
             break;
         case DOUBLE_WORD_SIZE:
-            GetMasm()->Mov(VixlReg(dst), VixlReg(src_r));
+            GetMasm()->Mov(VixlReg(dst), VixlReg(srcR));
             break;
         default:
             SetFalseResult();
@@ -1125,28 +1123,28 @@ void Aarch64Encoder::EncodeCastSigned(Reg dst, Reg src)
 
 void Aarch64Encoder::EncodeCastUnsigned(Reg dst, Reg src)
 {
-    size_t src_size = src.GetSize();
-    size_t dst_size = dst.GetSize();
-    auto src_r = Reg(src.GetId(), dst.GetType());
-    if (src_size > dst_size && dst_size < WORD_SIZE) {
+    size_t srcSize = src.GetSize();
+    size_t dstSize = dst.GetSize();
+    auto srcR = Reg(src.GetId(), dst.GetType());
+    if (srcSize > dstSize && dstSize < WORD_SIZE) {
         // We need to cut the number, if it is less, than 32-bit. It is by ISA agreement.
-        int64_t cut_value = (1ULL << dst_size) - 1;
-        GetMasm()->And(VixlReg(dst), VixlReg(src), VixlImm(cut_value));
+        int64_t cutValue = (1ULL << dstSize) - 1;
+        GetMasm()->And(VixlReg(dst), VixlReg(src), VixlImm(cutValue));
         return;
     }
     // Else unsigned extend
-    switch (src_size) {
+    switch (srcSize) {
         case BYTE_SIZE:
-            GetMasm()->Uxtb(VixlReg(dst), VixlReg(src_r));
+            GetMasm()->Uxtb(VixlReg(dst), VixlReg(srcR));
             return;
         case HALF_SIZE:
-            GetMasm()->Uxth(VixlReg(dst), VixlReg(src_r));
+            GetMasm()->Uxth(VixlReg(dst), VixlReg(srcR));
             return;
         case WORD_SIZE:
-            GetMasm()->Uxtw(VixlReg(dst), VixlReg(src_r));
+            GetMasm()->Uxtw(VixlReg(dst), VixlReg(srcR));
             return;
         case DOUBLE_WORD_SIZE:
-            GetMasm()->Mov(VixlReg(dst), VixlReg(src_r));
+            GetMasm()->Mov(VixlReg(dst), VixlReg(srcR));
             return;
         default:
             SetFalseResult();
@@ -1154,51 +1152,51 @@ void Aarch64Encoder::EncodeCastUnsigned(Reg dst, Reg src)
     }
 }
 
-void Aarch64Encoder::EncodeCastScalar(Reg dst, bool dst_signed, Reg src, bool src_signed)
+void Aarch64Encoder::EncodeCastScalar(Reg dst, bool dstSigned, Reg src, bool srcSigned)
 {
-    size_t src_size = src.GetSize();
-    size_t dst_size = dst.GetSize();
+    size_t srcSize = src.GetSize();
+    size_t dstSize = dst.GetSize();
     // In our ISA minimal type is 32-bit, so type less then 32-bit
     // we should extend to 32-bit. So we can have 2 cast
     // (For examble, i8->u16 will work as i8->u16 and u16->u32)
-    if (dst_size < WORD_SIZE) {
-        if (src_size > dst_size) {
-            if (dst_signed) {
+    if (dstSize < WORD_SIZE) {
+        if (srcSize > dstSize) {
+            if (dstSigned) {
                 EncodeCastSigned(dst, src);
             } else {
                 EncodeCastUnsigned(dst, src);
             }
             return;
         }
-        if (src_size == dst_size) {
+        if (srcSize == dstSize) {
             GetMasm()->Mov(VixlReg(dst), VixlReg(src));
-            if (!(src_signed || dst_signed) || (src_signed && dst_signed)) {
+            if (!(srcSigned || dstSigned) || (srcSigned && dstSigned)) {
                 return;
             }
-            if (dst_signed) {
+            if (dstSigned) {
                 EncodeCastSigned(Reg(dst.GetId(), INT32_TYPE), dst);
             } else {
                 EncodeCastUnsigned(Reg(dst.GetId(), INT32_TYPE), dst);
             }
             return;
         }
-        if (src_signed) {
+        if (srcSigned) {
             EncodeCastSigned(dst, src);
-            if (!dst_signed) {
+            if (!dstSigned) {
                 EncodeCastUnsigned(Reg(dst.GetId(), INT32_TYPE), dst);
             }
         } else {
             EncodeCastUnsigned(dst, src);
-            if (dst_signed) {
+            if (dstSigned) {
                 EncodeCastSigned(Reg(dst.GetId(), INT32_TYPE), dst);
             }
         }
     } else {
-        if (src_size == dst_size) {
+        if (srcSize == dstSize) {
             GetMasm()->Mov(VixlReg(dst), VixlReg(src));
             return;
         }
-        if (src_signed) {
+        if (srcSigned) {
             EncodeCastSigned(dst, src);
         } else {
             EncodeCastUnsigned(dst, src);
@@ -1233,15 +1231,15 @@ void Aarch64Encoder::EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::La
     // check INT64_MAX
     GetMasm()->Ccmp(VixlReg(dst, DOUBLE_WORD_SIZE), VixlImm(-1), vixl::aarch64::StatusFlags::VFlag,
                     vixl::aarch64::Condition::vc);
-    auto slow_label {static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(slow)};
+    auto slowLabel {static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(slow)};
     // jump to slow path in case of overflow
-    GetMasm()->B(slow_label, vixl::aarch64::Condition::vs);
+    GetMasm()->B(slowLabel, vixl::aarch64::Condition::vs);
 }
 
-void Aarch64Encoder::EncodeCast(Reg dst, bool dst_signed, Reg src, bool src_signed)
+void Aarch64Encoder::EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned)
 {
     if (src.IsFloat() || dst.IsFloat()) {
-        EncodeCastFloat(dst, dst_signed, src, src_signed);
+        EncodeCastFloat(dst, dstSigned, src, srcSigned);
         return;
     }
 
@@ -1253,7 +1251,7 @@ void Aarch64Encoder::EncodeCast(Reg dst, bool dst_signed, Reg src, bool src_sign
         return;
     }
     // Scalar part
-    EncodeCastScalar(dst, dst_signed, src, src_signed);
+    EncodeCastScalar(dst, dstSigned, src, srcSigned);
 }
 
 void Aarch64Encoder::EncodeCastToBool(Reg dst, Reg src)
@@ -1275,9 +1273,9 @@ void Aarch64Encoder::EncodeAdd(Reg dst, Reg src0, Shift src1)
     }
     ASSERT(src0.GetSize() <= dst.GetSize());
     if (src0.GetSize() < dst.GetSize()) {
-        auto src0_reg = Reg(src0.GetId(), dst.GetType());
-        auto src1_reg = Reg(src1.GetBase().GetId(), dst.GetType());
-        GetMasm()->Add(VixlReg(dst), VixlReg(src0_reg), VixlShift(Shift(src1_reg, src1.GetType(), src1.GetScale())));
+        auto src0Reg = Reg(src0.GetId(), dst.GetType());
+        auto src1Reg = Reg(src1.GetBase().GetId(), dst.GetType());
+        GetMasm()->Add(VixlReg(dst), VixlReg(src0Reg), VixlShift(Shift(src1Reg, src1.GetType(), src1.GetScale())));
         return;
     }
     GetMasm()->Add(VixlReg(dst), VixlReg(src0), VixlShift(src1));
@@ -1377,7 +1375,7 @@ void Aarch64Encoder::EncodeNegOverflowAndZero(compiler::LabelHolder::LabelId id,
     GetMasm()->Neg(VixlReg(dst).W(), VixlReg(src).W());
 }
 
-void Aarch64Encoder::EncodeDiv(Reg dst, bool dst_signed, Reg src0, Reg src1)
+void Aarch64Encoder::EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsFloat()) {
         GetMasm()->Fdiv(VixlVReg(dst), VixlVReg(src0), VixlVReg(src1));
@@ -1386,44 +1384,44 @@ void Aarch64Encoder::EncodeDiv(Reg dst, bool dst_signed, Reg src0, Reg src1)
 
     auto rzero = GetRegfile()->GetZeroReg().GetId();
     if (src1.GetId() == rzero || src0.GetId() == rzero) {
-        ScopedTmpReg tmp_reg(this, src1.GetType());
-        EncodeMov(tmp_reg, Imm(0));
+        ScopedTmpReg tmpReg(this, src1.GetType());
+        EncodeMov(tmpReg, Imm(0));
         // Denominator is zero-reg
         if (src1.GetId() == rzero) {
             // Encode Abort
-            GetMasm()->Udiv(VixlReg(dst), VixlReg(tmp_reg), VixlReg(tmp_reg));
+            GetMasm()->Udiv(VixlReg(dst), VixlReg(tmpReg), VixlReg(tmpReg));
             return;
         }
 
         // But src1 still may be zero
         if (src1.GetId() != src0.GetId()) {
-            if (dst_signed) {
-                GetMasm()->Sdiv(VixlReg(dst), VixlReg(tmp_reg), VixlReg(src1));
+            if (dstSigned) {
+                GetMasm()->Sdiv(VixlReg(dst), VixlReg(tmpReg), VixlReg(src1));
             } else {
-                GetMasm()->Udiv(VixlReg(dst), VixlReg(tmp_reg), VixlReg(src1));
+                GetMasm()->Udiv(VixlReg(dst), VixlReg(tmpReg), VixlReg(src1));
             }
             return;
         }
         UNREACHABLE();
     }
-    if (dst_signed) {
+    if (dstSigned) {
         GetMasm()->Sdiv(VixlReg(dst), VixlReg(src0), VixlReg(src1));
     } else {
         GetMasm()->Udiv(VixlReg(dst), VixlReg(src0), VixlReg(src1));
     }
 }
 
-void Aarch64Encoder::EncodeMod(Reg dst, bool dst_signed, Reg src0, Reg src1)
+void Aarch64Encoder::EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsScalar()) {
         auto rzero = GetRegfile()->GetZeroReg().GetId();
         if (src1.GetId() == rzero || src0.GetId() == rzero) {
-            ScopedTmpReg tmp_reg(this, src1.GetType());
-            EncodeMov(tmp_reg, Imm(0));
+            ScopedTmpReg tmpReg(this, src1.GetType());
+            EncodeMov(tmpReg, Imm(0));
             // Denominator is zero-reg
             if (src1.GetId() == rzero) {
                 // Encode Abort
-                GetMasm()->Udiv(VixlReg(dst), VixlReg(tmp_reg), VixlReg(tmp_reg));
+                GetMasm()->Udiv(VixlReg(dst), VixlReg(tmpReg), VixlReg(tmpReg));
                 return;
             }
 
@@ -1432,28 +1430,28 @@ void Aarch64Encoder::EncodeMod(Reg dst, bool dst_signed, Reg src0, Reg src1)
                 return;
             }
             // But src1 still may be zero
-            ScopedTmpRegU64 tmp_reg_ud(this);
+            ScopedTmpRegU64 tmpRegUd(this);
             if (dst.GetSize() < DOUBLE_WORD_SIZE) {
-                tmp_reg_ud.ChangeType(INT32_TYPE);
+                tmpRegUd.ChangeType(INT32_TYPE);
             }
-            auto tmp = VixlReg(tmp_reg_ud);
-            if (!dst_signed) {
-                GetMasm()->Udiv(tmp, VixlReg(tmp_reg), VixlReg(src1));
-                GetMasm()->Msub(VixlReg(dst), tmp, VixlReg(src1), VixlReg(tmp_reg));
+            auto tmp = VixlReg(tmpRegUd);
+            if (!dstSigned) {
+                GetMasm()->Udiv(tmp, VixlReg(tmpReg), VixlReg(src1));
+                GetMasm()->Msub(VixlReg(dst), tmp, VixlReg(src1), VixlReg(tmpReg));
                 return;
             }
-            GetMasm()->Sdiv(tmp, VixlReg(tmp_reg), VixlReg(src1));
-            GetMasm()->Msub(VixlReg(dst), tmp, VixlReg(src1), VixlReg(tmp_reg));
+            GetMasm()->Sdiv(tmp, VixlReg(tmpReg), VixlReg(src1));
+            GetMasm()->Msub(VixlReg(dst), tmp, VixlReg(src1), VixlReg(tmpReg));
             return;
         }
 
-        ScopedTmpRegU64 tmp_reg(this);
+        ScopedTmpRegU64 tmpReg(this);
         if (dst.GetSize() < DOUBLE_WORD_SIZE) {
-            tmp_reg.ChangeType(INT32_TYPE);
+            tmpReg.ChangeType(INT32_TYPE);
         }
-        auto tmp = VixlReg(tmp_reg);
+        auto tmp = VixlReg(tmpReg);
 
-        if (!dst_signed) {
+        if (!dstSigned) {
             GetMasm()->Udiv(tmp, VixlReg(src0), VixlReg(src1));
             GetMasm()->Msub(VixlReg(dst), tmp, VixlReg(src1), VixlReg(src0));
             return;
@@ -1479,13 +1477,13 @@ void Aarch64Encoder::EncodeFMod(Reg dst, Reg src0, Reg src1)
     }
 }
 
-void Aarch64Encoder::EncodeMin(Reg dst, bool dst_signed, Reg src0, Reg src1)
+void Aarch64Encoder::EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsFloat()) {
         GetMasm()->Fmin(VixlVReg(dst), VixlVReg(src0), VixlVReg(src1));
         return;
     }
-    if (dst_signed) {
+    if (dstSigned) {
         GetMasm()->Cmp(VixlReg(src0), VixlReg(src1));
         GetMasm()->Csel(VixlReg(dst), VixlReg(src0), VixlReg(src1), vixl::aarch64::Condition::lt);
         return;
@@ -1494,13 +1492,13 @@ void Aarch64Encoder::EncodeMin(Reg dst, bool dst_signed, Reg src0, Reg src1)
     GetMasm()->Csel(VixlReg(dst), VixlReg(src0), VixlReg(src1), vixl::aarch64::Condition::ls);
 }
 
-void Aarch64Encoder::EncodeMax(Reg dst, bool dst_signed, Reg src0, Reg src1)
+void Aarch64Encoder::EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsFloat()) {
         GetMasm()->Fmax(VixlVReg(dst), VixlVReg(src0), VixlVReg(src1));
         return;
     }
-    if (dst_signed) {
+    if (dstSigned) {
         GetMasm()->Cmp(VixlReg(src0), VixlReg(src1));
         GetMasm()->Csel(VixlReg(dst), VixlReg(src0), VixlReg(src1), vixl::aarch64::Condition::gt);
         return;
@@ -1598,8 +1596,8 @@ void Aarch64Encoder::EncodeAdd(Reg dst, Reg src, Imm imm)
     ASSERT(dst.IsScalar() && "UNIMPLEMENTED");
     ASSERT(dst.GetSize() >= src.GetSize());
     if (dst.GetSize() != src.GetSize()) {
-        auto src_reg = Reg(src.GetId(), dst.GetType());
-        GetMasm()->Add(VixlReg(dst), VixlReg(src_reg), VixlImm(imm));
+        auto srcReg = Reg(src.GetId(), dst.GetType());
+        GetMasm()->Add(VixlReg(dst), VixlReg(srcReg), VixlImm(imm));
         return;
     }
     GetMasm()->Add(VixlReg(dst), VixlReg(src), VixlImm(imm));
@@ -1626,7 +1624,7 @@ void Aarch64Encoder::EncodeShl(Reg dst, Reg src, Imm imm)
 
 void Aarch64Encoder::EncodeShr(Reg dst, Reg src, Imm imm)
 {
-    int64_t imm_value = static_cast<uint64_t>(imm.GetAsInt()) & (dst.GetSize() - 1);
+    int64_t immValue = static_cast<uint64_t>(imm.GetAsInt()) & (dst.GetSize() - 1);
 
     ASSERT(dst.IsScalar() && "Invalid operand type");
     auto rzero = GetRegfile()->GetZeroReg().GetId();
@@ -1636,7 +1634,7 @@ void Aarch64Encoder::EncodeShr(Reg dst, Reg src, Imm imm)
         return;
     }
 
-    GetMasm()->Lsr(VixlReg(dst), VixlReg(src), imm_value);
+    GetMasm()->Lsr(VixlReg(dst), VixlReg(src), immValue);
 }
 
 void Aarch64Encoder::EncodeAShr(Reg dst, Reg src, Imm imm)
@@ -1680,37 +1678,37 @@ void Aarch64Encoder::EncodeMov(Reg dst, Imm src)
     }
 }
 
-void Aarch64Encoder::EncodeLdr(Reg dst, bool dst_signed, MemRef mem)
+void Aarch64Encoder::EncodeLdr(Reg dst, bool dstSigned, MemRef mem)
 {
     auto rzero = GetRegfile()->GetZeroReg().GetId();
 
     if (!ConvertMem(mem).IsValid() || (dst.GetId() == rzero && dst.IsScalar())) {
         // Try move zero reg to dst (for do not create temp-reg)
         // Check: dst not vector, dst not index, dst not rzero
-        [[maybe_unused]] auto base_reg = mem.GetBase();
-        auto index_reg = mem.GetIndex();
+        [[maybe_unused]] auto baseReg = mem.GetBase();
+        auto indexReg = mem.GetIndex();
 
         // Invalid == base is rzero or invalid
-        ASSERT(base_reg.GetId() == rzero || !base_reg.IsValid());
+        ASSERT(baseReg.GetId() == rzero || !baseReg.IsValid());
         // checks for use dst-register
-        if (dst.IsScalar() && dst.IsValid() &&     // not float
-            (index_reg.GetId() != dst.GetId()) &&  // not index
-            (dst.GetId() != rzero)) {              // not rzero
+        if (dst.IsScalar() && dst.IsValid() &&    // not float
+            (indexReg.GetId() != dst.GetId()) &&  // not index
+            (dst.GetId() != rzero)) {             // not rzero
             // May use dst like rzero
             EncodeMov(dst, Imm(0));
 
-            auto fix_mem = MemRef(dst, index_reg, mem.GetScale(), mem.GetDisp());
-            ASSERT(ConvertMem(fix_mem).IsValid());
-            EncodeLdr(dst, dst_signed, fix_mem);
+            auto fixMem = MemRef(dst, indexReg, mem.GetScale(), mem.GetDisp());
+            ASSERT(ConvertMem(fixMem).IsValid());
+            EncodeLdr(dst, dstSigned, fixMem);
         } else {
             // Use tmp-reg
-            ScopedTmpReg tmp_reg(this);
-            EncodeMov(tmp_reg, Imm(0));
+            ScopedTmpReg tmpReg(this);
+            EncodeMov(tmpReg, Imm(0));
 
-            auto fix_mem = MemRef(tmp_reg, index_reg, mem.GetScale(), mem.GetDisp());
-            ASSERT(ConvertMem(fix_mem).IsValid());
+            auto fixMem = MemRef(tmpReg, indexReg, mem.GetScale(), mem.GetDisp());
+            ASSERT(ConvertMem(fixMem).IsValid());
             // Used for zero-dst
-            EncodeLdr(tmp_reg, dst_signed, fix_mem);
+            EncodeLdr(tmpReg, dstSigned, fixMem);
         }
         return;
     }
@@ -1719,7 +1717,7 @@ void Aarch64Encoder::EncodeLdr(Reg dst, bool dst_signed, MemRef mem)
         GetMasm()->Ldr(VixlVReg(dst), ConvertMem(mem));
         return;
     }
-    if (dst_signed) {
+    if (dstSigned) {
         if (dst.GetSize() == BYTE_SIZE) {
             GetMasm()->Ldrsb(VixlReg(dst, DOUBLE_WORD_SIZE), ConvertMem(mem));
             return;
@@ -1741,45 +1739,45 @@ void Aarch64Encoder::EncodeLdr(Reg dst, bool dst_signed, MemRef mem)
     GetMasm()->Ldr(VixlReg(dst), ConvertMem(mem));
 }
 
-void Aarch64Encoder::EncodeLdrAcquireInvalid(Reg dst, bool dst_signed, MemRef mem)
+void Aarch64Encoder::EncodeLdrAcquireInvalid(Reg dst, bool dstSigned, MemRef mem)
 {
     // Try move zero reg to dst (for do not create temp-reg)
     // Check: dst not vector, dst not index, dst not rzero
-    [[maybe_unused]] auto base_reg = mem.GetBase();
+    [[maybe_unused]] auto baseReg = mem.GetBase();
     auto rzero = GetRegfile()->GetZeroReg().GetId();
 
-    auto index_reg = mem.GetIndex();
+    auto indexReg = mem.GetIndex();
 
     // Invalid == base is rzero or invalid
-    ASSERT(base_reg.GetId() == rzero || !base_reg.IsValid());
+    ASSERT(baseReg.GetId() == rzero || !baseReg.IsValid());
     // checks for use dst-register
-    if (dst.IsScalar() && dst.IsValid() &&     // not float
-        (index_reg.GetId() != dst.GetId()) &&  // not index
-        (dst.GetId() != rzero)) {              // not rzero
+    if (dst.IsScalar() && dst.IsValid() &&    // not float
+        (indexReg.GetId() != dst.GetId()) &&  // not index
+        (dst.GetId() != rzero)) {             // not rzero
         // May use dst like rzero
         EncodeMov(dst, Imm(0));
 
-        auto fix_mem = MemRef(dst, index_reg, mem.GetScale(), mem.GetDisp());
-        ASSERT(ConvertMem(fix_mem).IsValid());
-        EncodeLdrAcquire(dst, dst_signed, fix_mem);
+        auto fixMem = MemRef(dst, indexReg, mem.GetScale(), mem.GetDisp());
+        ASSERT(ConvertMem(fixMem).IsValid());
+        EncodeLdrAcquire(dst, dstSigned, fixMem);
     } else {
         // Use tmp-reg
-        ScopedTmpReg tmp_reg(this);
-        EncodeMov(tmp_reg, Imm(0));
+        ScopedTmpReg tmpReg(this);
+        EncodeMov(tmpReg, Imm(0));
 
-        auto fix_mem = MemRef(tmp_reg, index_reg, mem.GetScale(), mem.GetDisp());
-        ASSERT(ConvertMem(fix_mem).IsValid());
+        auto fixMem = MemRef(tmpReg, indexReg, mem.GetScale(), mem.GetDisp());
+        ASSERT(ConvertMem(fixMem).IsValid());
         // Used for zero-dst
-        EncodeLdrAcquire(tmp_reg, dst_signed, fix_mem);
+        EncodeLdrAcquire(tmpReg, dstSigned, fixMem);
     }
 }
 
-void Aarch64Encoder::EncodeLdrAcquireScalar(Reg dst, bool dst_signed, MemRef mem)
+void Aarch64Encoder::EncodeLdrAcquireScalar(Reg dst, bool dstSigned, MemRef mem)
 {
 #ifndef NDEBUG
     CheckAlignment(mem, dst.GetSize());
 #endif  // NDEBUG
-    if (dst_signed) {
+    if (dstSigned) {
         if (dst.GetSize() == BYTE_SIZE) {
             GetMasm()->Ldarb(VixlReg(dst), ConvertMem(mem));
             GetMasm()->Sxtb(VixlReg(dst), VixlReg(dst));
@@ -1814,94 +1812,94 @@ void Aarch64Encoder::CheckAlignment(MemRef mem, size_t size)
     if (size == BYTE_SIZE) {
         return;
     }
-    size_t alignment_mask = (size >> 3U) - 1;
+    size_t alignmentMask = (size >> 3U) - 1;
     ASSERT(!mem.HasIndex() && !mem.HasScale());
     if (mem.HasDisp()) {
         // We need additional tmp register for check base + offset.
         // The case when separately the base and the offset are not aligned, but in sum there are aligned very rarely.
         // Therefore, the alignment check for base and offset takes place separately
         [[maybe_unused]] size_t offset = mem.GetDisp();
-        ASSERT((offset & alignment_mask) == 0);
+        ASSERT((offset & alignmentMask) == 0);
     }
-    auto base_reg = mem.GetBase();
+    auto baseReg = mem.GetBase();
     auto end = CreateLabel();
-    EncodeJumpTest(end, base_reg, Imm(alignment_mask), Condition::TST_EQ);
+    EncodeJumpTest(end, baseReg, Imm(alignmentMask), Condition::TST_EQ);
     EncodeAbort();
     BindLabel(end);
 }
 
-void Aarch64Encoder::EncodeLdrAcquire(Reg dst, bool dst_signed, MemRef mem)
+void Aarch64Encoder::EncodeLdrAcquire(Reg dst, bool dstSigned, MemRef mem)
 {
     if (mem.HasIndex()) {
-        ScopedTmpRegU64 tmp_reg(this);
+        ScopedTmpRegU64 tmpReg(this);
         if (mem.HasScale()) {
-            EncodeAdd(tmp_reg, mem.GetBase(), Shift(mem.GetIndex(), mem.GetScale()));
+            EncodeAdd(tmpReg, mem.GetBase(), Shift(mem.GetIndex(), mem.GetScale()));
         } else {
-            EncodeAdd(tmp_reg, mem.GetBase(), mem.GetIndex());
+            EncodeAdd(tmpReg, mem.GetBase(), mem.GetIndex());
         }
-        mem = MemRef(tmp_reg, mem.GetDisp());
+        mem = MemRef(tmpReg, mem.GetDisp());
     }
 
     auto rzero = GetRegfile()->GetZeroReg().GetId();
     if (!ConvertMem(mem).IsValid() || (dst.GetId() == rzero && dst.IsScalar())) {
-        EncodeLdrAcquireInvalid(dst, dst_signed, mem);
+        EncodeLdrAcquireInvalid(dst, dstSigned, mem);
         return;
     }
 
     ASSERT(!mem.HasIndex() && !mem.HasScale());
     if (dst.IsFloat()) {
-        ScopedTmpRegU64 tmp_reg(this);
-        auto mem_ldar = mem;
+        ScopedTmpRegU64 tmpReg(this);
+        auto memLdar = mem;
         if (mem.HasDisp()) {
             if (vixl::aarch64::Assembler::IsImmAddSub(mem.GetDisp())) {
-                EncodeAdd(tmp_reg, mem.GetBase(), Imm(mem.GetDisp()));
+                EncodeAdd(tmpReg, mem.GetBase(), Imm(mem.GetDisp()));
             } else {
-                EncodeMov(tmp_reg, Imm(mem.GetDisp()));
-                EncodeAdd(tmp_reg, mem.GetBase(), tmp_reg);
+                EncodeMov(tmpReg, Imm(mem.GetDisp()));
+                EncodeAdd(tmpReg, mem.GetBase(), tmpReg);
             }
-            mem_ldar = MemRef(tmp_reg);
+            memLdar = MemRef(tmpReg);
         }
 #ifndef NDEBUG
-        CheckAlignment(mem_ldar, dst.GetSize());
+        CheckAlignment(memLdar, dst.GetSize());
 #endif  // NDEBUG
-        auto tmp = VixlReg(tmp_reg, dst.GetSize());
-        GetMasm()->Ldar(tmp, ConvertMem(mem_ldar));
+        auto tmp = VixlReg(tmpReg, dst.GetSize());
+        GetMasm()->Ldar(tmp, ConvertMem(memLdar));
         GetMasm()->Fmov(VixlVReg(dst), tmp);
         return;
     }
 
     if (!mem.HasDisp()) {
-        EncodeLdrAcquireScalar(dst, dst_signed, mem);
+        EncodeLdrAcquireScalar(dst, dstSigned, mem);
         return;
     }
 
-    Reg dst_64(dst.GetId(), INT64_TYPE);
+    Reg dst64(dst.GetId(), INT64_TYPE);
     if (vixl::aarch64::Assembler::IsImmAddSub(mem.GetDisp())) {
-        EncodeAdd(dst_64, mem.GetBase(), Imm(mem.GetDisp()));
+        EncodeAdd(dst64, mem.GetBase(), Imm(mem.GetDisp()));
     } else {
-        EncodeMov(dst_64, Imm(mem.GetDisp()));
-        EncodeAdd(dst_64, mem.GetBase(), dst_64);
+        EncodeMov(dst64, Imm(mem.GetDisp()));
+        EncodeAdd(dst64, mem.GetBase(), dst64);
     }
-    EncodeLdrAcquireScalar(dst, dst_signed, MemRef(dst_64));
+    EncodeLdrAcquireScalar(dst, dstSigned, MemRef(dst64));
 }
 
 void Aarch64Encoder::EncodeStr(Reg src, MemRef mem)
 {
     if (!ConvertMem(mem).IsValid()) {
-        auto index_reg = mem.GetIndex();
+        auto indexReg = mem.GetIndex();
         auto rzero = GetRegfile()->GetZeroReg().GetId();
         // Invalid == base is rzero or invalid
         ASSERT(mem.GetBase().GetId() == rzero || !mem.GetBase().IsValid());
         // Use tmp-reg
-        ScopedTmpReg tmp_reg(this);
-        EncodeMov(tmp_reg, Imm(0));
+        ScopedTmpReg tmpReg(this);
+        EncodeMov(tmpReg, Imm(0));
 
-        auto fix_mem = MemRef(tmp_reg, index_reg, mem.GetScale(), mem.GetDisp());
-        ASSERT(ConvertMem(fix_mem).IsValid());
+        auto fixMem = MemRef(tmpReg, indexReg, mem.GetScale(), mem.GetDisp());
+        ASSERT(ConvertMem(fixMem).IsValid());
         if (src.GetId() != rzero) {
-            EncodeStr(src, fix_mem);
+            EncodeStr(src, fixMem);
         } else {
-            EncodeStr(tmp_reg, fix_mem);
+            EncodeStr(tmpReg, fixMem);
         }
         return;
     }
@@ -1924,8 +1922,8 @@ void Aarch64Encoder::EncodeStr(Reg src, MemRef mem)
 void Aarch64Encoder::EncodeStrRelease(Reg src, MemRef mem)
 {
     ScopedTmpRegLazy base(this);
-    MemRef fixed_mem;
-    bool mem_was_fixed = false;
+    MemRef fixedMem;
+    bool memWasFixed = false;
     if (mem.HasDisp()) {
         if (vixl::aarch64::Assembler::IsImmAddSub(mem.GetDisp())) {
             base.AcquireIfInvalid();
@@ -1935,109 +1933,109 @@ void Aarch64Encoder::EncodeStrRelease(Reg src, MemRef mem)
             EncodeMov(base, Imm(mem.GetDisp()));
             EncodeAdd(base, mem.GetBase(), base);
         }
-        mem_was_fixed = true;
+        memWasFixed = true;
     }
     if (mem.HasIndex()) {
         base.AcquireIfInvalid();
         if (mem.HasScale()) {
-            EncodeAdd(base, mem_was_fixed ? base : mem.GetBase(), Shift(mem.GetIndex(), mem.GetScale()));
+            EncodeAdd(base, memWasFixed ? base : mem.GetBase(), Shift(mem.GetIndex(), mem.GetScale()));
         } else {
-            EncodeAdd(base, mem_was_fixed ? base : mem.GetBase(), mem.GetIndex());
+            EncodeAdd(base, memWasFixed ? base : mem.GetBase(), mem.GetIndex());
         }
-        mem_was_fixed = true;
+        memWasFixed = true;
     }
 
-    if (mem_was_fixed) {
-        fixed_mem = MemRef(base);
+    if (memWasFixed) {
+        fixedMem = MemRef(base);
     } else {
-        fixed_mem = mem;
+        fixedMem = mem;
     }
 
 #ifndef NDEBUG
-    CheckAlignment(fixed_mem, src.GetSize());
+    CheckAlignment(fixedMem, src.GetSize());
 #endif  // NDEBUG
     if (src.IsFloat()) {
-        ScopedTmpRegU64 tmp_reg(this);
-        auto tmp = VixlReg(tmp_reg, src.GetSize());
+        ScopedTmpRegU64 tmpReg(this);
+        auto tmp = VixlReg(tmpReg, src.GetSize());
         GetMasm()->Fmov(tmp, VixlVReg(src));
-        GetMasm()->Stlr(tmp, ConvertMem(fixed_mem));
+        GetMasm()->Stlr(tmp, ConvertMem(fixedMem));
         return;
     }
     if (src.GetSize() == BYTE_SIZE) {
-        GetMasm()->Stlrb(VixlReg(src), ConvertMem(fixed_mem));
+        GetMasm()->Stlrb(VixlReg(src), ConvertMem(fixedMem));
         return;
     }
     if (src.GetSize() == HALF_SIZE) {
-        GetMasm()->Stlrh(VixlReg(src), ConvertMem(fixed_mem));
+        GetMasm()->Stlrh(VixlReg(src), ConvertMem(fixedMem));
         return;
     }
-    GetMasm()->Stlr(VixlReg(src), ConvertMem(fixed_mem));
+    GetMasm()->Stlr(VixlReg(src), ConvertMem(fixedMem));
 }
 
 void Aarch64Encoder::EncodeLdrExclusive(Reg dst, Reg addr, bool acquire)
 {
     ASSERT(dst.IsScalar());
-    auto dst_reg = VixlReg(dst);
-    auto mem_cvt = ConvertMem(MemRef(addr));
+    auto dstReg = VixlReg(dst);
+    auto memCvt = ConvertMem(MemRef(addr));
 #ifndef NDEBUG
     CheckAlignment(MemRef(addr), dst.GetSize());
 #endif  // NDEBUG
     if (dst.GetSize() == BYTE_SIZE) {
         if (acquire) {
-            GetMasm()->Ldaxrb(dst_reg, mem_cvt);
+            GetMasm()->Ldaxrb(dstReg, memCvt);
             return;
         }
-        GetMasm()->Ldxrb(dst_reg, mem_cvt);
+        GetMasm()->Ldxrb(dstReg, memCvt);
         return;
     }
     if (dst.GetSize() == HALF_SIZE) {
         if (acquire) {
-            GetMasm()->Ldaxrh(dst_reg, mem_cvt);
+            GetMasm()->Ldaxrh(dstReg, memCvt);
             return;
         }
-        GetMasm()->Ldxrh(dst_reg, mem_cvt);
+        GetMasm()->Ldxrh(dstReg, memCvt);
         return;
     }
     if (acquire) {
-        GetMasm()->Ldaxr(dst_reg, mem_cvt);
+        GetMasm()->Ldaxr(dstReg, memCvt);
         return;
     }
-    GetMasm()->Ldxr(dst_reg, mem_cvt);
+    GetMasm()->Ldxr(dstReg, memCvt);
 }
 
 void Aarch64Encoder::EncodeStrExclusive(Reg dst, Reg src, Reg addr, bool release)
 {
     ASSERT(dst.IsScalar() && src.IsScalar());
 
-    bool copy_dst = dst.GetId() == src.GetId() || dst.GetId() == addr.GetId();
+    bool copyDst = dst.GetId() == src.GetId() || dst.GetId() == addr.GetId();
     ScopedTmpReg tmp(this);
-    auto src_reg = VixlReg(src);
-    auto mem_cvt = ConvertMem(MemRef(addr));
-    auto dst_reg = copy_dst ? VixlReg(tmp) : VixlReg(dst);
+    auto srcReg = VixlReg(src);
+    auto memCvt = ConvertMem(MemRef(addr));
+    auto dstReg = copyDst ? VixlReg(tmp) : VixlReg(dst);
 #ifndef NDEBUG
     CheckAlignment(MemRef(addr), src.GetSize());
 #endif  // NDEBUG
 
     if (src.GetSize() == BYTE_SIZE) {
         if (release) {
-            GetMasm()->Stlxrb(dst_reg, src_reg, mem_cvt);
+            GetMasm()->Stlxrb(dstReg, srcReg, memCvt);
         } else {
-            GetMasm()->Stxrb(dst_reg, src_reg, mem_cvt);
+            GetMasm()->Stxrb(dstReg, srcReg, memCvt);
         }
     } else if (src.GetSize() == HALF_SIZE) {
         if (release) {
-            GetMasm()->Stlxrh(dst_reg, src_reg, mem_cvt);
+            GetMasm()->Stlxrh(dstReg, srcReg, memCvt);
         } else {
-            GetMasm()->Stxrh(dst_reg, src_reg, mem_cvt);
+            GetMasm()->Stxrh(dstReg, srcReg, memCvt);
         }
     } else {
         if (release) {
-            GetMasm()->Stlxr(dst_reg, src_reg, mem_cvt);
+            GetMasm()->Stlxr(dstReg, srcReg, memCvt);
         } else {
-            GetMasm()->Stxr(dst_reg, src_reg, mem_cvt);
+            GetMasm()->Stxr(dstReg, srcReg, memCvt);
         }
     }
-    if (copy_dst) {
+    if (copyDst) {
         EncodeMov(dst, tmp);
     }
 }
@@ -2060,7 +2058,7 @@ void Aarch64Encoder::EncodeStrz(Reg src, MemRef mem)
     GetMasm()->Str(VixlReg(src.As(INT64_TYPE)), ConvertMem(mem));
 }
 
-void Aarch64Encoder::EncodeSti(int64_t src, uint8_t src_size_bytes, MemRef mem)
+void Aarch64Encoder::EncodeSti(int64_t src, uint8_t srcSizeBytes, MemRef mem)
 {
     if (!ConvertMem(mem).IsValid()) {
         auto rzero = GetRegfile()->GetZeroReg();
@@ -2068,18 +2066,18 @@ void Aarch64Encoder::EncodeSti(int64_t src, uint8_t src_size_bytes, MemRef mem)
         return;
     }
 
-    ScopedTmpRegU64 tmp_reg(this);
-    auto tmp = VixlReg(tmp_reg);
+    ScopedTmpRegU64 tmpReg(this);
+    auto tmp = VixlReg(tmpReg);
     GetMasm()->Mov(tmp, VixlImm(src));
-    if (src_size_bytes == 1U) {
+    if (srcSizeBytes == 1U) {
         GetMasm()->Strb(tmp, ConvertMem(mem));
         return;
     }
-    if (src_size_bytes == HALF_WORD_SIZE_BYTES) {
+    if (srcSizeBytes == HALF_WORD_SIZE_BYTES) {
         GetMasm()->Strh(tmp, ConvertMem(mem));
         return;
     }
-    ASSERT((src_size_bytes == WORD_SIZE_BYTES) || (src_size_bytes == DOUBLE_WORD_SIZE_BYTES));
+    ASSERT((srcSizeBytes == WORD_SIZE_BYTES) || (srcSizeBytes == DOUBLE_WORD_SIZE_BYTES));
     GetMasm()->Str(tmp, ConvertMem(mem));
 }
 
@@ -2090,9 +2088,9 @@ void Aarch64Encoder::EncodeSti(float src, MemRef mem)
         EncodeStr(rzero, mem);
         return;
     }
-    ScopedTmpRegF32 tmp_reg(this);
-    GetMasm()->Fmov(VixlVReg(tmp_reg).S(), src);
-    EncodeStr(tmp_reg, mem);
+    ScopedTmpRegF32 tmpReg(this);
+    GetMasm()->Fmov(VixlVReg(tmpReg).S(), src);
+    EncodeStr(tmpReg, mem);
 }
 
 void Aarch64Encoder::EncodeSti(double src, MemRef mem)
@@ -2102,74 +2100,74 @@ void Aarch64Encoder::EncodeSti(double src, MemRef mem)
         EncodeStr(rzero, mem);
         return;
     }
-    ScopedTmpRegF64 tmp_reg(this);
-    GetMasm()->Fmov(VixlVReg(tmp_reg).D(), src);
-    EncodeStr(tmp_reg, mem);
+    ScopedTmpRegF64 tmpReg(this);
+    GetMasm()->Fmov(VixlVReg(tmpReg).D(), src);
+    EncodeStr(tmpReg, mem);
 }
 
-void Aarch64Encoder::EncodeMemCopy(MemRef mem_from, MemRef mem_to, size_t size)
+void Aarch64Encoder::EncodeMemCopy(MemRef memFrom, MemRef memTo, size_t size)
 {
-    if (!ConvertMem(mem_from).IsValid() || !ConvertMem(mem_to).IsValid()) {
+    if (!ConvertMem(memFrom).IsValid() || !ConvertMem(memTo).IsValid()) {
         auto rzero = GetRegfile()->GetZeroReg();
-        if (!ConvertMem(mem_from).IsValid()) {
+        if (!ConvertMem(memFrom).IsValid()) {
             // Encode one load - will fix inside
-            EncodeLdr(rzero, false, mem_from);
+            EncodeLdr(rzero, false, memFrom);
         } else {
-            ASSERT(!ConvertMem(mem_to).IsValid());
+            ASSERT(!ConvertMem(memTo).IsValid());
             // Encode one store - will fix inside
-            EncodeStr(rzero, mem_to);
+            EncodeStr(rzero, memTo);
         }
         return;
     }
-    ASSERT(ConvertMem(mem_from).IsValid());
-    ASSERT(ConvertMem(mem_to).IsValid());
-    ScopedTmpRegU64 tmp_reg(this);
-    auto tmp = VixlReg(tmp_reg, std::min(size, static_cast<size_t>(DOUBLE_WORD_SIZE)));
+    ASSERT(ConvertMem(memFrom).IsValid());
+    ASSERT(ConvertMem(memTo).IsValid());
+    ScopedTmpRegU64 tmpReg(this);
+    auto tmp = VixlReg(tmpReg, std::min(size, static_cast<size_t>(DOUBLE_WORD_SIZE)));
     if (size == BYTE_SIZE) {
-        GetMasm()->Ldrb(tmp, ConvertMem(mem_from));
-        GetMasm()->Strb(tmp, ConvertMem(mem_to));
+        GetMasm()->Ldrb(tmp, ConvertMem(memFrom));
+        GetMasm()->Strb(tmp, ConvertMem(memTo));
     } else if (size == HALF_SIZE) {
-        GetMasm()->Ldrh(tmp, ConvertMem(mem_from));
-        GetMasm()->Strh(tmp, ConvertMem(mem_to));
+        GetMasm()->Ldrh(tmp, ConvertMem(memFrom));
+        GetMasm()->Strh(tmp, ConvertMem(memTo));
     } else {
         ASSERT(size == WORD_SIZE || size == DOUBLE_WORD_SIZE);
-        GetMasm()->Ldr(tmp, ConvertMem(mem_from));
-        GetMasm()->Str(tmp, ConvertMem(mem_to));
+        GetMasm()->Ldr(tmp, ConvertMem(memFrom));
+        GetMasm()->Str(tmp, ConvertMem(memTo));
     }
 }
 
-void Aarch64Encoder::EncodeMemCopyz(MemRef mem_from, MemRef mem_to, size_t size)
+void Aarch64Encoder::EncodeMemCopyz(MemRef memFrom, MemRef memTo, size_t size)
 {
-    if (!ConvertMem(mem_from).IsValid() || !ConvertMem(mem_to).IsValid()) {
+    if (!ConvertMem(memFrom).IsValid() || !ConvertMem(memTo).IsValid()) {
         auto rzero = GetRegfile()->GetZeroReg();
-        if (!ConvertMem(mem_from).IsValid()) {
+        if (!ConvertMem(memFrom).IsValid()) {
             // Encode one load - will fix inside
-            EncodeLdr(rzero, false, mem_from);
+            EncodeLdr(rzero, false, memFrom);
         } else {
-            ASSERT(!ConvertMem(mem_to).IsValid());
+            ASSERT(!ConvertMem(memTo).IsValid());
             // Encode one store - will fix inside
-            EncodeStr(rzero, mem_to);
+            EncodeStr(rzero, memTo);
         }
         return;
     }
-    ASSERT(ConvertMem(mem_from).IsValid());
-    ASSERT(ConvertMem(mem_to).IsValid());
-    ScopedTmpRegU64 tmp_reg(this);
-    auto tmp = VixlReg(tmp_reg, std::min(size, static_cast<size_t>(DOUBLE_WORD_SIZE)));
+    ASSERT(ConvertMem(memFrom).IsValid());
+    ASSERT(ConvertMem(memTo).IsValid());
+    ScopedTmpRegU64 tmpReg(this);
+    auto tmp = VixlReg(tmpReg, std::min(size, static_cast<size_t>(DOUBLE_WORD_SIZE)));
     auto zero = VixlReg(GetRegfile()->GetZeroReg(), WORD_SIZE);
     if (size == BYTE_SIZE) {
-        GetMasm()->Ldrb(tmp, ConvertMem(mem_from));
-        GetMasm()->Stp(tmp, zero, ConvertMem(mem_to));
+        GetMasm()->Ldrb(tmp, ConvertMem(memFrom));
+        GetMasm()->Stp(tmp, zero, ConvertMem(memTo));
     } else if (size == HALF_SIZE) {
-        GetMasm()->Ldrh(tmp, ConvertMem(mem_from));
-        GetMasm()->Stp(tmp, zero, ConvertMem(mem_to));
+        GetMasm()->Ldrh(tmp, ConvertMem(memFrom));
+        GetMasm()->Stp(tmp, zero, ConvertMem(memTo));
     } else {
         ASSERT(size == WORD_SIZE || size == DOUBLE_WORD_SIZE);
-        GetMasm()->Ldr(tmp, ConvertMem(mem_from));
+        GetMasm()->Ldr(tmp, ConvertMem(memFrom));
         if (size == WORD_SIZE) {
-            GetMasm()->Stp(tmp, zero, ConvertMem(mem_to));
+            GetMasm()->Stp(tmp, zero, ConvertMem(memTo));
         } else {
-            GetMasm()->Str(tmp, ConvertMem(mem_to));
+            GetMasm()->Str(tmp, ConvertMem(memTo));
         }
     }
 }
@@ -2259,13 +2257,13 @@ void Aarch64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Imm
     }
 }
 
-void Aarch64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dst_signed, MemRef mem)
+void Aarch64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem)
 {
     ASSERT(dst0.IsFloat() == dst1.IsFloat());
     ASSERT(dst0.GetSize() == dst1.GetSize());
     if (!ConvertMem(mem).IsValid()) {
         // Encode one Ldr - will fix inside
-        EncodeLdr(dst0, dst_signed, mem);
+        EncodeLdr(dst0, dstSigned, mem);
         return;
     }
 
@@ -2273,7 +2271,7 @@ void Aarch64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dst_signed, MemRef mem)
         GetMasm()->Ldp(VixlVReg(dst0), VixlVReg(dst1), ConvertMem(mem));
         return;
     }
-    if (dst_signed && dst0.GetSize() == WORD_SIZE) {
+    if (dstSigned && dst0.GetSize() == WORD_SIZE) {
         GetMasm()->Ldpsw(VixlReg(dst0, DOUBLE_WORD_SIZE), VixlReg(dst1, DOUBLE_WORD_SIZE), ConvertMem(mem));
         return;
     }
@@ -2426,7 +2424,7 @@ void Aarch64Encoder::EncodeStackOverflowCheck(ssize_t offset)
 }
 
 bool Aarch64Encoder::CanEncodeImmAddSubCmp(int64_t imm, [[maybe_unused]] uint32_t size,
-                                           [[maybe_unused]] bool signed_compare)
+                                           [[maybe_unused]] bool signedCompare)
 {
     if (imm == INT64_MIN) {
         return false;
@@ -2482,20 +2480,20 @@ bool Aarch64Encoder::CanEncodeScale(uint64_t imm, uint32_t size)
     return (imm == 0) || ((1U << imm) == (size >> 3U));
 }
 
-bool Aarch64Encoder::CanEncodeShiftedOperand(ShiftOpcode opcode, ShiftType shift_type)
+bool Aarch64Encoder::CanEncodeShiftedOperand(ShiftOpcode opcode, ShiftType shiftType)
 {
     switch (opcode) {
         case ShiftOpcode::NEG_SR:
         case ShiftOpcode::ADD_SR:
         case ShiftOpcode::SUB_SR:
-            return shift_type == ShiftType::LSL || shift_type == ShiftType::LSR || shift_type == ShiftType::ASR;
+            return shiftType == ShiftType::LSL || shiftType == ShiftType::LSR || shiftType == ShiftType::ASR;
         case ShiftOpcode::AND_SR:
         case ShiftOpcode::OR_SR:
         case ShiftOpcode::XOR_SR:
         case ShiftOpcode::AND_NOT_SR:
         case ShiftOpcode::OR_NOT_SR:
         case ShiftOpcode::XOR_NOT_SR:
-            return shift_type != ShiftType::INVALID_SHIFT;
+            return shiftType != ShiftType::INVALID_SHIFT;
         default:
             return false;
     }
@@ -2519,27 +2517,27 @@ void Aarch64Encoder::AcquireScratchRegister(Reg reg)
 {
     ASSERT(GetMasm()->GetCurrentScratchRegisterScope() == nullptr);
     if (reg == GetTarget().GetLinkReg()) {
-        ASSERT_PRINT(!lr_acquired_, "Trying to acquire LR, which hasn't been released before");
-        lr_acquired_ = true;
+        ASSERT_PRINT(!lrAcquired_, "Trying to acquire LR, which hasn't been released before");
+        lrAcquired_ = true;
         return;
     }
     auto type = reg.GetType();
-    auto reg_id = reg.GetId();
+    auto regId = reg.GetId();
 
     if (type.IsFloat()) {
         ASSERT(GetMasm()->GetScratchVRegisterList()->IncludesAliasOf(VixlVReg(reg)));
-        GetMasm()->GetScratchVRegisterList()->Remove(reg_id);
+        GetMasm()->GetScratchVRegisterList()->Remove(regId);
     } else {
         ASSERT(GetMasm()->GetScratchRegisterList()->IncludesAliasOf(VixlReg(reg)));
-        GetMasm()->GetScratchRegisterList()->Remove(reg_id);
+        GetMasm()->GetScratchRegisterList()->Remove(regId);
     }
 }
 
 void Aarch64Encoder::ReleaseScratchRegister(Reg reg)
 {
     if (reg == GetTarget().GetLinkReg()) {
-        ASSERT_PRINT(lr_acquired_, "Trying to release LR, which hasn't been acquired before");
-        lr_acquired_ = false;
+        ASSERT_PRINT(lrAcquired_, "Trying to release LR, which hasn't been acquired before");
+        lrAcquired_ = false;
     } else if (reg.IsFloat()) {
         GetMasm()->GetScratchVRegisterList()->Combine(reg.GetId());
     } else if (reg.GetId() != GetTarget().GetLinkReg().GetId()) {
@@ -2550,7 +2548,7 @@ void Aarch64Encoder::ReleaseScratchRegister(Reg reg)
 bool Aarch64Encoder::IsScratchRegisterReleased(Reg reg)
 {
     if (reg == GetTarget().GetLinkReg()) {
-        return !lr_acquired_;
+        return !lrAcquired_;
     }
     if (reg.IsFloat()) {
         return GetMasm()->GetScratchVRegisterList()->IncludesAliasOf(VixlVReg(reg));
@@ -2558,7 +2556,7 @@ bool Aarch64Encoder::IsScratchRegisterReleased(Reg reg)
     return GetMasm()->GetScratchRegisterList()->IncludesAliasOf(VixlReg(reg));
 }
 
-void Aarch64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entry_point)
+void Aarch64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entryPoint)
 {
     if (!dst.IsFloat()) {
         SetFalseResult();
@@ -2577,7 +2575,7 @@ void Aarch64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entry_
             GetMasm()->Fmov(vixl::aarch64::s1, VixlVReg(tmp));
         }
 
-        MakeCall(entry_point);
+        MakeCall(entryPoint);
 
         if (dst.GetId() != vixl::aarch64::s0.GetCode()) {
             GetMasm()->Fmov(VixlVReg(dst), vixl::aarch64::s0);
@@ -2596,7 +2594,7 @@ void Aarch64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entry_
             GetMasm()->Fmov(vixl::aarch64::d1, VixlVReg(tmp));
         }
 
-        MakeCall(entry_point);
+        MakeCall(entryPoint);
 
         if (dst.GetId() != vixl::aarch64::d0.GetCode()) {
             GetMasm()->Fmov(VixlVReg(dst), vixl::aarch64::d0);
@@ -2607,50 +2605,50 @@ void Aarch64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entry_
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp)
+void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp)
 {
     if (registers.none()) {
         return;
     }
-    int32_t last_reg = registers.size() - 1;
-    for (; last_reg >= 0; --last_reg) {
-        if (registers.test(last_reg)) {
+    int32_t lastReg = registers.size() - 1;
+    for (; lastReg >= 0; --lastReg) {
+        if (registers.test(lastReg)) {
             break;
         }
     }
     // Construct single add for big offset
-    size_t sp_offset = 0;
-    auto last_offset = (slot + last_reg - start_reg) * DOUBLE_WORD_SIZE_BYTES;
+    size_t spOffset = 0;
+    auto lastOffset = (slot + lastReg - startReg) * DOUBLE_WORD_SIZE_BYTES;
 
-    if (!vixl::aarch64::Assembler::IsImmLSPair(last_offset, vixl::aarch64::kXRegSizeInBytesLog2)) {
-        ScopedTmpReg lr_reg(this, true);
-        auto tmp = VixlReg(lr_reg);
-        sp_offset = slot * DOUBLE_WORD_SIZE_BYTES;
+    if (!vixl::aarch64::Assembler::IsImmLSPair(lastOffset, vixl::aarch64::kXRegSizeInBytesLog2)) {
+        ScopedTmpReg lrReg(this, true);
+        auto tmp = VixlReg(lrReg);
+        spOffset = slot * DOUBLE_WORD_SIZE_BYTES;
         slot = 0;
-        if (vixl::aarch64::Assembler::IsImmAddSub(sp_offset)) {
-            GetMasm()->Add(tmp, vixl::aarch64::sp, VixlImm(sp_offset));
+        if (vixl::aarch64::Assembler::IsImmAddSub(spOffset)) {
+            GetMasm()->Add(tmp, vixl::aarch64::sp, VixlImm(spOffset));
         } else {
-            GetMasm()->Mov(tmp, VixlImm(sp_offset));
+            GetMasm()->Mov(tmp, VixlImm(spOffset));
             GetMasm()->Add(tmp, vixl::aarch64::sp, tmp);
         }
-        LoadStoreRegistersLoop<IS_STORE>(registers, slot, start_reg, is_fp, tmp);
+        LoadStoreRegistersLoop<IS_STORE>(registers, slot, startReg, isFp, tmp);
     } else {
-        LoadStoreRegistersLoop<IS_STORE>(registers, slot, start_reg, is_fp, vixl::aarch64::sp);
+        LoadStoreRegistersLoop<IS_STORE>(registers, slot, startReg, isFp, vixl::aarch64::sp);
     }
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask)
 {
-    auto base_reg = VixlReg(base);
-    bool has_mask = mask.any();
-    int32_t index = has_mask ? static_cast<int32_t>(mask.GetMinRegister()) : 0;
-    int32_t last_index = -1;
-    ssize_t last_id = -1;
+    auto baseReg = VixlReg(base);
+    bool hasMask = mask.any();
+    int32_t index = hasMask ? static_cast<int32_t>(mask.GetMinRegister()) : 0;
+    int32_t lastIndex = -1;
+    ssize_t lastId = -1;
 
     slot -= index;
     for (ssize_t id = index; id < helpers::ToSigned(registers.size()); id++) {
-        if (has_mask) {
+        if (hasMask) {
             if (!mask.test(id)) {
                 continue;
             }
@@ -2659,182 +2657,182 @@ void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool is_fp, i
         if (!registers.test(id)) {
             continue;
         }
-        if (!has_mask) {
+        if (!hasMask) {
             index++;
         }
-        if (last_id == -1) {
-            last_id = id;
-            last_index = index;
+        if (lastId == -1) {
+            lastId = id;
+            lastIndex = index;
             continue;
         }
 
-        auto reg = CPURegister(id, vixl::aarch64::kXRegSize, is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
-        auto last_reg =
-            CPURegister(last_id, vixl::aarch64::kXRegSize, is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
-        if (!has_mask || last_id + 1 == id) {
+        auto reg = CPURegister(id, vixl::aarch64::kXRegSize, isFp ? CPURegister::kVRegister : CPURegister::kRegister);
+        auto lastReg =
+            CPURegister(lastId, vixl::aarch64::kXRegSize, isFp ? CPURegister::kVRegister : CPURegister::kRegister);
+        if (!hasMask || lastId + 1 == id) {
             static constexpr ssize_t OFFSET = 2;
             if constexpr (IS_STORE) {  // NOLINT
-                GetMasm()->Stp(last_reg, reg, MemOperand(base_reg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
+                GetMasm()->Stp(lastReg, reg, MemOperand(baseReg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
             } else {  // NOLINT
-                GetMasm()->Ldp(last_reg, reg, MemOperand(base_reg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
+                GetMasm()->Ldp(lastReg, reg, MemOperand(baseReg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
             }
-            last_id = -1;
+            lastId = -1;
         } else {
             if constexpr (IS_STORE) {  // NOLINT
-                GetMasm()->Str(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
+                GetMasm()->Str(lastReg, MemOperand(baseReg, (slot + lastIndex - 1) * DOUBLE_WORD_SIZE_BYTES));
             } else {  // NOLINT
-                GetMasm()->Ldr(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
+                GetMasm()->Ldr(lastReg, MemOperand(baseReg, (slot + lastIndex - 1) * DOUBLE_WORD_SIZE_BYTES));
             }
-            last_id = id;
-            last_index = index;
+            lastId = id;
+            lastIndex = index;
         }
     }
-    if (last_id != -1) {
-        auto last_reg =
-            CPURegister(last_id, vixl::aarch64::kXRegSize, is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
+    if (lastId != -1) {
+        auto lastReg =
+            CPURegister(lastId, vixl::aarch64::kXRegSize, isFp ? CPURegister::kVRegister : CPURegister::kRegister);
         if constexpr (IS_STORE) {  // NOLINT
-            GetMasm()->Str(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
+            GetMasm()->Str(lastReg, MemOperand(baseReg, (slot + lastIndex - 1) * DOUBLE_WORD_SIZE_BYTES));
         } else {  // NOLINT
-            GetMasm()->Ldr(last_reg, MemOperand(base_reg, (slot + last_index - 1) * DOUBLE_WORD_SIZE_BYTES));
+            GetMasm()->Ldr(lastReg, MemOperand(baseReg, (slot + lastIndex - 1) * DOUBLE_WORD_SIZE_BYTES));
         }
     }
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask)
+void Aarch64Encoder::LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask)
 {
     if (registers.none()) {
         return;
     }
 
-    int32_t max_offset = (slot + helpers::ToSigned(registers.GetMaxRegister())) * DOUBLE_WORD_SIZE_BYTES;
-    int32_t min_offset = (slot + helpers::ToSigned(registers.GetMinRegister())) * DOUBLE_WORD_SIZE_BYTES;
+    int32_t maxOffset = (slot + helpers::ToSigned(registers.GetMaxRegister())) * DOUBLE_WORD_SIZE_BYTES;
+    int32_t minOffset = (slot + helpers::ToSigned(registers.GetMinRegister())) * DOUBLE_WORD_SIZE_BYTES;
 
-    ScopedTmpRegLazy tmp_reg(this, true);
+    ScopedTmpRegLazy tmpReg(this, true);
     // Construct single add for big offset
-    if (!vixl::aarch64::Assembler::IsImmLSPair(min_offset, vixl::aarch64::kXRegSizeInBytesLog2) ||
-        !vixl::aarch64::Assembler::IsImmLSPair(max_offset, vixl::aarch64::kXRegSizeInBytesLog2)) {
-        tmp_reg.AcquireWithLr();
-        auto lr_reg = VixlReg(tmp_reg);
-        ssize_t sp_offset = slot * DOUBLE_WORD_SIZE_BYTES;
-        if (vixl::aarch64::Assembler::IsImmAddSub(sp_offset)) {
-            GetMasm()->Add(lr_reg, VixlReg(base), VixlImm(sp_offset));
+    if (!vixl::aarch64::Assembler::IsImmLSPair(minOffset, vixl::aarch64::kXRegSizeInBytesLog2) ||
+        !vixl::aarch64::Assembler::IsImmLSPair(maxOffset, vixl::aarch64::kXRegSizeInBytesLog2)) {
+        tmpReg.AcquireWithLr();
+        auto lrReg = VixlReg(tmpReg);
+        ssize_t spOffset = slot * DOUBLE_WORD_SIZE_BYTES;
+        if (vixl::aarch64::Assembler::IsImmAddSub(spOffset)) {
+            GetMasm()->Add(lrReg, VixlReg(base), VixlImm(spOffset));
         } else {
-            GetMasm()->Mov(lr_reg, VixlImm(sp_offset));
-            GetMasm()->Add(lr_reg, VixlReg(base), lr_reg);
+            GetMasm()->Mov(lrReg, VixlImm(spOffset));
+            GetMasm()->Add(lrReg, VixlReg(base), lrReg);
         }
         // Adjust new values for slot and base register
         slot = 0;
-        base = tmp_reg;
+        base = tmpReg;
     }
 
-    LoadStoreRegistersMainLoop<IS_STORE>(registers, is_fp, slot, base, mask);
+    LoadStoreRegistersMainLoop<IS_STORE>(registers, isFp, slot, base, mask);
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegistersLoop(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp,
-                                            const vixl::aarch64::Register &base_reg)
+void Aarch64Encoder::LoadStoreRegistersLoop(RegMask registers, ssize_t slot, size_t startReg, bool isFp,
+                                            const vixl::aarch64::Register &baseReg)
 {
     size_t i = 0;
-    const auto get_next_reg = [&registers, &i, is_fp]() {
+    const auto getNextReg = [&registers, &i, isFp]() {
         for (; i < registers.size(); i++) {
             if (registers.test(i)) {
                 return CPURegister(i++, vixl::aarch64::kXRegSize,
-                                   is_fp ? CPURegister::kVRegister : CPURegister::kRegister);
+                                   isFp ? CPURegister::kVRegister : CPURegister::kRegister);
             }
         }
         return CPURegister();
     };
 
-    for (CPURegister next_reg = get_next_reg(); next_reg.IsValid();) {
-        const CPURegister curr_reg = next_reg;
-        next_reg = get_next_reg();
-        if (next_reg.IsValid() && (next_reg.GetCode() - 1 == curr_reg.GetCode())) {
+    for (CPURegister nextReg = getNextReg(); nextReg.IsValid();) {
+        const CPURegister currReg = nextReg;
+        nextReg = getNextReg();
+        if (nextReg.IsValid() && (nextReg.GetCode() - 1 == currReg.GetCode())) {
             if constexpr (IS_STORE) {  // NOLINT
-                GetMasm()->Stp(curr_reg, next_reg,
-                               MemOperand(base_reg, (slot + curr_reg.GetCode() - start_reg) * DOUBLE_WORD_SIZE_BYTES));
+                GetMasm()->Stp(currReg, nextReg,
+                               MemOperand(baseReg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             } else {  // NOLINT
-                GetMasm()->Ldp(curr_reg, next_reg,
-                               MemOperand(base_reg, (slot + curr_reg.GetCode() - start_reg) * DOUBLE_WORD_SIZE_BYTES));
+                GetMasm()->Ldp(currReg, nextReg,
+                               MemOperand(baseReg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             }
-            next_reg = get_next_reg();
+            nextReg = getNextReg();
         } else {
             if constexpr (IS_STORE) {  // NOLINT
-                GetMasm()->Str(curr_reg,
-                               MemOperand(base_reg, (slot + curr_reg.GetCode() - start_reg) * DOUBLE_WORD_SIZE_BYTES));
+                GetMasm()->Str(currReg,
+                               MemOperand(baseReg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             } else {  // NOLINT
-                GetMasm()->Ldr(curr_reg,
-                               MemOperand(base_reg, (slot + curr_reg.GetCode() - start_reg) * DOUBLE_WORD_SIZE_BYTES));
+                GetMasm()->Ldr(currReg,
+                               MemOperand(baseReg, (slot + currReg.GetCode() - startReg) * DOUBLE_WORD_SIZE_BYTES));
             }
         }
     }
 }
 
-void Aarch64Encoder::PushRegisters(RegMask registers, bool is_fp)
+void Aarch64Encoder::PushRegisters(RegMask registers, bool isFp)
 {
     static constexpr size_t PAIR_OFFSET = 2 * DOUBLE_WORD_SIZE_BYTES;
-    Register last_reg = INVALID_REG;
+    Register lastReg = INVALID_REG;
     for (size_t i = 0; i < registers.size(); i++) {
         if (registers[i]) {
-            if (last_reg == INVALID_REG) {
-                last_reg = i;
+            if (lastReg == INVALID_REG) {
+                lastReg = i;
                 continue;
             }
-            if (is_fp) {
-                GetMasm()->stp(vixl::aarch64::VRegister(last_reg, DOUBLE_WORD_SIZE),
+            if (isFp) {
+                GetMasm()->stp(vixl::aarch64::VRegister(lastReg, DOUBLE_WORD_SIZE),
                                vixl::aarch64::VRegister(i, DOUBLE_WORD_SIZE),
                                MemOperand(vixl::aarch64::sp, -PAIR_OFFSET, vixl::aarch64::AddrMode::PreIndex));
             } else {
-                GetMasm()->stp(vixl::aarch64::Register(last_reg, DOUBLE_WORD_SIZE),
+                GetMasm()->stp(vixl::aarch64::Register(lastReg, DOUBLE_WORD_SIZE),
                                vixl::aarch64::Register(i, DOUBLE_WORD_SIZE),
                                MemOperand(vixl::aarch64::sp, -PAIR_OFFSET, vixl::aarch64::AddrMode::PreIndex));
             }
-            last_reg = INVALID_REG;
+            lastReg = INVALID_REG;
         }
     }
-    if (last_reg != INVALID_REG) {
-        if (is_fp) {
-            GetMasm()->str(vixl::aarch64::VRegister(last_reg, DOUBLE_WORD_SIZE),
+    if (lastReg != INVALID_REG) {
+        if (isFp) {
+            GetMasm()->str(vixl::aarch64::VRegister(lastReg, DOUBLE_WORD_SIZE),
                            MemOperand(vixl::aarch64::sp, -PAIR_OFFSET, vixl::aarch64::AddrMode::PreIndex));
         } else {
-            GetMasm()->str(vixl::aarch64::Register(last_reg, DOUBLE_WORD_SIZE),
+            GetMasm()->str(vixl::aarch64::Register(lastReg, DOUBLE_WORD_SIZE),
                            MemOperand(vixl::aarch64::sp, -PAIR_OFFSET, vixl::aarch64::AddrMode::PreIndex));
         }
     }
 }
 
-void Aarch64Encoder::PopRegisters(RegMask registers, bool is_fp)
+void Aarch64Encoder::PopRegisters(RegMask registers, bool isFp)
 {
     static constexpr size_t PAIR_OFFSET = 2 * DOUBLE_WORD_SIZE_BYTES;
-    Register last_reg;
+    Register lastReg;
     if ((registers.count() & 1U) != 0) {
-        last_reg = registers.GetMaxRegister();
-        if (is_fp) {
-            GetMasm()->ldr(vixl::aarch64::VRegister(last_reg, DOUBLE_WORD_SIZE),
+        lastReg = registers.GetMaxRegister();
+        if (isFp) {
+            GetMasm()->ldr(vixl::aarch64::VRegister(lastReg, DOUBLE_WORD_SIZE),
                            MemOperand(vixl::aarch64::sp, PAIR_OFFSET, vixl::aarch64::AddrMode::PostIndex));
         } else {
-            GetMasm()->ldr(vixl::aarch64::Register(last_reg, DOUBLE_WORD_SIZE),
+            GetMasm()->ldr(vixl::aarch64::Register(lastReg, DOUBLE_WORD_SIZE),
                            MemOperand(vixl::aarch64::sp, PAIR_OFFSET, vixl::aarch64::AddrMode::PostIndex));
         }
-        registers.reset(last_reg);
+        registers.reset(lastReg);
     }
-    last_reg = INVALID_REG;
+    lastReg = INVALID_REG;
     for (ssize_t i = registers.size() - 1; i >= 0; i--) {
         if (registers[i]) {
-            if (last_reg == INVALID_REG) {
-                last_reg = i;
+            if (lastReg == INVALID_REG) {
+                lastReg = i;
                 continue;
             }
-            if (is_fp) {
+            if (isFp) {
                 GetMasm()->ldp(vixl::aarch64::VRegister(i, DOUBLE_WORD_SIZE),
-                               vixl::aarch64::VRegister(last_reg, DOUBLE_WORD_SIZE),
+                               vixl::aarch64::VRegister(lastReg, DOUBLE_WORD_SIZE),
                                MemOperand(vixl::aarch64::sp, PAIR_OFFSET, vixl::aarch64::AddrMode::PostIndex));
             } else {
                 GetMasm()->ldp(vixl::aarch64::Register(i, DOUBLE_WORD_SIZE),
-                               vixl::aarch64::Register(last_reg, DOUBLE_WORD_SIZE),
+                               vixl::aarch64::Register(lastReg, DOUBLE_WORD_SIZE),
                                MemOperand(vixl::aarch64::sp, PAIR_OFFSET, vixl::aarch64::AddrMode::PostIndex));
             }
-            last_reg = INVALID_REG;
+            lastReg = INVALID_REG;
         }
     }
 }
@@ -2859,17 +2857,17 @@ vixl::aarch64::Disassembler &Aarch64Encoder::GetDisasm() const
 #endif
 
 size_t Aarch64Encoder::DisasmInstr([[maybe_unused]] std::ostream &stream, size_t pc,
-                                   [[maybe_unused]] ssize_t code_offset) const
+                                   [[maybe_unused]] ssize_t codeOffset) const
 {
 #ifndef PANDA_MINIMAL_VIXL
-    auto buffer_start = GetMasm()->GetBuffer()->GetOffsetAddress<uintptr_t>(0);
+    auto bufferStart = GetMasm()->GetBuffer()->GetOffsetAddress<uintptr_t>(0);
     auto instr = GetMasm()->GetBuffer()->GetOffsetAddress<vixl::aarch64::Instruction *>(pc);
     GetDecoder().Decode(instr);
-    if (code_offset < 0) {
+    if (codeOffset < 0) {
         stream << GetDisasm().GetOutput();
     } else {
         stream << std::setw(0x4) << std::right << std::setfill('0') << std::hex
-               << reinterpret_cast<uintptr_t>(instr) - buffer_start + code_offset << ": " << GetDisasm().GetOutput()
+               << reinterpret_cast<uintptr_t>(instr) - bufferStart + codeOffset << ": " << GetDisasm().GetOutput()
                << std::setfill(' ') << std::dec;
     }
 

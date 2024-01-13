@@ -22,20 +22,20 @@
 
 namespace panda::os::unix::mem_hooks {
 
-size_t PandaHooks::alloc_via_standard_ = 0;
-bool PandaHooks::is_active_ = false;
+size_t PandaHooks::allocViaStandard_ = 0;
+bool PandaHooks::isActive_ = false;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-PandaHooks::AddrRange PandaHooks::ignore_code_range_;
-void *(*PandaHooks::real_malloc_)(size_t) = nullptr;
-void *(*PandaHooks::real_memalign_)(size_t, size_t) = nullptr;
-void (*PandaHooks::real_free_)(void *) = nullptr;
+PandaHooks::AddrRange PandaHooks::ignoreCodeRange_;
+void *(*PandaHooks::realMalloc_)(size_t) = nullptr;
+void *(*PandaHooks::realMemalign_)(size_t, size_t) = nullptr;
+void (*PandaHooks::realFree_)(void *) = nullptr;
 
 int FindLibDwarfCodeRegion(dl_phdr_info *info, [[maybe_unused]] size_t size, void *data)
 {
     auto arange = reinterpret_cast<PandaHooks::AddrRange *>(data);
     if (std::string_view(info->dlpi_name).find("libdwarf.so") != std::string_view::npos) {
-        Span<const ElfW(Phdr)> phdr_list(info->dlpi_phdr, info->dlpi_phnum);
-        for (ElfW(Phdr) phdr : phdr_list) {
+        Span<const ElfW(Phdr)> phdrList(info->dlpi_phdr, info->dlpi_phnum);
+        for (ElfW(Phdr) phdr : phdrList) {
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
             if (phdr.p_type == PT_LOAD && (phdr.p_flags & PF_X) != 0) {
                 *arange = PandaHooks::AddrRange(info->dlpi_addr + phdr.p_vaddr, phdr.p_memsz);
@@ -52,43 +52,43 @@ void PandaHooks::Initialize()
     // libdwarf allocates a lot of memory using malloc internally.
     // Since this library is used only for debug purpose don't consider
     // malloc calls from this library.
-    dl_iterate_phdr(FindLibDwarfCodeRegion, &PandaHooks::ignore_code_range_);
+    dl_iterate_phdr(FindLibDwarfCodeRegion, &PandaHooks::ignoreCodeRange_);
 }
 
 /* static */
 void PandaHooks::SaveRealFunctions()
 {
-    real_malloc_ = reinterpret_cast<decltype(real_malloc_)>(
+    realMalloc_ = reinterpret_cast<decltype(realMalloc_)>(
         dlsym(RTLD_NEXT, "malloc"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
-    ASSERT(real_malloc_ != nullptr);
-    real_memalign_ = reinterpret_cast<decltype(real_memalign_)>(
+    ASSERT(realMalloc_ != nullptr);
+    realMemalign_ = reinterpret_cast<decltype(realMemalign_)>(
         dlsym(RTLD_NEXT, "memalign"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
-    ASSERT(real_memalign_ != nullptr);
-    real_free_ = reinterpret_cast<decltype(real_free_)>(
+    ASSERT(realMemalign_ != nullptr);
+    realFree_ = reinterpret_cast<decltype(realFree_)>(
         dlsym(RTLD_NEXT, "free"));  // NOLINT(cppcoreguidelines-pro-type-cstyle-cast)
-    ASSERT(real_free_ != nullptr);
+    ASSERT(realFree_ != nullptr);
 }
 
 /* static */
 bool PandaHooks::ShouldCountAllocation(const void *caller)
 {
-    return !ignore_code_range_.Contains(ToUintPtr(caller));
+    return !ignoreCodeRange_.Contains(ToUintPtr(caller));
 }
 
 /* static */
 void *PandaHooks::MallocHook(size_t size, const void *caller)
 {
     if (ShouldCountAllocation(caller)) {
-        alloc_via_standard_ += size;
+        allocViaStandard_ += size;
     }
     // tracking internal allocator is implemented by malloc, we would fail here with this option
 #ifndef TRACK_INTERNAL_ALLOCATIONS
-    if (alloc_via_standard_ > MAX_ALLOC_VIA_STANDARD) {
+    if (allocViaStandard_ > MAX_ALLOC_VIA_STANDARD) {
         std::cerr << "Too many usage of standard allocations" << std::endl;
         abort();
     }
-#endif                                  // TRACK_INTERNAL_ALLOCATIONS
-    void *result = real_malloc_(size);  // NOLINT(cppcoreguidelines-no-malloc)
+#endif                                 // TRACK_INTERNAL_ALLOCATIONS
+    void *result = realMalloc_(size);  // NOLINT(cppcoreguidelines-no-malloc)
     if (UNLIKELY(result == nullptr)) {
         std::cerr << "Malloc error" << std::endl;
         abort();
@@ -100,16 +100,16 @@ void *PandaHooks::MallocHook(size_t size, const void *caller)
 void *PandaHooks::MemalignHook(size_t alignment, size_t size, const void *caller)
 {
     if (ShouldCountAllocation(caller)) {
-        alloc_via_standard_ += size;
+        allocViaStandard_ += size;
     }
     // tracking internal allocator is implemented by malloc, we would fail here with this option
 #ifndef TRACK_INTERNAL_ALLOCATIONS
-    if (alloc_via_standard_ > MAX_ALLOC_VIA_STANDARD) {
+    if (allocViaStandard_ > MAX_ALLOC_VIA_STANDARD) {
         std::cerr << "Too many usage of standard allocations" << std::endl;
         abort();
     }
 #endif  // TRACK_INTERNAL_ALLOCATIONS
-    void *result = real_memalign_(alignment, size);
+    void *result = realMemalign_(alignment, size);
     if (UNLIKELY(result == nullptr)) {
         std::cerr << "Align error" << std::endl;
         abort();
@@ -120,14 +120,14 @@ void *PandaHooks::MemalignHook(size_t alignment, size_t size, const void *caller
 /* static */
 void PandaHooks::FreeHook(void *ptr, [[maybe_unused]] const void *caller)
 {
-    real_free_(ptr);  // NOLINT(cppcoreguidelines-no-malloc)
+    realFree_(ptr);  // NOLINT(cppcoreguidelines-no-malloc)
 }
 
 /* static */
 void PandaHooks::Enable()
 {
 #ifdef PANDA_USE_MEMORY_HOOKS
-    is_active_ = true;
+    isActive_ = true;
 #endif  // PANDA_USE_MEMORY_HOOKS
 }
 
@@ -135,7 +135,7 @@ void PandaHooks::Enable()
 void PandaHooks::Disable()
 {
 #ifdef PANDA_USE_MEMORY_HOOKS
-    is_active_ = false;
+    isActive_ = false;
 #endif  // PANDA_USE_MEMORY_HOOKS
 }
 
@@ -146,40 +146,40 @@ void PandaHooks::Disable()
 // NOLINTNEXTLINE(readability-redundant-declaration,readability-identifier-naming)
 void *malloc(size_t size) noexcept
 {
-    if (panda::os::mem_hooks::PandaHooks::real_malloc_ == nullptr) {
+    if (panda::os::mem_hooks::PandaHooks::realMalloc_ == nullptr) {
         panda::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
     }
     if (panda::os::mem_hooks::PandaHooks::IsActive()) {
         void *caller = __builtin_return_address(0);
         return panda::os::mem_hooks::PandaHooks::MallocHook(size, caller);
     }
-    return panda::os::mem_hooks::PandaHooks::real_malloc_(size);
+    return panda::os::mem_hooks::PandaHooks::realMalloc_(size);
 }
 
 // NOLINTNEXTLINE(readability-redundant-declaration,readability-identifier-naming)
 void *memalign(size_t alignment, size_t size) noexcept
 {
-    if (panda::os::mem_hooks::PandaHooks::real_memalign_ == nullptr) {
+    if (panda::os::mem_hooks::PandaHooks::realMemalign_ == nullptr) {
         panda::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
     }
     if (panda::os::mem_hooks::PandaHooks::IsActive()) {
         void *caller = __builtin_return_address(0);
         return panda::os::mem_hooks::PandaHooks::MemalignHook(alignment, size, caller);
     }
-    return panda::os::mem_hooks::PandaHooks::real_memalign_(alignment, size);
+    return panda::os::mem_hooks::PandaHooks::realMemalign_(alignment, size);
 }
 
 // NOLINTNEXTLINE(readability-redundant-declaration,readability-identifier-naming)
 void free(void *ptr) noexcept
 {
-    if (panda::os::mem_hooks::PandaHooks::real_free_ == nullptr) {
+    if (panda::os::mem_hooks::PandaHooks::realFree_ == nullptr) {
         panda::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
     }
     if (panda::os::mem_hooks::PandaHooks::IsActive()) {
         void *caller = __builtin_return_address(0);
         return panda::os::mem_hooks::PandaHooks::FreeHook(ptr, caller);
     }
-    return panda::os::mem_hooks::PandaHooks::real_free_(ptr);
+    return panda::os::mem_hooks::PandaHooks::realFree_(ptr);
 }
 
 #endif  // PANDA_USE_MEMORY_HOOKS

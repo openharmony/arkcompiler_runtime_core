@@ -50,30 +50,30 @@ public:
      * Predicate checks GC-specific conditions on this reference (i.e. if we need to skip this reference e.g. referent
      * is not in collection set)
      */
-    virtual bool IsReference(const BaseClass *base_cls, const ObjectHeader *ref,
+    virtual bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                              const ReferenceCheckPredicateT &pred) const = 0;
 
     /**
      * Save reference for future processing and handle it with GC point of view (mark needed fields, if necessary)
      * Predicate checks if we should add this reference to the queue (e.g. don't process to many refs on concurrent)
      */
-    virtual void HandleReference(GC *gc, GCMarkingStackType *objects_stack, const BaseClass *cls,
+    virtual void HandleReference(GC *gc, GCMarkingStackType *objectsStack, const BaseClass *cls,
                                  const ObjectHeader *object, const ReferenceProcessPredicateT &pred) = 0;
 
     /**
      * Process all references which we discovered by GC.
      * Predicate checks if we should process all references at once (e.g. processing takes too much time)
      */
-    virtual void ProcessReferences(bool concurrent, bool clear_soft_references, GCPhase gc_phase,
+    virtual void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                                    const mem::GC::ReferenceClearPredicateT &pred) = 0;
 
     /// Collect all processed references. They were cleared on the previous phase - we only collect them.
     virtual panda::mem::Reference *CollectClearedReferences() = 0;
 
-    virtual void ScheduleForEnqueue(Reference *cleared_references) = 0;
+    virtual void ScheduleForEnqueue(Reference *clearedReferences) = 0;
 
     /// Enqueue cleared references to corresponding queue, if necessary.
-    virtual void Enqueue(panda::mem::Reference *cleared_references) = 0;
+    virtual void Enqueue(panda::mem::Reference *clearedReferences) = 0;
 
     /// Return size of the queue of references.
     virtual size_t GetReferenceQueueSize() const = 0;

@@ -65,7 +65,7 @@ public:
      * @param start_addr - first bit of the memory which must be covered by the Crossing Map.
      * @param size - size of the memory which must be covered by the Crossing Map.
      */
-    explicit CrossingMap(InternalAllocatorPtr internal_allocator, uintptr_t start_addr, size_t size);
+    explicit CrossingMap(InternalAllocatorPtr internalAllocator, uintptr_t startAddr, size_t size);
     ~CrossingMap();
     NO_COPY_SEMANTIC(CrossingMap);
     NO_MOVE_SEMANTIC(CrossingMap);
@@ -78,7 +78,7 @@ public:
      * @param obj_addr - pointer to the object (object header).
      * @param obj_size - size of the object.
      */
-    void AddObject(const void *obj_addr, size_t obj_size);
+    void AddObject(const void *objAddr, size_t objSize);
 
     /**
      * @brief Remove object from the Crossing map.
@@ -91,8 +91,8 @@ public:
      * @param prev_obj_size - size of the previous object.
      *        It is used check if previous object crosses the borders of the current map.
      */
-    void RemoveObject(const void *obj_addr, size_t obj_size, const void *next_obj_addr = nullptr,
-                      const void *prev_obj_addr = nullptr, size_t prev_obj_size = 0);
+    void RemoveObject(const void *objAddr, size_t objSize, const void *nextObjAddr = nullptr,
+                      const void *prevObjAddr = nullptr, size_t prevObjSize = 0);
 
     /**
      * @brief Find and return the first object, which starts in an interval inclusively
@@ -105,21 +105,21 @@ public:
      *  or an object which crosses a border of this interval
      *  or nullptr
      */
-    void *FindFirstObject(const void *start_addr, const void *end_addr);
+    void *FindFirstObject(const void *startAddr, const void *endAddr);
 
     /**
      * @brief Initialize a Crossing map for the corresponding memory ranges.
      * @param start_addr - pointer to the first byte of the interval.
      * @param size - size of the interval.
      */
-    void InitializeCrossingMapForMemory(const void *start_addr, size_t size);
+    void InitializeCrossingMapForMemory(const void *startAddr, size_t size);
 
     /**
      * @brief Remove a Crossing map for the corresponding memory ranges.
      * @param start_addr - pointer to the first byte of the interval.
      * @param size - size of the interval.
      */
-    void RemoveCrossingMapForMemory(const void *start_addr, size_t size);
+    void RemoveCrossingMapForMemory(const void *startAddr, size_t size);
 
 private:
     static constexpr bool CROSSING_MAP_MANAGE_CROSSED_BORDER = PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER;
@@ -239,68 +239,68 @@ private:
 
     size_t GetMapNumFromAddr(const void *addr)
     {
-        ASSERT(ToUintPtr(addr) >= start_addr_);
-        size_t map_num = (ToUintPtr(addr) - start_addr_) / CROSSING_MAP_GRANULARITY;
-        ASSERT(map_num < map_elements_count_);
-        return map_num;
+        ASSERT(ToUintPtr(addr) >= startAddr_);
+        size_t mapNum = (ToUintPtr(addr) - startAddr_) / CROSSING_MAP_GRANULARITY;
+        ASSERT(mapNum < mapElementsCount_);
+        return mapNum;
     }
 
-    void *GetAddrFromOffset(size_t map_num, size_t offset)
+    void *GetAddrFromOffset(size_t mapNum, size_t offset)
     {
-        ASSERT(map_num < map_elements_count_);
-        return ToVoidPtr(start_addr_ + map_num * CROSSING_MAP_GRANULARITY + (offset << CROSSING_MAP_OBJ_ALIGNMENT));
+        ASSERT(mapNum < mapElementsCount_);
+        return ToVoidPtr(startAddr_ + mapNum * CROSSING_MAP_GRANULARITY + (offset << CROSSING_MAP_OBJ_ALIGNMENT));
     }
 
     size_t GetOffsetFromAddr(const void *addr)
     {
-        ASSERT(ToUintPtr(addr) >= start_addr_);
-        size_t offset = (ToUintPtr(addr) - start_addr_) % CROSSING_MAP_GRANULARITY;
+        ASSERT(ToUintPtr(addr) >= startAddr_);
+        size_t offset = (ToUintPtr(addr) - startAddr_) % CROSSING_MAP_GRANULARITY;
         ASSERT((offset & (GetAlignmentInBytes(CROSSING_MAP_OBJ_ALIGNMENT) - 1U)) == 0U);
         return offset >> CROSSING_MAP_OBJ_ALIGNMENT;
     }
 
-    void UpdateCrossedBorderOnAdding(size_t first_crossed_border_map, size_t last_crossed_border_map);
-    void UpdateCrossedBorderOnRemoving(size_t crossed_border_map);
-    void *FindObjInMap(size_t map_num);
+    void UpdateCrossedBorderOnAdding(size_t firstCrossedBorderMap, size_t lastCrossedBorderMap);
+    void UpdateCrossedBorderOnRemoving(size_t crossedBorderMap);
+    void *FindObjInMap(size_t mapNum);
 
-    CrossingMapElement *GetMapElement(size_t map_num)
+    CrossingMapElement *GetMapElement(size_t mapNum)
     {
-        ASSERT(map_num < map_elements_count_);
-        size_t static_array_num = map_num / CROSSING_MAP_COUNT_IN_STATIC_ARRAY_ELEMENT;
-        size_t relative_map_num = map_num % CROSSING_MAP_COUNT_IN_STATIC_ARRAY_ELEMENT;
-        ASSERT(GetStaticArrayElement(static_array_num) != nullptr);
+        ASSERT(mapNum < mapElementsCount_);
+        size_t staticArrayNum = mapNum / CROSSING_MAP_COUNT_IN_STATIC_ARRAY_ELEMENT;
+        size_t relativeMapNum = mapNum % CROSSING_MAP_COUNT_IN_STATIC_ARRAY_ELEMENT;
+        ASSERT(GetStaticArrayElement(staticArrayNum) != nullptr);
         return static_cast<CrossingMapElement *>(ToVoidPtr(
-            (ToUintPtr(GetStaticArrayElement(static_array_num)) + relative_map_num * sizeof(CrossingMapElement))));
+            (ToUintPtr(GetStaticArrayElement(staticArrayNum)) + relativeMapNum * sizeof(CrossingMapElement))));
     }
 
-    CrossingMapElement *GetStaticArrayElement(size_t static_array_num)
+    CrossingMapElement *GetStaticArrayElement(size_t staticArrayNum)
     {
-        ASSERT(static_array_num < static_array_elements_count_);
-        auto element_pointer = static_cast<StaticArrayPtr>(
-            ToVoidPtr((ToUintPtr(static_array_) + static_array_num * sizeof(StaticArrayPtr))));
-        return *element_pointer;
+        ASSERT(staticArrayNum < staticArrayElementsCount_);
+        auto elementPointer =
+            static_cast<StaticArrayPtr>(ToVoidPtr((ToUintPtr(staticArray_) + staticArrayNum * sizeof(StaticArrayPtr))));
+        return *elementPointer;
     }
 
-    void SetStaticArrayElement(size_t static_array_num, CrossingMapElement *value)
+    void SetStaticArrayElement(size_t staticArrayNum, CrossingMapElement *value)
     {
-        ASSERT(static_array_num < static_array_elements_count_);
-        void *element = ToVoidPtr(ToUintPtr(static_array_) + static_array_num * sizeof(StaticArrayPtr));
+        ASSERT(staticArrayNum < staticArrayElementsCount_);
+        void *element = ToVoidPtr(ToUintPtr(staticArray_) + staticArrayNum * sizeof(StaticArrayPtr));
         *static_cast<StaticArrayPtr>(element) = value;
     }
 
     size_t GetStaticArrayNumFromAddr(const void *addr)
     {
-        ASSERT(ToUintPtr(addr) >= start_addr_);
-        size_t static_array_num = (ToUintPtr(addr) - start_addr_) / CROSSING_MAP_STATIC_ARRAY_GRANULARITY;
-        ASSERT(static_array_num < static_array_elements_count_);
-        return static_array_num;
+        ASSERT(ToUintPtr(addr) >= startAddr_);
+        size_t staticArrayNum = (ToUintPtr(addr) - startAddr_) / CROSSING_MAP_STATIC_ARRAY_GRANULARITY;
+        ASSERT(staticArrayNum < staticArrayElementsCount_);
+        return staticArrayNum;
     }
 
-    StaticArrayPtr static_array_ {nullptr};
-    uintptr_t start_addr_ {0};
-    size_t map_elements_count_ {0};
-    size_t static_array_elements_count_ {0};
-    InternalAllocatorPtr internal_allocator_ {nullptr};
+    StaticArrayPtr staticArray_ {nullptr};
+    uintptr_t startAddr_ {0};
+    size_t mapElementsCount_ {0};
+    size_t staticArrayElementsCount_ {0};
+    InternalAllocatorPtr internalAllocator_ {nullptr};
     friend class CrossingMapTest;
 };
 

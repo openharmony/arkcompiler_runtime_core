@@ -26,12 +26,12 @@ class NativePointer : public ObjectHeader {
 public:
     inline void *GetExternalPointer() const
     {
-        return external_pointer_;
+        return externalPointer_;
     }
 
-    inline void SetExternalPointer(void *external_pointer)
+    inline void SetExternalPointer(void *externalPointer)
     {
-        external_pointer_ = external_pointer;
+        externalPointer_ = externalPointer;
     }
 
     static NativePointer *Cast(ObjectHeader *object)
@@ -41,13 +41,13 @@ public:
 
     static constexpr uint32_t GetExternalPointerOffset()
     {
-        return MEMBER_OFFSET(NativePointer, external_pointer_);
+        return MEMBER_OFFSET(NativePointer, externalPointer_);
     }
 
 private:
     NativePointer() : ObjectHeader() {}
 
-    void *external_pointer_ {nullptr};
+    void *externalPointer_ {nullptr};
 };
 
 }  // namespace panda::coretypes

@@ -69,69 +69,69 @@ TEST_F(RegAllocResolverTest, ResolveFixedInputs)
      * - move v2 from r0 into r1;
      */
     Target target(GetGraph()->GetArch());
-    auto store_inst = &INS(3U);
-    store_inst->SetLocation(0U, Location::MakeRegister(target.GetParamRegId(0U)));
-    store_inst->SetLocation(1U, Location::MakeRegister(target.GetParamRegId(2U)));
-    store_inst->SetLocation(2U, Location::MakeRegister(target.GetParamRegId(1U)));
+    auto storeInst = &INS(3U);
+    storeInst->SetLocation(0U, Location::MakeRegister(target.GetParamRegId(0U)));
+    storeInst->SetLocation(1U, Location::MakeRegister(target.GetParamRegId(2U)));
+    storeInst->SetLocation(2U, Location::MakeRegister(target.GetParamRegId(1U)));
 
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     ASSERT_TRUE(la.Run());
 
-    auto param_0 = &INS(0U);
-    auto param_1 = &INS(1U);
-    auto param_2 = &INS(2U);
+    auto param0 = &INS(0U);
+    auto param1 = &INS(1U);
+    auto param2 = &INS(2U);
 
-    auto param_0_interval = la.GetInstLifeIntervals(param_0);
-    auto param_1_interval = la.GetInstLifeIntervals(param_1);
-    auto param_2_interval = la.GetInstLifeIntervals(param_2);
-    auto store_interval = la.GetInstLifeIntervals(store_inst);
-    auto add_interval = la.GetInstLifeIntervals(&INS(5U));
+    auto param0Interval = la.GetInstLifeIntervals(param0);
+    auto param1Interval = la.GetInstLifeIntervals(param1);
+    auto param2Interval = la.GetInstLifeIntervals(param2);
+    auto storeInterval = la.GetInstLifeIntervals(storeInst);
+    auto addInterval = la.GetInstLifeIntervals(&INS(5U));
 
-    param_0_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(0U)));
-    param_1_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(1U)));
-    param_2_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(2U)));
-    add_interval->SetLocation(Location::MakeRegister(target.GetParamRegId(3U)));
+    param0Interval->SetLocation(Location::MakeRegister(target.GetParamRegId(0U)));
+    param1Interval->SetLocation(Location::MakeRegister(target.GetParamRegId(1U)));
+    param2Interval->SetLocation(Location::MakeRegister(target.GetParamRegId(2U)));
+    addInterval->SetLocation(Location::MakeRegister(target.GetParamRegId(3U)));
 
-    param_0_interval->SplitAt(store_interval->GetBegin() - 1U, GetGraph()->GetAllocator())
+    param0Interval->SplitAt(storeInterval->GetBegin() - 1U, GetGraph()->GetAllocator())
         ->SetLocation(Location::MakeStackSlot(0U));
-    param_1_interval->SplitAt(add_interval->GetBegin() - 1U, GetGraph()->GetAllocator())
+    param1Interval->SplitAt(addInterval->GetBegin() - 1U, GetGraph()->GetAllocator())
         ->SetLocation(Location::MakeRegister(target.GetParamRegId(2U)));
-    auto p2_split_1 = param_2_interval->SplitAt(add_interval->GetBegin() - 1U, GetGraph()->GetAllocator());
-    p2_split_1->SetLocation(Location::MakeRegister(6U));
-    auto p2_split_2 = p2_split_1->SplitAt(store_interval->GetBegin() - 1U, GetGraph()->GetAllocator());
-    p2_split_2->SetLocation(Location::MakeRegister(target.GetParamRegId(0U)));
+    auto p2Split1 = param2Interval->SplitAt(addInterval->GetBegin() - 1U, GetGraph()->GetAllocator());
+    p2Split1->SetLocation(Location::MakeRegister(6U));
+    auto p2Split2 = p2Split1->SplitAt(storeInterval->GetBegin() - 1U, GetGraph()->GetAllocator());
+    p2Split2->SetLocation(Location::MakeRegister(target.GetParamRegId(0U)));
     la.GetInstLifeIntervals(&INS(4U))->SetLocation(Location::MakeRegister(target.GetReturnRegId()));
-    la.GetTmpRegInterval(store_inst)->SetLocation(Location::MakeRegister(8U));
+    la.GetTmpRegInterval(storeInst)->SetLocation(Location::MakeRegister(8U));
 
     InitUsedRegs(GetGraph());
     RegAllocResolver resolver(GetGraph());
     resolver.Resolve();
 
-    auto prev = store_inst->GetPrev();
+    auto prev = storeInst->GetPrev();
     ASSERT_TRUE(prev != nullptr && prev->GetOpcode() == Opcode::SpillFill);
     auto sf = prev->CastToSpillFill();
-    auto sf_data = sf->GetSpillFills();
-    ASSERT_EQ(sf_data.size(), 2U);
+    auto sfData = sf->GetSpillFills();
+    ASSERT_EQ(sfData.size(), 2U);
 
-    std::vector<SpillFillData> expected_sf {
+    std::vector<SpillFillData> expectedSf {
         SpillFillData {LocationType::REGISTER, LocationType::REGISTER, 0U, 1U, DataType::UINT64},
         SpillFillData {LocationType::STACK, LocationType::REGISTER, 0U, 0U,
                        ConvertRegType(GetGraph(), DataType::REFERENCE)}};
 
-    for (auto &exp_sf : expected_sf) {
+    for (auto &expSf : expectedSf) {
         bool found = false;
-        for (auto &eff_sf : sf_data) {
-            if (eff_sf == exp_sf) {
+        for (auto &effSf : sfData) {
+            if (effSf == expSf) {
                 found = true;
                 break;
             }
         }
         if (!found) {
             std::stringstream f;
-            for (auto &esf : sf_data) {
+            for (auto &esf : sfData) {
                 f << sf_data::ToString(esf, GetGraph()->GetArch()) << ", ";
             }
-            ASSERT_TRUE(found) << "Spill fill " << sf_data::ToString(exp_sf, GetGraph()->GetArch())
+            ASSERT_TRUE(found) << "Spill fill " << sf_data::ToString(expSf, GetGraph()->GetArch())
                                << "  not found among " << f.str();
         }
     }

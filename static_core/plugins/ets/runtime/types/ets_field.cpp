@@ -32,10 +32,10 @@ EtsClass *EtsField::GetType() const
 
 EtsString *EtsField::GetNameString() const
 {
-    panda_file::File::StringData name_data {};
-    name_data = GetCoreType()->GetName();
+    panda_file::File::StringData nameData {};
+    nameData = GetCoreType()->GetName();
 
-    return EtsString::Resolve(name_data.data, name_data.utf16_length);
+    return EtsString::Resolve(nameData.data, nameData.utf16Length);
 }
 
 const char *EtsField::GetTypeDescriptor() const

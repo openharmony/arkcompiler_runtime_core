@@ -31,7 +31,7 @@ extern "C" uint64_t InvokeCompiledCodeWithArgArray(const int64_t *, const Frame 
 extern "C" uint64_t InvokeCompiledCodeWithArgArrayDyn(const uint64_t *, uint32_t, const Frame *, const Method *,
                                                       ManagedThread *);
 
-extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, Frame *frame, Frame *last_frame);
+extern "C" int64_t InvokeInterpreter(ManagedThread *thread, const uint8_t *pc, Frame *frame, Frame *lastFrame);
 
 extern "C" void CompiledCodeToInterpreterBridge();
 extern "C" void CompiledCodeToInterpreterBridgeDyn();

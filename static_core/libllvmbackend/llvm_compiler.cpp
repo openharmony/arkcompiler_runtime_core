@@ -42,9 +42,9 @@ LLVMCompiler::LLVMCompiler(Arch arch) : arch_(arch)
     // REQUIRED_LLVM_VERSION is defined in libllvmbackend/CMakeLists.txt
     static_assert(std::string_view {LLVM_VERSION_STRING} == STRINGIFY(REQUIRED_LLVM_VERSION));
 
-    const std::string current_llvm_lib_version = llvm::LLVMContext::getLLVMVersion();
-    if (current_llvm_lib_version != STRINGIFY(REQUIRED_LLVM_VERSION)) {
-        llvm::report_fatal_error(llvm::Twine("Incompatible LLVM version " + current_llvm_lib_version + ". " +
+    const std::string currentLlvmLibVersion = llvm::LLVMContext::getLLVMVersion();
+    if (currentLlvmLibVersion != STRINGIFY(REQUIRED_LLVM_VERSION)) {
+        llvm::report_fatal_error(llvm::Twine("Incompatible LLVM version " + currentLlvmLibVersion + ". " +
                                              std::string(STRINGIFY(REQUIRED_LLVM_VERSION)) + " is required."),
                                  false);
     }
@@ -59,27 +59,27 @@ LLVMCompiler::LLVMCompiler(Arch arch) : arch_(arch)
 #endif
     context_.setOpaquePointers(true);
 
-    LLVMLogger::Init(OPTIONS.GetLlvmLog());
+    LLVMLogger::Init(g_options.GetLlvmLog());
 }
 
 panda::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOptions()
 {
-    panda::llvmbackend::LLVMCompilerOptions llvm_compiler_options {};
-    llvm_compiler_options.optimize = !panda::compiler::OPTIONS.IsCompilerNonOptimizing();
-    llvm_compiler_options.optlevel = llvm_compiler_options.optimize ? 2U : 0U;
-    llvm_compiler_options.dump_module_after_optimizations = OPTIONS.IsLlvmDumpAfter();
-    llvm_compiler_options.dump_module_before_optimizations = OPTIONS.IsLlvmDumpBefore();
-    llvm_compiler_options.inline_module_file = OPTIONS.GetLlvmInlineModule();
-    llvm_compiler_options.pipeline_file = OPTIONS.GetLlvmPipeline();
+    panda::llvmbackend::LLVMCompilerOptions llvmCompilerOptions {};
+    llvmCompilerOptions.optimize = !panda::compiler::g_options.IsCompilerNonOptimizing();
+    llvmCompilerOptions.optlevel = llvmCompilerOptions.optimize ? 2U : 0U;
+    llvmCompilerOptions.dumpModuleAfterOptimizations = g_options.IsLlvmDumpAfter();
+    llvmCompilerOptions.dumpModuleBeforeOptimizations = g_options.IsLlvmDumpBefore();
+    llvmCompilerOptions.inlineModuleFile = g_options.GetLlvmInlineModule();
+    llvmCompilerOptions.pipelineFile = g_options.GetLlvmPipeline();
 
-    llvm_compiler_options.do_irtoc_inline = !llvm_compiler_options.inline_module_file.empty();
+    llvmCompilerOptions.doIrtocInline = !llvmCompilerOptions.inlineModuleFile.empty();
 
-    return llvm_compiler_options;
+    return llvmCompilerOptions;
 }
 
 void LLVMCompiler::InitializeDefaultLLVMOptions()
 {
-    if (panda::compiler::OPTIONS.IsCompilerNonOptimizing()) {
+    if (panda::compiler::g_options.IsCompilerNonOptimizing()) {
         constexpr auto DISABLE = llvm::cl::boolOrDefault::BOU_FALSE;
         SetLLVMOption("fast-isel", DISABLE);
         SetLLVMOption("global-isel", DISABLE);
@@ -90,17 +90,17 @@ void LLVMCompiler::InitializeLLVMOptions()
 {
     llvm::cl::ResetAllOptionOccurrences();
     InitializeDefaultLLVMOptions();
-    auto llvm_options_str = OPTIONS.GetLlvmOptions();
-    if (llvm_options_str.length() == 0) {
+    auto llvmOptionsStr = g_options.GetLlvmOptions();
+    if (llvmOptionsStr.length() == 0) {
         return;
     }
 
     llvm::BumpPtrAllocator alloc;
-    llvm::StringSaver string_saver(alloc);
-    llvm::SmallVector<const char *, 0> parsed_argv;
-    parsed_argv.emplace_back("");  // First argument is an executable
-    llvm::cl::TokenizeGNUCommandLine(llvm_options_str, string_saver, parsed_argv);
-    llvm::cl::ParseCommandLineOptions(parsed_argv.size(), parsed_argv.data());
+    llvm::StringSaver stringSaver(alloc);
+    llvm::SmallVector<const char *, 0> parsedArgv;
+    parsedArgv.emplace_back("");  // First argument is an executable
+    llvm::cl::TokenizeGNUCommandLine(llvmOptionsStr, stringSaver, parsedArgv);
+    llvm::cl::ParseCommandLineOptions(parsedArgv.size(), parsedArgv.data());
 }
 
 template <typename T>
@@ -118,27 +118,27 @@ template void LLVMCompiler::SetLLVMOption(const char *option, bool val);
 llvm::Triple LLVMCompiler::GetTripleForArch(Arch arch)
 {
     std::string error;
-    std::string triple_name;
+    std::string tripleName;
     switch (arch) {
         case Arch::AARCH64:
-            triple_name = OPTIONS.GetLlvmTriple();
+            tripleName = g_options.GetLlvmTriple();
             break;
         case Arch::X86_64:
 #ifdef PANDA_TARGET_LINUX
-            triple_name = OPTIONS.WasSetLlvmTriple() ? OPTIONS.GetLlvmTriple() : "x86_64-unknown-linux-gnu";
+            tripleName = g_options.WasSetLlvmTriple() ? g_options.GetLlvmTriple() : "x86_64-unknown-linux-gnu";
 #elif defined(PANDA_TARGET_MACOS)
-            triple_name = OPTIONS.WasSetLlvmTriple() ? OPTIONS.GetLlvmTriple() : "x86_64-apple-darwin-gnu";
+            tripleName = g_options.WasSetLlvmTriple() ? g_options.GetLlvmTriple() : "x86_64-apple-darwin-gnu";
 #elif defined(PANDA_TARGET_WINDOWS)
-            triple_name = OPTIONS.WasSetLlvmTriple() ? OPTIONS.GetLlvmTriple() : "x86_64-unknown-windows-unknown";
+            tripleName = g_options.WasSetLlvmTriple() ? g_options.GetLlvmTriple() : "x86_64-unknown-windows-unknown";
 #else
-            triple_name = OPTIONS.WasSetLlvmTriple() ? OPTIONS.GetLlvmTriple() : "x86_64-unknown-unknown-unknown";
+            tripleName = g_options.WasSetLlvmTriple() ? g_options.GetLlvmTriple() : "x86_64-unknown-unknown-unknown";
 #endif
             break;
 
         default:
             UNREACHABLE();
     }
-    llvm::Triple triple(llvm::Triple::normalize(triple_name));
+    llvm::Triple triple(llvm::Triple::normalize(tripleName));
     [[maybe_unused]] auto target = llvm::TargetRegistry::lookupTarget("", triple, error);
     ASSERT_PRINT(target != nullptr, error);
     return triple;
@@ -149,10 +149,10 @@ std::string LLVMCompiler::GetCPUForArch(Arch arch)
     std::string cpu;
     switch (arch) {
         case Arch::AARCH64:
-            cpu = OPTIONS.GetLlvmCpu();
+            cpu = g_options.GetLlvmCpu();
             break;
         case Arch::X86_64:
-            cpu = OPTIONS.WasSetLlvmCpu() ? OPTIONS.GetLlvmCpu() : "";
+            cpu = g_options.WasSetLlvmCpu() ? g_options.GetLlvmCpu() : "";
             break;
         default:
             UNREACHABLE();

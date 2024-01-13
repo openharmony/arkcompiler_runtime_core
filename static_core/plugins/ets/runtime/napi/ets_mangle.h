@@ -21,9 +21,9 @@ namespace panda::ets {
 
 std::string MangleString(const std::string &name);
 
-std::string MangleMethodName(const std::string &class_name, const std::string &method_name);
+std::string MangleMethodName(const std::string &className, const std::string &methodName);
 
-std::string MangleMethodNameWithSignature(const std::string &mangled_name, const std::string &signature);
+std::string MangleMethodNameWithSignature(const std::string &mangledName, const std::string &signature);
 
 }  // namespace panda::ets
 

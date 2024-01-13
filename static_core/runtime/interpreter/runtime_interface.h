@@ -39,60 +39,60 @@ public:
 
     static Method *ResolveMethod(ManagedThread *thread, const Method &caller, BytecodeId id)
     {
-        auto resolved_id = caller.GetClass()->ResolveMethodIndex(id.AsIndex());
-        auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        auto *method = class_linker->GetMethod(caller, resolved_id);
+        auto resolvedId = caller.GetClass()->ResolveMethodIndex(id.AsIndex());
+        auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        auto *method = classLinker->GetMethod(caller, resolvedId);
         if (method == nullptr) {
             return nullptr;
         }
 
         auto *klass = method->GetClass();
-        if (!klass->IsInitialized() && !class_linker->InitializeClass(thread, klass)) {
+        if (!klass->IsInitialized() && !classLinker->InitializeClass(thread, klass)) {
             return nullptr;
         }
 
         return method;
     }
 
-    static const uint8_t *GetMethodName(const Method *caller, BytecodeId method_id)
+    static const uint8_t *GetMethodName(const Method *caller, BytecodeId methodId)
     {
-        auto resolved_id = caller->GetClass()->ResolveMethodIndex(method_id.AsIndex());
+        auto resolvedId = caller->GetClass()->ResolveMethodIndex(methodId.AsIndex());
         const auto *pf = caller->GetPandaFile();
-        const panda_file::MethodDataAccessor mda(*pf, resolved_id);
+        const panda_file::MethodDataAccessor mda(*pf, resolvedId);
         return pf->GetStringData(mda.GetNameId()).data;
     }
 
-    static Class *GetMethodClass(const Method *caller, BytecodeId method_id)
+    static Class *GetMethodClass(const Method *caller, BytecodeId methodId)
     {
-        auto resolved_id = caller->GetClass()->ResolveMethodIndex(method_id.AsIndex());
+        auto resolvedId = caller->GetClass()->ResolveMethodIndex(methodId.AsIndex());
         const auto *pf = caller->GetPandaFile();
-        const panda_file::MethodDataAccessor mda(*pf, resolved_id);
-        auto class_id = mda.GetClassId();
+        const panda_file::MethodDataAccessor mda(*pf, resolvedId);
+        auto classId = mda.GetClassId();
 
-        auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        return class_linker->GetClass(*caller, class_id);
+        auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        return classLinker->GetClass(*caller, classId);
     }
 
-    static uint32_t GetMethodArgumentsCount(Method *caller, BytecodeId method_id)
+    static uint32_t GetMethodArgumentsCount(Method *caller, BytecodeId methodId)
     {
-        auto resolved_id = caller->GetClass()->ResolveMethodIndex(method_id.AsIndex());
+        auto resolvedId = caller->GetClass()->ResolveMethodIndex(methodId.AsIndex());
         auto *pf = caller->GetPandaFile();
-        panda_file::MethodDataAccessor mda(*pf, resolved_id);
+        panda_file::MethodDataAccessor mda(*pf, resolvedId);
         panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
         return pda.GetNumArgs();
     }
 
     static Field *ResolveField(ManagedThread *thread, const Method &caller, BytecodeId id)
     {
-        auto resolved_id = caller.GetClass()->ResolveFieldIndex(id.AsIndex());
-        auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        auto *field = class_linker->GetField(caller, resolved_id);
+        auto resolvedId = caller.GetClass()->ResolveFieldIndex(id.AsIndex());
+        auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        auto *field = classLinker->GetField(caller, resolvedId);
         if (field == nullptr) {
             return nullptr;
         }
 
         auto *klass = field->GetClass();
-        if (!klass->IsInitialized() && !class_linker->InitializeClass(thread, field->GetClass())) {
+        if (!klass->IsInitialized() && !classLinker->InitializeClass(thread, field->GetClass())) {
             return nullptr;
         }
 
@@ -102,17 +102,17 @@ public:
     template <bool NEED_INIT>
     static Class *ResolveClass(ManagedThread *thread, const Method &caller, BytecodeId id)
     {
-        auto resolved_id = caller.GetClass()->ResolveClassIndex(id.AsIndex());
-        ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        Class *klass = class_linker->GetClass(caller, resolved_id);
+        auto resolvedId = caller.GetClass()->ResolveClassIndex(id.AsIndex());
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        Class *klass = classLinker->GetClass(caller, resolvedId);
 
         if (klass == nullptr) {
             return nullptr;
         }
 
         if (NEED_INIT) {
-            auto *klass_linker = Runtime::GetCurrent()->GetClassLinker();
-            if (!klass->IsInitialized() && !klass_linker->InitializeClass(thread, klass)) {
+            auto *klassLinker = Runtime::GetCurrent()->GetClassLinker();
+            if (!klass->IsInitialized() && !klassLinker->InitializeClass(thread, klass)) {
                 return nullptr;
             }
         }
@@ -183,9 +183,9 @@ public:
         panda::ThrowArithmeticException();
     }
 
-    static void ThrowClassCastException(Class *dst_type, Class *src_type)
+    static void ThrowClassCastException(Class *dstType, Class *srcType)
     {
-        panda::ThrowClassCastException(dst_type, src_type);
+        panda::ThrowClassCastException(dstType, srcType);
     }
 
     static void ThrowAbstractMethodError(Method *method)
@@ -203,9 +203,9 @@ public:
         panda::ThrowOutOfMemoryError(msg);
     }
 
-    static void ThrowArrayStoreException(Class *array_class, Class *elem_class)
+    static void ThrowArrayStoreException(Class *arrayClass, Class *elemClass)
     {
-        panda::ThrowArrayStoreException(array_class, elem_class);
+        panda::ThrowArrayStoreException(arrayClass, elemClass);
     }
 
     static void ThrowIllegalAccessException(const PandaString &msg)
@@ -235,23 +235,23 @@ public:
     }
 
     template <bool IS_DYNAMIC = false>
-    static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t num_actual_args, Method *method, Frame *prev)
+    static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev)
     {
-        return panda::CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, num_actual_args,
+        return panda::CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, numActualArgs,
                                                        method, prev);
     }
 
-    ALWAYS_INLINE static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs,
-                                                                 uint32_t num_actual_args, Method *method, Frame *prev)
+    ALWAYS_INLINE static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
+                                                                 Method *method, Frame *prev)
     {
-        return panda::CreateFrameWithActualArgsAndSize(size, nregs, num_actual_args, method, prev);
+        return panda::CreateFrameWithActualArgsAndSize(size, nregs, numActualArgs, method, prev);
     }
 
     template <bool IS_DYNAMIC = false>
-    static Frame *CreateNativeFrameWithActualArgs(uint32_t nregs, uint32_t num_actual_args, Method *method, Frame *prev)
+    static Frame *CreateNativeFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev)
     {
         return panda::CreateNativeFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs,
-                                                             num_actual_args, method, prev);
+                                                             numActualArgs, method, prev);
     }
 
     ALWAYS_INLINE static void FreeFrame(ManagedThread *thread, Frame *frame)
@@ -269,9 +269,9 @@ public:
         thread->OnRuntimeTerminated();
     }
 
-    static panda_file::SourceLang GetLanguageContext(Method *method_ptr)
+    static panda_file::SourceLang GetLanguageContext(Method *methodPtr)
     {
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method_ptr);
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*methodPtr);
         return ctx.GetLanguage();
     }
 

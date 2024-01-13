@@ -29,7 +29,7 @@ class FlagsForEnum<UInt, Enum, FLAG> {
 public:
     class ConstBit {
     public:
-        ConstBit(UInt bit_mask, const UInt &given_flags) : mask_ {bit_mask}, flags_ {given_flags} {};
+        ConstBit(UInt bitMask, const UInt &givenFlags) : mask_ {bitMask}, flags_ {givenFlags} {};
         ConstBit() = delete;
         ~ConstBit() = default;
 
@@ -51,18 +51,18 @@ public:
 
     class Bit : public ConstBit {
     public:
-        Bit(UInt bit_mask, UInt &given_flags) : ConstBit {bit_mask, given_flags} {};
+        Bit(UInt bitMask, UInt &givenFlags) : ConstBit {bitMask, givenFlags} {};
         ~Bit() = default;
         NO_COPY_SEMANTIC(Bit);
         NO_MOVE_SEMANTIC(Bit);
 
         Bit &operator=(bool b)
         {
-            UInt &proper_flags = const_cast<UInt &>(ConstBit::flags_);
+            UInt &properFlags = const_cast<UInt &>(ConstBit::flags_);
             if (b) {
-                proper_flags |= ConstBit::mask_;
+                properFlags |= ConstBit::mask_;
             } else {
-                proper_flags &= ~ConstBit::mask_;
+                properFlags &= ~ConstBit::mask_;
             }
             return *this;
         }

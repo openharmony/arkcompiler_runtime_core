@@ -39,11 +39,11 @@ TEST(VerifierTest_ObjPool, Basic)
 {
     int result = 0;
 
-    auto &&h = [&](S &s, size_t idx) {
+    auto &&h = [&result](S &s, size_t idx) {
         s.a = idx;
         result += idx;
     };
-    Pool pool {h, [&](S &s) { result -= s.a; }};
+    Pool pool {h, [&result](S &s) { result -= s.a; }};
 
     {
         auto q = pool.New();

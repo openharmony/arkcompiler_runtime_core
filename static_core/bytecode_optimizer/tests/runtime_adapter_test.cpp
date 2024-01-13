@@ -31,7 +31,7 @@ std::unique_ptr<const panda_file::File> ParseAndEmit(const std::string &source)
     auto res = parser.Parse(source);
     if (parser.ShowError().err != pandasm::Error::ErrorType::ERR_NONE) {
         std::cerr << "Parse failed: " << parser.ShowError().message << std::endl
-                  << parser.ShowError().whole_line << std::endl;
+                  << parser.ShowError().wholeLine << std::endl;
         ADD_FAILURE();
     }
     auto &program = res.Value();
@@ -49,25 +49,25 @@ Pointers GetPointers(const panda_file::File *arkf)
     Pointers pointers;
 
     for (uint32_t id : arkf->GetClasses()) {
-        panda_file::File::EntityId record_id {id};
+        panda_file::File::EntityId recordId {id};
 
-        if (arkf->IsExternal(record_id)) {
+        if (arkf->IsExternal(recordId)) {
             continue;
         }
 
-        panda_file::ClassDataAccessor cda {*arkf, record_id};
-        auto class_id = cda.GetClassId().GetOffset();
-        auto class_ptr = reinterpret_cast<compiler::RuntimeInterface::ClassPtr>(class_id);
-        pointers.klass.push_back(class_ptr);
+        panda_file::ClassDataAccessor cda {*arkf, recordId};
+        auto classId = cda.GetClassId().GetOffset();
+        auto classPtr = reinterpret_cast<compiler::RuntimeInterface::ClassPtr>(classId);
+        pointers.klass.push_back(classPtr);
 
         cda.EnumerateFields([&pointers](panda_file::FieldDataAccessor &fda) {
-            auto field_ptr = reinterpret_cast<compiler::RuntimeInterface::FieldPtr>(fda.GetFieldId().GetOffset());
-            pointers.field.push_back(field_ptr);
+            auto fieldPtr = reinterpret_cast<compiler::RuntimeInterface::FieldPtr>(fda.GetFieldId().GetOffset());
+            pointers.field.push_back(fieldPtr);
         });
 
         cda.EnumerateMethods([&pointers](panda_file::MethodDataAccessor &mda) {
-            auto method_ptr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
-            pointers.method.push_back(method_ptr);
+            auto methodPtr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
+            pointers.method.push_back(methodPtr);
         });
     }
 
@@ -141,12 +141,12 @@ TEST(RuntimeAdapter, Klass)
     EXPECT_EQ(adapter.GetMethodName(main), std::string("main"));
     EXPECT_EQ(adapter.GetMethodName(ctor), std::string(".ctor"));
 
-    auto class_id = reinterpret_cast<uint64_t>(klass);
+    auto classId = reinterpret_cast<uint64_t>(klass);
     EXPECT_FALSE(adapter.IsMethodExternal(main, ctor));
     EXPECT_FALSE(adapter.IsConstructor(main, SourceLanguage::PANDA_ASSEMBLY));
     EXPECT_EQ(adapter.GetMethodTotalArgumentType(ctor, 0U), compiler::DataType::Type::REFERENCE);
     EXPECT_EQ(adapter.GetMethodTotalArgumentType(ctor, 1U), compiler::DataType::Type::ANY);
-    EXPECT_EQ(adapter.IsArrayClass(ctor, class_id), false);
+    EXPECT_EQ(adapter.IsArrayClass(ctor, classId), false);
 }
 
 TEST(RuntimeAdapter, Methods)
@@ -179,20 +179,20 @@ TEST(RuntimeAdapter, Methods)
 
     BytecodeOptimizerRuntimeAdapter adapter(*arkf);
     auto main = pointers.method[0U];
-    auto func_ret_i16 = pointers.method[1U];
-    auto func_ret_u64 = pointers.method[2U];
+    auto funcRetI16 = pointers.method[1U];
+    auto funcRetU64 = pointers.method[2U];
 
-    EXPECT_EQ(adapter.GetMethodName(func_ret_u64), std::string("func_ret_u64"));
-    EXPECT_EQ(adapter.GetMethodName(func_ret_i16), std::string("func_ret_i16"));
+    EXPECT_EQ(adapter.GetMethodName(funcRetU64), std::string("func_ret_u64"));
+    EXPECT_EQ(adapter.GetMethodName(funcRetI16), std::string("func_ret_i16"));
     EXPECT_EQ(adapter.GetMethodName(main), std::string("main"));
 
-    EXPECT_EQ(adapter.GetMethodReturnType(func_ret_i16), compiler::DataType::Type::INT16);
-    EXPECT_EQ(adapter.GetMethodReturnType(func_ret_u64), compiler::DataType::Type::UINT64);
+    EXPECT_EQ(adapter.GetMethodReturnType(funcRetI16), compiler::DataType::Type::INT16);
+    EXPECT_EQ(adapter.GetMethodReturnType(funcRetU64), compiler::DataType::Type::UINT64);
 
-    const auto method_id = adapter.ResolveMethodIndex(main, 0U);
-    EXPECT_NE(method_id, 0U);
-    EXPECT_NE(adapter.GetClassIdForMethod(main, method_id), 0U);
-    EXPECT_EQ(adapter.GetMethodArgumentType(main, method_id, 0U), compiler::DataType::Type::INT32);
+    const auto methodId = adapter.ResolveMethodIndex(main, 0U);
+    EXPECT_NE(methodId, 0U);
+    EXPECT_NE(adapter.GetClassIdForMethod(main, methodId), 0U);
+    EXPECT_EQ(adapter.GetMethodArgumentType(main, methodId, 0U), compiler::DataType::Type::INT32);
 
     EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 0U), compiler::DataType::Type::UINT32);
     EXPECT_EQ(adapter.GetMethodTotalArgumentType(main, 1U), compiler::DataType::Type::UINT16);
@@ -225,24 +225,23 @@ TEST(RuntimeAdapter, Fields)
     ASSERT_EQ(pointers.field.size(), 2U);
 
     BytecodeOptimizerRuntimeAdapter adapter(*arkf);
-    auto store_to_static = pointers.method[0U];
-    auto record_with_static_field = pointers.klass[1U];
+    auto storeToStatic = pointers.method[0U];
+    auto recordWithStaticField = pointers.klass[1U];
     auto field = pointers.field[0U];
 
-    EXPECT_EQ(adapter.GetMethodName(store_to_static), std::string("store_to_static"));
+    EXPECT_EQ(adapter.GetMethodName(storeToStatic), std::string("store_to_static"));
 
     EXPECT_EQ(adapter.GetFieldName(field), std::string("field"));
     EXPECT_EQ(adapter.GetFieldType(field), compiler::DataType::Type::INT32);
-    const auto field_id = adapter.ResolveFieldIndex(store_to_static, 0U);
-    EXPECT_NE(field_id, 0U);
-    EXPECT_EQ(adapter.GetClassIdForField(store_to_static, field_id),
-              reinterpret_cast<uint64_t>(record_with_static_field));
-    uint32_t immut_var = 0;
-    const auto field_ptr = adapter.ResolveField(store_to_static, field_id, false, &immut_var);
-    EXPECT_EQ(immut_var, 0U);
-    EXPECT_EQ(adapter.GetClassForField(field_ptr), record_with_static_field);
-    EXPECT_EQ(adapter.GetFieldTypeById(store_to_static, field_id), compiler::DataType::Type::INT64);
-    EXPECT_EQ(adapter.IsFieldVolatile(field_ptr), false);
+    const auto fieldId = adapter.ResolveFieldIndex(storeToStatic, 0U);
+    EXPECT_NE(fieldId, 0U);
+    EXPECT_EQ(adapter.GetClassIdForField(storeToStatic, fieldId), reinterpret_cast<uint64_t>(recordWithStaticField));
+    uint32_t immutVar = 0;
+    const auto fieldPtr = adapter.ResolveField(storeToStatic, fieldId, false, &immutVar);
+    EXPECT_EQ(immutVar, 0U);
+    EXPECT_EQ(adapter.GetClassForField(fieldPtr), recordWithStaticField);
+    EXPECT_EQ(adapter.GetFieldTypeById(storeToStatic, fieldId), compiler::DataType::Type::INT64);
+    EXPECT_EQ(adapter.IsFieldVolatile(fieldPtr), false);
 }
 
 }  // namespace panda::bytecodeopt::test

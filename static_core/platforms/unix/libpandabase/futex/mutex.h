@@ -100,12 +100,12 @@ private:
 
     int GetRecursiveCount()
     {
-        return mutex_.recursive_count;
+        return mutex_.recursiveCount;
     }
 
     void SetRecursiveCount(int count)
     {
-        mutex_.recursive_count = count;
+        mutex_.recursiveCount = count;
     }
 
     static_assert(std::atomic<panda::os::thread::ThreadId>::is_always_lock_free);
@@ -118,7 +118,7 @@ private:
 protected:
     explicit Mutex(bool recursive) : Mutex()
     {
-        mutex_.recursive_mutex = recursive;
+        mutex_.recursiveMutex = recursive;
     };
 };
 
@@ -145,12 +145,12 @@ public:
         bool done = false;
         while (!done) {
             // Atomic with relaxed order reason: mutex synchronization
-            auto cur_state = state_.load(std::memory_order_relaxed);
-            if (LIKELY(cur_state >= UNLOCKED)) {
-                auto new_state = cur_state + READ_INCREMENT;
-                done = state_.compare_exchange_weak(cur_state, new_state, std::memory_order_acquire);
+            auto curState = state_.load(std::memory_order_relaxed);
+            if (LIKELY(curState >= UNLOCKED)) {
+                auto newState = curState + READ_INCREMENT;
+                done = state_.compare_exchange_weak(curState, newState, std::memory_order_acquire);
             } else {
-                HandleReadLockWait(cur_state);
+                HandleReadLockWait(curState);
             }
         }
         ASSERT(!HasExclusiveHolder());
@@ -177,16 +177,16 @@ private:
         ASSERT(!HasExclusiveHolder());
         bool done = false;
         // Atomic with relaxed order reason: mutex synchronization
-        auto cur_state = state_.load(std::memory_order_relaxed);
+        auto curState = state_.load(std::memory_order_relaxed);
         while (!done) {
-            if (LIKELY(cur_state > 0)) {
+            if (LIKELY(curState > 0)) {
                 // Reduce state by 1 and do release store.
                 // waiters_ load should not be reordered before state_, so it's done with seq cst.
-                auto new_state = cur_state - READ_INCREMENT;
+                auto newState = curState - READ_INCREMENT;
                 // cur_state should be updated with fetched value on fail
                 // Atomic with seq_cst order reason: mutex synchronization
-                done = state_.compare_exchange_weak(cur_state, new_state, std::memory_order_seq_cst);
-                if (done && new_state == UNLOCKED) {
+                done = state_.compare_exchange_weak(curState, newState, std::memory_order_seq_cst);
+                if (done && newState == UNLOCKED) {
                     // Atomic with seq_cst order reason: mutex synchronization
                     if (waiters_.load(std::memory_order_seq_cst) > 0) {
                         // Wake one exclusive waiter as there are now no readers.
@@ -205,7 +205,7 @@ private:
     PANDA_PUBLIC_API void WriteUnlock() RELEASE();
 
     // Non-inline path for handling waiting.
-    PANDA_PUBLIC_API void HandleReadLockWait(int32_t cur_state);
+    PANDA_PUBLIC_API void HandleReadLockWait(int32_t curState);
 
     static constexpr int32_t WRITE_LOCKED = -1;
     static constexpr int32_t UNLOCKED = 0;
@@ -219,18 +219,18 @@ private:
     }
 
     // Exclusive owner.
-    alignas(alignof(uint32_t)) std::atomic<panda::os::thread::ThreadId> exclusive_owner_ {0};
+    alignas(alignof(uint32_t)) std::atomic<panda::os::thread::ThreadId> exclusiveOwner_ {0};
     static_assert(std::atomic<panda::os::thread::ThreadId>::is_always_lock_free);
 
     bool HasExclusiveHolder()
     {
         // Atomic with relaxed order reason: mutex synchronization
-        return exclusive_owner_.load(std::memory_order_relaxed) != 0;
+        return exclusiveOwner_.load(std::memory_order_relaxed) != 0;
     }
     bool IsExclusiveHeld(panda::os::thread::ThreadId thread)
     {
         // Atomic with relaxed order reason: mutex synchronization
-        return exclusive_owner_.load(std::memory_order_relaxed) == thread;
+        return exclusiveOwner_.load(std::memory_order_relaxed) == thread;
     }
 
     // Number of waiters both for read and write locks.
@@ -287,9 +287,9 @@ public:
         futex::Wait(&cond_, &mutex->mutex_);
     }
 
-    PANDA_PUBLIC_API bool TimedWait(Mutex *mutex, uint64_t ms, uint64_t ns = 0, bool is_absolute = false)
+    PANDA_PUBLIC_API bool TimedWait(Mutex *mutex, uint64_t ms, uint64_t ns = 0, bool isAbsolute = false)
     {
-        return futex::TimedWait(&cond_, &mutex->mutex_, ms, ns, is_absolute);
+        return futex::TimedWait(&cond_, &mutex->mutex_, ms, ns, isAbsolute);
     }
 
 private:

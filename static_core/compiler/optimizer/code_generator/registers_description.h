@@ -37,21 +37,21 @@ static constexpr size_t RENAMING_CONST {14U};
 // Resulting
 // caller mask is 0000000111111111 and
 // callee mask is 1111100000000000.
-static inline constexpr size_t ConvertRegNumber(size_t reg_id)
+static inline constexpr size_t ConvertRegNumber(size_t regId)
 {
-    ASSERT(reg_id < MAX_NUM_REGS);
+    ASSERT(regId < MAX_NUM_REGS);
     // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-    if ((RENAMING_MASK_3_5_OR_9_11 & (size_t(1) << reg_id)) != 0) {
-        return RENAMING_CONST - reg_id;
+    if ((RENAMING_MASK_3_5_OR_9_11 & (size_t(1) << regId)) != 0) {
+        return RENAMING_CONST - regId;
     }
-    return reg_id;
+    return regId;
 }
 }  // namespace amd64
 #endif  // PANDA_COMPILER_TARGET_X86_64
 
 class RegistersDescription {
 public:
-    explicit RegistersDescription(ArenaAllocator *aa, Arch arch) : arena_allocator_(aa), arch_(arch) {}
+    explicit RegistersDescription(ArenaAllocator *aa, Arch arch) : arenaAllocator_(aa), arch_(arch) {}
     virtual ~RegistersDescription() = default;
 
     virtual ArenaVector<Reg> GetCalleeSaved() = 0;
@@ -75,11 +75,11 @@ public:
 
     ArenaAllocator *GetAllocator() const
     {
-        return arena_allocator_;
+        return arenaAllocator_;
     };
 
     // May be re-define to ignore some cases
-    virtual bool IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg)
+    virtual bool IsRegUsed(ArenaVector<Reg> vecReg, Reg reg)
     {
         // size ignored in arm64
         auto equality = [reg](Reg in) {
@@ -87,19 +87,19 @@ public:
                     (reg.GetSize() == in.GetSize())) ||
                    (!reg.IsValid() && !in.IsValid());
         };
-        return (std::find_if(vec_reg.begin(), vec_reg.end(), equality) != vec_reg.end());
+        return (std::find_if(vecReg.begin(), vecReg.end(), equality) != vecReg.end());
     }
 
-    static RegistersDescription *Create(ArenaAllocator *arena_allocator, Arch arch);
+    static RegistersDescription *Create(ArenaAllocator *arenaAllocator, Arch arch);
 
     RegMask GetRegMask() const
     {
-        return reg_mask_.None() ? GetDefaultRegMask() : reg_mask_;
+        return regMask_.None() ? GetDefaultRegMask() : regMask_;
     }
 
     void SetRegMask(const RegMask &mask)
     {
-        reg_mask_ = mask;
+        regMask_ = mask;
     }
 
     // Get registers mask which used in codegen, runtime e.t.c
@@ -113,16 +113,16 @@ public:
     virtual RegMask GetCallerSavedRegMask() const = 0;
     virtual RegMask GetCallerSavedVRegMask() const = 0;
 
-    void FillUsedCalleeSavedRegisters(RegMask *callee_regs, VRegMask *callee_vregs, bool set_all_callee_registers,
-                                      bool irtoc_optimized = false)
+    void FillUsedCalleeSavedRegisters(RegMask *calleeRegs, VRegMask *calleeVregs, bool setAllCalleeRegisters,
+                                      bool irtocOptimized = false)
     {
-        if (set_all_callee_registers) {
-            *callee_regs = RegMask(panda::GetCalleeRegsMask(arch_, false, irtoc_optimized));
-            *callee_vregs = VRegMask(panda::GetCalleeRegsMask(arch_, true, irtoc_optimized));
+        if (setAllCalleeRegisters) {
+            *calleeRegs = RegMask(panda::GetCalleeRegsMask(arch_, false, irtocOptimized));
+            *calleeVregs = VRegMask(panda::GetCalleeRegsMask(arch_, true, irtocOptimized));
         } else {
-            ASSERT(!irtoc_optimized);
-            *callee_regs = GetUsedRegsMask<RegMask, false>(GetCalleeSaved());
-            *callee_vregs = GetUsedRegsMask<VRegMask, true>(GetCalleeSaved());
+            ASSERT(!irtocOptimized);
+            *calleeRegs = GetUsedRegsMask<RegMask, false>(GetCalleeSaved());
+            *calleeVregs = GetUsedRegsMask<VRegMask, true>(GetCalleeSaved());
         }
     }
 
@@ -130,9 +130,9 @@ public:
     NO_MOVE_SEMANTIC(RegistersDescription);
 
 private:
-    ArenaAllocator *arena_allocator_ {nullptr};
+    ArenaAllocator *arenaAllocator_ {nullptr};
     Arch arch_;
-    RegMask reg_mask_ {0};
+    RegMask regMask_ {0};
 
     template <typename M, bool IS_FP>
     M GetUsedRegsMask(const ArenaVector<Reg> &regs)

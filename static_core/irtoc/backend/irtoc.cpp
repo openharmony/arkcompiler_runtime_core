@@ -21,23 +21,23 @@ namespace panda::irtoc {
 
 int Run(int argc, const char **argv)
 {
-    panda::PandArgParser pa_parser;
+    panda::PandArgParser paParser;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    panda::irtoc::OPTIONS.AddOptions(&pa_parser);
-    base_options::Options base_options("");
-    base_options.AddOptions(&pa_parser);
-    panda::compiler::OPTIONS.AddOptions(&pa_parser);
+    panda::irtoc::g_options.AddOptions(&paParser);
+    base_options::Options baseOptions("");
+    baseOptions.AddOptions(&paParser);
+    panda::compiler::g_options.AddOptions(&paParser);
 #ifdef PANDA_LLVM_IRTOC
-    panda::llvmbackend::OPTIONS.AddOptions(&pa_parser);
+    panda::llvmbackend::g_options.AddOptions(&paParser);
 #endif
-    if (!pa_parser.Parse(argc, argv)) {
-        std::cerr << "Error: " << pa_parser.GetErrorString() << "\n";
+    if (!paParser.Parse(argc, argv)) {
+        std::cerr << "Error: " << paParser.GetErrorString() << "\n";
         return -1;
     }
 
-    Logger::Initialize(base_options);
+    Logger::Initialize(baseOptions);
 
-    panda::compiler::CompilerLogger::SetComponents(panda::compiler::OPTIONS.GetCompilerLog());
+    panda::compiler::CompilerLogger::SetComponents(panda::compiler::g_options.GetCompilerLog());
 
     if (std::getenv("IRTOC_VERBOSE") != nullptr) {
         Logger::SetLevel(Logger::Level::DEBUG);

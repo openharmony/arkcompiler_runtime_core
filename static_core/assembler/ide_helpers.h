@@ -54,12 +54,12 @@ template <typename T>
 std::string JsonSerializeItemBody(const T &item)
 {
     std::stringstream ss;
-    std::string quoted_name = "\"" + item.name + "\"";
+    std::string quotedName = "\"" + item.name + "\"";
     ss << "{ "
-       << "\"name\": " << quoted_name;
-    if (item.file_location && item.file_location->is_defined) {
+       << "\"name\": " << quotedName;
+    if (item.fileLocation && item.fileLocation->isDefined) {
         ss << ", "
-           << "\"bodyLocation\": " << item.body_location.JsonSerialize() << " }";
+           << "\"bodyLocation\": " << item.bodyLocation.JsonSerialize() << " }";
     } else {
         ss << " }";
     }
@@ -67,16 +67,16 @@ std::string JsonSerializeItemBody(const T &item)
 }
 
 template <typename T>
-std::string JsonSerializeProgramItems(const T &item_table)
+std::string JsonSerializeProgramItems(const T &itemTable)
 {
     std::stringstream ss;
     ss << "[ ";
-    auto it = item_table.begin();
-    if (it != item_table.end()) {
+    auto it = itemTable.begin();
+    if (it != itemTable.end()) {
         ss << JsonSerializeItemBody(it->second);
         ++it;
     }
-    while (it != item_table.end()) {
+    while (it != itemTable.end()) {
         ss << ", " << JsonSerializeItemBody(it->second);
         ++it;
     }

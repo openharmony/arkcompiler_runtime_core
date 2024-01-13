@@ -62,7 +62,7 @@ inline std::ostream &operator<<(std::ostream &os, const std::initializer_list<Op
 
 class GraphChecker : public GraphVisitor {
 public:
-    explicit GraphChecker(Graph *graph, const char *pass_name);
+    explicit GraphChecker(Graph *graph, const char *passName);
     explicit GraphChecker(Graph *graph);
 
     ~GraphChecker() override
@@ -86,7 +86,7 @@ private:
     void CheckControlFlow(BasicBlock *block);
     void CheckDataFlow(BasicBlock *block);
     void CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block, Graph *graph);
-    void CheckPhiInputs(Inst *phi_inst);
+    void CheckPhiInputs(Inst *phiInst);
     void CheckInstsRegisters(BasicBlock *block);
     void CheckPhisRegisters(BasicBlock *block);
     void CheckNoLowLevel(BasicBlock *block);
@@ -107,7 +107,7 @@ private:
     void CheckBlockEdges(const BasicBlock &block);
     void CheckTryBeginBlock(const BasicBlock &block);
     void CheckJump(const BasicBlock &block);
-    bool IsTryCatchDomination(const BasicBlock *input_block, const BasicBlock *user_block) const;
+    bool IsTryCatchDomination(const BasicBlock *inputBlock, const BasicBlock *userBlock) const;
     void CheckInputType(Inst *inst) const;
 #ifndef NDEBUG
     bool NeedCheckSaveState();
@@ -131,7 +131,7 @@ private:
 
     ArenaAllocator *GetLocalAllocator()
     {
-        return &local_allocator_;
+        return &localAllocator_;
     }
 
     const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override
@@ -278,7 +278,7 @@ private:
         return DataType::GetCommonType(type1) == DataType::GetCommonType(type2);
     }
 
-    static void CheckBinaryOperationTypes(Inst *inst, bool is_int = false)
+    static void CheckBinaryOperationTypes(Inst *inst, bool isInt = false)
     {
         [[maybe_unused]] auto op1 = inst->GetInputs()[0].GetInst();
         [[maybe_unused]] auto op2 = inst->GetInputs()[1].GetInst();
@@ -289,7 +289,7 @@ private:
             }
         }
 
-        if (is_int) {
+        if (isInt) {
             ASSERT_DO(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                       (std::cerr << "Binary instruction type is not a integer", inst->Dump(&std::cerr)));
         }
@@ -321,12 +321,12 @@ private:
     }
 
     static void CheckBinaryOperationWithShiftedOperandTypes([[maybe_unused]] GraphVisitor *v, Inst *inst,
-                                                            [[maybe_unused]] bool ror_supported)
+                                                            [[maybe_unused]] bool rorSupported)
     {
         CheckBinaryOperationTypes(inst, true);
-        [[maybe_unused]] auto inst_w_shift = static_cast<BinaryShiftedRegisterOperation *>(inst);
-        ASSERT_DO(inst_w_shift->GetShiftType() != ShiftType::INVALID_SHIFT &&
-                      (ror_supported || inst_w_shift->GetShiftType() != ShiftType::ROR),
+        [[maybe_unused]] auto instWShift = static_cast<BinaryShiftedRegisterOperation *>(inst);
+        ASSERT_DO(instWShift->GetShiftType() != ShiftType::INVALID_SHIFT &&
+                      (rorSupported || instWShift->GetShiftType() != ShiftType::ROR),
                   (std::cerr << "Operation has invalid shift type\n", inst->Dump(&std::cerr)));
     }
 
@@ -338,13 +338,13 @@ private:
                    inst->Dump(&std::cerr), op->Dump(&std::cerr)));
     }
 
-    static void CheckTernaryOperationTypes(Inst *inst, bool is_int = false)
+    static void CheckTernaryOperationTypes(Inst *inst, bool isInt = false)
     {
         [[maybe_unused]] auto op1 = inst->GetInputs()[0].GetInst();
         [[maybe_unused]] auto op2 = inst->GetInputs()[1].GetInst();
         [[maybe_unused]] auto op3 = inst->GetInputs()[1].GetInst();
 
-        if (is_int) {
+        if (isInt) {
             ASSERT_DO(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                       (std::cerr << "Ternary instruction type is not a integer", inst->Dump(&std::cerr)));
         }
@@ -366,17 +366,17 @@ private:
                    inst->Dump(&std::cerr)));
     }
 
-    static void CheckMemoryInstruction([[maybe_unused]] Inst *inst, [[maybe_unused]] bool need_barrier = false)
+    static void CheckMemoryInstruction([[maybe_unused]] Inst *inst, [[maybe_unused]] bool needBarrier = false)
     {
         ASSERT_DO(DataType::IsTypeNumeric(inst->GetType()) || inst->GetType() == DataType::REFERENCE ||
                       inst->GetType() == DataType::ANY,
                   (std::cerr << "Memory instruction has wrong type\n", inst->Dump(&std::cerr)));
         if (inst->IsStore() && (inst->GetInputType(0) != DataType::POINTER) && (inst->GetType() == DataType::ANY)) {
-            ASSERT_DO(need_barrier, (std::cerr << "This store should have barrier:\n", inst->Dump(&std::cerr)));
+            ASSERT_DO(needBarrier, (std::cerr << "This store should have barrier:\n", inst->Dump(&std::cerr)));
         }
     }
 
-    static void CheckObjectType(Inst *inst, ObjectType type, [[maybe_unused]] uint32_t type_id)
+    static void CheckObjectType(Inst *inst, ObjectType type, [[maybe_unused]] uint32_t typeId)
     {
         auto graph = inst->GetBasicBlock()->GetGraph();
         if (!graph->SupportManagedCode()) {
@@ -385,42 +385,42 @@ private:
         if (graph->IsDynamicMethod()) {
             // IrToc use LoadObject and StoreObject with ObjectType::MEM_OBJECT for dynamic
             // We can inline intrinsics with the instruction under the  option --compiler-inline-full-intrinsics=true
-            if (!OPTIONS.IsCompilerInlineFullIntrinsics()) {
+            if (!g_options.IsCompilerInlineFullIntrinsics()) {
                 ASSERT_DO(type != ObjectType::MEM_OBJECT && type != ObjectType::MEM_STATIC,
                           (std::cerr << "The object type isn't supported for dynamic\n", inst->Dump(&std::cerr)));
             }
             if (type == ObjectType::MEM_DYN_CLASS) {
-                ASSERT_DO(type_id == TypeIdMixin::MEM_DYN_CLASS_ID,
+                ASSERT_DO(typeId == TypeIdMixin::MEM_DYN_CLASS_ID,
                           (std::cerr << "The object type_id for MEM_DYN_CLASS is incorrect\n", inst->Dump(&std::cerr)));
             } else if (type == ObjectType::MEM_DYN_PROPS) {
-                ASSERT_DO(type_id == TypeIdMixin::MEM_DYN_PROPS_ID,
+                ASSERT_DO(typeId == TypeIdMixin::MEM_DYN_PROPS_ID,
                           (std::cerr << "The object type_id for MEM_DYN_PROPS is incorrect\n", inst->Dump(&std::cerr)));
             } else if (type == ObjectType::MEM_DYN_PROTO_HOLDER) {
-                ASSERT_DO(type_id == TypeIdMixin::MEM_DYN_PROTO_HOLDER_ID,
+                ASSERT_DO(typeId == TypeIdMixin::MEM_DYN_PROTO_HOLDER_ID,
                           (std::cerr << "The object type_id for MEM_DYN_PROTO_HOLDER is incorrect\n",
                            inst->Dump(&std::cerr)));
             } else if (type == ObjectType::MEM_DYN_PROTO_CELL) {
-                [[maybe_unused]] Inst *obj_inst = inst->GetInput(0).GetInst();
+                [[maybe_unused]] Inst *objInst = inst->GetInput(0).GetInst();
                 ASSERT_DO(
-                    type_id == TypeIdMixin::MEM_DYN_PROTO_CELL_ID,
+                    typeId == TypeIdMixin::MEM_DYN_PROTO_CELL_ID,
                     (std::cerr << "The object type_id for MEM_DYN_PROTO_CELL is incorrect\n", inst->Dump(&std::cerr)));
             } else if (type == ObjectType::MEM_DYN_CHANGE_FIELD) {
-                [[maybe_unused]] Inst *obj_inst = inst->GetInput(0).GetInst();
-                ASSERT_DO(type_id == TypeIdMixin::MEM_DYN_CHANGE_FIELD_ID,
+                [[maybe_unused]] Inst *objInst = inst->GetInput(0).GetInst();
+                ASSERT_DO(typeId == TypeIdMixin::MEM_DYN_CHANGE_FIELD_ID,
                           (std::cerr << "The object type_id for MEM_DYN_CHANGE_FIELD is incorrect\n",
                            inst->Dump(&std::cerr)));
             } else if (type == ObjectType::MEM_DYN_GLOBAL) {
                 ASSERT_DO(
-                    type_id == TypeIdMixin::MEM_DYN_GLOBAL_ID,
+                    typeId == TypeIdMixin::MEM_DYN_GLOBAL_ID,
                     (std::cerr << "The object type_id for MEM_DYN_GLOBAL is incorrect\n", inst->Dump(&std::cerr)));
             } else if (type == ObjectType::MEM_DYN_HCLASS) {
                 ASSERT_DO(
-                    type_id == TypeIdMixin::MEM_DYN_HCLASS_ID,
+                    typeId == TypeIdMixin::MEM_DYN_HCLASS_ID,
                     (std::cerr << "The object type_id for MEM_DYN_HCLASS is incorrect\n", inst->Dump(&std::cerr)));
             } else {
                 ASSERT_DO(
-                    type_id != TypeIdMixin::MEM_DYN_GLOBAL_ID && type_id != TypeIdMixin::MEM_DYN_CLASS_ID &&
-                        type_id != TypeIdMixin::MEM_DYN_PROPS_ID,
+                    typeId != TypeIdMixin::MEM_DYN_GLOBAL_ID && typeId != TypeIdMixin::MEM_DYN_CLASS_ID &&
+                        typeId != TypeIdMixin::MEM_DYN_PROPS_ID,
                     (std::cerr << "The object type_id for MEM_DYN_GLOBAL is incorrect\n", inst->Dump(&std::cerr)));
             }
         } else {
@@ -432,10 +432,10 @@ private:
     static void CheckContrlFlowInst(Inst *inst)
     {
         auto block = inst->GetBasicBlock();
-        [[maybe_unused]] auto last_inst = *block->AllInstsSafeReverse().begin();
-        ASSERT_DO((last_inst == inst),
+        [[maybe_unused]] auto lastInst = *block->AllInstsSafeReverse().begin();
+        ASSERT_DO((lastInst == inst),
                   (std::cerr << "Control flow instruction must be last instruction in block\n CF instruction:\n",
-                   inst->Dump(&std::cerr), std::cerr << "\n last instruction:\n", last_inst->Dump(&std::cerr)));
+                   inst->Dump(&std::cerr), std::cerr << "\n last instruction:\n", lastInst->Dump(&std::cerr)));
         ASSERT_DO(inst->GetUsers().Empty(),
                   (std::cerr << "Control flow instruction has users\n", inst->Dump(&std::cerr)));
     }
@@ -444,22 +444,22 @@ private:
     {
 #ifndef NDEBUG
         const auto &inputs = inst->GetInputs();
-        auto ss_input = [&inst](const auto &input) {
+        auto ssInput = [&inst](const auto &input) {
             return input.GetInst()->GetOpcode() == Opcode::SaveState ||
                    (input.GetInst()->GetOpcode() == Opcode::SaveStateDeoptimize && inst->CanDeoptimize());
         };
-        bool has_save_state = std::find_if(inputs.begin(), inputs.end(), ss_input) != inputs.end();
+        bool hasSaveState = std::find_if(inputs.begin(), inputs.end(), ssInput) != inputs.end();
 
-        bool has_opc = true;
+        bool hasOpc = true;
         for (auto &node : inst->GetUsers()) {
             auto opc = node.GetInst()->GetOpcode();
-            has_opc &= std::find(opcs.begin(), opcs.end(), opc) != opcs.end();
+            hasOpc &= std::find(opcs.begin(), opcs.end(), opc) != opcs.end();
         }
 
-        ASSERT_DO(!inst->HasUsers() || has_opc,
+        ASSERT_DO(!inst->HasUsers() || hasOpc,
                   (inst->Dump(&std::cerr),
                    std::cerr << "Throw inst doesn't have any users from the list:" << opcs << std::endl));
-        ASSERT_DO(has_save_state, (inst->Dump(&std::cerr), std::cerr << "Throw inst without SaveState" << std::endl));
+        ASSERT_DO(hasSaveState, (inst->Dump(&std::cerr), std::cerr << "Throw inst without SaveState" << std::endl));
 #endif
     }
 
@@ -472,17 +472,17 @@ private:
 
     std::string GetPassName() const
     {
-        return pass_name_;
+        return passName_;
     }
 
     int IncrementNullPtrInstCounterAndGet()
     {
-        return ++null_ptr_inst_counter_;
+        return ++nullPtrInstCounter_;
     }
 
     int IncrementLoadUndefinedInstCounterAndGet()
     {
-        return ++load_undefined_inst_counter_;
+        return ++loadUndefinedInstCounter_;
     }
 
     void PrintFailedMethodAndPass() const;
@@ -491,10 +491,10 @@ private:
 private:
     Graph *graph_;
     ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
-    ArenaAllocator local_allocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
-    int null_ptr_inst_counter_ = 0;
-    int load_undefined_inst_counter_ = 0;
-    std::string pass_name_;
+    ArenaAllocator localAllocator_ {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
+    int nullPtrInstCounter_ = 0;
+    int loadUndefinedInstCounter_ = 0;
+    std::string passName_;
 };
 }  // namespace panda::compiler
 

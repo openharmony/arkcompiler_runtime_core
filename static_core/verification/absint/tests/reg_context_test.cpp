@@ -32,11 +32,11 @@ TEST_F(VerifierTest, AbsIntRegContext)
 {
     using Builtin = Type::Builtin;
     auto *config = NewConfig();
-    RuntimeOptions runtime_opts;
-    Runtime::Create(runtime_opts);
+    RuntimeOptions runtimeOpts;
+    Runtime::Create(runtimeOpts);
     auto *service = CreateService(config, Runtime::GetCurrent()->GetInternalAllocator(),
                                   Runtime::GetCurrent()->GetClassLinker(), "");
-    TypeSystem type_system(service->verifier_service);
+    TypeSystem typeSystem(service->verifierService);
     Variables variables;
 
     auto i16 = Type {Builtin::I16};
@@ -56,14 +56,14 @@ TEST_F(VerifierTest, AbsIntRegContext)
     ctx1[-1] = av1;
     ctx2[0] = av2;
 
-    auto ctx3 = RcUnion(&ctx1, &ctx2, &type_system);
+    auto ctx3 = RcUnion(&ctx1, &ctx2, &typeSystem);
 
     ctx3.RemoveInconsistentRegs();
     EXPECT_EQ(ctx3.Size(), 0);
 
     ctx1[0] = av1;
 
-    ctx3 = RcUnion(&ctx1, &ctx2, &type_system);
+    ctx3 = RcUnion(&ctx1, &ctx2, &typeSystem);
 
     ctx3.RemoveInconsistentRegs();
     EXPECT_EQ(ctx3.Size(), 1);

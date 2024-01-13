@@ -41,11 +41,11 @@ template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, 
 inline void ObjectAccessor::SetObject(void *obj, size_t offset, ObjectHeader *value)
 {
     if (NEED_WRITE_BARRIER) {
-        auto *barrier_set = GetBarrierSet();
+        auto *barrierSet = GetBarrierSet();
 
-        if (barrier_set->IsPreBarrierEnabled()) {
-            ObjectHeader *pre_val = GetObject<IS_VOLATILE, false, IS_DYN>(obj, offset);
-            barrier_set->PreBarrier(pre_val);
+        if (barrierSet->IsPreBarrierEnabled()) {
+            ObjectHeader *preVal = GetObject<IS_VOLATILE, false, IS_DYN>(obj, offset);
+            barrierSet->PreBarrier(preVal);
         }
 
         if (!IS_DYN) {
@@ -53,9 +53,9 @@ inline void ObjectAccessor::SetObject(void *obj, size_t offset, ObjectHeader *va
         } else {
             Set<ObjectHeader *, IS_VOLATILE>(obj, offset, value);
         }
-        auto gc_post_barrier_type = barrier_set->GetPostType();
-        if (!mem::IsEmptyBarrier(gc_post_barrier_type)) {
-            barrier_set->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
+        auto gcPostBarrierType = barrierSet->GetPostType();
+        if (!mem::IsEmptyBarrier(gcPostBarrierType)) {
+            barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
         }
     } else {
         if (!IS_DYN) {
@@ -83,10 +83,10 @@ template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, 
 inline void ObjectAccessor::SetObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value)
 {
     if (NEED_WRITE_BARRIER) {
-        auto *barrier_set = GetBarrierSet(thread);
-        if (barrier_set->IsPreBarrierEnabled()) {
-            ObjectHeader *pre_val = GetObject<IS_VOLATILE, IS_DYN>(obj, offset);
-            barrier_set->PreBarrier(pre_val);
+        auto *barrierSet = GetBarrierSet(thread);
+        if (barrierSet->IsPreBarrierEnabled()) {
+            ObjectHeader *preVal = GetObject<IS_VOLATILE, IS_DYN>(obj, offset);
+            barrierSet->PreBarrier(preVal);
         }
 
         if (!IS_DYN) {
@@ -94,8 +94,8 @@ inline void ObjectAccessor::SetObject(const ManagedThread *thread, void *obj, si
         } else {
             Set<ObjectHeader *, IS_VOLATILE>(obj, offset, value);
         }
-        if (!mem::IsEmptyBarrier(barrier_set->GetPostType())) {
-            barrier_set->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
+        if (!mem::IsEmptyBarrier(barrierSet->GetPostType())) {
+            barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
         }
     } else {
         if (!IS_DYN) {
@@ -173,106 +173,104 @@ inline void ObjectAccessor::SetFieldObject(const ManagedThread *thread, void *ob
 
 /* static */
 template <class T>
-inline T ObjectAccessor::GetFieldPrimitive(const void *obj, size_t offset, std::memory_order memory_order)
+inline T ObjectAccessor::GetFieldPrimitive(const void *obj, size_t offset, std::memory_order memoryOrder)
 {
-    return Get<T>(obj, offset, memory_order);
+    return Get<T>(obj, offset, memoryOrder);
 }
 
 /* static */
 template <class T>
-inline void ObjectAccessor::SetFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order)
+inline void ObjectAccessor::SetFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder)
 {
-    Set<T>(obj, offset, value, memory_order);
+    Set<T>(obj, offset, value, memoryOrder);
 }
 
 /* static */
 template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, int offset, std::memory_order memory_order)
+inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, int offset, std::memory_order memoryOrder)
 {
     if (!IS_DYN) {
-        return reinterpret_cast<ObjectHeader *>(Get<ObjectPointerType>(obj, offset, memory_order));
+        return reinterpret_cast<ObjectHeader *>(Get<ObjectPointerType>(obj, offset, memoryOrder));
     }
-    return Get<ObjectHeader *>(obj, offset, memory_order);
+    return Get<ObjectHeader *>(obj, offset, memoryOrder);
 }
 
-static inline std::memory_order GetComplementMemoryOrder(std::memory_order memory_order)
+static inline std::memory_order GetComplementMemoryOrder(std::memory_order memoryOrder)
 {
-    if (memory_order == std::memory_order_acquire) {
-        memory_order = std::memory_order_release;
-    } else if (memory_order == std::memory_order_release) {
-        memory_order = std::memory_order_acquire;
+    if (memoryOrder == std::memory_order_acquire) {
+        memoryOrder = std::memory_order_release;
+    } else if (memoryOrder == std::memory_order_release) {
+        memoryOrder = std::memory_order_acquire;
     }
-    return memory_order;
+    return memoryOrder;
 }
 
 /* static */
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
-inline void ObjectAccessor::SetFieldObject(void *obj, size_t offset, ObjectHeader *value,
-                                           std::memory_order memory_order)
+inline void ObjectAccessor::SetFieldObject(void *obj, size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     if (NEED_WRITE_BARRIER) {
-        auto *barrier_set = GetBarrierSet();
+        auto *barrierSet = GetBarrierSet();
 
-        if (barrier_set->IsPreBarrierEnabled()) {
+        if (barrierSet->IsPreBarrierEnabled()) {
             // If SetFieldObject is called with std::memory_order_release
             // we need to use the complement memory order std::memory_order_acquire
             // because we read the value.
-            ObjectHeader *pre_val = GetFieldObject<IS_DYN>(obj, offset, GetComplementMemoryOrder(memory_order));
-            barrier_set->PreBarrier(pre_val);
+            ObjectHeader *preVal = GetFieldObject<IS_DYN>(obj, offset, GetComplementMemoryOrder(memoryOrder));
+            barrierSet->PreBarrier(preVal);
         }
 
         if (!IS_DYN) {
-            Set<ObjectPointerType>(obj, offset, ToObjPtrType(value), memory_order);
+            Set<ObjectPointerType>(obj, offset, ToObjPtrType(value), memoryOrder);
         } else {
-            Set<ObjectHeader *>(obj, offset, value, memory_order);
+            Set<ObjectHeader *>(obj, offset, value, memoryOrder);
         }
-        auto gc_post_barrier_type = barrier_set->GetPostType();
-        if (!mem::IsEmptyBarrier(gc_post_barrier_type)) {
-            barrier_set->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
+        auto gcPostBarrierType = barrierSet->GetPostType();
+        if (!mem::IsEmptyBarrier(gcPostBarrierType)) {
+            barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
         }
     } else {
         if (!IS_DYN) {
-            Set<ObjectPointerType>(obj, offset, ToObjPtrType(value), memory_order);
+            Set<ObjectPointerType>(obj, offset, ToObjPtrType(value), memoryOrder);
         } else {
-            Set<ObjectHeader *>(obj, offset, value, memory_order);
+            Set<ObjectHeader *>(obj, offset, value, memoryOrder);
         }
     }
 }
 
 /* static */
 template <typename T>
-inline std::pair<bool, T> ObjectAccessor::CompareAndSetFieldPrimitive(void *obj, size_t offset, T old_value,
-                                                                      T new_value, std::memory_order memory_order,
-                                                                      bool strong)
+inline std::pair<bool, T> ObjectAccessor::CompareAndSetFieldPrimitive(void *obj, size_t offset, T oldValue, T newValue,
+                                                                      std::memory_order memoryOrder, bool strong)
 {
-    uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
-    ASSERT(IsAddressInObjectsHeap(raw_addr));
-    auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+    uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+    ASSERT(IsAddressInObjectsHeap(rawAddr));
+    auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
     if (strong) {
-        return {atomic_addr->compare_exchange_strong(old_value, new_value, memory_order), old_value};
+        return {atomicAddr->compare_exchange_strong(oldValue, newValue, memoryOrder), oldValue};
     }
-    return {atomic_addr->compare_exchange_weak(old_value, new_value, memory_order), old_value};
+    return {atomicAddr->compare_exchange_weak(oldValue, newValue, memoryOrder), oldValue};
 }
 
 /* static */
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
 inline std::pair<bool, ObjectHeader *> ObjectAccessor::CompareAndSetFieldObject(void *obj, size_t offset,
-                                                                                ObjectHeader *old_value,
-                                                                                ObjectHeader *new_value,
-                                                                                std::memory_order memory_order,
+                                                                                ObjectHeader *oldValue,
+                                                                                ObjectHeader *newValue,
+                                                                                std::memory_order memoryOrder,
                                                                                 bool strong)
 {
     bool success = false;
     ObjectHeader *result = nullptr;
-    auto get_result = [&]() {
+    auto getResult = [&]() {
         if (IS_DYN) {
             auto value =
-                CompareAndSetFieldPrimitive<ObjectHeader *>(obj, offset, old_value, new_value, memory_order, strong);
+                CompareAndSetFieldPrimitive<ObjectHeader *>(obj, offset, oldValue, newValue, memoryOrder, strong);
             success = value.first;
             result = value.second;
         } else {
-            auto value = CompareAndSetFieldPrimitive<ObjectPointerType>(obj, offset, ToObjPtrType(old_value),
-                                                                        ToObjPtrType(new_value), memory_order, strong);
+            auto value = CompareAndSetFieldPrimitive<ObjectPointerType>(obj, offset, ToObjPtrType(oldValue),
+                                                                        ToObjPtrType(newValue), memoryOrder, strong);
             success = value.first;
             result = reinterpret_cast<ObjectHeader *>(value.second);
         }
@@ -280,63 +278,63 @@ inline std::pair<bool, ObjectHeader *> ObjectAccessor::CompareAndSetFieldObject(
 
     if (NEED_WRITE_BARRIER) {
         // update field with pre barrier
-        auto *barrier_set = GetBarrierSet();
-        if (barrier_set->IsPreBarrierEnabled()) {
-            barrier_set->PreBarrier(GetObject<false, IS_DYN>(obj, offset));
+        auto *barrierSet = GetBarrierSet();
+        if (barrierSet->IsPreBarrierEnabled()) {
+            barrierSet->PreBarrier(GetObject<false, IS_DYN>(obj, offset));
         }
 
-        get_result();
-        if (success && !mem::IsEmptyBarrier(barrier_set->GetPostType())) {
-            barrier_set->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, new_value);
+        getResult();
+        if (success && !mem::IsEmptyBarrier(barrierSet->GetPostType())) {
+            barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, newValue);
         }
         return {success, result};
     }
 
-    get_result();
+    getResult();
     return {success, result};
 }
 
 /* static */
 template <typename T>
-inline T ObjectAccessor::GetAndSetFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memory_order)
+inline T ObjectAccessor::GetAndSetFieldPrimitive(void *obj, size_t offset, T value, std::memory_order memoryOrder)
 {
-    uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
-    ASSERT(IsAddressInObjectsHeap(raw_addr));
-    auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
-    return atomic_addr->exchange(value, memory_order);
+    uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+    ASSERT(IsAddressInObjectsHeap(rawAddr));
+    auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
+    return atomicAddr->exchange(value, memoryOrder);
 }
 
 /* static */
 template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
 inline ObjectHeader *ObjectAccessor::GetAndSetFieldObject(void *obj, size_t offset, ObjectHeader *value,
-                                                          std::memory_order memory_order)
+                                                          std::memory_order memoryOrder)
 {
     if (NEED_WRITE_BARRIER) {
         // update field with pre barrier
-        auto *barrier_set = GetBarrierSet();
-        if (barrier_set->IsPreBarrierEnabled()) {
-            barrier_set->PreBarrier(GetObject<false, IS_DYN>(obj, offset));
+        auto *barrierSet = GetBarrierSet();
+        if (barrierSet->IsPreBarrierEnabled()) {
+            barrierSet->PreBarrier(GetObject<false, IS_DYN>(obj, offset));
         }
-        ObjectHeader *result = IS_DYN ? GetAndSetFieldPrimitive<ObjectHeader *>(obj, offset, value, memory_order)
+        ObjectHeader *result = IS_DYN ? GetAndSetFieldPrimitive<ObjectHeader *>(obj, offset, value, memoryOrder)
                                       : reinterpret_cast<ObjectHeader *>(GetAndSetFieldPrimitive<ObjectPointerType>(
-                                            obj, offset, ToObjPtrType(value), memory_order));
-        if (result != nullptr && !mem::IsEmptyBarrier(barrier_set->GetPostType())) {
-            barrier_set->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
+                                            obj, offset, ToObjPtrType(value), memoryOrder));
+        if (result != nullptr && !mem::IsEmptyBarrier(barrierSet->GetPostType())) {
+            barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), offset, value);
         }
 
         return result;
     }
 
-    return IS_DYN ? GetAndSetFieldPrimitive<ObjectHeader *>(obj, offset, value, memory_order)
+    return IS_DYN ? GetAndSetFieldPrimitive<ObjectHeader *>(obj, offset, value, memoryOrder)
                   : reinterpret_cast<ObjectHeader *>(
-                        GetAndSetFieldPrimitive<ObjectPointerType>(obj, offset, ToObjPtrType(value), memory_order));
+                        GetAndSetFieldPrimitive<ObjectPointerType>(obj, offset, ToObjPtrType(value), memoryOrder));
 }
 
 /* static */
 template <typename T>
 inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[maybe_unused]] size_t offset,
                                                  [[maybe_unused]] T value,
-                                                 [[maybe_unused]] std::memory_order memory_order)
+                                                 [[maybe_unused]] std::memory_order memoryOrder)
 {
     if constexpr (std::is_same_v<T, uint8_t>) {  // NOLINT(readability-braces-around-statements)
         LOG(FATAL, RUNTIME) << "Could not do add for boolean";
@@ -344,22 +342,22 @@ inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[m
     } else {                                          // NOLINT(readability-misleading-indentation)
         if constexpr (std::is_floating_point_v<T>) {  // NOLINT(readability-braces-around-statements)
             // Atmoic fetch_add only defined in the atomic specializations for integral and pointer
-            uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
-            ASSERT(IsAddressInObjectsHeap(raw_addr));
-            auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+            uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+            ASSERT(IsAddressInObjectsHeap(rawAddr));
+            auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
             // Atomic with parameterized order reason: memory order passed as argument
-            T old_value = atomic_addr->load(memory_order);
-            T new_value;
+            T oldValue = atomicAddr->load(memoryOrder);
+            T newValue;
             do {
-                new_value = old_value + value;
-            } while (!atomic_addr->compare_exchange_weak(old_value, new_value, memory_order));
-            return old_value;
+                newValue = oldValue + value;
+            } while (!atomicAddr->compare_exchange_weak(oldValue, newValue, memoryOrder));
+            return oldValue;
         } else {  // NOLINT(readability-misleading-indentation, readability-else-after-return)
-            uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
-            ASSERT(IsAddressInObjectsHeap(raw_addr));
-            auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+            uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+            ASSERT(IsAddressInObjectsHeap(rawAddr));
+            auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
             // Atomic with parameterized order reason: memory order passed as argument
-            return atomic_addr->fetch_add(value, memory_order);
+            return atomicAddr->fetch_add(value, memoryOrder);
         }
     }
 }
@@ -368,17 +366,17 @@ inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[m
 template <typename T>
 inline T ObjectAccessor::GetAndBitwiseOrFieldPrimitive([[maybe_unused]] void *obj, [[maybe_unused]] size_t offset,
                                                        [[maybe_unused]] T value,
-                                                       [[maybe_unused]] std::memory_order memory_order)
+                                                       [[maybe_unused]] std::memory_order memoryOrder)
 {
     if constexpr (std::is_floating_point_v<T>) {  // NOLINT(readability-braces-around-statements)
         LOG(FATAL, RUNTIME) << "Could not do bitwise or for float/double";
         UNREACHABLE();
     } else {  // NOLINT(readability-misleading-indentation)
-        uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
-        ASSERT(IsAddressInObjectsHeap(raw_addr));
-        auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+        uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+        ASSERT(IsAddressInObjectsHeap(rawAddr));
+        auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
         // Atomic with parameterized order reason: memory order passed as argument
-        return atomic_addr->fetch_or(value, memory_order);
+        return atomicAddr->fetch_or(value, memoryOrder);
     }
 }
 
@@ -386,17 +384,17 @@ inline T ObjectAccessor::GetAndBitwiseOrFieldPrimitive([[maybe_unused]] void *ob
 template <typename T>
 inline T ObjectAccessor::GetAndBitwiseAndFieldPrimitive([[maybe_unused]] void *obj, [[maybe_unused]] size_t offset,
                                                         [[maybe_unused]] T value,
-                                                        [[maybe_unused]] std::memory_order memory_order)
+                                                        [[maybe_unused]] std::memory_order memoryOrder)
 {
     if constexpr (std::is_floating_point_v<T>) {  // NOLINT(readability-braces-around-statements)
         LOG(FATAL, RUNTIME) << "Could not do bitwise and for float/double";
         UNREACHABLE();
     } else {  // NOLINT(readability-misleading-indentation)
-        uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
-        ASSERT(IsAddressInObjectsHeap(raw_addr));
-        auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+        uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+        ASSERT(IsAddressInObjectsHeap(rawAddr));
+        auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
         // Atomic with parameterized order reason: memory order passed as argument
-        return atomic_addr->fetch_and(value, memory_order);
+        return atomicAddr->fetch_and(value, memoryOrder);
     }
 }
 
@@ -404,17 +402,17 @@ inline T ObjectAccessor::GetAndBitwiseAndFieldPrimitive([[maybe_unused]] void *o
 template <typename T>
 inline T ObjectAccessor::GetAndBitwiseXorFieldPrimitive([[maybe_unused]] void *obj, [[maybe_unused]] size_t offset,
                                                         [[maybe_unused]] T value,
-                                                        [[maybe_unused]] std::memory_order memory_order)
+                                                        [[maybe_unused]] std::memory_order memoryOrder)
 {
     if constexpr (std::is_floating_point_v<T>) {  // NOLINT(readability-braces-around-statements)
         LOG(FATAL, RUNTIME) << "Could not do bitwise xor for float/double";
         UNREACHABLE();
     } else {  // NOLINT(readability-misleading-indentation)
-        uintptr_t raw_addr = reinterpret_cast<uintptr_t>(obj) + offset;
-        ASSERT(IsAddressInObjectsHeap(raw_addr));
-        auto *atomic_addr = reinterpret_cast<std::atomic<T> *>(raw_addr);
+        uintptr_t rawAddr = reinterpret_cast<uintptr_t>(obj) + offset;
+        ASSERT(IsAddressInObjectsHeap(rawAddr));
+        auto *atomicAddr = reinterpret_cast<std::atomic<T> *>(rawAddr);
         // Atomic with parameterized order reason: memory order passed as argument
-        return atomic_addr->fetch_xor(value, memory_order);
+        return atomicAddr->fetch_xor(value, memoryOrder);
     }
 }
 
@@ -432,16 +430,16 @@ inline void ObjectAccessor::SetDynValue(const ManagedThread *thread, void *obj, 
                                         coretypes::TaggedType value)
 {
     if (UNLIKELY(GetBarrierSet(thread)->IsPreBarrierEnabled())) {
-        coretypes::TaggedValue pre_val(GetDynValue<coretypes::TaggedType>(obj, offset));
-        if (pre_val.IsHeapObject()) {
-            GetBarrierSet(thread)->PreBarrier(pre_val.GetRawHeapObject());
+        coretypes::TaggedValue preVal(GetDynValue<coretypes::TaggedType>(obj, offset));
+        if (preVal.IsHeapObject()) {
+            GetBarrierSet(thread)->PreBarrier(preVal.GetRawHeapObject());
         }
     }
     SetDynValueWithoutBarrier(obj, offset, value);
     coretypes::TaggedValue tv(value);
     if (tv.IsHeapObject() && tv.GetRawHeapObject() != nullptr) {
-        auto gc_post_barrier_type = GetPostBarrierType(thread);
-        if (!mem::IsEmptyBarrier(gc_post_barrier_type)) {
+        auto gcPostBarrierType = GetPostBarrierType(thread);
+        if (!mem::IsEmptyBarrier(gcPostBarrierType)) {
             GetBarrierSet(thread)->PostBarrier(obj, offset, tv.GetRawHeapObject());
         }
     }
@@ -453,31 +451,31 @@ inline void ObjectAccessor::SetDynPrimitive(const ManagedThread *thread, void *o
 {
     // Need pre-barrier becuase the previous value may be a reference.
     if (UNLIKELY(GetBarrierSet(thread)->IsPreBarrierEnabled())) {
-        coretypes::TaggedValue pre_val(GetDynValue<coretypes::TaggedType>(obj, offset));
-        if (pre_val.IsHeapObject()) {
-            GetBarrierSet(thread)->PreBarrier(pre_val.GetRawHeapObject());
+        coretypes::TaggedValue preVal(GetDynValue<coretypes::TaggedType>(obj, offset));
+        if (preVal.IsHeapObject()) {
+            GetBarrierSet(thread)->PreBarrier(preVal.GetRawHeapObject());
         }
     }
     SetDynValueWithoutBarrier(obj, offset, value);
     // Don't need post barrier because the value is a primitive.
 }
 
-inline void ObjectAccessor::SetClass(ObjectHeader *obj, BaseClass *new_class)
+inline void ObjectAccessor::SetClass(ObjectHeader *obj, BaseClass *newClass)
 {
-    auto *barrier_set = GetBarrierSet();
+    auto *barrierSet = GetBarrierSet();
 
-    if (barrier_set->IsPreBarrierEnabled()) {
+    if (barrierSet->IsPreBarrierEnabled()) {
         ASSERT(obj->ClassAddr<BaseClass>() != nullptr);
-        ObjectHeader *pre_val = obj->ClassAddr<BaseClass>()->GetManagedObject();
-        barrier_set->PreBarrier(pre_val);
+        ObjectHeader *preVal = obj->ClassAddr<BaseClass>()->GetManagedObject();
+        barrierSet->PreBarrier(preVal);
     }
 
-    obj->SetClass(new_class);
+    obj->SetClass(newClass);
 
-    auto gc_post_barrier_type = barrier_set->GetPostType();
-    if (!mem::IsEmptyBarrier(gc_post_barrier_type)) {
-        ASSERT(new_class->GetManagedObject() != nullptr);
-        barrier_set->PostBarrier(ToVoidPtr(ToUintPtr(obj)), 0, new_class->GetManagedObject());
+    auto gcPostBarrierType = barrierSet->GetPostType();
+    if (!mem::IsEmptyBarrier(gcPostBarrierType)) {
+        ASSERT(newClass->GetManagedObject() != nullptr);
+        barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), 0, newClass->GetManagedObject());
     }
 }
 }  // namespace panda

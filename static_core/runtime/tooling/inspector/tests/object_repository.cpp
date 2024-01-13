@@ -131,14 +131,14 @@ TEST_F(ObjectRepositoryTest, S)
 
     PtDebugFrame frame(&methods[0], nullptr);
     std::map<std::string, TypedValue> locals;
-    locals.emplace("a", TypedValue::U16(56));
+    locals.emplace("a", TypedValue::U16(56U));
     locals.emplace("ref", TypedValue::Reference(cls_object));
 
     auto frame_obj = obj.CreateFrameObject(frame, locals);
-    ASSERT_EQ(frame_obj.GetObjectId().value(), RemoteObjectId(2));
+    ASSERT_EQ(frame_obj.GetObjectId().value(), RemoteObjectId(2UL));
 
     auto properties = obj.GetProperties(frame_obj.GetObjectId().value(), true);
-    ASSERT_EQ(properties.size(), 2);
+    ASSERT_EQ(properties.size(), 2UL);
     ASSERT_EQ(properties[0].GetName(), "a");
 
     ASSERT_THAT(ToJson(frame_obj), JsonProperties(JsonProperty<JsonObject::StringT> {"description", "Frame #0"},

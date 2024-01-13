@@ -19,88 +19,88 @@
 namespace panda {
 using CaptureState = RegExpExecutor::CaptureState;
 
-static SaveStartOpCode G_SAVE_START_OPCODE = SaveStartOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
-static SaveEndOpCode G_SAVE_END_OPCODE = SaveEndOpCode();           // NOLINT(fuchsia-statically-constructed-objects)
-static CharOpCode G_CHAR_OPCODE = CharOpCode();                     // NOLINT(fuchsia-statically-constructed-objects)
-static GotoOpCode G_GOTO_OPCODE = GotoOpCode();                     // NOLINT(fuchsia-statically-constructed-objects)
-static SplitNextOpCode G_SPLIT_NEXT_OPCODE = SplitNextOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
-static SplitFirstOpCode G_SPLIT_FIRST_OPCODE = SplitFirstOpCode();  // NOLINT(fuchsia-statically-constructed-objects)
-static MatchOpCode G_MATCH_OPCODE = MatchOpCode();                  // NOLINT(fuchsia-statically-constructed-objects)
-static LoopOpCode G_LOOP_OPCODE = LoopOpCode();                     // NOLINT(fuchsia-statically-constructed-objects)
-static LoopGreedyOpCode G_LOOP_GREEDY_OPCODE = LoopGreedyOpCode();  // NOLINT(fuchsia-statically-constructed-objects)
-static PushCharOpCode G_PUSH_CHAR_OPCODE = PushCharOpCode();        // NOLINT(fuchsia-statically-constructed-objects)
-static CheckCharOpCode G_CHECK_CHAR_OPCODE = CheckCharOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
-static PushOpCode G_PUSH_OPCODE = PushOpCode();                     // NOLINT(fuchsia-statically-constructed-objects)
-static PopOpCode G_POP_OPCODE = PopOpCode();                        // NOLINT(fuchsia-statically-constructed-objects)
-static SaveResetOpCode G_SAVE_RESET_OPCODE = SaveResetOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
-static LineStartOpCode G_LINE_START_OPCODE = LineStartOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
-static LineEndOpCode G_LINE_END_OPCODE = LineEndOpCode();           // NOLINT(fuchsia-statically-constructed-objects)
+static SaveStartOpCode g_gSaveStartOpcode = SaveStartOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
+static SaveEndOpCode g_gSaveEndOpcode = SaveEndOpCode();           // NOLINT(fuchsia-statically-constructed-objects)
+static CharOpCode g_gCharOpcode = CharOpCode();                    // NOLINT(fuchsia-statically-constructed-objects)
+static GotoOpCode g_gGotoOpcode = GotoOpCode();                    // NOLINT(fuchsia-statically-constructed-objects)
+static SplitNextOpCode g_gSplitNextOpcode = SplitNextOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
+static SplitFirstOpCode g_gSplitFirstOpcode = SplitFirstOpCode();  // NOLINT(fuchsia-statically-constructed-objects)
+static MatchOpCode g_gMatchOpcode = MatchOpCode();                 // NOLINT(fuchsia-statically-constructed-objects)
+static LoopOpCode g_gLoopOpcode = LoopOpCode();                    // NOLINT(fuchsia-statically-constructed-objects)
+static LoopGreedyOpCode g_gLoopGreedyOpcode = LoopGreedyOpCode();  // NOLINT(fuchsia-statically-constructed-objects)
+static PushCharOpCode g_gPushCharOpcode = PushCharOpCode();        // NOLINT(fuchsia-statically-constructed-objects)
+static CheckCharOpCode g_gCheckCharOpcode = CheckCharOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
+static PushOpCode g_gPushOpcode = PushOpCode();                    // NOLINT(fuchsia-statically-constructed-objects)
+static PopOpCode g_gPopOpcode = PopOpCode();                       // NOLINT(fuchsia-statically-constructed-objects)
+static SaveResetOpCode g_gSaveResetOpcode = SaveResetOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
+static LineStartOpCode g_gLineStartOpcode = LineStartOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
+static LineEndOpCode g_gLineEndOpcode = LineEndOpCode();           // NOLINT(fuchsia-statically-constructed-objects)
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static WordBoundaryOpCode G_WORD_BOUNDARY_OPCODE = WordBoundaryOpCode();
+static WordBoundaryOpCode g_gWordBoundaryOpcode = WordBoundaryOpCode();
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static NotWordBoundaryOpCode G_NOT_WORD_BOUNDARY_OPCODE = NotWordBoundaryOpCode();
-static AllOpCode G_ALL_OPCODE = AllOpCode();                        // NOLINT(fuchsia-statically-constructed-objects)
-static DotsOpCode G_DOTS_OPCODE = DotsOpCode();                     // NOLINT(fuchsia-statically-constructed-objects)
-static MatchAheadOpCode G_MATCH_AHEAD_OPCODE = MatchAheadOpCode();  // NOLINT(fuchsia-statically-constructed-objects)
+static NotWordBoundaryOpCode g_gNotWordBoundaryOpcode = NotWordBoundaryOpCode();
+static AllOpCode g_gAllOpcode = AllOpCode();                       // NOLINT(fuchsia-statically-constructed-objects)
+static DotsOpCode g_gDotsOpcode = DotsOpCode();                    // NOLINT(fuchsia-statically-constructed-objects)
+static MatchAheadOpCode g_gMatchAheadOpcode = MatchAheadOpCode();  // NOLINT(fuchsia-statically-constructed-objects)
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static NegativeMatchAheadOpCode G_NEGATIVE_MATCH_AHEAD_OPCODE = NegativeMatchAheadOpCode();
-static MatchEndOpCode G_MATCH_END_OPCODE = MatchEndOpCode();  // NOLINT(fuchsia-statically-constructed-objects)
-static PrevOpCode G_PREV_OPCODE = PrevOpCode();               // NOLINT(fuchsia-statically-constructed-objects)
-static RangeOpCode G_RANGE_OPCODE = RangeOpCode();            // NOLINT(fuchsia-statically-constructed-objects)
+static NegativeMatchAheadOpCode g_gNegativeMatchAheadOpcode = NegativeMatchAheadOpCode();
+static MatchEndOpCode g_gMatchEndOpcode = MatchEndOpCode();  // NOLINT(fuchsia-statically-constructed-objects)
+static PrevOpCode g_gPrevOpcode = PrevOpCode();              // NOLINT(fuchsia-statically-constructed-objects)
+static RangeOpCode g_gRangeOpcode = RangeOpCode();           // NOLINT(fuchsia-statically-constructed-objects)
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static BackReferenceOpCode G_BACKREFERENCE_OPCODE = BackReferenceOpCode();
+static BackReferenceOpCode g_gBackreferenceOpcode = BackReferenceOpCode();
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static BackwardBackReferenceOpCode G_BACKWARD_BACKREFERENCE_OPCODE = BackwardBackReferenceOpCode();
-static Char32OpCode G_CHAR32_OPCODE = Char32OpCode();     // NOLINT(fuchsia-statically-constructed-objects)
-static Range32OpCode G_RANGE32_OPCODE = Range32OpCode();  // NOLINT(fuchsia-statically-constructed-objects)
+static BackwardBackReferenceOpCode g_gBackwardBackreferenceOpcode = BackwardBackReferenceOpCode();
+static Char32OpCode g_gChaR32Opcode = Char32OpCode();     // NOLINT(fuchsia-statically-constructed-objects)
+static Range32OpCode g_gRangE32Opcode = Range32OpCode();  // NOLINT(fuchsia-statically-constructed-objects)
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static std::vector<RegExpOpCode *> G_INTRINSIC_SET = {
-    &G_SAVE_START_OPCODE,
-    &G_SAVE_END_OPCODE,
-    &G_CHAR_OPCODE,
-    &G_GOTO_OPCODE,
-    &G_SPLIT_FIRST_OPCODE,
-    &G_SPLIT_NEXT_OPCODE,
-    &G_MATCH_AHEAD_OPCODE,
-    &G_NEGATIVE_MATCH_AHEAD_OPCODE,
-    &G_MATCH_OPCODE,
-    &G_LOOP_OPCODE,
-    &G_LOOP_GREEDY_OPCODE,
-    &G_PUSH_CHAR_OPCODE,
-    &G_CHECK_CHAR_OPCODE,
-    &G_PUSH_OPCODE,
-    &G_POP_OPCODE,
-    &G_SAVE_RESET_OPCODE,
-    &G_LINE_START_OPCODE,
-    &G_LINE_END_OPCODE,
-    &G_WORD_BOUNDARY_OPCODE,
-    &G_NOT_WORD_BOUNDARY_OPCODE,
-    &G_ALL_OPCODE,
-    &G_DOTS_OPCODE,
-    &G_MATCH_END_OPCODE,
-    &G_PREV_OPCODE,
-    &G_RANGE_OPCODE,
-    &G_BACKREFERENCE_OPCODE,
-    &G_BACKWARD_BACKREFERENCE_OPCODE,
-    &G_CHAR32_OPCODE,
-    &G_RANGE32_OPCODE,
+static std::vector<RegExpOpCode *> g_gIntrinsicSet = {
+    &g_gSaveStartOpcode,
+    &g_gSaveEndOpcode,
+    &g_gCharOpcode,
+    &g_gGotoOpcode,
+    &g_gSplitFirstOpcode,
+    &g_gSplitNextOpcode,
+    &g_gMatchAheadOpcode,
+    &g_gNegativeMatchAheadOpcode,
+    &g_gMatchOpcode,
+    &g_gLoopOpcode,
+    &g_gLoopGreedyOpcode,
+    &g_gPushCharOpcode,
+    &g_gCheckCharOpcode,
+    &g_gPushOpcode,
+    &g_gPopOpcode,
+    &g_gSaveResetOpcode,
+    &g_gLineStartOpcode,
+    &g_gLineEndOpcode,
+    &g_gWordBoundaryOpcode,
+    &g_gNotWordBoundaryOpcode,
+    &g_gAllOpcode,
+    &g_gDotsOpcode,
+    &g_gMatchEndOpcode,
+    &g_gPrevOpcode,
+    &g_gRangeOpcode,
+    &g_gBackreferenceOpcode,
+    &g_gBackwardBackreferenceOpcode,
+    &g_gChaR32Opcode,
+    &g_gRangE32Opcode,
 };
 
-RegExpOpCode::RegExpOpCode(uint8_t op_code, int size) : op_code_(op_code), size_(size) {}
+RegExpOpCode::RegExpOpCode(uint8_t opCode, int size) : opCode_(opCode), size_(size) {}
 
 /* static */
 RegExpOpCode *RegExpOpCode::GetRegExpOpCode(const DynChunk &buf, int pc)
 {
-    uint8_t op_code = buf.GetU8(pc);
-    ASSERT_PRINT(op_code <= G_INTRINSIC_SET.size(), "invalid op code");
-    return G_INTRINSIC_SET.at(op_code);
+    uint8_t opCode = buf.GetU8(pc);
+    ASSERT_PRINT(opCode <= g_gIntrinsicSet.size(), "invalid op code");
+    return g_gIntrinsicSet.at(opCode);
 }
 
 /* static */
-RegExpOpCode *RegExpOpCode::GetRegExpOpCode(uint8_t op_code)
+RegExpOpCode *RegExpOpCode::GetRegExpOpCode(uint8_t opCode)
 {
-    ASSERT_PRINT(op_code <= G_INTRINSIC_SET.size(), "invalid op code");
-    return G_INTRINSIC_SET.at(op_code);
+    ASSERT_PRINT(opCode <= g_gIntrinsicSet.size(), "invalid op code");
+    return g_gIntrinsicSet.at(opCode);
 }
 
 /* static */
@@ -109,8 +109,8 @@ void RegExpOpCode::DumpRegExpOpCode(std::ostream &out, const DynChunk &buf)
     out << "OpCode:\t" << std::endl;
     uint32_t pc = RegExpParser::OP_START_OFFSET;
     do {
-        RegExpOpCode *byte_code = GetRegExpOpCode(buf, pc);
-        pc = byte_code->DumpOpCode(out, buf, pc);
+        RegExpOpCode *byteCode = GetRegExpOpCode(buf, pc);
+        pc = byteCode->DumpOpCode(out, buf, pc);
     } while (pc < buf.size_);
 }
 
@@ -146,9 +146,9 @@ uint32_t SaveEndOpCode::DumpOpCode(std::ostream &out, const DynChunk &buf, uint3
 
 uint32_t CharOpCode::EmitOpCode(DynChunk *buf, uint32_t para) const
 {
-    auto para_char = static_cast<uint16_t>(para & 0xffffU);  // NOLINT(readability-magic-numbers)
+    auto paraChar = static_cast<uint16_t>(para & 0xffffU);  // NOLINT(readability-magic-numbers)
     buf->EmitChar(GetOpCode());
-    buf->EmitU16(para_char);
+    buf->EmitU16(paraChar);
     return GetDynChunkfSize(*buf);
 }
 
@@ -315,12 +315,12 @@ uint32_t CheckCharOpCode::DumpOpCode(std::ostream &out, const DynChunk &buf, uin
 
 uint32_t SaveResetOpCode::InsertOpCode(DynChunk *buf, uint32_t offset, uint32_t start, uint32_t end) const
 {
-    auto capture_start = static_cast<uint8_t>(start & 0xffU);  // NOLINT(readability-magic-numbers)
-    auto capture_end = static_cast<uint8_t>(end & 0xffU);      // NOLINT(readability-magic-numbers)
+    auto captureStart = static_cast<uint8_t>(start & 0xffU);  // NOLINT(readability-magic-numbers)
+    auto captureEnd = static_cast<uint8_t>(end & 0xffU);      // NOLINT(readability-magic-numbers)
     buf->Insert(offset, GetSize());
     buf->PutU8(offset, GetOpCode());
-    buf->PutU8(offset + RegExpOpCode::OP_SIZE_ONE, capture_start);
-    buf->PutU8(offset + RegExpOpCode::OP_SIZE_TWO, capture_end);
+    buf->PutU8(offset + RegExpOpCode::OP_SIZE_ONE, captureStart);
+    buf->PutU8(offset + RegExpOpCode::OP_SIZE_TWO, captureEnd);
     return GetDynChunkfSize(*buf);
 }
 
@@ -459,12 +459,12 @@ uint32_t RangeOpCode::DumpOpCode(std::ostream &out, const DynChunk &buf, uint32_
     return offset + size * RegExpOpCode::OP_SIZE_FOUR + RegExpOpCode::OP_SIZE_THREE;
 }
 
-uint32_t RangeOpCode::InsertOpCode(DynChunk *buf, const RangeSet &range_set) const
+uint32_t RangeOpCode::InsertOpCode(DynChunk *buf, const RangeSet &rangeSet) const
 {
     buf->EmitChar(GetOpCode());
-    size_t size = range_set.range_set_.size();
+    size_t size = rangeSet.rangeSet_.size();
     buf->EmitU16(size);
-    for (auto range : range_set.range_set_) {
+    for (auto range : rangeSet.rangeSet_) {
         buf->EmitU16(range.first);
         buf->EmitU16(range.second);
     }
@@ -486,12 +486,12 @@ uint32_t Range32OpCode::DumpOpCode(std::ostream &out, const DynChunk &buf, uint3
     return offset + size * +RegExpOpCode::OP_SIZE_EIGHT + RegExpOpCode::OP_SIZE_THREE;
 }
 
-uint32_t Range32OpCode::InsertOpCode(DynChunk *buf, const RangeSet &range_set) const
+uint32_t Range32OpCode::InsertOpCode(DynChunk *buf, const RangeSet &rangeSet) const
 {
     buf->EmitChar(GetOpCode());
-    size_t size = range_set.range_set_.size();
+    size_t size = rangeSet.rangeSet_.size();
     buf->EmitU16(size);
-    for (auto range : range_set.range_set_) {
+    for (auto range : rangeSet.rangeSet_) {
         buf->EmitU32(range.first);
         buf->EmitU32(range.second);
     }
@@ -569,11 +569,11 @@ void RangeSet::Insert(uint32_t start, uint32_t end)
     if (start > end) {
         return;
     }
-    std::pair<uint32_t, uint32_t> pair_element = std::make_pair(start, end);
-    if (range_set_.empty()) {
-        range_set_.emplace_back(pair_element);
+    std::pair<uint32_t, uint32_t> pairElement = std::make_pair(start, end);
+    if (rangeSet_.empty()) {
+        rangeSet_.emplace_back(pairElement);
     } else {
-        for (auto iter = range_set_.begin(); iter != range_set_.end(); iter++) {
+        for (auto iter = rangeSet_.begin(); iter != rangeSet_.end(); iter++) {
             if (IsIntersect(start, end, iter->first, iter->second) ||
                 IsAdjacent(start, end, iter->first, iter->second)) {
                 iter->first = std::min(iter->first, start);
@@ -581,78 +581,78 @@ void RangeSet::Insert(uint32_t start, uint32_t end)
                 return;
             }
             if (iter->first > end) {
-                range_set_.insert(iter, pair_element);
+                rangeSet_.insert(iter, pairElement);
                 return;
             }
         }
-        range_set_.emplace_back(pair_element);
+        rangeSet_.emplace_back(pairElement);
     }
 }
 
 void RangeSet::Insert(const RangeSet &s1)
 {
-    if (s1.range_set_.empty()) {
+    if (s1.rangeSet_.empty()) {
         return;
     }
-    if (range_set_.empty()) {
-        range_set_ = s1.range_set_;
+    if (rangeSet_.empty()) {
+        rangeSet_ = s1.rangeSet_;
     } else {
-        for (auto range : s1.range_set_) {
+        for (auto range : s1.rangeSet_) {
             Insert(range.first, range.second);
         }
         Compress();
     }
 }
 
-void RangeSet::Invert(bool is_utf16)
+void RangeSet::Invert(bool isUtf16)
 {
-    uint32_t max_value = is_utf16 ? UINT32_MAX : UINT16_MAX;
-    if (range_set_.empty()) {
-        range_set_.emplace_back(std::make_pair(0, max_value));
+    uint32_t maxValue = isUtf16 ? UINT32_MAX : UINT16_MAX;
+    if (rangeSet_.empty()) {
+        rangeSet_.emplace_back(std::make_pair(0, maxValue));
         return;
     }
 
-    auto iter = range_set_.begin();
-    auto iter2 = range_set_.begin();
-    if (iter->first == 0 && iter->second == max_value) {
-        range_set_.clear();
+    auto iter = rangeSet_.begin();
+    auto iter2 = rangeSet_.begin();
+    if (iter->first == 0 && iter->second == maxValue) {
+        rangeSet_.clear();
         return;
     }
     iter2++;
 
     uint32_t first = iter->first;
 
-    for (iter = range_set_.begin(); iter != range_set_.end(); iter++) {
-        if (iter->second == max_value) {
-            range_set_.erase(iter);
+    for (iter = rangeSet_.begin(); iter != rangeSet_.end(); iter++) {
+        if (iter->second == maxValue) {
+            rangeSet_.erase(iter);
             break;
         }
         iter->first = iter->second + 1;
-        if (iter2 != range_set_.end()) {
+        if (iter2 != rangeSet_.end()) {
             iter->second = iter2->first - 1;
             iter2++;
         } else {
-            iter->second = max_value;
+            iter->second = maxValue;
         }
     }
     if (first > 0) {
         std::pair<uint32_t, uint32_t> pair1 = std::make_pair(0, first - 1);
-        range_set_.push_front(pair1);
+        rangeSet_.push_front(pair1);
     }
     Compress();
 }
 
 void RangeSet::Compress()
 {
-    auto iter = range_set_.begin();
-    auto iter2 = range_set_.begin();
+    auto iter = rangeSet_.begin();
+    auto iter2 = rangeSet_.begin();
     iter2++;
-    while (iter2 != range_set_.end()) {
+    while (iter2 != rangeSet_.end()) {
         if (IsIntersect(iter->first, iter->second, iter2->first, iter2->second) ||
             IsAdjacent(iter->first, iter->second, iter2->first, iter2->second)) {
             iter->first = std::min(iter->first, iter2->first);
             iter->second = std::max(iter->second, iter2->second);
-            iter2 = range_set_.erase(iter2);
+            iter2 = rangeSet_.erase(iter2);
         } else {
             iter++;
             iter2++;

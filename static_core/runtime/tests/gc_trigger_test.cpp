@@ -57,7 +57,7 @@ public:
     static size_t GetTargetFootprint(const mem::GCAdaptiveTriggerHeap *trigger)
     {
         // Atomic with relaxed order reason: simple getter for test
-        return trigger->target_footprint_.load(std::memory_order_relaxed);
+        return trigger->targetFootprint_.load(std::memory_order_relaxed);
     }
 
 protected:
@@ -99,8 +99,8 @@ TEST_F(GCTriggerTest, ThresholdTest)
 
 class GCChecker : public mem::GCListener {
 public:
-    void GCFinished(const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                    [[maybe_unused]] size_t heap_size) override
+    void GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                    [[maybe_unused]] size_t heapSize) override
     {
         reason_ = task.reason;
         counter_++;
@@ -135,17 +135,17 @@ TEST(SchedGCOnNthAllocTriggerTest, TestTrigger)
     PandaVM *vm = Runtime::GetCurrent()->GetPandaVM();
     auto *trigger = vm->GetGCTrigger();
     ASSERT_EQ(mem::GCTriggerType::ON_NTH_ALLOC, trigger->GetType());
-    auto *sched_trigger = reinterpret_cast<mem::SchedGCOnNthAllocTrigger *>(trigger);
+    auto *schedTrigger = reinterpret_cast<mem::SchedGCOnNthAllocTrigger *>(trigger);
     GCChecker checker;
     vm->GetGC()->AddListener(&checker);
 
-    sched_trigger->ScheduleGc(GCTaskCause::YOUNG_GC_CAUSE, 2);
+    schedTrigger->ScheduleGc(GCTaskCause::YOUNG_GC_CAUSE, 2);
     coretypes::String::CreateEmptyString(ctx, vm);
-    EXPECT_FALSE(sched_trigger->IsTriggered());
+    EXPECT_FALSE(schedTrigger->IsTriggered());
     EXPECT_EQ(GCTaskCause::INVALID_CAUSE, checker.GetCause());
     coretypes::String::CreateEmptyString(ctx, vm);
     EXPECT_EQ(GCTaskCause::YOUNG_GC_CAUSE, checker.GetCause());
-    EXPECT_TRUE(sched_trigger->IsTriggered());
+    EXPECT_TRUE(schedTrigger->IsTriggered());
 
     thread->ManagedCodeEnd();
     Runtime::Destroy();
@@ -175,46 +175,46 @@ TEST(PauseTimeGoalTriggerTest, TestTrigger)
         GCChecker checker;
         vm->GetGC()->AddListener(&checker);
 
-        auto *pause_time_goal_trigger = static_cast<panda::mem::PauseTimeGoalTrigger *>(trigger);
+        auto *pauseTimeGoalTrigger = static_cast<panda::mem::PauseTimeGoalTrigger *>(trigger);
         constexpr size_t INIT_TARGET_FOOTPRINT = 1258291;
-        ASSERT_EQ(INIT_TARGET_FOOTPRINT, pause_time_goal_trigger->GetTargetFootprint());
+        ASSERT_EQ(INIT_TARGET_FOOTPRINT, pauseTimeGoalTrigger->GetTargetFootprint());
 
         constexpr size_t ARRAY_LENGTH = 5 * 32 * 1024;  // big enough to provoke several collections
         VMHandle<coretypes::String> dummy(thread, coretypes::String::CreateEmptyString(ctx, vm));
         VMHandle<coretypes::Array> array(
             thread, panda::mem::ObjectAllocator::AllocArray(ARRAY_LENGTH, ClassRoot::ARRAY_STRING, false));
 
-        size_t expected_counter = 1;
-        size_t start_idx = 0;
+        size_t expectedCounter = 1;
+        size_t startIdx = 0;
         for (size_t i = 0; i < ARRAY_LENGTH; i++) {
             auto *str = coretypes::String::CreateEmptyString(ctx, vm);
             array->Set(i, str);
 
-            auto collection = expected_counter == checker.GetCounter();
+            auto collection = expectedCounter == checker.GetCounter();
             if (collection) {
                 // objects become garbage
-                for (size_t j = start_idx; j < i; j++) {
+                for (size_t j = startIdx; j < i; j++) {
                     array->Set(j, dummy.GetPtr());
-                    start_idx = i;
+                    startIdx = i;
                 }
-                if (expected_counter < 2) {
+                if (expectedCounter < 2) {
                     ASSERT_EQ(GCTaskCause::YOUNG_GC_CAUSE, checker.GetCause());
-                } else if (expected_counter == 2) {
+                } else if (expectedCounter == 2) {
                     ASSERT_EQ(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, checker.GetCause());
-                } else if (expected_counter == 3) {
+                } else if (expectedCounter == 3) {
                     ASSERT_EQ(GCTaskCause::YOUNG_GC_CAUSE, checker.GetCause());
-                } else if (expected_counter > 3) {
+                } else if (expectedCounter > 3) {
                     break;
                 }
 
-                expected_counter++;
+                expectedCounter++;
             }
         }
 
-        ASSERT_GT(expected_counter, 3);
+        ASSERT_GT(expectedCounter, 3);
 
         // previous mixed collection should update target footprint
-        ASSERT_GT(pause_time_goal_trigger->GetTargetFootprint(), INIT_TARGET_FOOTPRINT);
+        ASSERT_GT(pauseTimeGoalTrigger->GetTargetFootprint(), INIT_TARGET_FOOTPRINT);
     }
     Runtime::Destroy();
 }

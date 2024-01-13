@@ -29,8 +29,8 @@ public:
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(PoolManager);
     DEFAULT_COPY_SEMANTIC(PoolManager);
     PANDA_PUBLIC_API static void Initialize(PoolType type = PoolType::MMAP);
-    PANDA_PUBLIC_API static Arena *AllocArena(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                                              const void *allocator_addr = nullptr);
+    PANDA_PUBLIC_API static Arena *AllocArena(size_t size, SpaceType spaceType, AllocatorType allocatorType,
+                                              const void *allocatorAddr = nullptr);
     PANDA_PUBLIC_API static void FreeArena(Arena *arena);
     PANDA_PUBLIC_API static MmapMemPool *GetMmapMemPool();
     static MallocMemPool *GetMallocMemPool();
@@ -38,10 +38,10 @@ public:
     PANDA_PUBLIC_API static void Finalize();
 
 private:
-    static bool is_initialized_;
-    static PoolType pool_type_;
-    static MallocMemPool *malloc_mem_pool_;
-    static MmapMemPool *mmap_mem_pool_;
+    static bool isInitialized_;
+    static PoolType poolType_;
+    static MallocMemPool *mallocMemPool_;
+    static MmapMemPool *mmapMemPool_;
 };
 
 }  // namespace panda

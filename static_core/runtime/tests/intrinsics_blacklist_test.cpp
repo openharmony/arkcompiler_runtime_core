@@ -34,7 +34,7 @@ public:
     IntrinsicsBlacklistTest() = default;
     ~IntrinsicsBlacklistTest() override
     {
-        if (runtime_created_) {
+        if (runtimeCreated_) {
             Runtime::Destroy();
         }
     }
@@ -44,13 +44,13 @@ public:
 
     void CreateRuntime(RuntimeOptions &options)
     {
-        ASSERT_FALSE(runtime_created_);
+        ASSERT_FALSE(runtimeCreated_);
         Runtime::Create(options);
-        runtime_created_ = true;
+        runtimeCreated_ = true;
     }
 
 private:
-    bool runtime_created_ {false};
+    bool runtimeCreated_ {false};
 };
 
 TEST_F(IntrinsicsBlacklistTest, DisableIntrinsic)
@@ -68,10 +68,10 @@ TEST_F(IntrinsicsBlacklistTest, DisableIntrinsic)
     RuntimeOptions options;
     options.SetLoadRuntimes({"core"});
     options.SetIntrinsicsBlacklist({"Math::absI32"});
-    auto exec_path = panda::os::file::File::GetExecutablePath();
-    std::string panda_std_lib =
-        exec_path.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
-    options.SetBootPandaFiles({panda_std_lib});
+    auto execPath = panda::os::file::File::GetExecutablePath();
+    std::string pandaStdLib =
+        execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
+    options.SetBootPandaFiles({pandaStdLib});
     CreateRuntime(options);
     pandasm::Parser parser;
     auto res = parser.Parse(source);

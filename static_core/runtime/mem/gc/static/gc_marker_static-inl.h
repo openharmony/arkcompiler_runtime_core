@@ -21,27 +21,27 @@
 namespace panda::mem {
 
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_STATIC>::HandleObject(GCMarkingStackType *objects_stack, const ObjectHeader *object,
+void GCMarker<Marker, LANG_TYPE_STATIC>::HandleObject(GCMarkingStackType *objectsStack, const ObjectHeader *object,
                                                       const Class *cls)
 {
     while (cls != nullptr) {
         // Iterate over instance fields
-        uint32_t ref_num = cls->GetRefFieldsNum<false>();
-        if (ref_num > 0) {
+        uint32_t refNum = cls->GetRefFieldsNum<false>();
+        if (refNum > 0) {
             uint32_t offset = cls->GetRefFieldsOffset<false>();
-            uint32_t ref_volatile_num = cls->GetVolatileRefFieldsNum<false>();
-            for (uint32_t i = 0; i < ref_volatile_num; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
-                auto *field_object = object->GetFieldObject<true>(offset);
-                ValidateObject(object, field_object);
-                if (field_object != nullptr && AsMarker()->MarkIfNotMarked(field_object)) {
-                    objects_stack->PushToStack(object, field_object);
+            uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<false>();
+            for (uint32_t i = 0; i < refVolatileNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+                auto *fieldObject = object->GetFieldObject<true>(offset);
+                ValidateObject(object, fieldObject);
+                if (fieldObject != nullptr && AsMarker()->MarkIfNotMarked(fieldObject)) {
+                    objectsStack->PushToStack(object, fieldObject);
                 }
             }
-            for (uint32_t i = ref_volatile_num; i < ref_num; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
-                auto *field_object = object->GetFieldObject<false>(offset);
-                ValidateObject(object, field_object);
-                if (field_object != nullptr && AsMarker()->MarkIfNotMarked(field_object)) {
-                    objects_stack->PushToStack(object, field_object);
+            for (uint32_t i = refVolatileNum; i < refNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+                auto *fieldObject = object->GetFieldObject<false>(offset);
+                ValidateObject(object, fieldObject);
+                if (fieldObject != nullptr && AsMarker()->MarkIfNotMarked(fieldObject)) {
+                    objectsStack->PushToStack(object, fieldObject);
                 }
             }
         }
@@ -49,88 +49,87 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::HandleObject(GCMarkingStackType *object
     }
 }
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_STATIC>::HandleClass(GCMarkingStackType *objects_stack, const Class *cls)
+void GCMarker<Marker, LANG_TYPE_STATIC>::HandleClass(GCMarkingStackType *objectsStack, const Class *cls)
 {
     // Iterate over static fields
-    uint32_t ref_num = cls->GetRefFieldsNum<true>();
-    if (ref_num > 0) {
+    uint32_t refNum = cls->GetRefFieldsNum<true>();
+    if (refNum > 0) {
         uint32_t offset = cls->GetRefFieldsOffset<true>();
-        uint32_t ref_volatile_num = cls->GetVolatileRefFieldsNum<true>();
-        for (uint32_t i = 0; i < ref_volatile_num; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
-            auto *field_object = cls->GetFieldObject<true>(offset);
-            if (field_object != nullptr && AsMarker()->MarkIfNotMarked(field_object)) {
-                objects_stack->PushToStack(cls->GetManagedObject(), field_object);
+        uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<true>();
+        for (uint32_t i = 0; i < refVolatileNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+            auto *fieldObject = cls->GetFieldObject<true>(offset);
+            if (fieldObject != nullptr && AsMarker()->MarkIfNotMarked(fieldObject)) {
+                objectsStack->PushToStack(cls->GetManagedObject(), fieldObject);
             }
         }
-        for (uint32_t i = ref_volatile_num; i < ref_num; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
-            auto *field_object = cls->GetFieldObject<false>(offset);
-            if (field_object != nullptr && AsMarker()->MarkIfNotMarked(field_object)) {
-                objects_stack->PushToStack(cls->GetManagedObject(), field_object);
+        for (uint32_t i = refVolatileNum; i < refNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+            auto *fieldObject = cls->GetFieldObject<false>(offset);
+            if (fieldObject != nullptr && AsMarker()->MarkIfNotMarked(fieldObject)) {
+                objectsStack->PushToStack(cls->GetManagedObject(), fieldObject);
             }
         }
     }
 }
 
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_STATIC>::HandleArrayClass(GCMarkingStackType *objects_stack,
-                                                          const coretypes::Array *array_object,
+void GCMarker<Marker, LANG_TYPE_STATIC>::HandleArrayClass(GCMarkingStackType *objectsStack,
+                                                          const coretypes::Array *arrayObject,
                                                           [[maybe_unused]] const Class *cls)
 {
-    LOG(DEBUG, GC) << "Array object: " << GetDebugInfoAboutObject(array_object);
-    ArraySizeT array_length = array_object->GetLength();
+    LOG(DEBUG, GC) << "Array object: " << GetDebugInfoAboutObject(arrayObject);
+    ArraySizeT arrayLength = arrayObject->GetLength();
 
     ASSERT(cls->IsObjectArrayClass());
 
-    LOG(DEBUG, GC) << "Iterate over: " << array_length << " elements in array";
-    for (coretypes::ArraySizeT i = 0; i < array_length; i++) {
-        auto *array_element = array_object->Get<ObjectHeader *>(i);
-        if (array_element == nullptr) {
+    LOG(DEBUG, GC) << "Iterate over: " << arrayLength << " elements in array";
+    for (coretypes::ArraySizeT i = 0; i < arrayLength; i++) {
+        auto *arrayElement = arrayObject->Get<ObjectHeader *>(i);
+        if (arrayElement == nullptr) {
             continue;
         }
 #ifndef NDEBUG
-        auto array_element_cls = array_element->ClassAddr<Class>();
-        LOG_IF(array_element_cls == nullptr, ERROR, GC)
-            << " object's class is nullptr: " << array_element << " from array: " << array_object;
-        ASSERT(array_element_cls != nullptr);
+        auto arrayElementCls = arrayElement->ClassAddr<Class>();
+        LOG_IF(arrayElementCls == nullptr, ERROR, GC)
+            << " object's class is nullptr: " << arrayElement << " from array: " << arrayObject;
+        ASSERT(arrayElementCls != nullptr);
 #endif
-        if (AsMarker()->MarkIfNotMarked(array_element)) {
-            objects_stack->PushToStack(array_object, array_element);
+        if (AsMarker()->MarkIfNotMarked(arrayElement)) {
+            objectsStack->PushToStack(arrayObject, arrayElement);
         }
     }
 }
 
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *objects_stack, const ObjectHeader *object,
-                                                      const BaseClass *base_cls,
-                                                      const ReferenceCheckPredicateT &ref_pred)
+void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object,
+                                                      const BaseClass *baseCls, const ReferenceCheckPredicateT &refPred)
 {
-    ASSERT(!base_cls->IsDynamicClass());
-    auto cls = static_cast<const Class *>(base_cls);
-    if (GetGC()->IsReference(cls, object, ref_pred)) {
-        GetGC()->ProcessReference(objects_stack, cls, object, GC::EmptyReferenceProcessPredicate);
+    ASSERT(!baseCls->IsDynamicClass());
+    auto cls = static_cast<const Class *>(baseCls);
+    if (GetGC()->IsReference(cls, object, refPred)) {
+        GetGC()->ProcessReference(objectsStack, cls, object, GC::EmptyReferenceProcessPredicate);
     } else {
-        MarkInstance(objects_stack, object, base_cls);
+        MarkInstance(objectsStack, object, baseCls);
     }
 }
 
 template <typename Marker>
-void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *objects_stack, const ObjectHeader *object,
-                                                      const BaseClass *base_cls)
+void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *objectsStack, const ObjectHeader *object,
+                                                      const BaseClass *baseCls)
 {
-    ASSERT(!base_cls->IsDynamicClass());
-    const auto *cls = static_cast<const Class *>(base_cls);
+    ASSERT(!baseCls->IsDynamicClass());
+    const auto *cls = static_cast<const Class *>(baseCls);
     if (cls->IsObjectArrayClass()) {
-        auto *array_object = static_cast<const panda::coretypes::Array *>(object);
-        HandleArrayClass(objects_stack, array_object, cls);
+        auto *arrayObject = static_cast<const panda::coretypes::Array *>(object);
+        HandleArrayClass(objectsStack, arrayObject, cls);
     } else if (cls->IsClassClass()) {
         // Handle Class handles static fields only, so we need to Handle regular fields explicitly too
-        auto object_cls = panda::Class::FromClassObject(object);
-        if (object_cls->IsInitializing() || object_cls->IsInitialized()) {
-            HandleClass(objects_stack, object_cls);
+        auto objectCls = panda::Class::FromClassObject(object);
+        if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
+            HandleClass(objectsStack, objectCls);
         }
-        HandleObject(objects_stack, object, cls);
+        HandleObject(objectsStack, object, cls);
     } else if (cls->IsInstantiable()) {
-        HandleObject(objects_stack, object, cls);
+        HandleObject(objectsStack, object, cls);
     } else {
         if (!cls->IsPrimitive()) {
             LOG(FATAL, GC) << "Wrong handling, missed type: " << cls->GetDescriptor();

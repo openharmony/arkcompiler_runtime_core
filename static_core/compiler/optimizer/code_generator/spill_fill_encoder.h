@@ -35,11 +35,11 @@ public:
 
     void EncodeSpillFill();
     static bool CanCombineSpillFills(SpillFillData pred, SpillFillData succ, const Graph *graph);
-    static void SortSpillFillData(ArenaVector<SpillFillData> *spill_fills);
+    static void SortSpillFillData(ArenaVector<SpillFillData> *spillFills);
 
     static bool IsCombiningEnabled(const Graph *graph)
     {
-        return graph->GetArch() == Arch::AARCH64 && OPTIONS.IsCompilerSpillFillPair();
+        return graph->GetArch() == Arch::AARCH64 && g_options.IsCompilerSpillFillPair();
     }
 
     inline Reg GetDstReg(Location dst, TypeInfo type)
@@ -57,17 +57,17 @@ public:
 
 private:
     size_t EncodeImmToX(const SpillFillData &sf);
-    size_t EncodeRegisterToX(const SpillFillData &sf, const SpillFillData *next, int consecutive_ops_hint = 0);
-    size_t EncodeStackToX(const SpillFillData &sf, const SpillFillData *next, int consecutive_ops_hint = 0);
+    size_t EncodeRegisterToX(const SpillFillData &sf, const SpillFillData *next, int consecutiveOpsHint = 0);
+    size_t EncodeStackToX(const SpillFillData &sf, const SpillFillData *next, int consecutiveOpsHint = 0);
     static bool AreConsecutiveOps(const SpillFillData &pred, const SpillFillData &succ);
-    void EncodeImmWithCorrectType(DataType::Type sf_type, MemRef dst_mem, ConstantInst *const_inst);
+    void EncodeImmWithCorrectType(DataType::Type sfType, MemRef dstMem, ConstantInst *constInst);
 
     SpillFillInst *inst_;
     Graph *graph_;
     Codegen *codegen_;
     Encoder *encoder_;
     CFrameLayout fl_;
-    Reg sp_reg_;
+    Reg spReg_;
 };
 }  // namespace panda::compiler
 #endif  // COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H

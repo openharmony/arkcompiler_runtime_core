@@ -51,7 +51,7 @@ public:
 
     uint32_t GetObjOffset() const
     {
-        return obj_offset_;
+        return objOffset_;
     }
 
     template <bool ALLOW_INIT>
@@ -66,22 +66,22 @@ public:
     NO_MOVE_SEMANTIC(EtsFieldWrapper);
 
 private:
-    EtsFieldWrapper(EtsClassWrapper *owner, Field *field) : owner_(owner), field_(field), lazy_refconvert_link_(field)
+    EtsFieldWrapper(EtsClassWrapper *owner, Field *field) : owner_(owner), field_(field), lazyRefconvertLink_(field)
     {
         static_assert(std::is_trivially_destructible_v<EtsFieldWrapper>);
 
         if (field->IsStatic()) {
-            obj_offset_ = field_->GetOffset() + EtsClass::GetRuntimeClassOffset();
+            objOffset_ = field_->GetOffset() + EtsClass::GetRuntimeClassOffset();
         } else {
-            obj_offset_ = field_->GetOffset();
+            objOffset_ = field_->GetOffset();
         }
     }
 
     EtsClassWrapper *owner_ {};
     Field *field_ {};
-    TypedPointer<const Field, JSRefConvert> lazy_refconvert_link_ {};
+    TypedPointer<const Field, JSRefConvert> lazyRefconvertLink_ {};
 
-    uint32_t obj_offset_ {};
+    uint32_t objOffset_ {};
 };
 
 }  // namespace panda::ets::interop::js::ets_proxy

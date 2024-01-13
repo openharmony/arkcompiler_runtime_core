@@ -101,14 +101,14 @@ public:
     static constexpr void SetTags(const typename T::Type &tag, const typename Tag::Type &...tags, Int &val)
     {
         using UInt = std::make_unsigned_t<Int>;
-        auto uint_val = static_cast<UInt>(val);
+        auto uintVal = static_cast<UInt>(val);
         auto mask = GetMask<Int, SHIFT>();
-        uint_val &= ~mask;
-        auto tag_val = static_cast<UInt>(tag);
-        tag_val <<= TAG_SHIFT + SHIFT;
-        tag_val &= mask;
-        uint_val |= tag_val;
-        val = static_cast<Int>(uint_val);
+        uintVal &= ~mask;
+        auto tagVal = static_cast<UInt>(tag);
+        tagVal <<= TAG_SHIFT + SHIFT;
+        tagVal &= mask;
+        uintVal |= tagVal;
+        val = static_cast<Int>(uintVal);
         Base::template SetTags<Int, SHIFT>(std::forward<const typename Tag::Type>(tags)..., val);
     }
 };

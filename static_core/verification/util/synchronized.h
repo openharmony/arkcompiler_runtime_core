@@ -36,19 +36,19 @@ class Synchronized {
             other.obj = nullptr;
         }
         const Synchronized *obj;  // NOLINT(misc-non-private-member-variables-in-classes)
-        explicit ConstProxy(const Synchronized *param_obj) ACQUIRE_SHARED(obj->rw_lock_) : obj {param_obj}
+        explicit ConstProxy(const Synchronized *paramObj) ACQUIRE_SHARED(obj->rwLock_) : obj {paramObj}
         {
-            obj->rw_lock_.ReadLock();
+            obj->rwLock_.ReadLock();
         }
         const C *operator->() const
         {
             ASSERT(obj != nullptr);
             return &obj->c_;
         }
-        ~ConstProxy() RELEASE_SHARED(obj->rw_lock_)
+        ~ConstProxy() RELEASE_SHARED(obj->rwLock_)
         {
             if (obj != nullptr) {
-                obj->rw_lock_.Unlock();
+                obj->rwLock_.Unlock();
             }
         }
         NO_COPY_OPERATOR(ConstProxy);
@@ -64,19 +64,19 @@ class Synchronized {
             other.obj = nullptr;
         }
         Synchronized *obj;  // NOLINT(misc-non-private-member-variables-in-classes)
-        explicit Proxy(Synchronized *param_obj) ACQUIRE(obj->rw_lock_) : obj {param_obj}
+        explicit Proxy(Synchronized *paramObj) ACQUIRE(obj->rwLock_) : obj {paramObj}
         {
-            obj->rw_lock_.WriteLock();
+            obj->rwLock_.WriteLock();
         }
         C *operator->()
         {
             ASSERT(obj != nullptr);
             return &obj->c_;
         }
-        ~Proxy() RELEASE(obj->rw_lock_)
+        ~Proxy() RELEASE(obj->rwLock_)
         {
             if (obj != nullptr) {
-                obj->rw_lock_.Unlock();
+                obj->rwLock_.Unlock();
             }
         }
         NO_COPY_OPERATOR(Proxy);
@@ -97,19 +97,19 @@ class Synchronized {
         return c_;
     }
 
-    void WriteLock() ACQUIRE(rw_lock_)
+    void WriteLock() ACQUIRE(rwLock_)
     {
-        rw_lock_.WriteLock();
+        rwLock_.WriteLock();
     }
 
-    void ReadLock() ACQUIRE_SHARED(rw_lock_)
+    void ReadLock() ACQUIRE_SHARED(rwLock_)
     {
-        rw_lock_.ReadLock();
+        rwLock_.ReadLock();
     }
 
-    void Unlock() RELEASE_GENERIC(rw_lock_)
+    void Unlock() RELEASE_GENERIC(rwLock_)
     {
-        rw_lock_.Unlock();
+        rwLock_.Unlock();
     }
 
     friend Friend1;
@@ -134,19 +134,19 @@ public:
     template <typename Handler>
     auto Apply(Handler &&handler)
     {
-        os::memory::WriteLockHolder lock_holder {rw_lock_};
+        os::memory::WriteLockHolder lockHolder {rwLock_};
         return handler(c_);
     }
 
     template <typename Handler>
     auto Apply(Handler &&handler) const
     {
-        os::memory::ReadLockHolder lock_holder {rw_lock_};
+        os::memory::ReadLockHolder lockHolder {rwLock_};
         return handler(c_);
     }
 
 private:
-    mutable panda::os::memory::RWLock rw_lock_;
+    mutable panda::os::memory::RWLock rwLock_;
 };
 }  // namespace panda::verifier
 

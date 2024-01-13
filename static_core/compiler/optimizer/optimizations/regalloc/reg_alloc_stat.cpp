@@ -19,10 +19,10 @@
 namespace panda::compiler {
 RegAllocStat::RegAllocStat(const ArenaVector<LifeIntervals *> &intervals)
 {
-    std::vector<bool> used_regs(INVALID_REG);
-    std::vector<bool> used_vregs(INVALID_REG);
-    std::vector<bool> used_slots(INVALID_REG);
-    std::vector<bool> used_vslots(INVALID_REG);
+    std::vector<bool> usedRegs(INVALID_REG);
+    std::vector<bool> usedVregs(INVALID_REG);
+    std::vector<bool> usedSlots(INVALID_REG);
+    std::vector<bool> usedVslots(INVALID_REG);
 
     for (const auto &interv : intervals) {
         if (interv->IsPhysical()) {
@@ -30,18 +30,18 @@ RegAllocStat::RegAllocStat(const ArenaVector<LifeIntervals *> &intervals)
         }
         auto location = interv->GetLocation();
         if (location.IsRegister()) {
-            used_regs[location.GetValue()] = true;
+            usedRegs[location.GetValue()] = true;
         } else if (location.IsFpRegister()) {
-            used_vregs[location.GetValue()] = true;
+            usedVregs[location.GetValue()] = true;
         } else if (location.IsStack()) {
             auto slot = location.GetValue();
-            DataType::IsFloatType(interv->GetType()) ? (used_slots[slot] = true) : (used_vslots[slot] = true);
+            DataType::IsFloatType(interv->GetType()) ? (usedSlots[slot] = true) : (usedVslots[slot] = true);
         }
     }
 
-    regs_ = static_cast<size_t>(std::count(used_regs.begin(), used_regs.end(), true));
-    vregs_ = static_cast<size_t>(std::count(used_vregs.begin(), used_vregs.end(), true));
-    slots_ = static_cast<size_t>(std::count(used_slots.begin(), used_slots.end(), true));
-    vslots_ = static_cast<size_t>(std::count(used_vslots.begin(), used_vslots.end(), true));
+    regs_ = static_cast<size_t>(std::count(usedRegs.begin(), usedRegs.end(), true));
+    vregs_ = static_cast<size_t>(std::count(usedVregs.begin(), usedVregs.end(), true));
+    slots_ = static_cast<size_t>(std::count(usedSlots.begin(), usedSlots.end(), true));
+    vslots_ = static_cast<size_t>(std::count(usedVslots.begin(), usedVslots.end(), true));
 }
 }  // namespace panda::compiler

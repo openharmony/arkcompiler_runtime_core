@@ -33,30 +33,30 @@ public:
     void BuildTestGraph2(Graph *graph);
 
     template <DominantCondResult DOM_RESULT, RemainedSuccessor ELIM_SUCC, SwapInputs SWAP_INPUTS = SwapInputs::FALSE>
-    void BuildGraphAndCheckElimination(ConditionCode dominant_code, ConditionCode code);
+    void BuildGraphAndCheckElimination(ConditionCode dominantCode, ConditionCode code);
 
     template <DominantCondResult DOM_RESULT, SwapInputs SWAP_INPUTS>
-    void BuildContitionsCheckGraph(Graph *graph, ConditionCode dominant_code, ConditionCode code);
+    void BuildContitionsCheckGraph(Graph *graph, ConditionCode dominantCode, ConditionCode code);
     template <DominantCondResult DOM_RESULT, SwapInputs SWAP_INPUTS>
-    void BuildContitionsCheckGraphElimTrueSucc(Graph *graph, ConditionCode dominant_code, ConditionCode code);
+    void BuildContitionsCheckGraphElimTrueSucc(Graph *graph, ConditionCode dominantCode, ConditionCode code);
     template <DominantCondResult DOM_RESULT, SwapInputs SWAP_INPUTS>
-    void BuildContitionsCheckGraphElimFalseSucc(Graph *graph, ConditionCode dominant_code, ConditionCode code);
+    void BuildContitionsCheckGraphElimFalseSucc(Graph *graph, ConditionCode dominantCode, ConditionCode code);
 
 protected:
     void InitBlockToBeDisconnected(std::vector<BasicBlock *> &&blocks)
     {
-        disconnected_blocks_ = std::move(blocks);
-        removed_instructions_.clear();
-        for (const auto &block : disconnected_blocks_) {
+        disconnectedBlocks_ = std::move(blocks);
+        removedInstructions_.clear();
+        for (const auto &block : disconnectedBlocks_) {
             for (auto inst : block->AllInsts()) {
-                removed_instructions_.push_back(inst);
+                removedInstructions_.push_back(inst);
             }
         }
     }
 
     void CheckBlocksDisconnected()
     {
-        for (const auto &block : disconnected_blocks_) {
+        for (const auto &block : disconnectedBlocks_) {
             EXPECT_TRUE(block->GetGraph() == nullptr);
             EXPECT_TRUE(block->IsEmpty());
             EXPECT_EQ(block->GetSuccsBlocks().size(), 0U);
@@ -72,8 +72,8 @@ protected:
     }
 
 private:
-    std::vector<BasicBlock *> disconnected_blocks_;
-    std::vector<Inst *> removed_instructions_;
+    std::vector<BasicBlock *> disconnectedBlocks_;
+    std::vector<Inst *> removedInstructions_;
 };
 
 /*
@@ -132,9 +132,9 @@ void BranchEliminationTest::BuildTestGraph(Graph *graph)
     }
 
     BB(CONST_CONDITION_BLOCK_ID).SetTry(true);
-    auto inst_if = BB(CONST_CONDITION_BLOCK_ID).GetLastInst();
-    ASSERT_TRUE(inst_if->GetOpcode() == Opcode::IfImm);
-    inst_if->SetInput(0U, &INS(3U));
+    auto instIf = BB(CONST_CONDITION_BLOCK_ID).GetLastInst();
+    ASSERT_TRUE(instIf->GetOpcode() == Opcode::IfImm);
+    instIf->SetInput(0U, &INS(3U));
 
     if constexpr (SWAP_CC == SwapCC::TRUE) {
         INS(4U).CastToIfImm()->SetCc(CC_EQ);
@@ -198,9 +198,9 @@ void BranchEliminationTest::BuildTestGraph2(Graph *graph)
             INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
-    auto inst_if = BB(CONST_CONDITION_BLOCK_ID).GetLastInst();
-    ASSERT_TRUE(inst_if->GetOpcode() == Opcode::IfImm);
-    inst_if->SetInput(0U, &INS(3U));
+    auto instIf = BB(CONST_CONDITION_BLOCK_ID).GetLastInst();
+    ASSERT_TRUE(instIf->GetOpcode() == Opcode::IfImm);
+    instIf->SetInput(0U, &INS(3U));
 }
 
 /*
@@ -766,8 +766,8 @@ TEST_F(BranchEliminationTest, RemoveEdgeToLoop)
     GetGraph()->RunPass<BranchElimination>();
     GetGraph()->RunPass<Cleanup>();
 
-    auto expected_graph = CreateEmptyGraph();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateEmptyGraph();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).u64();
         BASIC_BLOCK(2U, -1L)
@@ -776,7 +776,7 @@ TEST_F(BranchEliminationTest, RemoveEdgeToLoop)
         }
     }
 
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
 /*
@@ -793,7 +793,7 @@ TEST_F(BranchEliminationTest, RemoveEdgeToLoop)
  *      [exit]<-------------/
  */
 template <DominantCondResult DOM_RESULT, SwapInputs SWAP_INPUTS>
-void BranchEliminationTest::BuildContitionsCheckGraph(Graph *graph, ConditionCode dominant_code, ConditionCode code)
+void BranchEliminationTest::BuildContitionsCheckGraph(Graph *graph, ConditionCode dominantCode, ConditionCode code)
 {
     GRAPH(graph)
     {
@@ -803,7 +803,7 @@ void BranchEliminationTest::BuildContitionsCheckGraph(Graph *graph, ConditionCod
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(19U, Opcode::Compare).b().CC(dominant_code).Inputs(0U, 1U);
+            INST(19U, Opcode::Compare).b().CC(dominantCode).Inputs(0U, 1U);
             INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
         BASIC_BLOCK(3U, 7U)
@@ -854,7 +854,7 @@ void BranchEliminationTest::BuildContitionsCheckGraph(Graph *graph, ConditionCod
  *      [exit]<-------/
  */
 template <DominantCondResult DOM_RESULT, SwapInputs SWAP_INPUTS>
-void BranchEliminationTest::BuildContitionsCheckGraphElimFalseSucc(Graph *graph, ConditionCode dominant_code,
+void BranchEliminationTest::BuildContitionsCheckGraphElimFalseSucc(Graph *graph, ConditionCode dominantCode,
                                                                    ConditionCode code)
 {
     GRAPH(graph)
@@ -865,7 +865,7 @@ void BranchEliminationTest::BuildContitionsCheckGraphElimFalseSucc(Graph *graph,
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(19U, Opcode::Compare).b().CC(dominant_code).Inputs(0U, 1U);
+            INST(19U, Opcode::Compare).b().CC(dominantCode).Inputs(0U, 1U);
             INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
         BASIC_BLOCK(3U, 7U)
@@ -910,7 +910,7 @@ void BranchEliminationTest::BuildContitionsCheckGraphElimFalseSucc(Graph *graph,
  *      [exit]<-------------/
  */
 template <DominantCondResult DOM_RESULT, SwapInputs SWAP_INPUTS>
-void BranchEliminationTest::BuildContitionsCheckGraphElimTrueSucc(Graph *graph, ConditionCode dominant_code,
+void BranchEliminationTest::BuildContitionsCheckGraphElimTrueSucc(Graph *graph, ConditionCode dominantCode,
                                                                   ConditionCode code)
 {
     GRAPH(graph)
@@ -921,7 +921,7 @@ void BranchEliminationTest::BuildContitionsCheckGraphElimTrueSucc(Graph *graph, 
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(19U, Opcode::Compare).b().CC(dominant_code).Inputs(0U, 1U);
+            INST(19U, Opcode::Compare).b().CC(dominantCode).Inputs(0U, 1U);
             INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
         }
         BASIC_BLOCK(3U, 7U)
@@ -953,21 +953,21 @@ void BranchEliminationTest::BuildContitionsCheckGraphElimTrueSucc(Graph *graph, 
 }
 
 template <DominantCondResult DOM_RESULT, RemainedSuccessor REMAINED_SUCC, SwapInputs SWAP_INPUTS>
-void BranchEliminationTest::BuildGraphAndCheckElimination(ConditionCode dominant_code, ConditionCode code)
+void BranchEliminationTest::BuildGraphAndCheckElimination(ConditionCode dominantCode, ConditionCode code)
 {
     auto graph = CreateEmptyGraph();
-    BuildContitionsCheckGraph<DOM_RESULT, SWAP_INPUTS>(graph, dominant_code, code);
-    auto expected_graph = CreateEmptyGraph();
+    BuildContitionsCheckGraph<DOM_RESULT, SWAP_INPUTS>(graph, dominantCode, code);
+    auto expectedGraph = CreateEmptyGraph();
     if constexpr (REMAINED_SUCC == RemainedSuccessor::FALSE_SUCCESSOR) {
-        BuildContitionsCheckGraphElimTrueSucc<DOM_RESULT, SWAP_INPUTS>(expected_graph, dominant_code, code);
+        BuildContitionsCheckGraphElimTrueSucc<DOM_RESULT, SWAP_INPUTS>(expectedGraph, dominantCode, code);
     } else if constexpr (REMAINED_SUCC == RemainedSuccessor::TRUE_SUCCESSOR) {
-        BuildContitionsCheckGraphElimFalseSucc<DOM_RESULT, SWAP_INPUTS>(expected_graph, dominant_code, code);
+        BuildContitionsCheckGraphElimFalseSucc<DOM_RESULT, SWAP_INPUTS>(expectedGraph, dominantCode, code);
     } else {
-        BuildContitionsCheckGraph<DOM_RESULT, SWAP_INPUTS>(expected_graph, dominant_code, code);
+        BuildContitionsCheckGraph<DOM_RESULT, SWAP_INPUTS>(expectedGraph, dominantCode, code);
     }
 
     graph->RunPass<BranchElimination>();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(BranchEliminationTest, EliminateByDominatedCondition)
@@ -1197,8 +1197,8 @@ TEST_F(BranchEliminationTest, CascadeElimination)
     graph->RunPass<BranchElimination>();
     graph->RunPass<Cleanup>();
 
-    auto expected_graph = CreateEmptyGraph();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateEmptyGraph();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -1223,7 +1223,7 @@ TEST_F(BranchEliminationTest, CascadeElimination)
             INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 
     /*
      * Case 2
@@ -1257,8 +1257,8 @@ TEST_F(BranchEliminationTest, CascadeElimination)
      *      [exit]<-------/
      *
      */
-    auto graph_case2 = CreateEmptyGraph();
-    GRAPH(graph_case2)
+    auto graphCase2 = CreateEmptyGraph();
+    GRAPH(graphCase2)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -1301,11 +1301,11 @@ TEST_F(BranchEliminationTest, CascadeElimination)
             INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
-    graph_case2->RunPass<BranchElimination>();
-    graph_case2->RunPass<Cleanup>();
+    graphCase2->RunPass<BranchElimination>();
+    graphCase2->RunPass<Cleanup>();
 
-    auto expected_graph2 = CreateEmptyGraph();
-    GRAPH(expected_graph2)
+    auto expectedGraph2 = CreateEmptyGraph();
+    GRAPH(expectedGraph2)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -1330,7 +1330,7 @@ TEST_F(BranchEliminationTest, CascadeElimination)
             INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph_case2, expected_graph2));
+    ASSERT_TRUE(GraphComparator().Compare(graphCase2, expectedGraph2));
 }
 
 TEST_F(BranchEliminationTest, ConditionEliminationNotApplied)
@@ -1536,8 +1536,8 @@ TEST_F(BranchEliminationTest, CreateInfiniteLoop)
     graph->RunPass<BranchElimination>();
     ASSERT_FALSE(graph->HasEndBlock());
 
-    auto expected_graph = CreateEmptyGraph();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateEmptyGraph();
+    GRAPH(expectedGraph)
     {
         CONSTANT(1U, 1U);
         BASIC_BLOCK(2U, 3U)
@@ -1547,7 +1547,7 @@ TEST_F(BranchEliminationTest, CreateInfiniteLoop)
         {  // infinite loop
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 /**
@@ -1616,8 +1616,8 @@ TEST_F(BranchEliminationTest, CompareAndIfNotSameBlock)
     graph->RunPass<BranchElimination>();
     graph->RunPass<Cleanup>();
 
-    auto expected_graph = CreateEmptyGraph();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateEmptyGraph();
+    GRAPH(expectedGraph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -1656,7 +1656,7 @@ TEST_F(BranchEliminationTest, CompareAndIfNotSameBlock)
             INST(19U, Opcode::Return).u64().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
 TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
@@ -1705,8 +1705,8 @@ TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
     graph->RunPass<BranchElimination>();
     graph->RunPass<Cleanup>();
 
-    auto expected_graph = CreateEmptyGraph();
-    GRAPH(expected_graph)
+    auto expectedGraph = CreateEmptyGraph();
+    GRAPH(expectedGraph)
     {
         CONSTANT(0U, 0U);
         BASIC_BLOCK(2U, -1L)
@@ -1714,7 +1714,7 @@ TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
             INST(21U, Opcode::Return).s64().Inputs(0U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expected_graph));
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 // NOLINTEND(readability-magic-numbers)
 

@@ -80,7 +80,7 @@ protected:
      * @param task sended gc workers task
      * @param worker_data specific data for one worker if needed
      */
-    void RunGCWorkersTask(GCWorkersTask *task, void *worker_data = nullptr);
+    void RunGCWorkersTask(GCWorkersTask *task, void *workerData = nullptr);
 
 private:
     // Wait for all sended tasks, time in ms
@@ -90,23 +90,23 @@ private:
 
     ALWAYS_INLINE void ResetTasks()
     {
-        solved_tasks_ = 0U;
-        sended_tasks_ = 0U;
-        solved_tasks_snapshot_ = 0U;
+        solvedTasks_ = 0U;
+        sendedTasks_ = 0U;
+        solvedTasksSnapshot_ = 0U;
     }
 
     GC *gc_ {nullptr};
 
-    os::memory::Mutex all_solved_tasks_cond_var_lock_;
+    os::memory::Mutex allSolvedTasksCondVarLock_;
     /**
      * @brief Conditional varible is used for waiting for all gc tasks at some point
      * @see WaitUntilTasksEnd
      * @see IncreaseSolvedTasks
      */
-    os::memory::ConditionVariable all_solved_tasks_cond_var_ GUARDED_BY(all_solved_tasks_cond_var_lock_);
-    std::atomic_size_t solved_tasks_snapshot_ {0U};
-    std::atomic_size_t solved_tasks_ {0U};
-    std::atomic_size_t sended_tasks_ {0U};
+    os::memory::ConditionVariable allSolvedTasksCondVar_ GUARDED_BY(allSolvedTasksCondVarLock_);
+    std::atomic_size_t solvedTasksSnapshot_ {0U};
+    std::atomic_size_t solvedTasks_ {0U};
+    std::atomic_size_t sendedTasks_ {0U};
 };
 
 }  // namespace panda::mem

@@ -30,21 +30,21 @@ public:
     static EtsVoid *GetInstance()
     {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        EtsClassLinker *class_linker = coro->GetPandaVM()->GetClassLinker();
-        EtsClass *void_class = class_linker->GetVoidClass();
-        ASSERT(void_class->IsInitialized());  // do not trigger gc!
+        EtsClassLinker *classLinker = coro->GetPandaVM()->GetClassLinker();
+        EtsClass *voidClass = classLinker->GetVoidClass();
+        ASSERT(voidClass->IsInitialized());  // do not trigger gc!
 
-        EtsField *instance_field = void_class->GetStaticFieldIDByName("void_instance");
-        return reinterpret_cast<EtsVoid *>(void_class->GetStaticFieldObject(instance_field));
+        EtsField *instanceField = voidClass->GetStaticFieldIDByName("void_instance");
+        return reinterpret_cast<EtsVoid *>(voidClass->GetStaticFieldObject(instanceField));
     }
 
     static void Initialize()
     {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        EtsClassLinker *class_linker = coro->GetPandaVM()->GetClassLinker();
-        EtsClass *void_class = class_linker->GetVoidClass();
-        if (!void_class->IsInitialized()) {
-            class_linker->InitializeClass(coro, void_class);
+        EtsClassLinker *classLinker = coro->GetPandaVM()->GetClassLinker();
+        EtsClass *voidClass = classLinker->GetVoidClass();
+        if (!voidClass->IsInitialized()) {
+            classLinker->InitializeClass(coro, voidClass);
         }
     }
 

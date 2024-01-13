@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "util/optional_ref.h"
 
 #include "util/tests/verifier_test.h"
@@ -26,15 +27,15 @@ TEST_F(VerifierTest, invalid_ref)
     int a = 2;
     OptionalRef<int> ref1 {a};
     OptionalConstRef<int> ref2 {a};
-    OptionalRef<int> inv_ref1;
-    OptionalRef<int> inv_ref12 = {};
+    OptionalRef<int> invRef1;
+    OptionalRef<int> invRef12 = {};
 
     ASSERT_TRUE(ref1.HasRef());
     ASSERT_TRUE(ref2.HasRef());
-    EXPECT_EQ(ref1.Get(), 2);
-    EXPECT_EQ(ref2.Get(), 2);
-    EXPECT_TRUE(!inv_ref1.HasRef());
-    EXPECT_TRUE(!inv_ref12.HasRef());
+    EXPECT_EQ(ref1.Get(), 2_I);
+    EXPECT_EQ(ref2.Get(), 2_I);
+    EXPECT_TRUE(!invRef1.HasRef());
+    EXPECT_TRUE(!invRef12.HasRef());
 }
 
 }  // namespace panda::verifier::test

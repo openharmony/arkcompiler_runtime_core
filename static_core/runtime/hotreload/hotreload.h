@@ -28,11 +28,11 @@ namespace panda::hotreload {
 
 struct ClassContainment {
     const panda_file::File *pf;
-    panda_file::File::EntityId class_id;
-    const std::string class_name_;
-    Class *loaded_class;
-    Class *tmp_class;
-    uint32_t f_changes;
+    panda_file::File::EntityId classId;
+    const std::string className_;
+    Class *loadedClass;
+    Class *tmpClass;
+    uint32_t fChanges;
 };
 
 enum class Error {
@@ -93,18 +93,18 @@ protected:
     virtual void LangSpecificHotreloadPart() = 0;
 
     Error ValidateClassesHotreloadPossibility();
-    Error ValidateClassForHotreload(const ClassContainment &h_cls);
-    Type RecognizeHotreloadType(ClassContainment *h_cls);
+    Error ValidateClassForHotreload(const ClassContainment &hCls);
+    Type RecognizeHotreloadType(ClassContainment *hCls);
 
-    Type InheritanceChangesCheck(ClassContainment *h_cls);
-    Type FlagsChangesCheck(ClassContainment *h_cls);
-    Type FieldChangesCheck(ClassContainment *h_cls);
-    Type MethodChangesCheck(ClassContainment *h_cls);
+    Type InheritanceChangesCheck(ClassContainment *hCls);
+    Type FlagsChangesCheck(ClassContainment *hCls);
+    Type FieldChangesCheck(ClassContainment *hCls);
+    Type MethodChangesCheck(ClassContainment *hCls);
 
-    void ReloadClassNormal(const ClassContainment *h_cls);
-    void UpdateVtablesInRuntimeClasses(ClassLinker *class_linker);
-    void AddLoadedPandaFilesToRuntime(ClassLinker *class_linker);
-    void AddObsoleteClassesToRuntime(ClassLinker *class_linker);
+    void ReloadClassNormal(const ClassContainment *hCls);
+    void UpdateVtablesInRuntimeClasses(ClassLinker *classLinker);
+    void AddLoadedPandaFilesToRuntime(ClassLinker *classLinker);
+    void AddObsoleteClassesToRuntime(ClassLinker *classLinker);
 
     using FieldIdTable = PandaUnorderedMap<panda_file::File::EntityId, panda_file::File::EntityId>;
 
@@ -112,10 +112,10 @@ protected:
     ManagedThread *thread_;                  // NOLINT(misc-non-private-member-variables-in-classes)
     PandaVector<ClassContainment> classes_;  // NOLINT(misc-non-private-member-variables-in-classes)
     PandaVector<std::unique_ptr<const panda_file::File>>
-        panda_files_;                                         // NOLINT(misc-non-private-member-variables-in-classes)
-    PandaUnorderedMap<Method *, Method *> methods_table_;     // NOLINT(misc-non-private-member-variables-in-classes)
-    PandaUnorderedMap<Class *, FieldIdTable> fields_tables_;  // NOLINT(misc-non-private-member-variables-in-classes)
-    PandaUnorderedSet<Class *> reloaded_classes_;             // NOLINT(misc-non-private-member-variables-in-classes)
+        pandaFiles_;                                         // NOLINT(misc-non-private-member-variables-in-classes)
+    PandaUnorderedMap<Method *, Method *> methodsTable_;     // NOLINT(misc-non-private-member-variables-in-classes)
+    PandaUnorderedMap<Class *, FieldIdTable> fieldsTables_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    PandaUnorderedSet<Class *> reloadedClasses_;             // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 }  // namespace panda::hotreload

@@ -19,7 +19,7 @@
 
 namespace panda::compiler {
 
-ArenaString IdToString(uint32_t id, ArenaAllocator *allocator, bool v_reg = false, bool is_phi = false);
+ArenaString IdToString(uint32_t id, ArenaAllocator *allocator, bool vReg = false, bool isPhi = false);
 
 ArenaString InstId(const Inst *inst, ArenaAllocator *allocator);
 

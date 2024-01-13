@@ -33,9 +33,9 @@ AssemblyPrinter<aarch32::Aarch32Encoder>::AssemblyPrinter(ArenaAllocator *aa, aa
 }
 
 template <>
-void AssemblyPrinter<aarch32::Aarch32Encoder>::MakeCall(const void *entry_point)
+void AssemblyPrinter<aarch32::Aarch32Encoder>::MakeCall(const void *entryPoint)
 {
-    *str_ << "blx " << std::hex << entry_point << "\n";
+    *str_ << "blx " << std::hex << entryPoint << "\n";
 }
 #endif
 
@@ -55,9 +55,9 @@ AssemblyPrinter<aarch64::Aarch64Encoder>::AssemblyPrinter(ArenaAllocator *aa, aa
     labels_ = aa->template New<PrinterLabelHolder<AssemblyPrinter<aarch64::Aarch64Encoder>>>(this);
 }
 template <>
-void AssemblyPrinter<aarch64::Aarch64Encoder>::MakeCall(const void *entry_point)
+void AssemblyPrinter<aarch64::Aarch64Encoder>::MakeCall(const void *entryPoint)
 {
-    *str_ << "bl " << std::hex << entry_point << "\n";
+    *str_ << "bl " << std::hex << entryPoint << "\n";
 }
 #endif
 
@@ -77,9 +77,9 @@ AssemblyPrinter<amd64::Amd64Encoder>::AssemblyPrinter(ArenaAllocator *aa, amd64:
     labels_ = aa->template New<PrinterLabelHolder<AssemblyPrinter<amd64::Amd64Encoder>>>(this);
 }
 template <>
-void AssemblyPrinter<amd64::Amd64Encoder>::MakeCall(const void *entry_point)
+void AssemblyPrinter<amd64::Amd64Encoder>::MakeCall(const void *entryPoint)
 {
-    *str_ << "callq " << std::hex << entry_point << "@plt\n";
+    *str_ << "callq " << std::hex << entryPoint << "@plt\n";
 }
 #endif
 }  // namespace panda::compiler

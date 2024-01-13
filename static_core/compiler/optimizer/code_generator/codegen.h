@@ -97,15 +97,15 @@ public:
     }
     ArenaAllocator *GetLocalAllocator() const
     {
-        return local_allocator_;
+        return localAllocator_;
     }
     FrameInfo *GetFrameInfo() const
     {
-        return frame_info_;
+        return frameInfo_;
     }
-    void SetFrameInfo(FrameInfo *frame_info)
+    void SetFrameInfo(FrameInfo *frameInfo)
     {
-        frame_info_ = frame_info;
+        frameInfo_ = frameInfo;
     }
     virtual void CreateFrameInfo();
 
@@ -133,30 +133,30 @@ public:
 
     LabelHolder::LabelId GetLabelEntry() const
     {
-        return label_entry_;
+        return labelEntry_;
     }
 
     LabelHolder::LabelId GetLabelExit() const
     {
-        return label_exit_;
+        return labelExit_;
     }
 
     RuntimeInterface::MethodId GetMethodId()
     {
-        return method_id_;
+        return methodId_;
     }
 
     void SetStartCodeOffset(size_t offset)
     {
-        start_code_offset_ = offset;
+        startCodeOffset_ = offset;
     }
 
     size_t GetStartCodeOffset() const
     {
-        return start_code_offset_;
+        return startCodeOffset_;
     }
 
-    void Convert(ArenaVector<Reg> *regs_usage, const ArenaVector<bool> *mask, TypeInfo type_info);
+    void Convert(ArenaVector<Reg> *regsUsage, const ArenaVector<bool> *mask, TypeInfo typeInfo);
 
     Reg ConvertRegister(Register ref, DataType::Type type = DataType::Type::INT64);
 
@@ -187,17 +187,17 @@ public:
 
     CodeInfoBuilder *GetCodeBuilder() const
     {
-        return code_builder_;
+        return codeBuilder_;
     }
 
     void CreateStackMap(Inst *inst, Inst *user = nullptr);
 
-    void CreateStackMapRec(SaveStateInst *save_state, bool require_vreg_map, Inst *target_site);
-    void CreateVRegMap(SaveStateInst *save_state, size_t vregs_count, Inst *target_site);
+    void CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, Inst *targetSite);
+    void CreateVRegMap(SaveStateInst *saveState, size_t vregsCount, Inst *targetSite);
     void CreateVreg(const Location &location, Inst *inst, const VirtualRegister &vreg);
-    void FillVregIndices(SaveStateInst *save_state);
+    void FillVregIndices(SaveStateInst *saveState);
 
-    void CreateOsrEntry(SaveStateInst *save_state);
+    void CreateOsrEntry(SaveStateInst *saveState);
 
     void CreateVRegForRegister(const Location &location, Inst *inst, const VirtualRegister &vreg);
 
@@ -205,12 +205,12 @@ public:
     template <bool LIVE_INPUTS = false>
     std::pair<RegMask, VRegMask> GetLiveRegisters(Inst *inst)
     {
-        RegMask live_regs;
-        VRegMask live_fp_regs;
-        if (!OPTIONS.IsCompilerSaveOnlyLiveRegisters() || inst == nullptr) {
-            live_regs.set();
-            live_fp_regs.set();
-            return {live_regs, live_fp_regs};
+        RegMask liveRegs;
+        VRegMask liveFpRegs;
+        if (!g_options.IsCompilerSaveOnlyLiveRegisters() || inst == nullptr) {
+            liveRegs.set();
+            liveFpRegs.set();
+            return {liveRegs, liveFpRegs};
         }
         // Run LiveRegisters pass only if it is actually required
         if (!GetGraph()->IsAnalysisValid<LiveRegisters>()) {
@@ -219,31 +219,31 @@ public:
 
         // Add registers from intervals that are live at inst's definition
         auto &lr = GetGraph()->GetAnalysis<LiveRegisters>();
-        lr.VisitIntervalsWithLiveRegisters<LIVE_INPUTS>(inst, [&live_regs, &live_fp_regs, this](const auto &li) {
+        lr.VisitIntervalsWithLiveRegisters<LIVE_INPUTS>(inst, [&liveRegs, &liveFpRegs, this](const auto &li) {
             auto reg = ConvertRegister(li->GetReg(), li->GetType());
-            GetEncoder()->SetRegister(&live_regs, &live_fp_regs, reg);
+            GetEncoder()->SetRegister(&liveRegs, &liveFpRegs, reg);
         });
 
         // Add live temp registers
-        live_regs |= GetEncoder()->GetLiveTmpRegMask();
-        live_fp_regs |= GetEncoder()->GetLiveTmpFpRegMask();
+        liveRegs |= GetEncoder()->GetLiveTmpRegMask();
+        liveFpRegs |= GetEncoder()->GetLiveTmpFpRegMask();
 
-        return {live_regs, live_fp_regs};
+        return {liveRegs, liveFpRegs};
     }
 
     // Limits live register set to a number of registers used to pass parameters to the runtime or fastpath call:
     // 1) these ones are saved/restored by caller
     // 2) the remaining ones are saved/restored by the bridge function (aarch only) or by fastpath prologue/epilogue
-    void FillOnlyParameters(RegMask *live_regs, uint32_t num_params, bool is_fastpath) const;
+    void FillOnlyParameters(RegMask *liveRegs, uint32_t numParams, bool isFastpath) const;
 
     template <typename T, typename... Args>
     T *CreateSlowPath(Inst *inst, Args &&...args)
     {
         static_assert(std::is_base_of_v<SlowPathBase, T>);
         auto label = GetEncoder()->CreateLabel();
-        auto slow_path = GetLocalAllocator()->New<T>(label, inst, std::forward<Args>(args)...);
-        slow_paths_.push_back(slow_path);
-        return slow_path;
+        auto slowPath = GetLocalAllocator()->New<T>(label, inst, std::forward<Args>(args)...);
+        slowPaths_.push_back(slowPath);
+        return slowPath;
     }
 
     void EmitSlowPaths();
@@ -260,21 +260,21 @@ public:
         [[maybe_unused]] constexpr size_t MAX_PARAM_NUM = 8;
         static_assert(sizeof...(Args) <= MAX_PARAM_NUM);
         auto regfile = GetRegfile();
-        auto save_regs = regfile->GetCallerSavedRegMask();
-        save_regs.set(GetTarget().GetReturnRegId());
-        auto save_vregs = regfile->GetCallerSavedVRegMask();
-        save_vregs.set(GetTarget().GetReturnFpRegId());
+        auto saveRegs = regfile->GetCallerSavedRegMask();
+        saveRegs.set(GetTarget().GetReturnRegId());
+        auto saveVregs = regfile->GetCallerSavedVRegMask();
+        saveVregs.set(GetTarget().GetReturnFpRegId());
 
-        SaveCallerRegisters(save_regs, save_vregs, false);
+        SaveCallerRegisters(saveRegs, saveVregs, false);
         FillCallParams(std::forward<Args>(params)...);
         EmitCallRuntimeCode(nullptr, EntrypointId::TRACE);
-        LoadCallerRegisters(save_regs, save_vregs, false);
+        LoadCallerRegisters(saveRegs, saveVregs, false);
     }
 
     void CallIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId id);
 
     template <bool IS_FASTPATH, typename... Args>
-    void CallEntrypoint(Inst *inst, EntrypointId id, Reg dst_reg, RegMask preserved_regs, Args &&...params)
+    void CallEntrypoint(Inst *inst, EntrypointId id, Reg dstReg, RegMask preservedRegs, Args &&...params)
     {
         ASSERT(inst != nullptr);
         CHECK_EQ(sizeof...(Args), GetRuntime()->GetEntrypointArgsNum(id));
@@ -283,31 +283,31 @@ public:
             // params number passed from entrypoints_gen.S.erb will be inconsistent with Aarch32 ABI.
             // Thus, runtime bridges will have wrong params number (\paramsnum macro argument).
             ASSERT(EnsureParamsFitIn32Bit({params...}));
-            ASSERT(!dst_reg.IsValid() || dst_reg.GetSize() <= WORD_SIZE);
+            ASSERT(!dstReg.IsValid() || dstReg.GetSize() <= WORD_SIZE);
         }
 
         SCOPED_DISASM_STR(this, std::string("CallEntrypoint: ") + GetRuntime()->GetEntrypointName(id));
-        RegMask live_regs {preserved_regs | GetLiveRegisters(inst).first};
-        RegMask params_mask;
+        RegMask liveRegs {preservedRegs | GetLiveRegisters(inst).first};
+        RegMask paramsMask;
         if (inst->HasImplicitRuntimeCall() && !GetRuntime()->IsEntrypointNoreturn(id)) {
-            SaveRegistersForImplicitRuntime(inst, &params_mask, &live_regs);
+            SaveRegistersForImplicitRuntime(inst, &paramsMask, &liveRegs);
         }
 
         ASSERT(IS_FASTPATH == GetRuntime()->IsEntrypointFastPath(id));
-        bool ret_reg_alive {live_regs.Test(GetTarget().GetReturnRegId())};
+        bool retRegAlive {liveRegs.Test(GetTarget().GetReturnRegId())};
         // parameter regs: their initial values must be stored by the caller
         // Other caller regs stored in bridges
-        FillOnlyParameters(&live_regs, sizeof...(Args), IS_FASTPATH);
+        FillOnlyParameters(&liveRegs, sizeof...(Args), IS_FASTPATH);
 
-        if (IS_FASTPATH && ret_reg_alive && dst_reg.IsValid()) {
-            Reg ret_reg = GetTarget().GetReturnReg(dst_reg.GetType());
-            if (dst_reg.GetId() != ret_reg.GetId()) {
-                GetEncoder()->SetRegister(&live_regs, nullptr, ret_reg, true);
+        if (IS_FASTPATH && retRegAlive && dstReg.IsValid()) {
+            Reg retReg = GetTarget().GetReturnReg(dstReg.GetType());
+            if (dstReg.GetId() != retReg.GetId()) {
+                GetEncoder()->SetRegister(&liveRegs, nullptr, retReg, true);
             }
         }
 
-        GetEncoder()->SetRegister(&live_regs, nullptr, dst_reg, false);
-        SaveCallerRegisters(live_regs, VRegMask(), true);
+        GetEncoder()->SetRegister(&liveRegs, nullptr, dstReg, false);
+        SaveCallerRegisters(liveRegs, VRegMask(), true);
 
         if (sizeof...(Args) != 0) {
             FillCallParams(std::forward<Args>(params)...);
@@ -317,36 +317,36 @@ public:
         if (!EmitCallRuntimeCode(inst, id)) {
             return;
         }
-        if (dst_reg.IsValid()) {
-            ASSERT(dst_reg.IsScalar());
-            Reg ret_reg = GetTarget().GetReturnReg(dst_reg.GetType());
-            if (!IS_FASTPATH && ret_reg_alive && dst_reg.GetId() != ret_reg.GetId() &&
-                (!GetTarget().FirstParamIsReturnReg(ret_reg.GetType()) || sizeof...(Args) == 0U)) {
-                GetEncoder()->SetRegister(&live_regs, nullptr, ret_reg, true);
+        if (dstReg.IsValid()) {
+            ASSERT(dstReg.IsScalar());
+            Reg retReg = GetTarget().GetReturnReg(dstReg.GetType());
+            if (!IS_FASTPATH && retRegAlive && dstReg.GetId() != retReg.GetId() &&
+                (!GetTarget().FirstParamIsReturnReg(retReg.GetType()) || sizeof...(Args) == 0U)) {
+                GetEncoder()->SetRegister(&liveRegs, nullptr, retReg, true);
             }
 
             // We must:
             //  sign extended INT8 and INT16 to INT32
             //  zero extended UINT8 and UINT16 to UINT32
-            if (dst_reg.GetSize() < WORD_SIZE) {
-                bool is_signed = DataType::IsTypeSigned(inst->GetType());
-                GetEncoder()->EncodeCast(dst_reg.As(INT32_TYPE), is_signed, ret_reg, is_signed);
+            if (dstReg.GetSize() < WORD_SIZE) {
+                bool isSigned = DataType::IsTypeSigned(inst->GetType());
+                GetEncoder()->EncodeCast(dstReg.As(INT32_TYPE), isSigned, retReg, isSigned);
             } else {
-                GetEncoder()->EncodeMov(dst_reg, ret_reg);
+                GetEncoder()->EncodeMov(dstReg, retReg);
             }
         }
-        CallEntrypointFinalize(live_regs, params_mask, inst);
+        CallEntrypointFinalize(liveRegs, paramsMask, inst);
     }
 
-    void CallEntrypointFinalize(RegMask &live_regs, RegMask &params_mask, Inst *inst)
+    void CallEntrypointFinalize(RegMask &liveRegs, RegMask &paramsMask, Inst *inst)
     {
-        LoadCallerRegisters(live_regs, VRegMask(), true);
+        LoadCallerRegisters(liveRegs, VRegMask(), true);
 
         if (!inst->HasImplicitRuntimeCall()) {
             return;
         }
-        for (auto i = 0U; i < params_mask.size(); i++) {
-            if (params_mask.test(i)) {
+        for (auto i = 0U; i < paramsMask.size(); i++) {
+            if (paramsMask.test(i)) {
                 inst->GetSaveState()->GetRootsRegsMask().reset(i);
             }
         }
@@ -355,82 +355,81 @@ public:
     // The function is used for calling runtime functions through special bridges.
     // !NOTE Don't use the function for calling runtime without bridges(it save only parameters on stack)
     template <typename... Args>
-    void CallRuntime(Inst *inst, EntrypointId id, Reg dst_reg, RegMask preserved_regs, Args &&...params)
+    void CallRuntime(Inst *inst, EntrypointId id, Reg dstReg, RegMask preservedRegs, Args &&...params)
     {
-        CallEntrypoint<false>(inst, id, dst_reg, preserved_regs, std::forward<Args>(params)...);
+        CallEntrypoint<false>(inst, id, dstReg, preservedRegs, std::forward<Args>(params)...);
     }
 
     template <typename... Args>
-    void CallFastPath(Inst *inst, EntrypointId id, Reg dst_reg, RegMask preserved_regs, Args &&...params)
+    void CallFastPath(Inst *inst, EntrypointId id, Reg dstReg, RegMask preservedRegs, Args &&...params)
     {
-        CallEntrypoint<true>(inst, id, dst_reg, preserved_regs, std::forward<Args>(params)...);
+        CallEntrypoint<true>(inst, id, dstReg, preservedRegs, std::forward<Args>(params)...);
     }
 
     template <typename... Args>
-    void CallRuntimeWithMethod(Inst *inst, void *method, EntrypointId eid, Reg dst_reg, Args &&...params)
+    void CallRuntimeWithMethod(Inst *inst, void *method, EntrypointId eid, Reg dstReg, Args &&...params)
     {
         if (GetGraph()->IsAotMode()) {
-            ScopedTmpReg method_reg(GetEncoder());
-            LoadMethod(method_reg);
-            CallRuntime(inst, eid, dst_reg, RegMask::GetZeroMask(), method_reg, std::forward<Args>(params)...);
+            ScopedTmpReg methodReg(GetEncoder());
+            LoadMethod(methodReg);
+            CallRuntime(inst, eid, dstReg, RegMask::GetZeroMask(), methodReg, std::forward<Args>(params)...);
         } else {
             if (Is64BitsArch(GetArch())) {
-                CallRuntime(inst, eid, dst_reg, RegMask::GetZeroMask(), TypedImm(reinterpret_cast<uint64_t>(method)),
+                CallRuntime(inst, eid, dstReg, RegMask::GetZeroMask(), TypedImm(reinterpret_cast<uint64_t>(method)),
                             std::forward<Args>(params)...);
             } else {
                 // uintptr_t causes problems on host cross-jit compilation
-                CallRuntime(inst, eid, dst_reg, RegMask::GetZeroMask(), TypedImm(down_cast<uint32_t>(method)),
+                CallRuntime(inst, eid, dstReg, RegMask::GetZeroMask(), TypedImm(down_cast<uint32_t>(method)),
                             std::forward<Args>(params)...);
             }
         }
     }
 
-    void SaveRegistersForImplicitRuntime(Inst *inst, RegMask *params_mask, RegMask *mask);
+    void SaveRegistersForImplicitRuntime(Inst *inst, RegMask *paramsMask, RegMask *mask);
 
     void VisitNewArray(Inst *inst);
 
-    void LoadClassFromObject(Reg class_reg, Reg obj_reg);
+    void LoadClassFromObject(Reg classReg, Reg objReg);
     void VisitCallIndirect(CallIndirectInst *inst);
     void VisitCall(CallInst *inst);
     void CreateCallIntrinsic(IntrinsicInst *inst);
-    void CreateMultiArrayCall(CallInst *call_inst);
-    void CreateNewObjCall(NewObjectInst *new_obj);
-    void CreateNewObjCallOld(NewObjectInst *new_obj);
+    void CreateMultiArrayCall(CallInst *callInst);
+    void CreateNewObjCall(NewObjectInst *newObj);
+    void CreateNewObjCallOld(NewObjectInst *newObj);
     void CreateMonitorCall(MonitorInst *inst);
     void CreateMonitorCallOld(MonitorInst *inst);
     void CreateCheckCastInterfaceCall(Inst *inst);
-    void CreateNonDefaultInitClass(ClassInst *init_inst);
+    void CreateNonDefaultInitClass(ClassInst *initInst);
     void CheckObject(Reg reg, LabelHolder::LabelId label);
     template <bool IS_CLASS = false>
-    void CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved = {}, bool store_pair = false);
+    void CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved = {}, bool storePair = false);
     void CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2 = INVALID_REGISTER);
     void CreatePostWRBForDynamic(Inst *inst, MemRef mem, Reg reg1, Reg reg2);
-    void EncodePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object = true);
-    void CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object);
+    void EncodePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject = true);
+    void CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject);
     void CreatePostInterGenerationalBarrier(Reg base);
     // Creates call to IRtoC PostWrb Entrypoint. Offline means AOT or IRtoC compilation -> type of GC is not known. So
     // Managed Thread keeps pointer to actual IRtoC GC barriers implementation at run-time.
     void CreateOfflineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2);
     // Creates call to IRtoC PostWrb Entrypoint. Online means JIT compilation -> we know GC type.
-    void CreateOnlineIrtocPostWrbRegionTwoRegs(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object);
-    void CreateOnlineIrtocPostWrbRegionOneReg(Inst *inst, MemRef mem, Reg reg1, bool check_object);
-    void CreateOnlineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool check_object);
+    void CreateOnlineIrtocPostWrbRegionTwoRegs(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject);
+    void CreateOnlineIrtocPostWrbRegionOneReg(Inst *inst, MemRef mem, Reg reg1, bool checkObject);
+    void CreateOnlineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject);
     template <typename... Args>
-    void CallBarrier(RegMask live_regs, VRegMask live_vregs, std::variant<EntrypointId, Reg> entrypoint,
-                     Args &&...params)
+    void CallBarrier(RegMask liveRegs, VRegMask liveVregs, std::variant<EntrypointId, Reg> entrypoint, Args &&...params)
     {
-        SaveCallerRegisters(live_regs, live_vregs, true);
+        SaveCallerRegisters(liveRegs, liveVregs, true);
         FillCallParams(std::forward<Args>(params)...);
         EmitCallRuntimeCode(nullptr, entrypoint);
-        LoadCallerRegisters(live_regs, live_vregs, true);
+        LoadCallerRegisters(liveRegs, liveVregs, true);
     }
 
-    void CreateLoadClassFromPLT(Inst *inst, Reg tmp_reg, Reg dst, size_t class_id);
-    void CreateJumpToClassResolverPltShared(Inst *inst, Reg tmp_reg, RuntimeInterface::EntrypointId id);
-    void CreateLoadTLABInformation(Reg reg_tlab_start, Reg reg_tlab_size);
-    void CreateCheckForTLABWithConstSize(Inst *inst, Reg reg_tlab_start, Reg reg_tlab_size, size_t size,
+    void CreateLoadClassFromPLT(Inst *inst, Reg tmpReg, Reg dst, size_t classId);
+    void CreateJumpToClassResolverPltShared(Inst *inst, Reg tmpReg, RuntimeInterface::EntrypointId id);
+    void CreateLoadTLABInformation(Reg regTlabStart, Reg regTlabSize);
+    void CreateCheckForTLABWithConstSize(Inst *inst, Reg regTlabStart, Reg regTlabSize, size_t size,
                                          LabelHolder::LabelId label);
-    void CreateDebugRuntimeCallsForNewObject(Inst *inst, Reg reg_tlab_start, size_t alloc_size, RegMask preserved);
+    void CreateDebugRuntimeCallsForNewObject(Inst *inst, Reg regTlabStart, size_t allocSize, RegMask preserved);
     void CreateDebugRuntimeCallsForObjectClone(Inst *inst, Reg dst);
     void CallFastCreateStringFromCharArrayTlab(Inst *inst, Reg dst, Reg offset, Reg count, Reg array,
                                                std::variant<Reg, TypedImm> klass);
@@ -442,27 +441,27 @@ public:
         ASSERT(ss != nullptr &&
                (ss->GetOpcode() == Opcode::SaveState || ss->GetOpcode() == Opcode::SaveStateDeoptimize));
 
-        LabelHolder::LabelId slow_path;
+        LabelHolder::LabelId slowPath;
         if (inst->CanDeoptimize()) {
-            slow_path = CreateSlowPath<SlowPathDeoptimize>(inst, type)->GetLabel();
+            slowPath = CreateSlowPath<SlowPathDeoptimize>(inst, type)->GetLabel();
         } else {
-            slow_path = CreateSlowPath<T>(inst, id)->GetLabel();
+            slowPath = CreateSlowPath<T>(inst, id)->GetLabel();
         }
-        auto src_type = inst->GetInputType(0);
-        auto src = ConvertRegister(inst->GetSrcReg(0), src_type);
-        GetEncoder()->EncodeJump(slow_path, src, cc);
+        auto srcType = inst->GetInputType(0);
+        auto src = ConvertRegister(inst->GetSrcReg(0), srcType);
+        GetEncoder()->EncodeJump(slowPath, src, cc);
     }
 
     // The function alignment up the value from alignment_reg using tmp_reg.
-    void CreateAlignmentValue(Reg alignment_reg, Reg tmp_reg, size_t alignment);
-    void TryInsertImplicitNullCheck(Inst *inst, size_t prev_offset);
+    void CreateAlignmentValue(Reg alignmentReg, Reg tmpReg, size_t alignment);
+    void TryInsertImplicitNullCheck(Inst *inst, size_t prevOffset);
 
     const CFrameLayout &GetFrameLayout() const
     {
         return frame_layout_;
     }
 
-    bool RegisterKeepCallArgument(CallInst *call_inst, Reg reg);
+    bool RegisterKeepCallArgument(CallInst *callInst, Reg reg);
 
     void LoadMethod(Reg dst);
     void LoadFreeSlot(Reg dst);
@@ -500,8 +499,8 @@ public:
     }
 
     bool HasLiveCallerSavedRegs(Inst *inst);
-    void SaveCallerRegisters(RegMask live_regs, VRegMask live_vregs, bool adjust_regs);
-    void LoadCallerRegisters(RegMask live_regs, VRegMask live_vregs, bool adjust_regs);
+    void SaveCallerRegisters(RegMask liveRegs, VRegMask liveVregs, bool adjustRegs);
+    void LoadCallerRegisters(RegMask liveRegs, VRegMask liveVregs, bool adjustRegs);
 
     void IssueDisasm();
 
@@ -521,13 +520,13 @@ public:
 
     void AddLiveOut(const BasicBlock *bb, const Register reg)
     {
-        live_outs_[bb].Set(reg);
+        liveOuts_[bb].Set(reg);
     }
 
     RegMask GetLiveOut(const BasicBlock *bb) const
     {
-        auto it = live_outs_.find(bb);
-        return it != live_outs_.end() ? it->second : RegMask();
+        auto it = liveOuts_.find(bb);
+        return it != liveOuts_.end() ? it->second : RegMask();
     }
 
     Reg ThreadReg() const
@@ -537,7 +536,7 @@ public:
 
     static bool InstEncodedWithLibCall(const Inst *inst, Arch arch);
 
-    void EncodeDynamicCast(Inst *inst, Reg dst, bool dst_signed, Reg src);
+    void EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src);
 
     Reg ConvertInstTmpReg(const Inst *inst, DataType::Type type) const;
     Reg ConvertInstTmpReg(const Inst *inst) const;
@@ -546,8 +545,8 @@ public:
     {
         // -1 because some arch uses signed offset
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        uint64_t max_offset = 1ULL << (DataType::GetTypeSize(DataType::REFERENCE, GetArch()) - 1);
-        return offset < max_offset;
+        uint64_t maxOffset = 1ULL << (DataType::GetTypeSize(DataType::REFERENCE, GetArch()) - 1);
+        return offset < maxOffset;
     }
 
 protected:
@@ -563,11 +562,11 @@ protected:
 
     RegMask GetUsedRegs() const
     {
-        return used_regs_;
+        return usedRegs_;
     }
     RegMask GetUsedVRegs() const
     {
-        return used_vregs_;
+        return usedVregs_;
     }
 
     template <typename... Args>
@@ -575,22 +574,22 @@ protected:
 
     template <size_t IMM_ARRAY_SIZE, typename Arg, typename... Args>
     ALWAYS_INLINE inline void FillCallParamsHandleOperands(
-        ParameterInfo *param_info, SpillFillInst *reg_moves, ArenaVector<Reg> *sp_moves,
-        [[maybe_unused]] typename std::array<std::pair<Reg, Imm>, IMM_ARRAY_SIZE>::iterator imms_iter, Arg &&arg,
+        ParameterInfo *paramInfo, SpillFillInst *regMoves, ArenaVector<Reg> *spMoves,
+        [[maybe_unused]] typename std::array<std::pair<Reg, Imm>, IMM_ARRAY_SIZE>::iterator immsIter, Arg &&arg,
         Args &&...params);
 
     void EmitJump(const BasicBlock *bb);
 
     bool EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> entrypoint);
 
-    void IntfInlineCachePass(ResolveVirtualInst *resolver, Reg method_reg, Reg tmp_reg, Reg obj_reg);
+    void IntfInlineCachePass(ResolveVirtualInst *resolver, Reg methodReg, Reg tmpReg, Reg objReg);
 
     template <typename T>
     RuntimeInterface::MethodPtr GetCallerOfUnresolvedMethod(T *resolver);
 
     void EmitResolveVirtual(ResolveVirtualInst *resolver);
-    void EmitResolveUnknownVirtual(ResolveVirtualInst *resolver, Reg method_reg);
-    void EmitResolveVirtualAot(ResolveVirtualInst *resolver, Reg method_reg);
+    void EmitResolveUnknownVirtual(ResolveVirtualInst *resolver, Reg methodReg);
+    void EmitResolveVirtualAot(ResolveVirtualInst *resolver, Reg methodReg);
     void EmitCallVirtual(CallInst *call);
     void EmitCallResolvedVirtual(CallInst *call);
     void EmitCallStatic(CallInst *call);
@@ -608,7 +607,7 @@ protected:
         return Is64BitsArch(GetGraph()->GetArch()) ? SHIFT_64_BITS : SHIFT_32_BITS;
     }
 
-    void CalculateCardIndex(Reg base_reg, ScopedTmpReg *tmp, ScopedTmpReg *tmp1);
+    void CalculateCardIndex(Reg baseReg, ScopedTmpReg *tmp, ScopedTmpReg *tmp1);
     void CreateBuiltinIntrinsic(IntrinsicInst *inst);
     static constexpr int32_t NUM_OF_SRC_BUILTIN = 6;
     static constexpr uint8_t FIRST_OPERAND = 0;
@@ -621,66 +620,66 @@ protected:
     void FillBuiltin(IntrinsicInst *inst, SRCREGS src, Reg dst);
 
     template <typename Arg, typename... Args>
-    ALWAYS_INLINE inline void AddParamRegsInLiveMasksHandleArgs(ParameterInfo *param_info, RegMask *live_regs,
-                                                                VRegMask *live_vregs, Arg param, Args &&...params)
+    ALWAYS_INLINE inline void AddParamRegsInLiveMasksHandleArgs(ParameterInfo *paramInfo, RegMask *liveRegs,
+                                                                VRegMask *liveVregs, Arg param, Args &&...params)
     {
-        auto curr_dst = param_info->GetNativeParam(param.GetType());
-        if (std::holds_alternative<Reg>(curr_dst)) {
-            auto reg = std::get<Reg>(curr_dst);
+        auto currDst = paramInfo->GetNativeParam(param.GetType());
+        if (std::holds_alternative<Reg>(currDst)) {
+            auto reg = std::get<Reg>(currDst);
             if (reg.IsScalar()) {
-                live_regs->set(reg.GetId());
+                liveRegs->set(reg.GetId());
             } else {
-                live_vregs->set(reg.GetId());
+                liveVregs->set(reg.GetId());
             }
         } else {
             GetEncoder()->SetFalseResult();
             UNREACHABLE();
         }
         if constexpr (sizeof...(Args) != 0) {
-            AddParamRegsInLiveMasksHandleArgs(param_info, live_regs, live_vregs, std::forward<Args>(params)...);
+            AddParamRegsInLiveMasksHandleArgs(paramInfo, liveRegs, liveVregs, std::forward<Args>(params)...);
         }
     }
 
     template <typename... Args>
-    void AddParamRegsInLiveMasks(RegMask *live_regs, VRegMask *live_vregs, Args &&...params)
+    void AddParamRegsInLiveMasks(RegMask *liveRegs, VRegMask *liveVregs, Args &&...params)
     {
         auto callconv = GetCallingConvention();
-        auto param_info = callconv->GetParameterInfo(0);
-        AddParamRegsInLiveMasksHandleArgs(param_info, live_regs, live_vregs, std::forward<Args>(params)...);
+        auto paramInfo = callconv->GetParameterInfo(0);
+        AddParamRegsInLiveMasksHandleArgs(paramInfo, liveRegs, liveVregs, std::forward<Args>(params)...);
     }
 
     template <typename... Args>
-    void CreateStubCall(Inst *inst, RuntimeInterface::IntrinsicId intrinsic_id, Reg dst, Args &&...params)
+    void CreateStubCall(Inst *inst, RuntimeInterface::IntrinsicId intrinsicId, Reg dst, Args &&...params)
     {
-        VRegMask live_vregs;
-        RegMask live_regs;
-        AddParamRegsInLiveMasks(&live_regs, &live_vregs, params...);
+        VRegMask liveVregs;
+        RegMask liveRegs;
+        AddParamRegsInLiveMasks(&liveRegs, &liveVregs, params...);
         auto enc = GetEncoder();
         {
             SCOPED_DISASM_STR(this, "Save caller saved regs");
-            SaveCallerRegisters(live_regs, live_vregs, true);
+            SaveCallerRegisters(liveRegs, liveVregs, true);
         }
 
         FillCallParams(std::forward<Args>(params)...);
-        CallIntrinsic(inst, intrinsic_id);
+        CallIntrinsic(inst, intrinsicId);
 
         if (inst->GetSaveState() != nullptr) {
             CreateStackMap(inst);
         }
 
         if (dst.IsValid()) {
-            Reg ret_val = GetTarget().GetReturnReg(dst.GetType());
-            if (dst.GetId() != ret_val.GetId()) {
-                enc->SetRegister(&live_regs, &live_vregs, ret_val, true);
+            Reg retVal = GetTarget().GetReturnReg(dst.GetType());
+            if (dst.GetId() != retVal.GetId()) {
+                enc->SetRegister(&liveRegs, &liveVregs, retVal, true);
             }
             ASSERT(dst.IsScalar());
-            enc->EncodeMov(dst, ret_val);
+            enc->EncodeMov(dst, retVal);
         }
 
         {
             SCOPED_DISASM_STR(this, "Restore caller saved regs");
-            enc->SetRegister(&live_regs, &live_vregs, dst, false);
-            LoadCallerRegisters(live_regs, live_vregs, true);
+            enc->SetRegister(&liveRegs, &liveVregs, dst, false);
+            LoadCallerRegisters(liveRegs, liveVregs, true);
         }
     }
 
@@ -713,18 +712,18 @@ protected:
 
 private:
     template <typename T>
-    void EncodeImms(const T &imms, bool skip_first_location)
+    void EncodeImms(const T &imms, bool skipFirstLocation)
     {
-        auto param_info = GetCallingConvention()->GetParameterInfo(0);
-        auto imm_type = DataType::INT32;
-        if (skip_first_location) {
-            param_info->GetNextLocation(imm_type);
+        auto paramInfo = GetCallingConvention()->GetParameterInfo(0);
+        auto immType = DataType::INT32;
+        if (skipFirstLocation) {
+            paramInfo->GetNextLocation(immType);
         }
         for (auto imm : imms) {
-            auto location = param_info->GetNextLocation(imm_type);
+            auto location = paramInfo->GetNextLocation(immType);
             ASSERT(location.IsFixedRegister());
-            auto dst_reg = ConvertRegister(location.GetValue(), imm_type);
-            GetEncoder()->EncodeMov(dst_reg, Imm(imm));
+            auto dstReg = ConvertRegister(location.GetValue(), immType);
+            GetEncoder()->EncodeMov(dstReg, Imm(imm));
         }
     }
 
@@ -735,7 +734,7 @@ private:
 
 private:
     ArenaAllocator *allocator_;
-    ArenaAllocator *local_allocator_;
+    ArenaAllocator *localAllocator_;
     // Register description
     RegistersDescription *regfile_;
     // Encoder implementation
@@ -746,41 +745,41 @@ private:
     // Visitor for instructions
     GraphVisitor *visitor_ {};
 
-    CodeInfoBuilder *code_builder_ {nullptr};
+    CodeInfoBuilder *codeBuilder_ {nullptr};
 
-    ArenaVector<SlowPathBase *> slow_paths_;
-    ArenaUnorderedMap<RuntimeInterface::EntrypointId, SlowPathShared *> slow_paths_map_;
+    ArenaVector<SlowPathBase *> slowPaths_;
+    ArenaUnorderedMap<RuntimeInterface::EntrypointId, SlowPathShared *> slowPathsMap_;
 
     const CFrameLayout frame_layout_;  // NOLINT(readability-identifier-naming)
 
-    ArenaVector<OsrEntryStub *> osr_entries_;
+    ArenaVector<OsrEntryStub *> osrEntries_;
 
-    RuntimeInterface::MethodId method_id_ {INVALID_ID};
+    RuntimeInterface::MethodId methodId_ {INVALID_ID};
 
-    size_t start_code_offset_ {0};
+    size_t startCodeOffset_ {0};
 
-    ArenaVector<std::pair<int16_t, int16_t>> vreg_indices_;
+    ArenaVector<std::pair<int16_t, int16_t>> vregIndices_;
 
     RuntimeInterface *runtime_ {nullptr};
 
-    LabelHolder::LabelId label_entry_ {};
-    LabelHolder::LabelId label_exit_ {};
+    LabelHolder::LabelId labelEntry_ {};
+    LabelHolder::LabelId labelExit_ {};
 
-    FrameInfo *frame_info_ {nullptr};
+    FrameInfo *frameInfo_ {nullptr};
 
     const Target target_;
 
     /* Registers that have been allocated by regalloc */
-    RegMask used_regs_ {0};
-    RegMask used_vregs_ {0};
+    RegMask usedRegs_ {0};
+    RegMask usedVregs_ {0};
 
     /* Map of BasicBlock to live-out regsiters mask. It is needed in epilogue encoding to avoid overwriting of the
      * live-out registers */
-    ArenaUnorderedMap<const BasicBlock *, RegMask> live_outs_;
+    ArenaUnorderedMap<const BasicBlock *, RegMask> liveOuts_;
 
     Disassembly disasm_;
 
-    SpillFillsResolver spill_fills_resolver_;
+    SpillFillsResolver spillFillsResolver_;
 
     friend class EncodeVisitor;
     friend class BaselineCodegen;
@@ -828,7 +827,7 @@ public:
 
     // For each group of SpillFillData representing spill or fill operations and
     // sharing the same source and destination types order by stack slot number in descending order.
-    static void SortSpillFillData(ArenaVector<SpillFillData> *spill_fills);
+    static void SortSpillFillData(ArenaVector<SpillFillData> *spillFills);
     // Checks if two spill-fill operations could be coalesced into single operation over pair of arguments.
     static bool CanCombineSpillFills(SpillFillData pred, SpillFillData succ, const CFrameLayout &fl,
                                      const Graph *graph);
@@ -1127,32 +1126,32 @@ protected:
 
     // Helper functions
     static void FillUnresolvedClass(GraphVisitor *visitor, Inst *inst);
-    static void FillObjectClass(GraphVisitor *visitor, Reg tmp_reg, LabelHolder::LabelId throw_label);
-    static void FillOtherClass(GraphVisitor *visitor, Inst *inst, Reg tmp_reg, LabelHolder::LabelId throw_label);
-    static void FillArrayObjectClass(GraphVisitor *visitor, Reg tmp_reg, LabelHolder::LabelId throw_label);
-    static void FillArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmp_reg, LabelHolder::LabelId throw_label);
+    static void FillObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel);
+    static void FillOtherClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId throwLabel);
+    static void FillArrayObjectClass(GraphVisitor *visitor, Reg tmpReg, LabelHolder::LabelId throwLabel);
+    static void FillArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId throwLabel);
     static void FillInterfaceClass(GraphVisitor *visitor, Inst *inst);
 
     static void FillLoadClassUnresolved(GraphVisitor *visitor, Inst *inst);
 
-    static void FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, LabelHolder::LabelId end_label,
-                              compiler::ClassType klass_type);
+    static void FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, LabelHolder::LabelId endLabel,
+                              compiler::ClassType klassType);
 
     static void FillIsInstanceUnresolved(GraphVisitor *visitor, Inst *inst);
 
-    static void FillIsInstanceCaseObject(GraphVisitor *visitor, Inst *inst, Reg tmp_reg);
+    static void FillIsInstanceCaseObject(GraphVisitor *visitor, Inst *inst, Reg tmpReg);
 
-    static void FillIsInstanceCaseOther(GraphVisitor *visitor, Inst *inst, Reg tmp_reg, LabelHolder::LabelId end_label);
+    static void FillIsInstanceCaseOther(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId endLabel);
 
-    static void FillIsInstanceCaseArrayObject(GraphVisitor *visitor, Inst *inst, Reg tmp_reg,
-                                              LabelHolder::LabelId end_label);
+    static void FillIsInstanceCaseArrayObject(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
+                                              LabelHolder::LabelId endLabel);
 
-    static void FillIsInstanceCaseArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmp_reg,
-                                             LabelHolder::LabelId end_label);
+    static void FillIsInstanceCaseArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg,
+                                             LabelHolder::LabelId endLabel);
 
     static void FillIsInstanceCaseInterface(GraphVisitor *visitor, Inst *inst);
 
-    static void FillIsInstance(GraphVisitor *visitor, Inst *inst, Reg tmp_reg, LabelHolder::LabelId end_label);
+    static void FillIsInstance(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId endLabel);
 
 #include "optimizer/ir/visitor.inc"
 
@@ -1164,13 +1163,13 @@ private:
 
 template <size_t IMM_ARRAY_SIZE, typename Arg, typename... Args>
 ALWAYS_INLINE inline void Codegen::FillCallParamsHandleOperands(
-    ParameterInfo *param_info, SpillFillInst *reg_moves, ArenaVector<Reg> *sp_moves,
-    [[maybe_unused]] typename std::array<std::pair<Reg, Imm>, IMM_ARRAY_SIZE>::iterator imms_iter, Arg &&arg,
+    ParameterInfo *paramInfo, SpillFillInst *regMoves, ArenaVector<Reg> *spMoves,
+    [[maybe_unused]] typename std::array<std::pair<Reg, Imm>, IMM_ARRAY_SIZE>::iterator immsIter, Arg &&arg,
     Args &&...params)
 {
     Location dst;
     auto type = arg.GetType().ToDataType();
-    dst = param_info->GetNextLocation(type);
+    dst = paramInfo->GetNextLocation(type);
     if (dst.IsStackArgument()) {
         GetEncoder()->SetFalseResult();
         UNREACHABLE();  // Move to BoundaryFrame
@@ -1179,19 +1178,19 @@ ALWAYS_INLINE inline void Codegen::FillCallParamsHandleOperands(
     static_assert(std::is_same_v<std::decay_t<Arg>, TypedImm> || std::is_convertible_v<Arg, Reg>);
     if constexpr (std::is_same_v<std::decay_t<Arg>, TypedImm>) {
         auto reg = ConvertRegister(dst.GetValue(), type);
-        *imms_iter = {reg, arg.GetImm()};
-        imms_iter++;
+        *immsIter = {reg, arg.GetImm()};
+        immsIter++;
     } else {
         Reg reg(std::forward<Arg>(arg));
         if (reg == SpReg()) {
             // SP should be handled separately, since on the ARM64 target it has ID out of range
-            sp_moves->emplace_back(ConvertRegister(dst.GetValue(), type));
+            spMoves->emplace_back(ConvertRegister(dst.GetValue(), type));
         } else {
-            reg_moves->AddSpillFill(Location::MakeRegister(reg.GetId(), type), dst, type);
+            regMoves->AddSpillFill(Location::MakeRegister(reg.GetId(), type), dst, type);
         }
     }
     if constexpr (sizeof...(Args) != 0) {
-        FillCallParamsHandleOperands<IMM_ARRAY_SIZE>(param_info, reg_moves, sp_moves, imms_iter,
+        FillCallParamsHandleOperands<IMM_ARRAY_SIZE>(paramInfo, regMoves, spMoves, immsIter,
                                                      std::forward<Args>(params)...);
     }
 }
@@ -1220,27 +1219,27 @@ void Codegen::FillCallParams(Args &&...params)
         constexpr size_t IMMEDIATES_COUNT = CountParameters<Args...>().first;
         constexpr size_t REGS_COUNT = CountParameters<Args...>().second;
         // Native call - do not add reserve parameters
-        auto param_info = GetCallingConvention()->GetParameterInfo(0);
+        auto paramInfo = GetCallingConvention()->GetParameterInfo(0);
         std::array<std::pair<Reg, Imm>, IMMEDIATES_COUNT> immediates {};
-        ArenaVector<Reg> sp_moves(GetLocalAllocator()->Adapter());
-        auto reg_moves = GetGraph()->CreateInstSpillFill();
-        sp_moves.reserve(REGS_COUNT);
-        reg_moves->GetSpillFills().reserve(REGS_COUNT);
+        ArenaVector<Reg> spMoves(GetLocalAllocator()->Adapter());
+        auto regMoves = GetGraph()->CreateInstSpillFill();
+        spMoves.reserve(REGS_COUNT);
+        regMoves->GetSpillFills().reserve(REGS_COUNT);
 
-        FillCallParamsHandleOperands<IMMEDIATES_COUNT>(param_info, reg_moves, &sp_moves, immediates.begin(),
+        FillCallParamsHandleOperands<IMMEDIATES_COUNT>(paramInfo, regMoves, &spMoves, immediates.begin(),
                                                        std::forward<Args>(params)...);
 
         // Resolve registers move order and encode
-        spill_fills_resolver_.ResolveIfRequired(reg_moves);
-        SpillFillEncoder(this, reg_moves).EncodeSpillFill();
+        spillFillsResolver_.ResolveIfRequired(regMoves);
+        SpillFillEncoder(this, regMoves).EncodeSpillFill();
 
         // Encode immediates moves
-        for (auto &imm_values : immediates) {
-            GetEncoder()->EncodeMov(imm_values.first, imm_values.second);
+        for (auto &immValues : immediates) {
+            GetEncoder()->EncodeMov(immValues.first, immValues.second);
         }
 
         // Encode moves from SP reg
-        for (auto dst : sp_moves) {
+        for (auto dst : spMoves) {
             GetEncoder()->EncodeMov(dst, SpReg());
         }
     }

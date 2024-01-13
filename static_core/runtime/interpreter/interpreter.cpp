@@ -24,9 +24,9 @@
 
 namespace panda::interpreter {
 
-void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh)
+void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh)
 {
-    ExecuteImpl(thread, pc, frame, jump_to_eh);
+    ExecuteImpl(thread, pc, frame, jumpToEh);
     RESTORE_GLOBAL_REGS();
 }
 

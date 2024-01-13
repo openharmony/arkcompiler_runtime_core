@@ -58,8 +58,8 @@ public:
 
     ItemsPool(void *data, size_t size)
         : data_(reinterpret_cast<PaddedItem *>(data)),
-          data_end_(reinterpret_cast<PaddedItem *>(uintptr_t(data_) + size)),
-          current_pos_(reinterpret_cast<PaddedItem *>(data))
+          dataEnd_(reinterpret_cast<PaddedItem *>(uintptr_t(data_) + size)),
+          currentPos_(reinterpret_cast<PaddedItem *>(data))
     {
         ASSERT(data != nullptr);
         ASSERT(size % PADDED_ITEM_SIZE == 0);
@@ -68,36 +68,36 @@ public:
 
     Item *GetNextAlloc() const
     {
-        if (free_list_ != nullptr) {
-            return &free_list_->item;
+        if (freeList_ != nullptr) {
+            return &freeList_->item;
         }
-        return (current_pos_ < data_end_) ? &current_pos_->item : nullptr;
+        return (currentPos_ < dataEnd_) ? &currentPos_->item : nullptr;
     }
 
     Item *AllocItem()
     {
-        if (free_list_ != nullptr) {
-            PaddedItem *new_item = free_list_;
-            free_list_ = free_list_->next;
-            return &(new (new_item) PaddedItem())->item;
+        if (freeList_ != nullptr) {
+            PaddedItem *newItem = freeList_;
+            freeList_ = freeList_->next;
+            return &(new (newItem) PaddedItem())->item;
         }
 
-        if (UNLIKELY(current_pos_ >= data_end_)) {
+        if (UNLIKELY(currentPos_ >= dataEnd_)) {
             // Out of memory
             return nullptr;
         }
 
-        PaddedItem *new_item = current_pos_;
-        ++current_pos_;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return &(new (new_item) PaddedItem())->item;
+        PaddedItem *newItem = currentPos_;
+        ++currentPos_;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        return &(new (newItem) PaddedItem())->item;
     }
 
     void FreeItem(Item *item)
     {
-        PaddedItem *padded_item = GetPaddedItem(item);
-        padded_item->next = free_list_;
-        free_list_ = padded_item;
-        padded_item->~PaddedItem();
+        PaddedItem *paddedItem = GetPaddedItem(item);
+        paddedItem->next = freeList_;
+        freeList_ = paddedItem;
+        paddedItem->~PaddedItem();
     }
 
     // NOTE:
@@ -109,7 +109,7 @@ public:
             return false;
         }
         auto addr = uintptr_t(item);
-        return uintptr_t(data_) <= addr && addr < uintptr_t(data_end_);
+        return uintptr_t(data_) <= addr && addr < uintptr_t(dataEnd_);
     }
 
     inline uint32_t GetIndexByItem(Item *item)
@@ -117,8 +117,8 @@ public:
         ASSERT(IsValidItem(item));
         ASSERT(uintptr_t(item) % PADDED_ITEM_SIZE == 0);
 
-        PaddedItem *padded_item = GetPaddedItem(item);
-        return padded_item - data_;
+        PaddedItem *paddedItem = GetPaddedItem(item);
+        return paddedItem - data_;
     }
 
     inline Item *GetItemByIndex(uint32_t idx)
@@ -133,9 +133,9 @@ public:
 
 private:
     PaddedItem *const data_ {};
-    PaddedItem *const data_end_ {};
-    PaddedItem *current_pos_ {};
-    PaddedItem *free_list_ {};
+    PaddedItem *const dataEnd_ {};
+    PaddedItem *currentPos_ {};
+    PaddedItem *freeList_ {};
 
     friend testing::ItemsPoolTest;
 };

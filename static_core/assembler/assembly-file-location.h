@@ -21,16 +21,16 @@ namespace panda::pandasm {
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class FileLocation {
 public:
-    std::string whole_line; /* The line in which the field is defined */
-                            /*  Or line in which the field met, if the field is not defined */
-    size_t bound_left = 0;
-    size_t bound_right = 0;
-    size_t line_number = 0;
-    bool is_defined = false;
+    std::string wholeLine; /* The line in which the field is defined */
+                           /*  Or line in which the field met, if the field is not defined */
+    size_t boundLeft = 0;
+    size_t boundRight = 0;
+    size_t lineNumber = 0;
+    bool isDefined = false;
 
 public:
-    FileLocation(std::string &f_c, size_t b_l, size_t b_r, size_t l_n, bool d)
-        : whole_line(std::move(f_c)), bound_left(b_l), bound_right(b_r), line_number(l_n), is_defined(d)
+    FileLocation(std::string &fC, size_t bL, size_t bR, size_t lN, bool d)
+        : wholeLine(std::move(fC)), boundLeft(bL), boundRight(bR), lineNumber(lN), isDefined(d)
     {
     }
     ~FileLocation() = default;

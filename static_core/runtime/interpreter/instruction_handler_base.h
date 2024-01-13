@@ -101,10 +101,10 @@ public:
         static constexpr uint64_t STANDARD_DEBUG_INDENT = 5;
         LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "acc."
                                 << GetAccAsVReg<IS_DYNAMIC>().DumpVReg();
-        auto frame_handler = GetFrameHandler();
+        auto frameHandler = GetFrameHandler();
         for (size_t i = 0; i < GetFrame()->GetSize(); ++i) {
             LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "v" << i << "."
-                                    << frame_handler.GetVReg(i).DumpVReg();
+                                    << frameHandler.GetVReg(i).DumpVReg();
         }
 #endif
     }
@@ -263,9 +263,9 @@ protected:
         state_->SetInst(inst);
     }
 
-    ALWAYS_INLINE void SetDispatchTable(const void *const *dispatch_table)
+    ALWAYS_INLINE void SetDispatchTable(const void *const *dispatchTable)
     {
-        return state_->SetDispatchTable(dispatch_table);
+        return state_->SetDispatchTable(dispatchTable);
     }
 
     ALWAYS_INLINE void SaveState()
@@ -283,9 +283,9 @@ protected:
         return state_->GetOpcodeExtension();
     }
 
-    ALWAYS_INLINE void SetOpcodeExtension(uint16_t opcode_extension)
+    ALWAYS_INLINE void SetOpcodeExtension(uint16_t opcodeExtension)
     {
-        state_->SetOpcodeExtension(opcode_extension);
+        state_->SetOpcodeExtension(opcodeExtension);
     }
 
     ALWAYS_INLINE auto &GetFakeInstBuf()
@@ -312,23 +312,23 @@ protected:
     template <bool TAKEN>
     ALWAYS_INLINE void UpdateBranchStatistics()
     {
-        ProfilingData *prof_data = this->GetFrame()->GetMethod()->GetProfilingDataWithoutCheck();
-        if (prof_data != nullptr) {
+        ProfilingData *profData = this->GetFrame()->GetMethod()->GetProfilingDataWithoutCheck();
+        if (profData != nullptr) {
             auto pc = this->GetBytecodeOffset();
             if constexpr (TAKEN) {
-                prof_data->UpdateBranchTaken(pc);
+                profData->UpdateBranchTaken(pc);
             } else {
-                prof_data->UpdateBranchNotTaken(pc);
+                profData->UpdateBranchNotTaken(pc);
             }
         }
     }
 
     ALWAYS_INLINE void UpdateThrowStatistics()
     {
-        ProfilingData *prof_data = this->GetFrame()->GetMethod()->GetProfilingDataWithoutCheck();
-        if (prof_data != nullptr) {
+        ProfilingData *profData = this->GetFrame()->GetMethod()->GetProfilingDataWithoutCheck();
+        if (profData != nullptr) {
             auto pc = this->GetBytecodeOffset();
-            prof_data->UpdateThrowTaken(pc);
+            profData->UpdateThrowTaken(pc);
         }
     }
 

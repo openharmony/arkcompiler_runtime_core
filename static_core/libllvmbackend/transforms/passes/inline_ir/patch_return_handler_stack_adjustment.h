@@ -24,7 +24,7 @@ namespace panda::llvmbackend {
 
 class LLVMArkInterface;
 
-llvm::MachineFunctionPass *CreatePatchReturnHandlerStackAdjustmentPass(LLVMArkInterface *ark_interface);
+llvm::MachineFunctionPass *CreatePatchReturnHandlerStackAdjustmentPass(LLVMArkInterface *arkInterface);
 
 }  // namespace panda::llvmbackend
 

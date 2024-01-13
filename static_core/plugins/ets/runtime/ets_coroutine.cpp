@@ -26,8 +26,8 @@
 namespace panda::ets {
 
 EtsCoroutine::EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                           CoroutineContext *context, std::optional<EntrypointInfo> &&ep_info)
-    : Coroutine(id, allocator, vm, panda::panda_file::SourceLang::ETS, std::move(name), context, std::move(ep_info))
+                           CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo)
+    : Coroutine(id, allocator, vm, panda::panda_file::SourceLang::ETS, std::move(name), context, std::move(epInfo))
 {
     ASSERT(vm != nullptr);
 }
@@ -45,48 +45,48 @@ CoroutineManager *EtsCoroutine::GetCoroutineManager() const
 void EtsCoroutine::Initialize()
 {
     auto allocator = GetVM()->GetHeapManager()->GetInternalAllocator();
-    auto ets_napi_env = PandaEtsNapiEnv::Create(this, allocator);
-    if (!ets_napi_env) {
-        LOG(FATAL, RUNTIME) << "Cannot create PandaEtsNapiEnv: " << ets_napi_env.Error();
+    auto etsNapiEnv = PandaEtsNapiEnv::Create(this, allocator);
+    if (!etsNapiEnv) {
+        LOG(FATAL, RUNTIME) << "Cannot create PandaEtsNapiEnv: " << etsNapiEnv.Error();
     }
-    ets_napi_env_ = std::move(ets_napi_env.Value());
+    etsNapiEnv_ = std::move(etsNapiEnv.Value());
     // Main EtsCoroutine is Initialized before class linker and promise_class_ptr_ will be set after creating the class
     if (HasManagedEntrypoint()) {
-        promise_class_ptr_ = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();
-        undefined_obj_ = GetPandaVM()->GetUndefinedObject();
+        promiseClassPtr_ = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();
+        undefinedObj_ = GetPandaVM()->GetUndefinedObject();
     }
-    ASSERT(promise_class_ptr_ != nullptr || !HasManagedEntrypoint());
+    ASSERT(promiseClassPtr_ != nullptr || !HasManagedEntrypoint());
 
     Coroutine::Initialize();
 }
 
 void EtsCoroutine::FreeInternalMemory()
 {
-    ets_napi_env_->FreeInternalMemory();
+    etsNapiEnv_->FreeInternalMemory();
     ManagedThread::FreeInternalMemory();
 }
 
-void EtsCoroutine::RequestCompletion(Value return_value)
+void EtsCoroutine::RequestCompletion(Value returnValue)
 {
-    auto promise_ref = GetCompletionEvent()->GetPromise();
-    auto promise = reinterpret_cast<EtsPromise *>(GetVM()->GetGlobalObjectStorage()->Get(promise_ref));
+    auto promiseRef = GetCompletionEvent()->GetPromise();
+    auto promise = reinterpret_cast<EtsPromise *>(GetVM()->GetGlobalObjectStorage()->Get(promiseRef));
     if (promise != nullptr) {
         [[maybe_unused]] EtsHandleScope scope(this);
         EtsHandle<EtsPromise> hpromise(this, promise);
-        EtsObject *ret_object = nullptr;
+        EtsObject *retObject = nullptr;
         if (!HasPendingException()) {
-            panda_file::Type return_type = GetReturnType();
-            ret_object = GetReturnValueAsObject(return_type, return_value);
-            if (ret_object != nullptr) {
-                if (return_type.IsVoid()) {
+            panda_file::Type returnType = GetReturnType();
+            retObject = GetReturnValueAsObject(returnType, returnValue);
+            if (retObject != nullptr) {
+                if (returnType.IsVoid()) {
                     LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed";
-                } else if (return_type.IsPrimitive()) {
+                } else if (returnType.IsPrimitive()) {
                     LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed with return value 0x"
-                                           << std::hex << return_value.GetAs<uint64_t>();
+                                           << std::hex << returnValue.GetAs<uint64_t>();
                 } else {
                     LOG(DEBUG, COROUTINES)
                         << "Coroutine " << GetName() << " has completed with return value = ObjectPtr<"
-                        << return_value.GetAs<ObjectHeader *>() << ">";
+                        << returnValue.GetAs<ObjectHeader *>() << ">";
                 }
             }
         }
@@ -98,7 +98,7 @@ void EtsCoroutine::RequestCompletion(Value return_value)
                                   << " completed with an exception: " << exc->ClassAddr<Class>()->GetName();
             intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc));
         } else {
-            intrinsics::EtsPromiseResolve(hpromise.GetPtr(), ret_object);
+            intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject);
         }
     } else {
         LOG(DEBUG, COROUTINES)
@@ -106,7 +106,7 @@ void EtsCoroutine::RequestCompletion(Value return_value)
             << " has completed, but the associated promise has been already collected by the GC. Exception thrown: "
             << HasPendingException();
     }
-    Coroutine::RequestCompletion(return_value);
+    Coroutine::RequestCompletion(returnValue);
 }
 
 panda_file::Type EtsCoroutine::GetReturnType()
@@ -116,32 +116,32 @@ panda_file::Type EtsCoroutine::GetReturnType()
     return entrypoint->GetReturnType();
 }
 
-EtsObject *EtsCoroutine::GetReturnValueAsObject(panda_file::Type return_type, Value return_value)
+EtsObject *EtsCoroutine::GetReturnValueAsObject(panda_file::Type returnType, Value returnValue)
 {
-    switch (return_type.GetId()) {
+    switch (returnType.GetId()) {
         case panda_file::Type::TypeId::VOID:
             LOG(FATAL, COROUTINES) << "Return type 'void' is not supported yet in 'launch' instruction";
             break;
         case panda_file::Type::TypeId::U1:
-            return EtsBoxPrimitive<EtsBoolean>::Create(this, return_value.GetAs<EtsBoolean>());
+            return EtsBoxPrimitive<EtsBoolean>::Create(this, returnValue.GetAs<EtsBoolean>());
         case panda_file::Type::TypeId::I8:
-            return EtsBoxPrimitive<EtsByte>::Create(this, return_value.GetAs<EtsByte>());
+            return EtsBoxPrimitive<EtsByte>::Create(this, returnValue.GetAs<EtsByte>());
         case panda_file::Type::TypeId::I16:
-            return EtsBoxPrimitive<EtsShort>::Create(this, return_value.GetAs<EtsShort>());
+            return EtsBoxPrimitive<EtsShort>::Create(this, returnValue.GetAs<EtsShort>());
         case panda_file::Type::TypeId::U16:
-            return EtsBoxPrimitive<EtsChar>::Create(this, return_value.GetAs<EtsChar>());
+            return EtsBoxPrimitive<EtsChar>::Create(this, returnValue.GetAs<EtsChar>());
         case panda_file::Type::TypeId::I32:
-            return EtsBoxPrimitive<EtsInt>::Create(this, return_value.GetAs<EtsInt>());
+            return EtsBoxPrimitive<EtsInt>::Create(this, returnValue.GetAs<EtsInt>());
         case panda_file::Type::TypeId::F32:
-            return EtsBoxPrimitive<EtsFloat>::Create(this, return_value.GetAs<EtsFloat>());
+            return EtsBoxPrimitive<EtsFloat>::Create(this, returnValue.GetAs<EtsFloat>());
         case panda_file::Type::TypeId::F64:
-            return EtsBoxPrimitive<EtsDouble>::Create(this, return_value.GetAs<EtsDouble>());
+            return EtsBoxPrimitive<EtsDouble>::Create(this, returnValue.GetAs<EtsDouble>());
         case panda_file::Type::TypeId::I64:
-            return EtsBoxPrimitive<EtsLong>::Create(this, return_value.GetAs<EtsLong>());
+            return EtsBoxPrimitive<EtsLong>::Create(this, returnValue.GetAs<EtsLong>());
         case panda_file::Type::TypeId::REFERENCE:
-            return EtsObject::FromCoreType(return_value.GetAs<ObjectHeader *>());
+            return EtsObject::FromCoreType(returnValue.GetAs<ObjectHeader *>());
         default:
-            LOG(FATAL, COROUTINES) << "Unsupported return type: " << return_type;
+            LOG(FATAL, COROUTINES) << "Unsupported return type: " << returnType;
             break;
     }
     return nullptr;

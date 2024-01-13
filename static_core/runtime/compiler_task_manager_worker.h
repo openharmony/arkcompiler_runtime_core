@@ -31,14 +31,14 @@ public:
     static constexpr taskmanager::TaskProperties JIT_TASK_PROPERTIES {
         taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
 
-    CompilerTaskManagerWorker(mem::InternalAllocatorPtr internal_allocator, Compiler *compiler);
+    CompilerTaskManagerWorker(mem::InternalAllocatorPtr internalAllocator, Compiler *compiler);
 
     NO_COPY_SEMANTIC(CompilerTaskManagerWorker);
     NO_MOVE_SEMANTIC(CompilerTaskManagerWorker);
 
     void InitializeWorker() override
     {
-        compiler_worker_joined_ = false;
+        compilerWorkerJoined_ = false;
     }
 
     void FinalizeWorker() override
@@ -50,7 +50,7 @@ public:
 
     bool IsWorkerJoined() override
     {
-        return compiler_worker_joined_;
+        return compilerWorkerJoined_;
     }
 
     void AddTask(CompilerTask &&task) override;
@@ -58,17 +58,17 @@ public:
     ~CompilerTaskManagerWorker() override
     {
         taskmanager::TaskScheduler::GetTaskScheduler()
-            ->UnregisterAndDestroyTaskQueue<decltype(internal_allocator_->Adapter())>(compiler_task_manager_queue_);
+            ->UnregisterAndDestroyTaskQueue<decltype(internalAllocator_->Adapter())>(compilerTaskManagerQueue_);
     }
 
 private:
     void BackgroundCompileMethod(CompilerTask &&ctx);
 
-    taskmanager::TaskQueueInterface *compiler_task_manager_queue_ {nullptr};
-    os::memory::Mutex task_queue_lock_;
+    taskmanager::TaskQueueInterface *compilerTaskManagerQueue_ {nullptr};
+    os::memory::Mutex taskQueueLock_;
     // This queue is used for methods need to be compiled inside TaskScheduler without compilation_lock_.
-    PandaDeque<CompilerTask> compiler_task_deque_ GUARDED_BY(task_queue_lock_);
-    std::atomic<bool> compiler_worker_joined_ {true};
+    PandaDeque<CompilerTask> compilerTaskDeque_ GUARDED_BY(taskQueueLock_);
+    std::atomic<bool> compilerWorkerJoined_ {true};
 };
 
 }  // namespace panda

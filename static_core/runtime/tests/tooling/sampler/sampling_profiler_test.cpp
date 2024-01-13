@@ -37,8 +37,8 @@ inline std::string Separator()
 #endif
 }
 
-static const char *PROFILER_FILENAME = "profiler_result.aspt";
-static const char *PANDA_FILE_NAME = "sampling_profiler_test_ark_asm.abc";
+static const char *g_profilerFilename = "profiler_result.aspt";
+static const char *g_pandaFileName = "sampling_profiler_test_ark_asm.abc";
 static constexpr size_t TEST_CYCLE_THRESHOLD = 100;
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
@@ -54,13 +54,13 @@ public:
         options.SetRunGcInPlace(true);
         options.SetVerifyCallStack(false);
         options.SetInterpreterType("cpp");
-        auto exec_path = panda::os::file::File::GetExecutablePath();
-        std::string panda_std_lib =
-            exec_path.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
-        options.SetBootPandaFiles({panda_std_lib});
+        auto execPath = panda::os::file::File::GetExecutablePath();
+        std::string pandaStdLib =
+            execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
+        options.SetBootPandaFiles({pandaStdLib});
         Runtime::Create(options);
 
-        auto pf = panda_file::OpenPandaFileOrZip(PANDA_FILE_NAME);
+        auto pf = panda_file::OpenPandaFileOrZip(g_pandaFileName);
         Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf));
 
         thread_ = panda::MTManagedThread::GetCurrent();
@@ -74,46 +74,46 @@ public:
     void FullfillFakeSample(SampleInfo *ps)
     {
         for (uint32_t i = 0; i < SampleInfo::StackInfo::MAX_STACK_DEPTH; ++i) {
-            ps->stack_info.managed_stack[i] = {i, pf_id_};
+            ps->stackInfo.managedStack[i] = {i, pfId_};
         }
-        ps->thread_info.thread_id = GetThreadId();
-        ps->stack_info.managed_stack_size = SampleInfo::StackInfo::MAX_STACK_DEPTH;
+        ps->threadInfo.threadId = GetThreadId();
+        ps->stackInfo.managedStackSize = SampleInfo::StackInfo::MAX_STACK_DEPTH;
     }
 
     // Friend wrappers for accesing samplers private fields
-    static os::thread::NativeHandleType ExtractListenerTid(const Sampler *s_ptr)
+    static os::thread::NativeHandleType ExtractListenerTid(const Sampler *sPtr)
     {
-        return s_ptr->listener_tid_;
+        return sPtr->listenerTid_;
     }
 
-    static os::thread::NativeHandleType ExtractSamplerTid(const Sampler *s_ptr)
+    static os::thread::NativeHandleType ExtractSamplerTid(const Sampler *sPtr)
     {
-        return s_ptr->sampler_tid_;
+        return sPtr->samplerTid_;
     }
 
-    static PandaSet<os::thread::ThreadId> ExtractManagedThreads(Sampler *s_ptr)
+    static PandaSet<os::thread::ThreadId> ExtractManagedThreads(Sampler *sPtr)
     {
         // Sending a copy to avoid of datarace
-        os::memory::LockHolder holder(s_ptr->managed_threads_lock_);
-        PandaSet<os::thread::ThreadId> managed_threads_copy = s_ptr->managed_threads_;
-        return managed_threads_copy;
+        os::memory::LockHolder holder(sPtr->managedThreadsLock_);
+        PandaSet<os::thread::ThreadId> managedThreadsCopy = sPtr->managedThreads_;
+        return managedThreadsCopy;
     }
 
-    static size_t ExtractLoadedPFSize(Sampler *s_ptr)
+    static size_t ExtractLoadedPFSize(Sampler *sPtr)
     {
-        os::memory::LockHolder holder(s_ptr->loaded_pfs_lock_);
-        return s_ptr->loaded_pfs_.size();
+        os::memory::LockHolder holder(sPtr->loadedPfsLock_);
+        return sPtr->loadedPfs_.size();
     }
 
-    static std::array<int, 2> ExtractPipes(const Sampler *s_ptr)
+    static std::array<int, 2> ExtractPipes(const Sampler *sPtr)
     {
         // Sending a copy to avoid of datarace
-        return s_ptr->communicator_.listener_pipe_;
+        return sPtr->communicator_.listenerPipe_;
     }
 
-    static bool ExtractIsActive(const Sampler *s_ptr)
+    static bool ExtractIsActive(const Sampler *sPtr)
     {
-        return s_ptr->is_active_;
+        return sPtr->isActive_;
     }
 
     uint32_t GetThreadId()
@@ -123,7 +123,7 @@ public:
 
 protected:
     panda::MTManagedThread *thread_ {nullptr};
-    uintptr_t pf_id_ {0};
+    uintptr_t pfId_ {0};
     uint32_t checksum_ {0};
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
@@ -137,12 +137,12 @@ TEST_F(SamplerTest, SamplerInitTest)
     ASSERT_EQ(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), false);
 
-    ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
+    ASSERT_EQ(sp->Start(g_profilerFilename), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
 
-    ASSERT_EQ(sp->Start(PROFILER_FILENAME), false);
+    ASSERT_EQ(sp->Start(g_profilerFilename), false);
 
     sp->Stop();
     ASSERT_EQ(ExtractListenerTid(sp), 0);
@@ -150,7 +150,7 @@ TEST_F(SamplerTest, SamplerInitTest)
     ASSERT_EQ(ExtractIsActive(sp), false);
 
     // Second run
-    ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
+    ASSERT_EQ(sp->Start(g_profilerFilename), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
@@ -162,49 +162,49 @@ TEST_F(SamplerTest, SamplerInitTest)
     Sampler::Destroy(sp);
 }
 
-void RunManagedThread(std::atomic<bool> *sync_flag)
+void RunManagedThread(std::atomic<bool> *syncFlag)
 {
-    auto *m_thr =
+    auto *mThr =
         panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
-    m_thr->ManagedCodeBegin();
+    mThr->ManagedCodeBegin();
 
-    *sync_flag = true;
-    while (*sync_flag) {
+    *syncFlag = true;
+    while (*syncFlag) {
         // Calling safepoint 'cause starting profiler required to stop all managed threads
         interpreter::RuntimeInterface::Safepoint();
     }
 
-    m_thr->ManagedCodeEnd();
-    m_thr->Destroy();
+    mThr->ManagedCodeEnd();
+    mThr->Destroy();
 }
 
-void RunManagedThreadAndSaveThreadId(std::atomic<bool> *sync_flag, os::thread::ThreadId *id)
+void RunManagedThreadAndSaveThreadId(std::atomic<bool> *syncFlag, os::thread::ThreadId *id)
 {
-    auto *m_thr =
+    auto *mThr =
         panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
-    m_thr->ManagedCodeBegin();
+    mThr->ManagedCodeBegin();
 
     *id = os::thread::GetCurrentThreadId();
-    *sync_flag = true;
-    while (*sync_flag) {
+    *syncFlag = true;
+    while (*syncFlag) {
         // Calling safepoint 'cause starting profiler required to stop all managed threads
         interpreter::RuntimeInterface::Safepoint();
     }
 
-    m_thr->ManagedCodeEnd();
-    m_thr->Destroy();
+    mThr->ManagedCodeEnd();
+    mThr->Destroy();
 }
 
-void RunNativeThread(std::atomic<bool> *sync_flag)
+void RunNativeThread(std::atomic<bool> *syncFlag)
 {
-    auto *m_thr =
+    auto *mThr =
         panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
 
-    *sync_flag = true;
-    while (*sync_flag) {
+    *syncFlag = true;
+    while (*syncFlag) {
     }
 
-    m_thr->Destroy();
+    mThr->Destroy();
 }
 
 // Testing notification thread started/finished
@@ -213,7 +213,7 @@ TEST_F(SamplerTest, SamplerEventThreadNotificationTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
+    ASSERT_EQ(sp->Start(g_profilerFilename), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
@@ -221,24 +221,24 @@ TEST_F(SamplerTest, SamplerEventThreadNotificationTest)
     ASSERT_FALSE(ExtractManagedThreads(sp).empty());
     ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
 
-    std::atomic<bool> sync_flag1 = false;
-    std::atomic<bool> sync_flag2 = false;
-    std::atomic<bool> sync_flag3 = false;
-    std::thread managed_thread1(RunManagedThread, &sync_flag1);
-    std::thread managed_thread2(RunManagedThread, &sync_flag2);
-    std::thread managed_thread3(RunManagedThread, &sync_flag3);
+    std::atomic<bool> syncFlag1 = false;
+    std::atomic<bool> syncFlag2 = false;
+    std::atomic<bool> syncFlag3 = false;
+    std::thread managedThread1(RunManagedThread, &syncFlag1);
+    std::thread managedThread2(RunManagedThread, &syncFlag2);
+    std::thread managedThread3(RunManagedThread, &syncFlag3);
 
-    while (!sync_flag1 || !sync_flag2 || !sync_flag3) {
+    while (!syncFlag1 || !syncFlag2 || !syncFlag3) {
         ;
     }
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4);
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
 
-    sync_flag1 = false;
-    sync_flag2 = false;
-    sync_flag3 = false;
-    managed_thread1.join();
-    managed_thread2.join();
-    managed_thread3.join();
+    syncFlag1 = false;
+    syncFlag2 = false;
+    syncFlag3 = false;
+    managedThread1.join();
+    managedThread2.join();
+    managedThread3.join();
 
     ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
 
@@ -255,33 +255,33 @@ TEST_F(SamplerTest, SamplerCheckThreadIdTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
+    ASSERT_EQ(sp->Start(g_profilerFilename), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
 
     ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
 
-    std::atomic<bool> sync_flag1 = false;
-    os::thread::ThreadId mt_id = 0;
-    std::thread managed_thread1(RunManagedThreadAndSaveThreadId, &sync_flag1, &mt_id);
+    std::atomic<bool> syncFlag1 = false;
+    os::thread::ThreadId mtId = 0;
+    std::thread managedThread1(RunManagedThreadAndSaveThreadId, &syncFlag1, &mtId);
 
-    while (!sync_flag1) {
+    while (!syncFlag1) {
         ;
     }
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 2);
-    bool is_passed = false;
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 2UL);
+    bool isPassed = false;
 
     for (const auto &elem : ExtractManagedThreads(sp)) {
-        if (elem == mt_id) {
-            is_passed = true;
+        if (elem == mtId) {
+            isPassed = true;
             break;
         }
     }
-    ASSERT_TRUE(is_passed);
+    ASSERT_TRUE(isPassed);
 
-    sync_flag1 = false;
-    managed_thread1.join();
+    syncFlag1 = false;
+    managedThread1.join();
 
     ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
 
@@ -298,30 +298,30 @@ TEST_F(SamplerTest, SamplerCollectThreadTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    std::atomic<bool> sync_flag1 = false;
-    std::atomic<bool> sync_flag2 = false;
-    std::atomic<bool> sync_flag3 = false;
-    std::thread managed_thread1(RunManagedThread, &sync_flag1);
-    std::thread managed_thread2(RunManagedThread, &sync_flag2);
-    std::thread managed_thread3(RunManagedThread, &sync_flag3);
+    std::atomic<bool> syncFlag1 = false;
+    std::atomic<bool> syncFlag2 = false;
+    std::atomic<bool> syncFlag3 = false;
+    std::thread managedThread1(RunManagedThread, &syncFlag1);
+    std::thread managedThread2(RunManagedThread, &syncFlag2);
+    std::thread managedThread3(RunManagedThread, &syncFlag3);
 
-    while (!sync_flag1 || !sync_flag2 || !sync_flag3) {
+    while (!syncFlag1 || !syncFlag2 || !syncFlag3) {
         ;
     }
 
-    ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
+    ASSERT_EQ(sp->Start(g_profilerFilename), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
 
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4);
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
 
-    sync_flag1 = false;
-    sync_flag2 = false;
-    sync_flag3 = false;
-    managed_thread1.join();
-    managed_thread2.join();
-    managed_thread3.join();
+    syncFlag1 = false;
+    syncFlag2 = false;
+    syncFlag3 = false;
+    managedThread1.join();
+    managedThread2.join();
+    managedThread3.join();
 
     ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
 
@@ -338,35 +338,35 @@ TEST_F(SamplerTest, SamplerCollectNativeThreadTest)
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
 
-    std::atomic<bool> sync_flag1 = false;
-    std::atomic<bool> sync_flag2 = false;
-    std::atomic<bool> sync_flag3 = false;
-    std::thread managed_thread1(RunManagedThread, &sync_flag1);
-    std::thread native_thread2(RunNativeThread, &sync_flag2);
+    std::atomic<bool> syncFlag1 = false;
+    std::atomic<bool> syncFlag2 = false;
+    std::atomic<bool> syncFlag3 = false;
+    std::thread managedThread1(RunManagedThread, &syncFlag1);
+    std::thread nativeThread2(RunNativeThread, &syncFlag2);
 
-    while (!sync_flag1 || !sync_flag2) {
+    while (!syncFlag1 || !syncFlag2) {
         ;
     }
 
-    ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
+    ASSERT_EQ(sp->Start(g_profilerFilename), true);
     ASSERT_NE(ExtractListenerTid(sp), 0);
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
 
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 3);
-    std::thread native_thread3(RunNativeThread, &sync_flag3);
-    while (!sync_flag3) {
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 3UL);
+    std::thread nativeThread3(RunNativeThread, &syncFlag3);
+    while (!syncFlag3) {
         ;
     }
 
-    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4);
+    ASSERT_EQ(ExtractManagedThreads(sp).size(), 4UL);
 
-    sync_flag1 = false;
-    sync_flag2 = false;
-    sync_flag3 = false;
-    managed_thread1.join();
-    native_thread2.join();
-    native_thread3.join();
+    syncFlag1 = false;
+    syncFlag2 = false;
+    syncFlag3 = false;
+    managedThread1.join();
+    nativeThread2.join();
+    nativeThread3.join();
 
     ASSERT_EQ(ExtractManagedThreads(sp).size(), 1);
 
@@ -382,7 +382,7 @@ TEST_F(SamplerTest, SamplerPipesTest)
 {
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    sp->Start(PROFILER_FILENAME);
+    sp->Start(g_profilerFilename);
 
     ASSERT_NE(ExtractPipes(sp)[ThreadCommunicator::PIPE_READ_ID], 0);
     ASSERT_NE(ExtractPipes(sp)[ThreadCommunicator::PIPE_WRITE_ID], 0);
@@ -399,7 +399,7 @@ TEST_F(SamplerTest, ProfilerRestartStressTest)
     ASSERT_NE(sp, nullptr);
 
     for (uint32_t i = 0; i < CURRENT_TEST_THRESHOLD; i++) {
-        ASSERT_EQ(sp->Start(PROFILER_FILENAME), true);
+        ASSERT_EQ(sp->Start(g_profilerFilename), true);
         sp->Stop();
     }
 
@@ -410,19 +410,19 @@ TEST_F(SamplerTest, ThreadCommunicatorTest)
 {
     ThreadCommunicator communicator;
 
-    SampleInfo sample_input;
-    SampleInfo sample_output;
-    FullfillFakeSample(&sample_input);
+    SampleInfo sampleInput;
+    SampleInfo sampleOutput;
+    FullfillFakeSample(&sampleInput);
     ASSERT_TRUE(communicator.Init());
-    ASSERT_TRUE(communicator.SendSample(sample_input));
-    ASSERT_TRUE(communicator.ReadSample(&sample_output));
-    ASSERT_EQ(sample_output, sample_input);
+    ASSERT_TRUE(communicator.SendSample(sampleInput));
+    ASSERT_TRUE(communicator.ReadSample(&sampleOutput));
+    ASSERT_EQ(sampleOutput, sampleInput);
 }
 
 static void CommunicatorStressWritterThread(const ThreadCommunicator *com, const SampleInfo &sample,
-                                            uint32_t messages_amount)
+                                            uint32_t messagesAmount)
 {
-    for (uint32_t i = 0; i < messages_amount; ++i) {
+    for (uint32_t i = 0; i < messagesAmount; ++i) {
         // If the sample write failed we retrying to send it
         if (!com->SendSample(sample)) {
             std::cerr << "Failed to send a sample" << std::endl;
@@ -436,19 +436,19 @@ TEST_F(SamplerTest, ThreadCommunicatorMultithreadTest)
     constexpr uint32_t MESSAGES_AMOUNT = TEST_CYCLE_THRESHOLD * 100;
 
     ThreadCommunicator communicator;
-    SampleInfo sample_output;
-    SampleInfo sample_input;
-    FullfillFakeSample(&sample_input);
+    SampleInfo sampleOutput;
+    SampleInfo sampleInput;
+    FullfillFakeSample(&sampleInput);
     ASSERT_TRUE(communicator.Init());
 
-    std::thread sender(CommunicatorStressWritterThread, &communicator, sample_input, MESSAGES_AMOUNT);
+    std::thread sender(CommunicatorStressWritterThread, &communicator, sampleInput, MESSAGES_AMOUNT);
     for (uint32_t i = 0; i < MESSAGES_AMOUNT; ++i) {
         // If the sample write failed we retrying to send it
-        if (!communicator.ReadSample(&sample_output)) {
+        if (!communicator.ReadSample(&sampleOutput)) {
             std::cerr << "Failed to read a sample" << std::endl;
             abort();
         }
-        ASSERT_EQ(sample_output, sample_input);
+        ASSERT_EQ(sampleOutput, sampleInput);
     }
     sender.join();
 }
@@ -456,21 +456,21 @@ TEST_F(SamplerTest, ThreadCommunicatorMultithreadTest)
 // Testing reader and writer by writing and reading from .aspt one sample
 TEST_F(SamplerTest, StreamWriterReaderTest)
 {
-    const char *stream_test_filename = "stream_writer_reader_test.aspt";
-    SampleInfo sample_output;
-    SampleInfo sample_input;
+    const char *streamTestFilename = "stream_writer_reader_test.aspt";
+    SampleInfo sampleOutput;
+    SampleInfo sampleInput;
 
     {
-        StreamWriter writer(stream_test_filename);
-        FullfillFakeSample(&sample_input);
+        StreamWriter writer(streamTestFilename);
+        FullfillFakeSample(&sampleInput);
 
-        writer.WriteSample(sample_input);
+        writer.WriteSample(sampleInput);
     }
 
-    SampleReader reader(stream_test_filename);
-    ASSERT_TRUE(reader.GetNextSample(&sample_output));
-    ASSERT_EQ(sample_output, sample_input);
-    ASSERT_FALSE(reader.GetNextSample(&sample_output));
+    SampleReader reader(streamTestFilename);
+    ASSERT_TRUE(reader.GetNextSample(&sampleOutput));
+    ASSERT_EQ(sampleOutput, sampleInput);
+    ASSERT_FALSE(reader.GetNextSample(&sampleOutput));
     ASSERT_FALSE(reader.GetNextModule(nullptr));
 }
 
@@ -478,44 +478,44 @@ TEST_F(SamplerTest, StreamWriterReaderTest)
 TEST_F(SamplerTest, StreamWriterReaderLotsSamplesTest)
 {
     constexpr size_t CURRENT_TEST_THRESHOLD = TEST_CYCLE_THRESHOLD * 100;
-    const char *stream_test_filename = "stream_writer_reader_test_lots_samples.aspt";
-    SampleInfo sample_output;
-    SampleInfo sample_input;
+    const char *streamTestFilename = "stream_writer_reader_test_lots_samples.aspt";
+    SampleInfo sampleOutput;
+    SampleInfo sampleInput;
 
     {
-        StreamWriter writer(stream_test_filename);
-        FullfillFakeSample(&sample_input);
+        StreamWriter writer(streamTestFilename);
+        FullfillFakeSample(&sampleInput);
 
         for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
-            writer.WriteSample(sample_input);
+            writer.WriteSample(sampleInput);
         }
     }
 
-    SampleReader reader(stream_test_filename);
+    SampleReader reader(streamTestFilename);
     for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
-        ASSERT_TRUE(reader.GetNextSample(&sample_output));
-        ASSERT_EQ(sample_output, sample_input);
+        ASSERT_TRUE(reader.GetNextSample(&sampleOutput));
+        ASSERT_EQ(sampleOutput, sampleInput);
     }
-    ASSERT_FALSE(reader.GetNextSample(&sample_output));
+    ASSERT_FALSE(reader.GetNextSample(&sampleOutput));
     ASSERT_FALSE(reader.GetNextModule(nullptr));
 }
 
 // Testing reader and writer by writing and reading from .aspt one module
 TEST_F(SamplerTest, ModuleWriterReaderTest)
 {
-    const char *stream_test_filename = "stream_module_test_filename.aspt";
-    FileInfo module_input = {pf_id_, checksum_, "~/folder/folder/lib/panda_file.pa"};
-    FileInfo module_output = {};
+    const char *streamTestFilename = "stream_module_test_filename.aspt";
+    FileInfo moduleInput = {pfId_, checksum_, "~/folder/folder/lib/panda_file.pa"};
+    FileInfo moduleOutput = {};
 
     {
-        StreamWriter writer(stream_test_filename);
-        writer.WriteModule(module_input);
+        StreamWriter writer(streamTestFilename);
+        writer.WriteModule(moduleInput);
     }
 
-    SampleReader reader(stream_test_filename);
-    ASSERT_TRUE(reader.GetNextModule(&module_output));
-    ASSERT_EQ(module_output, module_input);
-    ASSERT_FALSE(reader.GetNextModule(&module_output));
+    SampleReader reader(streamTestFilename);
+    ASSERT_TRUE(reader.GetNextModule(&moduleOutput));
+    ASSERT_EQ(moduleOutput, moduleInput);
+    ASSERT_FALSE(reader.GetNextModule(&moduleOutput));
     ASSERT_FALSE(reader.GetNextSample(nullptr));
 }
 
@@ -523,23 +523,23 @@ TEST_F(SamplerTest, ModuleWriterReaderTest)
 TEST_F(SamplerTest, ModuleWriterReaderLotsModulesTest)
 {
     constexpr size_t CURRENT_TEST_THRESHOLD = TEST_CYCLE_THRESHOLD * 100;
-    const char *stream_test_filename = "stream_lots_modules_test_filename.aspt";
-    FileInfo module_input = {pf_id_, checksum_, "~/folder/folder/lib/panda_file.pa"};
-    FileInfo module_output = {};
+    const char *streamTestFilename = "stream_lots_modules_test_filename.aspt";
+    FileInfo moduleInput = {pfId_, checksum_, "~/folder/folder/lib/panda_file.pa"};
+    FileInfo moduleOutput = {};
 
     {
-        StreamWriter writer(stream_test_filename);
+        StreamWriter writer(streamTestFilename);
         for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
-            writer.WriteModule(module_input);
+            writer.WriteModule(moduleInput);
         }
     }
 
-    SampleReader reader(stream_test_filename);
+    SampleReader reader(streamTestFilename);
     for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
-        ASSERT_TRUE(reader.GetNextModule(&module_output));
-        ASSERT_EQ(module_output, module_input);
+        ASSERT_TRUE(reader.GetNextModule(&moduleOutput));
+        ASSERT_EQ(moduleOutput, moduleInput);
     }
-    ASSERT_FALSE(reader.GetNextModule(&module_output));
+    ASSERT_FALSE(reader.GetNextModule(&moduleOutput));
     ASSERT_FALSE(reader.GetNextSample(nullptr));
 }
 
@@ -547,62 +547,62 @@ TEST_F(SamplerTest, ModuleWriterReaderLotsModulesTest)
 TEST_F(SamplerTest, WriterReaderLotsRowsModulesAndSamplesTest)
 {
     constexpr size_t CURRENT_TEST_THRESHOLD = TEST_CYCLE_THRESHOLD * 100;
-    const char *stream_test_filename = "stream_lots_modules_and_samples_test_filename.aspt";
-    FileInfo module_input = {pf_id_, checksum_, "~/folder/folder/lib/panda_file.pa"};
-    FileInfo module_output = {};
-    SampleInfo sample_output;
-    SampleInfo sample_input;
+    const char *streamTestFilename = "stream_lots_modules_and_samples_test_filename.aspt";
+    FileInfo moduleInput = {pfId_, checksum_, "~/folder/folder/lib/panda_file.pa"};
+    FileInfo moduleOutput = {};
+    SampleInfo sampleOutput;
+    SampleInfo sampleInput;
 
     {
-        StreamWriter writer(stream_test_filename);
-        FullfillFakeSample(&sample_input);
+        StreamWriter writer(streamTestFilename);
+        FullfillFakeSample(&sampleInput);
         for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
-            writer.WriteModule(module_input);
-            writer.WriteSample(sample_input);
+            writer.WriteModule(moduleInput);
+            writer.WriteSample(sampleInput);
         }
     }
 
-    SampleReader reader(stream_test_filename);
+    SampleReader reader(streamTestFilename);
     for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
-        ASSERT_TRUE(reader.GetNextModule(&module_output));
-        ASSERT_EQ(module_output, module_input);
+        ASSERT_TRUE(reader.GetNextModule(&moduleOutput));
+        ASSERT_EQ(moduleOutput, moduleInput);
     }
 
     for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
-        ASSERT_TRUE(reader.GetNextSample(&sample_output));
-        ASSERT_EQ(sample_output, sample_input);
+        ASSERT_TRUE(reader.GetNextSample(&sampleOutput));
+        ASSERT_EQ(sampleOutput, sampleInput);
     }
 
-    ASSERT_FALSE(reader.GetNextModule(&module_output));
-    ASSERT_FALSE(reader.GetNextSample(&sample_output));
+    ASSERT_FALSE(reader.GetNextModule(&moduleOutput));
+    ASSERT_FALSE(reader.GetNextSample(&sampleOutput));
 }
 
 // Send sample to listener and check it inside the file
 TEST_F(SamplerTest, ListenerWriteFakeSampleTest)
 {
-    const char *stream_test_filename = "listener_write_fake_sample_test.aspt";
+    const char *streamTestFilename = "listener_write_fake_sample_test.aspt";
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    ASSERT_EQ(sp->Start(stream_test_filename), true);
+    ASSERT_EQ(sp->Start(streamTestFilename), true);
 
-    SampleInfo sample_output;
-    SampleInfo sample_input;
-    FullfillFakeSample(&sample_input);
-    sp->GetCommunicator().SendSample(sample_input);
+    SampleInfo sampleOutput;
+    SampleInfo sampleInput;
+    FullfillFakeSample(&sampleInput);
+    sp->GetCommunicator().SendSample(sampleInput);
     sp->Stop();
 
     bool status = true;
-    bool is_passed = false;
-    SampleReader reader(stream_test_filename);
+    bool isPassed = false;
+    SampleReader reader(streamTestFilename);
     while (status) {
-        status = reader.GetNextSample(&sample_output);
-        if (sample_output == sample_input) {
-            is_passed = true;
+        status = reader.GetNextSample(&sampleOutput);
+        if (sampleOutput == sampleInput) {
+            isPassed = true;
             break;
         }
     }
 
-    ASSERT_TRUE(is_passed);
+    ASSERT_TRUE(isPassed);
 
     Sampler::Destroy(sp);
 }
@@ -611,33 +611,33 @@ TEST_F(SamplerTest, ListenerWriteFakeSampleTest)
 TEST_F(SamplerTest, ListenerWriteLotsFakeSampleTest)
 {
     constexpr size_t CURRENT_TEST_THRESHOLD = TEST_CYCLE_THRESHOLD * 100;
-    const char *stream_test_filename = "listener_write_lots_fake_sample_test.aspt";
+    const char *streamTestFilename = "listener_write_lots_fake_sample_test.aspt";
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    ASSERT_EQ(sp->Start(stream_test_filename), true);
+    ASSERT_EQ(sp->Start(streamTestFilename), true);
 
-    SampleInfo sample_output;
-    SampleInfo sample_input;
-    size_t sent_samples_counter = 0;
-    FullfillFakeSample(&sample_input);
+    SampleInfo sampleOutput;
+    SampleInfo sampleInput;
+    size_t sentSamplesCounter = 0;
+    FullfillFakeSample(&sampleInput);
     for (size_t i = 0; i < CURRENT_TEST_THRESHOLD; ++i) {
-        if (sp->GetCommunicator().SendSample(sample_input)) {
-            ++sent_samples_counter;
+        if (sp->GetCommunicator().SendSample(sampleInput)) {
+            ++sentSamplesCounter;
         }
     }
     sp->Stop();
 
     bool status = true;
-    size_t amount_of_samples = 0;
-    SampleReader reader(stream_test_filename);
+    size_t amountOfSamples = 0;
+    SampleReader reader(streamTestFilename);
     while (status) {
-        if (sample_output == sample_input) {
-            ++amount_of_samples;
+        if (sampleOutput == sampleInput) {
+            ++amountOfSamples;
         }
-        status = reader.GetNextSample(&sample_output);
+        status = reader.GetNextSample(&sampleOutput);
     }
 
-    ASSERT_EQ(amount_of_samples, sent_samples_counter);
+    ASSERT_EQ(amountOfSamples, sentSamplesCounter);
 
     Sampler::Destroy(sp);
 }
@@ -645,18 +645,18 @@ TEST_F(SamplerTest, ListenerWriteLotsFakeSampleTest)
 // Checking that sampler collect panda files correctly
 TEST_F(SamplerTest, CollectPandaFilesTest)
 {
-    const char *stream_test_filename = "collect_panda_file_test.aspt";
+    const char *streamTestFilename = "collect_panda_file_test.aspt";
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    ASSERT_EQ(sp->Start(stream_test_filename), true);
+    ASSERT_EQ(sp->Start(streamTestFilename), true);
     sp->Stop();
 
-    FileInfo module_info;
-    SampleReader reader(stream_test_filename);
+    FileInfo moduleInfo;
+    SampleReader reader(streamTestFilename);
     bool status = false;
-    while (reader.GetNextModule(&module_info)) {
-        auto pf_ptr = reinterpret_cast<panda_file::File *>(module_info.ptr);
-        ASSERT_EQ(pf_ptr->GetFullFileName(), module_info.pathname);
+    while (reader.GetNextModule(&moduleInfo)) {
+        auto pfPtr = reinterpret_cast<panda_file::File *>(moduleInfo.ptr);
+        ASSERT_EQ(pfPtr->GetFullFileName(), moduleInfo.pathname);
         status = true;
     }
     ASSERT_TRUE(status);
@@ -666,14 +666,14 @@ TEST_F(SamplerTest, CollectPandaFilesTest)
 // Checking that sampler collect panda files correctly
 TEST_F(SamplerTest, WriteModuleEventTest)
 {
-    const char *stream_test_filename = "collect_panda_file_test.aspt";
+    const char *streamTestFilename = "collect_panda_file_test.aspt";
     auto *sp = Sampler::Create();
     ASSERT_NE(sp, nullptr);
-    ASSERT_EQ(sp->Start(stream_test_filename), true);
+    ASSERT_EQ(sp->Start(streamTestFilename), true);
 
-    auto exec_path = panda::os::file::File::GetExecutablePath();
+    auto execPath = panda::os::file::File::GetExecutablePath();
     std::string pandafile =
-        exec_path.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
+        execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
 
     auto pf = panda_file::OpenPandaFileOrZip(pandafile);
     Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf));
@@ -684,12 +684,12 @@ TEST_F(SamplerTest, WriteModuleEventTest)
 
     sp->Stop();
 
-    FileInfo module_info;
-    SampleReader reader(stream_test_filename);
+    FileInfo moduleInfo;
+    SampleReader reader(streamTestFilename);
     bool status = false;
-    while (reader.GetNextModule(&module_info)) {
-        auto pf_ptr = reinterpret_cast<panda_file::File *>(module_info.ptr);
-        ASSERT_EQ(pf_ptr->GetFullFileName(), module_info.pathname);
+    while (reader.GetNextModule(&moduleInfo)) {
+        auto pfPtr = reinterpret_cast<panda_file::File *>(moduleInfo.ptr);
+        ASSERT_EQ(pfPtr->GetFullFileName(), moduleInfo.pathname);
         status = true;
     }
     ASSERT_TRUE(status);
@@ -700,14 +700,14 @@ TEST_F(SamplerTest, WriteModuleEventTest)
 // Sampling big pandasm program and convert it
 TEST_F(SamplerTest, ProfilerSamplerSignalHandlerTest)
 {
-    const char *stream_test_filename = "sampler_signal_handler_test.aspt";
-    const char *result_test_filename = "sampler_signal_handler_test.csv";
-    size_t sample_counter = 0;
+    const char *streamTestFilename = "sampler_signal_handler_test.aspt";
+    const char *resultTestFilename = "sampler_signal_handler_test.csv";
+    size_t sampleCounter = 0;
 
     {
         auto *sp = Sampler::Create();
         ASSERT_NE(sp, nullptr);
-        ASSERT_EQ(sp->Start(stream_test_filename), true);
+        ASSERT_EQ(sp->Start(streamTestFilename), true);
 
         {
             ASSERT_TRUE(Runtime::GetCurrent()->Execute("_GLOBAL::main", {}));
@@ -715,30 +715,30 @@ TEST_F(SamplerTest, ProfilerSamplerSignalHandlerTest)
         sp->Stop();
 
         SampleInfo sample;
-        SampleReader reader(stream_test_filename);
-        bool is_find = false;
+        SampleReader reader(streamTestFilename);
+        bool isFind = false;
 
         while (reader.GetNextSample(&sample)) {
-            ++sample_counter;
-            if (sample.stack_info.managed_stack_size == 2) {
-                is_find = true;
+            ++sampleCounter;
+            if (sample.stackInfo.managedStackSize == 2U) {
+                isFind = true;
                 continue;
             }
-            ASSERT_NE(sample.stack_info.managed_stack_size, 0);
-            ASSERT_EQ(GetThreadId(), sample.thread_info.thread_id);
+            ASSERT_NE(sample.stackInfo.managedStackSize, 0);
+            ASSERT_EQ(GetThreadId(), sample.threadInfo.threadId);
         }
 
-        ASSERT_EQ(is_find, true);
+        ASSERT_EQ(isFind, true);
 
         Sampler::Destroy(sp);
     }
 
     // Checking converter
     {
-        AsptConverter conv(stream_test_filename);
-        ASSERT_EQ(conv.CollectTracesStats(), sample_counter);
+        AsptConverter conv(streamTestFilename);
+        ASSERT_EQ(conv.CollectTracesStats(), sampleCounter);
         ASSERT_TRUE(conv.CollectModules());
-        ASSERT_TRUE(conv.DumpResolvedTracesAsCSV(result_test_filename));
+        ASSERT_TRUE(conv.DumpResolvedTracesAsCSV(resultTestFilename));
     }
 }
 

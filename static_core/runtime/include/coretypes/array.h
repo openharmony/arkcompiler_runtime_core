@@ -55,27 +55,27 @@ public:
         return reinterpret_cast<Array *>(object);
     }
 
-    PANDA_PUBLIC_API static Array *Create(panda::Class *array_class, const uint8_t *data, ArraySizeT length,
-                                          panda::SpaceType space_type = panda::SpaceType::SPACE_TYPE_OBJECT);
+    PANDA_PUBLIC_API static Array *Create(panda::Class *arrayClass, const uint8_t *data, ArraySizeT length,
+                                          panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT);
 
-    PANDA_PUBLIC_API static Array *Create(panda::Class *array_class, ArraySizeT length,
-                                          panda::SpaceType space_type = panda::SpaceType::SPACE_TYPE_OBJECT);
+    PANDA_PUBLIC_API static Array *Create(panda::Class *arrayClass, ArraySizeT length,
+                                          panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT);
 
     PANDA_PUBLIC_API static Array *Create(DynClass *dynarrayclass, ArraySizeT length,
-                                          panda::SpaceType space_type = panda::SpaceType::SPACE_TYPE_OBJECT);
+                                          panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT);
 
-    static Array *CreateTagged(const PandaVM *vm, panda::BaseClass *array_class, ArraySizeT length,
-                               panda::SpaceType space_type = panda::SpaceType::SPACE_TYPE_OBJECT,
-                               TaggedValue init_value = TaggedValue::Undefined());
+    static Array *CreateTagged(const PandaVM *vm, panda::BaseClass *arrayClass, ArraySizeT length,
+                               panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT,
+                               TaggedValue initValue = TaggedValue::Undefined());
 
-    static size_t ComputeSize(size_t elem_size, ArraySizeT length)
+    static size_t ComputeSize(size_t elemSize, ArraySizeT length)
     {
-        ASSERT(elem_size != 0);
-        size_t size = sizeof(Array) + elem_size * length;
+        ASSERT(elemSize != 0);
+        size_t size = sizeof(Array) + elemSize * length;
 #ifdef PANDA_TARGET_32
         // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
-        size_t size_limit = (std::numeric_limits<size_t>::max() - sizeof(Array)) / elem_size;
-        if (UNLIKELY(size_limit < static_cast<size_t>(length))) {
+        size_t sizeLimit = (std::numeric_limits<size_t>::max() - sizeof(Array)) / elemSize;
+        if (UNLIKELY(sizeLimit < static_cast<size_t>(length))) {
             return 0;
         }
 #endif
@@ -112,48 +112,48 @@ public:
     void SetObject(size_t offset, ObjectHeader *value);
 
     template <class T>
-    T GetPrimitive(size_t offset, std::memory_order memory_order) const;
+    T GetPrimitive(size_t offset, std::memory_order memoryOrder) const;
 
     template <class T>
-    void SetPrimitive(size_t offset, T value, std::memory_order memory_order);
+    void SetPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <bool NEED_READ_BARRIER = true, bool IS_DYN = false>
-    ObjectHeader *GetObject(size_t offset, std::memory_order memory_order) const;
+    ObjectHeader *GetObject(size_t offset, std::memory_order memoryOrder) const;
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    void SetObject(size_t offset, ObjectHeader *value, std::memory_order memory_order);
+    void SetObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder);
 
     template <typename T>
-    bool CompareAndSetPrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order, bool strong);
+    bool CompareAndSetPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder, bool strong);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    bool CompareAndSetObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                             std::memory_order memory_order, bool strong);
+    bool CompareAndSetObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                             std::memory_order memoryOrder, bool strong);
 
     template <typename T>
-    T CompareAndExchangePrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order, bool strong);
+    T CompareAndExchangePrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder, bool strong);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    ObjectHeader *CompareAndExchangeObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                           std::memory_order memory_order, bool strong);
+    ObjectHeader *CompareAndExchangeObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                           std::memory_order memoryOrder, bool strong);
 
     template <typename T>
-    T GetAndSetPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndSetPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    ObjectHeader *GetAndSetObject(size_t offset, ObjectHeader *value, std::memory_order memory_order);
+    ObjectHeader *GetAndSetObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndAddPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndAddPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseOrPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseOrPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseAndPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseAndPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <class T, bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
     void Set(ArraySizeT idx, T elem);
@@ -174,9 +174,9 @@ public:
     template <class T, bool NEED_READ_BARRIER = true, bool IS_DYN = false>
     T Get([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx) const;
 
-    size_t ObjectSize(uint32_t component_size) const
+    size_t ObjectSize(uint32_t componentSize) const
     {
-        return ComputeSize(component_size, length_);
+        return ComputeSize(componentSize, length_);
     }
 
     static constexpr uint32_t GetLengthOffset()
@@ -192,19 +192,19 @@ public:
     template <bool IS_DYN>
     ArraySizeT GetElementOffset(ArraySizeT idx) const
     {
-        size_t elem_size;
+        size_t elemSize;
         // NOLINTNEXTLINE(readability-braces-around-statements)
         if constexpr (IS_DYN) {
-            elem_size = TaggedValue::TaggedTypeSize();
+            elemSize = TaggedValue::TaggedTypeSize();
         } else {  // NOLINT(readability-misleading-indentation)
-            elem_size = ClassAddr<panda::Class>()->GetComponentSize();
+            elemSize = ClassAddr<panda::Class>()->GetComponentSize();
         }
-        return GetDataOffset() + idx * elem_size;
+        return GetDataOffset() + idx * elemSize;
     }
 
     template <class DimIterator>
     static Array *CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *klass, uint32_t nargs,
-                                              const DimIterator &iter, size_t dim_idx = 0);
+                                              const DimIterator &iter, size_t dimIdx = 0);
 
 private:
     void SetLength(ArraySizeT length)

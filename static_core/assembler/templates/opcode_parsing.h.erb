@@ -22,7 +22,7 @@ bool Parser::ParseOperands()
 {
     std::string_view p;
     uint64_t number;
-    LOG(DEBUG, ASSEMBLER) << "operand search started (line " << line_stric_ << "): " << context_.tokens[0].whole_line;
+    LOG(DEBUG, ASSEMBLER) << "operand search started (line " << lineStric_ << "): " << context_.tokens[0].wholeLine;
     switch(context_.WaitFor())
     {
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
@@ -34,16 +34,16 @@ bool Parser::ParseOperands()
             case Token::Type::ID_OP_<%= insn.asm_token%>: {
 %  if insn.return? && !insn.properties.include?('dynamic')
 %    if insn.return_obj?
-                if (!curr_func_->return_type.IsObject()) {
+                if (!currFunc_->returnType.IsObject()) {
 %    elsif insn.return32?
-                if (!curr_func_->return_type.IsPrim32()) {
+                if (!currFunc_->returnType.IsPrim32()) {
 %    elsif insn.return64?
-                if (!curr_func_->return_type.IsPrim64()) {
+                if (!currFunc_->returnType.IsPrim64()) {
 %    elsif insn.return_void?
-                if (!curr_func_->return_type.IsVoid()) {
+                if (!currFunc_->returnType.IsVoid()) {
 %    end
                     GetWarning("Unexpected return type. Look at the return type in the function definition: " +
-                               curr_func_->return_type.GetName(),
+                               currFunc_->returnType.GetName(),
                                Error::ErrorType::WAR_UNEXPECTED_RETURN_TYPE);
                 }
 %  end
@@ -73,8 +73,8 @@ bool Parser::ParseOperands()
                     p = context_.GiveToken();
                     p.remove_prefix(1);
                     number = ToNumber(p);
-                    size_t reg_width = curr_func_->ins.back().MaxRegEncodingWidth();
-                    if ((1ULL << reg_width) <= number) {
+                    size_t regWidth = currFunc_->ins.back().MaxRegEncodingWidth();
+                    if ((1ULL << regWidth) <= number) {
                         context_.err = GetError("Register width mismatch.", Error::ErrorType::ERR_BAD_OPERAND);
                     }
                 } else if (context_.err.err == Error::ErrorType::ERR_NONE) {

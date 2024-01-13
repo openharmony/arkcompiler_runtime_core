@@ -534,10 +534,9 @@ TEST_F(RedundantLoopEliminationTest, InfiniteLoop)
     {
         BASIC_BLOCK(2U, 2U) {}
     }
-    auto clone_graph =
-        GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+    auto cloneGraph = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
     ASSERT_FALSE(GetGraph()->RunPass<RedundantLoopElimination>());
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone_graph));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), cloneGraph));
 }
 
 TEST_F(RedundantLoopEliminationTest, LoadObjectTest)

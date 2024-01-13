@@ -26,8 +26,8 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
     auto beg = text.find(header);
     auto end = text.find('}', beg);
 
-    assert(beg != std::string::npos);
-    assert(end != std::string::npos);
+    ASSERT(beg != std::string::npos);
+    ASSERT(end != std::string::npos);
 
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
@@ -146,10 +146,10 @@ TEST(InstructionsTest, TestCalls)
         ss.str().find(".function u16 long_function(i8 a0, i16 a1, i32 a2, i8 a3, i16 a4, i32 a5, i64 a6, f32 a7)") !=
         std::string::npos);
 
-    std::string body_g = ExtractFuncBody(ss.str(), "g(u1 a0) <static> {\n");
+    std::string bodyG = ExtractFuncBody(ss.str(), "g(u1 a0) <static> {\n");
 
     std::string line;
-    std::stringstream g {body_g};
+    std::stringstream g {bodyG};
     std::getline(g, line);
     EXPECT_EQ("\tcall.virt.short B.Bhandler_unspec:(B), v4", line);
     std::getline(g, line);
@@ -233,10 +233,10 @@ TEST(InstructionsTest, TestNewarr)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    std::string body_g = ExtractFuncBody(ss.str(), "g(u1 a0) <static> {\n");
+    std::string bodyG = ExtractFuncBody(ss.str(), "g(u1 a0) <static> {\n");
 
     std::string line;
-    std::stringstream g {body_g};
+    std::stringstream g {bodyG};
     std::getline(g, line);
     EXPECT_EQ("\tnewarr v0, a0, u1[]", line);
     std::getline(g, line);
@@ -278,8 +278,8 @@ TEST(InstructionsTest, TestCorrectReg)
 
     ASSERT(program);
     panda::pandasm::Program *prog = &(program.Value());
-    auto main_func = prog->function_table.find("main:()");
-    main_func->second.regs_num = 0;
+    auto mainFunc = prog->functionTable.find("main:()");
+    mainFunc->second.regsNum = 0;
 
     auto pf = panda::pandasm::AsmEmitter::Emit(*prog);
     ASSERT(pf);
@@ -290,10 +290,10 @@ TEST(InstructionsTest, TestCorrectReg)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    std::string body_main = ExtractFuncBody(ss.str(), "main() <static> {\n");
+    std::string bodyMain = ExtractFuncBody(ss.str(), "main() <static> {\n");
 
     std::string line;
-    std::stringstream main {body_main};
+    std::stringstream main {bodyMain};
     std::getline(main, line);
     EXPECT_EQ("\tlda.str \"string\"", line);
     std::getline(main, line);

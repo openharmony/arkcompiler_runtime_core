@@ -46,22 +46,22 @@ public:
         }
     }
 
-    void Write(uint32_t *ptr, size_t payload_length, size_t length)
+    void Write(uint32_t *ptr, size_t payloadLength, size_t length)
     {
-        ASSERT(payload_length <= length);
-        if (payload_length != 0) {
+        ASSERT(payloadLength <= length);
+        if (payloadLength != 0) {
             static constexpr size_t BITS_PER_WORD = BITS_PER_UINT32;
             EnsureSpace(length);
             BitMemoryRegion region(data_->data(), offset_, length);
             size_t i = 0;
-            for (; i < payload_length / BITS_PER_WORD; i++) {
+            for (; i < payloadLength / BITS_PER_WORD; i++) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 region.Write(ptr[i], i * BITS_PER_WORD, BITS_PER_WORD);
             }
-            size_t remaining_size = payload_length % BITS_PER_WORD;
-            if (remaining_size != 0) {
+            size_t remainingSize = payloadLength % BITS_PER_WORD;
+            if (remainingSize != 0) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                region.Write(ptr[i], i * BITS_PER_WORD, payload_length % BITS_PER_WORD);
+                region.Write(ptr[i], i * BITS_PER_WORD, payloadLength % BITS_PER_WORD);
             }
         }
         offset_ += length;

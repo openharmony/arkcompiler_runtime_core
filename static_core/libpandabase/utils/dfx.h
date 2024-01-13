@@ -51,27 +51,27 @@ using DfxOptionHandler = os::dfx_option::DfxOptionHandler;
 
 class DfxController {
 public:
-    static void Initialize(std::map<DfxOptionHandler::DfxOption, uint8_t> option_map);
+    static void Initialize(std::map<DfxOptionHandler::DfxOption, uint8_t> optionMap);
 
     PANDA_PUBLIC_API static void Initialize();
 
     static bool IsInitialized()
     {
-        return dfx_controller_ != nullptr;
+        return dfxController_ != nullptr;
     }
 
     PANDA_PUBLIC_API static void Destroy();
 
-    static uint8_t GetOptionValue(DfxOptionHandler::DfxOption dfx_option)
+    static uint8_t GetOptionValue(DfxOptionHandler::DfxOption dfxOption)
     {
         ASSERT(IsInitialized());
-        return dfx_controller_->option_map_[dfx_option];
+        return dfxController_->optionMap_[dfxOption];
     }
 
-    static void SetOptionValue(DfxOptionHandler::DfxOption dfx_option, uint8_t value)
+    static void SetOptionValue(DfxOptionHandler::DfxOption dfxOption, uint8_t value)
     {
         ASSERT(IsInitialized());
-        dfx_controller_->option_map_[dfx_option] = value;
+        dfxController_->optionMap_[dfxOption] = value;
     }
 
     PANDA_PUBLIC_API static void PrintDfxOptionValues();
@@ -81,15 +81,14 @@ public:
 private:
     static void SetDefaultOption();
 
-    explicit DfxController(std::map<DfxOptionHandler::DfxOption, uint8_t> option_map)
-        : option_map_(std::move(option_map))
+    explicit DfxController(std::map<DfxOptionHandler::DfxOption, uint8_t> optionMap) : optionMap_(std::move(optionMap))
     {
     }
 
     ~DfxController() = default;
 
-    std::map<DfxOptionHandler::DfxOption, uint8_t> option_map_;
-    PANDA_PUBLIC_API static DfxController *dfx_controller_;
+    std::map<DfxOptionHandler::DfxOption, uint8_t> optionMap_;
+    PANDA_PUBLIC_API static DfxController *dfxController_;
 
     static os::memory::Mutex mutex_;
 

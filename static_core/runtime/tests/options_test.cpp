@@ -53,9 +53,9 @@ TEST_F(RuntimeOptionsTest, TestCorrectOptions)
 // Testing that panda::PandArgParser detect invalid options and types
 TEST_F(RuntimeOptionsTest, TestIncorrectOptions)
 {
-    std::vector<std::string> invalid_options;
-    invalid_options.emplace_back("--InvalidOptionThatNotExistAndNeverWillBeAdded=true");
-    ASSERT_FALSE(GetParser()->Parse(invalid_options));
+    std::vector<std::string> invalidOptions;
+    invalidOptions.emplace_back("--InvalidOptionThatNotExistAndNeverWillBeAdded=true");
+    ASSERT_FALSE(GetParser()->Parse(invalidOptions));
     ASSERT_EQ(GetParser()->GetErrorString(),
               "pandargs: Invalid option \"InvalidOptionThatNotExistAndNeverWillBeAdded\"\n");
 }
@@ -63,20 +63,20 @@ TEST_F(RuntimeOptionsTest, TestIncorrectOptions)
 TEST_F(RuntimeOptionsTest, TestTailArgumets)
 {
     GetParser()->EnableTail();
-    std::vector<std::string> options_vector = GetCorrectOptionsList();
+    std::vector<std::string> optionsVector = GetCorrectOptionsList();
     panda::PandArg<std::string> file("file", "", "path to pandafile");
 
-    options_vector.emplace_back("tail1");
+    optionsVector.emplace_back("tail1");
     GetParser()->PushBackTail(&file);
-    ASSERT_TRUE(GetParser()->Parse(options_vector));
+    ASSERT_TRUE(GetParser()->Parse(optionsVector));
 
-    options_vector.emplace_back("tail2");
-    ASSERT_FALSE(GetParser()->Parse(options_vector));
+    optionsVector.emplace_back("tail2");
+    ASSERT_FALSE(GetParser()->Parse(optionsVector));
     ASSERT_EQ(GetParser()->GetErrorString(), "pandargs: Too many tail arguments given\n");
 
     GetParser()->DisableTail();
-    options_vector.pop_back();
-    ASSERT_FALSE(GetParser()->Parse(options_vector));
+    optionsVector.pop_back();
+    ASSERT_FALSE(GetParser()->Parse(optionsVector));
     ASSERT_EQ(GetParser()->GetErrorString(),
               "pandargs: Tail arguments are not enabled\npandargs: Tail found at literal \"tail1\"\n");
 }

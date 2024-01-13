@@ -31,14 +31,14 @@ constexpr std::initializer_list<const char *> TESTED_GC = {"stw", "gen-gc", "g1-
 {
     auto *vm = Runtime::GetCurrent()->GetPandaVM();
     ASSERT(vm != nullptr);
-    auto *string_class = Runtime::GetCurrent()
-                             ->GetClassLinker()
-                             ->GetExtension(vm->GetLanguageContext())
-                             ->GetClassRoot(ClassRoot::STRING);
-    ASSERT(string_class != nullptr);
-    mem::HeapManager *heap_manager = vm->GetHeapManager();
-    ASSERT(heap_manager != nullptr);
-    return heap_manager->AllocateObject(string_class, panda::coretypes::String::ComputeSizeUtf16(length));
+    auto *stringClass = Runtime::GetCurrent()
+                            ->GetClassLinker()
+                            ->GetExtension(vm->GetLanguageContext())
+                            ->GetClassRoot(ClassRoot::STRING);
+    ASSERT(stringClass != nullptr);
+    mem::HeapManager *heapManager = vm->GetHeapManager();
+    ASSERT(heapManager != nullptr);
+    return heapManager->AllocateObject(stringClass, panda::coretypes::String::ComputeSizeUtf16(length));
 }
 
 inline ObjectHeader *AllocNonMovableObject()
@@ -52,16 +52,16 @@ inline ObjectHeader *AllocNonMovableObject()
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions,-warnings-as-errors)
 class ObjectAllocator {
 public:
-    static coretypes::Array *AllocArray(size_t length, ClassRoot class_root, bool nonmovable)
+    static coretypes::Array *AllocArray(size_t length, ClassRoot classRoot, bool nonmovable)
     {
         Runtime *runtime = Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT;
-        auto *klass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(class_root);
+        SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT;
+        auto *klass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(classRoot);
         if (nonmovable) {
-            space_type = SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT;
+            spaceType = SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT;
         }
-        return coretypes::Array::Create(klass, length, space_type);
+        return coretypes::Array::Create(klass, length, spaceType);
     }
 
     static coretypes::String *AllocString(size_t length)

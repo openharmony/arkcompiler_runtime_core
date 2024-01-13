@@ -62,20 +62,20 @@ protected:
      * @brief Set the bit indexed by bit_offset.
      * @param bit_offset - index of the bit to set.
      */
-    void SetBit(size_t bit_offset)
+    void SetBit(size_t bitOffset)
     {
-        CheckBitOffset(bit_offset);
-        bitmap_[GetWordIdx(bit_offset)] |= GetBitMask(bit_offset);
+        CheckBitOffset(bitOffset);
+        bitmap_[GetWordIdx(bitOffset)] |= GetBitMask(bitOffset);
     }
 
     /**
      * @brief Clear the bit indexed by bit_offset.
      * @param bit_offset - index of the bit to clear.
      */
-    void ClearBit(size_t bit_offset)
+    void ClearBit(size_t bitOffset)
     {
-        CheckBitOffset(bit_offset);
-        bitmap_[GetWordIdx(bit_offset)] &= ~GetBitMask(bit_offset);
+        CheckBitOffset(bitOffset);
+        bitmap_[GetWordIdx(bitOffset)] &= ~GetBitMask(bitOffset);
     }
 
     /**
@@ -83,10 +83,10 @@ protected:
      * @param bit_offset - index of the bit to test.
      * @return Returns value of indexed bit.
      */
-    bool TestBit(size_t bit_offset) const
+    bool TestBit(size_t bitOffset) const
     {
-        CheckBitOffset(bit_offset);
-        return (bitmap_[GetWordIdx(bit_offset)] & GetBitMask(bit_offset)) != 0;
+        CheckBitOffset(bitOffset);
+        return (bitmap_[GetWordIdx(bitOffset)] & GetBitMask(bitOffset)) != 0;
     }
 
     /**
@@ -94,21 +94,21 @@ protected:
      * @param bit_offset - index of the bit to set.
      * @return Returns old value of the bit.
      */
-    bool AtomicTestAndSetBit(size_t bit_offset);
+    bool AtomicTestAndSetBit(size_t bitOffset);
 
     /**
      * @brief Atomically clear bit corresponding to addr. If the bit is set, clear it atomically. Otherwise, do nothing.
      * @param addr - addr must be aligned to BYTESPERCHUNK.
      * @return Returns old value of the bit.
      */
-    bool AtomicTestAndClearBit(size_t bit_offset);
+    bool AtomicTestAndClearBit(size_t bitOffset);
 
     /**
      * @brief Atomically test bit corresponding to addr.
      * @param addr - addr must be aligned to BYTESPERCHUNK.
      * @return Returns the value of the bit.
      */
-    bool AtomicTestBit(size_t bit_offset);
+    bool AtomicTestBit(size_t bitOffset);
 
     /**
      * @brief Iterates over all bits of bitmap sequentially.
@@ -139,38 +139,38 @@ protected:
             return;
         }
 
-        auto bitmap_word = GetBitmapWord<ATOMIC>(begin);
-        auto offset_within_word = GetBitIdxWithinWord(begin);
+        auto bitmapWord = GetBitmapWord<ATOMIC>(begin);
+        auto offsetWithinWord = GetBitIdxWithinWord(begin);
         // first word, clear bits before begin
-        bitmap_word &= GetRangeBitMask(offset_within_word, BITSPERWORD);
-        auto offset_word_begin = GetWordIdx(begin) * BITSPERWORD;
-        const bool right_aligned = (GetBitIdxWithinWord(end) == 0);
-        const auto offset_last_word_begin = GetWordIdx(end) * BITSPERWORD;
+        bitmapWord &= GetRangeBitMask(offsetWithinWord, BITSPERWORD);
+        auto offsetWordBegin = GetWordIdx(begin) * BITSPERWORD;
+        const bool rightAligned = (GetBitIdxWithinWord(end) == 0);
+        const auto offsetLastWordBegin = GetWordIdx(end) * BITSPERWORD;
         do {
-            if (offset_word_begin == offset_last_word_begin && !right_aligned) {
+            if (offsetWordBegin == offsetLastWordBegin && !rightAligned) {
                 // last partial word, clear bits after right boundary
                 auto mask = GetRangeBitMask(0, GetBitIdxWithinWord(end));
-                bitmap_word &= mask;
+                bitmapWord &= mask;
             }
             // loop over bits of bitmap_word
-            while (offset_within_word < BITSPERWORD) {
-                if (bitmap_word == 0) {
+            while (offsetWithinWord < BITSPERWORD) {
+                if (bitmapWord == 0) {
                     break;
                 }
-                offset_within_word = static_cast<size_t>(Ctz(bitmap_word));
-                if (!visitor(offset_word_begin + offset_within_word)) {
+                offsetWithinWord = static_cast<size_t>(Ctz(bitmapWord));
+                if (!visitor(offsetWordBegin + offsetWithinWord)) {
                     return;
                 }
-                bitmap_word &= ~GetBitMask(offset_within_word);
+                bitmapWord &= ~GetBitMask(offsetWithinWord);
             }
 
-            offset_word_begin += BITSPERWORD;
-            if (offset_word_begin >= end) {
+            offsetWordBegin += BITSPERWORD;
+            if (offsetWordBegin >= end) {
                 break;
             }
 
-            bitmap_word = GetBitmapWord<ATOMIC>(offset_word_begin);
-            offset_within_word = 0;
+            bitmapWord = GetBitmapWord<ATOMIC>(offsetWordBegin);
+            offsetWithinWord = 0;
         } while (true);
     }
 
@@ -239,14 +239,14 @@ protected:
      * @param begin - beginning BitmapWord index of the range, inclusive.
      * @param end - end BitmapWord index of the range, exclusive.
      */
-    void SetWords([[maybe_unused]] size_t word_begin, [[maybe_unused]] size_t word_end)
+    void SetWords([[maybe_unused]] size_t wordBegin, [[maybe_unused]] size_t wordEnd)
     {
-        ASSERT(word_begin <= word_end);
-        if (UNLIKELY(word_begin == word_end)) {
+        ASSERT(wordBegin <= wordEnd);
+        if (UNLIKELY(wordBegin == wordEnd)) {
             return;
         }
-        memset_s(&bitmap_[word_begin], (word_end - word_begin) * sizeof(BitmapWordType), ~static_cast<unsigned char>(0),
-                 (word_end - word_begin) * sizeof(BitmapWordType));
+        memset_s(&bitmap_[wordBegin], (wordEnd - wordBegin) * sizeof(BitmapWordType), ~static_cast<unsigned char>(0),
+                 (wordEnd - wordBegin) * sizeof(BitmapWordType));
     }
 
     /**
@@ -254,36 +254,36 @@ protected:
      * @param begin - beginning BitmapWord index of the range, inclusive.
      * @param end - end BitmapWord index of the range, exclusive.
      */
-    void ClearWords([[maybe_unused]] size_t word_begin, [[maybe_unused]] size_t word_end)
+    void ClearWords([[maybe_unused]] size_t wordBegin, [[maybe_unused]] size_t wordEnd)
     {
-        ASSERT(word_begin <= word_end);
-        if (UNLIKELY(word_begin == word_end)) {
+        ASSERT(wordBegin <= wordEnd);
+        if (UNLIKELY(wordBegin == wordEnd)) {
             return;
         }
-        memset_s(&bitmap_[word_begin], (word_end - word_begin) * sizeof(BitmapWordType), static_cast<unsigned char>(0),
-                 (word_end - word_begin) * sizeof(BitmapWordType));
+        memset_s(&bitmap_[wordBegin], (wordEnd - wordBegin) * sizeof(BitmapWordType), static_cast<unsigned char>(0),
+                 (wordEnd - wordBegin) * sizeof(BitmapWordType));
     }
 
     template <bool ATOMIC>
     size_t FindHighestPrecedingOrSameBit(size_t begin)
     {
-        auto word_begin_offset = GetWordIdx(begin) * BITSPERWORD;
-        auto offset_within_word = GetBitIdxWithinWord(begin);
-        auto mask = ~static_cast<BitmapWordType>(0) >> (BITSPERWORD - offset_within_word - 1);
-        auto bitmap_word = GetBitmapWord<ATOMIC>(begin) & mask;
+        auto wordBeginOffset = GetWordIdx(begin) * BITSPERWORD;
+        auto offsetWithinWord = GetBitIdxWithinWord(begin);
+        auto mask = ~static_cast<BitmapWordType>(0) >> (BITSPERWORD - offsetWithinWord - 1);
+        auto bitmapWord = GetBitmapWord<ATOMIC>(begin) & mask;
 
         while (true) {
-            if (bitmap_word != 0) {
-                offset_within_word = BITSPERWORD - static_cast<size_t>(Clz(bitmap_word)) - 1;
-                return word_begin_offset + offset_within_word;
+            if (bitmapWord != 0) {
+                offsetWithinWord = BITSPERWORD - static_cast<size_t>(Clz(bitmapWord)) - 1;
+                return wordBeginOffset + offsetWithinWord;
             }
 
-            if (word_begin_offset < BITSPERWORD) {
+            if (wordBeginOffset < BITSPERWORD) {
                 break;
             }
 
-            word_begin_offset -= BITSPERWORD;
-            bitmap_word = GetBitmapWord<ATOMIC>(word_begin_offset);
+            wordBeginOffset -= BITSPERWORD;
+            bitmapWord = GetBitmapWord<ATOMIC>(wordBeginOffset);
         }
 
         return begin;
@@ -307,9 +307,9 @@ private:
      * @param bit_offset - bit index.
      * @return Returns BitmapWord Index of bit_offset.
      */
-    static size_t GetWordIdx(size_t bit_offset)
+    static size_t GetWordIdx(size_t bitOffset)
     {
-        return bit_offset >> LOG_BITSPERWORD;
+        return bitOffset >> LOG_BITSPERWORD;
     }
 
     /**
@@ -317,11 +317,11 @@ private:
      * @param bit_offset - bit index.
      * @return Returns bit index within a BitmapWord.
      */
-    size_t GetBitIdxWithinWord(size_t bit_offset) const
+    size_t GetBitIdxWithinWord(size_t bitOffset) const
     {
-        CheckBitOffset(bit_offset);
+        CheckBitOffset(bitOffset);
         constexpr auto BIT_INDEX_MASK = static_cast<size_t>((1ULL << LOG_BITSPERWORD) - 1);
-        return bit_offset & BIT_INDEX_MASK;
+        return bitOffset & BIT_INDEX_MASK;
     }
 
     /**
@@ -329,9 +329,9 @@ private:
      * @param bit_offset - bit index.
      * @return Returns bit mask of bit_offset.
      */
-    BitmapWordType GetBitMask(size_t bit_offset) const
+    BitmapWordType GetBitMask(size_t bitOffset) const
     {
-        return 1ULL << GetBitIdxWithinWord(bit_offset);
+        return 1ULL << GetBitIdxWithinWord(bitOffset);
     }
 
     /**
@@ -342,20 +342,19 @@ private:
      * end_within_word is 0.
      * @return Returns bit mask.
      */
-    BitmapWordType GetRangeBitMask(size_t begin_within_word, size_t end_within_word) const
+    BitmapWordType GetRangeBitMask(size_t beginWithinWord, size_t endWithinWord) const
     {
-        ASSERT(begin_within_word < BITSPERWORD);
-        ASSERT(end_within_word <= BITSPERWORD);
-        ASSERT(begin_within_word <= end_within_word);
-        auto end_mask =
-            (end_within_word == BITSPERWORD) ? ~static_cast<BitmapWordType>(0) : GetBitMask(end_within_word) - 1;
-        return end_mask - (GetBitMask(begin_within_word) - 1);
+        ASSERT(beginWithinWord < BITSPERWORD);
+        ASSERT(endWithinWord <= BITSPERWORD);
+        ASSERT(beginWithinWord <= endWithinWord);
+        auto endMask = (endWithinWord == BITSPERWORD) ? ~static_cast<BitmapWordType>(0) : GetBitMask(endWithinWord) - 1;
+        return endMask - (GetBitMask(beginWithinWord) - 1);
     }
 
     /// @brief Check if bit_offset is valid.
-    void CheckBitOffset([[maybe_unused]] size_t bit_offset) const
+    void CheckBitOffset([[maybe_unused]] size_t bitOffset) const
     {
-        ASSERT(bit_offset <= Size());
+        ASSERT(bitOffset <= Size());
     }
 
     /**
@@ -397,16 +396,16 @@ private:
     }
 
     template <bool ATOMIC>
-    BitmapWordType GetBitmapWord(size_t bit_offset)
+    BitmapWordType GetBitmapWord(size_t bitOffset)
     {
-        auto index = GetWordIdx(bit_offset);
+        auto index = GetWordIdx(bitOffset);
         if constexpr (!ATOMIC) {
             return bitmap_[index];
         }
 
-        auto *word_addr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[index]);
+        auto *wordAddr = reinterpret_cast<std::atomic<BitmapWordType> *>(&bitmap_[index]);
         // Atomic with seq_cst order reason: datarace with AtomicTestAndSet
-        return word_addr->load(std::memory_order_seq_cst);
+        return wordAddr->load(std::memory_order_seq_cst);
     }
 };
 
@@ -417,10 +416,10 @@ private:
 template <size_t BYTESPERCHUNK = 1, typename PointerType = ObjectPointerType>
 class MemBitmap : public Bitmap {
 public:
-    explicit MemBitmap(void *mem_addr, size_t heap_size, void *bitmap_addr)
-        : Bitmap(static_cast<BitmapWordType *>(bitmap_addr), heap_size / BYTESPERCHUNK),
-          begin_addr_(ToPointerType(mem_addr)),
-          end_addr_(begin_addr_ + heap_size)
+    explicit MemBitmap(void *memAddr, size_t heapSize, void *bitmapAddr)
+        : Bitmap(static_cast<BitmapWordType *>(bitmapAddr), heapSize / BYTESPERCHUNK),
+          beginAddr_(ToPointerType(memAddr)),
+          endAddr_(beginAddr_ + heapSize)
     {
     }
     NO_COPY_SEMANTIC(MemBitmap);
@@ -432,18 +431,18 @@ public:
      * because we reuse the same bitmap storage.
      * @param mem_addr - start addr of the new range.
      */
-    void ReInitializeMemoryRange(void *mem_addr)
+    void ReInitializeMemoryRange(void *memAddr)
     {
-        begin_addr_ = ToPointerType(mem_addr);
-        end_addr_ = begin_addr_ + MemSizeInBytes();
+        beginAddr_ = ToPointerType(memAddr);
+        endAddr_ = beginAddr_ + MemSizeInBytes();
         Bitmap::ClearAllBits();
     }
 
-    inline static constexpr size_t GetBitMapSizeInByte(size_t heap_size)
+    inline static constexpr size_t GetBitMapSizeInByte(size_t heapSize)
     {
-        ASSERT(heap_size % BYTESPERCHUNK == 0);
-        size_t bit_size = heap_size / BYTESPERCHUNK;
-        return (AlignUp(bit_size, BITSPERWORD) >> Bitmap::LOG_BITSPERWORD) * sizeof(BitmapWordType);
+        ASSERT(heapSize % BYTESPERCHUNK == 0);
+        size_t bitSize = heapSize / BYTESPERCHUNK;
+        return (AlignUp(bitSize, BITSPERWORD) >> Bitmap::LOG_BITSPERWORD) * sizeof(BitmapWordType);
     }
 
     ~MemBitmap() = default;
@@ -455,7 +454,7 @@ public:
 
     inline std::pair<uintptr_t, uintptr_t> GetHeapRange()
     {
-        return {begin_addr_, end_addr_};
+        return {beginAddr_, endAddr_};
     }
 
     /**
@@ -544,20 +543,20 @@ public:
     template <bool ATOMIC = false>
     void *FindFirstMarkedChunks()
     {
-        void *first_marked = nullptr;
-        IterateOverSetBits<ATOMIC>([&first_marked, this](size_t bit_offset) {
-            first_marked = BitOffsetToAddr(bit_offset);
+        void *firstMarked = nullptr;
+        IterateOverSetBits<ATOMIC>([&firstMarked, this](size_t bitOffset) {
+            firstMarked = BitOffsetToAddr(bitOffset);
             return false;
         });
-        return first_marked;
+        return firstMarked;
     }
 
     /// @brief Iterates over marked chunks of memory sequentially.
     template <bool ATOMIC = false, typename MemVisitor>
     void IterateOverMarkedChunks(const MemVisitor &visitor)
     {
-        IterateOverSetBits<ATOMIC>([&visitor, this](size_t bit_offset) {
-            visitor(BitOffsetToAddr(bit_offset));
+        IterateOverSetBits<ATOMIC>([&visitor, this](size_t bitOffset) {
+            visitor(BitOffsetToAddr(bitOffset));
             return true;
         });
     }
@@ -566,7 +565,7 @@ public:
     template <typename MemVisitor>
     void IterateOverChunks(const MemVisitor &visitor)
     {
-        IterateOverBits([&visitor, this](size_t bit_offset) { visitor(BitOffsetToAddr(bit_offset)); });
+        IterateOverBits([&visitor, this](size_t bitOffset) { visitor(BitOffsetToAddr(bitOffset)); });
     }
 
     /// @brief Iterates over marked chunks of memory in range [begin, end) sequentially.
@@ -588,8 +587,8 @@ public:
     {
         CheckHalfClosedHalfOpenAddressRange(begin, end);
         IterateOverSetBitsInRange<ATOMIC>(FindHighestPrecedingOrSameBit<ATOMIC>(AddrToBitOffset(ToPointerType(begin))),
-                                          EndAddrToBitOffset(ToPointerType(end)), [&visitor, this](size_t bit_offset) {
-                                              return visitor(BitOffsetToAddr(bit_offset));
+                                          EndAddrToBitOffset(ToPointerType(end)), [&visitor, this](size_t bitOffset) {
+                                              return visitor(BitOffsetToAddr(bitOffset));
                                           });
     }
 
@@ -614,12 +613,12 @@ public:
     {
         CheckHalfClosedHalfOpenAddressRange(begin, end);
         IterateOverBitsInRange(AddrToBitOffset(ToPointerType(begin)), EndAddrToBitOffset(ToPointerType(end)),
-                               [&visitor, this](size_t bit_offset) { visitor(BitOffsetToAddr(bit_offset)); });
+                               [&visitor, this](size_t bitOffset) { visitor(BitOffsetToAddr(bitOffset)); });
     }
 
     bool IsAddrInRange(const void *addr) const
     {
-        return addr >= ToVoidPtr(begin_addr_) && addr < ToVoidPtr(end_addr_);
+        return addr >= ToVoidPtr(beginAddr_) && addr < ToVoidPtr(endAddr_);
     }
 
     template <class T>
@@ -632,25 +631,25 @@ private:
     /// @brief Computes bit offset from addr.
     size_t AddrToBitOffset(PointerType addr) const
     {
-        return (addr - begin_addr_) / BYTESPERCHUNK;
+        return (addr - beginAddr_) / BYTESPERCHUNK;
     }
 
     size_t EndAddrToBitOffset(PointerType addr) const
     {
-        return (AlignUp(addr, BYTESPERCHUNK) - begin_addr_) / BYTESPERCHUNK;
+        return (AlignUp(addr, BYTESPERCHUNK) - beginAddr_) / BYTESPERCHUNK;
     }
 
     /// @brief Computes address from bit offset.
-    void *BitOffsetToAddr(size_t bit_offset) const
+    void *BitOffsetToAddr(size_t bitOffset) const
     {
-        return ToVoidPtr(begin_addr_ + bit_offset * BYTESPERCHUNK);
+        return ToVoidPtr(beginAddr_ + bitOffset * BYTESPERCHUNK);
     }
 
     /// @brief Check if addr is valid.
     void CheckAddrValidity([[maybe_unused]] const void *addr) const
     {
         ASSERT(IsAddrInRange(addr));
-        ASSERT((ToPointerType(addr) - begin_addr_) % BYTESPERCHUNK == 0);
+        ASSERT((ToPointerType(addr) - beginAddr_) % BYTESPERCHUNK == 0);
     }
 
     /**
@@ -659,20 +658,20 @@ private:
      */
     bool IsAddrValid(const void *addr) const
     {
-        return IsAddrInRange(addr) && (ToPointerType(addr) - begin_addr_) % BYTESPERCHUNK == 0;
+        return IsAddrInRange(addr) && (ToPointerType(addr) - beginAddr_) % BYTESPERCHUNK == 0;
     }
 
     /// @brief Check if [begin, end) is a valid address range.
     void CheckHalfClosedHalfOpenAddressRange([[maybe_unused]] void *begin, [[maybe_unused]] void *end) const
     {
         CheckAddrValidity(begin);
-        ASSERT(ToPointerType(end) >= begin_addr_);
-        ASSERT(ToPointerType(end) <= end_addr_);
+        ASSERT(ToPointerType(end) >= beginAddr_);
+        ASSERT(ToPointerType(end) <= endAddr_);
         ASSERT(ToPointerType(begin) <= ToPointerType(end));
     }
 
-    PointerType begin_addr_ {0};
-    PointerType end_addr_ {0};
+    PointerType beginAddr_ {0};
+    PointerType endAddr_ {0};
 };
 
 using MarkBitmap = MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES>;

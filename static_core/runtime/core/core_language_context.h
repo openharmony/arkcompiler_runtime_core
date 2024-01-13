@@ -246,15 +246,15 @@ public:
         return utf::CStringAsMutf8("Lpanda/IllegalMonitorStateException;");
     }
 
-    void ThrowException(ManagedThread *thread, const uint8_t *mutf8_name, const uint8_t *mutf8_msg) const override;
+    void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const override;
 
     PandaUniquePtr<ITableBuilder> CreateITableBuilder() const override;
 
     PandaUniquePtr<VTableBuilder> CreateVTableBuilder() const override;
 
-    bool InitializeClass(ClassLinker *class_linker, ManagedThread *thread, Class *klass) const override
+    bool InitializeClass(ClassLinker *classLinker, ManagedThread *thread, Class *klass) const override
     {
-        return ClassInitializer<MT_MODE_MULTI>::Initialize(class_linker, thread, klass);
+        return ClassInitializer<MT_MODE_MULTI>::Initialize(classLinker, thread, klass);
     }
 
     std::unique_ptr<ClassLinkerExtension> CreateClassLinkerExtension() const override
@@ -264,7 +264,7 @@ public:
 
     PandaVM *CreateVM(Runtime *runtime, const RuntimeOptions &options) const override;
 
-    mem::GC *CreateGC(mem::GCType gc_type, mem::ObjectAllocatorBase *object_allocator,
+    mem::GC *CreateGC(mem::GCType gcType, mem::ObjectAllocatorBase *objectAllocator,
                       const mem::GCSettings &settings) const override;
 
     void ThrowStackOverflowException(ManagedThread *thread) const override;

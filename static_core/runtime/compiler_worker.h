@@ -27,8 +27,8 @@ class Compiler;
 /// @brief Compiler worker interface
 class CompilerWorker {
 public:
-    CompilerWorker(mem::InternalAllocatorPtr internal_allocator, Compiler *compiler)
-        : internal_allocator_(internal_allocator), compiler_(compiler)
+    CompilerWorker(mem::InternalAllocatorPtr internalAllocator, Compiler *compiler)
+        : internalAllocator_(internalAllocator), compiler_(compiler)
     {
     }
 
@@ -71,8 +71,8 @@ public:
     virtual void AddTask(CompilerTask &&task) = 0;
 
 protected:
-    mem::InternalAllocatorPtr internal_allocator_;  // NOLINT(misc-non-private-member-variables-in-classes)
-    Compiler *compiler_;                            // NOLINT(misc-non-private-member-variables-in-classes)
+    mem::InternalAllocatorPtr internalAllocator_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    Compiler *compiler_;                           // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 }  // namespace panda

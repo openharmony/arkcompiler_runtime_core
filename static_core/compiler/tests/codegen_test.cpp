@@ -27,6 +27,7 @@
 #include "compiler/compiler_task_runner.h"
 
 #include "libpandabase/macros.h"
+#include "libpandabase/utils/utils.h"
 #include "gtest/gtest.h"
 #include "unit_test.h"
 #include "utils/bit_utils.h"
@@ -39,13 +40,13 @@ const uint64_t ITERATION = 40;
 const uint64_t ITERATION = 20000;
 #endif
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
-static inline auto RANDOM_GENERATOR = std::mt19937_64(SEED);
+static inline auto g_randomGenerator = std::mt19937_64(SEED);
 
 namespace panda::compiler {
 
 class CodegenTest : public GraphTest {
 public:
-    CodegenTest() : exec_module_(GetAllocator(), GetGraph()->GetRuntime())
+    CodegenTest() : execModule_(GetAllocator(), GetGraph()->GetRuntime())
     {
 #ifndef NDEBUG
         // GraphChecker hack: LowLevel instructions may appear only after Lowering pass:
@@ -59,7 +60,7 @@ public:
 
     VixlExecModule &GetExecModule()
     {
-        return exec_module_;
+        return execModule_;
     }
 
     template <typename T>
@@ -75,21 +76,21 @@ public:
     void CheckLoadArrayPair(bool imm);
 
     template <typename T>
-    void CheckCmp(bool is_fcmpg = false);
+    void CheckCmp(bool isFcmpg = false);
 
     template <typename T>
-    void CheckReturnValue(Graph *graph, T expected_value);
+    void CheckReturnValue(Graph *graph, T expectedValue);
 
     template <typename T>
     void CheckBounds(size_t count);
 
-    void TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t l, uint32_t r, ShiftType shift_type,
+    void TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t l, uint32_t r, ShiftType shiftType,
                                                uint32_t shift, uint32_t erv);
 
-    void CreateGraphForOverflowTest(Graph *graph, Opcode overflow_opcode);
+    void CreateGraphForOverflowTest(Graph *graph, Opcode overflowOpcode);
 
 private:
-    VixlExecModule exec_module_;
+    VixlExecModule execModule_;
 };
 
 bool RunCodegen(Graph *graph)
@@ -165,8 +166,8 @@ TEST_F(CodegenTest, SimpleProgramm)
 
     GetExecModule().Execute();
 
-    auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, 0U);
+    auto retData = GetExecModule().GetRetValue();
+    EXPECT_EQ(retData, 0U);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
@@ -192,19 +193,19 @@ void CodegenTest::CheckStoreArray()
 
     auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
     auto index = graph->AddNewParameter(1U, DataType::INT32);
-    auto store_value = graph->AddNewParameter(2U, TYPE);
+    auto storeValue = graph->AddNewParameter(2U, TYPE);
 
     graph->ResetParameterInfo();
     array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
     index->SetLocationData(graph->GetDataForNativeParam(DataType::INT32));
-    store_value->SetLocationData(graph->GetDataForNativeParam(TYPE));
+    storeValue->SetLocationData(graph->GetDataForNativeParam(TYPE));
 
-    auto st_arr = graph->CreateInst(Opcode::StoreArray);
-    block->AppendInst(st_arr);
-    st_arr->SetType(TYPE);
-    st_arr->SetInput(0U, array);
-    st_arr->SetInput(1U, index);
-    st_arr->SetInput(2U, store_value);
+    auto stArr = graph->CreateInst(Opcode::StoreArray);
+    block->AppendInst(stArr);
+    stArr->SetType(TYPE);
+    stArr->SetInput(0U, array);
+    stArr->SetInput(1U, index);
+    stArr->SetInput(2U, storeValue);
     auto ret = graph->CreateInst(Opcode::ReturnVoid);
     block->AppendInst(ret);
 
@@ -215,37 +216,37 @@ void CodegenTest::CheckStoreArray()
 
     // call codegen
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
-    T array_data[4U];
-    auto default_value = CutValue<T>(0U, TYPE);
-    for (auto &data : array_data) {
-        data = default_value;
+    T arrayData[4U];
+    auto defaultValue = CutValue<T>(0U, TYPE);
+    for (auto &data : arrayData) {
+        data = defaultValue;
     }
-    auto param_1 = GetExecModule().CreateArray(array_data, 4U, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
-    auto param_3 = CutValue<T>(10U, TYPE);
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
-    GetExecModule().SetParameter(1U, param_2);
-    GetExecModule().SetParameter(2U, param_3);
+    auto param1 = GetExecModule().CreateArray(arrayData, 4U, GetObjectAllocator());
+    auto param2 = CutValue<int32_t>(2U, DataType::INT32);
+    auto param3 = CutValue<T>(10U, TYPE);
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
+    GetExecModule().SetParameter(1U, param2);
+    GetExecModule().SetParameter(2U, param3);
 
     GetExecModule().Execute();
 
-    GetExecModule().CopyArray(param_1, array_data);
+    GetExecModule().CopyArray(param1, arrayData);
 
     for (size_t i = 0; i < 4U; i++) {
         if (i == 2U) {
-            EXPECT_EQ(array_data[i], param_3);
+            EXPECT_EQ(arrayData[i], param3);
         } else {
-            EXPECT_EQ(array_data[i], default_value);
+            EXPECT_EQ(arrayData[i], defaultValue);
         }
     }
-    GetExecModule().FreeArray(param_1);
+    GetExecModule().FreeArray(param1);
 }
 
 template <typename T>
@@ -271,14 +272,14 @@ void CodegenTest::CheckLoadArray()
     array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
     index->SetLocationData(graph->GetDataForNativeParam(DataType::INT32));
 
-    auto ld_arr = graph->CreateInst(Opcode::LoadArray);
-    block->AppendInst(ld_arr);
-    ld_arr->SetType(TYPE);
-    ld_arr->SetInput(0U, array);
-    ld_arr->SetInput(1U, index);
+    auto ldArr = graph->CreateInst(Opcode::LoadArray);
+    block->AppendInst(ldArr);
+    ldArr->SetType(TYPE);
+    ldArr->SetInput(0U, array);
+    ldArr->SetInput(1U, index);
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(TYPE);
-    ret->SetInput(0U, ld_arr);
+    ret->SetInput(0U, ldArr);
     block->AppendInst(ret);
 
     SetNumVirtRegs(0U);
@@ -287,30 +288,30 @@ void CodegenTest::CheckLoadArray()
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
-    T array_data[4U];
+    T arrayData[4U];
     for (size_t i = 0; i < 4U; i++) {
-        array_data[i] = CutValue<T>((-i), TYPE);
+        arrayData[i] = CutValue<T>((-i), TYPE);
     }
-    auto param_1 = GetExecModule().CreateArray(array_data, 4U, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
-    GetExecModule().SetParameter(1U, param_2);
+    auto param1 = GetExecModule().CreateArray(arrayData, 4U, GetObjectAllocator());
+    auto param2 = CutValue<int32_t>(2U, DataType::INT32);
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
+    GetExecModule().SetParameter(1U, param2);
 
     GetExecModule().Execute();
 
-    GetExecModule().CopyArray(param_1, array_data);
+    GetExecModule().CopyArray(param1, arrayData);
 
-    GetExecModule().FreeArray(param_1);
+    GetExecModule().FreeArray(param1);
 
-    auto ret_data = GetExecModule().GetRetValue<T>();
-    EXPECT_EQ(ret_data, CutValue<T>(-2L, TYPE));
+    auto retData = GetExecModule().GetRetValue<T>();
+    EXPECT_EQ(retData, CutValue<T>(-2L, TYPE));
 }
 
 template <typename T>
@@ -344,13 +345,13 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
     val0->SetLocationData(graph->GetDataForNativeParam(TYPE));
     val1->SetLocationData(graph->GetDataForNativeParam(TYPE));
 
-    Inst *stp_arr = nullptr;
+    Inst *stpArr = nullptr;
     if (imm) {
-        stp_arr = graph->CreateInstStoreArrayPairI(TYPE, INVALID_PC, array, val0, val1, 2U);
-        block->AppendInst(stp_arr);
+        stpArr = graph->CreateInstStoreArrayPairI(TYPE, INVALID_PC, array, val0, val1, 2U);
+        block->AppendInst(stpArr);
     } else {
-        stp_arr = graph->CreateInstStoreArrayPair(TYPE, INVALID_PC, array, index, val0, val1);
-        block->AppendInst(stp_arr);
+        stpArr = graph->CreateInstStoreArrayPair(TYPE, INVALID_PC, array, index, val0, val1);
+        block->AppendInst(stpArr);
     }
 
     auto ret = graph->CreateInst(Opcode::ReturnVoid);
@@ -364,31 +365,31 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
-    T array_data[6U] = {0U, 0U, 0U, 0U, 0U, 0U};
-    auto param_1 = GetExecModule().CreateArray(array_data, 6U, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
-    auto param_3 = CutValue<T>(3U, TYPE);
-    auto param_4 = CutValue<T>(5U, TYPE);
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
-    GetExecModule().SetParameter(1U, param_2);
-    GetExecModule().SetParameter(2U, param_3);
-    GetExecModule().SetParameter(3U, param_4);
+    T arrayData[6U] = {0U, 0U, 0U, 0U, 0U, 0U};
+    auto param1 = GetExecModule().CreateArray(arrayData, 6U, GetObjectAllocator());
+    auto param2 = CutValue<int32_t>(2U, DataType::INT32);
+    auto param3 = CutValue<T>(3U, TYPE);
+    auto param4 = CutValue<T>(5U, TYPE);
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
+    GetExecModule().SetParameter(1U, param2);
+    GetExecModule().SetParameter(2U, param3);
+    GetExecModule().SetParameter(3U, param4);
 
     GetExecModule().Execute();
-    GetExecModule().CopyArray(param_1, array_data);
-    GetExecModule().FreeArray(param_1);
+    GetExecModule().CopyArray(param1, arrayData);
+    GetExecModule().FreeArray(param1);
 
-    T array_expected[6U] = {0U, 0U, 3U, 5U, 0U, 0U};
+    T arrayExpected[6U] = {0U, 0U, 3U, 5U, 0U, 0U};
 
     for (size_t i = 0; i < 6U; ++i) {
-        EXPECT_EQ(array_data[i], array_expected[i]);
+        EXPECT_EQ(arrayData[i], arrayExpected[i]);
     }
 }
 
@@ -419,26 +420,26 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
     array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
     index->SetLocationData(graph->GetDataForNativeParam(DataType::INT32));
 
-    Inst *ldp_arr = nullptr;
+    Inst *ldpArr = nullptr;
     if (imm) {
-        ldp_arr = graph->CreateInstLoadArrayPairI(TYPE, INVALID_PC, array, 2U);
-        block->AppendInst(ldp_arr);
+        ldpArr = graph->CreateInstLoadArrayPairI(TYPE, INVALID_PC, array, 2U);
+        block->AppendInst(ldpArr);
     } else {
-        ldp_arr = graph->CreateInstLoadArrayPair(TYPE, INVALID_PC, array, index);
-        block->AppendInst(ldp_arr);
+        ldpArr = graph->CreateInstLoadArrayPair(TYPE, INVALID_PC, array, index);
+        block->AppendInst(ldpArr);
     }
 
-    auto load_high = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldp_arr, 0U);
-    block->AppendInst(load_high);
+    auto loadHigh = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldpArr, 0U);
+    block->AppendInst(loadHigh);
 
-    auto load_low = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldp_arr, 1U);
-    block->AppendInst(load_low);
+    auto loadLow = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldpArr, 1U);
+    block->AppendInst(loadLow);
 
     auto sum = graph->CreateInst(Opcode::Add);
     block->AppendInst(sum);
     sum->SetType(TYPE);
-    sum->SetInput(0U, load_high);
-    sum->SetInput(1U, load_low);
+    sum->SetInput(0U, loadHigh);
+    sum->SetInput(1U, loadLow);
 
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(TYPE);
@@ -453,28 +454,28 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
-    T array_data[6U];
+    T arrayData[6U];
     // [ 1, 2, 3, 4, 5, 6] -> 7
     for (size_t i = 0; i < 6U; i++) {
-        array_data[i] = CutValue<T>(i + 1U, TYPE);
+        arrayData[i] = CutValue<T>(i + 1U, TYPE);
     }
-    auto param_1 = GetExecModule().CreateArray(array_data, 6U, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
-    GetExecModule().SetParameter(1U, param_2);
+    auto param1 = GetExecModule().CreateArray(arrayData, 6U, GetObjectAllocator());
+    auto param2 = CutValue<int32_t>(2U, DataType::INT32);
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
+    GetExecModule().SetParameter(1U, param2);
 
     GetExecModule().Execute();
-    GetExecModule().FreeArray(param_1);
+    GetExecModule().FreeArray(param1);
 
-    auto ret_data = GetExecModule().GetRetValue<T>();
-    EXPECT_EQ(ret_data, CutValue<T>(7U, TYPE));
+    auto retData = GetExecModule().GetRetValue<T>();
+    EXPECT_EQ(retData, CutValue<T>(7U, TYPE));
 }
 
 template <typename T>
@@ -497,21 +498,21 @@ void CodegenTest::CheckBounds(uint64_t count)
     graph->ResetParameterInfo();
     param->SetLocationData(graph->GetDataForNativeParam(TYPE));
 
-    BinaryImmOperation *last_inst = nullptr;
+    BinaryImmOperation *lastInst = nullptr;
     // instruction_count + parameter + return
     for (uint64_t i = count - 1U; i > 1U; --i) {
-        auto add_inst = graph->CreateInstAddI(TYPE, 0U, 1U);
-        block->AppendInst(add_inst);
-        if (last_inst == nullptr) {
-            add_inst->SetInput(0U, param);
+        auto addInst = graph->CreateInstAddI(TYPE, 0U, 1U);
+        block->AppendInst(addInst);
+        if (lastInst == nullptr) {
+            addInst->SetInput(0U, param);
         } else {
-            add_inst->SetInput(0U, last_inst);
+            addInst->SetInput(0U, lastInst);
         }
-        last_inst = add_inst;
+        lastInst = addInst;
     }
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(TYPE);
-    ret->SetInput(0U, last_inst);
+    ret->SetInput(0U, lastInst);
     block->AppendInst(ret);
 
 #ifndef NDEBUG
@@ -525,16 +526,16 @@ void CodegenTest::CheckBounds(uint64_t count)
 
     RegAlloc(graph);
 
-    auto insts_per_byte = GetGraph()->GetEncoder()->MaxArchInstPerEncoded();
-    auto max_bits_in_inst = GetInstructionSizeBits(GetGraph()->GetArch());
-    if (count * insts_per_byte * max_bits_in_inst > OPTIONS.GetCompilerMaxGenCodeSize()) {
+    auto instsPerByte = GetGraph()->GetEncoder()->MaxArchInstPerEncoded();
+    auto maxBitsInInst = GetInstructionSizeBits(GetGraph()->GetArch());
+    if (count * instsPerByte * maxBitsInInst > g_options.GetCompilerMaxGenCodeSize()) {
         EXPECT_FALSE(RunCodegen(graph));
     } else {
         ASSERT_TRUE(RunCodegen(graph));
-        auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-        auto code_exit = code_entry + graph->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
-        GetExecModule().SetInstructions(code_entry, code_exit);
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
 
         GetExecModule().SetDump(false);
 
@@ -542,16 +543,16 @@ void CodegenTest::CheckBounds(uint64_t count)
         GetExecModule().SetParameter(0U, param);
         GetExecModule().Execute();
 
-        auto ret_data = GetExecModule().GetRetValue<T>();
-        EXPECT_EQ(ret_data, CutValue<T>(count - 2L, TYPE));
+        auto retData = GetExecModule().GetRetValue<T>();
+        EXPECT_EQ(retData, CutValue<T>(count - 2L, TYPE));
     }
 }
 
 template <typename T>
-void CodegenTest::CheckCmp(bool is_fcmpg)
+void CodegenTest::CheckCmp(bool isFcmpg)
 {
     constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
-    bool is_float = DataType::IsFloatType(TYPE);
+    bool isFloat = DataType::IsFloatType(TYPE);
 
     // Create graph
     auto graph = CreateEmptyGraph();
@@ -577,8 +578,8 @@ void CodegenTest::CheckCmp(bool is_fcmpg)
     fcmp->SetInput(0U, param1);
     fcmp->SetInput(1U, param2);
     static_cast<CmpInst *>(fcmp)->SetOperandsType(TYPE);
-    if (is_float) {
-        static_cast<CmpInst *>(fcmp)->SetFcmpg(is_fcmpg);
+    if (isFloat) {
+        static_cast<CmpInst *>(fcmp)->SetFcmpg(isFcmpg);
     }
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(DataType::INT32);
@@ -591,70 +592,70 @@ void CodegenTest::CheckCmp(bool is_fcmpg)
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
-    T param_data[3U];
+    T paramData[3U];
     if (TYPE == DataType::FLOAT32) {
-        param_data[0U] = std::nanf("0");
+        paramData[0U] = std::nanf("0");
     } else if (TYPE == DataType::FLOAT64) {
-        param_data[0U] = std::nan("0");
+        paramData[0U] = std::nan("0");
     } else {
-        param_data[0U] = std::numeric_limits<T>::max();
-        param_data[2U] = std::numeric_limits<T>::min();
+        paramData[0U] = std::numeric_limits<T>::max();
+        paramData[2U] = std::numeric_limits<T>::min();
     }
-    param_data[1U] = CutValue<T>(2U, TYPE);
-    if (is_float) {
-        param_data[2U] = -param_data[1U];
+    paramData[1U] = CutValue<T>(2U, TYPE);
+    if (isFloat) {
+        paramData[2U] = -paramData[1U];
     }
 
     for (size_t i = 0; i < 3U; i++) {
         for (size_t j = 0; j < 3U; j++) {
-            auto param_1 = param_data[i];
-            auto param_2 = param_data[j];
-            GetExecModule().SetParameter(0U, param_1);
-            GetExecModule().SetParameter(1U, param_2);
+            auto param1 = paramData[i];
+            auto param2 = paramData[j];
+            GetExecModule().SetParameter(0U, param1);
+            GetExecModule().SetParameter(1U, param2);
 
             GetExecModule().Execute();
 
-            auto ret_data = GetExecModule().GetRetValue<int32_t>();
-            if ((i == 0U || j == 0U) && is_float) {
-                EXPECT_EQ(ret_data, is_fcmpg ? 1U : -1L);
+            auto retData = GetExecModule().GetRetValue<int32_t>();
+            if ((i == 0U || j == 0U) && isFloat) {
+                EXPECT_EQ(retData, isFcmpg ? 1U : -1L);
             } else if (i == j) {
-                EXPECT_EQ(ret_data, 0U);
+                EXPECT_EQ(retData, 0U);
             } else if (i > j) {
-                EXPECT_EQ(ret_data, -1L);
+                EXPECT_EQ(retData, -1L);
             } else {
-                EXPECT_EQ(ret_data, 1U);
+                EXPECT_EQ(retData, 1U);
             }
         }
     }
 }
 
 template <typename T>
-void CodegenTest::CheckReturnValue(Graph *graph, [[maybe_unused]] T expected_value)
+void CodegenTest::CheckReturnValue(Graph *graph, [[maybe_unused]] T expectedValue)
 {
     SetNumVirtRegs(0U);
     RegAlloc(graph);
     EXPECT_TRUE(RunCodegen(graph));
 
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
 
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
 
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
     GetExecModule().SetDump(false);
 
     GetExecModule().Execute();
     auto rv = GetExecModule().GetRetValue<T>();
-    EXPECT_EQ(rv, expected_value);
+    EXPECT_EQ(rv, expectedValue);
 }
 
-void CodegenTest::TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t l, uint32_t r, ShiftType shift_type,
+void CodegenTest::TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t l, uint32_t r, ShiftType shiftType,
                                                         uint32_t shift, uint32_t erv)
 {
     GRAPH(GetGraph())
@@ -664,7 +665,7 @@ void CodegenTest::TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t 
 
         BASIC_BLOCK(2U, -1L)
         {
-            INST(2U, opcode).Shift(shift_type, shift).u32().Inputs(0U, 1U);
+            INST(2U, opcode).Shift(shiftType, shift).u32().Inputs(0U, 1U);
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
@@ -672,7 +673,7 @@ void CodegenTest::TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t 
     CheckReturnValue(GetGraph(), erv);
 }
 
-void CodegenTest::CreateGraphForOverflowTest(Graph *graph, Opcode overflow_opcode)
+void CodegenTest::CreateGraphForOverflowTest(Graph *graph, Opcode overflowOpcode)
 {
     GRAPH(graph)
     {
@@ -681,7 +682,7 @@ void CodegenTest::CreateGraphForOverflowTest(Graph *graph, Opcode overflow_opcod
         CONSTANT(2U, 0U);
         BASIC_BLOCK(2U, 3U, 4U)
         {
-            INST(4U, overflow_opcode).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, overflowOpcode).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
         }
         BASIC_BLOCK(3U, -1L)
         {
@@ -742,24 +743,24 @@ TEST_F(CodegenTest, StoreArray)
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
     ObjectPointerType array[4U] = {0U, 0U, 0U, 0U};
-    auto param_1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
-    auto param_3 = CutValue<ObjectPointerType>(10U, DataType::UINT64);
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
-    GetExecModule().SetParameter(1U, param_2);
-    GetExecModule().SetParameter(2U, param_3);
+    auto param1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
+    auto param2 = CutValue<int32_t>(2U, DataType::INT32);
+    auto param3 = CutValue<ObjectPointerType>(10U, DataType::UINT64);
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
+    GetExecModule().SetParameter(1U, param2);
+    GetExecModule().SetParameter(2U, param3);
 
     GetExecModule().Execute();
 
-    GetExecModule().CopyArray(param_1, array);
+    GetExecModule().CopyArray(param1, array);
 
     for (size_t i = 0; i < 4U; i++) {
         if (i == 2U) {
@@ -768,7 +769,7 @@ TEST_F(CodegenTest, StoreArray)
             EXPECT_EQ(array[i], 0U) << "value of i: " << i;
         }
     }
-    GetExecModule().FreeArray(param_1);
+    GetExecModule().FreeArray(param1);
 }
 
 TEST_F(CodegenTest, StoreArrayPair)
@@ -818,19 +819,19 @@ TEST_F(CodegenTest, Compare)
             RegAlloc(graph);
 
             EXPECT_TRUE(RunCodegen(graph));
-            auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-            auto code_exit = code_entry + graph->GetCode().Size();
-            ASSERT(code_entry != nullptr && code_exit != nullptr);
-            GetExecModule().SetInstructions(code_entry, code_exit);
+            auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+            auto codeExit = codeEntry + graph->GetCode().Size();
+            ASSERT(codeEntry != nullptr && codeExit != nullptr);
+            GetExecModule().SetInstructions(codeEntry, codeExit);
 
             GetExecModule().SetDump(false);
 
             bool result;
-            auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
-            auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
+            auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
+            auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
-            GetExecModule().SetParameter(0U, param_1);
-            GetExecModule().SetParameter(1U, param_2);
+            GetExecModule().SetParameter(0U, param1);
+            GetExecModule().SetParameter(1U, param2);
 
             result = (cc == CC_NE || cc == CC_GT || cc == CC_GE || cc == CC_B || cc == CC_BE);
             if (inverse) {
@@ -839,11 +840,11 @@ TEST_F(CodegenTest, Compare)
 
             GetExecModule().Execute();
 
-            auto ret_data = GetExecModule().GetRetValue();
-            EXPECT_EQ(ret_data, result);
+            auto retData = GetExecModule().GetRetValue();
+            EXPECT_EQ(retData, result);
 
-            GetExecModule().SetParameter(0U, param_2);
-            GetExecModule().SetParameter(1U, param_1);
+            GetExecModule().SetParameter(0U, param2);
+            GetExecModule().SetParameter(1U, param1);
 
             GetExecModule().Execute();
 
@@ -852,11 +853,11 @@ TEST_F(CodegenTest, Compare)
                 result = !result;
             }
 
-            ret_data = GetExecModule().GetRetValue();
-            EXPECT_EQ(ret_data, result);
+            retData = GetExecModule().GetRetValue();
+            EXPECT_EQ(retData, result);
 
-            GetExecModule().SetParameter(0U, param_1);
-            GetExecModule().SetParameter(1U, param_1);
+            GetExecModule().SetParameter(0U, param1);
+            GetExecModule().SetParameter(1U, param1);
 
             result = (cc == CC_EQ || cc == CC_LE || cc == CC_GE || cc == CC_AE || cc == CC_BE);
             if (inverse) {
@@ -865,8 +866,8 @@ TEST_F(CodegenTest, Compare)
 
             GetExecModule().Execute();
 
-            ret_data = GetExecModule().GetRetValue();
-            EXPECT_EQ(ret_data, result);
+            retData = GetExecModule().GetRetValue();
+            EXPECT_EQ(retData, result);
         }
     }
 }
@@ -910,37 +911,37 @@ TEST_F(CodegenTest, GenIf)
         RegAlloc(graph);
 
         EXPECT_TRUE(RunCodegen(graph));
-        auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-        auto code_exit = code_entry + graph->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
-        GetExecModule().SetInstructions(code_entry, code_exit);
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
 
         GetExecModule().SetDump(false);
 
         bool result;
-        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
+        auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_2);
-        result = Compare(cc, param_1, param_2);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param2);
+        result = Compare(cc, param1, param2);
         GetExecModule().Execute();
-        auto ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        auto retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_2);
-        GetExecModule().SetParameter(1U, param_1);
+        GetExecModule().SetParameter(0U, param2);
+        GetExecModule().SetParameter(1U, param1);
         GetExecModule().Execute();
-        result = Compare(cc, param_2, param_1);
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        result = Compare(cc, param2, param1);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_1);
-        result = Compare(cc, param_1, param_1);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param1);
+        result = Compare(cc, param1, param1);
         GetExecModule().Execute();
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
     }
 }
 
@@ -981,35 +982,35 @@ TEST_F(CodegenTest, GenIfImm)
             RegAlloc(graph);
 
             EXPECT_TRUE(RunCodegen(graph));
-            auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-            auto code_exit = code_entry + graph->GetCode().Size();
-            ASSERT(code_entry != nullptr && code_exit != nullptr);
-            GetExecModule().SetInstructions(code_entry, code_exit);
+            auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+            auto codeExit = codeEntry + graph->GetCode().Size();
+            ASSERT(codeEntry != nullptr && codeExit != nullptr);
+            GetExecModule().SetInstructions(codeEntry, codeExit);
 
             GetExecModule().SetDump(false);
 
             bool result;
-            auto param_1 = CutValue<uint64_t>(value, DataType::INT32);
-            auto param_2 = CutValue<uint64_t>(value + 5U, DataType::INT32);
-            auto param_3 = CutValue<uint64_t>(value - 5L, DataType::INT32);
+            auto param1 = CutValue<uint64_t>(value, DataType::INT32);
+            auto param2 = CutValue<uint64_t>(value + 5U, DataType::INT32);
+            auto param3 = CutValue<uint64_t>(value - 5L, DataType::INT32);
 
-            GetExecModule().SetParameter(0U, param_1);
-            result = Compare(cc, param_1, param_1);
+            GetExecModule().SetParameter(0U, param1);
+            result = Compare(cc, param1, param1);
             GetExecModule().Execute();
-            auto ret_data = GetExecModule().GetRetValue();
-            EXPECT_EQ(ret_data, result);
+            auto retData = GetExecModule().GetRetValue();
+            EXPECT_EQ(retData, result);
 
-            GetExecModule().SetParameter(0U, param_2);
+            GetExecModule().SetParameter(0U, param2);
             GetExecModule().Execute();
-            result = Compare(cc, param_2, param_1);
-            ret_data = GetExecModule().GetRetValue();
-            EXPECT_EQ(ret_data, result);
+            result = Compare(cc, param2, param1);
+            retData = GetExecModule().GetRetValue();
+            EXPECT_EQ(retData, result);
 
-            GetExecModule().SetParameter(0U, param_3);
-            result = Compare(cc, param_3, param_1);
+            GetExecModule().SetParameter(0U, param3);
+            result = Compare(cc, param3, param1);
             GetExecModule().Execute();
-            ret_data = GetExecModule().GetRetValue();
-            EXPECT_EQ(ret_data, result);
+            retData = GetExecModule().GetRetValue();
+            EXPECT_EQ(retData, result);
         }
     }
 }
@@ -1047,37 +1048,37 @@ TEST_F(CodegenTest, If)
         RegAlloc(graph);
 
         EXPECT_TRUE(RunCodegen(graph));
-        auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-        auto code_exit = code_entry + graph->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
-        GetExecModule().SetInstructions(code_entry, code_exit);
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
 
         GetExecModule().SetDump(false);
 
         bool result;
-        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
+        auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_2);
-        result = Compare(cc, param_1, param_2);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param2);
+        result = Compare(cc, param1, param2);
         GetExecModule().Execute();
-        auto ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        auto retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_2);
-        GetExecModule().SetParameter(1U, param_1);
+        GetExecModule().SetParameter(0U, param2);
+        GetExecModule().SetParameter(1U, param1);
         GetExecModule().Execute();
-        result = Compare(cc, param_2, param_1);
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        result = Compare(cc, param2, param1);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_1);
-        result = Compare(cc, param_1, param_1);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param1);
+        result = Compare(cc, param1, param1);
         GetExecModule().Execute();
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
     }
 }
 
@@ -1092,18 +1093,17 @@ TEST_F(CodegenTest, AddOverflow)
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
 
-    InPlaceCompilerTaskRunner task_runner;
-    task_runner.GetContext().SetGraph(graph);
+    InPlaceCompilerTaskRunner taskRunner;
+    taskRunner.GetContext().SetGraph(graph);
     bool success = true;
-    task_runner.AddCallbackOnFail(
-        [&success]([[maybe_unused]] InPlaceCompilerContext &compiler_ctx) { success = false; });
-    RunOptimizations<INPLACE_MODE>(std::move(task_runner));
+    taskRunner.AddCallbackOnFail([&success]([[maybe_unused]] InPlaceCompilerContext &compilerCtx) { success = false; });
+    RunOptimizations<INPLACE_MODE>(std::move(taskRunner));
     EXPECT_TRUE(success);
 
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
@@ -1115,20 +1115,20 @@ TEST_F(CodegenTest, AddOverflow)
             int32_t a0 = values[i];
             int32_t a1 = values[j];
             int32_t result;
-            auto param_1 = CutValue<int32_t>(a0, DataType::INT32);
-            auto param_2 = CutValue<int32_t>(a1, DataType::INT32);
+            auto param1 = CutValue<int32_t>(a0, DataType::INT32);
+            auto param2 = CutValue<int32_t>(a1, DataType::INT32);
 
             if ((a0 > 0 && a1 > max - a0) || (a0 < 0 && a1 < min - a0)) {
                 result = 0;
             } else {
                 result = a0 + a1;
             }
-            GetExecModule().SetParameter(0U, param_1);
-            GetExecModule().SetParameter(1U, param_2);
+            GetExecModule().SetParameter(0U, param1);
+            GetExecModule().SetParameter(1U, param2);
             GetExecModule().Execute();
 
-            auto ret_data = GetExecModule().GetRetValue<int32_t>();
-            EXPECT_EQ(ret_data, result);
+            auto retData = GetExecModule().GetRetValue<int32_t>();
+            EXPECT_EQ(retData, result);
         }
     }
 }
@@ -1144,18 +1144,17 @@ TEST_F(CodegenTest, SubOverflow)
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
 
-    InPlaceCompilerTaskRunner task_runner;
-    task_runner.GetContext().SetGraph(graph);
+    InPlaceCompilerTaskRunner taskRunner;
+    taskRunner.GetContext().SetGraph(graph);
     bool success = true;
-    task_runner.AddCallbackOnFail(
-        [&success]([[maybe_unused]] InPlaceCompilerContext &compiler_ctx) { success = false; });
-    RunOptimizations<INPLACE_MODE>(std::move(task_runner));
+    taskRunner.AddCallbackOnFail([&success]([[maybe_unused]] InPlaceCompilerContext &compilerCtx) { success = false; });
+    RunOptimizations<INPLACE_MODE>(std::move(taskRunner));
     EXPECT_TRUE(success);
 
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
@@ -1167,20 +1166,20 @@ TEST_F(CodegenTest, SubOverflow)
             int32_t a0 = values[i];
             int32_t a1 = values[j];
             int32_t result;
-            auto param_1 = CutValue<int32_t>(a0, DataType::INT32);
-            auto param_2 = CutValue<int32_t>(a1, DataType::INT32);
+            auto param1 = CutValue<int32_t>(a0, DataType::INT32);
+            auto param2 = CutValue<int32_t>(a1, DataType::INT32);
 
             if ((a1 > 0 && a0 < min + a1) || (a1 < 0 && a0 > max + a1)) {
                 result = 0;
             } else {
                 result = a0 - a1;
             }
-            GetExecModule().SetParameter(0U, param_1);
-            GetExecModule().SetParameter(1U, param_2);
+            GetExecModule().SetParameter(0U, param1);
+            GetExecModule().SetParameter(1U, param2);
             GetExecModule().Execute();
 
-            auto ret_data = GetExecModule().GetRetValue<int32_t>();
-            EXPECT_EQ(ret_data, result);
+            auto retData = GetExecModule().GetRetValue<int32_t>();
+            EXPECT_EQ(retData, result);
         }
     }
 }
@@ -1219,37 +1218,37 @@ TEST_F(CodegenTest, GenSelect)
         RegAlloc(graph);
 
         EXPECT_TRUE(RunCodegen(graph));
-        auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-        auto code_exit = code_entry + graph->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
-        GetExecModule().SetInstructions(code_entry, code_exit);
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
 
         GetExecModule().SetDump(false);
 
         bool result;
-        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
+        auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_2);
-        result = Compare(cc, param_1, param_2);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param2);
+        result = Compare(cc, param1, param2);
         GetExecModule().Execute();
-        auto ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        auto retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_2);
-        GetExecModule().SetParameter(1U, param_1);
+        GetExecModule().SetParameter(0U, param2);
+        GetExecModule().SetParameter(1U, param1);
         GetExecModule().Execute();
-        result = Compare(cc, param_2, param_1);
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        result = Compare(cc, param2, param1);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_1);
-        result = Compare(cc, param_1, param_1);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param1);
+        result = Compare(cc, param1, param1);
         GetExecModule().Execute();
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
     }
 }
 
@@ -1280,35 +1279,35 @@ TEST_F(CodegenTest, BoolSelectImm)
         RegAlloc(graph);
 
         EXPECT_TRUE(RunCodegen(graph));
-        auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-        auto code_exit = code_entry + graph->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
-        GetExecModule().SetInstructions(code_entry, code_exit);
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
         GetExecModule().SetDump(false);
 
-        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
+        auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_2);
-        bool result = Compare(cc, param_1, param_2);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param2);
+        bool result = Compare(cc, param1, param2);
         GetExecModule().Execute();
-        auto ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        auto retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_2);
-        GetExecModule().SetParameter(1U, param_1);
+        GetExecModule().SetParameter(0U, param2);
+        GetExecModule().SetParameter(1U, param1);
         GetExecModule().Execute();
-        result = Compare(cc, param_2, param_1);
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        result = Compare(cc, param2, param1);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_1);
-        result = Compare(cc, param_1, param_1);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param1);
+        result = Compare(cc, param1, param1);
         GetExecModule().Execute();
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
     }
 }
 
@@ -1338,35 +1337,35 @@ TEST_F(CodegenTest, Select)
         RegAlloc(graph);
 
         EXPECT_TRUE(RunCodegen(graph));
-        auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-        auto code_exit = code_entry + graph->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
-        GetExecModule().SetInstructions(code_entry, code_exit);
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
         GetExecModule().SetDump(false);
 
-        auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
-        auto param_2 = CutValue<uint64_t>(-1L, DataType::UINT64);
+        auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
+        auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_2);
-        bool result = Compare(cc, param_1, param_2);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param2);
+        bool result = Compare(cc, param1, param2);
         GetExecModule().Execute();
-        auto ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        auto retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_2);
-        GetExecModule().SetParameter(1U, param_1);
+        GetExecModule().SetParameter(0U, param2);
+        GetExecModule().SetParameter(1U, param1);
         GetExecModule().Execute();
-        result = Compare(cc, param_2, param_1);
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        result = Compare(cc, param2, param1);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
 
-        GetExecModule().SetParameter(0U, param_1);
-        GetExecModule().SetParameter(1U, param_1);
+        GetExecModule().SetParameter(0U, param1);
+        GetExecModule().SetParameter(1U, param1);
         result = (cc == CC_EQ || cc == CC_LE || cc == CC_GE || cc == CC_AE || cc == CC_BE);
         GetExecModule().Execute();
-        ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, result);
+        retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, result);
     }
 }
 
@@ -1392,29 +1391,29 @@ TEST_F(CodegenTest, CompareObj)
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
-    auto param_1 = CutValue<uint64_t>(1U, DataType::UINT64);
-    auto param_2 = CutValue<uint64_t>(0U, DataType::UINT64);
+    auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
+    auto param2 = CutValue<uint64_t>(0U, DataType::UINT64);
 
-    GetExecModule().SetParameter(0U, param_1);
-
-    GetExecModule().Execute();
-
-    auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, 1U);
-
-    GetExecModule().SetParameter(0U, param_2);
+    GetExecModule().SetParameter(0U, param1);
 
     GetExecModule().Execute();
 
-    ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, 0U);
+    auto retData = GetExecModule().GetRetValue();
+    EXPECT_EQ(retData, 1U);
+
+    GetExecModule().SetParameter(0U, param2);
+
+    GetExecModule().Execute();
+
+    retData = GetExecModule().GetRetValue();
+    EXPECT_EQ(retData, 0U);
 }
 
 TEST_F(CodegenTest, LoadArray)
@@ -1448,26 +1447,26 @@ TEST_F(CodegenTest, LoadArray)
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
     ObjectPointerType array[4U] = {0xffffaaaaU, 0xffffbbbbU, 0xffffccccU, 0xffffddddU};
-    auto param_1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
-    auto param_2 = CutValue<int32_t>(2U, DataType::INT32);
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
-    GetExecModule().SetParameter(1U, param_2);
+    auto param1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
+    auto param2 = CutValue<int32_t>(2U, DataType::INT32);
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
+    GetExecModule().SetParameter(1U, param2);
 
     GetExecModule().Execute();
 
-    GetExecModule().CopyArray(param_1, array);
+    GetExecModule().CopyArray(param1, array);
 
-    GetExecModule().FreeArray(param_1);
-    auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, array[2U]);
+    GetExecModule().FreeArray(param1);
+    auto retData = GetExecModule().GetRetValue();
+    EXPECT_EQ(retData, array[2U]);
 }
 
 TEST_F(CodegenTest, LoadArrayPair)
@@ -1486,14 +1485,14 @@ TEST_F(CodegenTest, LoadArrayPair)
 TEST_F(CodegenTest, CheckCodegenBounds)
 {
     // Do not try to encode too large graph
-    uint64_t insts_per_byte = GetGraph()->GetEncoder()->MaxArchInstPerEncoded();
-    uint64_t max_bits_in_inst = GetInstructionSizeBits(GetGraph()->GetArch());
-    uint64_t inst_count = OPTIONS.GetCompilerMaxGenCodeSize() / (insts_per_byte * max_bits_in_inst);
+    uint64_t instsPerByte = GetGraph()->GetEncoder()->MaxArchInstPerEncoded();
+    uint64_t maxBitsInInst = GetInstructionSizeBits(GetGraph()->GetArch());
+    uint64_t instCount = g_options.GetCompilerMaxGenCodeSize() / (instsPerByte * maxBitsInInst);
 
-    CheckBounds<uint32_t>(inst_count - 1L);
-    CheckBounds<uint32_t>(inst_count + 1U);
+    CheckBounds<uint32_t>(instCount - 1L);
+    CheckBounds<uint32_t>(instCount + 1U);
 
-    CheckBounds<uint32_t>(inst_count / 2U);
+    CheckBounds<uint32_t>(instCount / 2U);
 }
 #endif
 
@@ -1515,22 +1514,22 @@ TEST_F(CodegenTest, LenArray)
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
     uint64_t array[4U] = {0U, 0U, 0U, 0U};
-    auto param_1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
+    auto param1 = GetExecModule().CreateArray(array, 4U, GetObjectAllocator());
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
 
     GetExecModule().Execute();
-    GetExecModule().FreeArray(param_1);
+    GetExecModule().FreeArray(param1);
 
-    auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, 4U);
+    auto retData = GetExecModule().GetRetValue();
+    EXPECT_EQ(retData, 4U);
 }
 
 TEST_F(CodegenTest, Parameter)
@@ -1555,22 +1554,22 @@ TEST_F(CodegenTest, Parameter)
     RegAlloc(graph);
 
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
-    auto param_1 = CutValue<uint64_t>(1234U, DataType::UINT64);
-    auto param_2 = CutValue<int16_t>(-1234L, DataType::INT16);
-    GetExecModule().SetParameter(0U, param_1);
-    GetExecModule().SetParameter(1U, param_2);
+    auto param1 = CutValue<uint64_t>(1234U, DataType::UINT64);
+    auto param2 = CutValue<int16_t>(-1234L, DataType::INT16);
+    GetExecModule().SetParameter(0U, param1);
+    GetExecModule().SetParameter(1U, param2);
 
     GetExecModule().Execute();
 
-    auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_EQ(ret_data, 1234U + 1234U);
+    auto retData = GetExecModule().GetRetValue();
+    EXPECT_EQ(retData, 1234U + 1234U);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
@@ -1616,23 +1615,23 @@ TEST_F(CodegenTest, RegallocTwoFreeRegs)
     }
     GraphChecker(GetGraph()).Check();
     EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto code_entry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto code_exit = code_entry + GetGraph()->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
+    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
-    auto param_1 = CutValue<uint64_t>(0x0U, DataType::UINT64);
-    auto param_2 = CutValue<uint16_t>(0x0U, DataType::INT32);
+    auto param1 = CutValue<uint64_t>(0x0U, DataType::UINT64);
+    auto param2 = CutValue<uint16_t>(0x0U, DataType::INT32);
 
-    GetExecModule().SetParameter(0U, param_1);
-    GetExecModule().SetParameter(1U, param_2);
+    GetExecModule().SetParameter(0U, param1);
+    GetExecModule().SetParameter(1U, param2);
 
     GetExecModule().Execute();
 
-    auto ret_data = GetExecModule().GetRetValue();
-    EXPECT_TRUE(ret_data == 10U * 9U * 8U * 7U * 6U * 5U * 4U * 3U * 2U * 1U + 20U);
+    auto retData = GetExecModule().GetRetValue();
+    EXPECT_TRUE(retData == 10U * 9U * 8U * 7U * 6U * 5U * 4U * 3U * 2U * 1U + 20U);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
@@ -1684,19 +1683,19 @@ TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
     GraphChecker(GetGraph()).Check();
 
     EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto code_entry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto code_exit = code_entry + GetGraph()->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
+    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     GetExecModule().SetDump(false);
 
-    auto param_1 = CutValue<uint64_t>(0x12345U, DataType::UINT64);
-    auto param_2 = CutValue<float>(0x12345U, DataType::FLOAT32);
+    auto param1 = CutValue<uint64_t>(0x12345U, DataType::UINT64);
+    auto param2 = CutValue<float>(0x12345U, DataType::FLOAT32);
 
-    GetExecModule().SetParameter(0U, param_1);
-    GetExecModule().SetParameter(1U, param_2);
-    GetExecModule().SetParameter(2U, param_2);
+    GetExecModule().SetParameter(0U, param1);
+    GetExecModule().SetParameter(1U, param2);
+    GetExecModule().SetParameter(2U, param2);
 
     GetExecModule().Execute();
 
@@ -1741,36 +1740,36 @@ TEST_F(CodegenTest, SaveState)
 
     // Run codegen
     EXPECT_TRUE(RunCodegen(graph));
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     // Enable dumping
     GetExecModule().SetDump(false);
 
-    uint64_t array_data[4U];
+    uint64_t arrayData[4U];
     for (size_t i = 0; i < 4U; i++) {
-        array_data[i] = i + 0x20U;
+        arrayData[i] = i + 0x20U;
     }
-    auto param_1 = GetExecModule().CreateArray(array_data, 4U, GetObjectAllocator());
-    auto param_2 = CutValue<uint64_t>(1U, DataType::UINT64);
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
-    GetExecModule().SetParameter(1U, param_2);
+    auto param1 = GetExecModule().CreateArray(arrayData, 4U, GetObjectAllocator());
+    auto param2 = CutValue<uint64_t>(1U, DataType::UINT64);
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
+    GetExecModule().SetParameter(1U, param2);
 
     GetExecModule().Execute();
     GetExecModule().SetDump(false);
     // End dump
 
-    auto ret_data = GetExecModule().GetRetValue();
+    auto retData = GetExecModule().GetRetValue();
     // NOTE (igorban) : really need to check array changes
-    EXPECT_EQ(ret_data, 4U * 0x21);
+    EXPECT_EQ(retData, 4U * 0x21);
 
     // Clear data for next execution
     while (auto current = GetGraph()->GetFirstConstInst()) {
         GetGraph()->RemoveConstFromList(current);
     }
-    GetExecModule().FreeArray(param_1);
+    GetExecModule().FreeArray(param1);
 }  // namespace panda::compiler
 
 TEST_F(CodegenTest, DeoptimizeIf)
@@ -1788,10 +1787,10 @@ TEST_F(CodegenTest, DeoptimizeIf)
     RegAlloc(GetGraph());
 
     EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto code_entry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto code_exit = code_entry + GetGraph()->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
+    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     // param == false [OK]
     auto param = false;
@@ -1826,26 +1825,26 @@ TEST_F(CodegenTest, ZeroCheck)
     SetNumVirtRegs(GetGraph()->GetVRegsCount());
 
     EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto code_entry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto code_exit = code_entry + GetGraph()->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
+    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     // param1 < 0 [OK]
-    auto param_1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::min(), DataType::INT64);
-    auto param_2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    GetExecModule().SetParameter(0U, param_1);
-    GetExecModule().SetParameter(1U, param_2);
+    auto param1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::min(), DataType::INT64);
+    auto param2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
+    GetExecModule().SetParameter(0U, param1);
+    GetExecModule().SetParameter(1U, param2);
     GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), param_1 + param_2);
+    EXPECT_EQ(GetExecModule().GetRetValue(), param1 + param2);
 
     // param1 > 0 [OK]
-    param_1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    param_2 = CutValue<uint64_t>(0U, DataType::INT64);
-    GetExecModule().SetParameter(0U, param_1);
-    GetExecModule().SetParameter(1U, param_2);
+    param1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
+    param2 = CutValue<uint64_t>(0U, DataType::INT64);
+    GetExecModule().SetParameter(0U, param1);
+    GetExecModule().SetParameter(1U, param2);
     GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), param_1 + param_2);
+    EXPECT_EQ(GetExecModule().GetRetValue(), param1 + param2);
 
     // param1 == 0 [THROW]
 }
@@ -1872,26 +1871,26 @@ TEST_F(CodegenTest, NegativeCheck)
     SetNumVirtRegs(GetGraph()->GetVRegsCount());
 
     EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto code_entry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto code_exit = code_entry + GetGraph()->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
+    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     // param1 > 0 [OK]
-    auto param_1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    auto param_2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::min(), DataType::INT64);
-    GetExecModule().SetParameter(0U, param_1);
-    GetExecModule().SetParameter(1U, param_2);
+    auto param1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
+    auto param2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::min(), DataType::INT64);
+    GetExecModule().SetParameter(0U, param1);
+    GetExecModule().SetParameter(1U, param2);
     GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), param_1 + param_2);
+    EXPECT_EQ(GetExecModule().GetRetValue(), param1 + param2);
 
     // param1 == 0 [OK]
-    param_1 = CutValue<uint64_t>(0U, DataType::INT64);
-    param_2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    GetExecModule().SetParameter(0U, param_1);
-    GetExecModule().SetParameter(1U, param_2);
+    param1 = CutValue<uint64_t>(0U, DataType::INT64);
+    param2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
+    GetExecModule().SetParameter(0U, param1);
+    GetExecModule().SetParameter(1U, param2);
     GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), param_1 + param_2);
+    EXPECT_EQ(GetExecModule().GetRetValue(), param1 + param2);
 
     // param1 < 0 [THROW]
 }
@@ -1925,10 +1924,10 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
     RegAlloc(GetGraph());
 
     EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto code_entry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto code_exit = code_entry + GetGraph()->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
+    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
 
     // NOTE (igorban) : fill Frame array == nullptr [THROW]
 
@@ -1936,8 +1935,8 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
     for (auto i = 0U; i < ARRAY_LEN; i++) {
         array[i] = i + 0x20U;
     }
-    auto param_1 = GetExecModule().CreateArray(array, ARRAY_LEN, GetObjectAllocator());
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param_1));
+    auto param1 = GetExecModule().CreateArray(array, ARRAY_LEN, GetObjectAllocator());
+    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
 
     // 0 <= index < ARRAY_LEN [OK]
     auto index = CutValue<uint64_t>(1U, DataType::UINT64);
@@ -1949,82 +1948,82 @@ TEST_F(CodegenTest, NullCheckBoundsCheck)
     NOTE (igorban) : fill Frame
     // index < 0 [THROW]
     */
-    GetExecModule().FreeArray(param_1);
+    GetExecModule().FreeArray(param1);
 }
 
 TEST_F(CodegenTest, ResolveParamSequence)
 {
-    ArenaVector<std::pair<uint8_t, uint8_t>> some_sequence(GetAllocator()->Adapter());
-    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 3U));
-    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 0U));
-    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
-    some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 2U));
+    ArenaVector<std::pair<uint8_t, uint8_t>> someSequence(GetAllocator()->Adapter());
+    someSequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 3U));
+    someSequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 0U));
+    someSequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+    someSequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 2U));
 
-    auto result = ResoveParameterSequence(&some_sequence, 13U, GetAllocator());
-    EXPECT_TRUE(some_sequence.empty());
-    ArenaVector<std::pair<uint8_t, uint8_t>> result_sequence(GetAllocator()->Adapter());
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 0U));
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 3U));
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(13U, 2U));
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
-    result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 13U));
+    auto result = ResoveParameterSequence(&someSequence, 13U, GetAllocator());
+    EXPECT_TRUE(someSequence.empty());
+    ArenaVector<std::pair<uint8_t, uint8_t>> resultSequence(GetAllocator()->Adapter());
+    resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 0U));
+    resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 3U));
+    resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(13U, 2U));
+    resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+    resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 13U));
 
-    EXPECT_EQ(result, result_sequence);
+    EXPECT_EQ(result, resultSequence);
 
     {
         // Special loop-only case
-        ArenaVector<std::pair<uint8_t, uint8_t>> some_sequence(GetAllocator()->Adapter());
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 2U));
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
-        some_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
+        ArenaVector<std::pair<uint8_t, uint8_t>> someSequence(GetAllocator()->Adapter());
+        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 2U));
+        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
+        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
+        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
 
-        auto result = ResoveParameterSequence(&some_sequence, 13U, GetAllocator());
-        EXPECT_TRUE(some_sequence.empty());
-        ArenaVector<std::pair<uint8_t, uint8_t>> result_sequence(GetAllocator()->Adapter());
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(13U, 2U));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
-        result_sequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 13U));
+        auto result = ResoveParameterSequence(&someSequence, 13U, GetAllocator());
+        EXPECT_TRUE(someSequence.empty());
+        ArenaVector<std::pair<uint8_t, uint8_t>> resultSequence(GetAllocator()->Adapter());
+        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(13U, 2U));
+        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
+        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
+        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
+        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 13U));
 
-        EXPECT_EQ(result, result_sequence);
+        EXPECT_EQ(result, resultSequence);
     }
-    const uint32_t reg_size = 30;
-    const uint8_t tmp_reg = reg_size + 5U;
+    const uint32_t regSize = 30;
+    const uint8_t tmpReg = regSize + 5U;
     for (uint64_t i = 0; i < ITERATION; ++i) {
-        EXPECT_TRUE(some_sequence.empty());
+        EXPECT_TRUE(someSequence.empty());
 
         std::vector<uint8_t> iters;
-        for (uint8_t j = 0; j < reg_size; ++j) {
+        for (uint8_t j = 0; j < regSize; ++j) {
             iters.push_back(j);
         }
-        std::shuffle(iters.begin(), iters.end(), RANDOM_GENERATOR);
-        std::vector<std::pair<uint8_t, uint8_t>> orig_vector;
-        for (uint8_t j = 0; j < reg_size; ++j) {
-            auto gen {RANDOM_GENERATOR()};
-            auto random_value = gen % reg_size;
-            orig_vector.emplace_back(std::pair<uint8_t, uint8_t>(iters[j], random_value));
+        std::shuffle(iters.begin(), iters.end(), g_randomGenerator);
+        std::vector<std::pair<uint8_t, uint8_t>> origVector;
+        for (uint8_t j = 0; j < regSize; ++j) {
+            auto gen {g_randomGenerator()};
+            auto randomValue = gen % regSize;
+            origVector.emplace_back(std::pair<uint8_t, uint8_t>(iters[j], randomValue));
         }
-        for (auto &pair : orig_vector) {
-            some_sequence.emplace_back(pair);
+        for (auto &pair : origVector) {
+            someSequence.emplace_back(pair);
         }
-        result_sequence = ResoveParameterSequence(&some_sequence, tmp_reg, GetAllocator());
+        resultSequence = ResoveParameterSequence(&someSequence, tmpReg, GetAllocator());
         std::vector<std::pair<uint8_t, uint8_t>> result;
-        for (auto &pair : result_sequence) {
+        for (auto &pair : resultSequence) {
             result.emplace_back(pair);
         }
 
         // First analysis - there are no dst before src
-        for (uint8_t j = 0; j < reg_size; ++j) {
+        for (uint8_t j = 0; j < regSize; ++j) {
             auto dst = result[j].first;
-            for (uint8_t k = j + 1U; k < reg_size; ++k) {
-                if (result[k].second == dst && result[k].second != tmp_reg) {
-                    std::cerr << " first = " << result[k].first << " tmp = " << (reg_size + 5U) << "\n";
+            for (uint8_t k = j + 1U; k < regSize; ++k) {
+                if (result[k].second == dst && result[k].second != tmpReg) {
+                    std::cerr << " first = " << result[k].first << " tmp = " << (regSize + 5U) << "\n";
                     std::cerr << " Before:\n";
-                    for (auto &it : orig_vector) {
+                    for (auto &it : origVector) {
                         std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";
                     }
                     std::cerr << " After:\n";
@@ -2044,12 +2043,12 @@ TEST_F(CodegenTest, ResolveParamSequence)
 
 TEST_F(CodegenTest, BoundsCheckI)
 {
-    uint64_t array_data[4098U];
+    uint64_t arrayData[4098U];
     for (unsigned i = 0; i < 4098U; i++) {
-        array_data[i] = i;
+        arrayData[i] = i;
     }
 
-    for (unsigned index = 4095; index <= 4097; index++) {
+    for (unsigned index = 4095U; index <= 4097U; index++) {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
@@ -2072,23 +2071,23 @@ TEST_F(CodegenTest, BoundsCheckI)
 
         // Run codegen
         EXPECT_TRUE(RunCodegen(graph));
-        auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-        auto code_exit = code_entry + graph->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
-        GetExecModule().SetInstructions(code_entry, code_exit);
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        GetExecModule().SetInstructions(codeEntry, codeExit);
 
         // Enable dumping
         GetExecModule().SetDump(false);
 
-        auto param = GetExecModule().CreateArray(array_data, index + 1U, GetObjectAllocator());
+        auto param = GetExecModule().CreateArray(arrayData, index + 1U, GetObjectAllocator());
         GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param));
 
         GetExecModule().Execute();
         GetExecModule().SetDump(false);
         // End dump
 
-        auto ret_data = GetExecModule().GetRetValue();
-        EXPECT_EQ(ret_data, index);
+        auto retData = GetExecModule().GetRetValue();
+        EXPECT_EQ(retData, index);
 
         GetExecModule().FreeArray(param);
     }
@@ -2124,9 +2123,9 @@ TEST_F(CodegenTest, MultiplyAddFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 10.0);
-        CONSTANT(1U, 42.0);
-        CONSTANT(2U, 13.0);
+        CONSTANT(0U, 10.0_D);
+        CONSTANT(1U, 42.0_D);
+        CONSTANT(2U, 13.0_D);
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -2135,7 +2134,7 @@ TEST_F(CodegenTest, MultiplyAddFloat)
         }
     }
 
-    CheckReturnValue(GetGraph(), 433.0);
+    CheckReturnValue(GetGraph(), 433.0_D);
 }
 
 TEST_F(CodegenTest, MultiplySubtractInteger)
@@ -2168,9 +2167,9 @@ TEST_F(CodegenTest, MultiplySubtractFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 10.0);
-        CONSTANT(1U, 42.0);
-        CONSTANT(2U, 13.0);
+        CONSTANT(0U, 10.0_D);
+        CONSTANT(1U, 42.0_D);
+        CONSTANT(2U, 13.0_D);
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -2179,7 +2178,7 @@ TEST_F(CodegenTest, MultiplySubtractFloat)
         }
     }
 
-    CheckReturnValue(GetGraph(), -407.0);
+    CheckReturnValue(GetGraph(), -407.0_D);
 }
 
 TEST_F(CodegenTest, MultiplyNegateInteger)
@@ -2211,8 +2210,8 @@ TEST_F(CodegenTest, MultiplyNegateFloat)
 
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 5.0);
-        CONSTANT(1U, 5.0);
+        CONSTANT(0U, 5.0_D);
+        CONSTANT(1U, 5.0_D);
 
         BASIC_BLOCK(2U, -1L)
         {
@@ -2221,7 +2220,7 @@ TEST_F(CodegenTest, MultiplyNegateFloat)
         }
     }
 
-    CheckReturnValue(GetGraph(), -25.0);
+    CheckReturnValue(GetGraph(), -25.0_D);
 }
 
 TEST_F(CodegenTest, OrNot)
@@ -2412,18 +2411,18 @@ TEST_F(CodegenTest, LoadArrayPairLivenessInfo)
     RegAlloc(graph);
     EXPECT_TRUE(RunCodegen(graph));
 
-    RegMask ldp_regs {};
+    RegMask ldpRegs {};
 
     auto cg = Codegen(graph);
     for (auto &bb : graph->GetBlocksLinearOrder()) {
         for (auto inst : bb->AllInsts()) {
             if (inst->GetOpcode() == Opcode::LoadArrayPair) {
-                ldp_regs.set(inst->GetDstReg(0U));
-                ldp_regs.set(inst->GetDstReg(1U));
+                ldpRegs.set(inst->GetDstReg(0U));
+                ldpRegs.set(inst->GetDstReg(1U));
             } else if (inst->GetOpcode() == Opcode::IsInstance) {
-                auto live_regs = cg.GetLiveRegisters(inst).first;
+                auto liveRegs = cg.GetLiveRegisters(inst).first;
                 // Both dst registers should be alive during IsInstance call
-                ASSERT_EQ(ldp_regs & live_regs, ldp_regs);
+                ASSERT_EQ(ldpRegs & liveRegs, ldpRegs);
             }
         }
     }
@@ -2450,12 +2449,12 @@ TEST_F(CodegenTest, CompareAnyTypeInst)
     ASSERT_TRUE(RegAlloc(graph));
     ASSERT_TRUE(RunCodegen(graph));
 
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
 
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
 
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
     GetExecModule().SetDump(false);
 
     GetExecModule().Execute();
@@ -2484,12 +2483,12 @@ TEST_F(CodegenTest, CastAnyTypeValueInst)
     ASSERT_TRUE(RegAlloc(graph));
     ASSERT_TRUE(RunCodegen(graph));
 
-    auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto code_exit = code_entry + graph->GetCode().Size();
+    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+    auto codeExit = codeEntry + graph->GetCode().Size();
 
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
 
-    GetExecModule().SetInstructions(code_entry, code_exit);
+    GetExecModule().SetInstructions(codeEntry, codeExit);
     GetExecModule().SetDump(false);
 
     GetExecModule().Execute();

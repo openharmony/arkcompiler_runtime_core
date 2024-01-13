@@ -23,37 +23,37 @@ namespace panda::time {
 
 constexpr size_t TIME_BUFF_LENGTH = 100;
 
-Timer::Timer(uint64_t *duration, bool need_restart) : duration_(duration), start_time_(GetCurrentTimeInNanos())
+Timer::Timer(uint64_t *duration, bool needRestart) : duration_(duration), startTime_(GetCurrentTimeInNanos())
 {
-    if (need_restart) {
+    if (needRestart) {
         *duration = 0;
     }
 }
 
 Timer::~Timer()
 {
-    *duration_ += GetCurrentTimeInNanos() - start_time_;
+    *duration_ += GetCurrentTimeInNanos() - startTime_;
 }
 
 PandaString GetCurrentTimeString()
 {
-    PandaOStringStream result_stream;
-    auto time_now = GetCurrentTimeInMillis(true);
-    auto millisecond = static_cast<time_t>(time_now % MILLISECONDS_IN_SECOND);
-    auto seconds = static_cast<time_t>(time_now / MILLISECONDS_IN_SECOND);
+    PandaOStringStream resultStream;
+    auto timeNow = GetCurrentTimeInMillis(true);
+    auto millisecond = static_cast<time_t>(timeNow % MILLISECONDS_IN_SECOND);
+    auto seconds = static_cast<time_t>(timeNow / MILLISECONDS_IN_SECOND);
 
     constexpr int DATE_BUFFER_SIZE = 16;
-    PandaString date_buffer;
-    date_buffer.resize(DATE_BUFFER_SIZE);
+    PandaString dateBuffer;
+    dateBuffer.resize(DATE_BUFFER_SIZE);
     std::tm *now = std::localtime(&seconds);
     ASSERT(now != nullptr);
-    if (std::strftime(date_buffer.data(), DATE_BUFFER_SIZE, "%b %d %T", now) == 0U) {
+    if (std::strftime(dateBuffer.data(), DATE_BUFFER_SIZE, "%b %d %T", now) == 0U) {
         return "";
     }
     // Because strftime returns a string in C format
-    date_buffer[DATE_BUFFER_SIZE - 1] = '.';
-    result_stream << date_buffer << std::setfill('0') << std::setw(PRECISION_FOR_TIME) << millisecond;
-    return result_stream.str();
+    dateBuffer[DATE_BUFFER_SIZE - 1] = '.';
+    resultStream << dateBuffer << std::setfill('0') << std::setw(PRECISION_FOR_TIME) << millisecond;
+    return resultStream.str();
 }
 
 PandaString GetCurrentTimeString(const char *format)

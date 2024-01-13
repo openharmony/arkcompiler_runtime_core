@@ -52,9 +52,9 @@ public:
      * @param string - a pointer to the MUTF8 string
      * @return 32 bits hash
      */
-    static uint32_t GetHash32String(const uint8_t *mutf8_string)
+    static uint32_t GetHash32String(const uint8_t *mutf8String)
     {
-        return HashImpl::GetHash32StringImpl(mutf8_string);
+        return HashImpl::GetHash32StringImpl(mutf8String);
     }
     /**
      * @brief Create 32 bits Hash from MUTF8 @param string.
@@ -62,9 +62,9 @@ public:
      * @param seed - seed which is used to calculate hash
      * @return 32 bits hash
      */
-    static uint32_t GetHash32StringWithSeed(const uint8_t *mutf8_string, uint32_t seed)
+    static uint32_t GetHash32StringWithSeed(const uint8_t *mutf8String, uint32_t seed)
     {
-        return HashImpl::GetHash32StringWithSeedImpl(mutf8_string, seed);
+        return HashImpl::GetHash32StringWithSeedImpl(mutf8String, seed);
     }
 };
 

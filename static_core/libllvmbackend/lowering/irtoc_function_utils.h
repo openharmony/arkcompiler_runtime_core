@@ -19,8 +19,8 @@
 #include <string>
 
 namespace panda::llvmbackend::irtoc_function_utils {
-bool IsNoAliasIrtocFunction(const std::string &external_name);
-bool IsPtrIgnIrtocFunction(const std::string &external_name);
+bool IsNoAliasIrtocFunction(const std::string &externalName);
+bool IsPtrIgnIrtocFunction(const std::string &externalName);
 }  // namespace panda::llvmbackend::irtoc_function_utils
 
 #endif  // LIBLLVMBACKEND_LOWERING_IRTOC_FUNCTION_UTILS_H

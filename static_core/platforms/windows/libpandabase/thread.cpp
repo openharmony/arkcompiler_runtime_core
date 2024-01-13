@@ -34,12 +34,12 @@ int GetPid()
     return _getpid();
 }
 
-int SetPriority(DWORD thread_id, int prio)
+int SetPriority(DWORD threadId, int prio)
 {
     // The priority can be set within range [-2, 2]
     ASSERT(prio >= -2);  // -2: the lowest priority
     ASSERT(prio <= 2);   // 2: the highest priority
-    HANDLE thread = OpenThread(THREAD_SET_INFORMATION, false, thread_id);
+    HANDLE thread = OpenThread(THREAD_SET_INFORMATION, false, threadId);
     if (thread == NULL) {
         LOG(FATAL, COMMON) << "OpenThread failed, error code " << GetLastError();
     }
@@ -49,9 +49,9 @@ int SetPriority(DWORD thread_id, int prio)
     return ret;
 }
 
-int GetPriority(DWORD thread_id)
+int GetPriority(DWORD threadId)
 {
-    HANDLE thread = OpenThread(THREAD_QUERY_INFORMATION, false, thread_id);
+    HANDLE thread = OpenThread(THREAD_QUERY_INFORMATION, false, threadId);
     if (thread == NULL) {
         LOG(FATAL, COMMON) << "OpenThread failed, error code " << GetLastError();
     }
@@ -60,10 +60,10 @@ int GetPriority(DWORD thread_id)
     return ret;
 }
 
-int SetThreadName(NativeHandleType pthread_handle, const char *name)
+int SetThreadName(NativeHandleType pthreadHandle, const char *name)
 {
-    ASSERT(pthread_handle != 0);
-    pthread_t thread = reinterpret_cast<pthread_t>(pthread_handle);
+    ASSERT(pthreadHandle != 0);
+    pthread_t thread = reinterpret_cast<pthread_t>(pthreadHandle);
     return pthread_setname_np(thread, name);
 }
 
@@ -82,9 +82,9 @@ void NativeSleep(unsigned int ms)
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-void ThreadDetach(NativeHandleType pthread_handle)
+void ThreadDetach(NativeHandleType pthreadHandle)
 {
-    pthread_detach(reinterpret_cast<pthread_t>(pthread_handle));
+    pthread_detach(reinterpret_cast<pthread_t>(pthreadHandle));
 }
 
 void ThreadExit(void *ret)
@@ -92,8 +92,8 @@ void ThreadExit(void *ret)
     pthread_exit(ret);
 }
 
-void ThreadJoin(NativeHandleType pthread_handle, void **ret)
+void ThreadJoin(NativeHandleType pthreadHandle, void **ret)
 {
-    pthread_join(reinterpret_cast<pthread_t>(pthread_handle), ret);
+    pthread_join(reinterpret_cast<pthread_t>(pthreadHandle), ret);
 }
 }  // namespace panda::os::thread

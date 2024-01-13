@@ -32,70 +32,70 @@ template <class LanguageConfig>
 PandaString GenerationalGC<LanguageConfig>::MemStats::Dump()
 {
     PandaStringStream statistic;
-    statistic << "Young freed " << young_free_object_count_ << " objects ("
-              << helpers::MemoryConverter(young_free_object_size_) << ") Young moved " << young_move_object_count_
-              << " objects, " << young_move_object_size_ << " bytes ("
-              << helpers::MemoryConverter(young_move_object_size_) << ")";
-    if (tenured_free_object_size_ > 0U) {
-        statistic << " Tenured freed " << tenured_free_object_size_ << "("
-                  << helpers::MemoryConverter(tenured_free_object_size_) << ")";
+    statistic << "Young freed " << youngFreeObjectCount_ << " objects ("
+              << helpers::MemoryConverter(youngFreeObjectSize_) << ") Young moved " << youngMoveObjectCount_
+              << " objects, " << youngMoveObjectSize_ << " bytes (" << helpers::MemoryConverter(youngMoveObjectSize_)
+              << ")";
+    if (tenuredFreeObjectSize_ > 0U) {
+        statistic << " Tenured freed " << tenuredFreeObjectSize_ << "("
+                  << helpers::MemoryConverter(tenuredFreeObjectSize_) << ")";
     }
     return statistic.str();
 }
 
 template <class LanguageConfig>
-void GenerationalGC<LanguageConfig>::UpdateMemStats(size_t bytes_in_heap_before, bool update_tenured_stats,
-                                                    bool record_allocation_for_moved_objects)
+void GenerationalGC<LanguageConfig>::UpdateMemStats(size_t bytesInHeapBefore, bool updateTenuredStats,
+                                                    bool recordAllocationForMovedObjects)
 {
-    size_t young_move_size = this->mem_stats_.GetSizeMovedYoung();
-    size_t young_move_count = this->mem_stats_.GetCountMovedYoung();
-    size_t young_delete_size = this->mem_stats_.GetSizeFreedYoung();
-    size_t young_delete_count = this->mem_stats_.GetCountFreedYoung();
-    size_t tenured_move_size = update_tenured_stats ? this->mem_stats_.GetSizeMovedTenured() : 0;
-    size_t tenured_move_count = update_tenured_stats ? this->mem_stats_.GetCountMovedTenured() : 0;
-    size_t tenured_delete_size = update_tenured_stats ? this->mem_stats_.GetSizeFreedTenured() : 0;
-    size_t tenured_delete_count = update_tenured_stats ? this->mem_stats_.GetCountFreedTenured() : 0;
+    size_t youngMoveSize = this->memStats_.GetSizeMovedYoung();
+    size_t youngMoveCount = this->memStats_.GetCountMovedYoung();
+    size_t youngDeleteSize = this->memStats_.GetSizeFreedYoung();
+    size_t youngDeleteCount = this->memStats_.GetCountFreedYoung();
+    size_t tenuredMoveSize = updateTenuredStats ? this->memStats_.GetSizeMovedTenured() : 0;
+    size_t tenuredMoveCount = updateTenuredStats ? this->memStats_.GetCountMovedTenured() : 0;
+    size_t tenuredDeleteSize = updateTenuredStats ? this->memStats_.GetSizeFreedTenured() : 0;
+    size_t tenuredDeleteCount = updateTenuredStats ? this->memStats_.GetCountFreedTenured() : 0;
 
-    auto *vm_mem_stats = this->GetPandaVm()->GetMemStats();
-    GCInstanceStats *gc_stats = this->GetStats();
+    auto *vmMemStats = this->GetPandaVm()->GetMemStats();
+    GCInstanceStats *gcStats = this->GetStats();
 
-    if (record_allocation_for_moved_objects) {
-        vm_mem_stats->RecordAllocateObjects(young_move_count + tenured_move_count, young_move_size + tenured_move_size,
-                                            SpaceType::SPACE_TYPE_OBJECT);
+    if (recordAllocationForMovedObjects) {
+        vmMemStats->RecordAllocateObjects(youngMoveCount + tenuredMoveCount, youngMoveSize + tenuredMoveSize,
+                                          SpaceType::SPACE_TYPE_OBJECT);
     }
-    if (young_move_size > 0) {
-        gc_stats->AddMemoryValue(young_move_size, MemoryTypeStats::MOVED_BYTES);
-        gc_stats->AddObjectsValue(young_move_count, ObjectTypeStats::MOVED_OBJECTS);
-        vm_mem_stats->RecordYoungMovedObjects(young_move_count, young_move_size, SpaceType::SPACE_TYPE_OBJECT);
+    if (youngMoveSize > 0) {
+        gcStats->AddMemoryValue(youngMoveSize, MemoryTypeStats::MOVED_BYTES);
+        gcStats->AddObjectsValue(youngMoveCount, ObjectTypeStats::MOVED_OBJECTS);
+        vmMemStats->RecordYoungMovedObjects(youngMoveCount, youngMoveSize, SpaceType::SPACE_TYPE_OBJECT);
     }
-    if (young_delete_size > 0) {
-        gc_stats->AddMemoryValue(young_delete_size, MemoryTypeStats::YOUNG_FREED_BYTES);
-        gc_stats->AddObjectsValue(young_delete_count, ObjectTypeStats::YOUNG_FREED_OBJECTS);
-    }
-
-    if (bytes_in_heap_before > 0) {
-        gc_stats->AddCopiedRatioValue(static_cast<double>(young_move_size + tenured_move_size) / bytes_in_heap_before);
+    if (youngDeleteSize > 0) {
+        gcStats->AddMemoryValue(youngDeleteSize, MemoryTypeStats::YOUNG_FREED_BYTES);
+        gcStats->AddObjectsValue(youngDeleteCount, ObjectTypeStats::YOUNG_FREED_OBJECTS);
     }
 
-    if (tenured_move_size > 0) {
-        gc_stats->AddMemoryValue(tenured_move_size, MemoryTypeStats::MOVED_BYTES);
-        gc_stats->AddObjectsValue(tenured_move_count, ObjectTypeStats::MOVED_OBJECTS);
-        vm_mem_stats->RecordTenuredMovedObjects(tenured_move_count, tenured_move_size, SpaceType::SPACE_TYPE_OBJECT);
+    if (bytesInHeapBefore > 0) {
+        gcStats->AddCopiedRatioValue(static_cast<double>(youngMoveSize + tenuredMoveSize) / bytesInHeapBefore);
     }
-    if (tenured_delete_size > 0) {
-        gc_stats->AddMemoryValue(tenured_delete_size, MemoryTypeStats::ALL_FREED_BYTES);
-        gc_stats->AddObjectsValue(tenured_delete_count, ObjectTypeStats::ALL_FREED_OBJECTS);
+
+    if (tenuredMoveSize > 0) {
+        gcStats->AddMemoryValue(tenuredMoveSize, MemoryTypeStats::MOVED_BYTES);
+        gcStats->AddObjectsValue(tenuredMoveCount, ObjectTypeStats::MOVED_OBJECTS);
+        vmMemStats->RecordTenuredMovedObjects(tenuredMoveCount, tenuredMoveSize, SpaceType::SPACE_TYPE_OBJECT);
     }
-    vm_mem_stats->RecordFreeObjects(young_delete_count + tenured_delete_count, young_delete_size + tenured_delete_size,
-                                    SpaceType::SPACE_TYPE_OBJECT);
+    if (tenuredDeleteSize > 0) {
+        gcStats->AddMemoryValue(tenuredDeleteSize, MemoryTypeStats::ALL_FREED_BYTES);
+        gcStats->AddObjectsValue(tenuredDeleteCount, ObjectTypeStats::ALL_FREED_OBJECTS);
+    }
+    vmMemStats->RecordFreeObjects(youngDeleteCount + tenuredDeleteCount, youngDeleteSize + tenuredDeleteSize,
+                                  SpaceType::SPACE_TYPE_OBJECT);
 }
 
 template <class LanguageConfig>
-void GenerationalGC<LanguageConfig>::CreateCardTable(InternalAllocatorPtr internal_allocator_ptr, uintptr_t min_address,
+void GenerationalGC<LanguageConfig>::CreateCardTable(InternalAllocatorPtr internalAllocatorPtr, uintptr_t minAddress,
                                                      size_t size)
 {
-    card_table_ = MakePandaUnique<CardTable>(internal_allocator_ptr, min_address, size);
-    card_table_->Initialize();
+    cardTable_ = MakePandaUnique<CardTable>(internalAllocatorPtr, minAddress, size);
+    cardTable_->Initialize();
 }
 
 template <class LanguageConfig>

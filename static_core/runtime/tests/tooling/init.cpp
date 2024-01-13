@@ -24,26 +24,26 @@ namespace panda::tooling::test {
 extern const char *GetCurrentTestName();
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static std::thread G_DEBUGGER_THREAD;
+static std::thread g_gDebuggerThread;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static std::unique_ptr<TestRunner> G_RUNNER {nullptr};
+static std::unique_ptr<TestRunner> g_gRunner {nullptr};
 
 extern "C" int StartDebugger(uint32_t /* port */, bool /* break_on_start */)
 {
-    const char *test_name = GetCurrentTestName();
-    G_RUNNER = std::make_unique<TestRunner>(test_name);
-    G_DEBUGGER_THREAD = std::thread([] {
+    const char *testName = GetCurrentTestName();
+    g_gRunner = std::make_unique<TestRunner>(testName);
+    g_gDebuggerThread = std::thread([] {
         TestUtil::WaitForInit();
-        G_RUNNER->Run();
+        g_gRunner->Run();
     });
     return 0;
 }
 
 extern "C" int StopDebugger()
 {
-    G_DEBUGGER_THREAD.join();
-    G_RUNNER->TerminateTest();
-    G_RUNNER.reset();
+    g_gDebuggerThread.join();
+    g_gRunner->TerminateTest();
+    g_gRunner.reset();
     return 0;
 }
 }  // namespace panda::tooling::test

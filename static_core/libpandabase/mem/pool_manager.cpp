@@ -22,67 +22,66 @@
 namespace panda {
 
 // default is mmap_mem_pool_
-PoolType PoolManager::pool_type_ = PoolType::MMAP;
-bool PoolManager::is_initialized_ = false;
-MallocMemPool *PoolManager::malloc_mem_pool_ = nullptr;
-MmapMemPool *PoolManager::mmap_mem_pool_ = nullptr;
+PoolType PoolManager::poolType_ = PoolType::MMAP;
+bool PoolManager::isInitialized_ = false;
+MallocMemPool *PoolManager::mallocMemPool_ = nullptr;
+MmapMemPool *PoolManager::mmapMemPool_ = nullptr;
 
-Arena *PoolManager::AllocArena(size_t size, SpaceType space_type, AllocatorType allocator_type,
-                               const void *allocator_addr)
+Arena *PoolManager::AllocArena(size_t size, SpaceType spaceType, AllocatorType allocatorType, const void *allocatorAddr)
 {
-    if (pool_type_ == PoolType::MMAP) {
-        return mmap_mem_pool_->template AllocArenaImpl<Arena, OSPagesAllocPolicy::NO_POLICY>(
-            size, space_type, allocator_type, allocator_addr);
+    if (poolType_ == PoolType::MMAP) {
+        return mmapMemPool_->template AllocArenaImpl<Arena, OSPagesAllocPolicy::NO_POLICY>(
+            size, spaceType, allocatorType, allocatorAddr);
     }
-    return malloc_mem_pool_->template AllocArenaImpl<Arena, OSPagesAllocPolicy::NO_POLICY>(
-        size, space_type, allocator_type, allocator_addr);
+    return mallocMemPool_->template AllocArenaImpl<Arena, OSPagesAllocPolicy::NO_POLICY>(size, spaceType, allocatorType,
+                                                                                         allocatorAddr);
 }
 
 void PoolManager::FreeArena(Arena *arena)
 {
-    if (pool_type_ == PoolType::MMAP) {
-        return mmap_mem_pool_->template FreeArenaImpl<Arena, OSPagesPolicy::IMMEDIATE_RETURN>(arena);
+    if (poolType_ == PoolType::MMAP) {
+        return mmapMemPool_->template FreeArenaImpl<Arena, OSPagesPolicy::IMMEDIATE_RETURN>(arena);
     }
-    return malloc_mem_pool_->template FreeArenaImpl<Arena, OSPagesPolicy::IMMEDIATE_RETURN>(arena);
+    return mallocMemPool_->template FreeArenaImpl<Arena, OSPagesPolicy::IMMEDIATE_RETURN>(arena);
 }
 
 void PoolManager::Initialize(PoolType type)
 {
-    ASSERT(!is_initialized_);
-    is_initialized_ = true;
-    pool_type_ = type;
-    if (pool_type_ == PoolType::MMAP) {
-        mmap_mem_pool_ = new MmapMemPool();
+    ASSERT(!isInitialized_);
+    isInitialized_ = true;
+    poolType_ = type;
+    if (poolType_ == PoolType::MMAP) {
+        mmapMemPool_ = new MmapMemPool();
     } else {
-        malloc_mem_pool_ = new MallocMemPool();
+        mallocMemPool_ = new MallocMemPool();
     }
     LOG(DEBUG, ALLOC) << "PoolManager Initialized";
 }
 
 MmapMemPool *PoolManager::GetMmapMemPool()
 {
-    ASSERT(is_initialized_);
-    ASSERT(pool_type_ == PoolType::MMAP);
-    return mmap_mem_pool_;
+    ASSERT(isInitialized_);
+    ASSERT(poolType_ == PoolType::MMAP);
+    return mmapMemPool_;
 }
 
 MallocMemPool *PoolManager::GetMallocMemPool()
 {
-    ASSERT(is_initialized_);
-    ASSERT(pool_type_ == PoolType::MALLOC);
-    return malloc_mem_pool_;
+    ASSERT(isInitialized_);
+    ASSERT(poolType_ == PoolType::MALLOC);
+    return mallocMemPool_;
 }
 
 void PoolManager::Finalize()
 {
-    ASSERT(is_initialized_);
-    is_initialized_ = false;
-    if (pool_type_ == PoolType::MMAP) {
-        delete mmap_mem_pool_;
-        mmap_mem_pool_ = nullptr;
+    ASSERT(isInitialized_);
+    isInitialized_ = false;
+    if (poolType_ == PoolType::MMAP) {
+        delete mmapMemPool_;
+        mmapMemPool_ = nullptr;
     } else {
-        delete malloc_mem_pool_;
-        malloc_mem_pool_ = nullptr;
+        delete mallocMemPool_;
+        mallocMemPool_ = nullptr;
     }
 }
 

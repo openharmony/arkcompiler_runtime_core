@@ -127,53 +127,51 @@ using EncodeDataType = Span<uint8_t>;
 
 class Graph final : public MarkerMgr {
 public:
-    explicit Graph(ArenaAllocator *allocator, ArenaAllocator *local_allocator, Arch arch)
-        : Graph(allocator, local_allocator, arch, false)
+    explicit Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch)
+        : Graph(allocator, localAllocator, arch, false)
     {
     }
 
-    Graph(ArenaAllocator *allocator, ArenaAllocator *local_allocator, Arch arch, bool osr_mode)
-        : Graph(allocator, local_allocator, arch, nullptr, GetDefaultRuntime(), osr_mode)
+    Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, bool osrMode)
+        : Graph(allocator, localAllocator, arch, nullptr, GetDefaultRuntime(), osrMode)
     {
     }
 
-    Graph(ArenaAllocator *allocator, ArenaAllocator *local_allocator, Arch arch, bool dynamic_method, bool bytecode_opt)
-        : Graph(allocator, local_allocator, arch, nullptr, GetDefaultRuntime(), false, nullptr, dynamic_method,
-                bytecode_opt)
+    Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, bool dynamicMethod, bool bytecodeOpt)
+        : Graph(allocator, localAllocator, arch, nullptr, GetDefaultRuntime(), false, nullptr, dynamicMethod,
+                bytecodeOpt)
     {
     }
 
-    Graph(ArenaAllocator *allocator, ArenaAllocator *local_allocator, Arch arch, RuntimeInterface::MethodPtr method,
-          RuntimeInterface *runtime, bool osr_mode)
-        : Graph(allocator, local_allocator, arch, method, runtime, osr_mode, nullptr)
+    Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, RuntimeInterface::MethodPtr method,
+          RuntimeInterface *runtime, bool osrMode)
+        : Graph(allocator, localAllocator, arch, method, runtime, osrMode, nullptr)
     {
     }
 
-    Graph(ArenaAllocator *allocator, ArenaAllocator *local_allocator, Arch arch, RuntimeInterface::MethodPtr method,
-          RuntimeInterface *runtime, bool osr_mode, Graph *parent, bool dynamic_method = false,
-          bool bytecode_opt = false)
-        : Graph(allocator, local_allocator, arch, method, runtime, parent,
-                GraphMode::Osr(osr_mode) | GraphMode::BytecodeOpt(bytecode_opt) |
-                    GraphMode::DynamicMethod(dynamic_method))
+    Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, RuntimeInterface::MethodPtr method,
+          RuntimeInterface *runtime, bool osrMode, Graph *parent, bool dynamicMethod = false, bool bytecodeOpt = false)
+        : Graph(allocator, localAllocator, arch, method, runtime, parent,
+                GraphMode::Osr(osrMode) | GraphMode::BytecodeOpt(bytecodeOpt) | GraphMode::DynamicMethod(dynamicMethod))
     {
     }
 
-    Graph(ArenaAllocator *allocator, ArenaAllocator *local_allocator, Arch arch, RuntimeInterface::MethodPtr method,
+    Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, RuntimeInterface::MethodPtr method,
           RuntimeInterface *runtime, Graph *parent, GraphMode mode)
         : allocator_(allocator),
-          local_allocator_(local_allocator),
+          localAllocator_(localAllocator),
           arch_(arch),
-          vector_bb_(allocator->Adapter()),
-          throwable_insts_(allocator->Adapter()),
+          vectorBb_(allocator->Adapter()),
+          throwableInsts_(allocator->Adapter()),
           runtime_(runtime),
           method_(method),
-          pass_manager_(this, parent != nullptr ? parent->GetPassManager() : nullptr),
-          event_writer_(runtime->GetClassNameFromMethod(method), runtime->GetMethodName(method)),
+          passManager_(this, parent != nullptr ? parent->GetPassManager() : nullptr),
+          eventWriter_(runtime->GetClassNameFromMethod(method), runtime->GetMethodName(method)),
           mode_(mode),
-          single_implementation_list_(allocator->Adapter()),
-          try_begin_blocks_(allocator->Adapter()),
-          spilled_constants_(allocator->Adapter()),
-          parent_graph_(parent)
+          singleImplementationList_(allocator->Adapter()),
+          tryBeginBlocks_(allocator->Adapter()),
+          spilledConstants_(allocator->Adapter()),
+          parentGraph_(parent)
     {
         SetNeedCleanup(true);
     }
@@ -191,8 +189,8 @@ public:
     /// Get default runtime interface object
     static RuntimeInterface *GetDefaultRuntime()
     {
-        static RuntimeInterface runtime_interface;
-        return &runtime_interface;
+        static RuntimeInterface runtimeInterface;
+        return &runtimeInterface;
     }
 
     Arch GetArch() const
@@ -214,8 +212,8 @@ public:
 #ifndef NDEBUG
     void AddBlock(BasicBlock *block, uint32_t id);
 #endif
-    void DisconnectBlock(BasicBlock *block, bool remove_last_inst = true, bool fix_dom_tree = true);
-    void DisconnectBlockRec(BasicBlock *block, bool remove_last_inst = true, bool fix_dom_tree = true);
+    void DisconnectBlock(BasicBlock *block, bool removeLastInst = true, bool fixDomTree = true);
+    void DisconnectBlockRec(BasicBlock *block, bool removeLastInst = true, bool fixDomTree = true);
 
     void EraseBlock(BasicBlock *block);
     void RestoreBlock(BasicBlock *block);
@@ -223,10 +221,10 @@ public:
     void RemoveEmptyBlock(BasicBlock *block);
 
     // Remove empty block. Block may have Phis and can't be a loop pre-header.
-    void RemoveEmptyBlockWithPhis(BasicBlock *block, bool irr_loop = false);
+    void RemoveEmptyBlockWithPhis(BasicBlock *block, bool irrLoop = false);
 
     // Remove block predecessors.
-    void RemovePredecessors(BasicBlock *block, bool remove_last_inst = true);
+    void RemovePredecessors(BasicBlock *block, bool removeLastInst = true);
 
     // Remove block successors.
     void RemoveSuccessors(BasicBlock *block);
@@ -237,49 +235,49 @@ public:
     // get end block
     BasicBlock *GetEndBlock()
     {
-        return end_block_;
+        return endBlock_;
     }
     // set end block
-    void SetEndBlock(BasicBlock *end_block)
+    void SetEndBlock(BasicBlock *endBlock)
     {
-        end_block_ = end_block;
+        endBlock_ = endBlock;
     }
     bool HasEndBlock()
     {
-        return end_block_ != nullptr;
+        return endBlock_ != nullptr;
     }
     // get start block
     BasicBlock *GetStartBlock()
     {
-        return start_block_;
+        return startBlock_;
     }
     BasicBlock *GetStartBlock() const
     {
-        return start_block_;
+        return startBlock_;
     }
     // set start block
-    void SetStartBlock(BasicBlock *start_block)
+    void SetStartBlock(BasicBlock *startBlock)
     {
-        start_block_ = start_block;
+        startBlock_ = startBlock;
     }
     // get vector_bb_
     const ArenaVector<BasicBlock *> &GetVectorBlocks() const
     {
-        return vector_bb_;
+        return vectorBb_;
     }
 
     size_t GetAliveBlocksCount() const
     {
-        return std::count_if(vector_bb_.begin(), vector_bb_.end(), [](BasicBlock *block) { return block != nullptr; });
+        return std::count_if(vectorBb_.begin(), vectorBb_.end(), [](BasicBlock *block) { return block != nullptr; });
     }
 
     PassManager *GetPassManager()
     {
-        return &pass_manager_;
+        return &passManager_;
     }
     const PassManager *GetPassManager() const
     {
-        return &pass_manager_;
+        return &passManager_;
     }
 
     const BoundsRangeInfo *GetBoundsRangeInfo() const;
@@ -301,38 +299,38 @@ public:
     /// Allocator for temporary usage, when allocated data is no longer needed after optimization/analysis finished.
     ArenaAllocator *GetLocalAllocator() const
     {
-        return local_allocator_;
+        return localAllocator_;
     }
     bool IsDFConstruct() const
     {
-        return FlagDFConstruct::Get(bit_fields_);
+        return FlagDFConstruct::Get(bitFields_);
     }
     void SetDFConstruct()
     {
-        FlagDFConstruct::Set(true, &bit_fields_);
+        FlagDFConstruct::Set(true, &bitFields_);
     }
 
     void SetAotData(AotData *data)
     {
-        aot_data_ = data;
+        aotData_ = data;
     }
     AotData *GetAotData()
     {
-        return aot_data_;
+        return aotData_;
     }
     const AotData *GetAotData() const
     {
-        return aot_data_;
+        return aotData_;
     }
 
     bool IsAotMode() const
     {
-        return aot_data_ != nullptr;
+        return aotData_ != nullptr;
     }
 
     bool IsAotNoChaMode() const
     {
-        return aot_data_ != nullptr && !aot_data_->GetUseCha();
+        return aotData_ != nullptr && !aotData_->GetUseCha();
     }
 
     bool IsOfflineCompilationMode() const
@@ -342,68 +340,68 @@ public:
 
     bool IsDefaultLocationsInit() const
     {
-        return FlagDefaultLocationsInit::Get(bit_fields_);
+        return FlagDefaultLocationsInit::Get(bitFields_);
     }
     void SetDefaultLocationsInit()
     {
-        FlagDefaultLocationsInit::Set(true, &bit_fields_);
+        FlagDefaultLocationsInit::Set(true, &bitFields_);
     }
     bool IsIrtocPrologEpilogOptimized() const
     {
-        return FlagIrtocPrologEpilogOptimized::Get(bit_fields_);
+        return FlagIrtocPrologEpilogOptimized::Get(bitFields_);
     }
     void SetIrtocPrologEpilogOptimized()
     {
-        FlagIrtocPrologEpilogOptimized::Set(true, &bit_fields_);
+        FlagIrtocPrologEpilogOptimized::Set(true, &bitFields_);
     }
     bool IsUnrollComplete() const
     {
-        return FlagUnrollComplete::Get(bit_fields_);
+        return FlagUnrollComplete::Get(bitFields_);
     }
     void SetUnrollComplete()
     {
-        FlagUnrollComplete::Set(true, &bit_fields_);
+        FlagUnrollComplete::Set(true, &bitFields_);
     }
 #ifndef NDEBUG
     bool IsRegAllocApplied() const
     {
-        return FlagRegallocApplied::Get(bit_fields_);
+        return FlagRegallocApplied::Get(bitFields_);
     }
     void SetRegAllocApplied()
     {
-        FlagRegallocApplied::Set(true, &bit_fields_);
+        FlagRegallocApplied::Set(true, &bitFields_);
     }
     bool IsRegAccAllocApplied() const
     {
-        return FlagRegaccallocApplied::Get(bit_fields_);
+        return FlagRegaccallocApplied::Get(bitFields_);
     }
     void SetRegAccAllocApplied()
     {
-        FlagRegaccallocApplied::Set(true, &bit_fields_);
+        FlagRegaccallocApplied::Set(true, &bitFields_);
     }
     bool IsInliningComplete() const
     {
-        return FlagInliningComplete::Get(bit_fields_) || IsOsrMode();
+        return FlagInliningComplete::Get(bitFields_) || IsOsrMode();
     }
     void SetInliningComplete()
     {
-        FlagInliningComplete::Set(true, &bit_fields_);
+        FlagInliningComplete::Set(true, &bitFields_);
     }
     bool IsLowLevelInstructionsEnabled() const
     {
-        return FlagLowLevelInstnsEnabled::Get(bit_fields_);
+        return FlagLowLevelInstnsEnabled::Get(bitFields_);
     }
     void SetLowLevelInstructionsEnabled()
     {
-        FlagLowLevelInstnsEnabled::Set(true, &bit_fields_);
+        FlagLowLevelInstnsEnabled::Set(true, &bitFields_);
     }
     bool IsDynUnitTest() const
     {
-        return FlagDynUnitTest::Get(bit_fields_);
+        return FlagDynUnitTest::Get(bitFields_);
     }
     void SetDynUnitTestFlag()
     {
-        FlagDynUnitTest::Set(true, &bit_fields_);
+        FlagDynUnitTest::Set(true, &bitFields_);
     }
 #else
     bool IsRegAllocApplied() const
@@ -415,11 +413,11 @@ public:
 #ifdef PANDA_COMPILER_DEBUG_INFO
     bool IsLineDebugInfoEnabled() const
     {
-        return FlagLineDebugInfoEnabled::Get(bit_fields_);
+        return FlagLineDebugInfoEnabled::Get(bitFields_);
     }
     void SetLineDebugInfoEnabled()
     {
-        FlagLineDebugInfoEnabled::Set(true, &bit_fields_);
+        FlagLineDebugInfoEnabled::Set(true, &bitFields_);
     }
 #endif
 
@@ -450,12 +448,12 @@ public:
 
     void SetCodeInfo(Span<uint8_t> data)
     {
-        code_info_data_ = data.SubSpan<const uint8_t>(0, data.size());
+        codeInfoData_ = data.SubSpan<const uint8_t>(0, data.size());
     }
 
     Span<const uint8_t> GetCodeInfoData() const
     {
-        return code_info_data_;
+        return codeInfoData_;
     }
 
     void DumpUsedRegs(std::ostream &out = std::cerr, const char *prefix = nullptr) const
@@ -464,17 +462,17 @@ public:
             out << prefix;
         }
         out << "'\n  used scalar regs: ";
-        if (used_regs_ != nullptr) {
-            for (unsigned i = 0; i < used_regs_->size(); ++i) {
-                if (used_regs_->at(i)) {
+        if (usedRegs_ != nullptr) {
+            for (unsigned i = 0; i < usedRegs_->size(); ++i) {
+                if (usedRegs_->at(i)) {
                     out << i << " ";
                 }
             }
         }
         out << "\n  used float  regs: ";
-        if (used_regs_ != nullptr) {
-            for (unsigned i = 0; i < used_vregs_->size(); ++i) {
-                if (used_vregs_->at(i)) {
+        if (usedRegs_ != nullptr) {
+            for (unsigned i = 0; i < usedVregs_->size(); ++i) {
+                if (usedVregs_->at(i)) {
                     out << i << " ";
                 }
             }
@@ -488,11 +486,11 @@ public:
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REG_TYPE == DataType::INT64) {
-            return used_regs_;
+            return usedRegs_;
         }
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REG_TYPE == DataType::FLOAT64) {
-            return used_vregs_;
+            return usedVregs_;
         }
         UNREACHABLE();
         return nullptr;
@@ -521,41 +519,41 @@ public:
     template <DataType::Type REG_TYPE>
     void SetUsedReg(Register reg)
     {
-        ArenaVector<bool> *graph_regs = nullptr;
+        ArenaVector<bool> *graphRegs = nullptr;
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REG_TYPE == DataType::INT64) {
-            graph_regs = used_regs_;
+            graphRegs = usedRegs_;
             // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
         } else if constexpr (REG_TYPE == DataType::FLOAT64) {
-            graph_regs = used_vregs_;
+            graphRegs = usedVregs_;
         } else {
             UNREACHABLE();
         }
-        ASSERT(graph_regs != nullptr);
-        ASSERT(reg < graph_regs->size());
-        (*graph_regs)[reg] = true;
+        ASSERT(graphRegs != nullptr);
+        ASSERT(reg < graphRegs->size());
+        (*graphRegs)[reg] = true;
     }
 
     template <DataType::Type REG_TYPE>
-    void InitUsedRegs(const ArenaVector<bool> *used_regs)
+    void InitUsedRegs(const ArenaVector<bool> *usedRegs)
     {
-        if (used_regs == nullptr) {
+        if (usedRegs == nullptr) {
             return;
         }
-        ArenaVector<bool> *graph_regs = nullptr;
+        ArenaVector<bool> *graphRegs = nullptr;
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REG_TYPE == DataType::INT64) {
-            used_regs_ = GetAllocator()->New<ArenaVector<bool>>(GetAllocator()->Adapter());
-            graph_regs = used_regs_;
+            usedRegs_ = GetAllocator()->New<ArenaVector<bool>>(GetAllocator()->Adapter());
+            graphRegs = usedRegs_;
             // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
         } else if constexpr (REG_TYPE == DataType::FLOAT64) {
-            used_vregs_ = GetAllocator()->New<ArenaVector<bool>>(GetAllocator()->Adapter());
-            graph_regs = used_vregs_;
+            usedVregs_ = GetAllocator()->New<ArenaVector<bool>>(GetAllocator()->Adapter());
+            graphRegs = usedVregs_;
         } else {
             UNREACHABLE();
         }
-        graph_regs->resize(used_regs->size());
-        std::copy(used_regs->begin(), used_regs->end(), graph_regs->begin());
+        graphRegs->resize(usedRegs->size());
+        std::copy(usedRegs->begin(), usedRegs->end(), graphRegs->begin());
     }
 
     Register GetZeroReg() const;
@@ -573,74 +571,74 @@ public:
 
     uint32_t GetStackSlotsCount() const
     {
-        return stack_slot_count_;
+        return stackSlotCount_;
     }
 
-    void SetStackSlotsCount(uint32_t stack_slot_count)
+    void SetStackSlotsCount(uint32_t stackSlotCount)
     {
-        stack_slot_count_ = stack_slot_count;
+        stackSlotCount_ = stackSlotCount;
     }
 
-    void UpdateStackSlotsCount(uint32_t stack_slot_count)
+    void UpdateStackSlotsCount(uint32_t stackSlotCount)
     {
-        stack_slot_count_ = std::max(stack_slot_count_, stack_slot_count);
+        stackSlotCount_ = std::max(stackSlotCount_, stackSlotCount);
     }
 
     uint32_t GetParametersSlotsCount() const;
 
     uint32_t GetExtSlotsStart() const
     {
-        return ext_stack_slot_;
+        return extStackSlot_;
     }
 
-    void SetExtSlotsStart(uint32_t ext_stack_slot)
+    void SetExtSlotsStart(uint32_t extStackSlot)
     {
-        ext_stack_slot_ = ext_stack_slot;
+        extStackSlot_ = extStackSlot;
     }
 
-    BasicBlock *CreateEmptyBlock(uint32_t guest_pc = INVALID_PC);
-    BasicBlock *CreateEmptyBlock(BasicBlock *base_block);
+    BasicBlock *CreateEmptyBlock(uint32_t guestPc = INVALID_PC);
+    BasicBlock *CreateEmptyBlock(BasicBlock *baseBlock);
 #ifndef NDEBUG
-    BasicBlock *CreateEmptyBlock(uint32_t id, uint32_t guest_pc);
+    BasicBlock *CreateEmptyBlock(uint32_t id, uint32_t guestPc);
 #endif
     BasicBlock *CreateStartBlock();
-    BasicBlock *CreateEndBlock(uint32_t guest_pc = INVALID_PC);
+    BasicBlock *CreateEndBlock(uint32_t guestPc = INVALID_PC);
     ConstantInst *GetFirstConstInst()
     {
-        return first_const_inst_;
+        return firstConstInst_;
     }
-    void SetFirstConstInst(ConstantInst *const_inst)
+    void SetFirstConstInst(ConstantInst *constInst)
     {
-        first_const_inst_ = const_inst;
+        firstConstInst_ = constInst;
     }
 
     Inst *GetNullPtrInst() const
     {
-        return nullptr_inst_;
+        return nullptrInst_;
     }
     bool HasNullPtrInst() const
     {
-        return nullptr_inst_ != nullptr;
+        return nullptrInst_ != nullptr;
     }
     void UnsetNullPtrInst()
     {
         ASSERT(HasNullPtrInst());
-        nullptr_inst_ = nullptr;
+        nullptrInst_ = nullptr;
     }
     Inst *GetOrCreateNullPtr();
 
     Inst *GetUndefinedInst() const
     {
-        return undefined_inst_;
+        return undefinedInst_;
     }
     bool HasUndefinedInst() const
     {
-        return undefined_inst_ != nullptr;
+        return undefinedInst_ != nullptr;
     }
     void UnsetUndefinedInst()
     {
         ASSERT(HasUndefinedInst());
-        undefined_inst_ = nullptr;
+        undefinedInst_ = nullptr;
     }
     Inst *GetOrCreateUndefinedInst();
 
@@ -657,59 +655,59 @@ public:
      */
     ConstantInst *FindOrAddConstant(ConstantInst *inst);
 
-    ParameterInst *AddNewParameter(uint16_t arg_number);
+    ParameterInst *AddNewParameter(uint16_t argNumber);
 
-    ParameterInst *AddNewParameter(uint16_t arg_number, DataType::Type type)
+    ParameterInst *AddNewParameter(uint16_t argNumber, DataType::Type type)
     {
-        ParameterInst *param = AddNewParameter(arg_number);
+        ParameterInst *param = AddNewParameter(argNumber);
         param->SetType(type);
         return param;
     }
 
-    ParameterInst *FindParameter(uint16_t arg_number);
+    ParameterInst *FindParameter(uint16_t argNumber);
 
     /*
      * The function remove the ConstantInst from the graph list
      * !NOTE ConstantInst isn't removed from BasicBlock list
      */
-    void RemoveConstFromList(ConstantInst *const_inst);
+    void RemoveConstFromList(ConstantInst *constInst);
 
     ConstantInst *GetSpilledConstant(ImmTableSlot slot)
     {
-        ASSERT(static_cast<size_t>(slot) < spilled_constants_.size());
-        return spilled_constants_[slot];
+        ASSERT(static_cast<size_t>(slot) < spilledConstants_.size());
+        return spilledConstants_[slot];
     }
 
-    ImmTableSlot AddSpilledConstant(ConstantInst *const_inst)
+    ImmTableSlot AddSpilledConstant(ConstantInst *constInst)
     {
         // Constant already in the table
-        auto current_slot = const_inst->GetImmTableSlot();
-        if (current_slot != INVALID_IMM_TABLE_SLOT) {
-            ASSERT(spilled_constants_[current_slot] == const_inst);
-            return current_slot;
+        auto currentSlot = constInst->GetImmTableSlot();
+        if (currentSlot != INVALID_IMM_TABLE_SLOT) {
+            ASSERT(spilledConstants_[currentSlot] == constInst);
+            return currentSlot;
         }
 
-        auto count = spilled_constants_.size();
+        auto count = spilledConstants_.size();
         if (count >= MAX_NUM_IMM_SLOTS) {
             return INVALID_IMM_TABLE_SLOT;
         }
-        spilled_constants_.push_back(const_inst);
-        const_inst->SetImmTableSlot(count);
+        spilledConstants_.push_back(constInst);
+        constInst->SetImmTableSlot(count);
         return ImmTableSlot(count);
     }
 
-    ImmTableSlot FindSpilledConstantSlot(ConstantInst *const_inst) const
+    ImmTableSlot FindSpilledConstantSlot(ConstantInst *constInst) const
     {
-        auto slot = std::find(spilled_constants_.begin(), spilled_constants_.end(), const_inst);
-        if (slot == spilled_constants_.end()) {
+        auto slot = std::find(spilledConstants_.begin(), spilledConstants_.end(), constInst);
+        if (slot == spilledConstants_.end()) {
             return INVALID_IMM_TABLE_SLOT;
         }
-        return std::distance(spilled_constants_.begin(), slot);
+        return std::distance(spilledConstants_.begin(), slot);
     }
 
     size_t GetSpilledConstantsCount() const
     {
-        return spilled_constants_.size();
+        return spilledConstants_.size();
     }
 
     bool HasAvailableConstantSpillSlots() const
@@ -719,50 +717,50 @@ public:
 
     auto begin()  // NOLINT(readability-identifier-naming)
     {
-        return vector_bb_.begin();
+        return vectorBb_.begin();
     }
     auto begin() const  // NOLINT(readability-identifier-naming)
     {
-        return vector_bb_.begin();
+        return vectorBb_.begin();
     }
     auto end()  // NOLINT(readability-identifier-naming)
     {
-        return vector_bb_.end();
+        return vectorBb_.end();
     }
     auto end() const  // NOLINT(readability-identifier-naming)
     {
-        return vector_bb_.end();
+        return vectorBb_.end();
     }
 
     void Dump(std::ostream *out) const;
 
     Loop *GetRootLoop()
     {
-        return root_loop_;
+        return rootLoop_;
     }
     const Loop *GetRootLoop() const
     {
-        return root_loop_;
+        return rootLoop_;
     }
 
-    void SetRootLoop(Loop *root_loop)
+    void SetRootLoop(Loop *rootLoop)
     {
-        root_loop_ = root_loop;
+        rootLoop_ = rootLoop;
     }
 
-    void SetHasIrreducibleLoop(bool has_irr_loop)
+    void SetHasIrreducibleLoop(bool hasIrrLoop)
     {
-        FlagIrredicibleLoop::Set(has_irr_loop, &bit_fields_);
+        FlagIrredicibleLoop::Set(hasIrrLoop, &bitFields_);
     }
 
-    void SetHasInfiniteLoop(bool has_inf_loop)
+    void SetHasInfiniteLoop(bool hasInfLoop)
     {
-        FlagInfiniteLoop::Set(has_inf_loop, &bit_fields_);
+        FlagInfiniteLoop::Set(hasInfLoop, &bitFields_);
     }
 
     void SetHasFloatRegs()
     {
-        FlagFloatRegs::Set(true, &bit_fields_);
+        FlagFloatRegs::Set(true, &bitFields_);
     }
 
     bool HasLoop() const;
@@ -776,48 +774,48 @@ public:
      */
     void AppendTryBeginBlock(const BasicBlock *block)
     {
-        try_begin_blocks_.push_back(block);
+        tryBeginBlocks_.push_back(block);
     }
 
     void EraseTryBeginBlock(const BasicBlock *block)
     {
-        auto it = std::find(try_begin_blocks_.begin(), try_begin_blocks_.end(), block);
-        if (it == try_begin_blocks_.end()) {
+        auto it = std::find(tryBeginBlocks_.begin(), tryBeginBlocks_.end(), block);
+        if (it == tryBeginBlocks_.end()) {
             ASSERT(false && "Trying to remove non try_begin block");
             return;
         }
-        try_begin_blocks_.erase(it);
+        tryBeginBlocks_.erase(it);
     }
 
     const auto &GetTryBeginBlocks() const
     {
-        return try_begin_blocks_;
+        return tryBeginBlocks_;
     }
 
-    void AppendThrowableInst(const Inst *inst, BasicBlock *catch_handler)
+    void AppendThrowableInst(const Inst *inst, BasicBlock *catchHandler)
     {
-        auto it = throwable_insts_.emplace(inst, GetAllocator()->Adapter()).first;
-        it->second.push_back(catch_handler);
+        auto it = throwableInsts_.emplace(inst, GetAllocator()->Adapter()).first;
+        it->second.push_back(catchHandler);
     }
 
     bool IsInstThrowable(const Inst *inst) const
     {
-        return throwable_insts_.count(inst) > 0;
+        return throwableInsts_.count(inst) > 0;
     }
 
     void RemoveThrowableInst(const Inst *inst);
-    void ReplaceThrowableInst(Inst *inst, Inst *new_inst);
+    void ReplaceThrowableInst(Inst *inst, Inst *newInst);
 
     const auto &GetThrowableInstHandlers(const Inst *inst) const
     {
         ASSERT(IsInstThrowable(inst));
-        return throwable_insts_.at(inst);
+        return throwableInsts_.at(inst);
     }
 
     void ClearTryCatchInfo()
     {
-        throwable_insts_.clear();
-        try_begin_blocks_.clear();
+        throwableInsts_.clear();
+        tryBeginBlocks_.clear();
     }
 
     void DumpThrowableInsts(std::ostream *out) const;
@@ -834,20 +832,20 @@ public:
     bool RunPass(Args... args)
     {
         ASSERT(GetPassManager());
-        return pass_manager_.RunPass<T>(std::forward<Args>(args)...);
+        return passManager_.RunPass<T>(std::forward<Args>(args)...);
     }
     template <typename T, typename... Args>
     bool RunPass(Args... args) const
     {
         ASSERT(GetPassManager());
-        return pass_manager_.RunPass<T>(std::forward<Args>(args)...);
+        return passManager_.RunPass<T>(std::forward<Args>(args)...);
     }
 
     template <typename T>
     bool RunPass(T *pass)
     {
         ASSERT(GetPassManager());
-        return pass_manager_.RunPass(pass, GetLocalAllocator()->GetAllocatedSize());
+        return passManager_.RunPass(pass, GetLocalAllocator()->GetAllocatedSize());
     }
 
     /**
@@ -866,7 +864,7 @@ public:
     const T &GetAnalysis() const
     {
         ASSERT(GetPassManager());
-        return pass_manager_.GetAnalysis<T>();
+        return passManager_.GetAnalysis<T>();
     }
 
     /**
@@ -913,11 +911,11 @@ public:
     /// Accessors to the number of current instruction id.
     auto GetCurrentInstructionId() const
     {
-        return instr_current_id_;
+        return instrCurrentId_;
     }
     auto SetCurrentInstructionId(size_t v)
     {
-        instr_current_id_ = v;
+        instrCurrentId_ = v;
     }
 
     /// RuntimeInterface accessors
@@ -947,12 +945,12 @@ public:
 
     EventWriter &GetEventWriter()
     {
-        return event_writer_;
+        return eventWriter_;
     }
 
     void SetCodeBuilder(CodeInfoBuilder *builder)
     {
-        ci_builder_ = builder;
+        ciBuilder_ = builder;
     }
 
     // clang-format off
@@ -965,7 +963,7 @@ public:
 #define INST_DEF(OPCODE, BASE, ...)                                      \
             case Opcode::OPCODE: {                                       \
                 auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE); \
-                inst->SetId(instr_current_id_++);                        \
+                inst->SetId(instrCurrentId_++);                        \
                 return inst;                                             \
             }
             OPCODE_LIST(INST_DEF)
@@ -981,7 +979,7 @@ public:
     template <typename... Args>                                                   \
     [[nodiscard]] BASE* CreateInst##OPCODE(Args&&... args) const {                \
         auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE, std::forward<Args>(args)...);  \
-        inst->SetId(instr_current_id_++); \
+        inst->SetId(instrCurrentId_++); \
         return inst; \
     }
     OPCODE_LIST(INST_DEF)
@@ -1017,22 +1015,22 @@ public:
 
     uint32_t GetBitFields()
     {
-        return bit_fields_;
+        return bitFields_;
     }
 
-    void SetBitFields(uint32_t bit_fields)
+    void SetBitFields(uint32_t bitFields)
     {
-        bit_fields_ = bit_fields;
+        bitFields_ = bitFields;
     }
 
     bool NeedCleanup() const
     {
-        return FlagNeedCleanup::Get(bit_fields_);
+        return FlagNeedCleanup::Get(bitFields_);
     }
 
     void SetNeedCleanup(bool v)
     {
-        FlagNeedCleanup::Set(v, &bit_fields_);
+        FlagNeedCleanup::Set(v, &bitFields_);
     }
 
     bool IsJitOrOsrMode() const
@@ -1090,7 +1088,7 @@ public:
 
     void AddSingleImplementationMethod(RuntimeInterface::MethodPtr method)
     {
-        single_implementation_list_.push_back(method);
+        singleImplementationList_.push_back(method);
     }
 
     void SetDynamicMethod()
@@ -1105,12 +1103,12 @@ public:
 
     auto &GetSingleImplementationList()
     {
-        return single_implementation_list_;
+        return singleImplementationList_;
     }
 
     Graph *GetParentGraph()
     {
-        return parent_graph_;
+        return parentGraph_;
     }
 
     Graph *GetOutermostParentGraph()
@@ -1124,12 +1122,12 @@ public:
 
     void SetVRegsCount(size_t count)
     {
-        vregs_count_ = count;
+        vregsCount_ = count;
     }
 
     size_t GetVRegsCount() const
     {
-        return vregs_count_;
+        return vregsCount_;
     }
 
     size_t GetEnvCount() const
@@ -1139,15 +1137,15 @@ public:
 
     RelocationHandler *GetRelocationHandler()
     {
-        return relocation_handler_;
+        return relocationHandler_;
     }
 
     void SetRelocationHandler(RelocationHandler *handler)
     {
-        relocation_handler_ = handler;
+        relocationHandler_ = handler;
     }
 
-    int64_t GetBranchCounter(const BasicBlock *block, bool true_succ);
+    int64_t GetBranchCounter(const BasicBlock *block, bool trueSucc);
 
     int64_t GetThrowCounter(const BasicBlock *block);
 
@@ -1215,37 +1213,37 @@ public:
 
     void SetMaxInliningDepth(uint32_t depth)
     {
-        max_inlining_depth_ = std::max(max_inlining_depth_, depth);
+        maxInliningDepth_ = std::max(maxInliningDepth_, depth);
     }
 
     uint32_t GetMaxInliningDepth()
     {
-        return max_inlining_depth_;
+        return maxInliningDepth_;
     }
 
 private:
-    void AddConstInStartBlock(ConstantInst *const_inst);
+    void AddConstInStartBlock(ConstantInst *constInst);
 
     NO_MOVE_SEMANTIC(Graph);
     NO_COPY_SEMANTIC(Graph);
 
 private:
-    uint32_t max_inlining_depth_ {0};
+    uint32_t maxInliningDepth_ {0};
     ArenaAllocator *const allocator_;
-    ArenaAllocator *const local_allocator_;
+    ArenaAllocator *const localAllocator_;
 
     Arch arch_ {RUNTIME_ARCH};
 
     // List of blocks in insertion order.
-    ArenaVector<BasicBlock *> vector_bb_;
-    BasicBlock *start_block_ {nullptr};
-    BasicBlock *end_block_ {nullptr};
+    ArenaVector<BasicBlock *> vectorBb_;
+    BasicBlock *startBlock_ {nullptr};
+    BasicBlock *endBlock_ {nullptr};
 
-    Loop *root_loop_ {nullptr};
+    Loop *rootLoop_ {nullptr};
 
-    AotData *aot_data_ {nullptr};
+    AotData *aotData_ {nullptr};
 
-    uint32_t bit_fields_ {0};
+    uint32_t bitFields_ {0};
     using FlagDFConstruct = BitField<bool, 0, 1>;
     using FlagNeedCleanup = FlagDFConstruct::NextFlag;
     using FlagIrredicibleLoop = FlagNeedCleanup::NextFlag;
@@ -1271,20 +1269,20 @@ private:
 
     // codegen data
     EncodeDataType data_;
-    Span<const uint8_t> code_info_data_;
-    ArenaVector<bool> *used_regs_ {nullptr};
-    ArenaVector<bool> *used_vregs_ {nullptr};
+    Span<const uint8_t> codeInfoData_;
+    ArenaVector<bool> *usedRegs_ {nullptr};
+    ArenaVector<bool> *usedVregs_ {nullptr};
 
     // NOTE (a.popov) Replace by ArenaMap from throwable_inst* to try_inst*
-    ArenaMap<const Inst *, ArenaVector<BasicBlock *>> throwable_insts_;
+    ArenaMap<const Inst *, ArenaVector<BasicBlock *>> throwableInsts_;
 
-    RegMask arch_used_regs_ {0};
+    RegMask archUsedRegs_ {0};
 
-    mutable size_t instr_current_id_ {0};
+    mutable size_t instrCurrentId_ {0};
     // first constant instruction in graph !NOTE rewrite it to hash-map
-    ConstantInst *first_const_inst_ {nullptr};
-    Inst *nullptr_inst_ {nullptr};
-    Inst *undefined_inst_ {nullptr};
+    ConstantInst *firstConstInst_ {nullptr};
+    Inst *nullptrInst_ {nullptr};
+    Inst *undefinedInst_ {nullptr};
     RuntimeInterface *runtime_ {nullptr};
     RuntimeInterface::MethodPtr method_ {nullptr};
 
@@ -1294,32 +1292,32 @@ private:
 
     CallingConvention *callconv_ {nullptr};
 
-    std::optional<MethodProperties> method_properties_ {std::nullopt};
+    std::optional<MethodProperties> methodProperties_ {std::nullopt};
 
-    ParameterInfo *param_info_ {nullptr};
+    ParameterInfo *paramInfo_ {nullptr};
 
-    RelocationHandler *relocation_handler_ {nullptr};
+    RelocationHandler *relocationHandler_ {nullptr};
 
-    mutable PassManager pass_manager_;
-    EventWriter event_writer_;
+    mutable PassManager passManager_;
+    EventWriter eventWriter_;
 
     GraphMode mode_;
 
-    CodeInfoBuilder *ci_builder_ {nullptr};
+    CodeInfoBuilder *ciBuilder_ {nullptr};
 
-    ArenaVector<RuntimeInterface::MethodPtr> single_implementation_list_;
-    ArenaVector<const BasicBlock *> try_begin_blocks_;
-    ArenaVector<ConstantInst *> spilled_constants_;
+    ArenaVector<RuntimeInterface::MethodPtr> singleImplementationList_;
+    ArenaVector<const BasicBlock *> tryBeginBlocks_;
+    ArenaVector<ConstantInst *> spilledConstants_;
     // Graph that inlines this graph
-    Graph *parent_graph_ {nullptr};
+    Graph *parentGraph_ {nullptr};
     // Number of used stack slots
-    uint32_t stack_slot_count_ {0};
+    uint32_t stackSlotCount_ {0};
     // Number of used stack slots for parameters
-    uint32_t param_slots_count_ {0};
+    uint32_t paramSlotsCount_ {0};
     // First language extension slot
-    uint32_t ext_stack_slot_ {0};
+    uint32_t extStackSlot_ {0};
     // Number of the virtual registers used in the compiled method (inlined methods aren't included).
-    uint32_t vregs_count_ {0};
+    uint32_t vregsCount_ {0};
     // Source language of the method being compiled
     SourceLanguage lang_ {SourceLanguage::PANDA_ASSEMBLY};
 };
@@ -1352,33 +1350,33 @@ private:
 template <typename T>
 ConstantInst *Graph::FindOrCreateConstant(T value)
 {
-    bool is_support_int32 = IsBytecodeOptimizer();
-    if (first_const_inst_ == nullptr) {
-        first_const_inst_ = CreateInstConstant(value, is_support_int32);
-        AddConstInStartBlock(first_const_inst_);
-        return first_const_inst_;
+    bool isSupportInt32 = IsBytecodeOptimizer();
+    if (firstConstInst_ == nullptr) {
+        firstConstInst_ = CreateInstConstant(value, isSupportInt32);
+        AddConstInStartBlock(firstConstInst_);
+        return firstConstInst_;
     }
-    ConstantInst *current_const = first_const_inst_;
-    ConstantInst *prev_const = nullptr;
-    while (current_const != nullptr) {
-        if (current_const->IsEqualConst(value, is_support_int32)) {
-            return current_const;
+    ConstantInst *currentConst = firstConstInst_;
+    ConstantInst *prevConst = nullptr;
+    while (currentConst != nullptr) {
+        if (currentConst->IsEqualConst(value, isSupportInt32)) {
+            return currentConst;
         }
-        prev_const = current_const;
-        current_const = current_const->GetNextConst();
+        prevConst = currentConst;
+        currentConst = currentConst->GetNextConst();
     }
-    ASSERT(prev_const != nullptr);
-    auto *new_const = CreateInstConstant(value, is_support_int32);
-    AddConstInStartBlock(new_const);
+    ASSERT(prevConst != nullptr);
+    auto *newConst = CreateInstConstant(value, isSupportInt32);
+    AddConstInStartBlock(newConst);
 
-    prev_const->SetNextConst(new_const);
-    return new_const;
+    prevConst->SetNextConst(newConst);
+    return newConst;
 }
 
 void InvalidateBlocksOrderAnalyzes(Graph *graph);
 void MarkLoopExits(const Graph *graph, Marker marker);
-void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rm_pred);
+void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rmPred);
 std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr method);
-size_t GetObjectOffset(const Graph *graph, ObjectType obj_type, RuntimeInterface::FieldPtr field, uint32_t type_id);
+size_t GetObjectOffset(const Graph *graph, ObjectType objType, RuntimeInterface::FieldPtr field, uint32_t typeId);
 }  // namespace panda::compiler
 #endif  // COMPILER_OPTIMIZER_IR_GRAPH_H

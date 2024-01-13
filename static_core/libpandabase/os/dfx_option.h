@@ -77,7 +77,7 @@ public:
 
     static DfxOption DfxOptionFromString(const std::string &s);
 
-    static std::string StringFromDfxOption(DfxOptionHandler::DfxOption dfx_option);
+    static std::string StringFromDfxOption(DfxOptionHandler::DfxOption dfxOption);
 };
 
 }  // namespace panda::os::dfx_option

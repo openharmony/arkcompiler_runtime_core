@@ -34,38 +34,38 @@ class HCountersFunctor : public FeaturesManager::Functor {
             std::string name;
             uint32_t value;
         };
-        std::string app_name;
+        std::string appName;
         uint64_t hash;
         uint32_t pid;
-        std::list<MethodInfo> methods_list;
+        std::list<MethodInfo> methodsList;
     };
 
 public:
     explicit HCountersFunctor(std::ostream &out) : out_(out) {}
     ~HCountersFunctor() = default;
 
-    bool operator()(const AppData &app_data, const std::vector<uint8_t> &data) override
+    bool operator()(const AppData &appData, const std::vector<uint8_t> &data) override
     {
-        std::unordered_map<std::string, uint32_t> method_info_map;
-        if (!serializer::BufferToType(data.data(), data.size(), method_info_map)) {
+        std::unordered_map<std::string, uint32_t> methodInfoMap;
+        if (!serializer::BufferToType(data.data(), data.size(), methodInfoMap)) {
             LOG(ERROR, DPROF) << "Cannot deserialize methodInfoMap";
             return false;
         }
 
-        std::list<HCountersInfo::MethodInfo> methods_list;
-        for (auto &it : method_info_map) {
-            methods_list.emplace_back(HCountersInfo::MethodInfo {it.first, it.second});
+        std::list<HCountersInfo::MethodInfo> methodsList;
+        for (auto &it : methodInfoMap) {
+            methodsList.emplace_back(HCountersInfo::MethodInfo {it.first, it.second});
         }
 
-        hcounters_info_list_.emplace_back(
-            HCountersInfo {app_data.GetName(), app_data.GetHash(), app_data.GetPid(), std::move(methods_list)});
+        hcountersInfoList_.emplace_back(
+            HCountersInfo {appData.GetName(), appData.GetHash(), appData.GetPid(), std::move(methodsList)});
 
         return true;
     }
 
     bool ShowInfo(const std::string &format)
     {
-        if (hcounters_info_list_.empty()) {
+        if (hcountersInfoList_.empty()) {
             return false;
         }
 
@@ -84,12 +84,12 @@ private:
     void ShowText()
     {
         out_ << "Feature: " << HCOUNTERS_FEATURE_NAME << std::endl;
-        for (auto &hcounters_info : hcounters_info_list_) {
-            out_ << "  app: name=" << hcounters_info.app_name << " pid=" << hcounters_info.pid
-                 << " hash=" << hcounters_info.hash << std::endl;
+        for (auto &hcountersInfo : hcountersInfoList_) {
+            out_ << "  app: name=" << hcountersInfo.appName << " pid=" << hcountersInfo.pid
+                 << " hash=" << hcountersInfo.hash << std::endl;
 
-            for (auto &method_info : hcounters_info.methods_list) {
-                out_ << "    " << method_info.name << ":" << method_info.value << std::endl;
+            for (auto &methodInfo : hcountersInfo.methodsList) {
+                out_ << "    " << methodInfo.name << ":" << methodInfo.value << std::endl;
             }
         }
     }
@@ -98,25 +98,25 @@ private:
     {
         out_ << "{" << std::endl;
         out_ << "  \"" << HCOUNTERS_FEATURE_NAME << "\": [" << std::endl;
-        for (auto &hcounters_info : hcounters_info_list_) {
+        for (auto &hcountersInfo : hcountersInfoList_) {
             out_ << "    {" << std::endl;
-            out_ << R"(      "app_name": ")" << hcounters_info.app_name << "\"," << std::endl;
-            out_ << R"(      "pid": ")" << hcounters_info.pid << "\"," << std::endl;
-            out_ << R"(      "hash": ")" << hcounters_info.hash << "\"," << std::endl;
+            out_ << R"(      "app_name": ")" << hcountersInfo.appName << "\"," << std::endl;
+            out_ << R"(      "pid": ")" << hcountersInfo.pid << "\"," << std::endl;
+            out_ << R"(      "hash": ")" << hcountersInfo.hash << "\"," << std::endl;
             out_ << R"(      "counters": [)" << std::endl;
-            for (auto &method_info : hcounters_info.methods_list) {
+            for (auto &methodInfo : hcountersInfo.methodsList) {
                 out_ << "        {" << std::endl;
-                out_ << R"(          "name": ")" << method_info.name << "\"," << std::endl;
-                out_ << R"(          "value": ")" << method_info.value << "\"" << std::endl;
+                out_ << R"(          "name": ")" << methodInfo.name << "\"," << std::endl;
+                out_ << R"(          "value": ")" << methodInfo.value << "\"" << std::endl;
                 out_ << "        }";
-                if (&method_info != &hcounters_info.methods_list.back()) {
+                if (&methodInfo != &hcountersInfo.methodsList.back()) {
                     out_ << ",";
                 }
                 out_ << std::endl;
             }
             out_ << "      ]" << std::endl;
             out_ << "    }";
-            if (&hcounters_info != &hcounters_info_list_.back()) {
+            if (&hcountersInfo != &hcountersInfoList_.back()) {
                 out_ << ",";
             }
             out_ << std::endl;
@@ -125,7 +125,7 @@ private:
         out_ << "}" << std::endl;
     }
 
-    std::list<HCountersInfo> hcounters_info_list_;
+    std::list<HCountersInfo> hcountersInfoList_;
     std::ostream &out_;
 
     NO_COPY_SEMANTIC(HCountersFunctor);

@@ -22,41 +22,41 @@
 namespace panda {
 ObjectLock::ObjectLock(ObjectHeader *obj)
     : scope_(HandleScope<ObjectHeader *>(ManagedThread::GetCurrent())),
-      obj_handler_(VMHandle<ObjectHeader>(ManagedThread::GetCurrent(), obj))
+      objHandler_(VMHandle<ObjectHeader>(ManagedThread::GetCurrent(), obj))
 {
-    [[maybe_unused]] auto res = Monitor::MonitorEnter(obj_handler_.GetPtr());
+    [[maybe_unused]] auto res = Monitor::MonitorEnter(objHandler_.GetPtr());
     ASSERT(res == Monitor::State::OK);
 }
 
-bool ObjectLock::Wait(bool ignore_interruption)
+bool ObjectLock::Wait(bool ignoreInterruption)
 {
-    Monitor::State state = Monitor::Wait(obj_handler_.GetPtr(), ThreadStatus::IS_WAITING, 0, 0, ignore_interruption);
+    Monitor::State state = Monitor::Wait(objHandler_.GetPtr(), ThreadStatus::IS_WAITING, 0, 0, ignoreInterruption);
     LOG_IF(state == Monitor::State::ILLEGAL, FATAL, RUNTIME) << "Monitor::Wait() failed";
     return state != Monitor::State::INTERRUPTED;
 }
 
 bool ObjectLock::TimedWait(uint64_t timeout)
 {
-    Monitor::State state = Monitor::Wait(obj_handler_.GetPtr(), ThreadStatus::IS_TIMED_WAITING, timeout, 0);
+    Monitor::State state = Monitor::Wait(objHandler_.GetPtr(), ThreadStatus::IS_TIMED_WAITING, timeout, 0);
     LOG_IF(state == Monitor::State::ILLEGAL, FATAL, RUNTIME) << "Monitor::Wait() failed";
     return state != Monitor::State::INTERRUPTED;
 }
 
 void ObjectLock::Notify()
 {
-    Monitor::State state = Monitor::Notify(obj_handler_.GetPtr());
+    Monitor::State state = Monitor::Notify(objHandler_.GetPtr());
     LOG_IF(state != Monitor::State::OK, FATAL, RUNTIME) << "Monitor::Notify() failed";
 }
 
 void ObjectLock::NotifyAll()
 {
-    Monitor::State state = Monitor::NotifyAll(obj_handler_.GetPtr());
+    Monitor::State state = Monitor::NotifyAll(objHandler_.GetPtr());
     LOG_IF(state != Monitor::State::OK, FATAL, RUNTIME) << "Monitor::NotifyAll() failed";
 }
 
 ObjectLock::~ObjectLock()
 {
-    [[maybe_unused]] auto res = Monitor::MonitorExit(obj_handler_.GetPtr());
+    [[maybe_unused]] auto res = Monitor::MonitorExit(objHandler_.GetPtr());
     ASSERT(res == Monitor::State::OK);
 }
 }  // namespace panda

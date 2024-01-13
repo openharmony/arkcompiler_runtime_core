@@ -34,11 +34,11 @@ public:
 
     PandaRunner()
     {
-        auto exec_path = panda::os::file::File::GetExecutablePath();
+        auto execPath = panda::os::file::File::GetExecutablePath();
 
-        std::vector<std::string> boot_panda_files = {exec_path.Value() + "/../pandastdlib/arkstdlib.abc"};
+        std::vector<std::string> bootPandaFiles = {execPath.Value() + "/../pandastdlib/arkstdlib.abc"};
 
-        options_.SetBootPandaFiles(boot_panda_files);
+        options_.SetBootPandaFiles(bootPandaFiles);
 
         options_.SetShouldLoadBootPandaFiles(true);
         options_.SetShouldInitializeIntrinsics(false);
@@ -50,8 +50,8 @@ public:
         pandasm::Parser parser;
 
         auto res = parser.Parse(source.data());
-        ASSERT_TRUE(res) << "Parse failed: " << res.Error().message << "\nLine " << res.Error().line_number << ": "
-                         << res.Error().whole_line;
+        ASSERT_TRUE(res) << "Parse failed: " << res.Error().message << "\nLine " << res.Error().lineNumber << ": "
+                         << res.Error().wholeLine;
         file_ = pandasm::AsmEmitter::Emit(res.Value());
     }
 
@@ -76,9 +76,9 @@ public:
         return Run(source, ssize_t(0));
     }
 
-    void Run(std::string_view source, ssize_t expected_result)
+    void Run(std::string_view source, ssize_t expectedResult)
     {
-        expected_result_ = expected_result;
+        expectedResult_ = expectedResult;
         return Run(source, std::vector<std::string> {});
     }
 
@@ -88,7 +88,7 @@ public:
             callback_ = nullptr;
             Runtime::Destroy();
         };
-        std::unique_ptr<void, decltype(finalizer)> runtime_destroyer(&finalizer, finalizer);
+        std::unique_ptr<void, decltype(finalizer)> runtimeDestroyer(&finalizer, finalizer);
 
         compiler::CompilerLogger::SetComponents(GetCompilerOptions().GetCompilerLog());
 
@@ -99,8 +99,8 @@ public:
     {
         pandasm::Parser parser;
         auto res = parser.Parse(source.data());
-        ASSERT_TRUE(res) << "Parse failed: " << res.Error().message << "\nLine " << res.Error().line_number << ": "
-                         << res.Error().whole_line;
+        ASSERT_TRUE(res) << "Parse failed: " << res.Error().message << "\nLine " << res.Error().lineNumber << ": "
+                         << res.Error().wholeLine;
         auto pf = pandasm::AsmEmitter::Emit(res.Value());
         runtime->GetClassLinker()->AddPandaFile(std::move(pf));
 
@@ -112,8 +112,8 @@ public:
 
         auto eres = runtime->Execute("_GLOBAL::main", args);
         ASSERT_TRUE(eres) << static_cast<unsigned>(eres.Error());
-        if (expected_result_) {
-            ASSERT_EQ(eres.Value(), expected_result_.value());
+        if (expectedResult_) {
+            ASSERT_EQ(eres.Value(), expectedResult_.value());
         }
     }
 
@@ -130,10 +130,10 @@ public:
 
     compiler::CompilerOptions &GetCompilerOptions()
     {
-        return compiler::OPTIONS;
+        return compiler::g_options;
     }
 
-    static Method *GetMethod(std::string_view method_name)
+    static Method *GetMethod(std::string_view methodName)
     {
         PandaString descriptor;
         auto *thread = MTManagedThread::GetCurrent();
@@ -144,7 +144,7 @@ public:
                        ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
         thread->ManagedCodeEnd();
         ASSERT(cls);
-        return cls->GetDirectMethod(utf::CStringAsMutf8(method_name.data()));
+        return cls->GetDirectMethod(utf::CStringAsMutf8(methodName.data()));
     }
 
 private:
@@ -155,7 +155,7 @@ private:
     RuntimeOptions options_;
     static inline Callback callback_ {nullptr};
     std::unique_ptr<const panda_file::File> file_ {nullptr};
-    std::optional<ssize_t> expected_result_;
+    std::optional<ssize_t> expectedResult_;
 };
 }  // namespace panda::test
 

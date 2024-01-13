@@ -87,7 +87,7 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %       raise "Unexpected operand type"
 %     end
 %   end
-%   ops << "profile_id" if insn.profiled?
+%   ops << "profileId" if insn.profiled?
 %   if insn.properties.include?('short_long_range')
 %     ops << ops.shift
 %   end
@@ -175,7 +175,7 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
     }
 % end
     default:
-        assert(0);
+        ASSERT(0);
     }
 
     return true;

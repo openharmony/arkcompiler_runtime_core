@@ -71,32 +71,31 @@ void RegisterConfigHandlerOptions(Config *dcfg)
         const FlagsSection flags = {
             {"show",
              {{"context", BoolField {offsetof(VerificationOptions, debug.show.context)}},
-              {"reg-changes", BoolField {offsetof(VerificationOptions, debug.show.reg_changes)}},
-              {"typesystem", BoolField {offsetof(VerificationOptions, debug.show.type_system)}},
+              {"reg-changes", BoolField {offsetof(VerificationOptions, debug.show.regChanges)}},
+              {"typesystem", BoolField {offsetof(VerificationOptions, debug.show.typeSystem)}},
               {"status", BoolField {offsetof(VerificationOptions, show.status)}}}},
             {"allow",
-             {{"undefined-class", BoolField {offsetof(VerificationOptions, debug.allow.undefined_class)}},
-              {"undefined-method", BoolField {offsetof(VerificationOptions, debug.allow.undefined_method)}},
-              {"undefined-field", BoolField {offsetof(VerificationOptions, debug.allow.undefined_field)}},
-              {"undefined-type", BoolField {offsetof(VerificationOptions, debug.allow.undefined_type)}},
-              {"undefined-string", BoolField {offsetof(VerificationOptions, debug.allow.undefined_string)}},
-              {"method-access-violation",
-               BoolField {offsetof(VerificationOptions, debug.allow.method_access_violation)}},
-              {"field-access-violation", BoolField {offsetof(VerificationOptions, debug.allow.field_access_violation)}},
+             {{"undefined-class", BoolField {offsetof(VerificationOptions, debug.allow.undefinedClass)}},
+              {"undefined-method", BoolField {offsetof(VerificationOptions, debug.allow.undefinedMethod)}},
+              {"undefined-field", BoolField {offsetof(VerificationOptions, debug.allow.undefinedField)}},
+              {"undefined-type", BoolField {offsetof(VerificationOptions, debug.allow.undefinedType)}},
+              {"undefined-string", BoolField {offsetof(VerificationOptions, debug.allow.undefinedString)}},
+              {"method-access-violation", BoolField {offsetof(VerificationOptions, debug.allow.methodAccessViolation)}},
+              {"field-access-violation", BoolField {offsetof(VerificationOptions, debug.allow.fieldAccessViolation)}},
               {"wrong-subclassing-in-method-args",
-               BoolField {offsetof(VerificationOptions, debug.allow.wrong_subclassing_in_method_args)}},
+               BoolField {offsetof(VerificationOptions, debug.allow.wrongSubclassingInMethodArgs)}},
               {"error-in-exception-handler",
-               BoolField {offsetof(VerificationOptions, debug.allow.error_in_exception_handler)}},
+               BoolField {offsetof(VerificationOptions, debug.allow.errorInExceptionHandler)}},
               {"permanent-runtime-exception",
-               BoolField {offsetof(VerificationOptions, debug.allow.permanent_runtime_exception)}}}}};
+               BoolField {offsetof(VerificationOptions, debug.allow.permanentRuntimeException)}}}}};
 
-        auto &verif_opts = config->opts;
+        auto &verifOpts = config->opts;
         for (const auto &s : section.sections) {
             if (flags.count(s.name) == 0) {
                 LOG_VERIFIER_DEBUG_CONFIG_WRONG_OPTIONS_SECTION(s.name, GetKeys(flags));
                 return false;
             }
-            const auto &section_flags = flags.at(s.name);
+            const auto &sectionFlags = flags.at(s.name);
             for (const auto &i : s.items) {
                 PandaVector<PandaString> c;
                 const char *start = i.c_str();
@@ -107,11 +106,11 @@ void RegisterConfigHandlerOptions(Config *dcfg)
                 }
                 if (!c.empty()) {
                     for (const auto &l : c) {
-                        if (section_flags.count(l) == 0) {
-                            LOG_VERIFIER_DEBUG_CONFIG_WRONG_OPTION_FOR_SECTION(l, s.name, GetKeys(section_flags));
+                        if (sectionFlags.count(l) == 0) {
+                            LOG_VERIFIER_DEBUG_CONFIG_WRONG_OPTION_FOR_SECTION(l, s.name, GetKeys(sectionFlags));
                             return false;
                         }
-                        section_flags.at(l).Of(verif_opts) = true;
+                        sectionFlags.at(l).Of(verifOpts) = true;
                         LOG_VERIFIER_DEBUG_CONFIG_OPTION_IS_ACTIVE_INFO(s.name, l);
                     }
                 }

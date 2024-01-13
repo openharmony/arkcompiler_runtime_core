@@ -42,8 +42,8 @@ public:
     NO_COPY_SEMANTIC(TraceDumper);
     NO_MOVE_SEMANTIC(TraceDumper);
 
-    explicit TraceDumper(ModuleMap *modules_map, MethodMap *methods_map)
-        : modules_map_(modules_map), methods_map_(methods_map)
+    explicit TraceDumper(ModuleMap *modulesMap, MethodMap *methodsMap)
+        : modulesMap_(modulesMap), methodsMap_(methodsMap)
     {
     }
     virtual ~TraceDumper() = default;
@@ -51,17 +51,17 @@ public:
     void DumpTraces(const SampleInfo &sample, size_t count);
 
 protected:
-    static void WriteThreadId(std::ofstream &stream, uint32_t thread_id);
-    static void WriteThreadStatus(std::ofstream &stream, SampleInfo::ThreadStatus thread_status);
+    static void WriteThreadId(std::ofstream &stream, uint32_t threadId);
+    static void WriteThreadStatus(std::ofstream &stream, SampleInfo::ThreadStatus threadStatus);
 
 private:
     virtual std::ofstream &ResolveStream(const SampleInfo &sample) = 0;
 
-    std::string ResolveName(const panda_file::File *pf, uint64_t file_id) const;
+    std::string ResolveName(const panda_file::File *pf, uint64_t fileId) const;
 
 private:
-    ModuleMap *modules_map_ {nullptr};
-    MethodMap *methods_map_ {nullptr};
+    ModuleMap *modulesMap_ {nullptr};
+    MethodMap *methodsMap_ {nullptr};
 };
 
 class SingleCSVDumper final : public TraceDumper {
@@ -69,12 +69,12 @@ public:
     NO_COPY_SEMANTIC(SingleCSVDumper);
     NO_MOVE_SEMANTIC(SingleCSVDumper);
 
-    explicit SingleCSVDumper(const char *filename, DumpType option, ModuleMap *modules_map, MethodMap *methods_map,
-                             bool build_cold_graph)
-        : TraceDumper(modules_map, methods_map),
+    explicit SingleCSVDumper(const char *filename, DumpType option, ModuleMap *modulesMap, MethodMap *methodsMap,
+                             bool buildColdGraph)
+        : TraceDumper(modulesMap, methodsMap),
           stream_(std::ofstream(filename)),
           option_(option),
-          build_cold_graph_(build_cold_graph)
+          buildColdGraph_(buildColdGraph)
     {
     }
     ~SingleCSVDumper() override = default;
@@ -85,7 +85,7 @@ private:
 private:
     std::ofstream stream_;
     DumpType option_;
-    bool build_cold_graph_;
+    bool buildColdGraph_;
 };
 
 class MultipleCSVDumper final : public TraceDumper {
@@ -93,9 +93,8 @@ public:
     NO_COPY_SEMANTIC(MultipleCSVDumper);
     NO_MOVE_SEMANTIC(MultipleCSVDumper);
 
-    explicit MultipleCSVDumper(const char *filename, ModuleMap *modules_map, MethodMap *methods_map,
-                               bool build_cold_graph)
-        : TraceDumper(modules_map, methods_map), filename_(filename), build_cold_graph_(build_cold_graph)
+    explicit MultipleCSVDumper(const char *filename, ModuleMap *modulesMap, MethodMap *methodsMap, bool buildColdGraph)
+        : TraceDumper(modulesMap, methodsMap), filename_(filename), buildColdGraph_(buildColdGraph)
     {
     }
     ~MultipleCSVDumper() override = default;
@@ -103,12 +102,12 @@ public:
 private:
     std::ofstream &ResolveStream(const SampleInfo &sample) override;
 
-    static std::string AddThreadIdToFilename(const std::string &filename, uint32_t thread_id);
+    static std::string AddThreadIdToFilename(const std::string &filename, uint32_t threadId);
 
 private:
     std::string filename_;
-    std::unordered_map<size_t, std::ofstream> thread_id_map_;
-    bool build_cold_graph_;
+    std::unordered_map<size_t, std::ofstream> threadIdMap_;
+    bool buildColdGraph_;
 };
 
 }  // namespace panda::tooling::sampler

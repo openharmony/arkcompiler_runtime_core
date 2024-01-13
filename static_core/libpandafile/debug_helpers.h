@@ -27,8 +27,8 @@ namespace panda::panda_file::debug_helpers {
 
 class BytecodeOffsetResolver {
 public:
-    BytecodeOffsetResolver(panda_file::LineProgramState *state, uint32_t bc_offset)
-        : state_(state), bc_offset_(bc_offset), prev_line_(state->GetLine())
+    BytecodeOffsetResolver(panda_file::LineProgramState *state, uint32_t bcOffset)
+        : state_(state), bcOffset_(bcOffset), prevLine_(state->GetLine())
     {
     }
 
@@ -56,24 +56,24 @@ public:
         }
     }
 
-    bool HandleAdvanceLine(int32_t line_diff) const
+    bool HandleAdvanceLine(int32_t lineDiff) const
     {
-        state_->AdvanceLine(line_diff);
+        state_->AdvanceLine(lineDiff);
         return true;
     }
 
-    bool HandleAdvancePc(uint32_t pc_diff) const
+    bool HandleAdvancePc(uint32_t pcDiff) const
     {
-        state_->AdvancePc(pc_diff);
+        state_->AdvancePc(pcDiff);
         return true;
     }
 
-    bool HandleSetFile([[maybe_unused]] uint32_t source_file_id) const
+    bool HandleSetFile([[maybe_unused]] uint32_t sourceFileId) const
     {
         return true;
     }
 
-    bool HandleSetSourceCode([[maybe_unused]] uint32_t source_code_id) const
+    bool HandleSetSourceCode([[maybe_unused]] uint32_t sourceCodeId) const
     {
         return true;
     }
@@ -88,72 +88,72 @@ public:
         return true;
     }
 
-    bool HandleStartLocal([[maybe_unused]] int32_t reg_number, [[maybe_unused]] uint32_t name_id,
-                          [[maybe_unused]] uint32_t type_id) const
+    bool HandleStartLocal([[maybe_unused]] int32_t regNumber, [[maybe_unused]] uint32_t nameId,
+                          [[maybe_unused]] uint32_t typeId) const
     {
         return true;
     }
 
-    bool HandleStartLocalExtended([[maybe_unused]] int32_t reg_number, [[maybe_unused]] uint32_t name_id,
-                                  [[maybe_unused]] uint32_t type_id, [[maybe_unused]] uint32_t type_signature_id) const
+    bool HandleStartLocalExtended([[maybe_unused]] int32_t regNumber, [[maybe_unused]] uint32_t nameId,
+                                  [[maybe_unused]] uint32_t typeId, [[maybe_unused]] uint32_t typeSignatureId) const
     {
         return true;
     }
 
-    bool HandleEndLocal([[maybe_unused]] int32_t reg_number) const
+    bool HandleEndLocal([[maybe_unused]] int32_t regNumber) const
     {
         return true;
     }
 
-    bool HandleSetColumn([[maybe_unused]] int32_t column_number) const
+    bool HandleSetColumn([[maybe_unused]] int32_t columnNumber) const
     {
         return true;
     }
 
-    bool HandleSpecialOpcode(uint32_t pc_offset, int32_t line_offset)
+    bool HandleSpecialOpcode(uint32_t pcOffset, int32_t lineOffset)
     {
-        state_->AdvancePc(pc_offset);
-        state_->AdvanceLine(line_offset);
+        state_->AdvancePc(pcOffset);
+        state_->AdvanceLine(lineOffset);
 
-        if (state_->GetAddress() == bc_offset_) {
+        if (state_->GetAddress() == bcOffset_) {
             line_ = state_->GetLine();
             return false;
         }
 
-        if (state_->GetAddress() > bc_offset_) {
-            line_ = prev_line_;
+        if (state_->GetAddress() > bcOffset_) {
+            line_ = prevLine_;
             return false;
         }
 
-        prev_line_ = state_->GetLine();
+        prevLine_ = state_->GetLine();
 
         return true;
     }
 
 private:
     panda_file::LineProgramState *state_;
-    uint32_t bc_offset_;
-    uint32_t prev_line_;
+    uint32_t bcOffset_;
+    uint32_t prevLine_;
     uint32_t line_ {0};
 };
 
-inline size_t GetLineNumber(panda::panda_file::MethodDataAccessor mda, uint32_t bc_offset,
-                            const panda::panda_file::File *panda_debug_file)
+inline size_t GetLineNumber(panda::panda_file::MethodDataAccessor mda, uint32_t bcOffset,
+                            const panda::panda_file::File *pandaDebugFile)
 {
-    auto debug_info_id = mda.GetDebugInfoId();
-    if (!debug_info_id) {
+    auto debugInfoId = mda.GetDebugInfoId();
+    if (!debugInfoId) {
         return -1;
     }
 
-    panda::panda_file::DebugInfoDataAccessor dda(*panda_debug_file, debug_info_id.value());
+    panda::panda_file::DebugInfoDataAccessor dda(*pandaDebugFile, debugInfoId.value());
     const uint8_t *program = dda.GetLineNumberProgram();
 
-    panda::panda_file::LineProgramState state(*panda_debug_file, panda::panda_file::File::EntityId(0),
-                                              dda.GetLineStart(), dda.GetConstantPool());
+    panda::panda_file::LineProgramState state(*pandaDebugFile, panda::panda_file::File::EntityId(0), dda.GetLineStart(),
+                                              dda.GetConstantPool());
 
-    BytecodeOffsetResolver resolver(&state, bc_offset);
-    panda::panda_file::LineNumberProgramProcessor<BytecodeOffsetResolver> program_processor(program, &resolver);
-    program_processor.Process();
+    BytecodeOffsetResolver resolver(&state, bcOffset);
+    panda::panda_file::LineNumberProgramProcessor<BytecodeOffsetResolver> programProcessor(program, &resolver);
+    programProcessor.Process();
 
     return resolver.GetLine();
 }

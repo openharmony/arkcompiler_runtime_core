@@ -29,9 +29,9 @@ namespace panda {
 static constexpr uint64_t SIGHOOK_ALLOW_NORETURN = 0x1UL;
 
 struct SighookAction {
-    bool (*sc_sigaction)(int, siginfo_t *, void *);
-    sigset_t sc_mask;
-    uint64_t sc_flags;
+    bool (*scSigaction)(int, siginfo_t *, void *);
+    sigset_t scMask;
+    uint64_t scFlags;
 };
 
 extern "C" void RegisterHookHandler(int signal, const SighookAction *sa);
@@ -42,9 +42,9 @@ PANDA_PUBLIC_API void ClearSignalHooksHandlersArray();
 // running on mobile, actually use sigchain, here provide sigchain stub to make sure complier success
 // the real used function is in libsigchain.a
 struct SigchainAction {
-    bool (*sc_sigaction)(int, siginfo_t *, void *);
-    sigset_t sc_mask;
-    uint64_t sc_flags;
+    bool (*scSigaction)(int, siginfo_t *, void *);
+    sigset_t scMask;
+    uint64_t scFlags;
 };
 
 extern "C" PANDA_PUBLIC_API void AddSpecialSignalHandlerFn(int signal, SigchainAction *sa);

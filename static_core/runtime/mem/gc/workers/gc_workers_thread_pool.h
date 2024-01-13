@@ -26,7 +26,7 @@ class GCWorkersThreadPool;
 
 class GCWorkersProcessor : public ProcessorInterface<GCWorkersTask, GCWorkersThreadPool *> {
 public:
-    explicit GCWorkersProcessor(GCWorkersThreadPool *gc_threads_pools) : gc_threads_pools_(gc_threads_pools) {}
+    explicit GCWorkersProcessor(GCWorkersThreadPool *gcThreadsPools) : gcThreadsPools_(gcThreadsPools) {}
 
     ~GCWorkersProcessor() override = default;
     NO_COPY_SEMANTIC(GCWorkersProcessor);
@@ -37,14 +37,14 @@ public:
     bool Destroy() override;
 
 private:
-    GCWorkersThreadPool *gc_threads_pools_;
-    void *worker_data_ {nullptr};
+    GCWorkersThreadPool *gcThreadsPools_;
+    void *workerData_ {nullptr};
 };
 
 class GCWorkersQueueSimple : public TaskQueueInterface<GCWorkersTask> {
 public:
-    explicit GCWorkersQueueSimple(mem::InternalAllocatorPtr allocator, size_t queue_limit)
-        : TaskQueueInterface<GCWorkersTask>(queue_limit), queue_(allocator->Adapter())
+    explicit GCWorkersQueueSimple(mem::InternalAllocatorPtr allocator, size_t queueLimit)
+        : TaskQueueInterface<GCWorkersTask>(queueLimit), queue_(allocator->Adapter())
     {
     }
 
@@ -55,26 +55,26 @@ public:
     GCWorkersTask GetTask() override
     {
         if (queue_.empty()) {
-            LOG(DEBUG, GC) << "Empty " << queue_name_ << ", return nothing";
+            LOG(DEBUG, GC) << "Empty " << queueName_ << ", return nothing";
             return GCWorkersTask();
         }
         auto task = queue_.front();
         queue_.pop_front();
-        LOG(DEBUG, GC) << "Extract a task from a " << queue_name_ << ": " << GetTaskDescription(task);
+        LOG(DEBUG, GC) << "Extract a task from a " << queueName_ << ": " << GetTaskDescription(task);
         return task;
     }
 
     // NOLINTNEXTLINE(google-default-arguments)
     void AddTask(GCWorkersTask &&ctx, [[maybe_unused]] size_t priority = 0) override
     {
-        LOG(DEBUG, GC) << "Add task to a " << queue_name_ << ": " << GetTaskDescription(ctx);
+        LOG(DEBUG, GC) << "Add task to a " << queueName_ << ": " << GetTaskDescription(ctx);
         queue_.push_front(ctx);
     }
 
     void Finalize() override
     {
         // Nothing to deallocate
-        LOG(DEBUG, GC) << "Clear a " << queue_name_;
+        LOG(DEBUG, GC) << "Clear a " << queueName_;
         queue_.clear();
     }
 
@@ -93,12 +93,12 @@ protected:
 
 private:
     PandaList<GCWorkersTask> queue_;
-    const char *queue_name_ = "simple gc workers task queue";
+    const char *queueName_ = "simple gc workers task queue";
 };
 
 class GCWorkersCreationInterface : public WorkerCreationInterface {
 public:
-    explicit GCWorkersCreationInterface(PandaVM *vm) : gc_thread_(vm, Thread::ThreadType::THREAD_TYPE_GC)
+    explicit GCWorkersCreationInterface(PandaVM *vm) : gcThread_(vm, Thread::ThreadType::THREAD_TYPE_GC)
     {
         ASSERT(vm != nullptr);
     }
@@ -107,21 +107,21 @@ public:
     NO_COPY_SEMANTIC(GCWorkersCreationInterface);
     NO_MOVE_SEMANTIC(GCWorkersCreationInterface);
 
-    void AttachWorker(bool helper_thread) override
+    void AttachWorker(bool helperThread) override
     {
-        if (!helper_thread) {
-            Thread::SetCurrent(&gc_thread_);
+        if (!helperThread) {
+            Thread::SetCurrent(&gcThread_);
         }
     }
-    void DetachWorker(bool helper_thread) override
+    void DetachWorker(bool helperThread) override
     {
-        if (!helper_thread) {
+        if (!helperThread) {
             Thread::SetCurrent(nullptr);
         }
     }
 
 private:
-    Thread gc_thread_;
+    Thread gcThread_;
 };
 
 /// @brief GC workers task pool based on internal thread pool
@@ -129,7 +129,7 @@ class GCWorkersThreadPool final : public GCWorkersTaskPool {
 public:
     NO_COPY_SEMANTIC(GCWorkersThreadPool);
     NO_MOVE_SEMANTIC(GCWorkersThreadPool);
-    explicit GCWorkersThreadPool(GC *gc, size_t threads_count = 0);
+    explicit GCWorkersThreadPool(GC *gc, size_t threadsCount = 0);
     ~GCWorkersThreadPool() final;
 
     void SetAffinityForGCWorkers();
@@ -153,11 +153,11 @@ private:
     void RunInCurrentThread() final;
 
     /* GC thread pool specific variables */
-    ThreadPool<GCWorkersTask, GCWorkersProcessor, GCWorkersThreadPool *> *thread_pool_;
+    ThreadPool<GCWorkersTask, GCWorkersProcessor, GCWorkersThreadPool *> *threadPool_;
     GCWorkersQueueSimple *queue_;
-    GCWorkersCreationInterface *worker_iface_;
-    mem::InternalAllocatorPtr internal_allocator_;
-    const size_t threads_count_;
+    GCWorkersCreationInterface *workerIface_;
+    mem::InternalAllocatorPtr internalAllocator_;
+    const size_t threadsCount_;
 
     friend class GCWorkersProcessor;
 };

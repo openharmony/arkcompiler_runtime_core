@@ -29,8 +29,8 @@ public:
     {
         panda::mem::MemConfig::Initialize(0, MEMORY_POOL_SIZE, 0, 0, 0, 0);
         PoolManager::Initialize();
-        mem_stats_ = new mem::MemStatsType();
-        allocator_ = new InternalAllocatorT<InternalAllocatorConfig::PANDA_ALLOCATORS>(mem_stats_);
+        memStats_ = new mem::MemStatsType();
+        allocator_ = new InternalAllocatorT<InternalAllocatorConfig::PANDA_ALLOCATORS>(memStats_);
     }
 
     ~InternalAllocatorTest() override
@@ -38,7 +38,7 @@ public:
         delete static_cast<Allocator *>(allocator_);
         PoolManager::Finalize();
         panda::mem::MemConfig::Finalize();
-        delete mem_stats_;
+        delete memStats_;
     }
 
     NO_COPY_SEMANTIC(InternalAllocatorTest);
@@ -50,28 +50,27 @@ protected:
 
     static constexpr size_t MEMORY_POOL_SIZE = 16_MB;
 
-    void InfinitiveAllocate(size_t alloc_size)
+    void InfinitiveAllocate(size_t allocSize)
     {
         void *mem = nullptr;
         do {
-            mem = allocator_->Alloc(alloc_size);
+            mem = allocator_->Alloc(allocSize);
         } while (mem != nullptr);
     }
 
     // Check that we don't have OOM and there is free space for mem pools
     bool CheckFreeSpaceForPools()
     {
-        size_t current_space_size =
-            PoolManager::GetMmapMemPool()
-                ->non_object_spaces_current_size_[SpaceTypeToIndex(SpaceType::SPACE_TYPE_INTERNAL)];
-        size_t max_space_size = PoolManager::GetMmapMemPool()
-                                    ->non_object_spaces_max_size_[SpaceTypeToIndex(SpaceType::SPACE_TYPE_INTERNAL)];
-        ASSERT(current_space_size <= max_space_size);
-        return (max_space_size - current_space_size) >= InternalAllocator<>::RunSlotsAllocatorT::GetMinPoolSize();
+        size_t currentSpaceSize = PoolManager::GetMmapMemPool()
+                                      ->nonObjectSpacesCurrentSize_[SpaceTypeToIndex(SpaceType::SPACE_TYPE_INTERNAL)];
+        size_t maxSpaceSize =
+            PoolManager::GetMmapMemPool()->nonObjectSpacesMaxSize_[SpaceTypeToIndex(SpaceType::SPACE_TYPE_INTERNAL)];
+        ASSERT(currentSpaceSize <= maxSpaceSize);
+        return (maxSpaceSize - currentSpaceSize) >= InternalAllocator<>::RunSlotsAllocatorT::GetMinPoolSize();
     }
 
 private:
-    mem::MemStatsType *mem_stats_;
+    mem::MemStatsType *memStats_;
 };
 
 TEST_F(InternalAllocatorTest, AvoidInfiniteLoopTest)
@@ -154,30 +153,30 @@ TEST_F(InternalAllocatorTest, AllocAlignmentTest)
         uint8_t a[N];
     };
 
-    auto is_aligned = [](void *ptr) { return IsAligned(reinterpret_cast<uintptr_t>(ptr), ALIGNMENT); };
+    auto isAligned = [](void *ptr) { return IsAligned(reinterpret_cast<uintptr_t>(ptr), ALIGNMENT); };
 
     auto *ptr = allocator_->Alloc(N);
-    if (!is_aligned(ptr)) {
+    if (!isAligned(ptr)) {
         allocator_->Free(ptr);
         ptr = nullptr;
     }
 
     {
         auto *p = allocator_->AllocArray<S>(1);
-        ASSERT_TRUE(is_aligned(p));
+        ASSERT_TRUE(isAligned(p));
         allocator_->Free(p);
     }
 
     {
         auto *p = allocator_->New<S>();
-        ASSERT_TRUE(is_aligned(p));
+        ASSERT_TRUE(isAligned(p));
         allocator_->Delete(p);
     }
 
     {
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
         auto *p = allocator_->New<S[]>(1);
-        ASSERT_TRUE(is_aligned(p));
+        ASSERT_TRUE(isAligned(p));
         allocator_->DeleteArray(p);
     }
 
@@ -196,36 +195,36 @@ TEST_F(InternalAllocatorTest, AllocLocalAlignmentTest)
         uint8_t a[N];
     };
 
-    auto is_aligned = [](void *ptr) { return IsAligned(reinterpret_cast<uintptr_t>(ptr), ALIGNMENT); };
+    auto isAligned = [](void *ptr) { return IsAligned(reinterpret_cast<uintptr_t>(ptr), ALIGNMENT); };
 
     auto *ptr = allocator_->AllocLocal(N);
-    if (!is_aligned(ptr)) {
+    if (!isAligned(ptr)) {
         allocator_->Free(ptr);
         ptr = nullptr;
     }
 
     {
         auto *p = allocator_->AllocArrayLocal<S>(1);
-        ASSERT_TRUE(is_aligned(p));
+        ASSERT_TRUE(isAligned(p));
         allocator_->Free(p);
     }
 
     {
         auto *p = allocator_->AllocArrayLocal<S>(1);
-        ASSERT_TRUE(is_aligned(p));
+        ASSERT_TRUE(isAligned(p));
         allocator_->Free(p);
     }
 
     {
         auto *p = allocator_->NewLocal<S>();
-        ASSERT_TRUE(is_aligned(p));
+        ASSERT_TRUE(isAligned(p));
         allocator_->Delete(p);
     }
 
     {
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
         auto *p = allocator_->NewLocal<S[]>(1);
-        ASSERT_TRUE(is_aligned(p));
+        ASSERT_TRUE(isAligned(p));
         allocator_->DeleteArray(p);
     }
 
@@ -240,23 +239,23 @@ TEST_F(InternalAllocatorTest, MoveContainerTest)
     constexpr auto MAGIC_VALUE = TestValueType {};
     AllocatorAdapter<TestValueType> adapter = allocator_->Adapter();
     using TestVector = std::vector<TestValueType, decltype(adapter)>;
-    TestVector vector_1(adapter);
-    TestVector vector_2(adapter);
+    TestVector vector1(adapter);
+    TestVector vector2(adapter);
     // Swap
-    auto vector_3 = std::move(vector_2);
-    vector_2 = std::move(vector_1);
-    vector_1 = std::move(vector_3);
-    vector_2.emplace_back(MAGIC_VALUE);
-    ASSERT_EQ(vector_2.back(), MAGIC_VALUE);
-    ASSERT_EQ(vector_2.get_allocator(), adapter);
+    auto vector3 = std::move(vector2);
+    vector2 = std::move(vector1);
+    vector1 = std::move(vector3);
+    vector2.emplace_back(MAGIC_VALUE);
+    ASSERT_EQ(vector2.back(), MAGIC_VALUE);
+    ASSERT_EQ(vector2.get_allocator(), adapter);
 
     using TestDeque = std::deque<TestValueType, decltype(adapter)>;
-    TestDeque *deque_tmp = allocator_->New<TestDeque>(allocator_->Adapter());
-    *deque_tmp = TestDeque(allocator_->Adapter());
-    deque_tmp->push_back(MAGIC_VALUE);
-    ASSERT_EQ(deque_tmp->get_allocator(), allocator_->Adapter());
-    ASSERT_EQ(deque_tmp->back(), MAGIC_VALUE);
-    allocator_->Delete(deque_tmp);
+    TestDeque *dequeTmp = allocator_->New<TestDeque>(allocator_->Adapter());
+    *dequeTmp = TestDeque(allocator_->Adapter());
+    dequeTmp->push_back(MAGIC_VALUE);
+    ASSERT_EQ(dequeTmp->get_allocator(), allocator_->Adapter());
+    ASSERT_EQ(dequeTmp->back(), MAGIC_VALUE);
+    allocator_->Delete(dequeTmp);
 }
 
 }  // namespace panda::mem::test

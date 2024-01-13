@@ -23,16 +23,16 @@
 
 namespace panda {
 
-extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bc_offset, const void *osr_code, void *cframe_ptr,
-                                 uintptr_t *reg_buffer, uintptr_t *fp_reg_buffer);
+extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const void *osrCode, void *cframePtr,
+                                 uintptr_t *regBuffer, uintptr_t *fpRegBuffer);
 
-bool OsrEntry(uintptr_t loop_head_bc, const void *osr_code);
+bool OsrEntry(uintptr_t loopHeadBc, const void *osrCode);
 
-extern "C" void OsrEntryAfterCFrame(Frame *frame, uintptr_t loop_head_bc, const void *osr_code, size_t frame_size);
-extern "C" void OsrEntryAfterIFrame(Frame *frame, uintptr_t loop_head_bc, const void *osr_code, size_t frame_size,
-                                    size_t stack_params);
-extern "C" void OsrEntryTopFrame(Frame *frame, uintptr_t loop_head_bc, const void *osr_code, size_t frame_size,
-                                 size_t stack_params);
+extern "C" void OsrEntryAfterCFrame(Frame *frame, uintptr_t loopHeadBc, const void *osrCode, size_t frameSize);
+extern "C" void OsrEntryAfterIFrame(Frame *frame, uintptr_t loopHeadBc, const void *osrCode, size_t frameSize,
+                                    size_t stackParams);
+extern "C" void OsrEntryTopFrame(Frame *frame, uintptr_t loopHeadBc, const void *osrCode, size_t frameSize,
+                                 size_t stackParams);
 
 extern "C" void SetOsrResult(Frame *frame, uint64_t uval, double fval);
 
@@ -40,9 +40,9 @@ class OsrCodeMap {
 public:
     void *Get(const Method *method)
     {
-        os::memory::ReadLockHolder holder(osr_lock_);
-        auto iter = code_map_.find(method);
-        if (UNLIKELY(iter == code_map_.end())) {
+        os::memory::ReadLockHolder holder(osrLock_);
+        auto iter = codeMap_.find(method);
+        if (UNLIKELY(iter == codeMap_.end())) {
             return nullptr;
         }
         return iter->second;
@@ -54,19 +54,19 @@ public:
             Remove(method);
             return;
         }
-        os::memory::WriteLockHolder holder(osr_lock_);
-        code_map_.insert({method, ptr});
+        os::memory::WriteLockHolder holder(osrLock_);
+        codeMap_.insert({method, ptr});
     }
 
     void Remove(const Method *method)
     {
-        os::memory::WriteLockHolder holder(osr_lock_);
-        code_map_.erase(method);
+        os::memory::WriteLockHolder holder(osrLock_);
+        codeMap_.erase(method);
     }
 
 private:
-    os::memory::RWLock osr_lock_;
-    PandaMap<const Method *, void *> code_map_;
+    os::memory::RWLock osrLock_;
+    PandaMap<const Method *, void *> codeMap_;
 };
 
 }  // namespace panda

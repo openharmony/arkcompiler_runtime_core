@@ -224,12 +224,12 @@ public:
         data_[index] &= ~(mask << shift);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         data_[index] |= (value << shift);
-        size_t end_bits = BITS_PER_BYTE - shift;
-        for (int i = 1; end_bits < length; i++, end_bits += BITS_PER_BYTE) {
+        size_t endBits = BITS_PER_BYTE - shift;
+        for (int i = 1; endBits < length; i++, endBits += BITS_PER_BYTE) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            data_[index + i] &= ~(mask >> end_bits);
+            data_[index + i] &= ~(mask >> endBits);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            data_[index + i] |= (value >> end_bits);
+            data_[index + i] |= (value >> endBits);
         }
     }
 
@@ -269,7 +269,7 @@ public:
         return Popcount(0, Size());
     }
 
-    void DumpVal(std::ostream &os, size_t val, bool &is_zero, int width) const;
+    void DumpVal(std::ostream &os, size_t val, bool &isZero, int width) const;
     void Dump(std::ostream &os) const;
 
     virtual ~BitMemoryRegion() = default;

@@ -22,7 +22,7 @@
 namespace panda::verifier {
 
 template <typename Parser, typename RegexHandler>
-const auto &MethodGroupParser(RegexHandler &regex_handler)
+const auto &MethodGroupParser(RegexHandler &regexHandler)
 {
     using panda::parser::Action;
     using panda::parser::Charset;
@@ -36,7 +36,7 @@ const auto &MethodGroupParser(RegexHandler &regex_handler)
     static const auto QUOTE = P::OfString("'");
     static const auto NON_QUOTES = P1::OfCharset(!Charset("'"));
 
-    static const auto REGEX_HANDLER = [&](Action a, typename P::Ctx &c, auto from, auto to) {
+    static const auto REGEX_HANDLER = [&regexHandler](Action a, typename P::Ctx &c, auto from, auto to) {
         if (a == Action::PARSED) {
             auto *start = from;
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -44,7 +44,7 @@ const auto &MethodGroupParser(RegexHandler &regex_handler)
             auto *end = to;
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             --end;
-            return regex_handler(c, PandaString {start, end});
+            return regexHandler(c, PandaString {start, end});
         }
         return true;
     };

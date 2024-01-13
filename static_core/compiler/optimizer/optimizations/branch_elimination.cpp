@@ -34,18 +34,18 @@ namespace panda::compiler {
  */
 BranchElimination::BranchElimination(Graph *graph)
     : Optimization(graph),
-      same_input_compares_(graph->GetLocalAllocator()->Adapter()),
-      same_input_compare_any_type_(graph->GetLocalAllocator()->Adapter())
+      sameInputCompares_(graph->GetLocalAllocator()->Adapter()),
+      sameInputCompareAnyType_(graph->GetLocalAllocator()->Adapter())
 {
 }
 
 bool BranchElimination::RunImpl()
 {
     GetGraph()->RunPass<DominatorsTree>();
-    is_applied_ = false;
-    same_input_compares_.clear();
-    auto marker_holder = MarkerHolder(GetGraph());
-    rm_block_marker_ = marker_holder.GetMarker();
+    isApplied_ = false;
+    sameInputCompares_.clear();
+    auto markerHolder = MarkerHolder(GetGraph());
+    rmBlockMarker_ = markerHolder.GetMarker();
     for (auto block : GetGraph()->GetBlocksRPO()) {
         if (block->IsEmpty() || (block->IsTry() && GetGraph()->IsBytecodeOptimizer())) {
             continue;
@@ -57,7 +57,7 @@ bool BranchElimination::RunImpl()
             }
             /* skip branch() elimination at the end of the
              * preheader until LoopUnrolling pass is done */
-            if (!GetGraph()->IsBytecodeOptimizer() && OPTIONS.IsCompilerDeferPreheaderTransform() &&
+            if (!GetGraph()->IsBytecodeOptimizer() && g_options.IsCompilerDeferPreheaderTransform() &&
                 !GetGraph()->IsUnrollComplete() && block->IsLoopValid() && block->IsLoopPreHeader()) {
                 continue;
             }
@@ -66,11 +66,11 @@ bool BranchElimination::RunImpl()
     }
     DisconnectBlocks();
 
-    if (is_applied_ && GetGraph()->IsOsrMode()) {
+    if (isApplied_ && GetGraph()->IsOsrMode()) {
         CleanupGraphSaveStateOSR(GetGraph());
     }
     COMPILER_LOG(DEBUG, BRANCH_ELIM) << "Branch elimination complete";
-    return is_applied_;
+    return isApplied_;
 }
 
 bool BranchElimination::SkipForOsr(const BasicBlock *block)
@@ -94,104 +94,104 @@ void BranchElimination::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
     // Before in "CleanupGraphSaveStateOSR" already run "LoopAnalyzer"
     // in case (is_applied_ && GetGraph()->IsOsrMode())
-    if (!(is_applied_ && GetGraph()->IsOsrMode())) {
+    if (!(isApplied_ && GetGraph()->IsOsrMode())) {
         GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
     }
     InvalidateBlocksOrderAnalyzes(GetGraph());
 }
 
-void BranchElimination::BranchEliminationConst(BasicBlock *if_block)
+void BranchElimination::BranchEliminationConst(BasicBlock *ifBlock)
 {
-    auto if_imm = if_block->GetLastInst()->CastToIfImm();
-    auto condition_inst = if_block->GetLastInst()->GetInput(0).GetInst();
+    auto ifImm = ifBlock->GetLastInst()->CastToIfImm();
+    auto conditionInst = ifBlock->GetLastInst()->GetInput(0).GetInst();
     COMPILER_LOG(DEBUG, BRANCH_ELIM) << "Block with constant if instruction input is visited, id = "
-                                     << if_block->GetId();
+                                     << ifBlock->GetId();
 
-    uint64_t const_value = condition_inst->CastToConstant()->GetIntValue();
-    bool cond_result = (const_value == if_imm->GetImm());
-    if (if_imm->GetCc() == CC_NE) {
-        cond_result = !cond_result;
+    uint64_t constValue = conditionInst->CastToConstant()->GetIntValue();
+    bool condResult = (constValue == ifImm->GetImm());
+    if (ifImm->GetCc() == CC_NE) {
+        condResult = !condResult;
     } else {
-        ASSERT(if_imm->GetCc() == CC_EQ);
+        ASSERT(ifImm->GetCc() == CC_EQ);
     }
-    auto eliminated_successor = if_block->GetFalseSuccessor();
-    if (!cond_result) {
-        eliminated_successor = if_block->GetTrueSuccessor();
+    auto eliminatedSuccessor = ifBlock->GetFalseSuccessor();
+    if (!condResult) {
+        eliminatedSuccessor = ifBlock->GetTrueSuccessor();
     }
-    EliminateBranch(if_block, eliminated_successor);
-    GetGraph()->GetEventWriter().EventBranchElimination(
-        if_block->GetId(), if_block->GetGuestPc(), condition_inst->GetId(), condition_inst->GetPc(), "const-condition",
-        eliminated_successor == if_block->GetTrueSuccessor());
+    EliminateBranch(ifBlock, eliminatedSuccessor);
+    GetGraph()->GetEventWriter().EventBranchElimination(ifBlock->GetId(), ifBlock->GetGuestPc(), conditionInst->GetId(),
+                                                        conditionInst->GetPc(), "const-condition",
+                                                        eliminatedSuccessor == ifBlock->GetTrueSuccessor());
 }
 
-void BranchElimination::BranchEliminationCompare(BasicBlock *if_block)
+void BranchElimination::BranchEliminationCompare(BasicBlock *ifBlock)
 {
-    auto if_imm = if_block->GetLastInst()->CastToIfImm();
-    auto condition_inst = if_block->GetLastInst()->GetInput(0).GetInst();
-    if (auto result = GetConditionResult(condition_inst)) {
+    auto ifImm = ifBlock->GetLastInst()->CastToIfImm();
+    auto conditionInst = ifBlock->GetLastInst()->GetInput(0).GetInst();
+    if (auto result = GetConditionResult(conditionInst)) {
         COMPILER_LOG(DEBUG, BRANCH_ELIM) << "Compare instruction result was resolved. Instruction id = "
-                                         << condition_inst->GetId()
+                                         << conditionInst->GetId()
                                          << ", resolved result: " << (result.value() ? "true" : "false");
-        auto eliminated_successor = if_imm->GetEdgeIfInputFalse();
+        auto eliminatedSuccessor = ifImm->GetEdgeIfInputFalse();
         if (!result.value()) {
-            eliminated_successor = if_imm->GetEdgeIfInputTrue();
+            eliminatedSuccessor = ifImm->GetEdgeIfInputTrue();
         }
-        EliminateBranch(if_block, eliminated_successor);
+        EliminateBranch(ifBlock, eliminatedSuccessor);
         GetGraph()->GetEventWriter().EventBranchElimination(
-            if_block->GetId(), if_block->GetGuestPc(), condition_inst->GetId(), condition_inst->GetPc(), "dominant-if",
-            eliminated_successor == if_block->GetTrueSuccessor());
+            ifBlock->GetId(), ifBlock->GetGuestPc(), conditionInst->GetId(), conditionInst->GetPc(), "dominant-if",
+            eliminatedSuccessor == ifBlock->GetTrueSuccessor());
     } else {
-        ConditionOps ops {condition_inst->GetInput(0).GetInst(), condition_inst->GetInput(1).GetInst()};
-        auto it = same_input_compares_.try_emplace(ops, GetGraph()->GetLocalAllocator()->Adapter());
-        it.first->second.push_back(condition_inst);
+        ConditionOps ops {conditionInst->GetInput(0).GetInst(), conditionInst->GetInput(1).GetInst()};
+        auto it = sameInputCompares_.try_emplace(ops, GetGraph()->GetLocalAllocator()->Adapter());
+        it.first->second.push_back(conditionInst);
     }
 }
 
-void BranchElimination::BranchEliminationCompareAnyType(BasicBlock *if_block)
+void BranchElimination::BranchEliminationCompareAnyType(BasicBlock *ifBlock)
 {
-    auto if_imm = if_block->GetLastInst()->CastToIfImm();
-    auto compare_any = if_block->GetLastInst()->GetInput(0).GetInst()->CastToCompareAnyType();
-    if (auto result = GetCompareAnyTypeResult(if_imm)) {
+    auto ifImm = ifBlock->GetLastInst()->CastToIfImm();
+    auto compareAny = ifBlock->GetLastInst()->GetInput(0).GetInst()->CastToCompareAnyType();
+    if (auto result = GetCompareAnyTypeResult(ifImm)) {
         COMPILER_LOG(DEBUG, BRANCH_ELIM) << "CompareAnyType instruction result was resolved. Instruction id = "
-                                         << compare_any->GetId()
+                                         << compareAny->GetId()
                                          << ", resolved result: " << (result.value() ? "true" : "false");
-        auto eliminated_successor = if_imm->GetEdgeIfInputFalse();
+        auto eliminatedSuccessor = ifImm->GetEdgeIfInputFalse();
         if (!result.value()) {
-            eliminated_successor = if_imm->GetEdgeIfInputTrue();
+            eliminatedSuccessor = ifImm->GetEdgeIfInputTrue();
         }
-        EliminateBranch(if_block, eliminated_successor);
-        GetGraph()->GetEventWriter().EventBranchElimination(if_block->GetId(), if_block->GetGuestPc(),
-                                                            compare_any->GetId(), compare_any->GetPc(), "dominant-if",
-                                                            eliminated_successor == if_block->GetTrueSuccessor());
+        EliminateBranch(ifBlock, eliminatedSuccessor);
+        GetGraph()->GetEventWriter().EventBranchElimination(ifBlock->GetId(), ifBlock->GetGuestPc(),
+                                                            compareAny->GetId(), compareAny->GetPc(), "dominant-if",
+                                                            eliminatedSuccessor == ifBlock->GetTrueSuccessor());
         return;
     }
 
-    Inst *input = compare_any->GetInput(0).GetInst();
-    auto it = same_input_compare_any_type_.try_emplace(input, GetGraph()->GetLocalAllocator()->Adapter());
-    it.first->second.push_back(compare_any);
+    Inst *input = compareAny->GetInput(0).GetInst();
+    auto it = sameInputCompareAnyType_.try_emplace(input, GetGraph()->GetLocalAllocator()->Adapter());
+    it.first->second.push_back(compareAny);
 }
 
 /**
  * Select unreachable successor and run elimination process
  * @param blocks - list of blocks with constant `if` instruction input
  */
-void BranchElimination::VisitBlock(BasicBlock *if_block)
+void BranchElimination::VisitBlock(BasicBlock *ifBlock)
 {
-    ASSERT(if_block != nullptr);
-    ASSERT(if_block->GetGraph() == GetGraph());
-    ASSERT(if_block->GetLastInst()->GetOpcode() == Opcode::IfImm);
-    ASSERT(if_block->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
+    ASSERT(ifBlock != nullptr);
+    ASSERT(ifBlock->GetGraph() == GetGraph());
+    ASSERT(ifBlock->GetLastInst()->GetOpcode() == Opcode::IfImm);
+    ASSERT(ifBlock->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
 
-    auto condition_inst = if_block->GetLastInst()->GetInput(0).GetInst();
-    switch (condition_inst->GetOpcode()) {
+    auto conditionInst = ifBlock->GetLastInst()->GetInput(0).GetInst();
+    switch (conditionInst->GetOpcode()) {
         case Opcode::Constant:
-            BranchEliminationConst(if_block);
+            BranchEliminationConst(ifBlock);
             break;
         case Opcode::Compare:
-            BranchEliminationCompare(if_block);
+            BranchEliminationCompare(ifBlock);
             break;
         case Opcode::CompareAnyType:
-            BranchEliminationCompareAnyType(if_block);
+            BranchEliminationCompareAnyType(ifBlock);
             break;
         default:
             break;
@@ -205,27 +205,27 @@ void BranchElimination::VisitBlock(BasicBlock *if_block)
  * @param if_block - block with constant 'if' instruction input
  * @param eliminated_block - unreachable form `if_block`
  */
-void BranchElimination::EliminateBranch(BasicBlock *if_block, BasicBlock *eliminated_block)
+void BranchElimination::EliminateBranch(BasicBlock *ifBlock, BasicBlock *eliminatedBlock)
 {
-    ASSERT(if_block != nullptr && if_block->GetGraph() == GetGraph());
-    ASSERT(eliminated_block != nullptr && eliminated_block->GetGraph() == GetGraph());
+    ASSERT(ifBlock != nullptr && ifBlock->GetGraph() == GetGraph());
+    ASSERT(eliminatedBlock != nullptr && eliminatedBlock->GetGraph() == GetGraph());
     // find predecessor which is not dominated by `eliminated_block`
-    auto preds = eliminated_block->GetPredsBlocks();
-    auto it = std::find_if(preds.begin(), preds.end(), [if_block, eliminated_block](BasicBlock *pred) {
-        return pred != if_block && !eliminated_block->IsDominate(pred);
+    auto preds = eliminatedBlock->GetPredsBlocks();
+    auto it = std::find_if(preds.begin(), preds.end(), [ifBlock, eliminatedBlock](BasicBlock *pred) {
+        return pred != ifBlock && !eliminatedBlock->IsDominate(pred);
     });
-    bool dominates_all_preds = (it == preds.cend());
-    if (preds.size() > 1 && !dominates_all_preds) {
-        RemovePredecessorUpdateDF(eliminated_block, if_block);
-        if_block->RemoveSucc(eliminated_block);
-        if_block->RemoveInst(if_block->GetLastInst());
+    bool dominatesAllPreds = (it == preds.cend());
+    if (preds.size() > 1 && !dominatesAllPreds) {
+        RemovePredecessorUpdateDF(eliminatedBlock, ifBlock);
+        ifBlock->RemoveSucc(eliminatedBlock);
+        ifBlock->RemoveInst(ifBlock->GetLastInst());
         GetGraph()->GetAnalysis<Rpo>().SetValid(true);
         // NOTE (a.popov) DominatorsTree could be restored inplace
         GetGraph()->RunPass<DominatorsTree>();
     } else {
-        eliminated_block->SetMarker(rm_block_marker_);
+        eliminatedBlock->SetMarker(rmBlockMarker_);
     }
-    is_applied_ = true;
+    isApplied_ = true;
 }
 
 /**
@@ -236,7 +236,7 @@ void BranchElimination::EliminateBranch(BasicBlock *if_block, BasicBlock *elimin
 void BranchElimination::MarkUnreachableBlocks(BasicBlock *block)
 {
     for (auto dom : block->GetDominatedBlocks()) {
-        dom->SetMarker(rm_block_marker_);
+        dom->SetMarker(rmBlockMarker_);
         MarkUnreachableBlocks(dom);
     }
 }
@@ -261,15 +261,15 @@ bool AllPredecessorsMarked(BasicBlock *block, Marker marker)
 void BranchElimination::DisconnectBlocks()
 {
     for (auto block : GetGraph()->GetBlocksRPO()) {
-        if (block->IsMarked(rm_block_marker_) || AllPredecessorsMarked(block, rm_block_marker_)) {
+        if (block->IsMarked(rmBlockMarker_) || AllPredecessorsMarked(block, rmBlockMarker_)) {
             MarkUnreachableBlocks(block);
         }
     }
 
-    const auto &rpo_blocks = GetGraph()->GetBlocksRPO();
-    for (auto it = rpo_blocks.rbegin(); it != rpo_blocks.rend(); it++) {
+    const auto &rpoBlocks = GetGraph()->GetBlocksRPO();
+    for (auto it = rpoBlocks.rbegin(); it != rpoBlocks.rend(); it++) {
         auto block = *it;
-        if (block != nullptr && block->IsMarked(rm_block_marker_)) {
+        if (block != nullptr && block->IsMarked(rmBlockMarker_)) {
             GetGraph()->DisconnectBlock(block);
             COMPILER_LOG(DEBUG, BRANCH_ELIM) << "Block was disconnected, id = " << block->GetId();
         }
@@ -282,23 +282,23 @@ void BranchElimination::DisconnectBlocks()
  * If `target_block` is dominated by one of the successors, need to check that `target_block`
  * is NOT reachable by the other successor
  */
-bool BlockIsReachedFromOnlySuccessor(BasicBlock *target_block, BasicBlock *dominant_block)
+bool BlockIsReachedFromOnlySuccessor(BasicBlock *targetBlock, BasicBlock *dominantBlock)
 {
-    ASSERT(dominant_block->IsDominate(target_block));
-    BasicBlock *other_succesor = nullptr;
-    if (dominant_block->GetTrueSuccessor()->IsDominate(target_block)) {
-        other_succesor = dominant_block->GetFalseSuccessor();
-    } else if (dominant_block->GetFalseSuccessor()->IsDominate(target_block)) {
-        other_succesor = dominant_block->GetTrueSuccessor();
+    ASSERT(dominantBlock->IsDominate(targetBlock));
+    BasicBlock *otherSuccesor = nullptr;
+    if (dominantBlock->GetTrueSuccessor()->IsDominate(targetBlock)) {
+        otherSuccesor = dominantBlock->GetFalseSuccessor();
+    } else if (dominantBlock->GetFalseSuccessor()->IsDominate(targetBlock)) {
+        otherSuccesor = dominantBlock->GetTrueSuccessor();
     } else {
         return false;
     }
 
-    auto marker_holder = MarkerHolder(target_block->GetGraph());
-    if (BlocksPathDfsSearch(marker_holder.GetMarker(), other_succesor, target_block)) {
+    auto markerHolder = MarkerHolder(targetBlock->GetGraph());
+    if (BlocksPathDfsSearch(markerHolder.GetMarker(), otherSuccesor, targetBlock)) {
         return false;
     }
-    ASSERT(!other_succesor->IsDominate(target_block));
+    ASSERT(!otherSuccesor->IsDominate(targetBlock));
     return true;
 }
 
@@ -307,11 +307,11 @@ bool BlockIsReachedFromOnlySuccessor(BasicBlock *target_block, BasicBlock *domin
  * when `dom_compare` has 2 or more `if_imm` users and `target_compare` is reachable from the same successors of these
  * if_imms
  */
-Inst *FindIfImmDominatesCondition(Inst *dom_compare, Inst *target_compare)
+Inst *FindIfImmDominatesCondition(Inst *domCompare, Inst *targetCompare)
 {
-    for (auto &user : dom_compare->GetUsers()) {
+    for (auto &user : domCompare->GetUsers()) {
         auto inst = user.GetInst();
-        if (inst->GetOpcode() == Opcode::IfImm && inst->IsDominate(target_compare)) {
+        if (inst->GetOpcode() == Opcode::IfImm && inst->IsDominate(targetCompare)) {
             return inst;
         }
     }
@@ -322,21 +322,21 @@ Inst *FindIfImmDominatesCondition(Inst *dom_compare, Inst *target_compare)
 std::optional<bool> BranchElimination::GetConditionResult(Inst *condition)
 {
     ConditionOps ops {condition->GetInput(0).GetInst(), condition->GetInput(1).GetInst()};
-    if (same_input_compares_.count(ops) <= 0) {
+    if (sameInputCompares_.count(ops) <= 0) {
         return std::nullopt;
     }
-    auto instructions = same_input_compares_.at(ops);
+    auto instructions = sameInputCompares_.at(ops);
     ASSERT(!instructions.empty());
-    for (auto dom_cond : instructions) {
+    for (auto domCond : instructions) {
         // Find dom_cond's if_imm, that dominates target condition
-        auto if_imm = FindIfImmDominatesCondition(dom_cond, condition);
-        if (if_imm == nullptr) {
+        auto ifImm = FindIfImmDominatesCondition(domCond, condition);
+        if (ifImm == nullptr) {
             continue;
         }
-        if (BlockIsReachedFromOnlySuccessor(condition->GetBasicBlock(), if_imm->GetBasicBlock())) {
-            if (auto result = TryResolveResult(condition, dom_cond, if_imm->CastToIfImm())) {
+        if (BlockIsReachedFromOnlySuccessor(condition->GetBasicBlock(), ifImm->GetBasicBlock())) {
+            if (auto result = TryResolveResult(condition, domCond, ifImm->CastToIfImm())) {
                 COMPILER_LOG(DEBUG, BRANCH_ELIM)
-                    << "Equal compare instructions were found. Dominant id = " << dom_cond->GetId()
+                    << "Equal compare instructions were found. Dominant id = " << domCond->GetId()
                     << ", dominated id = " << condition->GetId();
                 return result;
             }
@@ -346,35 +346,35 @@ std::optional<bool> BranchElimination::GetConditionResult(Inst *condition)
 }
 
 /// Resolve condition result if there is a dominant IfImmInst after CompareAnyTypeInst.
-std::optional<bool> BranchElimination::GetCompareAnyTypeResult(IfImmInst *if_imm)
+std::optional<bool> BranchElimination::GetCompareAnyTypeResult(IfImmInst *ifImm)
 {
-    auto compare_any = if_imm->GetInput(0).GetInst()->CastToCompareAnyType();
-    Inst *input = compare_any->GetInput(0).GetInst();
-    const auto it = same_input_compare_any_type_.find(input);
-    if (it == same_input_compare_any_type_.end()) {
+    auto compareAny = ifImm->GetInput(0).GetInst()->CastToCompareAnyType();
+    Inst *input = compareAny->GetInput(0).GetInst();
+    const auto it = sameInputCompareAnyType_.find(input);
+    if (it == sameInputCompareAnyType_.end()) {
         return std::nullopt;
     }
 
     const ArenaVector<CompareAnyTypeInst *> &instructions = it->second;
     ASSERT(!instructions.empty());
-    for (const auto dom_compare_any : instructions) {
+    for (const auto domCompareAny : instructions) {
         // Find dom_cond's if_imm, that dominates target condition.
-        auto if_imm_dom_block = FindIfImmDominatesCondition(dom_compare_any, if_imm);
-        if (if_imm_dom_block == nullptr) {
+        auto ifImmDomBlock = FindIfImmDominatesCondition(domCompareAny, ifImm);
+        if (ifImmDomBlock == nullptr) {
             continue;
         }
 
-        if (!BlockIsReachedFromOnlySuccessor(if_imm->GetBasicBlock(), if_imm_dom_block->GetBasicBlock())) {
+        if (!BlockIsReachedFromOnlySuccessor(ifImm->GetBasicBlock(), ifImmDomBlock->GetBasicBlock())) {
             continue;
         }
 
-        auto result = TryResolveCompareAnyTypeResult(compare_any, dom_compare_any, if_imm_dom_block->CastToIfImm());
+        auto result = TryResolveCompareAnyTypeResult(compareAny, domCompareAny, ifImmDomBlock->CastToIfImm());
         if (!result) {
             continue;
         }
 
         COMPILER_LOG(DEBUG, BRANCH_ELIM) << "Equal CompareAnyType instructions were found. Dominant id = "
-                                         << dom_compare_any->GetId() << ", dominated id = " << compare_any->GetId();
+                                         << domCompareAny->GetId() << ", dominated id = " << compareAny->GetId();
         return result;
     }
     return std::nullopt;
@@ -384,16 +384,16 @@ std::optional<bool> BranchElimination::GetCompareAnyTypeResult(IfImmInst *if_imm
  * Try to resolve CompareAnyTypeInst result with the information
  * about dominant CompareAnyTypeInst with the same inputs.
  */
-std::optional<bool> BranchElimination::TryResolveCompareAnyTypeResult(CompareAnyTypeInst *compare_any,
-                                                                      CompareAnyTypeInst *dom_compare_any,
-                                                                      IfImmInst *if_imm_dom_block)
+std::optional<bool> BranchElimination::TryResolveCompareAnyTypeResult(CompareAnyTypeInst *compareAny,
+                                                                      CompareAnyTypeInst *domCompareAny,
+                                                                      IfImmInst *ifImmDomBlock)
 {
-    auto compare_any_bb = compare_any->GetBasicBlock();
-    bool is_true_dom_branch = if_imm_dom_block->GetEdgeIfInputTrue()->IsDominate(compare_any_bb);
+    auto compareAnyBb = compareAny->GetBasicBlock();
+    bool isTrueDomBranch = ifImmDomBlock->GetEdgeIfInputTrue()->IsDominate(compareAnyBb);
 
-    auto graph = compare_any_bb->GetGraph();
+    auto graph = compareAnyBb->GetGraph();
     auto language = graph->GetRuntime()->GetMethodSourceLanguage(graph->GetMethod());
-    auto res = IsAnyTypeCanBeSubtypeOf(language, compare_any->GetAnyType(), dom_compare_any->GetAnyType());
+    auto res = IsAnyTypeCanBeSubtypeOf(language, compareAny->GetAnyType(), domCompareAny->GetAnyType());
     if (!res) {
         // We cannot compare types in compile-time
         return std::nullopt;
@@ -401,11 +401,11 @@ std::optional<bool> BranchElimination::TryResolveCompareAnyTypeResult(CompareAny
 
     if (res.value()) {
         // If CompareAnyTypeInst has the same types for any, then it can be optimized in any case.
-        return is_true_dom_branch;
+        return isTrueDomBranch;
     }
 
     // If CompareAnyTypeInst has the different types for any, then it can be optimized only in true-branch.
-    if (!is_true_dom_branch) {
+    if (!isTrueDomBranch) {
         return std::nullopt;
     }
 
@@ -421,7 +421,7 @@ std::optional<bool> BranchElimination::TryResolveCompareAnyTypeResult(CompareAny
  * - Then this result is applied to the current condition, if it is possible, using the table of condition codes
  * relation
  */
-std::optional<bool> BranchElimination::TryResolveResult(Inst *condition, Inst *dominant_condition, IfImmInst *if_imm)
+std::optional<bool> BranchElimination::TryResolveResult(Inst *condition, Inst *dominantCondition, IfImmInst *ifImm)
 {
     using std::nullopt;
 
@@ -444,23 +444,23 @@ std::optional<bool> BranchElimination::TryResolveResult(Inst *condition, Inst *d
         }};
     // clang-format on
 
-    auto dominant_cc = dominant_condition->CastToCompare()->GetCc();
+    auto dominantCc = dominantCondition->CastToCompare()->GetCc();
     // Swap the dominant condition code, if inputs are reversed: 'if (a < b)' -> 'if (b > a)'
-    if (condition->GetInput(0) != dominant_condition->GetInput(0)) {
-        ASSERT(condition->GetInput(0) == dominant_condition->GetInput(1));
-        dominant_cc = SwapOperandsConditionCode(dominant_cc);
+    if (condition->GetInput(0) != dominantCondition->GetInput(0)) {
+        ASSERT(condition->GetInput(0) == dominantCondition->GetInput(1));
+        dominantCc = SwapOperandsConditionCode(dominantCc);
     }
 
     // Reverse the `dominant_cc` if the `condition` is reached after branching the false succesor of the
     // if_imm's basic block
-    auto condition_bb = condition->GetBasicBlock();
-    if (if_imm->GetEdgeIfInputFalse()->IsDominate(condition_bb)) {
-        dominant_cc = GetInverseConditionCode(dominant_cc);
+    auto conditionBb = condition->GetBasicBlock();
+    if (ifImm->GetEdgeIfInputFalse()->IsDominate(conditionBb)) {
+        dominantCc = GetInverseConditionCode(dominantCc);
     } else {
-        ASSERT(if_imm->GetEdgeIfInputTrue()->IsDominate(condition_bb));
+        ASSERT(ifImm->GetEdgeIfInputTrue()->IsDominate(conditionBb));
     }
     // After these transformations dominant condition with current `dominant_cc` is equal to `true`
     // So `condition` result is resolved via table
-    return COND_RELATION[condition->CastToCompare()->GetCc()][dominant_cc];
+    return COND_RELATION[condition->CastToCompare()->GetCc()][dominantCc];
 }
 }  // namespace panda::compiler

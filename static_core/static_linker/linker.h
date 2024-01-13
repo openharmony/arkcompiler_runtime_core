@@ -36,21 +36,21 @@ struct Result {
             uint64_t write {};
             uint64_t total {};
         } elapsed;
-        size_t items_count {};
-        size_t class_count {};
-        size_t code_count {};
-        size_t debug_count {};
+        size_t itemsCount {};
+        size_t classCount {};
+        size_t codeCount {};
+        size_t debugCount {};
 
-        size_t deduplicated_foreigners {};
+        size_t deduplicatedForeigners {};
     } stats;
 };
 
 std::ostream &operator<<(std::ostream &o, const Result::Stats &s);
 
 struct Config {
-    bool strip_debug_info = false;
+    bool stripDebugInfo = false;
     std::set<std::string> partial {std::string(panda_file::ItemContainer::GetGlobalClassName())};
-    std::set<std::string> remains_partial {};
+    std::set<std::string> remainsPartial {};
 };
 
 Config DefaultConfig();

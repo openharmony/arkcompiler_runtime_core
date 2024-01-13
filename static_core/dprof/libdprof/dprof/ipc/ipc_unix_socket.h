@@ -22,9 +22,9 @@ namespace panda::dprof::ipc {
 os::unique_fd::UniqueFd CreateUnixServerSocket(int backlog);
 os::unique_fd::UniqueFd CreateUnixClientSocket();
 
-bool WaitDataTimeout(int fd, int timeout_ms);
+bool WaitDataTimeout(int fd, int timeoutMs);
 bool SendAll(int fd, const void *buf, int len);
-int RecvTimeout(int fd, void *buf, int len, int timeout_ms);
+int RecvTimeout(int fd, void *buf, int len, int timeoutMs);
 }  // namespace panda::dprof::ipc
 
 #endif  // DPROF_LIBDPROF_DPROF_IPC_IPC_UNIX_SOCKET_H

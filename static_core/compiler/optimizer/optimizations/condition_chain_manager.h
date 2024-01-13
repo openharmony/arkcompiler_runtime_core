@@ -34,10 +34,10 @@ public:
     void Reset();
 
 private:
-    ConditionChain *TryConditionChain(BasicBlock *bb, BasicBlock *multiple_preds_succ, BasicBlock *chain_bb);
+    ConditionChain *TryConditionChain(BasicBlock *bb, BasicBlock *multiplePredsSucc, BasicBlock *chainBb);
     bool IsConditionChainCandidate(const BasicBlock *bb);
     ArenaAllocator *allocator_;
-    ArenaVector<BasicBlock *> condition_chain_bb_;
+    ArenaVector<BasicBlock *> conditionChainBb_;
 };
 }  // namespace panda::compiler
 

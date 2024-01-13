@@ -17,37 +17,37 @@
 #include "runtime/handle_scope-inl.h"
 
 namespace panda::ets {
-RegExpMatchResult<VMHandle<EtsString>> RegExpExecutor::GetResult(bool is_success) const
+RegExpMatchResult<VMHandle<EtsString>> RegExpExecutor::GetResult(bool isSuccess) const
 {
     auto *thread = ManagedThread::GetCurrent();
     RegExpMatchResult<VMHandle<EtsString>> result;
     PandaVector<std::pair<bool, VMHandle<EtsString>>> captures;
-    result.is_success = is_success;
-    if (is_success) {
+    result.isSuccess = isSuccess;
+    if (isSuccess) {
         for (uint32_t i = 0; i < GetCaptureCount(); i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            CaptureState *capture_state = &GetCaptureResultList()[i];
+            CaptureState *captureState = &GetCaptureResultList()[i];
             if (i == 0) {
-                result.index = capture_state->capture_start - GetInputPtr();
+                result.index = captureState->captureStart - GetInputPtr();
                 if (IsWideChar()) {
                     result.index /= WIDE_CHAR_SIZE;
                 }
             }
-            int32_t len = capture_state->capture_end - capture_state->capture_start;
+            int32_t len = captureState->captureEnd - captureState->captureStart;
             std::pair<bool, VMHandle<EtsString>> pair;
-            if ((capture_state->capture_start != nullptr && capture_state->capture_end != nullptr) && (len >= 0)) {
+            if ((captureState->captureStart != nullptr && captureState->captureEnd != nullptr) && (len >= 0)) {
                 pair.first = false;
                 if (IsWideChar()) {
                     // create utf-16 string
                     pair.second = VMHandle<EtsString>(
                         thread, EtsString::CreateFromUtf16(
-                                    reinterpret_cast<const uint16_t *>(capture_state->capture_start), len / 2)
+                                    reinterpret_cast<const uint16_t *>(captureState->captureStart), len / 2)
                                     ->GetCoreType());
                 } else {
                     // create utf-8 string
                     PandaVector<uint8_t> buffer(len + 1);
                     uint8_t *dest = buffer.data();
-                    if (memcpy_s(dest, len + 1, reinterpret_cast<const uint8_t *>(capture_state->capture_start), len) !=
+                    if (memcpy_s(dest, len + 1, reinterpret_cast<const uint8_t *>(captureState->captureStart), len) !=
                         EOK) {
                         LOG(FATAL, COMMON) << "memcpy_s failed";
                         UNREACHABLE();
@@ -64,9 +64,9 @@ RegExpMatchResult<VMHandle<EtsString>> RegExpExecutor::GetResult(bool is_success
             captures.emplace_back(pair);
         }
         result.captures = std::move(captures);
-        result.end_index = GetCurrentPtr() - GetInputPtr();
+        result.endIndex = GetCurrentPtr() - GetInputPtr();
         if (IsWideChar()) {
-            result.end_index /= WIDE_CHAR_SIZE;
+            result.endIndex /= WIDE_CHAR_SIZE;
         }
     }
     return result;

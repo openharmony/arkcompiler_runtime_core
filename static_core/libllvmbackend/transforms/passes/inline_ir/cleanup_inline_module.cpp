@@ -100,14 +100,14 @@ enum class InlineFailureReason {
 
 class InlineFailure {
 public:
-    InlineFailure(InlineFailurePath inline_failure_path, InlineFailureReason reason)
-        : inline_failure_path_(std::move(inline_failure_path)), reason_(reason)
+    InlineFailure(InlineFailurePath inlineFailurePath, InlineFailureReason reason)
+        : inlineFailurePath_(std::move(inlineFailurePath)), reason_(reason)
     {
     }
 
     const InlineFailurePath &GetInlineFailurePath() const
     {
-        return inline_failure_path_;
+        return inlineFailurePath_;
     }
 
     InlineFailureReason GetReason() const
@@ -132,9 +132,9 @@ public:
 private:
     void PrintForHasAddressTaken(llvm::raw_ostream *output)
     {
-        ASSERT(!inline_failure_path_.empty());
+        ASSERT(!inlineFailurePath_.empty());
         ASSERT(reason_ == InlineFailureReason::HAS_ADDRESS_TAKEN);
-        auto function = inline_failure_path_[inline_failure_path_.size() - 1];
+        auto function = inlineFailurePath_[inlineFailurePath_.size() - 1];
         ASSERT(isa<Function>(function));
         *output << "address of the function = '" << function->getName() << "' is taken. Won't inline chain: ";
         PrintPath(output);
@@ -143,9 +143,9 @@ private:
     void PrintForUsesInternalVariable(llvm::raw_ostream *output)
     {
         ASSERT(reason_ == InlineFailureReason::USES_INTERNAL_VARIABLE);
-        ASSERT(inline_failure_path_.size() >= 2U);
+        ASSERT(inlineFailurePath_.size() >= 2U);
         // inline_failure_path_ = [..., functionUsingInternalVariable, ...not function..., internalVariable]
-        auto variable = inline_failure_path_[inline_failure_path_.size() - 1];
+        auto variable = inlineFailurePath_[inlineFailurePath_.size() - 1];
         auto function = FindLastFunctionInPath();
         *output << "Internal variable = '" << variable->getName() << "' is used in function = '" << function->getName()
                 << "'. Won't inline chain: ";
@@ -154,7 +154,7 @@ private:
 
     Function *FindLastFunctionInPath()
     {
-        for (auto it = inline_failure_path_.rbegin(); it != inline_failure_path_.rend(); it++) {
+        for (auto it = inlineFailurePath_.rbegin(); it != inlineFailurePath_.rend(); it++) {
             if (auto function = llvm::dyn_cast<Function>(*it)) {
                 return function;
             }
@@ -168,13 +168,13 @@ private:
     void PrintPath(llvm::raw_ostream *output)
     {
         ListSeparator separator(" -> ");
-        for (const auto &path_element : inline_failure_path_) {
-            *output << separator << "'" << path_element->getName() << "'";
+        for (const auto &pathElement : inlineFailurePath_) {
+            *output << separator << "'" << pathElement->getName() << "'";
         }
     }
 
 private:
-    InlineFailurePath inline_failure_path_;
+    InlineFailurePath inlineFailurePath_;
     InlineFailureReason reason_;
 };
 }  // namespace
@@ -219,15 +219,15 @@ private:
                 continue;
             }
 
-            ScopedInlineFailurePathElement inline_failure_path_element {&inline_failure_path_, &function};
+            ScopedInlineFailurePathElement inlineFailurePathElement {&inlineFailurePath_, &function};
             VisitFunction(&function);
         }
-        ASSERT(inline_failure_path_.empty());
+        ASSERT(inlineFailurePath_.empty());
 
         for_each(state_, [](auto entry) -> void {
-            auto function_state = entry.getSecond();
-            ASSERT(function_state == FunctionState::INLINABLE || function_state == FunctionState::NOT_INLINABLE);
-            if (function_state == FunctionState::NOT_INLINABLE) {
+            auto functionState = entry.getSecond();
+            ASSERT(functionState == FunctionState::INLINABLE || functionState == FunctionState::NOT_INLINABLE);
+            if (functionState == FunctionState::NOT_INLINABLE) {
                 auto function = entry.getFirst();
                 LLVM_DEBUG(llvm::dbgs() << "InlineModuleCleaner: removed '" << function->getName() << "'\n");
                 convertToDeclaration(*function);
@@ -247,21 +247,21 @@ private:
     void VisitFunction(Function *function)
     {
         static_assert(FunctionState() == FunctionState::UNKNOWN, "FunctionState::UNKNOWN must be the default value");
-        auto function_state = state_.lookup(function);
-        if (function_state != FunctionState::UNKNOWN) {
+        auto functionState = state_.lookup(function);
+        if (functionState != FunctionState::UNKNOWN) {
             return;
         }
         if (function->hasLocalLinkage() && function->hasAddressTaken()) {
             state_[function] = FunctionState::NOT_INLINABLE;
-            ReportInlineFailure(InlineFailureReason::HAS_ADDRESS_TAKEN, inline_failure_path_);
+            ReportInlineFailure(InlineFailureReason::HAS_ADDRESS_TAKEN, inlineFailurePath_);
             return;
         }
 
         state_.insert({function, FunctionState::IN_PROGRESS});
 
         DenseSet<Value *> visited;
-        for (auto &basic_block : *function) {
-            if (!IsInlinable(&basic_block, visited)) {
+        for (auto &basicBlock : *function) {
+            if (!IsInlinable(&basicBlock, visited)) {
                 state_[function] = FunctionState::NOT_INLINABLE;
                 return;
             }
@@ -271,7 +271,7 @@ private:
 
     bool IsInlinable(Value *value, DenseSet<Value *> &visited)
     {
-        ScopedInlineFailurePathElement inline_failure_path_element {&inline_failure_path_, value};
+        ScopedInlineFailurePathElement inlineFailurePathElement {&inlineFailurePath_, value};
         if (visited.contains(value)) {
             return true;
         }
@@ -328,11 +328,11 @@ private:
              * @endcode
              */
             VisitFunction(function);
-            auto function_state = state_.lookup(function);
-            return function_state == FunctionState::IN_PROGRESS || function_state == FunctionState::INLINABLE;
+            auto functionState = state_.lookup(function);
+            return functionState == FunctionState::IN_PROGRESS || functionState == FunctionState::INLINABLE;
         }
         if (isa<GlobalVariable>(value)) {
-            auto global_variable = cast<GlobalVariable>(value);
+            auto globalVariable = cast<GlobalVariable>(value);
             /**
              * Could be a constant from C++ declared in header.
              * We don't check for taken address because in different translation units address of such constant
@@ -344,7 +344,7 @@ private:
              * > for that static is only going to be allocated if an address or reference to it is taken, and the
              * > address is going to be different in each translation unit.
              */
-            if (global_variable->hasLocalLinkage() && !global_variable->isConstant()) {
+            if (globalVariable->hasLocalLinkage() && !globalVariable->isConstant()) {
                 /**
                  * Mutable variable with local linkage, can't inline.
                  *
@@ -357,7 +357,7 @@ private:
                  * }
                  * @endcode
                  */
-                ReportInlineFailure(InlineFailureReason::USES_INTERNAL_VARIABLE, inline_failure_path_);
+                ReportInlineFailure(InlineFailureReason::USES_INTERNAL_VARIABLE, inlineFailurePath_);
                 return false;
             }
             return true;
@@ -388,10 +388,10 @@ private:
         llvm_unreachable("Unexpected value");
     }
 
-    void ReportInlineFailure([[maybe_unused]] InlineFailureReason inline_failure_reason,
-                             [[maybe_unused]] const InlineFailurePath &failure_path)
+    void ReportInlineFailure([[maybe_unused]] InlineFailureReason inlineFailureReason,
+                             [[maybe_unused]] const InlineFailurePath &failurePath)
     {
-        LLVM_DEBUG(InlineFailure(failure_path, inline_failure_reason).Print(&llvm::dbgs()));
+        LLVM_DEBUG(InlineFailure(failurePath, inlineFailureReason).Print(&llvm::dbgs()));
         LLVM_DEBUG(llvm::dbgs() << "\n");
     }
 
@@ -399,24 +399,24 @@ private:
     {
         std::vector<DfsState::value_type> entries {state_.begin(), state_.end()};
         std::sort(entries.begin(), entries.end(), [](auto a, auto b) {
-            auto a_state = a.getSecond();
-            auto b_state = b.getSecond();
-            ASSERT(a_state == FunctionState::INLINABLE || a_state == FunctionState::NOT_INLINABLE);
-            ASSERT(b_state == FunctionState::INLINABLE || b_state == FunctionState::NOT_INLINABLE);
-            if (a_state != b_state) {
-                return a_state == FunctionState::NOT_INLINABLE;
+            auto aState = a.getSecond();
+            auto bState = b.getSecond();
+            ASSERT(aState == FunctionState::INLINABLE || aState == FunctionState::NOT_INLINABLE);
+            ASSERT(bState == FunctionState::INLINABLE || bState == FunctionState::NOT_INLINABLE);
+            if (aState != bState) {
+                return aState == FunctionState::NOT_INLINABLE;
             }
-            auto a_function = a.getFirst();
-            auto b_function = b.getFirst();
-            return a_function->getName() < b_function->getName();
+            auto aFunction = a.getFirst();
+            auto bFunction = b.getFirst();
+            return aFunction->getName() < bFunction->getName();
         });
         for (size_t i = 0; i < entries.size(); i++) {
             auto entry = entries[i];
             auto function = entry.getFirst();
-            auto function_state = entry.getSecond();
-            ASSERT(function_state == FunctionState::INLINABLE || function_state == FunctionState::NOT_INLINABLE);
+            auto functionState = entry.getSecond();
+            ASSERT(functionState == FunctionState::INLINABLE || functionState == FunctionState::NOT_INLINABLE);
             *output << (i + 1) << ". '" << function->getName() << "' is"
-                    << (function_state == FunctionState::INLINABLE ? " inlinable" : " not inlinable") << "\n";
+                    << (functionState == FunctionState::INLINABLE ? " inlinable" : " not inlinable") << "\n";
         }
     }
 
@@ -430,22 +430,22 @@ private:
             StringRef("llvm.global.annotations"),  //
         };
         for (const auto &name : VALUES_TO_ERASE) {
-            auto *global_value = module.getNamedValue(name);
-            if (global_value != nullptr) {
-                LLVM_DEBUG(llvm::dbgs() << "Erase " << global_value->getName() << "\n");
-                global_value->eraseFromParent();
+            auto *globalValue = module.getNamedValue(name);
+            if (globalValue != nullptr) {
+                LLVM_DEBUG(llvm::dbgs() << "Erase " << globalValue->getName() << "\n");
+                globalValue->eraseFromParent();
             }
         }
     }
 
 private:
     DfsState state_;
-    InlineFailurePath inline_failure_path_;
+    InlineFailurePath inlineFailurePath_;
 };
 
 bool CleanupInlineModule::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
 {
-    return options->do_irtoc_inline;
+    return options->doIrtocInline;
 }
 
 CleanupInlineModule::CleanupInlineModule() : cleaner_ {std::make_unique<InlineModuleCleaner>()} {}

@@ -25,7 +25,7 @@ class Inst;
 class ConditionChainCache {
 public:
     explicit ConditionChainCache(ArenaAllocator *allocator);
-    void Insert(ConditionChain *chain, Inst *phi_inst);
+    void Insert(ConditionChain *chain, Inst *phiInst);
     Inst *FindPhi(const ConditionChain *chain);
     void Clear();
 

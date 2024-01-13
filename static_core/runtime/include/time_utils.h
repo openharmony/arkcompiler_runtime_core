@@ -28,14 +28,14 @@ constexpr size_t PRECISION_FOR_TIME = 3;
 /// Measures time from creation to deletion of an object
 class Timer {
 public:
-    explicit Timer(uint64_t *duration, bool need_restart = false);
+    explicit Timer(uint64_t *duration, bool needRestart = false);
     NO_COPY_SEMANTIC(Timer);
     NO_MOVE_SEMANTIC(Timer);
     ~Timer();
 
 private:
     uint64_t *duration_;
-    uint64_t start_time_;
+    uint64_t startTime_;
 };
 
 /// Return current time in readable format

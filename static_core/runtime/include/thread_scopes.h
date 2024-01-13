@@ -64,20 +64,20 @@ private:
 
 class PANDA_PUBLIC_API ScopedChangeThreadStatus {
 public:
-    explicit ScopedChangeThreadStatus(ManagedThread *thread, ThreadStatus new_status) : thread_(thread)
+    explicit ScopedChangeThreadStatus(ManagedThread *thread, ThreadStatus newStatus) : thread_(thread)
     {
-        old_status_ = thread_->GetStatus();
-        thread_->UpdateStatus(new_status);
+        oldStatus_ = thread_->GetStatus();
+        thread_->UpdateStatus(newStatus);
     }
 
     ~ScopedChangeThreadStatus()
     {
-        thread_->UpdateStatus(old_status_);
+        thread_->UpdateStatus(oldStatus_);
     }
 
 private:
     ManagedThread *thread_;
-    ThreadStatus old_status_;
+    ThreadStatus oldStatus_;
 
     NO_COPY_SEMANTIC(ScopedChangeThreadStatus);
     NO_MOVE_SEMANTIC(ScopedChangeThreadStatus);

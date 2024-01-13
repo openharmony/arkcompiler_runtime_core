@@ -31,7 +31,7 @@ template <typename Task>
 class TaskQueueInterface {
 public:
     // All methods (except for Finalize) require an acquired lock from a thread pool.
-    explicit TaskQueueInterface(size_t queue_max_size = QUEUE_SIZE_MAX_SIZE) : queue_max_size_(queue_max_size) {}
+    explicit TaskQueueInterface(size_t queueMaxSize = QUEUE_SIZE_MAX_SIZE) : queueMaxSize_(queueMaxSize) {}
     virtual ~TaskQueueInterface() = default;
 
     NO_COPY_SEMANTIC(TaskQueueInterface);
@@ -59,14 +59,14 @@ public:
 
     bool IsFull()
     {
-        return GetQueueSize() >= queue_max_size_;
+        return GetQueueSize() >= queueMaxSize_;
     }
 
 protected:
     virtual size_t GetQueueSize() = 0;
 
 private:
-    const size_t queue_max_size_;
+    const size_t queueMaxSize_;
 };
 
 }  // namespace panda

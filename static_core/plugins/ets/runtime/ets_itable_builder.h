@@ -31,7 +31,7 @@ namespace panda::ets {
 
 class EtsITableBuilder : public ITableBuilder {
 public:
-    void Build(ClassLinker *class_linker, Class *base, Span<Class *> class_interfaces, bool is_interface) override;
+    void Build(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces, bool isInterface) override;
 
     void Resolve(Class *klass) override;
 

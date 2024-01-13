@@ -27,7 +27,7 @@
 #include "target/asm_printer.h"
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static std::string OUTPUT_DIR = "asm_output";
+static std::string g_outputDir = "asm_output";
 
 // Debug print to stdout
 #if ENABLE_DEBUG_STDOUT_PRINT
@@ -46,7 +46,7 @@ public:
 #ifdef STDOUT_PRINT
         curr_stream_ = &std::cout;
 #else
-        curr_stream_ = new std::stringstream();
+        currStream_ = new std::stringstream();
 #endif
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
@@ -60,38 +60,38 @@ public:
         bool print = true;
 #ifdef PANDA_COMPILER_TARGET_AARCH32
         if constexpr (ARCH == Arch::AARCH32) {
-            dir_suffix_ = "aarch32";
+            dirSuffix_ = "aarch32";
             auto enc = reinterpret_cast<aarch32::Aarch32Assembly *>(encoder_);
-            enc->SetStream(curr_stream_);
+            enc->SetStream(currStream_);
             callconv_ = CallingConvention::Create(allocator_, enc, regfile_, ARCH, pabi, osr, dyn, print);
             enc->GetEncoder()->SetRegfile(regfile_);
         }
 #endif
 #ifdef PANDA_COMPILER_TARGET_AARCH64
         if constexpr (ARCH == Arch::AARCH64) {
-            dir_suffix_ = "aarch64";
+            dirSuffix_ = "aarch64";
             auto enc = reinterpret_cast<aarch64::Aarch64Assembly *>(encoder_);
-            enc->SetStream(curr_stream_);
+            enc->SetStream(currStream_);
             callconv_ = CallingConvention::Create(allocator_, enc, regfile_, ARCH, pabi, osr, dyn, print);
             enc->GetEncoder()->SetRegfile(regfile_);
         }
 #endif
 #ifdef PANDA_COMPILER_TARGET_X86_64
         if constexpr (ARCH == Arch::X86_64) {
-            dir_suffix_ = "amd64";
+            dirSuffix_ = "amd64";
             auto enc = reinterpret_cast<amd64::Amd64Assembly *>(encoder_);
-            enc->SetStream(curr_stream_);
+            enc->SetStream(currStream_);
             callconv_ = CallingConvention::Create(allocator_, enc, regfile_, ARCH, pabi, osr, dyn, print);
             enc->GetEncoder()->SetRegfile(regfile_);
         }
 #endif
-        mem_stats_ = new BaseMemStats();
-        code_alloc_ = new (std::nothrow) CodeAllocator(mem_stats_);
+        memStats_ = new BaseMemStats();
+        codeAlloc_ = new (std::nothrow) CodeAllocator(memStats_);
         // Create dir if it is not exist
-        auto exec_path = panda::os::file::File::GetExecutablePath();
-        ASSERT(exec_path);
-        exec_path_ = exec_path.Value();
-        os::CreateDirectories(exec_path_ + "/" + OUTPUT_DIR);
+        auto execPath = panda::os::file::File::GetExecutablePath();
+        ASSERT(execPath);
+        execPath_ = execPath.Value();
+        os::CreateDirectories(execPath_ + "/" + g_outputDir);
         os::CreateDirectories(GetDir());
     }
     ~PrinterTest() override
@@ -99,11 +99,11 @@ public:
         Logger::Destroy();
         encoder_->~Encoder();
         delete allocator_;
-        delete code_alloc_;
-        delete mem_stats_;
+        delete codeAlloc_;
+        delete memStats_;
         PoolManager::Finalize();
         panda::mem::MemConfig::Finalize();
-        delete curr_stream_;
+        delete currStream_;
     }
 
     NO_MOVE_SEMANTIC(PrinterTest);
@@ -111,20 +111,20 @@ public:
 
     CodeAllocator *GetCodeAllocator()
     {
-        return code_alloc_;
+        return codeAlloc_;
     }
 
     std::string GetDir()
     {
-        return exec_path_ + "/" + OUTPUT_DIR + "/" + dir_suffix_ + "/";
+        return execPath_ + "/" + g_outputDir + "/" + dirSuffix_ + "/";
     }
 
     void ResetCodeAllocator(void *ptr, size_t size)
     {
-        os::mem::MapRange<std::byte> mem_range(static_cast<std::byte *>(ptr), size);
-        mem_range.MakeReadWrite();
-        delete code_alloc_;
-        code_alloc_ = new (std::nothrow) CodeAllocator(mem_stats_);
+        os::mem::MapRange<std::byte> memRange(static_cast<std::byte *>(ptr), size);
+        memRange.MakeReadWrite();
+        delete codeAlloc_;
+        codeAlloc_ = new (std::nothrow) CodeAllocator(memStats_);
     }
 
     ArenaAllocator *GetAllocator()
@@ -149,7 +149,7 @@ public:
 
     size_t GetCursor()
     {
-        return curr_cursor_;
+        return currCursor_;
     }
 
     // Warning! Do not use multiply times with different types!
@@ -171,26 +171,26 @@ public:
     void PreWork()
     {
         // Curor need to encode multiply tests due one execution
-        curr_cursor_ = 0;
+        currCursor_ = 0;
         encoder_->SetCursorOffset(0U);
 
-        [[maybe_unused]] std::string func_name = "test_" + GetTestName();
+        [[maybe_unused]] std::string funcName = "test_" + GetTestName();
 #ifdef PANDA_COMPILER_TARGET_AARCH32
         if constexpr (ARCH == Arch::AARCH32) {
             auto enc = reinterpret_cast<aarch32::Aarch32Assembly *>(encoder_);
-            enc->EmitFunctionName(reinterpret_cast<const void *>(func_name.c_str()));
+            enc->EmitFunctionName(reinterpret_cast<const void *>(funcName.c_str()));
         }
 #endif
 #ifdef PANDA_COMPILER_TARGET_AARCH64
         if constexpr (ARCH == Arch::AARCH64) {
             auto enc = reinterpret_cast<aarch64::Aarch64Assembly *>(encoder_);
-            enc->EmitFunctionName(reinterpret_cast<const void *>(func_name.c_str()));
+            enc->EmitFunctionName(reinterpret_cast<const void *>(funcName.c_str()));
         }
 #endif
 #ifdef PANDA_COMPILER_TARGET_X86_64
         if constexpr (ARCH == Arch::X86_64) {
             auto enc = reinterpret_cast<amd64::Amd64Assembly *>(encoder_);
-            enc->EmitFunctionName(reinterpret_cast<const void *>(func_name.c_str()));
+            enc->EmitFunctionName(reinterpret_cast<const void *>(funcName.c_str()));
         }
 #endif
         callconv_->GeneratePrologue(FrameInfo::FullPrologue());
@@ -199,9 +199,9 @@ public:
     void PostWork()
     {
         auto param = Target::Current().GetParamReg(0U);
-        auto return_reg = Target::Current().GetReturnReg();
-        if (param.GetId() != return_reg.GetId()) {
-            GetEncoder()->EncodeMov(return_reg, param);
+        auto returnReg = Target::Current().GetReturnReg();
+        if (param.GetId() != returnReg.GetId()) {
+            GetEncoder()->EncodeMov(returnReg, param);
         }
         callconv_->GenerateEpilogue(FrameInfo::FullPrologue(), []() {});
         encoder_->Finalize();
@@ -213,32 +213,32 @@ public:
     std::stringstream *GetStream()
 #endif
     {
-        return curr_stream_;
+        return currStream_;
     }
 
     void SetTestName(std::string name)
     {
-        test_name_ = std::move(name);
+        testName_ = std::move(name);
     }
 
     std::string GetTestName()
     {
-        return test_name_;
+        return testName_;
     }
 
     void FinalizeTest()
     {
         // Make them separate!
         std::string filename = GetTestName() + ".S";
-        std::ofstream asm_file;
-        asm_file.open(GetDir() + "/" + filename);
+        std::ofstream asmFile;
+        asmFile.open(GetDir() + "/" + filename);
         // Test must generate asembly-flie
-        ASSERT(asm_file.is_open());
+        ASSERT(asmFile.is_open());
         // Compile by assembler
 #ifndef STDOUT_PRINT
-        asm_file << GetStream()->str();
+        asmFile << GetStream()->str();
 #endif
-        asm_file.close();
+        asmFile.close();
     }
 
 private:
@@ -249,17 +249,17 @@ private:
     CallingConvention *cc_ {nullptr};
     // Callconv for masm initialization
     CallingConvention *callconv_ {nullptr};
-    CodeAllocator *code_alloc_ {nullptr};
-    BaseMemStats *mem_stats_ {nullptr};
-    size_t curr_cursor_ {0U};
+    CodeAllocator *codeAlloc_ {nullptr};
+    BaseMemStats *memStats_ {nullptr};
+    size_t currCursor_ {0U};
 #ifdef STDOUT_PRINT
     std::ostream *curr_stream_;
 #else
-    std::stringstream *curr_stream_;
+    std::stringstream *currStream_;
 #endif
-    std::string test_name_;
-    std::string exec_path_;
-    std::string dir_suffix_;
+    std::string testName_;
+    std::string execPath_;
+    std::string dirSuffix_;
 };
 
 #ifdef PANDA_COMPILER_TARGET_AARCH32

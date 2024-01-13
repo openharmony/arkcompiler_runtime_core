@@ -57,7 +57,7 @@ public:
     void SendZerohungEvent(const PandaString &error, int pid, PandaString msg);
     bool IsConfigReady() const
     {
-        return config_ready_;
+        return configReady_;
     }
     bool IsEnabled() const
     {
@@ -72,12 +72,12 @@ public:
         return ready_;
     }
     static void InitPreFork(bool enabled);
-    static void InitPostFork(bool is_systemserver);
+    static void InitPostFork(bool isSystemserver);
     static GcHung *Current();
     static void Start();
     static void Check(const GCTask &task);
     // NOLINTNEXTLINE(google-runtime-references)
-    static void Check(const PandaList<MTManagedThread *> &threads, uint64_t start_time);
+    static void Check(const PandaList<MTManagedThread *> &threads, uint64_t startTime);
     static bool UpdateConfig();
 
 private:
@@ -85,26 +85,26 @@ private:
     pid_t pid_ {-1};
     bool enabled_ {false};
     bool ready_ {false};
-    uint64_t interval_limit_ms_ {0};
-    uint64_t over_time_limit_ms_ {0};
-    uint64_t last_gc_time_ns_ {0};
-    uint64_t congestion_duration_ns_ {0};
-    int water_mark_limit_ {0};
-    int water_mark_ {0};
-    int report_count_ {0};
-    bool config_ready_ {false};
-    bool is_systemserver_ {false};
-    uint64_t start_time_ns_ {0};
-    os::library_loader::LibraryHandle libimonitor_dl_handler_ {nullptr};
-    ZrhungSendEvent zrhung_send_event_ {nullptr};
-    ZrhungGetConfig zrhung_get_config_ {nullptr};
+    uint64_t intervalLimitMs_ {0};
+    uint64_t overTimeLimitMs_ {0};
+    uint64_t lastGcTimeNs_ {0};
+    uint64_t congestionDurationNs_ {0};
+    int waterMarkLimit_ {0};
+    int waterMark_ {0};
+    int reportCount_ {0};
+    bool configReady_ {false};
+    bool isSystemserver_ {false};
+    uint64_t startTimeNs_ {0};
+    os::library_loader::LibraryHandle libimonitorDlHandler_ {nullptr};
+    ZrhungSendEvent zrhungSendEvent_ {nullptr};
+    ZrhungGetConfig zrhungGetConfig_ {nullptr};
 
     int GetConfig();
     int LoadLibimonitor();
     void ReportGcCongestion();
     void ReportSuspendTimedout();
-    void InitInternal(bool is_systemserver);
-    void CheckSuspend(const PandaList<MTManagedThread *> &threads, uint64_t start_time);
+    void InitInternal(bool isSystemserver);
+    void CheckSuspend(const PandaList<MTManagedThread *> &threads, uint64_t startTime);
     void CheckFrequency();
     void CheckOvertime(const GCTask &task);
     void UpdateStartTime();
@@ -112,10 +112,10 @@ private:
 
 class ScopedGcHung {
 public:
-    explicit ScopedGcHung(const GCTask *task_start)
+    explicit ScopedGcHung(const GCTask *taskStart)
     {
         GcHung::Start();
-        task_ = task_start;
+        task_ = taskStart;
     }
 
     ~ScopedGcHung()

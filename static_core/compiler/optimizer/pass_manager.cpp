@@ -48,12 +48,12 @@
 #endif  // ENABLE_IR_DUMP
 
 namespace panda::compiler {
-PassManager::PassManager(Graph *graph, PassManager *parent_pm)
+PassManager::PassManager(Graph *graph, PassManager *parentPm)
     : graph_(graph),
       optimizations_(graph->GetAllocator()->Adapter()),
       analyses_(details::PredefinedAnalyses::Instantiate<Analysis *>(graph_->GetAllocator(), graph_)),
-      stats_((parent_pm == nullptr) ? graph->GetAllocator()->New<PassManagerStatistics>(graph)
-                                    : parent_pm->GetStatistics())
+      stats_((parentPm == nullptr) ? graph->GetAllocator()->New<PassManagerStatistics>(graph)
+                                   : parentPm->GetStatistics())
 {
 }
 
@@ -68,59 +68,59 @@ static std::string ClearFileName(std::string str, std::string_view suffix)
 }
 #endif
 
-std::string PassManager::GetFileName([[maybe_unused]] const char *pass_name, [[maybe_unused]] const std::string &suffix)
+std::string PassManager::GetFileName([[maybe_unused]] const char *passName, [[maybe_unused]] const std::string &suffix)
 {
 #ifdef ENABLE_IR_DUMP
-    std::stringstream ss_filename;
-    std::stringstream ss_fullpath;
+    std::stringstream ssFilename;
+    std::stringstream ssFullpath;
     ASSERT(GetGraph()->GetRuntime() != nullptr);
 
-    std::string folder_name(OPTIONS.GetCompilerDumpFolder());
+    std::string folderName(g_options.GetCompilerDumpFolder());
 
-    os::CreateDirectories(folder_name);
+    os::CreateDirectories(folderName);
     constexpr auto IMM_3 = 3;
     constexpr auto IMM_4 = 4;
-    ss_filename << std::setw(IMM_3) << std::setfill('0') << execution_counter_ << "_";
-    if (pass_name != nullptr) {
-        ss_filename << "pass_" << std::setw(IMM_4) << std::setfill('0') << stats_->GetCurrentPassIndex() << "_";
+    ssFilename << std::setw(IMM_3) << std::setfill('0') << executionCounter_ << "_";
+    if (passName != nullptr) {
+        ssFilename << "pass_" << std::setw(IMM_4) << std::setfill('0') << stats_->GetCurrentPassIndex() << "_";
     }
     if (GetGraph()->GetParentGraph() != nullptr) {
-        ss_filename << "inlined_";
+        ssFilename << "inlined_";
     }
-    ss_filename << GetGraph()->GetRuntime()->GetClassNameFromMethod(GetGraph()->GetMethod()) << "_"
-                << GetGraph()->GetRuntime()->GetMethodName(GetGraph()->GetMethod());
+    ssFilename << GetGraph()->GetRuntime()->GetClassNameFromMethod(GetGraph()->GetMethod()) << "_"
+               << GetGraph()->GetRuntime()->GetMethodName(GetGraph()->GetMethod());
     if (GetGraph()->IsOsrMode()) {
-        ss_filename << "_OSR";
+        ssFilename << "_OSR";
     }
-    if (pass_name != nullptr) {
-        ss_filename << "_" << pass_name;
+    if (passName != nullptr) {
+        ssFilename << "_" << passName;
     }
-    ss_fullpath << folder_name.c_str() << "/" << ClearFileName(ss_filename.str(), suffix) << suffix;
-    return ss_fullpath.str();
+    ssFullpath << folderName.c_str() << "/" << ClearFileName(ssFilename.str(), suffix) << suffix;
+    return ssFullpath.str();
 #else
     return "";
 #endif  // ENABLE_IR_DUMP
 }
-void PassManager::DumpGraph([[maybe_unused]] const char *pass_name)
+void PassManager::DumpGraph([[maybe_unused]] const char *passName)
 {
 #ifdef ENABLE_IR_DUMP
-    std::ofstream strm(GetFileName(pass_name, ".ir"));
+    std::ofstream strm(GetFileName(passName, ".ir"));
     if (!strm.is_open()) {
-        std::cerr << errno << " ERROR: " << strerror(errno) << "\n" << GetFileName(pass_name, ".ir") << std::endl;
+        std::cerr << errno << " ERROR: " << strerror(errno) << "\n" << GetFileName(passName, ".ir") << std::endl;
     }
     ASSERT(strm.is_open());
     GetGraph()->Dump(&strm);
 #endif  // ENABLE_IR_DUMP
 }
-void PassManager::DumpLifeIntervals([[maybe_unused]] const char *pass_name)
+void PassManager::DumpLifeIntervals([[maybe_unused]] const char *passName)
 {
 #ifdef ENABLE_IR_DUMP
     if (!GetGraph()->IsAnalysisValid<LivenessAnalyzer>()) {
         return;
     }
-    std::ofstream strm(GetFileName(pass_name, ".li"));
+    std::ofstream strm(GetFileName(passName, ".li"));
     if (!strm.is_open()) {
-        std::cerr << errno << " ERROR: " << strerror(errno) << "\n" << GetFileName(pass_name, ".li") << std::endl;
+        std::cerr << errno << " ERROR: " << strerror(errno) << "\n" << GetFileName(passName, ".li") << std::endl;
     }
 
     ASSERT(strm.is_open());
@@ -142,16 +142,16 @@ void PassManager::InitialDumpVisualizerGraph()
 #endif  // ENABLE_IR_DUMP
 }
 
-void PassManager::DumpVisualizerGraph([[maybe_unused]] const char *pass_name)
+void PassManager::DumpVisualizerGraph([[maybe_unused]] const char *passName)
 {
 #ifdef ENABLE_IR_DUMP
     std::ofstream strm(GetFileName(), std::ios::app);
-    VisualizerPrinter(GetGraph(), &strm, pass_name).Print();
+    VisualizerPrinter(GetGraph(), &strm, passName).Print();
     strm.close();
 #endif  // ENABLE_IR_DUMP
 }
 
-bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
+bool PassManager::RunPass(Pass *pass, size_t localMemSizeBeforePass)
 {
     if (pass->IsAnalysis() && pass->IsValid()) {
         return true;
@@ -163,14 +163,14 @@ bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
 
     if (!IsCheckMode()) {
         stats_->ProcessBeforeRun(*pass);
-        if (first_execution_ && GetGraph()->GetParentGraph() == nullptr) {
+        if (firstExecution_ && GetGraph()->GetParentGraph() == nullptr) {
             StartExecution();
-            first_execution_ = false;
+            firstExecution_ = false;
         }
     }
 
 #ifndef NDEBUG
-    if (OPTIONS.IsCompilerEnableTracing()) {
+    if (g_options.IsCompilerEnableTracing()) {
         trace::BeginTracePoint(pass->GetPassName());
     }
 #endif  // NDEBUG
@@ -178,43 +178,43 @@ bool PassManager::RunPass(Pass *pass, size_t local_mem_size_before_pass)
     bool result = pass->Run();
 
 #ifndef NDEBUG
-    if (OPTIONS.IsCompilerEnableTracing()) {
+    if (g_options.IsCompilerEnableTracing()) {
         trace::EndTracePoint();
     }
 #endif  // NDEBUG
 
     if (!IsCheckMode()) {
-        ASSERT(graph_->GetLocalAllocator()->GetAllocatedSize() >= local_mem_size_before_pass);
-        stats_->ProcessAfterRun(graph_->GetLocalAllocator()->GetAllocatedSize() - local_mem_size_before_pass);
+        ASSERT(graph_->GetLocalAllocator()->GetAllocatedSize() >= localMemSizeBeforePass);
+        stats_->ProcessAfterRun(graph_->GetLocalAllocator()->GetAllocatedSize() - localMemSizeBeforePass);
     }
 
     if (pass->IsAnalysis()) {
         pass->SetValid(result);
     }
-    bool is_codegen = std::string("Codegen") == pass->GetPassName();
-    if (OPTIONS.IsCompilerDump() && pass->ShouldDump() && !IsCheckMode()) {
-        if (!OPTIONS.IsCompilerDumpFinal() || is_codegen) {
+    bool isCodegen = std::string("Codegen") == pass->GetPassName();
+    if (g_options.IsCompilerDump() && pass->ShouldDump() && !IsCheckMode()) {
+        if (!g_options.IsCompilerDumpFinal() || isCodegen) {
             DumpGraph(pass->GetPassName());
         }
     }
 
-    if (OPTIONS.IsCompilerVisualizerDump() && pass->ShouldDump()) {
+    if (g_options.IsCompilerVisualizerDump() && pass->ShouldDump()) {
         DumpVisualizerGraph(pass->GetPassName());
     }
 
 #ifndef NDEBUG
-    RunPassChecker(pass, result, is_codegen);
+    RunPassChecker(pass, result, isCodegen);
 #endif
     return result;
 }
 
-void PassManager::RunPassChecker(Pass *pass, bool result, bool is_codegen)
+void PassManager::RunPassChecker(Pass *pass, bool result, bool isCodegen)
 {
-    bool checker_enabled = OPTIONS.IsCompilerCheckGraph();
-    if (OPTIONS.IsCompilerCheckFinal()) {
-        checker_enabled = is_codegen;
+    bool checkerEnabled = g_options.IsCompilerCheckGraph();
+    if (g_options.IsCompilerCheckFinal()) {
+        checkerEnabled = isCodegen;
     }
-    if (result && !pass->IsAnalysis() && checker_enabled) {
+    if (result && !pass->IsAnalysis() && checkerEnabled) {
         GraphChecker(graph_, pass->GetPassName()).Check();
     }
 }
@@ -231,10 +231,10 @@ ArenaAllocator *PassManager::GetLocalAllocator()
 
 void PassManager::Finalize() const
 {
-    if (OPTIONS.IsCompilerPrintStats()) {
+    if (g_options.IsCompilerPrintStats()) {
         stats_->PrintStatistics();
     }
-    if (OPTIONS.WasSetCompilerDumpStatsCsv()) {
+    if (g_options.WasSetCompilerDumpStatsCsv()) {
         stats_->DumpStatisticsCsv();
     }
 }

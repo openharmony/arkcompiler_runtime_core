@@ -17,6 +17,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "libpandabase/utils/utils.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/code_generator/codegen.h"
@@ -61,10 +62,10 @@ public:
 
     void Visit(vixl::aarch64::Metadata *metadata, const vixl::aarch64::Instruction *instr) final
     {
-        auto visitor_it {FORM_TO_VISITOR.find((*metadata)["form"])};
-        ASSERT(visitor_it != std::end(FORM_TO_VISITOR));
+        auto visitorIt {FORM_TO_VISITOR.find((*metadata)["form"])};
+        ASSERT(visitorIt != std::end(FORM_TO_VISITOR));
 
-        const auto &visitor {visitor_it->second};
+        const auto &visitor {visitorIt->second};
         ASSERT(visitor != nullptr);
         visitor(this, instr);
     }
@@ -144,11 +145,11 @@ public:
                 regs_.set(instr->GetRt());                                                                            \
                 regs_.set(instr->GetRt2());                                                                           \
             } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_d) == vixl::aarch64::LoadStorePairOp::LDP_d) { \
-                ldp_v_++;                                                                                             \
+                ldpV_++;                                                                                              \
                 vregs_.set(instr->GetRt());                                                                           \
                 vregs_.set(instr->GetRt2());                                                                          \
             } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::STP_d) == vixl::aarch64::LoadStorePairOp::STP_d) { \
-                stp_v_++;                                                                                             \
+                stpV_++;                                                                                              \
                 vregs_.set(instr->GetRt());                                                                           \
                 vregs_.set(instr->GetRt2());                                                                          \
             }                                                                                                         \
@@ -169,12 +170,12 @@ public:
 
     auto GetLdpD()
     {
-        return ldp_v_;
+        return ldpV_;
     }
 
     auto GetStpD()
     {
-        return stp_v_;
+        return stpV_;
     }
 
     RegMask GetAccessedPairRegisters()
@@ -190,8 +191,8 @@ public:
 private:
     size_t ldp_ {0};
     size_t stp_ {0};
-    size_t ldp_v_ {0};
-    size_t stp_v_ {0};
+    size_t ldpV_ {0};
+    size_t stpV_ {0};
     RegMask regs_;
     VRegMask vregs_;
 };
@@ -199,7 +200,7 @@ private:
 // NOLINTBEGIN(readability-magic-numbers,modernize-avoid-c-arrays)
 TEST_F(CodegenCallerSavedRegistersTest, SaveOnlyLiveRegisters)
 {
-    OPTIONS.SetCompilerSaveOnlyLiveRegisters(true);
+    g_options.SetCompilerSaveOnlyLiveRegisters(true);
     constexpr auto ARGS_COUNT = 8;
     GRAPH(GetGraph())
     {
@@ -210,46 +211,46 @@ TEST_F(CodegenCallerSavedRegistersTest, SaveOnlyLiveRegisters)
             PARAMETER(i + ARGS_COUNT, i + ARGS_COUNT).f64();
         }
 
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1)
         {
-            INST(16, Opcode::Add).u64().Inputs(0, 1);
-            INST(17, Opcode::Add).u64().Inputs(16, 2);
-            INST(18, Opcode::Add).u64().Inputs(17, 3);
-            INST(19, Opcode::Add).u64().Inputs(18, 4);
-            INST(20, Opcode::Add).u64().Inputs(19, 5);
-            INST(21, Opcode::Add).u64().Inputs(20, 6);
-            INST(22, Opcode::Add).u64().Inputs(21, 7);
-            INST(23, Opcode::Add).f64().Inputs(8, 9);
-            INST(24, Opcode::Add).f64().Inputs(23, 10);
-            INST(25, Opcode::Add).f64().Inputs(24, 11);
-            INST(26, Opcode::Add).f64().Inputs(25, 12);
-            INST(27, Opcode::Add).f64().Inputs(26, 13);
-            INST(28, Opcode::Add).f64().Inputs(27, 14);
-            INST(29, Opcode::Add).f64().Inputs(28, 15);
-            INST(30, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(29);
-            INST(31, Opcode::Add).u64().Inputs(30, 22);
+            INST(16U, Opcode::Add).u64().Inputs(0, 1U);
+            INST(17U, Opcode::Add).u64().Inputs(16U, 2U);
+            INST(18U, Opcode::Add).u64().Inputs(17U, 3U);
+            INST(19U, Opcode::Add).u64().Inputs(18U, 4U);
+            INST(20U, Opcode::Add).u64().Inputs(19U, 5U);
+            INST(21U, Opcode::Add).u64().Inputs(20U, 6U);
+            INST(22U, Opcode::Add).u64().Inputs(21U, 7U);
+            INST(23U, Opcode::Add).f64().Inputs(8U, 9U);
+            INST(24U, Opcode::Add).f64().Inputs(23U, 10U);
+            INST(25U, Opcode::Add).f64().Inputs(24U, 11U);
+            INST(26U, Opcode::Add).f64().Inputs(25U, 12U);
+            INST(27U, Opcode::Add).f64().Inputs(26U, 13U);
+            INST(28U, Opcode::Add).f64().Inputs(27U, 14U);
+            INST(29U, Opcode::Add).f64().Inputs(28U, 15U);
+            INST(30U, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(29U);
+            INST(31U, Opcode::Add).u64().Inputs(30U, 22U);
 
-            INST(44, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68);
-            INST(32, Opcode::NewArray).ref().TypeId(8).Inputs(44, 31);
-            INST(33, Opcode::Return).ref().Inputs(32);
+            INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+            INST(32U, Opcode::NewArray).ref().TypeId(8U).Inputs(44U, 31U);
+            INST(33U, Opcode::Return).ref().Inputs(32U);
         }
     }
 
-    SetNumArgs(ARGS_COUNT * 2);
+    SetNumArgs(ARGS_COUNT * 2U);
     SetNumVirtRegs(0);
     GraphChecker(GetGraph()).Check();
     RegAlloc(GetGraph());
     ASSERT_TRUE(GetGraph()->RunPass<Codegen>());
 
-    auto code_entry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
+    auto codeEntry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto code_exit = code_entry + GetGraph()->GetCode().Size();
-    ASSERT(code_entry != nullptr && code_exit != nullptr);
+    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+    ASSERT(codeEntry != nullptr && codeExit != nullptr);
     auto &decoder {GetDecoder()};
     LoadStoreRegistersCollector visitor;
     vixl::aarch64::Decoder::ScopedAddVisitors sv(decoder, {&visitor});
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (auto instr = code_entry; instr < code_exit; instr += vixl::aarch64::kInstructionSize) {
+    for (auto instr = codeEntry; instr < codeExit; instr += vixl::aarch64::kInstructionSize) {
         decoder.Decode(instr);
     }
     // not using reg lists from vixl::aarch64 to check only r0-r7
@@ -262,49 +263,49 @@ class CodegenSpillFillCoalescingTest : public VixlDisasmTest {
 public:
     CodegenSpillFillCoalescingTest()
     {
-        OPTIONS.SetCompilerSpillFillPair(true);
-        OPTIONS.SetCompilerVerifyRegalloc(false);
+        g_options.SetCompilerSpillFillPair(true);
+        g_options.SetCompilerVerifyRegalloc(false);
     }
 
     void CheckSpillFillCoalescingForEvenRegsNumber(bool aligned)
     {
         GRAPH(GetGraph())
         {
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
                 INST(0, Opcode::SpillFill);
                 INST(1, Opcode::ReturnVoid);
             }
         }
 
-        int alignment_offset = aligned ? 1 : 0;
+        unsigned int alignmentOffset = aligned ? 1 : 0;
 
-        auto sf_inst = INS(0).CastToSpillFill();
-        sf_inst->AddSpill(0, 0 + alignment_offset, DataType::Type::INT64);
-        sf_inst->AddSpill(1, 1 + alignment_offset, DataType::Type::INT64);
-        sf_inst->AddSpill(0, 2 + alignment_offset, DataType::Type::FLOAT64);
-        sf_inst->AddSpill(1, 3 + alignment_offset, DataType::Type::FLOAT64);
-        sf_inst->AddFill(4 + alignment_offset, 3, DataType::Type::INT64);
-        sf_inst->AddFill(5 + alignment_offset, 2, DataType::Type::INT64);
-        sf_inst->AddFill(6 + alignment_offset, 3, DataType::Type::FLOAT64);
-        sf_inst->AddFill(7 + alignment_offset, 2, DataType::Type::FLOAT64);
+        auto sfInst = INS(0).CastToSpillFill();
+        sfInst->AddSpill(0U, 0U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(1U, 1U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(0U, 2U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddSpill(1U, 3U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddFill(4U + alignmentOffset, 3U, DataType::Type::INT64);
+        sfInst->AddFill(5U + alignmentOffset, 2U, DataType::Type::INT64);
+        sfInst->AddFill(6U + alignmentOffset, 3U, DataType::Type::FLOAT64);
+        sfInst->AddFill(7U + alignmentOffset, 2U, DataType::Type::FLOAT64);
 
         SetNumArgs(0);
         SetNumVirtRegs(0);
         GraphChecker(GetGraph()).Check();
-        GetGraph()->SetStackSlotsCount(8U + alignment_offset);
+        GetGraph()->SetStackSlotsCount(8U + alignmentOffset);
         RegAlloc(GetGraph());
         ASSERT_TRUE(GetGraph()->RunPass<Codegen>());
 
-        auto code_entry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
+        auto codeEntry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto code_exit = code_entry + GetGraph()->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
+        auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
         auto &decoder {GetDecoder()};
         LoadStoreInstCollector visitor;
         vixl::aarch64::Decoder::ScopedAddVisitors sv(decoder, {&visitor});
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (auto instr = code_entry; instr < code_exit; instr += vixl::aarch64::kInstructionSize) {
+        for (auto instr = codeEntry; instr < codeExit; instr += vixl::aarch64::kInstructionSize) {
             decoder.Decode(instr);
         }
         EXPECT_EQ(visitor.GetStpX(), 1 /* 1 use pre increment and not counted */);
@@ -317,54 +318,54 @@ public:
         EXPECT_EQ(visitor.GetAccessedPairVRegisters() & TEST_REGS, RegMask {0xF});
     }
 
-    void FormSpillFillInst(SpillFillInst *sf_inst, int alignment_offset)
+    void FormSpillFillInst(SpillFillInst *sfInst, unsigned int alignmentOffset)
     {
-        sf_inst->AddSpill(0, 0 + alignment_offset, DataType::Type::INT64);
-        sf_inst->AddSpill(1, 1 + alignment_offset, DataType::Type::INT64);
-        sf_inst->AddSpill(2, 2 + alignment_offset, DataType::Type::INT64);
-        sf_inst->AddSpill(0, 3 + alignment_offset, DataType::Type::FLOAT64);
-        sf_inst->AddSpill(1, 4 + alignment_offset, DataType::Type::FLOAT64);
-        sf_inst->AddSpill(2, 5 + alignment_offset, DataType::Type::FLOAT64);
-        sf_inst->AddFill(6 + alignment_offset, 3, DataType::Type::INT64);
-        sf_inst->AddFill(7 + alignment_offset, 4, DataType::Type::INT64);
-        sf_inst->AddFill(8 + alignment_offset, 5, DataType::Type::INT64);
-        sf_inst->AddFill(9 + alignment_offset, 3, DataType::Type::FLOAT64);
-        sf_inst->AddFill(10 + alignment_offset, 4, DataType::Type::FLOAT64);
-        sf_inst->AddFill(11 + alignment_offset, 5, DataType::Type::FLOAT64);
+        sfInst->AddSpill(0U, 0U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(1U, 1U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(2U, 2U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(0U, 3U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddSpill(1U, 4U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddSpill(2U, 5U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddFill(6U + alignmentOffset, 3U, DataType::Type::INT64);
+        sfInst->AddFill(7U + alignmentOffset, 4U, DataType::Type::INT64);
+        sfInst->AddFill(8U + alignmentOffset, 5U, DataType::Type::INT64);
+        sfInst->AddFill(9U + alignmentOffset, 3U, DataType::Type::FLOAT64);
+        sfInst->AddFill(10U + alignmentOffset, 4U, DataType::Type::FLOAT64);
+        sfInst->AddFill(11U + alignmentOffset, 5U, DataType::Type::FLOAT64);
     }
 
     void CheckSpillFillCoalescingForOddRegsNumber(bool aligned)
     {
         GRAPH(GetGraph())
         {
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
                 INST(0, Opcode::SpillFill);
                 INST(1, Opcode::ReturnVoid);
             }
         }
 
-        int alignment_offset = aligned ? 1 : 0;
+        int alignmentOffset = aligned ? 1 : 0;
 
-        auto sf_inst = INS(0).CastToSpillFill();
-        FormSpillFillInst(sf_inst, alignment_offset);
+        auto sfInst = INS(0).CastToSpillFill();
+        FormSpillFillInst(sfInst, alignmentOffset);
 
         SetNumArgs(0);
         SetNumVirtRegs(0);
         GraphChecker(GetGraph()).Check();
-        GetGraph()->SetStackSlotsCount(12U + alignment_offset);
+        GetGraph()->SetStackSlotsCount(12U + alignmentOffset);
         RegAlloc(GetGraph());
         ASSERT_TRUE(GetGraph()->RunPass<Codegen>());
 
-        auto code_entry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
+        auto codeEntry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto code_exit = code_entry + GetGraph()->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
+        auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
         auto &decoder {GetDecoder()};
         LoadStoreInstCollector visitor;
         vixl::aarch64::Decoder::ScopedAddVisitors sv(decoder, {&visitor});
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (auto instr = code_entry; instr < code_exit; instr += vixl::aarch64::kInstructionSize) {
+        for (auto instr = codeEntry; instr < codeExit; instr += vixl::aarch64::kInstructionSize) {
             decoder.Decode(instr);
         }
         EXPECT_EQ(visitor.GetStpX(), 1 /* 1 use pre increment and not counted */);
@@ -408,7 +409,7 @@ class CodegenLeafPrologueTest : public VixlDisasmTest {
 public:
     CodegenLeafPrologueTest()
     {
-        OPTIONS.SetCompilerVerifyRegalloc(false);
+        g_options.SetCompilerVerifyRegalloc(false);
 #ifndef NDEBUG
         graph_->SetLowLevelInstructionsEnabled();
 #endif
@@ -421,20 +422,20 @@ public:
         GRAPH(GetGraph())
         {
             PARAMETER(0, 0).ref();
-            BASIC_BLOCK(2, 3)
+            BASIC_BLOCK(2U, 3_I)
             {
-                INST(1, Opcode::LoadObject).s64().Inputs(0).TypeId(208U).ObjField(i);
-                INST(2, Opcode::AddI).s64().Inputs(1).Imm(1);
-                INST(3, Opcode::StoreObject).s64().Inputs(0, 2).TypeId(208U).ObjField(i);
+                INST(1U, Opcode::LoadObject).s64().Inputs(0).TypeId(208U).ObjField(i);
+                INST(2U, Opcode::AddI).s64().Inputs(1).Imm(1);
+                INST(3U, Opcode::StoreObject).s64().Inputs(0, 2_I).TypeId(208U).ObjField(i);
             }
-            BASIC_BLOCK(3, -1)
+            BASIC_BLOCK(3U, -1)
             {
-                INST(4, Opcode::ReturnVoid);
+                INST(4U, Opcode::ReturnVoid);
             }
         }
         SetNumArgs(1);
 
-        std::vector<std::string> expected_asm = {
+        std::vector<std::string> expectedAsm = {
 #ifdef PANDA_COMPILER_DEBUG_INFO
             "stp x29, x30, [sp, #-16]!",  // prolog save FP and LR
             "mov x29, sp",                // prolog set FP
@@ -455,22 +456,22 @@ public:
 
         GraphChecker(GetGraph()).Check();
         GetGraph()->RunPass<RegAllocLinearScan>();
-        bool setup_frame = GetGraph()->GetMethodProperties().GetRequireFrameSetup();
-        ASSERT_TRUE(setup_frame ? GetGraph()->RunPass<Codegen>() : GetGraph()->RunPass<CodegenNative>());
-        ASSERT_TRUE(GetGraph()->GetCode().Size() == expected_asm.size() * vixl::aarch64::kInstructionSize);
-        auto code_entry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
+        bool setupFrame = GetGraph()->GetMethodProperties().GetRequireFrameSetup();
+        ASSERT_TRUE(setupFrame ? GetGraph()->RunPass<Codegen>() : GetGraph()->RunPass<CodegenNative>());
+        ASSERT_TRUE(GetGraph()->GetCode().Size() == expectedAsm.size() * vixl::aarch64::kInstructionSize);
+        auto codeEntry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto code_exit = code_entry + GetGraph()->GetCode().Size();
-        size_t code_items = (code_exit - code_entry) / vixl::aarch64::kInstructionSize;
-        ASSERT_TRUE(code_items == expected_asm.size());
+        auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+        size_t codeItems = (codeExit - codeEntry) / vixl::aarch64::kInstructionSize;
+        ASSERT_TRUE(codeItems == expectedAsm.size());
 
         auto& decoder {GetDecoder()};
         auto& disasm {GetDisasm()};
         vixl::aarch64::Decoder::ScopedAddVisitors sv(decoder, {&disasm});
-        for (size_t item = 0; item < code_items; ++item) {
+        for (size_t item = 0; item < codeItems; ++item) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            decoder.Decode(code_entry + item * vixl::aarch64::kInstructionSize);
-            EXPECT_EQ(expected_asm.at(item), disasm.GetOutput());
+            decoder.Decode(codeEntry + item * vixl::aarch64::kInstructionSize);
+            EXPECT_EQ(expectedAsm.at(item), disasm.GetOutput());
         }
     }
 
@@ -480,34 +481,34 @@ public:
         RuntimeInterface::FieldPtr i = reinterpret_cast<void *>(0xDEADBEEF);  // NOLINT(modernize-use-auto)
         GRAPH(GetGraph())
         {
-            PARAMETER(0, 0).ref();
-            PARAMETER(1, 1).s64();
-            PARAMETER(2, 2).s64();
-            PARAMETER(3, 3).s64();
-            PARAMETER(4, 4).s64();
-            PARAMETER(5, 5).s64();
-            PARAMETER(6, 6).s64();
-            PARAMETER(7, 7).s64();
-            PARAMETER(8, 8).s64();
+            PARAMETER(0U, 0_I).ref();
+            PARAMETER(1U, 1_I).s64();
+            PARAMETER(2U, 2_I).s64();
+            PARAMETER(3U, 3_I).s64();
+            PARAMETER(4U, 4_I).s64();
+            PARAMETER(5U, 5_I).s64();
+            PARAMETER(6U, 6_I).s64();
+            PARAMETER(7U, 7_I).s64();
+            PARAMETER(8U, 8_I).s64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(10, Opcode::Add).s64().Inputs(1, 2);
-                INST(11, Opcode::Add).s64().Inputs(3, 4);
-                INST(12, Opcode::Add).s64().Inputs(5, 6);
-                INST(13, Opcode::Add).s64().Inputs(7, 8);
-                INST(14, Opcode::Add).s64().Inputs(10, 11);
-                INST(15, Opcode::Add).s64().Inputs(12, 13);
-                INST(16, Opcode::Add).s64().Inputs(14, 15);
-                INST(17, Opcode::StoreObject).s64().Inputs(0, 16).TypeId(301U).ObjField(i);
-                INST(18, Opcode::ReturnVoid);
+                INST(10U, Opcode::Add).s64().Inputs(1U, 2_I);
+                INST(11U, Opcode::Add).s64().Inputs(3U, 4_I);
+                INST(12U, Opcode::Add).s64().Inputs(5U, 6_I);
+                INST(13U, Opcode::Add).s64().Inputs(7U, 8_I);
+                INST(14U, Opcode::Add).s64().Inputs(10U, 11_I);
+                INST(15U, Opcode::Add).s64().Inputs(12U, 13_I);
+                INST(16U, Opcode::Add).s64().Inputs(14U, 15_I);
+                INST(17U, Opcode::StoreObject).s64().Inputs(0, 16_I).TypeId(301U).ObjField(i);
+                INST(18U, Opcode::ReturnVoid);
             }
         }
-        SetNumArgs(9);
+        SetNumArgs(9U);
 
         // In this case two parameters are passed on stack,
         // thus to address them SP needs to be adjusted in prolog/epilog.
-        std::vector<std::string> expected_asm = {
+        std::vector<std::string> expectedAsm = {
 #ifdef PANDA_COMPILER_DEBUG_INFO
             "stp x29, x30, [sp, #-16]!",    // prolog save FP and LR
             "mov x29, sp",                  // prolog set FP
@@ -542,29 +543,29 @@ public:
 #endif
             "ret"};
 
-        std::regex add_regex("^add[[:blank:]]+x[0-9]+,[[:blank:]]+x[0-9]+,[[:blank:]]+x[0-9]+",
+        std::regex addRegex("^add[[:blank:]]+x[0-9]+,[[:blank:]]+x[0-9]+,[[:blank:]]+x[0-9]+",
                              std::regex::egrep | std::regex::icase);
 
         GraphChecker(GetGraph()).Check();
         GetGraph()->RunPass<RegAllocLinearScan>();
-        bool setup_frame = GetGraph()->GetMethodProperties().GetRequireFrameSetup();
-        ASSERT_TRUE(setup_frame ? GetGraph()->RunPass<Codegen>() : GetGraph()->RunPass<CodegenNative>());
-        ASSERT_TRUE(GetGraph()->GetCode().Size() == expected_asm.size() * vixl::aarch64::kInstructionSize);
-        auto code_entry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
+        bool setupFrame = GetGraph()->GetMethodProperties().GetRequireFrameSetup();
+        ASSERT_TRUE(setupFrame ? GetGraph()->RunPass<Codegen>() : GetGraph()->RunPass<CodegenNative>());
+        ASSERT_TRUE(GetGraph()->GetCode().Size() == expectedAsm.size() * vixl::aarch64::kInstructionSize);
+        auto codeEntry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto code_exit = code_entry + GetGraph()->GetCode().Size();
-        size_t code_items = (code_exit - code_entry) / vixl::aarch64::kInstructionSize;
-        ASSERT_TRUE(code_items == expected_asm.size());
+        auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+        size_t codeItems = (codeExit - codeEntry) / vixl::aarch64::kInstructionSize;
+        ASSERT_TRUE(codeItems == expectedAsm.size());
 
         auto& decoder {GetDecoder()};
         auto& disasm {GetDisasm()};
         vixl::aarch64::Decoder::ScopedAddVisitors sv(decoder, {&disasm});
-        for (size_t item = 0; item < code_items; ++item) {
+        for (size_t item = 0; item < codeItems; ++item) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            decoder.Decode(code_entry + item * vixl::aarch64::kInstructionSize);
+            decoder.Decode(codeEntry + item * vixl::aarch64::kInstructionSize);
             // replace 'add rx, ry, rz' with 'add' to make comparison independent of regalloc
-            std::string s = std::regex_replace(disasm.GetOutput(), add_regex, "add");
-            EXPECT_EQ(expected_asm.at(item), s);
+            std::string s = std::regex_replace(disasm.GetOutput(), addRegex, "add");
+            EXPECT_EQ(expectedAsm.at(item), s);
         }
     }
 };
@@ -583,23 +584,23 @@ TEST_F(CodegenLeafPrologueTest, LeafWithParamsOnStackPrologueGeneration)
 class CodegenTest : public VixlDisasmTest {
 public:
     template <typename T, size_t LEN>
-    void AssertCode(const T (&expected_code)[LEN])
+    void AssertCode(const T (&expectedCode)[LEN])
     {
-        auto code_entry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
+        auto codeEntry = reinterpret_cast<vixl::aarch64::Instruction *>(GetGraph()->GetCode().Data());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto code_exit = code_entry + GetGraph()->GetCode().Size();
-        ASSERT(code_entry != nullptr && code_exit != nullptr);
+        auto codeExit = codeEntry + GetGraph()->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
         auto &decoder {GetDecoder()};
         auto &disasm {GetDisasm()};
         vixl::aarch64::Decoder::ScopedAddVisitors sv(decoder, {&disasm});
 
         size_t index = 0;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (auto instr = code_entry; instr < code_exit; instr += vixl::aarch64::kInstructionSize) {
+        for (auto instr = codeEntry; instr < codeExit; instr += vixl::aarch64::kInstructionSize) {
             decoder.Decode(instr);
             auto output = disasm.GetOutput();
             if (index == 0) {
-                if (std::strncmp(output, expected_code[index], std::strlen(expected_code[index])) == 0) {
+                if (std::strncmp(output, expectedCode[index], std::strlen(expectedCode[index])) == 0) {
                     index++;
                 }
                 continue;
@@ -607,7 +608,7 @@ public:
             if (index >= LEN) {
                 break;
             }
-            ASSERT_TRUE(std::strncmp(output, expected_code[index], std::strlen(expected_code[index])) == 0);
+            ASSERT_TRUE(std::strncmp(output, expectedCode[index], std::strlen(expectedCode[index])) == 0);
             index++;
         }
         ASSERT_EQ(index, LEN);
@@ -621,19 +622,19 @@ TEST_F(CodegenTest, CallVirtual)
     {
         PARAMETER(0, 0).ref();
         PARAMETER(1, 1).i32();
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1)
         {
-            INST(2, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
-            INST(3, Opcode::CallVirtual).v0id().InputsAutoType(0, 1, 2);
-            INST(4, Opcode::ReturnVoid).v0id();
+            INST(2U, Opcode::SaveState).Inputs(0, 1).SrcVregs({0, 1});
+            INST(3U, Opcode::CallVirtual).v0id().InputsAutoType(0_I, 1_I, 2_I);
+            INST(4U, Opcode::ReturnVoid).v0id();
         }
     }
     EXPECT_TRUE(RegAlloc(graph));
     EXPECT_TRUE(graph->RunPass<Codegen>());
     // exclude offset from verification to avoid test modifications
-    const char *expected_code[] = {"ldr w0, [x1, #", "ldr x0, [x0, #", "ldr x30, [x0, #",
-                                   "blr x30"};  // CallVirtual is encoded without tmp reg
-    AssertCode(expected_code);
+    const char *expectedCode[] = {"ldr w0, [x1, #", "ldr x0, [x0, #", "ldr x30, [x0, #",
+                                  "blr x30"};  // CallVirtual is encoded without tmp reg
+    AssertCode(expectedCode);
 }
 
 TEST_F(CodegenTest, EncodeMemCopy)
@@ -642,17 +643,17 @@ TEST_F(CodegenTest, EncodeMemCopy)
     GRAPH(graph)
     {
         CONSTANT(0, 0).i32().DstReg(0U);
-        BASIC_BLOCK(2, -1)
+        BASIC_BLOCK(2U, -1)
         {
-            INST(2, Opcode::SpillFill);
-            INST(3, Opcode::Return).i32().Inputs(0).DstReg(0U);
+            INST(2U, Opcode::SpillFill);
+            INST(3U, Opcode::Return).i32().Inputs(0).DstReg(0U);
         }
     }
-    auto spill_fill = INS(2).CastToSpillFill();
+    auto spillFill = INS(2U).CastToSpillFill();
     // Add moves chain: R0 -> S0 -> S1 -> R0 [u32]
-    spill_fill->AddSpillFill(Location::MakeRegister(0), Location::MakeStackSlot(0), DataType::INT32);
-    spill_fill->AddSpillFill(Location::MakeStackSlot(0), Location::MakeStackSlot(1), DataType::INT32);
-    spill_fill->AddSpillFill(Location::MakeStackSlot(1), Location::MakeRegister(0), DataType::INT32);
+    spillFill->AddSpillFill(Location::MakeRegister(0), Location::MakeStackSlot(0), DataType::INT32);
+    spillFill->AddSpillFill(Location::MakeStackSlot(0), Location::MakeStackSlot(1), DataType::INT32);
+    spillFill->AddSpillFill(Location::MakeStackSlot(1), Location::MakeRegister(0), DataType::INT32);
 
     graph->SetStackSlotsCount(2U);
 #ifndef NDEBUG
@@ -661,8 +662,8 @@ TEST_F(CodegenTest, EncodeMemCopy)
     EXPECT_TRUE(graph->RunPass<Codegen>());
 
     // Check that stack slots are 64-bit wide
-    const char *expected_code[] = {"str x0, [sp, #16]", "ldr x16, [sp, #16]", "str x16, [sp, #8]", "ldr w0, [sp, #8]"};
-    AssertCode(expected_code);
+    const char *expectedCode[] = {"str x0, [sp, #16]", "ldr x16, [sp, #16]", "str x16, [sp, #8]", "ldr w0, [sp, #8]"};
+    AssertCode(expectedCode);
 }
 
 TEST_F(CodegenTest, EncodeWithZeroReg)
@@ -676,20 +677,20 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         {
             CONSTANT(0, 0).i64();
             PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MAdd).i64().Inputs(0, 1, 2);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MAdd).i64().Inputs(0U, 1_I, 2_I);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
         EXPECT_TRUE(RegAlloc(graph));
         EXPECT_TRUE(graph->RunPass<Codegen>());
 
-        const char *expected_code[] = {"mov x0, x2"};
-        AssertCode(expected_code);
+        const char *expectedCode[] = {"mov x0, x2"};
+        AssertCode(expectedCode);
         ResetGraph();
     }
 
@@ -699,21 +700,21 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         GRAPH(graph)
         {
             CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(1U, 0).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MAdd).i64().Inputs(1, 0, 2);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MAdd).i64().Inputs(1, 0, 2_I);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
         EXPECT_TRUE(RegAlloc(graph));
         EXPECT_TRUE(graph->RunPass<Codegen>());
 
-        const char *expected_code[] = {"mov x0, x2"};
-        AssertCode(expected_code);
+        const char *expectedCode[] = {"mov x0, x2"};
+        AssertCode(expectedCode);
         ResetGraph();
     }
 
@@ -723,21 +724,21 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         GRAPH(graph)
         {
             CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(1U, 0).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MAdd).i64().Inputs(1, 2, 0);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MAdd).i64().Inputs(1, 2_I, 0);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
         EXPECT_TRUE(RegAlloc(graph));
         EXPECT_TRUE(graph->RunPass<Codegen>());
 
-        const char *expected_code[] = {"mul x0, x1, x2"};
-        AssertCode(expected_code);
+        const char *expectedCode[] = {"mul x0, x1, x2"};
+        AssertCode(expectedCode);
         ResetGraph();
     }
 
@@ -749,21 +750,21 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         GRAPH(graph)
         {
             CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(1U, 0).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MSub).i64().Inputs(0, 1, 2);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MSub).i64().Inputs(0, 1, 2_I);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
         EXPECT_TRUE(RegAlloc(graph));
         EXPECT_TRUE(graph->RunPass<Codegen>());
 
-        const char *expected_code[] = {"mov x0, x2"};
-        AssertCode(expected_code);
+        const char *expectedCode[] = {"mov x0, x2"};
+        AssertCode(expectedCode);
         ResetGraph();
     }
 
@@ -773,21 +774,21 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         GRAPH(graph)
         {
             CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(1U, 0).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MSub).i64().Inputs(1, 0, 2);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MSub).i64().Inputs(1, 0, 2_I);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
         EXPECT_TRUE(RegAlloc(graph));
         EXPECT_TRUE(graph->RunPass<Codegen>());
 
-        const char *expected_code[] = {"mov x0, x2"};
-        AssertCode(expected_code);
+        const char *expectedCode[] = {"mov x0, x2"};
+        AssertCode(expectedCode);
         ResetGraph();
     }
 
@@ -798,20 +799,20 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
         {
             CONSTANT(0, 0).i64();
             PARAMETER(1, 0).i64();
-            PARAMETER(2, 1).i64();
+            PARAMETER(2U, 1).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MSub).i64().Inputs(1, 2, 0);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MSub).i64().Inputs(1, 2_I, 0);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
         EXPECT_TRUE(RegAlloc(graph));
         EXPECT_TRUE(graph->RunPass<Codegen>());
 
-        const char *expected_code[] = {"mneg x0, x1, x2"};
-        AssertCode(expected_code);
+        const char *expectedCode[] = {"mneg x0, x1, x2"};
+        AssertCode(expectedCode);
         ResetGraph();
     }
 
@@ -825,18 +826,18 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
             CONSTANT(0, 0).i64();
             PARAMETER(1, 0).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MNeg).i64().Inputs(0, 1);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MNeg).i64().Inputs(0, 1);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
         EXPECT_TRUE(RegAlloc(graph));
         EXPECT_TRUE(graph->RunPass<Codegen>());
 
-        const char *expected_code[] = {"mov x0, #0"};
-        AssertCode(expected_code);
+        const char *expectedCode[] = {"mov x0, #0"};
+        AssertCode(expectedCode);
         ResetGraph();
     }
 
@@ -848,18 +849,18 @@ TEST_F(CodegenTest, EncodeWithZeroReg)
             CONSTANT(0, 0).i64();
             PARAMETER(1, 0).i64();
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(3, Opcode::MNeg).i64().Inputs(1, 0);
-                INST(4, Opcode::Return).i64().Inputs(3);
+                INST(3U, Opcode::MNeg).i64().Inputs(1, 0);
+                INST(4U, Opcode::Return).i64().Inputs(3U);
             }
         }
 
         EXPECT_TRUE(RegAlloc(graph));
         EXPECT_TRUE(graph->RunPass<Codegen>());
 
-        const char *expected_code[] = {"mov x0, #0"};
-        AssertCode(expected_code);
+        const char *expectedCode[] = {"mov x0, #0"};
+        AssertCode(expectedCode);
         ResetGraph();
     }
 }

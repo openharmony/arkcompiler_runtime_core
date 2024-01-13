@@ -155,12 +155,12 @@ TEST_F(BitTableTest, MultipleColumns)
 
     ASSERT_EQ(table.GetRowsCount(), 5U);
 
-    size_t row_index = 0;
+    size_t rowIndex = 0;
     for (auto row : table) {
         for (size_t i = 0; i < row.ColumnsCount(); i++) {
-            ASSERT_EQ(row.Get(i), values[row_index][i]);
+            ASSERT_EQ(row.Get(i), values[rowIndex][i]);
         }
-        row_index++;
+        rowIndex++;
     }
 }
 
@@ -383,8 +383,8 @@ TEST_F(BitTableTest, Bitmap)
                 vec.SetBit(j);
             }
         }
-        auto fixed_vec = vec.GetFixed();
-        values.push_back({builder.Add(fixed_vec), value});
+        auto fixedVec = vec.GetFixed();
+        values.push_back({builder.Add(fixedVec), value});
     }
 
     // Zero value also occupies row in the table
@@ -419,18 +419,18 @@ TEST_F(BitTableTest, BitmapDeduplication)
 {
     BitmapTableBuilder builder(GetAllocator());
     std::array<uint32_t, 128U> buff {};
-    std::array fixed_vectors = {ArenaBitVectorSpan(&buff[0U], 23U), ArenaBitVectorSpan(&buff[1U], 48U),
-                                ArenaBitVectorSpan(&buff[3U], 0U), ArenaBitVectorSpan(&buff[4U], 123U),
-                                ArenaBitVectorSpan(&buff[8U], 48U)};
+    std::array fixedVectors = {ArenaBitVectorSpan(&buff[0U], 23U), ArenaBitVectorSpan(&buff[1U], 48U),
+                               ArenaBitVectorSpan(&buff[3U], 0U), ArenaBitVectorSpan(&buff[4U], 123U),
+                               ArenaBitVectorSpan(&buff[8U], 48U)};
     std::array vectors = {ArenaBitVector(GetAllocator()), ArenaBitVector(GetAllocator()),
                           ArenaBitVector(GetAllocator()), ArenaBitVector(GetAllocator()),
                           ArenaBitVector(GetAllocator())};
-    FillVector(fixed_vectors[0U], 0x23232323U);
-    FillVector(fixed_vectors[1U], 0x48484848U);
-    FillVector(fixed_vectors[2U], 0U);
-    FillVector(fixed_vectors[3U], 0x23123123U);
-    FillVector(fixed_vectors[4U], 0x48484848U);
-    ASSERT_EQ(fixed_vectors[1U], fixed_vectors[4U]);
+    FillVector(fixedVectors[0U], 0x23232323U);
+    FillVector(fixedVectors[1U], 0x48484848U);
+    FillVector(fixedVectors[2U], 0U);
+    FillVector(fixedVectors[3U], 0x23123123U);
+    FillVector(fixedVectors[4U], 0x48484848U);
+    ASSERT_EQ(fixedVectors[1U], fixedVectors[4U]);
     vectors[0U].resize(1U);
     vectors[1U].resize(23U);
     vectors[2U].resize(123U);
@@ -440,11 +440,11 @@ TEST_F(BitTableTest, BitmapDeduplication)
     FillVector(vectors[1U], 0x11111111U);
     FillVector(vectors[2U], 0x23123123U);
     FillVector(vectors[3U], 0x34234234U);
-    ASSERT_EQ(builder.Add(fixed_vectors[0U].GetFixed()), 0U);
-    ASSERT_EQ(builder.Add(fixed_vectors[1U].GetFixed()), 1U);
-    ASSERT_EQ(builder.Add(fixed_vectors[2U].GetFixed()), BitTableDefault<1U>::NO_VALUE);
-    ASSERT_EQ(builder.Add(fixed_vectors[3U].GetFixed()), 2U);
-    ASSERT_EQ(builder.Add(fixed_vectors[4U].GetFixed()), 1U);
+    ASSERT_EQ(builder.Add(fixedVectors[0U].GetFixed()), 0U);
+    ASSERT_EQ(builder.Add(fixedVectors[1U].GetFixed()), 1U);
+    ASSERT_EQ(builder.Add(fixedVectors[2U].GetFixed()), BitTableDefault<1U>::NO_VALUE);
+    ASSERT_EQ(builder.Add(fixedVectors[3U].GetFixed()), 2U);
+    ASSERT_EQ(builder.Add(fixedVectors[4U].GetFixed()), 1U);
     ASSERT_EQ(builder.Add(vectors[0U].GetFixed()), 3U);
     ASSERT_EQ(builder.Add(vectors[1U].GetFixed()), 4U);
     ASSERT_EQ(builder.Add(vectors[2U].GetFixed()), 2U);

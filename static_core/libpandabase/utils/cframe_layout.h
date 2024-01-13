@@ -63,8 +63,8 @@ private:
 
 class CFrameLayout {
 public:
-    constexpr CFrameLayout(Arch arch, size_t spills_count)
-        : arch_(arch), spills_count_(AlignSpillCount(arch, spills_count))
+    constexpr CFrameLayout(Arch arch, size_t spillsCount)
+        : arch_(arch), spillsCount_(AlignSpillCount(arch, spillsCount))
     {
     }
     ~CFrameLayout() = default;
@@ -147,8 +147,8 @@ public:
     constexpr size_t GetFrameSize() const
     {
         // +1 for LR slot
-        size_t size_in_slots = STACK_START_SLOT + GetFirstSpillSlot() + spills_count_ + 1U;
-        return UNIT == OffsetUnit::BYTES ? (size_in_slots * GetSlotSize()) : size_in_slots;
+        size_t sizeInSlots = STACK_START_SLOT + GetFirstSpillSlot() + spillsCount_ + 1U;
+        return UNIT == OffsetUnit::BYTES ? (sizeInSlots * GetSlotSize()) : sizeInSlots;
     }
 
     template <OffsetOrigin ORIGIN, OffsetUnit UNIT>
@@ -187,15 +187,15 @@ public:
     }
 
     template <OffsetOrigin ORIGIN, OffsetUnit UNIT>
-    constexpr ssize_t GetSpillOffset(size_t spill_slot) const
+    constexpr ssize_t GetSpillOffset(size_t spillSlot) const
     {
         size_t shift = Is64BitsArch(arch_) ? 0 : 1;  // in arm32 one slot is 2 word and shifted by 1
-        return GetOffset<ORIGIN, UNIT>(STACK_START_SLOT + GetFirstSpillSlot() + (spill_slot << shift) + shift);
+        return GetOffset<ORIGIN, UNIT>(STACK_START_SLOT + GetFirstSpillSlot() + (spillSlot << shift) + shift);
     }
 
-    constexpr ssize_t GetSpillOffsetFromSpInBytes(size_t spill_slot) const
+    constexpr ssize_t GetSpillOffsetFromSpInBytes(size_t spillSlot) const
     {
-        return GetSpillOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>(spill_slot);
+        return GetSpillOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>(spillSlot);
     }
 
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -220,37 +220,37 @@ public:
     }
     constexpr size_t GetLastSpillSlot() const
     {
-        return GetFirstSpillSlot() + spills_count_ - 1;
+        return GetFirstSpillSlot() + spillsCount_ - 1;
     }
 
-    constexpr size_t GetCalleeFirstSlot(bool is_fp) const
+    constexpr size_t GetCalleeFirstSlot(bool isFp) const
     {
-        return is_fp ? GetCalleeRegistersCount(false) : 0;
+        return isFp ? GetCalleeRegistersCount(false) : 0;
     }
 
-    constexpr size_t GetCalleeLastSlot(bool is_fp) const
+    constexpr size_t GetCalleeLastSlot(bool isFp) const
     {
-        return GetCalleeFirstSlot(is_fp) + GetCalleeRegistersCount(is_fp) - 1;
+        return GetCalleeFirstSlot(isFp) + GetCalleeRegistersCount(isFp) - 1;
     }
 
-    constexpr size_t GetCallerFirstSlot(bool is_fp) const
+    constexpr size_t GetCallerFirstSlot(bool isFp) const
     {
-        return GetCalleeLastSlot(true) + 1 + (is_fp ? GetCallerRegistersCount(false) : 0);
+        return GetCalleeLastSlot(true) + 1 + (isFp ? GetCallerRegistersCount(false) : 0);
     }
 
-    constexpr size_t GetCallerLastSlot(bool is_fp) const
+    constexpr size_t GetCallerLastSlot(bool isFp) const
     {
-        return GetCallerFirstSlot(is_fp) + GetCallerRegistersCount(is_fp) - 1;
+        return GetCallerFirstSlot(isFp) + GetCallerRegistersCount(isFp) - 1;
     }
 
-    constexpr size_t GetCalleeRegistersCount(bool is_fp) const
+    constexpr size_t GetCalleeRegistersCount(bool isFp) const
     {
-        return panda::GetCalleeRegsCount(arch_, is_fp);
+        return panda::GetCalleeRegsCount(arch_, isFp);
     }
 
-    constexpr size_t GetCallerRegistersCount(bool is_fp) const
+    constexpr size_t GetCallerRegistersCount(bool isFp) const
     {
-        return panda::GetCallerRegsCount(arch_, is_fp);
+        return panda::GetCallerRegsCount(arch_, isFp);
     }
 
     constexpr size_t GetSlotSize() const
@@ -260,7 +260,7 @@ public:
 
     constexpr size_t GetSpillsCount() const
     {
-        return spills_count_;
+        return spillsCount_;
     }
 
     constexpr size_t GetRegsSlotsCount() const
@@ -296,26 +296,26 @@ public:
     }
 
 private:
-    constexpr size_t AlignSpillCount(Arch arch, size_t spills_count)
+    constexpr size_t AlignSpillCount(Arch arch, size_t spillsCount)
     {
         // Allign by odd-number, because GetSpillsStartSlot begins from fp (+1 slot for lr)
         if (arch == Arch::AARCH64 || arch == Arch::X86_64) {
-            if (((GetSpillsStartSlot() + spills_count) % 2) == 0) {
-                spills_count++;
+            if (((GetSpillsStartSlot() + spillsCount) % 2U) == 0) {
+                spillsCount++;
             }
         } else if (arch == Arch::AARCH32) {
             // Additional slot for spill/fill <-> sf-registers ldrd miscorp
-            spills_count = (spills_count + 1) * 2;
-            if (((GetSpillsStartSlot() + spills_count) % 2) == 0) {
-                spills_count++;
+            spillsCount = (spillsCount + 1) * 2U;
+            if (((GetSpillsStartSlot() + spillsCount) % 2U) == 0) {
+                spillsCount++;
             }
         }
-        return spills_count;
+        return spillsCount;
     }
 
 private:
     Arch arch_;
-    size_t spills_count_ {0};
+    size_t spillsCount_ {0};
 };
 
 static_assert(CFrameLayout::GetLocalsCount() >= 2U);

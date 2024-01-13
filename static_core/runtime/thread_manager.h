@@ -56,10 +56,10 @@ public:
      * @brief thread enumeration and applying @param cb to them
      * @return true if for every thread @param cb was successful (returned true) and false otherwise
      */
-    bool EnumerateThreads(const Callback &cb, unsigned int inc_mask = static_cast<unsigned int>(EnumerationFlag::ALL),
-                          unsigned int xor_mask = static_cast<unsigned int>(EnumerationFlag::NONE)) const
+    bool EnumerateThreads(const Callback &cb, unsigned int incMask = static_cast<unsigned int>(EnumerationFlag::ALL),
+                          unsigned int xorMask = static_cast<unsigned int>(EnumerationFlag::NONE)) const
     {
-        return EnumerateThreadsImpl(cb, inc_mask, xor_mask);
+        return EnumerateThreadsImpl(cb, incMask, xorMask);
     }
 
     virtual void WaitForDeregistration() = 0;
@@ -71,12 +71,12 @@ public:
 
     ManagedThread *GetMainThread() const
     {
-        return main_thread_;
+        return mainThread_;
     }
 
     void SetMainThread(ManagedThread *thread)
     {
-        main_thread_ = thread;
+        mainThread_ = thread;
     }
 
 protected:
@@ -97,8 +97,8 @@ protected:
             target = t->IsAttached();
             if ((mask & static_cast<unsigned int>(EnumerationFlag::NON_CORE_THREAD)) != 0) {
                 // Due to hyerarhical structure, we need to conjunct types
-                bool non_core_thread = t->GetThreadLang() != panda::panda_file::SourceLang::PANDA_ASSEMBLY;
-                target = target && non_core_thread;
+                bool nonCoreThread = t->GetThreadLang() != panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+                target = target && nonCoreThread;
             }
         }
 
@@ -109,11 +109,11 @@ protected:
         return target;
     }
 
-    bool ApplyCallbackToThread(const Callback &cb, ManagedThread *t, unsigned int inc_mask, unsigned int xor_mask) const
+    bool ApplyCallbackToThread(const Callback &cb, ManagedThread *t, unsigned int incMask, unsigned int xorMask) const
     {
-        bool inc_target = SatisfyTheMask(t, inc_mask);
-        bool xor_target = SatisfyTheMask(t, xor_mask);
-        if (inc_target != xor_target) {
+        bool incTarget = SatisfyTheMask(t, incMask);
+        bool xorTarget = SatisfyTheMask(t, xorMask);
+        if (incTarget != xorTarget) {
             if (!cb(t)) {
                 return false;
             }
@@ -121,10 +121,10 @@ protected:
         return true;
     }
 
-    virtual bool EnumerateThreadsImpl(const Callback &cb, unsigned int inc_mask, unsigned int xor_mask) const = 0;
+    virtual bool EnumerateThreadsImpl(const Callback &cb, unsigned int incMask, unsigned int xorMask) const = 0;
 
 private:
-    ManagedThread *main_thread_ {nullptr};
+    ManagedThread *mainThread_ {nullptr};
 };
 
 class MTThreadManager : public ThreadManager {
@@ -140,13 +140,13 @@ public:
     ~MTThreadManager() override;
 
     bool EnumerateThreadsWithLockheld(const Callback &cb,
-                                      unsigned int inc_mask = static_cast<unsigned int>(EnumerationFlag::ALL),
-                                      unsigned int xor_mask = static_cast<unsigned int>(EnumerationFlag::NONE)) const
+                                      unsigned int incMask = static_cast<unsigned int>(EnumerationFlag::ALL),
+                                      unsigned int xorMask = static_cast<unsigned int>(EnumerationFlag::NONE)) const
     // REQUIRES(*GetThreadsLock())
     // Cannot enable the annotation, as the function is also called with thread_lock directly
     {
         for (auto t : GetThreadsList()) {
-            if (!ApplyCallbackToThread(cb, t, inc_mask, xor_mask)) {
+            if (!ApplyCallbackToThread(cb, t, incMask, xorMask)) {
                 return false;
             }
         }
@@ -162,23 +162,23 @@ public:
         MTManagedThread *self = MTManagedThread::GetCurrent();
         self->GetMutatorLock()->WriteLock();
         {
-            os << "ARK THREADS (" << threads_count_ << "):\n";
+            os << "ARK THREADS (" << threadsCount_ << "):\n";
         }
         if (self != nullptr) {
-            os::memory::LockHolder lock(thread_lock_);
+            os::memory::LockHolder lock(threadLock_);
             int64_t start = panda::os::time::GetClockTimeInThreadCpuTime();
             int64_t end;
-            int64_t last_time = start;
+            int64_t lastTime = start;
             cb(self, os);
             for (const auto &thread : threads_) {
                 if (thread != self) {
                     cb(thread, os);
                     end = panda::os::time::GetClockTimeInThreadCpuTime();
-                    if ((end - last_time) > K_MAX_SINGLE_DUMP_TIME_NS) {
+                    if ((end - lastTime) > K_MAX_SINGLE_DUMP_TIME_NS) {
                         LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump thread : " << thread->GetId()
-                                            << "timeout : " << (end - last_time);
+                                            << "timeout : " << (end - lastTime);
                     }
-                    last_time = end;
+                    lastTime = end;
                     if ((end - start) > K_MAX_DUMP_TIME_NS) {
                         LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump timeout : " << end - start << "\n";
                         break;
@@ -195,36 +195,36 @@ public:
 
     void RegisterThread(MTManagedThread *thread)
     {
-        os::memory::LockHolder lock(thread_lock_);
-        auto main_thread = GetMainThread();
-        if (main_thread != nullptr) {
-            thread->SetPreWrbEntrypoint(main_thread->GetPreWrbEntrypoint());
+        os::memory::LockHolder lock(threadLock_);
+        auto mainThread = GetMainThread();
+        if (mainThread != nullptr) {
+            thread->SetPreWrbEntrypoint(mainThread->GetPreWrbEntrypoint());
         }
-        threads_count_++;
+        threadsCount_++;
 #ifndef NDEBUG
-        registered_threads_count_++;
+        registeredThreadsCount_++;
 #endif  // NDEBUG
         threads_.emplace_back(thread);
-        for (uint32_t i = suspend_new_count_; i > 0; i--) {
+        for (uint32_t i = suspendNewCount_; i > 0; i--) {
             thread->SuspendImpl(true);
         }
     }
 
     void IncPendingThreads()
     {
-        os::memory::LockHolder lock(thread_lock_);
-        pending_threads_++;
+        os::memory::LockHolder lock(threadLock_);
+        pendingThreads_++;
     }
 
     void DecPendingThreads()
     {
-        os::memory::LockHolder lock(thread_lock_);
-        pending_threads_--;
+        os::memory::LockHolder lock(threadLock_);
+        pendingThreads_--;
     }
 
     void AddDaemonThread()
     {
-        daemon_threads_count_++;
+        daemonThreadsCount_++;
     }
 
     int GetThreadsCount();
@@ -247,20 +247,20 @@ public:
     // Returns true if unregistration succeeded; for now it can fail when we are trying to unregister main thread
     bool UnregisterExitedThread(MTManagedThread *thread);
 
-    MTManagedThread *SuspendAndWaitThreadByInternalThreadId(uint32_t thread_id);
+    MTManagedThread *SuspendAndWaitThreadByInternalThreadId(uint32_t threadId);
 
     void RegisterSensitiveThread() const;
 
     os::memory::Mutex *GetThreadsLock()
     {
-        return &thread_lock_;
+        return &threadLock_;
     }
 
 protected:
-    bool EnumerateThreadsImpl(const Callback &cb, unsigned int inc_mask, unsigned int xor_mask) const override
+    bool EnumerateThreadsImpl(const Callback &cb, unsigned int incMask, unsigned int xorMask) const override
     {
         os::memory::LockHolder lock(*GetThreadsLock());
-        return EnumerateThreadsWithLockheld(cb, inc_mask, xor_mask);
+        return EnumerateThreadsWithLockheld(cb, incMask, xorMask);
     }
 
     // The methods are used only in EnumerateThreads in mt mode
@@ -270,34 +270,34 @@ protected:
     }
     os::memory::Mutex *GetThreadsLock() const
     {
-        return &thread_lock_;
+        return &threadLock_;
     }
 
 private:
-    bool HasNoActiveThreads() const REQUIRES(thread_lock_)
+    bool HasNoActiveThreads() const REQUIRES(threadLock_)
     {
-        ASSERT(threads_count_ >= daemon_threads_count_);
-        auto thread = static_cast<uint32_t>(threads_count_ - daemon_threads_count_);
-        return thread < 2 && pending_threads_ == 0;
+        ASSERT(threadsCount_ >= daemonThreadsCount_);
+        auto thread = static_cast<uint32_t>(threadsCount_ - daemonThreadsCount_);
+        return thread < 2 && pendingThreads_ == 0;
     }
 
-    bool StopThreadsOnTerminationLoops(MTManagedThread *current) REQUIRES(thread_lock_);
+    bool StopThreadsOnTerminationLoops(MTManagedThread *current) REQUIRES(threadLock_);
 
     /**
      * Tries to stop all daemon threads in case there are no active basic threads
      * returns false if we need to wait
      */
-    void StopDaemonThreads() REQUIRES(thread_lock_);
+    void StopDaemonThreads() REQUIRES(threadLock_);
 
     /**
      * Deregister all suspended threads including daemon threads.
      * Returns true on success and false otherwise.
      */
-    bool DeregisterSuspendedThreads() REQUIRES(thread_lock_);
+    bool DeregisterSuspendedThreads() REQUIRES(threadLock_);
 
-    void DecreaseCountersForThread(MTManagedThread *thread) REQUIRES(thread_lock_);
+    void DecreaseCountersForThread(MTManagedThread *thread) REQUIRES(threadLock_);
 
-    MTManagedThread *GetThreadByInternalThreadIdWithLockHeld(uint32_t thread_id) REQUIRES(thread_lock_);
+    MTManagedThread *GetThreadByInternalThreadIdWithLockHeld(uint32_t threadId) REQUIRES(threadLock_);
 
     bool CanDeregister(enum ThreadStatus status)
     {
@@ -312,29 +312,29 @@ private:
         return status == ThreadStatus::IS_TERMINATED_LOOP;
     }
 
-    mutable os::memory::Mutex thread_lock_;
+    mutable os::memory::Mutex threadLock_;
     // Counter used to suspend newly created threads after SuspendAllThreads/SuspendDaemonThreads
-    uint32_t suspend_new_count_ GUARDED_BY(thread_lock_) = 0;
+    uint32_t suspendNewCount_ GUARDED_BY(threadLock_) = 0;
     // We should delete only finished thread structures, so call delete explicitly on finished threads
     // and don't touch other pointers
-    PandaList<MTManagedThread *> threads_ GUARDED_BY(thread_lock_);
-    os::memory::Mutex ids_lock_;
-    std::bitset<MAX_INTERNAL_THREAD_ID> internal_thread_ids_ GUARDED_BY(ids_lock_);
-    uint32_t last_id_ GUARDED_BY(ids_lock_);
-    PandaList<MTManagedThread *> daemon_threads_;
+    PandaList<MTManagedThread *> threads_ GUARDED_BY(threadLock_);
+    os::memory::Mutex idsLock_;
+    std::bitset<MAX_INTERNAL_THREAD_ID> internalThreadIds_ GUARDED_BY(idsLock_);
+    uint32_t lastId_ GUARDED_BY(idsLock_);
+    PandaList<MTManagedThread *> daemonThreads_;
 
-    os::memory::ConditionVariable stop_var_;
-    std::atomic_uint32_t threads_count_ = 0;
+    os::memory::ConditionVariable stopVar_;
+    std::atomic_uint32_t threadsCount_ = 0;
 #ifndef NDEBUG
     // This field is required for counting all registered threads (including finished daemons)
     // in AttachThreadTest. It is not needed in production mode.
-    std::atomic_uint32_t registered_threads_count_ = 0;
+    std::atomic_uint32_t registeredThreadsCount_ = 0;
 #endif  // NDEBUG
-    std::atomic_uint32_t daemon_threads_count_ = 0;
+    std::atomic_uint32_t daemonThreadsCount_ = 0;
     // A specific counter of threads, which are not completely created
     // When the counter != 0, operations with thread set are permitted to avoid destruction of shared data (mutexes)
     // Synchronized with lock (not atomic) for mutual exclusion with thread operations
-    int pending_threads_ GUARDED_BY(thread_lock_);
+    int pendingThreads_ GUARDED_BY(threadLock_);
 };
 
 }  // namespace panda

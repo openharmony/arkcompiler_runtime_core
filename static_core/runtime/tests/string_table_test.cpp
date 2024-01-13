@@ -41,19 +41,19 @@ public:
     static constexpr size_t TEST_HEAP_SIZE = 36_MB;
     StringTableTest()
     {
-        const std::string gc_type = GetParam();
+        const std::string gcType = GetParam();
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetExplicitConcurrentGcEnabled(false);
-        if (gc_type == "g1-gc") {
+        if (gcType == "g1-gc") {
             options.SetYoungSpaceSize(G1_YOUNG_TEST_SIZE);
         } else {
             options.SetYoungSpaceSize(NON_G1_YOUNG_TEST_SIZE);
         }
 
         options.SetHeapSizeLimit(TEST_HEAP_SIZE);
-        options.SetGcType(gc_type);
+        options.SetGcType(gcType);
         options.SetCompilerEnableJit(false);
         Runtime::Create(options);
 
@@ -68,11 +68,11 @@ public:
         Runtime::Destroy();
     }
 
-    static coretypes::String *AllocUtf8String(std::vector<uint8_t> data, bool is_movable = true)
+    static coretypes::String *AllocUtf8String(std::vector<uint8_t> data, bool isMovable = true)
     {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         return coretypes::String::CreateFromMUtf8(data.data(), utf::MUtf8ToUtf16Size(data.data()), ctx,
-                                                  Runtime::GetCurrent()->GetPandaVM(), is_movable);
+                                                  Runtime::GetCurrent()->GetPandaVM(), isMovable);
     }
 
     void RunStringTableTests()
@@ -101,12 +101,12 @@ public:
         auto table = StringTable();
         std::vector<uint8_t> data {0x01, 0x02, 0x03, 0x00};  // NOLINT(readability-magic-numbers)
         auto *string = AllocUtf8String(data);
-        auto *interned_str1 =
+        auto *internedStr1 =
             table.GetOrInternString(data.data(), data.size() - 1,
                                     Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY));
-        auto *interned_str2 = table.GetOrInternString(
+        auto *internedStr2 = table.GetOrInternString(
             string, Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY));
-        ASSERT_EQ(interned_str1, interned_str2);
+        ASSERT_EQ(internedStr1, internedStr2);
         ASSERT_EQ(table.Size(), 1);
     }
 
@@ -116,11 +116,11 @@ public:
         auto table = StringTable();
         std::vector<uint8_t> data {0xc2, 0xa7, 0x34, 0x00};  // NOLINT(readability-magic-numbers)
         auto *string = AllocUtf8String(data);
-        auto *interned_str1 = table.GetOrInternString(
+        auto *internedStr1 = table.GetOrInternString(
             data.data(), 2, Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY));
-        auto *interned_str2 = table.GetOrInternString(
+        auto *internedStr2 = table.GetOrInternString(
             string, Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY));
-        ASSERT_EQ(interned_str1, interned_str2);
+        ASSERT_EQ(internedStr1, internedStr2);
         ASSERT_EQ(table.Size(), 1);
     }
 
@@ -131,14 +131,14 @@ public:
         std::vector<uint16_t> data {0xffc3, 0x33, 0x00};  // NOLINT(readability-magic-numbers)
 
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        auto *first_string =
+        auto *firstString =
             coretypes::String::CreateFromUtf16(data.data(), data.size(), ctx, Runtime::GetCurrent()->GetPandaVM());
-        auto *second_string =
+        auto *secondString =
             coretypes::String::CreateFromUtf16(data.data(), data.size(), ctx, Runtime::GetCurrent()->GetPandaVM());
 
-        auto *interned_str1 = table.GetOrInternString(first_string, ctx);
-        auto *interned_str2 = table.GetOrInternString(second_string, ctx);
-        ASSERT_EQ(interned_str1, interned_str2);
+        auto *internedStr1 = table.GetOrInternString(firstString, ctx);
+        auto *internedStr2 = table.GetOrInternString(secondString, ctx);
+        ASSERT_EQ(internedStr1, internedStr2);
         ASSERT_EQ(table.Size(), 1);
     }
 
@@ -148,17 +148,17 @@ public:
         static constexpr size_t ITERATIONS = 50;
         auto table = StringTable();
         std::vector<uint8_t> data {0x00};
-        const unsigned number_of_letters = 25;
+        const unsigned numberOfLetters = 25;
 
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         for (size_t i = 0; i < ITERATIONS; i++) {
-            data.insert(data.begin(), (('a' + i) % number_of_letters) + 1);
-            [[maybe_unused]] auto *first_pointer = table.GetOrInternString(AllocUtf8String(data), ctx);
-            [[maybe_unused]] auto *second_pointer =
+            data.insert(data.begin(), (('a' + i) % numberOfLetters) + 1);
+            [[maybe_unused]] auto *firstPointer = table.GetOrInternString(AllocUtf8String(data), ctx);
+            [[maybe_unused]] auto *secondPointer =
                 table.GetOrInternString(data.data(), utf::MUtf8ToUtf16Size(data.data()), ctx);
-            auto *third_pointer = table.GetOrInternString(AllocUtf8String(data), ctx);
-            ASSERT_EQ(first_pointer, second_pointer);
-            ASSERT_EQ(second_pointer, third_pointer);
+            auto *thirdPointer = table.GetOrInternString(AllocUtf8String(data), ctx);
+            ASSERT_EQ(firstPointer, secondPointer);
+            ASSERT_EQ(secondPointer, thirdPointer);
         }
         ASSERT_EQ(table.Size(), ITERATIONS);
     }
@@ -167,11 +167,11 @@ public:
     {
         ScopedManagedCodeThread s(thread_);
         auto table = thread_->GetVM()->GetStringTable();
-        auto table_init_size = table->Size();
+        auto tableInitSize = table->Size();
         std::vector<uint8_t> data1 {0x01, 0x00};
         std::vector<uint8_t> data2 {0x02, 0x00};
         std::vector<uint8_t> data3 {0x03, 0x00};
-        const unsigned expected_table_size = 2;
+        const unsigned expectedTableSize = 2;
 
         auto storage = thread_->GetVM()->GetGlobalObjectStorage();
 
@@ -182,33 +182,33 @@ public:
         auto *s3 = AllocUtf8String(data3);
         auto ref3 = storage->Add(s3, Reference::ObjectType::GLOBAL);
 
-        auto panda_class_context = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref1)), panda_class_context);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref2)), panda_class_context);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref3)), panda_class_context);
+        auto pandaClassContext = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref1)), pandaClassContext);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref2)), pandaClassContext);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref3)), pandaClassContext);
 
         storage->Remove(ref2);
 
         thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
-        ASSERT_EQ(table->Size(), table_init_size + expected_table_size);
+        ASSERT_EQ(table->Size(), tableInitSize + expectedTableSize);
 
         storage->Remove(ref1);
         storage->Remove(ref3);
         thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
-        ASSERT_EQ(table->Size(), table_init_size);
+        ASSERT_EQ(table->Size(), tableInitSize);
     }
 
     void SweepNonMovableObjectInTable()
     {
         ScopedManagedCodeThread s(thread_);
         auto table = thread_->GetVM()->GetStringTable();
-        auto table_init_size = table->Size();
+        auto tableInitSize = table->Size();
         std::vector<uint8_t> data1 {0x01, 0x00};
         std::vector<uint8_t> data2 {0x02, 0x00};
         std::vector<uint8_t> data3 {0x03, 0x00};
-        const unsigned expected_table_size = 2;
+        const unsigned expectedTableSize = 2;
 
         auto storage = thread_->GetVM()->GetGlobalObjectStorage();
 
@@ -222,22 +222,22 @@ public:
         ASSERT_NE(s3, nullptr);
         auto ref3 = storage->Add(s3, Reference::ObjectType::GLOBAL);
 
-        auto panda_class_context = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref1)), panda_class_context);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref2)), panda_class_context);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref3)), panda_class_context);
+        auto pandaClassContext = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref1)), pandaClassContext);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref2)), pandaClassContext);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref3)), pandaClassContext);
 
         storage->Remove(ref2);
 
         thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
-        ASSERT_EQ(table->Size(), table_init_size + expected_table_size);
+        ASSERT_EQ(table->Size(), tableInitSize + expectedTableSize);
 
         storage->Remove(ref1);
         storage->Remove(ref3);
         thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
-        ASSERT_EQ(table->Size(), table_init_size);
+        ASSERT_EQ(table->Size(), tableInitSize);
     }
 
     void SweepHumongousObjectInTable()
@@ -256,8 +256,8 @@ public:
         data1.push_back(0x00);
         data2.push_back(0x00);
         data3.push_back(0x00);
-        auto table_init_size = table->Size();
-        const unsigned expected_table_size = 2;
+        auto tableInitSize = table->Size();
+        const unsigned expectedTableSize = 2;
 
         auto storage = thread_->GetVM()->GetGlobalObjectStorage();
 
@@ -271,22 +271,22 @@ public:
         ASSERT_NE(s3, nullptr);
         auto ref3 = storage->Add(s3, Reference::ObjectType::GLOBAL);
 
-        auto panda_class_context = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref1)), panda_class_context);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref2)), panda_class_context);
-        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref3)), panda_class_context);
+        auto pandaClassContext = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref1)), pandaClassContext);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref2)), pandaClassContext);
+        table->GetOrInternString(reinterpret_cast<coretypes::String *>(storage->Get(ref3)), pandaClassContext);
 
         storage->Remove(ref2);
 
         thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
-        ASSERT_EQ(table->Size(), table_init_size + expected_table_size);
+        ASSERT_EQ(table->Size(), tableInitSize + expectedTableSize);
 
         storage->Remove(ref1);
         storage->Remove(ref3);
         thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
-        ASSERT_EQ(table->Size(), table_init_size);
+        ASSERT_EQ(table->Size(), tableInitSize);
     }
 
     void InternTooLongString()
@@ -294,7 +294,7 @@ public:
         ScopedManagedCodeThread s(thread_);
         auto table = StringTable();
         auto *runtime = Runtime::GetCurrent();
-        auto panda_class_context = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto pandaClassContext = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
 
         auto *thread = ManagedThread::GetCurrent();
 
@@ -303,12 +303,12 @@ public:
         PandaVector<VMHandle<ObjectHeader>> objects;
         constexpr size_t STRING_DATA_SIZE = 10000U;
         constexpr uint8_t START_VALUE_IN_STRING_DATA = 0x30;
-        std::vector<uint8_t> string_data(STRING_DATA_SIZE, START_VALUE_IN_STRING_DATA);
-        string_data.push_back(0x00);
+        std::vector<uint8_t> stringData(STRING_DATA_SIZE, START_VALUE_IN_STRING_DATA);
+        stringData.push_back(0x00);
 
-        auto fill_heap = [&string_data, &thread, &objects](bool is_movable) {
+        auto fillHeap = [&stringData, &thread, &objects](bool isMovable) {
             while (true) {
-                auto *obj = AllocUtf8String(string_data, is_movable);
+                auto *obj = AllocUtf8String(stringData, isMovable);
                 if (obj == nullptr) {
                     thread->ClearException();
                     break;
@@ -318,8 +318,8 @@ public:
         };
 
         {
-            fill_heap(true);
-            auto *res = table.GetOrInternString(string_data.data(), string_data.size() - 1, panda_class_context);
+            fillHeap(true);
+            auto *res = table.GetOrInternString(stringData.data(), stringData.size() - 1, pandaClassContext);
             ASSERT_EQ(res, nullptr);
             ManagedThread::GetCurrent()->ClearException();
         }
@@ -328,20 +328,20 @@ public:
             panda_file::ItemContainer container;
             panda_file::MemoryWriter writer;
 
-            auto *string_item = container.GetOrCreateStringItem(reinterpret_cast<char *>(string_data.data()));
+            auto *stringItem = container.GetOrCreateStringItem(reinterpret_cast<char *>(stringData.data()));
 
             container.Write(&writer);
             auto data = writer.GetData();
 
-            auto id = panda_file::File::EntityId(string_item->GetOffset());
+            auto id = panda_file::File::EntityId(stringItem->GetOffset());
 
             os::mem::ConstBytePtr ptr(reinterpret_cast<std::byte *>(data.data()), data.size(),
                                       [](std::byte *, size_t) noexcept {});
 
             auto pf = panda_file::File::OpenFromMemory(std::move(ptr));
 
-            fill_heap(false);
-            auto *res = table.GetOrInternInternalString(*pf, id, panda_class_context);
+            fillHeap(false);
+            auto *res = table.GetOrInternInternalString(*pf, id, pandaClassContext);
             ASSERT_EQ(res, nullptr);
             ManagedThread::GetCurrent()->ClearException();
         }

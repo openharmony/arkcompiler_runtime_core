@@ -18,17 +18,17 @@
 
 namespace panda::verifier {
 
-MethodOption::MsgClass MethodOptions::MsgClassFor(VerifierMessage msg_num) const
+MethodOption::MsgClass MethodOptions::MsgClassFor(VerifierMessage msgNum) const
 {
-    if (CanHandleMsg(msg_num)) {
-        return msg_classes_.at(msg_num);
+    if (CanHandleMsg(msgNum)) {
+        return msgClasses_.at(msgNum);
     }
     for (const auto &up : uplevel_) {
-        if (up.get().CanHandleMsg(msg_num)) {
-            return up.get().MsgClassFor(msg_num);
+        if (up.get().CanHandleMsg(msgNum)) {
+            return up.get().MsgClassFor(msgNum);
         }
     }
-    return GetDefaultClassForMessage(msg_num);
+    return GetDefaultClassForMessage(msgNum);
 }
 
 }  // namespace panda::verifier

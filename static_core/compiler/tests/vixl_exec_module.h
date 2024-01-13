@@ -71,17 +71,17 @@ T CutValue(uint64_t data, DataType::Type type)
 // Class for emulate generated arm64 code
 class VixlExecModule {
 public:
-    VixlExecModule(panda::ArenaAllocator *allocator, RuntimeInterface *runtime_info)
+    VixlExecModule(panda::ArenaAllocator *allocator, RuntimeInterface *runtimeInfo)
         : decoder_(allocator),
           simulator_(allocator, &decoder_, SimStack().Allocate()),
-          runtime_info_(runtime_info),
+          runtimeInfo_(runtimeInfo),
           allocator_(allocator),
           params_(allocator->Adapter()) {};
 
     void SetInstructions(const char *start, const char *end)
     {
-        start_pointer_ = reinterpret_cast<const Instruction *>(start);
-        end_pointer_ = reinterpret_cast<const Instruction *>(end);
+        startPointer_ = reinterpret_cast<const Instruction *>(start);
+        endPointer_ = reinterpret_cast<const Instruction *>(end);
     }
 
     // Original type
@@ -135,28 +135,28 @@ public:
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     template <typename T>
-    void *CreateArray(T *array, int size, ArenaAllocator *object_allocator)
+    void *CreateArray(T *array, int size, ArenaAllocator *objectAllocator)
     {
-        void *arr_data = object_allocator->Alloc(size * sizeof(T) + runtime_info_->GetArrayDataOffset(Arch::AARCH64));
-        ASSERT(IsAddressInObjectsHeap(arr_data));
-        int *lenarr = reinterpret_cast<int *>(reinterpret_cast<char *>(arr_data) +
-                                              runtime_info_->GetArrayLengthOffset(Arch::AARCH64));
+        void *arrData = objectAllocator->Alloc(size * sizeof(T) + runtimeInfo_->GetArrayDataOffset(Arch::AARCH64));
+        ASSERT(IsAddressInObjectsHeap(arrData));
+        int *lenarr = reinterpret_cast<int *>(reinterpret_cast<char *>(arrData) +
+                                              runtimeInfo_->GetArrayLengthOffset(Arch::AARCH64));
         lenarr[0] = size;
-        T *arr = reinterpret_cast<T *>(reinterpret_cast<char *>(arr_data) +
-                                       runtime_info_->GetArrayDataOffset(Arch::AARCH64));
+        T *arr =
+            reinterpret_cast<T *>(reinterpret_cast<char *>(arrData) + runtimeInfo_->GetArrayDataOffset(Arch::AARCH64));
 
         memcpy_s(arr, size * sizeof(T), array, size * sizeof(T));
-        return arr_data;
+        return arrData;
     }
 
     template <typename T>
-    void CopyArray(void *arr_data, T *array)
+    void CopyArray(void *arrData, T *array)
     {
-        int *lenarr = reinterpret_cast<int *>(reinterpret_cast<char *>(arr_data) +
-                                              runtime_info_->GetArrayLengthOffset(Arch::AARCH64));
+        int *lenarr = reinterpret_cast<int *>(reinterpret_cast<char *>(arrData) +
+                                              runtimeInfo_->GetArrayLengthOffset(Arch::AARCH64));
         auto size = lenarr[0];
-        T *arr = reinterpret_cast<T *>(reinterpret_cast<char *>(arr_data) +
-                                       runtime_info_->GetArrayDataOffset(Arch::AARCH64));
+        T *arr =
+            reinterpret_cast<T *>(reinterpret_cast<char *>(arrData) + runtimeInfo_->GetArrayDataOffset(Arch::AARCH64));
         memcpy_s(array, size * sizeof(T), arr, size * sizeof(T));
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -188,32 +188,32 @@ public:
         // we can put only 7 parameters to registers
         ASSERT(params_.size() <= 7);
         // 0 reg reserve to method
-        uint32_t curr_reg_num = 1;
-        uint32_t curr_vreg_num = 0;
+        uint32_t currRegNum = 1;
+        uint32_t currVregNum = 0;
         for (auto [imm, type] : params_) {
             if (type == DataType::BOOL) {
                 // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-                simulator_.WriteXRegister(curr_reg_num++, std::get<bool>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<bool>(imm));
             } else if (type == DataType::INT8) {
-                simulator_.WriteXRegister(curr_reg_num++, std::get<int8_t>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<int8_t>(imm));
             } else if (type == DataType::UINT8) {
-                simulator_.WriteXRegister(curr_reg_num++, std::get<uint8_t>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<uint8_t>(imm));
             } else if (type == DataType::INT16) {
-                simulator_.WriteXRegister(curr_reg_num++, std::get<int16_t>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<int16_t>(imm));
             } else if (type == DataType::UINT16) {
-                simulator_.WriteXRegister(curr_reg_num++, std::get<uint16_t>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<uint16_t>(imm));
             } else if (type == DataType::INT32) {
-                simulator_.WriteXRegister(curr_reg_num++, std::get<int32_t>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<int32_t>(imm));
             } else if (type == DataType::UINT32) {
-                simulator_.WriteXRegister(curr_reg_num++, std::get<uint32_t>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<uint32_t>(imm));
             } else if (type == DataType::INT64) {
-                simulator_.WriteXRegister(curr_reg_num++, std::get<int64_t>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<int64_t>(imm));
             } else if (type == DataType::UINT64) {
-                simulator_.WriteXRegister(curr_reg_num++, std::get<uint64_t>(imm));
+                simulator_.WriteXRegister(currRegNum++, std::get<uint64_t>(imm));
             } else if (type == DataType::FLOAT32) {
-                simulator_.WriteVRegister(curr_vreg_num++, std::get<float>(imm));
+                simulator_.WriteVRegister(currVregNum++, std::get<float>(imm));
             } else if (type == DataType::FLOAT64) {
-                simulator_.WriteVRegister(curr_vreg_num++, std::get<double>(imm));
+                simulator_.WriteVRegister(currVregNum++, std::get<double>(imm));
             } else {
                 UNREACHABLE();
             }
@@ -229,10 +229,10 @@ public:
         simulator_.WriteXRegister(0, 0xDEADC0DE);  // NOLINT(readability-magic-numbers)
         // Set x28 to the dummy thread, since prolog of the compiled method writes to it.
         static std::array<uint8_t, sizeof(ManagedThread)> dummy;
-        simulator_.WriteCPURegister(XRegister(28), dummy.data());  // NOLINT(readability-magic-numbers)
+        simulator_.WriteCPURegister(XRegister(28U), dummy.data());  // NOLINT(readability-magic-numbers)
 
         WriteParameters();
-        simulator_.RunFrom(reinterpret_cast<const Instruction *>(start_pointer_));
+        simulator_.RunFrom(reinterpret_cast<const Instruction *>(startPointer_));
     }
 
     // Change debbuging level
@@ -252,7 +252,7 @@ public:
         Disassembler disasm(allocator_);
         decoder.AppendVisitor(&disasm);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (auto instr = start_pointer_; instr < end_pointer_; instr += kInstructionSize) {
+        for (auto instr = startPointer_; instr < endPointer_; instr += kInstructionSize) {
             decoder.Decode(instr);
             std::cout << "VIXL disasm " << reinterpret_cast<uintptr_t>(instr) << " : 0x" << std::hex;
             std::cout << std::setfill('0') << std::right << std::setw(sizeof(int64_t));
@@ -282,11 +282,11 @@ private:
     // VIXL Simulator
     Simulator simulator_;
     // Begin of executed code
-    const Instruction *start_pointer_ {nullptr};
+    const Instruction *startPointer_ {nullptr};
     // End of executed code
-    const Instruction *end_pointer_ {nullptr};
+    const Instruction *endPointer_ {nullptr};
 
-    RuntimeInterface *runtime_info_;
+    RuntimeInterface *runtimeInfo_;
 
     // Dummy allocated data for parameters:
     panda::ArenaAllocator *allocator_;

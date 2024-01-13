@@ -21,56 +21,56 @@
 #include <numeric>
 namespace panda {
 
-void BaseMemStats::RecordAllocateRaw(size_t size, SpaceType type_mem)
+void BaseMemStats::RecordAllocateRaw(size_t size, SpaceType typeMem)
 {
-    ASSERT(!IsHeapSpace(type_mem));
-    RecordAllocate(size, type_mem);
+    ASSERT(!IsHeapSpace(typeMem));
+    RecordAllocate(size, typeMem);
 }
 
-void BaseMemStats::RecordAllocate(size_t size, SpaceType type_mem)
+void BaseMemStats::RecordAllocate(size_t size, SpaceType typeMem)
 {
-    auto index = helpers::ToUnderlying(type_mem);
+    auto index = helpers::ToUnderlying(typeMem);
     // Atomic with acq_rel order reason: data race with allocated_ with dependecies on reads after the load and on
     // writes before the store
     allocated_[index].fetch_add(size, std::memory_order_acq_rel);
 }
 
-void BaseMemStats::RecordMoved(size_t size, SpaceType type_mem)
+void BaseMemStats::RecordMoved(size_t size, SpaceType typeMem)
 {
-    auto index = helpers::ToUnderlying(type_mem);
+    auto index = helpers::ToUnderlying(typeMem);
     // Atomic with acq_rel order reason: data race with allocated_ with dependecies on reads after the load and on
     // writes before the store
-    uint64_t old_value = allocated_[index].fetch_sub(size, std::memory_order_acq_rel);
-    (void)old_value;
-    ASSERT(old_value >= size);
+    uint64_t oldValue = allocated_[index].fetch_sub(size, std::memory_order_acq_rel);
+    (void)oldValue;
+    ASSERT(oldValue >= size);
 }
 
-void BaseMemStats::RecordFreeRaw(size_t size, SpaceType type_mem)
+void BaseMemStats::RecordFreeRaw(size_t size, SpaceType typeMem)
 {
-    ASSERT(!IsHeapSpace(type_mem));
-    RecordFree(size, type_mem);
+    ASSERT(!IsHeapSpace(typeMem));
+    RecordFree(size, typeMem);
 }
 
-void BaseMemStats::RecordFree(size_t size, SpaceType type_mem)
+void BaseMemStats::RecordFree(size_t size, SpaceType typeMem)
 {
-    auto index = helpers::ToUnderlying(type_mem);
+    auto index = helpers::ToUnderlying(typeMem);
     // Atomic with acq_rel order reason: data race with allocated_ with dependecies on reads after the load and on
     // writes before the store
     freed_[index].fetch_add(size, std::memory_order_acq_rel);
 }
 
-uint64_t BaseMemStats::GetAllocated(SpaceType type_mem) const
+uint64_t BaseMemStats::GetAllocated(SpaceType typeMem) const
 {
     // Atomic with acquire order reason: data race with allocated_ with dependecies on reads after the load which should
     // become visible
-    return allocated_[helpers::ToUnderlying(type_mem)].load(std::memory_order_acquire);
+    return allocated_[helpers::ToUnderlying(typeMem)].load(std::memory_order_acquire);
 }
 
-uint64_t BaseMemStats::GetFreed(SpaceType type_mem) const
+uint64_t BaseMemStats::GetFreed(SpaceType typeMem) const
 {
     // Atomic with acquire order reason: data race with allocated_ with dependecies on reads after the load which should
     // become visible
-    return freed_[helpers::ToUnderlying(type_mem)].load(std::memory_order_acquire);
+    return freed_[helpers::ToUnderlying(typeMem)].load(std::memory_order_acquire);
 }
 
 uint64_t BaseMemStats::GetAllocatedHeap() const
@@ -106,9 +106,9 @@ uint64_t BaseMemStats::GetFootprintHeap() const
     return helpers::UnsignedDifferenceUint64(GetAllocatedHeap(), GetFreedHeap());
 }
 
-uint64_t BaseMemStats::GetFootprint(SpaceType type_mem) const
+uint64_t BaseMemStats::GetFootprint(SpaceType typeMem) const
 {
-    auto index = helpers::ToUnderlying(type_mem);
+    auto index = helpers::ToUnderlying(typeMem);
     // Atomic with acquire order reason: data race with allocated_ with dependecies on reads after the load which should
     // become visible
     LOG_IF(allocated_[index].load(std::memory_order_acquire) < freed_[index].load(std::memory_order_acquire), FATAL, GC)

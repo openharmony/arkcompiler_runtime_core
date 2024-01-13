@@ -23,47 +23,47 @@ class EtsInteropJsDynamicWithLambda : public EtsInteropTest {};
 TEST_F(EtsInteropJsDynamicWithLambda, TestArgs0)
 {
     auto ret = CallEtsMethod<uint32_t>("TestArgs0");
-    ASSERT_EQ(ret, 25);
+    ASSERT_EQ(ret, 25U);
 }
 
 TEST_F(EtsInteropJsDynamicWithLambda, TestArgs1)
 {
     auto ret = CallEtsMethod<uint32_t>("TestArgs1");
-    ASSERT_EQ(ret, 25);
+    ASSERT_EQ(ret, 25U);
 }
 
 TEST_F(EtsInteropJsDynamicWithLambda, TestArgs2)
 {
     auto ret = CallEtsMethod<uint32_t>("TestArgs2");
-    ASSERT_EQ(ret, 25);
+    ASSERT_EQ(ret, 25U);
 }
 
 // NOTE: vpukhov. Function cast #14626
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValue)
 {
     auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValue");
-    ASSERT_EQ(ret, 25);
+    ASSERT_EQ(ret, 25U);
 }
 
 // NOTE: vpukhov. Function cast #14626
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCast)
 {
     auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCast");
-    ASSERT_EQ(ret, 25);
+    ASSERT_EQ(ret, 25U);
 }
 
 // NOTE: vpukhov. Function cast #14626
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCache)
 {
     auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCache");
-    ASSERT_EQ(ret, 25);
+    ASSERT_EQ(ret, 25U);
 }
 
 // NOTE(itrubachev) this test can be enabled after fixing NOTE in checker::Type *TSAsExpression::Check in es2panda
 TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCastCallAsArgument)
 {
     auto ret = CallEtsMethod<uint32_t>("TestLambdaJSValueCastCallAsArgument");
-    ASSERT_EQ(ret, 25);
+    ASSERT_EQ(ret, 25U);
 }
 
 }  // namespace panda::ets::interop::js::testing

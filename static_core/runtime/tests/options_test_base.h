@@ -28,12 +28,12 @@ public:
     NO_COPY_SEMANTIC(RuntimeOptionsTestBase);
     NO_MOVE_SEMANTIC(RuntimeOptionsTestBase);
 
-    RuntimeOptionsTestBase() : runtime_options_("AAA") {}
+    RuntimeOptionsTestBase() : runtimeOptions_("AAA") {}
     ~RuntimeOptionsTestBase() override = default;
 
     void SetUp() override
     {
-        runtime_options_.AddOptions(&pa_parser_);
+        runtimeOptions_.AddOptions(&paParser_);
         LoadCorrectOptionsList();
     }
 
@@ -41,31 +41,31 @@ public:
 
     panda::PandArgParser *GetParser()
     {
-        return &pa_parser_;
+        return &paParser_;
     }
 
     const std::vector<std::string> &GetCorrectOptionsList() const
     {
-        return correct_options_list_;
+        return correctOptionsList_;
     }
 
     RuntimeOptions *GetRuntimeOptions()
     {
-        return &runtime_options_;
+        return &runtimeOptions_;
     }
 
 protected:
     void AddTestingOption(const std::string &opt, const std::string &value)
     {
-        correct_options_list_.push_back("--" + opt + "=" + value);
+        correctOptionsList_.push_back("--" + opt + "=" + value);
     }
 
 private:
     virtual void LoadCorrectOptionsList() = 0;
 
-    RuntimeOptions runtime_options_;
-    panda::PandArgParser pa_parser_;
-    std::vector<std::string> correct_options_list_;
+    RuntimeOptions runtimeOptions_;
+    panda::PandArgParser paParser_;
+    std::vector<std::string> correctOptionsList_;
 };
 }  // namespace panda::test
 

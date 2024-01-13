@@ -24,15 +24,15 @@ namespace panda::verifier {
 
 struct Config {
     VerificationOptions opts;
-    debug::DebugConfig debug_cfg;
+    debug::DebugConfig debugCfg;
 };
 
 struct Service {
     Config const *config = nullptr;
-    ClassLinker *class_linker = nullptr;
-    debug::DebugContext debug_ctx;
+    ClassLinker *classLinker = nullptr;
+    debug::DebugContext debugCtx;
     mem::InternalAllocatorPtr allocator;
-    VerifierService *verifier_service = nullptr;
+    VerifierService *verifierService = nullptr;
 };
 
 }  // namespace panda::verifier

@@ -25,20 +25,20 @@ class Frame;
 
 extern "C" Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame *prev);
 
-extern "C" Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t num_actual_args,
+extern "C" Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
                                                    Method *method, Frame *prev);
 
 extern "C" PANDA_PUBLIC_API Frame *CreateNativeFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs,
-                                                                          uint32_t num_actual_args, Method *method,
+                                                                          uint32_t numActualArgs, Method *method,
                                                                           Frame *prev);
 
 extern "C" Frame *CreateFrameForMethod(Method *method, Frame *prev);
 
 extern "C" Frame *CreateFrameForMethodDyn(Method *method, Frame *prev);
 
-extern "C" Frame *CreateFrameForMethodWithActualArgs(uint32_t num_actual_args, Method *method, Frame *prev);
+extern "C" Frame *CreateFrameForMethodWithActualArgs(uint32_t numActualArgs, Method *method, Frame *prev);
 
-extern "C" Frame *CreateFrameForMethodWithActualArgsDyn(uint32_t num_actual_args, Method *method, Frame *prev);
+extern "C" Frame *CreateFrameForMethodWithActualArgsDyn(uint32_t numActualArgs, Method *method, Frame *prev);
 
 extern "C" PANDA_PUBLIC_API void FreeFrame(Frame *frame);
 

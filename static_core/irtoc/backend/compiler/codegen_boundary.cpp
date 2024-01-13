@@ -18,7 +18,7 @@
 
 namespace panda::compiler {
 
-static void PushStackRegister(Encoder *encoder, Target target, Reg thread_reg, size_t tls_frame_offset)
+static void PushStackRegister(Encoder *encoder, Target target, Reg threadReg, size_t tlsFrameOffset)
 {
     static constexpr ssize_t FP_OFFSET = 2;
     ASSERT(sizeof(FrameBridgeKind) <= target.WordSize());
@@ -29,11 +29,11 @@ static void PushStackRegister(Encoder *encoder, Target target, Reg thread_reg, s
     {
         ScopedTmpReg tmp(encoder);
         encoder->EncodeSub(tmp, target.GetStackReg(), Imm(2U * target.WordSize()));
-        encoder->EncodeStr(tmp, MemRef(thread_reg, tls_frame_offset));
+        encoder->EncodeStr(tmp, MemRef(threadReg, tlsFrameOffset));
     }
 }
 
-static void PushLinkAndStackRegister(Encoder *encoder, Target target, Reg thread_reg, size_t tls_frame_offset)
+static void PushLinkAndStackRegister(Encoder *encoder, Target target, Reg threadReg, size_t tlsFrameOffset)
 {
     ScopedTmpReg tmp(encoder);
     static constexpr ssize_t FP_OFFSET = 3;
@@ -43,7 +43,7 @@ static void PushLinkAndStackRegister(Encoder *encoder, Target target, Reg thread
     encoder->EncodeStr(target.GetFrameReg(), MemRef(target.GetStackReg(), -FP_OFFSET * target.WordSize()));
 
     encoder->EncodeSub(target.GetLinkReg(), target.GetStackReg(), Imm(FP_OFFSET * target.WordSize()));
-    encoder->EncodeStr(target.GetLinkReg(), MemRef(thread_reg, tls_frame_offset));
+    encoder->EncodeStr(target.GetLinkReg(), MemRef(threadReg, tlsFrameOffset));
 }
 
 void CodegenBoundary::GeneratePrologue()
@@ -52,22 +52,22 @@ void CodegenBoundary::GeneratePrologue()
     auto encoder = GetEncoder();
     auto frame = GetFrameInfo();
     auto target = GetTarget();
-    auto thread_reg = ThreadReg();
-    auto tls_frame_offset = GetRuntime()->GetTlsFrameOffset(GetArch());
+    auto threadReg = ThreadReg();
+    auto tlsFrameOffset = GetRuntime()->GetTlsFrameOffset(GetArch());
 
     if (target.SupportLinkReg()) {
-        PushLinkAndStackRegister(encoder, target, thread_reg, tls_frame_offset);
+        PushLinkAndStackRegister(encoder, target, threadReg, tlsFrameOffset);
     } else {
-        PushStackRegister(encoder, target, thread_reg, tls_frame_offset);
+        PushStackRegister(encoder, target, threadReg, tlsFrameOffset);
     }
 
     encoder->EncodeSub(GetTarget().GetStackReg(), GetTarget().GetStackReg(), Imm(frame->GetFrameSize()));
 
-    auto callee_regs =
+    auto calleeRegs =
         GetCalleeRegsMask(GetArch(), false) & ~GetTarget().GetTempRegsMask().to_ulong() & ~ThreadReg().GetId();
-    auto callee_vregs = GetCalleeRegsMask(GetArch(), true) & ~GetTarget().GetTempVRegsMask().to_ulong();
-    auto caller_regs = GetCallerRegsMask(GetArch(), false) & ~GetTarget().GetTempRegsMask().to_ulong();
-    auto caller_vregs = GetCallerRegsMask(GetArch(), true) & ~GetTarget().GetTempVRegsMask().to_ulong();
+    auto calleeVregs = GetCalleeRegsMask(GetArch(), true) & ~GetTarget().GetTempVRegsMask().to_ulong();
+    auto callerRegs = GetCallerRegsMask(GetArch(), false) & ~GetTarget().GetTempRegsMask().to_ulong();
+    auto callerVregs = GetCallerRegsMask(GetArch(), true) & ~GetTarget().GetTempVRegsMask().to_ulong();
 
     Reg base = GetTarget().GetFrameReg();
     auto fl = GetFrameLayout();
@@ -75,17 +75,16 @@ void CodegenBoundary::GeneratePrologue()
         SCOPED_DISASM_STR(this, "Save caller registers");
         ssize_t offset = fl.GetOffset<CFrameLayout::OffsetOrigin::FP, CFrameLayout::OffsetUnit::SLOTS>(
             CFrameLayout::GetStackStartSlot() + fl.GetCallerLastSlot(false));
-        encoder->SaveRegisters(caller_regs, false, -offset, base, GetCallerRegsMask(GetArch(), false));
+        encoder->SaveRegisters(callerRegs, false, -offset, base, GetCallerRegsMask(GetArch(), false));
         offset = fl.GetOffset<CFrameLayout::OffsetOrigin::FP, CFrameLayout::OffsetUnit::SLOTS>(
             CFrameLayout::GetStackStartSlot() + fl.GetCallerLastSlot(true));
-        encoder->SaveRegisters(caller_vregs, true, -offset, base, GetCallerRegsMask(GetArch(), true));
+        encoder->SaveRegisters(callerVregs, true, -offset, base, GetCallerRegsMask(GetArch(), true));
     }
     {
         SCOPED_DISASM_STR(this, "Save callee registers");
         base = frame->GetCalleesRelativeFp() ? GetTarget().GetFrameReg() : GetTarget().GetStackReg();
-        encoder->SaveRegisters(callee_regs, false, frame->GetCalleesOffset(), base,
-                               GetCalleeRegsMask(GetArch(), false));
-        encoder->SaveRegisters(callee_vregs, true, frame->GetFpCalleesOffset(), base,
+        encoder->SaveRegisters(calleeRegs, false, frame->GetCalleesOffset(), base, GetCalleeRegsMask(GetArch(), false));
+        encoder->SaveRegisters(calleeVregs, true, frame->GetFpCalleesOffset(), base,
                                GetCalleeRegsMask(GetArch(), true));
     }
 }
@@ -103,30 +102,30 @@ void CodegenBoundary::CreateFrameInfo()
         FrameInfo::PositionedCallers::Encode(false) | FrameInfo::PositionedCallees::Encode(true) |
         FrameInfo::CallersRelativeFp::Encode(false) | FrameInfo::CalleesRelativeFp::Encode(false));
     auto target = Target(GetGraph()->GetArch());
-    size_t spills_count = GetGraph()->GetStackSlotsCount();
+    size_t spillsCount = GetGraph()->GetStackSlotsCount();
     size_t padding = 0;
-    size_t frame_size =
+    size_t frameSize =
         (CFrameLayout::HEADER_SIZE - (target.SupportLinkReg() ? 0 : 1) + GetCalleeRegsCount(target.GetArch(), false) +
          GetCalleeRegsCount(target.GetArch(), true) + GetCallerRegsCount(target.GetArch(), false) +
-         GetCallerRegsCount(target.GetArch(), true) + spills_count) *
+         GetCallerRegsCount(target.GetArch(), true) + spillsCount) *
         target.WordSize();
     if (target.SupportLinkReg()) {
-        padding = RoundUp(frame_size, target.GetSpAlignment()) - frame_size;
+        padding = RoundUp(frameSize, target.GetSpAlignment()) - frameSize;
     } else {
-        if ((frame_size % target.GetSpAlignment()) == 0) {
+        if ((frameSize % target.GetSpAlignment()) == 0) {
             padding = target.GetSpAlignment() - target.WordSize();
         }
     }
     CHECK_EQ(padding % target.WordSize(), 0U);
-    spills_count += padding / target.WordSize();
-    frame_size += padding;
+    spillsCount += padding / target.WordSize();
+    frameSize += padding;
     if (target.SupportLinkReg()) {
-        CHECK_EQ(frame_size % target.GetSpAlignment(), 0U);
+        CHECK_EQ(frameSize % target.GetSpAlignment(), 0U);
     } else {
-        CHECK_EQ(frame_size % target.GetSpAlignment(), target.GetSpAlignment() - target.WordSize());
+        CHECK_EQ(frameSize % target.GetSpAlignment(), target.GetSpAlignment() - target.WordSize());
     }
 
-    ssize_t offset = spills_count;
+    ssize_t offset = spillsCount;
     frame->SetFpCallersOffset(offset);
     offset += helpers::ToSigned(GetCallerRegsCount(target.GetArch(), true));
     frame->SetCallersOffset(offset);
@@ -136,8 +135,8 @@ void CodegenBoundary::CreateFrameInfo()
     offset += helpers::ToSigned(GetCalleeRegsCount(target.GetArch(), true));
     frame->SetCalleesOffset(offset);
 
-    frame->SetSpillsCount(spills_count);
-    frame->SetFrameSize(frame_size);
+    frame->SetSpillsCount(spillsCount);
+    frame->SetFrameSize(frameSize);
 
     SetFrameInfo(frame);
 }
@@ -147,9 +146,9 @@ void CodegenBoundary::IntrinsicTailCall(IntrinsicInst *inst)
     auto location = inst->GetLocation(0);
     ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
     auto src = Reg(location.GetValue(), GetTarget().GetPtrRegType());
-    RegMask liveout_mask = GetLiveOut(inst->GetBasicBlock());
+    RegMask liveoutMask = GetLiveOut(inst->GetBasicBlock());
     ScopedTmpReg target(GetEncoder());
-    if (!liveout_mask.Test(src.GetId())) {
+    if (!liveoutMask.Test(src.GetId())) {
         ASSERT(target.GetReg().IsValid());
         GetEncoder()->EncodeMov(target, src);
         src = target.GetReg();
@@ -164,28 +163,28 @@ void CodegenBoundary::RemoveBoundaryFrame(const BasicBlock *bb) const
     auto encoder = GetEncoder();
     auto frame = GetFrameInfo();
 
-    RegMask liveout_mask = GetLiveOut(bb);
+    RegMask liveoutMask = GetLiveOut(bb);
 
-    RegMask callee_regs = GetCalleeRegsMask(GetArch(), false) & ~GetTarget().GetTempRegsMask().to_ulong();
-    callee_regs &= ~liveout_mask;
-    callee_regs.reset(ThreadReg().GetId());
-    RegMask callee_vregs = GetCalleeRegsMask(GetArch(), true) & ~GetTarget().GetTempVRegsMask().to_ulong();
-    RegMask caller_regs = GetCallerRegsMask(GetArch(), false) & ~GetTarget().GetTempRegsMask().to_ulong();
-    caller_regs &= ~liveout_mask;
-    RegMask caller_vregs = GetCallerRegsMask(GetArch(), true) & ~GetTarget().GetTempVRegsMask().to_ulong();
+    RegMask calleeRegs = GetCalleeRegsMask(GetArch(), false) & ~GetTarget().GetTempRegsMask().to_ulong();
+    calleeRegs &= ~liveoutMask;
+    calleeRegs.reset(ThreadReg().GetId());
+    RegMask calleeVregs = GetCalleeRegsMask(GetArch(), true) & ~GetTarget().GetTempVRegsMask().to_ulong();
+    RegMask callerRegs = GetCallerRegsMask(GetArch(), false) & ~GetTarget().GetTempRegsMask().to_ulong();
+    callerRegs &= ~liveoutMask;
+    RegMask callerVregs = GetCallerRegsMask(GetArch(), true) & ~GetTarget().GetTempVRegsMask().to_ulong();
 
     Reg base = GetTarget().GetFrameReg();
     auto fl = GetFrameLayout();
     ssize_t offset = fl.GetOffset<CFrameLayout::OffsetOrigin::FP, CFrameLayout::OffsetUnit::SLOTS>(
         CFrameLayout::GetStackStartSlot() + fl.GetCallerLastSlot(false));
-    encoder->LoadRegisters(caller_regs, false, -offset, base, GetCallerRegsMask(GetArch(), false));
+    encoder->LoadRegisters(callerRegs, false, -offset, base, GetCallerRegsMask(GetArch(), false));
     offset = fl.GetOffset<CFrameLayout::OffsetOrigin::FP, CFrameLayout::OffsetUnit::SLOTS>(
         CFrameLayout::GetStackStartSlot() + fl.GetCallerLastSlot(true));
-    encoder->LoadRegisters(caller_vregs, true, -offset, base, GetCallerRegsMask(GetArch(), true));
+    encoder->LoadRegisters(callerVregs, true, -offset, base, GetCallerRegsMask(GetArch(), true));
 
     base = frame->GetCalleesRelativeFp() ? GetTarget().GetFrameReg() : GetTarget().GetStackReg();
-    encoder->LoadRegisters(callee_regs, false, frame->GetCalleesOffset(), base, GetCalleeRegsMask(GetArch(), false));
-    encoder->LoadRegisters(callee_vregs, true, frame->GetFpCalleesOffset(), base, GetCalleeRegsMask(GetArch(), true));
+    encoder->LoadRegisters(calleeRegs, false, frame->GetCalleesOffset(), base, GetCalleeRegsMask(GetArch(), false));
+    encoder->LoadRegisters(calleeVregs, true, frame->GetFpCalleesOffset(), base, GetCalleeRegsMask(GetArch(), true));
 
     encoder->EncodeAdd(GetTarget().GetStackReg(), GetTarget().GetStackReg(), Imm(frame->GetFrameSize()));
 

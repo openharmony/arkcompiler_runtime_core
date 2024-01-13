@@ -26,9 +26,9 @@ public:
 
     ~CoreClassLinkerExtension() override;
 
-    bool InitializeArrayClass(Class *array_class, Class *component_class) override;
+    bool InitializeArrayClass(Class *arrayClass, Class *componentClass) override;
 
-    void InitializePrimitiveClass(Class *primitive_class) override;
+    void InitializePrimitiveClass(Class *primitiveClass) override;
 
     size_t GetClassVTableSize(ClassRoot root) override;
 
@@ -42,7 +42,7 @@ public:
 
     size_t GetArrayClassSize() override;
 
-    Class *CreateClass(const uint8_t *descriptor, size_t vtable_size, size_t imt_size, size_t size) override;
+    Class *CreateClass(const uint8_t *descriptor, size_t vtableSize, size_t imtSize, size_t size) override;
 
     void FreeClass(Class *klass) override;
 
@@ -63,21 +63,21 @@ public:
 
     ClassLinkerErrorHandler *GetErrorHandler() override
     {
-        return &error_handler_;
+        return &errorHandler_;
     };
 
     NO_COPY_SEMANTIC(CoreClassLinkerExtension);
     NO_MOVE_SEMANTIC(CoreClassLinkerExtension);
 
 private:
-    bool InitializeImpl(bool compressed_string_enabled) override;
+    bool InitializeImpl(bool compressedStringEnabled) override;
 
     class ErrorHandler : public ClassLinkerErrorHandler {
     public:
         void OnError(ClassLinker::Error error, const PandaString &message) override;
     };
 
-    ErrorHandler error_handler_;
+    ErrorHandler errorHandler_;
 };
 
 }  // namespace panda

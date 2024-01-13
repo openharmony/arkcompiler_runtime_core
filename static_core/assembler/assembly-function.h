@@ -40,22 +40,22 @@ namespace panda::pandasm {
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Function {
     struct CatchBlock {
-        std::string whole_line;
-        std::string exception_record;
-        std::string try_begin_label;
-        std::string try_end_label;
-        std::string catch_begin_label;
-        std::string catch_end_label;
+        std::string wholeLine;
+        std::string exceptionRecord;
+        std::string tryBeginLabel;
+        std::string tryEndLabel;
+        std::string catchBeginLabel;
+        std::string catchEndLabel;
     };
 
     struct TryCatchInfo {
-        std::unordered_map<std::string_view, size_t> try_catch_labels;
-        std::unordered_map<std::string, std::vector<const CatchBlock *>> try_catch_map;
-        std::vector<std::string> try_catch_order;
+        std::unordered_map<std::string_view, size_t> tryCatchLabels;
+        std::unordered_map<std::string, std::vector<const CatchBlock *>> tryCatchMap;
+        std::vector<std::string> tryCatchOrder;
         TryCatchInfo(std::unordered_map<std::string_view, size_t> &labels,
                      std::unordered_map<std::string, std::vector<const CatchBlock *>> &map,
-                     std::vector<std::string> &param_try_catch_order)
-            : try_catch_labels(labels), try_catch_map(map), try_catch_order(param_try_catch_order)
+                     std::vector<std::string> &paramTryCatchOrder)
+            : tryCatchLabels(labels), tryCatchMap(map), tryCatchOrder(paramTryCatchOrder)
         {
         }
     };
@@ -74,26 +74,26 @@ struct Function {
     panda::panda_file::SourceLang language;
     std::unique_ptr<FunctionMetadata> metadata;
 
-    std::unordered_map<std::string, panda::pandasm::Label> label_table;
+    std::unordered_map<std::string, panda::pandasm::Label> labelTable;
     std::vector<panda::pandasm::Ins> ins; /* function instruction list */
-    std::vector<panda::pandasm::debuginfo::LocalVariable> local_variable_debug;
-    std::string source_file; /* The file in which the function is defined or empty */
-    std::string source_code;
-    std::vector<CatchBlock> catch_blocks;
-    int64_t value_of_first_param = -1;
-    size_t regs_num = 0;
-    size_t profile_size {0};
+    std::vector<panda::pandasm::debuginfo::LocalVariable> localVariableDebug;
+    std::string sourceFile; /* The file in which the function is defined or empty */
+    std::string sourceCode;
+    std::vector<CatchBlock> catchBlocks;
+    int64_t valueOfFirstParam = -1;
+    size_t regsNum = 0;
+    size_t profileSize {0};
     std::vector<Parameter> params;
-    bool body_presence = false;
-    Type return_type;
-    SourceLocation body_location;
-    std::optional<FileLocation> file_location;
+    bool bodyPresence = false;
+    Type returnType;
+    SourceLocation bodyLocation;
+    std::optional<FileLocation> fileLocation;
 
-    void SetInsDebug(const std::vector<debuginfo::Ins> &ins_debug)
+    void SetInsDebug(const std::vector<debuginfo::Ins> &insDebug)
     {
-        ASSERT(ins_debug.size() == ins.size());
+        ASSERT(insDebug.size() == ins.size());
         for (std::size_t i = 0; i < ins.size(); i++) {
-            ins[i].ins_debug = ins_debug[i];
+            ins[i].insDebug = insDebug[i];
         }
     }
 
@@ -102,12 +102,11 @@ struct Function {
         ins.emplace_back(instruction);
     }
 
-    Function(std::string s, panda::panda_file::SourceLang lang, size_t b_l, size_t b_r, std::string f_c, bool d,
-             size_t l_n)
+    Function(std::string s, panda::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
         : name(std::move(s)),
           language(lang),
           metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang)),
-          file_location({f_c, b_l, b_r, l_n, d})
+          fileLocation({fC, bL, bR, lN, d})
     {
     }
 
@@ -123,7 +122,7 @@ struct Function {
 
     std::size_t GetTotalRegs() const
     {
-        return regs_num;
+        return regsNum;
     }
 
     bool IsStatic() const
@@ -143,24 +142,24 @@ struct Function {
     uint32_t GetColumnNumber(size_t i) const;
 
     void EmitLocalVariable(panda_file::LineNumberProgramItem *program, panda_file::ItemContainer *container,
-                           std::vector<uint8_t> *constant_pool, uint32_t &pc_inc, size_t instruction_number) const;
-    void EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool, uint32_t pc_inc,
-                    int32_t line_inc) const;
-    void EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
-                        int32_t &prev_line_number, uint32_t &pc_inc, size_t instruction_number) const;
+                           std::vector<uint8_t> *constantPool, uint32_t &pcInc, size_t instructionNumber) const;
+    void EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool, uint32_t pcInc,
+                    int32_t lineInc) const;
+    void EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
+                        int32_t &prevLineNumber, uint32_t &pcInc, size_t instructionNumber) const;
 
     // column number is only for dynamic language now
-    void EmitColumnNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
-                          uint32_t &prev_column_number, uint32_t &pc_inc, size_t instruction_number) const;
+    void EmitColumnNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
+                          uint32_t &prevColumnNumber, uint32_t &pcInc, size_t instructionNumber) const;
 
-    void BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, const std::vector<uint8_t> &bytecode,
-                                panda_file::ItemContainer *container, std::vector<uint8_t> *constant_pool,
-                                bool emit_debug_info) const;
+    void BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, const std::vector<uint8_t> &bytecode,
+                                panda_file::ItemContainer *container, std::vector<uint8_t> *constantPool,
+                                bool emitDebugInfo) const;
 
     Function::TryCatchInfo MakeOrderAndOffsets(const std::vector<uint8_t> &bytecode) const;
 
     std::vector<panda_file::CodeItem::TryBlock> BuildTryBlocks(
-        panda_file::MethodItem *method, const std::unordered_map<std::string, panda_file::BaseClassItem *> &class_items,
+        panda_file::MethodItem *method, const std::unordered_map<std::string, panda_file::BaseClassItem *> &classItems,
         const std::vector<uint8_t> &bytecode) const;
 
     bool HasImplementation() const
@@ -168,9 +167,9 @@ struct Function {
         return !metadata->IsForeign() && metadata->HasImplementation();
     }
 
-    bool IsParameter(uint32_t reg_number) const
+    bool IsParameter(uint32_t regNumber) const
     {
-        return reg_number >= regs_num;
+        return regNumber >= regsNum;
     }
 
     bool CanThrow() const

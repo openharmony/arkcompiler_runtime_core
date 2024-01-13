@@ -24,7 +24,7 @@ class EtsClass;
 
 namespace panda::ets::test {
 
-EtsClass *GetTestClass(const char *source, const char *class_name, const std::string &source_filename = "");
+EtsClass *GetTestClass(const char *source, const char *className, const std::string &sourceFilename = "");
 
 }  // namespace panda::ets::test
 

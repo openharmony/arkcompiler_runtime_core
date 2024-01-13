@@ -43,7 +43,7 @@ public:
     void Finalize() override;
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
-    Coroutine *Launch(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments,
+    Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
                       CoroutineAffinity affinity) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
@@ -68,9 +68,9 @@ public:
     };
 
 protected:
-    bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int inc_mask,
-                              unsigned int xor_mask) const override;
-    CoroutineContext *CreateCoroutineContext(bool coro_has_entrypoint) override;
+    bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
+                              unsigned int xorMask) const override;
+    CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) override;
     void DeleteCoroutineContext(CoroutineContext *ctx) override;
 
     size_t GetCoroutineCount() override;
@@ -82,8 +82,8 @@ protected:
     uint32_t GetWorkersCount() const;
 
 private:
-    Coroutine *LaunchImpl(CompletionEvent *completion_event, Method *entrypoint, PandaVector<Value> &&arguments,
-                          bool start_suspended = true);
+    Coroutine *LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
+                          bool startSuspended = true);
     void ScheduleImpl();
 
     /* runnables queue management */
@@ -96,30 +96,30 @@ private:
 
     /* coroutine registry management */
     void AddToRegistry(Coroutine *co);
-    void RemoveFromRegistry(Coroutine *co) REQUIRES(coro_list_lock_);
+    void RemoveFromRegistry(Coroutine *co) REQUIRES(coroListLock_);
 
     void DeleteCoroutineInstance(Coroutine *co);
     bool RegisterWaiter(Coroutine *waiter, CoroutineEvent *awaitee) RELEASE(awaitee);
     void ScheduleNextCoroutine();
     void MainCoroutineCompleted();
 
-    os::memory::Mutex coro_switch_lock_;
-    os::memory::Mutex waiters_lock_;
-    mutable os::memory::Mutex coro_list_lock_;
+    os::memory::Mutex coroSwitchLock_;
+    os::memory::Mutex waitersLock_;
+    mutable os::memory::Mutex coroListLock_;
     // all registered coros
-    PandaSet<Coroutine *> coroutines_ GUARDED_BY(coro_list_lock_);
+    PandaSet<Coroutine *> coroutines_ GUARDED_BY(coroListLock_);
     // ready coros
-    PandaDeque<Coroutine *> runnables_queue_;
+    PandaDeque<Coroutine *> runnablesQueue_;
     // blocked coros: Coroutine AWAITS CoroutineEvent
     PandaMap<CoroutineEvent *, Coroutine *> waiters_;
 
-    os::memory::ConditionVariable cv_await_all_;
-    os::memory::Mutex cv_mutex_;
+    os::memory::ConditionVariable cvAwaitAll_;
+    os::memory::Mutex cvMutex_;
 
-    uint32_t workers_count_ = 1;
+    uint32_t workersCount_ = 1;
     // main is running from the very beginning
-    std::atomic_uint32_t running_coros_count_ = 1;
-    std::atomic_uint32_t coroutine_count_ = 0;
+    std::atomic_uint32_t runningCorosCount_ = 1;
+    std::atomic_uint32_t coroutineCount_ = 0;
 };
 
 }  // namespace panda

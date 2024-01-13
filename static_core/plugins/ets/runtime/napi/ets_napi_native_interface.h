@@ -19,7 +19,6 @@
 
 namespace panda::ets::napi {
 const ETS_NativeInterface *GetNativeInterface();
-// const ETS_NativeInterface *GetNativeDestroyInterface();
 }  // namespace panda::ets::napi
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_NATIVE_INTERFACE_H_

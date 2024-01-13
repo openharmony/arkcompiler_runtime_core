@@ -28,14 +28,14 @@ namespace panda::compiler {
 // NOLINTBEGIN(readability-magic-numbers)
 class LinearOrderTest : public AsmTest {
 public:
-    LinearOrderTest() : default_threshold_(compiler::OPTIONS.GetCompilerFreqBasedBranchReorderThreshold())
+    LinearOrderTest() : defaultThreshold_(compiler::g_options.GetCompilerFreqBasedBranchReorderThreshold())
     {
-        compiler::OPTIONS.SetCompilerFreqBasedBranchReorderThreshold(10U);
+        compiler::g_options.SetCompilerFreqBasedBranchReorderThreshold(10U);
     }
 
     ~LinearOrderTest() override
     {
-        compiler::OPTIONS.SetCompilerFreqBasedBranchReorderThreshold(default_threshold_);
+        compiler::g_options.SetCompilerFreqBasedBranchReorderThreshold(defaultThreshold_);
     }
 
     NO_COPY_SEMANTIC(LinearOrderTest);
@@ -52,18 +52,18 @@ public:
     void UpdateBranchTaken(uint32_t pc, uint32_t count = 1U)
     {
         auto method = reinterpret_cast<Method *>(GetGraph()->GetMethod());
-        auto profiling_data = method->GetProfilingData();
+        auto profilingData = method->GetProfilingData();
         for (uint32_t i = 0; i < count; i++) {
-            profiling_data->UpdateBranchTaken(pc);
+            profilingData->UpdateBranchTaken(pc);
         }
     }
 
     void UpdateBranchNotTaken(uint32_t pc, uint32_t count = 1U)
     {
         auto method = reinterpret_cast<Method *>(GetGraph()->GetMethod());
-        auto profiling_data = method->GetProfilingData();
+        auto profilingData = method->GetProfilingData();
         for (uint32_t i = 0; i < count; i++) {
-            profiling_data->UpdateBranchNotTaken(pc);
+            profilingData->UpdateBranchNotTaken(pc);
         }
     }
 
@@ -89,21 +89,21 @@ public:
     {
         Reset();
         const auto &blocks = GetGraph()->GetBlocksLinearOrder();
-        auto actual_it =
+        auto actualIt =
             std::find_if(std::begin(blocks), std::end(blocks), [id](BasicBlock *b) { return b->GetId() == id; }) + 1U;
-        auto expected_it = std::begin(expected);
-        while (actual_it != std::end(blocks) && expected_it != std::end(expected)) {
-            if ((*actual_it)->GetId() != *expected_it) {
+        auto expectedIt = std::begin(expected);
+        while (actualIt != std::end(blocks) && expectedIt != std::end(expected)) {
+            if ((*actualIt)->GetId() != *expectedIt) {
                 return false;
             }
-            ++actual_it;
-            ++expected_it;
+            ++actualIt;
+            ++expectedIt;
         }
-        return expected_it == std::end(expected);
+        return expectedIt == std::end(expected);
     }
 
 private:
-    uint32_t default_threshold_;
+    uint32_t defaultThreshold_;
 };
 
 TEST_F(LinearOrderTest, RareLoopSideExit)
@@ -375,7 +375,7 @@ jump_label_0:
     )";
     ASSERT_TRUE(ParseToGraph(source, "foo"));
     GetGraph()->RunPass<Cleanup>(false);
-    GetGraph()->RunPass<Licm>(OPTIONS.GetCompilerLicmHoistLimit());
+    GetGraph()->RunPass<Licm>(g_options.GetCompilerLicmHoistLimit());
     GetGraph()->RunPass<Cleanup>();
     ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
     ASSERT_TRUE(GetGraph()->RunPass<LoopPeeling>());

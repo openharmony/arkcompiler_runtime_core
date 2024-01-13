@@ -60,53 +60,53 @@ public:
 
     ~ClassLinker();
 
-    bool Initialize(bool compressed_string_enabled = true);
+    bool Initialize(bool compressedStringEnabled = true);
 
     bool InitializeRoots(ManagedThread *thread);
 
-    PANDA_PUBLIC_API Class *GetClass(const uint8_t *descriptor, bool need_copy_descriptor, ClassLinkerContext *context,
-                                     ClassLinkerErrorHandler *error_handler = nullptr);
+    PANDA_PUBLIC_API Class *GetClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                                     ClassLinkerErrorHandler *errorHandler = nullptr);
 
     PANDA_PUBLIC_API Class *GetClass(const panda_file::File &pf, panda_file::File::EntityId id,
-                                     ClassLinkerContext *context, ClassLinkerErrorHandler *error_handler = nullptr);
+                                     ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler = nullptr);
 
     PANDA_PUBLIC_API Class *GetClass(const Method &caller, panda_file::File::EntityId id,
-                                     ClassLinkerErrorHandler *error_handler = nullptr);
+                                     ClassLinkerErrorHandler *errorHandler = nullptr);
 
     inline Class *GetLoadedClass(const panda_file::File &pf, panda_file::File::EntityId id,
                                  ClassLinkerContext *context);
 
-    Class *LoadClass(const panda_file::File &pf, panda_file::File::EntityId class_id, ClassLinkerContext *context,
-                     ClassLinkerErrorHandler *error_handler = nullptr, bool add_to_runtime = true)
+    Class *LoadClass(const panda_file::File &pf, panda_file::File::EntityId classId, ClassLinkerContext *context,
+                     ClassLinkerErrorHandler *errorHandler = nullptr, bool addToRuntime = true)
     {
-        return LoadClass(&pf, class_id, pf.GetStringData(class_id).data, context, error_handler, add_to_runtime);
+        return LoadClass(&pf, classId, pf.GetStringData(classId).data, context, errorHandler, addToRuntime);
     }
 
     Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *context = nullptr,
-                      ClassLinkerErrorHandler *error_handler = nullptr);
+                      ClassLinkerErrorHandler *errorHandler = nullptr);
 
     Method *GetMethod(const Method &caller, panda_file::File::EntityId id,
-                      ClassLinkerErrorHandler *error_handler = nullptr);
+                      ClassLinkerErrorHandler *errorHandler = nullptr);
 
     Field *GetField(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *context = nullptr,
-                    ClassLinkerErrorHandler *error_handler = nullptr);
+                    ClassLinkerErrorHandler *errorHandler = nullptr);
 
     Field *GetField(const Method &caller, panda_file::File::EntityId id,
-                    ClassLinkerErrorHandler *error_handler = nullptr);
+                    ClassLinkerErrorHandler *errorHandler = nullptr);
 
     PANDA_PUBLIC_API void AddPandaFile(std::unique_ptr<const panda_file::File> &&pf,
                                        ClassLinkerContext *context = nullptr);
 
     template <typename Callback>
-    void EnumeratePandaFiles(Callback cb, bool skip_intrinsics = true) const
+    void EnumeratePandaFiles(Callback cb, bool skipIntrinsics = true) const
     {
-        os::memory::LockHolder lock(panda_files_lock_);
-        for (const auto &file_data : panda_files_) {
-            if (skip_intrinsics && file_data.pf->GetFilename().empty()) {
+        os::memory::LockHolder lock(pandaFilesLock_);
+        for (const auto &fileData : pandaFiles_) {
+            if (skipIntrinsics && fileData.pf->GetFilename().empty()) {
                 continue;
             }
 
-            if (!cb(*file_data.pf)) {
+            if (!cb(*fileData.pf)) {
                 break;
             }
         }
@@ -115,8 +115,8 @@ public:
     template <typename Callback>
     void EnumerateBootPandaFiles(Callback cb) const
     {
-        os::memory::LockHolder lock {boot_panda_files_lock_};
-        for (const auto &file : boot_panda_files_) {
+        os::memory::LockHolder lock {bootPandaFilesLock_};
+        for (const auto &file : bootPandaFiles_) {
             if (!cb(*file)) {
                 break;
             }
@@ -125,19 +125,19 @@ public:
 
     const PandaVector<const panda_file::File *> &GetBootPandaFiles() const
     {
-        return boot_panda_files_;
+        return bootPandaFiles_;
     }
 
     AotManager *GetAotManager()
     {
-        return aot_manager_.get();
+        return aotManager_.get();
     }
 
-    PandaString GetClassContextForAot(bool use_abs_path = true)
+    PandaString GetClassContextForAot(bool useAbsPath = true)
     {
-        PandaString aot_ctx;
-        EnumeratePandaFiles(compiler::AotClassContextCollector(&aot_ctx, use_abs_path));
-        return aot_ctx;
+        PandaString aotCtx;
+        EnumeratePandaFiles(compiler::AotClassContextCollector(&aotCtx, useAbsPath));
+        return aotCtx;
     }
 
     template <class Callback>
@@ -168,42 +168,42 @@ public:
     template <class Callback>
     void EnumerateContextsForDump(const Callback &cb, std::ostream &os)
     {
-        size_t register_index = 0;
+        size_t registerIndex = 0;
         ClassLinkerContext *parent = nullptr;
         ClassLinkerExtension *ext = nullptr;
-        auto enum_callback = [&register_index, &parent, &cb, &os, &ext](ClassLinkerContext *ctx) {
-            os << "#" << register_index << " ";
+        auto enumCallback = [&registerIndex, &parent, &cb, &os, &ext](ClassLinkerContext *ctx) {
+            os << "#" << registerIndex << " ";
             if (!cb(ctx, os, parent)) {
                 return true;
             }
             if (parent != nullptr) {
-                size_t parent_index = 0;
+                size_t parentIndex = 0;
                 bool founded = false;
-                ext->EnumerateContexts([parent, &parent_index, &founded](ClassLinkerContext *ctx_ptr) {
-                    if (parent == ctx_ptr) {
+                ext->EnumerateContexts([parent, &parentIndex, &founded](ClassLinkerContext *ctxPtr) {
+                    if (parent == ctxPtr) {
                         founded = true;
                         return false;
                     }
-                    parent_index++;
+                    parentIndex++;
                     return true;
                 });
                 if (founded) {
-                    os << "|Parent class loader: #" << parent_index << "\n";
+                    os << "|Parent class loader: #" << parentIndex << "\n";
                 } else {
                     os << "|Parent class loader: unknown\n";
                 }
             } else {
                 os << "|Parent class loader: empty\n";
             }
-            register_index++;
+            registerIndex++;
             return true;
         };
-        for (auto &ext_ptr : extensions_) {
-            if (ext_ptr == nullptr) {
+        for (auto &extPtr : extensions_) {
+            if (extPtr == nullptr) {
                 continue;
             }
-            ext = ext_ptr.get();
-            ext->EnumerateContexts(enum_callback);
+            ext = extPtr.get();
+            ext->EnumerateContexts(enumCallback);
         }
     }
 
@@ -251,12 +251,12 @@ public:
 
     void AddClassRoot(ClassRoot root, Class *klass);
 
-    Class *CreateArrayClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool need_copy_descriptor,
-                            Class *component_class);
+    Class *CreateArrayClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,
+                            Class *componentClass);
 
-    void FreeClassData(Class *class_ptr);
+    void FreeClassData(Class *classPtr);
 
-    void FreeClass(Class *class_ptr);
+    void FreeClass(Class *classPtr);
 
     mem::InternalAllocatorPtr GetAllocator() const
     {
@@ -265,7 +265,7 @@ public:
 
     bool IsInitialized() const
     {
-        return is_initialized_;
+        return isInitialized_;
     }
 
     Class *FindLoadedClass(const uint8_t *descriptor, ClassLinkerContext *context = nullptr);
@@ -274,14 +274,14 @@ public:
 
     void VisitLoadedClasses(size_t flag);
 
-    PANDA_PUBLIC_API Class *BuildClass(const uint8_t *descriptor, bool need_copy_descriptor, uint32_t access_flags,
-                                       Span<Method> methods, Span<Field> fields, Class *base_class,
-                                       Span<Class *> interfaces, ClassLinkerContext *context, bool is_interface);
+    PANDA_PUBLIC_API Class *BuildClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
+                                       Span<Method> methods, Span<Field> fields, Class *baseClass,
+                                       Span<Class *> interfaces, ClassLinkerContext *context, bool isInterface);
 
     bool IsPandaFileRegistered(const panda_file::File *file)
     {
-        os::memory::LockHolder lock(panda_files_lock_);
-        for (const auto &data : panda_files_) {
+        os::memory::LockHolder lock(pandaFilesLock_);
+        for (const auto &data : pandaFiles_) {
             if (data.pf.get() == file) {
                 return true;
             }
@@ -290,20 +290,20 @@ public:
         return false;
     }
 
-    ClassLinkerContext *GetAppContext(std::string_view panda_file)
+    ClassLinkerContext *GetAppContext(std::string_view pandaFile)
     {
-        ClassLinkerContext *app_context = nullptr;
-        EnumerateContexts([panda_file, &app_context](ClassLinkerContext *context) -> bool {
-            auto file_paths = context->GetPandaFilePaths();
-            for (auto &file : file_paths) {
-                if (file == panda_file) {
-                    app_context = context;
+        ClassLinkerContext *appContext = nullptr;
+        EnumerateContexts([pandaFile, &appContext](ClassLinkerContext *context) -> bool {
+            auto filePaths = context->GetPandaFilePaths();
+            for (auto &file : filePaths) {
+                if (file == pandaFile) {
+                    appContext = context;
                     return false;
                 }
             }
             return true;
         });
-        return app_context;
+        return appContext;
     }
 
     void RemoveCreatedClassInExtension(Class *klass);
@@ -313,79 +313,79 @@ public:
 private:
     struct ClassInfo {
         size_t size;
-        size_t num_sfields;
-        PandaUniquePtr<VTableBuilder> vtable_builder;
-        PandaUniquePtr<ITableBuilder> itable_builder;
-        PandaUniquePtr<IMTableBuilder> imtable_builder;
+        size_t numSfields;
+        PandaUniquePtr<VTableBuilder> vtableBuilder;
+        PandaUniquePtr<ITableBuilder> itableBuilder;
+        PandaUniquePtr<IMTableBuilder> imtableBuilder;
     };
 
-    Field *GetFieldById(Class *klass, const panda_file::FieldDataAccessor &field_data_accessor,
-                        ClassLinkerErrorHandler *error_handler);
+    Field *GetFieldById(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
+                        ClassLinkerErrorHandler *errorHandler);
 
-    Field *GetFieldBySignature(Class *klass, const panda_file::FieldDataAccessor &field_data_accessor,
-                               ClassLinkerErrorHandler *error_handler);
+    Field *GetFieldBySignature(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
+                               ClassLinkerErrorHandler *errorHandler);
 
-    Method *GetMethod(const Class *klass, const panda_file::MethodDataAccessor &method_data_accessor,
-                      ClassLinkerErrorHandler *error_handler);
+    Method *GetMethod(const Class *klass, const panda_file::MethodDataAccessor &methodDataAccessor,
+                      ClassLinkerErrorHandler *errorHandler);
 
     bool LinkBootClass(Class *klass);
 
-    Class *LoadArrayClass(const uint8_t *descriptor, bool need_copy_descriptor, ClassLinkerContext *context,
-                          ClassLinkerErrorHandler *error_handler);
+    Class *LoadArrayClass(const uint8_t *descriptor, bool needCopyDescriptor, ClassLinkerContext *context,
+                          ClassLinkerErrorHandler *errorHandler);
 
-    Class *LoadClass(const panda_file::File *pf, panda_file::File::EntityId class_id, const uint8_t *descriptor,
-                     ClassLinkerContext *context, ClassLinkerErrorHandler *error_handler, bool add_to_runtime = true);
+    Class *LoadClass(const panda_file::File *pf, panda_file::File::EntityId classId, const uint8_t *descriptor,
+                     ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler, bool addToRuntime = true);
 
-    Class *LoadClass(panda_file::ClassDataAccessor *class_data_accessor, const uint8_t *descriptor, Class *base_class,
+    Class *LoadClass(panda_file::ClassDataAccessor *classDataAccessor, const uint8_t *descriptor, Class *baseClass,
                      Span<Class *> interfaces, ClassLinkerContext *context, ClassLinkerExtension *ext,
-                     ClassLinkerErrorHandler *error_handler);
+                     ClassLinkerErrorHandler *errorHandler);
 
     Class *LoadBaseClass(panda_file::ClassDataAccessor *cda, const LanguageContext &ctx, ClassLinkerContext *context,
-                         ClassLinkerErrorHandler *error_handler);
+                         ClassLinkerErrorHandler *errorHandler);
 
     std::optional<Span<Class *>> LoadInterfaces(panda_file::ClassDataAccessor *cda, ClassLinkerContext *context,
-                                                ClassLinkerErrorHandler *error_handler);
+                                                ClassLinkerErrorHandler *errorHandler);
 
-    bool LinkFields(Class *klass, ClassLinkerErrorHandler *error_handler);
+    bool LinkFields(Class *klass, ClassLinkerErrorHandler *errorHandler);
 
-    bool LoadFields(Class *klass, panda_file::ClassDataAccessor *data_accessor, ClassLinkerErrorHandler *error_handler);
+    bool LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor, ClassLinkerErrorHandler *errorHandler);
 
-    bool LinkMethods(Class *klass, ClassInfo *class_info, ClassLinkerErrorHandler *error_handler);
+    bool LinkMethods(Class *klass, ClassInfo *classInfo, ClassLinkerErrorHandler *errorHandler);
 
-    bool LoadMethods(Class *klass, ClassInfo *class_info, panda_file::ClassDataAccessor *data_accessor,
-                     ClassLinkerErrorHandler *error_handler);
+    bool LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::ClassDataAccessor *dataAccessor,
+                     ClassLinkerErrorHandler *errorHandler);
 
-    ClassInfo GetClassInfo(panda_file::ClassDataAccessor *data_accessor, Class *base, Span<Class *> interfaces,
+    ClassInfo GetClassInfo(panda_file::ClassDataAccessor *dataAccessor, Class *base, Span<Class *> interfaces,
                            ClassLinkerContext *context);
 
     ClassInfo GetClassInfo(Span<Method> methods, Span<Field> fields, Class *base, Span<Class *> interfaces,
-                           bool is_interface);
+                           bool isInterface);
 
-    void OnError(ClassLinkerErrorHandler *error_handler, Error error, const PandaString &msg);
+    void OnError(ClassLinkerErrorHandler *errorHandler, Error error, const PandaString &msg);
 
-    static bool LayoutFields(Class *klass, Span<Field> fields, bool is_static, ClassLinkerErrorHandler *error_handler);
+    static bool LayoutFields(Class *klass, Span<Field> fields, bool isStatic, ClassLinkerErrorHandler *errorHandler);
 
     mem::InternalAllocatorPtr allocator_;
 
-    PandaVector<const panda_file::File *> boot_panda_files_ GUARDED_BY(boot_panda_files_lock_);
+    PandaVector<const panda_file::File *> bootPandaFiles_ GUARDED_BY(bootPandaFilesLock_);
 
     struct PandaFileLoadData {
         ClassLinkerContext *context;
         std::unique_ptr<const panda_file::File> pf;
     };
 
-    mutable os::memory::Mutex panda_files_lock_;
-    mutable os::memory::Mutex boot_panda_files_lock_;
-    PandaVector<PandaFileLoadData> panda_files_ GUARDED_BY(panda_files_lock_);
+    mutable os::memory::Mutex pandaFilesLock_;
+    mutable os::memory::Mutex bootPandaFilesLock_;
+    PandaVector<PandaFileLoadData> pandaFiles_ GUARDED_BY(pandaFilesLock_);
 
-    PandaUniquePtr<AotManager> aot_manager_;
+    PandaUniquePtr<AotManager> aotManager_;
     // Just to free them at destroy
-    os::memory::Mutex copied_names_lock_;
-    PandaList<const uint8_t *> copied_names_ GUARDED_BY(copied_names_lock_);
+    os::memory::Mutex copiedNamesLock_;
+    PandaList<const uint8_t *> copiedNames_ GUARDED_BY(copiedNamesLock_);
 
     std::array<std::unique_ptr<ClassLinkerExtension>, panda::panda_file::LANG_COUNT> extensions_;
 
-    bool is_initialized_ {false};
+    bool isInitialized_ {false};
 
     NO_COPY_SEMANTIC(ClassLinker);
     NO_MOVE_SEMANTIC(ClassLinker);

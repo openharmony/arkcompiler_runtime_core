@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "iostream"
+#include "libpandabase/utils/utils.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
@@ -47,13 +48,13 @@ public:
 
     class GCCounter : public GCListener {
     public:
-        void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size) override
+        void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) override
         {
             count_++;
         }
 
-        void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                        [[maybe_unused]] size_t heap_size) override
+        void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                        [[maybe_unused]] size_t heapSize) override
         {
         }
 
@@ -64,12 +65,12 @@ public:
     template <typename F>
     class GCHook : public GCListener {
     public:
-        explicit GCHook(F hook_arg) : hook_(hook_arg) {};
+        explicit GCHook(F hookArg) : hook_(hookArg) {};
 
-        void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size) override {}
+        void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) override {}
 
-        void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                        [[maybe_unused]] size_t heap_size) override
+        void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                        [[maybe_unused]] size_t heapSize) override
         {
             hook_();
         }
@@ -78,13 +79,13 @@ public:
         F hook_;
     };
 
-    void SetupRuntime(const std::string &gc_type_param)
+    void SetupRuntime(const std::string &gcTypeParam)
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetUseTlabForAllocations(false);
-        options.SetGcType(gc_type_param);
+        options.SetGcType(gcTypeParam);
         options.SetGcTriggerType("debug");
         options.SetGcDebugTriggerStart(std::numeric_limits<int>::max());
         options.SetCompilerEnableJit(false);
@@ -97,30 +98,30 @@ public:
         ASSERT(success);
 
         thread = panda::MTManagedThread::GetCurrent();
-        gc_type = Runtime::GetGCType(options, plugins::RuntimeTypeToLang(Runtime::GetRuntimeType()));
-        [[maybe_unused]] auto gc_local = thread->GetVM()->GetGC();
-        ASSERT(gc_local->GetType() == panda::mem::GCTypeFromString(gc_type_param));
-        ASSERT(gc_local->IsGenerational());
+        gcType = Runtime::GetGCType(options, plugins::RuntimeTypeToLang(Runtime::GetRuntimeType()));
+        [[maybe_unused]] auto gcLocal = thread->GetVM()->GetGC();
+        ASSERT(gcLocal->GetType() == panda::mem::GCTypeFromString(gcTypeParam));
+        ASSERT(gcLocal->IsGenerational());
         thread->ManagedCodeBegin();
     }
 
     void ResetRuntime()
     {
         DeleteHandles();
-        internal_allocator->Delete(gccnt);
+        internalAllocator->Delete(gccnt);
         thread->ManagedCodeEnd();
         bool success = Runtime::Destroy();
         ASSERT_TRUE(success) << "Cannot destroy Runtime";
     }
 
     template <typename F, size_t MULTI>
-    ObjVec MakeAllocations(size_t min_size, size_t max_size, size_t count, size_t *allocated, size_t *requested,
-                           F space_checker, bool check_oom_in_tenured = false);
+    ObjVec MakeAllocations(size_t minSize, size_t maxSize, size_t count, size_t *allocated, size_t *requested,
+                           F spaceChecker, bool checkOomInTenured = false);
 
     void InitRoot();
     void MakeObjectsAlive(const ObjVec &objects, int every = 1);
     void MakeObjectsPermAlive(const ObjVec &objects, int every = 1);
-    void MakeObjectsGarbage(size_t start_idx, size_t after_end_idx, int every = 1);
+    void MakeObjectsGarbage(size_t startIdx, size_t afterEndIdx, int every = 1);
     void DumpHandles();
     void DumpAliveObjects();
     void DeleteHandles();
@@ -133,63 +134,63 @@ public:
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     panda::MTManagedThread *thread {};
-    GCType gc_type {};
+    GCType gcType {};
 
     LanguageContext ctx {nullptr};
-    ObjectAllocatorBase *object_allocator {};
-    mem::InternalAllocatorPtr internal_allocator;
+    ObjectAllocatorBase *objectAllocator {};
+    mem::InternalAllocatorPtr internalAllocator;
     PandaVM *vm {};
     GC *gc {};
     std::vector<HanVec> handles;
     MemStatsType *ms {};
-    GCStats *gc_ms {};
+    GCStats *gcMs {};
     coretypes::Array *root = nullptr;
-    size_t root_size = 0;
+    size_t rootSize = 0;
     GCCounter *gccnt {};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 template <typename F, size_t MULTI>
-G1GCFullGCTest::ObjVec G1GCFullGCTest::MakeAllocations(size_t min_size, size_t max_size, size_t count,
-                                                       size_t *allocated, size_t *requested,
-                                                       [[maybe_unused]] F space_checker, bool check_oom_in_tenured)
+G1GCFullGCTest::ObjVec G1GCFullGCTest::MakeAllocations(size_t minSize, size_t maxSize, size_t count, size_t *allocated,
+                                                       size_t *requested, [[maybe_unused]] F spaceChecker,
+                                                       bool checkOomInTenured)
 {
-    ASSERT(min_size <= max_size);
+    ASSERT(minSize <= maxSize);
     *allocated = 0;
     *requested = 0;
     // Create array of object templates based on count and max size
-    PandaVector<PandaString> obj_templates(count);
-    size_t obj_size = sizeof(coretypes::String) + min_size;
+    PandaVector<PandaString> objTemplates(count);
+    size_t objSize = sizeof(coretypes::String) + minSize;
     for (size_t i = 0; i < count; ++i) {
-        PandaString simple_string;
-        simple_string.resize(obj_size - sizeof(coretypes::String));
-        obj_templates[i] = std::move(simple_string);
-        obj_size += (max_size / count + i);  // +i to mess with the alignment
-        if (obj_size > max_size) {
-            obj_size = max_size;
+        PandaString simpleString;
+        simpleString.resize(objSize - sizeof(coretypes::String));
+        objTemplates[i] = std::move(simpleString);
+        objSize += (maxSize / count + i);  // +i to mess with the alignment
+        if (objSize > maxSize) {
+            objSize = maxSize;
         }
     }
     ObjVec result;
     result.reserve(count * MULTI);
     for (size_t j = 0; j < count; ++j) {
-        size_t size = obj_templates[j].length() + sizeof(coretypes::String);
-        if (check_oom_in_tenured) {
+        size_t size = objTemplates[j].length() + sizeof(coretypes::String);
+        if (checkOomInTenured) {
             // Leaving 5MB in tenured seems OK
             auto free =
-                reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
+                reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
             // NOLINTNEXTLINE(readability-magic-numbers)
             if (size + 5000000 > free) {
                 return result;
             }
         }
         for (size_t i = 0; i < MULTI; ++i) {
-            coretypes::String *string_obj = coretypes::String::CreateFromMUtf8(
-                reinterpret_cast<const uint8_t *>(&obj_templates[j][0]), obj_templates[j].length(), ctx, vm);
-            ASSERT(string_obj != nullptr);
-            ASSERT(space_checker(ToUintPtr(string_obj)));
+            coretypes::String *stringObj = coretypes::String::CreateFromMUtf8(
+                reinterpret_cast<const uint8_t *>(&objTemplates[j][0]), objTemplates[j].length(), ctx, vm);
+            ASSERT(stringObj != nullptr);
+            ASSERT(spaceChecker(ToUintPtr(stringObj)));
             *allocated += GetAlignedObjectSize(size);
             *requested += size;
-            result.push_back(string_obj);
+            result.push_back(stringObj);
         }
     }
     return result;
@@ -197,12 +198,12 @@ G1GCFullGCTest::ObjVec G1GCFullGCTest::MakeAllocations(size_t min_size, size_t m
 
 void G1GCFullGCTest::InitRoot()
 {
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    Class *klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
                        ->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
     root = coretypes::Array::Create(klass, ROOT_MAX_SIZE);
-    root_size = 0;
+    rootSize = 0;
     MakeObjectsPermAlive({root});
 }
 
@@ -214,23 +215,23 @@ void G1GCFullGCTest::MakeObjectsAlive(const ObjVec &objects, int every)
         if (cnt != 0) {
             continue;
         }
-        root->Set(root_size, obj);
-        root_size++;
-        ASSERT(root_size < ROOT_MAX_SIZE);
+        root->Set(rootSize, obj);
+        rootSize++;
+        ASSERT(rootSize < ROOT_MAX_SIZE);
         cnt = every;
     }
 }
 
-void G1GCFullGCTest::MakeObjectsGarbage(size_t start_idx, size_t after_end_idx, int every)
+void G1GCFullGCTest::MakeObjectsGarbage(size_t startIdx, size_t afterEndIdx, int every)
 {
     int cnt = every;
-    for (size_t i = start_idx; i < after_end_idx; ++i) {
+    for (size_t i = startIdx; i < afterEndIdx; ++i) {
         cnt--;
         if (cnt != 0) {
             continue;
         }
         root->Set(i, 0);
-        root_size++;
+        rootSize++;
         cnt = every;
     }
 }
@@ -245,7 +246,7 @@ void G1GCFullGCTest::MakeObjectsPermAlive(const ObjVec &objects, int every)
         if (cnt != 0) {
             continue;
         }
-        result.push_back(internal_allocator->New<VMHandle<ObjectHeader *>>(thread, obj));
+        result.push_back(internalAllocator->New<VMHandle<ObjectHeader *>>(thread, obj));
         cnt = every;
     }
     handles.push_back(result);
@@ -264,7 +265,7 @@ void G1GCFullGCTest::DumpHandles()
 void G1GCFullGCTest::DumpAliveObjects()
 {
     std::cout << "Alive root array : " << handles[0][0]->GetPtr() << std::endl;
-    for (size_t i = 0; i < root_size; ++i) {
+    for (size_t i = 0; i < rootSize; ++i) {
         if (root->Get<ObjectHeader *>(i) != nullptr) {
             std::cout << "Alive idx " << i << " : " << root->Get<ObjectHeader *>(i) << std::endl;
         }
@@ -275,7 +276,7 @@ void G1GCFullGCTest::DeleteHandles()
 {
     for (auto &hv : handles) {
         for (auto *handle : hv) {
-            internal_allocator->Delete(handle);
+            internalAllocator->Delete(handle);
         }
     }
     handles.clear();
@@ -287,13 +288,13 @@ void G1GCFullGCTest::PrepareTest()
     if constexpr (std::is_same<LanguageConfig, panda::PandaAssemblyLanguageConfig>::value) {
         DeleteHandles();
         ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        object_allocator = thread->GetVM()->GetGC()->GetObjectAllocator();
+        objectAllocator = thread->GetVM()->GetGC()->GetObjectAllocator();
         vm = Runtime::GetCurrent()->GetPandaVM();
-        internal_allocator = Runtime::GetCurrent()->GetClassLinker()->GetAllocator();
+        internalAllocator = Runtime::GetCurrent()->GetClassLinker()->GetAllocator();
         gc = vm->GetGC();
         ms = vm->GetMemStats();
-        gc_ms = vm->GetGCStats();
-        gccnt = internal_allocator->New<GCCounter>();
+        gcMs = vm->GetGCStats();
+        gccnt = internalAllocator->New<GCCounter>();
         gc->AddListener(gccnt);
         InitRoot();
     } else {
@@ -303,13 +304,13 @@ void G1GCFullGCTest::PrepareTest()
 
 bool G1GCFullGCTest::IsInYoung(uintptr_t addr)
 {
-    switch (gc_type) {
+    switch (gcType) {
         case GCType::GEN_GC: {
-            return object_allocator->IsObjectInYoungSpace(reinterpret_cast<ObjectHeader *>(addr));
+            return objectAllocator->IsObjectInYoungSpace(reinterpret_cast<ObjectHeader *>(addr));
         }
         case GCType::G1_GC: {
-            auto mem_pool = PoolManager::GetMmapMemPool();
-            if (mem_pool->GetSpaceTypeForAddr(reinterpret_cast<ObjectHeader *>(addr)) != SpaceType::SPACE_TYPE_OBJECT) {
+            auto memPool = PoolManager::GetMmapMemPool();
+            if (memPool->GetSpaceTypeForAddr(reinterpret_cast<ObjectHeader *>(addr)) != SpaceType::SPACE_TYPE_OBJECT) {
                 return false;
             }
             return AddrToRegion(ToVoidPtr(addr))->HasFlag(RegionFlag::IS_EDEN);
@@ -328,69 +329,69 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
         HandleScope<ObjectHeader *> scope(thread);
         PrepareTest<panda::PandaAssemblyLanguageConfig>();
         [[maybe_unused]] size_t bytes {};
-        [[maybe_unused]] size_t raw_objects_size {};
+        [[maybe_unused]] size_t rawObjectsSize {};
 
-        [[maybe_unused]] size_t young_size =
+        [[maybe_unused]] size_t youngSize =
             reinterpret_cast<GenerationalSpaces *>(
-                reinterpret_cast<ObjectAllocatorGenBase *>(object_allocator)->GetHeapSpace())
+                reinterpret_cast<ObjectAllocatorGenBase *>(objectAllocator)->GetHeapSpace())
                 ->GetCurrentYoungSize();
-        [[maybe_unused]] size_t heap_size = mem::MemConfig::GetHeapSizeLimit();
-        [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator);
-        [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
+        [[maybe_unused]] size_t heapSize = mem::MemConfig::GetHeapSizeLimit();
+        [[maybe_unused]] auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
+        [[maybe_unused]] size_t maxYSize = g1Alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto y_space_check = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto h_space_check = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
-        [[maybe_unused]] auto t_free =
-            reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
-        const size_t y_obj_size = max_y_size / 10;
+        [[maybe_unused]] auto ySpaceCheck = [this](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto tFree =
+            reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
+        const size_t yObjSize = maxYSize / 10;
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-        size_t initial_heap = ms->GetFootprintHeap();
+        size_t initialHeap = ms->GetFootprintHeap();
 
         {
             // Ordinary young shall not be broken when intermixed with explicits
             int i = 0;
             size_t allocated = 0;
-            while (allocated < 2 * heap_size) {
-                ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
-                                                                         &raw_objects_size, y_space_check);
+            while (allocated < 2U * heapSize) {
+                ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
+                                                                       ySpaceCheck);
                 allocated += bytes;
                 // NOLINTNEXTLINE(readability-magic-numbers)
-                if (i++ % 100 == 0) {
+                if (i++ % 100_I == 0) {
                     gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
                 }
             }
             gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-            ASSERT_EQ(initial_heap, ms->GetFootprintHeap());
+            ASSERT_EQ(initialHeap, ms->GetFootprintHeap());
         }
 
         {
             // Intensive allocations surviving 1 young
-            auto old_root_size = root_size;
+            auto oldRootSize = rootSize;
             size_t allocated = 0;
-            bool gc_happened = false;
-            GCHook gchook([&old_root_size, this, &gc_happened]() {
-                MakeObjectsGarbage(old_root_size, this->root_size);
-                old_root_size = this->root_size;
-                gc_happened = true;
+            bool gcHappened = false;
+            GCHook gchook([&oldRootSize, this, &gcHappened]() {
+                MakeObjectsGarbage(oldRootSize, this->rootSize);
+                oldRootSize = this->rootSize;
+                gcHappened = true;
             });
             gc->AddListener(&gchook);
-            while (allocated < 4 * heap_size) {
-                ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
-                                                                         &raw_objects_size, y_space_check);
+            while (allocated < 4U * heapSize) {
+                ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
+                                                                       ySpaceCheck);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                tFree = reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())
+                            ->GetCurrentFreeTenuredSize();
                 allocated += bytes;
             }
-            MakeObjectsGarbage(old_root_size, root_size);
+            MakeObjectsGarbage(oldRootSize, rootSize);
             gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-            ASSERT_EQ(initial_heap, ms->GetFootprintHeap());
+            ASSERT_EQ(initialHeap, ms->GetFootprintHeap());
             gc->RemoveListener(&gchook);
         }
 
-        MakeObjectsGarbage(0, root_size);
+        MakeObjectsGarbage(0, rootSize);
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-        ASSERT_EQ(initial_heap, ms->GetFootprintHeap());
+        ASSERT_EQ(initialHeap, ms->GetFootprintHeap());
     }
     ResetRuntime();
 }
@@ -403,56 +404,56 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
         HandleScope<ObjectHeader *> scope(thread);
         PrepareTest<panda::PandaAssemblyLanguageConfig>();
         [[maybe_unused]] size_t bytes;
-        [[maybe_unused]] size_t raw_objects_size;
+        [[maybe_unused]] size_t rawObjectsSize;
 
-        [[maybe_unused]] size_t young_size =
+        [[maybe_unused]] size_t youngSize =
             reinterpret_cast<GenerationalSpaces *>(
-                reinterpret_cast<ObjectAllocatorGenBase *>(object_allocator)->GetHeapSpace())
+                reinterpret_cast<ObjectAllocatorGenBase *>(objectAllocator)->GetHeapSpace())
                 ->GetCurrentYoungSize();
-        [[maybe_unused]] size_t heap_size = mem::MemConfig::GetHeapSizeLimit();
-        [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator);
-        [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
+        [[maybe_unused]] size_t heapSize = mem::MemConfig::GetHeapSizeLimit();
+        [[maybe_unused]] auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
+        [[maybe_unused]] size_t maxYSize = g1Alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto y_space_check = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto h_space_check = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
-        [[maybe_unused]] auto t_free =
-            reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
-        const size_t y_obj_size = max_y_size / 10;
+        [[maybe_unused]] auto ySpaceCheck = [this](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto tFree =
+            reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
+        const size_t yObjSize = maxYSize / 10;
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-        size_t initial_heap = ms->GetFootprintHeap();
+        size_t initialHeap = ms->GetFootprintHeap();
 
         {
             // Allocating until we are close to OOM, then do release this mem,
             // do explicit full and allocate the same size once again
-            auto old_root_size = root_size;
+            auto oldRootSize = rootSize;
             int i = 0;
             // NOLINTNEXTLINE(readability-magic-numbers)
-            while (t_free > 2.2 * young_size) {
-                ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
-                                                                         &raw_objects_size, y_space_check);
+            while (tFree > 2.2F * youngSize) {
+                ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
+                                                                       ySpaceCheck);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                tFree = reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())
+                            ->GetCurrentFreeTenuredSize();
                 i++;
             }
             gc->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
-            MakeObjectsGarbage(old_root_size, root_size);
+            MakeObjectsGarbage(oldRootSize, rootSize);
 
-            old_root_size = root_size;
+            oldRootSize = rootSize;
             while (--i > 0) {
-                ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
-                                                                         &raw_objects_size, y_space_check);
+                ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
+                                                                       ySpaceCheck);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                tFree = reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())
+                            ->GetCurrentFreeTenuredSize();
             }
-            MakeObjectsGarbage(old_root_size, root_size);
+            MakeObjectsGarbage(oldRootSize, rootSize);
             gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
         }
 
-        MakeObjectsGarbage(0, root_size);
+        MakeObjectsGarbage(0, rootSize);
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-        ASSERT_EQ(initial_heap, ms->GetFootprintHeap());
+        ASSERT_EQ(initialHeap, ms->GetFootprintHeap());
     }
     ResetRuntime();
 }
@@ -465,55 +466,55 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
         HandleScope<ObjectHeader *> scope(thread);
         PrepareTest<panda::PandaAssemblyLanguageConfig>();
         [[maybe_unused]] size_t bytes;
-        [[maybe_unused]] size_t raw_objects_size;
+        [[maybe_unused]] size_t rawObjectsSize;
 
-        [[maybe_unused]] size_t young_size =
+        [[maybe_unused]] size_t youngSize =
             reinterpret_cast<GenerationalSpaces *>(
-                reinterpret_cast<ObjectAllocatorGenBase *>(object_allocator)->GetHeapSpace())
+                reinterpret_cast<ObjectAllocatorGenBase *>(objectAllocator)->GetHeapSpace())
                 ->GetCurrentYoungSize();
-        [[maybe_unused]] size_t heap_size = mem::MemConfig::GetHeapSizeLimit();
-        [[maybe_unused]] auto g1_alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(object_allocator);
-        [[maybe_unused]] size_t max_y_size = g1_alloc->GetYoungAllocMaxSize();
+        [[maybe_unused]] size_t heapSize = mem::MemConfig::GetHeapSizeLimit();
+        [[maybe_unused]] auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
+        [[maybe_unused]] size_t maxYSize = g1Alloc->GetYoungAllocMaxSize();
 
-        [[maybe_unused]] auto y_space_check = [&](uintptr_t addr) -> bool { return IsInYoung(addr); };
-        [[maybe_unused]] auto h_space_check = [&](uintptr_t addr) -> bool { return !IsInYoung(addr); };
-        [[maybe_unused]] auto t_free =
-            reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
-        const size_t y_obj_size = max_y_size / 10;
+        [[maybe_unused]] auto ySpaceCheck = [this](uintptr_t addr) -> bool { return IsInYoung(addr); };
+        [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
+        [[maybe_unused]] auto tFree =
+            reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
+        const size_t yObjSize = maxYSize / 10U;
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-        size_t initial_heap = ms->GetFootprintHeap();
+        size_t initialHeap = ms->GetFootprintHeap();
 
         {
             // Allocating until we are close to OOM, then do release this mem,
             // then allocate the same size once again checking if we can handle it w/o OOM
-            auto old_root_size = root_size;
+            auto oldRootSize = rootSize;
             int i = 0;
             // NOLINTNEXTLINE(readability-magic-numbers)
-            while (t_free > 2.2 * young_size) {
-                ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
-                                                                         &raw_objects_size, y_space_check);
+            while (tFree > 2.2F * youngSize) {
+                ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
+                                                                       ySpaceCheck);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                tFree = reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())
+                            ->GetCurrentFreeTenuredSize();
                 i++;
             }
-            MakeObjectsGarbage(old_root_size, root_size);
+            MakeObjectsGarbage(oldRootSize, rootSize);
 
-            old_root_size = root_size;
+            oldRootSize = rootSize;
             while (--i > 0) {
-                ObjVec ov1 = MakeAllocations<decltype(y_space_check), 1>(y_obj_size, y_obj_size, 1, &bytes,
-                                                                         &raw_objects_size, y_space_check);
+                ObjVec ov1 = MakeAllocations<decltype(ySpaceCheck), 1>(yObjSize, yObjSize, 1, &bytes, &rawObjectsSize,
+                                                                       ySpaceCheck);
                 MakeObjectsAlive(ov1, 1);
-                t_free = reinterpret_cast<GenerationalSpaces *>(object_allocator->GetHeapSpace())
-                             ->GetCurrentFreeTenuredSize();
+                tFree = reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())
+                            ->GetCurrentFreeTenuredSize();
             }
-            MakeObjectsGarbage(old_root_size, root_size);
+            MakeObjectsGarbage(oldRootSize, rootSize);
             gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
         }
 
-        MakeObjectsGarbage(0, root_size);
+        MakeObjectsGarbage(0, rootSize);
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-        ASSERT_EQ(initial_heap, ms->GetFootprintHeap());
+        ASSERT_EQ(initialHeap, ms->GetFootprintHeap());
     }
     ResetRuntime();
 }

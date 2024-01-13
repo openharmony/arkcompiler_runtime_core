@@ -33,9 +33,9 @@ class ConstArrayResolver : public compiler::Optimization {
 public:
     explicit ConstArrayResolver(compiler::Graph *graph, BytecodeOptIrInterface *iface)
         : compiler::Optimization(graph),
-          ir_interface_(iface),
-          const_arrays_init_(graph->GetLocalAllocator()->Adapter()),
-          const_arrays_fill_(graph->GetLocalAllocator()->Adapter())
+          irInterface_(iface),
+          constArraysInit_(graph->GetLocalAllocator()->Adapter()),
+          constArraysFill_(graph->GetLocalAllocator()->Adapter())
     {
     }
 
@@ -52,7 +52,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsConstArrayResolver();
+        return g_options.IsConstArrayResolver();
     }
 
 private:
@@ -60,15 +60,15 @@ private:
     void RemoveArraysFill();
     void InsertLoadConstArrayInsts();
     std::optional<std::vector<pandasm::LiteralArray::Literal>> FillLiteralArray(Inst *inst, size_t size);
-    bool FillLiteral(compiler::StoreInst *store_array_inst, pandasm::LiteralArray::Literal *literal);
-    void AddIntroLiterals(pandasm::LiteralArray *lt_ar);
+    bool FillLiteral(compiler::StoreInst *storeArrayInst, pandasm::LiteralArray::Literal *literal);
+    void AddIntroLiterals(pandasm::LiteralArray *ltAr);
     bool IsMultidimensionalArray(compiler::NewArrayInst *inst);
 
 private:
-    BytecodeOptIrInterface *ir_interface_ {nullptr};
-    ArenaMap<uint32_t, compiler::NewArrayInst *> const_arrays_init_;  // const_arrays_[literalarray_id] = new_array_inst
+    BytecodeOptIrInterface *irInterface_ {nullptr};
+    ArenaMap<uint32_t, compiler::NewArrayInst *> constArraysInit_;  // const_arrays_[literalarray_id] = new_array_inst
     ArenaMap<Inst *, std::vector<Inst *>>
-        const_arrays_fill_;  // const_arrays_[new_array_inst] = {store_array_inst_1, ... , store_array_inst_n}
+        constArraysFill_;  // const_arrays_[new_array_inst] = {store_array_inst_1, ... , store_array_inst_n}
 };
 }  // namespace panda::bytecodeopt
 

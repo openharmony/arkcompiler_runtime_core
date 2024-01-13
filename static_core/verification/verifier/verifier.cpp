@@ -37,12 +37,12 @@ namespace panda::verifier {
 
 size_t const MAX_THREADS = 64;
 
-void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t thread_num, std::atomic<bool> *result)
+void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t threadNum, std::atomic<bool> *result)
 {
-    LOG(DEBUG, VERIFIER) << "Verifier thread " << thread_num << " starting";
+    LOG(DEBUG, VERIFIER) << "Verifier thread " << threadNum << " starting";
     {
         std::stringstream ss;
-        ss << "Verifier #" << thread_num;
+        ss << "Verifier #" << threadNum;
         if (os::thread::SetThreadName(os::thread::GetNativeHandle(), ss.str().c_str()) != 0) {
             LOG(ERROR, VERIFIER) << "Failed to set worker thread name " << ss.str();
         }
@@ -53,7 +53,7 @@ void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t thread_
     auto mode = options.GetVerificationMode();
 
     ManagedThread *thread = nullptr;
-    panda_file::SourceLang current_lang = panda_file::SourceLang::INVALID;
+    panda_file::SourceLang currentLang = panda_file::SourceLang::INVALID;
     for (;;) {
         Method *method;
         {
@@ -64,13 +64,13 @@ void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t thread_
             method = queue->front();
             queue->pop_front();
         }
-        auto method_lang = method->GetClass()->GetSourceLang();
-        if (method_lang != current_lang) {
+        auto methodLang = method->GetClass()->GetSourceLang();
+        if (methodLang != currentLang) {
             if (thread != nullptr) {
-                plugin::GetLanguagePlugin(current_lang)->DestroyManagedThread(thread);
+                plugin::GetLanguagePlugin(currentLang)->DestroyManagedThread(thread);
             }
-            thread = plugin::GetLanguagePlugin(method_lang)->CreateManagedThread();
-            current_lang = method_lang;
+            thread = plugin::GetLanguagePlugin(methodLang)->CreateManagedThread();
+            currentLang = methodLang;
         }
         if (panda::verifier::Verify(service, method, mode) != Status::OK) {
             *result = false;
@@ -78,14 +78,14 @@ void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t thread_
         }
     }
     if (thread != nullptr) {
-        plugin::GetLanguagePlugin(current_lang)->DestroyManagedThread(thread);
+        plugin::GetLanguagePlugin(currentLang)->DestroyManagedThread(thread);
     }
-    LOG(DEBUG, VERIFIER) << "Verifier thread " << thread_num << " finishing";
+    LOG(DEBUG, VERIFIER) << "Verifier thread " << threadNum << " finishing";
 }
 
-bool RunVerifier(const Options &cli_options)
+bool RunVerifier(const Options &cliOptions)
 {
-    auto is_perf_measure = cli_options.IsPerfMeasure();
+    auto isPerfMeasure = cliOptions.IsPerfMeasure();
     std::chrono::steady_clock::time_point begin;
     std::chrono::steady_clock::time_point end;
 
@@ -93,145 +93,146 @@ bool RunVerifier(const Options &cli_options)
     os::memory::Mutex lock;
 
     auto &runtime = *Runtime::GetCurrent();
-    auto &class_linker = *runtime.GetClassLinker();
+    auto &classLinker = *runtime.GetClassLinker();
 
-    const std::vector<std::string> &class_names = cli_options.GetClasses();
-    const std::vector<std::string> &method_names = cli_options.GetMethods();
+    const std::vector<std::string> &classNames = cliOptions.GetClasses();
+    const std::vector<std::string> &methodNames = cliOptions.GetMethods();
 
     std::atomic<bool> result = true;
 
-    PandaUnorderedSet<Method *> methods_set;
+    PandaUnorderedSet<Method *> methodsSet;
 
-    auto enqueue_method = [&](Method *method) {
-        if (methods_set.count(method) == 0) {
+    auto enqueueMethod = [&methodsSet, &queue](Method *method) {
+        if (methodsSet.count(method) == 0) {
             queue.push_back(method);
-            methods_set.insert(method);
+            methodsSet.insert(method);
         }
     };
 
-    bool verify_libraries = runtime.GetOptions().IsVerifyRuntimeLibraries();
+    bool verifyLibraries = runtime.GetOptions().IsVerifyRuntimeLibraries();
 
-    auto enqueue_class = [&](const Class &klass) {
-        if (!verify_libraries && IsSystemClass(&klass)) {
+    auto enqueueClass = [&verifyLibraries, &enqueueMethod](const Class &klass) {
+        if (!verifyLibraries && IsSystemClass(&klass)) {
             LOG(INFO, VERIFIER) << klass.GetName() << " is a system class, skipping";
             return;
         }
         LOG(INFO, VERIFIER) << "Begin verification of class " << klass.GetName();
         for (auto &method : klass.GetMethods()) {
-            enqueue_method(&method);
+            enqueueMethod(&method);
         }
     };
 
     // we need ScopedManagedCodeThread for the verifier since it can allocate objects
     {
-        ScopedManagedCodeThread managed_obj_thread(ManagedThread::GetCurrent());
-        if (class_names.empty() && method_names.empty()) {
-            auto handle_file = [&](const panda_file::File &file) {
+        ScopedManagedCodeThread managedObjThread(ManagedThread::GetCurrent());
+        if (classNames.empty() && methodNames.empty()) {
+            auto handleFile = [&result, &classLinker, &enqueueClass](const panda_file::File &file) {
                 LOG(INFO, VERIFIER) << "Processing file" << file.GetFilename();
                 for (auto id : file.GetClasses()) {
-                    panda_file::File::EntityId entity_id {id};
-                    if (!file.IsExternal(entity_id)) {
-                        auto opt_lang = panda_file::ClassDataAccessor {file, entity_id}.GetSourceLang();
-                        if (opt_lang.has_value() && !IsValidSourceLang(opt_lang.value())) {
+                    panda_file::File::EntityId entityId {id};
+                    if (!file.IsExternal(entityId)) {
+                        auto optLang = panda_file::ClassDataAccessor {file, entityId}.GetSourceLang();
+                        if (optLang.has_value() && !IsValidSourceLang(optLang.value())) {
                             LOG(ERROR, VERIFIER) << "Unknown SourceLang";
                             result = false;
                             return false;
                         }
                         ClassLinkerExtension *ext =
-                            class_linker.GetExtension(opt_lang.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
+                            classLinker.GetExtension(optLang.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
                         if (ext == nullptr) {
                             LOG(ERROR, VERIFIER) << "Error: Class Linker Extension failed to initialize";
                             result = false;
                             return false;
                         }
-                        const Class *klass = ext->GetClass(file, entity_id);
+                        const Class *klass = ext->GetClass(file, entityId);
 
                         if (klass != nullptr) {
-                            enqueue_class(*klass);
+                            enqueueClass(*klass);
                         }
                     }
                 }
                 return true;
             };
 
-            class_linker.EnumeratePandaFiles(handle_file);
+            classLinker.EnumeratePandaFiles(handleFile);
 
-            if (verify_libraries) {
-                class_linker.EnumerateBootPandaFiles(handle_file);
+            if (verifyLibraries) {
+                classLinker.EnumerateBootPandaFiles(handleFile);
             } else if (runtime.GetPandaFiles().empty()) {
                 // in this case the last boot-panda-file and only it is actually not a system file and should be
                 // verified
                 OptionalConstRef<panda_file::File> file;
-                class_linker.EnumerateBootPandaFiles([&file](const panda_file::File &pf) {
+                classLinker.EnumerateBootPandaFiles([&file](const panda_file::File &pf) {
                     file = std::cref(pf);
                     return true;
                 });
                 if (file.HasRef()) {
-                    handle_file(*file);
+                    handleFile(*file);
                 } else {
                     LOG(ERROR, VERIFIER) << "No files given to verify";
                 }
             }
         } else {
-            PandaUnorderedMap<std::string, Class *> classes_by_name;
+            PandaUnorderedMap<std::string, Class *> classesByName;
             ClassLinkerContext *ctx =
-                class_linker.GetExtension(runtime.GetLanguageContext(runtime.GetRuntimeType()))->GetBootContext();
+                classLinker.GetExtension(runtime.GetLanguageContext(runtime.GetRuntimeType()))->GetBootContext();
 
-            auto get_class_by_name = [&](const std::string &class_name) -> Class * {
-                auto it = classes_by_name.find(class_name);
-                if (it != classes_by_name.end()) {
+            auto getClassByName = [&classesByName, &classLinker, &ctx,
+                                   &result](const std::string &className) -> Class * {
+                auto it = classesByName.find(className);
+                if (it != classesByName.end()) {
                     return it->second;
                 }
 
                 PandaString descriptor;
-                const uint8_t *class_name_bytes =
-                    ClassHelper::GetDescriptor(utf::CStringAsMutf8(class_name.c_str()), &descriptor);
-                Class *klass = class_linker.GetClass(class_name_bytes, true, ctx);
+                const uint8_t *classNameBytes =
+                    ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
+                Class *klass = classLinker.GetClass(classNameBytes, true, ctx);
                 if (klass == nullptr) {
-                    LOG(ERROR, VERIFIER) << "Error: Cannot resolve class with name " << class_name;
+                    LOG(ERROR, VERIFIER) << "Error: Cannot resolve class with name " << className;
                     result = false;
                 }
 
-                classes_by_name.emplace(class_name, klass);
+                classesByName.emplace(className, klass);
                 return klass;
             };
 
-            for (const auto &class_name : class_names) {
-                Class *klass = get_class_by_name(class_name);
+            for (const auto &className : classNames) {
+                Class *klass = getClassByName(className);
                 // the bad case is already handled in get_class_by_name
                 if (klass != nullptr) {
-                    enqueue_class(*klass);
+                    enqueueClass(*klass);
                 }
             }
 
-            for (const std::string &fq_method_name : method_names) {
-                size_t pos = fq_method_name.find_last_of("::");
+            for (const std::string &fqMethodName : methodNames) {
+                size_t pos = fqMethodName.find_last_of("::");
                 if (pos == std::string::npos) {
                     LOG(ERROR, VERIFIER) << "Error: Fully qualified method name must contain '::', was "
-                                         << fq_method_name;
+                                         << fqMethodName;
                     result = false;
                     break;
                 }
-                std::string class_name = fq_method_name.substr(0, pos - 1);
-                std::string_view unqualified_method_name = std::string_view(fq_method_name).substr(pos + 1);
-                if (std::find(class_names.begin(), class_names.end(), class_name) != class_names.end()) {
+                std::string className = fqMethodName.substr(0, pos - 1);
+                std::string_view unqualifiedMethodName = std::string_view(fqMethodName).substr(pos + 1);
+                if (std::find(classNames.begin(), classNames.end(), className) != classNames.end()) {
                     // this method was already verified while enumerating class_names
                     continue;
                 }
-                Class *klass = get_class_by_name(class_name);
+                Class *klass = getClassByName(className);
                 if (klass != nullptr) {
-                    bool method_found = false;
+                    bool methodFound = false;
                     for (auto &method : klass->GetMethods()) {
-                        const char *name_data = utf::Mutf8AsCString(method.GetName().data);
-                        if (std::string_view(name_data) == unqualified_method_name) {
-                            method_found = true;
-                            LOG(INFO, VERIFIER) << "Verification of method '" << fq_method_name << "'";
-                            enqueue_method(&method);
+                        const char *nameData = utf::Mutf8AsCString(method.GetName().data);
+                        if (std::string_view(nameData) == unqualifiedMethodName) {
+                            methodFound = true;
+                            LOG(INFO, VERIFIER) << "Verification of method '" << fqMethodName << "'";
+                            enqueueMethod(&method);
                         }
                     }
-                    if (!method_found) {
-                        LOG(ERROR, VERIFIER) << "Error: Cannot resolve method with name " << unqualified_method_name
-                                             << " in class " << class_name;
+                    if (!methodFound) {
+                        LOG(ERROR, VERIFIER) << "Error: Cannot resolve method with name " << unqualifiedMethodName
+                                             << " in class " << className;
                         result = false;
                     }
                 }
@@ -239,7 +240,7 @@ bool RunVerifier(const Options &cli_options)
         }
     }
 
-    if (is_perf_measure) {
+    if (isPerfMeasure) {
         begin = std::chrono::steady_clock::now();
     }
 
@@ -255,7 +256,7 @@ bool RunVerifier(const Options &cli_options)
         runtime.GetInternalAllocator()->Delete(thr);
     }
 
-    if (is_perf_measure) {
+    if (isPerfMeasure) {
         end = std::chrono::steady_clock::now();
         std::cout << "Verification time = "
                   << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " us" << std::endl;
@@ -264,102 +265,102 @@ bool RunVerifier(const Options &cli_options)
     return result;
 }
 
-void PrintHelp(const PandArgParser &pa_parser)
+void PrintHelp(const PandArgParser &paParser)
 {
-    std::string error = pa_parser.GetErrorString();
+    std::string error = paParser.GetErrorString();
     if (!error.empty()) {
         error += "\n\n";
     }
     std::cerr << error << "Usage: verifier [option...] [file]\n"
               << "Verify specified Panda files (given by file and --panda-files) "
               << "or certain classes/methods in them.\n\n"
-              << pa_parser.GetHelpString() << std::endl;
+              << paParser.GetHelpString() << std::endl;
 }
 
 int Main(int argc, const char **argv)
 {
     Span<const char *> sp(argv, argc);
-    RuntimeOptions runtime_options(sp[0]);
-    Options cli_options(sp[0]);
-    PandArgParser pa_parser;
-    base_options::Options base_options("");
+    RuntimeOptions runtimeOptions(sp[0]);
+    Options cliOptions(sp[0]);
+    PandArgParser paParser;
+    base_options::Options baseOptions("");
 
     PandArg<bool> help("help", false, "Print this message and exit");
     PandArg<bool> options("options", false, "Print verifier options");
     // tail argument
     PandArg<std::string> file("file", "", "path to pandafile");
 
-    cli_options.AddOptions(&pa_parser);
+    cliOptions.AddOptions(&paParser);
 
-    pa_parser.Add(&help);
-    pa_parser.Add(&options);
-    pa_parser.PushBackTail(&file);
-    pa_parser.EnableTail();
+    paParser.Add(&help);
+    paParser.Add(&options);
+    paParser.PushBackTail(&file);
+    paParser.EnableTail();
 
-    if (!pa_parser.Parse(argc, argv)) {
-        PrintHelp(pa_parser);
+    if (!paParser.Parse(argc, argv)) {
+        PrintHelp(paParser);
         return 1;
     }
 
-    if (runtime_options.IsVersion()) {
+    if (runtimeOptions.IsVersion()) {
         PrintPandaVersion();
         return 0;
     }
 
     if (help.GetValue()) {
-        PrintHelp(pa_parser);
+        PrintHelp(paParser);
         return 0;
     }
 
     if (options.GetValue()) {
-        std::cout << pa_parser.GetRegularArgs() << std::endl;
+        std::cout << paParser.GetRegularArgs() << std::endl;
         return 0;
     }
 
-    auto cli_options_err = cli_options.Validate();
-    if (cli_options_err) {
-        std::cerr << "Error: " << cli_options_err.value().GetMessage() << std::endl;
+    auto cliOptionsErr = cliOptions.Validate();
+    if (cliOptionsErr) {
+        std::cerr << "Error: " << cliOptionsErr.value().GetMessage() << std::endl;
         return 1;
     }
 
-    auto boot_panda_files = cli_options.GetBootPandaFiles();
-    auto panda_files = cli_options.GetPandaFiles();
-    std::string main_file_name = file.GetValue();
+    auto bootPandaFiles = cliOptions.GetBootPandaFiles();
+    auto pandaFiles = cliOptions.GetPandaFiles();
+    std::string mainFileName = file.GetValue();
 
-    if (!main_file_name.empty()) {
-        if (panda_files.empty()) {
-            boot_panda_files.push_back(main_file_name);
+    if (!mainFileName.empty()) {
+        if (pandaFiles.empty()) {
+            bootPandaFiles.push_back(mainFileName);
         } else {
-            auto found_iter = std::find_if(panda_files.begin(), panda_files.end(),
-                                           [&](auto &file_name) { return main_file_name == file_name; });
-            if (found_iter == panda_files.end()) {
-                panda_files.push_back(main_file_name);
+            auto foundIter = std::find_if(pandaFiles.begin(), pandaFiles.end(),
+                                          [&mainFileName](auto &fileName) { return mainFileName == fileName; });
+            if (foundIter == pandaFiles.end()) {
+                pandaFiles.push_back(mainFileName);
             }
         }
     }
 
-    runtime_options.SetBootPandaFiles(boot_panda_files);
-    runtime_options.SetPandaFiles(panda_files);
-    runtime_options.SetLoadRuntimes(cli_options.GetLoadRuntimes());
-    runtime_options.SetGcType(cli_options.GetGcType());
+    runtimeOptions.SetBootPandaFiles(bootPandaFiles);
+    runtimeOptions.SetPandaFiles(pandaFiles);
+    runtimeOptions.SetLoadRuntimes(cliOptions.GetLoadRuntimes());
+    runtimeOptions.SetGcType(cliOptions.GetGcType());
 
-    base_options.SetLogComponents(cli_options.GetLogComponents());
-    base_options.SetLogLevel(cli_options.GetLogLevel());
-    base_options.SetLogStream(cli_options.GetLogStream());
-    base_options.SetLogFile(cli_options.GetLogFile());
-    Logger::Initialize(base_options);
+    baseOptions.SetLogComponents(cliOptions.GetLogComponents());
+    baseOptions.SetLogLevel(cliOptions.GetLogLevel());
+    baseOptions.SetLogStream(cliOptions.GetLogStream());
+    baseOptions.SetLogFile(cliOptions.GetLogFile());
+    Logger::Initialize(baseOptions);
 
-    runtime_options.SetLimitStandardAlloc(cli_options.IsLimitStandardAlloc());
-    runtime_options.SetInternalAllocatorType(cli_options.GetInternalAllocatorType());
-    runtime_options.SetInternalMemorySizeLimit(cli_options.GetInternalMemorySizeLimit());
+    runtimeOptions.SetLimitStandardAlloc(cliOptions.IsLimitStandardAlloc());
+    runtimeOptions.SetInternalAllocatorType(cliOptions.GetInternalAllocatorType());
+    runtimeOptions.SetInternalMemorySizeLimit(cliOptions.GetInternalMemorySizeLimit());
 
-    runtime_options.SetVerificationMode(cli_options.IsDebugMode() ? VerificationMode::DEBUG
-                                                                  : VerificationMode::AHEAD_OF_TIME);
-    runtime_options.SetVerificationConfigFile(cli_options.GetConfigFile());
-    runtime_options.SetVerificationCacheFile(cli_options.GetCacheFile());
-    runtime_options.SetVerificationUpdateCache(cli_options.IsUpdateCache());
-    runtime_options.SetVerifyRuntimeLibraries(cli_options.IsVerifyRuntimeLibraries());
-    uint32_t threads = cli_options.GetThreads();
+    runtimeOptions.SetVerificationMode(cliOptions.IsDebugMode() ? VerificationMode::DEBUG
+                                                                : VerificationMode::AHEAD_OF_TIME);
+    runtimeOptions.SetVerificationConfigFile(cliOptions.GetConfigFile());
+    runtimeOptions.SetVerificationCacheFile(cliOptions.GetCacheFile());
+    runtimeOptions.SetVerificationUpdateCache(cliOptions.IsUpdateCache());
+    runtimeOptions.SetVerifyRuntimeLibraries(cliOptions.IsVerifyRuntimeLibraries());
+    uint32_t threads = cliOptions.GetThreads();
     if (threads == 0) {
         threads = std::thread::hardware_concurrency();
         // hardware_concurrency can return 0 if the value is not computable or well defined
@@ -369,16 +370,16 @@ int Main(int argc, const char **argv)
             threads = MAX_THREADS;
         }
     }
-    runtime_options.SetVerificationThreads(threads);
+    runtimeOptions.SetVerificationThreads(threads);
 
-    if (!Runtime::Create(runtime_options)) {
+    if (!Runtime::Create(runtimeOptions)) {
         std::cerr << "Error: cannot create runtime" << std::endl;
         return -1;
     }
 
-    int ret = RunVerifier(cli_options) ? 0 : -1;
+    int ret = RunVerifier(cliOptions) ? 0 : -1;
 
-    if (cli_options.IsPrintMemoryStatistics()) {
+    if (cliOptions.IsPrintMemoryStatistics()) {
         std::cout << Runtime::GetCurrent()->GetMemoryStatistics();
     }
     if (!Runtime::Destroy()) {

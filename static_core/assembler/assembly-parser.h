@@ -63,13 +63,13 @@ public:
      *     (Possible: a0, a1,..., aN. Impossible: a1, a10, a13).
      *   - Each function has its own label table.
      */
-    PANDA_PUBLIC_API Expected<Program, Error> Parse(TokenSet &vectors_tokens, const std::string &file_name = "");
+    PANDA_PUBLIC_API Expected<Program, Error> Parse(TokenSet &vectorsTokens, const std::string &fileName = "");
 
     /*
      * The main function of parsing, which takes a string with source and a name of the source file.
      * Returns a program or an error value: Expected<Program, Error>
      */
-    PANDA_PUBLIC_API Expected<Program, Error> Parse(const std::string &source, const std::string &file_name = "");
+    PANDA_PUBLIC_API Expected<Program, Error> Parse(const std::string &source, const std::string &fileName = "");
 
     /*
      * Returns a set error
@@ -86,49 +86,49 @@ public:
 
 private:
     panda::pandasm::Program program_;
-    std::unordered_map<std::string, panda::pandasm::Label> *label_table_ = nullptr;
+    std::unordered_map<std::string, panda::pandasm::Label> *labelTable_ = nullptr;
     Metadata *metadata_ = nullptr;
     Context context_; /* token iterator */
-    panda::pandasm::Record *curr_record_ = nullptr;
-    panda::pandasm::LiteralArray *curr_array_ = nullptr;
-    bool is_const_array_ = false;
-    panda::pandasm::LiteralArray::Literal *curr_array_elem_ = nullptr;
-    panda::pandasm::Function *curr_func_ = nullptr;
-    panda::pandasm::Ins *curr_ins_ = nullptr;
-    panda::pandasm::Field *curr_fld_ = nullptr;
-    size_t line_stric_ = 0;
+    panda::pandasm::Record *currRecord_ = nullptr;
+    panda::pandasm::LiteralArray *currArray_ = nullptr;
+    bool isConstArray_ = false;
+    panda::pandasm::LiteralArray::Literal *currArrayElem_ = nullptr;
+    panda::pandasm::Function *currFunc_ = nullptr;
+    panda::pandasm::Ins *currIns_ = nullptr;
+    panda::pandasm::Field *currFld_ = nullptr;
+    size_t lineStric_ = 0;
     panda::pandasm::Error err_;
     panda::pandasm::ErrorList war_;
     bool open_ = false; /* flag of being in a code section */
-    bool record_def_ = false;
-    bool array_def_ = false;
-    bool func_def_ = false;
+    bool recordDef_ = false;
+    bool arrayDef_ = false;
+    bool funcDef_ = false;
     static constexpr uint32_t INTRO_CONST_ARRAY_LITERALS_NUMBER = 2;
 
     inline Error GetError(const std::string &mess = "", Error::ErrorType err = Error::ErrorType::ERR_NONE,
-                          int8_t shift = 0, int token_shift = 0, const std::string &add_mess = "") const
+                          int8_t shift = 0, int tokenShift = 0, const std::string &addMess = "") const
     {
-        return Error(mess, line_stric_, err, add_mess,
-                     context_.tokens[static_cast<int>(context_.number) + token_shift - 1].bound_left + shift,
-                     context_.tokens[static_cast<int>(context_.number) + token_shift - 1].bound_right,
-                     context_.tokens[static_cast<int>(context_.number) + token_shift - 1].whole_line);
+        return Error(mess, lineStric_, err, addMess,
+                     context_.tokens[static_cast<int>(context_.number) + tokenShift - 1].boundLeft + shift,
+                     context_.tokens[static_cast<int>(context_.number) + tokenShift - 1].boundRight,
+                     context_.tokens[static_cast<int>(context_.number) + tokenShift - 1].wholeLine);
     }
 
     inline void GetWarning(const std::string &mess = "", Error::ErrorType err = Error::ErrorType::ERR_NONE,
-                           int8_t shift = 0, const std::string &add_mess = "")
+                           int8_t shift = 0, const std::string &addMess = "")
     {
-        war_.emplace_back(mess, line_stric_, err, add_mess,
-                          context_.tokens[context_.number - 1].bound_left + static_cast<size_t>(shift),
-                          context_.tokens[context_.number - 1].bound_right,
-                          context_.tokens[context_.number - 1].whole_line, Error::ErrorClass::WARNING);
+        war_.emplace_back(mess, lineStric_, err, addMess,
+                          context_.tokens[context_.number - 1].boundLeft + static_cast<size_t>(shift),
+                          context_.tokens[context_.number - 1].boundRight,
+                          context_.tokens[context_.number - 1].wholeLine, Error::ErrorClass::WARNING);
     }
 
-    SourcePosition GetCurrentPosition(bool left_bound) const
+    SourcePosition GetCurrentPosition(bool leftBound) const
     {
-        if (left_bound) {
-            return SourcePosition {line_stric_, context_.tokens[context_.number - 1].bound_left};
+        if (leftBound) {
+            return SourcePosition {lineStric_, context_.tokens[context_.number - 1].boundLeft};
         }
-        return SourcePosition {line_stric_, context_.tokens[context_.number - 1].bound_right};
+        return SourcePosition {lineStric_, context_.tokens[context_.number - 1].boundRight};
     }
 
     bool LabelValidName();
@@ -149,10 +149,10 @@ private:
     bool ParseFunctionArgComma(bool &comma);
     bool ParseFunctionArgs();
     bool ParseType(Type *type);
-    bool PrefixedValidName(bool allow_brackets = false);
+    bool PrefixedValidName(bool allowBrackets = false);
     bool ParseMetaListComma(bool &comma, bool eq);
     bool MeetExpMetaList(bool eq);
-    bool BuildMetaListAttr(bool &eq, std::string &attribute_name, std::string &attribute_value);
+    bool BuildMetaListAttr(bool &eq, std::string &attributeName, std::string &attributeValue);
     bool ParseMetaList(bool flag);
     bool ParseMetaDef();
     bool ParseRecordFullSign();
@@ -179,15 +179,15 @@ private:
     uint8_t ParseMultiArrayHallmark();
 
     bool ParseInteger(int64_t *value);
-    bool ParseFloat(double *value, bool is_64bit);
+    bool ParseFloat(double *value, bool is64bit);
     bool ParseOperandVreg();
     bool ParseOperandComma();
     bool ParseOperandInteger();
-    bool ParseOperandFloat(bool is_64bit);
+    bool ParseOperandFloat(bool is64bit);
     bool ParseOperandId();
     bool ParseOperandLabel();
     bool ParseOperandField();
-    bool ParseOperandType(Type::VerificationType ver_type);
+    bool ParseOperandType(Type::VerificationType verType);
     bool ParseOperandNone();
     bool ParseOperandString();
     bool ParseOperandLiteralArray();
@@ -198,29 +198,29 @@ private:
     bool ParseOperandInitobj();
 
     void SetFunctionInformation();
-    void SetRecordInformation(const std::string &record_name);
+    void SetRecordInformation(const std::string &recordName);
     void SetArrayInformation();
     void SetOperationInformation();
     void ParseAsCatchall(const std::vector<Token> &tokens);
-    void ParseAsLanguage(const std::vector<Token> &tokens, bool &is_lang_parsed, bool &is_first_statement);
+    void ParseAsLanguage(const std::vector<Token> &tokens, bool &isLangParsed, bool &isFirstStatement);
     void ParseAsRecord(const std::vector<Token> &tokens);
     void ParseAsArray(const std::vector<Token> &tokens);
     void ParseAsFunction(const std::vector<Token> &tokens);
     void ParseAsUnionField(const std::vector<Token> &tokens);
     void ParseAsBraceRight(const std::vector<Token> &tokens);
-    bool ParseAfterLine(bool &is_first_statement);
-    Expected<Program, Error> ParseAfterMainLoop(const std::string &file_name);
+    bool ParseAfterLine(bool &isFirstStatement);
+    Expected<Program, Error> ParseAfterMainLoop(const std::string &fileName);
     void ParseResetFunctionLabelsAndParams();
     void ParseResetTables();
     void ParseResetFunctionTable();
     void ParseResetRecordTable();
     void ParseResetArrayTable();
     void ParseAsLanguageDirective();
-    Function::CatchBlock PrepareCatchBlock(bool is_catchall, size_t size, size_t catchall_tokens_num,
-                                           size_t catch_tokens_num);
+    Function::CatchBlock PrepareCatchBlock(bool isCatchall, size_t size, size_t catchallTokensNum,
+                                           size_t catchTokensNum);
     void ParseAsCatchDirective();
     void SetError();
-    void SetMetadataContextError(const Metadata::Error &err, bool has_value);
+    void SetMetadataContextError(const Metadata::Error &err, bool hasValue);
 
     Expected<char, Error> ParseOctalEscapeSequence(std::string_view s, size_t *i);
     Expected<char, Error> ParseHexEscapeSequence(std::string_view s, size_t *i);
@@ -229,9 +229,9 @@ private:
     template <class T>
     auto TryEmplaceInTable(bool flag, T &item, const std::string &cid)
     {
-        return item.try_emplace(cid, cid, program_.lang, context_.tokens[context_.number - 1].bound_left,
-                                context_.tokens[context_.number - 1].bound_right,
-                                context_.tokens[context_.number - 1].whole_line, flag, line_stric_);
+        return item.try_emplace(cid, cid, program_.lang, context_.tokens[context_.number - 1].boundLeft,
+                                context_.tokens[context_.number - 1].boundRight,
+                                context_.tokens[context_.number - 1].wholeLine, flag, lineStric_);
     }
 
     template <class T>
@@ -244,20 +244,20 @@ private:
             return true;
         }
 
-        if (iter->second.file_location->is_defined && flag) {
+        if (iter->second.fileLocation->isDefined && flag) {
             return false;
         }
 
-        if (!iter->second.file_location->is_defined && flag) {
-            iter->second.file_location->is_defined = true;
+        if (!iter->second.fileLocation->isDefined && flag) {
+            iter->second.fileLocation->isDefined = true;
             return true;
         }
 
-        if (!iter->second.file_location->is_defined) {
-            iter->second.file_location->bound_left = context_.tokens[context_.number - 1].bound_left;
-            iter->second.file_location->bound_right = context_.tokens[context_.number - 1].bound_right;
-            iter->second.file_location->whole_line = context_.tokens[context_.number - 1].whole_line;
-            iter->second.file_location->line_number = line_stric_;
+        if (!iter->second.fileLocation->isDefined) {
+            iter->second.fileLocation->boundLeft = context_.tokens[context_.number - 1].boundLeft;
+            iter->second.fileLocation->boundRight = context_.tokens[context_.number - 1].boundRight;
+            iter->second.fileLocation->wholeLine = context_.tokens[context_.number - 1].wholeLine;
+            iter->second.fileLocation->lineNumber = lineStric_;
         }
 
         return true;
@@ -270,9 +270,9 @@ inline auto Parser::TryEmplaceInTable(bool flag, std::unordered_map<std::string,
 {
     return item.try_emplace(std::string(context_.GiveToken().data(), context_.GiveToken().length()),
                             std::string(context_.GiveToken().data(), context_.GiveToken().length()),
-                            context_.tokens[context_.number - 1].bound_left,
-                            context_.tokens[context_.number - 1].bound_right,
-                            context_.tokens[context_.number - 1].whole_line, flag, line_stric_);
+                            context_.tokens[context_.number - 1].boundLeft,
+                            context_.tokens[context_.number - 1].boundRight,
+                            context_.tokens[context_.number - 1].wholeLine, flag, lineStric_);
 }
 
 }  // namespace panda::pandasm

@@ -46,12 +46,12 @@ public:
     using BlockIterator = ArenaVector<BasicBlock *>::iterator;
     using BlockConstIterator = ArenaVector<BasicBlock *>::const_iterator;
 
-    ConditionChain(BlockIterator begin, size_t size, size_t multiple_predecessors_successor_index,
-                   size_t single_predecessor_successor_index)
+    ConditionChain(BlockIterator begin, size_t size, size_t multiplePredecessorsSuccessorIndex,
+                   size_t singlePredecessorSuccessorIndex)
         : begin_(begin),
           size_(size),
-          multiple_predecessors_successor_index_(multiple_predecessors_successor_index),
-          single_predecessor_successor_index_(single_predecessor_successor_index)
+          multiplePredecessorsSuccessorIndex_(multiplePredecessorsSuccessorIndex),
+          singlePredecessorSuccessorIndex_(singlePredecessorSuccessorIndex)
     {
     }
 
@@ -113,19 +113,19 @@ public:
 
     BasicBlock *GetMultiplePredecessorsSuccessor() const
     {
-        return GetFirstBlock()->GetSuccessor(multiple_predecessors_successor_index_);
+        return GetFirstBlock()->GetSuccessor(multiplePredecessorsSuccessorIndex_);
     }
 
     BasicBlock *GetSinglePredecessorSuccessor() const
     {
-        return GetLastBlock()->GetSuccessor(single_predecessor_successor_index_);
+        return GetLastBlock()->GetSuccessor(singlePredecessorSuccessorIndex_);
     }
 
 private:
     BlockIterator begin_;
     size_t size_;
-    size_t multiple_predecessors_successor_index_;
-    size_t single_predecessor_successor_index_;
+    size_t multiplePredecessorsSuccessorIndex_;
+    size_t singlePredecessorSuccessorIndex_;
 };
 }  // namespace panda::compiler
 

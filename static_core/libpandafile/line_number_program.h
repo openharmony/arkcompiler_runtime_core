@@ -23,8 +23,8 @@ namespace panda::panda_file {
 
 class LineProgramState {
 public:
-    LineProgramState(const File &pf, File::EntityId file, size_t line, Span<const uint8_t> constant_pool)
-        : pf_(pf), file_(file), line_(line), constant_pool_(constant_pool)
+    LineProgramState(const File &pf, File::EntityId file, size_t line, Span<const uint8_t> constantPool)
+        : pf_(pf), file_(file), line_(line), constantPool_(constantPool)
     {
     }
 
@@ -55,17 +55,17 @@ public:
 
     void SetSourceCode(uint32_t offset)
     {
-        source_code_ = File::EntityId(offset);
+        sourceCode_ = File::EntityId(offset);
     }
 
     const uint8_t *GetSourceCode() const
     {
-        return pf_.GetStringData(source_code_).data;
+        return pf_.GetStringData(sourceCode_).data;
     }
 
     bool HasSourceCode() const
     {
-        return source_code_.IsValid();
+        return sourceCode_.IsValid();
     }
 
     size_t GetLine() const
@@ -90,12 +90,12 @@ public:
 
     uint32_t ReadULeb128()
     {
-        return panda_file::helpers::ReadULeb128(&constant_pool_);
+        return panda_file::helpers::ReadULeb128(&constantPool_);
     }
 
     int32_t ReadSLeb128()
     {
-        return panda_file::helpers::ReadLeb128(&constant_pool_);
+        return panda_file::helpers::ReadLeb128(&constantPool_);
     }
 
     const File &GetPandaFile() const
@@ -107,10 +107,10 @@ private:
     const File &pf_;
 
     File::EntityId file_;
-    File::EntityId source_code_;
+    File::EntityId sourceCode_;
     size_t line_;
     size_t column_ {0};
-    Span<const uint8_t> constant_pool_;
+    Span<const uint8_t> constantPool_;
 
     uint32_t address_ {0};
 };
@@ -211,14 +211,14 @@ private:
 
     bool HandleAdvanceLine() const
     {
-        auto line_diff = state_->ReadSLeb128();
-        return handler_->HandleAdvanceLine(line_diff);
+        auto lineDiff = state_->ReadSLeb128();
+        return handler_->HandleAdvanceLine(lineDiff);
     }
 
     bool HandleAdvancePc() const
     {
-        auto pc_diff = state_->ReadULeb128();
-        return handler_->HandleAdvancePc(pc_diff);
+        auto pcDiff = state_->ReadULeb128();
+        return handler_->HandleAdvancePc(pcDiff);
     }
 
     bool HandleSetFile() const
@@ -243,25 +243,25 @@ private:
 
     bool HandleStartLocal()
     {
-        auto reg_number = ReadRegisterNumber();
-        auto name_index = state_->ReadULeb128();
-        auto type_index = state_->ReadULeb128();
-        return handler_->HandleStartLocal(reg_number, name_index, type_index);
+        auto regNumber = ReadRegisterNumber();
+        auto nameIndex = state_->ReadULeb128();
+        auto typeIndex = state_->ReadULeb128();
+        return handler_->HandleStartLocal(regNumber, nameIndex, typeIndex);
     }
 
     bool HandleStartLocalExtended()
     {
-        auto reg_number = ReadRegisterNumber();
-        auto name_index = state_->ReadULeb128();
-        auto type_index = state_->ReadULeb128();
-        auto type_signature_index = state_->ReadULeb128();
-        return handler_->HandleStartLocalExtended(reg_number, name_index, type_index, type_signature_index);
+        auto regNumber = ReadRegisterNumber();
+        auto nameIndex = state_->ReadULeb128();
+        auto typeIndex = state_->ReadULeb128();
+        auto typeSignatureIndex = state_->ReadULeb128();
+        return handler_->HandleStartLocalExtended(regNumber, nameIndex, typeIndex, typeSignatureIndex);
     }
 
     bool HandleEndLocal()
     {
-        auto reg_number = ReadRegisterNumber();
-        return handler_->HandleEndLocal(reg_number);
+        auto regNumber = ReadRegisterNumber();
+        return handler_->HandleEndLocal(regNumber);
     }
 
     bool HandleSetColumn()
@@ -274,10 +274,10 @@ private:
     {
         ASSERT(static_cast<uint8_t>(opcode) >= LineNumberProgramItem::OPCODE_BASE);
 
-        auto adjust_opcode = static_cast<int32_t>(static_cast<uint8_t>(opcode) - LineNumberProgramItem::OPCODE_BASE);
-        auto pc_offset = static_cast<uint32_t>(adjust_opcode / LineNumberProgramItem::LINE_RANGE);
-        int32_t line_offset = adjust_opcode % LineNumberProgramItem::LINE_RANGE + LineNumberProgramItem::LINE_BASE;
-        return handler_->HandleSpecialOpcode(pc_offset, line_offset);
+        auto adjustOpcode = static_cast<int32_t>(static_cast<uint8_t>(opcode) - LineNumberProgramItem::OPCODE_BASE);
+        auto pcOffset = static_cast<uint32_t>(adjustOpcode / LineNumberProgramItem::LINE_RANGE);
+        int32_t lineOffset = adjustOpcode % LineNumberProgramItem::LINE_RANGE + LineNumberProgramItem::LINE_BASE;
+        return handler_->HandleSpecialOpcode(pcOffset, lineOffset);
     }
 
     LineProgramState *state_;

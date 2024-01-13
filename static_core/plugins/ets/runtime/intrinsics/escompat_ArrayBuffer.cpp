@@ -38,19 +38,19 @@ extern "C" ObjectHeader *EtsArrayBufferFrom(EtsObject *obj)
     }
     [[maybe_unused]] EtsHandleScope s(coro);
     EtsHandle<EtsArray> array(coro, reinterpret_cast<EtsArray *>(obj));
-    EtsClass *arraybuf_class = coro->GetPandaVM()->GetClassLinker()->GetArrayBufferClass();
-    EtsHandle<EtsArrayBuffer> buf(coro, reinterpret_cast<EtsArrayBuffer *>(EtsObject::Create(coro, arraybuf_class)));
+    EtsClass *arraybufClass = coro->GetPandaVM()->GetClassLinker()->GetArrayBufferClass();
+    EtsHandle<EtsArrayBuffer> buf(coro, reinterpret_cast<EtsArrayBuffer *>(EtsObject::Create(coro, arraybufClass)));
     if (UNLIKELY(buf.GetPtr() == nullptr)) {
         return nullptr;
     }
-    EtsInt byte_length = array->GetLength() * array->GetElementSize();
-    buf->SetByteLength(byte_length);
-    auto *data = EtsArray::CreateForPrimitive<EtsByteArray>(EtsClassRoot::BYTE_ARRAY, byte_length);
+    EtsInt byteLength = array->GetLength() * array->GetElementSize();
+    buf->SetByteLength(byteLength);
+    auto *data = EtsArray::CreateForPrimitive<EtsByteArray>(EtsClassRoot::BYTE_ARRAY, byteLength);
     buf->SetData(coro, data);
     if (UNLIKELY(buf->GetData() == nullptr)) {
         return nullptr;
     }
-    memcpy(buf->GetData()->GetData<EtsByte>(), array->GetData<EtsByte>(), byte_length);
+    memcpy(buf->GetData()->GetData<EtsByte>(), array->GetData<EtsByte>(), byteLength);
     return buf.GetPtr();
 }
 }  // namespace panda::ets::intrinsics

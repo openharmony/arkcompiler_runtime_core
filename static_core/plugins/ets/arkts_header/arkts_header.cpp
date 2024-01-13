@@ -24,30 +24,30 @@
 #include "runtime/include/mem/panda_string.h"
 #include "header_writer.h"
 
-void PrintHelp(panda::PandArgParser &pa_parser)
+void PrintHelp(panda::PandArgParser &paParser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "arkts_header [options] INPUT_FILE OUTPUT_FILE" << std::endl << std::endl;
     std::cerr << "Supported options:" << std::endl << std::endl;
-    std::cerr << pa_parser.GetHelpString() << std::endl;
+    std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input,
+bool ProcessArgs(panda::PandArgParser &paParser, const panda::PandArg<std::string> &input,
                  panda::PandArg<std::string> &output, const panda::PandArg<bool> &help, int argc, const char **argv)
 {
-    if (!pa_parser.Parse(argc, argv)) {
-        PrintHelp(pa_parser);
+    if (!paParser.Parse(argc, argv)) {
+        PrintHelp(paParser);
         return false;
     }
 
     if (input.GetValue().empty() || help.GetValue()) {
-        PrintHelp(pa_parser);
+        PrintHelp(paParser);
         return false;
     }
 
     if (output.GetValue().empty()) {
-        std::string output_filename = input.GetValue().substr(0, input.GetValue().find_last_of('.')) + ".h";
-        output.SetValue(output_filename);
+        std::string outputFilename = input.GetValue().substr(0, input.GetValue().find_last_of('.')) + ".h";
+        output.SetValue(outputFilename);
     }
 
     panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR,
@@ -62,27 +62,27 @@ int main(int argc, const char **argv)
     panda::PandArg<std::string> input("INPUT", "", "Input binary file");
     panda::PandArg<std::string> output("OUTPUT", "", "Output header file");
 
-    panda::PandArgParser pa_parser;
+    panda::PandArgParser paParser;
 
-    pa_parser.Add(&help);
-    pa_parser.PushBackTail(&input);
-    pa_parser.PushBackTail(&output);
-    pa_parser.EnableTail();
+    paParser.Add(&help);
+    paParser.PushBackTail(&input);
+    paParser.PushBackTail(&output);
+    paParser.EnableTail();
 
-    if (!ProcessArgs(pa_parser, input, output, help, argc, argv)) {
+    if (!ProcessArgs(paParser, input, output, help, argc, argv)) {
         return 1;
     }
 
-    auto input_file = panda::panda_file::File::Open(input.GetValue());
-    if (!input_file) {
+    auto inputFile = panda::panda_file::File::Open(input.GetValue());
+    if (!inputFile) {
         LOG(ERROR, ETS_NAPI) << "Cannot open file '" << input.GetValue() << "'";
         return 1;
     }
 
-    panda::ets::header_writer::HeaderWriter writer(std::move(input_file), output.GetValue());
+    panda::ets::header_writer::HeaderWriter writer(std::move(inputFile), output.GetValue());
 
-    auto created_header = writer.PrintFunction();
-    if (!created_header) {
+    auto createdHeader = writer.PrintFunction();
+    if (!createdHeader) {
         std::cout << "No native functions found in file '" << input.GetValue() << "', header not created" << std::endl;
     }
 

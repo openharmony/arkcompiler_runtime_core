@@ -22,9 +22,9 @@ namespace panda::os {
 std::string GetAbsolutePath(std::string_view path)
 {
     constexpr size_t MAX_PATH_LEN = 2048;
-    char full_path[MAX_PATH_LEN] = {0};
-    _fullpath(full_path, path.data(), MAX_PATH_LEN);
-    return full_path;
+    char fullPath[MAX_PATH_LEN] = {0};
+    _fullpath(fullPath, path.data(), MAX_PATH_LEN);
+    return fullPath;
 }
 
 }  // namespace panda::os

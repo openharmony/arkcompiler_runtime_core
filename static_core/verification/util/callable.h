@@ -81,16 +81,16 @@ public:
     }
 
     template <typename T>
-    constexpr callable(const T &obj, R (T::*param_method)(Args...) const)
+    constexpr callable(const T &obj, R (T::*paramMethod)(Args...) const)
         : object_ {reinterpret_cast<CallableType *>(&const_cast<T &>(obj))},
-          method_ {reinterpret_cast<MethodType>(param_method)}
+          method_ {reinterpret_cast<MethodType>(paramMethod)}
     {
     }
 
     template <typename T>
-    constexpr callable(T &obj, R (T::*param_method)(Args...))
+    constexpr callable(T &obj, R (T::*paramMethod)(Args...))
         : object_ {reinterpret_cast<CallableType *>(&const_cast<T &>(obj))},
-          method_ {reinterpret_cast<MethodType>(param_method)}
+          method_ {reinterpret_cast<MethodType>(paramMethod)}
     {
     }
 

@@ -24,7 +24,7 @@ class ObjectLock {
 public:
     PANDA_PUBLIC_API explicit ObjectLock(ObjectHeader *obj);
 
-    bool Wait(bool ignore_interruption = false);
+    bool Wait(bool ignoreInterruption = false);
 
     bool TimedWait(uint64_t timeout);
 
@@ -39,7 +39,7 @@ public:
 
 private:
     HandleScope<ObjectHeader *> scope_;
-    VMHandle<ObjectHeader> obj_handler_;
+    VMHandle<ObjectHeader> objHandler_;
 };
 }  // namespace panda
 

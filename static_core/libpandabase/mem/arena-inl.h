@@ -24,17 +24,17 @@
 
 namespace panda {
 
-inline Arena::Arena(size_t buff_size, void *buff) : Arena(buff_size, buff, ARENA_DEFAULT_ALIGNMENT) {}
+inline Arena::Arena(size_t buffSize, void *buff) : Arena(buffSize, buff, ARENA_DEFAULT_ALIGNMENT) {}
 
-inline Arena::Arena(size_t buff_size, void *buff, Alignment start_alignment)
+inline Arena::Arena(size_t buffSize, void *buff, Alignment startAlignment)
     : buff_(buff),
-      start_pos_(ToVoidPtr(AlignUp(ToUintPtr(buff), GetAlignmentInBytes(start_alignment)))),
-      cur_pos_(start_pos_),
-      size_(buff_size)
+      startPos_(ToVoidPtr(AlignUp(ToUintPtr(buff), GetAlignmentInBytes(startAlignment)))),
+      curPos_(startPos_),
+      size_(buffSize)
 {
     ASSERT(ToUintPtr(buff) == AlignUp(ToUintPtr(buff), GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT)));
     ASAN_POISON_MEMORY_REGION(buff_, size_);
-    LOG(DEBUG, ALLOC) << "Arena: created with buff addr = " << buff << " size = " << buff_size;
+    LOG(DEBUG, ALLOC) << "Arena: created with buff addr = " << buff << " size = " << buffSize;
 }
 
 inline Arena::~Arena()
@@ -46,11 +46,11 @@ inline Arena::~Arena()
 inline void *Arena::Alloc(size_t size, Alignment alignment)
 {
     void *ret = nullptr;
-    size_t free_size = GetFreeSize();
-    ret = std::align(GetAlignmentInBytes(alignment), size, cur_pos_, free_size);
+    size_t freeSize = GetFreeSize();
+    ret = std::align(GetAlignmentInBytes(alignment), size, curPos_, freeSize);
     if (ret != nullptr) {
         ASAN_UNPOISON_MEMORY_REGION(ret, size);
-        cur_pos_ = ToVoidPtr(ToUintPtr(ret) + size);
+        curPos_ = ToVoidPtr(ToUintPtr(ret) + size);
     }
     LOG(DEBUG, ALLOC) << "Arena::Alloc size = " << size << " alignment = " << alignment << " at addr = " << ret;
     return ret;
@@ -58,13 +58,13 @@ inline void *Arena::Alloc(size_t size, Alignment alignment)
 
 inline void *Arena::AlignedAlloc(size_t size, [[maybe_unused]] Alignment alignment)
 {
-    ASSERT(AlignUp(ToUintPtr(cur_pos_), GetAlignmentInBytes(alignment)) == ToUintPtr(cur_pos_));
+    ASSERT(AlignUp(ToUintPtr(curPos_), GetAlignmentInBytes(alignment)) == ToUintPtr(curPos_));
     ASSERT(AlignUp(size, GetAlignmentInBytes(alignment)) == size);
     void *ret = nullptr;
-    uintptr_t new_cur_pos = ToUintPtr(cur_pos_) + size;
-    if (new_cur_pos <= (ToUintPtr(buff_) + size_)) {
-        ret = cur_pos_;
-        cur_pos_ = ToVoidPtr(new_cur_pos);
+    uintptr_t newCurPos = ToUintPtr(curPos_) + size;
+    if (newCurPos <= (ToUintPtr(buff_) + size_)) {
+        ret = curPos_;
+        curPos_ = ToVoidPtr(newCurPos);
         ASAN_UNPOISON_MEMORY_REGION(ret, size);
     }
     return ret;
@@ -89,14 +89,14 @@ inline Arena *Arena::GetNextArena() const
 
 inline size_t Arena::GetFreeSize() const
 {
-    ASSERT(ToUintPtr(cur_pos_) >= ToUintPtr(GetStartPos()));
-    return size_ - (ToUintPtr(cur_pos_) - ToUintPtr(GetStartPos()));
+    ASSERT(ToUintPtr(curPos_) >= ToUintPtr(GetStartPos()));
+    return size_ - (ToUintPtr(curPos_) - ToUintPtr(GetStartPos()));
 }
 
 inline size_t Arena::GetOccupiedSize() const
 {
-    ASSERT(ToUintPtr(cur_pos_) >= ToUintPtr(GetStartPos()));
-    return ToUintPtr(cur_pos_) - ToUintPtr(GetStartPos());
+    ASSERT(ToUintPtr(curPos_) >= ToUintPtr(GetStartPos()));
+    return ToUintPtr(curPos_) - ToUintPtr(GetStartPos());
 }
 
 inline void *Arena::GetArenaEnd() const
@@ -116,22 +116,22 @@ inline void *Arena::GetAllocatedStart() const
 
 inline bool Arena::InArena(const void *mem) const
 {
-    return (ToUintPtr(cur_pos_) > ToUintPtr(mem)) && (ToUintPtr(GetStartPos()) <= ToUintPtr(mem));
+    return (ToUintPtr(curPos_) > ToUintPtr(mem)) && (ToUintPtr(GetStartPos()) <= ToUintPtr(mem));
 }
 
 inline void Arena::Free(void *mem)
 {
     ASSERT(InArena(mem));
-    ASAN_POISON_MEMORY_REGION(mem, ToUintPtr(cur_pos_) - ToUintPtr(mem));
-    cur_pos_ = mem;
+    ASAN_POISON_MEMORY_REGION(mem, ToUintPtr(curPos_) - ToUintPtr(mem));
+    curPos_ = mem;
 }
 
-inline void Arena::Resize(size_t new_size)
+inline void Arena::Resize(size_t newSize)
 {
-    size_t old_size = GetOccupiedSize();
-    ASSERT(new_size <= old_size);
-    cur_pos_ = ToVoidPtr(ToUintPtr(GetStartPos()) + new_size);
-    ASAN_POISON_MEMORY_REGION(cur_pos_, old_size - new_size);
+    size_t oldSize = GetOccupiedSize();
+    ASSERT(newSize <= oldSize);
+    curPos_ = ToVoidPtr(ToUintPtr(GetStartPos()) + newSize);
+    ASAN_POISON_MEMORY_REGION(curPos_, oldSize - newSize);
 }
 
 inline void Arena::Reset()
@@ -139,11 +139,11 @@ inline void Arena::Reset()
     Resize(0);
 }
 
-inline void Arena::ExpandArena(const void *extra_buff, size_t size)
+inline void Arena::ExpandArena(const void *extraBuff, size_t size)
 {
-    ASSERT(ToUintPtr(extra_buff) == AlignUp(ToUintPtr(extra_buff), DEFAULT_ALIGNMENT_IN_BYTES));
-    ASSERT(ToUintPtr(extra_buff) == ToUintPtr(GetArenaEnd()));
-    ASAN_POISON_MEMORY_REGION(extra_buff, size);
+    ASSERT(ToUintPtr(extraBuff) == AlignUp(ToUintPtr(extraBuff), DEFAULT_ALIGNMENT_IN_BYTES));
+    ASSERT(ToUintPtr(extraBuff) == ToUintPtr(GetArenaEnd()));
+    ASAN_POISON_MEMORY_REGION(extraBuff, size);
     LOG(DEBUG, ALLOC) << "Expand arena: Add " << size << " bytes to the arena " << this;
     size_ += size;
 }

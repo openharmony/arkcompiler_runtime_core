@@ -31,12 +31,12 @@ struct EntryFileStat {
 public:
     uint32_t GetUncompressedSize() const
     {
-        return (uint32_t)file_stat.uncompressed_size;
+        return (uint32_t)fileStat.uncompressed_size;
     }
 
     uint32_t GetCompressedSize() const
     {
-        return (uint32_t)file_stat.compressed_size;
+        return (uint32_t)fileStat.compressed_size;
     }
 
     inline uint32_t GetOffset() const
@@ -46,11 +46,11 @@ public:
 
     inline bool IsCompressed() const
     {
-        return file_stat.compression_method != 0;
+        return fileStat.compression_method != 0;
     }
 
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    unz_file_info file_stat;
+    unz_file_info fileStat;
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     uint32_t offset;
 };
@@ -156,7 +156,7 @@ int CloseCurrentFile(ZipArchiveHandle &handle);
  *
  * Returns 0 on success and 1 on failure.
  */
-int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t buf_size);
+int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t bufSize);
 
 /*
  * Add a new file filename(resident in memory pbuf which has size of size |buf_size|) to the archive zipname,
@@ -167,7 +167,7 @@ int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t buf_size);
  *
  * Returns 0 on success and 1 on failure.
  */
-int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void *pbuf, size_t buf_size,
+int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void *pbuf, size_t bufSize,
                            int append = APPEND_STATUS_CREATE, int level = Z_BEST_COMPRESSION);
 }  // namespace panda
 

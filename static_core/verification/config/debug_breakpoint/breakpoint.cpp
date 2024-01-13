@@ -27,43 +27,43 @@ namespace panda::verifier::debug {
 
 using BreakpointConfigT = PandaVector<std::pair<PandaString, Offsets>>;
 
-OptionalRef<Offsets> BreakpointsForName(const BreakpointConfigT &breakpoint_config, const PandaString &method_name)
+OptionalRef<Offsets> BreakpointsForName(const BreakpointConfigT &breakpointConfig, const PandaString &methodName)
 {
-    auto iter = std::find_if(breakpoint_config.begin(), breakpoint_config.end(),
-                             [&](const auto &pair) { return pair.first == method_name; });
-    if (iter == breakpoint_config.end()) {
+    auto iter = std::find_if(breakpointConfig.begin(), breakpointConfig.end(),
+                             [&methodName](const auto &pair) { return pair.first == methodName; });
+    if (iter == breakpointConfig.end()) {
         return {};
     }
     return iter->second;
 }
 
-void DebugConfig::AddBreakpointConfig(const PandaString &method_name, Offset offset)
+void DebugConfig::AddBreakpointConfig(const PandaString &methodName, Offset offset)
 {
-    auto opt_breakpoints = BreakpointsForName(managed_breakpoints, method_name);
-    if (opt_breakpoints.HasRef()) {
-        opt_breakpoints->push_back(offset);
+    auto optBreakpoints = BreakpointsForName(managedBreakpoints, methodName);
+    if (optBreakpoints.HasRef()) {
+        optBreakpoints->push_back(offset);
     } else {
-        managed_breakpoints.push_back({method_name, Offsets {offset}});
+        managedBreakpoints.push_back({methodName, Offsets {offset}});
     }
-    LOG_VERIFIER_DEBUG_BREAKPOINT_ADDED_INFO(method_name, offset);
+    LOG_VERIFIER_DEBUG_BREAKPOINT_ADDED_INFO(methodName, offset);
 }
 
-void DebugContext::InsertBreakpoints(PandaString const &method_name, Method::UniqId id)
+void DebugContext::InsertBreakpoints(PandaString const &methodName, Method::UniqId id)
 {
-    auto opt_breakpoints = BreakpointsForName(config->managed_breakpoints, method_name);
-    if (opt_breakpoints.HasRef()) {
-        for (const auto offset : opt_breakpoints.Get()) {
-            LOG_VERIFIER_DEBUG_BREAKPOINT_SET_INFO(method_name, id, offset);
-            breakpoint.Apply([&](auto &breakpoint_map) { breakpoint_map[id].insert(offset); });
+    auto optBreakpoints = BreakpointsForName(config->managedBreakpoints, methodName);
+    if (optBreakpoints.HasRef()) {
+        for (const auto offset : optBreakpoints.Get()) {
+            LOG_VERIFIER_DEBUG_BREAKPOINT_SET_INFO(methodName, id, offset);
+            breakpoint.Apply([&](auto &breakpointMap) { breakpointMap[id].insert(offset); });
         }
     }
 }
 
 bool CheckManagedBreakpoint(DebugContext const *ctx, Method::UniqId id, Offset offset)
 {
-    return ctx->breakpoint.Apply([&](const auto &breakpoint_map) {
-        auto iter = breakpoint_map.find(id);
-        if (iter == breakpoint_map.end()) {
+    return ctx->breakpoint.Apply([&](const auto &breakpointMap) {
+        auto iter = breakpointMap.find(id);
+        if (iter == breakpointMap.end()) {
             return false;
         }
         return iter->second.count(offset) > 0;

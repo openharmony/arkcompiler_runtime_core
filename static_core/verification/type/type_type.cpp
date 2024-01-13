@@ -190,7 +190,7 @@ std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
     }
     if (tp.IsIntersection()) {
         auto members = tp.GetIntersectionMembers(tsys);
-        if (members.size() < 2) {
+        if (members.size() < 2UL) {
             return false;
         }
         for (auto mtp : members) {
@@ -202,7 +202,7 @@ std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
     }
     if (tp.IsUnion()) {
         auto members = tp.GetUnionMembers(tsys);
-        if (members.size() < 2) {
+        if (members.size() < 2UL) {
             return false;
         }
         for (auto mtp : members) {
@@ -337,9 +337,9 @@ panda_file::Type::TypeId Type::ToTypeId() const
 size_t Type::GetTypeWidth() const
 {
     using TypeId = panda_file::Type::TypeId;
-    auto type_id = ToTypeId();
-    if (type_id != TypeId::INVALID) {
-        return panda_file::Type(type_id).GetBitWidth();
+    auto typeId = ToTypeId();
+    if (typeId != TypeId::INVALID) {
+        return panda_file::Type(typeId).GetBitWidth();
     }
     switch (GetBuiltin()) {
         case Builtin::INTEGRAL8:
@@ -418,23 +418,23 @@ Type Type::Union(Span<Type> span, TypeSystem *tsys)
     return Type {ConstructWithTag(UNION_TAG, ConstructPayload(rspan.size(), tsys->GetSpanIndex(rspan)))};
 }
 
-static bool IsClassSubtypeOfType(Class const *lhs_class, Type rhs, TypeSystem *tsys)
+static bool IsClassSubtypeOfType(Class const *lhsClass, Type rhs, TypeSystem *tsys)
 {
     // Deal with arrays; those are covariant
     {
-        auto *lhs_component = lhs_class->GetComponentType();
-        if (lhs_component != nullptr) {
+        auto *lhsComponent = lhsClass->GetComponentType();
+        if (lhsComponent != nullptr) {
             if (!rhs.IsClass() || rhs.GetClass()->GetComponentType() == nullptr) {
-                Type supertype_of_array = tsys->SupertypeOfArray();
-                return supertype_of_array.IsConsistent() && IsSubtype(supertype_of_array, rhs, tsys);
+                Type supertypeOfArray = tsys->SupertypeOfArray();
+                return supertypeOfArray.IsConsistent() && IsSubtype(supertypeOfArray, rhs, tsys);
             }
-            auto *rhs_component = rhs.GetClass()->GetComponentType();
-            auto rhs_component_type = Type {rhs_component};
-            return IsClassSubtypeOfType(lhs_component, rhs_component_type, tsys);
+            auto *rhsComponent = rhs.GetClass()->GetComponentType();
+            auto rhsComponentType = Type {rhsComponent};
+            return IsClassSubtypeOfType(lhsComponent, rhsComponentType, tsys);
         }
     }
 
-    return tsys->SupertypesOfClass(lhs_class)->count(rhs) > 0;
+    return tsys->SupertypesOfClass(lhsClass)->count(rhs) > 0;
 }
 
 bool IsSubtypeImpl(Type lhs, Type rhs, TypeSystem *tsys)
@@ -442,21 +442,21 @@ bool IsSubtypeImpl(Type lhs, Type rhs, TypeSystem *tsys)
     ASSERT(InvariantHolds(lhs, tsys));
     ASSERT(InvariantHolds(rhs, tsys));
     if (lhs.IsBuiltin() && rhs.IsBuiltin()) {
-        auto lhs_builtin = lhs.GetBuiltin();
-        auto rhs_builtin = rhs.GetBuiltin();
-        return (builtin_supertypes[lhs_builtin] & Bitmap({rhs_builtin})) != 0;
+        auto lhsBuiltin = lhs.GetBuiltin();
+        auto rhsBuiltin = rhs.GetBuiltin();
+        return (builtin_supertypes[lhsBuiltin] & Bitmap({rhsBuiltin})) != 0;
     }
     if (lhs.IsBuiltin() && rhs.IsClass()) {
-        auto lhs_builtin = lhs.GetBuiltin();
-        auto rhs_class = rhs.GetClass();
-        auto *checker = class_subtyping_funs[lhs_builtin].is_class_supertype_of_builtin;
-        return checker != nullptr && checker(rhs_class);
+        auto lhsBuiltin = lhs.GetBuiltin();
+        auto rhsClass = rhs.GetClass();
+        auto *checker = class_subtyping_funs[lhsBuiltin].is_class_supertype_of_builtin;
+        return checker != nullptr && checker(rhsClass);
     }
     if (lhs.IsClass() && rhs.IsBuiltin()) {
-        auto const *lhs_class = lhs.GetClass();
-        auto rhs_builtin = rhs.GetBuiltin();
-        auto *checker = class_subtyping_funs[rhs_builtin].is_builtin_supertype_of_class;
-        return checker != nullptr && checker(lhs_class);
+        auto const *lhsClass = lhs.GetClass();
+        auto rhsBuiltin = rhs.GetBuiltin();
+        auto *checker = class_subtyping_funs[rhsBuiltin].is_builtin_supertype_of_class;
+        return checker != nullptr && checker(lhsClass);
     }
     if (lhs.IsClass() && rhs.IsClass()) {
         return IsClassSubtypeOfType(lhs.GetClass(), rhs, tsys);
@@ -522,28 +522,30 @@ bool IsSubtypeImpl(Type lhs, Type rhs, TypeSystem *tsys)
 
 static bool IsIntersectionReasonable(Span<Type> members)
 {
-    // // We know that none of the members is a subtype of any other.
-    // bool have_builtins = false;
-    // bool have_classes = false;
+#ifdef UNCOMMENT_WHEN_READY
+    // We know that none of the members is a subtype of any other.
+    bool have_builtins = false;
+    bool have_classes = false;
 
-    // // Nothing is a subclass of both a class and a builtin (except NULL_POINTER and BOT).
-    // for (auto const &mtp : *members) {
-    //     if (mtp.IsBuiltin()) {
-    //         have_builtins = true;
-    //         if (have_classes) {
-    //             return false;
-    //         }
-    //     } else {
-    //         ASSERT(mtp.IsClass());
-    //         have_classes = true;
-    //         if (have_builtins) {
-    //             return false;
-    //         }
-    //     }
-    // }
+    // Nothing is a subclass of both a class and a builtin (except NULL_POINTER and BOT).
+    for (auto const &mtp : *members) {
+        if (mtp.IsBuiltin()) {
+            have_builtins = true;
+            if (have_classes) {
+                return false;
+            }
+        } else {
+            ASSERT(mtp.IsClass());
+            have_classes = true;
+            if (have_builtins) {
+                return false;
+            }
+        }
+    }
+#endif
 
     // Java specific?
-    bool have_class = false;
+    bool haveClass = false;
     for (auto const &mtp : members) {
         if (mtp.IsClass()) {
             Class const *cls = mtp.GetClass();
@@ -552,12 +554,12 @@ static bool IsIntersectionReasonable(Span<Type> members)
                 return false;
             }
             if (!cls->IsInterface()) {
-                if (have_class) {
+                if (haveClass) {
                     // no memaningful intersection between classes,
                     // other than subtyping
                     return false;
                 }
-                have_class = true;
+                haveClass = true;
             }
         }
     }
@@ -591,26 +593,26 @@ Type Type::IntersectSpans(Span<Type const> lhs, Span<Type const> rhs, TypeSystem
     PandaVector<Type> res;
 
     for (auto ltp : lhs) {
-        bool to_include = true;
+        bool toInclude = true;
         for (auto rtp : rhs) {
             if (IsSubtype(rtp, ltp, tsys) && ltp != rtp) {
-                to_include = false;
+                toInclude = false;
                 break;
             }
         }
-        if (to_include) {
+        if (toInclude) {
             res.push_back(ltp);
         }
     }
     for (auto rtp : rhs) {
-        bool to_include = true;
+        bool toInclude = true;
         for (auto ltp : lhs) {
             if (IsSubtype(ltp, rtp, tsys)) {
-                to_include = false;
+                toInclude = false;
                 break;
             }
         }
-        if (to_include) {
+        if (toInclude) {
             res.push_back(rtp);
         }
     }
@@ -652,31 +654,31 @@ Type TpIntersection(Type lhs, Type rhs, TypeSystem *tsys)
 
     // At least one of the sides is a union.
     // Spans will be invalidated in the course of building the intersection, so we need to copy them.
-    PandaUnorderedSet<Type> union_res;
-    auto lhs_span = ToUnionSpan(&lhs, tsys);
-    auto rhs_span = ToUnionSpan(&rhs, tsys);
-    PandaVector<Type> lhs_vec {lhs_span.begin(), lhs_span.end()};
-    PandaVector<Type> rhs_vec {rhs_span.begin(), rhs_span.end()};
+    PandaUnorderedSet<Type> unionRes;
+    auto lhsSpan = ToUnionSpan(&lhs, tsys);
+    auto rhsSpan = ToUnionSpan(&rhs, tsys);
+    PandaVector<Type> lhsVec {lhsSpan.begin(), lhsSpan.end()};
+    PandaVector<Type> rhsVec {rhsSpan.begin(), rhsSpan.end()};
 
-    for (auto m_lhs : lhs_vec) {
-        for (auto m_rhs : rhs_vec) {
-            Type alt = TpIntersection(m_lhs, m_rhs, tsys);
+    for (auto mLhs : lhsVec) {
+        for (auto mRhs : rhsVec) {
+            Type alt = TpIntersection(mLhs, mRhs, tsys);
             if (alt != Type {Type::Builtin::BOT}) {
-                union_res.insert(alt);
+                unionRes.insert(alt);
             }
         }
     }
-    if (union_res.empty()) {
+    if (unionRes.empty()) {
         return Type {Type::Builtin::BOT};
     }
-    if (union_res.size() == 1) {
-        return *union_res.cbegin();
+    if (unionRes.size() == 1) {
+        return *unionRes.cbegin();
     }
-    PandaVector<Type> union_res_vec;
-    for (auto &m : union_res) {
-        union_res_vec.push_back(m);
+    PandaVector<Type> unionResVec;
+    for (auto &m : unionRes) {
+        unionResVec.push_back(m);
     }
-    return Type::Union(Span {union_res_vec}, tsys);
+    return Type::Union(Span {unionResVec}, tsys);
 }
 
 Type TpUnion(Type lhs, Type rhs, TypeSystem *tsys)
@@ -691,35 +693,35 @@ Type TpUnion(Type lhs, Type rhs, TypeSystem *tsys)
     if (lhs.IsBuiltin() && rhs.IsBuiltin()) {
         return Type {builtin_lub[lhs.GetBuiltin()][rhs.GetBuiltin()]};
     }
-    PandaVector<Type> union_res;
-    auto lhs_span = ToUnionSpan(&lhs, tsys);
-    auto rhs_span = ToUnionSpan(&rhs, tsys);
-    for (auto m_lhs : lhs_span) {
-        bool to_include = true;
-        for (auto m_rhs : rhs_span) {
-            if (IsSubtype(m_lhs, m_rhs, tsys) && m_lhs != m_rhs) {
-                to_include = false;
+    PandaVector<Type> unionRes;
+    auto lhsSpan = ToUnionSpan(&lhs, tsys);
+    auto rhsSpan = ToUnionSpan(&rhs, tsys);
+    for (auto mLhs : lhsSpan) {
+        bool toInclude = true;
+        for (auto mRhs : rhsSpan) {
+            if (IsSubtype(mLhs, mRhs, tsys) && mLhs != mRhs) {
+                toInclude = false;
                 break;
             }
         }
-        if (to_include) {
-            union_res.push_back(m_lhs);
+        if (toInclude) {
+            unionRes.push_back(mLhs);
         }
     }
-    for (auto m_rhs : rhs_span) {
-        bool to_include = true;
-        for (auto m_lhs : lhs_span) {
-            if (IsSubtype(m_rhs, m_lhs, tsys)) {
-                to_include = false;
+    for (auto mRhs : rhsSpan) {
+        bool toInclude = true;
+        for (auto mLhs : lhsSpan) {
+            if (IsSubtype(mRhs, mLhs, tsys)) {
+                toInclude = false;
                 break;
             }
         }
-        if (to_include) {
-            union_res.push_back(m_rhs);
+        if (toInclude) {
+            unionRes.push_back(mRhs);
         }
     }
-    ASSERT(union_res.size() > 1);
-    return Type::Union(Span {union_res}, tsys);
+    ASSERT(unionRes.size() > 1);
+    return Type::Union(Span {unionRes}, tsys);
 }
 
 Type Type::GetArrayElementType(TypeSystem *tsys) const
@@ -727,9 +729,9 @@ Type Type::GetArrayElementType(TypeSystem *tsys) const
     if (IsClass()) {
         Class const *klass = GetClass();
         if (klass->IsArrayClass()) {
-            auto *array_component = klass->GetComponentType();
-            ASSERT(array_component != nullptr);
-            return Type {array_component};
+            auto *arrayComponent = klass->GetComponentType();
+            ASSERT(arrayComponent != nullptr);
+            return Type {arrayComponent};
         }
         return Top();
     }
@@ -748,8 +750,8 @@ Type Type::GetArrayElementType(TypeSystem *tsys) const
     }
     if (IsUnion()) {
         // GetArrayElementType may invalidate span, so copy it.
-        auto members_span = GetUnionMembers(tsys);
-        PandaVector<Type> members {members_span.begin(), members_span.end()};
+        auto membersSpan = GetUnionMembers(tsys);
+        PandaVector<Type> members {membersSpan.begin(), membersSpan.end()};
         PandaVector<Type> vec;
         for (auto m : members) {
             vec.push_back(m.GetArrayElementType(tsys));

@@ -18,22 +18,22 @@
 
 namespace panda::mem {
 
-GCScopedPhase::GCScopedPhase(GC *gc, GCPhase new_phase)
+GCScopedPhase::GCScopedPhase(GC *gc, GCPhase newPhase)
 {
     ASSERT(gc != nullptr);
     gc_ = gc;
-    gc_->BeginTracePoint(GetPhaseName(new_phase));
-    phase_ = new_phase;
-    old_phase_ = gc_->GetGCPhase();
+    gc_->BeginTracePoint(GetPhaseName(newPhase));
+    phase_ = newPhase;
+    oldPhase_ = gc_->GetGCPhase();
     gc_->SetGCPhase(phase_);
     LOG(DEBUG, GC) << "== " << GetGCName() << "::" << GetPhaseName(phase_) << " started ==";
-    gc_->FireGCPhaseStarted(new_phase);
+    gc_->FireGCPhaseStarted(newPhase);
 }
 
 GCScopedPhase::~GCScopedPhase()
 {
     gc_->FireGCPhaseFinished(phase_);
-    gc_->SetGCPhase(old_phase_);
+    gc_->SetGCPhase(oldPhase_);
     gc_->EndTracePoint();
     LOG(DEBUG, GC) << "== " << GetGCName() << "::" << GetPhaseName(phase_) << " finished ==";
 }

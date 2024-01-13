@@ -24,14 +24,14 @@ namespace panda::panda_file {
 template <class Callback>
 inline void DebugInfoDataAccessor::EnumerateParameters(const Callback &cb)
 {
-    auto sp = parameters_sp_;
+    auto sp = parametersSp_;
 
-    for (size_t i = 0; i < num_params_; i++) {
+    for (size_t i = 0; i < numParams_; i++) {
         File::EntityId id(helpers::ReadULeb128(&sp));
         cb(id);
     }
 
-    constant_pool_size_sp_ = sp;
+    constantPoolSizeSp_ = sp;
 }
 
 inline void DebugInfoDataAccessor::SkipParameters()
@@ -41,14 +41,14 @@ inline void DebugInfoDataAccessor::SkipParameters()
 
 inline Span<const uint8_t> DebugInfoDataAccessor::GetConstantPool()
 {
-    if (constant_pool_size_sp_.data() == nullptr) {
+    if (constantPoolSizeSp_.data() == nullptr) {
         SkipParameters();
     }
 
-    auto sp = constant_pool_size_sp_;
+    auto sp = constantPoolSizeSp_;
 
     uint32_t size = helpers::ReadULeb128(&sp);
-    line_num_program_off_sp_ = sp.SubSpan(size);
+    lineNumProgramOffSp_ = sp.SubSpan(size);
 
     return sp.First(size);
 }
@@ -60,17 +60,17 @@ inline void DebugInfoDataAccessor::SkipConstantPool()
 
 inline const uint8_t *DebugInfoDataAccessor::GetLineNumberProgram()
 {
-    if (line_num_program_off_sp_.data() == nullptr) {
+    if (lineNumProgramOffSp_.data() == nullptr) {
         SkipConstantPool();
     }
 
-    auto sp = line_num_program_off_sp_;
+    auto sp = lineNumProgramOffSp_;
     uint32_t index = helpers::ReadULeb128(&sp);
-    auto line_num_program_id = panda_file_.ResolveLineNumberProgramIndex(index);
+    auto lineNumProgramId = pandaFile_.ResolveLineNumberProgramIndex(index);
 
-    size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - debug_info_id_.GetOffset();
+    size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - debugInfoId_.GetOffset();
 
-    return panda_file_.GetSpanFromId(line_num_program_id).data();
+    return pandaFile_.GetSpanFromId(lineNumProgramId).data();
 }
 
 inline void DebugInfoDataAccessor::SkipLineNumberProgram()

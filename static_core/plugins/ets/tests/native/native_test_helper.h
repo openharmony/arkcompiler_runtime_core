@@ -26,11 +26,11 @@ namespace panda::ets::test {
 class EtsNapiTestBaseClass : public testing::Test {
 public:
     template <typename R, typename... Args>
-    void CallEtsFuntion(R *ret, std::string_view method_name, Args &&...args)
+    void CallEtsFuntion(R *ret, std::string_view methodName, Args &&...args)
     {
         ets_class cls = env_->FindClass("ETSGLOBAL");
         ASSERT_NE(cls, nullptr);
-        ets_method fn = env_->GetStaticp_method(cls, method_name.data(), nullptr);
+        ets_method fn = env_->GetStaticp_method(cls, methodName.data(), nullptr);
 
         // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
         if constexpr (std::is_same_v<R, ets_boolean>) {
@@ -67,24 +67,24 @@ protected:
         ASSERT_NE(stdlib, nullptr);
 
         // clang-format off
-        std::vector<EtsVMOption> options_vector{
+        std::vector<EtsVMOption> optionsVector{
             {EtsOptionType::EtsGcType, "epsilon"},
             {EtsOptionType::EtsNoJit, nullptr},
             {EtsOptionType::EtsBootFile, stdlib}
         };
         // clang-format on
 
-        abc_path_ = std::getenv("ARK_ETS_GTEST_ABC_PATH");
-        if (abc_path_ != nullptr) {
-            options_vector.push_back({EtsOptionType::EtsBootFile, abc_path_});
+        abcPath_ = std::getenv("ARK_ETS_GTEST_ABC_PATH");
+        if (abcPath_ != nullptr) {
+            optionsVector.push_back({EtsOptionType::EtsBootFile, abcPath_});
         }
 
-        EtsVMInitArgs vm_args;
-        vm_args.version = ETS_NAPI_VERSION_1_0;
-        vm_args.options = options_vector.data();
-        vm_args.nOptions = static_cast<ets_int>(options_vector.size());
+        EtsVMInitArgs vmArgs;
+        vmArgs.version = ETS_NAPI_VERSION_1_0;
+        vmArgs.options = optionsVector.data();
+        vmArgs.nOptions = static_cast<ets_int>(optionsVector.size());
 
-        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vm_args) == ETS_OK) << "Cannot create ETS VM";
+        ASSERT_TRUE(ETS_CreateVM(&vm_, &env_, &vmArgs) == ETS_OK) << "Cannot create ETS VM";
     }
 
     void TearDown() override
@@ -93,7 +93,7 @@ protected:
     }
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    const char *abc_path_ {nullptr};
+    const char *abcPath_ {nullptr};
     EtsEnv *env_ {nullptr};
     EtsVM *vm_ {nullptr};
     // NOLINTEND(misc-non-private-member-variables-in-classes)

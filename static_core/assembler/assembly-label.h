@@ -22,11 +22,11 @@
 namespace panda::pandasm {
 
 struct Label {
-    std::string name;                           // NOLINT(misc-non-private-member-variables-in-classes)
-    std::optional<FileLocation> file_location;  // NOLINT(misc-non-private-member-variables-in-classes)
+    std::string name;                          // NOLINT(misc-non-private-member-variables-in-classes)
+    std::optional<FileLocation> fileLocation;  // NOLINT(misc-non-private-member-variables-in-classes)
 
-    Label(std::string s, size_t b_l, size_t b_r, std::string f_c, bool d, size_t l_n)
-        : name(std::move(s)), file_location({f_c, b_l, b_r, l_n, d})
+    Label(std::string s, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
+        : name(std::move(s)), fileLocation({fC, bL, bR, lN, d})
     {
     }
 

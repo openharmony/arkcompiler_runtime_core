@@ -24,15 +24,15 @@ namespace panda::panda_file {
 
 inline File::StringData File::GetStringData(EntityId id) const
 {
-    StringData str_data {};
+    StringData strData {};
     auto sp = GetSpanFromId(id);
 
-    auto tag_utf16_length = panda_file::helpers::ReadULeb128(&sp);
-    str_data.utf16_length = tag_utf16_length >> 1U;
-    str_data.is_ascii = static_cast<bool>(tag_utf16_length & 1U);
-    str_data.data = sp.data();
+    auto tagUtf16Length = panda_file::helpers::ReadULeb128(&sp);
+    strData.utf16Length = tagUtf16Length >> 1U;
+    strData.isAscii = static_cast<bool>(tagUtf16Length & 1U);
+    strData.data = sp.data();
 
-    return str_data;
+    return strData;
 }
 
 }  // namespace panda::panda_file

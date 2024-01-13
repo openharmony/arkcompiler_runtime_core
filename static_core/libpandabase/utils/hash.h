@@ -59,9 +59,9 @@ inline uint32_t GetHash32(const uint8_t *key, size_t len)
  * @param string - a pointer to the MUTF8 string
  * @return 32 bits hash
  */
-inline uint32_t GetHash32String(const uint8_t *mutf8_string)
+inline uint32_t GetHash32String(const uint8_t *mutf8String)
 {
-    return Hash::GetHash32String(mutf8_string);
+    return Hash::GetHash32String(mutf8String);
 }
 
 /**
@@ -70,9 +70,9 @@ inline uint32_t GetHash32String(const uint8_t *mutf8_string)
  * @param seed - seed which is used to calculate hash
  * @return 32 bits hash
  */
-inline uint32_t GetHash32StringWithSeed(const uint8_t *mutf8_string, uint32_t seed)
+inline uint32_t GetHash32StringWithSeed(const uint8_t *mutf8String, uint32_t seed)
 {
-    return Hash::GetHash32StringWithSeed(mutf8_string, seed);
+    return Hash::GetHash32StringWithSeed(mutf8String, seed);
 }
 
 constexpr uint32_t FNV_INITIAL_SEED = 0x811c9dc5;

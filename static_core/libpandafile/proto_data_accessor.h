@@ -24,23 +24,23 @@ namespace panda::panda_file {
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class ProtoDataAccessor {
 public:
-    ProtoDataAccessor(const File &panda_file, File::EntityId proto_id) : panda_file_(panda_file), proto_id_(proto_id) {}
+    ProtoDataAccessor(const File &pandaFile, File::EntityId protoId) : pandaFile_(pandaFile), protoId_(protoId) {}
 
     ~ProtoDataAccessor() = default;
 
     const File &GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     File::EntityId GetProtoId() const
     {
-        return proto_id_;
+        return protoId_;
     }
 
     Span<const uint8_t> GetShorty() const
     {
-        return panda_file_.GetSpanFromId(proto_id_);
+        return pandaFile_.GetSpanFromId(protoId_);
     }
 
     template <class Callback>
@@ -56,11 +56,11 @@ public:
 
     size_t GetRefNum()
     {
-        if (ref_types_sp_.data() == nullptr) {
+        if (refTypesSp_.data() == nullptr) {
             SkipShorty();
         }
 
-        return ref_types_num_;
+        return refTypesNum_;
     }
 
     size_t GetSize()
@@ -79,12 +79,12 @@ private:
 
     Type GetType(size_t idx) const;
 
-    const File &panda_file_;
-    File::EntityId proto_id_;
+    const File &pandaFile_;
+    File::EntityId protoId_;
 
-    size_t elem_num_ {0};
-    Span<const uint8_t> ref_types_sp_ {nullptr, nullptr};
-    size_t ref_types_num_ {0};
+    size_t elemNum_ {0};
+    Span<const uint8_t> refTypesSp_ {nullptr, nullptr};
+    size_t refTypesNum_ {0};
     size_t size_ {0};
 };
 

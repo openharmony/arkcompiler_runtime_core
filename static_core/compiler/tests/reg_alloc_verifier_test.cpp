@@ -21,22 +21,22 @@
 namespace panda::compiler {
 class RegAllocVerifierTest : public GraphTest {
 public:
-    RegAllocVerifierTest() : default_verify_option_(OPTIONS.IsCompilerVerifyRegalloc())
+    RegAllocVerifierTest() : defaultVerifyOption_(g_options.IsCompilerVerifyRegalloc())
     {
         // Avoid fatal errors in the negative-tests
-        OPTIONS.SetCompilerVerifyRegalloc(false);
+        g_options.SetCompilerVerifyRegalloc(false);
     }
 
     ~RegAllocVerifierTest() override
     {
-        OPTIONS.SetCompilerVerifyRegalloc(default_verify_option_);
+        g_options.SetCompilerVerifyRegalloc(defaultVerifyOption_);
     }
 
     NO_COPY_SEMANTIC(RegAllocVerifierTest);
     NO_MOVE_SEMANTIC(RegAllocVerifierTest);
 
 private:
-    bool default_verify_option_ {};
+    bool defaultVerifyOption_ {};
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -367,11 +367,11 @@ TEST_F(RegAllocVerifierTest, VerifyIndirectCall)
         GTEST_SKIP();
     }
     GetGraph()->SetMode(GraphMode::FastPath());
-    auto ptr_type = Is64BitsArch(GetGraph()->GetArch()) ? DataType::Type::UINT64 : DataType::Type::UINT32;
+    auto ptrType = Is64BitsArch(GetGraph()->GetArch()) ? DataType::Type::UINT64 : DataType::Type::UINT32;
 
     GRAPH(GetGraph())
     {
-        PARAMETER(0U, 0U).type(ptr_type);
+        PARAMETER(0U, 0U).type(ptrType);
         PARAMETER(1U, 1U).u64();
         PARAMETER(2U, 2U).u64();
 

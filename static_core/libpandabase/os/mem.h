@@ -97,7 +97,7 @@ PANDA_PUBLIC_API uintptr_t AlignDownToPageSize(uintptr_t addr);
  * @param size - min required size in bytes
  * @return
  */
-PANDA_PUBLIC_API void *AlignedAlloc(size_t alignment_in_bytes, size_t size);
+PANDA_PUBLIC_API void *AlignedAlloc(size_t alignmentInBytes, size_t size);
 
 /**
  * @brief Free memory, allocated by AlignedAlloc.
@@ -181,16 +181,16 @@ class MapPtr {
 public:
     using Deleter = void (*)(T *, size_t) noexcept;
 
-    MapPtr(T *ptr, size_t size, Deleter deleter) : ptr_(ptr), size_(size), page_offset_(0), deleter_(deleter) {}
-    MapPtr(T *ptr, size_t size, size_t page_offset, Deleter deleter)
-        : ptr_(ptr), size_(size), page_offset_(page_offset), deleter_(deleter)
+    MapPtr(T *ptr, size_t size, Deleter deleter) : ptr_(ptr), size_(size), pageOffset_(0), deleter_(deleter) {}
+    MapPtr(T *ptr, size_t size, size_t pageOffset, Deleter deleter)
+        : ptr_(ptr), size_(size), pageOffset_(pageOffset), deleter_(deleter)
     {
     }
 
     MapPtr(MapPtr &&other) noexcept
     {
         ptr_ = other.ptr_;
-        page_offset_ = other.page_offset_;
+        pageOffset_ = other.pageOffset_;
         size_ = other.size_;
         deleter_ = other.deleter_;
         other.ptr_ = nullptr;
@@ -200,7 +200,7 @@ public:
     MapPtr &operator=(MapPtr &&other) noexcept
     {
         ptr_ = other.ptr_;
-        page_offset_ = other.page_offset_;
+        pageOffset_ = other.pageOffset_;
         size_ = other.size_;
         deleter_ = other.deleter_;
         other.ptr_ = nullptr;
@@ -235,7 +235,7 @@ public:
 
     MapPtr<T, MapPtrType::CONST> ToConst()
     {
-        MapPtr<T, MapPtrType::CONST> res(ptr_, size_, page_offset_, deleter_);
+        MapPtr<T, MapPtrType::CONST> res(ptr_, size_, pageOffset_, deleter_);
         ptr_ = nullptr;
         return res;
     }
@@ -266,16 +266,16 @@ public:
         if (ptr_ == nullptr) {
             return;
         }
-        uintptr_t addr = reinterpret_cast<uintptr_t>(ptr_) - page_offset_;
+        uintptr_t addr = reinterpret_cast<uintptr_t>(ptr_) - pageOffset_;
         // LINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        size_t size = size_ + page_offset_;
+        size_t size = size_ + pageOffset_;
         deleter_(reinterpret_cast<T *>(addr), size);
     }
 
 private:
     T *ptr_;
     size_t size_;
-    size_t page_offset_;
+    size_t pageOffset_;
     Deleter deleter_;
 
     NO_COPY_SEMANTIC(MapPtr);
@@ -297,7 +297,7 @@ static_assert(ConstBytePtr::GetPtrOffset() == 0);
  * the function handles this situatio. The resulting BytePtr will points to desired data.
  * @param hint - an desired address to map file to.
  */
-PANDA_PUBLIC_API BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t file_offset = 0,
+PANDA_PUBLIC_API BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t fileOffset = 0,
                                  void *hint = nullptr);
 
 /**
@@ -315,7 +315,7 @@ BytePtr MapExecuted(size_t size);
  * @param force_poison - poison mmaped memory
  * @return
  */
-PANDA_PUBLIC_API void *MapRWAnonymousRaw(size_t size, bool force_poison = true);
+PANDA_PUBLIC_API void *MapRWAnonymousRaw(size_t size, bool forcePoison = true);
 
 /**
  * Anonymous mmap with READ | WRITE protection for pages.
@@ -327,7 +327,7 @@ PANDA_PUBLIC_API void *MapRWAnonymousRaw(size_t size, bool force_poison = true);
  * @param force_poison - poison mmaped memory
  * @return
  */
-PANDA_PUBLIC_API void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligment_in_bytes, bool force_poison = true);
+PANDA_PUBLIC_API void *MapRWAnonymousWithAlignmentRaw(size_t size, size_t aligmentInBytes, bool forcePoison = true);
 
 // ASAN mapped its structures at this magic address (shadow offset):
 // see https://github.com/google/sanitizers/wiki/AddressSanitizerAlgorithm
@@ -358,7 +358,7 @@ static constexpr uint64_t MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS = 0x7fff8000ULL;
  * @note returned memory will be poisoned in ASAN targets,
  * if you need other behavior - consider to change interface, or use manual unpoisoning
  */
-void *MapRWAnonymousInFirst4GB(void *min_mem, size_t size, size_t iterative_step = 4_KB);
+void *MapRWAnonymousInFirst4GB(void *minMem, size_t size, size_t iterativeStep = 4_KB);
 
 /**
  * Anonymous mmap with fixed address and READ | WRITE protection for pages
@@ -369,7 +369,7 @@ void *MapRWAnonymousInFirst4GB(void *min_mem, size_t size, size_t iterative_step
  * @param force_poison poison mmaped memory
  * @return pointer to the mapped area
  */
-void *MapRWAnonymousFixedRaw(void *mem, size_t size, bool force_poison = true);
+void *MapRWAnonymousFixedRaw(void *mem, size_t size, bool forcePoison = true);
 
 /**
  * Unmap previously mapped memory.
@@ -407,13 +407,13 @@ PANDA_PUBLIC_API size_t GetCacheLineSize();
  * @param pages_end - address of pages ending, should be multiple of PAGE_SIZE
  * @return
  */
-inline int ReleasePages([[maybe_unused]] uintptr_t pages_start, [[maybe_unused]] uintptr_t pages_end)
+inline int ReleasePages([[maybe_unused]] uintptr_t pagesStart, [[maybe_unused]] uintptr_t pagesEnd)
 {
-    ASSERT(pages_start % os::mem::GetPageSize() == 0);
-    ASSERT(pages_end % os::mem::GetPageSize() == 0);
-    ASSERT(pages_end >= pages_start);
+    ASSERT(pagesStart % os::mem::GetPageSize() == 0);
+    ASSERT(pagesEnd % os::mem::GetPageSize() == 0);
+    ASSERT(pagesEnd >= pagesStart);
 #ifdef PANDA_TARGET_UNIX
-    return madvise(ToVoidPtr(pages_start), pages_end - pages_start, MADV_DONTNEED);
+    return madvise(ToVoidPtr(pagesStart), pagesEnd - pagesStart, MADV_DONTNEED);
 #else
     // On Windows systems we can do nothing
     return 0;

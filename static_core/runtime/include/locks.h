@@ -49,13 +49,13 @@ public:
     static MutatorLock *NewMutatorLock();
 
     /// Lock used for preventing custom_tls_cache_ modifications
-    static os::memory::Mutex *custom_tls_lock_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    static os::memory::Mutex *customTlsLock_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
     /**
      * The lock is a specific lock for exclusive suspension process,
      * It is static for access from JVMTI interface
      */
-    static os::memory::Mutex *user_suspension_lock_;
+    static os::memory::Mutex *userSuspensionLock_;
 };
 
 }  // namespace panda

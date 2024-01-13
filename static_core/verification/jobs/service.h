@@ -53,7 +53,7 @@ private:
 
         // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
         SourceLang lang;
-        size_t total_processors = 0;
+        size_t totalProcessors = 0;
         PandaDeque<TaskProcessor *> queue;
         // NOLINTEND(misc-non-private-member-variables-in-classes)
     };
@@ -62,7 +62,7 @@ private:
     ClassLinker *linker_;
 
     panda::os::memory::Mutex lock_;
-    panda::os::memory::ConditionVariable cond_var_ GUARDED_BY(lock_);
+    panda::os::memory::ConditionVariable condVar_ GUARDED_BY(lock_);
     PandaUnorderedMap<panda_file::SourceLang, LangData> processors_ GUARDED_BY(lock_);
 
     bool shutdown_ {false};
@@ -74,7 +74,7 @@ public:
 
     TypeSystem *GetTypeSystem()
     {
-        return &type_system_;
+        return &typeSystem_;
     }
 
     SourceLang GetLang()
@@ -85,7 +85,7 @@ public:
 private:
     VerifierService *service_;
     SourceLang const lang_;
-    TypeSystem type_system_ {service_, lang_};
+    TypeSystem typeSystem_ {service_, lang_};
 };
 
 }  // namespace panda::verifier

@@ -18,12 +18,12 @@
 #include "runtime/include/runtime.h"
 
 namespace panda {
-LibraryAgent::LibraryAgent(os::memory::Mutex &mutex, PandaString library_path, PandaString load_callback_name,
-                           PandaString unload_callback_name)
+LibraryAgent::LibraryAgent(os::memory::Mutex &mutex, PandaString libraryPath, PandaString loadCallbackName,
+                           PandaString unloadCallbackName)
     : lock_(mutex),
-      library_path_(std::move(library_path)),
-      load_callback_name_(std::move(load_callback_name)),
-      unload_callback_name_(std::move(unload_callback_name))
+      libraryPath_(std::move(libraryPath)),
+      loadCallbackName_(std::move(loadCallbackName)),
+      unloadCallbackName_(std::move(unloadCallbackName))
 {
 }
 
@@ -31,33 +31,33 @@ bool LibraryAgent::Load()
 {
     ASSERT(!handle_.IsValid());
 
-    auto handle = os::library_loader::Load(library_path_);
+    auto handle = os::library_loader::Load(libraryPath_);
     if (!handle) {
-        LOG(ERROR, RUNTIME) << "Couldn't load library '" << library_path_ << "': " << handle.Error().ToString();
+        LOG(ERROR, RUNTIME) << "Couldn't load library '" << libraryPath_ << "': " << handle.Error().ToString();
         return false;
     }
 
-    auto load_callback = os::library_loader::ResolveSymbol(handle.Value(), load_callback_name_);
-    if (!load_callback) {
-        LOG(ERROR, RUNTIME) << "Couldn't resolve '" << load_callback_name_ << "' in '" << library_path_
-                            << "':" << load_callback.Error().ToString();
+    auto loadCallback = os::library_loader::ResolveSymbol(handle.Value(), loadCallbackName_);
+    if (!loadCallback) {
+        LOG(ERROR, RUNTIME) << "Couldn't resolve '" << loadCallbackName_ << "' in '" << libraryPath_
+                            << "':" << loadCallback.Error().ToString();
         return false;
     }
 
-    auto unload_callback = os::library_loader::ResolveSymbol(handle.Value(), unload_callback_name_);
-    if (!unload_callback) {
-        LOG(ERROR, RUNTIME) << "Couldn't resolve '" << unload_callback_name_ << "' in '" << library_path_
-                            << "':" << unload_callback.Error().ToString();
+    auto unloadCallback = os::library_loader::ResolveSymbol(handle.Value(), unloadCallbackName_);
+    if (!unloadCallback) {
+        LOG(ERROR, RUNTIME) << "Couldn't resolve '" << unloadCallbackName_ << "' in '" << libraryPath_
+                            << "':" << unloadCallback.Error().ToString();
         return false;
     }
 
-    if (!CallLoadCallback(load_callback.Value())) {
-        LOG(ERROR, RUNTIME) << "'" << load_callback_name_ << "' failed in '" << library_path_ << "'";
+    if (!CallLoadCallback(loadCallback.Value())) {
+        LOG(ERROR, RUNTIME) << "'" << loadCallbackName_ << "' failed in '" << libraryPath_ << "'";
         return false;
     }
 
     handle_ = std::move(handle.Value());
-    unload_callback_ = unload_callback.Value();
+    unloadCallback_ = unloadCallback.Value();
 
     return true;
 }
@@ -66,8 +66,8 @@ bool LibraryAgent::Unload()
 {
     ASSERT(handle_.IsValid());
 
-    if (!CallUnloadCallback(unload_callback_)) {
-        LOG(ERROR, RUNTIME) << "'" << unload_callback_name_ << "' failed in '" << library_path_ << "'";
+    if (!CallUnloadCallback(unloadCallback_)) {
+        LOG(ERROR, RUNTIME) << "'" << unloadCallbackName_ << "' failed in '" << libraryPath_ << "'";
         return false;
     }
 

@@ -32,7 +32,8 @@
 namespace panda {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static os::memory::Mutex TRACE_LOCK;
+extern os::memory::Mutex g_traceLock;
+
 enum EventFlag {
     TRACE_METHOD_ENTER = 0x00,
     TRACE_METHOD_EXIT = 0x01,
@@ -61,7 +62,7 @@ public:
         return data;
     }
 
-    static void StartTracing(const char *trace_filename, size_t buffer_size);
+    static void StartTracing(const char *traceFilename, size_t bufferSize);
 
     static void TriggerTracing();
 
@@ -72,14 +73,14 @@ public:
 
     static void StopTracing();
 
-    static bool is_tracing_;
+    static bool isTracing_;
 
     ~Trace() override;
 
     uint64_t GetAverageTime();
 
 protected:
-    explicit Trace(PandaUniquePtr<panda::os::unix::file::File> trace_file, size_t buffer_size);
+    explicit Trace(PandaUniquePtr<panda::os::unix::file::File> traceFile, size_t bufferSize);
     uint32_t EncodeMethodToId(Method *method);
     virtual PandaString GetThreadName(ManagedThread *thread) = 0;
     virtual PandaString GetMethodDetailInfo(Method *method) = 0;
@@ -99,50 +100,50 @@ private:
     static const uint8_t WRITE_LENGTH = 8;
 
     // used to define the number of this item we have writed  just now
-    const uint8_t number_of_2_bytes_ = 2;
-    const uint8_t number_of_4_bytes_ = 4;
-    const uint8_t number_of_8_bytes_ = 8;
+    const uint8_t numberOf2Bytes_ = 2;
+    const uint8_t numberOf4Bytes_ = 4;
+    const uint8_t numberOf8Bytes_ = 8;
 
-    const int32_t loop_number_ = 10000;
-    const int32_t divide_number_ = 10;
+    const int32_t loopNumber_ = 10000;
+    const int32_t divideNumber_ = 10;
 
     PandaUniquePtr<RuntimeListener> listener_;
 
-    os::memory::Mutex methods_lock_;
+    os::memory::Mutex methodsLock_;
     // all methods are encoded to id, and put method、id into this map
-    PandaMap<Method *, uint32_t> method_id_pandamap_ GUARDED_BY(methods_lock_);
-    PandaVector<Method *> methods_called_vector_ GUARDED_BY(methods_lock_);
+    PandaMap<Method *, uint32_t> methodIdPandamap_ GUARDED_BY(methodsLock_);
+    PandaVector<Method *> methodsCalledVector_ GUARDED_BY(methodsLock_);
 
-    os::memory::Mutex thread_info_lock_;
-    PandaSet<PandaString> thread_info_set_ GUARDED_BY(thread_info_lock_);
+    os::memory::Mutex threadInfoLock_;
+    PandaSet<PandaString> threadInfoSet_ GUARDED_BY(threadInfoLock_);
 
     uint32_t EncodeMethodAndEventToId(Method *method, EventFlag flag);
     Method *DecodeIdToMethod(uint32_t id);
 
-    void GetCalledMethods(size_t end_offset, PandaSet<Method *> *called_methods);
+    void GetCalledMethods(size_t endOffset, PandaSet<Method *> *calledMethods);
 
-    void GetTimes(uint32_t *thread_time, uint32_t *real_time);
+    void GetTimes(uint32_t *threadTime, uint32_t *realTime);
 
-    void WriteInfoToBuf(const ManagedThread *thread, Method *method, EventFlag event, uint32_t thread_time,
-                        uint32_t real_time);
+    void WriteInfoToBuf(const ManagedThread *thread, Method *method, EventFlag event, uint32_t threadTime,
+                        uint32_t realTime);
 
     void RecordThreadsInfo(PandaOStringStream *os);
-    void RecordMethodsInfo(PandaOStringStream *os, const PandaSet<Method *> &called_methods);
+    void RecordMethodsInfo(PandaOStringStream *os, const PandaSet<Method *> &calledMethods);
 
-    void GetUniqueMethods(size_t buffer_length, PandaSet<Method *> *called_methods_set);
+    void GetUniqueMethods(size_t bufferLength, PandaSet<Method *> *calledMethodsSet);
 
-    static Trace *volatile singleton_trace_ GUARDED_BY(TRACE_LOCK);
+    static Trace *volatile singletonTrace_ GUARDED_BY(g_traceLock);
 
-    PandaUniquePtr<panda::os::unix::file::File> trace_file_;
-    const size_t buffer_size_;
+    PandaUniquePtr<panda::os::unix::file::File> traceFile_;
+    const size_t bufferSize_;
 
     PandaUniquePtr<uint8_t[]> buffer_;  // NOLINT(modernize-avoid-c-arrays)
 
-    const uint64_t trace_start_time_;
+    const uint64_t traceStartTime_;
 
-    const uint64_t base_cpu_time_;
+    const uint64_t baseCpuTime_;
 
-    std::atomic<int32_t> buffer_offset_;
+    std::atomic<int32_t> bufferOffset_;
 
     bool overbrim_ {false};
 

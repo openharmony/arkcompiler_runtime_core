@@ -31,19 +31,19 @@ struct MethodSymInfoExt {
 
 struct PandaFileExt;
 
-bool OpenPandafileFromMemoryExt(void *addr, const uint64_t *size, const std::string &file_name,
-                                struct PandaFileExt **panda_file_ext);
+bool OpenPandafileFromMemoryExt(void *addr, const uint64_t *size, const std::string &fileName,
+                                struct PandaFileExt **pandaFileExt);
 
-bool OpenPandafileFromFdExt([[maybe_unused]] int fd, [[maybe_unused]] uint64_t offset, const std::string &file_name,
-                            struct PandaFileExt **panda_file_ext);
+bool OpenPandafileFromFdExt([[maybe_unused]] int fd, [[maybe_unused]] uint64_t offset, const std::string &fileName,
+                            struct PandaFileExt **pandaFileExt);
 
-bool QueryMethodSymByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *method_info);
+bool QueryMethodSymByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *methodInfo);
 
-bool QueryMethodSymAndLineByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *method_info);
+bool QueryMethodSymAndLineByOffsetExt(struct PandaFileExt *pf, uint64_t offset, struct MethodSymInfoExt *methodInfo);
 
 using MethodSymInfoExtCallBack = void(struct MethodSymInfoExt *, void *);
 
-void QueryAllMethodSymsExt(PandaFileExt *pf, MethodSymInfoExtCallBack callback, void *user_data);
+void QueryAllMethodSymsExt(PandaFileExt *pf, MethodSymInfoExtCallBack callback, void *userData);
 
 #ifdef __cplusplus
 }  // extern "C"

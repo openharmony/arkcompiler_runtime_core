@@ -34,25 +34,25 @@ std::string ConvertEtsReferenceToString(const std::string &name)
 }
 
 HeaderWriter::HeaderWriter(std::unique_ptr<const panda_file::File> &&input, std::string output)
-    : input_file_(std::move(input)), output_name_(std::move(output))
+    : inputFile_(std::move(input)), outputName_(std::move(output))
 {
 }
 
 void HeaderWriter::OpenOutput()
 {
-    output_file_.close();
-    output_file_.clear();
-    output_file_.open(output_name_.c_str());
+    outputFile_.close();
+    outputFile_.clear();
+    outputFile_.open(outputName_.c_str());
 }
 
 bool HeaderWriter::PrintFunction()
 {
-    auto classes_span = input_file_->GetClasses();
-    for (auto id : classes_span) {
-        if (input_file_->IsExternal(panda_file::File::EntityId(id))) {
+    auto classesSpan = inputFile_->GetClasses();
+    for (auto id : classesSpan) {
+        if (inputFile_->IsExternal(panda_file::File::EntityId(id))) {
             continue;
         }
-        panda_file::ClassDataAccessor cda(*input_file_, panda_file::File::EntityId(id));
+        panda_file::ClassDataAccessor cda(*inputFile_, panda_file::File::EntityId(id));
         if (cda.GetSourceLang() != SourceLanguage::ETS) {
             continue;
         }
@@ -60,35 +60,35 @@ bool HeaderWriter::PrintFunction()
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
             if (mda.IsNative()) {
                 // Founded first native, need to create file and write beginning
-                if (!need_header_) {
-                    need_header_ = true;
+                if (!needHeader_) {
+                    needHeader_ = true;
                     CreateHeader();
                 }
 
-                std::string class_name = utf::Mutf8AsCString(cda.GetDescriptor());
-                if (class_name[0] == 'L') {
-                    class_name = class_name.substr(1, class_name.size() - 2);
+                std::string className = utf::Mutf8AsCString(cda.GetDescriptor());
+                if (className[0] == 'L') {
+                    className = className.substr(1, className.size() - 2U);
                 }
-                PrintPrototype(class_name, mda, CheckOverloading(cda, mda));
+                PrintPrototype(className, mda, CheckOverloading(cda, mda));
             }
         });
     }
-    if (need_header_) {
+    if (needHeader_) {
         PrintEnd();
     }
-    return need_header_;
+    return needHeader_;
 }
 
 bool HeaderWriter::CheckOverloading(panda_file::ClassDataAccessor &cda, panda_file::MethodDataAccessor &mda)
 {
-    bool is_overloaded = false;
-    cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda1) {
+    bool isOverloaded = false;
+    cda.EnumerateMethods([&mda, &isOverloaded](panda_file::MethodDataAccessor &mda1) {
         if ((mda1.GetName().data == mda.GetName().data) && mda1.IsNative() &&
             !(mda.GetMethodId() == mda1.GetMethodId())) {
-            is_overloaded = true;
+            isOverloaded = true;
         }
     });
-    return is_overloaded;
+    return isOverloaded;
 }
 
 void HeaderWriter::ProcessProtoType(panda_file::Type type, panda_file::File::EntityId klass, std::string &sign,
@@ -98,61 +98,60 @@ void HeaderWriter::ProcessProtoType(panda_file::Type type, panda_file::File::Ent
         sign.append(panda_file::Type::GetSignatureByTypeId(type));
         args.append(ConvertEtsPrimitiveTypeToString(ConvertPandaTypeToEtsType(type)));
     } else {
-        std::string name = utf::Mutf8AsCString(input_file_->GetStringData(klass).data);
+        std::string name = utf::Mutf8AsCString(inputFile_->GetStringData(klass).data);
         sign.append(name);
         args.append(ConvertEtsReferenceToString(name));
     }
 }
 
-void HeaderWriter::PrintPrototype(const std::string &class_name, panda_file::MethodDataAccessor &mda,
-                                  bool is_overloaded)
+void HeaderWriter::PrintPrototype(const std::string &className, panda_file::MethodDataAccessor &mda, bool isOverloaded)
 {
-    std::string method_name = utf::Mutf8AsCString(mda.GetName().data);
-    std::string second_arg = ConvertEtsReferenceToString("object");
+    std::string methodName = utf::Mutf8AsCString(mda.GetName().data);
+    std::string secondArg = ConvertEtsReferenceToString("object");
     ;
     if (mda.IsStatic()) {
-        second_arg = ConvertEtsReferenceToString("class");
+        secondArg = ConvertEtsReferenceToString("class");
     }
     std::string sign;
     std::string args;
-    std::string return_sign;
-    std::string return_arg;
+    std::string returnSign;
+    std::string returnArg;
 
-    size_t ref_idx = 0;
-    panda_file::ProtoDataAccessor pda(*input_file_, mda.GetProtoId());
+    size_t refIdx = 0;
+    panda_file::ProtoDataAccessor pda(*inputFile_, mda.GetProtoId());
 
     auto type = pda.GetReturnType();
-    panda_file::File::EntityId class_id;
+    panda_file::File::EntityId classId;
 
     if (!type.IsPrimitive()) {
-        class_id = pda.GetReferenceType(ref_idx++);
+        classId = pda.GetReferenceType(refIdx++);
     }
 
-    ProcessProtoType(type, class_id, return_sign, return_arg);
+    ProcessProtoType(type, classId, returnSign, returnArg);
 
     for (uint32_t idx = 0; idx < pda.GetNumArgs(); ++idx) {
-        auto arg_type = pda.GetArgType(idx);
-        panda_file::File::EntityId klass_id;
-        if (!arg_type.IsPrimitive()) {
-            klass_id = pda.GetReferenceType(ref_idx++);
+        auto argType = pda.GetArgType(idx);
+        panda_file::File::EntityId klassId;
+        if (!argType.IsPrimitive()) {
+            klassId = pda.GetReferenceType(refIdx++);
         }
         args.append(", ");
-        ProcessProtoType(arg_type, klass_id, sign, args);
+        ProcessProtoType(argType, klassId, sign, args);
     }
 
-    std::string mangled_name = MangleMethodName(class_name, method_name);
-    if (is_overloaded) {
-        mangled_name = MangleMethodNameWithSignature(mangled_name, sign);
+    std::string mangledName = MangleMethodName(className, methodName);
+    if (isOverloaded) {
+        mangledName = MangleMethodNameWithSignature(mangledName, sign);
     }
 
     sign.append(":");
-    sign.append(return_sign);
+    sign.append(returnSign);
 
-    output_file_ << "/*\n Class:     " << class_name << "\n"
-                 << " Method:    " << method_name << "\n"
-                 << " Signature: " << sign << "\n */\n"
-                 << "ETS_EXPORT " << return_arg << " ETS_CALL " << mangled_name << "(EtsEnv *, " << second_arg << args
-                 << ");\n\n";
+    outputFile_ << "/*\n Class:     " << className << "\n"
+                << " Method:    " << methodName << "\n"
+                << " Signature: " << sign << "\n */\n"
+                << "ETS_EXPORT " << returnArg << " ETS_CALL " << mangledName << "(EtsEnv *, " << secondArg << args
+                << ");\n\n";
 }
 
 }  // namespace panda::ets::header_writer

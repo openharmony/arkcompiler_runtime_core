@@ -107,7 +107,7 @@ void RegisterConfigHandlerBreakpoints(Config *dcfg)
                             c.offsets.push_back(0);
                         }
                         for (auto o : c.offsets) {
-                            cfg->debug_cfg.AddBreakpointConfig(c.method, o);
+                            cfg->debugCfg.AddBreakpointConfig(c.method, o);
                         }
                     }
                 }

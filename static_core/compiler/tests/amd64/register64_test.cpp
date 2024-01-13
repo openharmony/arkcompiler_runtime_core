@@ -27,7 +27,7 @@ const uint64_t ITERATION = 20;
 const uint64_t ITERATION = 0xffffff;
 #endif
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
-static inline auto RANDOM_GEN = std::mt19937_64(SEED);
+static inline auto g_randomGen = std::mt19937_64(SEED);
 
 namespace panda::compiler {
 class Register64Test : public ::testing::Test {
@@ -65,52 +65,52 @@ TEST_F(Register64Test, TempRegisters)
     amd64::Amd64RegisterDescription regfile(GetAllocator());
     encoder.SetRegfile(&regfile);
 
-    auto float_type = FLOAT64_TYPE;
+    auto floatType = FLOAT64_TYPE;
 
-    auto initial_count = encoder.GetScratchRegistersCount();
-    auto initial_fp_count = encoder.GetScratchFPRegistersCount();
-    ASSERT_NE(initial_count, 0);
-    ASSERT_NE(initial_fp_count, 0);
+    auto initialCount = encoder.GetScratchRegistersCount();
+    auto initialFpCount = encoder.GetScratchFPRegistersCount();
+    ASSERT_NE(initialCount, 0);
+    ASSERT_NE(initialFpCount, 0);
 
     std::vector<Reg> regs;
-    for (size_t i = 0; i < initial_count; i++) {
+    for (size_t i = 0; i < initialCount; i++) {
         regs.push_back(encoder.AcquireScratchRegister(INT64_TYPE));
     }
     ASSERT_EQ(encoder.GetScratchRegistersCount(), 0);
-    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
     for (auto reg : regs) {
         encoder.ReleaseScratchRegister(reg);
     }
-    ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count);
+    ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount);
 
     regs.clear();
-    for (size_t i = 0; i < initial_fp_count; i++) {
-        regs.push_back(encoder.AcquireScratchRegister(float_type));
+    for (size_t i = 0; i < initialFpCount; i++) {
+        regs.push_back(encoder.AcquireScratchRegister(floatType));
     }
 
-    ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count);
+    ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount);
     ASSERT_EQ(encoder.GetScratchFPRegistersCount(), 0);
     for (auto reg : regs) {
         encoder.ReleaseScratchRegister(reg);
     }
-    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
 
     {
         ScopedTmpRegRef reg(&encoder);
-        ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count - 1);
-        ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+        ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount - 1);
+        ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
         if (encoder.GetScratchRegistersCount() != 0) {
             ScopedTmpRegU32 reg2(&encoder);
-            ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count - 2);
+            ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount - 2U);
         }
         {
-            ScopedTmpReg reg2(&encoder, float_type);
-            ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count - 1);
-            ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count - 1);
+            ScopedTmpReg reg2(&encoder, floatType);
+            ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount - 1);
+            ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount - 1);
         }
-        ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+        ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
     }
-    ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count);
-    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+    ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount);
+    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
 }
 }  // namespace panda::compiler

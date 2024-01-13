@@ -54,13 +54,13 @@ static size_t GetArrayObjectSize(panda::Class *klass, size_t n)
     return sizeof(Array) + klass->GetComponentSize() * n;
 }
 
-static void TestArrayObjectSize(ClassRoot class_root, uint32_t n)
+static void TestArrayObjectSize(ClassRoot classRoot, uint32_t n)
 {
     std::string msg = "Test with class_root ";
-    msg += std::to_string(static_cast<int>(class_root));
+    msg += std::to_string(static_cast<int>(classRoot));
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(class_root);
+    auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(classRoot);
 
     Array *array = Array::Create(klass, n);
     ASSERT_NE(array, nullptr) << msg;
@@ -71,17 +71,17 @@ static void TestArrayObjectSize(ClassRoot class_root, uint32_t n)
 TEST_F(ArrayTest, ObjectSize)
 {
     // NOLINTBEGIN(readability-magic-numbers)
-    TestArrayObjectSize(ClassRoot::ARRAY_U1, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_I8, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_U8, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_I16, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_U16, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_I32, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_U32, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_I64, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_U64, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_F32, 10);
-    TestArrayObjectSize(ClassRoot::ARRAY_F64, 10);
+    TestArrayObjectSize(ClassRoot::ARRAY_U1, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_I8, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_U8, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_I16, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_U16, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_I32, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_U32, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_I64, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_U64, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_F32, 10U);
+    TestArrayObjectSize(ClassRoot::ARRAY_F64, 10U);
     // NOLINTEND(readability-magic-numbers)
 }
 

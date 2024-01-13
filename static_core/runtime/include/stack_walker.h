@@ -92,7 +92,7 @@ public:
     PANDA_PUBLIC_API static StackWalker Create(const ManagedThread *thread, UnwindPolicy policy = UnwindPolicy::ALL);
 
     StackWalker() = default;
-    StackWalker(void *fp, bool is_frame_compiled, uintptr_t npc, UnwindPolicy policy = UnwindPolicy::ALL);
+    StackWalker(void *fp, bool isFrameCompiled, uintptr_t npc, UnwindPolicy policy = UnwindPolicy::ALL);
 
     virtual ~StackWalker() = default;
 
@@ -156,10 +156,10 @@ public:
         return std::holds_alternative<CFrameType>(frame_);
     }
 
-    interpreter::VRegister GetVRegValue(size_t vreg_num);
+    interpreter::VRegister GetVRegValue(size_t vregNum);
 
     template <bool IS_DYNAMIC = false, typename T>
-    void SetVRegValue(VRegInfo reg_info, T value);
+    void SetVRegValue(VRegInfo regInfo, T value);
 
     CFrameType &GetCFrame()
     {
@@ -186,10 +186,10 @@ public:
     auto GetCompiledCodeEntry() const
     {
         ASSERT(IsCFrame());
-        return code_info_.GetCode();
+        return codeInfo_.GetCode();
     }
 
-    Frame *ConvertToIFrame(FrameKind *prev_frame_kind, uint32_t *num_inlined_methods);
+    Frame *ConvertToIFrame(FrameKind *prevFrameKind, uint32_t *numInlinedMethods);
 
     bool IsCompilerBoundFrame(SlotType *prev);
 
@@ -218,8 +218,8 @@ public:
     template <FrameKind KIND>
     static uintptr_t GetBoundaryFrameMethod(const void *ptr)
     {
-        auto frame_method = reinterpret_cast<uintptr_t>(GetMethodFromBoundary<KIND>(ptr));
-        return frame_method;
+        auto frameMethod = reinterpret_cast<uintptr_t>(GetMethodFromBoundary<KIND>(ptr));
+        return frameMethod;
     }
 
     template <FrameKind KIND>
@@ -234,11 +234,11 @@ public:
 
     bool IsInlined() const
     {
-        return inline_depth_ != -1;
+        return inlineDepth_ != -1;
     }
 
     // Dump modify walker state - you must call it only for rvalue object
-    void Dump(std::ostream &os, bool print_vregs = false) &&;
+    void Dump(std::ostream &os, bool printVregs = false) &&;
 
     CalleeRegsBuffer &GetCalleeRegsForDeoptimize();
 
@@ -275,13 +275,12 @@ private:
     // and corresponding callee-saved regs masks.
     struct CalleeStorage {
         std::array<uintptr_t *, CALLEE_REGS_COUNT> stack = {nullptr};
-        RegMask int_regs_mask {0};
-        RegMask fp_regs_mask {0};
+        RegMask intRegsMask {0};
+        RegMask fpRegsMask {0};
     };
 
-    void InitCalleeBuffer(SlotType *callee_slots, CalleeStorage *prev_callees);
-    CFrameType CreateCFrame(SlotType *ptr, uintptr_t npc, SlotType *callee_slots,
-                            CalleeStorage *prev_callees = nullptr);
+    void InitCalleeBuffer(SlotType *calleeSlots, CalleeStorage *prevCallees);
+    CFrameType CreateCFrame(SlotType *ptr, uintptr_t npc, SlotType *calleeSlots, CalleeStorage *prevCallees = nullptr);
 
     template <bool CREATE>
     CFrameType CreateCFrameForC2IBridge(Frame *frame);
@@ -303,9 +302,9 @@ private:
 
     template <bool OBJECTS, bool WITH_REG_INFO, VRegInfo::Type OBJ_TYPE, VRegInfo::Type PRIMITIVE_TYPE, class F,
               typename Func>
-    bool IterateRegsForIFrameInternal(F frame_handler, Func func);
+    bool IterateRegsForIFrameInternal(F frameHandler, Func func);
 
-    FrameVariant GetTopFrameFromFp(void *ptr, bool is_frame_compiled, uintptr_t npc);
+    FrameVariant GetTopFrameFromFp(void *ptr, bool isFrameCompiled, uintptr_t npc);
 
     void NextFromCFrame();
     void NextFromIFrame();
@@ -350,7 +349,7 @@ private:
             return 0;
         }
         if (IsInlined()) {
-            auto ii = code_info_.GetInlineInfo(stackmap_, inline_depth_);
+            auto ii = codeInfo_.GetInlineInfo(stackmap_, inlineDepth_);
             return ii.GetBytecodePc();
         }
         return stackmap_.GetBytecodePc();
@@ -364,7 +363,7 @@ private:
 
     bool HandleAddingAsIFrame();
 
-    void SetPrevFrame(FrameKind *prev_frame_kind, void **prev_frame, CFrameType *cframe);
+    void SetPrevFrame(FrameKind *prevFrameKind, void **prevFrame, CFrameType *cframe);
 
 public:
     class EnvData {
@@ -373,33 +372,33 @@ public:
     public:
         template <typename Allocator>
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-        explicit EnvData(const compiler::CodeInfo::VRegList<Allocator> &vreg_list, const CFrameType &cframe,
-                         const CodeInfo &code_info, SlotType **callee_stack)
+        explicit EnvData(const compiler::CodeInfo::VRegList<Allocator> &vregList, const CFrameType &cframe,
+                         const CodeInfo &codeInfo, SlotType **calleeStack)
         {
             for (size_t i = 0; i < VRegInfo::ENV_COUNT; i++) {
-                auto vreg = vreg_list[vreg_list.size() - (VRegInfo::ENV_COUNT - i)];
-                env_data_[i] = cframe.GetVRegValue<true>(vreg, code_info, callee_stack).GetValue();
+                auto vreg = vregList[vregList.size() - (VRegInfo::ENV_COUNT - i)];
+                envData_[i] = cframe.GetVRegValue<true>(vreg, codeInfo, calleeStack).GetValue();
             }
         }
 
         const EnvType &operator[](VRegInfo::VRegType type) const
         {
-            return env_data_[type - VRegInfo::VRegType::ENV_BEGIN];
+            return envData_[type - VRegInfo::VRegType::ENV_BEGIN];
         };
 
     private:
-        std::array<EnvType, VRegInfo::ENV_COUNT> env_data_;
+        std::array<EnvType, VRegInfo::ENV_COUNT> envData_;
     };
 
 private:
     FrameVariant frame_ {nullptr};
     UnwindPolicy policy_ {UnwindPolicy::ALL};
-    CodeInfo code_info_;
+    CodeInfo codeInfo_;
     compiler::StackMap stackmap_;
-    int inline_depth_ {-1};
-    CalleeStorage callee_stack_;
-    CalleeStorage prev_callee_stack_;
-    CalleeRegsBuffer deopt_callee_regs_ = {0};
+    int inlineDepth_ {-1};
+    CalleeStorage calleeStack_;
+    CalleeStorage prevCalleeStack_;
+    CalleeRegsBuffer deoptCalleeRegs_ = {0};
 };
 
 static_assert((BoundaryFrame<FrameKind::INTERPRETER>::METHOD_OFFSET) * sizeof(uintptr_t) == Frame::GetMethodOffset());

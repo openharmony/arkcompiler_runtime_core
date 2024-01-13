@@ -20,11 +20,11 @@
 namespace panda::ets {
 
 /*static*/
-EtsPromise *EtsPromise::Create(EtsCoroutine *ets_coroutine)
+EtsPromise *EtsPromise::Create(EtsCoroutine *etsCoroutine)
 {
-    EtsClass *klass = ets_coroutine->GetPandaVM()->GetClassLinker()->GetPromiseClass();
-    EtsObject *ets_object = EtsObject::Create(ets_coroutine, klass);
-    return reinterpret_cast<EtsPromise *>(ets_object);
+    EtsClass *klass = etsCoroutine->GetPandaVM()->GetClassLinker()->GetPromiseClass();
+    EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
+    return reinterpret_cast<EtsPromise *>(etsObject);
 }
 
 }  // namespace panda::ets

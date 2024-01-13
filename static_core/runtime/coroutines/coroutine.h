@@ -62,7 +62,7 @@ public:
     /// A helper struct that aggregates all EP related data for a coroutine with a managed EP
     struct ManagedEntrypointInfo {
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-        CompletionEvent *completion_event;  ///< not owned by this structure, just passed!
+        CompletionEvent *completionEvent;  ///< not owned by this structure, just passed!
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
         Method *entrypoint;
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
@@ -78,7 +78,7 @@ public:
          * @param args the array of EP method arguments
          */
         explicit ManagedEntrypointInfo(CompletionEvent *event, Method *entry, PandaVector<Value> &&args)
-            : completion_event(event), entrypoint(entry), arguments(std::move(args))
+            : completionEvent(event), entrypoint(entry), arguments(std::move(args))
         {
             ASSERT(event != nullptr);
             ASSERT(entry != nullptr);
@@ -112,7 +112,7 @@ public:
      * coroutine. For details see CoroutineManager::CoroutineFactory
      */
     static Coroutine *Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                             std::optional<EntrypointInfo> &&ep_info = std::nullopt);
+                             std::optional<EntrypointInfo> &&epInfo = std::nullopt);
     ~Coroutine() override;
 
     /// Should be called after creation in order to create native context and do other things
@@ -122,7 +122,7 @@ public:
      * but is called to prepare a cached Coroutine instance for reuse when it is needed.
      * Implies that the CleanUp() method was called before caching.
      */
-    void ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&ep_info);
+    void ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo);
     /**
      * Manual destruction, applicable only to the main coro. Other ones get deleted by the coroutine manager once they
      * finish execution of their entrypoint method.
@@ -131,7 +131,7 @@ public:
 
     void CleanUp() override;
 
-    bool RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size) override;
+    bool RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize) override;
 
     static bool ThreadIsCoroutine(Thread *thread)
     {
@@ -165,14 +165,14 @@ public:
     /// Get unique coroutine ID
     uint32_t GetCoroutineId() const
     {
-        return coroutine_id_;
+        return coroutineId_;
     }
 
     /**
      * Suspend a coroutine, so its status becomes either Status::RUNNABLE or Status::BLOCKED, depending on the suspend
      * reason.
      */
-    virtual void RequestSuspend(bool gets_blocked);
+    virtual void RequestSuspend(bool getsBlocked);
     /// Resume the suspended coroutine, so its status becomes Status::RUNNING.
     virtual void RequestResume();
     /// Unblock the blocked coroutine, setting its status to Status::RUNNABLE
@@ -181,12 +181,12 @@ public:
      * @brief Indicate that coroutine entrypoint execution is finished. Propagates the coroutine
      * return value to language level objects.
      */
-    virtual void RequestCompletion(Value return_value);
+    virtual void RequestCompletion(Value returnValue);
 
     /// Get the CompletionEvent instance
     CompletionEvent *GetCompletionEvent()
     {
-        return std::get<ManagedEntrypointData>(entrypoint_).completion_event;
+        return std::get<ManagedEntrypointData>(entrypoint_).completionEvent;
     }
 
     bool HasManagedEntrypoint() const
@@ -241,23 +241,23 @@ public:
 
     bool IsSuspendOnStartup() const
     {
-        return start_suspended_;
+        return startSuspended_;
     }
 
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
     explicit Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
-                       panda::panda_file::SourceLang thread_lang, PandaString name, CoroutineContext *context,
-                       std::optional<EntrypointInfo> &&ep_info);
+                       panda::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
+                       std::optional<EntrypointInfo> &&epInfo);
 
-    void SetCoroutineStatus(Status new_status);
+    void SetCoroutineStatus(Status newStatus);
 
 private:
     /// a converter function that stores the data from EntrypointInfo in the member variables
-    void SetEntrypointData(std::optional<EntrypointInfo> &&ep_info);
+    void SetEntrypointData(std::optional<EntrypointInfo> &&epInfo);
 
     PandaString name_;
-    uint32_t coroutine_id_ = 0;
+    uint32_t coroutineId_ = 0;
 
     /// contains managed entrypoint parameters if the coroutine an EP and is "managed"
     struct ManagedEntrypointData {
@@ -265,14 +265,14 @@ private:
         NO_MOVE_SEMANTIC(ManagedEntrypointData);
 
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-        CompletionEvent *completion_event = nullptr;  ///< is owned by this structure
+        CompletionEvent *completionEvent = nullptr;  ///< is owned by this structure
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
         Method *entrypoint = nullptr;
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
         PandaVector<Value> arguments;
 
         explicit ManagedEntrypointData(CompletionEvent *event, Method *entry, PandaVector<Value> &&args)
-            : completion_event(event), entrypoint(entry), arguments(std::move(args))
+            : completionEvent(event), entrypoint(entry), arguments(std::move(args))
         {
             ASSERT(event != nullptr);
             ASSERT(entry != nullptr);
@@ -298,7 +298,7 @@ private:
 
     CoroutineContext *context_ = nullptr;
     // NOTE(konstanting, #I67QXC): check if we still need this functionality
-    bool start_suspended_ = false;
+    bool startSuspended_ = false;
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

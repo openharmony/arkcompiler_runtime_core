@@ -29,15 +29,15 @@ class GCRoot;
 template <LangTypeT LANG_TYPE = LANG_TYPE_STATIC>
 class HeapReferenceVerifier {
 public:
-    explicit HeapReferenceVerifier(HeapManager *heap, size_t *count) : heap_(heap), fail_count_(count) {}
+    explicit HeapReferenceVerifier(HeapManager *heap, size_t *count) : heap_(heap), failCount_(count) {}
 
-    void operator()(ObjectHeader *object_header, ObjectHeader *referent);
+    void operator()(ObjectHeader *objectHeader, ObjectHeader *referent);
 
     void operator()(const GCRoot &root);
 
 private:
     HeapManager *const heap_ {nullptr};
-    size_t *const fail_count_ {nullptr};
+    size_t *const failCount_ {nullptr};
 };
 
 /**
@@ -49,18 +49,18 @@ class HeapObjectVerifier {
 public:
     HeapObjectVerifier() = delete;
 
-    HeapObjectVerifier(HeapManager *heap, size_t *count) : heap_(heap), fail_count_(count) {}
+    HeapObjectVerifier(HeapManager *heap, size_t *count) : heap_(heap), failCount_(count) {}
 
     void operator()(ObjectHeader *obj);
 
     size_t GetFailCount() const
     {
-        return *fail_count_;
+        return *failCount_;
     }
 
 private:
     HeapManager *const heap_ {nullptr};
-    size_t *const fail_count_ {nullptr};
+    size_t *const failCount_ {nullptr};
 };
 
 class HeapVerifierBase {
@@ -112,7 +112,7 @@ public:
 
 private:
     struct ObjectCache {
-        const ObjectHeader *heap_object;
+        const ObjectHeader *heapObject;
         const ObjectHeader *referent;
     };
 };
@@ -133,11 +133,11 @@ public:
      * @param in_alive_space whether the object places in space which was not moved (region promotion, for example)
      * @return true if reference is correct and false otherwise
      */
-    bool VerifyUpdatedRef(ObjectHeader *object, ObjectHeader *updated_ref, bool in_alive_space) const;
+    bool VerifyUpdatedRef(ObjectHeader *object, ObjectHeader *updatedRef, bool inAliveSpace) const;
 
 private:
-    void *class_address_ = nullptr;
-    ObjectHeader *old_address_ = nullptr;
+    void *classAddress_ = nullptr;
+    ObjectHeader *oldAddress_ = nullptr;
 };
 
 template <class LanguageConfig>
@@ -148,9 +148,9 @@ public:
     DEFAULT_MOVE_SEMANTIC(HeapVerifierIntoGC);
     ~HeapVerifierIntoGC() = default;
 
-    void CollectVerificationInfo(PandaVector<MemRange> &&collectable_mem_ranges);
+    void CollectVerificationInfo(PandaVector<MemRange> &&collectableMemRanges);
 
-    size_t VerifyAll(PandaVector<MemRange> &&alive_mem_ranges = PandaVector<MemRange>());
+    size_t VerifyAll(PandaVector<MemRange> &&aliveMemRanges = PandaVector<MemRange>());
 
 private:
     using VerifyingRefs = PandaUnorderedMap<size_t, ObjectVerificationInfo>;
@@ -158,13 +158,13 @@ private:
 
     bool InCollectableSpace(const ObjectHeader *object) const;
     bool InAliveSpace(const ObjectHeader *object) const;
-    void AddToVerificationInfo(RefsVerificationInfo &verification_info, size_t ref_number, ObjectHeader *object_header,
+    void AddToVerificationInfo(RefsVerificationInfo &verificationInfo, size_t refNumber, ObjectHeader *objectHeader,
                                ObjectHeader *referent);
 
-    RefsVerificationInfo collectable_verification_info_;
-    RefsVerificationInfo permanent_verification_info_;
-    PandaVector<MemRange> collectable_mem_ranges_;
-    PandaVector<MemRange> alive_mem_ranges_;
+    RefsVerificationInfo collectableVerificationInfo_;
+    RefsVerificationInfo permanentVerificationInfo_;
+    PandaVector<MemRange> collectableMemRanges_;
+    PandaVector<MemRange> aliveMemRanges_;
 };
 }  // namespace panda::mem
 

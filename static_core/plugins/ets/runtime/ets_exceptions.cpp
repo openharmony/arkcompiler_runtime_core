@@ -26,26 +26,26 @@
 
 namespace panda::ets {
 
-static EtsClass *GetExceptionClass(EtsCoroutine *coroutine, const char *class_descriptor)
+static EtsClass *GetExceptionClass(EtsCoroutine *coroutine, const char *classDescriptor)
 {
     ASSERT(coroutine != nullptr);
-    ASSERT(class_descriptor != nullptr);
+    ASSERT(classDescriptor != nullptr);
 
-    EtsClassLinker *class_linker = coroutine->GetPandaVM()->GetClassLinker();
-    EtsClass *cls = class_linker->GetClass(class_descriptor, true);
+    EtsClassLinker *classLinker = coroutine->GetPandaVM()->GetClassLinker();
+    EtsClass *cls = classLinker->GetClass(classDescriptor, true);
     if (cls == nullptr) {
-        LOG(ERROR, CLASS_LINKER) << "Class " << class_descriptor << " not found";
+        LOG(ERROR, CLASS_LINKER) << "Class " << classDescriptor << " not found";
         return nullptr;
     }
 
-    if (!class_linker->InitializeClass(coroutine, cls)) {
-        LOG(ERROR, CLASS_LINKER) << "Class " << class_descriptor << " cannot be initialized";
+    if (!classLinker->InitializeClass(coroutine, cls)) {
+        LOG(ERROR, CLASS_LINKER) << "Class " << classDescriptor << " cannot be initialized";
         return nullptr;
     }
     return cls;
 }
 
-void ThrowEtsException(EtsCoroutine *coroutine, const char *class_descriptor, const char *msg)
+void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
 {
     ASSERT(coroutine != nullptr);
     ASSERT(coroutine == EtsCoroutine::GetCurrent());
@@ -60,18 +60,18 @@ void ThrowEtsException(EtsCoroutine *coroutine, const char *class_descriptor, co
     EtsHandle<EtsObject> cause(coroutine, EtsObject::FromCoreType(coroutine->GetException()));
     coroutine->ClearException();
 
-    EtsClass *cls = GetExceptionClass(coroutine, class_descriptor);
+    EtsClass *cls = GetExceptionClass(coroutine, classDescriptor);
     if (cls == nullptr) {
         return;
     }
 
-    EtsString *ets_msg = nullptr;
+    EtsString *etsMsg = nullptr;
     if (msg != nullptr) {
-        ets_msg = EtsString::CreateFromMUtf8(msg);
+        etsMsg = EtsString::CreateFromMUtf8(msg);
     } else {
-        ets_msg = EtsString::CreateNewEmptyString();
+        etsMsg = EtsString::CreateNewEmptyString();
     }
-    if (UNLIKELY(ets_msg == nullptr)) {
+    if (UNLIKELY(etsMsg == nullptr)) {
         // OOM happened during msg allocation
         ASSERT(coroutine->HasPendingException());
         return;
@@ -84,23 +84,23 @@ void ThrowEtsException(EtsCoroutine *coroutine, const char *class_descriptor, co
                                                       panda_file_items::class_descriptors::OBJECT});
     EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
     if (ctor == nullptr) {
-        LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << class_descriptor;
+        LOG(FATAL, RUNTIME) << "No method " << panda_file_items::CTOR << " in class " << classDescriptor;
         return;
     }
 
-    EtsHandle<EtsString> msg_handle(coroutine, ets_msg);
-    EtsHandle<EtsObject> exc_handle(coroutine, EtsObject::Create(cls));
+    EtsHandle<EtsString> msgHandle(coroutine, etsMsg);
+    EtsHandle<EtsObject> excHandle(coroutine, EtsObject::Create(cls));
     // clang-format off
     std::array args {
-        Value(exc_handle.GetPtr()->GetCoreType()),
-        Value(msg_handle.GetPtr()->GetCoreType()),
+        Value(excHandle.GetPtr()->GetCoreType()),
+        Value(msgHandle.GetPtr()->GetCoreType()),
         Value(cause.GetPtr()->GetCoreType())
     };
     // clang-format on
 
     EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(coroutine, args.data());
     if (LIKELY(!coroutine->HasPendingException())) {
-        coroutine->SetException(exc_handle.GetPtr()->GetCoreType());
+        coroutine->SetException(excHandle.GetPtr()->GetCoreType());
     }
 }
 

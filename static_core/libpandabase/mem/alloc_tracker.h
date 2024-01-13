@@ -49,24 +49,24 @@ public:
     void TrackAlloc(void *addr, size_t size, [[maybe_unused]] SpaceType space) override
     {
         os::memory::LockHolder lock(lock_);
-        internal_alloc_counter_++;
-        total_allocated_ += size;
-        current_allocated_ += size;
-        peak_allocated_ = std::max(peak_allocated_, current_allocated_);
-        auto ins_result = allocated_addresses_.insert({addr, AllocInfo(internal_alloc_counter_, size)});
-        ASSERT(ins_result.second);
-        static_cast<void>(ins_result);  // Fix compilation in release
+        internalAllocCounter_++;
+        totalAllocated_ += size;
+        currentAllocated_ += size;
+        peakAllocated_ = std::max(peakAllocated_, currentAllocated_);
+        auto insResult = allocatedAddresses_.insert({addr, AllocInfo(internalAllocCounter_, size)});
+        ASSERT(insResult.second);
+        static_cast<void>(insResult);  // Fix compilation in release
     }
 
     void TrackFree(void *addr) override
     {
         os::memory::LockHolder lock(lock_);
-        internal_free_counter_++;
-        auto it = allocated_addresses_.find(addr);
-        ASSERT(it != allocated_addresses_.end());
+        internalFreeCounter_++;
+        auto it = allocatedAddresses_.find(addr);
+        ASSERT(it != allocatedAddresses_.end());
         size_t size = it->second.GetSize();
-        allocated_addresses_.erase(it);
-        current_allocated_ -= size;
+        allocatedAddresses_.erase(it);
+        currentAllocated_ -= size;
     }
 
     void Dump() override
@@ -77,15 +77,15 @@ public:
     void Dump(std::ostream &out) override
     {
         out << "Internal memory allocations:\n";
-        out << "allocations count: " << internal_alloc_counter_ << "\n";
-        out << "  total allocated: " << total_allocated_ << "\n";
-        out << "   peak allocated: " << peak_allocated_ << "\n";
+        out << "allocations count: " << internalAllocCounter_ << "\n";
+        out << "  total allocated: " << totalAllocated_ << "\n";
+        out << "   peak allocated: " << peakAllocated_ << "\n";
     }
 
     void DumpMemLeaks(std::ostream &out) override
     {
         out << "=== Allocated Internal Memory: ===" << std::endl;
-        for (auto it : allocated_addresses_) {
+        for (auto it : allocatedAddresses_) {
             out << std::hex << it.first << ", allocation #" << std::dec << it.second.GetAllocNumber() << std::endl;
         }
         out << "==================================" << std::endl;
@@ -94,11 +94,11 @@ public:
 private:
     class AllocInfo {
     public:
-        AllocInfo(size_t alloc_number, size_t size) : alloc_number_(alloc_number), size_(size) {}
+        AllocInfo(size_t allocNumber, size_t size) : allocNumber_(allocNumber), size_(size) {}
 
         size_t GetAllocNumber() const
         {
-            return alloc_number_;
+            return allocNumber_;
         }
 
         size_t GetSize() const
@@ -107,17 +107,17 @@ private:
         }
 
     private:
-        size_t alloc_number_;
+        size_t allocNumber_;
         size_t size_;
     };
 
 private:
-    size_t internal_alloc_counter_ = 0;
-    size_t internal_free_counter_ = 0;
-    size_t total_allocated_ = 0;
-    size_t current_allocated_ = 0;
-    size_t peak_allocated_ = 0;
-    std::unordered_map<void *, AllocInfo> allocated_addresses_;
+    size_t internalAllocCounter_ = 0;
+    size_t internalFreeCounter_ = 0;
+    size_t totalAllocated_ = 0;
+    size_t currentAllocated_ = 0;
+    size_t peakAllocated_ = 0;
+    std::unordered_map<void *, AllocInfo> allocatedAddresses_;
     os::memory::Mutex lock_;
 };
 
@@ -138,8 +138,8 @@ private:
 
     class AllocInfo {
     public:
-        AllocInfo(uint32_t id, uint32_t size, uint32_t space, uint32_t stacktrace_id)
-            : id_(id), size_(size), space_(space), stacktrace_id_(stacktrace_id)
+        AllocInfo(uint32_t id, uint32_t size, uint32_t space, uint32_t stacktraceId)
+            : id_(id), size_(size), space_(space), stacktraceId_(stacktraceId)
         {
         }
 
@@ -165,7 +165,7 @@ private:
 
         uint32_t GetStacktraceId() const
         {
-            return stacktrace_id_;
+            return stacktraceId_;
         }
 
     private:
@@ -173,12 +173,12 @@ private:
         uint32_t id_;
         uint32_t size_;
         uint32_t space_;
-        uint32_t stacktrace_id_;
+        uint32_t stacktraceId_;
     };
 
     class FreeInfo {
     public:
-        explicit FreeInfo(uint32_t alloc_id) : alloc_id_(alloc_id) {}
+        explicit FreeInfo(uint32_t allocId) : allocId_(allocId) {}
 
         uint32_t GetTag() const
         {
@@ -187,24 +187,24 @@ private:
 
         uint32_t GetAllocId() const
         {
-            return alloc_id_;
+            return allocId_;
         }
 
     private:
         const uint32_t tag_ = FREE_TAG;
-        uint32_t alloc_id_;
+        uint32_t allocId_;
     };
 
     void AllocArena() REQUIRES(mutex_);
-    uint32_t WriteStacks(std::ostream &out, std::map<uint32_t, uint32_t> *id_map) REQUIRES(mutex_);
+    uint32_t WriteStacks(std::ostream &out, std::map<uint32_t, uint32_t> *idMap) REQUIRES(mutex_);
 
 private:
-    std::atomic<size_t> alloc_counter_ = 0;
-    uint32_t cur_id_ GUARDED_BY(mutex_) = 0;
-    Span<uint8_t> cur_arena_ GUARDED_BY(mutex_);
+    std::atomic<size_t> allocCounter_ = 0;
+    uint32_t curId_ GUARDED_BY(mutex_) = 0;
+    Span<uint8_t> curArena_ GUARDED_BY(mutex_);
     std::list<std::unique_ptr<uint8_t[]>> arenas_ GUARDED_BY(mutex_);  // NOLINT(modernize-avoid-c-arrays)
     std::list<Stacktrace> stacktraces_ GUARDED_BY(mutex_);
-    std::map<void *, AllocInfo *> cur_allocs_ GUARDED_BY(mutex_);
+    std::map<void *, AllocInfo *> curAllocs_ GUARDED_BY(mutex_);
     os::memory::Mutex mutex_;
 };
 

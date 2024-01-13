@@ -68,12 +68,12 @@ inline bool IsFastpathIntrinsic(RuntimeInterface::IntrinsicId intrinsic)
     }
 }
 
-inline bool IsStackRangeIntrinsic(RuntimeInterface::IntrinsicId intrinsic, [[maybe_unused]] size_t *explicit_args)
+inline bool IsStackRangeIntrinsic(RuntimeInterface::IntrinsicId intrinsic, [[maybe_unused]] size_t *explicitArgs)
 {
     switch (intrinsic) {  // NOLINT(hicpp-multiway-paths-covered)
 % Compiler::intrinsics.select(&:is_stackrange?).each do |intrinsic|
     case RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
-        *explicit_args = <%= intrinsic.arguments.length() - 1 %>;
+        *explicitArgs = <%= intrinsic.arguments.length() - 1 %>;
         return true;
 % end
     default:

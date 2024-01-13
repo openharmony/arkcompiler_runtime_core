@@ -39,14 +39,14 @@ public:
         method_ = method;
     }
 
-    void SetOsr(bool is_osr)
+    void SetOsr(bool isOsr)
     {
-        is_osr_ = is_osr;
+        isOsr_ = isOsr;
     }
 
-    void SetVM(PandaVM *panda_vm)
+    void SetVM(PandaVM *pandaVm)
     {
-        panda_vm_ = panda_vm;
+        pandaVm_ = pandaVm;
     }
 
     void SetAllocator(ArenaAllocator *allocator)
@@ -54,14 +54,14 @@ public:
         allocator_ = allocator;
     }
 
-    void SetLocalAllocator(ArenaAllocator *local_allocator)
+    void SetLocalAllocator(ArenaAllocator *localAllocator)
     {
-        local_allocator_ = local_allocator;
+        localAllocator_ = localAllocator;
     }
 
-    void SetMethodName(std::string method_name)
+    void SetMethodName(std::string methodName)
     {
-        method_name_ = std::move(method_name);
+        methodName_ = std::move(methodName);
     }
 
     void SetGraph(Graph *graph)
@@ -74,9 +74,9 @@ public:
         pipeline_ = pipeline;
     }
 
-    void SetCompilationStatus(bool compilation_status)
+    void SetCompilationStatus(bool compilationStatus)
     {
-        compilation_status_ = compilation_status;
+        compilationStatus_ = compilationStatus;
     }
 
     Method *GetMethod() const
@@ -86,12 +86,12 @@ public:
 
     bool IsOsr() const
     {
-        return is_osr_;
+        return isOsr_;
     }
 
     PandaVM *GetVM() const
     {
-        return panda_vm_;
+        return pandaVm_;
     }
 
     ArenaAllocator *GetAllocator() const
@@ -101,12 +101,12 @@ public:
 
     ArenaAllocator *GetLocalAllocator() const
     {
-        return local_allocator_;
+        return localAllocator_;
     }
 
     const std::string &GetMethodName() const
     {
-        return method_name_;
+        return methodName_;
     }
 
     Graph *GetGraph() const
@@ -121,27 +121,27 @@ public:
 
     bool GetCompilationStatus() const
     {
-        return compilation_status_;
+        return compilationStatus_;
     }
 
 private:
     Method *method_ {nullptr};
-    bool is_osr_ {false};
-    PandaVM *panda_vm_ {nullptr};
+    bool isOsr_ {false};
+    PandaVM *pandaVm_ {nullptr};
     ArenaAllocator *allocator_ {nullptr};
-    ArenaAllocator *local_allocator_ {nullptr};
-    std::string method_name_;
+    ArenaAllocator *localAllocator_ {nullptr};
+    std::string methodName_;
     Graph *graph_ {nullptr};
     Pipeline *pipeline_ {nullptr};
     // Used only in JIT Compilation
-    bool compilation_status_ {false};
+    bool compilationStatus_ {false};
 };
 
 class InPlaceCompilerTaskRunner : public panda::TaskRunner<InPlaceCompilerTaskRunner, InPlaceCompilerContext> {
 public:
     InPlaceCompilerContext &GetContext() override
     {
-        return task_ctx_;
+        return taskCtx_;
     }
 
     /**
@@ -150,13 +150,13 @@ public:
      * @param task_func - task which will be executed with @param task_runner
      */
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
-    static void StartTask(InPlaceCompilerTaskRunner task_runner, TaskRunner::TaskFunc task_func)
+    static void StartTask(InPlaceCompilerTaskRunner taskRunner, TaskRunner::TaskFunc taskFunc)
     {
-        task_func(std::move(task_runner));
+        taskFunc(std::move(taskRunner));
     }
 
 private:
-    InPlaceCompilerContext task_ctx_;
+    InPlaceCompilerContext taskCtx_;
 };
 
 }  // namespace panda::compiler

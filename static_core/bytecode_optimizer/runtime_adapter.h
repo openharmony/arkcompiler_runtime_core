@@ -32,29 +32,29 @@ using compiler::RuntimeInterface;
 
 class BytecodeOptimizerRuntimeAdapter : public RuntimeInterface {
 public:
-    explicit BytecodeOptimizerRuntimeAdapter(const panda_file::File &panda_file) : panda_file_(panda_file) {}
+    explicit BytecodeOptimizerRuntimeAdapter(const panda_file::File &pandaFile) : pandaFile_(pandaFile) {}
     ~BytecodeOptimizerRuntimeAdapter() override = default;
     NO_COPY_SEMANTIC(BytecodeOptimizerRuntimeAdapter);
     NO_MOVE_SEMANTIC(BytecodeOptimizerRuntimeAdapter);
 
     BinaryFilePtr GetBinaryFileForMethod([[maybe_unused]] MethodPtr method) const override
     {
-        return const_cast<panda_file::File *>(&panda_file_);
+        return const_cast<panda_file::File *>(&pandaFile_);
     }
 
-    MethodId ResolveMethodIndex(MethodPtr parent_method, MethodIndex index) const override
+    MethodId ResolveMethodIndex(MethodPtr parentMethod, MethodIndex index) const override
     {
-        return panda_file_.ResolveMethodIndex(MethodCast(parent_method), index).GetOffset();
+        return pandaFile_.ResolveMethodIndex(MethodCast(parentMethod), index).GetOffset();
     }
 
-    FieldId ResolveFieldIndex(MethodPtr parent_method, FieldIndex index) const override
+    FieldId ResolveFieldIndex(MethodPtr parentMethod, FieldIndex index) const override
     {
-        return panda_file_.ResolveFieldIndex(MethodCast(parent_method), index).GetOffset();
+        return pandaFile_.ResolveFieldIndex(MethodCast(parentMethod), index).GetOffset();
     }
 
-    IdType ResolveTypeIndex(MethodPtr parent_method, TypeIndex index) const override
+    IdType ResolveTypeIndex(MethodPtr parentMethod, TypeIndex index) const override
     {
-        return panda_file_.ResolveClassIndex(MethodCast(parent_method), index).GetOffset();
+        return pandaFile_.ResolveClassIndex(MethodCast(parentMethod), index).GetOffset();
     }
 
     MethodPtr GetMethodById([[maybe_unused]] MethodPtr caller, MethodId id) const override
@@ -69,23 +69,23 @@ public:
 
     compiler::DataType::Type GetMethodReturnType(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
-        panda_file::ProtoDataAccessor pda(panda_file_, mda.GetProtoId());
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
+        panda_file::ProtoDataAccessor pda(pandaFile_, mda.GetProtoId());
 
         return ToCompilerType(panda_file::GetEffectiveType(pda.GetReturnType()));
     }
 
     IdType GetMethodReturnTypeId(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
-        panda_file::ProtoDataAccessor pda(panda_file_, mda.GetProtoId());
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
+        panda_file::ProtoDataAccessor pda(pandaFile_, mda.GetProtoId());
 
         return pda.GetReferenceType(0).GetOffset();
     }
 
     compiler::DataType::Type GetMethodTotalArgumentType(MethodPtr method, size_t index) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         if (!mda.IsStatic()) {
             if (index == 0) {
@@ -95,33 +95,33 @@ public:
             --index;
         }
 
-        panda_file::ProtoDataAccessor pda(panda_file_, mda.GetProtoId());
+        panda_file::ProtoDataAccessor pda(pandaFile_, mda.GetProtoId());
         return ToCompilerType(panda_file::GetEffectiveType(pda.GetArgType(index)));
     }
 
     compiler::DataType::Type GetMethodArgumentType([[maybe_unused]] MethodPtr caller, MethodId id,
                                                    size_t index) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, panda_file::File::EntityId(id));
-        panda_file::ProtoDataAccessor pda(panda_file_, mda.GetProtoId());
+        panda_file::MethodDataAccessor mda(pandaFile_, panda_file::File::EntityId(id));
+        panda_file::ProtoDataAccessor pda(pandaFile_, mda.GetProtoId());
 
         return ToCompilerType(panda_file::GetEffectiveType(pda.GetArgType(index)));
     }
 
     size_t GetMethodTotalArgumentsCount(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
-        panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
+        panda_file::CodeDataAccessor cda(pandaFile_, mda.GetCodeId().value());
 
         return cda.GetNumArgs();
     }
 
     size_t GetMethodArgumentsCount([[maybe_unused]] MethodPtr caller, MethodId id) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, panda_file::File::EntityId(id));
-        panda_file::ProtoDataAccessor pda(panda_file_, mda.GetProtoId());
+        panda_file::MethodDataAccessor mda(pandaFile_, panda_file::File::EntityId(id));
+        panda_file::ProtoDataAccessor pda(pandaFile_, mda.GetProtoId());
 
         return pda.GetNumArgs();
     }
@@ -133,77 +133,77 @@ public:
 
     size_t GetMethodRegistersCount(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
-        panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
+        panda_file::CodeDataAccessor cda(pandaFile_, mda.GetCodeId().value());
 
         return cda.GetNumVregs();
     }
 
     const uint8_t *GetMethodCode(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
-        panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
+        panda_file::CodeDataAccessor cda(pandaFile_, mda.GetCodeId().value());
 
         return cda.GetInstructions();
     }
 
     size_t GetMethodCodeSize(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
-        panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
+        panda_file::CodeDataAccessor cda(pandaFile_, mda.GetCodeId().value());
 
         return cda.GetCodeSize();
     }
 
     SourceLanguage GetMethodSourceLanguage(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         ASSERT(!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative());
 
-        auto source_lang = mda.GetSourceLang();
-        ASSERT(source_lang.has_value());
+        auto sourceLang = mda.GetSourceLang();
+        ASSERT(sourceLang.has_value());
 
-        return static_cast<SourceLanguage>(source_lang.value());
+        return static_cast<SourceLanguage>(sourceLang.value());
     }
 
-    size_t GetClassIdForField([[maybe_unused]] MethodPtr method, size_t field_id) const override
+    size_t GetClassIdForField([[maybe_unused]] MethodPtr method, size_t fieldId) const override
     {
-        panda_file::FieldDataAccessor fda(panda_file_, panda_file::File::EntityId(field_id));
+        panda_file::FieldDataAccessor fda(pandaFile_, panda_file::File::EntityId(fieldId));
 
         return static_cast<size_t>(fda.GetClassId().GetOffset());
     }
 
     ClassPtr GetClassForField(FieldPtr field) const override
     {
-        panda_file::FieldDataAccessor fda(panda_file_, FieldCast(field));
+        panda_file::FieldDataAccessor fda(pandaFile_, FieldCast(field));
 
         return reinterpret_cast<ClassPtr>(fda.GetClassId().GetOffset());
     }
 
     size_t GetClassIdForMethod(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         return static_cast<size_t>(mda.GetClassId().GetOffset());
     }
 
-    size_t GetClassIdForMethod([[maybe_unused]] MethodPtr caller, size_t method_id) const override
+    size_t GetClassIdForMethod([[maybe_unused]] MethodPtr caller, size_t methodId) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, panda_file::File::EntityId(method_id));
+        panda_file::MethodDataAccessor mda(pandaFile_, panda_file::File::EntityId(methodId));
 
         return static_cast<size_t>(mda.GetClassId().GetOffset());
     }
 
     bool IsMethodExternal([[maybe_unused]] MethodPtr caller, MethodPtr callee) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(callee));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(callee));
 
         return mda.IsExternal();
     }
@@ -220,14 +220,14 @@ public:
 
     bool IsMethodStatic(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         return mda.IsStatic();
     }
 
     bool IsMethodStatic([[maybe_unused]] MethodPtr caller, MethodId id) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, panda_file::File::EntityId(id));
+        panda_file::MethodDataAccessor mda(pandaFile_, panda_file::File::EntityId(id));
 
         return mda.IsStatic();
     }
@@ -240,27 +240,27 @@ public:
 
     std::string GetClassNameFromMethod(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
-        auto string_data = panda_file_.GetStringData(mda.GetClassId());
+        auto stringData = pandaFile_.GetStringData(mda.GetClassId());
 
-        return std::string(reinterpret_cast<const char *>(string_data.data));
+        return std::string(reinterpret_cast<const char *>(stringData.data));
     }
 
     std::string GetClassName(ClassPtr cls) const override
     {
-        auto string_data = panda_file_.GetStringData(ClassCast(cls));
+        auto stringData = pandaFile_.GetStringData(ClassCast(cls));
 
-        return std::string(reinterpret_cast<const char *>(string_data.data));
+        return std::string(reinterpret_cast<const char *>(stringData.data));
     }
 
     std::string GetMethodName(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
-        auto string_data = panda_file_.GetStringData(mda.GetNameId());
+        auto stringData = pandaFile_.GetStringData(mda.GetNameId());
 
-        return std::string(reinterpret_cast<const char *>(string_data.data));
+        return std::string(reinterpret_cast<const char *>(stringData.data));
     }
 
     bool IsConstructor(MethodPtr method, SourceLanguage lang) override
@@ -270,15 +270,15 @@ public:
 
     std::string GetMethodFullName(MethodPtr method, bool /* with_signature */) const override
     {
-        auto class_name = GetClassNameFromMethod(method);
-        auto method_name = GetMethodName(method);
+        auto className = GetClassNameFromMethod(method);
+        auto methodName = GetMethodName(method);
 
-        return class_name + "::" + method_name;
+        return className + "::" + methodName;
     }
 
     ClassPtr GetClass(MethodPtr method) const override
     {
-        panda_file::MethodDataAccessor mda(panda_file_, MethodCast(method));
+        panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
         return reinterpret_cast<ClassPtr>(mda.GetClassId().GetOffset());
     }
@@ -297,10 +297,10 @@ public:
     {
         panda_file::File::EntityId cid(id);
 
-        return panda_file::IsArrayDescriptor(panda_file_.GetStringData(cid).data);
+        return panda_file::IsArrayDescriptor(pandaFile_.GetStringData(cid).data);
     }
 
-    FieldPtr ResolveField([[maybe_unused]] MethodPtr method, size_t id, [[maybe_unused]] bool allow_external,
+    FieldPtr ResolveField([[maybe_unused]] MethodPtr method, size_t id, [[maybe_unused]] bool allowExternal,
                           uint32_t * /* class_id */) override
     {
         return reinterpret_cast<FieldPtr>(id);
@@ -308,82 +308,82 @@ public:
 
     compiler::DataType::Type GetFieldType(FieldPtr field) const override
     {
-        panda_file::FieldDataAccessor fda(panda_file_, FieldCast(field));
+        panda_file::FieldDataAccessor fda(pandaFile_, FieldCast(field));
 
         return ToCompilerType(panda_file::Type::GetTypeFromFieldEncoding(fda.GetType()));
     }
 
-    compiler::DataType::Type GetFieldTypeById([[maybe_unused]] MethodPtr parent_method, IdType id) const override
+    compiler::DataType::Type GetFieldTypeById([[maybe_unused]] MethodPtr parentMethod, IdType id) const override
     {
-        panda_file::FieldDataAccessor fda(panda_file_, panda_file::File::EntityId(id));
+        panda_file::FieldDataAccessor fda(pandaFile_, panda_file::File::EntityId(id));
 
         return ToCompilerType(panda_file::Type::GetTypeFromFieldEncoding(fda.GetType()));
     }
 
     IdType GetFieldValueTypeId([[maybe_unused]] MethodPtr method, IdType id) const override
     {
-        auto type_id = panda_file::FieldDataAccessor::GetTypeId(panda_file_, panda_file::File::EntityId(id));
-        return type_id.GetOffset();
+        auto typeId = panda_file::FieldDataAccessor::GetTypeId(pandaFile_, panda_file::File::EntityId(id));
+        return typeId.GetOffset();
     }
 
     bool IsFieldVolatile(FieldPtr field) const override
     {
-        panda_file::FieldDataAccessor fda(panda_file_, FieldCast(field));
+        panda_file::FieldDataAccessor fda(pandaFile_, FieldCast(field));
 
         if (!fda.IsExternal()) {
             return fda.IsVolatile();
         }
 
-        auto field_id = panda_file::File::EntityId();
+        auto fieldId = panda_file::File::EntityId();
 
-        if (panda_file_.IsExternal(fda.GetClassId())) {
+        if (pandaFile_.IsExternal(fda.GetClassId())) {
             // If the field is external and class of the field is also external
             // assume that field is volatile
             return true;
         }
 
-        auto class_id = panda_file::ClassDataAccessor(panda_file_, fda.GetClassId()).GetSuperClassId();
+        auto classId = panda_file::ClassDataAccessor(pandaFile_, fda.GetClassId()).GetSuperClassId();
 #ifndef NDEBUG
-        auto visited_classes = std::unordered_set<panda_file::File::EntityId> {class_id};
+        auto visitedClasses = std::unordered_set<panda_file::File::EntityId> {classId};
 #endif
-        while (class_id.IsValid() && !panda_file_.IsExternal(class_id)) {
-            auto cda = panda_file::ClassDataAccessor(panda_file_, class_id);
-            cda.EnumerateFields([&field_id, &fda](panda_file::FieldDataAccessor &field_data_accessor) {
+        while (classId.IsValid() && !pandaFile_.IsExternal(classId)) {
+            auto cda = panda_file::ClassDataAccessor(pandaFile_, classId);
+            cda.EnumerateFields([&fieldId, &fda](panda_file::FieldDataAccessor &fieldDataAccessor) {
                 auto &pf = fda.GetPandaFile();
-                auto field_type = panda_file::Type::GetTypeFromFieldEncoding(fda.GetType());
-                if (fda.GetType() != field_data_accessor.GetType()) {
+                auto fieldType = panda_file::Type::GetTypeFromFieldEncoding(fda.GetType());
+                if (fda.GetType() != fieldDataAccessor.GetType()) {
                     return;
                 }
 
-                if (pf.GetStringData(fda.GetNameId()) != pf.GetStringData(field_data_accessor.GetNameId())) {
+                if (pf.GetStringData(fda.GetNameId()) != pf.GetStringData(fieldDataAccessor.GetNameId())) {
                     return;
                 }
 
-                if (field_type.IsReference()) {
+                if (fieldType.IsReference()) {
                     if (pf.GetStringData(panda_file::File::EntityId(fda.GetType())) !=
-                        pf.GetStringData(panda_file::File::EntityId(field_data_accessor.GetType()))) {
+                        pf.GetStringData(panda_file::File::EntityId(fieldDataAccessor.GetType()))) {
                         return;
                     }
                 }
 
-                field_id = field_data_accessor.GetFieldId();
+                fieldId = fieldDataAccessor.GetFieldId();
             });
 
-            class_id = cda.GetSuperClassId();
+            classId = cda.GetSuperClassId();
 #ifndef NDEBUG
-            ASSERT_PRINT(visited_classes.count(class_id) == 0, "Class hierarchy is incorrect");
-            visited_classes.insert(class_id);
+            ASSERT_PRINT(visitedClasses.count(classId) == 0, "Class hierarchy is incorrect");
+            visitedClasses.insert(classId);
 #endif
         }
 
-        if (!field_id.IsValid()) {
+        if (!fieldId.IsValid()) {
             // If we cannot find field (for example it's in the class that located in other panda file)
             // assume that field is volatile
             return true;
         }
-        ASSERT(field_id.IsValid());
-        panda_file::FieldDataAccessor field_da(panda_file_, field_id);
-        return field_da.IsVolatile();
+        ASSERT(fieldId.IsValid());
+        panda_file::FieldDataAccessor fieldDa(pandaFile_, fieldId);
+        return fieldDa.IsVolatile();
     }
 
     ClassPtr ResolveType([[maybe_unused]] MethodPtr method, size_t id) const override
@@ -393,9 +393,9 @@ public:
 
     std::string GetFieldName(FieldPtr field) const override
     {
-        panda_file::FieldDataAccessor fda(panda_file_, FieldCast(field));
-        auto string_data = panda_file_.GetStringData(fda.GetNameId());
-        return utf::Mutf8AsCString(string_data.data);
+        panda_file::FieldDataAccessor fda(pandaFile_, FieldCast(field));
+        auto stringData = pandaFile_.GetStringData(fda.GetNameId());
+        return utf::Mutf8AsCString(stringData.data);
     }
 
 private:
@@ -452,7 +452,7 @@ private:
         return panda_file::File::EntityId(reinterpret_cast<uintptr_t>(field));
     }
 
-    const panda_file::File &panda_file_;
+    const panda_file::File &pandaFile_;
 };
 }  // namespace panda
 

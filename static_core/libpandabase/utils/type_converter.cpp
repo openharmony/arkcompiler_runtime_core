@@ -94,31 +94,31 @@ std::ostream &operator<<(std::ostream &os, const ValueUnit &element)
 
 template <size_t SIZE>
 ValueUnit TypeConverter(const std::array<double, SIZE> &coeffs, const std::array<std::string_view, SIZE + 1> &literals,
-                        uint64_t value_base_dimension)
+                        uint64_t valueBaseDimension)
 {
     constexpr double LIMIT = 1.0;
-    double division_ratio = 1;
-    auto value_base_dimension_double = static_cast<double>(value_base_dimension);
-    for (size_t index_coeff = 0; index_coeff < SIZE; ++index_coeff) {
-        if (value_base_dimension_double / (division_ratio * coeffs[index_coeff]) < LIMIT) {
-            return ValueUnit(value_base_dimension_double / division_ratio, literals[index_coeff]);
+    double divisionRatio = 1;
+    auto valueBaseDimensionDouble = static_cast<double>(valueBaseDimension);
+    for (size_t indexCoeff = 0; indexCoeff < SIZE; ++indexCoeff) {
+        if (valueBaseDimensionDouble / (divisionRatio * coeffs[indexCoeff]) < LIMIT) {
+            return ValueUnit(valueBaseDimensionDouble / divisionRatio, literals[indexCoeff]);
         }
-        division_ratio *= coeffs[index_coeff];
+        divisionRatio *= coeffs[indexCoeff];
     }
 
-    return ValueUnit(value_base_dimension_double / division_ratio, literals[SIZE]);
+    return ValueUnit(valueBaseDimensionDouble / divisionRatio, literals[SIZE]);
 }
 
-ValueUnit TimeConverter(uint64_t times_in_nanos)
+ValueUnit TimeConverter(uint64_t timesInNanos)
 {
-    return TypeConverter(COEFFS_TIME, LITERALS_TIME, times_in_nanos);
+    return TypeConverter(COEFFS_TIME, LITERALS_TIME, timesInNanos);
 }
 
 ValueUnit MemoryConverter(uint64_t bytes)
 {
-    ValueUnit bytes_format = TypeConverter(COEFFS_MEMORY, LITERALS_MEMORY, bytes);
-    bytes_format.SetPrecision(0);
-    return bytes_format;
+    ValueUnit bytesFormat = TypeConverter(COEFFS_MEMORY, LITERALS_MEMORY, bytes);
+    bytesFormat.SetPrecision(0);
+    return bytesFormat;
 }
 
 ValueUnit ValueConverter(uint64_t value, ValueType type)

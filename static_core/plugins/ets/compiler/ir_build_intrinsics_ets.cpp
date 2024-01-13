@@ -30,35 +30,34 @@ namespace panda::compiler {
     fraction size is 23 bits for floats and 52 bits for doubles
     exponent mask is 0xff (8 bits) for floats and 0x7ff (11 bits) for doubles
  */
-void InstBuilder::BuildIsFiniteIntrinsic(const BytecodeInstruction *bc_inst, bool acc_read)
+void InstBuilder::BuildIsFiniteIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
 {
-    auto method_index = bc_inst->GetId(0).AsIndex();
-    auto method_id = GetRuntime()->ResolveMethodIndex(GetMethod(), method_index);
-    auto type = GetMethodArgumentType(method_id, 0);
+    auto methodIndex = bcInst->GetId(0).AsIndex();
+    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
+    auto type = GetMethodArgumentType(methodId, 0);
     auto itype = type == DataType::FLOAT32 ? DataType::INT32 : DataType::INT64;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto fp_fract_size = type == DataType::FLOAT32 ? 23 : 52;
+    auto fpFractSize = type == DataType::FLOAT32 ? 23 : 52;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto fp_exp_mask = type == DataType::FLOAT32 ? 0xff : 0x7ff;
+    auto fpExpMask = type == DataType::FLOAT32 ? 0xff : 0x7ff;
 
-    auto bitcast = GetGraph()->CreateInstBitcast(itype, GetPc(bc_inst->GetAddress()),
-                                                 GetArgDefinition(bc_inst, 0, acc_read), type);
+    auto bitcast =
+        GetGraph()->CreateInstBitcast(itype, GetPc(bcInst->GetAddress()), GetArgDefinition(bcInst, 0, accRead), type);
     auto shift =
-        GetGraph()->CreateInstShr(itype, GetPc(bc_inst->GetAddress()), bitcast, FindOrCreateConstant(fp_fract_size));
-    auto mask =
-        GetGraph()->CreateInstAnd(itype, GetPc(bc_inst->GetAddress()), shift, FindOrCreateConstant(fp_exp_mask));
-    auto cmp = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bc_inst->GetAddress()), mask,
-                                             FindOrCreateConstant(fp_exp_mask), itype, ConditionCode::CC_NE);
+        GetGraph()->CreateInstShr(itype, GetPc(bcInst->GetAddress()), bitcast, FindOrCreateConstant(fpFractSize));
+    auto mask = GetGraph()->CreateInstAnd(itype, GetPc(bcInst->GetAddress()), shift, FindOrCreateConstant(fpExpMask));
+    auto cmp = GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bcInst->GetAddress()), mask,
+                                             FindOrCreateConstant(fpExpMask), itype, ConditionCode::CC_NE);
 
     AddInstruction(bitcast, shift, mask, cmp);
     UpdateDefinitionAcc(cmp);
 }
 
-void InstBuilder::BuildStdRuntimeEquals(const BytecodeInstruction *bc_inst, bool acc_read)
+void InstBuilder::BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool accRead)
 {
-    auto cmp = GetGraph()->CreateInstCompare(
-        DataType::BOOL, GetPc(bc_inst->GetAddress()), GetArgDefinition(bc_inst, 1, acc_read),
-        GetArgDefinition(bc_inst, 2, acc_read), DataType::REFERENCE, ConditionCode::CC_EQ);
+    auto cmp =
+        GetGraph()->CreateInstCompare(DataType::BOOL, GetPc(bcInst->GetAddress()), GetArgDefinition(bcInst, 1, accRead),
+                                      GetArgDefinition(bcInst, 2, accRead), DataType::REFERENCE, ConditionCode::CC_EQ);
     AddInstruction(cmp);
     UpdateDefinitionAcc(cmp);
 }

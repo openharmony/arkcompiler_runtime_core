@@ -14,6 +14,7 @@
  */
 
 #include "serializer/serializer.h"
+#include "libpandabase/utils/utils.h"
 #include <gtest/gtest.h>
 
 namespace panda {
@@ -29,32 +30,32 @@ protected:
 };
 
 template <typename T>
-void SerializerTypeToBuffer(const T &type, std::vector<uint8_t> &buffer, size_t ret_val)
+void SerializerTypeToBuffer(const T &type, std::vector<uint8_t> &buffer, size_t retVal)
 {
     auto ret = serializer::TypeToBuffer(type, buffer);
     ASSERT_TRUE(ret);
-    ASSERT_EQ(ret.Value(), ret_val);
+    ASSERT_EQ(ret.Value(), retVal);
 }
 
 template <typename T>
-void SerializerBufferToType(const std::vector<uint8_t> &buffer, T &type, size_t ret_val)
+void SerializerBufferToType(const std::vector<uint8_t> &buffer, T &type, size_t retVal)
 {
     auto ret = serializer::BufferToType(buffer.data(), buffer.size(), type);
     ASSERT_TRUE(ret);
-    ASSERT_EQ(ret.Value(), ret_val);
+    ASSERT_EQ(ret.Value(), retVal);
 }
 
 template <typename T>
-void DoTest(T value, int ret_val)
+void DoTest(T value, int retVal)
 {
     constexpr const int64_t IMM_FOUR = 4;
     // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
     T a = value;
     T b {};
     std::vector<uint8_t> buffer;
-    SerializerTypeToBuffer(a, buffer, ret_val);
+    SerializerTypeToBuffer(a, buffer, retVal);
     buffer.resize(IMM_FOUR * buffer.size());
-    SerializerBufferToType(buffer, b, ret_val);
+    SerializerBufferToType(buffer, b, retVal);
     ASSERT_EQ(a, value);
     ASSERT_EQ(b, value);
     ASSERT_EQ(a, b);
@@ -95,11 +96,11 @@ TEST_F(SerializatorTest, TestPodTypes)
     TestPod<int32_t>(0xfe52567fU);
     TestPod<int64_t>(0xff1234fdec57891bU);
 
-    TestPod<float>(0.234664);
-    TestPod<double>(22345.3453453);
-    TestPod<long double>(99453.64345);
+    TestPod<float>(0.234664_D);
+    TestPod<double>(22345.3453453_D);
+    TestPod<long double>(99453.64345_D);
 
-    TestPod<PodStruct>({0xffU, -23458L, 10345893U, -98343451L, -3.54634, 1.44e6});
+    TestPod<PodStruct>({0xffU, -23458L, 10345893U, -98343451L, -3.54634_D, 1.44e6});
 }
 
 TEST_F(SerializatorTest, TestString)
@@ -173,18 +174,18 @@ bool operator==(const TestStruct &lhs, const TestStruct &rhs)
 
 TEST_F(SerializatorTest, TestStruct)
 {
-    TestStruct test_struct {1U, 2U, 3U, 4U, "Liza", {8U, 9U, 5U}};
-    unsigned test_ret = 1U + 2U + 4U + 8U + 4U + 4U + 4U + sizeof(int) * 3U;
+    TestStruct testStruct {1U, 2U, 3U, 4U, "Liza", {8U, 9U, 5U}};
+    unsigned testRet = 1U + 2U + 4U + 8U + 4U + 4U + 4U + sizeof(int) * 3U;
 
-    TestStruct a = test_struct;
+    TestStruct a = testStruct;
     TestStruct b;
     ASSERT_EQ(serializer::StructToBuffer<6U>(a, buffer_), true);
     buffer_.resize(4U * buffer_.size());
     auto ret = serializer::RawBufferToStruct<6U>(buffer_.data(), buffer_.size(), b);
     ASSERT_TRUE(ret.HasValue());
-    ASSERT_EQ(ret.Value(), test_ret);
-    ASSERT_EQ(a, test_struct);
-    ASSERT_EQ(b, test_struct);
+    ASSERT_EQ(ret.Value(), testRet);
+    ASSERT_EQ(a, testStruct);
+    ASSERT_EQ(b, testStruct);
     ASSERT_EQ(a, b);
 }
 

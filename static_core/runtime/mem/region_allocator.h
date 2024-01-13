@@ -49,16 +49,16 @@ static inline Region *ObjectToRegion(const ObjectHeader *object)
     return region;
 }
 
-static inline bool IsSameRegion(const void *o1, const void *o2, size_t region_size_bits)
+static inline bool IsSameRegion(const void *o1, const void *o2, size_t regionSizeBits)
 {
-    return ((ToUintPtr(o1) ^ ToUintPtr(o2)) >> region_size_bits == 0);
+    return (((ToUintPtr(o1) ^ ToUintPtr(o2)) >> regionSizeBits) == 0);
 }
 
 /// Return the region which corresponds to the address.
 static inline Region *AddrToRegion(const void *addr)
 {
-    auto region_addr = PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(addr);
-    return static_cast<Region *>(region_addr);
+    auto regionAddr = PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(addr);
+    return static_cast<Region *>(regionAddr);
 }
 
 template <typename LockConfigT>
@@ -67,12 +67,12 @@ public:
     NO_MOVE_SEMANTIC(RegionAllocatorBase);
     NO_COPY_SEMANTIC(RegionAllocatorBase);
 
-    explicit RegionAllocatorBase(MemStatsType *mem_stats, GenerationalSpaces *spaces, SpaceType space_type,
-                                 AllocatorType allocator_type, size_t init_space_size, bool extend, size_t region_size,
-                                 size_t empty_tenured_regions_max_count);
-    explicit RegionAllocatorBase(MemStatsType *mem_stats, GenerationalSpaces *spaces, SpaceType space_type,
-                                 AllocatorType allocator_type, RegionPool *shared_region_pool,
-                                 size_t empty_tenured_regions_max_count);
+    explicit RegionAllocatorBase(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
+                                 AllocatorType allocatorType, size_t initSpaceSize, bool extend, size_t regionSize,
+                                 size_t emptyTenuredRegionsMaxCount);
+    explicit RegionAllocatorBase(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
+                                 AllocatorType allocatorType, RegionPool *sharedRegionPool,
+                                 size_t emptyTenuredRegionsMaxCount);
 
     virtual ~RegionAllocatorBase()
     {
@@ -81,17 +81,17 @@ public:
 
     Region *GetRegion(const ObjectHeader *object) const
     {
-        return region_space_.GetRegion(object);
+        return regionSpace_.GetRegion(object);
     }
 
     RegionSpace *GetSpace()
     {
-        return &region_space_;
+        return &regionSpace_;
     }
 
     const RegionSpace *GetSpace() const
     {
-        return &region_space_;
+        return &regionSpace_;
     }
 
     PandaVector<Region *> GetAllRegions();
@@ -105,43 +105,43 @@ public:
 protected:
     void ClearRegionsPool()
     {
-        region_space_.FreeAllRegions();
+        regionSpace_.FreeAllRegions();
 
-        if (init_block_.GetMem() != nullptr) {
-            spaces_->FreeSharedPool(init_block_.GetMem(), init_block_.GetSize());
-            init_block_ = NULLPOOL;
+        if (initBlock_.GetMem() != nullptr) {
+            spaces_->FreeSharedPool(initBlock_.GetMem(), initBlock_.GetSize());
+            initBlock_ = NULLPOOL;
         }
     }
 
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
-    Region *AllocRegion(size_t region_size, RegionFlag eden_or_old_or_nonmovable, RegionFlag properties)
+    Region *AllocRegion(size_t regionSize, RegionFlag edenOrOldOrNonmovable, RegionFlag properties)
     {
-        return region_space_.NewRegion(region_size, eden_or_old_or_nonmovable, properties, OS_ALLOC_POLICY);
+        return regionSpace_.NewRegion(regionSize, edenOrOldOrNonmovable, properties, OS_ALLOC_POLICY);
     }
 
     SpaceType GetSpaceType() const
     {
-        return space_type_;
+        return spaceType_;
     }
 
     template <typename AllocConfigT, OSPagesAllocPolicy OS_ALLOC_POLICY = OSPagesAllocPolicy::NO_POLICY>
-    Region *CreateAndSetUpNewRegion(size_t region_size, RegionFlag region_type, RegionFlag properties = IS_UNUSED)
-        REQUIRES(region_lock_);
+    Region *CreateAndSetUpNewRegion(size_t regionSize, RegionFlag regionType, RegionFlag properties = IS_UNUSED)
+        REQUIRES(regionLock_);
 
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    LockConfigT region_lock_;
+    LockConfigT regionLock_;
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    MemStatsType *mem_stats_;
+    MemStatsType *memStats_;
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    SpaceType space_type_;
+    SpaceType spaceType_;
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     GenerationalSpaces *spaces_;
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    RegionPool region_pool_;  // self created pool, only used by this allocator
+    RegionPool regionPool_;  // self created pool, only used by this allocator
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    RegionSpace region_space_;  // the target region space used by this allocator
+    RegionSpace regionSpace_;  // the target region space used by this allocator
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    Pool init_block_;  // the initial memory block for region allocation
+    Pool initBlock_;  // the initial memory block for region allocation
 };
 
 /// @brief A region-based bump-pointer allocator.
@@ -161,9 +161,9 @@ public:
      * @param init_space_size - initial continuous space size, 0 means no need for initial space
      * @param extend - true means that will allocate more regions from mmap pool if initial space is not enough
      */
-    explicit RegionAllocator(MemStatsType *mem_stats, GenerationalSpaces *spaces,
-                             SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT, size_t init_space_size = 0,
-                             bool extend = true, size_t empty_tenured_regions_max_count = 0);
+    explicit RegionAllocator(MemStatsType *memStats, GenerationalSpaces *spaces,
+                             SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT, size_t initSpaceSize = 0,
+                             bool extend = true, size_t emptyTenuredRegionsMaxCount = 0);
 
     /**
      * @brief Create new region allocator with shared region pool specified
@@ -171,8 +171,8 @@ public:
      * @param space_type - space type
      * @param shared_region_pool - a shared region pool that can be reused by multi-spaces
      */
-    explicit RegionAllocator(MemStatsType *mem_stats, GenerationalSpaces *spaces, SpaceType space_type,
-                             RegionPool *shared_region_pool, size_t empty_tenured_regions_max_count = 0);
+    explicit RegionAllocator(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
+                             RegionPool *sharedRegionPool, size_t emptyTenuredRegionsMaxCount = 0);
 
     ~RegionAllocator() override = default;
 
@@ -180,9 +180,9 @@ public:
     void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT);
 
     template <typename T>
-    T *AllocArray(size_t arr_length)
+    T *AllocArray(size_t arrLength)
     {
-        return static_cast<T *>(Alloc(sizeof(T) * arr_length));
+        return static_cast<T *>(Alloc(sizeof(T) * arrLength));
     }
 
     void Free([[maybe_unused]] void *mem) {}
@@ -251,7 +251,7 @@ public:
      *  can be used as a simple visitor if we enable /param use_marked_bitmap
      */
     template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP = false>
-    void CompactAllSpecificRegions(const GCObjectVisitor &death_checker, const ObjectVisitorEx &move_handler);
+    void CompactAllSpecificRegions(const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveHandler);
 
     template <RegionFlag REGION_TYPE>
     void ClearCurrentRegion()
@@ -271,8 +271,8 @@ public:
      *  can be used as a simple visitor if we enable /param use_marked_bitmap
      */
     template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP = false>
-    void CompactSeveralSpecificRegions(const PandaVector<Region *> &regions, const GCObjectVisitor &death_checker,
-                                       const ObjectVisitorEx &move_handler);
+    void CompactSeveralSpecificRegions(const PandaVector<Region *> &regions, const GCObjectVisitor &deathChecker,
+                                       const ObjectVisitorEx &moveHandler);
 
     /**
      * Iterate over specific region
@@ -286,12 +286,12 @@ public:
      *  can be used as a simple visitor if we enable /param use_marked_bitmap
      */
     template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP = false>
-    void CompactSpecificRegion(Region *regions, const GCObjectVisitor &death_checker,
-                               const ObjectVisitorEx &move_handler);
+    void CompactSpecificRegion(Region *regions, const GCObjectVisitor &deathChecker,
+                               const ObjectVisitorEx &moveHandler);
 
     template <bool USE_MARKED_BITMAP = false>
-    void PromoteYoungRegion(Region *region, const GCObjectVisitor &death_checker,
-                            const ObjectVisitor &alive_objects_handler);
+    void PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker,
+                            const ObjectVisitor &aliveObjectsHandler);
 
     /**
      * Reset all regions with type /param regions_type.
@@ -319,7 +319,7 @@ public:
     /// Release reserved region to free space
     void ReleaseReservedRegion();
 
-    void VisitAndRemoveAllPools([[maybe_unused]] const MemVisitor &mem_visitor)
+    void VisitAndRemoveAllPools([[maybe_unused]] const MemVisitor &memVisitor)
     {
         this->ClearRegionsPool();
     }
@@ -344,9 +344,9 @@ public:
         return AllocatorType::REGION_ALLOCATOR;
     }
 
-    void SetDesiredEdenLength(size_t eden_length)
+    void SetDesiredEdenLength(size_t edenLength)
     {
-        this->GetSpace()->SetDesiredEdenLength(eden_length);
+        this->GetSpace()->SetDesiredEdenLength(edenLength);
     }
 
 private:
@@ -354,30 +354,30 @@ private:
     template <bool atomic = true, RegionFlag REGION_TYPE>
     Region *GetCurrentRegion()
     {
-        Region **cur_region = GetCurrentRegionPointerUnsafe<REGION_TYPE>();
+        Region **curRegion = GetCurrentRegionPointerUnsafe<REGION_TYPE>();
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (atomic) {
             // Atomic with relaxed order reason: data race with cur_region with no synchronization or ordering
             // constraints imposed on other reads or writes
-            return reinterpret_cast<std::atomic<Region *> *>(cur_region)->load(std::memory_order_relaxed);
+            return reinterpret_cast<std::atomic<Region *> *>(curRegion)->load(std::memory_order_relaxed);
             // NOLINTNEXTLINE(readability-misleading-indentation)
         }
-        return *cur_region;
+        return *curRegion;
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <bool atomic = true, RegionFlag REGION_TYPE>
     void SetCurrentRegion(Region *region)
     {
-        Region **cur_region = GetCurrentRegionPointerUnsafe<REGION_TYPE>();
+        Region **curRegion = GetCurrentRegionPointerUnsafe<REGION_TYPE>();
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (atomic) {
             // Atomic with relaxed order reason: data race with cur_region with no synchronization or ordering
             // constraints imposed on other reads or writes
-            reinterpret_cast<std::atomic<Region *> *>(cur_region)->store(region, std::memory_order_relaxed);
+            reinterpret_cast<std::atomic<Region *> *>(curRegion)->store(region, std::memory_order_relaxed);
             // NOLINTNEXTLINE(readability-misleading-indentation)
         } else {
-            *cur_region = region;
+            *curRegion = region;
         }
     }
 
@@ -386,7 +386,7 @@ private:
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_EDEN) {
-            return &eden_current_region_;
+            return &edenCurrentRegion_;
         }
         UNREACHABLE();
         return nullptr;
@@ -398,7 +398,7 @@ private:
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_EDEN) {
-            SetCurrentRegion<atomic, REGION_TYPE>(&full_region_);
+            SetCurrentRegion<atomic, REGION_TYPE>(&fullRegion_);
             return;
         }
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
@@ -450,21 +450,21 @@ private:
     template <bool atomic = true, RegionFlag REGION_TYPE>
     Region *PopFromRegionQueue()
     {
-        PandaVector<Region *> *region_queue = GetRegionQueuePointer<REGION_TYPE>();
+        PandaVector<Region *> *regionQueue = GetRegionQueuePointer<REGION_TYPE>();
         Region *region = nullptr;
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (atomic) {
             os::memory::LockHolder lock(*GetQueueLock<REGION_TYPE>());
-            if (!region_queue->empty()) {
-                region = region_queue->back();
-                region_queue->pop_back();
+            if (!regionQueue->empty()) {
+                region = regionQueue->back();
+                regionQueue->pop_back();
             }
             return region;
             // NOLINTNEXTLINE(readability-misleading-indentation)
         }
-        if (!region_queue->empty()) {
-            region = region_queue->back();
-            region_queue->pop_back();
+        if (!regionQueue->empty()) {
+            region = regionQueue->back();
+            regionQueue->pop_back();
         }
         return region;
     }
@@ -473,15 +473,15 @@ private:
     template <bool atomic = true, RegionFlag REGION_TYPE>
     void PushToRegionQueue(Region *region)
     {
-        PandaVector<Region *> *region_queue = GetRegionQueuePointer<REGION_TYPE>();
+        PandaVector<Region *> *regionQueue = GetRegionQueuePointer<REGION_TYPE>();
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (atomic) {
             os::memory::LockHolder lock(*GetQueueLock<REGION_TYPE>());
-            region_queue->push_back(region);
+            regionQueue->push_back(region);
             return;
             // NOLINTNEXTLINE(readability-misleading-indentation)
         }
-        region_queue->push_back(region);
+        regionQueue->push_back(region);
     }
 
     template <RegionFlag REGION_TYPE>
@@ -489,7 +489,7 @@ private:
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_OLD) {
-            return &old_queue_lock_;
+            return &oldQueueLock_;
         }
         UNREACHABLE();
         return nullptr;
@@ -500,23 +500,23 @@ private:
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_OLD) {
-            return &old_region_queue_;
+            return &oldRegionQueue_;
         }
         UNREACHABLE();
         return nullptr;
     }
 
     template <RegionFlag REGION_TYPE>
-    void *AllocRegular(size_t align_size);
+    void *AllocRegular(size_t alignSize);
     TLAB *CreateTLABInRegion(Region *region, size_t size);
 
-    Region full_region_;
-    Region *eden_current_region_;
-    Region *reserved_region_ = nullptr;
-    os::memory::Mutex old_queue_lock_;
-    PandaVector<Region *> old_region_queue_;
+    Region fullRegion_;
+    Region *edenCurrentRegion_;
+    Region *reservedRegion_ = nullptr;
+    os::memory::Mutex oldQueueLock_;
+    PandaVector<Region *> oldRegionQueue_;
     // To store partially used Regions that can be reused later.
-    panda::PandaMultiMap<size_t, Region *, std::greater<size_t>> retained_tlabs_;
+    panda::PandaMultiMap<size_t, Region *, std::greater<size_t>> retainedTlabs_;
     friend class test::RegionAllocatorTest;
 };
 
@@ -528,10 +528,10 @@ public:
     NO_MOVE_SEMANTIC(RegionNonmovableAllocator);
     NO_COPY_SEMANTIC(RegionNonmovableAllocator);
 
-    explicit RegionNonmovableAllocator(MemStatsType *mem_stats, GenerationalSpaces *spaces, SpaceType space_type,
-                                       size_t init_space_size = 0, bool extend = true);
-    explicit RegionNonmovableAllocator(MemStatsType *mem_stats, GenerationalSpaces *spaces, SpaceType space_type,
-                                       RegionPool *shared_region_pool);
+    explicit RegionNonmovableAllocator(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
+                                       size_t initSpaceSize = 0, bool extend = true);
+    explicit RegionNonmovableAllocator(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
+                                       RegionPool *sharedRegionPool);
 
     ~RegionNonmovableAllocator() override = default;
 
@@ -539,30 +539,30 @@ public:
 
     void Free(void *mem);
 
-    void Collect(const GCObjectVisitor &death_checker);
+    void Collect(const GCObjectVisitor &deathChecker);
 
     template <typename ObjectVisitor>
-    void IterateOverObjects(const ObjectVisitor &obj_visitor)
+    void IterateOverObjects(const ObjectVisitor &objVisitor)
     {
-        object_allocator_.IterateOverObjects(obj_visitor);
+        objectAllocator_.IterateOverObjects(objVisitor);
     }
 
     template <typename MemVisitor>
-    void IterateOverObjectsInRange(const MemVisitor &mem_visitor, void *begin, void *end)
+    void IterateOverObjectsInRange(const MemVisitor &memVisitor, void *begin, void *end)
     {
-        object_allocator_.IterateOverObjectsInRange(mem_visitor, begin, end);
+        objectAllocator_.IterateOverObjectsInRange(memVisitor, begin, end);
     }
 
-    void VisitAndRemoveAllPools([[maybe_unused]] const MemVisitor &mem_visitor)
+    void VisitAndRemoveAllPools([[maybe_unused]] const MemVisitor &memVisitor)
     {
-        object_allocator_.VisitAndRemoveAllPools([this](void *mem, [[maybe_unused]] size_t size) {
+        objectAllocator_.VisitAndRemoveAllPools([this](void *mem, [[maybe_unused]] size_t size) {
             auto *region = AddrToRegion(mem);
             ASSERT(ToUintPtr(mem) + size == region->End());
             this->GetSpace()->FreeRegion(region);
         });
     }
 
-    void VisitAndRemoveFreeRegions(const RegionsVisitor &region_visitor);
+    void VisitAndRemoveFreeRegions(const RegionsVisitor &regionVisitor);
 
     constexpr static size_t GetMaxSize()
     {
@@ -572,7 +572,7 @@ public:
 
     bool ContainObject(const ObjectHeader *object) const
     {
-        return object_allocator_.ContainObject(object);
+        return objectAllocator_.ContainObject(object);
     }
 
     bool IsLive(const ObjectHeader *object) const
@@ -582,9 +582,9 @@ public:
     }
 
 private:
-    void *NewRegionAndRetryAlloc(size_t object_size, Alignment align);
+    void *NewRegionAndRetryAlloc(size_t objectSize, Alignment align);
 
-    mutable ObjectAllocator object_allocator_;
+    mutable ObjectAllocator objectAllocator_;
 };
 
 /// @brief A region-based humongous allocator.
@@ -601,7 +601,7 @@ public:
      * @param mem_stats - memory statistics
      * @param space_type - space type
      */
-    explicit RegionHumongousAllocator(MemStatsType *mem_stats, GenerationalSpaces *spaces, SpaceType space_type);
+    explicit RegionHumongousAllocator(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType);
 
     ~RegionHumongousAllocator() override = default;
 
@@ -609,14 +609,14 @@ public:
     void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT);
 
     template <typename T>
-    T *AllocArray(size_t arr_length)
+    T *AllocArray(size_t arrLength)
     {
-        return static_cast<T *>(Alloc(sizeof(T) * arr_length));
+        return static_cast<T *>(Alloc(sizeof(T) * arrLength));
     }
 
     void Free([[maybe_unused]] void *mem) {}
 
-    void CollectAndRemoveFreeRegions(const RegionsVisitor &region_visitor, const GCObjectVisitor &death_checker);
+    void CollectAndRemoveFreeRegions(const RegionsVisitor &regionVisitor, const GCObjectVisitor &deathChecker);
 
     /**
      * @brief Iterates over all objects allocated by this allocator.
@@ -642,7 +642,7 @@ public:
         });
     }
 
-    void VisitAndRemoveAllPools([[maybe_unused]] const MemVisitor &mem_visitor)
+    void VisitAndRemoveAllPools([[maybe_unused]] const MemVisitor &memVisitor)
     {
         this->ClearRegionsPool();
     }
@@ -659,7 +659,7 @@ public:
 
 private:
     void ResetRegion(Region *region);
-    void Collect(Region *region, const GCObjectVisitor &death_checker);
+    void Collect(Region *region, const GCObjectVisitor &deathChecker);
 
     // If we change this constant, we will increase fragmentation dramatically
     static_assert(REGION_SIZE / PANDA_POOL_ALIGNMENT_IN_BYTES == 1);

@@ -29,13 +29,13 @@ Aarch32CallingConvention::Aarch32CallingConvention(ArenaAllocator *allocator, En
 {
 }
 
-ParameterInfo *Aarch32CallingConvention::GetParameterInfo(uint8_t regs_offset)
+ParameterInfo *Aarch32CallingConvention::GetParameterInfo(uint8_t regsOffset)
 {
-    auto param_info = GetAllocator()->New<aarch32::Aarch32ParameterInfo>();
-    for (int i = 0; i < regs_offset; ++i) {
-        param_info->GetNativeParam(INT32_TYPE);
+    auto paramInfo = GetAllocator()->New<aarch32::Aarch32ParameterInfo>();
+    for (int i = 0; i < regsOffset; ++i) {
+        paramInfo->GetNativeParam(INT32_TYPE);
     }
-    return param_info;
+    return paramInfo;
 }
 
 void *Aarch32CallingConvention::GetCodeEntry()
@@ -49,11 +49,11 @@ uint32_t Aarch32CallingConvention::GetCodeSize()
     return GetMasm()->GetSizeOfCodeGenerated();
 }
 
-uint8_t Aarch32CallingConvention::PushPopVRegs(VRegMask vregs, bool is_push = true)
+uint8_t Aarch32CallingConvention::PushPopVRegs(VRegMask vregs, bool isPush = true)
 {
     int8_t first = -1;
     uint8_t size = 0;
-    bool is_sequential = true;
+    bool isSequential = true;
     for (size_t i = 0; i < vregs.size(); ++i) {
         if (-1 == first && vregs.test(i)) {
             first = i;
@@ -62,7 +62,7 @@ uint8_t Aarch32CallingConvention::PushPopVRegs(VRegMask vregs, bool is_push = tr
         }
         if (vregs.test(i)) {
             if (!vregs.test(i - 1)) {
-                is_sequential = false;
+                isSequential = false;
                 break;
             }
             ++size;
@@ -73,22 +73,22 @@ uint8_t Aarch32CallingConvention::PushPopVRegs(VRegMask vregs, bool is_push = tr
         return 0;
     }
 
-    if (is_sequential) {
-        auto reg_list = vixl::aarch32::SRegisterList(vixl::aarch32::SRegister(first), size);
-        if (is_push) {
-            GetMasm()->Vpush(reg_list);
+    if (isSequential) {
+        auto regList = vixl::aarch32::SRegisterList(vixl::aarch32::SRegister(first), size);
+        if (isPush) {
+            GetMasm()->Vpush(regList);
         } else {
-            GetMasm()->Vpop(reg_list);
+            GetMasm()->Vpop(regList);
         }
         return size;
     }
 
-    uint32_t real_offset = 0;
-    if (is_push) {
+    uint32_t realOffset = 0;
+    if (isPush) {
         for (int32_t i = vregs.size() - 1; i >= 0; --i) {
             if (vregs.test(i)) {
                 GetMasm()->PushRegister(VixlVReg(Reg(i, FLOAT32_TYPE)).S());
-                ++real_offset;
+                ++realOffset;
             }
         }
     } else {
@@ -96,14 +96,14 @@ uint8_t Aarch32CallingConvention::PushPopVRegs(VRegMask vregs, bool is_push = tr
         for (size_t i = 0; i < vregs.size(); ++i) {
             if (vregs.test(i)) {
                 GetMasm()->Vpop(vixl::aarch32::SRegisterList(VixlVReg(Reg(i, FLOAT32_TYPE)).S(), VREG_SIZE));
-                ++real_offset;
+                ++realOffset;
             }
         }
     }
-    return real_offset;
+    return realOffset;
 }
 
-uint8_t Aarch32CallingConvention::PushRegs(RegMask regs, VRegMask vregs, bool is_callee)
+uint8_t Aarch32CallingConvention::PushRegs(RegMask regs, VRegMask vregs, bool isCallee)
 {
     auto regdescr = static_cast<Aarch32RegisterDescription *>(GetRegfile());
     auto fp = GetTarget().GetFrameReg().GetId();
@@ -115,33 +115,33 @@ uint8_t Aarch32CallingConvention::PushRegs(RegMask regs, VRegMask vregs, bool is
         regs.reset(lr);
     }
 
-    uint8_t real_offset = 0;
-    uint32_t saved_registers_mask = 0;
+    uint8_t realOffset = 0;
+    uint32_t savedRegistersMask = 0;
 
     for (size_t i = 0; i < regs.size(); ++i) {
         if (regs.test(i)) {
-            saved_registers_mask |= 1UL << i;
-            ++real_offset;
+            savedRegistersMask |= 1UL << i;
+            ++realOffset;
         }
     }
 
     if (((regs.count() + vregs.count()) & 1U) == 1) {
         // NOTE(igorban) move them to Sub(sp)
-        uint8_t align_reg = regdescr->GetAligmentReg(is_callee);
-        GetMasm()->PushRegister(vixl::aarch32::Register(align_reg));
-        ++real_offset;
+        uint8_t alignReg = regdescr->GetAligmentReg(isCallee);
+        GetMasm()->PushRegister(vixl::aarch32::Register(alignReg));
+        ++realOffset;
     }
 
-    if (saved_registers_mask != 0) {
-        GetMasm()->Push(vixl::aarch32::RegisterList(saved_registers_mask));
+    if (savedRegistersMask != 0) {
+        GetMasm()->Push(vixl::aarch32::RegisterList(savedRegistersMask));
     }
-    real_offset += PushPopVRegs(vregs, true);
-    ASSERT((real_offset & 1U) == 0);
+    realOffset += PushPopVRegs(vregs, true);
+    ASSERT((realOffset & 1U) == 0);
 
-    return real_offset;
+    return realOffset;
 }
 
-uint8_t Aarch32CallingConvention::PopRegs(RegMask regs, VRegMask vregs, bool is_callee)
+uint8_t Aarch32CallingConvention::PopRegs(RegMask regs, VRegMask vregs, bool isCallee)
 {
     auto regdescr = static_cast<Aarch32RegisterDescription *>(GetRegfile());
 
@@ -154,30 +154,30 @@ uint8_t Aarch32CallingConvention::PopRegs(RegMask regs, VRegMask vregs, bool is_
         regs.reset(lr);
     }
 
-    uint8_t real_offset = 0;
-    real_offset += PushPopVRegs(vregs, false);
+    uint8_t realOffset = 0;
+    realOffset += PushPopVRegs(vregs, false);
 
-    uint32_t saved_registers_mask = 0;
+    uint32_t savedRegistersMask = 0;
 
     for (size_t i = 0; i < regs.size(); ++i) {
         if (regs.test(i)) {
-            saved_registers_mask |= 1UL << i;
-            ++real_offset;
+            savedRegistersMask |= 1UL << i;
+            ++realOffset;
         }
     }
 
-    if (saved_registers_mask != 0) {
-        GetMasm()->Pop(vixl::aarch32::RegisterList(saved_registers_mask));
+    if (savedRegistersMask != 0) {
+        GetMasm()->Pop(vixl::aarch32::RegisterList(savedRegistersMask));
     }
 
     if (((regs.count() + vregs.count()) & 1U) == 1) {
-        uint8_t align_reg = regdescr->GetAligmentReg(is_callee);
-        GetMasm()->Pop(vixl::aarch32::Register(align_reg));
-        ++real_offset;
+        uint8_t alignReg = regdescr->GetAligmentReg(isCallee);
+        GetMasm()->Pop(vixl::aarch32::Register(alignReg));
+        ++realOffset;
     }
-    ASSERT((real_offset & 1U) == 0);
+    ASSERT((realOffset & 1U) == 0);
 
-    return real_offset;
+    return realOffset;
 }
 
 std::variant<Reg, uint8_t> Aarch32ParameterInfo::GetNativeParam(const TypeInfo &type)
@@ -186,51 +186,51 @@ std::variant<Reg, uint8_t> Aarch32ParameterInfo::GetNativeParam(const TypeInfo &
 #if (PANDA_TARGET_ARM32_ABI_HARD)
     // Use vector registers
     if (type == FLOAT32_TYPE) {
-        if (current_vector_number_ > MAX_VECTOR_SINGLE_PARAM_ID) {
-            return current_stack_offset_++;
+        if (currentVectorNumber_ > MAX_VECTOR_SINGLE_PARAM_ID) {
+            return currentStackOffset_++;
         }
-        return Reg(current_vector_number_++, FLOAT32_TYPE);
+        return Reg(currentVectorNumber_++, FLOAT32_TYPE);
     }
     if (type == FLOAT64_TYPE) {
         // Allignment for 8 bytes (in stack and registers)
-        if ((current_vector_number_ & 1U) == 1) {
-            ++current_vector_number_;
+        if ((currentVectorNumber_ & 1U) == 1) {
+            ++currentVectorNumber_;
         }
-        if ((current_vector_number_ >> 1U) > MAX_VECTOR_DOUBLE_PARAM_ID) {
-            if ((current_stack_offset_ & 1U) == 1) {
-                ++current_stack_offset_;
+        if ((currentVectorNumber_ >> 1U) > MAX_VECTOR_DOUBLE_PARAM_ID) {
+            if ((currentStackOffset_ & 1U) == 1) {
+                ++currentStackOffset_;
             }
-            auto stack_offset = current_stack_offset_;
-            current_stack_offset_ += STEP;
-            return stack_offset;
+            auto stackOffset = currentStackOffset_;
+            currentStackOffset_ += STEP;
+            return stackOffset;
         }
-        auto vector_number = current_vector_number_;
-        current_vector_number_ += STEP;
-        return Reg(vector_number, FLOAT64_TYPE);
+        auto vectorNumber = currentVectorNumber_;
+        currentVectorNumber_ += STEP;
+        return Reg(vectorNumber, FLOAT64_TYPE);
     }
 #endif  // PANDA_TARGET_ARM32_ABI_HARD
     if (type.GetSize() == DOUBLE_WORD_SIZE) {
-        if ((current_scalar_number_ & 1U) == 1) {
-            ++current_scalar_number_;
+        if ((currentScalarNumber_ & 1U) == 1) {
+            ++currentScalarNumber_;
         }
         // Allignment for 8 bytes (in stack and registers)
-        if (current_scalar_number_ > MAX_SCALAR_PARAM_ID) {
-            if ((current_stack_offset_ & 1U) == 1) {
-                ++current_stack_offset_;
+        if (currentScalarNumber_ > MAX_SCALAR_PARAM_ID) {
+            if ((currentStackOffset_ & 1U) == 1) {
+                ++currentStackOffset_;
             }
-            auto stack_offset = current_stack_offset_;
-            current_stack_offset_ += STEP;
-            return stack_offset;
+            auto stackOffset = currentStackOffset_;
+            currentStackOffset_ += STEP;
+            return stackOffset;
         }
-        auto scalar_number = current_scalar_number_;
-        current_scalar_number_ += STEP;
-        return Reg(scalar_number, INT64_TYPE);
+        auto scalarNumber = currentScalarNumber_;
+        currentScalarNumber_ += STEP;
+        return Reg(scalarNumber, INT64_TYPE);
     }
-    if (current_scalar_number_ > MAX_SCALAR_PARAM_ID) {
-        return current_stack_offset_++;
+    if (currentScalarNumber_ > MAX_SCALAR_PARAM_ID) {
+        return currentStackOffset_++;
     }
     ASSERT(!type.IsFloat() || type == FLOAT32_TYPE);
-    return Reg(current_scalar_number_++, type.IsFloat() ? INT32_TYPE : type);
+    return Reg(currentScalarNumber_++, type.IsFloat() ? INT32_TYPE : type);
 }
 
 Location Aarch32ParameterInfo::GetNextLocation(DataType::Type type)
@@ -248,76 +248,76 @@ Location Aarch32ParameterInfo::GetNextLocation(DataType::Type type)
     return Location::MakeStackArgument(std::get<uint8_t>(res));
 }
 
-void Aarch32CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &frame_info)
+void Aarch32CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &frameInfo)
 {
     auto encoder = GetEncoder();
     ASSERT(encoder->IsValid());
     ASSERT(encoder->InitMasm());
     const CFrameLayout &fl = encoder->GetFrameLayout();
-    auto fp_reg = GetTarget().GetFrameReg();
-    auto sp_reg = GetTarget().GetStackReg();
+    auto fpReg = GetTarget().GetFrameReg();
+    auto spReg = GetTarget().GetStackReg();
 
     GetMasm()->Push(RegisterList(vixl::aarch32::r11, vixl::aarch32::lr));
-    SET_CFI_OFFSET(push_fplr, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(pushFplr, encoder->GetCursorOffset());
 
     ASSERT(!IsDynCallMode());
 
-    encoder->EncodeMov(fp_reg, sp_reg);
-    SET_CFI_OFFSET(set_fp, encoder->GetCursorOffset());
+    encoder->EncodeMov(fpReg, spReg);
+    SET_CFI_OFFSET(setFp, encoder->GetCursorOffset());
     constexpr auto IMM_2 = 2;
-    encoder->EncodeSub(sp_reg, sp_reg, Imm(WORD_SIZE_BYTES * IMM_2));
-    encoder->EncodeStr(GetTarget().GetParamReg(0), MemRef(sp_reg, WORD_SIZE_BYTES));
+    encoder->EncodeSub(spReg, spReg, Imm(WORD_SIZE_BYTES * IMM_2));
+    encoder->EncodeStr(GetTarget().GetParamReg(0), MemRef(spReg, WORD_SIZE_BYTES));
 
     // Allocate space for locals
-    auto locals_size = (CFrameSlots::Start() - CFrameData::Start()) * WORD_SIZE_BYTES;
-    encoder->EncodeSub(sp_reg, sp_reg, Imm(locals_size));
+    auto localsSize = (CFrameSlots::Start() - CFrameData::Start()) * WORD_SIZE_BYTES;
+    encoder->EncodeSub(spReg, spReg, Imm(localsSize));
 
     SET_CFI_CALLEE_REGS(GetCalleeRegsMask(Arch::AARCH32, false));
     SET_CFI_CALLEE_VREGS(GetCalleeRegsMask(Arch::AARCH32, true));
     GetMasm()->Push(RegisterList(GetCalleeRegsMask(Arch::AARCH32, false).GetValue()));
     GetMasm()->Vpush(
         SRegisterList(SRegister(GetFirstCalleeReg(Arch::AARCH32, true)), GetCalleeRegsCount(Arch::AARCH32, true)));
-    SET_CFI_OFFSET(push_callees, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(pushCallees, encoder->GetCursorOffset());
 
     // Reset OSR flag and set HasFloatRegsFlag
-    auto callee_regs_size =
+    auto calleeRegsSize =
         (GetCalleeRegsCount(Arch::AARCH32, true) + GetCalleeRegsCount(Arch::AARCH32, false)) * WORD_SIZE_BYTES;
-    auto flags {static_cast<uint32_t>(frame_info.GetHasFloatRegs()) << CFrameLayout::HasFloatRegsFlag::START_BIT};
-    encoder->EncodeSti(flags, sizeof(flags), MemRef(sp_reg, callee_regs_size + locals_size));
+    auto flags {static_cast<uint32_t>(frameInfo.GetHasFloatRegs()) << CFrameLayout::HasFloatRegsFlag::START_BIT};
+    encoder->EncodeSti(flags, sizeof(flags), MemRef(spReg, calleeRegsSize + localsSize));
 
     encoder->EncodeSub(
-        sp_reg, sp_reg,
+        spReg, spReg,
         Imm((fl.GetSpillsCount() + fl.GetCallerRegistersCount(false) + fl.GetCallerRegistersCount(true)) *
             WORD_SIZE_BYTES));
 }
 
-void Aarch32CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo &frame_info,
+void Aarch32CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo &frameInfo,
                                                 std::function<void()> /* post_job */)
 {
     auto encoder = GetEncoder();
     const CFrameLayout &fl = encoder->GetFrameLayout();
-    auto sp_reg = GetTarget().GetStackReg();
+    auto spReg = GetTarget().GetStackReg();
 
     encoder->EncodeAdd(
-        sp_reg, sp_reg,
+        spReg, spReg,
         Imm((fl.GetSpillsCount() + fl.GetCallerRegistersCount(false) + fl.GetCallerRegistersCount(true)) *
             WORD_SIZE_BYTES));
 
     GetMasm()->Vpop(
         SRegisterList(SRegister(GetFirstCalleeReg(Arch::AARCH32, true)), GetCalleeRegsCount(Arch::AARCH32, true)));
     GetMasm()->Pop(RegisterList(GetCalleeRegsMask(Arch::AARCH32, false).GetValue()));
-    SET_CFI_OFFSET(pop_callees, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popCallees, encoder->GetCursorOffset());
 
     // ARM32 doesn't support OSR mode
     ASSERT(!IsOsrMode());
     // Support restoring of LR and FP registers once OSR is supported in arm32
     static_assert(!ArchTraits<Arch::AARCH32>::SUPPORT_OSR);
     constexpr auto IMM_2 = 2;
-    encoder->EncodeAdd(sp_reg, sp_reg, Imm(WORD_SIZE_BYTES * IMM_2));
-    encoder->EncodeAdd(sp_reg, sp_reg, Imm(WORD_SIZE_BYTES * (CFrameSlots::Start() - CFrameData::Start())));
+    encoder->EncodeAdd(spReg, spReg, Imm(WORD_SIZE_BYTES * IMM_2));
+    encoder->EncodeAdd(spReg, spReg, Imm(WORD_SIZE_BYTES * (CFrameSlots::Start() - CFrameData::Start())));
 
     GetMasm()->Pop(RegisterList(vixl::aarch32::r11, vixl::aarch32::lr));
-    SET_CFI_OFFSET(pop_fplr, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
 
     encoder->EncodeReturn();
 }

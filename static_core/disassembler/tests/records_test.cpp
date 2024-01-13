@@ -25,8 +25,8 @@ static inline std::string ExtractRecordBody(const std::string &text, const std::
     auto beg = text.find(header);
     auto end = text.find('}', beg);
 
-    assert(beg != std::string::npos);
-    assert(end != std::string::npos);
+    ASSERT(beg != std::string::npos);
+    ASSERT(end != std::string::npos);
 
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
@@ -135,10 +135,10 @@ TEST(RecordTest, RecordWithRecord)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    std::string body_a = ExtractRecordBody(ss.str(), ".record A {\n");
-    std::stringstream a {body_a};
-    std::string body_b = ExtractRecordBody(ss.str(), ".record B {\n");
-    std::stringstream b {body_b};
+    std::string bodyA = ExtractRecordBody(ss.str(), ".record A {\n");
+    std::stringstream a {bodyA};
+    std::string bodyB = ExtractRecordBody(ss.str(), ".record B {\n");
+    std::stringstream b {bodyB};
 
     std::string line;
     std::getline(b, line);

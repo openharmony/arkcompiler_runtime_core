@@ -41,39 +41,39 @@ class MethodOptions {
 public:
     bool ShowContext() const
     {
-        return show_info_[MethodOption::InfoType::CONTEXT];
+        return showInfo_[MethodOption::InfoType::CONTEXT];
     }
 
     bool ShowRegChanges() const
     {
-        return show_info_[MethodOption::InfoType::REG_CHANGES];
+        return showInfo_[MethodOption::InfoType::REG_CHANGES];
     }
 
     bool ShowCflow() const
     {
-        return show_info_[MethodOption::InfoType::CFLOW];
+        return showInfo_[MethodOption::InfoType::CFLOW];
     }
 
     bool ShowJobFill() const
     {
-        return show_info_[MethodOption::InfoType::JOBFILL];
+        return showInfo_[MethodOption::InfoType::JOBFILL];
     }
 
     void SetShow(MethodOption::InfoType info)
     {
-        show_info_[info] = true;
+        showInfo_[info] = true;
     }
 
-    void SetMsgClass(VerifierMessage msg_num, MethodOption::MsgClass klass)
+    void SetMsgClass(VerifierMessage msgNum, MethodOption::MsgClass klass)
     {
-        msg_classes_[msg_num] = klass;
+        msgClasses_[msgNum] = klass;
     }
 
     template <typename Validator>
-    void SetMsgClass(Validator validator, size_t msg_num, MethodOption::MsgClass klass)
+    void SetMsgClass(Validator validator, size_t msgNum, MethodOption::MsgClass klass)
     {
-        if (validator(static_cast<VerifierMessage>(msg_num))) {
-            msg_classes_[static_cast<VerifierMessage>(msg_num)] = klass;
+        if (validator(static_cast<VerifierMessage>(msgNum))) {
+            msgClasses_[static_cast<VerifierMessage>(msgNum)] = klass;
         }
     }
 
@@ -82,31 +82,31 @@ public:
         uplevel_.push_back(std::cref(up));
     }
 
-    bool CanHandleMsg(VerifierMessage msg_num) const
+    bool CanHandleMsg(VerifierMessage msgNum) const
     {
-        return msg_classes_.count(msg_num) > 0;
+        return msgClasses_.count(msgNum) > 0;
     }
 
-    MethodOption::MsgClass MsgClassFor(VerifierMessage msg_num) const;
+    MethodOption::MsgClass MsgClassFor(VerifierMessage msgNum) const;
 
-    bool IsInMsgClass(VerifierMessage msg_num, MethodOption::MsgClass klass) const
+    bool IsInMsgClass(VerifierMessage msgNum, MethodOption::MsgClass klass) const
     {
-        return MsgClassFor(msg_num) == klass;
+        return MsgClassFor(msgNum) == klass;
     }
 
-    bool IsHidden(VerifierMessage msg_num) const
+    bool IsHidden(VerifierMessage msgNum) const
     {
-        return IsInMsgClass(msg_num, MethodOption::MsgClass::HIDDEN);
+        return IsInMsgClass(msgNum, MethodOption::MsgClass::HIDDEN);
     }
 
-    bool IsWarning(VerifierMessage msg_num) const
+    bool IsWarning(VerifierMessage msgNum) const
     {
-        return IsInMsgClass(msg_num, MethodOption::MsgClass::WARNING);
+        return IsInMsgClass(msgNum, MethodOption::MsgClass::WARNING);
     }
 
-    bool IsError(VerifierMessage msg_num) const
+    bool IsError(VerifierMessage msgNum) const
     {
-        return IsInMsgClass(msg_num, MethodOption::MsgClass::ERROR);
+        return IsInMsgClass(msgNum, MethodOption::MsgClass::ERROR);
     }
 
     PandaString Image() const
@@ -119,7 +119,7 @@ public:
         }
         result += "\n";
         result += "  Show: ";
-        show_info_.EnumerateFlags([&](auto flag) {
+        showInfo_.EnumerateFlags([&](auto flag) {
             switch (flag) {
                 case MethodOption::InfoType::CONTEXT:
                     result += "'context' ";
@@ -143,7 +143,7 @@ public:
         });
         result += "\n";
         result += "  Checks: ";
-        enabled_check_.EnumerateValues([&](auto flag) {
+        enabledCheck_.EnumerateValues([&](auto flag) {
             switch (flag) {
                 case MethodOption::CheckType::TYPING:
                     result += "'typing' ";
@@ -174,7 +174,7 @@ public:
         return result;
     }
 
-    explicit MethodOptions(PandaString param_name) : name_ {std::move(param_name)} {}
+    explicit MethodOptions(PandaString paramName) : name_ {std::move(paramName)} {}
 
     const PandaString &GetName() const
     {
@@ -183,12 +183,12 @@ public:
 
     MethodOption::CheckEnum &Check()
     {
-        return enabled_check_;
+        return enabledCheck_;
     }
 
     const MethodOption::CheckEnum &Check() const
     {
-        return enabled_check_;
+        return enabledCheck_;
     }
 
 private:
@@ -196,11 +196,11 @@ private:
     {
         PandaString result;
         result += "  Messages:\n";
-        for (const auto &m : msg_classes_) {
-            const auto &msg_num = m.first;
+        for (const auto &m : msgClasses_) {
+            const auto &msgNum = m.first;
             const auto &klass = m.second;
             result += "    ";
-            result += VerifierMessageToString(msg_num);
+            result += VerifierMessageToString(msgNum);
             result += " : ";
             switch (klass) {
                 case MethodOption::MsgClass::ERROR:
@@ -225,18 +225,18 @@ private:
 
     const PandaString name_;
     PandaVector<std::reference_wrapper<const MethodOptions>> uplevel_;
-    PandaUnorderedMap<VerifierMessage, MethodOption::MsgClass> msg_classes_;
-    MethodOption::InfoTypeFlag show_info_;
-    MethodOption::CheckEnum enabled_check_;
+    PandaUnorderedMap<VerifierMessage, MethodOption::MsgClass> msgClasses_;
+    MethodOption::InfoTypeFlag showInfo_;
+    MethodOption::CheckEnum enabledCheck_;
 
     // In verifier_messages_data.cpp
     struct VerifierMessageDefault {
         VerifierMessage msg;
-        MethodOption::MsgClass msg_class;
+        MethodOption::MsgClass msgClass;
     };
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    static VerifierMessageDefault message_defaults_[];
+    static VerifierMessageDefault messageDefaults_[];
 };
 
 }  // namespace panda::verifier

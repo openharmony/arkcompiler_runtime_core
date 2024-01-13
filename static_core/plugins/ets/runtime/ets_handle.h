@@ -27,8 +27,8 @@ template <typename T>
 class EtsHandle : public VMHandle<T> {
 public:
     inline explicit EtsHandle() : VMHandle<T>() {}
-    explicit EtsHandle(EtsCoroutine *coroutine, T *ets_obj)
-        : VMHandle<T>(ManagedThread::CastFromThread(coroutine), GetObjectHeader(ets_obj))
+    explicit EtsHandle(EtsCoroutine *coroutine, T *etsObj)
+        : VMHandle<T>(ManagedThread::CastFromThread(coroutine), GetObjectHeader(etsObj))
     {
     }
 
@@ -42,13 +42,13 @@ public:
     NO_COPY_SEMANTIC(EtsHandle);
 
 private:
-    static constexpr ObjectHeader *GetObjectHeader(T *ets_obj)
+    static constexpr ObjectHeader *GetObjectHeader(T *etsObj)
     {
         EtsObject *object = nullptr;
         if constexpr (std::is_same_v<T, EtsObject>) {
-            object = ets_obj;
+            object = etsObj;
         } else {
-            object = ets_obj != nullptr ? ets_obj->AsObject() : nullptr;
+            object = etsObj != nullptr ? etsObj->AsObject() : nullptr;
         }
         return object != nullptr ? object->GetCoreType() : nullptr;
     }

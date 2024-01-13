@@ -131,7 +131,7 @@ private:
     void Compress(BasicBlock *block);
     void DfsNumbering(BasicBlock *block);
     BasicBlock *Eval(BasicBlock *block);
-    void Init(size_t blocks_count);
+    void Init(size_t blocksCount);
     void Link(BasicBlock *parent, BasicBlock *block)
     {
         SetAncestor(block, parent);
@@ -141,7 +141,7 @@ private:
 private:
     static constexpr int32_t DEFAULT_DFS_VAL = -1;
     // number of the block according to the order it is reached during the DFS
-    int32_t dfs_num_ {DEFAULT_DFS_VAL};
+    int32_t dfsNum_ {DEFAULT_DFS_VAL};
     BlocksVector *ancestors_ {nullptr};
     ArenaVector<BlocksVector> *buckets_ {nullptr};
     BlocksVector *idoms_ {nullptr};

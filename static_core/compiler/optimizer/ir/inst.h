@@ -218,36 +218,36 @@ bool Compare(ConditionCode cc, T lhs, T rhs)
 {
     using SignedT = std::make_signed_t<T>;
     using UnsignedT = std::make_unsigned_t<T>;
-    auto lhs_u = bit_cast<UnsignedT>(lhs);
-    auto rhs_u = bit_cast<UnsignedT>(rhs);
-    auto lhs_s = bit_cast<SignedT>(lhs);
-    auto rhs_s = bit_cast<SignedT>(rhs);
+    auto lhsU = bit_cast<UnsignedT>(lhs);
+    auto rhsU = bit_cast<UnsignedT>(rhs);
+    auto lhsS = bit_cast<SignedT>(lhs);
+    auto rhsS = bit_cast<SignedT>(rhs);
 
     switch (cc) {
         case ConditionCode::CC_EQ:
-            return lhs_u == rhs_u;
+            return lhsU == rhsU;
         case ConditionCode::CC_NE:
-            return lhs_u != rhs_u;
+            return lhsU != rhsU;
         case ConditionCode::CC_LT:
-            return lhs_s < rhs_s;
+            return lhsS < rhsS;
         case ConditionCode::CC_LE:
-            return lhs_s <= rhs_s;
+            return lhsS <= rhsS;
         case ConditionCode::CC_GT:
-            return lhs_s > rhs_s;
+            return lhsS > rhsS;
         case ConditionCode::CC_GE:
-            return lhs_s >= rhs_s;
+            return lhsS >= rhsS;
         case ConditionCode::CC_B:
-            return lhs_u < rhs_u;
+            return lhsU < rhsU;
         case ConditionCode::CC_BE:
-            return lhs_u <= rhs_u;
+            return lhsU <= rhsU;
         case ConditionCode::CC_A:
-            return lhs_u > rhs_u;
+            return lhsU > rhsU;
         case ConditionCode::CC_AE:
-            return lhs_u >= rhs_u;
+            return lhsU >= rhsU;
         case ConditionCode::CC_TST_EQ:
-            return (lhs_u & rhs_u) == 0;
+            return (lhsU & rhsU) == 0;
         case ConditionCode::CC_TST_NE:
-            return (lhs_u & rhs_u) != 0;
+            return (lhsU & rhsU) != 0;
         default:
             UNREACHABLE();
             return false;
@@ -357,8 +357,8 @@ public:
     using ClassType = RuntimeInterface::ClassPtr;
 
     constexpr ObjectTypeInfo() = default;
-    ObjectTypeInfo(ClassType klass, bool is_exact)
-        : class_(reinterpret_cast<uintptr_t>(klass) | static_cast<uintptr_t>(is_exact))
+    ObjectTypeInfo(ClassType klass, bool isExact)
+        : class_(reinterpret_cast<uintptr_t>(klass) | static_cast<uintptr_t>(isExact))
     {
         ASSERT((reinterpret_cast<uintptr_t>(klass) & EXACT_MASK) == 0);
     }
@@ -491,9 +491,9 @@ public:
         return inst_;
     }
 
-    static inline uint8_t GetPadding(Arch arch, uint32_t inputs_count)
+    static inline uint8_t GetPadding(Arch arch, uint32_t inputsCount)
     {
-        return static_cast<uint8_t>(!Is64BitsArch(arch) && inputs_count % 2U == 1U);
+        return static_cast<uint8_t>(!Is64BitsArch(arch) && inputsCount % 2U == 1U);
     }
 
 private:
@@ -537,8 +537,8 @@ inline bool operator!=(const Input &lhs, const Input &rhs)
 class User final {
 public:
     User() = default;
-    User(bool is_static, unsigned index, unsigned size)
-        : properties_(IsStaticFlag::Encode(is_static) | IndexField::Encode(index) | SizeField::Encode(size) |
+    User(bool isStatic, unsigned index, unsigned size)
+        : properties_(IsStaticFlag::Encode(isStatic) | IndexField::Encode(index) | SizeField::Encode(size) |
                       BbNumField::Encode(BbNumField::MaxValue()))
     {
         ASSERT(index < 1U << (BITS_FOR_INDEX - 1U));
@@ -593,10 +593,10 @@ public:
         return BbNumField::Decode(properties_);
     }
 
-    void SetBbNum(uint32_t bb_num)
+    void SetBbNum(uint32_t bbNum)
     {
         ASSERT(IsDynamic());
-        BbNumField::Set(bb_num, &properties_);
+        BbNumField::Set(bbNum, &properties_);
     }
 
     auto GetNext() const
@@ -775,7 +775,7 @@ public:
     void Remove(unsigned index);
 
     /// Reallocate inputs/users storage to a new one with specified capacity.
-    void Reallocate(size_t new_capacity = 0);
+    void Reallocate(size_t newCapacity = 0);
 
     /// Get instruction to which these operands belongs to.
     Inst *GetOwnerInst() const
@@ -911,20 +911,20 @@ public:
 
     auto GetLinearNumber() const
     {
-        return linear_number_;
+        return linearNumber_;
     }
     void SetLinearNumber(LinearNumber number)
     {
-        linear_number_ = number;
+        linearNumber_ = number;
     }
 
     auto GetCloneNumber() const
     {
-        return clone_number_;
+        return cloneNumber_;
     }
     void SetCloneNumber(int32_t number)
     {
-        clone_number_ = number;
+        cloneNumber_ = number;
     }
 
     // Opcode accessors
@@ -955,11 +955,11 @@ public:
     // Type accessors
     DataType::Type GetType() const
     {
-        return FieldType::Get(bit_fields_);
+        return FieldType::Get(bitFields_);
     }
     void SetType(DataType::Type type)
     {
-        FieldType::Set(type, &bit_fields_);
+        FieldType::Set(type, &bitFields_);
     }
     bool HasType() const
     {
@@ -1228,24 +1228,24 @@ public:
 
     ObjectTypeInfo GetObjectTypeInfo() const
     {
-        return object_type_info_;
+        return objectTypeInfo_;
     }
 
     bool HasObjectTypeInfo() const
     {
-        return object_type_info_.IsValid();
+        return objectTypeInfo_.IsValid();
     }
 
     void SetObjectTypeInfo(ObjectTypeInfo o)
     {
-        object_type_info_ = o;
+        objectTypeInfo_ = o;
     }
 
     Inst *GetDataFlowInput(int index) const
     {
         return GetDataFlowInput(GetInput(index).GetInst());
     }
-    static Inst *GetDataFlowInput(Inst *input_inst);
+    static Inst *GetDataFlowInput(Inst *inputInst);
 
     bool IsPrecedingInSameBlock(const Inst *other) const;
 
@@ -1306,7 +1306,7 @@ public:
     bool IsMovableObject() const;
 
     /// Return instruction clone
-    virtual Inst *Clone(const Graph *target_graph) const;
+    virtual Inst *Clone(const Graph *targetGraph) const;
 
     uintptr_t GetFlagsMask() const
     {
@@ -1366,13 +1366,13 @@ public:
     void AddUser(User *user)
     {
         ASSERT(user && user->GetInst());
-        user->SetNext(first_user_);
+        user->SetNext(firstUser_);
         user->SetPrev(nullptr);
-        if (first_user_ != nullptr) {
-            ASSERT(first_user_->GetPrev() == nullptr);
-            first_user_->SetPrev(user);
+        if (firstUser_ != nullptr) {
+            ASSERT(firstUser_->GetPrev() == nullptr);
+            firstUser_->SetPrev(user);
         }
-        first_user_ = user;
+        firstUser_ = user;
     }
 
     /**
@@ -1383,8 +1383,8 @@ public:
     {
         ASSERT(user);
         ASSERT(HasUsers());
-        if (user == first_user_) {
-            first_user_ = user->GetNext();
+        if (user == firstUser_) {
+            firstUser_ = user->GetNext();
         }
         user->Remove();
     }
@@ -1414,12 +1414,12 @@ public:
      * @param old_input - instruction that should be replaced
      * @param new_input - new input instruction
      */
-    void ReplaceInput(Inst *old_input, Inst *new_input)
+    void ReplaceInput(Inst *oldInput, Inst *newInput)
     {
         unsigned index = 0;
         for (auto input : GetInputs()) {
-            if (input.GetInst() == old_input) {
-                SetInput(index, new_input);
+            if (input.GetInst() == oldInput) {
+                SetInput(index, newInput);
             }
             index++;
         }
@@ -1492,8 +1492,8 @@ public:
     void RemoveInputs()
     {
         if (UNLIKELY(IsOperandsDynamic())) {
-            for (auto inputs_count = GetInputsCount(); inputs_count != 0; --inputs_count) {
-                RemoveInput(inputs_count - 1);
+            for (auto inputsCount = GetInputsCount(); inputsCount != 0; --inputsCount) {
+                RemoveInput(inputsCount - 1);
             }
         } else {
             for (size_t i = 0; i < GetInputsCount(); ++i) {
@@ -1543,11 +1543,11 @@ public:
             return Span<Input>(operands->Inputs(), operands->Size());
         }
 
-        auto inputs_count {GetField<InputsCount>()};
+        auto inputsCount {GetField<InputsCount>()};
         return Span<Input>(
             reinterpret_cast<Input *>(reinterpret_cast<uintptr_t>(this) -
-                                      (inputs_count + Input::GetPadding(RUNTIME_ARCH, inputs_count)) * sizeof(Input)),
-            inputs_count);
+                                      (inputsCount + Input::GetPadding(RUNTIME_ARCH, inputsCount)) * sizeof(Input)),
+            inputsCount);
     }
     Span<const Input> GetInputs() const
     {
@@ -1565,11 +1565,11 @@ public:
 
     UserList<User> GetUsers()
     {
-        return UserList<User>(&first_user_);
+        return UserList<User>(&firstUser_);
     }
     UserList<const User> GetUsers() const
     {
-        return UserList<const User>(&first_user_);
+        return UserList<const User>(&firstUser_);
     }
 
     size_t GetInputsCount() const
@@ -1582,12 +1582,12 @@ public:
 
     bool HasUsers() const
     {
-        return first_user_ != nullptr;
+        return firstUser_ != nullptr;
     };
 
     bool HasSingleUser() const
     {
-        return first_user_ != nullptr && first_user_->GetNext() == nullptr;
+        return firstUser_ != nullptr && firstUser_->GetNext() == nullptr;
     }
 
     /// Reserve space in dataflow storage for specified inputs count
@@ -1626,24 +1626,24 @@ public:
 
     virtual uint32_t Latency() const
     {
-        return OPTIONS.GetCompilerSchedLatency();
+        return g_options.GetCompilerSchedLatency();
     }
 
     template <typename Accessor>
     typename Accessor::ValueType GetField() const
     {
-        return Accessor::Get(bit_fields_);
+        return Accessor::Get(bitFields_);
     }
 
     template <typename Accessor>
     void SetField(typename Accessor::ValueType value)
     {
-        Accessor::Set(value, &bit_fields_);
+        Accessor::Set(value, &bitFields_);
     }
 
     uint64_t GetAllFields() const
     {
-        return bit_fields_;
+        return bitFields_;
     }
 
     bool IsPhi() const
@@ -1689,16 +1689,16 @@ public:
         return 0;
     }
 
-    virtual void SetVnObject([[maybe_unused]] VnObject *vn_obj) {}
+    virtual void SetVnObject([[maybe_unused]] VnObject *vnObj) {}
 
     Register GetDstReg() const
     {
-        return dst_reg_;
+        return dstReg_;
     }
 
     void SetDstReg(Register reg)
     {
-        dst_reg_ = reg;
+        dstReg_ = reg;
     }
 
     uint32_t GetVN() const
@@ -1710,7 +1710,7 @@ public:
     {
         vn_ = vn;
     }
-    void Dump(std::ostream *out, bool new_line = true) const;
+    void Dump(std::ostream *out, bool newLine = true) const;
     virtual bool DumpInputs(std::ostream * /* out */) const;
     virtual void DumpOpcode(std::ostream * /* out */) const;
     void DumpBytecode(std::ostream * /* out */) const;
@@ -1750,28 +1750,28 @@ public:
 
     User *GetFirstUser() const
     {
-        return first_user_;
+        return firstUser_;
     }
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
     InstDebugInfo *GetDebugInfo() const
     {
-        return debug_info_;
+        return debugInfo_;
     }
 
     void SetDebugInfo(InstDebugInfo *info)
     {
-        debug_info_ = info;
+        debugInfo_ = info;
     }
 
     RuntimeInterface::MethodPtr GetCurrentMethod() const
     {
-        return current_method_;
+        return currentMethod_;
     }
 
-    void SetCurrentMethod(RuntimeInterface::MethodPtr current_method)
+    void SetCurrentMethod(RuntimeInterface::MethodPtr currentMethod)
     {
-        current_method_ = current_method;
+        currentMethod_ = currentMethod;
     }
 #endif
 
@@ -1785,7 +1785,7 @@ protected:
 
     explicit Inst(Opcode opcode, DataType::Type type, uint32_t pc) : pc_(pc), opcode_(opcode)
     {
-        bit_fields_ = inst_flags::GetFlagsMask(opcode);
+        bitFields_ = inst_flags::GetFlagsMask(opcode);
         SetField<FieldType>(type);
     }
 
@@ -1806,11 +1806,11 @@ private:
         if (UNLIKELY(IsOperandsDynamic())) {
             return GetDynamicOperands()->GetUser(index);
         }
-        auto inputs_count {GetField<InputsCount>()};
+        auto inputsCount {GetField<InputsCount>()};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return reinterpret_cast<User *>(reinterpret_cast<Input *>(this) -
                                         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                                        (inputs_count + Input::GetPadding(RUNTIME_ARCH, inputs_count))) -
+                                        (inputsCount + Input::GetPadding(RUNTIME_ARCH, inputsCount))) -
                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                index - 1;
     }
@@ -1821,9 +1821,9 @@ private:
             return sizeof(DynamicOperands);
         }
 
-        auto inputs_count {GetField<InputsCount>()};
-        return inputs_count * (sizeof(Input) + sizeof(User)) +
-               Input::GetPadding(RUNTIME_ARCH, inputs_count) * sizeof(Input);
+        auto inputsCount {GetField<InputsCount>()};
+        return inputsCount * (sizeof(Input) + sizeof(User)) +
+               Input::GetPadding(RUNTIME_ARCH, inputsCount) * sizeof(Input);
     }
 
 private:
@@ -1831,8 +1831,8 @@ private:
     BasicBlock *bb_ {nullptr};
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    InstDebugInfo *debug_info_ {nullptr};
-    RuntimeInterface::MethodPtr current_method_ {nullptr};
+    InstDebugInfo *debugInfo_ {nullptr};
+    RuntimeInterface::MethodPtr currentMethod_ {nullptr};
 #endif
 
     /// Next instruction within basic block
@@ -1842,10 +1842,10 @@ private:
     Inst *prev_ {nullptr};
 
     /// First user in users chain
-    User *first_user_ {nullptr};
+    User *firstUser_ {nullptr};
 
     /// This value hold properties of the instruction. It accessed via BitField types(f.e. FieldType).
-    uint64_t bit_fields_ {0};
+    uint64_t bitFields_ {0};
 
     /// Unique id of instruction
     uint32_t id_ {INVALID_ID};
@@ -1857,18 +1857,18 @@ private:
     uint32_t pc_ {INVALID_PC};
 
     /// Number used in cloning
-    uint32_t clone_number_ {0};
+    uint32_t cloneNumber_ {0};
 
     /// Instruction number getting while visiting graph
-    LinearNumber linear_number_ {INVALID_LINEAR_NUM};
+    LinearNumber linearNumber_ {INVALID_LINEAR_NUM};
 
-    ObjectTypeInfo object_type_info_ {};
+    ObjectTypeInfo objectTypeInfo_ {};
 
     /// Opcode, see opcodes.def
     Opcode opcode_ {Opcode::INVALID};
 
     // Destination register type - defined in FieldType
-    Register dst_reg_ {INVALID_REG};
+    Register dstReg_ {INVALID_REG};
 };
 
 /**
@@ -1988,13 +1988,13 @@ enum ObjectType {
     LAST = MEM_DYN_ARRAY_LENGTH
 };
 
-inline const char *ObjectTypeToString(ObjectType obj_type)
+inline const char *ObjectTypeToString(ObjectType objType)
 {
     static constexpr auto COUNT = static_cast<uint8_t>(ObjectType::LAST) + 1;
     static constexpr std::array<const char *, COUNT> OBJ_TYPE_NAMES = {
         "Object", "Static", "GlobalVar",        "Dynamic inlined", "Properties",     "Elements", "Class",
         "Hclass", "Method", "Prototype holder", "Prototype cell",  "IsChangeFieald", "Length"};
-    auto idx = static_cast<uint8_t>(obj_type);
+    auto idx = static_cast<uint8_t>(objType);
     ASSERT(idx <= LAST);
     return OBJ_TYPE_NAMES[idx];
 }
@@ -2015,7 +2015,7 @@ public:
     static constexpr uint32_t MEM_DYN_ELEMENTS_ID = MEM_PROMISE_CLASS_ID - ObjectType::MEM_DYN_ELEMENTS;
     static constexpr uint32_t MEM_DYN_ARRAY_LENGTH_ID = MEM_PROMISE_CLASS_ID - ObjectType::MEM_DYN_ARRAY_LENGTH;
 
-    TypeIdMixin(uint32_t type_id, RuntimeInterface::MethodPtr method) : type_id_(type_id), method_(method) {}
+    TypeIdMixin(uint32_t typeId, RuntimeInterface::MethodPtr method) : typeId_(typeId), method_(method) {}
 
     TypeIdMixin() = default;
     NO_COPY_SEMANTIC(TypeIdMixin);
@@ -2024,12 +2024,12 @@ public:
 
     void SetTypeId(uint32_t id)
     {
-        type_id_ = id;
+        typeId_ = id;
     }
 
     auto GetTypeId() const
     {
-        return type_id_;
+        return typeId_;
     }
 
     void SetMethod(RuntimeInterface::MethodPtr method)
@@ -2042,7 +2042,7 @@ public:
     }
 
 private:
-    uint32_t type_id_ {0};
+    uint32_t typeId_ {0};
     // The pointer to the method in which this instruction is executed(inlined method)
     RuntimeInterface::MethodPtr method_ {nullptr};
 };
@@ -2053,9 +2053,9 @@ class ClassTypeMixin : public T {
 public:
     using T::T;
 
-    void SetClassType(ClassType class_type)
+    void SetClassType(ClassType classType)
     {
-        T::template SetField<ClassTypeField>(class_type);
+        T::template SetField<ClassTypeField>(classType);
     }
 
     ClassType GetClassType() const
@@ -2074,9 +2074,9 @@ class OmitNullCheckMixin : public T {
 public:
     using T::T;
 
-    void SetOmitNullCheck(bool omit_null_check)
+    void SetOmitNullCheck(bool omitNullCheck)
     {
-        T::template SetField<OmitNullCheckFlag>(omit_null_check);
+        T::template SetField<OmitNullCheckFlag>(omitNullCheck);
     }
 
     bool GetOmitNullCheck() const
@@ -2159,9 +2159,9 @@ class VolatileMixin : public T {
 public:
     using T::T;
 
-    void SetVolatile(bool is_volatile)
+    void SetVolatile(bool isVolatile)
     {
-        T::template SetField<IsVolatileFlag>(is_volatile);
+        T::template SetField<IsVolatileFlag>(isVolatile);
     }
     bool GetVolatile() const
     {
@@ -2309,26 +2309,26 @@ protected:
 /// Mixin for instrucion with ShiftType
 class ShiftTypeMixin {
 public:
-    explicit ShiftTypeMixin(ShiftType shift_type) : shift_type_(shift_type) {}
+    explicit ShiftTypeMixin(ShiftType shiftType) : shiftType_(shiftType) {}
     NO_COPY_SEMANTIC(ShiftTypeMixin);
     NO_MOVE_SEMANTIC(ShiftTypeMixin);
     virtual ~ShiftTypeMixin() = default;
 
-    void SetShiftType(ShiftType shift_type)
+    void SetShiftType(ShiftType shiftType)
     {
-        shift_type_ = shift_type;
+        shiftType_ = shiftType;
     }
 
     ShiftType GetShiftType() const
     {
-        return shift_type_;
+        return shiftType_;
     }
 
 protected:
     ShiftTypeMixin() = default;
 
 private:
-    ShiftType shift_type_ {INVALID_SHIFT};
+    ShiftType shiftType_ {INVALID_SHIFT};
 };
 
 /// Mixin for instructions with multiple return values
@@ -2343,7 +2343,7 @@ public:
         if (index == 0) {
             return T::GetDstReg();
         }
-        return dst_regs_[index - 1];
+        return dstRegs_[index - 1];
     }
 
     Location GetDstLocation(unsigned index) const override
@@ -2352,7 +2352,7 @@ public:
         if (index == 0) {
             return Location::MakeRegister(T::GetDstReg());
         }
-        return Location::MakeRegister(dst_regs_[index - 1]);
+        return Location::MakeRegister(dstRegs_[index - 1]);
     }
 
     void SetDstReg(unsigned index, Register reg) override
@@ -2361,7 +2361,7 @@ public:
         if (index == 0) {
             T::SetDstReg(reg);
         } else {
-            dst_regs_[index - 1] = reg;
+            dstRegs_[index - 1] = reg;
         }
     }
 
@@ -2371,7 +2371,7 @@ public:
     }
 
 private:
-    std::array<Register, N - 1> dst_regs_;
+    std::array<Register, N - 1> dstRegs_;
 };
 
 /**
@@ -2388,13 +2388,13 @@ public:
     void SetSrcReg(unsigned index, Register reg) override
     {
         ASSERT(index < N);
-        src_regs_[index] = reg;
+        srcRegs_[index] = reg;
     }
 
     Register GetSrcReg(unsigned index) const override
     {
         ASSERT(index < N);
-        return src_regs_[index];
+        return srcRegs_[index];
     }
 
     Location GetLocation(size_t index) const override
@@ -2414,15 +2414,15 @@ public:
 
     void SetTmpLocation(Location location) override
     {
-        tmp_location_ = location;
+        tmpLocation_ = location;
     }
 
     Location GetTmpLocation() const override
     {
-        return tmp_location_;
+        return tmpLocation_;
     }
 
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 
 private:
     template <typename T, std::size_t... IS>
@@ -2432,8 +2432,8 @@ private:
     }
 
 private:
-    std::array<Register, N> src_regs_ = CreateArray(INVALID_REG, std::make_index_sequence<INPUT_COUNT>());
-    Location tmp_location_ {};
+    std::array<Register, N> srcRegs_ = CreateArray(INVALID_REG, std::make_index_sequence<INPUT_COUNT>());
+    Location tmpLocation_ {};
 };
 
 /**
@@ -2506,9 +2506,9 @@ public:
         : FixedInputsInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
     }
 };
 
@@ -2522,10 +2522,10 @@ public:
         : FixedInputsInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetInput(3, input3);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetInput(3U, input3);
     }
 };
 
@@ -2623,7 +2623,7 @@ public:
         return true;
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
     Inst *Evaluate();
 };
@@ -2645,9 +2645,9 @@ public:
     uint32_t Latency() const override
     {
         if (GetOpcode() == Opcode::Div) {
-            return OPTIONS.GetCompilerSchedLatencyLong();
+            return g_options.GetCompilerSchedLatencyLong();
         }
-        return OPTIONS.GetCompilerSchedLatency();
+        return g_options.GetCompilerSchedLatency();
     }
 
     bool IsSafeInst() const override
@@ -2665,17 +2665,17 @@ public:
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
-        auto input_type = GetInput(index).GetInst()->GetType();
+        auto inputType = GetInput(index).GetInst()->GetType();
         auto type = GetType();
         if (GetOpcode() == Opcode::Sub && !DataType::IsTypeSigned(type)) {
-            ASSERT(GetCommonType(input_type) == GetCommonType(type) || input_type == DataType::POINTER ||
-                   DataType::GetCommonType(input_type) == DataType::INT64);
-            return input_type;
+            ASSERT(GetCommonType(inputType) == GetCommonType(type) || inputType == DataType::POINTER ||
+                   DataType::GetCommonType(inputType) == DataType::INT64);
+            return inputType;
         }
         if (GetOpcode() == Opcode::Add && type == DataType::POINTER) {
-            ASSERT(GetCommonType(input_type) == GetCommonType(type) ||
-                   DataType::GetCommonType(input_type) == DataType::INT64);
-            return input_type;
+            ASSERT(GetCommonType(inputType) == GetCommonType(type) ||
+                   DataType::GetCommonType(inputType) == DataType::INT64);
+            return inputType;
         }
         return GetType();
     }
@@ -2704,21 +2704,21 @@ public:
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
-        auto input_type = GetInput(index).GetInst()->GetType();
+        auto inputType = GetInput(index).GetInst()->GetType();
         auto type = GetType();
         if (GetOpcode() == Opcode::SubI && !DataType::IsTypeSigned(type)) {
-            ASSERT(GetCommonType(input_type) == GetCommonType(type) || input_type == DataType::POINTER);
-            return input_type;
+            ASSERT(GetCommonType(inputType) == GetCommonType(type) || inputType == DataType::POINTER);
+            return inputType;
         }
         if (GetOpcode() == Opcode::AddI && type == DataType::POINTER) {
-            ASSERT(DataType::GetCommonType(input_type) == DataType::GetCommonType(GetType()) ||
-                   (input_type == DataType::REFERENCE && GetType() == DataType::POINTER));
-            return input_type;
+            ASSERT(DataType::GetCommonType(inputType) == DataType::GetCommonType(GetType()) ||
+                   (inputType == DataType::REFERENCE && GetType() == DataType::POINTER));
+            return inputType;
         }
         return GetType();
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
     bool DumpInputs(std::ostream * /* out */) const override;
 
     bool IsSafeInst() const override
@@ -2731,9 +2731,9 @@ public:
         return true;
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         static_cast<BinaryImmOperation *>(clone)->SetImm(GetImm());
         return clone;
     }
@@ -2746,13 +2746,13 @@ public:
     DECLARE_INST(UnaryShiftedRegisterOperation);
     using FixedInputsInst::FixedInputsInst;
 
-    explicit UnaryShiftedRegisterOperation(Opcode opcode, ShiftType shift_type, uint64_t imm)
-        : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
+    explicit UnaryShiftedRegisterOperation(Opcode opcode, ShiftType shiftType, uint64_t imm)
+        : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
     {
     }
     explicit UnaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm,
-                                           ShiftType shift_type)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
+                                           ShiftType shiftType)
+        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
@@ -2764,9 +2764,9 @@ public:
         return GetType();
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
     bool DumpInputs(std::ostream * /* out */) const override;
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 };
 
 /// Binary operation that shifts its second operand prior the application.
@@ -2776,13 +2776,13 @@ public:
     DECLARE_INST(BinaryShiftedRegisterOperation);
     using FixedInputsInst::FixedInputsInst;
 
-    explicit BinaryShiftedRegisterOperation(Opcode opcode, ShiftType shift_type, uint64_t imm)
-        : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
+    explicit BinaryShiftedRegisterOperation(Opcode opcode, ShiftType shiftType, uint64_t imm)
+        : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
     {
     }
     explicit BinaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                            uint64_t imm, ShiftType shift_type)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shift_type)
+                                            uint64_t imm, ShiftType shiftType)
+        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
@@ -2795,9 +2795,9 @@ public:
         return GetType();
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
     bool DumpInputs(std::ostream * /* out */) const override;
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 };
 
 class SpillFillInst;
@@ -2805,19 +2805,19 @@ class SpillFillInst;
 /// Mixin to hold location data
 class LocationDataMixin {
 public:
-    void SetLocationData(SpillFillData location_data)
+    void SetLocationData(SpillFillData locationData)
     {
-        location_data_ = location_data;
+        locationData_ = locationData;
     }
 
     auto GetLocationData() const
     {
-        return location_data_;
+        return locationData_;
     }
 
     auto &GetLocationData()
     {
-        return location_data_;
+        return locationData_;
     }
 
 protected:
@@ -2827,7 +2827,7 @@ protected:
     virtual ~LocationDataMixin() = default;
 
 private:
-    SpillFillData location_data_ {};
+    SpillFillData locationData_ {};
 };
 
 /// Mixin to hold input types of call instruction
@@ -2839,29 +2839,29 @@ public:
     void AllocateInputTypes(ArenaAllocator *allocator, size_t capacity)
     {
         ASSERT(allocator != nullptr);
-        ASSERT(input_types_ == nullptr);
-        input_types_ = allocator->New<ArenaVector<DataType::Type>>(allocator->Adapter());
-        ASSERT(input_types_ != nullptr);
-        input_types_->reserve(capacity);
-        ASSERT(input_types_->capacity() >= capacity);
+        ASSERT(inputTypes_ == nullptr);
+        inputTypes_ = allocator->New<ArenaVector<DataType::Type>>(allocator->Adapter());
+        ASSERT(inputTypes_ != nullptr);
+        inputTypes_->reserve(capacity);
+        ASSERT(inputTypes_->capacity() >= capacity);
     }
     void AddInputType(DataType::Type type)
     {
-        ASSERT(input_types_ != nullptr);
-        input_types_->push_back(type);
+        ASSERT(inputTypes_ != nullptr);
+        inputTypes_->push_back(type);
     }
     ArenaVector<DataType::Type> *GetInputTypes()
     {
-        return input_types_;
+        return inputTypes_;
     }
-    void CloneTypes(ArenaAllocator *allocator, InputTypesMixin<T> *target_inst) const
+    void CloneTypes(ArenaAllocator *allocator, InputTypesMixin<T> *targetInst) const
     {
-        if (UNLIKELY(input_types_ == nullptr)) {
+        if (UNLIKELY(inputTypes_ == nullptr)) {
             return;
         }
-        target_inst->AllocateInputTypes(allocator, input_types_->size());
-        for (auto input_type : *input_types_) {
-            target_inst->AddInputType(input_type);
+        targetInst->AllocateInputTypes(allocator, inputTypes_->size());
+        for (auto inputType : *inputTypes_) {
+            targetInst->AddInputType(inputType);
         }
     }
     void AppendInputs(const std::initializer_list<std::pair<Inst *, DataType::Type>> &inputs)
@@ -2890,7 +2890,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    ArenaVector<DataType::Type> *input_types_ {nullptr};
+    ArenaVector<DataType::Type> *inputTypes_ {nullptr};
 };
 
 /// Mixin to hold method data
@@ -2900,17 +2900,17 @@ public:
 
     MethodDataMixin(uint32_t id, RuntimeInterface::MethodPtr method)
     {
-        method_id_ = id;
+        methodId_ = id;
         method_ = method;
     }
 
     void SetCallMethodId(uint32_t id)
     {
-        method_id_ = id;
+        methodId_ = id;
     }
     auto GetCallMethodId() const
     {
-        return method_id_;
+        return methodId_;
     }
     void SetCallMethod(RuntimeInterface::MethodPtr method)
     {
@@ -2936,7 +2936,7 @@ protected:
     virtual ~MethodDataMixin() = default;
 
 private:
-    uint32_t method_id_ {INVALID_METHOD_ID};
+    uint32_t methodId_ {INVALID_METHOD_ID};
     RuntimeInterface::MethodPtr method_ {nullptr};
     uintptr_t function_ {0};
 };
@@ -2949,9 +2949,9 @@ public:
     using Base = FixedInputsInst1;
     using Base::Base;
 
-    ResolveStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id,
+    ResolveStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t methodId,
                       RuntimeInterface::MethodPtr method)
-        : Base(opcode, type, pc), MethodDataMixin(method_id, method)
+        : Base(opcode, type, pc), MethodDataMixin(methodId, method)
     {
     }
 
@@ -2962,14 +2962,14 @@ public:
         return DataType::NO_TYPE;
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        ASSERT(target_graph != nullptr);
-        auto inst_clone = FixedInputsInst1::Clone(target_graph);
-        auto rslv_clone = static_cast<ResolveStaticInst *>(inst_clone);
-        rslv_clone->SetCallMethodId(GetCallMethodId());
-        rslv_clone->SetCallMethod(GetCallMethod());
-        return inst_clone;
+        ASSERT(targetGraph != nullptr);
+        auto instClone = FixedInputsInst1::Clone(targetGraph);
+        auto rslvClone = static_cast<ResolveStaticInst *>(instClone);
+        rslvClone->SetCallMethodId(GetCallMethodId());
+        rslvClone->SetCallMethod(GetCallMethod());
+        return instClone;
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -2983,9 +2983,9 @@ public:
     using Base = FixedInputsInst2;
     using Base::Base;
 
-    ResolveVirtualInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id,
+    ResolveVirtualInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t methodId,
                        RuntimeInterface::MethodPtr method)
-        : Base(opcode, type, pc), MethodDataMixin(method_id, method)
+        : Base(opcode, type, pc), MethodDataMixin(methodId, method)
     {
     }
 
@@ -3003,14 +3003,14 @@ public:
         }
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        ASSERT(target_graph != nullptr);
-        auto inst_clone = FixedInputsInst2::Clone(target_graph);
-        auto rslv_clone = static_cast<ResolveVirtualInst *>(inst_clone);
-        rslv_clone->SetCallMethodId(GetCallMethodId());
-        rslv_clone->SetCallMethod(GetCallMethod());
-        return inst_clone;
+        ASSERT(targetGraph != nullptr);
+        auto instClone = FixedInputsInst2::Clone(targetGraph);
+        auto rslvClone = static_cast<ResolveVirtualInst *>(instClone);
+        rslvClone->SetCallMethodId(GetCallMethodId());
+        rslvClone->SetCallMethod(GetCallMethod());
+        return instClone;
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -3022,14 +3022,13 @@ public:
     using Base = FixedInputsInst2;
     using Base::Base;
 
-    InitStringInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                   StringCtorType ctor_type)
+    InitStringInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, StringCtorType ctorType)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetStringCtorType(ctor_type);
+        SetStringCtorType(ctorType);
     }
 
     bool IsFromString() const
@@ -3050,9 +3049,9 @@ public:
         return DataType::NO_TYPE;
     }
 
-    void SetStringCtorType(StringCtorType ctor_type)
+    void SetStringCtorType(StringCtorType ctorType)
     {
-        SetField<StringCtorTypeField>(ctor_type);
+        SetField<StringCtorTypeField>(ctorType);
     }
 
     StringCtorType GetStringCtorType() const
@@ -3062,9 +3061,9 @@ public:
 
     void DumpOpcode(std::ostream * /* unused */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst2::Clone(target_graph);
+        auto clone = FixedInputsInst2::Clone(targetGraph);
         clone->CastToInitString()->SetStringCtorType(GetStringCtorType());
         return clone;
     }
@@ -3082,9 +3081,9 @@ public:
     using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
 
-    CallInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t method_id,
+    CallInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t methodId,
              RuntimeInterface::MethodPtr method = nullptr)
-        : Base(opcode, type, pc), MethodDataMixin(method_id, method)
+        : Base(opcode, type, pc), MethodDataMixin(methodId, method)
     {
     }
 
@@ -3100,17 +3099,17 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(input_types_ != nullptr);
-        ASSERT(index < input_types_->size());
+        ASSERT(inputTypes_ != nullptr);
+        ASSERT(index < inputTypes_->size());
         ASSERT(index < GetInputsCount());
-        return (*input_types_)[index];
+        return (*inputTypes_)[index];
     }
 
     void DumpOpcode(std::ostream *out) const override;
 
-    void SetCanNativeException(bool is_native)
+    void SetCanNativeException(bool isNative)
     {
-        SetField<IsNativeExceptionFlag>(is_native);
+        SetField<IsNativeExceptionFlag>(isNative);
     }
 
     bool GetCanNativeException() const
@@ -3118,7 +3117,7 @@ public:
         return GetField<IsNativeExceptionFlag>();
     }
 
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 
     bool IsRuntimeCall() const override
     {
@@ -3141,13 +3140,13 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(input_types_ != nullptr);
-        ASSERT(index < input_types_->size());
+        ASSERT(inputTypes_ != nullptr);
+        ASSERT(index < inputTypes_->size());
         ASSERT(index < GetInputsCount());
-        return (*input_types_)[index];
+        return (*inputTypes_)[index];
     }
 
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 };
 
 /// Length methods instruction
@@ -3157,16 +3156,16 @@ public:
     using Base = ArrayInstMixin<FixedInputsInst1>;
     using Base::Base;
 
-    explicit LengthMethodInst(Opcode opcode, bool is_array = true) : Base(opcode)
+    explicit LengthMethodInst(Opcode opcode, bool isArray = true) : Base(opcode)
     {
-        SetIsArray(is_array);
+        SetIsArray(isArray);
     }
-    LengthMethodInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, bool is_array = true)
+    LengthMethodInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, bool isArray = true)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetIsArray(is_array);
+        SetIsArray(isArray);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -3175,9 +3174,9 @@ public:
         return DataType::REFERENCE;
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(static_cast<LengthMethodInst *>(clone)->IsArray() == IsArray());
         return clone;
     }
@@ -3195,14 +3194,14 @@ public:
     {
         SetCc(cc);
     }
-    CompareInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type oper_type,
+    CompareInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type operType,
                 ConditionCode cc)
         : BaseInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetOperandsType(oper_type);
+        SetOperandsType(operType);
         SetCc(cc);
     }
 
@@ -3213,11 +3212,11 @@ public:
     }
     void DumpOpcode(std::ostream * /* unused */) const override;
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToCompare()->GetCc() == GetCc());
         ASSERT(clone->CastToCompare()->GetOperandsType() == GetOperandsType());
         return clone;
@@ -3230,9 +3229,9 @@ class AnyTypeMixin : public T {
 public:
     using T::T;
 
-    void SetAnyType(AnyBaseType any_type)
+    void SetAnyType(AnyBaseType anyType)
     {
-        T::template SetField<AnyBaseTypeField>(any_type);
+        T::template SetField<AnyBaseTypeField>(anyType);
     }
 
     AnyBaseType GetAnyType() const override
@@ -3295,17 +3294,17 @@ public:
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CompareAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+    CompareAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
         : BaseInst(opcode, DataType::Type::BOOL, pc)
     {
-        SetAnyType(any_type);
+        SetAnyType(anyType);
     }
 
-    CompareAnyTypeInst(Opcode opcode, uint32_t pc, Inst *input0, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+    CompareAnyTypeInst(Opcode opcode, uint32_t pc, Inst *input0, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
         : BaseInst(opcode, DataType::Type::BOOL, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetAnyType(any_type);
+        SetAnyType(anyType);
         SetInput(0, input0);
     }
 
@@ -3316,11 +3315,11 @@ public:
     }
 
     void DumpOpcode(std::ostream *out) const override;
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToCompareAnyType()->GetAnyType() == GetAnyType());
         return clone;
     }
@@ -3333,18 +3332,18 @@ public:
     using BaseInst = AnyTypeMixin<FixedInputsInst0>;
     using BaseInst::BaseInst;
 
-    GetAnyTypeNameInst(Opcode opcode, uint32_t pc, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+    GetAnyTypeNameInst(Opcode opcode, uint32_t pc, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
         : BaseInst(opcode, DataType::Type::ANY, pc)
     {
-        SetAnyType(any_type);
+        SetAnyType(anyType);
     }
 
     void DumpOpcode(std::ostream *out) const override;
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToGetAnyTypeName()->SetAnyType(GetAnyType());
         return clone;
     }
@@ -3357,16 +3356,16 @@ public:
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CastAnyTypeValueInst(Opcode opcode, uint32_t pc, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, AnyBaseTypeToDataType(any_type), pc)
+    CastAnyTypeValueInst(Opcode opcode, uint32_t pc, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, AnyBaseTypeToDataType(anyType), pc)
     {
     }
 
-    CastAnyTypeValueInst(Opcode opcode, uint32_t pc, Inst *input0, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, AnyBaseTypeToDataType(any_type), pc)
+    CastAnyTypeValueInst(Opcode opcode, uint32_t pc, Inst *input0, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
+        : BaseInst(opcode, AnyBaseTypeToDataType(anyType), pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetAnyType(any_type);
+        SetAnyType(anyType);
         SetInput(0, input0);
     }
 
@@ -3383,9 +3382,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph)->CastToCastAnyTypeValue();
+        auto clone = FixedInputsInst::Clone(targetGraph)->CastToCastAnyTypeValue();
         ASSERT(clone->GetAnyType() == GetAnyType());
         ASSERT(clone->GetType() == GetType());
         return clone;
@@ -3401,11 +3400,11 @@ public:
 
     CastValueToAnyTypeInst(Opcode opcode, uint32_t pc) : BaseInst(opcode, DataType::ANY, pc) {}
 
-    CastValueToAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType any_type, Inst *input0)
+    CastValueToAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType anyType, Inst *input0)
         : BaseInst(opcode, DataType::ANY, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetAnyType(any_type);
+        SetAnyType(anyType);
         SetInput(0, input0);
     }
 
@@ -3417,9 +3416,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph)->CastToCastValueToAnyType();
+        auto clone = FixedInputsInst::Clone(targetGraph)->CastToCastValueToAnyType();
         ASSERT(clone->GetAnyType() == GetAnyType());
         ASSERT(clone->GetType() == GetType());
         return clone;
@@ -3434,13 +3433,13 @@ public:
     using BaseInst::BaseInst;
 
     AnyTypeCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                     AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+                     AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
         : BaseInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetAnyType(any_type);
+        SetAnyType(anyType);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -3451,9 +3450,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToAnyTypeCheck()->GetAnyType() == GetAnyType());
         return clone;
     }
@@ -3474,13 +3473,13 @@ public:
     using BaseInst::BaseInst;
 
     HclassCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                    AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+                    AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
         : BaseInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetAnyType(any_type);
+        SetAnyType(anyType);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -3513,9 +3512,9 @@ public:
 
     void ExtendFlags(Inst *inst);
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<HclassCheckInst *>(FixedInputsInst2::Clone(target_graph));
+        auto clone = static_cast<HclassCheckInst *>(FixedInputsInst2::Clone(targetGraph));
         clone->SetCheckFunctionIsNotClassConstructor(GetCheckFunctionIsNotClassConstructor());
         clone->SetCheckIsFunction(GetCheckIsFunction());
         return clone;
@@ -3539,7 +3538,7 @@ public:
     using Inst::Inst;
 
     template <typename T>
-    explicit ConstantInst(Opcode /* unused */, T value, bool support_int32 = false) : Inst(Opcode::Constant)
+    explicit ConstantInst(Opcode /* unused */, T value, bool supportInt32 = false) : Inst(Opcode::Constant)
     {
         ASSERT(GetTypeFromCType<T>() != DataType::NO_TYPE);
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
@@ -3552,14 +3551,14 @@ public:
         } else if constexpr (GetTypeFromCType<T>() == DataType::ANY) {
             value_ = value.Raw();
             // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-        } else if (GetTypeFromCType<T>(support_int32) == DataType::INT32) {
+        } else if (GetTypeFromCType<T>(supportInt32) == DataType::INT32) {
             value_ = static_cast<int32_t>(value);
             // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
         } else {
             value_ = value;
         }
 
-        SetType(GetTypeFromCType<T>(support_int32));
+        SetType(GetTypeFromCType<T>(supportInt32));
     }
 
     bool IsSafeInst() const override
@@ -3604,19 +3603,19 @@ public:
 
     ConstantInst *GetNextConst()
     {
-        return next_const_;
+        return nextConst_;
     }
-    void SetNextConst(ConstantInst *next_const)
+    void SetNextConst(ConstantInst *nextConst)
     {
-        next_const_ = next_const;
+        nextConst_ = nextConst;
     }
 
     template <typename T>
-    static constexpr DataType::Type GetTypeFromCType(bool support_int32 = false)
+    static constexpr DataType::Type GetTypeFromCType(bool supportInt32 = false)
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
         if constexpr (std::is_integral_v<T>) {
-            if (support_int32 && sizeof(T) == sizeof(uint32_t)) {
+            if (supportInt32 && sizeof(T) == sizeof(uint32_t)) {
                 return DataType::INT32;
             }
             return DataType::INT64;
@@ -3633,15 +3632,15 @@ public:
         return DataType::NO_TYPE;
     }
 
-    inline bool IsEqualConst(double value, [[maybe_unused]] bool support_int32 = false)
+    inline bool IsEqualConst(double value, [[maybe_unused]] bool supportInt32 = false)
     {
         return IsEqualConst(DataType::FLOAT64, bit_cast<uint64_t, double>(value));
     }
-    inline bool IsEqualConst(float value, [[maybe_unused]] bool support_int32 = false)
+    inline bool IsEqualConst(float value, [[maybe_unused]] bool supportInt32 = false)
     {
         return IsEqualConst(DataType::FLOAT32, bit_cast<uint32_t, float>(value));
     }
-    inline bool IsEqualConst(DataType::Any value, [[maybe_unused]] bool support_int32 = false)
+    inline bool IsEqualConst(DataType::Any value, [[maybe_unused]] bool supportInt32 = false)
     {
         return IsEqualConst(DataType::ANY, value.Raw());
     }
@@ -3650,18 +3649,18 @@ public:
         return GetType() == type && value_ == value;
     }
     template <typename T>
-    inline bool IsEqualConst(T value, bool support_int32 = false)
+    inline bool IsEqualConst(T value, bool supportInt32 = false)
     {
         static_assert(GetTypeFromCType<T>() == DataType::INT64);
-        if (support_int32 && sizeof(T) == sizeof(uint32_t)) {
+        if (supportInt32 && sizeof(T) == sizeof(uint32_t)) {
             return (GetType() == DataType::INT32 && static_cast<int32_t>(value_) == static_cast<int32_t>(value));
         }
         return (GetType() == DataType::INT64 && value_ == static_cast<uint64_t>(value));
     }
 
-    inline bool IsEqualConstAllTypes(int64_t value, bool support_int32 = false)
+    inline bool IsEqualConstAllTypes(int64_t value, bool supportInt32 = false)
     {
-        return IsEqualConst(value, support_int32) || IsEqualConst(static_cast<float>(value)) ||
+        return IsEqualConst(value, supportInt32) || IsEqualConst(static_cast<float>(value)) ||
                IsEqualConst(static_cast<double>(value));
     }
 
@@ -3672,14 +3671,14 @@ public:
                (GetIntValue() == 0 || GetIntValue() == 1);
     }
 
-    void SetImmTableSlot(ImmTableSlot imm_slot)
+    void SetImmTableSlot(ImmTableSlot immSlot)
     {
-        imm_slot_ = imm_slot;
+        immSlot_ = immSlot;
     }
 
     auto GetImmTableSlot() const
     {
-        return imm_slot_;
+        return immSlot_;
     }
 
     Location GetDstLocation() const override
@@ -3692,12 +3691,12 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 
 private:
     uint64_t value_ {0};
-    ConstantInst *next_const_ {nullptr};
-    ImmTableSlot imm_slot_ {INVALID_IMM_TABLE_SLOT};
+    ConstantInst *nextConst_ {nullptr};
+    ImmTableSlot immSlot_ {INVALID_IMM_TABLE_SLOT};
 };
 
 // Type describing the purpose of the SpillFillInst.
@@ -3715,7 +3714,7 @@ public:
     DECLARE_INST(SpillFillInst);
 
     explicit SpillFillInst(ArenaAllocator *allocator, Opcode opcode, SpillFillType type = UNKNOWN)
-        : FixedInputsInst0(opcode), spill_fills_(allocator->Adapter()), sf_type_(type)
+        : FixedInputsInst0(opcode), spillFills_(allocator->Adapter()), sfType_(type)
     {
     }
 
@@ -3739,84 +3738,84 @@ public:
         AddSpillFill(Location::MakeStackSlot(src), Location::MakeStackSlot(dst), type);
     }
 
-    void AddSpillFill(const SpillFillData &spill_fill)
+    void AddSpillFill(const SpillFillData &spillFill)
     {
-        spill_fills_.emplace_back(spill_fill);
+        spillFills_.emplace_back(spillFill);
     }
 
     void AddSpillFill(const Location &src, const Location &dst, DataType::Type type)
     {
-        spill_fills_.emplace_back(SpillFillData {src.GetKind(), dst.GetKind(), src.GetValue(), dst.GetValue(), type});
+        spillFills_.emplace_back(SpillFillData {src.GetKind(), dst.GetKind(), src.GetValue(), dst.GetValue(), type});
     }
 
     const ArenaVector<SpillFillData> &GetSpillFills() const
     {
-        return spill_fills_;
+        return spillFills_;
     }
 
     ArenaVector<SpillFillData> &GetSpillFills()
     {
-        return spill_fills_;
+        return spillFills_;
     }
 
     const SpillFillData &GetSpillFill(size_t n) const
     {
-        ASSERT(n < spill_fills_.size());
-        return spill_fills_[n];
+        ASSERT(n < spillFills_.size());
+        return spillFills_[n];
     }
 
     SpillFillData &GetSpillFill(size_t n)
     {
-        ASSERT(n < spill_fills_.size());
-        return spill_fills_[n];
+        ASSERT(n < spillFills_.size());
+        return spillFills_[n];
     }
 
     void RemoveSpillFill(size_t n)
     {
-        ASSERT(n < spill_fills_.size());
-        spill_fills_.erase(spill_fills_.begin() + n);
+        ASSERT(n < spillFills_.size());
+        spillFills_.erase(spillFills_.begin() + n);
     }
 
     // Get register number, holded by n-th spill-fill
     Register GetInputReg(size_t n) const
     {
-        ASSERT(n < spill_fills_.size());
-        ASSERT(spill_fills_[n].SrcType() == LocationType::REGISTER);
-        return spill_fills_[n].SrcValue();
+        ASSERT(n < spillFills_.size());
+        ASSERT(spillFills_[n].SrcType() == LocationType::REGISTER);
+        return spillFills_[n].SrcValue();
     }
 
     void ClearSpillFills()
     {
-        spill_fills_.clear();
+        spillFills_.clear();
     }
 
     SpillFillType GetSpillFillType() const
     {
-        return sf_type_;
+        return sfType_;
     }
 
     void SetSpillFillType(SpillFillType type)
     {
-        sf_type_ = type;
+        sfType_ = type;
     }
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
 #ifndef NDEBUG
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph)->CastToSpillFill();
+        auto clone = FixedInputsInst::Clone(targetGraph)->CastToSpillFill();
         clone->SetSpillFillType(GetSpillFillType());
-        for (auto spill_fill : spill_fills_) {
-            clone->AddSpillFill(spill_fill);
+        for (auto spillFill : spillFills_) {
+            clone->AddSpillFill(spillFill);
         }
         return clone;
     }
 #endif
 
 private:
-    ArenaVector<SpillFillData> spill_fills_;
-    SpillFillType sf_type_ {UNKNOWN};
+    ArenaVector<SpillFillData> spillFills_;
+    SpillFillType sfType_ {UNKNOWN};
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
@@ -3827,35 +3826,35 @@ public:
     static constexpr uint16_t DYNAMIC_NUM_ARGS = std::numeric_limits<uint16_t>::max();
     static constexpr uint16_t INVALID_ARG_REF_NUM = std::numeric_limits<uint16_t>::max();
 
-    explicit ParameterInst(Opcode /* unused */, uint16_t arg_number, DataType::Type type = DataType::NO_TYPE)
-        : Inst(Opcode::Parameter, type, INVALID_PC), arg_number_(arg_number)
+    explicit ParameterInst(Opcode /* unused */, uint16_t argNumber, DataType::Type type = DataType::NO_TYPE)
+        : Inst(Opcode::Parameter, type, INVALID_PC), argNumber_(argNumber)
     {
     }
     uint16_t GetArgNumber() const
     {
-        return arg_number_;
+        return argNumber_;
     }
 
-    void SetArgNumber(uint16_t arg_number)
+    void SetArgNumber(uint16_t argNumber)
     {
-        arg_number_ = arg_number;
+        argNumber_ = argNumber;
     }
     uint16_t GetArgRefNumber() const
     {
-        return arg_ref_number_;
+        return argRefNumber_;
     }
 
-    void SetArgRefNumber(uint16_t arg_ref_number)
+    void SetArgRefNumber(uint16_t argRefNumber)
     {
-        arg_ref_number_ = arg_ref_number;
+        argRefNumber_ = argRefNumber;
     }
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 
 private:
-    uint16_t arg_number_ {0};
-    uint16_t arg_ref_number_ {INVALID_ARG_REF_NUM};
+    uint16_t argNumber_ {0};
+    uint16_t argRefNumber_ {INVALID_ARG_REF_NUM};
 };
 
 inline bool IsZeroConstant(const Inst *inst)
@@ -3875,10 +3874,10 @@ public:
     using BaseInst = AnyTypeMixin<DynamicInputsInst>;
     using BaseInst::BaseInst;
 
-    PhiInst(Opcode opcode, DataType::Type type, uint32_t pc, AnyBaseType any_type = AnyBaseType::UNDEFINED_TYPE)
+    PhiInst(Opcode opcode, DataType::Type type, uint32_t pc, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
         : BaseInst(opcode, type, pc)
     {
-        SetAnyType(any_type);
+        SetAnyType(anyType);
     }
 
     /// Get basic block corresponding to given input index. Returned pointer to basic block, can't be nullptr
@@ -3894,15 +3893,15 @@ public:
         return GetDynamicOperands()->GetUser(index)->GetBbNum();
     }
 
-    void SetPhiInputBbNum(unsigned index, uint32_t bb_num)
+    void SetPhiInputBbNum(unsigned index, uint32_t bbNum)
     {
         ASSERT(index < GetInputsCount());
-        GetDynamicOperands()->GetUser(index)->SetBbNum(bb_num);
+        GetDynamicOperands()->GetUser(index)->SetBbNum(bbNum);
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = DynamicInputsInst::Clone(target_graph);
+        auto clone = DynamicInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToPhi()->GetAnyType() == GetAnyType());
         return clone;
     }
@@ -3940,7 +3939,7 @@ struct SaveStateImm {
     uint64_t value;
     uint16_t vreg;
     DataType::Type type;
-    VRegType vreg_type;
+    VRegType vregType;
 };
 
 /**
@@ -3953,11 +3952,11 @@ public:
     DECLARE_INST(SaveStateInst);
     using DynamicInputsInst::DynamicInputsInst;
 
-    SaveStateInst(Opcode opcode, uint32_t pc, void *method, CallInst *inst, uint32_t inlining_depth)
+    SaveStateInst(Opcode opcode, uint32_t pc, void *method, CallInst *inst, uint32_t inliningDepth)
         : DynamicInputsInst(opcode, DataType::NO_TYPE, pc),
           method_(method),
-          caller_inst_(inst),
-          inlining_depth_(inlining_depth)
+          callerInst_(inst),
+          inliningDepth_(inliningDepth)
     {
     }
 
@@ -3966,8 +3965,8 @@ public:
     void AppendBridge(Inst *inst)
     {
         ASSERT(inst != nullptr);
-        auto new_input = AppendInput(inst);
-        SetVirtualRegister(new_input, VirtualRegister(VirtualRegister::BRIDGE, VRegType::VREG));
+        auto newInput = AppendInput(inst);
+        SetVirtualRegister(newInput, VirtualRegister(VirtualRegister::BRIDGE, VRegType::VREG));
     }
 
     void SetVirtualRegister(size_t index, VirtualRegister reg)
@@ -3996,13 +3995,13 @@ public:
     bool RemoveNumericInputs()
     {
         size_t idx = 0;
-        size_t inputs_count = GetInputsCount();
+        size_t inputsCount = GetInputsCount();
         bool removed = false;
-        while (idx < inputs_count) {
-            auto input_inst = GetInput(idx).GetInst();
-            if (DataType::IsTypeNumeric(input_inst->GetType())) {
+        while (idx < inputsCount) {
+            auto inputInst = GetInput(idx).GetInst();
+            if (DataType::IsTypeNumeric(inputInst->GetType())) {
                 RemoveInput(idx);
-                inputs_count--;
+                inputsCount--;
                 removed = true;
             } else {
                 idx++;
@@ -4027,23 +4026,23 @@ public:
 
     auto GetCallerInst() const
     {
-        return caller_inst_;
+        return callerInst_;
     }
     auto SetCallerInst(CallInst *inst)
     {
-        caller_inst_ = inst;
+        callerInst_ = inst;
     }
 
     uint32_t GetInliningDepth() const override
     {
-        return inlining_depth_;
+        return inliningDepth_;
     }
-    void SetInliningDepth(uint32_t inlining_depth)
+    void SetInliningDepth(uint32_t inliningDepth)
     {
-        inlining_depth_ = inlining_depth;
+        inliningDepth_ = inliningDepth;
     }
 
-    void AppendImmediate(uint64_t imm, uint16_t vreg, DataType::Type type, VRegType vreg_type);
+    void AppendImmediate(uint64_t imm, uint16_t vreg, DataType::Type type, VRegType vregType);
 
     const ArenaVector<SaveStateImm> *GetImmediates() const
     {
@@ -4068,35 +4067,35 @@ public:
 
     void SetRootsRegMaskBit(size_t reg)
     {
-        ASSERT(reg < roots_regs_mask_.size());
-        roots_regs_mask_.set(reg);
+        ASSERT(reg < rootsRegsMask_.size());
+        rootsRegsMask_.set(reg);
     }
 
     void SetRootsStackMaskBit(size_t slot)
     {
-        if (roots_stack_mask_ != nullptr) {
-            roots_stack_mask_->SetBit(slot);
+        if (rootsStackMask_ != nullptr) {
+            rootsStackMask_->SetBit(slot);
         }
     }
 
     ArenaBitVector *GetRootsStackMask()
     {
-        return roots_stack_mask_;
+        return rootsStackMask_;
     }
 
     auto &GetRootsRegsMask()
     {
-        return roots_regs_mask_;
+        return rootsRegsMask_;
     }
 
     void CreateRootsStackMask(ArenaAllocator *allocator)
     {
-        ASSERT(roots_stack_mask_ == nullptr);
-        roots_stack_mask_ = allocator->New<ArenaBitVector>(allocator);
-        roots_stack_mask_->Reset();
+        ASSERT(rootsStackMask_ == nullptr);
+        rootsStackMask_ = allocator->New<ArenaBitVector>(allocator);
+        rootsStackMask_->Reset();
     }
 
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 #ifndef NDEBUG
     void SetInputsWereDeleted()
     {
@@ -4119,10 +4118,10 @@ private:
     ArenaVector<SaveStateImm> *immediates_ {nullptr};
     void *method_ {nullptr};
     // If instruction is in the inlined graph, this variable points to the inliner's call instruction.
-    CallInst *caller_inst_ {nullptr};
-    uint32_t inlining_depth_ {0};
-    ArenaBitVector *roots_stack_mask_ {nullptr};
-    std::bitset<BITS_PER_UINT32> roots_regs_mask_ {0};
+    CallInst *callerInst_ {nullptr};
+    uint32_t inliningDepth_ {0};
+    ArenaBitVector *rootsStackMask_ {nullptr};
+    std::bitset<BITS_PER_UINT32> rootsRegsMask_ {0};
 };
 
 /// Load value from array or string
@@ -4132,19 +4131,19 @@ public:
     using Base = ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
 
-    explicit LoadInst(Opcode opcode, bool is_array = true) : Base(opcode)
+    explicit LoadInst(Opcode opcode, bool isArray = true) : Base(opcode)
     {
-        SetIsArray(is_array);
+        SetIsArray(isArray);
     }
-    LoadInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, bool need_barrier = false,
-             bool is_array = true)
+    LoadInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, bool needBarrier = false,
+             bool isArray = true)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetNeedBarrier(need_barrier);
-        SetIsArray(is_array);
+        SetNeedBarrier(needBarrier);
+        SetIsArray(isArray);
     }
 
     Inst *GetArray()
@@ -4166,10 +4165,10 @@ public:
         ASSERT(index < GetInputsCount());
         switch (index) {
             case 0: {
-                auto input_type = GetInput(0).GetInst()->GetType();
-                ASSERT(input_type == DataType::NO_TYPE || input_type == DataType::REFERENCE ||
-                       input_type == DataType::ANY);
-                return input_type;
+                auto inputType = GetInput(0).GetInst()->GetType();
+                ASSERT(inputType == DataType::NO_TYPE || inputType == DataType::REFERENCE ||
+                       inputType == DataType::ANY);
+                return inputType;
             }
             case 1:
                 return DataType::INT32;
@@ -4180,12 +4179,12 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = NeedBarrierMixin<FixedInputsInst2>::Clone(target_graph);
+        auto clone = NeedBarrierMixin<FixedInputsInst2>::Clone(targetGraph);
         ASSERT(static_cast<LoadInst *>(clone)->IsArray() == IsArray());
         return clone;
     }
@@ -4202,9 +4201,9 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
     }
 
     Inst *GetArray()
@@ -4237,7 +4236,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 
@@ -4272,7 +4271,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 /// Store value into array element
@@ -4283,14 +4282,14 @@ public:
     using Base::Base;
 
     StoreInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-              bool need_barrier = false)
+              bool needBarrier = false)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetNeedBarrier(need_barrier);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -4315,9 +4314,9 @@ public:
         ASSERT(index < GetInputsCount());
         switch (index) {
             case 0: {
-                auto input_type = GetInput(0).GetInst()->GetType();
-                ASSERT(input_type == DataType::ANY || input_type == DataType::REFERENCE);
-                return input_type;
+                auto inputType = GetInput(0).GetInst()->GetType();
+                ASSERT(inputType == DataType::ANY || inputType == DataType::REFERENCE);
+                return inputType;
             }
             case 1:
                 return DataType::INT32;
@@ -4343,19 +4342,19 @@ public:
     using Base = VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>;
     using Base::Base;
 
-    LoadInstI(Opcode opcode, uint64_t imm, bool is_array = true) : Base(opcode), ImmediateMixin(imm)
+    LoadInstI(Opcode opcode, uint64_t imm, bool isArray = true) : Base(opcode), ImmediateMixin(imm)
     {
-        SetIsArray(is_array);
+        SetIsArray(isArray);
     }
-    LoadInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, bool is_volatile = false,
-              bool need_barrier = false, bool is_array = true)
+    LoadInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, bool isVolatile = false,
+              bool needBarrier = false, bool isArray = true)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetIsArray(is_array);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetIsArray(isArray);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -4366,9 +4365,9 @@ public:
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index == 0);
-        auto input_type = GetInput(0).GetInst()->GetType();
-        ASSERT(input_type == DataType::ANY || input_type == DataType::REFERENCE);
-        return input_type;
+        auto inputType = GetInput(0).GetInst()->GetType();
+        ASSERT(inputType == DataType::ANY || inputType == DataType::REFERENCE);
+        return inputType;
     }
 
     bool IsBarrier() const override
@@ -4378,9 +4377,9 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<LoadInstI *>(FixedInputsInst::Clone(target_graph));
+        auto clone = static_cast<LoadInstI *>(FixedInputsInst::Clone(targetGraph));
         clone->SetImm(GetImm());
         ASSERT(clone->IsArray() == IsArray());
         ASSERT(clone->GetVolatile() == GetVolatile());
@@ -4389,7 +4388,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 
@@ -4402,14 +4401,14 @@ public:
     using Base::Base;
 
     LoadMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    LoadMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, bool is_volatile = false,
-                 bool need_barrier = false)
+    LoadMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, bool isVolatile = false,
+                 bool needBarrier = false)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     Inst *GetPointer()
@@ -4420,9 +4419,9 @@ public:
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index == 0);
-        auto input_0_type = GetInput(0).GetInst()->GetType();
-        ASSERT(input_0_type == DataType::POINTER || input_0_type == DataType::REFERENCE);
-        return input_0_type;
+        auto input0Type = GetInput(0).GetInst()->GetType();
+        ASSERT(input0Type == DataType::POINTER || input0Type == DataType::REFERENCE);
+        return input0Type;
     }
 
     bool IsBarrier() const override
@@ -4432,9 +4431,9 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<LoadMemInstI *>(FixedInputsInst::Clone(target_graph));
+        auto clone = static_cast<LoadMemInstI *>(FixedInputsInst::Clone(targetGraph));
         clone->SetImm(GetImm());
         ASSERT(clone->GetVolatile() == GetVolatile());
         return clone;
@@ -4442,7 +4441,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 
@@ -4456,14 +4455,14 @@ public:
 
     StoreInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
     StoreInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
-               bool is_volatile = false, bool need_barrier = false)
+               bool isVolatile = false, bool needBarrier = false)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -4484,9 +4483,9 @@ public:
         ASSERT(index < GetInputsCount());
         switch (index) {
             case 0: {
-                auto input_type = GetInput(0).GetInst()->GetType();
-                ASSERT(input_type == DataType::ANY || input_type == DataType::REFERENCE);
-                return input_type;
+                auto inputType = GetInput(0).GetInst()->GetType();
+                ASSERT(inputType == DataType::ANY || inputType == DataType::REFERENCE);
+                return inputType;
             }
             case 1:
                 return GetType();
@@ -4497,9 +4496,9 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<StoreInstI *>(FixedInputsInst::Clone(target_graph));
+        auto clone = static_cast<StoreInstI *>(FixedInputsInst::Clone(targetGraph));
         clone->SetImm(GetImm());
         ASSERT(clone->GetVolatile() == GetVolatile());
         return clone;
@@ -4522,14 +4521,14 @@ public:
 
     StoreMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
     StoreMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
-                  bool is_volatile = false, bool need_barrier = false)
+                  bool isVolatile = false, bool needBarrier = false)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -4550,9 +4549,9 @@ public:
         ASSERT(index < GetInputsCount());
         switch (index) {
             case 0: {
-                auto input_0_type = GetInput(0).GetInst()->GetType();
-                ASSERT(input_0_type == DataType::POINTER || input_0_type == DataType::REFERENCE);
-                return input_0_type;
+                auto input0Type = GetInput(0).GetInst()->GetType();
+                ASSERT(input0Type == DataType::POINTER || input0Type == DataType::REFERENCE);
+                return input0Type;
             }
             case 1:
                 return GetType();
@@ -4563,9 +4562,9 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<StoreMemInstI *>(FixedInputsInst::Clone(target_graph));
+        auto clone = static_cast<StoreMemInstI *>(FixedInputsInst::Clone(targetGraph));
         clone->SetImm(GetImm());
         ASSERT(clone->GetVolatile() == GetVolatile());
         return clone;
@@ -4580,26 +4579,26 @@ public:
     using Base = ArrayInstMixin<FixedInputsInst<2U>>;
     using Base::Base;
 
-    BoundsCheckInstI(Opcode opcode, uint64_t imm, bool is_array = true) : Base(opcode), ImmediateMixin(imm)
+    BoundsCheckInstI(Opcode opcode, uint64_t imm, bool isArray = true) : Base(opcode), ImmediateMixin(imm)
     {
-        SetIsArray(is_array);
+        SetIsArray(isArray);
     }
 
     BoundsCheckInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
-                     bool is_array = true)
+                     bool isArray = true)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetIsArray(is_array);
+        SetIsArray(isArray);
     }
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToBoundsCheckI()->SetImm(GetImm());
         ASSERT(clone->CastToBoundsCheckI()->IsArray() == IsArray());
         return clone;
@@ -4614,25 +4613,25 @@ public:
     using Base = ArrayInstMixin<FixedInputsInst<3U>>;
     using Base::Base;
 
-    explicit BoundsCheckInst(Opcode opcode, bool is_array = true) : Base(opcode)
+    explicit BoundsCheckInst(Opcode opcode, bool isArray = true) : Base(opcode)
     {
-        SetIsArray(is_array);
+        SetIsArray(isArray);
     }
 
     BoundsCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                    bool is_array = true)
+                    bool isArray = true)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetIsArray(is_array);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetIsArray(isArray);
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToBoundsCheck()->IsArray() == IsArray());
         return clone;
     }
@@ -4664,9 +4663,9 @@ public:
         return GetField<IsImplicitFlag>();
     }
 
-    void SetImplicit(bool is_implicit = true)
+    void SetImplicit(bool isImplicit = true)
     {
-        SetField<IsImplicitFlag>(is_implicit);
+        SetField<IsImplicitFlag>(isImplicit);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -4697,9 +4696,9 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToReturnI()->SetImm(GetImm());
         return clone;
     }
@@ -4721,9 +4720,9 @@ public:
         return GetField<IsExtendedLivenessFlag>();
     }
 
-    void SetExtendedLiveness(bool is_extened_liveness = true)
+    void SetExtendedLiveness(bool isExtenedLiveness = true)
     {
-        SetField<IsExtendedLivenessFlag>(is_extened_liveness);
+        SetField<IsExtendedLivenessFlag>(isExtenedLiveness);
     }
 
 private:
@@ -4791,33 +4790,33 @@ public:
     using Base::Base;
     using IntrinsicId = RuntimeInterface::IntrinsicId;
 
-    IntrinsicInst(Opcode opcode, IntrinsicId intrinsic_id) : Base(opcode), intrinsic_id_(intrinsic_id)
+    IntrinsicInst(Opcode opcode, IntrinsicId intrinsicId) : Base(opcode), intrinsicId_(intrinsicId)
     {
-        AdjustFlags(intrinsic_id, this);
+        AdjustFlags(intrinsicId, this);
     }
 
-    IntrinsicInst(Opcode opcode, DataType::Type type, uint32_t pc, IntrinsicId intrinsic_id)
-        : Base(opcode, type, pc), intrinsic_id_(intrinsic_id)
+    IntrinsicInst(Opcode opcode, DataType::Type type, uint32_t pc, IntrinsicId intrinsicId)
+        : Base(opcode, type, pc), intrinsicId_(intrinsicId)
     {
-        AdjustFlags(intrinsic_id, this);
+        AdjustFlags(intrinsicId, this);
     }
 
     IntrinsicId GetIntrinsicId() const
     {
-        return intrinsic_id_;
+        return intrinsicId_;
     }
 
-    void SetIntrinsicId(IntrinsicId intrinsic_id)
+    void SetIntrinsicId(IntrinsicId intrinsicId)
     {
-        intrinsic_id_ = intrinsic_id;
+        intrinsicId_ = intrinsicId;
     }
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(input_types_ != nullptr);
-        ASSERT(index < input_types_->size());
+        ASSERT(inputTypes_ != nullptr);
+        ASSERT(index < inputTypes_->size());
         ASSERT(index < GetInputsCount());
-        return (*input_types_)[index];
+        return (*inputTypes_)[index];
     }
 
     uint32_t GetImm(size_t index) const
@@ -4897,7 +4896,7 @@ public:
         SetField<MethodFirstInput>(true);
     }
 
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 
     bool CanBeInlined()
     {
@@ -4928,7 +4927,7 @@ protected:
     using LastField = MethodFirstInput;
 
 private:
-    IntrinsicId intrinsic_id_ {RuntimeInterface::IntrinsicId::COUNT};
+    IntrinsicId intrinsicId_ {RuntimeInterface::IntrinsicId::COUNT};
     ArenaVector<uint32_t> *imms_ {nullptr};  // record imms appeared in intrinsics
 };
 
@@ -4943,12 +4942,12 @@ public:
     using BaseInst = InstWithOperandsType<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CastInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, DataType::Type oper_type)
+    CastInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, DataType::Type operType)
         : BaseInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
-        SetOperandsType(oper_type);
+        SetOperandsType(operType);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -4958,13 +4957,13 @@ public:
         return type != DataType::NO_TYPE ? type : GetInput(0).GetInst()->GetType();
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
     void DumpOpcode(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<CastInst *>(FixedInputsInst::Clone(target_graph));
+        auto clone = static_cast<CastInst *>(FixedInputsInst::Clone(targetGraph));
         ASSERT(clone->GetOperandsType() == GetOperandsType());
         return clone;
     }
@@ -4979,13 +4978,13 @@ public:
     using BaseInst = InstWithOperandsType<FixedInputsInst2>;
     using BaseInst::BaseInst;
 
-    CmpInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type oper_type)
+    CmpInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type operType)
         : BaseInst(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetOperandsType(oper_type);
+        SetOperandsType(operType);
     }
 
     bool IsFcmpg() const
@@ -5025,13 +5024,13 @@ public:
         return GetOperandsType();
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
     void DumpOpcode(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToCmp()->GetOperandsType() == GetOperandsType());
         return clone;
     }
@@ -5051,24 +5050,24 @@ public:
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>>;
     using Base::Base;
 
-    LoadObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
-                   RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool is_volatile = false,
-                   bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method), FieldMixin(field)
+    LoadObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
+                   RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool isVolatile = false,
+                   bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method), FieldMixin(field)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
         ASSERT(GetInputsCount() == 1);
-        auto input_type = GetInput(0).GetInst()->GetType();
-        ASSERT(input_type == DataType::NO_TYPE || input_type == DataType::REFERENCE || input_type == DataType::ANY);
-        return input_type;
+        auto inputType = GetInput(0).GetInst()->GetType();
+        ASSERT(inputType == DataType::NO_TYPE || inputType == DataType::REFERENCE || inputType == DataType::ANY);
+        return inputType;
     }
 
     bool IsBarrier() const override
@@ -5078,9 +5077,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToLoadObject()->SetTypeId(GetTypeId());
         clone->CastToLoadObject()->SetMethod(GetMethod());
         clone->CastToLoadObject()->SetObjField(GetObjField());
@@ -5091,7 +5090,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 
@@ -5103,15 +5102,15 @@ public:
     using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
     using Base::Base;
 
-    LoadMemInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, bool is_volatile = false,
-                bool need_barrier = false)
+    LoadMemInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, bool isVolatile = false,
+                bool needBarrier = false)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5123,10 +5122,10 @@ public:
         }
 
         ASSERT(index == 0U);
-        auto input_0_type = GetInput(0).GetInst()->GetType();
-        ASSERT((GetInput(0).GetInst()->IsConst() && input_0_type == DataType::INT64) ||
-               input_0_type == DataType::POINTER || input_0_type == DataType::REFERENCE);
-        return input_0_type;
+        auto input0Type = GetInput(0).GetInst()->GetType();
+        ASSERT((GetInput(0).GetInst()->IsConst() && input0Type == DataType::INT64) || input0Type == DataType::POINTER ||
+               input0Type == DataType::REFERENCE);
+        return input0Type;
     }
 
     bool IsBarrier() const override
@@ -5137,9 +5136,9 @@ public:
     void DumpOpcode(std::ostream *out) const override;
     bool DumpInputs(std::ostream * /* unused */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToLoad()->GetVolatile() == GetVolatile());
         ASSERT(clone->CastToLoad()->GetScale() == GetScale());
         return clone;
@@ -5147,7 +5146,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 
@@ -5162,9 +5161,9 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
     }
 
     bool IsBarrier() const override
@@ -5185,10 +5184,10 @@ public:
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetInput(3, input3);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetInput(3U, input3);
     }
 
     bool IsBarrier() const override
@@ -5205,13 +5204,13 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    ResolveObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
-                           RuntimeInterface::MethodPtr method, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    ResolveObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
+                           RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -5222,9 +5221,9 @@ public:
         return DataType::NO_TYPE;
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToResolveObjectField()->SetTypeId(GetTypeId());
         clone->CastToResolveObjectField()->SetMethod(GetMethod());
         return clone;
@@ -5232,7 +5231,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -5247,15 +5246,15 @@ public:
     using Base::Base;
 
     LoadResolvedObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                uint32_t type_id, RuntimeInterface::MethodPtr method, bool is_volatile = false,
-                                bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+                                uint32_t typeId, RuntimeInterface::MethodPtr method, bool isVolatile = false,
+                                bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -5270,9 +5269,9 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToLoadResolvedObjectField()->SetTypeId(GetTypeId());
         clone->CastToLoadResolvedObjectField()->SetMethod(GetMethod());
         ASSERT(clone->CastToLoadResolvedObjectField()->GetVolatile() == GetVolatile());
@@ -5281,7 +5280,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -5298,16 +5297,16 @@ public:
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
-                    RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool is_volatile = false,
-                    bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method), FieldMixin(field)
+    StoreObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
+                    RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool isVolatile = false,
+                    bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method), FieldMixin(field)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5322,9 +5321,9 @@ public:
         return index == 0 ? DataType::REFERENCE : GetType();
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToStoreObject()->SetTypeId(GetTypeId());
         clone->CastToStoreObject()->SetMethod(GetMethod());
         clone->CastToStoreObject()->SetObjField(GetObjField());
@@ -5352,16 +5351,16 @@ public:
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
     StoreResolvedObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                 Inst *input2, uint32_t type_id, RuntimeInterface::MethodPtr method,
-                                 bool is_volatile = false, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+                                 Inst *input2, uint32_t typeId, RuntimeInterface::MethodPtr method,
+                                 bool isVolatile = false, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5384,9 +5383,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToStoreResolvedObjectField()->SetTypeId(GetTypeId());
         clone->CastToStoreResolvedObjectField()->SetMethod(GetMethod());
         ASSERT(clone->CastToStoreResolvedObjectField()->GetVolatile() == GetVolatile());
@@ -5412,15 +5411,15 @@ public:
     static constexpr size_t STORED_INPUT_INDEX = 2;
 
     StoreMemInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                 bool is_volatile = false, bool need_barrier = false)
+                 bool isVolatile = false, bool needBarrier = false)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5440,17 +5439,17 @@ public:
         }
 
         ASSERT(index == 0U);
-        auto input_0_type = GetInput(0).GetInst()->GetType();
-        ASSERT(input_0_type == DataType::POINTER || input_0_type == DataType::REFERENCE);
-        return input_0_type;
+        auto input0Type = GetInput(0).GetInst()->GetType();
+        ASSERT(input0Type == DataType::POINTER || input0Type == DataType::REFERENCE);
+        return input0Type;
     }
 
     void DumpOpcode(std::ostream *out) const override;
     bool DumpInputs(std::ostream * /* unused */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToStore()->GetVolatile() == GetVolatile());
         ASSERT(clone->CastToStore()->GetScale() == GetScale());
         return clone;
@@ -5465,15 +5464,15 @@ public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
 
-    LoadStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
-                   RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool is_volatile = false,
-                   bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method), FieldMixin(field)
+    LoadStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
+                   RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool isVolatile = false,
+                   bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method), FieldMixin(field)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5490,9 +5489,9 @@ public:
         return DataType::REFERENCE;
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToLoadStatic()->SetTypeId(GetTypeId());
         clone->CastToLoadStatic()->SetMethod(GetMethod());
         clone->CastToLoadStatic()->SetObjField(GetObjField());
@@ -5502,7 +5501,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 
@@ -5514,13 +5513,13 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    ResolveObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
-                                 RuntimeInterface::MethodPtr method, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    ResolveObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
+                                 RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -5531,9 +5530,9 @@ public:
         return DataType::NO_TYPE;
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToResolveObjectFieldStatic()->SetTypeId(GetTypeId());
         clone->CastToResolveObjectFieldStatic()->SetMethod(GetMethod());
         return clone;
@@ -5541,7 +5540,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -5555,15 +5554,15 @@ public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
 
-    LoadResolvedObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t type_id,
-                                      RuntimeInterface::MethodPtr method, bool is_volatile = false,
-                                      bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    LoadResolvedObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
+                                      RuntimeInterface::MethodPtr method, bool isVolatile = false,
+                                      bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -5578,9 +5577,9 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToLoadResolvedObjectFieldStatic()->SetTypeId(GetTypeId());
         clone->CastToLoadResolvedObjectFieldStatic()->SetMethod(GetMethod());
         ASSERT(clone->CastToLoadResolvedObjectFieldStatic()->GetVolatile() == GetVolatile());
@@ -5589,7 +5588,7 @@ public:
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -5606,16 +5605,16 @@ public:
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
-                    RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool is_volatile = false,
-                    bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method), FieldMixin(field)
+    StoreStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
+                    RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool isVolatile = false,
+                    bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method), FieldMixin(field)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetVolatile(is_volatile);
-        SetNeedBarrier(need_barrier);
+        SetVolatile(isVolatile);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5634,9 +5633,9 @@ public:
         return GetType();
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToStoreStatic()->SetTypeId(GetTypeId());
         clone->CastToStoreStatic()->SetMethod(GetMethod());
         clone->CastToStoreStatic()->SetObjField(GetObjField());
@@ -5660,13 +5659,13 @@ public:
     using Base::Base;
 
     UnresolvedStoreStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                              uint32_t type_id, RuntimeInterface::MethodPtr method, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+                              uint32_t typeId, RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5687,9 +5686,9 @@ public:
         return GetType();
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToUnresolvedStoreStatic()->SetTypeId(GetTypeId());
         clone->CastToUnresolvedStoreStatic()->SetMethod(GetMethod());
         return clone;
@@ -5705,13 +5704,13 @@ public:
     using Base::Base;
 
     StoreResolvedObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                       uint32_t type_id, RuntimeInterface::MethodPtr method, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+                                       uint32_t typeId, RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5729,9 +5728,9 @@ public:
         return GetType();  // stored value
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToStoreResolvedObjectFieldStatic()->SetTypeId(GetTypeId());
         clone->CastToStoreResolvedObjectFieldStatic()->SetMethod(GetMethod());
         return clone;
@@ -5748,14 +5747,14 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
-    NewObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
-                  RuntimeInterface::MethodPtr method, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    NewObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
+                  RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5773,9 +5772,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToNewObject()->SetTypeId(GetTypeId());
         clone->CastToNewObject()->SetMethod(GetMethod());
         return clone;
@@ -5794,16 +5793,15 @@ public:
     static constexpr size_t INDEX_SIZE = 1;
     static constexpr size_t INDEX_SAVE_STATE = 2;
 
-    NewArrayInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input_class, Inst *input_size,
-                 Inst *input_save_state, uint32_t type_id, RuntimeInterface::MethodPtr method,
-                 bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    NewArrayInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *inputClass, Inst *inputSize,
+                 Inst *inputSaveState, uint32_t typeId, RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(INDEX_CLASS, input_class);
-        SetInput(INDEX_SIZE, input_size);
-        SetInput(INDEX_SAVE_STATE, input_save_state);
-        SetNeedBarrier(need_barrier);
+        SetInput(INDEX_CLASS, inputClass);
+        SetInput(INDEX_SIZE, inputSize);
+        SetInput(INDEX_SAVE_STATE, inputSaveState);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5829,9 +5827,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToNewArray()->SetTypeId(GetTypeId());
         clone->CastToNewArray()->SetMethod(GetMethod());
         return clone;
@@ -5845,13 +5843,13 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    LoadConstArrayInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t type_id,
-                       RuntimeInterface::MethodPtr method, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    LoadConstArrayInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t typeId,
+                       RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5867,9 +5865,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToLoadConstArray()->SetTypeId(GetTypeId());
         clone->CastToLoadConstArray()->SetMethod(GetMethod());
         return clone;
@@ -5883,14 +5881,14 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
-    FillConstArrayInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
-                       RuntimeInterface::MethodPtr method, uint64_t imm, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method), ImmediateMixin(imm)
+    FillConstArrayInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
+                       RuntimeInterface::MethodPtr method, uint64_t imm, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5906,9 +5904,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToFillConstArray()->SetTypeId(GetTypeId());
         clone->CastToFillConstArray()->SetMethod(GetMethod());
         clone->CastToFillConstArray()->SetImm(GetImm());
@@ -5926,15 +5924,15 @@ public:
     using Base::Base;
 
     CheckCastInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                  uint32_t type_id, RuntimeInterface::MethodPtr method, ClassType class_type, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+                  uint32_t typeId, RuntimeInterface::MethodPtr method, ClassType classType, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetClassType(class_type);
-        SetNeedBarrier(need_barrier);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetClassType(classType);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -5954,9 +5952,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToCheckCast()->SetTypeId(GetTypeId());
         clone->CastToCheckCast()->SetMethod(GetMethod());
         ASSERT(clone->CastToCheckCast()->GetClassType() == GetClassType());
@@ -5975,16 +5973,15 @@ public:
     using Base::Base;
 
     IsInstanceInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                   uint32_t type_id, RuntimeInterface::MethodPtr method, ClassType class_type,
-                   bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+                   uint32_t typeId, RuntimeInterface::MethodPtr method, ClassType classType, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetClassType(class_type);
-        SetNeedBarrier(need_barrier);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetClassType(classType);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -6004,9 +6001,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToIsInstance()->SetTypeId(GetTypeId());
         clone->CastToIsInstance()->SetMethod(GetMethod());
         ASSERT(clone->CastToIsInstance()->GetClassType() == GetClassType());
@@ -6023,13 +6020,13 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    LoadFromPool(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t type_id,
-                 RuntimeInterface::MethodPtr method, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    LoadFromPool(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t typeId,
+                 RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -6045,9 +6042,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         static_cast<LoadFromPool *>(clone)->SetTypeId(GetTypeId());
         static_cast<LoadFromPool *>(clone)->SetMethod(GetMethod());
         return clone;
@@ -6062,13 +6059,13 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    LoadFromPoolDynamic(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t type_id,
-                        RuntimeInterface::MethodPtr method, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method)
+    LoadFromPoolDynamic(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t typeId,
+                        RuntimeInterface::MethodPtr method, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -6079,9 +6076,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         static_cast<LoadFromPoolDynamic *>(clone)->SetTypeId(GetTypeId());
         static_cast<LoadFromPoolDynamic *>(clone)->SetMethod(GetMethod());
         return clone;
@@ -6097,7 +6094,7 @@ public:
         SetField<StringFlag>(v);
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
 protected:
     using StringFlag = LastField::NextFlag;
@@ -6112,13 +6109,13 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    ClassInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t type_id,
-              RuntimeInterface::MethodPtr method, RuntimeInterface::ClassPtr klass, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method), klass_(klass)
+    ClassInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t typeId,
+              RuntimeInterface::MethodPtr method, RuntimeInterface::ClassPtr klass, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method), klass_(klass)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -6128,9 +6125,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         static_cast<ClassInst *>(clone)->SetTypeId(GetTypeId());
         static_cast<ClassInst *>(clone)->SetMethod(GetMethod());
         static_cast<ClassInst *>(clone)->SetClass(GetClass());
@@ -6164,11 +6161,11 @@ public:
     using Base = NeedBarrierMixin<FixedInputsInst0>;
     using Base::Base;
 
-    RuntimeClassInst(Opcode opcode, DataType::Type type, int32_t pc, uint32_t type_id,
-                     RuntimeInterface::MethodPtr method, RuntimeInterface::ClassPtr klass, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method), klass_(klass)
+    RuntimeClassInst(Opcode opcode, DataType::Type type, int32_t pc, uint32_t typeId,
+                     RuntimeInterface::MethodPtr method, RuntimeInterface::ClassPtr klass, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method), klass_(klass)
     {
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -6178,9 +6175,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         static_cast<RuntimeClassInst *>(clone)->SetTypeId(GetTypeId());
         static_cast<RuntimeClassInst *>(clone)->SetMethod(GetMethod());
         static_cast<RuntimeClassInst *>(clone)->SetClass(GetClass());
@@ -6192,7 +6189,7 @@ public:
         return klass_;
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
     void SetClass(RuntimeInterface::ClassPtr klass)
     {
@@ -6216,14 +6213,14 @@ public:
     {
     }
 
-    GlobalVarInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t type_id,
-                  RuntimeInterface::MethodPtr method, uintptr_t address, bool need_barrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(type_id, method), address_(address)
+    GlobalVarInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
+                  RuntimeInterface::MethodPtr method, uintptr_t address, bool needBarrier = false)
+        : Base(opcode, type, pc), TypeIdMixin(typeId, method), address_(address)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     bool IsBarrier() const override
@@ -6233,9 +6230,9 @@ public:
 
     void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         static_cast<GlobalVarInst *>(clone)->SetTypeId(GetTypeId());
         static_cast<GlobalVarInst *>(clone)->SetMethod(GetMethod());
         return clone;
@@ -6270,22 +6267,22 @@ public:
     enum class ObjectType { UNKNOWN, CLASS, METHOD, CONSTANT_POOL, STRING, PANDA_FILE_OFFSET, LAST };
 
     LoadImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, void *obj,
-                      ObjectType obj_type = ObjectType::CLASS)
+                      ObjectType objType = ObjectType::CLASS)
         : Base(opcode, type, pc), obj_(reinterpret_cast<uint64_t>(obj))
     {
-        SetObjectType(obj_type);
+        SetObjectType(objType);
     }
 
     LoadImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t obj,
-                      ObjectType obj_type = ObjectType::CLASS)
+                      ObjectType objType = ObjectType::CLASS)
         : Base(opcode, type, pc), obj_(obj)
     {
-        SetObjectType(obj_type);
+        SetObjectType(objType);
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = Inst::Clone(target_graph);
+        auto clone = Inst::Clone(targetGraph);
         clone->CastToLoadImmediate()->SetObjectType(GetObjectType());
         clone->CastToLoadImmediate()->obj_ = obj_;
         return clone;
@@ -6301,9 +6298,9 @@ public:
         return GetField<ObjectTypeField>();
     }
 
-    void SetObjectType(ObjectType obj_type)
+    void SetObjectType(ObjectType objType)
     {
-        SetField<ObjectTypeField>(obj_type);
+        SetField<ObjectTypeField>(objType);
     }
 
     void SetMethod(RuntimeInterface::MethodPtr obj)
@@ -6373,7 +6370,7 @@ public:
         return obj_;
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
     void DumpOpcode(std::ostream * /* unused */) const override;
 
@@ -6392,32 +6389,32 @@ public:
     using Base::Base;
 
     FunctionImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, uintptr_t ptr)
-        : Base(opcode, type, pc), function_ptr_(ptr)
+        : Base(opcode, type, pc), functionPtr_(ptr)
     {
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = Inst::Clone(target_graph);
-        clone->CastToFunctionImmediate()->function_ptr_ = function_ptr_;
+        auto clone = Inst::Clone(targetGraph);
+        clone->CastToFunctionImmediate()->functionPtr_ = functionPtr_;
         return clone;
     }
 
     uintptr_t GetFunctionPtr() const
     {
-        return function_ptr_;
+        return functionPtr_;
     }
 
     void SetFunctionPtr(uintptr_t ptr)
     {
-        function_ptr_ = ptr;
+        functionPtr_ = ptr;
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
     void DumpOpcode(std::ostream *out) const override;
 
 private:
-    uintptr_t function_ptr_ {0};
+    uintptr_t functionPtr_ {0};
 };
 
 /// Get object from the specific source(handle).
@@ -6429,32 +6426,32 @@ public:
     using Base::Base;
 
     LoadObjFromConstInst(Opcode opcode, DataType::Type type, uint32_t pc, uintptr_t ptr)
-        : Base(opcode, type, pc), object_ptr_(ptr)
+        : Base(opcode, type, pc), objectPtr_(ptr)
     {
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = Inst::Clone(target_graph);
-        clone->CastToLoadObjFromConst()->object_ptr_ = object_ptr_;
+        auto clone = Inst::Clone(targetGraph);
+        clone->CastToLoadObjFromConst()->objectPtr_ = objectPtr_;
         return clone;
     }
 
     uintptr_t GetObjPtr() const
     {
-        return object_ptr_;
+        return objectPtr_;
     }
 
     void SetObjPtr(uintptr_t ptr)
     {
-        object_ptr_ = ptr;
+        objectPtr_ = ptr;
     }
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
     void DumpOpcode(std::ostream *out) const override;
 
 private:
-    uintptr_t object_ptr_ {0};
+    uintptr_t objectPtr_ {0};
 };
 
 /// Select instruction
@@ -6466,15 +6463,15 @@ public:
     using Base::Base;
 
     SelectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2, Inst *input3,
-               DataType::Type oper_type, ConditionCode cc)
+               DataType::Type operType, ConditionCode cc)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetInput(3, input3);
-        SetOperandsType(oper_type);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetInput(3U, input3);
+        SetOperandsType(operType);
         SetCc(cc);
         if (IsReferenceOrAny()) {
             SetFlag(inst_flags::REF_SPECIAL);
@@ -6494,11 +6491,11 @@ public:
     }
 
     void DumpOpcode(std::ostream * /* unused */) const override;
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToSelect()->GetCc() == GetCc());
         ASSERT(clone->CastToSelect()->GetOperandsType() == GetOperandsType());
         return clone;
@@ -6514,14 +6511,14 @@ public:
     using Base::Base;
 
     SelectImmInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                  uint64_t imm, DataType::Type oper_type, ConditionCode cc)
+                  uint64_t imm, DataType::Type operType, ConditionCode cc)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetOperandsType(oper_type);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetOperandsType(operType);
         SetCc(cc);
         if (IsReferenceOrAny()) {
             SetFlag(inst_flags::REF_SPECIAL);
@@ -6541,9 +6538,9 @@ public:
     void DumpOpcode(std::ostream * /* unused */) const override;
     bool DumpInputs(std::ostream * /* unused */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToSelectImm()->GetCc() == GetCc());
         ASSERT(clone->CastToSelectImm()->GetOperandsType() == GetOperandsType());
         clone->CastToSelectImm()->SetImm(GetImm());
@@ -6564,14 +6561,14 @@ public:
         SetCc(cc);
     }
 
-    IfInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type oper_type,
+    IfInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type operType,
            ConditionCode cc, RuntimeInterface::MethodPtr method = nullptr)
         : Base(opcode, type, pc), method_(method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetOperandsType(oper_type);
+        SetOperandsType(operType);
         SetCc(cc);
     }
 
@@ -6583,11 +6580,11 @@ public:
 
     void DumpOpcode(std::ostream * /* unused */) const override;
 
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(static_cast<IfInst *>(clone)->GetCc() == GetCc());
         ASSERT(static_cast<IfInst *>(clone)->GetOperandsType() == GetOperandsType());
         static_cast<IfInst *>(clone)->SetMethod(GetMethod());
@@ -6622,13 +6619,13 @@ public:
         SetCc(cc);
     }
 
-    IfImmInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, DataType::Type oper_type,
+    IfImmInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, DataType::Type operType,
               ConditionCode cc, RuntimeInterface::MethodPtr method = nullptr)
         : Base(opcode, type, pc), ImmediateMixin(imm), method_(method)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetOperandsType(oper_type);
+        SetOperandsType(operType);
         SetCc(cc);
     }
 
@@ -6640,11 +6637,11 @@ public:
 
     void DumpOpcode(std::ostream * /* unused */) const override;
     bool DumpInputs(std::ostream * /* unused */) const override;
-    void SetVnObject(VnObject *vn_obj) override;
+    void SetVnObject(VnObject *vnObj) override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToIfImm()->GetCc() == GetCc());
         ASSERT(clone->CastToIfImm()->GetOperandsType() == GetOperandsType());
         clone->CastToIfImm()->SetMethod(GetMethod());
@@ -6691,16 +6688,16 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToLoadPairPart()->SetImm(GetImm());
         return clone;
     }
 
     uint32_t Latency() const override
     {
-        return OPTIONS.GetCompilerSchedLatencyLong();
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 
@@ -6713,13 +6710,13 @@ public:
     using Base::Base;
 
     LoadArrayPairInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                      bool need_barrier = false)
+                      bool needBarrier = false)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -6736,9 +6733,9 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph)->CastToLoadArrayPair();
+        auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPair();
 #ifndef NDEBUG
         for (size_t i = 0; i < GetDstCount(); ++i) {
             clone->SetDstReg(i, GetDstReg(i));
@@ -6775,15 +6772,15 @@ public:
     using Base::Base;
 
     StoreArrayPairInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                       Inst *input3, bool need_barrier = false)
+                       Inst *input3, bool needBarrier = false)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetInput(3, input3);
-        SetNeedBarrier(need_barrier);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetInput(3U, input3);
+        SetNeedBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -6837,12 +6834,12 @@ public:
     explicit LoadArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
     LoadArrayPairInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm,
-                       bool need_barrier = false)
+                       bool needBarrier = false)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetNeedBarrier(need_barrier);
+        SetNeedBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -6856,9 +6853,9 @@ public:
     }
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph)->CastToLoadArrayPairI();
+        auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPairI();
         clone->SetImm(GetImm());
 #ifndef NDEBUG
         for (size_t i = 0; i < GetDstCount(); ++i) {
@@ -6894,14 +6891,14 @@ public:
     explicit StoreArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
     StoreArrayPairInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                        uint64_t imm, bool need_barrier = false)
+                        uint64_t imm, bool needBarrier = false)
         : Base(opcode, type, pc), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
-        SetNeedBarrier(need_barrier);
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
+        SetNeedBarrier(needBarrier);
     }
 
     Inst *GetArray()
@@ -6943,9 +6940,9 @@ public:
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToStoreArrayPairI()->SetImm(GetImm());
         return clone;
     }
@@ -6961,17 +6958,17 @@ public:
 
     const ArenaVector<const Inst *> *GetThrowableInsts() const
     {
-        return throw_insts_;
+        return throwInsts_;
     }
 
     const Inst *GetThrowableInst(size_t i) const
     {
-        ASSERT(throw_insts_ != nullptr && i < throw_insts_->size());
-        return throw_insts_->at(i);
+        ASSERT(throwInsts_ != nullptr && i < throwInsts_->size());
+        return throwInsts_->at(i);
     }
 
     void AppendThrowableInst(const Inst *inst);
-    void ReplaceThrowableInst(const Inst *old_inst, const Inst *new_inst);
+    void ReplaceThrowableInst(const Inst *oldInst, const Inst *newInst);
     void RemoveInput(unsigned index) override;
 
     bool IsAcc() const
@@ -6991,14 +6988,14 @@ protected:
 private:
     size_t GetThrowableInstIndex(const Inst *inst)
     {
-        ASSERT(throw_insts_ != nullptr);
-        auto it = std::find(throw_insts_->begin(), throw_insts_->end(), inst);
-        ASSERT(it != throw_insts_->end());
-        return std::distance(throw_insts_->begin(), it);
+        ASSERT(throwInsts_ != nullptr);
+        auto it = std::find(throwInsts_->begin(), throwInsts_->end(), inst);
+        ASSERT(it != throwInsts_->end());
+        return std::distance(throwInsts_->begin(), it);
     }
 
 private:
-    ArenaVector<const Inst *> *throw_insts_ {nullptr};
+    ArenaVector<const Inst *> *throwInsts_ {nullptr};
 };
 
 class TryInst : public FixedInputsInst0 {
@@ -7006,47 +7003,47 @@ public:
     DECLARE_INST(TryInst);
     using FixedInputsInst0::FixedInputsInst0;
 
-    explicit TryInst(Opcode opcode, BasicBlock *end_bb = nullptr)
-        : FixedInputsInst0(opcode, DataType::NO_TYPE, INVALID_PC), try_end_bb_(end_bb)
+    explicit TryInst(Opcode opcode, BasicBlock *endBb = nullptr)
+        : FixedInputsInst0(opcode, DataType::NO_TYPE, INVALID_PC), tryEndBb_(endBb)
     {
     }
 
-    void AppendCatchTypeId(uint32_t id, uint32_t catch_edge_index);
+    void AppendCatchTypeId(uint32_t id, uint32_t catchEdgeIndex);
 
     const ArenaVector<uint32_t> *GetCatchTypeIds() const
     {
-        return catch_type_ids_;
+        return catchTypeIds_;
     }
 
     const ArenaVector<uint32_t> *GetCatchEdgeIndexes() const
     {
-        return catch_edge_indexes_;
+        return catchEdgeIndexes_;
     }
 
     size_t GetCatchTypeIdsCount() const
     {
-        return (catch_type_ids_ == nullptr ? 0 : catch_type_ids_->size());
+        return (catchTypeIds_ == nullptr ? 0 : catchTypeIds_->size());
     }
 
-    Inst *Clone(const Graph *target_graph) const override;
+    Inst *Clone(const Graph *targetGraph) const override;
 
-    void SetTryEndBlock(BasicBlock *try_end_bb)
+    void SetTryEndBlock(BasicBlock *tryEndBb)
     {
-        try_end_bb_ = try_end_bb;
+        tryEndBb_ = tryEndBb;
     }
 
     BasicBlock *GetTryEndBlock() const
     {
-        return try_end_bb_;
+        return tryEndBb_;
     }
 
 private:
-    ArenaVector<uint32_t> *catch_type_ids_ {nullptr};
-    ArenaVector<uint32_t> *catch_edge_indexes_ {nullptr};
-    BasicBlock *try_end_bb_ {nullptr};
+    ArenaVector<uint32_t> *catchTypeIds_ {nullptr};
+    ArenaVector<uint32_t> *catchEdgeIndexes_ {nullptr};
+    BasicBlock *tryEndBb_ {nullptr};
 };
 
-TryInst *GetTryBeginInst(const BasicBlock *try_begin_bb);
+TryInst *GetTryBeginInst(const BasicBlock *tryBeginBb);
 
 /// Mixin for Deoptimize instructions
 template <typename T>
@@ -7054,9 +7051,9 @@ class DeoptimizeTypeMixin : public T {
 public:
     using T::T;
 
-    void SetDeoptimizeType(DeoptimizeType deopt_type)
+    void SetDeoptimizeType(DeoptimizeType deoptType)
     {
-        T::template SetField<DeoptimizeTypeField>(deopt_type);
+        T::template SetField<DeoptimizeTypeField>(deoptType);
     }
 
     void SetDeoptimizeType(Inst *inst)
@@ -7120,17 +7117,17 @@ public:
     using Base::Base;
 
     DeoptimizeInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input,
-                   DeoptimizeType deopt_type = DeoptimizeType::NOT_PROFILED)
+                   DeoptimizeType deoptType = DeoptimizeType::NOT_PROFILED)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input);
-        SetDeoptimizeType(deopt_type);
+        SetDeoptimizeType(deoptType);
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToDeoptimize()->GetDeoptimizeType() == GetDeoptimizeType());
         return clone;
     }
@@ -7147,18 +7144,18 @@ public:
     using Base::Base;
 
     DeoptimizeIfInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                     DeoptimizeType deopt_type)
+                     DeoptimizeType deoptType)
         : Base(opcode, type, pc)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetDeoptimizeType(deopt_type);
+        SetDeoptimizeType(deoptType);
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(target_graph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         ASSERT(clone->CastToDeoptimizeIf()->GetDeoptimizeType() == GetDeoptimizeType());
         return clone;
     }
@@ -7186,30 +7183,30 @@ public:
     using Base = InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst3>>>;
     using Base::Base;
 
-    explicit DeoptimizeCompareInst(Opcode opcode, const DeoptimizeIfInst *deopt_if, const CompareInst *compare)
-        : Base(opcode, deopt_if->GetType(), deopt_if->GetPc())
+    explicit DeoptimizeCompareInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare)
+        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc())
     {
-        SetDeoptimizeType(deopt_if->GetDeoptimizeType());
+        SetDeoptimizeType(deoptIf->GetDeoptimizeType());
         SetOperandsType(compare->GetOperandsType());
         SetCc(compare->GetCc());
     }
 
-    DeoptimizeCompareInst(Opcode opcode, const DeoptimizeIfInst *deopt_if, const CompareInst *compare, Inst *input0,
+    DeoptimizeCompareInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare, Inst *input0,
                           Inst *input1, Inst *input2)
-        : Base(opcode, deopt_if->GetType(), deopt_if->GetPc())
+        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc())
     {
         SetField<InputsCount>(INPUT_COUNT);
-        SetDeoptimizeType(deopt_if->GetDeoptimizeType());
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetInput(2, input2);
+        SetDeoptimizeType(deoptIf->GetDeoptimizeType());
+        SetInput(0U, input0);
+        SetInput(1U, input1);
+        SetInput(2U, input2);
         SetOperandsType(compare->GetOperandsType());
         SetCc(compare->GetCc());
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst3::Clone(target_graph);
+        auto clone = FixedInputsInst3::Clone(targetGraph);
         ASSERT(clone->CastToDeoptimizeCompare()->GetDeoptimizeType() == GetDeoptimizeType());
         ASSERT(clone->CastToDeoptimizeCompare()->GetOperandsType() == GetOperandsType());
         ASSERT(clone->CastToDeoptimizeCompare()->GetCc() == GetCc());
@@ -7241,30 +7238,30 @@ public:
     using Base = InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst2>>>;
     using Base::Base;
 
-    explicit DeoptimizeCompareImmInst(Opcode opcode, const DeoptimizeIfInst *deopt_if, const CompareInst *compare,
+    explicit DeoptimizeCompareImmInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare,
                                       uint64_t imm)
-        : Base(opcode, deopt_if->GetType(), deopt_if->GetPc()), ImmediateMixin(imm)
+        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc()), ImmediateMixin(imm)
     {
-        SetDeoptimizeType(deopt_if->GetDeoptimizeType());
+        SetDeoptimizeType(deoptIf->GetDeoptimizeType());
         SetOperandsType(compare->GetOperandsType());
         SetCc(compare->GetCc());
     }
 
-    DeoptimizeCompareImmInst(Opcode opcode, const DeoptimizeIfInst *deopt_if, const CompareInst *compare, Inst *input0,
+    DeoptimizeCompareImmInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare, Inst *input0,
                              Inst *input1, uint64_t imm)
-        : Base(opcode, deopt_if->GetType(), deopt_if->GetPc()), ImmediateMixin(imm)
+        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc()), ImmediateMixin(imm)
     {
         SetField<InputsCount>(INPUT_COUNT);
         SetInput(0, input0);
         SetInput(1, input1);
-        SetDeoptimizeType(deopt_if->GetDeoptimizeType());
+        SetDeoptimizeType(deoptIf->GetDeoptimizeType());
         SetOperandsType(compare->GetOperandsType());
         SetCc(compare->GetCc());
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst2::Clone(target_graph);
+        auto clone = FixedInputsInst2::Clone(targetGraph);
         ASSERT(clone->CastToDeoptimizeCompareImm()->GetDeoptimizeType() == GetDeoptimizeType());
         ASSERT(clone->CastToDeoptimizeCompareImm()->GetOperandsType() == GetOperandsType());
         ASSERT(clone->CastToDeoptimizeCompareImm()->GetCc() == GetCc());
@@ -7319,14 +7316,14 @@ public:
         return ss->GetCallerInst() != nullptr;
     }
 
-    Inst *Clone(const Graph *target_graph) const override
+    Inst *Clone(const Graph *targetGraph) const override
     {
-        ASSERT(target_graph != nullptr);
-        auto inst_clone = FixedInputsInst2::Clone(target_graph);
-        auto throw_clone = static_cast<ThrowInst *>(inst_clone);
-        throw_clone->SetCallMethodId(GetCallMethodId());
-        throw_clone->SetCallMethod(GetCallMethod());
-        return inst_clone;
+        ASSERT(targetGraph != nullptr);
+        auto instClone = FixedInputsInst2::Clone(targetGraph);
+        auto throwClone = static_cast<ThrowInst *>(instClone);
+        throwClone->SetCallMethodId(GetCallMethodId());
+        throwClone->SetCallMethod(GetCallMethod());
+        return instClone;
     }
 };
 

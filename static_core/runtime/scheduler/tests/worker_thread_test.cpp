@@ -32,17 +32,17 @@ public:
         Logger::Initialize(base_options::Options(""));
 
         RuntimeOptions options;
-        auto exec_path = panda::os::file::File::GetExecutablePath();
-        std::string panda_std_lib = exec_path.Value() + "/../pandastdlib/arkstdlib.abc";
-        options.SetBootPandaFiles({panda_std_lib});
+        auto execPath = panda::os::file::File::GetExecutablePath();
+        std::string pandaStdLib = execPath.Value() + "/../pandastdlib/arkstdlib.abc";
+        options.SetBootPandaFiles({pandaStdLib});
         Runtime::Create(options);
-        main_thread_ = Thread::GetCurrent();
+        mainThread_ = Thread::GetCurrent();
         Thread::SetCurrent(nullptr);
     }
 
     ~WorkerThreadTest() override
     {
-        Thread::SetCurrent(main_thread_);
+        Thread::SetCurrent(mainThread_);
         Runtime::Destroy();
     }
 
@@ -50,7 +50,7 @@ public:
     NO_MOVE_SEMANTIC(WorkerThreadTest);
 
 private:
-    Thread *main_thread_ = nullptr;
+    Thread *mainThread_ = nullptr;
 };
 
 TEST_F(WorkerThreadTest, SwitchTasksInOneWorkerThread)

@@ -33,24 +33,24 @@ namespace panda {
 using TaggedValue = coretypes::TaggedValue;
 using TaggedType = coretypes::TaggedType;
 
-mem::TLAB *ManagedThread::zero_tlab_ = nullptr;
+mem::TLAB *ManagedThread::zeroTlab_ = nullptr;
 static const int MIN_PRIORITY = os::thread::LOWEST_PRIORITY;
 
 static mem::InternalAllocatorPtr GetInternalAllocator(Thread *thread)
 {
     // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have HeapManager, so we get internal allocator from
     // runtime
-    mem::HeapManager *heap_manager = thread->GetVM()->GetHeapManager();
-    if (heap_manager != nullptr) {
-        return heap_manager->GetInternalAllocator();
+    mem::HeapManager *heapManager = thread->GetVM()->GetHeapManager();
+    if (heapManager != nullptr) {
+        return heapManager->GetInternalAllocator();
     }
     return Runtime::GetCurrent()->GetInternalAllocator();
 }
 
 MTManagedThread::ThreadId MTManagedThread::GetInternalId()
 {
-    ASSERT(internal_id_ != 0);
-    return internal_id_;
+    ASSERT(internalId_ != 0);
+    return internalId_;
 }
 
 Thread::~Thread()
@@ -67,54 +67,54 @@ void Thread::FreeAllocatedMemory()
 {
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     ASSERT(allocator != nullptr);
-    allocator->Delete(pre_buff_);
-    pre_buff_ = nullptr;
+    allocator->Delete(preBuff_);
+    preBuff_ = nullptr;
 
 #ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
-    allocator->Free(signal_stack_.ss_sp);
+    allocator->Free(signalStack_.ss_sp);
 #endif
 }
 
-Thread::Thread(PandaVM *vm, ThreadType thread_type)
-    : vm_(vm), thread_type_(thread_type), mutator_lock_(vm->GetMutatorLock())
+Thread::Thread(PandaVM *vm, ThreadType threadType)
+    : vm_(vm), threadType_(threadType), mutatorLock_(vm->GetMutatorLock())
 {
     // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
     mem::GC *gc = vm->GetGC();
     if (gc != nullptr) {
-        barrier_set_ = vm->GetGC()->GetBarrierSet();
-        InitCardTableData(barrier_set_);
+        barrierSet_ = vm->GetGC()->GetBarrierSet();
+        InitCardTableData(barrierSet_);
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.as_int = initial_thread_flag_;
+    fts_.asInt = initialThreadFlag_;
 
 #ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    signal_stack_.ss_sp = allocator->Alloc(SIGSTKSZ * 8);
-    signal_stack_.ss_size = SIGSTKSZ * 8;
-    signal_stack_.ss_flags = 0;
-    sigaltstack(&signal_stack_, nullptr);
+    signalStack_.ss_sp = allocator->Alloc(SIGSTKSZ * 8U);
+    signalStack_.ss_size = SIGSTKSZ * 8U;
+    signalStack_.ss_flags = 0;
+    sigaltstack(&signalStack_, nullptr);
 #endif
 }
 
 void Thread::InitCardTableData(mem::GCBarrierSet *barrier)
 {
-    auto post_barrier_type = barrier->GetPostType();
-    switch (post_barrier_type) {
+    auto postBarrierType = barrier->GetPostType();
+    switch (postBarrierType) {
         case panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:
-            card_table_min_addr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
-            card_table_addr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
-            post_wrb_one_object_ = reinterpret_cast<void *>(PostInterGenerationalBarrier1);
-            post_wrb_two_objects_ = reinterpret_cast<void *>(PostInterGenerationalBarrier2);
+            cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
+            cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
+            postWrbOneObject_ = reinterpret_cast<void *>(PostInterGenerationalBarrier1);
+            postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterGenerationalBarrier2);
             break;
         case panda::mem::BarrierType::POST_INTERREGION_BARRIER:
-            card_table_addr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
-            card_table_min_addr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
-            post_wrb_one_object_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkSingleFast);
-            post_wrb_two_objects_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkPairFast);
+            cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
+            cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
+            postWrbOneObject_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkSingleFast);
+            postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkPairFast);
             break;
         case panda::mem::BarrierType::POST_WRB_NONE:
-            post_wrb_one_object_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
-            post_wrb_two_objects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
+            postWrbOneObject_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
+            postWrbTwoObjects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
             break;
         case mem::POST_RB_NONE:
             break;
@@ -132,40 +132,40 @@ void Thread::InitPreBuff()
     mem::GC *gc = GetVM()->GetGC();
     auto barrier = gc->GetBarrierSet();
     if (barrier->GetPreType() != panda::mem::BarrierType::PRE_WRB_NONE) {
-        pre_buff_ = allocator->New<PandaVector<ObjectHeader *>>();
+        preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
     }
 }
 
 CONSTEXPR_IN_RELEASE ThreadFlag GetInitialThreadFlag()
 {
 #ifndef NDEBUG
-    ThreadFlag initial_flag = Runtime::GetOptions().IsRunGcEverySafepoint() ? SAFEPOINT_REQUEST : NO_FLAGS;
-    return initial_flag;
+    ThreadFlag initialFlag = Runtime::GetOptions().IsRunGcEverySafepoint() ? SAFEPOINT_REQUEST : NO_FLAGS;
+    return initialFlag;
 #else
     return NO_FLAGS;
 #endif
 }
 
-ThreadFlag Thread::initial_thread_flag_ = NO_FLAGS;
+ThreadFlag Thread::initialThreadFlag_ = NO_FLAGS;
 
 /* static */
 void ManagedThread::Initialize()
 {
     ASSERT(!Thread::GetCurrent());
-    ASSERT(!zero_tlab_);
+    ASSERT(!zeroTlab_);
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    zero_tlab_ = allocator->New<mem::TLAB>(nullptr, 0U);
-    initial_thread_flag_ = GetInitialThreadFlag();
+    zeroTlab_ = allocator->New<mem::TLAB>(nullptr, 0U);
+    initialThreadFlag_ = GetInitialThreadFlag();
 }
 
 /* static */
 void ManagedThread::Shutdown()
 {
-    ASSERT(zero_tlab_);
+    ASSERT(zeroTlab_);
     ManagedThread::SetCurrent(nullptr);
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    allocator->Delete(zero_tlab_);
-    zero_tlab_ = nullptr;
+    allocator->Delete(zeroTlab_);
+    zeroTlab_ = nullptr;
     /* @sync 1
      * @description: Runtime is terminated at this point and we cannot create new threads
      * */
@@ -179,24 +179,24 @@ void MTManagedThread::Yield()
 }
 
 /* static - creation of the initial Managed thread */
-ManagedThread *ManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::panda_file::SourceLang thread_lang)
+ManagedThread *ManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::panda_file::SourceLang threadLang)
 {
-    trace::ScopedTrace scoped_trace("ManagedThread::Create");
+    trace::ScopedTrace scopedTrace("ManagedThread::Create");
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
     // Create thread structure using new, we rely on this structure to be accessible in child threads after
     // runtime is destroyed
     return new ManagedThread(os::thread::GetCurrentThreadId(), allocator, vm, Thread::ThreadType::THREAD_TYPE_MANAGED,
-                             thread_lang);
+                             threadLang);
 }
 
 /* static - creation of the initial MT Managed thread */
-MTManagedThread *MTManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::panda_file::SourceLang thread_lang)
+MTManagedThread *MTManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::panda_file::SourceLang threadLang)
 {
-    trace::ScopedTrace scoped_trace("MTManagedThread::Create");
+    trace::ScopedTrace scopedTrace("MTManagedThread::Create");
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
     // Create thread structure using new, we rely on this structure to be accessible in child threads after
     // runtime is destroyed
-    auto thread = new MTManagedThread(os::thread::GetCurrentThreadId(), allocator, vm, thread_lang);
+    auto thread = new MTManagedThread(os::thread::GetCurrentThreadId(), allocator, vm, threadLang);
     thread->ProcessCreatedThread();
 
     runtime->GetNotificationManager()->ThreadStartEvent(thread);
@@ -204,38 +204,38 @@ MTManagedThread *MTManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::p
     return thread;
 }
 
-ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *panda_vm,
-                             Thread::ThreadType thread_type, panda::panda_file::SourceLang thread_lang)
-    : Thread(panda_vm, thread_type),
+ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *pandaVm,
+                             Thread::ThreadType threadType, panda::panda_file::SourceLang threadLang)
+    : Thread(pandaVm, threadType),
       id_(id),
-      thread_lang_(thread_lang),
-      pt_thread_info_(allocator->New<tooling::PtThreadInfo>()),
-      thread_frame_states_(allocator->Adapter())
+      threadLang_(threadLang),
+      ptThreadInfo_(allocator->New<tooling::PtThreadInfo>()),
+      threadFrameStates_(allocator->Adapter())
 {
-    ASSERT(zero_tlab_ != nullptr);
-    tlab_ = zero_tlab_;
+    ASSERT(zeroTlab_ != nullptr);
+    tlab_ = zeroTlab_;
 
     // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
-    mem::GC *gc = panda_vm->GetGC();
+    mem::GC *gc = pandaVm->GetGC();
     if (gc != nullptr) {
-        pre_barrier_type_ = gc->GetBarrierSet()->GetPreType();
-        post_barrier_type_ = gc->GetBarrierSet()->GetPostType();
-        auto barrier_set = gc->GetBarrierSet();
-        if (barrier_set->GetPreType() != panda::mem::BarrierType::PRE_WRB_NONE) {
-            pre_buff_ = allocator->New<PandaVector<ObjectHeader *>>();
+        preBarrierType_ = gc->GetBarrierSet()->GetPreType();
+        postBarrierType_ = gc->GetBarrierSet()->GetPostType();
+        auto barrierSet = gc->GetBarrierSet();
+        if (barrierSet->GetPreType() != panda::mem::BarrierType::PRE_WRB_NONE) {
+            preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
             // need to initialize in constructor because we have barriers between constructor and InitBuffers in
             // InitializedClasses
-            g1_post_barrier_ring_buffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
+            g1PostBarrierRingBuffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
         }
     }
 
-    stack_frame_allocator_ =
+    stackFrameAllocator_ =
         allocator->New<mem::StackFrameAllocator>(Runtime::GetOptions().UseMallocForInternalAllocations());
-    internal_local_allocator_ =
+    internalLocalAllocator_ =
         mem::InternalAllocator<>::SetUpLocalInternalAllocator(static_cast<mem::Allocator *>(allocator));
-    tagged_handle_storage_ = allocator->New<HandleStorage<TaggedType>>(allocator);
-    tagged_global_handle_storage_ = allocator->New<GlobalHandleStorage<TaggedType>>(allocator);
-    object_header_handle_storage_ = allocator->New<HandleStorage<ObjectHeader *>>(allocator);
+    taggedHandleStorage_ = allocator->New<HandleStorage<TaggedType>>(allocator);
+    taggedGlobalHandleStorage_ = allocator->New<GlobalHandleStorage<TaggedType>>(allocator);
+    objectHeaderHandleStorage_ = allocator->New<HandleStorage<ObjectHeader *>>(allocator);
 }
 
 ManagedThread::~ManagedThread()
@@ -244,22 +244,22 @@ ManagedThread::~ManagedThread()
     // NB! ThreadManager is expected to store finished threads in separate list and GC destroys them,
     // current_thread should be nullified in Destroy()
     // (zero_tlab == nullptr means that we destroyed Runtime and do not need to register TLAB)
-    if (zero_tlab_ != nullptr) {
+    if (zeroTlab_ != nullptr) {
         // We should register TLAB size for MemStats during thread destroy.
         GetVM()->GetHeapManager()->RegisterTLAB(GetTLAB());
     }
 
     mem::InternalAllocatorPtr allocator = GetInternalAllocator(this);
-    allocator->Delete(object_header_handle_storage_);
-    allocator->Delete(tagged_global_handle_storage_);
-    allocator->Delete(tagged_handle_storage_);
-    mem::InternalAllocator<>::FinalizeLocalInternalAllocator(internal_local_allocator_,
+    allocator->Delete(objectHeaderHandleStorage_);
+    allocator->Delete(taggedGlobalHandleStorage_);
+    allocator->Delete(taggedHandleStorage_);
+    mem::InternalAllocator<>::FinalizeLocalInternalAllocator(internalLocalAllocator_,
                                                              static_cast<mem::Allocator *>(allocator));
-    internal_local_allocator_ = nullptr;
-    allocator->Delete(stack_frame_allocator_);
-    allocator->Delete(pt_thread_info_.release());
+    internalLocalAllocator_ = nullptr;
+    allocator->Delete(stackFrameAllocator_);
+    allocator->Delete(ptThreadInfo_.release());
 
-    ASSERT(thread_frame_states_.empty() && "stack should be empty");
+    ASSERT(threadFrameStates_.empty() && "stack should be empty");
 }
 
 void ManagedThread::InitBuffers()
@@ -270,11 +270,11 @@ void ManagedThread::InitBuffers()
     if (barrier->GetPreType() != panda::mem::BarrierType::PRE_WRB_NONE) {
         // we need to recreate buffers if it was detach (we removed all structures) and attach again
         // skip initializing in first attach after constructor
-        if (pre_buff_ == nullptr) {
-            ASSERT(pre_buff_ == nullptr);
-            pre_buff_ = allocator->New<PandaVector<ObjectHeader *>>();
-            ASSERT(g1_post_barrier_ring_buffer_ == nullptr);
-            g1_post_barrier_ring_buffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
+        if (preBuff_ == nullptr) {
+            ASSERT(preBuff_ == nullptr);
+            preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
+            ASSERT(g1PostBarrierRingBuffer_ == nullptr);
+            g1PostBarrierRingBuffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
         }
     }
 }
@@ -284,123 +284,123 @@ NO_INLINE static uintptr_t GetStackTop()
     return ToUintPtr(__builtin_frame_address(0));
 }
 
-NO_INLINE static void LoadStackPages(uintptr_t end_addr)
+NO_INLINE static void LoadStackPages(uintptr_t endAddr)
 {
     // ISO C++ forbids variable length array and alloca is unsafe,
     // so we have to extend stack step by step via recursive call
     constexpr size_t MARGIN = 512;
     constexpr size_t STACK_PAGE_SIZE = 4_KB;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    volatile uint8_t stack_buffer[STACK_PAGE_SIZE - MARGIN];
-    if (ToUintPtr(&(stack_buffer[0])) >= end_addr + STACK_PAGE_SIZE) {
-        LoadStackPages(end_addr);
+    volatile uint8_t stackBuffer[STACK_PAGE_SIZE - MARGIN];
+    if (ToUintPtr(&(stackBuffer[0])) >= endAddr + STACK_PAGE_SIZE) {
+        LoadStackPages(endAddr);
     }
-    stack_buffer[0] = 0;
+    stackBuffer[0] = 0;
 }
 
-bool ManagedThread::RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size)
+bool ManagedThread::RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize)
 {
-    int error = os::thread::ThreadGetStackInfo(os::thread::GetNativeHandle(), &stack_addr, &stack_size, &guard_size);
+    int error = os::thread::ThreadGetStackInfo(os::thread::GetNativeHandle(), &stackAddr, &stackSize, &guardSize);
     if (error != 0) {
         LOG(ERROR, RUNTIME) << "RetrieveStackInfo: fail to get stack info, error = " << strerror(errno);
     }
     return error == 0;
 }
 
-void ManagedThread::InitForStackOverflowCheck(size_t native_stack_reserved_size, size_t native_stack_protected_size)
+void ManagedThread::InitForStackOverflowCheck(size_t nativeStackReservedSize, size_t nativeStackProtectedSize)
 {
-    void *stack_base = nullptr;
-    size_t guard_size;
-    size_t stack_size;
+    void *stackBase = nullptr;
+    size_t guardSize;
+    size_t stackSize;
 #if defined(PANDA_ASAN_ON) || defined(PANDA_TSAN_ON) || !defined(NDEBUG)
     static constexpr size_t RESERVED_SIZE = 64_KB;
 #else
     static constexpr size_t RESERVED_SIZE = 12_KB;
 #endif
     static_assert(STACK_OVERFLOW_RESERVED_SIZE == RESERVED_SIZE);  // compiler depends on this to test load!!!
-    if (!RetrieveStackInfo(stack_base, stack_size, guard_size)) {
+    if (!RetrieveStackInfo(stackBase, stackSize, guardSize)) {
         return;
     }
-    if (guard_size < panda::os::mem::GetPageSize()) {
-        guard_size = panda::os::mem::GetPageSize();
+    if (guardSize < panda::os::mem::GetPageSize()) {
+        guardSize = panda::os::mem::GetPageSize();
     }
-    if (stack_size <= native_stack_reserved_size + native_stack_protected_size + guard_size) {
-        LOG(ERROR, RUNTIME) << "InitForStackOverflowCheck: stack size not enough, stack_base = " << stack_base
-                            << ", stack_size = " << stack_size << ", guard_size = " << guard_size;
+    if (stackSize <= nativeStackReservedSize + nativeStackProtectedSize + guardSize) {
+        LOG(ERROR, RUNTIME) << "InitForStackOverflowCheck: stack size not enough, stack_base = " << stackBase
+                            << ", stack_size = " << stackSize << ", guard_size = " << guardSize;
         return;
     }
-    LOG(DEBUG, RUNTIME) << "InitForStackOverflowCheck: stack_base = " << stack_base << ", stack_size = " << stack_size
-                        << ", guard_size = " << guard_size;
-    native_stack_begin_ = ToUintPtr(stack_base) + guard_size;
-    native_stack_end_ = native_stack_begin_ + native_stack_protected_size + native_stack_reserved_size;
-    native_stack_reserved_size_ = native_stack_reserved_size;
-    native_stack_protected_size_ = native_stack_protected_size;
-    native_stack_guard_size_ = guard_size;
-    native_stack_size_ = stack_size;
+    LOG(DEBUG, RUNTIME) << "InitForStackOverflowCheck: stack_base = " << stackBase << ", stack_size = " << stackSize
+                        << ", guard_size = " << guardSize;
+    nativeStackBegin_ = ToUintPtr(stackBase) + guardSize;
+    nativeStackEnd_ = nativeStackBegin_ + nativeStackProtectedSize + nativeStackReservedSize;
+    nativeStackReservedSize_ = nativeStackReservedSize;
+    nativeStackProtectedSize_ = nativeStackProtectedSize;
+    nativeStackGuardSize_ = guardSize;
+    nativeStackSize_ = stackSize;
     // init frame stack size same with native stack size (*4 - is just an heuristic to pass some tests)
     // But frame stack size cannot be larger than max memory size in frame allocator
-    auto iframe_stack_size = stack_size * 4;
-    auto allocator_max_size = stack_frame_allocator_->GetFullMemorySize();
-    iframe_stack_size_ = iframe_stack_size <= allocator_max_size ? iframe_stack_size : allocator_max_size;
+    auto iframeStackSize = stackSize * 4;
+    auto allocatorMaxSize = stackFrameAllocator_->GetFullMemorySize();
+    iframeStackSize_ = iframeStackSize <= allocatorMaxSize ? iframeStackSize : allocatorMaxSize;
     ProtectNativeStack();
-    stack_frame_allocator_->SetReservedMemorySize(iframe_stack_size_);
-    stack_frame_allocator_->ReserveMemory();
+    stackFrameAllocator_->SetReservedMemorySize(iframeStackSize_);
+    stackFrameAllocator_->ReserveMemory();
 }
 
 void ManagedThread::ProtectNativeStack()
 {
-    if (native_stack_protected_size_ == 0) {
+    if (nativeStackProtectedSize_ == 0) {
         return;
     }
 
     // Try to mprotect directly
-    if (!panda::os::mem::MakeMemProtected(ToVoidPtr(native_stack_begin_), native_stack_protected_size_)) {
+    if (!panda::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
         return;
     }
 
     // If fail to mprotect, try to load stack page and then retry to mprotect
-    uintptr_t native_stack_top = AlignDown(GetStackTop(), panda::os::mem::GetPageSize());
+    uintptr_t nativeStackTop = AlignDown(GetStackTop(), panda::os::mem::GetPageSize());
     LOG(DEBUG, RUNTIME) << "ProtectNativeStack: try to load pages, mprotect error = " << strerror(errno)
-                        << ", stack_begin = " << native_stack_begin_ << ", stack_top = " << native_stack_top
-                        << ", stack_size = " << native_stack_size_ << ", guard_size = " << native_stack_guard_size_;
-    if (native_stack_size_ > STACK_MAX_SIZE_OVERFLOW_CHECK || native_stack_end_ >= native_stack_top ||
-        native_stack_top > native_stack_end_ + STACK_MAX_SIZE_OVERFLOW_CHECK) {
+                        << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
+                        << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_;
+    if (nativeStackSize_ > STACK_MAX_SIZE_OVERFLOW_CHECK || nativeStackEnd_ >= nativeStackTop ||
+        nativeStackTop > nativeStackEnd_ + STACK_MAX_SIZE_OVERFLOW_CHECK) {
         LOG(ERROR, RUNTIME) << "ProtectNativeStack: too large stack, mprotect error = " << strerror(errno)
                             << ", max_stack_size = " << STACK_MAX_SIZE_OVERFLOW_CHECK
-                            << ", stack_begin = " << native_stack_begin_ << ", stack_top = " << native_stack_top
-                            << ", stack_size = " << native_stack_size_ << ", guard_size = " << native_stack_guard_size_;
+                            << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
+                            << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_;
         return;
     }
-    LoadStackPages(native_stack_begin_);
-    if (panda::os::mem::MakeMemProtected(ToVoidPtr(native_stack_begin_), native_stack_protected_size_)) {
+    LoadStackPages(nativeStackBegin_);
+    if (panda::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
         LOG(ERROR, RUNTIME) << "ProtectNativeStack: fail to protect pages, error = " << strerror(errno)
-                            << ", stack_begin = " << native_stack_begin_ << ", stack_top = " << native_stack_top
-                            << ", stack_size = " << native_stack_size_ << ", guard_size = " << native_stack_guard_size_;
+                            << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
+                            << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_;
     }
-    size_t release_size = native_stack_top - native_stack_begin_ - panda::os::mem::GetPageSize();
-    if (panda::os::mem::ReleasePages(native_stack_begin_, native_stack_begin_ + release_size) != 0) {
+    size_t releaseSize = nativeStackTop - nativeStackBegin_ - panda::os::mem::GetPageSize();
+    if (panda::os::mem::ReleasePages(nativeStackBegin_, nativeStackBegin_ + releaseSize) != 0) {
         LOG(ERROR, RUNTIME) << "ProtectNativeStack: fail to release pages, error = " << strerror(errno)
-                            << ", stack_begin = " << native_stack_begin_ << ", stack_top = " << native_stack_top
-                            << ", stack_size = " << native_stack_size_ << ", guard_size = " << native_stack_guard_size_
-                            << ", release_size = " << release_size;
+                            << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
+                            << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_
+                            << ", release_size = " << releaseSize;
     }
 }
 
 void ManagedThread::DisableStackOverflowCheck()
 {
-    native_stack_end_ = native_stack_begin_;
-    iframe_stack_size_ = std::numeric_limits<size_t>::max();
-    if (native_stack_protected_size_ > 0) {
-        panda::os::mem::MakeMemReadWrite(ToVoidPtr(native_stack_begin_), native_stack_protected_size_);
+    nativeStackEnd_ = nativeStackBegin_;
+    iframeStackSize_ = std::numeric_limits<size_t>::max();
+    if (nativeStackProtectedSize_ > 0) {
+        panda::os::mem::MakeMemReadWrite(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_);
     }
 }
 
 void ManagedThread::EnableStackOverflowCheck()
 {
-    native_stack_end_ = native_stack_begin_ + native_stack_protected_size_ + native_stack_reserved_size_;
-    iframe_stack_size_ = native_stack_size_ * 4;
-    if (native_stack_protected_size_ > 0) {
-        panda::os::mem::MakeMemProtected(ToVoidPtr(native_stack_begin_), native_stack_protected_size_);
+    nativeStackEnd_ = nativeStackBegin_ + nativeStackProtectedSize_ + nativeStackReservedSize_;
+    iframeStackSize_ = nativeStackSize_ * 4U;
+    if (nativeStackProtectedSize_ > 0) {
+        panda::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_);
     }
 }
 
@@ -414,61 +414,61 @@ void ManagedThread::SuspendCheck() NO_THREAD_SAFETY_ANALYSIS
     ResumeImpl(true);
 }
 
-void ManagedThread::SuspendImpl(bool internal_suspend)
+void ManagedThread::SuspendImpl(bool internalSuspend)
 {
-    os::memory::LockHolder lock(suspend_lock_);
+    os::memory::LockHolder lock(suspendLock_);
     LOG(DEBUG, RUNTIME) << "Suspending thread " << GetId();
-    if (!internal_suspend) {
+    if (!internalSuspend) {
         if (IsUserSuspended()) {
             LOG(DEBUG, RUNTIME) << "thread " << GetId() << " is already suspended";
             return;
         }
-        user_code_suspend_count_++;
+        userCodeSuspendCount_++;
     }
-    auto old_count = suspend_count_++;
-    if (old_count == 0) {
+    auto oldCount = suspendCount_++;
+    if (oldCount == 0) {
         SetFlag(SUSPEND_REQUEST);
     }
 }
 
-void ManagedThread::ResumeImpl(bool internal_resume)
+void ManagedThread::ResumeImpl(bool internalResume)
 {
-    os::memory::LockHolder lock(suspend_lock_);
+    os::memory::LockHolder lock(suspendLock_);
     LOG(DEBUG, RUNTIME) << "Resuming thread " << GetId();
-    if (!internal_resume) {
+    if (!internalResume) {
         if (!IsUserSuspended()) {
             LOG(DEBUG, RUNTIME) << "thread " << GetId() << " is already resumed";
             return;
         }
-        ASSERT(user_code_suspend_count_ != 0);
-        user_code_suspend_count_--;
+        ASSERT(userCodeSuspendCount_ != 0);
+        userCodeSuspendCount_--;
     }
-    if (suspend_count_ > 0) {
-        suspend_count_--;
-        if (suspend_count_ == 0) {
+    if (suspendCount_ > 0) {
+        suspendCount_--;
+        if (suspendCount_ == 0) {
             ClearFlag(SUSPEND_REQUEST);
         }
     }
     // Help for UnregisterExitedThread
     TSAN_ANNOTATE_HAPPENS_BEFORE(&fts_);
-    suspend_var_.Signal();
+    suspendVar_.Signal();
 }
 
 void ManagedThread::SafepointPoll()
 {
     if (this->TestAllFlags()) {
-        trace::ScopedTrace scoped_trace("RunSafepoint");
+        trace::ScopedTrace scopedTrace("RunSafepoint");
         panda::interpreter::RuntimeInterface::Safepoint();
     }
 }
 
 void ManagedThread::NativeCodeBegin()
 {
-    LOG_IF(!(thread_frame_states_.empty() || thread_frame_states_.top() != NATIVE_CODE), FATAL, RUNTIME)
+    LOG_IF(!(threadFrameStates_.empty() || threadFrameStates_.top() != NATIVE_CODE), FATAL, RUNTIME)
         << LogThreadStack(NATIVE_CODE) << " or stack should be empty";
-    thread_frame_states_.push(NATIVE_CODE);
+    threadFrameStates_.push(NATIVE_CODE);
     UpdateStatus(ThreadStatus::NATIVE);
-    is_managed_scope_ = false;
+    isManagedScope_ = false;
 }
 
 void ManagedThread::NativeCodeEnd()
@@ -477,42 +477,42 @@ void ManagedThread::NativeCodeEnd()
     // If this was last frame, it should have been called from Destroy() and it should UpdateStatus to FINISHED
     // after this method
     UpdateStatus(ThreadStatus::RUNNING);
-    is_managed_scope_ = true;
-    LOG_IF(thread_frame_states_.empty(), FATAL, RUNTIME) << "stack should be not empty";
-    LOG_IF(thread_frame_states_.top() != NATIVE_CODE, FATAL, RUNTIME) << LogThreadStack(NATIVE_CODE);
-    thread_frame_states_.pop();
+    isManagedScope_ = true;
+    LOG_IF(threadFrameStates_.empty(), FATAL, RUNTIME) << "stack should be not empty";
+    LOG_IF(threadFrameStates_.top() != NATIVE_CODE, FATAL, RUNTIME) << LogThreadStack(NATIVE_CODE);
+    threadFrameStates_.pop();
 }
 
 bool ManagedThread::IsInNativeCode() const
 {
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
-    return thread_frame_states_.top() == NATIVE_CODE;
+    return threadFrameStates_.top() == NATIVE_CODE;
 }
 
 void ManagedThread::ManagedCodeBegin()
 {
     // thread_frame_states_ should not be accessed without MutatorLock (as runtime could have been destroyed)
     UpdateStatus(ThreadStatus::RUNNING);
-    is_managed_scope_ = true;
+    isManagedScope_ = true;
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
-    LOG_IF(thread_frame_states_.top() != NATIVE_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
-    thread_frame_states_.push(MANAGED_CODE);
+    LOG_IF(threadFrameStates_.top() != NATIVE_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
+    threadFrameStates_.push(MANAGED_CODE);
 }
 
 void ManagedThread::ManagedCodeEnd()
 {
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
-    LOG_IF(thread_frame_states_.top() != MANAGED_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
-    thread_frame_states_.pop();
+    LOG_IF(threadFrameStates_.top() != MANAGED_CODE, FATAL, RUNTIME) << LogThreadStack(MANAGED_CODE);
+    threadFrameStates_.pop();
     // Should be NATIVE_CODE
     UpdateStatus(ThreadStatus::NATIVE);
-    is_managed_scope_ = false;
+    isManagedScope_ = false;
 }
 
 bool ManagedThread::IsManagedCode() const
 {
     LOG_IF(HasClearStack(), FATAL, RUNTIME) << "stack should be not empty";
-    return thread_frame_states_.top() == MANAGED_CODE;
+    return threadFrameStates_.top() == MANAGED_CODE;
 }
 
 // Since we don't allow two consecutive NativeCode frames, there is no managed code on stack if
@@ -522,7 +522,7 @@ bool ManagedThread::HasManagedCodeOnStack() const
     if (HasClearStack()) {
         return false;
     }
-    if (thread_frame_states_.size() == 1 && IsInNativeCode()) {
+    if (threadFrameStates_.size() == 1 && IsInNativeCode()) {
         return false;
     }
     return true;
@@ -530,7 +530,7 @@ bool ManagedThread::HasManagedCodeOnStack() const
 
 bool ManagedThread::HasClearStack() const
 {
-    return thread_frame_states_.empty();
+    return threadFrameStates_.empty();
 }
 
 PandaString ManagedThread::ThreadStatusAsString(enum ThreadStatus status)
@@ -567,73 +567,73 @@ PandaString ManagedThread::ThreadStatusAsString(enum ThreadStatus status)
     }
 }
 
-PandaString ManagedThread::LogThreadStack(ThreadState new_state) const
+PandaString ManagedThread::LogThreadStack(ThreadState newState) const
 {
-    PandaStringStream debug_message;
-    static std::unordered_map<ThreadState, std::string> thread_state_to_string_map = {
+    PandaStringStream debugMessage;
+    static std::unordered_map<ThreadState, std::string> threadStateToStringMap = {
         {ThreadState::NATIVE_CODE, "NATIVE_CODE"}, {ThreadState::MANAGED_CODE, "MANAGED_CODE"}};
-    auto new_state_it = thread_state_to_string_map.find(new_state);
-    auto top_frame_it = thread_state_to_string_map.find(thread_frame_states_.top());
-    ASSERT(new_state_it != thread_state_to_string_map.end());
-    ASSERT(top_frame_it != thread_state_to_string_map.end());
+    auto newStateIt = threadStateToStringMap.find(newState);
+    auto topFrameIt = threadStateToStringMap.find(threadFrameStates_.top());
+    ASSERT(newStateIt != threadStateToStringMap.end());
+    ASSERT(topFrameIt != threadStateToStringMap.end());
 
-    debug_message << "threadId: " << GetId() << " "
-                  << "tried go to " << new_state_it->second << " state, but last frame is: " << top_frame_it->second
-                  << ", " << thread_frame_states_.size() << " frames in stack (from up to bottom): [";
+    debugMessage << "threadId: " << GetId() << " "
+                 << "tried go to " << newStateIt->second << " state, but last frame is: " << topFrameIt->second << ", "
+                 << threadFrameStates_.size() << " frames in stack (from up to bottom): [";
 
-    PandaStack<ThreadState> copy_stack(thread_frame_states_);
-    while (!copy_stack.empty()) {
-        auto it = thread_state_to_string_map.find(copy_stack.top());
-        ASSERT(it != thread_state_to_string_map.end());
-        debug_message << it->second;
-        if (copy_stack.size() > 1) {
-            debug_message << "|";
+    PandaStack<ThreadState> copyStack(threadFrameStates_);
+    while (!copyStack.empty()) {
+        auto it = threadStateToStringMap.find(copyStack.top());
+        ASSERT(it != threadStateToStringMap.end());
+        debugMessage << it->second;
+        if (copyStack.size() > 1) {
+            debugMessage << "|";
         }
-        copy_stack.pop();
+        copyStack.pop();
     }
-    debug_message << "]";
-    return debug_message.str();
+    debugMessage << "]";
+    return debugMessage.str();
 }
 
-MTManagedThread::MTManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *panda_vm,
-                                 panda::panda_file::SourceLang thread_lang)
-    : ManagedThread(id, allocator, panda_vm, Thread::ThreadType::THREAD_TYPE_MT_MANAGED, thread_lang),
-      entering_monitor_(nullptr)
+MTManagedThread::MTManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *pandaVm,
+                                 panda::panda_file::SourceLang threadLang)
+    : ManagedThread(id, allocator, pandaVm, Thread::ThreadType::THREAD_TYPE_MT_MANAGED, threadLang),
+      enteringMonitor_(nullptr)
 {
-    ASSERT(panda_vm != nullptr);
-    auto thread_manager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
-    internal_id_ = thread_manager->GetInternalThreadId();
+    ASSERT(pandaVm != nullptr);
+    auto threadManager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
+    internalId_ = threadManager->GetInternalThreadId();
 
     auto ext = Runtime::GetCurrent()->GetClassLinker()->GetExtension(GetThreadLang());
     if (ext != nullptr) {
-        string_class_ptr_ = ext->GetClassRoot(ClassRoot::STRING);
+        stringClassPtr_ = ext->GetClassRoot(ClassRoot::STRING);
     }
 
-    auto *rs = allocator->New<mem::ReferenceStorage>(panda_vm->GetGlobalObjectStorage(), allocator, false);
+    auto *rs = allocator->New<mem::ReferenceStorage>(pandaVm->GetGlobalObjectStorage(), allocator, false);
     LOG_IF((rs == nullptr || !rs->Init()), FATAL, RUNTIME) << "Cannot create pt reference storage";
-    pt_reference_storage_ = PandaUniquePtr<mem::ReferenceStorage>(rs);
+    ptReferenceStorage_ = PandaUniquePtr<mem::ReferenceStorage>(rs);
 }
 
 MTManagedThread::~MTManagedThread()
 {
-    ASSERT(internal_id_ != 0);
-    auto thread_manager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
-    thread_manager->RemoveInternalThreadId(internal_id_);
+    ASSERT(internalId_ != 0);
+    auto threadManager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
+    threadManager->RemoveInternalThreadId(internalId_);
 }
 
-void ManagedThread::PushLocalObject(ObjectHeader **object_header)
+void ManagedThread::PushLocalObject(ObjectHeader **objectHeader)
 {
     ASSERT(TestLockState());
-    local_objects_.push_back(object_header);
-    LOG(DEBUG, GC) << "PushLocalObject for thread " << std::hex << this << ", obj = " << *object_header;
+    localObjects_.push_back(objectHeader);
+    LOG(DEBUG, GC) << "PushLocalObject for thread " << std::hex << this << ", obj = " << *objectHeader;
 }
 
 void ManagedThread::PopLocalObject()
 {
     ASSERT(TestLockState());
-    ASSERT(!local_objects_.empty());
-    LOG(DEBUG, GC) << "PopLocalObject from thread " << std::hex << this << ", obj = " << *local_objects_.back();
-    local_objects_.pop_back();
+    ASSERT(!localObjects_.empty());
+    LOG(DEBUG, GC) << "PopLocalObject from thread " << std::hex << this << ", obj = " << *localObjects_.back();
+    localObjects_.pop_back();
 }
 
 bool ManagedThread::TestLockState() const
@@ -649,19 +649,19 @@ bool ManagedThread::TestLockState() const
 
 void MTManagedThread::PushLocalObjectLocked(ObjectHeader *obj)
 {
-    local_objects_locked_.EmplaceBack(obj, GetFrame());
+    localObjectsLocked_.EmplaceBack(obj, GetFrame());
 }
 
 void MTManagedThread::PopLocalObjectLocked([[maybe_unused]] ObjectHeader *out)
 {
-    if (LIKELY(!local_objects_locked_.Empty())) {
+    if (LIKELY(!localObjectsLocked_.Empty())) {
 #ifndef NDEBUG
-        ObjectHeader *obj = local_objects_locked_.Back().GetObject();
+        ObjectHeader *obj = localObjectsLocked_.Back().GetObject();
         if (obj != out) {
             LOG(WARNING, RUNTIME) << "Locked object is not paired";
         }
 #endif  // !NDEBUG
-        local_objects_locked_.PopBack();
+        localObjectsLocked_.PopBack();
     } else {
         LOG(WARNING, RUNTIME) << "PopLocalObjectLocked failed, current thread locked object is empty";
     }
@@ -669,7 +669,7 @@ void MTManagedThread::PopLocalObjectLocked([[maybe_unused]] ObjectHeader *out)
 
 Span<LockedObjectInfo> MTManagedThread::GetLockedObjectInfos()
 {
-    return local_objects_locked_.Data();
+    return localObjectsLocked_.Data();
 }
 
 void ManagedThread::UpdateTLAB(mem::TLAB *tlab)
@@ -681,8 +681,8 @@ void ManagedThread::UpdateTLAB(mem::TLAB *tlab)
 
 void ManagedThread::ClearTLAB()
 {
-    ASSERT(zero_tlab_ != nullptr);
-    tlab_ = zero_tlab_;
+    ASSERT(zeroTlab_ != nullptr);
+    tlab_ = zeroTlab_;
 }
 
 /* Common actions for creation of the thread. */
@@ -690,9 +690,9 @@ void MTManagedThread::ProcessCreatedThread()
 {
     ManagedThread::SetCurrent(this);
     // Runtime takes ownership of the thread
-    trace::ScopedTrace scoped_trace2("ThreadManager::RegisterThread");
-    auto thread_manager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
-    thread_manager->RegisterThread(this);
+    trace::ScopedTrace scopedTrace2("ThreadManager::RegisterThread");
+    auto threadManager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
+    threadManager->RegisterThread(this);
     NativeCodeBegin();
 }
 
@@ -701,19 +701,19 @@ void ManagedThread::UpdateGCRoots()
     if ((exception_ != nullptr) && (exception_->IsForwarded())) {
         exception_ = ::panda::mem::GetForwardAddress(exception_);
     }
-    for (auto &&it : local_objects_) {
+    for (auto &&it : localObjects_) {
         if ((*it)->IsForwarded()) {
             (*it) = ::panda::mem::GetForwardAddress(*it);
         }
     }
 
-    if (!tagged_handle_scopes_.empty()) {
-        tagged_handle_storage_->UpdateHeapObject();
-        tagged_global_handle_storage_->UpdateHeapObject();
+    if (!taggedHandleScopes_.empty()) {
+        taggedHandleStorage_->UpdateHeapObject();
+        taggedGlobalHandleStorage_->UpdateHeapObject();
     }
 
-    if (!object_header_handle_scopes_.empty()) {
-        object_header_handle_storage_->UpdateHeapObject();
+    if (!objectHeaderHandleScopes_.empty()) {
+        objectHeaderHandleStorage_->UpdateHeapObject();
     }
 }
 
@@ -721,12 +721,12 @@ void ManagedThread::UpdateGCRoots()
 bool MTManagedThread::Sleep(uint64_t ms)
 {
     auto thread = MTManagedThread::GetCurrent();
-    bool is_interrupted = thread->IsInterrupted();
-    if (!is_interrupted) {
+    bool isInterrupted = thread->IsInterrupted();
+    if (!isInterrupted) {
         thread->TimedWait(ThreadStatus::IS_SLEEPING, ms, 0);
-        is_interrupted = thread->IsInterrupted();
+        isInterrupted = thread->IsInterrupted();
     }
-    return is_interrupted;
+    return isInterrupted;
 }
 
 void ManagedThread::SetThreadPriority(int32_t prio)
@@ -749,18 +749,18 @@ uint32_t ManagedThread::GetThreadPriority()
 void MTManagedThread::UpdateGCRoots()
 {
     ManagedThread::UpdateGCRoots();
-    for (auto &it : local_objects_locked_.Data()) {
+    for (auto &it : localObjectsLocked_.Data()) {
         if (it.GetObject()->IsForwarded()) {
             it.SetObject(panda::mem::GetForwardAddress(it.GetObject()));
         }
     }
 
     // Update enter_monitor_object_
-    if (enter_monitor_object_ != nullptr && enter_monitor_object_->IsForwarded()) {
-        enter_monitor_object_ = panda::mem::GetForwardAddress(enter_monitor_object_);
+    if (enterMonitorObject_ != nullptr && enterMonitorObject_->IsForwarded()) {
+        enterMonitorObject_ = panda::mem::GetForwardAddress(enterMonitorObject_);
     }
 
-    pt_reference_storage_->UpdateMovedRefs();
+    ptReferenceStorage_->UpdateMovedRefs();
 }
 
 void MTManagedThread::VisitGCRoots(const ObjectVisitor &cb)
@@ -768,24 +768,24 @@ void MTManagedThread::VisitGCRoots(const ObjectVisitor &cb)
     ManagedThread::VisitGCRoots(cb);
 
     // Visit enter_monitor_object_
-    if (enter_monitor_object_ != nullptr) {
-        cb(enter_monitor_object_);
+    if (enterMonitorObject_ != nullptr) {
+        cb(enterMonitorObject_);
     }
 
-    pt_reference_storage_->VisitObjects([&cb](const mem::GCRoot &gc_root) { cb(gc_root.GetObjectHeader()); },
-                                        mem::RootType::ROOT_PT_LOCAL);
+    ptReferenceStorage_->VisitObjects([&cb](const mem::GCRoot &gcRoot) { cb(gcRoot.GetObjectHeader()); },
+                                      mem::RootType::ROOT_PT_LOCAL);
 }
 void MTManagedThread::SetDaemon()
 {
-    is_daemon_ = true;
-    auto thread_manager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
-    thread_manager->AddDaemonThread();
+    isDaemon_ = true;
+    auto threadManager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
+    threadManager->AddDaemonThread();
     SetThreadPriority(MIN_PRIORITY);
 }
 
 void MTManagedThread::Interrupt(MTManagedThread *thread)
 {
-    os::memory::LockHolder lock(thread->cond_lock_);
+    os::memory::LockHolder lock(thread->condLock_);
     LOG(DEBUG, RUNTIME) << "Interrupt a thread " << thread->GetId();
     thread->SetInterruptedWithLockHeld(true);
     thread->SignalWithLockHeld();
@@ -794,7 +794,7 @@ void MTManagedThread::Interrupt(MTManagedThread *thread)
 
 bool MTManagedThread::Interrupted()
 {
-    os::memory::LockHolder lock(cond_lock_);
+    os::memory::LockHolder lock(condLock_);
     bool res = IsInterruptedWithLockHeld();
     SetInterruptedWithLockHeld(false);
     return res;
@@ -811,16 +811,16 @@ void ManagedThread::VisitGCRoots(const ObjectVisitor &cb)
     if (exception_ != nullptr) {
         cb(exception_);
     }
-    for (auto it : local_objects_) {
+    for (auto it : localObjects_) {
         cb(*it);
     }
 
-    if (!tagged_handle_scopes_.empty()) {
-        tagged_handle_storage_->VisitGCRoots(cb);
-        tagged_global_handle_storage_->VisitGCRoots(cb);
+    if (!taggedHandleScopes_.empty()) {
+        taggedHandleStorage_->VisitGCRoots(cb);
+        taggedGlobalHandleStorage_->VisitGCRoots(cb);
     }
-    if (!object_header_handle_scopes_.empty()) {
-        object_header_handle_storage_->VisitGCRoots(cb);
+    if (!objectHeaderHandleScopes_.empty()) {
+        objectHeaderHandleStorage_->VisitGCRoots(cb);
     }
 }
 
@@ -838,8 +838,8 @@ void MTManagedThread::Destroy()
         runtime->GetNotificationManager()->ThreadEndEvent(this);
     }
 
-    auto thread_manager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
-    if (thread_manager->UnregisterExitedThread(this)) {
+    auto threadManager = reinterpret_cast<MTThreadManager *>(GetVM()->GetThreadManager());
+    if (threadManager->UnregisterExitedThread(this)) {
         // Clear current_thread only if unregistration was successfull
         ManagedThread::SetCurrent(nullptr);
     }
@@ -847,9 +847,9 @@ void MTManagedThread::Destroy()
 
 CustomTLSData *ManagedThread::GetCustomTLSData(const char *key)
 {
-    os::memory::LockHolder lock(*Locks::custom_tls_lock_);
-    auto it = custom_tls_cache_.find(key);
-    if (it == custom_tls_cache_.end()) {
+    os::memory::LockHolder lock(*Locks::customTlsLock_);
+    auto it = customTlsCache_.find(key);
+    if (it == customTlsCache_.end()) {
         return nullptr;
     }
     return it->second.get();
@@ -857,30 +857,30 @@ CustomTLSData *ManagedThread::GetCustomTLSData(const char *key)
 
 void ManagedThread::SetCustomTLSData(const char *key, CustomTLSData *data)
 {
-    os::memory::LockHolder lock(*Locks::custom_tls_lock_);
-    PandaUniquePtr<CustomTLSData> tls_data(data);
-    auto it = custom_tls_cache_.find(key);
-    if (it == custom_tls_cache_.end()) {
-        custom_tls_cache_[key] = {PandaUniquePtr<CustomTLSData>()};
+    os::memory::LockHolder lock(*Locks::customTlsLock_);
+    PandaUniquePtr<CustomTLSData> tlsData(data);
+    auto it = customTlsCache_.find(key);
+    if (it == customTlsCache_.end()) {
+        customTlsCache_[key] = {PandaUniquePtr<CustomTLSData>()};
     }
-    custom_tls_cache_[key].swap(tls_data);
+    customTlsCache_[key].swap(tlsData);
 }
 
 bool ManagedThread::EraseCustomTLSData(const char *key)
 {
-    os::memory::LockHolder lock(*Locks::custom_tls_lock_);
-    return custom_tls_cache_.erase(key) != 0;
+    os::memory::LockHolder lock(*Locks::customTlsLock_);
+    return customTlsCache_.erase(key) != 0;
 }
 
 LanguageContext ManagedThread::GetLanguageContext()
 {
-    return Runtime::GetCurrent()->GetLanguageContext(thread_lang_);
+    return Runtime::GetCurrent()->GetLanguageContext(threadLang_);
 }
 
 void MTManagedThread::FreeInternalMemory()
 {
-    local_objects_locked_.~LockedObjectList<>();
-    pt_reference_storage_.reset();
+    localObjectsLocked_.~LockedObjectList<>();
+    ptReferenceStorage_.reset();
 
     ManagedThread::FreeInternalMemory();
 }
@@ -888,9 +888,9 @@ void MTManagedThread::FreeInternalMemory()
 void ManagedThread::DestroyInternalResources()
 {
     GetVM()->GetGC()->OnThreadTerminate(this, mem::BuffersKeepingFlag::DELETE);
-    ASSERT(pre_buff_ == nullptr);
-    ASSERT(g1_post_barrier_ring_buffer_ == nullptr);
-    pt_thread_info_->Destroy();
+    ASSERT(preBuff_ == nullptr);
+    ASSERT(g1PostBarrierRingBuffer_ == nullptr);
+    ptThreadInfo_->Destroy();
 }
 
 void ManagedThread::CleanupInternalResources()
@@ -900,27 +900,27 @@ void ManagedThread::CleanupInternalResources()
 
 void ManagedThread::FreeInternalMemory()
 {
-    thread_frame_states_.~PandaStack<ThreadState>();
+    threadFrameStates_.~PandaStack<ThreadState>();
     DestroyInternalResources();
 
-    local_objects_.~PandaVector<ObjectHeader **>();
+    localObjects_.~PandaVector<ObjectHeader **>();
     {
-        os::memory::LockHolder lock(*Locks::custom_tls_lock_);
-        custom_tls_cache_.~PandaMap<const char *, PandaUniquePtr<CustomTLSData>>();
+        os::memory::LockHolder lock(*Locks::customTlsLock_);
+        customTlsCache_.~PandaMap<const char *, PandaUniquePtr<CustomTLSData>>();
     }
 
     mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    allocator->Delete(stack_frame_allocator_);
-    allocator->Delete(internal_local_allocator_);
+    allocator->Delete(stackFrameAllocator_);
+    allocator->Delete(internalLocalAllocator_);
 
-    allocator->Delete(pt_thread_info_.release());
+    allocator->Delete(ptThreadInfo_.release());
 
-    tagged_handle_scopes_.~PandaVector<HandleScope<coretypes::TaggedType> *>();
-    allocator->Delete(tagged_handle_storage_);
-    allocator->Delete(tagged_global_handle_storage_);
+    taggedHandleScopes_.~PandaVector<HandleScope<coretypes::TaggedType> *>();
+    allocator->Delete(taggedHandleStorage_);
+    allocator->Delete(taggedGlobalHandleStorage_);
 
-    allocator->Delete(object_header_handle_storage_);
-    object_header_handle_scopes_.~PandaVector<HandleScope<ObjectHeader *> *>();
+    allocator->Delete(objectHeaderHandleStorage_);
+    objectHeaderHandleScopes_.~PandaVector<HandleScope<ObjectHeader *> *>();
 
     Thread::FreeInternalMemory();
 }
@@ -951,25 +951,25 @@ void ManagedThread::CleanUp()
     ClearException();
     ClearTLAB();
 
-    while (!thread_frame_states_.empty()) {
-        thread_frame_states_.pop();
+    while (!threadFrameStates_.empty()) {
+        threadFrameStates_.pop();
     }
-    local_objects_.clear();
+    localObjects_.clear();
     {
-        os::memory::LockHolder lock(*Locks::custom_tls_lock_);
-        custom_tls_cache_.clear();
+        os::memory::LockHolder lock(*Locks::customTlsLock_);
+        customTlsCache_.clear();
     }
-    interpreter_cache_.Clear();
+    interpreterCache_.Clear();
 
-    tagged_handle_scopes_.clear();
-    tagged_handle_storage_->FreeHandles(0);
-    tagged_global_handle_storage_->FreeHandles();
+    taggedHandleScopes_.clear();
+    taggedHandleStorage_->FreeHandles(0);
+    taggedGlobalHandleStorage_->FreeHandles();
 
-    object_header_handle_storage_->FreeHandles(0);
-    object_header_handle_scopes_.clear();
+    objectHeaderHandleStorage_->FreeHandles(0);
+    objectHeaderHandleScopes_.clear();
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    fts_.as_int = initial_thread_flag_;
+    fts_.asInt = initialThreadFlag_;
     StoreStatus<DONT_CHECK_SAFEPOINT, NO_READLOCK>(ThreadStatus::CREATED);
     // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }

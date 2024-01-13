@@ -42,13 +42,13 @@ const auto ChangeJaveStackFormat =                                      // NOLIN
 using FuncUnwindstack = bool (*)(pid_t, std::ostream &, int);
 class DumpUnattachedThread {
 public:
-    void AddTid(pid_t tid_thread);
+    void AddTid(pid_t tidThread);
     bool InitKernelTidLists();
-    void Dump(std::ostream &os, bool dump_native_crash, FuncUnwindstack call_unwindstack);
+    void Dump(std::ostream &os, bool dumpNativeCrash, FuncUnwindstack callUnwindstack);
 
 private:
-    std::set<pid_t> kernel_tid_;
-    std::set<pid_t> thread_manager_tids_;
+    std::set<pid_t> kernelTid_;
+    std::set<pid_t> threadManagerTids_;
 };
 void DumpKernelStack(std::ostream &os, pid_t tid, const char *tag, bool count);
 std::string GetNativeThreadNameForFile(pid_t tid);

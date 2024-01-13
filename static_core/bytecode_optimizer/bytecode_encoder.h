@@ -37,7 +37,7 @@ public:
         return imm >= min && imm <= max;
     }
 
-    bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, [[maybe_unused]] bool signed_compare) override
+    bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, [[maybe_unused]] bool signedCompare) override
     {
         return CanEncodeImmHelper(imm, size, INT8_MIN, INT8_MAX);
     }

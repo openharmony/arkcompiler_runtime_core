@@ -91,81 +91,81 @@ const char *LLVMArkInterface::GetFramePointerRegister() const
 
 uintptr_t LLVMArkInterface::GetEntrypointTlsOffset(EntrypointId id) const
 {
-    Arch ark_arch = LLVMArchToArkArch(triple_.getArch());
+    Arch arkArch = LLVMArchToArkArch(triple_.getArch());
     using PandaEntrypointId = panda::compiler::RuntimeInterface::EntrypointId;
-    return runtime_->GetEntrypointTlsOffset(ark_arch, static_cast<PandaEntrypointId>(id));
+    return runtime_->GetEntrypointTlsOffset(arkArch, static_cast<PandaEntrypointId>(id));
 }
 
 size_t LLVMArkInterface::GetTlsPreWrbEntrypointOffset() const
 {
-    Arch ark_arch = LLVMArchToArkArch(triple_.getArch());
-    return runtime_->GetTlsPreWrbEntrypointOffset(ark_arch);
+    Arch arkArch = LLVMArchToArkArch(triple_.getArch());
+    return runtime_->GetTlsPreWrbEntrypointOffset(arkArch);
 }
 
 uint32_t LLVMArkInterface::GetManagedThreadPostWrbOneObjectOffset() const
 {
-    Arch ark_arch = LLVMArchToArkArch(triple_.getArch());
-    return cross_values::GetManagedThreadPostWrbOneObjectOffset(ark_arch);
+    Arch arkArch = LLVMArchToArkArch(triple_.getArch());
+    return cross_values::GetManagedThreadPostWrbOneObjectOffset(arkArch);
 }
 
-llvm::StringRef LLVMArkInterface::GetRuntimeFunctionName(LLVMArkInterface::RuntimeCallType call_type,
+llvm::StringRef LLVMArkInterface::GetRuntimeFunctionName(LLVMArkInterface::RuntimeCallType callType,
                                                          LLVMArkInterface::IntrinsicId id)
 {
-    if (call_type == LLVMArkInterface::RuntimeCallType::INTRINSIC) {
+    if (callType == LLVMArkInterface::RuntimeCallType::INTRINSIC) {
         return llvm::StringRef(GetIntrinsicRuntimeFunctionName(id));
     }
     // sanity check
-    ASSERT(call_type == LLVMArkInterface::RuntimeCallType::ENTRYPOINT);
+    ASSERT(callType == LLVMArkInterface::RuntimeCallType::ENTRYPOINT);
     return llvm::StringRef(GetEntrypointRuntimeFunctionName(id));
 }
 
 llvm::FunctionType *LLVMArkInterface::GetRuntimeFunctionType(llvm::StringRef name) const
 {
-    return runtime_function_types_.lookup(name);
+    return runtimeFunctionTypes_.lookup(name);
 }
 
 llvm::FunctionType *LLVMArkInterface::GetOrCreateRuntimeFunctionType(llvm::LLVMContext &ctx, llvm::Module *module,
-                                                                     LLVMArkInterface::RuntimeCallType call_type,
+                                                                     LLVMArkInterface::RuntimeCallType callType,
                                                                      LLVMArkInterface::IntrinsicId id)
 {
-    auto rt_function_name = GetRuntimeFunctionName(call_type, id);
-    auto rt_function_ty = GetRuntimeFunctionType(rt_function_name);
-    if (rt_function_ty != nullptr) {
-        return rt_function_ty;
+    auto rtFunctionName = GetRuntimeFunctionName(callType, id);
+    auto rtFunctionTy = GetRuntimeFunctionType(rtFunctionName);
+    if (rtFunctionTy != nullptr) {
+        return rtFunctionTy;
     }
 
-    if (call_type == RuntimeCallType::INTRINSIC) {
-        rt_function_ty = GetIntrinsicDeclaration(ctx, static_cast<RuntimeInterface::IntrinsicId>(id));
+    if (callType == RuntimeCallType::INTRINSIC) {
+        rtFunctionTy = GetIntrinsicDeclaration(ctx, static_cast<RuntimeInterface::IntrinsicId>(id));
     } else {
         // sanity check
-        ASSERT(call_type == RuntimeCallType::ENTRYPOINT);
-        rt_function_ty = GetEntrypointDeclaration(ctx, module, static_cast<RuntimeInterface::EntrypointId>(id));
+        ASSERT(callType == RuntimeCallType::ENTRYPOINT);
+        rtFunctionTy = GetEntrypointDeclaration(ctx, module, static_cast<RuntimeInterface::EntrypointId>(id));
     }
 
-    ASSERT(rt_function_ty != nullptr);
-    runtime_function_types_.insert({rt_function_name, rt_function_ty});
-    return rt_function_ty;
+    ASSERT(rtFunctionTy != nullptr);
+    runtimeFunctionTypes_.insert({rtFunctionName, rtFunctionTy});
+    return rtFunctionTy;
 }
 
-void LLVMArkInterface::RememberFunctionOrigin(const llvm::Function *function, MethodPtr method_ptr)
+void LLVMArkInterface::RememberFunctionOrigin(const llvm::Function *function, MethodPtr methodPtr)
 {
     ASSERT(function != nullptr);
-    ASSERT(method_ptr != nullptr);
+    ASSERT(methodPtr != nullptr);
 
-    auto file = static_cast<panda_file::File *>(runtime_->GetBinaryFileForMethod(method_ptr));
-    [[maybe_unused]] auto insertion_result = function_origins_.insert({function, file});
-    ASSERT(insertion_result.second);
-    LLVM_LOG(DEBUG, INFRA) << function->getName().data() << " defined in " << runtime_->GetFileName(method_ptr);
+    auto file = static_cast<panda_file::File *>(runtime_->GetBinaryFileForMethod(methodPtr));
+    [[maybe_unused]] auto insertionResult = functionOrigins_.insert({function, file});
+    ASSERT(insertionResult.second);
+    LLVM_LOG(DEBUG, INFRA) << function->getName().data() << " defined in " << runtime_->GetFileName(methodPtr);
 }
 
 LLVMArkInterface::RuntimeCallee LLVMArkInterface::GetEntrypointCallee(EntrypointId id) const
 {
     using PandaEntrypointId = panda::compiler::RuntimeInterface::EntrypointId;
     auto eid = static_cast<PandaEntrypointId>(id);
-    auto function_name = GetEntrypointInternalName(eid);
-    auto function_proto = GetRuntimeFunctionType(function_name);
-    ASSERT(function_proto != nullptr);
-    return {function_proto, function_name};
+    auto functionName = GetEntrypointInternalName(eid);
+    auto functionProto = GetRuntimeFunctionType(functionName);
+    ASSERT(functionProto != nullptr);
+    return {functionProto, functionName};
 }
 
 llvm::Function *LLVMArkInterface::GetFunctionByMethodPtr(LLVMArkInterface::MethodPtr method) const
@@ -175,21 +175,21 @@ llvm::Function *LLVMArkInterface::GetFunctionByMethodPtr(LLVMArkInterface::Metho
     return functions_.lookup(method);
 }
 
-void LLVMArkInterface::PutFunction(LLVMArkInterface::MethodPtr method_ptr, llvm::Function *function)
+void LLVMArkInterface::PutFunction(LLVMArkInterface::MethodPtr methodPtr, llvm::Function *function)
 {
     ASSERT(function != nullptr);
-    ASSERT(method_ptr != nullptr);
+    ASSERT(methodPtr != nullptr);
     // We are not expecting `tan` functions other than we are adding in LLVMIrConstructor::EmitTan()
     ASSERT(function->getName() != "tan");
 
-    [[maybe_unused]] auto f_insertion_result = functions_.insert({method_ptr, function});
-    ASSERT_PRINT(f_insertion_result.first->second == function,
-                 std::string("Attempt to map '") + GetUniqMethodName(method_ptr) + "' to a function = '" +
+    [[maybe_unused]] auto fInsertionResult = functions_.insert({methodPtr, function});
+    ASSERT_PRINT(fInsertionResult.first->second == function,
+                 std::string("Attempt to map '") + GetUniqMethodName(methodPtr) + "' to a function = '" +
                      function->getName().str() + "', but the method_ptr already mapped to '" +
-                     f_insertion_result.first->second->getName().str() + "'");
-    auto source_lang = static_cast<uint8_t>(runtime_->GetMethodSourceLanguage(method_ptr));
-    [[maybe_unused]] auto sl_insertion_result = source_languages_.insert({function, source_lang});
-    ASSERT(sl_insertion_result.first->second == source_lang);
+                     fInsertionResult.first->second->getName().str() + "'");
+    auto sourceLang = static_cast<uint8_t>(runtime_->GetMethodSourceLanguage(methodPtr));
+    [[maybe_unused]] auto slInsertionResult = sourceLanguages_.insert({function, sourceLang});
+    ASSERT(slInsertionResult.first->second == sourceLang);
 }
 
 const char *LLVMArkInterface::GetIntrinsicRuntimeFunctionName(LLVMArkInterface::IntrinsicId id) const
@@ -204,23 +204,23 @@ const char *LLVMArkInterface::GetEntrypointRuntimeFunctionName(LLVMArkInterface:
     return GetEntrypointInternalName(static_cast<RuntimeInterface::EntrypointId>(id));
 }
 
-std::string LLVMArkInterface::GetUniqMethodName(LLVMArkInterface::MethodPtr method_ptr) const
+std::string LLVMArkInterface::GetUniqMethodName(LLVMArkInterface::MethodPtr methodPtr) const
 {
-    ASSERT(method_ptr != nullptr);
+    ASSERT(methodPtr != nullptr);
 
     if (IsIrtocMode()) {
-        return runtime_->GetMethodName(method_ptr);
+        return runtime_->GetMethodName(methodPtr);
     }
 #ifndef NDEBUG
-    auto uniq_name = std::string(runtime_->GetMethodFullName(method_ptr, true));
-    uniq_name.append("_id_");
-    uniq_name.append(std::to_string(runtime_->GetUniqMethodId(method_ptr)));
+    auto uniqName = std::string(runtime_->GetMethodFullName(methodPtr, true));
+    uniqName.append("_id_");
+    uniqName.append(std::to_string(runtime_->GetUniqMethodId(methodPtr)));
 #else
-    std::stringstream ss_uniq_name;
-    ss_uniq_name << "f_" << std::hex << method_ptr;
-    auto uniq_name = ss_uniq_name.str();
+    std::stringstream ssUniqName;
+    ssUniqName << "f_" << std::hex << methodPtr;
+    auto uniqName = ssUniqName.str();
 #endif
-    return uniq_name;
+    return uniqName;
 }
 
 std::string LLVMArkInterface::GetUniqMethodName(const Method *method) const
@@ -231,22 +231,22 @@ std::string LLVMArkInterface::GetUniqMethodName(const Method *method) const
     return GetUniqMethodName(static_cast<MethodPtr>(casted));
 }
 
-std::string LLVMArkInterface::GetUniqueBasicBlockName(const std::string &bb_name, const std::string &unique_suffix)
+std::string LLVMArkInterface::GetUniqueBasicBlockName(const std::string &bbName, const std::string &uniqueSuffix)
 {
-    std::stringstream unique_name;
-    const std::string name_delimiter = "..";
-    auto first = bb_name.find(name_delimiter);
+    std::stringstream uniqueName;
+    const std::string nameDelimiter = "..";
+    auto first = bbName.find(nameDelimiter);
     if (first == std::string::npos) {
-        unique_name << bb_name << "_" << unique_suffix;
-        return unique_name.str();
+        uniqueName << bbName << "_" << uniqueSuffix;
+        return uniqueName.str();
     }
 
-    auto second = bb_name.rfind(name_delimiter);
+    auto second = bbName.rfind(nameDelimiter);
     ASSERT(second != std::string::npos);
 
-    unique_name << bb_name.substr(0, first + 2U) << unique_suffix << bb_name.substr(second, bb_name.size());
+    uniqueName << bbName.substr(0, first + 2U) << uniqueSuffix << bbName.substr(second, bbName.size());
 
-    return unique_name.str();
+    return uniqueName.str();
 }
 
 bool LLVMArkInterface::IsIrtocMode() const
@@ -254,15 +254,15 @@ bool LLVMArkInterface::IsIrtocMode() const
     return true;
 }
 
-void LLVMArkInterface::AppendIrtocReturnHandler(llvm::StringRef return_handler)
+void LLVMArkInterface::AppendIrtocReturnHandler(llvm::StringRef returnHandler)
 {
-    irtoc_return_handlers_.push_back(return_handler);
+    irtocReturnHandlers_.push_back(returnHandler);
 }
 
 bool LLVMArkInterface::IsIrtocReturnHandler(const llvm::Function &function) const
 {
-    return std::find(irtoc_return_handlers_.cbegin(), irtoc_return_handlers_.cend(), function.getName()) !=
-           irtoc_return_handlers_.cend();
+    return std::find(irtocReturnHandlers_.cbegin(), irtocReturnHandlers_.cend(), function.getName()) !=
+           irtocReturnHandlers_.cend();
 }
 
 }  // namespace panda::llvmbackend

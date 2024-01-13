@@ -221,20 +221,20 @@ public:
         return type_ != other.type_;
     }
 
-    static constexpr Type GetTypeFromFieldEncoding(uint32_t field_encoding) {
-        uint8_t ref_encoding = Type(TypeId::REFERENCE).GetFieldEncoding();
-        uint8_t last_encoding = Type(TypeId::TAGGED).GetFieldEncoding();
-        if (field_encoding == last_encoding) {
+    static constexpr Type GetTypeFromFieldEncoding(uint32_t fieldEncoding) {
+        uint8_t refEncoding = Type(TypeId::REFERENCE).GetFieldEncoding();
+        uint8_t lastEncoding = Type(TypeId::TAGGED).GetFieldEncoding();
+        if (fieldEncoding == lastEncoding) {
             return Type(TypeId::TAGGED);
         }
-        if (field_encoding > last_encoding || field_encoding == ref_encoding) {
+        if (fieldEncoding > lastEncoding || fieldEncoding == refEncoding) {
             // The case when field's type encoding is >= sizeof(Header).
-            // It means the field_encoding is a reference type which refers to Class or ForeignClass
+            // It means the fieldEncoding is a reference type which refers to Class or ForeignClass
             // See file_format.md FieldType paragraph
             return Type(TypeId::REFERENCE);
         }
 
-        return Type(static_cast<TypeId>(field_encoding + static_cast<uint8_t>(TypeId::U1)));
+        return Type(static_cast<TypeId>(fieldEncoding + static_cast<uint8_t>(TypeId::U1)));
     }
 
     friend std::ostream &operator<<(std::ostream &stream, const Type &type) {

@@ -33,7 +33,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerSimplifyStringBuilder();
+        return g_options.IsCompilerSimplifyStringBuilder();
     }
 
     const char *GetPassName() const override
@@ -50,7 +50,7 @@ private:
 
 private:
     constexpr static size_t CONSTRUCTOR_WITH_STRING_ARG_TOTAL_ARGS_NUM = 3;
-    bool is_applied_ {false};
+    bool isApplied_ {false};
 };
 
 }  // namespace panda::compiler

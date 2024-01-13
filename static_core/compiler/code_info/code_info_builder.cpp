@@ -18,191 +18,191 @@
 
 namespace panda::compiler {
 
-void CodeInfoBuilder::BeginMethod(uint32_t frame_size, uint32_t vregs_count)
+void CodeInfoBuilder::BeginMethod(uint32_t frameSize, uint32_t vregsCount)
 {
 #ifndef NDEBUG
-    ASSERT(!was_method_begin_);
-    ASSERT(!was_stack_map_begin_);
-    ASSERT(!was_inline_info_begin_);
-    was_method_begin_ = true;
+    ASSERT(!wasMethodBegin_);
+    ASSERT(!wasStackMapBegin_);
+    ASSERT(!wasInlineInfoBegin_);
+    wasMethodBegin_ = true;
 #endif
 
-    SetFrameSize(frame_size);
-    vregs_count_ = vregs_count;
-    constant_table_.Add({0});
+    SetFrameSize(frameSize);
+    vregsCount_ = vregsCount;
+    constantTable_.Add({0});
 }
 
 void CodeInfoBuilder::EndMethod()
 {
 #ifndef NDEBUG
-    ASSERT(was_method_begin_);
-    ASSERT(!was_stack_map_begin_);
-    ASSERT(!was_inline_info_begin_);
-    was_method_begin_ = false;
+    ASSERT(wasMethodBegin_);
+    ASSERT(!wasStackMapBegin_);
+    ASSERT(!wasInlineInfoBegin_);
+    wasMethodBegin_ = false;
 #endif
 }
 
-void CodeInfoBuilder::BeginStackMap(uint32_t bpc, uint32_t npc, ArenaBitVector *stack_roots, uint32_t regs_roots,
-                                    bool require_vreg_map, bool is_osr)
+void CodeInfoBuilder::BeginStackMap(uint32_t bpc, uint32_t npc, ArenaBitVector *stackRoots, uint32_t regsRoots,
+                                    bool requireVregMap, bool isOsr)
 {
 #ifndef NDEBUG
-    ASSERT(was_method_begin_);
-    ASSERT(!was_stack_map_begin_);
-    ASSERT(!was_inline_info_begin_);
-    was_stack_map_begin_ = true;
+    ASSERT(wasMethodBegin_);
+    ASSERT(!wasStackMapBegin_);
+    ASSERT(!wasInlineInfoBegin_);
+    wasStackMapBegin_ = true;
 #endif
-    inline_info_stack_.clear();
-    current_vregs_.clear();
+    inlineInfoStack_.clear();
+    currentVregs_.clear();
 
-    ASSERT(stack_maps_.GetSize() == 0 || npc >= stack_maps_.GetLast()[StackMap::COLUMN_NATIVE_PC]);
+    ASSERT(stackMaps_.GetSize() == 0 || npc >= stackMaps_.GetLast()[StackMap::COLUMN_NATIVE_PC]);
 
-    current_vregs_count_ = require_vreg_map ? vregs_count_ : 0;
+    currentVregsCount_ = requireVregMap ? vregsCount_ : 0;
 
-    current_stack_map_ = BitTableBuilder<StackMap>::Entry();
-    current_stack_map_[StackMap::COLUMN_PROPERTIES] = StackMap::CreateProperties(is_osr, require_vreg_map);
-    current_stack_map_[StackMap::COLUMN_BYTECODE_PC] = bpc;
-    current_stack_map_[StackMap::COLUMN_NATIVE_PC] = StackMap::PackAddress(npc, arch_);
-    if (regs_roots != 0) {
-        current_stack_map_[StackMap::COLUMN_ROOTS_REG_MASK_INDEX] = roots_reg_masks_.Add({regs_roots});
+    currentStackMap_ = BitTableBuilder<StackMap>::Entry();
+    currentStackMap_[StackMap::COLUMN_PROPERTIES] = StackMap::CreateProperties(isOsr, requireVregMap);
+    currentStackMap_[StackMap::COLUMN_BYTECODE_PC] = bpc;
+    currentStackMap_[StackMap::COLUMN_NATIVE_PC] = StackMap::PackAddress(npc, arch_);
+    if (regsRoots != 0) {
+        currentStackMap_[StackMap::COLUMN_ROOTS_REG_MASK_INDEX] = rootsRegMasks_.Add({regsRoots});
     }
-    if (stack_roots != nullptr && !stack_roots->empty()) {
-        current_stack_map_[StackMap::COLUMN_ROOTS_STACK_MASK_INDEX] = roots_stack_masks_.Add(stack_roots->GetFixed());
+    if (stackRoots != nullptr && !stackRoots->empty()) {
+        currentStackMap_[StackMap::COLUMN_ROOTS_STACK_MASK_INDEX] = rootsStackMasks_.Add(stackRoots->GetFixed());
     }
     // Ensure that stackmaps are inserted in sorted order
-    if (stack_maps_.GetRowsCount() != 0) {
-        ASSERT(current_stack_map_[StackMap::COLUMN_NATIVE_PC] >= stack_maps_.GetLast()[StackMap::COLUMN_NATIVE_PC]);
+    if (stackMaps_.GetRowsCount() != 0) {
+        ASSERT(currentStackMap_[StackMap::COLUMN_NATIVE_PC] >= stackMaps_.GetLast()[StackMap::COLUMN_NATIVE_PC]);
     }
 }
 
 void CodeInfoBuilder::EndStackMap()
 {
 #ifndef NDEBUG
-    ASSERT(was_method_begin_);
-    ASSERT(was_stack_map_begin_);
-    ASSERT(!was_inline_info_begin_);
-    was_stack_map_begin_ = false;
+    ASSERT(wasMethodBegin_);
+    ASSERT(wasStackMapBegin_);
+    ASSERT(!wasInlineInfoBegin_);
+    wasStackMapBegin_ = false;
 #endif
-    if (!inline_info_stack_.empty()) {
-        inline_info_stack_.back()[InlineInfo::COLUMN_IS_LAST] = static_cast<uint32_t>(true);
-        current_stack_map_[StackMap::COLUMN_INLINE_INFO_INDEX] = inline_infos_.AddArray(Span(inline_info_stack_));
+    if (!inlineInfoStack_.empty()) {
+        inlineInfoStack_.back()[InlineInfo::COLUMN_IS_LAST] = static_cast<uint32_t>(true);
+        currentStackMap_[StackMap::COLUMN_INLINE_INFO_INDEX] = inlineInfos_.AddArray(Span(inlineInfoStack_));
     }
 
     EmitVRegs();
 
-    stack_maps_.Add(current_stack_map_);
+    stackMaps_.Add(currentStackMap_);
 }
 
 void CodeInfoBuilder::DumpCurrentStackMap(std::ostream &stream) const
 {
-    stream << "Stackmap #" << (stack_maps_.GetRowsCount() - 1) << ": npc=0x" << std::hex
-           << StackMap::UnpackAddress(current_stack_map_[StackMap::COLUMN_NATIVE_PC], arch_) << ", bpc=0x" << std::hex
-           << current_stack_map_[StackMap::COLUMN_BYTECODE_PC];
-    if (current_stack_map_[StackMap::COLUMN_INLINE_INFO_INDEX] != StackMap::NO_VALUE) {
-        stream << ", inline_depth=" << inline_info_stack_.size();
+    stream << "Stackmap #" << (stackMaps_.GetRowsCount() - 1) << ": npc=0x" << std::hex
+           << StackMap::UnpackAddress(currentStackMap_[StackMap::COLUMN_NATIVE_PC], arch_) << ", bpc=0x" << std::hex
+           << currentStackMap_[StackMap::COLUMN_BYTECODE_PC];
+    if (currentStackMap_[StackMap::COLUMN_INLINE_INFO_INDEX] != StackMap::NO_VALUE) {
+        stream << ", inline_depth=" << inlineInfoStack_.size();
     }
-    if (current_stack_map_[StackMap::COLUMN_ROOTS_REG_MASK_INDEX] != StackMap::NO_VALUE ||
-        current_stack_map_[StackMap::COLUMN_ROOTS_STACK_MASK_INDEX] != StackMap::NO_VALUE) {
+    if (currentStackMap_[StackMap::COLUMN_ROOTS_REG_MASK_INDEX] != StackMap::NO_VALUE ||
+        currentStackMap_[StackMap::COLUMN_ROOTS_STACK_MASK_INDEX] != StackMap::NO_VALUE) {
         stream << ", roots=[";
         const char *sep = "";
-        if (current_stack_map_[StackMap::COLUMN_ROOTS_REG_MASK_INDEX] != StackMap::NO_VALUE) {
-            auto &entry = roots_reg_masks_.GetEntry(current_stack_map_[StackMap::COLUMN_ROOTS_REG_MASK_INDEX]);
+        if (currentStackMap_[StackMap::COLUMN_ROOTS_REG_MASK_INDEX] != StackMap::NO_VALUE) {
+            auto &entry = rootsRegMasks_.GetEntry(currentStackMap_[StackMap::COLUMN_ROOTS_REG_MASK_INDEX]);
             stream << "r:0x" << std::hex << entry[RegisterMask::COLUMN_MASK];
             sep = ",";
         }
-        if (current_stack_map_[StackMap::COLUMN_ROOTS_STACK_MASK_INDEX] != StackMap::NO_VALUE) {
-            auto region = roots_stack_masks_.GetEntry(current_stack_map_[StackMap::COLUMN_ROOTS_STACK_MASK_INDEX]);
+        if (currentStackMap_[StackMap::COLUMN_ROOTS_STACK_MASK_INDEX] != StackMap::NO_VALUE) {
+            auto region = rootsStackMasks_.GetEntry(currentStackMap_[StackMap::COLUMN_ROOTS_STACK_MASK_INDEX]);
             stream << sep << "s:" << region;
         }
         stream << "]";
     }
-    if (current_stack_map_[StackMap::COLUMN_VREG_MASK_INDEX] != StackMap::NO_VALUE) {
-        stream << ", vregs=" << vreg_masks_.GetEntry(current_stack_map_[StackMap::COLUMN_VREG_MASK_INDEX]);
+    if (currentStackMap_[StackMap::COLUMN_VREG_MASK_INDEX] != StackMap::NO_VALUE) {
+        stream << ", vregs=" << vregMasks_.GetEntry(currentStackMap_[StackMap::COLUMN_VREG_MASK_INDEX]);
     }
 }
 
-void CodeInfoBuilder::BeginInlineInfo(void *method, uint32_t method_id, uint32_t bpc, uint32_t vregs_count)
+void CodeInfoBuilder::BeginInlineInfo(void *method, uint32_t methodId, uint32_t bpc, uint32_t vregsCount)
 {
 #ifndef NDEBUG
-    ASSERT(was_method_begin_);
-    ASSERT(was_stack_map_begin_);
-    was_inline_info_begin_ = true;
+    ASSERT(wasMethodBegin_);
+    ASSERT(wasStackMapBegin_);
+    wasInlineInfoBegin_ = true;
 #endif
-    BitTableBuilder<InlineInfo>::Entry inline_info;
-    current_vregs_count_ += vregs_count;
+    BitTableBuilder<InlineInfo>::Entry inlineInfo;
+    currentVregsCount_ += vregsCount;
 
-    inline_info[InlineInfo::COLUMN_IS_LAST] = static_cast<uint32_t>(false);
-    inline_info[InlineInfo::COLUMN_BYTECODE_PC] = bpc;
-    inline_info[InlineInfo::COLUMN_VREGS_COUNT] = current_vregs_count_;
+    inlineInfo[InlineInfo::COLUMN_IS_LAST] = static_cast<uint32_t>(false);
+    inlineInfo[InlineInfo::COLUMN_BYTECODE_PC] = bpc;
+    inlineInfo[InlineInfo::COLUMN_VREGS_COUNT] = currentVregsCount_;
     if (method != nullptr) {
-        inline_info[InlineInfo::COLUMN_METHOD_HI] = High32Bits(method);
-        inline_info[InlineInfo::COLUMN_METHOD_LOW] = Low32Bits(method);
+        inlineInfo[InlineInfo::COLUMN_METHOD_HI] = High32Bits(method);
+        inlineInfo[InlineInfo::COLUMN_METHOD_LOW] = Low32Bits(method);
     } else {
-        ASSERT(method_id != 0);
-        inline_info[InlineInfo::COLUMN_METHOD_ID_INDEX] = method_ids_.Add({method_id});
+        ASSERT(methodId != 0);
+        inlineInfo[InlineInfo::COLUMN_METHOD_ID_INDEX] = methodIds_.Add({methodId});
     }
 
-    inline_info_stack_.push_back(inline_info);
+    inlineInfoStack_.push_back(inlineInfo);
 }
 
 void CodeInfoBuilder::EndInlineInfo()
 {
 #ifndef NDEBUG
-    ASSERT(was_method_begin_);
-    ASSERT(was_stack_map_begin_);
-    ASSERT(was_inline_info_begin_);
-    was_inline_info_begin_ = false;
+    ASSERT(wasMethodBegin_);
+    ASSERT(wasStackMapBegin_);
+    ASSERT(wasInlineInfoBegin_);
+    wasInlineInfoBegin_ = false;
 #endif
-    ASSERT(current_vregs_.size() == current_vregs_count_);
+    ASSERT(currentVregs_.size() == currentVregsCount_);
 }
 
-void CodeInfoBuilder::AddConstant(uint64_t value, VRegInfo::Type type, VRegInfo::VRegType vreg_type)
+void CodeInfoBuilder::AddConstant(uint64_t value, VRegInfo::Type type, VRegInfo::VRegType vregType)
 {
-    VRegInfo vreg(0, VRegInfo::Location::CONSTANT, type, vreg_type);
+    VRegInfo vreg(0, VRegInfo::Location::CONSTANT, type, vregType);
     uint32_t low = value & ((1LLU << BITS_PER_UINT32) - 1);
     uint32_t hi = (value >> BITS_PER_UINT32) & ((1LLU << BITS_PER_UINT32) - 1);
-    vreg.SetConstantIndices(constant_table_.Add({low}), constant_table_.Add({hi}));
-    current_vregs_.push_back(vreg);
+    vreg.SetConstantIndices(constantTable_.Add({low}), constantTable_.Add({hi}));
+    currentVregs_.push_back(vreg);
 }
 
 void CodeInfoBuilder::EmitVRegs()
 {
-    ASSERT(current_vregs_.size() == current_vregs_count_);
-    if (current_vregs_.empty()) {
+    ASSERT(currentVregs_.size() == currentVregsCount_);
+    if (currentVregs_.empty()) {
         return;
     }
 
-    if (current_vregs_.size() > last_vregs_.size()) {
-        last_vregs_.resize(current_vregs_.size(), VRegInfo::Invalid());
-        vregs_last_change_.resize(current_vregs_.size());
+    if (currentVregs_.size() > lastVregs_.size()) {
+        lastVregs_.resize(currentVregs_.size(), VRegInfo::Invalid());
+        vregsLastChange_.resize(currentVregs_.size());
     }
 
-    ArenaVector<BitTableBuilder<VRegisterCatalogueIndex>::Entry> &vregs_map = vregs_map_storage_;
-    ArenaBitVector &vregs_mask = vregs_mask_storage_;
-    vregs_map.clear();
-    vregs_mask.clear();
+    ArenaVector<BitTableBuilder<VRegisterCatalogueIndex>::Entry> &vregsMap = vregsMapStorage_;
+    ArenaBitVector &vregsMask = vregsMaskStorage_;
+    vregsMap.clear();
+    vregsMask.clear();
 
-    for (size_t i = 0; i < current_vregs_.size(); i++) {
-        auto &vreg = current_vregs_[i];
-        uint32_t distatnce = stack_maps_.GetRowsCount() - vregs_last_change_[i];
-        if (last_vregs_[i] != vreg || distatnce > MAX_VREG_LIVE_DISTANCE) {
-            BitTableBuilder<VRegisterInfo>::Entry vreg_entry;
-            vreg_entry[VRegisterInfo::COLUMN_INFO] = vreg.GetInfo();
-            vreg_entry[VRegisterInfo::COLUMN_VALUE] = vreg.GetValue();
-            uint32_t index = vreg.IsLive() ? vregs_catalogue_.Add(vreg_entry) : decltype(vregs_catalogue_)::NO_VALUE;
-            vregs_map.push_back({index});
-            vregs_mask.SetBit(i);
-            last_vregs_[i] = vreg;
-            vregs_last_change_[i] = stack_maps_.GetRowsCount();
+    for (size_t i = 0; i < currentVregs_.size(); i++) {
+        auto &vreg = currentVregs_[i];
+        uint32_t distatnce = stackMaps_.GetRowsCount() - vregsLastChange_[i];
+        if (lastVregs_[i] != vreg || distatnce > MAX_VREG_LIVE_DISTANCE) {
+            BitTableBuilder<VRegisterInfo>::Entry vregEntry;
+            vregEntry[VRegisterInfo::COLUMN_INFO] = vreg.GetInfo();
+            vregEntry[VRegisterInfo::COLUMN_VALUE] = vreg.GetValue();
+            uint32_t index = vreg.IsLive() ? vregsCatalogue_.Add(vregEntry) : decltype(vregsCatalogue_)::NO_VALUE;
+            vregsMap.push_back({index});
+            vregsMask.SetBit(i);
+            lastVregs_[i] = vreg;
+            vregsLastChange_[i] = stackMaps_.GetRowsCount();
         }
     }
 
-    BitMemoryRegion rgn(vregs_mask.data(), vregs_mask.size());
-    ASSERT(vregs_mask.PopCount() == vregs_map.size());
-    if (vregs_mask.PopCount() != 0) {
-        current_stack_map_[StackMap::COLUMN_VREG_MASK_INDEX] = vreg_masks_.Add(vregs_mask.GetFixed());
+    BitMemoryRegion rgn(vregsMask.data(), vregsMask.size());
+    ASSERT(vregsMask.PopCount() == vregsMap.size());
+    if (vregsMask.PopCount() != 0) {
+        currentStackMap_[StackMap::COLUMN_VREG_MASK_INDEX] = vregMasks_.Add(vregsMask.GetFixed());
     }
-    if (!current_vregs_.empty()) {
-        current_stack_map_[StackMap::COLUMN_VREG_MAP_INDEX] = vregs_map_.AddArray(Span(vregs_map));
+    if (!currentVregs_.empty()) {
+        currentStackMap_[StackMap::COLUMN_VREG_MAP_INDEX] = vregsMap_.AddArray(Span(vregsMap));
     }
 }
 
@@ -210,15 +210,15 @@ void CodeInfoBuilder::Encode(ArenaVector<uint8_t> *stream, size_t offset)
 {
     BitMemoryStreamOut out(stream, offset);
 
-    uint32_t tables_mask = 0;
-    EnumerateTables([&tables_mask](size_t index, const auto &table) {
+    uint32_t tablesMask = 0;
+    EnumerateTables([&tablesMask](size_t index, const auto &table) {
         if (table->GetRowsCount() != 0) {
-            tables_mask |= (1U << index);
+            tablesMask |= (1U << index);
         }
     });
 
-    header_.SetTableMask(tables_mask);
-    header_.SetVRegsCount(vregs_count_);
+    header_.SetTableMask(tablesMask);
+    header_.SetVRegsCount(vregsCount_);
     header_.Encode(out);
 
     EnumerateTables([&out]([[maybe_unused]] size_t index, const auto &table) {

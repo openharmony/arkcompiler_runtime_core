@@ -22,34 +22,34 @@
 namespace panda::tooling::inspector {
 void DebugInfoCache::AddPandaFile(const panda_file::File &file)
 {
-    os::memory::LockHolder lock(debug_infos_mutex_);
-    debug_infos_.emplace(std::piecewise_construct, std::forward_as_tuple(&file),
-                         std::forward_as_tuple(file, [this, &file](auto method_id, auto source_name) {
-                             os::memory::LockHolder l(disassemblies_mutex_);
-                             disassemblies_.emplace(std::piecewise_construct, std::forward_as_tuple(source_name),
-                                                    std::forward_as_tuple(file, method_id));
-                         }));
+    os::memory::LockHolder lock(debugInfosMutex_);
+    debugInfos_.emplace(std::piecewise_construct, std::forward_as_tuple(&file),
+                        std::forward_as_tuple(file, [this, &file](auto methodId, auto sourceName) {
+                            os::memory::LockHolder l(disassembliesMutex_);
+                            disassemblies_.emplace(std::piecewise_construct, std::forward_as_tuple(sourceName),
+                                                   std::forward_as_tuple(file, methodId));
+                        }));
 }
 
-void DebugInfoCache::GetSourceLocation(const PtFrame &frame, std::string_view &source_file,
-                                       std::string_view &method_name, size_t &line_number)
+void DebugInfoCache::GetSourceLocation(const PtFrame &frame, std::string_view &sourceFile, std::string_view &methodName,
+                                       size_t &lineNumber)
 {
     auto method = frame.GetMethod();
-    auto panda_file = method->GetPandaFile();
-    auto &debug_info = GetDebugInfo(panda_file);
-    source_file = debug_info.GetSourceFile(method->GetFileId());
+    auto pandaFile = method->GetPandaFile();
+    auto &debugInfo = GetDebugInfo(pandaFile);
+    sourceFile = debugInfo.GetSourceFile(method->GetFileId());
 
-    method_name = utf::Mutf8AsCString(method->GetName().data);
+    methodName = utf::Mutf8AsCString(method->GetName().data);
 
     // Line number entry corresponding to the bytecode location is
     // the last such entry for which the bytecode offset is not greater than
     // the given offset. Use `std::upper_bound` to find the first entry
     // for which the condition is not true, and then step back.
-    auto &table = debug_info.GetLineNumberTable(method->GetFileId());
-    auto line_number_iter = std::upper_bound(table.begin(), table.end(), frame.GetBytecodeOffset(),
-                                             [](auto offset, auto &entry) { return offset < entry.offset; });
-    ASSERT(line_number_iter != table.begin());
-    line_number = std::prev(line_number_iter)->line;
+    auto &table = debugInfo.GetLineNumberTable(method->GetFileId());
+    auto lineNumberIter = std::upper_bound(table.begin(), table.end(), frame.GetBytecodeOffset(),
+                                           [](auto offset, auto &entry) { return offset < entry.offset; });
+    ASSERT(lineNumberIter != table.begin());
+    lineNumber = std::prev(lineNumberIter)->line;
 }
 
 std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetCurrentLineLocations(const PtFrame &frame)
@@ -57,123 +57,123 @@ std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetCurrentLineLocat
     std::unordered_set<PtLocation, HashLocation> locations;
 
     auto method = frame.GetMethod();
-    auto panda_file = method->GetPandaFile();
-    auto method_id = method->GetFileId();
-    auto &table = GetDebugInfo(panda_file).GetLineNumberTable(method_id);
+    auto pandaFile = method->GetPandaFile();
+    auto methodId = method->GetFileId();
+    auto &table = GetDebugInfo(pandaFile).GetLineNumberTable(methodId);
     auto it = std::upper_bound(table.begin(), table.end(), frame.GetBytecodeOffset(),
                                [](auto offset, auto entry) { return offset < entry.offset; });
     if (it == table.begin()) {
         return locations;
     }
-    auto line_number = (--it)->line;
+    auto lineNumber = (--it)->line;
 
     for (it = table.begin(); it != table.end(); ++it) {
-        if (it->line != line_number) {
+        if (it->line != lineNumber) {
             continue;
         }
 
         auto next = it + 1;
-        auto next_offset = next != table.end() ? next->offset : method->GetCodeSize();
-        for (auto o = it->offset; o < next_offset; o++) {
-            locations.emplace(panda_file->GetFilename().c_str(), method_id, o);
+        auto nextOffset = next != table.end() ? next->offset : method->GetCodeSize();
+        for (auto o = it->offset; o < nextOffset; o++) {
+            locations.emplace(pandaFile->GetFilename().c_str(), methodId, o);
         }
     }
 
     return locations;
 }
 
-std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetContinueToLocations(std::string_view source_file,
-                                                                                    size_t line_number)
+std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetContinueToLocations(std::string_view sourceFile,
+                                                                                    size_t lineNumber)
 {
     std::unordered_set<PtLocation, HashLocation> locations;
-    EnumerateLineEntries([](auto, auto &) { return true; },
-                         [source_file](auto, auto &debug_info, auto method_id) {
-                             return debug_info.GetSourceFile(method_id) == source_file;
-                         },
-                         [line_number, &locations](auto panda_file, auto &, auto method_id, auto &entry, auto next) {
-                             if (entry.line == line_number) {
-                                 uint32_t next_offset;
-                                 if (next == nullptr) {
-                                     panda_file::MethodDataAccessor mda(*panda_file, method_id);
-                                     if (auto code_id = mda.GetCodeId()) {
-                                         next_offset =
-                                             panda_file::CodeDataAccessor(*panda_file, *code_id).GetCodeSize();
-                                     } else {
-                                         next_offset = 0;
-                                     }
-                                 } else {
-                                     next_offset = next->offset;
-                                 }
+    EnumerateLineEntries(
+        [](auto, auto &) { return true; },
+        [sourceFile](auto, auto &debugInfo, auto methodId) { return debugInfo.GetSourceFile(methodId) == sourceFile; },
+        [lineNumber, &locations](auto pandaFile, auto &, auto methodId, auto &entry, auto next) {
+            if (entry.line == lineNumber) {
+                uint32_t nextOffset;
+                if (next == nullptr) {
+                    panda_file::MethodDataAccessor mda(*pandaFile, methodId);
+                    if (auto codeId = mda.GetCodeId()) {
+                        nextOffset = panda_file::CodeDataAccessor(*pandaFile, *codeId).GetCodeSize();
+                    } else {
+                        nextOffset = 0;
+                    }
+                } else {
+                    nextOffset = next->offset;
+                }
 
-                                 for (auto o = entry.offset; o < next_offset; o++) {
-                                     locations.emplace(panda_file->GetFilename().data(), method_id, o);
-                                 }
-                             }
-                             return true;
-                         });
+                for (auto o = entry.offset; o < nextOffset; o++) {
+                    locations.emplace(pandaFile->GetFilename().data(), methodId, o);
+                }
+            }
+            return true;
+        });
     return locations;
 }
 
 std::vector<PtLocation> DebugInfoCache::GetBreakpointLocations(
-    const std::function<bool(std::string_view)> &source_file_filter, size_t line_number,
-    std::set<std::string_view> &source_files)
+    const std::function<bool(std::string_view)> &sourceFileFilter, size_t lineNumber,
+    std::set<std::string_view> &sourceFiles)
 {
     std::vector<PtLocation> locations;
-    source_files.clear();
+    sourceFiles.clear();
+    // clang-format off
     EnumerateLineEntries([](auto, auto &) { return true; },
-                         [&source_file_filter](auto, auto &debug_info, auto method_id) {
-                             return source_file_filter(debug_info.GetSourceFile(method_id));
-                         },
-                         [line_number, &source_files, &locations](auto panda_file, auto &debug_info, auto method_id,
-                                                                  auto &entry, auto /* next */) {
-                             if (entry.line == line_number) {
-                                 source_files.insert(debug_info.GetSourceFile(method_id));
-                                 locations.emplace_back(panda_file->GetFilename().data(), method_id, entry.offset);
-                             }
+                        [&sourceFileFilter](auto, auto &debugInfo, auto methodId) {
+                            return sourceFileFilter(debugInfo.GetSourceFile(methodId));
+                        },
+                        [lineNumber, &sourceFiles, &locations](auto pandaFile, auto &debugInfo, auto methodId,
+                                                               auto &entry, auto /* next */) {
+                            if (entry.line == lineNumber) {
+                                sourceFiles.insert(debugInfo.GetSourceFile(methodId));
+                                locations.emplace_back(pandaFile->GetFilename().data(), methodId, entry.offset);
+                            }
 
-                             return true;
-                         });
+                            return true;
+                        });
+    // clang-format on
     return locations;
 }
 
-std::set<size_t> DebugInfoCache::GetValidLineNumbers(std::string_view source_file, size_t start_line, size_t end_line,
-                                                     bool restrict_to_function)
+std::set<size_t> DebugInfoCache::GetValidLineNumbers(std::string_view sourceFile, size_t startLine, size_t endLine,
+                                                     bool restrictToFunction)
 {
-    std::set<size_t> line_numbers;
+    std::set<size_t> lineNumbers;
     EnumerateLineEntries([](auto, auto &) { return true; },
-                         [source_file, start_line, restrict_to_function](auto, auto &debug_info, auto method_id) {
-                             if (debug_info.GetSourceFile(method_id) != source_file) {
+                         [sourceFile, startLine, restrictToFunction](auto, auto &debugInfo, auto methodId) {
+                             if (debugInfo.GetSourceFile(methodId) != sourceFile) {
                                  return false;
                              }
 
-                             bool has_less = false;
-                             bool has_greater = false;
-                             if (restrict_to_function) {
-                                 for (auto &entry : debug_info.GetLineNumberTable(method_id)) {
-                                     if (entry.line <= start_line) {
-                                         has_less = true;
+                             bool hasLess = false;
+                             bool hasGreater = false;
+                             if (restrictToFunction) {
+                                 for (auto &entry : debugInfo.GetLineNumberTable(methodId)) {
+                                     if (entry.line <= startLine) {
+                                         hasLess = true;
                                      }
 
-                                     if (entry.line >= start_line) {
-                                         has_greater = true;
+                                     if (entry.line >= startLine) {
+                                         hasGreater = true;
                                      }
 
-                                     if (has_less && has_greater) {
+                                     if (hasLess && hasGreater) {
                                          break;
                                      }
                                  }
                              }
 
-                             return !restrict_to_function || (has_less && has_greater);
+                             return !restrictToFunction || (hasLess && hasGreater);
                          },
-                         [start_line, end_line, &line_numbers](auto, auto &, auto, auto &entry, auto /* next */) {
-                             if (entry.line >= start_line && entry.line < end_line) {
-                                 line_numbers.insert(entry.line);
+                         [startLine, endLine, &lineNumbers](auto, auto &, auto, auto &entry, auto /* next */) {
+                             if (entry.line >= startLine && entry.line < endLine) {
+                                 lineNumbers.insert(entry.line);
                              }
 
                              return true;
                          });
-    return line_numbers;
+    return lineNumbers;
 }
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -210,8 +210,10 @@ static TypedValue CreateTypedValueFromReg(uint64_t reg, panda_file::Type::TypeId
             return TypedValue::Reference(reinterpret_cast<ObjectHeader *>(reg));
         case panda_file::Type::TypeId::TAGGED:
             return TypedValue::Tagged(coretypes::TaggedValue(static_cast<coretypes::TaggedType>(reg)));
+        default:
+            UNREACHABLE();
+            return TypedValue::Invalid();
     }
-    UNREACHABLE();
 }
 // NOLINTEND(readability-magic-numbers)
 
@@ -256,8 +258,8 @@ std::map<std::string, TypedValue> DebugInfoCache::GetLocals(const PtFrame &frame
 {
     std::map<std::string, TypedValue> result;
 
-    auto local_handler = [&result](const std::string &name, const std::string &signature, uint64_t reg,
-                                   PtFrame::RegisterKind kind) {
+    auto localHandler = [&result](const std::string &name, const std::string &signature, uint64_t reg,
+                                  PtFrame::RegisterKind kind) {
         auto type = signature.empty() ? panda_file::Type::TypeId::INVALID : GetTypeIdBySignature(signature[0]);
         if (type == panda_file::Type::TypeId::INVALID) {
             switch (kind) {
@@ -270,6 +272,9 @@ std::map<std::string, TypedValue> DebugInfoCache::GetLocals(const PtFrame &frame
                 case PtFrame::RegisterKind::TAGGED:
                     type = panda_file::Type::TypeId::TAGGED;
                     break;
+                default:
+                    UNREACHABLE();
+                    break;
             }
         }
 
@@ -277,48 +282,47 @@ std::map<std::string, TypedValue> DebugInfoCache::GetLocals(const PtFrame &frame
     };
 
     auto method = frame.GetMethod();
-    auto method_id = method->GetFileId();
-    auto &debug_info = GetDebugInfo(method->GetPandaFile());
-    auto &parameters = debug_info.GetParameterInfo(method_id);
+    auto methodId = method->GetFileId();
+    auto &debugInfo = GetDebugInfo(method->GetPandaFile());
+    auto &parameters = debugInfo.GetParameterInfo(methodId);
     for (auto i = 0U; i < parameters.size(); i++) {
         auto &parameter = parameters[i];
-        local_handler(parameter.name, parameter.signature, frame.GetArgument(i), frame.GetArgumentKind(i));
+        localHandler(parameter.name, parameter.signature, frame.GetArgument(i), frame.GetArgumentKind(i));
     }
 
-    auto &variables = debug_info.GetLocalVariableTable(method_id);
+    auto &variables = debugInfo.GetLocalVariableTable(methodId);
     for (auto &variable : variables) {
-        auto frame_offset = frame.GetBytecodeOffset();
-        if (variable.start_offset <= frame_offset && frame_offset < variable.end_offset) {
-            local_handler(variable.name, variable.type_signature,
-                          // We introduced a hack in DisasmBackedDebugInfoExtractor, assigning -1 to Accumulator
-                          variable.reg_number == -1 ? frame.GetAccumulator() : frame.GetVReg(variable.reg_number),
-                          variable.reg_number == -1 ? frame.GetAccumulatorKind()
-                                                    : frame.GetVRegKind(variable.reg_number));
+        auto frameOffset = frame.GetBytecodeOffset();
+        if (variable.startOffset <= frameOffset && frameOffset < variable.endOffset) {
+            localHandler(variable.name, variable.typeSignature,
+                         // We introduced a hack in DisasmBackedDebugInfoExtractor, assigning -1 to Accumulator
+                         variable.regNumber == -1 ? frame.GetAccumulator() : frame.GetVReg(variable.regNumber),
+                         variable.regNumber == -1 ? frame.GetAccumulatorKind() : frame.GetVRegKind(variable.regNumber));
         }
     }
 
     return result;
 }
 
-std::string DebugInfoCache::GetSourceCode(std::string_view source_file)
+std::string DebugInfoCache::GetSourceCode(std::string_view sourceFile)
 {
     {
-        os::memory::LockHolder lock(disassemblies_mutex_);
+        os::memory::LockHolder lock(disassembliesMutex_);
 
-        auto it = disassemblies_.find(source_file);
+        auto it = disassemblies_.find(sourceFile);
         if (it != disassemblies_.end()) {
             return GetDebugInfo(&it->second.first).GetSourceCode(it->second.second);
         }
     }
 
-    if (!os::file::File::IsRegularFile(source_file.data())) {
+    if (!os::file::File::IsRegularFile(sourceFile.data())) {
         return {};
     }
 
     std::string result;
 
     std::stringstream buffer;
-    buffer << std::ifstream(source_file.data()).rdbuf();
+    buffer << std::ifstream(sourceFile.data()).rdbuf();
 
     result = buffer.str();
     if (!result.empty() && result.back() != '\n') {
@@ -330,9 +334,9 @@ std::string DebugInfoCache::GetSourceCode(std::string_view source_file)
 
 const panda_file::DebugInfoExtractor &DebugInfoCache::GetDebugInfo(const panda_file::File *file)
 {
-    os::memory::LockHolder lock(debug_infos_mutex_);
-    auto it = debug_infos_.find(file);
-    ASSERT(it != debug_infos_.end());
+    os::memory::LockHolder lock(debugInfosMutex_);
+    auto it = debugInfos_.find(file);
+    ASSERT(it != debugInfos_.end());
     return it->second;
 }
 }  // namespace panda::tooling::inspector

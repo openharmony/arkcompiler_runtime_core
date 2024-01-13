@@ -23,9 +23,9 @@
 namespace panda::compiler {
 PassManagerStatistics::PassManagerStatistics(Graph *graph)
     : graph_(graph),
-      pass_stat_list_(graph->GetAllocator()->Adapter()),
-      pass_stat_stack_(graph->GetAllocator()->Adapter()),
-      enable_ir_stat_(OPTIONS.IsCompilerEnableIrStats())
+      passStatList_(graph->GetAllocator()->Adapter()),
+      passStatStack_(graph->GetAllocator()->Adapter()),
+      enableIrStat_(g_options.IsCompilerEnableIrStats())
 {
 }
 
@@ -40,8 +40,8 @@ void PassManagerStatistics::PrintStatistics() const
     static constexpr auto OFFSET_DEFAULT = 12;
     static constexpr auto OFFSET_PASS_NAME = 34;
     static constexpr auto OFFSET_TOTAL = 41;
-    char space_buf[BUF_SIZE];
-    std::fill(space_buf, space_buf + BUF_SIZE, ' ');
+    char spaceBuf[BUF_SIZE];
+    std::fill(spaceBuf, spaceBuf + BUF_SIZE, ' ');
     size_t index = 0;
     out << std::dec
         << std::setw(OFFSET_ID) << std::right << "ID" << " " << std::left
@@ -51,121 +51,121 @@ void PassManagerStatistics::PrintStatistics() const
         << std::setw(OFFSET_DEFAULT) << "Time,us" << std::endl;
     out << "-----------------------------------------------------------------------------\n";
     size_t total_time = 0;
-    for (const auto& stat : pass_stat_list_) {
-        auto indent = stat.run_depth * OFFSET_STAT;
-        space_buf[indent] = 0;
-        out << std::setw(OFFSET_ID) << std::right << index << space_buf << " "
-            << std::left << std::setw(OFFSET_PASS_NAME - indent) << stat.pass_name << ": "
-            << std::right << std::setw(OFFSET_DEFAULT) << stat.mem_used_ir << std::setw(OFFSET_DEFAULT)
-            << stat.mem_used_local << std::setw(OFFSET_DEFAULT) << stat.time_us << std::endl;
-        space_buf[indent] = ' ';
+    for (const auto& stat : passStatList_) {
+        auto indent = stat.runDepth * OFFSET_STAT;
+        spaceBuf[indent] = 0;
+        out << std::setw(OFFSET_ID) << std::right << index << spaceBuf << " "
+            << std::left << std::setw(OFFSET_PASS_NAME - indent) << stat.passName << ": "
+            << std::right << std::setw(OFFSET_DEFAULT) << stat.memUsedIr << std::setw(OFFSET_DEFAULT)
+            << stat.memUsedLocal << std::setw(OFFSET_DEFAULT) << stat.timeUs << std::endl;
+        spaceBuf[indent] = ' ';
         index++;
-        total_time += stat.time_us;
+        total_time += stat.timeUs;
     }
     out << "-----------------------------------------------------------------------------\n";
     out << std::setw(OFFSET_TOTAL) << "TOTAL: "
         << std::right << std::setw(OFFSET_DEFAULT) << graph_->GetAllocator()->GetAllocatedSize()
         << std::setw(OFFSET_DEFAULT) << graph_->GetLocalAllocator()->GetAllocatedSize()
         << std::setw(OFFSET_DEFAULT) << total_time << std::endl;
-    out << "PBC instruction number : " << pbc_inst_num_ << std::endl;
+    out << "PBC instruction number : " << pbcInstNum_ << std::endl;
 #endif
     // clang-format on
 }
 
 void PassManagerStatistics::ProcessBeforeRun(const Pass &pass)
 {
-    size_t allocated_size = graph_->GetAllocator()->GetAllocatedSize();
+    size_t allocatedSize = graph_->GetAllocator()->GetAllocatedSize();
     constexpr auto OFFSET_NORMAL = 2;
-    std::string indent(pass_call_depth_ * OFFSET_NORMAL, '.');
+    std::string indent(passCallDepth_ * OFFSET_NORMAL, '.');
     COMPILER_LOG(DEBUG, PM) << "Run pass: " << indent << pass.GetPassName();
 
-    if (!pass_stat_stack_.empty()) {
-        auto top_pass = pass_stat_stack_.top();
-        ASSERT(allocated_size >= last_allocated_ir_);
-        top_pass->mem_used_ir += allocated_size - last_allocated_ir_;
-        if (!OPTIONS.IsCompilerResetLocalAllocator()) {
-            ASSERT(graph_->GetLocalAllocator()->GetAllocatedSize() >= last_allocated_local_);
-            top_pass->mem_used_local += graph_->GetLocalAllocator()->GetAllocatedSize() - last_allocated_local_;
+    if (!passStatStack_.empty()) {
+        auto topPass = passStatStack_.top();
+        ASSERT(allocatedSize >= lastAllocatedIr_);
+        topPass->memUsedIr += allocatedSize - lastAllocatedIr_;
+        if (!g_options.IsCompilerResetLocalAllocator()) {
+            ASSERT(graph_->GetLocalAllocator()->GetAllocatedSize() >= lastAllocatedLocal_);
+            topPass->memUsedLocal += graph_->GetLocalAllocator()->GetAllocatedSize() - lastAllocatedLocal_;
         }
-        top_pass->time_us +=
-            std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - last_timestamp_)
+        topPass->timeUs +=
+            std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - lastTimestamp_)
                 .count();
     }
 
-    pass_stat_list_.push_back({pass_call_depth_, pass.GetPassName(), {0, 0}, {0, 0}, 0, 0, 0});
-    if (enable_ir_stat_) {
+    passStatList_.push_back({passCallDepth_, pass.GetPassName(), {0, 0}, {0, 0}, 0, 0, 0});
+    if (enableIrStat_) {
         for (auto block : graph_->GetVectorBlocks()) {
             if (block == nullptr) {
                 continue;
             }
-            pass_stat_list_.back().before_pass.num_of_basicblocks++;
+            passStatList_.back().beforePass.numOfBasicblocks++;
             for ([[maybe_unused]] auto inst : block->Insts()) {
-                pass_stat_list_.back().before_pass.num_of_instructions++;
+                passStatList_.back().beforePass.numOfInstructions++;
             }
         }
     }
 
-    pass_stat_stack_.push(&pass_stat_list_.back());
+    passStatStack_.push(&passStatList_.back());
     // Call `GetAllocator()->GetAllocatedSize()` again to exclude allocations caused by PassManagerStatistics itself:
-    last_allocated_ir_ = graph_->GetAllocator()->GetAllocatedSize();
-    last_allocated_local_ = graph_->GetLocalAllocator()->GetAllocatedSize();
-    last_timestamp_ = std::chrono::steady_clock::now();
+    lastAllocatedIr_ = graph_->GetAllocator()->GetAllocatedSize();
+    lastAllocatedLocal_ = graph_->GetLocalAllocator()->GetAllocatedSize();
+    lastTimestamp_ = std::chrono::steady_clock::now();
 
-    pass_call_depth_++;
+    passCallDepth_++;
 }
 
-void PassManagerStatistics::ProcessAfterRun(size_t local_mem_used)
+void PassManagerStatistics::ProcessAfterRun(size_t localMemUsed)
 {
-    auto top_pass = pass_stat_stack_.top();
-    ASSERT(graph_->GetAllocator()->GetAllocatedSize() >= last_allocated_ir_);
-    top_pass->mem_used_ir += graph_->GetAllocator()->GetAllocatedSize() - last_allocated_ir_;
-    if (OPTIONS.IsCompilerResetLocalAllocator()) {
-        top_pass->mem_used_local = local_mem_used;
+    auto topPass = passStatStack_.top();
+    ASSERT(graph_->GetAllocator()->GetAllocatedSize() >= lastAllocatedIr_);
+    topPass->memUsedIr += graph_->GetAllocator()->GetAllocatedSize() - lastAllocatedIr_;
+    if (g_options.IsCompilerResetLocalAllocator()) {
+        topPass->memUsedLocal = localMemUsed;
     } else {
-        ASSERT(graph_->GetLocalAllocator()->GetAllocatedSize() >= last_allocated_local_);
-        top_pass->mem_used_local += graph_->GetLocalAllocator()->GetAllocatedSize() - last_allocated_local_;
+        ASSERT(graph_->GetLocalAllocator()->GetAllocatedSize() >= lastAllocatedLocal_);
+        topPass->memUsedLocal += graph_->GetLocalAllocator()->GetAllocatedSize() - lastAllocatedLocal_;
     }
-    top_pass->time_us +=
-        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - last_timestamp_)
+    topPass->timeUs +=
+        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - lastTimestamp_)
             .count();
 
-    if (enable_ir_stat_) {
+    if (enableIrStat_) {
         for (auto block : graph_->GetVectorBlocks()) {
             if (block == nullptr) {
                 continue;
             }
-            top_pass->after_pass.num_of_basicblocks++;
+            topPass->afterPass.numOfBasicblocks++;
             for ([[maybe_unused]] auto inst : block->Insts()) {
-                top_pass->after_pass.num_of_instructions++;
+                topPass->afterPass.numOfInstructions++;
             }
         }
     }
 
-    pass_stat_stack_.pop();
-    last_allocated_ir_ = graph_->GetAllocator()->GetAllocatedSize();
-    last_allocated_local_ = graph_->GetLocalAllocator()->GetAllocatedSize();
-    last_timestamp_ = std::chrono::steady_clock::now();
+    passStatStack_.pop();
+    lastAllocatedIr_ = graph_->GetAllocator()->GetAllocatedSize();
+    lastAllocatedLocal_ = graph_->GetLocalAllocator()->GetAllocatedSize();
+    lastTimestamp_ = std::chrono::steady_clock::now();
 
-    pass_call_depth_--;
-    pass_run_index_++;
+    passCallDepth_--;
+    passRunIndex_++;
 }
 
 void PassManagerStatistics::DumpStatisticsCsv(char sep) const
 {
-    ASSERT(OPTIONS.WasSetCompilerDumpStatsCsv());
-    static std::ofstream csv(OPTIONS.GetCompilerDumpStatsCsv(), std::ofstream::trunc);
-    auto m_name = graph_->GetRuntime()->GetMethodFullName(graph_->GetMethod(), true);
-    for (const auto &i : pass_stat_list_) {
-        csv << "\"" << m_name << "\"" << sep;
-        csv << i.pass_name << sep;
-        csv << i.mem_used_ir << sep;
-        csv << i.mem_used_local << sep;
-        csv << i.time_us << sep;
-        if (enable_ir_stat_) {
-            csv << i.before_pass.num_of_basicblocks << sep;
-            csv << i.after_pass.num_of_basicblocks << sep;
-            csv << i.before_pass.num_of_instructions << sep;
-            csv << i.after_pass.num_of_instructions << sep;
+    ASSERT(g_options.WasSetCompilerDumpStatsCsv());
+    static std::ofstream csv(g_options.GetCompilerDumpStatsCsv(), std::ofstream::trunc);
+    auto mName = graph_->GetRuntime()->GetMethodFullName(graph_->GetMethod(), true);
+    for (const auto &i : passStatList_) {
+        csv << "\"" << mName << "\"" << sep;
+        csv << i.passName << sep;
+        csv << i.memUsedIr << sep;
+        csv << i.memUsedLocal << sep;
+        csv << i.timeUs << sep;
+        if (enableIrStat_) {
+            csv << i.beforePass.numOfBasicblocks << sep;
+            csv << i.afterPass.numOfBasicblocks << sep;
+            csv << i.beforePass.numOfInstructions << sep;
+            csv << i.afterPass.numOfInstructions << sep;
         }
         csv << GetPbcInstNum();
         csv << '\n';

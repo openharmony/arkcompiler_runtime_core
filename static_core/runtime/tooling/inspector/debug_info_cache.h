@@ -38,42 +38,41 @@ public:
     NO_MOVE_SEMANTIC(DebugInfoCache);
 
     void AddPandaFile(const panda_file::File &file);
-    void GetSourceLocation(const PtFrame &frame, std::string_view &source_file, std::string_view &method_name,
-                           size_t &line_number);
+    void GetSourceLocation(const PtFrame &frame, std::string_view &sourceFile, std::string_view &methodName,
+                           size_t &lineNumber);
     std::unordered_set<PtLocation, HashLocation> GetCurrentLineLocations(const PtFrame &frame);
-    std::unordered_set<PtLocation, HashLocation> GetContinueToLocations(std::string_view source_file,
-                                                                        size_t line_number);
-    std::vector<PtLocation> GetBreakpointLocations(const std::function<bool(std::string_view)> &source_file_filter,
-                                                   size_t line_number, std::set<std::string_view> &source_files);
-    std::set<size_t> GetValidLineNumbers(std::string_view source_file, size_t start_line, size_t end_line,
-                                         bool restrict_to_function);
+    std::unordered_set<PtLocation, HashLocation> GetContinueToLocations(std::string_view sourceFile, size_t lineNumber);
+    std::vector<PtLocation> GetBreakpointLocations(const std::function<bool(std::string_view)> &sourceFileFilter,
+                                                   size_t lineNumber, std::set<std::string_view> &sourceFiles);
+    std::set<size_t> GetValidLineNumbers(std::string_view sourceFile, size_t startLine, size_t endLine,
+                                         bool restrictToFunction);
 
     std::map<std::string, TypedValue> GetLocals(const PtFrame &frame);
 
-    std::string GetSourceCode(std::string_view source_file);
+    std::string GetSourceCode(std::string_view sourceFile);
 
 private:
     const panda_file::DebugInfoExtractor &GetDebugInfo(const panda_file::File *file);
 
     template <typename PFF, typename MF, typename H>
-    void EnumerateLineEntries(PFF &&panda_file_filter, MF &&method_filter, H &&handler)
+    void EnumerateLineEntries(PFF &&pandaFileFilter, MF &&methodFilter, H &&handler)
     {
-        os::memory::LockHolder lock(debug_infos_mutex_);
+        os::memory::LockHolder lock(debugInfosMutex_);
 
-        for (auto &[file, debug_info] : debug_infos_) {
-            if (!panda_file_filter(file, debug_info)) {
+        for (auto &[file, debug_info] : debugInfos_) {
+            if (!pandaFileFilter(file, debug_info)) {
                 continue;
             }
 
-            for (auto method_id : debug_info.GetMethodIdList()) {
-                if (!method_filter(file, debug_info, method_id)) {
+            for (auto methodId : debug_info.GetMethodIdList()) {
+                if (!methodFilter(file, debug_info, methodId)) {
                     continue;
                 }
 
-                auto &table = debug_info.GetLineNumberTable(method_id);
+                auto &table = debug_info.GetLineNumberTable(methodId);
                 for (auto it = table.begin(); it != table.end(); ++it) {
                     auto next = it + 1;
-                    if (!handler(file, debug_info, method_id, *it, next != table.end() ? &*next : nullptr)) {
+                    if (!handler(file, debug_info, methodId, *it, next != table.end() ? &*next : nullptr)) {
                         break;
                     }
                 }
@@ -81,13 +80,13 @@ private:
         }
     }
 
-    os::memory::Mutex debug_infos_mutex_;
-    std::unordered_map<const panda_file::File *, disasm::DisasmBackedDebugInfoExtractor> debug_infos_
-        GUARDED_BY(debug_infos_mutex_);
+    os::memory::Mutex debugInfosMutex_;
+    std::unordered_map<const panda_file::File *, disasm::DisasmBackedDebugInfoExtractor> debugInfos_
+        GUARDED_BY(debugInfosMutex_);
 
-    os::memory::Mutex disassemblies_mutex_;
+    os::memory::Mutex disassembliesMutex_;
     std::unordered_map<std::string_view, std::pair<const panda_file::File &, panda_file::File::EntityId>> disassemblies_
-        GUARDED_BY(disassemblies_mutex_);
+        GUARDED_BY(disassembliesMutex_);
 };
 }  // namespace panda::tooling::inspector
 

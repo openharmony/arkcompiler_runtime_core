@@ -52,13 +52,13 @@ static bool IsInPermitList(std::string_view path)
         LOG(ERROR, RUNTIME) << "Failed to get file name from path: " << path;
         return false;
     }
-    std::string_view file_name = path.substr(pos + 1U);
-    return StartsWith(file_name, "HMS-Ohos-");
+    std::string_view fileName = path.substr(pos + 1U);
+    return StartsWith(fileName, "HMS-Ohos-");
 }
 
-bool RuntimeController::CanLoadPandaFileInternal(std::string_view real_path) const
+bool RuntimeController::CanLoadPandaFileInternal(std::string_view realPath) const
 {
-    return (!StartsWithData(real_path)) || IsInPermitList(real_path);
+    return (!StartsWithData(realPath)) || IsInPermitList(realPath);
 }
 
 bool RuntimeController::CanLoadPandaFile(const std::string &path) const
@@ -70,8 +70,8 @@ bool RuntimeController::CanLoadPandaFile(const std::string &path) const
             LOG(ERROR, RUNTIME) << "Failed to get realpath for " << path;
             return true;  // Allow loading panda file.
         }
-        std::string_view real_path = buffer.data();
-        bool allow = CanLoadPandaFileInternal(real_path);
+        std::string_view realPath = buffer.data();
+        bool allow = CanLoadPandaFileInternal(realPath);
 
         if (!allow) {
             LOG(WARNING, RUNTIME) << "Disallow loading panda file in data directory : " << path;

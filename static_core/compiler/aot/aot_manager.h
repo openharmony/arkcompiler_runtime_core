@@ -37,31 +37,31 @@ public:
     NO_COPY_SEMANTIC(AotManager);
     ~AotManager() = default;
 
-    Expected<bool, std::string> AddFile(const std::string &file_name, RuntimeInterface *runtime, uint32_t gc_type,
+    Expected<bool, std::string> AddFile(const std::string &fileName, RuntimeInterface *runtime, uint32_t gcType,
                                         bool force = false);
 
-    const AotFile *GetFile(const std::string &file_name) const;
+    const AotFile *GetFile(const std::string &fileName) const;
 
-    const AotPandaFile *FindPandaFile(const std::string &file_name);
+    const AotPandaFile *FindPandaFile(const std::string &fileName);
 
     PandaString GetBootClassContext() const
     {
-        return boot_class_context_;
+        return bootClassContext_;
     }
 
     void SetBootClassContext(PandaString context)
     {
-        boot_class_context_ = std::move(context);
+        bootClassContext_ = std::move(context);
     }
 
     PandaString GetAppClassContext() const
     {
-        return app_class_context_;
+        return appClassContext_;
     }
 
     void SetAppClassContext(PandaString context)
     {
-        app_class_context_ = std::move(context);
+        appClassContext_ = std::move(context);
     }
 
     void VerifyClassHierarchy();
@@ -71,39 +71,39 @@ public:
         // use counter to get roots count without acquiring vector's lock
         // Atomic with acquire order reason: data race with aot_string_gc_roots_count_ with dependecies on reads after
         // the load which should become visible
-        return aot_string_gc_roots_count_.load(std::memory_order_acquire);
+        return aotStringGcRootsCount_.load(std::memory_order_acquire);
     }
 
-    void RegisterAotStringRoot(ObjectHeader **slot, bool is_young);
+    void RegisterAotStringRoot(ObjectHeader **slot, bool isYoung);
 
     template <typename Callback>
-    void VisitAotStringRoots(Callback cb, bool visit_only_young)
+    void VisitAotStringRoots(Callback cb, bool visitOnlyYoung)
     {
-        ASSERT(aot_string_gc_roots_.empty() ||
-               (aot_string_young_set_.size() - 1) == (aot_string_gc_roots_.size() - 1) / MASK_WIDTH);
+        ASSERT(aotStringGcRoots_.empty() ||
+               (aotStringYoungSet_.size() - 1) == (aotStringGcRoots_.size() - 1) / MASK_WIDTH);
 
-        if (!visit_only_young) {
-            for (auto root : aot_string_gc_roots_) {
+        if (!visitOnlyYoung) {
+            for (auto root : aotStringGcRoots_) {
                 cb(root);
             }
             return;
         }
 
-        if (!has_young_aot_string_refs_) {
+        if (!hasYoungAotStringRefs_) {
             return;
         }
 
         // Atomic with acquire order reason: data race with aot_string_gc_roots_count_ with dependecies on reads after
         // the load which should become visible
-        size_t total_roots = aot_string_gc_roots_count_.load(std::memory_order_acquire);
-        for (size_t idx = 0; idx < aot_string_young_set_.size(); idx++) {
-            auto mask = aot_string_young_set_[idx];
+        size_t totalRoots = aotStringGcRootsCount_.load(std::memory_order_acquire);
+        for (size_t idx = 0; idx < aotStringYoungSet_.size(); idx++) {
+            auto mask = aotStringYoungSet_[idx];
             if (mask == 0) {
                 continue;
             }
-            for (size_t offset = 0; offset < MASK_WIDTH && idx * MASK_WIDTH + offset < total_roots; offset++) {
+            for (size_t offset = 0; offset < MASK_WIDTH && idx * MASK_WIDTH + offset < totalRoots; offset++) {
                 if ((mask & (1ULL << offset)) != 0) {
-                    cb(aot_string_gc_roots_[idx * MASK_WIDTH + offset]);
+                    cb(aotStringGcRoots_[idx * MASK_WIDTH + offset]);
                 }
             }
         }
@@ -112,20 +112,20 @@ public:
     template <typename Callback, typename IsYoungPredicate>
     void UpdateAotStringRoots(Callback cb, IsYoungPredicate p)
     {
-        ASSERT(aot_string_gc_roots_.empty() ||
-               (aot_string_young_set_.size() - 1) == (aot_string_gc_roots_.size() - 1) / MASK_WIDTH);
+        ASSERT(aotStringGcRoots_.empty() ||
+               (aotStringYoungSet_.size() - 1) == (aotStringGcRoots_.size() - 1) / MASK_WIDTH);
 
-        has_young_aot_string_refs_ = false;
+        hasYoungAotStringRefs_ = false;
         size_t idx = 0;
-        for (auto root : aot_string_gc_roots_) {
+        for (auto root : aotStringGcRoots_) {
             cb(root);
             uint64_t bitmask = 1ULL << (idx % MASK_WIDTH);
 
-            if ((aot_string_young_set_[idx / MASK_WIDTH] & bitmask) != 0) {
-                bool is_young = p(*root);
-                has_young_aot_string_refs_ |= is_young;
-                if (!is_young) {
-                    aot_string_young_set_[idx / MASK_WIDTH] &= ~bitmask;
+            if ((aotStringYoungSet_[idx / MASK_WIDTH] & bitmask) != 0) {
+                bool isYoung = p(*root);
+                hasYoungAotStringRefs_ |= isYoung;
+                if (!isYoung) {
+                    aotStringYoungSet_[idx / MASK_WIDTH] &= ~bitmask;
                 }
             }
 
@@ -135,9 +135,9 @@ public:
 
     bool InAotFileRange(uintptr_t pc)
     {
-        for (auto &aot_file : aot_files_) {
-            auto code = reinterpret_cast<uintptr_t>(aot_file->GetCode());
-            if (pc >= code && pc < code + reinterpret_cast<uintptr_t>(aot_file->GetCodeSize())) {
+        for (auto &aotFile : aotFiles_) {
+            auto code = reinterpret_cast<uintptr_t>(aotFile->GetCode());
+            if (pc >= code && pc < code + reinterpret_cast<uintptr_t>(aotFile->GetCodeSize())) {
                 return true;
             }
         }
@@ -146,26 +146,25 @@ public:
 
     bool HasAotFiles()
     {
-        return !aot_files_.empty();
+        return !aotFiles_.empty();
     }
 
 private:
-    PandaVector<std::unique_ptr<AotFile>> aot_files_;
-    PandaUnorderedMap<std::string, AotPandaFile> files_map_;
-    PandaString boot_class_context_;
-    PandaString app_class_context_;
+    PandaVector<std::unique_ptr<AotFile>> aotFiles_;
+    PandaUnorderedMap<std::string, AotPandaFile> filesMap_;
+    PandaString bootClassContext_;
+    PandaString appClassContext_;
 
-    os::memory::RecursiveMutex aot_string_roots_lock_;
-    PandaVector<ObjectHeader **> aot_string_gc_roots_;
-    std::atomic_uint32_t aot_string_gc_roots_count_ {0};
-    bool has_young_aot_string_refs_ {false};
-    PandaVector<BitSetElement> aot_string_young_set_;
+    os::memory::RecursiveMutex aotStringRootsLock_;
+    PandaVector<ObjectHeader **> aotStringGcRoots_;
+    std::atomic_uint32_t aotStringGcRootsCount_ {0};
+    bool hasYoungAotStringRefs_ {false};
+    PandaVector<BitSetElement> aotStringYoungSet_;
 };
 
 class AotClassContextCollector {
 public:
-    explicit AotClassContextCollector(PandaString *acc, bool use_abs_path = true)
-        : acc_(acc), use_abs_path_(use_abs_path) {};
+    explicit AotClassContextCollector(PandaString *acc, bool useAbsPath = true) : acc_(acc), useAbsPath_(useAbsPath) {};
     bool operator()(const panda_file::File &pf);
 
     DEFAULT_MOVE_SEMANTIC(AotClassContextCollector);
@@ -174,7 +173,7 @@ public:
 
 private:
     PandaString *acc_;
-    bool use_abs_path_;
+    bool useAbsPath_;
 };
 }  // namespace panda::compiler
 

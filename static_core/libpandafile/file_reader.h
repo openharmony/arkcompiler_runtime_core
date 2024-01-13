@@ -52,7 +52,7 @@ public:
     explicit FileReader(std::unique_ptr<const File> &&file) : file_(std::move(file)) {}
     virtual ~FileReader() = default;
 
-    bool ReadContainer(bool should_rebuild_indices = true);
+    bool ReadContainer(bool shouldRebuildIndices = true);
 
     ItemContainer *GetContainerPtr()
     {
@@ -66,7 +66,7 @@ public:
 
     const std::map<File::EntityId, BaseItem *> *GetItems() const
     {
-        return &items_done_;
+        return &itemsDone_;
     }
 
     void ComputeLayoutAndUpdateIndices();
@@ -79,26 +79,26 @@ private:
     bool ReadRegionHeaders();
     bool ReadClasses();
 
-    bool CreateLiteralArrayItem(LiteralDataAccessor *lit_array_accessor, File::EntityId array_id, uint32_t index);
-    AnnotationItem *CreateAnnotationItem(File::EntityId ann_id);
-    MethodItem *CreateMethodItem(ClassItem *cls, File::EntityId method_id);
-    ForeignMethodItem *CreateForeignMethodItem(BaseClassItem *fcls, File::EntityId method_id);
-    FieldItem *CreateFieldItem(ClassItem *cls, File::EntityId field_id);
-    ForeignFieldItem *CreateForeignFieldItem(BaseClassItem *fcls, File::EntityId field_id);
-    ClassItem *CreateClassItem(File::EntityId class_id);
-    ForeignClassItem *CreateForeignClassItem(File::EntityId class_id);
-    MethodHandleItem *CreateMethodHandleItem(File::EntityId mh_id);
-    TypeItem *CreateParamTypeItem(ProtoDataAccessor *proto_acc, size_t param_num, size_t reference_num);
-    std::vector<MethodParamItem> CreateMethodParamItems(ProtoDataAccessor *proto_acc, MethodDataAccessor *method_acc,
-                                                        size_t reference_num);
-    DebugInfoItem *CreateDebugInfoItem(File::EntityId debug_info_id);
-    void UpdateDebugInfoDependecies(File::EntityId debug_info_id);
-    void UpdateDebugInfo(DebugInfoItem *debug_info_item, File::EntityId debug_info_id);
+    bool CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, File::EntityId arrayId, uint32_t index);
+    AnnotationItem *CreateAnnotationItem(File::EntityId annId);
+    MethodItem *CreateMethodItem(ClassItem *cls, File::EntityId methodId);
+    ForeignMethodItem *CreateForeignMethodItem(BaseClassItem *fcls, File::EntityId methodId);
+    FieldItem *CreateFieldItem(ClassItem *cls, File::EntityId fieldId);
+    ForeignFieldItem *CreateForeignFieldItem(BaseClassItem *fcls, File::EntityId fieldId);
+    ClassItem *CreateClassItem(File::EntityId classId);
+    ForeignClassItem *CreateForeignClassItem(File::EntityId classId);
+    MethodHandleItem *CreateMethodHandleItem(File::EntityId mhId);
+    TypeItem *CreateParamTypeItem(ProtoDataAccessor *protoAcc, size_t paramNum, size_t referenceNum);
+    std::vector<MethodParamItem> CreateMethodParamItems(ProtoDataAccessor *protoAcc, MethodDataAccessor *methodAcc,
+                                                        size_t referenceNum);
+    DebugInfoItem *CreateDebugInfoItem(File::EntityId debugInfoId);
+    void UpdateDebugInfoDependecies(File::EntityId debugInfoId);
+    void UpdateDebugInfo(DebugInfoItem *debugInfoItem, File::EntityId debugInfoId);
 
     template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
-    void SetIntegerFieldValue(FieldDataAccessor *field_acc, FieldItem *field_item)
+    void SetIntegerFieldValue(FieldDataAccessor *fieldAcc, FieldItem *fieldItem)
     {
-        auto value = field_acc->GetValue<T>();
+        auto value = fieldAcc->GetValue<T>();
 
         if (!value) {
             return;
@@ -106,19 +106,19 @@ private:
 
         // NOLINTNEXTLINE(readability-braces-around-statements)
         if constexpr (is_same_v<T, int64_t> || is_same_v<T, uint64_t>) {
-            auto *value_item = container_.GetOrCreateLongValueItem(value.value());
-            field_item->SetValue(value_item);
+            auto *valueItem = container_.GetOrCreateLongValueItem(value.value());
+            fieldItem->SetValue(valueItem);
             // NOLINTNEXTLINE(readability-misleading-indentation)
         } else {
-            auto *value_item = container_.GetOrCreateIntegerValueItem(value.value());
-            field_item->SetValue(value_item);
+            auto *valueItem = container_.GetOrCreateIntegerValueItem(value.value());
+            fieldItem->SetValue(valueItem);
         }
     }
 
     template <typename T, std::enable_if_t<std::is_floating_point_v<T>, bool> = true>
-    void SetFloatFieldValue(FieldDataAccessor *field_acc, FieldItem *field_item)
+    void SetFloatFieldValue(FieldDataAccessor *fieldAcc, FieldItem *fieldItem)
     {
-        auto value = field_acc->GetValue<T>();
+        auto value = fieldAcc->GetValue<T>();
 
         if (!value) {
             return;
@@ -126,61 +126,61 @@ private:
 
         // NOLINTNEXTLINE(readability-braces-around-statements)
         if constexpr (is_same_v<T, double>) {
-            auto *value_item = container_.GetOrCreateDoubleValueItem(value.value());
-            field_item->SetValue(value_item);
+            auto *valueItem = container_.GetOrCreateDoubleValueItem(value.value());
+            fieldItem->SetValue(valueItem);
             // NOLINTNEXTLINE(readability-misleading-indentation)
         } else {
-            auto *value_item = container_.GetOrCreateFloatValueItem(value.value());
-            field_item->SetValue(value_item);
+            auto *valueItem = container_.GetOrCreateFloatValueItem(value.value());
+            fieldItem->SetValue(valueItem);
         }
     }
 
-    void SetStringFieldValue(FieldDataAccessor *field_acc, FieldItem *field_item)
+    void SetStringFieldValue(FieldDataAccessor *fieldAcc, FieldItem *fieldItem)
     {
-        auto value = field_acc->GetValue<uint32_t>();
+        auto value = fieldAcc->GetValue<uint32_t>();
 
         if (value) {
-            panda_file::File::EntityId string_id(value.value());
-            auto data = file_->GetStringData(string_id);
-            std::string string_data(reinterpret_cast<const char *>(data.data));
-            auto *string_item = container_.GetOrCreateStringItem(string_data);
-            auto *value_item = container_.GetOrCreateIdValueItem(string_item);
-            field_item->SetValue(value_item);
+            panda_file::File::EntityId stringId(value.value());
+            auto data = file_->GetStringData(stringId);
+            std::string stringData(reinterpret_cast<const char *>(data.data));
+            auto *stringItem = container_.GetOrCreateStringItem(stringData);
+            auto *valueItem = container_.GetOrCreateIdValueItem(stringItem);
+            fieldItem->SetValue(valueItem);
         }
     }
 
     // Creates foreign or non-foreign method item
-    inline BaseItem *CreateGenericMethodItem(BaseClassItem *class_item, File::EntityId method_id)
+    inline BaseItem *CreateGenericMethodItem(BaseClassItem *classItem, File::EntityId methodId)
     {
-        if (file_->IsExternal(method_id)) {
-            return CreateForeignMethodItem(class_item, method_id);
+        if (file_->IsExternal(methodId)) {
+            return CreateForeignMethodItem(classItem, methodId);
         }
-        return CreateMethodItem(static_cast<ClassItem *>(class_item), method_id);
+        return CreateMethodItem(static_cast<ClassItem *>(classItem), methodId);
     }
 
     // Creates foreign or non-foreign field item
-    inline BaseItem *CreateGenericFieldItem(BaseClassItem *class_item, File::EntityId field_id)
+    inline BaseItem *CreateGenericFieldItem(BaseClassItem *classItem, File::EntityId fieldId)
     {
-        if (file_->IsExternal(field_id)) {
-            return CreateForeignFieldItem(class_item, field_id);
+        if (file_->IsExternal(fieldId)) {
+            return CreateForeignFieldItem(classItem, fieldId);
         }
-        return CreateFieldItem(static_cast<ClassItem *>(class_item), field_id);
+        return CreateFieldItem(static_cast<ClassItem *>(classItem), fieldId);
     }
 
     // Creates foreign or non-foreign class item
-    inline BaseClassItem *CreateGenericClassItem(File::EntityId class_id)
+    inline BaseClassItem *CreateGenericClassItem(File::EntityId classId)
     {
-        if (file_->IsExternal(class_id)) {
-            return CreateForeignClassItem(class_id);
+        if (file_->IsExternal(classId)) {
+            return CreateForeignClassItem(classId);
         }
-        return CreateClassItem(class_id);
+        return CreateClassItem(classId);
     }
 
-    void UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverse_done);
+    void UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverseDone);
 
     std::unique_ptr<const File> file_;
     ItemContainer container_;
-    std::map<File::EntityId, BaseItem *> items_done_;
+    std::map<File::EntityId, BaseItem *> itemsDone_;
 };
 
 }  // namespace panda::panda_file

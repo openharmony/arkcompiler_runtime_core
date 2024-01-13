@@ -15,6 +15,7 @@
 
 #include "utils/arch.h"
 #include "gtest/gtest.h"
+#include "libpandabase/utils/utils.h"
 #include <array>
 
 extern "C" int IrtocTestAddValues(int64_t, int64_t);
@@ -32,22 +33,22 @@ namespace panda::test {
 
 TEST(Irtoc, AddValues)
 {
-    ASSERT_EQ(IrtocTestAddValues(1, 2), 3);
-    ASSERT_EQ(IrtocTestAddValues(-1, -2), -3);
+    ASSERT_EQ(IrtocTestAddValues(1L, 2L), 3_I);
+    ASSERT_EQ(IrtocTestAddValues(-1L, -2L), -3_I);
 }
 
 TEST(Irtoc, IncMaxValue)
 {
-    ASSERT_EQ(IrtocTestIncMaxValue(10, 9), 11);
-    ASSERT_EQ(IrtocTestIncMaxValue(4, 8), 9);
-    ASSERT_EQ(IrtocTestIncMaxValue(4, 4), 5);
+    ASSERT_EQ(IrtocTestIncMaxValue(10U, 9U), 11_I);
+    ASSERT_EQ(IrtocTestIncMaxValue(4U, 8U), 9_I);
+    ASSERT_EQ(IrtocTestIncMaxValue(4U, 4U), 5_I);
 }
 
 TEST(Irtoc, IncMaxValueLabels)
 {
-    ASSERT_EQ(IrtocTestIncMaxValueLabels(10, 9), 11);
-    ASSERT_EQ(IrtocTestIncMaxValueLabels(4, 8), 9);
-    ASSERT_EQ(IrtocTestIncMaxValueLabels(4, 4), 5);
+    ASSERT_EQ(IrtocTestIncMaxValueLabels(10U, 9U), 11_I);
+    ASSERT_EQ(IrtocTestIncMaxValueLabels(4U, 8U), 9_I);
+    ASSERT_EQ(IrtocTestIncMaxValueLabels(4U, 4U), 5_I);
 }
 
 template <size_t N>
@@ -55,10 +56,10 @@ uint64_t ModifyArrayForLoopTest(std::array<uint64_t, N> *data)
 {
     uint64_t res = 0;
     for (size_t i = 0; i < data->size(); i++) {
-        if ((i % 2) == 0) {
-            if (((*data)[i] % 2) == 0) {
-                (*data)[i] += 2;
-                res += 2;
+        if ((i % 2U) == 0) {
+            if (((*data)[i] % 2U) == 0) {
+                (*data)[i] += 2U;
+                res += 2U;
             } else {
                 (*data)[i] += 1;
                 res += 1;
@@ -73,15 +74,15 @@ uint64_t ModifyArrayForLoopTest(std::array<uint64_t, N> *data)
 
 void TestLoop(TestCfgFunc func)
 {
-    std::array<uint64_t, 8> buf {};
+    std::array<uint64_t, 8U> buf {};
     for (size_t i = 0; i < buf.size(); i++) {
-        buf[i] = i + i % 3;
+        buf[i] = i + i % 3U;
     }
-    std::array<uint64_t, 8> buf_expected = buf;
-    auto expected = ModifyArrayForLoopTest(&buf_expected);
+    std::array<uint64_t, 8U> bufExpected = buf;
+    auto expected = ModifyArrayForLoopTest(&bufExpected);
     uint64_t res = func(static_cast<void *>(buf.data()), buf.size());
     ASSERT_EQ(expected, res);
-    ASSERT_EQ(buf_expected, buf);
+    ASSERT_EQ(bufExpected, buf);
 }
 
 TEST(Irtoc, Loop)
@@ -98,15 +99,15 @@ TEST(Irtoc, SeqLabels)
     if constexpr (RUNTIME_ARCH == Arch::AARCH32) {
         GTEST_SKIP();
     }
-    EXPECT_EQ(IrtocTestSeqLabels(0), 1);
-    EXPECT_EQ(IrtocTestSeqLabels(5), 6);
-    EXPECT_EQ(IrtocTestSeqLabels(10), 11);
-    EXPECT_EQ(IrtocTestSeqLabels(11), 13);
-    EXPECT_EQ(IrtocTestSeqLabels(55), 57);
-    EXPECT_EQ(IrtocTestSeqLabels(100), 102);
-    EXPECT_EQ(IrtocTestSeqLabels(101), 104);
-    EXPECT_EQ(IrtocTestSeqLabels(1010), 1013);
-    EXPECT_EQ(IrtocTestSeqLabels(54545), 54548);
+    EXPECT_EQ(IrtocTestSeqLabels(0U), 1U);
+    EXPECT_EQ(IrtocTestSeqLabels(5U), 6U);
+    EXPECT_EQ(IrtocTestSeqLabels(10U), 11U);
+    EXPECT_EQ(IrtocTestSeqLabels(11U), 13U);
+    EXPECT_EQ(IrtocTestSeqLabels(55U), 57U);
+    EXPECT_EQ(IrtocTestSeqLabels(100U), 102U);
+    EXPECT_EQ(IrtocTestSeqLabels(101U), 104U);
+    EXPECT_EQ(IrtocTestSeqLabels(1010U), 1013U);
+    EXPECT_EQ(IrtocTestSeqLabels(54545U), 54548U);
 }
 
 extern "C" int IrtocTestRelocations(int);
@@ -117,9 +118,9 @@ extern "C" int TestCall(int n)
 
 TEST(Irtoc, Relocations)
 {
-    ASSERT_EQ(IrtocTestRelocations(1), 5);
-    ASSERT_EQ(IrtocTestRelocations(2), 10);
-    ASSERT_EQ(IrtocTestRelocations(3), 17);
+    ASSERT_EQ(IrtocTestRelocations(1_I), 5_I);
+    ASSERT_EQ(IrtocTestRelocations(2_I), 10_I);
+    ASSERT_EQ(IrtocTestRelocations(3_I), 17_I);
 }
 
 extern "C" size_t IncrementInt(size_t n)
@@ -141,24 +142,24 @@ TEST(Irtoc, RelocationsParams)
     if constexpr (RUNTIME_ARCH == Arch::AARCH32) {
         GTEST_SKIP();
     }
-    ASSERT_EQ(IrtocTestRelocations2(0, 1, 2.0, 3, 4, 5, 6.0, 7.0, 8, 9, 10.0, 11, 12, 13, 14.0), 120);
+    ASSERT_EQ(IrtocTestRelocations2(0U, 1U, 2.0F, 3U, 4U, 5U, 6.0F, 7.0F, 8U, 9U, 10.0F, 11U, 12U, 13U, 14.0F), 120U);
 }
 
 TEST(Irtoc, Labels)
 {
-    EXPECT_EQ(IrtocTestLabels(0), 0);
-    EXPECT_EQ(IrtocTestLabels(1), 1);
-    EXPECT_EQ(IrtocTestLabels(2), 3);
-    EXPECT_EQ(IrtocTestLabels(3), 6);
-    EXPECT_EQ(IrtocTestLabels(4), 10);
-    EXPECT_EQ(IrtocTestLabels(5), 15);
-    EXPECT_EQ(IrtocTestLabels(100), 5050);
+    EXPECT_EQ(IrtocTestLabels(0U), 0U);
+    EXPECT_EQ(IrtocTestLabels(1U), 1U);
+    EXPECT_EQ(IrtocTestLabels(2U), 3U);
+    EXPECT_EQ(IrtocTestLabels(3U), 6U);
+    EXPECT_EQ(IrtocTestLabels(4U), 10U);
+    EXPECT_EQ(IrtocTestLabels(5U), 15U);
+    EXPECT_EQ(IrtocTestLabels(100U), 5050U);
 }
 
 TEST(Irtoc, ReturnBeforeLabel)
 {
-    EXPECT_EQ(IrtocTestReturnBeforeLabel(42), 2);
-    EXPECT_EQ(IrtocTestReturnBeforeLabel(146), 1);
+    EXPECT_EQ(IrtocTestReturnBeforeLabel(42U), 2U);
+    EXPECT_EQ(IrtocTestReturnBeforeLabel(146U), 1U);
 }
 
 }  // namespace panda::test

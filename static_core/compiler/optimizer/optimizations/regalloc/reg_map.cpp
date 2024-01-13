@@ -18,105 +18,105 @@
 
 namespace panda::compiler {
 
-void RegisterMap::SetMask(const LocationMask &reg_mask, size_t priority_reg)
+void RegisterMap::SetMask(const LocationMask &regMask, size_t priorityReg)
 {
-    codegen_reg_map_.clear();
+    codegenRegMap_.clear();
 
     // Firstly map registers available for register allocator starting with the highest priority one
-    for (size_t reg = priority_reg; reg < reg_mask.GetSize(); ++reg) {
-        if (!reg_mask.IsSet(reg)) {
-            codegen_reg_map_.push_back(reg);
+    for (size_t reg = priorityReg; reg < regMask.GetSize(); ++reg) {
+        if (!regMask.IsSet(reg)) {
+            codegenRegMap_.push_back(reg);
         }
     }
-    border_ = static_cast<Register>(codegen_reg_map_.size());
+    border_ = static_cast<Register>(codegenRegMap_.size());
 
     // Add caller registers
-    for (size_t reg = 0; reg < priority_reg; ++reg) {
-        if (!reg_mask.IsSet(reg)) {
-            codegen_reg_map_.push_back(reg);
+    for (size_t reg = 0; reg < priorityReg; ++reg) {
+        if (!regMask.IsSet(reg)) {
+            codegenRegMap_.push_back(reg);
         }
     }
-    available_regs_count_ = codegen_reg_map_.size();
+    availableRegsCount_ = codegenRegMap_.size();
 
     // Now map unavailable registers, since they can be assigned to the instructions
-    for (size_t reg = 0; reg < reg_mask.GetSize(); ++reg) {
-        if (reg_mask.IsSet(reg)) {
-            codegen_reg_map_.push_back(reg);
+    for (size_t reg = 0; reg < regMask.GetSize(); ++reg) {
+        if (regMask.IsSet(reg)) {
+            codegenRegMap_.push_back(reg);
         }
     }
 }
 
-void RegisterMap::SetCallerFirstMask(const LocationMask &reg_mask, size_t first_callee_reg, size_t last_callee_reg)
+void RegisterMap::SetCallerFirstMask(const LocationMask &regMask, size_t firstCalleeReg, size_t lastCalleeReg)
 {
-    codegen_reg_map_.clear();
+    codegenRegMap_.clear();
 
     // Add caller registers
-    for (size_t reg = 0; reg < first_callee_reg; ++reg) {
-        if (!reg_mask.IsSet(reg)) {
-            codegen_reg_map_.push_back(reg);
+    for (size_t reg = 0; reg < firstCalleeReg; ++reg) {
+        if (!regMask.IsSet(reg)) {
+            codegenRegMap_.push_back(reg);
         }
     }
 
     // Add caller registers after callees onece
-    for (size_t reg = last_callee_reg + 1; reg < reg_mask.GetSize(); ++reg) {
-        if (!reg_mask.IsSet(reg)) {
-            codegen_reg_map_.push_back(reg);
+    for (size_t reg = lastCalleeReg + 1; reg < regMask.GetSize(); ++reg) {
+        if (!regMask.IsSet(reg)) {
+            codegenRegMap_.push_back(reg);
         }
     }
-    border_ = static_cast<Register>(codegen_reg_map_.size());
+    border_ = static_cast<Register>(codegenRegMap_.size());
 
     // Add callee registers
-    for (size_t reg = first_callee_reg; reg <= last_callee_reg; ++reg) {
-        if (!reg_mask.IsSet(reg)) {
-            codegen_reg_map_.push_back(reg);
+    for (size_t reg = firstCalleeReg; reg <= lastCalleeReg; ++reg) {
+        if (!regMask.IsSet(reg)) {
+            codegenRegMap_.push_back(reg);
         }
     }
-    available_regs_count_ = codegen_reg_map_.size();
+    availableRegsCount_ = codegenRegMap_.size();
 
     // Now map unavailable registers, since they can be assigned to the instructions
-    for (size_t reg = 0; reg < reg_mask.GetSize(); ++reg) {
-        if (reg_mask.IsSet(reg)) {
-            codegen_reg_map_.push_back(reg);
+    for (size_t reg = 0; reg < regMask.GetSize(); ++reg) {
+        if (regMask.IsSet(reg)) {
+            codegenRegMap_.push_back(reg);
         }
     }
 }
 
 size_t RegisterMap::Size() const
 {
-    return codegen_reg_map_.size();
+    return codegenRegMap_.size();
 }
 
 size_t RegisterMap::GetAvailableRegsCount() const
 {
-    return available_regs_count_;
+    return availableRegsCount_;
 }
 
 bool RegisterMap::IsRegAvailable(Register reg, Arch arch) const
 {
-    return arch != Arch::AARCH32 || reg < available_regs_count_;
+    return arch != Arch::AARCH32 || reg < availableRegsCount_;
 }
 
-Register RegisterMap::CodegenToRegallocReg(Register codegen_reg) const
+Register RegisterMap::CodegenToRegallocReg(Register codegenReg) const
 {
-    auto it = std::find(codegen_reg_map_.cbegin(), codegen_reg_map_.cend(), codegen_reg);
-    ASSERT(it != codegen_reg_map_.end());
-    return std::distance(codegen_reg_map_.cbegin(), it);
+    auto it = std::find(codegenRegMap_.cbegin(), codegenRegMap_.cend(), codegenReg);
+    ASSERT(it != codegenRegMap_.end());
+    return std::distance(codegenRegMap_.cbegin(), it);
 }
 
-Register RegisterMap::RegallocToCodegenReg(Register regalloc_reg) const
+Register RegisterMap::RegallocToCodegenReg(Register regallocReg) const
 {
-    ASSERT(regalloc_reg < codegen_reg_map_.size());
-    return codegen_reg_map_[regalloc_reg];
+    ASSERT(regallocReg < codegenRegMap_.size());
+    return codegenRegMap_[regallocReg];
 }
 
 void RegisterMap::Dump(std::ostream *out) const
 {
     *out << "Regalloc -> Codegen" << std::endl;
-    for (size_t i = 0; i < codegen_reg_map_.size(); i++) {
-        if (i == available_regs_count_) {
+    for (size_t i = 0; i < codegenRegMap_.size(); i++) {
+        if (i == availableRegsCount_) {
             *out << "Unavailable for RA:" << std::endl;
         }
-        *out << "r" << std::to_string(i) << " -> r" << std::to_string(codegen_reg_map_[i]) << std::endl;
+        *out << "r" << std::to_string(i) << " -> r" << std::to_string(codegenRegMap_[i]) << std::endl;
     }
 }
 

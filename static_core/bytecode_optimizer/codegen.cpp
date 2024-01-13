@@ -73,31 +73,30 @@ void DoStaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result)
     }
 }
 
-void BytecodeGen::AppendCatchBlock(uint32_t type_id, const compiler::BasicBlock *try_begin,
-                                   const compiler::BasicBlock *try_end, const compiler::BasicBlock *catch_begin,
-                                   const compiler::BasicBlock *catch_end)
+void BytecodeGen::AppendCatchBlock(uint32_t typeId, const compiler::BasicBlock *tryBegin,
+                                   const compiler::BasicBlock *tryEnd, const compiler::BasicBlock *catchBegin,
+                                   const compiler::BasicBlock *catchEnd)
 {
     auto cb = pandasm::Function::CatchBlock();
-    if (type_id != 0U) {
-        cb.exception_record = ir_interface_->GetTypeIdByOffset(type_id);
+    if (typeId != 0U) {
+        cb.exceptionRecord = irInterface_->GetTypeIdByOffset(typeId);
     }
-    cb.try_begin_label = BytecodeGen::LabelName(try_begin->GetId());
-    cb.try_end_label = "end_" + BytecodeGen::LabelName(try_end->GetId());
-    cb.catch_begin_label = BytecodeGen::LabelName(catch_begin->GetId());
-    cb.catch_end_label =
-        catch_end == nullptr ? cb.catch_begin_label : "end_" + BytecodeGen::LabelName(catch_end->GetId());
-    catch_blocks_.emplace_back(cb);
+    cb.tryBeginLabel = BytecodeGen::LabelName(tryBegin->GetId());
+    cb.tryEndLabel = "end_" + BytecodeGen::LabelName(tryEnd->GetId());
+    cb.catchBeginLabel = BytecodeGen::LabelName(catchBegin->GetId());
+    cb.catchEndLabel = catchEnd == nullptr ? cb.catchBeginLabel : "end_" + BytecodeGen::LabelName(catchEnd->GetId());
+    catchBlocks_.emplace_back(cb);
 }
 
 void BytecodeGen::VisitTryBegin(const compiler::BasicBlock *bb)
 {
     ASSERT(bb->IsTryBegin());
-    auto try_inst = GetTryBeginInst(bb);
-    auto try_end = try_inst->GetTryEndBlock();
-    ASSERT(try_end != nullptr && try_end->IsTryEnd());
+    auto tryInst = GetTryBeginInst(bb);
+    auto tryEnd = tryInst->GetTryEndBlock();
+    ASSERT(tryEnd != nullptr && tryEnd->IsTryEnd());
 
-    bb->EnumerateCatchHandlers([&, bb, try_end](BasicBlock *catch_handler, size_t type_id) {
-        AppendCatchBlock(type_id, bb, try_end, catch_handler);
+    bb->EnumerateCatchHandlers([&, bb, tryEnd](BasicBlock *catchHandler, size_t typeId) {
+        AppendCatchBlock(typeId, bb, tryEnd, catchHandler);
         return true;
     });
 }
@@ -143,19 +142,19 @@ bool BytecodeGen::RunImpl()
         VisitTryBegin(bb);
     }
     function_->ins = std::move(GetResult());
-    function_->catch_blocks = catch_blocks_;
+    function_->catchBlocks = catchBlocks_;
     return true;
 }
 
 void BytecodeGen::EmitJump(const BasicBlock *bb)
 {
-    BasicBlock *suc_bb = nullptr;
+    BasicBlock *sucBb = nullptr;
     ASSERT(bb != nullptr);
 
     if (bb->GetLastInst() == nullptr) {
         ASSERT(bb->IsEmpty());
-        suc_bb = bb->GetSuccsBlocks()[0U];
-        result_.push_back(pandasm::Create_JMP(BytecodeGen::LabelName(suc_bb->GetId())));
+        sucBb = bb->GetSuccsBlocks()[0U];
+        result_.push_back(pandasm::Create_JMP(BytecodeGen::LabelName(sucBb->GetId())));
         return;
     }
 
@@ -164,28 +163,28 @@ void BytecodeGen::EmitJump(const BasicBlock *bb)
         case Opcode::If:
         case Opcode::IfImm:
             ASSERT(bb->GetSuccsBlocks().size() == compiler::MAX_SUCCS_NUM);
-            suc_bb = bb->GetFalseSuccessor();
+            sucBb = bb->GetFalseSuccessor();
             break;
         default:
-            suc_bb = bb->GetSuccsBlocks()[0U];
+            sucBb = bb->GetSuccsBlocks()[0U];
             break;
     }
-    result_.push_back(pandasm::Create_JMP(BytecodeGen::LabelName(suc_bb->GetId())));
+    result_.push_back(pandasm::Create_JMP(BytecodeGen::LabelName(sucBb->GetId())));
 }
 
 void BytecodeGen::AddLineNumber(const Inst *inst, const size_t idx)
 {
-    if (ir_interface_ != nullptr && idx < result_.size()) {
-        auto ln = ir_interface_->GetLineNumberByPc(inst->GetPc());
-        result_[idx].ins_debug.SetLineNumber(ln);
+    if (irInterface_ != nullptr && idx < result_.size()) {
+        auto ln = irInterface_->GetLineNumberByPc(inst->GetPc());
+        result_[idx].insDebug.SetLineNumber(ln);
     }
 }
 
 void BytecodeGen::AddColumnNumber(const Inst *inst, const uint32_t idx)
 {
-    if (ir_interface_ != nullptr && idx < result_.size()) {
-        auto cn = ir_interface_->GetColumnNumberByPc(inst->GetPc());
-        result_[idx].ins_debug.SetColumnNumber(cn);
+    if (irInterface_ != nullptr && idx < result_.size()) {
+        auto cn = irInterface_->GetColumnNumberByPc(inst->GetPc());
+        result_[idx].insDebug.SetColumnNumber(cn);
     }
 }
 
@@ -253,7 +252,7 @@ static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<
     ASSERT(compiler::DataType::Is32Bits(type, Arch::NONE));
 
     pandasm::Ins movi;
-    auto dst_reg = inst->GetDstReg();
+    auto dstReg = inst->GetDstReg();
     movi.regs.emplace_back(inst->GetDstReg());
 
     switch (type) {
@@ -268,11 +267,11 @@ static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<
                 res.emplace_back(pandasm::Create_LDAI_DYN(inst->CastToConstant()->GetInt32Value()));
                 DoStaDyn(inst->GetDstReg(), res);
             } else {
-                if (dst_reg == compiler::ACC_REG_ID) {
+                if (dstReg == compiler::ACC_REG_ID) {
                     pandasm::Ins ldai = pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value());
                     res.emplace_back(ldai);
                 } else {
-                    movi = pandasm::Create_MOVI(dst_reg, inst->CastToConstant()->GetInt32Value());
+                    movi = pandasm::Create_MOVI(dstReg, inst->CastToConstant()->GetInt32Value());
                     res.emplace_back(movi);
                 }
             }
@@ -282,11 +281,11 @@ static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<
                 res.emplace_back(pandasm::Create_FLDAI_DYN(inst->CastToConstant()->GetFloatValue()));
                 DoStaDyn(inst->GetDstReg(), res);
             } else {
-                if (dst_reg == compiler::ACC_REG_ID) {
+                if (dstReg == compiler::ACC_REG_ID) {
                     pandasm::Ins ldai = pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue());
                     res.emplace_back(ldai);
                 } else {
-                    movi = pandasm::Create_FMOVI(dst_reg, inst->CastToConstant()->GetFloatValue());
+                    movi = pandasm::Create_FMOVI(dstReg, inst->CastToConstant()->GetFloatValue());
                     res.emplace_back(movi);
                 }
             }
@@ -302,7 +301,7 @@ static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<
     ASSERT(compiler::DataType::Is64Bits(type, Arch::NONE));
 
     pandasm::Ins movi;
-    auto dst_reg = inst->GetDstReg();
+    auto dstReg = inst->GetDstReg();
     movi.regs.emplace_back(inst->GetDstReg());
 
     switch (type) {
@@ -312,11 +311,11 @@ static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<
                 res.emplace_back(pandasm::Create_LDAI_DYN(inst->CastToConstant()->GetInt64Value()));
                 DoStaDyn(inst->GetDstReg(), res);
             } else {
-                if (dst_reg == compiler::ACC_REG_ID) {
+                if (dstReg == compiler::ACC_REG_ID) {
                     pandasm::Ins ldai = pandasm::Create_LDAI_64(inst->CastToConstant()->GetInt64Value());
                     res.emplace_back(ldai);
                 } else {
-                    movi = pandasm::Create_MOVI_64(dst_reg, inst->CastToConstant()->GetInt64Value());
+                    movi = pandasm::Create_MOVI_64(dstReg, inst->CastToConstant()->GetInt64Value());
                     res.emplace_back(movi);
                 }
             }
@@ -326,11 +325,11 @@ static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<
                 res.emplace_back(pandasm::Create_FLDAI_DYN(inst->CastToConstant()->GetDoubleValue()));
                 DoStaDyn(inst->GetDstReg(), res);
             } else {
-                if (dst_reg == compiler::ACC_REG_ID) {
+                if (dstReg == compiler::ACC_REG_ID) {
                     pandasm::Ins ldai = pandasm::Create_FLDAI_64(inst->CastToConstant()->GetDoubleValue());
                     res.emplace_back(ldai);
                 } else {
-                    movi = pandasm::Create_FMOVI_64(dst_reg, inst->CastToConstant()->GetDoubleValue());
+                    movi = pandasm::Create_FMOVI_64(dstReg, inst->CastToConstant()->GetDoubleValue());
                     res.emplace_back(movi);
                 }
             }
@@ -491,26 +490,26 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
     ASSERT(op == compiler::Opcode::CallStatic || op == compiler::Opcode::CallVirtual ||
            op == compiler::Opcode::InitObject);
     auto *enc = static_cast<BytecodeGen *>(visitor);
-    auto call_inst = CastToCall(inst);
-    auto sf_count = inst->GetInputsCount() - (inst->RequireState() ? 1U : 0U);
+    auto callInst = CastToCall(inst);
+    auto sfCount = inst->GetInputsCount() - (inst->RequireState() ? 1U : 0U);
     size_t start = op == compiler::Opcode::InitObject ? 1U : 0U;  // exclude LoadAndInitClass
-    auto nargs = sf_count - start;                                // exclude LoadAndInitClass
+    auto nargs = sfCount - start;                                 // exclude LoadAndInitClass
     pandasm::Ins ins;
 
     ins.opcode = ChooseCallOpcode(op, nargs);
 
     if (nargs > MAX_NUM_NON_RANGE_ARGS) {
 #ifndef NDEBUG
-        auto start_reg = inst->GetSrcReg(start);
-        ASSERT(start_reg <= MAX_8_BIT_REG);
-        for (auto i = start; i < sf_count; ++i) {
+        auto startReg = inst->GetSrcReg(start);
+        ASSERT(startReg <= MAX_8_BIT_REG);
+        for (auto i = start; i < sfCount; ++i) {
             auto reg = inst->GetSrcReg(i);
-            ASSERT(reg - start_reg == static_cast<int>(i - start));  // check 'range-ness' of registers
+            ASSERT(reg - startReg == static_cast<int>(i - start));  // check 'range-ness' of registers
         }
 #endif  // !NDEBUG
         ins.regs.emplace_back(inst->GetSrcReg(start));
     } else {
-        for (size_t i = start; i < sf_count; ++i) {
+        for (size_t i = start; i < sfCount; ++i) {
             auto reg = inst->GetSrcReg(i);
             ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS || reg == compiler::ACC_REG_ID);
             if (reg == compiler::ACC_REG_ID) {
@@ -522,10 +521,10 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
             }
         }
     }
-    ins.ids.emplace_back(enc->ir_interface_->GetMethodIdByOffset(call_inst->GetCallMethodId()));
+    ins.ids.emplace_back(enc->irInterface_->GetMethodIdByOffset(callInst->GetCallMethodId()));
     enc->result_.emplace_back(ins);
     if (inst->GetDstReg() != compiler::INVALID_REG && inst->GetDstReg() != compiler::ACC_REG_ID) {
-        enc->EncodeSta(inst->GetDstReg(), call_inst->GetType());
+        enc->EncodeSta(inst->GetDstReg(), callInst->GetType());
     }
 }
 
@@ -708,10 +707,10 @@ static void VisitIfRef([[maybe_unused]] BytecodeGen *enc, compiler::IfInst *inst
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::VisitIf(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitIf(GraphVisitor *v, Inst *instBase)
 {
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToIf();
+    auto inst = instBase->CastToIf();
     switch (inst->GetInputType(0U)) {
         case compiler::DataType::BOOL:
         case compiler::DataType::UINT8:
@@ -760,21 +759,21 @@ static std::optional<coretypes::TaggedValue> IsEcmaConstTemplate(Inst const *ins
     if (inst->GetOpcode() != compiler::Opcode::CastValueToAnyType) {
         return {};
     }
-    auto cvat_inst = inst->CastToCastValueToAnyType();
-    if (!cvat_inst->GetInput(0U).GetInst()->IsConst()) {
+    auto cvatInst = inst->CastToCastValueToAnyType();
+    if (!cvatInst->GetInput(0U).GetInst()->IsConst()) {
         return {};
     }
-    auto const_inst = cvat_inst->GetInput(0U).GetInst()->CastToConstant();
+    auto constInst = cvatInst->GetInput(0U).GetInst()->CastToConstant();
 
-    switch (cvat_inst->GetAnyType()) {
+    switch (cvatInst->GetAnyType()) {
         case compiler::AnyBaseType::ECMASCRIPT_UNDEFINED_TYPE:
             return coretypes::TaggedValue(coretypes::TaggedValue::VALUE_UNDEFINED);
         case compiler::AnyBaseType::ECMASCRIPT_INT_TYPE:
-            return coretypes::TaggedValue(static_cast<int32_t>(const_inst->GetIntValue()));
+            return coretypes::TaggedValue(static_cast<int32_t>(constInst->GetIntValue()));
         case compiler::AnyBaseType::ECMASCRIPT_DOUBLE_TYPE:
-            return coretypes::TaggedValue(const_inst->GetDoubleValue());
+            return coretypes::TaggedValue(constInst->GetDoubleValue());
         case compiler::AnyBaseType::ECMASCRIPT_BOOLEAN_TYPE:
-            return coretypes::TaggedValue(static_cast<bool>(const_inst->GetInt64Value() != 0U));
+            return coretypes::TaggedValue(static_cast<bool>(constInst->GetInt64Value() != 0U));
         case compiler::AnyBaseType::ECMASCRIPT_NULL_TYPE:
             return coretypes::TaggedValue(coretypes::TaggedValue::VALUE_NULL);
         default:
@@ -788,16 +787,16 @@ void BytecodeGen::IfEcma(GraphVisitor *v, compiler::IfInst *inst)
     auto enc = static_cast<BytecodeGen *>(v);
 
     compiler::Register reg = compiler::INVALID_REG_ID;
-    coretypes::TaggedValue cmp_val;
+    coretypes::TaggedValue cmpVal;
 
-    auto test_lhs = IsEcmaConstTemplate(inst->GetInput(0U).GetInst());
-    auto test_rhs = IsEcmaConstTemplate(inst->GetInput(1U).GetInst());
+    auto testLhs = IsEcmaConstTemplate(inst->GetInput(0U).GetInst());
+    auto testRhs = IsEcmaConstTemplate(inst->GetInput(1U).GetInst());
 
-    if (test_lhs.has_value() && test_lhs->IsBoolean()) {
-        cmp_val = test_lhs.value();
+    if (testLhs.has_value() && testLhs->IsBoolean()) {
+        cmpVal = testLhs.value();
         reg = inst->GetSrcReg(1U);
-    } else if (test_rhs.has_value() && test_rhs->IsBoolean()) {
-        cmp_val = test_rhs.value();
+    } else if (testRhs.has_value() && testRhs->IsBoolean()) {
+        cmpVal = testRhs.value();
         reg = inst->GetSrcReg(0U);
     } else {
         LOG(ERROR, BYTECODE_OPTIMIZER) << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
@@ -808,7 +807,7 @@ void BytecodeGen::IfEcma(GraphVisitor *v, compiler::IfInst *inst)
     DoLdaDyn(reg, enc->result_);
     switch (inst->GetCc()) {
         case compiler::CC_EQ: {
-            if (cmp_val.IsTrue()) {
+            if (cmpVal.IsTrue()) {
                 enc->result_.emplace_back(
                     pandasm::Create_ECMA_JTRUE(LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId())));
             } else {
@@ -818,7 +817,7 @@ void BytecodeGen::IfEcma(GraphVisitor *v, compiler::IfInst *inst)
             break;
         }
         case compiler::CC_NE: {
-            if (cmp_val.IsTrue()) {
+            if (cmpVal.IsTrue()) {
                 enc->result_.emplace_back(pandasm::Create_ECMA_ISTRUE());
             } else {
                 enc->result_.emplace_back(pandasm::Create_ECMA_ISFALSE());
@@ -837,15 +836,15 @@ void BytecodeGen::IfEcma(GraphVisitor *v, compiler::IfInst *inst)
 #endif
 #endif
 
-void BytecodeGen::VisitIfImm(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitIfImm(GraphVisitor *v, Inst *instBase)
 {
-    auto inst = inst_base->CastToIfImm();
+    auto inst = instBase->CastToIfImm();
     auto imm = inst->GetImm();
     if (imm == 0U) {
-        IfImmZero(v, inst_base);
+        IfImmZero(v, instBase);
         return;
     }
-    IfImmNonZero(v, inst_base);
+    IfImmNonZero(v, instBase);
 }
 
 static void IfImmZero32(BytecodeGen *enc, compiler::IfImmInst *inst, std::vector<pandasm::Ins> &res, bool &success)
@@ -921,10 +920,10 @@ static void IfImmZeroRef(BytecodeGen *enc, compiler::IfImmInst *inst, std::vecto
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *instBase)
 {
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToIfImm();
+    auto inst = instBase->CastToIfImm();
     switch (inst->GetInputType(0U)) {
         case compiler::DataType::BOOL:
         case compiler::DataType::UINT8:
@@ -938,7 +937,7 @@ void BytecodeGen::IfImmZero(GraphVisitor *v, Inst *inst_base)
         }
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64: {
-            IfImm64(v, inst_base);
+            IfImm64(v, instBase);
             break;
         }
         case compiler::DataType::REFERENCE: {
@@ -998,10 +997,10 @@ static void IfImmNonZero32(BytecodeGen *enc, compiler::IfImmInst *inst, std::vec
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::IfImmNonZero(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::IfImmNonZero(GraphVisitor *v, Inst *instBase)
 {
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToIfImm();
+    auto inst = instBase->CastToIfImm();
     switch (inst->GetInputType(0U)) {
         case compiler::DataType::BOOL:
         case compiler::DataType::UINT8:
@@ -1015,7 +1014,7 @@ void BytecodeGen::IfImmNonZero(GraphVisitor *v, Inst *inst_base)
         }
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64: {
-            IfImm64(v, inst_base);
+            IfImm64(v, instBase);
             break;
         }
         case compiler::DataType::REFERENCE: {
@@ -1034,10 +1033,10 @@ void BytecodeGen::IfImmNonZero(GraphVisitor *v, Inst *inst_base)
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::IfImm64(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::IfImm64(GraphVisitor *v, Inst *instBase)
 {
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToIfImm();
+    auto inst = instBase->CastToIfImm();
 
     if (enc->GetGraph()->IsDynamicMethod()) {
         enc->result_.emplace_back(pandasm::Create_LDAI_DYN(inst->GetImm()));
@@ -1321,10 +1320,10 @@ static void VisitCastFromF64([[maybe_unused]] BytecodeGen *enc, compiler::CastIn
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::VisitCast(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitCast(GraphVisitor *v, Inst *instBase)
 {
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToCast();
+    auto inst = instBase->CastToCast();
     switch (inst->GetInputType(0U)) {
         case compiler::DataType::INT32: {
             VisitCastFromI32(enc, inst, enc->result_, enc->success_);
@@ -1361,11 +1360,11 @@ void BytecodeGen::VisitCast(GraphVisitor *v, Inst *inst_base)
     }
 }
 
-void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *instBase)
 {
     pandasm::Ins ins;
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToLoadString();
+    auto inst = instBase->CastToLoadString();
 
     /* Do not emit unused code for Str -> CastValueToAnyType chains */
     if (enc->GetGraph()->IsDynamicMethod()) {
@@ -1375,7 +1374,7 @@ void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *inst_base)
         }
     }
 
-    enc->result_.emplace_back(pandasm::Create_LDA_STR(enc->ir_interface_->GetStringIdByOffset(inst->GetTypeId())));
+    enc->result_.emplace_back(pandasm::Create_LDA_STR(enc->irInterface_->GetStringIdByOffset(inst->GetTypeId())));
     if (inst->GetDstReg() != compiler::ACC_REG_ID) {
         if (enc->GetGraph()->IsDynamicMethod()) {
             enc->result_.emplace_back(pandasm::Create_STA_DYN(inst->GetDstReg()));
@@ -1385,11 +1384,11 @@ void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *inst_base)
     }
 }
 
-void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *instBase)
 {
     pandasm::Ins ins;
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToReturn();
+    auto inst = instBase->CastToReturn();
     switch (inst->GetType()) {
         case compiler::DataType::BOOL:
         case compiler::DataType::UINT8:
@@ -1421,8 +1420,8 @@ void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *inst_base)
         }
         case compiler::DataType::ANY: {
 #if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT)
-            auto test_arg = IsEcmaConstTemplate(inst->GetInput(0U).GetInst());
-            if (test_arg.has_value() && test_arg->IsUndefined()) {
+            auto testArg = IsEcmaConstTemplate(inst->GetInput(0U).GetInst());
+            if (testArg.has_value() && testArg->IsUndefined()) {
                 enc->result_.emplace_back(pandasm::Create_ECMA_RETURNUNDEFINED());
                 break;
             }
@@ -1445,12 +1444,12 @@ void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *inst_base)
     }
 }
 
-void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst_base)
+void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *instBase)
 {
     auto enc = static_cast<BytecodeGen *>(v);
 
 #if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT)
-    auto cvat = inst_base->CastToCastValueToAnyType();
+    auto cvat = instBase->CastToCastValueToAnyType();
     switch (cvat->GetAnyType()) {
         case compiler::AnyBaseType::ECMASCRIPT_NULL_TYPE:
             enc->result_.emplace_back(pandasm::Create_ECMA_LDNULL());
@@ -1491,13 +1490,13 @@ void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[ma
         case compiler::AnyBaseType::ECMASCRIPT_STRING_TYPE: {
             auto input = cvat->GetInput(0U).GetInst()->CastToLoadString();
             enc->result_.emplace_back(
-                pandasm::Create_LDA_STR(enc->ir_interface_->GetStringIdByOffset(input->GetTypeId())));
+                pandasm::Create_LDA_STR(enc->irInterface_->GetStringIdByOffset(input->GetTypeId())));
             break;
         }
         case compiler::AnyBaseType::ECMASCRIPT_BIGINT_TYPE: {
             auto input = cvat->GetInput(0U).GetInst()->CastToLoadString();
             enc->result_.emplace_back(
-                pandasm::Create_ECMA_LDBIGINT(enc->ir_interface_->GetStringIdByOffset(input->GetTypeId())));
+                pandasm::Create_ECMA_LDBIGINT(enc->irInterface_->GetStringIdByOffset(input->GetTypeId())));
             break;
         }
         default:
@@ -1505,26 +1504,26 @@ void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[ma
     }
     DoStaDyn(cvat->GetDstReg(), enc->result_);
 #else
-    LOG(ERROR, BYTECODE_OPTIMIZER) << "Codegen for " << compiler::GetOpcodeString(inst_base->GetOpcode()) << " failed";
+    LOG(ERROR, BYTECODE_OPTIMIZER) << "Codegen for " << compiler::GetOpcodeString(instBase->GetOpcode()) << " failed";
     enc->success_ = false;
 #endif
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-void BytecodeGen::VisitStoreObject(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitStoreObject(GraphVisitor *v, Inst *instBase)
 {
-    if (TryPluginStoreObjectVisitor(v, inst_base)) {
+    if (TryPluginStoreObjectVisitor(v, instBase)) {
         return;
     }
 
     auto enc = static_cast<BytecodeGen *>(v);
-    const compiler::StoreObjectInst *inst = inst_base->CastToStoreObject();
+    const compiler::StoreObjectInst *inst = instBase->CastToStoreObject();
 
     compiler::Register vd = inst->GetSrcReg(0U);
     compiler::Register vs = inst->GetSrcReg(1U);
-    std::string id = enc->ir_interface_->GetFieldIdByOffset(inst->GetTypeId());
+    std::string id = enc->irInterface_->GetFieldIdByOffset(inst->GetTypeId());
 
-    bool is_acc_type = (vs == compiler::ACC_REG_ID);
+    bool isAccType = (vs == compiler::ACC_REG_ID);
 
     switch (inst->GetType()) {
         case compiler::DataType::BOOL:
@@ -1535,7 +1534,7 @@ void BytecodeGen::VisitStoreObject(GraphVisitor *v, Inst *inst_base)
         case compiler::DataType::UINT32:
         case compiler::DataType::INT32:
         case compiler::DataType::FLOAT32:
-            if (is_acc_type) {
+            if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_STOBJ(vd, id));
             } else {
                 enc->result_.emplace_back(pandasm::Create_STOBJ_V(vs, vd, id));
@@ -1544,14 +1543,14 @@ void BytecodeGen::VisitStoreObject(GraphVisitor *v, Inst *inst_base)
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64:
         case compiler::DataType::FLOAT64:
-            if (is_acc_type) {
+            if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_STOBJ_64(vd, id));
             } else {
                 enc->result_.emplace_back(pandasm::Create_STOBJ_V_64(vs, vd, id));
             }
             break;
         case compiler::DataType::REFERENCE:
-            if (is_acc_type) {
+            if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_STOBJ_OBJ(vd, id));
             } else {
                 enc->result_.emplace_back(pandasm::Create_STOBJ_V_OBJ(vs, vd, id));
@@ -1564,17 +1563,17 @@ void BytecodeGen::VisitStoreObject(GraphVisitor *v, Inst *inst_base)
     }
 }
 
-void BytecodeGen::VisitStoreStatic(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitStoreStatic(GraphVisitor *v, Inst *instBase)
 {
-    if (TryPluginStoreStaticVisitor(v, inst_base)) {
+    if (TryPluginStoreStaticVisitor(v, instBase)) {
         return;
     }
 
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToStoreStatic();
+    auto inst = instBase->CastToStoreStatic();
 
     compiler::Register vs = inst->GetSrcReg(1U);
-    std::string id = enc->ir_interface_->GetFieldIdByOffset(inst->GetTypeId());
+    std::string id = enc->irInterface_->GetFieldIdByOffset(inst->GetTypeId());
 
     switch (inst->GetType()) {
         case compiler::DataType::BOOL:
@@ -1610,20 +1609,20 @@ static bool IsAccLoadObject(const compiler::LoadObjectInst *inst)
     return inst->GetDstReg() == compiler::ACC_REG_ID;
 }
 
-void BytecodeGen::VisitLoadObject(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitLoadObject(GraphVisitor *v, Inst *instBase)
 {
-    if (TryPluginLoadObjectVisitor(v, inst_base)) {
+    if (TryPluginLoadObjectVisitor(v, instBase)) {
         return;
     }
 
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToLoadObject();
+    auto inst = instBase->CastToLoadObject();
 
     compiler::Register vs = inst->GetSrcReg(0U);
     compiler::Register vd = inst->GetDstReg();
-    std::string id = enc->ir_interface_->GetFieldIdByOffset(inst->GetTypeId());
+    std::string id = enc->irInterface_->GetFieldIdByOffset(inst->GetTypeId());
 
-    bool is_acc_type = IsAccLoadObject(inst);
+    bool isAccType = IsAccLoadObject(inst);
 
     switch (inst->GetType()) {
         case compiler::DataType::BOOL:
@@ -1634,7 +1633,7 @@ void BytecodeGen::VisitLoadObject(GraphVisitor *v, Inst *inst_base)
         case compiler::DataType::UINT32:
         case compiler::DataType::INT32:
         case compiler::DataType::FLOAT32:
-            if (is_acc_type) {
+            if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_LDOBJ(vs, id));
             } else {
                 enc->result_.emplace_back(pandasm::Create_LDOBJ_V(vd, vs, id));
@@ -1643,14 +1642,14 @@ void BytecodeGen::VisitLoadObject(GraphVisitor *v, Inst *inst_base)
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64:
         case compiler::DataType::FLOAT64:
-            if (is_acc_type) {
+            if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_LDOBJ_64(vs, id));
             } else {
                 enc->result_.emplace_back(pandasm::Create_LDOBJ_V_64(vd, vs, id));
             }
             break;
         case compiler::DataType::REFERENCE:
-            if (is_acc_type) {
+            if (isAccType) {
                 enc->result_.emplace_back(pandasm::Create_LDOBJ_OBJ(vs, id));
             } else {
                 enc->result_.emplace_back(pandasm::Create_LDOBJ_V_OBJ(vd, vs, id));
@@ -1663,17 +1662,17 @@ void BytecodeGen::VisitLoadObject(GraphVisitor *v, Inst *inst_base)
     }
 }
 
-void BytecodeGen::VisitLoadStatic(GraphVisitor *v, Inst *inst_base)
+void BytecodeGen::VisitLoadStatic(GraphVisitor *v, Inst *instBase)
 {
-    if (TryPluginLoadStaticVisitor(v, inst_base)) {
+    if (TryPluginLoadStaticVisitor(v, instBase)) {
         return;
     }
 
     auto enc = static_cast<BytecodeGen *>(v);
-    auto inst = inst_base->CastToLoadStatic();
+    auto inst = instBase->CastToLoadStatic();
 
     compiler::Register vd = inst->GetDstReg();
-    std::string id = enc->ir_interface_->GetFieldIdByOffset(inst->GetTypeId());
+    std::string id = enc->irInterface_->GetFieldIdByOffset(inst->GetTypeId());
 
     switch (inst->GetType()) {
         case compiler::DataType::BOOL:
@@ -1707,14 +1706,14 @@ void BytecodeGen::VisitLoadStatic(GraphVisitor *v, Inst *inst_base)
 void BytecodeGen::VisitCatchPhi(GraphVisitor *v, Inst *inst)
 {
     if (inst->CastToCatchPhi()->IsAcc()) {
-        bool has_real_users = false;
+        bool hasRealUsers = false;
         for (auto &user : inst->GetUsers()) {
             if (!user.GetInst()->IsSaveState()) {
-                has_real_users = true;
+                hasRealUsers = true;
                 break;
             }
         }
-        if (has_real_users) {
+        if (hasRealUsers) {
             auto enc = static_cast<BytecodeGen *>(v);
             enc->result_.emplace_back(pandasm::Create_STA_OBJ(inst->GetDstReg()));
         }

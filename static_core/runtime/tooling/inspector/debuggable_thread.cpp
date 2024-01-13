@@ -18,17 +18,17 @@
 namespace panda::tooling::inspector {
 DebuggableThread::DebuggableThread(
     ManagedThread *thread,
-    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&pre_suspend,
-    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&post_suspend,
-    std::function<void()> &&pre_wait_suspension, std::function<void()> &&post_wait_suspension,
-    std::function<void()> &&pre_resume, std::function<void()> &&post_resume)
+    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&preSuspend,
+    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&postSuspend,
+    std::function<void()> &&preWaitSuspension, std::function<void()> &&postWaitSuspension,
+    std::function<void()> &&preResume, std::function<void()> &&postResume)
     : thread_(thread),
-      pre_suspend_(std::move(pre_suspend)),
-      post_suspend_(std::move(post_suspend)),
-      pre_wait_suspension_(std::move(pre_wait_suspension)),
-      post_wait_suspension_(std::move(post_wait_suspension)),
-      pre_resume_(std::move(pre_resume)),
-      post_resume_(std::move(post_resume))
+      preSuspend_(std::move(preSuspend)),
+      postSuspend_(std::move(postSuspend)),
+      preWaitSuspension_(std::move(preWaitSuspension)),
+      postWaitSuspension_(std::move(postWaitSuspension)),
+      preResume_(std::move(preResume)),
+      postResume_(std::move(postResume))
 {
     ASSERT(thread);
 }
@@ -132,7 +132,7 @@ bool DebuggableThread::RequestToObjectRepository(std::function<void(ObjectReposi
     thread_->Resume();
 
     while (request_) {
-        request_done_.Wait(&mutex_);
+        requestDone_.Wait(&mutex_);
     }
 
     ASSERT(suspended_);
@@ -146,8 +146,8 @@ void DebuggableThread::OnException(bool uncaught)
     os::memory::LockHolder lock(mutex_);
     state_.OnException(uncaught);
     while (state_.IsPaused()) {
-        ObjectRepository object_repository;
-        Suspend(object_repository, {}, thread_->GetException());
+        ObjectRepository objectRepository;
+        Suspend(objectRepository, {}, thread_->GetException());
     }
 }
 
@@ -168,9 +168,9 @@ void DebuggableThread::OnSingleStep(const PtLocation &location)
     os::memory::LockHolder lock(mutex_);
     state_.OnSingleStep(location);
     while (state_.IsPaused()) {
-        ObjectRepository object_repository;
-        auto hit_breakpoints = state_.GetBreakpointsByLocation(location);
-        Suspend(object_repository, hit_breakpoints, {});
+        ObjectRepository objectRepository;
+        auto hitBreakpoints = state_.GetBreakpointsByLocation(location);
+        Suspend(objectRepository, hitBreakpoints, {});
     }
 }
 
@@ -178,14 +178,14 @@ std::vector<RemoteObject> DebuggableThread::OnConsoleCall(const PandaVector<Type
 {
     std::vector<RemoteObject> result;
 
-    ObjectRepository object_repository;
+    ObjectRepository objectRepository;
     std::transform(arguments.begin(), arguments.end(), std::back_inserter(result),
-                   [&object_repository](auto value) { return object_repository.CreateObject(value); });
+                   [&objectRepository](auto value) { return objectRepository.CreateObject(value); });
 
     return result;
 }
 
-void DebuggableThread::Suspend(ObjectRepository &object_repository, const std::vector<BreakpointId> &hit_breakpoints,
+void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::vector<BreakpointId> &hitBreakpoints,
                                ObjectHeader *exception)
 {
     ASSERT(ManagedThread::GetCurrent() == thread_);
@@ -193,19 +193,19 @@ void DebuggableThread::Suspend(ObjectRepository &object_repository, const std::v
     ASSERT(!suspended_);
     ASSERT(!request_.has_value());
 
-    pre_suspend_(object_repository, hit_breakpoints, exception);
+    preSuspend_(objectRepository, hitBreakpoints, exception);
 
     suspended_ = true;
     thread_->Suspend();
 
-    post_suspend_(object_repository, hit_breakpoints, exception);
+    postSuspend_(objectRepository, hitBreakpoints, exception);
 
     while (suspended_) {
         mutex_.Unlock();
 
-        pre_wait_suspension_();
+        preWaitSuspension_();
         thread_->WaitSuspension();
-        post_wait_suspension_();
+        postWaitSuspension_();
 
         mutex_.Lock();
 
@@ -224,12 +224,12 @@ void DebuggableThread::Suspend(ObjectRepository &object_repository, const std::v
         ASSERT(suspended_ == request_.has_value());
 
         if (request_) {
-            (*request_)(object_repository);
+            (*request_)(objectRepository);
 
             request_.reset();
             thread_->Suspend();
 
-            request_done_.Signal();
+            requestDone_.Signal();
         }
     }
 }
@@ -244,11 +244,11 @@ void DebuggableThread::Resume()
 
     ASSERT(thread_->IsSuspended());
 
-    pre_resume_();
+    preResume_();
 
     suspended_ = false;
     thread_->Resume();
 
-    post_resume_();
+    postResume_();
 }
 }  // namespace panda::tooling::inspector

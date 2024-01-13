@@ -25,17 +25,17 @@
 
 namespace panda {
 
-static bool IS_INITIALIZED = false;
+static bool g_isInitialized = false;
 
-os::memory::Mutex *Locks::custom_tls_lock_ = nullptr;
-os::memory::Mutex *Locks::user_suspension_lock_ = nullptr;
+os::memory::Mutex *Locks::customTlsLock_ = nullptr;
+os::memory::Mutex *Locks::userSuspensionLock_ = nullptr;
 
 void Locks::Initialize()
 {
-    if (!IS_INITIALIZED) {
-        Locks::custom_tls_lock_ = new os::memory::Mutex();
-        Locks::user_suspension_lock_ = new os::memory::Mutex();
-        IS_INITIALIZED = true;
+    if (!g_isInitialized) {
+        Locks::customTlsLock_ = new os::memory::Mutex();
+        Locks::userSuspensionLock_ = new os::memory::Mutex();
+        g_isInitialized = true;
     }
 }
 

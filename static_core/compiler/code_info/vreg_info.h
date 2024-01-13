@@ -46,17 +46,17 @@ public:
         FieldLocation::Set(Location::NONE, &info_);
         ASSERT(!IsLive());
     }
-    VRegInfo(uint32_t value, VRegInfo::Location location, Type type, VRegType vreg_type)
+    VRegInfo(uint32_t value, VRegInfo::Location location, Type type, VRegType vregType)
         : value_(value),
-          info_(FieldLocation::Encode(location) | FieldType::Encode(type) | FieldVRegType::Encode(vreg_type))
+          info_(FieldLocation::Encode(location) | FieldType::Encode(type) | FieldVRegType::Encode(vregType))
     {
     }
-    VRegInfo(uint32_t value, VRegInfo::Location location, Type type, VRegType vreg_type, uint32_t index)
-        : VRegInfo(value, location, type, vreg_type)
+    VRegInfo(uint32_t value, VRegInfo::Location location, Type type, VRegType vregType, uint32_t index)
+        : VRegInfo(value, location, type, vregType)
     {
         FieldVRegIndex::Set(index, &info_);
     }
-    VRegInfo(uint32_t value, uint32_t packed_info) : value_(value), info_(packed_info) {}
+    VRegInfo(uint32_t value, uint32_t packedInfo) : value_(value), info_(packedInfo) {}
 
     static VRegInfo Invalid()
     {

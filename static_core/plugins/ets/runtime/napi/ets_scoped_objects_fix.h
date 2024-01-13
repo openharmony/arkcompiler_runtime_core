@@ -139,8 +139,8 @@ public:
     {
         ASSERT_MANAGED_CODE();
         RETURN_NULL_IF_NULL(obj);
-        EtsReferenceStorage *ref_storage = GetEtsReferenceStorage(env);
-        EtsReference *ref = ref_storage->NewEtsRef(obj, EtsReference::EtsObjectType::WEAK);
+        EtsReferenceStorage *refStorage = GetEtsReferenceStorage(env);
+        EtsReference *ref = refStorage->NewEtsRef(obj, EtsReference::EtsObjectType::WEAK);
         return EtsRefToEtsNapiWeak(ref);
     }
 
@@ -171,8 +171,8 @@ public:
 
     void TraverseReferenceTable()
     {
-        mem::ReferenceStorage *ref_storage = GetEtsReferenceStorage()->GetAsReferenceStorage();
-        PandaVector<ObjectHeader *> table = ref_storage->GetAllObjects();
+        mem::ReferenceStorage *refStorage = GetEtsReferenceStorage()->GetAsReferenceStorage();
+        PandaVector<ObjectHeader *> table = refStorage->GetAllObjects();
         for (const auto *obj : table) {
             std::cout << "object classname = ";
             std::cout << obj->ClassAddr<Class>()->GetName() << std::endl;
@@ -214,7 +214,7 @@ private:
 class ScopedManagedCodeFix : public ManagedCodeAccessor {
     class ExceptionData {
     public:
-        ExceptionData(const char *name, const char *message) : class_name_(name)
+        ExceptionData(const char *name, const char *message) : className_(name)
         {
             if (message != nullptr) {
                 message_ = message;
@@ -223,7 +223,7 @@ class ScopedManagedCodeFix : public ManagedCodeAccessor {
 
         const char *GetClassName() const
         {
-            return class_name_.c_str();
+            return className_.c_str();
         }
 
         const char *GetMessage() const
@@ -232,17 +232,17 @@ class ScopedManagedCodeFix : public ManagedCodeAccessor {
         }
 
     private:
-        PandaString class_name_;
+        PandaString className_;
         std::optional<PandaString> message_;
     };
 
 public:
     explicit ScopedManagedCodeFix(PandaEtsNapiEnv *env)
-        : ManagedCodeAccessor(env), already_in_managed_(ManagedThread::IsManagedScope())
+        : ManagedCodeAccessor(env), alreadyInManaged_(ManagedThread::IsManagedScope())
     {
         ASSERT(env == PandaEtsNapiEnv::GetCurrent());
 
-        if (already_in_managed_ && IsAccessFromManagedAllowed()) {
+        if (alreadyInManaged_ && IsAccessFromManagedAllowed()) {
             return;
         }
 
@@ -251,61 +251,61 @@ public:
 
     ~ScopedManagedCodeFix()
     {
-        if (exception_data_) {
-            ThrowEtsException(Coroutine(), exception_data_->GetClassName(), exception_data_->GetMessage());
+        if (exceptionData_) {
+            ThrowEtsException(Coroutine(), exceptionData_->GetClassName(), exceptionData_->GetMessage());
         }
 
-        if (!already_in_managed_) {
+        if (!alreadyInManaged_) {
             Coroutine()->ManagedCodeEnd();
         }
     }
 
     void ThrowNewException(EtsNapiException kind, const char *message)
     {
-        ASSERT(!exception_data_);
+        ASSERT(!exceptionData_);
 
-        std::string_view class_name {};
+        std::string_view className {};
         switch (kind) {
             case EtsNapiException::ARRAY_INDEX_OUT_OF_BOUNDS:
-                class_name = panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+                className = panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
                 break;
             case EtsNapiException::ARRAY_STORE:
-                class_name = panda_file_items::class_descriptors::ARRAY_STORE_EXCEPTION;
+                className = panda_file_items::class_descriptors::ARRAY_STORE_EXCEPTION;
                 break;
             case EtsNapiException::ILLEGAL_MONITOR_STATE:
-                class_name = panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_EXCEPTION;
+                className = panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_EXCEPTION;
                 break;
             case EtsNapiException::INSTANTIATION:
-                class_name = panda_file_items::class_descriptors::INSTANTIATION_ERROR;
+                className = panda_file_items::class_descriptors::INSTANTIATION_ERROR;
                 break;
             case EtsNapiException::NO_CLASS_DEF_FOUND:
-                class_name = panda_file_items::class_descriptors::NO_CLASS_DEF_FOUND_ERROR;
+                className = panda_file_items::class_descriptors::NO_CLASS_DEF_FOUND_ERROR;
                 break;
             case EtsNapiException::NO_SUCH_FIELD:
-                class_name = panda_file_items::class_descriptors::NO_SUCH_FIELD_ERROR;
+                className = panda_file_items::class_descriptors::NO_SUCH_FIELD_ERROR;
                 break;
             case EtsNapiException::NO_SUCH_METHOD:
-                class_name = panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR;
+                className = panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR;
                 break;
             case EtsNapiException::NULL_POINTER_EXCEPTION:
-                class_name = panda_file_items::class_descriptors::NULL_POINTER_EXCEPTION;
+                className = panda_file_items::class_descriptors::NULL_POINTER_EXCEPTION;
                 break;
             case EtsNapiException::OUT_OF_MEMORY:
-                class_name = panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR;
+                className = panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR;
                 break;
             case EtsNapiException::STRING_INDEX_OUT_OF_BOUNDS:
-                class_name = panda_file_items::class_descriptors::STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+                className = panda_file_items::class_descriptors::STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION;
                 break;
             default:
                 UNREACHABLE();
         }
 
-        exception_data_ = MakePandaUnique<ExceptionData>(class_name.data(), message);
+        exceptionData_ = MakePandaUnique<ExceptionData>(className.data(), message);
     }
 
     bool HasPendingException()
     {
-        return exception_data_ || Coroutine()->HasPendingException();
+        return exceptionData_ || Coroutine()->HasPendingException();
     }
 
     NO_COPY_SEMANTIC(ScopedManagedCodeFix);
@@ -324,8 +324,8 @@ private:
 #endif  // NDEBUG
     }
 
-    PandaUniquePtr<ExceptionData> exception_data_;
-    bool already_in_managed_;
+    PandaUniquePtr<ExceptionData> exceptionData_;
+    bool alreadyInManaged_;
 };
 
 class ScopedManagedCodeFastNative : public ManagedCodeAccessor {

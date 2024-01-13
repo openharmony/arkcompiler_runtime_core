@@ -29,44 +29,44 @@ namespace panda::verifier {
 
 struct VerificationOptions {
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    std::string config_file = "default";
+    std::string configFile = "default";
     VerificationMode mode = VerificationMode::DISABLED;
     struct {
         bool status = false;
     } show;
-    bool verify_runtime_libraries = false;
-    bool sync_on_class_initialization = false;
-    size_t verification_threads = 1;
+    bool verifyRuntimeLibraries = false;
+    bool syncOnClassInitialization = false;
+    size_t verificationThreads = 1;
     struct {
         std::string file;
-        bool update_on_exit = false;
+        bool updateOnExit = false;
     } cache;
     struct {
         struct {
-            bool reg_changes = false;
+            bool regChanges = false;
             bool context = false;
-            bool type_system = false;
+            bool typeSystem = false;
         } show;
         struct {
-            bool undefined_class = false;
-            bool undefined_method = false;
-            bool undefined_field = false;
-            bool undefined_type = false;
-            bool undefined_string = false;
-            bool method_access_violation = false;
-            bool error_in_exception_handler = false;
-            bool permanent_runtime_exception = false;
-            bool field_access_violation = false;
-            bool wrong_subclassing_in_method_args = false;
+            bool undefinedClass = false;
+            bool undefinedMethod = false;
+            bool undefinedField = false;
+            bool undefinedType = false;
+            bool undefinedString = false;
+            bool methodAccessViolation = false;
+            bool errorInExceptionHandler = false;
+            bool permanentRuntimeException = false;
+            bool fieldAccessViolation = false;
+            bool wrongSubclassingInMethodArgs = false;
         } allow;
-        MethodOptionsConfig *method_options = nullptr;
+        MethodOptionsConfig *methodOptions = nullptr;
         MethodOptionsConfig &GetMethodOptions()
         {
-            return *method_options;
+            return *methodOptions;
         }
         const MethodOptionsConfig &GetMethodOptions() const
         {
-            return *method_options;
+            return *methodOptions;
         }
     } debug;
     // NOLINTEND(misc-non-private-member-variables-in-classes)

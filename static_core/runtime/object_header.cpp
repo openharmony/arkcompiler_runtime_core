@@ -30,8 +30,15 @@
 
 namespace panda {
 
+namespace object_header_traits {
+
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+std::atomic<uint32_t> g_hashSeed = std::atomic<uint32_t>(LINEAR_SEED + std::time(nullptr));
+
+}  // namespace object_header_traits
+
 /* static */
-ObjectHeader *ObjectHeader::CreateObject(ManagedThread *thread, panda::BaseClass *klass, bool non_movable)
+ObjectHeader *ObjectHeader::CreateObject(ManagedThread *thread, panda::BaseClass *klass, bool nonMovable)
 {
     ASSERT(klass != nullptr);
 #ifndef NDEBUG
@@ -45,22 +52,22 @@ ObjectHeader *ObjectHeader::CreateObject(ManagedThread *thread, panda::BaseClass
 
     size_t size = klass->GetObjectSize();
     ASSERT(size != 0);
-    mem::HeapManager *heap_manager = thread->GetVM()->GetHeapManager();
+    mem::HeapManager *heapManager = thread->GetVM()->GetHeapManager();
     ObjectHeader *obj {nullptr};
-    if (UNLIKELY(heap_manager->IsObjectFinalized(klass))) {
-        non_movable = true;
+    if (UNLIKELY(heapManager->IsObjectFinalized(klass))) {
+        nonMovable = true;
     }
-    if (LIKELY(!non_movable)) {
-        obj = heap_manager->AllocateObject(klass, size);
+    if (LIKELY(!nonMovable)) {
+        obj = heapManager->AllocateObject(klass, size);
     } else {
-        obj = heap_manager->AllocateNonMovableObject(klass, size);
+        obj = heapManager->AllocateNonMovableObject(klass, size);
     }
     return obj;
 }
 
-ObjectHeader *ObjectHeader::CreateObject(panda::BaseClass *klass, bool non_movable)
+ObjectHeader *ObjectHeader::CreateObject(panda::BaseClass *klass, bool nonMovable)
 {
-    return CreateObject(ManagedThread::GetCurrent(), klass, non_movable);
+    return CreateObject(ManagedThread::GetCurrent(), klass, nonMovable);
 }
 
 /* static */
@@ -80,9 +87,9 @@ ObjectHeader *ObjectHeader::CreateNonMovable(BaseClass *klass)
     return CreateObject(klass, true);
 }
 
-uint32_t ObjectHeader::GetHashCodeFromMonitor(Monitor *monitor_p)
+uint32_t ObjectHeader::GetHashCodeFromMonitor(Monitor *monitorP)
 {
-    return monitor_p->GetHashCode();
+    return monitorP->GetHashCode();
 }
 
 uint32_t ObjectHeader::GetHashCodeMTSingle()
@@ -106,36 +113,36 @@ uint32_t ObjectHeader::GetHashCodeMTSingle()
 
 uint32_t ObjectHeader::GetHashCodeMTMulti()
 {
-    ObjectHeader *current_obj = this;
+    ObjectHeader *currentObj = this;
     while (true) {
-        auto mark = current_obj->AtomicGetMark();
+        auto mark = currentObj->AtomicGetMark();
         auto *thread = MTManagedThread::GetCurrent();
         ASSERT(thread != nullptr);
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-        VMHandle<ObjectHeader> handle_obj(thread, current_obj);
+        VMHandle<ObjectHeader> handleObj(thread, currentObj);
 
         switch (mark.GetState()) {
             case MarkWord::STATE_UNLOCKED: {
-                auto hash_mark = mark.DecodeFromHash(GenerateHashCode());
-                ASSERT(hash_mark.GetState() == MarkWord::STATE_HASHED);
-                current_obj->AtomicSetMark(mark, hash_mark);
+                auto hashMark = mark.DecodeFromHash(GenerateHashCode());
+                ASSERT(hashMark.GetState() == MarkWord::STATE_HASHED);
+                currentObj->AtomicSetMark(mark, hashMark);
                 break;
             }
             case MarkWord::STATE_LIGHT_LOCKED: {
-                os::thread::ThreadId owner_thread_id = mark.GetThreadId();
-                if (owner_thread_id == thread->GetInternalId()) {
+                os::thread::ThreadId ownerThreadId = mark.GetThreadId();
+                if (ownerThreadId == thread->GetInternalId()) {
                     Monitor::Inflate(this, thread);
                 } else {
-                    Monitor::InflateThinLock(thread, handle_obj);
-                    current_obj = handle_obj.GetPtr();
+                    Monitor::InflateThinLock(thread, handleObj);
+                    currentObj = handleObj.GetPtr();
                 }
                 break;
             }
             case MarkWord::STATE_HEAVY_LOCKED: {
-                auto monitor_id = mark.GetMonitorId();
-                auto monitor_p = MTManagedThread::GetCurrent()->GetMonitorPool()->LookupMonitor(monitor_id);
-                if (monitor_p != nullptr) {
-                    return GetHashCodeFromMonitor(monitor_p);
+                auto monitorId = mark.GetMonitorId();
+                auto monitorP = MTManagedThread::GetCurrent()->GetMonitorPool()->LookupMonitor(monitorId);
+                if (monitorP != nullptr) {
+                    return GetHashCodeFromMonitor(monitorP);
                 }
                 LOG(FATAL, RUNTIME) << "Error on GetHashCode(): no monitor on heavy locked state";
                 break;
@@ -162,71 +169,70 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
      NOTE(d.trubenkov):
         use bariers for possible copied reference fields
     */
-    auto object_class = src->ClassAddr<Class>();
-    std::size_t obj_size = src->ObjectSize();
+    auto objectClass = src->ClassAddr<Class>();
+    std::size_t objSize = src->ObjectSize();
 
     // AllocateObject can trigger gc, use handle for src.
     auto *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
-    mem::HeapManager *heap_manager = thread->GetVM()->GetHeapManager();
+    mem::HeapManager *heapManager = thread->GetVM()->GetHeapManager();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<ObjectHeader> src_handle(thread, src);
+    VMHandle<ObjectHeader> srcHandle(thread, src);
 
     ObjectHeader *dst = nullptr;
     // Determine whether object is non-movable
     if (PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(src) == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT) {
-        dst = heap_manager->AllocateNonMovableObject(object_class, obj_size);
+        dst = heapManager->AllocateNonMovableObject(objectClass, objSize);
     } else {
-        dst = heap_manager->AllocateObject(object_class, obj_size);
+        dst = heapManager->AllocateObject(objectClass, objSize);
     }
     if (dst == nullptr) {
         return nullptr;
     }
-    ASSERT(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(src_handle.GetPtr()) ==
+    ASSERT(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(srcHandle.GetPtr()) ==
            PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(dst));
 
-    Span<uint8_t> src_sp(reinterpret_cast<uint8_t *>(src_handle.GetPtr()), obj_size);
-    Span<uint8_t> dst_sp(reinterpret_cast<uint8_t *>(dst), obj_size);
+    Span<uint8_t> srcSp(reinterpret_cast<uint8_t *>(srcHandle.GetPtr()), objSize);
+    Span<uint8_t> dstSp(reinterpret_cast<uint8_t *>(dst), objSize);
     constexpr const std::size_t WORD_SIZE = sizeof(uintptr_t);
-    std::size_t bytes_to_copy = obj_size - ObjectHeader::ObjectHeaderSize();
-    std::size_t words_to_copy = bytes_to_copy / WORD_SIZE;
-    std::size_t words_to_copy_end = ObjectHeader::ObjectHeaderSize() + WORD_SIZE * words_to_copy;
-    std::size_t object_pointers_to_copy = (bytes_to_copy - WORD_SIZE * words_to_copy) / OBJECT_POINTER_SIZE;
-    std::size_t object_pointers_to_copy_end = words_to_copy_end + object_pointers_to_copy * OBJECT_POINTER_SIZE;
+    std::size_t bytesToCopy = objSize - ObjectHeader::ObjectHeaderSize();
+    std::size_t wordsToCopy = bytesToCopy / WORD_SIZE;
+    std::size_t wordsToCopyEnd = ObjectHeader::ObjectHeaderSize() + WORD_SIZE * wordsToCopy;
+    std::size_t objectPointersToCopy = (bytesToCopy - WORD_SIZE * wordsToCopy) / OBJECT_POINTER_SIZE;
+    std::size_t objectPointersToCopyEnd = wordsToCopyEnd + objectPointersToCopy * OBJECT_POINTER_SIZE;
     // copy words
-    for (std::size_t i = ObjectHeader::ObjectHeaderSize(); i < words_to_copy_end; i += WORD_SIZE) {
+    for (std::size_t i = ObjectHeader::ObjectHeaderSize(); i < wordsToCopyEnd; i += WORD_SIZE) {
         // Atomic with relaxed order reason: data race with src_handle with no synchronization or ordering constraints
         // imposed on other reads or writes
-        reinterpret_cast<std::atomic<uintptr_t> *>(&dst_sp[i])
-            ->store(reinterpret_cast<std::atomic<uintptr_t> *>(&src_sp[i])->load(std::memory_order_relaxed),
-                    std::memory_order_relaxed);
+        reinterpret_cast<std::atomic<uintptr_t> *>(&dstSp[i])->store(
+            reinterpret_cast<std::atomic<uintptr_t> *>(&srcSp[i])->load(std::memory_order_relaxed),
+            std::memory_order_relaxed);
     }
     // copy remaining memory by object pointer
-    for (std::size_t i = words_to_copy_end; i < object_pointers_to_copy_end; i += OBJECT_POINTER_SIZE) {
-        reinterpret_cast<std::atomic<panda::ObjectPointerType> *>(&dst_sp[i])
-            ->store(
-                // Atomic with relaxed order reason: data race with src_handle with no synchronization or ordering
-                // constraints imposed on other reads or writes
-                reinterpret_cast<std::atomic<panda::ObjectPointerType> *>(&src_sp[i])->load(std::memory_order_relaxed),
-                std::memory_order_relaxed);
+    for (std::size_t i = wordsToCopyEnd; i < objectPointersToCopyEnd; i += OBJECT_POINTER_SIZE) {
+        reinterpret_cast<std::atomic<panda::ObjectPointerType> *>(&dstSp[i])->store(
+            // Atomic with relaxed order reason: data race with src_handle with no synchronization or ordering
+            // constraints imposed on other reads or writes
+            reinterpret_cast<std::atomic<panda::ObjectPointerType> *>(&srcSp[i])->load(std::memory_order_relaxed),
+            std::memory_order_relaxed);
     }
     // copy remaining memory by bytes
-    for (std::size_t i = object_pointers_to_copy_end; i < obj_size; i++) {
+    for (std::size_t i = objectPointersToCopyEnd; i < objSize; i++) {
         // Atomic with relaxed order reason: data race with src_handle with no synchronization or ordering constraints
         // imposed on other reads or writes
-        reinterpret_cast<std::atomic<uint8_t> *>(&dst_sp[i])
-            ->store(reinterpret_cast<std::atomic<uint8_t> *>(&src_sp[i])->load(std::memory_order_relaxed),
-                    std::memory_order_relaxed);
+        reinterpret_cast<std::atomic<uint8_t> *>(&dstSp[i])->store(
+            reinterpret_cast<std::atomic<uint8_t> *>(&srcSp[i])->load(std::memory_order_relaxed),
+            std::memory_order_relaxed);
     }
 
     // Call barriers here.
-    auto *barrier_set = thread->GetBarrierSet();
+    auto *barrierSet = thread->GetBarrierSet();
     // We don't need pre barrier here because we don't change any links inside main object
     // Post barrier
-    auto gc_post_barrier_type = barrier_set->GetPostType();
-    if (!mem::IsEmptyBarrier(gc_post_barrier_type)) {
-        if (!object_class->IsArrayClass() || !object_class->GetComponentType()->IsPrimitive()) {
-            barrier_set->PostBarrier(dst, 0, obj_size);
+    auto gcPostBarrierType = barrierSet->GetPostType();
+    if (!mem::IsEmptyBarrier(gcPostBarrierType)) {
+        if (!objectClass->IsArrayClass() || !objectClass->GetComponentType()->IsPrimitive()) {
+            barrierSet->PostBarrier(dst, 0, objSize);
         }
     }
     return dst;
@@ -234,18 +240,18 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
 
 size_t ObjectHeader::ObjectSize() const
 {
-    auto *base_klass = ClassAddr<BaseClass>();
-    if (base_klass->IsDynamicClass()) {
-        return ObjectSizeDyn(base_klass);
+    auto *baseKlass = ClassAddr<BaseClass>();
+    if (baseKlass->IsDynamicClass()) {
+        return ObjectSizeDyn(baseKlass);
     }
-    return ObjectSizeStatic(base_klass);
+    return ObjectSizeStatic(baseKlass);
 }
 
-size_t ObjectHeader::ObjectSizeDyn(BaseClass *base_klass) const
+size_t ObjectHeader::ObjectSizeDyn(BaseClass *baseKlass) const
 {
     // if we do it concurrently, the real klass may be changed,
     // but we are ok with that
-    auto *klass = static_cast<HClass *>(base_klass);
+    auto *klass = static_cast<HClass *>(baseKlass);
 
     if (klass->IsArray()) {
         return static_cast<const coretypes::Array *>(this)->ObjectSize(TaggedValue::TaggedTypeSize());
@@ -257,13 +263,13 @@ size_t ObjectHeader::ObjectSizeDyn(BaseClass *base_klass) const
     if (klass->IsFreeObject()) {
         return static_cast<const mem::FreeObject *>(this)->GetSize();
     }
-    return base_klass->GetObjectSize();
+    return baseKlass->GetObjectSize();
 }
 
-size_t ObjectHeader::ObjectSizeStatic(BaseClass *base_klass) const
+size_t ObjectHeader::ObjectSizeStatic(BaseClass *baseKlass) const
 {
-    ASSERT(base_klass == ClassAddr<BaseClass>());
-    auto *klass = static_cast<Class *>(base_klass);
+    ASSERT(baseKlass == ClassAddr<BaseClass>());
+    auto *klass = static_cast<Class *>(baseKlass);
 
     if (klass->IsArrayClass()) {
         return static_cast<const coretypes::Array *>(this)->ObjectSize(klass->GetComponentSize());
@@ -279,7 +285,7 @@ size_t ObjectHeader::ObjectSizeStatic(BaseClass *base_klass) const
             return panda::Class::GetClassObjectSizeFromClass(cls, klass->GetSourceLang());
         }
     }
-    return base_klass->GetObjectSize();
+    return baseKlass->GetObjectSize();
 }
 
 }  // namespace panda

@@ -23,38 +23,38 @@ class SharedReferenceSanity {
 public:
     static inline void Kill(SharedReference *ref)
     {
-        ASSERT(ref->js_ref_ != nullptr);
-        ref->js_ref_ = nullptr;
+        ASSERT(ref->jsRef_ != nullptr);
+        ref->jsRef_ = nullptr;
     }
 
     static inline bool CheckAlive(SharedReference *ref)
     {
-        return ref->js_ref_ != nullptr;
+        return ref->jsRef_ != nullptr;
     }
 };
 
 /*static*/
 std::unique_ptr<SharedReferenceStorage> SharedReferenceStorage::Create()
 {
-    size_t real_size = SharedReferenceStorage::MAX_POOL_SIZE;
+    size_t realSize = SharedReferenceStorage::MAX_POOL_SIZE;
 
-    void *data = os::mem::MapRWAnonymousRaw(real_size);
+    void *data = os::mem::MapRWAnonymousRaw(realSize);
     if (data == nullptr) {
         INTEROP_LOG(FATAL) << "Cannot allocate MemPool";
         return nullptr;
     }
-    return std::unique_ptr<SharedReferenceStorage>(new SharedReferenceStorage(data, real_size));
+    return std::unique_ptr<SharedReferenceStorage>(new SharedReferenceStorage(data, realSize));
 }
 
-SharedReference *SharedReferenceStorage::GetReference(EtsObject *ets_object)
+SharedReference *SharedReferenceStorage::GetReference(EtsObject *etsObject)
 {
-    ASSERT(HasReference(ets_object));
-    return GetItemByIndex(SharedReference::ExtractMaybeIndex(ets_object));
+    ASSERT(HasReference(etsObject));
+    return GetItemByIndex(SharedReference::ExtractMaybeIndex(etsObject));
 }
 
-SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value js_object)
+SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value jsObject)
 {
-    void *data = SharedReference::ExtractMaybeReference(env, js_object);
+    void *data = SharedReference::ExtractMaybeReference(env, jsObject);
     if (UNLIKELY(data == nullptr)) {
         return nullptr;
     }
@@ -63,26 +63,26 @@ SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value j
 
 SharedReference *SharedReferenceStorage::GetReference(void *data)
 {
-    auto *shared_ref = reinterpret_cast<SharedReference *>(data);
-    if (UNLIKELY(!IsValidItem(shared_ref))) {
+    auto *sharedRef = reinterpret_cast<SharedReference *>(data);
+    if (UNLIKELY(!IsValidItem(sharedRef))) {
         // We don't own that object
         return nullptr;
     }
-    ASSERT(SharedReferenceSanity::CheckAlive(shared_ref));
-    return shared_ref;
+    ASSERT(SharedReferenceSanity::CheckAlive(sharedRef));
+    return sharedRef;
 }
 
 template <SharedReference::InitFn REF_INIT>
-inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsObject *ets_object,
-                                                                napi_value js_object)
+inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsObject *etsObject,
+                                                                napi_value jsObject)
 {
-    ASSERT(!SharedReference::HasReference(ets_object));
-    SharedReference *shared_ref = AllocItem();
-    if (UNLIKELY(shared_ref == nullptr)) {
+    ASSERT(!SharedReference::HasReference(etsObject));
+    SharedReference *sharedRef = AllocItem();
+    if (UNLIKELY(sharedRef == nullptr)) {
         ctx->ThrowJSError(ctx->GetJSEnv(), "no free space for SharedReference");
         return nullptr;
     }
-    if (UNLIKELY(!(shared_ref->*REF_INIT)(ctx, ets_object, js_object, GetIndexByItem(shared_ref)))) {
+    if (UNLIKELY(!(sharedRef->*REF_INIT)(ctx, etsObject, jsObject, GetIndexByItem(sharedRef)))) {
         auto coro = EtsCoroutine::GetCurrent();
         if (coro->HasPendingException()) {
             ctx->ForwardEtsException(coro);
@@ -90,36 +90,35 @@ inline SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx,
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
-    return shared_ref;
+    return sharedRef;
 }
 
-SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *ets_object,
-                                                            napi_value js_object)
+SharedReference *SharedReferenceStorage::CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject)
 {
-    return CreateReference<&SharedReference::InitETSObject>(ctx, ets_object, js_object);
+    return CreateReference<&SharedReference::InitETSObject>(ctx, etsObject, jsObject);
 }
 
-SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object)
+SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject)
 {
-    return CreateReference<&SharedReference::InitJSObject>(ctx, ets_object, js_object);
+    return CreateReference<&SharedReference::InitJSObject>(ctx, etsObject, jsObject);
 }
 
-SharedReference *SharedReferenceStorage::CreateHybridObjectRef(InteropCtx *ctx, EtsObject *ets_object,
-                                                               napi_value js_object)
+SharedReference *SharedReferenceStorage::CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject,
+                                                               napi_value jsObject)
 {
-    return CreateReference<&SharedReference::InitHybridObject>(ctx, ets_object, js_object);
+    return CreateReference<&SharedReference::InitHybridObject>(ctx, etsObject, jsObject);
 }
 
-void SharedReferenceStorage::RemoveReference(SharedReference *shared_ref)
+void SharedReferenceStorage::RemoveReference(SharedReference *sharedRef)
 {
-    FreeItem(shared_ref);
-    SharedReferenceSanity::Kill(shared_ref);
+    FreeItem(sharedRef);
+    SharedReferenceSanity::Kill(sharedRef);
 }
 
 bool SharedReferenceStorage::CheckAlive(void *data)
 {
-    auto *shared_ref = reinterpret_cast<SharedReference *>(data);
-    return IsValidItem(shared_ref) && SharedReferenceSanity::CheckAlive(shared_ref);
+    auto *sharedRef = reinterpret_cast<SharedReference *>(data);
+    return IsValidItem(sharedRef) && SharedReferenceSanity::CheckAlive(sharedRef);
 }
 
 }  // namespace panda::ets::interop::js::ets_proxy

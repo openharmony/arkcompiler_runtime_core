@@ -24,11 +24,11 @@ void IMTableBuilder::Build(const panda_file::ClassDataAccessor *cda, ITable itab
         return;
     }
 
-    size_t ifm_num = 0;
+    size_t ifmNum = 0;
     for (size_t i = 0; i < itable.Size(); i++) {
         auto &entry = itable[i];
         auto methods = entry.GetMethods();
-        ifm_num += methods.Size();
+        ifmNum += methods.Size();
     }
 
     // set imtable size rules
@@ -36,28 +36,28 @@ void IMTableBuilder::Build(const panda_file::ClassDataAccessor *cda, ITable itab
     // (2) as IMTABLE_SIZE when it's in [IMTABLE_SIZE, IMTABLE_SIZE * OVERSIZE_MULTIPLE], eg. [32,64]
     // (3) as 0 when it's much more bigger than fixed IMTABLE_SIZE, since conflict probability is high and IMTable will
     // be almost empty
-    SetIMTSize((ifm_num <= Class::IMTABLE_SIZE)
-                   ? ifm_num
-                   : ((ifm_num <= Class::IMTABLE_SIZE * OVERSIZE_MULTIPLE) ? Class::IMTABLE_SIZE : 0));
+    SetIMTSize((ifmNum <= Class::IMTABLE_SIZE)
+                   ? ifmNum
+                   : ((ifmNum <= Class::IMTABLE_SIZE * OVERSIZE_MULTIPLE) ? Class::IMTABLE_SIZE : 0));
 }
 
-void IMTableBuilder::Build(ITable itable, bool is_interface)
+void IMTableBuilder::Build(ITable itable, bool isInterface)
 {
-    if (is_interface || itable.Size() == 0U) {
+    if (isInterface || itable.Size() == 0U) {
         return;
     }
 
-    size_t ifm_num = 0;
+    size_t ifmNum = 0;
     for (size_t i = 0; i < itable.Size(); i++) {
         auto &entry = itable[i];
         auto methods = entry.GetMethods();
-        ifm_num += methods.Size();
+        ifmNum += methods.Size();
     }
 
     // set imtable size rules: the same as function above
-    SetIMTSize((ifm_num <= Class::IMTABLE_SIZE)
-                   ? ifm_num
-                   : ((ifm_num <= Class::IMTABLE_SIZE * OVERSIZE_MULTIPLE) ? Class::IMTABLE_SIZE : 0));
+    SetIMTSize((ifmNum <= Class::IMTABLE_SIZE)
+                   ? ifmNum
+                   : ((ifmNum <= Class::IMTABLE_SIZE * OVERSIZE_MULTIPLE) ? Class::IMTABLE_SIZE : 0));
 }
 
 void IMTableBuilder::UpdateClass(Class *klass)
@@ -66,27 +66,27 @@ void IMTableBuilder::UpdateClass(Class *klass)
         return;
     }
 
-    auto imtable_size = klass->GetIMTSize();
-    if (imtable_size == 0U) {
+    auto imtableSize = klass->GetIMTSize();
+    if (imtableSize == 0U) {
         return;
     }
 
-    std::array<bool, Class::IMTABLE_SIZE> is_method_conflict = {false};
+    std::array<bool, Class::IMTABLE_SIZE> isMethodConflict = {false};
 
     auto itable = klass->GetITable();
     auto imtable = klass->GetIMT();
 
     for (size_t i = 0; i < itable.Size(); i++) {
         auto &entry = itable[i];
-        auto itf_methods = entry.GetInterface()->GetVirtualMethods();
-        auto imp_methods = entry.GetMethods();
+        auto itfMethods = entry.GetInterface()->GetVirtualMethods();
+        auto impMethods = entry.GetMethods();
 
-        for (size_t j = 0; j < itf_methods.Size(); j++) {
-            auto imp_method = imp_methods[j];
-            auto itf_method_id = klass->GetIMTableIndex(itf_methods[j].GetFileId().GetOffset());
-            if (!is_method_conflict.at(itf_method_id)) {
-                auto ret = AddMethod(imtable, imtable_size, itf_method_id, imp_method);
-                is_method_conflict[itf_method_id] = !ret;
+        for (size_t j = 0; j < itfMethods.Size(); j++) {
+            auto impMethod = impMethods[j];
+            auto itfMethodId = klass->GetIMTableIndex(itfMethods[j].GetFileId().GetOffset());
+            if (!isMethodConflict.at(itfMethodId)) {
+                auto ret = AddMethod(imtable, imtableSize, itfMethodId, impMethod);
+                isMethodConflict[itfMethodId] = !ret;
             }
         }
     }
@@ -96,11 +96,11 @@ void IMTableBuilder::UpdateClass(Class *klass)
 #endif  // NDEBUG
 }
 
-bool IMTableBuilder::AddMethod(panda::Span<panda::Method *> imtable, [[maybe_unused]] uint32_t imtable_size,
-                               uint32_t id, Method *method)
+bool IMTableBuilder::AddMethod(panda::Span<panda::Method *> imtable, [[maybe_unused]] uint32_t imtableSize, uint32_t id,
+                               Method *method)
 {
     bool result = false;
-    ASSERT(id < imtable_size);
+    ASSERT(id < imtableSize);
     if (imtable[id] == nullptr) {
         imtable[id] = method;
         result = true;
@@ -114,8 +114,8 @@ void IMTableBuilder::DumpIMTable(Class *klass)
 {
     LOG(DEBUG, CLASS_LINKER) << "imtable of class " << klass->GetName() << ":";
     auto imtable = klass->GetIMT();
-    auto imtable_size = klass->GetIMTSize();
-    for (size_t i = 0; i < imtable_size; i++) {
+    auto imtableSize = klass->GetIMTSize();
+    for (size_t i = 0; i < imtableSize; i++) {
         auto method = imtable[i];
         if (method != nullptr) {
             LOG(DEBUG, CLASS_LINKER) << "[ " << i << " ] " << method->GetFullName();

@@ -42,7 +42,7 @@ namespace panda::tooling {
 class Breakpoint {
 public:
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-    Breakpoint(Method *method, uint32_t bc_offset) : method_(method), bc_offset_(bc_offset) {}
+    Breakpoint(Method *method, uint32_t bcOffset) : method_(method), bcOffset_(bcOffset) {}
     ~Breakpoint() = default;
 
     Method *GetMethod() const
@@ -52,7 +52,7 @@ public:
 
     uint32_t GetBytecodeOffset() const
     {
-        return bc_offset_;
+        return bcOffset_;
     }
 
     bool operator==(const Breakpoint &bpoint) const
@@ -65,7 +65,7 @@ public:
 
 private:
     Method *method_;
-    uint32_t bc_offset_;
+    uint32_t bcOffset_;
 };
 
 // Deprecated API
@@ -92,8 +92,8 @@ public:
     enum class Type { ACCESS, MODIFY };
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-    PropertyWatch(panda_file::File::EntityId class_id, panda_file::File::EntityId field_id, Type type)
-        : class_id_(class_id), field_id_(field_id), type_(type)
+    PropertyWatch(panda_file::File::EntityId classId, panda_file::File::EntityId fieldId, Type type)
+        : classId_(classId), fieldId_(fieldId), type_(type)
     {
     }
 
@@ -101,12 +101,12 @@ public:
 
     panda_file::File::EntityId GetClassId() const
     {
-        return class_id_;
+        return classId_;
     }
 
     panda_file::File::EntityId GetFieldId() const
     {
-        return field_id_;
+        return fieldId_;
     }
 
     Type GetType() const
@@ -118,8 +118,8 @@ private:
     NO_COPY_SEMANTIC(PropertyWatch);
     NO_MOVE_SEMANTIC(PropertyWatch);
 
-    panda_file::File::EntityId class_id_;
-    panda_file::File::EntityId field_id_;
+    panda_file::File::EntityId classId_;
+    panda_file::File::EntityId fieldId_;
     Type type_;
 };
 
@@ -130,8 +130,8 @@ public:
     explicit Debugger(const Runtime *runtime)
         : runtime_(runtime),
           breakpoints_(GetInternalAllocatorAdapter(runtime)),
-          property_watches_(GetInternalAllocatorAdapter(runtime)),
-          vm_started_(runtime->IsInitialized())
+          propertyWatches_(GetInternalAllocatorAdapter(runtime)),
+          vmStarted_(runtime->IsInitialized())
     {
         runtime_->GetNotificationManager()->AddListener(this, DEBUG_EVENT_MASK);
     }
@@ -177,7 +177,7 @@ public:
         return {};
     }
 
-    std::optional<Error> SetNotification(PtThread thread, bool enable, PtHookType hook_type) override;
+    std::optional<Error> SetNotification(PtThread thread, bool enable, PtHookType hookType) override;
     std::optional<Error> SetBreakpoint(const PtLocation &location) override;
 
     std::optional<Error> RemoveBreakpoint(const PtLocation &location) override;
@@ -193,27 +193,27 @@ public:
         hooks_.LoadModule(filename);
     }
 
-    void ThreadStart(ManagedThread *managed_thread) override
+    void ThreadStart(ManagedThread *managedThread) override
     {
-        hooks_.ThreadStart(PtThread(managed_thread));
+        hooks_.ThreadStart(PtThread(managedThread));
     }
 
-    void ThreadEnd(ManagedThread *managed_thread) override
+    void ThreadEnd(ManagedThread *managedThread) override
     {
-        hooks_.ThreadEnd(PtThread(managed_thread));
+        hooks_.ThreadEnd(PtThread(managedThread));
     }
 
-    void BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bc_offset) override;
+    void BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bcOffset) override;
 
     void VmStart() override
     {
-        vm_started_ = true;
+        vmStarted_ = true;
         hooks_.VmStart();
     }
 
-    void VmInitialization(ManagedThread *managed_thread) override
+    void VmInitialization(ManagedThread *managedThread) override
     {
-        hooks_.VmInitialization(PtThread(managed_thread));
+        hooks_.VmInitialization(PtThread(managedThread));
     }
 
     void VmDeath() override
@@ -237,10 +237,10 @@ public:
 
     void ObjectAlloc(BaseClass *klass, ObjectHeader *object, ManagedThread *thread, size_t size) override;
 
-    void ExceptionThrow(ManagedThread *thread, Method *method, ObjectHeader *exception_object,
-                        uint32_t bc_offset) override;
-    void ExceptionCatch(ManagedThread *thread, Method *method, ObjectHeader *exception_object,
-                        uint32_t bc_offset) override;
+    void ExceptionThrow(ManagedThread *thread, Method *method, ObjectHeader *exceptionObject,
+                        uint32_t bcOffset) override;
+    void ExceptionCatch(ManagedThread *thread, Method *method, ObjectHeader *exceptionObject,
+                        uint32_t bcOffset) override;
 
     void ConsoleCall(ManagedThread *thread, ConsoleCallType type, uint64_t timestamp,
                      const PandaVector<TypedValue> &arguments) override
@@ -255,7 +255,7 @@ public:
     void ClassPrepare(Class *klass) override;
 
     void MonitorWait(ObjectHeader *object, int64_t timeout) override;
-    void MonitorWaited(ObjectHeader *object, bool timed_out) override;
+    void MonitorWaited(ObjectHeader *object, bool timedOut) override;
     void MonitorContendedEnter(ObjectHeader *object) override;
     void MonitorContendedEntered(ObjectHeader *object) override;
 
@@ -264,12 +264,12 @@ public:
      *
      * API's function should be revorked and input parameters should be added
      */
-    std::optional<Error> GetThreadList(PandaVector<PtThread> *thread_list) const override
+    std::optional<Error> GetThreadList(PandaVector<PtThread> *threadList) const override
     {
         runtime_->GetPandaVM()->GetThreadManager()->EnumerateThreads(
-            [thread_list](ManagedThread *managed_thread) {
-                ASSERT(managed_thread && "thread is null");
-                thread_list->push_back(PtThread(managed_thread));
+            [threadList](ManagedThread *managedThread) {
+                ASSERT(managedThread && "thread is null");
+                threadList->push_back(PtThread(managedThread));
                 return true;
             },
             static_cast<unsigned int>(panda::EnumerationFlag::ALL),
@@ -279,7 +279,7 @@ public:
     }
 
     std::optional<Error> GetThreadInfo([[maybe_unused]] PtThread thread,
-                                       [[maybe_unused]] ThreadInfo *info_ptr) const override
+                                       [[maybe_unused]] ThreadInfo *infoPtr) const override
     {
         PT_UNIMPLEMENTED();
         return {};
@@ -289,26 +289,26 @@ public:
 
     std::optional<Error> ResumeThread(PtThread thread) const override;
 
-    std::optional<Error> SetVariable([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frame_depth,
-                                     [[maybe_unused]] int32_t reg_number,
+    std::optional<Error> SetVariable([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frameDepth,
+                                     [[maybe_unused]] int32_t regNumber,
                                      [[maybe_unused]] const PtValue &value) const override
     {
         PT_UNIMPLEMENTED();
         return {};
     }
 
-    std::optional<Error> SetVariable(PtThread thread, uint32_t frame_depth, int32_t reg_number,
+    std::optional<Error> SetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
                                      const VRegValue &value) const override;
 
-    std::optional<Error> GetVariable([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frame_depth,
-                                     [[maybe_unused]] int32_t reg_number,
+    std::optional<Error> GetVariable([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frameDepth,
+                                     [[maybe_unused]] int32_t regNumber,
                                      [[maybe_unused]] PtValue *result) const override
     {
         PT_UNIMPLEMENTED();
         return {};
     }
 
-    std::optional<Error> GetVariable(PtThread thread, uint32_t frame_depth, int32_t reg_number,
+    std::optional<Error> GetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
                                      VRegValue *result) const override;
 
     std::optional<Error> GetProperty([[maybe_unused]] PtObject object, [[maybe_unused]] PtProperty property,
@@ -325,7 +325,7 @@ public:
         return {};
     }
 
-    std::optional<Error> EvaluateExpression([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frame_number,
+    std::optional<Error> EvaluateExpression([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frameNumber,
                                             [[maybe_unused]] ExpressionWrapper expr,
                                             [[maybe_unused]] PtValue *result) const override
     {
@@ -333,14 +333,14 @@ public:
         return {};
     }
 
-    std::optional<Error> RetransformClasses([[maybe_unused]] int class_count,
+    std::optional<Error> RetransformClasses([[maybe_unused]] int classCount,
                                             [[maybe_unused]] const PtClass *classes) const override
     {
         PT_UNIMPLEMENTED();
         return {};
     }
 
-    std::optional<Error> RedefineClasses([[maybe_unused]] int class_count,
+    std::optional<Error> RedefineClasses([[maybe_unused]] int classCount,
                                          [[maybe_unused]] const PandaClassDefinition *classes) const override
     {
         PT_UNIMPLEMENTED();
@@ -348,15 +348,15 @@ public:
     }
 
     std::optional<Error> RestartFrame([[maybe_unused]] PtThread thread,
-                                      [[maybe_unused]] uint32_t frame_number) const override;
+                                      [[maybe_unused]] uint32_t frameNumber) const override;
 
-    std::optional<Error> SetAsyncCallStackDepth([[maybe_unused]] uint32_t max_depth) const override
+    std::optional<Error> SetAsyncCallStackDepth([[maybe_unused]] uint32_t maxDepth) const override
     {
         PT_UNIMPLEMENTED();
         return {};
     }
 
-    std::optional<Error> AwaitPromise([[maybe_unused]] PtObject promise_object,
+    std::optional<Error> AwaitPromise([[maybe_unused]] PtObject promiseObject,
                                       [[maybe_unused]] PtValue *result) const override
     {
         PT_UNIMPLEMENTED();
@@ -365,14 +365,14 @@ public:
 
     std::optional<Error> CallFunctionOn([[maybe_unused]] PtObject object, [[maybe_unused]] PtMethod method,
                                         [[maybe_unused]] const PandaVector<PtValue> &arguments,
-                                        [[maybe_unused]] PtValue *return_value) const override
+                                        [[maybe_unused]] PtValue *returnValue) const override
     {
         PT_UNIMPLEMENTED();
         return {};
     }
 
-    std::optional<Error> GetProperties([[maybe_unused]] uint32_t *count_ptr,
-                                       [[maybe_unused]] char ***property_ptr) const override
+    std::optional<Error> GetProperties([[maybe_unused]] uint32_t *countPtr,
+                                       [[maybe_unused]] char ***propertyPtr) const override
     {
         PT_UNIMPLEMENTED();
         return {};
@@ -408,14 +408,13 @@ public:
         return {};
     }
 
-    std::optional<Error> GetThisVariableByFrame([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frame_depth,
+    std::optional<Error> GetThisVariableByFrame([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frameDepth,
                                                 [[maybe_unused]] PtValue *result) override
     {
         PT_UNIMPLEMENTED();
         return {};
     }
-    std::optional<Error> GetThisVariableByFrame(PtThread thread, uint32_t frame_depth,
-                                                ObjectHeader **this_ptr) override;
+    std::optional<Error> GetThisVariableByFrame(PtThread thread, uint32_t frameDepth, ObjectHeader **thisPtr) override;
 
     std::optional<Error> SetPropertyAccessWatch(BaseClass *klass, PtProperty property) override;
 
@@ -426,9 +425,9 @@ public:
     std::optional<Error> ClearPropertyModificationWatch(BaseClass *klass, PtProperty property) override;
 
 private:
-    Expected<interpreter::StaticVRegisterRef, Error> GetVRegByPandaFrame(panda::Frame *frame, int32_t reg_number) const;
+    Expected<interpreter::StaticVRegisterRef, Error> GetVRegByPandaFrame(panda::Frame *frame, int32_t regNumber) const;
     Expected<interpreter::DynamicVRegisterRef, Error> GetVRegByPandaFrameDyn(panda::Frame *frame,
-                                                                             int32_t reg_number) const;
+                                                                             int32_t regNumber) const;
     std::optional<Error> CheckLocation(const PtLocation &location);
     bool IsBreakpoint(const PtLocation &location) const REQUIRES_SHARED(rwlock_);
     bool EraseBreakpoint(const PtLocation &location);
@@ -436,16 +435,16 @@ private:
     bool IsPropertyWatchActive() const
     {
         os::memory::ReadLockHolder rholder(rwlock_);
-        return !property_watches_.empty();
+        return !propertyWatches_.empty();
     }
-    const tooling::PropertyWatch *FindPropertyWatch(panda_file::File::EntityId class_id,
-                                                    panda_file::File::EntityId field_id,
+    const tooling::PropertyWatch *FindPropertyWatch(panda_file::File::EntityId classId,
+                                                    panda_file::File::EntityId fieldId,
                                                     tooling::PropertyWatch::Type type) const REQUIRES_SHARED(rwlock_);
-    bool RemovePropertyWatch(panda_file::File::EntityId class_id, panda_file::File::EntityId field_id,
+    bool RemovePropertyWatch(panda_file::File::EntityId classId, panda_file::File::EntityId fieldId,
                              tooling::PropertyWatch::Type type);
 
     bool HandleBreakpoint(ManagedThread *thread, Method *method, const PtLocation &location);
-    void HandleNotifyFramePop(ManagedThread *thread, Method *method, bool was_popped_by_exception);
+    void HandleNotifyFramePop(ManagedThread *thread, Method *method, bool wasPoppedByException);
     bool HandleStep(ManagedThread *thread, Method *method, const PtLocation &location);
 
     bool HandlePropertyAccess(ManagedThread *thread, Method *method, const PtLocation &location);
@@ -464,9 +463,9 @@ private:
 
     mutable os::memory::RWLock rwlock_;
     PandaUnorderedSet<PtLocation, HashLocation> breakpoints_ GUARDED_BY(rwlock_);
-    PandaList<PropertyWatch> property_watches_ GUARDED_BY(rwlock_);
+    PandaList<PropertyWatch> propertyWatches_ GUARDED_BY(rwlock_);
     // NOTE(m.strizhak): research how to rework VM start to avoid atomic
-    std::atomic_bool vm_started_ {false};
+    std::atomic_bool vmStarted_ {false};
 
     NO_COPY_SEMANTIC(Debugger);
     NO_MOVE_SEMANTIC(Debugger);
@@ -474,12 +473,12 @@ private:
 
 class PtDebugFrame : public PtFrame {
 public:
-    explicit PANDA_PUBLIC_API PtDebugFrame(Method *method, Frame *interpreter_frame);
+    explicit PANDA_PUBLIC_API PtDebugFrame(Method *method, Frame *interpreterFrame);
     ~PtDebugFrame() override = default;
 
     bool IsInterpreterFrame() const override
     {
-        return is_interpreter_frame_;
+        return isInterpreterFrame_;
     }
 
     Method *GetMethod() const override
@@ -489,7 +488,7 @@ public:
 
     uint64_t GetVReg(size_t i) const override
     {
-        if (!is_interpreter_frame_) {
+        if (!isInterpreterFrame_) {
             return 0;
         }
         return vregs_[i];
@@ -497,10 +496,10 @@ public:
 
     RegisterKind GetVRegKind(size_t i) const override
     {
-        if (!is_interpreter_frame_) {
+        if (!isInterpreterFrame_) {
             return PtFrame::RegisterKind::PRIMITIVE;
         }
-        return vreg_kinds_[i];
+        return vregKinds_[i];
     }
 
     size_t GetVRegNum() const override
@@ -510,7 +509,7 @@ public:
 
     uint64_t GetArgument(size_t i) const override
     {
-        if (!is_interpreter_frame_) {
+        if (!isInterpreterFrame_) {
             return 0;
         }
         return args_[i];
@@ -518,10 +517,10 @@ public:
 
     RegisterKind GetArgumentKind(size_t i) const override
     {
-        if (!is_interpreter_frame_) {
+        if (!isInterpreterFrame_) {
             return PtFrame::RegisterKind::PRIMITIVE;
         }
-        return arg_kinds_[i];
+        return argKinds_[i];
     }
 
     size_t GetArgumentNum() const override
@@ -536,22 +535,22 @@ public:
 
     RegisterKind GetAccumulatorKind() const override
     {
-        return acc_kind_;
+        return accKind_;
     }
 
     panda_file::File::EntityId GetMethodId() const override
     {
-        return method_id_;
+        return methodId_;
     }
 
     uint32_t GetBytecodeOffset() const override
     {
-        return bc_offset_;
+        return bcOffset_;
     }
 
     std::string GetPandaFile() const override
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     // mock API
@@ -564,17 +563,17 @@ private:
     NO_COPY_SEMANTIC(PtDebugFrame);
     NO_MOVE_SEMANTIC(PtDebugFrame);
 
-    bool is_interpreter_frame_;
+    bool isInterpreterFrame_;
     Method *method_;
     uint64_t acc_ {0};
-    RegisterKind acc_kind_ {PtFrame::RegisterKind::PRIMITIVE};
+    RegisterKind accKind_ {PtFrame::RegisterKind::PRIMITIVE};
     PandaVector<uint64_t> vregs_;
-    PandaVector<RegisterKind> vreg_kinds_;
+    PandaVector<RegisterKind> vregKinds_;
     PandaVector<uint64_t> args_;
-    PandaVector<RegisterKind> arg_kinds_;
-    panda_file::File::EntityId method_id_;
-    uint32_t bc_offset_ {0};
-    std::string panda_file_;
+    PandaVector<RegisterKind> argKinds_;
+    panda_file::File::EntityId methodId_;
+    uint32_t bcOffset_ {0};
+    std::string pandaFile_;
 };
 }  // namespace panda::tooling
 

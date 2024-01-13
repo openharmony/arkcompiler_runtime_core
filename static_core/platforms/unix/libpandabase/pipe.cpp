@@ -57,30 +57,30 @@ int SetFdNonblocking(const UniqueFd &fd)
 #endif
 }
 
-Expected<size_t, Error> ReadFromPipe(const UniqueFd &pipe_fd, void *buf, size_t size)
+Expected<size_t, Error> ReadFromPipe(const UniqueFd &pipeFd, void *buf, size_t size)
 {
-    ssize_t bytes_read = PANDA_FAILURE_RETRY(read(pipe_fd.Get(), buf, size));
-    if (bytes_read < 0) {
+    ssize_t bytesRead = PANDA_FAILURE_RETRY(read(pipeFd.Get(), buf, size));
+    if (bytesRead < 0) {
         return Unexpected(Error(errno));
     }
-    return {static_cast<size_t>(bytes_read)};
+    return {static_cast<size_t>(bytesRead)};
 }
 
-Expected<size_t, Error> WriteToPipe(const UniqueFd &pipe_fd, const void *buf, size_t size)
+Expected<size_t, Error> WriteToPipe(const UniqueFd &pipeFd, const void *buf, size_t size)
 {
-    ssize_t bytes_written = PANDA_FAILURE_RETRY(write(pipe_fd.Get(), buf, size));
-    if (bytes_written < 0) {
+    ssize_t bytesWritten = PANDA_FAILURE_RETRY(write(pipeFd.Get(), buf, size));
+    if (bytesWritten < 0) {
         return Unexpected(Error(errno));
     }
-    return {static_cast<size_t>(bytes_written)};
+    return {static_cast<size_t>(bytesWritten)};
 }
 
 Expected<size_t, Error> WaitForEvent(const UniqueFd *handles, size_t size, EventType type)
 {
-    uint16_t poll_events;
+    uint16_t pollEvents;
     switch (type) {
         case EventType::READY:
-            poll_events = POLLIN;
+            pollEvents = POLLIN;
             break;
 
         default:
@@ -91,7 +91,7 @@ Expected<size_t, Error> WaitForEvent(const UniqueFd *handles, size_t size, Event
     std::vector<pollfd> pollfds(size);
     for (size_t i = 0; i < size; i++) {
         pollfds[i].fd = handles[i].Get();  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        pollfds[i].events = static_cast<int16_t>(poll_events);
+        pollfds[i].events = static_cast<int16_t>(pollEvents);
     }
 
     while (true) {
@@ -101,7 +101,7 @@ Expected<size_t, Error> WaitForEvent(const UniqueFd *handles, size_t size, Event
         }
 
         for (size_t i = 0; i < size; i++) {
-            if ((static_cast<size_t>(pollfds[i].revents) & poll_events) == poll_events) {
+            if ((static_cast<size_t>(pollfds[i].revents) & pollEvents) == pollEvents) {
                 return {i};
             }
         }

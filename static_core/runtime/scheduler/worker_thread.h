@@ -42,7 +42,7 @@ public:
     static WorkerThread *AttachThread();
     static void DetachThread()
     {
-        trace::ScopedTrace scoped_trace(__FUNCTION__);
+        trace::ScopedTrace scopedTrace(__FUNCTION__);
         auto thread = GetCurrent();
         thread->Detach();
     }

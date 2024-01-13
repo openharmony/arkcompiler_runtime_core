@@ -26,18 +26,18 @@ namespace panda::compiler {
 LivenessAnalyzer::LivenessAnalyzer(Graph *graph)
     : Analysis(graph),
       allocator_(graph->GetAllocator()),
-      linear_blocks_(graph->GetAllocator()->Adapter()),
-      inst_life_numbers_(graph->GetAllocator()->Adapter()),
-      inst_life_intervals_(graph->GetAllocator()->Adapter()),
-      insts_by_life_number_(graph->GetAllocator()->Adapter()),
-      block_live_ranges_(graph->GetAllocator()->Adapter()),
-      block_live_sets_(graph->GetLocalAllocator()->Adapter()),
-      pending_catch_phi_inputs_(graph->GetAllocator()->Adapter()),
-      physical_general_intervals_(graph->GetAllocator()->Adapter()),
-      physical_vector_intervals_(graph->GetAllocator()->Adapter()),
-      intervals_for_temps_(graph->GetAllocator()->Adapter()),
-      use_table_(graph->GetAllocator()),
-      has_safepoint_during_call_(graph->GetRuntime()->HasSafepointDuringCall())
+      linearBlocks_(graph->GetAllocator()->Adapter()),
+      instLifeNumbers_(graph->GetAllocator()->Adapter()),
+      instLifeIntervals_(graph->GetAllocator()->Adapter()),
+      instsByLifeNumber_(graph->GetAllocator()->Adapter()),
+      blockLiveRanges_(graph->GetAllocator()->Adapter()),
+      blockLiveSets_(graph->GetLocalAllocator()->Adapter()),
+      pendingCatchPhiInputs_(graph->GetAllocator()->Adapter()),
+      physicalGeneralIntervals_(graph->GetAllocator()->Adapter()),
+      physicalVectorIntervals_(graph->GetAllocator()->Adapter()),
+      intervalsForTemps_(graph->GetAllocator()->Adapter()),
+      useTable_(graph->GetAllocator()),
+      hasSafepointDuringCall_(graph->GetRuntime()->HasSafepointDuringCall())
 {
 }
 
@@ -53,32 +53,32 @@ bool LivenessAnalyzer::RunImpl()
     BuildInstLifeNumbers();
     BuildInstLifeIntervals();
     Finalize();
-    if (!pending_catch_phi_inputs_.empty()) {
+    if (!pendingCatchPhiInputs_.empty()) {
         COMPILER_LOG(ERROR, LIVENESS_ANALYZER)
             << "Graph contains CatchPhi instructions whose inputs were not processed";
         return false;
     }
-    std::copy_if(physical_general_intervals_.begin(), physical_general_intervals_.end(),
-                 std::back_inserter(inst_life_intervals_), [](auto li) { return li != nullptr; });
-    std::copy_if(physical_vector_intervals_.begin(), physical_vector_intervals_.end(),
-                 std::back_inserter(inst_life_intervals_), [](auto li) { return li != nullptr; });
-    std::copy(intervals_for_temps_.begin(), intervals_for_temps_.end(), std::back_inserter(inst_life_intervals_));
+    std::copy_if(physicalGeneralIntervals_.begin(), physicalGeneralIntervals_.end(),
+                 std::back_inserter(instLifeIntervals_), [](auto li) { return li != nullptr; });
+    std::copy_if(physicalVectorIntervals_.begin(), physicalVectorIntervals_.end(),
+                 std::back_inserter(instLifeIntervals_), [](auto li) { return li != nullptr; });
+    std::copy(intervalsForTemps_.begin(), intervalsForTemps_.end(), std::back_inserter(instLifeIntervals_));
     COMPILER_LOG(DEBUG, LIVENESS_ANALYZER) << "Liveness analysis is constructed";
     return true;
 }
 
 void LivenessAnalyzer::ResetLiveness()
 {
-    inst_life_numbers_.clear();
-    inst_life_intervals_.clear();
-    block_live_sets_.clear();
-    block_live_ranges_.clear();
-    physical_general_intervals_.clear();
-    physical_vector_intervals_.clear();
-    intervals_for_temps_.clear();
+    instLifeNumbers_.clear();
+    instLifeIntervals_.clear();
+    blockLiveSets_.clear();
+    blockLiveRanges_.clear();
+    physicalGeneralIntervals_.clear();
+    physicalVectorIntervals_.clear();
+    intervalsForTemps_.clear();
     if (GetGraph()->GetArch() != Arch::NONE) {
-        physical_general_intervals_.resize(REGISTERS_NUM);
-        physical_vector_intervals_.resize(VREGISTERS_NUM);
+        physicalGeneralIntervals_.resize(REGISTERS_NUM);
+        physicalVectorIntervals_.resize(VREGISTERS_NUM);
     }
 #ifndef NDEBUG
     finalized_ = false;
@@ -94,8 +94,8 @@ void LivenessAnalyzer::BuildBlocksLinearOrder()
 {
     ASSERT_PRINT(GetGraph()->IsAnalysisValid<DominatorsTree>(), "Liveness Analyzer needs valid Dom Tree");
     auto size = GetGraph()->GetBlocksRPO().size();
-    linear_blocks_.reserve(size);
-    linear_blocks_.clear();
+    linearBlocks_.reserve(size);
+    linearBlocks_.clear();
     marker_ = GetGraph()->NewMarker();
     ASSERT_PRINT(marker_ != UNDEF_MARKER, "There are no free markers");
     if (GetGraph()->IsBytecodeOptimizer() && !GetGraph()->GetTryBeginBlocks().empty()) {
@@ -103,12 +103,12 @@ void LivenessAnalyzer::BuildBlocksLinearOrder()
     } else {
         LinearizeBlocks<false>();
     }
-    ASSERT(linear_blocks_.size() == size);
+    ASSERT(linearBlocks_.size() == size);
     GetGraph()->EraseMarker(marker_);
     ASSERT_PRINT(CheckLinearOrder(), "Linear block order isn't correct");
 
-    block_live_sets_.resize(GetGraph()->GetVectorBlocks().size());
-    block_live_ranges_.resize(GetGraph()->GetVectorBlocks().size());
+    blockLiveSets_.resize(GetGraph()->GetVectorBlocks().size());
+    blockLiveRanges_.resize(GetGraph()->GetVectorBlocks().size());
 }
 
 /*
@@ -148,7 +148,7 @@ void LivenessAnalyzer::LinearizeBlocks()
         auto current = pending.front();
         pending.pop_front();
 
-        linear_blocks_.push_back(current);
+        linearBlocks_.push_back(current);
         current->SetMarker(marker_);
 
         auto succs = current->GetSuccsBlocks();
@@ -162,16 +162,16 @@ void LivenessAnalyzer::LinearizeBlocks()
             }
 
             if constexpr (USE_PC_ORDER) {  // NOLINT(readability-braces-around-statements)
-                auto pc_compare = [succ](auto block) { return block->GetGuestPc() > succ->GetGuestPc(); };
-                auto insert_before = std::find_if(pending.begin(), pending.end(), pc_compare);
-                pending.insert(insert_before, succ);
+                auto pcCompare = [succ](auto block) { return block->GetGuestPc() > succ->GetGuestPc(); };
+                auto insertBefore = std::find_if(pending.begin(), pending.end(), pcCompare);
+                pending.insert(insertBefore, succ);
             } else {
                 // Insert successor right before the first block not from an inner loop.
                 // Such ordering guarantee that a loop and all it's inner loops will be processed
                 // before following edges leading to outer loop blocks.
-                auto is_not_inner_loop = [succ](auto block) { return !block->GetLoop()->IsInside(succ->GetLoop()); };
-                auto insert_before = std::find_if(pending.begin(), pending.end(), is_not_inner_loop);
-                pending.insert(insert_before, succ);
+                auto isNotInnerLoop = [succ](auto block) { return !block->GetLoop()->IsInside(succ->GetLoop()); };
+                auto insertBefore = std::find_if(pending.begin(), pending.end(), isNotInnerLoop);
+                pending.insert(insertBefore, succ);
             }
         }
     }
@@ -182,24 +182,24 @@ void LivenessAnalyzer::LinearizeBlocks()
  */
 bool LivenessAnalyzer::CheckLinearOrder()
 {
-    ArenaVector<size_t> block_pos(GetGraph()->GetVectorBlocks().size(), 0, GetAllocator()->Adapter());
+    ArenaVector<size_t> blockPos(GetGraph()->GetVectorBlocks().size(), 0, GetAllocator()->Adapter());
     size_t position = 0;
-    for (auto block : linear_blocks_) {
-        block_pos[block->GetId()] = position++;
+    for (auto block : linearBlocks_) {
+        blockPos[block->GetId()] = position++;
     }
 
-    for (auto block : linear_blocks_) {
+    for (auto block : linearBlocks_) {
         if (block->GetDominator() != nullptr) {
-            ASSERT_PRINT(block_pos[block->GetDominator()->GetId()] < block_pos[block->GetId()],
+            ASSERT_PRINT(blockPos[block->GetDominator()->GetId()] < blockPos[block->GetId()],
                          "Each block should be visited after its dominator");
         }
         if (!block->IsTryEnd()) {
             continue;
         }
         ASSERT(block->GetTryId() != INVALID_ID);
-        for (auto bb : linear_blocks_) {
+        for (auto bb : linearBlocks_) {
             if (bb->IsTry() && bb->GetTryId() == block->GetTryId()) {
-                ASSERT_PRINT(block_pos[bb->GetId()] < block_pos[block->GetId()],
+                ASSERT_PRINT(blockPos[bb->GetId()] < blockPos[block->GetId()],
                              "Each try-block should be visited before its try-end block");
             }
         }
@@ -213,76 +213,76 @@ bool LivenessAnalyzer::CheckLinearOrder()
  */
 void LivenessAnalyzer::BuildInstLifeNumbers()
 {
-    LifeNumber block_begin;
-    LifeNumber life_number = 0;
-    LinearNumber linear_number = 0;
+    LifeNumber blockBegin;
+    LifeNumber lifeNumber = 0;
+    LinearNumber linearNumber = 0;
 
     for (auto block : GetLinearizedBlocks()) {
-        block_begin = life_number;
+        blockBegin = lifeNumber;
         // set the same number for each phi in the block
         for (auto phi : block->PhiInsts()) {
-            phi->SetLinearNumber(linear_number++);
-            SetInstLifeNumber(phi, life_number);
+            phi->SetLinearNumber(linearNumber++);
+            SetInstLifeNumber(phi, lifeNumber);
             CreateLifeIntervals(phi);
         }
         // ignore PHI instructions
-        insts_by_life_number_.push_back(nullptr);
+        instsByLifeNumber_.push_back(nullptr);
         // set a unique number for each instruction in the block, differing by 2
         // for the reason of adding spill/fill instructions
         for (auto inst : block->Insts()) {
-            inst->SetLinearNumber(linear_number++);
+            inst->SetLinearNumber(linearNumber++);
             CreateLifeIntervals(inst);
             if (IsPseudoUserOfMultiOutput(inst)) {
                 // Should be the same life number as pseudo-user, since actually they have the same definition
-                SetInstLifeNumber(inst, life_number);
-                GetInstLifeIntervals(inst)->AddUsePosition(life_number);
+                SetInstLifeNumber(inst, lifeNumber);
+                GetInstLifeIntervals(inst)->AddUsePosition(lifeNumber);
                 continue;
             }
-            life_number += LIFE_NUMBER_GAP;
-            SetInstLifeNumber(inst, life_number);
-            SetUsePositions(inst, life_number);
-            insts_by_life_number_.push_back(inst);
+            lifeNumber += LIFE_NUMBER_GAP;
+            SetInstLifeNumber(inst, lifeNumber);
+            SetUsePositions(inst, lifeNumber);
+            instsByLifeNumber_.push_back(inst);
 
             if (inst->RequireTmpReg()) {
-                CreateIntervalForTemp(life_number);
+                CreateIntervalForTemp(lifeNumber);
             }
         }
-        life_number += LIFE_NUMBER_GAP;
-        SetBlockLiveRange(block, {block_begin, life_number});
+        lifeNumber += LIFE_NUMBER_GAP;
+        SetBlockLiveRange(block, {blockBegin, lifeNumber});
     }
 }
 
-void LivenessAnalyzer::SetUsePositions(Inst *user_inst, LifeNumber life_number)
+void LivenessAnalyzer::SetUsePositions(Inst *userInst, LifeNumber lifeNumber)
 {
     if (GetGraph()->IsBytecodeOptimizer()) {
         return;
     }
-    if (user_inst->IsCatchPhi() || user_inst->IsSaveState()) {
+    if (userInst->IsCatchPhi() || userInst->IsSaveState()) {
         return;
     }
-    for (size_t i = 0; i < user_inst->GetInputsCount(); i++) {
-        auto location = user_inst->GetLocation(i);
+    for (size_t i = 0; i < userInst->GetInputsCount(); i++) {
+        auto location = userInst->GetLocation(i);
         if (!location.IsAnyRegister()) {
             continue;
         }
-        auto input_inst = user_inst->GetDataFlowInput(i);
-        auto li = GetInstLifeIntervals(input_inst);
+        auto inputInst = userInst->GetDataFlowInput(i);
+        auto li = GetInstLifeIntervals(inputInst);
         if (location.IsRegisterValid()) {
-            use_table_.AddUseOnFixedLocation(input_inst, location, life_number);
+            useTable_.AddUseOnFixedLocation(inputInst, location, lifeNumber);
         } else if (location.IsUnallocatedRegister()) {
-            li->AddUsePosition(life_number);
+            li->AddUsePosition(lifeNumber);
         }
     }
 
     // Constant can be defined without register
-    if (user_inst->IsConst() && OPTIONS.IsCompilerRematConst()) {
+    if (userInst->IsConst() && g_options.IsCompilerRematConst()) {
         return;
     }
 
     // If instruction required dst register, set use position in the beginning of the interval
-    auto li = GetInstLifeIntervals(user_inst);
+    auto li = GetInstLifeIntervals(userInst);
     if (!li->NoDest()) {
-        li->AddUsePosition(life_number);
+        li->AddUsePosition(lifeNumber);
     }
 }
 
@@ -293,8 +293,8 @@ void LivenessAnalyzer::BuildInstLifeIntervals()
 {
     for (auto it = GetLinearizedBlocks().rbegin(); it != GetLinearizedBlocks().rend(); it++) {
         auto block = *it;
-        auto live_set = GetInitInstLiveSet(block);
-        ProcessBlockLiveInstructions(block, live_set);
+        auto liveSet = GetInitInstLiveSet(block);
+        ProcessBlockLiveInstructions(block, liveSet);
     }
 }
 
@@ -305,17 +305,17 @@ void LivenessAnalyzer::BuildInstLifeIntervals()
  */
 InstLiveSet *LivenessAnalyzer::GetInitInstLiveSet(BasicBlock *block)
 {
-    unsigned instruction_count = inst_life_intervals_.size();
-    auto live_set = GetAllocator()->New<InstLiveSet>(instruction_count, GetAllocator());
+    unsigned instructionCount = instLifeIntervals_.size();
+    auto liveSet = GetAllocator()->New<InstLiveSet>(instructionCount, GetAllocator());
     for (auto succ : block->GetSuccsBlocks()) {
         // catch-begin is pseudo successor, its live set will be processed for blocks with throwable instructions
         if (succ->IsCatchBegin()) {
             continue;
         }
-        live_set->Union(GetBlockLiveSet(succ));
+        liveSet->Union(GetBlockLiveSet(succ));
         for (auto phi : succ->PhiInsts()) {
-            auto phi_input = phi->CastToPhi()->GetPhiDataflowInput(block);
-            live_set->Add(phi_input->GetLinearNumber());
+            auto phiInput = phi->CastToPhi()->GetPhiDataflowInput(block);
+            liveSet->Add(phiInput->GetLinearNumber());
         }
     }
 
@@ -323,35 +323,35 @@ InstLiveSet *LivenessAnalyzer::GetInitInstLiveSet(BasicBlock *block)
     // block
     if (auto inst = block->GetFistThrowableInst(); inst != nullptr) {
         auto handlers = GetGraph()->GetThrowableInstHandlers(inst);
-        for (auto catch_handler : handlers) {
-            live_set->Union(GetBlockLiveSet(catch_handler));
+        for (auto catchHandler : handlers) {
+            liveSet->Union(GetBlockLiveSet(catchHandler));
         }
     }
-    return live_set;
+    return liveSet;
 }
 
 LifeNumber LivenessAnalyzer::GetLoopEnd(Loop *loop)
 {
-    LifeNumber loop_end = 0;
+    LifeNumber loopEnd = 0;
     // find max LifeNumber of inner loops
     for (auto inner : loop->GetInnerLoops()) {
-        loop_end = std::max(loop_end, GetLoopEnd(inner));
+        loopEnd = std::max(loopEnd, GetLoopEnd(inner));
     }
     // find max LifeNumber of back_edges
-    for (auto back_edge : loop->GetBackEdges()) {
-        loop_end = std::max(loop_end, GetBlockLiveRange(back_edge).GetEnd());
+    for (auto backEdge : loop->GetBackEdges()) {
+        loopEnd = std::max(loopEnd, GetBlockLiveRange(backEdge).GetEnd());
     }
-    return loop_end;
+    return loopEnd;
 }
 
 /*
  * Append and adjust the lifetime intervals for each instruction live in the block and for their inputs
  */
-void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveSet *live_set)
+void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveSet *liveSet)
 {
     // For each live instruction set initial life range equals to the block life range
-    for (auto &interval : inst_life_intervals_) {
-        if (live_set->IsSet(interval->GetInst()->GetLinearNumber())) {
+    for (auto &interval : instLifeIntervals_) {
+        if (liveSet->IsSet(interval->GetInst()->GetLinearNumber())) {
             interval->AppendRange(GetBlockLiveRange(block));
         }
     }
@@ -359,27 +359,27 @@ void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveS
     for (Inst *inst : block->InstsSafeReverse()) {
         // Shorten instruction lifetime to the position where its defined
         // and remove from the block's live set
-        auto inst_life_number = GetInstLifeNumber(inst);
+        auto instLifeNumber = GetInstLifeNumber(inst);
         auto interval = GetInstLifeIntervals(inst);
-        interval->StartFrom(inst_life_number);
-        live_set->Remove(inst->GetLinearNumber());
+        interval->StartFrom(instLifeNumber);
+        liveSet->Remove(inst->GetLinearNumber());
         if (inst->IsCatchPhi()) {
             // catch-phi's liveness should overlap all linked try blocks' livenesses
             for (auto pred : inst->GetBasicBlock()->GetPredsBlocks()) {
-                inst_life_number = std::min(inst_life_number, GetBlockLiveRange(pred).GetBegin());
+                instLifeNumber = std::min(instLifeNumber, GetBlockLiveRange(pred).GetBegin());
             }
-            interval->StartFrom(inst_life_number);
+            interval->StartFrom(instLifeNumber);
             AdjustCatchPhiInputsLifetime(inst);
         } else {
             if (inst->GetOpcode() == Opcode::LiveOut) {
                 if (block->GetSuccsBlocks().size() == 1 && block->GetSuccessor(0)->IsEndBlock()) {
-                    interval->AppendRange({inst_life_number, GetBlockLiveRange(block).GetEnd()});
+                    interval->AppendRange({instLifeNumber, GetBlockLiveRange(block).GetEnd()});
                 } else {
-                    interval->AppendRange({inst_life_number, GetBlockLiveRange(GetGraph()->GetEndBlock()).GetBegin()});
+                    interval->AppendRange({instLifeNumber, GetBlockLiveRange(GetGraph()->GetEndBlock()).GetBegin()});
                 }
             }
-            auto current_live_range = LiveRange {GetBlockLiveRange(block).GetBegin(), inst_life_number};
-            AdjustInputsLifetime(inst, current_live_range, live_set);
+            auto currentLiveRange = LiveRange {GetBlockLiveRange(block).GetBegin(), instLifeNumber};
+            AdjustInputsLifetime(inst, currentLiveRange, liveSet);
         }
 
         BlockFixedRegisters(inst);
@@ -387,25 +387,25 @@ void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveS
 
     // The lifetime interval of phis instructions starts at the beginning of the block
     for (auto phi : block->PhiInsts()) {
-        live_set->Remove(phi->GetLinearNumber());
+        liveSet->Remove(phi->GetLinearNumber());
     }
 
     // All instructions live at the beginning ot the loop header
     // must be live for the entire loop
     if (block->IsLoopHeader()) {
-        LifeNumber loop_end_position = GetLoopEnd(block->GetLoop());
+        LifeNumber loopEndPosition = GetLoopEnd(block->GetLoop());
 
-        for (auto &interval : inst_life_intervals_) {
-            if (live_set->IsSet(interval->GetInst()->GetLinearNumber())) {
-                interval->AppendGroupRange({GetBlockLiveRange(block).GetBegin(), loop_end_position});
+        for (auto &interval : instLifeIntervals_) {
+            if (liveSet->IsSet(interval->GetInst()->GetLinearNumber())) {
+                interval->AppendGroupRange({GetBlockLiveRange(block).GetBegin(), loopEndPosition});
             }
         }
     }
-    SetBlockLiveSet(block, live_set);
+    SetBlockLiveSet(block, liveSet);
 }
 
 /* static */
-LiveRange LivenessAnalyzer::GetPropagatedLiveRange(Inst *inst, LiveRange live_range)
+LiveRange LivenessAnalyzer::GetPropagatedLiveRange(Inst *inst, LiveRange liveRange)
 {
     /*
      * Implicit null check encoded as no-op and if the reference to check is null
@@ -414,25 +414,25 @@ LiveRange LivenessAnalyzer::GetPropagatedLiveRange(Inst *inst, LiveRange live_ra
      * life intervals of SaveState's inputs until NullCheck user.
      */
     if (inst->IsNullCheck() && !inst->GetUsers().Empty() && inst->CastToNullCheck()->IsImplicit()) {
-        auto extend_until = std::numeric_limits<LifeNumber>::max();
+        auto extendUntil = std::numeric_limits<LifeNumber>::max();
         for (auto &user : inst->GetUsers()) {
             // Skip the users dominating the NullCheck as their live ranges
             // start earlier than NullCheck's live range.
             if (!user.GetInst()->IsDominate(inst)) {
                 auto li = GetInstLifeIntervals(user.GetInst());
                 ASSERT(li != nullptr);
-                extend_until = std::min<LifeNumber>(extend_until, li->GetBegin() + 1);
+                extendUntil = std::min<LifeNumber>(extendUntil, li->GetBegin() + 1);
             }
         }
-        live_range.SetEnd(extend_until);
-        return live_range;
+        liveRange.SetEnd(extendUntil);
+        return liveRange;
     }
     /*
      * We need to propagate liveness for instruction with CallRuntime to save registers before call;
      * Otherwise, we will not be able to restore the value of the virtual registers
      */
     if (inst->IsPropagateLiveness()) {
-        live_range.SetEnd(live_range.GetEnd() + 1);
+        liveRange.SetEnd(liveRange.GetEnd() + 1);
     } else if (inst->GetOpcode() == Opcode::ReturnInlined && inst->CastToReturnInlined()->IsExtendedLiveness()) {
         /*
          * [ReturnInlined]
@@ -442,62 +442,62 @@ LiveRange LivenessAnalyzer::GetPropagatedLiveRange(Inst *inst, LiveRange live_ra
          *
          * In this case we propagate ReturnInlined inputs liveness up to the end of basic block
          */
-        live_range.SetEnd(GetBlockLiveRange(inst->GetBasicBlock()).GetEnd());
+        liveRange.SetEnd(GetBlockLiveRange(inst->GetBasicBlock()).GetEnd());
     }
-    return live_range;
+    return liveRange;
 }
 
 /*
  * Adjust instruction inputs lifetime and add them to the block's live set
  */
-void LivenessAnalyzer::AdjustInputsLifetime(Inst *inst, LiveRange live_range, InstLiveSet *live_set)
+void LivenessAnalyzer::AdjustInputsLifetime(Inst *inst, LiveRange liveRange, InstLiveSet *liveSet)
 {
     for (auto input : inst->GetInputs()) {
-        auto input_inst = inst->GetDataFlowInput(input.GetInst());
-        live_set->Add(input_inst->GetLinearNumber());
-        SetInputRange(inst, input_inst, live_range);
+        auto inputInst = inst->GetDataFlowInput(input.GetInst());
+        liveSet->Add(inputInst->GetLinearNumber());
+        SetInputRange(inst, inputInst, liveRange);
     }
 
     // Extend SaveState inputs lifetime to the end of SaveState's lifetime
     if (inst->RequireState()) {
-        auto save_state = inst->GetSaveState();
-        auto propagated_range = GetPropagatedLiveRange(inst, live_range);
+        auto saveState = inst->GetSaveState();
+        auto propagatedRange = GetPropagatedLiveRange(inst, liveRange);
         while (true) {
-            ASSERT(save_state != nullptr);
-            for (auto ss_input : save_state->GetInputs()) {
-                auto input_inst = save_state->GetDataFlowInput(ss_input.GetInst());
-                live_set->Add(input_inst->GetLinearNumber());
-                GetInstLifeIntervals(input_inst)->AppendRange(propagated_range);
+            ASSERT(saveState != nullptr);
+            for (auto ssInput : saveState->GetInputs()) {
+                auto inputInst = saveState->GetDataFlowInput(ssInput.GetInst());
+                liveSet->Add(inputInst->GetLinearNumber());
+                GetInstLifeIntervals(inputInst)->AppendRange(propagatedRange);
             }
-            auto caller_inst = save_state->GetCallerInst();
-            if (caller_inst == nullptr) {
+            auto callerInst = saveState->GetCallerInst();
+            if (callerInst == nullptr) {
                 break;
             }
-            save_state = caller_inst->GetSaveState();
+            saveState = callerInst->GetSaveState();
         }
     }
 
     // Handle CatchPhi inputs associated with inst
-    auto range = pending_catch_phi_inputs_.equal_range(inst);
+    auto range = pendingCatchPhiInputs_.equal_range(inst);
     for (auto it = range.first; it != range.second; ++it) {
-        auto throwable_input = it->second;
-        auto throwable_input_interval = GetInstLifeIntervals(throwable_input);
-        live_set->Add(throwable_input->GetLinearNumber());
-        throwable_input_interval->AppendRange(live_range);
+        auto throwableInput = it->second;
+        auto throwableInputInterval = GetInstLifeIntervals(throwableInput);
+        liveSet->Add(throwableInput->GetLinearNumber());
+        throwableInputInterval->AppendRange(liveRange);
     }
-    pending_catch_phi_inputs_.erase(inst);
+    pendingCatchPhiInputs_.erase(inst);
 }
 
 /*
  * Increase ref-input liveness in the 'no-async-jit' mode, since GC can be triggered and delete ref during callee-method
  * compilation
  */
-void LivenessAnalyzer::SetInputRange(const Inst *inst, const Inst *input, LiveRange live_range) const
+void LivenessAnalyzer::SetInputRange(const Inst *inst, const Inst *input, LiveRange liveRange) const
 {
-    if (has_safepoint_during_call_ && inst->IsCall() && DataType::IsReference(input->GetType())) {
-        GetInstLifeIntervals(input)->AppendRange(live_range.GetBegin(), live_range.GetEnd() + 1U);
+    if (hasSafepointDuringCall_ && inst->IsCall() && DataType::IsReference(input->GetType())) {
+        GetInstLifeIntervals(input)->AppendRange(liveRange.GetBegin(), liveRange.GetEnd() + 1U);
     } else {
-        GetInstLifeIntervals(input)->AppendRange(live_range);
+        GetInstLifeIntervals(input)->AppendRange(liveRange);
     }
 }
 
@@ -508,25 +508,25 @@ void LivenessAnalyzer::SetInputRange(const Inst *inst, const Inst *input, LiveRa
  */
 void LivenessAnalyzer::AdjustCatchPhiInputsLifetime(Inst *inst)
 {
-    auto catch_phi = inst->CastToCatchPhi();
+    auto catchPhi = inst->CastToCatchPhi();
 
-    for (ssize_t input_idx = catch_phi->GetInputsCount() - 1; input_idx >= 0; input_idx--) {
-        auto input_inst = catch_phi->GetDataFlowInput(input_idx);
-        auto throwable_inst = const_cast<Inst *>(catch_phi->GetThrowableInst(input_idx));
+    for (ssize_t inputIdx = catchPhi->GetInputsCount() - 1; inputIdx >= 0; inputIdx--) {
+        auto inputInst = catchPhi->GetDataFlowInput(inputIdx);
+        auto throwableInst = const_cast<Inst *>(catchPhi->GetThrowableInst(inputIdx));
 
-        pending_catch_phi_inputs_.insert({throwable_inst, input_inst});
+        pendingCatchPhiInputs_.insert({throwableInst, inputInst});
     }
 }
 
 void LivenessAnalyzer::SetInstLifeNumber([[maybe_unused]] const Inst *inst, LifeNumber number)
 {
-    ASSERT(inst_life_numbers_.size() == inst->GetLinearNumber());
-    inst_life_numbers_.push_back(number);
+    ASSERT(instLifeNumbers_.size() == inst->GetLinearNumber());
+    instLifeNumbers_.push_back(number);
 }
 
 LifeNumber LivenessAnalyzer::GetInstLifeNumber(const Inst *inst) const
 {
-    return inst_life_numbers_[inst->GetLinearNumber()];
+    return instLifeNumbers_[inst->GetLinearNumber()];
 }
 
 /*
@@ -536,9 +536,9 @@ LifeNumber LivenessAnalyzer::GetInstLifeNumber(const Inst *inst) const
 void LivenessAnalyzer::CreateLifeIntervals(Inst *inst)
 {
     ASSERT(!finalized_);
-    ASSERT(inst->GetLinearNumber() == inst_life_intervals_.size());
+    ASSERT(inst->GetLinearNumber() == instLifeIntervals_.size());
     auto interval = GetAllocator()->New<LifeIntervals>(GetAllocator(), inst);
-    inst_life_intervals_.push_back(interval);
+    instLifeIntervals_.push_back(interval);
 }
 
 void LivenessAnalyzer::CreateIntervalForTemp(LifeNumber ln)
@@ -549,33 +549,33 @@ void LivenessAnalyzer::CreateIntervalForTemp(LifeNumber ln)
     interval->AddUsePosition(ln);
     // DataType is INT64, since general register is reserved (for 32-bits arch will be converted to INT32)
     interval->SetType(ConvertRegType(GetGraph(), DataType::INT64));
-    intervals_for_temps_.push_back(interval);
+    intervalsForTemps_.push_back(interval);
 }
 
 LifeIntervals *LivenessAnalyzer::GetInstLifeIntervals(const Inst *inst) const
 {
     ASSERT(inst->GetLinearNumber() != INVALID_LINEAR_NUM);
-    return inst_life_intervals_[inst->GetLinearNumber()];
+    return instLifeIntervals_[inst->GetLinearNumber()];
 }
 
-void LivenessAnalyzer::SetBlockLiveRange(BasicBlock *block, LiveRange life_range)
+void LivenessAnalyzer::SetBlockLiveRange(BasicBlock *block, LiveRange lifeRange)
 {
-    block_live_ranges_[block->GetId()] = life_range;
+    blockLiveRanges_[block->GetId()] = lifeRange;
 }
 
 LiveRange LivenessAnalyzer::GetBlockLiveRange(const BasicBlock *block) const
 {
-    return block_live_ranges_[block->GetId()];
+    return blockLiveRanges_[block->GetId()];
 }
 
-void LivenessAnalyzer::SetBlockLiveSet(BasicBlock *block, InstLiveSet *live_set)
+void LivenessAnalyzer::SetBlockLiveSet(BasicBlock *block, InstLiveSet *liveSet)
 {
-    block_live_sets_[block->GetId()] = live_set;
+    blockLiveSets_[block->GetId()] = liveSet;
 }
 
 InstLiveSet *LivenessAnalyzer::GetBlockLiveSet(BasicBlock *block) const
 {
-    return block_live_sets_[block->GetId()];
+    return blockLiveSets_[block->GetId()];
 }
 
 void LivenessAnalyzer::DumpLifeIntervals(std::ostream &out) const
@@ -584,8 +584,8 @@ void LivenessAnalyzer::DumpLifeIntervals(std::ostream &out) const
         if (bb->GetId() >= GetBlocksCount()) {
             continue;
         }
-        auto block_range = GetBlockLiveRange(bb);
-        out << "BB " << bb->GetId() << "\t" << block_range.ToString() << std::endl;
+        auto blockRange = GetBlockLiveRange(bb);
+        out << "BB " << bb->GetId() << "\t" << blockRange.ToString() << std::endl;
 
         for (auto inst : bb->AllInsts()) {
             if (inst->GetLinearNumber() == INVALID_LINEAR_NUM) {
@@ -603,7 +603,7 @@ void LivenessAnalyzer::DumpLifeIntervals(std::ostream &out) const
     }
 
     out << "Temps:" << std::endl;
-    for (auto interval : intervals_for_temps_) {
+    for (auto interval : intervalsForTemps_) {
         out << interval->ToString<false>() << "@ " << interval->GetLocation().ToString(GetGraph()->GetArch())
             << std::endl;
     }
@@ -612,45 +612,45 @@ void LivenessAnalyzer::DumpLifeIntervals(std::ostream &out) const
 
 void LivenessAnalyzer::DumpLocationsUsage(std::ostream &out) const
 {
-    std::map<Register, std::vector<LifeIntervals *>> regs_intervals;
-    std::map<Register, std::vector<LifeIntervals *>> vregs_intervals;
-    std::map<Register, std::vector<LifeIntervals *>> slots_intervals;
-    for (auto &interval : inst_life_intervals_) {
+    std::map<Register, std::vector<LifeIntervals *>> regsIntervals;
+    std::map<Register, std::vector<LifeIntervals *>> vregsIntervals;
+    std::map<Register, std::vector<LifeIntervals *>> slotsIntervals;
+    for (auto &interval : instLifeIntervals_) {
         for (auto sibling = interval; sibling != nullptr; sibling = sibling->GetSibling()) {
             auto location = sibling->GetLocation();
             if (location.IsFpRegister()) {
                 ASSERT(DataType::IsFloatType(interval->GetType()));
-                vregs_intervals[location.GetValue()].push_back(sibling);
+                vregsIntervals[location.GetValue()].push_back(sibling);
             } else if (location.IsRegister()) {
-                regs_intervals[location.GetValue()].push_back(sibling);
+                regsIntervals[location.GetValue()].push_back(sibling);
             } else if (location.IsStack()) {
-                slots_intervals[location.GetValue()].push_back(sibling);
+                slotsIntervals[location.GetValue()].push_back(sibling);
             }
         }
     }
 
-    for (auto intervals_map : {&regs_intervals, &vregs_intervals, &slots_intervals}) {
-        std::string loc_symbol;
-        if (intervals_map == &regs_intervals) {
+    for (auto intervalsMap : {&regsIntervals, &vregsIntervals, &slotsIntervals}) {
+        std::string locSymbol;
+        if (intervalsMap == &regsIntervals) {
             out << std::endl << "Registers intervals" << std::endl;
-            loc_symbol = "r";
-        } else if (intervals_map == &vregs_intervals) {
+            locSymbol = "r";
+        } else if (intervalsMap == &vregsIntervals) {
             out << std::endl << "Vector registers intervals" << std::endl;
-            loc_symbol = "vr";
+            locSymbol = "vr";
         } else {
-            ASSERT(intervals_map == &slots_intervals);
+            ASSERT(intervalsMap == &slotsIntervals);
             out << std::endl << "Stack slots intervals" << std::endl;
-            loc_symbol = "s";
+            locSymbol = "s";
         }
 
-        if (intervals_map->empty()) {
+        if (intervalsMap->empty()) {
             out << "-" << std::endl;
             continue;
         }
-        for (auto &[reg, intervals] : *intervals_map) {
+        for (auto &[reg, intervals] : *intervalsMap) {
             std::sort(intervals.begin(), intervals.end(),
                       [](const auto &lhs, const auto &rhs) { return lhs->GetBegin() < rhs->GetBegin(); });
-            out << loc_symbol << std::to_string(reg) << ": ";
+            out << locSymbol << std::to_string(reg) << ": ";
             auto delim = "";
             for (auto &interval : intervals) {
                 out << delim << interval->ToString<false>();
@@ -667,15 +667,15 @@ void LivenessAnalyzer::BlockFixedRegisters(Inst *inst)
         return;
     }
 
-    auto block_from = GetInstLifeNumber(inst);
+    auto blockFrom = GetInstLifeNumber(inst);
     if (IsCallBlockingRegisters(inst)) {
-        BlockPhysicalRegisters<false>(block_from);
-        BlockPhysicalRegisters<true>(block_from);
+        BlockPhysicalRegisters<false>(blockFrom);
+        BlockPhysicalRegisters<true>(blockFrom);
     }
     for (auto i = 0U; i < inst->GetInputsCount(); ++i) {
-        BlockFixedLocationRegister(inst->GetLocation(i), block_from);
+        BlockFixedLocationRegister(inst->GetLocation(i), blockFrom);
     }
-    BlockFixedLocationRegister(inst->GetDstLocation(), block_from);
+    BlockFixedLocationRegister(inst->GetDstLocation(), blockFrom);
 
     if (inst->IsParameter()) {
         // Block a register starting from the position preceding entry block start to
@@ -686,56 +686,56 @@ void LivenessAnalyzer::BlockFixedRegisters(Inst *inst)
         // to avoid its assignment to parameter instructions in case of high register pressure.
         // The required interval is blocked using two calls to correctly mark first use position of a
         // blocked register.
-        BlockFixedLocationRegister(inst->CastToParameter()->GetLocationData().GetSrc(), block_from);
+        BlockFixedLocationRegister(inst->CastToParameter()->GetLocationData().GetSrc(), blockFrom);
         BlockFixedLocationRegister(inst->CastToParameter()->GetLocationData().GetSrc(), FIRST_AVAILABLE_LIFE_NUMBER,
-                                   block_from - 1, false);
+                                   blockFrom - 1, false);
         // Block second parameter register that contains number of actual arguments in case of
         // dynamic methods as it is used in parameter's code generation
         if (GetGraph()->GetMode().IsDynamicMethod() &&
             GetGraph()->FindParameter(ParameterInst::DYNAMIC_NUM_ARGS) == nullptr) {
-            BlockReg<false>(Target(GetGraph()->GetArch()).GetParamRegId(1), block_from, block_from + 1U, true);
-            BlockReg<false>(Target(GetGraph()->GetArch()).GetParamRegId(1), FIRST_AVAILABLE_LIFE_NUMBER, block_from - 1,
+            BlockReg<false>(Target(GetGraph()->GetArch()).GetParamRegId(1), blockFrom, blockFrom + 1U, true);
+            BlockReg<false>(Target(GetGraph()->GetArch()).GetParamRegId(1), FIRST_AVAILABLE_LIFE_NUMBER, blockFrom - 1,
                             false);
         }
     }
 }
 
 template <bool IS_FP>
-void LivenessAnalyzer::BlockPhysicalRegisters(LifeNumber block_from)
+void LivenessAnalyzer::BlockPhysicalRegisters(LifeNumber blockFrom)
 {
     auto arch = GetGraph()->GetArch();
-    RegMask caller_regs {GetCallerRegsMask(arch, IS_FP)};
+    RegMask callerRegs {GetCallerRegsMask(arch, IS_FP)};
     for (auto reg = GetFirstCallerReg(arch, IS_FP); reg <= GetLastCallerReg(arch, IS_FP); ++reg) {
-        if (caller_regs.test(reg)) {
-            BlockReg<IS_FP>(reg, block_from, block_from + 1U, true);
+        if (callerRegs.test(reg)) {
+            BlockReg<IS_FP>(reg, blockFrom, blockFrom + 1U, true);
         }
     }
 }
 
-void LivenessAnalyzer::BlockFixedLocationRegister(Location location, LifeNumber block_from, LifeNumber block_to,
-                                                  bool is_use)
+void LivenessAnalyzer::BlockFixedLocationRegister(Location location, LifeNumber blockFrom, LifeNumber blockTo,
+                                                  bool isUse)
 {
     if (location.IsRegister() && location.IsRegisterValid()) {
-        BlockReg<false>(location.GetValue(), block_from, block_to, is_use);
+        BlockReg<false>(location.GetValue(), blockFrom, blockTo, isUse);
     } else if (location.IsFpRegister() && location.IsRegisterValid()) {
-        BlockReg<true>(location.GetValue(), block_from, block_to, is_use);
+        BlockReg<true>(location.GetValue(), blockFrom, blockTo, isUse);
     }
 }
 
 template <bool IS_FP>
-void LivenessAnalyzer::BlockReg(Register reg, LifeNumber block_from, LifeNumber block_to, bool is_use)
+void LivenessAnalyzer::BlockReg(Register reg, LifeNumber blockFrom, LifeNumber blockTo, bool isUse)
 {
     ASSERT(!finalized_);
-    auto &intervals = IS_FP ? physical_vector_intervals_ : physical_general_intervals_;
+    auto &intervals = IS_FP ? physicalVectorIntervals_ : physicalGeneralIntervals_;
     auto interval = intervals.at(reg);
     if (interval == nullptr) {
         interval = GetGraph()->GetAllocator()->New<LifeIntervals>(GetGraph()->GetAllocator());
         interval->SetPhysicalReg(reg, IS_FP ? DataType::FLOAT64 : DataType::UINT64);
         intervals.at(reg) = interval;
     }
-    interval->AppendRange(block_from, block_to);
-    if (is_use) {
-        interval->AddUsePosition(block_from);
+    interval->AppendRange(blockFrom, blockTo);
+    if (isUse) {
+        interval->AddUsePosition(blockFrom);
     }
 }
 
@@ -754,40 +754,40 @@ LifeIntervals *LifeIntervals::SplitAt(LifeNumber ln, ArenaAllocator *alloc)
 {
     ASSERT(!IsPhysical());
     ASSERT(ln > GetBegin() && ln <= GetEnd());
-    auto split_child = alloc->New<LifeIntervals>(alloc, GetInst());
+    auto splitChild = alloc->New<LifeIntervals>(alloc, GetInst());
 #ifndef NDEBUG
     ASSERT(finalized_);
-    split_child->finalized_ = true;
+    splitChild->finalized_ = true;
 #endif
     if (sibling_ != nullptr) {
-        split_child->sibling_ = sibling_;
+        splitChild->sibling_ = sibling_;
     }
-    split_child->is_split_sibling_ = true;
+    splitChild->isSplitSibling_ = true;
 
-    sibling_ = split_child;
-    split_child->SetType(GetType());
+    sibling_ = splitChild;
+    splitChild->SetType(GetType());
 
-    auto i = live_ranges_.size();
-    while (i > 0 && live_ranges_[i - 1].GetEnd() <= ln) {
+    auto i = liveRanges_.size();
+    while (i > 0 && liveRanges_[i - 1].GetEnd() <= ln) {
         i--;
     }
     if (i > 0) {
-        auto &range = live_ranges_[i - 1];
+        auto &range = liveRanges_[i - 1];
         if (range.GetBegin() < ln) {
-            split_child->AppendRange(range.GetBegin(), ln);
+            splitChild->AppendRange(range.GetBegin(), ln);
             range.SetBegin(ln);
         }
     }
-    split_child->live_ranges_.insert(split_child->live_ranges_.end(), live_ranges_.begin() + i, live_ranges_.end());
-    live_ranges_.erase(live_ranges_.begin() + i, live_ranges_.end());
-    std::swap(live_ranges_, split_child->live_ranges_);
+    splitChild->liveRanges_.insert(splitChild->liveRanges_.end(), liveRanges_.begin() + i, liveRanges_.end());
+    liveRanges_.erase(liveRanges_.begin() + i, liveRanges_.end());
+    std::swap(liveRanges_, splitChild->liveRanges_);
 
     // Move use positions to the child
-    auto it = std::lower_bound(use_positions_.begin(), use_positions_.end(), ln);
-    split_child->use_positions_.insert(split_child->use_positions_.end(), it, use_positions_.end());
-    use_positions_.erase(it, use_positions_.end());
+    auto it = std::lower_bound(usePositions_.begin(), usePositions_.end(), ln);
+    splitChild->usePositions_.insert(splitChild->usePositions_.end(), it, usePositions_.end());
+    usePositions_.erase(it, usePositions_.end());
 
-    return split_child;
+    return splitChild;
 }
 
 void LifeIntervals::SplitAroundUses(ArenaAllocator *alloc)
@@ -811,17 +811,17 @@ void LifeIntervals::MergeSibling()
 #ifndef NDEBUG
     ASSERT(finalized_);
     ASSERT(sibling_->finalized_);
-    if (!use_positions_.empty() && !sibling_->use_positions_.empty()) {
-        ASSERT(use_positions_.back() <= sibling_->use_positions_.front());
+    if (!usePositions_.empty() && !sibling_->usePositions_.empty()) {
+        ASSERT(usePositions_.back() <= sibling_->usePositions_.front());
     }
 #endif
-    for (auto range : live_ranges_) {
+    for (auto range : liveRanges_) {
         sibling_->AppendRange(range);
     }
-    live_ranges_ = std::move(sibling_->live_ranges_);
+    liveRanges_ = std::move(sibling_->liveRanges_);
 
-    for (auto &use_pos : sibling_->use_positions_) {
-        AddUsePosition(use_pos);
+    for (auto &usePos : sibling_->usePositions_) {
+        AddUsePosition(usePos);
     }
     sibling_ = nullptr;
 }
@@ -847,29 +847,29 @@ bool LifeIntervals::Intersects(const LiveRange &range) const
         (GetBegin() <= range.GetBegin() && range.GetEnd() <= GetEnd());
 }
 
-LifeNumber LifeIntervals::GetFirstIntersectionWith(const LifeIntervals *other, LifeNumber search_from) const
+LifeNumber LifeIntervals::GetFirstIntersectionWith(const LifeIntervals *other, LifeNumber searchFrom) const
 {
     for (auto it = GetRanges().rbegin(); it != GetRanges().rend(); it++) {
         auto range = *it;
-        if (range.GetEnd() <= search_from) {
+        if (range.GetEnd() <= searchFrom) {
             continue;
         }
-        for (auto other_it = other->GetRanges().rbegin(); other_it != other->GetRanges().rend(); other_it++) {
-            auto other_range = *other_it;
-            if (other_range.GetEnd() <= search_from) {
+        for (auto otherIt = other->GetRanges().rbegin(); otherIt != other->GetRanges().rend(); otherIt++) {
+            auto otherRange = *otherIt;
+            if (otherRange.GetEnd() <= searchFrom) {
                 continue;
             }
-            auto range_begin = std::max<LifeNumber>(search_from, range.GetBegin());
-            auto other_range_begin = std::max<LifeNumber>(search_from, other_range.GetBegin());
-            if (range_begin <= other_range_begin && other_range_begin < range.GetEnd()) {
+            auto rangeBegin = std::max<LifeNumber>(searchFrom, range.GetBegin());
+            auto otherRangeBegin = std::max<LifeNumber>(searchFrom, otherRange.GetBegin());
+            if (rangeBegin <= otherRangeBegin && otherRangeBegin < range.GetEnd()) {
                 // [range]
                 //    [other]
-                return other_range_begin;
+                return otherRangeBegin;
                 // NOLINTNEXTLINE(readability-else-after-return)
-            } else if (range_begin > other_range_begin && range_begin < other_range.GetEnd()) {
+            } else if (rangeBegin > otherRangeBegin && rangeBegin < otherRange.GetEnd()) {
                 //     [range]
                 // [other]
-                return range_begin;
+                return rangeBegin;
             }
         }
     }
@@ -912,19 +912,19 @@ float CalcSpillWeight(const LivenessAnalyzer &la, LifeIntervals *interval)
         return std::numeric_limits<float>::min();
     }
 
-    float use_weight = 0;
+    float useWeight = 0;
     if (interval->GetInst()->IsPhi()) {
-        use_weight += GetSpillWeightAt(la, interval->GetBegin());
+        useWeight += GetSpillWeightAt(la, interval->GetBegin());
     }
 
     for (auto use : interval->GetUsePositions()) {
         if (use == interval->GetBegin()) {
-            use_weight += GetSpillWeightAt(la, use + 1);
+            useWeight += GetSpillWeightAt(la, use + 1);
         } else {
-            use_weight += GetSpillWeightAt(la, use - 1);
+            useWeight += GetSpillWeightAt(la, use - 1);
         }
     }
-    return use_weight;
+    return useWeight;
 }
 
 }  // namespace panda::compiler

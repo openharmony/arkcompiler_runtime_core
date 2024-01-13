@@ -36,16 +36,16 @@ public:
     BaseMemStats() = default;
     virtual ~BaseMemStats() = default;
 
-    PANDA_PUBLIC_API void RecordAllocateRaw(size_t size, SpaceType type_mem);
+    PANDA_PUBLIC_API void RecordAllocateRaw(size_t size, SpaceType typeMem);
 
     // NOTE(aemelenko): call RecordFreeRaw when CodeAllocator supports deallocate
     // NOTE(aemelenko): call RecordFreeRaw when ArenaAllocator supports deallocate
-    PANDA_PUBLIC_API void RecordFreeRaw(size_t size, SpaceType type_mem);
+    PANDA_PUBLIC_API void RecordFreeRaw(size_t size, SpaceType typeMem);
 
     // getters
-    [[nodiscard]] PANDA_PUBLIC_API uint64_t GetAllocated(SpaceType type_mem) const;
-    [[nodiscard]] PANDA_PUBLIC_API uint64_t GetFreed(SpaceType type_mem) const;
-    [[nodiscard]] PANDA_PUBLIC_API uint64_t GetFootprint(SpaceType type_mem) const;
+    [[nodiscard]] PANDA_PUBLIC_API uint64_t GetAllocated(SpaceType typeMem) const;
+    [[nodiscard]] PANDA_PUBLIC_API uint64_t GetFreed(SpaceType typeMem) const;
+    [[nodiscard]] PANDA_PUBLIC_API uint64_t GetFootprint(SpaceType typeMem) const;
 
     [[nodiscard]] PANDA_PUBLIC_API uint64_t GetAllocatedHeap() const;
     [[nodiscard]] PANDA_PUBLIC_API uint64_t GetFreedHeap() const;
@@ -53,9 +53,9 @@ public:
     [[nodiscard]] PANDA_PUBLIC_API uint64_t GetTotalFootprint() const;
 
 protected:
-    PANDA_PUBLIC_API void RecordAllocate(size_t size, SpaceType type_mem);
-    PANDA_PUBLIC_API void RecordMoved(size_t size, SpaceType type_mem);
-    PANDA_PUBLIC_API void RecordFree(size_t size, SpaceType type_mem);
+    PANDA_PUBLIC_API void RecordAllocate(size_t size, SpaceType typeMem);
+    PANDA_PUBLIC_API void RecordMoved(size_t size, SpaceType typeMem);
+    PANDA_PUBLIC_API void RecordFree(size_t size, SpaceType typeMem);
 
 private:
     std::array<std::atomic_uint64_t, SPACE_TYPE_SIZE> allocated_ {0};

@@ -45,7 +45,7 @@ constexpr const uint32_t LINEAR_X = 1103515245U;
 constexpr const uint32_t LINEAR_Y = 12345U;
 constexpr const uint32_t LINEAR_SEED = 987654321U;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static auto HASH_SEED = std::atomic<uint32_t>(LINEAR_SEED + std::time(nullptr));
+extern std::atomic<uint32_t> g_hashSeed;
 
 }  // namespace object_header_traits
 
@@ -60,20 +60,20 @@ public:
     // Use it only in single thread
     inline MarkWord GetMark() const
     {
-        return *(const_cast<MarkWord *>(reinterpret_cast<const MarkWord *>(&mark_word_)));
+        return *(const_cast<MarkWord *>(reinterpret_cast<const MarkWord *>(&markWord_)));
     }
-    inline void SetMark(volatile MarkWord mark_word)
+    inline void SetMark(volatile MarkWord markWord)
     {
-        mark_word_ = mark_word.Value();
+        markWord_ = markWord.Value();
     }
 
     inline MarkWord AtomicGetMark() const
     {
-        auto ptr = const_cast<MarkWord *>(reinterpret_cast<const MarkWord *>(&mark_word_));
-        auto atomic_ptr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
+        auto ptr = const_cast<MarkWord *>(reinterpret_cast<const MarkWord *>(&markWord_));
+        auto atomicPtr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
         // Atomic with seq_cst order reason: data race with markWord_ with requirement for sequentially consistent order
         // where threads observe all modifications in the same order
-        return atomic_ptr->load(std::memory_order_seq_cst);
+        return atomicPtr->load(std::memory_order_seq_cst);
     }
 
     inline void SetClass(BaseClass *klass)
@@ -81,7 +81,7 @@ public:
         static_assert(sizeof(ClassHelper::ClassWordSize) == sizeof(ObjectPointerType));
         // Atomic with release order reason: data race with classWord_ with dependecies on writes before the store which
         // should become visible acquire
-        reinterpret_cast<std::atomic<ClassHelper::ClassWordSize> *>(&class_word_)
+        reinterpret_cast<std::atomic<ClassHelper::ClassWordSize> *>(&classWord_)
             ->store(static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(klass)), std::memory_order_release);
         ASSERT(ClassAddr<BaseClass>() == klass);
     }
@@ -89,7 +89,7 @@ public:
     template <typename T>
     inline T *ClassAddr() const
     {
-        auto ptr = const_cast<ClassHelper::ClassWordSize *>(&class_word_);
+        auto ptr = const_cast<ClassHelper::ClassWordSize *>(&classWord_);
         // Atomic with acquire order reason: data race with classWord_ with dependecies on reads after the load which
         // should become visible
         return reinterpret_cast<T *>(
@@ -99,28 +99,28 @@ public:
     template <typename T>
     inline T *NotAtomicClassAddr() const
     {
-        return reinterpret_cast<T *>(*const_cast<ClassHelper::ClassWordSize *>(&class_word_));
+        return reinterpret_cast<T *>(*const_cast<ClassHelper::ClassWordSize *>(&classWord_));
     }
 
     // Generate hash value for an object.
     static inline uint32_t GenerateHashCode()
     {
-        uint32_t ex_val;
-        uint32_t n_val;
+        uint32_t exVal;
+        uint32_t nVal;
         do {
             // Atomic with relaxed order reason: data race with hash_seed with no synchronization or ordering
             // constraints imposed on other reads or writes
-            ex_val = object_header_traits::HASH_SEED.load(std::memory_order_relaxed);
-            n_val = ex_val * object_header_traits::LINEAR_X + object_header_traits::LINEAR_Y;
-        } while (!object_header_traits::HASH_SEED.compare_exchange_weak(ex_val, n_val, std::memory_order_relaxed) ||
-                 (ex_val & MarkWord::HASH_MASK) == 0);
-        return ex_val & MarkWord::HASH_MASK;
+            exVal = object_header_traits::g_hashSeed.load(std::memory_order_relaxed);
+            nVal = exVal * object_header_traits::LINEAR_X + object_header_traits::LINEAR_Y;
+        } while (!object_header_traits::g_hashSeed.compare_exchange_weak(exVal, nVal, std::memory_order_relaxed) ||
+                 (exVal & MarkWord::HASH_MASK) == 0);
+        return exVal & MarkWord::HASH_MASK;
     }
 
     // Get Hash value for an object.
     template <MTModeT MT_MODE>
     uint32_t GetHashCode();
-    uint32_t GetHashCodeFromMonitor(Monitor *monitor_p);
+    uint32_t GetHashCodeFromMonitor(Monitor *monitorP);
 
     // Size of object header
     static constexpr size_t ObjectHeaderSize()
@@ -130,12 +130,12 @@ public:
 
     static constexpr size_t GetClassOffset()
     {
-        return MEMBER_OFFSET(ObjectHeader, class_word_);
+        return MEMBER_OFFSET(ObjectHeader, classWord_);
     }
 
     static constexpr size_t GetMarkWordOffset()
     {
-        return MEMBER_OFFSET(ObjectHeader, mark_word_);
+        return MEMBER_OFFSET(ObjectHeader, markWord_);
     }
 
     // Garbage collection method
@@ -185,17 +185,17 @@ public:
     inline void *FieldAddr(int offset) const;
 
     template <bool STRONG = true>
-    bool AtomicSetMark(MarkWord &old_mark_word, MarkWord new_mark_word)
+    bool AtomicSetMark(MarkWord &oldMarkWord, MarkWord newMarkWord)
     {
         // This is the way to operate with casting MarkWordSize <-> MarkWord and atomics
-        auto ptr = reinterpret_cast<MarkWord *>(&mark_word_);
-        auto atomic_ptr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
+        auto ptr = reinterpret_cast<MarkWord *>(&markWord_);
+        auto atomicPtr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
         // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
         if constexpr (STRONG) {  // NOLINT(bugprone-suspicious-semicolon)
-            return atomic_ptr->compare_exchange_strong(old_mark_word, new_mark_word);
+            return atomicPtr->compare_exchange_strong(oldMarkWord, newMarkWord);
         }
         // CAS weak may return false results, but is more efficient, use it only in loops
-        return atomic_ptr->compare_exchange_weak(old_mark_word, new_mark_word);
+        return atomicPtr->compare_exchange_weak(oldMarkWord, newMarkWord);
     }
 
     // Accessors to typical Class types
@@ -235,50 +235,49 @@ public:
     void SetFieldObject(const ManagedThread *thread, size_t offset, ObjectHeader *value);
 
     template <class T>
-    T GetFieldPrimitive(size_t offset, std::memory_order memory_order) const;
+    T GetFieldPrimitive(size_t offset, std::memory_order memoryOrder) const;
 
     template <class T>
-    void SetFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    void SetFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <bool NEED_READ_BARRIER = true, bool IS_DYN = false>
-    ObjectHeader *GetFieldObject(size_t offset, std::memory_order memory_order) const;
+    ObjectHeader *GetFieldObject(size_t offset, std::memory_order memoryOrder) const;
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    void SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memory_order);
+    void SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder);
 
     template <typename T>
-    bool CompareAndSetFieldPrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order,
-                                     bool strong);
+    bool CompareAndSetFieldPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder, bool strong);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    bool CompareAndSetFieldObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                  std::memory_order memory_order, bool strong);
+    bool CompareAndSetFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                  std::memory_order memoryOrder, bool strong);
 
     template <typename T>
-    T CompareAndExchangeFieldPrimitive(size_t offset, T old_value, T new_value, std::memory_order memory_order,
+    T CompareAndExchangeFieldPrimitive(size_t offset, T oldValue, T newValue, std::memory_order memoryOrder,
                                        bool strong);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    ObjectHeader *CompareAndExchangeFieldObject(size_t offset, ObjectHeader *old_value, ObjectHeader *new_value,
-                                                std::memory_order memory_order, bool strong);
+    ObjectHeader *CompareAndExchangeFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
+                                                std::memory_order memoryOrder, bool strong);
 
     template <typename T>
-    T GetAndSetFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndSetFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <bool NEED_WRITE_BARRIER = true, bool IS_DYN = false>
-    ObjectHeader *GetAndSetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memory_order);
+    ObjectHeader *GetAndSetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndAddFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndAddFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseOrFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseOrFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseAndFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseAndFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     template <typename T>
-    T GetAndBitwiseXorFieldPrimitive(size_t offset, T value, std::memory_order memory_order);
+    T GetAndBitwiseXorFieldPrimitive(size_t offset, T value, std::memory_order memoryOrder);
 
     /*
      * Is the object is an instance of specified class.
@@ -288,7 +287,7 @@ public:
     inline bool IsInstanceOf(const Class *klass) const;
 
     // Verification methods
-    static void Verify(ObjectHeader *object_header);
+    static void Verify(ObjectHeader *objectHeader);
 
     static ObjectHeader *Create(BaseClass *klass);
     static ObjectHeader *Create(ManagedThread *thread, BaseClass *klass);
@@ -302,23 +301,23 @@ public:
     size_t ObjectSize() const;
 
     template <LangTypeT LANG>
-    size_t ObjectSize(BaseClass *base_klass) const
+    size_t ObjectSize(BaseClass *baseKlass) const
     {
         if constexpr (LANG == LangTypeT::LANG_TYPE_DYNAMIC) {
-            return ObjectSizeDyn(base_klass);
+            return ObjectSizeDyn(baseKlass);
         } else {
             static_assert(LANG == LangTypeT::LANG_TYPE_STATIC);
-            return ObjectSizeStatic(base_klass);
+            return ObjectSizeStatic(baseKlass);
         }
     }
 
 private:
     uint32_t GetHashCodeMTSingle();
     uint32_t GetHashCodeMTMulti();
-    size_t ObjectSizeDyn(BaseClass *base_klass) const;
-    size_t ObjectSizeStatic(BaseClass *base_klass) const;
-    MarkWord::MarkWordSize mark_word_;
-    ClassHelper::ClassWordSize class_word_;
+    size_t ObjectSizeDyn(BaseClass *baseKlass) const;
+    size_t ObjectSizeStatic(BaseClass *baseKlass) const;
+    MarkWord::MarkWordSize markWord_;
+    ClassHelper::ClassWordSize classWord_;
 
     /**
      * Allocates memory for the Object. No ctor is called.
@@ -326,8 +325,8 @@ private:
      * @param non_movable - if true, object will be allocated in non-movable space
      * @return pointer to the created Object
      */
-    static ObjectHeader *CreateObject(BaseClass *klass, bool non_movable);
-    static ObjectHeader *CreateObject(ManagedThread *thread, BaseClass *klass, bool non_movable);
+    static ObjectHeader *CreateObject(BaseClass *klass, bool nonMovable);
+    static ObjectHeader *CreateObject(ManagedThread *thread, BaseClass *klass, bool nonMovable);
 };
 
 constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 4U;

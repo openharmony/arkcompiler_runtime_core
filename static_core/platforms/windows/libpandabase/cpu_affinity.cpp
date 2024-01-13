@@ -125,45 +125,45 @@ CpuSet &CpuSet::operator^=(const CpuSet &other)
     return *this;
 }
 
-size_t CpuAffinityManager::cpu_count_ = 0U;
-CpuSet CpuAffinityManager::best_cpu_set_;             // NOLINT(fuchsia-statically-constructed-objects)
-CpuSet CpuAffinityManager::middle_cpu_set_;           // NOLINT(fuchsia-statically-constructed-objects)
-CpuSet CpuAffinityManager::best_and_middle_cpu_set_;  // NOLINT(fuchsia-statically-constructed-objects)
-CpuSet CpuAffinityManager::weak_cpu_set_;             // NOLINT(fuchsia-statically-constructed-objects)
+size_t CpuAffinityManager::cpuCount_ = 0U;
+CpuSet CpuAffinityManager::bestCpuSet_;           // NOLINT(fuchsia-statically-constructed-objects)
+CpuSet CpuAffinityManager::middleCpuSet_;         // NOLINT(fuchsia-statically-constructed-objects)
+CpuSet CpuAffinityManager::bestAndMiddleCpuSet_;  // NOLINT(fuchsia-statically-constructed-objects)
+CpuSet CpuAffinityManager::weakCpuSet_;           // NOLINT(fuchsia-statically-constructed-objects)
 
 /* static */
 void CpuAffinityManager::Initialize()
 {
     ASSERT(!IsCpuAffinityEnabled());
-    ASSERT(best_cpu_set_.IsEmpty());
-    ASSERT(middle_cpu_set_.IsEmpty());
-    ASSERT(best_and_middle_cpu_set_.IsEmpty());
-    ASSERT(weak_cpu_set_.IsEmpty());
-    cpu_count_ = std::thread::hardware_concurrency();
+    ASSERT(bestCpuSet_.IsEmpty());
+    ASSERT(middleCpuSet_.IsEmpty());
+    ASSERT(bestAndMiddleCpuSet_.IsEmpty());
+    ASSERT(weakCpuSet_.IsEmpty());
+    cpuCount_ = std::thread::hardware_concurrency();
     LoadCpuFreq();
 }
 
 /* static */
 bool CpuAffinityManager::IsCpuAffinityEnabled()
 {
-    return cpu_count_ != 0U;
+    return cpuCount_ != 0U;
 }
 
 /* static */
 void CpuAffinityManager::Finalize()
 {
-    cpu_count_ = 0U;
-    best_cpu_set_.Clear();
-    middle_cpu_set_.Clear();
-    best_and_middle_cpu_set_.Clear();
-    weak_cpu_set_.Clear();
+    cpuCount_ = 0U;
+    bestCpuSet_.Clear();
+    middleCpuSet_.Clear();
+    bestAndMiddleCpuSet_.Clear();
+    weakCpuSet_.Clear();
 }
 
 /* static */
 void CpuAffinityManager::LoadCpuFreq()
 {
     // No implement for windows now
-    cpu_count_ = 0U;
+    cpuCount_ = 0U;
 }
 
 /* static */

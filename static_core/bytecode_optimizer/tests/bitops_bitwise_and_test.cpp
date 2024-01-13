@@ -118,9 +118,9 @@ TEST_F(AsmTest, BitopsBitwiseAnd)
     // NOLINTEND(readability-magic-numbers)
     EXPECT_TRUE(GraphComparator().Compare(GetGraph(), expected));
 
-    const auto sig_main = pandasm::GetFunctionSignatureFromName("main", {});
+    const auto sigMain = pandasm::GetFunctionSignatureFromName("main", {});
 
-    auto &function = program.function_table.at(sig_main);
+    auto &function = program.functionTable.at(sigMain);
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, GetIrInterface()));
 }
 

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/tests/mock/mock_test_helper.h"
 
 // NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-pro-type-vararg, readability-named-parameter)
@@ -34,13 +35,13 @@ class RegisteringNativeMethodsTestDeath : public RegisteringNativeMethodsTestBas
 static ets_int NativeMethods_foo_native(EtsEnv *, ets_class)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    return 42;
+    return 42_I;
 }
 
 static ets_long NativeMethods_long_foo_native(EtsEnv *, ets_class)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    return static_cast<ets_long>(84);
+    return static_cast<ets_long>(84L);
 }
 
 TEST_F(RegisteringNativeMethodsTestDeath, RegisterNativesDeathTest)
@@ -95,11 +96,11 @@ TEST_F(RegisteringNativeMethodsTest, RegisterNativesArrayTest)
 
     ets_method foo_id = env_->GetStaticp_method(cls, "foo", ":I");
     ASSERT_NE(foo_id, nullptr);
-    ASSERT_EQ(env_->CallStaticIntMethod(cls, foo_id), static_cast<ets_int>(42));
+    ASSERT_EQ(env_->CallStaticIntMethod(cls, foo_id), static_cast<ets_int>(42_I));
 
     ets_method long_foo_id = env_->GetStaticp_method(cls, "long_foo", ":J");
     ASSERT_NE(long_foo_id, nullptr);
-    ASSERT_EQ(env_->CallStaticLongMethod(cls, long_foo_id), static_cast<ets_int>(84));
+    ASSERT_EQ(env_->CallStaticLongMethod(cls, long_foo_id), static_cast<ets_int>(84_I));
 }
 
 TEST_F(RegisteringNativeMethodsTestDeath, UnregisterNativesDeathTest)

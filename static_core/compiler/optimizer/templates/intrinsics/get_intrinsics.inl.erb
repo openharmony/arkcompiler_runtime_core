@@ -63,7 +63,7 @@ inline RuntimeInterface::IntrinsicId GetIntrinsicEntryPointId(intrinsics::Intrin
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-uintptr_t PandaRuntimeInterface::GetIntrinsicAddress(bool runtime_call, [[maybe_unused]] SourceLanguage lang,
+uintptr_t PandaRuntimeInterface::GetIntrinsicAddress(bool runtimeCall, [[maybe_unused]] SourceLanguage lang,
                                                      [[maybe_unused]] PandaRuntimeInterface::IntrinsicId id) const {
     switch (id) {
     case IntrinsicId::LIB_CALL_FMOD: {
@@ -137,7 +137,7 @@ uintptr_t PandaRuntimeInterface::GetIntrinsicAddress(bool runtime_call, [[maybe_
 %   else
 %     if intrinsic.respond_to?(:fast_path)
         if (!FASTPATH_ENABLED || !IsGcValidForFastPath(lang)) {
-            return runtime_call ? reinterpret_cast<uintptr_t>(<%= "#{intrinsic.impl.rpartition('::').last}Bridge" %>) :
+            return runtimeCall ? reinterpret_cast<uintptr_t>(<%= "#{intrinsic.impl.rpartition('::').last}Bridge" %>) :
 #ifdef NDEBUG
                 reinterpret_cast<uintptr_t>(<%= intrinsic.impl %>);
 #else
@@ -146,7 +146,7 @@ uintptr_t PandaRuntimeInterface::GetIntrinsicAddress(bool runtime_call, [[maybe_
         }
 #ifndef RUNTIME_HAS_NO_FASTPATH
 %     end
-        return runtime_call ? reinterpret_cast<uintptr_t>(<%= bridge %>) :
+        return runtimeCall ? reinterpret_cast<uintptr_t>(<%= bridge %>) :
 #ifdef NDEBUG
           reinterpret_cast<uintptr_t>(<%= impl %>);
 #else

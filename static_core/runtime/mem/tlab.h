@@ -141,7 +141,7 @@ public:
 
     bool IsUninitialized()
     {
-        return (memory_start_addr_ == nullptr) || (cur_free_position_ == nullptr) || (memory_end_addr_ == nullptr);
+        return (memoryStartAddr_ == nullptr) || (curFreePosition_ == nullptr) || (memoryEndAddr_ == nullptr);
     }
 
     NO_MOVE_SEMANTIC(TLAB);
@@ -176,15 +176,15 @@ public:
      * @brief Iterates over all objects in this TLAB
      * @param object_visitor
      */
-    void IterateOverObjects(const std::function<void(ObjectHeader *object_header)> &object_visitor);
+    void IterateOverObjects(const std::function<void(ObjectHeader *objectHeader)> &objectVisitor);
 
     /**
      * @brief Iterates over objects in the range inclusively.
      * @param mem_visitor - function pointer or functor
      * @param mem_range - memory range
      */
-    void IterateOverObjectsInRange(const std::function<void(ObjectHeader *object_header)> &mem_visitor,
-                                   const MemRange &mem_range);
+    void IterateOverObjectsInRange(const std::function<void(ObjectHeader *objectHeader)> &memVisitor,
+                                   const MemRange &memRange);
 
     /**
      * Collects dead objects and move alive with provided visitor
@@ -192,14 +192,14 @@ public:
      * @param object_move_visitor - object visitor
      */
     template <typename ObjectMoveVisitorT>
-    void CollectAndMove(const GCObjectVisitor &death_checker, const ObjectMoveVisitorT &object_move_visitor)
+    void CollectAndMove(const GCObjectVisitor &deathChecker, const ObjectMoveVisitorT &objectMoveVisitor)
     {
         LOG_TLAB_ALLOCATOR(DEBUG) << "CollectAndMove started";
-        IterateOverObjects([&](ObjectHeader *object_header) {
+        IterateOverObjects([&](ObjectHeader *objectHeader) {
             // We are interested only in moving alive objects, after that we cleanup this buffer
-            if (death_checker(object_header) == ObjectStatus::ALIVE_OBJECT) {
-                LOG_TLAB_ALLOCATOR(DEBUG) << "CollectAndMove found alive object with addr " << object_header;
-                object_move_visitor(object_header);
+            if (deathChecker(objectHeader) == ObjectStatus::ALIVE_OBJECT) {
+                LOG_TLAB_ALLOCATOR(DEBUG) << "CollectAndMove found alive object with addr " << objectHeader;
+                objectMoveVisitor(objectHeader);
             }
         });
         LOG_TLAB_ALLOCATOR(DEBUG) << "CollectAndMove finished";
@@ -211,63 +211,63 @@ public:
 
     TLAB *GetNextTLAB()
     {
-        return next_tlab_;
+        return nextTlab_;
     }
 
     TLAB *GetPrevTLAB()
     {
-        return prev_tlab_;
+        return prevTlab_;
     }
 
-    void SetNextTLAB(TLAB *tlab_pointer)
+    void SetNextTLAB(TLAB *tlabPointer)
     {
-        next_tlab_ = tlab_pointer;
+        nextTlab_ = tlabPointer;
     }
 
-    void SetPrevTLAB(TLAB *tlab_pointer)
+    void SetPrevTLAB(TLAB *tlabPointer)
     {
-        prev_tlab_ = tlab_pointer;
+        prevTlab_ = tlabPointer;
     }
 
     void *GetStartAddr() const
     {
-        return memory_start_addr_;
+        return memoryStartAddr_;
     }
 
     void *GetEndAddr() const
     {
-        return memory_end_addr_;
+        return memoryEndAddr_;
     }
 
     void *GetCurPos() const
     {
-        return cur_free_position_;
+        return curFreePosition_;
     }
 
     size_t GetOccupiedSize() const
     {
-        ASSERT(ToUintPtr(cur_free_position_) >= ToUintPtr(memory_start_addr_));
-        return ToUintPtr(cur_free_position_) - ToUintPtr(memory_start_addr_);
+        ASSERT(ToUintPtr(curFreePosition_) >= ToUintPtr(memoryStartAddr_));
+        return ToUintPtr(curFreePosition_) - ToUintPtr(memoryStartAddr_);
     }
 
     MemRange GetMemRangeForOccupiedMemory() const
     {
-        return MemRange(ToUintPtr(memory_start_addr_), ToUintPtr(cur_free_position_) - 1);
+        return MemRange(ToUintPtr(memoryStartAddr_), ToUintPtr(curFreePosition_) - 1);
     }
 
     static constexpr size_t TLABStartAddrOffset()
     {
-        return MEMBER_OFFSET(TLAB, memory_start_addr_);
+        return MEMBER_OFFSET(TLAB, memoryStartAddr_);
     }
 
     static constexpr size_t TLABFreePointerOffset()
     {
-        return MEMBER_OFFSET(TLAB, cur_free_position_);
+        return MEMBER_OFFSET(TLAB, curFreePosition_);
     }
 
     static constexpr size_t TLABEndAddrOffset()
     {
-        return MEMBER_OFFSET(TLAB, memory_end_addr_);
+        return MEMBER_OFFSET(TLAB, memoryEndAddr_);
     }
 
     static constexpr AllocatorType GetAllocatorType()
@@ -277,24 +277,24 @@ public:
 
     size_t GetSize()
     {
-        ASSERT(ToUintPtr(memory_end_addr_) >= ToUintPtr(memory_start_addr_));
-        return ToUintPtr(memory_end_addr_) - ToUintPtr(memory_start_addr_);
+        ASSERT(ToUintPtr(memoryEndAddr_) >= ToUintPtr(memoryStartAddr_));
+        return ToUintPtr(memoryEndAddr_) - ToUintPtr(memoryStartAddr_);
     }
 
 private:
     size_t GetFreeSize()
     {
-        ASSERT(ToUintPtr(cur_free_position_) >= ToUintPtr(memory_start_addr_));
-        ASSERT(ToUintPtr(cur_free_position_) <= ToUintPtr(memory_end_addr_));
-        return ToUintPtr(memory_end_addr_) - ToUintPtr(cur_free_position_);
+        ASSERT(ToUintPtr(curFreePosition_) >= ToUintPtr(memoryStartAddr_));
+        ASSERT(ToUintPtr(curFreePosition_) <= ToUintPtr(memoryEndAddr_));
+        return ToUintPtr(memoryEndAddr_) - ToUintPtr(curFreePosition_);
     }
 
-    TLAB *next_tlab_;
-    TLAB *prev_tlab_;
+    TLAB *nextTlab_;
+    TLAB *prevTlab_;
     // NOTE(aemelenko): Maybe use OBJECT_POINTER_SIZE here for heap allocation.
-    void *memory_start_addr_ {nullptr};
-    void *memory_end_addr_ {nullptr};
-    void *cur_free_position_ {nullptr};
+    void *memoryStartAddr_ {nullptr};
+    void *memoryEndAddr_ {nullptr};
+    void *curFreePosition_ {nullptr};
 };
 
 #undef LOG_TLAB_ALLOCATOR

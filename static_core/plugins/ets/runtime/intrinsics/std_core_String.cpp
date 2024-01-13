@@ -61,23 +61,23 @@ EtsCharArray *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
 
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<coretypes::String> s_handle(thread, s->GetCoreType());
+    VMHandle<coretypes::String> sHandle(thread, s->GetCoreType());
     ets_int n = end - begin;
-    EtsCharArray *char_array = EtsCharArray::Create(n);
-    if (char_array == nullptr || n == 0) {
-        return char_array;
+    EtsCharArray *charArray = EtsCharArray::Create(n);
+    if (charArray == nullptr || n == 0) {
+        return charArray;
     }
-    Span<ets_char> out(char_array->GetData<ets_char>(), char_array->GetLength());
-    s_handle.GetPtr()->CopyDataRegionUtf16(&out[0], begin, char_array->GetLength(), s_handle.GetPtr()->GetLength());
-    return char_array;
+    Span<ets_char> out(charArray->GetData<ets_char>(), charArray->GetLength());
+    sHandle.GetPtr()->CopyDataRegionUtf16(&out[0], begin, charArray->GetLength(), sHandle.GetPtr()->GetLength());
+    return charArray;
 }
 
 EtsString *StdCoreStringSubstring(EtsString *str, ets_int begin, ets_int end)
 {
     ASSERT(str != nullptr);
     auto indexes = coretypes::String::NormalizeSubStringIndexes(begin, end, str->GetCoreType());
-    ets_int substr_length = indexes.second - indexes.first;
-    return EtsString::FastSubString(str, static_cast<uint32_t>(indexes.first), static_cast<uint32_t>(substr_length));
+    ets_int substrLength = indexes.second - indexes.first;
+    return EtsString::FastSubString(str, static_cast<uint32_t>(indexes.first), static_cast<uint32_t>(substrLength));
 }
 
 uint16_t StdCoreStringCharAt(EtsString *s, int32_t index)
@@ -123,24 +123,24 @@ uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
     return static_cast<uint8_t>(owner->StringsAreEqual(s));
 }
 
-int32_t StdCoreStringSearch(EtsString *this_str, EtsString *reg)
+int32_t StdCoreStringSearch(EtsString *thisStr, EtsString *reg)
 {
     PandaVector<uint8_t> buf;
-    auto this_s = std::string(this_str->ConvertToStringView(&buf));
+    auto thisS = std::string(thisStr->ConvertToStringView(&buf));
     auto regex = std::string(reg->ConvertToStringView(&buf));
 
     std::regex e(regex);
-    return std::sregex_iterator(this_s.begin(), this_s.end(), e)->position();
+    return std::sregex_iterator(thisS.begin(), thisS.end(), e)->position();
 }
 
-EtsString *StdCoreStringMatch(EtsString *this_str, EtsString *reg)
+EtsString *StdCoreStringMatch(EtsString *thisStr, EtsString *reg)
 {
     PandaVector<uint8_t> buf;
-    auto this_s = std::string(this_str->ConvertToStringView(&buf));
+    auto thisS = std::string(thisStr->ConvertToStringView(&buf));
     auto regex = std::string(reg->ConvertToStringView(&buf));
 
     std::regex e(regex);
-    return EtsString::CreateFromMUtf8(std::sregex_iterator(this_s.begin(), this_s.end(), e)->str().c_str());
+    return EtsString::CreateFromMUtf8(std::sregex_iterator(thisS.begin(), thisS.end(), e)->str().c_str());
 }
 
 EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
@@ -148,104 +148,104 @@ EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
-    icu::UnicodeString utf16_str;
+    icu::UnicodeString utf16Str;
     if (str->IsUtf16()) {
-        utf16_str = icu::UnicodeString {str->GetDataUtf16(), static_cast<int32_t>(str->GetUtf16Length())};
+        utf16Str = icu::UnicodeString {str->GetDataUtf16(), static_cast<int32_t>(str->GetUtf16Length())};
     } else {
-        utf16_str =
+        utf16Str =
             icu::UnicodeString {utf::Mutf8AsCString(str->GetDataMUtf8()), static_cast<int32_t>(str->GetLength())};
     }
 
-    UErrorCode error_code = U_ZERO_ERROR;
-    utf16_str = normalizer->normalize(utf16_str, error_code);
+    UErrorCode errorCode = U_ZERO_ERROR;
+    utf16Str = normalizer->normalize(utf16Str, errorCode);
 
-    if (UNLIKELY(U_FAILURE(error_code))) {
-        std::string message = "Got error in process of normalization: '" + std::string(u_errorName(error_code)) + "'";
+    if (UNLIKELY(U_FAILURE(errorCode))) {
+        std::string message = "Got error in process of normalization: '" + std::string(u_errorName(errorCode)) + "'";
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
 
-    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(utf16_str.getTerminatedBuffer()),
-                                      utf16_str.length());
+    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(utf16Str.getTerminatedBuffer()),
+                                      utf16Str.length());
 }
 
-EtsString *StdCoreStringNormalizeNFC(EtsString *this_str)
+EtsString *StdCoreStringNormalizeNFC(EtsString *thisStr)
 {
-    UErrorCode error_code = U_ZERO_ERROR;
-    auto normalizer = Normalizer2::getNFCInstance(error_code);
-    if (UNLIKELY(U_FAILURE(error_code))) {
-        std::string message = "Cannot get NFC normalizer: '" + std::string(u_errorName(error_code)) + "'";
+    UErrorCode errorCode = U_ZERO_ERROR;
+    auto normalizer = Normalizer2::getNFCInstance(errorCode);
+    if (UNLIKELY(U_FAILURE(errorCode))) {
+        std::string message = "Cannot get NFC normalizer: '" + std::string(u_errorName(errorCode)) + "'";
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
-    return StringNormalize(this_str, normalizer);
+    return StringNormalize(thisStr, normalizer);
 }
 
-EtsString *StdCoreStringNormalizeNFD(EtsString *this_str)
+EtsString *StdCoreStringNormalizeNFD(EtsString *thisStr)
 {
-    UErrorCode error_code = U_ZERO_ERROR;
-    auto normalizer = Normalizer2::getNFDInstance(error_code);
-    if (UNLIKELY(U_FAILURE(error_code))) {
-        std::string message = "Cannot get NFD normalizer: '" + std::string(u_errorName(error_code)) + "'";
+    UErrorCode errorCode = U_ZERO_ERROR;
+    auto normalizer = Normalizer2::getNFDInstance(errorCode);
+    if (UNLIKELY(U_FAILURE(errorCode))) {
+        std::string message = "Cannot get NFD normalizer: '" + std::string(u_errorName(errorCode)) + "'";
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
-    return StringNormalize(this_str, normalizer);
+    return StringNormalize(thisStr, normalizer);
 }
 
-EtsString *StdCoreStringNormalizeNFKC(EtsString *this_str)
+EtsString *StdCoreStringNormalizeNFKC(EtsString *thisStr)
 {
-    UErrorCode error_code = U_ZERO_ERROR;
-    auto normalizer = Normalizer2::getNFKCInstance(error_code);
-    if (UNLIKELY(U_FAILURE(error_code))) {
-        std::string message = "Cannot get NFKC normalizer: '" + std::string(u_errorName(error_code)) + "'";
+    UErrorCode errorCode = U_ZERO_ERROR;
+    auto normalizer = Normalizer2::getNFKCInstance(errorCode);
+    if (UNLIKELY(U_FAILURE(errorCode))) {
+        std::string message = "Cannot get NFKC normalizer: '" + std::string(u_errorName(errorCode)) + "'";
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
-    return StringNormalize(this_str, normalizer);
+    return StringNormalize(thisStr, normalizer);
 }
 
-EtsString *StdCoreStringNormalizeNFKD(EtsString *this_str)
+EtsString *StdCoreStringNormalizeNFKD(EtsString *thisStr)
 {
-    UErrorCode error_code = U_ZERO_ERROR;
-    auto normalizer = Normalizer2::getNFKDInstance(error_code);
-    if (UNLIKELY(U_FAILURE(error_code))) {
-        std::string message = "Cannot get NFKD normalizer: '" + std::string(u_errorName(error_code)) + "'";
+    UErrorCode errorCode = U_ZERO_ERROR;
+    auto normalizer = Normalizer2::getNFKDInstance(errorCode);
+    if (UNLIKELY(U_FAILURE(errorCode))) {
+        std::string message = "Cannot get NFKD normalizer: '" + std::string(u_errorName(errorCode)) + "'";
         ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
-    return StringNormalize(this_str, normalizer);
+    return StringNormalize(thisStr, normalizer);
 }
 
-uint8_t StdCoreStringIsWellFormed(EtsString *this_str)
+uint8_t StdCoreStringIsWellFormed(EtsString *thisStr)
 {
-    if (!this_str->IsUtf16()) {
+    if (!thisStr->IsUtf16()) {
         return UINT8_C(1);
     }
-    auto length = this_str->GetUtf16Length();
-    auto code_units = Span<uint16_t>(this_str->GetDataUtf16(), length);
+    auto length = thisStr->GetUtf16Length();
+    auto codeUnits = Span<uint16_t>(thisStr->GetDataUtf16(), length);
     for (size_t i = 0; i < length; ++i) {
-        uint16_t code_unit = code_units[i];
-        if ((code_unit & CHAR0X1FFC00) == CHAR0XD800) {
+        uint16_t codeUnit = codeUnits[i];
+        if ((codeUnit & CHAR0X1FFC00) == CHAR0XD800) {
             // Code unit is a leading surrogate
             if (i == length - 1) {
                 return UINT8_C(0);
             }
             // Is not trail surrogate
-            if ((code_units[i + 1] & CHAR0X1FFC00) != CHAR0XDC00) {
+            if ((codeUnits[i + 1] & CHAR0X1FFC00) != CHAR0XDC00) {
                 return UINT8_C(0);
             }
             // Skip the paired trailing surrogate
             ++i;
             // Is trail surrogate
-        } else if ((code_unit & CHAR0X1FFC00) == CHAR0XDC00) {
+        } else if ((codeUnit & CHAR0X1FFC00) == CHAR0XDC00) {
             return UINT8_C(0);
         }
     }
     return UINT8_C(1);
 }
 
-EtsString *StdCoreStringToLocaleLowerCase(EtsString *this_str, EtsString *locale)
+EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *locale)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -254,29 +254,29 @@ EtsString *StdCoreStringToLocaleLowerCase(EtsString *this_str, EtsString *locale
     UErrorCode status = U_ZERO_ERROR;
     if (locale != nullptr) {
         PandaVector<uint8_t> buf;
-        std::string_view loc_tag = locale->ConvertToStringView(&buf);
-        icu::StringPiece sp {loc_tag.data(), static_cast<int32_t>(loc_tag.size())};
+        std::string_view locTag = locale->ConvertToStringView(&buf);
+        icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
         loc = icu::Locale::forLanguageTag(sp, status);
         if (UNLIKELY(U_FAILURE(status))) {
-            std::string message = "Language tag '" + std::string(loc_tag) + "' is invalid or not supported";
+            std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
             ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
             return nullptr;
         }
     }
 
-    icu::UnicodeString utf16_str;
-    if (this_str->IsUtf16()) {
-        utf16_str = icu::UnicodeString {this_str->GetDataUtf16(), static_cast<int32_t>(this_str->GetUtf16Length())};
+    icu::UnicodeString utf16Str;
+    if (thisStr->IsUtf16()) {
+        utf16Str = icu::UnicodeString {thisStr->GetDataUtf16(), static_cast<int32_t>(thisStr->GetUtf16Length())};
     } else {
-        utf16_str = icu::UnicodeString {utf::Mutf8AsCString(this_str->GetDataMUtf8()),
-                                        static_cast<int32_t>(this_str->GetLength())};
+        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(thisStr->GetDataMUtf8()),
+                                       static_cast<int32_t>(thisStr->GetLength())};
     }
 
-    auto res = utf16_str.toLower(loc);
+    auto res = utf16Str.toLower(loc);
     return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
 }
 
-EtsString *StdCoreStringToLocaleUpperCase(EtsString *this_str, EtsString *locale)
+EtsString *StdCoreStringToLocaleUpperCase(EtsString *thisStr, EtsString *locale)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -285,74 +285,74 @@ EtsString *StdCoreStringToLocaleUpperCase(EtsString *this_str, EtsString *locale
     UErrorCode status = U_ZERO_ERROR;
     if (locale != nullptr) {
         PandaVector<uint8_t> buf;
-        std::string_view loc_tag = locale->ConvertToStringView(&buf);
-        icu::StringPiece sp {loc_tag.data(), static_cast<int32_t>(loc_tag.size())};
+        std::string_view locTag = locale->ConvertToStringView(&buf);
+        icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
         loc = icu::Locale::forLanguageTag(sp, status);
         if (UNLIKELY(U_FAILURE(status))) {
-            std::string message = "Language tag '" + std::string(loc_tag) + "' is invalid or not supported";
+            std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
             ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
             return nullptr;
         }
     }
 
-    icu::UnicodeString utf16_str;
-    if (this_str->IsUtf16()) {
-        utf16_str = icu::UnicodeString {this_str->GetDataUtf16(), static_cast<int32_t>(this_str->GetUtf16Length())};
+    icu::UnicodeString utf16Str;
+    if (thisStr->IsUtf16()) {
+        utf16Str = icu::UnicodeString {thisStr->GetDataUtf16(), static_cast<int32_t>(thisStr->GetUtf16Length())};
     } else {
-        utf16_str = icu::UnicodeString {utf::Mutf8AsCString(this_str->GetDataMUtf8()),
-                                        static_cast<int32_t>(this_str->GetLength())};
+        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(thisStr->GetDataMUtf8()),
+                                       static_cast<int32_t>(thisStr->GetLength())};
     }
 
-    auto res = utf16_str.toUpper(loc);
+    auto res = utf16Str.toUpper(loc);
     return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
 }
 
-ets_short StdCoreStringLocaleCmp(EtsString *this_str, EtsString *cmp_str, EtsString *locale_str)
+ets_short StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsString *localeStr)
 {
-    ASSERT(this_str != nullptr && cmp_str != nullptr);
+    ASSERT(thisStr != nullptr && cmpStr != nullptr);
     icu::Locale loc;
     UErrorCode status = U_ZERO_ERROR;
-    if (locale_str != nullptr) {
+    if (localeStr != nullptr) {
         PandaVector<uint8_t> buf;
-        std::string_view loc_tag = locale_str->ConvertToStringView(&buf);
-        icu::StringPiece sp {loc_tag.data(), static_cast<int32_t>(loc_tag.size())};
+        std::string_view locTag = localeStr->ConvertToStringView(&buf);
+        icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
         loc = icu::Locale::forLanguageTag(sp, status);
         if (UNLIKELY(U_FAILURE(status))) {
             EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-            std::string message = "Language tag '" + std::string(loc_tag) + "' is invalid or not supported";
+            std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
             ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
             return 0;
         }
     }
     icu::UnicodeString source;
-    if (this_str->IsUtf16()) {
-        source = icu::UnicodeString {this_str->GetDataUtf16(), static_cast<int32_t>(this_str->GetUtf16Length())};
+    if (thisStr->IsUtf16()) {
+        source = icu::UnicodeString {thisStr->GetDataUtf16(), static_cast<int32_t>(thisStr->GetUtf16Length())};
     } else {
-        source = icu::UnicodeString {utf::Mutf8AsCString(this_str->GetDataMUtf8()),
-                                     static_cast<int32_t>(this_str->GetLength())};
+        source = icu::UnicodeString {utf::Mutf8AsCString(thisStr->GetDataMUtf8()),
+                                     static_cast<int32_t>(thisStr->GetLength())};
     }
     icu::UnicodeString target;
-    if (cmp_str->IsUtf16()) {
-        target = icu::UnicodeString {cmp_str->GetDataUtf16(), static_cast<int32_t>(cmp_str->GetUtf16Length())};
+    if (cmpStr->IsUtf16()) {
+        target = icu::UnicodeString {cmpStr->GetDataUtf16(), static_cast<int32_t>(cmpStr->GetUtf16Length())};
     } else {
-        target = icu::UnicodeString {utf::Mutf8AsCString(cmp_str->GetDataMUtf8()),
-                                     static_cast<int32_t>(cmp_str->GetLength())};
+        target =
+            icu::UnicodeString {utf::Mutf8AsCString(cmpStr->GetDataMUtf8()), static_cast<int32_t>(cmpStr->GetLength())};
     }
     status = U_ZERO_ERROR;
-    std::unique_ptr<icu::Collator> my_collator(icu::Collator::createInstance(loc, status));
+    std::unique_ptr<icu::Collator> myCollator(icu::Collator::createInstance(loc, status));
     if (UNLIKELY(U_FAILURE(status))) {
-        icu::UnicodeString disp_name;
-        loc.getDisplayName(disp_name);
-        std::string locale_name;
-        disp_name.toUTF8String(locale_name);
-        LOG(FATAL, ETS) << "Failed to create the collator for " << locale_name;
+        icu::UnicodeString dispName;
+        loc.getDisplayName(dispName);
+        std::string localeName;
+        dispName.toUTF8String(localeName);
+        LOG(FATAL, ETS) << "Failed to create the collator for " << localeName;
     }
-    return my_collator->compare(source, target);
+    return myCollator->compare(source, target);
 }
 
-ets_int StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, ets_int from_index)
+ets_int StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, ets_int fromIndex)
 {
-    return panda::intrinsics::StringIndexOfU16(s, ch, from_index);
+    return panda::intrinsics::StringIndexOfU16(s, ch, fromIndex);
 }
 
 ets_int StdCoreStringIndexOf(EtsString *s, uint16_t ch)
@@ -360,29 +360,29 @@ ets_int StdCoreStringIndexOf(EtsString *s, uint16_t ch)
     return StdCoreStringIndexOfAfter(s, ch, 0);
 }
 
-ets_int StdCoreStringIndexOfString(EtsString *this_str, EtsString *pattern_str, ets_int from_index)
+ets_int StdCoreStringIndexOfString(EtsString *thisStr, EtsString *patternStr, ets_int fromIndex)
 {
-    ASSERT(this_str != nullptr && pattern_str != nullptr);
-    return this_str->GetCoreType()->IndexOf(pattern_str->GetCoreType(), from_index);
+    ASSERT(thisStr != nullptr && patternStr != nullptr);
+    return thisStr->GetCoreType()->IndexOf(patternStr->GetCoreType(), fromIndex);
 }
 
-ets_int StdCoreStringLastIndexOfString(EtsString *this_str, EtsString *pattern_str, ets_int from_index)
+ets_int StdCoreStringLastIndexOfString(EtsString *thisStr, EtsString *patternStr, ets_int fromIndex)
 {
-    ASSERT(this_str != nullptr && pattern_str != nullptr);
+    ASSERT(thisStr != nullptr && patternStr != nullptr);
     // "abc".lastIndexOf("ab", -10) will return 0
-    return this_str->GetCoreType()->LastIndexOf(pattern_str->GetCoreType(), std::max(from_index, 0));
+    return thisStr->GetCoreType()->LastIndexOf(patternStr->GetCoreType(), std::max(fromIndex, 0));
 }
 
-ets_char StdCoreStringCodePointToChar(ets_int code_point)
+ets_char StdCoreStringCodePointToChar(ets_int codePoint)
 {
-    icu::UnicodeString uni_str((UChar32)code_point);
-    return static_cast<ets_char>(uni_str.charAt(0));
+    icu::UnicodeString uniStr((UChar32)codePoint);
+    return static_cast<ets_char>(uniStr.charAt(0));
 }
 
-int32_t StdCoreStringHashCode(EtsString *this_str)
+int32_t StdCoreStringHashCode(EtsString *thisStr)
 {
-    ASSERT(this_str != nullptr);
-    return this_str->GetCoreType()->GetHashcode();
+    ASSERT(thisStr != nullptr);
+    return thisStr->GetCoreType()->GetHashcode();
 }
 
 }  // namespace panda::ets::intrinsics

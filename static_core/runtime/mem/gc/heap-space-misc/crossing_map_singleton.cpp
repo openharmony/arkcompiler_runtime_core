@@ -51,51 +51,51 @@ bool CrossingMapSingleton::IsCreated()
 /* static */
 bool CrossingMapSingleton::Destroy()
 {
-    CrossingMap *temp_instance;
+    CrossingMap *tempInstance;
     {
         os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
 
         if (instance_ == nullptr) {
             return false;
         }
-        temp_instance = instance_;
+        tempInstance = instance_;
         instance_ = nullptr;
     }
-    temp_instance->Destroy();
+    tempInstance->Destroy();
     InternalAllocatorPtr allocator {InternalAllocator<>::GetInternalAllocatorFromRuntime()};
-    allocator->Delete(temp_instance);
+    allocator->Delete(tempInstance);
     return true;
 }
 
 /* static */
-void CrossingMapSingleton::AddObject(void *obj_addr, size_t obj_size)
+void CrossingMapSingleton::AddObject(void *objAddr, size_t objSize)
 {
-    GetCrossingMap()->AddObject(obj_addr, obj_size);
+    GetCrossingMap()->AddObject(objAddr, objSize);
 }
 
 /* static */
-void CrossingMapSingleton::RemoveObject(void *obj_addr, size_t obj_size, void *next_obj_addr, void *prev_obj_addr,
-                                        size_t prev_obj_size)
+void CrossingMapSingleton::RemoveObject(void *objAddr, size_t objSize, void *nextObjAddr, void *prevObjAddr,
+                                        size_t prevObjSize)
 {
-    GetCrossingMap()->RemoveObject(obj_addr, obj_size, next_obj_addr, prev_obj_addr, prev_obj_size);
+    GetCrossingMap()->RemoveObject(objAddr, objSize, nextObjAddr, prevObjAddr, prevObjSize);
 }
 
 /* static */
-void *CrossingMapSingleton::FindFirstObject(void *start_addr, void *end_addr)
+void *CrossingMapSingleton::FindFirstObject(void *startAddr, void *endAddr)
 {
-    return GetCrossingMap()->FindFirstObject(start_addr, end_addr);
+    return GetCrossingMap()->FindFirstObject(startAddr, endAddr);
 }
 
 /* static */
-void CrossingMapSingleton::InitializeCrossingMapForMemory(void *start_addr, size_t size)
+void CrossingMapSingleton::InitializeCrossingMapForMemory(void *startAddr, size_t size)
 {
-    return GetCrossingMap()->InitializeCrossingMapForMemory(start_addr, size);
+    return GetCrossingMap()->InitializeCrossingMapForMemory(startAddr, size);
 }
 
 /* static */
-void CrossingMapSingleton::RemoveCrossingMapForMemory(void *start_addr, size_t size)
+void CrossingMapSingleton::RemoveCrossingMapForMemory(void *startAddr, size_t size)
 {
-    return GetCrossingMap()->RemoveCrossingMapForMemory(start_addr, size);
+    return GetCrossingMap()->RemoveCrossingMapForMemory(startAddr, size);
 }
 
 /* static */
@@ -105,10 +105,10 @@ size_t CrossingMapSingleton::GetCrossingMapGranularity()
 }
 
 /* static */
-void CrossingMapSingleton::MarkCardsAsYoung(const MemRange &mem_range)
+void CrossingMapSingleton::MarkCardsAsYoung(const MemRange &memRange)
 {
-    auto card_table = Thread::GetCurrent()->GetVM()->GetGC()->GetCardTable();
-    card_table->MarkCardsAsYoung(mem_range);
+    auto cardTable = Thread::GetCurrent()->GetVM()->GetGC()->GetCardTable();
+    cardTable->MarkCardsAsYoung(memRange);
 }
 
 }  // namespace panda::mem

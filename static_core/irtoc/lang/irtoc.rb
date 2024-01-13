@@ -45,10 +45,12 @@ FILE_BEGIN = %{
 using namespace panda::compiler;
 
 namespace panda::irtoc \{
+// NOLINTBEGIN(readability-identifier-naming)
 
 }
 
 FILE_END = %{
+// NOLINTEND(readability-identifier-naming)
 \} // namespace panda::irtoc
 
 #endif  // __clang_analyzer__
@@ -237,7 +239,9 @@ def main
     Output.println('#include "optimizer/ir/inst.h"')
     Output.println('#include "asm_defines.h"')
     Output.println('namespace panda::compiler {')
+    Output.println('// NOLINTBEGIN(readability-identifier-naming)')
     builder_functions.each(&:generate_builder)
+    Output.println('// NOLINTEND(readability-identifier-naming)')
     Output.println('} // namespace panda::compiler')
   elsif Options.ir_api == 'ir-inline'
     Output.setup Options.output_files[0]

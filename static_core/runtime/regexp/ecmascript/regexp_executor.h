@@ -22,18 +22,18 @@ namespace panda {
 
 template <class T>
 struct RegExpMatchResult {
-    uint32_t end_index = 0;
+    uint32_t endIndex = 0;
     uint32_t index = 0;
     // first value is true if result is undefined
     PandaVector<std::pair<bool, T>> captures;
-    bool is_success = false;
+    bool isSuccess = false;
 };
 
 class RegExpExecutor {
 public:
     struct CaptureState {
-        const uint8_t *capture_start;
-        const uint8_t *capture_end;
+        const uint8_t *captureStart;
+        const uint8_t *captureEnd;
     };
 
     enum StateType : uint8_t {
@@ -44,10 +44,10 @@ public:
 
     struct RegExpState {
         StateType type = STATE_SPLIT;
-        uint32_t current_pc = 0;
-        uint32_t current_stack = 0;
-        const uint8_t *current_ptr = nullptr;
-        __extension__ CaptureState *capture_result_list[0];  // NOLINT(modernize-avoid-c-arrays)
+        uint32_t currentPc = 0;
+        uint32_t currentStack = 0;
+        const uint8_t *currentPtr = nullptr;
+        __extension__ CaptureState *captureResultList[0];  // NOLINT(modernize-avoid-c-arrays)
     };
 
     explicit RegExpExecutor() = default;
@@ -56,20 +56,20 @@ public:
     {
         auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
         allocator->DeleteArray(stack_);
-        allocator->DeleteArray(capture_result_list_);
-        allocator->DeleteArray(state_stack_);
+        allocator->DeleteArray(captureResultList_);
+        allocator->DeleteArray(stateStack_);
     }
 
     NO_COPY_SEMANTIC(RegExpExecutor);
     NO_MOVE_SEMANTIC(RegExpExecutor);
 
-    PANDA_PUBLIC_API bool Execute(const uint8_t *input, uint32_t last_index, uint32_t length, uint8_t *buf,
-                                  bool is_wide_char = false);
+    PANDA_PUBLIC_API bool Execute(const uint8_t *input, uint32_t lastIndex, uint32_t length, uint8_t *buf,
+                                  bool isWideChar = false);
 
-    bool ExecuteInternal(const DynChunk &byte_code, uint32_t pc_end);
+    bool ExecuteInternal(const DynChunk &byteCode, uint32_t pcEnd);
     inline bool HandleFirstSplit()
     {
-        if (GetCurrentPC() == RegExpParser::OP_START_OFFSET && state_stack_len_ == 0 &&
+        if (GetCurrentPC() == RegExpParser::OP_START_OFFSET && stateStackLen_ == 0 &&
             (flags_ & RegExpParser::FLAG_STICKY) == 0) {
             if (IsEOF()) {
                 if (MatchFailed()) {
@@ -83,36 +83,36 @@ public:
         return true;
     }
 
-    inline bool HandleOpAll(uint8_t op_code)
+    inline bool HandleOpAll(uint8_t opCode)
     {
         if (IsEOF()) {
             return !MatchFailed();
         }
-        uint32_t current_char = GetCurrentChar();
-        if ((op_code == RegExpOpCode::OP_DOTS) && IsTerminator(current_char)) {
+        uint32_t currentChar = GetCurrentChar();
+        if ((opCode == RegExpOpCode::OP_DOTS) && IsTerminator(currentChar)) {
             return !MatchFailed();
         }
-        Advance(op_code);
+        Advance(opCode);
         return true;
     }
 
-    inline bool HandleOpChar(const DynChunk &byte_code, uint8_t op_code)
+    inline bool HandleOpChar(const DynChunk &byteCode, uint8_t opCode)
     {
-        uint32_t expected_char;
-        if (op_code == RegExpOpCode::OP_CHAR32) {
-            expected_char = byte_code.GetU32(GetCurrentPC() + 1);
+        uint32_t expectedChar;
+        if (opCode == RegExpOpCode::OP_CHAR32) {
+            expectedChar = byteCode.GetU32(GetCurrentPC() + 1);
         } else {
-            expected_char = byte_code.GetU16(GetCurrentPC() + 1);
+            expectedChar = byteCode.GetU16(GetCurrentPC() + 1);
         }
         if (IsEOF()) {
             return !MatchFailed();
         }
-        uint32_t current_char = GetCurrentChar();
+        uint32_t currentChar = GetCurrentChar();
         if (IsIgnoreCase()) {
-            current_char = static_cast<uint32_t>(RegExpParser::Canonicalize(current_char, IsUtf16()));
+            currentChar = static_cast<uint32_t>(RegExpParser::Canonicalize(currentChar, IsUtf16()));
         }
-        if (current_char == expected_char) {
-            Advance(op_code);
+        if (currentChar == expectedChar) {
+            Advance(opCode);
         } else {
             if (MatchFailed()) {
                 return false;
@@ -121,11 +121,11 @@ public:
         return true;
     }
 
-    inline bool HandleOpWordBoundary(uint8_t op_code)
+    inline bool HandleOpWordBoundary(uint8_t opCode)
     {
         if (IsEOF()) {
-            if (op_code == RegExpOpCode::OP_WORD_BOUNDARY) {
-                Advance(op_code);
+            if (opCode == RegExpOpCode::OP_WORD_BOUNDARY) {
+                Advance(opCode);
             } else {
                 if (MatchFailed()) {
                     return false;
@@ -133,17 +133,17 @@ public:
             }
             return true;
         }
-        bool pre_is_word = false;
+        bool preIsWord = false;
         if (GetCurrentPtr() != input_) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            pre_is_word = IsWordChar(PeekPrevChar(current_ptr_, input_));
+            preIsWord = IsWordChar(PeekPrevChar(currentPtr_, input_));
         }
-        bool current_is_word = IsWordChar(PeekChar(current_ptr_, input_end_));
-        if (((op_code == RegExpOpCode::OP_WORD_BOUNDARY) &&
-             ((!pre_is_word && current_is_word) || (pre_is_word && !current_is_word))) ||
-            ((op_code == RegExpOpCode::OP_NOT_WORD_BOUNDARY) &&
-             ((pre_is_word && current_is_word) || (!pre_is_word && !current_is_word)))) {
-            Advance(op_code);
+        bool currentIsWord = IsWordChar(PeekChar(currentPtr_, inputEnd_));
+        if (((opCode == RegExpOpCode::OP_WORD_BOUNDARY) &&
+             ((!preIsWord && currentIsWord) || (preIsWord && !currentIsWord))) ||
+            ((opCode == RegExpOpCode::OP_NOT_WORD_BOUNDARY) &&
+             ((preIsWord && currentIsWord) || (!preIsWord && !currentIsWord)))) {
+            Advance(opCode);
         } else {
             if (MatchFailed()) {
                 return false;
@@ -152,15 +152,15 @@ public:
         return true;
     }
 
-    inline bool HandleOpLineStart(uint8_t op_code)
+    inline bool HandleOpLineStart(uint8_t opCode)
     {
         if (IsEOF()) {
             return !MatchFailed();
         }
         if ((GetCurrentPtr() == input_) ||
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            ((flags_ & RegExpParser::FLAG_MULTILINE) != 0 && PeekPrevChar(current_ptr_, input_) == '\n')) {
-            Advance(op_code);
+            ((flags_ & RegExpParser::FLAG_MULTILINE) != 0 && PeekPrevChar(currentPtr_, input_) == '\n')) {
+            Advance(opCode);
         } else {
             if (MatchFailed()) {
                 return false;
@@ -169,12 +169,12 @@ public:
         return true;
     }
 
-    inline bool HandleOpLineEnd(uint8_t op_code)
+    inline bool HandleOpLineEnd(uint8_t opCode)
     {
         if (IsEOF() ||
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            ((flags_ & RegExpParser::FLAG_MULTILINE) != 0 && PeekChar(current_ptr_, input_end_) == '\n')) {
-            Advance(op_code);
+            ((flags_ & RegExpParser::FLAG_MULTILINE) != 0 && PeekChar(currentPtr_, inputEnd_) == '\n')) {
+            Advance(opCode);
         } else {
             if (MatchFailed()) {
                 return false;
@@ -183,133 +183,133 @@ public:
         return true;
     }
 
-    inline void HandleOpSaveStart(const DynChunk &byte_code, uint8_t op_code)
+    inline void HandleOpSaveStart(const DynChunk &byteCode, uint8_t opCode)
     {
-        uint32_t capture_index = byte_code.GetU8(GetCurrentPC() + 1);
-        ASSERT(capture_index < n_capture_);
+        uint32_t captureIndex = byteCode.GetU8(GetCurrentPC() + 1);
+        ASSERT(captureIndex < nCapture_);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        CaptureState *capture_state = &capture_result_list_[capture_index];
-        capture_state->capture_start = GetCurrentPtr();
-        Advance(op_code);
+        CaptureState *captureState = &captureResultList_[captureIndex];
+        captureState->captureStart = GetCurrentPtr();
+        Advance(opCode);
     }
 
-    inline void HandleOpSaveEnd(const DynChunk &byte_code, uint8_t op_code)
+    inline void HandleOpSaveEnd(const DynChunk &byteCode, uint8_t opCode)
     {
-        uint32_t capture_index = byte_code.GetU8(GetCurrentPC() + 1);
-        ASSERT(capture_index < n_capture_);
+        uint32_t captureIndex = byteCode.GetU8(GetCurrentPC() + 1);
+        ASSERT(captureIndex < nCapture_);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        CaptureState *capture_state = &capture_result_list_[capture_index];
-        capture_state->capture_end = GetCurrentPtr();
-        Advance(op_code);
+        CaptureState *captureState = &captureResultList_[captureIndex];
+        captureState->captureEnd = GetCurrentPtr();
+        Advance(opCode);
     }
 
-    inline void HandleOpSaveReset(const DynChunk &byte_code, uint8_t op_code)
+    inline void HandleOpSaveReset(const DynChunk &byteCode, uint8_t opCode)
     {
-        uint32_t catpure_start_index = byte_code.GetU8(GetCurrentPC() + SAVE_RESET_START);
-        uint32_t catpure_end_index = byte_code.GetU8(GetCurrentPC() + SAVE_RESET_END);
-        for (uint32_t i = catpure_start_index; i <= catpure_end_index; i++) {
+        uint32_t catpureStartIndex = byteCode.GetU8(GetCurrentPC() + SAVE_RESET_START);
+        uint32_t catpureEndIndex = byteCode.GetU8(GetCurrentPC() + SAVE_RESET_END);
+        for (uint32_t i = catpureStartIndex; i <= catpureEndIndex; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            CaptureState *capture_state = &capture_result_list_[i];
-            capture_state->capture_start = nullptr;
-            capture_state->capture_end = nullptr;
+            CaptureState *captureState = &captureResultList_[i];
+            captureState->captureStart = nullptr;
+            captureState->captureEnd = nullptr;
         }
-        Advance(op_code);
+        Advance(opCode);
     }
 
-    inline void HandleOpMatch(const DynChunk &byte_code, uint8_t op_code)
+    inline void HandleOpMatch(const DynChunk &byteCode, uint8_t opCode)
     {
-        auto type = static_cast<StateType>(op_code - RegExpOpCode::OP_SPLIT_NEXT);
+        auto type = static_cast<StateType>(opCode - RegExpOpCode::OP_SPLIT_NEXT);
         ASSERT(type == STATE_SPLIT || type == STATE_MATCH_AHEAD || type == STATE_NEGATIVE_MATCH_AHEAD);
-        uint32_t offset = byte_code.GetU32(GetCurrentPC() + 1);
-        Advance(op_code);
-        uint32_t split_pc = GetCurrentPC() + offset;
-        PushRegExpState(type, split_pc);
+        uint32_t offset = byteCode.GetU32(GetCurrentPC() + 1);
+        Advance(opCode);
+        uint32_t splitPc = GetCurrentPC() + offset;
+        PushRegExpState(type, splitPc);
     }
 
-    inline void HandleOpSplitFirst(const DynChunk &byte_code, uint8_t op_code)
+    inline void HandleOpSplitFirst(const DynChunk &byteCode, uint8_t opCode)
     {
-        uint32_t offset = byte_code.GetU32(GetCurrentPC() + 1);
-        Advance(op_code);
+        uint32_t offset = byteCode.GetU32(GetCurrentPC() + 1);
+        Advance(opCode);
         PushRegExpState(STATE_SPLIT, GetCurrentPC());
         AdvanceOffset(offset);
     }
 
-    inline bool HandleOpPrev(uint8_t op_code)
+    inline bool HandleOpPrev(uint8_t opCode)
     {
         if (GetCurrentPtr() == input_) {
             if (MatchFailed()) {
                 return false;
             }
         } else {
-            PrevPtr(&current_ptr_, input_);
-            Advance(op_code);
+            PrevPtr(&currentPtr_, input_);
+            Advance(opCode);
         }
         return true;
     }
 
-    inline void HandleOpLoop(const DynChunk &byte_code, uint8_t op_code)
+    inline void HandleOpLoop(const DynChunk &byteCode, uint8_t opCode)
     {
-        uint32_t quantify_min = byte_code.GetU32(GetCurrentPC() + LOOP_MIN_OFFSET);
-        uint32_t quantify_max = byte_code.GetU32(GetCurrentPC() + LOOP_MAX_OFFSET);
-        uint32_t pc_offset = byte_code.GetU32(GetCurrentPC() + LOOP_PC_OFFSET);
-        Advance(op_code);
-        uint32_t loop_pc_end = GetCurrentPC();
-        uint32_t loop_pc_start = GetCurrentPC() + pc_offset;
-        bool is_greedy = op_code == RegExpOpCode::OP_LOOP_GREEDY;
-        uint32_t loop_max = is_greedy ? quantify_max : quantify_min;
+        uint32_t quantifyMin = byteCode.GetU32(GetCurrentPC() + LOOP_MIN_OFFSET);
+        uint32_t quantifyMax = byteCode.GetU32(GetCurrentPC() + LOOP_MAX_OFFSET);
+        uint32_t pcOffset = byteCode.GetU32(GetCurrentPC() + LOOP_PC_OFFSET);
+        Advance(opCode);
+        uint32_t loopPcEnd = GetCurrentPC();
+        uint32_t loopPcStart = GetCurrentPC() + pcOffset;
+        bool isGreedy = opCode == RegExpOpCode::OP_LOOP_GREEDY;
+        uint32_t loopMax = isGreedy ? quantifyMax : quantifyMin;
 
-        uint32_t loop_count = PeekStack();
-        SetStackValue(++loop_count);
-        if (loop_count < loop_max) {
+        uint32_t loopCount = PeekStack();
+        SetStackValue(++loopCount);
+        if (loopCount < loopMax) {
             // greedy failed, goto next
-            if (loop_count >= quantify_min) {
-                PushRegExpState(STATE_SPLIT, loop_pc_end);
+            if (loopCount >= quantifyMin) {
+                PushRegExpState(STATE_SPLIT, loopPcEnd);
             }
             // Goto loop start
-            SetCurrentPC(loop_pc_start);
+            SetCurrentPC(loopPcStart);
         } else {
-            if (!is_greedy && (loop_count < quantify_max)) {
-                PushRegExpState(STATE_SPLIT, loop_pc_start);
+            if (!isGreedy && (loopCount < quantifyMax)) {
+                PushRegExpState(STATE_SPLIT, loopPcStart);
             }
         }
     }
 
-    inline bool HandleOpRange32(const DynChunk &byte_code)
+    inline bool HandleOpRange32(const DynChunk &byteCode)
     {
         if (IsEOF()) {
             return !MatchFailed();
         }
-        uint32_t current_char = GetCurrentChar();
+        uint32_t currentChar = GetCurrentChar();
         if (IsIgnoreCase()) {
-            current_char = static_cast<uint32_t>(RegExpParser::Canonicalize(current_char, IsUtf16()));
+            currentChar = static_cast<uint32_t>(RegExpParser::Canonicalize(currentChar, IsUtf16()));
         }
-        uint16_t range_count = byte_code.GetU16(GetCurrentPC() + 1);
-        bool is_found = false;
-        int32_t idx_min = 0;
-        int32_t idx_max = static_cast<int32_t>(range_count) - 1;
+        uint16_t rangeCount = byteCode.GetU16(GetCurrentPC() + 1);
+        bool isFound = false;
+        int32_t idxMin = 0;
+        int32_t idxMax = static_cast<int32_t>(rangeCount) - 1;
         int32_t idx = 0;
         uint32_t low = 0;
-        uint32_t high = byte_code.GetU32(GetCurrentPC() + RANGE32_HEAD_OFFSET + idx_max * RANGE32_MAX_OFFSET +
-                                         RANGE32_MAX_HALF_OFFSET);
-        if (current_char <= high) {
-            while (idx_min <= idx_max) {
-                idx = (idx_min + idx_max) / RANGE32_OFFSET;
-                low = byte_code.GetU32(GetCurrentPC() + RANGE32_HEAD_OFFSET +
-                                       static_cast<uint32_t>(idx) * RANGE32_MAX_OFFSET);
-                high = byte_code.GetU32(GetCurrentPC() + RANGE32_HEAD_OFFSET +
-                                        static_cast<uint32_t>(idx) * RANGE32_MAX_OFFSET + RANGE32_MAX_HALF_OFFSET);
-                if (current_char < low) {
-                    idx_max = idx - 1;
-                } else if (current_char > high) {
-                    idx_min = idx + 1;
+        uint32_t high = byteCode.GetU32(GetCurrentPC() + RANGE32_HEAD_OFFSET + idxMax * RANGE32_MAX_OFFSET +
+                                        RANGE32_MAX_HALF_OFFSET);
+        if (currentChar <= high) {
+            while (idxMin <= idxMax) {
+                idx = (idxMin + idxMax) / RANGE32_OFFSET;
+                low = byteCode.GetU32(GetCurrentPC() + RANGE32_HEAD_OFFSET +
+                                      static_cast<uint32_t>(idx) * RANGE32_MAX_OFFSET);
+                high = byteCode.GetU32(GetCurrentPC() + RANGE32_HEAD_OFFSET +
+                                       static_cast<uint32_t>(idx) * RANGE32_MAX_OFFSET + RANGE32_MAX_HALF_OFFSET);
+                if (currentChar < low) {
+                    idxMax = idx - 1;
+                } else if (currentChar > high) {
+                    idxMin = idx + 1;
                 } else {
-                    is_found = true;
+                    isFound = true;
                     break;
                 }
             }
         }
-        if (is_found) {
-            AdvanceOffset(range_count * RANGE32_MAX_OFFSET + RANGE32_HEAD_OFFSET);
+        if (isFound) {
+            AdvanceOffset(rangeCount * RANGE32_MAX_OFFSET + RANGE32_HEAD_OFFSET);
         } else {
             if (MatchFailed()) {
                 return false;
@@ -318,42 +318,42 @@ public:
         return true;
     }
 
-    inline bool HandleOpRange(const DynChunk &byte_code)
+    inline bool HandleOpRange(const DynChunk &byteCode)
     {
         if (IsEOF()) {
             return !MatchFailed();
         }
-        uint32_t current_char = GetCurrentChar();
+        uint32_t currentChar = GetCurrentChar();
         if (IsIgnoreCase()) {
-            current_char = static_cast<uint32_t>(RegExpParser::Canonicalize(current_char, IsUtf16()));
+            currentChar = static_cast<uint32_t>(RegExpParser::Canonicalize(currentChar, IsUtf16()));
         }
-        uint16_t range_count = byte_code.GetU16(GetCurrentPC() + 1);
-        bool is_found = false;
-        int32_t idx_min = 0;
-        int32_t idx_max = range_count - 1;
+        uint16_t rangeCount = byteCode.GetU16(GetCurrentPC() + 1);
+        bool isFound = false;
+        int32_t idxMin = 0;
+        int32_t idxMax = rangeCount - 1;
         int32_t idx = 0;
         uint32_t low = 0;
         uint32_t high =
-            byte_code.GetU16(GetCurrentPC() + RANGE32_HEAD_OFFSET + idx_max * RANGE32_MAX_HALF_OFFSET + RANGE32_OFFSET);
-        if (current_char <= high) {
-            while (idx_min <= idx_max) {
-                idx = (idx_min + idx_max) / RANGE32_OFFSET;
-                low = byte_code.GetU16(GetCurrentPC() + RANGE32_HEAD_OFFSET +
-                                       static_cast<uint32_t>(idx) * RANGE32_MAX_HALF_OFFSET);
-                high = byte_code.GetU16(GetCurrentPC() + RANGE32_HEAD_OFFSET +
-                                        static_cast<uint32_t>(idx) * RANGE32_MAX_HALF_OFFSET + RANGE32_OFFSET);
-                if (current_char < low) {
-                    idx_max = idx - 1;
-                } else if (current_char > high) {
-                    idx_min = idx + 1;
+            byteCode.GetU16(GetCurrentPC() + RANGE32_HEAD_OFFSET + idxMax * RANGE32_MAX_HALF_OFFSET + RANGE32_OFFSET);
+        if (currentChar <= high) {
+            while (idxMin <= idxMax) {
+                idx = (idxMin + idxMax) / RANGE32_OFFSET;
+                low = byteCode.GetU16(GetCurrentPC() + RANGE32_HEAD_OFFSET +
+                                      static_cast<uint32_t>(idx) * RANGE32_MAX_HALF_OFFSET);
+                high = byteCode.GetU16(GetCurrentPC() + RANGE32_HEAD_OFFSET +
+                                       static_cast<uint32_t>(idx) * RANGE32_MAX_HALF_OFFSET + RANGE32_OFFSET);
+                if (currentChar < low) {
+                    idxMax = idx - 1;
+                } else if (currentChar > high) {
+                    idxMin = idx + 1;
                 } else {
-                    is_found = true;
+                    isFound = true;
                     break;
                 }
             }
         }
-        if (is_found) {
-            AdvanceOffset(range_count * RANGE32_MAX_HALF_OFFSET + RANGE32_HEAD_OFFSET);
+        if (isFound) {
+            AdvanceOffset(rangeCount * RANGE32_MAX_HALF_OFFSET + RANGE32_HEAD_OFFSET);
         } else {
             if (MatchFailed()) {
                 return false;
@@ -362,105 +362,105 @@ public:
         return true;
     }
 
-    inline bool HandleOpBackReference(const DynChunk &byte_code, uint8_t op_code)
+    inline bool HandleOpBackReference(const DynChunk &byteCode, uint8_t opCode)
     {
-        uint32_t capture_index = byte_code.GetU8(GetCurrentPC() + 1);
-        if (capture_index >= n_capture_) {
+        uint32_t captureIndex = byteCode.GetU8(GetCurrentPC() + 1);
+        if (captureIndex >= nCapture_) {
             return !MatchFailed();
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const uint8_t *capture_start = capture_result_list_[capture_index].capture_start;
+        const uint8_t *captureStart = captureResultList_[captureIndex].captureStart;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const uint8_t *capture_end = capture_result_list_[capture_index].capture_end;
-        if (capture_start == nullptr || capture_end == nullptr) {
-            Advance(op_code);
+        const uint8_t *captureEnd = captureResultList_[captureIndex].captureEnd;
+        if (captureStart == nullptr || captureEnd == nullptr) {
+            Advance(opCode);
             return true;
         }
-        bool is_matched = true;
-        if (op_code == RegExpOpCode::OP_BACKREFERENCE) {
-            const uint8_t *ref_cptr = capture_start;
-            while (ref_cptr < capture_end) {
+        bool isMatched = true;
+        if (opCode == RegExpOpCode::OP_BACKREFERENCE) {
+            const uint8_t *refCptr = captureStart;
+            while (refCptr < captureEnd) {
                 if (IsEOF()) {
-                    is_matched = false;
+                    isMatched = false;
                     break;
                 }
                 // NOLINTNEXTLINE(readability-identifier-naming)
-                uint32_t c1 = GetChar(&ref_cptr, capture_end);
+                uint32_t c1 = GetChar(&refCptr, captureEnd);
                 // NOLINTNEXTLINE(readability-identifier-naming)
-                uint32_t c2 = GetChar(&current_ptr_, input_end_);
+                uint32_t c2 = GetChar(&currentPtr_, inputEnd_);
                 if (IsIgnoreCase()) {
                     c1 = static_cast<uint32_t>(RegExpParser::Canonicalize(c1, IsUtf16()));
                     c2 = static_cast<uint32_t>(RegExpParser::Canonicalize(c2, IsUtf16()));
                 }
                 if (c1 != c2) {
-                    is_matched = false;
+                    isMatched = false;
                     break;
                 }
             }
-            if (!is_matched) {
+            if (!isMatched) {
                 if (MatchFailed()) {
                     return false;
                 }
             } else {
-                Advance(op_code);
+                Advance(opCode);
             }
         } else {
-            const uint8_t *ref_cptr = capture_end;
-            while (ref_cptr > capture_start) {
+            const uint8_t *refCptr = captureEnd;
+            while (refCptr > captureStart) {
                 if (GetCurrentPtr() == input_) {
-                    is_matched = false;
+                    isMatched = false;
                     break;
                 }
                 // NOLINTNEXTLINE(readability-identifier-naming)
-                uint32_t c1 = GetPrevChar(&ref_cptr, capture_start);
+                uint32_t c1 = GetPrevChar(&refCptr, captureStart);
                 // NOLINTNEXTLINE(readability-identifier-naming)
-                uint32_t c2 = GetPrevChar(&current_ptr_, input_);
+                uint32_t c2 = GetPrevChar(&currentPtr_, input_);
                 if (IsIgnoreCase()) {
                     c1 = static_cast<uint32_t>(RegExpParser::Canonicalize(c1, IsUtf16()));
                     c2 = static_cast<uint32_t>(RegExpParser::Canonicalize(c2, IsUtf16()));
                 }
                 if (c1 != c2) {
-                    is_matched = false;
+                    isMatched = false;
                     break;
                 }
             }
-            if (!is_matched) {
+            if (!isMatched) {
                 if (MatchFailed()) {
                     return false;
                 }
             } else {
-                Advance(op_code);
+                Advance(opCode);
             }
         }
         return true;
     }
 
-    inline void Advance(uint8_t op_code, uint32_t offset = 0)
+    inline void Advance(uint8_t opCode, uint32_t offset = 0)
     {
-        current_pc_ += offset + static_cast<uint32_t>(RegExpOpCode::GetRegExpOpCode(op_code)->GetSize());
+        currentPc_ += offset + static_cast<uint32_t>(RegExpOpCode::GetRegExpOpCode(opCode)->GetSize());
     }
 
     inline void AdvanceOffset(uint32_t offset)
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        current_pc_ += offset;
+        currentPc_ += offset;
     }
 
     inline uint32_t GetCurrentChar()
     {
-        return GetChar(&current_ptr_, input_end_);
+        return GetChar(&currentPtr_, inputEnd_);
     }
 
     inline void AdvanceCurrentPtr()
     {
-        AdvancePtr(&current_ptr_, input_end_);
+        AdvancePtr(&currentPtr_, inputEnd_);
     }
 
     uint32_t GetChar(const uint8_t **pp, const uint8_t *end) const
     {
         uint32_t c;
         const uint8_t *cptr = *pp;
-        if (!is_wide_char_) {
+        if (!isWideChar_) {
             c = *cptr;
             *pp += 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         } else {
@@ -483,7 +483,7 @@ public:
     {
         uint32_t c;
         const uint8_t *cptr = p;
-        if (!is_wide_char_) {
+        if (!isWideChar_) {
             c = *cptr;
         } else {
             uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
@@ -502,7 +502,7 @@ public:
     void AdvancePtr(const uint8_t **pp, const uint8_t *end) const
     {
         const uint8_t *cptr = *pp;
-        if (!is_wide_char_) {
+        if (!isWideChar_) {
             *pp += 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         } else {
             uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
@@ -521,7 +521,7 @@ public:
     {
         uint32_t c;
         const uint8_t *cptr = p;
-        if (!is_wide_char_) {
+        if (!isWideChar_) {
             c = cptr[-1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         } else {
             cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -542,7 +542,7 @@ public:
     {
         uint32_t c;
         const uint8_t *cptr = *pp;
-        if (!is_wide_char_) {
+        if (!isWideChar_) {
             c = cptr[-1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             cptr -= 1;     // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             *pp = cptr;
@@ -566,7 +566,7 @@ public:
     void PrevPtr(const uint8_t **pp, const uint8_t *start) const
     {
         const uint8_t *cptr = *pp;
-        if (!is_wide_char_) {
+        if (!isWideChar_) {
             cptr -= 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             *pp = cptr;
         } else {
@@ -583,90 +583,90 @@ public:
         }
     }
 
-    bool MatchFailed(bool is_matched = false);
+    bool MatchFailed(bool isMatched = false);
 
     void SetCurrentPC(uint32_t pc)
     {
-        current_pc_ = pc;
+        currentPc_ = pc;
     }
 
     void SetCurrentPtr(const uint8_t *ptr)
     {
-        current_ptr_ = ptr;
+        currentPtr_ = ptr;
     }
 
     bool IsEOF() const
     {
-        return current_ptr_ >= input_end_;
+        return currentPtr_ >= inputEnd_;
     }
 
     uint32_t GetCurrentPC() const
     {
-        return current_pc_;
+        return currentPc_;
     }
 
     void PushStack(uintptr_t val)
     {
-        ASSERT(current_stack_ < n_stack_);
+        ASSERT(currentStack_ < nStack_);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        stack_[current_stack_++] = val;
+        stack_[currentStack_++] = val;
     }
 
     void SetStackValue(uintptr_t val) const
     {
-        ASSERT(current_stack_ >= 1);
+        ASSERT(currentStack_ >= 1);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        stack_[current_stack_ - 1] = val;
+        stack_[currentStack_ - 1] = val;
     }
 
     uintptr_t PopStack()
     {
-        ASSERT(current_stack_ >= 1);
+        ASSERT(currentStack_ >= 1);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return stack_[--current_stack_];
+        return stack_[--currentStack_];
     }
 
     uintptr_t PeekStack() const
     {
-        ASSERT(current_stack_ >= 1);
+        ASSERT(currentStack_ >= 1);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return stack_[current_stack_ - 1];
+        return stack_[currentStack_ - 1];
     }
 
     const uint8_t *GetCurrentPtr() const
     {
-        return current_ptr_;
+        return currentPtr_;
     }
 
     CaptureState *GetCaptureResultList() const
     {
-        return capture_result_list_;
+        return captureResultList_;
     }
 
     uint32_t GetCaptureCount() const
     {
-        return n_capture_;
+        return nCapture_;
     }
 
     void DumpResult(std::ostream &out) const;
 
     void PushRegExpState(StateType type, uint32_t pc);
 
-    RegExpState *PopRegExpState(bool copy_captrue = true);
+    RegExpState *PopRegExpState(bool copyCaptrue = true);
 
     void DropRegExpState()
     {
-        state_stack_len_--;
+        stateStackLen_--;
     }
 
     RegExpState *PeekRegExpState() const
     {
-        ASSERT(state_stack_len_ >= 1);
+        ASSERT(stateStackLen_ >= 1);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return reinterpret_cast<RegExpState *>(state_stack_ + (state_stack_len_ - 1) * state_size_);
+        return reinterpret_cast<RegExpState *>(stateStack_ + (stateStackLen_ - 1) * stateSize_);
     }
 
-    void ReAllocStack(uint32_t stack_len);
+    void ReAllocStack(uint32_t stackLen);
 
     inline bool IsWordChar(uint8_t value) const
     {
@@ -692,7 +692,7 @@ public:
 
     inline bool IsWideChar() const
     {
-        return is_wide_char_;
+        return isWideChar_;
     }
 
     inline uint8_t *GetInputPtr() const
@@ -716,23 +716,23 @@ public:
 
 private:
     uint8_t *input_ = nullptr;
-    uint8_t *input_end_ = nullptr;
-    bool is_wide_char_ = false;
+    uint8_t *inputEnd_ = nullptr;
+    bool isWideChar_ = false;
 
-    uint32_t current_pc_ = 0;
-    const uint8_t *current_ptr_ = nullptr;
-    CaptureState *capture_result_list_ = nullptr;
+    uint32_t currentPc_ = 0;
+    const uint8_t *currentPtr_ = nullptr;
+    CaptureState *captureResultList_ = nullptr;
     uintptr_t *stack_ = nullptr;
-    uint32_t current_stack_ = 0;
+    uint32_t currentStack_ = 0;
 
-    uint32_t n_capture_ = 0;
-    uint32_t n_stack_ = 0;
+    uint32_t nCapture_ = 0;
+    uint32_t nStack_ = 0;
 
     uint32_t flags_ = 0;
-    uint32_t state_stack_len_ = 0;
-    uint32_t state_stack_size_ = 0;
-    uint32_t state_size_ = 0;
-    uint8_t *state_stack_ = nullptr;
+    uint32_t stateStackLen_ = 0;
+    uint32_t stateStackSize_ = 0;
+    uint32_t stateSize_ = 0;
+    uint8_t *stateStack_ = nullptr;
 };
 }  // namespace panda
 #endif  // core_REGEXP_REGEXP_EXECUTOR_H

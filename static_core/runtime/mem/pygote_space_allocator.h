@@ -45,13 +45,13 @@ class PygoteSpaceAllocator final {
 public:
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(PygoteSpaceAllocator);
     NO_COPY_SEMANTIC(PygoteSpaceAllocator);
-    explicit PygoteSpaceAllocator(MemStatsType *mem_stats);
+    explicit PygoteSpaceAllocator(MemStatsType *memStats);
     ~PygoteSpaceAllocator();
     void *Alloc(size_t size, Alignment alignment = panda::DEFAULT_ALIGNMENT);
 
     void Free(void *mem);
 
-    void SetState(PygoteSpaceState new_state);
+    void SetState(PygoteSpaceState newState);
 
     PygoteSpaceState GetState() const
     {
@@ -78,34 +78,34 @@ public:
     {
         // return live_bitmaps as mark bitmap for gc,
         // gc will update it at end of gc process
-        return live_bitmaps_;
+        return liveBitmaps_;
     }
 
     template <typename Visitor>
     void IterateOverObjectsInRange(const Visitor &visitor, void *start, void *end);
 
-    void IterateOverObjects(const ObjectVisitor &object_visitor);
+    void IterateOverObjects(const ObjectVisitor &objectVisitor);
 
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor);
 
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor);
 
-    void Collect(const GCObjectVisitor &gc_visitor);
+    void Collect(const GCObjectVisitor &gcVisitor);
 
-    void SetHeapSpace(HeapSpace *heap_space)
+    void SetHeapSpace(HeapSpace *heapSpace)
     {
-        heap_space_ = heap_space;
+        heapSpace_ = heapSpace;
     }
 
 private:
-    void CreateLiveBitmap(void *heap_begin, size_t heap_size);
-    RunSlotsAllocator<AllocConfigT> runslots_alloc_;
+    void CreateLiveBitmap(void *heapBegin, size_t heapSize);
+    RunSlotsAllocator<AllocConfigT> runslotsAlloc_;
     Arena *arena_ = nullptr;
-    SpaceType space_type_ = SpaceType::SPACE_TYPE_OBJECT;
+    SpaceType spaceType_ = SpaceType::SPACE_TYPE_OBJECT;
     PygoteSpaceState state_ = STATE_PYGOTE_INIT;
-    BitmapList live_bitmaps_;
-    MemStatsType *mem_stats_;
-    HeapSpace *heap_space_ {nullptr};
+    BitmapList liveBitmaps_;
+    MemStatsType *memStats_;
+    HeapSpace *heapSpace_ {nullptr};
 };
 
 }  // namespace panda::mem

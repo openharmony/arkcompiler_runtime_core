@@ -43,8 +43,8 @@ public:
     void ResetCountersWithTaskProperties(TaskProperties properties) override;
 
 private:
-    mutable std::unordered_map<TaskStatus, os::memory::Mutex> per_status_lock_;
-    std::unordered_map<TaskStatus, TaskPropertiesCounterMap> task_properties_counter_map_;
+    mutable std::unordered_map<TaskStatus, os::memory::Mutex> perStatusLock_;
+    std::unordered_map<TaskStatus, TaskPropertiesCounterMap> taskPropertiesCounterMap_;
 };
 
 }  // namespace panda::taskmanager

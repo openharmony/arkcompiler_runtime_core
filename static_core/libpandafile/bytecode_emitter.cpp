@@ -75,36 +75,36 @@ static void EmitImpl(Span<uint8_t> buf, Span<const uint8_t> offsets, Type arg, T
 
     uint8_t offset = offsets[0];
     size_t bitlen = offsets[1] - offsets[0];
-    size_t byte_offset = offset / BIT_8;
-    size_t bit_offset = offset % BIT_8;
+    size_t byteOffset = offset / BIT_8;
+    size_t bitOffset = offset % BIT_8;
     switch (bitlen) {
         case BIT_4: {
             auto val = static_cast<uint8_t>(arg);
-            buf[byte_offset] |= static_cast<uint8_t>(static_cast<uint8_t>(val & BITMASK_4) << bit_offset);
+            buf[byteOffset] |= static_cast<uint8_t>(static_cast<uint8_t>(val & BITMASK_4) << bitOffset);
             break;
         }
         case BIT_8: {
             auto val = static_cast<uint8_t>(arg);
-            buf[byte_offset] = val;
+            buf[byteOffset] = val;
             break;
         }
         case BIT_16: {
             auto val = static_cast<uint16_t>(arg);
-            buf[byte_offset] = val & BYTEMASK;
-            buf[byte_offset + 1] = val >> BIT_8;
+            buf[byteOffset] = val & BYTEMASK;
+            buf[byteOffset + 1] = val >> BIT_8;
             break;
         }
         case BIT_32: {
             auto val = static_cast<uint32_t>(arg);
             for (size_t i = 0; i < sizeof(uint32_t); i++) {
-                buf[byte_offset + i] = (val >> (i * BIT_8)) & BYTEMASK;
+                buf[byteOffset + i] = (val >> (i * BIT_8)) & BYTEMASK;
             }
             break;
         }
         case BIT_64: {
             auto val = static_cast<uint64_t>(arg);
             for (size_t i = 0; i < sizeof(uint64_t); i++) {
-                buf[byte_offset + i] = (val >> (i * BIT_8)) & BYTEMASK;
+                buf[byteOffset + i] = (val >> (i * BIT_8)) & BYTEMASK;
             }
             break;
         }
@@ -155,67 +155,67 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::Build(std::vector<uint8_t> *output)
 BytecodeEmitter::ErrorCode BytecodeEmitter::ReserveSpaceForOffsets()
 {
     uint32_t bias = 0;
-    std::map<uint32_t, Label> new_branches;
+    std::map<uint32_t, Label> newBranches;
     auto it = branches_.begin();
     while (it != branches_.end()) {
-        uint32_t insn_pc = it->first + bias;
+        uint32_t insnPc = it->first + bias;
         auto label = it->second;
 
-        BytecodeInstruction insn(&bytecode_[insn_pc]);
+        BytecodeInstruction insn(&bytecode_[insnPc]);
         auto opcode = insn.GetOpcode();
-        const auto encoded_imm_size = GetBitImmSizeByOpcode(opcode);
-        const auto real_imm_size = GetBitLengthSigned(EstimateMaxDistance(insn_pc, label.GetPc(), bias));
+        const auto encodedImmSize = GetBitImmSizeByOpcode(opcode);
+        const auto realImmSize = GetBitLengthSigned(EstimateMaxDistance(insnPc, label.GetPc(), bias));
 
-        auto new_target = insn_pc;
-        size_t extra_bytes = 0;
+        auto newTarget = insnPc;
+        size_t extraBytes = 0;
 
-        if (real_imm_size > encoded_imm_size) {
-            auto res = DoReserveSpaceForOffset(insn, insn_pc, real_imm_size, &extra_bytes, &new_target);
+        if (realImmSize > encodedImmSize) {
+            auto res = DoReserveSpaceForOffset(insn, insnPc, realImmSize, &extraBytes, &newTarget);
             if (res != ErrorCode::SUCCESS) {
                 return res;
             }
         }
 
-        new_branches.insert(std::make_pair(new_target, label));
-        if (extra_bytes > 0) {
-            bias += extra_bytes;
-            UpdateLabelTargets(insn_pc, extra_bytes);
+        newBranches.insert(std::make_pair(newTarget, label));
+        if (extraBytes > 0) {
+            bias += extraBytes;
+            UpdateLabelTargets(insnPc, extraBytes);
         }
         it = branches_.erase(it);
     }
-    branches_ = std::move(new_branches);
+    branches_ = std::move(newBranches);
     return ErrorCode::SUCCESS;
 }
 
-BytecodeEmitter::ErrorCode BytecodeEmitter::DoReserveSpaceForOffset(const BytecodeInstruction &insn, uint32_t insn_pc,
-                                                                    BitImmSize expected_imm_size,
-                                                                    size_t *extra_bytes_ptr, uint32_t *target_ptr)
+BytecodeEmitter::ErrorCode BytecodeEmitter::DoReserveSpaceForOffset(const BytecodeInstruction &insn, uint32_t insnPc,
+                                                                    BitImmSize expectedImmSize, size_t *extraBytesPtr,
+                                                                    uint32_t *targetPtr)
 {
     auto opcode = insn.GetOpcode();
-    const auto insn_size = GetSizeByOpcode(opcode);
+    const auto insnSize = GetSizeByOpcode(opcode);
 
-    auto upd_op = GetSuitableJump(opcode, expected_imm_size);
+    auto updOp = GetSuitableJump(opcode, expectedImmSize);
     using DifferenceTypeT = decltype(bytecode_)::iterator::difference_type;
-    if (upd_op != Opcode::LAST) {
-        *extra_bytes_ptr = GetSizeByOpcode(upd_op) - insn_size;
-        bytecode_.insert(bytecode_.begin() + static_cast<DifferenceTypeT>(insn_pc + insn_size), *extra_bytes_ptr, 0);
+    if (updOp != Opcode::LAST) {
+        *extraBytesPtr = GetSizeByOpcode(updOp) - insnSize;
+        bytecode_.insert(bytecode_.begin() + static_cast<DifferenceTypeT>(insnPc + insnSize), *extraBytesPtr, 0);
     } else {
-        *extra_bytes_ptr = GetSizeByOpcode(Opcode::JMP_IMM32);
-        bytecode_.insert(bytecode_.begin() + static_cast<DifferenceTypeT>(insn_pc + insn_size), *extra_bytes_ptr, 0);
+        *extraBytesPtr = GetSizeByOpcode(Opcode::JMP_IMM32);
+        bytecode_.insert(bytecode_.begin() + static_cast<DifferenceTypeT>(insnPc + insnSize), *extraBytesPtr, 0);
 
-        upd_op = RevertConditionCode(opcode);
-        if (upd_op == Opcode::LAST) {
+        updOp = RevertConditionCode(opcode);
+        if (updOp == Opcode::LAST) {
             UNREACHABLE();  // no revcc and no far opcode
             return ErrorCode::INTERNAL_ERROR;
         }
-        UpdateBranchOffs(&bytecode_[insn_pc], static_cast<int32_t>(insn_size + GetSizeByOpcode(Opcode::JMP_IMM32)));
-        *target_ptr = insn_pc + insn_size;
-        Emit<Format::IMM32>(bytecode_.begin() + *target_ptr, Opcode::JMP_IMM32, 0);
+        UpdateBranchOffs(&bytecode_[insnPc], static_cast<int32_t>(insnSize + GetSizeByOpcode(Opcode::JMP_IMM32)));
+        *targetPtr = insnPc + insnSize;
+        Emit<Format::IMM32>(bytecode_.begin() + *targetPtr, Opcode::JMP_IMM32, 0);
     }
-    if (BytecodeInstruction(reinterpret_cast<uint8_t *>(&upd_op)).IsPrefixed()) {
-        Emit<BytecodeInstruction::Format::PREF_NONE>(bytecode_.begin() + insn_pc, upd_op);
+    if (BytecodeInstruction(reinterpret_cast<uint8_t *>(&updOp)).IsPrefixed()) {
+        Emit<BytecodeInstruction::Format::PREF_NONE>(bytecode_.begin() + insnPc, updOp);
     } else {
-        Emit<BytecodeInstruction::Format::NONE>(bytecode_.begin() + insn_pc, upd_op);
+        Emit<BytecodeInstruction::Format::NONE>(bytecode_.begin() + insnPc, updOp);
     }
     return ErrorCode::SUCCESS;
 }
@@ -223,49 +223,49 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::DoReserveSpaceForOffset(const Byteco
 BytecodeEmitter::ErrorCode BytecodeEmitter::UpdateBranches()
 {
     for (std::pair<const uint32_t, Label> &branch : branches_) {
-        uint32_t insn_pc = branch.first;
+        uint32_t insnPc = branch.first;
         Label label = branch.second;
-        auto offset = static_cast<int32_t>(label.GetPc()) - static_cast<int32_t>(insn_pc);
-        UpdateBranchOffs(&bytecode_[insn_pc], offset);
+        auto offset = static_cast<int32_t>(label.GetPc()) - static_cast<int32_t>(insnPc);
+        UpdateBranchOffs(&bytecode_[insnPc], offset);
     }
     return ErrorCode::SUCCESS;
 }
 
 void BytecodeEmitter::UpdateLabelTargets(uint32_t pc, size_t bias)
 {
-    pc_list_.push_front(pc);
-    Label fake(pc_list_.begin());
-    std::list<Label> updated_labels;
+    pcList_.push_front(pc);
+    Label fake(pcList_.begin());
+    std::list<Label> updatedLabels;
     auto it = targets_.upper_bound(fake);
     while (it != targets_.end()) {
         Label label = *it;
         it = targets_.erase(it);
         *label.pc_ += bias;
-        updated_labels.push_back(label);
+        updatedLabels.push_back(label);
     }
-    targets_.insert(updated_labels.begin(), updated_labels.end());
-    pc_list_.pop_front();
+    targets_.insert(updatedLabels.begin(), updatedLabels.end());
+    pcList_.pop_front();
 }
 
-int32_t BytecodeEmitter::EstimateMaxDistance(uint32_t insn_pc, uint32_t target_pc, uint32_t bias) const
+int32_t BytecodeEmitter::EstimateMaxDistance(uint32_t insnPc, uint32_t targetPc, uint32_t bias) const
 {
     int32_t distance = 0;
-    uint32_t end_pc = 0;
+    uint32_t endPc = 0;
     std::map<uint32_t, Label>::const_iterator it;
-    if (target_pc > insn_pc) {
-        it = branches_.lower_bound(insn_pc - bias);
-        distance = static_cast<int32_t>(target_pc - insn_pc);
-        end_pc = target_pc - bias;
-    } else if (target_pc < insn_pc) {
-        it = branches_.lower_bound(target_pc - bias);
-        distance = static_cast<int32_t>(target_pc - insn_pc);
-        end_pc = insn_pc - bias;
+    if (targetPc > insnPc) {
+        it = branches_.lower_bound(insnPc - bias);
+        distance = static_cast<int32_t>(targetPc - insnPc);
+        endPc = targetPc - bias;
+    } else if (targetPc < insnPc) {
+        it = branches_.lower_bound(targetPc - bias);
+        distance = static_cast<int32_t>(targetPc - insnPc);
+        endPc = insnPc - bias;
     } else {
         // Do we support branch to itself?
         return 0;
     }
 
-    while (it != branches_.end() && it->first < end_pc) {
+    while (it != branches_.end() && it->first < endPc) {
         auto insn = BytecodeInstruction(&bytecode_[it->first + bias]);
         auto longest = GetSizeByOpcode(GetLongestJump(insn.GetOpcode()));
         distance += static_cast<int32_t>(longest - insn.GetSize());

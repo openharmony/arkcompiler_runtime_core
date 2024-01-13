@@ -36,20 +36,20 @@ public:
     virtual bool RunOne() = 0;
 
     // Pause the event loop. Wait for the current task to finish.
-    void Pause() ACQUIRE_SHARED(task_execution_)
+    void Pause() ACQUIRE_SHARED(taskExecution_)
     {
-        task_execution_.ReadLock();
+        taskExecution_.ReadLock();
     }
 
     // Notify the event loop to continue.
-    void Continue() RELEASE_GENERIC(task_execution_)
+    void Continue() RELEASE_GENERIC(taskExecution_)
     {
-        task_execution_.Unlock();
+        taskExecution_.Unlock();
     }
 
 private:
     std::atomic<bool> running_ {false};
-    os::memory::RWLock task_execution_;
+    os::memory::RWLock taskExecution_;
 };
 }  // namespace panda::tooling::inspector
 

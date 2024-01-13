@@ -17,15 +17,15 @@ template <RuntimeInterface::IntrinsicId ID, DataType::Type RET_TYPE, DataType::T
 friend struct IntrinsicBuilder;
 
 template <size_t N>
-IntrinsicInst *BuildInteropIntrinsic(size_t pc, RuntimeInterface::IntrinsicId id, DataType::Type ret_type,
+IntrinsicInst *BuildInteropIntrinsic(size_t pc, RuntimeInterface::IntrinsicId id, DataType::Type retType,
                                      const std::array<DataType::Type, N> &types,
                                      const std::array<Inst *, N + 1> &inputs);
-std::pair<Inst *, Inst *> BuildResolveInteropCallIntrinsic(RuntimeInterface::InteropCallKind call_kind, size_t pc,
+std::pair<Inst *, Inst *> BuildResolveInteropCallIntrinsic(RuntimeInterface::InteropCallKind callKind, size_t pc,
                                                            RuntimeInterface::MethodPtr method, Inst *arg0, Inst *arg1,
-                                                           SaveStateInst *save_state);
-void BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind call_kind, size_t pc,
-                                             RuntimeInterface::MethodPtr method, Inst *js_call,
-                                             SaveStateInst *save_state);
-void BuildInteropCall(const BytecodeInstruction *bc_inst, RuntimeInterface::InteropCallKind call_kind,
-                      RuntimeInterface::MethodPtr method, bool is_range, bool acc_read);
-bool TryBuildInteropCall(const BytecodeInstruction *bc_inst, bool is_range, bool acc_read);
+                                                           SaveStateInst *saveState);
+void BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind callKind, size_t pc,
+                                             RuntimeInterface::MethodPtr method, Inst *jsCall,
+                                             SaveStateInst *saveState);
+void BuildInteropCall(const BytecodeInstruction *bcInst, RuntimeInterface::InteropCallKind callKind,
+                      RuntimeInterface::MethodPtr method, bool isRange, bool accRead);
+bool TryBuildInteropCall(const BytecodeInstruction *bcInst, bool isRange, bool accRead);

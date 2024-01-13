@@ -55,28 +55,28 @@ class GraphCloner {
     struct LoopUnrollData {
         BasicBlock *header {nullptr};
         BasicBlock *backedge {nullptr};
-        BasicBlock *exit_block {nullptr};
+        BasicBlock *exitBlock {nullptr};
         BasicBlock *outer {nullptr};
         ArenaVector<BasicBlock *> *blocks {nullptr};
-        InstVector *phi_update_inputs {nullptr};
-        PhiInputsMap *phi_replaced_inputs {nullptr};
+        InstVector *phiUpdateInputs {nullptr};
+        PhiInputsMap *phiReplacedInputs {nullptr};
     };
 
 protected:
     struct LoopClonerData {
         BasicBlock *outer {nullptr};
         BasicBlock *header {nullptr};
-        BasicBlock *pre_header {nullptr};
+        BasicBlock *preHeader {nullptr};
         ArenaVector<BasicBlock *> *blocks {nullptr};
     };
 
 public:
-    explicit GraphCloner(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *local_allocator);
+    explicit GraphCloner(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator);
 
     Graph *CloneGraph();
-    BasicBlock *CloneLoopHeader(BasicBlock *block, BasicBlock *outer, BasicBlock *replaceable_pred);
+    BasicBlock *CloneLoopHeader(BasicBlock *block, BasicBlock *outer, BasicBlock *replaceablePred);
     Loop *CloneLoop(Loop *loop);
-    bool IsLoopClonable(Loop *loop, size_t inst_limit);
+    bool IsLoopClonable(Loop *loop, size_t instLimit);
 
     /**
      * Make equal to the `factor` number of clones of loop body and insert them into the graph
@@ -134,34 +134,34 @@ public:
     void UnrollLoopBody(Loop *loop, size_t factor)
     {
         ASSERT_PRINT(IsLoopSingleBackEdgeExitPoint(loop), "Cloning blocks doesn't have single entry/exit point");
-        auto marker_holder = MarkerHolder(GetGraph());
-        clone_marker_ = marker_holder.GetMarker();
-        auto unroll_data = PrepareLoopToUnroll(loop, (TYPE & UnrollType::UNROLL_WITHOUT_SIDE_EXITS) == 0);
+        auto markerHolder = MarkerHolder(GetGraph());
+        cloneMarker_ = markerHolder.GetMarker();
+        auto unrollData = PrepareLoopToUnroll(loop, (TYPE & UnrollType::UNROLL_WITHOUT_SIDE_EXITS) == 0);
 
-        auto clone_count = factor - 1;
-        for (size_t i = 0; i < clone_count; i++) {
-            CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, true>(*unroll_data->blocks, GetGraph());
-            BuildLoopUnrollControlFlow(unroll_data);
+        auto cloneCount = factor - 1;
+        for (size_t i = 0; i < cloneCount; i++) {
+            CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, true>(*unrollData->blocks, GetGraph());
+            BuildLoopUnrollControlFlow(unrollData);
             // NOLINTNEXTLINE(bugprone-suspicious-semicolon, readability-braces-around-statements)
             if constexpr ((TYPE & UnrollType::UNROLL_WITHOUT_SIDE_EXITS) != 0) {
                 // Users update should be done on the last no-side-exits unroll iteration
                 // before building loop data-flow
-                if (i + 1 == clone_count) {  // last_iteration
-                    UpdateUsersAfterNoSideExitsUnroll(unroll_data);
+                if (i + 1 == cloneCount) {  // last_iteration
+                    UpdateUsersAfterNoSideExitsUnroll(unrollData);
                 }
             }
-            BuildLoopUnrollDataFlow(unroll_data);
+            BuildLoopUnrollDataFlow(unrollData);
         }
 
         // NOLINTNEXTLINE(bugprone-suspicious-semicolon, readability-braces-around-statements)
         if constexpr ((TYPE & UnrollType::UNROLL_REMOVE_BACK_EDGE) != 0) {
-            RemoveLoopBackEdge(unroll_data);
+            RemoveLoopBackEdge(unrollData);
         }
         // NOLINTNEXTLINE(bugprone-suspicious-semicolon, readability-braces-around-statements)
         if constexpr (TYPE == UnrollType::UNROLL_CONSTANT_ITERATIONS) {
-            RemoveLoopPreHeader(unroll_data);
+            RemoveLoopPreHeader(unrollData);
         }
-        ssb_.FixPhisWithCheckInputs(unroll_data->outer);
+        ssb_.FixPhisWithCheckInputs(unrollData->outer);
     }
 
 protected:
@@ -175,24 +175,24 @@ protected:
         ASSERT(block != nullptr);
         ASSERT_PRINT(block->GetGraph() == GetGraph(), "GraphCloner probably caught disconnected block");
         ASSERT_DO(HasClone(block), block->Dump(&std::cerr));
-        return clone_blocks_[block->GetId()];
+        return cloneBlocks_[block->GetId()];
     }
 
     template <CloneEdgeType EDGE_TYPE>
     void CloneEdges(BasicBlock *block)
     {
         auto clone = GetClone(block);
-        auto block_edges = &block->GetPredsBlocks();
-        auto clone_edges = &clone->GetPredsBlocks();
+        auto blockEdges = &block->GetPredsBlocks();
+        auto cloneEdges = &clone->GetPredsBlocks();
         // NOLINTNEXTLINE(bugprone-suspicious-semicolon, readability-braces-around-statements)
         if constexpr (EDGE_TYPE == CloneEdgeType::EDGE_SUCC) {
-            block_edges = &block->GetSuccsBlocks();
-            clone_edges = &clone->GetSuccsBlocks();
+            blockEdges = &block->GetSuccsBlocks();
+            cloneEdges = &clone->GetSuccsBlocks();
         }
-        ASSERT(clone_edges->empty());
-        clone_edges->reserve(block_edges->size());
-        for (auto edge : *block_edges) {
-            clone_edges->push_back(GetClone(edge));
+        ASSERT(cloneEdges->empty());
+        cloneEdges->reserve(blockEdges->size());
+        for (auto edge : *blockEdges) {
+            cloneEdges->push_back(GetClone(edge));
         }
     }
 
@@ -201,26 +201,26 @@ protected:
      * cloned form the original block
      */
     template <InstCloneType TYPE, bool SKIP_SAFEPOINTS>
-    void CloneBlocksAndInstructions(const ArenaVector<BasicBlock *> &blocks, Graph *target_graph)
+    void CloneBlocksAndInstructions(const ArenaVector<BasicBlock *> &blocks, Graph *targetGraph)
     {
-        clone_blocks_.clear();
-        clone_blocks_.resize(GetGraph()->GetVectorBlocks().size(), nullptr);
-        clone_instructions_.clear();
-        size_t inst_count = 0;
+        cloneBlocks_.clear();
+        cloneBlocks_.resize(GetGraph()->GetVectorBlocks().size(), nullptr);
+        cloneInstructions_.clear();
+        size_t instCount = 0;
         for (const auto &block : blocks) {
             if (block != nullptr) {
-                auto clone = block->Clone(target_graph);
-                clone_blocks_[block->GetId()] = clone;
-                CloneInstructions<TYPE, SKIP_SAFEPOINTS>(block, clone, &inst_count);
+                auto clone = block->Clone(targetGraph);
+                cloneBlocks_[block->GetId()] = clone;
+                CloneInstructions<TYPE, SKIP_SAFEPOINTS>(block, clone, &instCount);
                 if (block->IsTryBegin()) {
-                    target_graph->AppendTryBeginBlock(clone);
+                    targetGraph->AppendTryBeginBlock(clone);
                 }
             }
         }
     }
 
-    void MakeLoopCloneInfo(LoopClonerData *unroll_data);
-    BasicBlock *CreateNewOutsideSucc(BasicBlock *outside_succ, BasicBlock *back_edge, BasicBlock *pre_header);
+    void MakeLoopCloneInfo(LoopClonerData *unrollData);
+    BasicBlock *CreateNewOutsideSucc(BasicBlock *outsideSucc, BasicBlock *backEdge, BasicBlock *preHeader);
 
     /**
      * Use the following rules cloning the inputs:
@@ -266,49 +266,49 @@ protected:
         ASSERT_PRINT(inst->GetBasicBlock()->GetGraph() == GetGraph(),
                      "GraphCloner probably caught an instruction from disconnected block");
         // Empty clone_blocks_ means we are cloning only one basic block
-        ASSERT(clone_blocks_.empty() || HasClone(inst->GetBasicBlock()));
+        ASSERT(cloneBlocks_.empty() || HasClone(inst->GetBasicBlock()));
 
-        return clone_instructions_[inst->GetCloneNumber()];
+        return cloneInstructions_[inst->GetCloneNumber()];
     }
 
 private:
     // Whole graph cloning
-    void CopyLoop(Loop *loop, Loop *cloned_loop);
-    void CloneLinearOrder(Graph *new_graph);
+    void CopyLoop(Loop *loop, Loop *clonedLoop);
+    void CloneLinearOrder(Graph *newGraph);
     void BuildControlFlow();
     void BuildDataFlow();
-    void CloneAnalyses(Graph *new_graph);
+    void CloneAnalyses(Graph *newGraph);
     // Loop cloning
     LoopClonerData *PrepareLoopToClone(Loop *loop);
-    GraphCloner::LoopClonerData *PopulateLoopClonerData(Loop *loop, BasicBlock *pre_header, BasicBlock *outside_succ);
-    void BuildLoopCloneControlFlow(LoopClonerData *unroll_data);
-    void BuildLoopCloneDataFlow(LoopClonerData *unroll_data);
+    GraphCloner::LoopClonerData *PopulateLoopClonerData(Loop *loop, BasicBlock *preHeader, BasicBlock *outsideSucc);
+    void BuildLoopCloneControlFlow(LoopClonerData *unrollData);
+    void BuildLoopCloneDataFlow(LoopClonerData *unrollData);
     // Unroll cloning
-    LoopUnrollData *PrepareLoopToUnroll(Loop *loop, bool clone_side_exits);
-    BasicBlock *CreateResolverBlock(Loop *loop, BasicBlock *back_edge);
-    BasicBlock *SplitBackEdge(LoopUnrollData *unroll_data, Loop *loop, BasicBlock *back_edge);
-    void UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unroll_data);
-    void BuildLoopUnrollControlFlow(LoopUnrollData *unroll_data);
-    void BuildLoopUnrollDataFlow(LoopUnrollData *unroll_data);
-    void RemoveLoopBackEdge(const LoopUnrollData *unroll_data);
-    void RemoveLoopPreHeader(const LoopUnrollData *unroll_data);
+    LoopUnrollData *PrepareLoopToUnroll(Loop *loop, bool cloneSideExits);
+    BasicBlock *CreateResolverBlock(Loop *loop, BasicBlock *backEdge);
+    BasicBlock *SplitBackEdge(LoopUnrollData *unrollData, Loop *loop, BasicBlock *backEdge);
+    void UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unrollData);
+    void BuildLoopUnrollControlFlow(LoopUnrollData *unrollData);
+    void BuildLoopUnrollDataFlow(LoopUnrollData *unrollData);
+    void RemoveLoopBackEdge(const LoopUnrollData *unrollData);
+    void RemoveLoopPreHeader(const LoopUnrollData *unrollData);
     // Loop header cloning
     void BuildClonedLoopHeaderDataFlow(const BasicBlock &block, BasicBlock *resolver, BasicBlock *clone);
-    void UpdateUsersForClonedLoopHeader(Inst *inst, BasicBlock *outer_block);
+    void UpdateUsersForClonedLoopHeader(Inst *inst, BasicBlock *outerBlock);
     // Cloned blocks and instructions getters
     bool HasClone(const BasicBlock *block)
     {
-        return (block->GetId() < clone_blocks_.size()) && (clone_blocks_[block->GetId()] != nullptr);
+        return (block->GetId() < cloneBlocks_.size()) && (cloneBlocks_[block->GetId()] != nullptr);
     }
 
     bool HasClone(Inst *inst)
     {
-        return inst->IsMarked(clone_marker_) && (inst->GetCloneNumber() < clone_instructions_.size());
+        return inst->IsMarked(cloneMarker_) && (inst->GetCloneNumber() < cloneInstructions_.size());
     }
 
     /// Clone block's instructions and append to the block's clone
     template <InstCloneType TYPE, bool SKIP_SAFEPOINTS>
-    void CloneInstructions(const BasicBlock *block, BasicBlock *clone, size_t *inst_count)
+    void CloneInstructions(const BasicBlock *block, BasicBlock *clone, size_t *instCount)
     {
         for (auto inst : block->Insts()) {
             if constexpr (SKIP_SAFEPOINTS) {  // NOLINT
@@ -322,42 +322,42 @@ private:
                 }
             }
 
-            clone->AppendInst(CloneInstruction(inst, inst_count, clone->GetGraph()));
+            clone->AppendInst(CloneInstruction(inst, instCount, clone->GetGraph()));
         }
 
         if constexpr (TYPE == InstCloneType::CLONE_ALL) {  // NOLINT
             for (auto phi : block->PhiInsts()) {
-                auto phi_clone = CloneInstruction(phi, inst_count, clone->GetGraph());
-                clone->AppendPhi(phi_clone->CastToPhi());
+                auto phiClone = CloneInstruction(phi, instCount, clone->GetGraph());
+                clone->AppendPhi(phiClone->CastToPhi());
             }
         }
     }
 
     /// Clone instruction and mark both: clone and cloned
-    Inst *CloneInstruction(Inst *inst, size_t *inst_count, Graph *target_graph)
+    Inst *CloneInstruction(Inst *inst, size_t *instCount, Graph *targetGraph)
     {
-        inst->SetCloneNumber((*inst_count)++);
-        auto inst_clone = inst->Clone(target_graph);
-        clone_instructions_.push_back(inst_clone);
-        inst->SetMarker(clone_marker_);
-        inst_clone->SetMarker(clone_marker_);
-        if (inst->GetBasicBlock()->GetGraph() != target_graph) {
-            inst_clone->SetId(inst->GetId());
+        inst->SetCloneNumber((*instCount)++);
+        auto instClone = inst->Clone(targetGraph);
+        cloneInstructions_.push_back(instClone);
+        inst->SetMarker(cloneMarker_);
+        instClone->SetMarker(cloneMarker_);
+        if (inst->GetBasicBlock()->GetGraph() != targetGraph) {
+            instClone->SetId(inst->GetId());
         }
-        return inst_clone;
+        return instClone;
     }
 
     bool IsInstLoopHeaderPhi(Inst *inst, Loop *loop);
 
 protected:
-    Marker clone_marker_ {UNDEF_MARKER};  // NOLINT(misc-non-private-member-variables-in-classes)
+    Marker cloneMarker_ {UNDEF_MARKER};  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
     Graph *graph_;
     ArenaAllocator *allocator_;
-    ArenaAllocator *local_allocator_;
-    ArenaVector<BasicBlock *> clone_blocks_;
-    InstVector clone_instructions_;
+    ArenaAllocator *localAllocator_;
+    ArenaVector<BasicBlock *> cloneBlocks_;
+    InstVector cloneInstructions_;
     SaveStateBridgesBuilder ssb_;
 };
 }  // namespace panda::compiler

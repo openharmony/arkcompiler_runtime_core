@@ -21,12 +21,12 @@
 namespace panda::compiler {
 bool BalanceExpressions::RunImpl()
 {
-    processed_inst_mrk_ = GetGraph()->NewMarker();
+    processedInstMrk_ = GetGraph()->NewMarker();
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         ProcessBB(bb);
     }
-    GetGraph()->EraseMarker(processed_inst_mrk_);
-    return is_applied_;
+    GetGraph()->EraseMarker(processedInstMrk_);
+    return isApplied_;
 }
 
 void BalanceExpressions::InvalidateAnalyses()
@@ -47,14 +47,14 @@ void BalanceExpressions::ProcessBB(BasicBlock *bb)
     auto it = bb->InstsReverse().begin();
     for (; it != it.end(); ++it) {
         ASSERT(*it != nullptr);
-        if ((*it)->SetMarker(processed_inst_mrk_)) {
+        if ((*it)->SetMarker(processedInstMrk_)) {
             // The instruction is already processed;
             continue;
         }
         if (SuitableInst(*it)) {
             // The final operator of the chain is found, start analyzing:
-            auto inst_to_continue_cycle = ProccesExpressionChain(*it);
-            it.SetCurrent(inst_to_continue_cycle);
+            auto instToContinueCycle = ProccesExpressionChain(*it);
+            it.SetCurrent(instToContinueCycle);
         }
     }
 }
@@ -69,20 +69,20 @@ bool BalanceExpressions::SuitableInst(Inst *inst)
     return false;
 }
 
-Inst *BalanceExpressions::ProccesExpressionChain(Inst *last_operator)
+Inst *BalanceExpressions::ProccesExpressionChain(Inst *lastOperator)
 {
-    ASSERT(last_operator != nullptr);
-    AnalyzeInputsRec(last_operator);
+    ASSERT(lastOperator != nullptr);
+    AnalyzeInputsRec(lastOperator);
 
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << "\nConsidering expression:";
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << *this;
 
-    auto inst_to_continue = NeedsOptimization() ? OptimizeExpression(last_operator->GetNext()) : last_operator;
+    auto instToContinue = NeedsOptimization() ? OptimizeExpression(lastOperator->GetNext()) : lastOperator;
 
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Expression considered.";
 
     Reset();
-    return inst_to_continue;
+    return instToContinue;
 }
 
 /**
@@ -91,7 +91,7 @@ Inst *BalanceExpressions::ProccesExpressionChain(Inst *last_operator)
  * By the end of the algorithm, `operators_.front()` points to the first instruction in expression and
  * `operators_.back()` points to the last (`operators_.front()` dominates `operators_.back()`).
  */
-Inst *BalanceExpressions::OptimizeExpression(Inst *inst_after_expr)
+Inst *BalanceExpressions::OptimizeExpression(Inst *instAfterExpr)
 {
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Optimizing expression:";
     AllocateSourcesRec<true>(0, sources_.size() - 1);
@@ -104,10 +104,10 @@ Inst *BalanceExpressions::OptimizeExpression(Inst *inst_after_expr)
         operators_[i]->SetNext(operators_[i + 1]);
         operators_[i]->SetPrev(operators_[i - 1]);
     }
-    if (inst_after_expr == nullptr) {
+    if (instAfterExpr == nullptr) {
         GetBB()->AppendRangeInst(operators_.front(), operators_.back());
     } else {
-        GetBB()->InsertRangeBefore(operators_.front(), operators_.back(), inst_after_expr);
+        GetBB()->InsertRangeBefore(operators_.front(), operators_.back(), instAfterExpr);
     }
 
     SetIsApplied(true);
@@ -115,8 +115,8 @@ Inst *BalanceExpressions::OptimizeExpression(Inst *inst_after_expr)
     COMPILER_LOG(DEBUG, BALANCE_EXPR) << *this;
 
     // Need to return pointer to the next instruction in order to correctly continue the cycle:
-    Inst *inst_to_continue_cycle = operators_.front();
-    return inst_to_continue_cycle;
+    Inst *instToContinueCycle = operators_.front();
+    return instToContinueCycle;
 }
 
 /**
@@ -127,45 +127,45 @@ Inst *BalanceExpressions::OptimizeExpression(Inst *inst_after_expr)
  * (`operators_.front()` is the first, `operators_.back()` is the last).
  */
 template <bool IS_FIRST_CALL>
-Inst *BalanceExpressions::AllocateSourcesRec(size_t first_idx, size_t last_idx)
+Inst *BalanceExpressions::AllocateSourcesRec(size_t firstIdx, size_t lastIdx)
 {
-    COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Allocating operators for sources_[" << first_idx << " to " << last_idx << "]";
-    size_t split_idx = first_idx + GetBitFloor(last_idx - first_idx + 1) - 1;
+    COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Allocating operators for sources_[" << firstIdx << " to " << lastIdx << "]";
+    size_t splitIdx = firstIdx + GetBitFloor(lastIdx - firstIdx + 1) - 1;
 
-    Inst *lhs = GetOperand(first_idx, split_idx);
-    Inst *rhs = LIKELY((split_idx + 1) != last_idx) ? GetOperand(split_idx + 1, last_idx) : sources_[split_idx + 1];
+    Inst *lhs = GetOperand(firstIdx, splitIdx);
+    Inst *rhs = LIKELY((splitIdx + 1) != lastIdx) ? GetOperand(splitIdx + 1, lastIdx) : sources_[splitIdx + 1];
     // `(split_idx + 1) == last_idx` means an odd number of `sources_` and we are considering
     // the last (unpaired) source. This situation may occur only with `rhs`.
-    ASSERT(first_idx != split_idx);
+    ASSERT(firstIdx != splitIdx);
 
     // Operator allocation:
-    ASSERT(operators_alloc_idx_ < operators_.size());
-    Inst *allocated_operator = operators_[operators_alloc_idx_];
-    operators_alloc_idx_++;
+    ASSERT(operatorsAllocIdx_ < operators_.size());
+    Inst *allocatedOperator = operators_[operatorsAllocIdx_];
+    operatorsAllocIdx_++;
 
     // Operator initialization:
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (IS_FIRST_CALL) {
         // The first call allocates and generates at the same time the last operator of expression and
         // its users should be saved.
-        allocated_operator->RemoveInputs();
-        allocated_operator->GetBasicBlock()->EraseInst(allocated_operator);
+        allocatedOperator->RemoveInputs();
+        allocatedOperator->GetBasicBlock()->EraseInst(allocatedOperator);
     } else {  // NOLINT(readability-misleading-indentation)
-        allocated_operator->GetBasicBlock()->RemoveInst(allocated_operator);
+        allocatedOperator->GetBasicBlock()->RemoveInst(allocatedOperator);
     }
-    allocated_operator->SetBasicBlock(GetBB());
-    allocated_operator->SetInput(0, lhs);
-    allocated_operator->SetInput(1, rhs);
+    allocatedOperator->SetBasicBlock(GetBB());
+    allocatedOperator->SetInput(0, lhs);
+    allocatedOperator->SetInput(1, rhs);
 
-    COMPILER_LOG(DEBUG, BALANCE_EXPR) << "sources_[" << first_idx << " to " << last_idx << "] allocated";
-    return allocated_operator;
+    COMPILER_LOG(DEBUG, BALANCE_EXPR) << "sources_[" << firstIdx << " to " << lastIdx << "] allocated";
+    return allocatedOperator;
 }
 
-Inst *BalanceExpressions::GetOperand(size_t first_idx, size_t last_idx)
+Inst *BalanceExpressions::GetOperand(size_t firstIdx, size_t lastIdx)
 {
-    ASSERT(last_idx > first_idx);
-    return (last_idx - first_idx == 1) ? GenerateElementalOperator(sources_[first_idx], sources_[last_idx])
-                                       : AllocateSourcesRec<false>(first_idx, last_idx);
+    ASSERT(lastIdx > firstIdx);
+    return (lastIdx - firstIdx == 1) ? GenerateElementalOperator(sources_[firstIdx], sources_[lastIdx])
+                                     : AllocateSourcesRec<false>(firstIdx, lastIdx);
 }
 
 /**
@@ -175,20 +175,20 @@ Inst *BalanceExpressions::GetOperand(size_t first_idx, size_t last_idx)
 Inst *BalanceExpressions::GenerateElementalOperator(Inst *lhs, Inst *rhs)
 {
     ASSERT(lhs && rhs);
-    ASSERT(operators_alloc_idx_ < operators_.size());
-    Inst *allocated_operator = operators_[operators_alloc_idx_];
-    operators_alloc_idx_++;
-    allocated_operator->GetBasicBlock()->RemoveInst(allocated_operator);
+    ASSERT(operatorsAllocIdx_ < operators_.size());
+    Inst *allocatedOperator = operators_[operatorsAllocIdx_];
+    operatorsAllocIdx_++;
+    allocatedOperator->GetBasicBlock()->RemoveInst(allocatedOperator);
 
-    allocated_operator->SetBasicBlock(GetBB());
+    allocatedOperator->SetBasicBlock(GetBB());
 
     // There is no need to clean users of lhs and rhs because it is cleaned during RemoveInst()
     // (as soon as every of operator_insts_ is removed before further usage)
 
-    allocated_operator->SetInput(0, lhs);
-    allocated_operator->SetInput(1, rhs);
-    COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Created an elemental operator:\n" << *allocated_operator;
-    return allocated_operator;
+    allocatedOperator->SetInput(0, lhs);
+    allocatedOperator->SetInput(1, rhs);
+    COMPILER_LOG(DEBUG, BALANCE_EXPR) << "Created an elemental operator:\n" << *allocatedOperator;
+    return allocatedOperator;
 }
 
 /**
@@ -197,20 +197,20 @@ Inst *BalanceExpressions::GenerateElementalOperator(Inst *lhs, Inst *rhs)
  */
 void BalanceExpressions::AnalyzeInputsRec(Inst *inst)
 {
-    expr_cur_depth_++;
+    exprCurDepth_++;
     ASSERT(inst != nullptr);
 
-    auto lhs_input = inst->GetInput(0).GetInst();
-    auto rhs_input = inst->GetInput(1).GetInst();
+    auto lhsInput = inst->GetInput(0).GetInst();
+    auto rhsInput = inst->GetInput(1).GetInst();
 
-    TryExtendChainRec(lhs_input);
-    TryExtendChainRec(rhs_input);
+    TryExtendChainRec(lhsInput);
+    TryExtendChainRec(rhsInput);
     operators_.push_back(inst);
 
-    if (expr_max_depth_ < expr_cur_depth_) {
-        expr_max_depth_ = expr_cur_depth_;
+    if (exprMaxDepth_ < exprCurDepth_) {
+        exprMaxDepth_ = exprCurDepth_;
     }
-    expr_cur_depth_--;
+    exprCurDepth_--;
 }
 
 /**
@@ -222,7 +222,7 @@ void BalanceExpressions::TryExtendChainRec(Inst *inst)
     ASSERT(inst);
     if (inst->GetOpcode() == GetOpcode()) {
         if (inst->HasSingleUser()) {
-            inst->SetMarker(processed_inst_mrk_);
+            inst->SetMarker(processedInstMrk_);
 
             AnalyzeInputsRec(inst);
 
@@ -242,10 +242,10 @@ bool BalanceExpressions::NeedsOptimization()
         return false;
     }
     // Avoid large shift exponent for size_t
-    if (expr_max_depth_ >= std::numeric_limits<size_t>::digits) {
+    if (exprMaxDepth_ >= std::numeric_limits<size_t>::digits) {
         return false;
     }
-    size_t current = 1UL << (expr_max_depth_);
+    size_t current = 1UL << (exprMaxDepth_);
     size_t optimal = GetBitCeil(sources_.size());
     return current > optimal;
 }
@@ -254,9 +254,9 @@ void BalanceExpressions::Reset()
 {
     sources_.clear();
     operators_.clear();
-    expr_cur_depth_ = 0;
-    expr_max_depth_ = 0;
-    operators_alloc_idx_ = 0;
+    exprCurDepth_ = 0;
+    exprMaxDepth_ = 0;
+    operatorsAllocIdx_ = 0;
     SetOpcode(Opcode::INVALID);
 }
 

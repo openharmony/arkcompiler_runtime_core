@@ -65,7 +65,7 @@ public:
     static void EndCurrent();
 
 private:
-    WorkerThread *worker_thread_ = nullptr;
+    WorkerThread *workerThread_ = nullptr;
     ObjectHeader *future_ = nullptr;
 
     NO_COPY_SEMANTIC(Task);

@@ -108,10 +108,10 @@ private:
         return v >> BITS_FOR_SPAN_SIZE;
     }
 
-    static uintptr_t ConstructPayload(size_t span_size, size_t span_index)
+    static uintptr_t ConstructPayload(size_t spanSize, size_t spanIndex)
     {
-        ASSERT(span_size > 0 && span_size <= MAX_SPAN_SIZE);
-        return (span_index << BITS_FOR_SPAN_SIZE) | span_size;
+        ASSERT(spanSize > 0 && spanSize <= MAX_SPAN_SIZE);
+        return (spanIndex << BITS_FOR_SPAN_SIZE) | spanSize;
     }
 
 public:

@@ -23,8 +23,8 @@ namespace panda::compiler {
 class GraphCreator {
 public:
     GraphCreator() = delete;
-    explicit GraphCreator(ArenaAllocator &allocator, ArenaAllocator &local_allocator)
-        : allocator_(allocator), local_allocator_(local_allocator)
+    explicit GraphCreator(ArenaAllocator &allocator, ArenaAllocator &localAllocator)
+        : allocator_(allocator), localAllocator_(localAllocator)
     {
     }
 
@@ -52,7 +52,7 @@ public:
 
     ArenaAllocator *GetLocalAllocator() const
     {
-        return &local_allocator_;
+        return &localAllocator_;
     }
 
 private:
@@ -76,15 +76,15 @@ private:
 private:
     // need to create graphs
     ArenaAllocator &allocator_;
-    ArenaAllocator &local_allocator_;
+    ArenaAllocator &localAllocator_;
     RuntimeInterfaceMock runtime_;
     Arch arch_ {Arch::AARCH64};
 
 public:
     void SetNumVRegsArgs(size_t regs, size_t args)
     {
-        runtime_.vregs_count_ = regs;
-        runtime_.args_count_ = args;
+        runtime_.vregsCount_ = regs;
+        runtime_.argsCount_ = args;
     }
 };
 
@@ -93,25 +93,25 @@ public:
     InstGenerator() = delete;
     explicit InstGenerator(ArenaAllocator &allocator) : allocator_(allocator) {}
 
-    std::vector<Inst *> &Generate(Opcode op_code);
+    std::vector<Inst *> &Generate(Opcode opCode);
 
     int GetAllPossibleInstToGenerateNumber()
     {
         int result = 0;
-        for (auto &it : opcode_x_possible_types_) {
+        for (auto &it : opcodeXPossibleTypes_) {
             result += it.second.size();
         }
         return result;
     }
 
-    int GetPossibleInstToGenerateNumber(Opcode op_code)
+    int GetPossibleInstToGenerateNumber(Opcode opCode)
     {
-        return opcode_x_possible_types_[op_code].size();
+        return opcodeXPossibleTypes_[opCode].size();
     }
 
     std::map<Opcode, std::vector<DataType::Type>> &GetMap()
     {
-        return opcode_x_possible_types_;
+        return opcodeXPossibleTypes_;
     }
 
     ArenaAllocator *GetAllocator()
@@ -121,76 +121,76 @@ public:
 
 private:
     template <class T>
-    std::vector<Inst *> &GenerateOperations(Opcode op_code);
+    std::vector<Inst *> &GenerateOperations(Opcode opCode);
 
     template <class T>
-    std::vector<Inst *> &GenerateOperationsImm(Opcode op_code);
+    std::vector<Inst *> &GenerateOperationsImm(Opcode opCode);
 
     template <class T>
-    std::vector<Inst *> &GenerateOperationsShiftedRegister(Opcode op_code);
+    std::vector<Inst *> &GenerateOperationsShiftedRegister(Opcode opCode);
 
-    void GenerateIntrinsic(DataType::Type type, RuntimeInterface::IntrinsicId intrinsic_id)
+    void GenerateIntrinsic(DataType::Type type, RuntimeInterface::IntrinsicId intrinsicId)
     {
         auto inst = Inst::New<IntrinsicInst>(&allocator_, Opcode::Intrinsic);
         inst->SetType(type);
-        inst->SetIntrinsicId(intrinsic_id);
-        AdjustFlags(intrinsic_id, inst);
+        inst->SetIntrinsicId(intrinsicId);
+        AdjustFlags(intrinsicId, inst);
         insts_.push_back(inst);
     }
 
-    std::vector<DataType::Type> integer_types_ {DataType::UINT8,  DataType::INT8,  DataType::UINT16, DataType::INT16,
-                                                DataType::UINT32, DataType::INT32, DataType::UINT64, DataType::INT64};
+    std::vector<DataType::Type> integerTypes_ {DataType::UINT8,  DataType::INT8,  DataType::UINT16, DataType::INT16,
+                                               DataType::UINT32, DataType::INT32, DataType::UINT64, DataType::INT64};
 
-    std::vector<DataType::Type> numeric_types_ {DataType::BOOL,  DataType::UINT8,   DataType::INT8,   DataType::UINT16,
-                                                DataType::INT16, DataType::UINT32,  DataType::INT32,  DataType::UINT64,
-                                                DataType::INT64, DataType::FLOAT32, DataType::FLOAT64};
+    std::vector<DataType::Type> numericTypes_ {DataType::BOOL,  DataType::UINT8,   DataType::INT8,   DataType::UINT16,
+                                               DataType::INT16, DataType::UINT32,  DataType::INT32,  DataType::UINT64,
+                                               DataType::INT64, DataType::FLOAT32, DataType::FLOAT64};
 
-    std::vector<DataType::Type> ref_num_types_ {
+    std::vector<DataType::Type> refNumTypes_ {
         DataType::REFERENCE, DataType::BOOL,  DataType::UINT8,  DataType::INT8,  DataType::UINT16,  DataType::INT16,
         DataType::UINT32,    DataType::INT32, DataType::UINT64, DataType::INT64, DataType::FLOAT32, DataType::FLOAT64};
 
-    std::vector<DataType::Type> ref_int_types_ {DataType::REFERENCE, DataType::BOOL,  DataType::UINT8,  DataType::INT8,
-                                                DataType::UINT16,    DataType::INT16, DataType::UINT32, DataType::INT32,
-                                                DataType::UINT64,    DataType::INT64};
+    std::vector<DataType::Type> refIntTypes_ {DataType::REFERENCE, DataType::BOOL,  DataType::UINT8,  DataType::INT8,
+                                              DataType::UINT16,    DataType::INT16, DataType::UINT32, DataType::INT32,
+                                              DataType::UINT64,    DataType::INT64};
 
-    std::vector<DataType::Type> all_types_ {DataType::REFERENCE, DataType::BOOL,  DataType::UINT8,   DataType::INT8,
-                                            DataType::UINT16,    DataType::INT16, DataType::UINT32,  DataType::INT32,
-                                            DataType::UINT64,    DataType::INT64, DataType::FLOAT32, DataType::FLOAT64,
-                                            DataType::VOID};
+    std::vector<DataType::Type> allTypes_ {DataType::REFERENCE, DataType::BOOL,  DataType::UINT8,   DataType::INT8,
+                                           DataType::UINT16,    DataType::INT16, DataType::UINT32,  DataType::INT32,
+                                           DataType::UINT64,    DataType::INT64, DataType::FLOAT32, DataType::FLOAT64,
+                                           DataType::VOID};
 
-    std::vector<DataType::Type> floats_types_ {DataType::FLOAT32, DataType::FLOAT64};
+    std::vector<DataType::Type> floatsTypes_ {DataType::FLOAT32, DataType::FLOAT64};
 
-    std::map<Opcode, std::vector<DataType::Type>> opcode_x_possible_types_ = {
-        {Opcode::Neg, numeric_types_},
-        {Opcode::Abs, numeric_types_},
-        {Opcode::Not, integer_types_},
-        {Opcode::Add, numeric_types_},
-        {Opcode::Sub, numeric_types_},
-        {Opcode::Mul, numeric_types_},
-        {Opcode::Div, numeric_types_},
-        {Opcode::Min, numeric_types_},
-        {Opcode::Max, numeric_types_},
-        {Opcode::Shl, integer_types_},
-        {Opcode::Shr, integer_types_},
-        {Opcode::AShr, integer_types_},
-        {Opcode::Mod, numeric_types_},
-        {Opcode::And, integer_types_},
-        {Opcode::Or, integer_types_},
-        {Opcode::Xor, integer_types_},
-        {Opcode::Compare, ref_num_types_},
-        {Opcode::If, ref_int_types_},
+    std::map<Opcode, std::vector<DataType::Type>> opcodeXPossibleTypes_ = {
+        {Opcode::Neg, numericTypes_},
+        {Opcode::Abs, numericTypes_},
+        {Opcode::Not, integerTypes_},
+        {Opcode::Add, numericTypes_},
+        {Opcode::Sub, numericTypes_},
+        {Opcode::Mul, numericTypes_},
+        {Opcode::Div, numericTypes_},
+        {Opcode::Min, numericTypes_},
+        {Opcode::Max, numericTypes_},
+        {Opcode::Shl, integerTypes_},
+        {Opcode::Shr, integerTypes_},
+        {Opcode::AShr, integerTypes_},
+        {Opcode::Mod, numericTypes_},
+        {Opcode::And, integerTypes_},
+        {Opcode::Or, integerTypes_},
+        {Opcode::Xor, integerTypes_},
+        {Opcode::Compare, refNumTypes_},
+        {Opcode::If, refIntTypes_},
         {Opcode::Cmp, {DataType::INT32}},
         {Opcode::Constant, {DataType::INT64, DataType::FLOAT32, DataType::FLOAT64}},
-        {Opcode::Phi, ref_num_types_},
-        {Opcode::IfImm, ref_int_types_},
-        {Opcode::Cast, numeric_types_},
-        {Opcode::Parameter, ref_num_types_},
+        {Opcode::Phi, refNumTypes_},
+        {Opcode::IfImm, refIntTypes_},
+        {Opcode::Cast, numericTypes_},
+        {Opcode::Parameter, refNumTypes_},
         {Opcode::IsInstance, {DataType::BOOL}},
         {Opcode::LenArray, {DataType::INT32}},
-        {Opcode::LoadArray, ref_num_types_},
-        {Opcode::StoreArray, ref_num_types_},
-        {Opcode::LoadArrayI, ref_num_types_},
-        {Opcode::StoreArrayI, ref_num_types_},
+        {Opcode::LoadArray, refNumTypes_},
+        {Opcode::StoreArray, refNumTypes_},
+        {Opcode::LoadArrayI, refNumTypes_},
+        {Opcode::StoreArrayI, refNumTypes_},
         {Opcode::CheckCast, {DataType::NO_TYPE}},
         {Opcode::NullCheck, {DataType::NO_TYPE}},
         {Opcode::ZeroCheck, {DataType::NO_TYPE}},
@@ -201,32 +201,32 @@ private:
         {Opcode::ReturnVoid, {DataType::NO_TYPE}},
         {Opcode::Throw, {DataType::NO_TYPE}},
         {Opcode::NewArray, {DataType::REFERENCE}},
-        {Opcode::Return, ref_num_types_},
-        {Opcode::ReturnI, numeric_types_},
-        {Opcode::CallStatic, all_types_},
-        {Opcode::CallVirtual, all_types_},
-        {Opcode::AddI, integer_types_},
-        {Opcode::SubI, integer_types_},
-        {Opcode::AndI, integer_types_},
-        {Opcode::OrI, integer_types_},
-        {Opcode::XorI, integer_types_},
-        {Opcode::ShrI, integer_types_},
-        {Opcode::ShlI, integer_types_},
-        {Opcode::AShrI, integer_types_},
+        {Opcode::Return, refNumTypes_},
+        {Opcode::ReturnI, numericTypes_},
+        {Opcode::CallStatic, allTypes_},
+        {Opcode::CallVirtual, allTypes_},
+        {Opcode::AddI, integerTypes_},
+        {Opcode::SubI, integerTypes_},
+        {Opcode::AndI, integerTypes_},
+        {Opcode::OrI, integerTypes_},
+        {Opcode::XorI, integerTypes_},
+        {Opcode::ShrI, integerTypes_},
+        {Opcode::ShlI, integerTypes_},
+        {Opcode::AShrI, integerTypes_},
         {Opcode::SpillFill, {DataType::NO_TYPE}},
         {Opcode::NewObject, {DataType::REFERENCE}},
-        {Opcode::LoadObject, ref_num_types_},
-        {Opcode::LoadStatic, ref_num_types_},
-        {Opcode::StoreObject, ref_num_types_},
-        {Opcode::StoreStatic, ref_num_types_},
+        {Opcode::LoadObject, refNumTypes_},
+        {Opcode::LoadStatic, refNumTypes_},
+        {Opcode::StoreObject, refNumTypes_},
+        {Opcode::StoreStatic, refNumTypes_},
         {Opcode::LoadString, {DataType::REFERENCE}},
         {Opcode::LoadType, {DataType::REFERENCE}},
         {Opcode::SafePoint, {DataType::NO_TYPE}},
         {Opcode::ReturnInlined, {DataType::NO_TYPE}},
         {Opcode::Monitor, {DataType::VOID}},
         {Opcode::Intrinsic, {}},
-        {Opcode::Select, ref_int_types_},
-        {Opcode::SelectImm, ref_int_types_},
+        {Opcode::Select, refIntTypes_},
+        {Opcode::SelectImm, refIntTypes_},
         {Opcode::NullPtr, {DataType::REFERENCE}},
         {Opcode::LoadArrayPair,
          {DataType::UINT32, DataType::INT32, DataType::UINT64, DataType::INT64, DataType::FLOAT32, DataType::FLOAT64,
@@ -240,34 +240,31 @@ private:
         {Opcode::StoreArrayPairI,
          {DataType::UINT32, DataType::INT32, DataType::UINT64, DataType::INT64, DataType::FLOAT32, DataType::FLOAT64,
           DataType::REFERENCE}},
-        {Opcode::AndNot, integer_types_},
-        {Opcode::OrNot, integer_types_},
-        {Opcode::XorNot, integer_types_},
-        {Opcode::MNeg, numeric_types_},
-        {Opcode::MAdd, numeric_types_},
-        {Opcode::MSub, numeric_types_},
-        {Opcode::AddSR, integer_types_},
-        {Opcode::SubSR, integer_types_},
-        {Opcode::AndSR, integer_types_},
-        {Opcode::OrSR, integer_types_},
-        {Opcode::XorSR, integer_types_},
-        {Opcode::AndNotSR, integer_types_},
-        {Opcode::OrNotSR, integer_types_},
-        {Opcode::XorNotSR, integer_types_},
-        {Opcode::NegSR, integer_types_},
+        {Opcode::AndNot, integerTypes_},
+        {Opcode::OrNot, integerTypes_},
+        {Opcode::XorNot, integerTypes_},
+        {Opcode::MNeg, numericTypes_},
+        {Opcode::MAdd, numericTypes_},
+        {Opcode::MSub, numericTypes_},
+        {Opcode::AddSR, integerTypes_},
+        {Opcode::SubSR, integerTypes_},
+        {Opcode::AndSR, integerTypes_},
+        {Opcode::OrSR, integerTypes_},
+        {Opcode::XorSR, integerTypes_},
+        {Opcode::AndNotSR, integerTypes_},
+        {Opcode::OrNotSR, integerTypes_},
+        {Opcode::XorNotSR, integerTypes_},
+        {Opcode::NegSR, integerTypes_},
     };
 
-    std::vector<ShiftType> only_shifts_ = {ShiftType::LSL, ShiftType::LSR, ShiftType::ASR};
-    std::vector<ShiftType> shifts_and_rotation_ = {ShiftType::LSL, ShiftType::LSR, ShiftType::ASR, ShiftType::ROR};
-    std::map<Opcode, std::vector<ShiftType>> opcode_x_possible_shift_types_ = {{Opcode::AddSR, only_shifts_},
-                                                                               {Opcode::SubSR, only_shifts_},
-                                                                               {Opcode::AndSR, shifts_and_rotation_},
-                                                                               {Opcode::OrSR, shifts_and_rotation_},
-                                                                               {Opcode::XorSR, shifts_and_rotation_},
-                                                                               {Opcode::AndNotSR, shifts_and_rotation_},
-                                                                               {Opcode::OrNotSR, shifts_and_rotation_},
-                                                                               {Opcode::XorNotSR, shifts_and_rotation_},
-                                                                               {Opcode::NegSR, only_shifts_}};
+    std::vector<ShiftType> onlyShifts_ = {ShiftType::LSL, ShiftType::LSR, ShiftType::ASR};
+    std::vector<ShiftType> shiftsAndRotation_ = {ShiftType::LSL, ShiftType::LSR, ShiftType::ASR, ShiftType::ROR};
+    std::map<Opcode, std::vector<ShiftType>> opcodeXPossibleShiftTypes_ = {
+        {Opcode::AddSR, onlyShifts_},          {Opcode::SubSR, onlyShifts_},
+        {Opcode::AndSR, shiftsAndRotation_},   {Opcode::OrSR, shiftsAndRotation_},
+        {Opcode::XorSR, shiftsAndRotation_},   {Opcode::AndNotSR, shiftsAndRotation_},
+        {Opcode::OrNotSR, shiftsAndRotation_}, {Opcode::XorNotSR, shiftsAndRotation_},
+        {Opcode::NegSR, onlyShifts_}};
     std::vector<Inst *> insts_;
 
     // need to create graphs
@@ -277,8 +274,8 @@ private:
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class StatisticGenerator {
 public:
-    StatisticGenerator(InstGenerator &inst_generator, GraphCreator &graph_creator)
-        : inst_generator_(inst_generator), graph_creator_(graph_creator)
+    StatisticGenerator(InstGenerator &instGenerator, GraphCreator &graphCreator)
+        : instGenerator_(instGenerator), graphCreator_(graphCreator)
     {
     }
 
@@ -298,17 +295,17 @@ public:
         return statistic_;
     }
 
-    void GenerateHTMLPage(const std::string &file_name);
+    void GenerateHTMLPage(const std::string &fileName);
 
 protected:
-    InstGenerator &inst_generator_;
-    GraphCreator &graph_creator_;
+    InstGenerator &instGenerator_;
+    GraphCreator &graphCreator_;
 
-    int all_inst_number_ = 0;
-    int positive_inst_number_ = 0;
+    int allInstNumber_ = 0;
+    int positiveInstNumber_ = 0;
 
-    int all_opcode_number_ = 0;
-    int implemented_opcode_number_ = 0;
+    int allOpcodeNumber_ = 0;
+    int implementedOpcodeNumber_ = 0;
 
     FullStat statistic_;
 

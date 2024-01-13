@@ -29,8 +29,6 @@ using namespace panda::verifier;
 
 namespace panda::verifier::test {
 
-// using namespace rc;
-
 namespace {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-err58-cpp)

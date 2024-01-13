@@ -32,17 +32,17 @@ namespace panda::compiler {
 // caller mask is 0000000111111111 and
 // callee mask is 1111100000000000.
 
-constexpr size_t ConvertRegNumberX86(size_t reg_id)
+constexpr size_t ConvertRegNumberX86(size_t regId)
 {
     constexpr size_t RENAMING_MASK_3_5_OR_9_11 {0xE38};
     constexpr size_t RENAMING_CONST {14U};
 
-    ASSERT(reg_id < MAX_NUM_REGS);
+    ASSERT(regId < MAX_NUM_REGS);
     // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-    if ((RENAMING_MASK_3_5_OR_9_11 & (size_t(1) << reg_id)) != 0) {
-        return RENAMING_CONST - reg_id;
+    if ((RENAMING_MASK_3_5_OR_9_11 & (size_t(1) << regId)) != 0) {
+        return RENAMING_CONST - regId;
     }
-    return reg_id;
+    return regId;
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -131,11 +131,11 @@ struct ArchCallingConventionX8664 {
 #define DEF_FP_REG_NAME(r) "xmm" #r,
     static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME)};
 #undef DEF_FP_REG_NAME
-    static constexpr const char *GetRegName(size_t reg, bool is_fp)
+    static constexpr const char *GetRegName(size_t reg, bool isFp)
     {
-        ASSERT(reg < REG_NAMES.size() || is_fp);
-        ASSERT(reg < FP_REG_NAMES.size() || !is_fp);
-        return is_fp ? FP_REG_NAMES[reg] : REG_NAMES[reg];
+        ASSERT(reg < REG_NAMES.size() || isFp);
+        ASSERT(reg < FP_REG_NAMES.size() || !isFp);
+        return isFp ? FP_REG_NAMES[reg] : REG_NAMES[reg];
     }
 };
 
@@ -162,11 +162,11 @@ struct ArchCallingConventionAarch64 {
     static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME)};
 #undef DEF_FP_REG_NAME
 
-    static constexpr const char *GetRegName(size_t reg, bool is_fp)
+    static constexpr const char *GetRegName(size_t reg, bool isFp)
     {
-        ASSERT(reg < REG_NAMES.size() || is_fp);
-        ASSERT(reg < FP_REG_NAMES.size() || !is_fp);
-        return is_fp ? FP_REG_NAMES[reg] : REG_NAMES[reg];
+        ASSERT(reg < REG_NAMES.size() || isFp);
+        ASSERT(reg < FP_REG_NAMES.size() || !isFp);
+        return isFp ? FP_REG_NAMES[reg] : REG_NAMES[reg];
     }
 };
 
@@ -193,11 +193,11 @@ struct ArchCallingConventionAarch32 {
     static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME)};
 #undef DEF_FP_REG_NAME
 
-    static constexpr const char *GetRegName(size_t reg, bool is_fp)
+    static constexpr const char *GetRegName(size_t reg, bool isFp)
     {
-        ASSERT(reg < REG_NAMES.size() || is_fp);
-        ASSERT(reg < FP_REG_NAMES.size() || !is_fp);
-        return is_fp ? FP_REG_NAMES[reg] : REG_NAMES[reg];
+        ASSERT(reg < REG_NAMES.size() || isFp);
+        ASSERT(reg < FP_REG_NAMES.size() || !isFp);
+        return isFp ? FP_REG_NAMES[reg] : REG_NAMES[reg];
     }
 };
 
@@ -214,7 +214,7 @@ struct ArchCallingConventionX86 {
     static constexpr uint32_t GENERAL_REGS_MASK = MakeMaskByExcluding(16, 0);
     static constexpr uint32_t SP_ALIGNMENT = 8;
 
-    static constexpr const char *GetRegName([[maybe_unused]] size_t reg, [[maybe_unused]] bool is_fp)
+    static constexpr const char *GetRegName([[maybe_unused]] size_t reg, [[maybe_unused]] bool isFp)
     {
         return "not supported";
     }
@@ -431,8 +431,8 @@ public:
 
     constexpr Reg GetParamReg(size_t index, TypeInfo type) const
     {
-        auto reg_id {type.IsScalar() ? GetParamRegId(index) : GetFpParamRegId(index)};
-        return Reg(reg_id, type);
+        auto regId {type.IsScalar() ? GetParamRegId(index) : GetFpParamRegId(index)};
+        return Reg(regId, type);
     }
 
     constexpr Reg GetParamReg(size_t index) const
@@ -458,17 +458,17 @@ public:
     }
 
     // NOTE(msherstennikov): Take into account register size
-    std::string GetRegName(size_t reg, bool is_fp) const
+    std::string GetRegName(size_t reg, bool isFp) const
     {
         switch (arch_) {
             case Arch::X86_64:
-                return ArchCallingConventionX8664::GetRegName(reg, is_fp);
+                return ArchCallingConventionX8664::GetRegName(reg, isFp);
             case Arch::X86:
-                return ArchCallingConventionX86::GetRegName(reg, is_fp);
+                return ArchCallingConventionX86::GetRegName(reg, isFp);
             case Arch::AARCH64:
-                return ArchCallingConventionAarch64::GetRegName(reg, is_fp);
+                return ArchCallingConventionAarch64::GetRegName(reg, isFp);
             case Arch::AARCH32:
-                return ArchCallingConventionAarch32::GetRegName(reg, is_fp);
+                return ArchCallingConventionAarch32::GetRegName(reg, isFp);
             case Arch::NONE:
                 return "r" + std::to_string(reg);
             default:

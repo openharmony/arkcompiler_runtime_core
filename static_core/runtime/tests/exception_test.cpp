@@ -51,10 +51,10 @@ protected:
 
         options_.SetGcType("gen-gc");
 
-        auto exec_path = panda::os::file::File::GetExecutablePath();
-        std::string panda_std_lib =
-            exec_path.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
-        options_.SetBootPandaFiles({panda_std_lib});
+        auto execPath = panda::os::file::File::GetExecutablePath();
+        std::string pandaStdLib =
+            execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
+        options_.SetBootPandaFiles({pandaStdLib});
     }
 
     ~PandaExceptionTest() override
@@ -66,9 +66,9 @@ protected:
     NO_COPY_SEMANTIC(PandaExceptionTest);
     NO_MOVE_SEMANTIC(PandaExceptionTest);
 
-    inline void CreateRuntime(ExType ex_type)
+    inline void CreateRuntime(ExType exType)
     {
-        switch (ex_type) {
+        switch (exType) {
             case ExType::INT: {
                 options_.SetCompilerEnableJit(false);
                 break;
@@ -148,14 +148,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallShortINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -165,14 +165,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -231,14 +231,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallShortJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -248,14 +248,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -317,14 +317,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -334,14 +334,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -403,14 +403,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -420,14 +420,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -490,14 +490,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallRangeINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -507,14 +507,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallRangeINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -577,14 +577,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallRangeJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -594,14 +594,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallRangeJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -660,14 +660,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccShortINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -677,14 +677,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -743,14 +743,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccShortJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -760,14 +760,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -828,14 +828,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -845,14 +845,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -913,14 +913,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -930,14 +930,14 @@ TEST_F(PandaExceptionTest, AbstractMethodStaticCallAccJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -996,14 +996,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallShortINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1013,14 +1013,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1079,14 +1079,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallShortJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1096,14 +1096,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1165,14 +1165,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1182,14 +1182,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1251,14 +1251,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1268,14 +1268,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1338,14 +1338,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallRangeINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1355,14 +1355,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallRangeINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1425,14 +1425,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallRangeJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1442,14 +1442,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallRangeJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1508,14 +1508,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccShortINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1525,14 +1525,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1591,14 +1591,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccShortJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1608,14 +1608,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1676,14 +1676,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1693,14 +1693,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1761,14 +1761,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1778,14 +1778,14 @@ TEST_F(PandaExceptionTest, AbstractMethodVirtualCallAccJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1839,14 +1839,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectShortINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1856,14 +1856,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectShortINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1917,14 +1917,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectShortJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -1934,14 +1934,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectShortJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -1999,14 +1999,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -2016,14 +2016,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -2081,14 +2081,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -2098,14 +2098,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -2164,14 +2164,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeINT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -2181,14 +2181,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeINT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 /**
@@ -2247,14 +2247,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeJIT)
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     Class *klass =
-        class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+        classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
             ->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("ProvokeAbstractMethodException"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
@@ -2264,14 +2264,14 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeJIT)
     std::vector<Value> args;
     Value result = method->Invoke(ManagedThread::GetCurrent(), args.data());
 
-    int64_t expected_result = 0;
-    int64_t unexpected_exception = 2;
-    int64_t no_exceptions = -1;
+    int64_t expectedResult = 0;
+    int64_t unexpectedException = 2;
+    int64_t noExceptions = -1;
 
-    ASSERT_NE(result.GetAs<int64_t>(), unexpected_exception)
+    ASSERT_NE(result.GetAs<int64_t>(), unexpectedException)
         << "AbstractMethod exception should have been thrown, but another has";
-    ASSERT_NE(result.GetAs<int64_t>(), no_exceptions) << "No exceptions were thrown";
-    ASSERT_EQ(result.GetAs<int64_t>(), expected_result) << "Unexpected error";
+    ASSERT_NE(result.GetAs<int64_t>(), noExceptions) << "No exceptions were thrown";
+    ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
 }  // namespace panda::test

@@ -27,17 +27,17 @@ bool CFrame::IsNativeMethod() const
 }
 
 template <bool NEED_PACK>
-interpreter::VRegister CFrame::GetVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &code_info,
-                                            SlotType **callee_stack) const
+interpreter::VRegister CFrame::GetVRegValue(const VRegInfo &vreg, const compiler::CodeInfo &codeInfo,
+                                            SlotType **calleeStack) const
 {
     switch (vreg.GetLocation()) {
         case VRegInfo::Location::SLOT:
             return GetVRegValueSlot<NEED_PACK>(vreg);
         case VRegInfo::Location::REGISTER:
         case VRegInfo::Location::FP_REGISTER:
-            return GetVRegValueRegister<NEED_PACK>(vreg, callee_stack);
+            return GetVRegValueRegister<NEED_PACK>(vreg, calleeStack);
         case VRegInfo::Location::CONSTANT:
-            return GetVRegValueConstant<NEED_PACK>(vreg, code_info);
+            return GetVRegValueConstant<NEED_PACK>(vreg, codeInfo);
         default:
             return interpreter::VRegister {};
     }
@@ -75,7 +75,7 @@ uint64_t CFrame::GetPackValue(VRegInfo::Type type, uint64_t val) const
 template <bool NEED_PACK>
 interpreter::VRegister CFrame::GetVRegValueSlot(const VRegInfo &vreg) const
 {
-    interpreter::VRegister res_reg;
+    interpreter::VRegister resReg;
     uint64_t val = GetValueFromSlot(vreg.GetValue());
     // NOLINTNEXTLINE(bugprone-suspicious-semicolon,readability-braces-around-statements)
     if constexpr (!ArchTraits<ARCH>::IS_64_BITS) {
@@ -88,105 +88,105 @@ interpreter::VRegister CFrame::GetVRegValueSlot(const VRegInfo &vreg) const
     if constexpr (NEED_PACK) {
         val = GetPackValue(vreg.GetType(), val);
     }
-    res_reg.Set(val);
-    return res_reg;
+    resReg.Set(val);
+    return resReg;
 }
 
 template <bool NEED_PACK>
-interpreter::VRegister CFrame::GetVRegValueRegister(const VRegInfo &vreg, SlotType **callee_stack) const
+interpreter::VRegister CFrame::GetVRegValueRegister(const VRegInfo &vreg, SlotType **calleeStack) const
 {
-    interpreter::VRegister res_reg;
-    bool is_fp = vreg.GetLocation() == VRegInfo::Location::FP_REGISTER;
-    if ((GetCallerRegsMask(ARCH, is_fp) & (1U << vreg.GetValue())).Any()) {
+    interpreter::VRegister resReg;
+    bool isFp = vreg.GetLocation() == VRegInfo::Location::FP_REGISTER;
+    if ((GetCallerRegsMask(ARCH, isFp) & (1U << vreg.GetValue())).Any()) {
         CFrameLayout fl(ARCH, 0);
-        RegMask mask(GetCallerRegsMask(RUNTIME_ARCH, is_fp));
-        auto reg_num = mask.GetDistanceFromTail(vreg.GetValue());
-        reg_num = fl.GetCallerLastSlot(is_fp) - reg_num;
-        uint64_t val = GetValueFromSlot(reg_num);
+        RegMask mask(GetCallerRegsMask(RUNTIME_ARCH, isFp));
+        auto regNum = mask.GetDistanceFromTail(vreg.GetValue());
+        regNum = fl.GetCallerLastSlot(isFp) - regNum;
+        uint64_t val = GetValueFromSlot(regNum);
         // NOLINTNEXTLINE(bugprone-suspicious-semicolon,readability-magic-numbers,readability-braces-around-statements)
         if constexpr (!ArchTraits<ARCH>::IS_64_BITS) {
             if (vreg.Has64BitValue()) {
                 ASSERT(!vreg.IsObject());
-                val |= static_cast<uint64_t>(GetValueFromSlot(static_cast<int>(reg_num) - 1)) << BITS_PER_UINT32;
+                val |= static_cast<uint64_t>(GetValueFromSlot(static_cast<int>(regNum) - 1)) << BITS_PER_UINT32;
             }
         }
         // NOLINTNEXTLINE(bugprone-suspicious-semicolon,readability-braces-around-statements)
         if constexpr (NEED_PACK) {
             val = GetPackValue(vreg.GetType(), val);
         }
-        res_reg.Set(val);
-        return res_reg;
+        resReg.Set(val);
+        return resReg;
     }
 
-    uint64_t val = ReadCalleeSavedRegister(vreg.GetValue(), is_fp, callee_stack);
+    uint64_t val = ReadCalleeSavedRegister(vreg.GetValue(), isFp, calleeStack);
     if (!ArchTraits<ARCH>::IS_64_BITS && vreg.Has64BitValue()) {
-        val |= static_cast<uint64_t>(ReadCalleeSavedRegister(vreg.GetValue() + 1, is_fp, callee_stack))
+        val |= static_cast<uint64_t>(ReadCalleeSavedRegister(vreg.GetValue() + 1, isFp, calleeStack))
                << BITS_PER_UINT32;
     }
     // NOLINTNEXTLINE(bugprone-suspicious-semicolon,readability-braces-around-statements)
     if constexpr (NEED_PACK) {
         val = GetPackValue(vreg.GetType(), val);
     }
-    if (is_fp) {
-        res_reg.Set(val);
+    if (isFp) {
+        resReg.Set(val);
         if (vreg.Has64BitValue()) {
-            res_reg.Set(bit_cast<double>(val));
-            return res_reg;
+            resReg.Set(bit_cast<double>(val));
+            return resReg;
         }
-        res_reg.Set(bit_cast<float>(static_cast<uint32_t>(val)));
-        return res_reg;
+        resReg.Set(bit_cast<float>(static_cast<uint32_t>(val)));
+        return resReg;
     }
-    res_reg.Set(val);
-    return res_reg;
+    resReg.Set(val);
+    return resReg;
 }
 
 template <bool NEED_PACK>
-interpreter::VRegister CFrame::GetVRegValueConstant(const VRegInfo &vreg, const compiler::CodeInfo &code_info) const
+interpreter::VRegister CFrame::GetVRegValueConstant(const VRegInfo &vreg, const compiler::CodeInfo &codeInfo) const
 {
-    interpreter::VRegister res_reg;
-    auto val = code_info.GetConstant(vreg);
+    interpreter::VRegister resReg;
+    auto val = codeInfo.GetConstant(vreg);
     // NOLINTNEXTLINE(bugprone-suspicious-semicolon,readability-braces-around-statements)
     if constexpr (NEED_PACK) {
         val = GetPackValue(vreg.GetType(), val);
     }
-    res_reg.Set(val);
-    return res_reg;
+    resReg.Set(val);
+    return resReg;
 }
 
 template <bool NEED_PACK>
-void CFrame::SetVRegValue(const VRegInfo &vreg, uint64_t value, SlotType **callee_stack)
+void CFrame::SetVRegValue(const VRegInfo &vreg, uint64_t value, SlotType **calleeStack)
 {
-    auto location_value = static_cast<int>(vreg.GetValue());
+    auto locationValue = static_cast<int>(vreg.GetValue());
     // NOLINTNEXTLINE(bugprone-suspicious-semicolon,readability-braces-around-statements)
     if constexpr (NEED_PACK) {
         value = GetPackValue(vreg.GetType(), value);
     }
     switch (vreg.GetLocation()) {
         case VRegInfo::Location::SLOT: {
-            SetValueToSlot(location_value, value);
+            SetValueToSlot(locationValue, value);
             if (!ArchTraits<ARCH>::IS_64_BITS && vreg.Has64BitValue()) {
-                SetValueToSlot(location_value - 1, value >> BITS_PER_UINT32);
+                SetValueToSlot(locationValue - 1, value >> BITS_PER_UINT32);
             }
             break;
         }
         case VRegInfo::Location::REGISTER:
         case VRegInfo::Location::FP_REGISTER: {
-            bool is_fp = vreg.GetLocation() == VRegInfo::Location::FP_REGISTER;
-            if ((GetCallerRegsMask(ARCH, is_fp) & (1U << vreg.GetValue())).Any()) {
+            bool isFp = vreg.GetLocation() == VRegInfo::Location::FP_REGISTER;
+            if ((GetCallerRegsMask(ARCH, isFp) & (1U << vreg.GetValue())).Any()) {
                 CFrameLayout fl(ARCH, 0);
-                auto reg_num = location_value - GetFirstCallerReg(ARCH, is_fp);
-                reg_num = fl.GetCallerLastSlot(is_fp) - reg_num;
-                SetValueToSlot(reg_num, value);
+                auto regNum = locationValue - GetFirstCallerReg(ARCH, isFp);
+                regNum = fl.GetCallerLastSlot(isFp) - regNum;
+                SetValueToSlot(regNum, value);
                 if (!ArchTraits<ARCH>::IS_64_BITS && vreg.Has64BitValue()) {
-                    SetValueToSlot(static_cast<int>(reg_num) - 1, value >> BITS_PER_UINT32);
+                    SetValueToSlot(static_cast<int>(regNum) - 1, value >> BITS_PER_UINT32);
                 }
                 break;
             }
-            WriteCalleeSavedRegister(location_value, value, is_fp, callee_stack);
+            WriteCalleeSavedRegister(locationValue, value, isFp, calleeStack);
             // NOLINTNEXTLINE(bugprone-suspicious-semicolon,readability-braces-around-statements)
             if constexpr (!ArchTraits<ARCH>::IS_64_BITS) {
                 if (vreg.Has64BitValue()) {
-                    WriteCalleeSavedRegister(location_value + 1, value >> BITS_PER_UINT32, is_fp, callee_stack);
+                    WriteCalleeSavedRegister(locationValue + 1, value >> BITS_PER_UINT32, isFp, calleeStack);
                 }
                 break;
             }
@@ -200,70 +200,70 @@ void CFrame::SetVRegValue(const VRegInfo &vreg, uint64_t value, SlotType **calle
     }
 }
 
-void CFrame::Dump(const CodeInfo &code_info, std::ostream &os)
+void CFrame::Dump(const CodeInfo &codeInfo, std::ostream &os)
 {
-    auto max_slot = code_info.GetHeader().GetFrameSize() / ArchTraits<RUNTIME_ARCH>::POINTER_SIZE;
-    Dump(os, max_slot);
+    auto maxSlot = codeInfo.GetHeader().GetFrameSize() / ArchTraits<RUNTIME_ARCH>::POINTER_SIZE;
+    Dump(os, maxSlot);
 }
 
-void CFrame::Dump(std::ostream &os, uint32_t max_slot)
+void CFrame::Dump(std::ostream &os, uint32_t maxSlot)
 {
     if (IsNative()) {
         os << "NATIVE CFRAME: fp=" << fp_ << std::endl;
         return;
     }
-    auto spill_start_slot = GetCalleeRegsCount(ARCH, false) + GetCalleeRegsCount(ARCH, true) +
-                            GetCallerRegsCount(ARCH, false) + GetCallerRegsCount(ARCH, true);
-    max_slot = (max_slot > spill_start_slot) ? (max_slot - spill_start_slot) : 0;
+    auto spillStartSlot = GetCalleeRegsCount(ARCH, false) + GetCalleeRegsCount(ARCH, true) +
+                          GetCallerRegsCount(ARCH, false) + GetCallerRegsCount(ARCH, true);
+    maxSlot = (maxSlot > spillStartSlot) ? (maxSlot - spillStartSlot) : 0;
 
-    auto print_mem = [](std::ostream &stream, void *addr, std::string_view dscr, uintptr_t value) {
+    auto printMem = [](std::ostream &stream, void *addr, std::string_view dscr, uintptr_t value) {
         constexpr size_t WIDTH = 16;
         stream << ' ' << addr << ": " << std::setw(WIDTH) << std::setfill(' ') << dscr << " 0x" << std::hex << value
                << std::dec << std::endl;
     };
     os << "****************************************\n";
-    os << "* CFRAME: fp=" << fp_ << ", max_spill_slot=" << max_slot << '\n';
+    os << "* CFRAME: fp=" << fp_ << ", max_spill_slot=" << maxSlot << '\n';
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    print_mem(os, fp_ - CFrameLayout::LrSlot::Start(), "lr", GetLr());
+    printMem(os, fp_ - CFrameLayout::LrSlot::Start(), "lr", GetLr());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    print_mem(os, fp_ - CFrameLayout::PrevFrameSlot::Start(), "prev", reinterpret_cast<uintptr_t>(GetPrevFrame()));
+    printMem(os, fp_ - CFrameLayout::PrevFrameSlot::Start(), "prev", reinterpret_cast<uintptr_t>(GetPrevFrame()));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    print_mem(os, fp_ - CFrameLayout::MethodSlot::Start(), "method", reinterpret_cast<uintptr_t>(GetMethod()));
+    printMem(os, fp_ - CFrameLayout::MethodSlot::Start(), "method", reinterpret_cast<uintptr_t>(GetMethod()));
     PandaString dscr;
     size_t slot = 0;
-    DumpCalleeRegs(os, print_mem, &dscr, &slot);
-    DumpCalleeFPRegs(os, print_mem, &dscr, &slot);
-    DumpCallerRegs(os, print_mem, &dscr, &slot);
-    DumpCallerFPRegs(os, print_mem, &dscr, &slot);
-    DumpLocals(os, print_mem, &dscr, &slot, max_slot);
+    DumpCalleeRegs(os, printMem, &dscr, &slot);
+    DumpCalleeFPRegs(os, printMem, &dscr, &slot);
+    DumpCallerRegs(os, printMem, &dscr, &slot);
+    DumpCallerFPRegs(os, printMem, &dscr, &slot);
+    DumpLocals(os, printMem, &dscr, &slot, maxSlot);
 
     os << "* CFRAME END\n";
     os << "****************************************\n";
 }
 
-void CFrame::DumpCalleeRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot)
+void CFrame::DumpCalleeRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot)
 {
     os << " [Callee saved registers]\n";
     for (auto i = panda::helpers::ToSigned(GetLastCalleeReg(ARCH, false));
          i >= panda::helpers::ToSigned(GetFirstCalleeReg(ARCH, false)); i--, (*slot)++) {
         *dscr = "x" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        print_mem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
+        printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
     }
 }
 
-void CFrame::DumpCalleeFPRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot)
+void CFrame::DumpCalleeFPRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot)
 {
     os << " [Callee saved FP registers]\n";
     for (auto i = panda::helpers::ToSigned(GetLastCalleeReg(ARCH, true));
          i >= panda::helpers::ToSigned(GetFirstCalleeReg(ARCH, true)); i--, (*slot)++) {
         *dscr = "d" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        print_mem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
+        printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
     }
 }
 
-void CFrame::DumpCallerRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot)
+void CFrame::DumpCallerRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot)
 {
     os << " [Caller saved registers] " << GetLastCallerReg(ARCH, false) << " " << GetFirstCallerReg(ARCH, false)
        << "\n";
@@ -271,28 +271,28 @@ void CFrame::DumpCallerRegs(std::ostream &os, MemPrinter print_mem, PandaString 
          i >= panda::helpers::ToSigned(GetFirstCallerReg(ARCH, false)); i--, (*slot)++) {
         *dscr = "x" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        print_mem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
+        printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
     }
 }
 
-void CFrame::DumpCallerFPRegs(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot)
+void CFrame::DumpCallerFPRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot)
 {
     os << " [Caller saved FP registers]\n";
     for (auto i = panda::helpers::ToSigned(GetLastCallerReg(ARCH, true));
          i >= panda::helpers::ToSigned(GetFirstCallerReg(ARCH, true)); i--, (*slot)++) {
         *dscr = "d" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        print_mem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
+        printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
     }
 }
 
-void CFrame::DumpLocals(std::ostream &os, MemPrinter print_mem, PandaString *dscr, size_t *slot, int32_t max_slot)
+void CFrame::DumpLocals(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot, int32_t maxSlot)
 {
     os << " [Locals]\n";
-    for (auto i = 0; i <= max_slot; i++, (*slot)++) {
+    for (auto i = 0; i <= maxSlot; i++, (*slot)++) {
         *dscr = "s" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        print_mem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
+        printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
     }
 }
 

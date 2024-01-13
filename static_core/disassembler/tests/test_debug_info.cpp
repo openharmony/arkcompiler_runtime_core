@@ -26,8 +26,8 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
     auto beg = text.find(header);
     auto end = text.find('}', beg);
 
-    assert(beg != std::string::npos);
-    assert(end != std::string::npos);
+    ASSERT(beg != std::string::npos);
+    ASSERT(end != std::string::npos);
 
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
@@ -71,29 +71,29 @@ TEST(TestDebugInfo, TestDebugInfo)
     d.CollectInfo();
     d.Serialize(ss, true, true);
 
-    std::string body_g = ExtractFuncBody(ss.str(), "g() <static> {");
+    std::string bodyG = ExtractFuncBody(ss.str(), "g() <static> {");
 
-    ASSERT_NE(body_g.find("#   LINE_NUMBER_TABLE:"), std::string::npos);
-    ASSERT_NE(body_g.find("#\tline 14: 0\n"), std::string::npos);
+    ASSERT_NE(bodyG.find("#   LINE_NUMBER_TABLE:"), std::string::npos);
+    ASSERT_NE(bodyG.find("#\tline 14: 0\n"), std::string::npos);
 
-    size_t code_start = body_g.find("#   CODE:\n");
-    ASSERT_NE(code_start, std::string::npos) << "Code section in function g not found";
-    size_t code_end = body_g.find("\n\n");  // First gap in function body is code section end
-    ASSERT_NE(code_end, std::string::npos) << "Gap after code section in function g not found";
-    ASSERT_LT(code_start, code_end);
+    size_t codeStart = bodyG.find("#   CODE:\n");
+    ASSERT_NE(codeStart, std::string::npos) << "Code section in function g not found";
+    size_t codeEnd = bodyG.find("\n\n");  // First gap in function body is code section end
+    ASSERT_NE(codeEnd, std::string::npos) << "Gap after code section in function g not found";
+    ASSERT_LT(codeStart, codeEnd);
     std::string instructions =
-        body_g.substr(code_start + strlen("#   CODE:\n"), code_end + 1 - (code_start + strlen("#   CODE:\n")));
+        bodyG.substr(codeStart + strlen("#   CODE:\n"), codeEnd + 1 - (codeStart + strlen("#   CODE:\n")));
 
-    std::regex const inst_regex("# offset: ");
-    std::ptrdiff_t const instruction_count(std::distance(
-        std::sregex_iterator(instructions.begin(), instructions.end(), inst_regex), std::sregex_iterator()));
+    std::regex const instRegex("# offset: ");
+    std::ptrdiff_t const instructionCount(std::distance(
+        std::sregex_iterator(instructions.begin(), instructions.end(), instRegex), std::sregex_iterator()));
 
-    const panda::disasm::ProgInfo &prog_info = d.GetProgInfo();
-    auto g_it = prog_info.methods_info.find("g:()");
-    ASSERT_NE(g_it, prog_info.methods_info.end());
+    const panda::disasm::ProgInfo &progInfo = d.GetProgInfo();
+    auto gIt = progInfo.methodsInfo.find("g:()");
+    ASSERT_NE(gIt, progInfo.methodsInfo.end());
     // In case of pandasm the table should contain entry on each instruction
-    ASSERT_EQ(g_it->second.line_number_table.size(), instruction_count);
+    ASSERT_EQ(gIt->second.lineNumberTable.size(), instructionCount);
 
     // There should be no local variables for panda assembler
-    ASSERT_EQ(body_g.find("#   LOCAL_VARIABLE_TABLE:"), std::string::npos);
+    ASSERT_EQ(bodyG.find("#   LOCAL_VARIABLE_TABLE:"), std::string::npos);
 }

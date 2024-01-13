@@ -105,26 +105,26 @@ struct Error {
     };
 
     ErrorClass type;
-    std::string whole_line;
+    std::string wholeLine;
     size_t pos; /* positions to highlight the word */
     size_t end;
     ErrorType err;
     std::string message;
     std::string verbose;
-    size_t line_number;
+    size_t lineNumber;
 
     inline Error() : Error("No messages", 0, ErrorType::ERR_NONE, "", 0, 0, "") {}
 
-    inline Error(std::string s, size_t line, ErrorType error_type, std::string overinfo, size_t p, size_t e,
-                 std::string buff, ErrorClass class_type = ErrorClass::ERROR)
-        : type(class_type),
-          whole_line(std::move(buff)),
+    inline Error(std::string s, size_t line, ErrorType errorType, std::string overinfo, size_t p, size_t e,
+                 std::string buff, ErrorClass classType = ErrorClass::ERROR)
+        : type(classType),
+          wholeLine(std::move(buff)),
           pos(p),
           end(e),
-          err(error_type),
+          err(errorType),
           message(std::move(s)),
           verbose(std::move(overinfo)),
-          line_number(line)
+          lineNumber(line)
     {
     }
 };

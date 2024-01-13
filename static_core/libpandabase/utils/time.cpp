@@ -20,30 +20,30 @@
 namespace panda::time {
 
 template <class T>
-static uint64_t GetCurrentTime(bool need_system)
+static uint64_t GetCurrentTime(bool needSystem)
 {
-    if (need_system) {
+    if (needSystem) {
         return std::chrono::duration_cast<T>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
     return std::chrono::duration_cast<T>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
 /// Return current time in milliseconds
-uint64_t GetCurrentTimeInMillis(bool need_system)
+uint64_t GetCurrentTimeInMillis(bool needSystem)
 {
-    return GetCurrentTime<std::chrono::milliseconds>(need_system);
+    return GetCurrentTime<std::chrono::milliseconds>(needSystem);
 }
 
 /// Return current time in microseconds
-uint64_t GetCurrentTimeInMicros(bool need_system)
+uint64_t GetCurrentTimeInMicros(bool needSystem)
 {
-    return GetCurrentTime<std::chrono::microseconds>(need_system);
+    return GetCurrentTime<std::chrono::microseconds>(needSystem);
 }
 
 /// Return current time in nanoseconds
-uint64_t GetCurrentTimeInNanos(bool need_system)
+uint64_t GetCurrentTimeInNanos(bool needSystem)
 {
-    return GetCurrentTime<std::chrono::nanoseconds>(need_system);
+    return GetCurrentTime<std::chrono::nanoseconds>(needSystem);
 }
 
 }  // namespace panda::time

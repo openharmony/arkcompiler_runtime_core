@@ -39,11 +39,11 @@ StackWalker StackWalker::Create(const ManagedThread *thread, UnwindPolicy policy
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-StackWalker::StackWalker(void *fp, bool is_frame_compiled, uintptr_t npc, UnwindPolicy policy)
+StackWalker::StackWalker(void *fp, bool isFrameCompiled, uintptr_t npc, UnwindPolicy policy)
 {
-    frame_ = GetTopFrameFromFp(fp, is_frame_compiled, npc);
+    frame_ = GetTopFrameFromFp(fp, isFrameCompiled, npc);
     if (policy == UnwindPolicy::SKIP_INLINED) {
-        inline_depth_ = -1;
+        inlineDepth_ = -1;
     }
 }
 
@@ -53,9 +53,9 @@ void StackWalker::Reset(const ManagedThread *thread)
 }
 
 /* static */
-typename StackWalker::FrameVariant StackWalker::GetTopFrameFromFp(void *ptr, bool is_frame_compiled, uintptr_t npc)
+typename StackWalker::FrameVariant StackWalker::GetTopFrameFromFp(void *ptr, bool isFrameCompiled, uintptr_t npc)
 {
-    if (is_frame_compiled) {
+    if (isFrameCompiled) {
         if (IsBoundaryFrame<FrameKind::INTERPRETER>(ptr)) {
             auto bp = GetPrevFromBoundary<FrameKind::INTERPRETER>(ptr);
             if (GetBoundaryFrameMethod<FrameKind::COMPILER>(bp) == BYPASS) {
@@ -87,12 +87,12 @@ Method *StackWalker::GetMethod()
             return nullptr;
         }
         if (IsInlined()) {
-            auto method_variant = code_info_.GetMethod(stackmap_, inline_depth_);
-            if (std::holds_alternative<uint32_t>(method_variant)) {
+            auto methodVariant = codeInfo_.GetMethod(stackmap_, inlineDepth_);
+            if (std::holds_alternative<uint32_t>(methodVariant)) {
                 return Runtime::GetCurrent()->GetClassLinker()->GetMethod(
-                    *cframe.GetMethod(), panda_file::File::EntityId(std::get<uint32_t>(method_variant)));
+                    *cframe.GetMethod(), panda_file::File::EntityId(std::get<uint32_t>(methodVariant)));
             }
-            return reinterpret_cast<Method *>(std::get<void *>(method_variant));
+            return reinterpret_cast<Method *>(std::get<void *>(methodVariant));
         }
     }
     return cframe.GetMethod();
@@ -112,8 +112,8 @@ StackWalker::CFrameType StackWalker::CreateCFrameForC2IBridge(Frame *frame)
     return CFrameType(prev);
 }
 
-StackWalker::CFrameType StackWalker::CreateCFrame(SlotType *ptr, uintptr_t npc, SlotType *callee_slots,
-                                                  CalleeStorage *prev_callees)
+StackWalker::CFrameType StackWalker::CreateCFrame(SlotType *ptr, uintptr_t npc, SlotType *calleeSlots,
+                                                  CalleeStorage *prevCallees)
 {
     CFrameType cframe(ptr);
     // NOTE(m.strizhak): replace this condition with assert after fixing JIT trampolines for sampler
@@ -123,40 +123,39 @@ StackWalker::CFrameType StackWalker::CreateCFrame(SlotType *ptr, uintptr_t npc, 
     if (cframe.IsNativeMethod()) {
         return cframe;
     }
-    const void *code_entry;
+    const void *codeEntry;
     if (cframe.ShouldDeoptimize()) {
         // When method was deoptimized due to speculation failure, regular code entry become invalid,
         // so we read entry from special backup field in the frame.
-        code_entry = cframe.GetDeoptCodeEntry();
+        codeEntry = cframe.GetDeoptCodeEntry();
     } else if (cframe.IsOsr()) {
-        code_entry = Thread::GetCurrent()->GetVM()->GetCompiler()->GetOsrCode(cframe.GetMethod());
+        codeEntry = Thread::GetCurrent()->GetVM()->GetCompiler()->GetOsrCode(cframe.GetMethod());
     } else {
-        code_entry = cframe.GetMethod()->GetCompiledEntryPoint();
+        codeEntry = cframe.GetMethod()->GetCompiledEntryPoint();
     }
-    new (&code_info_) CodeInfo(CodeInfo::GetCodeOriginFromEntryPoint(code_entry));
+    new (&codeInfo_) CodeInfo(CodeInfo::GetCodeOriginFromEntryPoint(codeEntry));
     // StackOverflow stackmap has zero address
     if (npc == 0) {
-        stackmap_ = code_info_.FindStackMapForNativePc(npc);
+        stackmap_ = codeInfo_.FindStackMapForNativePc(npc);
     } else {
-        auto code = reinterpret_cast<uintptr_t>(code_info_.GetCode());
+        auto code = reinterpret_cast<uintptr_t>(codeInfo_.GetCode());
         CHECK_GT(npc, code);
         CHECK_LT(npc - code, std::numeric_limits<uint32_t>::max());
-        stackmap_ = code_info_.FindStackMapForNativePc(npc - code);
+        stackmap_ = codeInfo_.FindStackMapForNativePc(npc - code);
     }
 
-    ASSERT_PRINT(
-        stackmap_.IsValid(), "Stackmap not found "
-                                 << cframe.GetMethod()->GetFullName() << ": npc=0x" << std::hex << npc << ", code=["
-                                 << reinterpret_cast<const void *>(code_info_.GetCode())
-                                 << ".."
-                                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                                 << reinterpret_cast<const void *>(code_info_.GetCode() + code_info_.GetCodeSize())
-                                 << "]" << std::dec);
-    callee_stack_.int_regs_mask = code_info_.GetHeader().GetCalleeRegMask();
-    callee_stack_.fp_regs_mask = code_info_.GetHeader().GetCalleeFpRegMask();
-    inline_depth_ = code_info_.GetInlineDepth(stackmap_);
+    ASSERT_PRINT(stackmap_.IsValid(),
+                 "Stackmap not found " << cframe.GetMethod()->GetFullName() << ": npc=0x" << std::hex << npc
+                                       << ", code=[" << reinterpret_cast<const void *>(codeInfo_.GetCode())
+                                       << ".."
+                                       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                                       << reinterpret_cast<const void *>(codeInfo_.GetCode() + codeInfo_.GetCodeSize())
+                                       << "]" << std::dec);
+    calleeStack_.intRegsMask = codeInfo_.GetHeader().GetCalleeRegMask();
+    calleeStack_.fpRegsMask = codeInfo_.GetHeader().GetCalleeFpRegMask();
+    inlineDepth_ = codeInfo_.GetInlineDepth(stackmap_);
 
-    InitCalleeBuffer(callee_slots, prev_callees);
+    InitCalleeBuffer(calleeSlots, prevCallees);
 
     return cframe;
 }
@@ -204,43 +203,43 @@ StackWalker::CFrameType StackWalker::CreateCFrame(SlotType *ptr, uintptr_t npc, 
  *                (---)
  * --------------------  <-- callee_slots - CalleeIntRegsCount() - CalleeFpRegsCount()
  */
-void StackWalker::InitCalleeBuffer(SlotType *callee_slots, CalleeStorage *prev_callees)
+void StackWalker::InitCalleeBuffer(SlotType *calleeSlots, CalleeStorage *prevCallees)
 {
     constexpr RegMask ARCH_INT_REGS_MASK(panda::GetCalleeRegsMask(RUNTIME_ARCH, false));
     constexpr RegMask ARCH_FP_REGS_MASK(panda::GetCalleeRegsMask(RUNTIME_ARCH, true));
 
-    bool prev_is_native = IsCFrame() ? GetCFrame().IsNative() : false;
-    if (callee_slots != nullptr || prev_callees != nullptr) {
+    bool prevIsNative = IsCFrame() ? GetCFrame().IsNative() : false;
+    if (calleeSlots != nullptr || prevCallees != nullptr) {
         // Process scalar integer callee registers
         for (size_t reg = FirstCalleeIntReg(); reg <= LastCalleeIntReg(); reg++) {
             size_t offset = reg - FirstCalleeIntReg();
-            if (prev_callees == nullptr || prev_is_native) {
+            if (prevCallees == nullptr || prevIsNative) {
                 size_t slot = ARCH_INT_REGS_MASK.GetDistanceFromHead(reg);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                callee_stack_.stack[offset] = callee_slots - slot - 1;
-            } else if (prev_callees->int_regs_mask.Test(reg)) {
-                size_t slot = prev_callees->int_regs_mask.GetDistanceFromHead(reg);
+                calleeStack_.stack[offset] = calleeSlots - slot - 1;
+            } else if (prevCallees->intRegsMask.Test(reg)) {
+                size_t slot = prevCallees->intRegsMask.GetDistanceFromHead(reg);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                callee_stack_.stack[offset] = callee_slots - slot - 1;
+                calleeStack_.stack[offset] = calleeSlots - slot - 1;
             } else {
-                ASSERT(nullptr != prev_callees->stack[offset]);
-                callee_stack_.stack[offset] = prev_callees->stack[offset];
+                ASSERT(nullptr != prevCallees->stack[offset]);
+                calleeStack_.stack[offset] = prevCallees->stack[offset];
             }
         }
         // Process SIMD and Floating-Point callee registers
         for (size_t reg = FirstCalleeFpReg(); reg <= LastCalleeFpReg(); reg++) {
             size_t offset = CalleeIntRegsCount() + reg - FirstCalleeFpReg();
-            if (prev_callees == nullptr || prev_is_native) {
+            if (prevCallees == nullptr || prevIsNative) {
                 size_t slot = ARCH_FP_REGS_MASK.GetDistanceFromHead(reg);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                callee_stack_.stack[offset] = callee_slots - CalleeIntRegsCount() - slot - 1;
-            } else if (prev_callees->fp_regs_mask.Test(reg)) {
-                size_t slot = prev_callees->fp_regs_mask.GetDistanceFromHead(reg);
+                calleeStack_.stack[offset] = calleeSlots - CalleeIntRegsCount() - slot - 1;
+            } else if (prevCallees->fpRegsMask.Test(reg)) {
+                size_t slot = prevCallees->fpRegsMask.GetDistanceFromHead(reg);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                callee_stack_.stack[offset] = callee_slots - CalleeIntRegsCount() - slot - 1;
+                calleeStack_.stack[offset] = calleeSlots - CalleeIntRegsCount() - slot - 1;
             } else {
-                ASSERT(nullptr != prev_callees->stack[offset]);
-                callee_stack_.stack[offset] = prev_callees->stack[offset];
+                ASSERT(nullptr != prevCallees->stack[offset]);
+                calleeStack_.stack[offset] = prevCallees->stack[offset];
             }
         }
     }
@@ -250,79 +249,79 @@ StackWalker::CalleeRegsBuffer &StackWalker::GetCalleeRegsForDeoptimize()
 {
     // Process scalar integer callee registers
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    SlotType *callee_src_slots = GetCFrame().GetCalleeSaveStack() - 1;
-    SlotType *callee_dst_slots = &deopt_callee_regs_[CalleeFpRegsCount()];
+    SlotType *calleeSrcSlots = GetCFrame().GetCalleeSaveStack() - 1;
+    SlotType *calleeDstSlots = &deoptCalleeRegs_[CalleeFpRegsCount()];
     for (size_t reg = FirstCalleeIntReg(); reg <= LastCalleeIntReg(); reg++) {
         size_t offset = reg - FirstCalleeIntReg();
-        if (callee_stack_.int_regs_mask.Test(reg)) {
-            size_t slot = callee_stack_.int_regs_mask.GetDistanceFromHead(reg);
+        if (calleeStack_.intRegsMask.Test(reg)) {
+            size_t slot = calleeStack_.intRegsMask.GetDistanceFromHead(reg);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            callee_dst_slots[offset] = *(callee_src_slots - slot);
+            calleeDstSlots[offset] = *(calleeSrcSlots - slot);
         } else {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            callee_dst_slots[offset] = *callee_stack_.stack[offset];
+            calleeDstSlots[offset] = *calleeStack_.stack[offset];
         }
     }
     // Process SIMD and Floating-Point callee registers
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    callee_src_slots = GetCFrame().GetCalleeSaveStack() - CalleeIntRegsCount() - 1;
-    callee_dst_slots = deopt_callee_regs_.begin();
+    calleeSrcSlots = GetCFrame().GetCalleeSaveStack() - CalleeIntRegsCount() - 1;
+    calleeDstSlots = deoptCalleeRegs_.begin();
     for (size_t reg = FirstCalleeFpReg(); reg <= LastCalleeFpReg(); reg++) {
         size_t offset = reg - FirstCalleeFpReg();
-        if (callee_stack_.fp_regs_mask.Test(reg)) {
-            size_t slot = callee_stack_.fp_regs_mask.GetDistanceFromHead(reg);
+        if (calleeStack_.fpRegsMask.Test(reg)) {
+            size_t slot = calleeStack_.fpRegsMask.GetDistanceFromHead(reg);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            callee_dst_slots[offset] = *(callee_src_slots - slot);
+            calleeDstSlots[offset] = *(calleeSrcSlots - slot);
         } else {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            callee_dst_slots[offset] = *callee_stack_.stack[CalleeIntRegsCount() + offset];
+            calleeDstSlots[offset] = *calleeStack_.stack[CalleeIntRegsCount() + offset];
         }
     }
 
-    return deopt_callee_regs_;
+    return deoptCalleeRegs_;
 }
 
-interpreter::VRegister StackWalker::GetVRegValue(size_t vreg_num)
+interpreter::VRegister StackWalker::GetVRegValue(size_t vregNum)
 {
     if (IsCFrame()) {
         // NOTE(msherstennikov): we need to cache vregs_list within single cframe
-        auto vregs_list = code_info_.GetVRegList(stackmap_, inline_depth_,
-                                                 mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
-        ASSERT(vregs_list[vreg_num].GetIndex() == vreg_num);
+        auto vregsList =
+            codeInfo_.GetVRegList(stackmap_, inlineDepth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
+        ASSERT(vregsList[vregNum].GetIndex() == vregNum);
         interpreter::VRegister vreg0;
         [[maybe_unused]] interpreter::VRegister vreg1;
-        GetCFrame().GetVRegValue(vregs_list[vreg_num], code_info_, callee_stack_.stack.data(),
+        GetCFrame().GetVRegValue(vregsList[vregNum], codeInfo_, calleeStack_.stack.data(),
                                  interpreter::StaticVRegisterRef(&vreg0, &vreg1));
         return vreg0;
     }
-    ASSERT(vreg_num < GetIFrame()->GetSize());
-    return GetIFrame()->GetVReg(vreg_num);
+    ASSERT(vregNum < GetIFrame()->GetSize());
+    return GetIFrame()->GetVReg(vregNum);
 }
 
 template <bool IS_DYNAMIC, typename T>
-void StackWalker::SetVRegValue(VRegInfo reg_info, T value)
+void StackWalker::SetVRegValue(VRegInfo regInfo, T value)
 {
     if (IsCFrame()) {
         auto &cframe = GetCFrame();
         if (IsDynamicMethod()) {
             if constexpr (sizeof(T) == sizeof(uint64_t)) {  // NOLINT
-                cframe.SetVRegValue<true>(reg_info, bit_cast<uint64_t>(value), callee_stack_.stack.data());
+                cframe.SetVRegValue<true>(regInfo, bit_cast<uint64_t>(value), calleeStack_.stack.data());
             } else {  // NOLINT
                 static_assert(sizeof(T) == sizeof(uint32_t));
-                cframe.SetVRegValue<true>(reg_info, static_cast<uint64_t>(bit_cast<uint32_t>(value)),
-                                          callee_stack_.stack.data());
+                cframe.SetVRegValue<true>(regInfo, static_cast<uint64_t>(bit_cast<uint32_t>(value)),
+                                          calleeStack_.stack.data());
             }
         } else {
             if constexpr (sizeof(T) == sizeof(uint64_t)) {  // NOLINT
-                cframe.SetVRegValue(reg_info, bit_cast<uint64_t>(value), callee_stack_.stack.data());
+                cframe.SetVRegValue(regInfo, bit_cast<uint64_t>(value), calleeStack_.stack.data());
             } else {  // NOLINT
                 static_assert(sizeof(T) == sizeof(uint32_t));
-                cframe.SetVRegValue(reg_info, static_cast<uint64_t>(bit_cast<uint32_t>(value)),
-                                    callee_stack_.stack.data());
+                cframe.SetVRegValue(regInfo, static_cast<uint64_t>(bit_cast<uint32_t>(value)),
+                                    calleeStack_.stack.data());
             }
         }
     } else {
-        auto vreg = GetFrameHandler<IS_DYNAMIC>(GetIFrame()).GetVReg(reg_info.GetIndex());
+        auto vreg = GetFrameHandler<IS_DYNAMIC>(GetIFrame()).GetVReg(regInfo.GetIndex());
         if constexpr (std::is_same_v<T, ObjectHeader *>) {  // NOLINT
             ASSERT(vreg.HasObject() && "Trying to change object variable by scalar value");
             vreg.SetReference(value);
@@ -361,10 +360,10 @@ void StackWalker::NextFromCFrame()
 {
     if (IsInlined()) {
         if (policy_ != UnwindPolicy::SKIP_INLINED) {
-            inline_depth_--;
+            inlineDepth_--;
             return;
         }
-        inline_depth_ = -1;
+        inlineDepth_ = -1;
     }
     if (policy_ == UnwindPolicy::ONLY_INLINED) {
         frame_ = nullptr;
@@ -375,22 +374,22 @@ void StackWalker::NextFromCFrame()
         frame_ = nullptr;
         return;
     }
-    auto frame_method = GetBoundaryFrameMethod<FrameKind::COMPILER>(prev);
-    switch (frame_method) {
+    auto frameMethod = GetBoundaryFrameMethod<FrameKind::COMPILER>(prev);
+    switch (frameMethod) {
         case FrameBridgeKind::INTERPRETER_TO_COMPILED_CODE: {
-            auto prev_frame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
-            if (prev_frame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prev_frame)) {
-                frame_ = CreateCFrameForC2IBridge<true>(prev_frame);
+            auto prevFrame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
+            if (prevFrame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prevFrame)) {
+                frame_ = CreateCFrameForC2IBridge<true>(prevFrame);
                 break;
             }
 
-            frame_ = reinterpret_cast<Frame *>(prev_frame);
+            frame_ = reinterpret_cast<Frame *>(prevFrame);
             break;
         }
         case FrameBridgeKind::BYPASS: {
-            auto prev_frame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
-            if (prev_frame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prev_frame)) {
-                frame_ = CreateCFrameForC2IBridge<true>(prev_frame);
+            auto prevFrame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
+            if (prevFrame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prevFrame)) {
+                frame_ = CreateCFrameForC2IBridge<true>(prevFrame);
                 break;
             }
             frame_ = CreateCFrame(reinterpret_cast<SlotType *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev)),
@@ -399,9 +398,9 @@ void StackWalker::NextFromCFrame()
             break;
         }
         default:
-            prev_callee_stack_ = callee_stack_;
+            prevCalleeStack_ = calleeStack_;
             frame_ = CreateCFrame(reinterpret_cast<SlotType *>(prev), GetCFrame().GetLr(),
-                                  GetCFrame().GetCalleeSaveStack(), &prev_callee_stack_);
+                                  GetCFrame().GetCalleeSaveStack(), &prevCalleeStack_);
             break;
     }
 }
@@ -441,19 +440,19 @@ FrameAccessor StackWalker::GetNextFrame()
         if (prev == nullptr) {
             return FrameAccessor(nullptr);
         }
-        auto frame_method = GetBoundaryFrameMethod<FrameKind::COMPILER>(prev);
-        switch (frame_method) {
+        auto frameMethod = GetBoundaryFrameMethod<FrameKind::COMPILER>(prev);
+        switch (frameMethod) {
             case FrameBridgeKind::INTERPRETER_TO_COMPILED_CODE: {
-                auto prev_frame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
-                if (prev_frame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prev_frame)) {
-                    return FrameAccessor(CreateCFrameForC2IBridge<false>(prev_frame));
+                auto prevFrame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
+                if (prevFrame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prevFrame)) {
+                    return FrameAccessor(CreateCFrameForC2IBridge<false>(prevFrame));
                 }
-                return FrameAccessor(prev_frame);
+                return FrameAccessor(prevFrame);
             }
             case FrameBridgeKind::BYPASS: {
-                auto prev_frame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
-                if (prev_frame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prev_frame)) {
-                    return FrameAccessor(CreateCFrameForC2IBridge<false>(prev_frame));
+                auto prevFrame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
+                if (prevFrame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prevFrame)) {
+                    return FrameAccessor(CreateCFrameForC2IBridge<false>(prevFrame));
                 }
                 return FrameAccessor(
                     CFrameType(reinterpret_cast<SlotType *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev))));
@@ -507,10 +506,10 @@ bool StackWalker::IsCompilerBoundFrame(SlotType *prev)
         return true;
     }
     if (GetBoundaryFrameMethod<FrameKind::COMPILER>(prev) == FrameBridgeKind::BYPASS) {
-        auto prev_frame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
+        auto prevFrame = reinterpret_cast<Frame *>(GetPrevFromBoundary<FrameKind::COMPILER>(prev));
         // Case for clinit:
         // Compiled code -> C2I -> InitializeClass -> call clinit -> I2C -> compiled code for clinit
-        if (prev_frame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prev_frame)) {
+        if (prevFrame != nullptr && IsBoundaryFrame<FrameKind::INTERPRETER>(prevFrame)) {
             return true;
         }
     }
@@ -518,52 +517,52 @@ bool StackWalker::IsCompilerBoundFrame(SlotType *prev)
     return false;
 }
 
-Frame *StackWalker::ConvertToIFrame(FrameKind *prev_frame_kind, uint32_t *num_inlined_methods)
+Frame *StackWalker::ConvertToIFrame(FrameKind *prevFrameKind, uint32_t *numInlinedMethods)
 {
     if (!IsCFrame()) {
         return GetIFrame();
     }
     auto &cframe = GetCFrame();
 
-    auto inline_depth = inline_depth_;
-    bool is_invoke = false;
+    auto inlineDepth = inlineDepth_;
+    bool isInvoke = false;
 
-    void *prev_frame;
-    bool is_init = false;
+    void *prevFrame;
+    bool isInit = false;
     if (IsInlined()) {
-        inline_depth_--;
-        *num_inlined_methods = *num_inlined_methods + 1;
-        prev_frame = ConvertToIFrame(prev_frame_kind, num_inlined_methods);
-        auto iframe = static_cast<Frame *>(prev_frame);
+        inlineDepth_--;
+        *numInlinedMethods = *numInlinedMethods + 1;
+        prevFrame = ConvertToIFrame(prevFrameKind, numInlinedMethods);
+        auto iframe = static_cast<Frame *>(prevFrame);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto pc = iframe->GetMethod()->GetInstructions() + iframe->GetBytecodeOffset();
         if (BytecodeInstruction(pc).HasFlag(BytecodeInstruction::INIT_OBJ)) {
-            is_init = true;
+            isInit = true;
         }
     } else {
         auto prev = cframe.GetPrevFrame();
         if (prev == nullptr) {
-            *prev_frame_kind = FrameKind::NONE;
-            prev_frame = nullptr;
+            *prevFrameKind = FrameKind::NONE;
+            prevFrame = nullptr;
         } else {
             if (IsCompilerBoundFrame(prev)) {
-                is_invoke = true;
-                prev_frame = reinterpret_cast<Frame *>(
+                isInvoke = true;
+                prevFrame = reinterpret_cast<Frame *>(
                     StackWalker::GetPrevFromBoundary<FrameKind::COMPILER>(cframe.GetPrevFrame()));
-                if (prev_frame_kind != nullptr) {
-                    *prev_frame_kind = FrameKind::INTERPRETER;
+                if (prevFrameKind != nullptr) {
+                    *prevFrameKind = FrameKind::INTERPRETER;
                 }
             } else {
-                prev_frame = cframe.GetPrevFrame();
-                if (prev_frame_kind != nullptr) {
-                    *prev_frame_kind = FrameKind::COMPILER;
+                prevFrame = cframe.GetPrevFrame();
+                if (prevFrameKind != nullptr) {
+                    *prevFrameKind = FrameKind::COMPILER;
                 }
             }
         }
     }
-    inline_depth_ = inline_depth;
-    auto vreg_list =
-        code_info_.GetVRegList(stackmap_, inline_depth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
+    inlineDepth_ = inlineDepth;
+    auto vregList =
+        codeInfo_.GetVRegList(stackmap_, inlineDepth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
     auto method = GetMethod();
     Frame *frame;
 
@@ -571,58 +570,57 @@ Frame *StackWalker::ConvertToIFrame(FrameKind *prev_frame_kind, uint32_t *num_in
         /* If there is a usage of rest arguments in dynamic function, then a managed object to contain actual arguments
          * is constructed in prologue. Thus there is no need to reconstruct rest arguments here
          */
-        auto num_actual_args = method->GetNumArgs();
+        auto numActualArgs = method->GetNumArgs();
         /* If there are no arguments-keeping object construction in execution path, the number of actual args may be
          * retreived from cframe
          */
 
-        size_t frame_num_vregs = method->GetNumVregs() + num_actual_args;
-        frame = interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(frame_num_vregs, num_actual_args, method,
-                                                                               reinterpret_cast<Frame *>(prev_frame));
+        size_t frameNumVregs = method->GetNumVregs() + numActualArgs;
+        frame = interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(frameNumVregs, numActualArgs, method,
+                                                                               reinterpret_cast<Frame *>(prevFrame));
         frame->SetDynamic();
-        DynamicFrameHandler frame_handler(frame);
+        DynamicFrameHandler frameHandler(frame);
         static constexpr uint8_t ACC_OFFSET = VRegInfo::ENV_COUNT + 1;
-        for (size_t i = 0; i < vreg_list.size() - ACC_OFFSET; i++) {
-            auto vreg = vreg_list[i];
+        for (size_t i = 0; i < vregList.size() - ACC_OFFSET; i++) {
+            auto vreg = vregList[i];
             if (!vreg.IsLive()) {
                 continue;
             }
-            auto reg_ref = frame_handler.GetVReg(i);
-            GetCFrame().GetPackVRegValue(vreg, code_info_, callee_stack_.stack.data(), reg_ref);
+            auto regRef = frameHandler.GetVReg(i);
+            GetCFrame().GetPackVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
         }
         {
-            auto vreg = vreg_list[vreg_list.size() - ACC_OFFSET];
+            auto vreg = vregList[vregList.size() - ACC_OFFSET];
             if (vreg.IsLive()) {
-                auto reg_ref = frame_handler.GetAccAsVReg();
-                GetCFrame().GetPackVRegValue(vreg, code_info_, callee_stack_.stack.data(), reg_ref);
+                auto regRef = frameHandler.GetAccAsVReg();
+                GetCFrame().GetPackVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
             }
         }
-        EnvData env_data {vreg_list, GetCFrame(), code_info_, callee_stack_.stack.data()};
-        Thread::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, env_data);
+        EnvData envData {vregList, GetCFrame(), codeInfo_, calleeStack_.stack.data()};
+        Thread::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, envData);
     } else {
-        auto frame_num_vregs = method->GetNumVregs() + method->GetNumArgs();
-        ASSERT((frame_num_vregs + 1) >= vreg_list.size());
-        frame =
-            interpreter::RuntimeInterface::CreateFrame(frame_num_vregs, method, reinterpret_cast<Frame *>(prev_frame));
-        StaticFrameHandler frame_handler(frame);
-        for (size_t i = 0; i < vreg_list.size(); i++) {
-            auto vreg = vreg_list[i];
+        auto frameNumVregs = method->GetNumVregs() + method->GetNumArgs();
+        ASSERT((frameNumVregs + 1) >= vregList.size());
+        frame = interpreter::RuntimeInterface::CreateFrame(frameNumVregs, method, reinterpret_cast<Frame *>(prevFrame));
+        StaticFrameHandler frameHandler(frame);
+        for (size_t i = 0; i < vregList.size(); i++) {
+            auto vreg = vregList[i];
             if (!vreg.IsLive()) {
                 continue;
             }
 
-            bool is_acc = i == (vreg_list.size() - 1);
-            auto reg_ref = is_acc ? frame->GetAccAsVReg() : frame_handler.GetVReg(i);
-            GetCFrame().GetVRegValue(vreg, code_info_, callee_stack_.stack.data(), reg_ref);
+            bool isAcc = i == (vregList.size() - 1);
+            auto regRef = isAcc ? frame->GetAccAsVReg() : frameHandler.GetVReg(i);
+            GetCFrame().GetVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
         }
     }
 
     frame->SetDeoptimized();
     frame->SetBytecodeOffset(GetBytecodePc());
-    if (is_init) {
+    if (isInit) {
         frame->SetInitobj();
     }
-    if (is_invoke) {
+    if (isInvoke) {
         frame->SetInvoke();
     }
     return frame;
@@ -640,15 +638,15 @@ void StackWalker::Verify()
     for (; HasFrame(); NextFrame()) {
 #ifndef NDEBUG
         ASSERT(GetMethod() != nullptr);
-        IterateVRegsWithInfo([this]([[maybe_unused]] const auto &reg_info, const auto &vreg) {
-            if (reg_info.GetType() == compiler::VRegInfo::Type::ANY) {
+        IterateVRegsWithInfo([this]([[maybe_unused]] const auto &regInfo, const auto &vreg) {
+            if (regInfo.GetType() == compiler::VRegInfo::Type::ANY) {
                 ASSERT(IsDynamicMethod());
                 return true;
             }
 
             if (vreg.HasObject()) {
                 // Use Frame::VRegister::HasObject() to detect objects
-                ASSERT(reg_info.IsObject());
+                ASSERT(regInfo.IsObject());
                 if (ObjectHeader *object = vreg.GetReference(); object != nullptr) {
                     auto *cls = object->ClassAddr<Class>();
                     if (!IsAddressInObjectsHeap(cls)) {
@@ -660,7 +658,7 @@ void StackWalker::Verify()
                     }
                 }
             } else {
-                ASSERT(!reg_info.IsObject());
+                ASSERT(!regInfo.IsObject());
                 vreg.GetLong();
             }
             return true;
@@ -694,7 +692,7 @@ void StackWalker::Verify()
 
 // Dump function change StackWalker object-state, that's why it may be called only
 // with rvalue reference.
-void StackWalker::Dump(std::ostream &os, bool print_vregs /* = false */) &&
+void StackWalker::Dump(std::ostream &os, bool printVregs /* = false */) &&
 {
     [[maybe_unused]] static constexpr size_t WIDTH_INDEX = 4;
     [[maybe_unused]] static constexpr size_t WIDTH_REG = 10;
@@ -702,27 +700,27 @@ void StackWalker::Dump(std::ostream &os, bool print_vregs /* = false */) &&
     [[maybe_unused]] static constexpr size_t WIDTH_LOCATION = 12;
     [[maybe_unused]] static constexpr size_t WIDTH_TYPE = 20;
 
-    size_t frame_index = 0;
+    size_t frameIndex = 0;
     os << "Panda call stack:\n";
     for (; HasFrame(); NextFrame()) {
-        os << std::setw(WIDTH_INDEX) << std::setfill(' ') << std::right << std::dec << frame_index << ": "
+        os << std::setw(WIDTH_INDEX) << std::setfill(' ') << std::right << std::dec << frameIndex << ": "
            << std::setfill('0');
         os << std::setw(WIDTH_FRAME) << std::hex;
         os << (IsCFrame() ? reinterpret_cast<Frame *>(GetCFrame().GetFrameOrigin()) : GetIFrame()) << " in ";
         DumpFrame(os);
         os << std::endl;
-        if (print_vregs) {
-            IterateVRegsWithInfo([this, &os](auto reg_info, const auto &vreg) {
+        if (printVregs) {
+            IterateVRegsWithInfo([this, &os](auto regInfo, const auto &vreg) {
                 os << "     " << std::setw(WIDTH_REG) << std::setfill(' ') << std::right
-                   << (reg_info.IsSpecialVReg() ? VRegInfo::VRegTypeToString(reg_info.GetVRegType())
-                                                : (std::string("v") + std::to_string(reg_info.GetIndex())));
+                   << (regInfo.IsSpecialVReg() ? VRegInfo::VRegTypeToString(regInfo.GetVRegType())
+                                               : (std::string("v") + std::to_string(regInfo.GetIndex())));
                 os << " = ";
-                if (reg_info.GetType() == compiler::VRegInfo::Type::ANY) {
+                if (regInfo.GetType() == compiler::VRegInfo::Type::ANY) {
                     os << "0x";
                 }
                 os << std::left;
                 os << std::setw(WIDTH_TYPE) << std::setfill(' ');
-                switch (reg_info.GetType()) {
+                switch (regInfo.GetType()) {
                     case compiler::VRegInfo::Type::INT64:
                     case compiler::VRegInfo::Type::INT32:
                         os << std::dec << vreg.GetLong();
@@ -750,9 +748,9 @@ void StackWalker::Dump(std::ostream &os, bool print_vregs /* = false */) &&
                         os << "unknown";
                         break;
                 }
-                os << std::setw(WIDTH_LOCATION) << std::setfill(' ') << reg_info.GetTypeString();  // NOLINT
+                os << std::setw(WIDTH_LOCATION) << std::setfill(' ') << regInfo.GetTypeString();  // NOLINT
                 if (IsCFrame()) {
-                    os << reg_info.GetLocationString() << ":" << std::dec << helpers::ToSigned(reg_info.GetValue());
+                    os << regInfo.GetLocationString() << ":" << std::dec << helpers::ToSigned(regInfo.GetValue());
                 } else {
                     os << '-';
                 }
@@ -760,17 +758,17 @@ void StackWalker::Dump(std::ostream &os, bool print_vregs /* = false */) &&
                 return true;
             });
         }
-        if (IsCFrame() && print_vregs) {
+        if (IsCFrame() && printVregs) {
             os << "roots:";
-            IterateObjectsWithInfo([&os](auto &reg_info, const auto &vreg) {
+            IterateObjectsWithInfo([&os](auto &regInfo, const auto &vreg) {
                 ASSERT(vreg.HasObject());
-                os << " " << reg_info.GetLocationString() << "[" << std::dec << reg_info.GetValue() << "]=" << std::hex
+                os << " " << regInfo.GetLocationString() << "[" << std::dec << regInfo.GetValue() << "]=" << std::hex
                    << vreg.GetReference();
                 return true;
             });
             os << std::endl;
         }
-        frame_index++;
+        frameIndex++;
     }
 }
 
@@ -784,9 +782,9 @@ void StackWalker::DumpFrame(std::ostream &os)
             os << " (compiled" << (GetCFrame().IsOsr() ? "/osr" : "") << ": npc=" << GetNativePc()
                << (IsInlined() ? ", inlined) " : ") ");
             if (IsInlined()) {
-                code_info_.DumpInlineInfo(os, stackmap_, inline_depth_);
+                codeInfo_.DumpInlineInfo(os, stackmap_, inlineDepth_);
             } else {
-                code_info_.Dump(os, stackmap_);
+                codeInfo_.Dump(os, stackmap_);
             }
         }
 

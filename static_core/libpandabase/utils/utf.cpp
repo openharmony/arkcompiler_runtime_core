@@ -48,16 +48,16 @@ namespace panda::utf {
  * Convert mutf8 sequence to utf16 pair and return pair: [utf16 code point, mutf8 size].
  * In case of invalid sequence return first byte of it.
  */
-std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t max_bytes)
+std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t maxBytes)
 {
     // NOTE(d.kovalneko): make the function safe
-    Span<const uint8_t> sp(data, max_bytes);
+    Span<const uint8_t> sp(data, maxBytes);
     uint8_t d0 = sp[0];
     if ((d0 & MASK1) == 0) {
         return {d0, 1};
     }
 
-    if (max_bytes < CONST_2) {
+    if (maxBytes < CONST_2) {
         return {d0, 1};
     }
     uint8_t d1 = sp[1];
@@ -65,7 +65,7 @@ std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t 
         return {((d0 & MASK_5BIT) << DATA_WIDTH) | (d1 & MASK_6BIT), 2};
     }
 
-    if (max_bytes < CONST_3) {
+    if (maxBytes < CONST_3) {
         return {d0, 1};
     }
     uint8_t d2 = sp[CONST_2];
@@ -74,97 +74,97 @@ std::pair<uint32_t, size_t> ConvertMUtf8ToUtf16Pair(const uint8_t *data, size_t 
                 CONST_3};
     }
 
-    if (max_bytes < CONST_4) {
+    if (maxBytes < CONST_4) {
         return {d0, 1};
     }
     uint8_t d3 = sp[CONST_3];
-    uint32_t code_point = ((d0 & MASK_4BIT) << (DATA_WIDTH * CONST_3)) | ((d1 & MASK_6BIT) << (DATA_WIDTH * CONST_2)) |
-                          ((d2 & MASK_6BIT) << DATA_WIDTH) | (d3 & MASK_6BIT);
+    uint32_t codePoint = ((d0 & MASK_4BIT) << (DATA_WIDTH * CONST_3)) | ((d1 & MASK_6BIT) << (DATA_WIDTH * CONST_2)) |
+                         ((d2 & MASK_6BIT) << DATA_WIDTH) | (d3 & MASK_6BIT);
 
     uint32_t pair = 0;
-    pair |= ((code_point >> (PAIR_ELEMENT_WIDTH - DATA_WIDTH)) + U16_LEAD) & MASK_16BIT;
+    pair |= ((codePoint >> (PAIR_ELEMENT_WIDTH - DATA_WIDTH)) + U16_LEAD) & MASK_16BIT;
     pair <<= PAIR_ELEMENT_WIDTH;
-    pair |= (code_point & MASK_10BIT) + U16_TAIL;
+    pair |= (codePoint & MASK_10BIT) + U16_TAIL;
 
     return {pair, CONST_4};
 }
 
 static constexpr uint32_t CombineTwoU16(uint16_t d0, uint16_t d1)
 {
-    uint32_t code_point = d0 - DECODE_LEAD_LOW;
-    code_point <<= (PAIR_ELEMENT_WIDTH - DATA_WIDTH);
-    code_point |= d1 - DECODE_TRAIL_LOW;  // NOLINT(hicpp-signed-bitwise
-    code_point += DECODE_SECOND_FACTOR;
-    return code_point;
+    uint32_t codePoint = d0 - DECODE_LEAD_LOW;
+    codePoint <<= (PAIR_ELEMENT_WIDTH - DATA_WIDTH);
+    codePoint |= d1 - DECODE_TRAIL_LOW;  // NOLINT(hicpp-signed-bitwise
+    codePoint += DECODE_SECOND_FACTOR;
+    return codePoint;
 }
 
-bool IsMUtf8OnlySingleBytes(const uint8_t *mutf8_in)
+bool IsMUtf8OnlySingleBytes(const uint8_t *mutf8In)
 {
-    while (*mutf8_in != '\0') {    // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (*mutf8_in >= MASK1) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    while (*mutf8In != '\0') {    // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (*mutf8In >= MASK1) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             return false;
         }
-        mutf8_in += 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        mutf8In += 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
     return true;
 }
 
-size_t ConvertRegionUtf16ToMUtf8(const uint16_t *utf16_in, uint8_t *mutf8_out, size_t utf16_len, size_t mutf8_len,
+size_t ConvertRegionUtf16ToMUtf8(const uint16_t *utf16In, uint8_t *mutf8Out, size_t utf16Len, size_t mutf8Len,
                                  size_t start)
 {
-    return ConvertRegionUtf16ToUtf8(utf16_in, mutf8_out, utf16_len, mutf8_len, start, true);
+    return ConvertRegionUtf16ToUtf8(utf16In, mutf8Out, utf16Len, mutf8Len, start, true);
 }
 
-void ConvertMUtf8ToUtf16(const uint8_t *mutf8_in, size_t mutf8_len, uint16_t *utf16_out)
+void ConvertMUtf8ToUtf16(const uint8_t *mutf8In, size_t mutf8Len, uint16_t *utf16Out)
 {
-    size_t in_pos = 0;
-    while (in_pos < mutf8_len) {
-        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8_in, mutf8_len - in_pos);
+    size_t inPos = 0;
+    while (inPos < mutf8Len) {
+        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8In, mutf8Len - inPos);
         auto [p_hi, p_lo] = SplitUtf16Pair(pair);
 
         if (p_hi != 0) {
-            *utf16_out++ = p_hi;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            *utf16Out++ = p_hi;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
-        *utf16_out++ = p_lo;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        *utf16Out++ = p_lo;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-        mutf8_in += nbytes;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        in_pos += nbytes;
+        mutf8In += nbytes;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        inPos += nbytes;
     }
 }
 
-size_t ConvertRegionMUtf8ToUtf16(const uint8_t *mutf8_in, uint16_t *utf16_out, size_t mutf8_len, size_t utf16_len,
+size_t ConvertRegionMUtf8ToUtf16(const uint8_t *mutf8In, uint16_t *utf16Out, size_t mutf8Len, size_t utf16Len,
                                  size_t start)
 {
-    size_t in_pos = 0;
-    size_t out_pos = 0;
-    while (in_pos < mutf8_len) {
-        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8_in, mutf8_len - in_pos);
+    size_t inPos = 0;
+    size_t outPos = 0;
+    while (inPos < mutf8Len) {
+        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8In, mutf8Len - inPos);
         auto [p_hi, p_lo] = SplitUtf16Pair(pair);
 
-        mutf8_in += nbytes;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        in_pos += nbytes;
+        mutf8In += nbytes;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        inPos += nbytes;
         if (start > 0) {
             start -= nbytes;
             continue;
         }
 
         if (p_hi != 0) {
-            if (out_pos++ >= utf16_len - 1) {  // check for place for two uint16
-                --out_pos;
+            if (outPos++ >= utf16Len - 1) {  // check for place for two uint16
+                --outPos;
                 break;
             }
-            *utf16_out++ = p_hi;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            *utf16Out++ = p_hi;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
-        if (out_pos++ >= utf16_len) {
-            --out_pos;
+        if (outPos++ >= utf16Len) {
+            --outPos;
             break;
         }
-        *utf16_out++ = p_lo;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        *utf16Out++ = p_lo;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-    return out_pos;
+    return outPos;
 }
 
-int CompareMUtf8ToMUtf8(const uint8_t *mutf8_1, const uint8_t *mutf8_2)
+int CompareMUtf8ToMUtf8(const uint8_t *mutf81, const uint8_t *mutf82)
 {
     uint32_t c1;
     uint32_t c2;
@@ -172,8 +172,8 @@ int CompareMUtf8ToMUtf8(const uint8_t *mutf8_1, const uint8_t *mutf8_2)
     uint32_t n2;
 
     do {
-        c1 = *mutf8_1;
-        c2 = *mutf8_2;
+        c1 = *mutf81;
+        c2 = *mutf82;
 
         if (c1 == 0 && c2 == 0) {
             return 0;
@@ -187,11 +187,11 @@ int CompareMUtf8ToMUtf8(const uint8_t *mutf8_1, const uint8_t *mutf8_2)
             return 1;
         }
 
-        std::tie(c1, n1) = ConvertMUtf8ToUtf16Pair(mutf8_1);
-        std::tie(c2, n2) = ConvertMUtf8ToUtf16Pair(mutf8_2);
+        std::tie(c1, n1) = ConvertMUtf8ToUtf16Pair(mutf81);
+        std::tie(c2, n2) = ConvertMUtf8ToUtf16Pair(mutf82);
 
-        mutf8_1 += n1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        mutf8_2 += n2;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        mutf81 += n1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        mutf82 += n2;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     } while (c1 == c2);
 
     auto [c1p1, c1p2] = SplitUtf16Pair(c1);
@@ -206,39 +206,39 @@ int CompareMUtf8ToMUtf8(const uint8_t *mutf8_1, const uint8_t *mutf8_2)
 }
 
 // compare plain utf8, which allows 0 inside a string
-int CompareUtf8ToUtf8(const uint8_t *utf8_1, size_t utf8_1_length, const uint8_t *utf8_2, size_t utf8_2_length)
+int CompareUtf8ToUtf8(const uint8_t *utf81, size_t utf81Length, const uint8_t *utf82, size_t utf82Length)
 {
     uint32_t c1;
     uint32_t c2;
     uint32_t n1;
     uint32_t n2;
 
-    uint32_t utf8_1_index = 0;
-    uint32_t utf8_2_index = 0;
+    uint32_t utf81Index = 0;
+    uint32_t utf82Index = 0;
 
     do {
-        if (utf8_1_index == utf8_1_length && utf8_2_index == utf8_2_length) {
+        if (utf81Index == utf81Length && utf82Index == utf82Length) {
             return 0;
         }
 
-        if (utf8_1_index == utf8_1_length && utf8_2_index < utf8_2_length) {
+        if (utf81Index == utf81Length && utf82Index < utf82Length) {
             return -1;
         }
 
-        if (utf8_1_index < utf8_1_length && utf8_2_index == utf8_2_length) {
+        if (utf81Index < utf81Length && utf82Index == utf82Length) {
             return 1;
         }
 
-        c1 = *utf8_1;
-        c2 = *utf8_2;
+        c1 = *utf81;
+        c2 = *utf82;
 
-        std::tie(c1, n1) = ConvertMUtf8ToUtf16Pair(utf8_1);
-        std::tie(c2, n2) = ConvertMUtf8ToUtf16Pair(utf8_2);
+        std::tie(c1, n1) = ConvertMUtf8ToUtf16Pair(utf81);
+        std::tie(c2, n2) = ConvertMUtf8ToUtf16Pair(utf82);
 
-        utf8_1 += n1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        utf8_2 += n2;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        utf8_1_index += n1;
-        utf8_2_index += n2;
+        utf81 += n1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        utf82 += n2;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        utf81Index += n1;
+        utf82Index += n2;
     } while (c1 == c2);
 
     auto [c1p1, c1p2] = SplitUtf16Pair(c1);
@@ -269,12 +269,12 @@ size_t MUtf8ToUtf16Size(const uint8_t *mutf8)
     return res;
 }
 
-size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8_len)
+size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8Len)
 {
     size_t pos = 0;
     size_t res = 0;
-    while (pos != mutf8_len) {
-        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8, mutf8_len - pos);
+    while (pos != mutf8Len) {
+        auto [pair, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8, mutf8Len - pos);
         if (nbytes == 0) {
             nbytes = 1;
         }
@@ -285,18 +285,18 @@ size_t MUtf8ToUtf16Size(const uint8_t *mutf8, size_t mutf8_len)
     return res;
 }
 
-bool IsEqual(Span<const uint8_t> utf8_1, Span<const uint8_t> utf8_2)
+bool IsEqual(Span<const uint8_t> utf81, Span<const uint8_t> utf82)
 {
-    if (utf8_1.size() != utf8_2.size()) {
+    if (utf81.size() != utf82.size()) {
         return false;
     }
 
-    return memcmp(utf8_1.data(), utf8_2.data(), utf8_1.size()) == 0;
+    return memcmp(utf81.data(), utf82.data(), utf81.size()) == 0;
 }
 
-bool IsEqual(const uint8_t *mutf8_1, const uint8_t *mutf8_2)
+bool IsEqual(const uint8_t *mutf81, const uint8_t *mutf82)
 {
-    return strcmp(Mutf8AsCString(mutf8_1), Mutf8AsCString(mutf8_2)) == 0;
+    return strcmp(Mutf8AsCString(mutf81), Mutf8AsCString(mutf82)) == 0;
 }
 
 bool IsValidModifiedUTF8(const uint8_t *elems)
@@ -358,6 +358,9 @@ bool IsValidModifiedUTF8(const uint8_t *elems)
                 }
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 ++elems;
+                break;
+            default:
+                UNREACHABLE();
                 break;
         }
     }
@@ -447,12 +450,12 @@ Utf8Char ConvertUtf16ToUtf8(uint16_t d0, uint16_t d1, bool modify)
         UNREACHABLE();
     }
 
-    uint32_t code_point = CombineTwoU16(d0, d1);
+    uint32_t codePoint = CombineTwoU16(d0, d1);
 
-    auto ch0 = static_cast<uint8_t>((code_point >> UtfOffset::EIGHTEEN) | UTF8_4B_FIRST);
-    auto ch1 = static_cast<uint8_t>(((code_point >> UtfOffset::TWELVE) & MASK_6BIT) | MASK1);
-    auto ch2 = static_cast<uint8_t>(((code_point >> UtfOffset::SIX) & MASK_6BIT) | MASK1);
-    auto ch3 = static_cast<uint8_t>((code_point & MASK_6BIT) | MASK1);
+    auto ch0 = static_cast<uint8_t>((codePoint >> UtfOffset::EIGHTEEN) | UTF8_4B_FIRST);
+    auto ch1 = static_cast<uint8_t>(((codePoint >> UtfOffset::TWELVE) & MASK_6BIT) | MASK1);
+    auto ch2 = static_cast<uint8_t>(((codePoint >> UtfOffset::SIX) & MASK_6BIT) | MASK1);
+    auto ch3 = static_cast<uint8_t>((codePoint & MASK_6BIT) | MASK1);
 
     return {UtfLength::FOUR, {ch0, ch1, ch2, ch3}};
 }
@@ -499,33 +502,33 @@ size_t Utf16ToMUtf8Size(const uint16_t *mutf16, uint32_t length)
     return Utf16ToUtf8Size(mutf16, length, true);
 }
 
-size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16_in, uint8_t *utf8_out, size_t utf16_len, size_t utf8_len,
+size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len, size_t utf8Len,
                                 size_t start, bool modify)
 {
-    size_t utf8_pos = 0;
-    if (utf16_in == nullptr || utf8_out == nullptr || utf8_len == 0) {
+    size_t utf8Pos = 0;
+    if (utf16In == nullptr || utf8Out == nullptr || utf8Len == 0) {
         return 0;
     }
-    size_t end = start + utf16_len;
+    size_t end = start + utf16Len;
     for (size_t i = start; i < end; ++i) {
-        uint16_t next16_code = 0;
+        uint16_t next16Code = 0;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if ((i + 1) != end && IsAvailableNextUtf16Code(utf16_in[i + 1])) {
-            next16_code = utf16_in[i + 1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if ((i + 1) != end && IsAvailableNextUtf16Code(utf16In[i + 1])) {
+            next16Code = utf16In[i + 1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        Utf8Char ch = ConvertUtf16ToUtf8(utf16_in[i], next16_code, modify);
-        if (utf8_pos + ch.n > utf8_len) {
+        Utf8Char ch = ConvertUtf16ToUtf8(utf16In[i], next16Code, modify);
+        if (utf8Pos + ch.n > utf8Len) {
             break;
         }
         for (size_t c = 0; c < ch.n; ++c) {
-            utf8_out[utf8_pos++] = ch.ch[c];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            utf8Out[utf8Pos++] = ch.ch[c];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
         if (ch.n == UtfLength::FOUR) {  // Two UTF-16 chars are used
             ++i;
         }
     }
-    return utf8_pos;
+    return utf8Pos;
 }
 
 std::pair<uint32_t, size_t> ConvertUtf8ToUtf16Pair(const uint8_t *data, bool combine)
@@ -547,31 +550,31 @@ std::pair<uint32_t, size_t> ConvertUtf8ToUtf16Pair(const uint8_t *data, bool com
     }
 
     uint8_t d3 = data[UtfLength::THREE];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    uint32_t code_point = ((d0 & MASK_4BIT) << UtfOffset::EIGHTEEN) | ((d1 & MASK_6BIT) << UtfOffset::TWELVE) |
-                          ((d2 & MASK_6BIT) << DATA_WIDTH) | (d3 & MASK_6BIT);
+    uint32_t codePoint = ((d0 & MASK_4BIT) << UtfOffset::EIGHTEEN) | ((d1 & MASK_6BIT) << UtfOffset::TWELVE) |
+                         ((d2 & MASK_6BIT) << DATA_WIDTH) | (d3 & MASK_6BIT);
 
     uint32_t pair = 0;
     if (combine) {
-        uint32_t lead = ((code_point >> (PAIR_ELEMENT_WIDTH - DATA_WIDTH)) + U16_LEAD);
-        uint32_t tail = ((code_point & MASK_10BIT) + U16_TAIL) & MASK_16BIT;
+        uint32_t lead = ((codePoint >> (PAIR_ELEMENT_WIDTH - DATA_WIDTH)) + U16_LEAD);
+        uint32_t tail = ((codePoint & MASK_10BIT) + U16_TAIL) & MASK_16BIT;
         pair = U16_GET_SUPPLEMENTARY(lead, tail);  // NOLINT(hicpp-signed-bitwise)
     } else {
-        pair |= ((code_point >> (PAIR_ELEMENT_WIDTH - DATA_WIDTH)) + U16_LEAD) << PAIR_ELEMENT_WIDTH;
-        pair |= ((code_point & MASK_10BIT) + U16_TAIL) & MASK_16BIT;
+        pair |= ((codePoint >> (PAIR_ELEMENT_WIDTH - DATA_WIDTH)) + U16_LEAD) << PAIR_ELEMENT_WIDTH;
+        pair |= ((codePoint & MASK_10BIT) + U16_TAIL) & MASK_16BIT;
     }
 
     return {pair, UtfLength::FOUR};
 }
 
-size_t Utf8ToUtf16Size(const uint8_t *utf8, size_t utf8_len)
+size_t Utf8ToUtf16Size(const uint8_t *utf8, size_t utf8Len)
 {
-    return MUtf8ToUtf16Size(utf8, utf8_len);
+    return MUtf8ToUtf16Size(utf8, utf8Len);
 }
 
-size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8_in, uint16_t *utf16_out, size_t utf8_len, size_t utf16_len,
+size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8In, uint16_t *utf16Out, size_t utf8Len, size_t utf16Len,
                                 size_t start)
 {
-    return ConvertRegionMUtf8ToUtf16(utf8_in, utf16_out, utf8_len, utf16_len, start);
+    return ConvertRegionMUtf8ToUtf16(utf8In, utf16Out, utf8Len, utf16Len, start);
 }
 
 bool IsUTF16SurrogatePair(const uint16_t lead)

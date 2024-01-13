@@ -42,27 +42,27 @@ namespace panda::verifier {
 VerificationStatus CflowMethodInfo::FillCodeMaps(Method const *method)
 {
     auto status = IterateOverInstructions(
-        addr_start_, addr_start_, addr_end_,
-        [this, method]([[maybe_unused]] auto typ, uint8_t const *pc, size_t sz, bool exception_source,
+        addrStart_, addrStart_, addrEnd_,
+        [this, method]([[maybe_unused]] auto typ, uint8_t const *pc, size_t sz, bool exceptionSource,
                        [[maybe_unused]] auto tgt) -> std::optional<VerificationStatus> {
             SetFlag(pc, INSTRUCTION);
-            if (exception_source) {
+            if (exceptionSource) {
                 SetFlag(pc, EXCEPTION_SOURCE);
             }
             if (tgt != nullptr) {  // a jump
                 if (!IsAddrValid(tgt)) {
                     LOG_VERIFIER_CFLOW_INVALID_JUMP_OUTSIDE_METHOD_BODY(
-                        method->GetFullName(), OffsetAsHexStr(addr_start_, tgt), OffsetAsHexStr(addr_start_, pc));
+                        method->GetFullName(), OffsetAsHexStr(addrStart_, tgt), OffsetAsHexStr(addrStart_, pc));
                     return VerificationStatus::ERROR;
                 }
                 SetFlag(tgt, JUMP_TARGET);
             }
-            uint8_t const *next_inst_pc = &pc[sz];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (next_inst_pc == addr_end_) {
+            uint8_t const *nextInstPc = &pc[sz];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            if (nextInstPc == addrEnd_) {
                 return VerificationStatus::OK;
             }
-            if (next_inst_pc > addr_end_) {
-                LOG_VERIFIER_CFLOW_INVALID_INSTRUCTION(OffsetAsHexStr(addr_start_, pc));
+            if (nextInstPc > addrEnd_) {
+                LOG_VERIFIER_CFLOW_INVALID_INSTRUCTION(OffsetAsHexStr(addrStart_, pc));
                 return VerificationStatus::ERROR;
             }
             return std::nullopt;
@@ -77,37 +77,37 @@ VerificationStatus CflowMethodInfo::ProcessCatchBlocks(Method const *method)
     LOG(DEBUG, VERIFIER) << "Tracing exception handlers.";
 
     auto status = VerificationStatus::OK;
-    method->EnumerateCatchBlocks([&]([[maybe_unused]] uint8_t const *try_start_pc,
-                                     [[maybe_unused]] uint8_t const *try_end_pc, CatchBlock const &catch_block) {
-        auto catch_block_start = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(addr_start_) +
-                                                                   static_cast<uintptr_t>(catch_block.GetHandlerPc()));
-        auto catch_block_end =
-            &catch_block_start[catch_block.GetCodeSize()];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (catch_block_start > catch_block_end || catch_block_start >= addr_end_ || catch_block_end < addr_start_) {
-            LOG_VERIFIER_CFLOW_BAD_CATCH_BLOCK_BOUNDARIES(OffsetAsHexStr(addr_start_, catch_block_start),
-                                                          OffsetAsHexStr(addr_start_, catch_block_end));
+    method->EnumerateCatchBlocks([&]([[maybe_unused]] uint8_t const *tryStartPc,
+                                     [[maybe_unused]] uint8_t const *tryEndPc, CatchBlock const &catchBlock) {
+        auto catchBlockStart = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(addrStart_) +
+                                                                 static_cast<uintptr_t>(catchBlock.GetHandlerPc()));
+        auto catchBlockEnd =
+            &catchBlockStart[catchBlock.GetCodeSize()];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (catchBlockStart > catchBlockEnd || catchBlockStart >= addrEnd_ || catchBlockEnd < addrStart_) {
+            LOG_VERIFIER_CFLOW_BAD_CATCH_BLOCK_BOUNDARIES(OffsetAsHexStr(addrStart_, catchBlockStart),
+                                                          OffsetAsHexStr(addrStart_, catchBlockEnd));
             status = VerificationStatus::ERROR;
             return false;
         }
-        if (catch_block_end == catch_block_start) {
+        if (catchBlockEnd == catchBlockStart) {
             // special case, no need to iterate over instructions.
             return true;
         }
 
-        handler_start_addresses_.push_back(catch_block_start);
+        handlerStartAddresses_.push_back(catchBlockStart);
 
         auto result = IterateOverInstructions(
-            catch_block_start, addr_start_, addr_end_,
-            [this, catch_block_end]([[maybe_unused]] auto typ, uint8_t const *pc, size_t sz,
-                                    [[maybe_unused]] bool exception_source,
-                                    [[maybe_unused]] auto tgt) -> std::optional<VerificationStatus> {
+            catchBlockStart, addrStart_, addrEnd_,
+            [this, catchBlockEnd]([[maybe_unused]] auto typ, uint8_t const *pc, size_t sz,
+                                  [[maybe_unused]] bool exceptionSource,
+                                  [[maybe_unused]] auto tgt) -> std::optional<VerificationStatus> {
                 SetFlag(pc, EXCEPTION_HANDLER);
-                uint8_t const *next_inst_pc = &pc[sz];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                if (next_inst_pc == catch_block_end) {
+                uint8_t const *nextInstPc = &pc[sz];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                if (nextInstPc == catchBlockEnd) {
                     return VerificationStatus::OK;
                 }
-                if (next_inst_pc > catch_block_end) {
-                    LOG_VERIFIER_CFLOW_INVALID_INSTRUCTION(OffsetAsHexStr(addr_start_, pc));
+                if (nextInstPc > catchBlockEnd) {
+                    LOG_VERIFIER_CFLOW_INVALID_INSTRUCTION(OffsetAsHexStr(addrStart_, pc));
                     return VerificationStatus::ERROR;
                 }
                 return std::nullopt;
@@ -117,35 +117,35 @@ VerificationStatus CflowMethodInfo::ProcessCatchBlocks(Method const *method)
     });
 
     // Serves as a barrier
-    auto end_code = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(method->GetInstructions()) +
-                                                      method->GetCodeSize());
-    handler_start_addresses_.push_back(end_code);
-    std::sort(handler_start_addresses_.begin(), handler_start_addresses_.end());
+    auto endCode = reinterpret_cast<uint8_t const *>(reinterpret_cast<uintptr_t>(method->GetInstructions()) +
+                                                     method->GetCodeSize());
+    handlerStartAddresses_.push_back(endCode);
+    std::sort(handlerStartAddresses_.begin(), handlerStartAddresses_.end());
 
     return status;
 }
 
 PandaUniquePtr<CflowMethodInfo> GetCflowMethodInfo(Method const *method)
 {
-    const uint8_t *method_pc_start_ptr = method->GetInstructions();
-    size_t code_size = method->GetCodeSize();
+    const uint8_t *methodPcStartPtr = method->GetInstructions();
+    size_t codeSize = method->GetCodeSize();
 
-    auto cflow_info = MakePandaUnique<CflowMethodInfo>(method_pc_start_ptr, code_size);
+    auto cflowInfo = MakePandaUnique<CflowMethodInfo>(methodPcStartPtr, codeSize);
 
     LOG(DEBUG, VERIFIER) << "Build control flow info for method " << method->GetFullName();
 
     // 1. fill instructions map
     LOG(DEBUG, VERIFIER) << "Build instructions map.";
-    if (cflow_info->FillCodeMaps(method) == VerificationStatus::ERROR) {
+    if (cflowInfo->FillCodeMaps(method) == VerificationStatus::ERROR) {
         return {};
     }
 
     // 2. Mark exception handlers.
-    if (cflow_info->ProcessCatchBlocks(method) == VerificationStatus::ERROR) {
+    if (cflowInfo->ProcessCatchBlocks(method) == VerificationStatus::ERROR) {
         return {};
     }
 
-    return cflow_info;
+    return cflowInfo;
 }
 
 }  // namespace panda::verifier

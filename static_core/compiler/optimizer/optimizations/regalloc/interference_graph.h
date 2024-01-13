@@ -40,7 +40,7 @@ public:
     static constexpr uint16_t NO_BIAS = 0xffff;
 
     template <typename T>
-    ColorNode(unsigned number, T alloc) : cs_point_set_(alloc), number_(number), physical_(), fixed_()
+    ColorNode(unsigned number, T alloc) : csPointSet_(alloc), number_(number), physical_(), fixed_()
     {
     }
 
@@ -74,9 +74,9 @@ public:
         return bias_;
     }
 
-    void Assign(LifeIntervals *life_intervals) noexcept
+    void Assign(LifeIntervals *lifeIntervals) noexcept
     {
-        life_intervals_ = life_intervals;
+        lifeIntervals_ = lifeIntervals;
     }
 
     bool IsFixedColor() const noexcept
@@ -102,17 +102,17 @@ public:
 
     LifeIntervals *GetLifeIntervals() const noexcept
     {
-        return life_intervals_;
+        return lifeIntervals_;
     }
 
     void AddCallsite(LifeNumber point) noexcept
     {
-        cs_point_set_.insert(point);
+        csPointSet_.insert(point);
     }
 
     unsigned GetCallsiteIntersectCount() const noexcept
     {
-        return cs_point_set_.size();
+        return csPointSet_.size();
     }
 
     void SetSpillWeight(float weight)
@@ -126,8 +126,8 @@ public:
     }
 
 private:
-    LifeIntervals *life_intervals_ = nullptr;
-    ArenaUnorderedSet<LifeNumber> cs_point_set_;
+    LifeIntervals *lifeIntervals_ = nullptr;
+    ArenaUnorderedSet<LifeNumber> csPointSet_;
     unsigned number_;
     float weight_ {};
     uint16_t bias_ = NO_BIAS;  // Bias is a group of nodes for coalescing
@@ -200,7 +200,7 @@ using NodeVector = ArenaVector<ColorNode>;
 // one is for random checks (here is a matrix) and lists on adjacency for sequental access. It's worth to add!
 class InterferenceGraph {
 public:
-    explicit InterferenceGraph(ArenaAllocator *alloc) : nodes_(alloc->Adapter()), matrix_(alloc), use_spill_weight_() {}
+    explicit InterferenceGraph(ArenaAllocator *alloc) : nodes_(alloc->Adapter()), matrix_(alloc), useSpillWeight_() {}
     ColorNode *AllocNode();
 
     NodeVector &GetNodes() noexcept
@@ -284,23 +284,23 @@ public:
 
     void SetUseSpillWeight(bool use)
     {
-        use_spill_weight_ = use;
+        useSpillWeight_ = use;
     }
 
     bool IsUsedSpillWeight() const
     {
-        return use_spill_weight_;
+        return useSpillWeight_;
     }
 
     bool IsChordal() const;
-    void Dump(const std::string &name = "IG", bool skip_physical = true, std::ostream &out = std::cout) const;
+    void Dump(const std::string &name = "IG", bool skipPhysical = true, std::ostream &out = std::cout) const;
 
     template <unsigned MAX_COLORS>
-    bool AssignColors(size_t colors, size_t callee_offset)
+    bool AssignColors(size_t colors, size_t calleeOffset)
     {
         ASSERT(colors <= MAX_COLORS);
-        std::bitset<MAX_COLORS> nbr_colors;
-        std::bitset<MAX_COLORS> nbr_bias_colors;
+        std::bitset<MAX_COLORS> nbrColors;
+        std::bitset<MAX_COLORS> nbrBiasColors;
 
         bool success = true;
         for (unsigned id : GetOrderedNodesIds()) {
@@ -314,42 +314,42 @@ public:
             }
 
             // Make busy colors maps
-            MakeBusyBitmap(id, &nbr_colors, &nbr_bias_colors);
+            MakeBusyBitmap(id, &nbrColors, &nbrBiasColors);
 
             // Try bias color first if free
-            size_t try_color;
+            size_t tryColor;
             if (node.HasBias() && biases_[node.GetBias()].color != INVALID_REG &&
-                !nbr_colors[biases_[node.GetBias()].color]) {
-                try_color = biases_[node.GetBias()].color;
-                COMPILER_LOG(DEBUG, REGALLOC) << "Bias color chosen " << try_color;
+                !nbrColors[biases_[node.GetBias()].color]) {
+                tryColor = biases_[node.GetBias()].color;
+                COMPILER_LOG(DEBUG, REGALLOC) << "Bias color chosen " << tryColor;
             } else {
                 // The best case is to find color that is not in neighbour colors and not in biased
-                nbr_bias_colors |= nbr_colors;  // Make compound busy bitmap
+                nbrBiasColors |= nbrColors;  // Make compound busy bitmap
 
                 // For nodes that take part in bias with callsites intersection, prefer callee saved registers.
                 // In cases first interval of bias isn't intersected it will be placed in callersaved register,
                 // that will affect entire coalesced bias group.
                 size_t off = 0;
                 if (node.HasBias() && biases_[node.GetBias()].callsites > 0) {
-                    off = callee_offset;
+                    off = calleeOffset;
                 }
 
                 // Find first not allocated disregard biasing
-                if ((try_color = FirstFree(nbr_colors, nbr_bias_colors, colors, off)) == colors) {
-                    node.SetColor(try_color);
+                if ((tryColor = FirstFree(nbrColors, nbrBiasColors, colors, off)) == colors) {
+                    node.SetColor(tryColor);
                     success = false;
                     continue;
                 }
 
                 // Assign bias color if first observed in component
                 if (node.HasBias() && biases_[node.GetBias()].color == INVALID_REG) {
-                    biases_[node.GetBias()].color = try_color;
-                    COMPILER_LOG(DEBUG, REGALLOC) << "Set bias color " << try_color;
+                    biases_[node.GetBias()].color = tryColor;
+                    COMPILER_LOG(DEBUG, REGALLOC) << "Set bias color " << tryColor;
                 }
             }
 
             // Assign color
-            node.SetColor(try_color);
+            node.SetColor(tryColor);
             COMPILER_LOG(DEBUG, REGALLOC) << "Node " << node.GetNumber() << ": Set color: "
                                           << " " << unsigned(node.GetColor());
         }
@@ -358,55 +358,55 @@ public:
 
 private:
     template <typename T>
-    void MakeBusyBitmap(unsigned id, T *nbr_colors, T *nbr_bias_colors)
+    void MakeBusyBitmap(unsigned id, T *nbrColors, T *nbrBiasColors)
     {
-        nbr_colors->reset();
-        nbr_bias_colors->reset();
+        nbrColors->reset();
+        nbrBiasColors->reset();
         // Collect neighbors colors
-        for (unsigned nbr_id = 0; nbr_id < Size(); nbr_id++) {
-            auto &nbr_node = GetNode(nbr_id);
+        for (unsigned nbrId = 0; nbrId < Size(); nbrId++) {
+            auto &nbrNode = GetNode(nbrId);
 
             // Collect neighbour color
-            if (nbr_node.GetColor() != INVALID_REG && HasEdge(id, nbr_id)) {
-                ASSERT(nbr_node.GetColor() < nbr_colors->size());
-                nbr_colors->set(nbr_node.GetColor());
-            } else if (nbr_id != id && nbr_node.HasBias() && HasEdge(id, nbr_id)) {
+            if (nbrNode.GetColor() != INVALID_REG && HasEdge(id, nbrId)) {
+                ASSERT(nbrNode.GetColor() < nbrColors->size());
+                nbrColors->set(nbrNode.GetColor());
+            } else if (nbrId != id && nbrNode.HasBias() && HasEdge(id, nbrId)) {
                 // Collect biased neighbour color
-                ASSERT(nbr_node.GetBias() < GetBiasCount());
-                if (biases_[nbr_node.GetBias()].color != INVALID_REG) {
-                    nbr_bias_colors->set(biases_[nbr_node.GetBias()].color);
+                ASSERT(nbrNode.GetBias() < GetBiasCount());
+                if (biases_[nbrNode.GetBias()].color != INVALID_REG) {
+                    nbrBiasColors->set(biases_[nbrNode.GetBias()].color);
                 }
             }
         }
     }
 
     template <typename T>
-    static size_t FirstFree(const T &nbr_bs, const T &nbr_bs_bias, size_t colors, size_t off)
+    static size_t FirstFree(const T &nbrBs, const T &nbrBsBias, size_t colors, size_t off)
     {
         // Find first free
-        size_t try_color;
-        for (try_color = off; try_color < colors + off; try_color++) {
-            if (!nbr_bs[try_color % colors]) {
+        size_t tryColor;
+        for (tryColor = off; tryColor < colors + off; tryColor++) {
+            if (!nbrBs[tryColor % colors]) {
                 break;
             }
         }
 
         // Find free regarding biasing (higher part of bitmap)
-        for (auto i = try_color; i < colors + off; i++) {
-            if (!nbr_bs_bias[i % colors]) {
-                try_color = i;
+        for (auto i = tryColor; i < colors + off; i++) {
+            if (!nbrBsBias[i % colors]) {
+                tryColor = i;
                 break;
             }
         }
 
-        return try_color == colors + off ? colors : try_color % colors;
+        return tryColor == colors + off ? colors : tryColor % colors;
     }
 
     NodeVector nodes_;
     GraphMatrix matrix_;
     static const size_t DEFAULT_BIAS_SIZE = 16;
     SmallVector<Bias, DEFAULT_BIAS_SIZE> biases_;
-    uint8_t use_spill_weight_ : 1;
+    uint8_t useSpillWeight_ : 1;
 };
 }  // namespace panda::compiler
 

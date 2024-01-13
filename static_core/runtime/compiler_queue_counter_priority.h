@@ -54,9 +54,9 @@ public:
         return timestamp_;
     }
 
-    void UpdateCounter(int64_t new_counter)
+    void UpdateCounter(int64_t newCounter)
     {
-        counter_ = new_counter;
+        counter_ = newCounter;
     }
 
 private:
@@ -75,13 +75,13 @@ private:
  */
 class CompilerPriorityCounterQueue : public CompilerQueueInterface {
 public:
-    explicit CompilerPriorityCounterQueue(mem::InternalAllocatorPtr allocator, uint64_t max_length,
-                                          uint64_t task_life_span)
+    explicit CompilerPriorityCounterQueue(mem::InternalAllocatorPtr allocator, uint64_t maxLength,
+                                          uint64_t taskLifeSpan)
         : allocator_(allocator), queue_(allocator->Adapter())
     {
-        max_length_ = max_length;
-        task_life_span_ = task_life_span;
-        queue_name_ = "";
+        maxLength_ = maxLength;
+        taskLifeSpan_ = taskLifeSpan;
+        queueName_ = "";
         SetQueueName("priority counter compilation queue");
     }
 
@@ -89,7 +89,7 @@ public:
     {
         UpdateQueue();
         if (queue_.empty()) {
-            LOG(DEBUG, COMPILATION_QUEUE) << "Empty " << queue_name_ << ", return nothing";
+            LOG(DEBUG, COMPILATION_QUEUE) << "Empty " << queueName_ << ", return nothing";
             return CompilerTask();
         }
         sort(queue_.begin(), queue_.end(), comparator_);
@@ -97,7 +97,7 @@ public:
         auto task = std::move(element->GetContext());
         queue_.pop_back();
         allocator_->Delete(element);
-        LOG(DEBUG, COMPILATION_QUEUE) << "Extract a task from a " << queue_name_ << ": " << GetTaskDescription(task);
+        LOG(DEBUG, COMPILATION_QUEUE) << "Extract a task from a " << queueName_ << ": " << GetTaskDescription(task);
         return task;
     }
 
@@ -105,7 +105,7 @@ public:
     void AddTask(CompilerTask &&ctx, [[maybe_unused]] size_t priority = 0) override
     {
         UpdateQueue();
-        if (queue_.size() >= max_length_) {
+        if (queue_.size() >= maxLength_) {
             // Not sure if it is possible to exceed the size more than one
             // Reset the counter of the rejected method;
             ctx.GetMethod()->ResetHotnessCounter();
@@ -113,10 +113,10 @@ public:
                                                         ctx.IsOsr() ? Method::COMPILED : Method::NOT_COMPILED);
             // Maybe, replace the other method in queue?
             LOG(DEBUG, COMPILATION_QUEUE) << "Skip adding the task " << GetTaskDescription(ctx)
-                                          << " due to limit of tasks (" << max_length_ << ") in a " << queue_name_;
+                                          << " due to limit of tasks (" << maxLength_ << ") in a " << queueName_;
             return;
         }
-        LOG(DEBUG, COMPILATION_QUEUE) << "Add an element to a " << queue_name_ << ": " << GetTaskDescription(ctx);
+        LOG(DEBUG, COMPILATION_QUEUE) << "Add an element to a " << queueName_ << ": " << GetTaskDescription(ctx);
         auto element = allocator_->New<CompilationQueueElement>(std::move(ctx));
         // Sorting will be in Get function
         queue_.push_back(element);
@@ -128,7 +128,7 @@ public:
             allocator_->Delete(e);
         }
         queue_.clear();
-        LOG(DEBUG, COMPILATION_QUEUE) << "Clear a " << queue_name_;
+        LOG(DEBUG, COMPILATION_QUEUE) << "Clear a " << queueName_;
     }
 
 protected:
@@ -141,13 +141,13 @@ protected:
     {
         // The only way to update counter
         element->UpdateCounter(element->GetContext().GetMethod()->GetHotnessCounter());
-        uint64_t cur_stamp = time::GetCurrentTimeInMillis();
-        return (cur_stamp - element->GetTimestamp() >= task_life_span_);
+        uint64_t curStamp = time::GetCurrentTimeInMillis();
+        return (curStamp - element->GetTimestamp() >= taskLifeSpan_);
     }
 
     void SetQueueName(char const *name)
     {
-        queue_name_ = name;
+        queueName_ = name;
     }
 
 private:
@@ -178,7 +178,7 @@ private:
             auto element = *it;
             // We should update the counter inside as the queue choose the semantic of the counter by itself
             if (UpdateCounterAndCheck(element)) {
-                LOG(DEBUG, COMPILATION_QUEUE) << "Remove an expired element from a " << queue_name_ << ": "
+                LOG(DEBUG, COMPILATION_QUEUE) << "Remove an expired element from a " << queueName_ << ": "
                                               << GetTaskDescription(element->GetContext());
                 auto ctx = std::move(element->GetContext());
                 ctx.GetMethod()->AtomicSetCompilationStatus(Method::WAITING,
@@ -193,10 +193,10 @@ private:
     mem::InternalAllocatorPtr allocator_;
     PandaVector<CompilationQueueElement *> queue_;
     Comparator comparator_;
-    uint64_t max_length_;
+    uint64_t maxLength_;
     // In milliseconds
-    uint64_t task_life_span_;
-    const char *queue_name_;
+    uint64_t taskLifeSpan_;
+    const char *queueName_;
 };
 
 }  // namespace panda

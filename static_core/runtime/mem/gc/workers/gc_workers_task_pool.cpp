@@ -20,35 +20,35 @@ namespace panda::mem {
 void GCWorkersTaskPool::IncreaseSolvedTasks()
 {
     // Atomic with seq_cst order reason: solved_tasks_ value synchronization
-    auto solved_tasks_old_value = solved_tasks_.fetch_add(1, std::memory_order_seq_cst);
-    if (solved_tasks_old_value + 1U == sended_tasks_) {
-        os::memory::LockHolder lock(all_solved_tasks_cond_var_lock_);
-        all_solved_tasks_cond_var_.Signal();
+    auto solvedTasksOldValue = solvedTasks_.fetch_add(1, std::memory_order_seq_cst);
+    if (solvedTasksOldValue + 1U == sendedTasks_) {
+        os::memory::LockHolder lock(allSolvedTasksCondVarLock_);
+        allSolvedTasksCondVar_.Signal();
 
         // Here we use double check to be sure that IncreaseSolvedTasks method will release
         // all_solved_tasks_cond_var_lock_ before GCWorkersTaskPool deleting in GC::DestroyWorkersTaskPool method
-        if (solved_tasks_old_value + 1U > solved_tasks_snapshot_) {
-            solved_tasks_snapshot_ = solved_tasks_old_value + 1U;
+        if (solvedTasksOldValue + 1U > solvedTasksSnapshot_) {
+            solvedTasksSnapshot_ = solvedTasksOldValue + 1U;
         }
     }
 }
 
 bool GCWorkersTaskPool::AddTask(GCWorkersTask &&task)
 {
-    sended_tasks_++;
+    sendedTasks_++;
     [[maybe_unused]] GCWorkersTaskTypes type = task.GetType();
     if (this->TryAddTask(std::forward<GCWorkersTask &&>(task))) {
         LOG(DEBUG, GC) << "Added a new " << GCWorkersTaskTypesToString(type) << " to gc task pool";
         return true;
     }
     // Couldn't add gc workers task to pool
-    sended_tasks_--;
+    sendedTasks_--;
     return false;
 }
 
-void GCWorkersTaskPool::RunGCWorkersTask(GCWorkersTask *task, void *worker_data)
+void GCWorkersTaskPool::RunGCWorkersTask(GCWorkersTask *task, void *workerData)
 {
-    gc_->WorkerTaskProcessing(task, worker_data);
+    gc_->WorkerTaskProcessing(task, workerData);
     IncreaseSolvedTasks();
 }
 
@@ -58,14 +58,14 @@ void GCWorkersTaskPool::WaitUntilTasksEnd()
         // Current thread can to help workers with gc task processing.
         // Try to get gc workers task from pool if it's possible and run the task immediately
         this->RunInCurrentThread();
-        os::memory::LockHolder lock(all_solved_tasks_cond_var_lock_);
+        os::memory::LockHolder lock(allSolvedTasksCondVarLock_);
         // If all sended task were solved then break from wait loop
         // Here we use double check to be sure that IncreaseSolvedTasks method will release
         // all_solved_tasks_cond_var_lock_ before GCWorkersTaskPool deleting in GC::DestroyWorkersTaskPool method
-        if (solved_tasks_ == sended_tasks_ && solved_tasks_ == solved_tasks_snapshot_) {
+        if (solvedTasks_ == sendedTasks_ && solvedTasks_ == solvedTasksSnapshot_) {
             break;
         }
-        all_solved_tasks_cond_var_.TimedWait(&all_solved_tasks_cond_var_lock_, ALL_GC_TASKS_FINISH_WAIT_TIMEOUT);
+        allSolvedTasksCondVar_.TimedWait(&allSolvedTasksCondVarLock_, ALL_GC_TASKS_FINISH_WAIT_TIMEOUT);
     }
     ResetTasks();
 }

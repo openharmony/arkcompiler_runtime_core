@@ -33,19 +33,18 @@ struct Record {
     bool conflict = false; /* Name is conflict with panda primitive types. Need special handle. */
     panda::panda_file::SourceLang language;
     std::unique_ptr<RecordMetadata> metadata;
-    std::vector<Field> field_list; /* class fields list */
-    size_t params_num = 0;
-    bool body_presence = false;
-    SourceLocation body_location;
-    std::string source_file; /* The file in which the record is defined or empty */
-    std::optional<FileLocation> file_location;
+    std::vector<Field> fieldList; /* class fields list */
+    size_t paramsNum = 0;
+    bool bodyPresence = false;
+    SourceLocation bodyLocation;
+    std::string sourceFile; /* The file in which the record is defined or empty */
+    std::optional<FileLocation> fileLocation;
 
-    Record(std::string s, panda::panda_file::SourceLang lang, size_t b_l, size_t b_r, std::string f_c, bool d,
-           size_t l_n)
+    Record(std::string s, panda::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
         : name(std::move(s)),
           language(lang),
           metadata(extensions::MetadataExtension::CreateRecordMetadata(lang)),
-          file_location({f_c, b_l, b_r, l_n, d})
+          fileLocation({fC, bL, bR, lN, d})
     {
     }
 

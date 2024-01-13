@@ -92,15 +92,15 @@ TEST(VerifierParserTest, Parser)
     static const auto ABCP = P::OfCharset(Charset {"abcABC"});
     static const auto DEFP = P1::OfCharset(Charset {"defDEF"});
     static const auto STRINGP = P2::OfString("string");
-    std::string a_bc {"aBc"};
-    It start = &(a_bc[0]);
-    It end = &(a_bc[3]);
+    std::string aBc {"aBc"};
+    It start = &(aBc[0]);
+    It end = &(aBc[3]);
     EXPECT_TRUE(ABCP(cont, start, end));
-    start = &(a_bc[1]);
+    start = &(aBc[1]);
     EXPECT_TRUE(ABCP(cont, start, end));
-    start = &(a_bc[0]);
+    start = &(aBc[0]);
     EXPECT_FALSE(DEFP(cont, start, end));
-    start = &(a_bc[0]);
+    start = &(aBc[0]);
     EXPECT_FALSE(STRINGP(cont, start, end));
     std::string string {"string"};
     start = &(string[0]);
@@ -149,16 +149,16 @@ TEST(VerifierParserTest, Parser)
     start = &(string[0]);
     end = &(string[6]);
     EXPECT_FALSE(FOOABCP(cont, start, end));
-    std::string foo_ac_b {"fooAcB"};
-    start = &(foo_ac_b[0]);
-    end = &(foo_ac_b[6]);
+    std::string fooAcB {"fooAcB"};
+    start = &(fooAcB[0]);
+    end = &(fooAcB[6]);
     EXPECT_TRUE(FOOABCP(cont, start, end));
-    start = &(foo_ac_b[0]);
+    start = &(fooAcB[0]);
     EXPECT_FALSE(BARABCP(cont, start, end));
 
     static const auto ABCDEFP = ABCP | DEFP;
-    start = &(a_bc[0]);
-    end = &(a_bc[3]);
+    start = &(aBc[0]);
+    end = &(aBc[3]);
     EXPECT_TRUE(ABCDEFP(cont, start, end));
     start = &(string[0]);
     end = &(string[6]);
@@ -168,8 +168,8 @@ TEST(VerifierParserTest, Parser)
     EXPECT_TRUE(ABCDEFP(cont, start, end));
 
     static const auto EMPTYP = ABCP & DEFP;
-    start = &(a_bc[0]);
-    end = &(a_bc[3]);
+    start = &(aBc[0]);
+    end = &(aBc[3]);
     EXPECT_FALSE(EMPTYP(cont, start, end));
     start = &(string[0]);
     end = &(string[6]);
@@ -190,8 +190,8 @@ TEST(VerifierParserTest, Parser)
     EXPECT_FALSE(ABC2P(cont, start, end));
 
     static const auto NOABCP = !ABCP;
-    start = &(a_bc[0]);
-    end = &(a_bc[3]);
+    start = &(aBc[0]);
+    end = &(aBc[3]);
     EXPECT_FALSE(NOABCP(cont, start, end));
     start = &(string[0]);
     end = &(string[6]);

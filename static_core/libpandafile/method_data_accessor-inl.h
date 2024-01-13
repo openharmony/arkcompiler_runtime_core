@@ -25,39 +25,39 @@
 namespace panda::panda_file {
 
 // static
-inline File::EntityId MethodDataAccessor::GetNameId(const File &panda_file, File::EntityId method_id)
+inline File::EntityId MethodDataAccessor::GetNameId(const File &pandaFile, File::EntityId methodId)
 {
     constexpr size_t SKIP_NUM = 2;  // skip class_idx and proto_idx
-    auto sp = panda_file.GetSpanFromId(method_id).SubSpan(IDX_SIZE * SKIP_NUM);
+    auto sp = pandaFile.GetSpanFromId(methodId).SubSpan(IDX_SIZE * SKIP_NUM);
     return File::EntityId(helpers::Read<ID_SIZE>(&sp));
 }
 
 // static
-inline panda_file::File::StringData MethodDataAccessor::GetName(const File &panda_file, File::EntityId method_id)
+inline panda_file::File::StringData MethodDataAccessor::GetName(const File &pandaFile, File::EntityId methodId)
 {
-    return panda_file.GetStringData(GetNameId(panda_file, method_id));
+    return pandaFile.GetStringData(GetNameId(pandaFile, methodId));
 }
 
 // static
-inline File::EntityId MethodDataAccessor::GetProtoId(const File &panda_file, File::EntityId method_id)
+inline File::EntityId MethodDataAccessor::GetProtoId(const File &pandaFile, File::EntityId methodId)
 {
     constexpr size_t SKIP_NUM = 1;  // skip class_idx
-    auto sp = panda_file.GetSpanFromId(method_id).SubSpan(IDX_SIZE * SKIP_NUM);
-    auto proto_idx = helpers::Read<IDX_SIZE>(&sp);
-    return File::EntityId(panda_file.ResolveProtoIndex(method_id, proto_idx).GetOffset());
+    auto sp = pandaFile.GetSpanFromId(methodId).SubSpan(IDX_SIZE * SKIP_NUM);
+    auto protoIdx = helpers::Read<IDX_SIZE>(&sp);
+    return File::EntityId(pandaFile.ResolveProtoIndex(methodId, protoIdx).GetOffset());
 }
 
 // static
-inline File::EntityId MethodDataAccessor::GetClassId(const File &panda_file, File::EntityId method_id)
+inline File::EntityId MethodDataAccessor::GetClassId(const File &pandaFile, File::EntityId methodId)
 {
-    auto sp = panda_file.GetSpanFromId(method_id);
-    auto class_idx = helpers::Read<IDX_SIZE>(&sp);
-    return File::EntityId(panda_file.ResolveClassIndex(method_id, class_idx).GetOffset());
+    auto sp = pandaFile.GetSpanFromId(methodId);
+    auto classIdx = helpers::Read<IDX_SIZE>(&sp);
+    return File::EntityId(pandaFile.ResolveClassIndex(methodId, classIdx).GetOffset());
 }
 
 inline panda_file::File::StringData MethodDataAccessor::GetName() const
 {
-    return panda_file_.GetStringData(GetNameId());
+    return pandaFile_.GetStringData(GetNameId());
 }
 
 inline void MethodDataAccessor::SkipCode()
@@ -107,183 +107,182 @@ inline void MethodDataAccessor::SkipRuntimeTypeAnnotation()
 
 inline std::optional<File::EntityId> MethodDataAccessor::GetCodeId()
 {
-    if (is_external_) {
+    if (isExternal_) {
         // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
         // which fails Release builds for GCC 8 and 9.
         std::optional<File::EntityId> novalue;
         return novalue;
     }
 
-    return helpers::GetOptionalTaggedValue<File::EntityId>(tagged_values_sp_, MethodTag::CODE, &source_lang_sp_);
+    return helpers::GetOptionalTaggedValue<File::EntityId>(taggedValuesSp_, MethodTag::CODE, &sourceLangSp_);
 }
 
 inline std::optional<SourceLang> MethodDataAccessor::GetSourceLang()
 {
-    if (is_external_) {
+    if (isExternal_) {
         // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
         // which fails Release builds for GCC 8 and 9.
         std::optional<SourceLang> novalue;
         return novalue;
     }
 
-    if (source_lang_sp_.data() == nullptr) {
+    if (sourceLangSp_.data() == nullptr) {
         SkipCode();
     }
 
-    return helpers::GetOptionalTaggedValue<SourceLang>(source_lang_sp_, MethodTag::SOURCE_LANG,
-                                                       &runtime_annotations_sp_);
+    return helpers::GetOptionalTaggedValue<SourceLang>(sourceLangSp_, MethodTag::SOURCE_LANG, &runtimeAnnotationsSp_);
 }
 
 template <class Callback>
 inline void MethodDataAccessor::EnumerateRuntimeAnnotations(Callback cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return;
     }
 
-    if (runtime_annotations_sp_.data() == nullptr) {
+    if (runtimeAnnotationsSp_.data() == nullptr) {
         SkipSourceLang();
     }
 
     helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(
-        runtime_annotations_sp_, MethodTag::RUNTIME_ANNOTATION, cb, &runtime_param_annotation_sp_);
+        runtimeAnnotationsSp_, MethodTag::RUNTIME_ANNOTATION, cb, &runtimeParamAnnotationSp_);
 }
 
 inline std::optional<File::EntityId> MethodDataAccessor::GetRuntimeParamAnnotationId()
 {
-    if (is_external_) {
+    if (isExternal_) {
         return {};
     }
 
-    if (runtime_param_annotation_sp_.data() == nullptr) {
+    if (runtimeParamAnnotationSp_.data() == nullptr) {
         SkipRuntimeAnnotations();
     }
 
-    return helpers::GetOptionalTaggedValue<File::EntityId>(runtime_param_annotation_sp_,
-                                                           MethodTag::RUNTIME_PARAM_ANNOTATION, &debug_sp_);
+    return helpers::GetOptionalTaggedValue<File::EntityId>(runtimeParamAnnotationSp_,
+                                                           MethodTag::RUNTIME_PARAM_ANNOTATION, &debugSp_);
 }
 
 inline std::optional<File::EntityId> MethodDataAccessor::GetDebugInfoId()
 {
-    if (is_external_) {
+    if (isExternal_) {
         return {};
     }
 
-    if (debug_sp_.data() == nullptr) {
+    if (debugSp_.data() == nullptr) {
         SkipRuntimeParamAnnotation();
     }
 
-    return helpers::GetOptionalTaggedValue<File::EntityId>(debug_sp_, MethodTag::DEBUG_INFO, &annotations_sp_);
+    return helpers::GetOptionalTaggedValue<File::EntityId>(debugSp_, MethodTag::DEBUG_INFO, &annotationsSp_);
 }
 
 template <class Callback>
 inline void MethodDataAccessor::EnumerateAnnotations(Callback cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return;
     }
 
-    if (annotations_sp_.data() == nullptr) {
+    if (annotationsSp_.data() == nullptr) {
         SkipDebugInfo();
     }
 
-    helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(annotations_sp_, MethodTag::ANNOTATION, cb,
-                                                                        &param_annotation_sp_);
+    helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(annotationsSp_, MethodTag::ANNOTATION, cb,
+                                                                        &paramAnnotationSp_);
 }
 
 template <class Callback>
 inline bool MethodDataAccessor::EnumerateRuntimeAnnotationsWithEarlyStop(Callback cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return false;
     }
 
-    if (runtime_annotations_sp_.data() == nullptr) {
+    if (runtimeAnnotationsSp_.data() == nullptr) {
         SkipSourceLang();
     }
 
     return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, MethodTag, Callback>(
-        runtime_annotations_sp_, MethodTag::RUNTIME_ANNOTATION, cb);
+        runtimeAnnotationsSp_, MethodTag::RUNTIME_ANNOTATION, cb);
 }
 
 template <class Callback>
 inline bool MethodDataAccessor::EnumerateAnnotationsWithEarlyStop(Callback cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return false;
     }
 
-    if (annotations_sp_.data() == nullptr) {
+    if (annotationsSp_.data() == nullptr) {
         SkipDebugInfo();
     }
 
-    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, MethodTag, Callback>(annotations_sp_,
+    return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, MethodTag, Callback>(annotationsSp_,
                                                                                             MethodTag::ANNOTATION, cb);
 }
 
 template <class Callback>
 inline void MethodDataAccessor::EnumerateTypeAnnotations(Callback cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return;
     }
 
-    if (type_annotation_sp_.data() == nullptr) {
+    if (typeAnnotationSp_.data() == nullptr) {
         SkipParamAnnotation();
     }
 
-    helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(type_annotation_sp_, MethodTag::TYPE_ANNOTATION,
-                                                                        cb, &runtime_type_annotation_sp_);
+    helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(typeAnnotationSp_, MethodTag::TYPE_ANNOTATION,
+                                                                        cb, &runtimeTypeAnnotationSp_);
 }
 
 template <class Callback>
 inline void MethodDataAccessor::EnumerateRuntimeTypeAnnotations(Callback cb)
 {
-    if (is_external_) {
+    if (isExternal_) {
         return;
     }
 
-    if (runtime_type_annotation_sp_.data() == nullptr) {
+    if (runtimeTypeAnnotationSp_.data() == nullptr) {
         SkipTypeAnnotation();
     }
 
     helpers::EnumerateTaggedValues<File::EntityId, MethodTag, Callback>(
-        runtime_type_annotation_sp_, MethodTag::RUNTIME_TYPE_ANNOTATION, cb, &profile_info_sp_);
+        runtimeTypeAnnotationSp_, MethodTag::RUNTIME_TYPE_ANNOTATION, cb, &profileInfoSp_);
 }
 
 inline std::optional<size_t> MethodDataAccessor::GetProfileSize()
 {
-    if (is_external_) {
+    if (isExternal_) {
         // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
         // which fails Release builds for GCC 8 and 9.
         std::optional<size_t> novalue;
         return novalue;
     }
 
-    if (profile_info_sp_.data() == nullptr) {
+    if (profileInfoSp_.data() == nullptr) {
         SkipRuntimeTypeAnnotation();
     }
     Span<const uint8_t> sp {nullptr, nullptr};
-    auto v = helpers::GetOptionalTaggedValue<uint16_t>(profile_info_sp_, MethodTag::PROFILE_INFO, &sp);
-    size_ = panda_file_.GetIdFromPointer(sp.data()).GetOffset() - method_id_.GetOffset() + 1;  // + 1 for NOTHING tag
+    auto v = helpers::GetOptionalTaggedValue<uint16_t>(profileInfoSp_, MethodTag::PROFILE_INFO, &sp);
+    size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - methodId_.GetOffset() + 1;  // + 1 for NOTHING tag
     return v;
 }
 
 inline std::optional<File::EntityId> MethodDataAccessor::GetParamAnnotationId()
 {
-    if (is_external_) {
+    if (isExternal_) {
         // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
         // which fails Release builds for GCC 8 and 9.
         std::optional<File::EntityId> novalue;
         return novalue;
     }
 
-    if (param_annotation_sp_.data() == nullptr) {
+    if (paramAnnotationSp_.data() == nullptr) {
         SkipAnnotations();
     }
 
-    auto v = helpers::GetOptionalTaggedValue<File::EntityId>(param_annotation_sp_, MethodTag::PARAM_ANNOTATION,
-                                                             &type_annotation_sp_);
+    auto v = helpers::GetOptionalTaggedValue<File::EntityId>(paramAnnotationSp_, MethodTag::PARAM_ANNOTATION,
+                                                             &typeAnnotationSp_);
 
     return v;
 }
@@ -317,32 +316,32 @@ inline uint32_t MethodDataAccessor::GetRuntimeTypeAnnotationsNumber()
 }
 
 template <typename Callback>
-void MethodDataAccessor::EnumerateTypesInProto(Callback cb, bool skip_this)
+void MethodDataAccessor::EnumerateTypesInProto(Callback cb, bool skipThis)
 {
-    size_t ref_idx = 0;
+    size_t refIdx = 0;
     panda_file::ProtoDataAccessor pda(GetPandaFile(), GetProtoId());
 
     auto type = pda.GetReturnType();
-    panda_file::File::EntityId class_id;
+    panda_file::File::EntityId classId;
 
     if (!type.IsPrimitive()) {
-        class_id = pda.GetReferenceType(ref_idx++);
+        classId = pda.GetReferenceType(refIdx++);
     }
 
-    cb(type, class_id);
+    cb(type, classId);
 
-    if (!IsStatic() && !skip_this) {
+    if (!IsStatic() && !skipThis) {
         // first arg type is method class
         cb(panda_file::Type {panda_file::Type::TypeId::REFERENCE}, GetClassId());
     }
 
     for (uint32_t idx = 0; idx < pda.GetNumArgs(); ++idx) {
-        auto arg_type = pda.GetArgType(idx);
-        panda_file::File::EntityId klass_id;
-        if (!arg_type.IsPrimitive()) {
-            klass_id = pda.GetReferenceType(ref_idx++);
+        auto argType = pda.GetArgType(idx);
+        panda_file::File::EntityId klassId;
+        if (!argType.IsPrimitive()) {
+            klassId = pda.GetReferenceType(refIdx++);
         }
-        cb(arg_type, klass_id);
+        cb(argType, klassId);
     }
 }
 
@@ -352,20 +351,20 @@ inline Type MethodDataAccessor::GetReturnType() const
     return pda.GetReturnType();
 }
 
-inline uint32_t MethodDataAccessor::GetNumericalAnnotation(uint32_t field_id)
+inline uint32_t MethodDataAccessor::GetNumericalAnnotation(uint32_t fieldId)
 {
     static constexpr uint32_t NUM_ELEMENT = 3;
-    static std::array<const char *, NUM_ELEMENT> elem_name_table = {"icSize", "parameterLength", "funcName"};
+    static std::array<const char *, NUM_ELEMENT> elemNameTable = {"icSize", "parameterLength", "funcName"};
     uint32_t result = 0;
-    EnumerateAnnotations([&](File::EntityId annotation_id) {
-        AnnotationDataAccessor ada(panda_file_, annotation_id);
-        auto *annotation_name = reinterpret_cast<const char *>(panda_file_.GetStringData(ada.GetClassId()).data);
-        if (::strcmp("L_ESAnnotation;", annotation_name) == 0) {
-            uint32_t elem_count = ada.GetCount();
-            for (uint32_t i = 0; i < elem_count; i++) {
+    EnumerateAnnotations([&](File::EntityId annotationId) {
+        AnnotationDataAccessor ada(pandaFile_, annotationId);
+        auto *annotationName = reinterpret_cast<const char *>(pandaFile_.GetStringData(ada.GetClassId()).data);
+        if (::strcmp("L_ESAnnotation;", annotationName) == 0) {
+            uint32_t elemCount = ada.GetCount();
+            for (uint32_t i = 0; i < elemCount; i++) {
                 AnnotationDataAccessor::Elem adae = ada.GetElement(i);
-                auto *elem_name = reinterpret_cast<const char *>(panda_file_.GetStringData(adae.GetNameId()).data);
-                if (::strcmp(elem_name_table[field_id], elem_name) == 0) {
+                auto *elemName = reinterpret_cast<const char *>(pandaFile_.GetStringData(adae.GetNameId()).data);
+                if (::strcmp(elemNameTable[fieldId], elemName) == 0) {
                     result = adae.GetScalarValue().GetValue();
                 }
             }
@@ -376,11 +375,10 @@ inline uint32_t MethodDataAccessor::GetNumericalAnnotation(uint32_t field_id)
 
 inline std::string MethodDataAccessor::GetFullName() const
 {
-    uint32_t str_offset =
-        const_cast<MethodDataAccessor *>(this)->GetNumericalAnnotation(AnnotationField::FUNCTION_NAME);
-    if (str_offset != 0) {
-        auto cname = panda_file::ClassDataAccessor(panda_file_, GetClassId()).DemangledName();
-        auto mname = utf::Mutf8AsCString(panda_file_.GetStringData(panda_file::File::EntityId(str_offset)).data);
+    uint32_t strOffset = const_cast<MethodDataAccessor *>(this)->GetNumericalAnnotation(AnnotationField::FUNCTION_NAME);
+    if (strOffset != 0) {
+        auto cname = panda_file::ClassDataAccessor(pandaFile_, GetClassId()).DemangledName();
+        auto mname = utf::Mutf8AsCString(pandaFile_.GetStringData(panda_file::File::EntityId(strOffset)).data);
         return cname + "::" + mname;
     }
     return utf::Mutf8AsCString(GetName().data);

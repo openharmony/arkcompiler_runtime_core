@@ -73,12 +73,12 @@ public:
     FRAME_INFO_GET_FIELD(name, type) \
     FRAME_INFO_SET_FIELD(name, type)
 
-    FRAME_INFO_ATTR(FrameSize, frame_size_);
-    FRAME_INFO_ATTR(SpillsCount, spills_count_);
-    FRAME_INFO_ATTR(CallersOffset, callers_offset_);
-    FRAME_INFO_ATTR(CalleesOffset, callees_offset_);
-    FRAME_INFO_ATTR(FpCallersOffset, fp_callers_offset_);
-    FRAME_INFO_ATTR(FpCalleesOffset, fp_callees_offset_);
+    FRAME_INFO_ATTR(FrameSize, frameSize_);
+    FRAME_INFO_ATTR(SpillsCount, spillsCount_);
+    FRAME_INFO_ATTR(CallersOffset, callersOffset_);
+    FRAME_INFO_ATTR(CalleesOffset, calleesOffset_);
+    FRAME_INFO_ATTR(FpCallersOffset, fpCallersOffset_);
+    FRAME_INFO_ATTR(FpCalleesOffset, fpCalleesOffset_);
     FRAME_INFO_FIELD(PositionedCallers, bool);
     FRAME_INFO_FIELD(PositionedCallees, bool);
     FRAME_INFO_FIELD(CallersRelativeFp, bool);
@@ -143,13 +143,13 @@ public:
 
 private:
     uint32_t fields_ {0};
-    int32_t frame_size_ {0};
-    int16_t spills_count_ {0};
+    int32_t frameSize_ {0};
+    int16_t spillsCount_ {0};
     // Offset to caller registers storage (in words)
-    int16_t callers_offset_ {0};
-    int16_t callees_offset_ {0};
-    int16_t fp_callers_offset_ {0};
-    int16_t fp_callees_offset_ {0};
+    int16_t callersOffset_ {0};
+    int16_t calleesOffset_ {0};
+    int16_t fpCallersOffset_ {0};
+    int16_t fpCalleesOffset_ {0};
 };
 }  // namespace panda::compiler
 

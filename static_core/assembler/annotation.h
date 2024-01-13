@@ -34,12 +34,12 @@ class AnnotationElement;
 
 class AnnotationData {
 public:
-    AnnotationData(std::string_view record_name, std::vector<AnnotationElement> elements)
-        : record_name_(record_name), elements_(std::move(elements))
+    AnnotationData(std::string_view recordName, std::vector<AnnotationElement> elements)
+        : recordName_(recordName), elements_(std::move(elements))
     {
     }
 
-    explicit AnnotationData(std::string_view record_name) : record_name_(record_name) {}
+    explicit AnnotationData(std::string_view recordName) : recordName_(recordName) {}
 
     DEFAULT_MOVE_SEMANTIC(AnnotationData);
     DEFAULT_COPY_SEMANTIC(AnnotationData);
@@ -48,7 +48,7 @@ public:
 
     std::string GetName() const
     {
-        return record_name_;
+        return recordName_;
     }
 
     const std::vector<AnnotationElement> &GetElements() const
@@ -62,7 +62,7 @@ public:
     }
 
 private:
-    std::string record_name_;
+    std::string recordName_;
     std::vector<AnnotationElement> elements_;
 };
 
@@ -499,8 +499,8 @@ private:
 
 class ArrayValue : public Value {
 public:
-    ArrayValue(Type component_type, std::vector<ScalarValue> values)
-        : Value(Type::ARRAY), component_type_(component_type), values_(std::move(values))
+    ArrayValue(Type componentType, std::vector<ScalarValue> values)
+        : Value(Type::ARRAY), componentType_(componentType), values_(std::move(values))
     {
     }
 
@@ -516,11 +516,11 @@ public:
 
     Type GetComponentType() const
     {
-        return component_type_;
+        return componentType_;
     }
 
 private:
-    Type component_type_;
+    Type componentType_;
     std::vector<ScalarValue> values_;
 };
 
@@ -531,8 +531,8 @@ public:
     {
     }
 
-    PANDA_PUBLIC_API AnnotationElement(const AnnotationElement &ann_elem);
-    PANDA_PUBLIC_API AnnotationElement &operator=(const AnnotationElement &ann_elem);
+    PANDA_PUBLIC_API AnnotationElement(const AnnotationElement &annElem);
+    PANDA_PUBLIC_API AnnotationElement &operator=(const AnnotationElement &annElem);
     DEFAULT_MOVE_SEMANTIC(AnnotationElement);
     ~AnnotationElement() = default;
 

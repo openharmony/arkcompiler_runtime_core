@@ -85,12 +85,12 @@ public:
     {
         RemoveFlags(attribute);
 
-        set_attributes_.erase(attribute);
+        setAttributes_.erase(attribute);
     }
 
     bool GetAttribute(const std::string &attribute) const
     {
-        return set_attributes_.find(attribute) != set_attributes_.cend();
+        return setAttributes_.find(attribute) != setAttributes_.cend();
     }
 
     std::optional<Error> SetAttributeValue(std::string_view attribute, std::string_view value)
@@ -128,7 +128,7 @@ public:
 
     const std::unordered_set<std::string> &GetBoolAttributes() const
     {
-        return set_attributes_;
+        return setAttributes_;
     }
 
     const std::unordered_map<std::string, std::vector<std::string>> &GetAttributes() const
@@ -165,7 +165,7 @@ protected:
 
     virtual std::optional<Error> Store(std::string_view attribute)
     {
-        set_attributes_.emplace(attribute);
+        setAttributes_.emplace(attribute);
 
         return {};
     }
@@ -187,7 +187,7 @@ protected:
     std::optional<Error> ValidateSize(std::string_view value) const;
 
 private:
-    std::unordered_set<std::string> set_attributes_;
+    std::unordered_set<std::string> setAttributes_;
     std::unordered_map<std::string, std::vector<std::string>> attributes_;
 };
 
@@ -251,7 +251,7 @@ private:
         void Initialize(std::string_view name)
         {
             name_ = name;
-            is_initialized_ = true;
+            isInitialized_ = true;
         }
 
         void Reset()
@@ -259,8 +259,8 @@ private:
             name_.clear();
             values_.clear();
             type_ = {};
-            component_type_ = {};
-            is_initialized_ = false;
+            componentType_ = {};
+            isInitialized_ = false;
         }
 
         void SetType(Value::Type type)
@@ -271,18 +271,18 @@ private:
         void SetComponentType(Value::Type type)
         {
             ASSERT(type != Value::Type::ARRAY);
-            component_type_ = type;
+            componentType_ = type;
         }
 
         std::optional<Error> AddValue(
             std::string_view value,
-            const std::unordered_map<std::string, std::unique_ptr<AnnotationData>> &annotation_id_map);
+            const std::unordered_map<std::string, std::unique_ptr<AnnotationData>> &annotationIdMap);
 
         AnnotationElement CreateAnnotationElement()
         {
             if (IsArray()) {
                 return AnnotationElement(name_,
-                                         std::make_unique<ArrayValue>(component_type_.value(), std::move(values_)));
+                                         std::make_unique<ArrayValue>(componentType_.value(), std::move(values_)));
             }
 
             return AnnotationElement(name_, std::make_unique<ScalarValue>(values_.front()));
@@ -300,12 +300,12 @@ private:
 
         bool IsComponentTypeSet() const
         {
-            return component_type_.has_value();
+            return componentType_.has_value();
         }
 
         bool IsInitialized() const
         {
-            return is_initialized_;
+            return isInitialized_;
         }
 
         bool IsCompleted() const
@@ -326,10 +326,10 @@ private:
         }
 
     private:
-        bool is_initialized_ {false};
+        bool isInitialized_ {false};
         std::string name_;
         std::optional<Value::Type> type_;
-        std::optional<Value::Type> component_type_;
+        std::optional<Value::Type> componentType_;
         std::vector<ScalarValue> values_;
     };
 
@@ -338,7 +338,7 @@ private:
         void Initialize(std::string_view name)
         {
             name_ = name;
-            is_initialized_ = true;
+            isInitialized_ = true;
         }
 
         void Reset()
@@ -346,7 +346,7 @@ private:
             name_.clear();
             elements_.clear();
             id_ = {};
-            is_initialized_ = false;
+            isInitialized_ = false;
         }
 
         void SetId(std::string_view id)
@@ -382,14 +382,14 @@ private:
 
         bool IsInitialized() const
         {
-            return is_initialized_;
+            return isInitialized_;
         }
 
     private:
         std::string name_;
         std::optional<std::string> id_;
         std::vector<AnnotationElement> elements_;
-        bool is_initialized_ {false};
+        bool isInitialized_ {false};
     };
 
     std::optional<Metadata::Error> MeetExpRecordAttribute(std::string_view attribute, std::string_view value);
@@ -406,77 +406,77 @@ private:
             ResetAnnotationBuilder();
         }
 
-        annotation_builder_.Initialize(name);
+        annotationBuilder_.Initialize(name);
     }
 
     void ResetAnnotationBuilder()
     {
         ASSERT(IsParseAnnotation());
 
-        if (IsParseAnnotationElement() && annotation_element_builder_.IsCompleted()) {
+        if (IsParseAnnotationElement() && annotationElementBuilder_.IsCompleted()) {
             ResetAnnotationElementBuilder();
         }
 
-        if (annotation_builder_.HasId()) {
-            id_map_.insert({annotation_builder_.GetId(), annotation_builder_.CreateAnnotationData()});
+        if (annotationBuilder_.HasId()) {
+            idMap_.insert({annotationBuilder_.GetId(), annotationBuilder_.CreateAnnotationData()});
         } else {
-            annotation_builder_.AddAnnnotationDataToVector(&annotations_);
+            annotationBuilder_.AddAnnnotationDataToVector(&annotations_);
         }
 
-        annotation_builder_.Reset();
+        annotationBuilder_.Reset();
     }
 
     bool IsParseAnnotation() const
     {
-        return annotation_builder_.IsInitialized();
+        return annotationBuilder_.IsInitialized();
     }
 
     void InitializeAnnotationElementBuilder(std::string_view name)
     {
-        if (IsParseAnnotationElement() && annotation_element_builder_.IsCompleted()) {
+        if (IsParseAnnotationElement() && annotationElementBuilder_.IsCompleted()) {
             ResetAnnotationElementBuilder();
         }
 
-        annotation_element_builder_.Initialize(name);
+        annotationElementBuilder_.Initialize(name);
     }
 
     void ResetAnnotationElementBuilder()
     {
         ASSERT(IsParseAnnotationElement());
-        ASSERT(annotation_element_builder_.IsCompleted());
+        ASSERT(annotationElementBuilder_.IsCompleted());
 
-        annotation_builder_.AddElement(annotation_element_builder_.CreateAnnotationElement());
+        annotationBuilder_.AddElement(annotationElementBuilder_.CreateAnnotationElement());
 
-        annotation_element_builder_.Reset();
+        annotationElementBuilder_.Reset();
     }
 
     bool IsParseAnnotationElement() const
     {
-        return annotation_element_builder_.IsInitialized();
+        return annotationElementBuilder_.IsInitialized();
     }
 
-    AnnotationBuilder annotation_builder_;
-    AnnotationElementBuilder annotation_element_builder_;
+    AnnotationBuilder annotationBuilder_;
+    AnnotationElementBuilder annotationElementBuilder_;
     std::vector<AnnotationData> annotations_;
-    std::unordered_map<std::string, std::unique_ptr<AnnotationData>> id_map_;
+    std::unordered_map<std::string, std::unique_ptr<AnnotationData>> idMap_;
 };
 
 class ItemMetadata : public AnnotationMetadata {
 public:
     uint32_t GetAccessFlags() const
     {
-        return access_flags_;
+        return accessFlags_;
     }
 
-    void SetAccessFlags(uint32_t access_flags)
+    void SetAccessFlags(uint32_t accessFlags)
     {
-        access_flags_ = access_flags;
+        accessFlags_ = accessFlags;
     }
 
     PANDA_PUBLIC_API bool IsForeign() const;
 
 private:
-    uint32_t access_flags_ {0};
+    uint32_t accessFlags_ {0};
 };
 
 class RecordMetadata : public ItemMetadata {
@@ -511,12 +511,12 @@ class FieldMetadata : public ItemMetadata {
 public:
     void SetFieldType(const Type &type)
     {
-        field_type_ = type;
+        fieldType_ = type;
     }
 
     Type GetFieldType() const
     {
-        return field_type_;
+        return fieldType_;
     }
 
     void SetValue(const ScalarValue &value)
@@ -550,7 +550,7 @@ protected:
     }
 
 private:
-    Type field_type_;
+    Type fieldType_;
     std::optional<ScalarValue> value_;
 };
 

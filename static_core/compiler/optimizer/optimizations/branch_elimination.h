@@ -55,7 +55,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerBranchElimination();
+        return g_options.IsCompilerBranchElimination();
     }
 
     const char *GetPassName() const override
@@ -66,25 +66,24 @@ public:
 
 private:
     bool SkipForOsr(const BasicBlock *block);
-    void VisitBlock(BasicBlock *if_block);
-    void EliminateBranch(BasicBlock *if_block, BasicBlock *eliminated_block);
+    void VisitBlock(BasicBlock *ifBlock);
+    void EliminateBranch(BasicBlock *ifBlock, BasicBlock *eliminatedBlock);
     void MarkUnreachableBlocks(BasicBlock *block);
     void DisconnectBlocks();
     std::optional<bool> GetConditionResult(Inst *condition);
-    std::optional<bool> TryResolveResult(Inst *condition, Inst *dominant_condition, IfImmInst *if_imm_block);
-    void BranchEliminationConst(BasicBlock *if_block);
-    void BranchEliminationCompare(BasicBlock *if_block);
-    void BranchEliminationCompareAnyType(BasicBlock *if_block);
-    std::optional<bool> GetCompareAnyTypeResult(IfImmInst *if_imm);
-    std::optional<bool> TryResolveCompareAnyTypeResult(CompareAnyTypeInst *compare_any,
-                                                       CompareAnyTypeInst *dom_compare_any,
-                                                       IfImmInst *if_imm_dom_block);
+    std::optional<bool> TryResolveResult(Inst *condition, Inst *dominantCondition, IfImmInst *ifImmBlock);
+    void BranchEliminationConst(BasicBlock *ifBlock);
+    void BranchEliminationCompare(BasicBlock *ifBlock);
+    void BranchEliminationCompareAnyType(BasicBlock *ifBlock);
+    std::optional<bool> GetCompareAnyTypeResult(IfImmInst *ifImm);
+    std::optional<bool> TryResolveCompareAnyTypeResult(CompareAnyTypeInst *compareAny,
+                                                       CompareAnyTypeInst *domCompareAny, IfImmInst *ifImmDomBlock);
 
 private:
-    bool is_applied_ {false};
-    Marker rm_block_marker_ {UNDEF_MARKER};
-    ArenaUnorderedMap<ConditionOps, InstVector, CcHash, CcEqual> same_input_compares_;
-    ArenaUnorderedMap<Inst *, ArenaVector<CompareAnyTypeInst *>> same_input_compare_any_type_;
+    bool isApplied_ {false};
+    Marker rmBlockMarker_ {UNDEF_MARKER};
+    ArenaUnorderedMap<ConditionOps, InstVector, CcHash, CcEqual> sameInputCompares_;
+    ArenaUnorderedMap<Inst *, ArenaVector<CompareAnyTypeInst *>> sameInputCompareAnyType_;
 };
 
 }  // namespace panda::compiler

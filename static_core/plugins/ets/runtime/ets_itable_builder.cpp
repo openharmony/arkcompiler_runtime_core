@@ -38,18 +38,18 @@ static Method *FindMethodInVTable(Class *klass, Method *method)
 // interfaces of a superclass (they are located before others)
 // self interfaces and interfaces of self interfaces
 // add methods if it's not an interface (methods are located only for classes)
-void EtsITableBuilder::Build(ClassLinker *class_linker, Class *base, Span<Class *> class_interfaces, bool is_interface)
+void EtsITableBuilder::Build(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces, bool isInterface)
 {
     PandaUnorderedSet<Class *> interfaces;
 
     if (base != nullptr) {
-        auto super_itable = base->GetITable().Get();
-        for (auto item : super_itable) {
+        auto superItable = base->GetITable().Get();
+        for (auto item : superItable) {
             interfaces.insert(item.GetInterface());
         }
     }
 
-    for (auto interface : class_interfaces) {
+    for (auto interface : classInterfaces) {
         auto table = interface->GetITable().Get();
         for (auto item : table) {
             interfaces.insert(item.GetInterface());
@@ -57,7 +57,7 @@ void EtsITableBuilder::Build(ClassLinker *class_linker, Class *base, Span<Class 
         interfaces.insert(interface);
     }
 
-    auto allocator = class_linker->GetAllocator();
+    auto allocator = classLinker->GetAllocator();
     ITable::Entry *array = nullptr;
     if (!interfaces.empty()) {
         array = allocator->AllocArray<ITable::Entry>(interfaces.size());
@@ -70,21 +70,21 @@ void EtsITableBuilder::Build(ClassLinker *class_linker, Class *base, Span<Class 
     }
 
     if (base != nullptr) {
-        auto super_itable = base->GetITable().Get();
-        for (size_t i = 0; i < super_itable.size(); i++) {
-            itable[i] = super_itable[i].Copy(allocator);
-            interfaces.erase(super_itable[i].GetInterface());
+        auto superItable = base->GetITable().Get();
+        for (size_t i = 0; i < superItable.size(); i++) {
+            itable[i] = superItable[i].Copy(allocator);
+            interfaces.erase(superItable[i].GetInterface());
         }
     }
 
-    size_t super_itable_size = 0;
+    size_t superItableSize = 0;
     if (base != nullptr) {
-        super_itable_size = base->GetITable().Size();
+        superItableSize = base->GetITable().Size();
     }
 
-    size_t shift = super_itable_size;
+    size_t shift = superItableSize;
 
-    for (auto interface : class_interfaces) {
+    for (auto interface : classInterfaces) {
         auto table = interface->GetITable().Get();
         for (auto &item : table) {
             auto iterator = interfaces.find(item.GetInterface());
@@ -104,16 +104,16 @@ void EtsITableBuilder::Build(ClassLinker *class_linker, Class *base, Span<Class 
 
     ASSERT(interfaces.empty());
 
-    if (!is_interface) {
-        for (size_t i = super_itable_size; i < itable.Size(); i++) {
+    if (!isInterface) {
+        for (size_t i = superItableSize; i < itable.Size(); i++) {
             auto &entry = itable[i];
             auto methods = entry.GetInterface()->GetVirtualMethods();
-            Method **methods_alloc = nullptr;
+            Method **methodsAlloc = nullptr;
             if (!methods.Empty()) {
-                methods_alloc = allocator->AllocArray<Method *>(methods.size());
+                methodsAlloc = allocator->AllocArray<Method *>(methods.size());
             }
-            Span<Method *> methods_array = {methods_alloc, methods.size()};
-            entry.SetMethods(methods_array);
+            Span<Method *> methodsArray = {methodsAlloc, methods.size()};
+            entry.SetMethods(methodsArray);
         }
     }
 
@@ -151,15 +151,15 @@ void EtsITableBuilder::DumpITable([[maybe_unused]] Class *klass)
 #ifndef NDEBUG
     LOG(DEBUG, CLASS_LINKER) << "itable of class " << klass->GetName() << ":";
     auto itable = klass->GetITable();
-    size_t idx_i = 0;
-    size_t idx_m = 0;
+    size_t idxI = 0;
+    size_t idxM = 0;
     for (size_t i = 0; i < itable.Size(); i++) {
         auto entry = itable[i];
         auto interface = entry.GetInterface();
-        LOG(DEBUG, CLASS_LINKER) << "[ interface - " << idx_i++ << " ] " << interface->GetName() << ":";
+        LOG(DEBUG, CLASS_LINKER) << "[ interface - " << idxI++ << " ] " << interface->GetName() << ":";
         auto methods = entry.GetMethods();
         for (auto *method : methods) {
-            LOG(DEBUG, CLASS_LINKER) << "[ method - " << idx_m++ << " ] " << method->GetFullName() << " - "
+            LOG(DEBUG, CLASS_LINKER) << "[ method - " << idxM++ << " ] " << method->GetFullName() << " - "
                                      << method->GetFileId().GetOffset();
         }
     }

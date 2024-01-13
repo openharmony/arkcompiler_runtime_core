@@ -111,7 +111,7 @@ public:
      * @return true if it was interrupted; false otherwise
      */
     PANDA_PUBLIC_API static State Wait(ObjectHeader *obj, ThreadStatus status, uint64_t timeout, uint64_t nanos,
-                                       bool ignore_interruption = false);
+                                       bool ignoreInterruption = false);
 
     static State Notify(ObjectHeader *obj);
 
@@ -146,7 +146,7 @@ public:
 
     static Monitor *GetMonitorFromObject(ObjectHeader *obj);
 
-    static void TraceMonitorLock(ObjectHeader *obj, bool is_wait);
+    static void TraceMonitorLock(ObjectHeader *obj, bool isWait);
 
     static void TraceMonitorUnLock();
 
@@ -171,7 +171,7 @@ public:
     }
 
     // Public constructor is needed for allocator
-    explicit Monitor(MonitorId id) : id_(id), owner_(), hash_code_(0), waiters_counter_(0)
+    explicit Monitor(MonitorId id) : id_(id), owner_(), hashCode_(0), waitersCounter_(0)
     {
         // Atomic with relaxed order reason: memory access in monitor
         owner_.store(nullptr, std::memory_order_relaxed);
@@ -186,15 +186,15 @@ private:
     // current Monitor::Notify implementation relies on the fact that reference to MTManagedThread is still valid
     // when PopFront is called.
     ThreadList<MTManagedThread> waiters_;
-    ThreadList<MTManagedThread> to_wakeup_;
-    uint64_t recursive_counter_ {0};
+    ThreadList<MTManagedThread> toWakeup_;
+    uint64_t recursiveCounter_ {0};
     os::memory::Mutex lock_;
-    std::atomic<uint32_t> hash_code_;
-    std::atomic<uint32_t> waiters_counter_;
+    std::atomic<uint32_t> hashCode_;
+    std::atomic<uint32_t> waitersCounter_;
 
     // NO_THREAD_SAFETY_ANALYSIS for monitor->lock_
     // Some more information in the issue #1662
-    bool Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &obj_handle,
+    bool Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &objHandle,
                  bool trylock) NO_THREAD_SAFETY_ANALYSIS;
 
     void InitWithOwner(MTManagedThread *thread, ObjectHeader *obj) NO_THREAD_SAFETY_ANALYSIS;

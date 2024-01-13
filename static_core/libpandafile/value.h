@@ -25,7 +25,7 @@ namespace panda::panda_file {
 
 class ScalarValue {
 public:
-    ScalarValue(const File &panda_file, uint32_t value) : panda_file_(panda_file), value_(value) {}
+    ScalarValue(const File &pandaFile, uint32_t value) : pandaFile_(pandaFile), value_(value) {}
 
     ~ScalarValue() = default;
 
@@ -49,7 +49,7 @@ public:
         }
 
         File::EntityId id(value_);
-        auto sp = panda_file_.GetSpanFromId(id);
+        auto sp = pandaFile_.GetSpanFromId(id);
         auto res = helpers::Read<T_SIZE>(&sp);
 
         if constexpr (std::is_floating_point_v<T>) {  // NOLINT
@@ -65,15 +65,15 @@ public:
     }
 
 private:
-    const File &panda_file_;
+    const File &pandaFile_;
     uint32_t value_;
 };
 
 class ArrayValue {
 public:
-    ArrayValue(const File &panda_file, File::EntityId id) : panda_file_(panda_file), id_(id)
+    ArrayValue(const File &pandaFile, File::EntityId id) : pandaFile_(pandaFile), id_(id)
     {
-        auto sp = panda_file_.GetSpanFromId(id_);
+        auto sp = pandaFile_.GetSpanFromId(id_);
         count_ = helpers::ReadULeb128(&sp);
         data_ = sp;
     }
@@ -113,7 +113,7 @@ public:
 private:
     static constexpr size_t COUNT_SIZE = sizeof(uint32_t);
 
-    const File &panda_file_;
+    const File &pandaFile_;
     File::EntityId id_;
     uint32_t count_;
     Span<const uint8_t> data_ {nullptr, nullptr};

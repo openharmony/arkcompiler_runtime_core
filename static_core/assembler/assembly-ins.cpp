@@ -18,7 +18,7 @@
 
 namespace panda::pandasm {
 
-std::string panda::pandasm::Ins::RegsToString(bool &first, bool print_args, size_t first_arg_idx) const
+std::string panda::pandasm::Ins::RegsToString(bool &first, bool printArgs, size_t firstArgIdx) const
 {
     std::stringstream translator;
     for (const auto &reg : this->regs) {
@@ -28,8 +28,8 @@ std::string panda::pandasm::Ins::RegsToString(bool &first, bool print_args, size
             first = false;
         }
 
-        if (print_args && reg >= first_arg_idx) {
-            translator << " a" << reg - first_arg_idx;
+        if (printArgs && reg >= firstArgIdx) {
+            translator << " a" << reg - firstArgIdx;
         } else {
             translator << " v" << reg;
         }
@@ -73,18 +73,17 @@ std::string panda::pandasm::Ins::IdsToString(bool &first) const
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::OperandsToString(bool print_args, size_t first_arg_idx) const
+std::string panda::pandasm::Ins::OperandsToString(bool printArgs, size_t firstArgIdx) const
 {
     bool first = true;
     std::stringstream ss {};
 
-    ss << this->RegsToString(first, print_args, first_arg_idx) << this->ImmsToString(first) << this->IdsToString(first);
+    ss << this->RegsToString(first, printArgs, firstArgIdx) << this->ImmsToString(first) << this->IdsToString(first);
 
     return ss.str();
 }
 
-std::string panda::pandasm::Ins::RegToString(const size_t idx, bool is_first, bool print_args,
-                                             size_t first_arg_idx) const
+std::string panda::pandasm::Ins::RegToString(const size_t idx, bool isFirst, bool printArgs, size_t firstArgIdx) const
 {
     if (idx >= regs.size()) {
         return std::string("");
@@ -92,14 +91,14 @@ std::string panda::pandasm::Ins::RegToString(const size_t idx, bool is_first, bo
 
     std::stringstream translator;
 
-    if (!is_first) {
+    if (!isFirst) {
         translator << ", ";
     } else {
         translator << " ";
     }
 
-    if (print_args && regs[idx] >= first_arg_idx) {
-        translator << "a" << regs[idx] - first_arg_idx;
+    if (printArgs && regs[idx] >= firstArgIdx) {
+        translator << "a" << regs[idx] - firstArgIdx;
     } else {
         translator << "v" << regs[idx];
     }
@@ -107,7 +106,7 @@ std::string panda::pandasm::Ins::RegToString(const size_t idx, bool is_first, bo
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::ImmToString(const size_t idx, bool is_first) const
+std::string panda::pandasm::Ins::ImmToString(const size_t idx, bool isFirst) const
 {
     if (idx >= imms.size()) {
         return std::string("");
@@ -116,7 +115,7 @@ std::string panda::pandasm::Ins::ImmToString(const size_t idx, bool is_first) co
     auto *number = std::get_if<double>(&(imms[idx]));
     std::stringstream translator;
 
-    if (!is_first) {
+    if (!isFirst) {
         translator << ", ";
     } else {
         translator << " ";
@@ -131,7 +130,7 @@ std::string panda::pandasm::Ins::ImmToString(const size_t idx, bool is_first) co
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::IdToString(const size_t idx, bool is_first) const
+std::string panda::pandasm::Ins::IdToString(const size_t idx, bool isFirst) const
 {
     if (idx >= ids.size()) {
         return std::string("");
@@ -139,7 +138,7 @@ std::string panda::pandasm::Ins::IdToString(const size_t idx, bool is_first) con
 
     std::stringstream translator;
 
-    if (!is_first) {
+    if (!isFirst) {
         translator << ", ";
     } else {
         translator << " ";

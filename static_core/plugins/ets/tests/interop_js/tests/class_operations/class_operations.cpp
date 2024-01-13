@@ -22,7 +22,7 @@ class EtsInteropClassOperationsTest : public EtsInteropTest {
 public:
     void SetUp() override
     {
-        interop_js_test_path_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
+        interopJsTestPath_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
         // This object is used to save global js names
         if (!RunJsScript("var gtest_env = {};\n")) {
             std::abort();

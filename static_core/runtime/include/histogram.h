@@ -30,8 +30,8 @@ namespace panda {
 template <class Value>
 class SimpleHistogram {
 public:
-    explicit SimpleHistogram(helpers::ValueType type_of_value = helpers::ValueType::VALUE_TYPE_OBJECT)
-        : type_of_value_(type_of_value)
+    explicit SimpleHistogram(helpers::ValueType typeOfValue = helpers::ValueType::VALUE_TYPE_OBJECT)
+        : typeOfValue_(typeOfValue)
     {
     }
 
@@ -42,7 +42,7 @@ public:
      */
     template <class ForwardIterator>
     SimpleHistogram(ForwardIterator start, ForwardIterator finish,
-                    helpers::ValueType type_of_value = helpers::ValueType::VALUE_TYPE_OBJECT);
+                    helpers::ValueType typeOfValue = helpers::ValueType::VALUE_TYPE_OBJECT);
 
     /**
      *  @brief Output the General statistics of Histogram
@@ -87,7 +87,7 @@ public:
 
     double GetDispersion() const
     {
-        return sum_of_squares_ / static_cast<double>(count_) - GetAvg() * GetAvg();
+        return sumOfSquares_ / static_cast<double>(count_) - GetAvg() * GetAvg();
     }
 
     ~SimpleHistogram() = default;
@@ -98,10 +98,10 @@ public:
 private:
     size_t count_ = 0;
     Value sum_ {};
-    Value sum_of_squares_ {};
+    Value sumOfSquares_ {};
     Value min_ {};
     Value max_ {};
-    helpers::ValueType type_of_value_;
+    helpers::ValueType typeOfValue_;
 };
 
 /**
@@ -111,8 +111,8 @@ private:
 template <class Value>
 class Histogram : public SimpleHistogram<Value> {
 public:
-    explicit Histogram(helpers::ValueType type_of_value = helpers::ValueType::VALUE_TYPE_OBJECT)
-        : SimpleHistogram<Value>(type_of_value)
+    explicit Histogram(helpers::ValueType typeOfValue = helpers::ValueType::VALUE_TYPE_OBJECT)
+        : SimpleHistogram<Value>(typeOfValue)
     {
     }
 
@@ -123,7 +123,7 @@ public:
      */
     template <class ForwardIterator>
     Histogram(ForwardIterator start, ForwardIterator finish,
-              helpers::ValueType type_of_value = helpers::ValueType::VALUE_TYPE_OBJECT);
+              helpers::ValueType typeOfValue = helpers::ValueType::VALUE_TYPE_OBJECT);
 
     /**
      *  @brief Output the first @param count_top of the lowest values by key
@@ -131,7 +131,7 @@ public:
      *  @param count_top Number of first values to output
      *  @return PandaString with in format: "[key:count[,]]*"
      */
-    PandaString GetTopDump(size_t count_top = DEFAULT_TOP_SIZE) const;
+    PandaString GetTopDump(size_t countTop = DEFAULT_TOP_SIZE) const;
 
     /**
      *  @brief Add @param element to statistics @param number of times

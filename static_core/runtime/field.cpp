@@ -24,18 +24,18 @@ namespace panda {
 
 panda_file::File::StringData Field::GetName() const
 {
-    const auto *panda_file = GetPandaFile();
-    auto name_id = panda_file::FieldDataAccessor::GetNameId(*panda_file, file_id_);
-    return panda_file->GetStringData(name_id);
+    const auto *pandaFile = GetPandaFile();
+    auto nameId = panda_file::FieldDataAccessor::GetNameId(*pandaFile, fileId_);
+    return pandaFile->GetStringData(nameId);
 }
 
-Class *Field::ResolveTypeClass(ClassLinkerErrorHandler *error_handler) const
+Class *Field::ResolveTypeClass(ClassLinkerErrorHandler *errorHandler) const
 {
-    const auto *panda_file = GetPandaFile();
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    const auto *pandaFile = GetPandaFile();
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*GetClass());
-    auto *ext = class_linker->GetExtension(ctx);
+    auto *ext = classLinker->GetExtension(ctx);
     ASSERT(ext != nullptr);
 
     switch (GetTypeId()) {
@@ -64,8 +64,8 @@ Class *Field::ResolveTypeClass(ClassLinkerErrorHandler *error_handler) const
         case panda_file::Type::TypeId::TAGGED:
             return ext->GetClassRoot(ClassRoot::TAGGED);
         case panda_file::Type::TypeId::REFERENCE:
-            return ext->GetClass(*panda_file, panda_file::FieldDataAccessor::GetTypeId(*panda_file, file_id_),
-                                 GetClass()->GetLoadContext(), error_handler);
+            return ext->GetClass(*pandaFile, panda_file::FieldDataAccessor::GetTypeId(*pandaFile, fileId_),
+                                 GetClass()->GetLoadContext(), errorHandler);
         default:
             UNREACHABLE();
     }

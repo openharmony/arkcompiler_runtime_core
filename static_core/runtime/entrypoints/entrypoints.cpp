@@ -107,17 +107,17 @@ extern "C" NO_ADDRESS_SANITIZE void InterpreterEntryPoint(Method *method, Frame 
         UNREACHABLE();
     }
 
-    Frame *prev_frame = thread->GetCurrentFrame();
+    Frame *prevFrame = thread->GetCurrentFrame();
     thread->SetCurrentFrame(frame);
 
-    auto is_compiled_code = thread->IsCurrentFrameCompiled();
+    auto isCompiledCode = thread->IsCurrentFrameCompiled();
     thread->SetCurrentFrameIsCompiled(false);
     interpreter::Execute(thread, pc, frame);
-    thread->SetCurrentFrameIsCompiled(is_compiled_code);
-    if (prev_frame != nullptr && reinterpret_cast<uintptr_t>(prev_frame->GetMethod()) == COMPILED_CODE_TO_INTERPRETER) {
-        thread->SetCurrentFrame(prev_frame->GetPrevFrame());
+    thread->SetCurrentFrameIsCompiled(isCompiledCode);
+    if (prevFrame != nullptr && reinterpret_cast<uintptr_t>(prevFrame->GetMethod()) == COMPILED_CODE_TO_INTERPRETER) {
+        thread->SetCurrentFrame(prevFrame->GetPrevFrame());
     } else {
-        thread->SetCurrentFrame(prev_frame);
+        thread->SetCurrentFrame(prevFrame);
     }
 }
 
@@ -143,11 +143,11 @@ extern "C" void WriteTlabStatsEntrypoint([[maybe_unused]] void const *mem, size_
     [[maybe_unused]] auto tlab = reinterpret_cast<size_t>(ManagedThread::GetCurrent()->GetTLAB());
     EVENT_TLAB_ALLOC(ManagedThread::GetCurrent()->GetId(), tlab, reinterpret_cast<size_t>(mem), size);
     if (mem::PANDA_TRACK_TLAB_ALLOCATIONS) {
-        auto mem_stats = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetMemStats();
-        if (mem_stats == nullptr) {
+        auto memStats = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetMemStats();
+        if (memStats == nullptr) {
             return;
         }
-        mem_stats->RecordAllocateObject(size, SpaceType::SPACE_TYPE_OBJECT);
+        memStats->RecordAllocateObject(size, SpaceType::SPACE_TYPE_OBJECT);
     }
 }
 
@@ -161,7 +161,7 @@ extern "C" coretypes::Array *CreateArraySlowPathEntrypoint(Class *klass, size_t 
         HandlePendingException();
         UNREACHABLE();
     }
-    if (compiler::OPTIONS.IsCompilerEnableTlabEvents()) {
+    if (compiler::g_options.IsCompilerEnableTlabEvents()) {
         EVENT_SLOWPATH_ALLOC(ManagedThread::GetCurrent()->GetId());
     }
     return arr;
@@ -171,18 +171,18 @@ extern "C" coretypes::Array *CreateMultiArrayRecEntrypoint(ManagedThread *thread
                                                            size_t *sizes, uint32_t num)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,-warnings-as-errors)
-    auto arr_size = sizes[num];
+    auto arrSize = sizes[num];
 
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     // SUPPRESS_CSA_NEXTLINE(alpha.core.CheckObjHeaderTypeRef)
-    VMHandle<coretypes::Array> handle(thread, coretypes::Array::Create(klass, arr_size));
+    VMHandle<coretypes::Array> handle(thread, coretypes::Array::Create(klass, arrSize));
     if (handle.GetPtr() == nullptr) {
         return nullptr;
     }
     auto *component = klass->GetComponentType();
 
     if (component->IsArrayClass() && num + 1 < nargs) {
-        for (size_t idx = 0; idx < arr_size; idx++) {
+        for (size_t idx = 0; idx < arrSize; idx++) {
             auto *array = CreateMultiArrayRecEntrypoint(thread, component, nargs, sizes, num + 1);
 
             if (array == nullptr) {
@@ -235,7 +235,7 @@ extern "C" coretypes::String *CreateStringFromCharsEntrypoint(ObjectHeader *obj)
 
 extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t offset, uint32_t length,
                                                                         ObjectHeader *obj,
-                                                                        [[maybe_unused]] ObjectHeader *string_klass)
+                                                                        [[maybe_unused]] ObjectHeader *stringKlass)
 {
     BEGIN_ENTRYPOINT();
     auto vm = ManagedThread::GetCurrent()->GetVM();
@@ -249,7 +249,7 @@ extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t
 }
 
 extern "C" coretypes::String *CreateStringFromCharsZeroOffsetEntrypoint(uint32_t length, ObjectHeader *obj,
-                                                                        [[maybe_unused]] ObjectHeader *string_klass)
+                                                                        [[maybe_unused]] ObjectHeader *stringKlass)
 {
     BEGIN_ENTRYPOINT();
     auto vm = ManagedThread::GetCurrent()->GetVM();
@@ -268,8 +268,8 @@ extern "C" coretypes::String *SubStringFromStringEntrypoint(ObjectHeader *obj, i
 
     auto vm = ManagedThread::GetCurrent()->GetVM();
     auto indexes = coretypes::String::NormalizeSubStringIndexes(begin, end, static_cast<coretypes::String *>(obj));
-    auto substr_length = indexes.second - indexes.first;
-    auto substr = coretypes::String::FastSubString(static_cast<coretypes::String *>(obj), indexes.first, substr_length,
+    auto substrLength = indexes.second - indexes.first;
+    auto substr = coretypes::String::FastSubString(static_cast<coretypes::String *>(obj), indexes.first, substrLength,
                                                    vm->GetLanguageContext(), vm);
     if (UNLIKELY(substr == nullptr)) {
         HandlePendingException();
@@ -279,7 +279,7 @@ extern "C" coretypes::String *SubStringFromStringEntrypoint(ObjectHeader *obj, i
 }
 
 extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t begin, int32_t end,
-                                                      [[maybe_unused]] ObjectHeader *array_klass)
+                                                      [[maybe_unused]] ObjectHeader *arrayKlass)
 {
     BEGIN_ENTRYPOINT();
 
@@ -304,8 +304,8 @@ extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t
         UNREACHABLE();
     }
     auto vm = ManagedThread::GetCurrent()->GetVM();
-    auto array_length = end - begin;
-    auto array = coretypes::String::GetChars(static_cast<coretypes::String *>(obj), begin, array_length,
+    auto arrayLength = end - begin;
+    auto array = coretypes::String::GetChars(static_cast<coretypes::String *>(obj), begin, arrayLength,
                                              vm->GetLanguageContext());
     if (UNLIKELY(array == nullptr)) {
         HandlePendingException();
@@ -314,11 +314,11 @@ extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t
     return array;
 }
 
-extern "C" coretypes::Array *ResolveLiteralArrayEntrypoint(const Method *caller, uint32_t type_id)
+extern "C" coretypes::Array *ResolveLiteralArrayEntrypoint(const Method *caller, uint32_t typeId)
 {
     BEGIN_ENTRYPOINT();
 
-    auto arr = Runtime::GetCurrent()->ResolveLiteralArray(ManagedThread::GetCurrent()->GetVM(), *caller, type_id);
+    auto arr = Runtime::GetCurrent()->ResolveLiteralArray(ManagedThread::GetCurrent()->GetVM(), *caller, typeId);
     if (UNLIKELY(arr == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -360,7 +360,7 @@ extern "C" ObjectHeader *CreateObjectByClassEntrypoint(Class *klass)
             HandlePendingException();
             UNREACHABLE();
         }
-        if (compiler::OPTIONS.IsCompilerEnableTlabEvents()) {
+        if (compiler::g_options.IsCompilerEnableTlabEvents()) {
             EVENT_SLOWPATH_ALLOC(ManagedThread::GetCurrent()->GetId());
         }
         return obj;
@@ -388,10 +388,10 @@ extern "C" ObjectHeader *PostBarrierWriteEntrypoint(ObjectHeader *obj, size_t si
 {
     LOG_ENTRYPOINT();
     AnnotateSanitizersEntrypoint(obj, size);
-    auto *object_class = obj->ClassAddr<Class>();
-    auto *barrier_set = ManagedThread::GetCurrent()->GetBarrierSet();
-    if (!object_class->IsArrayClass() || !object_class->GetComponentType()->IsPrimitive()) {
-        barrier_set->PostBarrier(obj, 0, size);
+    auto *objectClass = obj->ClassAddr<Class>();
+    auto *barrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
+    if (!objectClass->IsArrayClass() || !objectClass->GetComponentType()->IsPrimitive()) {
+        barrierSet->PostBarrier(obj, 0, size);
     }
     return obj;
 }
@@ -403,9 +403,9 @@ extern "C" void CheckCastEntrypoint(const ObjectHeader *obj, Class *klass)
     // Don't use obj after ClassLinker call because GC can move it.
     // Since we need only class and class in a non-movalble object
     // it is ok to get it here.
-    Class *obj_klass = obj == nullptr ? nullptr : obj->ClassAddr<Class>();
-    if (UNLIKELY(obj_klass != nullptr && !klass->IsAssignableFrom(obj_klass))) {
-        panda::ThrowClassCastException(klass, obj_klass);
+    Class *objKlass = obj == nullptr ? nullptr : obj->ClassAddr<Class>();
+    if (UNLIKELY(objKlass != nullptr && !klass->IsAssignableFrom(objKlass))) {
+        panda::ThrowClassCastException(klass, objKlass);
         HandlePendingException();
         UNREACHABLE();
     }
@@ -418,8 +418,8 @@ extern "C" uint8_t IsInstanceEntrypoint(ObjectHeader *obj, Class *klass)
     // Don't use obj after ClassLinker call because GC can move it.
     // Since we need only class and class in a non-movalble object
     // it is ok to get it here.
-    Class *obj_klass = obj == nullptr ? nullptr : obj->ClassAddr<Class>();
-    if (UNLIKELY(obj_klass != nullptr && klass->IsAssignableFrom(obj_klass))) {
+    Class *objKlass = obj == nullptr ? nullptr : obj->ClassAddr<Class>();
+    if (UNLIKELY(objKlass != nullptr && klass->IsAssignableFrom(objKlass))) {
         return 1;
     }
     return 0;
@@ -431,18 +431,18 @@ extern "C" void SafepointEntrypoint()
     interpreter::RuntimeInterface::Safepoint();
 }
 
-extern "C" ObjectHeader *ResolveClassObjectEntrypoint(const Method *caller, FileEntityId type_id)
+extern "C" ObjectHeader *ResolveClassObjectEntrypoint(const Method *caller, FileEntityId typeId)
 {
     BEGIN_ENTRYPOINT();
-    auto klass = reinterpret_cast<Class *>(ResolveClassEntrypoint(caller, type_id));
+    auto klass = reinterpret_cast<Class *>(ResolveClassEntrypoint(caller, typeId));
     return klass->GetManagedObject();
 }
 
-extern "C" void *ResolveClassEntrypoint(const Method *caller, FileEntityId type_id)
+extern "C" void *ResolveClassEntrypoint(const Method *caller, FileEntityId typeId)
 {
     BEGIN_ENTRYPOINT();
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    Class *klass = class_linker->GetClass(*caller, panda_file::File::EntityId(type_id));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    Class *klass = classLinker->GetClass(*caller, panda_file::File::EntityId(typeId));
     if (UNLIKELY(klass == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -461,7 +461,7 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
 {
     BEGIN_ENTRYPOINT();
     auto runtime = Runtime::GetCurrent();
-    auto aot_manager = runtime->GetClassLinker()->GetAotManager();
+    auto aotManager = runtime->GetClassLinker()->GetAotManager();
     auto vm = ManagedThread::GetCurrent()->GetVM();
     auto str = runtime->ResolveStringFromCompiledCode(vm, *caller, panda::panda_file::File::EntityId(id));
     if (UNLIKELY(str == nullptr)) {
@@ -469,7 +469,7 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
     }
 
     // to many strings were saved to slots, so simply return the resolved string
-    if (aot_manager->GetAotStringRootsCount() >= Runtime::GetOptions().GetAotStringGcRootsLimit()) {
+    if (aotManager->GetAotStringRootsCount() >= Runtime::GetOptions().GetAotStringGcRootsLimit()) {
         return str;
     }
 
@@ -477,22 +477,22 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
 
     // Atomic with acquire order reason: data race with slot with dependecies on reads after the load which should
     // become visible
-    auto counter_val = counter->load(std::memory_order_acquire);
-    if (counter_val >= compiler::RuntimeInterface::RESOLVE_STRING_AOT_COUNTER_LIMIT - 1) {
+    auto counterVal = counter->load(std::memory_order_acquire);
+    if (counterVal >= compiler::RuntimeInterface::RESOLVE_STRING_AOT_COUNTER_LIMIT - 1) {
         return str;
     }
 
-    if (counter_val < Runtime::GetOptions().GetResolveStringAotThreshold()) {
+    if (counterVal < Runtime::GetOptions().GetResolveStringAotThreshold()) {
         // try to update counter, but ignore result - in the worst case we'll save
         // string's pointer to slot a bit later
-        counter->compare_exchange_strong(counter_val, counter_val + 1, std::memory_order_release,
+        counter->compare_exchange_strong(counterVal, counterVal + 1, std::memory_order_release,
                                          std::memory_order_relaxed);
     } else {
         // try to replace the counter with string pointer and register the slot as GC root in case of success
-        if (counter->compare_exchange_strong(counter_val, static_cast<uint32_t>(reinterpret_cast<uint64_t>(str)),
+        if (counter->compare_exchange_strong(counterVal, static_cast<uint32_t>(reinterpret_cast<uint64_t>(str)),
                                              std::memory_order_release, std::memory_order_relaxed)) {
-            bool is_young = vm->GetHeapManager()->IsObjectInYoungSpace(str);
-            aot_manager->RegisterAotStringRoot(slot, is_young);
+            bool isYoung = vm->GetHeapManager()->IsObjectInYoungSpace(str);
+            aotManager->RegisterAotStringRoot(slot, isYoung);
             EVENT_AOT_RESOLVE_STRING(ConvertToString(str));
         }
     }
@@ -502,41 +502,41 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
 
 extern "C" Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame *prev)
 {
-    uint32_t ext_sz = EMPTY_EXT_FRAME_DATA_SIZE;
+    uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
     if (LIKELY(method)) {
-        ext_sz = Runtime::GetCurrent()->GetLanguageContext(*method).GetFrameExtSize();
+        extSz = Runtime::GetCurrent()->GetLanguageContext(*method).GetFrameExtSize();
     }
-    size_t alloc_sz = Frame::GetAllocSize(size, ext_sz);
-    Frame *frame = Thread::GetCurrent()->GetVM()->GetHeapManager()->AllocateExtFrame(alloc_sz, ext_sz);
+    size_t allocSz = Frame::GetAllocSize(size, extSz);
+    Frame *frame = Thread::GetCurrent()->GetVM()->GetHeapManager()->AllocateExtFrame(allocSz, extSz);
     if (UNLIKELY(frame == nullptr)) {
         return nullptr;
     }
-    return new (frame) Frame(Frame::ToExt(frame, ext_sz), method, prev, nregs);
+    return new (frame) Frame(Frame::ToExt(frame, extSz), method, prev, nregs);
 }
 
-extern "C" Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t num_actual_args,
+extern "C" Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
                                                    Method *method, Frame *prev)
 {
     auto *thread = ManagedThread::GetCurrent();
-    uint32_t ext_sz = thread->GetVM()->GetFrameExtSize();
-    size_t alloc_sz = Frame::GetAllocSize(size, ext_sz);
-    void *mem = thread->GetStackFrameAllocator()->Alloc(alloc_sz);
+    uint32_t extSz = thread->GetVM()->GetFrameExtSize();
+    size_t allocSz = Frame::GetAllocSize(size, extSz);
+    void *mem = thread->GetStackFrameAllocator()->Alloc(allocSz);
     if (UNLIKELY(mem == nullptr)) {
         return nullptr;
     }
-    return new (Frame::FromExt(mem, ext_sz)) Frame(mem, method, prev, nregs, num_actual_args);
+    return new (Frame::FromExt(mem, extSz)) Frame(mem, method, prev, nregs, numActualArgs);
 }
 
-extern "C" Frame *CreateNativeFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t num_actual_args,
+extern "C" Frame *CreateNativeFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
                                                          Method *method, Frame *prev)
 {
-    uint32_t ext_sz = EMPTY_EXT_FRAME_DATA_SIZE;
-    size_t alloc_sz = Frame::GetAllocSize(size, ext_sz);
-    void *mem = ManagedThread::GetCurrent()->GetStackFrameAllocator()->Alloc(alloc_sz);
+    uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
+    size_t allocSz = Frame::GetAllocSize(size, extSz);
+    void *mem = ManagedThread::GetCurrent()->GetStackFrameAllocator()->Alloc(allocSz);
     if (UNLIKELY(mem == nullptr)) {
         return nullptr;
     }
-    return new (Frame::FromExt(mem, ext_sz)) Frame(mem, method, prev, nregs, num_actual_args);
+    return new (Frame::FromExt(mem, extSz)) Frame(mem, method, prev, nregs, numActualArgs);
 }
 
 template <bool IS_DYNAMIC = false>
@@ -546,15 +546,15 @@ static Frame *CreateFrame(uint32_t nregs, Method *method, Frame *prev)
 }
 
 template <bool IS_DYNAMIC>
-static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t num_actual_args, Method *method, Frame *prev)
+static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev)
 {
     auto frame =
-        CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, num_actual_args, method, prev);
+        CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, numActualArgs, method, prev);
     if (IS_DYNAMIC) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method);
-        coretypes::TaggedValue initial_value = ctx.GetInitialTaggedValue();
+        coretypes::TaggedValue initialValue = ctx.GetInitialTaggedValue();
         for (size_t i = 0; i < nregs; i++) {
-            frame->GetVReg(i).SetValue(initial_value.GetRawData());
+            frame->GetVReg(i).SetValue(initialValue.GetRawData());
         }
         frame->SetDynamic();
     }
@@ -573,18 +573,18 @@ extern "C" Frame *CreateFrameForMethodDyn(Method *method, Frame *prev)
     return CreateFrame<true>(nregs, method, prev);
 }
 
-extern "C" Frame *CreateFrameForMethodWithActualArgs(uint32_t num_actual_args, Method *method, Frame *prev)
+extern "C" Frame *CreateFrameForMethodWithActualArgs(uint32_t numActualArgs, Method *method, Frame *prev)
 {
-    auto nargs = std::max(num_actual_args, method->GetNumArgs());
+    auto nargs = std::max(numActualArgs, method->GetNumArgs());
     auto nregs = nargs + method->GetNumVregs();
-    return CreateFrameWithActualArgs<false>(nregs, num_actual_args, method, prev);
+    return CreateFrameWithActualArgs<false>(nregs, numActualArgs, method, prev);
 }
 
-extern "C" Frame *CreateFrameForMethodWithActualArgsDyn(uint32_t num_actual_args, Method *method, Frame *prev)
+extern "C" Frame *CreateFrameForMethodWithActualArgsDyn(uint32_t numActualArgs, Method *method, Frame *prev)
 {
-    auto nargs = std::max(num_actual_args, method->GetNumArgs());
+    auto nargs = std::max(numActualArgs, method->GetNumArgs());
     auto nregs = nargs + method->GetNumVregs();
-    return CreateFrameWithActualArgs<true>(nregs, num_actual_args, method, prev);
+    return CreateFrameWithActualArgs<true>(nregs, numActualArgs, method, prev);
 }
 
 extern "C" void FreeFrame(Frame *frame)
@@ -593,11 +593,11 @@ extern "C" void FreeFrame(Frame *frame)
     ManagedThread::GetCurrent()->GetStackFrameAllocator()->Free(frame->GetExt());
 }
 
-extern "C" uintptr_t GetStaticFieldAddressEntrypoint(Method *method, uint32_t field_id)
+extern "C" uintptr_t GetStaticFieldAddressEntrypoint(Method *method, uint32_t fieldId)
 {
     BEGIN_ENTRYPOINT();
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = class_linker->GetField(*method, panda_file::File::EntityId(field_id));
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId));
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -607,16 +607,16 @@ extern "C" uintptr_t GetStaticFieldAddressEntrypoint(Method *method, uint32_t fi
     return reinterpret_cast<uintptr_t>(klass) + field->GetOffset();
 }
 
-extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, uint32_t field_id, ObjectHeader *obj)
+extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, uint32_t fieldId, ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
     auto thread = ManagedThread::GetCurrent();
     // One must not use plain ObjectHeader pointer here as GC can move obj.
     // Wrap it in VMHandle.
-    [[maybe_unused]] HandleScope<ObjectHeader *> obj_handle_scope(thread);
-    VMHandle<ObjectHeader> obj_handle(thread, obj);
+    [[maybe_unused]] HandleScope<ObjectHeader *> objHandleScope(thread);
+    VMHandle<ObjectHeader> objHandle(thread, obj);
 
-    auto field = Runtime::GetCurrent()->GetClassLinker()->GetField(*method, panda_file::File::EntityId(field_id));
+    auto field = Runtime::GetCurrent()->GetClassLinker()->GetField(*method, panda_file::File::EntityId(fieldId));
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -626,38 +626,38 @@ extern "C" void UnresolvedStoreStaticBarrieredEntrypoint(Method *method, uint32_
         UNREACHABLE();
     }
 
-    auto *class_ptr = field->GetClass();
-    ASSERT(class_ptr != nullptr);
-    InitializeClassEntrypoint(class_ptr);
+    auto *classPtr = field->GetClass();
+    ASSERT(classPtr != nullptr);
+    InitializeClassEntrypoint(classPtr);
 
     // field_addr = class_ptr + field's offset
-    auto field_addr = reinterpret_cast<uint32_t *>(reinterpret_cast<uintptr_t>(class_ptr) + field->GetOffset());
-    auto *barrier_set = thread->GetBarrierSet();
+    auto fieldAddr = reinterpret_cast<uint32_t *>(reinterpret_cast<uintptr_t>(classPtr) + field->GetOffset());
+    auto *barrierSet = thread->GetBarrierSet();
     // Pre-barrier
-    if (barrier_set->IsPreBarrierEnabled()) {
+    if (barrierSet->IsPreBarrierEnabled()) {
         // Load
         // Atomic with acquire order reason: assume load can be volatile
-        auto current_reference = __atomic_load_n(field_addr, std::memory_order_acquire);
-        barrier_set->PreBarrier(reinterpret_cast<void *>(current_reference));
+        auto currentReference = __atomic_load_n(fieldAddr, std::memory_order_acquire);
+        barrierSet->PreBarrier(reinterpret_cast<void *>(currentReference));
     }
     // Store
     // Atomic with release order reason: assume store can be volatile
-    auto ref = reinterpret_cast<uintptr_t>(obj_handle.GetPtr());
-    ASSERT(sizeof(ref) == 4 || (ref & 0xFFFFFFFF00000000UL) == 0);
-    __atomic_store_n(field_addr, static_cast<uint32_t>(ref), std::memory_order_release);
+    auto ref = reinterpret_cast<uintptr_t>(objHandle.GetPtr());
+    ASSERT(sizeof(ref) == 4U || (ref & 0xFFFFFFFF00000000UL) == 0);
+    __atomic_store_n(fieldAddr, static_cast<uint32_t>(ref), std::memory_order_release);
     // Post-barrier
-    if (!mem::IsEmptyBarrier(barrier_set->GetPostType())) {
-        auto obj_ptr_ptr = reinterpret_cast<uintptr_t>(class_ptr) + Class::GetManagedObjectOffset();
-        auto obj_ptr = *reinterpret_cast<uint32_t *>(obj_ptr_ptr);
-        barrier_set->PostBarrier(reinterpret_cast<void *>(obj_ptr), 0, reinterpret_cast<void *>(ref));
+    if (!mem::IsEmptyBarrier(barrierSet->GetPostType())) {
+        auto objPtrPtr = reinterpret_cast<uintptr_t>(classPtr) + Class::GetManagedObjectOffset();
+        auto objPtr = *reinterpret_cast<uint32_t *>(objPtrPtr);
+        barrierSet->PostBarrier(reinterpret_cast<void *>(objPtr), 0, reinterpret_cast<void *>(ref));
     }
 }
 
-extern "C" uintptr_t GetUnknownStaticFieldMemoryAddressEntrypoint(Method *method, uint32_t field_id, size_t *slot)
+extern "C" uintptr_t GetUnknownStaticFieldMemoryAddressEntrypoint(Method *method, uint32_t fieldId, size_t *slot)
 {
     BEGIN_ENTRYPOINT();
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = class_linker->GetField(*method, panda_file::File::EntityId(field_id));
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId));
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -673,11 +673,11 @@ extern "C" uintptr_t GetUnknownStaticFieldMemoryAddressEntrypoint(Method *method
     return addr;
 }
 
-extern "C" size_t GetFieldOffsetEntrypoint(Method *method, uint32_t field_id)
+extern "C" size_t GetFieldOffsetEntrypoint(Method *method, uint32_t fieldId)
 {
     BEGIN_ENTRYPOINT();
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    auto field = class_linker->GetField(*method, panda_file::File::EntityId(field_id));
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto field = classLinker->GetField(*method, panda_file::File::EntityId(fieldId));
     if (UNLIKELY(field == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -688,8 +688,8 @@ extern "C" size_t GetFieldOffsetEntrypoint(Method *method, uint32_t field_id)
 extern "C" void InitializeClassEntrypoint(Class *klass)
 {
     BEGIN_ENTRYPOINT();
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    if (!klass->IsInitialized() && !class_linker->InitializeClass(ManagedThread::GetCurrent(), klass)) {
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    if (!klass->IsInitialized() && !classLinker->InitializeClass(ManagedThread::GetCurrent(), klass)) {
         HandlePendingException();
         UNREACHABLE();
     }
@@ -698,8 +698,8 @@ extern "C" void InitializeClassEntrypoint(Class *klass)
 extern "C" Class *InitializeClassByIdEntrypoint(const Method *caller, FileEntityId id)
 {
     BEGIN_ENTRYPOINT();
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    Class *klass = class_linker->GetClass(*caller, panda_file::File::EntityId(id));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    Class *klass = classLinker->GetClass(*caller, panda_file::File::EntityId(id));
     if (UNLIKELY(klass == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -728,61 +728,61 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveVirtualCallEntrypoint(const Meth
 }
 
 extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveVirtualCallAotEntrypoint(const Method *caller, ObjectHeader *obj,
-                                                                         size_t callee_id,
-                                                                         [[maybe_unused]] uintptr_t cache_addr)
+                                                                         size_t calleeId,
+                                                                         [[maybe_unused]] uintptr_t cacheAddr)
 {
     BEGIN_ENTRYPOINT();
     // Don't use obj after ClassLinker call because GC can move it.
     // Since we need only class and class in a non-movalble object
     // it is ok to get it here.
-    auto *obj_klass = obj->ClassAddr<Class>();
-    Method *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(callee_id));
+    auto *objKlass = obj->ClassAddr<Class>();
+    Method *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(calleeId));
     if (UNLIKELY(method == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
     }
-    auto *resolved = obj_klass->ResolveVirtualMethod(method);
+    auto *resolved = objKlass->ResolveVirtualMethod(method);
     ASSERT(resolved != nullptr);
 
 #if defined(PANDA_TARGET_ARM64)
     // In arm64, use interface inlineCache
     // NOTE(liyiming): will support x86_64 in future
     // issue #7018
-    auto method_head = obj_klass->GetRawFirstMethodAddr();
-    if (cache_addr == 0 || method_head == nullptr) {
+    auto methodHead = objKlass->GetRawFirstMethodAddr();
+    if (cacheAddr == 0 || methodHead == nullptr) {
         return reinterpret_cast<uintptr_t>(resolved);
     }
 
     constexpr uint32_t METHOD_COMPRESS = 3;
     constexpr uint32_t CACHE_OFFSET_32 = 32;
     constexpr uint32_t CACHE_OFFSET_34 = 34;
-    auto cache = reinterpret_cast<int64_t *>(cache_addr);
-    auto method_resolved = reinterpret_cast<int64_t>(resolved);
-    int64_t method_cache = method_resolved - reinterpret_cast<int64_t>(method_head);
+    auto cache = reinterpret_cast<int64_t *>(cacheAddr);
+    auto methodResolved = reinterpret_cast<int64_t>(resolved);
+    int64_t methodCache = methodResolved - reinterpret_cast<int64_t>(methodHead);
 
-    int64_t method_cache_judge = method_cache >> CACHE_OFFSET_34;  // NOLINT(hicpp-signed-bitwise)
-    if (method_cache_judge != 0 && method_cache_judge != -1) {
+    int64_t methodCacheJudge = methodCache >> CACHE_OFFSET_34;  // NOLINT(hicpp-signed-bitwise)
+    if (methodCacheJudge != 0 && methodCacheJudge != -1) {
         return reinterpret_cast<uintptr_t>(resolved);
     }
-    method_cache = method_cache >> METHOD_COMPRESS;                            // NOLINT(hicpp-signed-bitwise)
-    method_cache = method_cache << CACHE_OFFSET_32;                            // NOLINT(hicpp-signed-bitwise)
-    int64_t save_cache = method_cache | reinterpret_cast<int64_t>(obj_klass);  // NOLINT(hicpp-signed-bitwise)
-    *cache = save_cache;
+    methodCache = methodCache >> METHOD_COMPRESS;                           // NOLINT(hicpp-signed-bitwise)
+    methodCache = methodCache << CACHE_OFFSET_32;                           // NOLINT(hicpp-signed-bitwise)
+    int64_t saveCache = methodCache | reinterpret_cast<int64_t>(objKlass);  // NOLINT(hicpp-signed-bitwise)
+    *cache = saveCache;
 #endif
     return reinterpret_cast<uintptr_t>(resolved);
 }
 
 extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveUnknownVirtualCallEntrypoint(const Method *caller, ObjectHeader *obj,
-                                                                             size_t callee_id, size_t *slot)
+                                                                             size_t calleeId, size_t *slot)
 {
     {
         auto thread = ManagedThread::GetCurrent();
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-        VMHandle<ObjectHeader> handle_obj(thread, obj);
+        VMHandle<ObjectHeader> handleObj(thread, obj);
 
         BEGIN_ENTRYPOINT();
         auto runtime = Runtime::GetCurrent();
-        Method *method = runtime->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(callee_id));
+        Method *method = runtime->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(calleeId));
         if (LIKELY(method != nullptr)) {
             // Cache a method index in vtable
             if (slot != nullptr && (!method->GetClass()->IsInterface() || method->IsDefaultInterfaceMethod())) {
@@ -791,7 +791,7 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveUnknownVirtualCallEntrypoint(con
                 *slot = method->GetVTableIndex() + 1;
             }
 
-            auto *resolved = handle_obj.GetPtr()->ClassAddr<Class>()->ResolveVirtualMethod(method);
+            auto *resolved = handleObj.GetPtr()->ClassAddr<Class>()->ResolveVirtualMethod(method);
             ASSERT(resolved != nullptr);
 
             return reinterpret_cast<uintptr_t>(resolved);
@@ -802,28 +802,28 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveUnknownVirtualCallEntrypoint(con
     UNREACHABLE();
 }
 
-extern "C" void CheckStoreArrayReferenceEntrypoint(coretypes::Array *array, ObjectHeader *store_obj)
+extern "C" void CheckStoreArrayReferenceEntrypoint(coretypes::Array *array, ObjectHeader *storeObj)
 {
     BEGIN_ENTRYPOINT();
     ASSERT(array != nullptr);
-    ASSERT(store_obj != nullptr);
+    ASSERT(storeObj != nullptr);
 
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto *array_class = array->ClassAddr<Class>();
-    auto *element_class = array_class->GetComponentType();
+    auto *arrayClass = array->ClassAddr<Class>();
+    auto *elementClass = arrayClass->GetComponentType();
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (UNLIKELY(!store_obj->IsInstanceOf(element_class))) {
+    if (UNLIKELY(!storeObj->IsInstanceOf(elementClass))) {
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-        panda::ThrowArrayStoreException(array_class, store_obj->ClassAddr<Class>());
+        panda::ThrowArrayStoreException(arrayClass, storeObj->ClassAddr<Class>());
         HandlePendingException();
         UNREACHABLE();
     }
 }
 
-extern "C" Method *GetCalleeMethodEntrypoint(const Method *caller, size_t callee_id)
+extern "C" Method *GetCalleeMethodEntrypoint(const Method *caller, size_t calleeId)
 {
     BEGIN_ENTRYPOINT();
-    auto *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(callee_id));
+    auto *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(calleeId));
     if (UNLIKELY(method == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -832,10 +832,10 @@ extern "C" Method *GetCalleeMethodEntrypoint(const Method *caller, size_t callee
     return method;
 }
 
-extern "C" Method *GetUnknownCalleeMethodEntrypoint(const Method *caller, size_t callee_id, size_t *slot)
+extern "C" Method *GetUnknownCalleeMethodEntrypoint(const Method *caller, size_t calleeId, size_t *slot)
 {
     BEGIN_ENTRYPOINT();
-    auto *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(callee_id));
+    auto *method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*caller, panda_file::File::EntityId(calleeId));
     if (UNLIKELY(method == nullptr)) {
         HandlePendingException();
         UNREACHABLE();
@@ -949,13 +949,13 @@ extern "C" NO_ADDRESS_SANITIZE void NegativeArraySizeExceptionEntrypoint(ssize_t
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
-extern "C" NO_ADDRESS_SANITIZE void ClassCastExceptionEntrypoint(Class *inst_class, ObjectHeader *src_obj)
+extern "C" NO_ADDRESS_SANITIZE void ClassCastExceptionEntrypoint(Class *instClass, ObjectHeader *srcObj)
 {
     BEGIN_ENTRYPOINT();
     LOG(DEBUG, INTEROP) << "ClassCastExceptionEntrypoint \n";
     ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
-    ASSERT(src_obj != nullptr);
-    ThrowClassCastException(inst_class, src_obj->ClassAddr<Class>());
+    ASSERT(srcObj != nullptr);
+    ThrowClassCastException(instClass, srcObj->ClassAddr<Class>());
     SetExceptionEvent(events::ExceptionType::CAST_CHECK);
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
@@ -973,27 +973,27 @@ extern "C" NO_ADDRESS_SANITIZE void StackOverflowExceptionEntrypoint()
     HandlePendingException(UnwindPolicy::SKIP_INLINED);
 }
 
-extern "C" NO_ADDRESS_SANITIZE void DeoptimizeEntrypoint(uint64_t deoptimize_type)
+extern "C" NO_ADDRESS_SANITIZE void DeoptimizeEntrypoint(uint64_t deoptimizeType)
 {
     BEGIN_ENTRYPOINT();
     auto thread = ManagedThread::GetCurrent();
     auto type = static_cast<panda::compiler::DeoptimizeType>(
-        deoptimize_type & ((1U << MinimumBitsToStore(panda::compiler::DeoptimizeType::COUNT)) - 1));
-    [[maybe_unused]] auto inst_id = deoptimize_type >> MinimumBitsToStore(panda::compiler::DeoptimizeType::COUNT);
+        deoptimizeType & ((1U << MinimumBitsToStore(panda::compiler::DeoptimizeType::COUNT)) - 1));
+    [[maybe_unused]] auto instId = deoptimizeType >> MinimumBitsToStore(panda::compiler::DeoptimizeType::COUNT);
     LOG(INFO, INTEROP) << "DeoptimizeEntrypoint (reason: " << panda::compiler::DeoptimizeTypeToString(type)
-                       << ", inst_id: " << inst_id << ")\n";
+                       << ", inst_id: " << instId << ")\n";
 
     EVENT_DEOPTIMIZATION_REASON(std::string(StackWalker::Create(thread).GetMethod()->GetFullName()),
                                 panda::compiler::DeoptimizeTypeToString(type));
 
     ASSERT(!thread->HasPendingException());
     auto stack = StackWalker::Create(thread);
-    Method *destroy_method = nullptr;
+    Method *destroyMethod = nullptr;
     if (type >= panda::compiler::DeoptimizeType::CAUSE_METHOD_DESTRUCTION) {
         // Get pointer to top method
-        destroy_method = StackWalker::Create(thread, UnwindPolicy::SKIP_INLINED).GetMethod();
+        destroyMethod = StackWalker::Create(thread, UnwindPolicy::SKIP_INLINED).GetMethod();
     }
-    Deoptimize(&stack, nullptr, false, destroy_method);
+    Deoptimize(&stack, nullptr, false, destroyMethod);
 }
 
 extern "C" NO_ADDRESS_SANITIZE void ThrowInstantiationErrorEntrypoint(Class *klass)
@@ -1094,9 +1094,9 @@ extern "C" void TraceEntrypoint(size_t pid, ...)
         }
         case TraceId::PRINT_ARG: {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,clang-analyzer-valist.Uninitialized)
-            size_t args_num = va_arg(args, size_t);
+            size_t argsNum = va_arg(args, size_t);
             std::cerr << "[TRACE ARGS] ";
-            for (size_t i = 0; i < args_num; i++) {
+            for (size_t i = 0; i < argsNum; i++) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 std::cerr << i << "=" << va_arg(args, void *) << " ";
             }
@@ -1132,9 +1132,9 @@ extern "C" void FreeFrameInterp(Frame *frame, ManagedThread *current)
     current->GetStackFrameAllocator()->Free(frame->GetExt());
 }
 
-extern "C" void *AllocFrameInterp(ManagedThread *current, size_t alloc_sz)
+extern "C" void *AllocFrameInterp(ManagedThread *current, size_t allocSz)
 {
-    void *mem = current->GetStackFrameAllocator()->Alloc<false>(alloc_sz);
+    void *mem = current->GetStackFrameAllocator()->Alloc<false>(allocSz);
     if (UNLIKELY(mem == nullptr)) {
         current->DisableStackOverflowCheck();
         panda::ThrowStackOverflowException(current);
@@ -1159,17 +1159,17 @@ extern "C" int IsCompiled(const void *entrypoint)
     return static_cast<int>(entrypoint != reinterpret_cast<const void *>(CompiledCodeToInterpreterBridge));
 }
 
-extern "C" size_t GetClassIdEntrypoint(const Method *caller, uint32_t class_id)
+extern "C" size_t GetClassIdEntrypoint(const Method *caller, uint32_t classId)
 {
-    auto resolved_id = caller->GetClass()->ResolveClassIndex(BytecodeId(class_id).AsIndex());
-    return resolved_id.GetOffset();
+    auto resolvedId = caller->GetClass()->ResolveClassIndex(BytecodeId(classId).AsIndex());
+    return resolvedId.GetOffset();
 }
 
-extern "C" coretypes::Array *CreateArrayByIdEntrypoint(ManagedThread *thread, const Method *caller, uint32_t class_id,
+extern "C" coretypes::Array *CreateArrayByIdEntrypoint(ManagedThread *thread, const Method *caller, uint32_t classId,
                                                        int32_t length)
 {
     CHECK_STACK_WALKER;
-    auto *klass = interpreter::RuntimeInterface::ResolveClass<true>(thread, *caller, BytecodeId(class_id));
+    auto *klass = interpreter::RuntimeInterface::ResolveClass<true>(thread, *caller, BytecodeId(classId));
     if (UNLIKELY(klass == nullptr)) {
         return nullptr;
     }
@@ -1178,28 +1178,28 @@ extern "C" coretypes::Array *CreateArrayByIdEntrypoint(ManagedThread *thread, co
 
 template <BytecodeInstruction::Format FORMAT>
 static coretypes::Array *CreateMultiDimArray(ManagedThread *thread, Frame *frame, Class *klass, Method *caller,
-                                             uint32_t method_id, const uint8_t *pc)
+                                             uint32_t methodId, const uint8_t *pc)
 {
-    interpreter::DimIterator<FORMAT> dim_iter {BytecodeInstruction(pc), frame};
-    auto nargs = interpreter::RuntimeInterface::GetMethodArgumentsCount(caller, BytecodeId(method_id));
+    interpreter::DimIterator<FORMAT> dimIter {BytecodeInstruction(pc), frame};
+    auto nargs = interpreter::RuntimeInterface::GetMethodArgumentsCount(caller, BytecodeId(methodId));
     auto obj =
-        coretypes::Array::CreateMultiDimensionalArray<interpreter::DimIterator<FORMAT>>(thread, klass, nargs, dim_iter);
+        coretypes::Array::CreateMultiDimensionalArray<interpreter::DimIterator<FORMAT>>(thread, klass, nargs, dimIter);
     return obj;
 }
 
 extern "C" coretypes::Array *CreateMultiDimensionalArrayById(ManagedThread *thread, Frame *frame, Class *klass,
-                                                             Method *caller, uint32_t method_id, const uint8_t *pc,
-                                                             int32_t format_idx)
+                                                             Method *caller, uint32_t methodId, const uint8_t *pc,
+                                                             int32_t formatIdx)
 {
-    switch (format_idx) {
-        case 0:
-            return CreateMultiDimArray<BytecodeInstruction::Format::V4_V4_ID16>(thread, frame, klass, caller, method_id,
+    switch (formatIdx) {
+        case 0U:
+            return CreateMultiDimArray<BytecodeInstruction::Format::V4_V4_ID16>(thread, frame, klass, caller, methodId,
                                                                                 pc);
-        case 1:
+        case 1U:
             return CreateMultiDimArray<BytecodeInstruction::Format::V4_V4_V4_V4_ID16>(thread, frame, klass, caller,
-                                                                                      method_id, pc);
-        case 2:
-            return CreateMultiDimArray<BytecodeInstruction::Format::V8_ID16>(thread, frame, klass, caller, method_id,
+                                                                                      methodId, pc);
+        case 2U:
+            return CreateMultiDimArray<BytecodeInstruction::Format::V8_ID16>(thread, frame, klass, caller, methodId,
                                                                              pc);
         default:
             UNREACHABLE();
@@ -1213,8 +1213,8 @@ extern "C" ObjectHeader *CreateObjectByClassInterpreter(ManagedThread *thread, C
     ASSERT(!klass->IsArrayClass());
 
     if (!klass->IsInitialized()) {
-        auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-        if (!class_linker->InitializeClass(thread, klass)) {
+        auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        if (!classLinker->InitializeClass(thread, klass)) {
             return nullptr;
         }
     }
@@ -1226,9 +1226,9 @@ extern "C" uint32_t CheckCastByIdEntrypoint(ObjectHeader *obj, Class *klass)
 {
     CHECK_STACK_WALKER;
     ASSERT(IsAddressInObjectsHeapOrNull(obj));
-    Class *obj_klass = obj == nullptr ? nullptr : obj->ClassAddr<Class>();
-    if (UNLIKELY(obj_klass != nullptr && !klass->IsAssignableFrom(obj_klass))) {
-        panda::ThrowClassCastException(klass, obj_klass);
+    Class *objKlass = obj == nullptr ? nullptr : obj->ClassAddr<Class>();
+    if (UNLIKELY(objKlass != nullptr && !klass->IsAssignableFrom(objKlass))) {
+        panda::ThrowClassCastException(klass, objKlass);
         return 1;
     }
     return 0;
@@ -1249,10 +1249,10 @@ extern "C" coretypes::String *ResolveStringByIdEntrypoint(ManagedThread *thread,
 }
 
 extern "C" coretypes::Array *ResolveLiteralArrayByIdEntrypoint(ManagedThread *thread, const Method *caller,
-                                                               uint32_t type_id)
+                                                               uint32_t typeId)
 {
     BEGIN_ENTRYPOINT();
-    return interpreter::RuntimeInterface::ResolveLiteralArray(thread->GetVM(), *caller, BytecodeId(type_id));
+    return interpreter::RuntimeInterface::ResolveLiteralArray(thread->GetVM(), *caller, BytecodeId(typeId));
 }
 
 extern "C" Class *ResolveTypeByIdEntrypoint(ManagedThread *thread, Method *caller, uint32_t id,
@@ -1267,24 +1267,24 @@ extern "C" Class *ResolveTypeByIdEntrypoint(ManagedThread *thread, Method *calle
     return klass;
 }
 
-extern "C" Field *GetFieldByIdEntrypoint([[maybe_unused]] ManagedThread *thread, Method *caller, uint32_t field_id,
+extern "C" Field *GetFieldByIdEntrypoint([[maybe_unused]] ManagedThread *thread, Method *caller, uint32_t fieldId,
                                          InterpreterCache::Entry *entry, const uint8_t *pc)
 {
     CHECK_STACK_WALKER;
-    auto resolved_id = caller->GetClass()->ResolveFieldIndex(BytecodeId(field_id).AsIndex());
-    auto *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    auto *field = class_linker->GetField(*caller, panda_file::File::EntityId(resolved_id));
+    auto resolvedId = caller->GetClass()->ResolveFieldIndex(BytecodeId(fieldId).AsIndex());
+    auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    auto *field = classLinker->GetField(*caller, panda_file::File::EntityId(resolvedId));
     if (field != nullptr) {
         *entry = {pc, caller, static_cast<void *>(field)};
     }
     return field;
 }
 
-extern "C" Field *GetStaticFieldByIdEntrypoint(ManagedThread *thread, Method *caller, uint32_t field_id,
+extern "C" Field *GetStaticFieldByIdEntrypoint(ManagedThread *thread, Method *caller, uint32_t fieldId,
                                                InterpreterCache::Entry *entry, const uint8_t *pc)
 {
     CHECK_STACK_WALKER;
-    auto *field = interpreter::RuntimeInterface::ResolveField(thread, *caller, BytecodeId(field_id));
+    auto *field = interpreter::RuntimeInterface::ResolveField(thread, *caller, BytecodeId(fieldId));
     if (field == nullptr) {
         return field;
     }
@@ -1293,11 +1293,11 @@ extern "C" Field *GetStaticFieldByIdEntrypoint(ManagedThread *thread, Method *ca
     return field;
 }
 
-extern "C" Method *GetCalleeMethodFromBytecodeId(ManagedThread *thread, Method *caller, uint32_t callee_id,
+extern "C" Method *GetCalleeMethodFromBytecodeId(ManagedThread *thread, Method *caller, uint32_t calleeId,
                                                  InterpreterCache::Entry *entry, const uint8_t *pc)
 {
     CHECK_STACK_WALKER;
-    auto *method = interpreter::RuntimeInterface::ResolveMethod(thread, *caller, BytecodeId(callee_id));
+    auto *method = interpreter::RuntimeInterface::ResolveMethod(thread, *caller, BytecodeId(calleeId));
     if (method == nullptr) {
         return nullptr;  // if nullptr we don't need to cache
     }
@@ -1305,27 +1305,27 @@ extern "C" Method *GetCalleeMethodFromBytecodeId(ManagedThread *thread, Method *
     return method;
 }
 
-extern "C" Class *GetMethodClassById(Method *method, uint32_t method_id)
+extern "C" Class *GetMethodClassById(Method *method, uint32_t methodId)
 {
     CHECK_STACK_WALKER;
-    Class *klass = interpreter::RuntimeInterface::GetMethodClass(method, BytecodeId(method_id));
+    Class *klass = interpreter::RuntimeInterface::GetMethodClass(method, BytecodeId(methodId));
     return klass;  // May be nullptr if exception occured
 }
 
-extern "C" Method *ResolveVirtualMethod(const Method *callee, Frame *frame, const ObjectPointerType obj_ptr,
+extern "C" Method *ResolveVirtualMethod(const Method *callee, Frame *frame, const ObjectPointerType objPtr,
                                         const uint8_t *pc, Method *caller)
 {
-    auto *obj = reinterpret_cast<const ObjectHeader *>(obj_ptr);
+    auto *obj = reinterpret_cast<const ObjectHeader *>(objPtr);
     ASSERT(IsAddressInObjectsHeap(obj));
     auto *cls = obj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
     auto *resolved = cls->ResolveVirtualMethod(callee);
     ASSERT(resolved != nullptr);
 
-    ProfilingData *prof_data = caller->GetProfilingData();
-    auto bytecode_offset = pc - frame->GetInstruction();
-    if (prof_data != nullptr) {
-        prof_data->UpdateInlineCaches(bytecode_offset, cls);
+    ProfilingData *profData = caller->GetProfilingData();
+    auto bytecodeOffset = pc - frame->GetInstruction();
+    if (profData != nullptr) {
+        profData->UpdateInlineCaches(bytecodeOffset, cls);
     }
 
     return resolved;
@@ -1349,9 +1349,9 @@ extern "C" bool DecrementHotnessCounter(Method *method, ManagedThread *thread)
     return method->GetCompiledEntryPoint() != GetCompiledCodeToInterpreterBridge(method);
 }
 
-extern "C" bool DecrementHotnessCounterDyn(Method *method, TaggedValue func_obj, ManagedThread *thread)
+extern "C" bool DecrementHotnessCounterDyn(Method *method, TaggedValue funcObj, ManagedThread *thread)
 {
-    method->DecrementHotnessCounter<true>(thread, 0, nullptr, false, func_obj);
+    method->DecrementHotnessCounter<true>(thread, 0, nullptr, false, funcObj);
     if (thread->HasPendingException()) {
         return false;
     }
@@ -1365,14 +1365,14 @@ extern "C" void CallCompilerSlowPath(ManagedThread *thread, Method *method)
 }
 
 extern "C" bool CallCompilerSlowPathOSR(ManagedThread *thread, Method *method, Frame *frame, uint64_t acc,
-                                        uint64_t acc_tag, uint32_t ins_offset, int offset)
+                                        uint64_t accTag, uint32_t insOffset, int offset)
 {
     CHECK_STACK_WALKER;
     if constexpr (ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR) {
         ASSERT(ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR);
         if (!frame->IsDeoptimized() && Runtime::GetOptions().IsCompilerEnableOsr()) {
-            frame->SetAcc(panda::interpreter::AccVRegister(acc, acc_tag));
-            return method->DecrementHotnessCounter<false>(thread, ins_offset + offset, &frame->GetAcc(), true);
+            frame->SetAcc(panda::interpreter::AccVRegister(acc, accTag));
+            return method->DecrementHotnessCounter<false>(thread, insOffset + offset, &frame->GetAcc(), true);
         }
     }
     method->DecrementHotnessCounter<false>(thread, 0, nullptr);
@@ -1380,30 +1380,30 @@ extern "C" bool CallCompilerSlowPathOSR(ManagedThread *thread, Method *method, F
 }
 
 extern "C" void UpdateBranchTaken([[maybe_unused]] Method *method, Frame *frame, const uint8_t *pc,
-                                  ProfilingData *prof_data_irtoc)
+                                  ProfilingData *profDataIrtoc)
 {
     // Add a second prof_data loading because without it THREAD_SANITIZER crashes
     // NOTE(aantipina): investigate and delete the second loading (issue I6DTAA)
-    [[maybe_unused]] ProfilingData *prof_data = method->GetProfilingDataWithoutCheck();
-    prof_data_irtoc->UpdateBranchTaken(pc - frame->GetInstruction());
+    [[maybe_unused]] ProfilingData *profData = method->GetProfilingDataWithoutCheck();
+    profDataIrtoc->UpdateBranchTaken(pc - frame->GetInstruction());
 }
 
 extern "C" void UpdateBranchUntaken([[maybe_unused]] Method *method, Frame *frame, const uint8_t *pc,
-                                    ProfilingData *prof_data_irtoc)
+                                    ProfilingData *profDataIrtoc)
 {
     // Add a second prof_data loading because without it THREAD_SANITIZER crashes
     // NOTE(aantipina): investigate and delete the second loading
-    [[maybe_unused]] ProfilingData *prof_data = method->GetProfilingDataWithoutCheck();
-    prof_data_irtoc->UpdateBranchNotTaken(pc - frame->GetInstruction());
+    [[maybe_unused]] ProfilingData *profData = method->GetProfilingDataWithoutCheck();
+    profDataIrtoc->UpdateBranchNotTaken(pc - frame->GetInstruction());
 }
 
 extern "C" uint32_t ReadUlebEntrypoint(const uint8_t *ptr)
 {
     uint32_t result;
     [[maybe_unused]] size_t n;
-    [[maybe_unused]] bool is_full;
-    std::tie(result, n, is_full) = leb128::DecodeUnsigned<uint32_t>(ptr);
-    ASSERT(is_full);
+    [[maybe_unused]] bool isFull;
+    std::tie(result, n, isFull) = leb128::DecodeUnsigned<uint32_t>(ptr);
+    ASSERT(isFull);
     return result;
 }
 
@@ -1424,9 +1424,9 @@ extern "C" void ThrowExceptionFromInterpreter(ManagedThread *thread, ObjectHeade
     ASSERT(!thread->HasPendingException());
     ASSERT(IsAddressInObjectsHeap(exception));
     Method *method = frame->GetMethod();
-    ProfilingData *prof_data = method->GetProfilingDataWithoutCheck();
-    if (prof_data != nullptr) {
-        prof_data->UpdateThrowTaken(pc - frame->GetInstruction());
+    ProfilingData *profData = method->GetProfilingDataWithoutCheck();
+    if (profData != nullptr) {
+        profData->UpdateThrowTaken(pc - frame->GetInstruction());
     }
     thread->SetException(exception);
 }
@@ -1459,46 +1459,46 @@ extern "C" void ThrowArrayIndexOutOfBoundsExceptionFromInterpreter(ssize_t idx, 
     interpreter::RuntimeInterface::ThrowArrayIndexOutOfBoundsException(idx, length);
 }
 
-extern "C" uint8_t CheckStoreArrayReferenceFromInterpreter(coretypes::Array *array, ObjectHeader *store_obj)
+extern "C" uint8_t CheckStoreArrayReferenceFromInterpreter(coretypes::Array *array, ObjectHeader *storeObj)
 {
     CHECK_STACK_WALKER;
     ASSERT(array != nullptr);
-    ASSERT(IsAddressInObjectsHeapOrNull(store_obj));
+    ASSERT(IsAddressInObjectsHeapOrNull(storeObj));
 
-    if (store_obj == nullptr) {  // NOTE: may be moved to IRTOC
+    if (storeObj == nullptr) {  // NOTE: may be moved to IRTOC
         return 0;
     }
 
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto *array_class = array->ClassAddr<Class>();
-    auto *element_class = array_class->GetComponentType();
+    auto *arrayClass = array->ClassAddr<Class>();
+    auto *elementClass = arrayClass->GetComponentType();
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (!store_obj->IsInstanceOf(element_class)) {
+    if (!storeObj->IsInstanceOf(elementClass)) {
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-        interpreter::RuntimeInterface::ThrowArrayStoreException(array_class, store_obj->ClassAddr<Class>());
+        interpreter::RuntimeInterface::ThrowArrayStoreException(arrayClass, storeObj->ClassAddr<Class>());
         return 1;
     }
     return 0;
 }
 
-extern "C" uint32_t FindCatchBlockInIFramesStackless(ManagedThread **curr_thread, Frame **curr_frame, const uint8_t *pc)
+extern "C" uint32_t FindCatchBlockInIFramesStackless(ManagedThread **currThread, Frame **currFrame, const uint8_t *pc)
 {
-    uint32_t inst = pc - (*curr_frame)->GetInstruction();
-    Frame *frame = *curr_frame;
+    uint32_t inst = pc - (*currFrame)->GetInstruction();
+    Frame *frame = *currFrame;
 
     while (frame != nullptr) {
-        ManagedThread *thread = *curr_thread;
+        ManagedThread *thread = *currThread;
         Frame *prev = frame->GetPrevFrame();
         ASSERT(thread->HasPendingException());
 
         Method *method = frame->GetMethod();
-        uint32_t pc_offset = interpreter::RuntimeInterface::FindCatchBlock(*method, thread->GetException(), inst);
-        if (pc_offset != panda_file::INVALID_OFFSET) {
-            return pc_offset;
+        uint32_t pcOffset = interpreter::RuntimeInterface::FindCatchBlock(*method, thread->GetException(), inst);
+        if (pcOffset != panda_file::INVALID_OFFSET) {
+            return pcOffset;
         }
 
         if (!frame->IsStackless() || prev == nullptr || StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(prev)) {
-            return pc_offset;
+            return pcOffset;
         }
 
         EVENT_METHOD_EXIT(method->GetFullName(), events::MethodExitKind::INTERP, thread->RecordMethodExit());
@@ -1506,7 +1506,7 @@ extern "C" uint32_t FindCatchBlockInIFramesStackless(ManagedThread **curr_thread
         Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, method);
 
         inst = prev->GetBytecodeOffset();
-        *curr_frame = prev;
+        *currFrame = prev;
 
         thread->GetVM()->HandleReturnFrame();
 
@@ -1514,7 +1514,7 @@ extern "C" uint32_t FindCatchBlockInIFramesStackless(ManagedThread **curr_thread
 
         ASSERT(thread->HasPendingException());
 
-        interpreter::RuntimeInterface::FreeFrame(*curr_thread, frame);
+        interpreter::RuntimeInterface::FreeFrame(*currThread, frame);
 
         LOG(DEBUG, INTERPRETER) << "Exit: Runtime Call.";
 
@@ -1524,43 +1524,43 @@ extern "C" uint32_t FindCatchBlockInIFramesStackless(ManagedThread **curr_thread
     return panda_file::INVALID_OFFSET;
 }
 
-extern "C" const uint8_t *FindCatchBlockInIFrames(ManagedThread *curr_thread, Frame *curr_frame, const uint8_t *pc)
+extern "C" const uint8_t *FindCatchBlockInIFrames(ManagedThread *currThread, Frame *currFrame, const uint8_t *pc)
 {
     CHECK_STACK_WALKER;
 
-    uint32_t pc_offset = panda_file::INVALID_OFFSET;
+    uint32_t pcOffset = panda_file::INVALID_OFFSET;
 
-    pc_offset = FindCatchBlockInIFramesStackless(&curr_thread, &curr_frame, pc);
+    pcOffset = FindCatchBlockInIFramesStackless(&currThread, &currFrame, pc);
 
-    if (pc_offset == panda_file::INVALID_OFFSET) {
+    if (pcOffset == panda_file::INVALID_OFFSET) {
         if constexpr (RUNTIME_ARCH == Arch::AARCH64 || RUNTIME_ARCH == Arch::AARCH32 || RUNTIME_ARCH == Arch::X86_64) {
-            panda::FindCatchBlockInCallStack(curr_thread);
+            panda::FindCatchBlockInCallStack(currThread);
         }
         return pc;
     }
 
-    Method *method = curr_frame->GetMethod();
+    Method *method = currFrame->GetMethod();
     ASSERT(method != nullptr);
     LanguageContext ctx = interpreter::RuntimeInterface::GetLanguageContext(*method);
-    ObjectHeader *exception_object = curr_thread->GetException();
-    ctx.SetExceptionToVReg(curr_frame->GetAcc(), exception_object);
+    ObjectHeader *exceptionObject = currThread->GetException();
+    ctx.SetExceptionToVReg(currFrame->GetAcc(), exceptionObject);
 
-    curr_thread->ClearException();
-    Span<const uint8_t> sp(curr_frame->GetMethod()->GetInstructions(), pc_offset);
+    currThread->ClearException();
+    Span<const uint8_t> sp(currFrame->GetMethod()->GetInstructions(), pcOffset);
     return sp.cend();
 }
 
-extern "C" coretypes::String *VmCreateString(ManagedThread *thread, Method *method, ObjectHeader *ctor_arg)
+extern "C" coretypes::String *VmCreateString(ManagedThread *thread, Method *method, ObjectHeader *ctorArg)
 {
     CHECK_STACK_WALKER;
     // If ctor has the only argument (object itself), ctor_arg is allowed to contain garbage
-    ASSERT(method->GetNumArgs() == 1 || IsAddressInObjectsHeapOrNull(ctor_arg));
+    ASSERT(method->GetNumArgs() == 1 || IsAddressInObjectsHeapOrNull(ctorArg));
 
-    return thread->GetVM()->CreateString(method, ctor_arg);
+    return thread->GetVM()->CreateString(method, ctorArg);
 }
 
 extern "C" void DebugPrintEntrypoint([[maybe_unused]] panda::Frame *frame, [[maybe_unused]] const uint8_t *pc,
-                                     [[maybe_unused]] uint64_t acc_payload, [[maybe_unused]] uint64_t acc_tag)
+                                     [[maybe_unused]] uint64_t accPayload, [[maybe_unused]] uint64_t accTag)
 {
     CHECK_STACK_WALKER;
 #ifndef NDEBUG
@@ -1569,26 +1569,26 @@ extern "C" void DebugPrintEntrypoint([[maybe_unused]] panda::Frame *frame, [[may
     }
 
     constexpr uint64_t STANDARD_DEBUG_INDENT = 5;
-    PandaString acc_dump;
-    auto acc_vreg = panda::interpreter::VRegister(acc_payload);
-    auto acc_tag_vreg = panda::interpreter::VRegister(acc_tag);
+    PandaString accDump;
+    auto accVreg = panda::interpreter::VRegister(accPayload);
+    auto accTagVreg = panda::interpreter::VRegister(accTag);
     if (frame->IsDynamic()) {
-        acc_dump = panda::interpreter::DynamicVRegisterRef(&acc_vreg).DumpVReg();
-        LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "acc." << acc_dump;
+        accDump = panda::interpreter::DynamicVRegisterRef(&accVreg).DumpVReg();
+        LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "acc." << accDump;
 
-        DynamicFrameHandler frame_handler(frame);
+        DynamicFrameHandler frameHandler(frame);
         for (size_t i = 0; i < frame->GetSize(); ++i) {
             LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "v" << i << "."
-                                    << frame_handler.GetVReg(i).DumpVReg();
+                                    << frameHandler.GetVReg(i).DumpVReg();
         }
     } else {
-        acc_dump = panda::interpreter::StaticVRegisterRef(&acc_vreg, &acc_tag_vreg).DumpVReg();
-        LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "acc." << acc_dump;
+        accDump = panda::interpreter::StaticVRegisterRef(&accVreg, &accTagVreg).DumpVReg();
+        LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "acc." << accDump;
 
-        StaticFrameHandler frame_handler(frame);
+        StaticFrameHandler frameHandler(frame);
         for (size_t i = 0; i < frame->GetSize(); ++i) {
             LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "v" << i << "."
-                                    << frame_handler.GetVReg(i).DumpVReg();
+                                    << frameHandler.GetVReg(i).DumpVReg();
         }
     }
     LOG(DEBUG, INTERPRETER) << " pc: " << (void *)pc << " ---> " << BytecodeInstruction(pc);
@@ -1659,8 +1659,8 @@ static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(Obje
     auto thread = ManagedThread::GetCurrent();
     HandleScope<ObjectHeader *> scope(thread);
     VMHandle<ObjectHeader> handle(thread, sb);
-    VMHandle<coretypes::String> str_handle {};
-    str_handle = str != nullptr ? VMHandle<coretypes::String>(thread, str) : str_handle;
+    VMHandle<coretypes::String> strHandle {};
+    strHandle = str != nullptr ? VMHandle<coretypes::String>(thread, str) : strHandle;
 
     auto *vm = Runtime::GetCurrent()->GetPandaVM();
     auto klass = Runtime::GetCurrent()
@@ -1671,7 +1671,7 @@ static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(Obje
     auto capacity = RecalculateCapacity(GetCapacity(sb), newsize);
     auto *newstorage = panda::coretypes::Array::Create(klass, capacity);
     sb = reinterpret_cast<ObjectHeader *>(handle.GetPtr());
-    str = str != nullptr ? str_handle.GetPtr() : nullptr;
+    str = str != nullptr ? strHandle.GetPtr() : nullptr;
 
     if (newstorage == nullptr) {
         return std::make_tuple(false, sb, str);

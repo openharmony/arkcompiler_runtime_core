@@ -27,14 +27,14 @@ namespace panda::mem {
 template <class LanguageConfig>
 UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorker(G1GC<LanguageConfig> *gc,
                                                        GCG1BarrierSet::ThreadLocalCardQueues *queue,
-                                                       os::memory::Mutex *queue_lock, size_t region_size,
-                                                       bool update_concurrent, size_t min_concurrent_cards_to_process)
+                                                       os::memory::Mutex *queueLock, size_t regionSize,
+                                                       bool updateConcurrent, size_t minConcurrentCardsToProcess)
     : gc_(gc),
-      region_size_bits_(panda::helpers::math::GetIntLog2(region_size)),
-      min_concurrent_cards_to_process_(min_concurrent_cards_to_process),
+      regionSizeBits_(panda::helpers::math::GetIntLog2(regionSize)),
+      minConcurrentCardsToProcess_(minConcurrentCardsToProcess),
       queue_(queue),
-      queue_lock_(queue_lock),
-      update_concurrent_(update_concurrent)
+      queueLock_(queueLock),
+      updateConcurrent_(updateConcurrent)
 {
     static constexpr size_t PREALLOCATED_CARDS_SET_SIZE = 256;
     cards_.reserve(PREALLOCATED_CARDS_SET_SIZE);
@@ -46,8 +46,8 @@ UpdateRemsetWorker<LanguageConfig>::~UpdateRemsetWorker()
     auto allocator = gc_->GetInternalAllocator();
     // Take the lock to satisfy TSAN.
     // Actually at this moment all mutators should be destroyed and the lock is not needed.
-    os::memory::LockHolder holder(post_barrier_buffers_lock_);
-    for (auto *buffer : post_barrier_buffers_) {
+    os::memory::LockHolder holder(postBarrierBuffersLock_);
+    for (auto *buffer : postBarrierBuffers_) {
         allocator->Delete(buffer);
     }
 }
@@ -58,7 +58,7 @@ void UpdateRemsetWorker<LanguageConfig>::CreateWorker()
     if (IsFlag(UpdateRemsetWorkerFlags::IS_STOP_WORKER)) {
         RemoveFlag(UpdateRemsetWorkerFlags::IS_STOP_WORKER);
     }
-    if (update_concurrent_) {
+    if (updateConcurrent_) {
         this->CreateWorkerImpl();
     }
 }
@@ -67,7 +67,7 @@ template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::DestroyWorker()
 {
     SetFlag(UpdateRemsetWorkerFlags::IS_STOP_WORKER);
-    if (update_concurrent_) {
+    if (updateConcurrent_) {
         this->DestroyWorkerImpl();
     }
 }
@@ -75,14 +75,14 @@ void UpdateRemsetWorker<LanguageConfig>::DestroyWorker()
 template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::AddPostBarrierBuffer(PandaVector<mem::CardTable::CardPtr> *buffer)
 {
-    os::memory::LockHolder holder(post_barrier_buffers_lock_);
-    post_barrier_buffers_.push_back(buffer);
+    os::memory::LockHolder holder(postBarrierBuffersLock_);
+    postBarrierBuffers_.push_back(buffer);
 }
 
 template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::FillFromDefered(PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
-    os::memory::LockHolder holder(*queue_lock_);
+    os::memory::LockHolder holder(*queueLock_);
     std::copy(cards_.begin(), cards_.end(), std::inserter(*cards, cards->end()));
     cards_.clear();
 }
@@ -90,7 +90,7 @@ void UpdateRemsetWorker<LanguageConfig>::FillFromDefered(PandaUnorderedSet<CardT
 template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::FillFromQueue(PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
-    os::memory::LockHolder holder(*queue_lock_);
+    os::memory::LockHolder holder(*queueLock_);
     std::copy(queue_->begin(), queue_->end(), std::inserter(*cards, cards->end()));
     queue_->clear();
 }
@@ -100,9 +100,9 @@ void UpdateRemsetWorker<LanguageConfig>::FillFromThreads(PandaUnorderedSet<CardT
 {
     auto *vm = gc_->GetPandaVm();
     ASSERT(vm != nullptr);
-    auto *thread_manager = vm->GetThreadManager();
-    ASSERT(thread_manager != nullptr);
-    thread_manager->EnumerateThreads([this, cards](ManagedThread *thread) {
+    auto *threadManager = vm->GetThreadManager();
+    ASSERT(threadManager != nullptr);
+    threadManager->EnumerateThreads([this, cards](ManagedThread *thread) {
         auto *buffer = thread->GetG1PostBarrierBuffer();
         if (buffer != nullptr) {
             FillFromPostBarrierBuffer(buffer, cards);
@@ -115,27 +115,27 @@ template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffers(PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
     auto allocator = gc_->GetInternalAllocator();
-    os::memory::LockHolder holder(post_barrier_buffers_lock_);
-    while (!post_barrier_buffers_.empty()) {
-        auto *buffer = post_barrier_buffers_.back();
-        post_barrier_buffers_.pop_back();
+    os::memory::LockHolder holder(postBarrierBuffersLock_);
+    while (!postBarrierBuffers_.empty()) {
+        auto *buffer = postBarrierBuffers_.back();
+        postBarrierBuffers_.pop_back();
         FillFromPostBarrierBuffer(buffer, cards);
         allocator->Delete(buffer);
     }
 }
 
 template <class LanguageConfig>
-void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(
-    GCG1BarrierSet::G1PostBarrierRingBufferType *post_wrb, PandaUnorderedSet<CardTable::CardPtr> *cards)
+void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(GCG1BarrierSet::G1PostBarrierRingBufferType *postWrb,
+                                                                   PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
-    if (post_wrb == nullptr) {
+    if (postWrb == nullptr) {
         return;
     }
-    bool has_element;
+    bool hasElement;
     while (true) {
         mem::CardTable::CardPtr card;
-        has_element = post_wrb->TryPop(&card);
-        if (!has_element) {
+        hasElement = postWrb->TryPop(&card);
+        if (!hasElement) {
             break;
         }
         cards->insert(card);
@@ -143,44 +143,44 @@ void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(
 }
 
 template <class LanguageConfig>
-void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(GCG1BarrierSet::ThreadLocalCardQueues *post_wrb,
+void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(GCG1BarrierSet::ThreadLocalCardQueues *postWrb,
                                                                    PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
-    while (!post_wrb->empty()) {
-        cards->insert(post_wrb->back());
-        post_wrb->pop_back();
+    while (!postWrb->empty()) {
+        cards->insert(postWrb->back());
+        postWrb->pop_back();
     }
 }
 
 template <class LanguageConfig>
 class RemsetCardHandler : public CardHandler {
 public:
-    RemsetCardHandler(CardTable *card_table, size_t region_size_bits, const std::atomic<bool> &defer_cards)
-        : CardHandler(card_table), region_size_bits_(region_size_bits), defer_cards_(defer_cards)
+    RemsetCardHandler(CardTable *cardTable, size_t regionSizeBits, const std::atomic<bool> &deferCards)
+        : CardHandler(cardTable), regionSizeBits_(regionSizeBits), deferCards_(deferCards)
     {
     }
 
 protected:
-    bool HandleObject(ObjectHeader *object_header, void *begin, void *end) override
+    bool HandleObject(ObjectHeader *objectHeader, void *begin, void *end) override
     {
-        auto obj_ref_visitor = [this](ObjectHeader *from_obj, ObjectHeader *to_obj, uint32_t offset,
-                                      [[maybe_unused]] bool is_volatile) {
-            ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(to_obj)),
-                      std::cerr << "Not suitable space for to_obj: " << to_obj << std::endl);
+        auto objRefVisitor = [this](ObjectHeader *fromObj, ObjectHeader *toObj, uint32_t offset,
+                                    [[maybe_unused]] bool isVolatile) {
+            ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(toObj)),
+                      std::cerr << "Not suitable space for to_obj: " << toObj << std::endl);
 
             // don't need lock because only one thread changes remsets
-            RemSet<>::AddRefWithAddr<false>(from_obj, offset, to_obj);
-            LOG(DEBUG, GC) << "fill rem set " << from_obj << " -> " << to_obj;
+            RemSet<>::AddRefWithAddr<false>(fromObj, offset, toObj);
+            LOG(DEBUG, GC) << "fill rem set " << fromObj << " -> " << toObj;
             // Atomic with relaxed order reason: memory order is not required
-            return !defer_cards_.load(std::memory_order_relaxed);
+            return !deferCards_.load(std::memory_order_relaxed);
         };
         return ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<true>(
-            object_header, obj_ref_visitor, begin, end);
+            objectHeader, objRefVisitor, begin, end);
     }
 
 private:
-    size_t region_size_bits_;
-    const std::atomic<bool> &defer_cards_;
+    size_t regionSizeBits_;
+    const std::atomic<bool> &deferCards_;
 };
 
 template <class LanguageConfig>
@@ -191,25 +191,25 @@ size_t UpdateRemsetWorker<LanguageConfig>::ProcessAllCards()
     FillFromPostBarrierBuffers(&cards_);
     LOG_IF(!cards_.empty(), DEBUG, GC) << "Started process: " << cards_.size() << " cards";
 
-    size_t cards_size = 0;
-    RemsetCardHandler<LanguageConfig> card_handler(gc_->GetCardTable(), region_size_bits_, defer_cards_);
+    size_t cardsSize = 0;
+    RemsetCardHandler<LanguageConfig> cardHandler(gc_->GetCardTable(), regionSizeBits_, deferCards_);
     for (auto it = cards_.begin(); it != cards_.end();) {
-        if (!card_handler.Handle(*it)) {
+        if (!cardHandler.Handle(*it)) {
             break;
         }
-        cards_size++;
+        cardsSize++;
 
         it = cards_.erase(it);
     }
-    LOG_IF(!cards_.empty(), DEBUG, GC) << "Processed " << cards_size << " cards";
-    return cards_size;
+    LOG_IF(!cards_.empty(), DEBUG, GC) << "Processed " << cardsSize << " cards";
+    return cardsSize;
 }
 
 template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::DrainAllCards(PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
-    os::memory::LockHolder holder(update_remset_lock_);
+    os::memory::LockHolder holder(updateRemsetLock_);
     FillFromDefered(cards);
     FillFromQueue(cards);
     FillFromThreads(cards);
@@ -220,7 +220,7 @@ template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::GCProcessCards()
 {
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
-    os::memory::LockHolder holder(update_remset_lock_);
+    os::memory::LockHolder holder(updateRemsetLock_);
     ProcessAllCards();
 }
 
@@ -238,7 +238,7 @@ void UpdateRemsetWorker<LanguageConfig>::GCInvalidateRegions(RegionVector *regio
 {
     // Do invalidate region on pause in GCThread
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
-    os::memory::LockHolder holder(update_remset_lock_);
+    os::memory::LockHolder holder(updateRemsetLock_);
     DoInvalidateRegions(regions);
 }
 
@@ -249,15 +249,15 @@ void UpdateRemsetWorker<LanguageConfig>::InvalidateRegions(RegionVector *regions
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PROCESS_CARD));
     SetFlag(UpdateRemsetWorkerFlags::IS_INVALIDATE_REGIONS);
     // Atomic with relaxed order reason: memory order is not required
-    defer_cards_.store(true, std::memory_order_relaxed);
+    deferCards_.store(true, std::memory_order_relaxed);
     // Aquare lock to be sure that UpdateRemsetWorker has been stopped
-    os::memory::LockHolder holder(update_remset_lock_);
+    os::memory::LockHolder holder(updateRemsetLock_);
     LOG(DEBUG, GC) << "Remset worker has been paused to invalidate region on concurrent";
     DoInvalidateRegions(regions);
     // Atomic with relaxed order reason: memory order is not required
-    defer_cards_.store(false, std::memory_order_relaxed);
+    deferCards_.store(false, std::memory_order_relaxed);
     RemoveFlag(UpdateRemsetWorkerFlags::IS_INVALIDATE_REGIONS);
-    if (update_concurrent_) {
+    if (updateConcurrent_) {
         this->ContinueProcessCards();
     }
 }
@@ -268,27 +268,27 @@ void UpdateRemsetWorker<LanguageConfig>::SuspendWorkerForGCPause()
     ASSERT(!IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
     SetFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD);
     // Atomic with relaxed order reason: memory order is not required
-    defer_cards_.store(true, std::memory_order_relaxed);
+    deferCards_.store(true, std::memory_order_relaxed);
     // Aquare lock to be sure that UpdateRemsetWorker has been stopped
-    os::memory::LockHolder holder(update_remset_lock_);
+    os::memory::LockHolder holder(updateRemsetLock_);
 #ifndef NDEBUG
-    paused_by_gc_thread_ = true;
+    pausedByGcThread_ = true;
 #endif
     LOG(DEBUG, GC) << "Remset worker has been paused for GC";
     // Atomic with relaxed order reason: memory order is not required
-    defer_cards_.store(false, std::memory_order_relaxed);
+    deferCards_.store(false, std::memory_order_relaxed);
 }
 
 template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::ResumeWorkerAfterGCPause()
 {
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
-    os::memory::LockHolder holder(update_remset_lock_);
+    os::memory::LockHolder holder(updateRemsetLock_);
 #ifndef NDEBUG
-    paused_by_gc_thread_ = false;
+    pausedByGcThread_ = false;
 #endif
     RemoveFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD);
-    if (update_concurrent_) {
+    if (updateConcurrent_) {
         this->ContinueProcessCards();
     }
 }

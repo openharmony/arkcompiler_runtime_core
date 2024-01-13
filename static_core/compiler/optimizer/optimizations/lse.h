@@ -100,8 +100,8 @@ public:
     using PhiCands = ArenaDoubleUnorderedMap<Loop *, Inst *, InstVector>;
     using HeapEqClasses = ArenaUnorderedMap<int, std::pair<Heap, PhiCands>>;
 
-    explicit Lse(Graph *graph, bool hoist_loads = true)
-        : Optimization(graph), hoist_loads_(hoist_loads), be_alive_(GetGraph()->GetLocalAllocator()->Adapter()) {};
+    explicit Lse(Graph *graph, bool hoistLoads = true)
+        : Optimization(graph), hoistLoads_(hoistLoads), beAlive_(GetGraph()->GetLocalAllocator()->Adapter()) {};
 
     NO_MOVE_SEMANTIC(Lse);
     NO_COPY_SEMANTIC(Lse);
@@ -111,7 +111,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerLse();
+        return g_options.IsCompilerLse();
     }
 
     const char *GetPassName() const override
@@ -127,21 +127,21 @@ public:
 private:
     void InitializeHeap(BasicBlock *block, HeapEqClasses *heaps);
     void MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps);
-    int MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phi_fixup_mrk);
-    void FixupPhisInBlock(BasicBlock *block, Marker phi_fixup_mrk);
+    int MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk);
+    void FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk);
     const char *GetEliminationCode(Inst *inst, Inst *origin);
     void ApplyHoistToCandidate(Loop *loop, Inst *alive);
     void TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps,
                                 const ArenaUnorderedMap<Inst *, struct HeapValue> *eliminated);
-    void ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phi_fixup_mrk);
+    void ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phiFixupMrk);
     void DeleteInstruction(Inst *inst, Inst *value);
     void DeleteInstructions(const ArenaUnorderedMap<Inst *, struct HeapValue> &eliminated);
 
 private:
     bool applied_ {false};
-    bool hoist_loads_;
+    bool hoistLoads_;
     SaveStateBridgesBuilder ssb_;
-    ArenaUnorderedSet<Inst *> be_alive_;
+    ArenaUnorderedSet<Inst *> beAlive_;
 };
 
 }  // namespace panda::compiler

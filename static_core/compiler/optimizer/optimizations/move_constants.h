@@ -33,7 +33,7 @@ public:
     bool RunImpl() override;
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerMoveConstants();
+        return g_options.IsCompilerMoveConstants();
     }
 
     const char *GetPassName() const override
@@ -42,9 +42,9 @@ public:
     }
 
 private:
-    ArenaUnorderedMap<uint32_t, ArenaVector<BasicBlock *>> user_dominators_cache_;
-    ArenaVector<const ArenaVector<BasicBlock *> *> user_dominating_blocks_;
-    int moved_constants_counter_ {0};
+    ArenaUnorderedMap<uint32_t, ArenaVector<BasicBlock *>> userDominatorsCache_;
+    ArenaVector<const ArenaVector<BasicBlock *> *> userDominatingBlocks_;
+    int movedConstantsCounter_ {0};
 
     void MoveFromStartBlock(Inst *inst);
     void GetUsersDominatingBlocks(const Inst *inst);

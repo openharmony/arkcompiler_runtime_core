@@ -50,18 +50,18 @@ extern "C" void AsmUnreachable()
 }
 
 #if !defined(PANDA_TARGET_ARM64)
-extern "C" void OsrEntryAfterCFrame([[maybe_unused]] Frame *frame, [[maybe_unused]] uintptr_t loop_head_bc,
-                                    [[maybe_unused]] const void *osr_code, [[maybe_unused]] size_t frame_size)
+extern "C" void OsrEntryAfterCFrame([[maybe_unused]] Frame *frame, [[maybe_unused]] uintptr_t loopHeadBc,
+                                    [[maybe_unused]] const void *osrCode, [[maybe_unused]] size_t frameSize)
 {
     UNREACHABLE();
 }
-extern "C" void OsrEntryAfterIFrame([[maybe_unused]] Frame *frame, [[maybe_unused]] uintptr_t loop_head_bc,
-                                    [[maybe_unused]] const void *osr_code, [[maybe_unused]] size_t frame_size)
+extern "C" void OsrEntryAfterIFrame([[maybe_unused]] Frame *frame, [[maybe_unused]] uintptr_t loopHeadBc,
+                                    [[maybe_unused]] const void *osrCode, [[maybe_unused]] size_t frameSize)
 {
     UNREACHABLE();
 }
-extern "C" void OsrEntryTopFrame([[maybe_unused]] Frame *frame, [[maybe_unused]] uintptr_t loop_head_bc,
-                                 [[maybe_unused]] const void *osr_code, [[maybe_unused]] size_t frame_size)
+extern "C" void OsrEntryTopFrame([[maybe_unused]] Frame *frame, [[maybe_unused]] uintptr_t loopHeadBc,
+                                 [[maybe_unused]] const void *osrCode, [[maybe_unused]] size_t frameSize)
 {
     UNREACHABLE();
 }

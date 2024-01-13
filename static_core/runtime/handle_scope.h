@@ -33,12 +33,12 @@ public:
 
     inline uint32_t GetBeginIndex() const
     {
-        return begin_index_;
+        return beginIndex_;
     }
 
     inline uint32_t GetHandleCount() const
     {
-        return handle_count_;
+        return handleCount_;
     }
 
     uintptr_t NewHandle(T value);
@@ -48,10 +48,10 @@ protected:
 
     inline ManagedThread *GetThread() const;
 
-    uint32_t begin_index_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
+    uint32_t beginIndex_ {0};  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
-    uint32_t handle_count_ {0};
+    uint32_t handleCount_ {0};
     ManagedThread *thread_ {nullptr};
 
     NO_COPY_SEMANTIC(HandleScope);
@@ -68,7 +68,7 @@ public:
 
     inline ~EscapeHandleScope() override
     {
-        ASSERT(already_escape_);
+        ASSERT(alreadyEscape_);
     }
 
     NO_COPY_SEMANTIC(EscapeHandleScope);
@@ -76,15 +76,15 @@ public:
 
     inline HandleBase Escape(HandleBase handle)
     {
-        ASSERT(!already_escape_);
-        already_escape_ = true;
-        *(reinterpret_cast<T *>(escape_handle_.GetAddress())) = *(reinterpret_cast<T *>(handle.GetAddress()));
-        return escape_handle_;
+        ASSERT(!alreadyEscape_);
+        alreadyEscape_ = true;
+        *(reinterpret_cast<T *>(escapeHandle_.GetAddress())) = *(reinterpret_cast<T *>(handle.GetAddress()));
+        return escapeHandle_;
     }
 
 private:
-    bool already_escape_ = false;
-    HandleBase escape_handle_;
+    bool alreadyEscape_ = false;
+    HandleBase escapeHandle_;
 };
 }  // namespace panda
 #endif  // PANDA_RUNTIME_HANDLE_SCOPE_H

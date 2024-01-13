@@ -87,10 +87,10 @@ DEATH_TEST(Logger, LoggingExceptionsFatal)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    panda::Logger::ComponentMask component_mask;
-    component_mask.set(Logger::Component::COMPILER);
+    panda::Logger::ComponentMask componentMask;
+    componentMask.set(Logger::Component::COMPILER);
 
-    Logger::InitializeStdLogging(Logger::Level::FATAL, component_mask);
+    Logger::InitializeStdLogging(Logger::Level::FATAL, componentMask);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMPILER));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ASSEMBLER));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::DISASSEMBLER));
@@ -118,10 +118,10 @@ DEATH_TEST(Logger, LoggingExceptionsError)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
-    panda::Logger::ComponentMask component_mask;
-    component_mask.set(Logger::Component::COMPILER);
+    panda::Logger::ComponentMask componentMask;
+    componentMask.set(Logger::Component::COMPILER);
 
-    Logger::InitializeStdLogging(Logger::Level::ERROR, component_mask);
+    Logger::InitializeStdLogging(Logger::Level::ERROR, componentMask);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMPILER));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ASSEMBLER));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::DISASSEMBLER));
@@ -210,11 +210,11 @@ TEST(Logger, FilterFatal)
 
 TEST(Logger, ComponentFilter)
 {
-    panda::Logger::ComponentMask component_mask;
-    component_mask.set(Logger::Component::COMPILER);
-    component_mask.set(Logger::Component::GC);
+    panda::Logger::ComponentMask componentMask;
+    componentMask.set(Logger::Component::COMPILER);
+    componentMask.set(Logger::Component::GC);
 
-    Logger::InitializeStdLogging(Logger::Level::INFO, component_mask);
+    Logger::InitializeStdLogging(Logger::Level::INFO, componentMask);
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::WARNING, Logger::Component::ALLOC));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMPILER));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::GC));
@@ -241,9 +241,9 @@ TEST(Logger, ComponentFilter)
 DEATH_TEST(Logger, FileLogging)
 {
     uint32_t tid = os::thread::GetCurrentThreadId();
-    std::string log_filename = helpers::string::Format("/tmp/gtest_panda_logger_file_%06x", tid);
+    std::string logFilename = helpers::string::Format("/tmp/gtest_panda_logger_file_%06x", tid);
 
-    Logger::InitializeFileLogging(log_filename, Logger::Level::INFO,
+    Logger::InitializeFileLogging(logFilename, Logger::Level::INFO,
                                   panda::Logger::ComponentMask().set(Logger::Component::COMMON));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::COMMON));
@@ -265,14 +265,13 @@ DEATH_TEST(Logger, FileLogging)
         tid, tid);
     std::regex e(res);
     {
-        std::ifstream log_file_stream(log_filename);
-        std::string log_file_content((std::istreambuf_iterator<char>(log_file_stream)),
-                                     std::istreambuf_iterator<char>());
-        EXPECT_TRUE(std::regex_match(log_file_content, e));
+        std::ifstream logFileStream(logFilename);
+        std::string logFileContent((std::istreambuf_iterator<char>(logFileStream)), std::istreambuf_iterator<char>());
+        EXPECT_TRUE(std::regex_match(logFileContent, e));
     }
 #endif  // GTEST_HAS_DEATH_TEST
 
-    EXPECT_EQ(std::remove(log_filename.c_str()), 0U);
+    EXPECT_EQ(std::remove(logFilename.c_str()), 0U);
 
     Logger::Destroy();
     EXPECT_FALSE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::ALLOC));

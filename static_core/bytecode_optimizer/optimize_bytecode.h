@@ -25,8 +25,8 @@
 namespace panda::bytecodeopt {
 PANDA_PUBLIC_API bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface = nullptr);
 PANDA_PUBLIC_API bool OptimizeBytecode(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
-                                       const std::string &pandafile_name, bool is_dynamic = false,
-                                       bool has_memory_pool = false);
+                                       const std::string &pandafileName, bool isDynamic = false,
+                                       bool hasMemoryPool = false);
 }  // namespace panda::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H

@@ -66,7 +66,7 @@ void Context::Merge()
         auto *ic = reader.GetContainerPtr();
         auto &classes = *ic->GetClassMap();
 
-        known_items_.reserve(reader.GetItems()->size());
+        knownItems_.reserve(reader.GetItems()->size());
 
         for (auto [name, i] : classes) {
             if (i->IsForeign()) {
@@ -80,26 +80,26 @@ void Context::Merge()
                 }
             }
             auto clz = cont_.GetOrCreateClassItem(name);
-            known_items_[i] = clz;
-            came_from_.emplace(clz, &reader);
+            knownItems_[i] = clz;
+            cameFrom_.emplace(clz, &reader);
         }
     }
 
     // find all referenced foreign classes
     for (auto &reader : readers_) {
         auto *items = reader.GetItems();
-        for (auto &it_pair : *items) {
-            auto *item = it_pair.second;
+        for (auto &itPair : *items) {
+            auto *item = itPair.second;
 
             if (item->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM) {
                 auto *fc = static_cast<panda_file::ForeignClassItem *>(item);
                 auto name = GetStr(fc->GetNameItem());
                 if (auto iter = cm.find(name); iter != cm.end()) {
-                    known_items_[fc] = iter->second;
+                    knownItems_[fc] = iter->second;
                 } else {
                     auto clz = cont_.GetOrCreateForeignClassItem(name);
-                    came_from_.emplace(clz, &reader);
-                    known_items_[fc] = clz;
+                    cameFrom_.emplace(clz, &reader);
+                    knownItems_[fc] = clz;
                 }
             }
         }
@@ -139,10 +139,10 @@ void Context::Merge()
         }
     }
 
-    for (const auto &f : deferred_failed_annotations_) {
+    for (const auto &f : deferredFailedAnnotations_) {
         f();
     }
-    deferred_failed_annotations_.clear();
+    deferredFailedAnnotations_.clear();
 }
 
 void Context::MergeClass(const panda_file::FileReader *reader, panda_file::ClassItem *ni, panda_file::ClassItem *oi)
@@ -176,8 +176,8 @@ void Context::MergeClass(const panda_file::FileReader *reader, panda_file::Class
 void Context::MergeField(const panda_file::FileReader *reader, panda_file::ClassItem *clz, panda_file::FieldItem *oi)
 {
     auto ni = clz->AddField(StringFromOld(oi->GetNameItem()), TypeFromOld(oi->GetTypeItem()), oi->GetAccessFlags());
-    known_items_[oi] = ni;
-    came_from_.emplace(ni, reader);
+    knownItems_[oi] = ni;
+    cameFrom_.emplace(ni, reader);
 
     TransferAnnotations(reader, ni, oi);
 }
@@ -185,14 +185,14 @@ void Context::MergeField(const panda_file::FileReader *reader, panda_file::Class
 void Context::MergeMethod(const panda_file::FileReader *reader, panda_file::ClassItem *clz, panda_file::MethodItem *oi)
 {
     auto [proto, params] = GetProto(oi->GetProto());
-    auto &old_params = oi->GetParams();
+    auto &oldParams = oi->GetParams();
     auto *ni = clz->AddMethod(StringFromOld(oi->GetNameItem()), proto, oi->GetAccessFlags(), params);
-    known_items_[oi] = ni;
-    came_from_.emplace(ni, reader);
+    knownItems_[oi] = ni;
+    cameFrom_.emplace(ni, reader);
     ni->SetProfileSize(oi->GetProfileSize());
 
-    for (size_t i = 0; i < old_params.size(); i++) {
-        TransferAnnotations(reader, &ni->GetParams()[i], &old_params[i]);
+    for (size_t i = 0; i < oldParams.size(); i++) {
+        TransferAnnotations(reader, &ni->GetParams()[i], &oldParams[i]);
     }
 
     TransferAnnotations(reader, ni, oi);
@@ -205,28 +205,28 @@ void Context::MergeMethod(const panda_file::FileReader *reader, panda_file::Clas
         cont_.CreateItem<panda_file::ParamAnnotationsItem>(ni, false);
     }
 
-    auto should_save = false;
+    auto shouldSave = false;
     std::vector<uint8_t> *instructions = nullptr;
 
-    auto patch_lnp = false;
+    auto patchLnp = false;
 
-    if (auto odbg = oi->GetDebugInfo(); !conf_.strip_debug_info && odbg != nullptr) {
-        panda_file::LineNumberProgramItem *lnp_item {};
+    if (auto odbg = oi->GetDebugInfo(); !conf_.stripDebugInfo && odbg != nullptr) {
+        panda_file::LineNumberProgramItem *lnpItem {};
 
-        auto old_program = odbg->GetLineNumberProgram();
-        if (auto old = known_items_.find(old_program); old != known_items_.end()) {
-            lnp_item = static_cast<panda_file::LineNumberProgramItem *>(old->second);
-            cont_.IncRefLineNumberProgramItem(lnp_item);
+        auto oldProgram = odbg->GetLineNumberProgram();
+        if (auto old = knownItems_.find(oldProgram); old != knownItems_.end()) {
+            lnpItem = static_cast<panda_file::LineNumberProgramItem *>(old->second);
+            cont_.IncRefLineNumberProgramItem(lnpItem);
         } else {
-            lnp_item = cont_.CreateLineNumberProgramItem();
-            known_items_.emplace(old_program, lnp_item);
+            lnpItem = cont_.CreateLineNumberProgramItem();
+            knownItems_.emplace(oldProgram, lnpItem);
 
-            should_save = true;
-            result_.stats.debug_count++;
-            patch_lnp = true;
+            shouldSave = true;
+            result_.stats.debugCount++;
+            patchLnp = true;
         }
 
-        auto *ndbg = cont_.CreateItem<panda_file::DebugInfoItem>(lnp_item);
+        auto *ndbg = cont_.CreateItem<panda_file::DebugInfoItem>(lnpItem);
         ndbg->SetLineNumber(odbg->GetLineNumber());
         ni->SetDebugInfo(ndbg);
         for (auto *s : *odbg->GetParameters()) {
@@ -235,8 +235,8 @@ void Context::MergeMethod(const panda_file::FileReader *reader, panda_file::Clas
     }
 
     if (auto oci = oi->GetCode(); oci != nullptr) {
-        should_save = true;
-        result_.stats.code_count++;
+        shouldSave = true;
+        result_.stats.codeCount++;
 
         auto nci = cont_.CreateItem<panda_file::CodeItem>();
         ni->SetCode(nci);
@@ -253,19 +253,19 @@ void Context::MergeMethod(const panda_file::FileReader *reader, panda_file::Clas
             ncbs.reserve(ocbs.size());
             for (const auto &ocb : ocbs) {
                 ASSERT(ocb.GetMethod() == oi);
-                auto exc_klass = ClassFromOld(ocb.GetType());
-                if (exc_klass != nullptr) {
-                    ni->AddIndexDependency(exc_klass);
+                auto excKlass = ClassFromOld(ocb.GetType());
+                if (excKlass != nullptr) {
+                    ni->AddIndexDependency(excKlass);
                 }
-                ncbs.emplace_back(ni, exc_klass, ocb.GetHandlerPc(), ocb.GetCodeSize());
+                ncbs.emplace_back(ni, excKlass, ocb.GetHandlerPc(), ocb.GetCodeSize());
             }
             auto ntb = panda_file::CodeItem::TryBlock(otb.GetStartPc(), otb.GetLength(), ncbs);
             nci->AddTryBlock(ntb);
         }
     }
 
-    if (should_save) {
-        code_datas_.push_back(CodeData {instructions, oi, ni, reader, patch_lnp});
+    if (shouldSave) {
+        codeDatas_.push_back(CodeData {instructions, oi, ni, reader, patchLnp});
     }
 }
 
@@ -278,13 +278,13 @@ bool Context::IsSameType(panda::panda_file::TypeItem *nevv, panda::panda_file::T
         return nevv->GetType() == old->GetType();
     }
 
-    auto iter = known_items_.find(old);
-    return iter != known_items_.end() && iter->second == nevv;
+    auto iter = knownItems_.find(old);
+    return iter != knownItems_.end() && iter->second == nevv;
 }
 
 std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::BaseClassItem *klass,
                                                                     panda_file::ForeignMethodItem *fm,
-                                                                    std::vector<ErrorDetail> *related_items)
+                                                                    std::vector<ErrorDetail> *relatedItems)
 {
     if (klass == nullptr) {
         return false;
@@ -302,7 +302,7 @@ std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::
         auto nm = beg->get();
         auto np = nm->GetProto();
 
-        related_items->emplace_back("candidate", nm);
+        relatedItems->emplace_back("candidate", nm);
 
         if (op->GetRefTypes().size() != np->GetRefTypes().size()) {
             continue;
@@ -325,10 +325,10 @@ std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::
         }
     }
 
-    panda_file::BaseClassItem *search_in = kls->GetSuperClass();
+    panda_file::BaseClassItem *searchIn = kls->GetSuperClass();
     size_t idx = 0;
     while (true) {
-        auto res = TryFindMethod(search_in, fm, related_items);
+        auto res = TryFindMethod(searchIn, fm, relatedItems);
         if (std::holds_alternative<bool>(res)) {
             if (std::get<bool>(res)) {
                 return res;
@@ -340,20 +340,20 @@ std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::
         if (idx >= kls->GetInterfaces().size()) {
             return false;
         }
-        search_in = kls->GetInterfaces()[idx++];
+        searchIn = kls->GetInterfaces()[idx++];
     }
     return false;
 }
 
 void Context::MergeForeignMethod(const panda_file::FileReader *reader, panda_file::ForeignMethodItem *fm)
 {
-    ASSERT(known_items_.find(fm) == known_items_.end());
-    ASSERT(known_items_.find(fm->GetClassItem()) != known_items_.end());
-    auto clz = static_cast<panda_file::BaseClassItem *>(known_items_[fm->GetClassItem()]);
+    ASSERT(knownItems_.find(fm) == knownItems_.end());
+    ASSERT(knownItems_.find(fm->GetClassItem()) != knownItems_.end());
+    auto clz = static_cast<panda_file::BaseClassItem *>(knownItems_[fm->GetClassItem()]);
     std::vector<panda::static_linker::Context::ErrorDetail> details = {{"method", fm}};
     auto res = TryFindMethod(clz, fm, &details);
-    if (std::holds_alternative<bool>(res) || conf_.remains_partial.count(GetStr(clz->GetNameItem())) != 0) {
-        if (std::get<bool>(res) || conf_.remains_partial.count(GetStr(clz->GetNameItem())) != 0) {
+    if (std::holds_alternative<bool>(res) || conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
+        if (std::get<bool>(res) || conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
             MergeForeignMethodCreate(reader, clz, fm);
         } else {
             Error("Unresolved method", details, reader);
@@ -366,7 +366,7 @@ void Context::MergeForeignMethod(const panda_file::FileReader *reader, panda_fil
                                       << ErrorToString({"old method", fm}, 1) << '\n'
                                       << ErrorToString({"new method", meth}, 1);
         }
-        known_items_[fm] = meth;
+        knownItems_[fm] = meth;
     }
 }
 
@@ -377,21 +377,21 @@ void Context::MergeForeignMethodCreate(const panda_file::FileReader *reader, pan
     auto name = StringFromOld(fm->GetNameItem());
     auto proto = GetProto(fm->GetProto()).first;
     auto access = fm->GetAccessFlags();
-    auto [iter, was_inserted] = foreign_methods_.emplace(
+    auto [iter, was_inserted] = foreignMethods_.emplace(
         std::piecewise_construct, std::forward_as_tuple(fc, name, proto, access), std::forward_as_tuple(nullptr));
     if (was_inserted) {
         iter->second = cont_.CreateItem<panda_file::ForeignMethodItem>(fc, name, proto, access);
     } else {
-        result_.stats.deduplicated_foreigners++;
+        result_.stats.deduplicatedForeigners++;
     }
     auto nfm = iter->second;
-    came_from_.emplace(nfm, reader);
-    known_items_[fm] = nfm;
+    cameFrom_.emplace(nfm, reader);
+    knownItems_[fm] = nfm;
 }
 
 std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassItem *> Context::TryFindField(
-    panda_file::BaseClassItem *klass, const std::string &name, panda_file::TypeItem *expected_type,
-    std::vector<panda_file::FieldItem *> *bad_candidates)
+    panda_file::BaseClassItem *klass, const std::string &name, panda_file::TypeItem *expectedType,
+    std::vector<panda_file::FieldItem *> *badCandidates)
 {
     if (klass == nullptr) {
         return std::monostate {};
@@ -400,33 +400,33 @@ std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassIt
         return static_cast<panda_file::ForeignClassItem *>(klass);
     }
     auto kls = static_cast<panda_file::ClassItem *>(klass);
-    panda_file::FieldItem *new_fld = nullptr;
+    panda_file::FieldItem *newFld = nullptr;
     kls->VisitFields([&](panda_file::BaseItem *bi) {
         ASSERT(bi->GetItemType() == panda_file::ItemTypes::FIELD_ITEM);
         auto fld = static_cast<panda_file::FieldItem *>(bi);
         if (fld->GetNameItem()->GetData() != name) {
             return true;
         }
-        if (fld->GetTypeItem() != expected_type) {
-            if (bad_candidates != nullptr) {
-                bad_candidates->push_back(fld);
+        if (fld->GetTypeItem() != expectedType) {
+            if (badCandidates != nullptr) {
+                badCandidates->push_back(fld);
             }
             return true;
         }
-        new_fld = fld;
+        newFld = fld;
         return false;
     });
-    if (new_fld != nullptr) {
-        return new_fld;
+    if (newFld != nullptr) {
+        return newFld;
     }
-    return TryFindField(kls->GetSuperClass(), name, expected_type, bad_candidates);
+    return TryFindField(kls->GetSuperClass(), name, expectedType, badCandidates);
 }
 
 void Context::MergeForeignField(const panda_file::FileReader *reader, panda_file::ForeignFieldItem *ff)
 {
-    ASSERT(known_items_.find(ff) == known_items_.end());
-    ASSERT(known_items_.find(ff->GetClassItem()) != known_items_.end());
-    auto clz = static_cast<panda_file::BaseClassItem *>(known_items_[ff->GetClassItem()]);
+    ASSERT(knownItems_.find(ff) == knownItems_.end());
+    ASSERT(knownItems_.find(ff->GetClassItem()) != knownItems_.end());
+    auto clz = static_cast<panda_file::BaseClassItem *>(knownItems_[ff->GetClassItem()]);
     if (clz->GetItemType() != panda_file::ItemTypes::FOREIGN_CLASS_ITEM) {
         ASSERT(clz->GetItemType() == panda_file::ItemTypes::CLASS_ITEM);
         auto rclz = static_cast<panda_file::ClassItem *>(clz);
@@ -437,7 +437,7 @@ void Context::MergeForeignField(const panda_file::FileReader *reader, panda_file
             [&](auto el) {
                 using T = decltype(el);
                 if constexpr (std::is_same_v<T, std::monostate>) {
-                    if (conf_.remains_partial.count(GetStr(clz->GetNameItem())) != 0) {
+                    if (conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
                         MergeForeignFieldCreate(reader, clz, ff);
                     } else {
                         auto details = std::vector<ErrorDetail> {{"field", ff}};
@@ -447,15 +447,15 @@ void Context::MergeForeignField(const panda_file::FileReader *reader, panda_file
                         Error("Unresolved field", details, reader);
                     }
                 } else if constexpr (std::is_same_v<T, panda_file::FieldItem *>) {
-                    known_items_[ff] = el;
+                    knownItems_[ff] = el;
                 } else {
                     ASSERT((std::is_same_v<T, panda_file::ForeignClassItem *>));
                     // el or klass? propagate field to base or not?
-                    auto field_klass = el;
+                    auto fieldKlass = el;
                     LOG(DEBUG, STATIC_LINKER) << "Propagating foreign field to base\n"
                                               << ErrorToString({"field", ff}, 1) << '\n'
-                                              << ErrorToString({"new base", field_klass}, 1);
-                    MergeForeignFieldCreate(reader, field_klass, ff);
+                                              << ErrorToString({"new base", fieldKlass}, 1);
+                    MergeForeignFieldCreate(reader, fieldKlass, ff);
                 }
             },
             res);
@@ -470,17 +470,17 @@ void Context::MergeForeignFieldCreate(const panda_file::FileReader *reader, pand
     auto *fc = static_cast<panda_file::ForeignClassItem *>(clz);
     auto name = StringFromOld(ff->GetNameItem());
     auto typ = TypeFromOld(ff->GetTypeItem());
-    auto [iter, was_inserted] = foreign_fields_.emplace(std::piecewise_construct, std::forward_as_tuple(fc, name, typ),
-                                                        std::forward_as_tuple(nullptr));
+    auto [iter, was_inserted] = foreignFields_.emplace(std::piecewise_construct, std::forward_as_tuple(fc, name, typ),
+                                                       std::forward_as_tuple(nullptr));
     if (was_inserted) {
         iter->second = cont_.CreateItem<panda_file::ForeignFieldItem>(fc, name, typ);
     } else {
-        result_.stats.deduplicated_foreigners++;
+        result_.stats.deduplicatedForeigners++;
     }
 
     auto nff = iter->second;
-    came_from_.emplace(nff, reader);
-    known_items_[ff] = nff;
+    cameFrom_.emplace(nff, reader);
+    knownItems_[ff] = nff;
 }
 
 std::vector<panda_file::Type> Helpers::BreakProto(panda_file::ProtoItem *p)
@@ -491,8 +491,8 @@ std::vector<panda_file::Type> Helpers::BreakProto(panda_file::ProtoItem *p)
     ret.reserve(panda_file::SHORTY_ELEM_PER16 * shorty.size());
 
     // SHORTY
-    size_t num_elem = 0;
-    size_t num_refs = 0;
+    size_t numElem = 0;
+    size_t numRefs = 0;
     auto fetch = [idx = size_t(0), &shorty]() mutable {
         ASSERT(idx < shorty.size());
         return shorty[idx++];
@@ -501,31 +501,31 @@ std::vector<panda_file::Type> Helpers::BreakProto(panda_file::ProtoItem *p)
     auto v = fetch();
 
     while (v != 0) {
-        auto shift = (num_elem % panda_file::SHORTY_ELEM_PER16) * panda_file::SHORTY_ELEM_WIDTH;
+        auto shift = (numElem % panda_file::SHORTY_ELEM_PER16) * panda_file::SHORTY_ELEM_WIDTH;
 
         auto elem = (static_cast<decltype(shift)>(v) >> shift) & panda_file::SHORTY_ELEM_MASK;
 
         if (elem == 0) {
             break;
         }
-        auto as_id = panda_file::Type::TypeId(elem);
-        ASSERT(as_id != panda_file::Type::TypeId::INVALID);
+        auto asId = panda_file::Type::TypeId(elem);
+        ASSERT(asId != panda_file::Type::TypeId::INVALID);
 
-        auto t = panda_file::Type(as_id);
+        auto t = panda_file::Type(asId);
         if (t.IsReference()) {
-            num_refs++;
+            numRefs++;
         }
         static_assert(std::is_trivially_copyable_v<decltype(t)>);
         ret.emplace_back(t);
 
-        num_elem++;
+        numElem++;
 
-        if (num_elem % panda_file::SHORTY_ELEM_PER16 == 0) {
+        if (numElem % panda_file::SHORTY_ELEM_PER16 == 0) {
             v = fetch();
         }
     }
 
-    ASSERT(num_refs == p->GetRefTypes().size());
+    ASSERT(numRefs == p->GetRefTypes().size());
     ASSERT(!ret.empty());
 
     return ret;
@@ -541,14 +541,14 @@ std::pair<panda_file::ProtoItem *, std::vector<panda_file::MethodParamItem>> Con
     auto params = std::vector<panda_file::MethodParamItem>();
     params.reserve(typs.size() - 1);
 
-    size_t num_refs = 0;
+    size_t numRefs = 0;
 
     for (auto const &t : typs) {
         panda_file::TypeItem *ti;
 
         if (t.IsReference()) {
-            ASSERT(num_refs < refs.size());
-            ti = TypeFromOld(refs[num_refs++]);
+            ASSERT(numRefs < refs.size());
+            ti = TypeFromOld(refs[numRefs++]);
         } else {
             ti = cont_.GetOrCreatePrimitiveTypeItem(t);
         }
@@ -560,7 +560,7 @@ std::pair<panda_file::ProtoItem *, std::vector<panda_file::MethodParamItem>> Con
         }
     }
 
-    ASSERT(num_refs == refs.size());
+    ASSERT(numRefs == refs.size());
     ASSERT(ret != nullptr);
 
     auto proto = cont_.GetOrCreateProtoItem(ret, params);
@@ -571,17 +571,17 @@ std::pair<panda_file::ProtoItem *, std::vector<panda_file::MethodParamItem>> Con
 template <typename T, typename Getter, typename Adder>
 void Context::AddAnnotationImpl(AddAnnotationImplData<T> ad, Getter getter, Adder adder)
 {
-    const auto &old_annot_list = DerefPtrRef(getter(ad.oi));
-    for (size_t ind = ad.from; ind < old_annot_list.size(); ind++) {
-        auto old_annot = old_annot_list[ind];
-        auto mb_new_annot = AnnotFromOld(old_annot);
-        if (std::holds_alternative<panda_file::AnnotationItem *>(mb_new_annot)) {
-            adder(ad.ni, std::get<panda_file::AnnotationItem *>(mb_new_annot));
+    const auto &oldAnnotList = DerefPtrRef(getter(ad.oi));
+    for (size_t ind = ad.from; ind < oldAnnotList.size(); ind++) {
+        auto oldAnnot = oldAnnotList[ind];
+        auto mbNewAnnot = AnnotFromOld(oldAnnot);
+        if (std::holds_alternative<panda_file::AnnotationItem *>(mbNewAnnot)) {
+            adder(ad.ni, std::get<panda_file::AnnotationItem *>(mbNewAnnot));
             return;
         }
-        const auto &ed = std::get<ErrorDetail>(mb_new_annot);
-        if (ad.retries_left-- == 0) {
-            std::vector<ErrorDetail> details {ErrorDetail {"annotation", old_annot}, ed};
+        const auto &ed = std::get<ErrorDetail>(mbNewAnnot);
+        if (ad.retriesLeft-- == 0) {
+            std::vector<ErrorDetail> details {ErrorDetail {"annotation", oldAnnot}, ed};
             if constexpr (std::is_base_of_v<panda_file::BaseItem, std::decay_t<T>>) {
                 details.emplace_back("old item", ad.oi);
                 details.emplace_back("new item", ad.ni);
@@ -592,7 +592,7 @@ void Context::AddAnnotationImpl(AddAnnotationImplData<T> ad, Getter getter, Adde
 
         LOG(DEBUG, STATIC_LINKER) << "defer annotation transferring due to" << ErrorToString(ed, 1);
         ad.from = ind;
-        deferred_failed_annotations_.emplace_back([=]() { AddAnnotationImpl<T>(ad, getter, adder); });
+        deferredFailedAnnotations_.emplace_back([=]() { AddAnnotationImpl<T>(ad, getter, adder); });
         return;
     }
 }
@@ -618,46 +618,46 @@ void Context::TransferAnnotations(const panda_file::FileReader *reader, T *ni, T
 
 std::variant<panda_file::AnnotationItem *, Context::ErrorDetail> Context::AnnotFromOld(panda_file::AnnotationItem *oa)
 {
-    if (auto iter = known_items_.find(oa); iter != known_items_.end()) {
+    if (auto iter = knownItems_.find(oa); iter != knownItems_.end()) {
         return static_cast<panda_file::AnnotationItem *>(iter->second);
     }
 
     using Elem = panda_file::AnnotationItem::Elem;
 
-    const auto &old_elems = *oa->GetElements();
-    auto new_elems = std::vector<Elem>();
-    new_elems.reserve(old_elems.size());
-    for (const auto &oe : old_elems) {
+    const auto &oldElems = *oa->GetElements();
+    auto newElems = std::vector<Elem>();
+    newElems.reserve(oldElems.size());
+    for (const auto &oe : oldElems) {
         auto name = StringFromOld(oe.GetName());
-        auto *old_val = oe.GetValue();
-        panda_file::ValueItem *new_val {};
+        auto *oldVal = oe.GetValue();
+        panda_file::ValueItem *newVal {};
 
         using ValueType = panda_file::ValueItem::Type;
-        switch (old_val->GetType()) {
+        switch (oldVal->GetType()) {
             case ValueType::INTEGER:
-                new_val = cont_.GetOrCreateIntegerValueItem(old_val->GetAsScalar()->GetValue<uint32_t>());
+                newVal = cont_.GetOrCreateIntegerValueItem(oldVal->GetAsScalar()->GetValue<uint32_t>());
                 break;
             case ValueType::LONG:
-                new_val = cont_.GetOrCreateLongValueItem(old_val->GetAsScalar()->GetValue<uint64_t>());
+                newVal = cont_.GetOrCreateLongValueItem(oldVal->GetAsScalar()->GetValue<uint64_t>());
                 break;
             case ValueType::FLOAT:
-                new_val = cont_.GetOrCreateFloatValueItem(old_val->GetAsScalar()->GetValue<float>());
+                newVal = cont_.GetOrCreateFloatValueItem(oldVal->GetAsScalar()->GetValue<float>());
                 break;
             case ValueType::DOUBLE:
-                new_val = cont_.GetOrCreateDoubleValueItem(old_val->GetAsScalar()->GetValue<double>());
+                newVal = cont_.GetOrCreateDoubleValueItem(oldVal->GetAsScalar()->GetValue<double>());
                 break;
             case ValueType::ID: {
-                auto old_item = old_val->GetAsScalar()->GetIdItem();
-                ASSERT(old_item != nullptr);
-                auto new_item = ScalarValueIdFromOld(old_item);
-                if (std::holds_alternative<ErrorDetail>(new_item)) {
-                    return std::move(std::get<ErrorDetail>(new_item));
+                auto oldItem = oldVal->GetAsScalar()->GetIdItem();
+                ASSERT(oldItem != nullptr);
+                auto newItem = ScalarValueIdFromOld(oldItem);
+                if (std::holds_alternative<ErrorDetail>(newItem)) {
+                    return std::move(std::get<ErrorDetail>(newItem));
                 }
-                new_val = cont_.GetOrCreateIdValueItem(std::get<panda_file::BaseItem *>(new_item));
+                newVal = cont_.GetOrCreateIdValueItem(std::get<panda_file::BaseItem *>(newItem));
                 break;
             }
             case ValueType::ARRAY: {
-                auto old = old_val->GetAsArray();
+                auto old = oldVal->GetAsArray();
                 auto its = old->GetItems();
                 for (auto &i : its) {
                     if (i.HasValue<panda_file::BaseItem *>()) {
@@ -668,33 +668,32 @@ std::variant<panda_file::AnnotationItem *, Context::ErrorDetail> Context::AnnotF
                         i = panda_file::ScalarValueItem(std::get<panda_file::BaseItem *>(vl));
                     }
                 }
-                new_val = cont_.CreateItem<panda_file::ArrayValueItem>(old->GetComponentType(), std::move(its));
+                newVal = cont_.CreateItem<panda_file::ArrayValueItem>(old->GetComponentType(), std::move(its));
                 break;
             }
             default:
                 UNREACHABLE();
         }
 
-        ASSERT(new_val != nullptr);
-        new_elems.emplace_back(name, new_val);
+        ASSERT(newVal != nullptr);
+        newElems.emplace_back(name, newVal);
     }
 
-    auto clz_it = known_items_.find(oa->GetClassItem());
-    ASSERT(clz_it != known_items_.end());
-    ASSERT(clz_it->second->GetItemType() == panda_file::ItemTypes::CLASS_ITEM ||
-           clz_it->second->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM);
-    auto clz = static_cast<panda_file::BaseClassItem *>(clz_it->second);
+    auto clzIt = knownItems_.find(oa->GetClassItem());
+    ASSERT(clzIt != knownItems_.end());
+    ASSERT(clzIt->second->GetItemType() == panda_file::ItemTypes::CLASS_ITEM ||
+           clzIt->second->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM);
+    auto clz = static_cast<panda_file::BaseClassItem *>(clzIt->second);
 
-    auto na = cont_.CreateItem<panda_file::AnnotationItem>(clz, std::move(new_elems), oa->GetTags());
-    known_items_.emplace(oa, na);
+    auto na = cont_.CreateItem<panda_file::AnnotationItem>(clz, std::move(newElems), oa->GetTags());
+    knownItems_.emplace(oa, na);
     return na;
 }
 
 std::variant<panda_file::BaseItem *, Context::ErrorDetail> Context::ScalarValueIdFromOld(panda_file::BaseItem *oi)
 {
-    if (auto new_item_it = known_items_.find(static_cast<panda_file::IndexedItem *>(oi));
-        new_item_it != known_items_.end()) {
-        return new_item_it->second;
+    if (auto newItemIt = knownItems_.find(static_cast<panda_file::IndexedItem *>(oi)); newItemIt != knownItems_.end()) {
+        return newItemIt->second;
     }
     if (oi->GetItemType() == panda_file::ItemTypes::STRING_ITEM) {
         return StringFromOld(static_cast<panda_file::StringItem *>(oi));
@@ -709,8 +708,8 @@ std::variant<panda_file::BaseItem *, Context::ErrorDetail> Context::ScalarValueI
 
 void Context::Parse()
 {
-    for (auto &code_data : code_datas_) {
-        ProcessCodeData(patcher_, &code_data);
+    for (auto &codeData : codeDatas_) {
+        ProcessCodeData(patcher_, &codeData);
     }
     patcher_.ApplyDeps(this);
 }

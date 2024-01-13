@@ -17,12 +17,12 @@
 #define DISASM_ETS_PLUGIN_INCLUDED
 
 void GeteTSMetadata();
-void GetETSMetadata(pandasm::Record *record, const panda_file::File::EntityId &record_id);
-void SetETSAttributes(pandasm::Record *record, const panda_file::File::EntityId &record_id) const;
-void GetETSMetadata(pandasm::Function *method, const panda_file::File::EntityId &method_id);
-void SetETSAttributes(pandasm::Function *method, const panda_file::File::EntityId &method_id) const;
-void GetETSMetadata(pandasm::Field *field, const panda_file::File::EntityId &field_id);
-void SetETSAttributes(pandasm::Field *field, const panda_file::File::EntityId &field_id) const;
+void GetETSMetadata(pandasm::Record *record, const panda_file::File::EntityId &recordId);
+void SetETSAttributes(pandasm::Record *record, const panda_file::File::EntityId &recordId) const;
+void GetETSMetadata(pandasm::Function *method, const panda_file::File::EntityId &methodId);
+void SetETSAttributes(pandasm::Function *method, const panda_file::File::EntityId &methodId) const;
+void GetETSMetadata(pandasm::Field *field, const panda_file::File::EntityId &fieldId);
+void SetETSAttributes(pandasm::Field *field, const panda_file::File::EntityId &fieldId) const;
 AnnotationList GetETSAnnotation(const panda_file::File::EntityId &id, const std::string &type = "");
 
 #endif

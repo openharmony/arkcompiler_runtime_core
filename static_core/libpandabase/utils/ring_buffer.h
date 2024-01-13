@@ -220,7 +220,7 @@ public:
             buffer_[tail_].~value_type();
         }
         DecrementBufferIndex(tail_);
-        --current_size_;
+        --currentSize_;
     }
 
     /// Removes the first element of the ring buffer
@@ -230,7 +230,7 @@ public:
             buffer_[head_].~value_type();
         }
         IncrementBufferIndex(head_);
-        --current_size_;
+        --currentSize_;
     }
 
     /// @return iterator to the first element
@@ -358,7 +358,7 @@ public:
     /// @return current ring buffer size
     constexpr size_type size() const noexcept  // NOLINT(readability-identifier-naming)
     {
-        return current_size_;
+        return currentSize_;
     }
 
     /// @return maximum ring buffer size
@@ -377,7 +377,7 @@ public:
         }
         head_ = 0;
         tail_ = capacity();
-        current_size_ = 0;
+        currentSize_ = 0;
     }
 
 private:
@@ -387,7 +387,7 @@ private:
         if (full()) {
             IncrementBufferIndex(head_);
         } else {
-            ++current_size_;
+            ++currentSize_;
         }
     }
 
@@ -397,7 +397,7 @@ private:
         if (full()) {
             DecrementBufferIndex(tail_);
         } else {
-            ++current_size_;
+            ++currentSize_;
         }
     }
 
@@ -414,7 +414,7 @@ private:
     std::array<T, N + 1> buffer_ = {};
     size_type head_ = 0U;
     size_type tail_ = N;
-    size_type current_size_ = 0U;
+    size_type currentSize_ = 0U;
 };
 }  // namespace panda
 

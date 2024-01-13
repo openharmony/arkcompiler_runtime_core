@@ -65,34 +65,34 @@
 namespace panda::interpreter {
 
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED = false>
-void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh);
+void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh);
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED = false>
-void ExecuteImplDebug(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh);
+void ExecuteImplDebug(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh);
 
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED = false>
-void ExecuteImplInner(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh);
+void ExecuteImplInner(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh);
 
 class FrameHelperDefault {
 public:
     template <BytecodeInstruction::Format FORMAT, class InstructionHandler>
-    ALWAYS_INLINE static uint32_t GetNumberActualArgsDyn(InstructionHandler *instr_handler)
+    ALWAYS_INLINE static uint32_t GetNumberActualArgsDyn(InstructionHandler *instrHandler)
     {
         // +1 means function object itself
-        return instr_handler->GetInst().template GetImm<FORMAT, 0>() + 1;
+        return instrHandler->GetInst().template GetImm<FORMAT, 0>() + 1;
     }
 
     template <BytecodeInstruction::Format FORMAT, class InstructionHandler>
-    ALWAYS_INLINE static void CopyArgumentsDyn([[maybe_unused]] InstructionHandler *instr_handler,
-                                               [[maybe_unused]] Frame *new_frame, [[maybe_unused]] uint32_t num_vregs,
-                                               [[maybe_unused]] uint32_t num_actual_args)
+    ALWAYS_INLINE static void CopyArgumentsDyn([[maybe_unused]] InstructionHandler *instrHandler,
+                                               [[maybe_unused]] Frame *newFrame, [[maybe_unused]] uint32_t numVregs,
+                                               [[maybe_unused]] uint32_t numActualArgs)
     {
     }
 
     template <class RuntimeIfaceT>
-    ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregs_size, Method *method,
-                                            Frame *prev, uint32_t nregs, uint32_t num_actual_args)
+    ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregsSize, Method *method,
+                                            Frame *prev, uint32_t nregs, uint32_t numActualArgs)
     {
-        return RuntimeIfaceT::CreateFrameWithActualArgsAndSize(nregs_size, nregs, num_actual_args, method, prev);
+        return RuntimeIfaceT::CreateFrameWithActualArgsAndSize(nregsSize, nregs, numActualArgs, method, prev);
     }
 };
 
@@ -135,8 +135,8 @@ public:
         uint16_t vd = this->GetInst().template GetVReg<FORMAT, 0>();
         uint16_t vs = this->GetInst().template GetVReg<FORMAT, 1>();
         LOG_INST() << "mov v" << vd << ", v" << vs;
-        auto cur_frame_handler = this->GetFrameHandler();
-        cur_frame_handler.GetVReg(vd).MovePrimitive(cur_frame_handler.GetVReg(vs));
+        auto curFrameHandler = this->GetFrameHandler();
+        curFrameHandler.GetVReg(vd).MovePrimitive(curFrameHandler.GetVReg(vs));
         this->template MoveToNextInst<FORMAT, false>();
     }
 
@@ -146,8 +146,8 @@ public:
         uint16_t vd = this->GetInst().template GetVReg<FORMAT, 0>();
         uint16_t vs = this->GetInst().template GetVReg<FORMAT, 1>();
         LOG_INST() << "mov.64 v" << vd << ", v" << vs;
-        auto cur_frame_handler = this->GetFrameHandler();
-        cur_frame_handler.GetVReg(vd).MovePrimitive(cur_frame_handler.GetVReg(vs));
+        auto curFrameHandler = this->GetFrameHandler();
+        curFrameHandler.GetVReg(vd).MovePrimitive(curFrameHandler.GetVReg(vs));
         this->template MoveToNextInst<FORMAT, false>();
     }
 
@@ -157,8 +157,8 @@ public:
         uint16_t vd = this->GetInst().template GetVReg<FORMAT, 0>();
         uint16_t vs = this->GetInst().template GetVReg<FORMAT, 1>();
         LOG_INST() << "mov.obj v" << vd << ", v" << vs;
-        auto cur_frame_handler = this->GetFrameHandler();
-        cur_frame_handler.GetVReg(vd).MoveReference(cur_frame_handler.GetVReg(vs));
+        auto curFrameHandler = this->GetFrameHandler();
+        curFrameHandler.GetVReg(vd).MoveReference(curFrameHandler.GetVReg(vs));
         this->template MoveToNextInst<FORMAT, false>();
     }
 
@@ -168,8 +168,8 @@ public:
         uint16_t vd = this->GetInst().template GetVReg<FORMAT, 0>();
         uint16_t vs = this->GetInst().template GetVReg<FORMAT, 1>();
         LOG_INST() << "mov.dyn v" << vd << ", v" << vs;
-        auto cur_frame_handler = this->GetFrameHandler();
-        cur_frame_handler.GetVReg(vd).Move(cur_frame_handler.GetVReg(vs));
+        auto curFrameHandler = this->GetFrameHandler();
+        curFrameHandler.GetVReg(vd).Move(curFrameHandler.GetVReg(vs));
         this->template MoveToNextInst<FORMAT, false>();
     }
 
@@ -288,12 +288,12 @@ public:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleLdaStr()
     {
-        auto string_id = this->GetInst().template GetId<FORMAT>();
-        LOG_INST() << "lda.str " << std::hex << "0x" << string_id;
+        auto stringId = this->GetInst().template GetId<FORMAT>();
+        LOG_INST() << "lda.str " << std::hex << "0x" << stringId;
 
         this->GetFrame()->SetAcc(this->GetAcc());
         PandaVM *vm = this->GetThread()->GetVM();
-        vm->HandleLdaStr(this->GetFrame(), string_id);
+        vm->HandleLdaStr(this->GetFrame(), stringId);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -307,10 +307,10 @@ public:
     {
         if constexpr (std::is_same_v<T, ObjectHeader *>) {
             if (elem != nullptr) {
-                auto *array_class = array->ClassAddr<Class>();
-                auto *element_class = array_class->GetComponentType();
-                if (UNLIKELY(!elem->IsInstanceOf(element_class))) {
-                    RuntimeIfaceT::ThrowArrayStoreException(array_class, elem->template ClassAddr<Class>());
+                auto *arrayClass = array->ClassAddr<Class>();
+                auto *elementClass = arrayClass->GetComponentType();
+                if (UNLIKELY(!elem->IsInstanceOf(elementClass))) {
+                    RuntimeIfaceT::ThrowArrayStoreException(arrayClass, elem->template ClassAddr<Class>());
                     return false;
                 }
             }
@@ -321,9 +321,9 @@ public:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleLdaType()
     {
-        auto type_id = this->GetInst().template GetId<FORMAT>();
-        LOG_INST() << "lda.type " << std::hex << "0x" << type_id;
-        Class *type = ResolveType(type_id);
+        auto typeId = this->GetInst().template GetId<FORMAT>();
+        LOG_INST() << "lda.type " << std::hex << "0x" << typeId;
+        Class *type = ResolveType(typeId);
         if (LIKELY(type != nullptr)) {
             this->GetAccAsVReg().SetReference(type->GetManagedObject());
             this->template MoveToNextInst<FORMAT, false>();
@@ -1811,13 +1811,13 @@ public:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleLdaConst()
     {
-        auto litarr_id = this->GetInst().template GetId<FORMAT>();
+        auto litarrId = this->GetInst().template GetId<FORMAT>();
         uint16_t vd = this->GetInst().template GetVReg<FORMAT>();
 
-        LOG_INST() << "lda.const v" << vd << ", " << std::hex << "0x" << litarr_id;
+        LOG_INST() << "lda.const v" << vd << ", " << std::hex << "0x" << litarrId;
 
         this->GetFrame()->SetAcc(this->GetAcc());
-        auto array = ResolveLiteralArray(litarr_id);
+        auto array = ResolveLiteralArray(litarrId);
         this->GetAcc() = this->GetFrame()->GetAcc();
 
         if (UNLIKELY(array == nullptr)) {
@@ -2440,11 +2440,11 @@ public:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleCheckcast()
     {
-        auto type_id = this->GetInst().template GetId<FORMAT>();
+        auto typeId = this->GetInst().template GetId<FORMAT>();
 
-        LOG_INST() << "checkcast " << std::hex << "0x" << type_id;
+        LOG_INST() << "checkcast " << std::hex << "0x" << typeId;
 
-        Class *type = ResolveType(type_id);
+        Class *type = ResolveType(typeId);
         if (LIKELY(type != nullptr)) {
             ObjectHeader *obj = this->GetAcc().GetReference();
 
@@ -2462,11 +2462,11 @@ public:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE void HandleIsinstance()
     {
-        auto type_id = this->GetInst().template GetId<FORMAT>();
+        auto typeId = this->GetInst().template GetId<FORMAT>();
 
-        LOG_INST() << "isinstance " << std::hex << "0x" << type_id;
+        LOG_INST() << "isinstance " << std::hex << "0x" << typeId;
 
-        Class *type = ResolveType(type_id);
+        Class *type = ResolveType(typeId);
         if (LIKELY(type != nullptr)) {
             ObjectHeader *obj = this->GetAcc().GetReference();
 
@@ -2691,15 +2691,15 @@ public:
 
             ASSERT(thread->HasPendingException());
 
-            uint32_t pc_offset = this->FindCatchBlock(thread->GetException(), this->GetBytecodeOffset());
+            uint32_t pcOffset = this->FindCatchBlock(thread->GetException(), this->GetBytecodeOffset());
 
-            if (pc_offset != panda_file::INVALID_OFFSET) {
-                return pc_offset;
+            if (pcOffset != panda_file::INVALID_OFFSET) {
+                return pcOffset;
             }
 
             if (!frame->IsStackless() || prev == nullptr ||
                 StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(prev)) {
-                return pc_offset;
+                return pcOffset;
             }
 
             Method *method = frame->GetMethod();
@@ -3008,10 +3008,10 @@ public:
 
         if constexpr (std::is_same_v<T, ObjectHeader *>) {
             if (elem != nullptr) {
-                auto *array_class = array->ClassAddr<Class>();
-                auto *element_class = array_class->GetComponentType();
-                if (UNLIKELY(!elem->IsInstanceOf(element_class))) {
-                    RuntimeIfaceT::ThrowArrayStoreException(array_class, elem->template ClassAddr<Class>());
+                auto *arrayClass = array->ClassAddr<Class>();
+                auto *elementClass = arrayClass->GetComponentType();
+                if (UNLIKELY(!elem->IsInstanceOf(elementClass))) {
+                    RuntimeIfaceT::ThrowArrayStoreException(arrayClass, elem->template ClassAddr<Class>());
                     return false;
                 }
             }
@@ -3114,22 +3114,21 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT, bool IS_DYNAMIC_T>
-    ALWAYS_INLINE inline void CopyCallAccShortArguments(Frame &frame, uint32_t num_vregs)
+    ALWAYS_INLINE inline void CopyCallAccShortArguments(Frame &frame, uint32_t numVregs)
     {
-        auto cur_frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>();
-        auto frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
+        auto curFrameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>();
+        auto frameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
         static_assert(FORMAT == BytecodeInstruction::Format::V4_IMM4_ID16, "Invalid call acc short format");
-        auto acc_position = static_cast<size_t>(this->GetInst().template GetImm<FORMAT, 0>());
-        switch (acc_position) {
+        auto accPosition = static_cast<size_t>(this->GetInst().template GetImm<FORMAT, 0>());
+        switch (accPosition) {
             case 0U:
-                frame_handler.GetVReg(num_vregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
-                frame_handler.GetVReg(num_vregs + 1U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+                frameHandler.GetVReg(numVregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+                frameHandler.GetVReg(numVregs + 1U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
                 break;
             case 1U:
-                frame_handler.GetVReg(num_vregs) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
-                frame_handler.GetVReg(num_vregs + 1U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+                frameHandler.GetVReg(numVregs) = curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+                frameHandler.GetVReg(numVregs + 1U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
                 break;
             default:
                 UNREACHABLE();
@@ -3137,48 +3136,45 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT, bool IS_DYNAMIC_T>
-    ALWAYS_INLINE inline void CopyCallAccArguments(Frame &frame, uint32_t num_vregs)
+    ALWAYS_INLINE inline void CopyCallAccArguments(Frame &frame, uint32_t numVregs)
     {
-        auto cur_frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>();
-        auto frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
+        auto curFrameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>();
+        auto frameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
         static_assert(FORMAT == BytecodeInstruction::Format::V4_V4_V4_IMM4_ID16, "Invalid call acc format");
-        auto acc_position = static_cast<size_t>(this->GetInst().template GetImm<FORMAT, 0>());
-        switch (acc_position) {
+        auto accPosition = static_cast<size_t>(this->GetInst().template GetImm<FORMAT, 0>());
+        switch (accPosition) {
             case 0U:
-                frame_handler.GetVReg(num_vregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
-                frame_handler.GetVReg(num_vregs + 1U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
-                frame_handler.GetVReg(num_vregs + 2U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1>());
-                frame_handler.GetVReg(num_vregs + 3U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2>());
+                frameHandler.GetVReg(numVregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+                frameHandler.GetVReg(numVregs + 1U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+                frameHandler.GetVReg(numVregs + 2U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1>());
+                frameHandler.GetVReg(numVregs + 3U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2>());
                 break;
             case 1U:
-                frame_handler.GetVReg(num_vregs) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
-                frame_handler.GetVReg(num_vregs + 1U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
-                frame_handler.GetVReg(num_vregs + 2U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1>());
-                frame_handler.GetVReg(num_vregs + 3U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2>());
+                frameHandler.GetVReg(numVregs) = curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+                frameHandler.GetVReg(numVregs + 1U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+                frameHandler.GetVReg(numVregs + 2U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1>());
+                frameHandler.GetVReg(numVregs + 3U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2>());
                 break;
             case 2U:
-                frame_handler.GetVReg(num_vregs) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
-                frame_handler.GetVReg(num_vregs + 1U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1>());
-                frame_handler.GetVReg(num_vregs + 2U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
-                frame_handler.GetVReg(num_vregs + 3U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2>());
+                frameHandler.GetVReg(numVregs) = curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+                frameHandler.GetVReg(numVregs + 1U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1>());
+                frameHandler.GetVReg(numVregs + 2U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+                frameHandler.GetVReg(numVregs + 3U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2>());
                 break;
             case 3U:
-                frame_handler.GetVReg(num_vregs) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
-                frame_handler.GetVReg(num_vregs + 1U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1>());
-                frame_handler.GetVReg(num_vregs + 2U) =
-                    cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2>());
-                frame_handler.GetVReg(num_vregs + 3U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+                frameHandler.GetVReg(numVregs) = curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+                frameHandler.GetVReg(numVregs + 1U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1>());
+                frameHandler.GetVReg(numVregs + 2U) =
+                    curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2>());
+                frameHandler.GetVReg(numVregs + 3U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
                 break;
             default:
                 UNREACHABLE();
@@ -3186,102 +3182,100 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT, bool IS_DYNAMIC_T, bool INITOBJ>
-    ALWAYS_INLINE inline void CopyCallShortArguments(Frame &frame, uint32_t num_vregs)
+    ALWAYS_INLINE inline void CopyCallShortArguments(Frame &frame, uint32_t numVregs)
     {
         static_assert(FORMAT == BytecodeInstruction::Format::V4_V4_ID16, "Invalid call short format");
 
-        auto cur_frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>();
-        auto frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
+        auto curFrameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>();
+        auto frameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
         constexpr size_t SHIFT = INITOBJ ? 1U : 0;
         if constexpr (INITOBJ) {
-            frame_handler.GetVReg(num_vregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+            frameHandler.GetVReg(numVregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
         }
 
-        frame_handler.GetVReg(num_vregs + SHIFT) =
-            cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
-        frame_handler.GetVReg(num_vregs + SHIFT + 1U) =
-            cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>());
+        frameHandler.GetVReg(numVregs + SHIFT) = curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+        frameHandler.GetVReg(numVregs + SHIFT + 1U) =
+            curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>());
     }
 
     template <BytecodeInstruction::Format FORMAT, bool IS_DYNAMIC_T, bool INITOBJ>
-    ALWAYS_INLINE inline void CopyCallArguments(Frame &frame, uint32_t num_vregs)
+    ALWAYS_INLINE inline void CopyCallArguments(Frame &frame, uint32_t numVregs)
     {
         static_assert(FORMAT == BytecodeInstruction::Format::V4_V4_V4_V4_ID16, "Invalid call format");
 
-        auto cur_frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>();
-        auto frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
+        auto curFrameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>();
+        auto frameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
         constexpr size_t SHIFT = INITOBJ ? 1U : 0;
         if constexpr (INITOBJ) {
-            frame_handler.GetVReg(num_vregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+            frameHandler.GetVReg(numVregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
         }
 
-        frame_handler.GetVReg(num_vregs + SHIFT) =
-            cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
-        frame_handler.GetVReg(num_vregs + SHIFT + 1U) =
-            cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>());
-        frame_handler.GetVReg(num_vregs + SHIFT + 2U) =
-            cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2U>());
-        frame_handler.GetVReg(num_vregs + SHIFT + 3U) =
-            cur_frame_handler.GetVReg(this->GetInst().template GetVReg<FORMAT, 3U>());
+        frameHandler.GetVReg(numVregs + SHIFT) = curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 0>());
+        frameHandler.GetVReg(numVregs + SHIFT + 1U) =
+            curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 1U>());
+        frameHandler.GetVReg(numVregs + SHIFT + 2U) =
+            curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 2U>());
+        frameHandler.GetVReg(numVregs + SHIFT + 3U) =
+            curFrameHandler.GetVReg(this->GetInst().template GetVReg<FORMAT, 3U>());
     }
 
     template <bool IS_DYNAMIC_T, BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE inline void CopyCallArguments(Frame &frame, uint32_t num_vregs, uint32_t num_actual_args)
+    ALWAYS_INLINE inline void CopyCallArguments(Frame &frame, uint32_t numVregs, uint32_t numActualArgs)
     {
-        auto cur_frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>();
-        auto frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
-        frame_handler.GetVReg(num_vregs) = cur_frame_handler.GetVReg(this->GetInst().GetVReg(0));
-        if (num_actual_args == 2) {
-            frame_handler.GetVReg(num_vregs + 1U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+        auto curFrameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>();
+        auto frameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
+        frameHandler.GetVReg(numVregs) = curFrameHandler.GetVReg(this->GetInst().GetVReg(0));
+        if (numActualArgs == 2) {
+            frameHandler.GetVReg(numVregs + 1U).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
         }
     }
 
     template <BytecodeInstruction::Format FORMAT, bool IS_DYNAMIC_T, bool INITOBJ>
-    ALWAYS_INLINE inline void CopyRangeArguments(Frame &frame, uint32_t num_vregs, uint32_t num_actual_args)
+    ALWAYS_INLINE inline void CopyRangeArguments(Frame &frame, uint32_t numVregs, uint32_t numActualArgs)
     {
-        auto cur_frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>();
-        auto frame_handler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
+        auto curFrameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>();
+        auto frameHandler = this->template GetFrameHandler<IS_DYNAMIC_T>(&frame);
         constexpr size_t SHIFT = INITOBJ ? 1U : 0;
         if constexpr (INITOBJ) {
-            frame_handler.GetVReg(num_vregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
+            frameHandler.GetVReg(numVregs).Move(this->template GetAccAsVReg<IS_DYNAMIC_T>());
         }
 
-        uint16_t start_reg = this->GetInst().template GetVReg<FORMAT, 0>();
-        for (size_t i = 0; i < num_actual_args - SHIFT; i++) {
-            frame_handler.GetVReg(num_vregs + SHIFT + i) = cur_frame_handler.GetVReg(start_reg + i);
+        uint16_t startReg = this->GetInst().template GetVReg<FORMAT, 0>();
+        for (size_t i = 0; i < numActualArgs - SHIFT; i++) {
+            frameHandler.GetVReg(numVregs + SHIFT + i) = curFrameHandler.GetVReg(startReg + i);
         }
     }
 
     template <class FrameHelper, BytecodeInstruction::Format FORMAT, bool IS_DYNAMIC_T, bool IS_RANGE, bool ACCEPT_ACC,
               bool INITOBJ, bool CALL>
-    ALWAYS_INLINE inline void CopyArguments(Frame &frame, uint32_t num_vregs, [[maybe_unused]] uint32_t num_actual_args,
-                                            uint32_t num_args)
+    ALWAYS_INLINE inline void CopyArguments(Frame &frame, uint32_t numVregs, [[maybe_unused]] uint32_t numActualArgs,
+                                            uint32_t numArgs)
     {
         if constexpr (IS_DYNAMIC_T) {
-            FrameHelper::template CopyArgumentsDyn<FORMAT>(this, &frame, num_vregs, num_actual_args);
+            FrameHelper::template CopyArgumentsDyn<FORMAT>(this, &frame, numVregs, numActualArgs);
             return;
         }
-        if (num_args == 0) {
+        if (numArgs == 0) {
             return;
         }
 
         if constexpr (IS_RANGE) {
-            CopyRangeArguments<FORMAT, IS_DYNAMIC_T, INITOBJ>(frame, num_vregs, num_actual_args);
+            CopyRangeArguments<FORMAT, IS_DYNAMIC_T, INITOBJ>(frame, numVregs, numActualArgs);
         } else if constexpr (ACCEPT_ACC) {
             if constexpr (FORMAT == BytecodeInstruction::Format::V4_IMM4_ID16) {
-                CopyCallAccShortArguments<FORMAT, IS_DYNAMIC_T>(frame, num_vregs);
+                CopyCallAccShortArguments<FORMAT, IS_DYNAMIC_T>(frame, numVregs);
             } else if constexpr (FORMAT == BytecodeInstruction::Format::V4_V4_V4_IMM4_ID16) {
-                CopyCallAccArguments<FORMAT, IS_DYNAMIC_T>(frame, num_vregs);
+                CopyCallAccArguments<FORMAT, IS_DYNAMIC_T>(frame, numVregs);
             } else {
                 UNREACHABLE();
             }
         } else if constexpr (!CALL) {
-            CopyCallArguments<IS_DYNAMIC_T, FORMAT>(frame, num_vregs, num_actual_args);
+            CopyCallArguments<IS_DYNAMIC_T, FORMAT>(frame, numVregs, numActualArgs);
         } else {
             if constexpr (FORMAT == BytecodeInstruction::Format::V4_V4_ID16) {
-                CopyCallShortArguments<FORMAT, IS_DYNAMIC_T, INITOBJ>(frame, num_vregs);
+                CopyCallShortArguments<FORMAT, IS_DYNAMIC_T, INITOBJ>(frame, numVregs);
             } else if constexpr (FORMAT == BytecodeInstruction::Format::V4_V4_V4_V4_ID16) {
-                CopyCallArguments<FORMAT, IS_DYNAMIC_T, INITOBJ>(frame, num_vregs);
+                CopyCallArguments<FORMAT, IS_DYNAMIC_T, INITOBJ>(frame, numVregs);
             } else {
                 UNREACHABLE();
             }
@@ -3290,30 +3284,30 @@ public:
 
     template <class FrameHelper, BytecodeInstruction::Format FORMAT, bool IS_DYNAMIC_T, bool IS_RANGE, bool ACCEPT_ACC,
               bool INITOBJ, bool CALL, bool STACK_LESS>
-    ALWAYS_INLINE inline bool CreateAndSetFrame(Method *method, Frame **frame, uint32_t num_vregs)
+    ALWAYS_INLINE inline bool CreateAndSetFrame(Method *method, Frame **frame, uint32_t numVregs)
     {
-        uint32_t num_declared_args = method->GetNumArgs();
-        uint32_t num_actual_args;
+        uint32_t numDeclaredArgs = method->GetNumArgs();
+        uint32_t numActualArgs;
         uint32_t nregs;
 
         if constexpr (IS_DYNAMIC_T) {
-            num_actual_args = FrameHelper::template GetNumberActualArgsDyn<FORMAT>(this);
-            nregs = num_vregs + std::max(num_declared_args, num_actual_args);
+            numActualArgs = FrameHelper::template GetNumberActualArgsDyn<FORMAT>(this);
+            nregs = numVregs + std::max(numDeclaredArgs, numActualArgs);
         } else {
-            num_actual_args = num_declared_args;
+            numActualArgs = numDeclaredArgs;
             if (FORMAT == BytecodeInstruction::Format::V4_V4_ID16 ||
                 FORMAT == BytecodeInstruction::Format::V4_IMM4_ID16) {
-                nregs = num_vregs + (INITOBJ ? 3U : 2U);
+                nregs = numVregs + (INITOBJ ? 3U : 2U);
             } else if (FORMAT == BytecodeInstruction::Format::V4_V4_V4_V4_ID16 ||
                        FORMAT == BytecodeInstruction::Format::V4_V4_V4_IMM4_ID16) {
-                nregs = num_vregs + (INITOBJ ? 5U : 4U);
+                nregs = numVregs + (INITOBJ ? 5U : 4U);
             } else {
-                nregs = num_vregs + num_declared_args;
+                nregs = numVregs + numDeclaredArgs;
             }
         }
         auto current = this->GetThread();
         *frame = FrameHelper::template CreateFrame<RuntimeIfaceT>(current, Frame::GetActualSize<IS_DYNAMIC>(nregs),
-                                                                  method, this->GetFrame(), nregs, num_actual_args);
+                                                                  method, this->GetFrame(), nregs, numActualArgs);
 
         if (UNLIKELY(*frame == nullptr)) {
             current->DisableStackOverflowCheck();
@@ -3329,7 +3323,7 @@ public:
         }
 
         CopyArguments<FrameHelper, FORMAT, IS_DYNAMIC_T, IS_RANGE, ACCEPT_ACC, INITOBJ, CALL>(
-            **frame, num_vregs, num_actual_args, num_declared_args);
+            **frame, numVregs, numActualArgs, numDeclaredArgs);
 
         RuntimeIfaceT::SetCurrentFrame(current, *frame);
 
@@ -3359,13 +3353,13 @@ public:
               bool INITOBJ, bool CALL>
     ALWAYS_INLINE inline void CallInterpreterStackless(Method *method)
     {
-        uint32_t num_vregs;
+        uint32_t numVregs;
         auto *instructions =
-            panda_file::CodeDataAccessor::GetInstructions(*method->GetPandaFile(), method->GetCodeId(), &num_vregs);
+            panda_file::CodeDataAccessor::GetInstructions(*method->GetPandaFile(), method->GetCodeId(), &numVregs);
 
         Frame *frame = nullptr;
         if (!CreateAndSetFrame<FrameHelper, FORMAT, IS_DYNAMIC_T, IS_RANGE, ACCEPT_ACC, INITOBJ, CALL, true>(
-                method, &frame, num_vregs)) {
+                method, &frame, numVregs)) {
             return;
         }
 
@@ -3447,9 +3441,9 @@ public:
         auto *resolved = cls->ResolveVirtualMethod(method);
         ASSERT(resolved != nullptr);
 
-        ProfilingData *prof_data = this->GetFrame()->GetMethod()->GetProfilingData();
-        if (prof_data != nullptr) {
-            prof_data->UpdateInlineCaches(this->GetBytecodeOffset(), obj->ClassAddr<Class>());
+        ProfilingData *profData = this->GetFrame()->GetMethod()->GetProfilingData();
+        if (profData != nullptr) {
+            profData->UpdateInlineCaches(this->GetBytecodeOffset(), obj->ClassAddr<Class>());
         }
 
         HandleCall<FrameHelperDefault, FORMAT, false, IS_RANGE, ACCEPT_ACC>(resolved);
@@ -3714,7 +3708,7 @@ public:
     }
 
     template <BytecodeInstruction::Format FORMAT>
-    ALWAYS_INLINE void InitializeObject(BytecodeId &method_id)
+    ALWAYS_INLINE void InitializeObject(BytecodeId &methodId)
     {
         Class *klass;
         auto cache = this->GetThread()->GetInterpreterCache();
@@ -3722,7 +3716,7 @@ public:
         if (method != nullptr) {
             klass = method->GetClass();
         } else {
-            klass = RuntimeIfaceT::GetMethodClass(this->GetFrame()->GetMethod(), method_id);
+            klass = RuntimeIfaceT::GetMethodClass(this->GetFrame()->GetMethod(), methodId);
             this->GetAccAsVReg().SetPrimitive(0);
             if (UNLIKELY(klass == nullptr)) {
                 this->MoveToExceptionHandler();
@@ -3731,10 +3725,10 @@ public:
         }
 
         if (UNLIKELY(klass->IsArrayClass())) {
-            DimIterator<FORMAT> dim_iter {this->GetInst(), this->GetFrame()};
-            auto nargs = RuntimeIfaceT::GetMethodArgumentsCount(this->GetFrame()->GetMethod(), method_id);
+            DimIterator<FORMAT> dimIter {this->GetInst(), this->GetFrame()};
+            auto nargs = RuntimeIfaceT::GetMethodArgumentsCount(this->GetFrame()->GetMethod(), methodId);
             auto obj = coretypes::Array::CreateMultiDimensionalArray<DimIterator<FORMAT>>(this->GetThread(), klass,
-                                                                                          nargs, dim_iter);
+                                                                                          nargs, dimIter);
             if (LIKELY(obj != nullptr)) {
                 this->GetAccAsVReg().SetReference(obj);
                 this->template MoveToNextInst<FORMAT, false>();
@@ -3745,7 +3739,7 @@ public:
         }
 
         if (UNLIKELY(method == nullptr)) {
-            method = ResolveMethod(method_id);
+            method = ResolveMethod(methodId);
         }
         if (UNLIKELY(klass->IsStringClass())) {
             if (UNLIKELY(method == nullptr)) {
@@ -3753,11 +3747,11 @@ public:
                 return;
             }
 
-            uint16_t obj_vreg = this->GetInst().template GetVReg<FORMAT>();
-            ObjectHeader *ctor_arg = this->GetFrame()->GetVReg(obj_vreg).template GetAs<ObjectHeader *>();
+            uint16_t objVreg = this->GetInst().template GetVReg<FORMAT>();
+            ObjectHeader *ctorArg = this->GetFrame()->GetVReg(objVreg).template GetAs<ObjectHeader *>();
 
             PandaVM *vm = this->GetThread()->GetVM();
-            auto str = vm->CreateString(method, ctor_arg);
+            auto str = vm->CreateString(method, ctorArg);
             if (LIKELY(str != nullptr)) {
                 this->GetAccAsVReg().SetReference(str);
                 this->template MoveToNextInst<FORMAT, false>();
@@ -3774,8 +3768,8 @@ private:
     template <BytecodeInstruction::Format FORMAT>
     ALWAYS_INLINE ObjectHeader *GetObjHelper()
     {
-        uint16_t obj_vreg = this->GetInst().template GetVReg<FORMAT, 0>();
-        return this->GetFrame()->GetVReg(obj_vreg).GetReference();
+        uint16_t objVreg = this->GetInst().template GetVReg<FORMAT, 0>();
+        return this->GetFrame()->GetVReg(objVreg).GetReference();
     }
 
     template <BytecodeInstruction::Format FORMAT, bool ACCEPT_ACC = false>
@@ -3801,13 +3795,13 @@ private:
     }
 };
 
-extern "C" void ExecuteImplStub(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh, void *impl);
+extern "C" void ExecuteImplStub(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh, void *impl);
 
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED>
-void ExecuteImplInner(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh)
+void ExecuteImplInner(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh)
 {
     void *impl = reinterpret_cast<void *>(&ExecuteImpl<RuntimeIfaceT, IS_DYNAMIC, IS_PROFILE_ENABLED>);
-    ExecuteImplStub(thread, pc, frame, jump_to_eh, impl);
+    ExecuteImplStub(thread, pc, frame, jumpToEh, impl);
 }
 
 }  // namespace panda::interpreter

@@ -37,7 +37,7 @@ public:
 
     bool IsApplied() const
     {
-        return is_applied_;
+        return isApplied_;
     }
 
     void InvalidateAnalyses() override;
@@ -45,10 +45,10 @@ public:
 private:
     bool TransformLoop(Loop *loop) override;
     BasicBlock *IsRedundant(Loop *loop);
-    void DeleteLoop(Loop *loop, BasicBlock *outside_succ) const;
+    void DeleteLoop(Loop *loop, BasicBlock *outsideSucc) const;
 
-    BasicBlock *loop_exit_ {nullptr};
-    bool is_applied_ {false};
+    BasicBlock *loopExit_ {nullptr};
+    bool isApplied_ {false};
 };
 }  // namespace panda::compiler
 

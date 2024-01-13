@@ -27,179 +27,178 @@ PandaString GCStats::GetStatistics()
     PandaStringStream statistic;
     statistic << time::GetCurrentTimeString() << " ";
 
-    statistic << GC_NAMES[ToIndex(gc_type_)] << " ";
-    statistic << "freed " << objects_freed_ << "(" << helpers::MemoryConverter(objects_freed_bytes_) << "), ";
-    statistic << large_objects_freed_ << "(" << helpers::MemoryConverter(large_objects_freed_bytes_)
-              << ") LOS objects, ";
+    statistic << GC_NAMES[ToIndex(gcType_)] << " ";
+    statistic << "freed " << objectsFreed_ << "(" << helpers::MemoryConverter(objectsFreedBytes_) << "), ";
+    statistic << largeObjectsFreed_ << "(" << helpers::MemoryConverter(largeObjectsFreedBytes_) << ") LOS objects, ";
 
     constexpr uint16_t MAX_PERCENT = 100;
-    size_t total_heap = mem::MemConfig::GetHeapSizeLimit();
-    size_t allocated_now = mem_stats_->GetFootprintHeap();
-    ASSERT(allocated_now <= total_heap);
-    uint16_t percent = round((1 - (allocated_now * 1.0 / total_heap)) * MAX_PERCENT);
+    size_t totalHeap = mem::MemConfig::GetHeapSizeLimit();
+    ASSERT(totalHeap != 0);
+    size_t allocatedNow = memStats_->GetFootprintHeap();
+    ASSERT(allocatedNow <= totalHeap);
+    uint16_t percent = round((1 - (allocatedNow * 1.0 / totalHeap)) * MAX_PERCENT);
     ASSERT(percent <= MAX_PERCENT);
-    statistic << percent << "% free, " << helpers::MemoryConverter(allocated_now) << "/"
-              << helpers::MemoryConverter(total_heap) << ", ";
-    bool initial_mark_pause = GetPhasePause(PauseTypeStats::INITIAL_MARK_PAUSE) != 0U;
-    bool remark_pause = IsGenerationalGCType(gc_type_) && (GetPhasePause(PauseTypeStats::REMARK_PAUSE) != 0U);
+    statistic << percent << "% free, " << helpers::MemoryConverter(allocatedNow) << "/"
+              << helpers::MemoryConverter(totalHeap) << ", ";
+    bool initialMarkPause = GetPhasePause(PauseTypeStats::INITIAL_MARK_PAUSE) != 0U;
+    bool remarkPause = IsGenerationalGCType(gcType_) && (GetPhasePause(PauseTypeStats::REMARK_PAUSE) != 0U);
     statistic << GetPhasePauseStat(PauseTypeStats::COMMON_PAUSE)
-              << (initial_mark_pause ? GetPhasePauseStat(PauseTypeStats::INITIAL_MARK_PAUSE) : "")
-              << (remark_pause ? GetPhasePauseStat(PauseTypeStats::REMARK_PAUSE) : "")
-              << " total: " << helpers::TimeConverter(last_duration_);
+              << (initialMarkPause ? GetPhasePauseStat(PauseTypeStats::INITIAL_MARK_PAUSE) : "")
+              << (remarkPause ? GetPhasePauseStat(PauseTypeStats::REMARK_PAUSE) : "")
+              << " total: " << helpers::TimeConverter(lastDuration_);
     return statistic.str();
 }
 
-PandaString GCStats::GetFinalStatistics(HeapManager *heap_manager)
+PandaString GCStats::GetFinalStatistics(HeapManager *heapManager)
 {
-    auto total_time = ConvertTimeToPeriod(time::GetCurrentTimeInNanos() - start_time_, true);
-    auto total_time_gc = helpers::TimeConverter(total_duration_);
-    auto total_allocated = mem_stats_->GetAllocatedHeap();
-    auto total_freed = mem_stats_->GetFreedHeap();
-    auto total_objects = mem_stats_->GetTotalObjectsAllocated();
+    auto totalTime = ConvertTimeToPeriod(time::GetCurrentTimeInNanos() - startTime_, true);
+    auto totalTimeGc = helpers::TimeConverter(totalDuration_);
+    auto totalAllocated = memStats_->GetAllocatedHeap();
+    auto totalFreed = memStats_->GetFreedHeap();
+    auto totalObjects = memStats_->GetTotalObjectsAllocated();
 
-    auto current_memory = mem_stats_->GetFootprintHeap();
-    auto total_memory = heap_manager->GetTotalMemory();
-    auto max_memory = heap_manager->GetMaxMemory();
+    auto currentMemory = memStats_->GetFootprintHeap();
+    auto totalMemory = heapManager->GetTotalMemory();
+    auto maxMemory = heapManager->GetMaxMemory();
 
-    Histogram<uint64_t> duration_info(all_number_durations_->begin(), all_number_durations_->end());
+    Histogram<uint64_t> durationInfo(allNumberDurations_->begin(), allNumberDurations_->end());
 
-    if (count_gc_period_ != 0U) {
-        duration_info.AddValue(count_gc_period_);
+    if (countGcPeriod_ != 0U) {
+        durationInfo.AddValue(countGcPeriod_);
     }
-    if (total_time > duration_info.GetCountDifferent()) {
-        duration_info.AddValue(0, total_time - duration_info.GetCountDifferent());
+    if (totalTime > durationInfo.GetCountDifferent()) {
+        durationInfo.AddValue(0, totalTime - durationInfo.GetCountDifferent());
     }
     PandaStringStream statistic;
 
-    statistic << heap_manager->GetGC()->DumpStatistics() << "\n";
+    statistic << heapManager->GetGC()->DumpStatistics() << "\n";
 
-    statistic << "Total time spent in GC: " << total_time_gc << "\n";
+    statistic << "Total time spent in GC: " << totalTimeGc << "\n";
 
-    statistic << "Mean GC size throughput "
-              << helpers::MemoryConverter(total_allocated / total_time_gc.GetDoubleValue()) << "/"
-              << total_time_gc.GetLiteral() << "\n";
-    statistic << "Mean GC object throughput: " << std::scientific << total_objects / total_time_gc.GetDoubleValue()
-              << " objects/" << total_time_gc.GetLiteral() << "\n";
-    statistic << "Total number of allocations " << total_objects << "\n";
-    statistic << "Total bytes allocated " << helpers::MemoryConverter(total_allocated) << "\n";
-    statistic << "Total bytes freed " << helpers::MemoryConverter(total_freed) << "\n\n";
+    statistic << "Mean GC size throughput " << helpers::MemoryConverter(totalAllocated / totalTimeGc.GetDoubleValue())
+              << "/" << totalTimeGc.GetLiteral() << "\n";
+    statistic << "Mean GC object throughput: " << std::scientific << totalObjects / totalTimeGc.GetDoubleValue()
+              << " objects/" << totalTimeGc.GetLiteral() << "\n";
+    statistic << "Total number of allocations " << totalObjects << "\n";
+    statistic << "Total bytes allocated " << helpers::MemoryConverter(totalAllocated) << "\n";
+    statistic << "Total bytes freed " << helpers::MemoryConverter(totalFreed) << "\n\n";
 
-    statistic << "Free memory " << helpers::MemoryConverter(helpers::UnsignedDifference(total_memory, current_memory))
+    statistic << "Free memory " << helpers::MemoryConverter(helpers::UnsignedDifference(totalMemory, currentMemory))
               << "\n";
-    statistic << "Free memory until GC " << helpers::MemoryConverter(heap_manager->GetFreeMemory()) << "\n";
+    statistic << "Free memory until GC " << helpers::MemoryConverter(heapManager->GetFreeMemory()) << "\n";
     statistic << "Free memory until OOME "
-              << helpers::MemoryConverter(helpers::UnsignedDifference(max_memory, total_memory)) << "\n";
-    statistic << "Total memory " << helpers::MemoryConverter(total_memory) << "\n";
+              << helpers::MemoryConverter(helpers::UnsignedDifference(maxMemory, totalMemory)) << "\n";
+    statistic << "Total memory " << helpers::MemoryConverter(totalMemory) << "\n";
 
     {
-        os::memory::LockHolder lock(mutator_stats_lock_);
-        statistic << "Total mutator paused time: " << helpers::TimeConverter(total_mutator_pause_) << "\n";
+        os::memory::LockHolder lock(mutatorStatsLock_);
+        statistic << "Total mutator paused time: " << helpers::TimeConverter(totalMutatorPause_) << "\n";
     }
-    statistic << "Total time waiting for GC to complete: " << helpers::TimeConverter(total_pause_) << "\n";
-    statistic << "Total GC count: " << duration_info.GetSum() << "\n";
-    statistic << "Total GC time: " << total_time_gc << "\n";
-    statistic << "Total blocking GC count: " << duration_info.GetSum() << "\n";
-    statistic << "Total blocking GC time: " << total_time_gc << "\n";
-    statistic << "Histogram of GC count per 10000 ms: " << duration_info.GetTopDump() << "\n";
-    statistic << "Histogram of blocking GC count per 10000 ms: " << duration_info.GetTopDump() << "\n";
+    statistic << "Total time waiting for GC to complete: " << helpers::TimeConverter(totalPause_) << "\n";
+    statistic << "Total GC count: " << durationInfo.GetSum() << "\n";
+    statistic << "Total GC time: " << totalTimeGc << "\n";
+    statistic << "Total blocking GC count: " << durationInfo.GetSum() << "\n";
+    statistic << "Total blocking GC time: " << totalTimeGc << "\n";
+    statistic << "Histogram of GC count per 10000 ms: " << durationInfo.GetTopDump() << "\n";
+    statistic << "Histogram of blocking GC count per 10000 ms: " << durationInfo.GetTopDump() << "\n";
 
-    statistic << "Native bytes registered: " << heap_manager->GetGC()->GetNativeBytesRegistered() << "\n\n";
+    statistic << "Native bytes registered: " << heapManager->GetGC()->GetNativeBytesRegistered() << "\n\n";
 
-    statistic << "Max memory " << helpers::MemoryConverter(max_memory) << "\n";
+    statistic << "Max memory " << helpers::MemoryConverter(maxMemory) << "\n";
 
     return statistic.str();
 }
 
-PandaString GCStats::GetPhasePauseStat(PauseTypeStats pause_type)
+PandaString GCStats::GetPhasePauseStat(PauseTypeStats pauseType)
 {
     PandaStringStream statistic;
-    statistic << " phase: " << ToString(pause_type)
-              << " paused: " << helpers::TimeConverter(last_pause_[ToIndex(pause_type)]);
+    statistic << " phase: " << ToString(pauseType)
+              << " paused: " << helpers::TimeConverter(lastPause_[ToIndex(pauseType)]);
     return statistic.str();
 }
 
-uint64_t GCStats::GetPhasePause(PauseTypeStats pause_type)
+uint64_t GCStats::GetPhasePause(PauseTypeStats pauseType)
 {
-    return last_pause_[ToIndex(pause_type)];
+    return lastPause_[ToIndex(pauseType)];
 }
 
-GCStats::GCStats(MemStatsType *mem_stats, GCType gc_type_from_runtime, InternalAllocatorPtr allocator)
-    : mem_stats_(mem_stats), allocator_(allocator)
+GCStats::GCStats(MemStatsType *memStats, GCType gcTypeFromRuntime, InternalAllocatorPtr allocator)
+    : memStats_(memStats), allocator_(allocator)
 {
-    start_time_ = time::GetCurrentTimeInNanos();
-    all_number_durations_ = allocator_->New<PandaVector<uint64_t>>(allocator_->Adapter());
-    gc_type_ = gc_type_from_runtime;
+    startTime_ = time::GetCurrentTimeInNanos();
+    allNumberDurations_ = allocator_->New<PandaVector<uint64_t>>(allocator_->Adapter());
+    gcType_ = gcTypeFromRuntime;
 }
 
 GCStats::~GCStats()
 {
-    gc_type_ = GCType::INVALID_GC;
+    gcType_ = GCType::INVALID_GC;
 
-    if (all_number_durations_ != nullptr) {
-        allocator_->Delete(all_number_durations_);
+    if (allNumberDurations_ != nullptr) {
+        allocator_->Delete(allNumberDurations_);
     }
-    all_number_durations_ = nullptr;
+    allNumberDurations_ = nullptr;
 }
 
 void GCStats::StartMutatorLock()
 {
-    os::memory::LockHolder lock(mutator_stats_lock_);
-    if (count_mutator_ == 0) {
-        mutator_start_time_ = time::GetCurrentTimeInNanos();
+    os::memory::LockHolder lock(mutatorStatsLock_);
+    if (countMutator_ == 0) {
+        mutatorStartTime_ = time::GetCurrentTimeInNanos();
     }
-    ++count_mutator_;
+    ++countMutator_;
 }
 
 void GCStats::StopMutatorLock()
 {
-    os::memory::LockHolder lock(mutator_stats_lock_);
-    if (count_mutator_ == 0) {
+    os::memory::LockHolder lock(mutatorStatsLock_);
+    if (countMutator_ == 0) {
         return;
     }
-    if (count_mutator_ == 1) {
-        total_mutator_pause_ += time::GetCurrentTimeInNanos() - mutator_start_time_;
-        mutator_start_time_ = 0;
+    if (countMutator_ == 1) {
+        totalMutatorPause_ += time::GetCurrentTimeInNanos() - mutatorStartTime_;
+        mutatorStartTime_ = 0;
     }
-    --count_mutator_;
+    --countMutator_;
 }
 
 void GCStats::StartCollectStats()
 {
-    mem_stats_->ClearLastYoungObjectsMovedBytes();
-    objects_freed_ = mem_stats_->GetTotalObjectsFreed();
-    objects_freed_bytes_ = mem_stats_->GetFootprintHeap();
-    large_objects_freed_ = mem_stats_->GetTotalHumongousObjectsFreed();
-    large_objects_freed_bytes_ = mem_stats_->GetFootprint(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    memStats_->ClearLastYoungObjectsMovedBytes();
+    objectsFreed_ = memStats_->GetTotalObjectsFreed();
+    objectsFreedBytes_ = memStats_->GetFootprintHeap();
+    largeObjectsFreed_ = memStats_->GetTotalHumongousObjectsFreed();
+    largeObjectsFreedBytes_ = memStats_->GetFootprint(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
 }
 
-void GCStats::StopCollectStats(GCInstanceStats *instance_stats)
+void GCStats::StopCollectStats(GCInstanceStats *instanceStats)
 {
-    objects_freed_ = mem_stats_->GetTotalObjectsFreed() - objects_freed_;
-    large_objects_freed_ = mem_stats_->GetTotalHumongousObjectsFreed() - large_objects_freed_;
+    objectsFreed_ = memStats_->GetTotalObjectsFreed() - objectsFreed_;
+    largeObjectsFreed_ = memStats_->GetTotalHumongousObjectsFreed() - largeObjectsFreed_;
 
-    size_t current_objects_freed_bytes = mem_stats_->GetFootprintHeap();
-    size_t current_large_objects_freed_bytes = mem_stats_->GetFootprint(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    size_t currentObjectsFreedBytes = memStats_->GetFootprintHeap();
+    size_t currentLargeObjectsFreedBytes = memStats_->GetFootprint(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
 
-    if (objects_freed_bytes_ < current_objects_freed_bytes) {
-        objects_freed_bytes_ = 0;
+    if (objectsFreedBytes_ < currentObjectsFreedBytes) {
+        objectsFreedBytes_ = 0;
     } else {
-        objects_freed_bytes_ -= current_objects_freed_bytes;
+        objectsFreedBytes_ -= currentObjectsFreedBytes;
     }
 
-    if (large_objects_freed_bytes_ < current_large_objects_freed_bytes) {
-        large_objects_freed_bytes_ = 0;
+    if (largeObjectsFreedBytes_ < currentLargeObjectsFreedBytes) {
+        largeObjectsFreedBytes_ = 0;
     } else {
-        large_objects_freed_bytes_ -= current_large_objects_freed_bytes;
+        largeObjectsFreedBytes_ -= currentLargeObjectsFreedBytes;
     }
-    if ((instance_stats != nullptr) && (objects_freed_ > 0)) {
-        instance_stats->AddMemoryValue(objects_freed_bytes_, MemoryTypeStats::ALL_FREED_BYTES);
-        instance_stats->AddObjectsValue(objects_freed_, ObjectTypeStats::ALL_FREED_OBJECTS);
+    if ((instanceStats != nullptr) && (objectsFreed_ > 0)) {
+        instanceStats->AddMemoryValue(objectsFreedBytes_, MemoryTypeStats::ALL_FREED_BYTES);
+        instanceStats->AddObjectsValue(objectsFreed_, ObjectTypeStats::ALL_FREED_OBJECTS);
     }
 }
 
-uint64_t GCStats::ConvertTimeToPeriod(uint64_t time_in_nanos, bool ceil)
+uint64_t GCStats::ConvertTimeToPeriod(uint64_t timeInNanos, bool ceil)
 {
-    std::chrono::nanoseconds nanos(time_in_nanos);
+    std::chrono::nanoseconds nanos(timeInNanos);
     if (ceil) {
         using ResultDuration = std::chrono::duration<double, PERIOD>;
         return std::ceil(std::chrono::duration_cast<ResultDuration>(nanos).count());
@@ -208,158 +207,154 @@ uint64_t GCStats::ConvertTimeToPeriod(uint64_t time_in_nanos, bool ceil)
     return std::chrono::duration_cast<ResultDuration>(nanos).count();
 }
 
-void GCStats::AddPause(uint64_t pause, GCInstanceStats *instance_stats, PauseTypeStats pause_type)
+void GCStats::AddPause(uint64_t pause, GCInstanceStats *instanceStats, PauseTypeStats pauseType)
 {
     // COMMON_PAUSE can be accounted in different methods but it cannot be interleaved with other pause types
-    ASSERT(prev_pause_type_ == PauseTypeStats::COMMON_PAUSE || pause_type != PauseTypeStats::COMMON_PAUSE);
-    if ((instance_stats != nullptr) && (pause > 0)) {
-        instance_stats->AddTimeValue(pause, TimeTypeStats::ALL_PAUSED_TIME);
+    ASSERT(prevPauseType_ == PauseTypeStats::COMMON_PAUSE || pauseType != PauseTypeStats::COMMON_PAUSE);
+    if ((instanceStats != nullptr) && (pause > 0)) {
+        instanceStats->AddTimeValue(pause, TimeTypeStats::ALL_PAUSED_TIME);
     }
-    auto &last_pause = last_pause_[ToIndex(pause_type)];
+    auto &lastPause = lastPause_[ToIndex(pauseType)];
     // allow accounting in different methods for COMMON_PAUSE only
-    ASSERT(last_pause == 0 || pause_type == PauseTypeStats::COMMON_PAUSE);
-    last_pause += pause;
-    total_pause_ += pause;
+    ASSERT(lastPause == 0 || pauseType == PauseTypeStats::COMMON_PAUSE);
+    lastPause += pause;
+    totalPause_ += pause;
 #ifndef NDEBUG
-    prev_pause_type_ = pause_type;
+    prevPauseType_ = pauseType;
 #endif
 }
 
 void GCStats::ResetLastPause()
 {
-    for (auto pause_type = PauseTypeStats::COMMON_PAUSE; pause_type != PauseTypeStats::PAUSE_TYPE_STATS_LAST;
-         pause_type = ToPauseTypeStats(ToIndex(pause_type) + 1)) {
-        last_pause_[ToIndex(pause_type)] = 0U;
+    for (auto pauseType = PauseTypeStats::COMMON_PAUSE; pauseType != PauseTypeStats::PAUSE_TYPE_STATS_LAST;
+         pauseType = ToPauseTypeStats(ToIndex(pauseType) + 1)) {
+        lastPause_[ToIndex(pauseType)] = 0U;
     }
 #ifndef NDEBUG
-    prev_pause_type_ = PauseTypeStats::COMMON_PAUSE;
+    prevPauseType_ = PauseTypeStats::COMMON_PAUSE;
 #endif
 }
 
-void GCStats::RecordDuration(uint64_t duration, GCInstanceStats *instance_stats)
+void GCStats::RecordDuration(uint64_t duration, GCInstanceStats *instanceStats)
 {
-    uint64_t start_time_duration = ConvertTimeToPeriod(time::GetCurrentTimeInNanos() - start_time_ - duration);
+    uint64_t startTimeDuration = ConvertTimeToPeriod(time::GetCurrentTimeInNanos() - startTime_ - duration);
     // every PERIOD
-    if ((count_gc_period_ != 0U) && (last_start_duration_ != start_time_duration)) {
-        all_number_durations_->push_back(count_gc_period_);
-        count_gc_period_ = 0U;
+    if ((countGcPeriod_ != 0U) && (lastStartDuration_ != startTimeDuration)) {
+        allNumberDurations_->push_back(countGcPeriod_);
+        countGcPeriod_ = 0U;
     }
-    last_start_duration_ = start_time_duration;
-    ++count_gc_period_;
-    if ((instance_stats != nullptr) && (duration > 0)) {
-        instance_stats->AddTimeValue(duration, TimeTypeStats::ALL_TOTAL_TIME);
+    lastStartDuration_ = startTimeDuration;
+    ++countGcPeriod_;
+    if ((instanceStats != nullptr) && (duration > 0)) {
+        instanceStats->AddTimeValue(duration, TimeTypeStats::ALL_TOTAL_TIME);
     }
-    last_duration_ = duration;
-    total_duration_ += duration;
+    lastDuration_ = duration;
+    totalDuration_ += duration;
 }
 
-GCScopedStats::GCScopedStats(GCStats *stats, GCInstanceStats *instance_stats)
-    : start_time_(time::GetCurrentTimeInNanos()), instance_stats_(instance_stats), stats_(stats)
+GCScopedStats::GCScopedStats(GCStats *stats, GCInstanceStats *instanceStats)
+    : startTime_(time::GetCurrentTimeInNanos()), instanceStats_(instanceStats), stats_(stats)
 {
     stats_->StartCollectStats();
 }
 
 GCScopedStats::~GCScopedStats()
 {
-    stats_->StopCollectStats(instance_stats_);
-    stats_->RecordDuration(time::GetCurrentTimeInNanos() - start_time_, instance_stats_);
+    stats_->StopCollectStats(instanceStats_);
+    stats_->RecordDuration(time::GetCurrentTimeInNanos() - startTime_, instanceStats_);
 }
 
-GCScopedPauseStats::GCScopedPauseStats(GCStats *stats, GCInstanceStats *instance_stats, PauseTypeStats pause_type)
-    : start_time_(time::GetCurrentTimeInNanos()),
-      instance_stats_(instance_stats),
-      stats_(stats),
-      pause_type_(pause_type)
+GCScopedPauseStats::GCScopedPauseStats(GCStats *stats, GCInstanceStats *instanceStats, PauseTypeStats pauseType)
+    : startTime_(time::GetCurrentTimeInNanos()), instanceStats_(instanceStats), stats_(stats), pauseType_(pauseType)
 {
 }
 
 GCScopedPauseStats::~GCScopedPauseStats()
 {
-    stats_->AddPause(time::GetCurrentTimeInNanos() - start_time_, instance_stats_, pause_type_);
+    stats_->AddPause(time::GetCurrentTimeInNanos() - startTime_, instanceStats_, pauseType_);
 }
 
-PandaString GCInstanceStats::GetDump(GCType gc_type)
+PandaString GCInstanceStats::GetDump(GCType gcType)
 {
     PandaStringStream statistic;
 
-    bool young_space = time_stats_[ToIndex(TimeTypeStats::YOUNG_TOTAL_TIME)].GetSum() > 0U;
-    bool all_space = time_stats_[ToIndex(TimeTypeStats::ALL_TOTAL_TIME)].GetSum() > 0U;
-    bool minor_gc = copied_bytes_.GetCount() > 0U;
-    bool was_deleted = reclaim_bytes_.GetCount() > 0U;
-    bool was_moved = memory_stats_[ToIndex(MemoryTypeStats::MOVED_BYTES)].GetCount() > 0U;
+    bool youngSpace = timeStats_[ToIndex(TimeTypeStats::YOUNG_TOTAL_TIME)].GetSum() > 0U;
+    bool allSpace = timeStats_[ToIndex(TimeTypeStats::ALL_TOTAL_TIME)].GetSum() > 0U;
+    bool minorGc = copiedBytes_.GetCount() > 0U;
+    bool wasDeleted = reclaimBytes_.GetCount() > 0U;
+    bool wasMoved = memoryStats_[ToIndex(MemoryTypeStats::MOVED_BYTES)].GetCount() > 0U;
 
-    if (young_space) {
-        statistic << GetYoungSpaceDump(gc_type);
-    } else if (all_space) {
-        statistic << GetAllSpacesDump(gc_type);
+    if (youngSpace) {
+        statistic << GetYoungSpaceDump(gcType);
+    } else if (allSpace) {
+        statistic << GetAllSpacesDump(gcType);
     }
 
-    if (was_deleted) {
-        statistic << "Average GC reclaim bytes ratio " << reclaim_bytes_.GetAvg() << " over "
-                  << reclaim_bytes_.GetCount() << " GC cycles \n";
+    if (wasDeleted) {
+        statistic << "Average GC reclaim bytes ratio " << reclaimBytes_.GetAvg() << " over " << reclaimBytes_.GetCount()
+                  << " GC cycles \n";
     }
 
-    if (minor_gc) {
-        statistic << "Average minor GC copied live bytes ratio " << copied_bytes_.GetAvg() << " over "
-                  << copied_bytes_.GetCount() << " minor GCs \n";
+    if (minorGc) {
+        statistic << "Average minor GC copied live bytes ratio " << copiedBytes_.GetAvg() << " over "
+                  << copiedBytes_.GetCount() << " minor GCs \n";
     }
 
-    if (was_moved) {
+    if (wasMoved) {
         statistic << "Cumulative bytes moved "
-                  << memory_stats_[ToIndex(MemoryTypeStats::MOVED_BYTES)].GetGeneralStatistic() << "\n";
+                  << memoryStats_[ToIndex(MemoryTypeStats::MOVED_BYTES)].GetGeneralStatistic() << "\n";
         statistic << "Cumulative objects moved "
-                  << objects_stats_[ToIndex(ObjectTypeStats::MOVED_OBJECTS)].GetGeneralStatistic() << "\n";
+                  << objectsStats_[ToIndex(ObjectTypeStats::MOVED_OBJECTS)].GetGeneralStatistic() << "\n";
     }
 
     return statistic.str();
 }
 
-PandaString GCInstanceStats::GetYoungSpaceDump(GCType gc_type)
+PandaString GCInstanceStats::GetYoungSpaceDump(GCType gcType)
 {
     PandaStringStream statistic;
-    statistic << "young " << GC_NAMES[ToIndex(gc_type)]
-              << " paused: " << time_stats_[ToIndex(TimeTypeStats::YOUNG_PAUSED_TIME)].GetGeneralStatistic() << "\n";
+    statistic << "young " << GC_NAMES[ToIndex(gcType)]
+              << " paused: " << timeStats_[ToIndex(TimeTypeStats::YOUNG_PAUSED_TIME)].GetGeneralStatistic() << "\n";
 
-    auto &young_total_time_hist = time_stats_[ToIndex(TimeTypeStats::YOUNG_TOTAL_TIME)];
-    auto young_total_time = helpers::TimeConverter(young_total_time_hist.GetSum());
-    auto young_total_freed_obj = objects_stats_[ToIndex(ObjectTypeStats::YOUNG_FREED_OBJECTS)].GetSum();
-    auto young_total_freed_bytes = memory_stats_[ToIndex(MemoryTypeStats::YOUNG_FREED_BYTES)].GetSum();
+    auto &youngTotalTimeHist = timeStats_[ToIndex(TimeTypeStats::YOUNG_TOTAL_TIME)];
+    auto youngTotalTime = helpers::TimeConverter(youngTotalTimeHist.GetSum());
+    auto youngTotalFreedObj = objectsStats_[ToIndex(ObjectTypeStats::YOUNG_FREED_OBJECTS)].GetSum();
+    auto youngTotalFreedBytes = memoryStats_[ToIndex(MemoryTypeStats::YOUNG_FREED_BYTES)].GetSum();
 
-    statistic << "young " << GC_NAMES[ToIndex(gc_type)] << " total time: " << young_total_time
-              << " mean time: " << helpers::TimeConverter(young_total_time_hist.GetAvg()) << "\n";
-    statistic << "young " << GC_NAMES[ToIndex(gc_type)] << " freed: " << young_total_freed_obj << " with total size "
-              << helpers::MemoryConverter(young_total_freed_bytes) << "\n";
+    statistic << "young " << GC_NAMES[ToIndex(gcType)] << " total time: " << youngTotalTime
+              << " mean time: " << helpers::TimeConverter(youngTotalTimeHist.GetAvg()) << "\n";
+    statistic << "young " << GC_NAMES[ToIndex(gcType)] << " freed: " << youngTotalFreedObj << " with total size "
+              << helpers::MemoryConverter(youngTotalFreedBytes) << "\n";
 
-    statistic << "young " << GC_NAMES[ToIndex(gc_type)] << " throughput: " << std::scientific
-              << young_total_freed_obj / young_total_time.GetDoubleValue() << "objects/"
-              << young_total_time.GetLiteral() << " / "
-              << helpers::MemoryConverter(young_total_freed_bytes / young_total_time.GetDoubleValue()) << "/"
-              << young_total_time.GetLiteral() << "\n";
+    statistic << "young " << GC_NAMES[ToIndex(gcType)] << " throughput: " << std::scientific
+              << youngTotalFreedObj / youngTotalTime.GetDoubleValue() << "objects/" << youngTotalTime.GetLiteral()
+              << " / " << helpers::MemoryConverter(youngTotalFreedBytes / youngTotalTime.GetDoubleValue()) << "/"
+              << youngTotalTime.GetLiteral() << "\n";
 
     return statistic.str();
 }
 
-PandaString GCInstanceStats::GetAllSpacesDump(GCType gc_type)
+PandaString GCInstanceStats::GetAllSpacesDump(GCType gcType)
 {
     PandaStringStream statistic;
 
-    statistic << GC_NAMES[ToIndex(gc_type)]
-              << " paused: " << time_stats_[ToIndex(TimeTypeStats::ALL_PAUSED_TIME)].GetGeneralStatistic() << "\n";
+    statistic << GC_NAMES[ToIndex(gcType)]
+              << " paused: " << timeStats_[ToIndex(TimeTypeStats::ALL_PAUSED_TIME)].GetGeneralStatistic() << "\n";
 
-    auto &total_time_hist = time_stats_[ToIndex(TimeTypeStats::ALL_TOTAL_TIME)];
-    auto total_time = helpers::TimeConverter(total_time_hist.GetSum());
-    auto total_freed_obj = objects_stats_[ToIndex(ObjectTypeStats::ALL_FREED_OBJECTS)].GetSum();
-    auto total_freed_bytes = memory_stats_[ToIndex(MemoryTypeStats::ALL_FREED_BYTES)].GetSum();
+    auto &totalTimeHist = timeStats_[ToIndex(TimeTypeStats::ALL_TOTAL_TIME)];
+    auto totalTime = helpers::TimeConverter(totalTimeHist.GetSum());
+    auto totalFreedObj = objectsStats_[ToIndex(ObjectTypeStats::ALL_FREED_OBJECTS)].GetSum();
+    auto totalFreedBytes = memoryStats_[ToIndex(MemoryTypeStats::ALL_FREED_BYTES)].GetSum();
 
-    statistic << GC_NAMES[ToIndex(gc_type)] << " total time: " << total_time
-              << " mean time: " << helpers::TimeConverter(total_time_hist.GetAvg()) << "\n";
-    statistic << GC_NAMES[ToIndex(gc_type)] << " freed: " << total_freed_obj << " with total size "
-              << helpers::MemoryConverter(total_freed_bytes) << "\n";
+    statistic << GC_NAMES[ToIndex(gcType)] << " total time: " << totalTime
+              << " mean time: " << helpers::TimeConverter(totalTimeHist.GetAvg()) << "\n";
+    statistic << GC_NAMES[ToIndex(gcType)] << " freed: " << totalFreedObj << " with total size "
+              << helpers::MemoryConverter(totalFreedBytes) << "\n";
 
-    statistic << GC_NAMES[ToIndex(gc_type)] << " throughput: " << std::scientific
-              << total_freed_obj / total_time.GetDoubleValue() << "objects/" << total_time.GetLiteral() << " / "
-              << helpers::MemoryConverter(total_freed_bytes / total_time.GetDoubleValue()) << "/"
-              << total_time.GetLiteral() << "\n";
+    statistic << GC_NAMES[ToIndex(gcType)] << " throughput: " << std::scientific
+              << totalFreedObj / totalTime.GetDoubleValue() << "objects/" << totalTime.GetLiteral() << " / "
+              << helpers::MemoryConverter(totalFreedBytes / totalTime.GetDoubleValue()) << "/" << totalTime.GetLiteral()
+              << "\n";
 
     return statistic.str();
 }

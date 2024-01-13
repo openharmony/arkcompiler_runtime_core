@@ -27,9 +27,8 @@ namespace panda::compiler {
 using LifeIntervalsIt = ArenaVector<LifeIntervals *>::iterator;
 class LifeIntervalsTreeNode {
 public:
-    explicit LifeIntervalsTreeNode(LifeNumber min_value, LifeNumber max_value, LifeIntervalsIt begin,
-                                   LifeIntervalsIt end)
-        : min_value_(min_value), max_value_(max_value), begin_(begin), end_(end)
+    explicit LifeIntervalsTreeNode(LifeNumber minValue, LifeNumber maxValue, LifeIntervalsIt begin, LifeIntervalsIt end)
+        : minValue_(minValue), maxValue_(maxValue), begin_(begin), end_(end)
     {
     }
 
@@ -39,17 +38,17 @@ public:
 
     LifeNumber GetMidpoint() const
     {
-        return (min_value_ + max_value_) / 2;
+        return (minValue_ + maxValue_) / 2U;
     }
 
     LifeNumber GetMinValue() const
     {
-        return min_value_;
+        return minValue_;
     }
 
     LifeNumber GetMaxValue() const
     {
-        return max_value_;
+        return maxValue_;
     }
 
     LifeIntervalsIt GetBegin() const
@@ -85,8 +84,8 @@ public:
     }
 
 private:
-    LifeNumber min_value_;
-    LifeNumber max_value_;
+    LifeNumber minValue_;
+    LifeNumber maxValue_;
     LifeIntervalsIt begin_;
     LifeIntervalsIt end_;
     LifeIntervalsTreeNode *left_ {nullptr};
@@ -105,8 +104,7 @@ public:
         return LifeIntervalsTree::BuildIntervalsTree(graph->GetAnalysis<LivenessAnalyzer>().GetLifeIntervals(), graph);
     }
 
-    static LifeIntervalsTree *BuildIntervalsTree(const ArenaVector<LifeIntervals *> &life_intervals,
-                                                 const Graph *graph);
+    static LifeIntervalsTree *BuildIntervalsTree(const ArenaVector<LifeIntervals *> &lifeIntervals, const Graph *graph);
 
     explicit LifeIntervalsTree(LifeIntervalsTreeNode *root) : root_(root) {};
 
@@ -115,7 +113,7 @@ public:
     ~LifeIntervalsTree() = default;
 
     template <bool LIVE_INPUTS = true, typename Func>
-    void VisitIntervals(LifeNumber ln, Func func, const Inst *skip_inst = nullptr) const
+    void VisitIntervals(LifeNumber ln, Func func, const Inst *skipInst = nullptr) const
     {
         for (auto node = root_; node != nullptr; node = ln < node->GetMidpoint() ? node->GetLeft() : node->GetRight()) {
             if (ln < node->GetMinValue() || ln > node->GetMaxValue()) {
@@ -124,7 +122,7 @@ public:
             }
             for (auto i = node->GetBegin(); i < node->GetEnd(); i++) {
                 auto interval = *i;
-                if (interval->GetInst() == skip_inst) {
+                if (interval->GetInst() == skipInst) {
                     continue;
                 }
                 if (ln > interval->GetEnd()) {
@@ -155,7 +153,7 @@ public:
 
     bool RunImpl() override
     {
-        inst_life_intervals_tree_ = LifeIntervalsTree::BuildIntervalsTree(GetGraph());
+        instLifeIntervalsTree_ = LifeIntervalsTree::BuildIntervalsTree(GetGraph());
         return true;
     }
 
@@ -166,13 +164,13 @@ public:
     {
         ASSERT(GetGraph()->IsAnalysisValid<LivenessAnalyzer>());
 
-        if (inst_life_intervals_tree_ == nullptr) {
+        if (instLifeIntervalsTree_ == nullptr) {
             return;
         }
 
         auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
         auto li = la.GetInstLifeIntervals(inst);
-        inst_life_intervals_tree_->VisitIntervals<LIVE_INPUTS, Func>(li->GetBegin(), func, inst);
+        instLifeIntervalsTree_->VisitIntervals<LIVE_INPUTS, Func>(li->GetBegin(), func, inst);
     }
 
     const char *GetPassName() const override
@@ -181,7 +179,7 @@ public:
     }
 
 private:
-    LifeIntervalsTree *inst_life_intervals_tree_ {nullptr};
+    LifeIntervalsTree *instLifeIntervalsTree_ {nullptr};
 };
 
 }  // namespace panda::compiler

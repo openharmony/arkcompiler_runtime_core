@@ -63,12 +63,12 @@ public:
         options.SetCompilerEnableJit(false);
         options.SetGcWorkersCount(0);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        options.SetG1PromotionRegionAliveRate(100);
+        options.SetG1PromotionRegionAliveRate(100U);
         options.SetGcTriggerType("debug-never");
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetExplicitConcurrentGcEnabled(false);
-        options.SetG1NumberOfTenuredRegionsAtMixedCollection(2);
+        options.SetG1NumberOfTenuredRegionsAtMixedCollection(2U);
         return options;
     }
 
@@ -79,24 +79,25 @@ public:
         return DEFAULT_REGION_SIZE;
     }
 
-    static constexpr size_t StringLengthFitIntoRegion(size_t num_regions)
+    static constexpr size_t StringLengthFitIntoRegion(size_t numRegions)
     {
-        return num_regions * DEFAULT_REGION_SIZE - sizeof(coretypes::String) - Region::HeadSize();
+        return numRegions * DEFAULT_REGION_SIZE - sizeof(coretypes::String) - Region::HeadSize();
     }
 
-    static size_t GetHumongousArrayLength(ClassRoot class_root)
+    static size_t GetHumongousArrayLength(ClassRoot classRoot)
     {
         Runtime *runtime = Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-        auto *array_class = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(class_root);
-        EXPECT_TRUE(array_class->IsArrayClass());
-        if (!array_class->IsArrayClass()) {
+        auto *arrayClass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(classRoot);
+        EXPECT_TRUE(arrayClass->IsArrayClass());
+        if (!arrayClass->IsArrayClass()) {
             return 0;
         }
         // Total array size will be DEFAULT_REGION_SIZE * elem_size + sizeof(Array).
         // It is enough to make it humongous.
-        size_t elem_size = array_class->GetComponentSize();
-        return DEFAULT_REGION_SIZE / elem_size + 1;
+        size_t elemSize = arrayClass->GetComponentSize();
+        ASSERT(elemSize != 0);
+        return DEFAULT_REGION_SIZE / elemSize + 1;
     }
 
     ObjectAllocatorG1<> *GetAllocator()
@@ -143,11 +144,11 @@ private:
     {
         RemSet<> *remset = ObjectToRegion(ref_.GetPtr())->GetRemSet();
         ASSERT_NE(nullptr, remset);
-        bool has_object = false;
+        bool hasObject = false;
         ObjectHeader *object = obj_.GetPtr();
-        remset->IterateOverObjects([object, &has_object](ObjectHeader *obj) { has_object |= object == obj; });
+        remset->IterateOverObjects([object, &hasObject](ObjectHeader *obj) { hasObject |= object == obj; });
         // remset is not fully updated during mixed collection, check set of dirty objects
-        ASSERT_TRUE(has_object || gc_->HasRefFromRemset(object));
+        ASSERT_TRUE(hasObject || gc_->HasRefFromRemset(object));
     }
 
 private:
@@ -159,7 +160,7 @@ private:
 TEST_F(G1GCTest, TestAddrToRegion)
 {
     MTManagedThread *thread = MTManagedThread::GetCurrent();
-    size_t humongous_len = GetHumongousArrayLength(ClassRoot::ARRAY_U8);
+    size_t humongousLen = GetHumongousArrayLength(ClassRoot::ARRAY_U8);
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
@@ -167,30 +168,30 @@ TEST_F(G1GCTest, TestAddrToRegion)
     ASSERT_NE(nullptr, young.GetPtr());
     VMHandle<ObjectHeader> nonmovable(thread, ObjectAllocator::AllocArray(0, ClassRoot::ARRAY_U8, true));
     ASSERT_NE(nullptr, nonmovable.GetPtr());
-    VMHandle<ObjectHeader> humongous(thread, ObjectAllocator::AllocArray(humongous_len, ClassRoot::ARRAY_U8, false));
+    VMHandle<ObjectHeader> humongous(thread, ObjectAllocator::AllocArray(humongousLen, ClassRoot::ARRAY_U8, false));
     ASSERT_NE(nullptr, humongous.GetPtr());
 
-    Region *young_region = ObjectToRegion(young.GetPtr());
-    ASSERT_NE(nullptr, young_region);
-    ASSERT_EQ(young_region, AddrToRegion(young.GetPtr()));
-    bool has_young_obj = false;
-    young_region->IterateOverObjects(
-        [&has_young_obj, &young](ObjectHeader *obj) { has_young_obj |= obj == young.GetPtr(); });
-    ASSERT_TRUE(has_young_obj);
+    Region *youngRegion = ObjectToRegion(young.GetPtr());
+    ASSERT_NE(nullptr, youngRegion);
+    ASSERT_EQ(youngRegion, AddrToRegion(young.GetPtr()));
+    bool hasYoungObj = false;
+    youngRegion->IterateOverObjects(
+        [&hasYoungObj, &young](ObjectHeader *obj) { hasYoungObj |= obj == young.GetPtr(); });
+    ASSERT_TRUE(hasYoungObj);
 
-    Region *nonmovable_region = ObjectToRegion(nonmovable.GetPtr());
-    ASSERT_NE(nullptr, nonmovable_region);
-    ASSERT_EQ(nonmovable_region, AddrToRegion(nonmovable.GetPtr()));
-    ASSERT_TRUE(nonmovable_region->GetLiveBitmap()->Test(nonmovable.GetPtr()));
+    Region *nonmovableRegion = ObjectToRegion(nonmovable.GetPtr());
+    ASSERT_NE(nullptr, nonmovableRegion);
+    ASSERT_EQ(nonmovableRegion, AddrToRegion(nonmovable.GetPtr()));
+    ASSERT_TRUE(nonmovableRegion->GetLiveBitmap()->Test(nonmovable.GetPtr()));
 
-    Region *humongous_region = ObjectToRegion(humongous.GetPtr());
-    ASSERT_NE(nullptr, humongous_region);
-    ASSERT_EQ(humongous_region, AddrToRegion(humongous.GetPtr()));
-    ASSERT_EQ(humongous_region, AddrToRegion(ToVoidPtr(ToUintPtr(humongous.GetPtr()) + DEFAULT_REGION_SIZE)));
-    bool has_humongous_obj = false;
-    humongous_region->IterateOverObjects(
-        [&has_humongous_obj, &humongous](ObjectHeader *obj) { has_humongous_obj |= obj == humongous.GetPtr(); });
-    ASSERT_TRUE(has_humongous_obj);
+    Region *humongousRegion = ObjectToRegion(humongous.GetPtr());
+    ASSERT_NE(nullptr, humongousRegion);
+    ASSERT_EQ(humongousRegion, AddrToRegion(humongous.GetPtr()));
+    ASSERT_EQ(humongousRegion, AddrToRegion(ToVoidPtr(ToUintPtr(humongous.GetPtr()) + DEFAULT_REGION_SIZE)));
+    bool hasHumongousObj = false;
+    humongousRegion->IterateOverObjects(
+        [&hasHumongousObj, &humongous](ObjectHeader *obj) { hasHumongousObj |= obj == humongous.GetPtr(); });
+    ASSERT_TRUE(hasHumongousObj);
 }
 
 TEST_F(G1GCTest, TestAllocHumongousArray)
@@ -206,26 +207,26 @@ TEST_F(G1GCTest, NonMovable2YoungRef)
 {
     Runtime *runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
 
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     static constexpr size_t ARRAY_LENGTH = 100;
-    coretypes::Array *non_movable_obj = nullptr;
-    uintptr_t prev_young_addr = 0;
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+    coretypes::Array *nonMovableObj = nullptr;
+    uintptr_t prevYoungAddr = 0;
+    Class *klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
                        ->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
-    non_movable_obj = coretypes::Array::Create(klass, ARRAY_LENGTH, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    coretypes::String *young_obj = coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
-    non_movable_obj->Set(0, young_obj);
-    prev_young_addr = ToUintPtr(young_obj);
-    VMHandle<coretypes::Array> non_movable_obj_ptr(thread, non_movable_obj);
+    nonMovableObj = coretypes::Array::Create(klass, ARRAY_LENGTH, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    coretypes::String *youngObj = coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
+    nonMovableObj->Set(0, youngObj);
+    prevYoungAddr = ToUintPtr(youngObj);
+    VMHandle<coretypes::Array> nonMovableObjPtr(thread, nonMovableObj);
 
     // Trigger GC
-    RemSetChecker listener(gc, non_movable_obj, non_movable_obj->Get<ObjectHeader *>(0));
+    RemSetChecker listener(gc, nonMovableObj, nonMovableObj->Get<ObjectHeader *>(0));
     gc->AddListener(&listener);
 
     {
@@ -234,11 +235,11 @@ TEST_F(G1GCTest, NonMovable2YoungRef)
         task.Run(*gc);
     }
 
-    auto young_obj_2 = static_cast<coretypes::String *>(non_movable_obj_ptr->Get<ObjectHeader *>(0));
+    auto youngObj2 = static_cast<coretypes::String *>(nonMovableObjPtr->Get<ObjectHeader *>(0));
     // Check GC has moved the young obj
-    ASSERT_NE(prev_young_addr, ToUintPtr(young_obj_2));
+    ASSERT_NE(prevYoungAddr, ToUintPtr(youngObj2));
     // Check young object is accessible
-    ASSERT_EQ(0, young_obj_2->GetLength());
+    ASSERT_EQ(0, youngObj2->GetLength());
 }
 
 TEST_F(G1GCTest, Humongous2YoungRef)
@@ -248,16 +249,16 @@ TEST_F(G1GCTest, Humongous2YoungRef)
     GC *gc = runtime->GetPandaVM()->GetGC();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    uintptr_t prev_young_addr = 0;
-    size_t array_length = GetHumongousArrayLength(ClassRoot::ARRAY_STRING);
-    VMHandle<coretypes::Array> humongous_obj(thread,
-                                             ObjectAllocator::AllocArray(array_length, ClassRoot::ARRAY_STRING, false));
-    ObjectHeader *young_obj = ObjectAllocator::AllocObjectInYoung();
-    humongous_obj->Set(0, young_obj);
-    prev_young_addr = ToUintPtr(young_obj);
+    uintptr_t prevYoungAddr = 0;
+    size_t arrayLength = GetHumongousArrayLength(ClassRoot::ARRAY_STRING);
+    VMHandle<coretypes::Array> humongousObj(thread,
+                                            ObjectAllocator::AllocArray(arrayLength, ClassRoot::ARRAY_STRING, false));
+    ObjectHeader *youngObj = ObjectAllocator::AllocObjectInYoung();
+    humongousObj->Set(0, youngObj);
+    prevYoungAddr = ToUintPtr(youngObj);
 
     // Trigger GC
-    RemSetChecker listener(gc, humongous_obj.GetPtr(), humongous_obj->Get<ObjectHeader *>(0));
+    RemSetChecker listener(gc, humongousObj.GetPtr(), humongousObj->Get<ObjectHeader *>(0));
     gc->AddListener(&listener);
 
     {
@@ -266,11 +267,11 @@ TEST_F(G1GCTest, Humongous2YoungRef)
         task.Run(*gc);
     }
 
-    young_obj = static_cast<ObjectHeader *>(humongous_obj->Get<ObjectHeader *>(0));
+    youngObj = static_cast<ObjectHeader *>(humongousObj->Get<ObjectHeader *>(0));
     // Check GC has moved the young obj
-    ASSERT_NE(prev_young_addr, ToUintPtr(young_obj));
+    ASSERT_NE(prevYoungAddr, ToUintPtr(youngObj));
     // Check the young object is accessible
-    ASSERT_NE(nullptr, young_obj->ClassAddr<Class>());
+    ASSERT_NE(nullptr, youngObj->ClassAddr<Class>());
 }
 
 TEST_F(G1GCTest, TestCollectTenured)
@@ -284,7 +285,7 @@ TEST_F(G1GCTest, TestCollectTenured)
     VMHandle<coretypes::Array> humongous;
     VMHandle<coretypes::Array> nonmovable;
     ObjectHeader *obj;
-    uintptr_t obj_addr;
+    uintptr_t objAddr;
 
     humongous =
         VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(GetHumongousArrayLength(ClassRoot::ARRAY_STRING),
@@ -293,7 +294,7 @@ TEST_F(G1GCTest, TestCollectTenured)
     obj = ObjectAllocator::AllocObjectInYoung();
     humongous->Set(0, obj);
     nonmovable->Set(0, obj);
-    obj_addr = ToUintPtr(obj);
+    objAddr = ToUintPtr(obj);
 
     RemSetChecker listener1(gc, humongous.GetPtr(), obj);
     RemSetChecker listener2(gc, nonmovable.GetPtr(), obj);
@@ -306,10 +307,10 @@ TEST_F(G1GCTest, TestCollectTenured)
     }
     // Check the obj obj was propagated to tenured
     obj = humongous->Get<ObjectHeader *>(0);
-    ASSERT_NE(obj_addr, ToUintPtr(obj));
+    ASSERT_NE(objAddr, ToUintPtr(obj));
     ASSERT_TRUE(ObjectToRegion(obj)->HasFlag(RegionFlag::IS_OLD));
 
-    obj_addr = ToUintPtr(obj);
+    objAddr = ToUintPtr(obj);
     {
         ScopedNativeCodeThread sn(thread);
         GCTask task1(GCTaskCause::EXPLICIT_CAUSE);  // run full GC to collect all regions
@@ -318,7 +319,7 @@ TEST_F(G1GCTest, TestCollectTenured)
 
     // Check the tenured obj was propagated to another tenured region
     obj = humongous->Get<ObjectHeader *>(0);
-    ASSERT_NE(obj_addr, ToUintPtr(obj));
+    ASSERT_NE(objAddr, ToUintPtr(obj));
     ASSERT_TRUE(ObjectToRegion(obj)->HasFlag(RegionFlag::IS_OLD));
 
     // Check the objet is accessible
@@ -330,55 +331,55 @@ TEST_F(G1GCTest, CheckRemsetToHumongousAfterReclaimHumongousObject)
 {
     Runtime *runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
 
     ScopedManagedCodeThread s(thread);
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope_for_young_obj(thread);
+    [[maybe_unused]] HandleScope<ObjectHeader *> scopeForYoungObj(thread);
 
     // 1MB array
     static constexpr size_t HUMONGOUS_ARRAY_LENGTH = 262144LU;
     static constexpr size_t YOUNG_ARRAY_LENGTH = ((DEFAULT_REGION_SIZE - Region::HeadSize()) / 4U) - 16U;
-    coretypes::Array *humongous_obj;
-    coretypes::Array *young_arr;
+    coretypes::Array *humongousObj;
+    coretypes::Array *youngArr;
 
     auto *gc = runtime->GetPandaVM()->GetGC();
-    auto region_pred = []([[maybe_unused]] Region *r) { return true; };
+    auto regionPred = []([[maybe_unused]] Region *r) { return true; };
 
     Class *klass;
 
-    klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+    klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
                 ->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
 
-    young_arr = coretypes::Array::Create(klass, YOUNG_ARRAY_LENGTH);
-    ASSERT_NE(young_arr, nullptr);
-    auto *region = ObjectToRegion(young_arr);
+    youngArr = coretypes::Array::Create(klass, YOUNG_ARRAY_LENGTH);
+    ASSERT_NE(youngArr, nullptr);
+    auto *region = ObjectToRegion(youngArr);
     ASSERT_NE(region, nullptr);
 
-    VMHandle<coretypes::Array> young_obj_ptr(thread, young_arr);
+    VMHandle<coretypes::Array> youngObjPtr(thread, youngArr);
     GCTask task(GCTaskCause::EXPLICIT_CAUSE);
     {
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope_for_humongous_obj(thread);
+        [[maybe_unused]] HandleScope<ObjectHeader *> scopeForHumongousObj(thread);
 
-        humongous_obj = coretypes::Array::Create(klass, HUMONGOUS_ARRAY_LENGTH);
+        humongousObj = coretypes::Array::Create(klass, HUMONGOUS_ARRAY_LENGTH);
 
-        ASSERT_NE(humongous_obj, nullptr);
+        ASSERT_NE(humongousObj, nullptr);
         // add humongous object to our remset
-        humongous_obj->Set(0, young_obj_ptr.GetPtr());
+        humongousObj->Set(0, youngObjPtr.GetPtr());
 
         ASSERT_EQ(gc->GetType(), GCType::G1_GC);
         {
-            VMHandle<coretypes::Array> humongous_obj_ptr(thread, humongous_obj);
+            VMHandle<coretypes::Array> humongousObjPtr(thread, humongousObj);
             {
                 ScopedNativeCodeThread sn(thread);
                 task.Run(*gc);
             }
 
-            auto array_region = ObjectToRegion(young_obj_ptr.GetPtr());
+            auto arrayRegion = ObjectToRegion(youngObjPtr.GetPtr());
             PandaVector<Region *> regions;
-            array_region->GetRemSet()->Iterate(
-                region_pred, [&regions](Region *r, [[maybe_unused]] const MemRange &range) { regions.push_back(r); });
+            arrayRegion->GetRemSet()->Iterate(
+                regionPred, [&regions](Region *r, [[maybe_unused]] const MemRange &range) { regions.push_back(r); });
             ASSERT_EQ(1U, regions.size());  // we have reference only from 1 humongous space
             ASSERT_TRUE(regions[0]->HasFlag(IS_LARGE_OBJECT));
             ASSERT_EQ(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT,
@@ -396,10 +397,10 @@ TEST_F(G1GCTest, CheckRemsetToHumongousAfterReclaimHumongousObject)
         task.Run(*gc);  // humongous object should be reclaimed
     }
 
-    auto array_region = ObjectToRegion(young_obj_ptr.GetPtr());
+    auto arrayRegion = ObjectToRegion(youngObjPtr.GetPtr());
     PandaVector<Region *> regions;
-    array_region->GetRemSet()->Iterate(
-        region_pred, [&regions](Region *r, [[maybe_unused]] const MemRange &range) { regions.push_back(r); });
+    arrayRegion->GetRemSet()->Iterate(
+        regionPred, [&regions](Region *r, [[maybe_unused]] const MemRange &range) { regions.push_back(r); });
     ASSERT_EQ(0U, regions.size());  // we have no references from the humongous space
 }
 
@@ -415,22 +416,22 @@ public:
 
         // Allocate quite large object to make allocator to create a separate region
         // NOLINTNEXTLINE(readability-magic-numbers)
-        size_t nonmovable_len = 9 * DEFAULT_REGION_SIZE / 10;
-        ObjectHeader *dummy = ObjectAllocator::AllocArray(nonmovable_len, ClassRoot::ARRAY_U8, true);
-        Region *dummy_region = ObjectToRegion(dummy);
-        EXPECT_TRUE(dummy_region->HasFlag(RegionFlag::IS_NONMOVABLE));
+        size_t nonmovableLen = 9 * DEFAULT_REGION_SIZE / 10;
+        ObjectHeader *dummy = ObjectAllocator::AllocArray(nonmovableLen, ClassRoot::ARRAY_U8, true);
+        Region *dummyRegion = ObjectToRegion(dummy);
+        EXPECT_TRUE(dummyRegion->HasFlag(RegionFlag::IS_NONMOVABLE));
         nonmovable_ =
-            VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(nonmovable_len, ClassRoot::ARRAY_U8, true));
-        Region *nonmovable_region = ObjectToRegion(nonmovable_.GetPtr());
-        EXPECT_TRUE(nonmovable_region->HasFlag(RegionFlag::IS_NONMOVABLE));
-        EXPECT_NE(nonmovable_region, dummy_region);
-        nonmovable_mark_bitmap_addr_ = ToUintPtr(nonmovable_region->GetMarkBitmap());
+            VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(nonmovableLen, ClassRoot::ARRAY_U8, true));
+        Region *nonmovableRegion = ObjectToRegion(nonmovable_.GetPtr());
+        EXPECT_TRUE(nonmovableRegion->HasFlag(RegionFlag::IS_NONMOVABLE));
+        EXPECT_NE(nonmovableRegion, dummyRegion);
+        nonmovableMarkBitmapAddr_ = ToUintPtr(nonmovableRegion->GetMarkBitmap());
 
-        size_t humongous_len = G1GCTest::GetHumongousArrayLength(ClassRoot::ARRAY_U8);
+        size_t humongousLen = G1GCTest::GetHumongousArrayLength(ClassRoot::ARRAY_U8);
         humongous_ =
-            VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(humongous_len, ClassRoot::ARRAY_U8, false));
-        Region *humongous_region = ObjectToRegion(humongous_.GetPtr());
-        humongous_mark_bitmap_addr_ = ToUintPtr(humongous_region->GetMarkBitmap());
+            VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(humongousLen, ClassRoot::ARRAY_U8, false));
+        Region *humongousRegion = ObjectToRegion(humongous_.GetPtr());
+        humongousMarkBitmapAddr_ = ToUintPtr(humongousRegion->GetMarkBitmap());
     }
 
     ObjectHeader *GetNonMovable()
@@ -441,7 +442,7 @@ public:
 
     uintptr_t GetNonMovableMarkBitmapAddr()
     {
-        return nonmovable_mark_bitmap_addr_;
+        return nonmovableMarkBitmapAddr_;
     }
 
     ObjectHeader *GetHumongous()
@@ -451,14 +452,14 @@ public:
 
     uintptr_t GetHumongousMarkBitmapAddr()
     {
-        return humongous_mark_bitmap_addr_;
+        return humongousMarkBitmapAddr_;
     }
 
 private:
     VMHandle<ObjectHeader> nonmovable_;
-    uintptr_t nonmovable_mark_bitmap_addr_ {};
+    uintptr_t nonmovableMarkBitmapAddr_ {};
     VMHandle<ObjectHeader> humongous_;
-    uintptr_t humongous_mark_bitmap_addr_ {};
+    uintptr_t humongousMarkBitmapAddr_ {};
 };
 
 // Test the new objects created during concurrent marking are alive
@@ -484,13 +485,13 @@ TEST_F(G1GCTest, TestNewObjectsSATB)
     ASSERT_NE(nullptr, listener.GetHumongous());
 
     // Check the objects are alive
-    Region *nonmovable_region = ObjectToRegion(listener.GetNonMovable());
-    ASSERT_NE(nullptr, nonmovable_region->GetLiveBitmap());
-    ASSERT_TRUE(nonmovable_region->GetLiveBitmap()->Test(listener.GetNonMovable()));
+    Region *nonmovableRegion = ObjectToRegion(listener.GetNonMovable());
+    ASSERT_NE(nullptr, nonmovableRegion->GetLiveBitmap());
+    ASSERT_TRUE(nonmovableRegion->GetLiveBitmap()->Test(listener.GetNonMovable()));
     ASSERT_FALSE(listener.GetNonMovable()->IsMarkedForGC());  // mark should be done using mark bitmap
-    Region *humongous_region = ObjectToRegion(listener.GetHumongous());
-    ASSERT_NE(nullptr, humongous_region->GetLiveBitmap());
-    ASSERT_TRUE(humongous_region->GetLiveBitmap()->Test(listener.GetHumongous()));
+    Region *humongousRegion = ObjectToRegion(listener.GetHumongous());
+    ASSERT_NE(nullptr, humongousRegion->GetLiveBitmap());
+    ASSERT_TRUE(humongousRegion->GetLiveBitmap()->Test(listener.GetHumongous()));
     ASSERT_FALSE(listener.GetHumongous()->IsMarkedForGC());  // mark should be done using mark bitmap
 }
 
@@ -498,41 +499,41 @@ class CollectionSetChecker : public GCListener {
 public:
     explicit CollectionSetChecker(ObjectAllocatorG1<> *allocator) : allocator_(allocator) {}
 
-    void SetExpectedRegions(const std::initializer_list<Region *> &expected_regions)
+    void SetExpectedRegions(const std::initializer_list<Region *> &expectedRegions)
     {
-        expected_regions_ = expected_regions;
+        expectedRegions_ = expectedRegions;
     }
 
     void GCPhaseStarted(GCPhase phase) override
     {
         if (phase == GCPhase::GC_PHASE_MARK_YOUNG) {
-            EXPECT_EQ(expected_regions_, GetCollectionSet());
-            expected_regions_.clear();
+            EXPECT_EQ(expectedRegions_, GetCollectionSet());
+            expectedRegions_.clear();
         }
     }
 
 private:
     PandaSet<Region *> GetCollectionSet()
     {
-        PandaSet<Region *> collection_set;
+        PandaSet<Region *> collectionSet;
         for (Region *region : allocator_->GetAllRegions()) {
             if (region->HasFlag(RegionFlag::IS_COLLECTION_SET)) {
-                collection_set.insert(region);
+                collectionSet.insert(region);
             }
         }
-        return collection_set;
+        return collectionSet;
     }
 
 private:
     ObjectAllocatorG1<> *allocator_;
-    PandaSet<Region *> expected_regions_;
+    PandaSet<Region *> expectedRegions_;
 };
 
 TEST_F(G1GCTest, TestGetCollectibleRegionsHasAllYoungRegions)
 {
     // The object will occupy more than half of region.
     // So expect the allocator allocates a separate young region for each object.
-    size_t young_len = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::Array);
+    size_t youngLen = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::Array);
 
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
@@ -548,9 +549,9 @@ TEST_F(G1GCTest, TestGetCollectibleRegionsHasAllYoungRegions)
         VMHandle<ObjectHeader> young2;
         VMHandle<ObjectHeader> young3;
 
-        young1 = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(young_len, ClassRoot::ARRAY_U8, false));
-        young2 = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(young_len, ClassRoot::ARRAY_U8, false));
-        young3 = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(young_len, ClassRoot::ARRAY_U8, false));
+        young1 = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(youngLen, ClassRoot::ARRAY_U8, false));
+        young2 = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(youngLen, ClassRoot::ARRAY_U8, false));
+        young3 = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(youngLen, ClassRoot::ARRAY_U8, false));
 
         Region *yregion1 = ObjectToRegion(young1.GetPtr());
         Region *yregion2 = ObjectToRegion(young2.GetPtr());
@@ -608,19 +609,19 @@ TEST_F(G1GCTest, TestGetCollectibleRegionsHasAllRegionsInCaseOfFull)
 
 TEST_F(G1GCTest, TestMixedCollections)
 {
-    uint32_t garbage_rate = Runtime::GetOptions().GetG1RegionGarbageRateThreshold();
+    uint32_t garbageRate = Runtime::GetOptions().GetG1RegionGarbageRateThreshold();
     // The object will occupy more than half of region.
     // So expect the allocator allocates a separate young region for each object.
     static constexpr size_t ARRAY_SIZE = 4;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    size_t big_len = garbage_rate * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
+    size_t bigLen = garbageRate * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    size_t big_len1 = (garbage_rate + 1) * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
+    size_t bigLen1 = (garbageRate + 1) * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    size_t big_len2 = (garbage_rate + 2) * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
-    size_t small_len = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::String);
-    std::array<size_t, ARRAY_SIZE> lenths_array {big_len, big_len1, big_len2, small_len};
-    size_t mini_obj_len = PANDA_TLAB_SIZE + 1;  // To allocate not in TLAB
+    size_t bigLen2 = (garbageRate + 2) * DEFAULT_REGION_SIZE / 100 + sizeof(coretypes::String);
+    size_t smallLen = DEFAULT_REGION_SIZE / 2 + sizeof(coretypes::String);
+    std::array<size_t, ARRAY_SIZE> lenthsArray {bigLen, bigLen1, bigLen2, smallLen};
+    size_t miniObjLen = PANDA_TLAB_SIZE + 1;  // To allocate not in TLAB
 
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
@@ -629,25 +630,25 @@ TEST_F(G1GCTest, TestMixedCollections)
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
-    VMHandle<coretypes::Array> small_object_holder;
-    VMHandle<coretypes::Array> big_object_holder;
+    VMHandle<coretypes::Array> smallObjectHolder;
+    VMHandle<coretypes::Array> bigObjectHolder;
     VMHandle<ObjectHeader> young;
 
     // Allocate objects of different sizes.
     // Allocate mini object after each of them for prevent clearing after concurrent
     // Mixed regions should be choosen according to the largest garbage.
-    big_object_holder =
-        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(4, ClassRoot::ARRAY_STRING, false));
-    small_object_holder =
-        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(4, ClassRoot::ARRAY_STRING, false));
+    bigObjectHolder =
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(4U, ClassRoot::ARRAY_STRING, false));
+    smallObjectHolder =
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(4U, ClassRoot::ARRAY_STRING, false));
     for (size_t i = 0; i < ARRAY_SIZE; i++) {
-        big_object_holder->Set(i, ObjectAllocator::AllocString(lenths_array[i]));
-        small_object_holder->Set(i, ObjectAllocator::AllocString(mini_obj_len));
-        Region *first_region = ObjectToRegion(big_object_holder->Get<ObjectHeader *>(i));
-        Region *second_region = ObjectToRegion(small_object_holder->Get<ObjectHeader *>(i));
-        ASSERT_TRUE(first_region->HasFlag(RegionFlag::IS_EDEN));
-        ASSERT_TRUE(second_region->HasFlag(RegionFlag::IS_EDEN));
-        ASSERT_TRUE(first_region == second_region);
+        bigObjectHolder->Set(i, ObjectAllocator::AllocString(lenthsArray[i]));
+        smallObjectHolder->Set(i, ObjectAllocator::AllocString(miniObjLen));
+        Region *firstRegion = ObjectToRegion(bigObjectHolder->Get<ObjectHeader *>(i));
+        Region *secondRegion = ObjectToRegion(smallObjectHolder->Get<ObjectHeader *>(i));
+        ASSERT_TRUE(firstRegion->HasFlag(RegionFlag::IS_EDEN));
+        ASSERT_TRUE(secondRegion->HasFlag(RegionFlag::IS_EDEN));
+        ASSERT_TRUE(firstRegion == secondRegion);
     }
 
     {
@@ -660,16 +661,16 @@ TEST_F(G1GCTest, TestMixedCollections)
     // Now we don't know which tenured region is current.
     // So propagate one big young object to tenured to make the latter current.
     VMHandle<ObjectHeader> current;
-    current = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(small_len, ClassRoot::ARRAY_U8, false));
+    current = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocArray(smallLen, ClassRoot::ARRAY_U8, false));
 
     // Propogate 'current' object -> tenured and prepare for mixed GC
     // Release 'big1', 'big2' and 'small' objects to make them garbage
-    Region *region0 = ObjectToRegion(big_object_holder->Get<ObjectHeader *>(0));
-    Region *region1 = ObjectToRegion(big_object_holder->Get<ObjectHeader *>(1));
-    Region *region2 = ObjectToRegion(big_object_holder->Get<ObjectHeader *>(2));
-    Region *region3 = ObjectToRegion(big_object_holder->Get<ObjectHeader *>(3));
+    Region *region0 = ObjectToRegion(bigObjectHolder->Get<ObjectHeader *>(0));
+    Region *region1 = ObjectToRegion(bigObjectHolder->Get<ObjectHeader *>(1));
+    Region *region2 = ObjectToRegion(bigObjectHolder->Get<ObjectHeader *>(2));
+    Region *region3 = ObjectToRegion(bigObjectHolder->Get<ObjectHeader *>(3));
     for (size_t i = 0; i < ARRAY_SIZE; i++) {
-        big_object_holder->Set(i, static_cast<ObjectHeader *>(nullptr));
+        bigObjectHolder->Set(i, static_cast<ObjectHeader *>(nullptr));
     }
     {
         ScopedNativeCodeThread sn(thread);
@@ -708,12 +709,12 @@ TEST_F(G1GCTest, TestHandlePendingCards)
     auto thread = MTManagedThread::GetCurrent();
     auto runtime = Runtime::GetCurrent();
     auto ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto array_class = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
+    auto arrayClass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
     auto gc = runtime->GetPandaVM()->GetGC();
-    size_t elem_size = array_class->GetComponentSize();
-    size_t array_size = DEFAULT_REGION_SIZE / 2;
+    size_t elemSize = arrayClass->GetComponentSize();
+    size_t arraySize = DEFAULT_REGION_SIZE / 2;
     // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
-    size_t array_length = array_size / elem_size + 1;
+    size_t arrayLength = arraySize / elemSize + 1;
     ScopedManagedCodeThread s(thread);
     HandleScope<ObjectHeader *> scope(thread);
 
@@ -721,7 +722,7 @@ TEST_F(G1GCTest, TestHandlePendingCards)
     std::vector<VMHandle<coretypes::Array>> arrays;
 
     for (size_t i = 0; i < REGION_NUM; i++) {
-        arrays.emplace_back(thread, ObjectAllocator::AllocArray(array_length, ClassRoot::ARRAY_STRING, false));
+        arrays.emplace_back(thread, ObjectAllocator::AllocArray(arrayLength, ClassRoot::ARRAY_STRING, false));
     }
 
     {
@@ -735,12 +736,12 @@ TEST_F(G1GCTest, TestHandlePendingCards)
     }
 
     std::vector<VMHandle<coretypes::String>> strings;
-    std::vector<void *> string_orig_ptrs;
+    std::vector<void *> stringOrigPtrs;
 
     for (auto &array : arrays) {
         auto str = ObjectAllocator::AllocString(StringLengthFitIntoRegion(1));
         strings.emplace_back(thread, str);
-        string_orig_ptrs.push_back(str);
+        stringOrigPtrs.push_back(str);
         array->Set(0, str);  // create dirty card
     }
 
@@ -755,8 +756,8 @@ TEST_F(G1GCTest, TestHandlePendingCards)
     for (size_t i = 0; i < REGION_NUM; i++) {
         auto &array = arrays[i];
         auto &str = strings[i];
-        auto str_orig_ptr = string_orig_ptrs[i];
-        ASSERT_NE(str_orig_ptr, str.GetPtr());                   // string was moved
+        auto strOrigPtr = stringOrigPtrs[i];
+        ASSERT_NE(strOrigPtr, str.GetPtr());                     // string was moved
         ASSERT_EQ(array->Get<ObjectHeader *>(0), str.GetPtr());  // refs were correctly updated
     }
 
@@ -783,7 +784,7 @@ public:
     {
         RuntimeOptions options = CreateDefaultOptions();
         // NOLINTNEXTLINE(readability-magic-numbers)
-        options.SetG1PromotionRegionAliveRate(50);
+        options.SetG1PromotionRegionAliveRate(PROMOTE_RATE);
         return options;
     }
 
@@ -797,13 +798,13 @@ TEST_F(G1GCPromotionTest, TestCorrectPromotionYoungRegion)
     static constexpr size_t HUMONGOUS_STRING_LEN = G1GCPromotionTest::GetHumongousStringLength();
     // Consume more than 50% of region size
     static constexpr size_t FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT =
-        DEFAULT_REGION_SIZE / sizeof(coretypes::String) * 2 / 3 + 1;
+        DEFAULT_REGION_SIZE / sizeof(coretypes::String) * 2U / 3U + 1;
     // Consume less than 50% of region size
     static constexpr size_t SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT = 1;
     ASSERT(FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT <= HUMONGOUS_STRING_LEN);
-    ASSERT((FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT * sizeof(coretypes::String) * 100 / DEFAULT_REGION_SIZE) >
+    ASSERT((FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT * sizeof(coretypes::String) * 100U / DEFAULT_REGION_SIZE) >
            G1GCPromotionTest::PROMOTE_RATE);
-    ASSERT((SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT * sizeof(coretypes::String) * 100 / DEFAULT_REGION_SIZE) <
+    ASSERT((SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT * sizeof(coretypes::String) * 100U / DEFAULT_REGION_SIZE) <
            G1GCPromotionTest::PROMOTE_RATE);
 
     Runtime *runtime = Runtime::GetCurrent();
@@ -817,22 +818,22 @@ TEST_F(G1GCPromotionTest, TestCorrectPromotionYoungRegion)
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
-    VMHandle<coretypes::Array> first_holder;
-    VMHandle<coretypes::Array> second_holder;
+    VMHandle<coretypes::Array> firstHolder;
+    VMHandle<coretypes::Array> secondHolder;
     VMHandle<ObjectHeader> young;
-    std::array<ObjectHeader *, FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT> first_region_object_links {};
-    std::array<ObjectHeader *, SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT> second_region_object_links {};
+    std::array<ObjectHeader *, FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT> firstRegionObjectLinks {};
+    std::array<ObjectHeader *, SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT> secondRegionObjectLinks {};
     // Check Promotion for young region:
 
-    first_holder = VMHandle<coretypes::Array>(
+    firstHolder = VMHandle<coretypes::Array>(
         thread, ObjectAllocator::AllocArray(HUMONGOUS_STRING_LEN, ClassRoot::ARRAY_STRING, false));
-    Region *first_region = ObjectToRegion(ObjectAllocator::AllocObjectInYoung());
-    ASSERT_TRUE(first_region->HasFlag(RegionFlag::IS_EDEN));
+    Region *firstRegion = ObjectToRegion(ObjectAllocator::AllocObjectInYoung());
+    ASSERT_TRUE(firstRegion->HasFlag(RegionFlag::IS_EDEN));
     for (size_t i = 0; i < FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT; i++) {
-        first_region_object_links[i] = ObjectAllocator::AllocObjectInYoung();
-        ASSERT_TRUE(first_region_object_links[i] != nullptr);
-        first_holder->Set(i, first_region_object_links[i]);
-        ASSERT_TRUE(ObjectToRegion(first_region_object_links[i]) == first_region);
+        firstRegionObjectLinks[i] = ObjectAllocator::AllocObjectInYoung();
+        ASSERT_TRUE(firstRegionObjectLinks[i] != nullptr);
+        firstHolder->Set(i, firstRegionObjectLinks[i]);
+        ASSERT_TRUE(ObjectToRegion(firstRegionObjectLinks[i]) == firstRegion);
     }
 
     {
@@ -843,20 +844,20 @@ TEST_F(G1GCPromotionTest, TestCorrectPromotionYoungRegion)
     }
     // Check that we didn't change the links for young objects from the first region:
     for (size_t i = 0; i < FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT; i++) {
-        ASSERT_EQ(first_region_object_links[i], first_holder->Get<ObjectHeader *>(i));
-        ASSERT_TRUE(ObjectToRegion(first_holder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_OLD));
-        ASSERT_FALSE(ObjectToRegion(first_holder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_PROMOTED));
+        ASSERT_EQ(firstRegionObjectLinks[i], firstHolder->Get<ObjectHeader *>(i));
+        ASSERT_TRUE(ObjectToRegion(firstHolder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_OLD));
+        ASSERT_FALSE(ObjectToRegion(firstHolder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_PROMOTED));
     }
 
-    second_holder = VMHandle<coretypes::Array>(
+    secondHolder = VMHandle<coretypes::Array>(
         thread, ObjectAllocator::AllocArray(HUMONGOUS_STRING_LEN, ClassRoot::ARRAY_STRING, false));
-    Region *second_region = ObjectToRegion(ObjectAllocator::AllocObjectInYoung());
-    ASSERT_TRUE(second_region->HasFlag(RegionFlag::IS_EDEN));
+    Region *secondRegion = ObjectToRegion(ObjectAllocator::AllocObjectInYoung());
+    ASSERT_TRUE(secondRegion->HasFlag(RegionFlag::IS_EDEN));
     for (size_t i = 0; i < SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT; i++) {
-        second_region_object_links[i] = ObjectAllocator::AllocObjectInYoung();
-        ASSERT_TRUE(second_region_object_links[i] != nullptr);
-        second_holder->Set(i, second_region_object_links[i]);
-        ASSERT_TRUE(ObjectToRegion(second_region_object_links[i]) == second_region);
+        secondRegionObjectLinks[i] = ObjectAllocator::AllocObjectInYoung();
+        ASSERT_TRUE(secondRegionObjectLinks[i] != nullptr);
+        secondHolder->Set(i, secondRegionObjectLinks[i]);
+        ASSERT_TRUE(ObjectToRegion(secondRegionObjectLinks[i]) == secondRegion);
     }
 
     {
@@ -867,9 +868,9 @@ TEST_F(G1GCPromotionTest, TestCorrectPromotionYoungRegion)
     }
     // Check that we changed the links for young objects from the second region:
     for (size_t i = 0; i < SECOND_YOUNG_REGION_ALIVE_OBJECTS_COUNT; i++) {
-        ASSERT_NE(second_region_object_links[i], second_holder->Get<ObjectHeader *>(i));
-        ASSERT_TRUE(ObjectToRegion(second_holder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_OLD));
-        ASSERT_FALSE(ObjectToRegion(second_holder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_PROMOTED));
+        ASSERT_NE(secondRegionObjectLinks[i], secondHolder->Get<ObjectHeader *>(i));
+        ASSERT_TRUE(ObjectToRegion(secondHolder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_OLD));
+        ASSERT_FALSE(ObjectToRegion(secondHolder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_PROMOTED));
     }
 
     {
@@ -880,9 +881,9 @@ TEST_F(G1GCPromotionTest, TestCorrectPromotionYoungRegion)
     }
     // Now we should have updated links in the humongous object to first region objects:
     for (size_t i = 0; i < FIRST_YOUNG_REGION_ALIVE_OBJECTS_COUNT; i++) {
-        ASSERT_NE(first_region_object_links[i], first_holder->Get<ObjectHeader *>(i));
-        ASSERT_TRUE(ObjectToRegion(first_holder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_OLD));
-        ASSERT_FALSE(ObjectToRegion(first_holder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_PROMOTED));
+        ASSERT_NE(firstRegionObjectLinks[i], firstHolder->Get<ObjectHeader *>(i));
+        ASSERT_TRUE(ObjectToRegion(firstHolder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_OLD));
+        ASSERT_FALSE(ObjectToRegion(firstHolder->Get<ObjectHeader *>(i))->HasFlag(RegionFlag::IS_PROMOTED));
     }
 }
 
@@ -904,9 +905,9 @@ public:
 
     bool CheckRemSets()
     {
-        Region *ref_region = ObjectToRegion(string_->GetPtr());
+        Region *refRegion = ObjectToRegion(string_->GetPtr());
         found_ = false;
-        ref_region->GetRemSet()->IterateOverObjects([this](ObjectHeader *obj) {
+        refRegion->GetRemSet()->IterateOverObjects([this](ObjectHeader *obj) {
             if (obj == array_->GetPtr()) {
                 found_ = true;
             }
@@ -946,14 +947,14 @@ TEST_F(G1GCPromotionTest, TestPromotedRegionHasValidRemSets)
 
     // Allocate an array which ocuppies more than half region.
     // This array will be promoted.
-    auto *array_class = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
-    size_t elem_size = array_class->GetComponentSize();
-    size_t array_size = DEFAULT_REGION_SIZE / 2;
-    size_t array_length = array_size / elem_size + 1;
-    VMHandle<coretypes::Array> array(thread, ObjectAllocator::AllocArray(array_length, ClassRoot::ARRAY_STRING, false));
+    auto *arrayClass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
+    size_t elemSize = arrayClass->GetComponentSize();
+    size_t arraySize = DEFAULT_REGION_SIZE / 2;
+    size_t arrayLength = arraySize / elemSize + 1;
+    VMHandle<coretypes::Array> array(thread, ObjectAllocator::AllocArray(arrayLength, ClassRoot::ARRAY_STRING, false));
     ASSERT_FALSE(array->IsForwarded());
-    Region *array_region = ObjectToRegion(array.GetPtr());
-    ASSERT_TRUE(array_region->IsYoung());
+    Region *arrayRegion = ObjectToRegion(array.GetPtr());
+    ASSERT_TRUE(arrayRegion->IsYoung());
     array->Set(0, string.GetPtr());
 
     PromotionRemSetChecker listener(&array, &string);
@@ -966,7 +967,7 @@ TEST_F(G1GCPromotionTest, TestPromotedRegionHasValidRemSets)
         ASSERT_FALSE(listener.IsFound());
     }
     // Check the array was promoted.
-    ASSERT_TRUE(array_region == ObjectToRegion(array.GetPtr()));
+    ASSERT_TRUE(arrayRegion == ObjectToRegion(array.GetPtr()));
 
     // remset is not fully updated during mixed collection
     ProcessDirtyCards(static_cast<G1GC<PandaAssemblyLanguageConfig> *>(gc));
@@ -1077,12 +1078,12 @@ TEST_F(G1GCTest, TestGarbageBytesCalculation)
     array = VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(2, ClassRoot::ARRAY_STRING, false));
     ASSERT_TRUE(ObjectToRegion(array.GetPtr())->HasFlag(RegionFlag::IS_EDEN));
     // The same for string. The instance size must be 8-bytes aligned.
-    array->Set(0, ObjectAllocator::AllocString(8));
-    array->Set(1, ObjectAllocator::AllocString(8));
+    array->Set(0, ObjectAllocator::AllocString(8U));
+    array->Set(1, ObjectAllocator::AllocString(8U));
     ASSERT_TRUE(ObjectToRegion(array->Get<ObjectHeader *>(0))->HasFlag(RegionFlag::IS_EDEN));
 
-    size_t array_size = GetObjectSize(array.GetPtr());
-    size_t str_size = GetObjectSize(array->Get<ObjectHeader *>(0));
+    size_t arraySize = GetObjectSize(array.GetPtr());
+    size_t strSize = GetObjectSize(array->Get<ObjectHeader *>(0));
 
     {
         ScopedNativeCodeThread sn(thread);
@@ -1107,69 +1108,69 @@ TEST_F(G1GCTest, TestGarbageBytesCalculation)
     }
 
     Region *region = ObjectToRegion(array.GetPtr());
-    ASSERT_EQ(array_size + str_size, region->GetLiveBytes());
-    ASSERT_EQ(str_size, region->GetGarbageBytes());
+    ASSERT_EQ(arraySize + strSize, region->GetLiveBytes());
+    ASSERT_EQ(strSize, region->GetGarbageBytes());
 }
 
 TEST_F(G1GCTest, NonMovableClearingDuringConcurrentPhaseTest)
 {
     Runtime *runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto obj_allocator = Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator();
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    auto objAllocator = Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
 
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     // NOLINTBEGIN(readability-magic-numbers)
-    size_t array_length = GetHumongousArrayLength(ClassRoot::ARRAY_STRING) - 50;
-    coretypes::Array *first_non_movable_obj = nullptr;
-    coretypes::Array *second_non_movable_obj = nullptr;
-    uintptr_t prev_young_addr = 0;
+    size_t arrayLength = GetHumongousArrayLength(ClassRoot::ARRAY_STRING) - 50;
+    coretypes::Array *firstNonMovableObj = nullptr;
+    coretypes::Array *secondNonMovableObj = nullptr;
+    uintptr_t prevYoungAddr = 0;
 
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+    Class *klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
                        ->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
-    first_non_movable_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    second_non_movable_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    ASSERT_EQ(true, ObjectToRegion(first_non_movable_obj)->HasFlag(RegionFlag::IS_NONMOVABLE));
-    ASSERT_EQ(true, ObjectToRegion(second_non_movable_obj)->HasFlag(RegionFlag::IS_NONMOVABLE));
-    coretypes::String *young_obj = coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
-    first_non_movable_obj->Set(0, young_obj);
-    prev_young_addr = ToUintPtr(young_obj);
+    firstNonMovableObj = coretypes::Array::Create(klass, arrayLength, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    secondNonMovableObj = coretypes::Array::Create(klass, arrayLength, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    ASSERT_EQ(true, ObjectToRegion(firstNonMovableObj)->HasFlag(RegionFlag::IS_NONMOVABLE));
+    ASSERT_EQ(true, ObjectToRegion(secondNonMovableObj)->HasFlag(RegionFlag::IS_NONMOVABLE));
+    coretypes::String *youngObj = coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
+    firstNonMovableObj->Set(0, youngObj);
+    prevYoungAddr = ToUintPtr(youngObj);
 
-    VMHandle<coretypes::Array> second_non_movable_obj_ptr(thread, second_non_movable_obj);
+    VMHandle<coretypes::Array> secondNonMovableObjPtr(thread, secondNonMovableObj);
 
     {
-        [[maybe_unused]] HandleScope<ObjectHeader *> first_scope(thread);
-        VMHandle<coretypes::Array> first_non_movable_obj_ptr(thread, first_non_movable_obj);
+        [[maybe_unused]] HandleScope<ObjectHeader *> firstScope(thread);
+        VMHandle<coretypes::Array> firstNonMovableObjPtr(thread, firstNonMovableObj);
         {
             ScopedNativeCodeThread sn(thread);
             GCTask task(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
             task.Run(*gc);
         }
 
-        auto young_obj_2 = static_cast<coretypes::String *>(first_non_movable_obj_ptr->Get<ObjectHeader *>(0));
+        auto youngObj2 = static_cast<coretypes::String *>(firstNonMovableObjPtr->Get<ObjectHeader *>(0));
         // Check GC has moved the young obj
-        ASSERT_NE(prev_young_addr, ToUintPtr(young_obj_2));
+        ASSERT_NE(prevYoungAddr, ToUintPtr(youngObj2));
         // Check young object is accessible
-        ASSERT_EQ(0, young_obj_2->GetLength());
+        ASSERT_EQ(0, youngObj2->GetLength());
     }
 
     // Check that all objects are alive
-    ASSERT_EQ(true, obj_allocator->ContainObject(first_non_movable_obj));
-    ASSERT_EQ(true, obj_allocator->ContainObject(second_non_movable_obj));
-    ASSERT_EQ(true, obj_allocator->IsLive(first_non_movable_obj));
-    ASSERT_EQ(true, obj_allocator->IsLive(second_non_movable_obj));
+    ASSERT_EQ(true, objAllocator->ContainObject(firstNonMovableObj));
+    ASSERT_EQ(true, objAllocator->ContainObject(secondNonMovableObj));
+    ASSERT_EQ(true, objAllocator->IsLive(firstNonMovableObj));
+    ASSERT_EQ(true, objAllocator->IsLive(secondNonMovableObj));
     // Check that the first object is accessible
-    bool found_first_object = false;
-    obj_allocator->IterateOverObjects([&first_non_movable_obj, &found_first_object](ObjectHeader *object) {
-        if (first_non_movable_obj == object) {
-            found_first_object = true;
+    bool foundFirstObject = false;
+    objAllocator->IterateOverObjects([&firstNonMovableObj, &foundFirstObject](ObjectHeader *object) {
+        if (firstNonMovableObj == object) {
+            foundFirstObject = true;
         }
     });
-    ASSERT_EQ(true, found_first_object);
+    ASSERT_EQ(true, foundFirstObject);
 
     // So, try to remove the first non movable object:
     {
@@ -1179,71 +1180,71 @@ TEST_F(G1GCTest, NonMovableClearingDuringConcurrentPhaseTest)
     }
 
     // Check that the second object is still alive
-    ASSERT_EQ(true, obj_allocator->ContainObject(second_non_movable_obj));
-    ASSERT_EQ(true, obj_allocator->IsLive(second_non_movable_obj));
+    ASSERT_EQ(true, objAllocator->ContainObject(secondNonMovableObj));
+    ASSERT_EQ(true, objAllocator->IsLive(secondNonMovableObj));
     // Check that the first object is dead
-    obj_allocator->IterateOverObjects(
-        [&first_non_movable_obj](ObjectHeader *object) { ASSERT_NE(first_non_movable_obj, object); });
+    objAllocator->IterateOverObjects(
+        [&firstNonMovableObj](ObjectHeader *object) { ASSERT_NE(firstNonMovableObj, object); });
 }
 
 TEST_F(G1GCTest, HumongousClearingDuringConcurrentPhaseTest)
 {
     Runtime *runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto obj_allocator = Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator();
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
+    auto objAllocator = Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator();
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
 
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    size_t array_length = GetHumongousArrayLength(ClassRoot::ARRAY_STRING);
-    coretypes::Array *first_humongous_obj = nullptr;
-    coretypes::Array *second_humongous_obj = nullptr;
-    uintptr_t prev_young_addr = 0;
+    size_t arrayLength = GetHumongousArrayLength(ClassRoot::ARRAY_STRING);
+    coretypes::Array *firstHumongousObj = nullptr;
+    coretypes::Array *secondHumongousObj = nullptr;
+    uintptr_t prevYoungAddr = 0;
 
-    Class *klass = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+    Class *klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
                        ->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
-    first_humongous_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    second_humongous_obj = coretypes::Array::Create(klass, array_length, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-    ASSERT_EQ(true, ObjectToRegion(first_humongous_obj)->HasFlag(RegionFlag::IS_LARGE_OBJECT));
-    ASSERT_EQ(true, ObjectToRegion(second_humongous_obj)->HasFlag(RegionFlag::IS_LARGE_OBJECT));
-    coretypes::String *young_obj = coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
-    first_humongous_obj->Set(0, young_obj);
-    prev_young_addr = ToUintPtr(young_obj);
+    firstHumongousObj = coretypes::Array::Create(klass, arrayLength, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    secondHumongousObj = coretypes::Array::Create(klass, arrayLength, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    ASSERT_EQ(true, ObjectToRegion(firstHumongousObj)->HasFlag(RegionFlag::IS_LARGE_OBJECT));
+    ASSERT_EQ(true, ObjectToRegion(secondHumongousObj)->HasFlag(RegionFlag::IS_LARGE_OBJECT));
+    coretypes::String *youngObj = coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
+    firstHumongousObj->Set(0, youngObj);
+    prevYoungAddr = ToUintPtr(youngObj);
 
-    VMHandle<coretypes::Array> second_humongous_obj_ptr(thread, second_humongous_obj);
+    VMHandle<coretypes::Array> secondHumongousObjPtr(thread, secondHumongousObj);
 
     {
-        HandleScope<ObjectHeader *> first_scope(thread);
-        VMHandle<coretypes::Array> first_humongous_obj_ptr(thread, first_humongous_obj);
+        HandleScope<ObjectHeader *> firstScope(thread);
+        VMHandle<coretypes::Array> firstHumongousObjPtr(thread, firstHumongousObj);
         {
             ScopedNativeCodeThread sn(thread);
             GCTask task(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
             task.Run(*gc);
         }
 
-        auto young_obj_2 = static_cast<coretypes::String *>(first_humongous_obj_ptr->Get<ObjectHeader *>(0));
+        auto youngObj2 = static_cast<coretypes::String *>(firstHumongousObjPtr->Get<ObjectHeader *>(0));
         // Check GC has moved the young obj
-        ASSERT_NE(prev_young_addr, ToUintPtr(young_obj_2));
+        ASSERT_NE(prevYoungAddr, ToUintPtr(youngObj2));
         // Check young object is accessible
-        ASSERT_EQ(0, young_obj_2->GetLength());
+        ASSERT_EQ(0, youngObj2->GetLength());
     }
 
     // Check that all objects are alive
-    ASSERT_EQ(true, obj_allocator->ContainObject(first_humongous_obj));
-    ASSERT_EQ(true, obj_allocator->ContainObject(second_humongous_obj));
-    ASSERT_EQ(true, obj_allocator->IsLive(first_humongous_obj));
-    ASSERT_EQ(true, obj_allocator->IsLive(second_humongous_obj));
+    ASSERT_EQ(true, objAllocator->ContainObject(firstHumongousObj));
+    ASSERT_EQ(true, objAllocator->ContainObject(secondHumongousObj));
+    ASSERT_EQ(true, objAllocator->IsLive(firstHumongousObj));
+    ASSERT_EQ(true, objAllocator->IsLive(secondHumongousObj));
     // Check that the first object is accessible
-    bool found_first_object = false;
-    obj_allocator->IterateOverObjects([&first_humongous_obj, &found_first_object](ObjectHeader *object) {
-        if (first_humongous_obj == object) {
-            found_first_object = true;
+    bool foundFirstObject = false;
+    objAllocator->IterateOverObjects([&firstHumongousObj, &foundFirstObject](ObjectHeader *object) {
+        if (firstHumongousObj == object) {
+            foundFirstObject = true;
         }
     });
-    ASSERT_EQ(true, found_first_object);
+    ASSERT_EQ(true, foundFirstObject);
 
     {
         ScopedNativeCodeThread sn(thread);
@@ -1253,27 +1254,27 @@ TEST_F(G1GCTest, HumongousClearingDuringConcurrentPhaseTest)
     }
 
     // Check that the second object is still alive
-    ASSERT_EQ(true, obj_allocator->ContainObject(second_humongous_obj));
-    ASSERT_EQ(true, obj_allocator->IsLive(second_humongous_obj));
+    ASSERT_EQ(true, objAllocator->ContainObject(secondHumongousObj));
+    ASSERT_EQ(true, objAllocator->IsLive(secondHumongousObj));
     // Check that the first object is dead
-    obj_allocator->IterateOverObjects(
-        [&first_humongous_obj](ObjectHeader *object) { ASSERT_NE(first_humongous_obj, object); });
+    objAllocator->IterateOverObjects(
+        [&firstHumongousObj](ObjectHeader *object) { ASSERT_NE(firstHumongousObj, object); });
 }
 
 class G1FullGCTest : public G1GCTest {
 public:
-    explicit G1FullGCTest(uint32_t full_gc_region_fragmentation_rate = 0)
-        : G1GCTest(CreateOptions(full_gc_region_fragmentation_rate))
+    explicit G1FullGCTest(uint32_t fullGcRegionFragmentationRate = 0)
+        : G1GCTest(CreateOptions(fullGcRegionFragmentationRate))
     {
     }
 
-    static RuntimeOptions CreateOptions(uint32_t full_gc_region_fragmentation_rate)
+    static RuntimeOptions CreateOptions(uint32_t fullGcRegionFragmentationRate)
     {
         RuntimeOptions options = CreateDefaultOptions();
         options.SetInitYoungSpaceSize(YOUNG_SIZE);
         options.SetYoungSpaceSize(YOUNG_SIZE);
         options.SetHeapSizeLimit(HEAP_SIZE);
-        options.SetG1FullGcRegionFragmentationRate(full_gc_region_fragmentation_rate);
+        options.SetG1FullGcRegionFragmentationRate(fullGcRegionFragmentationRate);
         return options;
     }
 
@@ -1288,24 +1289,24 @@ public:
         return HEAP_SIZE / DEFAULT_REGION_SIZE - 1U;
     }
 
-    size_t RefArrayLengthFitIntoRegion(size_t num_regions)
+    size_t RefArrayLengthFitIntoRegion(size_t numRegions)
     {
         Runtime *runtime = Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto *klass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
-        size_t elem_size = klass->GetComponentSize();
+        size_t elemSize = klass->GetComponentSize();
         // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
-        return (num_regions * DEFAULT_REGION_SIZE - sizeof(coretypes::Array) - Region::HeadSize()) / elem_size;
+        return (numRegions * DEFAULT_REGION_SIZE - sizeof(coretypes::Array) - Region::HeadSize()) / elemSize;
     }
 
-    void FillHeap(size_t num_regions, VMHandle<coretypes::Array> &holder, size_t start_index)
+    void FillHeap(size_t numRegions, VMHandle<coretypes::Array> &holder, size_t startIndex)
     {
         constexpr size_t STRING_LENGTH = StringLengthFitIntoRegion(1);
-        EXPECT_LE(num_regions, holder->GetLength());
-        for (size_t i = 0; i < num_regions; ++i) {
+        EXPECT_LE(numRegions, holder->GetLength());
+        for (size_t i = 0; i < numRegions; ++i) {
             ObjectHeader *obj = ObjectAllocator::AllocString(STRING_LENGTH);
             EXPECT_NE(nullptr, obj);
-            holder->Set(start_index + i, obj);
+            holder->Set(startIndex + i, obj);
         }
     }
 
@@ -1320,8 +1321,8 @@ TEST_F(G1FullGCTest, TestFullGCCollectsNonRegularObjects)
     GC *gc = runtime->GetPandaVM()->GetGC();
     ManagedThread *thread = ManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
-    ObjectHeader *humongous_obj = ObjectAllocator::AllocString(GetHumongousStringLength());
-    ObjectHeader *nonmovable_obj = AllocNonMovableObject();
+    ObjectHeader *humongousObj = ObjectAllocator::AllocString(GetHumongousStringLength());
+    ObjectHeader *nonmovableObj = AllocNonMovableObject();
 
     {
         ScopedNativeCodeThread sn(thread);
@@ -1329,13 +1330,13 @@ TEST_F(G1FullGCTest, TestFullGCCollectsNonRegularObjects)
         task.Run(*gc);
     }
 
-    PandaVector<Region *> nonregular_regions = GetAllocator()->GetNonRegularRegions();
-    for (Region *region : nonregular_regions) {
+    PandaVector<Region *> nonregularRegions = GetAllocator()->GetNonRegularRegions();
+    for (Region *region : nonregularRegions) {
         if (region->HasFlag(IS_LARGE_OBJECT)) {
-            ASSERT_NE(humongous_obj, region->GetLargeObject());
+            ASSERT_NE(humongousObj, region->GetLargeObject());
         } else if (region->HasFlag(IS_NONMOVABLE)) {
-            if (region->Begin() <= ToUintPtr(nonmovable_obj) && ToUintPtr(nonmovable_obj) < region->End()) {
-                ASSERT_FALSE(region->GetLiveBitmap()->Test(nonmovable_obj));
+            if (region->Begin() <= ToUintPtr(nonmovableObj) && ToUintPtr(nonmovableObj) < region->End()) {
+                ASSERT_FALSE(region->GetLiveBitmap()->Test(nonmovableObj));
             }
         } else {
             FAIL() << "Unknown region type";
@@ -1353,16 +1354,16 @@ TEST_F(G1FullGCTest, TestFullGCFreeHumongousBeforeTenuredCollection)
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::Array> holder(thread, ObjectAllocator::AllocArray(NumRegions(), ClassRoot::ARRAY_STRING, true));
-    coretypes::String *humongous_obj =
+    coretypes::String *humongousObj =
         ObjectAllocator::AllocString(StringLengthFitIntoRegion(NUM_REGIONS_FOR_HUMONGOUS));
-    holder->Set(0, humongous_obj);
-    size_t num_free_regions =
+    holder->Set(0, humongousObj);
+    size_t numFreeRegions =
         NumRegions() - NumYoungRegions() - NUM_NONMOVABLE_REGIONS_FOR_RUNTIME - NUM_REGIONS_FOR_HUMONGOUS;
-    FillHeap(num_free_regions, holder, 1);  // occupy 4 tenured regions and 3 young regions
+    FillHeap(numFreeRegions, holder, 1);  // occupy 4 tenured regions and 3 young regions
     // move 3 young regions to tenured space.
     gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
     // now tenured space is full. Fill young space.
-    FillHeap(NumYoungRegions(), holder, num_free_regions + 1);
+    FillHeap(NumYoungRegions(), holder, numFreeRegions + 1);
     // At this point we have filled 4 tenured regions and 4 young regions and 3 free tenured regions.
     // We cannot do young GC because there are not enough free regions in tenured to move 4 young regions.
     // Check we are OOM
@@ -1379,43 +1380,43 @@ TEST_F(G1FullGCTest, TestRemSetsAndYoungCardsAfterFailedFullGC)
 {
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
-    CardTable *card_table = gc->GetCardTable();
-    ASSERT_NE(nullptr, card_table);
+    CardTable *cardTable = gc->GetCardTable();
+    ASSERT_NE(nullptr, cardTable);
     ManagedThread *thread = ManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::Array> holder(thread, ObjectAllocator::AllocArray(NumRegions(), ClassRoot::ARRAY_STRING, true));
-    size_t num_free_regions = NumRegions() - NumYoungRegions() - NUM_NONMOVABLE_REGIONS_FOR_RUNTIME + 1U;
-    FillHeap(num_free_regions, holder, 0);  // occupy 8 tenured regions and 3 young regions
-    VMHandle<coretypes::Array> young_array(
+    size_t numFreeRegions = NumRegions() - NumYoungRegions() - NUM_NONMOVABLE_REGIONS_FOR_RUNTIME + 1U;
+    FillHeap(numFreeRegions, holder, 0);  // occupy 8 tenured regions and 3 young regions
+    VMHandle<coretypes::Array> youngArray(
         thread, ObjectAllocator::AllocArray(RefArrayLengthFitIntoRegion(1), ClassRoot::ARRAY_STRING, false));
-    ASSERT(ObjectToRegion(young_array.GetPtr())->IsEden());
-    young_array->Set(0, holder->Get<ObjectHeader *>(0));
-    uintptr_t tenured_addr_before_gc = ToUintPtr(holder->Get<ObjectHeader *>(0));
+    ASSERT(ObjectToRegion(youngArray.GetPtr())->IsEden());
+    youngArray->Set(0, holder->Get<ObjectHeader *>(0));
+    uintptr_t tenuredAddrBeforeGc = ToUintPtr(holder->Get<ObjectHeader *>(0));
     // Trigger FullGC by allocating an object in full young. It should fail because there is no tenured space to move 4
     // young regions.
     ASSERT_EQ(nullptr, ObjectAllocator::AllocObjectInYoung());
-    uintptr_t tenured_addr_after_gc = ToUintPtr(holder->Get<ObjectHeader *>(0));
+    uintptr_t tenuredAddrAfterGc = ToUintPtr(holder->Get<ObjectHeader *>(0));
     // Check GC moved tenured regions
-    ASSERT_NE(tenured_addr_before_gc, tenured_addr_after_gc);
+    ASSERT_NE(tenuredAddrBeforeGc, tenuredAddrAfterGc);
     // Check FullGC updates refs in young correctly in case it cannot collect young.
-    ASSERT_EQ(holder->Get<ObjectHeader *>(0), young_array->Get<ObjectHeader *>(0));
+    ASSERT_EQ(holder->Get<ObjectHeader *>(0), youngArray->Get<ObjectHeader *>(0));
     // Check remsets.
-    Region *young_region = ObjectToRegion(young_array.GetPtr());
-    ASSERT_TRUE(young_region->IsEden());
-    Region *tenured_region = ObjectToRegion(holder->Get<ObjectHeader *>(0));
-    ASSERT_TRUE(tenured_region->HasFlag(IS_OLD));
-    bool has_object = false;
-    tenured_region->GetRemSet()->IterateOverObjects(
-        [&has_object, &young_array](ObjectHeader *obj) { has_object |= obj == young_array.GetPtr(); });
-    ASSERT_FALSE(has_object);
+    Region *youngRegion = ObjectToRegion(youngArray.GetPtr());
+    ASSERT_TRUE(youngRegion->IsEden());
+    Region *tenuredRegion = ObjectToRegion(holder->Get<ObjectHeader *>(0));
+    ASSERT_TRUE(tenuredRegion->HasFlag(IS_OLD));
+    bool hasObject = false;
+    tenuredRegion->GetRemSet()->IterateOverObjects(
+        [&hasObject, &youngArray](ObjectHeader *obj) { hasObject |= obj == youngArray.GetPtr(); });
+    ASSERT_FALSE(hasObject);
     // Check young cards
     ASSERT_EQ(NumYoungRegions(), GetAllocator()->GetYoungRegions().size());
     for (Region *region : GetAllocator()->GetYoungRegions()) {
         uintptr_t begin = ToUintPtr(region);
         uintptr_t end = region->End();
         while (begin < end) {
-            ASSERT_TRUE(card_table->GetCardPtr(begin)->IsYoung());
+            ASSERT_TRUE(cardTable->GetCardPtr(begin)->IsYoung());
             begin += CardTable::GetCardSize();
         }
     }
@@ -1425,56 +1426,56 @@ TEST_F(G1FullGCTest, TestFullGCGenericFlow)
 {
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
-    CardTable *card_table = gc->GetCardTable();
-    ASSERT_NE(nullptr, card_table);
+    CardTable *cardTable = gc->GetCardTable();
+    ASSERT_NE(nullptr, cardTable);
     ManagedThread *thread = ManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::Array> holder(thread, ObjectAllocator::AllocArray(NumRegions(), ClassRoot::ARRAY_STRING, true));
-    size_t num_free_regions = NumRegions() - NumYoungRegions() - NUM_NONMOVABLE_REGIONS_FOR_RUNTIME + 1U;
-    FillHeap(num_free_regions, holder, 0);  // occupy 8 tenured regions and 3 young regions
-    VMHandle<coretypes::Array> young_array(
+    size_t numFreeRegions = NumRegions() - NumYoungRegions() - NUM_NONMOVABLE_REGIONS_FOR_RUNTIME + 1U;
+    FillHeap(numFreeRegions, holder, 0);  // occupy 8 tenured regions and 3 young regions
+    VMHandle<coretypes::Array> youngArray(
         thread, ObjectAllocator::AllocArray(RefArrayLengthFitIntoRegion(1), ClassRoot::ARRAY_STRING, false));
-    ASSERT(ObjectToRegion(young_array.GetPtr())->IsEden());
-    young_array->Set(0, holder->Get<ObjectHeader *>(0));
+    ASSERT(ObjectToRegion(youngArray.GetPtr())->IsEden());
+    youngArray->Set(0, holder->Get<ObjectHeader *>(0));
     // Check we are OOM
     ASSERT_EQ(nullptr, ObjectAllocator::AllocObjectInYoung());
-    uintptr_t tenured_addr_before_gc = ToUintPtr(holder->Get<ObjectHeader *>(0));
+    uintptr_t tenuredAddrBeforeGc = ToUintPtr(holder->Get<ObjectHeader *>(0));
     // Forget two tenured regions
-    holder->Set(1, static_cast<ObjectHeader *>(nullptr));
-    holder->Set(2, static_cast<ObjectHeader *>(nullptr));
+    holder->Set(1U, static_cast<ObjectHeader *>(nullptr));
+    holder->Set(2U, static_cast<ObjectHeader *>(nullptr));
     // Now there should be enough space in tenured to move young
     gc->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
     ASSERT_NE(nullptr, ObjectAllocator::AllocObjectInYoung());
-    uintptr_t tenured_addr_after_gc = ToUintPtr(holder->Get<ObjectHeader *>(0));
+    uintptr_t tenuredAddrAfterGc = ToUintPtr(holder->Get<ObjectHeader *>(0));
     // Check GC moved tenured regions
-    ASSERT_NE(tenured_addr_before_gc, tenured_addr_after_gc);
+    ASSERT_NE(tenuredAddrBeforeGc, tenuredAddrAfterGc);
     // Check FullGC updates refs in young correctly in case it cannot collect young.
-    ASSERT_EQ(holder->Get<ObjectHeader *>(0), young_array->Get<ObjectHeader *>(0));
+    ASSERT_EQ(holder->Get<ObjectHeader *>(0), youngArray->Get<ObjectHeader *>(0));
 }
 
 TEST_F(G1FullGCTest, TestFullGCResetTenuredRegions)
 {
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
-    CardTable *card_table = gc->GetCardTable();
-    ASSERT_NE(nullptr, card_table);
+    CardTable *cardTable = gc->GetCardTable();
+    ASSERT_NE(nullptr, cardTable);
     ManagedThread *thread = ManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::Array> holder(thread, ObjectAllocator::AllocArray(NumRegions(), ClassRoot::ARRAY_STRING, true));
     // Fill almost all regions (3 tenured regions will be free)
-    size_t num_free_regions = NumRegions() - NUM_NONMOVABLE_REGIONS_FOR_RUNTIME;
-    size_t num_filled_regions = RoundDown(num_free_regions, NumYoungRegions());
-    FillHeap(num_filled_regions, holder, 0);
+    size_t numFreeRegions = NumRegions() - NUM_NONMOVABLE_REGIONS_FOR_RUNTIME;
+    size_t numFilledRegions = RoundDown(numFreeRegions, NumYoungRegions());
+    FillHeap(numFilledRegions, holder, 0);
     // Foreget all objects
-    for (size_t i = 0; i < num_filled_regions; ++i) {
+    for (size_t i = 0; i < numFilledRegions; ++i) {
         holder->Set(i, static_cast<ObjectHeader *>(nullptr));
     }
     gc->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
     // Fill almost all regions (3 tenured regions will be free)
     // We should be able to allocate all objects because FullGC should reset old tenured regions.
-    FillHeap(num_filled_regions, holder, 0);
+    FillHeap(numFilledRegions, holder, 0);
 }
 
 template <uint32_t REGION_FRAGMENTATION_RATE>
@@ -1483,14 +1484,14 @@ public:
     G1FullGCWithRegionFragmentationRate() : G1FullGCTest(REGION_FRAGMENTATION_RATE) {}
 };
 
-class FullGcRegionFragmentationRateOptionNever : public G1FullGCWithRegionFragmentationRate<100> {};
+class FullGcRegionFragmentationRateOptionNever : public G1FullGCWithRegionFragmentationRate<100U> {};
 
 TEST_F(FullGcRegionFragmentationRateOptionNever, TestG1FullGcRegionFragmentationRateOptionNever)
 {
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
-    CardTable *card_table = gc->GetCardTable();
-    ASSERT_NE(nullptr, card_table);
+    CardTable *cardTable = gc->GetCardTable();
+    ASSERT_NE(nullptr, cardTable);
     ManagedThread *thread = ManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -1515,8 +1516,8 @@ TEST_F(FullGcRegionFragmentationRateOptionAlways, TestG1FullGcRegionFragmentatio
 {
     Runtime *runtime = Runtime::GetCurrent();
     GC *gc = runtime->GetPandaVM()->GetGC();
-    CardTable *card_table = gc->GetCardTable();
-    ASSERT_NE(nullptr, card_table);
+    CardTable *cardTable = gc->GetCardTable();
+    ASSERT_NE(nullptr, cardTable);
     ManagedThread *thread = ManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -1574,10 +1575,10 @@ protected:
 
 TEST_F(G1FullGCOOMTest, AllocateBy1Region)
 {
-    constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8), DEFAULT_ALIGNMENT_IN_BYTES);
+    constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8F), DEFAULT_ALIGNMENT_IN_BYTES);
     {
         [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread_);
-        auto *g1_allocator =
+        auto *g1Allocator =
             static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
         // Fill tenured space by garbage
         do {
@@ -1585,17 +1586,17 @@ TEST_F(G1FullGCOOMTest, AllocateBy1Region)
             ASSERT_NE(handle.GetPtr(), nullptr) << "Must be correctly allocated object in non-full heap";
             // Move new object to tenured
             Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-        } while (g1_allocator->HaveTenuredSize(2));
-        ASSERT_TRUE(g1_allocator->HaveTenuredSize(1));
+        } while (g1Allocator->HaveTenuredSize(2U));
+        ASSERT_TRUE(g1Allocator->HaveTenuredSize(1));
         // Allocate one young region
-        VMHandle<ObjectHeader> handle_1(thread_, ObjectAllocator::AllocString(OBJECT_SIZE));
-        ASSERT_NE(handle_1.GetPtr(), nullptr) << "Must be correctly allocated object. Heap has a lot of garbage";
+        VMHandle<ObjectHeader> handle1(thread_, ObjectAllocator::AllocString(OBJECT_SIZE));
+        ASSERT_NE(handle1.GetPtr(), nullptr) << "Must be correctly allocated object. Heap has a lot of garbage";
         // Try to move alone young region to last tenured region
         Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
         // Fully fill young space
-        while (g1_allocator->GetHeapSpace()->GetCurrentFreeYoungSize() > 0) {
-            auto *young_obj = ObjectAllocator::AllocString(OBJECT_SIZE);
-            ASSERT_NE(young_obj, nullptr) << "Must allocate in free young space";
+        while (g1Allocator->GetHeapSpace()->GetCurrentFreeYoungSize() > 0) {
+            auto *youngObj = ObjectAllocator::AllocString(OBJECT_SIZE);
+            ASSERT_NE(youngObj, nullptr) << "Must allocate in free young space";
         }
     }
     ASSERT_NE(ObjectAllocator::AllocString(OBJECT_SIZE), nullptr)
@@ -1604,8 +1605,8 @@ TEST_F(G1FullGCOOMTest, AllocateBy1Region)
 
 TEST_F(G1FullGCOOMTest, PinUnpinObject)
 {
-    constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8), DEFAULT_ALIGNMENT_IN_BYTES);
-    auto *g1_allocator =
+    constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8F), DEFAULT_ALIGNMENT_IN_BYTES);
+    auto *g1Allocator =
         static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
     {
         [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread_);
@@ -1615,63 +1616,63 @@ TEST_F(G1FullGCOOMTest, PinUnpinObject)
             ASSERT_NE(handle.GetPtr(), nullptr) << "Must be correctly allocated object in non-full heap";
             // Move new object to tenured
             Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-        } while (g1_allocator->HaveTenuredSize(2));
-        ASSERT_TRUE(g1_allocator->HaveTenuredSize(1));
+        } while (g1Allocator->HaveTenuredSize(2U));
+        ASSERT_TRUE(g1Allocator->HaveTenuredSize(1));
         // Allocate one young region
-        VMHandle<ObjectHeader> handle_1(thread_, ObjectAllocator::AllocString(OBJECT_SIZE));
-        ASSERT_NE(handle_1.GetPtr(), nullptr) << "Must be correctly allocated object in young";
-        ASSERT_TRUE(ObjectToRegion(handle_1.GetPtr())->IsYoung());
+        VMHandle<ObjectHeader> handle1(thread_, ObjectAllocator::AllocString(OBJECT_SIZE));
+        ASSERT_NE(handle1.GetPtr(), nullptr) << "Must be correctly allocated object in young";
+        ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->IsYoung());
         // Pin object in young region
-        g1_allocator->PinObject(handle_1.GetPtr());
+        g1Allocator->PinObject(handle1.GetPtr());
         // Try to move young region to last tenured region
         Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-        ASSERT_TRUE(ObjectToRegion(handle_1.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+        ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->HasFlag(RegionFlag::IS_OLD));
         // Just allocate one object in young
-        auto *young_obj = ObjectAllocator::AllocString(OBJECT_SIZE);
-        ASSERT_NE(young_obj, nullptr) << "Must allocate in free young space";
+        auto *youngObj = ObjectAllocator::AllocString(OBJECT_SIZE);
+        ASSERT_NE(youngObj, nullptr) << "Must allocate in free young space";
         // Run Full GC
         Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::OOM_CAUSE));
         // Check "pinned" region
-        ASSERT_TRUE(ObjectToRegion(handle_1.GetPtr())->HasFlag(RegionFlag::IS_OLD));
-        ASSERT_TRUE(ObjectToRegion(handle_1.GetPtr())->HasPinnedObjects());
+        ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+        ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->HasPinnedObjects());
         // Unpin object
-        g1_allocator->UnpinObject(handle_1.GetPtr());
+        g1Allocator->UnpinObject(handle1.GetPtr());
         // Check "unpinned" region
-        ASSERT_TRUE(ObjectToRegion(handle_1.GetPtr())->HasFlag(RegionFlag::IS_OLD));
-        ASSERT_FALSE(ObjectToRegion(handle_1.GetPtr())->HasPinnedObjects());
+        ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+        ASSERT_FALSE(ObjectToRegion(handle1.GetPtr())->HasPinnedObjects());
     }
     // Run yet FullGC after unpinning
     Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::OOM_CAUSE));
-    g1_allocator->IterateOverObjects([](ObjectHeader *obj) {
+    g1Allocator->IterateOverObjects([](ObjectHeader *obj) {
         ASSERT_FALSE(ObjectToRegion(obj)->HasPinnedObjects()) << "Along pinned object was unpinned before GC";
     });
 }
 
-static void PinUnpinTest(SpaceType requested_space_type, size_t object_size = 1_KB)
+static void PinUnpinTest(SpaceType requestedSpaceType, size_t objectSize = 1_KB)
 {
-    ASSERT_TRUE(IsHeapSpace(requested_space_type));
+    ASSERT_TRUE(IsHeapSpace(requestedSpaceType));
     Runtime::Create(G1FullGCOOMTest::CreateOOMOptions());
     auto *thread = MTManagedThread::GetCurrent();
     ASSERT_NE(thread, nullptr);
     thread->ManagedCodeBegin();
-    auto *g1_allocator =
+    auto *g1Allocator =
         static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
     {
         [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread);
         constexpr size_t OBJ_ELEMENT_SIZE = 64;
-        auto *address_before_gc =
-            ObjectAllocator::AllocArray(object_size / OBJ_ELEMENT_SIZE, ClassRoot::ARRAY_I64,
-                                        requested_space_type == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
-        ASSERT_NE(address_before_gc, nullptr);
-        VMHandle<ObjectHeader> handle(thread, address_before_gc);
-        SpaceType obj_space_type =
+        auto *addressBeforeGc =
+            ObjectAllocator::AllocArray(objectSize / OBJ_ELEMENT_SIZE, ClassRoot::ARRAY_I64,
+                                        requestedSpaceType == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+        ASSERT_NE(addressBeforeGc, nullptr);
+        VMHandle<ObjectHeader> handle(thread, addressBeforeGc);
+        SpaceType objSpaceType =
             PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(static_cast<void *>(handle.GetPtr()));
-        ASSERT_EQ(obj_space_type, requested_space_type);
-        g1_allocator->PinObject(handle.GetPtr());
+        ASSERT_EQ(objSpaceType, requestedSpaceType);
+        g1Allocator->PinObject(handle.GetPtr());
         // Run GC - try to move objects
         Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
-        ASSERT_EQ(address_before_gc, handle.GetPtr()) << "Pinned object must not moved";
-        g1_allocator->UnpinObject(handle.GetPtr());
+        ASSERT_EQ(addressBeforeGc, handle.GetPtr()) << "Pinned object must not moved";
+        g1Allocator->UnpinObject(handle.GetPtr());
     }
     thread->ManagedCodeEnd();
     Runtime::Destroy();

@@ -23,8 +23,8 @@
 
 namespace panda {
 
-void ThrowException(const LanguageContext &ctx, ManagedThread *thread, const uint8_t *mutf8_name,
-                    const uint8_t *mutf8_msg);
+void ThrowException(const LanguageContext &ctx, ManagedThread *thread, const uint8_t *mutf8Name,
+                    const uint8_t *mutf8Msg);
 
 PANDA_PUBLIC_API void ThrowNullPointerException();
 // This function could be used in case there are no managed stack frames.
@@ -51,13 +51,13 @@ void ThrowNegativeArraySizeException(const PandaString &msg);
 
 void ThrowArithmeticException();
 
-void ThrowClassCastException(const Class *dst_type, const Class *src_type);
+void ThrowClassCastException(const Class *dstType, const Class *srcType);
 
 void ThrowAbstractMethodError(const Method *method);
 
 void ThrowIncompatibleClassChangeErrorForMethodConflict(const Method *method);
 
-void ThrowArrayStoreException(const Class *array_class, const Class *element_class);
+void ThrowArrayStoreException(const Class *arrayClass, const Class *elementClass);
 
 void ThrowArrayStoreException(const PandaString &msg);
 
@@ -69,7 +69,7 @@ void ThrowIOException(const PandaString &msg);
 
 void ThrowIllegalArgumentException(const PandaString &msg);
 
-void ThrowClassCircularityError(const PandaString &class_name, const LanguageContext &ctx);
+void ThrowClassCircularityError(const PandaString &className, const LanguageContext &ctx);
 
 void ThrowOutOfMemoryError(ManagedThread *thread, const PandaString &msg);
 
@@ -77,7 +77,7 @@ PANDA_PUBLIC_API void ThrowOutOfMemoryError(const PandaString &msg);
 
 void FindCatchBlockInCallStack(ManagedThread *thread);
 
-void FindCatchBlockInCFrames(ManagedThread *thread, StackWalker *stack, Frame *orig_frame);
+void FindCatchBlockInCFrames(ManagedThread *thread, StackWalker *stack, Frame *origFrame);
 
 void ThrowIllegalAccessException(const PandaString &msg);
 

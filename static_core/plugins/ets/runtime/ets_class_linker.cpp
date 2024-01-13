@@ -24,25 +24,25 @@
 
 namespace panda::ets {
 
-EtsClassLinker::EtsClassLinker(ClassLinker *class_linker) : class_linker_(class_linker) {}
+EtsClassLinker::EtsClassLinker(ClassLinker *classLinker) : classLinker_(classLinker) {}
 
 /*static*/
-Expected<PandaUniquePtr<EtsClassLinker>, PandaString> EtsClassLinker::Create(ClassLinker *class_linker)
+Expected<PandaUniquePtr<EtsClassLinker>, PandaString> EtsClassLinker::Create(ClassLinker *classLinker)
 {
-    PandaUniquePtr<EtsClassLinker> ets_class_linker = MakePandaUnique<EtsClassLinker>(class_linker);
-    return Expected<PandaUniquePtr<EtsClassLinker>, PandaString>(std::move(ets_class_linker));
+    PandaUniquePtr<EtsClassLinker> etsClassLinker = MakePandaUnique<EtsClassLinker>(classLinker);
+    return Expected<PandaUniquePtr<EtsClassLinker>, PandaString>(std::move(etsClassLinker));
 }
 
 bool EtsClassLinker::Initialize()
 {
-    ClassLinkerExtension *ext = class_linker_->GetExtension(panda_file::SourceLang::ETS);
+    ClassLinkerExtension *ext = classLinker_->GetExtension(panda_file::SourceLang::ETS);
     ext_ = EtsClassLinkerExtension::FromCoreType(ext);
     return true;
 }
 
 bool EtsClassLinker::InitializeClass(EtsCoroutine *coroutine, EtsClass *klass)
 {
-    return class_linker_->InitializeClass(coroutine, klass->GetRuntimeClass());
+    return classLinker_->InitializeClass(coroutine, klass->GetRuntimeClass());
 }
 
 EtsClass *EtsClassLinker::GetClassRoot(EtsClassRoot root) const
@@ -50,36 +50,36 @@ EtsClass *EtsClassLinker::GetClassRoot(EtsClassRoot root) const
     return EtsClass::FromRuntimeClass(ext_->GetClassRoot(static_cast<panda::ClassRoot>(root)));
 }
 
-EtsClass *EtsClassLinker::GetClass(const char *name, bool need_copy_descriptor,
-                                   ClassLinkerContext *class_linker_context, ClassLinkerErrorHandler *error_handler)
+EtsClass *EtsClassLinker::GetClass(const char *name, bool needCopyDescriptor, ClassLinkerContext *classLinkerContext,
+                                   ClassLinkerErrorHandler *errorHandler)
 {
-    const uint8_t *class_descriptor = utf::CStringAsMutf8(name);
-    Class *cls = ext_->GetClass(class_descriptor, need_copy_descriptor, class_linker_context, error_handler);
+    const uint8_t *classDescriptor = utf::CStringAsMutf8(name);
+    Class *cls = ext_->GetClass(classDescriptor, needCopyDescriptor, classLinkerContext, errorHandler);
     return LIKELY(cls != nullptr) ? EtsClass::FromRuntimeClass(cls) : nullptr;
 }
 
 EtsClass *EtsClassLinker::GetClass(const panda_file::File &pf, panda_file::File::EntityId id,
-                                   ClassLinkerContext *class_linker_context, ClassLinkerErrorHandler *error_handler)
+                                   ClassLinkerContext *classLinkerContext, ClassLinkerErrorHandler *errorHandler)
 {
-    Class *cls = ext_->GetClass(pf, id, class_linker_context, error_handler);
+    Class *cls = ext_->GetClass(pf, id, classLinkerContext, errorHandler);
     return LIKELY(cls != nullptr) ? EtsClass::FromRuntimeClass(cls) : nullptr;
 }
 
 Method *EtsClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::EntityId id)
 {
-    return class_linker_->GetMethod(pf, id);
+    return classLinker_->GetMethod(pf, id);
 }
 
 Method *EtsClassLinker::GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine)
 {
-    panda_file::File::EntityId async_ann_id = EtsAnnotation::FindAsyncAnnotation(method);
-    ASSERT(async_ann_id.IsValid());
+    panda_file::File::EntityId asyncAnnId = EtsAnnotation::FindAsyncAnnotation(method);
+    ASSERT(asyncAnnId.IsValid());
     const panda_file::File &pf = *method->GetPandaFile();
-    panda_file::AnnotationDataAccessor ada(pf, async_ann_id);
-    auto impl_method_id = ada.GetElement(0).GetScalarValue().Get<panda_file::File::EntityId>();
-    Method *result = GetMethod(pf, impl_method_id);
+    panda_file::AnnotationDataAccessor ada(pf, asyncAnnId);
+    auto implMethodId = ada.GetElement(0).GetScalarValue().Get<panda_file::File::EntityId>();
+    Method *result = GetMethod(pf, implMethodId);
     if (result == nullptr) {
-        panda_file::MethodDataAccessor mda(pf, impl_method_id);
+        panda_file::MethodDataAccessor mda(pf, implMethodId);
         PandaStringStream out;
         out << "Cannot resolve async method " << mda.GetFullName();
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR, out.str());

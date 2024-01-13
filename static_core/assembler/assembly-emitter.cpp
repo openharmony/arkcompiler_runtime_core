@@ -87,7 +87,7 @@ namespace panda::pandasm {
 
 /* static */
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-std::string AsmEmitter::last_error_ {};
+std::string AsmEmitter::lastError_ {};
 
 static panda_file::Type::TypeId GetTypeId(Value::Type type)
 {
@@ -122,35 +122,35 @@ static panda_file::Type::TypeId GetTypeId(Value::Type type)
 }
 
 /* static */
-bool AsmEmitter::CheckValueType(Value::Type value_type, const Type &type, const Program &program)
+bool AsmEmitter::CheckValueType(Value::Type valueType, const Type &type, const Program &program)
 {
-    auto value_type_id = GetTypeId(value_type);
-    if (value_type_id != type.GetId()) {
-        SetLastError("Inconsistent element (" + AnnotationElement::TypeToString(value_type) +
+    auto valueTypeId = GetTypeId(valueType);
+    if (valueTypeId != type.GetId()) {
+        SetLastError("Inconsistent element (" + AnnotationElement::TypeToString(valueType) +
                      ") and function's return type (" + type.GetName() + ")");
         return false;
     }
 
-    switch (value_type) {
+    switch (valueType) {
         case Value::Type::STRING:
         case Value::Type::RECORD:
         case Value::Type::ANNOTATION:
         case Value::Type::ENUM: {
-            auto it = program.record_table.find(type.GetName());
-            if (it == program.record_table.cend()) {
+            auto it = program.recordTable.find(type.GetName());
+            if (it == program.recordTable.cend()) {
                 SetLastError("Record " + type.GetName() + " not found");
                 return false;
             }
 
             auto &record = it->second;
-            if (value_type == Value::Type::ANNOTATION && !record.metadata->IsAnnotation() &&
+            if (valueType == Value::Type::ANNOTATION && !record.metadata->IsAnnotation() &&
                 !record.metadata->IsRuntimeAnnotation() && !record.metadata->IsRuntimeTypeAnnotation() &&
                 !record.metadata->IsTypeAnnotation()) {
                 SetLastError("Record " + type.GetName() + " isn't annotation");
                 return false;
             }
 
-            if (value_type == Value::Type::ENUM && (record.metadata->GetAccessFlags() & ACC_ENUM) == 0) {
+            if (valueType == Value::Type::ENUM && (record.metadata->GetAccessFlags() & ACC_ENUM) == 0) {
                 SetLastError("Record " + type.GetName() + " isn't enum");
                 return false;
             }
@@ -159,7 +159,7 @@ bool AsmEmitter::CheckValueType(Value::Type value_type, const Type &type, const 
         }
         case Value::Type::ARRAY: {
             if (!type.IsArray()) {
-                SetLastError("Inconsistent element (" + AnnotationElement::TypeToString(value_type) +
+                SetLastError("Inconsistent element (" + AnnotationElement::TypeToString(valueType) +
                              ") and function's return type (" + type.GetName() + ")");
                 return false;
             }
@@ -181,11 +181,11 @@ std::string AsmEmitter::GetMethodSignatureFromProgram(const std::string &name, c
         return name;
     }
 
-    const auto it_synonym = program.function_synonyms.find(name);
-    const bool is_method_known = (it_synonym != program.function_synonyms.end());
-    const bool is_single_synonym = (is_method_known && (it_synonym->second.size() == 1));
-    if (is_single_synonym) {
-        return it_synonym->second[0];
+    const auto itSynonym = program.functionSynonyms.find(name);
+    const bool isMethodKnown = (itSynonym != program.functionSynonyms.end());
+    const bool isSingleSynonym = (isMethodKnown && (itSynonym->second.size() == 1));
+    if (isSingleSynonym) {
+        return itSynonym->second[0];
     }
     SetLastError("More than one alternative for method " + name);
     return std::string("");
@@ -198,9 +198,9 @@ panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
 {
     ASSERT(out != nullptr);
 
-    auto value_type = value->GetType();
+    auto valueType = value->GetType();
 
-    switch (value_type) {
+    switch (valueType) {
         case Value::Type::U1:
         case Value::Type::I8:
         case Value::Type::U8: {
@@ -238,14 +238,14 @@ panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
             return &out->back();
         }
         case Value::Type::STRING: {
-            auto *string_item = container->GetOrCreateStringItem(value->GetAsScalar()->GetValue<std::string>());
-            out->emplace_back(string_item);
+            auto *stringItem = container->GetOrCreateStringItem(value->GetAsScalar()->GetValue<std::string>());
+            out->emplace_back(stringItem);
             return &out->back();
         }
         case Value::Type::METHOD: {
             auto name = value->GetAsScalar()->GetValue<std::string>();
-            auto method_item = static_cast<panda::panda_file::MethodItem *>(Find(methods, name));
-            out->emplace_back(method_item);
+            auto methodItem = static_cast<panda::panda_file::MethodItem *>(Find(methods, name));
+            out->emplace_back(methodItem);
             return &out->back();
         }
         default:
@@ -261,18 +261,18 @@ bool AsmEmitter::CheckValueRecordCase(const Value *value, const Program &program
         return true;
     }
 
-    auto record_name = t.GetName();
-    bool is_found;
+    auto recordName = t.GetName();
+    bool isFound;
     if (t.IsArray()) {
-        auto it = program.array_types.find(t);
-        is_found = it != program.array_types.cend();
+        auto it = program.arrayTypes.find(t);
+        isFound = it != program.arrayTypes.cend();
     } else {
-        auto it = program.record_table.find(record_name);
-        is_found = it != program.record_table.cend();
+        auto it = program.recordTable.find(recordName);
+        isFound = it != program.recordTable.cend();
     }
 
-    if (!is_found) {
-        SetLastError("Incorrect value: record " + record_name + " not found");
+    if (!isFound) {
+        SetLastError("Incorrect value: record " + recordName + " not found");
         return false;
     }
 
@@ -282,10 +282,10 @@ bool AsmEmitter::CheckValueRecordCase(const Value *value, const Program &program
 /* static */
 bool AsmEmitter::CheckValueMethodCase(const Value *value, const Program &program)
 {
-    auto function_name = value->GetAsScalar()->GetValue<std::string>();
-    auto it = program.function_table.find(function_name);
-    if (it == program.function_table.cend()) {
-        SetLastError("Incorrect value: function " + function_name + " not found");
+    auto functionName = value->GetAsScalar()->GetValue<std::string>();
+    auto it = program.functionTable.find(functionName);
+    if (it == program.functionTable.cend()) {
+        SetLastError("Incorrect value: function " + functionName + " not found");
         return false;
     }
 
@@ -295,26 +295,26 @@ bool AsmEmitter::CheckValueMethodCase(const Value *value, const Program &program
 /* static */
 bool AsmEmitter::CheckValueEnumCase(const Value *value, const Type &type, const Program &program)
 {
-    auto enum_value = value->GetAsScalar()->GetValue<std::string>();
-    auto record_name = GetOwnerName(enum_value);
-    auto field_name = GetItemName(enum_value);
+    auto enumValue = value->GetAsScalar()->GetValue<std::string>();
+    auto recordName = GetOwnerName(enumValue);
+    auto fieldName = GetItemName(enumValue);
 
-    if (record_name != type.GetName()) {
+    if (recordName != type.GetName()) {
         SetLastError("Incorrect value: Expected " + type.GetName() + " enum record");
         return false;
     }
 
-    const auto &record = program.record_table.find(record_name)->second;
-    auto it = std::find_if(record.field_list.cbegin(), record.field_list.cend(),
-                           [&field_name](const Field &field) { return field.name == field_name; });
-    if (it == record.field_list.cend()) {
-        SetLastError("Incorrect value: Enum field " + enum_value + " not found");
+    const auto &record = program.recordTable.find(recordName)->second;
+    auto it = std::find_if(record.fieldList.cbegin(), record.fieldList.cend(),
+                           [&fieldName](const Field &field) { return field.name == fieldName; });
+    if (it == record.fieldList.cend()) {
+        SetLastError("Incorrect value: Enum field " + enumValue + " not found");
         return false;
     }
 
     const auto &field = *it;
     if ((field.metadata->GetAccessFlags() & ACC_ENUM) == 0) {
-        SetLastError("Incorrect value: Field " + enum_value + " isn't enum");
+        SetLastError("Incorrect value: Field " + enumValue + " isn't enum");
         return false;
     }
 
@@ -324,19 +324,19 @@ bool AsmEmitter::CheckValueEnumCase(const Value *value, const Type &type, const 
 /* static */
 bool AsmEmitter::CheckValueArrayCase(const Value *value, const Type &type, const Program &program)
 {
-    auto component_type = type.GetComponentType();
-    auto value_component_type = value->GetAsArray()->GetComponentType();
-    if (value_component_type == Value::Type::VOID && value->GetAsArray()->GetValues().empty()) {
+    auto componentType = type.GetComponentType();
+    auto valueComponentType = value->GetAsArray()->GetComponentType();
+    if (valueComponentType == Value::Type::VOID && value->GetAsArray()->GetValues().empty()) {
         return true;
     }
 
-    if (!CheckValueType(value_component_type, component_type, program)) {
+    if (!CheckValueType(valueComponentType, componentType, program)) {
         SetLastError("Incorrect array's component type: " + GetLastError());
         return false;
     }
 
-    for (auto &elem_value : value->GetAsArray()->GetValues()) {
-        if (!CheckValue(&elem_value, component_type, program)) {
+    for (auto &elemValue : value->GetAsArray()->GetValues()) {
+        if (!CheckValue(&elemValue, componentType, program)) {
             SetLastError("Incorrect array's element: " + GetLastError());
             return false;
         }
@@ -348,13 +348,13 @@ bool AsmEmitter::CheckValueArrayCase(const Value *value, const Type &type, const
 /* static */
 bool AsmEmitter::CheckValue(const Value *value, const Type &type, const Program &program)
 {
-    auto value_type = value->GetType();
-    if (!CheckValueType(value_type, type, program)) {
+    auto valueType = value->GetType();
+    if (!CheckValueType(valueType, type, program)) {
         SetLastError("Incorrect type: " + GetLastError());
         return false;
     }
 
-    switch (value_type) {
+    switch (valueType) {
         case Value::Type::RECORD: {
             if (!CheckValueRecordCase(value, program)) {
                 return false;
@@ -395,13 +395,13 @@ bool AsmEmitter::CheckValue(const Value *value, const Type &type, const Program 
 ScalarValueItem *AsmEmitter::CreateScalarStringValueItem(ItemContainer *container, const Value *value,
                                                          std::vector<ScalarValueItem> *out)
 {
-    auto *string_item = container->GetOrCreateStringItem(value->GetAsScalar()->GetValue<std::string>());
+    auto *stringItem = container->GetOrCreateStringItem(value->GetAsScalar()->GetValue<std::string>());
     if (out != nullptr) {
-        out->emplace_back(string_item);
+        out->emplace_back(stringItem);
         return &out->back();
     }
 
-    return container->CreateItem<ScalarValueItem>(string_item);
+    return container->CreateItem<ScalarValueItem>(stringItem);
 }
 
 /* static */
@@ -410,7 +410,7 @@ ScalarValueItem *AsmEmitter::CreateScalarRecordValueItem(
     const std::unordered_map<std::string, BaseClassItem *> &classes)
 {
     auto type = value->GetAsScalar()->GetValue<Type>();
-    BaseClassItem *class_item;
+    BaseClassItem *classItem;
     if (type.IsObject()) {
         auto name = type.GetName();
         auto it = classes.find(name);
@@ -418,17 +418,17 @@ ScalarValueItem *AsmEmitter::CreateScalarRecordValueItem(
             return nullptr;
         }
 
-        class_item = it->second;
+        classItem = it->second;
     } else {
-        class_item = container->GetOrCreateForeignClassItem(type.GetDescriptor());
+        classItem = container->GetOrCreateForeignClassItem(type.GetDescriptor());
     }
 
     if (out != nullptr) {
-        out->emplace_back(class_item);
+        out->emplace_back(classItem);
         return &out->back();
     }
 
-    return container->CreateItem<ScalarValueItem>(class_item);
+    return container->CreateItem<ScalarValueItem>(classItem);
 }
 
 /* static */
@@ -445,13 +445,13 @@ ScalarValueItem *AsmEmitter::CreateScalarMethodValueItem(
         return nullptr;
     }
 
-    auto *method_item = it->second;
+    auto *methodItem = it->second;
     if (out != nullptr) {
-        out->emplace_back(method_item);
+        out->emplace_back(methodItem);
         return &out->back();
     }
 
-    return container->CreateItem<ScalarValueItem>(method_item);
+    return container->CreateItem<ScalarValueItem>(methodItem);
 }
 
 /* static */
@@ -465,13 +465,13 @@ ScalarValueItem *AsmEmitter::CreateScalarEnumValueItem(ItemContainer *container,
         return nullptr;
     }
 
-    auto *field_item = it->second;
+    auto *fieldItem = it->second;
     if (out != nullptr) {
-        out->emplace_back(field_item);
+        out->emplace_back(fieldItem);
         return &out->back();
     }
 
-    return container->CreateItem<ScalarValueItem>(field_item);
+    return container->CreateItem<ScalarValueItem>(fieldItem);
 }
 
 /* static */
@@ -482,17 +482,17 @@ ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
     const std::unordered_map<std::string, BaseMethodItem *> &methods)
 {
     auto annotation = value->GetAsScalar()->GetValue<AnnotationData>();
-    auto *annotation_item = CreateAnnotationItem(container, annotation, program, classes, fields, methods);
-    if (annotation_item == nullptr) {
+    auto *annotationItem = CreateAnnotationItem(container, annotation, program, classes, fields, methods);
+    if (annotationItem == nullptr) {
         return nullptr;
     }
 
     if (out != nullptr) {
-        out->emplace_back(annotation_item);
+        out->emplace_back(annotationItem);
         return &out->back();
     }
 
-    return container->CreateItem<ScalarValueItem>(annotation_item);
+    return container->CreateItem<ScalarValueItem>(annotationItem);
 }
 
 /* static */
@@ -502,9 +502,9 @@ ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, con
                                                    const std::unordered_map<std::string, BaseFieldItem *> &fields,
                                                    const std::unordered_map<std::string, BaseMethodItem *> &methods)
 {
-    auto value_type = value->GetType();
+    auto valueType = value->GetType();
 
-    switch (value_type) {
+    switch (valueType) {
         case Value::Type::U1:
         case Value::Type::I8:
         case Value::Type::U8:
@@ -556,16 +556,15 @@ ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *va
     switch (value->GetType()) {
         case Value::Type::ARRAY: {
             std::vector<ScalarValueItem> elements;
-            for (const auto &elem_value : value->GetAsArray()->GetValues()) {
-                auto *item =
-                    CreateScalarValueItem(container, &elem_value, &elements, program, classes, fields, methods);
+            for (const auto &elemValue : value->GetAsArray()->GetValues()) {
+                auto *item = CreateScalarValueItem(container, &elemValue, &elements, program, classes, fields, methods);
                 if (item == nullptr) {
                     return nullptr;
                 }
             }
 
-            auto component_type = value->GetAsArray()->GetComponentType();
-            return container->CreateItem<ArrayValueItem>(panda_file::Type(GetTypeId(component_type)),
+            auto componentType = value->GetAsArray()->GetComponentType();
+            return container->CreateItem<ArrayValueItem>(panda_file::Type(GetTypeId(componentType)),
                                                          std::move(elements));
         }
         default: {
@@ -581,54 +580,54 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
                                                  const std::unordered_map<std::string, BaseFieldItem *> &fields,
                                                  const std::unordered_map<std::string, BaseMethodItem *> &methods)
 {
-    auto record_name = annotation.GetName();
-    auto it = program.record_table.find(record_name);
-    if (it == program.record_table.cend()) {
-        SetLastError("Record " + record_name + " not found");
+    auto recordName = annotation.GetName();
+    auto it = program.recordTable.find(recordName);
+    if (it == program.recordTable.cend()) {
+        SetLastError("Record " + recordName + " not found");
         return nullptr;
     }
 
     auto &record = it->second;
     if (!record.metadata->IsAnnotation()) {
-        SetLastError("Record " + record_name + " isn't annotation");
+        SetLastError("Record " + recordName + " isn't annotation");
         return nullptr;
     }
 
-    std::vector<AnnotationItem::Elem> item_elements;
-    std::vector<AnnotationItem::Tag> tag_elements;
+    std::vector<AnnotationItem::Elem> itemElements;
+    std::vector<AnnotationItem::Tag> tagElements;
 
     for (const auto &element : annotation.GetElements()) {
         auto name = element.GetName();
         auto *value = element.GetValue();
 
-        auto value_type = value->GetType();
+        auto valueType = value->GetType();
 
-        uint8_t tag_type;
+        uint8_t tagType;
 
-        if (value_type == Value::Type::ARRAY && !value->GetAsArray()->GetValues().empty()) {
-            auto array_element_type = value->GetAsArray()->GetComponentType();
-            tag_type = Value::GetArrayTypeAsChar(array_element_type);
+        if (valueType == Value::Type::ARRAY && !value->GetAsArray()->GetValues().empty()) {
+            auto arrayElementType = value->GetAsArray()->GetComponentType();
+            tagType = Value::GetArrayTypeAsChar(arrayElementType);
         } else {
-            tag_type = Value::GetTypeAsChar(value_type);
+            tagType = Value::GetTypeAsChar(valueType);
         }
 
-        ASSERT(tag_type != '0');
+        ASSERT(tagType != '0');
 
-        auto function_name = record.name + "." + name;
+        auto functionName = record.name + "." + name;
 
-        function_name = GetMethodSignatureFromProgram(function_name, program);
+        functionName = GetMethodSignatureFromProgram(functionName, program);
 
         if (record.HasImplementation()) {
-            auto func_it = program.function_table.find(function_name);
-            if (func_it == program.function_table.cend()) {
+            auto funcIt = program.functionTable.find(functionName);
+            if (funcIt == program.functionTable.cend()) {
                 // Definitions of the system annotations may be absent.
                 // So print message and continue if corresponding function isn't found.
-                LOG(INFO, ASSEMBLER) << "Function " << function_name << " not found";
+                LOG(INFO, ASSEMBLER) << "Function " << functionName << " not found";
             } else {
-                auto &function = func_it->second;
+                auto &function = funcIt->second;
 
-                if (!CheckValue(value, function.return_type, program)) {
-                    SetLastError("Incorrect annotation element " + function_name + ": " + GetLastError());
+                if (!CheckValue(value, function.returnType, program)) {
+                    SetLastError("Incorrect annotation element " + functionName + ": " + GetLastError());
                     return nullptr;
                 }
             }
@@ -636,16 +635,16 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
 
         auto *item = CreateValueItem(container, value, program, classes, fields, methods);
         if (item == nullptr) {
-            SetLastError("Cannot create value item for annotation element " + function_name + ": " + GetLastError());
+            SetLastError("Cannot create value item for annotation element " + functionName + ": " + GetLastError());
             return nullptr;
         }
 
-        item_elements.emplace_back(container->GetOrCreateStringItem(name), item);
-        tag_elements.emplace_back(tag_type);
+        itemElements.emplace_back(container->GetOrCreateStringItem(name), item);
+        tagElements.emplace_back(tagType);
     }
 
-    auto *cls = classes.find(record_name)->second;
-    return container->CreateItem<AnnotationItem>(cls, std::move(item_elements), std::move(tag_elements));
+    auto *cls = classes.find(recordName)->second;
+    return container->CreateItem<AnnotationItem>(cls, std::move(itemElements), std::move(tagElements));
 }
 
 MethodHandleItem *AsmEmitter::CreateMethodHandleItem(ItemContainer *container, const MethodHandle &mh,
@@ -658,7 +657,7 @@ MethodHandleItem *AsmEmitter::CreateMethodHandleItem(ItemContainer *container, c
         case panda_file::MethodHandleType::GET_STATIC:
         case panda_file::MethodHandleType::PUT_INSTANCE:
         case panda_file::MethodHandleType::GET_INSTANCE: {
-            item = container->CreateItem<MethodHandleItem>(mh.type, fields.at(mh.item_name));
+            item = container->CreateItem<MethodHandleItem>(mh.type, fields.at(mh.itemName));
             break;
         }
         case panda_file::MethodHandleType::INVOKE_STATIC:
@@ -666,7 +665,7 @@ MethodHandleItem *AsmEmitter::CreateMethodHandleItem(ItemContainer *container, c
         case panda_file::MethodHandleType::INVOKE_CONSTRUCTOR:
         case panda_file::MethodHandleType::INVOKE_DIRECT:
         case panda_file::MethodHandleType::INVOKE_INTERFACE: {
-            item = container->CreateItem<MethodHandleItem>(mh.type, methods.at(mh.item_name));
+            item = container->CreateItem<MethodHandleItem>(mh.type, methods.at(mh.itemName));
             break;
         }
         default:
@@ -684,20 +683,20 @@ bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const Annotat
                                 const std::unordered_map<std::string, BaseMethodItem *> &methods)
 {
     for (const auto &annotation : metadata.GetAnnotations()) {
-        auto *annotation_item = CreateAnnotationItem(container, annotation, program, classes, fields, methods);
-        if (annotation_item == nullptr) {
+        auto *annotationItem = CreateAnnotationItem(container, annotation, program, classes, fields, methods);
+        if (annotationItem == nullptr) {
             return false;
         }
 
-        auto &record = program.record_table.find(annotation.GetName())->second;
+        auto &record = program.recordTable.find(annotation.GetName())->second;
         if (record.metadata->IsRuntimeAnnotation()) {
-            item->AddRuntimeAnnotation(annotation_item);
+            item->AddRuntimeAnnotation(annotationItem);
         } else if (record.metadata->IsAnnotation()) {
-            item->AddAnnotation(annotation_item);
+            item->AddAnnotation(annotationItem);
         } else if (record.metadata->IsRuntimeTypeAnnotation()) {
-            item->AddRuntimeTypeAnnotation(annotation_item);
+            item->AddRuntimeTypeAnnotation(annotationItem);
         } else if (record.metadata->IsTypeAnnotation()) {
-            item->AddTypeAnnotation(annotation_item);
+            item->AddTypeAnnotation(annotationItem);
         }
     }
 
@@ -729,28 +728,28 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Function &fun
         }
 
         if (insn.HasFlag(InstFlags::METHOD_ID)) {
-            AddBytecodeIndexDependencies(method, insn, entities.method_items);
+            AddBytecodeIndexDependencies(method, insn, entities.methodItems);
             continue;
         }
 
         if (insn.HasFlag(InstFlags::FIELD_ID)) {
-            AddBytecodeIndexDependencies(method, insn, entities.field_items);
+            AddBytecodeIndexDependencies(method, insn, entities.fieldItems);
             continue;
         }
 
         if (insn.HasFlag(InstFlags::TYPE_ID)) {
-            AddBytecodeIndexDependencies(method, insn, entities.class_items);
+            AddBytecodeIndexDependencies(method, insn, entities.classItems);
             continue;
         }
     }
 
-    for (const auto &catch_block : func.catch_blocks) {
-        if (catch_block.exception_record.empty()) {
+    for (const auto &catchBlock : func.catchBlocks) {
+        if (catchBlock.exceptionRecord.empty()) {
             continue;
         }
 
-        auto it = entities.class_items.find(catch_block.exception_record);
-        ASSERT(it != entities.class_items.cend());
+        auto it = entities.classItems.find(catchBlock.exceptionRecord);
+        ASSERT(it != entities.classItems.cend());
         auto *item = it->second;
         ASSERT(item->GetIndexType() != panda_file::IndexType::NONE);
         method->AddIndexDependency(item);
@@ -763,7 +762,7 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
 {
     for (const auto &s : program.strings) {
         auto *item = items->GetOrCreateStringItem(s);
-        entities.string_items.insert({s, item});
+        entities.stringItems.insert({s, item});
     }
 }
 
@@ -771,85 +770,85 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
 void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                                   AsmEmitter::AsmEntityCollections &entities)
 {
-    for (const auto &[id, l] : program.literalarray_table) {
-        auto literal_array_item = items->GetOrCreateLiteralArrayItem(id);
-        std::vector<panda_file::LiteralItem> literal_array;
+    for (const auto &[id, l] : program.literalarrayTable) {
+        auto literalArrayItem = items->GetOrCreateLiteralArrayItem(id);
+        std::vector<panda_file::LiteralItem> literalArray;
 
         for (auto &literal : l.literals) {
             std::unique_ptr<ScalarValue> value;
 
             switch (literal.tag) {
                 case panda_file::LiteralTag::ARRAY_U1: {
-                    ASSERT(program.array_types.find(Type("u1", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("u1", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         // NOLINTNEXTLINE(readability-implicit-bool-conversion)
                         ScalarValue::Create<Value::Type::U1>(static_cast<bool>(std::get<bool>(literal.value))));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_U8: {
-                    ASSERT(program.array_types.find(Type("u8", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("u8", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::U8>(std::get<uint8_t>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_I8: {
-                    ASSERT(program.array_types.find(Type("i8", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("i8", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::I8>(std::get<uint8_t>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_U16: {
-                    ASSERT(program.array_types.find(Type("u16", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("u16", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::U16>(std::get<uint16_t>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_I16: {
-                    ASSERT(program.array_types.find(Type("i16", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("i16", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::I16>(std::get<uint16_t>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_U32: {
-                    ASSERT(program.array_types.find(Type("u32", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("u32", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::U32>(std::get<uint32_t>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_I32: {
-                    ASSERT(program.array_types.find(Type("i32", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("i32", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::I32>(std::get<uint32_t>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_U64: {
-                    ASSERT(program.array_types.find(Type("u64", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("u64", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::U64>(std::get<uint64_t>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_I64: {
-                    ASSERT(program.array_types.find(Type("i64", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("i64", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::I64>(std::get<uint64_t>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_F32: {
-                    ASSERT(program.array_types.find(Type("f32", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("f32", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::F32>(std::get<float>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_F64: {
-                    ASSERT(program.array_types.find(Type("f64", 1)) != program.array_types.end());
+                    ASSERT(program.arrayTypes.find(Type("f64", 1)) != program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(
                         ScalarValue::Create<Value::Type::F64>(std::get<double>(literal.value)));
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_STRING:
-                    ASSERT(program.array_types.find(Type(
+                    ASSERT(program.arrayTypes.find(Type(
                                Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
-                           program.array_types.end());
+                           program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
                         std::string_view(std::get<std::string>(literal.value))));
                     break;
@@ -900,11 +899,11 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
             }
 
             // the return pointer of vector element should not be rewrited
-            CreateLiteralItem(items, value.get(), &literal_array, entities.method_items);
+            CreateLiteralItem(items, value.get(), &literalArray, entities.methodItems);
         }
 
-        literal_array_item->AddItems(literal_array);
-        entities.literalarray_items.insert({id, literal_array_item});
+        literalArrayItem->AddItems(literalArray);
+        entities.literalarrayItems.insert({id, literalArrayItem});
     }
 }
 
@@ -912,57 +911,57 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
 void AsmEmitter::MakeArrayTypeItems(ItemContainer *items, const Program &program,
                                     AsmEmitter::AsmEntityCollections &entities)
 {
-    for (const auto &t : program.array_types) {
-        auto *foreign_record = items->GetOrCreateForeignClassItem(t.GetDescriptor());
-        entities.class_items.insert({t.GetName(), foreign_record});
+    for (const auto &t : program.arrayTypes) {
+        auto *foreignRecord = items->GetOrCreateForeignClassItem(t.GetDescriptor());
+        entities.classItems.insert({t.GetName(), foreignRecord});
     }
 }
 
 /* static */
 bool AsmEmitter::HandleRecordAsForeign(
     ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
-    const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitive_types, const std::string &name,
+    const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes, const std::string &name,
     const Record &rec)
 {
-    Type record_type = Type::FromName(name);
-    auto *foreign_record = items->GetOrCreateForeignClassItem(record_type.GetDescriptor(rec.conflict));
-    entities.class_items.insert({name, foreign_record});
-    for (const auto &f : rec.field_list) {
+    Type recordType = Type::FromName(name);
+    auto *foreignRecord = items->GetOrCreateForeignClassItem(recordType.GetDescriptor(rec.conflict));
+    entities.classItems.insert({name, foreignRecord});
+    for (const auto &f : rec.fieldList) {
         ASSERT(f.metadata->IsForeign());
-        auto *field_name = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
-        std::string full_field_name = name + "." + f.name;
+        auto *fieldName = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
+        std::string fullFieldName = name + "." + f.name;
         if (!f.metadata->IsForeign()) {
             SetLastError("External record " + name + " has a non-external field " + f.name);
             return false;
         }
-        auto *type_item = GetTypeItem(items, primitive_types, f.type, program);
-        if (type_item == nullptr) {
-            SetLastError("Field " + full_field_name + " has undefined type");
+        auto *typeItem = GetTypeItem(items, primitiveTypes, f.type, program);
+        if (typeItem == nullptr) {
+            SetLastError("Field " + fullFieldName + " has undefined type");
             return false;
         }
-        auto *field = items->CreateItem<ForeignFieldItem>(foreign_record, field_name, type_item);
-        entities.field_items.insert({full_field_name, field});
+        auto *field = items->CreateItem<ForeignFieldItem>(foreignRecord, fieldName, typeItem);
+        entities.fieldItems.insert({fullFieldName, field});
     }
     return true;
 }
 
 /* static */
 bool AsmEmitter::HandleBaseRecord(ItemContainer *items, const Program &program, const std::string &name,
-                                  const Record &base_rec, ClassItem *record)
+                                  const Record &baseRec, ClassItem *record)
 {
-    auto base_name = base_rec.metadata->GetBase();
-    if (!base_name.empty()) {
-        auto it = program.record_table.find(base_name);
-        if (it == program.record_table.cend()) {
-            SetLastError("Base record " + base_name + " is not defined for record " + name);
+    auto baseName = baseRec.metadata->GetBase();
+    if (!baseName.empty()) {
+        auto it = program.recordTable.find(baseName);
+        if (it == program.recordTable.cend()) {
+            SetLastError("Base record " + baseName + " is not defined for record " + name);
             return false;
         }
         auto &rec = it->second;
-        Type base_type(base_name, 0);
+        Type baseType(baseName, 0);
         if (rec.metadata->IsForeign()) {
-            record->SetSuperClass(items->GetOrCreateForeignClassItem(base_type.GetDescriptor(rec.conflict)));
+            record->SetSuperClass(items->GetOrCreateForeignClassItem(baseType.GetDescriptor(rec.conflict)));
         } else {
-            record->SetSuperClass(items->GetOrCreateClassItem(base_type.GetDescriptor(rec.conflict)));
+            record->SetSuperClass(items->GetOrCreateClassItem(baseType.GetDescriptor(rec.conflict)));
         }
     }
     return true;
@@ -974,19 +973,19 @@ bool AsmEmitter::HandleInterfaces(ItemContainer *items, const Program &program, 
 {
     auto ifaces = rec.metadata->GetInterfaces();
     for (const auto &item : ifaces) {
-        auto it = program.record_table.find(item);
-        if (it == program.record_table.cend()) {
+        auto it = program.recordTable.find(item);
+        if (it == program.recordTable.cend()) {
             std::stringstream error;
             error << "Interface record " << item << " is not defined for record " << name;
             SetLastError(error.str());
             return false;
         }
         auto &iface = it->second;
-        Type iface_type(item, 0);
+        Type ifaceType(item, 0);
         if (iface.metadata->IsForeign()) {
-            record->AddInterface(items->GetOrCreateForeignClassItem(iface_type.GetDescriptor(iface.conflict)));
+            record->AddInterface(items->GetOrCreateForeignClassItem(ifaceType.GetDescriptor(iface.conflict)));
         } else {
-            record->AddInterface(items->GetOrCreateClassItem(iface_type.GetDescriptor(iface.conflict)));
+            record->AddInterface(items->GetOrCreateClassItem(ifaceType.GetDescriptor(iface.conflict)));
         }
     }
     return true;
@@ -994,46 +993,46 @@ bool AsmEmitter::HandleInterfaces(ItemContainer *items, const Program &program, 
 
 /* static */
 bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
-                              const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitive_types,
+                              const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes,
                               const std::string &name, const Record &rec, ClassItem *record)
 {
-    for (const auto &f : rec.field_list) {
-        auto *field_name = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
-        std::string full_field_name = f.name;
+    for (const auto &f : rec.fieldList) {
+        auto *fieldName = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
+        std::string fullFieldName = f.name;
         if (!panda_file::IsDummyClassName(name)) {
-            full_field_name.insert(0, name + ".");
+            fullFieldName.insert(0, name + ".");
         }
-        auto *type_item = GetTypeItem(items, primitive_types, f.type, program);
-        if (type_item == nullptr) {
-            SetLastError("Field " + full_field_name + " has undefined type");
+        auto *typeItem = GetTypeItem(items, primitiveTypes, f.type, program);
+        if (typeItem == nullptr) {
+            SetLastError("Field " + fullFieldName + " has undefined type");
             return false;
         }
         BaseFieldItem *field;
         if (f.metadata->IsForeign()) {
-            field = items->CreateItem<ForeignFieldItem>(record, field_name, type_item);
+            field = items->CreateItem<ForeignFieldItem>(record, fieldName, typeItem);
         } else {
-            field = record->AddField(field_name, type_item, f.metadata->GetAccessFlags());
+            field = record->AddField(fieldName, typeItem, f.metadata->GetAccessFlags());
         }
-        entities.field_items.insert({full_field_name, field});
+        entities.fieldItems.insert({fullFieldName, field});
     }
     return true;
 }
 
 /* static */
 bool AsmEmitter::HandleRecord(ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
-                              const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitive_types,
+                              const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes,
                               const std::string &name, const Record &rec)
 {
-    Type record_type = Type::FromName(name);
-    auto *record = items->GetOrCreateClassItem(record_type.GetDescriptor(rec.conflict));
-    entities.class_items.insert({name, record});
+    Type recordType = Type::FromName(name);
+    auto *record = items->GetOrCreateClassItem(recordType.GetDescriptor(rec.conflict));
+    entities.classItems.insert({name, record});
 
     record->SetAccessFlags(rec.metadata->GetAccessFlags());
     record->SetSourceLang(rec.language);
 
-    if (!rec.source_file.empty()) {
-        auto *source_file_item = items->GetOrCreateStringItem(rec.source_file);
-        record->SetSourceFile(source_file_item);
+    if (!rec.sourceFile.empty()) {
+        auto *sourceFileItem = items->GetOrCreateStringItem(rec.sourceFile);
+        record->SetSourceFile(sourceFileItem);
     }
 
     if (!HandleBaseRecord(items, program, name, rec, record)) {
@@ -1044,7 +1043,7 @@ bool AsmEmitter::HandleRecord(ItemContainer *items, const Program &program, AsmE
         return false;
     }
 
-    if (!HandleFields(items, program, entities, primitive_types, name, rec, record)) {
+    if (!HandleFields(items, program, entities, primitiveTypes, name, rec, record)) {
         return false;
     }
 
@@ -1054,15 +1053,15 @@ bool AsmEmitter::HandleRecord(ItemContainer *items, const Program &program, AsmE
 /* static */
 bool AsmEmitter::MakeRecordItems(
     ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
-    const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitive_types)
+    const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes)
 {
-    for (const auto &[name, rec] : program.record_table) {
+    for (const auto &[name, rec] : program.recordTable) {
         if (rec.metadata->IsForeign()) {
-            if (!HandleRecordAsForeign(items, program, entities, primitive_types, name, rec)) {
+            if (!HandleRecordAsForeign(items, program, entities, primitiveTypes, name, rec)) {
                 return false;
             }
         } else {
-            if (!HandleRecord(items, program, entities, primitive_types, name, rec)) {
+            if (!HandleRecord(items, program, entities, primitiveTypes, name, rec)) {
                 return false;
             }
         }
@@ -1086,17 +1085,17 @@ StringItem *AsmEmitter::GetMethodName(ItemContainer *items, const Function &func
 
 /* static */
 bool AsmEmitter::HandleAreaForInner(ItemContainer *items, const Program &program, ClassItem **area,
-                                    ForeignClassItem **foreign_area, const std::string &name,
-                                    const std::string &record_owner_name)
+                                    ForeignClassItem **foreignArea, const std::string &name,
+                                    const std::string &recordOwnerName)
 {
-    auto iter = program.record_table.find(record_owner_name);
-    if (iter != program.record_table.end()) {
+    auto iter = program.recordTable.find(recordOwnerName);
+    if (iter != program.recordTable.end()) {
         auto &rec = iter->second;
-        Type record_owner_type = Type::FromName(record_owner_name);
-        auto descriptor = record_owner_type.GetDescriptor(rec.conflict);
+        Type recordOwnerType = Type::FromName(recordOwnerName);
+        auto descriptor = recordOwnerType.GetDescriptor(rec.conflict);
         if (rec.metadata->IsForeign()) {
-            *foreign_area = items->GetOrCreateForeignClassItem(descriptor);
-            if (*foreign_area == nullptr) {
+            *foreignArea = items->GetOrCreateForeignClassItem(descriptor);
+            if (*foreignArea == nullptr) {
                 SetLastError("Unable to create external record " + iter->first);
                 return false;
             }
@@ -1105,7 +1104,7 @@ bool AsmEmitter::HandleAreaForInner(ItemContainer *items, const Program &program
             (*area)->SetAccessFlags(rec.metadata->GetAccessFlags());
         }
     } else {
-        SetLastError("Function " + name + " is bound to undefined record " + record_owner_name);
+        SetLastError("Function " + name + " is bound to undefined record " + recordOwnerName);
         return false;
     }
     return true;
@@ -1113,15 +1112,15 @@ bool AsmEmitter::HandleAreaForInner(ItemContainer *items, const Program &program
 
 /* static */
 bool AsmEmitter::HandleRecordOnwer(ItemContainer *items, const Program &program, ClassItem **area,
-                                   ForeignClassItem **foreign_area, const std::string &name,
-                                   const std::string &record_owner_name)
+                                   ForeignClassItem **foreignArea, const std::string &name,
+                                   const std::string &recordOwnerName)
 {
-    if (record_owner_name.empty()) {
+    if (recordOwnerName.empty()) {
         *area = items->GetOrCreateGlobalClassItem();
         (*area)->SetAccessFlags(ACC_PUBLIC);
         (*area)->SetSourceLang(program.lang);
     } else {
-        if (!HandleAreaForInner(items, program, area, foreign_area, name, record_owner_name)) {
+        if (!HandleAreaForInner(items, program, area, foreignArea, name, recordOwnerName)) {
             return false;
         }
     }
@@ -1131,17 +1130,17 @@ bool AsmEmitter::HandleRecordOnwer(ItemContainer *items, const Program &program,
 /* static */
 bool AsmEmitter::HandleFunctionParams(
     ItemContainer *items, const Program &program, size_t idx, const std::string &name, const Function &func,
-    const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitive_types,
+    const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes,
     std::vector<MethodParamItem> &params)
 {
     for (size_t i = idx; i < func.params.size(); i++) {
         const auto &p = func.params[i].type;
-        auto *type_item = GetTypeItem(items, primitive_types, p, program);
-        if (type_item == nullptr) {
+        auto *typeItem = GetTypeItem(items, primitiveTypes, p, program);
+        if (typeItem == nullptr) {
             SetLastError("Argument " + std::to_string(i) + " of function " + name + " has undefined type");
             return false;
         }
-        params.emplace_back(type_item);
+        params.emplace_back(typeItem);
     }
     return true;
 }
@@ -1149,7 +1148,7 @@ bool AsmEmitter::HandleFunctionParams(
 /* static */
 bool AsmEmitter::HandleFunctionLocalVariables(ItemContainer *items, const Function &func, const std::string &name)
 {
-    for (const auto &v : func.local_variable_debug) {
+    for (const auto &v : func.localVariableDebug) {
         if (v.name.empty()) {
             SetLastError("Function '" + name + "' has an empty local variable name");
             return false;
@@ -1165,8 +1164,8 @@ bool AsmEmitter::HandleFunctionLocalVariables(ItemContainer *items, const Functi
             continue;
         }
         items->GetOrCreateStringItem(v.signature);
-        if (!v.signature_type.empty()) {
-            items->GetOrCreateStringItem(v.signature_type);
+        if (!v.signatureType.empty()) {
+            items->GetOrCreateStringItem(v.signatureType);
         }
     }
     return true;
@@ -1174,33 +1173,33 @@ bool AsmEmitter::HandleFunctionLocalVariables(ItemContainer *items, const Functi
 
 /* static */
 bool AsmEmitter::CreateMethodItem(ItemContainer *items, AsmEmitter::AsmEntityCollections &entities,
-                                  const Function &func, TypeItem *type_item, ClassItem *area,
-                                  ForeignClassItem *foreign_area, uint32_t access_flags, StringItem *method_name,
-                                  const std::string &mangled_name, const std::string &name,
+                                  const Function &func, TypeItem *typeItem, ClassItem *area,
+                                  ForeignClassItem *foreignArea, uint32_t accessFlags, StringItem *methodName,
+                                  const std::string &mangledName, const std::string &name,
                                   std::vector<MethodParamItem> &params)
 {
-    auto *proto = items->GetOrCreateProtoItem(type_item, params);
+    auto *proto = items->GetOrCreateProtoItem(typeItem, params);
     BaseMethodItem *method;
-    if (foreign_area == nullptr) {
+    if (foreignArea == nullptr) {
         if (func.metadata->IsForeign()) {
-            method = items->CreateItem<ForeignMethodItem>(area, method_name, proto, access_flags);
+            method = items->CreateItem<ForeignMethodItem>(area, methodName, proto, accessFlags);
         } else {
-            method = area->AddMethod(method_name, proto, access_flags, params);
+            method = area->AddMethod(methodName, proto, accessFlags, params);
         }
     } else {
         if (!func.metadata->IsForeign()) {
             SetLastError("Non-external function " + name + " is bound to external record");
             return false;
         }
-        method = items->CreateItem<ForeignMethodItem>(foreign_area, method_name, proto, access_flags);
+        method = items->CreateItem<ForeignMethodItem>(foreignArea, methodName, proto, accessFlags);
     }
-    entities.method_items.insert({mangled_name, method});
+    entities.methodItems.insert({mangledName, method});
     if (!func.metadata->IsForeign() && func.metadata->HasImplementation()) {
-        if (!func.source_file.empty()) {
-            items->GetOrCreateStringItem(func.source_file);
+        if (!func.sourceFile.empty()) {
+            items->GetOrCreateStringItem(func.sourceFile);
         }
-        if (!func.source_code.empty()) {
-            items->GetOrCreateStringItem(func.source_code);
+        if (!func.sourceCode.empty()) {
+            items->GetOrCreateStringItem(func.sourceCode);
         }
     }
     return true;
@@ -1209,50 +1208,50 @@ bool AsmEmitter::CreateMethodItem(ItemContainer *items, AsmEmitter::AsmEntityCol
 /* static */
 bool AsmEmitter::MakeFunctionItems(
     ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
-    const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitive_types, bool emit_debug_info)
+    const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes, bool emitDebugInfo)
 {
-    for (const auto &f : program.function_table) {
+    for (const auto &f : program.functionTable) {
         const auto &[mangled_name, func] = f;
 
         auto name = pandasm::DeMangleName(mangled_name);
 
-        StringItem *method_name = GetMethodName(items, func, name);
+        StringItem *methodName = GetMethodName(items, func, name);
 
         ClassItem *area = nullptr;
-        ForeignClassItem *foreign_area = nullptr;
+        ForeignClassItem *foreignArea = nullptr;
 
-        std::string record_owner_name = GetOwnerName(name);
-        if (!HandleRecordOnwer(items, program, &area, &foreign_area, name, record_owner_name)) {
+        std::string recordOwnerName = GetOwnerName(name);
+        if (!HandleRecordOnwer(items, program, &area, &foreignArea, name, recordOwnerName)) {
             return false;
         }
 
         auto params = std::vector<MethodParamItem> {};
 
-        uint32_t access_flags = func.metadata->GetAccessFlags();
+        uint32_t accessFlags = func.metadata->GetAccessFlags();
 
-        if (func.params.empty() || func.params[0].type.GetName() != record_owner_name || func.metadata->IsCctor()) {
-            access_flags |= ACC_STATIC;
+        if (func.params.empty() || func.params[0].type.GetName() != recordOwnerName || func.metadata->IsCctor()) {
+            accessFlags |= ACC_STATIC;
         }
 
-        bool is_static = (access_flags & ACC_STATIC) != 0;
-        size_t idx = is_static ? 0 : 1;
+        bool isStatic = (accessFlags & ACC_STATIC) != 0;
+        size_t idx = isStatic ? 0 : 1;
 
-        if (!HandleFunctionParams(items, program, idx, name, func, primitive_types, params)) {
+        if (!HandleFunctionParams(items, program, idx, name, func, primitiveTypes, params)) {
             return false;
         }
 
-        if (emit_debug_info && !HandleFunctionLocalVariables(items, func, name)) {
+        if (emitDebugInfo && !HandleFunctionLocalVariables(items, func, name)) {
             return false;
         }
 
-        auto *type_item = GetTypeItem(items, primitive_types, func.return_type, program);
-        if (type_item == nullptr) {
+        auto *typeItem = GetTypeItem(items, primitiveTypes, func.returnType, program);
+        if (typeItem == nullptr) {
             SetLastError("Function " + name + " has undefined return type");
             return false;
         }
 
-        if (!CreateMethodItem(items, entities, func, type_item, area, foreign_area, access_flags, method_name,
-                              mangled_name, name, params)) {
+        if (!CreateMethodItem(items, entities, func, typeItem, area, foreignArea, accessFlags, methodName, mangled_name,
+                              name, params)) {
             return false;
         }
     }
@@ -1263,36 +1262,36 @@ bool AsmEmitter::MakeFunctionItems(
 bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &program,
                                        const AsmEmitter::AsmEntityCollections &entities)
 {
-    for (const auto &[name, record] : program.record_table) {
+    for (const auto &[name, record] : program.recordTable) {
         if (record.metadata->IsForeign()) {
             continue;
         }
 
-        auto *class_item = static_cast<ClassItem *>(Find(entities.class_items, name));
-        if (!AddAnnotations(class_item, items, *record.metadata, program, entities.class_items, entities.field_items,
-                            entities.method_items)) {
+        auto *classItem = static_cast<ClassItem *>(Find(entities.classItems, name));
+        if (!AddAnnotations(classItem, items, *record.metadata, program, entities.classItems, entities.fieldItems,
+                            entities.methodItems)) {
             SetLastError("Cannot emit annotations for record " + record.name + ": " + GetLastError());
             return false;
         }
 
-        for (const auto &field : record.field_list) {
-            auto field_name = field.name;
+        for (const auto &field : record.fieldList) {
+            auto fieldName = field.name;
             if (!panda_file::IsDummyClassName(name)) {
-                field_name.insert(0, record.name + ".");
+                fieldName.insert(0, record.name + ".");
             }
-            auto *field_item = static_cast<FieldItem *>(Find(entities.field_items, field_name));
-            if (!AddAnnotations(field_item, items, *field.metadata, program, entities.class_items, entities.field_items,
-                                entities.method_items)) {
-                SetLastError("Cannot emit annotations for field " + field_name + ": " + GetLastError());
+            auto *fieldItem = static_cast<FieldItem *>(Find(entities.fieldItems, fieldName));
+            if (!AddAnnotations(fieldItem, items, *field.metadata, program, entities.classItems, entities.fieldItems,
+                                entities.methodItems)) {
+                SetLastError("Cannot emit annotations for field " + fieldName + ": " + GetLastError());
                 return false;
             }
 
             auto res = field.metadata->GetValue();
             if (res) {
                 auto value = res.value();
-                auto *item = CreateValueItem(items, &value, program, entities.class_items, entities.field_items,
-                                             entities.method_items);
-                field_item->SetValue(item);
+                auto *item = CreateValueItem(items, &value, program, entities.classItems, entities.fieldItems,
+                                             entities.methodItems);
+                fieldItem->SetValue(item);
             }
         }
     }
@@ -1300,46 +1299,45 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
 }
 
 /* static */
-void AsmEmitter::SetCodeAndDebugInfo(ItemContainer *items, MethodItem *method, const Function &func,
-                                     bool emit_debug_info)
+void AsmEmitter::SetCodeAndDebugInfo(ItemContainer *items, MethodItem *method, const Function &func, bool emitDebugInfo)
 {
     auto *code = items->CreateItem<CodeItem>();
     method->SetCode(code);
     code->AddMethod(method);  // we need it for Profile-Guided optimization
 
-    if (!emit_debug_info && !func.CanThrow()) {
+    if (!emitDebugInfo && !func.CanThrow()) {
         return;
     }
 
-    auto *line_number_program = items->CreateLineNumberProgramItem();
-    auto *debug_info = items->CreateItem<DebugInfoItem>(line_number_program);
-    if (emit_debug_info) {
-        for (const auto &v : func.local_variable_debug) {
+    auto *lineNumberProgram = items->CreateLineNumberProgramItem();
+    auto *debugInfo = items->CreateItem<DebugInfoItem>(lineNumberProgram);
+    if (emitDebugInfo) {
+        for (const auto &v : func.localVariableDebug) {
             ASSERT(v.reg >= 0);
             if (func.IsParameter(v.reg)) {
-                debug_info->AddParameter(items->GetOrCreateStringItem(v.name));
+                debugInfo->AddParameter(items->GetOrCreateStringItem(v.name));
             }
         }
     } else {
         auto nparams = method->GetParams().size();
         for (size_t i = 0; i < nparams; i++) {
-            debug_info->AddParameter(nullptr);
+            debugInfo->AddParameter(nullptr);
         }
     }
-    method->SetDebugInfo(debug_info);
+    method->SetDebugInfo(debugInfo);
 }
 
 /* static */
 void AsmEmitter::SetMethodSourceLang(const Program &program, MethodItem *method, const Function &func,
                                      const std::string &name)
 {
-    std::string record_name = GetOwnerName(name);
-    if (record_name.empty()) {
+    std::string recordName = GetOwnerName(name);
+    if (recordName.empty()) {
         method->SetSourceLang(func.language);
         return;
     }
 
-    auto &rec = program.record_table.find(record_name)->second;
+    auto &rec = program.recordTable.find(recordName)->second;
     if (rec.language != func.language) {
         method->SetSourceLang(func.language);
     }
@@ -1350,20 +1348,20 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
                                                const AsmEmitter::AsmEntityCollections &entities, MethodItem *method,
                                                const Function &func)
 {
-    if (!AddAnnotations(method, items, *func.metadata, program, entities.class_items, entities.field_items,
-                        entities.method_items)) {
+    if (!AddAnnotations(method, items, *func.metadata, program, entities.classItems, entities.fieldItems,
+                        entities.methodItems)) {
         SetLastError("Cannot emit annotations for function " + func.name + ": " + GetLastError());
         return false;
     }
 
-    auto &param_items = method->GetParams();
-    for (size_t proto_idx = 0; proto_idx < param_items.size(); proto_idx++) {
-        size_t param_idx = method->IsStatic() ? proto_idx : proto_idx + 1;
-        auto &param = func.params[param_idx];
-        auto &param_item = param_items[proto_idx];
-        if (!AddAnnotations(&param_item, items, *param.metadata, program, entities.class_items, entities.field_items,
-                            entities.method_items)) {
-            SetLastError("Cannot emit annotations for parameter a" + std::to_string(param_idx) + "of function " +
+    auto &paramItems = method->GetParams();
+    for (size_t protoIdx = 0; protoIdx < paramItems.size(); protoIdx++) {
+        size_t paramIdx = method->IsStatic() ? protoIdx : protoIdx + 1;
+        auto &param = func.params[paramIdx];
+        auto &paramItem = paramItems[protoIdx];
+        if (!AddAnnotations(&paramItem, items, *param.metadata, program, entities.classItems, entities.fieldItems,
+                            entities.methodItems)) {
+            SetLastError("Cannot emit annotations for parameter a" + std::to_string(paramIdx) + "of function " +
                          func.name + ": " + GetLastError());
             return false;
         }
@@ -1383,17 +1381,17 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
 /* static */
 bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const Program &program,
                                                      const AsmEmitter::AsmEntityCollections &entities,
-                                                     bool emit_debug_info)
+                                                     bool emitDebugInfo)
 {
-    for (const auto &[name, func] : program.function_table) {
+    for (const auto &[name, func] : program.functionTable) {
         if (func.metadata->IsForeign()) {
             continue;
         }
 
-        auto *method = static_cast<MethodItem *>(Find(entities.method_items, name));
+        auto *method = static_cast<MethodItem *>(Find(entities.methodItems, name));
 
         if (func.metadata->HasImplementation()) {
-            SetCodeAndDebugInfo(items, method, func, emit_debug_info);
+            SetCodeAndDebugInfo(items, method, func, emitDebugInfo);
             AddBytecodeIndexDependencies(method, func, entities);
         }
 
@@ -1402,8 +1400,8 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
         if (!AddMethodAndParamsAnnotations(items, program, entities, method, func)) {
             return false;
         }
-        if (func.profile_size <= MethodItem::MAX_PROFILE_SIZE) {
-            method->SetProfileSize(func.profile_size);
+        if (func.profileSize <= MethodItem::MAX_PROFILE_SIZE) {
+            method->SetProfileSize(func.profileSize);
         }
     }
     return true;
@@ -1412,23 +1410,23 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
 /* static */
 void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, AsmEmitter::AsmEntityCollections &entities)
 {
-    for (const auto &[name, method] : entities.method_items) {
+    for (const auto &[name, method] : entities.methodItems) {
         maps->methods.insert({method->GetFileId().GetOffset(), std::string(name)});
     }
 
-    for (const auto &[name, field] : entities.field_items) {
+    for (const auto &[name, field] : entities.fieldItems) {
         maps->fields.insert({field->GetFileId().GetOffset(), std::string(name)});
     }
 
-    for (const auto &[name, cls] : entities.class_items) {
+    for (const auto &[name, cls] : entities.classItems) {
         maps->classes.insert({cls->GetFileId().GetOffset(), std::string(name)});
     }
 
-    for (const auto &[name, str] : entities.string_items) {
+    for (const auto &[name, str] : entities.stringItems) {
         maps->strings.insert({str->GetFileId().GetOffset(), std::string(name)});
     }
 
-    for (const auto &[name, arr] : entities.literalarray_items) {
+    for (const auto &[name, arr] : entities.literalarrayItems) {
         maps->literalarrays.emplace(arr->GetFileId().GetOffset(), name);
     }
 }
@@ -1436,41 +1434,41 @@ void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, AsmEmitter::AsmEntityCol
 /* static */
 void AsmEmitter::EmitDebugInfo(ItemContainer *items, const Program &program, const std::vector<uint8_t> *bytes,
                                const MethodItem *method, const Function &func, const std::string &name,
-                               bool emit_debug_info)
+                               bool emitDebugInfo)
 {
-    auto *debug_info = method->GetDebugInfo();
-    if (debug_info == nullptr) {
+    auto *debugInfo = method->GetDebugInfo();
+    if (debugInfo == nullptr) {
         return;
     }
 
-    auto *line_number_program = debug_info->GetLineNumberProgram();
-    auto *constant_pool = debug_info->GetConstantPool();
+    auto *lineNumberProgram = debugInfo->GetLineNumberProgram();
+    auto *constantPool = debugInfo->GetConstantPool();
 
-    std::string record_name = GetOwnerName(name);
-    std::string record_source_file;
-    if (!record_name.empty()) {
-        auto &rec = program.record_table.find(record_name)->second;
-        record_source_file = rec.source_file;
+    std::string recordName = GetOwnerName(name);
+    std::string recordSourceFile;
+    if (!recordName.empty()) {
+        auto &rec = program.recordTable.find(recordName)->second;
+        recordSourceFile = rec.sourceFile;
     }
 
-    if (!func.source_file.empty() && func.source_file != record_source_file) {
-        if (!func.source_code.empty()) {
-            auto *source_code_item = items->GetOrCreateStringItem(func.source_code);
-            ASSERT(source_code_item->GetOffset() != 0);
-            line_number_program->EmitSetSourceCode(constant_pool, source_code_item);
+    if (!func.sourceFile.empty() && func.sourceFile != recordSourceFile) {
+        if (!func.sourceCode.empty()) {
+            auto *sourceCodeItem = items->GetOrCreateStringItem(func.sourceCode);
+            ASSERT(sourceCodeItem->GetOffset() != 0);
+            lineNumberProgram->EmitSetSourceCode(constantPool, sourceCodeItem);
         }
-        auto *source_file_item = items->GetOrCreateStringItem(func.source_file);
-        ASSERT(source_file_item->GetOffset() != 0);
-        line_number_program->EmitSetFile(constant_pool, source_file_item);
+        auto *sourceFileItem = items->GetOrCreateStringItem(func.sourceFile);
+        ASSERT(sourceFileItem->GetOffset() != 0);
+        lineNumberProgram->EmitSetFile(constantPool, sourceFileItem);
     }
-    func.BuildLineNumberProgram(debug_info, *bytes, items, constant_pool, emit_debug_info);
+    func.BuildLineNumberProgram(debugInfo, *bytes, items, constantPool, emitDebugInfo);
 }
 
 /* static */
 bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
-                               const AsmEmitter::AsmEntityCollections &entities, bool emit_debug_info)
+                               const AsmEmitter::AsmEntityCollections &entities, bool emitDebugInfo)
 {
-    for (const auto &f : program.function_table) {
+    for (const auto &f : program.functionTable) {
         const auto &[name, func] = f;
 
         if (func.metadata->IsForeign() || !func.metadata->HasImplementation()) {
@@ -1478,20 +1476,20 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
         }
 
         auto emitter = BytecodeEmitter {};
-        auto *method = static_cast<MethodItem *>(Find(entities.method_items, name));
-        if (!func.Emit(emitter, method, entities.method_items, entities.field_items, entities.class_items,
-                       entities.string_items, entities.literalarray_items)) {
+        auto *method = static_cast<MethodItem *>(Find(entities.methodItems, name));
+        if (!func.Emit(emitter, method, entities.methodItems, entities.fieldItems, entities.classItems,
+                       entities.stringItems, entities.literalarrayItems)) {
             SetLastError("Internal error during emitting function: " + func.name);
             return false;
         }
 
         auto *code = method->GetCode();
-        code->SetNumVregs(func.regs_num);
+        code->SetNumVregs(func.regsNum);
         code->SetNumArgs(func.GetParamsNum());
 
-        size_t num_ins =
+        size_t numIns =
             std::count_if(func.ins.begin(), func.ins.end(), [](auto it) { return it.opcode != Opcode::INVALID; });
-        code->SetNumInstructions(num_ins);
+        code->SetNumInstructions(numIns);
 
         auto *bytes = code->GetInstructions();
         auto status = emitter.Build(static_cast<std::vector<unsigned char> *>(bytes));
@@ -1500,21 +1498,21 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
                          std::to_string(static_cast<int>(status)));
             return false;
         }
-        auto try_blocks = func.BuildTryBlocks(method, entities.class_items, *bytes);
-        for (auto &try_block : try_blocks) {
-            code->AddTryBlock(try_block);
+        auto tryBlocks = func.BuildTryBlocks(method, entities.classItems, *bytes);
+        for (auto &tryBlock : tryBlocks) {
+            code->AddTryBlock(tryBlock);
         }
 
-        EmitDebugInfo(items, program, bytes, method, func, name, emit_debug_info);
+        EmitDebugInfo(items, program, bytes, method, func, name, emitDebugInfo);
     }
     return true;
 }
 
 /* static */
-bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps, bool emit_debug_info,
-                      panda::panda_file::pgo::ProfileOptimizer *profile_opt)
+bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps, bool emitDebugInfo,
+                      panda::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
-    auto primitive_types = CreatePrimitiveTypes(items);
+    auto primitiveTypes = CreatePrimitiveTypes(items);
 
     auto entities = AsmEmitter::AsmEntityCollections {};
 
@@ -1524,11 +1522,11 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
 
     MakeArrayTypeItems(items, program, entities);
 
-    if (!MakeRecordItems(items, program, entities, primitive_types)) {
+    if (!MakeRecordItems(items, program, entities, primitiveTypes)) {
         return false;
     }
 
-    if (!MakeFunctionItems(items, program, entities, primitive_types, emit_debug_info)) {
+    if (!MakeFunctionItems(items, program, entities, primitiveTypes, emitDebugInfo)) {
         return false;
     }
 
@@ -1540,12 +1538,12 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
     }
 
     // Add Code and DebugInfo items last due to they have variable size that depends on bytecode
-    if (!MakeFunctionDebugInfoAndAnnotations(items, program, entities, emit_debug_info)) {
+    if (!MakeFunctionDebugInfoAndAnnotations(items, program, entities, emitDebugInfo)) {
         return false;
     }
 
-    if (profile_opt != nullptr) {
-        items->ReorderItems(profile_opt);
+    if (profileOpt != nullptr) {
+        items->ReorderItems(profileOpt);
     }
 
     items->ComputeLayout();
@@ -1554,15 +1552,15 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
         FillMap(maps, entities);
     }
 
-    return EmitFunctions(items, program, entities, emit_debug_info);
+    return EmitFunctions(items, program, entities, emitDebugInfo);
 }
 
 bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::string, size_t> *stat,
-                      PandaFileToPandaAsmMaps *maps, bool debug_info,
-                      panda::panda_file::pgo::ProfileOptimizer *profile_opt)
+                      PandaFileToPandaAsmMaps *maps, bool debugInfo,
+                      panda::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
     auto items = ItemContainer {};
-    if (!Emit(&items, program, maps, debug_info, profile_opt)) {
+    if (!Emit(&items, program, maps, debugInfo, profileOpt)) {
         return false;
     }
 
@@ -1574,15 +1572,15 @@ bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::stri
 }
 
 bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat,
-                      PandaFileToPandaAsmMaps *maps, bool debug_info,
-                      panda::panda_file::pgo::ProfileOptimizer *profile_opt)
+                      PandaFileToPandaAsmMaps *maps, bool debugInfo,
+                      panda::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
     auto writer = FileWriter(filename);
     if (!writer) {
         SetLastError("Unable to open" + filename + " for writing");
         return false;
     }
-    return Emit(&writer, program, stat, maps, debug_info, profile_opt);
+    return Emit(&writer, program, stat, maps, debugInfo, profileOpt);
 }
 
 std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program, PandaFileToPandaAsmMaps *maps)
@@ -1601,13 +1599,13 @@ std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program,
     }
 
     os::mem::ConstBytePtr ptr(
-        buffer, size, [](std::byte *buffer_ptr, [[maybe_unused]] size_t param_size) noexcept { delete[] buffer_ptr; });
+        buffer, size, [](std::byte *bufferPtr, [[maybe_unused]] size_t paramSize) noexcept { delete[] bufferPtr; });
     return panda_file::File::OpenFromMemory(std::move(ptr));
 }
 
 bool AsmEmitter::AssignProfileInfo(Program *program)
 {
-    std::unordered_map<size_t, std::vector<Ins *>> inst_map;
+    std::unordered_map<size_t, std::vector<Ins *>> instMap;
     constexpr auto SIZES = profiling::GetOrderedProfileSizes();
 
     /**
@@ -1616,34 +1614,34 @@ bool AsmEmitter::AssignProfileInfo(Program *program)
      * Then we iterate over this map in descending order - from biggest profile element size
      * to smallest. And assign profile index to all instructions with same size.
      */
-    for (auto &func : program->function_table) {
+    for (auto &func : program->functionTable) {
         for (auto &inst : func.second.ins) {
-            auto prof_size = INST_PROFILE_SIZES[static_cast<unsigned>(inst.opcode)];
-            if (prof_size != 0) {
-                inst_map[prof_size].push_back(&inst);
+            auto profSize = INST_PROFILE_SIZES[static_cast<unsigned>(inst.opcode)];
+            if (profSize != 0) {
+                instMap[profSize].push_back(&inst);
             }
         }
         size_t index = 0;
         for (auto it = SIZES.rbegin(); it != SIZES.rend(); ++it) {
-            std::vector<Ins *> &vec = inst_map[*it];
+            std::vector<Ins *> &vec = instMap[*it];
             for (auto inst : vec) {
-                inst->profile_id = index;
+                inst->profileId = index;
                 index += *it;
             }
             vec.clear();
         }
 
-        func.second.profile_size = index;
+        func.second.profileSize = index;
     }
     return true;
 }
 
 TypeItem *AsmEmitter::GetTypeItem(
-    ItemContainer *items, const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitive_types,
+    ItemContainer *items, const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes,
     const Type &type, const Program &program)
 {
     if (!type.IsObject()) {
-        return Find(primitive_types, type.GetId());
+        return Find(primitiveTypes, type.GetId());
     }
 
     if (type.IsArray()) {
@@ -1651,8 +1649,8 @@ TypeItem *AsmEmitter::GetTypeItem(
     }
 
     const auto &name = type.GetName();
-    auto iter = program.record_table.find(name);
-    if (iter == program.record_table.end()) {
+    auto iter = program.recordTable.find(name);
+    if (iter == program.recordTable.end()) {
         return nullptr;
     }
 
@@ -1675,13 +1673,13 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
     auto labels = std::unordered_map<std::string_view, panda::Label> {};
 
     for (const auto &insn : ins) {
-        if (insn.set_label) {
+        if (insn.setLabel) {
             labels.insert_or_assign(insn.label, emitter.CreateLabel());
         }
     }
 
     for (const auto &insn : ins) {
-        if (insn.set_label) {
+        if (insn.setLabel) {
             auto search = labels.find(insn.label);
             ASSERT(search != labels.end());
             emitter.Bind(search->second);
@@ -1698,31 +1696,31 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
 }
 
 void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, ItemContainer *container,
-                                 std::vector<uint8_t> *constant_pool, uint32_t &pc_inc, size_t instruction_number) const
+                                 std::vector<uint8_t> *constantPool, uint32_t &pcInc, size_t instructionNumber) const
 {
-    auto try_emit_pc = [program, constant_pool, &pc_inc]() -> void {
-        if (pc_inc != 0) {
-            program->EmitAdvancePc(constant_pool, pc_inc);
-            pc_inc = 0;
+    auto tryEmitPc = [program, constantPool, &pcInc]() -> void {
+        if (pcInc != 0) {
+            program->EmitAdvancePc(constantPool, pcInc);
+            pcInc = 0;
         }
     };
-    for (auto &v : local_variable_debug) {
+    for (auto &v : localVariableDebug) {
         if (IsParameter(v.reg)) {
             continue;
         }
-        if (instruction_number == v.start) {
-            try_emit_pc();
-            StringItem *variable_name = container->GetOrCreateStringItem(v.name);
-            StringItem *variable_type = container->GetOrCreateStringItem(v.signature);
-            if (v.signature_type.empty()) {
-                program->EmitStartLocal(constant_pool, v.reg, variable_name, variable_type);
+        if (instructionNumber == v.start) {
+            tryEmitPc();
+            StringItem *variableName = container->GetOrCreateStringItem(v.name);
+            StringItem *variableType = container->GetOrCreateStringItem(v.signature);
+            if (v.signatureType.empty()) {
+                program->EmitStartLocal(constantPool, v.reg, variableName, variableType);
             } else {
-                StringItem *type_signature = container->GetOrCreateStringItem(v.signature_type);
-                program->EmitStartLocalExtended(constant_pool, v.reg, variable_name, variable_type, type_signature);
+                StringItem *typeSignature = container->GetOrCreateStringItem(v.signatureType);
+                program->EmitStartLocalExtended(constantPool, v.reg, variableName, variableType, typeSignature);
             }
         }
-        if (instruction_number == (v.start + v.length)) {
-            try_emit_pc();
+        if (instructionNumber == (v.start + v.length)) {
+            tryEmitPc();
             program->EmitEndLocal(v.reg);
         }
     }
@@ -1730,87 +1728,87 @@ void Function::EmitLocalVariable(panda_file::LineNumberProgramItem *program, Ite
 
 size_t Function::GetLineNumber(size_t i) const
 {
-    return static_cast<int32_t>(ins[i].ins_debug.line_number);
+    return static_cast<int32_t>(ins[i].insDebug.lineNumber);
 }
 
 uint32_t Function::GetColumnNumber(size_t i) const
 {
-    return static_cast<int32_t>(ins[i].ins_debug.column_number);
+    return static_cast<int32_t>(ins[i].insDebug.columnNumber);
 }
 
-void Function::EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
-                          uint32_t pc_inc, int32_t line_inc) const
+void Function::EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
+                          uint32_t pcInc, int32_t lineInc) const
 {
-    if (!program->EmitSpecialOpcode(pc_inc, line_inc)) {
-        if (pc_inc != 0) {
-            program->EmitAdvancePc(constant_pool, pc_inc);
-            if (!program->EmitSpecialOpcode(0, line_inc)) {
-                program->EmitAdvanceLine(constant_pool, line_inc);
+    if (!program->EmitSpecialOpcode(pcInc, lineInc)) {
+        if (pcInc != 0) {
+            program->EmitAdvancePc(constantPool, pcInc);
+            if (!program->EmitSpecialOpcode(0, lineInc)) {
+                program->EmitAdvanceLine(constantPool, lineInc);
                 program->EmitSpecialOpcode(0, 0);
             }
         } else {
-            program->EmitAdvanceLine(constant_pool, line_inc);
+            program->EmitAdvanceLine(constantPool, lineInc);
             program->EmitSpecialOpcode(0, 0);
         }
     }
 }
 
-void Function::EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
-                              int32_t &prev_line_number, uint32_t &pc_inc, size_t instruction_number) const
+void Function::EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
+                              int32_t &prevLineNumber, uint32_t &pcInc, size_t instructionNumber) const
 {
-    int32_t line_inc = GetLineNumber(instruction_number) - prev_line_number;
-    if (line_inc != 0) {
-        prev_line_number = GetLineNumber(instruction_number);
-        EmitNumber(program, constant_pool, pc_inc, line_inc);
-        pc_inc = 0;
+    int32_t lineInc = GetLineNumber(instructionNumber) - prevLineNumber;
+    if (lineInc != 0) {
+        prevLineNumber = GetLineNumber(instructionNumber);
+        EmitNumber(program, constantPool, pcInc, lineInc);
+        pcInc = 0;
     }
 }
 
-void Function::EmitColumnNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constant_pool,
-                                uint32_t &prev_column_number, uint32_t &pc_inc, size_t instruction_number) const
+void Function::EmitColumnNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
+                                uint32_t &prevColumnNumber, uint32_t &pcInc, size_t instructionNumber) const
 {
-    uint32_t cn = GetColumnNumber(instruction_number);
-    if (cn != prev_column_number) {
-        program->EmitColumn(constant_pool, pc_inc, cn);
-        pc_inc = 0;
-        prev_column_number = cn;
+    uint32_t cn = GetColumnNumber(instructionNumber);
+    if (cn != prevColumnNumber) {
+        program->EmitColumn(constantPool, pcInc, cn);
+        pcInc = 0;
+        prevColumnNumber = cn;
     }
 }
 
-void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, const std::vector<uint8_t> &bytecode,
-                                      ItemContainer *container, std::vector<uint8_t> *constant_pool,
-                                      bool emit_debug_info) const
+void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, const std::vector<uint8_t> &bytecode,
+                                      ItemContainer *container, std::vector<uint8_t> *constantPool,
+                                      bool emitDebugInfo) const
 {
-    auto *program = debug_item->GetLineNumberProgram();
+    auto *program = debugItem->GetLineNumberProgram();
 
     if (ins.empty()) {
         program->EmitEnd();
         return;
     }
 
-    uint32_t pc_inc = 0;
-    int32_t prev_line_number = GetLineNumber(0);
-    uint32_t prev_column_number = std::numeric_limits<uint32_t>::max();
+    uint32_t pcInc = 0;
+    int32_t prevLineNumber = GetLineNumber(0);
+    uint32_t prevColumnNumber = std::numeric_limits<uint32_t>::max();
     BytecodeInstruction bi(bytecode.data());
-    debug_item->SetLineNumber(static_cast<uint32_t>(prev_line_number));
+    debugItem->SetLineNumber(static_cast<uint32_t>(prevLineNumber));
 
     for (size_t i = 0; i < ins.size(); i++) {
-        if (emit_debug_info) {
-            EmitLocalVariable(program, container, constant_pool, pc_inc, i);
+        if (emitDebugInfo) {
+            EmitLocalVariable(program, container, constantPool, pcInc, i);
         }
         if (ins[i].opcode == Opcode::INVALID) {
             continue;
         }
 
-        if (emit_debug_info || ins[i].CanThrow()) {
-            EmitLineNumber(program, constant_pool, prev_line_number, pc_inc, i);
+        if (emitDebugInfo || ins[i].CanThrow()) {
+            EmitLineNumber(program, constantPool, prevLineNumber, pcInc, i);
         }
 
-        if (panda::panda_file::IsDynamicLanguage(language) && emit_debug_info) {
-            EmitColumnNumber(program, constant_pool, prev_column_number, pc_inc, i);
+        if (panda::panda_file::IsDynamicLanguage(language) && emitDebugInfo) {
+            EmitColumnNumber(program, constantPool, prevColumnNumber, pcInc, i);
         }
 
-        pc_inc += bi.GetSize();
+        pcInc += bi.GetSize();
         bi = bi.GetNext();
     }
 
@@ -1819,119 +1817,119 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, con
 
 Function::TryCatchInfo Function::MakeOrderAndOffsets(const std::vector<uint8_t> &bytecode) const
 {
-    std::unordered_map<std::string_view, size_t> try_catch_labels;
-    std::unordered_map<std::string, std::vector<const CatchBlock *>> try_catch_map;
-    std::vector<std::string> try_catch_order;
+    std::unordered_map<std::string_view, size_t> tryCatchLabels;
+    std::unordered_map<std::string, std::vector<const CatchBlock *>> tryCatchMap;
+    std::vector<std::string> tryCatchOrder;
 
-    for (auto &catch_block : catch_blocks) {
-        try_catch_labels.insert_or_assign(catch_block.try_begin_label, 0);
-        try_catch_labels.insert_or_assign(catch_block.try_end_label, 0);
-        try_catch_labels.insert_or_assign(catch_block.catch_begin_label, 0);
-        try_catch_labels.insert_or_assign(catch_block.catch_end_label, 0);
+    for (auto &catchBlock : catchBlocks) {
+        tryCatchLabels.insert_or_assign(catchBlock.tryBeginLabel, 0);
+        tryCatchLabels.insert_or_assign(catchBlock.tryEndLabel, 0);
+        tryCatchLabels.insert_or_assign(catchBlock.catchBeginLabel, 0);
+        tryCatchLabels.insert_or_assign(catchBlock.catchEndLabel, 0);
 
-        std::string try_key = catch_block.try_begin_label + ":" + catch_block.try_end_label;
-        auto it = try_catch_map.find(try_key);
-        if (it == try_catch_map.cend()) {
-            std::tie(it, std::ignore) = try_catch_map.try_emplace(try_key);
-            try_catch_order.push_back(try_key);
+        std::string tryKey = catchBlock.tryBeginLabel + ":" + catchBlock.tryEndLabel;
+        auto it = tryCatchMap.find(tryKey);
+        if (it == tryCatchMap.cend()) {
+            std::tie(it, std::ignore) = tryCatchMap.try_emplace(tryKey);
+            tryCatchOrder.push_back(tryKey);
         }
-        it->second.push_back(&catch_block);
+        it->second.push_back(&catchBlock);
     }
 
     BytecodeInstruction bi(bytecode.data());
-    size_t pc_offset = 0;
+    size_t pcOffset = 0;
 
     for (const auto &i : ins) {
-        if (i.set_label) {
-            auto it = try_catch_labels.find(i.label);
-            if (it != try_catch_labels.cend()) {
-                try_catch_labels[i.label] = pc_offset;
+        if (i.setLabel) {
+            auto it = tryCatchLabels.find(i.label);
+            if (it != tryCatchLabels.cend()) {
+                tryCatchLabels[i.label] = pcOffset;
             }
         }
         if (i.opcode == Opcode::INVALID) {
             continue;
         }
 
-        pc_offset += bi.GetSize();
+        pcOffset += bi.GetSize();
         bi = bi.GetNext();
     }
 
-    return Function::TryCatchInfo {try_catch_labels, try_catch_map, try_catch_order};
+    return Function::TryCatchInfo {tryCatchLabels, tryCatchMap, tryCatchOrder};
 }
 
 std::vector<CodeItem::TryBlock> Function::BuildTryBlocks(
-    MethodItem *method, const std::unordered_map<std::string, BaseClassItem *> &class_items,
+    MethodItem *method, const std::unordered_map<std::string, BaseClassItem *> &classItems,
     const std::vector<uint8_t> &bytecode) const
 {
-    std::vector<CodeItem::TryBlock> try_blocks;
+    std::vector<CodeItem::TryBlock> tryBlocks;
 
     if (ins.empty()) {
-        return try_blocks;
+        return tryBlocks;
     }
 
     Function::TryCatchInfo tcs = MakeOrderAndOffsets(bytecode);
 
-    for (const auto &t_key : tcs.try_catch_order) {
-        auto kv = tcs.try_catch_map.find(t_key);
-        ASSERT(kv != tcs.try_catch_map.cend());
-        auto &try_catch_blocks = kv->second;
+    for (const auto &tKey : tcs.tryCatchOrder) {
+        auto kv = tcs.tryCatchMap.find(tKey);
+        ASSERT(kv != tcs.tryCatchMap.cend());
+        auto &tryCatchBlocks = kv->second;
 
-        ASSERT(!try_catch_blocks.empty());
+        ASSERT(!tryCatchBlocks.empty());
 
-        std::vector<CodeItem::CatchBlock> catch_block_items;
+        std::vector<CodeItem::CatchBlock> catchBlockItems;
 
-        for (auto *catch_block : try_catch_blocks) {
-            auto class_name = catch_block->exception_record;
+        for (auto *catchBlock : tryCatchBlocks) {
+            auto className = catchBlock->exceptionRecord;
 
-            BaseClassItem *class_item = nullptr;
-            if (!class_name.empty()) {
-                auto it = class_items.find(class_name);
-                ASSERT(it != class_items.cend());
-                class_item = it->second;
+            BaseClassItem *classItem = nullptr;
+            if (!className.empty()) {
+                auto it = classItems.find(className);
+                ASSERT(it != classItems.cend());
+                classItem = it->second;
             }
 
-            auto handler_pc_offset = tcs.try_catch_labels[catch_block->catch_begin_label];
-            auto handler_code_size = tcs.try_catch_labels[catch_block->catch_end_label] - handler_pc_offset;
-            catch_block_items.emplace_back(method, class_item, handler_pc_offset, handler_code_size);
+            auto handlerPcOffset = tcs.tryCatchLabels[catchBlock->catchBeginLabel];
+            auto handlerCodeSize = tcs.tryCatchLabels[catchBlock->catchEndLabel] - handlerPcOffset;
+            catchBlockItems.emplace_back(method, classItem, handlerPcOffset, handlerCodeSize);
         }
 
-        auto try_start_pc_offset = tcs.try_catch_labels[try_catch_blocks[0]->try_begin_label];
-        auto try_end_pc_offset = tcs.try_catch_labels[try_catch_blocks[0]->try_end_label];
-        ASSERT(try_end_pc_offset >= try_start_pc_offset);
-        try_blocks.emplace_back(try_start_pc_offset, try_end_pc_offset - try_start_pc_offset, catch_block_items);
+        auto tryStartPcOffset = tcs.tryCatchLabels[tryCatchBlocks[0]->tryBeginLabel];
+        auto tryEndPcOffset = tcs.tryCatchLabels[tryCatchBlocks[0]->tryEndLabel];
+        ASSERT(tryEndPcOffset >= tryStartPcOffset);
+        tryBlocks.emplace_back(tryStartPcOffset, tryEndPcOffset - tryStartPcOffset, catchBlockItems);
     }
 
-    return try_blocks;
+    return tryBlocks;
 }
 
 void Function::DebugDump() const
 {
     std::cerr << "name: " << name << std::endl;
     for (const auto &i : ins) {
-        std::cerr << i.ToString("\n", true, regs_num);
+        std::cerr << i.ToString("\n", true, regsNum);
     }
 }
 
 std::string GetOwnerName(std::string name)
 {
     name = DeMangleName(name);
-    auto super_pos = name.find_last_of(PARSE_AREA_MARKER);
-    if (super_pos == std::string::npos) {
+    auto superPos = name.find_last_of(PARSE_AREA_MARKER);
+    if (superPos == std::string::npos) {
         return "";
     }
 
-    return name.substr(0, super_pos);
+    return name.substr(0, superPos);
 }
 
 std::string GetItemName(std::string name)
 {
     name = DeMangleName(name);
-    auto super_pos = name.find_last_of(PARSE_AREA_MARKER);
-    if (super_pos == std::string::npos) {
+    auto superPos = name.find_last_of(PARSE_AREA_MARKER);
+    if (superPos == std::string::npos) {
         return name;
     }
 
-    return name.substr(super_pos + 1);
+    return name.substr(superPos + 1);
 }
 
 }  // namespace panda::pandasm

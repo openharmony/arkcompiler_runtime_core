@@ -59,8 +59,8 @@ enum PointerType {
 class Pointer {
 public:
     Pointer() = default;
-    Pointer(PointerType type, const Inst *base, const Inst *idx, uint64_t imm, const void *type_ptr)
-        : type_(type), base_(base), idx_(idx), imm_(imm), type_ptr_(type_ptr), volatile_(false)
+    Pointer(PointerType type, const Inst *base, const Inst *idx, uint64_t imm, const void *typePtr)
+        : type_(type), base_(base), idx_(idx), imm_(imm), typePtr_(typePtr), volatile_(false)
     {
         local_ = base == nullptr ? false : IsLocalAlias(base);
     };
@@ -70,19 +70,19 @@ public:
         return Pointer(OBJECT, base, nullptr, 0, nullptr);
     }
 
-    static Pointer CreatePoolConstant(uint32_t type_id)
+    static Pointer CreatePoolConstant(uint32_t typeId)
     {
-        return Pointer(POOL_CONSTANT, nullptr, nullptr, type_id, nullptr);
+        return Pointer(POOL_CONSTANT, nullptr, nullptr, typeId, nullptr);
     }
 
-    static Pointer CreateStaticField(uint32_t type_id, const void *type_ptr = nullptr)
+    static Pointer CreateStaticField(uint32_t typeId, const void *typePtr = nullptr)
     {
-        return Pointer(STATIC_FIELD, nullptr, nullptr, type_id, type_ptr);
+        return Pointer(STATIC_FIELD, nullptr, nullptr, typeId, typePtr);
     }
 
-    static Pointer CreateObjectField(const Inst *base, uint32_t type_id, const void *type_ptr = nullptr)
+    static Pointer CreateObjectField(const Inst *base, uint32_t typeId, const void *typePtr = nullptr)
     {
-        return Pointer(OBJECT_FIELD, base, nullptr, type_id, type_ptr);
+        return Pointer(OBJECT_FIELD, base, nullptr, typeId, typePtr);
     }
 
     static Pointer CreateArrayElement(const Inst *array, const Inst *idx, uint64_t imm = 0)
@@ -117,7 +117,7 @@ public:
 
     const void *GetTypePtr() const
     {
-        return type_ptr_;
+        return typePtr_;
     }
 
     bool IsLocal() const
@@ -125,10 +125,10 @@ public:
         return local_;
     }
 
-    void SetLocalVolatile(bool local, bool is_volatile)
+    void SetLocalVolatile(bool local, bool isVolatile)
     {
         local_ = local;
-        volatile_ = is_volatile;
+        volatile_ = isVolatile;
     }
 
     bool IsVolatile() const
@@ -136,19 +136,19 @@ public:
         return volatile_;
     }
 
-    void SetVolatile(bool is_volatile)
+    void SetVolatile(bool isVolatile)
     {
-        volatile_ = is_volatile;
+        volatile_ = isVolatile;
     }
 
     void Dump(std::ostream *out) const;
 
     bool HasSameOffset(const Pointer &p) const
     {
-        if (type_ptr_ == nullptr && p.type_ptr_ == nullptr) {
+        if (typePtr_ == nullptr && p.typePtr_ == nullptr) {
             return imm_ == p.imm_;
         }
-        return type_ptr_ == p.type_ptr_;
+        return typePtr_ == p.typePtr_;
     }
 
 private:
@@ -234,7 +234,7 @@ private:
     const Inst *base_;
     const Inst *idx_;
     uint64_t imm_;
-    const void *type_ptr_;
+    const void *typePtr_;
     bool local_;
     bool volatile_;
 };
@@ -250,9 +250,9 @@ struct PointerEqual {
 struct PointerHash {
     uint32_t operator()(Pointer const &p) const
     {
-        auto inst_hasher = std::hash<const Inst *> {};
-        uint32_t hash = inst_hasher(p.GetBase());
-        hash += inst_hasher(p.GetIdx());
+        auto instHasher = std::hash<const Inst *> {};
+        uint32_t hash = instHasher(p.GetBase());
+        hash += instHasher(p.GetIdx());
         if (p.GetTypePtr() == nullptr) {
             hash += std::hash<uint64_t> {}(p.GetImm());
         } else {
@@ -390,8 +390,8 @@ public:
 
     ArenaSet<Inst *> *GetClearInputsSet()
     {
-        inputs_set_->clear();
-        return inputs_set_;
+        inputsSet_->clear();
+        return inputsSet_;
     }
 
 #include "optimizer/ir/visitor.inc"
@@ -420,13 +420,13 @@ private:
     void DumpChains(std::ostream *out) const;
 
 private:
-    PointerMap<PointerSet> points_to_;
+    PointerMap<PointerSet> pointsTo_;
 
     // Local containers:
     PointerMap<ArenaVector<Pointer>> *chains_ {nullptr};
     PointerPairVector *direct_ {nullptr};
     PointerPairVector *copy_ {nullptr};
-    ArenaSet<Inst *> *inputs_set_ {nullptr};
+    ArenaSet<Inst *> *inputsSet_ {nullptr};
 };
 }  // namespace panda::compiler
 

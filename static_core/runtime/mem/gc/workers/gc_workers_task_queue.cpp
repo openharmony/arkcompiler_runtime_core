@@ -24,23 +24,23 @@ GCWorkersTaskQueue::~GCWorkersTaskQueue() = default;
 
 bool GCWorkersTaskQueue::TryAddTask(GCWorkersTask &&task)
 {
-    auto gc_task_runner = [this, gc_worker_task = std::move(task)]() mutable {  // NOLINT(performance-move-const-arg)
-        this->RunGCWorkersTask(&gc_worker_task);
+    auto gcTaskRunner = [this, gcWorkerTask = std::move(task)]() mutable {  // NOLINT(performance-move-const-arg)
+        this->RunGCWorkersTask(&gcWorkerTask);
     };
-    auto gc_task = taskmanager::Task::Create(GC_TASK_PROPERTIES, gc_task_runner);
-    GetGC()->GetWorkersTaskQueue()->AddTask(std::move(gc_task));
+    auto gcTask = taskmanager::Task::Create(GC_TASK_PROPERTIES, gcTaskRunner);
+    GetGC()->GetWorkersTaskQueue()->AddTask(std::move(gcTask));
     return true;
 }
 
 void GCWorkersTaskQueue::RunInCurrentThread()
 {
-    auto possible_gc_task = taskmanager::TaskScheduler::GetTaskScheduler()->GetTaskFromQueue(GC_TASK_PROPERTIES);
-    if (!possible_gc_task.has_value()) {
+    auto possibleGcTask = taskmanager::TaskScheduler::GetTaskScheduler()->GetTaskFromQueue(GC_TASK_PROPERTIES);
+    if (!possibleGcTask.has_value()) {
         // No available gc task for execution
         return;
     }
     // Execute gc workers task in the current thread for help to workers
-    possible_gc_task->RunTask();
+    possibleGcTask->RunTask();
 }
 
 }  // namespace panda::mem

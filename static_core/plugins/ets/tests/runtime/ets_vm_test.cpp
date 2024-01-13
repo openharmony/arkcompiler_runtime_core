@@ -62,87 +62,87 @@ public:
     NO_MOVE_SEMANTIC(EtsVMTest);
 };
 
-static void AssertCompoundClassRoot(EtsClassLinker *class_linker, EtsClassRoot root)
+static void AssertCompoundClassRoot(EtsClassLinker *classLinker, EtsClassRoot root)
 {
-    EtsClass *klass = class_linker->GetClassRoot(root);
-    Class *core_class = klass->GetRuntimeClass();
+    EtsClass *klass = classLinker->GetClassRoot(root);
+    Class *coreClass = klass->GetRuntimeClass();
 
     ASSERT_NE(klass, nullptr);
     ASSERT_TRUE(klass->IsInitialized());
-    ASSERT_TRUE(core_class->IsInstantiable());
+    ASSERT_TRUE(coreClass->IsInstantiable());
     ASSERT_FALSE(klass->IsArrayClass());
     ASSERT_FALSE(klass->IsPrimitive());
     ASSERT_FALSE(klass->IsInterface());
     ASSERT_FALSE(klass->IsAbstract());
-    ASSERT_FALSE(core_class->IsProxy());
-    ASSERT_EQ(core_class->GetLoadContext(), class_linker->GetEtsClassLinkerExtension()->GetBootContext());
+    ASSERT_FALSE(coreClass->IsProxy());
+    ASSERT_EQ(coreClass->GetLoadContext(), classLinker->GetEtsClassLinkerExtension()->GetBootContext());
 
     if (root == EtsClassRoot::OBJECT) {
-        ASSERT_TRUE(core_class->IsObjectClass());
+        ASSERT_TRUE(coreClass->IsObjectClass());
         ASSERT_EQ(klass->GetBase(), nullptr);
     } else {
-        ASSERT_FALSE(core_class->IsObjectClass());
+        ASSERT_FALSE(coreClass->IsObjectClass());
         ASSERT_NE(klass->GetBase(), nullptr);
-        ASSERT_EQ(klass->GetBase(), class_linker->GetClassRoot(EtsClassRoot::OBJECT));
+        ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
     }
 }
 
-static void AssertCompoundContainerClassRoot(EtsClassLinker *class_linker, EtsClassRoot root)
+static void AssertCompoundContainerClassRoot(EtsClassLinker *classLinker, EtsClassRoot root)
 {
-    EtsClass *klass = class_linker->GetClassRoot(root);
-    Class *core_class = klass->GetRuntimeClass();
+    EtsClass *klass = classLinker->GetClassRoot(root);
+    Class *coreClass = klass->GetRuntimeClass();
 
     ASSERT_NE(klass, nullptr);
     ASSERT_TRUE(klass->IsInitialized());
-    ASSERT_TRUE(core_class->IsInstantiable());
+    ASSERT_TRUE(coreClass->IsInstantiable());
     ASSERT_TRUE(klass->IsArrayClass());
     ASSERT_FALSE(klass->IsPrimitive());
     ASSERT_FALSE(klass->IsInterface());
     ASSERT_TRUE(klass->IsAbstract());
-    ASSERT_FALSE(core_class->IsProxy());
-    ASSERT_EQ(core_class->GetLoadContext(), class_linker->GetEtsClassLinkerExtension()->GetBootContext());
-    ASSERT_FALSE(core_class->IsObjectClass());
+    ASSERT_FALSE(coreClass->IsProxy());
+    ASSERT_EQ(coreClass->GetLoadContext(), classLinker->GetEtsClassLinkerExtension()->GetBootContext());
+    ASSERT_FALSE(coreClass->IsObjectClass());
     ASSERT_NE(klass->GetBase(), nullptr);
-    ASSERT_EQ(klass->GetBase(), class_linker->GetClassRoot(EtsClassRoot::OBJECT));
+    ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
 }
 
-static void AssertPrimitiveClassRoot(EtsClassLinker *class_linker, EtsClassRoot root)
+static void AssertPrimitiveClassRoot(EtsClassLinker *classLinker, EtsClassRoot root)
 {
-    EtsClass *klass = class_linker->GetClassRoot(root);
-    Class *core_class = klass->GetRuntimeClass();
+    EtsClass *klass = classLinker->GetClassRoot(root);
+    Class *coreClass = klass->GetRuntimeClass();
 
     ASSERT_NE(klass, nullptr);
     ASSERT_TRUE(klass->IsInitialized());
-    ASSERT_FALSE(core_class->IsInstantiable());
+    ASSERT_FALSE(coreClass->IsInstantiable());
     ASSERT_FALSE(klass->IsArrayClass());
     ASSERT_TRUE(klass->IsPrimitive());
     ASSERT_TRUE(klass->IsPublic());
     ASSERT_TRUE(klass->IsFinal());
     ASSERT_FALSE(klass->IsInterface());
     ASSERT_TRUE(klass->IsAbstract());
-    ASSERT_FALSE(core_class->IsProxy());
-    ASSERT_EQ(core_class->GetLoadContext(), class_linker->GetEtsClassLinkerExtension()->GetBootContext());
+    ASSERT_FALSE(coreClass->IsProxy());
+    ASSERT_EQ(coreClass->GetLoadContext(), classLinker->GetEtsClassLinkerExtension()->GetBootContext());
     ASSERT_EQ(klass->GetBase(), nullptr);
 }
 
-static void AssertPrimitiveContainerClassRoot(EtsClassLinker *class_linker, EtsClassRoot root)
+static void AssertPrimitiveContainerClassRoot(EtsClassLinker *classLinker, EtsClassRoot root)
 {
-    EtsClass *klass = class_linker->GetClassRoot(root);
-    Class *core_class = klass->GetRuntimeClass();
+    EtsClass *klass = classLinker->GetClassRoot(root);
+    Class *coreClass = klass->GetRuntimeClass();
 
     ASSERT_NE(klass, nullptr);
     ASSERT_TRUE(klass->IsInitialized());
-    ASSERT_TRUE(core_class->IsInstantiable());
+    ASSERT_TRUE(coreClass->IsInstantiable());
     ASSERT_TRUE(klass->IsArrayClass());
     ASSERT_FALSE(klass->IsPrimitive());
     ASSERT_TRUE(klass->IsPublic());
     ASSERT_TRUE(klass->IsFinal());
     ASSERT_FALSE(klass->IsInterface());
     ASSERT_TRUE(klass->IsAbstract());
-    ASSERT_FALSE(core_class->IsProxy());
-    ASSERT_EQ(core_class->GetLoadContext(), class_linker->GetEtsClassLinkerExtension()->GetBootContext());
+    ASSERT_FALSE(coreClass->IsProxy());
+    ASSERT_EQ(coreClass->GetLoadContext(), classLinker->GetEtsClassLinkerExtension()->GetBootContext());
     ASSERT_NE(klass->GetBase(), nullptr);
-    ASSERT_EQ(klass->GetBase(), class_linker->GetClassRoot(EtsClassRoot::OBJECT));
+    ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
 }
 
 TEST_F(EtsVMTest, InitTest)
@@ -150,46 +150,46 @@ TEST_F(EtsVMTest, InitTest)
     auto runtime = Runtime::GetCurrent();
     ASSERT_NE(runtime, nullptr);
 
-    PandaEtsVM *ets_vm = PandaEtsVM::GetCurrent();
-    ASSERT_NE(ets_vm, nullptr);
+    PandaEtsVM *etsVm = PandaEtsVM::GetCurrent();
+    ASSERT_NE(etsVm, nullptr);
 
-    EtsClassLinker *class_linker = ets_vm->GetClassLinker();
-    ASSERT_NE(class_linker, nullptr);
+    EtsClassLinker *classLinker = etsVm->GetClassLinker();
+    ASSERT_NE(classLinker, nullptr);
 
-    EtsClassLinkerExtension *ext = class_linker->GetEtsClassLinkerExtension();
+    EtsClassLinkerExtension *ext = classLinker->GetEtsClassLinkerExtension();
     ASSERT_NE(ext, nullptr);
     ASSERT_EQ(ext->GetLanguage(), panda_file::SourceLang::ETS);
     ASSERT_TRUE(ext->IsInitialized());
 
-    AssertCompoundClassRoot(class_linker, EtsClassRoot::OBJECT);
-    AssertCompoundClassRoot(class_linker, EtsClassRoot::CLASS);
-    AssertCompoundClassRoot(class_linker, EtsClassRoot::STRING);
+    AssertCompoundClassRoot(classLinker, EtsClassRoot::OBJECT);
+    AssertCompoundClassRoot(classLinker, EtsClassRoot::CLASS);
+    AssertCompoundClassRoot(classLinker, EtsClassRoot::STRING);
 
-    AssertCompoundContainerClassRoot(class_linker, EtsClassRoot::STRING_ARRAY);
+    AssertCompoundContainerClassRoot(classLinker, EtsClassRoot::STRING_ARRAY);
 
-    AssertPrimitiveClassRoot(class_linker, EtsClassRoot::BOOLEAN);
-    AssertPrimitiveClassRoot(class_linker, EtsClassRoot::BYTE);
-    AssertPrimitiveClassRoot(class_linker, EtsClassRoot::SHORT);
-    AssertPrimitiveClassRoot(class_linker, EtsClassRoot::CHAR);
-    AssertPrimitiveClassRoot(class_linker, EtsClassRoot::INT);
-    AssertPrimitiveClassRoot(class_linker, EtsClassRoot::LONG);
-    AssertPrimitiveClassRoot(class_linker, EtsClassRoot::FLOAT);
-    AssertPrimitiveClassRoot(class_linker, EtsClassRoot::DOUBLE);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::BOOLEAN);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::BYTE);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::SHORT);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::CHAR);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::INT);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::LONG);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::FLOAT);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::DOUBLE);
 
-    AssertPrimitiveContainerClassRoot(class_linker, EtsClassRoot::BOOLEAN_ARRAY);
-    AssertPrimitiveContainerClassRoot(class_linker, EtsClassRoot::BYTE_ARRAY);
-    AssertPrimitiveContainerClassRoot(class_linker, EtsClassRoot::SHORT_ARRAY);
-    AssertPrimitiveContainerClassRoot(class_linker, EtsClassRoot::CHAR_ARRAY);
-    AssertPrimitiveContainerClassRoot(class_linker, EtsClassRoot::INT_ARRAY);
-    AssertPrimitiveContainerClassRoot(class_linker, EtsClassRoot::LONG_ARRAY);
-    AssertPrimitiveContainerClassRoot(class_linker, EtsClassRoot::FLOAT_ARRAY);
-    AssertPrimitiveContainerClassRoot(class_linker, EtsClassRoot::DOUBLE_ARRAY);
+    AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::BOOLEAN_ARRAY);
+    AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::BYTE_ARRAY);
+    AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::SHORT_ARRAY);
+    AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::CHAR_ARRAY);
+    AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::INT_ARRAY);
+    AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::LONG_ARRAY);
+    AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::FLOAT_ARRAY);
+    AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::DOUBLE_ARRAY);
 
-    EtsCoroutine *ets_coroutine = EtsCoroutine::GetCurrent();
-    ASSERT_NE(ets_coroutine, nullptr);
+    EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent();
+    ASSERT_NE(etsCoroutine, nullptr);
 
-    auto vm = ets_coroutine->GetVM();
-    ASSERT_EQ(vm->GetAssociatedThread(), ets_coroutine);
+    auto vm = etsCoroutine->GetVM();
+    ASSERT_EQ(vm->GetAssociatedThread(), etsCoroutine);
 
     ASSERT_NE(vm, nullptr);
     ASSERT_EQ(ext->GetLanguage(), vm->GetLanguageContext().GetLanguage());

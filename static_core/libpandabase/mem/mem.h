@@ -72,9 +72,9 @@ enum Alignment {
  * @param logAlignment - logarithmic alignment
  * @return alingnment in bytes
  */
-constexpr size_t GetAlignmentInBytes(const Alignment log_alignment)
+constexpr size_t GetAlignmentInBytes(const Alignment logAlignment)
 {
-    return 1U << static_cast<uint32_t>(log_alignment);
+    return 1U << static_cast<uint32_t>(logAlignment);
 }
 
 /**
@@ -82,14 +82,14 @@ constexpr size_t GetAlignmentInBytes(const Alignment log_alignment)
  * @param ALIGNMENT_IN_BYTES - should be power of 2
  * @return alignment in bits
  */
-constexpr Alignment GetLogAlignment(const uint32_t alignment_in_bytes)
+constexpr Alignment GetLogAlignment(const uint32_t alignmentInBytes)
 {
     using helpers::math::GetIntLog2;
     // check if it is power of 2
-    ASSERT((alignment_in_bytes != 0) && !(alignment_in_bytes & (alignment_in_bytes - 1)));
-    ASSERT(GetIntLog2(alignment_in_bytes) >= Alignment::LOG_ALIGN_MIN);
-    ASSERT(GetIntLog2(alignment_in_bytes) <= Alignment::LOG_ALIGN_MAX);
-    return static_cast<Alignment>(GetIntLog2(alignment_in_bytes));
+    ASSERT((alignmentInBytes != 0) && !(alignmentInBytes & (alignmentInBytes - 1)));
+    ASSERT(GetIntLog2(alignmentInBytes) >= Alignment::LOG_ALIGN_MIN);
+    ASSERT(GetIntLog2(alignmentInBytes) <= Alignment::LOG_ALIGN_MAX);
+    return static_cast<Alignment>(GetIntLog2(alignmentInBytes));
 }
 
 template <class T>
@@ -277,12 +277,12 @@ using GCObjectVisitor = std::function<ObjectStatus(ObjectHeader *)>;
 using ObjectMoveVisitor = std::add_pointer<size_t(void *mem)>::type;
 using ObjectVisitor = std::function<void(ObjectHeader *)>;
 /// from_object is object from which we found to_object by reference.
-using ObjectVisitorEx = std::function<void(ObjectHeader *from_object, ObjectHeader *to_object)>;
+using ObjectVisitorEx = std::function<void(ObjectHeader *fromObject, ObjectHeader *toObject)>;
 using ObjectChecker = std::function<bool(const ObjectHeader *)>;
 using GCRootVisitor = std::function<void(const mem::GCRoot &)>;
 using MemRangeChecker = std::function<bool(mem::MemRange &)>;
 
-inline bool NoFilterChecker([[maybe_unused]] const ObjectHeader *object_header)
+inline bool NoFilterChecker([[maybe_unused]] const ObjectHeader *objectHeader)
 {
     return true;
 }

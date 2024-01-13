@@ -36,12 +36,12 @@ static ets_int DestroyEtsVM(EtsVM *vm)
         return ETS_ERR;
     }
 
-    auto panda_vm = PandaEtsVM::FromEtsVM(vm);
-    auto main_vm = runtime->GetPandaVM();
-    if (panda_vm == main_vm) {
+    auto pandaVm = PandaEtsVM::FromEtsVM(vm);
+    auto mainVm = runtime->GetPandaVM();
+    if (pandaVm == mainVm) {
         Runtime::Destroy();
     } else {
-        PandaEtsVM::Destroy(panda_vm);
+        PandaEtsVM::Destroy(pandaVm);
     }
 
     return ETS_OK;
@@ -52,9 +52,9 @@ bool CheckVersionEtsNapi(ets_int version)
     return (version == ETS_NAPI_VERSION_1_0);
 }
 
-static ets_int GetEnv([[maybe_unused]] EtsVM *vm, EtsEnv **p_env, [[maybe_unused]] ets_int version)
+static ets_int GetEnv([[maybe_unused]] EtsVM *vm, EtsEnv **pEnv, [[maybe_unused]] ets_int version)
 {
-    if (p_env == nullptr) {
+    if (pEnv == nullptr) {
         LOG(ERROR, RUNTIME) << "Cannot get environment, p_env is null";
         return ETS_ERR;
     }
@@ -66,10 +66,10 @@ static ets_int GetEnv([[maybe_unused]] EtsVM *vm, EtsEnv **p_env, [[maybe_unused
     }
 
     if (!CheckVersionEtsNapi(version)) {
-        *p_env = nullptr;
+        *pEnv = nullptr;
         return ETS_ERR_VER;
     }
-    *p_env = coroutine->GetEtsNapiEnv();
+    *pEnv = coroutine->GetEtsNapiEnv();
 
     return ETS_OK;
 }
@@ -81,165 +81,165 @@ const ETS_InvokeInterface *GetInvokeInterface()
     return &S_INVOKE_INTERFACE;
 }
 
-static EtsVMInitArgs S_DEFAULT_ARGS = {0, 0, nullptr};
+static EtsVMInitArgs g_sDefaultArgs = {0, 0, nullptr};
 
-extern "C" ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vm_args)
+extern "C" ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vmArgs)
 {
-    *vm_args = S_DEFAULT_ARGS;
+    *vmArgs = g_sDefaultArgs;
     return ETS_OK;
 }
 
-extern "C" ets_int ETS_GetCreatedVMs(EtsVM **vm_buf, ets_size buf_len, ets_size *n_vms)
+extern "C" ets_int ETS_GetCreatedVMs(EtsVM **vmBuf, ets_size bufLen, ets_size *nVms)
 {
-    if (n_vms == nullptr) {
+    if (nVms == nullptr) {
         return ETS_ERR;
     }
 
     if (auto coroutine = EtsCoroutine::GetCurrent()) {
-        *n_vms = 1;
+        *nVms = 1;
 
-        if (vm_buf == nullptr || buf_len < 1) {
+        if (vmBuf == nullptr || bufLen < 1) {
             return ETS_ERR;
         }
 
-        *vm_buf = coroutine->GetPandaVM();
+        *vmBuf = coroutine->GetPandaVM();
     } else {
-        *n_vms = 0;
+        *nVms = 0;
     }
 
     return ETS_OK;
 }
 
-static void *LOG_PRINT_FUNCTION = nullptr;
+static void *g_logPrintFunction = nullptr;
 
 static void EtsMobileLogPrint(int id, int level, const char *component, const char *fmt, const char *msg)
 {
-    int ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelUnknown;
+    int etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelUnknown;
     switch (level) {
         case panda::Logger::PandaLog2MobileLog::UNKNOWN:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelUnknown;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelUnknown;
             break;
         case panda::Logger::PandaLog2MobileLog::DEFAULT:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelDefault;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelDefault;
             break;
         case panda::Logger::PandaLog2MobileLog::VERBOSE:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelVerbose;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelVerbose;
             break;
         case panda::Logger::PandaLog2MobileLog::DEBUG:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelDebug;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelDebug;
             break;
         case panda::Logger::PandaLog2MobileLog::INFO:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelInfo;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelInfo;
             break;
         case panda::Logger::PandaLog2MobileLog::WARN:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelWarn;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelWarn;
             break;
         case panda::Logger::PandaLog2MobileLog::ERROR:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelError;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelError;
             break;
         case panda::Logger::PandaLog2MobileLog::FATAL:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelFatal;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelFatal;
             break;
         case panda::Logger::PandaLog2MobileLog::SILENT:
-            ets_level = EtsMobileLogggerLevel::EtsMobileLogLevelSilent;
+            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelSilent;
             break;
         default:
             LOG(ERROR, RUNTIME) << "No such mobile log option";
     }
 
-    auto log_print_callback = reinterpret_cast<FuncMobileLogPrint>(LOG_PRINT_FUNCTION);
-    ASSERT(log_print_callback != nullptr);
-    log_print_callback(id, ets_level, component, fmt, msg);
+    auto logPrintCallback = reinterpret_cast<FuncMobileLogPrint>(g_logPrintFunction);
+    ASSERT(logPrintCallback != nullptr);
+    logPrintCallback(id, etsLevel, component, fmt, msg);
 }
 
-static bool ParseOptions(const EtsVMInitArgs *args, RuntimeOptions &runtime_options)
+static bool ParseOptions(const EtsVMInitArgs *args, RuntimeOptions &runtimeOptions)
 {
-    std::vector<std::string> boot_panda_files;
-    std::vector<std::string> aot_files;
-    std::vector<std::string> ark_files;
-    base_options::Options base_options("");
+    std::vector<std::string> bootPandaFiles;
+    std::vector<std::string> aotFiles;
+    std::vector<std::string> arkFiles;
+    base_options::Options baseOptions("");
 
-    runtime_options.SetLoadRuntimes({"ets"});
+    runtimeOptions.SetLoadRuntimes({"ets"});
 
     Span<const EtsVMOption> options(args->options, args->nOptions);
     for (auto &o : options) {
-        auto extra_str = reinterpret_cast<const char *>(o.extraInfo);
+        auto extraStr = reinterpret_cast<const char *>(o.extraInfo);
 
         switch (o.option) {
             case EtsOptionType::EtsLogLevel:
-                base_options.SetLogLevel(extra_str);
+                baseOptions.SetLogLevel(extraStr);
                 break;
             case EtsOptionType::EtsMobileLog:
-                LOG_PRINT_FUNCTION = const_cast<void *>(o.extraInfo);
-                runtime_options.SetMobileLog(reinterpret_cast<void *>(EtsMobileLogPrint));
+                g_logPrintFunction = const_cast<void *>(o.extraInfo);
+                runtimeOptions.SetMobileLog(reinterpret_cast<void *>(EtsMobileLogPrint));
                 break;
             case EtsOptionType::EtsBootFile:
-                boot_panda_files.emplace_back(extra_str);
+                bootPandaFiles.emplace_back(extraStr);
                 break;
             case EtsOptionType::EtsAotFile:
-                aot_files.emplace_back(extra_str);
+                aotFiles.emplace_back(extraStr);
                 break;
             case EtsOptionType::EtsArkFile:
-                ark_files.emplace_back(extra_str);
+                arkFiles.emplace_back(extraStr);
                 break;
             case EtsOptionType::EtsJit:
-                runtime_options.SetCompilerEnableJit(true);
+                runtimeOptions.SetCompilerEnableJit(true);
                 break;
             case EtsOptionType::EtsNoJit:
-                runtime_options.SetCompilerEnableJit(false);
+                runtimeOptions.SetCompilerEnableJit(false);
                 break;
             case EtsOptionType::EtsAot:
-                runtime_options.SetEnableAn(true);
+                runtimeOptions.SetEnableAn(true);
                 break;
             case EtsOptionType::EtsNoAot:
-                runtime_options.SetEnableAn(false);
+                runtimeOptions.SetEnableAn(false);
                 break;
             case EtsOptionType::EtsGcTriggerType:
-                runtime_options.SetGcTriggerType(extra_str);
+                runtimeOptions.SetGcTriggerType(extraStr);
                 break;
             case EtsOptionType::EtsGcType:
-                runtime_options.SetGcType(extra_str);
+                runtimeOptions.SetGcType(extraStr);
                 break;
             case EtsOptionType::EtsRunGcInPlace:
-                runtime_options.SetRunGcInPlace(true);
+                runtimeOptions.SetRunGcInPlace(true);
                 break;
             case EtsOptionType::EtsInterpreterType:
-                runtime_options.SetInterpreterType(extra_str);
+                runtimeOptions.SetInterpreterType(extraStr);
                 break;
             default:
                 LOG(ERROR, RUNTIME) << "No such option";
         }
     }
 
-    Logger::Initialize(base_options);
+    Logger::Initialize(baseOptions);
 
-    runtime_options.SetBootPandaFiles(boot_panda_files);
-    runtime_options.SetAotFiles(aot_files);
-    runtime_options.SetPandaFiles(ark_files);
+    runtimeOptions.SetBootPandaFiles(bootPandaFiles);
+    runtimeOptions.SetAotFiles(aotFiles);
+    runtimeOptions.SetPandaFiles(arkFiles);
 
     return true;
 }
 
-extern "C" ETS_EXPORT ets_int ETS_CreateVM(EtsVM **p_vm, EtsEnv **p_env, EtsVMInitArgs *vm_args)
+extern "C" ETS_EXPORT ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArgs)
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
 
-    if (p_vm == nullptr || p_env == nullptr) {
+    if (pVm == nullptr || pEnv == nullptr) {
         return ETS_ERR;
     }
 
-    if (!CheckVersionEtsNapi(vm_args->version)) {
-        LOG(ERROR, ETS_NAPI) << "Error: Unsupported Ets napi version = " << vm_args->version;
+    if (!CheckVersionEtsNapi(vmArgs->version)) {
+        LOG(ERROR, ETS_NAPI) << "Error: Unsupported Ets napi version = " << vmArgs->version;
         return ETS_ERR_VER;
     }
 
-    RuntimeOptions runtime_options;
+    RuntimeOptions runtimeOptions;
 
-    if (!ParseOptions(vm_args, runtime_options)) {
+    if (!ParseOptions(vmArgs, runtimeOptions)) {
         return ETS_ERR;
     }
 
-    if (!Runtime::Create(runtime_options)) {
+    if (!Runtime::Create(runtimeOptions)) {
         LOG(ERROR, RUNTIME) << "Cannot create runtime";
         return ETS_ERR;
     }
@@ -249,11 +249,11 @@ extern "C" ETS_EXPORT ets_int ETS_CreateVM(EtsVM **p_vm, EtsEnv **p_env, EtsVMIn
     auto coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
 
-    *p_vm = coroutine->GetPandaVM();
-    ASSERT(*p_vm != nullptr);
+    *pVm = coroutine->GetPandaVM();
+    ASSERT(*pVm != nullptr);
 
-    *p_env = coroutine->GetEtsNapiEnv();
-    ASSERT(*p_env != nullptr);
+    *pEnv = coroutine->GetEtsNapiEnv();
+    ASSERT(*pEnv != nullptr);
 
     return ETS_OK;
 }

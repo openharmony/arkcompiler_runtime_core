@@ -31,17 +31,17 @@ TEST_F(VerifierTest, EnumTag)
 {
     using EnumTag5 = TagForEnum<Numbers, Numbers::ONE, Numbers::TWO, Numbers::THREE, Numbers::FOUR, Numbers::FIVE>;
 
-    ASSERT_EQ(EnumTag5::SIZE, 5);
-    EXPECT_EQ(EnumTag5::BITS, 3);
-    EXPECT_EQ(EnumTag5::GetIndexFor(Numbers::TWO), 1);
-    EXPECT_EQ(EnumTag5::GetValueFor(3), Numbers::FOUR);
+    ASSERT_EQ(EnumTag5::SIZE, 5UL);
+    EXPECT_EQ(EnumTag5::BITS, 3UL);
+    EXPECT_EQ(EnumTag5::GetIndexFor(Numbers::TWO), 1UL);
+    EXPECT_EQ(EnumTag5::GetValueFor(3UL), Numbers::FOUR);
 
     using EnumTag3 = TagForEnum<Numbers, Numbers::ONE, Numbers::TWO, Numbers::THREE>;
 
-    ASSERT_EQ(EnumTag3::SIZE, 3);
-    EXPECT_EQ(EnumTag3::BITS, 2);
-    EXPECT_EQ(EnumTag3::GetIndexFor(Numbers::TWO), 1);
-    EXPECT_EQ(EnumTag3::GetValueFor(0), Numbers::ONE);
+    ASSERT_EQ(EnumTag3::SIZE, 3UL);
+    EXPECT_EQ(EnumTag3::BITS, 2UL);
+    EXPECT_EQ(EnumTag3::GetIndexFor(Numbers::TWO), 1UL);
+    EXPECT_EQ(EnumTag3::GetValueFor(0UL), Numbers::ONE);
 }
 
 }  // namespace panda::verifier::test

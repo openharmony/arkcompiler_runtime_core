@@ -27,7 +27,7 @@ public:
     {
         // Disable regalloc verification as generated code may operate on
         // registers/stack slots containing uninitialized values
-        OPTIONS.SetCompilerVerifyRegalloc(false);
+        g_options.SetCompilerVerifyRegalloc(false);
     }
 };
 
@@ -42,101 +42,101 @@ public:
 
     void Generate() override
     {
-        for (const auto &op : inst_generator_.GetMap()) {
+        for (const auto &op : instGenerator_.GetMap()) {
             ASSERT(op.first != Opcode::Builtin);
             if (op.first == Opcode::Intrinsic) {
                 continue;
             }
-            if (graph_creator_.GetRuntimeTargetArch() == Arch::AARCH32 && op.first == Opcode::StoreArrayPair) {
+            if (graphCreator_.GetRuntimeTargetArch() == Arch::AARCH32 && op.first == Opcode::StoreArrayPair) {
                 // StoreArrayPair requires 4 registers for inputs + 1 temp register,
                 // which is more than the number of available registers for AARCH32
                 // That's why we skip StoreArrayPair generation for AARCH32 target
                 continue;
             }
-            auto it = inst_generator_.Generate(op.first);
-            FullInstStat full_inst_stat = tmplt_;
+            auto it = instGenerator_.Generate(op.first);
+            FullInstStat fullInstStat = tmplt_;
             for (auto &i : it) {
-                ASSERT(graph_creator_.GetAllocator()->GetAllocatedSize() == 0U);
-                auto graph = graph_creator_.GenerateGraph(i);
+                ASSERT(graphCreator_.GetAllocator()->GetAllocatedSize() == 0U);
+                auto graph = graphCreator_.GenerateGraph(i);
                 graph->RunPass<RegAllocLinearScan>();
                 bool status = graph->RunPass<Codegen>();
-                full_inst_stat[i->GetType()] = static_cast<std::map<DataType::Type, int8_t>::mapped_type>(status);
-                all_inst_number_++;
-                positive_inst_number_ += static_cast<int>(status);
+                fullInstStat[i->GetType()] = static_cast<std::map<DataType::Type, int8_t>::mapped_type>(status);
+                allInstNumber_++;
+                positiveInstNumber_ += static_cast<int>(status);
                 // To consume less memory
                 graph->~Graph();
-                graph_creator_.GetAllocator()->Resize(0U);
+                graphCreator_.GetAllocator()->Resize(0U);
             }
-            statistic_.first.insert({op.first, full_inst_stat});
+            statistic_.first.insert({op.first, fullInstStat});
         }
-        auto intrinsics = inst_generator_.Generate(Opcode::Intrinsic);
+        auto intrinsics = instGenerator_.Generate(Opcode::Intrinsic);
         for (auto &intrinsic : intrinsics) {
-            ASSERT(graph_creator_.GetAllocator()->GetAllocatedSize() == 0U);
-            auto graph = graph_creator_.GenerateGraph(intrinsic);
+            ASSERT(graphCreator_.GetAllocator()->GetAllocatedSize() == 0U);
+            auto graph = graphCreator_.GenerateGraph(intrinsic);
             graph->RunPass<RegAllocLinearScan>();
             bool status = graph->RunPass<Codegen>();
             statistic_.second[intrinsic->CastToIntrinsic()->GetIntrinsicId()] = status;
-            all_inst_number_++;
-            positive_inst_number_ += static_cast<int>(status);
+            allInstNumber_++;
+            positiveInstNumber_ += static_cast<int>(status);
             graph->~Graph();
-            graph_creator_.GetAllocator()->Resize(0U);
+            graphCreator_.GetAllocator()->Resize(0U);
         }
         for (auto i = 0; i != static_cast<int>(Opcode::NUM_OPCODES); ++i) {
             auto opc = static_cast<Opcode>(i);
             if (opc == Opcode::NOP || opc == Opcode::Intrinsic || opc == Opcode::Builtin) {
                 continue;
             }
-            all_opcode_number_++;
-            implemented_opcode_number_ += static_cast<int>(statistic_.first.find(opc) != statistic_.first.end());
+            allOpcodeNumber_++;
+            implementedOpcodeNumber_ += static_cast<int>(statistic_.first.find(opc) != statistic_.first.end());
         }
     }
 };
 
 TEST_F(InstGeneratorTest, AllInstTestARM64)
 {
-    ArenaAllocator inst_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator inst_gen(inst_alloc);
+    ArenaAllocator instAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    InstGenerator instGen(instAlloc);
 
-    ArenaAllocator graph_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator graph_local_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    GraphCreator graph_creator(graph_alloc, graph_local_alloc);
+    ArenaAllocator graphAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    ArenaAllocator graphLocalAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    GraphCreator graphCreator(graphAlloc, graphLocalAlloc);
 
     // ARM64
-    CodegenStatisticGenerator stat_gen_arm64(inst_gen, graph_creator);
-    stat_gen_arm64.Generate();
-    stat_gen_arm64.GenerateHTMLPage("CodegenStatisticARM64.html");
+    CodegenStatisticGenerator statGenArm64(instGen, graphCreator);
+    statGenArm64.Generate();
+    statGenArm64.GenerateHTMLPage("CodegenStatisticARM64.html");
 }
 
 TEST_F(InstGeneratorTest, AllInstTestARM32)
 {
-    ArenaAllocator inst_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator inst_gen(inst_alloc);
+    ArenaAllocator instAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    InstGenerator instGen(instAlloc);
 
-    ArenaAllocator graph_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator graph_local_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    GraphCreator graph_creator(graph_alloc, graph_local_alloc);
+    ArenaAllocator graphAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    ArenaAllocator graphLocalAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    GraphCreator graphCreator(graphAlloc, graphLocalAlloc);
 
     // ARM32
-    graph_creator.SetRuntimeTargetArch(Arch::AARCH32);
-    CodegenStatisticGenerator stat_gen_arm32(inst_gen, graph_creator);
-    stat_gen_arm32.Generate();
-    stat_gen_arm32.GenerateHTMLPage("CodegenStatisticARM32.html");
+    graphCreator.SetRuntimeTargetArch(Arch::AARCH32);
+    CodegenStatisticGenerator statGenArm32(instGen, graphCreator);
+    statGenArm32.Generate();
+    statGenArm32.GenerateHTMLPage("CodegenStatisticARM32.html");
 }
 
 TEST_F(InstGeneratorTest, AllInstTestAMD64)
 {
-    ArenaAllocator inst_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator inst_gen(inst_alloc);
+    ArenaAllocator instAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    InstGenerator instGen(instAlloc);
 
-    ArenaAllocator graph_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator graph_local_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    GraphCreator graph_creator(graph_alloc, graph_local_alloc);
+    ArenaAllocator graphAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    ArenaAllocator graphLocalAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    GraphCreator graphCreator(graphAlloc, graphLocalAlloc);
 
     // AMD64
-    graph_creator.SetRuntimeTargetArch(Arch::X86_64);
-    CodegenStatisticGenerator stat_gen_amd64(inst_gen, graph_creator);
-    stat_gen_amd64.Generate();
-    stat_gen_amd64.GenerateHTMLPage("CodegenStatisticAMD64.html");
+    graphCreator.SetRuntimeTargetArch(Arch::X86_64);
+    CodegenStatisticGenerator statGenAmd64(instGen, graphCreator);
+    statGenAmd64.Generate();
+    statGenAmd64.GenerateHTMLPage("CodegenStatisticAMD64.html");
 }
 
 }  // namespace panda::compiler
@@ -164,18 +164,18 @@ public:
 #endif
     ArithGenerator() = delete;
 
-    explicit ArithGenerator(InstGenerator &inst_generator, GraphCreator &graph_creator)
-        : CodegenStatisticGenerator(inst_generator, graph_creator),
-          exec_module_(graph_creator_.GetAllocator(), graph_creator_.GetRuntime()) {};
+    explicit ArithGenerator(InstGenerator &instGenerator, GraphCreator &graphCreator)
+        : CodegenStatisticGenerator(instGenerator, graphCreator),
+          execModule_(graphCreator_.GetAllocator(), graphCreator_.GetRuntime()) {};
 
     uint64_t GetRandomData()
     {
-        static auto random_gen = std::mt19937_64(SEED);  // NOLINT(cert-msc51-cpp)
-        return random_gen();
+        static auto randomGen = std::mt19937_64(SEED);  // NOLINT(cert-msc51-cpp)
+        return randomGen();
     };
 
     template <class T>
-    void FixParams([[maybe_unused]] T *param_1, [[maybe_unused]] T *param_2, [[maybe_unused]] T *param_3, Opcode opc)
+    void FixParams([[maybe_unused]] T *param1, [[maybe_unused]] T *param2, [[maybe_unused]] T *param3, Opcode opc)
     {
         switch (opc) {
             case Opcode::Neg:
@@ -206,8 +206,8 @@ public:
                     return;
                 } else {
                     // shift parameters to prevent overflow
-                    *param_1 >>= 2U;
-                    *param_2 >>= 2U;
+                    *param1 >>= 2U;
+                    *param2 >>= 2U;
                     return;
                 }
             }
@@ -219,13 +219,13 @@ public:
                     return;
                 } else {
                     // shift parameters to prevent overflow
-                    *param_1 >>= sizeof(T) * 4U;
-                    *param_2 >>= (sizeof(T) * 4U + 1U);
-                    if (*param_2 == 0U) {
-                        *param_2 = *param_1 + 1U;
+                    *param1 >>= sizeof(T) * 4U;
+                    *param2 >>= (sizeof(T) * 4U + 1U);
+                    if (*param2 == 0U) {
+                        *param2 = *param1 + 1U;
                     }
-                    if (*param_2 == 0U) {
-                        *param_2 = *param_2 + 1U;
+                    if (*param2 == 0U) {
+                        *param2 = *param2 + 1U;
                     };
                     return;
                 }
@@ -236,17 +236,17 @@ public:
                     return;
                 } else {
                     // shift parameters to prevent overflow
-                    *param_1 >>= sizeof(T) * 4U;
-                    *param_2 >>= (sizeof(T) * 4U + 2U);
-                    *param_3 >>= sizeof(T) * 4U;
-                    if (*param_2 == 0U) {
-                        *param_2 = *param_1 + 1U;
+                    *param1 >>= sizeof(T) * 4U;
+                    *param2 >>= (sizeof(T) * 4U + 2U);
+                    *param3 >>= sizeof(T) * 4U;
+                    if (*param2 == 0U) {
+                        *param2 = *param1 + 1U;
                     }
-                    if (*param_2 == 0U) {
-                        *param_2 = *param_2 + 1U;
+                    if (*param2 == 0U) {
+                        *param2 = *param2 + 1U;
                     };
-                    if (*param_3 == 0U) {
-                        *param_3 = *param_3 + 1U;
+                    if (*param3 == 0U) {
+                        *param3 = *param3 + 1U;
                     }
                 }
                 return;
@@ -256,7 +256,7 @@ public:
                 if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
                     return;
                 } else {
-                    *param_1 >>= 2U;
+                    *param1 >>= 2U;
                     return;
                 }
             case Opcode::ShlI:
@@ -273,9 +273,9 @@ public:
                 if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
                     return;
                 } else {
-                    *param_1 >>= 2U;
+                    *param1 >>= 2U;
                     // mask for shift
-                    *param_2 &= (sizeof(T) - 1U);
+                    *param2 &= (sizeof(T) - 1U);
                     return;
                 }
             default:
@@ -324,25 +324,25 @@ public:
     template <class ParamType>
     void Generate(Opcode opc, std::tuple<ParamType, ParamType, ParamType> vals)
     {
-        auto it = inst_generator_.Generate(opc);
+        auto it = instGenerator_.Generate(opc);
         for (auto &inst : it) {
             auto type = inst->GetType();
-            auto shift_type = ShiftType::INVALID_SHIFT;
+            auto shiftType = ShiftType::INVALID_SHIFT;
             if (VixlExecModule::GetType<ParamType>() == type) {
-                auto param_1 = std::get<0U>(vals);
-                auto param_2 = std::get<1U>(vals);
-                auto param_3 = std::get<2U>(vals);
-                FixParams<ParamType>(&param_1, &param_2, &param_3, opc);
+                auto param1 = std::get<0U>(vals);
+                auto param2 = std::get<1U>(vals);
+                auto param3 = std::get<2U>(vals);
+                FixParams<ParamType>(&param1, &param2, &param3, opc);
                 if (IsImmOps(opc)) {
-                    static_cast<BinaryImmOperation *>(inst)->SetImm(param_2);
+                    static_cast<BinaryImmOperation *>(inst)->SetImm(param2);
                 } else if (IsUnaryShiftedRegisterOps(opc)) {
-                    static_cast<UnaryShiftedRegisterOperation *>(inst)->SetImm(param_2);
-                    shift_type = static_cast<UnaryShiftedRegisterOperation *>(inst)->GetShiftType();
+                    static_cast<UnaryShiftedRegisterOperation *>(inst)->SetImm(param2);
+                    shiftType = static_cast<UnaryShiftedRegisterOperation *>(inst)->GetShiftType();
                 } else if (IsBinaryShiftedRegisterOps(opc)) {
-                    static_cast<BinaryShiftedRegisterOperation *>(inst)->SetImm(param_3);
-                    shift_type = static_cast<BinaryShiftedRegisterOperation *>(inst)->GetShiftType();
+                    static_cast<BinaryShiftedRegisterOperation *>(inst)->SetImm(param3);
+                    shiftType = static_cast<BinaryShiftedRegisterOperation *>(inst)->GetShiftType();
                 }
-                auto graph = graph_creator_.GenerateGraph(inst);
+                auto graph = graphCreator_.GenerateGraph(inst);
 
                 auto finalizer = [&graph]([[maybe_unused]] void *ptr) {
                     if (graph != nullptr) {
@@ -355,50 +355,50 @@ public:
                 if (!graph->RunPass<Codegen>()) {
                     return;
                 };
-                auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
+                auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                auto code_exit = code_entry + graph->GetCode().Size();
-                ASSERT(code_entry != nullptr && code_exit != nullptr);
-                exec_module_.SetInstructions(code_entry, code_exit);
+                auto codeExit = codeEntry + graph->GetCode().Size();
+                ASSERT(codeEntry != nullptr && codeExit != nullptr);
+                execModule_.SetInstructions(codeEntry, codeExit);
 
-                exec_module_.SetDump(false);
+                execModule_.SetDump(false);
 
-                exec_module_.SetParameter(0U, param_1);
+                execModule_.SetParameter(0U, param1);
 
                 if (!IsImmOps(opc)) {
-                    exec_module_.SetParameter(1U, param_2);
+                    execModule_.SetParameter(1U, param2);
                 }
 
                 if (IsTernary(opc)) {
-                    exec_module_.SetParameter(2U, param_3);
+                    execModule_.SetParameter(2U, param3);
                 }
 
-                exec_module_.Execute();
+                execModule_.Execute();
 
                 struct RetValue {
                     uint64_t data;
                     uint64_t type;
                 };
 
-                auto ret_data = exec_module_.GetRetValue<ParamType>();
-                auto calc_data = DoLogic<ParamType>(opc, param_1, param_2, param_3, shift_type,
-                                                    DataType::GetTypeSize(type, graph->GetArch()));
-                if (calc_data != ret_data) {
-                    std::cout << "  data " << ret_data << " sizeof type  "
+                auto retData = execModule_.GetRetValue<ParamType>();
+                auto calcData = DoLogic<ParamType>(opc, param1, param2, param3, shiftType,
+                                                   DataType::GetTypeSize(type, graph->GetArch()));
+                if (calcData != retData) {
+                    std::cout << "  data " << retData << " sizeof type  "
                               << static_cast<uint64_t>(sizeof(ParamType) * 8U) << " \n";
-                    std::cout << std::hex << "parameter_1 = " << param_1 << " parameter_2 = " << param_2
-                              << "parameter_3 = " << param_3 << "\n";
+                    std::cout << std::hex << "parameter_1 = " << param1 << " parameter_2 = " << param2
+                              << "parameter_3 = " << param3 << "\n";
                     inst->Dump(&std::cerr);
-                    std::cout << "calculated = " << calc_data << " returned " << ret_data << "\n";
-                    exec_module_.SetDump(true);
-                    exec_module_.PrintInstructions();
-                    exec_module_.SetParameter(0U, param_1);
-                    exec_module_.SetParameter(1U, param_2);
-                    exec_module_.SetParameter(2U, param_3);
-                    exec_module_.Execute();
-                    exec_module_.SetDump(false);
+                    std::cout << "calculated = " << calcData << " returned " << retData << "\n";
+                    execModule_.SetDump(true);
+                    execModule_.PrintInstructions();
+                    execModule_.SetParameter(0U, param1);
+                    execModule_.SetParameter(1U, param2);
+                    execModule_.SetParameter(2U, param3);
+                    execModule_.Execute();
+                    execModule_.SetDump(false);
                 }
-                ASSERT_EQ(calc_data, ret_data);
+                ASSERT_EQ(calcData, retData);
             }
         }
     }
@@ -408,13 +408,13 @@ public:
     {
         auto opc = Opcode::Cast;
 
-        auto it = inst_generator_.Generate(opc);
+        auto it = instGenerator_.Generate(opc);
         for (auto &inst : it) {
             auto type = inst->GetType();
             if (VixlExecModule::GetType<ParamType>() == type) {
-                ParamType param_1 = val;
+                ParamType param1 = val;
 
-                auto graph = graph_creator_.GenerateGraph(inst);
+                auto graph = graphCreator_.GenerateGraph(inst);
 
                 auto finalizer = [&graph]([[maybe_unused]] void *ptr) {
                     if (graph != nullptr) {
@@ -433,64 +433,64 @@ public:
                 if (!graph->RunPass<Codegen>()) {
                     return;
                 };
-                auto code_entry = reinterpret_cast<char *>(graph->GetCode().Data());
+                auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                auto code_exit = code_entry + graph->GetCode().Size();
-                ASSERT(code_entry != nullptr && code_exit != nullptr);
-                exec_module_.SetInstructions(code_entry, code_exit);
+                auto codeExit = codeEntry + graph->GetCode().Size();
+                ASSERT(codeEntry != nullptr && codeExit != nullptr);
+                execModule_.SetInstructions(codeEntry, codeExit);
 
-                exec_module_.SetDump(false);
-                exec_module_.SetParameter(0U, param_1);
-                exec_module_.Execute();
+                execModule_.SetDump(false);
+                execModule_.SetParameter(0U, param1);
+                execModule_.Execute();
 
-                auto ret_data = exec_module_.GetRetValue<ResultType>();
-                ResultType calc_data;
+                auto retData = execModule_.GetRetValue<ResultType>();
+                ResultType calcData;
 
                 if constexpr ((GetCommonType(VixlExecModule::GetType<ResultType>()) == DataType::Type::INT64) &&
                               (std::is_same_v<ParamType, float> || std::is_same_v<ParamType, double>)) {
-                    if (param_1 > (ParamType)std::numeric_limits<ResultType>::max()) {
-                        calc_data = std::numeric_limits<ResultType>::max();
-                    } else if (param_1 < (ParamType)std::numeric_limits<ResultType>::min()) {
-                        calc_data = std::numeric_limits<ResultType>::min();
+                    if (param1 > (ParamType)std::numeric_limits<ResultType>::max()) {
+                        calcData = std::numeric_limits<ResultType>::max();
+                    } else if (param1 < (ParamType)std::numeric_limits<ResultType>::min()) {
+                        calcData = std::numeric_limits<ResultType>::min();
                     } else {
-                        calc_data = static_cast<ResultType>(param_1);
+                        calcData = static_cast<ResultType>(param1);
                     }
                 } else {
-                    calc_data = static_cast<ResultType>(param_1);
+                    calcData = static_cast<ResultType>(param1);
                 }
 
-                if (calc_data != ret_data) {
+                if (calcData != retData) {
                     if constexpr (std::is_same_v<ResultType, double> || std::is_same_v<ParamType, double>) {
-                        std::cout << std::hex << " in parameter = " << param_1 << "\n";
-                        std::cout << std::hex << "parameter_1 = " << static_cast<double>(param_1) << "\n";
+                        std::cout << std::hex << " in parameter = " << param1 << "\n";
+                        std::cout << std::hex << "parameter_1 = " << static_cast<double>(param1) << "\n";
                     }
 
 #ifndef NDEBUG
                     std::cout << " cast from " << DataType::ToString(VixlExecModule::GetType<ParamType>()) << " to "
                               << DataType::ToString(VixlExecModule::GetType<ResultType>()) << "\n";
 #endif
-                    std::cout << "  data " << ret_data << " sizeof type  "
+                    std::cout << "  data " << retData << " sizeof type  "
                               << static_cast<uint64_t>(sizeof(ParamType) * 8U) << " \n";
                     inst->Dump(&std::cerr);
-                    exec_module_.SetDump(true);
-                    exec_module_.SetParameter(0U, param_1);
-                    exec_module_.Execute();
-                    exec_module_.SetDump(false);
+                    execModule_.SetDump(true);
+                    execModule_.SetParameter(0U, param1);
+                    execModule_.Execute();
+                    execModule_.SetDump(false);
                 }
-                ASSERT_EQ(calc_data, ret_data);
+                ASSERT_EQ(calcData, retData);
             }
         }
     }
 
     template <class T>
-    T DoShift(T value, ShiftType shift_type, uint64_t scale, uint8_t type_size)
+    T DoShift(T value, ShiftType shiftType, uint64_t scale, uint8_t typeSize)
     {
-        switch (shift_type) {
+        switch (shiftType) {
             case ShiftType::LSL:
                 return static_cast<uint64_t>(value) << scale;
             case ShiftType::ROR:
                 return (static_cast<uint64_t>(value) >> scale) |
-                       (value << (type_size - scale));  // NOLINT(hicpp-signed-bitwise)
+                       (value << (typeSize - scale));  // NOLINT(hicpp-signed-bitwise)
             case ShiftType::LSR:
                 if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) {
                     return static_cast<uint32_t>(value) >> static_cast<uint32_t>(scale);
@@ -509,147 +509,147 @@ public:
     // NOLINTBEGIN(hicpp-signed-bitwise)
     // Make logic with parameters (default - first parameter)
     template <class T>
-    T DoLogic(Opcode opc, T param_1, [[maybe_unused]] T param_2, [[maybe_unused]] T param_3,
-              [[maybe_unused]] ShiftType shift_type, [[maybe_unused]] uint8_t type_size)
+    T DoLogic(Opcode opc, T param1, [[maybe_unused]] T param2, [[maybe_unused]] T param3,
+              [[maybe_unused]] ShiftType shiftType, [[maybe_unused]] uint8_t typeSize)
     {
         constexpr DataType::Type TYPE = ConstantInst::GetTypeFromCType<T>();
         constexpr bool ARITHMETIC_TYPE = (TYPE == DataType::INT64);
         switch (opc) {
             case Opcode::Neg:
-                return -param_1;
+                return -param1;
             case Opcode::MAdd:
-                return param_1 * param_2 + param_3;
+                return param1 * param2 + param3;
             case Opcode::MSub:
-                return param_3 - param_1 * param_2;
+                return param3 - param1 * param2;
             case Opcode::Not:
-                return (-param_1 - 1L);
+                return (-param1 - 1L);
             case Opcode::Add:
             case Opcode::AddI:
-                return (param_1 + param_2);
+                return (param1 + param2);
             case Opcode::Sub:
             case Opcode::SubI:
-                return (param_1 - param_2);
+                return (param1 - param2);
             case Opcode::Mul:
-                return (param_1 * param_2);
+                return (param1 * param2);
             case Opcode::MNeg:
-                return -(param_1 * param_2);
+                return -(param1 * param2);
             case Opcode::Div:
-                ASSERT_PRINT(param_2 != 0U, "If you got this assert, you may change SEED");
-                return (param_1 / param_2);
+                ASSERT_PRINT(param2 != 0U, "If you got this assert, you may change SEED");
+                return (param1 / param2);
             case Opcode::Mod:
                 if constexpr (ARITHMETIC_TYPE) {
-                    ASSERT_PRINT(param_2 != 0U, "If you got this assert, you may change SEED");
-                    return param_1 % param_2;
+                    ASSERT_PRINT(param2 != 0U, "If you got this assert, you may change SEED");
+                    return param1 % param2;
                 } else {
-                    return fmod(param_1, param_2);
+                    return fmod(param1, param2);
                 }
             case Opcode::Min:
-                return std::min(param_1, param_2);
+                return std::min(param1, param2);
             case Opcode::Max:
-                return std::max(param_1, param_2);
+                return std::max(param1, param2);
 
             case Opcode::NegSR:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return -(DoShift(param_1, shift_type, param_2, type_size));
+                    return -(DoShift(param1, shiftType, param2, typeSize));
                 }
                 /* fall-through */
             case Opcode::ShlI:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::LSL, param_2, type_size);
+                    return DoShift(param1, ShiftType::LSL, param2, typeSize);
                 }
                 /* fall-through */
             case Opcode::Shl:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::LSL, param_2 & (type_size - 1L), type_size);
+                    return DoShift(param1, ShiftType::LSL, param2 & (typeSize - 1L), typeSize);
                 }
                 /* fall-through */
             case Opcode::ShrI:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::LSR, param_2, type_size);
+                    return DoShift(param1, ShiftType::LSR, param2, typeSize);
                 }
                 /* fall-through */
             case Opcode::Shr:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::LSR, param_2 & (type_size - 1L), type_size);
+                    return DoShift(param1, ShiftType::LSR, param2 & (typeSize - 1L), typeSize);
                 }
                 /* fall-through */
             case Opcode::AShr:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::ASR, param_2 & (type_size - 1L), type_size);
+                    return DoShift(param1, ShiftType::ASR, param2 & (typeSize - 1L), typeSize);
                 }
                 /* fall-through */
             case Opcode::AShrI:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return DoShift(param_1, ShiftType::ASR, param_2, type_size);
+                    return DoShift(param1, ShiftType::ASR, param2, typeSize);
                 }
                 /* fall-through */
             case Opcode::And:
             case Opcode::AndI:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 & param_2;
+                    return param1 & param2;
                 }
                 /* fall-through */
             case Opcode::AndSR:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 & DoShift(param_2, shift_type, param_3, type_size);
+                    return param1 & DoShift(param2, shiftType, param3, typeSize);
                 }
                 /* fall-through */
             case Opcode::Or:
             case Opcode::OrI:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 | param_2;
+                    return param1 | param2;
                 }
                 /* fall-through */
             case Opcode::OrSR:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 | DoShift(param_2, shift_type, param_3, type_size);
+                    return param1 | DoShift(param2, shiftType, param3, typeSize);
                 }
                 /* fall-through */
             case Opcode::Xor:
             case Opcode::XorI:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 ^ param_2;
+                    return param1 ^ param2;
                 }
                 /* fall-through */
             case Opcode::XorSR:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 ^ DoShift(param_2, shift_type, param_3, type_size);
+                    return param1 ^ DoShift(param2, shiftType, param3, typeSize);
                 }
                 /* fall-through */
             case Opcode::AndNot:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 & (~param_2);
+                    return param1 & (~param2);
                 }
                 /* fall-through */
             case Opcode::AndNotSR:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 & (~DoShift(param_2, shift_type, param_3, type_size));
+                    return param1 & (~DoShift(param2, shiftType, param3, typeSize));
                 }
                 /* fall-through */
             case Opcode::OrNot:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 | (~param_2);
+                    return param1 | (~param2);
                 }
                 /* fall-through */
             case Opcode::OrNotSR:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 | (~DoShift(param_2, shift_type, param_3, type_size));
+                    return param1 | (~DoShift(param2, shiftType, param3, typeSize));
                 }
                 /* fall-through */
             case Opcode::XorNot:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 ^ (~param_2);
+                    return param1 ^ (~param2);
                 }
                 /* fall-through */
             case Opcode::XorNotSR:
                 if constexpr (ARITHMETIC_TYPE) {
-                    return param_1 ^ (~DoShift(param_2, shift_type, param_3, type_size));
+                    return param1 ^ (~DoShift(param2, shiftType, param3, typeSize));
                 }
                 /* fall-through */
             case Opcode::Abs:
                 if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> || std::is_same_v<T, int32_t> ||
                               std::is_same_v<T, int64_t>) {
-                    return std::abs(param_1);
+                    return std::abs(param1);
                 }
                 /* fall-through */
             default:
@@ -660,7 +660,7 @@ public:
     // NOLINTEND(hicpp-signed-bitwise)
 
 private:
-    VixlExecModule exec_module_;
+    VixlExecModule execModule_;
 };
 // NOLINTEND(hicpp-signed-bitwise)
 
@@ -824,96 +824,96 @@ void OneTestShift(ArithGenerator &gen, Opcode opc)
 void RandomTestsPart1()
 {
     ArenaAllocator alloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator local_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator inst_gen(alloc);
-    GraphCreator graph_creator(alloc, local_alloc);
-    ArithGenerator stat_gen(inst_gen, graph_creator);
+    ArenaAllocator localAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    InstGenerator instGen(alloc);
+    GraphCreator graphCreator(alloc, localAlloc);
+    ArithGenerator statGen(instGen, graphCreator);
 
-    OneTest(stat_gen, Opcode::Add);
-    OneTestFP(stat_gen, Opcode::Add);
+    OneTest(statGen, Opcode::Add);
+    OneTestFP(statGen, Opcode::Add);
 
-    OneTest(stat_gen, Opcode::Sub);
-    OneTestFP(stat_gen, Opcode::Sub);
+    OneTest(statGen, Opcode::Sub);
+    OneTestFP(statGen, Opcode::Sub);
 
-    OneTest(stat_gen, Opcode::Mul);
-    OneTestFP(stat_gen, Opcode::Mul);
+    OneTest(statGen, Opcode::Mul);
+    OneTestFP(statGen, Opcode::Mul);
 
-    OneTest(stat_gen, Opcode::Div);
-    OneTestFP(stat_gen, Opcode::Div);
+    OneTest(statGen, Opcode::Div);
+    OneTestFP(statGen, Opcode::Div);
 
-    OneTest(stat_gen, Opcode::Mod);
+    OneTest(statGen, Opcode::Mod);
     // Disabled, because external fmod() call is currently x86_64 -- incompatible with aarch64 runtime :(
     // stat_gen  Opcode::Mod
 
-    OneTest(stat_gen, Opcode::Min);
-    OneTestFP(stat_gen, Opcode::Min);
+    OneTest(statGen, Opcode::Min);
+    OneTestFP(statGen, Opcode::Min);
 
-    OneTest(stat_gen, Opcode::Max);
-    OneTestFP(stat_gen, Opcode::Max);
+    OneTest(statGen, Opcode::Max);
+    OneTestFP(statGen, Opcode::Max);
 
-    OneTest(stat_gen, Opcode::Shl);
-    OneTest(stat_gen, Opcode::Shr);
-    OneTest(stat_gen, Opcode::AShr);
+    OneTest(statGen, Opcode::Shl);
+    OneTest(statGen, Opcode::Shr);
+    OneTest(statGen, Opcode::AShr);
 }
 
 void RandomTestsPart2()
 {
     ArenaAllocator alloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator local_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator inst_gen(alloc);
-    GraphCreator graph_creator(alloc, local_alloc);
-    ArithGenerator stat_gen(inst_gen, graph_creator);
+    ArenaAllocator localAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    InstGenerator instGen(alloc);
+    GraphCreator graphCreator(alloc, localAlloc);
+    ArithGenerator statGen(instGen, graphCreator);
 
-    OneTest(stat_gen, Opcode::And);
+    OneTest(statGen, Opcode::And);
     // Float unsupported
 
-    OneTest(stat_gen, Opcode::Or);
+    OneTest(statGen, Opcode::Or);
     // Float unsupported
 
-    OneTest(stat_gen, Opcode::Xor);
+    OneTest(statGen, Opcode::Xor);
     // Float unsupported
 
-    OneTest(stat_gen, Opcode::Neg);
+    OneTest(statGen, Opcode::Neg);
 
-    OneTestSign(stat_gen, Opcode::Abs);
+    OneTestSign(statGen, Opcode::Abs);
 
-    OneTest(stat_gen, Opcode::Not);
+    OneTest(statGen, Opcode::Not);
 
-    OneTest(stat_gen, Opcode::AddI);
+    OneTest(statGen, Opcode::AddI);
 
-    OneTest(stat_gen, Opcode::SubI);
+    OneTest(statGen, Opcode::SubI);
 
-    OneTest(stat_gen, Opcode::ShlI);
+    OneTest(statGen, Opcode::ShlI);
 
-    OneTest(stat_gen, Opcode::ShrI);
+    OneTest(statGen, Opcode::ShrI);
 
-    OneTest(stat_gen, Opcode::AShrI);
+    OneTest(statGen, Opcode::AShrI);
 
-    OneTest(stat_gen, Opcode::AndI);
+    OneTest(statGen, Opcode::AndI);
 
-    OneTest(stat_gen, Opcode::OrI);
+    OneTest(statGen, Opcode::OrI);
 
-    OneTest(stat_gen, Opcode::XorI);
+    OneTest(statGen, Opcode::XorI);
 
     // Special case for Case-instruction - generate inputs types.
-    OneTestCast(stat_gen);
+    OneTestCast(statGen);
 }
 
 void NotRandomTests()
 {
     ArenaAllocator alloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator local_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator inst_gen(alloc);
-    GraphCreator graph_creator(alloc, local_alloc);
-    ArithGenerator stat_gen(inst_gen, graph_creator);
+    ArenaAllocator localAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    InstGenerator instGen(alloc);
+    GraphCreator graphCreator(alloc, localAlloc);
+    ArithGenerator statGen(instGen, graphCreator);
 
-    stat_gen.Generate<uint64_t>(Opcode::Min, {UINT64_MAX, 0U});
-    stat_gen.Generate<uint64_t>(Opcode::Min, {0U, UINT64_MAX});
-    stat_gen.Generate<int64_t>(Opcode::Min, {0U, UINT64_MAX});
-    stat_gen.Generate<int64_t>(Opcode::Min, {0U, UINT64_MAX});
-    OneTestShift(stat_gen, Opcode::Shl);
-    OneTestShift(stat_gen, Opcode::Shr);
-    OneTestShift(stat_gen, Opcode::AShr);
+    statGen.Generate<uint64_t>(Opcode::Min, {UINT64_MAX, 0U});
+    statGen.Generate<uint64_t>(Opcode::Min, {0U, UINT64_MAX});
+    statGen.Generate<int64_t>(Opcode::Min, {0U, UINT64_MAX});
+    statGen.Generate<int64_t>(Opcode::Min, {0U, UINT64_MAX});
+    OneTestShift(statGen, Opcode::Shl);
+    OneTestShift(statGen, Opcode::Shr);
+    OneTestShift(statGen, Opcode::AShr);
 }
 
 TEST_F(InstGeneratorTest, GenArithVixlCode)
@@ -931,20 +931,20 @@ TEST_F(InstGeneratorTest, GenArithVixlCode)
  */
 TEST_F(InstGeneratorTest, AliasAnalysisSupportTest)
 {
-    ArenaAllocator inst_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator inst_gen(inst_alloc);
+    ArenaAllocator instAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    InstGenerator instGen(instAlloc);
 
-    ArenaAllocator graph_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator graph_local_alloc(SpaceType::SPACE_TYPE_COMPILER);
-    GraphCreator graph_creator(graph_alloc, graph_local_alloc);
+    ArenaAllocator graphAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    ArenaAllocator graphLocalAlloc(SpaceType::SPACE_TYPE_COMPILER);
+    GraphCreator graphCreator(graphAlloc, graphLocalAlloc);
 
-    for (const auto &op : inst_gen.GetMap()) {
-        auto it = inst_gen.Generate(op.first);
+    for (const auto &op : instGen.GetMap()) {
+        auto it = instGen.Generate(op.first);
         for (auto &i : it) {
             if (i->GetType() != DataType::REFERENCE) {
                 continue;
             }
-            auto graph = graph_creator.GenerateGraph(i);
+            auto graph = graphCreator.GenerateGraph(i);
 
             auto finalizer = [&graph]([[maybe_unused]] void *ptr) {
                 if (graph != nullptr) {

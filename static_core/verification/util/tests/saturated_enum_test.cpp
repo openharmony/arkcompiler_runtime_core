@@ -16,6 +16,7 @@
 #include "util/saturated_enum.h"
 
 #include "util/tests/verifier_test.h"
+#include "libpandabase/utils/utils.h"
 
 #include <gtest/gtest.h>
 
@@ -25,34 +26,34 @@ enum class Numbers { ONE, TWO, THREE, FOUR, FIVE };
 
 TEST_F(VerifierTest, saturated_enum)
 {
-    SaturatedEnum<Numbers, Numbers::FOUR, Numbers::THREE, Numbers::TWO, Numbers::ONE> s_enum;
-    EXPECT_EQ(s_enum, Numbers::ONE);
+    SaturatedEnum<Numbers, Numbers::FOUR, Numbers::THREE, Numbers::TWO, Numbers::ONE> sEnum;
+    EXPECT_EQ(sEnum, Numbers::ONE);
 
 #ifndef NDEBUG
-    EXPECT_DEATH(s_enum[Numbers::FIVE], "");
+    EXPECT_DEATH(sEnum[Numbers::FIVE], "");
 #endif
 
-    EXPECT_FALSE(s_enum[Numbers::TWO]);
-    EXPECT_TRUE(s_enum[Numbers::ONE]);
+    EXPECT_FALSE(sEnum[Numbers::TWO]);
+    EXPECT_TRUE(sEnum[Numbers::ONE]);
 
-    s_enum |= Numbers::THREE;
-    EXPECT_EQ(s_enum, Numbers::THREE);
-    EXPECT_FALSE(s_enum[Numbers::FOUR]);
-    EXPECT_TRUE(s_enum[Numbers::TWO]);
+    sEnum |= Numbers::THREE;
+    EXPECT_EQ(sEnum, Numbers::THREE);
+    EXPECT_FALSE(sEnum[Numbers::FOUR]);
+    EXPECT_TRUE(sEnum[Numbers::TWO]);
 
     int i = 0;
-    s_enum.EnumerateValues([&i](Numbers) {
+    sEnum.EnumerateValues([&i](Numbers) {
         i++;
         return true;
     });
-    EXPECT_EQ(i, 3);
+    EXPECT_EQ(i, 3_I);
 
     i = 0;
-    s_enum.EnumerateValues([&i](Numbers en) {
+    sEnum.EnumerateValues([&i](Numbers en) {
         i++;
         return en != Numbers::TWO;
     });
-    EXPECT_EQ(i, 2);
+    EXPECT_EQ(i, 2_I);
 }
 
 }  // namespace panda::verifier::test

@@ -39,7 +39,7 @@ namespace {
 
 using Literals = PandaVector<PandaString>;
 
-bool ProcessSectionMsg(MethodOption::MsgClass msg_class, const PandaString &items, MethodOptions *options)
+bool ProcessSectionMsg(MethodOption::MsgClass msgClass, const PandaString &items, MethodOptions *options)
 {
     MessageSetContext c;
 
@@ -50,8 +50,8 @@ bool ProcessSectionMsg(MethodOption::MsgClass msg_class, const PandaString &item
         return false;
     }
 
-    for (const auto msg_num : c.nums) {
-        options->SetMsgClass(VerifierMessageIsValid, msg_num, msg_class);
+    for (const auto msgNum : c.nums) {
+        options->SetMsgClass(VerifierMessageIsValid, msgNum, msgClass);
     }
 
     return true;
@@ -77,15 +77,15 @@ bool ProcessSectionShow(const Literals &literals, MethodOptions *options)
     return true;
 }
 
-bool ProcessSectionUplevel(const Literals &uplevel_options, const MethodOptionsConfig &all_method_options,
+bool ProcessSectionUplevel(const Literals &uplevelOptions, const MethodOptionsConfig &allMethodOptions,
                            MethodOptions *options)
 {
-    for (const auto &uplevel : uplevel_options) {
-        if (!all_method_options.IsOptionsPresent(uplevel)) {
+    for (const auto &uplevel : uplevelOptions) {
+        if (!allMethodOptions.IsOptionsPresent(uplevel)) {
             LOG(ERROR, VERIFIER) << "Cannot find uplevel options: '" << uplevel << "'";
             return false;
         }
-        options->AddUpLevel(all_method_options.GetOptions(uplevel));
+        options->AddUpLevel(allMethodOptions.GetOptions(uplevel));
     }
 
     return true;
@@ -93,18 +93,18 @@ bool ProcessSectionUplevel(const Literals &uplevel_options, const MethodOptionsC
 
 bool ProcessSectionCheck(const Literals &checks, MethodOptions *options)
 {
-    auto &options_check = options->Check();
+    auto &optionsCheck = options->Check();
     for (const auto &c : checks) {
         if (c == "cflow") {
-            options_check |= MethodOption::CheckType::CFLOW;
+            optionsCheck |= MethodOption::CheckType::CFLOW;
         } else if (c == "reg-usage") {
-            options_check |= MethodOption::CheckType::REG_USAGE;
+            optionsCheck |= MethodOption::CheckType::REG_USAGE;
         } else if (c == "resolve-id") {
-            options_check |= MethodOption::CheckType::RESOLVE_ID;
+            optionsCheck |= MethodOption::CheckType::RESOLVE_ID;
         } else if (c == "typing") {
-            options_check |= MethodOption::CheckType::TYPING;
+            optionsCheck |= MethodOption::CheckType::TYPING;
         } else if (c == "absint") {
-            options_check |= MethodOption::CheckType::ABSINT;
+            optionsCheck |= MethodOption::CheckType::ABSINT;
         } else {
             LOG(ERROR, VERIFIER) << "Unexpected check type: '" << c << "'";
             return false;
@@ -119,8 +119,8 @@ bool ProcessSectionCheck(const Literals &checks, MethodOptions *options)
 const auto &MethodOptionsProcessor()
 {
     static const auto PROCESS_METHOD_OPTIONS = [](Config *cfg, const Section &section) {
-        MethodOptionsConfig &all_options = cfg->opts.debug.GetMethodOptions();
-        MethodOptions &options = all_options.NewOptions(section.name);
+        MethodOptionsConfig &allOptions = cfg->opts.debug.GetMethodOptions();
+        MethodOptions &options = allOptions.NewOptions(section.name);
 
         for (const auto &s : section.sections) {
             const PandaString &name = s.name;
@@ -156,7 +156,7 @@ const auto &MethodOptionsProcessor()
                         return false;
                     }
                 } else if (name == "uplevel") {
-                    if (!ProcessSectionUplevel(literals, all_options, &options)) {
+                    if (!ProcessSectionUplevel(literals, allOptions, &options)) {
                         return false;
                     }
                 } else if (name == "check") {
@@ -181,14 +181,14 @@ const auto &MethodOptionsProcessor()
 void RegisterConfigHandlerMethodOptions(Config *dcfg)
 {
     static const auto CONFIG_DEBUG_METHOD_OPTIONS_VERIFIER = [](Config *ddcfg, const Section &section) {
-        bool default_present = false;
+        bool defaultPresent = false;
         for (const auto &s : section.sections) {
             if (s.name == "default") {
-                default_present = true;
+                defaultPresent = true;
                 break;
             }
         }
-        if (!default_present) {
+        if (!defaultPresent) {
             // take default section from inlined config
             Section cfg;
             if (!ParseConfig(panda::verifier::config::VERIFIER_DEBUG_DEFAULT_CONFIG, cfg)) {
@@ -214,8 +214,8 @@ void RegisterConfigHandlerMethodOptions(Config *dcfg)
 
 void SetDefaultMethodOptions(Config *dcfg)
 {
-    auto &verif_options = dcfg->opts;
-    auto &options = verif_options.debug.GetMethodOptions();
+    auto &verifOptions = dcfg->opts;
+    auto &options = verifOptions.debug.GetMethodOptions();
     if (!options.IsOptionsPresent("default")) {
         // take default section from inlined config
         Section cfg;

@@ -47,15 +47,15 @@ class FreeSlot {
 public:
     FreeSlot *GetNext()
     {
-        return next_free_;
+        return nextFree_;
     }
     void SetNext(FreeSlot *next)
     {
-        next_free_ = next;
+        nextFree_ = next;
     }
 
 private:
-    FreeSlot *next_free_ {nullptr};
+    FreeSlot *nextFree_ {nullptr};
 };
 /**
  * The main class for RunSlots.
@@ -68,7 +68,7 @@ class RunSlots {
 public:
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
     ATTRIBUTE_NO_SANITIZE_ADDRESS
-    void Initialize(size_t slot_size, uintptr_t pool_pointer, bool initialize_lock);
+    void Initialize(size_t slotSize, uintptr_t poolPointer, bool initializeLock);
 
     static constexpr size_t MaxSlotSize()
     {
@@ -91,16 +91,16 @@ public:
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
     ATTRIBUTE_NO_SANITIZE_ADDRESS
-    void PushFreeSlot(FreeSlot *mem_slot);
+    void PushFreeSlot(FreeSlot *memSlot);
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
     ATTRIBUTE_NO_SANITIZE_ADDRESS
     uintptr_t GetPoolPointer()
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        uintptr_t pool_pointer = pool_pointer_;
+        uintptr_t poolPointer = poolPointer_;
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
-        return pool_pointer;
+        return poolPointer;
     }
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
@@ -108,9 +108,9 @@ public:
     bool IsEmpty()
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        bool is_empty = (used_slots_ == 0);
+        bool isEmpty = (usedSlots_ == 0);
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
-        return is_empty;
+        return isEmpty;
     }
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
@@ -118,9 +118,9 @@ public:
     bool IsFull()
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        bool is_full = (next_free_ == nullptr) && (first_uninitialized_slot_offset_ == 0);
+        bool isFull = (nextFree_ == nullptr) && (firstUninitializedSlotOffset_ == 0);
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
-        return is_full;
+        return isFull;
     }
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
@@ -128,7 +128,7 @@ public:
     void SetNextRunSlots(RunSlots *runslots)
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        next_runslot_ = runslots;
+        nextRunslot_ = runslots;
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
     }
 
@@ -137,7 +137,7 @@ public:
     RunSlots *GetNextRunSlots()
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        RunSlots *next = next_runslot_;
+        RunSlots *next = nextRunslot_;
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
         return next;
     }
@@ -147,7 +147,7 @@ public:
     void SetPrevRunSlots(RunSlots *runslots)
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        prev_runslot_ = runslots;
+        prevRunslot_ = runslots;
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
     }
 
@@ -156,7 +156,7 @@ public:
     RunSlots *GetPrevRunSlots()
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        RunSlots *prev = prev_runslot_;
+        RunSlots *prev = prevRunslot_;
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
         return prev;
     }
@@ -166,7 +166,7 @@ public:
     size_t GetSlotsSize()
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
-        size_t size = slot_size_;
+        size_t size = slotSize_;
         ASAN_POISON_MEMORY_REGION(this, GetHeaderSize());
         return size;
     }
@@ -184,18 +184,18 @@ public:
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
     template <typename ObjectVisitor>
-    ATTRIBUTE_NO_SANITIZE_ADDRESS void IterateOverOccupiedSlots(const ObjectVisitor &object_visitor)
+    ATTRIBUTE_NO_SANITIZE_ADDRESS void IterateOverOccupiedSlots(const ObjectVisitor &objectVisitor)
     {
         ASAN_UNPOISON_MEMORY_REGION(this, GetHeaderSize());
         // NOTE(aemelenko): We can increase execution speed of this loops and do not count BitMapToSlot each time
-        for (size_t array_index = 0; array_index < BITMAP_ARRAY_SIZE; array_index++) {
-            uint8_t byte = bitmap_[array_index];
+        for (size_t arrayIndex = 0; arrayIndex < BITMAP_ARRAY_SIZE; arrayIndex++) {
+            uint8_t byte = bitmap_[arrayIndex];
             if (byte == 0x0) {
                 continue;
             }
             for (size_t bit = 0; bit < (1U << BITS_IN_BYTE_POWER_OF_TWO); bit++) {
                 if (byte & 0x1U) {
-                    object_visitor(static_cast<ObjectHeader *>(static_cast<void *>(BitMapToSlot(array_index, bit))));
+                    objectVisitor(static_cast<ObjectHeader *>(static_cast<void *>(BitMapToSlot(arrayIndex, bit))));
                 }
                 byte = byte >> 1U;
             }
@@ -253,19 +253,19 @@ private:
         return sizeof(RunSlots);
     }
 
-    size_t ComputeFirstSlotOffset(size_t slot_size);
+    size_t ComputeFirstSlotOffset(size_t slotSize);
 
     void SetupSlots();
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
     ATTRIBUTE_NO_SANITIZE_ADDRESS
-    void MarkAsOccupied(const FreeSlot *slot_mem);
+    void MarkAsOccupied(const FreeSlot *slotMem);
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
     ATTRIBUTE_NO_SANITIZE_ADDRESS
-    void MarkAsFree(const FreeSlot *slot_mem);
+    void MarkAsFree(const FreeSlot *slotMem);
 
-    FreeSlot *BitMapToSlot(size_t array_index, size_t bit);
+    FreeSlot *BitMapToSlot(size_t arrayIndex, size_t bit);
 
     class RunVerifier {
     public:
@@ -277,7 +277,7 @@ private:
         size_t operator()(RunSlots *run);
 
     private:
-        size_t fail_cnt_ {0};
+        size_t failCnt_ {0};
     };
 
     // Use ATTRIBUTE_NO_SANITIZE_ADDRESS to prevent MT issues with POISON/UNPOISON
@@ -288,13 +288,13 @@ private:
                   std::numeric_limits<uint16_t>::max());                                     // used_slots_
     static_assert(SlotsSizes::SLOT_MAX_SIZE_BYTES <= std::numeric_limits<uint16_t>::max());  // slot_size_
     static_assert(RUNSLOTS_SIZE <= std::numeric_limits<uint16_t>::max());  // first_uninitialized_slot_offset_
-    uint16_t used_slots_ {0};
-    uint16_t slot_size_ {0};
-    uint16_t first_uninitialized_slot_offset_ {0};  // If equal to zero - we don't have uninitialized slots
-    uintptr_t pool_pointer_ {0};
-    FreeSlot *next_free_ {nullptr};
-    RunSlots *next_runslot_ {nullptr};
-    RunSlots *prev_runslot_ {nullptr};
+    uint16_t usedSlots_ {0};
+    uint16_t slotSize_ {0};
+    uint16_t firstUninitializedSlotOffset_ {0};  // If equal to zero - we don't have uninitialized slots
+    uintptr_t poolPointer_ {0};
+    FreeSlot *nextFree_ {nullptr};
+    RunSlots *nextRunslot_ {nullptr};
+    RunSlots *prevRunslot_ {nullptr};
     LockTypeT lock_;
 
     // Bitmap for identifying live objects in this RunSlot

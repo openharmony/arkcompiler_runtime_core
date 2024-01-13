@@ -26,12 +26,12 @@
 namespace panda::profiling {
 enum class CallKind { UNKNOWN = 0, MONOMORPHIC, POLYMORPHIC, MEGAMORPHIC, COUNT };
 
-inline const char *CallKindToString(CallKind call_kind)
+inline const char *CallKindToString(CallKind callKind)
 {
     static constexpr auto COUNT = static_cast<uint8_t>(CallKind::COUNT);
     static constexpr std::array<const char *, COUNT> CALL_KIND_NAMES = {"UNKNOWN", "MONOMORPHIC", "POLYMORPHIC",
                                                                         "MEGAMORPHIC"};
-    auto idx = static_cast<uint8_t>(call_kind);
+    auto idx = static_cast<uint8_t>(callKind);
     ASSERT(idx < COUNT);
     return CALL_KIND_NAMES[idx];
 }

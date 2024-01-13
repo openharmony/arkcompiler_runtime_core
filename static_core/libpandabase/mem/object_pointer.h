@@ -38,14 +38,14 @@ public:
         ASSERT(IsAddressInObjectsHeapOrNull(ToUintPtr(object)));
     }
     // NOLINTNEXTLINE(google-explicit-constructor)
-    ObjectPointer(std::nullptr_t a_nullptr) noexcept : object_(ToObjPtrType(a_nullptr)) {}
+    ObjectPointer(std::nullptr_t aNullptr) noexcept : object_(ToObjPtrType(aNullptr)) {}
 
     DEFAULT_COPY_SEMANTIC(ObjectPointer);
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(ObjectPointer);
 
-    ObjectPointer &operator=(std::nullptr_t a_nullptr)
+    ObjectPointer &operator=(std::nullptr_t aNullptr)
     {
-        object_ = ToObjPtrType(a_nullptr);
+        object_ = ToObjPtrType(aNullptr);
         return *this;
     }
 

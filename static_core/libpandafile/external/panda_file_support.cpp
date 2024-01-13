@@ -29,20 +29,20 @@ decltype(QueryMethodSymAndLineByOffsetExt) *PandaFileWrapper::pQueryMethodSymAnd
 decltype(QueryAllMethodSymsExt) *PandaFileWrapper::pQueryAllMethodSymsExt = nullptr;
 
 using OnceCallback = void();
-static void CallOnce(bool *once_flag, OnceCallback call_back)
+static void CallOnce(bool *onceFlag, OnceCallback callBack)
 {
-    static panda::os::memory::Mutex once_lock;
-    panda::os::memory::LockHolder lock(once_lock);
-    if (!(*once_flag)) {
-        call_back();
-        *once_flag = true;
+    static panda::os::memory::Mutex onceLock;
+    panda::os::memory::LockHolder lock(onceLock);
+    if (!(*onceFlag)) {
+        callBack();
+        *onceFlag = true;
     }
 }
 
 void LoadPandFileExt()
 {
-    static bool dlopen_once = false;
-    CallOnce(&dlopen_once, []() {
+    static bool dlopenOnce = false;
+    CallOnce(&dlopenOnce, []() {
         const char pandafileext[] = "libpandafileExt.so";
         void *hd = dlopen(pandafileext, RTLD_NOW);
         if (hd == nullptr) {

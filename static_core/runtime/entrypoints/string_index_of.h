@@ -66,40 +66,40 @@ int32_t StringIndexOfSwar(CharType *data, int32_t offset, int32_t length, CharTy
 {
     static_assert(std::is_same_v<uint8_t, CharType> || std::is_same_v<uint16_t, CharType>,
                   "Only uint8_t and uint16_t CharTypes are supported");
-    auto data_typed = reinterpret_cast<CharType *>(data);
-    auto end = data_typed + length;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto dataTyped = reinterpret_cast<CharType *>(data);
+    auto end = dataTyped + length;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-    auto ptr = data_typed + offset;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto prefix_end = reinterpret_cast<CharType *>(
+    auto ptr = dataTyped + offset;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto prefixEnd = reinterpret_cast<CharType *>(
         std::min((reinterpret_cast<uintptr_t>(ptr) & ~(sizeof(LoadType) - 1)) + sizeof(LoadType),
                  reinterpret_cast<uintptr_t>(end)));
-    ASSERT(prefix_end >= ptr);
-    ASSERT(prefix_end <= end);
-    while (ptr < prefix_end) {
+    ASSERT(prefixEnd >= ptr);
+    ASSERT(prefixEnd <= end);
+    while (ptr < prefixEnd) {
         if (*ptr == character) {
-            return ptr - data_typed;
+            return ptr - dataTyped;
         }
         ++ptr;
     }
-    auto main_end = reinterpret_cast<CharType *>(reinterpret_cast<uintptr_t>(end) & ~(sizeof(LoadType) - 1));
-    ASSERT(main_end <= end);
-    LoadType search_pattern = BuildSearchPattern<CharType, LoadType>(character);
-    while (ptr < main_end) {
+    auto mainEnd = reinterpret_cast<CharType *>(reinterpret_cast<uintptr_t>(end) & ~(sizeof(LoadType) - 1));
+    ASSERT(mainEnd <= end);
+    LoadType searchPattern = BuildSearchPattern<CharType, LoadType>(character);
+    while (ptr < mainEnd) {
         LoadType value = *reinterpret_cast<LoadType *>(ptr);
-        LoadType xored_value = search_pattern ^ value;
-        LoadType eq = (xored_value - IndexOfConstants<CharType, LoadType>::XOR_SUB_MASK) &
-                      ~(xored_value | IndexOfConstants<CharType, LoadType>::NXOR_OR_MASK);
+        LoadType xoredValue = searchPattern ^ value;
+        LoadType eq = (xoredValue - IndexOfConstants<CharType, LoadType>::XOR_SUB_MASK) &
+                      ~(xoredValue | IndexOfConstants<CharType, LoadType>::NXOR_OR_MASK);
         if (eq != 0) {
             size_t idx = ClzInSwappedBytes<LoadType>(eq) / IndexOfConstants<CharType, LoadType>::BITS_PER_CHAR;
             ASSERT(ptr[idx] == character);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            return ptr + idx - data_typed;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            return ptr + idx - dataTyped;   // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         ptr += IndexOfConstants<CharType, LoadType>::VECTOR_SIZE;
     }
     while (ptr < end) {
         if (*ptr == character) {
-            return ptr - data_typed;
+            return ptr - dataTyped;
         }
         ++ptr;
     }
@@ -188,7 +188,7 @@ inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
 {
     auto string = reinterpret_cast<panda::coretypes::String *>(str);
     ASSERT(string != nullptr);
-    bool is_utf8 = string->IsMUtf8();
+    bool isUtf8 = string->IsMUtf8();
     auto length = string->GetLength();
     if (offset < 0) {
         offset = 0;
@@ -197,7 +197,7 @@ inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
     if (static_cast<uint32_t>(offset) >= length) {
         return -1;
     }
-    if (is_utf8) {
+    if (isUtf8) {
         if (character > std::numeric_limits<uint8_t>::max()) {
             return -1;
         }

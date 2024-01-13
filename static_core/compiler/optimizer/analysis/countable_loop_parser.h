@@ -26,14 +26,14 @@ class Loop;
  * for (init(a); if_imm(compare(a,test)); update(a)) {...}
  */
 struct CountableLoopInfo {
-    Inst *if_imm;
+    Inst *ifImm;
     Inst *init;
     Inst *test;
     Inst *update;
     Inst *index;
-    uint64_t const_step;
-    ConditionCode normalized_cc;  // cc between `update` and `test`
-    bool is_inc;
+    uint64_t constStep;
+    ConditionCode normalizedCc;  // cc between `update` and `test`
+    bool isInc;
 };
 
 /// Helper class to check if loop is countable and to get its parameters
@@ -46,8 +46,8 @@ public:
     ~CountableLoopParser() = default;
 
     std::optional<CountableLoopInfo> Parse();
-    static bool HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loop_info);
-    static std::optional<uint64_t> GetLoopIterations(const CountableLoopInfo &loop_info);
+    static bool HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loopInfo);
+    static std::optional<uint64_t> GetLoopIterations(const CountableLoopInfo &loopInfo);
 
 private:
     bool IsInstIncOrDec(Inst *inst);
@@ -61,8 +61,8 @@ private:
 
 private:
     const Loop &loop_;
-    CountableLoopInfo loop_info_ {};
-    bool is_head_loop_exit_ = false;
+    CountableLoopInfo loopInfo_ {};
+    bool isHeadLoopExit_ = false;
 };
 }  // namespace panda::compiler
 

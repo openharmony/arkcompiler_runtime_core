@@ -22,14 +22,14 @@
 namespace panda::tooling {
 class PtThread {
 public:
-    explicit PtThread(ManagedThread *managed_thread) : managed_thread_(managed_thread) {}
+    explicit PtThread(ManagedThread *managedThread) : managedThread_(managedThread) {}
 
     // Deprecated API
     explicit PtThread(uint32_t /* unused */) {}
 
     bool operator==(const PtThread &other) const
     {
-        return managed_thread_ == other.managed_thread_;
+        return managedThread_ == other.managedThread_;
     }
 
     bool operator!=(const PtThread &other) const
@@ -39,18 +39,18 @@ public:
 
     bool operator<(const PtThread &other) const
     {
-        return managed_thread_ < other.managed_thread_;
+        return managedThread_ < other.managedThread_;
     }
 
     uint32_t GetId() const
     {
         constexpr uint32_t PT_THREAD_NONE_ID = 0xffffffff;
-        return managed_thread_ == nullptr ? PT_THREAD_NONE_ID : managed_thread_->GetId();
+        return managedThread_ == nullptr ? PT_THREAD_NONE_ID : managedThread_->GetId();
     }
 
     ManagedThread *GetManagedThread() const
     {
-        return managed_thread_;
+        return managedThread_;
     }
 
     PANDA_PUBLIC_API static const PtThread NONE;
@@ -61,7 +61,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(PtThread);
 
 private:
-    ManagedThread *managed_thread_ {nullptr};
+    ManagedThread *managedThread_ {nullptr};
 };
 }  // namespace panda::tooling
 

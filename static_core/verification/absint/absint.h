@@ -28,11 +28,11 @@
 #include <optional>
 
 namespace panda::verifier {
-VerificationContext PrepareVerificationContext(TypeSystem *type_system, Job const *job);
+VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const *job);
 
-VerificationStatus AbstractInterpret(VerificationContext &verif_ctx, const uint8_t *pc);
+VerificationStatus AbstractInterpret(VerificationContext &verifCtx, const uint8_t *pc);
 
-VerificationStatus VerifyMethod(VerificationContext &verif_ctx);
+VerificationStatus VerifyMethod(VerificationContext &verifCtx);
 }  // namespace panda::verifier
 
 #endif  // !PANDA_VERIFIER_ABSINT_HPP_

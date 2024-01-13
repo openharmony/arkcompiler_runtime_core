@@ -25,11 +25,11 @@ bool DeoptimizeElimination::RunImpl()
 {
     GetGraph()->RunPass<LoopAnalyzer>();
 
-    uint64_t insts_number = VisitGraphAndCount();
+    uint64_t instsNumber = VisitGraphAndCount();
 
     ReplaceDeoptimizeIfByUnconditionalDeoptimize();
 
-    if (!HaveCalls() && insts_number <= OPTIONS.GetCompilerSafepointEliminationLimit()) {
+    if (!HaveCalls() && instsNumber <= g_options.GetCompilerSafepointEliminationLimit()) {
         RemoveSafePoints();
     }
     if (IsLoopDeleted() && GetGraph()->IsOsrMode()) {
@@ -40,7 +40,7 @@ bool DeoptimizeElimination::RunImpl()
 
 void DeoptimizeElimination::ReplaceDeoptimizeIfByUnconditionalDeoptimize()
 {
-    for (auto &inst : deoptimize_must_throw_) {
+    for (auto &inst : deoptimizeMustThrow_) {
         auto block = inst->GetBasicBlock();
         if (block != nullptr) {
             block->ReplaceInstByDeoptimize(inst);
@@ -68,15 +68,15 @@ void DeoptimizeElimination::RemoveSafePoints()
 bool DeoptimizeElimination::RequireRegMap(Inst *inst)
 {
     for (auto &user : inst->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst->RequireRegMap()) {
+        auto userInst = user.GetInst();
+        if (userInst->RequireRegMap()) {
             return true;
         }
-        auto opcode = user_inst->GetOpcode();
+        auto opcode = userInst->GetOpcode();
         if (opcode == Opcode::CallStatic || opcode == Opcode::CallVirtual || opcode == Opcode::CallResolvedVirtual ||
             opcode == Opcode::CallDynamic || opcode == Opcode::CallResolvedStatic) {
             // Inlined method can contain Deoptimize or DeoptimizeIf
-            if (static_cast<CallInst *>(user_inst)->IsInlined()) {
+            if (static_cast<CallInst *>(userInst)->IsInlined()) {
                 return true;
             }
         }
@@ -90,17 +90,17 @@ void DeoptimizeElimination::VisitDefault(Inst *inst)
         return;
     }
     for (auto &user : inst->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (!user_inst->IsSaveState()) {
+        auto userInst = user.GetInst();
+        if (!userInst->IsSaveState()) {
             return;
         }
-        if (user_inst->GetOpcode() == Opcode::SafePoint) {
-            if (OPTIONS.IsCompilerSafePointsRequireRegMap()) {
+        if (userInst->GetOpcode() == Opcode::SafePoint) {
+            if (g_options.IsCompilerSafePointsRequireRegMap()) {
                 return;
             }
             continue;
         }
-        if (RequireRegMap(user_inst)) {
+        if (RequireRegMap(userInst)) {
             return;
         }
     }
@@ -159,12 +159,12 @@ void DeoptimizeElimination::VisitDeoptimizeIf(GraphVisitor *v, Inst *inst)
         }
     } else {
         for (auto &user : input->GetUsers()) {
-            auto user_inst = user.GetInst();
-            if (user_inst != inst && user_inst->GetOpcode() == Opcode::DeoptimizeIf &&
-                !(graph->IsOsrMode() && block->GetLoop() != user_inst->GetBasicBlock()->GetLoop()) &&
-                inst->InSameBlockOrDominate(user_inst)) {
-                ASSERT(inst->IsDominate(user_inst));
-                visitor->RemoveDeoptimizeIf(user_inst);
+            auto userInst = user.GetInst();
+            if (userInst != inst && userInst->GetOpcode() == Opcode::DeoptimizeIf &&
+                !(graph->IsOsrMode() && block->GetLoop() != userInst->GetBasicBlock()->GetLoop()) &&
+                inst->InSameBlockOrDominate(userInst)) {
+                ASSERT(inst->IsDominate(userInst));
+                visitor->RemoveDeoptimizeIf(userInst);
             }
         }
     }
@@ -187,9 +187,9 @@ bool DeoptimizeElimination::TryToRemoveRedundantSaveState(Inst *inst)
 
 bool DeoptimizeElimination::CanRemoveGuard(Inst *guard)
 {
-    auto guard_block = guard->GetBasicBlock();
-    auto it = InstSafeIterator<IterationType::INST, IterationDirection::BACKWARD>(*guard_block, guard);
-    for (++it; it != guard_block->InstsSafeReverse().end(); ++it) {
+    auto guardBlock = guard->GetBasicBlock();
+    auto it = InstSafeIterator<IterationType::INST, IterationDirection::BACKWARD>(*guardBlock, guard);
+    for (++it; it != guardBlock->InstsSafeReverse().end(); ++it) {
         auto inst = *it;
         if (inst->IsRuntimeCall()) {
             return false;
@@ -198,64 +198,64 @@ bool DeoptimizeElimination::CanRemoveGuard(Inst *guard)
             return true;
         }
     }
-    auto mrk = guard_block->GetGraph()->NewMarker();
-    auto remove_mrk = guard_block->GetGraph()->NewMarker();
+    auto mrk = guardBlock->GetGraph()->NewMarker();
+    auto removeMrk = guardBlock->GetGraph()->NewMarker();
 
     /*
      * Run search recursively from current block to start block.
      * We can remove guard, if guard is met in all ways and there should be no call instructions between current
      * guard and found guards.
      */
-    bool can_remove = true;
-    for (auto succ_block : guard_block->GetPredsBlocks()) {
-        can_remove &= CanRemoveGuardRec(succ_block, guard, mrk, remove_mrk);
-        if (!can_remove) {
+    bool canRemove = true;
+    for (auto succBlock : guardBlock->GetPredsBlocks()) {
+        canRemove &= CanRemoveGuardRec(succBlock, guard, mrk, removeMrk);
+        if (!canRemove) {
             break;
         }
     }
-    guard_block->GetGraph()->EraseMarker(mrk);
-    guard_block->GetGraph()->EraseMarker(remove_mrk);
-    return can_remove;
+    guardBlock->GetGraph()->EraseMarker(mrk);
+    guardBlock->GetGraph()->EraseMarker(removeMrk);
+    return canRemove;
 }
 
 bool DeoptimizeElimination::CanRemoveGuardRec(BasicBlock *block, Inst *guard, const Marker &mrk,
-                                              const Marker &remove_mrk)
+                                              const Marker &removeMrk)
 {
     if (block->IsStartBlock()) {
         return false;
     }
-    auto block_type = GetBlockType(block);
+    auto blockType = GetBlockType(block);
     if (block->SetMarker(mrk)) {
-        return block->IsMarked(remove_mrk);
+        return block->IsMarked(removeMrk);
     }
-    if (block_type == BlockType::INVALID) {
+    if (blockType == BlockType::INVALID) {
         for (auto inst : block->InstsSafeReverse()) {
             if (inst->IsRuntimeCall()) {
                 PushNewBlockType(block, BlockType::RUNTIME_CALL);
                 return false;
             }
             if (inst->GetOpcode() == Opcode::IsMustDeoptimize) {
-                [[maybe_unused]] auto result = block->SetMarker(remove_mrk);
+                [[maybe_unused]] auto result = block->SetMarker(removeMrk);
                 ASSERT(!result);
                 PushNewBlockType(block, BlockType::GUARD);
                 return true;
             }
         }
         PushNewBlockType(block, BlockType::NOTHING);
-    } else if (block_type != BlockType::NOTHING) {
-        if (block_type == BlockType::GUARD) {
-            [[maybe_unused]] auto result = block->SetMarker(remove_mrk);
+    } else if (blockType != BlockType::NOTHING) {
+        if (blockType == BlockType::GUARD) {
+            [[maybe_unused]] auto result = block->SetMarker(removeMrk);
             ASSERT(!result);
             return true;
         }
         return false;
     }
-    for (const auto &succ_block : block->GetPredsBlocks()) {
-        if (!CanRemoveGuardRec(succ_block, guard, mrk, remove_mrk)) {
+    for (const auto &succBlock : block->GetPredsBlocks()) {
+        if (!CanRemoveGuardRec(succBlock, guard, mrk, removeMrk)) {
             return false;
         }
     }
-    [[maybe_unused]] auto result = block->SetMarker(remove_mrk);
+    [[maybe_unused]] auto result = block->SetMarker(removeMrk);
     ASSERT(!result);
     return true;
 }

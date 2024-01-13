@@ -76,11 +76,11 @@ public:
     NO_MOVE_SEMANTIC(WorkerCreationInterface);
     WorkerCreationInterface() = default;
     virtual ~WorkerCreationInterface() = default;
-    virtual void AttachWorker([[maybe_unused]] bool helper_thread)
+    virtual void AttachWorker([[maybe_unused]] bool helperThread)
     {
         // do nothing here
     }
-    virtual void DetachWorker([[maybe_unused]] bool helper_thread)
+    virtual void DetachWorker([[maybe_unused]] bool helperThread)
     {
         // do nothing here
     }
@@ -93,71 +93,71 @@ public:
     NO_MOVE_SEMANTIC(ThreadPool);
 
     explicit ThreadPool(mem::InternalAllocatorPtr allocator, TaskQueueInterface<Task> *queue, ProcArg args,
-                        size_t n_threads = 1, const char *thread_name = nullptr,
-                        WorkerCreationInterface *worker_creation_interface = nullptr)
+                        size_t nThreads = 1, const char *threadName = nullptr,
+                        WorkerCreationInterface *workerCreationInterface = nullptr)
         : allocator_(allocator),
           queue_(queue),
           workers_(allocator_->Adapter()),
           procs_(allocator_->Adapter()),
           args_(args),
-          is_thread_active_(allocator_->Adapter()),
-          worker_creation_interface_(worker_creation_interface)
+          isThreadActive_(allocator_->Adapter()),
+          workerCreationInterface_(workerCreationInterface)
     {
-        is_active_ = true;
-        thread_name_ = thread_name;
-        Scale(n_threads);
+        isActive_ = true;
+        threadName_ = threadName;
+        Scale(nThreads);
     }
 
     ~ThreadPool()
     {
-        os::memory::LockHolder lock(scale_lock_);
+        os::memory::LockHolder lock(scaleLock_);
         DeactivateWorkers();
         WaitForWorkers();
     }
 
-    void Scale(size_t new_n_threads)
+    void Scale(size_t newNThreads)
     {
-        os::memory::LockHolder scale_lock(scale_lock_);
+        os::memory::LockHolder scaleLock(scaleLock_);
         if (!IsActive()) {
             return;
         }
-        LOG(DEBUG, RUNTIME) << "Scale thread pool for " << new_n_threads << " new threads";
-        if (new_n_threads <= 0) {
-            LOG(ERROR, RUNTIME) << "Incorrect number of threads " << new_n_threads << " for thread pool";
+        LOG(DEBUG, RUNTIME) << "Scale thread pool for " << newNThreads << " new threads";
+        if (newNThreads <= 0) {
+            LOG(ERROR, RUNTIME) << "Incorrect number of threads " << newNThreads << " for thread pool";
             return;
         }
-        if (new_n_threads > threads_counter_) {
+        if (newNThreads > threadsCounter_) {
             // Need to add new threads.
             {
-                os::memory::LockHolder queue_lock(queue_lock_);
-                is_thread_active_.resize(new_n_threads);
+                os::memory::LockHolder queueLock(queueLock_);
+                isThreadActive_.resize(newNThreads);
             }
-            for (size_t i = threads_counter_; i < new_n_threads; i++) {
+            for (size_t i = threadsCounter_; i < newNThreads; i++) {
                 CreateNewThread(i);
             }
-        } else if (new_n_threads < threads_counter_) {
+        } else if (newNThreads < threadsCounter_) {
             // Need to remove threads.
-            for (size_t i = threads_counter_ - 1; i >= new_n_threads; i--) {
+            for (size_t i = threadsCounter_ - 1; i >= newNThreads; i--) {
                 StopWorker(workers_.back(), i);
                 workers_.pop_back();
                 allocator_->Delete(procs_.back());
                 procs_.pop_back();
             }
             {
-                os::memory::LockHolder queue_lock(queue_lock_);
-                is_thread_active_.resize(new_n_threads);
+                os::memory::LockHolder queueLock(queueLock_);
+                isThreadActive_.resize(newNThreads);
             }
         } else {
             // Same number of threads - do nothing.
         }
-        threads_counter_ = new_n_threads;
+        threadsCounter_ = newNThreads;
         LOG(DEBUG, RUNTIME) << "Scale has been completed";
     }
 
     void Help()
     {
         // Disallow scaling while the main thread processes the queue
-        os::memory::LockHolder scale_lock(scale_lock_);
+        os::memory::LockHolder scaleLock(scaleLock_);
         if (!IsActive()) {
             return;
         }
@@ -174,7 +174,7 @@ public:
         while (true) {
             Task task;
             {
-                os::memory::LockHolder lock(queue_lock_);
+                os::memory::LockHolder lock(queueLock_);
                 task = std::move(queue_->GetTask());
             }
             if (task.IsEmpty()) {
@@ -196,8 +196,8 @@ public:
     {
         bool res = false;
         {
-            os::memory::LockHolder lock(queue_lock_);
-            if (!is_active_) {
+            os::memory::LockHolder lock(queueLock_);
+            if (!isActive_) {
                 return false;
             }
             res = queue_->TryAddTask(std::move(task));
@@ -212,8 +212,8 @@ public:
     bool PutTask(Task &&task)
     {
         {
-            os::memory::LockHolder lock(queue_lock_);
-            if (!is_active_) {
+            os::memory::LockHolder lock(queueLock_);
+            if (!isActive_) {
                 return false;
             }
             while (queue_->IsFull()) {
@@ -227,13 +227,13 @@ public:
 
     bool IsActive()
     {
-        os::memory::LockHolder lock(queue_lock_);
-        return is_active_;
+        os::memory::LockHolder lock(queueLock_);
+        return isActive_;
     }
 
     void Shutdown(bool force = false)
     {
-        os::memory::LockHolder lock(scale_lock_);
+        os::memory::LockHolder lock(scaleLock_);
         DeactivateWorkers();
         if (force) {
             // Sync.
@@ -243,12 +243,12 @@ public:
 
     void WaitTask()
     {
-        cond_var_.TimedWait(&queue_lock_, TASK_WAIT_TIMEOUT);
+        condVar_.TimedWait(&queueLock_, TASK_WAIT_TIMEOUT);
     }
 
-    static void WorkerEntry(ThreadPool<Task, Proc, ProcArg> *thread_pool, Proc *proc, int i)
+    static void WorkerEntry(ThreadPool<Task, Proc, ProcArg> *threadPool, Proc *proc, int i)
     {
-        WorkerCreationInterface *iface = thread_pool->GetWorkerCreationInterface();
+        WorkerCreationInterface *iface = threadPool->GetWorkerCreationInterface();
         if (iface != nullptr) {
             iface->AttachWorker(false);
         }
@@ -259,17 +259,17 @@ public:
         while (true) {
             Task task;
             {
-                os::memory::LockHolder lock(thread_pool->queue_lock_);
-                if (!thread_pool->IsActive(i)) {
+                os::memory::LockHolder lock(threadPool->queueLock_);
+                if (!threadPool->IsActive(i)) {
                     break;
                 }
-                task = std::move(thread_pool->queue_->GetTask());
+                task = std::move(threadPool->queue_->GetTask());
                 if (task.IsEmpty()) {
-                    thread_pool->WaitTask();
+                    threadPool->WaitTask();
                     continue;
                 }
             }
-            thread_pool->SignalTask();
+            threadPool->SignalTask();
             LOG(DEBUG, RUNTIME) << "Worker " << i << " started to process task";
             proc->Process(std::move(task));
         }
@@ -286,7 +286,7 @@ public:
 
     void EnumerateProcs(ProcVisitor visitor, size_t data)
     {
-        os::memory::LockHolder lock(scale_lock_);
+        os::memory::LockHolder lock(scaleLock_);
         for (auto it : procs_) {
             visitor(it, data);
         }
@@ -295,39 +295,39 @@ public:
 private:
     void SignalTask()
     {
-        cond_var_.Signal();
+        condVar_.Signal();
     }
 
     void SignalAllTasks()
     {
-        cond_var_.SignalAll();
+        condVar_.SignalAll();
     }
 
     void DeactivateWorkers()
     {
-        os::memory::LockHolder lock(queue_lock_);
-        is_active_ = false;
+        os::memory::LockHolder lock(queueLock_);
+        isActive_ = false;
         queue_->Finalize();
         SignalAllTasks();
         // NOLINTNEXTLINE(modernize-loop-convert)
-        for (size_t i = 0; i < is_thread_active_.size(); i++) {
-            is_thread_active_.at(i) = false;
+        for (size_t i = 0; i < isThreadActive_.size(); i++) {
+            isThreadActive_.at(i) = false;
         }
     }
 
-    bool IsActive(int i) REQUIRES(queue_lock_)
+    bool IsActive(int i) REQUIRES(queueLock_)
     {
-        return is_thread_active_.at(i);
+        return isThreadActive_.at(i);
     }
 
-    void WaitForWorkers() REQUIRES(scale_lock_)
+    void WaitForWorkers() REQUIRES(scaleLock_)
     {
         for (auto worker : workers_) {
             StopWorker(worker);
         }
         {
-            os::memory::LockHolder lock(queue_lock_);
-            is_thread_active_.clear();
+            os::memory::LockHolder lock(queueLock_);
+            isThreadActive_.clear();
         }
         workers_.clear();
         for (auto proc : procs_) {
@@ -336,12 +336,12 @@ private:
         procs_.clear();
     }
 
-    void StopWorker(std::thread *worker, size_t thread_id = 0) REQUIRES(scale_lock_)
+    void StopWorker(std::thread *worker, size_t threadId = 0) REQUIRES(scaleLock_)
     {
         if (worker != nullptr) {
-            if (thread_id != 0) {
-                os::memory::LockHolder lock(queue_lock_);
-                is_thread_active_.at(thread_id) = false;
+            if (threadId != 0) {
+                os::memory::LockHolder lock(queueLock_);
+                isThreadActive_.at(threadId) = false;
             }
             SignalAllTasks();
             worker->join();
@@ -350,19 +350,19 @@ private:
         }
     }
 
-    void CreateNewThread(int i) REQUIRES(scale_lock_)
+    void CreateNewThread(int i) REQUIRES(scaleLock_)
     {
         {
-            os::memory::LockHolder lock(queue_lock_);
-            is_thread_active_.at(i) = true;
+            os::memory::LockHolder lock(queueLock_);
+            isThreadActive_.at(i) = true;
         }
         auto proc = allocator_->New<Proc>(args_);
         auto worker = allocator_->New<std::thread>(WorkerEntry, this, proc, i);
         if (worker == nullptr) {
             LOG(FATAL, RUNTIME) << "Cannot create a worker thread";
         }
-        if (thread_name_ != nullptr) {
-            int res = os::thread::SetThreadName(worker->native_handle(), thread_name_);
+        if (threadName_ != nullptr) {
+            int res = os::thread::SetThreadName(worker->native_handle(), threadName_);
             if (res != 0) {
                 LOG(ERROR, RUNTIME) << "Failed to set a name for the worker thread";
             }
@@ -373,22 +373,22 @@ private:
 
     WorkerCreationInterface *GetWorkerCreationInterface()
     {
-        return worker_creation_interface_;
+        return workerCreationInterface_;
     }
 
     mem::InternalAllocatorPtr allocator_;
-    os::memory::ConditionVariable cond_var_;
-    TaskQueueInterface<Task> *queue_ GUARDED_BY(queue_lock_);
-    PandaList<std::thread *> workers_ GUARDED_BY(scale_lock_);
-    size_t threads_counter_ GUARDED_BY(scale_lock_) = 0;
-    PandaList<Proc *> procs_ GUARDED_BY(scale_lock_);
+    os::memory::ConditionVariable condVar_;
+    TaskQueueInterface<Task> *queue_ GUARDED_BY(queueLock_);
+    PandaList<std::thread *> workers_ GUARDED_BY(scaleLock_);
+    size_t threadsCounter_ GUARDED_BY(scaleLock_) = 0;
+    PandaList<Proc *> procs_ GUARDED_BY(scaleLock_);
     ProcArg args_;
-    bool is_active_ GUARDED_BY(queue_lock_) = false;
-    os::memory::Mutex queue_lock_;
-    os::memory::Mutex scale_lock_;
-    PandaVector<bool> is_thread_active_ GUARDED_BY(queue_lock_);
-    WorkerCreationInterface *worker_creation_interface_;
-    const char *thread_name_;
+    bool isActive_ GUARDED_BY(queueLock_) = false;
+    os::memory::Mutex queueLock_;
+    os::memory::Mutex scaleLock_;
+    PandaVector<bool> isThreadActive_ GUARDED_BY(queueLock_);
+    WorkerCreationInterface *workerCreationInterface_;
+    const char *threadName_;
 };
 
 }  // namespace panda

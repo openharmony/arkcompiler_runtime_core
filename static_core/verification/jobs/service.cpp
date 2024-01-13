@@ -30,12 +30,12 @@ void VerifierService::Destroy()
     shutdown_ = true;
 
     for (auto &it : processors_) {
-        auto *lang_data = &it.second;
+        auto *langData = &it.second;
         // Wait for ongoing verifications to finish
-        while (lang_data->total_processors < lang_data->queue.size()) {
-            cond_var_.Wait(&lock_);
+        while (langData->totalProcessors < langData->queue.size()) {
+            condVar_.Wait(&lock_);
         }
-        for (auto *processor : lang_data->queue) {
+        for (auto *processor : langData->queue) {
             allocator_->Delete<TaskProcessor>(processor);
         }
     }
@@ -50,14 +50,14 @@ TaskProcessor *VerifierService::GetProcessor(SourceLang lang)
     if (processors_.count(lang) == 0) {
         processors_.emplace(lang, lang);
     }
-    LangData *lang_data = &processors_.at(lang);
-    if (lang_data->queue.empty()) {
-        lang_data->queue.push_back(allocator_->New<TaskProcessor>(this, lang));
-        lang_data->total_processors++;
+    LangData *langData = &processors_.at(lang);
+    if (langData->queue.empty()) {
+        langData->queue.push_back(allocator_->New<TaskProcessor>(this, lang));
+        langData->totalProcessors++;
     }
     // NOTE(gogabr): should we use a queue or stack discipline?
-    auto res = lang_data->queue.front();
-    lang_data->queue.pop_front();
+    auto res = langData->queue.front();
+    langData->queue.pop_front();
     return res;
 }
 
@@ -67,7 +67,7 @@ void VerifierService::ReleaseProcessor(TaskProcessor *processor)
     auto lang = processor->GetLang();
     ASSERT(processors_.count(lang) > 0);
     processors_.at(lang).queue.push_back(processor);
-    cond_var_.Signal();
+    condVar_.Signal();
 }
 
 }  // namespace panda::verifier

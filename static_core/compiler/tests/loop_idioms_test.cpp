@@ -21,14 +21,14 @@
 namespace panda::compiler {
 class LoopIdiomsTest : public GraphTest {
 protected:
-    bool CheckFillArrayFull(DataType::Type array_type, RuntimeInterface::IntrinsicId expected_intrinsic)
+    bool CheckFillArrayFull(DataType::Type arrayType, RuntimeInterface::IntrinsicId expectedIntrinsic)
     {
         auto initial = CreateEmptyGraph();
         GRAPH(initial)
         {
             // NOLINTBEGIN(readability-magic-numbers)
             PARAMETER(0U, 0U).ref();
-            PARAMETER(1U, 1U).type(array_type);
+            PARAMETER(1U, 1U).type(arrayType);
             CONSTANT(2U, 0U);
             CONSTANT(3U, 1U);
 
@@ -44,7 +44,7 @@ protected:
             BASIC_BLOCK(3U, 4U, 3U)
             {
                 INST(9U, Opcode::Phi).i32().Inputs(2U, 11U);
-                INST(10U, Opcode::StoreArray).type(array_type).Inputs(5U, 9U, 1U);
+                INST(10U, Opcode::StoreArray).type(arrayType).Inputs(5U, 9U, 1U);
                 INST(11U, Opcode::Add).i32().Inputs(9U, 3U);
                 INST(12U, Opcode::Compare).b().Inputs(6U, 11U).CC(CC_LE).SrcType(DataType::INT32);
                 INST(13U, Opcode::IfImm).Inputs(12U).Imm(0U).CC(CC_NE).SrcType(DataType::BOOL);
@@ -67,7 +67,7 @@ protected:
         {
             // NOLINTBEGIN(readability-magic-numbers)
             PARAMETER(0U, 0U).ref();
-            PARAMETER(1U, 1U).type(array_type);
+            PARAMETER(1U, 1U).type(arrayType);
             CONSTANT(2U, 0U);
             CONSTANT(3U, 1U);
             CONSTANT(20U, 6U);  // LoopIdioms::ITERATIONS_THRESHOLD
@@ -91,7 +91,7 @@ protected:
             BASIC_BLOCK(3U, 4U, 3U)
             {
                 INST(9U, Opcode::Phi).i32().Inputs(2U, 11U);
-                INST(10U, Opcode::StoreArray).type(array_type).Inputs(5U, 9U, 1U);
+                INST(10U, Opcode::StoreArray).type(arrayType).Inputs(5U, 9U, 1U);
                 INST(11U, Opcode::Add).i32().Inputs(9U, 3U);
                 INST(12U, Opcode::Compare).b().Inputs(6U, 11U).CC(CC_LE).SrcType(DataType::INT32);
                 INST(13U, Opcode::IfImm).Inputs(12U).Imm(0U).CC(CC_NE).SrcType(DataType::BOOL);
@@ -101,8 +101,8 @@ protected:
             {
                 INST(18U, Opcode::Intrinsic)
                     .v0id()
-                    .Inputs({{DataType::REFERENCE, 5U}, {array_type, 1U}, {DataType::INT32, 2U}, {DataType::INT32, 6U}})
-                    .IntrinsicId(expected_intrinsic)
+                    .Inputs({{DataType::REFERENCE, 5U}, {arrayType, 1U}, {DataType::INT32, 2U}, {DataType::INT32, 6U}})
+                    .IntrinsicId(expectedIntrinsic)
                     .SetFlag(compiler::inst_flags::NO_HOIST)
                     .SetFlag(compiler::inst_flags::NO_DCE)
                     .SetFlag(compiler::inst_flags::NO_CSE)

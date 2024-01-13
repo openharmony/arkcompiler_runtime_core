@@ -64,7 +64,7 @@ protected:
 
     void AddMemoryPoolToAllocator(NonObjectHumongousObjAllocator &alloc, size_t size)
     {
-        os::memory::LockHolder lock(pool_lock_);
+        os::memory::LockHolder lock(poolLock_);
         size = AlignUp(size, PANDA_POOL_ALIGNMENT_IN_BYTES);
         Pool pool = PoolManager::GetMmapMemPool()->AllocPool(AlignUp(size, PANDA_POOL_ALIGNMENT_IN_BYTES),
                                                              SpaceType::SPACE_TYPE_INTERNAL,
@@ -73,7 +73,7 @@ protected:
         if (pool.GetMem() == nullptr) {
             ASSERT_TRUE(0 && "Can't get a new pool from PoolManager");
         }
-        allocated_pools_by_pool_manager_.push_back(pool);
+        allocatedPoolsByPoolManager_.push_back(pool);
         if (!alloc.AddMemoryPool(pool.GetMem(), size)) {
             ASSERT_TRUE(0 && "Can't add mem pool to allocator");
         }
@@ -92,16 +92,16 @@ protected:
 
     void ClearPoolManager()
     {
-        for (auto i : allocated_pools_by_pool_manager_) {
+        for (auto i : allocatedPoolsByPoolManager_) {
             PoolManager::GetMmapMemPool()->FreePool(i.GetMem(), i.GetSize());
         }
-        allocated_pools_by_pool_manager_.clear();
+        allocatedPoolsByPoolManager_.clear();
     }
 
 private:
-    std::vector<Pool> allocated_pools_by_pool_manager_;
+    std::vector<Pool> allocatedPoolsByPoolManager_;
     // Mutex, which allows only one thread to add pool to the pool vector
-    os::memory::Mutex pool_lock_;
+    os::memory::Mutex poolLock_;
 };
 
 TEST_F(HumongousObjAllocatorTest, CheckIncorrectMemoryPoolReusageTest)
@@ -112,41 +112,41 @@ TEST_F(HumongousObjAllocatorTest, CheckIncorrectMemoryPoolReusageTest)
     static constexpr size_t SECOND_OBJECT_SIZE = POOL_SIZE - GetAlignmentInBytes(OBJECT_ALIGNMENT);
     ASSERT(PANDA_POOL_ALIGNMENT_IN_BYTES > GetAlignmentInBytes(OBJECT_ALIGNMENT));
     ASSERT_TRUE(NonObjectHumongousObjAllocator::GetMinPoolSize(FIRST_OBJECT_SIZE) == POOL_SIZE);
-    mem::MemStatsType mem_stats;
-    NonObjectHumongousObjAllocator allocator(&mem_stats);
+    mem::MemStatsType memStats;
+    NonObjectHumongousObjAllocator allocator(&memStats);
     AddMemoryPoolToAllocator(allocator, POOL_SIZE);
-    void *first_object = allocator.Alloc(FIRST_OBJECT_SIZE, OBJECT_ALIGNMENT);
-    ASSERT_TRUE(first_object != nullptr);
-    allocator.Free(first_object);
-    void *second_object = allocator.Alloc(SECOND_OBJECT_SIZE, OBJECT_ALIGNMENT);
-    ASSERT_TRUE(second_object == nullptr);
+    void *firstObject = allocator.Alloc(FIRST_OBJECT_SIZE, OBJECT_ALIGNMENT);
+    ASSERT_TRUE(firstObject != nullptr);
+    allocator.Free(firstObject);
+    void *secondObject = allocator.Alloc(SECOND_OBJECT_SIZE, OBJECT_ALIGNMENT);
+    ASSERT_TRUE(secondObject == nullptr);
 }
 
 TEST_F(HumongousObjAllocatorTest, SimpleAllocateDifferentObjSizeTest)
 {
     LOG(DEBUG, ALLOC) << "SimpleAllocateDifferentObjSizeTest";
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectHumongousObjAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectHumongousObjAllocator allocator(memStats);
     std::vector<void *> values;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 0; i < 20; i++) {
-        size_t pool_size = DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE * i;
-        size_t alloc_size = pool_size - sizeof(POOL_HEADER_SIZE) - GetAlignmentInBytes(LOG_ALIGN_MAX);
-        AddMemoryPoolToAllocator(allocator, pool_size);
-        void *mem = allocator.Alloc(alloc_size);
+    for (size_t i = 0; i < 20U; i++) {
+        size_t poolSize = DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE * i;
+        size_t allocSize = poolSize - sizeof(POOL_HEADER_SIZE) - GetAlignmentInBytes(LOG_ALIGN_MAX);
+        AddMemoryPoolToAllocator(allocator, poolSize);
+        void *mem = allocator.Alloc(allocSize);
         ASSERT_TRUE(mem != nullptr);
         values.push_back(mem);
-        LOG(DEBUG, ALLOC) << "Allocate obj with size " << alloc_size << " at " << std::hex << mem;
+        LOG(DEBUG, ALLOC) << "Allocate obj with size " << allocSize << " at " << std::hex << mem;
     }
     for (auto i : values) {
         allocator.Free(i);
     }
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 0; i < 20; i++) {
+    for (size_t i = 0; i < 20U; i++) {
         void *mem = allocator.Alloc(MAX_ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(HumongousObjAllocatorTest, AllocateWriteFreeTest)
@@ -165,7 +165,7 @@ TEST_F(HumongousObjAllocatorTest, AllocateRandomFreeTest)
 
 TEST_F(HumongousObjAllocatorTest, AlignmentAllocTest)
 {
-    static constexpr size_t MAX_ALLOC = MIN_ALLOC_SIZE + 10;
+    static constexpr size_t MAX_ALLOC = MIN_ALLOC_SIZE + 10U;
     static constexpr size_t POOLS_COUNT =
         (MAX_ALLOC - MIN_ALLOC_SIZE + 1) * (HUMONGOUS_LOG_MAX_ALIGN - LOG_ALIGN_MIN + 1);
     AlignedAllocFreeTest<MIN_ALLOC_SIZE, MAX_ALLOC, LOG_ALIGN_MIN, HUMONGOUS_LOG_MAX_ALIGN>(POOLS_COUNT);

@@ -17,9 +17,9 @@
 #include "runtime/mem/gc/gc_root_type.h"
 
 namespace panda::mem {
-std::ostream &operator<<(std::ostream &os, RootType root_type)
+std::ostream &operator<<(std::ostream &os, RootType rootType)
 {
-    switch (root_type) {
+    switch (rootType) {
         case RootType::ROOT_UNKNOWN:
             os << "ROOT_UNKNOWN";
             break;

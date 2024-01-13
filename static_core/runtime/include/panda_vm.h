@@ -47,9 +47,9 @@ enum class PandaVMType : size_t { ECMA_VM };  // Deprecated. Only for Compabilit
 
 class PandaVM {
 public:
-    static PandaVM *Create(Runtime *runtime, const RuntimeOptions &options, std::string_view runtime_type);
+    static PandaVM *Create(Runtime *runtime, const RuntimeOptions &options, std::string_view runtimeType);
 
-    explicit PandaVM() : mutator_lock_(Locks::NewMutatorLock()) {};
+    explicit PandaVM() : mutatorLock_(Locks::NewMutatorLock()) {};
 
     virtual ~PandaVM() = default;
 
@@ -91,7 +91,7 @@ public:
      * Method will be called only in a mutator thread
      */
     virtual void HandleGCRoutineInMutator() {}
-    virtual void HandleLdaStr(Frame *frame, BytecodeId string_id);
+    virtual void HandleLdaStr(Frame *frame, BytecodeId stringId);
     virtual void HandleReturnFrame() {}
 
     virtual mem::GCStats *GetGCStats() const = 0;
@@ -125,9 +125,9 @@ public:
         GetStringTable()->VisitStrings(visitor);
     }
 
-    virtual void SweepVmRefs(const GCObjectVisitor &gc_object_visitor)
+    virtual void SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
     {
-        GetStringTable()->Sweep(gc_object_visitor);
+        GetStringTable()->Sweep(gcObjectVisitor);
     }
 
     virtual bool UpdateMovedStrings()
@@ -170,7 +170,7 @@ public:
 
     uint32_t GetFrameExtSize() const
     {
-        return frame_ext_size_;
+        return frameExtSize_;
     }
 
     virtual bool IsBytecodeProfilingEnabled() const
@@ -187,37 +187,37 @@ public:
         return false;
     }
 
-    virtual void DumpHeap(PandaOStringStream *o_str) const
+    virtual void DumpHeap(PandaOStringStream *oStr) const
     {
-        size_t obj_cnt = 0;
-        *o_str << "Dumping heap" << std::endl;
-        GetHeapManager()->IterateOverObjects([&obj_cnt, &o_str](ObjectHeader *mem) {
-            DumpObject(mem, o_str);
-            obj_cnt++;
+        size_t objCnt = 0;
+        *oStr << "Dumping heap" << std::endl;
+        GetHeapManager()->IterateOverObjects([&objCnt, &oStr](ObjectHeader *mem) {
+            DumpObject(mem, oStr);
+            objCnt++;
         });
-        *o_str << "Total dumped " << obj_cnt << std::endl;
+        *oStr << "Total dumped " << objCnt << std::endl;
     }
 
     virtual PandaString GetClassesFootprint() const;
 
     void LoadDebuggerAgent()
     {
-        debugger_agent_ = CreateDebuggerAgent();
+        debuggerAgent_ = CreateDebuggerAgent();
     }
 
     void UnloadDebuggerAgent()
     {
-        debugger_agent_.reset();
+        debuggerAgent_.reset();
     }
 
     MutatorLock *GetMutatorLock()
     {
-        return mutator_lock_;
+        return mutatorLock_;
     }
 
     const MutatorLock *GetMutatorLock() const
     {
-        return mutator_lock_;
+        return mutatorLock_;
     }
 
     // Intrusive GC test API
@@ -238,20 +238,20 @@ protected:
 
     void SetFrameExtSize(uint32_t size)
     {
-        frame_ext_size_ = size;
+        frameExtSize_ = size;
     }
 
     virtual LoadableAgentHandle CreateDebuggerAgent();
 
 private:
     /// Lock used for preventing object heap modifications (for example at GC<->JIT,ManagedCode interaction during STW)
-    MutatorLock *mutator_lock_;
-    uint32_t frame_ext_size_ {EMPTY_EXT_FRAME_DATA_SIZE};
-    LoadableAgentHandle debugger_agent_;
+    MutatorLock *mutatorLock_;
+    uint32_t frameExtSize_ {EMPTY_EXT_FRAME_DATA_SIZE};
+    LoadableAgentHandle debuggerAgent_;
 
     // Intrusive GC test API
-    PandaList<ObjectHeader *> mark_queue_ GUARDED_BY(mark_queue_lock_);
-    os::memory::Mutex mark_queue_lock_;
+    PandaList<ObjectHeader *> markQueue_ GUARDED_BY(markQueueLock_);
+    os::memory::Mutex markQueueLock_;
 };
 
 }  // namespace panda

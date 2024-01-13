@@ -85,16 +85,16 @@ inline void WriteArg(arch::ArgWriter<RUNTIME_ARCH> *writer, T arg, Args... args)
 template <typename T>
 inline T InvokeEntryPoint(Method *method)
 {
-    PandaVector<uint8_t> gpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
-    Span<uint8_t> gprs(gpr_data.data(), gpr_data.size());
-    PandaVector<uint8_t> fpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
-    Span<uint8_t> fprs(fpr_data.data(), fpr_data.size());
+    PandaVector<uint8_t> gprData(arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
+    Span<uint8_t> gprs(gprData.data(), gprData.size());
+    PandaVector<uint8_t> fprData(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
+    Span<uint8_t> fprs(fprData.data(), fprData.size());
     PandaVector<uint8_t> stack;
     arch::ArgWriter<RUNTIME_ARCH> writer(&gprs, &fprs, stack.data());
     writer.Write(method);
 
     ManagedThread *thread = ManagedThread::GetCurrent();
-    return GetInvokeHelper<T>()(gpr_data.data(), fpr_data.data(), stack.data(), 0, thread);
+    return GetInvokeHelper<T>()(gprData.data(), fprData.data(), stack.data(), 0, thread);
 }
 
 template <typename T, typename... Args>
@@ -140,41 +140,41 @@ inline T InvokeEntryPoint(Method *method, Args... args)
         ++it;
     }
 
-    PandaVector<uint8_t> gpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
-    Span<uint8_t> gprs(gpr_data.data(), gpr_data.size());
-    PandaVector<uint8_t> fpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
-    Span<uint8_t> fprs(fpr_data.data(), fpr_data.size());
+    PandaVector<uint8_t> gprData(arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
+    Span<uint8_t> gprs(gprData.data(), gprData.size());
+    PandaVector<uint8_t> fprData(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
+    Span<uint8_t> fprs(fprData.data(), fprData.size());
     PandaVector<uint8_t> stack(counter.GetStackSpaceSize());
     arch::ArgWriter<RUNTIME_ARCH> writer(&gprs, &fprs, stack.data());
     writer.Write(method);
     WriteArg(&writer, args...);
 
     ManagedThread *thread = ManagedThread::GetCurrent();
-    return GetInvokeHelper<T>()(gpr_data.data(), fpr_data.data(), stack.data(), counter.GetStackSize(), thread);
+    return GetInvokeHelper<T>()(gprData.data(), fprData.data(), stack.data(), counter.GetStackSize(), thread);
 }
 
 template <typename... Args>
-coretypes::TaggedValue InvokeDynEntryPoint(Method *method, uint32_t num_args, Args... args)
+coretypes::TaggedValue InvokeDynEntryPoint(Method *method, uint32_t numArgs, Args... args)
 {
     arch::ArgCounter<RUNTIME_ARCH> counter;
     counter.Count<Method *>();
     counter.Count<uint32_t>();
-    for (uint32_t i = 0; i <= num_args; ++i) {
+    for (uint32_t i = 0; i <= numArgs; ++i) {
         counter.Count<coretypes::TaggedValue>();
     }
 
-    PandaVector<uint8_t> gpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
-    Span<uint8_t> gprs(gpr_data.data(), gpr_data.size());
-    PandaVector<uint8_t> fpr_data(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
-    Span<uint8_t> fprs(fpr_data.data(), fpr_data.size());
+    PandaVector<uint8_t> gprData(arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
+    Span<uint8_t> gprs(gprData.data(), gprData.size());
+    PandaVector<uint8_t> fprData(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
+    Span<uint8_t> fprs(fprData.data(), fprData.size());
     PandaVector<uint8_t> stack(counter.GetStackSpaceSize());
     arch::ArgWriter<RUNTIME_ARCH> writer(&gprs, &fprs, stack.data());
     writer.Write(method);
-    writer.Write(num_args);
+    writer.Write(numArgs);
     WriteArg(&writer, args...);
 
     ManagedThread *thread = ManagedThread::GetCurrent();
-    return GetInvokeHelper<coretypes::TaggedValue>()(gpr_data.data(), fpr_data.data(), stack.data(),
+    return GetInvokeHelper<coretypes::TaggedValue>()(gprData.data(), fprData.data(), stack.data(),
                                                      counter.GetStackSize(), thread);
 }
 

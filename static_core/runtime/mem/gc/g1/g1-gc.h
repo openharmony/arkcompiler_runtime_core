@@ -39,7 +39,7 @@ class RefInfo {
 public:
     RefInfo() = default;
 
-    RefInfo(ObjectHeader *object, uint32_t ref_offset) : object_(object), ref_offset_(ref_offset) {}
+    RefInfo(ObjectHeader *object, uint32_t refOffset) : object_(object), refOffset_(refOffset) {}
 
     ~RefInfo() = default;
 
@@ -50,7 +50,7 @@ public:
 
     uint32_t GetReferenceOffset() const
     {
-        return ref_offset_;
+        return refOffset_;
     }
 
     DEFAULT_COPY_SEMANTIC(RefInfo);
@@ -58,7 +58,7 @@ public:
 
 private:
     ObjectHeader *object_;
-    uint32_t ref_offset_;
+    uint32_t refOffset_;
 };
 
 /// @brief G1 alike GC
@@ -72,7 +72,7 @@ class G1GC : public GenerationalGC<LanguageConfig> {
                                                      PandaVector<PandaDeque<ObjectHeader *> *>>;
 
 public:
-    explicit G1GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings);
+    explicit G1GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
 
     ~G1GC() override;
 
@@ -80,13 +80,13 @@ public:
     {
         GC::StopGC();
         // GC is using update_remset_worker so we need to stop GC first before we destroy the worker
-        update_remset_worker_->DestroyWorker();
+        updateRemsetWorker_->DestroyWorker();
     }
 
     NO_MOVE_SEMANTIC(G1GC);
     NO_COPY_SEMANTIC(G1GC);
 
-    void InitGCBits(panda::ObjectHeader *obj_header) override;
+    void InitGCBits(panda::ObjectHeader *objHeader) override;
 
     void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *object) override;
 
@@ -96,9 +96,9 @@ public:
         return true;
     }
 
-    void WorkerTaskProcessing(GCWorkersTask *task, void *worker_data) override;
+    void WorkerTaskProcessing(GCWorkersTask *task, void *workerData) override;
 
-    void MarkReferences(GCMarkingStackType *references, GCPhase gc_phase) override;
+    void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) override;
 
     void MarkObject(ObjectHeader *object) override;
 
@@ -106,7 +106,7 @@ public:
 
     bool InGCSweepRange(const ObjectHeader *object) const override;
 
-    void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keep_buffers) override;
+    void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers) override;
 
     void PreZygoteFork() override;
     void PostZygoteFork() override;
@@ -115,16 +115,16 @@ public:
 
     void StartGC() override
     {
-        update_remset_worker_->CreateWorker();
+        updateRemsetWorker_->CreateWorker();
         GC::StartGC();
     }
 
     bool HasRefFromRemset(ObjectHeader *obj)
     {
-        for (auto &ref_vector : unique_refs_from_remsets_) {
-            auto it = std::find_if(ref_vector->cbegin(), ref_vector->cend(),
+        for (auto &refVector : uniqueRefsFromRemsets_) {
+            auto it = std::find_if(refVector->cbegin(), refVector->cend(),
                                    [obj](auto ref) { return ref.GetObject() == obj; });
-            if (it != ref_vector->cend()) {
+            if (it != refVector->cend()) {
                 return true;
             }
         }
@@ -149,9 +149,9 @@ protected:
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     /// Queue with updated refs info
-    GCG1BarrierSet::ThreadLocalCardQueues *updated_refs_queue_ {nullptr};
-    os::memory::Mutex queue_lock_;
-    os::memory::Mutex gc_worker_queue_lock_;
+    GCG1BarrierSet::ThreadLocalCardQueues *updatedRefsQueue_ {nullptr};
+    os::memory::Mutex queueLock_;
+    os::memory::Mutex gcWorkerQueueLock_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
@@ -162,29 +162,29 @@ private:
     bool HaveGarbageRegions(const PandaPriorityQueue<std::pair<uint32_t, Region *>> &regions);
 
     template <RegionFlag REGION_TYPE, bool FULL_GC>
-    void DoRegionCompacting(Region *region, bool use_gc_workers,
-                            PandaVector<PandaVector<ObjectHeader *> *> *moved_objects_vector);
+    void DoRegionCompacting(Region *region, bool useGcWorkers,
+                            PandaVector<PandaVector<ObjectHeader *> *> *movedObjectsVector);
 
     template <bool ATOMIC, bool CONCURRENTLY>
     void CollectNonRegularObjects();
 
     template <bool ATOMIC, bool CONCURRENTLY>
-    void CollectEmptyRegions(GCTask &task, PandaVector<Region *> *empty_tenured_regions);
+    void CollectEmptyRegions(GCTask &task, PandaVector<Region *> *emptyTenuredRegions);
 
     template <bool ATOMIC, bool CONCURRENTLY>
-    void ClearEmptyTenuredMovableRegions(PandaVector<Region *> *empty_tenured_regions);
+    void ClearEmptyTenuredMovableRegions(PandaVector<Region *> *emptyTenuredRegions);
 
     bool NeedToPromote(const Region *region) const;
 
     template <bool ATOMIC, RegionFlag REGION_TYPE>
-    void RegionCompactingImpl(Region *region, const ObjectVisitor &moved_object_saver);
+    void RegionCompactingImpl(Region *region, const ObjectVisitor &movedObjectSaver);
 
     template <bool ATOMIC>
-    void RegionPromotionImpl(Region *region, const ObjectVisitor &moved_object_saver);
+    void RegionPromotionImpl(Region *region, const ObjectVisitor &movedObjectSaver);
 
     // Return whether all cross region references were processed in mem_range
     template <typename Handler>
-    void IterateOverRefsInMemRange(const MemRange &mem_range, Region *region, Handler &refs_handler);
+    void IterateOverRefsInMemRange(const MemRange &memRange, Region *region, Handler &refsHandler);
 
     template <typename Visitor>
     void CacheRefsFromDirtyCards(Visitor visitor);
@@ -199,7 +199,7 @@ private:
 
     void RunFullGC(panda::GCTask &task);
 
-    void RunMixedGC(panda::GCTask &task, const CollectionSet &collection_set);
+    void RunMixedGC(panda::GCTask &task, const CollectionSet &collectionSet);
 
     /// Determine whether GC need to run concurrent mark or mixed GC
     bool ScheduleMixedGCAndConcurrentMark(panda::GCTask &task);
@@ -207,14 +207,14 @@ private:
     /// Start concurrent mark
     void RunConcurrentMark(panda::GCTask &task);
 
-    void RunPhasesForRegions([[maybe_unused]] panda::GCTask &task, const CollectionSet &collectible_regions);
+    void RunPhasesForRegions([[maybe_unused]] panda::GCTask &task, const CollectionSet &collectibleRegions);
 
     void PreStartupImp() override;
 
-    void VisitCard(CardTable::CardPtr card, const ObjectVisitor &object_visitor, const CardVisitor &card_visitor);
+    void VisitCard(CardTable::CardPtr card, const ObjectVisitor &objectVisitor, const CardVisitor &cardVisitor);
 
     /// GC for young generation. Runs with STW.
-    void RunGC(GCTask &task, const CollectionSet &collectible_regions);
+    void RunGC(GCTask &task, const CollectionSet &collectibleRegions);
 
     /// GC for tenured generation.
     void RunTenuredGC(const GCTask &task);
@@ -227,7 +227,7 @@ private:
      *
      * @return true
      */
-    static void CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *base_klass);
+    static void CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
 
     /**
      * Mark predicate with calculation of live bytes in region, not atomically
@@ -235,10 +235,10 @@ private:
      *
      * @param object marked object from marking-stack
      */
-    static void CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *base_klass);
+    static void CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
 
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
-    MemRange MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectible_regions);
+    MemRange MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
 
     /**
      * Mark roots and add them to the stack
@@ -246,7 +246,7 @@ private:
      * @param visit_class_roots
      * @param visit_card_table_roots
      */
-    void MarkRoots(GCMarkingStackType *objects_stack, CardTableVisitFlag visit_card_table_roots,
+    void MarkRoots(GCMarkingStackType *objectsStack, CardTableVisitFlag visitCardTableRoots,
                    VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL);
 
     /**
@@ -254,7 +254,7 @@ private:
      * STW
      * @param objects_stack
      */
-    void InitialMark(GCMarkingStackType *objects_stack);
+    void InitialMark(GCMarkingStackType *objectsStack);
 
     void MarkStackMixed(GCMarkingStackType *stack);
 
@@ -267,14 +267,14 @@ private:
      * @return true if moving was success, false otherwise
      */
     template <bool FULL_GC>
-    bool CollectAndMove(const CollectionSet &collection_set);
+    bool CollectAndMove(const CollectionSet &collectionSet);
 
     /**
      * Collect verification info for CollectAndMove phase
      * @param collection_set collection set for the current phase
      * @return instance of verifier to be used to verify for updated references
      */
-    [[nodiscard]] HeapVerifierIntoGC<LanguageConfig> CollectVerificationInfo(const CollectionSet &collection_set);
+    [[nodiscard]] HeapVerifierIntoGC<LanguageConfig> CollectVerificationInfo(const CollectionSet &collectionSet);
 
     /**
      * Verify updted references
@@ -284,17 +284,16 @@ private:
      * @see CollectVerificationInfo
      * @see UpdateRefsToMovedObjects
      */
-    void VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfig> &&collect_verifier,
-                              const CollectionSet &collection_set);
+    void VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfig> &&collectVerifier, const CollectionSet &collectionSet);
 
     template <bool FULL_GC, bool NEED_LOCK>
     std::conditional_t<FULL_GC, UpdateRemsetRefUpdater<LanguageConfig, NEED_LOCK>,
                        EnqueueRemsetRefUpdater<LanguageConfig>>
-    CreateRefUpdater(GCG1BarrierSet::ThreadLocalCardQueues *updated_ref_queue) const;
+    CreateRefUpdater(GCG1BarrierSet::ThreadLocalCardQueues *updatedRefQueue) const;
 
     /// Update all refs to moved objects
     template <bool FULL_GC, bool USE_WORKERS>
-    void UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_GC> *moved_objects_container);
+    void UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_GC> *movedObjectsContainer);
 
     void Sweep();
 
@@ -309,22 +308,22 @@ private:
      * @param objects_stack stack for marked objects
      * @param use_gc_workers whether do marking in parallel
      */
-    void OnPauseMark(GCTask &task, GCMarkingStackType *objects_stack, bool use_gc_workers);
+    void OnPauseMark(GCTask &task, GCMarkingStackType *objectsStack, bool useGcWorkers);
 
     /// Start process of concurrent marking
     void ConcurrentMarking(panda::GCTask &task);
 
     /// Iterate over roots and mark them concurrently
-    NO_THREAD_SAFETY_ANALYSIS void ConcurentMarkImpl(GCMarkingStackType *objects_stack);
+    NO_THREAD_SAFETY_ANALYSIS void ConcurentMarkImpl(GCMarkingStackType *objectsStack);
 
     void PauseTimeGoalDelay();
 
-    void InitialMark(GCMarkingStackType &marking_stack);
+    void InitialMark(GCMarkingStackType &markingStack);
 
     /*
      * Mark the heap in concurrent mode and calculate live bytes
      */
-    void ConcurrentMark(GCMarkingStackType *objects_stack);
+    void ConcurrentMark(GCMarkingStackType *objectsStack);
 
     /// ReMarks objects after Concurrent marking and actualize information about live bytes
     void Remark(panda::GCTask const &task);
@@ -335,16 +334,16 @@ private:
     void SweepRegularVmRefs();
 
     /// Return collectible regions
-    CollectionSet GetCollectibleRegions(panda::GCTask const &task, bool is_mixed);
-    void AddOldRegionsMaxAllowed(CollectionSet &collection_set);
-    void AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collection_set);
+    CollectionSet GetCollectibleRegions(panda::GCTask const &task, bool isMixed);
+    void AddOldRegionsMaxAllowed(CollectionSet &collectionSet);
+    void AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet);
 
     CollectionSet GetFullCollectionSet();
 
-    void UpdateCollectionSet(const CollectionSet &collectible_regions);
+    void UpdateCollectionSet(const CollectionSet &collectibleRegions);
 
     /// Estimate space in tenured to objects from collectible regions
-    bool HaveEnoughSpaceToMove(const CollectionSet &collectible_regions);
+    bool HaveEnoughSpaceToMove(const CollectionSet &collectibleRegions);
 
     /// Check if we have enough free regions in tenured space
     bool HaveEnoughRegionsToMove(size_t num);
@@ -353,7 +352,7 @@ private:
      * Add data from SATB buffer to the object stack
      * @param object_stack - stack to add data to
      */
-    void DrainSatb(GCAdaptiveStack *object_stack);
+    void DrainSatb(GCAdaptiveStack *objectStack);
 
     void HandlePendingDirtyCards();
 
@@ -375,7 +374,7 @@ private:
     template <class Visitor>
     void UpdateRefsFromRemSets(const Visitor &visitor);
 
-    MemRange CacheRefsFromRemsets(const MemRangeRefsChecker &refs_checker);
+    MemRange CacheRefsFromRemsets(const MemRangeRefsChecker &refsChecker);
 
     void ClearRefsFromRemsetsCache();
 
@@ -383,17 +382,17 @@ private:
 
     bool ShouldRunTenuredGC(const GCTask &task) override;
 
-    void RestoreYoungCards(const CollectionSet &collection_set);
+    void RestoreYoungCards(const CollectionSet &collectionSet);
 
-    void ClearYoungCards(const CollectionSet &collection_set);
+    void ClearYoungCards(const CollectionSet &collectionSet);
 
-    void ClearDirtyAndYoungCards(const MemRange &dirty_cards_range);
+    void ClearDirtyAndYoungCards(const MemRange &dirtyCardsRange);
 
     size_t GetMaxMixedRegionsCount();
 
-    void PrepareYoungRegionsForFullGC(const CollectionSet &collection_set);
+    void PrepareYoungRegionsForFullGC(const CollectionSet &collectionSet);
 
-    void RestoreYoungRegionsAfterFullGC(const CollectionSet &collection_set);
+    void RestoreYoungRegionsAfterFullGC(const CollectionSet &collectionSet);
 
     template <typename Container>
     void BuildCrossYoungRemSets(const Container &young);
@@ -402,33 +401,33 @@ private:
     size_t CalculateDesiredEdenLengthByPauseDuration();
 
     G1GCPauseMarker<LanguageConfig> marker_;
-    G1GCConcurrentMarker<LanguageConfig> conc_marker_;
-    G1GCMixedMarker<LanguageConfig> mixed_marker_;
+    G1GCConcurrentMarker<LanguageConfig> concMarker_;
+    G1GCMixedMarker<LanguageConfig> mixedMarker_;
     /// Flag indicates if we currently in concurrent marking phase
-    std::atomic<bool> concurrent_marking_flag_ {false};
+    std::atomic<bool> concurrentMarkingFlag_ {false};
     /// Flag indicates if we need to interrupt concurrent marking
-    std::atomic<bool> interrupt_concurrent_flag_ {false};
+    std::atomic<bool> interruptConcurrentFlag_ {false};
     /// Function called in the post WRB
-    std::function<void(const void *, const void *)> post_queue_func_ {nullptr};
+    std::function<void(const void *, const void *)> postQueueFunc_ {nullptr};
     /**
      * After first process it stores humongous objects only, after marking them it's still store them for updating
      * pointers from Humongous
      */
-    PandaList<PandaVector<ObjectHeader *> *> satb_buff_list_ GUARDED_BY(satb_and_newobj_buf_lock_) {};
-    PandaVector<ObjectHeader *> newobj_buffer_ GUARDED_BY(satb_and_newobj_buf_lock_);
+    PandaList<PandaVector<ObjectHeader *> *> satbBuffList_ GUARDED_BY(satbAndNewobjBufLock_) {};
+    PandaVector<ObjectHeader *> newobjBuffer_ GUARDED_BY(satbAndNewobjBufLock_);
     // The lock guards both variables: satb_buff_list_ and newobj_buffer_
-    os::memory::Mutex satb_and_newobj_buf_lock_;
-    UpdateRemsetWorker<LanguageConfig> *update_remset_worker_ {nullptr};
-    GCMarkingStackType concurrent_marking_stack_;
-    GCMarkingStackType::MarkedObjects mixed_marked_objects_;
-    std::atomic<bool> is_mixed_gc_required_ {false};
+    os::memory::Mutex satbAndNewobjBufLock_;
+    UpdateRemsetWorker<LanguageConfig> *updateRemsetWorker_ {nullptr};
+    GCMarkingStackType concurrentMarkingStack_;
+    GCMarkingStackType::MarkedObjects mixedMarkedObjects_;
+    std::atomic<bool> isMixedGcRequired_ {false};
     /// Number of tenured regions added at the young GC
-    size_t number_of_mixed_tenured_regions_ {2};
-    double region_garbage_rate_threshold_ {0.0};
-    double g1_promotion_region_alive_rate_ {0.0};
-    bool g1_track_freed_objects_ {false};
-    bool is_explicit_concurrent_gc_enabled_ {false};
-    CollectionSet collection_set_;
+    size_t numberOfMixedTenuredRegions_ {2};
+    double regionGarbageRateThreshold_ {0.0};
+    double g1PromotionRegionAliveRate_ {0.0};
+    bool g1TrackFreedObjects_ {false};
+    bool isExplicitConcurrentGcEnabled_ {false};
+    CollectionSet collectionSet_;
     // Max size of unique_refs_from_remsets_ buffer. It should be enough to store
     // almost all references to the collection set.
     // But any way there may be humongous arrays which contains a lot of references to the collection set.
@@ -438,18 +437,18 @@ private:
     // List elements have RefVector inside, with double size compare to previous one (starts from MAX_REFS)
     // Each vector element contains an object from the remset and the offset of
     // the field which refers to the collection set.
-    PandaList<RefVector *> unique_refs_from_remsets_;
+    PandaList<RefVector *> uniqueRefsFromRemsets_;
     // Dirty cards which are not fully processed before collection.
     // These cards are processed later.
-    PandaUnorderedSet<CardTable::CardPtr> dirty_cards_;
+    PandaUnorderedSet<CardTable::CardPtr> dirtyCards_;
 #ifndef NDEBUG
-    bool unique_cards_initialized_ = false;
+    bool uniqueCardsInitialized_ = false;
 #endif  // NDEBUG
-    size_t region_size_bits_;
-    G1PauseTracker g1_pause_tracker_;
-    os::memory::Mutex concurrent_mark_mutex_;
-    os::memory::Mutex mixed_marked_objects_mutex_;
-    os::memory::ConditionVariable concurrent_mark_cond_var_;
+    size_t regionSizeBits_;
+    G1PauseTracker g1PauseTracker_;
+    os::memory::Mutex concurrentMarkMutex_;
+    os::memory::Mutex mixedMarkedObjectsMutex_;
+    os::memory::ConditionVariable concurrentMarkCondVar_;
     G1Analytics analytics_;
 
     template <class>

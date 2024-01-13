@@ -24,20 +24,20 @@
 
 namespace panda::os {
 
-void CreateDirectories(const std::string &folder_name)
+void CreateDirectories(const std::string &folderName)
 {
 #ifdef PANDA_TARGET_MOBILE
     constexpr auto DIR_PERMISSIONS = 0775;
-    mkdir(folder_name.c_str(), DIR_PERMISSIONS);
+    mkdir(folderName.c_str(), DIR_PERMISSIONS);
 #elif PANDA_TARGET_MACOS || PANDA_TARGET_OHOS
-    std::filesystem::create_directories(std::filesystem::path(folder_name));
+    std::filesystem::create_directories(std::filesystem::path(folderName));
 #elif PANDA_TARGET_WINDOWS
-    CreateDirectory(folder_name.c_str(), NULL);
+    CreateDirectory(folderName.c_str(), NULL);
 #else
     constexpr auto DIR_PERMISSIONS = 0775;
-    auto status = mkdir(folder_name.c_str(), DIR_PERMISSIONS);
+    auto status = mkdir(folderName.c_str(), DIR_PERMISSIONS);
     if (status != 0) {
-        LOG(WARNING, COMMON) << "Failed to create directory \"" << folder_name.c_str() << "\"\n";
+        LOG(WARNING, COMMON) << "Failed to create directory \"" << folderName.c_str() << "\"\n";
         LOG(WARNING, COMMON) << "Return status :" << status << "\n";
     }
 #endif
@@ -45,8 +45,8 @@ void CreateDirectories(const std::string &folder_name)
 
 bool IsFileExists(const std::string &filepath)
 {
-    std::ifstream opened_file(filepath);
-    return opened_file.good();
+    std::ifstream openedFile(filepath);
+    return openedFile.good();
 }
 
 std::string GetParentDir(const std::string &filepath)
@@ -84,21 +84,21 @@ std::string NormalizePath(const std::string &path)
 
     auto delim = file::File::GetPathDelim();
     ASSERT(delim.length() == 1);
-    auto delim_char = delim[0];
+    auto delimChar = delim[0];
 
     std::vector<std::string_view> parts;
     size_t begin = 0;
     size_t length = 0;
     size_t i = 0;
     while (i < path.size()) {
-        if (path[i++] != delim_char) {
+        if (path[i++] != delimChar) {
             ++length;
             continue;
         }
 
         std::string_view sv(&path[begin], length);
 
-        while (path[i] == delim_char) {
+        while (path[i] == delimChar) {
             ++i;
         }
 

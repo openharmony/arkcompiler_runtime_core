@@ -31,16 +31,15 @@ class RuntimeOptions;
 
 namespace panda::ets {
 
-PANDA_PUBLIC_API bool CreateRuntime(const std::string &stdlib_abc, const std::string &path_abc, bool use_jit,
-                                    bool use_aot);
+PANDA_PUBLIC_API bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, bool useJit, bool useAot);
 
-PANDA_PUBLIC_API bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)> const &add_options);
+PANDA_PUBLIC_API bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)> const &addOptions);
 
 PANDA_PUBLIC_API bool DestroyRuntime();
 
 PANDA_PUBLIC_API std::pair<bool, int> ExecuteMain();
 
-PANDA_PUBLIC_API bool BindNative(const char *class_descriptor, const char *method_name, void *impl);
+PANDA_PUBLIC_API bool BindNative(const char *classDescriptor, const char *methodName, void *impl);
 
 PANDA_PUBLIC_API void LogError(const std::string &msg);
 }  // namespace panda::ets

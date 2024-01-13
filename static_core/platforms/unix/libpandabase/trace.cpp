@@ -27,27 +27,27 @@ static const char TRACE_MARKER_PATH[] = "/sys/kernel/debug/tracing/trace_marker"
 
 namespace panda::trace::internal {
 
-PANDA_PUBLIC_API int G_TRACE_MARKER_FD = -1;
+PANDA_PUBLIC_API int g_traceMarkerFd = -1;
 bool DoInit()
 {
-    if (G_TRACE_MARKER_FD != -1) {
+    if (g_traceMarkerFd != -1) {
         LOG(ERROR, TRACE) << "Already init.";
         return false;
     }
 
-    const char *panda_trace_val = std::getenv(PANDA_TRACE_KEY);
-    if (panda_trace_val == nullptr) {
+    const char *pandaTraceVal = std::getenv(PANDA_TRACE_KEY);
+    if (pandaTraceVal == nullptr) {
         return false;
     }
 
-    if (panda_trace_val != std::string("1")) {
-        LOG(INFO, TRACE) << "Cannot init, " << PANDA_TRACE_KEY << "=" << panda_trace_val;
+    if (pandaTraceVal != std::string("1")) {
+        LOG(INFO, TRACE) << "Cannot init, " << PANDA_TRACE_KEY << "=" << pandaTraceVal;
         return false;
     }
 
     // NOLINTNEXTLINE(hicpp-signed-bitwise,cppcoreguidelines-pro-type-vararg)
-    G_TRACE_MARKER_FD = open(TRACE_MARKER_PATH, O_CLOEXEC | O_WRONLY);
-    if (G_TRACE_MARKER_FD == -1) {
+    g_traceMarkerFd = open(TRACE_MARKER_PATH, O_CLOEXEC | O_WRONLY);
+    if (g_traceMarkerFd == -1) {
         PLOG(ERROR, TRACE) << "Cannot open file: " << TRACE_MARKER_PATH;
         return false;
     }
@@ -59,8 +59,8 @@ bool DoInit()
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define WRITE_MESSAGE(...)                                                                           \
     do {                                                                                             \
-        ASSERT(G_TRACE_MARKER_FD != -1);                                                             \
-        if (UNLIKELY(dprintf(G_TRACE_MARKER_FD, __VA_ARGS__) < 0)) {                                 \
+        ASSERT(g_traceMarkerFd != -1);                                                               \
+        if (UNLIKELY(dprintf(g_traceMarkerFd, __VA_ARGS__) < 0)) {                                   \
             LOG(ERROR, TRACE) << "Cannot write trace event. Try enabling tracing and run app again"; \
         }                                                                                            \
     } while (0)

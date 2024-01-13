@@ -39,6 +39,7 @@
 #include "file_items.h"
 #include "ir_interface.h"
 #include "libpandabase/utils/logger.h"
+#include "libpandabase/utils/utils.h"
 #include "mem/arena_allocator.h"
 #include "mem/pool_manager.h"
 #include "method_data_accessor-inl.h"
@@ -56,22 +57,22 @@ using compiler::Opcode;
 
 struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    size_t argument_count {0};
+    size_t argumentCount {0};
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    bool is_constructor {true};
+    bool isConstructor {true};
 
-    explicit RuntimeInterfaceMock(size_t arg_count) : RuntimeInterfaceMock(arg_count, true) {}
+    explicit RuntimeInterfaceMock(size_t argCount) : RuntimeInterfaceMock(argCount, true) {}
 
-    RuntimeInterfaceMock(size_t arg_count, bool is_ctor) : argument_count(arg_count), is_constructor(is_ctor) {}
+    RuntimeInterfaceMock(size_t argCount, bool isCtor) : argumentCount(argCount), isConstructor(isCtor) {}
 
     size_t GetMethodTotalArgumentsCount([[maybe_unused]] MethodPtr method) const override
     {
-        return argument_count;
+        return argumentCount;
     }
 
     bool IsConstructor([[maybe_unused]] MethodPtr method, [[maybe_unused]] SourceLanguage lang) override
     {
-        return is_constructor;
+        return isConstructor;
     }
 };
 
@@ -106,7 +107,7 @@ public:
 
 namespace test {
 
-extern std::string GLOB_ARGV0;
+extern std::string g_globArgV0;
 
 }  // namespace test
 
@@ -114,14 +115,14 @@ class CommonTest : public ::testing::Test {
 public:
     CommonTest()
     {
-        compiler::OPTIONS.SetCompilerUseSafepoint(false);
-        compiler::OPTIONS.SetCompilerSupportInitObjectInst(true);
+        compiler::g_options.SetCompilerUseSafepoint(false);
+        compiler::g_options.SetCompilerSupportInitObjectInst(true);
 
         // NOLINTNEXTLINE(readability-magic-numbers)
         mem::MemConfig::Initialize(128_MB, 64_MB, 64_MB, 32_MB, 0, 0);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_INTERNAL);
-        local_allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_INTERNAL);
+        localAllocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_INTERNAL);
         builder_ = new compiler::IrConstructor();
 
         Logger::InitializeStdLogging(Logger::Level::ERROR,
@@ -130,7 +131,7 @@ public:
     ~CommonTest() override
     {
         delete allocator_;
-        delete local_allocator_;
+        delete localAllocator_;
         delete builder_;
         PoolManager::Finalize();
         mem::MemConfig::Finalize();
@@ -147,13 +148,13 @@ public:
     }
     ArenaAllocator *GetLocalAllocator()
     {
-        return local_allocator_;
+        return localAllocator_;
     }
 
-    compiler::Graph *CreateEmptyGraph(bool is_dynamic = false)
+    compiler::Graph *CreateEmptyGraph(bool isDynamic = false)
     {
         auto *graph =
-            GetAllocator()->New<compiler::Graph>(GetAllocator(), GetLocalAllocator(), Arch::NONE, is_dynamic, true);
+            GetAllocator()->New<compiler::Graph>(GetAllocator(), GetLocalAllocator(), Arch::NONE, isDynamic, true);
         return graph;
     }
 
@@ -183,71 +184,70 @@ protected:
 
 private:
     ArenaAllocator *allocator_;
-    ArenaAllocator *local_allocator_;
+    ArenaAllocator *localAllocator_;
     compiler::Graph *graph_ {nullptr};
 };
 
 class AsmTest : public CommonTest {
 public:
-    bool ParseToGraph(const std::string &source, const std::string &func_name, const char *file_name = "test.pb")
+    bool ParseToGraph(const std::string &source, const std::string &funcName, const char *fileName = "test.pb")
     {
         panda::pandasm::Parser parser;
-        auto res = parser.Parse(source, file_name);
+        auto res = parser.Parse(source, fileName);
         if (parser.ShowError().err != pandasm::Error::ErrorType::ERR_NONE) {
             std::cerr << "Parse failed: " << parser.ShowError().message << std::endl
-                      << parser.ShowError().whole_line << std::endl;
+                      << parser.ShowError().wholeLine << std::endl;
             ADD_FAILURE();
             return false;
         }
         auto &prog = res.Value();
-        return ParseToGraph(&prog, func_name);
+        return ParseToGraph(&prog, funcName);
     }
 
-    virtual bool ParseToGraph(pandasm::Program *prog, const std::string &func_name)
+    virtual bool ParseToGraph(pandasm::Program *prog, const std::string &funcName)
     {
         pfile_ = pandasm::AsmEmitter::Emit(*prog, &maps_);
-        ir_interface_ = std::make_unique<bytecodeopt::BytecodeOptIrInterface>(&maps_, prog);
+        irInterface_ = std::make_unique<bytecodeopt::BytecodeOptIrInterface>(&maps_, prog);
 
         if (pfile_ == nullptr) {
             ADD_FAILURE();
             return false;
         }
 
-        auto ptr_file = pfile_.get();
-        if (ptr_file == nullptr) {
+        auto ptrFile = pfile_.get();
+        if (ptrFile == nullptr) {
             ADD_FAILURE();
             return false;
         }
 
-        compiler::Graph *temp_graph = nullptr;
+        compiler::Graph *tempGraph = nullptr;
 
-        for (uint32_t id : ptr_file->GetClasses()) {
-            panda_file::File::EntityId record_id {id};
+        for (uint32_t id : ptrFile->GetClasses()) {
+            panda_file::File::EntityId recordId {id};
 
-            if (ptr_file->IsExternal(record_id)) {
+            if (ptrFile->IsExternal(recordId)) {
                 continue;
             }
 
-            panda_file::ClassDataAccessor cda {*ptr_file, record_id};
-            cda.EnumerateMethods([&temp_graph, ptr_file, func_name, this](panda_file::MethodDataAccessor &mda) {
-                auto name_id = mda.GetNameId();
-                auto str = ptr_file->GetStringData(name_id).data;
-                bool is_equal = (std::string(func_name) == std::string(reinterpret_cast<const char *>(str)));
-                auto method_ptr =
-                    reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
+            panda_file::ClassDataAccessor cda {*ptrFile, recordId};
+            cda.EnumerateMethods([&tempGraph, ptrFile, funcName, this](panda_file::MethodDataAccessor &mda) {
+                auto nameId = mda.GetNameId();
+                auto str = ptrFile->GetStringData(nameId).data;
+                bool isEqual = (std::string(funcName) == std::string(reinterpret_cast<const char *>(str)));
+                auto methodPtr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
 
-                if (!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative() && is_equal) {
+                if (!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative() && isEqual) {
                     auto adapter = allocator_.New<BytecodeOptimizerRuntimeAdapter>(mda.GetPandaFile());
-                    temp_graph = allocator_.New<compiler::Graph>(&allocator_, &local_allocator_, Arch::NONE, method_ptr,
-                                                                 adapter, false, nullptr, false, true);
-                    ASSERT_NE(temp_graph, nullptr);
-                    ASSERT_TRUE(temp_graph->RunPass<compiler::IrBuilder>());
+                    tempGraph = allocator_.New<compiler::Graph>(&allocator_, &localAllocator_, Arch::NONE, methodPtr,
+                                                                adapter, false, nullptr, false, true);
+                    ASSERT_NE(tempGraph, nullptr);
+                    ASSERT_TRUE(tempGraph->RunPass<compiler::IrBuilder>());
                 }
             });
         }
 
-        if (temp_graph != nullptr) {
-            SetGraph(temp_graph);
+        if (tempGraph != nullptr) {
+            SetGraph(tempGraph);
             return true;
         }
         return false;
@@ -255,7 +255,7 @@ public:
 
     bytecodeopt::BytecodeOptIrInterface *GetIrInterface()
     {
-        return ir_interface_.get();
+        return irInterface_.get();
     }
 
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps *GetMaps()
@@ -269,10 +269,10 @@ public:
     }
 
 private:
-    std::unique_ptr<BytecodeOptIrInterface> ir_interface_;
+    std::unique_ptr<BytecodeOptIrInterface> irInterface_;
     pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps_;
     ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_COMPILER};
-    ArenaAllocator local_allocator_ {SpaceType::SPACE_TYPE_COMPILER};
+    ArenaAllocator localAllocator_ {SpaceType::SPACE_TYPE_COMPILER};
     std::unique_ptr<const panda_file::File> pfile_ {nullptr};
 };
 
@@ -307,7 +307,7 @@ public:
         }
         return std::equal(block1->AllInsts().begin(), block1->AllInsts().end(), block2->AllInsts().begin(),
                           block2->AllInsts().end(), [this](auto inst1, auto inst2) {
-                              assert(inst2 != nullptr);
+                              ASSERT(inst2 != nullptr);
                               bool t = Compare(inst1, inst2);
                               if (!t) {
                                   std::cerr << "Different instructions:\n";
@@ -320,23 +320,23 @@ public:
 
     bool Compare(Inst *inst1, Inst *inst2)
     {
-        if (auto it = inst_compare_map_.insert({inst1, inst2}); !it.second) {
+        if (auto it = instCompareMap_.insert({inst1, inst2}); !it.second) {
             if (inst2 == it.first->second) {
                 return true;
             }
-            inst_compare_map_.erase(inst1);
+            instCompareMap_.erase(inst1);
             return false;
         }
 
         if (inst1->GetOpcode() != inst2->GetOpcode() || inst1->GetType() != inst2->GetType() ||
             inst1->GetInputsCount() != inst2->GetInputsCount()) {
-            inst_compare_map_.erase(inst1);
+            instCompareMap_.erase(inst1);
             return false;
         }
 
         if (inst1->GetOpcode() == Opcode::Intrinsic || inst1->GetOpcode() == Opcode::Builtin) {
             if (inst1->CastToIntrinsic()->GetIntrinsicId() != inst2->CastToIntrinsic()->GetIntrinsicId()) {
-                inst_compare_map_.erase(inst1);
+                instCompareMap_.erase(inst1);
                 return false;
             }
         }
@@ -345,7 +345,7 @@ public:
             if (!std::equal(
                     inst1->GetInputs().begin(), inst1->GetInputs().end(), inst2->GetInputs().begin(),
                     [this](Input input1, Input input2) { return Compare(input1.GetInst(), input2.GetInst()); })) {
-                inst_compare_map_.erase(inst1);
+                instCompareMap_.erase(inst1);
                 return false;
             }
         } else {
@@ -354,7 +354,7 @@ public:
                     std::find_if(inst2->GetInputs().begin(), inst2->GetInputs().end(),
                                  [this, &input1](Input input2) { return Compare(input1.GetInst(), input2.GetInst()); });
                 if (it == inst2->GetInputs().end()) {
-                    inst_compare_map_.erase(inst1);
+                    instCompareMap_.erase(inst1);
                     return false;
                 }
             }
@@ -367,7 +367,7 @@ public:
 #define CHECK(Opc, Getter)                                                                                   \
     do {                                                                                                     \
         if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
-            inst_compare_map_.erase(inst1);                                                                  \
+            instCompareMap_.erase(inst1);                                                                    \
             return false;                                                                                    \
         }                                                                                                    \
     } while (0)
@@ -414,13 +414,13 @@ public:
             auto cmp1 = static_cast<compiler::CmpInst *>(inst1);
             auto cmp2 = static_cast<compiler::CmpInst *>(inst2);
             if (cmp1->IsFcmpg() != cmp2->IsFcmpg()) {
-                inst_compare_map_.erase(inst1);
+                instCompareMap_.erase(inst1);
                 return false;
             }
         }
         for (uint32_t i = 0; i < inst2->GetInputsCount(); i++) {
             if (inst1->GetInputType(i) != inst2->GetInputType(i)) {
-                inst_compare_map_.erase(inst1);
+                instCompareMap_.erase(inst1);
                 return false;
             }
         }
@@ -428,36 +428,36 @@ public:
     }
 
 private:
-    std::unordered_map<Inst *, Inst *> inst_compare_map_;
+    std::unordered_map<Inst *, Inst *> instCompareMap_;
 };
 
 class IrBuilderTest : public AsmTest {
 public:
-    void CheckSimple(const std::string &inst_name, compiler::DataType::Type data_type, const std::string &inst_type)
+    void CheckSimple(const std::string &instName, compiler::DataType::Type dataType, const std::string &instType)
     {
-        ASSERT(inst_name == "mov" || inst_name == "lda" || inst_name == "sta");
-        std::string curr_type;
-        if (data_type == compiler::DataType::Type::REFERENCE) {
-            curr_type = "i64[]";
+        ASSERT(instName == "mov" || instName == "lda" || instName == "sta");
+        std::string currType;
+        if (dataType == compiler::DataType::Type::REFERENCE) {
+            currType = "i64[]";
         } else {
-            curr_type = ToString(data_type);
+            currType = ToString(dataType);
         }
 
-        std::string source = ".function " + curr_type + " main(";
-        source += curr_type + " a0){\n";
-        if (inst_name == "mov") {
-            source += "mov" + inst_type + " v0, a0\n";
-            source += "lda" + inst_type + " v0\n";
-        } else if (inst_name == "lda") {
-            source += "lda" + inst_type + " a0\n";
-        } else if (inst_name == "sta") {
-            source += "lda" + inst_type + " a0\n";
-            source += "sta" + inst_type + " v0\n";
-            source += "lda" + inst_type + " v0\n";
+        std::string source = ".function " + currType + " main(";
+        source += currType + " a0){\n";
+        if (instName == "mov") {
+            source += "mov" + instType + " v0, a0\n";
+            source += "lda" + instType + " v0\n";
+        } else if (instName == "lda") {
+            source += "lda" + instType + " a0\n";
+        } else if (instName == "sta") {
+            source += "lda" + instType + " a0\n";
+            source += "sta" + instType + " v0\n";
+            source += "lda" + instType + " v0\n";
         } else {
             UNREACHABLE();
         }
-        source += "return" + inst_type + "\n";
+        source += "return" + instType + "\n";
         source += "}";
 
         ASSERT_TRUE(ParseToGraph(source, "main"));
@@ -466,38 +466,37 @@ public:
         GRAPH(graph)
         {
             PARAMETER(0, 0);
-            INS(0).SetType(data_type);
+            INS(0).SetType(dataType);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
                 INST(1, Opcode::Return).Inputs(0);
-                INS(1).SetType(data_type);
+                INS(1).SetType(dataType);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckSimpleWithImm(const std::string &inst_name, compiler::DataType::Type data_type,
-                            const std::string &inst_type)
+    void CheckSimpleWithImm(const std::string &instName, compiler::DataType::Type dataType, const std::string &instType)
     {
-        ASSERT(inst_name == "mov" || inst_name == "fmov" || inst_name == "lda" || inst_name == "flda");
-        std::string curr_type = ToString(data_type);
+        ASSERT(instName == "mov" || instName == "fmov" || instName == "lda" || instName == "flda");
+        std::string currType = ToString(dataType);
 
-        std::string source = ".function " + curr_type + " main(){\n";
-        if (inst_name == "mov") {
-            source += "movi" + inst_type + " v0, 0\n";
-            source += "lda" + inst_type + " v0\n";
-        } else if (inst_name == "fmov") {
-            source += "fmovi" + inst_type + " v0, 0.\n";
-            source += "lda" + inst_type + " v0\n";
-        } else if (inst_name == "lda") {
-            source += "ldai" + inst_type + " 0\n";
-        } else if (inst_name == "flda") {
-            source += "fldai" + inst_type + " 0.\n";
+        std::string source = ".function " + currType + " main(){\n";
+        if (instName == "mov") {
+            source += "movi" + instType + " v0, 0\n";
+            source += "lda" + instType + " v0\n";
+        } else if (instName == "fmov") {
+            source += "fmovi" + instType + " v0, 0.\n";
+            source += "lda" + instType + " v0\n";
+        } else if (instName == "lda") {
+            source += "ldai" + instType + " 0\n";
+        } else if (instName == "flda") {
+            source += "fldai" + instType + " 0.\n";
         } else {
             UNREACHABLE();
         }
-        source += "return" + inst_type + "\n";
+        source += "return" + instType + "\n";
         source += "}";
 
         ASSERT_TRUE(ParseToGraph(source, "main"));
@@ -507,31 +506,31 @@ public:
         GRAPH(graph)
         {
             CONSTANT(0, 0);
-            INS(0).SetType(data_type);
+            INS(0).SetType(dataType);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
                 INST(1, Opcode::Return).Inputs(0);
-                INS(1).SetType(data_type);
+                INS(1).SetType(dataType);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckCmp(const std::string &inst_name, compiler::DataType::Type data_type, const std::string &inst_type)
+    void CheckCmp(const std::string &instName, compiler::DataType::Type dataType, const std::string &instType)
     {
-        ASSERT(inst_name == "ucmp" || inst_name == "fcmpl" || inst_name == "fcmpg");
-        std::string curr_type;
-        if (data_type == compiler::DataType::Type::REFERENCE) {
-            curr_type = "i64[]";
+        ASSERT(instName == "ucmp" || instName == "fcmpl" || instName == "fcmpg");
+        std::string currType;
+        if (dataType == compiler::DataType::Type::REFERENCE) {
+            currType = "i64[]";
         } else {
-            curr_type = ToString(data_type);
+            currType = ToString(dataType);
         }
         std::string source = ".function i32 main(";
-        source += curr_type + " a0, ";
-        source += curr_type + " a1){\n";
-        source += "lda" + inst_type + " a0\n";
-        source += inst_name + inst_type + " a1\n";
+        source += currType + " a0, ";
+        source += currType + " a1){\n";
+        source += "lda" + instType + " a0\n";
+        source += instName + instType + " a1\n";
         source += "return\n";
         source += "}";
 
@@ -541,30 +540,30 @@ public:
         GRAPH(graph)
         {
             PARAMETER(0, 0);
-            INS(0).SetType(data_type);
+            INS(0).SetType(dataType);
             PARAMETER(1, 1);
-            INS(1).SetType(data_type);
+            INS(1).SetType(dataType);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(2, Opcode::Cmp).s32().Inputs(0, 1);
-                INST(3, Opcode::Return).s32().Inputs(2);
+                INST(2U, Opcode::Cmp).s32().Inputs(0, 1);
+                INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckFloatCmp(const std::string &inst_name, compiler::DataType::Type data_type, const std::string &inst_type,
+    void CheckFloatCmp(const std::string &instName, compiler::DataType::Type dataType, const std::string &instType,
                        bool fcmpg)
     {
-        ASSERT(inst_name == "fcmpl" || inst_name == "fcmpg");
-        std::string curr_type = ToString(data_type);
+        ASSERT(instName == "fcmpl" || instName == "fcmpg");
+        std::string currType = ToString(dataType);
 
         std::string source = ".function i32 main(";
-        source += curr_type + " a0, ";
-        source += curr_type + " a1){\n";
-        source += "lda" + inst_type + " a0\n";
-        source += inst_name + inst_type + " a1\n";
+        source += currType + " a0, ";
+        source += currType + " a1){\n";
+        source += "lda" + instType + " a0\n";
+        source += instName + instType + " a1\n";
         source += "return\n";
         source += "}";
 
@@ -574,14 +573,14 @@ public:
         GRAPH(graph)
         {
             PARAMETER(0, 0);
-            INS(0).SetType(data_type);
+            INS(0).SetType(dataType);
             PARAMETER(1, 1);
-            INS(1).SetType(data_type);
+            INS(1).SetType(dataType);
 
-            BASIC_BLOCK(2, -1)
+            BASIC_BLOCK(2U, -1)
             {
-                INST(2, Opcode::Cmp).s32().SrcType(data_type).Fcmpg(fcmpg).Inputs(0, 1);
-                INST(3, Opcode::Return).s32().Inputs(2);
+                INST(2U, Opcode::Cmp).s32().SrcType(dataType).Fcmpg(fcmpg).Inputs(0, 1);
+                INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -614,19 +613,19 @@ public:
                 UNREACHABLE();
         }
 
-        std::string inst_postfix {};
-        std::string param_type = "i32";
+        std::string instPostfix {};
+        std::string paramType = "i32";
         auto type = compiler::DataType::INT32;
         if constexpr (IS_OBJ) {
-            inst_postfix = ".obj";
-            param_type = "i64[]";
+            instPostfix = ".obj";
+            paramType = "i64[]";
             type = compiler::DataType::REFERENCE;
         }
 
         std::string source = ".function void main(";
-        source += param_type + " a0) {\n";
-        source += "lda" + inst_postfix + " a0\n";
-        source += cmd + inst_postfix + " label\n";
+        source += paramType + " a0) {\n";
+        source += "lda" + instPostfix + " a0\n";
+        source += cmd + instPostfix + " label\n";
         source += "label: ";
         source += "return.void\n}";
 
@@ -637,21 +636,21 @@ public:
         {
             PARAMETER(0, 0);
             INS(0).SetType(type);
-            CONSTANT(2, 0).s64();
+            CONSTANT(2U, 0).s64();
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3_I, 4_I)
             {
-                INST(1, Opcode::Compare).b().CC(cc).Inputs(0, 2);
-                INST(3, Opcode::IfImm)
+                INST(1U, Opcode::Compare).b().CC(cc).Inputs(0, 2_I);
+                INST(3U, Opcode::IfImm)
                     .SrcType(compiler::DataType::BOOL)
                     .CC(compiler::ConditionCode::CC_NE)
                     .Inputs(1)
                     .Imm(0);
             }
-            BASIC_BLOCK(3, 4) {}
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(3U, 4_I) {}
+            BASIC_BLOCK(4U, -1)
             {
-                INST(4, Opcode::ReturnVoid).v0id();
+                INST(4U, Opcode::ReturnVoid).v0id();
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -683,19 +682,19 @@ public:
             default:
                 UNREACHABLE();
         }
-        std::string inst_postfix {};
-        std::string param_type = "i32";
+        std::string instPostfix {};
+        std::string paramType = "i32";
         auto type = compiler::DataType::INT32;
         if constexpr (IS_OBJ) {
-            inst_postfix = ".obj";
-            param_type = "i64[]";
+            instPostfix = ".obj";
+            paramType = "i64[]";
             type = compiler::DataType::REFERENCE;
         }
 
         std::string source = ".function void main(";
-        source += param_type + " a0, " + param_type + " a1) {\n";
-        source += "lda" + inst_postfix + " a0\n";
-        source += cmd + inst_postfix + " a1, label\n";
+        source += paramType + " a0, " + paramType + " a1) {\n";
+        source += "lda" + instPostfix + " a0\n";
+        source += cmd + instPostfix + " a1, label\n";
         source += "label: ";
         source += "return.void\n}";
 
@@ -709,17 +708,17 @@ public:
             PARAMETER(1, 1);
             INS(1).SetType(type);
 
-            BASIC_BLOCK(2, 3, 4)
+            BASIC_BLOCK(2U, 3_I, 4_I)
             {
-                INST(2, Opcode::Compare).b().CC(cc).Inputs(0, 1);
-                INST(3, Opcode::IfImm)
+                INST(2U, Opcode::Compare).b().CC(cc).Inputs(0, 1);
+                INST(3U, Opcode::IfImm)
                     .SrcType(compiler::DataType::BOOL)
                     .CC(compiler::ConditionCode::CC_NE)
                     .Imm(0)
-                    .Inputs(2);
+                    .Inputs(2U);
             }
-            BASIC_BLOCK(3, 4) {}
-            BASIC_BLOCK(4, -1)
+            BASIC_BLOCK(3U, 4_I) {}
+            BASIC_BLOCK(4U, -1)
             {
                 INST(4, Opcode::ReturnVoid).v0id();
             }
@@ -727,7 +726,7 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckOtherPasses(panda::pandasm::Program *prog, const std::string &fun_name)
+    void CheckOtherPasses(panda::pandasm::Program *prog, const std::string &funName)
     {
         GetGraph()->RunPass<compiler::Cleanup>();
         GetGraph()->RunPass<Canonicalization>();
@@ -740,69 +739,69 @@ public:
         EXPECT_TRUE(GetGraph()->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
         GetGraph()->RunPass<compiler::Cleanup>();
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());
-        ASSERT_TRUE(prog->function_table.find(fun_name) != prog->function_table.end());
-        auto &function = prog->function_table.at(fun_name);
+        ASSERT_TRUE(prog->functionTable.find(funName) != prog->functionTable.end());
+        auto &function = prog->functionTable.at(funName);
         GetGraph()->RunPass<compiler::Cleanup>();
         EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, GetIrInterface()));
         auto pf = pandasm::AsmEmitter::Emit(*prog);
         ASSERT_NE(pf, nullptr);
     }
 
-    void CheckConstArrayFilling(panda::pandasm::Program *prog, [[maybe_unused]] const std::string &class_name,
-                                const std::string &func_name)
+    void CheckConstArrayFilling(panda::pandasm::Program *prog, [[maybe_unused]] const std::string &className,
+                                const std::string &funcName)
     {
-        if (prog->literalarray_table.size() == 1) {
-            EXPECT_TRUE(prog->literalarray_table["0"].literals[0].tag == panda_file::LiteralTag::TAGVALUE);
-            EXPECT_TRUE(prog->literalarray_table["0"].literals[1].tag == panda_file::LiteralTag::INTEGER);
-            EXPECT_TRUE(prog->literalarray_table["0"].literals[2].tag == panda_file::LiteralTag::ARRAY_I32);
+        if (prog->literalarrayTable.size() == 1) {
+            EXPECT_TRUE(prog->literalarrayTable["0"].literals[0U].tag == panda_file::LiteralTag::TAGVALUE);
+            EXPECT_TRUE(prog->literalarrayTable["0"].literals[1U].tag == panda_file::LiteralTag::INTEGER);
+            EXPECT_TRUE(prog->literalarrayTable["0"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I32);
             return;
         }
-        EXPECT_TRUE(prog->literalarray_table.size() == 8);
-        for (const auto &elem : prog->literalarray_table) {
-            EXPECT_TRUE(elem.second.literals.size() == 5);
-            EXPECT_TRUE(elem.second.literals[0].tag == panda_file::LiteralTag::TAGVALUE);
-            EXPECT_TRUE(elem.second.literals[1].tag == panda_file::LiteralTag::INTEGER);
+        EXPECT_TRUE(prog->literalarrayTable.size() == 8U);
+        for (const auto &elem : prog->literalarrayTable) {
+            EXPECT_TRUE(elem.second.literals.size() == 5U);
+            EXPECT_TRUE(elem.second.literals[0U].tag == panda_file::LiteralTag::TAGVALUE);
+            EXPECT_TRUE(elem.second.literals[1U].tag == panda_file::LiteralTag::INTEGER);
         }
-        EXPECT_TRUE(prog->literalarray_table["7"].literals[2].tag == panda_file::LiteralTag::ARRAY_U1);
-        EXPECT_TRUE(prog->literalarray_table["6"].literals[2].tag == panda_file::LiteralTag::ARRAY_I8);
-        EXPECT_TRUE(prog->literalarray_table["5"].literals[2].tag == panda_file::LiteralTag::ARRAY_I16);
-        EXPECT_TRUE(prog->literalarray_table["4"].literals[2].tag == panda_file::LiteralTag::ARRAY_I32);
-        EXPECT_TRUE(prog->literalarray_table["3"].literals[2].tag == panda_file::LiteralTag::ARRAY_I64);
-        EXPECT_TRUE(prog->literalarray_table["2"].literals[2].tag == panda_file::LiteralTag::ARRAY_F32);
-        EXPECT_TRUE(prog->literalarray_table["1"].literals[2].tag == panda_file::LiteralTag::ARRAY_F64);
-        EXPECT_TRUE(prog->literalarray_table["0"].literals[2].tag == panda_file::LiteralTag::ARRAY_STRING);
+        EXPECT_TRUE(prog->literalarrayTable["7"].literals[2U].tag == panda_file::LiteralTag::ARRAY_U1);
+        EXPECT_TRUE(prog->literalarrayTable["6"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I8);
+        EXPECT_TRUE(prog->literalarrayTable["5"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I16);
+        EXPECT_TRUE(prog->literalarrayTable["4"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I32);
+        EXPECT_TRUE(prog->literalarrayTable["3"].literals[2U].tag == panda_file::LiteralTag::ARRAY_I64);
+        EXPECT_TRUE(prog->literalarrayTable["2"].literals[2U].tag == panda_file::LiteralTag::ARRAY_F32);
+        EXPECT_TRUE(prog->literalarrayTable["1"].literals[2U].tag == panda_file::LiteralTag::ARRAY_F64);
+        EXPECT_TRUE(prog->literalarrayTable["0"].literals[2U].tag == panda_file::LiteralTag::ARRAY_STRING);
 
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());
-        ASSERT_TRUE(prog->function_table.find(func_name) != prog->function_table.end());
-        auto &function = prog->function_table.at(func_name);
+        ASSERT_TRUE(prog->functionTable.find(funcName) != prog->functionTable.end());
+        auto &function = prog->functionTable.at(funcName);
         EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, GetIrInterface()));
-        ASSERT(pandasm::AsmEmitter::Emit(class_name + ".panda", *prog, nullptr, nullptr, false));
+        ASSERT(pandasm::AsmEmitter::Emit(className + ".panda", *prog, nullptr, nullptr, false));
     }
 
     enum CheckConstArrayTypes { ACCESS, SKIP_MULTIDIM_ARRAYS };
 
-    void CheckConstArray(panda::pandasm::Program *prog, const char *class_name, const std::string &func_name,
+    void CheckConstArray(panda::pandasm::Program *prog, const char *className, const std::string &funcName,
                          CheckConstArrayTypes type)
     {
-        OPTIONS.SetConstArrayResolver(true);
+        g_options.SetConstArrayResolver(true);
 
-        panda::pandasm::AsmEmitter::Emit(std::string(class_name) + ".panda", *prog, nullptr, nullptr, false);
-        auto temp_name = func_name.substr(func_name.find('.') + 1);
-        EXPECT_TRUE(ParseToGraph(prog, temp_name.substr(0, temp_name.find(':'))));
+        panda::pandasm::AsmEmitter::Emit(std::string(className) + ".panda", *prog, nullptr, nullptr, false);
+        auto tempName = funcName.substr(funcName.find('.') + 1);
+        EXPECT_TRUE(ParseToGraph(prog, tempName.substr(0, tempName.find(':'))));
         EXPECT_TRUE(RunOptimizations(GetGraph(), GetIrInterface()));
 
-        compiler::Inst *const_array_def_inst {nullptr};
+        compiler::Inst *constArrayDefInst {nullptr};
         for (auto bb : GetGraph()->GetBlocksRPO()) {
             for (auto inst : bb->AllInsts()) {
                 switch (type) {
                     case CheckConstArrayTypes::ACCESS: {
                         if (inst->GetOpcode() == Opcode::LoadConstArray) {
-                            const_array_def_inst = inst;
+                            constArrayDefInst = inst;
                             continue;
                         }
                         if (inst->GetOpcode() == Opcode::LoadArray) {
-                            EXPECT_TRUE(const_array_def_inst != nullptr);
-                            EXPECT_TRUE(inst->CastToLoadArray()->GetArray() == const_array_def_inst);
+                            EXPECT_TRUE(constArrayDefInst != nullptr);
+                            EXPECT_TRUE(inst->CastToLoadArray()->GetArray() == constArrayDefInst);
                         }
                         continue;
                     }
@@ -817,8 +816,8 @@ public:
         }
 
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());
-        ASSERT_TRUE(prog->function_table.find(func_name) != prog->function_table.end());
-        auto &function = prog->function_table.at(func_name);
+        ASSERT_TRUE(prog->functionTable.find(funcName) != prog->functionTable.end());
+        auto &function = prog->functionTable.at(funcName);
         EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, GetIrInterface()));
         ASSERT(pandasm::AsmEmitter::Emit("LiteralArrayIntAccess.panda", *prog, nullptr, nullptr, false));
     }

@@ -27,9 +27,9 @@ class Loop final {
 public:
     Loop(ArenaAllocator *allocator, BasicBlock *header, uint32_t id)
         : header_(header),
-          back_edges_(allocator->Adapter()),
+          backEdges_(allocator->Adapter()),
           blocks_(allocator->Adapter()),
-          inner_loops_(allocator->Adapter()),
+          innerLoops_(allocator->Adapter()),
           id_(id)
     {
     }
@@ -40,61 +40,60 @@ public:
 
     bool operator==(const Loop &other) const
     {
-        return std::tie(header_, pre_header_, is_irreducible_, is_root_, is_infinite_) ==
-                   std::tie(other.header_, other.pre_header_, other.is_irreducible_, other.is_root_,
-                            other.is_infinite_) &&
-               IsEqualBlocks(blocks_, other.blocks_) && IsEqualBlocks(back_edges_, other.back_edges_);
+        return std::tie(header_, preHeader_, isIrreducible_, isRoot_, isInfinite_) ==
+                   std::tie(other.header_, other.preHeader_, other.isIrreducible_, other.isRoot_, other.isInfinite_) &&
+               IsEqualBlocks(blocks_, other.blocks_) && IsEqualBlocks(backEdges_, other.backEdges_);
     }
 
     BasicBlock *GetHeader() const
     {
         return header_;
     }
-    void SetPreHeader(BasicBlock *pre_header)
+    void SetPreHeader(BasicBlock *preHeader)
     {
-        pre_header_ = pre_header;
+        preHeader_ = preHeader;
     }
 
     BasicBlock *GetPreHeader() const
     {
-        return pre_header_;
+        return preHeader_;
     }
     void AppendBackEdge(BasicBlock *block)
     {
-        ASSERT(std::find(back_edges_.begin(), back_edges_.end(), block) == back_edges_.end());
-        back_edges_.push_back(block);
+        ASSERT(std::find(backEdges_.begin(), backEdges_.end(), block) == backEdges_.end());
+        backEdges_.push_back(block);
     }
 
-    void ReplaceBackEdge(BasicBlock *block, BasicBlock *new_block)
+    void ReplaceBackEdge(BasicBlock *block, BasicBlock *newBlock)
     {
-        ASSERT(block != new_block);
-        ASSERT(std::find(back_edges_.begin(), back_edges_.end(), new_block) == back_edges_.end());
-        auto it = std::find(back_edges_.begin(), back_edges_.end(), block);
-        ASSERT(it != back_edges_.end());
-        ASSERT(std::find(it + 1, back_edges_.end(), block) == back_edges_.end());
-        back_edges_[std::distance(back_edges_.begin(), it)] = new_block;
+        ASSERT(block != newBlock);
+        ASSERT(std::find(backEdges_.begin(), backEdges_.end(), newBlock) == backEdges_.end());
+        auto it = std::find(backEdges_.begin(), backEdges_.end(), block);
+        ASSERT(it != backEdges_.end());
+        ASSERT(std::find(it + 1, backEdges_.end(), block) == backEdges_.end());
+        backEdges_[std::distance(backEdges_.begin(), it)] = newBlock;
     }
 
     bool HasBackEdge(BasicBlock *block) const
     {
-        auto it = std::find(back_edges_.begin(), back_edges_.end(), block);
-        return it != back_edges_.end();
+        auto it = std::find(backEdges_.begin(), backEdges_.end(), block);
+        return it != backEdges_.end();
     }
 
     void RemoveBackEdge(BasicBlock *block)
     {
-        auto it = std::find(back_edges_.begin(), back_edges_.end(), block);
-        ASSERT(it != back_edges_.end());
-        ASSERT(std::find(it + 1, back_edges_.end(), block) == back_edges_.end());
-        back_edges_[std::distance(back_edges_.begin(), it)] = back_edges_.back();
-        back_edges_.pop_back();
+        auto it = std::find(backEdges_.begin(), backEdges_.end(), block);
+        ASSERT(it != backEdges_.end());
+        ASSERT(std::find(it + 1, backEdges_.end(), block) == backEdges_.end());
+        backEdges_[std::distance(backEdges_.begin(), it)] = backEdges_.back();
+        backEdges_.pop_back();
     }
 
     void MoveHeaderToSucc();
 
     const ArenaVector<BasicBlock *> &GetBackEdges() const
     {
-        return back_edges_;
+        return backEdges_;
     }
 
     void AppendBlock(BasicBlock *block);
@@ -113,49 +112,49 @@ public:
     {
         return blocks_;
     }
-    void AppendInnerLoop(Loop *inner_loop)
+    void AppendInnerLoop(Loop *innerLoop)
     {
-        inner_loops_.push_back(inner_loop);
+        innerLoops_.push_back(innerLoop);
     }
     ArenaVector<Loop *> &GetInnerLoops()
     {
-        return inner_loops_;
+        return innerLoops_;
     }
     const ArenaVector<Loop *> &GetInnerLoops() const
     {
-        return inner_loops_;
+        return innerLoops_;
     }
-    void SetOuterLoop(Loop *outer_loop)
+    void SetOuterLoop(Loop *outerLoop)
     {
-        outer_loop_ = outer_loop;
+        outerLoop_ = outerLoop;
     }
     Loop *GetOuterLoop() const
     {
-        return outer_loop_;
+        return outerLoop_;
     }
-    void SetIsIrreducible(bool is_irreducible)
+    void SetIsIrreducible(bool isIrreducible)
     {
-        is_irreducible_ = is_irreducible;
+        isIrreducible_ = isIrreducible;
     }
     bool IsIrreducible() const
     {
-        return is_irreducible_;
+        return isIrreducible_;
     }
     bool IsInfinite() const
     {
-        return is_infinite_;
+        return isInfinite_;
     }
-    void SetIsInfinite(bool is_infinite)
+    void SetIsInfinite(bool isInfinite)
     {
-        is_infinite_ = is_infinite;
+        isInfinite_ = isInfinite;
     }
     void SetAsRoot()
     {
-        is_root_ = true;
+        isRoot_ = true;
     }
     bool IsRoot() const
     {
-        return is_root_;
+        return isRoot_;
     }
     uint32_t GetId() const
     {
@@ -189,16 +188,16 @@ private:
 
 private:
     BasicBlock *header_ {nullptr};
-    BasicBlock *pre_header_ {nullptr};
-    ArenaVector<BasicBlock *> back_edges_;
+    BasicBlock *preHeader_ {nullptr};
+    ArenaVector<BasicBlock *> backEdges_;
     ArenaVector<BasicBlock *> blocks_;
-    ArenaVector<Loop *> inner_loops_;
-    Loop *outer_loop_ {nullptr};
+    ArenaVector<Loop *> innerLoops_;
+    Loop *outerLoop_ {nullptr};
     uint32_t id_ {INVALID_ID};
     uint32_t depth_ {0};
-    bool is_irreducible_ {false};
-    bool is_infinite_ {false};
-    bool is_root_ {false};
+    bool isIrreducible_ {false};
+    bool isInfinite_ {false};
+    bool isRoot_ {false};
 
     friend class LoopAnalyzer;
 };
@@ -215,17 +214,17 @@ public:
     }
 
     void CreateRootLoop();
-    Loop *CreateNewLoop(BasicBlock *loop_header);
+    Loop *CreateNewLoop(BasicBlock *loopHeader);
 
 private:
     void ResetLoopInfo();
     void CollectBackEdges();
     void BackEdgeSearch(BasicBlock *block);
-    void ProcessNewBackEdge(BasicBlock *header, BasicBlock *back_edge);
+    void ProcessNewBackEdge(BasicBlock *header, BasicBlock *backEdge);
     void FindAndInsertPreHeaders(Loop *loop);
-    void MovePhiInputsToPreHeader(BasicBlock *header, BasicBlock *pre_header, const ArenaVector<int> &fw_edges_indexes);
-    void UpdateControlFlowWithPreHeader(BasicBlock *header, BasicBlock *pre_header,
-                                        const ArenaVector<int> &fw_edges_indexes);
+    void MovePhiInputsToPreHeader(BasicBlock *header, BasicBlock *preHeader, const ArenaVector<int> &fwEdgesIndexes);
+    void UpdateControlFlowWithPreHeader(BasicBlock *header, BasicBlock *preHeader,
+                                        const ArenaVector<int> &fwEdgesIndexes);
     ArenaVector<int> GetForwardEdgesIndexes(BasicBlock *header);
     bool PreHeaderExists(Loop *loop);
     BasicBlock *CreatePreHeader(BasicBlock *header);
@@ -235,9 +234,9 @@ private:
     void SetLoopProperties(Loop *loop, uint32_t depth);
 
 private:
-    Marker black_marker_ {};
-    Marker gray_marker_ {};
-    uint32_t loop_counter_ {0};
+    Marker blackMarker_ {};
+    Marker grayMarker_ {};
+    uint32_t loopCounter_ {0};
 };
 
 BasicBlock *GetLoopOutsideSuccessor(Loop *loop);

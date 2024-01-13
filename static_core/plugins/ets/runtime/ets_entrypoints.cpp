@@ -37,47 +37,47 @@ using TypeId = panda_file::Type::TypeId;
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-static inline bool Launch(EtsCoroutine *current_coro, Method *method, const EtsHandle<EtsPromise> &promise_handle,
+static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHandle<EtsPromise> &promiseHandle,
                           PandaVector<Value> &&args)
 {
-    ASSERT(current_coro != nullptr);
-    PandaEtsVM *ets_vm = current_coro->GetPandaVM();
-    auto promise_ref = ets_vm->GetGlobalObjectStorage()->Add(promise_handle.GetPtr(), mem::Reference::ObjectType::WEAK);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promise_ref);
-    promise_handle.GetPtr()->SetEventPtr(evt);
+    ASSERT(currentCoro != nullptr);
+    PandaEtsVM *etsVm = currentCoro->GetPandaVM();
+    auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::WEAK);
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef);
+    promiseHandle.GetPtr()->SetEventPtr(evt);
     // create the coro and put it to the ready queue
-    auto *coro = current_coro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineAffinity::NONE);
+    auto *coro = currentCoro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineAffinity::NONE);
     if (UNLIKELY(coro == nullptr)) {
         // OOM
-        promise_handle.GetPtr()->SetEventPtr(nullptr);
+        promiseHandle.GetPtr()->SetEventPtr(nullptr);
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         return false;
     }
     return true;
 }
 
-void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHeader *this_obj)
+void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHeader *thisObj)
 {
     auto *promise = reinterpret_cast<EtsPromise *>(obj);
     ASSERT(promise != nullptr);
 
     PandaVector<Value> values;
-    if (this_obj != nullptr) {
+    if (thisObj != nullptr) {
         ASSERT(!method->IsStatic());
         // Add this for virtual call
-        values.push_back(Value(this_obj));
+        values.push_back(Value(thisObj));
     } else {
         ASSERT(method->IsStatic());
     }
-    arch::ArgReaderStack<RUNTIME_ARCH> arg_reader(reinterpret_cast<uint8_t *>(args));
+    arch::ArgReaderStack<RUNTIME_ARCH> argReader(reinterpret_cast<uint8_t *>(args));
     arch::ValueWriter writer(&values);
-    ARCH_COPY_METHOD_ARGS(method, arg_reader, writer);
+    ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
-    auto *current_coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(current_coro);
-    EtsHandle<EtsPromise> promise_handle(current_coro, promise);
-    bool successful_launch = Launch(current_coro, method, promise_handle, std::move(values));
-    if (UNLIKELY(!successful_launch)) {
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
+    bool successfulLaunch = Launch(currentCoro, method, promiseHandle, std::move(values));
+    if (UNLIKELY(!successfulLaunch)) {
         HandlePendingException();
         UNREACHABLE();
     }
@@ -85,17 +85,13 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
 
 extern "C" void CreateLaunchStaticCoroutineEntrypoint(Method *method, ObjectHeader *obj, uint64_t *args)
 {
-    // BEGIN_ENTRYPOINT();
-
     LaunchCoroutine(method, obj, args, nullptr);
 }
 
 extern "C" void CreateLaunchVirtualCoroutineEntrypoint(Method *method, ObjectHeader *obj, uint64_t *args,
-                                                       ObjectHeader *this_obj)
+                                                       ObjectHeader *thisObj)
 {
-    // BEGIN_ENTRYPOINT();
-
-    LaunchCoroutine(method, obj, args, this_obj);
+    LaunchCoroutine(method, obj, args, thisObj);
 }
 
 template <BytecodeInstruction::Format FORMAT>
@@ -106,23 +102,23 @@ ObjectHeader *LaunchFromInterpreterImpl(Method *method, Frame *frame, const uint
         return nullptr;
     }
 
-    auto num_args = method->GetNumArgs();
-    auto args = PandaVector<Value> {num_args};
-    auto frame_handler = StaticFrameHandler(frame);
-    auto vreg_iter = interpreter::VRegisterIterator<FORMAT> {BytecodeInstruction(pc), frame};
-    for (decltype(num_args) i = 0; i < num_args; ++i) {
-        args[i] = Value::FromVReg(frame_handler.GetVReg(vreg_iter.GetVRegIdx(i)));
+    auto numArgs = method->GetNumArgs();
+    auto args = PandaVector<Value> {numArgs};
+    auto frameHandler = StaticFrameHandler(frame);
+    auto vregIter = interpreter::VRegisterIterator<FORMAT> {BytecodeInstruction(pc), frame};
+    for (decltype(numArgs) i = 0; i < numArgs; ++i) {
+        args[i] = Value::FromVReg(frameHandler.GetVReg(vregIter.GetVRegIdx(i)));
     }
 
-    auto *current_coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(current_coro);
-    EtsHandle<EtsPromise> promise_handle(current_coro, promise);
-    bool successful_launch = Launch(current_coro, method, promise_handle, std::move(args));
-    if (UNLIKELY(!successful_launch)) {
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
+    bool successfulLaunch = Launch(currentCoro, method, promiseHandle, std::move(args));
+    if (UNLIKELY(!successfulLaunch)) {
         return nullptr;
     }
-    frame->GetAccAsVReg().SetReference(promise_handle.GetPtr());
-    return promise_handle.GetPtr();
+    frame->GetAccAsVReg().SetReference(promiseHandle.GetPtr());
+    return promiseHandle.GetPtr();
 }
 
 extern "C" ObjectHeader *LaunchFromInterpreterShort(Method *method, Frame *frame, const uint8_t *pc)

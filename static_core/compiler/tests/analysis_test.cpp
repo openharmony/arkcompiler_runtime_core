@@ -199,8 +199,8 @@ TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
         }
     }
 
-    auto bridge_example = CreateEmptyGraph();
-    GRAPH(bridge_example)
+    auto bridgeExample = CreateEmptyGraph();
+    GRAPH(bridgeExample)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -210,9 +210,9 @@ TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
         }
     }
 
-    Graph *graph_bc = CreateEmptyBytecodeGraph();
-    graph_bc->SetRuntime(&runtime_);
-    GRAPH(graph_bc)
+    Graph *graphBc = CreateEmptyBytecodeGraph();
+    graphBc->SetRuntime(&runtime_);
+    GRAPH(graphBc)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -236,11 +236,11 @@ TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
     const BasicBlock *bb = GetGraph()->GetVectorBlocks().at(2U);
     ssb.SearchAndCreateMissingObjInSaveState(GetGraph(), bb->GetFirstInst(), bb->GetLastInst());
 
-    const BasicBlock *bb_bc = graph_bc->GetVectorBlocks().at(2U);
-    ssb.SearchAndCreateMissingObjInSaveState(graph_bc, bb_bc->GetFirstInst(), bb_bc->GetLastInst());
+    const BasicBlock *bbBc = graphBc->GetVectorBlocks().at(2U);
+    ssb.SearchAndCreateMissingObjInSaveState(graphBc, bbBc->GetFirstInst(), bbBc->GetLastInst());
 
-    ASSERT_TRUE(GraphComparator().Compare(graph_bc, example));
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), bridge_example));
+    ASSERT_TRUE(GraphComparator().Compare(graphBc, example));
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), bridgeExample));
 }
 
 // NOLINTEND(readability-magic-numbers)

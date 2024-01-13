@@ -41,12 +41,12 @@ namespace panda::paoc {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_PAOC(level) LOG(level, COMPILER) << "PAOC: "
 
-Paoc::CompilingContext::CompilingContext(Method *method_ptr, size_t method_index, std::ofstream *statistics_dump)
-    : method(method_ptr),
+Paoc::CompilingContext::CompilingContext(Method *methodPtr, size_t methodIndex, std::ofstream *statisticsDump)
+    : method(methodPtr),
       allocator(panda::SpaceType::SPACE_TYPE_COMPILER, PandaVM::GetCurrent()->GetMemStats(), true),
-      graph_local_allocator(panda::SpaceType::SPACE_TYPE_COMPILER, PandaVM::GetCurrent()->GetMemStats(), true),
-      index(method_index),
-      stats(statistics_dump)
+      graphLocalAllocator(panda::SpaceType::SPACE_TYPE_COMPILER, PandaVM::GetCurrent()->GetMemStats(), true),
+      index(methodIndex),
+      stats(statisticsDump)
 {
 }
 
@@ -56,7 +56,7 @@ Paoc::CompilingContext::~CompilingContext()
         graph->~Graph();
     }
     ASSERT(stats != nullptr);
-    if (compilation_status && *stats) {
+    if (compilationStatus && *stats) {
         DumpStatistics();
     }
 }
@@ -67,7 +67,7 @@ void Paoc::CompilingContext::DumpStatistics() const
     *stats << method->GetFullName() << sep;
     *stats << "paoc-summary" << sep;
     *stats << allocator.GetAllocatedSize() << sep;
-    *stats << graph_local_allocator.GetAllocatedSize() << '\n';
+    *stats << graphLocalAllocator.GetAllocatedSize() << '\n';
 }
 
 /// A class that encloses paoc's initialization:
@@ -78,30 +78,30 @@ public:
     int Init(const panda::Span<const char *> &args)
     {
         ASSERT(args.Data() != nullptr);
-        panda::PandArgParser pa_parser;
+        panda::PandArgParser paParser;
 
-        paoc_->runtime_options_ = std::make_unique<decltype(paoc_->runtime_options_)::element_type>(args[0]);
-        paoc_->runtime_options_->AddOptions(&pa_parser);
-        paoc_->paoc_options_ = std::make_unique<decltype(paoc_->paoc_options_)::element_type>(args[0]);
-        paoc_->paoc_options_->AddOptions(&pa_parser);
-        panda::compiler::OPTIONS.AddOptions(&pa_parser);
+        paoc_->runtimeOptions_ = std::make_unique<decltype(paoc_->runtimeOptions_)::element_type>(args[0]);
+        paoc_->runtimeOptions_->AddOptions(&paParser);
+        paoc_->paocOptions_ = std::make_unique<decltype(paoc_->paocOptions_)::element_type>(args[0]);
+        paoc_->paocOptions_->AddOptions(&paParser);
+        panda::compiler::g_options.AddOptions(&paParser);
 
-        base_options::Options base_options("");
-        base_options.AddOptions((&pa_parser));
+        base_options::Options baseOptions("");
+        baseOptions.AddOptions((&paParser));
 
-        paoc_->AddExtraOptions(&pa_parser);
+        paoc_->AddExtraOptions(&paParser);
 
-        if (!pa_parser.Parse(args.Size(), args.Data())) {
-            std::cerr << "Error: " << pa_parser.GetErrorString() << "\n";
+        if (!paParser.Parse(args.Size(), args.Data())) {
+            std::cerr << "Error: " << paParser.GetErrorString() << "\n";
             return -1;
         }
-        Logger::Initialize(base_options);
-        if (paoc_->paoc_options_->GetPaocPandaFiles().empty()) {
-            paoc_->PrintUsage(pa_parser);
+        Logger::Initialize(baseOptions);
+        if (paoc_->paocOptions_->GetPaocPandaFiles().empty()) {
+            paoc_->PrintUsage(paParser);
             return 1;
         }
-        if (!os::IsDirExists(os::GetParentDir(paoc_->paoc_options_->GetPaocOutput()))) {
-            std::cerr << "Error: directory for output file \"" << paoc_->paoc_options_->GetPaocOutput()
+        if (!os::IsDirExists(os::GetParentDir(paoc_->paocOptions_->GetPaocOutput()))) {
+            std::cerr << "Error: directory for output file \"" << paoc_->paocOptions_->GetPaocOutput()
                       << "\" doesn't exist "
                       << "\n";
             return -1;
@@ -112,7 +112,7 @@ public:
         if (InitCompiler() != 0) {
             return -1;
         }
-        if (paoc_->paoc_options_->WasSetPaocClusters() && !InitPaocClusters(&pa_parser)) {
+        if (paoc_->paocOptions_->WasSetPaocClusters() && !InitPaocClusters(&paParser)) {
             return -1;
         }
         if (paoc_->IsLLVMAotMode()) {
@@ -125,20 +125,20 @@ public:
 private:
     int InitRuntime()
     {
-        auto runtime_options_err = paoc_->runtime_options_->Validate();
-        if (runtime_options_err) {
-            std::cerr << "Error: " << runtime_options_err.value().GetMessage() << std::endl;
+        auto runtimeOptionsErr = paoc_->runtimeOptions_->Validate();
+        if (runtimeOptionsErr) {
+            std::cerr << "Error: " << runtimeOptionsErr.value().GetMessage() << std::endl;
             return 1;
         }
 #ifndef PANDA_ASAN_ON
-        if (!paoc_->runtime_options_->WasSetInternalMemorySizeLimit()) {
+        if (!paoc_->runtimeOptions_->WasSetInternalMemorySizeLimit()) {
             // 2Gb - for emitting code
             constexpr size_t CODE_SIZE_LIMIT = 0x7f000000;
-            paoc_->runtime_options_->SetInternalMemorySizeLimit(CODE_SIZE_LIMIT);
+            paoc_->runtimeOptions_->SetInternalMemorySizeLimit(CODE_SIZE_LIMIT);
         }
 #endif
-        paoc_->runtime_options_->SetArkAot(true);
-        if (!panda::Runtime::Create(*paoc_->runtime_options_)) {
+        paoc_->runtimeOptions_->SetArkAot(true);
+        if (!panda::Runtime::Create(*paoc_->runtimeOptions_)) {
             std::cerr << "Failed to create runtime!\n";
             return -1;
         }
@@ -148,27 +148,27 @@ private:
 
     int InitCompiler()
     {
-        CompilerLogger::Init(panda::compiler::OPTIONS.GetCompilerLog());
+        CompilerLogger::Init(panda::compiler::g_options.GetCompilerLog());
 
-        if (panda::compiler::OPTIONS.IsCompilerEnableEvents()) {
-            EventWriter::Init(panda::compiler::OPTIONS.GetCompilerEventsPath());
+        if (panda::compiler::g_options.IsCompilerEnableEvents()) {
+            EventWriter::Init(panda::compiler::g_options.GetCompilerEventsPath());
         }
         ValidateCompilerOptions();
 
-        if (paoc_->paoc_options_->WasSetPaocMethodsFromFile()) {
+        if (paoc_->paocOptions_->WasSetPaocMethodsFromFile()) {
             InitPaocMethodsFromFile();
         }
-        paoc_->skip_info_.is_first_compiled = !paoc_->paoc_options_->WasSetPaocSkipUntil();
-        paoc_->skip_info_.is_last_compiled = false;
+        paoc_->skipInfo_.isFirstCompiled = !paoc_->paocOptions_->WasSetPaocSkipUntil();
+        paoc_->skipInfo_.isLastCompiled = false;
 
         if (!InitAotBuilder()) {
             return 1;
         }
-        if (paoc_->paoc_options_->WasSetPaocDumpStatsCsv()) {
-            paoc_->statistics_dump_ = std::ofstream(paoc_->paoc_options_->GetPaocDumpStatsCsv(), std::ofstream::trunc);
+        if (paoc_->paocOptions_->WasSetPaocDumpStatsCsv()) {
+            paoc_->statisticsDump_ = std::ofstream(paoc_->paocOptions_->GetPaocDumpStatsCsv(), std::ofstream::trunc);
         }
         InitPaocMode();
-        paoc_->code_allocator_ = new ArenaAllocator(panda::SpaceType::SPACE_TYPE_INTERNAL, nullptr, true);
+        paoc_->codeAllocator_ = new ArenaAllocator(panda::SpaceType::SPACE_TYPE_INTERNAL, nullptr, true);
         paoc_->loader_ = panda::Runtime::GetCurrent()->GetClassLinker();
 
         return 0;
@@ -176,25 +176,25 @@ private:
 
     void ValidateCompilerOptions()
     {
-        auto compiler_options_err = panda::compiler::OPTIONS.Validate();
-        if (compiler_options_err) {
-            LOG_PAOC(FATAL) << compiler_options_err.value().GetMessage();
+        auto compilerOptionsErr = panda::compiler::g_options.Validate();
+        if (compilerOptionsErr) {
+            LOG_PAOC(FATAL) << compilerOptionsErr.value().GetMessage();
         }
-        auto paoc_options_err = paoc_->paoc_options_->Validate();
-        if (paoc_options_err) {
-            LOG_PAOC(FATAL) << paoc_options_err.value().GetMessage();
+        auto paocOptionsErr = paoc_->paocOptions_->Validate();
+        if (paocOptionsErr) {
+            LOG_PAOC(FATAL) << paocOptionsErr.value().GetMessage();
         }
 
         paoc_->ValidateExtraOptions();
 
-        if (paoc_->paoc_options_->WasSetPaocOutput() && paoc_->paoc_options_->WasSetPaocBootOutput()) {
+        if (paoc_->paocOptions_->WasSetPaocOutput() && paoc_->paocOptions_->WasSetPaocBootOutput()) {
             LOG_PAOC(FATAL) << "combination of --paoc-output and --paoc-boot-output is not compatible\n";
         }
-        if (paoc_->paoc_options_->WasSetPaocBootPandaLocations()) {
-            if (paoc_->paoc_options_->WasSetPaocBootLocation()) {
+        if (paoc_->paocOptions_->WasSetPaocBootPandaLocations()) {
+            if (paoc_->paocOptions_->WasSetPaocBootLocation()) {
                 LOG_PAOC(FATAL) << "We can't use --paoc-boot-panda-locations with --paoc-boot-location\n";
             }
-            auto locations = paoc_->paoc_options_->GetPaocBootPandaLocations();
+            auto locations = paoc_->paocOptions_->GetPaocBootPandaLocations();
             size_t i = 0;
             // In fact boot files are preloaded by Runtime
             for (auto bpf : Runtime::GetCurrent()->GetClassLinker()->GetBootPandaFiles()) {
@@ -204,15 +204,15 @@ private:
                         << "number of locations in --paoc-boot-panda-locations less then files in --boot-panda-files\n";
                 }
                 auto filename = locations[i];
-                auto bpf_name = bpf->GetFilename();
-                if (!CompareBootFiles(bpf_name, filename)) {
+                auto bpfName = bpf->GetFilename();
+                if (!CompareBootFiles(bpfName, filename)) {
                     EVENT_PAOC("different files in --paoc-boot-panda-locations and --boot-panda-files");
                     LOG_PAOC(ERROR) << "The file from --paoc-boot-panda-locations: " << filename;
                     LOG_PAOC(ERROR) << "isn't eqaul the file from --boot-panda-files: " << bpf->GetFilename();
                     LOG_PAOC(FATAL) << "Files posotions " << i;
                 }
-                paoc_->location_mapping_[bpf_name] = filename;
-                paoc_->preloaded_files_[paoc_->GetFilePath(bpf_name)] = bpf;
+                paoc_->locationMapping_[bpfName] = filename;
+                paoc_->preloadedFiles_[paoc_->GetFilePath(bpfName)] = bpf;
                 ++i;
             }
             if (i != locations.size()) {
@@ -223,36 +223,36 @@ private:
         }
         // In fact boot files are preloaded by Runtime
         for (auto bpf : Runtime::GetCurrent()->GetClassLinker()->GetBootPandaFiles()) {
-            if (!paoc_->paoc_options_->GetPaocBootLocation().empty()) {
-                std::string filename = GetFileLocation(*bpf, paoc_->paoc_options_->GetPaocBootLocation());
-                paoc_->location_mapping_[bpf->GetFilename()] = filename;
+            if (!paoc_->paocOptions_->GetPaocBootLocation().empty()) {
+                std::string filename = GetFileLocation(*bpf, paoc_->paocOptions_->GetPaocBootLocation());
+                paoc_->locationMapping_[bpf->GetFilename()] = filename;
             }
-            paoc_->preloaded_files_[paoc_->GetFilePath(bpf->GetFilename())] = bpf;
+            paoc_->preloadedFiles_[paoc_->GetFilePath(bpf->GetFilename())] = bpf;
         }
     }
 
     void InitPaocMethodsFromFile()
     {
-        std::ifstream mfile(paoc_->paoc_options_->GetPaocMethodsFromFile());
+        std::ifstream mfile(paoc_->paocOptions_->GetPaocMethodsFromFile());
         std::string line;
         if (mfile) {
             while (getline(mfile, line)) {
-                paoc_->methods_list_.insert(line);
+                paoc_->methodsList_.insert(line);
             }
         }
-        LOG_PAOC(INFO) << "Method list size: " << paoc_->methods_list_.size();
+        LOG_PAOC(INFO) << "Method list size: " << paoc_->methodsList_.size();
     }
 
     void InitPaocMode()
     {
-        const auto &mode_str = paoc_->paoc_options_->GetPaocMode();
-        if (mode_str == "aot") {
+        const auto &modeStr = paoc_->paocOptions_->GetPaocMode();
+        if (modeStr == "aot") {
             paoc_->mode_ = PaocMode::AOT;
-        } else if (mode_str == "jit") {
+        } else if (modeStr == "jit") {
             paoc_->mode_ = PaocMode::JIT;
-        } else if (mode_str == "osr") {
+        } else if (modeStr == "osr") {
             paoc_->mode_ = PaocMode::OSR;
-        } else if (mode_str == "llvm") {
+        } else if (modeStr == "llvm") {
             paoc_->mode_ = PaocMode::LLVM;
         } else {
             UNREACHABLE();
@@ -262,53 +262,53 @@ private:
     bool InitAotBuilder()
     {
         Arch arch = RUNTIME_ARCH;
-        bool cross_compilation = false;
-        if (compiler::OPTIONS.WasSetCompilerCrossArch()) {
-            arch = GetArchFromString(compiler::OPTIONS.GetCompilerCrossArch());
-            cross_compilation = arch != RUNTIME_ARCH;
+        bool crossCompilation = false;
+        if (compiler::g_options.WasSetCompilerCrossArch()) {
+            arch = GetArchFromString(compiler::g_options.GetCompilerCrossArch());
+            crossCompilation = arch != RUNTIME_ARCH;
         }
-        panda::compiler::OPTIONS.AdjustCpuFeatures(cross_compilation);
+        panda::compiler::g_options.AdjustCpuFeatures(crossCompilation);
 
         if (arch == Arch::NONE) {
-            LOG_PAOC(ERROR) << "Invalid --compiler-cross-arch option:" << compiler::OPTIONS.GetCompilerCrossArch();
+            LOG_PAOC(ERROR) << "Invalid --compiler-cross-arch option:" << compiler::g_options.GetCompilerCrossArch();
             return false;
         }
         if (!BackendSupport(arch)) {
-            LOG_PAOC(ERROR) << "Backend is not supported: " << compiler::OPTIONS.GetCompilerCrossArch();
+            LOG_PAOC(ERROR) << "Backend is not supported: " << compiler::g_options.GetCompilerCrossArch();
             return false;
         }
-        paoc_->aot_builder_ = paoc_->CreateAotBuilder();
-        paoc_->aot_builder_->SetArch(arch);
+        paoc_->aotBuilder_ = paoc_->CreateAotBuilder();
+        paoc_->aotBuilder_->SetArch(arch);
 
         // Initialize GC:
-        auto runtime_lang = paoc_->runtime_options_->GetRuntimeType();
+        auto runtimeLang = paoc_->runtimeOptions_->GetRuntimeType();
         // Fix it in issue 8164:
-        auto gc_type = panda::mem::GCTypeFromString(paoc_->runtime_options_->GetGcType(runtime_lang));
-        ASSERT(gc_type != panda::mem::GCType::INVALID_GC);
+        auto gcType = panda::mem::GCTypeFromString(paoc_->runtimeOptions_->GetGcType(runtimeLang));
+        ASSERT(gcType != panda::mem::GCType::INVALID_GC);
 
-        paoc_->aot_builder_->SetGcType(static_cast<uint32_t>(gc_type));
+        paoc_->aotBuilder_->SetGcType(static_cast<uint32_t>(gcType));
 
 #ifndef NDEBUG
-        paoc_->aot_builder_->SetGenerateSymbols(true);
+        paoc_->aotBuilder_->SetGenerateSymbols(true);
 #else
-        paoc_->aot_builder_->SetGenerateSymbols(paoc_->paoc_options_->IsPaocGenerateSymbols());
+        paoc_->aotBuilder_->SetGenerateSymbols(paoc_->paocOptions_->IsPaocGenerateSymbols());
 #endif
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        paoc_->aot_builder_->SetEmitDebugInfo(panda::compiler::OPTIONS.IsCompilerEmitDebugInfo());
+        paoc_->aotBuilder_->SetEmitDebugInfo(panda::compiler::g_options.IsCompilerEmitDebugInfo());
 #endif
         return true;
     }
 
-    bool InitPaocClusters(panda::PandArgParser *pa_parser)
+    bool InitPaocClusters(panda::PandArgParser *paParser)
     {
-        std::ifstream fstream(paoc_->paoc_options_->GetPaocClusters());
+        std::ifstream fstream(paoc_->paocOptions_->GetPaocClusters());
         if (!fstream) {
             LOG_PAOC(ERROR) << "Can't open `paoc-clusters` file";
             return false;
         }
         JsonObject obj(fstream.rdbuf());
         fstream.close();
-        paoc_->clusters_info_.Init(obj, pa_parser);
+        paoc_->clustersInfo_.Init(obj, paParser);
         return true;
     }
 
@@ -322,38 +322,38 @@ int Paoc::Run(const panda::Span<const char *> &args)
         return -1;
     }
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    if (compiler::OPTIONS.WasSetCompilerProfile()) {
-        auto res = runtime_->AddProfile(compiler::OPTIONS.GetCompilerProfile());
+    if (compiler::g_options.WasSetCompilerProfile()) {
+        auto res = runtime_->AddProfile(compiler::g_options.GetCompilerProfile());
         if (!res) {
-            LOG(FATAL, COMPILER) << "Cannot open profile `" << compiler::OPTIONS.GetCompilerProfile()
+            LOG(FATAL, COMPILER) << "Cannot open profile `" << compiler::g_options.GetCompilerProfile()
                                  << "`: " << res.Error();
         }
     }
-    aot_builder_->SetRuntime(runtime_);
-    slow_path_data_ = allocator->New<compiler::SharedSlowPathData>();
+    aotBuilder_->SetRuntime(runtime_);
+    slowPathData_ = allocator->New<compiler::SharedSlowPathData>();
 
     if (!LoadPandaFiles()) {
         LOG_PAOC(FATAL) << "Can not load panda files";
     }
-    bool error_occurred = !CompileFiles();
-    bool attempted_to_compile = (compilation_index_ != 0);
-    error_occurred |= !attempted_to_compile;
+    bool errorOccurred = !CompileFiles();
+    bool attemptedToCompile = (compilationIndex_ != 0);
+    errorOccurred |= !attemptedToCompile;
     if (IsAotMode()) {
-        if (aot_builder_->GetCurrentCodeAddress() != 0 || !aot_builder_->GetClassHashTableSize()->empty() ||
+        if (aotBuilder_->GetCurrentCodeAddress() != 0 || !aotBuilder_->GetClassHashTableSize()->empty() ||
             IsLLVMAotMode()) {
             RunAotMode(args);
         }
-        if (aot_builder_->GetCurrentCodeAddress() == 0 && aot_builder_->GetClassHashTableSize()->empty()) {
+        if (aotBuilder_->GetCurrentCodeAddress() == 0 && aotBuilder_->GetClassHashTableSize()->empty()) {
             LOG_PAOC(ERROR) << "There are no compiled methods";
             Clear(allocator);
             return -1;
         }
     }
-    if (!attempted_to_compile) {
+    if (!attemptedToCompile) {
         LOG_PAOC(WARNING) << "There are no compiled methods";
     }
     Clear(allocator);
-    return ShouldIgnoreFailures() ? 0 : (error_occurred ? 1 : 0);
+    return ShouldIgnoreFailures() ? 0 : (errorOccurred ? 1 : 0);
 }
 
 void Paoc::RunAotMode(const panda::Span<const char *> &args)
@@ -363,61 +363,61 @@ void Paoc::RunAotMode(const panda::Span<const char *> &args)
         cmdline += arg;
         cmdline += " ";
     }
-    std::string class_ctx;
-    loader_->EnumeratePandaFiles([this, &class_ctx](const panda_file::File &pf) {
-        if (location_mapping_.find(pf.GetFilename()) == location_mapping_.end()) {
-            class_ctx += GetFilePath(pf.GetFilename());
+    std::string classCtx;
+    loader_->EnumeratePandaFiles([this, &classCtx](const panda_file::File &pf) {
+        if (locationMapping_.find(pf.GetFilename()) == locationMapping_.end()) {
+            classCtx += GetFilePath(pf.GetFilename());
         } else {
-            class_ctx += location_mapping_[pf.GetFilename()];
+            classCtx += locationMapping_[pf.GetFilename()];
         }
-        class_ctx += '*';
-        class_ctx += pf.GetPaddedChecksum();
-        class_ctx += ':';
+        classCtx += '*';
+        classCtx += pf.GetPaddedChecksum();
+        classCtx += ':';
         return true;
     });
-    class_ctx.pop_back();
-    aot_builder_->SetClassContext(class_ctx);
-    LOG(DEBUG, COMPILER) << "PAOC: ClassContext '" << class_ctx << '\'';
-    auto output_file = paoc_options_->GetPaocOutput();
-    if (paoc_options_->WasSetPaocBootOutput()) {
-        aot_builder_->SetBootAot(true);
-        output_file = paoc_options_->GetPaocBootOutput();
+    classCtx.pop_back();
+    aotBuilder_->SetClassContext(classCtx);
+    LOG(DEBUG, COMPILER) << "PAOC: ClassContext '" << classCtx << '\'';
+    auto outputFile = paocOptions_->GetPaocOutput();
+    if (paocOptions_->WasSetPaocBootOutput()) {
+        aotBuilder_->SetBootAot(true);
+        outputFile = paocOptions_->GetPaocBootOutput();
     }
-    aot_builder_->SetWithCha(paoc_options_->IsPaocUseCha());
+    aotBuilder_->SetWithCha(paocOptions_->IsPaocUseCha());
 
     if (IsLLVMAotMode()) {
-        bool write_aot = EndLLVM();
-        if (!write_aot) {
+        bool writeAot = EndLLVM();
+        if (!writeAot) {
             return;
         }
     }
 
-    aot_builder_->Write(cmdline, output_file);
-    LOG_PAOC(INFO) << "METHODS COMPILED (success/all): " << success_methods_ << '/'
-                   << success_methods_ + failed_methods_;
-    LOG_PAOC(DEBUG) << "Successfully compiled to " << output_file;
+    aotBuilder_->Write(cmdline, outputFile);
+    LOG_PAOC(INFO) << "METHODS COMPILED (success/all): " << successMethods_ << '/' << successMethods_ + failedMethods_;
+    LOG_PAOC(DEBUG) << "Successfully compiled to " << outputFile;
 }
 
 void Paoc::Clear(panda::mem::InternalAllocatorPtr allocator)
 {
-    delete code_allocator_;
-    allocator->Delete(slow_path_data_);
-    methods_list_.clear();
+    delete codeAllocator_;
+    codeAllocator_ = nullptr;
+    allocator->Delete(slowPathData_);
+    methodsList_.clear();
     panda::Runtime::Destroy();
 }
 
-void Paoc::StartAotFile(const panda_file::File &pfile_ref)
+void Paoc::StartAotFile(const panda_file::File &pfileRef)
 {
     ASSERT(IsAotMode());
     std::string filename;
-    if (paoc_options_->GetPaocLocation().empty()) {
-        filename = GetFilePath(pfile_ref.GetFilename());
+    if (paocOptions_->GetPaocLocation().empty()) {
+        filename = GetFilePath(pfileRef.GetFilename());
     } else {
-        filename = GetFileLocation(pfile_ref, paoc_options_->GetPaocLocation());
-        location_mapping_[pfile_ref.GetFilename()] = filename;
+        filename = GetFileLocation(pfileRef, paocOptions_->GetPaocLocation());
+        locationMapping_[pfileRef.GetFilename()] = filename;
     }
     ASSERT(!filename.empty());
-    aot_builder_->StartFile(filename, pfile_ref.GetHeader()->checksum);
+    aotBuilder_->StartFile(filename, pfileRef.GetHeader()->checksum);
 }
 
 /**
@@ -426,56 +426,56 @@ void Paoc::StartAotFile(const panda_file::File &pfile_ref)
  */
 bool Paoc::CompileFiles()
 {
-    auto pfiles = paoc_options_->GetPaocPandaFiles();
-    bool error_occurred = false;
+    auto pfiles = paocOptions_->GetPaocPandaFiles();
+    bool errorOccurred = false;
     auto *vm = panda::Runtime::GetCurrent()->GetPandaVM();
-    for (auto &file_name : pfiles) {
+    for (auto &fileName : pfiles) {
         // Load panda file
         const panda_file::File *pfile;
 
-        auto file_path = GetFilePath(file_name);
-        if (preloaded_files_.find(file_path) != preloaded_files_.end()) {
-            pfile = preloaded_files_[file_path];
+        auto filePath = GetFilePath(fileName);
+        if (preloadedFiles_.find(filePath) != preloadedFiles_.end()) {
+            pfile = preloadedFiles_[filePath];
         } else {
-            auto file = vm->OpenPandaFile(file_name);
+            auto file = vm->OpenPandaFile(fileName);
             if (!file) {
-                error_occurred = true;
+                errorOccurred = true;
                 if (!ShouldIgnoreFailures()) {
-                    LOG_PAOC(FATAL) << "Can not open file: " << file_name;
+                    LOG_PAOC(FATAL) << "Can not open file: " << fileName;
                 }
-                LOG_PAOC(WARNING) << "Can not open file: " << file_name;
+                LOG_PAOC(WARNING) << "Can not open file: " << fileName;
                 continue;
             }
             pfile = file.get();
             loader_->AddPandaFile(std::move(file));
-            LOG_PAOC(DEBUG) << "Added panda file: " << file_name;
+            LOG_PAOC(DEBUG) << "Added panda file: " << fileName;
         }
-        auto &pfile_ref = *pfile;
+        auto &pfileRef = *pfile;
 
         if (IsAotMode()) {
-            StartAotFile(pfile_ref);
+            StartAotFile(pfileRef);
         }
 
-        if (!CompilePandaFile(pfile_ref)) {
-            error_occurred = true;
+        if (!CompilePandaFile(pfileRef)) {
+            errorOccurred = true;
         }
 
         if (IsAotMode()) {
-            aot_builder_->EndFile();
+            aotBuilder_->EndFile();
         }
-        if (error_occurred && !ShouldIgnoreFailures()) {
+        if (errorOccurred && !ShouldIgnoreFailures()) {
             return false;
         }
     }
-    return !error_occurred;
+    return !errorOccurred;
 }
 
-std::string Paoc::GetFilePath(std::string file_name)
+std::string Paoc::GetFilePath(std::string fileName)
 {
-    if (runtime_options_->IsAotVerifyAbsPath()) {
-        return os::GetAbsolutePath(file_name);
+    if (runtimeOptions_->IsAotVerifyAbsPath()) {
+        return os::GetAbsolutePath(fileName);
     }
-    return file_name;
+    return fileName;
 }
 
 /**
@@ -483,57 +483,56 @@ std::string Paoc::GetFilePath(std::string file_name)
  * `--paoc-skip-until`, `--paoc-compile-until` and `--paoc-methods-from-file` options:
  * @return `false` on error.
  */
-bool Paoc::CompilePandaFile(const panda_file::File &pfile_ref)
+bool Paoc::CompilePandaFile(const panda_file::File &pfileRef)
 {
-    auto classes = pfile_ref.GetClasses();
-    bool error_occurred = false;
-    for (auto &class_id : classes) {
-        panda_file::File::EntityId id(class_id);
-        panda::Class *klass = ResolveClass(pfile_ref, id);
-        std::string class_name = ClassHelper::GetName(pfile_ref.GetStringData(id).data);
+    auto classes = pfileRef.GetClasses();
+    bool errorOccurred = false;
+    for (auto &classId : classes) {
+        panda_file::File::EntityId id(classId);
+        panda::Class *klass = ResolveClass(pfileRef, id);
+        std::string className = ClassHelper::GetName(pfileRef.GetStringData(id).data);
 
-        if (!PossibleToCompile(pfile_ref, klass, id)) {
-            if (paoc_options_->IsPaocVerbose()) {
-                LOG_PAOC(DEBUG) << "Ignoring a class `" << class_name << "` (id = " << id << ", file `"
-                                << pfile_ref.GetFilename() << "`)";
+        if (!PossibleToCompile(pfileRef, klass, id)) {
+            if (paocOptions_->IsPaocVerbose()) {
+                LOG_PAOC(DEBUG) << "Ignoring a class `" << className << "` (id = " << id << ", file `"
+                                << pfileRef.GetFilename() << "`)";
             }
             continue;
         }
 
         ASSERT(klass != nullptr);
-        if (paoc_options_->IsPaocVerbose()) {
-            LOG_PAOC(DEBUG) << "Compiling class `" << class_name << "` (id = " << id << ", file `"
-                            << pfile_ref.GetFilename() << "`)";
+        if (paocOptions_->IsPaocVerbose()) {
+            LOG_PAOC(DEBUG) << "Compiling class `" << className << "` (id = " << id << ", file `"
+                            << pfileRef.GetFilename() << "`)";
         }
 
         // Check that all of the methods are compiled correctly:
         ASSERT(klass->GetPandaFile() != nullptr);
         if (!Compile(klass, *klass->GetPandaFile())) {
-            error_occurred = true;
-            std::string err_msg =
-                "Class `" + class_name + "` from " + pfile_ref.GetFilename() + " compiled with errors";
-            PrintError(err_msg);
+            errorOccurred = true;
+            std::string errMsg = "Class `" + className + "` from " + pfileRef.GetFilename() + " compiled with errors";
+            PrintError(errMsg);
             if (!ShouldIgnoreFailures()) {
                 break;
             }
         }
     }
 
-    BuildClassHashTable(pfile_ref);
+    BuildClassHashTable(pfileRef);
 
-    return !error_occurred;
+    return !errorOccurred;
 }
 
-panda::Class *Paoc::ResolveClass(const panda_file::File &pfile_ref, panda_file::File::EntityId class_id)
+panda::Class *Paoc::ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId)
 {
     ErrorHandler handler;
     ScopedMutatorLock lock;
-    if (pfile_ref.IsExternal(class_id)) {
+    if (pfileRef.IsExternal(classId)) {
         return nullptr;
     }
-    panda_file::ClassDataAccessor cda(pfile_ref, class_id);
+    panda_file::ClassDataAccessor cda(pfileRef, classId);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&cda);
-    auto klass = loader_->GetExtension(ctx)->GetClass(pfile_ref, class_id, nullptr, &handler);
+    auto klass = loader_->GetExtension(ctx)->GetClass(pfileRef, classId, nullptr, &handler);
     return klass;
 }
 
@@ -541,36 +540,36 @@ panda::Class *Paoc::ResolveClass(const panda_file::File &pfile_ref, panda_file::
  * Check if it is possible to compile a class.
  * @return true if the class isn't external, abstract, interface and isn't an array class.
  */
-bool Paoc::PossibleToCompile(const panda_file::File &pfile_ref, const panda::Class *klass,
-                             panda_file::File::EntityId class_id)
+bool Paoc::PossibleToCompile(const panda_file::File &pfileRef, const panda::Class *klass,
+                             panda_file::File::EntityId classId)
 {
-    std::string class_name = ClassHelper::GetName(pfile_ref.GetStringData(class_id).data);
+    std::string className = ClassHelper::GetName(pfileRef.GetStringData(classId).data);
     if (klass == nullptr) {
-        if (paoc_options_->IsPaocVerbose()) {
-            LOG_PAOC(DEBUG) << "Class is nullptr: `" << class_name << "`";
-            LOG_PAOC(ERROR) << "ClassLinker can't load a class `" << class_name << "`";
+        if (paocOptions_->IsPaocVerbose()) {
+            LOG_PAOC(DEBUG) << "Class is nullptr: `" << className << "`";
+            LOG_PAOC(ERROR) << "ClassLinker can't load a class `" << className << "`";
         }
         return false;
     }
 
     // Skip external classes
-    if (pfile_ref.IsExternal(class_id) || klass->GetFileId().GetOffset() != class_id.GetOffset()) {
-        if (paoc_options_->IsPaocVerbose()) {
-            LOG_PAOC(DEBUG) << "Can't compile external class `" << class_name << "`";
+    if (pfileRef.IsExternal(classId) || klass->GetFileId().GetOffset() != classId.GetOffset()) {
+        if (paocOptions_->IsPaocVerbose()) {
+            LOG_PAOC(DEBUG) << "Can't compile external class `" << className << "`";
         }
         return false;
     }
     // Skip object array class
     if (klass->IsArrayClass()) {
-        if (paoc_options_->IsPaocVerbose()) {
-            LOG_PAOC(DEBUG) << "Can't compile array class `" << class_name << "`";
+        if (paocOptions_->IsPaocVerbose()) {
+            LOG_PAOC(DEBUG) << "Can't compile array class `" << className << "`";
         }
         return false;
     }
 
     if (klass->IsAbstract()) {
-        if (paoc_options_->IsPaocVerbose()) {
-            LOG_PAOC(DEBUG) << "Will compile abstract class `" << class_name << "`";
+        if (paocOptions_->IsPaocVerbose()) {
+            LOG_PAOC(DEBUG) << "Will compile abstract class `" << className << "`";
         }
     }
 
@@ -581,44 +580,44 @@ bool Paoc::PossibleToCompile(const panda_file::File &pfile_ref, const panda::Cla
  * Compile the class.
  * @return `false` on error.
  */
-bool Paoc::Compile(Class *klass, const panda_file::File &pfile_ref)
+bool Paoc::Compile(Class *klass, const panda_file::File &pfileRef)
 {
     ASSERT(klass != nullptr);
 
     if (IsAotMode()) {
-        aot_builder_->StartClass(*klass);
+        aotBuilder_->StartClass(*klass);
     }
-    bool error_occurred = false;
+    bool errorOccurred = false;
     auto methods = klass->GetMethods();
-    panda_file::ClassDataAccessor cda(pfile_ref, klass->GetFileId());
-    size_t method_index = 0;
-    size_t smethod_idx = klass->GetNumVirtualMethods();
-    size_t vmethod_idx = 0;
-    cda.EnumerateMethods([this, &smethod_idx, &vmethod_idx, &methods, &method_index, &pfile_ref,
-                          &error_occurred](panda_file::MethodDataAccessor &method_data_accessor) {
-        if (error_occurred && !ShouldIgnoreFailures()) {
+    panda_file::ClassDataAccessor cda(pfileRef, klass->GetFileId());
+    size_t methodIndex = 0;
+    size_t smethodIdx = klass->GetNumVirtualMethods();
+    size_t vmethodIdx = 0;
+    cda.EnumerateMethods([this, &smethodIdx, &vmethodIdx, &methods, &methodIndex, &pfileRef,
+                          &errorOccurred](panda_file::MethodDataAccessor &methodDataAccessor) {
+        if (errorOccurred && !ShouldIgnoreFailures()) {
             return;
         }
         // NOTE(pishin, msherstennikov): revisit
         // Method (or the whole class?) may already have a definition in another file,
         // in this case it should not be added into AOT file.
-        Method &method = method_data_accessor.IsStatic() ? methods[smethod_idx++] : methods[vmethod_idx++];
-        auto method_name = runtime_->GetMethodFullName(&method, false);
-        if (method.GetPandaFile()->GetFilename() == pfile_ref.GetFilename() && !Skip(&method) &&
-            IsMethodInList(method_name) && OPTIONS.MatchesRegex(method_name) && !Compile(&method, method_index)) {
-            error_occurred = true;
+        Method &method = methodDataAccessor.IsStatic() ? methods[smethodIdx++] : methods[vmethodIdx++];
+        auto methodName = runtime_->GetMethodFullName(&method, false);
+        if (method.GetPandaFile()->GetFilename() == pfileRef.GetFilename() && !Skip(&method) &&
+            IsMethodInList(methodName) && g_options.MatchesRegex(methodName) && !Compile(&method, methodIndex)) {
+            errorOccurred = true;
         }
-        method_index++;
+        methodIndex++;
     });
 
     if (IsAotMode()) {
-        aot_builder_->EndClass();
+        aotBuilder_->EndClass();
     }
 
-    return !error_occurred;
+    return !errorOccurred;
 }
 
-bool Paoc::Compile(Method *method, size_t method_index)
+bool Paoc::Compile(Method *method, size_t methodIndex)
 {
     if (method == nullptr) {
         LOG_PAOC(WARNING) << "Method is nullptr";
@@ -626,65 +625,63 @@ bool Paoc::Compile(Method *method, size_t method_index)
     }
 #ifndef NDEBUG
     const auto *pfile = method->GetPandaFile();
-    auto method_id = method->GetFileId();
+    auto methodId = method->GetFileId();
     ASSERT(pfile != nullptr);
-    ASSERT(!pfile->IsExternal(method_id));
+    ASSERT(!pfile->IsExternal(methodId));
 #endif
 
     if (method->IsAbstract() || method->IsNative() || method->IsIntrinsic()) {
         return true;
     }
-    auto method_name = runtime_->GetMethodFullName(method, false);
+    auto methodName = runtime_->GetMethodFullName(method, false);
 
-    ++compilation_index_;
-    LOG_PAOC(INFO) << "[" << compilation_index_ << "] Compile method (id=" << method->GetFileId()
-                   << "): " << method_name;
+    ++compilationIndex_;
+    LOG_PAOC(INFO) << "[" << compilationIndex_ << "] Compile method (id=" << method->GetFileId() << "): " << methodName;
 
-    CompilingContext ctx(method, method_index, &statistics_dump_);
+    CompilingContext ctx(method, methodIndex, &statisticsDump_);
 
-    PaocClusters::ScopedApplySpecialOptions to(method_name, &clusters_info_);
+    PaocClusters::ScopedApplySpecialOptions to(methodName, &clustersInfo_);
     switch (mode_) {
         case PaocMode::AOT:
         case PaocMode::LLVM:
             if (!CompileAot(&ctx)) {
-                EVENT_COMPILATION(method_name, false, ctx.method->GetCodeSize(), 0, 0, 0,
+                EVENT_COMPILATION(methodName, false, ctx.method->GetCodeSize(), 0, 0, 0,
                                   events::CompilationStatus::FAILED);
-                failed_methods_++;
-                ctx.compilation_status = false;
+                failedMethods_++;
+                ctx.compilationStatus = false;
             } else {
-                success_methods_++;
+                successMethods_++;
             }
             break;
         case PaocMode::JIT:
-            ctx.compilation_status = CompileJit(&ctx);
+            ctx.compilationStatus = CompileJit(&ctx);
             break;
         case PaocMode::OSR:
-            ctx.compilation_status = CompileOsr(&ctx);
+            ctx.compilationStatus = CompileOsr(&ctx);
             break;
         default:
             UNREACHABLE();
     }
-    return ctx.compilation_status;
+    return ctx.compilationStatus;
 }
 
-bool Paoc::CompileInGraph(CompilingContext *ctx, std::string method_name, bool is_osr)
+bool Paoc::CompileInGraph(CompilingContext *ctx, std::string methodName, bool isOsr)
 {
-    compiler::InPlaceCompilerTaskRunner task_runner;
-    auto &task_ctx = task_runner.GetContext();
-    task_ctx.SetMethod(ctx->method);
-    task_ctx.SetOsr(is_osr);
-    task_ctx.SetAllocator(&ctx->allocator);
-    task_ctx.SetLocalAllocator(&ctx->graph_local_allocator);
-    task_ctx.SetMethodName(std::move(method_name));
-    task_runner.AddFinalize(
-        [&graph = ctx->graph](InPlaceCompilerContext &compiler_ctx) { graph = compiler_ctx.GetGraph(); });
+    compiler::InPlaceCompilerTaskRunner taskRunner;
+    auto &taskCtx = taskRunner.GetContext();
+    taskCtx.SetMethod(ctx->method);
+    taskCtx.SetOsr(isOsr);
+    taskCtx.SetAllocator(&ctx->allocator);
+    taskCtx.SetLocalAllocator(&ctx->graphLocalAllocator);
+    taskCtx.SetMethodName(std::move(methodName));
+    taskRunner.AddFinalize(
+        [&graph = ctx->graph](InPlaceCompilerContext &compilerCtx) { graph = compilerCtx.GetGraph(); });
 
     bool success = true;
-    task_runner.AddCallbackOnFail(
-        [&success]([[maybe_unused]] InPlaceCompilerContext &compiler_ctx) { success = false; });
+    taskRunner.AddCallbackOnFail([&success]([[maybe_unused]] InPlaceCompilerContext &compilerCtx) { success = false; });
     auto arch = ChooseArch(Arch::NONE);
-    bool is_dynamic = panda::panda_file::IsDynamicLanguage(ctx->method->GetClass()->GetSourceLang());
-    compiler::CompileInGraph<compiler::INPLACE_MODE>(runtime_, is_dynamic, arch, std::move(task_runner));
+    bool isDynamic = panda::panda_file::IsDynamicLanguage(ctx->method->GetClass()->GetSourceLang());
+    compiler::CompileInGraph<compiler::INPLACE_MODE>(runtime_, isDynamic, arch, std::move(taskRunner));
     return success;
 }
 
@@ -698,8 +695,8 @@ bool Paoc::CompileJit(CompilingContext *ctx)
     ASSERT(mode_ == PaocMode::JIT);
     auto name = runtime_->GetMethodFullName(ctx->method, false);
     if (!CompileInGraph(ctx, name, false)) {
-        std::string err_msg = "Failed to JIT-compile method: " + name;
-        PrintError(err_msg);
+        std::string errMsg = "Failed to JIT-compile method: " + name;
+        PrintError(errMsg);
         return false;
     }
     EVENT_COMPILATION(name, false, ctx->method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::COMPILED);
@@ -716,8 +713,8 @@ bool Paoc::CompileOsr(CompilingContext *ctx)
     ASSERT(mode_ == PaocMode::OSR);
     auto name = runtime_->GetMethodFullName(ctx->method, false);
     if (!CompileInGraph(ctx, name, true)) {
-        std::string err_msg = "Failed to OSR-compile method: " + name;
-        PrintError(err_msg);
+        std::string errMsg = "Failed to OSR-compile method: " + name;
+        PrintError(errMsg);
         return false;
     }
     EVENT_COMPILATION(name, true, ctx->method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::COMPILED);
@@ -726,26 +723,26 @@ bool Paoc::CompileOsr(CompilingContext *ctx)
 
 bool Paoc::TryCreateGraph(CompilingContext *ctx)
 {
-    auto source_lang = ctx->method->GetClass()->GetSourceLang();
-    bool is_dynamic = panda::panda_file::IsDynamicLanguage(source_lang);
+    auto sourceLang = ctx->method->GetClass()->GetSourceLang();
+    bool isDynamic = panda::panda_file::IsDynamicLanguage(sourceLang);
 
-    ctx->graph = ctx->allocator.New<Graph>(&ctx->allocator, &ctx->graph_local_allocator, aot_builder_->GetArch(),
-                                           ctx->method, runtime_, false, nullptr, is_dynamic);
+    ctx->graph = ctx->allocator.New<Graph>(&ctx->allocator, &ctx->graphLocalAllocator, aotBuilder_->GetArch(),
+                                           ctx->method, runtime_, false, nullptr, isDynamic);
     if (ctx->graph == nullptr) {
         PrintError("Graph creation failed!");
         return false;
     }
-    ctx->graph->SetLanguage(source_lang);
+    ctx->graph->SetLanguage(sourceLang);
     return true;
 }
 
-bool Paoc::FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t code_address)
+bool Paoc::FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t codeAddress)
 {
-    CompiledMethod compiled_method(ctx->graph->GetArch(), ctx->method, ctx->index);
-    compiled_method.SetCode(ctx->graph->GetCode().ToConst());
-    compiled_method.SetCodeInfo(ctx->graph->GetCodeInfoData());
+    CompiledMethod compiledMethod(ctx->graph->GetArch(), ctx->method, ctx->index);
+    compiledMethod.SetCode(ctx->graph->GetCode().ToConst());
+    compiledMethod.SetCodeInfo(ctx->graph->GetCodeInfoData());
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    compiled_method.SetCfiInfo(ctx->graph->GetCallingConvention()->GetCfiInfo());
+    compiledMethod.SetCfiInfo(ctx->graph->GetCallingConvention()->GetCfiInfo());
 #endif
     if (ctx->graph->GetCode().empty() || ctx->graph->GetCodeInfoData().empty()) {
         LOG(INFO, COMPILER) << "Emit code failed";
@@ -756,23 +753,22 @@ bool Paoc::FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t 
     EVENT_PAOC("Compiling " + runtime_->GetMethodFullName(ctx->method, false) + " using panda");
     ASSERT(ctx->graph != nullptr);
 
-    aot_builder_->AddMethod(compiled_method);
+    aotBuilder_->AddMethod(compiledMethod);
 
-    EVENT_COMPILATION(runtime_->GetMethodFullName(ctx->method, false), false, ctx->method->GetCodeSize(), code_address,
-                      compiled_method.GetCode().size(), compiled_method.GetCodeInfo().size(),
+    EVENT_COMPILATION(runtime_->GetMethodFullName(ctx->method, false), false, ctx->method->GetCodeSize(), codeAddress,
+                      compiledMethod.GetCode().size(), compiledMethod.GetCodeInfo().size(),
                       events::CompilationStatus::COMPILED);
     return true;
 }
 
 bool Paoc::RunOptimizations(CompilingContext *ctx)
 {
-    compiler::InPlaceCompilerTaskRunner task_runner;
-    task_runner.GetContext().SetGraph(ctx->graph);
+    compiler::InPlaceCompilerTaskRunner taskRunner;
+    taskRunner.GetContext().SetGraph(ctx->graph);
     bool success = true;
-    task_runner.AddCallbackOnFail(
-        [&success]([[maybe_unused]] InPlaceCompilerContext &compiler_ctx) { success = false; });
+    taskRunner.AddCallbackOnFail([&success]([[maybe_unused]] InPlaceCompilerContext &compilerCtx) { success = false; });
 
-    compiler::RunOptimizations<compiler::INPLACE_MODE>(std::move(task_runner));
+    compiler::RunOptimizations<compiler::INPLACE_MODE>(std::move(taskRunner));
     return success;
 }
 
@@ -785,12 +781,12 @@ bool Paoc::CompileAot(CompilingContext *ctx)
     ASSERT(ctx != nullptr);
     ASSERT(IsAotMode());
 
-    LOG_IF(IsLLVMAotMode() && !paoc_options_->IsPaocUseCha(), FATAL, COMPILER)
+    LOG_IF(IsLLVMAotMode() && !paocOptions_->IsPaocUseCha(), FATAL, COMPILER)
         << "LLVM AOT compiler supports only --paoc-use-cha=true";
 
-    std::string class_name = ClassHelper::GetName(ctx->method->GetClassName().data);
-    if (runtime_options_->WasSetEventsOutput()) {
-        EVENT_PAOC("Trying to compile method: " + class_name +
+    std::string className = ClassHelper::GetName(ctx->method->GetClassName().data);
+    if (runtimeOptions_->WasSetEventsOutput()) {
+        EVENT_PAOC("Trying to compile method: " + className +
                    "::" + reinterpret_cast<const char *>(ctx->method->GetName().data));
     }
 
@@ -798,15 +794,14 @@ bool Paoc::CompileAot(CompilingContext *ctx)
         return false;
     }
 
-    uintptr_t code_address = aot_builder_->GetCurrentCodeAddress();
-    auto aot_data = ctx->graph->GetAllocator()->New<AotData>(
-        ctx->method->GetPandaFile(), ctx->graph, code_address, aot_builder_->GetIntfInlineCacheIndex(),
-        aot_builder_->GetGotPlt(), aot_builder_->GetGotVirtIndexes(), aot_builder_->GetGotClass(),
-        aot_builder_->GetGotString(), aot_builder_->GetGotIntfInlineCache(), aot_builder_->GetGotCommon(),
-        slow_path_data_);
+    uintptr_t codeAddress = aotBuilder_->GetCurrentCodeAddress();
+    auto aotData = ctx->graph->GetAllocator()->New<AotData>(
+        ctx->method->GetPandaFile(), ctx->graph, codeAddress, aotBuilder_->GetIntfInlineCacheIndex(),
+        aotBuilder_->GetGotPlt(), aotBuilder_->GetGotVirtIndexes(), aotBuilder_->GetGotClass(),
+        aotBuilder_->GetGotString(), aotBuilder_->GetGotIntfInlineCache(), aotBuilder_->GetGotCommon(), slowPathData_);
 
-    aot_data->SetUseCha(paoc_options_->IsPaocUseCha());
-    ctx->graph->SetAotData(aot_data);
+    aotData->SetUseCha(paocOptions_->IsPaocUseCha());
+    ctx->graph->SetAotData(aotData);
 
     if (!ctx->graph->RunPass<IrBuilder>()) {
         PrintError("IrBuilder failed!");
@@ -838,7 +833,7 @@ bool Paoc::CompileAot(CompilingContext *ctx)
         return false;
     }
 
-    return FinalizeCompileAot(ctx, code_address);
+    return FinalizeCompileAot(ctx, codeAddress);
 }
 
 void Paoc::PrintError(const std::string &error)
@@ -852,10 +847,10 @@ void Paoc::PrintError(const std::string &error)
 
 bool Paoc::ShouldIgnoreFailures()
 {
-    return compiler::OPTIONS.IsCompilerIgnoreFailures();
+    return compiler::g_options.IsCompilerIgnoreFailures();
 }
 
-void Paoc::PrintUsage(const panda::PandArgParser &pa_parser)
+void Paoc::PrintUsage(const panda::PandArgParser &paParser)
 {
     std::cerr << "Usage: ark_aot [OPTIONS] --paoc-panda-files <list>\n";
     std::cerr << "    --paoc-panda-files          list of input panda files, it is a mandatory option\n";
@@ -872,12 +867,12 @@ void Paoc::PrintUsage(const panda::PandArgParser &pa_parser)
     std::cerr << "    --compiler-ignore-failures  ignore failures in methods/classes/files compilation\n";
     std::cerr << " You can also use other Ark compiler options\n";
 
-    std::cerr << pa_parser.GetHelpString() << std::endl;
+    std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-bool Paoc::IsMethodInList(const std::string &method_full_name)
+bool Paoc::IsMethodInList(const std::string &methodFullName)
 {
-    return !paoc_options_->WasSetPaocMethodsFromFile() || (methods_list_.find(method_full_name) != methods_list_.end());
+    return !paocOptions_->WasSetPaocMethodsFromFile() || (methodsList_.find(methodFullName) != methodsList_.end());
 }
 
 /*
@@ -889,26 +884,26 @@ bool Paoc::Skip(Method *method)
         return true;
     }
 
-    auto method_name = runtime_->GetMethodFullName(method, false);
-    if (!skip_info_.is_first_compiled) {
-        if (method_name == paoc_options_->GetPaocSkipUntil()) {
-            skip_info_.is_first_compiled = true;
+    auto methodName = runtime_->GetMethodFullName(method, false);
+    if (!skipInfo_.isFirstCompiled) {
+        if (methodName == paocOptions_->GetPaocSkipUntil()) {
+            skipInfo_.isFirstCompiled = true;
         } else {
             return true;
         }
     }
-    if (skip_info_.is_last_compiled) {
+    if (skipInfo_.isLastCompiled) {
         return true;
     }
-    if (paoc_options_->WasSetPaocCompileUntil() && method_name == paoc_options_->GetPaocCompileUntil()) {
-        skip_info_.is_last_compiled = true;
+    if (paocOptions_->WasSetPaocCompileUntil() && methodName == paocOptions_->GetPaocCompileUntil()) {
+        skipInfo_.isLastCompiled = true;
     }
     return false;
 }
 
-std::string Paoc::GetFileLocation(const panda_file::File &pfile_ref, std::string location)
+std::string Paoc::GetFileLocation(const panda_file::File &pfileRef, std::string location)
 {
-    auto &filename = pfile_ref.GetFilename();
+    auto &filename = pfileRef.GetFilename();
     if (auto pos = filename.rfind('/'); pos != std::string::npos) {
         if (location.back() == '/') {
             pos++;
@@ -920,49 +915,49 @@ std::string Paoc::GetFileLocation(const panda_file::File &pfile_ref, std::string
     return location;
 }
 
-bool Paoc::CompareBootFiles(std::string filename, std::string paoc_location)
+bool Paoc::CompareBootFiles(std::string filename, std::string paocLocation)
 {
     if (auto pos = filename.rfind('/'); pos != std::string::npos) {
         filename = filename.substr(++pos);
     }
-    if (auto pos = paoc_location.rfind('/'); pos != std::string::npos) {
-        paoc_location = paoc_location.substr(++pos);
+    if (auto pos = paocLocation.rfind('/'); pos != std::string::npos) {
+        paocLocation = paocLocation.substr(++pos);
     }
 
-    return paoc_location == filename;
+    return paocLocation == filename;
 }
 
 bool Paoc::LoadPandaFiles()
 {
-    bool error_occurred = false;
+    bool errorOccurred = false;
     auto *vm = panda::Runtime::GetCurrent()->GetPandaVM();
-    auto pfiles = runtime_options_->GetPandaFiles();
-    for (auto &file_name : pfiles) {
-        auto pfile = vm->OpenPandaFile(file_name);
+    auto pfiles = runtimeOptions_->GetPandaFiles();
+    for (auto &fileName : pfiles) {
+        auto pfile = vm->OpenPandaFile(fileName);
         if (!pfile) {
-            error_occurred = true;
+            errorOccurred = true;
             if (!ShouldIgnoreFailures()) {
-                LOG_PAOC(FATAL) << "Can not open file: " << file_name;
+                LOG_PAOC(FATAL) << "Can not open file: " << fileName;
             }
-            LOG_PAOC(WARNING) << "Can not open file: " << file_name;
+            LOG_PAOC(WARNING) << "Can not open file: " << fileName;
             continue;
         }
 
-        if (!paoc_options_->GetPaocLocation().empty()) {
-            std::string filename = GetFileLocation(*pfile, paoc_options_->GetPaocLocation());
-            location_mapping_[pfile->GetFilename()] = filename;
+        if (!paocOptions_->GetPaocLocation().empty()) {
+            std::string filename = GetFileLocation(*pfile, paocOptions_->GetPaocLocation());
+            locationMapping_[pfile->GetFilename()] = filename;
         }
 
-        preloaded_files_[GetFilePath(file_name)] = pfile.get();
+        preloadedFiles_[GetFilePath(fileName)] = pfile.get();
         loader_->AddPandaFile(std::move(pfile));
     }
-    return !error_occurred;
+    return !errorOccurred;
 }
 
-void Paoc::BuildClassHashTable(const panda_file::File &pfile_ref)
+void Paoc::BuildClassHashTable(const panda_file::File &pfileRef)
 {
-    if (!pfile_ref.GetClasses().empty()) {
-        aot_builder_->AddClassHashTable(pfile_ref);
+    if (!pfileRef.GetClasses().empty()) {
+        aotBuilder_->AddClassHashTable(pfileRef);
     }
 }
 

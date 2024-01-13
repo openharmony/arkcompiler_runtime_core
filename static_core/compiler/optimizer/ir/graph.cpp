@@ -83,27 +83,27 @@ void Graph::RemoveUnreachableBlocks()
     EraseMarker(mrk);
 }
 
-void Graph::AddConstInStartBlock(ConstantInst *const_inst)
+void Graph::AddConstInStartBlock(ConstantInst *constInst)
 {
-    GetStartBlock()->AppendInst(const_inst);
+    GetStartBlock()->AppendInst(constInst);
 }
 
-ParameterInst *Graph::AddNewParameter(uint16_t arg_number)
+ParameterInst *Graph::AddNewParameter(uint16_t argNumber)
 {
-    ParameterInst *param = CreateInstParameter(arg_number);
+    ParameterInst *param = CreateInstParameter(argNumber);
     GetStartBlock()->AppendInst(param);
     return param;
 }
 
-ParameterInst *Graph::FindParameter(uint16_t arg_number)
+ParameterInst *Graph::FindParameter(uint16_t argNumber)
 {
     for (auto inst : GetStartBlock()->AllInsts()) {
         if (!inst->IsParameter()) {
             continue;
         }
-        auto param_inst = inst->CastToParameter();
-        if (param_inst->GetArgNumber() == arg_number) {
-            return param_inst;
+        auto paramInst = inst->CastToParameter();
+        if (paramInst->GetArgNumber() == argNumber) {
+            return paramInst;
         }
     }
     return nullptr;
@@ -111,39 +111,39 @@ ParameterInst *Graph::FindParameter(uint16_t arg_number)
 
 Inst *Graph::GetOrCreateNullPtr()
 {
-    if (nullptr_inst_ == nullptr) {
-        nullptr_inst_ = CreateInstNullPtr(DataType::REFERENCE);
-        GetStartBlock()->AppendInst(nullptr_inst_);
+    if (nullptrInst_ == nullptr) {
+        nullptrInst_ = CreateInstNullPtr(DataType::REFERENCE);
+        GetStartBlock()->AppendInst(nullptrInst_);
     }
-    return nullptr_inst_;
+    return nullptrInst_;
 }
 
 Inst *Graph::GetOrCreateUndefinedInst()
 {
-    if (undefined_inst_ == nullptr) {
-        undefined_inst_ = CreateInstLoadUndefined(DataType::REFERENCE);
-        GetStartBlock()->AppendInst(undefined_inst_);
+    if (undefinedInst_ == nullptr) {
+        undefinedInst_ = CreateInstLoadUndefined(DataType::REFERENCE);
+        GetStartBlock()->AppendInst(undefinedInst_);
     }
-    return undefined_inst_;
+    return undefinedInst_;
 }
 
-void Graph::RemoveConstFromList(ConstantInst *const_inst)
+void Graph::RemoveConstFromList(ConstantInst *constInst)
 {
-    if (const_inst == first_const_inst_) {
-        first_const_inst_ = const_inst->GetNextConst();
-        const_inst->SetNextConst(nullptr);
+    if (constInst == firstConstInst_) {
+        firstConstInst_ = constInst->GetNextConst();
+        constInst->SetNextConst(nullptr);
         return;
     }
-    auto current = first_const_inst_;
+    auto current = firstConstInst_;
     auto next = current->GetNextConst();
-    while (next != nullptr && next != const_inst) {
+    while (next != nullptr && next != constInst) {
         current = next;
         next = next->GetNextConst();
     }
     ASSERT(next != nullptr);
-    ASSERT(next == const_inst);
-    current->SetNextConst(const_inst->GetNextConst());
-    const_inst->SetNextConst(nullptr);
+    ASSERT(next == constInst);
+    current->SetNextConst(constInst->GetNextConst());
+    constInst->SetNextConst(nullptr);
 }
 
 void InvalidateBlocksOrderAnalyzes(Graph *graph)
@@ -155,8 +155,8 @@ void InvalidateBlocksOrderAnalyzes(Graph *graph)
 
 void Graph::AddBlock(BasicBlock *block)
 {
-    block->SetId(vector_bb_.size());
-    vector_bb_.push_back(block);
+    block->SetId(vectorBb_.size());
+    vectorBb_.push_back(block);
     block->SetGraph(this);
     InvalidateBlocksOrderAnalyzes(this);
 }
@@ -164,13 +164,13 @@ void Graph::AddBlock(BasicBlock *block)
 #ifndef NDEBUG
 void Graph::AddBlock(BasicBlock *block, uint32_t id)
 {
-    if (vector_bb_.size() <= id) {
+    if (vectorBb_.size() <= id) {
         // (id + 1) for adding a block with index 0
-        vector_bb_.resize((id + 1U) << 1U, nullptr);
+        vectorBb_.resize((id + 1U) << 1U, nullptr);
     }
-    ASSERT(vector_bb_[id] == nullptr);
+    ASSERT(vectorBb_[id] == nullptr);
     block->SetId(id);
-    vector_bb_[id] = block;
+    vectorBb_[id] = block;
     InvalidateBlocksOrderAnalyzes(this);
 }
 #endif
@@ -205,29 +205,29 @@ AliasType Graph::CheckInstAlias(Inst *mem1, Inst *mem2)
     return GetValidAnalysis<AliasAnalysis>().CheckInstAlias(mem1, mem2);
 }
 
-BasicBlock *Graph::CreateEmptyBlock(uint32_t guest_pc)
+BasicBlock *Graph::CreateEmptyBlock(uint32_t guestPc)
 {
-    auto block = GetAllocator()->New<BasicBlock>(this, guest_pc);
+    auto block = GetAllocator()->New<BasicBlock>(this, guestPc);
     AddBlock(block);
     return block;
 }
 
 // Create empty block with base block's properties
-BasicBlock *Graph::CreateEmptyBlock(BasicBlock *base_block)
+BasicBlock *Graph::CreateEmptyBlock(BasicBlock *baseBlock)
 {
-    ASSERT(base_block != nullptr);
+    ASSERT(baseBlock != nullptr);
     auto block = CreateEmptyBlock();
-    block->SetGuestPc(base_block->GetGuestPc());
-    block->SetAllFields(base_block->GetAllFields());
-    block->SetTryId(base_block->GetTryId());
+    block->SetGuestPc(baseBlock->GetGuestPc());
+    block->SetAllFields(baseBlock->GetAllFields());
+    block->SetTryId(baseBlock->GetTryId());
     block->SetOsrEntry(false);
     return block;
 }
 
 #ifndef NDEBUG
-BasicBlock *Graph::CreateEmptyBlock(uint32_t id, uint32_t guest_pc)
+BasicBlock *Graph::CreateEmptyBlock(uint32_t id, uint32_t guestPc)
 {
-    auto block = GetAllocator()->New<BasicBlock>(this, guest_pc);
+    auto block = GetAllocator()->New<BasicBlock>(this, guestPc);
     AddBlock(block, id);
     return block;
 }
@@ -240,34 +240,34 @@ BasicBlock *Graph::CreateStartBlock()
     return block;
 }
 
-BasicBlock *Graph::CreateEndBlock(uint32_t guest_pc)
+BasicBlock *Graph::CreateEndBlock(uint32_t guestPc)
 {
-    auto block = CreateEmptyBlock(guest_pc);
+    auto block = CreateEmptyBlock(guestPc);
     SetEndBlock(block);
     return block;
 }
 
-void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rm_pred)
+void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rmPred)
 {
     constexpr auto IMM_2 = 2;
     if (block->GetPredsBlocks().size() == IMM_2) {
         for (auto phi : block->PhiInstsSafe()) {
-            auto rm_index = phi->CastToPhi()->GetPredBlockIndex(rm_pred);
-            auto remaining_inst = phi->GetInput(1 - rm_index).GetInst();
-            if (phi != remaining_inst && remaining_inst->GetBasicBlock() != nullptr) {
-                phi->ReplaceUsers(remaining_inst);
+            auto rmIndex = phi->CastToPhi()->GetPredBlockIndex(rmPred);
+            auto remainingInst = phi->GetInput(1 - rmIndex).GetInst();
+            if (phi != remainingInst && remainingInst->GetBasicBlock() != nullptr) {
+                phi->ReplaceUsers(remainingInst);
             }
             block->RemoveInst(phi);
         }
     } else if (block->GetPredsBlocks().size() > IMM_2) {
         for (auto phi : block->PhiInstsSafe()) {
-            auto rm_index = phi->CastToPhi()->GetPredBlockIndex(rm_pred);
-            phi->CastToPhi()->RemoveInput(rm_index);
+            auto rmIndex = phi->CastToPhi()->GetPredBlockIndex(rmPred);
+            phi->CastToPhi()->RemoveInput(rmIndex);
         }
     } else {
         ASSERT(block->GetPredsBlocks().size() == 1);
     }
-    block->RemovePred(rm_pred);
+    block->RemovePred(rmPred);
     InvalidateBlocksOrderAnalyzes(block->GetGraph());
 }
 
@@ -287,10 +287,10 @@ void Graph::RemoveSuccessors(BasicBlock *block)
  * Remove edges between `block` and its predecessors,
  * update last instructions in predecessors blocks
  */
-void Graph::RemovePredecessors(BasicBlock *block, bool remove_last_inst)
+void Graph::RemovePredecessors(BasicBlock *block, bool removeLastInst)
 {
     for (auto pred : block->GetPredsBlocks()) {
-        if (remove_last_inst && !pred->IsTryBegin() && !pred->IsTryEnd()) {
+        if (removeLastInst && !pred->IsTryBegin() && !pred->IsTryEnd()) {
             if (pred->GetSuccsBlocks().size() == 2U) {
                 auto last = pred->GetLastInst();
                 ASSERT(last->GetOpcode() == Opcode::If || last->GetOpcode() == Opcode::IfImm ||
@@ -316,10 +316,10 @@ static void FinishBlockRemoval(BasicBlock *block)
     auto dominator = block->GetDominator();
     if (dominator != nullptr) {
         dominator->RemoveDominatedBlock(block);
-        for (auto dom_block : block->GetDominatedBlocks()) {
-            ASSERT(dom_block->GetDominator() == block);
-            dominator->AddDominatedBlock(dom_block);
-            dom_block->SetDominator(dominator);
+        for (auto domBlock : block->GetDominatedBlocks()) {
+            ASSERT(domBlock->GetDominator() == block);
+            dominator->AddDominatedBlock(domBlock);
+            domBlock->SetDominator(dominator);
         }
     }
     block->SetDominator(nullptr);
@@ -331,10 +331,10 @@ static void FinishBlockRemoval(BasicBlock *block)
 }
 
 /// @param block - a block which is disconnecting from the graph with clearing control-flow and data-flow
-void Graph::DisconnectBlock(BasicBlock *block, bool remove_last_inst, bool fix_dom_tree)
+void Graph::DisconnectBlock(BasicBlock *block, bool removeLastInst, bool fixDomTree)
 {
-    ASSERT(IsAnalysisValid<DominatorsTree>() || !fix_dom_tree);
-    RemovePredecessors(block, remove_last_inst);
+    ASSERT(IsAnalysisValid<DominatorsTree>() || !fixDomTree);
+    RemovePredecessors(block, removeLastInst);
     RemoveSuccessors(block);
 
     if (block->IsTryBegin()) {
@@ -347,39 +347,39 @@ void Graph::DisconnectBlock(BasicBlock *block, bool remove_last_inst, bool fix_d
     if (block->IsEndBlock()) {
         SetEndBlock(nullptr);
     }
-    if (fix_dom_tree) {
+    if (fixDomTree) {
         FinishBlockRemoval(block);
     }
     EraseBlock(block);
     // NB! please do not forget to fix LoopAnalyzer or invalidate it after the end of the pass
 }
 
-void Graph::DisconnectBlockRec(BasicBlock *block, bool remove_last_inst, bool fix_dom_tree)
+void Graph::DisconnectBlockRec(BasicBlock *block, bool removeLastInst, bool fixDomTree)
 {
     if (block->GetGraph() == nullptr) {
         return;
     }
-    bool loop_flag = false;
+    bool loopFlag = false;
     if (block->IsLoopHeader()) {
-        loop_flag = true;
+        loopFlag = true;
         auto loop = block->GetLoop();
         for (auto pred : block->GetPredsBlocks()) {
-            loop_flag &= (std::find(loop->GetBackEdges().begin(), loop->GetBackEdges().end(), pred) !=
-                          loop->GetBackEdges().end());
+            loopFlag &= (std::find(loop->GetBackEdges().begin(), loop->GetBackEdges().end(), pred) !=
+                         loop->GetBackEdges().end());
         }
     }
-    if (block->GetPredsBlocks().empty() || loop_flag) {
+    if (block->GetPredsBlocks().empty() || loopFlag) {
         ArenaVector<BasicBlock *> succs(block->GetSuccsBlocks(), GetLocalAllocator()->Adapter());
-        DisconnectBlock(block, remove_last_inst, fix_dom_tree);
+        DisconnectBlock(block, removeLastInst, fixDomTree);
         for (auto succ : succs) {
-            DisconnectBlockRec(succ, remove_last_inst, fix_dom_tree);
+            DisconnectBlockRec(succ, removeLastInst, fixDomTree);
         }
     }
 }
 
 void Graph::EraseBlock(BasicBlock *block)
 {
-    vector_bb_[block->GetId()] = nullptr;
+    vectorBb_[block->GetId()] = nullptr;
     if (GetEndBlock() == block) {
         SetEndBlock(nullptr);
     }
@@ -389,8 +389,8 @@ void Graph::EraseBlock(BasicBlock *block)
 
 void Graph::RestoreBlock(BasicBlock *block)
 {
-    ASSERT(vector_bb_[block->GetId()] == nullptr);
-    vector_bb_[block->GetId()] = block;
+    ASSERT(vectorBb_[block->GetId()] == nullptr);
+    vectorBb_[block->GetId()] = block;
     block->SetGraph(this);
     InvalidateBlocksOrderAnalyzes(this);
 }
@@ -409,14 +409,14 @@ void Graph::RemoveEmptyBlock(BasicBlock *block)
 }
 
 /// @param block - same for block without instructions, may have Phi(s)
-void Graph::RemoveEmptyBlockWithPhis(BasicBlock *block, bool irr_loop)
+void Graph::RemoveEmptyBlockWithPhis(BasicBlock *block, bool irrLoop)
 {
     ASSERT(IsAnalysisValid<DominatorsTree>());
     ASSERT(block->IsEmpty());
 
     ASSERT(!block->GetSuccsBlocks().empty());
     ASSERT(!block->GetPredsBlocks().empty());
-    block->RemoveEmptyBlock(irr_loop);
+    block->RemoveEmptyBlock(irrLoop);
 
     FinishBlockRemoval(block);
     EraseBlock(block);
@@ -440,13 +440,13 @@ ConstantInst *Graph::FindConstant(DataType::Type type, uint64_t value)
 
 ConstantInst *Graph::FindOrAddConstant(ConstantInst *inst)
 {
-    auto existing_const = FindConstant(inst->GetType(), inst->GetRawValue());
-    if (existing_const != nullptr) {
-        return existing_const;
+    auto existingConst = FindConstant(inst->GetType(), inst->GetRawValue());
+    if (existingConst != nullptr) {
+        return existingConst;
     }
     AddConstInStartBlock(inst);
-    inst->SetNextConst(first_const_inst_);
-    first_const_inst_ = inst;
+    inst->SetNextConst(firstConstInst_);
+    firstConstInst_ = inst;
     return inst;
 }
 
@@ -457,7 +457,7 @@ Encoder *Graph::GetEncoder()
             return encoder_ = GetAllocator()->New<bytecodeopt::BytecodeEncoder>(GetAllocator());
         }
 #if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
-        encoder_ = Encoder::Create(GetAllocator(), GetArch(), OPTIONS.IsCompilerEmitAsm(), IsDynamicMethod());
+        encoder_ = Encoder::Create(GetAllocator(), GetArch(), g_options.IsCompilerEmitAsm(), IsDynamicMethod());
 #endif
     }
     return encoder_;
@@ -483,11 +483,11 @@ CallingConvention *Graph::GetCallingConvention()
     if (callconv_ == nullptr) {
         // We use encoder_ instead of GetEncoder() because we use CallingConvention for ParameterInfo.
         // This doesn't require an encoder, so we don't create one
-        bool is_opt_irtoc = (mode_.IsInterpreter() || mode_.IsInterpreterEntry()) && IsIrtocPrologEpilogOptimized();
+        bool isOptIrtoc = (mode_.IsInterpreter() || mode_.IsInterpreterEntry()) && IsIrtocPrologEpilogOptimized();
         callconv_ = CallingConvention::Create(GetAllocator(), encoder_, GetRegisters(), GetArch(),
                                               //   is_panda_abi,      is_osr,           is_dyn
                                               mode_.SupportManagedCode(), IsOsrMode(),
-                                              IsDynamicMethod() && !GetMode().IsDynamicStub(), false, is_opt_irtoc);
+                                              IsDynamicMethod() && !GetMode().IsDynamicStub(), false, isOptIrtoc);
     }
     return callconv_;
 #endif
@@ -498,11 +498,11 @@ const MethodProperties &Graph::GetMethodProperties()
 #if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
     UNREACHABLE();
 #else
-    if (!method_properties_) {
-        method_properties_.emplace(this);
+    if (!methodProperties_) {
+        methodProperties_.emplace(this);
     }
 #endif
-    return method_properties_.value();
+    return methodProperties_.value();
 }
 
 void Graph::ResetParameterInfo()
@@ -510,17 +510,17 @@ void Graph::ResetParameterInfo()
 #if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
     auto callconv = GetCallingConvention();
     if (callconv == nullptr) {
-        param_info_ = nullptr;
+        paramInfo_ = nullptr;
         return;
     }
-    auto regs_reserve = 0;
+    auto regsReserve = 0;
     if (GetMode().SupportManagedCode()) {
-        regs_reserve++;
+        regsReserve++;
         if (GetMode().IsDynamicMethod() && GetMode().IsDynamicStub()) {
-            regs_reserve++;
+            regsReserve++;
         }
     }
-    param_info_ = callconv->GetParameterInfo(regs_reserve);
+    paramInfo_ = callconv->GetParameterInfo(regsReserve);
 #endif
 }
 
@@ -539,9 +539,9 @@ Register Graph::GetZeroReg() const
 
 Register Graph::GetArchTempReg() const
 {
-    auto temp_mask = Target(GetArch()).GetTempRegsMask();
+    auto tempMask = Target(GetArch()).GetTempRegsMask();
     for (ssize_t reg = RegMask::Size() - 1; reg >= 0; reg--) {
-        if (temp_mask[reg] && const_cast<Graph *>(this)->GetArchUsedRegs()[reg]) {
+        if (tempMask[reg] && const_cast<Graph *>(this)->GetArchUsedRegs()[reg]) {
             return reg;
         }
     }
@@ -554,28 +554,28 @@ Register Graph::GetArchTempVReg() const
     if (regfile == nullptr) {
         return INVALID_REG;
     }
-    auto reg_id = regfile->GetTempVReg();
-    if (reg_id == INVALID_REG_ID) {
+    auto regId = regfile->GetTempVReg();
+    if (regId == INVALID_REG_ID) {
         return INVALID_REG;
     }
-    return reg_id;
+    return regId;
 }
 
 RegMask Graph::GetArchUsedRegs()
 {
     auto regfile = GetRegisters();
-    if (regfile == nullptr && arch_used_regs_.None()) {
+    if (regfile == nullptr && archUsedRegs_.None()) {
         return RegMask();
     }
-    if (arch_used_regs_.None()) {
-        arch_used_regs_ = regfile->GetRegMask();
+    if (archUsedRegs_.None()) {
+        archUsedRegs_ = regfile->GetRegMask();
     }
-    return arch_used_regs_;
+    return archUsedRegs_;
 }
 
 void Graph::SetArchUsedRegs(RegMask mask)
 {
-    arch_used_regs_ = mask;
+    archUsedRegs_ = mask;
     GetRegisters()->SetRegMask(mask);
 }
 
@@ -606,19 +606,19 @@ bool Graph::HasLoop() const
 bool Graph::HasIrreducibleLoop() const
 {
     ASSERT(GetAnalysis<LoopAnalyzer>().IsValid());
-    return FlagIrredicibleLoop::Get(bit_fields_);
+    return FlagIrredicibleLoop::Get(bitFields_);
 }
 
 bool Graph::HasInfiniteLoop() const
 {
     ASSERT(GetAnalysis<LoopAnalyzer>().IsValid());
-    return FlagInfiniteLoop::Get(bit_fields_);
+    return FlagInfiniteLoop::Get(bitFields_);
 }
 
 bool Graph::HasFloatRegs() const
 {
     ASSERT(IsRegAllocApplied());
-    return FlagFloatRegs::Get(bit_fields_);
+    return FlagFloatRegs::Get(bitFields_);
 }
 
 /*
@@ -658,46 +658,46 @@ SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
     return {};
 #else
     // NOTE(pishin) change to ASSERT
-    if (param_info_ == nullptr) {
+    if (paramInfo_ == nullptr) {
         // NOTE(pishin) enable after fixing arch in tests - UNREACHABLE()
         return {};
     }
 
-    auto param = param_info_->GetNativeParam(Codegen::ConvertDataType(type, GetArch()));
+    auto param = paramInfo_->GetNativeParam(Codegen::ConvertDataType(type, GetArch()));
     if (std::holds_alternative<Reg>(param)) {
         auto reg = std::get<Reg>(param);
         // NOTE! Vector parameter can be put to scalar register in aarch32
-        DataType::Type reg_type;
+        DataType::Type regType;
         if (reg.IsFloat()) {
-            reg_type = DataType::FLOAT64;
+            regType = DataType::FLOAT64;
         } else if (reg.GetType() == INT64_TYPE) {
-            reg_type = DataType::UINT64;
+            regType = DataType::UINT64;
         } else {
-            reg_type = DataType::UINT32;
+            regType = DataType::UINT32;
         }
         auto loc = reg.IsFloat() ? LocationType::FP_REGISTER : LocationType::REGISTER;
-        return SpillFillData(SpillFillData {loc, LocationType::INVALID, reg.GetId(), INVALID_REG, reg_type});
+        return SpillFillData(SpillFillData {loc, LocationType::INVALID, reg.GetId(), INVALID_REG, regType});
     }
     ASSERT(std::holds_alternative<uint8_t>(param));
     auto slot = std::get<uint8_t>(param);
-    DataType::Type reg_type;
+    DataType::Type regType;
     if (DataType::IsFloatType(type)) {
-        reg_type = type;
+        regType = type;
     } else if (DataType::Is32Bits(type, GetArch())) {
-        reg_type = DataType::UINT32;
+        regType = DataType::UINT32;
     } else {
-        reg_type = DataType::UINT64;
+        regType = DataType::UINT64;
     }
     return SpillFillData(
-        SpillFillData {LocationType::STACK_PARAMETER, LocationType::INVALID, slot, INVALID_REG, reg_type});
+        SpillFillData {LocationType::STACK_PARAMETER, LocationType::INVALID, slot, INVALID_REG, regType});
 #endif
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming,-warnings-as-errors)
 Graph::ParameterList::Iterator Graph::ParameterList::begin()
 {
-    auto start_bb = graph_->GetStartBlock();
-    Iterator it(start_bb->GetFirstInst());
+    auto startBb = graph_->GetStartBlock();
+    Iterator it(startBb->GetFirstInst());
     if (*it != nullptr && it->GetOpcode() != Opcode::Parameter) {
         ++it;
     }
@@ -707,47 +707,47 @@ Graph::ParameterList::Iterator Graph::ParameterList::begin()
 void Graph::RemoveThrowableInst(const Inst *inst)
 {
     ASSERT(IsInstThrowable(inst));
-    for (auto catch_handler : throwable_insts_.at(inst)) {
-        for (auto catch_inst : catch_handler->AllInsts()) {
-            if (!catch_inst->IsCatchPhi() || catch_inst->CastToCatchPhi()->IsAcc()) {
+    for (auto catchHandler : throwableInsts_.at(inst)) {
+        for (auto catchInst : catchHandler->AllInsts()) {
+            if (!catchInst->IsCatchPhi() || catchInst->CastToCatchPhi()->IsAcc()) {
                 continue;
             }
-            auto catch_phi = catch_inst->CastToCatchPhi();
-            const auto &vregs = catch_phi->GetThrowableInsts();
+            auto catchPhi = catchInst->CastToCatchPhi();
+            const auto &vregs = catchPhi->GetThrowableInsts();
             auto it = std::find(vregs->begin(), vregs->end(), inst);
             if (it != vregs->end()) {
                 int index = std::distance(vregs->begin(), it);
-                catch_phi->RemoveInput(index);
+                catchPhi->RemoveInput(index);
             }
         }
     }
-    throwable_insts_.erase(inst);
+    throwableInsts_.erase(inst);
 }
 
-void Graph::ReplaceThrowableInst(Inst *old_inst, Inst *new_inst)
+void Graph::ReplaceThrowableInst(Inst *oldInst, Inst *newInst)
 {
-    auto it = throwable_insts_.emplace(new_inst, GetAllocator()->Adapter()).first;
-    it->second = std::move(throwable_insts_.at(old_inst));
+    auto it = throwableInsts_.emplace(newInst, GetAllocator()->Adapter()).first;
+    it->second = std::move(throwableInsts_.at(oldInst));
 
-    for (auto catch_handler : it->second) {
-        for (auto catch_inst : catch_handler->AllInsts()) {
-            if (!catch_inst->IsCatchPhi() || catch_inst->CastToCatchPhi()->IsAcc()) {
+    for (auto catchHandler : it->second) {
+        for (auto catchInst : catchHandler->AllInsts()) {
+            if (!catchInst->IsCatchPhi() || catchInst->CastToCatchPhi()->IsAcc()) {
                 continue;
             }
-            auto catch_phi = catch_inst->CastToCatchPhi();
-            const auto &vregs = catch_phi->GetThrowableInsts();
-            auto iter = std::find(vregs->begin(), vregs->end(), old_inst);
+            auto catchPhi = catchInst->CastToCatchPhi();
+            const auto &vregs = catchPhi->GetThrowableInsts();
+            auto iter = std::find(vregs->begin(), vregs->end(), oldInst);
             if (iter != vregs->end()) {
-                catch_phi->ReplaceThrowableInst(old_inst, new_inst);
+                catchPhi->ReplaceThrowableInst(oldInst, newInst);
             }
         }
     }
-    throwable_insts_.erase(old_inst);
+    throwableInsts_.erase(oldInst);
 }
 
 void Graph::DumpThrowableInsts(std::ostream *out) const
 {
-    for (auto &[inst, handlers] : throwable_insts_) {
+    for (auto &[inst, handlers] : throwableInsts_) {
         (*out) << "Throwable Inst";
         inst->Dump(out);
         (*out) << "Catch handlers:";
@@ -779,18 +779,18 @@ void Graph::InitDefaultLocations()
     SetDefaultLocationsInit();
 }
 
-int64_t Graph::GetBranchCounter(const BasicBlock *block, bool true_succ)
+int64_t Graph::GetBranchCounter(const BasicBlock *block, bool trueSucc)
 {
     ASSERT(block->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
-    auto last_inst = block->GetLastInst();
-    if (last_inst->GetPc() == 0) {
+    auto lastInst = block->GetLastInst();
+    if (lastInst->GetPc() == 0) {
         return 0;
     }
     RuntimeInterface::MethodPtr method;
-    if (last_inst->GetOpcode() == Opcode::IfImm) {
-        method = last_inst->CastToIfImm()->GetMethod();
-    } else if (last_inst->GetOpcode() == Opcode::If) {
-        method = last_inst->CastToIf()->GetMethod();
+    if (lastInst->GetOpcode() == Opcode::IfImm) {
+        method = lastInst->CastToIfImm()->GetMethod();
+    } else if (lastInst->GetOpcode() == Opcode::If) {
+        method = lastInst->CastToIf()->GetMethod();
     } else {
         return 0;
     }
@@ -800,35 +800,35 @@ int64_t Graph::GetBranchCounter(const BasicBlock *block, bool true_succ)
         return 0;
     }
 
-    return block->IsInverted() == true_succ ? GetRuntime()->GetBranchNotTakenCounter(method, last_inst->GetPc())
-                                            : GetRuntime()->GetBranchTakenCounter(method, last_inst->GetPc());
+    return block->IsInverted() == trueSucc ? GetRuntime()->GetBranchNotTakenCounter(method, lastInst->GetPc())
+                                           : GetRuntime()->GetBranchTakenCounter(method, lastInst->GetPc());
 }
 
 int64_t Graph::GetThrowCounter(const BasicBlock *block)
 {
-    auto last_inst = block->GetLastInst();
-    if (last_inst == nullptr || last_inst->GetOpcode() != Opcode::Throw || last_inst->GetPc() == INVALID_PC) {
+    auto lastInst = block->GetLastInst();
+    if (lastInst == nullptr || lastInst->GetOpcode() != Opcode::Throw || lastInst->GetPc() == INVALID_PC) {
         return 0;
     }
 
-    auto method = last_inst->CastToThrow()->GetCallMethod();
+    auto method = lastInst->CastToThrow()->GetCallMethod();
     if (method == nullptr) {
         return 0;
     }
 
-    return GetRuntime()->GetThrowTakenCounter(method, last_inst->GetPc());
+    return GetRuntime()->GetThrowTakenCounter(method, lastInst->GetPc());
 }
 
 uint32_t Graph::GetParametersSlotsCount() const
 {
-    uint32_t max_slot = 0;
-    for (auto param_inst : GetParameters()) {
-        auto location = param_inst->CastToParameter()->GetLocationData().GetSrc();
+    uint32_t maxSlot = 0;
+    for (auto paramInst : GetParameters()) {
+        auto location = paramInst->CastToParameter()->GetLocationData().GetSrc();
         if (location.IsStackParameter()) {
-            max_slot = location.GetValue() + 1U;
+            maxSlot = location.GetValue() + 1U;
         }
     }
-    return max_slot;
+    return maxSlot;
 }
 
 void GraphMode::Dump(std::ostream &stm)
@@ -851,9 +851,9 @@ void GraphMode::Dump(std::ostream &stm)
     DUMP_MODE(InterpreterEntry);
 }
 
-size_t GetObjectOffset(const Graph *graph, ObjectType obj_type, RuntimeInterface::FieldPtr field, uint32_t type_id)
+size_t GetObjectOffset(const Graph *graph, ObjectType objType, RuntimeInterface::FieldPtr field, uint32_t typeId)
 {
-    switch (obj_type) {
+    switch (objType) {
         case ObjectType::MEM_DYN_GLOBAL:
             return graph->GetRuntime()->GetPropertyBoxOffset(graph->GetArch());
         case ObjectType::MEM_DYN_ELEMENTS:
@@ -869,7 +869,7 @@ size_t GetObjectOffset(const Graph *graph, ObjectType obj_type, RuntimeInterface
         case ObjectType::MEM_DYN_ARRAY_LENGTH:
             return graph->GetRuntime()->GetDynArrayLenthOffset(graph->GetArch());
         case ObjectType::MEM_DYN_INLINED:
-            return type_id;
+            return typeId;
         case ObjectType::MEM_DYN_CLASS:
             return graph->GetRuntime()->GetObjClassOffset(graph->GetArch());
         case ObjectType::MEM_DYN_METHOD:

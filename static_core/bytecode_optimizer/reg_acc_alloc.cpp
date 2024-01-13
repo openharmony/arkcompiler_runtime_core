@@ -21,14 +21,14 @@
 namespace panda::bytecodeopt {
 
 /// Decide if accumulator register gets dirty between two instructions.
-bool IsAccWriteBetween(compiler::Inst *src_inst, compiler::Inst *dst_inst)
+bool IsAccWriteBetween(compiler::Inst *srcInst, compiler::Inst *dstInst)
 {
-    ASSERT(src_inst != dst_inst);
+    ASSERT(srcInst != dstInst);
 
-    compiler::BasicBlock *block = src_inst->GetBasicBlock();
-    compiler::Inst *inst = src_inst->GetNext();
+    compiler::BasicBlock *block = srcInst->GetBasicBlock();
+    compiler::Inst *inst = srcInst->GetNext();
 
-    while (inst != dst_inst) {
+    while (inst != dstInst) {
         if (UNLIKELY(inst == nullptr)) {
             do {
                 // NOTE(rtakacs): visit all the successors to get information about the
@@ -40,7 +40,7 @@ bool IsAccWriteBetween(compiler::Inst *src_inst, compiler::Inst *dst_inst)
                 ASSERT(block->GetSuccsBlocks().size() == 1U);
                 block = block->GetSuccessor(0U);
                 // NOTE(rtakacs): only linear flow is supported right now.
-                if (!dst_inst->IsPhi() && block->GetPredsBlocks().size() > 1U) {
+                if (!dstInst->IsPhi() && block->GetPredsBlocks().size() > 1U) {
                     return true;
                 }
             } while (block->IsEmpty() && !block->HasPhi());
@@ -61,7 +61,7 @@ bool IsAccWriteBetween(compiler::Inst *src_inst, compiler::Inst *dst_inst)
             if (inst->IsAccRead()) {
                 compiler::Inst *input = inst->GetInput(AccReadIndex(inst)).GetInst();
 
-                if (input != src_inst && input->GetDstReg() != compiler::ACC_REG_ID) {
+                if (input != srcInst && input->GetDstReg() != compiler::ACC_REG_ID) {
                     return true;
                 }
             }
@@ -76,7 +76,7 @@ bool IsAccWriteBetween(compiler::Inst *src_inst, compiler::Inst *dst_inst)
 inline bool RegAccAlloc::IsPhiOptimizable(compiler::Inst *phi) const
 {
     ASSERT(phi->GetOpcode() == compiler::Opcode::Phi);
-    return phi->IsMarked(acc_marker_);
+    return phi->IsMarked(accMarker_);
 }
 
 /// Return true if instruction can read the accumulator.
@@ -143,12 +143,12 @@ bool RegAccAlloc::CanUserReadAcc(compiler::Inst *inst, compiler::Inst *user) con
     }
 
     for (auto &input : user->GetInputs()) {
-        auto input_inst = input.GetInst();
-        if (input_inst != user && input_inst->GetDstReg() == compiler::ACC_REG_ID) {
+        auto inputInst = input.GetInst();
+        if (inputInst != user && inputInst->GetDstReg() == compiler::ACC_REG_ID) {
             return false;
         }
-        if (inst->IsPhi() && input_inst->IsConst() &&
-            (input_inst->GetBasicBlock()->GetId() != user->GetBasicBlock()->GetId())) {
+        if (inst->IsPhi() && inputInst->IsConst() &&
+            (inputInst->GetBasicBlock()->GetId() != user->GetBasicBlock()->GetId())) {
             return false;
         }
     }
@@ -176,14 +176,14 @@ bool RegAccAlloc::IsPhiAccReady(compiler::Inst *phi) const
     // NOTE(rtakacs): there can be cases when the input/output of a Phi is an other Phi.
     // These cases are not optimized for accumulator.
     for (auto input : phi->GetInputs()) {
-        compiler::Inst *phi_input = input.GetInst();
+        compiler::Inst *phiInput = input.GetInst();
 
-        if (!IsAccWrite(phi_input) || IsAccWriteBetween(phi_input, phi)) {
+        if (!IsAccWrite(phiInput) || IsAccWriteBetween(phiInput, phi)) {
             return false;
         }
     }
 
-    std::unordered_set<compiler::Inst *> users_that_required_swap_inputs;
+    std::unordered_set<compiler::Inst *> usersThatRequiredSwapInputs;
     for (auto &user : phi->GetUsers()) {
         compiler::Inst *uinst = user.GetInst();
 
@@ -191,10 +191,10 @@ bool RegAccAlloc::IsPhiAccReady(compiler::Inst *phi) const
             return false;
         }
         if (UserNeedSwapInputs(phi, uinst)) {
-            users_that_required_swap_inputs.insert(uinst);
+            usersThatRequiredSwapInputs.insert(uinst);
         }
     }
-    for (auto uinst : users_that_required_swap_inputs) {
+    for (auto uinst : usersThatRequiredSwapInputs) {
         uinst->SwapInputs();
     }
 
@@ -271,7 +271,7 @@ bool RegAccAlloc::RunImpl()
     for (auto block : GetGraph()->GetBlocksRPO()) {
         for (auto phi : block->PhiInsts()) {
             if (IsPhiAccReady(phi)) {
-                phi->SetMarker(acc_marker_);
+                phi->SetMarker(accMarker_);
             }
         }
     }
@@ -283,9 +283,9 @@ bool RegAccAlloc::RunImpl()
                 continue;
             }
 
-            bool use_acc_dst_reg = true;
+            bool useAccDstReg = true;
 
-            std::unordered_set<compiler::Inst *> users_that_required_swap_inputs;
+            std::unordered_set<compiler::Inst *> usersThatRequiredSwapInputs;
             for (auto &user : inst->GetUsers()) {
                 compiler::Inst *uinst = user.GetInst();
                 if (uinst->IsSaveState()) {
@@ -293,18 +293,18 @@ bool RegAccAlloc::RunImpl()
                 }
                 if (CanUserReadAcc(inst, uinst)) {
                     if (UserNeedSwapInputs(inst, uinst)) {
-                        users_that_required_swap_inputs.insert(uinst);
+                        usersThatRequiredSwapInputs.insert(uinst);
                     }
                     SetNeedLda(uinst, false);
                 } else {
-                    use_acc_dst_reg = false;
+                    useAccDstReg = false;
                 }
             }
-            for (auto uinst : users_that_required_swap_inputs) {
+            for (auto uinst : usersThatRequiredSwapInputs) {
                 uinst->SwapInputs();
             }
 
-            if (use_acc_dst_reg) {
+            if (useAccDstReg) {
                 inst->SetDstReg(compiler::ACC_REG_ID);
             } else if (MaybeRegDst(inst)) {
                 inst->ClearFlag(compiler::inst_flags::ACC_WRITE);

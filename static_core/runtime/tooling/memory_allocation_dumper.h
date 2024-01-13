@@ -36,9 +36,9 @@
 namespace panda::tooling {
 class MemoryAllocationDumper : public RuntimeListener {
 public:
-    explicit MemoryAllocationDumper(const PandaString &dump_file, const Runtime *runtime) : runtime_(runtime)
+    explicit MemoryAllocationDumper(const PandaString &dumpFile, const Runtime *runtime) : runtime_(runtime)
     {
-        dumpstream_.open(dump_file.c_str(), std::ios::out);
+        dumpstream_.open(dumpFile.c_str(), std::ios::out);
         runtime_->GetNotificationManager()->AddListener(this, DUMP_EVENT_MASK);
     }
 
@@ -59,14 +59,14 @@ public:
         }
         ASSERT(thread == ManagedThread::GetCurrent());
 
-        PandaString klass_name;
+        PandaString klassName;
         if (klass->IsDynamicClass()) {
-            klass_name = "Dynamic";
+            klassName = "Dynamic";
         } else {
-            klass_name = ClassHelper::GetName<PandaString>(static_cast<Class *>(klass)->GetDescriptor());
+            klassName = ClassHelper::GetName<PandaString>(static_cast<Class *>(klass)->GetDescriptor());
         }
 
-        DumpAllocation("NO_ERROR", "ObjectAlloc", klass_name, object, size);
+        DumpAllocation("NO_ERROR", "ObjectAlloc", klassName, object, size);
     }
 
     void GarbageCollectorStart() override
@@ -81,12 +81,12 @@ public:
 
 private:
     // Add one func to use lock in right way
-    void DumpAllocation(const char *err, const char *caller, const PandaString &klass_name, ObjectHeader *object,
+    void DumpAllocation(const char *err, const char *caller, const PandaString &klassName, ObjectHeader *object,
                         size_t size)
     {
         os::memory::LockHolder lock(lock_);
         const void *rawptr = static_cast<const void *>(object);
-        dumpstream_ << err << "," << time::GetCurrentTimeInMicros() << "," << caller << "," << klass_name << ","
+        dumpstream_ << err << "," << time::GetCurrentTimeInMicros() << "," << caller << "," << klassName << ","
                     << rawptr << "," << size << std::endl;
     }
 

@@ -73,39 +73,38 @@ size_t Inlining::CalculateInstructionsCount(Graph *graph)
     return count;
 }
 
-Inlining::Inlining(Graph *graph, uint32_t instructions_count, uint32_t depth, uint32_t methods_inlined)
+Inlining::Inlining(Graph *graph, uint32_t instructionsCount, uint32_t depth, uint32_t methodsInlined)
     : Optimization(graph),
       depth_(depth),
-      methods_inlined_(methods_inlined),
-      instructions_count_(instructions_count != 0 ? instructions_count : CalculateInstructionsCount(graph)),
-      instructions_limit_(OPTIONS.GetCompilerInliningMaxInsts()),
-      return_blocks_(graph->GetLocalAllocator()->Adapter()),
+      methodsInlined_(methodsInlined),
+      instructionsCount_(instructionsCount != 0 ? instructionsCount : CalculateInstructionsCount(graph)),
+      instructionsLimit_(g_options.GetCompilerInliningMaxInsts()),
+      returnBlocks_(graph->GetLocalAllocator()->Adapter()),
       blacklist_(graph->GetLocalAllocator()->Adapter()),
-      vregs_count_(graph->GetVRegsCount()),
+      vregsCount_(graph->GetVRegsCount()),
       cha_(graph->GetRuntime()->GetCha())
 {
 }
 
 bool Inlining::IsInlineCachesEnabled() const
 {
-    return DoesArchSupportDeoptimization(GetGraph()->GetArch()) && !OPTIONS.IsCompilerNoPicInlining();
+    return DoesArchSupportDeoptimization(GetGraph()->GetArch()) && !g_options.IsCompilerNoPicInlining();
 }
 
 #ifdef PANDA_EVENTS_ENABLED
-static void EmitEvent(const Graph *graph, const CallInst *call_inst, const InlineContext &ctx, events::InlineResult res)
+static void EmitEvent(const Graph *graph, const CallInst *callInst, const InlineContext &ctx, events::InlineResult res)
 {
     auto runtime = graph->GetRuntime();
     events::InlineKind kind;
-    if (ctx.cha_devirtualize) {
+    if (ctx.chaDevirtualize) {
         kind = events::InlineKind::VIRTUAL_CHA;
-    } else if (CanReplaceWithCallStatic(call_inst->GetOpcode()) || ctx.replace_to_static) {
+    } else if (CanReplaceWithCallStatic(callInst->GetOpcode()) || ctx.replaceToStatic) {
         kind = events::InlineKind::VIRTUAL;
     } else {
         kind = events::InlineKind::STATIC;
     }
     EVENT_INLINE(runtime->GetMethodFullName(graph->GetMethod()),
-                 ctx.method != nullptr ? runtime->GetMethodFullName(ctx.method) : "null", call_inst->GetId(), kind,
-                 res);
+                 ctx.method != nullptr ? runtime->GetMethodFullName(ctx.method) : "null", callInst->GetId(), kind, res);
 }
 #else
 // NOLINTNEXTLINE(readability-named-parameter)
@@ -116,11 +115,11 @@ bool Inlining::RunImpl()
 {
     GetGraph()->RunPass<LoopAnalyzer>();
 
-    auto blacklist_names = OPTIONS.GetCompilerInliningBlacklist();
-    blacklist_.reserve(blacklist_names.size());
+    auto blacklistNames = g_options.GetCompilerInliningBlacklist();
+    blacklist_.reserve(blacklistNames.size());
 
-    for (const auto &method_name : blacklist_names) {
-        blacklist_.insert(method_name);
+    for (const auto &methodName : blacklistNames) {
+        blacklist_.insert(methodName);
     }
     return Do();
 }
@@ -167,16 +166,16 @@ bool Inlining::IsInstSuitableForInline(Inst *inst) const
     if (!inst->IsCall()) {
         return false;
     }
-    auto call_inst = static_cast<CallInst *>(inst);
-    ASSERT(!call_inst->IsDynamicCall());
-    if (call_inst->IsInlined() || call_inst->IsLaunchCall()) {
+    auto callInst = static_cast<CallInst *>(inst);
+    ASSERT(!callInst->IsDynamicCall());
+    if (callInst->IsInlined() || callInst->IsLaunchCall()) {
         return false;
     }
-    if (call_inst->IsUnresolved() || call_inst->GetCallMethod() == nullptr) {
-        LOG_INLINING(DEBUG) << "Unknown method " << call_inst->GetCallMethodId();
+    if (callInst->IsUnresolved() || callInst->GetCallMethod() == nullptr) {
+        LOG_INLINING(DEBUG) << "Unknown method " << callInst->GetCallMethodId();
         return false;
     }
-    ASSERT(call_inst->GetCallMethod() != nullptr);
+    ASSERT(callInst->GetCallMethod() != nullptr);
     return true;
 }
 
@@ -196,69 +195,69 @@ void Inlining::InvalidateAnalyses()
  */
 Inst *GetNextParam(Inst *inst)
 {
-    for (auto next_inst = inst->GetNext(); next_inst != nullptr; next_inst = next_inst->GetNext()) {
-        if (next_inst->GetOpcode() == Opcode::Parameter) {
-            return next_inst;
+    for (auto nextInst = inst->GetNext(); nextInst != nullptr; nextInst = nextInst->GetNext()) {
+        if (nextInst->GetOpcode() == Opcode::Parameter) {
+            return nextInst;
         }
     }
     return nullptr;
 }
 
-bool Inlining::TryInline(CallInst *call_inst)
+bool Inlining::TryInline(CallInst *callInst)
 {
     InlineContext ctx;
-    if (!ResolveTarget(call_inst, &ctx)) {
+    if (!ResolveTarget(callInst, &ctx)) {
         if (IsInlineCachesEnabled()) {
-            return TryInlineWithInlineCaches(call_inst);
+            return TryInlineWithInlineCaches(callInst);
         }
         return false;
     }
 
-    ASSERT(!call_inst->IsInlined());
+    ASSERT(!callInst->IsInlined());
 
-    LOG_INLINING(DEBUG) << "Try to inline(id=" << call_inst->GetId() << (call_inst->IsVirtualCall() ? ", virtual" : "")
+    LOG_INLINING(DEBUG) << "Try to inline(id=" << callInst->GetId() << (callInst->IsVirtualCall() ? ", virtual" : "")
                         << ", size=" << GetGraph()->GetRuntime()->GetMethodCodeSize(ctx.method) << ", vregs="
                         << GetGraph()->GetRuntime()->GetMethodArgumentsCount(ctx.method) +
                                GetGraph()->GetRuntime()->GetMethodRegistersCount(ctx.method) + 1
-                        << (ctx.cha_devirtualize ? ", CHA" : "")
+                        << (ctx.chaDevirtualize ? ", CHA" : "")
                         << "): " << GetGraph()->GetRuntime()->GetMethodFullName(ctx.method, true);
 
-    if (DoInline(call_inst, &ctx)) {
+    if (DoInline(callInst, &ctx)) {
         if (IsIntrinsic(&ctx)) {
-            call_inst->GetBasicBlock()->RemoveInst(call_inst);
+            callInst->GetBasicBlock()->RemoveInst(callInst);
         }
-        EmitEvent(GetGraph(), call_inst, ctx, events::InlineResult::SUCCESS);
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::SUCCESS);
         return true;
     }
-    if (ctx.replace_to_static && !ctx.cha_devirtualize) {
+    if (ctx.replaceToStatic && !ctx.chaDevirtualize) {
         ASSERT(ctx.method != nullptr);
-        if (call_inst->GetCallMethod() != ctx.method) {
+        if (callInst->GetCallMethod() != ctx.method) {
             // Replace method id only if the methods are different.
             // Otherwise, leave the method id as is because:
             // 1. In aot mode the new method id can refer to a method from a different file
             // 2. In jit mode the method id does not matter
-            call_inst->SetCallMethodId(GetGraph()->GetRuntime()->GetMethodId(ctx.method));
+            callInst->SetCallMethodId(GetGraph()->GetRuntime()->GetMethodId(ctx.method));
         }
-        call_inst->SetCallMethod(ctx.method);
-        if (call_inst->GetOpcode() == Opcode::CallResolvedVirtual) {
+        callInst->SetCallMethod(ctx.method);
+        if (callInst->GetOpcode() == Opcode::CallResolvedVirtual) {
             // Drop the first argument - the resolved method
-            ASSERT(!call_inst->GetInputs().empty());
-            for (size_t i = 0; i < call_inst->GetInputsCount() - 1; i++) {
-                call_inst->SetInput(i, call_inst->GetInput(i + 1).GetInst());
+            ASSERT(!callInst->GetInputs().empty());
+            for (size_t i = 0; i < callInst->GetInputsCount() - 1; i++) {
+                callInst->SetInput(i, callInst->GetInput(i + 1).GetInst());
             }
-            call_inst->RemoveInput(call_inst->GetInputsCount() - 1);
-            ASSERT(!call_inst->GetInputTypes()->empty());
-            call_inst->GetInputTypes()->erase(call_inst->GetInputTypes()->begin());
+            callInst->RemoveInput(callInst->GetInputsCount() - 1);
+            ASSERT(!callInst->GetInputTypes()->empty());
+            callInst->GetInputTypes()->erase(callInst->GetInputTypes()->begin());
         }
-        call_inst->SetOpcode(Opcode::CallStatic);
-        EmitEvent(GetGraph(), call_inst, ctx, events::InlineResult::DEVIRTUALIZED);
+        callInst->SetOpcode(Opcode::CallStatic);
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::DEVIRTUALIZED);
         return true;
     }
 
     return false;
 }
 
-bool Inlining::TryInlineWithInlineCaches(CallInst *call_inst)
+bool Inlining::TryInlineWithInlineCaches(CallInst *callInst)
 {
     if (GetGraph()->IsAotMode()) {
         // We don't support offline inline caches yet.
@@ -271,193 +270,193 @@ bool Inlining::TryInlineWithInlineCaches(CallInst *call_inst)
     }
 
     ArenaVector<RuntimeInterface::ClassPtr> receivers(GetGraph()->GetLocalAllocator()->Adapter());
-    auto call_kind = pic->GetClasses(GetGraph()->GetMethod(), call_inst->GetPc(), &receivers);
-    switch (call_kind) {
+    auto callKind = pic->GetClasses(GetGraph()->GetMethod(), callInst->GetPc(), &receivers);
+    switch (callKind) {
         case InlineCachesInterface::CallKind::MEGAMORPHIC:
-            EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), "-", call_inst->GetId(),
+            EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), "-", callInst->GetId(),
                          events::InlineKind::VIRTUAL_POLYMORPHIC, events::InlineResult::FAIL_MEGAMORPHIC);
             return false;
         case InlineCachesInterface::CallKind::UNKNOWN:
             return false;
         case InlineCachesInterface::CallKind::MONOMORPHIC:
-            return DoInlineMonomorphic(call_inst, receivers[0]);
+            return DoInlineMonomorphic(callInst, receivers[0]);
         case InlineCachesInterface::CallKind::POLYMORPHIC:
-            ASSERT(call_kind == InlineCachesInterface::CallKind::POLYMORPHIC);
-            return DoInlinePolymorphic(call_inst, &receivers);
+            ASSERT(callKind == InlineCachesInterface::CallKind::POLYMORPHIC);
+            return DoInlinePolymorphic(callInst, &receivers);
         default:
             break;
     }
     return false;
 }
 
-bool Inlining::DoInlineMonomorphic(CallInst *call_inst, RuntimeInterface::ClassPtr receiver)
+bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPtr receiver)
 {
     auto runtime = GetGraph()->GetRuntime();
     InlineContext ctx;
-    ctx.method = runtime->ResolveVirtualMethod(receiver, call_inst->GetCallMethod());
+    ctx.method = runtime->ResolveVirtualMethod(receiver, callInst->GetCallMethod());
 
-    auto call_bb = call_inst->GetBasicBlock();
-    auto save_state = call_inst->GetSaveState();
-    auto obj_inst = call_inst->GetObjectInst();
+    auto callBb = callInst->GetBasicBlock();
+    auto saveState = callInst->GetSaveState();
+    auto objInst = callInst->GetObjectInst();
 
     LOG_INLINING(DEBUG) << "Try to inline monomorphic(size=" << runtime->GetMethodCodeSize(ctx.method)
                         << "): " << GetMethodFullName(GetGraph(), ctx.method);
 
-    if (!DoInline(call_inst, &ctx)) {
+    if (!DoInline(callInst, &ctx)) {
         return false;
     }
 
     // Add type guard
-    auto get_cls_inst = GetGraph()->CreateInstGetInstanceClass(DataType::REFERENCE, call_inst->GetPc(), obj_inst);
-    auto load_cls_inst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, call_inst->GetPc(), receiver);
-    auto cmp_inst = GetGraph()->CreateInstCompare(DataType::BOOL, call_inst->GetPc(), get_cls_inst, load_cls_inst,
-                                                  DataType::REFERENCE, ConditionCode::CC_NE);
-    auto deopt_inst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc(), cmp_inst, save_state,
-                                                         DeoptimizeType::INLINE_IC);
+    auto getClsInst = GetGraph()->CreateInstGetInstanceClass(DataType::REFERENCE, callInst->GetPc(), objInst);
+    auto loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
+    auto cmpInst = GetGraph()->CreateInstCompare(DataType::BOOL, callInst->GetPc(), getClsInst, loadClsInst,
+                                                 DataType::REFERENCE, ConditionCode::CC_NE);
+    auto deoptInst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, callInst->GetPc(), cmpInst, saveState,
+                                                        DeoptimizeType::INLINE_IC);
     if (IsIntrinsic(&ctx)) {
-        call_inst->InsertBefore(load_cls_inst);
-        call_inst->InsertBefore(get_cls_inst);
-        call_inst->InsertBefore(cmp_inst);
-        call_inst->InsertBefore(deopt_inst);
-        call_inst->GetBasicBlock()->RemoveInst(call_inst);
+        callInst->InsertBefore(loadClsInst);
+        callInst->InsertBefore(getClsInst);
+        callInst->InsertBefore(cmpInst);
+        callInst->InsertBefore(deoptInst);
+        callInst->GetBasicBlock()->RemoveInst(callInst);
     } else {
-        call_bb->AppendInst(load_cls_inst);
-        call_bb->AppendInst(get_cls_inst);
-        call_bb->AppendInst(cmp_inst);
-        call_bb->AppendInst(deopt_inst);
+        callBb->AppendInst(loadClsInst);
+        callBb->AppendInst(getClsInst);
+        callBb->AppendInst(cmpInst);
+        callBb->AppendInst(deoptInst);
     }
 
     EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), runtime->GetMethodFullName(ctx.method),
-                 call_inst->GetId(), events::InlineKind::VIRTUAL_MONOMORPHIC, events::InlineResult::SUCCESS);
+                 callInst->GetId(), events::InlineKind::VIRTUAL_MONOMORPHIC, events::InlineResult::SUCCESS);
     return true;
 }
 
-void Inlining::CreateCompareClass(CallInst *call_inst, Inst *get_cls_inst, RuntimeInterface::ClassPtr receiver,
-                                  BasicBlock *call_bb)
+void Inlining::CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeInterface::ClassPtr receiver,
+                                  BasicBlock *callBb)
 {
-    auto load_cls_inst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, call_inst->GetPc(), receiver);
-    auto cmp_inst = GetGraph()->CreateInstCompare(DataType::BOOL, call_inst->GetPc(), load_cls_inst, get_cls_inst,
-                                                  DataType::REFERENCE, ConditionCode::CC_EQ);
-    auto if_inst = GetGraph()->CreateInstIfImm(DataType::BOOL, call_inst->GetPc(), cmp_inst, 0, DataType::BOOL,
-                                               ConditionCode::CC_NE);
-    call_bb->AppendInst(load_cls_inst);
-    call_bb->AppendInst(cmp_inst);
-    call_bb->AppendInst(if_inst);
+    auto loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
+    auto cmpInst = GetGraph()->CreateInstCompare(DataType::BOOL, callInst->GetPc(), loadClsInst, getClsInst,
+                                                 DataType::REFERENCE, ConditionCode::CC_EQ);
+    auto ifInst = GetGraph()->CreateInstIfImm(DataType::BOOL, callInst->GetPc(), cmpInst, 0, DataType::BOOL,
+                                              ConditionCode::CC_NE);
+    callBb->AppendInst(loadClsInst);
+    callBb->AppendInst(cmpInst);
+    callBb->AppendInst(ifInst);
 }
 
-void Inlining::InsertDeoptimizeInst(CallInst *call_inst, BasicBlock *call_bb, DeoptimizeType deopt_type)
+void Inlining::InsertDeoptimizeInst(CallInst *callInst, BasicBlock *callBb, DeoptimizeType deoptType)
 {
     // If last class compare returns false we need to deoptimize the method.
     // So we construct instruction DeoptimizeIf and insert instead of IfImm inst.
-    auto if_inst = call_bb->GetLastInst();
-    ASSERT(if_inst != nullptr && if_inst->GetOpcode() == Opcode::IfImm);
-    ASSERT(if_inst->CastToIfImm()->GetImm() == 0 && if_inst->CastToIfImm()->GetCc() == ConditionCode::CC_NE);
+    auto ifInst = callBb->GetLastInst();
+    ASSERT(ifInst != nullptr && ifInst->GetOpcode() == Opcode::IfImm);
+    ASSERT(ifInst->CastToIfImm()->GetImm() == 0 && ifInst->CastToIfImm()->GetCc() == ConditionCode::CC_NE);
 
-    auto compare_inst = if_inst->GetInput(0).GetInst()->CastToCompare();
-    ASSERT(compare_inst != nullptr && compare_inst->GetCc() == ConditionCode::CC_EQ);
-    compare_inst->SetCc(ConditionCode::CC_NE);
+    auto compareInst = ifInst->GetInput(0).GetInst()->CastToCompare();
+    ASSERT(compareInst != nullptr && compareInst->GetCc() == ConditionCode::CC_EQ);
+    compareInst->SetCc(ConditionCode::CC_NE);
 
-    auto deopt_inst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc(), compare_inst,
-                                                         call_inst->GetSaveState(), deopt_type);
+    auto deoptInst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, callInst->GetPc(), compareInst,
+                                                        callInst->GetSaveState(), deoptType);
 
-    call_bb->RemoveInst(if_inst);
-    call_bb->AppendInst(deopt_inst);
+    callBb->RemoveInst(ifInst);
+    callBb->AppendInst(deoptInst);
 }
 
-void Inlining::InsertCallInst(CallInst *call_inst, BasicBlock *call_bb, BasicBlock *ret_bb, Inst *phi_inst)
+void Inlining::InsertCallInst(CallInst *callInst, BasicBlock *callBb, BasicBlock *retBb, Inst *phiInst)
 {
-    ASSERT(phi_inst == nullptr || phi_inst->GetBasicBlock() == ret_bb);
+    ASSERT(phiInst == nullptr || phiInst->GetBasicBlock() == retBb);
     // Insert new BB
-    auto new_call_bb = GetGraph()->CreateEmptyBlock(call_bb);
-    call_bb->GetLoop()->AppendBlock(new_call_bb);
-    call_bb->AddSucc(new_call_bb);
-    new_call_bb->AddSucc(ret_bb);
+    auto newCallBb = GetGraph()->CreateEmptyBlock(callBb);
+    callBb->GetLoop()->AppendBlock(newCallBb);
+    callBb->AddSucc(newCallBb);
+    newCallBb->AddSucc(retBb);
 
     // Copy SaveState inst
-    auto ss = call_inst->GetSaveState();
-    auto clone_ss = static_cast<SaveStateInst *>(ss->Clone(GetGraph()));
-    for (size_t input_idx = 0; input_idx < ss->GetInputsCount(); input_idx++) {
-        clone_ss->AppendInput(ss->GetInput(input_idx));
-        clone_ss->SetVirtualRegister(input_idx, ss->GetVirtualRegister(input_idx));
+    auto ss = callInst->GetSaveState();
+    auto cloneSs = static_cast<SaveStateInst *>(ss->Clone(GetGraph()));
+    for (size_t inputIdx = 0; inputIdx < ss->GetInputsCount(); inputIdx++) {
+        cloneSs->AppendInput(ss->GetInput(inputIdx));
+        cloneSs->SetVirtualRegister(inputIdx, ss->GetVirtualRegister(inputIdx));
     }
-    new_call_bb->AppendInst(clone_ss);
+    newCallBb->AppendInst(cloneSs);
 
     // Copy Call inst
-    auto clone_call = call_inst->Clone(GetGraph());
-    for (auto input : call_inst->GetInputs()) {
-        clone_call->AppendInput(input.GetInst());
+    auto cloneCall = callInst->Clone(GetGraph());
+    for (auto input : callInst->GetInputs()) {
+        cloneCall->AppendInput(input.GetInst());
     }
-    clone_call->SetSaveState(clone_ss);
-    new_call_bb->AppendInst(clone_call);
+    cloneCall->SetSaveState(cloneSs);
+    newCallBb->AppendInst(cloneCall);
 
     // Set return value in phi inst
-    if (phi_inst != nullptr) {
-        phi_inst->AppendInput(clone_call);
+    if (phiInst != nullptr) {
+        phiInst->AppendInput(cloneCall);
     }
 }
 
-void Inlining::UpdateParameterDataflow(Graph *graph_inl, Inst *call_inst)
+void Inlining::UpdateParameterDataflow(Graph *graphInl, Inst *callInst)
 {
     // Replace inlined graph incoming dataflow edges
-    auto start_bb = graph_inl->GetStartBlock();
+    auto startBb = graphInl->GetStartBlock();
     // Last input is SaveState
-    if (call_inst->GetInputsCount() > 1) {
-        Inst *param_inst = *start_bb->Insts().begin();
-        if (param_inst != nullptr && param_inst->GetOpcode() != Opcode::Parameter) {
-            param_inst = GetNextParam(param_inst);
+    if (callInst->GetInputsCount() > 1) {
+        Inst *paramInst = *startBb->Insts().begin();
+        if (paramInst != nullptr && paramInst->GetOpcode() != Opcode::Parameter) {
+            paramInst = GetNextParam(paramInst);
         }
-        while (param_inst != nullptr) {
-            ASSERT(param_inst);
-            auto arg_num = param_inst->CastToParameter()->GetArgNumber();
-            if (call_inst->GetOpcode() == Opcode::CallResolvedVirtual ||
-                call_inst->GetOpcode() == Opcode::CallResolvedStatic) {
-                ASSERT(arg_num != ParameterInst::DYNAMIC_NUM_ARGS);
-                arg_num += 1;  // skip method_reg
+        while (paramInst != nullptr) {
+            ASSERT(paramInst);
+            auto argNum = paramInst->CastToParameter()->GetArgNumber();
+            if (callInst->GetOpcode() == Opcode::CallResolvedVirtual ||
+                callInst->GetOpcode() == Opcode::CallResolvedStatic) {
+                ASSERT(argNum != ParameterInst::DYNAMIC_NUM_ARGS);
+                argNum += 1;  // skip method_reg
             }
             Inst *input = nullptr;
-            if (arg_num < call_inst->GetInputsCount() - 1) {
-                input = call_inst->GetInput(arg_num).GetInst();
-            } else if (arg_num == ParameterInst::DYNAMIC_NUM_ARGS) {
-                input = GetGraph()->FindOrCreateConstant(call_inst->GetInputsCount() - 1);
+            if (argNum < callInst->GetInputsCount() - 1) {
+                input = callInst->GetInput(argNum).GetInst();
+            } else if (argNum == ParameterInst::DYNAMIC_NUM_ARGS) {
+                input = GetGraph()->FindOrCreateConstant(callInst->GetInputsCount() - 1);
             } else {
                 input = GetGraph()->FindOrCreateConstant(DataType::Any(coretypes::TaggedValue::VALUE_UNDEFINED));
             }
-            param_inst->ReplaceUsers(input);
-            param_inst = GetNextParam(param_inst);
+            paramInst->ReplaceUsers(input);
+            paramInst = GetNextParam(paramInst);
         }
     }
 }
 
-void UpdateExternalParameterDataflow(Graph *graph_inl, Inst *call_inst)
+void UpdateExternalParameterDataflow(Graph *graphInl, Inst *callInst)
 {
     // Replace inlined graph incoming dataflow edges
-    auto start_bb = graph_inl->GetStartBlock();
+    auto startBb = graphInl->GetStartBlock();
     // Last input is SaveState
-    if (call_inst->GetInputsCount() <= 1) {
+    if (callInst->GetInputsCount() <= 1) {
         return;
     }
-    Inst *param_inst = *start_bb->Insts().begin();
-    if (param_inst != nullptr && param_inst->GetOpcode() != Opcode::Parameter) {
-        param_inst = GetNextParam(param_inst);
+    Inst *paramInst = *startBb->Insts().begin();
+    if (paramInst != nullptr && paramInst->GetOpcode() != Opcode::Parameter) {
+        paramInst = GetNextParam(paramInst);
     }
-    ArenaVector<Inst *> worklist {graph_inl->GetLocalAllocator()->Adapter()};
-    while (param_inst != nullptr) {
-        auto arg_num = param_inst->CastToParameter()->GetArgNumber();
-        ASSERT(arg_num != ParameterInst::DYNAMIC_NUM_ARGS);
-        if (call_inst->GetOpcode() == Opcode::CallResolvedVirtual ||
-            call_inst->GetOpcode() == Opcode::CallResolvedStatic) {
-            arg_num += 1;  // skip method_reg
+    ArenaVector<Inst *> worklist {graphInl->GetLocalAllocator()->Adapter()};
+    while (paramInst != nullptr) {
+        auto argNum = paramInst->CastToParameter()->GetArgNumber();
+        ASSERT(argNum != ParameterInst::DYNAMIC_NUM_ARGS);
+        if (callInst->GetOpcode() == Opcode::CallResolvedVirtual ||
+            callInst->GetOpcode() == Opcode::CallResolvedStatic) {
+            argNum += 1;  // skip method_reg
         }
-        ASSERT(arg_num < call_inst->GetInputsCount() - 1);
-        auto input = call_inst->GetInput(arg_num);
-        for (auto &user : param_inst->GetUsers()) {
+        ASSERT(argNum < callInst->GetInputsCount() - 1);
+        auto input = callInst->GetInput(argNum);
+        for (auto &user : paramInst->GetUsers()) {
             if (user.GetInst()->GetOpcode() == Opcode::NullCheck) {
                 user.GetInst()->ReplaceUsers(input.GetInst());
                 worklist.push_back(user.GetInst());
             }
         }
-        param_inst->ReplaceUsers(input.GetInst());
-        param_inst = GetNextParam(param_inst);
+        paramInst->ReplaceUsers(input.GetInst());
+        paramInst = GetNextParam(paramInst);
     }
     for (auto inst : worklist) {
         auto ss = inst->GetInput(1).GetInst();
@@ -479,19 +478,19 @@ static inline CallInst *CloneVirtualCallInst(CallInst *call, Graph *graph)
     UNREACHABLE();
 }
 
-bool Inlining::DoInlinePolymorphic(CallInst *call_inst, ArenaVector<RuntimeInterface::ClassPtr> *receivers)
+bool Inlining::DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterface::ClassPtr> *receivers)
 {
     LOG_INLINING(DEBUG) << "Try inline polymorphic call(" << receivers->size() << " receivers):";
-    LOG_INLINING(DEBUG) << "  instruction: " << *call_inst;
+    LOG_INLINING(DEBUG) << "  instruction: " << *callInst;
 
-    bool has_unreachable_blocks = false;
-    bool has_runtime_calls = false;
+    bool hasUnreachableBlocks = false;
+    bool hasRuntimeCalls = false;
     auto runtime = GetGraph()->GetRuntime();
-    auto get_cls_inst = GetGraph()->CreateInstGetInstanceClass(DataType::REFERENCE, call_inst->GetPc());
-    PhiInst *phi_inst = nullptr;
-    BasicBlock *call_bb = nullptr;
-    BasicBlock *call_cont_bb = nullptr;
-    auto inlined_methods = methods_inlined_;
+    auto getClsInst = GetGraph()->CreateInstGetInstanceClass(DataType::REFERENCE, callInst->GetPc());
+    PhiInst *phiInst = nullptr;
+    BasicBlock *callBb = nullptr;
+    BasicBlock *callContBb = nullptr;
+    auto inlinedMethods = methodsInlined_;
 
     // For each receiver we construct BB for CallVirtual inlined, and BB for Return.Inlined
     // Inlined graph we inserts between the blocks:
@@ -524,125 +523,125 @@ bool Inlining::DoInlinePolymorphic(CallInst *call_inst, ArenaVector<RuntimeInter
     //         phi(new_call_bb, return_inlined_block)
     for (auto receiver : *receivers) {
         InlineContext ctx;
-        ctx.method = runtime->ResolveVirtualMethod(receiver, call_inst->GetCallMethod());
+        ctx.method = runtime->ResolveVirtualMethod(receiver, callInst->GetCallMethod());
         ASSERT(ctx.method != nullptr && !runtime->IsMethodAbstract(ctx.method));
         LOG_INLINING(DEBUG) << "Inline receiver " << runtime->GetMethodFullName(ctx.method);
-        if (!CheckMethodCanBeInlined<true, false>(call_inst, &ctx)) {
+        if (!CheckMethodCanBeInlined<true, false>(callInst, &ctx)) {
             continue;
         }
-        ASSERT(ctx.intrinsic_id == RuntimeInterface::IntrinsicId::INVALID);
+        ASSERT(ctx.intrinsicId == RuntimeInterface::IntrinsicId::INVALID);
 
         // Create Call.inlined
-        CallInst *new_call_inst = CloneVirtualCallInst(call_inst, GetGraph());
-        new_call_inst->SetCallMethodId(runtime->GetMethodId(ctx.method));
-        new_call_inst->SetCallMethod(ctx.method);
-        auto inl_graph = BuildGraph(&ctx, call_inst, new_call_inst);
-        if (inl_graph.graph == nullptr) {
+        CallInst *newCallInst = CloneVirtualCallInst(callInst, GetGraph());
+        newCallInst->SetCallMethodId(runtime->GetMethodId(ctx.method));
+        newCallInst->SetCallMethod(ctx.method);
+        auto inlGraph = BuildGraph(&ctx, callInst, newCallInst);
+        if (inlGraph.graph == nullptr) {
             continue;
         }
-        vregs_count_ += inl_graph.graph->GetVRegsCount();
-        if (call_bb == nullptr) {
+        vregsCount_ += inlGraph.graph->GetVRegsCount();
+        if (callBb == nullptr) {
             // Split block by call instruction
-            call_bb = call_inst->GetBasicBlock();
-            call_cont_bb = call_bb->SplitBlockAfterInstruction(call_inst, false);
-            call_bb->AppendInst(get_cls_inst);
-            if (call_inst->GetType() != DataType::VOID) {
-                phi_inst = GetGraph()->CreateInstPhi(call_inst->GetType(), call_inst->GetPc());
-                phi_inst->ReserveInputs(receivers->size() << 1U);
-                call_cont_bb->AppendPhi(phi_inst);
+            callBb = callInst->GetBasicBlock();
+            callContBb = callBb->SplitBlockAfterInstruction(callInst, false);
+            callBb->AppendInst(getClsInst);
+            if (callInst->GetType() != DataType::VOID) {
+                phiInst = GetGraph()->CreateInstPhi(callInst->GetType(), callInst->GetPc());
+                phiInst->ReserveInputs(receivers->size() << 1U);
+                callContBb->AppendPhi(phiInst);
             }
         } else {
-            auto new_call_bb = GetGraph()->CreateEmptyBlock(call_bb);
-            call_bb->GetLoop()->AppendBlock(new_call_bb);
-            call_bb->AddSucc(new_call_bb);
-            call_bb = new_call_bb;
+            auto newCallBb = GetGraph()->CreateEmptyBlock(callBb);
+            callBb->GetLoop()->AppendBlock(newCallBb);
+            callBb->AddSucc(newCallBb);
+            callBb = newCallBb;
         }
 
-        CreateCompareClass(call_inst, get_cls_inst, receiver, call_bb);
+        CreateCompareClass(callInst, getClsInst, receiver, callBb);
 
         // Create call_inlined_block
-        auto call_inlined_block = GetGraph()->CreateEmptyBlock(call_bb);
-        call_bb->GetLoop()->AppendBlock(call_inlined_block);
-        call_bb->AddSucc(call_inlined_block);
+        auto callInlinedBlock = GetGraph()->CreateEmptyBlock(callBb);
+        callBb->GetLoop()->AppendBlock(callInlinedBlock);
+        callBb->AddSucc(callInlinedBlock);
 
         // Insert Call.inlined in call_inlined_block
-        new_call_inst->AppendInput(call_inst->GetObjectInst());
-        new_call_inst->AppendInput(call_inst->GetSaveState());
-        new_call_inst->SetInlined(true);
-        new_call_inst->SetFlag(inst_flags::NO_DST);
+        newCallInst->AppendInput(callInst->GetObjectInst());
+        newCallInst->AppendInput(callInst->GetSaveState());
+        newCallInst->SetInlined(true);
+        newCallInst->SetFlag(inst_flags::NO_DST);
         // Set NO_DCE flag, since some call instructions might not have one after inlining
-        new_call_inst->SetFlag(inst_flags::NO_DCE);
-        call_inlined_block->PrependInst(new_call_inst);
+        newCallInst->SetFlag(inst_flags::NO_DCE);
+        callInlinedBlock->PrependInst(newCallInst);
 
         // Create return_inlined_block and inster PHI for non void functions
-        auto return_inlined_block = GetGraph()->CreateEmptyBlock(call_bb);
-        call_bb->GetLoop()->AppendBlock(return_inlined_block);
-        PhiInst *local_phi_inst = nullptr;
-        if (call_inst->GetType() != DataType::VOID) {
-            local_phi_inst = GetGraph()->CreateInstPhi(call_inst->GetType(), call_inst->GetPc());
-            local_phi_inst->ReserveInputs(receivers->size() << 1U);
-            return_inlined_block->AppendPhi(local_phi_inst);
+        auto returnInlinedBlock = GetGraph()->CreateEmptyBlock(callBb);
+        callBb->GetLoop()->AppendBlock(returnInlinedBlock);
+        PhiInst *localPhiInst = nullptr;
+        if (callInst->GetType() != DataType::VOID) {
+            localPhiInst = GetGraph()->CreateInstPhi(callInst->GetType(), callInst->GetPc());
+            localPhiInst->ReserveInputs(receivers->size() << 1U);
+            returnInlinedBlock->AppendPhi(localPhiInst);
         }
 
         // Inlined graph between call_inlined_block and return_inlined_block
-        GetGraph()->SetMaxMarkerIdx(inl_graph.graph->GetCurrentMarkerIdx());
-        UpdateParameterDataflow(inl_graph.graph, call_inst);
-        UpdateDataflow(inl_graph.graph, call_inst, local_phi_inst, phi_inst);
-        MoveConstants(inl_graph.graph);
-        UpdateControlflow(inl_graph.graph, call_inlined_block, return_inlined_block);
+        GetGraph()->SetMaxMarkerIdx(inlGraph.graph->GetCurrentMarkerIdx());
+        UpdateParameterDataflow(inlGraph.graph, callInst);
+        UpdateDataflow(inlGraph.graph, callInst, localPhiInst, phiInst);
+        MoveConstants(inlGraph.graph);
+        UpdateControlflow(inlGraph.graph, callInlinedBlock, returnInlinedBlock);
 
-        if (!return_inlined_block->GetPredsBlocks().empty()) {
-            if (inl_graph.has_runtime_calls) {
-                auto inlined_return =
-                    GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC, new_call_inst->GetSaveState());
-                return_inlined_block->PrependInst(inlined_return);
+        if (!returnInlinedBlock->GetPredsBlocks().empty()) {
+            if (inlGraph.hasRuntimeCalls) {
+                auto inlinedReturn =
+                    GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC, newCallInst->GetSaveState());
+                returnInlinedBlock->PrependInst(inlinedReturn);
             }
-            if (call_inst->GetType() != DataType::VOID) {
-                ASSERT(phi_inst);
+            if (callInst->GetType() != DataType::VOID) {
+                ASSERT(phiInst);
                 // clang-tidy think that phi_inst can be nullptr
-                phi_inst->AppendInput(local_phi_inst);  // NOLINT
+                phiInst->AppendInput(localPhiInst);  // NOLINT
             }
-            return_inlined_block->AddSucc(call_cont_bb);
+            returnInlinedBlock->AddSucc(callContBb);
         } else {
             // We need remove return_inlined_block if inlined graph doesn't have Return inst(only Throw or Deoptimize)
-            has_unreachable_blocks = true;
+            hasUnreachableBlocks = true;
         }
 
-        if (inl_graph.has_runtime_calls) {
-            has_runtime_calls = true;
+        if (inlGraph.hasRuntimeCalls) {
+            hasRuntimeCalls = true;
         } else {
-            new_call_inst->GetBasicBlock()->RemoveInst(new_call_inst);
+            newCallInst->GetBasicBlock()->RemoveInst(newCallInst);
         }
 
         GetGraph()->GetPassManager()->GetStatistics()->AddInlinedMethods(1);
         EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), runtime->GetMethodFullName(ctx.method),
-                     call_inst->GetId(), events::InlineKind::VIRTUAL_POLYMORPHIC, events::InlineResult::SUCCESS);
+                     callInst->GetId(), events::InlineKind::VIRTUAL_POLYMORPHIC, events::InlineResult::SUCCESS);
         LOG_INLINING(DEBUG) << "Successfully inlined: " << GetMethodFullName(GetGraph(), ctx.method);
-        methods_inlined_++;
+        methodsInlined_++;
     }
-    if (call_bb == nullptr) {
+    if (callBb == nullptr) {
         // Nothing was inlined
         return false;
     }
-    if (call_cont_bb->GetPredsBlocks().empty() || has_unreachable_blocks) {
+    if (callContBb->GetPredsBlocks().empty() || hasUnreachableBlocks) {
         GetGraph()->RemoveUnreachableBlocks();
     }
 
-    get_cls_inst->SetInput(0, call_inst->GetObjectInst());
+    getClsInst->SetInput(0, callInst->GetObjectInst());
 
-    if (methods_inlined_ - inlined_methods == receivers->size()) {
-        InsertDeoptimizeInst(call_inst, call_bb);
+    if (methodsInlined_ - inlinedMethods == receivers->size()) {
+        InsertDeoptimizeInst(callInst, callBb);
     } else {
-        InsertCallInst(call_inst, call_bb, call_cont_bb, phi_inst);
+        InsertCallInst(callInst, callBb, callContBb, phiInst);
     }
-    if (call_inst->GetType() != DataType::VOID) {
-        call_inst->ReplaceUsers(phi_inst);
+    if (callInst->GetType() != DataType::VOID) {
+        callInst->ReplaceUsers(phiInst);
     }
 
-    ProcessCallReturnInstructions(call_inst, call_cont_bb, has_runtime_calls);
+    ProcessCallReturnInstructions(callInst, callContBb, hasRuntimeCalls);
 
-    if (has_runtime_calls) {
-        call_inst->GetBasicBlock()->RemoveInst(call_inst);
+    if (hasRuntimeCalls) {
+        callInst->GetBasicBlock()->RemoveInst(callInst);
     }
 
     return true;
@@ -661,31 +660,31 @@ void CheckExternalGraph(Graph *graph)
 }
 #endif
 
-Inst *Inlining::GetNewDefAndCorrectDF(Inst *call_inst, Inst *old_def)
+Inst *Inlining::GetNewDefAndCorrectDF(Inst *callInst, Inst *oldDef)
 {
-    if (old_def->IsConst()) {
-        auto constant = old_def->CastToConstant();
-        auto exising_constant = GetGraph()->FindOrAddConstant(constant);
-        return exising_constant;
+    if (oldDef->IsConst()) {
+        auto constant = oldDef->CastToConstant();
+        auto exisingConstant = GetGraph()->FindOrAddConstant(constant);
+        return exisingConstant;
     }
-    if (old_def->IsParameter()) {
-        auto arg_num = old_def->CastToParameter()->GetArgNumber();
-        ASSERT(arg_num < call_inst->GetInputsCount() - 1);
-        auto input = call_inst->GetInput(arg_num).GetInst();
+    if (oldDef->IsParameter()) {
+        auto argNum = oldDef->CastToParameter()->GetArgNumber();
+        ASSERT(argNum < callInst->GetInputsCount() - 1);
+        auto input = callInst->GetInput(argNum).GetInst();
         return input;
     }
-    ASSERT(old_def->GetOpcode() == Opcode::NullPtr);
-    auto exising_nullptr = GetGraph()->GetOrCreateNullPtr();
-    return exising_nullptr;
+    ASSERT(oldDef->GetOpcode() == Opcode::NullPtr);
+    auto exisingNullptr = GetGraph()->GetOrCreateNullPtr();
+    return exisingNullptr;
 }
 
-bool Inlining::TryInlineExternal(CallInst *call_inst, InlineContext *ctx)
+bool Inlining::TryInlineExternal(CallInst *callInst, InlineContext *ctx)
 {
-    if (TryInlineExternalAot(call_inst, ctx)) {
+    if (TryInlineExternalAot(callInst, ctx)) {
         return true;
     }
     // Skip external methods
-    EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::SKIP_EXTERNAL);
+    EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::SKIP_EXTERNAL);
     LOG_INLINING(DEBUG) << "We can't inline external method: " << GetMethodFullName(GetGraph(), ctx->method);
     return false;
 }
@@ -694,19 +693,19 @@ bool Inlining::TryInlineExternal(CallInst *call_inst, InlineContext *ctx)
  * External methods could be inlined only if there are no instructions requiring state.
  * The only exception are NullChecks that check parameters and used by LoadObject/StoreObject.
  */
-bool CheckExternalMethodInstructions(Graph *graph, CallInst *call_inst)
+bool CheckExternalMethodInstructions(Graph *graph, CallInst *callInst)
 {
-    ArenaUnorderedSet<Inst *> suspicious_instructions(graph->GetLocalAllocator()->Adapter());
+    ArenaUnorderedSet<Inst *> suspiciousInstructions(graph->GetLocalAllocator()->Adapter());
     for (auto bb : graph->GetVectorBlocks()) {
         if (bb == nullptr) {
             continue;
         }
         for (auto inst : bb->InstsSafe()) {
-            bool is_rt_call = inst->RequireState() || inst->IsRuntimeCall();
+            bool isRtCall = inst->RequireState() || inst->IsRuntimeCall();
             auto opcode = inst->GetOpcode();
-            if (is_rt_call && opcode == Opcode::NullCheck) {
-                suspicious_instructions.insert(inst);
-            } else if (is_rt_call && opcode != Opcode::NullCheck) {
+            if (isRtCall && opcode == Opcode::NullCheck) {
+                suspiciousInstructions.insert(inst);
+            } else if (isRtCall && opcode != Opcode::NullCheck) {
                 return false;
             }
             if (opcode != Opcode::LoadObject && opcode != Opcode::StoreObject) {
@@ -714,7 +713,7 @@ bool CheckExternalMethodInstructions(Graph *graph, CallInst *call_inst)
             }
             auto nc = inst->GetInput(0).GetInst();
             if (nc->GetOpcode() == Opcode::NullCheck && nc->HasSingleUser()) {
-                suspicious_instructions.erase(nc);
+                suspiciousInstructions.erase(nc);
             }
             // If LoadObject/StoreObject first input (i.e. object to load data from / store data to)
             // is a method parameter and corresponding call instruction's input is either NullCheck
@@ -722,18 +721,18 @@ bool CheckExternalMethodInstructions(Graph *graph, CallInst *call_inst)
             // the parameter is known to be not null at the time load/store will be executed.
             // If we can't prove that the input is not-null then NullCheck could not be eliminated
             // and a method could not be inlined.
-            auto obj_input = inst->GetDataFlowInput(0);
-            if (obj_input->GetOpcode() != Opcode::Parameter) {
+            auto objInput = inst->GetDataFlowInput(0);
+            if (objInput->GetOpcode() != Opcode::Parameter) {
                 return false;
             }
-            auto param_id = obj_input->CastToParameter()->GetArgNumber() + call_inst->GetObjectIndex();
-            if (call_inst->GetInput(param_id).GetInst()->GetOpcode() != Opcode::NullCheck &&
-                call_inst->GetDataFlowInput(param_id)->GetOpcode() != Opcode::NewObject) {
+            auto paramId = objInput->CastToParameter()->GetArgNumber() + callInst->GetObjectIndex();
+            if (callInst->GetInput(paramId).GetInst()->GetOpcode() != Opcode::NullCheck &&
+                callInst->GetDataFlowInput(paramId)->GetOpcode() != Opcode::NewObject) {
                 return false;
             }
         }
     }
-    return suspicious_instructions.empty();
+    return suspiciousInstructions.empty();
 }
 
 /*
@@ -742,29 +741,29 @@ bool CheckExternalMethodInstructions(Graph *graph, CallInst *call_inst)
  * to/from a parameter for which we can prove that it can't be null. In that case
  * NullChecks preceding LoadObject/StoreObject are removed from inlined graph.
  */
-bool Inlining::TryInlineExternalAot(CallInst *call_inst, InlineContext *ctx)
+bool Inlining::TryInlineExternalAot(CallInst *callInst, InlineContext *ctx)
 {
     // We can't guarantee without cha that runtime will use this external file.
     if (!GetGraph()->GetAotData()->GetUseCha()) {
         return false;
     }
-    IrBuilderExternalInliningAnalysis bytecode_analysis(GetGraph(), ctx->method);
-    if (!GetGraph()->RunPass(&bytecode_analysis)) {
-        EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::UNSUITABLE);
+    IrBuilderExternalInliningAnalysis bytecodeAnalysis(GetGraph(), ctx->method);
+    if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
+        EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::UNSUITABLE);
         LOG_INLINING(DEBUG) << "We can't inline external method: " << GetMethodFullName(GetGraph(), ctx->method);
         return false;
     }
-    auto graph_inl = GetGraph()->CreateChildGraph(ctx->method);
-    graph_inl->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
+    auto graphInl = GetGraph()->CreateChildGraph(ctx->method);
+    graphInl->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
 
     auto stats = GetGraph()->GetPassManager()->GetStatistics();
-    auto saved_pbc_inst_num = stats->GetPbcInstNum();
-    if (!TryBuildGraph(*ctx, graph_inl, call_inst, nullptr)) {
-        stats->SetPbcInstNum(saved_pbc_inst_num);
+    auto savedPbcInstNum = stats->GetPbcInstNum();
+    if (!TryBuildGraph(*ctx, graphInl, callInst, nullptr)) {
+        stats->SetPbcInstNum(savedPbcInstNum);
         return false;
     }
 
-    graph_inl->RunPass<Cleanup>();
+    graphInl->RunPass<Cleanup>();
 
     // External method could be inlined only if there are no instructions requiring state
     // because compiler saves method id into stack map's inline info and there is no way
@@ -773,93 +772,93 @@ bool Inlining::TryInlineExternalAot(CallInst *call_inst, InlineContext *ctx)
     // external method except NullChecks used by LoadObject/StoreObject that checks nullness
     // of parameters that known to be non-null at the call time. In that case NullChecks
     // will be eliminated and there will no instruction requiring state.
-    if (!CheckExternalMethodInstructions(graph_inl, call_inst)) {
-        stats->SetPbcInstNum(saved_pbc_inst_num);
+    if (!CheckExternalMethodInstructions(graphInl, callInst)) {
+        stats->SetPbcInstNum(savedPbcInstNum);
         return false;
     }
 
-    vregs_count_ += graph_inl->GetVRegsCount();
+    vregsCount_ += graphInl->GetVRegsCount();
 
     auto method = ctx->method;
     auto runtime = GetGraph()->GetRuntime();
     // Call instruction is already inlined, so change its call id to the resolved method.
-    call_inst->SetCallMethodId(runtime->GetMethodId(method));
-    call_inst->SetCallMethod(method);
+    callInst->SetCallMethodId(runtime->GetMethodId(method));
+    callInst->SetCallMethod(method);
 
-    auto call_bb = call_inst->GetBasicBlock();
-    auto call_cont_bb = call_bb->SplitBlockAfterInstruction(call_inst, false);
+    auto callBb = callInst->GetBasicBlock();
+    auto callContBb = callBb->SplitBlockAfterInstruction(callInst, false);
 
-    GetGraph()->SetMaxMarkerIdx(graph_inl->GetCurrentMarkerIdx());
+    GetGraph()->SetMaxMarkerIdx(graphInl->GetCurrentMarkerIdx());
     // Adjust instruction id counter for parent graph, thereby avoid situation when two instructions have same id.
-    GetGraph()->SetCurrentInstructionId(graph_inl->GetCurrentInstructionId());
+    GetGraph()->SetCurrentInstructionId(graphInl->GetCurrentInstructionId());
 
-    UpdateExternalParameterDataflow(graph_inl, call_inst);
-    UpdateDataflow(graph_inl, call_inst, call_cont_bb);
-    MoveConstants(graph_inl);
-    UpdateControlflow(graph_inl, call_bb, call_cont_bb);
+    UpdateExternalParameterDataflow(graphInl, callInst);
+    UpdateDataflow(graphInl, callInst, callContBb);
+    MoveConstants(graphInl);
+    UpdateControlflow(graphInl, callBb, callContBb);
 
-    if (call_cont_bb->GetPredsBlocks().empty()) {
+    if (callContBb->GetPredsBlocks().empty()) {
         GetGraph()->RemoveUnreachableBlocks();
     } else {
-        return_blocks_.push_back(call_cont_bb);
+        returnBlocks_.push_back(callContBb);
     }
 
-    bool need_barriers = runtime->IsMemoryBarrierRequired(method);
-    ProcessCallReturnInstructions(call_inst, call_cont_bb, false, need_barriers);
+    bool needBarriers = runtime->IsMemoryBarrierRequired(method);
+    ProcessCallReturnInstructions(callInst, callContBb, false, needBarriers);
 
 #ifndef NDEBUG
-    CheckExternalGraph(graph_inl);
+    CheckExternalGraph(graphInl);
 #endif
 
     LOG_INLINING(DEBUG) << "Successfully inlined external method: " << GetMethodFullName(GetGraph(), ctx->method);
-    methods_inlined_++;
+    methodsInlined_++;
     return true;
 }
 
-bool Inlining::DoInlineIntrinsic(CallInst *call_inst, InlineContext *ctx)
+bool Inlining::DoInlineIntrinsic(CallInst *callInst, InlineContext *ctx)
 {
-    auto intrinsic_id = ctx->intrinsic_id;
-    ASSERT(intrinsic_id != RuntimeInterface::IntrinsicId::INVALID);
-    ASSERT(call_inst != nullptr);
-    if (!EncodesBuiltin(GetGraph()->GetRuntime(), intrinsic_id, GetGraph()->GetArch())) {
+    auto intrinsicId = ctx->intrinsicId;
+    ASSERT(intrinsicId != RuntimeInterface::IntrinsicId::INVALID);
+    ASSERT(callInst != nullptr);
+    if (!EncodesBuiltin(GetGraph()->GetRuntime(), intrinsicId, GetGraph()->GetArch())) {
         return false;
     }
-    IntrinsicInst *inst = GetGraph()->CreateInstIntrinsic(call_inst->GetType(), call_inst->GetPc(), intrinsic_id);
-    bool need_save_state = inst->RequireState();
+    IntrinsicInst *inst = GetGraph()->CreateInstIntrinsic(callInst->GetType(), callInst->GetPc(), intrinsicId);
+    bool needSaveState = inst->RequireState();
 
-    size_t inputs_count = call_inst->GetInputsCount() - (need_save_state ? 0 : 1);
+    size_t inputsCount = callInst->GetInputsCount() - (needSaveState ? 0 : 1);
 
-    inst->ReserveInputs(inputs_count);
-    inst->AllocateInputTypes(GetGraph()->GetAllocator(), inputs_count);
+    inst->ReserveInputs(inputsCount);
+    inst->AllocateInputTypes(GetGraph()->GetAllocator(), inputsCount);
 
-    auto inputs = call_inst->GetInputs();
-    for (size_t i = 0; i < inputs_count; ++i) {
-        inst->AppendInputAndType(inputs[i].GetInst(), call_inst->GetInputType(i));
+    auto inputs = callInst->GetInputs();
+    for (size_t i = 0; i < inputsCount; ++i) {
+        inst->AppendInputAndType(inputs[i].GetInst(), callInst->GetInputType(i));
     }
 
     auto method = ctx->method;
-    if (ctx->cha_devirtualize) {
-        InsertChaGuard(call_inst);
+    if (ctx->chaDevirtualize) {
+        InsertChaGuard(callInst);
         GetCha()->AddDependency(method, GetGraph()->GetOutermostParentGraph()->GetMethod());
         GetGraph()->GetOutermostParentGraph()->AddSingleImplementationMethod(method);
     }
 
-    call_inst->InsertAfter(inst);
-    call_inst->ReplaceUsers(inst);
+    callInst->InsertAfter(inst);
+    callInst->ReplaceUsers(inst);
     LOG_INLINING(DEBUG) << "The method: " << GetMethodFullName(GetGraph(), method) << "replaced to the intrinsic"
-                        << GetIntrinsicName(intrinsic_id);
+                        << GetIntrinsicName(intrinsicId);
 
     return true;
 }
 
-bool Inlining::DoInlineMethod(CallInst *call_inst, InlineContext *ctx)
+bool Inlining::DoInlineMethod(CallInst *callInst, InlineContext *ctx)
 {
-    ASSERT(ctx->intrinsic_id == RuntimeInterface::IntrinsicId::INVALID);
+    ASSERT(ctx->intrinsicId == RuntimeInterface::IntrinsicId::INVALID);
     auto method = ctx->method;
 
     auto runtime = GetGraph()->GetRuntime();
 
-    if (resolve_wo_inline_) {
+    if (resolveWoInline_) {
         // Return, don't inline anything
         // At this point we:
         // 1. Gave a chance to inline external method
@@ -870,223 +869,221 @@ bool Inlining::DoInlineMethod(CallInst *call_inst, InlineContext *ctx)
     ASSERT(!runtime->IsMethodAbstract(method));
 
     // Split block by call instruction
-    auto call_bb = call_inst->GetBasicBlock();
+    auto callBb = callInst->GetBasicBlock();
     // NOTE (a.popov) Support inlining to the catch blocks
-    if (call_bb->IsCatch()) {
+    if (callBb->IsCatch()) {
         return false;
     }
 
-    auto graph_inl = BuildGraph(ctx, call_inst);
-    if (graph_inl.graph == nullptr) {
+    auto graphInl = BuildGraph(ctx, callInst);
+    if (graphInl.graph == nullptr) {
         return false;
     }
 
-    vregs_count_ += graph_inl.graph->GetVRegsCount();
+    vregsCount_ += graphInl.graph->GetVRegsCount();
 
     // Call instruction is already inlined, so change its call id to the resolved method.
-    call_inst->SetCallMethodId(runtime->GetMethodId(method));
-    call_inst->SetCallMethod(method);
+    callInst->SetCallMethodId(runtime->GetMethodId(method));
+    callInst->SetCallMethod(method);
 
-    auto call_cont_bb = call_bb->SplitBlockAfterInstruction(call_inst, false);
+    auto callContBb = callBb->SplitBlockAfterInstruction(callInst, false);
 
-    GetGraph()->SetMaxMarkerIdx(graph_inl.graph->GetCurrentMarkerIdx());
-    UpdateParameterDataflow(graph_inl.graph, call_inst);
-    UpdateDataflow(graph_inl.graph, call_inst, call_cont_bb);
+    GetGraph()->SetMaxMarkerIdx(graphInl.graph->GetCurrentMarkerIdx());
+    UpdateParameterDataflow(graphInl.graph, callInst);
+    UpdateDataflow(graphInl.graph, callInst, callContBb);
 
-    MoveConstants(graph_inl.graph);
+    MoveConstants(graphInl.graph);
 
-    UpdateControlflow(graph_inl.graph, call_bb, call_cont_bb);
+    UpdateControlflow(graphInl.graph, callBb, callContBb);
 
-    if (call_cont_bb->GetPredsBlocks().empty()) {
+    if (callContBb->GetPredsBlocks().empty()) {
         GetGraph()->RemoveUnreachableBlocks();
     } else {
-        return_blocks_.push_back(call_cont_bb);
+        returnBlocks_.push_back(callContBb);
     }
 
-    if (ctx->cha_devirtualize) {
-        InsertChaGuard(call_inst);
+    if (ctx->chaDevirtualize) {
+        InsertChaGuard(callInst);
         GetCha()->AddDependency(method, GetGraph()->GetOutermostParentGraph()->GetMethod());
         GetGraph()->GetOutermostParentGraph()->AddSingleImplementationMethod(method);
     }
 
-    bool need_barriers = runtime->IsMemoryBarrierRequired(method);
-    ProcessCallReturnInstructions(call_inst, call_cont_bb, graph_inl.has_runtime_calls, need_barriers);
+    bool needBarriers = runtime->IsMemoryBarrierRequired(method);
+    ProcessCallReturnInstructions(callInst, callContBb, graphInl.hasRuntimeCalls, needBarriers);
 
     LOG_INLINING(DEBUG) << "Successfully inlined: " << GetMethodFullName(GetGraph(), method);
     GetGraph()->GetPassManager()->GetStatistics()->AddInlinedMethods(1);
-    methods_inlined_++;
+    methodsInlined_++;
 
     return true;
 }
 
-bool Inlining::DoInline(CallInst *call_inst, InlineContext *ctx)
+bool Inlining::DoInline(CallInst *callInst, InlineContext *ctx)
 {
-    ASSERT(!call_inst->IsInlined());
+    ASSERT(!callInst->IsInlined());
 
     auto method = ctx->method;
 
     auto runtime = GetGraph()->GetRuntime();
 
-    if (!CheckMethodCanBeInlined<false, true>(call_inst, ctx)) {
+    if (!CheckMethodCanBeInlined<false, true>(callInst, ctx)) {
         return false;
     }
     if (runtime->IsMethodExternal(GetGraph()->GetMethod(), method) && !IsIntrinsic(ctx)) {
-        if (!OPTIONS.IsCompilerInlineExternalMethods()) {
+        if (!g_options.IsCompilerInlineExternalMethods()) {
             // Skip external methods
-            EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::SKIP_EXTERNAL);
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::SKIP_EXTERNAL);
             LOG_INLINING(DEBUG) << "We can't inline external method: " << GetMethodFullName(GetGraph(), ctx->method);
             return false;
         }
         if (GetGraph()->IsAotMode()) {
-            return TryInlineExternal(call_inst, ctx);
+            return TryInlineExternal(callInst, ctx);
         }
     }
 
     if (IsIntrinsic(ctx)) {
-        return DoInlineIntrinsic(call_inst, ctx);
+        return DoInlineIntrinsic(callInst, ctx);
     }
-    return DoInlineMethod(call_inst, ctx);
+    return DoInlineMethod(callInst, ctx);
 }
 
-void Inlining::ProcessCallReturnInstructions(CallInst *call_inst, BasicBlock *call_cont_bb, bool has_runtime_calls,
-                                             bool need_barriers)
+void Inlining::ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *callContBb, bool hasRuntimeCalls,
+                                             bool needBarriers)
 {
-    if (has_runtime_calls) {
+    if (hasRuntimeCalls) {
         // In case if inlined graph contains call to runtime we need to preserve call instruction with special `Inlined`
         // flag and create new `ReturnInlined` instruction, hereby codegen can properly handle method frames.
-        call_inst->SetInlined(true);
-        call_inst->SetFlag(inst_flags::NO_DST);
+        callInst->SetInlined(true);
+        callInst->SetFlag(inst_flags::NO_DST);
         // Set NO_DCE flag, since some call instructions might not have one after inlining
-        call_inst->SetFlag(inst_flags::NO_DCE);
-        // Remove call_inst's all inputs except SaveState and NullCheck(if exist)
+        callInst->SetFlag(inst_flags::NO_DCE);
+        // Remove callInst's all inputs except SaveState and NullCheck(if exist)
         // Do not remove function (first) input for dynamic calls
-        auto save_state = call_inst->GetSaveState();
-        ASSERT(save_state->GetOpcode() == Opcode::SaveState);
-        if (call_inst->GetOpcode() != Opcode::CallDynamic) {
-            auto nullcheck_inst = call_inst->GetObjectInst();
-            call_inst->RemoveInputs();
-            if (nullcheck_inst->GetOpcode() == Opcode::NullCheck) {
-                call_inst->AppendInput(nullcheck_inst);
+        auto saveState = callInst->GetSaveState();
+        ASSERT(saveState->GetOpcode() == Opcode::SaveState);
+        if (callInst->GetOpcode() != Opcode::CallDynamic) {
+            auto nullcheckInst = callInst->GetObjectInst();
+            callInst->RemoveInputs();
+            if (nullcheckInst->GetOpcode() == Opcode::NullCheck) {
+                callInst->AppendInput(nullcheckInst);
             }
         } else {
-            auto func = call_inst->GetInput(0).GetInst();
-            call_inst->RemoveInputs();
-            call_inst->AppendInput(func);
+            auto func = callInst->GetInput(0).GetInst();
+            callInst->RemoveInputs();
+            callInst->AppendInput(func);
         }
-        call_inst->AppendInput(save_state);
-        call_inst->SetType(DataType::VOID);
-        for (auto bb : return_blocks_) {
-            auto inlined_return =
-                GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC, call_inst->GetSaveState());
-            if (bb != call_cont_bb && (bb->IsEndWithThrowOrDeoptimize() ||
-                                       (bb->IsEmpty() && bb->GetPredsBlocks()[0]->IsEndWithThrowOrDeoptimize()))) {
-                auto last_inst = !bb->IsEmpty() ? bb->GetLastInst() : bb->GetPredsBlocks()[0]->GetLastInst();
-                last_inst->InsertBefore(inlined_return);
-                inlined_return->SetExtendedLiveness();
+        callInst->AppendInput(saveState);
+        callInst->SetType(DataType::VOID);
+        for (auto bb : returnBlocks_) {
+            auto inlinedReturn =
+                GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC, callInst->GetSaveState());
+            if (bb != callContBb && (bb->IsEndWithThrowOrDeoptimize() ||
+                                     (bb->IsEmpty() && bb->GetPredsBlocks()[0]->IsEndWithThrowOrDeoptimize()))) {
+                auto lastInst = !bb->IsEmpty() ? bb->GetLastInst() : bb->GetPredsBlocks()[0]->GetLastInst();
+                lastInst->InsertBefore(inlinedReturn);
+                inlinedReturn->SetExtendedLiveness();
             } else {
-                bb->PrependInst(inlined_return);
+                bb->PrependInst(inlinedReturn);
             }
-            if (need_barriers) {
-                inlined_return->SetFlag(inst_flags::MEM_BARRIER);
+            if (needBarriers) {
+                inlinedReturn->SetFlag(inst_flags::MEM_BARRIER);
             }
         }
     } else {
         // Otherwise we remove call instruction
-        auto save_state = call_inst->GetSaveState();
+        auto saveState = callInst->GetSaveState();
         // Remove SaveState if it has only Call instruction in the users
-        if (save_state->GetUsers().Front().GetNext() == nullptr) {
-            save_state->GetBasicBlock()->RemoveInst(save_state);
+        if (saveState->GetUsers().Front().GetNext() == nullptr) {
+            saveState->GetBasicBlock()->RemoveInst(saveState);
         }
-        call_inst->GetBasicBlock()->RemoveInst(call_inst);
+        callInst->GetBasicBlock()->RemoveInst(callInst);
     }
-    return_blocks_.clear();
+    returnBlocks_.clear();
 }
 
-bool Inlining::CheckBytecode(CallInst *call_inst, const InlineContext &ctx, bool *callee_call_runtime)
+bool Inlining::CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool *calleeCallRuntime)
 {
-    auto vregs_num = GetGraph()->GetRuntime()->GetMethodArgumentsCount(ctx.method) +
-                     GetGraph()->GetRuntime()->GetMethodRegistersCount(ctx.method) + 1;
-    if ((vregs_count_ + vregs_num) >= OPTIONS.GetCompilerMaxVregsNum()) {
-        EmitEvent(GetGraph(), call_inst, ctx, events::InlineResult::LIMIT);
-        LOG_INLINING(DEBUG) << "Reached vregs limit: current=" << vregs_count_ << ", inlined=" << vregs_num;
+    auto vregsNum = GetGraph()->GetRuntime()->GetMethodArgumentsCount(ctx.method) +
+                    GetGraph()->GetRuntime()->GetMethodRegistersCount(ctx.method) + 1;
+    if ((vregsCount_ + vregsNum) >= g_options.GetCompilerMaxVregsNum()) {
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::LIMIT);
+        LOG_INLINING(DEBUG) << "Reached vregs limit: current=" << vregsCount_ << ", inlined=" << vregsNum;
         return false;
     }
-    IrBuilderInliningAnalysis bytecode_analysis(GetGraph(), ctx.method);
-    if (!GetGraph()->RunPass(&bytecode_analysis)) {
-        EmitEvent(GetGraph(), call_inst, ctx, events::InlineResult::UNSUITABLE);
+    IrBuilderInliningAnalysis bytecodeAnalysis(GetGraph(), ctx.method);
+    if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
         LOG_INLINING(DEBUG) << "Method contains unsuitable bytecode";
         return false;
     }
 
-    if (bytecode_analysis.HasRuntimeCalls() && OPTIONS.IsCompilerInlineSimpleOnly()) {
-        EmitEvent(GetGraph(), call_inst, ctx, events::InlineResult::UNSUITABLE);
+    if (bytecodeAnalysis.HasRuntimeCalls() && g_options.IsCompilerInlineSimpleOnly()) {
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
         return false;
     }
-    if (callee_call_runtime != nullptr) {
-        *callee_call_runtime = bytecode_analysis.HasRuntimeCalls();
+    if (calleeCallRuntime != nullptr) {
+        *calleeCallRuntime = bytecodeAnalysis.HasRuntimeCalls();
     }
     return true;
 }
 
-bool Inlining::CheckInstructionLimit(CallInst *call_inst, InlineContext *ctx, size_t inlined_insts_count)
+bool Inlining::CheckInstructionLimit(CallInst *callInst, InlineContext *ctx, size_t inlinedInstsCount)
 {
     // Don't inline if we reach the limit of instructions and method is big enough.
-    if (inlined_insts_count > SMALL_METHOD_MAX_SIZE &&
-        (instructions_count_ + inlined_insts_count) >= instructions_limit_) {
-        EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::LIMIT);
-        LOG_INLINING(DEBUG) << "Reached instructions limit: current_size=" << instructions_count_
-                            << ", inlined_size=" << inlined_insts_count;
-        ctx->replace_to_static = CanReplaceWithCallStatic(call_inst->GetOpcode());
+    if (inlinedInstsCount > SMALL_METHOD_MAX_SIZE && (instructionsCount_ + inlinedInstsCount) >= instructionsLimit_) {
+        EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::LIMIT);
+        LOG_INLINING(DEBUG) << "Reached instructions limit: current_size=" << instructionsCount_
+                            << ", inlined_size=" << inlinedInstsCount;
+        ctx->replaceToStatic = CanReplaceWithCallStatic(callInst->GetOpcode());
         return false;
     }
     return true;
 }
 
-bool Inlining::TryBuildGraph(const InlineContext &ctx, Graph *graph_inl, CallInst *call_inst, CallInst *poly_call_inst)
+bool Inlining::TryBuildGraph(const InlineContext &ctx, Graph *graphInl, CallInst *callInst, CallInst *polyCallInst)
 {
-    if (!graph_inl->RunPass<IrBuilder>(ctx.method, poly_call_inst != nullptr ? poly_call_inst : call_inst,
-                                       depth_ + 1)) {
-        EmitEvent(GetGraph(), call_inst, ctx, events::InlineResult::FAIL);
+    if (!graphInl->RunPass<IrBuilder>(ctx.method, polyCallInst != nullptr ? polyCallInst : callInst, depth_ + 1)) {
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::FAIL);
         LOG_INLINING(WARNING) << "Graph building failed";
         return false;
     }
 
-    if (graph_inl->HasInfiniteLoop()) {
-        EmitEvent(GetGraph(), call_inst, ctx, events::InlineResult::INF_LOOP);
+    if (graphInl->HasInfiniteLoop()) {
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::INF_LOOP);
         COMPILER_LOG(INFO, INLINING) << "Inlining of the methods with infinite loop is not supported";
         return false;
     }
 
-    if (!OPTIONS.IsCompilerInliningSkipAlwaysThrowMethods()) {
+    if (!g_options.IsCompilerInliningSkipAlwaysThrowMethods()) {
         return true;
     }
 
-    bool always_throw = true;
+    bool alwaysThrow = true;
     // check that end block could be reached only through throw-blocks
-    for (auto pred : graph_inl->GetEndBlock()->GetPredsBlocks()) {
-        auto return_inst = pred->GetLastInst();
-        if (return_inst == nullptr) {
+    for (auto pred : graphInl->GetEndBlock()->GetPredsBlocks()) {
+        auto returnInst = pred->GetLastInst();
+        if (returnInst == nullptr) {
             ASSERT(pred->IsTryEnd());
             ASSERT(pred->GetPredsBlocks().size() == 1);
             pred = pred->GetPredBlockByIndex(0);
         }
         if (!pred->IsEndWithThrowOrDeoptimize()) {
-            always_throw = false;
+            alwaysThrow = false;
             break;
         }
     }
-    if (!always_throw) {
+    if (!alwaysThrow) {
         return true;
     }
-    EmitEvent(GetGraph(), call_inst, ctx, events::InlineResult::UNSUITABLE);
+    EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
     LOG_INLINING(DEBUG) << "Method always throw an expection, skip inlining: "
                         << GetMethodFullName(GetGraph(), ctx.method);
     return false;
 }
 
-void RemoveDeadSafePoints(Graph *graph_inl)
+void RemoveDeadSafePoints(Graph *graphInl)
 {
-    for (auto bb : *graph_inl) {
+    for (auto bb : *graphInl) {
         if (bb == nullptr || bb->IsStartBlock() || bb->IsEndBlock()) {
             continue;
         }
@@ -1101,145 +1098,145 @@ void RemoveDeadSafePoints(Graph *graph_inl)
     }
 }
 
-bool Inlining::CheckLoops(bool *callee_call_runtime, Graph *graph_inl)
+bool Inlining::CheckLoops(bool *calleeCallRuntime, Graph *graphInl)
 {
     // Check that inlined graph hasn't loops
-    graph_inl->RunPass<LoopAnalyzer>();
-    if (graph_inl->HasLoop()) {
-        if (OPTIONS.IsCompilerInlineSimpleOnly()) {
+    graphInl->RunPass<LoopAnalyzer>();
+    if (graphInl->HasLoop()) {
+        if (g_options.IsCompilerInlineSimpleOnly()) {
             LOG_INLINING(INFO) << "Inlining of the methods with loops is disabled";
             return false;
         }
-        *callee_call_runtime = true;
-    } else if (!*callee_call_runtime) {
-        RemoveDeadSafePoints(graph_inl);
+        *calleeCallRuntime = true;
+    } else if (!*calleeCallRuntime) {
+        RemoveDeadSafePoints(graphInl);
     }
     return true;
 }
 
 /* static */
-void Inlining::PropagateObjectInfo(Graph *graph_inl, CallInst *call_inst)
+void Inlining::PropagateObjectInfo(Graph *graphInl, CallInst *callInst)
 {
     // Propagate object type information to the parameters of the inlined graph
-    auto index = call_inst->GetObjectIndex();
+    auto index = callInst->GetObjectIndex();
     // NOLINTNEXTLINE(readability-static-accessed-through-instance)
-    for (auto param_inst : graph_inl->GetParameters()) {
-        auto input_inst = call_inst->GetDataFlowInput(index);
-        param_inst->SetObjectTypeInfo(input_inst->GetObjectTypeInfo());
+    for (auto paramInst : graphInl->GetParameters()) {
+        auto inputInst = callInst->GetDataFlowInput(index);
+        paramInst->SetObjectTypeInfo(inputInst->GetObjectTypeInfo());
         index++;
     }
 }
 
-InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *call_inst, CallInst *poly_call_inst)
+InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallInst *polyCallInst)
 {
-    bool callee_call_runtime = false;
-    if (!CheckBytecode(call_inst, *ctx, &callee_call_runtime)) {
+    bool calleeCallRuntime = false;
+    if (!CheckBytecode(callInst, *ctx, &calleeCallRuntime)) {
         return InlinedGraph();
     }
 
-    auto graph_inl = GetGraph()->CreateChildGraph(ctx->method);
+    auto graphInl = GetGraph()->CreateChildGraph(ctx->method);
 
     // Propagate instruction id counter to inlined graph, thereby avoid instructions id duplication
-    graph_inl->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
+    graphInl->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
 
     auto stats = GetGraph()->GetPassManager()->GetStatistics();
-    auto saved_pbc_inst_num = stats->GetPbcInstNum();
-    if (!TryBuildGraph(*ctx, graph_inl, call_inst, poly_call_inst)) {
-        stats->SetPbcInstNum(saved_pbc_inst_num);
+    auto savedPbcInstNum = stats->GetPbcInstNum();
+    if (!TryBuildGraph(*ctx, graphInl, callInst, polyCallInst)) {
+        stats->SetPbcInstNum(savedPbcInstNum);
         return InlinedGraph();
     }
 
-    PropagateObjectInfo(graph_inl, call_inst);
+    PropagateObjectInfo(graphInl, callInst);
 
     // Run basic optimizations
-    graph_inl->RunPass<Cleanup>(false);
-    auto peephole_applied = graph_inl->RunPass<Peepholes>();
-    auto object_type_applied = graph_inl->RunPass<ObjectTypeCheckElimination>();
-    if (peephole_applied || object_type_applied) {
-        graph_inl->RunPass<BranchElimination>();
-        graph_inl->RunPass<Cleanup>();
+    graphInl->RunPass<Cleanup>(false);
+    auto peepholeApplied = graphInl->RunPass<Peepholes>();
+    auto objectTypeApplied = graphInl->RunPass<ObjectTypeCheckElimination>();
+    if (peepholeApplied || objectTypeApplied) {
+        graphInl->RunPass<BranchElimination>();
+        graphInl->RunPass<Cleanup>();
     }
-    graph_inl->RunPass<SimplifyStringBuilder>();
+    graphInl->RunPass<SimplifyStringBuilder>();
 
     // Don't inline if we reach the limit of instructions and method is big enough.
-    auto inlined_insts_count = CalculateInstructionsCount(graph_inl);
-    if (!CheckInstructionLimit(call_inst, ctx, inlined_insts_count)) {
-        stats->SetPbcInstNum(saved_pbc_inst_num);
+    auto inlinedInstsCount = CalculateInstructionsCount(graphInl);
+    if (!CheckInstructionLimit(callInst, ctx, inlinedInstsCount)) {
+        stats->SetPbcInstNum(savedPbcInstNum);
         return InlinedGraph();
     }
 
-    if ((depth_ + 1) < OPTIONS.GetCompilerInliningMaxDepth()) {
-        graph_inl->RunPass<Inlining>(instructions_count_ + inlined_insts_count, depth_ + 1, methods_inlined_ + 1);
+    if ((depth_ + 1) < g_options.GetCompilerInliningMaxDepth()) {
+        graphInl->RunPass<Inlining>(instructionsCount_ + inlinedInstsCount, depth_ + 1, methodsInlined_ + 1);
     }
 
-    instructions_count_ += CalculateInstructionsCount(graph_inl);
+    instructionsCount_ += CalculateInstructionsCount(graphInl);
 
-    GetGraph()->SetMaxMarkerIdx(graph_inl->GetCurrentMarkerIdx());
+    GetGraph()->SetMaxMarkerIdx(graphInl->GetCurrentMarkerIdx());
 
     // Adjust instruction id counter for parent graph, thereby avoid situation when two instructions have same id.
-    GetGraph()->SetCurrentInstructionId(graph_inl->GetCurrentInstructionId());
+    GetGraph()->SetCurrentInstructionId(graphInl->GetCurrentInstructionId());
 
-    if (ctx->cha_devirtualize && !GetCha()->IsSingleImplementation(ctx->method)) {
-        EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::LOST_SINGLE_IMPL);
+    if (ctx->chaDevirtualize && !GetCha()->IsSingleImplementation(ctx->method)) {
+        EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::LOST_SINGLE_IMPL);
         LOG_INLINING(WARNING) << "Method lost single implementation property while we build IR for it";
-        stats->SetPbcInstNum(saved_pbc_inst_num);
+        stats->SetPbcInstNum(savedPbcInstNum);
         return InlinedGraph();
     }
 
-    if (!CheckLoops(&callee_call_runtime, graph_inl)) {
-        stats->SetPbcInstNum(saved_pbc_inst_num);
+    if (!CheckLoops(&calleeCallRuntime, graphInl)) {
+        stats->SetPbcInstNum(savedPbcInstNum);
         return InlinedGraph();
     }
-    return {graph_inl, callee_call_runtime};
+    return {graphInl, calleeCallRuntime};
 }
 
 template <bool CHECK_EXTERNAL>
-bool Inlining::CheckTooBigMethodCanBeInlined(const CallInst *call_inst, InlineContext *ctx, bool method_is_too_big)
+bool Inlining::CheckTooBigMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx, bool methodIsTooBig)
 {
-    ctx->replace_to_static = CanReplaceWithCallStatic(call_inst->GetOpcode());
+    ctx->replaceToStatic = CanReplaceWithCallStatic(callInst->GetOpcode());
     if constexpr (!CHECK_EXTERNAL) {
         if (GetGraph()->GetRuntime()->IsMethodExternal(GetGraph()->GetMethod(), ctx->method)) {
             // Do not replace to call static if --compiler-inline-external-methods=false
-            ctx->replace_to_static &= OPTIONS.IsCompilerInlineExternalMethods();
+            ctx->replaceToStatic &= g_options.IsCompilerInlineExternalMethods();
             ASSERT(ctx->method != nullptr);
             // Allow to replace CallVirtual with CallStatic if the resolved method is same as the called method
-            // In AOT mode the resolved method id can be different from the method id in the call_inst,
-            // but we'll keep the method id from the call_inst because the resolved method id can be not correct
+            // In AOT mode the resolved method id can be different from the method id in the callInst,
+            // but we'll keep the method id from the callInst because the resolved method id can be not correct
             // for aot compiled method
-            ctx->replace_to_static &= ctx->method == call_inst->GetCallMethod()
-                                      // Or if it's not aot mode. That is, just replace in other modes
-                                      || !GetGraph()->IsAotMode();
+            ctx->replaceToStatic &= ctx->method == callInst->GetCallMethod()
+                                    // Or if it's not aot mode. That is, just replace in other modes
+                                    || !GetGraph()->IsAotMode();
         }
     }
-    if (method_is_too_big) {
+    if (methodIsTooBig) {
         return false;
     }
-    ASSERT(resolve_wo_inline_);
+    ASSERT(resolveWoInline_);
     // Continue and return true to give a change to TryInlineExternalAot
     return true;
 }
 
 template <bool CHECK_EXTERNAL, bool CHECK_INTRINSICS>
-bool Inlining::CheckMethodCanBeInlined(const CallInst *call_inst, InlineContext *ctx)
+bool Inlining::CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx)
 {
     if (ctx->method == nullptr) {
         return false;
     }
     if constexpr (CHECK_EXTERNAL) {
         ASSERT(!GetGraph()->IsAotMode());
-        if (!OPTIONS.IsCompilerInlineExternalMethods() &&
+        if (!g_options.IsCompilerInlineExternalMethods() &&
             GetGraph()->GetRuntime()->IsMethodExternal(GetGraph()->GetMethod(), ctx->method)) {
             // Skip external methods
-            EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::SKIP_EXTERNAL);
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::SKIP_EXTERNAL);
             LOG_INLINING(DEBUG) << "We can't inline external method: " << GetMethodFullName(GetGraph(), ctx->method);
             return false;
         }
     }
 
     if (!blacklist_.empty()) {
-        std::string method_name = GetGraph()->GetRuntime()->GetMethodFullName(ctx->method);
-        if (blacklist_.find(method_name) != blacklist_.end()) {
-            EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::NOINLINE);
+        std::string methodName = GetGraph()->GetRuntime()->GetMethodFullName(ctx->method);
+        if (blacklist_.find(methodName) != blacklist_.end()) {
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::NOINLINE);
             LOG_INLINING(DEBUG) << "Method is in the blacklist: " << GetMethodFullName(GetGraph(), ctx->method);
             return false;
         }
@@ -1248,157 +1245,156 @@ bool Inlining::CheckMethodCanBeInlined(const CallInst *call_inst, InlineContext 
     if (!GetGraph()->GetRuntime()->IsMethodCanBeInlined(ctx->method)) {
         if constexpr (CHECK_INTRINSICS) {
             if (GetGraph()->GetRuntime()->IsMethodIntrinsic(ctx->method)) {
-                ctx->intrinsic_id = GetGraph()->GetRuntime()->GetIntrinsicId(ctx->method);
+                ctx->intrinsicId = GetGraph()->GetRuntime()->GetIntrinsicId(ctx->method);
                 return true;
             }
         }
-        EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::UNSUITABLE);
+        EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::UNSUITABLE);
         return false;
     }
 
     if (GetGraph()->GetRuntime()->GetMethodName(ctx->method).find("__noinline__") != std::string::npos) {
-        EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::NOINLINE);
+        EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::NOINLINE);
         return false;
     }
 
-    bool method_is_too_big =
-        GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method) >= OPTIONS.GetCompilerInliningMaxSize();
-    if (method_is_too_big) {
-        EmitEvent(GetGraph(), call_inst, *ctx, events::InlineResult::LIMIT);
+    bool methodIsTooBig =
+        GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method) >= g_options.GetCompilerInliningMaxSize();
+    if (methodIsTooBig) {
+        EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::LIMIT);
         LOG_INLINING(DEBUG) << "Method is too big: " << GetMethodFullName(GetGraph(), ctx->method);
     }
 
-    if (method_is_too_big || resolve_wo_inline_) {
-        return CheckTooBigMethodCanBeInlined<CHECK_EXTERNAL>(call_inst, ctx, method_is_too_big);
+    if (methodIsTooBig || resolveWoInline_) {
+        return CheckTooBigMethodCanBeInlined<CHECK_EXTERNAL>(callInst, ctx, methodIsTooBig);
     }
     return true;
 }
 
-void RemoveReturnVoidInst(BasicBlock *end_block)
+void RemoveReturnVoidInst(BasicBlock *endBlock)
 {
-    for (auto &pred : end_block->GetPredsBlocks()) {
-        auto return_inst = pred->GetLastInst();
-        if (return_inst->GetOpcode() == Opcode::Throw || return_inst->GetOpcode() == Opcode::Deoptimize) {
+    for (auto &pred : endBlock->GetPredsBlocks()) {
+        auto returnInst = pred->GetLastInst();
+        if (returnInst->GetOpcode() == Opcode::Throw || returnInst->GetOpcode() == Opcode::Deoptimize) {
             continue;
         }
-        ASSERT(return_inst->GetOpcode() == Opcode::ReturnVoid);
-        pred->RemoveInst(return_inst);
+        ASSERT(returnInst->GetOpcode() == Opcode::ReturnVoid);
+        pred->RemoveInst(returnInst);
     }
 }
 
 /// Embed inlined dataflow graph into the caller graph. A special case where the graph is empty
-void Inlining::UpdateDataflowForEmptyGraph(Inst *call_inst, std::variant<BasicBlock *, PhiInst *> use,
-                                           BasicBlock *end_block)
+void Inlining::UpdateDataflowForEmptyGraph(Inst *callInst, std::variant<BasicBlock *, PhiInst *> use,
+                                           BasicBlock *endBlock)
 {
-    auto pred_block = end_block->GetPredsBlocks().front();
-    auto return_inst = pred_block->GetLastInst();
-    ASSERT(return_inst->GetOpcode() == Opcode::Return || return_inst->GetOpcode() == Opcode::ReturnVoid ||
-           pred_block->IsEndWithThrowOrDeoptimize());
-    if (return_inst->GetOpcode() == Opcode::Return) {
-        ASSERT(return_inst->GetInputsCount() == 1);
-        auto input_inst = return_inst->GetInput(0).GetInst();
+    auto predBlock = endBlock->GetPredsBlocks().front();
+    auto returnInst = predBlock->GetLastInst();
+    ASSERT(returnInst->GetOpcode() == Opcode::Return || returnInst->GetOpcode() == Opcode::ReturnVoid ||
+           predBlock->IsEndWithThrowOrDeoptimize());
+    if (returnInst->GetOpcode() == Opcode::Return) {
+        ASSERT(returnInst->GetInputsCount() == 1);
+        auto inputInst = returnInst->GetInput(0).GetInst();
         if (std::holds_alternative<PhiInst *>(use)) {
-            auto phi_inst = std::get<PhiInst *>(use);
-            phi_inst->AppendInput(input_inst);
+            auto phiInst = std::get<PhiInst *>(use);
+            phiInst->AppendInput(inputInst);
         } else {
-            call_inst->ReplaceUsers(input_inst);
+            callInst->ReplaceUsers(inputInst);
         }
     }
-    if (!pred_block->IsEndWithThrowOrDeoptimize()) {
-        pred_block->RemoveInst(return_inst);
+    if (!predBlock->IsEndWithThrowOrDeoptimize()) {
+        predBlock->RemoveInst(returnInst);
     }
 }
 
 /// Embed inlined dataflow graph into the caller graph.
-void Inlining::UpdateDataflow(Graph *graph_inl, Inst *call_inst, std::variant<BasicBlock *, PhiInst *> use,
-                              Inst *new_def)
+void Inlining::UpdateDataflow(Graph *graphInl, Inst *callInst, std::variant<BasicBlock *, PhiInst *> use, Inst *newDef)
 {
     // Replace inlined graph outcoming dataflow edges
-    auto end_block = graph_inl->GetEndBlock();
-    if (end_block->GetPredsBlocks().size() > 1) {
-        if (call_inst->GetType() == DataType::VOID) {
-            RemoveReturnVoidInst(end_block);
+    auto endBlock = graphInl->GetEndBlock();
+    if (endBlock->GetPredsBlocks().size() > 1) {
+        if (callInst->GetType() == DataType::VOID) {
+            RemoveReturnVoidInst(endBlock);
             return;
         }
-        PhiInst *phi_inst = nullptr;
+        PhiInst *phiInst = nullptr;
         if (std::holds_alternative<BasicBlock *>(use)) {
-            phi_inst = GetGraph()->CreateInstPhi(GetGraph()->GetRuntime()->GetMethodReturnType(graph_inl->GetMethod()),
-                                                 INVALID_PC);
-            phi_inst->ReserveInputs(end_block->GetPredsBlocks().size());
-            std::get<BasicBlock *>(use)->AppendPhi(phi_inst);
+            phiInst = GetGraph()->CreateInstPhi(GetGraph()->GetRuntime()->GetMethodReturnType(graphInl->GetMethod()),
+                                                INVALID_PC);
+            phiInst->ReserveInputs(endBlock->GetPredsBlocks().size());
+            std::get<BasicBlock *>(use)->AppendPhi(phiInst);
         } else {
-            phi_inst = std::get<PhiInst *>(use);
-            ASSERT(phi_inst != nullptr);
+            phiInst = std::get<PhiInst *>(use);
+            ASSERT(phiInst != nullptr);
         }
-        for (auto pred : end_block->GetPredsBlocks()) {
-            auto return_inst = pred->GetLastInst();
-            if (return_inst == nullptr) {
+        for (auto pred : endBlock->GetPredsBlocks()) {
+            auto returnInst = pred->GetLastInst();
+            if (returnInst == nullptr) {
                 ASSERT(pred->IsTryEnd());
                 ASSERT(pred->GetPredsBlocks().size() == 1);
                 pred = pred->GetPredBlockByIndex(0);
-                return_inst = pred->GetLastInst();
+                returnInst = pred->GetLastInst();
             }
             if (pred->IsEndWithThrowOrDeoptimize()) {
                 continue;
             }
-            ASSERT(return_inst->GetOpcode() == Opcode::Return);
-            ASSERT(return_inst->GetInputsCount() == 1);
-            phi_inst->AppendInput(return_inst->GetInput(0).GetInst());
-            pred->RemoveInst(return_inst);
+            ASSERT(returnInst->GetOpcode() == Opcode::Return);
+            ASSERT(returnInst->GetInputsCount() == 1);
+            phiInst->AppendInput(returnInst->GetInput(0).GetInst());
+            pred->RemoveInst(returnInst);
         }
-        if (new_def == nullptr) {
-            new_def = phi_inst;
+        if (newDef == nullptr) {
+            newDef = phiInst;
         }
-        call_inst->ReplaceUsers(new_def);
+        callInst->ReplaceUsers(newDef);
     } else {
-        UpdateDataflowForEmptyGraph(call_inst, use, end_block);
+        UpdateDataflowForEmptyGraph(callInst, use, endBlock);
     }
 }
 
 /// Embed inlined controlflow graph into the caller graph.
-void Inlining::UpdateControlflow(Graph *graph_inl, BasicBlock *call_bb, BasicBlock *call_cont_bb)
+void Inlining::UpdateControlflow(Graph *graphInl, BasicBlock *callBb, BasicBlock *callContBb)
 {
     // Move all blocks from inlined graph to parent
-    auto current_loop = call_bb->GetLoop();
-    for (auto bb : graph_inl->GetVectorBlocks()) {
+    auto currentLoop = callBb->GetLoop();
+    for (auto bb : graphInl->GetVectorBlocks()) {
         if (bb != nullptr && !bb->IsStartBlock() && !bb->IsEndBlock()) {
             bb->ClearMarkers();
             GetGraph()->AddBlock(bb);
-            bb->CopyTryCatchProps(call_bb);
+            bb->CopyTryCatchProps(callBb);
         }
     }
-    call_cont_bb->CopyTryCatchProps(call_bb);
+    callContBb->CopyTryCatchProps(callBb);
 
     // Fix loop tree
-    for (auto loop : graph_inl->GetRootLoop()->GetInnerLoops()) {
-        current_loop->AppendInnerLoop(loop);
-        loop->SetOuterLoop(current_loop);
+    for (auto loop : graphInl->GetRootLoop()->GetInnerLoops()) {
+        currentLoop->AppendInnerLoop(loop);
+        loop->SetOuterLoop(currentLoop);
     }
-    for (auto bb : graph_inl->GetRootLoop()->GetBlocks()) {
-        bb->SetLoop(current_loop);
-        current_loop->AppendBlock(bb);
+    for (auto bb : graphInl->GetRootLoop()->GetBlocks()) {
+        bb->SetLoop(currentLoop);
+        currentLoop->AppendBlock(bb);
     }
 
     // Connect inlined graph as successor of the first part of call continuation block
-    auto start_bb = graph_inl->GetStartBlock();
-    ASSERT(start_bb->GetSuccsBlocks().size() == 1);
-    auto succ = start_bb->GetSuccessor(0);
-    succ->ReplacePred(start_bb, call_bb);
-    start_bb->GetSuccsBlocks().clear();
+    auto startBb = graphInl->GetStartBlock();
+    ASSERT(startBb->GetSuccsBlocks().size() == 1);
+    auto succ = startBb->GetSuccessor(0);
+    succ->ReplacePred(startBb, callBb);
+    startBb->GetSuccsBlocks().clear();
 
-    ASSERT(graph_inl->HasEndBlock());
-    auto end_block = graph_inl->GetEndBlock();
-    for (auto pred : end_block->GetPredsBlocks()) {
-        end_block->RemovePred(pred);
+    ASSERT(graphInl->HasEndBlock());
+    auto endBlock = graphInl->GetEndBlock();
+    for (auto pred : endBlock->GetPredsBlocks()) {
+        endBlock->RemovePred(pred);
         if (pred->IsEndWithThrowOrDeoptimize() ||
             (pred->IsEmpty() && pred->GetPredsBlocks()[0]->IsEndWithThrowOrDeoptimize())) {
             if (!GetGraph()->HasEndBlock()) {
                 GetGraph()->CreateEndBlock();
             }
-            return_blocks_.push_back(pred);
-            pred->ReplaceSucc(end_block, GetGraph()->GetEndBlock());
+            returnBlocks_.push_back(pred);
+            pred->ReplaceSucc(endBlock, GetGraph()->GetEndBlock());
         } else {
-            pred->ReplaceSucc(end_block, call_cont_bb);
+            pred->ReplaceSucc(endBlock, callContBb);
         }
     }
 }
@@ -1407,43 +1403,43 @@ void Inlining::UpdateControlflow(Graph *graph_inl, BasicBlock *call_bb, BasicBlo
  * Move constants of the inlined graph to the current one if same constant doesn't already exist.
  * If constant exists just fix callee graph's dataflow to use existing constants.
  */
-void Inlining::MoveConstants(Graph *graph_inl)
+void Inlining::MoveConstants(Graph *graphInl)
 {
-    auto start_bb = graph_inl->GetStartBlock();
-    for (ConstantInst *constant = graph_inl->GetFirstConstInst(), *next_constant = nullptr; constant != nullptr;
-         constant = next_constant) {
-        next_constant = constant->GetNextConst();
-        start_bb->EraseInst(constant);
-        auto exising_constant = GetGraph()->FindOrAddConstant(constant);
-        if (exising_constant != constant) {
-            constant->ReplaceUsers(exising_constant);
+    auto startBb = graphInl->GetStartBlock();
+    for (ConstantInst *constant = graphInl->GetFirstConstInst(), *nextConstant = nullptr; constant != nullptr;
+         constant = nextConstant) {
+        nextConstant = constant->GetNextConst();
+        startBb->EraseInst(constant);
+        auto exisingConstant = GetGraph()->FindOrAddConstant(constant);
+        if (exisingConstant != constant) {
+            constant->ReplaceUsers(exisingConstant);
         }
     }
 
     // Move NullPtr instruction
-    if (graph_inl->HasNullPtrInst()) {
-        start_bb->EraseInst(graph_inl->GetNullPtrInst());
-        auto exising_nullptr = GetGraph()->GetOrCreateNullPtr();
-        graph_inl->GetNullPtrInst()->ReplaceUsers(exising_nullptr);
+    if (graphInl->HasNullPtrInst()) {
+        startBb->EraseInst(graphInl->GetNullPtrInst());
+        auto exisingNullptr = GetGraph()->GetOrCreateNullPtr();
+        graphInl->GetNullPtrInst()->ReplaceUsers(exisingNullptr);
     }
     // Move LoadUndefined instruction
-    if (graph_inl->HasUndefinedInst()) {
-        start_bb->EraseInst(graph_inl->GetUndefinedInst());
-        auto exising_undefined = GetGraph()->GetOrCreateUndefinedInst();
-        graph_inl->GetUndefinedInst()->ReplaceUsers(exising_undefined);
+    if (graphInl->HasUndefinedInst()) {
+        startBb->EraseInst(graphInl->GetUndefinedInst());
+        auto exisingUndefined = GetGraph()->GetOrCreateUndefinedInst();
+        graphInl->GetUndefinedInst()->ReplaceUsers(exisingUndefined);
     }
 }
 
-bool Inlining::ResolveTarget(CallInst *call_inst, InlineContext *ctx)
+bool Inlining::ResolveTarget(CallInst *callInst, InlineContext *ctx)
 {
     auto runtime = GetGraph()->GetRuntime();
-    auto method = call_inst->GetCallMethod();
-    if (call_inst->GetOpcode() == Opcode::CallStatic) {
+    auto method = callInst->GetCallMethod();
+    if (callInst->GetOpcode() == Opcode::CallStatic) {
         ctx->method = method;
         return true;
     }
 
-    if (OPTIONS.IsCompilerNoVirtualInlining()) {
+    if (g_options.IsCompilerNoVirtualInlining()) {
         return false;
     }
 
@@ -1453,37 +1449,37 @@ bool Inlining::ResolveTarget(CallInst *call_inst, InlineContext *ctx)
         return true;
     }
 
-    auto object_inst = call_inst->GetDataFlowInput(call_inst->GetObjectIndex());
-    auto type_info = object_inst->GetObjectTypeInfo();
-    if (CanUseTypeInfo(type_info, method)) {
-        auto receiver = type_info.GetClass();
-        MethodPtr resolved_method;
+    auto objectInst = callInst->GetDataFlowInput(callInst->GetObjectIndex());
+    auto typeInfo = objectInst->GetObjectTypeInfo();
+    if (CanUseTypeInfo(typeInfo, method)) {
+        auto receiver = typeInfo.GetClass();
+        MethodPtr resolvedMethod;
         if (runtime->IsInterfaceMethod(method)) {
-            resolved_method = runtime->ResolveInterfaceMethod(receiver, method);
+            resolvedMethod = runtime->ResolveInterfaceMethod(receiver, method);
         } else {
-            resolved_method = runtime->ResolveVirtualMethod(receiver, method);
+            resolvedMethod = runtime->ResolveVirtualMethod(receiver, method);
         }
-        if (resolved_method != nullptr && (type_info.IsExact() || runtime->IsMethodFinal(resolved_method))) {
-            ctx->method = resolved_method;
+        if (resolvedMethod != nullptr && (typeInfo.IsExact() || runtime->IsMethodFinal(resolvedMethod))) {
+            ctx->method = resolvedMethod;
             return true;
         }
-        if (type_info.IsExact()) {
+        if (typeInfo.IsExact()) {
             LOG_INLINING(WARNING) << "Runtime failed to resolve method";
             return false;
         }
     }
 
-    if (ArchTraits<RUNTIME_ARCH>::SUPPORT_DEOPTIMIZATION && !OPTIONS.IsCompilerNoChaInlining() &&
+    if (ArchTraits<RUNTIME_ARCH>::SUPPORT_DEOPTIMIZATION && !g_options.IsCompilerNoChaInlining() &&
         !GetGraph()->IsAotMode()) {
         // Try resolve via CHA
         auto cha = GetCha();
         if (cha != nullptr && cha->IsSingleImplementation(method)) {
             auto klass = runtime->GetClass(method);
-            ctx->method = runtime->ResolveVirtualMethod(klass, call_inst->GetCallMethod());
+            ctx->method = runtime->ResolveVirtualMethod(klass, callInst->GetCallMethod());
             if (ctx->method == nullptr) {
                 return false;
             }
-            ctx->cha_devirtualize = true;
+            ctx->chaDevirtualize = true;
             return true;
         }
     }
@@ -1491,26 +1487,26 @@ bool Inlining::ResolveTarget(CallInst *call_inst, InlineContext *ctx)
     return false;
 }
 
-bool Inlining::CanUseTypeInfo(ObjectTypeInfo type_info, RuntimeInterface::MethodPtr method)
+bool Inlining::CanUseTypeInfo(ObjectTypeInfo typeInfo, RuntimeInterface::MethodPtr method)
 {
     auto runtime = GetGraph()->GetRuntime();
-    if (!type_info || runtime->IsInterface(type_info.GetClass())) {
+    if (!typeInfo || runtime->IsInterface(typeInfo.GetClass())) {
         return false;
     }
-    if (type_info.IsExact()) {
+    if (typeInfo.IsExact()) {
         return true;
     }
-    return runtime->IsAssignableFrom(runtime->GetClass(method), type_info.GetClass());
+    return runtime->IsAssignableFrom(runtime->GetClass(method), typeInfo.GetClass());
 }
 
-void Inlining::InsertChaGuard(CallInst *call_inst)
+void Inlining::InsertChaGuard(CallInst *callInst)
 {
-    auto save_state = call_inst->GetSaveState();
-    auto check_deopt = GetGraph()->CreateInstIsMustDeoptimize(DataType::BOOL, call_inst->GetPc());
-    auto deopt = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, call_inst->GetPc(), check_deopt, save_state,
+    auto saveState = callInst->GetSaveState();
+    auto checkDeopt = GetGraph()->CreateInstIsMustDeoptimize(DataType::BOOL, callInst->GetPc());
+    auto deopt = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, callInst->GetPc(), checkDeopt, saveState,
                                                     DeoptimizeType::INLINE_CHA);
-    call_inst->InsertBefore(deopt);
-    deopt->InsertBefore(check_deopt);
+    callInst->InsertBefore(deopt);
+    deopt->InsertBefore(checkDeopt);
 }
 
 bool Inlining::SkipBlock(const BasicBlock *block) const
@@ -1518,7 +1514,7 @@ bool Inlining::SkipBlock(const BasicBlock *block) const
     if (block == nullptr || block->IsEmpty()) {
         return true;
     }
-    if (!OPTIONS.IsCompilerInliningSkipThrowBlocks() || (GetGraph()->GetThrowCounter(block) > 0)) {
+    if (!g_options.IsCompilerInliningSkipThrowBlocks() || (GetGraph()->GetThrowCounter(block) > 0)) {
         return false;
     }
     return block->IsEndWithThrowOrDeoptimize();

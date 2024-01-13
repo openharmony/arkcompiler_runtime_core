@@ -201,32 +201,32 @@ public:
     {
         // Clear monitor and status bits
         MarkWordSize temp = Value() & (~(MONITOR_POINTER_MASK_IN_PLACE | STATUS_MASK_IN_PLACE));
-        MarkWordSize monitor_in_place = (static_cast<MarkWordSize>(monitor) & MONITOR_POINTER_MASK)
-                                        << MONITOR_POINTER_SHIFT;
-        return MarkWord(temp | monitor_in_place | (STATUS_HEAVYWEIGHT_LOCK << STATUS_SHIFT));
+        MarkWordSize monitorInPlace = (static_cast<MarkWordSize>(monitor) & MONITOR_POINTER_MASK)
+                                      << MONITOR_POINTER_SHIFT;
+        return MarkWord(temp | monitorInPlace | (STATUS_HEAVYWEIGHT_LOCK << STATUS_SHIFT));
     }
 
     PANDA_PUBLIC_API MarkWord DecodeFromHash(uint32_t hash);
 
-    MarkWord DecodeFromForwardingAddress(MarkWordSize forwarding_address)
+    MarkWord DecodeFromForwardingAddress(MarkWordSize forwardingAddress)
     {
         static_assert(sizeof(MarkWordSize) == OBJECT_POINTER_SIZE,
                       "MarkWord has different size than OBJECT_POINTER_SIZE");
-        ASSERT((forwarding_address & FORWARDING_ADDRESS_MASK_IN_PLACE) == forwarding_address);
-        return DecodeFromForwardingAddressField(forwarding_address >> FORWARDING_ADDRESS_SHIFT);
+        ASSERT((forwardingAddress & FORWARDING_ADDRESS_MASK_IN_PLACE) == forwardingAddress);
+        return DecodeFromForwardingAddressField(forwardingAddress >> FORWARDING_ADDRESS_SHIFT);
     }
 
-    MarkWord DecodeFromLightLock(os::thread::ThreadId thread_id, uint32_t count)
+    MarkWord DecodeFromLightLock(os::thread::ThreadId threadId, uint32_t count)
     {
         // Clear monitor and status bits
         MarkWordSize temp =
             Value() &
             (~(LIGHT_LOCK_THREADID_MASK_IN_PLACE | LIGHT_LOCK_LOCK_COUNT_MASK_IN_PLACE | STATUS_MASK_IN_PLACE));
-        MarkWordSize lightlock_thread_in_place = (static_cast<MarkWordSize>(thread_id) & LIGHT_LOCK_THREADID_MASK)
-                                                 << LIGHT_LOCK_THREADID_SHIFT;
-        MarkWordSize lightlock_lock_count_in_place = (static_cast<MarkWordSize>(count) & LIGHT_LOCK_LOCK_COUNT_MASK)
-                                                     << LIGHT_LOCK_LOCK_COUNT_SHIFT;
-        return MarkWord(temp | lightlock_thread_in_place | lightlock_lock_count_in_place |
+        MarkWordSize lightlockThreadInPlace = (static_cast<MarkWordSize>(threadId) & LIGHT_LOCK_THREADID_MASK)
+                                              << LIGHT_LOCK_THREADID_SHIFT;
+        MarkWordSize lightlockLockCountInPlace = (static_cast<MarkWordSize>(count) & LIGHT_LOCK_LOCK_COUNT_MASK)
+                                                 << LIGHT_LOCK_LOCK_COUNT_SHIFT;
+        return MarkWord(temp | lightlockThreadInPlace | lightlockLockCountInPlace |
                         (STATUS_LIGHTWEIGHT_LOCK << STATUS_SHIFT));
     }
 
@@ -364,13 +364,13 @@ private:
      * @param forwarding_address - address shifted by FORWARDING_ADDRESS_SHIFT
      * @return MarkWord with encoded forwarding_address and GC state
      */
-    MarkWord DecodeFromForwardingAddressField(MarkWordSize forwarding_address)
+    MarkWord DecodeFromForwardingAddressField(MarkWordSize forwardingAddress)
     {
-        ASSERT(forwarding_address <= ((std::numeric_limits<MarkWordSize>::max()) >> FORWARDING_ADDRESS_SHIFT));
+        ASSERT(forwardingAddress <= ((std::numeric_limits<MarkWordSize>::max()) >> FORWARDING_ADDRESS_SHIFT));
         // Forwardind address consumes all bits except status. We don't need to save GC state
-        MarkWordSize forwarding_address_in_place = (forwarding_address & FORWARDING_ADDRESS_MASK)
-                                                   << FORWARDING_ADDRESS_SHIFT;
-        return MarkWord(forwarding_address_in_place | (STATUS_GC << STATUS_SHIFT));
+        MarkWordSize forwardingAddressInPlace = (forwardingAddress & FORWARDING_ADDRESS_MASK)
+                                                << FORWARDING_ADDRESS_SHIFT;
+        return MarkWord(forwardingAddressInPlace | (STATUS_GC << STATUS_SHIFT));
     }
 
     /// @return pointer shifted by FORWARDING_ADDRESS_SHIFT

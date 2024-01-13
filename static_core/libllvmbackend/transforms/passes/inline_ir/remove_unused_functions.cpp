@@ -42,12 +42,12 @@ namespace panda::llvmbackend::passes {
 
 bool RemoveUnusedFunctions::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
 {
-    return options->do_irtoc_inline;
+    return options->doIrtocInline;
 }
 
 llvm::PreservedAnalyses RemoveUnusedFunctions::run(llvm::Module &module, llvm::ModuleAnalysisManager & /*AM*/)
 {
-    DenseSet<Function *> used_functions;
+    DenseSet<Function *> usedFunctions;
     for (auto &function : module.functions()) {
         if (function.getMetadata(LLVMArkInterface::FUNCTION_MD_INLINE_MODULE) != nullptr) {
             LLVM_DEBUG(llvm::dbgs() << "Skip " << function.getName() << " from inline module\n");
@@ -58,12 +58,12 @@ llvm::PreservedAnalyses RemoveUnusedFunctions::run(llvm::Module &module, llvm::M
         }
         LLVM_DEBUG(llvm::dbgs() << function.getName() << " is root\n");
         DenseSet<Value *> seen;
-        VisitValue(used_functions, function, seen);
+        VisitValue(usedFunctions, function, seen);
     }
 
     bool changed = false;
     for (auto &function : module.functions()) {
-        if (!used_functions.contains(&function)) {
+        if (!usedFunctions.contains(&function)) {
             LLVM_DEBUG(llvm::dbgs() << "Deleted body of " << function.getName() << "\n");
             convertToDeclaration(function);
             changed |= true;
@@ -73,35 +73,34 @@ llvm::PreservedAnalyses RemoveUnusedFunctions::run(llvm::Module &module, llvm::M
     changed |= panda::llvmbackend::RemoveDanglingAliases(module);
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
-void RemoveUnusedFunctions::VisitValue(DenseSet<Function *> &used_functions, Value &value,
-                                       DenseSet<Value *> &seen_values)
+void RemoveUnusedFunctions::VisitValue(DenseSet<Function *> &usedFunctions, Value &value, DenseSet<Value *> &seenValues)
 {
-    if (seen_values.contains(&value)) {
+    if (seenValues.contains(&value)) {
         return;
     }
 
-    seen_values.insert(&value);
+    seenValues.insert(&value);
 
     if (isa<Function>(value)) {
         auto &function = cast<Function>(value);
-        if (used_functions.contains(&function)) {
+        if (usedFunctions.contains(&function)) {
             return;
         }
 
-        used_functions.insert(&function);
+        usedFunctions.insert(&function);
         DenseSet<Value *> seen;
-        for (auto &basic_block : function) {
-            VisitValue(used_functions, basic_block, seen);
+        for (auto &basicBlock : function) {
+            VisitValue(usedFunctions, basicBlock, seen);
         }
     } else if (isa<BasicBlock>(value)) {
-        auto &basic_block = cast<BasicBlock>(value);
-        for (auto &instruction : basic_block) {
-            VisitValue(used_functions, instruction, seen_values);
+        auto &basicBlock = cast<BasicBlock>(value);
+        for (auto &instruction : basicBlock) {
+            VisitValue(usedFunctions, instruction, seenValues);
         }
     } else if (isa<User>(value)) {
         auto &user = cast<User>(value);
         for (auto operand : user.operand_values()) {
-            VisitValue(used_functions, *operand, seen_values);
+            VisitValue(usedFunctions, *operand, seenValues);
         }
     } else {
         if (isa<Argument, llvm::MetadataAsValue, InlineAsm>(value)) {

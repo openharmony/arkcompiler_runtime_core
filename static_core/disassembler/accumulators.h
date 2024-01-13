@@ -27,36 +27,36 @@ using LabelTable = std::map<size_t, std::string>;
 using IdList = std::vector<panda::panda_file::File::EntityId>;
 
 struct MethodInfo {
-    std::string method_info;
+    std::string methodInfo;
 
-    std::vector<std::string> instructions_info;
+    std::vector<std::string> instructionsInfo;
 
-    panda_file::LineNumberTable line_number_table;
+    panda_file::LineNumberTable lineNumberTable;
 
-    panda_file::LocalVariableTable local_variable_table;
+    panda_file::LocalVariableTable localVariableTable;
 };
 
 struct RecordInfo {
-    std::string record_info;
+    std::string recordInfo;
 
-    std::vector<std::string> fields_info;
+    std::vector<std::string> fieldsInfo;
 };
 
 struct ProgInfo {
-    std::map<std::string, RecordInfo> records_info;
-    std::map<std::string, MethodInfo> methods_info;
+    std::map<std::string, RecordInfo> recordsInfo;
+    std::map<std::string, MethodInfo> methodsInfo;
 };
 
 using AnnotationList = std::vector<std::pair<std::string, std::string>>;
 
 struct RecordAnnotations {
-    AnnotationList ann_list;
-    std::map<std::string, AnnotationList> field_annotations;
+    AnnotationList annList;
+    std::map<std::string, AnnotationList> fieldAnnotations;
 };
 
 struct ProgAnnotations {
-    std::map<std::string, AnnotationList> method_annotations;
-    std::map<std::string, RecordAnnotations> record_annotations;
+    std::map<std::string, AnnotationList> methodAnnotations;
+    std::map<std::string, RecordAnnotations> recordAnnotations;
 };
 }  // namespace panda::disasm
 

@@ -22,11 +22,11 @@
 namespace panda::compiler {
 class Cleanup final : public Optimization {
 public:
-    explicit Cleanup(Graph *graph, bool light_mode = true)
+    explicit Cleanup(Graph *graph, bool lightMode = true)
         : Optimization(graph),
           empty1_(graph->GetLocalAllocator()->Adapter()),
           empty2_(graph->GetLocalAllocator()->Adapter()),
-          saved_preds_(graph->GetLocalAllocator()->Adapter()),
+          savedPreds_(graph->GetLocalAllocator()->Adapter()),
           dead_(graph->GetLocalAllocator()->Adapter()),
           temp_(graph->GetLocalAllocator()->Adapter()),
           ancestors_(graph->GetLocalAllocator()->Adapter()),
@@ -37,7 +37,7 @@ public:
           semi_(graph->GetLocalAllocator()->Adapter()),
           vertices_(graph->GetLocalAllocator()->Adapter()),
           map_(graph->GetLocalAllocator()->Adapter()),
-          light_mode_(light_mode)
+          lightMode_(lightMode)
     {
     }
 
@@ -58,25 +58,25 @@ public:
 private:
     bool CanBeMerged(BasicBlock *bb);
 
-    bool RunOnce(ArenaSet<BasicBlock *> *empty_blocks, ArenaSet<BasicBlock *> *new_empty_blocks, bool simple_dce);
-    void RemoveDeadPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *new_empty_blocks);
-    bool ProcessBB(BasicBlock *bb, Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks);
+    bool RunOnce(ArenaSet<BasicBlock *> *emptyBlocks, ArenaSet<BasicBlock *> *newEmptyBlocks, bool simpleDce);
+    void RemoveDeadPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *newEmptyBlocks);
+    bool ProcessBB(BasicBlock *bb, Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks);
     bool CheckSpecialTriangle(BasicBlock *bb);
 
-    void MarkInlinedCaller(Marker live_mrk, Inst *save_state);
+    void MarkInlinedCaller(Marker liveMrk, Inst *saveState);
     bool IsRemovableCall(Inst *inst);
     template <bool LIGHT_MODE>
-    void MarkLiveRec(Marker live_mrk, Inst *inst);
+    void MarkLiveRec(Marker liveMrk, Inst *inst);
     template <bool LIGHT_MODE>
-    void MarkLiveInstructions(Marker dead_mrk, Marker live_mrk);
+    void MarkLiveInstructions(Marker deadMrk, Marker liveMrk);
     template <bool LIGHT_MODE>
-    bool Dce(Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks);
+    bool Dce(Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks);
 
-    void SetLiveRec(Inst *inst, Marker mrk, Marker live_mrk);
-    void LiveUserSearchRec(Inst *inst, Marker mrk, Marker live_mrk, Marker dead_mrk);
-    bool SimpleDce(Marker dead_mrk, ArenaSet<BasicBlock *> *new_empty_blocks);
-    void Marking(Marker dead_mrk, Marker mrk, Marker live_mrk);
-    bool Removal(ArenaSet<BasicBlock *> *new_empty_blocks);
+    void SetLiveRec(Inst *inst, Marker mrk, Marker liveMrk);
+    void LiveUserSearchRec(Inst *inst, Marker mrk, Marker liveMrk, Marker deadMrk);
+    bool SimpleDce(Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks);
+    void Marking(Marker deadMrk, Marker mrk, Marker liveMrk);
+    bool Removal(ArenaSet<BasicBlock *> *newEmptyBlocks);
 
     bool PhiChecker();
     bool PhiCheckerLight() const;
@@ -84,7 +84,7 @@ private:
 
     ArenaSet<BasicBlock *> empty1_;
     ArenaSet<BasicBlock *> empty2_;
-    ArenaVector<BasicBlock *> saved_preds_;
+    ArenaVector<BasicBlock *> savedPreds_;
     InstVector dead_;
     InstVector temp_;
 
@@ -97,12 +97,12 @@ private:
     InstVector vertices_;
     ArenaUnorderedMap<Inst *, uint32_t> map_;
 
-    Inst *fake_root_ {nullptr};
+    Inst *fakeRoot_ {nullptr};
     static constexpr int32_t DEFAULT_DFS_VAL = 0;
     // number of the inst according to the order it is reached during the DFS
-    int32_t dfs_num_ {DEFAULT_DFS_VAL};
+    int32_t dfsNum_ {DEFAULT_DFS_VAL};
 
-    bool light_mode_ {true};
+    bool lightMode_ {true};
 
     inline uint32_t GetInstId(Inst *inst) const
     {

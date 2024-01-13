@@ -104,14 +104,14 @@ static T RandomGen()
         }
 
         // Uniform distribution floating value
-        std::uniform_real_distribution<T> dis_num(1.0, 2.0);
-        int8_t sign = (gen % 2) == 0 ? 1 : -1;
+        std::uniform_real_distribution<T> dis_num(1.0F, 2.0F);
+        int8_t sign = (gen % 2U) == 0 ? 1 : -1;
         if constexpr (std::is_same_v<T, float>) {
             std::uniform_real_distribution<float> dis(MIN_EXP_BASE2_FLOAT, MAX_EXP_BASE2_FLOAT);
             return sign * dis_num(RANDOM_GENERATOR) * std::pow(2.0F, dis(RANDOM_GENERATOR));
         } else if constexpr (std::is_same_v<T, double>) {
             std::uniform_real_distribution<double> dis(MIN_EXP_BASE2_DOUBLE, MAX_EXP_BASE2_DOUBLE);
-            return sign * dis_num(RANDOM_GENERATOR) * std::pow(2.0, dis(RANDOM_GENERATOR));
+            return sign * dis_num(RANDOM_GENERATOR) * std::pow(2.0F, dis(RANDOM_GENERATOR));
         }
 
         UNREACHABLE();
@@ -742,7 +742,7 @@ bool TestBitTestAndBranch(Encoder32Test *test, T value, int pos, uint32_t expect
 template <typename T, bool NOT_ZERO = false>
 bool TestBitTestAndBranch(Encoder32Test *test)
 {
-    size_t max_pos = std::is_same<uint64_t, T>::value ? 64 : 32;
+    size_t max_pos = std::is_same<uint64_t, T>::value ? 64U : 32U;
     for (size_t i = 0; i < max_pos; i++) {
         T value = static_cast<T>(1) << i;
         if (!TestBitTestAndBranch<T, NOT_ZERO>(test, value, i, NOT_ZERO ? 0 : 1)) {

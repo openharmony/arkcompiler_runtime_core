@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "assembly-parser.h"
+#include "libpandabase/utils/utils.h"
 #include "libpandafile/bytecode_emitter.h"
 #include "libpandafile/bytecode_instruction.h"
 #include "libpandafile/file_items.h"
@@ -87,7 +88,7 @@ public:
     void SetUpHelperFunctions(const std::string &language)
     {
         Runtime *runtime = Runtime::GetCurrent();
-        ClassLinker *class_linker = runtime->GetClassLinker();
+        ClassLinker *classLinker = runtime->GetClassLinker();
 
         std::string source = ".language " + language + "\n" + R"(
             .record TestUtils {}
@@ -98,46 +99,46 @@ public:
         auto res = p.Parse(source);
         ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
 
         auto descriptor = std::make_unique<PandaString>();
-        std::optional<panda::panda_file::SourceLang> lang_local = panda_file::LanguageFromString(language);
-        if (!lang_local) {
+        std::optional<panda::panda_file::SourceLang> langLocal = panda_file::LanguageFromString(language);
+        if (!langLocal) {
             UNREACHABLE();
         }
-        auto *extension = class_linker->GetExtension(lang_local.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
+        auto *extension = classLinker->GetExtension(langLocal.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
         Class *klass =
             extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("TestUtils"), descriptor.get()));
 
-        Method *cmp_dyn = klass->GetDirectMethod(utf::CStringAsMutf8("cmpDyn"));
-        ASSERT_NE(cmp_dyn, nullptr);
-        cmp_dyn->SetCompiledEntryPoint(reinterpret_cast<const void *>(CmpDynImpl));
+        Method *cmpDyn = klass->GetDirectMethod(utf::CStringAsMutf8("cmpDyn"));
+        ASSERT_NE(cmpDyn, nullptr);
+        cmpDyn->SetCompiledEntryPoint(reinterpret_cast<const void *>(CmpDynImpl));
 
         Method *ldundefined = klass->GetDirectMethod(utf::CStringAsMutf8("ldundefined"));
         ASSERT_NE(ldundefined, nullptr);
         ldundefined->SetCompiledEntryPoint(reinterpret_cast<const void *>(LdUndefinedImpl));
     }
 
-    Method *MakeNoArgsMethod(TypeId ret_type, int64_t ret)
+    Method *MakeNoArgsMethod(TypeId retType, int64_t ret)
     {
         Runtime *runtime = Runtime::GetCurrent();
-        ClassLinker *class_linker = runtime->GetClassLinker();
+        ClassLinker *classLinker = runtime->GetClassLinker();
         LanguageContext ctx = runtime->GetLanguageContext(lang_);
 
         std::ostringstream out;
         out << ".language " << ctx << '\n';
-        if (ret_type == TypeId::REFERENCE) {
+        if (retType == TypeId::REFERENCE) {
             // 'operator <<' for TypeId::REFERENCE returns 'reference'. So create a class to handle this situation.
             out << ".record reference {}\n";
         }
-        out << ".function " << panda_file::Type(ret_type) << " main() {\n";
-        if (TypeId::F32 <= ret_type && ret_type <= TypeId::F64) {
+        out << ".function " << panda_file::Type(retType) << " main() {\n";
+        if (TypeId::F32 <= retType && retType <= TypeId::F64) {
             out << "fldai.64 " << bit_cast<double>(ret) << '\n';
             out << "return.64\n";
-        } else if (TypeId::I64 <= ret_type && ret_type <= TypeId::U64) {
+        } else if (TypeId::I64 <= retType && retType <= TypeId::U64) {
             out << "ldai.64 " << ret << '\n';
             out << "return.64\n";
-        } else if (ret_type == TypeId::REFERENCE) {
+        } else if (retType == TypeId::REFERENCE) {
             out << "lda.null\n";
             out << "return.obj\n";
         } else {
@@ -150,10 +151,10 @@ public:
         auto res = p.Parse(out.str());
         // ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
 
         auto descriptor = std::make_unique<PandaString>();
-        auto *extension = class_linker->GetExtension(ctx);
+        auto *extension = classLinker->GetExtension(ctx);
         Class *klass =
             extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), descriptor.get()));
 
@@ -163,70 +164,70 @@ public:
     }
 
     Method *MakeCheckArgsMethod(const std::initializer_list<TypeId> &shorty, const std::initializer_list<int64_t> args,
-                                bool is_instance = false)
+                                bool isInstance = false)
     {
         Runtime *runtime = Runtime::GetCurrent();
-        ClassLinker *class_linker = runtime->GetClassLinker();
+        ClassLinker *classLinker = runtime->GetClassLinker();
         LanguageContext ctx = runtime->GetLanguageContext(lang_);
 
         std::ostringstream out;
         std::ostringstream signature;
         std::ostringstream body;
-        uint32_t arg_num = 0;
+        uint32_t argNum = 0;
 
-        if (is_instance) {
+        if (isInstance) {
             signature << "Test a0";
             body << "lda.null\n";
             body << "jne.obj a0, fail\n";
-            ++arg_num;
+            ++argNum;
         }
-        auto shorty_it = shorty.begin();
-        TypeId ret_type = *shorty_it++;
-        auto args_it = args.begin();
-        while (shorty_it != shorty.end()) {
-            if (args_it == args.end()) {
+        auto shortyIt = shorty.begin();
+        TypeId retType = *shortyIt++;
+        auto argsIt = args.begin();
+        while (shortyIt != shorty.end()) {
+            if (argsIt == args.end()) {
                 // only dynamic methods could be called with less arguments than declared
-                ASSERT(*shorty_it == TypeId::TAGGED);
+                ASSERT(*shortyIt == TypeId::TAGGED);
             }
-            if (arg_num > 0) {
+            if (argNum > 0) {
                 signature << ", ";
             }
-            if ((TypeId::F32 <= *shorty_it && *shorty_it <= TypeId::U64) || *shorty_it == TypeId::REFERENCE ||
-                *shorty_it == TypeId::TAGGED) {
-                signature << panda_file::Type(*shorty_it) << " a" << arg_num;
-                if (TypeId::F32 <= *shorty_it && *shorty_it <= TypeId::F64) {
-                    body << "fldai.64 " << bit_cast<double>(*args_it) << '\n';
-                    body << "fcmpg.64 a" << arg_num << '\n';
+            if ((TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::U64) || *shortyIt == TypeId::REFERENCE ||
+                *shortyIt == TypeId::TAGGED) {
+                signature << panda_file::Type(*shortyIt) << " a" << argNum;
+                if (TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::F64) {
+                    body << "fldai.64 " << bit_cast<double>(*argsIt) << '\n';
+                    body << "fcmpg.64 a" << argNum << '\n';
                     body << "jnez fail\n";
-                } else if (TypeId::I64 <= *shorty_it && *shorty_it <= TypeId::U64) {
-                    body << "ldai.64 " << *args_it << '\n';
-                    body << "cmp.64 a" << arg_num << '\n';
+                } else if (TypeId::I64 <= *shortyIt && *shortyIt <= TypeId::U64) {
+                    body << "ldai.64 " << *argsIt << '\n';
+                    body << "cmp.64 a" << argNum << '\n';
                     body << "jnez fail\n";
-                } else if (*shorty_it == TypeId::TAGGED) {
-                    if (args_it == args.end()) {
+                } else if (*shortyIt == TypeId::TAGGED) {
+                    if (argsIt == args.end()) {
                         body << "call.short TestUtils.ldundefined\n";
                     } else {
-                        body << "ldai.dyn " << *args_it << '\n';
+                        body << "ldai.dyn " << *argsIt << '\n';
                     }
                     body << "sta.dyn v0\n";
-                    body << "call.short TestUtils.cmpDyn, v0, a" << arg_num << '\n';
+                    body << "call.short TestUtils.cmpDyn, v0, a" << argNum << '\n';
                     body << "jnez fail\n";
                 } else {
                     body << "lda.null\n";
-                    body << "jne.obj a" << arg_num << ", fail\n";
+                    body << "jne.obj a" << argNum << ", fail\n";
                 }
             } else {
-                signature << "i32 a" << arg_num;
-                body << "ldai " << *args_it << '\n';
-                body << "jne a" << arg_num << ", fail\n";
+                signature << "i32 a" << argNum;
+                body << "ldai " << *argsIt << '\n';
+                body << "jne a" << argNum << ", fail\n";
             }
-            ++shorty_it;
-            if (args_it != args.end()) {
-                ++args_it;
+            ++shortyIt;
+            if (argsIt != args.end()) {
+                ++argsIt;
             }
-            ++arg_num;
+            ++argNum;
         }
-        if (ret_type == TypeId::TAGGED) {
+        if (retType == TypeId::TAGGED) {
             body << "ldai.dyn 1\n";
             body << "return.dyn\n";
             body << "fail:\n";
@@ -246,18 +247,17 @@ public:
         out << ".function any TestUtils.ldundefined() <external>\n";
         out << ".record reference {}\n";
         out << ".record Test {}\n";
-        out << ".function " << panda_file::Type(ret_type) << " Test.main(" << signature.str() << ") {\n";
+        out << ".function " << panda_file::Type(retType) << " Test.main(" << signature.str() << ") {\n";
         out << body.str();
         out << "}";
 
         pandasm::Parser p;
         auto res = p.Parse(out.str());
-        // ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
 
         auto descriptor = std::make_unique<PandaString>();
-        auto *extension = class_linker->GetExtension(ctx);
+        auto *extension = classLinker->GetExtension(ctx);
         Class *klass = extension->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("Test"), descriptor.get()));
 
         Method *main = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
@@ -278,14 +278,14 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeVoidNoArg)
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeIntNoArg)
 {
-    auto method = MakeNoArgsMethod(TypeId::I32, 5);
+    auto method = MakeNoArgsMethod(TypeId::I32, 5L);
     auto res = InvokeEntryPoint<int32_t>(method);
     ASSERT_EQ(res, 5);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLongNoArg)
 {
-    auto method = MakeNoArgsMethod(TypeId::I64, 7);
+    auto method = MakeNoArgsMethod(TypeId::I64, 7L);
 
     auto res = InvokeEntryPoint<int64_t>(method);
     ASSERT_EQ(res, 7);
@@ -294,10 +294,10 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLongNoArg)
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeDoubleNoArg)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto method = MakeNoArgsMethod(TypeId::F64, bit_cast<int64_t>(3.0));
+    auto method = MakeNoArgsMethod(TypeId::F64, bit_cast<int64_t>(3.0_D));
 
     auto res = InvokeEntryPoint<double>(method);
-    ASSERT_EQ(res, 3.0);
+    ASSERT_EQ(res, 3.0_D);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeObjNoArg)
@@ -311,59 +311,60 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeObjNoArg)
 /// Args tests:
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeInt)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32}, {5});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32}, {5L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 5);
+    auto res = InvokeEntryPoint<int32_t>(method, 5L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeInstanceInt)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32}, {0, 5}, true);
+    auto method = MakeCheckArgsMethod({TypeId::I32}, {0, 5L}, true);
 
-    auto res = InvokeEntryPoint<int32_t>(method, nullptr, 5);
+    auto res = InvokeEntryPoint<int32_t>(method, nullptr, 5L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke3Int)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32}, {3, 2, 1});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32}, {3L, 2L, 1L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 3, 2, 1);
+    auto res = InvokeEntryPoint<int32_t>(method, 3L, 2L, 1L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLong)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I64}, {7});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I64}, {7L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 7);
+    auto res = InvokeEntryPoint<int32_t>(method, 7L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeDouble)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::F64}, {bit_cast<int64_t>(2.0)});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::F64}, {bit_cast<int64_t>(2.0_D)});
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto res = InvokeEntryPoint<int32_t>(method, 2.0);
+    auto res = InvokeEntryPoint<int32_t>(method, 2.0_D);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke4Int)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32}, {4, 3, 2, 1});
+    auto method =
+        MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32}, {4L, 3L, 2L, 1L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 4, 3, 2, 1);
+    auto res = InvokeEntryPoint<int32_t>(method, 4L, 3L, 2L, 1L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke2Long)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I64, TypeId::I64}, {7, 8});
+    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I64, TypeId::I64}, {7L, 8L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 7, 8);
+    auto res = InvokeEntryPoint<int32_t>(method, 7L, 8L);
     ASSERT_EQ(res, 1);
 }
 
@@ -372,9 +373,9 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke2Long)
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke4IntDouble)
 {
     auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::F64},
-                                      {4, 3, 2, 1, bit_cast<int64_t>(8.0)});
+                                      {4L, 3L, 2L, 1L, bit_cast<int64_t>(8.0_D)});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 4, 3, 2, 1, 8.0);
+    auto res = InvokeEntryPoint<int32_t>(method, 4L, 3L, 2L, 1L, 8.0_D);
     ASSERT_EQ(res, 1);
 }
 
@@ -382,22 +383,23 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke7Int)
 {
     auto method = MakeCheckArgsMethod(
         {TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32},
-        {7, 6, 5, 4, 3, 2, 1});
+        {7L, 6L, 5L, 4L, 3L, 2L, 1L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 7, 6, 5, 4, 3, 2, 1);
+    auto res = InvokeEntryPoint<int32_t>(method, 7L, 6L, 5L, 4L, 3L, 2L, 1L);
     ASSERT_EQ(res, 1);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke7Int8Double)
 {
-    auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
-                                       TypeId::I32, TypeId::I32, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64,
-                                       TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64},
-                                      {7, 6, 5, 4, 3, 2, 1, bit_cast<int64_t>(10.0), bit_cast<int64_t>(11.0),
-                                       bit_cast<int64_t>(12.0), bit_cast<int64_t>(13.0), bit_cast<int64_t>(14.0),
-                                       bit_cast<int64_t>(15.0), bit_cast<int64_t>(16.0), bit_cast<int64_t>(17.0)});
+    auto method = MakeCheckArgsMethod(
+        {TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
+         TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64},
+        {7L, 6L, 5L, 4L, 3L, 2L, 1L, bit_cast<int64_t>(10.0_D), bit_cast<int64_t>(11.0_D), bit_cast<int64_t>(12.0_D),
+         bit_cast<int64_t>(13.0_D), bit_cast<int64_t>(14.0_D), bit_cast<int64_t>(15.0_D), bit_cast<int64_t>(16.0_D),
+         bit_cast<int64_t>(17.0_D)});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 7, 6, 5, 4, 3, 2, 1, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0);
+    auto res = InvokeEntryPoint<int32_t>(method, 7L, 6L, 5L, 4L, 3L, 2L, 1L, 10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D,
+                                         15.0_D, 16.0_D, 17.0_D);
     ASSERT_EQ(res, 1);
 }
 
@@ -405,9 +407,9 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke8Int)
 {
     auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
                                        TypeId::I32, TypeId::I32, TypeId::I32},
-                                      {8, 7, 6, 5, 4, 3, 2, 1});
+                                      {8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L});
 
-    auto res = InvokeEntryPoint<int32_t>(method, 8, 7, 6, 5, 4, 3, 2, 1);
+    auto res = InvokeEntryPoint<int32_t>(method, 8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L);
     ASSERT_EQ(res, 1);
 }
 
@@ -416,13 +418,13 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke8Int9Double)
     auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
                                        TypeId::I32, TypeId::I32, TypeId::I32, TypeId::F64, TypeId::F64, TypeId::F64,
                                        TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64, TypeId::F64},
-                                      {8, 7, 6, 5, 4, 3, 2, 1, bit_cast<int64_t>(10.0), bit_cast<int64_t>(11.0),
-                                       bit_cast<int64_t>(12.0), bit_cast<int64_t>(13.0), bit_cast<int64_t>(14.0),
-                                       bit_cast<int64_t>(15.0), bit_cast<int64_t>(16.0), bit_cast<int64_t>(17.0),
-                                       bit_cast<int64_t>(18.0)});
+                                      {8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L, bit_cast<int64_t>(10.0_D),
+                                       bit_cast<int64_t>(11.0_D), bit_cast<int64_t>(12.0_D), bit_cast<int64_t>(13.0_D),
+                                       bit_cast<int64_t>(14.0_D), bit_cast<int64_t>(15.0_D), bit_cast<int64_t>(16.0_D),
+                                       bit_cast<int64_t>(17.0_D), bit_cast<int64_t>(18.0_D)});
 
-    auto res =
-        InvokeEntryPoint<int32_t>(method, 8, 7, 6, 5, 4, 3, 2, 1, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0);
+    auto res = InvokeEntryPoint<int32_t>(method, 8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L, 10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D,
+                                         15.0_D, 16.0_D, 17.0_D, 18.0_D);
     ASSERT_EQ(res, 1);
 }
 

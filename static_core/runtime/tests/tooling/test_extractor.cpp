@@ -31,32 +31,32 @@ namespace panda::tooling::test {
 
 TestExtractor::TestExtractor(const panda_file::File *pf)
 {
-    lang_extractor_ = MakePandaUnique<panda_file::DebugInfoExtractor>(pf);
+    langExtractor_ = MakePandaUnique<panda_file::DebugInfoExtractor>(pf);
 }
 
-std::pair<EntityId, uint32_t> TestExtractor::GetBreakpointAddress(const SourceLocation &source_location)
+std::pair<EntityId, uint32_t> TestExtractor::GetBreakpointAddress(const SourceLocation &sourceLocation)
 {
-    auto pos = source_location.path.find_last_of("/\\");
-    auto name = source_location.path;
+    auto pos = sourceLocation.path.find_last_of("/\\");
+    auto name = sourceLocation.path;
 
     if (pos != PandaString::npos) {
         name = name.substr(pos + 1);
     }
 
-    std::vector<panda_file::File::EntityId> methods = lang_extractor_->GetMethodIdList();
+    std::vector<panda_file::File::EntityId> methods = langExtractor_->GetMethodIdList();
     for (const auto &method : methods) {
-        auto src_name = PandaString(lang_extractor_->GetSourceFile(method));
-        auto pos_sf = src_name.find_last_of("/\\");
-        if (pos_sf != PandaString::npos) {
-            src_name = src_name.substr(pos_sf + 1);
+        auto srcName = PandaString(langExtractor_->GetSourceFile(method));
+        auto posSf = srcName.find_last_of("/\\");
+        if (posSf != PandaString::npos) {
+            srcName = srcName.substr(posSf + 1);
         }
-        if (src_name == name) {
-            const panda_file::LineNumberTable &line_table = lang_extractor_->GetLineNumberTable(method);
-            if (line_table.empty()) {
+        if (srcName == name) {
+            const panda_file::LineNumberTable &lineTable = langExtractor_->GetLineNumberTable(method);
+            if (lineTable.empty()) {
                 continue;
             }
 
-            std::optional<size_t> offset = GetOffsetByTableLineNumber(line_table, source_location.line);
+            std::optional<size_t> offset = GetOffsetByTableLineNumber(lineTable, sourceLocation.line);
             if (offset == std::nullopt) {
                 continue;
             }
@@ -66,48 +66,48 @@ std::pair<EntityId, uint32_t> TestExtractor::GetBreakpointAddress(const SourceLo
     return {EntityId(), 0};
 }
 
-PandaList<PtStepRange> TestExtractor::GetStepRanges(EntityId method_id, uint32_t current_offset)
+PandaList<PtStepRange> TestExtractor::GetStepRanges(EntityId methodId, uint32_t currentOffset)
 {
-    const panda_file::LineNumberTable &line_table = lang_extractor_->GetLineNumberTable(method_id);
-    if (line_table.empty()) {
+    const panda_file::LineNumberTable &lineTable = langExtractor_->GetLineNumberTable(methodId);
+    if (lineTable.empty()) {
         return {};
     }
 
-    std::optional<size_t> line = GetLineNumberByTableOffset(line_table, current_offset);
+    std::optional<size_t> line = GetLineNumberByTableOffset(lineTable, currentOffset);
     if (line == std::nullopt) {
         return {};
     }
 
     PandaList<PtStepRange> res;
-    for (auto it = line_table.begin(); it != line_table.end(); ++it) {
+    for (auto it = lineTable.begin(); it != lineTable.end(); ++it) {
         if (it->line == line) {
-            size_t idx = it - line_table.begin();
-            if (it + 1 != line_table.end()) {
-                res.push_back({line_table[idx].offset, line_table[idx + 1].offset});
+            size_t idx = it - lineTable.begin();
+            if (it + 1 != lineTable.end()) {
+                res.push_back({lineTable[idx].offset, lineTable[idx + 1].offset});
             } else {
-                res.push_back({line_table[idx].offset, std::numeric_limits<uint32_t>::max()});
+                res.push_back({lineTable[idx].offset, std::numeric_limits<uint32_t>::max()});
             }
         }
     }
     return res;
 }
 
-std::vector<panda_file::LocalVariableInfo> TestExtractor::GetLocalVariableInfo(EntityId method_id, size_t offset)
+std::vector<panda_file::LocalVariableInfo> TestExtractor::GetLocalVariableInfo(EntityId methodId, size_t offset)
 {
-    const std::vector<panda_file::LocalVariableInfo> &variables = lang_extractor_->GetLocalVariableTable(method_id);
+    const std::vector<panda_file::LocalVariableInfo> &variables = langExtractor_->GetLocalVariableTable(methodId);
     std::vector<panda_file::LocalVariableInfo> result;
 
     for (const auto &variable : variables) {
-        if (variable.start_offset <= offset && offset <= variable.end_offset) {
+        if (variable.startOffset <= offset && offset <= variable.endOffset) {
             result.push_back(variable);
         }
     }
     return result;
 }
 
-const std::vector<panda_file::DebugInfoExtractor::ParamInfo> &TestExtractor::GetParameterInfo(EntityId method_id)
+const std::vector<panda_file::DebugInfoExtractor::ParamInfo> &TestExtractor::GetParameterInfo(EntityId methodId)
 {
-    return lang_extractor_->GetParameterInfo(method_id);
+    return langExtractor_->GetParameterInfo(methodId);
 }
 
 std::optional<size_t> TestExtractor::GetLineNumberByTableOffset(const panda_file::LineNumberTable &table,
@@ -131,18 +131,18 @@ std::optional<uint32_t> TestExtractor::GetOffsetByTableLineNumber(const panda_fi
     return std::nullopt;
 }
 
-SourceLocation TestExtractor::GetSourceLocation(EntityId method_id, uint32_t bytecode_offset)
+SourceLocation TestExtractor::GetSourceLocation(EntityId methodId, uint32_t bytecodeOffset)
 {
-    const panda_file::LineNumberTable &line_table = lang_extractor_->GetLineNumberTable(method_id);
-    if (line_table.empty()) {
+    const panda_file::LineNumberTable &lineTable = langExtractor_->GetLineNumberTable(methodId);
+    if (lineTable.empty()) {
         return SourceLocation();
     }
 
-    std::optional<size_t> line = GetLineNumberByTableOffset(line_table, bytecode_offset);
+    std::optional<size_t> line = GetLineNumberByTableOffset(lineTable, bytecodeOffset);
     if (line == std::nullopt) {
         return SourceLocation();
     }
 
-    return SourceLocation {lang_extractor_->GetSourceFile(method_id), line.value()};
+    return SourceLocation {langExtractor_->GetSourceFile(methodId), line.value()};
 }
 }  // namespace  panda::tooling::test

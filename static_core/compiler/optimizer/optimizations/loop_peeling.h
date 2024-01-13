@@ -32,7 +32,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerLoopPeeling();
+        return g_options.IsCompilerLoopPeeling();
     }
 
     const char *GetPassName() const override
@@ -45,9 +45,9 @@ public:
 private:
     bool TransformLoop(Loop *loop) override;
     void InsertPreLoop(Loop *loop);
-    size_t MoveLoopExitToBackEdge(BasicBlock *header, BasicBlock *back_edge);
-    void UpdateClonedInstInputs(Inst *inst, BasicBlock *header, BasicBlock *back_edge);
-    bool is_appied_ {false};
+    size_t MoveLoopExitToBackEdge(BasicBlock *header, BasicBlock *backEdge);
+    void UpdateClonedInstInputs(Inst *inst, BasicBlock *header, BasicBlock *backEdge);
+    bool isAppied_ {false};
     SaveStateBridgesBuilder ssb_;
 };
 }  // namespace panda::compiler

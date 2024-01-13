@@ -43,7 +43,7 @@ public:
 
 private:
     using MethodHandler =
-        std::function<void(const std::string &session_id, std::optional<Id>, const JsonObject &params)>;
+        std::function<void(const std::string &sessionId, std::optional<Id>, const JsonObject &params)>;
     using ResultHandler = std::function<void(const JsonObject &)>;
 
 public:
@@ -54,13 +54,13 @@ protected:
 
     void OnResult(Id id, ResultHandler &&handler)
     {
-        result_handlers_[id] = std::move(handler);
+        resultHandlers_[id] = std::move(handler);
     }
 
 private:
-    os::memory::Mutex method_handlers_mutex_;
-    std::unordered_map<std::string, MethodHandler> method_handlers_ GUARDED_BY(method_handlers_mutex_);
-    std::unordered_map<Id, ResultHandler> result_handlers_;
+    os::memory::Mutex methodHandlersMutex_;
+    std::unordered_map<std::string, MethodHandler> methodHandlers_ GUARDED_BY(methodHandlersMutex_);
+    std::unordered_map<Id, ResultHandler> resultHandlers_;
 };
 
 // JSON-RPC endpoint handling the Inspector protocol.
@@ -74,10 +74,10 @@ public:
 
 protected:
     void Call(
-        const std::string &session_id, std::optional<Id> id, const char *method,
+        const std::string &sessionId, std::optional<Id> id, const char *method,
         std::function<void(JsonObjectBuilder &)> &&params = [](JsonObjectBuilder & /* builder */) {})
     {
-        Send([&session_id, id, method, &params](JsonObjectBuilder &call) {
+        Send([&sessionId, id, method, &params](JsonObjectBuilder &call) {
             if (id) {
                 call.AddProperty("id", *id);
             }
@@ -85,21 +85,21 @@ protected:
             call.AddProperty("method", method);
             call.AddProperty("params", std::move(params));
 
-            if (!session_id.empty()) {
-                call.AddProperty("sessionId", session_id);
+            if (!sessionId.empty()) {
+                call.AddProperty("sessionId", sessionId);
             }
         });
     }
 
     template <typename Result>
-    void Reply(const std::string &session_id, Id id, Result &&result)
+    void Reply(const std::string &sessionId, Id id, Result &&result)
     {
-        Send([&session_id, id, &result](JsonObjectBuilder &reply) {
+        Send([&sessionId, id, &result](JsonObjectBuilder &reply) {
             reply.AddProperty("id", id);
             reply.AddProperty("result", std::forward<Result>(result));
 
-            if (!session_id.empty()) {
-                reply.AddProperty("sessionId", session_id);
+            if (!sessionId.empty()) {
+                reply.AddProperty("sessionId", sessionId);
             }
         });
     }

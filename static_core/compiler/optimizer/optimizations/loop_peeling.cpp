@@ -75,7 +75,7 @@ bool LoopPeeling::RunImpl()
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Run " << GetPassName();
     RunLoopsVisitor();
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << GetPassName() << " complete";
-    return is_appied_;
+    return isAppied_;
 }
 
 void LoopPeeling::InvalidateAnalyses()
@@ -96,11 +96,11 @@ static inline void CleanDeadPhis(BasicBlock *block)
 
 static bool HeaderHasInlinedCalls(const BasicBlock *header)
 {
-    auto check_inlined_call = [](auto inst) {
+    auto checkInlinedCall = [](auto inst) {
         return inst->IsCall() && static_cast<const CallInst *>(inst)->IsInlined();
     };
     auto insts = header->AllInsts();
-    return std::find_if(insts.begin(), insts.end(), check_inlined_call) != insts.end();
+    return std::find_if(insts.begin(), insts.end(), checkInlinedCall) != insts.end();
 }
 
 bool LoopPeeling::TransformLoop(Loop *loop)
@@ -113,14 +113,14 @@ bool LoopPeeling::TransformLoop(Loop *loop)
     if (HeaderHasInlinedCalls(header)) {
         return false;
     }
-    auto back_edge = loop->GetBackEdges()[0];
+    auto backEdge = loop->GetBackEdges()[0];
     InsertPreLoop(loop);
-    auto moved_inst_count = MoveLoopExitToBackEdge(header, back_edge);
+    auto movedInstCount = MoveLoopExitToBackEdge(header, backEdge);
     CleanDeadPhis(header);
-    is_appied_ = true;
+    isAppied_ = true;
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Loop was peeled, id = " << loop->GetId();
-    GetGraph()->GetEventWriter().EventLoopPeeling(loop->GetId(), header->GetGuestPc(), back_edge->GetGuestPc(),
-                                                  moved_inst_count);
+    GetGraph()->GetEventWriter().EventLoopPeeling(loop->GetId(), header->GetGuestPc(), backEdge->GetGuestPc(),
+                                                  movedInstCount);
     return true;
 }
 
@@ -128,82 +128,82 @@ bool LoopPeeling::TransformLoop(Loop *loop)
 void LoopPeeling::InsertPreLoop(Loop *loop)
 {
     auto header = loop->GetHeader();
-    auto pre_header = loop->GetPreHeader();
-    auto graph_cloner =
+    auto preHeader = loop->GetPreHeader();
+    auto graphCloner =
         GraphCloner(header->GetGraph(), header->GetGraph()->GetAllocator(), header->GetGraph()->GetLocalAllocator());
-    graph_cloner.CloneLoopHeader(header, GetLoopOuterBlock(header), pre_header);
+    graphCloner.CloneLoopHeader(header, GetLoopOuterBlock(header), preHeader);
 }
 
 /*
  *  Make back-edge loop-exit point
  */
-size_t LoopPeeling::MoveLoopExitToBackEdge(BasicBlock *header, BasicBlock *back_edge)
+size_t LoopPeeling::MoveLoopExitToBackEdge(BasicBlock *header, BasicBlock *backEdge)
 {
-    size_t moved_inst_count = 0;
-    auto outer_block = GetLoopOuterBlock(header);
-    size_t outer_idx = header->GetSuccBlockIndex(outer_block);
+    size_t movedInstCount = 0;
+    auto outerBlock = GetLoopOuterBlock(header);
+    size_t outerIdx = header->GetSuccBlockIndex(outerBlock);
 
     // Create exit block
-    BasicBlock *exit_block = nullptr;
-    if (header != back_edge) {
+    BasicBlock *exitBlock = nullptr;
+    if (header != backEdge) {
         ASSERT(GetGraph()->IsAnalysisValid<DominatorsTree>());
-        exit_block = back_edge->InsertNewBlockToSuccEdge(header);
-        outer_block->ReplacePred(header, exit_block);
-        header->RemoveSucc(outer_block);
-        exit_block->SetTry(header->IsTry());
+        exitBlock = backEdge->InsertNewBlockToSuccEdge(header);
+        outerBlock->ReplacePred(header, exitBlock);
+        header->RemoveSucc(outerBlock);
+        exitBlock->SetTry(header->IsTry());
 
         auto loop = header->GetLoop();
-        loop->AppendBlock(exit_block);
-        loop->ReplaceBackEdge(back_edge, exit_block);
+        loop->AppendBlock(exitBlock);
+        loop->ReplaceBackEdge(backEdge, exitBlock);
 
         // Check the order of true-false successors
-        if (exit_block->GetSuccBlockIndex(outer_block) != outer_idx) {
-            exit_block->SwapTrueFalseSuccessors();
+        if (exitBlock->GetSuccBlockIndex(outerBlock) != outerIdx) {
+            exitBlock->SwapTrueFalseSuccessors();
         }
 
         // Fix Dominators info
-        auto &dom_tree = GetGraph()->GetAnalysis<DominatorsTree>();
-        dom_tree.SetValid(true);
-        dom_tree.SetDomPair(back_edge, exit_block);
-        back_edge = exit_block;
+        auto &domTree = GetGraph()->GetAnalysis<DominatorsTree>();
+        domTree.SetValid(true);
+        domTree.SetDomPair(backEdge, exitBlock);
+        backEdge = exitBlock;
     }
 
     // Use reverse order to keep domination relation between instructions in the header-block
     for (auto inst : header->InstsSafeReverse()) {
-        if (exit_block != nullptr) {
+        if (exitBlock != nullptr) {
             header->EraseInst(inst);
-            exit_block->PrependInst(inst);
-            moved_inst_count++;
+            exitBlock->PrependInst(inst);
+            movedInstCount++;
         }
-        UpdateClonedInstInputs(inst, header, back_edge);
+        UpdateClonedInstInputs(inst, header, backEdge);
     }
 
     // Update outer phis
-    for (auto phi : outer_block->PhiInsts()) {
-        size_t header_idx = phi->CastToPhi()->GetPredBlockIndex(back_edge);
-        auto header_inst = phi->GetInput(header_idx).GetInst();
-        if (header_inst->IsPhi()) {
-            phi->SetInput(header_idx, header_inst->CastToPhi()->GetPhiInput(back_edge));
+    for (auto phi : outerBlock->PhiInsts()) {
+        size_t headerIdx = phi->CastToPhi()->GetPredBlockIndex(backEdge);
+        auto headerInst = phi->GetInput(headerIdx).GetInst();
+        if (headerInst->IsPhi()) {
+            phi->SetInput(headerIdx, headerInst->CastToPhi()->GetPhiInput(backEdge));
         }
     }
 
     ssb_.FixPhisWithCheckInputs(header);
-    ssb_.FixPhisWithCheckInputs(exit_block);
-    ssb_.FixPhisWithCheckInputs(outer_block);
+    ssb_.FixPhisWithCheckInputs(exitBlock);
+    ssb_.FixPhisWithCheckInputs(outerBlock);
 
-    return moved_inst_count;
+    return movedInstCount;
 }
 
-void LoopPeeling::UpdateClonedInstInputs(Inst *inst, BasicBlock *header, BasicBlock *back_edge)
+void LoopPeeling::UpdateClonedInstInputs(Inst *inst, BasicBlock *header, BasicBlock *backEdge)
 {
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
-        auto input_inst = inst->GetInput(i).GetInst();
-        if (input_inst->IsPhi() && input_inst->GetBasicBlock() == header) {
-            auto phi_input = input_inst->CastToPhi()->GetPhiInput(back_edge);
+        auto inputInst = inst->GetInput(i).GetInst();
+        if (inputInst->IsPhi() && inputInst->GetBasicBlock() == header) {
+            auto phiInput = inputInst->CastToPhi()->GetPhiInput(backEdge);
             // Replace phi by its input, if this input will NOT be moved to the exit block
-            bool is_moved = phi_input->GetBasicBlock() == header && !phi_input->IsPhi();
-            if (phi_input->IsDominate(inst) && !is_moved) {
-                inst->SetInput(i, phi_input);
+            bool isMoved = phiInput->GetBasicBlock() == header && !phiInput->IsPhi();
+            if (phiInput->IsDominate(inst) && !isMoved) {
+                inst->SetInput(i, phiInput);
             }
         }
     }

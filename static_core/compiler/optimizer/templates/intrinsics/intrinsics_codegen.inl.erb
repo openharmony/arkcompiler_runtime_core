@@ -19,13 +19,13 @@
 void Codegen::FillBuiltin(IntrinsicInst *inst, SRCREGS src, Reg dst)
 {
     auto entrypoint = inst->GetIntrinsicId();
-    auto emit_event = true;
+    auto emitEvent = true;
     switch (entrypoint) {
 % Compiler::intrinsics.select {|intrinsic| intrinsic.respond_to? 'codegen_func'}.each do |intrinsic|
         case RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
             <%= intrinsic.codegen_func %>(inst, dst, src);
 %   if intrinsic.class_name == "Irtoc"
-            emit_event = false;
+            emitEvent = false;
 %   end
             break;
 % end
@@ -34,7 +34,7 @@ void Codegen::FillBuiltin(IntrinsicInst *inst, SRCREGS src, Reg dst)
             break;
         }
     }
-    if (!GetEncoder()->GetResult() && emit_event) {
+    if (!GetEncoder()->GetResult() && emitEvent) {
         EVENT_INTRINSIC_COMPILATION(GetIntrinsicName(inst->GetIntrinsicId()), \
                                     events::IntrinsicCompilationResult::INLINE_FAILED);
     }

@@ -64,7 +64,7 @@ int FromUtf8(int c, int l, const uint8_t *p, const uint8_t **pp)
     return c;
 }
 
-int UnicodeFromUtf8(const uint8_t *p, int max_len, const uint8_t **pp)
+int UnicodeFromUtf8(const uint8_t *p, int maxLen, const uint8_t **pp)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     int c = *p++;
@@ -88,7 +88,7 @@ int UnicodeFromUtf8(const uint8_t *p, int max_len, const uint8_t **pp)
         return INVALID_UNICODE_FROM_UTF8;
     }
     /* check that we have enough characters */
-    if (l > (max_len - 1)) {
+    if (l > (maxLen - 1)) {
         return INVALID_UNICODE_FROM_UTF8;
     }
     return FromUtf8(c, l, p, pp);
@@ -102,9 +102,9 @@ static constexpr uint32_t CHAR_MAXS = 128;
 static constexpr uint32_t ID_START_TABLE_ASCII[4] = {
     /* $ A-Z _ a-z */
     0x00000000, 0x00000010, 0x87FFFFFE, 0x07FFFFFE};
-static RangeSet G_RANGE_D(0x30, 0x39);  // NOLINT(fuchsia-statically-constructed-objects, readability-magic-numbers)
+static RangeSet g_gRangeD(0x30, 0x39);  // NOLINT(fuchsia-statically-constructed-objects, readability-magic-numbers)
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static RangeSet G_RANGE_S({
+static RangeSet g_gRangeS({
     std::pair<uint32_t, uint32_t>(0x0009, 0x000D),  // NOLINT(readability-magic-numbers)
     std::pair<uint32_t, uint32_t>(0x0020, 0x0020),  // NOLINT(readability-magic-numbers)
     std::pair<uint32_t, uint32_t>(0x00A0, 0x00A0),  // NOLINT(readability-magic-numbers)
@@ -121,7 +121,7 @@ static RangeSet G_RANGE_S({
 });
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static RangeSet G_RANGE_W({
+static RangeSet g_gRangeW({
     std::pair<uint32_t, uint32_t>(0x0030, 0x0039),  // NOLINT(readability-magic-numbers)
     std::pair<uint32_t, uint32_t>(0x0041, 0x005A),  // NOLINT(readability-magic-numbers)
     std::pair<uint32_t, uint32_t>(0x005F, 0x005F),  // NOLINT(readability-magic-numbers)
@@ -129,14 +129,14 @@ static RangeSet G_RANGE_W({
 });
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static RangeSet G_REGEXP_IDENTIFY_START({
+static RangeSet g_gRegexpIdentifyStart({
     std::pair<uint32_t, uint32_t>(0x0024, 0x0024),  // NOLINT(readability-magic-numbers)
     std::pair<uint32_t, uint32_t>(0x0041, 0x005A),  // NOLINT(readability-magic-numbers)
     std::pair<uint32_t, uint32_t>(0x0061, 0x007A),  // NOLINT(readability-magic-numbers)
 });
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static RangeSet G_REGEXP_IDENTIFY_CONTINUE({
+static RangeSet g_gRegexpIdentifyContinue({
     std::pair<uint32_t, uint32_t>(0x0024, 0x0024),  // NOLINT(readability-magic-numbers)
     std::pair<uint32_t, uint32_t>(0x0030, 0x0039),  // NOLINT(readability-magic-numbers)
     std::pair<uint32_t, uint32_t>(0x0041, 0x005A),  // NOLINT(readability-magic-numbers)
@@ -156,47 +156,47 @@ void RegExpParser::Parse()
     //      Disjunction[?U, ?N]
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     Advance();
-    SaveStartOpCode save_start_op;
-    int capture_index = capture_count_++;
-    save_start_op.EmitOpCode(&buffer_, capture_index);
+    SaveStartOpCode saveStartOp;
+    int captureIndex = captureCount_++;
+    saveStartOp.EmitOpCode(&buffer_, captureIndex);
     ParseDisjunction(false);
     if (c0_ != KEY_EOF) {
         ParseError("extraneous characters at the end");
         return;
     }
-    SaveEndOpCode save_end_op;
-    save_end_op.EmitOpCode(&buffer_, capture_index);
-    MatchEndOpCode match_end_op;
-    match_end_op.EmitOpCode(&buffer_, 0);
+    SaveEndOpCode saveEndOp;
+    saveEndOp.EmitOpCode(&buffer_, captureIndex);
+    MatchEndOpCode matchEndOp;
+    matchEndOp.EmitOpCode(&buffer_, 0);
     // dynbuffer head assignments
     buffer_.PutU32(0, buffer_.size_);
-    buffer_.PutU32(NUM_CAPTURE__OFFSET, capture_count_);
-    buffer_.PutU32(NUM_STACK_OFFSET, stack_count_);
+    buffer_.PutU32(NUM_CAPTURE__OFFSET, captureCount_);
+    buffer_.PutU32(NUM_STACK_OFFSET, stackCount_);
     buffer_.PutU32(FLAGS_OFFSET, flags_);
 #ifndef _NO_DEBUG_
     RegExpOpCode::DumpRegExpOpCode(std::cout, buffer_);
 #endif
 }
 
-void RegExpParser::ParseDisjunction(bool is_backward)
+void RegExpParser::ParseDisjunction(bool isBackward)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     PrintF("Parse Disjunction------\n");
     size_t start = buffer_.size_;
-    ParseAlternative(is_backward);
-    if (is_error_) {
+    ParseAlternative(isBackward);
+    if (isError_) {
         return;
     }
     do {
         if (c0_ == '|') {
-            SplitNextOpCode split_op;
+            SplitNextOpCode splitOp;
             uint32_t len = buffer_.size_ - start;
-            GotoOpCode goto_op;
-            split_op.InsertOpCode(&buffer_, start, len + goto_op.GetSize());
-            uint32_t pos = goto_op.EmitOpCode(&buffer_, 0) - goto_op.GetSize();
+            GotoOpCode gotoOp;
+            splitOp.InsertOpCode(&buffer_, start, len + gotoOp.GetSize());
+            uint32_t pos = gotoOp.EmitOpCode(&buffer_, 0) - gotoOp.GetSize();
             Advance();
-            ParseAlternative(is_backward);
-            goto_op.UpdateOpPara(&buffer_, pos, buffer_.size_ - pos - goto_op.GetSize());
+            ParseAlternative(isBackward);
+            gotoOp.UpdateOpPara(&buffer_, pos, buffer_.size_ - pos - gotoOp.GetSize());
         }
     } while (c0_ != KEY_EOF && c0_ != ')');
 }
@@ -219,7 +219,7 @@ uint32_t RegExpParser::ParseOctalLiteral()
     return value;
 }
 
-bool RegExpParser::ParseUnlimitedLengthHexNumber(uint32_t max_value, uint32_t *value)
+bool RegExpParser::ParseUnlimitedLengthHexNumber(uint32_t maxValue, uint32_t *value)
 {
     uint32_t x = 0;
     int d = static_cast<int>(HexValue(c0_));
@@ -232,7 +232,7 @@ bool RegExpParser::ParseUnlimitedLengthHexNumber(uint32_t max_value, uint32_t *v
             return false;
         }
         x = x * HEX_VALUE + static_cast<uint32_t>(d);
-        if (x > max_value) {
+        if (x > maxValue) {
             return false;
         }
         Advance();
@@ -300,30 +300,30 @@ bool RegExpParser::ParseHexEscape(int length, uint32_t *value)
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-void RegExpParser::ParseAlternative(bool is_backward)
+void RegExpParser::ParseAlternative(bool isBackward)
 {
     size_t start = buffer_.size_;
     while (c0_ != '|' && c0_ != KEY_EOF && c0_ != ')') {
-        if (is_error_) {
+        if (isError_) {
             return;
         }
-        size_t atom_bc_start = buffer_.GetSize();
-        int capture_index = 0;
-        bool is_atom = false;
+        size_t atomBcStart = buffer_.GetSize();
+        int captureIndex = 0;
+        bool isAtom = false;
         switch (c0_) {
             case '^': {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 PrintF("Assertion %c line start \n", c0_);
-                LineStartOpCode line_start_op;
-                line_start_op.EmitOpCode(&buffer_, 0);
+                LineStartOpCode lineStartOp;
+                lineStartOp.EmitOpCode(&buffer_, 0);
                 Advance();
                 break;
             }
             case '$': {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 PrintF("Assertion %c line end \n", c0_);
-                LineEndOpCode line_end_op;
-                line_end_op.EmitOpCode(&buffer_, 0);
+                LineEndOpCode lineEndOp;
+                lineEndOp.EmitOpCode(&buffer_, 0);
                 Advance();
                 break;
             }
@@ -335,48 +335,48 @@ void RegExpParser::ParseAlternative(bool is_backward)
                     case 'b': {
                         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                         PrintF("Assertion %c \n", c0_);
-                        WordBoundaryOpCode word_boundary_op;
-                        word_boundary_op.EmitOpCode(&buffer_, 0);
+                        WordBoundaryOpCode wordBoundaryOp;
+                        wordBoundaryOp.EmitOpCode(&buffer_, 0);
                         Advance();
                         break;
                     }
                     case 'B': {
                         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                         PrintF("Assertion %c \n", c0_);
-                        NotWordBoundaryOpCode not_word_boundary_op;
-                        not_word_boundary_op.EmitOpCode(&buffer_, 0);
+                        NotWordBoundaryOpCode notWordBoundaryOp;
+                        notWordBoundaryOp.EmitOpCode(&buffer_, 0);
                         Advance();
                         break;
                     }
                     default: {
-                        is_atom = true;
-                        int atom_value = ParseAtomEscape(is_backward);
-                        if (atom_value != -1) {
+                        isAtom = true;
+                        int atomValue = ParseAtomEscape(isBackward);
+                        if (atomValue != -1) {
                             if (IsIgnoreCase()) {
                                 if (!IsUtf16()) {
-                                    atom_value = Canonicalize(atom_value, false);
+                                    atomValue = Canonicalize(atomValue, false);
                                 } else {
-                                    icu::UnicodeSet set(atom_value, atom_value);
+                                    icu::UnicodeSet set(atomValue, atomValue);
                                     set.closeOver(USET_CASE_INSENSITIVE);
                                     set.removeAllStrings();
                                     int32_t size = set.size();
-                                    RangeOpCode range_op;
-                                    RangeSet range_result;
+                                    RangeOpCode rangeOp;
+                                    RangeSet rangeResult;
                                     for (int32_t idx = 0; idx < size; idx++) {
                                         int32_t uc = set.charAt(idx);
-                                        RangeSet cur_range(uc);
-                                        range_result.Insert(cur_range);
+                                        RangeSet curRange(uc);
+                                        rangeResult.Insert(curRange);
                                     }
-                                    range_op.InsertOpCode(&buffer_, range_result);
+                                    rangeOp.InsertOpCode(&buffer_, rangeResult);
                                     break;
                                 }
                             }
-                            if (atom_value <= UINT16_MAX) {
-                                CharOpCode char_op;
-                                char_op.EmitOpCode(&buffer_, atom_value);
+                            if (atomValue <= UINT16_MAX) {
+                                CharOpCode charOp;
+                                charOp.EmitOpCode(&buffer_, atomValue);
                             } else {
-                                Char32OpCode char_op;
-                                char_op.EmitOpCode(&buffer_, atom_value);
+                                Char32OpCode charOp;
+                                charOp.EmitOpCode(&buffer_, atomValue);
                             }
                         }
                         break;
@@ -386,64 +386,64 @@ void RegExpParser::ParseAlternative(bool is_backward)
             }
             case '(': {
                 Advance();
-                is_atom = ParseAssertionCapture(&capture_index, is_backward);
+                isAtom = ParseAssertionCapture(&captureIndex, isBackward);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 Advance();
                 break;
             }
             case '.': {
-                PrevOpCode prev_op;
-                if (is_backward) {
-                    prev_op.EmitOpCode(&buffer_, 0);
+                PrevOpCode prevOp;
+                if (isBackward) {
+                    prevOp.EmitOpCode(&buffer_, 0);
                 }
                 if (IsDotAll()) {
-                    AllOpCode all_op;
-                    all_op.EmitOpCode(&buffer_, 0);
+                    AllOpCode allOp;
+                    allOp.EmitOpCode(&buffer_, 0);
                 } else {
-                    DotsOpCode dots_op;
-                    dots_op.EmitOpCode(&buffer_, 0);
+                    DotsOpCode dotsOp;
+                    dotsOp.EmitOpCode(&buffer_, 0);
                 }
-                if (is_backward) {
-                    prev_op.EmitOpCode(&buffer_, 0);
+                if (isBackward) {
+                    prevOp.EmitOpCode(&buffer_, 0);
                 }
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 PrintF("Atom %c match any \n", c0_);
-                is_atom = true;
+                isAtom = true;
                 Advance();
                 break;
             }
             case '[': {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 PrintF("Atom %c match range \n", c0_);
-                is_atom = true;
-                PrevOpCode prev_op;
+                isAtom = true;
+                PrevOpCode prevOp;
                 Advance();
-                if (is_backward) {
-                    prev_op.EmitOpCode(&buffer_, 0);
+                if (isBackward) {
+                    prevOp.EmitOpCode(&buffer_, 0);
                 }
-                bool is_invert = false;
+                bool isInvert = false;
                 if (c0_ == '^') {
-                    is_invert = true;
+                    isInvert = true;
                     Advance();
                 }
-                RangeSet range_result;
-                if (!ParseClassRanges(&range_result)) {
+                RangeSet rangeResult;
+                if (!ParseClassRanges(&rangeResult)) {
                     break;
                 }
-                if (is_invert) {
-                    range_result.Invert(IsUtf16());
+                if (isInvert) {
+                    rangeResult.Invert(IsUtf16());
                 }
-                uint32_t high_value = range_result.HighestValue();
-                if (high_value <= UINT16_MAX) {
-                    RangeOpCode range_op;
-                    range_op.InsertOpCode(&buffer_, range_result);
+                uint32_t highValue = rangeResult.HighestValue();
+                if (highValue <= UINT16_MAX) {
+                    RangeOpCode rangeOp;
+                    rangeOp.InsertOpCode(&buffer_, rangeResult);
                 } else {
-                    Range32OpCode range_op;
-                    range_op.InsertOpCode(&buffer_, range_result);
+                    Range32OpCode rangeOp;
+                    rangeOp.InsertOpCode(&buffer_, rangeResult);
                 }
 
-                if (is_backward) {
-                    prev_op.EmitOpCode(&buffer_, 0);
+                if (isBackward) {
+                    prevOp.EmitOpCode(&buffer_, 0);
                 }
                 break;
             }
@@ -475,13 +475,13 @@ void RegExpParser::ParseAlternative(bool is_backward)
                 // PatternCharacter
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 PrintF("PatternCharacter %c\n", c0_);
-                is_atom = true;
+                isAtom = true;
                 {
-                    PrevOpCode prev_op;
-                    if (is_backward) {
-                        prev_op.EmitOpCode(&buffer_, 0);
+                    PrevOpCode prevOp;
+                    if (isBackward) {
+                        prevOp.EmitOpCode(&buffer_, 0);
                     }
-                    uint32_t matched_char = c0_;
+                    uint32_t matchedChar = c0_;
                     if (c0_ > (INT8_MAX + 1)) {
                         Prev();
                         int i = 0;
@@ -489,42 +489,42 @@ void RegExpParser::ParseAlternative(bool is_backward)
                         int32_t length = end_ - pc_ + 1;
                         // NOLINTNEXTLINE(hicpp-signed-bitwise)
                         U8_NEXT(pc_, i, length, c);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                        matched_char = static_cast<uint32_t>(c);
+                        matchedChar = static_cast<uint32_t>(c);
                         pc_ += i;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                     }
                     if (IsIgnoreCase()) {
-                        matched_char = static_cast<uint32_t>(Canonicalize(static_cast<int>(matched_char), IsUtf16()));
+                        matchedChar = static_cast<uint32_t>(Canonicalize(static_cast<int>(matchedChar), IsUtf16()));
                     }
-                    if (matched_char > UINT16_MAX) {
-                        Char32OpCode char_op;
-                        char_op.EmitOpCode(&buffer_, matched_char);
+                    if (matchedChar > UINT16_MAX) {
+                        Char32OpCode charOp;
+                        charOp.EmitOpCode(&buffer_, matchedChar);
                     } else {
-                        CharOpCode char_op;
-                        char_op.EmitOpCode(&buffer_, matched_char);
+                        CharOpCode charOp;
+                        charOp.EmitOpCode(&buffer_, matchedChar);
                     }
-                    if (is_backward) {
-                        prev_op.EmitOpCode(&buffer_, 0);
+                    if (isBackward) {
+                        prevOp.EmitOpCode(&buffer_, 0);
                     }
                 }
                 Advance();
                 break;
             }
         }
-        if (is_atom && !is_error_) {
-            ParseQuantifier(atom_bc_start, capture_index, capture_count_ - 1);
+        if (isAtom && !isError_) {
+            ParseQuantifier(atomBcStart, captureIndex, captureCount_ - 1);
         }
-        if (is_backward) {
+        if (isBackward) {
             size_t end = buffer_.GetSize();
-            size_t term_size = end - atom_bc_start;
-            size_t move_size = end - start;
-            buffer_.Expand(end + term_size);
+            size_t termSize = end - atomBcStart;
+            size_t moveSize = end - start;
+            buffer_.Expand(end + termSize);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (memmove_s(buffer_.buf_ + start + term_size, move_size, buffer_.buf_ + start, move_size) != EOK) {
+            if (memmove_s(buffer_.buf_ + start + termSize, moveSize, buffer_.buf_ + start, moveSize) != EOK) {
                 LOG(FATAL, COMMON) << "memmove_s failed";
                 UNREACHABLE();
             }
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (memcpy_s(buffer_.buf_ + start, term_size, buffer_.buf_ + end, term_size) != EOK) {
+            if (memcpy_s(buffer_.buf_ + start, termSize, buffer_.buf_ + end, termSize) != EOK) {
                 LOG(FATAL, COMMON) << "memcpy_s failed";
                 UNREACHABLE();
             }
@@ -535,25 +535,25 @@ void RegExpParser::ParseAlternative(bool is_backward)
 int RegExpParser::FindGroupName(const PandaString &name)
 {
     size_t len = 0;
-    size_t name_len = name.size();
-    const char *p = reinterpret_cast<char *>(group_names_.buf_);
+    size_t nameLen = name.size();
+    const char *p = reinterpret_cast<char *>(groupNames_.buf_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    const char *buf_end = reinterpret_cast<char *>(group_names_.buf_) + group_names_.size_;
-    int capture_index = 1;
-    while (p < buf_end) {
+    const char *bufEnd = reinterpret_cast<char *>(groupNames_.buf_) + groupNames_.size_;
+    int captureIndex = 1;
+    while (p < bufEnd) {
         len = strlen(p);
-        if (len == name_len && memcmp(name.c_str(), p, name_len) == 0) {
-            return capture_index;
+        if (len == nameLen && memcmp(name.c_str(), p, nameLen) == 0) {
+            return captureIndex;
         }
         p += len + 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        capture_index++;
+        captureIndex++;
     }
     return -1;
 }
 
-bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
+bool RegExpParser::ParseAssertionCapture(int *captureIndex, bool isBackward)
 {
-    bool is_atom = false;
+    bool isAtom = false;
     do {
         if (c0_ == '?') {
             Advance();
@@ -564,12 +564,12 @@ bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
                     PrintF("Assertion(?= Disjunction)\n");
                     Advance();
                     uint32_t start = buffer_.size_;
-                    ParseDisjunction(is_backward);
-                    MatchOpCode match_op;
-                    match_op.EmitOpCode(&buffer_, 0);
-                    MatchAheadOpCode match_ahead_op;
+                    ParseDisjunction(isBackward);
+                    MatchOpCode matchOp;
+                    matchOp.EmitOpCode(&buffer_, 0);
+                    MatchAheadOpCode matchAheadOp;
                     uint32_t len = buffer_.size_ - start;
-                    match_ahead_op.InsertOpCode(&buffer_, start, len);
+                    matchAheadOp.InsertOpCode(&buffer_, start, len);
                     break;
                 }
                 // (?!Disjunction[?U, ?N])
@@ -578,12 +578,12 @@ bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
                     PrintF("Assertion(?! Disjunction)\n");
                     uint32_t start = buffer_.size_;
                     Advance();
-                    ParseDisjunction(is_backward);
-                    MatchOpCode match_op;
-                    match_op.EmitOpCode(&buffer_, 0);
-                    NegativeMatchAheadOpCode match_ahead_op;
+                    ParseDisjunction(isBackward);
+                    MatchOpCode matchOp;
+                    matchOp.EmitOpCode(&buffer_, 0);
+                    NegativeMatchAheadOpCode matchAheadOp;
                     uint32_t len = buffer_.size_ - start;
-                    match_ahead_op.InsertOpCode(&buffer_, start, len);
+                    matchAheadOp.InsertOpCode(&buffer_, start, len);
                     break;
                 }
                 case '<': {
@@ -595,11 +595,11 @@ bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
                         Advance();
                         uint32_t start = buffer_.size_;
                         ParseDisjunction(true);
-                        MatchOpCode match_op;
-                        match_op.EmitOpCode(&buffer_, 0);
-                        MatchAheadOpCode match_ahead_op;
+                        MatchOpCode matchOp;
+                        matchOp.EmitOpCode(&buffer_, 0);
+                        MatchAheadOpCode matchAheadOp;
                         uint32_t len = buffer_.size_ - start;
-                        match_ahead_op.InsertOpCode(&buffer_, start, len);
+                        matchAheadOp.InsertOpCode(&buffer_, start, len);
                         // (?<!Disjunction[?U, ?N])
                     } else if (c0_ == '!') {
                         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -607,11 +607,11 @@ bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
                         Advance();
                         uint32_t start = buffer_.size_;
                         ParseDisjunction(true);
-                        MatchOpCode match_op;
-                        match_op.EmitOpCode(&buffer_, 0);
-                        NegativeMatchAheadOpCode match_ahead_op;
+                        MatchOpCode matchOp;
+                        matchOp.EmitOpCode(&buffer_, 0);
+                        NegativeMatchAheadOpCode matchAheadOp;
                         uint32_t len = buffer_.size_ - start;
-                        match_ahead_op.InsertOpCode(&buffer_, start, len);
+                        matchAheadOp.InsertOpCode(&buffer_, start, len);
                     } else {
                         Prev();
                         PandaString name;
@@ -624,8 +624,8 @@ bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
                             ParseError("Duplicate GroupName error.");
                             return false;
                         }
-                        group_names_.EmitStr(name.c_str());
-                        new_group_names_.push_back(name);
+                        groupNames_.EmitStr(name.c_str());
+                        newGroupNames_.push_back(name);
                         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                         PrintF("group name %s", name.c_str());
                         Advance();
@@ -637,9 +637,9 @@ bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
                 case ':':
                     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                     PrintF("Atom(?<: Disjunction)\n");
-                    is_atom = true;
+                    isAtom = true;
                     Advance();
-                    ParseDisjunction(is_backward);
+                    ParseDisjunction(isBackward);
                     break;
                 default:
                     Advance();
@@ -647,26 +647,26 @@ bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
                     return false;
             }
         } else {
-            group_names_.EmitChar(0);
+            groupNames_.EmitChar(0);
         parseCapture:
-            is_atom = true;
-            *capture_index = capture_count_++;
-            SaveEndOpCode save_end_op;
-            SaveStartOpCode save_start_op;
-            if (is_backward) {
-                save_end_op.EmitOpCode(&buffer_, *capture_index);
+            isAtom = true;
+            *captureIndex = captureCount_++;
+            SaveEndOpCode saveEndOp;
+            SaveStartOpCode saveStartOp;
+            if (isBackward) {
+                saveEndOp.EmitOpCode(&buffer_, *captureIndex);
             } else {
-                save_start_op.EmitOpCode(&buffer_, *capture_index);
+                saveStartOp.EmitOpCode(&buffer_, *captureIndex);
             }
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            PrintF("capture start %d \n", *capture_index);
-            ParseDisjunction(is_backward);
+            PrintF("capture start %d \n", *captureIndex);
+            ParseDisjunction(isBackward);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-            PrintF("capture end %d \n", *capture_index);
-            if (is_backward) {
-                save_start_op.EmitOpCode(&buffer_, *capture_index);
+            PrintF("capture end %d \n", *captureIndex);
+            if (isBackward) {
+                saveStartOp.EmitOpCode(&buffer_, *captureIndex);
             } else {
-                save_end_op.EmitOpCode(&buffer_, *capture_index);
+                saveEndOp.EmitOpCode(&buffer_, *captureIndex);
             }
         }
     } while (c0_ != ')' && c0_ != KEY_EOF);
@@ -674,7 +674,7 @@ bool RegExpParser::ParseAssertionCapture(int *capture_index, bool is_backward)
         ParseError("capture syntax error");
         return false;
     }
-    return is_atom;
+    return isAtom;
 }
 
 int RegExpParser::ParseDecimalDigits()
@@ -749,11 +749,11 @@ bool RegExpParser::ParserIntervalQuantifier(int *pmin, int *pmax)
     return true;
 }
 
-void RegExpParser::ParseQuantifier(size_t atom_bc_start, int capture_start, int capture_end)
+void RegExpParser::ParseQuantifier(size_t atomBcStart, int captureStart, int captureEnd)
 {
     int min = -1;
     int max = -1;
-    bool is_greedy = true;
+    bool isGreedy = true;
     switch (c0_) {
         case '*':
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -793,7 +793,7 @@ void RegExpParser::ParseQuantifier(size_t atom_bc_start, int capture_start, int 
             break;
     }
     if (c0_ == '?') {
-        is_greedy = false;
+        isGreedy = false;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         PrintF("Quantifier::QuantifierPrefix?\n");
         Advance();
@@ -802,46 +802,46 @@ void RegExpParser::ParseQuantifier(size_t atom_bc_start, int capture_start, int 
         return;
     }
     if (min != -1 && max != -1) {
-        stack_count_++;
-        PushOpCode push_op;
-        push_op.InsertOpCode(&buffer_, atom_bc_start);
-        atom_bc_start += push_op.GetSize();
+        stackCount_++;
+        PushOpCode pushOp;
+        pushOp.InsertOpCode(&buffer_, atomBcStart);
+        atomBcStart += pushOp.GetSize();
 
-        if (capture_start != 0) {
-            SaveResetOpCode save_reset_op;
-            save_reset_op.InsertOpCode(&buffer_, atom_bc_start, capture_start, capture_end);
+        if (captureStart != 0) {
+            SaveResetOpCode saveResetOp;
+            saveResetOp.InsertOpCode(&buffer_, atomBcStart, captureStart, captureEnd);
         }
 
         // zero advance check
         if (max == INT32_MAX) {
-            stack_count_++;
-            PushCharOpCode push_char_op;
-            push_char_op.InsertOpCode(&buffer_, atom_bc_start);
-            CheckCharOpCode check_char_op;
+            stackCount_++;
+            PushCharOpCode pushCharOp;
+            pushCharOp.InsertOpCode(&buffer_, atomBcStart);
+            CheckCharOpCode checkCharOp;
             // NOLINTNEXTLINE(readability-magic-numbers)
-            check_char_op.EmitOpCode(&buffer_, RegExpOpCode::GetRegExpOpCode(RegExpOpCode::OP_LOOP)->GetSize());
+            checkCharOp.EmitOpCode(&buffer_, RegExpOpCode::GetRegExpOpCode(RegExpOpCode::OP_LOOP)->GetSize());
         }
 
-        if (is_greedy) {
-            LoopGreedyOpCode loop_op;
-            loop_op.EmitOpCode(&buffer_, atom_bc_start - buffer_.GetSize() - loop_op.GetSize(), min, max);
+        if (isGreedy) {
+            LoopGreedyOpCode loopOp;
+            loopOp.EmitOpCode(&buffer_, atomBcStart - buffer_.GetSize() - loopOp.GetSize(), min, max);
         } else {
-            LoopOpCode loop_op;
-            loop_op.EmitOpCode(&buffer_, atom_bc_start - buffer_.GetSize() - loop_op.GetSize(), min, max);
+            LoopOpCode loopOp;
+            loopOp.EmitOpCode(&buffer_, atomBcStart - buffer_.GetSize() - loopOp.GetSize(), min, max);
         }
 
         if (min == 0) {
-            if (is_greedy) {
-                SplitNextOpCode split_next_op;
-                split_next_op.InsertOpCode(&buffer_, atom_bc_start, buffer_.GetSize() - atom_bc_start);
+            if (isGreedy) {
+                SplitNextOpCode splitNextOp;
+                splitNextOp.InsertOpCode(&buffer_, atomBcStart, buffer_.GetSize() - atomBcStart);
             } else {
-                SplitFirstOpCode split_first_op;
-                split_first_op.InsertOpCode(&buffer_, atom_bc_start, buffer_.GetSize() - atom_bc_start);
+                SplitFirstOpCode splitFirstOp;
+                splitFirstOp.InsertOpCode(&buffer_, atomBcStart, buffer_.GetSize() - atomBcStart);
             }
         }
 
-        PopOpCode pop_op;
-        pop_op.EmitOpCode(&buffer_);
+        PopOpCode popOp;
+        popOp.EmitOpCode(&buffer_);
     }
 }
 
@@ -897,12 +897,12 @@ bool RegExpParser::ParseGroupSpecifier(const uint8_t **pp, PandaString &name)
     return true;
 }
 
-int RegExpParser::ParseCaptureCount(const char *group_name)
+int RegExpParser::ParseCaptureCount(const char *groupName)
 {
     const uint8_t *p = nullptr;
-    int capture_index = 1;
+    int captureIndex = 1;
     PandaString name;
-    has_named_captures_ = 0;
+    hasNamedCaptures_ = 0;
     for (p = base_; p < end_; p++) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         switch (*p) {
             case '(': {
@@ -911,20 +911,20 @@ int RegExpParser::ParseCaptureCount(const char *group_name)
                     if (p[CAPTURE_CONUT_ADVANCE - 1] == '<' && p[CAPTURE_CONUT_ADVANCE] != '!' &&
                         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                         p[CAPTURE_CONUT_ADVANCE] != '=') {
-                        has_named_captures_ = 1;
+                        hasNamedCaptures_ = 1;
                         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                         p += CAPTURE_CONUT_ADVANCE;
-                        if (group_name != nullptr) {
+                        if (groupName != nullptr) {
                             if (ParseGroupSpecifier(&p, name)) {
-                                if (strcmp(name.c_str(), group_name) == 0) {
-                                    return capture_index;
+                                if (strcmp(name.c_str(), groupName) == 0) {
+                                    return captureIndex;
                                 }
                             }
                         }
-                        capture_index++;
+                        captureIndex++;
                     }
                 } else {
-                    capture_index++;
+                    captureIndex++;
                 }
                 break;
             }
@@ -944,11 +944,11 @@ int RegExpParser::ParseCaptureCount(const char *group_name)
                 break;
         }
     }
-    return capture_index;
+    return captureIndex;
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-int RegExpParser::ParseAtomEscape(bool is_backward)
+int RegExpParser::ParseAtomEscape(bool isBackward)
 {
     // AtomEscape[U, N]::
     //     DecimalEscape
@@ -958,7 +958,7 @@ int RegExpParser::ParseAtomEscape(bool is_backward)
     int result = -1;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     PrintF("Parse AtomEscape------\n");
-    PrevOpCode prev_op;
+    PrevOpCode prevOp;
     switch (c0_) {
         case KEY_EOF:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -977,82 +977,82 @@ int RegExpParser::ParseAtomEscape(bool is_backward)
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             PrintF("NonZeroDigit %c\n", c0_);
             int capture = ParseDecimalDigits();
-            if (capture > capture_count_ - 1 && capture > ParseCaptureCount(nullptr) - 1) {
+            if (capture > captureCount_ - 1 && capture > ParseCaptureCount(nullptr) - 1) {
                 ParseError("invalid backreference count");
                 break;
             }
-            if (is_backward) {
-                BackwardBackReferenceOpCode back_reference_op;
-                back_reference_op.EmitOpCode(&buffer_, capture);
+            if (isBackward) {
+                BackwardBackReferenceOpCode backReferenceOp;
+                backReferenceOp.EmitOpCode(&buffer_, capture);
             } else {
-                BackReferenceOpCode back_reference_op;
-                back_reference_op.EmitOpCode(&buffer_, capture);
+                BackReferenceOpCode backReferenceOp;
+                backReferenceOp.EmitOpCode(&buffer_, capture);
             }
             break;
         }
         // CharacterClassEscape
         case 'd': {
             // [0-9]
-            RangeOpCode range_op;
-            if (is_backward) {
-                prev_op.EmitOpCode(&buffer_, 0);
+            RangeOpCode rangeOp;
+            if (isBackward) {
+                prevOp.EmitOpCode(&buffer_, 0);
             }
-            range_op.InsertOpCode(&buffer_, G_RANGE_D);
+            rangeOp.InsertOpCode(&buffer_, g_gRangeD);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
             break;
         }
         case 'D': {
             // [^0-9]
-            RangeSet atom_range(G_RANGE_D);
-            atom_range.Invert(IsUtf16());
-            Range32OpCode range_op;
-            if (is_backward) {
-                prev_op.EmitOpCode(&buffer_, 0);
+            RangeSet atomRange(g_gRangeD);
+            atomRange.Invert(IsUtf16());
+            Range32OpCode rangeOp;
+            if (isBackward) {
+                prevOp.EmitOpCode(&buffer_, 0);
             }
-            range_op.InsertOpCode(&buffer_, atom_range);
+            rangeOp.InsertOpCode(&buffer_, atomRange);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
             break;
         }
         case 's': {
             // [\f\n\r\t\v]
-            RangeOpCode range_op;
-            if (is_backward) {
-                prev_op.EmitOpCode(&buffer_, 0);
+            RangeOpCode rangeOp;
+            if (isBackward) {
+                prevOp.EmitOpCode(&buffer_, 0);
             }
-            range_op.InsertOpCode(&buffer_, G_RANGE_S);
+            rangeOp.InsertOpCode(&buffer_, g_gRangeS);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
             break;
         }
         case 'S': {
-            RangeSet atom_range(G_RANGE_S);
-            Range32OpCode range_op;
-            atom_range.Invert(IsUtf16());
-            if (is_backward) {
-                prev_op.EmitOpCode(&buffer_, 0);
+            RangeSet atomRange(g_gRangeS);
+            Range32OpCode rangeOp;
+            atomRange.Invert(IsUtf16());
+            if (isBackward) {
+                prevOp.EmitOpCode(&buffer_, 0);
             }
-            range_op.InsertOpCode(&buffer_, atom_range);
+            rangeOp.InsertOpCode(&buffer_, atomRange);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
             break;
         }
         case 'w': {
             // [A-Za-z0-9]
-            RangeOpCode range_op;
-            if (is_backward) {
-                prev_op.EmitOpCode(&buffer_, 0);
+            RangeOpCode rangeOp;
+            if (isBackward) {
+                prevOp.EmitOpCode(&buffer_, 0);
             }
-            range_op.InsertOpCode(&buffer_, G_RANGE_W);
+            rangeOp.InsertOpCode(&buffer_, g_gRangeW);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
             break;
         }
         case 'W': {
             // [^A-Za-z0-9]
-            RangeSet atom_range(G_RANGE_W);
-            atom_range.Invert(IsUtf16());
-            Range32OpCode range_op;
-            if (is_backward) {
-                prev_op.EmitOpCode(&buffer_, 0);
+            RangeSet atomRange(g_gRangeW);
+            atomRange.Invert(IsUtf16());
+            Range32OpCode rangeOp;
+            if (isBackward) {
+                prevOp.EmitOpCode(&buffer_, 0);
             }
-            range_op.InsertOpCode(&buffer_, atom_range);
+            rangeOp.InsertOpCode(&buffer_, atomRange);
             goto parseLookBehind;  // NOLINT(cppcoreguidelines-avoid-goto)
             break;
         }
@@ -1085,20 +1085,20 @@ int RegExpParser::ParseAtomEscape(bool is_backward)
                     break;
                 }
             }
-            if (is_backward) {
-                BackwardBackReferenceOpCode back_reference_op;
-                back_reference_op.EmitOpCode(&buffer_, postion);
+            if (isBackward) {
+                BackwardBackReferenceOpCode backReferenceOp;
+                backReferenceOp.EmitOpCode(&buffer_, postion);
             } else {
-                BackReferenceOpCode back_reference_op;
-                back_reference_op.EmitOpCode(&buffer_, postion);
+                BackReferenceOpCode backReferenceOp;
+                backReferenceOp.EmitOpCode(&buffer_, postion);
             }
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             Advance();
             break;
         }
         parseLookBehind : {
-            if (is_backward) {
-                prev_op.EmitOpCode(&buffer_, 0);
+            if (isBackward) {
+                prevOp.EmitOpCode(&buffer_, 0);
             }
             Advance();
             break;
@@ -1112,15 +1112,15 @@ int RegExpParser::ParseAtomEscape(bool is_backward)
 
 int RegExpParser::RecountCaptures()
 {
-    if (total_capture_count_ < 0) {
-        const char *name = reinterpret_cast<const char *>(group_names_.buf_);
-        total_capture_count_ = ParseCaptureCount(name);
+    if (totalCaptureCount_ < 0) {
+        const char *name = reinterpret_cast<const char *>(groupNames_.buf_);
+        totalCaptureCount_ = ParseCaptureCount(name);
     }
-    return total_capture_count_;
+    return totalCaptureCount_;
 }
 bool RegExpParser::HasNamedCaptures()
 {
-    if (has_named_captures_ < 0) {
+    if (hasNamedCaptures_ < 0) {
         RecountCaptures();
     }
     return false;
@@ -1292,8 +1292,8 @@ bool RegExpParser::ParseClassRanges(RangeSet *result)
             return false;
         }
 
-        int next_c0 = *pc_;
-        if (c0_ == '-' && next_c0 != ']') {
+        int nextC0 = *pc_;
+        if (c0_ == '-' && nextC0 != ']') {
             if (c1 == CLASS_RANGE_BASE) {
                 if (IsUtf16()) {
                     ParseError("invalid class range");
@@ -1356,13 +1356,13 @@ uint32_t RegExpParser::ParseClassAtom(RangeSet *atom)
         }
         default: {
             uint32_t value = c0_;
-            size_t u16_size = 0;
+            size_t u16Size = 0;
             if (c0_ > INT8_MAX) {
                 pc_ -= 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                auto u16_result = utf::ConvertUtf8ToUtf16Pair(pc_, true);
-                value = u16_result.first;
-                u16_size = u16_result.second;
-                Advance(u16_size + 1);
+                auto u16Result = utf::ConvertUtf8ToUtf16Pair(pc_, true);
+                value = u16Result.first;
+                u16Size = u16Result.second;
+                Advance(u16Size + 1);
             } else {
                 Advance();
             }
@@ -1401,7 +1401,7 @@ int RegExpParser::ParseClassEscape(RangeSet *atom)
         case 'd':
         case 'D':
             result = CLASS_RANGE_BASE;
-            atom->Insert(G_RANGE_D);
+            atom->Insert(g_gRangeD);
             if (c0_ == 'D') {
                 atom->Invert(IsUtf16());
             }
@@ -1410,7 +1410,7 @@ int RegExpParser::ParseClassEscape(RangeSet *atom)
         case 's':
         case 'S':
             result = CLASS_RANGE_BASE;
-            atom->Insert(G_RANGE_S);
+            atom->Insert(g_gRangeS);
             if (c0_ == 'S') {
                 atom->Invert(IsUtf16());
             }
@@ -1421,7 +1421,7 @@ int RegExpParser::ParseClassEscape(RangeSet *atom)
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             PrintF("ClassEscape::CharacterClassEscape %c\n", c0_);
             result = CLASS_RANGE_BASE;
-            atom->Insert(G_RANGE_W);
+            atom->Insert(g_gRangeW);
             if (c0_ == 'W') {
                 atom->Invert(IsUtf16());
             }
@@ -1439,15 +1439,15 @@ int RegExpParser::ParseClassEscape(RangeSet *atom)
                 if (c0_ == '}') {
                     break;  // p{}, invalid
                 }
-                bool is_value = false;
-                ParseUnicodePropertyValueCharacters(&is_value);
-                if (!is_value && c0_ == '=') {
+                bool isValue = false;
+                ParseUnicodePropertyValueCharacters(&isValue);
+                if (!isValue && c0_ == '=') {
                     // UnicodePropertyName = UnicodePropertyValue
                     Advance();
                     if (c0_ == '}') {
                         break;  // p{xxx=}, invalid
                     }
-                    ParseUnicodePropertyValueCharacters(&is_value);
+                    ParseUnicodePropertyValueCharacters(&isValue);
                 }
                 if (c0_ != '}') {
                     break;  // p{xxx, invalid
@@ -1469,7 +1469,7 @@ int RegExpParser::ParseClassEscape(RangeSet *atom)
     return result;
 }
 
-void RegExpParser::ParseUnicodePropertyValueCharacters(bool *is_value)
+void RegExpParser::ParseUnicodePropertyValueCharacters(bool *isValue)
 {
     if ((c0_ >= 'A' && c0_ <= 'Z') || (c0_ >= 'a' && c0_ <= 'z')) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -1478,14 +1478,14 @@ void RegExpParser::ParseUnicodePropertyValueCharacters(bool *is_value)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         PrintF("UnicodePropertyCharacter:: _ \n");
     } else if (c0_ >= '0' && c0_ <= '9') {
-        *is_value = true;
+        *isValue = true;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         PrintF("UnicodePropertyValueCharacter::DecimalDigit %c\n", c0_);
     } else {
         return;
     }
     Advance();
-    ParseUnicodePropertyValueCharacters(is_value);
+    ParseUnicodePropertyValueCharacters(isValue);
 }
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
@@ -1502,17 +1502,17 @@ void RegExpParser::PrintF(const char *fmt, ...)
 #endif
 }
 
-void RegExpParser::ParseError(const char *error_message)
+void RegExpParser::ParseError(const char *errorMessage)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     PrintF("error: ");
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    PrintF(error_message);
+    PrintF(errorMessage);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     PrintF("\n");
     SetIsError();
-    size_t length = strlen(error_message) + 1;
-    if (memcpy_s(error_msg_, length, error_message, length) != EOK) {
+    size_t length = strlen(errorMessage) + 1;
+    if (memcpy_s(errorMsg_, length, errorMessage, length) != EOK) {
         LOG(FATAL, COMMON) << "memcpy_s failed";
         UNREACHABLE();
     }

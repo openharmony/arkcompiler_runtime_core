@@ -31,7 +31,7 @@ enum class Intrinsic : uint16_t {
 
 static_assert(static_cast<size_t>(Intrinsic::<%= Runtime::intrinsics.last.enum_name %>) <= MAX_INTRINSIC_NUMBER, "Too much intrinsics");
 
-bool Initialize(panda::panda_file::SourceLang vm_lang);
+bool Initialize(panda::panda_file::SourceLang vmLang);
 extern "C" void UnknownIntrinsic(); // NOLINT(readability-named-parameter)
 
 }  // namespace panda::intrinsics

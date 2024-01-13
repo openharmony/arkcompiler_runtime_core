@@ -22,57 +22,57 @@
 namespace panda {
 
 Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
-                             std::optional<EntrypointInfo> &&ep_info)
+                             std::optional<EntrypointInfo> &&epInfo)
 {
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
     auto *co = allocator->New<Coroutine>(os::thread::GetCurrentThreadId(), allocator, vm,
                                          panda::panda_file::SourceLang::PANDA_ASSEMBLY, std::move(name), context,
-                                         std::move(ep_info));
+                                         std::move(epInfo));
     co->Initialize();
     return co;
 }
 
 Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
-                     panda::panda_file::SourceLang thread_lang, PandaString name, CoroutineContext *context,
-                     std::optional<EntrypointInfo> &&ep_info)
-    : ManagedThread(id, allocator, vm, Thread::ThreadType::THREAD_TYPE_TASK, thread_lang),
+                     panda::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
+                     std::optional<EntrypointInfo> &&epInfo)
+    : ManagedThread(id, allocator, vm, Thread::ThreadType::THREAD_TYPE_TASK, threadLang),
       name_(std::move(name)),
       context_(context),
-      start_suspended_(ep_info.has_value())
+      startSuspended_(epInfo.has_value())
 {
     ASSERT(vm != nullptr);
     ASSERT(context != nullptr);
-    SetEntrypointData(std::move(ep_info));
-    coroutine_id_ = static_cast<CoroutineManager *>(GetVM()->GetThreadManager())->AllocateCoroutineId();
+    SetEntrypointData(std::move(epInfo));
+    coroutineId_ = static_cast<CoroutineManager *>(GetVM()->GetThreadManager())->AllocateCoroutineId();
 }
 
 Coroutine::~Coroutine()
 {
-    static_cast<CoroutineManager *>(GetVM()->GetThreadManager())->FreeCoroutineId(coroutine_id_);
+    static_cast<CoroutineManager *>(GetVM()->GetThreadManager())->FreeCoroutineId(coroutineId_);
 }
 
-void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&ep_info)
+void Coroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo)
 {
     ASSERT(context != nullptr);
     name_ = std::move(name);
-    start_suspended_ = ep_info.has_value();
+    startSuspended_ = epInfo.has_value();
     context_ = context;
 
-    SetEntrypointData(std::move(ep_info));
+    SetEntrypointData(std::move(epInfo));
     context_->AttachToCoroutine(this);
 }
 
-void Coroutine::SetEntrypointData(std::optional<EntrypointInfo> &&ep_info)
+void Coroutine::SetEntrypointData(std::optional<EntrypointInfo> &&epInfo)
 {
-    if (ep_info.has_value()) {
-        auto &info = ep_info.value();
+    if (epInfo.has_value()) {
+        auto &info = epInfo.value();
         if (std::holds_alternative<ManagedEntrypointInfo>(info)) {
-            auto &managed_ep = std::get<ManagedEntrypointInfo>(info);
-            entrypoint_.emplace<ManagedEntrypointData>(managed_ep.completion_event, managed_ep.entrypoint,
-                                                       std::move(managed_ep.arguments));
+            auto &managedEp = std::get<ManagedEntrypointInfo>(info);
+            entrypoint_.emplace<ManagedEntrypointData>(managedEp.completionEvent, managedEp.entrypoint,
+                                                       std::move(managedEp.arguments));
         } else if (std::holds_alternative<NativeEntrypointInfo>(info)) {
-            auto &native_ep = std::get<NativeEntrypointInfo>(info);
-            entrypoint_ = NativeEntrypointData(native_ep.entrypoint, native_ep.param);
+            auto &nativeEp = std::get<NativeEntrypointInfo>(info);
+            entrypoint_ = NativeEntrypointData(nativeEp.entrypoint, nativeEp.param);
         }
     }
 }
@@ -82,14 +82,14 @@ void Coroutine::CleanUp()
     ManagedThread::CleanUp();
     name_ = "";
     entrypoint_ = std::monostate();
-    start_suspended_ = false;
+    startSuspended_ = false;
     context_->CleanUp();
 }
 
 Coroutine::ManagedEntrypointData::~ManagedEntrypointData()
 {
     // delete the event as it is owned by the ManagedEntrypointData instance
-    Runtime::GetCurrent()->GetInternalAllocator()->Delete(completion_event);
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(completionEvent);
 }
 
 PandaString Coroutine::GetName() const
@@ -102,9 +102,9 @@ Coroutine::Status Coroutine::GetCoroutineStatus() const
     return context_->GetStatus();
 }
 
-void Coroutine::SetCoroutineStatus(Coroutine::Status new_status)
+void Coroutine::SetCoroutineStatus(Coroutine::Status newStatus)
 {
-    context_->SetStatus(new_status);
+    context_->SetStatus(newStatus);
 }
 
 void Coroutine::Destroy()
@@ -119,19 +119,19 @@ void Coroutine::Initialize()
                               ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
 }
 
-bool Coroutine::RetrieveStackInfo(void *&stack_addr, size_t &stack_size, size_t &guard_size)
+bool Coroutine::RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize)
 {
     if (HasManagedEntrypoint() || HasNativeEntrypoint()) {
         // has EP and separate native context for its execution
-        return context_->RetrieveStackInfo(stack_addr, stack_size, guard_size);
+        return context_->RetrieveStackInfo(stackAddr, stackSize, guardSize);
     }
     // does not have EP, executes on OS-provided context and stack
-    return ManagedThread::RetrieveStackInfo(stack_addr, stack_size, guard_size);
+    return ManagedThread::RetrieveStackInfo(stackAddr, stackSize, guardSize);
 }
 
-void Coroutine::RequestSuspend(bool gets_blocked)
+void Coroutine::RequestSuspend(bool getsBlocked)
 {
-    context_->RequestSuspend(gets_blocked);
+    context_->RequestSuspend(getsBlocked);
 }
 
 void Coroutine::RequestResume()
@@ -144,7 +144,7 @@ void Coroutine::RequestUnblock()
     context_->RequestUnblock();
 }
 
-void Coroutine::RequestCompletion([[maybe_unused]] Value return_value)
+void Coroutine::RequestCompletion([[maybe_unused]] Value returnValue)
 {
     auto *e = GetCompletionEvent();
     e->SetHappened();

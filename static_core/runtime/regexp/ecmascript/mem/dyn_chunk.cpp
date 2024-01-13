@@ -18,34 +18,34 @@
 #include "securec.h"
 
 namespace panda {
-int DynChunk::Expand(size_t new_size)
+int DynChunk::Expand(size_t newSize)
 {
-    if (new_size > allocated_size_) {
+    if (newSize > allocatedSize_) {
         if (error_) {
             return FAILURE;
         }
-        ASSERT(allocated_size_ <= std::numeric_limits<size_t>::max() / ALLOCATE_MULTIPLIER);
-        size_t size = allocated_size_ * ALLOCATE_MULTIPLIER;
-        new_size = std::max({size, new_size, ALLOCATE_MIN_SIZE});
+        ASSERT(allocatedSize_ <= std::numeric_limits<size_t>::max() / ALLOCATE_MULTIPLIER);
+        size_t size = allocatedSize_ * ALLOCATE_MULTIPLIER;
+        newSize = std::max({size, newSize, ALLOCATE_MIN_SIZE});
         // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-        auto *new_buf = Runtime::GetCurrent()->GetInternalAllocator()->New<uint8_t[]>(new_size);
-        if (new_buf == nullptr) {
+        auto *newBuf = Runtime::GetCurrent()->GetInternalAllocator()->New<uint8_t[]>(newSize);
+        if (newBuf == nullptr) {
             error_ = true;
             return FAILURE;
         }
-        if (memset_s(new_buf, new_size, 0, new_size) != EOK) {
+        if (memset_s(newBuf, newSize, 0, newSize) != EOK) {
             error_ = true;
             return FAILURE;
         }
         if (buf_ != nullptr) {
-            if (memcpy_s(new_buf, size_, buf_, size_) != EOK) {
+            if (memcpy_s(newBuf, size_, buf_, size_) != EOK) {
                 error_ = true;
                 return FAILURE;
             }
         }
         Runtime::GetCurrent()->GetInternalAllocator()->DeleteArray(buf_);
-        buf_ = new_buf;
-        allocated_size_ = new_size;
+        buf_ = newBuf;
+        allocatedSize_ = newSize;
     }
     return SUCCESS;
 }
@@ -58,9 +58,9 @@ int DynChunk::Insert(uint32_t position, size_t len)
     if (Expand(size_ + len) != 0) {
         return FAILURE;
     }
-    size_t move_size = size_ - position;
+    size_t moveSize = size_ - position;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    if (memmove_s(buf_ + position + len, move_size, buf_ + position, move_size) != EOK) {
+    if (memmove_s(buf_ + position + len, moveSize, buf_ + position, moveSize) != EOK) {
         return FAILURE;
     }
     size_ += len;
@@ -69,7 +69,7 @@ int DynChunk::Insert(uint32_t position, size_t len)
 
 int DynChunk::Emit(const uint8_t *data, size_t length)
 {
-    if (UNLIKELY((size_ + length) > allocated_size_)) {
+    if (UNLIKELY((size_ + length) > allocatedSize_)) {
         if (Expand(size_ + length) != 0) {
             return FAILURE;
         }
@@ -90,7 +90,7 @@ int DynChunk::EmitChar(uint8_t c)
 
 int DynChunk::EmitSelf(size_t offset, size_t length)
 {
-    if (UNLIKELY((size_ + length) > allocated_size_)) {
+    if (UNLIKELY((size_ + length) > allocatedSize_)) {
         if (Expand(size_ + length) != 0) {
             return FAILURE;
         }

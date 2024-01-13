@@ -39,11 +39,11 @@ protected:
             COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Graph doesn't have loops";
         }
 
-        auto marker_holder = MarkerHolder(GetGraph());
-        auto marker_loop_exit = marker_holder.GetMarker();
-        MarkLoopExits(GetGraph(), marker_loop_exit);
+        auto markerHolder = MarkerHolder(GetGraph());
+        auto markerLoopExit = markerHolder.GetMarker();
+        MarkLoopExits(GetGraph(), markerLoopExit);
         for (auto loop : GetGraph()->GetRootLoop()->GetInnerLoops()) {
-            LoopVisitLRN(loop, marker_loop_exit);
+            LoopVisitLRN(loop, markerLoopExit);
         }
     }
 
@@ -72,10 +72,10 @@ protected:
     bool LoopVisitLRN(Loop *loop, Marker marker)
     {
         ASSERT(loop != nullptr);
-        const auto &inner_loops = loop->GetInnerLoops();
+        const auto &innerLoops = loop->GetInnerLoops();
         bool result = true;
-        for (auto inner_loop : inner_loops) {
-            result &= LoopVisitLRN(inner_loop, marker);
+        for (auto innerLoop : innerLoops) {
+            result &= LoopVisitLRN(innerLoop, marker);
         }
 
         if (result && IsSupportedLoopType(loop)) {
@@ -124,13 +124,13 @@ protected:
         return TransformLoop(loop);
     }
 
-    BasicBlock *GetLoopOuterBlock(BasicBlock *exit_block)
+    BasicBlock *GetLoopOuterBlock(BasicBlock *exitBlock)
     {
-        ASSERT(exit_block->GetSuccsBlocks().size() == 2);
-        auto loop = exit_block->GetLoop();
-        auto outer = exit_block->GetTrueSuccessor();
+        ASSERT(exitBlock->GetSuccsBlocks().size() == 2U);
+        auto loop = exitBlock->GetLoop();
+        auto outer = exitBlock->GetTrueSuccessor();
         if (outer->GetLoop() == loop) {
-            outer = exit_block->GetFalseSuccessor();
+            outer = exitBlock->GetFalseSuccessor();
         }
         ASSERT(outer->GetLoop() != loop);
         return outer;

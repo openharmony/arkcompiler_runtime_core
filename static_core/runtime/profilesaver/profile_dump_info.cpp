@@ -42,16 +42,16 @@ const uint8_t ProfileDumpInfo::kProfileVersion[] = {'0', '1', '\0'};          //
 
 static constexpr uint16_t K_MAX_FILE_KEY_LENGTH = PATH_MAX;  // NOLINT
 
-static bool WriteBuffer(int fd, const uint8_t *buffer, size_t byte_count)
+static bool WriteBuffer(int fd, const uint8_t *buffer, size_t byteCount)
 {  // NOLINT
-    while (byte_count > 0) {
-        int bytes_written = write(fd, buffer, byte_count);  // real place to write
-        if (bytes_written == -1) {
+    while (byteCount > 0) {
+        int bytesWritten = write(fd, buffer, byteCount);  // real place to write
+        if (bytesWritten == -1) {
             return false;
         }
-        byte_count -= bytes_written;
+        byteCount -= bytesWritten;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        buffer += bytes_written;
+        buffer += bytesWritten;
     }
     return true;
 }
@@ -86,28 +86,28 @@ static int testEOF(int fd)
 
 int64_t GetFileSizeBytes(const PandaString &filename)
 {
-    struct stat stat_buf {};
-    int rc = stat(filename.c_str(), &stat_buf);
-    return (rc == 0) ? stat_buf.st_size : -1;
+    struct stat statBuf {};
+    int rc = stat(filename.c_str(), &statBuf);
+    return (rc == 0) ? statBuf.st_size : -1;
 }
 
 ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::SerializerBuffer::FillFromFd(int fd, const PandaString &source,
                                                                                 PandaString *error)
 {
-    size_t byte_count = ptr_end_ - ptr_current_;
-    uint8_t *buffer = ptr_current_;
-    while (byte_count > 0) {
-        int bytes_read = read(fd, buffer, byte_count);
-        if (bytes_read == 0) {  // NOLINT
+    size_t byteCount = ptrEnd_ - ptrCurrent_;
+    uint8_t *buffer = ptrCurrent_;
+    while (byteCount > 0) {
+        int bytesRead = read(fd, buffer, byteCount);
+        if (bytesRead == 0) {  // NOLINT
             *error += "Profile EOF reached prematurely for " + source;
             return PROFILE_LOAD_BAD_DATA;
-        } else if (bytes_read < 0) {  // NOLINT
+        } else if (bytesRead < 0) {  // NOLINT
             *error += "Profile IO error for " + source + ConvertToString(os::Error(errno).ToString());
             return PROFILE_LOAD_IO_ERROR;
         }
-        byte_count -= bytes_read;
+        byteCount -= bytesRead;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        buffer += bytes_read;
+        buffer += bytesRead;
     }
     return PROFILE_LOAD_SUCCESS;
 }
@@ -117,26 +117,26 @@ T ProfileDumpInfo::SerializerBuffer::ReadUintAndAdvance()
 {
     static_assert(std::is_unsigned<T>::value, "Type is not unsigned");
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    ASSERT(ptr_current_ + sizeof(T) <= ptr_end_);
+    ASSERT(ptrCurrent_ + sizeof(T) <= ptrEnd_);
     T value = 0;
     for (size_t i = 0; i < sizeof(T); i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        value += ptr_current_[i] << (i * K_BITS_PER_BYTE);
+        value += ptrCurrent_[i] << (i * K_BITS_PER_BYTE);
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    ptr_current_ += sizeof(T);
+    ptrCurrent_ += sizeof(T);
     return value;
 }
 
-bool ProfileDumpInfo::SerializerBuffer::CompareAndAdvance(const uint8_t *data, size_t data_size)
+bool ProfileDumpInfo::SerializerBuffer::CompareAndAdvance(const uint8_t *data, size_t dataSize)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    if (ptr_current_ + data_size > ptr_end_) {
+    if (ptrCurrent_ + dataSize > ptrEnd_) {
         return false;
     }
-    if (memcmp(ptr_current_, data, data_size) == 0) {
+    if (memcmp(ptrCurrent_, data, dataSize) == 0) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        ptr_current_ += data_size;
+        ptrCurrent_ += dataSize;
         return true;
     }
     return false;
@@ -144,47 +144,47 @@ bool ProfileDumpInfo::SerializerBuffer::CompareAndAdvance(const uint8_t *data, s
 
 bool ProfileDumpInfo::MergeWith(const ProfileDumpInfo &other)
 {
-    for (const auto &other_it : other.dump_info_) {
-        auto info_it = dump_info_.find(other_it.first);
-        if ((info_it != dump_info_.end()) && (info_it->second.checksum != other_it.second.checksum)) {
-            LOG(INFO, RUNTIME) << "info_it->second.checksum" << info_it->second.checksum;
-            LOG(INFO, RUNTIME) << "other_it->second.checksum" << other_it.second.checksum;
-            LOG(INFO, RUNTIME) << "Checksum mismatch" << other_it.first;
+    for (const auto &otherIt : other.dumpInfo_) {
+        auto infoIt = dumpInfo_.find(otherIt.first);
+        if ((infoIt != dumpInfo_.end()) && (infoIt->second.checksum != otherIt.second.checksum)) {
+            LOG(INFO, RUNTIME) << "info_it->second.checksum" << infoIt->second.checksum;
+            LOG(INFO, RUNTIME) << "other_it->second.checksum" << otherIt.second.checksum;
+            LOG(INFO, RUNTIME) << "Checksum mismatch" << otherIt.first;
             return false;
         }
     }
     LOG(INFO, RUNTIME) << "All checksums match";
 
-    for (const auto &other_it : other.dump_info_) {
-        const PandaString &other_profile_location = other_it.first;
-        const ProfileLineData &other_profile_data = other_it.second;
-        auto info_it = dump_info_.find(other_profile_location);
-        if (info_it == dump_info_.end()) {
+    for (const auto &otherIt : other.dumpInfo_) {
+        const PandaString &otherProfileLocation = otherIt.first;
+        const ProfileLineData &otherProfileData = otherIt.second;
+        auto infoIt = dumpInfo_.find(otherProfileLocation);
+        if (infoIt == dumpInfo_.end()) {
             auto ret =
-                dump_info_.insert(std::make_pair(other_profile_location, ProfileLineData(other_profile_data.checksum)));
+                dumpInfo_.insert(std::make_pair(otherProfileLocation, ProfileLineData(otherProfileData.checksum)));
             ASSERT(ret.second);
-            info_it = ret.first;
+            infoIt = ret.first;
         }
-        info_it->second.method_wrapper_set.insert(other_profile_data.method_wrapper_set.begin(),
-                                                  other_profile_data.method_wrapper_set.end());
-        info_it->second.class_wrapper_set.insert(other_profile_data.class_wrapper_set.begin(),
-                                                 other_profile_data.class_wrapper_set.end());
+        infoIt->second.methodWrapperSet.insert(otherProfileData.methodWrapperSet.begin(),
+                                               otherProfileData.methodWrapperSet.end());
+        infoIt->second.classWrapperSet.insert(otherProfileData.classWrapperSet.begin(),
+                                              otherProfileData.classWrapperSet.end());
     }
     return true;
 }
 
 bool ProfileDumpInfo::AddMethodsAndClasses(const PandaVector<ExtractedMethod> &methods,
-                                           const PandaSet<ExtractedResolvedClasses> &resolved_classes)
+                                           const PandaSet<ExtractedResolvedClasses> &resolvedClasses)
 {
     for (const ExtractedMethod &method : methods) {
-        if (!AddMethodWrapper(ConvertToString(method.panda_file->GetFilename()),
-                              method.panda_file->GetHeader()->checksum, MethodWrapper(method.file_id.GetOffset()))) {
+        if (!AddMethodWrapper(ConvertToString(method.pandaFile->GetFilename()), method.pandaFile->GetHeader()->checksum,
+                              MethodWrapper(method.fileId.GetOffset()))) {
             return false;
         }
     }
 
-    for (const ExtractedResolvedClasses &class_resolved : resolved_classes) {
-        if (!AddResolvedClasses(class_resolved)) {
+    for (const ExtractedResolvedClasses &classResolved : resolvedClasses) {
+        if (!AddResolvedClasses(classResolved)) {
             return false;
         }
     }
@@ -194,8 +194,8 @@ bool ProfileDumpInfo::AddMethodsAndClasses(const PandaVector<ExtractedMethod> &m
 uint64_t ProfileDumpInfo::GetNumberOfMethods() const
 {
     uint64_t total = 0;
-    for (const auto &it : dump_info_) {
-        total += it.second.method_wrapper_set.size();
+    for (const auto &it : dumpInfo_) {
+        total += it.second.methodWrapperSet.size();
     }
     return total;
 }
@@ -203,57 +203,57 @@ uint64_t ProfileDumpInfo::GetNumberOfMethods() const
 uint64_t ProfileDumpInfo::GetNumberOfResolvedClasses() const
 {
     uint64_t total = 0;
-    for (const auto &it : dump_info_) {
-        total += it.second.class_wrapper_set.size();
+    for (const auto &it : dumpInfo_) {
+        total += it.second.classWrapperSet.size();
     }
     return total;
 }
 
-bool ProfileDumpInfo::ContainsMethod(const ExtractedMethod &method_ref) const
+bool ProfileDumpInfo::ContainsMethod(const ExtractedMethod &methodRef) const
 {
-    auto info_it = dump_info_.find(ConvertToString(method_ref.panda_file->GetFilename()));
-    if (info_it != dump_info_.end()) {
-        if (method_ref.panda_file->GetHeader()->checksum != info_it->second.checksum) {
+    auto infoIt = dumpInfo_.find(ConvertToString(methodRef.pandaFile->GetFilename()));
+    if (infoIt != dumpInfo_.end()) {
+        if (methodRef.pandaFile->GetHeader()->checksum != infoIt->second.checksum) {
             return false;
         }
-        const PandaSet<MethodWrapper> &methods = info_it->second.method_wrapper_set;
-        return methods.find(MethodWrapper(method_ref.file_id.GetOffset())) != methods.end();
+        const PandaSet<MethodWrapper> &methods = infoIt->second.methodWrapperSet;
+        return methods.find(MethodWrapper(methodRef.fileId.GetOffset())) != methods.end();
     }
     return false;
 }
 
-bool ProfileDumpInfo::ContainsClass(const panda_file::File &pandafile, uint32_t class_def_idx) const
+bool ProfileDumpInfo::ContainsClass(const panda_file::File &pandafile, uint32_t classDefIdx) const
 {
-    auto info_it = dump_info_.find(ConvertToString(pandafile.GetFilename()));
-    if (info_it != dump_info_.end()) {
-        if (pandafile.GetHeader()->checksum != info_it->second.checksum) {
+    auto infoIt = dumpInfo_.find(ConvertToString(pandafile.GetFilename()));
+    if (infoIt != dumpInfo_.end()) {
+        if (pandafile.GetHeader()->checksum != infoIt->second.checksum) {
             return false;
         }
-        const PandaSet<ClassWrapper> &classes = info_it->second.class_wrapper_set;
-        return classes.find(ClassWrapper(class_def_idx)) != classes.end();
+        const PandaSet<ClassWrapper> &classes = infoIt->second.classWrapperSet;
+        return classes.find(ClassWrapper(classDefIdx)) != classes.end();
     }
     return false;
 }
 
-bool ProfileDumpInfo::AddMethodWrapper(const PandaString &panda_file_location, uint32_t checksum,
-                                       const ProfileDumpInfo::MethodWrapper &method_to_add)
+bool ProfileDumpInfo::AddMethodWrapper(const PandaString &pandaFileLocation, uint32_t checksum,
+                                       const ProfileDumpInfo::MethodWrapper &methodToAdd)
 {
-    ProfileLineData *const data = GetOrAddProfileLineData(panda_file_location, checksum);
+    ProfileLineData *const data = GetOrAddProfileLineData(pandaFileLocation, checksum);
     if (data == nullptr) {
         return false;
     }
-    data->method_wrapper_set.insert(method_to_add);
+    data->methodWrapperSet.insert(methodToAdd);
     return true;
 }
 
-bool ProfileDumpInfo::AddClassWrapper(const PandaString &panda_file_location, uint32_t checksum,
-                                      const ProfileDumpInfo::ClassWrapper &class_to_add)
+bool ProfileDumpInfo::AddClassWrapper(const PandaString &pandaFileLocation, uint32_t checksum,
+                                      const ProfileDumpInfo::ClassWrapper &classToAdd)
 {
-    ProfileLineData *const data = GetOrAddProfileLineData(panda_file_location, checksum);
+    ProfileLineData *const data = GetOrAddProfileLineData(pandaFileLocation, checksum);
     if (data == nullptr) {
         return false;
     }
-    data->class_wrapper_set.insert(class_to_add);
+    data->classWrapperSet.insert(classToAdd);
     return true;
 }
 
@@ -266,87 +266,87 @@ bool ProfileDumpInfo::AddResolvedClasses(const ExtractedResolvedClasses &classes
         return false;
     }
     for (auto const &i : classes.GetClasses()) {
-        data->class_wrapper_set.insert(ClassWrapper(i));
+        data->classWrapperSet.insert(ClassWrapper(i));
     }
     return true;
 }
 
-ProfileDumpInfo::ProfileLineData *ProfileDumpInfo::GetOrAddProfileLineData(const PandaString &panda_file_location,
+ProfileDumpInfo::ProfileLineData *ProfileDumpInfo::GetOrAddProfileLineData(const PandaString &pandaFileLocation,
                                                                            uint32_t checksum)
 {
-    auto info_it = dump_info_.find(panda_file_location);
-    if (info_it == dump_info_.end()) {
-        auto ret = dump_info_.insert(std::make_pair(panda_file_location, ProfileLineData(checksum)));
+    auto infoIt = dumpInfo_.find(pandaFileLocation);
+    if (infoIt == dumpInfo_.end()) {
+        auto ret = dumpInfo_.insert(std::make_pair(pandaFileLocation, ProfileLineData(checksum)));
         ASSERT(ret.second);
-        info_it = ret.first;
+        infoIt = ret.first;
     }
-    if (info_it->second.checksum != checksum) {
-        LOG(INFO, RUNTIME) << "Checksum mismatch" << panda_file_location;
+    if (infoIt->second.checksum != checksum) {
+        LOG(INFO, RUNTIME) << "Checksum mismatch" << pandaFileLocation;
         return nullptr;
     }
-    return &(info_it->second);
+    return &(infoIt->second);
 }
 
 bool ProfileDumpInfo::Save(int fd)
 {
     ASSERT(fd >= 0);
-    trace::ScopedTrace scoped_trace(__PRETTY_FUNCTION__);
+    trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
 
     static constexpr size_t K_MAX_BUFFER_SIZE = 8 * 1024;
     PandaVector<uint8_t> buffer;  // each element 1 byte
 
     WriteBuffer(fd, kProfileMagic, sizeof(kProfileMagic));
     WriteBuffer(fd, kProfileVersion, sizeof(kProfileVersion));
-    AddUintToBuffer(&buffer, static_cast<uint32_t>(dump_info_.size()));
+    AddUintToBuffer(&buffer, static_cast<uint32_t>(dumpInfo_.size()));
 
-    for (const auto &it : dump_info_) {
+    for (const auto &it : dumpInfo_) {
         if (buffer.size() > K_MAX_BUFFER_SIZE) {
             if (!WriteBuffer(fd, buffer.data(), buffer.size())) {
                 return false;
             }
             buffer.clear();
         }
-        const PandaString &file_location = it.first;
-        const ProfileLineData &file_data = it.second;
+        const PandaString &fileLocation = it.first;
+        const ProfileLineData &fileData = it.second;
 
-        if (file_location.size() >= K_MAX_FILE_KEY_LENGTH) {
+        if (fileLocation.size() >= K_MAX_FILE_KEY_LENGTH) {
             LOG(INFO, RUNTIME) << "PandaFileKey exceeds allocated limit";
             return false;
         }
 
-        size_t required_capacity = buffer.size() + K_LINE_HEADER_SIZE + file_location.size() +
-                                   K_METHOD_BYTES * file_data.method_wrapper_set.size() +
-                                   K_CLASS_BYTES * file_data.class_wrapper_set.size();
-        buffer.reserve(required_capacity);
+        size_t requiredCapacity = buffer.size() + K_LINE_HEADER_SIZE + fileLocation.size() +
+                                  K_METHOD_BYTES * fileData.methodWrapperSet.size() +
+                                  K_CLASS_BYTES * fileData.classWrapperSet.size();
+        buffer.reserve(requiredCapacity);
 
-        ASSERT(file_location.size() <= std::numeric_limits<uint16_t>::max());
-        ASSERT(file_data.method_wrapper_set.size() <= std::numeric_limits<uint32_t>::max());
-        ASSERT(file_data.class_wrapper_set.size() <= std::numeric_limits<uint32_t>::max());
+        ASSERT(fileLocation.size() <= std::numeric_limits<uint16_t>::max());
+        ASSERT(fileData.methodWrapperSet.size() <= std::numeric_limits<uint32_t>::max());
+        ASSERT(fileData.classWrapperSet.size() <= std::numeric_limits<uint32_t>::max());
 
-        AddUintToBuffer(&buffer, static_cast<uint16_t>(file_location.size()));
-        AddUintToBuffer(&buffer, static_cast<uint32_t>(file_data.method_wrapper_set.size()));
-        AddUintToBuffer(&buffer, static_cast<uint32_t>(file_data.class_wrapper_set.size()));
-        AddUintToBuffer(&buffer, file_data.checksum);
-        AddStringToBuffer(&buffer, file_location);
+        AddUintToBuffer(&buffer, static_cast<uint16_t>(fileLocation.size()));
+        AddUintToBuffer(&buffer, static_cast<uint32_t>(fileData.methodWrapperSet.size()));
+        AddUintToBuffer(&buffer, static_cast<uint32_t>(fileData.classWrapperSet.size()));
+        AddUintToBuffer(&buffer, fileData.checksum);
+        AddStringToBuffer(&buffer, fileLocation);
 
-        if (UNLIKELY(file_data.empty())) {
+        if (UNLIKELY(fileData.empty())) {
             LOG(INFO, RUNTIME) << "EMPTY FILE DATA, WERIED!";
         }
 
-        for (auto method_it : file_data.method_wrapper_set) {
-            AddUintToBuffer(&buffer, method_it.method_id);
+        for (auto methodIt : fileData.methodWrapperSet) {
+            AddUintToBuffer(&buffer, methodIt.methodId);
         }
-        for (auto class_it : file_data.class_wrapper_set) {
-            AddUintToBuffer(&buffer, class_it.class_id);
+        for (auto classIt : fileData.classWrapperSet) {
+            AddUintToBuffer(&buffer, classIt.classId);
         }
-        ASSERT(required_capacity == buffer.size());
+        ASSERT(requiredCapacity == buffer.size());
     }
     return WriteBuffer(fd, buffer.data(), buffer.size());
 }
 
 bool ProfileDumpInfo::Load(int fd)
 {
-    trace::ScopedTrace scoped_trace(__PRETTY_FUNCTION__);
+    trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
     PandaString error;
     ProfileLoadSatus status = LoadInternal(fd, &error);
 
@@ -360,37 +360,37 @@ bool ProfileDumpInfo::Load(int fd)
 ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::LoadInternal(int fd, PandaString *error)
 {
     ASSERT(fd >= 0);
-    trace::ScopedTrace scoped_trace(__PRETTY_FUNCTION__);
+    trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
 
-    struct stat stat_buffer {};
-    if (fstat(fd, &stat_buffer) != 0) {
+    struct stat statBuffer {};
+    if (fstat(fd, &statBuffer) != 0) {
         return PROFILE_LOAD_IO_ERROR;
     }
 
-    if (stat_buffer.st_size == 0) {
+    if (statBuffer.st_size == 0) {
         LOG(INFO, RUNTIME) << "empty file";
         return PROFILE_LOAD_EMPTYFILE;
     }
 
-    uint32_t number_of_lines;
-    ProfileLoadSatus status = ReadProfileHeader(fd, &number_of_lines, error);
+    uint32_t numberOfLines;
+    ProfileLoadSatus status = ReadProfileHeader(fd, &numberOfLines, error);
     if (status != PROFILE_LOAD_SUCCESS) {
         return status;
     }
-    LOG(INFO, RUNTIME) << "number of profile items = " << number_of_lines;
+    LOG(INFO, RUNTIME) << "number of profile items = " << numberOfLines;
 
-    while (number_of_lines > 0) {
-        ProfileLineHeader line_header;
-        status = ReadProfileLineHeader(fd, &line_header, error);
+    while (numberOfLines > 0) {
+        ProfileLineHeader lineHeader;
+        status = ReadProfileLineHeader(fd, &lineHeader, error);
         if (status != PROFILE_LOAD_SUCCESS) {
             return status;
         }
 
-        status = ReadProfileLine(fd, line_header, error);
+        status = ReadProfileLine(fd, lineHeader, error);
         if (status != PROFILE_LOAD_SUCCESS) {
             return status;
         }
-        number_of_lines--;
+        numberOfLines--;
     }
 
     int result = testEOF(fd);
@@ -406,113 +406,112 @@ ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::LoadInternal(int fd, PandaStr
     return PROFILE_LOAD_BAD_DATA;
 }
 
-ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::ReadProfileHeader(int fd, uint32_t *number_of_lines,
+ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::ReadProfileHeader(int fd, uint32_t *numberOfLines,
                                                                      PandaString *error)
 {
-    const size_t k_magic_version_size = sizeof(kProfileMagic) + sizeof(kProfileVersion) + sizeof(uint32_t);
+    const size_t kMagicVersionSize = sizeof(kProfileMagic) + sizeof(kProfileVersion) + sizeof(uint32_t);
 
-    SerializerBuffer safe_buffer(k_magic_version_size);
+    SerializerBuffer safeBuffer(kMagicVersionSize);
 
-    ProfileLoadSatus status = safe_buffer.FillFromFd(fd, "ReadProfileHeader", error);
+    ProfileLoadSatus status = safeBuffer.FillFromFd(fd, "ReadProfileHeader", error);
     if (status != PROFILE_LOAD_SUCCESS) {
         return status;
     }
 
-    if (!safe_buffer.CompareAndAdvance(kProfileMagic, sizeof(kProfileMagic))) {
+    if (!safeBuffer.CompareAndAdvance(kProfileMagic, sizeof(kProfileMagic))) {
         *error = "Profile missing magic";
         return PROFILE_LOAD_VERSION_MISMATCH;
     }
-    if (!safe_buffer.CompareAndAdvance(kProfileVersion, sizeof(kProfileVersion))) {
+    if (!safeBuffer.CompareAndAdvance(kProfileVersion, sizeof(kProfileVersion))) {
         *error = "Profile version mismatch";
         return PROFILE_LOAD_VERSION_MISMATCH;
     }
 
-    *number_of_lines = safe_buffer.ReadUintAndAdvance<uint32_t>();
+    *numberOfLines = safeBuffer.ReadUintAndAdvance<uint32_t>();
     return PROFILE_LOAD_SUCCESS;
 }
 
-ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::ReadProfileLineHeader(int fd, ProfileLineHeader *line_header,
+ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::ReadProfileLineHeader(int fd, ProfileLineHeader *lineHeader,
                                                                          PandaString *error)
 {
-    SerializerBuffer header_buffer(K_LINE_HEADER_SIZE);
-    ProfileLoadSatus status = header_buffer.FillFromFd(fd, "ReadProfileLineHeader", error);
+    SerializerBuffer headerBuffer(K_LINE_HEADER_SIZE);
+    ProfileLoadSatus status = headerBuffer.FillFromFd(fd, "ReadProfileLineHeader", error);
     if (status != PROFILE_LOAD_SUCCESS) {
         return status;
     }
 
-    auto panda_location_size = header_buffer.ReadUintAndAdvance<uint16_t>();  // max chars in location, 4096 = 2 ^ 12
-    line_header->method_set_size = header_buffer.ReadUintAndAdvance<uint32_t>();
-    line_header->class_set_size = header_buffer.ReadUintAndAdvance<uint32_t>();
-    line_header->checksum = header_buffer.ReadUintAndAdvance<uint32_t>();
+    auto pandaLocationSize = headerBuffer.ReadUintAndAdvance<uint16_t>();  // max chars in location, 4096 = 2 ^ 12
+    lineHeader->methodSetSize = headerBuffer.ReadUintAndAdvance<uint32_t>();
+    lineHeader->classSetSize = headerBuffer.ReadUintAndAdvance<uint32_t>();
+    lineHeader->checksum = headerBuffer.ReadUintAndAdvance<uint32_t>();
 
-    if (panda_location_size == 0 || panda_location_size > K_MAX_FILE_KEY_LENGTH) {
-        *error = "PandaFileKey has an invalid size: " + std::to_string(panda_location_size);
+    if (pandaLocationSize == 0 || pandaLocationSize > K_MAX_FILE_KEY_LENGTH) {
+        *error = "PandaFileKey has an invalid size: " + std::to_string(pandaLocationSize);
         return PROFILE_LOAD_BAD_DATA;
     }
 
-    SerializerBuffer location_buffer(panda_location_size);
+    SerializerBuffer locationBuffer(pandaLocationSize);
     // Read the binary data: location string
-    status = location_buffer.FillFromFd(fd, "ReadProfileLineHeader", error);
+    status = locationBuffer.FillFromFd(fd, "ReadProfileLineHeader", error);
     if (status != PROFILE_LOAD_SUCCESS) {
         return status;
     }
-    line_header->panda_file_location.assign(reinterpret_cast<char *>(location_buffer.Get()), panda_location_size);
+    lineHeader->pandaFileLocation.assign(reinterpret_cast<char *>(locationBuffer.Get()), pandaLocationSize);
     return PROFILE_LOAD_SUCCESS;
 }
 
-ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::ReadProfileLine(int fd, const ProfileLineHeader &line_header,
+ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::ReadProfileLine(int fd, const ProfileLineHeader &lineHeader,
                                                                    PandaString *error)
 {
     static constexpr uint32_t K_MAX_NUMBER_OF_ENTRIES_TO_READ = 8000;  // ~8 kb
-    uint32_t methods_left_to_read = line_header.method_set_size;
-    uint32_t classes_left_to_read = line_header.class_set_size;
+    uint32_t methodsLeftToRead = lineHeader.methodSetSize;
+    uint32_t classesLeftToRead = lineHeader.classSetSize;
 
-    while ((methods_left_to_read > 0) || (classes_left_to_read > 0)) {
-        uint32_t methods_to_read = std::min(K_MAX_NUMBER_OF_ENTRIES_TO_READ, methods_left_to_read);
-        uint32_t max_classes_to_read = K_MAX_NUMBER_OF_ENTRIES_TO_READ - methods_to_read;  // >=0
-        uint32_t classes_to_read = std::min(max_classes_to_read, classes_left_to_read);
+    while ((methodsLeftToRead > 0) || (classesLeftToRead > 0)) {
+        uint32_t methodsToRead = std::min(K_MAX_NUMBER_OF_ENTRIES_TO_READ, methodsLeftToRead);
+        uint32_t maxClassesToRead = K_MAX_NUMBER_OF_ENTRIES_TO_READ - methodsToRead;  // >=0
+        uint32_t classesToRead = std::min(maxClassesToRead, classesLeftToRead);
 
-        size_t line_size = K_METHOD_BYTES * methods_to_read + K_CLASS_BYTES * classes_to_read;
-        SerializerBuffer line_buffer(line_size);
+        size_t lineSize = K_METHOD_BYTES * methodsToRead + K_CLASS_BYTES * classesToRead;
+        SerializerBuffer lineBuffer(lineSize);
 
-        ProfileLoadSatus status = line_buffer.FillFromFd(fd, "ReadProfileLine", error);
+        ProfileLoadSatus status = lineBuffer.FillFromFd(fd, "ReadProfileLine", error);
         if (status != PROFILE_LOAD_SUCCESS) {
             return status;
         }
-        if (!ProcessLine(line_buffer, methods_to_read, classes_to_read, line_header.checksum,
-                         line_header.panda_file_location)) {
+        if (!ProcessLine(lineBuffer, methodsToRead, classesToRead, lineHeader.checksum, lineHeader.pandaFileLocation)) {
             *error = "Error when reading profile file line";
             return PROFILE_LOAD_BAD_DATA;
         }
 
-        methods_left_to_read -= methods_to_read;
-        classes_left_to_read -= classes_to_read;
+        methodsLeftToRead -= methodsToRead;
+        classesLeftToRead -= classesToRead;
     }
     return PROFILE_LOAD_SUCCESS;
 }
 
 // NOLINTNEXTLINE(google-runtime-references)
-bool ProfileDumpInfo::ProcessLine(SerializerBuffer &line_buffer, uint32_t method_set_size, uint32_t class_set_size,
-                                  uint32_t checksum, const PandaString &panda_file_location)
+bool ProfileDumpInfo::ProcessLine(SerializerBuffer &lineBuffer, uint32_t methodSetSize, uint32_t classSetSize,
+                                  uint32_t checksum, const PandaString &pandaFileLocation)
 {
-    for (uint32_t i = 0; i < method_set_size; i++) {
+    for (uint32_t i = 0; i < methodSetSize; i++) {
         // NB! Read the method info from buffer...
-        auto method_idx = line_buffer.ReadUintAndAdvance<uint32_t>();
-        if (!AddMethodWrapper(panda_file_location, checksum, MethodWrapper(method_idx))) {
+        auto methodIdx = lineBuffer.ReadUintAndAdvance<uint32_t>();
+        if (!AddMethodWrapper(pandaFileLocation, checksum, MethodWrapper(methodIdx))) {
             return false;
         }
     }
 
-    for (uint32_t i = 0; i < class_set_size; i++) {
-        auto class_def_idx = line_buffer.ReadUintAndAdvance<uint32_t>();
-        if (!AddClassWrapper(panda_file_location, checksum, ClassWrapper(class_def_idx))) {
+    for (uint32_t i = 0; i < classSetSize; i++) {
+        auto classDefIdx = lineBuffer.ReadUintAndAdvance<uint32_t>();
+        if (!AddClassWrapper(pandaFileLocation, checksum, ClassWrapper(classDefIdx))) {
             return false;
         }
     }
     return true;
 }
 
-bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytes_written, bool force)
+bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytesWritten, bool force)
 {
     // NB! we using READWRITE mode to leave the creation job to framework layer.
     panda::os::unix::file::File myfile = panda::os::file::Open(filename, panda::os::file::Mode::READWRITE);
@@ -525,13 +524,13 @@ bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytes_
 
     LOG(INFO, RUNTIME) << "  Step3.2: starting merging ***";
     PandaString error;
-    ProfileDumpInfo file_dump_info;
-    ProfileLoadSatus status = file_dump_info.LoadInternal(fd, &error);
+    ProfileDumpInfo fileDumpInfo;
+    ProfileLoadSatus status = fileDumpInfo.LoadInternal(fd, &error);
     if (status == PROFILE_LOAD_SUCCESS || status == PROFILE_LOAD_EMPTYFILE) {
-        if (MergeWith(file_dump_info)) {
-            if (dump_info_ == file_dump_info.dump_info_) {
-                if (bytes_written != nullptr) {
-                    *bytes_written = 0;
+        if (MergeWith(fileDumpInfo)) {
+            if (dumpInfo_ == fileDumpInfo.dumpInfo_) {
+                if (bytesWritten != nullptr) {
+                    *bytesWritten = 0;
                 }
                 LOG(INFO, RUNTIME) << "  No Saving as no change byte_written = 0";
                 if (status != PROFILE_LOAD_EMPTYFILE) {
@@ -560,9 +559,9 @@ bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytes_
 
     bool result = Save(fd);
     if (result) {
-        if (bytes_written != nullptr) {
-            LOG(INFO, RUNTIME) << "      Profile Saver Bingo! and bytes written = " << bytes_written;
-            *bytes_written = GetFileSizeBytes(filename);
+        if (bytesWritten != nullptr) {
+            LOG(INFO, RUNTIME) << "      Profile Saver Bingo! and bytes written = " << bytesWritten;
+            *bytesWritten = GetFileSizeBytes(filename);
         }
     } else {
         LOG(ERROR, RUNTIME) << "Failed to save profile info to " << filename;

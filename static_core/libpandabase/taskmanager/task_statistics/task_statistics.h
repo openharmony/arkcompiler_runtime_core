@@ -96,7 +96,7 @@ public:
     virtual void ResetCountersWithTaskProperties(TaskProperties properties) = 0;
 
 protected:
-    std::vector<TaskProperties> all_task_properties_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    std::vector<TaskProperties> allTaskProperties_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 }  // namespace panda::taskmanager

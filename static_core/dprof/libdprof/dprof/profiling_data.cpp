@@ -21,15 +21,15 @@
 #include "serializer/serializer.h"
 
 namespace panda::dprof {
-bool ProfilingData::SetFeatureDate(const std::string &feature_name, std::vector<uint8_t> &&data)
+bool ProfilingData::SetFeatureDate(const std::string &featureName, std::vector<uint8_t> &&data)
 {
-    auto it = features_data_map_.find(feature_name);
-    if (it != features_data_map_.end()) {
-        LOG(ERROR, DPROF) << "Feature already exists, featureName=" << feature_name;
+    auto it = featuresDataMap_.find(featureName);
+    if (it != featuresDataMap_.end()) {
+        LOG(ERROR, DPROF) << "Feature already exists, featureName=" << featureName;
         return false;
     }
 
-    features_data_map_.emplace(std::pair(feature_name, std::move(data)));
+    featuresDataMap_.emplace(std::pair(featureName, std::move(data)));
     return false;
 }
 
@@ -43,42 +43,42 @@ bool ProfilingData::DumpAndResetFeatures()
 
     ipc::protocol::Version tmp {ipc::protocol::VERSION};
 
-    std::vector<uint8_t> version_data;
-    serializer::StructToBuffer<ipc::protocol::VERSION_FCOUNT>(tmp, version_data);
+    std::vector<uint8_t> versionData;
+    serializer::StructToBuffer<ipc::protocol::VERSION_FCOUNT>(tmp, versionData);
 
-    ipc::Message msg_version(ipc::Message::Id::VERSION, std::move(version_data));
-    if (!SendMessage(sock.Get(), msg_version)) {
+    ipc::Message msgVersion(ipc::Message::Id::VERSION, std::move(versionData));
+    if (!SendMessage(sock.Get(), msgVersion)) {
         LOG(ERROR, DPROF) << "Cannot send version";
         return false;
     }
 
-    ipc::protocol::AppInfo tmp2 {app_name_, hash_, pid_};
-    std::vector<uint8_t> app_info_data;
-    serializer::StructToBuffer<ipc::protocol::APP_INFO_FCOUNT>(tmp2, app_info_data);
+    ipc::protocol::AppInfo tmp2 {appName_, hash_, pid_};
+    std::vector<uint8_t> appInfoData;
+    serializer::StructToBuffer<ipc::protocol::APP_INFO_FCOUNT>(tmp2, appInfoData);
 
-    ipc::Message msg_app_info(ipc::Message::Id::APP_INFO, std::move(app_info_data));
-    if (!SendMessage(sock.Get(), msg_app_info)) {
+    ipc::Message msgAppInfo(ipc::Message::Id::APP_INFO, std::move(appInfoData));
+    if (!SendMessage(sock.Get(), msgAppInfo)) {
         LOG(ERROR, DPROF) << "Cannot send app info";
         return false;
     }
 
     // Send features data
-    for (auto &kv : features_data_map_) {
-        ipc::protocol::FeatureData tmp_data;
-        tmp_data.name = kv.first;
-        tmp_data.data = std::move(kv.second);
+    for (auto &kv : featuresDataMap_) {
+        ipc::protocol::FeatureData tmpData;
+        tmpData.name = kv.first;
+        tmpData.data = std::move(kv.second);
 
-        std::vector<uint8_t> feature_data;
-        serializer::StructToBuffer<ipc::protocol::FEATURE_DATA_FCOUNT>(tmp_data, feature_data);
+        std::vector<uint8_t> featureData;
+        serializer::StructToBuffer<ipc::protocol::FEATURE_DATA_FCOUNT>(tmpData, featureData);
 
-        ipc::Message msg_feature_data(ipc::Message::Id::FEATURE_DATA, std::move(feature_data));
-        if (!SendMessage(sock.Get(), msg_feature_data)) {
-            LOG(ERROR, DPROF) << "Cannot send feature data, featureName=" << tmp_data.name;
+        ipc::Message msgFeatureData(ipc::Message::Id::FEATURE_DATA, std::move(featureData));
+        if (!SendMessage(sock.Get(), msgFeatureData)) {
+            LOG(ERROR, DPROF) << "Cannot send feature data, featureName=" << tmpData.name;
             return false;
         }
     }
 
-    features_data_map_.clear();
+    featuresDataMap_.clear();
     return true;
 }
 }  // namespace panda::dprof

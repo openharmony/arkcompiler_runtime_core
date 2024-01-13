@@ -75,18 +75,18 @@ public:
     static void VisitStoreStatic(GraphVisitor *visitor, Inst *inst);
 
     void ProcessManagedCall(Inst *inst, ParameterInfo *pinfo = nullptr);
-    void ProcessManagedCallStackRange(Inst *inst, size_t range_start, ParameterInfo *pinfo = nullptr);
+    void ProcessManagedCallStackRange(Inst *inst, size_t rangeStart, ParameterInfo *pinfo = nullptr);
 
 private:
     ParameterInfo *GetResetParameterInfo();
     ParameterInfo *GetParameterInfo()
     {
-        return params_info_;
+        return paramsInfo_;
     }
 
 #include "optimizer/ir/visitor.inc"
 private:
-    ParameterInfo *params_info_ {nullptr};
+    ParameterInfo *paramsInfo_ {nullptr};
 };
 
 bool RunLocationsBuilder(Graph *graph);

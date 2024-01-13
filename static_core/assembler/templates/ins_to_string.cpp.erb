@@ -19,12 +19,12 @@
 namespace panda::pandasm {
 
 // NOLINTNEXTLINE(readability-function-size)
-std::string panda::pandasm::Ins::ToString(const std::string &endline, bool print_args /* = false */,
-                                          size_t first_arg_idx /* = 0*/) const {
-    std::string full_operation {};
-    std::string reg_case {};
-    if (this->set_label) {
-        full_operation += this->label +": ";
+std::string panda::pandasm::Ins::ToString(const std::string &endline, bool printArgs /* = false */,
+                                          size_t firstArgIdx /* = 0*/) const {
+    std::string fullOperation {};
+    std::string regCase {};
+    if (this->setLabel) {
+        fullOperation += this->label +": ";
     }
     switch(this->opcode) {
 
@@ -35,7 +35,7 @@ std::string panda::pandasm::Ins::ToString(const std::string &endline, bool print
 %  operands = insn.operands
 %  properties = insn.properties
         case panda::pandasm::Opcode::<%= insn.asm_token%>: {
-            full_operation += "<%= insn.mnemonic%>";
+            fullOperation += "<%= insn.mnemonic%>";
 % idx_imm = 0
 % idx_reg = 0
 % idx_ids = 0
@@ -44,34 +44,34 @@ std::string panda::pandasm::Ins::ToString(const std::string &endline, bool print
 % next if index == 0
 % #NOTE(knazarov): refactor next line
 % if (item.include?("id") || item.start_with?("imm") && insn.jump?)
-            full_operation += IdToString(<%= idx_ids%>, <%= index == 1 ? "true" : "false"%>);
+            fullOperation += IdToString(<%= idx_ids%>, <%= index == 1 ? "true" : "false"%>);
 %           idx_ids += 1
 % elsif item.start_with?("imm")
-            full_operation += ImmToString(<%= idx_imm%>, <%= index == 1 ? "true" : "false"%>);
+            fullOperation += ImmToString(<%= idx_imm%>, <%= index == 1 ? "true" : "false"%>);
 %           idx_imm += 1
 % elsif item.start_with?("v")
-            full_operation += RegToString(<%= idx_reg%>, <%= index == 1 ? "true" : "false"%>, print_args, first_arg_idx);
+            fullOperation += RegToString(<%= idx_reg%>, <%= index == 1 ? "true" : "false"%>, printArgs, firstArgIdx);
 %           idx_reg += 1
 % end
 % end
 % if insn.profiled?
-            full_operation += " # [prof=";
-            full_operation += std::to_string(profile_id);
-            full_operation += ']';
+            fullOperation += " # [prof=";
+            fullOperation += std::to_string(profileId);
+            fullOperation += ']';
 % end
         } break;
 % end
 % Panda::pseudo_instructions.each do |insn|
         case panda::pandasm::Opcode::<%= insn.opcode %>: {
-            full_operation += "<%= insn.opcode %>";
-            full_operation += this->OperandsToString(print_args, first_arg_idx);
+            fullOperation += "<%= insn.opcode %>";
+            fullOperation += this->OperandsToString(printArgs, firstArgIdx);
         } break;
 % end
         case panda::pandasm::Opcode::INVALID: {
-            full_operation += "";
+            fullOperation += "";
         } break;
     }
-    return full_operation + endline;
+    return fullOperation + endline;
 }
 
 } // namespace panda::pandasm

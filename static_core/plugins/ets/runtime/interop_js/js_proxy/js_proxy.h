@@ -28,11 +28,11 @@ namespace panda::ets::interop::js::js_proxy {
 
 class JSProxy {
 public:
-    static std::unique_ptr<JSProxy> Create(EtsClass *ets_class, Span<Method *> proxy_methods);
+    static std::unique_ptr<JSProxy> Create(EtsClass *etsClass, Span<Method *> proxyMethods);
 
     EtsClass *GetProxyClass() const
     {
-        return proxy_klass_;
+        return proxyKlass_;
     }
 
     static bool IsProxyClass(Class *klass)
@@ -40,7 +40,7 @@ public:
         // For class descriptor "Lname;" proxy descriptor is "L$name$;"
         const uint8_t *descriptor = klass->GetDescriptor();
         Span<const uint8_t> desc(descriptor, utf::Mutf8Size(descriptor));
-        return desc[0] == 'L' && desc[1] == '$' && desc[desc.size() - 1] == ';' && desc[desc.size() - 2] == '$';
+        return desc[0] == 'L' && desc[1] == '$' && desc[desc.size() - 1] == ';' && desc[desc.size() - 2U] == '$';
     }
 
     ~JSProxy() = default;
@@ -49,10 +49,10 @@ public:
     NO_MOVE_SEMANTIC(JSProxy);
 
 private:
-    explicit JSProxy(EtsClass *proxy_klass) : proxy_klass_(proxy_klass) {}
+    explicit JSProxy(EtsClass *proxyKlass) : proxyKlass_(proxyKlass) {}
 
-    EtsClass *const proxy_klass_ {};
-    std::unique_ptr<Method[]> proxy_methods_ {};  // NOLINT(modernize-avoid-c-arrays)
+    EtsClass *const proxyKlass_ {};
+    std::unique_ptr<Method[]> proxyMethods_ {};  // NOLINT(modernize-avoid-c-arrays)
     // NOTE(vpukhov): add flag if original class has final methods or public fields
     // NOTE(vpukhov): must ensure compat-class methods except accessors do not access its private state
 };

@@ -50,18 +50,18 @@ public:
 
     bool RunImpl() override;
 
-    void SetCheckNonCatchOnly(bool check_non_catch_only)
+    void SetCheckNonCatchOnly(bool checkNonCatchOnly)
     {
-        check_non_catch_only_ = check_non_catch_only;
+        checkNonCatchOnly_ = checkNonCatchOnly;
     }
 
 private:
-    void MarkedMonitorRec(BasicBlock *bb, int32_t num_monitors);
+    void MarkedMonitorRec(BasicBlock *bb, int32_t numMonitors);
 
     Marker marker_ {UNDEF_MARKER};
-    bool incorrect_monitors_ {false};
-    ArenaVector<uint32_t> *entered_monitors_count_ {nullptr};
-    bool check_non_catch_only_ {false};
+    bool incorrectMonitors_ {false};
+    ArenaVector<uint32_t> *enteredMonitorsCount_ {nullptr};
+    bool checkNonCatchOnly_ {false};
 };
 }  // namespace panda::compiler
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_MONITOR_ANALYSIS_H

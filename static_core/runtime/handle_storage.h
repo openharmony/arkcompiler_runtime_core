@@ -66,11 +66,11 @@ private:
 
     uintptr_t NewHandle(T value = 0);
 
-    void FreeHandles(uint32_t begin_idx);
+    void FreeHandles(uint32_t beginIdx);
 
     uintptr_t GetNodeAddress(uint32_t index) const;
 
-    uint32_t last_index_ {0};
+    uint32_t lastIndex_ {0};
     PandaVector<std::array<T, NODE_BLOCK_SIZE> *> nodes_;
     InternalAllocatorPtr allocator_ {nullptr};
     friend class ManagedThread;

@@ -32,19 +32,19 @@ struct VmaEntry {
     enum DebugInfoStatus { NOT_READ, VALID, BAD };
 
     // NOLINTNEXTLINE(modernize-pass-by-value)
-    VmaEntry(uintptr_t param_start_addr, uintptr_t param_end_addr, uintptr_t param_offset, const std::string &fname)
-        : start_addr(param_start_addr), end_addr(param_end_addr), offset(param_offset), filename(fname)
+    VmaEntry(uintptr_t paramStartAddr, uintptr_t paramEndAddr, uintptr_t paramOffset, const std::string &fname)
+        : startAddr(paramStartAddr), endAddr(paramEndAddr), offset(paramOffset), filename(fname)
     {
     }
 
     ~VmaEntry() = default;
 
-    uintptr_t start_addr;               // NOLINT(misc-non-private-member-variables-in-classes)
-    uintptr_t end_addr;                 // NOLINT(misc-non-private-member-variables-in-classes)
+    uintptr_t startAddr;                // NOLINT(misc-non-private-member-variables-in-classes)
+    uintptr_t endAddr;                  // NOLINT(misc-non-private-member-variables-in-classes)
     uintptr_t offset;                   // NOLINT(misc-non-private-member-variables-in-classes)
     std::string filename;               // NOLINT(misc-non-private-member-variables-in-classes)
     DebugInfoStatus status {NOT_READ};  // NOLINT(misc-non-private-member-variables-in-classes)
-    DebugInfo debug_info;               // NOLINT(misc-non-private-member-variables-in-classes)
+    DebugInfo debugInfo;                // NOLINT(misc-non-private-member-variables-in-classes)
 
     DEFAULT_MOVE_SEMANTIC(VmaEntry);
     NO_COPY_SEMANTIC(VmaEntry);
@@ -89,8 +89,8 @@ public:
     {
         os::memory::LockHolder lock(mutex_);
         ScanVma();
-        for (size_t frame_num = 0; frame_num < stacktrace.size(); ++frame_num) {
-            PrintFrame(frame_num, stacktrace[frame_num], out);
+        for (size_t frameNum = 0; frameNum < stacktrace.size(); ++frameNum) {
+            PrintFrame(frameNum, stacktrace[frameNum], out);
         }
         return out;
     }
@@ -102,11 +102,11 @@ private:
     explicit StackPrinter() = default;
     ~StackPrinter() = default;
 
-    void PrintFrame(size_t frame_num, uintptr_t pc, std::ostream &out)
+    void PrintFrame(size_t frameNum, uintptr_t pc, std::ostream &out)
     {
         std::ios_base::fmtflags f = out.flags();
         auto w = out.width();
-        out << "#" << std::setw(2U) << std::left << frame_num << ": 0x" << std::hex << pc << " ";
+        out << "#" << std::setw(2U) << std::left << frameNum << ": 0x" << std::hex << pc << " ";
         out.flags(f);
         out.width(w);
 
@@ -117,15 +117,15 @@ private:
             vma = FindVma(pc);
         }
         if (vma != nullptr) {
-            uintptr_t pc_offset = pc - vma->start_addr + vma->offset;
+            uintptr_t pcOffset = pc - vma->startAddr + vma->offset;
             // pc points to the instruction after the call
             // Decrement pc to get source line number pointing to the function call
-            --pc_offset;
+            --pcOffset;
             std::string function;
-            std::string src_file;
+            std::string srcFile;
             unsigned int line = 0;
-            if (ReadDebugInfo(vma) && vma->debug_info.GetSrcLocation(pc_offset, &function, &src_file, &line)) {
-                PrintFrame(function, src_file, line, out);
+            if (ReadDebugInfo(vma) && vma->debugInfo.GetSrcLocation(pcOffset, &function, &srcFile, &line)) {
+                PrintFrame(function, srcFile, line, out);
                 return;
             }
             uintptr_t offset = 0;
@@ -137,7 +137,7 @@ private:
         out << "??:??\n";
     }
 
-    void PrintFrame(const std::string &function, const std::string &src_file, unsigned int line, std::ostream &out)
+    void PrintFrame(const std::string &function, const std::string &srcFile, unsigned int line, std::ostream &out)
     {
         if (function.empty()) {
             out << "??";
@@ -145,10 +145,10 @@ private:
             Demangle(function, out);
         }
         out << "\n     at ";
-        if (src_file.empty()) {
+        if (srcFile.empty()) {
             out << "??";
         } else {
-            out << src_file;
+            out << srcFile;
         }
         out << ":";
         if (line == 0) {
@@ -183,10 +183,10 @@ private:
     {
         size_t length = 0;
         int status = 0;
-        char *demangled_function = abi::__cxa_demangle(function.c_str(), nullptr, &length, &status);
+        char *demangledFunction = abi::__cxa_demangle(function.c_str(), nullptr, &length, &status);
         if (status == 0) {
-            out << demangled_function;
-            free(demangled_function);  // NOLINT(cppcoreguidelines-no-malloc)
+            out << demangledFunction;
+            free(demangledFunction);  // NOLINT(cppcoreguidelines-no-malloc)
         } else {
             out << function;
         }
@@ -196,8 +196,8 @@ private:
     {
         VmaEntry el(pc, pc, 0, "");
         auto it = std::upper_bound(vmas_.begin(), vmas_.end(), el,
-                                   [](const VmaEntry &e1, const VmaEntry &e2) { return e1.end_addr < e2.end_addr; });
-        if (it != vmas_.end() && (it->start_addr <= pc && pc < it->end_addr)) {
+                                   [](const VmaEntry &e1, const VmaEntry &e2) { return e1.endAddr < e2.endAddr; });
+        if (it != vmas_.end() && (it->startAddr <= pc && pc < it->endAddr)) {
             return &(*it);
         }
         return nullptr;
@@ -211,7 +211,7 @@ private:
         if (vma->status == VmaEntry::BAD) {
             return false;
         }
-        if (!vma->filename.empty() && vma->debug_info.ReadFromFile(vma->filename.c_str()) == DebugInfo::SUCCESS) {
+        if (!vma->filename.empty() && vma->debugInfo.ReadFromFile(vma->filename.c_str()) == DebugInfo::SUCCESS) {
             vma->status = VmaEntry::VALID;
             return true;
         }
@@ -238,16 +238,16 @@ private:
             std::string line;
             std::getline(maps, line);
             Tokenizer tokenizer(line);
-            std::string start_addr = tokenizer.Next('-');
-            std::string end_addr = tokenizer.Next();
+            std::string startAddr = tokenizer.Next('-');
+            std::string endAddr = tokenizer.Next();
             std::string rights = tokenizer.Next();
             if (rights.length() == MODE_FIELD_LEN && rights[XMODE_POS] == 'x') {
                 std::string offset = tokenizer.Next();
                 tokenizer.Next();
                 tokenizer.Next();
-                std::string obj_filename = tokenizer.Next();
-                vmas_.emplace_back(stoul(start_addr, nullptr, HEX_RADIX), stoul(end_addr, nullptr, HEX_RADIX),
-                                   stoul(offset, nullptr, HEX_RADIX), obj_filename);
+                std::string objFilename = tokenizer.Next();
+                vmas_.emplace_back(stoul(startAddr, nullptr, HEX_RADIX), stoul(endAddr, nullptr, HEX_RADIX),
+                                   stoul(offset, nullptr, HEX_RADIX), objFilename);
             }
         }
     }
@@ -300,13 +300,13 @@ static _Unwind_Reason_Code FrameHandler(struct _Unwind_Context *ctx, [[maybe_unu
 static size_t GetStacktrace(uintptr_t *buf, size_t size)
 {
     static constexpr int SKIP_FRAMES = 2;  // backtrace
-    Buf buf_wrapper(buf, SKIP_FRAMES, size);
-    _Unwind_Reason_Code res = _Unwind_Backtrace(FrameHandler, &buf_wrapper);
-    if (res != _URC_END_OF_STACK || buf_wrapper.Size() < 0) {
+    Buf bufWrapper(buf, SKIP_FRAMES, size);
+    _Unwind_Reason_Code res = _Unwind_Backtrace(FrameHandler, &bufWrapper);
+    if (res != _URC_END_OF_STACK || bufWrapper.Size() < 0) {
         return 0;
     }
 
-    return buf_wrapper.Size();
+    return bufWrapper.Size();
 }
 
 std::vector<uintptr_t> GetStacktrace()

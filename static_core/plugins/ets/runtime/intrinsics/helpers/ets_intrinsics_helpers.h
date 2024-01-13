@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <type_traits>
 #include "libpandabase/utils/bit_helpers.h"
+#include "libpandabase/utils/utils.h"
 #include "intrinsics.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -103,31 +104,31 @@ inline uint8_t ToDigit(uint8_t c)
 
 inline double PowHelper(uint64_t number, int16_t exponent, uint8_t radix)
 {
-    const double log_2_radix {std::log2(radix)};
+    const double log2Radix {std::log2(radix)};
 
-    double exp_rem = log_2_radix * exponent;
-    int exp_i = static_cast<int>(exp_rem);
-    exp_rem = exp_rem - exp_i;
+    double expRem = log2Radix * exponent;
+    int expI = static_cast<int>(expRem);
+    expRem = expRem - expI;
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    DoubleValUnion u = {static_cast<double>(number) * std::pow(2.0, exp_rem)};
+    DoubleValUnion u = {static_cast<double>(number) * std::pow(2.0, expRem)};
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    exp_i = u.bits.exponent + exp_i;
-    if (((exp_i & ~coretypes::DOUBLE_EXPONENT_MASK) != 0) || exp_i == 0) {  // NOLINT(hicpp-signed-bitwise)
-        if (exp_i > 0) {
+    expI = u.bits.exponent + expI;
+    if (((expI & ~coretypes::DOUBLE_EXPONENT_MASK) != 0) || expI == 0) {  // NOLINT(hicpp-signed-bitwise)
+        if (expI > 0) {
             return std::numeric_limits<double>::infinity();
         }
-        if (exp_i < -static_cast<int>(coretypes::DOUBLE_SIGNIFICAND_SIZE)) {
+        if (expI < -static_cast<int>(coretypes::DOUBLE_SIGNIFICAND_SIZE)) {
             return -std::numeric_limits<double>::infinity();
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         u.bits.exponent = 0;
         // NOLINTNEXTLINE(hicpp-signed-bitwise, cppcoreguidelines-pro-type-union-access)
-        u.bits.significand = (u.bits.significand | coretypes::DOUBLE_HIDDEN_BIT) >> (1 - exp_i);
+        u.bits.significand = (u.bits.significand | coretypes::DOUBLE_HIDDEN_BIT) >> (1 - expI);
     } else {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        u.bits.exponent = exp_i;
+        u.bits.exponent = expI;
     }
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
@@ -156,10 +157,10 @@ inline bool GotoNonspace(uint8_t **ptr, const uint8_t *end)
         size_t size = 1;
         if (c > INT8_MAX) {
             size = 0;
-            uint16_t utf8_bit = INT8_MAX + 1;  // equal 0b1000'0000
-            while (utf8_bit > 0 && (c & utf8_bit) == utf8_bit) {
+            uint16_t utf8Bit = INT8_MAX + 1;  // equal 0b1000'0000
+            while (utf8Bit > 0 && (c & utf8Bit) == utf8Bit) {
                 ++size;
-                utf8_bit >>= 1UL;
+                utf8Bit >>= 1UL;
             }
             if (utf::ConvertRegionUtf8ToUtf16(*ptr, &c, end - *ptr, 1, 0) <= 0) {
                 return true;
@@ -186,7 +187,7 @@ inline double Strtod(const char *str, int exponent, uint8_t radix)
     auto p = const_cast<char *>(str);
     Sign sign = Sign::NONE;
     uint64_t number = 0;
-    uint64_t number_max = (UINT64_MAX - (radix - 1)) / radix;
+    uint64_t numberMax = (UINT64_MAX - (radix - 1)) / radix;
     double result = 0.0;
     if (*p == '-') {
         sign = Sign::NEG;
@@ -200,7 +201,7 @@ inline double Strtod(const char *str, int exponent, uint8_t radix)
         if (digit >= radix) {
             break;
         }
-        if (number < number_max) {
+        if (number < numberMax) {
             number = number * radix + digit;
         } else {
             ++exponent;
@@ -236,7 +237,7 @@ FpType TruncateFp(FpType number)
 }
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
-PandaString DecimalsToString(FpType *number_integer, FpType fraction, int radix, FpType delta)
+PandaString DecimalsToString(FpType *numberInteger, FpType fraction, int radix, FpType delta)
 {
     PandaString result;
     while (fraction >= delta) {
@@ -246,17 +247,17 @@ PandaString DecimalsToString(FpType *number_integer, FpType fraction, int radix,
         fraction -= integer;
         result += CHARS[integer];
         if (fraction > HALF && fraction + delta > 1) {
-            size_t fraction_end = result.size() - 1;
-            result[fraction_end] = Carry(*result.rbegin(), radix);
-            for (; fraction_end > 0; fraction_end--) {
-                if (result[fraction_end] == '0') {
-                    result[fraction_end - 1] = Carry(result[fraction_end - 1], radix);
+            size_t fractionEnd = result.size() - 1;
+            result[fractionEnd] = Carry(*result.rbegin(), radix);
+            for (; fractionEnd > 0; fractionEnd--) {
+                if (result[fractionEnd] == '0') {
+                    result[fractionEnd - 1] = Carry(result[fractionEnd - 1], radix);
                 } else {
                     break;
                 }
             }
-            if (fraction_end == 0) {
-                (*number_integer)++;
+            if (fractionEnd == 0) {
+                (*numberInteger)++;
             }
             break;
         }
@@ -290,30 +291,30 @@ PandaString IntegerToString(FpType number, int radix)
 }
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
-FpType StrToFp(char *str, char **str_end)
+FpType StrToFp(char *str, char **strEnd)
 {
     if constexpr (std::is_same_v<FpType, double>) {
-        return std::strtod(str, str_end);
+        return std::strtod(str, strEnd);
     } else {
-        return std::strtof(str, str_end);
+        return std::strtof(str, strEnd);
     }
 }
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
-void GetBase(FpType d, int digits, int *decpt, char *buf, char *buf_tmp, int size)
+void GetBase(FpType d, int digits, int *decpt, char *buf, char *bufTmp, int size)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    int result = snprintf_s(buf_tmp, size, size - 1, "%+.*e", digits - 1, d);
+    int result = snprintf_s(bufTmp, size, size - 1, "%+.*e", digits - 1, d);
     if (result == -1) {
         LOG(FATAL, ETS) << "snprintf_s failed";
         UNREACHABLE();
     }
     // mantissa
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    buf[0] = buf_tmp[1];
+    buf[0] = bufTmp[1];
     if (digits > 1) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (memcpy_s(buf + 1, digits, buf_tmp + 2, digits) != EOK) {  // 2 means add the point char to buf
+        if (memcpy_s(buf + 1U, digits, bufTmp + 2U, digits) != EOK) {  // 2 means add the point char to buf
             LOG(FATAL, ETS) << "snprintf_s failed";
             UNREACHABLE();
         }
@@ -321,11 +322,11 @@ void GetBase(FpType d, int digits, int *decpt, char *buf, char *buf_tmp, int siz
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     buf[digits + 1] = '\0';
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    char *end_buf = buf_tmp + size;
-    const int positive = (digits > 1) ? 1 : 0;
+    char *endBuf = bufTmp + size;
+    const size_t positive = (digits > 1) ? 1 : 0;
     // exponent
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    *decpt = std::strtol(buf_tmp + digits + 2 + positive, &end_buf, TEN) + 1;  // 2 means ignore the integer and point
+    *decpt = std::strtol(bufTmp + digits + 2U + positive, &endBuf, TEN) + 1;  // 2 means ignore the integer and point
 }
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
@@ -334,31 +335,31 @@ int GetMinmumDigits(FpType d, int *decpt, char *buf)
     int digits = 0;
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char buf_tmp[BUF_SIZE] = {0};
+    char bufTmp[BUF_SIZE] = {0};
 
     // find the minimum amount of digits
-    int min_digits = 1;
-    int max_digits = std::is_same_v<FpType, double> ? DOUBLE_MAX_PRECISION : FLOAT_MAX_PRECISION;
+    int minDigits = 1;
+    int maxDigits = std::is_same_v<FpType, double> ? DOUBLE_MAX_PRECISION : FLOAT_MAX_PRECISION;
 
-    while (min_digits < max_digits) {
-        digits = (min_digits + max_digits) / 2;
-        GetBase(d, digits, decpt, buf, buf_tmp, sizeof(buf_tmp));
+    while (minDigits < maxDigits) {
+        digits = (minDigits + maxDigits) / 2_I;
+        GetBase(d, digits, decpt, buf, bufTmp, sizeof(bufTmp));
 
-        bool same = StrToFp<FpType>(buf_tmp, nullptr) == d;
+        bool same = StrToFp<FpType>(bufTmp, nullptr) == d;
 
         if (same) {
             // no need to keep the trailing zeros
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            while (digits >= 2 && buf[digits] == '0') {  // 2 means ignore the integer and point
+            while (digits >= 2_I && buf[digits] == '0') {  // 2 means ignore the integer and point
                 digits--;
             }
-            max_digits = digits;
+            maxDigits = digits;
         } else {
-            min_digits = digits + 1;
+            minDigits = digits + 1;
         }
     }
-    digits = max_digits;
-    GetBase(d, digits, decpt, buf, buf_tmp, sizeof(buf_tmp));
+    digits = maxDigits;
+    GetBase(d, digits, decpt, buf, bufTmp, sizeof(bufTmp));
 
     return digits;
 }
@@ -384,22 +385,22 @@ EtsString *FpToStringDecimalRadix(FpType number)
 
     if (MIN_BOUND <= number && number < 1) {  // 0.1: 10 ** -1
         // Fast path. In this case, n==0, just need to calculate k and s.
-        PandaString result_fast = "0.";
-        SignedIntType s_fast = 0;
-        int k_fast = 1;
+        PandaString resultFast = "0.";
+        SignedIntType sFast = 0;
+        int kFast = 1;
         SignedIntType power = 1;
-        while (k_fast <= helpers::FLOAT_MAX_PRECISION) {
-            power *= TEN;                                                       // 10: base 10
-            int digit_fast = static_cast<SignedIntType>(number * power) % TEN;  // 10: base 10
-            ASSERT(0 <= digit_fast && digit_fast <= 9);                         // 9: single digit max
-            s_fast = s_fast * TEN + digit_fast;                                 // 10: base 10
-            result_fast += ToPandaString(digit_fast);
-            if (s_fast / static_cast<FpType>(power) == number) {  // s * (10 ** -k)
+        while (kFast <= helpers::FLOAT_MAX_PRECISION) {
+            power *= TEN;                                                      // 10: base 10
+            int digitFast = static_cast<SignedIntType>(number * power) % TEN;  // 10: base 10
+            ASSERT(0 <= digitFast && digitFast <= 9);                          // 9: single digit max
+            sFast = sFast * TEN + digitFast;                                   // 10: base 10
+            resultFast += ToPandaString(digitFast);
+            if (sFast / static_cast<FpType>(power) == number) {  // s * (10 ** -k)
                 break;
             }
-            k_fast++;
+            kFast++;
         }
-        result += result_fast;
+        result += resultFast;
         return EtsString::CreateFromMUtf8(result.c_str());
     }
 
@@ -409,7 +410,7 @@ EtsString *FpToStringDecimalRadix(FpType number)
     int n = 0;
     int k = GetMinmumDigits(number, &n, buffer);
     PandaString base = buffer;
-    if (n > 0 && n <= 21) {  // NOLINT(readability-magic-numbers)
+    if (n > 0 && n <= 21_I) {  // NOLINT(readability-magic-numbers)
         base.erase(1, 1);
         if (k <= n) {
             // 6. If k ≤ n ≤ 21, return the String consisting of the code units of the k digits of the decimal
@@ -422,7 +423,7 @@ EtsString *FpToStringDecimalRadix(FpType number)
             // the remaining k−n digits of the decimal representation of s.
             base.insert(n, 1, '.');
         }
-    } else if (-6 < n && n <= 0) {  // NOLINT(readability-magic-numbers)
+    } else if (-6_I < n && n <= 0) {  // NOLINT(readability-magic-numbers)
         // 8. If −6 < n ≤ 0, return the String consisting of the code unit 0x0030 (DIGIT ZERO), followed by the code
         // unit 0x002E (FULL STOP), followed by −n occurrences of the code unit 0x0030 (DIGIT ZERO), followed by the
         // code units of the k digits of the decimal representation of s.
@@ -481,8 +482,8 @@ EtsString *FpToString(FpType number, int radix)
         number = -number;
     }
 
-    FpType integral_part;
-    FpType number_fraction = std::modf(number, &integral_part);
+    FpType integralPart;
+    FpType numberFraction = std::modf(number, &integralPart);
 
     auto value = bit_cast<UnsignedIntType>(number);
     value += 1;
@@ -493,12 +494,12 @@ EtsString *FpToString(FpType number, int radix)
     }
 
     PandaString result;
-    if (number_fraction != 0 && number_fraction >= delta) {
+    if (numberFraction != 0 && numberFraction >= delta) {
         result += ".";
-        result += DecimalsToString<FpType>(&integral_part, number_fraction, radix, delta);
+        result += DecimalsToString<FpType>(&integralPart, numberFraction, radix, delta);
     }
 
-    result = IntegerToString(integral_part, radix) + result;
+    result = IntegerToString(integralPart, radix) + result;
 
     if (negative) {
         result = "-" + result;

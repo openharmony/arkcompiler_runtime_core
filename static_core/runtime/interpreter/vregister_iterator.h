@@ -23,10 +23,10 @@ public:
     // NOLINTNEXTLINE(performance-move-const-arg)
     explicit VRegisterIterator(BytecodeInstruction insn, Frame *frame) : instn_(std::move(insn)), frame_(frame) {}
 
-    ALWAYS_INLINE size_t GetVRegIdx(size_t param_idx) const
+    ALWAYS_INLINE size_t GetVRegIdx(size_t paramIdx) const
     {
         if constexpr (BytecodeInstruction::IsVregArgsShort(FORMAT)) {
-            switch (param_idx) {
+            switch (paramIdx) {
                 case 0: {
                     return instn_.GetVReg<FORMAT, 0>();
                 }
@@ -37,24 +37,24 @@ public:
                     UNREACHABLE();
             }
         } else if constexpr (BytecodeInstruction::IsVregArgs(FORMAT)) {
-            switch (param_idx) {
-                case 0: {
-                    return instn_.GetVReg<FORMAT, 0>();
+            switch (paramIdx) {
+                case 0U: {
+                    return instn_.GetVReg<FORMAT, 0U>();
                 }
-                case 1: {
-                    return instn_.GetVReg<FORMAT, 1>();
+                case 1U: {
+                    return instn_.GetVReg<FORMAT, 1U>();
                 }
-                case 2: {
-                    return instn_.GetVReg<FORMAT, 2>();
+                case 2U: {
+                    return instn_.GetVReg<FORMAT, 2U>();
                 }
-                case 3: {
-                    return instn_.GetVReg<FORMAT, 3>();
+                case 3U: {
+                    return instn_.GetVReg<FORMAT, 3U>();
                 }
                 default:
                     UNREACHABLE();
             }
         } else if constexpr (BytecodeInstruction::IsVregArgsRange(FORMAT)) {
-            return instn_.GetVReg<FORMAT, 0>() + param_idx;
+            return instn_.GetVReg<FORMAT, 0>() + paramIdx;
         } else {
             UNREACHABLE();
             return SIZE_MAX;
@@ -62,9 +62,9 @@ public:
     }
 
     template <class T>
-    ALWAYS_INLINE T GetAs(size_t param_idx) const
+    ALWAYS_INLINE T GetAs(size_t paramIdx) const
     {
-        return frame_->GetVReg(GetVRegIdx(param_idx)).template GetAs<T>();
+        return frame_->GetVReg(GetVRegIdx(paramIdx)).template GetAs<T>();
     }
 
 private:
@@ -78,9 +78,9 @@ public:
     // NOLINTNEXTLINE(performance-move-const-arg)
     explicit DimIterator(BytecodeInstruction insn, Frame *frame) : VRegisterIterator<FORMAT>(std::move(insn), frame) {}
 
-    int32_t Get(size_t param_idx) const
+    int32_t Get(size_t paramIdx) const
     {
-        return this->template GetAs<int32_t>(param_idx);
+        return this->template GetAs<int32_t>(paramIdx);
     }
 };
 

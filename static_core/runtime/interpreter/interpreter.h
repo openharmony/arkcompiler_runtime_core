@@ -22,7 +22,7 @@
 
 namespace panda::interpreter {
 
-void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jump_to_eh = false);
+void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh = false);
 
 }  // namespace panda::interpreter
 

@@ -112,12 +112,12 @@ struct Ins {
     std::vector<std::string> ids;    /* list of arguments - identifiers */
     std::vector<IType> imms;         /* list of arguments - immediates */
     std::string label;               /* label at the beginning of a line */
-    bool set_label = false;          /* whether this label is defined */
-    debuginfo::Ins ins_debug;
-    uint16_t profile_id {0}; /* Index in the profile vector */
+    bool setLabel = false;           /* whether this label is defined */
+    debuginfo::Ins insDebug;
+    uint16_t profileId {0}; /* Index in the profile vector */
 
-    PANDA_PUBLIC_API std::string ToString(const std::string &endline = "", bool print_args = false,
-                                          size_t first_arg_idx = 0) const;
+    PANDA_PUBLIC_API std::string ToString(const std::string &endline = "", bool printArgs = false,
+                                          size_t firstArgIdx = 0) const;
 
     bool Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
@@ -194,12 +194,12 @@ struct Ins {
             return {};
         }
 
-        auto use_idxs = USE_IDXS_TABLE[static_cast<size_t>(opcode)];
+        auto useIdxs = USE_IDXS_TABLE[static_cast<size_t>(opcode)];
         std::vector<uint16_t> res(MAX_NUMBER_OF_SRC_REGS + 1);
         if (HasFlag(InstFlags::ACC_READ)) {
             res.push_back(Ins::ACCUMULATOR);
         }
-        for (auto idx : use_idxs) {
+        for (auto idx : useIdxs) {
             if (idx == INVALID_REG_IDX) {
                 break;
             }
@@ -214,9 +214,9 @@ struct Ins {
         if (opcode == Opcode::INVALID) {
             return {};
         }
-        auto def_idx = DEF_IDX_TABLE[static_cast<size_t>(opcode)];
-        if (def_idx != INVALID_REG_IDX) {
-            return regs[def_idx];
+        auto defIdx = DEF_IDX_TABLE[static_cast<size_t>(opcode)];
+        if (defIdx != INVALID_REG_IDX) {
+            return regs[defIdx];
         }
         if (HasFlag(InstFlags::ACC_WRITE)) {
             return Ins::ACCUMULATOR;
@@ -226,9 +226,9 @@ struct Ins {
 
     bool IsValidToEmit() const
     {
-        const auto invalid_reg_num = 1U << MaxRegEncodingWidth();
+        const auto invalidRegNum = 1U << MaxRegEncodingWidth();
         for (auto reg : regs) {
-            if (reg >= invalid_reg_num) {
+            if (reg >= invalidRegNum) {
                 return false;
             }
         }
@@ -237,18 +237,18 @@ struct Ins {
 
     bool HasDebugInfo() const
     {
-        return ins_debug.line_number != 0;
+        return insDebug.lineNumber != 0;
     }
 
 private:
-    std::string OperandsToString(bool print_args = false, size_t first_arg_idx = 0) const;
-    std::string RegsToString(bool &first, bool print_args = false, size_t first_arg_idx = 0) const;
+    std::string OperandsToString(bool printArgs = false, size_t firstArgIdx = 0) const;
+    std::string RegsToString(bool &first, bool printArgs = false, size_t firstArgIdx = 0) const;
     std::string ImmsToString(bool &first) const;
     std::string IdsToString(bool &first) const;
 
-    std::string IdToString(size_t idx, bool is_first) const;
-    std::string ImmToString(size_t idx, bool is_first) const;
-    std::string RegToString(size_t idx, bool is_first, bool print_args = false, size_t first_arg_idx = 0) const;
+    std::string IdToString(size_t idx, bool isFirst) const;
+    std::string ImmToString(size_t idx, bool isFirst) const;
+    std::string RegToString(size_t idx, bool isFirst, bool printArgs = false, size_t firstArgIdx = 0) const;
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 

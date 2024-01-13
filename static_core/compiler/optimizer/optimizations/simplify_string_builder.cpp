@@ -36,7 +36,7 @@ SimplifyStringBuilder::SimplifyStringBuilder(Graph *graph) : Optimization(graph)
 
 bool SimplifyStringBuilder::RunImpl()
 {
-    is_applied_ = false;
+    isApplied_ = false;
     for (auto block : GetGraph()->GetBlocksRPO()) {
         if (block->IsEmpty()) {
             continue;
@@ -44,7 +44,7 @@ bool SimplifyStringBuilder::RunImpl()
         VisitBlock(block);
     }
     COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Simplify StringBuilder complete";
-    return is_applied_;
+    return isApplied_;
 }
 
 void SimplifyStringBuilder::InvalidateAnalyses()
@@ -102,17 +102,17 @@ bool IsDataFlowInput(Inst *inst, Inst *input)
 bool IsUsedOutsideBasicBlock(Inst *inst, BasicBlock *bb)
 {
     for (auto &user : inst->GetUsers()) {
-        auto user_inst = user.GetInst();
-        if (user_inst->IsCheck()) {
-            if (!user_inst->HasSingleUser()) {
+        auto userInst = user.GetInst();
+        if (userInst->IsCheck()) {
+            if (!userInst->HasSingleUser()) {
                 // In case of multi user check-instruction we assume it is used outside current basic block without
                 // actually testing it.
                 return true;
             }
             // In case of signle user check-instruction we test its the only user.
-            user_inst = user_inst->GetUsers().Front().GetInst();
+            userInst = userInst->GetUsers().Front().GetInst();
         }
-        if (user_inst->GetBasicBlock() != bb) {
+        if (userInst->GetBasicBlock() != bb) {
             return true;
         }
     }
@@ -129,16 +129,16 @@ void SimplifyStringBuilder::VisitBlock(BasicBlock *block)
     InstIter inst = block->Insts().begin();
     while ((inst = SkipToStringBuilderConstructor(inst, block->Insts().end())) != block->Insts().end()) {
         ASSERT((*inst)->IsStaticCall());
-        auto ctor_call = (*inst)->CastToCallStatic();
+        auto ctorCall = (*inst)->CastToCallStatic();
 
         // void StringBuilder::<ctor> instance, arg, save_state
-        ASSERT(ctor_call->GetInputsCount() == CONSTRUCTOR_WITH_STRING_ARG_TOTAL_ARGS_NUM);
-        auto instance = ctor_call->GetInput(0).GetInst();
-        auto arg = ctor_call->GetInput(1).GetInst();
+        ASSERT(ctorCall->GetInputsCount() == CONSTRUCTOR_WITH_STRING_ARG_TOTAL_ARGS_NUM);
+        auto instance = ctorCall->GetInput(0).GetInst();
+        auto arg = ctorCall->GetInput(1).GetInst();
 
         // Look for StringBuilder usages within current basic block
-        auto next_inst = block->Insts().end();
-        bool remove_ctor = true;
+        auto nextInst = block->Insts().end();
+        bool removeCtor = true;
         for (++inst; inst != block->Insts().end(); ++inst) {
             // Skip SaveState instructions
             if ((*inst)->IsSaveState()) {
@@ -153,7 +153,7 @@ void SimplifyStringBuilder::VisitBlock(BasicBlock *block)
             // Continue (outer loop) with the next StringBuilder constructor,
             // in case we met one in inner loop
             if (IsMethodStringBuilderConstructorWithStringArg(*inst)) {
-                next_inst = next_inst != block->Insts().end() ? next_inst : inst;
+                nextInst = nextInst != block->Insts().end() ? nextInst : inst;
             }
 
             if (!IsDataFlowInput(*inst, instance)) {
@@ -167,22 +167,22 @@ void SimplifyStringBuilder::VisitBlock(BasicBlock *block)
                 (*inst)->ClearFlag(compiler::inst_flags::NO_DCE);
                 COMPILER_LOG(DEBUG, SIMPLIFY_SB)
                     << "Remove StringBuilder toString()-call (id=" << (*inst)->GetId() << ")";
-                is_applied_ = true;
+                isApplied_ = true;
             } else {
-                remove_ctor = false;
+                removeCtor = false;
                 break;
             }
         }
 
         // Remove StringBuilder constructor unless it has usages
-        if (remove_ctor && !IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
-            ctor_call->ClearFlag(compiler::inst_flags::NO_DCE);
-            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Remove StringBuilder constructor (id=" << ctor_call->GetId() << ")";
-            is_applied_ = true;
+        if (removeCtor && !IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
+            ctorCall->ClearFlag(compiler::inst_flags::NO_DCE);
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Remove StringBuilder constructor (id=" << ctorCall->GetId() << ")";
+            isApplied_ = true;
         }
 
         // Proceed to the next StringBuilder constructor
-        inst = next_inst != block->Insts().end() ? next_inst : inst;
+        inst = nextInst != block->Insts().end() ? nextInst : inst;
     }
 }
 

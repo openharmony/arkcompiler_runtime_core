@@ -75,20 +75,20 @@ public:
      * Construct BumpPointer allocator with provided pool
      * @param pool - pool
      */
-    explicit BumpPointerAllocator(Pool pool, SpaceType type_allocation, MemStatsType *mem_stats,
-                                  size_t tlabs_max_count = 0);
+    explicit BumpPointerAllocator(Pool pool, SpaceType typeAllocation, MemStatsType *memStats,
+                                  size_t tlabsMaxCount = 0);
 
     [[nodiscard]] void *Alloc(size_t size, Alignment alignment = panda::DEFAULT_ALIGNMENT);
 
-    void VisitAndRemoveAllPools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveAllPools(const MemVisitor &memVisitor);
 
-    void VisitAndRemoveFreePools(const MemVisitor &mem_visitor);
+    void VisitAndRemoveFreePools(const MemVisitor &memVisitor);
 
     /**
      * @brief Iterates over all objects allocated by this allocator
      * @param object_visitor
      */
-    void IterateOverObjects(const std::function<void(ObjectHeader *object_header)> &object_visitor);
+    void IterateOverObjects(const std::function<void(ObjectHeader *objectHeader)> &objectVisitor);
 
     /**
      * @brief Iterates over objects in the range inclusively.
@@ -98,7 +98,7 @@ public:
      * @param right_border - a pointer to the last byte of the range
      */
     template <typename MemVisitor>
-    void IterateOverObjectsInRange(const MemVisitor &mem_visitor, void *left_border, void *right_border);
+    void IterateOverObjectsInRange(const MemVisitor &memVisitor, void *leftBorder, void *rightBorder);
 
     /// Resets to the "all clear" state
     void Reset();
@@ -119,7 +119,7 @@ public:
 
     // BumpPointer allocator can't be used for simple collection.
     // Only for CollectAndMove.
-    void Collect(GCObjectVisitor death_checker_fn) = delete;
+    void Collect(GCObjectVisitor deathCheckerFn) = delete;
 
     /**
      * Collects dead objects and move alive with provided visitor
@@ -127,7 +127,7 @@ public:
      * @param object_move_visitor - object visitor
      */
     template <typename ObjectMoveVisitorT>
-    void CollectAndMove(const GCObjectVisitor &death_checker, const ObjectMoveVisitorT &object_move_visitor);
+    void CollectAndMove(const GCObjectVisitor &deathChecker, const ObjectMoveVisitorT &objectMoveVisitor);
 
     static constexpr AllocatorType GetAllocatorType()
     {
@@ -141,21 +141,21 @@ public:
 private:
     class TLABsManager {
     public:
-        explicit TLABsManager(size_t tlabs_max_count) : tlabs_max_count_(tlabs_max_count), tlabs_(tlabs_max_count) {}
+        explicit TLABsManager(size_t tlabsMaxCount) : tlabsMaxCount_(tlabsMaxCount), tlabs_(tlabsMaxCount) {}
 
         void Reset()
         {
-            for (size_t i = 0; i < cur_tlab_num_; i++) {
+            for (size_t i = 0; i < curTlabNum_; i++) {
                 tlabs_[i].Fill(nullptr, 0);
             }
-            cur_tlab_num_ = 0;
-            tlabs_occupied_size_ = 0;
+            curTlabNum_ = 0;
+            tlabsOccupiedSize_ = 0;
         }
 
         TLAB *GetUnusedTLABInstance()
         {
-            if (cur_tlab_num_ < tlabs_max_count_) {
-                return &tlabs_[cur_tlab_num_++];
+            if (curTlabNum_ < tlabsMaxCount_) {
+                return &tlabs_[curTlabNum_++];
             }
             return nullptr;
         }
@@ -163,7 +163,7 @@ private:
         template <class Visitor>
         void IterateOverTLABs(const Visitor &visitor)
         {
-            for (size_t i = 0; i < cur_tlab_num_; i++) {
+            for (size_t i = 0; i < curTlabNum_; i++) {
                 if (!visitor(&tlabs_[i])) {
                     return;
                 }
@@ -172,27 +172,27 @@ private:
 
         size_t GetTLABsOccupiedSize()
         {
-            return tlabs_occupied_size_;
+            return tlabsOccupiedSize_;
         }
 
         void IncreaseTLABsOccupiedSize(size_t size)
         {
-            tlabs_occupied_size_ += size;
+            tlabsOccupiedSize_ += size;
         }
 
     private:
-        size_t cur_tlab_num_ {0};
-        size_t tlabs_max_count_;
+        size_t curTlabNum_ {0};
+        size_t tlabsMaxCount_;
         std::vector<TLAB> tlabs_;
-        size_t tlabs_occupied_size_ {0};
+        size_t tlabsOccupiedSize_ {0};
     };
 
     // Mutex, which allows only one thread to Alloc/Free/Collect/Iterate inside this allocator
-    LockConfigT allocator_lock_;
+    LockConfigT allocatorLock_;
     Arena arena_;
-    TLABsManager tlab_manager_;
-    SpaceType type_allocation_;
-    MemStatsType *mem_stats_;
+    TLABsManager tlabManager_;
+    SpaceType typeAllocation_;
+    MemStatsType *memStats_;
 };
 
 }  // namespace panda::mem

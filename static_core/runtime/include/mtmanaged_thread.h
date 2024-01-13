@@ -24,10 +24,10 @@ public:
 
     PANDA_PUBLIC_API static MTManagedThread *Create(
         Runtime *runtime, PandaVM *vm,
-        panda::panda_file::SourceLang thread_lang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        panda::panda_file::SourceLang threadLang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
 
     explicit MTManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
-                             panda::panda_file::SourceLang thread_lang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+                             panda::panda_file::SourceLang threadLang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
     ~MTManagedThread() override;
 
     MonitorPool *GetMonitorPool();
@@ -45,12 +45,12 @@ public:
 
     ThreadStatus GetWaitingMonitorOldStatus()
     {
-        return monitor_old_status_;
+        return monitorOldStatus_;
     }
 
     void SetWaitingMonitorOldStatus(ThreadStatus status)
     {
-        monitor_old_status_ = status;
+        monitorOldStatus_ = status;
     }
 
     void FreeInternalMemory() override;
@@ -59,27 +59,27 @@ public:
 
     Monitor *GetWaitingMonitor()
     {
-        return waiting_monitor_;
+        return waitingMonitor_;
     }
 
     void SetWaitingMonitor(Monitor *monitor)
     {
-        ASSERT(waiting_monitor_ == nullptr || monitor == nullptr);
-        waiting_monitor_ = monitor;
+        ASSERT(waitingMonitor_ == nullptr || monitor == nullptr);
+        waitingMonitor_ = monitor;
     }
 
     Monitor *GetEnteringMonitor() const
     {
         // Atomic with relaxed order reason: ordering constraints are not required
-        return entering_monitor_.load(std::memory_order_relaxed);
+        return enteringMonitor_.load(std::memory_order_relaxed);
     }
 
     void SetEnteringMonitor(Monitor *monitor)
     {
         // Atomic with relaxed order reason: ordering constraints are not required
-        ASSERT(entering_monitor_.load(std::memory_order_relaxed) == nullptr || monitor == nullptr);
+        ASSERT(enteringMonitor_.load(std::memory_order_relaxed) == nullptr || monitor == nullptr);
         // Atomic with relaxed order reason: ordering constraints are not required
-        entering_monitor_.store(monitor, std::memory_order_relaxed);
+        enteringMonitor_.store(monitor, std::memory_order_relaxed);
     }
 
     virtual void StopDaemonThread();
@@ -91,7 +91,7 @@ public:
 
     bool IsDaemon()
     {
-        return is_daemon_;
+        return isDaemon_;
     }
 
     void SetDaemon();
@@ -103,37 +103,37 @@ public:
     PANDA_PUBLIC_API static void Interrupt(MTManagedThread *thread);
 
     // Need to acquire the mutex before waiting to avoid scheduling between monitor release and clond_lock acquire
-    os::memory::Mutex *GetWaitingMutex() RETURN_CAPABILITY(cond_lock_)
+    os::memory::Mutex *GetWaitingMutex() RETURN_CAPABILITY(condLock_)
     {
-        return &cond_lock_;
+        return &condLock_;
     }
 
     void Signal()
     {
-        os::memory::LockHolder lock(cond_lock_);
-        cond_var_.Signal();
+        os::memory::LockHolder lock(condLock_);
+        condVar_.Signal();
     }
 
     PANDA_PUBLIC_API bool Interrupted();
 
     bool IsInterrupted()
     {
-        os::memory::LockHolder lock(cond_lock_);
-        return is_interrupted_;
+        os::memory::LockHolder lock(condLock_);
+        return isInterrupted_;
     }
 
-    bool IsInterruptedWithLockHeld() const REQUIRES(cond_lock_)
+    bool IsInterruptedWithLockHeld() const REQUIRES(condLock_)
     {
-        return is_interrupted_;
+        return isInterrupted_;
     }
 
     void ClearInterrupted()
     {
-        os::memory::LockHolder lock(cond_lock_);
+        os::memory::LockHolder lock(condLock_);
         /* @sync 1
          * @description Before we clear is_interrupted_ flag.
          * */
-        is_interrupted_ = false;
+        isInterrupted_ = false;
     }
 
     static bool ThreadIsMTManagedThread(Thread *thread)
@@ -175,30 +175,30 @@ public:
         return nullptr;
     }
 
-    void WaitWithLockHeld(ThreadStatus wait_status) REQUIRES(cond_lock_)
+    void WaitWithLockHeld(ThreadStatus waitStatus) REQUIRES(condLock_)
     {
-        ASSERT(wait_status == ThreadStatus::IS_WAITING);
-        auto old_status = GetStatus();
-        UpdateStatus(wait_status);
+        ASSERT(waitStatus == ThreadStatus::IS_WAITING);
+        auto oldStatus = GetStatus();
+        UpdateStatus(waitStatus);
         WaitWithLockHeldInternal();
         // Unlock before setting status RUNNING to handle MutatorReadLock without inversed lock order.
-        cond_lock_.Unlock();
-        UpdateStatus(old_status);
-        cond_lock_.Lock();
+        condLock_.Unlock();
+        UpdateStatus(oldStatus);
+        condLock_.Lock();
     }
 
     static void WaitForSuspension(ManagedThread *thread)
     {
         static constexpr uint32_t YIELD_ITERS = 500;
-        uint32_t loop_iter = 0;
+        uint32_t loopIter = 0;
         while (thread->GetStatus() == ThreadStatus::RUNNING) {
             if (!thread->IsSuspended()) {
                 LOG(WARNING, RUNTIME) << "No request for suspension, do not wait thread " << thread->GetId();
                 break;
             }
 
-            loop_iter++;
-            if (loop_iter < YIELD_ITERS) {
+            loopIter++;
+            if (loopIter < YIELD_ITERS) {
                 MTManagedThread::Yield();
             } else {
                 // Use native sleep over ManagedThread::Sleep to prevent potentially time consuming
@@ -209,38 +209,38 @@ public:
         }
     }
 
-    bool TimedWaitWithLockHeld(ThreadStatus wait_status, uint64_t timeout, uint64_t nanos, bool is_absolute = false)
-        REQUIRES(cond_lock_)
+    bool TimedWaitWithLockHeld(ThreadStatus waitStatus, uint64_t timeout, uint64_t nanos, bool isAbsolute = false)
+        REQUIRES(condLock_)
     {
-        ASSERT(wait_status == ThreadStatus::IS_TIMED_WAITING || wait_status == ThreadStatus::IS_SLEEPING ||
-               wait_status == ThreadStatus::IS_BLOCKED || wait_status == ThreadStatus::IS_SUSPENDED ||
-               wait_status == ThreadStatus::IS_COMPILER_WAITING || wait_status == ThreadStatus::IS_WAITING_INFLATION);
-        auto old_status = GetStatus();
-        UpdateStatus(wait_status);
-        bool res = TimedWaitWithLockHeldInternal(timeout, nanos, is_absolute);
+        ASSERT(waitStatus == ThreadStatus::IS_TIMED_WAITING || waitStatus == ThreadStatus::IS_SLEEPING ||
+               waitStatus == ThreadStatus::IS_BLOCKED || waitStatus == ThreadStatus::IS_SUSPENDED ||
+               waitStatus == ThreadStatus::IS_COMPILER_WAITING || waitStatus == ThreadStatus::IS_WAITING_INFLATION);
+        auto oldStatus = GetStatus();
+        UpdateStatus(waitStatus);
+        bool res = TimedWaitWithLockHeldInternal(timeout, nanos, isAbsolute);
         // Unlock before setting status RUNNING to handle MutatorReadLock without inversed lock order.
-        cond_lock_.Unlock();
-        UpdateStatus(old_status);
-        cond_lock_.Lock();
+        condLock_.Unlock();
+        UpdateStatus(oldStatus);
+        condLock_.Lock();
         return res;
     }
 
-    bool TimedWait(ThreadStatus wait_status, uint64_t timeout, uint64_t nanos = 0, bool is_absolute = false)
+    bool TimedWait(ThreadStatus waitStatus, uint64_t timeout, uint64_t nanos = 0, bool isAbsolute = false)
     {
-        ASSERT(wait_status == ThreadStatus::IS_TIMED_WAITING || wait_status == ThreadStatus::IS_SLEEPING ||
-               wait_status == ThreadStatus::IS_BLOCKED || wait_status == ThreadStatus::IS_SUSPENDED ||
-               wait_status == ThreadStatus::IS_COMPILER_WAITING || wait_status == ThreadStatus::IS_WAITING_INFLATION);
-        auto old_status = GetStatus();
+        ASSERT(waitStatus == ThreadStatus::IS_TIMED_WAITING || waitStatus == ThreadStatus::IS_SLEEPING ||
+               waitStatus == ThreadStatus::IS_BLOCKED || waitStatus == ThreadStatus::IS_SUSPENDED ||
+               waitStatus == ThreadStatus::IS_COMPILER_WAITING || waitStatus == ThreadStatus::IS_WAITING_INFLATION);
+        auto oldStatus = GetStatus();
         bool res = false;
         {
-            os::memory::LockHolder lock(cond_lock_);
-            UpdateStatus(wait_status);
+            os::memory::LockHolder lock(condLock_);
+            UpdateStatus(waitStatus);
             /* @sync 1
              * @description Right after changing the thread's status and before going to sleep
              * */
-            res = TimedWaitWithLockHeldInternal(timeout, nanos, is_absolute);
+            res = TimedWaitWithLockHeldInternal(timeout, nanos, isAbsolute);
         }
-        UpdateStatus(old_status);
+        UpdateStatus(oldStatus);
         return res;
     }
 
@@ -281,13 +281,13 @@ public:
     ObjectHeader *GetEnterMonitorObject()
     {
         ASSERT_MANAGED_CODE();
-        return enter_monitor_object_;
+        return enterMonitorObject_;
     }
 
-    void SetEnterMonitorObject(ObjectHeader *object_header)
+    void SetEnterMonitorObject(ObjectHeader *objectHeader)
     {
         ASSERT_MANAGED_CODE();
-        enter_monitor_object_ = object_header;
+        enterMonitorObject_ = objectHeader;
     }
 
     MTManagedThread *GetNextWait() const
@@ -302,7 +302,7 @@ public:
 
     mem::ReferenceStorage *GetPtReferenceStorage() const
     {
-        return pt_reference_storage_.get();
+        return ptReferenceStorage_.get();
     }
 
     static constexpr uint32_t GetLockedObjectCapacityOffset()
@@ -322,59 +322,59 @@ public:
 
     static constexpr uint32_t GetLocalObjectLockedOffset()
     {
-        return MEMBER_OFFSET(MTManagedThread, local_objects_locked_);
+        return MEMBER_OFFSET(MTManagedThread, localObjectsLocked_);
     }
 
 protected:
     virtual void ProcessCreatedThread();
 
-    void WaitWithLockHeldInternal() REQUIRES(cond_lock_)
+    void WaitWithLockHeldInternal() REQUIRES(condLock_)
     {
         ASSERT(this == ManagedThread::GetCurrent());
-        cond_var_.Wait(&cond_lock_);
+        condVar_.Wait(&condLock_);
     }
 
-    bool TimedWaitWithLockHeldInternal(uint64_t timeout, uint64_t nanos, bool is_absolute = false) REQUIRES(cond_lock_)
+    bool TimedWaitWithLockHeldInternal(uint64_t timeout, uint64_t nanos, bool isAbsolute = false) REQUIRES(condLock_)
     {
         ASSERT(this == ManagedThread::GetCurrent());
-        return cond_var_.TimedWait(&cond_lock_, timeout, nanos, is_absolute);
+        return condVar_.TimedWait(&condLock_, timeout, nanos, isAbsolute);
     }
 
-    void SignalWithLockHeld() REQUIRES(cond_lock_)
+    void SignalWithLockHeld() REQUIRES(condLock_)
     {
-        cond_var_.Signal();
+        condVar_.Signal();
     }
 
-    void SetInterruptedWithLockHeld(bool interrupted) REQUIRES(cond_lock_)
+    void SetInterruptedWithLockHeld(bool interrupted) REQUIRES(condLock_)
     {
-        is_interrupted_ = interrupted;
+        isInterrupted_ = interrupted;
     }
 
 private:
     MTManagedThread *next_ {nullptr};
 
-    LockedObjectList<> local_objects_locked_;
+    LockedObjectList<> localObjectsLocked_;
 
     // Implementation of Wait/Notify
-    os::memory::ConditionVariable cond_var_ GUARDED_BY(cond_lock_);
-    os::memory::Mutex cond_lock_;
+    os::memory::ConditionVariable condVar_ GUARDED_BY(condLock_);
+    os::memory::Mutex condLock_;
 
-    bool is_interrupted_ GUARDED_BY(cond_lock_) = false;
+    bool isInterrupted_ GUARDED_BY(condLock_) = false;
 
-    bool is_daemon_ = false;
+    bool isDaemon_ = false;
 
-    Monitor *waiting_monitor_ {nullptr};
+    Monitor *waitingMonitor_ {nullptr};
 
     // Count of monitors owned by this thread
-    std::atomic_int32_t monitor_count_ {0};
+    std::atomic_int32_t monitorCount_ {0};
     // Used for dumping stack info
-    ThreadStatus monitor_old_status_ {ThreadStatus::FINISHED};
-    ObjectHeader *enter_monitor_object_ {nullptr};
+    ThreadStatus monitorOldStatus_ {ThreadStatus::FINISHED};
+    ObjectHeader *enterMonitorObject_ {nullptr};
 
     // Monitor, in which this thread is entering. It is required only to detect deadlocks with daemon threads.
-    std::atomic<Monitor *> entering_monitor_;
+    std::atomic<Monitor *> enteringMonitor_;
 
-    PandaUniquePtr<mem::ReferenceStorage> pt_reference_storage_ {nullptr};
+    PandaUniquePtr<mem::ReferenceStorage> ptReferenceStorage_ {nullptr};
 
     NO_COPY_SEMANTIC(MTManagedThread);
     NO_MOVE_SEMANTIC(MTManagedThread);

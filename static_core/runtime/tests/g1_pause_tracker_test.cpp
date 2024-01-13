@@ -20,93 +20,93 @@
 namespace panda::mem {
 class G1PauseTrackerTest : public testing::Test {
 public:
-    G1PauseTrackerTest() : now_us_(panda::time::GetCurrentTimeInMillis()) {}
+    G1PauseTrackerTest() : nowUs_(panda::time::GetCurrentTimeInMillis()) {}
 
     int64_t Now()
     {
-        return now_us_;
+        return nowUs_;
     }
 
-    bool AddPauseTime(G1PauseTracker &pause_tracker, int64_t pause_time_us)
+    bool AddPauseTime(G1PauseTracker &pauseTracker, int64_t pauseTimeUs)
     {
-        auto result = pause_tracker.AddPause(now_us_, now_us_ + pause_time_us);
-        AddTime(pause_time_us);
+        auto result = pauseTracker.AddPause(nowUs_, nowUs_ + pauseTimeUs);
+        AddTime(pauseTimeUs);
         return result;
     }
 
-    void AddTime(int64_t time_us)
+    void AddTime(int64_t timeUs)
     {
-        now_us_ += time_us;
+        nowUs_ += timeUs;
     }
 
 private:
-    int64_t now_us_;
+    int64_t nowUs_;
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
 TEST_F(G1PauseTrackerTest, MaxGcPauseRequiresNewTimeSlice)
 {
-    G1PauseTracker pause_tracker(20, 10);
-    AddPauseTime(pause_tracker, 1'000);
-    ASSERT_EQ(10'000, pause_tracker.MinDelayBeforePauseInMicros(Now(), 10'000));
-    ASSERT_EQ(10'000, pause_tracker.MinDelayBeforeMaxPauseInMicros(Now()));
-    AddTime(4'000);
-    ASSERT_EQ(6'000, pause_tracker.MinDelayBeforePauseInMicros(Now(), 10'000));
-    ASSERT_EQ(6'000, pause_tracker.MinDelayBeforeMaxPauseInMicros(Now()));
+    G1PauseTracker pauseTracker(20L, 10L);
+    AddPauseTime(pauseTracker, 1'000L);
+    ASSERT_EQ(10'000L, pauseTracker.MinDelayBeforePauseInMicros(Now(), 10'000L));
+    ASSERT_EQ(10'000L, pauseTracker.MinDelayBeforeMaxPauseInMicros(Now()));
+    AddTime(4'000L);
+    ASSERT_EQ(6'000L, pauseTracker.MinDelayBeforePauseInMicros(Now(), 10'000L));
+    ASSERT_EQ(6'000L, pauseTracker.MinDelayBeforeMaxPauseInMicros(Now()));
 }
 
 TEST_F(G1PauseTrackerTest, MinDelayBeforePauseInMicrosQueueIsFull)
 {
-    G1PauseTracker pause_tracker(20, 10);
-    AddPauseTime(pause_tracker, 1'000);
-    AddTime(2'000);
-    AddPauseTime(pause_tracker, 2'000);
-    AddTime(5'000);
-    AddPauseTime(pause_tracker, 1'000);
-    AddTime(5'000);
-    AddPauseTime(pause_tracker, 3'000);
-    AddTime(1'000);
-    ASSERT_EQ(0, pause_tracker.MinDelayBeforePauseInMicros(Now(), 6'000));
-    ASSERT_EQ(4'000, pause_tracker.MinDelayBeforePauseInMicros(Now(), 7'000));
+    G1PauseTracker pauseTracker(20L, 10L);
+    AddPauseTime(pauseTracker, 1'000L);
+    AddTime(2'000L);
+    AddPauseTime(pauseTracker, 2'000L);
+    AddTime(5'000L);
+    AddPauseTime(pauseTracker, 1'000L);
+    AddTime(5'000L);
+    AddPauseTime(pauseTracker, 3'000L);
+    AddTime(1'000L);
+    ASSERT_EQ(0, pauseTracker.MinDelayBeforePauseInMicros(Now(), 6'000L));
+    ASSERT_EQ(4'000L, pauseTracker.MinDelayBeforePauseInMicros(Now(), 7'000L));
 }
 
 TEST_F(G1PauseTrackerTest, MinDelayBeforePauseInMicrosQueueIsNotFull)
 {
-    G1PauseTracker pause_tracker(20, 10);
-    for (int i = 0; i < 16; i++) {
-        ASSERT_TRUE(AddPauseTime(pause_tracker, 1'000));
-        AddTime(1'000);
+    G1PauseTracker pauseTracker(20L, 10L);
+    for (size_t i = 0; i < 16U; i++) {
+        ASSERT_TRUE(AddPauseTime(pauseTracker, 1'000L));
+        AddTime(1'000L);
     }
-    ASSERT_EQ(1'000, pause_tracker.MinDelayBeforePauseInMicros(Now(), 2'000));
-    ASSERT_EQ(2'000, pause_tracker.MinDelayBeforePauseInMicros(Now(), 3'000));
-    ASSERT_EQ(9'000, pause_tracker.MinDelayBeforePauseInMicros(Now(), 10'000));
-    ASSERT_EQ(4'000, pause_tracker.MinDelayBeforePauseInMicros(Now() + 5'000, 10'000));
-    ASSERT_EQ(9'000, pause_tracker.MinDelayBeforeMaxPauseInMicros(Now()));
-    ASSERT_EQ(4'000, pause_tracker.MinDelayBeforeMaxPauseInMicros(Now() + 5'000));
+    ASSERT_EQ(1'000L, pauseTracker.MinDelayBeforePauseInMicros(Now(), 2'000L));
+    ASSERT_EQ(2'000L, pauseTracker.MinDelayBeforePauseInMicros(Now(), 3'000L));
+    ASSERT_EQ(9'000L, pauseTracker.MinDelayBeforePauseInMicros(Now(), 10'000L));
+    ASSERT_EQ(4'000L, pauseTracker.MinDelayBeforePauseInMicros(Now() + 5'000L, 10'000L));
+    ASSERT_EQ(9'000L, pauseTracker.MinDelayBeforeMaxPauseInMicros(Now()));
+    ASSERT_EQ(4'000L, pauseTracker.MinDelayBeforeMaxPauseInMicros(Now() + 5'000L));
 }
 
 TEST_F(G1PauseTrackerTest, ExceedMaxGcTime)
 {
-    G1PauseTracker pause_tracker(20, 10);
-    ASSERT_TRUE(AddPauseTime(pause_tracker, 3'000));
-    AddTime(3'000);
-    ASSERT_TRUE(AddPauseTime(pause_tracker, 3'000));
-    AddTime(3'000);
-    ASSERT_TRUE(AddPauseTime(pause_tracker, 4'000));
-    AddTime(3'999);
-    ASSERT_FALSE(AddPauseTime(pause_tracker, 1));
+    G1PauseTracker pauseTracker(20L, 10L);
+    ASSERT_TRUE(AddPauseTime(pauseTracker, 3'000L));
+    AddTime(3'000L);
+    ASSERT_TRUE(AddPauseTime(pauseTracker, 3'000L));
+    AddTime(3'000L);
+    ASSERT_TRUE(AddPauseTime(pauseTracker, 4'000L));
+    AddTime(3'999L);
+    ASSERT_FALSE(AddPauseTime(pauseTracker, 1));
 }
 
 TEST_F(G1PauseTrackerTest, NotExceedMaxGcTime)
 {
-    G1PauseTracker pause_tracker(20, 10);
-    ASSERT_TRUE(AddPauseTime(pause_tracker, 3'000));
-    AddTime(3'000);
-    ASSERT_TRUE(AddPauseTime(pause_tracker, 3'000));
-    AddTime(3'000);
-    ASSERT_TRUE(AddPauseTime(pause_tracker, 4'000));
-    AddTime(4'000);
-    ASSERT_TRUE(AddPauseTime(pause_tracker, 1));
+    G1PauseTracker pauseTracker(20L, 10L);
+    ASSERT_TRUE(AddPauseTime(pauseTracker, 3'000L));
+    AddTime(3'000L);
+    ASSERT_TRUE(AddPauseTime(pauseTracker, 3'000L));
+    AddTime(3'000L);
+    ASSERT_TRUE(AddPauseTime(pauseTracker, 4'000L));
+    AddTime(4'000L);
+    ASSERT_TRUE(AddPauseTime(pauseTracker, 1));
 }
 // NOLINTEND(readability-magic-numbers)
 }  // namespace panda::mem

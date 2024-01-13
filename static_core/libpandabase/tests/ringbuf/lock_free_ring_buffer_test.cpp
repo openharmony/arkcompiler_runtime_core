@@ -63,17 +63,17 @@ TEST(LockFreeRingBufferTest, PushPopTest)
         queue.push(i);
         // NOLINTNEXTLINE(cert-msc50-cpp,readability-magic-numbers)
         if (i % ((rand() % 100) + 1) == 0 && !queue.empty()) {
-            size_t buffer_pop = buffer.Pop();
-            size_t queue_pop = queue.front();
+            size_t bufferPop = buffer.Pop();
+            size_t queuePop = queue.front();
             queue.pop();
-            ASSERT_EQ(buffer_pop, queue_pop);
+            ASSERT_EQ(bufferPop, queuePop);
         }
     }
     while (!queue.empty()) {
-        size_t buffer_pop = buffer.Pop();
-        size_t queue_pop = queue.front();
+        size_t bufferPop = buffer.Pop();
+        size_t queuePop = queue.front();
         queue.pop();
-        ASSERT_EQ(buffer_pop, queue_pop);
+        ASSERT_EQ(bufferPop, queuePop);
     }
     size_t x = 0;
     bool pop = buffer.TryPop(&x);
@@ -81,17 +81,17 @@ TEST(LockFreeRingBufferTest, PushPopTest)
     ASSERT_EQ(x, 0);
 }
 
-void PopElementsFromBuffer(LockFreeBuffer<size_t, DEFAULT_BUFFER_SIZE> *buffer, std::atomic<bool> *pop_thread_started,
-                           std::atomic<bool> *pop_thread_finished, size_t *pop_sum)
+void PopElementsFromBuffer(LockFreeBuffer<size_t, DEFAULT_BUFFER_SIZE> *buffer, std::atomic<bool> *popThreadStarted,
+                           std::atomic<bool> *popThreadFinished, size_t *popSum)
 {
-    pop_thread_started->store(true);
-    ASSERT(*pop_sum == 0);
+    popThreadStarted->store(true);
+    ASSERT(*popSum == 0);
 
-    while (!pop_thread_finished->load()) {
+    while (!popThreadFinished->load()) {
         size_t x;
-        bool pop_success = buffer->TryPop(&x);
-        if (pop_success) {
-            *pop_sum += x;
+        bool popSuccess = buffer->TryPop(&x);
+        if (popSuccess) {
+            *popSum += x;
         }
     }
 }
@@ -101,27 +101,27 @@ TEST(LockFreeRingBufferTest, MultiThreadingTest)
     // NOLINTNEXTLINE(cert-msc51-cpp)
     srand(SEED);
     LockFreeBuffer<size_t, DEFAULT_BUFFER_SIZE> buffer;
-    std::atomic<bool> pop_thread_started = false;
-    std::atomic<bool> pop_thread_finished = false;
-    size_t pop_sum = 0;
-    auto pop_thread = std::thread(PopElementsFromBuffer, &buffer, &pop_thread_started, &pop_thread_finished, &pop_sum);
+    std::atomic<bool> popThreadStarted = false;
+    std::atomic<bool> popThreadFinished = false;
+    size_t popSum = 0;
+    auto popThread = std::thread(PopElementsFromBuffer, &buffer, &popThreadStarted, &popThreadFinished, &popSum);
     // wait until pop_thread starts to work
-    while (!pop_thread_started.load()) {
+    while (!popThreadStarted.load()) {
     }
 
-    size_t expected_sum = 0;
+    size_t expectedSum = 0;
     size_t sum = 0;
     for (size_t i = 0; i < ITERATIONS; i++) {
-        expected_sum += i;
+        expectedSum += i;
         buffer.Push(i);
     }
 
     // wait pop_thread to process everything
     while (!buffer.IsEmpty()) {
     }
-    pop_thread_finished.store(true);
-    pop_thread.join();
-    sum += pop_sum;  // can be without atomics because we use it after .join only -> HB
-    ASSERT_EQ(sum, expected_sum);
+    popThreadFinished.store(true);
+    popThread.join();
+    sum += popSum;  // can be without atomics because we use it after .join only -> HB
+    ASSERT_EQ(sum, expectedSum);
 }
 }  // namespace panda::mem

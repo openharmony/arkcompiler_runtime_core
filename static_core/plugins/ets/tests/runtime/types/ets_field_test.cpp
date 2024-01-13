@@ -68,29 +68,29 @@ private:
     EtsCoroutine *coroutine_ = nullptr;
 };
 
-static void TestFieldMethods(const char *source, const char *class_name, const char *field_name,
-                             const char *field_type_descriptor_name, bool is_static_field)
+static void TestFieldMethods(const char *source, const char *className, const char *fieldName,
+                             const char *fieldTypeDescriptorName, bool isStaticField)
 {
-    EtsClass *klass = GetTestClass(source, class_name);
+    EtsClass *klass = GetTestClass(source, className);
     ASSERT_NE(klass, nullptr);
 
-    EtsString *field_name_string = EtsString::CreateFromMUtf8(field_name);
+    EtsString *fieldNameString = EtsString::CreateFromMUtf8(fieldName);
     EtsField *field1 = nullptr;
     EtsField *field2 = nullptr;
 
-    if (is_static_field) {
-        field1 = klass->GetStaticFieldIDByName(field_name);
+    if (isStaticField) {
+        field1 = klass->GetStaticFieldIDByName(fieldName);
         field2 = klass->GetStaticFieldIDByOffset(field1->GetOffset());
     } else {
-        field1 = klass->GetDeclaredFieldIDByName(field_name);
+        field1 = klass->GetDeclaredFieldIDByName(fieldName);
         field2 = klass->GetFieldIDByOffset(field1->GetOffset());
     }
 
     ASSERT_EQ(field1, field2);
-    ASSERT_TRUE(field_name_string->StringsAreEqual(reinterpret_cast<EtsObject *>(field1->GetNameString())));
-    ASSERT_TRUE(!strcmp(field1->GetName(), field_name));
-    ASSERT_TRUE(!strcmp(field1->GetTypeDescriptor(), field_type_descriptor_name));
-    ASSERT_EQ(field1->IsStatic(), is_static_field);
+    ASSERT_TRUE(fieldNameString->StringsAreEqual(reinterpret_cast<EtsObject *>(field1->GetNameString())));
+    ASSERT_TRUE(!strcmp(field1->GetName(), fieldName));
+    ASSERT_TRUE(!strcmp(field1->GetTypeDescriptor(), fieldTypeDescriptorName));
+    ASSERT_EQ(field1->IsStatic(), isStaticField);
     ASSERT_EQ(klass, field1->GetDeclaringClass());
 }
 
@@ -99,8 +99,8 @@ TEST_F(EtsFieldTest, AllMethods)
     const char *source = R"(
         .language eTS
         .record Ball {
-	        f32 BALL_RADIUS <static>
-	        i32 BALL_SPEED <static>
+            f32 BALL_RADIUS <static>
+            i32 BALL_SPEED <static>
             f32 vx
             i32 vy
         }

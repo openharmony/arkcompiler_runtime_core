@@ -45,9 +45,9 @@ class ChecksElimination : public Optimization, public GraphVisitor {
 public:
     explicit ChecksElimination(Graph *graph)
         : Optimization(graph),
-          bounds_checks_(graph->GetLocalAllocator()->Adapter()),
-          checks_for_move_out_of_loop_(graph->GetLocalAllocator()->Adapter()),
-          checks_must_throw_(graph->GetLocalAllocator()->Adapter())
+          boundsChecks_(graph->GetLocalAllocator()->Adapter()),
+          checksForMoveOutOfLoop_(graph->GetLocalAllocator()->Adapter()),
+          checksMustThrow_(graph->GetLocalAllocator()->Adapter())
     {
     }
 
@@ -64,25 +64,25 @@ public:
 
     bool IsApplied() const
     {
-        return is_applied_;
+        return isApplied_;
     }
     void SetApplied()
     {
-        is_applied_ = true;
+        isApplied_ = true;
     }
 
     bool IsLoopDeleted() const
     {
-        return is_loop_deleted_;
+        return isLoopDeleted_;
     }
     void SetLoopDeleted()
     {
-        is_loop_deleted_ = true;
+        isLoopDeleted_ = true;
     }
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerChecksElimination();
+        return g_options.IsCompilerChecksElimination();
     }
 
     void InvalidateAnalyses() override;
@@ -109,30 +109,30 @@ public:
 
 #include "optimizer/ir/visitor.inc"
 private:
-    bool TryToEliminateAnyTypeCheck(Inst *inst, Inst *inst_to_replace, AnyBaseType type, AnyBaseType prev_type);
+    bool TryToEliminateAnyTypeCheck(Inst *inst, Inst *instToReplace, AnyBaseType type, AnyBaseType prevType);
     void UpdateHclassChecks(Inst *inst);
-    std::optional<Inst *> GetHclassCheckFromLoads(Inst *load_class);
-    void ReplaceUsersAndRemoveCheck(Inst *inst_del, Inst *inst_rep);
-    void PushNewCheckForMoveOutOfLoop(Inst *any_type_check)
+    std::optional<Inst *> GetHclassCheckFromLoads(Inst *loadClass);
+    void ReplaceUsersAndRemoveCheck(Inst *instDel, Inst *instRep);
+    void PushNewCheckForMoveOutOfLoop(Inst *anyTypeCheck)
     {
-        checks_for_move_out_of_loop_.push_back(any_type_check);
+        checksForMoveOutOfLoop_.push_back(anyTypeCheck);
     }
 
     void PushNewCheckMustThrow(Inst *inst)
     {
-        checks_must_throw_.push_back(inst);
+        checksMustThrow_.push_back(inst);
     }
 
     static bool IsInstIncOrDec(Inst *inst);
     static int64_t GetInc(Inst *inst);
-    static Loop *GetLoopForBoundsCheck(BasicBlock *block, Inst *len_array, Inst *index);
-    void InitItemForNewIndex(GroupedBoundsChecks *place, Inst *index, Inst *inst, bool check_upper, bool check_lower);
-    void PushNewBoundsCheck(Loop *loop, Inst *len_array, Inst *index, Inst *inst, bool check_upper, bool check_lower);
+    static Loop *GetLoopForBoundsCheck(BasicBlock *block, Inst *lenArray, Inst *index);
+    void InitItemForNewIndex(GroupedBoundsChecks *place, Inst *index, Inst *inst, bool checkUpper, bool checkLower);
+    void PushNewBoundsCheck(Loop *loop, Inst *lenArray, Inst *index, Inst *inst, bool checkUpper, bool checkLower);
     void TryRemoveDominatedNullChecks(Inst *inst, Inst *ref);
     void TryRemoveDominatedHclassCheck(Inst *inst);
     template <Opcode OPC, bool CHECK_FULL_DOM = false, typename CheckInputs = bool (*)(Inst *)>
     void TryRemoveDominatedChecks(
-        Inst *inst, CheckInputs check_inputs = [](Inst * /*unused*/) { return true; });
+        Inst *inst, CheckInputs checkInputs = [](Inst * /*unused*/) { return true; });
     template <Opcode OPC>
     void TryRemoveConsecutiveChecks(Inst *inst);
     template <Opcode OPC>
@@ -142,44 +142,43 @@ private:
     template <Opcode OPC>
     void TryOptimizeOverflowCheck(Inst *inst);
 
-    bool TryInsertDeoptimizationForLargeStep(ConditionCode cc, Inst *result_len_array, Inst *lower, Inst *upper,
-                                             int64_t max_add, Inst *insert_deopt_after, Inst *ss, uint64_t const_step);
-    bool TryInsertDeoptimization(LoopInfo loop_info, Inst *len_array, int64_t max_add, int64_t min_add,
-                                 bool has_check_in_header);
+    bool TryInsertDeoptimizationForLargeStep(ConditionCode cc, Inst *resultLenArray, Inst *lower, Inst *upper,
+                                             int64_t maxAdd, Inst *insertDeoptAfter, Inst *ss, uint64_t constStep);
+    bool TryInsertDeoptimization(LoopInfo loopInfo, Inst *lenArray, int64_t maxAdd, int64_t minAdd,
+                                 bool hasCheckInHeader);
 
-    Inst *InsertNewLenArray(Inst *len_array, Inst *ss);
-    bool NeedUpperDeoptimization(BasicBlock *header, Inst *len_array, BoundsRange len_array_range, Inst *upper,
-                                 BoundsRange upper_range, int64_t max_add, ConditionCode cc,
-                                 bool *insert_new_len_array);
-    void InsertDeoptimizationForIndexOverflow(CountableLoopInfo *countable_loop_info, BoundsRange index_upper_range,
+    Inst *InsertNewLenArray(Inst *lenArray, Inst *ss);
+    bool NeedUpperDeoptimization(BasicBlock *header, Inst *lenArray, BoundsRange lenArrayRange, Inst *upper,
+                                 BoundsRange upperRange, int64_t maxAdd, ConditionCode cc, bool *insertNewLenArray);
+    void InsertDeoptimizationForIndexOverflow(CountableLoopInfo *countableLoopInfo, BoundsRange indexUpperRange,
                                               Inst *ss);
-    void ProcessingLoop(Loop *loop, ArenaUnorderedMap<Inst *, GroupedBoundsChecks> *lenarr_index_checks);
-    void ProcessingGroupBoundsCheck(GroupedBoundsChecks *index_boundschecks, LoopInfo loop_info, Inst *len_array);
+    void ProcessingLoop(Loop *loop, ArenaUnorderedMap<Inst *, GroupedBoundsChecks> *lenarrIndexChecks);
+    void ProcessingGroupBoundsCheck(GroupedBoundsChecks *indexBoundschecks, LoopInfo loopInfo, Inst *lenArray);
     void ReplaceBoundsCheckToDeoptimizationBeforeLoop();
-    void HoistLoopInvariantBoundsChecks(Inst *len_array, GroupedBoundsChecks *index_boundschecks, Loop *loop);
-    Inst *FindSaveState(const InstVector &insts_to_delete);
+    void HoistLoopInvariantBoundsChecks(Inst *lenArray, GroupedBoundsChecks *indexBoundschecks, Loop *loop);
+    Inst *FindSaveState(const InstVector &instsToDelete);
     void ReplaceBoundsCheckToDeoptimizationInLoop();
     void ReplaceCheckMustThrowByUnconditionalDeoptimize();
     void MoveCheckOutOfLoop();
 
     void InsertInstAfter(Inst *inst, Inst *after, BasicBlock *block);
     void InsertBoundsCheckDeoptimization(ConditionCode cc, Inst *left, int64_t val, Inst *right, Inst *ss,
-                                         Inst *insert_after, Opcode new_left_opcode = Opcode::Add);
-    Inst *InsertDeoptimization(ConditionCode cc, Inst *left, Inst *right, Inst *ss, Inst *insert_after,
-                               DeoptimizeType deopt_type);
+                                         Inst *insertAfter, Opcode newLeftOpcode = Opcode::Add);
+    Inst *InsertDeoptimization(ConditionCode cc, Inst *left, Inst *right, Inst *ss, Inst *insertAfter,
+                               DeoptimizeType deoptType);
 
     std::optional<LoopInfo> FindLoopInfo(Loop *loop);
     Inst *FindSaveState(Loop *loop);
-    Inst *FindOptimalSaveStateForHoist(Inst *inst, Inst **optimal_insert_after);
+    Inst *FindOptimalSaveStateForHoist(Inst *inst, Inst **optimalInsertAfter);
     static bool IsInlinedCallLoadMethod(Inst *inst);
 
 private:
-    NotFullyRedundantBoundsCheck bounds_checks_;
-    InstVector checks_for_move_out_of_loop_;
-    InstVector checks_must_throw_;
+    NotFullyRedundantBoundsCheck boundsChecks_;
+    InstVector checksForMoveOutOfLoop_;
+    InstVector checksMustThrow_;
 
-    bool is_applied_ {false};
-    bool is_loop_deleted_ {false};
+    bool isApplied_ {false};
+    bool isLoopDeleted_ {false};
 };
 }  // namespace panda::compiler
 

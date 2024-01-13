@@ -21,21 +21,21 @@
 
 namespace panda::panda_file {
 
-ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId class_id)
-    : panda_file_(panda_file), class_id_(class_id)
+ClassDataAccessor::ClassDataAccessor(const File &pandaFile, File::EntityId classId)
+    : pandaFile_(pandaFile), classId_(classId)
 {
-    ASSERT(!panda_file.IsExternal(class_id));
-    auto sp = panda_file_.GetSpanFromId(class_id_);
-    name_.utf16_length = helpers::ReadULeb128(&sp);
+    ASSERT(!pandaFile.IsExternal(classId));
+    auto sp = pandaFile_.GetSpanFromId(classId_);
+    name_.utf16Length = helpers::ReadULeb128(&sp);
     name_.data = sp.data();
 
     sp = sp.SubSpan(utf::Mutf8Size(name_.data) + 1);  // + 1 for null byte
 
-    super_class_off_ = helpers::Read<ID_SIZE>(&sp);
+    superClassOff_ = helpers::Read<ID_SIZE>(&sp);
 
-    access_flags_ = helpers::ReadULeb128(&sp);
-    num_fields_ = helpers::ReadULeb128(&sp);
-    num_methods_ = helpers::ReadULeb128(&sp);
+    accessFlags_ = helpers::ReadULeb128(&sp);
+    numFields_ = helpers::ReadULeb128(&sp);
+    numMethods_ = helpers::ReadULeb128(&sp);
 
     auto tag = static_cast<ClassTag>(sp[0]);
 
@@ -43,20 +43,20 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
         sp = sp.SubSpan(1);
 
         if (tag == ClassTag::INTERFACES) {
-            num_ifaces_ = helpers::ReadULeb128(&sp);
-            ifaces_offsets_sp_ = sp;
-            sp = sp.SubSpan(IDX_SIZE * num_ifaces_);
+            numIfaces_ = helpers::ReadULeb128(&sp);
+            ifacesOffsetsSp_ = sp;
+            sp = sp.SubSpan(IDX_SIZE * numIfaces_);
         }
 
         tag = static_cast<ClassTag>(sp[0]);
     }
 
-    source_lang_sp_ = sp;
+    sourceLangSp_ = sp;
 
     if (tag == ClassTag::NOTHING) {
-        annotations_sp_ = sp;
-        source_file_sp_ = sp;
-        fields_sp_ = sp.SubSpan(TAG_SIZE);  // skip NOTHING tag
+        annotationsSp_ = sp;
+        sourceFileSp_ = sp;
+        fieldsSp_ = sp.SubSpan(TAG_SIZE);  // skip NOTHING tag
     }
 }
 

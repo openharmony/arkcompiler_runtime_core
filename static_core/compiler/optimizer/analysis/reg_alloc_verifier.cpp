@@ -38,11 +38,11 @@ std::string ToString(LocationState::State state)
 }
 
 const LocationState &GetPhiLocationState(const BlockState &state, const ArenaVector<LocationState> &immediates,
-                                         const LifeIntervals *interval, bool is_high)
+                                         const LifeIntervals *interval, bool isHigh)
 {
     auto location = interval->GetLocation();
     if (location.IsStack()) {
-        ASSERT(!is_high);
+        ASSERT(!isHigh);
         return state.GetStack(location.GetValue());
     }
     if (location.IsConstant()) {
@@ -51,25 +51,25 @@ const LocationState &GetPhiLocationState(const BlockState &state, const ArenaVec
     }
     if (location.IsFpRegister()) {
         ASSERT(IsFloatType(interval->GetType()));
-        return state.GetVReg(location.GetValue() + (is_high ? 1U : 0U));
+        return state.GetVReg(location.GetValue() + (isHigh ? 1U : 0U));
     }
     ASSERT(location.IsRegister());
-    return state.GetReg(location.GetValue() + (is_high ? 1U : 0U));
+    return state.GetReg(location.GetValue() + (isHigh ? 1U : 0U));
 }
 
-LocationState &GetPhiLocationState(BlockState *state, const LifeIntervals *interval, bool is_high)
+LocationState &GetPhiLocationState(BlockState *state, const LifeIntervals *interval, bool isHigh)
 {
     auto location = interval->GetLocation();
     if (location.IsStack()) {
-        ASSERT(!is_high);
+        ASSERT(!isHigh);
         return state->GetStack(location.GetValue());
     }
     if (location.IsFpRegister()) {
         ASSERT(IsFloatType(interval->GetType()));
-        return state->GetVReg(location.GetValue() + (is_high ? 1U : 0U));
+        return state->GetVReg(location.GetValue() + (isHigh ? 1U : 0U));
     }
     ASSERT(location.IsRegister());
-    return state->GetReg(location.GetValue() + (is_high ? 1U : 0U));
+    return state->GetReg(location.GetValue() + (isHigh ? 1U : 0U));
 }
 
 bool MergeImpl(const ArenaVector<LocationState> &from, ArenaVector<LocationState> *to)
@@ -87,9 +87,9 @@ bool MergeImpl(const ArenaVector<LocationState> &from, ArenaVector<LocationState
 
 class BlockStates {
 public:
-    BlockStates(size_t regs, size_t vregs, size_t stack_slots, size_t stack_params, ArenaAllocator *allocator)
-        : start_state_(regs, vregs, stack_slots, stack_params, allocator),
-          end_state_(regs, vregs, stack_slots, stack_params, allocator)
+    BlockStates(size_t regs, size_t vregs, size_t stackSlots, size_t stackParams, ArenaAllocator *allocator)
+        : startState_(regs, vregs, stackSlots, stackParams, allocator),
+          endState_(regs, vregs, stackSlots, stackParams, allocator)
     {
     }
     ~BlockStates() = default;
@@ -98,18 +98,18 @@ public:
 
     BlockState &GetStart()
     {
-        return start_state_;
+        return startState_;
     }
 
     BlockState &GetEnd()
     {
-        return end_state_;
+        return endState_;
     }
 
     BlockState &ResetEndToStart()
     {
-        end_state_.Copy(&start_state_);
-        return end_state_;
+        endState_.Copy(&startState_);
+        return endState_;
     }
 
     bool IsUpdated() const
@@ -133,21 +133,21 @@ public:
     }
 
 private:
-    BlockState start_state_;
-    BlockState end_state_;
+    BlockState startState_;
+    BlockState endState_;
     bool updated_ {false};
     bool visited_ {false};
 };
 
 void InitStates(ArenaUnorderedMap<uint32_t, BlockStates> *blocks, const Graph *graph)
 {
-    auto used_regs = graph->GetUsedRegs<DataType::INT64>()->size();
-    auto used_vregs = graph->GetUsedRegs<DataType::FLOAT64>()->size();
+    auto usedRegs = graph->GetUsedRegs<DataType::INT64>()->size();
+    auto usedVregs = graph->GetUsedRegs<DataType::FLOAT64>()->size();
     for (auto &bb : graph->GetVectorBlocks()) {
         if (bb == nullptr) {
             continue;
         }
-        [[maybe_unused]] auto res = blocks->try_emplace(bb->GetId(), used_regs, used_vregs, MAX_NUM_STACK_SLOTS,
+        [[maybe_unused]] auto res = blocks->try_emplace(bb->GetId(), usedRegs, usedVregs, MAX_NUM_STACK_SLOTS,
                                                         MAX_NUM_STACK_SLOTS, graph->GetLocalAllocator());
         ASSERT(res.second);
     }
@@ -156,8 +156,8 @@ void InitStates(ArenaUnorderedMap<uint32_t, BlockStates> *blocks, const Graph *g
 void CheckAllBlocksVisited([[maybe_unused]] const ArenaUnorderedMap<uint32_t, BlockStates> &blocks)
 {
 #ifndef NDEBUG
-    for (auto &block_state : blocks) {
-        ASSERT(block_state.second.IsVisited());
+    for (auto &blockState : blocks) {
+        ASSERT(blockState.second.IsVisited());
     }
 #endif
 }
@@ -201,12 +201,12 @@ bool LocationState::Merge(const LocationState &other)
     return false;
 }
 
-BlockState::BlockState(size_t regs, size_t vregs, size_t stack_slots, size_t stack_params, ArenaAllocator *alloc)
+BlockState::BlockState(size_t regs, size_t vregs, size_t stackSlots, size_t stackParams, ArenaAllocator *alloc)
     : regs_(regs, alloc->Adapter()),
       vregs_(vregs, alloc->Adapter()),
-      stack_(stack_slots, alloc->Adapter()),
-      stack_param_(stack_params, alloc->Adapter()),
-      stack_arg_(0, alloc->Adapter())
+      stack_(stackSlots, alloc->Adapter()),
+      stackParam_(stackParams, alloc->Adapter()),
+      stackArg_(0, alloc->Adapter())
 
 {
 }
@@ -224,27 +224,27 @@ bool BlockState::Merge(const BlockState &state, const PhiInstSafeIter &phis, Bas
      */
     constexpr std::array<bool, 2U> IS_HIGH = {false, true};
     for (auto phi : phis) {
-        auto phi_interval = la.GetInstLifeIntervals(phi);
+        auto phiInterval = la.GetInstLifeIntervals(phi);
         auto input = phi->CastToPhi()->GetPhiDataflowInput(pred);
-        for (size_t is_high_idx = 0; is_high_idx < (IsRegisterPair(phi_interval) ? 2U : 1U); is_high_idx++) {
-            auto &input_state = GetPhiLocationState(state, immediates, phi_interval, IS_HIGH[is_high_idx]);
-            auto &phi_state = GetPhiLocationState(this, phi_interval, IS_HIGH[is_high_idx]);
+        for (size_t isHighIdx = 0; isHighIdx < (IsRegisterPair(phiInterval) ? 2U : 1U); isHighIdx++) {
+            auto &inputState = GetPhiLocationState(state, immediates, phiInterval, IS_HIGH[isHighIdx]);
+            auto &phiState = GetPhiLocationState(this, phiInterval, IS_HIGH[isHighIdx]);
 
-            if (input_state.GetState() != LocationState::State::KNOWN) {
+            if (inputState.GetState() != LocationState::State::KNOWN) {
                 continue;
             }
-            if (input_state.IsValid(input)) {
-                updated = phi_state.GetState() != LocationState::State::KNOWN || phi_state.GetId() != phi->GetId();
-                phi_state.SetId(phi->GetId());
+            if (inputState.IsValid(input)) {
+                updated = phiState.GetState() != LocationState::State::KNOWN || phiState.GetId() != phi->GetId();
+                phiState.SetId(phi->GetId());
                 // don't merge it
-                phi_state.SetSkip(true);
+                phiState.SetSkip(true);
             }
         }
     }
     updated |= MergeImpl(state.regs_, &regs_);
     updated |= MergeImpl(state.vregs_, &vregs_);
     updated |= MergeImpl(state.stack_, &stack_);
-    updated |= MergeImpl(state.stack_param_, &stack_param_);
+    updated |= MergeImpl(state.stackParam_, &stackParam_);
     // note that stack_arg_ is not merged as it is only used during call handing
     return updated;
 }
@@ -254,24 +254,24 @@ void BlockState::Copy(BlockState *state)
     std::copy(state->regs_.begin(), state->regs_.end(), regs_.begin());
     std::copy(state->vregs_.begin(), state->vregs_.end(), vregs_.begin());
     std::copy(state->stack_.begin(), state->stack_.end(), stack_.begin());
-    std::copy(state->stack_param_.begin(), state->stack_param_.end(), stack_param_.begin());
+    std::copy(state->stackParam_.begin(), state->stackParam_.end(), stackParam_.begin());
     // note that stack_arg_ is not merged as it is only used during call handing
 }
 
-RegAllocVerifier::RegAllocVerifier(Graph *graph, bool save_live_regs_on_call)
+RegAllocVerifier::RegAllocVerifier(Graph *graph, bool saveLiveRegsOnCall)
     : Analysis(graph),
       immediates_(graph->GetLocalAllocator()->Adapter()),
-      saved_regs_(GetGraph()->GetLocalAllocator()->Adapter()),
-      saved_vregs_(GetGraph()->GetLocalAllocator()->Adapter()),
-      save_live_regs_(save_live_regs_on_call)
+      savedRegs_(GetGraph()->GetLocalAllocator()->Adapter()),
+      savedVregs_(GetGraph()->GetLocalAllocator()->Adapter()),
+      saveLiveRegs_(saveLiveRegsOnCall)
 {
 }
 
 void RegAllocVerifier::InitImmediates()
 {
     immediates_.clear();
-    for (size_t imm_slot = 0; imm_slot < GetGraph()->GetSpilledConstantsCount(); ++imm_slot) {
-        auto con = GetGraph()->GetSpilledConstant(imm_slot);
+    for (size_t immSlot = 0; immSlot < GetGraph()->GetSpilledConstantsCount(); ++immSlot) {
+        auto con = GetGraph()->GetSpilledConstant(immSlot);
         immediates_.emplace_back(LocationState::State::KNOWN, con->GetId());
     }
 }
@@ -282,19 +282,19 @@ LocationState &RegAllocVerifier::GetLocationState(Location location)
     auto offset = location.GetValue();
 
     if (loc == LocationType::STACK) {
-        return current_state_->GetStack(offset);
+        return currentState_->GetStack(offset);
     }
     if (loc == LocationType::REGISTER) {
-        return current_state_->GetReg(offset);
+        return currentState_->GetReg(offset);
     }
     if (loc == LocationType::FP_REGISTER) {
-        return current_state_->GetVReg(offset);
+        return currentState_->GetVReg(offset);
     }
     if (loc == LocationType::STACK_ARGUMENT) {
-        return current_state_->GetStackArg(offset);
+        return currentState_->GetStackArg(offset);
     }
     if (loc == LocationType::STACK_PARAMETER) {
-        return current_state_->GetStackParam(offset);
+        return currentState_->GetStackParam(offset);
     }
     ASSERT(loc == LocationType::IMMEDIATE);
     ASSERT(offset < immediates_.size());
@@ -309,16 +309,16 @@ bool RegAllocVerifier::ForEachLocation(Location location, DataType::Type type, T
 {
     bool success = callback(GetLocationState(location));
     if (IsRegisterPair(location, type, GetGraph())) {
-        auto pired_reg = Location::MakeRegister(location.GetValue() + 1);
-        success &= callback(GetLocationState(pired_reg));
+        auto piredReg = Location::MakeRegister(location.GetValue() + 1);
+        success &= callback(GetLocationState(piredReg));
     }
     return success;
 }
 
-void RegAllocVerifier::UpdateLocation(Location location, DataType::Type type, uint32_t inst_id)
+void RegAllocVerifier::UpdateLocation(Location location, DataType::Type type, uint32_t instId)
 {
-    ForEachLocation(location, type, [inst_id](auto &state) {
-        state.SetId(inst_id);
+    ForEachLocation(location, type, [instId](auto &state) {
+        state.SetId(instId);
         return true;
     });
 }
@@ -339,36 +339,36 @@ void RegAllocVerifier::HandleDest(Inst *inst)
         return;
     }
 
-    [[maybe_unused]] size_t handled_users = 0;
+    [[maybe_unused]] size_t handledUsers = 0;
     for (auto &user : inst->GetUsers()) {
         if (IsPseudoUserOfMultiOutput(user.GetInst())) {
-            auto inst_id = user.GetInst()->GetId();
+            auto instId = user.GetInst()->GetId();
             auto idx = user.GetInst()->CastToLoadPairPart()->GetSrcRegIndex();
-            UpdateLocation(Location::MakeRegister(inst->GetDstReg(idx), type), type, inst_id);
-            ++handled_users;
+            UpdateLocation(Location::MakeRegister(inst->GetDstReg(idx), type), type, instId);
+            ++handledUsers;
         }
     }
-    ASSERT(handled_users == inst->GetDstCount());
+    ASSERT(handledUsers == inst->GetDstCount());
 }
 
-BasicBlock *PropagateBlockState(BasicBlock *current_block, BlockState *current_state,
+BasicBlock *PropagateBlockState(BasicBlock *currentBlock, BlockState *currentState,
                                 const ArenaVector<LocationState> &immediates,
                                 ArenaUnorderedMap<uint32_t, BlockStates> *blocks)
 {
-    BasicBlock *next_block {nullptr};
-    auto &la = current_block->GetGraph()->GetAnalysis<LivenessAnalyzer>();
-    for (auto succ : current_block->GetSuccsBlocks()) {
+    BasicBlock *nextBlock {nullptr};
+    auto &la = currentBlock->GetGraph()->GetAnalysis<LivenessAnalyzer>();
+    for (auto succ : currentBlock->GetSuccsBlocks()) {
         auto phis = succ->PhiInstsSafe();
-        auto &succ_state = blocks->at(succ->GetId());
-        bool merge_updated = succ_state.GetStart().Merge(*current_state, phis, current_block, immediates, la);
+        auto &succState = blocks->at(succ->GetId());
+        bool mergeUpdated = succState.GetStart().Merge(*currentState, phis, currentBlock, immediates, la);
         // if merged did not update the state, but successor is not visited yet then force its visit
-        merge_updated |= !succ_state.IsVisited();
-        succ_state.SetUpdated(succ_state.IsUpdated() || merge_updated);
-        if (merge_updated) {
-            next_block = succ;
+        mergeUpdated |= !succState.IsVisited();
+        succState.SetUpdated(succState.IsUpdated() || mergeUpdated);
+        if (mergeUpdated) {
+            nextBlock = succ;
         }
     }
-    return next_block;
+    return nextBlock;
 }
 
 bool RegAllocVerifier::RunImpl()
@@ -376,26 +376,26 @@ bool RegAllocVerifier::RunImpl()
     ArenaUnorderedMap<uint32_t, BlockStates> blocks(GetGraph()->GetLocalAllocator()->Adapter());
     InitStates(&blocks, GetGraph());
     InitImmediates();
-    implicit_null_check_handled_marker_ = GetGraph()->NewMarker();
+    implicitNullCheckHandledMarker_ = GetGraph()->NewMarker();
 
     success_ = true;
-    current_block_ = GetGraph()->GetStartBlock();
+    currentBlock_ = GetGraph()->GetStartBlock();
     while (success_) {
-        ASSERT(current_block_ != nullptr);
+        ASSERT(currentBlock_ != nullptr);
 
-        blocks.at(current_block_->GetId()).SetUpdated(false);
-        blocks.at(current_block_->GetId()).SetVisited(true);
+        blocks.at(currentBlock_->GetId()).SetUpdated(false);
+        blocks.at(currentBlock_->GetId()).SetVisited(true);
         // use state at the end of the block as current state and reset it to the state
         // at the beginning of the block before processing.
-        current_state_ = &blocks.at(current_block_->GetId()).ResetEndToStart();
+        currentState_ = &blocks.at(currentBlock_->GetId()).ResetEndToStart();
 
         ProcessCurrentBlock();
         if (!success_) {
             break;
         }
 
-        current_block_ = PropagateBlockState(current_block_, current_state_, immediates_, &blocks);
-        if (current_block_ != nullptr) {
+        currentBlock_ = PropagateBlockState(currentBlock_, currentState_, immediates_, &blocks);
+        if (currentBlock_ != nullptr) {
             continue;
         }
         // pick a block pending processing
@@ -404,14 +404,14 @@ bool RegAllocVerifier::RunImpl()
             break;
         }
         const auto &bbs = GetGraph()->GetVectorBlocks();
-        auto bb_id = it->first;
-        auto block_it =
-            std::find_if(bbs.begin(), bbs.end(), [bb_id](auto bb) { return bb != nullptr && bb->GetId() == bb_id; });
-        ASSERT(block_it != bbs.end());
-        current_block_ = *block_it;
+        auto bbId = it->first;
+        auto blockIt =
+            std::find_if(bbs.begin(), bbs.end(), [bbId](auto bb) { return bb != nullptr && bb->GetId() == bbId; });
+        ASSERT(blockIt != bbs.end());
+        currentBlock_ = *blockIt;
     }
 
-    GetGraph()->EraseMarker(implicit_null_check_handled_marker_);
+    GetGraph()->EraseMarker(implicitNullCheckHandledMarker_);
     if (success_) {
         CheckAllBlocksVisited(blocks);
     }
@@ -420,7 +420,7 @@ bool RegAllocVerifier::RunImpl()
 
 void RegAllocVerifier::ProcessCurrentBlock()
 {
-    for (auto inst : current_block_->InstsSafe()) {
+    for (auto inst : currentBlock_->InstsSafe()) {
         if (!success_) {
             return;
         }
@@ -510,14 +510,14 @@ void RegAllocVerifier::HandleConst(ConstantInst *inst)
     }
 
     // if const inst does not have valid register then it was spilled to imm table.
-    auto imm_slot = GetGraph()->FindSpilledConstantSlot(inst->CastToConstant());
+    auto immSlot = GetGraph()->FindSpilledConstantSlot(inst->CastToConstant());
     // zero const is a special case - we're using zero reg to encode it.
-    if (imm_slot == INVALID_IMM_TABLE_SLOT && IsZeroConstantOrNullPtr(inst)) {
+    if (immSlot == INVALID_IMM_TABLE_SLOT && IsZeroConstantOrNullPtr(inst)) {
         return;
     }
 
     // if there is no place in the imm table, constant will be spilled to the stack.
-    ASSERT(imm_slot != INVALID_IMM_TABLE_SLOT || !GetGraph()->HasAvailableConstantSpillSlots());
+    ASSERT(immSlot != INVALID_IMM_TABLE_SLOT || !GetGraph()->HasAvailableConstantSpillSlots());
 }
 
 // Verify instn's inputs and set instn's id to destination location.
@@ -530,15 +530,15 @@ void RegAllocVerifier::HandleInst(Inst *inst)
             continue;
         }
 
-        auto input_type = inst->GetInputType(i);
-        if (input_type == DataType::NO_TYPE) {
+        auto inputType = inst->GetInputType(i);
+        if (inputType == DataType::NO_TYPE) {
             ASSERT(inst->GetOpcode() == Opcode::CallIndirect);
-            input_type = Is64BitsArch(GetGraph()->GetArch()) ? DataType::INT64 : DataType::INT32;
+            inputType = Is64BitsArch(GetGraph()->GetArch()) ? DataType::INT64 : DataType::INT32;
         } else {
-            input_type = ConvertRegType(GetGraph(), input_type);
+            inputType = ConvertRegType(GetGraph(), inputType);
         }
 
-        success_ &= ForEachLocation(inst->GetLocation(i), input_type, [input, inst, i](LocationState &location) {
+        success_ &= ForEachLocation(inst->GetLocation(i), inputType, [input, inst, i](LocationState &location) {
             if (location.GetState() != LocationState::State::KNOWN) {
                 COMPILER_LOG(ERROR, REGALLOC) << "Input #" << i << " is loaded from location with state "
                                               << ToString(location.GetState()) << std::endl
@@ -564,31 +564,31 @@ bool RegAllocVerifier::IsSaveRestoreRegisters(Inst *inst)
     if (!inst->IsIntrinsic()) {
         return false;
     }
-    auto intrinsic_id = inst->CastToIntrinsic()->GetIntrinsicId();
-    return intrinsic_id == RuntimeInterface::IntrinsicId::INTRINSIC_SAVE_REGISTERS_EP ||
-           intrinsic_id == RuntimeInterface::IntrinsicId::INTRINSIC_RESTORE_REGISTERS_EP;
+    auto intrinsicId = inst->CastToIntrinsic()->GetIntrinsicId();
+    return intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_SAVE_REGISTERS_EP ||
+           intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_RESTORE_REGISTERS_EP;
 }
 
 void RegAllocVerifier::HandleSaveRestoreRegisters(Inst *inst)
 {
     ASSERT(inst->IsIntrinsic());
-    auto used_regs = GetGraph()->GetUsedRegs<DataType::INT64>()->size();
+    auto usedRegs = GetGraph()->GetUsedRegs<DataType::INT64>()->size();
     switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
         case RuntimeInterface::IntrinsicId::INTRINSIC_SAVE_REGISTERS_EP:
-            ASSERT(saved_regs_.empty());
-            for (size_t reg = 0; reg < used_regs; reg++) {
-                saved_regs_.push_back(current_state_->GetReg(reg));
+            ASSERT(savedRegs_.empty());
+            for (size_t reg = 0; reg < usedRegs; reg++) {
+                savedRegs_.push_back(currentState_->GetReg(reg));
             }
             break;
         case RuntimeInterface::IntrinsicId::INTRINSIC_RESTORE_REGISTERS_EP:
-            ASSERT(!saved_regs_.empty());
-            for (size_t reg = 0; reg < used_regs; reg++) {
-                if (saved_regs_[reg].GetState() == LocationState::State::UNKNOWN) {
+            ASSERT(!savedRegs_.empty());
+            for (size_t reg = 0; reg < usedRegs; reg++) {
+                if (savedRegs_[reg].GetState() == LocationState::State::UNKNOWN) {
                     continue;
                 }
-                current_state_->GetReg(reg) = saved_regs_[reg];
+                currentState_->GetReg(reg) = savedRegs_[reg];
             }
-            saved_regs_.clear();
+            savedRegs_.clear();
             break;
         default:
             UNREACHABLE();
@@ -610,7 +610,7 @@ void RegAllocVerifier::TryHandleImplicitNullCheck(Inst *inst)
     NullCheckInst *nc = nullptr;
     for (auto &input : inst->GetInputs()) {
         if (input.GetInst()->IsNullCheck() && input.GetInst()->CastToNullCheck()->IsImplicit() &&
-            !input.GetInst()->IsMarked(implicit_null_check_handled_marker_)) {
+            !input.GetInst()->IsMarked(implicitNullCheckHandledMarker_)) {
             nc = input.GetInst()->CastToNullCheck();
             break;
         }
@@ -618,7 +618,7 @@ void RegAllocVerifier::TryHandleImplicitNullCheck(Inst *inst)
     if (nc == nullptr) {
         return;
     }
-    nc->SetMarker(implicit_null_check_handled_marker_);
+    nc->SetMarker(implicitNullCheckHandledMarker_);
 }
 
 }  // namespace panda::compiler

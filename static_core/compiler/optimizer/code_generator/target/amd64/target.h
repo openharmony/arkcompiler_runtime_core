@@ -40,7 +40,7 @@ static inline bool IsConditionSigned(Condition cc)
 }
 
 /// Converters
-static inline asmjit::x86::Condition::Code ArchCc(Condition cc, bool is_float = false)
+static inline asmjit::x86::Condition::Code ArchCc(Condition cc, bool isFloat = false)
 {
     switch (cc) {
         case Condition::EQ:
@@ -48,13 +48,13 @@ static inline asmjit::x86::Condition::Code ArchCc(Condition cc, bool is_float = 
         case Condition::NE:
             return asmjit::x86::Condition::Code::kNotEqual;
         case Condition::LT:
-            return is_float ? asmjit::x86::Condition::Code::kUnsignedLT : asmjit::x86::Condition::Code::kSignedLT;
+            return isFloat ? asmjit::x86::Condition::Code::kUnsignedLT : asmjit::x86::Condition::Code::kSignedLT;
         case Condition::GT:
-            return is_float ? asmjit::x86::Condition::Code::kUnsignedGT : asmjit::x86::Condition::Code::kSignedGT;
+            return isFloat ? asmjit::x86::Condition::Code::kUnsignedGT : asmjit::x86::Condition::Code::kSignedGT;
         case Condition::LE:
-            return is_float ? asmjit::x86::Condition::Code::kUnsignedLE : asmjit::x86::Condition::Code::kSignedLE;
+            return isFloat ? asmjit::x86::Condition::Code::kUnsignedLE : asmjit::x86::Condition::Code::kSignedLE;
         case Condition::GE:
-            return is_float ? asmjit::x86::Condition::Code::kUnsignedGE : asmjit::x86::Condition::Code::kSignedGE;
+            return isFloat ? asmjit::x86::Condition::Code::kUnsignedGE : asmjit::x86::Condition::Code::kSignedGE;
         case Condition::LO:
             return asmjit::x86::Condition::Code::kUnsignedLT;
         case Condition::LS:
@@ -198,30 +198,30 @@ static inline asmjit::x86::Gp ArchReg(Reg reg, uint8_t size = 0)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
-        size_t reg_size = size == 0 ? reg.GetSize() : size;
-        auto arch_id = ConvertRegNumber(reg.GetId());
+        size_t regSize = size == 0 ? reg.GetSize() : size;
+        auto archId = ConvertRegNumber(reg.GetId());
 
-        asmjit::x86::Gp arch_reg;
-        switch (reg_size) {
+        asmjit::x86::Gp archReg;
+        switch (regSize) {
             case DOUBLE_WORD_SIZE:
-                arch_reg = asmjit::x86::Gp(asmjit::x86::Gpq::kSignature, arch_id);
+                archReg = asmjit::x86::Gp(asmjit::x86::Gpq::kSignature, archId);
                 break;
             case WORD_SIZE:
-                arch_reg = asmjit::x86::Gp(asmjit::x86::Gpd::kSignature, arch_id);
+                archReg = asmjit::x86::Gp(asmjit::x86::Gpd::kSignature, archId);
                 break;
             case HALF_SIZE:
-                arch_reg = asmjit::x86::Gp(asmjit::x86::Gpw::kSignature, arch_id);
+                archReg = asmjit::x86::Gp(asmjit::x86::Gpw::kSignature, archId);
                 break;
             case BYTE_SIZE:
-                arch_reg = asmjit::x86::Gp(asmjit::x86::GpbLo::kSignature, arch_id);
+                archReg = asmjit::x86::Gp(asmjit::x86::GpbLo::kSignature, archId);
                 break;
 
             default:
                 UNREACHABLE();
         }
 
-        ASSERT(arch_reg.isValid());
-        return arch_reg;
+        ASSERT(archReg.isValid());
+        return archReg;
     }
     if (reg.GetId() == ConvertRegNumber(asmjit::x86::rsp.id())) {
         return asmjit::x86::rsp;
@@ -235,8 +235,8 @@ static inline asmjit::x86::Gp ArchReg(Reg reg, uint8_t size = 0)
 static inline asmjit::x86::Xmm ArchVReg(Reg reg)
 {
     ASSERT(reg.IsValid() && reg.IsFloat());
-    auto arch_vreg = asmjit::x86::xmm(reg.GetId());
-    return arch_vreg;
+    auto archVreg = asmjit::x86::xmm(reg.GetId());
+    return archVreg;
 }
 
 static inline asmjit::Imm ArchImm(Imm imm)
@@ -279,25 +279,25 @@ public:
             // Default memory - base + offset
             mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), mem.GetDisp());
         } else if (base && regoffset && !offset) {
-            auto base_size = mem.GetBase().GetSize();
-            auto index_size = mem.GetIndex().GetSize();
+            auto baseSize = mem.GetBase().GetSize();
+            auto indexSize = mem.GetIndex().GetSize();
 
-            ASSERT(base_size >= index_size);
-            ASSERT(index_size >= WORD_SIZE);
+            ASSERT(baseSize >= indexSize);
+            ASSERT(indexSize >= WORD_SIZE);
 
-            if (base_size > index_size) {
-                need_extend_index_ = true;
+            if (baseSize > indexSize) {
+                needExtendIndex_ = true;
             }
 
             if (mem.GetScale() == 0) {
-                mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), base_size));
+                mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize));
             } else {
                 auto scale = mem.GetScale();
                 if (scale <= 3U) {
-                    mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), base_size), scale);
+                    mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize), scale);
                 } else {
-                    mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), base_size));
-                    big_shift_ = scale;
+                    mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize));
+                    bigShift_ = scale;
                 }
             }
         } else {
@@ -312,32 +312,32 @@ public:
 
     asmjit::x86::Mem Prepare(asmjit::x86::Assembler *masm)
     {
-        if (is_prepared_) {
+        if (isPrepared_) {
             return mem_;
         }
 
-        if (big_shift_ != 0) {
-            ASSERT(!mem_.hasOffset() && mem_.hasIndex() && big_shift_ > 3U);
-            masm->shl(mem_.indexReg().as<asmjit::x86::Gp>(), asmjit::imm(big_shift_));
+        if (bigShift_ != 0) {
+            ASSERT(!mem_.hasOffset() && mem_.hasIndex() && bigShift_ > 3U);
+            masm->shl(mem_.indexReg().as<asmjit::x86::Gp>(), asmjit::imm(bigShift_));
         }
 
-        if (need_extend_index_) {
+        if (needExtendIndex_) {
             ASSERT(mem_.hasIndex());
-            auto q_index = mem_.indexReg().as<asmjit::x86::Gp>();
-            auto d_index {q_index};
-            d_index.setSignature(asmjit::x86::Gpd::kSignature);
-            masm->movsxd(q_index, d_index);
+            auto qIndex = mem_.indexReg().as<asmjit::x86::Gp>();
+            auto dIndex {qIndex};
+            dIndex.setSignature(asmjit::x86::Gpd::kSignature);
+            masm->movsxd(qIndex, dIndex);
         }
 
-        is_prepared_ = true;
+        isPrepared_ = true;
         return mem_;
     }
 
 private:
-    int64_t big_shift_ {0};
+    int64_t bigShift_ {0};
     asmjit::x86::Mem mem_;
-    bool need_extend_index_ {false};
-    bool is_prepared_ {false};
+    bool needExtendIndex_ {false};
+    bool isPrepared_ {false};
 };
 
 /*
@@ -381,19 +381,19 @@ public:
 
     RegMask GetCallerSavedRegMask() const override
     {
-        return RegMask(caller_saved_.GetMask());
+        return RegMask(callerSaved_.GetMask());
     }
 
     VRegMask GetCallerSavedVRegMask() const override
     {
-        return VRegMask(caller_savedv_.GetMask());
+        return VRegMask(callerSavedv_.GetMask());
     }
 
     bool IsCalleeRegister(Reg reg) override
     {
-        bool is_fp = reg.IsFloat();
-        return reg.GetId() >= GetFirstCalleeReg(Arch::X86_64, is_fp) &&
-               reg.GetId() <= GetLastCalleeReg(Arch::X86_64, is_fp);
+        bool isFp = reg.IsFloat();
+        return reg.GetId() >= GetFirstCalleeReg(Arch::X86_64, isFp) &&
+               reg.GetId() <= GetLastCalleeReg(Arch::X86_64, isFp);
     }
 
     Reg GetZeroReg() const override
@@ -420,21 +420,21 @@ public:
     {
         static constexpr size_t HIGH_MASK {0xFFFF0000};
 
-        RegMask reg_mask(HIGH_MASK);
-        reg_mask |= compiler::arch_info::x86_64::TEMP_REGS;
-        reg_mask.set(ConvertRegNumber(asmjit::x86::rbp.id()));
-        reg_mask.set(ConvertRegNumber(asmjit::x86::rsp.id()));
-        reg_mask.set(GetThreadReg(Arch::X86_64));
-        return reg_mask;
+        RegMask regMask(HIGH_MASK);
+        regMask |= compiler::arch_info::x86_64::TEMP_REGS;
+        regMask.set(ConvertRegNumber(asmjit::x86::rbp.id()));
+        regMask.set(ConvertRegNumber(asmjit::x86::rsp.id()));
+        regMask.set(GetThreadReg(Arch::X86_64));
+        return regMask;
     }
 
     VRegMask GetVRegMask() override
     {
         static constexpr size_t HIGH_MASK {0xFFFF0000};
 
-        VRegMask vreg_mask(HIGH_MASK);
-        vreg_mask |= compiler::arch_info::x86_64::TEMP_FP_REGS;
-        return vreg_mask;
+        VRegMask vregMask(HIGH_MASK);
+        vregMask |= compiler::arch_info::x86_64::TEMP_FP_REGS;
+        return vregMask;
     }
 
     // Check register mapping
@@ -456,25 +456,25 @@ public:
         return true;
     }
 
-    bool IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg) override;
+    bool IsRegUsed(ArenaVector<Reg> vecReg, Reg reg) override;
 
 public:
     // Special implementation-specific getters
     size_t GetCalleeSavedR()
     {
-        return static_cast<size_t>(callee_saved_);
+        return static_cast<size_t>(calleeSaved_);
     }
     size_t GetCalleeSavedV()
     {
-        return static_cast<size_t>(callee_savedv_);
+        return static_cast<size_t>(calleeSavedv_);
     }
     size_t GetCallerSavedR()
     {
-        return static_cast<size_t>(caller_saved_);
+        return static_cast<size_t>(callerSaved_);
     }
     size_t GetCallerSavedV()
     {
-        return static_cast<size_t>(caller_savedv_);
+        return static_cast<size_t>(callerSavedv_);
     }
 
     Reg AcquireScratchRegister(TypeInfo type)
@@ -544,13 +544,13 @@ public:
     }
 
 private:
-    ArenaVector<Reg> used_regs_;
+    ArenaVector<Reg> usedRegs_;
 
-    RegList callee_saved_ {GetCalleeRegsMask(Arch::X86_64, false).GetValue()};
-    RegList caller_saved_ {GetCallerRegsMask(Arch::X86_64, false).GetValue()};
+    RegList calleeSaved_ {GetCalleeRegsMask(Arch::X86_64, false).GetValue()};
+    RegList callerSaved_ {GetCallerRegsMask(Arch::X86_64, false).GetValue()};
 
-    RegList callee_savedv_ {GetCalleeRegsMask(Arch::X86_64, true).GetValue()};
-    RegList caller_savedv_ {GetCallerRegsMask(Arch::X86_64, true).GetValue()};
+    RegList calleeSavedv_ {GetCalleeRegsMask(Arch::X86_64, true).GetValue()};
+    RegList callerSavedv_ {GetCallerRegsMask(Arch::X86_64, true).GetValue()};
 
     RegList scratch_ {compiler::arch_info::x86_64::TEMP_REGS.to_ulong()};
     RegList scratchv_ {compiler::arch_info::x86_64::TEMP_FP_REGS.to_ulong()};
@@ -642,33 +642,33 @@ public:
     void EncodeAdd(Reg dst, Reg src0, Shift src1) override;
 
     void EncodeCastToBool(Reg dst, Reg src) override;
-    void EncodeCast(Reg dst, bool dst_signed, Reg src, bool src_signed) override;
+    void EncodeCast(Reg dst, bool dstSigned, Reg src, bool srcSigned) override;
     void EncodeFastPathDynamicCast(Reg dst, Reg src, LabelHolder::LabelId slow) override;
-    void EncodeMin(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeDiv(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeMod(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
-    void EncodeMax(Reg dst, bool dst_signed, Reg src0, Reg src1) override;
+    void EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
 
     void EncodeAddOverflow(compiler::LabelHolder::LabelId id, Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeSubOverflow(compiler::LabelHolder::LabelId id, Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeNegOverflowAndZero(compiler::LabelHolder::LabelId id, Reg dst, Reg src) override;
 
-    void EncodeLdr(Reg dst, bool dst_signed, MemRef mem) override;
-    void EncodeLdrAcquire(Reg dst, bool dst_signed, MemRef mem) override;
+    void EncodeLdr(Reg dst, bool dstSigned, MemRef mem) override;
+    void EncodeLdrAcquire(Reg dst, bool dstSigned, MemRef mem) override;
 
     void EncodeMov(Reg dst, Imm src) override;
     void EncodeStr(Reg src, MemRef mem) override;
     void EncodeStrRelease(Reg src, MemRef mem) override;
     // zerod high part: [reg.size, 64)
     void EncodeStrz(Reg src, MemRef mem) override;
-    void EncodeSti(int64_t src, uint8_t src_size_bytes, MemRef mem) override;
+    void EncodeSti(int64_t src, uint8_t srcSizeBytes, MemRef mem) override;
     void EncodeSti(float src, MemRef mem) override;
     void EncodeSti(double src, MemRef mem) override;
     // size must be 8, 16,32 or 64
-    void EncodeMemCopy(MemRef mem_from, MemRef mem_to, size_t size) override;
+    void EncodeMemCopy(MemRef memFrom, MemRef memTo, size_t size) override;
     // size must be 8, 16,32 or 64
     // zerod high part: [reg.size, 64)
-    void EncodeMemCopyz(MemRef mem_from, MemRef mem_to, size_t size) override;
+    void EncodeMemCopyz(MemRef memFrom, MemRef memTo, size_t size) override;
 
     void EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc) override;
 
@@ -680,7 +680,7 @@ public:
     void EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc) override;
     void EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc) override;
 
-    void EncodeLdp(Reg dst0, Reg dst1, bool dst_signed, MemRef mem) override;
+    void EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem) override;
 
     void EncodeStp(Reg src0, Reg src1, MemRef mem) override;
 
@@ -702,7 +702,7 @@ public:
     void EncodeFpToBits(Reg dst, Reg src) override;
     void EncodeMoveBitsRaw(Reg dst, Reg src) override;
 
-    bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signed_compare) override;
+    bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signedCompare) override;
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
     bool CanEncodeScale(uint64_t imm, uint32_t size) override;
     bool CanEncodeBitCount() override;
@@ -782,7 +782,7 @@ public:
         return INT64_TYPE;
     };
 
-    size_t DisasmInstr(std::ostream &stream, size_t pc, ssize_t code_offset) const override;
+    size_t DisasmInstr(std::ostream &stream, size_t pc, ssize_t codeOffset) const override;
 
     void *BufferData() const override
     {
@@ -802,9 +802,9 @@ public:
 
     void MakeCall(compiler::RelocationInfo *relocation) override;
     void MakeCall(LabelHolder::LabelId id) override;
-    void MakeCall(const void *entry_point) override;
+    void MakeCall(const void *entryPoint) override;
     void MakeCall(Reg reg) override;
-    void MakeCall(MemRef entry_point) override;
+    void MakeCall(MemRef entryPoint) override;
 
     void MakeCallAot(intptr_t offset) override;
     void MakeCallByOffset(intptr_t offset) override;
@@ -835,36 +835,36 @@ public:
 
     void EncodeJump(RelocationInfo *relocation) override;
 
-    void EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bit_pos, bool bit_value) override;
+    void EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bitPos, bool bitValue) override;
 
     void EncodeAbort() override;
 
     void EncodeReturn() override;
 
-    void MakeLibCall(Reg dst, Reg src0, Reg src1, void *entry_point);
+    void MakeLibCall(Reg dst, Reg src0, Reg src1, void *entryPoint);
 
-    void SaveRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp) override
+    void SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override
     {
-        LoadStoreRegisters<true>(registers, slot, start_reg, is_fp);
+        LoadStoreRegisters<true>(registers, slot, startReg, isFp);
     }
-    void LoadRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp) override
+    void LoadRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override
     {
-        LoadStoreRegisters<false>(registers, slot, start_reg, is_fp);
+        LoadStoreRegisters<false>(registers, slot, startReg, isFp);
     }
-    void SaveRegisters(RegMask registers, bool is_fp, ssize_t slot, Reg base, RegMask mask) override
+    void SaveRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override
     {
-        LoadStoreRegisters<true>(registers, is_fp, slot, base, mask);
+        LoadStoreRegisters<true>(registers, isFp, slot, base, mask);
     }
-    void LoadRegisters(RegMask registers, bool is_fp, ssize_t slot, Reg base, RegMask mask) override
+    void LoadRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override
     {
-        LoadStoreRegisters<false>(registers, is_fp, slot, base, mask);
+        LoadStoreRegisters<false>(registers, isFp, slot, base, mask);
     }
 
-    void PushRegisters(RegMask registers, bool is_fp) override;
-    void PopRegisters(RegMask registers, bool is_fp) override;
+    void PushRegisters(RegMask registers, bool isFp) override;
+    void PopRegisters(RegMask registers, bool isFp) override;
 
     template <typename Func>
-    void EncodeRelativePcMov(Reg reg, intptr_t offset, Func encode_instruction);
+    void EncodeRelativePcMov(Reg reg, intptr_t offset, Func encodeInstruction);
 
     asmjit::x86::Assembler *GetMasm() const
     {
@@ -889,10 +889,10 @@ public:
 
 private:
     template <bool IS_STORE>
-    void LoadStoreRegisters(RegMask registers, ssize_t slot, size_t start_reg, bool is_fp);
+    void LoadStoreRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp);
 
     template <bool IS_STORE>
-    void LoadStoreRegisters(RegMask registers, bool is_fp, int32_t slot, Reg base, RegMask mask);
+    void LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask);
 
     inline Reg MakeShift(Shift shift);
 
@@ -902,17 +902,17 @@ private:
     void EncodeRoundToPInfFloat(Reg dst, Reg src);
     void EncodeRoundToPInfDouble(Reg dst, Reg src);
 
-    void EncodeCastFloatToScalar(Reg dst, bool dst_signed, Reg src);
+    void EncodeCastFloatToScalar(Reg dst, bool dstSigned, Reg src);
     inline void EncodeCastFloatSignCheckRange(Reg dst, Reg src, const asmjit::Label &end);
     inline void EncodeCastFloatUnsignCheckRange(Reg dst, Reg src, const asmjit::Label &end);
     void EncodeCastFloatCheckNan(Reg dst, Reg src, const asmjit::Label &end);
-    void EncodeCastFloatCheckRange(Reg dst, Reg src, const asmjit::Label &end, int64_t min_value, uint64_t max_value);
+    void EncodeCastFloatCheckRange(Reg dst, Reg src, const asmjit::Label &end, int64_t minValue, uint64_t maxValue);
     void EncodeCastFloat32ToUint64(Reg dst, Reg src);
     void EncodeCastFloat64ToUint64(Reg dst, Reg src);
 
-    void EncodeCastScalarToFloat(Reg dst, Reg src, bool src_signed);
+    void EncodeCastScalarToFloat(Reg dst, Reg src, bool srcSigned);
     void EncodeCastScalarToFloatUnsignDouble(Reg dst, Reg src);
-    void EncodeCastScalar(Reg dst, bool dst_signed, Reg src, bool src_signed);
+    void EncodeCastScalar(Reg dst, bool dstSigned, Reg src, bool srcSigned);
 
     void EncodeDivFloat(Reg dst, Reg src0, Reg src1);
     void EncodeModFloat(Reg dst, Reg src0, Reg src1);
@@ -930,8 +930,8 @@ private:
 
 private:
     Amd64LabelHolder *labels_ {nullptr};
-    asmjit::ErrorHandler *error_handler_ {nullptr};
-    asmjit::CodeHolder *code_holder_ {nullptr};
+    asmjit::ErrorHandler *errorHandler_ {nullptr};
+    asmjit::CodeHolder *codeHolder_ {nullptr};
     asmjit::x86::Assembler *masm_ {nullptr};
 };  // Amd64Encoder
 
@@ -958,15 +958,15 @@ public:
         return true;
     }
 
-    void GeneratePrologue(const FrameInfo &frame_info) override;
-    void GenerateEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) override;
-    void GenerateNativePrologue(const FrameInfo &frame_info) override
+    void GeneratePrologue(const FrameInfo &frameInfo) override;
+    void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
+    void GenerateNativePrologue(const FrameInfo &frameInfo) override
     {
-        GeneratePrologue(frame_info);
+        GeneratePrologue(frameInfo);
     }
-    void GenerateNativeEpilogue(const FrameInfo &frame_info, std::function<void()> post_job) override
+    void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override
     {
-        GenerateEpilogue(frame_info, post_job);
+        GenerateEpilogue(frameInfo, postJob);
     }
 
     void *GetCodeEntry() override;
@@ -978,7 +978,7 @@ public:
     size_t PopRegs(RegList regs, RegList vregs);
 
     // Calculating information about parameters and save regs_offset registers for special needs
-    ParameterInfo *GetParameterInfo(uint8_t regs_offset) override;
+    ParameterInfo *GetParameterInfo(uint8_t regsOffset) override;
 
     asmjit::x86::Assembler *GetMasm()
     {

@@ -96,35 +96,35 @@ public:
         : prev_(prev),
           method_(method),
           nregs_(nregs),
-          num_actual_args_(0),
-          bc_offset_(0),
+          numActualArgs_(0),
+          bcOffset_(0),
           flags_(0),
           ext_(ext),
-          next_inst_(nullptr),
+          nextInst_(nullptr),
           inst_(nullptr)
     {
     }
-    ALWAYS_INLINE inline Frame(void *ext, Method *method, Frame *prev, uint32_t nregs, uint32_t num_actual_args)
+    ALWAYS_INLINE inline Frame(void *ext, Method *method, Frame *prev, uint32_t nregs, uint32_t numActualArgs)
         : prev_(prev),
           method_(method),
           nregs_(nregs),
-          num_actual_args_(num_actual_args),
-          bc_offset_(0),
+          numActualArgs_(numActualArgs),
+          bcOffset_(0),
           flags_(0),
           ext_(ext),
-          next_inst_(nullptr),
+          nextInst_(nullptr),
           inst_(nullptr)
     {
     }
 
-    ALWAYS_INLINE static void *ToExt(Frame *frame, size_t ext_sz)
+    ALWAYS_INLINE static void *ToExt(Frame *frame, size_t extSz)
     {
-        return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(frame) - ext_sz);
+        return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(frame) - extSz);
     }
 
-    ALWAYS_INLINE static Frame *FromExt(void *ext, size_t ext_sz)
+    ALWAYS_INLINE static Frame *FromExt(void *ext, size_t extSz)
     {
-        return reinterpret_cast<Frame *>(reinterpret_cast<uintptr_t>(ext) + ext_sz);
+        return reinterpret_cast<Frame *>(reinterpret_cast<uintptr_t>(ext) + extSz);
     }
 
     ALWAYS_INLINE inline void *GetExt() const
@@ -186,27 +186,27 @@ public:
 
     ALWAYS_INLINE inline uint32_t GetNumActualArgs() const
     {
-        return num_actual_args_;
+        return numActualArgs_;
     }
 
-    ALWAYS_INLINE inline void SetBytecodeOffset(uint32_t bc_offset)
+    ALWAYS_INLINE inline void SetBytecodeOffset(uint32_t bcOffset)
     {
-        bc_offset_ = bc_offset;
+        bcOffset_ = bcOffset;
     }
 
     ALWAYS_INLINE inline uint32_t GetBytecodeOffset() const
     {
-        return bc_offset_;
+        return bcOffset_;
     }
 
     ALWAYS_INLINE inline void SetNextInstruction(BytecodeInstruction inst)
     {
-        next_inst_ = inst;
+        nextInst_ = inst;
     }
 
     ALWAYS_INLINE inline BytecodeInstruction GetNextInstruction() const
     {
-        return next_inst_;
+        return nextInst_;
     }
 
     ALWAYS_INLINE inline void SetInstruction(const uint8_t *inst)
@@ -219,9 +219,9 @@ public:
         return inst_;
     }
 
-    ALWAYS_INLINE static inline size_t GetAllocSize(size_t size, uint32_t ext_sz)
+    ALWAYS_INLINE static inline size_t GetAllocSize(size_t size, uint32_t extSz)
     {
-        return AlignUp(sizeof(Frame) + sizeof(interpreter::VRegister) * size + ext_sz,
+        return AlignUp(sizeof(Frame) + sizeof(interpreter::VRegister) * size + extSz,
                        GetAlignmentInBytes(DEFAULT_FRAME_ALIGNMENT));
     }
 
@@ -374,7 +374,7 @@ public:
 
     ALWAYS_INLINE static inline constexpr uint32_t GetNumActualArgsOffset()
     {
-        return MEMBER_OFFSET(Frame, num_actual_args_);
+        return MEMBER_OFFSET(Frame, numActualArgs_);
     }
 
     ALWAYS_INLINE static inline constexpr uint32_t GetFlagsOffset()
@@ -384,7 +384,7 @@ public:
 
     ALWAYS_INLINE static inline constexpr uint32_t GetNextInstructionOffset()
     {
-        return MEMBER_OFFSET(Frame, next_inst_);
+        return MEMBER_OFFSET(Frame, nextInst_);
     }
 
     ALWAYS_INLINE static inline constexpr uint32_t GetInstructionsOffset()
@@ -394,7 +394,7 @@ public:
 
     ALWAYS_INLINE static constexpr uint32_t GetBytecodeOffsetOffset()
     {
-        return MEMBER_OFFSET(Frame, bc_offset_);
+        return MEMBER_OFFSET(Frame, bcOffset_);
     }
 
     ALWAYS_INLINE static constexpr uint32_t GetExtOffset()
@@ -411,15 +411,15 @@ private:
     Frame *prev_;
     Method *method_;
     uint32_t nregs_;
-    uint32_t num_actual_args_;
-    uint32_t bc_offset_;
+    uint32_t numActualArgs_;
+    uint32_t bcOffset_;
     size_t flags_;
 
     // ExtFrame<Ext> allocation ptr
     void *ext_;
 
     interpreter::AccVRegister acc_;
-    BytecodeInstruction next_inst_;
+    BytecodeInstruction nextInst_;
     const uint8_t *inst_;
 
     __extension__ interpreter::VRegister vregs_[0];  // NOLINT(modernize-avoid-c-arrays)
@@ -479,9 +479,9 @@ public:
         return frame_->GetNumActualArgs();
     }
 
-    ALWAYS_INLINE inline void SetBytecodeOffset(uint32_t bc_offset)
+    ALWAYS_INLINE inline void SetBytecodeOffset(uint32_t bcOffset)
     {
-        frame_->SetBytecodeOffset(bc_offset);
+        frame_->SetBytecodeOffset(bcOffset);
     }
 
     ALWAYS_INLINE inline uint32_t GetBytecodeOffset() const
@@ -715,7 +715,7 @@ public:
 
     ALWAYS_INLINE inline ExtData *GetExtData()
     {
-        return &ext_data_;
+        return &extData_;
     }
 
     ALWAYS_INLINE static inline constexpr uint32_t GetExtSize()
@@ -741,12 +741,12 @@ public:
     }
 
 private:
-    static constexpr uint32_t EXT_DATA_OFFSET = MEMBER_OFFSET(ExtFrame<ExtData>, ext_data_);
+    static constexpr uint32_t EXT_DATA_OFFSET = MEMBER_OFFSET(ExtFrame<ExtData>, extData_);
     static constexpr uint32_t FRAME_OFFSET = MEMBER_OFFSET(ExtFrame<ExtData>, frame_);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-    ExtData ext_data_;
+    ExtData extData_;
     __extension__ Frame frame_;
 #pragma GCC diagnostic pop
 };
@@ -764,24 +764,24 @@ static_assert(EMPTY_EXT_FRAME_DATA_SIZE == 0, "Nonzero EMPTY_EXT_FRAME_DATA_SIZE
 #pragma GCC diagnostic pop
 
 template <class ExtT = EmptyExtFrameData>
-ALWAYS_INLINE inline Frame *CreateFrame(mem::StackFrameAllocator *stack_frame_allocator, uint32_t nregs_size,
-                                        Method *method, Frame *prev, uint32_t nregs, uint32_t num_actual_args)
+ALWAYS_INLINE inline Frame *CreateFrame(mem::StackFrameAllocator *stackFrameAllocator, uint32_t nregsSize,
+                                        Method *method, Frame *prev, uint32_t nregs, uint32_t numActualArgs)
 {
     constexpr uint32_t EXT_SIZE = ExtFrame<ExtT>::GetExtSize();
 
-    size_t ext_frame_size = Frame::GetAllocSize(nregs_size, EXT_SIZE);
-    void *mem = stack_frame_allocator->Alloc(ext_frame_size);
+    size_t extFrameSize = Frame::GetAllocSize(nregsSize, EXT_SIZE);
+    void *mem = stackFrameAllocator->Alloc(extFrameSize);
     if (UNLIKELY(mem == nullptr)) {
         return nullptr;
     }
     // CODECHECK-NOLINTNEXTLINE(CPP_RULE_ID_SMARTPOINTER_INSTEADOF_ORIGINPOINTER)
-    return new (Frame::FromExt(mem, EXT_SIZE)) Frame(mem, method, prev, nregs, num_actual_args);
+    return new (Frame::FromExt(mem, EXT_SIZE)) Frame(mem, method, prev, nregs, numActualArgs);
 }
 
-ALWAYS_INLINE inline void DestroyFrame(mem::StackFrameAllocator *stack_frame_allocator, Frame *frame)
+ALWAYS_INLINE inline void DestroyFrame(mem::StackFrameAllocator *stackFrameAllocator, Frame *frame)
 {
     ASSERT(frame->GetExt() != nullptr);
-    stack_frame_allocator->Free(frame->GetExt());
+    stackFrameAllocator->Free(frame->GetExt());
 }
 
 }  // namespace panda

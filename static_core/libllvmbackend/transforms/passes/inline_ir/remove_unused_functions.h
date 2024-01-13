@@ -45,8 +45,8 @@ public:
     llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &analysis_manager);
 
 private:
-    void VisitValue(llvm::DenseSet<llvm::Function *> &used_functions, llvm::Value &value,
-                    llvm::DenseSet<llvm::Value *> &seen_values);
+    void VisitValue(llvm::DenseSet<llvm::Function *> &usedFunctions, llvm::Value &value,
+                    llvm::DenseSet<llvm::Value *> &seenValues);
 
 public:
     static constexpr llvm::StringRef ARG_NAME = "remove-unused-functions";

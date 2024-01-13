@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/lambda_utils.h"
@@ -39,18 +40,18 @@ public:
     bool IsInitialized();
     void AddTaskId(uint64_t id);
     bool HasId(uint64_t id);
-    void SetCallbackForTask(uint32_t task_id, mem::Reference *callback_ref);
-    void GCStarted(const GCTask &task, size_t heap_size) override;
+    void SetCallbackForTask(uint32_t taskId, mem::Reference *callbackRef);
+    void GCStarted(const GCTask &task, size_t heapSize) override;
     void GCPhaseStarted(mem::GCPhase phase) override;
-    void GCFinished(const GCTask &task, size_t heap_size_before_gc, size_t heap_size) override;
+    void GCFinished(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize) override;
     void RemoveId(uint64_t id);
 
 private:
     bool initialized_ = false;
-    std::vector<uint64_t> task_ids_ GUARDED_BY(lock_);
-    uint32_t current_task_id_ = 0;
-    uint32_t callback_task_id_ = 0;
-    mem::Reference *callback_ref_ = nullptr;
+    std::vector<uint64_t> taskIds_ GUARDED_BY(lock_);
+    uint32_t currentTaskId_ = 0;
+    uint32_t callbackTaskId_ = 0;
+    mem::Reference *callbackRef_ = nullptr;
     os::memory::Mutex lock_;
 };
 
@@ -71,63 +72,63 @@ bool GCTaskTracker::IsInitialized()
 void GCTaskTracker::AddTaskId(uint64_t id)
 {
     os::memory::LockHolder lock(lock_);
-    task_ids_.push_back(id);
+    taskIds_.push_back(id);
 }
 
 bool GCTaskTracker::HasId(uint64_t id)
 {
     os::memory::LockHolder lock(lock_);
-    return std::find(task_ids_.begin(), task_ids_.end(), id) != task_ids_.end();
+    return std::find(taskIds_.begin(), taskIds_.end(), id) != taskIds_.end();
 }
 
-void GCTaskTracker::SetCallbackForTask(uint32_t task_id, mem::Reference *callback_ref)
+void GCTaskTracker::SetCallbackForTask(uint32_t taskId, mem::Reference *callbackRef)
 {
-    callback_task_id_ = task_id;
-    callback_ref_ = callback_ref;
+    callbackTaskId_ = taskId;
+    callbackRef_ = callbackRef;
 }
 
-void GCTaskTracker::GCStarted(const GCTask &task, [[maybe_unused]] size_t heap_size)
+void GCTaskTracker::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
 {
-    current_task_id_ = task.GetId();
+    currentTaskId_ = task.GetId();
 }
 
 void GCTaskTracker::GCPhaseStarted(mem::GCPhase phase)
 {
-    if (phase != mem::GCPhase::GC_PHASE_MARK || callback_ref_ == nullptr || current_task_id_ != callback_task_id_) {
+    if (phase != mem::GCPhase::GC_PHASE_MARK || callbackRef_ == nullptr || currentTaskId_ != callbackTaskId_) {
         return;
     }
     auto *coroutine = EtsCoroutine::GetCurrent();
-    auto *obj = reinterpret_cast<EtsObject *>(coroutine->GetPandaVM()->GetGlobalObjectStorage()->Get(callback_ref_));
+    auto *obj = reinterpret_cast<EtsObject *>(coroutine->GetPandaVM()->GetGlobalObjectStorage()->Get(callbackRef_));
     Value arg(obj->GetCoreType());
     os::memory::ReadLockHolder lock(*coroutine->GetPandaVM()->GetRendezvous()->GetMutatorLock());
     LambdaUtils::InvokeVoid(coroutine, obj);
 }
 
-void GCTaskTracker::GCFinished(const GCTask &task, [[maybe_unused]] size_t heap_size_before_gc,
-                               [[maybe_unused]] size_t heap_size)
+void GCTaskTracker::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                               [[maybe_unused]] size_t heapSize)
 {
     RemoveId(task.GetId());
 }
 
 void GCTaskTracker::RemoveId(uint64_t id)
 {
-    current_task_id_ = 0;
-    if (id == callback_task_id_ && callback_ref_ != nullptr) {
-        EtsCoroutine::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage()->Remove(callback_ref_);
-        callback_ref_ = nullptr;
+    currentTaskId_ = 0;
+    if (id == callbackTaskId_ && callbackRef_ != nullptr) {
+        EtsCoroutine::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage()->Remove(callbackRef_);
+        callbackRef_ = nullptr;
     }
     if (id != 0) {
         os::memory::LockHolder lock(lock_);
-        auto it = std::find(task_ids_.begin(), task_ids_.end(), id);
+        auto it = std::find(taskIds_.begin(), taskIds_.end(), id);
         // There may be no such id if the corresponding GC has been triggered not by startGC
-        if (it != task_ids_.end()) {
-            task_ids_.erase(it);
+        if (it != taskIds_.end()) {
+            taskIds_.erase(it);
         }
     }
 }
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-GCTaskTracker G_GCTASK_TRACKER;
+GCTaskTracker g_gGctaskTracker;
 
 static inline size_t ClampToSizeT(EtsLong n)
 {
@@ -141,16 +142,16 @@ static inline size_t ClampToSizeT(EtsLong n)
 
 static GCTaskCause GCCauseFromInt(EtsInt cause)
 {
-    if (cause == 0) {
+    if (cause == 0_I) {
         return GCTaskCause::YOUNG_GC_CAUSE;
     }
-    if (cause == 1) {
+    if (cause == 1_I) {
         return GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE;
     }
-    if (cause == 2) {
+    if (cause == 2_I) {
         return GCTaskCause::MIXED;
     }
-    if (cause == 3) {
+    if (cause == 3_I) {
         return GCTaskCause::OOM_CAUSE;
     }
     return GCTaskCause::INVALID_CAUSE;
@@ -168,7 +169,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    bool run_gc_in_place = Runtime::GetOptions().IsRunGcInPlace("ets");
+    bool runGcInPlace = Runtime::GetOptions().IsRunGcInPlace("ets");
 
     GCTaskCause reason = GCCauseFromInt(cause);
     if (reason == GCTaskCause::INVALID_CAUSE) {
@@ -178,27 +179,27 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback)
     }
     auto *gc = coroutine->GetVM()->GetGC();
     if (!gc->CheckGCCause(reason)) {
-        PandaStringStream e_msg;
-        e_msg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION, e_msg.str());
+        PandaStringStream eMsg;
+        eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION, eMsg.str());
         return -1;
     }
-    G_GCTASK_TRACKER.InitIfNeeded(gc);
+    g_gGctaskTracker.InitIfNeeded(gc);
     auto task = MakePandaUnique<GCTask>(reason);
     uint32_t id = task->GetId();
     if (callback != nullptr) {
-        auto *callback_ref = coroutine->GetPandaVM()->GetGlobalObjectStorage()->Add(callback->GetCoreType(),
-                                                                                    mem::Reference::ObjectType::GLOBAL);
-        G_GCTASK_TRACKER.SetCallbackForTask(id, callback_ref);
+        auto *callbackRef = coroutine->GetPandaVM()->GetGlobalObjectStorage()->Add(callback->GetCoreType(),
+                                                                                   mem::Reference::ObjectType::GLOBAL);
+        g_gGctaskTracker.SetCallbackForTask(id, callbackRef);
         // Run GC in place, because need to run callback in managed part
-        run_gc_in_place = true;
+        runGcInPlace = true;
     }
 
     // Young GC runs in place
     if (reason == GCTaskCause::YOUNG_GC_CAUSE) {
-        run_gc_in_place = true;
+        runGcInPlace = true;
     }
-    if (run_gc_in_place) {
+    if (runGcInPlace) {
         return gc->WaitForGCInManaged(*task) ? 0 : -1;
     }
     // Run GC in GC-thread
@@ -207,9 +208,9 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback)
                           "Calling GC threshold not in place after calling postponeGCStart");
         return -1;
     }
-    G_GCTASK_TRACKER.AddTaskId(id);
+    g_gGctaskTracker.AddTaskId(id);
     if (!gc->Trigger(std::move(task))) {
-        G_GCTASK_TRACKER.RemoveId(id);
+        g_gGctaskTracker.RemoveId(id);
         return -1;
     }
     return static_cast<EtsLong>(id);
@@ -220,17 +221,17 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback)
  * @param gc_id - id of the GC which is returned by startGc.
  * If gc_id is 0 or -1 the function returns immediately.
  */
-extern "C" EtsVoid *StdGCWaitForFinishGC(EtsLong gc_id)
+extern "C" EtsVoid *StdGCWaitForFinishGC(EtsLong gcId)
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
-    if (gc_id <= 0) {
+    if (gcId <= 0) {
         return EtsVoid::GetInstance();
     }
-    auto id = static_cast<uint64_t>(gc_id);
-    ASSERT(G_GCTASK_TRACKER.IsInitialized());
+    auto id = static_cast<uint64_t>(gcId);
+    ASSERT(g_gGctaskTracker.IsInitialized());
     ScopedNativeCodeThread s(thread);
-    while (G_GCTASK_TRACKER.HasId(id)) {
+    while (g_gGctaskTracker.HasId(id)) {
         constexpr uint64_t WAIT_TIME_MS = 10;
         os::thread::NativeSleep(WAIT_TIME_MS);
     }
@@ -247,8 +248,8 @@ extern "C" EtsBoolean StdGCIsScheduledGCTriggered()
     if (trigger->GetType() != mem::GCTriggerType::ON_NTH_ALLOC) {
         return ToEtsBoolean(false);
     }
-    auto sched_trigger = reinterpret_cast<mem::SchedGCOnNthAllocTrigger *>(vm->GetGCTrigger());
-    return ToEtsBoolean(sched_trigger->IsTriggered());
+    auto schedTrigger = reinterpret_cast<mem::SchedGCOnNthAllocTrigger *>(vm->GetGCTrigger());
+    return ToEtsBoolean(schedTrigger->IsTriggered());
 }
 
 extern "C" EtsVoid *StdGCPostponeGCStart()
@@ -369,18 +370,18 @@ extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
     }
 
     auto *vm = Thread::GetCurrent()->GetVM();
-    SpaceType obj_space_type =
+    SpaceType objSpaceType =
         PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(static_cast<void *>(obj->GetCoreType()));
 
-    if (obj_space_type == SpaceType::SPACE_TYPE_OBJECT && vm->GetGC()->IsGenerational()) {
+    if (objSpaceType == SpaceType::SPACE_TYPE_OBJECT && vm->GetGC()->IsGenerational()) {
         if (vm->GetHeapManager()->IsObjectInYoungSpace(obj->GetCoreType())) {
-            const EtsInt young_space = 4;
-            return young_space;
+            const EtsInt youngSpace = 4;
+            return youngSpace;
         }
-        const EtsInt tenured_space = 5;
-        return tenured_space;
+        const EtsInt tenuredSpace = 5;
+        return tenuredSpace;
     }
-    return SpaceTypeToIndex(obj_space_type);
+    return SpaceTypeToIndex(objSpaceType);
 }
 
 extern "C" EtsVoid *StdGCPinObject(EtsObject *obj)
@@ -445,9 +446,9 @@ extern "C" EtsVoid *StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
     auto *vm = coroutine->GetVM();
     auto *gc = vm->GetGC();
     if (!gc->CheckGCCause(reason)) {
-        PandaStringStream e_msg;
-        e_msg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION, e_msg.str());
+        PandaStringStream eMsg;
+        eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION, eMsg.str());
         return EtsVoid::GetInstance();
     }
     mem::GCTrigger *trigger = vm->GetGCTrigger();
@@ -456,10 +457,10 @@ extern "C" EtsVoid *StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
                           "VM is running with unsupported GC trigger");
         return EtsVoid::GetInstance();
     }
-    EtsVoid *void_instance = EtsVoid::GetInstance();
-    auto sched_trigger = reinterpret_cast<mem::SchedGCOnNthAllocTrigger *>(trigger);
-    sched_trigger->ScheduleGc(reason, counter);
-    return void_instance;
+    EtsVoid *voidInstance = EtsVoid::GetInstance();
+    auto schedTrigger = reinterpret_cast<mem::SchedGCOnNthAllocTrigger *>(trigger);
+    schedTrigger->ScheduleGc(reason, counter);
+    return voidInstance;
 }
 
 extern "C" EtsLong StdGetFreeHeapSize()

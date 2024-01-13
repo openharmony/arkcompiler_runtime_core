@@ -34,29 +34,29 @@ namespace panda::compiler::aarch32 {
  */
 Aarch32RegisterDescription::Aarch32RegisterDescription(ArenaAllocator *allocator)
     : RegistersDescription(allocator, Arch::AARCH32),
-      aarch32_reg_list_(allocator->Adapter()),
-      used_regs_(allocator->Adapter())
+      aarch32RegList_(allocator->Adapter()),
+      usedRegs_(allocator->Adapter())
 {
     // Initialize Masm
     for (uint32_t i = 0; i <= MAX_NUM_REGS; ++i) {
-        aarch32_reg_list_.emplace_back(Reg(i, INT32_TYPE));
-        aarch32_reg_list_.emplace_back(Reg(i, FLOAT32_TYPE));
+        aarch32RegList_.emplace_back(Reg(i, INT32_TYPE));
+        aarch32RegList_.emplace_back(Reg(i, FLOAT32_TYPE));
     }
 
     for (auto i = vixl::aarch32::r4.GetCode(); i < vixl::aarch32::r8.GetCode(); ++i) {
-        caller_savedv_.set(i);
+        callerSavedv_.set(i);
     }
 }
 
 bool Aarch32RegisterDescription::IsValid() const
 {
-    return !aarch32_reg_list_.empty();
+    return !aarch32RegList_.empty();
 }
 
-bool Aarch32RegisterDescription::IsRegUsed(ArenaVector<Reg> vec_reg, Reg reg)
+bool Aarch32RegisterDescription::IsRegUsed(ArenaVector<Reg> vecReg, Reg reg)
 {
     auto equality = [reg](Reg in) { return (reg.GetId() == in.GetId()) && (reg.GetType() == in.GetType()); };
-    return (std::find_if(vec_reg.begin(), vec_reg.end(), equality) != vec_reg.end());
+    return (std::find_if(vecReg.begin(), vecReg.end(), equality) != vecReg.end());
 }
 
 /* static */
@@ -82,12 +82,12 @@ bool Aarch32RegisterDescription::IsTmp(Reg reg)
 ArenaVector<Reg> Aarch32RegisterDescription::GetCalleeSaved()
 {
     ArenaVector<Reg> out(GetAllocator()->Adapter());
-    ASSERT(callee_saved_.size() == callee_savedv_.size());
-    for (size_t i = 0; i < callee_saved_.size(); ++i) {
-        if (callee_saved_.test(i)) {
+    ASSERT(calleeSaved_.size() == calleeSavedv_.size());
+    for (size_t i = 0; i < calleeSaved_.size(); ++i) {
+        if (calleeSaved_.test(i)) {
             out.emplace_back(Reg(i, INT32_TYPE));
         }
-        if ((callee_savedv_.test(i))) {
+        if ((calleeSavedv_.test(i))) {
             out.emplace_back(Reg(i, FLOAT32_TYPE));
         }
     }
@@ -96,50 +96,50 @@ ArenaVector<Reg> Aarch32RegisterDescription::GetCalleeSaved()
 
 void Aarch32RegisterDescription::SetCalleeSaved([[maybe_unused]] const ArenaVector<Reg> &regs)
 {
-    callee_saved_ = CALLEE_SAVED;
-    callee_savedv_ = CALLEE_SAVEDV;
+    calleeSaved_ = CALLEE_SAVED;
+    calleeSavedv_ = CALLEE_SAVEDV;
 }
 
 void Aarch32RegisterDescription::SetUsedRegs(const ArenaVector<Reg> &regs)
 {
-    used_regs_ = regs;
+    usedRegs_ = regs;
 
-    ASSERT(callee_saved_.size() == caller_saved_.size());
-    ASSERT(callee_savedv_.size() == caller_savedv_.size());
+    ASSERT(calleeSaved_.size() == callerSaved_.size());
+    ASSERT(calleeSavedv_.size() == callerSavedv_.size());
 
-    allignment_reg_callee_ = vixl::aarch32::r10.GetCode();
+    allignmentRegCallee_ = vixl::aarch32::r10.GetCode();
     // NOTE (pishin) need to resolve conflict
-    allignment_reg_caller_ = vixl::aarch32::r10.GetCode();
-    for (size_t i = 0; i < callee_saved_.size(); ++i) {
+    allignmentRegCaller_ = vixl::aarch32::r10.GetCode();
+    for (size_t i = 0; i < calleeSaved_.size(); ++i) {
         // IsRegUsed use used_regs_ variable
-        bool scalar_used = IsRegUsed(used_regs_, Reg(i, INT64_TYPE));
-        bool is_tmp = IsTmp(Reg(i, INT32_TYPE));
-        if ((!scalar_used && ((callee_saved_.test(i)))) || is_tmp) {
-            callee_saved_.reset(i);
-            allignment_reg_callee_ = i;
+        bool scalarUsed = IsRegUsed(usedRegs_, Reg(i, INT64_TYPE));
+        bool isTmp = IsTmp(Reg(i, INT32_TYPE));
+        if ((!scalarUsed && ((calleeSaved_.test(i)))) || isTmp) {
+            calleeSaved_.reset(i);
+            allignmentRegCallee_ = i;
         }
-        if (!scalar_used && ((caller_saved_.test(i)))) {
-            allignment_reg_caller_ = i;
+        if (!scalarUsed && ((callerSaved_.test(i)))) {
+            allignmentRegCaller_ = i;
         }
-        bool is_vtmp = IsTmp(Reg(i, FLOAT32_TYPE));
+        bool isVtmp = IsTmp(Reg(i, FLOAT32_TYPE));
 
-        bool vector_used = IsRegUsed(used_regs_, Reg(i, FLOAT64_TYPE));
-        if ((!vector_used && ((callee_savedv_.test(i)))) || is_vtmp) {
-            callee_savedv_.reset(i);
+        bool vectorUsed = IsRegUsed(usedRegs_, Reg(i, FLOAT64_TYPE));
+        if ((!vectorUsed && ((calleeSavedv_.test(i)))) || isVtmp) {
+            calleeSavedv_.reset(i);
         }
-        if (!vector_used && ((caller_savedv_.test(i)))) {
-            caller_savedv_.reset(i);
+        if (!vectorUsed && ((callerSavedv_.test(i)))) {
+            callerSavedv_.reset(i);
         }
         if (i > (AVAILABLE_DOUBLE_WORD_REGISTERS << 1U)) {
             continue;
         }
-        if (!scalar_used && ((callee_saved_.test(i + 1)))) {
-            callee_saved_.reset(i + 1);
+        if (!scalarUsed && ((calleeSaved_.test(i + 1)))) {
+            calleeSaved_.reset(i + 1);
         }
     }
 
-    callee_saved_.reset(vixl::aarch32::pc.GetCode());
-    caller_saved_.reset(vixl::aarch32::pc.GetCode());
+    calleeSaved_.reset(vixl::aarch32::pc.GetCode());
+    callerSaved_.reset(vixl::aarch32::pc.GetCode());
 }
 
 }  // namespace panda::compiler::aarch32

@@ -35,10 +35,10 @@
 
 namespace panda {
 
-void ThrowException(const LanguageContext &ctx, ManagedThread *thread, const uint8_t *mutf8_name,
-                    const uint8_t *mutf8_msg)
+void ThrowException(const LanguageContext &ctx, ManagedThread *thread, const uint8_t *mutf8Name,
+                    const uint8_t *mutf8Msg)
 {
-    ctx.ThrowException(thread, mutf8_name, mutf8_msg);
+    ctx.ThrowException(thread, mutf8Name, mutf8Msg);
 }
 
 static LanguageContext GetLanguageContext(ManagedThread *thread)
@@ -137,13 +137,13 @@ void ThrowArithmeticException()
     ThrowException(ctx, thread, ctx.GetArithmeticExceptionClassDescriptor(), utf::CStringAsMutf8("/ by zero"));
 }
 
-void ThrowClassCastException(const Class *dst_type, const Class *src_type)
+void ThrowClassCastException(const Class *dstType, const Class *srcType)
 {
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
     PandaString msg;
-    msg = src_type->GetName() + " cannot be cast to " + dst_type->GetName();
+    msg = srcType->GetName() + " cannot be cast to " + dstType->GetName();
 
     ThrowException(ctx, thread, ctx.GetClassCastExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
@@ -174,10 +174,10 @@ void ThrowIncompatibleClassChangeErrorForMethodConflict(const Method *method)
     ThrowException(ctx, thread, ctx.GetIncompatibleClassChangeErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
 
-void ThrowArrayStoreException(const Class *array_class, const Class *element_class)
+void ThrowArrayStoreException(const Class *arrayClass, const Class *elementClass)
 {
     PandaStringStream ss;
-    ss << element_class->GetName() << " cannot be stored in an array of type " << array_class->GetName();
+    ss << elementClass->GetName() << " cannot be stored in an array of type " << arrayClass->GetName();
     ThrowArrayStoreException(ss.str());
 }
 
@@ -205,10 +205,10 @@ void ThrowIllegalArgumentException(const PandaString &msg)
     ThrowException(ctx, thread, ctx.GetIllegalArgumentExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
 
-void ThrowClassCircularityError(const PandaString &class_name, const LanguageContext &ctx)
+void ThrowClassCircularityError(const PandaString &className, const LanguageContext &ctx)
 {
     auto *thread = ManagedThread::GetCurrent();
-    PandaString msg = "Class or interface \"" + class_name + "\" is its own superclass or superinterface";
+    PandaString msg = "Class or interface \"" + className + "\" is its own superclass or superinterface";
     ThrowException(ctx, thread, ctx.GetClassCircularityErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
 
@@ -219,43 +219,43 @@ void ThrowClassCircularityError(const PandaString &class_name, const LanguageCon
  *  2. we cannot use HandleScope here because the function is [[noreturn]]
  */
 // NOLINTNEXTLINE(google-runtime-references)
-NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWalker *stack, Frame *orig_frame)
+NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWalker *stack, Frame *origFrame)
 {
-    auto next_frame = stack->GetNextFrame();
-    for (; stack->HasFrame(); stack->NextFrame(), next_frame = stack->GetNextFrame()) {
+    auto nextFrame = stack->GetNextFrame();
+    for (; stack->HasFrame(); stack->NextFrame(), nextFrame = stack->GetNextFrame()) {
         LOG(DEBUG, INTEROP) << "Search for the catch block in " << stack->GetMethod()->GetFullName();
 
         auto pc = stack->GetBytecodePc();
         auto *method = stack->GetMethod();
         ASSERT(method != nullptr);
-        uint32_t pc_offset = method->FindCatchBlock(thread->GetException()->ClassAddr<Class>(), pc);
+        uint32_t pcOffset = method->FindCatchBlock(thread->GetException()->ClassAddr<Class>(), pc);
 
-        if (pc_offset != panda_file::INVALID_OFFSET) {
-            if (orig_frame != nullptr) {
-                FreeFrame(orig_frame);
+        if (pcOffset != panda_file::INVALID_OFFSET) {
+            if (origFrame != nullptr) {
+                FreeFrame(origFrame);
             }
 
             LOG(DEBUG, INTEROP) << "Catch block is found in " << stack->GetMethod()->GetFullName();
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            Deoptimize(stack, method->GetInstructions() + pc_offset);
+            Deoptimize(stack, method->GetInstructions() + pcOffset);
             UNREACHABLE();
         }
 
         thread->GetVM()->HandleReturnFrame();
 
-        if (!next_frame.IsCFrame()) {
-            if (orig_frame != nullptr) {
-                FreeFrame(orig_frame);
+        if (!nextFrame.IsCFrame()) {
+            if (origFrame != nullptr) {
+                FreeFrame(origFrame);
             }
-            thread->SetCurrentFrame(next_frame.GetIFrame());
+            thread->SetCurrentFrame(nextFrame.GetIFrame());
             LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame isn't CFrame";
             DropCompiledFrame(stack);
             UNREACHABLE();
         }
 
-        if (next_frame.GetCFrame().IsNative()) {
-            if (orig_frame != nullptr) {
-                FreeFrame(orig_frame);
+        if (nextFrame.GetCFrame().IsNative()) {
+            if (origFrame != nullptr) {
+                FreeFrame(origFrame);
             }
             LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is NATIVE";
             DropCompiledFrame(stack);
@@ -263,8 +263,8 @@ NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWal
         }
 
         if (method->IsStaticConstructor()) {
-            if (orig_frame != nullptr) {
-                FreeFrame(orig_frame);
+            if (origFrame != nullptr) {
+                FreeFrame(origFrame);
             }
             LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is StaticConstructor";
             DropCompiledFrame(stack);
@@ -279,8 +279,8 @@ NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWal
                  * function. Dynamic languages may do c2c call through runtime, so it's necessary to return to exit
                  * active function properly.
                  */
-                if (orig_frame != nullptr) {
-                    FreeFrame(orig_frame);
+                if (origFrame != nullptr) {
+                    FreeFrame(origFrame);
                 }
                 LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is caller's cframe";
                 DropCompiledFrame(stack);
@@ -289,7 +289,7 @@ NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWal
         }
     }
 
-    if (next_frame.IsValid()) {
+    if (nextFrame.IsValid()) {
         LOG(DEBUG, INTEROP) << "Exception " << thread->GetException()->ClassAddr<Class>()->GetName() << " isn't found";
         EVENT_METHOD_EXIT(stack->GetMethod()->GetFullName(), events::MethodExitKind::COMPILED,
                           thread->RecordMethodExit());
@@ -308,11 +308,11 @@ NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWal
 NO_ADDRESS_SANITIZE void FindCatchBlockInCallStack(ManagedThread *thread)
 {
     auto stack = StackWalker::Create(thread);
-    auto orig_frame = stack.GetIFrame();
+    auto origFrame = stack.GetIFrame();
     ASSERT(!stack.IsCFrame());
-    LOG(DEBUG, INTEROP) << "Enter in FindCatchBlockInCallStack for " << orig_frame->GetMethod()->GetFullName();
+    LOG(DEBUG, INTEROP) << "Enter in FindCatchBlockInCallStack for " << origFrame->GetMethod()->GetFullName();
     // Exception will be handled in the Method::Invoke's caller
-    if (orig_frame->IsInvoke()) {
+    if (origFrame->IsInvoke()) {
         return;
     }
 
@@ -323,7 +323,7 @@ NO_ADDRESS_SANITIZE void FindCatchBlockInCallStack(ManagedThread *thread)
         return;
     }
     thread->GetVM()->HandleReturnFrame();
-    FindCatchBlockInCFrames(thread, &stack, orig_frame);
+    FindCatchBlockInCFrames(thread, &stack, origFrame);
 }
 
 void ThrowFileNotFoundException(const PandaString &msg)

@@ -27,26 +27,26 @@
 namespace panda::dprof {
 /* static */
 std::unique_ptr<AppData> AppData::CreateByParams(const std::string &name, uint64_t hash, uint32_t pid,
-                                                 FeaturesMap &&features_map)
+                                                 FeaturesMap &&featuresMap)
 {
-    std::unique_ptr<AppData> app_data(new AppData);
+    std::unique_ptr<AppData> appData(new AppData);
 
-    app_data->common_info_.name = name;
-    app_data->common_info_.hash = hash;
-    app_data->common_info_.pid = pid;
-    app_data->features_map_ = std::move(features_map);
+    appData->commonInfo_.name = name;
+    appData->commonInfo_.hash = hash;
+    appData->commonInfo_.pid = pid;
+    appData->featuresMap_ = std::move(featuresMap);
 
-    return app_data;
+    return appData;
 }
 
 /* static */
 std::unique_ptr<AppData> AppData::CreateByBuffer(const std::vector<uint8_t> &buffer)
 {
-    std::unique_ptr<AppData> app_data(new AppData);
+    std::unique_ptr<AppData> appData(new AppData);
 
     const uint8_t *data = buffer.data();
     size_t size = buffer.size();
-    auto r = serializer::RawBufferToStruct<3>(data, size, app_data->common_info_);  // 3
+    auto r = serializer::RawBufferToStruct<3>(data, size, appData->commonInfo_);  // 3
     if (!r) {
         LOG(ERROR, DPROF) << "Cannot deserialize buffer to common_info. Error: " << r.Error();
         return nullptr;
@@ -55,7 +55,7 @@ std::unique_ptr<AppData> AppData::CreateByBuffer(const std::vector<uint8_t> &buf
     data = serializer::ToUint8tPtr(serializer::ToUintPtr(data) + r.Value());
     size -= r.Value();
 
-    r = serializer::BufferToType(data, size, app_data->features_map_);
+    r = serializer::BufferToType(data, size, appData->featuresMap_);
     if (!r) {
         LOG(ERROR, DPROF) << "Cannot deserialize features_map. Error: " << r.Error();
         return nullptr;
@@ -67,17 +67,17 @@ std::unique_ptr<AppData> AppData::CreateByBuffer(const std::vector<uint8_t> &buf
         return nullptr;
     }
 
-    return app_data;
+    return appData;
 }
 
 bool AppData::ToBuffer(std::vector<uint8_t> &buffer) const
 {
     // 3
-    if (!serializer::StructToBuffer<3>(common_info_, buffer)) {
+    if (!serializer::StructToBuffer<3>(commonInfo_, buffer)) {
         LOG(ERROR, DPROF) << "Cannot serialize common_info";
         return false;
     }
-    auto ret = serializer::TypeToBuffer(features_map_, buffer);
+    auto ret = serializer::TypeToBuffer(featuresMap_, buffer);
     if (!ret) {
         LOG(ERROR, DPROF) << "Cannot serialize features_map. Error: " << ret.Error();
         return false;
@@ -86,58 +86,58 @@ bool AppData::ToBuffer(std::vector<uint8_t> &buffer) const
 }
 
 /* static */
-std::unique_ptr<AppDataStorage> AppDataStorage::Create(const std::string &storage_dir, bool create_dir)
+std::unique_ptr<AppDataStorage> AppDataStorage::Create(const std::string &storageDir, bool createDir)
 {
-    if (storage_dir.empty()) {
+    if (storageDir.empty()) {
         LOG(ERROR, DPROF) << "Storage directory is not set";
         return nullptr;
     }
 
-    struct stat stat_buffer {};
-    if (::stat(storage_dir.c_str(), &stat_buffer) == 0) {
+    struct stat statBuffer {};
+    if (::stat(storageDir.c_str(), &statBuffer) == 0) {
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        if (S_ISDIR(stat_buffer.st_mode)) {
-            return std::unique_ptr<AppDataStorage>(new AppDataStorage(storage_dir));
+        if (S_ISDIR(statBuffer.st_mode)) {
+            return std::unique_ptr<AppDataStorage>(new AppDataStorage(storageDir));
         }
 
-        LOG(ERROR, DPROF) << storage_dir << " is already exists and it is neither directory";
+        LOG(ERROR, DPROF) << storageDir << " is already exists and it is neither directory";
         return nullptr;
     }
 
-    if (create_dir) {
+    if (createDir) {
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        if (::mkdir(storage_dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+        if (::mkdir(storageDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
             PLOG(ERROR, DPROF) << "mkdir() failed";
             return nullptr;
         }
-        return std::unique_ptr<AppDataStorage>(new AppDataStorage(storage_dir));
+        return std::unique_ptr<AppDataStorage>(new AppDataStorage(storageDir));
     }
 
     return nullptr;
 }
 
-bool AppDataStorage::SaveAppData(const AppData &app_data)
+bool AppDataStorage::SaveAppData(const AppData &appData)
 {
     std::vector<uint8_t> buffer;
-    if (!app_data.ToBuffer(buffer)) {
+    if (!appData.ToBuffer(buffer)) {
         LOG(ERROR, DPROF) << "Cannot serialize AppData to buffer";
         return false;
     }
 
     // Save buffer to file
-    std::string file_name = MakeAppPath(app_data.GetName(), app_data.GetHash(), app_data.GetPid());
-    std::ofstream file(file_name, std::ios::binary);
+    std::string fileName = MakeAppPath(appData.GetName(), appData.GetHash(), appData.GetPid());
+    std::ofstream file(fileName, std::ios::binary);
     if (!file.is_open()) {
-        LOG(ERROR, DPROF) << "Cannot open file: " << file_name;
+        LOG(ERROR, DPROF) << "Cannot open file: " << fileName;
         return false;
     }
     file.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
     if (file.bad()) {
-        LOG(ERROR, DPROF) << "Cannot write AppData to file: " << file_name;
+        LOG(ERROR, DPROF) << "Cannot write AppData to file: " << fileName;
         return false;
     }
 
-    LOG(DEBUG, DPROF) << "Save AppData to file: " << file_name;
+    LOG(DEBUG, DPROF) << "Save AppData to file: " << fileName;
     return true;
 }
 
@@ -150,13 +150,13 @@ struct dirent *DoReadDir(DIR *dirp)
 void AppDataStorage::ForEachApps(const std::function<bool(std::unique_ptr<AppData> &&)> &callback) const
 {
     using UniqueDir = std::unique_ptr<DIR, void (*)(DIR *)>;
-    UniqueDir dir(::opendir(storage_dir_.c_str()), [](DIR *directory) {
+    UniqueDir dir(::opendir(storageDir_.c_str()), [](DIR *directory) {
         if (::closedir(directory) == -1) {
             PLOG(FATAL, DPROF) << "closedir() failed";
         }
     });
     if (dir.get() == nullptr) {
-        PLOG(FATAL, DPROF) << "opendir() failed, dir=" << storage_dir_;
+        PLOG(FATAL, DPROF) << "opendir() failed, dir=" << storageDir_;
         return;
     }
 
@@ -172,15 +172,15 @@ void AppDataStorage::ForEachApps(const std::function<bool(std::unique_ptr<AppDat
             continue;
         }
 
-        std::string path = storage_dir_ + "/" + ent->d_name;
+        std::string path = storageDir_ + "/" + ent->d_name;
         struct stat statbuf {};
         if (stat(path.c_str(), &statbuf) == -1) {
             PLOG(ERROR, DPROF) << "stat() failed, path=" << path;
             continue;
         }
-        size_t file_size = statbuf.st_size;
+        size_t fileSize = statbuf.st_size;
 
-        if (file_size > MAX_BUFFER_SIZE) {
+        if (fileSize > MAX_BUFFER_SIZE) {
             LOG(ERROR, DPROF) << "File is to large: " << path;
             continue;
         }
@@ -192,16 +192,16 @@ void AppDataStorage::ForEachApps(const std::function<bool(std::unique_ptr<AppDat
             continue;
         }
         std::vector<uint8_t> buffer;
-        buffer.reserve(file_size);
+        buffer.reserve(fileSize);
         buffer.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 
-        auto app_data = AppData::CreateByBuffer(buffer);
-        if (!app_data) {
+        auto appData = AppData::CreateByBuffer(buffer);
+        if (!appData) {
             LOG(ERROR, DPROF) << "Cannot deserialize file: " << path;
             continue;
         }
 
-        if (!callback(std::move(app_data))) {
+        if (!callback(std::move(appData))) {
             break;
         }
     }
@@ -209,11 +209,11 @@ void AppDataStorage::ForEachApps(const std::function<bool(std::unique_ptr<AppDat
 
 std::string AppDataStorage::MakeAppPath(const std::string &name, uint64_t hash, uint32_t pid) const
 {
-    ASSERT(!storage_dir_.empty());
+    ASSERT(!storageDir_.empty());
     ASSERT(!name.empty());
 
     std::stringstream str;
-    str << storage_dir_ << "/" << name << "@" << pid << "@" << hash;
+    str << storageDir_ << "/" << name << "@" << pid << "@" << hash;
     return str.str();
 }
 }  // namespace panda::dprof

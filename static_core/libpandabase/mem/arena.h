@@ -27,7 +27,7 @@ constexpr Alignment ARENA_DEFAULT_ALIGNMENT = DEFAULT_ALIGNMENT;
 
 class Arena {
 public:
-    Arena(size_t buff_size, void *buff);
+    Arena(size_t buffSize, void *buff);
     virtual ~Arena();
     DEFAULT_MOVE_SEMANTIC(Arena);
     DEFAULT_COPY_SEMANTIC(Arena);
@@ -78,7 +78,7 @@ public:
 
     void *GetTop() const
     {
-        return cur_pos_;
+        return curPos_;
     }
 
     size_t GetSize() const
@@ -96,7 +96,7 @@ public:
     void Free(void *mem);
 
     /// @brief Set occupied memory size to @param new_size.
-    void Resize(size_t new_size);
+    void Resize(size_t newSize);
 
     /// @brief empties arena
     void Reset();
@@ -106,10 +106,10 @@ public:
      * @param extra_buff - pointer to the extra buffer located just after the current.
      * @param size - the size of the extra buffer
      */
-    void ExpandArena(const void *extra_buff, size_t size);
+    void ExpandArena(const void *extraBuff, size_t size);
 
 protected:
-    Arena(size_t buff_size, void *buff, Alignment start_alignment);
+    Arena(size_t buffSize, void *buff, Alignment startAlignment);
     /**
      * @brief Fast allocates memory with size @param size
      * @param size - size of the allocated memory, must be @param alignment aligned
@@ -120,21 +120,21 @@ protected:
 
     void *GetStartPos() const
     {
-        return start_pos_;
+        return startPos_;
     }
 
 private:
     Arena *next_ = nullptr;
     void *buff_ = nullptr;
-    void *start_pos_ = nullptr;
-    void *cur_pos_ = nullptr;
+    void *startPos_ = nullptr;
+    void *curPos_ = nullptr;
     size_t size_ = 0;
 };
 
 template <Alignment ALIGNMENT_T>
 class AlignedArena : public Arena {
 public:
-    AlignedArena(size_t buff_size, void *buff) : Arena(buff_size, buff, ALIGNMENT_T) {}
+    AlignedArena(size_t buffSize, void *buff) : Arena(buffSize, buff, ALIGNMENT_T) {}
 
     ~AlignedArena() override = default;
 
@@ -151,7 +151,7 @@ private:
 template <Alignment ALIGNMENT_T>
 class DoubleLinkedAlignedArena : public AlignedArena<ALIGNMENT_T> {
 public:
-    DoubleLinkedAlignedArena(size_t buff_size, void *buff) : AlignedArena<ALIGNMENT_T>(buff_size, buff) {}
+    DoubleLinkedAlignedArena(size_t buffSize, void *buff) : AlignedArena<ALIGNMENT_T>(buffSize, buff) {}
 
     /**
      * @brief Links this Arena to the next @param arena

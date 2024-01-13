@@ -17,13 +17,13 @@
 
 namespace panda {
 
-std::atomic<int> AssertGCScopeT<true>::gc_flag_ = 0;
+std::atomic<int> AssertGCScopeT<true>::gcFlag_ = 0;
 
 // static
 bool AssertGCScopeT<true>::IsAllowed()
 {
     // Atomic with relaxed order reason: data race with gc_flag with no synchronization or ordering constraints imposed
     // on other reads or writes
-    return AssertGCScopeT::gc_flag_.load(std::memory_order_relaxed) == 0;
+    return AssertGCScopeT::gcFlag_.load(std::memory_order_relaxed) == 0;
 }
 }  // namespace panda

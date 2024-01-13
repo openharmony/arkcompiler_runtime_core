@@ -47,13 +47,13 @@ public:
 protected:
     static constexpr size_t MINIMAL_POOL_SIZE = PANDA_POOL_ALIGNMENT_IN_BYTES;
 
-    void AddToPoolMap(Pool pool, SpaceType space_type, AllocatorType allocator_type, void *allocator_addr = nullptr)
+    void AddToPoolMap(Pool pool, SpaceType spaceType, AllocatorType allocatorType, void *allocatorAddr = nullptr)
     {
-        if (allocator_addr == nullptr) {
-            allocator_addr = pool.GetMem();
+        if (allocatorAddr == nullptr) {
+            allocatorAddr = pool.GetMem();
         }
         pools_.push_back(pool);
-        pool_map_.AddPoolToMap(pool.GetMem(), pool.GetSize(), space_type, allocator_type, allocator_addr);
+        poolMap_.AddPoolToMap(pool.GetMem(), pool.GetSize(), spaceType, allocatorType, allocatorAddr);
     }
 
     void RemovePoolFromMap(Pool pool)
@@ -61,34 +61,34 @@ protected:
         auto items = std::remove(pools_.begin(), pools_.end(), pool);
         ASSERT(items != pools_.end());
         pools_.erase(items, pools_.end());
-        pool_map_.RemovePoolFromMap(pool.GetMem(), pool.GetSize());
+        poolMap_.RemovePoolFromMap(pool.GetMem(), pool.GetSize());
     }
 
     void ResetPoolMap()
     {
         for (auto i : pools_) {
-            pool_map_.RemovePoolFromMap(i.GetMem(), i.GetSize());
+            poolMap_.RemovePoolFromMap(i.GetMem(), i.GetSize());
         }
         pools_.clear();
     }
 
     bool IsEmptyPoolMap() const
     {
-        return pool_map_.IsEmpty();
+        return poolMap_.IsEmpty();
     }
 
     SpaceType GetRandSpaceType() const
     {
         // NOLINTNEXTLINE(cert-msc50-cpp)
-        int rand_index = rand() % ALL_SPACE_TYPES.size();
-        return ALL_SPACE_TYPES[rand_index];
+        int randIndex = rand() % ALL_SPACE_TYPES.size();
+        return ALL_SPACE_TYPES[randIndex];
     }
 
     AllocatorType GetRandAllocatorType() const
     {
         // NOLINTNEXTLINE(cert-msc50-cpp)
-        int rand_index = rand() % ALL_ALLOCATOR_TYPES.size();
-        return ALL_ALLOCATOR_TYPES[rand_index];
+        int randIndex = rand() % ALL_ALLOCATOR_TYPES.size();
+        return ALL_ALLOCATOR_TYPES[randIndex];
     }
 
     size_t RandHeapAddr() const
@@ -97,12 +97,12 @@ protected:
         return AlignUp(rand() % PANDA_MAX_HEAP_SIZE, DEFAULT_ALIGNMENT_IN_BYTES);
     }
 
-    void CheckRandomPoolAddress(Pool pool, SpaceType space_type, AllocatorType allocator_type, uintptr_t allocator_addr)
+    void CheckRandomPoolAddress(Pool pool, SpaceType spaceType, AllocatorType allocatorType, uintptr_t allocatorAddr)
     {
-        void *pool_addr = RandAddrFromPool(pool);
-        ASSERT_EQ(GetSpaceTypeForAddr(pool_addr), space_type);
-        ASSERT_EQ(GetAllocatorInfoForAddr(pool_addr).GetType(), allocator_type);
-        ASSERT_EQ(ToUintPtr(GetAllocatorInfoForAddr(pool_addr).GetAllocatorHeaderAddr()), allocator_addr);
+        void *poolAddr = RandAddrFromPool(pool);
+        ASSERT_EQ(GetSpaceTypeForAddr(poolAddr), spaceType);
+        ASSERT_EQ(GetAllocatorInfoForAddr(poolAddr).GetType(), allocatorType);
+        ASSERT_EQ(ToUintPtr(GetAllocatorInfoForAddr(poolAddr).GetAllocatorHeaderAddr()), allocatorAddr);
     }
 
 private:
@@ -114,12 +114,12 @@ private:
 
     AllocatorInfo GetAllocatorInfoForAddr(const void *addr) const
     {
-        return pool_map_.GetAllocatorInfo(addr);
+        return poolMap_.GetAllocatorInfo(addr);
     }
 
     SpaceType GetSpaceTypeForAddr(const void *addr) const
     {
-        return pool_map_.GetSpaceType(addr);
+        return poolMap_.GetSpaceType(addr);
     }
 
     static constexpr std::array<SpaceType, 6U> ALL_SPACE_TYPES = {SpaceType::SPACE_TYPE_OBJECT,
@@ -136,7 +136,7 @@ private:
 
     unsigned int seed_;
     std::vector<Pool> pools_;
-    PoolMap pool_map_;
+    PoolMap poolMap_;
 };
 
 TEST_F(PoolMapTest, TwoConsistentPoolsTest)
@@ -150,22 +150,22 @@ TEST_F(PoolMapTest, TwoConsistentPoolsTest)
     static constexpr AllocatorType FIRST_ALLOCATOR_TYPE = AllocatorType::RUNSLOTS_ALLOCATOR;
     static constexpr AllocatorType SECOND_ALLOCATOR_TYPE = AllocatorType::FREELIST_ALLOCATOR;
 
-    uintptr_t first_pool_allocator_header_addr = RandHeapAddr();
+    uintptr_t firstPoolAllocatorHeaderAddr = RandHeapAddr();
 
-    Pool first_pool(FIRST_POOL_SIZE, ToVoidPtr(FIRST_POOL_ADDR));
-    Pool second_pool(SECOND_POOL_SIZE, ToVoidPtr(SECOND_POOL_ADDR));
+    Pool firstPool(FIRST_POOL_SIZE, ToVoidPtr(FIRST_POOL_ADDR));
+    Pool secondPool(SECOND_POOL_SIZE, ToVoidPtr(SECOND_POOL_ADDR));
 
-    AddToPoolMap(first_pool, FIRST_SPACE_TYPE, FIRST_ALLOCATOR_TYPE, ToVoidPtr(first_pool_allocator_header_addr));
-    AddToPoolMap(second_pool, SECOND_SPACE_TYPE, SECOND_ALLOCATOR_TYPE);
+    AddToPoolMap(firstPool, FIRST_SPACE_TYPE, FIRST_ALLOCATOR_TYPE, ToVoidPtr(firstPoolAllocatorHeaderAddr));
+    AddToPoolMap(secondPool, SECOND_SPACE_TYPE, SECOND_ALLOCATOR_TYPE);
 
-    CheckRandomPoolAddress(first_pool, FIRST_SPACE_TYPE, FIRST_ALLOCATOR_TYPE, first_pool_allocator_header_addr);
+    CheckRandomPoolAddress(firstPool, FIRST_SPACE_TYPE, FIRST_ALLOCATOR_TYPE, firstPoolAllocatorHeaderAddr);
     // We haven't initialized second allocator header address.
     // Therefore it must return a pointer to the first pool byte.
-    CheckRandomPoolAddress(second_pool, SECOND_SPACE_TYPE, SECOND_ALLOCATOR_TYPE, SECOND_POOL_ADDR);
+    CheckRandomPoolAddress(secondPool, SECOND_SPACE_TYPE, SECOND_ALLOCATOR_TYPE, SECOND_POOL_ADDR);
 
     // Check that we remove elements from pool map correctly
-    RemovePoolFromMap(first_pool);
-    RemovePoolFromMap(second_pool);
+    RemovePoolFromMap(firstPool);
+    RemovePoolFromMap(secondPool);
 
     ASSERT_TRUE(IsEmptyPoolMap());
     ResetPoolMap();
@@ -178,10 +178,10 @@ TEST_F(PoolMapTest, AddRemoveDifferentPoolsTest)
     static constexpr uintptr_t POOL_START_ADDR = PANDA_POOL_ALIGNMENT_IN_BYTES;
     for (size_t i = 0; i < ITERATIONS; i++) {
         // NOLINTNEXTLINE(cert-msc50-cpp)
-        size_t pool_size = AlignUp(rand() % MAX_POOL_SIZE, PANDA_POOL_ALIGNMENT_IN_BYTES);
+        size_t poolSize = AlignUp(rand() % MAX_POOL_SIZE, PANDA_POOL_ALIGNMENT_IN_BYTES);
         SpaceType space = GetRandSpaceType();
         AllocatorType allocator = GetRandAllocatorType();
-        Pool pool(pool_size, ToVoidPtr(POOL_START_ADDR));
+        Pool pool(poolSize, ToVoidPtr(POOL_START_ADDR));
 
         AddToPoolMap(pool, space, allocator);
         CheckRandomPoolAddress(pool, space, allocator, POOL_START_ADDR);

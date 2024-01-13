@@ -48,50 +48,50 @@
 
 namespace panda {
 
-Method::Proto::Proto(const panda_file::File &pf, panda_file::File::EntityId proto_id)
+Method::Proto::Proto(const panda_file::File &pf, panda_file::File::EntityId protoId)
 {
-    panda_file::ProtoDataAccessor pda(pf, proto_id);
+    panda_file::ProtoDataAccessor pda(pf, protoId);
 
     pda.EnumerateTypes([this](panda_file::Type type) { shorty_.push_back(type); });
 
-    auto ref_num = pda.GetRefNum();
-    for (size_t ref_idx = 0; ref_idx < ref_num; ++ref_idx) {
-        auto id = pda.GetReferenceType(ref_idx);
-        ref_types_.emplace_back(utf::Mutf8AsCString(pf.GetStringData(id).data));
+    auto refNum = pda.GetRefNum();
+    for (size_t refIdx = 0; refIdx < refNum; ++refIdx) {
+        auto id = pda.GetReferenceType(refIdx);
+        refTypes_.emplace_back(utf::Mutf8AsCString(pf.GetStringData(id).data));
     }
 }
 
 bool Method::ProtoId::operator==(const Method::ProtoId &other) const
 {
     if (&pf_ == &other.pf_) {
-        return proto_id_ == other.proto_id_;
+        return protoId_ == other.protoId_;
     }
 
-    panda_file::ProtoDataAccessor pda1(pf_, proto_id_);
-    panda_file::ProtoDataAccessor pda2(other.pf_, other.proto_id_);
+    panda_file::ProtoDataAccessor pda1(pf_, protoId_);
+    panda_file::ProtoDataAccessor pda2(other.pf_, other.protoId_);
     return pda1.IsEqual(&pda2);
 }
 
 bool Method::ProtoId::operator==(const Proto &other) const
 {
     const auto &shorties = other.GetShorty();
-    const auto &ref_types = other.GetRefTypes();
+    const auto &refTypes = other.GetRefTypes();
 
     bool equal = true;
-    size_t shorty_idx = 0;
-    panda_file::ProtoDataAccessor pda(pf_, proto_id_);
-    pda.EnumerateTypes([&equal, &shorties, &shorty_idx](panda_file::Type type) {
-        equal = equal && shorty_idx < shorties.size() && type == shorties[shorty_idx];
-        ++shorty_idx;
+    size_t shortyIdx = 0;
+    panda_file::ProtoDataAccessor pda(pf_, protoId_);
+    pda.EnumerateTypes([&equal, &shorties, &shortyIdx](panda_file::Type type) {
+        equal = equal && shortyIdx < shorties.size() && type == shorties[shortyIdx];
+        ++shortyIdx;
     });
-    if (!equal || shorty_idx != shorties.size() || pda.GetRefNum() != ref_types.size()) {
+    if (!equal || shortyIdx != shorties.size() || pda.GetRefNum() != refTypes.size()) {
         return false;
     }
 
     // check ref types
-    for (size_t ref_idx = 0; ref_idx < ref_types.size(); ++ref_idx) {
-        auto id = pda.GetReferenceType(ref_idx);
-        if (ref_types[ref_idx] != utf::Mutf8AsCString(pf_.GetStringData(id).data)) {
+    for (size_t refIdx = 0; refIdx < refTypes.size(); ++refIdx) {
+        auto id = pda.GetReferenceType(refIdx);
+        if (refTypes[refIdx] != utf::Mutf8AsCString(pf_.GetStringData(id).data)) {
             return false;
         }
     }
@@ -101,12 +101,12 @@ bool Method::ProtoId::operator==(const Proto &other) const
 
 std::string_view Method::Proto::GetReturnTypeDescriptor() const
 {
-    auto ret_type = GetReturnType();
-    if (!ret_type.IsPrimitive()) {
-        return ref_types_[0];
+    auto retType = GetReturnType();
+    if (!retType.IsPrimitive()) {
+        return refTypes_[0];
     }
 
-    switch (ret_type.GetId()) {
+    switch (retType.GetId()) {
         case panda_file::Type::TypeId::VOID:
             return "V";
         case panda_file::Type::TypeId::U1:
@@ -138,34 +138,34 @@ std::string_view Method::Proto::GetReturnTypeDescriptor() const
     }
 }
 
-PandaString Method::Proto::GetSignature(bool include_return_type)
+PandaString Method::Proto::GetSignature(bool includeReturnType)
 {
     PandaOStringStream signature;
     signature << "(";
     auto &shorty = GetShorty();
-    auto &ref_types = GetRefTypes();
+    auto &refTypes = GetRefTypes();
 
-    auto ref_it = ref_types.begin();
-    panda_file::Type return_type = shorty[0];
-    if (!return_type.IsPrimitive()) {
-        ++ref_it;
+    auto refIt = refTypes.begin();
+    panda_file::Type returnType = shorty[0];
+    if (!returnType.IsPrimitive()) {
+        ++refIt;
     }
-    auto shorty_end = shorty.end();
-    auto shorty_it = shorty.begin() + 1;
-    for (; shorty_it != shorty_end; ++shorty_it) {
-        if ((*shorty_it).IsPrimitive()) {
-            signature << panda_file::Type::GetSignatureByTypeId(*shorty_it);
+    auto shortyEnd = shorty.end();
+    auto shortyIt = shorty.begin() + 1;
+    for (; shortyIt != shortyEnd; ++shortyIt) {
+        if ((*shortyIt).IsPrimitive()) {
+            signature << panda_file::Type::GetSignatureByTypeId(*shortyIt);
         } else {
-            signature << *ref_it;
-            ++ref_it;
+            signature << *refIt;
+            ++refIt;
         }
     }
     signature << ")";
-    if (include_return_type) {
-        if (return_type.IsPrimitive()) {
-            signature << panda_file::Type::GetSignatureByTypeId(return_type);
+    if (includeReturnType) {
+        if (returnType.IsPrimitive()) {
+            signature << panda_file::Type::GetSignatureByTypeId(returnType);
         } else {
-            signature << ref_types[0];
+            signature << refTypes[0];
         }
     }
 
@@ -182,38 +182,38 @@ uint32_t Method::GetClassNameHashFromString(const PandaString &str)
     return GetHash32String(reinterpret_cast<const uint8_t *>(str.c_str()));
 }
 
-Method::UniqId Method::CalcUniqId(const uint8_t *class_descr, const uint8_t *name)
+Method::UniqId Method::CalcUniqId(const uint8_t *classDescr, const uint8_t *name)
 {
     auto constexpr HALF = 32ULL;
     constexpr uint64_t NO_FILE = 0xFFFFFFFFULL << HALF;
-    uint64_t hash = PseudoFnvHashString(class_descr);
+    uint64_t hash = PseudoFnvHashString(classDescr);
     hash = PseudoFnvHashString(name, hash);
     return NO_FILE | hash;
 }
 
-Method::Method(Class *klass, const panda_file::File *pf, panda_file::File::EntityId file_id,
-               panda_file::File::EntityId code_id, uint32_t access_flags, uint32_t num_args, const uint16_t *shorty)
-    : access_flags_(access_flags),
-      num_args_(num_args),
-      stor_16_pair_({0, 0}),
-      class_word_(static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(klass))),
-      compiled_entry_point_(nullptr),
-      panda_file_(pf),
+Method::Method(Class *klass, const panda_file::File *pf, panda_file::File::EntityId fileId,
+               panda_file::File::EntityId codeId, uint32_t accessFlags, uint32_t numArgs, const uint16_t *shorty)
+    : accessFlags_(accessFlags),
+      numArgs_(numArgs),
+      stor16Pair_({0, 0}),
+      classWord_(static_cast<ClassHelper::ClassWordSize>(ToObjPtrType(klass))),
+      compiledEntryPoint_(nullptr),
+      pandaFile_(pf),
       pointer_(),
 
-      file_id_(file_id),
-      code_id_(code_id),
+      fileId_(fileId),
+      codeId_(codeId),
       shorty_(shorty)
 {
     ResetHotnessCounter();
 
     // Atomic with relaxed order reason: data race with native_pointer_ with no synchronization or ordering constraints
     // imposed on other reads or writes NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    pointer_.native_pointer.store(nullptr, std::memory_order_relaxed);
+    pointer_.nativePointer.store(nullptr, std::memory_order_relaxed);
     SetCompilationStatus(CompilationStage::NOT_COMPILED);
 }
 
-Value Method::Invoke(ManagedThread *thread, Value *args, bool proxy_call)
+Value Method::Invoke(ManagedThread *thread, Value *args, bool proxyCall)
 {
 #ifndef NDEBUG
     if (thread->HasPendingException()) {
@@ -223,7 +223,7 @@ Value Method::Invoke(ManagedThread *thread, Value *args, bool proxy_call)
     }
 #endif
     ASSERT(!thread->HasPendingException());
-    return InvokeImpl<InvokeHelperStatic>(thread, GetNumArgs(), args, proxy_call);
+    return InvokeImpl<InvokeHelperStatic>(thread, GetNumArgs(), args, proxyCall);
 }
 
 PANDA_PUBLIC_API panda_file::Type Method::GetReturnType() const
@@ -242,25 +242,25 @@ panda_file::Type Method::GetArgType(size_t idx) const
         --idx;
     }
 
-    panda_file::ProtoDataAccessor pda(*(panda_file_),
-                                      panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
+    panda_file::ProtoDataAccessor pda(*(pandaFile_),
+                                      panda_file::MethodDataAccessor::GetProtoId(*(pandaFile_), fileId_));
     return pda.GetArgType(idx);
 }
 
 panda_file::File::StringData Method::GetRefReturnType() const
 {
     ASSERT(GetReturnType().IsReference());
-    panda_file::ProtoDataAccessor pda(*(panda_file_),
-                                      panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
-    panda_file::File::EntityId class_id = pda.GetReferenceType(0);
-    return panda_file_->GetStringData(class_id);
+    panda_file::ProtoDataAccessor pda(*(pandaFile_),
+                                      panda_file::MethodDataAccessor::GetProtoId(*(pandaFile_), fileId_));
+    panda_file::File::EntityId classId = pda.GetReferenceType(0);
+    return pandaFile_->GetStringData(classId);
 }
 
 panda_file::File::StringData Method::GetRefArgType(size_t idx) const
 {
     if (!IsStatic()) {
         if (idx == 0) {
-            return panda_file_->GetStringData(panda_file::MethodDataAccessor::GetClassId(*(panda_file_), file_id_));
+            return pandaFile_->GetStringData(panda_file::MethodDataAccessor::GetClassId(*(pandaFile_), fileId_));
         }
 
         --idx;
@@ -270,44 +270,44 @@ panda_file::File::StringData Method::GetRefArgType(size_t idx) const
     if (GetReturnType().IsReference()) {
         ++idx;
     }
-    panda_file::ProtoDataAccessor pda(*(panda_file_),
-                                      panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
-    panda_file::File::EntityId class_id = pda.GetReferenceType(idx);
-    return panda_file_->GetStringData(class_id);
+    panda_file::ProtoDataAccessor pda(*(pandaFile_),
+                                      panda_file::MethodDataAccessor::GetProtoId(*(pandaFile_), fileId_));
+    panda_file::File::EntityId classId = pda.GetReferenceType(idx);
+    return pandaFile_->GetStringData(classId);
 }
 
 panda_file::File::StringData Method::GetName() const
 {
-    return panda_file::MethodDataAccessor::GetName(*(panda_file_), file_id_);
+    return panda_file::MethodDataAccessor::GetName(*(pandaFile_), fileId_);
 }
 
-PandaString Method::GetFullName(bool with_signature) const
+PandaString Method::GetFullName(bool withSignature) const
 {
     PandaOStringStream ss;
-    int ref_idx = 0;
-    if (with_signature) {
-        auto return_type = GetReturnType();
-        if (return_type.IsReference()) {
+    int refIdx = 0;
+    if (withSignature) {
+        auto returnType = GetReturnType();
+        if (returnType.IsReference()) {
             ss << ClassHelper::GetName(GetRefReturnType().data) << ' ';
         } else {
-            ss << return_type << ' ';
+            ss << returnType << ' ';
         }
     }
     if (GetClass() != nullptr) {
         ss << PandaString(GetClass()->GetName());
     }
     ss << "::" << utf::Mutf8AsCString(Method::GetName().data);
-    if (!with_signature) {
+    if (!withSignature) {
         return ss.str();
     }
     const char *sep = "";
     ss << '(';
-    panda_file::ProtoDataAccessor pda(*(panda_file_),
-                                      panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
+    panda_file::ProtoDataAccessor pda(*(pandaFile_),
+                                      panda_file::MethodDataAccessor::GetProtoId(*(pandaFile_), fileId_));
     for (size_t i = 0; i < GetNumArgs(); i++) {
         auto type = GetEffectiveArgType(i);
         if (type.IsReference()) {
-            ss << sep << ClassHelper::GetName(GetRefArgType(ref_idx++).data);
+            ss << sep << ClassHelper::GetName(GetRefArgType(refIdx++).data);
         } else {
             ss << sep << type;
         }
@@ -317,109 +317,110 @@ PandaString Method::GetFullName(bool with_signature) const
     return ss.str();
 }
 
-PandaString Method::GetLineNumberAndSourceFile(uint32_t bc_offset) const
+PandaString Method::GetLineNumberAndSourceFile(uint32_t bcOffset) const
 {
     PandaOStringStream ss;
     auto *source = GetClassSourceFile().data;
-    auto line_num = GetLineNumFromBytecodeOffset(bc_offset);
+    auto lineNum = GetLineNumFromBytecodeOffset(bcOffset);
 
     if (source == nullptr) {
         source = utf::CStringAsMutf8("<unknown>");
     }
 
-    ss << source << ":" << line_num;
+    ss << source << ":" << lineNum;
     return ss.str();
 }
 
 panda_file::File::StringData Method::GetClassName() const
 {
-    return panda_file_->GetStringData(panda_file::MethodDataAccessor::GetClassId(*(panda_file_), file_id_));
+    return pandaFile_->GetStringData(panda_file::MethodDataAccessor::GetClassId(*(pandaFile_), fileId_));
 }
 
 Method::Proto Method::GetProto() const
 {
-    return Proto(*(panda_file_), panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
+    return Proto(*(pandaFile_), panda_file::MethodDataAccessor::GetProtoId(*(pandaFile_), fileId_));
 }
 
 Method::ProtoId Method::GetProtoId() const
 {
-    return ProtoId(*(panda_file_), panda_file::MethodDataAccessor::GetProtoId(*(panda_file_), file_id_));
+    return ProtoId(*(pandaFile_), panda_file::MethodDataAccessor::GetProtoId(*(pandaFile_), fileId_));
 }
 
-uint32_t Method::GetNumericalAnnotation(AnnotationField field_id) const
+uint32_t Method::GetNumericalAnnotation(AnnotationField fieldId) const
 {
-    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
-    return mda.GetNumericalAnnotation(field_id);
+    panda_file::MethodDataAccessor mda(*(pandaFile_), fileId_);
+    return mda.GetNumericalAnnotation(fieldId);
 }
 
-panda_file::File::StringData Method::GetStringDataAnnotation(AnnotationField field_id) const
+panda_file::File::StringData Method::GetStringDataAnnotation(AnnotationField fieldId) const
 {
-    ASSERT(field_id >= AnnotationField::STRING_DATA_BEGIN && field_id <= AnnotationField::STRING_DATA_END);
-    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
-    uint32_t str_offset = mda.GetNumericalAnnotation(field_id);
-    if (str_offset == 0) {
+    ASSERT(fieldId >= AnnotationField::STRING_DATA_BEGIN && fieldId <= AnnotationField::STRING_DATA_END);
+    panda_file::MethodDataAccessor mda(*(pandaFile_), fileId_);
+    uint32_t strOffset = mda.GetNumericalAnnotation(fieldId);
+    if (strOffset == 0) {
         return {0, nullptr};
     }
-    return panda_file_->GetStringData(panda_file::File::EntityId(str_offset));
+    return pandaFile_->GetStringData(panda_file::File::EntityId(strOffset));
 }
 
 int64_t Method::GetBranchTakenCounter(uint32_t pc)
 {
-    auto profiling_data = GetProfilingData();
-    if (profiling_data == nullptr) {
+    auto profilingData = GetProfilingData();
+    if (profilingData == nullptr) {
         return 0;
     }
-    return profiling_data->GetBranchTakenCounter(pc);
+    return profilingData->GetBranchTakenCounter(pc);
 }
 
 int64_t Method::GetBranchNotTakenCounter(uint32_t pc)
 {
-    auto profiling_data = GetProfilingData();
-    if (profiling_data == nullptr) {
+    auto profilingData = GetProfilingData();
+    if (profilingData == nullptr) {
         return 0;
     }
-    return profiling_data->GetBranchNotTakenCounter(pc);
+    return profilingData->GetBranchNotTakenCounter(pc);
 }
 
 int64_t Method::GetThrowTakenCounter(uint32_t pc)
 {
-    auto profiling_data = GetProfilingData();
-    if (profiling_data == nullptr) {
+    auto profilingData = GetProfilingData();
+    if (profilingData == nullptr) {
         return 0;
     }
-    return profiling_data->GetThrowTakenCounter(pc);
+    return profilingData->GetThrowTakenCounter(pc);
 }
 
 uint32_t Method::FindCatchBlockInPandaFile(const Class *cls, uint32_t pc) const
 {
     ASSERT(!IsAbstract());
 
-    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
-    panda_file::CodeDataAccessor cda(*(panda_file_), mda.GetCodeId().value());
+    panda_file::MethodDataAccessor mda(*(pandaFile_), fileId_);
+    panda_file::CodeDataAccessor cda(*(pandaFile_), mda.GetCodeId().value());
 
-    uint32_t pc_offset = panda_file::INVALID_OFFSET;
+    uint32_t pcOffset = panda_file::INVALID_OFFSET;
 
-    cda.EnumerateTryBlocks([&pc_offset, cls, pc, this](panda_file::CodeDataAccessor::TryBlock &try_block) {
-        if ((try_block.GetStartPc() <= pc) && ((try_block.GetStartPc() + try_block.GetLength()) > pc)) {
-            try_block.EnumerateCatchBlocks([&](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
-                auto type_idx = catch_block.GetTypeIdx();
-                if (type_idx == panda_file::INVALID_INDEX) {
-                    pc_offset = catch_block.GetHandlerPc();
-                    return false;
-                }
+    cda.EnumerateTryBlocks([&pcOffset, cls, pc, this](panda_file::CodeDataAccessor::TryBlock &tryBlock) {
+        if ((tryBlock.GetStartPc() <= pc) && ((tryBlock.GetStartPc() + tryBlock.GetLength()) > pc)) {
+            tryBlock.EnumerateCatchBlocks(
+                [this, &pcOffset, &cls](panda_file::CodeDataAccessor::CatchBlock &catchBlock) {
+                    auto typeIdx = catchBlock.GetTypeIdx();
+                    if (typeIdx == panda_file::INVALID_INDEX) {
+                        pcOffset = catchBlock.GetHandlerPc();
+                        return false;
+                    }
 
-                auto type_id = GetClass()->ResolveClassIndex(type_idx);
-                auto *handler_class = Runtime::GetCurrent()->GetClassLinker()->GetClass(*this, type_id);
-                if (cls->IsSubClassOf(handler_class)) {
-                    pc_offset = catch_block.GetHandlerPc();
-                    return false;
-                }
-                return true;
-            });
+                    auto typeId = GetClass()->ResolveClassIndex(typeIdx);
+                    auto *handlerClass = Runtime::GetCurrent()->GetClassLinker()->GetClass(*this, typeId);
+                    if (cls->IsSubClassOf(handlerClass)) {
+                        pcOffset = catchBlock.GetHandlerPc();
+                        return false;
+                    }
+                    return true;
+                });
         }
-        return pc_offset == panda_file::INVALID_OFFSET;
+        return pcOffset == panda_file::INVALID_OFFSET;
     });
-    return pc_offset;
+    return pcOffset;
 }
 
 uint32_t Method::FindCatchBlock(const Class *cls, uint32_t pc) const
@@ -429,11 +430,11 @@ uint32_t Method::FindCatchBlock(const Class *cls, uint32_t pc) const
     VMHandle<ObjectHeader> exception(thread, thread->GetException());
     thread->ClearException();
 
-    auto pc_offset = FindCatchBlockInPandaFile(cls, pc);
+    auto pcOffset = FindCatchBlockInPandaFile(cls, pc);
 
     thread->SetException(exception.GetPtr());
 
-    return pc_offset;
+    return pcOffset;
 }
 
 panda_file::Type Method::GetEffectiveArgType(size_t idx) const
@@ -446,21 +447,21 @@ panda_file::Type Method::GetEffectiveReturnType() const
     return panda_file::GetEffectiveType(GetReturnType());
 }
 
-int32_t Method::GetLineNumFromBytecodeOffset(uint32_t bc_offset) const
+int32_t Method::GetLineNumFromBytecodeOffset(uint32_t bcOffset) const
 {
-    panda_file::MethodDataAccessor mda(*(panda_file_), file_id_);
-    return panda_file::debug_helpers::GetLineNumber(mda, bc_offset, panda_file_);
+    panda_file::MethodDataAccessor mda(*(pandaFile_), fileId_);
+    return panda_file::debug_helpers::GetLineNumber(mda, bcOffset, pandaFile_);
 }
 
 panda_file::File::StringData Method::GetClassSourceFile() const
 {
-    panda_file::ClassDataAccessor cda(*(panda_file_), GetClass()->GetFileId());
-    auto source_file_id = cda.GetSourceFileId();
-    if (!source_file_id) {
+    panda_file::ClassDataAccessor cda(*(pandaFile_), GetClass()->GetFileId());
+    auto sourceFileId = cda.GetSourceFileId();
+    if (!sourceFileId) {
         return {0, nullptr};
     }
 
-    return panda_file_->GetStringData(source_file_id.value());
+    return pandaFile_->GetStringData(sourceFileId.value());
 }
 
 bool Method::IsVerified() const
@@ -551,25 +552,25 @@ void Method::StartProfiling()
                                          alignof(ThrowData)) +
                                  sizeof(ThrowData) * throws.size());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto vcalls_mem = reinterpret_cast<uint8_t *>(data) + RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
-    auto branches_data_offset = RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
-                                            sizeof(CallSiteInlineCache) * vcalls.size(),
-                                        alignof(BranchData));
+    auto vcallsMem = reinterpret_cast<uint8_t *>(data) + RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
+    auto branchesDataOffset = RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
+                                          sizeof(CallSiteInlineCache) * vcalls.size(),
+                                      alignof(BranchData));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto branches_mem = reinterpret_cast<uint8_t *>(data) + branches_data_offset;
+    auto branchesMem = reinterpret_cast<uint8_t *>(data) + branchesDataOffset;
 
-    auto throws_data_offset = RoundUp(branches_data_offset + sizeof(BranchData) * branches.size(), alignof(ThrowData));
+    auto throwsDataOffset = RoundUp(branchesDataOffset + sizeof(BranchData) * branches.size(), alignof(ThrowData));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto throws_mem = reinterpret_cast<uint8_t *>(data) + throws_data_offset;
+    auto throwsMem = reinterpret_cast<uint8_t *>(data) + throwsDataOffset;
 
-    auto profiling_data =
-        new (data) ProfilingData(CallSiteInlineCache::From(vcalls_mem, vcalls),
-                                 BranchData::From(branches_mem, branches), ThrowData::From(throws_mem, throws));
+    auto profilingData =
+        new (data) ProfilingData(CallSiteInlineCache::From(vcallsMem, vcalls), BranchData::From(branchesMem, branches),
+                                 ThrowData::From(throwsMem, throws));
 
-    ProfilingData *old_value = nullptr;
+    ProfilingData *oldValue = nullptr;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    while (!pointer_.profiling_data.compare_exchange_weak(old_value, profiling_data)) {
-        if (old_value != nullptr) {
+    while (!pointer_.profilingData.compare_exchange_weak(oldValue, profilingData)) {
+        if (oldValue != nullptr) {
             // We're late, some thread already started profiling.
             allocator->Delete(data);
             return;
@@ -594,7 +595,7 @@ void Method::StopProfiling()
     allocator->Free(GetProfilingData());
     // Atomic with release order reason: data race with profiling_data_ with dependecies on writes before the store
     // which should become visible acquire NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-    pointer_.profiling_data.store(nullptr, std::memory_order_release);
+    pointer_.profilingData.store(nullptr, std::memory_order_release);
 }
 
 bool Method::IsProxy() const
@@ -611,13 +612,13 @@ int16_t Method::GetInitialHotnessCounter()
 
     auto &options = Runtime::GetOptions();
     uint32_t threshold = options.GetCompilerHotnessThreshold();
-    uint32_t prof_threshold = options.GetCompilerProfilingThreshold();
-    return std::min(threshold, prof_threshold);
+    uint32_t profThreshold = options.GetCompilerProfilingThreshold();
+    return std::min(threshold, profThreshold);
 }
 
 void Method::ResetHotnessCounter()
 {
-    stor_16_pair_.hotness_counter = GetInitialHotnessCounter();
+    stor16Pair_.hotnessCounter = GetInitialHotnessCounter();
 }
 
 }  // namespace panda

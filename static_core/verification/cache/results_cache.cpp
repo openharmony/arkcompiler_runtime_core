@@ -27,12 +27,12 @@ namespace panda::verifier {
 
 struct VerificationResultCache::Impl {
     std::string filename;
-    Synchronized<PandaUnorderedSet<uint64_t>> verified_ok;
-    Synchronized<PandaUnorderedSet<uint64_t>> verified_fail;
+    Synchronized<PandaUnorderedSet<uint64_t>> verifiedOk;
+    Synchronized<PandaUnorderedSet<uint64_t>> verifiedFail;
 
     template <typename It>
-    Impl(std::string file_name, It data_start, It data_end)
-        : filename {std::move(file_name)}, verified_ok {data_start, data_end}
+    Impl(std::string fileName, It dataStart, It dataEnd)
+        : filename {std::move(fileName)}, verifiedOk {dataStart, dataEnd}
     {
     }
 };
@@ -88,14 +88,14 @@ void VerificationResultCache::Initialize(const std::string &filename)
     ASSERT(Enabled());
 }
 
-void VerificationResultCache::Destroy(bool update_file)
+void VerificationResultCache::Destroy(bool updateFile)
 {
     if (!Enabled()) {
         return;
     }
-    if (update_file) {
+    if (updateFile) {
         PandaVector<uint64_t> data;
-        impl_->verified_ok.Apply([&data](const auto &set) {
+        impl_->verifiedOk.Apply([&data](const auto &set) {
             data.reserve(set.size());
             data.insert(data.begin(), set.cbegin(), set.cend());
         });
@@ -126,24 +126,24 @@ void VerificationResultCache::Destroy(bool update_file)
     impl_ = nullptr;
 }
 
-void VerificationResultCache::CacheResult(uint64_t method_id, bool result)
+void VerificationResultCache::CacheResult(uint64_t methodId, bool result)
 {
     if (Enabled()) {
         if (result) {
-            impl_->verified_ok->insert(method_id);
+            impl_->verifiedOk->insert(methodId);
         } else {
-            impl_->verified_fail->insert(method_id);
+            impl_->verifiedFail->insert(methodId);
         }
     }
 }
 
-VerificationResultCache::Status VerificationResultCache::Check(uint64_t method_id)
+VerificationResultCache::Status VerificationResultCache::Check(uint64_t methodId)
 {
     if (Enabled()) {
-        if (impl_->verified_ok->count(method_id) > 0) {
+        if (impl_->verifiedOk->count(methodId) > 0) {
             return Status::OK;
         }
-        if (impl_->verified_fail->count(method_id) > 0) {
+        if (impl_->verifiedFail->count(methodId) > 0) {
             return Status::FAILED;
         }
     }

@@ -28,7 +28,7 @@ namespace panda::llvmbackend::passes {
 
 bool MarkInlineModule::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
 {
-    return options->do_irtoc_inline;
+    return options->doIrtocInline;
 }
 
 /// Mark all functions and global variables from inline module with FUNCTION_MD_INLINE_MODULE metadata

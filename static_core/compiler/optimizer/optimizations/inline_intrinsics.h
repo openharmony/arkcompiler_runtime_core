@@ -50,12 +50,12 @@ public:
 
 private:
     AnyBaseType GetAssumedAnyType(const Inst *inst);
-    bool TryInline(CallInst *call_inst);
+    bool TryInline(CallInst *callInst);
     bool TryInline(IntrinsicInst *intrinsic);
     bool DoInline(IntrinsicInst *intrinsic);
     ArenaVector<AnyBaseType> types_;
-    ArenaVector<Inst *> saved_inputs_;
-    ArenaVector<RuntimeInterface::NamedAccessProfileData> named_access_profile_;
+    ArenaVector<Inst *> savedInputs_;
+    ArenaVector<RuntimeInterface::NamedAccessProfileData> namedAccessProfile_;
 };
 }  // namespace panda::compiler
 

@@ -31,9 +31,9 @@ Config *NewConfig()
     return result;
 }
 
-bool LoadConfigFile(Config *config, std::string_view config_file_name)
+bool LoadConfigFile(Config *config, std::string_view configFileName)
 {
-    return panda::verifier::config::LoadConfig(config, config_file_name);
+    return panda::verifier::config::LoadConfig(config, configFileName);
 }
 
 void DestroyConfig(Config *config)
@@ -55,31 +55,31 @@ bool IsOnlyVerify(Config const *config)
 }
 
 Service *CreateService(Config const *config, panda::mem::InternalAllocatorPtr allocator, ClassLinker *linker,
-                       std::string const &cache_file_name)
+                       std::string const &cacheFileName)
 {
-    if (!cache_file_name.empty()) {
-        VerificationResultCache::Initialize(cache_file_name);
+    if (!cacheFileName.empty()) {
+        VerificationResultCache::Initialize(cacheFileName);
     }
     auto res = allocator->New<Service>();
     res->config = config;
-    res->class_linker = linker;
+    res->classLinker = linker;
     res->allocator = allocator;
     res->config = config;
-    res->verifier_service = allocator->New<VerifierService>(allocator, linker);
-    res->verifier_service->Init();
-    res->debug_ctx.SetConfig(&config->debug_cfg);
+    res->verifierService = allocator->New<VerifierService>(allocator, linker);
+    res->verifierService->Init();
+    res->debugCtx.SetConfig(&config->debugCfg);
     return res;
 }
 
-void DestroyService(Service *service, bool update_cache_file)
+void DestroyService(Service *service, bool updateCacheFile)
 {
     if (service == nullptr) {
         return;
     }
-    VerificationResultCache::Destroy(update_cache_file);
+    VerificationResultCache::Destroy(updateCacheFile);
     auto allocator = service->allocator;
-    service->verifier_service->Destroy();
-    allocator->Delete(service->verifier_service);
+    service->verifierService->Destroy();
+    allocator->Delete(service->verifierService);
     allocator->Delete(service);
 }
 
@@ -112,8 +112,8 @@ static void ReportStatus(Service const *service, Method const *method, std::stri
 
 static bool VerifyClass(Class *clazz)
 {
-    auto *lang_plugin = plugin::GetLanguagePlugin(clazz->GetSourceLang());
-    auto result = lang_plugin->CheckClass(clazz);
+    auto *langPlugin = plugin::GetLanguagePlugin(clazz->GetSourceLang());
+    auto result = langPlugin->CheckClass(clazz);
     if (!result.IsOk()) {
         LOG(ERROR, VERIFIER) << result.msg << " " << clazz->GetName();
         clazz->SetState(Class::State::ERRONEOUS);
@@ -160,26 +160,26 @@ Status Verify(Service *service, panda::Method *method, VerificationMode mode)
         LOG(DEBUG, VERIFIER) << method->GetFullName(true) << " has no code, no meaningful verification";
         return Status::OK;
     }
-    service->debug_ctx.AddMethod(*method, mode == VerificationMode::DEBUG);
-    if (service->debug_ctx.SkipVerification(method->GetUniqId())) {
+    service->debugCtx.AddMethod(*method, mode == VerificationMode::DEBUG);
+    if (service->debugCtx.SkipVerification(method->GetUniqId())) {
         LOG(DEBUG, VERIFIER) << "Skipping verification of '" << method->GetFullName()
                              << "' according to verifier configuration";
         return Status::OK;
     }
 
-    auto uniq_id = method->GetUniqId();
-    auto method_name = method->GetFullName();
+    auto uniqId = method->GetUniqId();
+    auto methodName = method->GetFullName();
     if (VerificationResultCache::Enabled()) {
-        auto cached_status = ToPublic(VerificationResultCache::Check(uniq_id));
-        if (cached_status != Status::UNKNOWN) {
-            LOG(DEBUG, VERIFIER) << "Verification result of method '" << method_name
-                                 << "' was cached: " << (cached_status == Status::OK ? "OK" : "FAIL");
-            return cached_status;
+        auto cachedStatus = ToPublic(VerificationResultCache::Check(uniqId));
+        if (cachedStatus != Status::UNKNOWN) {
+            LOG(DEBUG, VERIFIER) << "Verification result of method '" << methodName
+                                 << "' was cached: " << (cachedStatus == Status::OK ? "OK" : "FAIL");
+            return cachedStatus;
         }
     }
 
     auto lang = method->GetClass()->GetSourceLang();
-    auto *processor = service->verifier_service->GetProcessor(lang);
+    auto *processor = service->verifierService->GetProcessor(lang);
 
     if (processor == nullptr) {
         LOG(INFO, VERIFIER) << "Attempt to  verify " << method->GetFullName(true)
@@ -187,23 +187,23 @@ Status Verify(Service *service, panda::Method *method, VerificationMode mode)
         return Status::FAILED;
     }
 
-    auto const &method_options = service->config->opts.debug.GetMethodOptions();
-    auto const &verif_method_options = method_options[method_name];
-    LOG(DEBUG, VERIFIER) << "Verification config for '" << method_name << "': " << verif_method_options.GetName();
+    auto const &methodOptions = service->config->opts.debug.GetMethodOptions();
+    auto const &verifMethodOptions = methodOptions[methodName];
+    LOG(DEBUG, VERIFIER) << "Verification config for '" << methodName << "': " << verifMethodOptions.GetName();
     LOG(INFO, VERIFIER) << "Started verification of method '" << method->GetFullName(true) << "'";
 
     // class verification can be called concurrently
     if ((method->GetClass()->GetState() < Class::State::VERIFIED) && !VerifyClass(method->GetClass())) {
         return Status::FAILED;
     }
-    Job job {service, method, verif_method_options};
+    Job job {service, method, verifMethodOptions};
     bool result = job.DoChecks(processor->GetTypeSystem());
 
-    LOG(DEBUG, VERIFIER) << "Verification result for '" << method_name << "': " << result;
+    LOG(DEBUG, VERIFIER) << "Verification result for '" << methodName << "': " << result;
 
-    service->verifier_service->ReleaseProcessor(processor);
+    service->verifierService->ReleaseProcessor(processor);
 
-    VerificationResultCache::CacheResult(uniq_id, result);
+    VerificationResultCache::CacheResult(uniqId, result);
 
     if (result) {
         method->SetVerificationStage(VStage::VERIFIED_OK);

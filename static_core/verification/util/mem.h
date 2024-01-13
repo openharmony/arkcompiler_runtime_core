@@ -85,7 +85,7 @@ ALWAYS_INLINE inline uintptr_t GetPointer(uintptr_t x)
 ALWAYS_INLINE inline uintptr_t ConstructWithTag(int tag, uintptr_t v)
 {
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    ASSERT(tag < (1 << 4));
+    ASSERT(tag < (1 << 4U));
     ASSERT(v < (1UL << TAG_SHIFT));
     return NOT_POINTER | (static_cast<uintptr_t>(tag) << TAG_SHIFT) | v;
 }

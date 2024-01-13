@@ -449,14 +449,14 @@ public:
         return PopCount(size());
     }
 
-    size_t PopCount(size_t last_index) const
+    size_t PopCount(size_t lastIndex) const
     {
         if (empty()) {
             return 0;
         }
         size_t res = 0;
-        size_t words = GetWordIndex(last_index);
-        size_t offset = last_index % WORD_BITS;
+        size_t words = GetWordIndex(lastIndex);
+        size_t offset = lastIndex % WORD_BITS;
         for (size_t i = 0; i < words; i++) {
             res += Popcount(storage_[i]);
         }
@@ -516,11 +516,11 @@ public:
     template <bool IS_FIXED_SIZE, typename AllocatorType>
     BitVectorBase<IS_FIXED_SIZE, AllocatorType> &operator|=(const BitVectorBase<IS_FIXED_SIZE, AllocatorType> &other)
     {
-        auto min_size = std::min<size_t>(storage_.size(), other.storage_.size());
-        for (size_t i = 0; i < min_size; ++i) {
+        auto minSize = std::min<size_t>(storage_.size(), other.storage_.size());
+        for (size_t i = 0; i < minSize; ++i) {
             storage_[i] |= other.storage_[i];
         }
-        for (size_t i = min_size; i < other.storage_.size(); ++i) {
+        for (size_t i = minSize; i < other.storage_.size(); ++i) {
             storage_.push_back(other.storage_[i]);
         }
         size_ = std::max<size_t>(size_, other.size_);

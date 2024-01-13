@@ -45,7 +45,7 @@ public:
         thread_->ManagedCodeBegin();
         if (!CrossingMapSingleton::IsCreated()) {
             CrossingMapSingleton::Create();
-            crossingmap_manual_handling_ = true;
+            crossingmapManualHandling_ = true;
         }
     }
 
@@ -53,7 +53,7 @@ public:
     {
         thread_->ManagedCodeEnd();
         ClearPoolManager();
-        if (crossingmap_manual_handling_) {
+        if (crossingmapManualHandling_) {
             CrossingMapSingleton::Destroy();
         }
         Runtime::Destroy();
@@ -68,14 +68,14 @@ protected:
 
     void AddMemoryPoolToAllocator(NonObjectFreeListAllocator &alloc) override
     {
-        os::memory::LockHolder lock(pool_lock_);
+        os::memory::LockHolder lock(poolLock_);
         Pool pool = PoolManager::GetMmapMemPool()->AllocPool(DEFAULT_POOL_SIZE_FOR_ALLOC, SpaceType::SPACE_TYPE_OBJECT,
                                                              AllocatorType::FREELIST_ALLOCATOR, &alloc);
         ASSERT(pool.GetSize() == DEFAULT_POOL_SIZE_FOR_ALLOC);
         if (pool.GetMem() == nullptr) {
             ASSERT_TRUE(0 && "Can't get a new pool from PoolManager");
         }
-        allocated_pools_by_pool_manager_.push_back(pool);
+        allocatedPoolsByPoolManager_.push_back(pool);
         if (!alloc.AddMemoryPool(pool.GetMem(), pool.GetSize())) {
             ASSERT_TRUE(0 && "Can't add mem pool to allocator");
         }
@@ -92,46 +92,46 @@ protected:
         return allocator.AllocatedByFreeListAllocator(mem);
     }
 
-    void ClearPoolManager(bool clear_crossing_map = false)
+    void ClearPoolManager(bool clearCrossingMap = false)
     {
-        for (auto i : allocated_pools_by_pool_manager_) {
+        for (auto i : allocatedPoolsByPoolManager_) {
             PoolManager::GetMmapMemPool()->FreePool(i.GetMem(), i.GetSize());
-            if (clear_crossing_map) {
+            if (clearCrossingMap) {
                 // We need to remove corresponding Pools from the CrossingMap
                 CrossingMapSingleton::RemoveCrossingMapForMemory(i.GetMem(), i.GetSize());
             }
         }
-        allocated_pools_by_pool_manager_.clear();
+        allocatedPoolsByPoolManager_.clear();
     }
 
 private:
     panda::MTManagedThread *thread_ {};
-    std::vector<Pool> allocated_pools_by_pool_manager_;
+    std::vector<Pool> allocatedPoolsByPoolManager_;
     RuntimeOptions options_;
-    bool crossingmap_manual_handling_ {false};
+    bool crossingmapManualHandling_ {false};
     // Mutex, which allows only one thread to add pool to the pool vector
-    os::memory::Mutex pool_lock_;
+    os::memory::Mutex poolLock_;
 };
 
 TEST_F(FreeListAllocatorTest, SimpleAllocateDifferentObjSizeTest)
 {
     LOG(DEBUG, ALLOC) << "SimpleAllocateDifferentObjSizeTest";
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectFreeListAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectFreeListAllocator allocator(memStats);
     AddMemoryPoolToAllocator(allocator);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 23; i < 300; i++) {
+    for (size_t i = 23U; i < 300U; i++) {
         void *mem = allocator.Alloc(i);
         (void)mem;
         LOG(DEBUG, ALLOC) << "Allocate obj with size " << i << " at " << std::hex << mem;
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(FreeListAllocatorTest, AllocateWriteFreeTest)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    AllocateAndFree(FREELIST_ALLOCATOR_MIN_SIZE, 512);
+    AllocateAndFree(FREELIST_ALLOCATOR_MIN_SIZE, 512U);
 }
 
 TEST_F(FreeListAllocatorTest, AllocateRandomFreeTest)
@@ -139,7 +139,7 @@ TEST_F(FreeListAllocatorTest, AllocateRandomFreeTest)
     static constexpr size_t ALLOC_SIZE = FREELIST_ALLOCATOR_MIN_SIZE;
     static constexpr size_t ELEMENTS_COUNT = 512;
     static constexpr size_t POOLS_COUNT = 1;
-    AllocateFreeDifferentSizesTest<ALLOC_SIZE, 2 * ALLOC_SIZE>(ELEMENTS_COUNT, POOLS_COUNT);
+    AllocateFreeDifferentSizesTest<ALLOC_SIZE, 2U * ALLOC_SIZE>(ELEMENTS_COUNT, POOLS_COUNT);
 }
 
 TEST_F(FreeListAllocatorTest, AllocateTooBigObjTest)
@@ -151,7 +151,7 @@ TEST_F(FreeListAllocatorTest, AlignmentAllocTest)
 {
     static constexpr size_t POOLS_COUNT = 2;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    AlignedAllocFreeTest<FREELIST_ALLOCATOR_MIN_SIZE, MAX_ALLOC_SIZE / 4096>(POOLS_COUNT);
+    AlignedAllocFreeTest<FREELIST_ALLOCATOR_MIN_SIZE, MAX_ALLOC_SIZE / 4096U>(POOLS_COUNT);
 }
 
 TEST_F(FreeListAllocatorTest, AllocateTooMuchTest)
@@ -195,145 +195,146 @@ TEST_F(FreeListAllocatorTest, AllocatedByFreeListAllocatorTest)
 TEST_F(FreeListAllocatorTest, FailedLinksTest)
 {
     static constexpr size_t MIN_ALLOC_SIZE = FREELIST_ALLOCATOR_MIN_SIZE;
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectFreeListAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectFreeListAllocator allocator(memStats);
     AddMemoryPoolToAllocator(allocator);
     std::pair<void *, size_t> pair;
 
-    std::array<std::pair<void *, size_t>, 3> memory_elements;
-    for (size_t i = 0; i < 3; i++) {
+    std::array<std::pair<void *, size_t>, 3U> memoryElements;
+    for (size_t i = 0; i < 3U; i++) {
         void *mem = allocator.Alloc(MIN_ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
         size_t index = SetBytesFromByteArray(mem, MIN_ALLOC_SIZE);
-        std::pair<void *, size_t> new_pair(mem, index);
-        memory_elements.at(i) = new_pair;
+        std::pair<void *, size_t> newPair(mem, index);
+        memoryElements.at(i) = newPair;
     }
 
-    pair = memory_elements[1];
+    pair = memoryElements[1];
     ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(pair), MIN_ALLOC_SIZE, std::get<1>(pair)));
     allocator.Free(std::get<0>(pair));
 
-    pair = memory_elements[0];
+    pair = memoryElements[0];
     ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(pair), MIN_ALLOC_SIZE, std::get<1>(pair)));
     allocator.Free(std::get<0>(pair));
 
     {
-        void *mem = allocator.Alloc(MIN_ALLOC_SIZE * 2);
+        void *mem = allocator.Alloc(MIN_ALLOC_SIZE * 2U);
         ASSERT_TRUE(mem != nullptr);
-        size_t index = SetBytesFromByteArray(mem, MIN_ALLOC_SIZE * 2);
-        std::pair<void *, size_t> new_pair(mem, index);
-        memory_elements.at(0) = new_pair;
+        size_t index = SetBytesFromByteArray(mem, MIN_ALLOC_SIZE * 2U);
+        std::pair<void *, size_t> newPair(mem, index);
+        memoryElements.at(0) = newPair;
     }
 
     {
         void *mem = allocator.Alloc(MIN_ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
         size_t index = SetBytesFromByteArray(mem, MIN_ALLOC_SIZE);
-        std::pair<void *, size_t> new_pair(mem, index);
-        memory_elements.at(1) = new_pair;
+        std::pair<void *, size_t> newPair(mem, index);
+        memoryElements.at(1) = newPair;
     }
 
     {
-        pair = memory_elements[0];
-        ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(pair), MIN_ALLOC_SIZE * 2, std::get<1>(pair)));
+        pair = memoryElements[0];
+        ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(pair), MIN_ALLOC_SIZE * 2U, std::get<1>(pair)));
         allocator.Free(std::get<0>(pair));
     }
 
     {
-        pair = memory_elements[1];
+        pair = memoryElements[1];
         ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(pair), MIN_ALLOC_SIZE, std::get<1>(pair)));
         allocator.Free(std::get<0>(pair));
     }
 
     {
-        pair = memory_elements[2];
+        pair = memoryElements[2U];
         ASSERT_TRUE(CompareBytesWithByteArray(std::get<0>(pair), MIN_ALLOC_SIZE, std::get<1>(pair)));
         allocator.Free(std::get<0>(pair));
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(FreeListAllocatorTest, MaxAllocationSizeTest)
 {
     static constexpr size_t ALLOC_SIZE = MAX_ALLOC_SIZE;
     static constexpr size_t ALLOC_COUNT = 2;
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectFreeListAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectFreeListAllocator allocator(memStats);
     AddMemoryPoolToAllocator(allocator);
-    std::array<void *, ALLOC_COUNT> memory_elements {};
+    std::array<void *, ALLOC_COUNT> memoryElements {};
     for (size_t i = 0; i < ALLOC_COUNT; i++) {
         void *mem = allocator.Alloc(ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
-        memory_elements.at(i) = mem;
+        memoryElements.at(i) = mem;
     }
     for (size_t i = 0; i < ALLOC_COUNT; i++) {
-        allocator.Free(memory_elements.at(i));
+        allocator.Free(memoryElements.at(i));
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(FreeListAllocatorTest, AllocateTheWholePoolFreeAndAllocateAgainTest)
 {
-    size_t min_size_power_of_two;
+    size_t minSizePowerOfTwo;
     if ((FREELIST_ALLOCATOR_MIN_SIZE & (FREELIST_ALLOCATOR_MIN_SIZE - 1)) == 0U) {
-        min_size_power_of_two = panda::helpers::math::GetIntLog2(FREELIST_ALLOCATOR_MIN_SIZE);
+        minSizePowerOfTwo = panda::helpers::math::GetIntLog2(FREELIST_ALLOCATOR_MIN_SIZE);
     } else {
-        min_size_power_of_two = ceil(std::log(FREELIST_ALLOCATOR_MIN_SIZE) / std::log(2));
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        minSizePowerOfTwo = ceil(std::log(FREELIST_ALLOCATOR_MIN_SIZE) / std::log(2.0F));
     }
-    if (((1U << min_size_power_of_two) - sizeof(freelist::MemoryBlockHeader)) < FREELIST_ALLOCATOR_MIN_SIZE) {
-        min_size_power_of_two++;
+    if (((1U << minSizePowerOfTwo) - sizeof(freelist::MemoryBlockHeader)) < FREELIST_ALLOCATOR_MIN_SIZE) {
+        minSizePowerOfTwo++;
     }
-    size_t alloc_size = (1U << min_size_power_of_two) - sizeof(freelist::MemoryBlockHeader);
+    size_t allocSize = (1U << minSizePowerOfTwo) - sizeof(freelist::MemoryBlockHeader);
     // To cover all memory we need to consider pool header size at first bytes of pool memory.
-    size_t first_alloc_size = (1U << min_size_power_of_two) - sizeof(freelist::MemoryBlockHeader) - POOL_HEADER_SIZE;
-    if (first_alloc_size < FREELIST_ALLOCATOR_MIN_SIZE) {
-        first_alloc_size = (1U << (min_size_power_of_two + 1)) - sizeof(freelist::MemoryBlockHeader) - POOL_HEADER_SIZE;
+    size_t firstAllocSize = (1U << minSizePowerOfTwo) - sizeof(freelist::MemoryBlockHeader) - POOL_HEADER_SIZE;
+    if (firstAllocSize < FREELIST_ALLOCATOR_MIN_SIZE) {
+        firstAllocSize = (1U << (minSizePowerOfTwo + 1)) - sizeof(freelist::MemoryBlockHeader) - POOL_HEADER_SIZE;
     }
-    auto *mem_stats = new mem::MemStatsType();
-    NonObjectFreeListAllocator allocator(mem_stats);
+    auto *memStats = new mem::MemStatsType();
+    NonObjectFreeListAllocator allocator(memStats);
     AddMemoryPoolToAllocator(allocator);
-    std::vector<void *> memory_elements;
-    size_t alloc_count = 0;
+    std::vector<void *> memoryElements;
+    size_t allocCount = 0;
 
     // Allocate first element
-    void *first_alloc_mem = allocator.Alloc(first_alloc_size);
-    ASSERT_TRUE(first_alloc_mem != nullptr);
+    void *firstAllocMem = allocator.Alloc(firstAllocSize);
+    ASSERT_TRUE(firstAllocMem != nullptr);
 
     // Allocate and use the whole alloc pool
     while (true) {
-        void *mem = allocator.Alloc(alloc_size);
+        void *mem = allocator.Alloc(allocSize);
         if (mem == nullptr) {
             break;
         }
-        alloc_count++;
-        memory_elements.push_back(mem);
+        allocCount++;
+        memoryElements.push_back(mem);
     }
 
     // Free all elements
-    allocator.Free(first_alloc_mem);
-    for (size_t i = 0; i < alloc_count; i++) {
-        allocator.Free(memory_elements.back());
-        memory_elements.pop_back();
+    allocator.Free(firstAllocMem);
+    for (size_t i = 0; i < allocCount; i++) {
+        allocator.Free(memoryElements.back());
+        memoryElements.pop_back();
     }
 
     // Allocate first element again
-    first_alloc_mem = allocator.Alloc(first_alloc_size);
-    ASSERT_TRUE(first_alloc_mem != nullptr);
+    firstAllocMem = allocator.Alloc(firstAllocSize);
+    ASSERT_TRUE(firstAllocMem != nullptr);
 
     // Allocate again
-    for (size_t i = 0; i < alloc_count; i++) {
-        void *mem = allocator.Alloc(alloc_size);
+    for (size_t i = 0; i < allocCount; i++) {
+        void *mem = allocator.Alloc(allocSize);
         ASSERT_TRUE(mem != nullptr);
-        memory_elements.push_back(mem);
+        memoryElements.push_back(mem);
     }
 
     // Free all elements again
-    allocator.Free(first_alloc_mem);
-    for (size_t i = 0; i < alloc_count; i++) {
-        allocator.Free(memory_elements.back());
-        memory_elements.pop_back();
+    allocator.Free(firstAllocMem);
+    for (size_t i = 0; i < allocCount; i++) {
+        allocator.Free(memoryElements.back());
+        memoryElements.pop_back();
     }
-    delete mem_stats;
+    delete memStats;
 }
 
 TEST_F(FreeListAllocatorTest, MTAllocFreeTest)
@@ -351,7 +352,7 @@ TEST_F(FreeListAllocatorTest, MTAllocFreeTest)
     // Threads can concurrently add Pools to the allocator, therefore, we must make it into account
     // And also we must take fragmentation into account
     ASSERT_TRUE(mem::MemConfig::GetHeapSizeLimit() >
-                2 * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
+                2U * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
                     THREADS_COUNT * DEFAULT_POOL_SIZE_FOR_ALLOC);
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         MtAllocFreeTest<FREELIST_ALLOCATOR_MIN_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(MIN_ELEMENTS_COUNT,
@@ -375,7 +376,7 @@ TEST_F(FreeListAllocatorTest, MTAllocIterateTest)
     // Threads can concurrently add Pools to the allocator, therefore, we must make it into account
     // And also we must take fragmentation into account
     ASSERT_TRUE(mem::MemConfig::GetHeapSizeLimit() >
-                2 * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
+                2U * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
                     THREADS_COUNT * DEFAULT_POOL_SIZE_FOR_ALLOC);
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         MtAllocIterateTest<FREELIST_ALLOCATOR_MIN_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(
@@ -399,7 +400,7 @@ TEST_F(FreeListAllocatorTest, MTAllocCollectTest)
     // Threads can concurrently add Pools to the allocator, therefore, we must make it into account
     // And also we must take fragmentation into account
     ASSERT_TRUE(mem::MemConfig::GetHeapSizeLimit() >
-                2 * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
+                2U * (AlignUp(MAX_ELEMENTS_COUNT * MAX_MT_ALLOC_SIZE, DEFAULT_POOL_SIZE_FOR_ALLOC)) +
                     THREADS_COUNT * DEFAULT_POOL_SIZE_FOR_ALLOC);
     for (size_t i = 0; i < MT_TEST_RUN_COUNT; i++) {
         MtAllocCollectTest<FREELIST_ALLOCATOR_MIN_SIZE, MAX_MT_ALLOC_SIZE, THREADS_COUNT>(MIN_ELEMENTS_COUNT,
@@ -419,8 +420,8 @@ TEST_F(FreeListAllocatorTest, MTAllocCollectTest)
  */
 TEST_F(FreeListAllocatorTest, AlignTest)
 {
-    auto mem_stats = std::unique_ptr<mem::MemStatsType>();
-    NonObjectFreeListAllocator allocator(mem_stats.get());
+    auto memStats = std::unique_ptr<mem::MemStatsType>();
+    NonObjectFreeListAllocator allocator(memStats.get());
     AddMemoryPoolToAllocator(allocator);
 
     // NOLINTNEXTLINE(readability-magic-numbers)

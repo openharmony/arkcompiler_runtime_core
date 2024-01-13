@@ -20,24 +20,25 @@
 
 namespace panda {
 
-StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coro_manager,
+StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager,
                                                  ScheduleLoopType type, PandaString name)
-    : coro_manager_(coro_manager), id_(os::thread::GetCurrentThreadId()), name_(std::move(name))
+    : coroManager_(coroManager), id_(os::thread::GetCurrentThreadId()), name_(std::move(name))
 {
     if (type == ScheduleLoopType::THREAD) {
-        schedule_loop_ctx_ = coro_manager->CreateEntrypointlessCoroutine(runtime, vm, /*make_current*/ false);
+        scheduleLoopCtx_ =
+            coroManager->CreateEntrypointlessCoroutine(runtime, vm, false);  // false value is make_current
         std::thread t(&StackfulCoroutineWorker::ThreadProc, this);
         os::thread::SetThreadName(t.native_handle(), name_.c_str());
         t.detach();
     } else {
-        schedule_loop_ctx_ = coro_manager->CreateNativeCoroutine(runtime, vm, ScheduleLoopProxy, this);
-        PushToRunnableQueue(schedule_loop_ctx_);
+        scheduleLoopCtx_ = coroManager->CreateNativeCoroutine(runtime, vm, ScheduleLoopProxy, this);
+        PushToRunnableQueue(scheduleLoopCtx_);
     }
 }
 
-void StackfulCoroutineWorker::AddRunnableCoroutine(Coroutine *new_coro, bool prioritize)
+void StackfulCoroutineWorker::AddRunnableCoroutine(Coroutine *newCoro, bool prioritize)
 {
-    PushToRunnableQueue(new_coro, prioritize);
+    PushToRunnableQueue(newCoro, prioritize);
 }
 
 bool StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
@@ -53,12 +54,12 @@ bool StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
         return false;
     }
 
-    waiters_lock_.Lock();
+    waitersLock_.Lock();
     awaitee->Unlock();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::AddWaitingCoroutine: " << waiter->GetName() << " AWAITS";
     waiters_.insert({awaitee, waiter});
 
-    runnables_lock_.Lock();
+    runnablesLock_.Lock();
     ASSERT(RunnableCoroutinesExist());
     ScopedNativeCodeThread n(Coroutine::GetCurrent());
     // will unlock waiters_lock_ and switch ctx
@@ -69,7 +70,7 @@ bool StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
 
 void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
 {
-    os::memory::LockHolder lock(waiters_lock_);
+    os::memory::LockHolder lock(waitersLock_);
     auto w = waiters_.find(blocker);
     if (w != waiters_.end()) {
         auto *coro = w->second;
@@ -85,7 +86,7 @@ void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
     ASSERT(finalizee->GetContext<StackfulCoroutineContext>()->GetWorker() == this);
     ASSERT(GetCurrentContext()->GetWorker() == this);
 
-    finalization_queue_.push(finalizee);
+    finalizationQueue_.push(finalizee);
     ScheduleNextCoroUnlockNone();
 }
 
@@ -101,8 +102,8 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
     // part of MAIN finalization sequence
     if (RunnableCoroutinesExist()) {
         // the schedule loop is still runnable
-        ASSERT(schedule_loop_ctx_->HasNativeEntrypoint());
-        runnables_lock_.Lock();
+        ASSERT(scheduleLoopCtx_->HasNativeEntrypoint());
+        runnablesLock_.Lock();
         // sch loop only
         ASSERT(runnables_.size() == 1);
         SuspendCurrentCoroAndScheduleNext();
@@ -111,28 +112,28 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
 
 void StackfulCoroutineWorker::DisableCoroutineSwitch()
 {
-    ++disable_coro_switch_counter_;
+    ++disableCoroSwitchCounter_;
     LOG(DEBUG, COROUTINES) << "Coroutine switch on " << GetName()
-                           << " has been disabled! Recursive ctr = " << disable_coro_switch_counter_;
+                           << " has been disabled! Recursive ctr = " << disableCoroSwitchCounter_;
 }
 
 void StackfulCoroutineWorker::EnableCoroutineSwitch()
 {
     ASSERT(IsCoroutineSwitchDisabled());
-    --disable_coro_switch_counter_;
+    --disableCoroSwitchCounter_;
     LOG(DEBUG, COROUTINES) << "Coroutine switch on " << GetName()
-                           << " has been enabled! Recursive ctr = " << disable_coro_switch_counter_;
+                           << " has been enabled! Recursive ctr = " << disableCoroSwitchCounter_;
 }
 
 bool StackfulCoroutineWorker::IsCoroutineSwitchDisabled()
 {
-    return disable_coro_switch_counter_ > 0;
+    return disableCoroSwitchCounter_ > 0;
 }
 
 #ifndef NDEBUG
 void StackfulCoroutineWorker::PrintRunnables(const PandaString &requester)
 {
-    os::memory::LockHolder lock(runnables_lock_);
+    os::memory::LockHolder lock(runnablesLock_);
     LOG(DEBUG, COROUTINES) << "[" << requester << "] ";
     for (auto *co : runnables_) {
         LOG(DEBUG, COROUTINES) << co->GetName() << " <";
@@ -144,15 +145,15 @@ void StackfulCoroutineWorker::PrintRunnables(const PandaString &requester)
 void StackfulCoroutineWorker::ThreadProc()
 {
     id_ = os::thread::GetCurrentThreadId();
-    schedule_loop_ctx_->GetContext<StackfulCoroutineContext>()->SetWorker(this);
-    Coroutine::SetCurrent(schedule_loop_ctx_);
-    schedule_loop_ctx_->RequestResume();
-    schedule_loop_ctx_->NativeCodeBegin();
+    scheduleLoopCtx_->GetContext<StackfulCoroutineContext>()->SetWorker(this);
+    Coroutine::SetCurrent(scheduleLoopCtx_);
+    scheduleLoopCtx_->RequestResume();
+    scheduleLoopCtx_->NativeCodeBegin();
     ScheduleLoopBody();
-    coro_manager_->DestroyEntrypointlessCoroutine(schedule_loop_ctx_);
+    coroManager_->DestroyEntrypointlessCoroutine(scheduleLoopCtx_);
 
     ASSERT(id_ == os::thread::GetCurrentThreadId());
-    coro_manager_->OnWorkerShutdown();
+    coroManager_->OnWorkerShutdown();
 }
 
 void StackfulCoroutineWorker::ScheduleLoop()
@@ -163,10 +164,10 @@ void StackfulCoroutineWorker::ScheduleLoop()
 
 void StackfulCoroutineWorker::ScheduleLoopBody()
 {
-    ScopedManagedCodeThread s(schedule_loop_ctx_);
+    ScopedManagedCodeThread s(scheduleLoopCtx_);
     while (IsActive()) {
         RequestScheduleImpl();
-        os::memory::LockHolder lk_runnables(runnables_lock_);
+        os::memory::LockHolder lkRunnables(runnablesLock_);
         UpdateLoadFactor();
     }
 }
@@ -176,24 +177,24 @@ void StackfulCoroutineWorker::ScheduleLoopProxy(void *worker)
     static_cast<StackfulCoroutineWorker *>(worker)->ScheduleLoop();
 }
 
-void StackfulCoroutineWorker::PushToRunnableQueue(Coroutine *co, bool push_front)
+void StackfulCoroutineWorker::PushToRunnableQueue(Coroutine *co, bool pushFront)
 {
-    os::memory::LockHolder lock(runnables_lock_);
+    os::memory::LockHolder lock(runnablesLock_);
     co->GetContext<StackfulCoroutineContext>()->SetWorker(this);
 
-    if (push_front) {
+    if (pushFront) {
         runnables_.push_front(co);
     } else {
         runnables_.push_back(co);
     }
     UpdateLoadFactor();
 
-    runnables_cv_.Signal();
+    runnablesCv_.Signal();
 }
 
 Coroutine *StackfulCoroutineWorker::PopFromRunnableQueue()
 {
-    os::memory::LockHolder lock(runnables_lock_);
+    os::memory::LockHolder lock(runnablesLock_);
     ASSERT(!runnables_.empty());
     auto *co = runnables_.front();
     runnables_.pop_front();
@@ -203,7 +204,7 @@ Coroutine *StackfulCoroutineWorker::PopFromRunnableQueue()
 
 bool StackfulCoroutineWorker::RunnableCoroutinesExist() const
 {
-    os::memory::LockHolder lock(runnables_lock_);
+    os::memory::LockHolder lock(runnablesLock_);
     return !runnables_.empty();
 }
 
@@ -211,8 +212,8 @@ void StackfulCoroutineWorker::WaitForRunnables()
 {
     // NOTE(konstanting): in case of work stealing, use timed wait and try periodically to steal some runnables
     while (!RunnableCoroutinesExist() && IsActive()) {
-        runnables_cv_.Wait(
-            &runnables_lock_);  // or timed wait? we may miss the signal in some cases (e.g. IsActive() change)...
+        runnablesCv_.Wait(
+            &runnablesLock_);  // or timed wait? we may miss the signal in some cases (e.g. IsActive() change)...
         if (!RunnableCoroutinesExist() && IsActive()) {
             LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::WaitForRunnables: spurious wakeup!";
         } else {
@@ -225,7 +226,7 @@ void StackfulCoroutineWorker::RequestScheduleImpl()
 {
     // precondition: called within the current worker, no cross-worker calls allowed
     ASSERT(GetCurrentContext()->GetWorker() == this);
-    runnables_lock_.Lock();
+    runnablesLock_.Lock();
 
     // NOTE(konstanting): implement coro migration, work stealing, etc.
     ScopedNativeCodeThread n(Coroutine::GetCurrent());
@@ -234,7 +235,7 @@ void StackfulCoroutineWorker::RequestScheduleImpl()
     } else {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::RequestSchedule: No runnables, starting to wait...";
         WaitForRunnables();
-        runnables_lock_.Unlock();
+        runnablesLock_.Unlock();
     }
 }
 
@@ -260,10 +261,10 @@ void StackfulCoroutineWorker::SuspendCurrentCoroAndScheduleNext()
 template <bool SUSPEND_AS_BLOCKED>
 void StackfulCoroutineWorker::SuspendCurrentCoroGeneric()
 {
-    auto *current_coro = Coroutine::GetCurrent();
-    current_coro->RequestSuspend(SUSPEND_AS_BLOCKED);
+    auto *currentCoro = Coroutine::GetCurrent();
+    currentCoro->RequestSuspend(SUSPEND_AS_BLOCKED);
     if constexpr (!SUSPEND_AS_BLOCKED) {
-        PushToRunnableQueue(current_coro, false);
+        PushToRunnableQueue(currentCoro, false);
     }
 }
 
@@ -280,32 +281,32 @@ void StackfulCoroutineWorker::SuspendCurrentCoro()
 void StackfulCoroutineWorker::ScheduleNextCoroUnlockRunnablesWaiters()
 {
     // precondition: runnable coros are present
-    auto *current_ctx = GetCurrentContext();
-    auto *next_ctx = PrepareNextRunnableContextForSwitch();
+    auto *currentCtx = GetCurrentContext();
+    auto *nextCtx = PrepareNextRunnableContextForSwitch();
 
-    runnables_lock_.Unlock();
-    waiters_lock_.Unlock();
+    runnablesLock_.Unlock();
+    waitersLock_.Unlock();
 
-    SwitchCoroutineContext(current_ctx, next_ctx);
+    SwitchCoroutineContext(currentCtx, nextCtx);
 }
 
 void StackfulCoroutineWorker::ScheduleNextCoroUnlockRunnables()
 {
     // precondition: runnable coros are present
-    auto *current_ctx = GetCurrentContext();
-    auto *next_ctx = PrepareNextRunnableContextForSwitch();
+    auto *currentCtx = GetCurrentContext();
+    auto *nextCtx = PrepareNextRunnableContextForSwitch();
 
-    runnables_lock_.Unlock();
+    runnablesLock_.Unlock();
 
-    SwitchCoroutineContext(current_ctx, next_ctx);
+    SwitchCoroutineContext(currentCtx, nextCtx);
 }
 
 void StackfulCoroutineWorker::ScheduleNextCoroUnlockNone()
 {
     // precondition: runnable coros are present
-    auto *current_ctx = GetCurrentContext();
-    auto *next_ctx = PrepareNextRunnableContextForSwitch();
-    SwitchCoroutineContext(current_ctx, next_ctx);
+    auto *currentCtx = GetCurrentContext();
+    auto *nextCtx = PrepareNextRunnableContextForSwitch();
+    SwitchCoroutineContext(currentCtx, nextCtx);
 }
 
 StackfulCoroutineContext *StackfulCoroutineWorker::GetCurrentContext() const
@@ -317,10 +318,10 @@ StackfulCoroutineContext *StackfulCoroutineWorker::GetCurrentContext() const
 StackfulCoroutineContext *StackfulCoroutineWorker::PrepareNextRunnableContextForSwitch()
 {
     // precondition: runnable coros are present
-    auto *next_ctx = PopFromRunnableQueue()->GetContext<StackfulCoroutineContext>();
-    next_ctx->RequestResume();
-    Coroutine::SetCurrent(next_ctx->GetCoroutine());
-    return next_ctx;
+    auto *nextCtx = PopFromRunnableQueue()->GetContext<StackfulCoroutineContext>();
+    nextCtx->RequestResume();
+    Coroutine::SetCurrent(nextCtx->GetCoroutine());
+    return nextCtx;
 }
 
 void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *from, StackfulCoroutineContext *to)
@@ -333,16 +334,16 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
 
 void StackfulCoroutineWorker::FinalizeTerminatedCoros()
 {
-    while (!finalization_queue_.empty()) {
-        auto *f = finalization_queue_.front();
-        finalization_queue_.pop();
-        coro_manager_->DestroyEntrypointfulCoroutine(f);
+    while (!finalizationQueue_.empty()) {
+        auto *f = finalizationQueue_.front();
+        finalizationQueue_.pop();
+        coroManager_->DestroyEntrypointfulCoroutine(f);
     }
 }
 
 void StackfulCoroutineWorker::UpdateLoadFactor()
 {
-    load_factor_ = (load_factor_ + runnables_.size()) / 2;
+    loadFactor_ = (loadFactor_ + runnables_.size()) / 2U;
 }
 
 void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()

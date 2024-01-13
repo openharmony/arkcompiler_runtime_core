@@ -79,9 +79,9 @@ Class *OsrCodeTest::GetClass()
     auto res = p.Parse(source.c_str());
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-    auto *extension = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->AddPandaFile(std::move(pf));
+    auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
     PandaString descriptor;
 

@@ -71,12 +71,12 @@ static std::unique_ptr<ClassLinker> CreateClassLinker(ManagedThread *thread)
     std::vector<std::unique_ptr<ClassLinkerExtension>> extensions;
     extensions.push_back(std::make_unique<CoreClassLinkerExtension>());
     auto allocator = thread->GetVM()->GetHeapManager()->GetInternalAllocator();
-    auto class_linker = std::make_unique<ClassLinker>(allocator, std::move(extensions));
-    if (!class_linker->Initialize()) {
+    auto classLinker = std::make_unique<ClassLinker>(allocator, std::move(extensions));
+    if (!classLinker->Initialize()) {
         return nullptr;
     }
 
-    return class_linker;
+    return classLinker;
 }
 
 TEST_F(ClassLinkerTest, TestGetClass)
@@ -92,14 +92,14 @@ TEST_F(ClassLinkerTest, TestGetClass)
     auto res = p.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *ext = class_linker->GetExtension(ctx);
+    auto *ext = classLinker->GetExtension(ctx);
 
-    auto *pf_ptr = pf.get();
-    class_linker->AddPandaFile(std::move(pf));
+    auto *pfPtr = pf.get();
+    classLinker->AddPandaFile(std::move(pf));
 
     Class *klass;
 
@@ -113,7 +113,7 @@ TEST_F(ClassLinkerTest, TestGetClass)
 
     EXPECT_EQ(klass, ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor)));
     EXPECT_EQ(klass->GetBase(), ext->GetClassRoot(ClassRoot::OBJECT));
-    EXPECT_EQ(klass->GetPandaFile(), pf_ptr);
+    EXPECT_EQ(klass->GetPandaFile(), pfPtr);
     EXPECT_EQ(klass->GetMethods().size(), 1U);
     EXPECT_EQ(klass->GetComponentSize(), 0U);
 }
@@ -131,15 +131,15 @@ TEST_F(ClassLinkerTest, TestEnumerateClasses)
     auto res = p.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
     // Load _GLOBAL class
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
 
     std::set<std::string> classes {"panda.Object",
@@ -173,29 +173,29 @@ TEST_F(ClassLinkerTest, TestEnumerateClasses)
                                    "[Lpanda/Class;",
                                    "_GLOBAL"};
 
-    std::set<std::string> loaded_classes;
+    std::set<std::string> loadedClasses;
 
-    class_linker->EnumerateClasses([&](Class *k) {
-        loaded_classes.emplace(k->GetName());
+    classLinker->EnumerateClasses([&loadedClasses](Class *k) {
+        loadedClasses.emplace(k->GetName());
         return true;
     });
 
-    EXPECT_EQ(loaded_classes, classes);
+    EXPECT_EQ(loadedClasses, classes);
 }
 
-static void TestPrimitiveClassRoot(const ClassLinkerExtension &class_linker_ext, ClassRoot class_root,
-                                   panda_file::Type::TypeId type_id)
+static void TestPrimitiveClassRoot(const ClassLinkerExtension &classLinkerExt, ClassRoot classRoot,
+                                   panda_file::Type::TypeId typeId)
 {
     std::string msg = "Test with class root ";
-    msg += std::to_string(static_cast<int>(class_root));
+    msg += std::to_string(static_cast<int>(classRoot));
 
-    Class *klass = class_linker_ext.GetClassRoot(class_root);
+    Class *klass = classLinkerExt.GetClassRoot(classRoot);
     ASSERT_NE(klass, nullptr) << msg;
     EXPECT_EQ(klass->GetBase(), nullptr) << msg;
     EXPECT_EQ(klass->GetComponentSize(), 0U) << msg;
     EXPECT_EQ(klass->GetFlags(), 0U) << msg;
     EXPECT_EQ(klass->GetAccessFlags(), ACC_PUBLIC | ACC_FINAL | ACC_ABSTRACT) << msg;
-    EXPECT_EQ(klass->GetType().GetId(), type_id) << msg;
+    EXPECT_EQ(klass->GetType().GetId(), typeId) << msg;
     EXPECT_FALSE(klass->IsArrayClass()) << msg;
     EXPECT_FALSE(klass->IsStringClass()) << msg;
     EXPECT_TRUE(klass->IsPrimitive()) << msg;
@@ -203,9 +203,9 @@ static void TestPrimitiveClassRoot(const ClassLinkerExtension &class_linker_ext,
     EXPECT_FALSE(klass->IsInstantiable()) << msg;
 }
 
-static size_t GetComponentSize(ClassRoot component_root)
+static size_t GetComponentSize(ClassRoot componentRoot)
 {
-    switch (component_root) {
+    switch (componentRoot) {
         case ClassRoot::U1:
         case ClassRoot::I8:
         case ClassRoot::U8:
@@ -226,22 +226,21 @@ static size_t GetComponentSize(ClassRoot component_root)
     }
 }
 
-static void TestArrayClassRoot(const ClassLinkerExtension &class_linker_ext, ClassRoot class_root,
-                               ClassRoot component_root)
+static void TestArrayClassRoot(const ClassLinkerExtension &classLinkerExt, ClassRoot classRoot, ClassRoot componentRoot)
 {
     std::string msg = "Test with class root ";
-    msg += std::to_string(static_cast<int>(class_root));
+    msg += std::to_string(static_cast<int>(classRoot));
 
-    Class *klass = class_linker_ext.GetClassRoot(class_root);
-    Class *component_class = class_linker_ext.GetClassRoot(component_root);
+    Class *klass = classLinkerExt.GetClassRoot(classRoot);
+    Class *componentClass = classLinkerExt.GetClassRoot(componentRoot);
     ASSERT_NE(klass, nullptr) << msg;
-    EXPECT_EQ(klass->GetBase(), class_linker_ext.GetClassRoot(ClassRoot::OBJECT)) << msg;
-    EXPECT_EQ(klass->GetComponentType(), component_class) << msg;
-    EXPECT_EQ(klass->GetComponentSize(), GetComponentSize(component_root)) << msg;
+    EXPECT_EQ(klass->GetBase(), classLinkerExt.GetClassRoot(ClassRoot::OBJECT)) << msg;
+    EXPECT_EQ(klass->GetComponentType(), componentClass) << msg;
+    EXPECT_EQ(klass->GetComponentSize(), GetComponentSize(componentRoot)) << msg;
     EXPECT_EQ(klass->GetFlags(), 0U) << msg;
     EXPECT_EQ(klass->GetAccessFlags(), ACC_PUBLIC | ACC_FINAL | ACC_ABSTRACT) << msg;
     EXPECT_EQ(klass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE) << msg;
-    EXPECT_EQ(klass->IsObjectArrayClass(), !component_class->IsPrimitive()) << msg;
+    EXPECT_EQ(klass->IsObjectArrayClass(), !componentClass->IsPrimitive()) << msg;
     EXPECT_TRUE(klass->IsArrayClass()) << msg;
     EXPECT_FALSE(klass->IsStringClass()) << msg;
     EXPECT_FALSE(klass->IsPrimitive()) << msg;
@@ -251,33 +250,33 @@ static void TestArrayClassRoot(const ClassLinkerExtension &class_linker_ext, Cla
 
 TEST_F(ClassLinkerTest, TestClassRoots)
 {
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *ext = class_linker->GetExtension(ctx);
+    auto *ext = classLinker->GetExtension(ctx);
 
-    Class *object_class = ext->GetClassRoot(ClassRoot::OBJECT);
-    ASSERT_NE(object_class, nullptr);
-    EXPECT_EQ(object_class->GetBase(), nullptr);
-    EXPECT_EQ(object_class->GetComponentSize(), 0U);
-    EXPECT_EQ(object_class->GetFlags(), 0U);
-    EXPECT_EQ(object_class->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
-    EXPECT_FALSE(object_class->IsArrayClass());
-    EXPECT_FALSE(object_class->IsObjectArrayClass());
-    EXPECT_FALSE(object_class->IsStringClass());
-    EXPECT_FALSE(object_class->IsPrimitive());
+    Class *objectClass = ext->GetClassRoot(ClassRoot::OBJECT);
+    ASSERT_NE(objectClass, nullptr);
+    EXPECT_EQ(objectClass->GetBase(), nullptr);
+    EXPECT_EQ(objectClass->GetComponentSize(), 0U);
+    EXPECT_EQ(objectClass->GetFlags(), 0U);
+    EXPECT_EQ(objectClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
+    EXPECT_FALSE(objectClass->IsArrayClass());
+    EXPECT_FALSE(objectClass->IsObjectArrayClass());
+    EXPECT_FALSE(objectClass->IsStringClass());
+    EXPECT_FALSE(objectClass->IsPrimitive());
 
-    Class *string_class = ext->GetClassRoot(ClassRoot::STRING);
-    ASSERT_NE(string_class, nullptr);
-    EXPECT_EQ(string_class->GetBase(), object_class);
-    EXPECT_EQ(string_class->GetComponentSize(), 0U);
-    EXPECT_EQ(string_class->GetFlags(), Class::STRING_CLASS);
-    EXPECT_EQ(string_class->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
-    EXPECT_FALSE(string_class->IsArrayClass());
-    EXPECT_FALSE(string_class->IsObjectArrayClass());
-    EXPECT_TRUE(string_class->IsStringClass());
-    EXPECT_FALSE(string_class->IsPrimitive());
+    Class *stringClass = ext->GetClassRoot(ClassRoot::STRING);
+    ASSERT_NE(stringClass, nullptr);
+    EXPECT_EQ(stringClass->GetBase(), objectClass);
+    EXPECT_EQ(stringClass->GetComponentSize(), 0U);
+    EXPECT_EQ(stringClass->GetFlags(), Class::STRING_CLASS);
+    EXPECT_EQ(stringClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
+    EXPECT_FALSE(stringClass->IsArrayClass());
+    EXPECT_FALSE(stringClass->IsObjectArrayClass());
+    EXPECT_TRUE(stringClass->IsStringClass());
+    EXPECT_FALSE(stringClass->IsPrimitive());
 
     TestPrimitiveClassRoot(*ext, ClassRoot::U1, panda_file::Type::TypeId::U1);
     TestPrimitiveClassRoot(*ext, ClassRoot::I8, panda_file::Type::TypeId::I8);
@@ -317,17 +316,17 @@ struct FieldData {
         return name == other.name && size == other.size && offset == other.offset;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const FieldData &field_data)
+    friend std::ostream &operator<<(std::ostream &os, const FieldData &fieldData)
     {
-        return os << "{ name: \"" << field_data.name << "\", size: " << field_data.size
-                  << ", offset: " << field_data.offset << " }";
+        return os << "{ name: \"" << fieldData.name << "\", size: " << fieldData.size
+                  << ", offset: " << fieldData.offset << " }";
     }
 };
 
 struct FieldDataHash {
-    size_t operator()(const FieldData &field_data) const
+    size_t operator()(const FieldData &fieldData) const
     {
-        return std::hash<std::string>()(field_data.name);
+        return std::hash<std::string>()(fieldData.name);
     }
 };
 
@@ -430,74 +429,74 @@ TEST_F(ClassLinkerTest, FieldLayout)
     auto res = p.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R2"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
-    std::vector<FieldData> sorted_sfields {{"sf_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
-                                           {"sf_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
-                                           {"sf_f64", sizeof(double), 0},
-                                           {"sf_i64", sizeof(int64_t), 0},
-                                           {"sf_u64", sizeof(uint64_t), 0},
-                                           {"sf_i32", sizeof(int32_t), 0},
-                                           {"sf_u32", sizeof(uint32_t), 0},
-                                           {"sf_f32", sizeof(float), 0},
-                                           {"sf_i16", sizeof(int16_t), 0},
-                                           {"sf_u16", sizeof(uint16_t), 0},
-                                           {"sf_u1", sizeof(uint8_t), 0},
-                                           {"sf_i8", sizeof(int8_t), 0},
-                                           {"sf_u8", sizeof(uint8_t), 0}};
+    std::vector<FieldData> sortedSfields {{"sf_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
+                                          {"sf_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
+                                          {"sf_f64", sizeof(double), 0},
+                                          {"sf_i64", sizeof(int64_t), 0},
+                                          {"sf_u64", sizeof(uint64_t), 0},
+                                          {"sf_i32", sizeof(int32_t), 0},
+                                          {"sf_u32", sizeof(uint32_t), 0},
+                                          {"sf_f32", sizeof(float), 0},
+                                          {"sf_i16", sizeof(int16_t), 0},
+                                          {"sf_u16", sizeof(uint16_t), 0},
+                                          {"sf_u1", sizeof(uint8_t), 0},
+                                          {"sf_i8", sizeof(int8_t), 0},
+                                          {"sf_u8", sizeof(uint8_t), 0}};
 
-    std::vector<FieldData> sorted_ifields {{"if_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
-                                           {"if_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
-                                           {"if_f64", sizeof(double), 0},
-                                           {"if_i64", sizeof(int64_t), 0},
-                                           {"if_u64", sizeof(uint64_t), 0},
-                                           {"if_i32", sizeof(int32_t), 0},
-                                           {"if_u32", sizeof(uint32_t), 0},
-                                           {"if_f32", sizeof(float), 0},
-                                           {"if_i16", sizeof(int16_t), 0},
-                                           {"if_u16", sizeof(uint16_t), 0},
-                                           {"if_u1", sizeof(uint8_t), 0},
-                                           {"if_i8", sizeof(int8_t), 0},
-                                           {"if_u8", sizeof(uint8_t), 0}};
+    std::vector<FieldData> sortedIfields {{"if_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
+                                          {"if_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
+                                          {"if_f64", sizeof(double), 0},
+                                          {"if_i64", sizeof(int64_t), 0},
+                                          {"if_u64", sizeof(uint64_t), 0},
+                                          {"if_i32", sizeof(int32_t), 0},
+                                          {"if_u32", sizeof(uint32_t), 0},
+                                          {"if_f32", sizeof(float), 0},
+                                          {"if_i16", sizeof(int16_t), 0},
+                                          {"if_u16", sizeof(uint16_t), 0},
+                                          {"if_u1", sizeof(uint8_t), 0},
+                                          {"if_i8", sizeof(int8_t), 0},
+                                          {"if_u8", sizeof(uint8_t), 0}};
 
     size_t offset = klass->GetStaticFieldsOffset();
 
     if (!IsAligned<sizeof(double)>(offset + ClassHelper::OBJECT_POINTER_SIZE)) {
         FieldData data {"sf_i32", sizeof(int32_t), 0};
         // NOLINTNEXTLINE(bugprone-inaccurate-erase)
-        sorted_sfields.erase(std::remove(sorted_sfields.begin(), sorted_sfields.end(), data));
-        sorted_sfields.insert(sorted_sfields.cbegin() + 1, data);
+        sortedSfields.erase(std::remove(sortedSfields.begin(), sortedSfields.end(), data));
+        sortedSfields.insert(sortedSfields.cbegin() + 1, data);
     }
 
-    UpdateOffsets(&sorted_sfields, offset);
+    UpdateOffsets(&sortedSfields, offset);
 
     offset = ObjectHeader::ObjectHeaderSize();
 
     if (!IsAligned<sizeof(double)>(offset + ClassHelper::OBJECT_POINTER_SIZE)) {
         FieldData data {"if_i32", sizeof(int32_t), 0};
         // NOLINTNEXTLINE(bugprone-inaccurate-erase)
-        sorted_ifields.erase(std::remove(sorted_ifields.begin(), sorted_ifields.end(), data));
-        sorted_ifields.insert(sorted_ifields.cbegin() + 1, data);
+        sortedIfields.erase(std::remove(sortedIfields.begin(), sortedIfields.end(), data));
+        sortedIfields.insert(sortedIfields.cbegin() + 1, data);
     }
 
-    UpdateOffsets(&sorted_ifields, offset);
+    UpdateOffsets(&sortedIfields, offset);
 
-    auto field_cmp = [](const FieldData &f1, const FieldData &f2) { return f1.offset < f2.offset; };
+    auto fieldCmp = [](const FieldData &f1, const FieldData &f2) { return f1.offset < f2.offset; };
 
     std::vector<FieldData> sfields;
     for (const auto &field : klass->GetStaticFields()) {
         sfields.push_back({utf::Mutf8AsCString(field.GetName().data), GetSize(field), field.GetOffset()});
     }
-    std::sort(sfields.begin(), sfields.end(), field_cmp);
-    EXPECT_EQ(sfields, sorted_sfields);
+    std::sort(sfields.begin(), sfields.end(), fieldCmp);
+    EXPECT_EQ(sfields, sortedSfields);
 
     std::unordered_set<FieldData, FieldDataHash> ifields;
 
@@ -505,16 +504,16 @@ TEST_F(ClassLinkerTest, FieldLayout)
         ifields.insert({utf::Mutf8AsCString(field.GetName().data), GetSize(field), field.GetOffset()});
     }
 
-    std::unordered_set<FieldData, FieldDataHash> sorted_ifields_set(sorted_ifields.cbegin(), sorted_ifields.cend());
-    EXPECT_EQ(ifields, sorted_ifields_set);
+    std::unordered_set<FieldData, FieldDataHash> sortedIfieldsSet(sortedIfields.cbegin(), sortedIfields.cend());
+    EXPECT_EQ(ifields, sortedIfieldsSet);
 }
 
 TEST_F(ClassLinkerTest, ResolveExternalClass)
 {
     uint32_t offset;
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
     {
         pandasm::Parser p;
@@ -537,39 +536,39 @@ TEST_F(ClassLinkerTest, ResolveExternalClass)
         // 2 - "[LExt/R;"
         offset = pf->GetClasses()[2];
 
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
     }
 
     PandaString descriptor;
 
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
     auto *method = klass->GetDirectMethod(utf::CStringAsMutf8("main"));
     ASSERT_NE(method, nullptr);
 
-    auto *external_class = class_linker->GetClass(*method, panda_file::File::EntityId(offset));
-    ASSERT_EQ(external_class, nullptr);
+    auto *externalClass = classLinker->GetClass(*method, panda_file::File::EntityId(offset));
+    ASSERT_EQ(externalClass, nullptr);
 
     {
         pandasm::Parser p;
 
-        auto ext_source = R"(
+        auto extSource = R"(
             .record Ext {}
             .record Ext.R {}
         )";
 
-        auto res = p.Parse(ext_source);
-        auto ext_pf = pandasm::AsmEmitter::Emit(res.Value());
+        auto res = p.Parse(extSource);
+        auto extPf = pandasm::AsmEmitter::Emit(res.Value());
 
-        class_linker->AddPandaFile(std::move(ext_pf));
+        classLinker->AddPandaFile(std::move(extPf));
     }
 
-    external_class = class_linker->GetClass(*method, panda_file::File::EntityId(offset));
-    ASSERT_NE(external_class, nullptr);
+    externalClass = classLinker->GetClass(*method, panda_file::File::EntityId(offset));
+    ASSERT_NE(externalClass, nullptr);
 
-    EXPECT_STREQ(utf::Mutf8AsCString(external_class->GetDescriptor()),
+    EXPECT_STREQ(utf::Mutf8AsCString(externalClass->GetDescriptor()),
                  utf::Mutf8AsCString(ClassHelper::GetArrayDescriptor(utf::CStringAsMutf8("Ext.R"), 1, &descriptor)));
 }
 
@@ -584,32 +583,32 @@ TEST_F(ClassLinkerTest, ArrayClass)
     auto res = p.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto *klass = ext->GetClass(ClassHelper::GetArrayDescriptor(utf::CStringAsMutf8("UnknownClass"), 1, &descriptor));
     ASSERT_EQ(klass, nullptr);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    for (size_t i = 0; i < 256; i++) {
+    for (size_t i = 0; i < 256U; i++) {
         auto *cls = ext->GetClass(ClassHelper::GetArrayDescriptor(utf::CStringAsMutf8("R"), i, &descriptor));
         ASSERT_NE(cls, nullptr);
         EXPECT_EQ(utf::Mutf8AsCString(cls->GetDescriptor()), descriptor);
     }
 }
 
-static Method *GetMethod(ClassLinker *class_linker, const char *class_name, const char *method_name,
+static Method *GetMethod(ClassLinker *classLinker, const char *className, const char *methodName,
                          const panda::PandaString &signature)
 {
     PandaString descriptor;
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8(class_name), &descriptor));
-    auto *method = klass->GetDirectMethod(utf::CStringAsMutf8(method_name));
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8(className), &descriptor));
+    auto *method = klass->GetDirectMethod(utf::CStringAsMutf8(methodName));
     if (signature != method->GetProto().GetSignature()) {
         return nullptr;
     }
@@ -644,37 +643,37 @@ TEST_F(ClassLinkerTest, VTable)
         auto res = p.Parse(source);
         auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-        auto class_linker = CreateClassLinker(thread_);
-        ASSERT_NE(class_linker, nullptr);
+        auto classLinker = CreateClassLinker(thread_);
+        ASSERT_NE(classLinker, nullptr);
 
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
 
         PandaString descriptor;
 
-        auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-        auto *class_a = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
-        ASSERT_NE(class_a, nullptr);
+        auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto *classA = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
+        ASSERT_NE(classA, nullptr);
 
-        auto smethods = class_a->GetStaticMethods();
-        ASSERT_EQ(smethods.size(), 2);
+        auto smethods = classA->GetStaticMethods();
+        ASSERT_EQ(smethods.size(), 2U);
 
-        auto vmethods = class_a->GetVirtualMethods();
-        ASSERT_EQ(vmethods.size(), 2);
+        auto vmethods = classA->GetVirtualMethods();
+        ASSERT_EQ(vmethods.size(), 2U);
 
         {
             auto set = GetMethodsSet(smethods);
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "A", "f1", "()V")), set.cend());
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "A", "f2", "(I)V")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "A", "f1", "()V")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "A", "f2", "(I)V")), set.cend());
         }
 
         {
             auto set = GetMethodsSet(vmethods);
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "A", "f3", "()V")), set.cend());
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "A", "f4", "(I)V")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "A", "f3", "()V")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "A", "f4", "(I)V")), set.cend());
         }
 
         {
-            auto vtable = class_a->GetVTable();
+            auto vtable = classA->GetVTable();
             ASSERT_EQ(vtable.size(), vmethods.size());
 
             for (const auto &vmethod : vmethods) {
@@ -704,101 +703,101 @@ TEST_F(ClassLinkerTest, VTableInheritance)
         auto res = p.Parse(source);
         auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-        auto class_linker = CreateClassLinker(thread_);
-        ASSERT_NE(class_linker, nullptr);
+        auto classLinker = CreateClassLinker(thread_);
+        ASSERT_NE(classLinker, nullptr);
 
-        class_linker->AddPandaFile(std::move(pf));
+        classLinker->AddPandaFile(std::move(pf));
 
         PandaString descriptor;
 
-        auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-        auto *class_b = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor));
-        ASSERT_NE(class_b, nullptr);
+        auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto *classB = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor));
+        ASSERT_NE(classB, nullptr);
 
-        auto *class_a = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
-        ASSERT_NE(class_a, nullptr);
+        auto *classA = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
+        ASSERT_NE(classA, nullptr);
 
-        auto vtable_b = class_b->GetVTable();
-        ASSERT_EQ(vtable_b.size(), 4);
+        auto vtableB = classB->GetVTable();
+        ASSERT_EQ(vtableB.size(), 4U);
 
-        auto vtable_a = class_a->GetVTable();
-        ASSERT_EQ(vtable_a.size(), 2);
+        auto vtableA = classA->GetVTable();
+        ASSERT_EQ(vtableA.size(), 2U);
 
         {
             auto set = std::unordered_set<Method *> {};
-            for (const auto &m : vtable_a) {
+            for (const auto &m : vtableA) {
                 set.insert(m);
             }
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "A", "f1", "(I)LA;")), set.cend());
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "A", "f2", "(LC;)LA;")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "A", "f1", "(I)LA;")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "A", "f2", "(LC;)LA;")), set.cend());
         }
 
         {
             auto set = std::unordered_set<Method *> {};
-            for (const auto &m : vtable_b) {
+            for (const auto &m : vtableB) {
                 set.insert(m);
             }
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "A", "f1", "(I)LA;")), set.cend());
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "B", "f2", "(LC;)LB;")), set.cend());
-            ASSERT_NE(set.find(GetMethod(class_linker.get(), "B", "f1", "(J)LB;")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "A", "f1", "(I)LA;")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "B", "f2", "(LC;)LB;")), set.cend());
+            ASSERT_NE(set.find(GetMethod(classLinker.get(), "B", "f1", "(J)LB;")), set.cend());
         }
     }
 }
 
 TEST_F(ClassLinkerTest, PrimitiveClasses)
 {
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *ext = class_linker->GetExtension(ctx);
+    auto *ext = classLinker->GetExtension(ctx);
 
     PandaString descriptor;
 
     auto type = panda_file::Type(panda_file::Type::TypeId::I32);
 
-    auto *primitive_class = ext->GetClass(ClassHelper::GetPrimitiveDescriptor(type, &descriptor));
-    ASSERT_NE(primitive_class, nullptr);
-    EXPECT_STREQ(utf::Mutf8AsCString(primitive_class->GetDescriptor()),
+    auto *primitiveClass = ext->GetClass(ClassHelper::GetPrimitiveDescriptor(type, &descriptor));
+    ASSERT_NE(primitiveClass, nullptr);
+    EXPECT_STREQ(utf::Mutf8AsCString(primitiveClass->GetDescriptor()),
                  utf::Mutf8AsCString(ClassHelper::GetPrimitiveDescriptor(type, &descriptor)));
 
-    auto *primitive_array_class1 = ext->GetClass(ClassHelper::GetPrimitiveArrayDescriptor(type, 1, &descriptor));
-    ASSERT_NE(primitive_array_class1, nullptr);
-    EXPECT_STREQ(utf::Mutf8AsCString(primitive_array_class1->GetDescriptor()),
+    auto *primitiveArrayClass1 = ext->GetClass(ClassHelper::GetPrimitiveArrayDescriptor(type, 1, &descriptor));
+    ASSERT_NE(primitiveArrayClass1, nullptr);
+    EXPECT_STREQ(utf::Mutf8AsCString(primitiveArrayClass1->GetDescriptor()),
                  utf::Mutf8AsCString(ClassHelper::GetPrimitiveArrayDescriptor(type, 1, &descriptor)));
 
-    auto *primitive_array_class2 = ext->GetClass(ClassHelper::GetPrimitiveArrayDescriptor(type, 2, &descriptor));
-    ASSERT_NE(primitive_array_class2, nullptr);
-    EXPECT_STREQ(utf::Mutf8AsCString(primitive_array_class2->GetDescriptor()),
+    auto *primitiveArrayClass2 = ext->GetClass(ClassHelper::GetPrimitiveArrayDescriptor(type, 2, &descriptor));
+    ASSERT_NE(primitiveArrayClass2, nullptr);
+    EXPECT_STREQ(utf::Mutf8AsCString(primitiveArrayClass2->GetDescriptor()),
                  utf::Mutf8AsCString(ClassHelper::GetPrimitiveArrayDescriptor(type, 2, &descriptor)));
 }
 
 class TestClassLinkerContext : public ClassLinkerContext {
 public:
-    TestClassLinkerContext(const uint8_t *descriptor, bool need_copy_descriptor, Class *klass,
+    TestClassLinkerContext(const uint8_t *descriptor, bool needCopyDescriptor, Class *klass,
                            panda_file::SourceLang lang)
-        : ClassLinkerContext(lang), descriptor_(descriptor), need_copy_descriptor_(need_copy_descriptor), klass_(klass)
+        : ClassLinkerContext(lang), descriptor_(descriptor), needCopyDescriptor_(needCopyDescriptor), klass_(klass)
     {
     }
 
-    Class *LoadClass(const uint8_t *descriptor, bool need_copy_descriptor,
-                     [[maybe_unused]] ClassLinkerErrorHandler *error_handler) override
+    Class *LoadClass(const uint8_t *descriptor, bool needCopyDescriptor,
+                     [[maybe_unused]] ClassLinkerErrorHandler *errorHandler) override
     {
-        is_success_ = utf::IsEqual(descriptor, descriptor_) && need_copy_descriptor == need_copy_descriptor_;
+        isSuccess_ = utf::IsEqual(descriptor, descriptor_) && needCopyDescriptor == needCopyDescriptor_;
         InsertClass(klass_);
         return klass_;
     }
 
     bool IsSuccess() const
     {
-        return is_success_;
+        return isSuccess_;
     }
 
 private:
     const uint8_t *descriptor_;
-    bool need_copy_descriptor_ {};
+    bool needCopyDescriptor_ {};
     Class *klass_;
-    bool is_success_ {false};
+    bool isSuccess_ {false};
 };
 
 TEST_F(ClassLinkerTest, LoadContext)
@@ -813,46 +812,46 @@ TEST_F(ClassLinkerTest, LoadContext)
     auto res = p.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *class_a = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *classA = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
 
-    ASSERT_NE(class_a, nullptr);
-    ASSERT_EQ(class_a->GetLoadContext()->IsBootContext(), true);
+    ASSERT_NE(classA, nullptr);
+    ASSERT_EQ(classA->GetLoadContext()->IsBootContext(), true);
 
-    auto *class_b = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor));
+    auto *classB = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor));
 
-    ASSERT_NE(class_b, nullptr);
-    ASSERT_EQ(class_b->GetLoadContext()->IsBootContext(), true);
+    ASSERT_NE(classB, nullptr);
+    ASSERT_EQ(classB->GetLoadContext()->IsBootContext(), true);
 
     auto *desc = ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor);
-    TestClassLinkerContext ctx(desc, true, class_b, panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *class_b_ctx = ext->GetClass(desc, true, &ctx);
+    TestClassLinkerContext ctx(desc, true, classB, panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *classBCtx = ext->GetClass(desc, true, &ctx);
 
     ASSERT_TRUE(ctx.IsSuccess());
-    ASSERT_EQ(class_b_ctx, class_b);
+    ASSERT_EQ(classBCtx, classB);
 
-    bool is_matched = false;
-    ctx.EnumerateClasses([&is_matched](Class *klass) {
-        is_matched = klass->GetName() == "B";
+    bool isMatched = false;
+    ctx.EnumerateClasses([&isMatched](Class *klass) {
+        isMatched = klass->GetName() == "B";
         return true;
     });
 
-    ASSERT_TRUE(is_matched);
+    ASSERT_TRUE(isMatched);
 
-    auto *class_array_b =
-        class_linker->GetClass(ClassHelper::GetArrayDescriptor(utf::CStringAsMutf8("B"), 1, &descriptor), true, &ctx);
+    auto *classArrayB =
+        classLinker->GetClass(ClassHelper::GetArrayDescriptor(utf::CStringAsMutf8("B"), 1, &descriptor), true, &ctx);
 
-    ASSERT_NE(class_array_b, nullptr);
-    ASSERT_EQ(class_array_b->GetLoadContext(), ext->GetBootContext());
+    ASSERT_NE(classArrayB, nullptr);
+    ASSERT_EQ(classArrayB->GetLoadContext(), ext->GetBootContext());
 
     {
-        PandaUnorderedSet<Class *> expected {class_b};
+        PandaUnorderedSet<Class *> expected {classB};
         PandaUnorderedSet<Class *> classes;
         ctx.EnumerateClasses([&](Class *klass) {
             classes.insert(klass);
@@ -864,19 +863,19 @@ TEST_F(ClassLinkerTest, LoadContext)
 
     {
         PandaUnorderedSet<Class *> classes;
-        class_linker->EnumerateClasses([&](Class *klass) {
+        classLinker->EnumerateClasses([&](Class *klass) {
             classes.insert(klass);
             return true;
         });
 
-        ASSERT_NE(classes.find(class_a), classes.cend());
-        ASSERT_EQ(*classes.find(class_a), class_a);
+        ASSERT_NE(classes.find(classA), classes.cend());
+        ASSERT_EQ(*classes.find(classA), classA);
 
-        ASSERT_NE(classes.find(class_b), classes.cend());
-        ASSERT_EQ(*classes.find(class_b), class_b);
+        ASSERT_NE(classes.find(classB), classes.cend());
+        ASSERT_EQ(*classes.find(classB), classB);
 
-        ASSERT_NE(classes.find(class_array_b), classes.cend());
-        ASSERT_EQ(*classes.find(class_array_b), class_array_b);
+        ASSERT_NE(classes.find(classArrayB), classes.cend());
+        ASSERT_EQ(*classes.find(classArrayB), classArrayB);
     }
 }
 
@@ -901,13 +900,13 @@ TEST_F(ClassLinkerTest, Accesses)
     auto res = pandasm::Parser {}.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *ext = class_linker->GetExtension(ctx);
+    auto *ext = classLinker->GetExtension(ctx);
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     // Global
     {
@@ -941,10 +940,10 @@ TEST_F(ClassLinkerTest, Accesses)
         ASSERT_TRUE(f->IsPrivate());
 
         auto i = 0;
-        auto access_predicates =
+        auto accessPredicates =
             std::array {&panda::Field::IsPublic, &panda::Field::IsProtected, &panda::Field::IsPrivate};
         for (const auto &field : klass->GetFields()) {
-            ASSERT_TRUE((field.*access_predicates[i])());
+            ASSERT_TRUE((field.*accessPredicates[i])());
             i++;
         }
         ASSERT_EQ(i, klass->GetFields().size());
@@ -969,26 +968,26 @@ TEST_F(ClassLinkerTest, Inheritance)
     auto res = pandasm::Parser {}.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *ext = class_linker->GetExtension(ctx);
+    auto *ext = classLinker->GetExtension(ctx);
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
-    auto class_a = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
-    ASSERT_NE(class_a, nullptr);
+    auto classA = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
+    ASSERT_NE(classA, nullptr);
 
-    auto class_b = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor));
-    ASSERT_NE(class_b, nullptr);
+    auto classB = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor));
+    ASSERT_NE(classB, nullptr);
 
-    ASSERT_EQ(class_a->GetBase(), ext->GetClassRoot(ClassRoot::OBJECT));
-    ASSERT_EQ(class_b->GetBase(), class_a);
+    ASSERT_EQ(classA->GetBase(), ext->GetClassRoot(ClassRoot::OBJECT));
+    ASSERT_EQ(classB->GetBase(), classA);
 
-    ASSERT_TRUE(class_b->IsSubClassOf(class_a));
+    ASSERT_TRUE(classB->IsSubClassOf(classA));
 }
 
 TEST_F(ClassLinkerTest, IsSubClassOf)
@@ -1002,36 +1001,36 @@ TEST_F(ClassLinkerTest, IsSubClassOf)
     auto res = pandasm::Parser {}.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *ext = class_linker->GetExtension(ctx);
+    auto *ext = classLinker->GetExtension(ctx);
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     PandaString descriptor;
 
-    auto class_a = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
-    ASSERT_NE(class_a, nullptr);
+    auto classA = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("A"), &descriptor));
+    ASSERT_NE(classA, nullptr);
 
-    auto class_b = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor));
-    ASSERT_NE(class_b, nullptr);
+    auto classB = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor));
+    ASSERT_NE(classB, nullptr);
 
-    auto class_c = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("C"), &descriptor));
-    ASSERT_NE(class_c, nullptr);
+    auto classC = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("C"), &descriptor));
+    ASSERT_NE(classC, nullptr);
 
-    ASSERT_TRUE(class_a->IsSubClassOf(class_a));
-    ASSERT_FALSE(class_a->IsSubClassOf(class_b));
-    ASSERT_FALSE(class_a->IsSubClassOf(class_c));
+    ASSERT_TRUE(classA->IsSubClassOf(classA));
+    ASSERT_FALSE(classA->IsSubClassOf(classB));
+    ASSERT_FALSE(classA->IsSubClassOf(classC));
 
-    ASSERT_TRUE(class_b->IsSubClassOf(class_a));
-    ASSERT_TRUE(class_b->IsSubClassOf(class_b));
-    ASSERT_FALSE(class_b->IsSubClassOf(class_c));
+    ASSERT_TRUE(classB->IsSubClassOf(classA));
+    ASSERT_TRUE(classB->IsSubClassOf(classB));
+    ASSERT_FALSE(classB->IsSubClassOf(classC));
 
-    ASSERT_TRUE(class_c->IsSubClassOf(class_a));
-    ASSERT_TRUE(class_c->IsSubClassOf(class_b));
-    ASSERT_TRUE(class_c->IsSubClassOf(class_c));
+    ASSERT_TRUE(classC->IsSubClassOf(classA));
+    ASSERT_TRUE(classC->IsSubClassOf(classB));
+    ASSERT_TRUE(classC->IsSubClassOf(classC));
 }
 
 TEST_F(ClassLinkerTest, Final)
@@ -1049,13 +1048,13 @@ TEST_F(ClassLinkerTest, Final)
     auto res = pandasm::Parser {}.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
-    auto class_linker = CreateClassLinker(thread_);
-    ASSERT_NE(class_linker, nullptr);
+    auto classLinker = CreateClassLinker(thread_);
+    ASSERT_NE(classLinker, nullptr);
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *ext = class_linker->GetExtension(ctx);
+    auto *ext = classLinker->GetExtension(ctx);
 
-    class_linker->AddPandaFile(std::move(pf));
+    classLinker->AddPandaFile(std::move(pf));
 
     // record A
     {

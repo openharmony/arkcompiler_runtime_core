@@ -21,21 +21,21 @@
 namespace ark {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-struct ark::os::unix::memory::futex::fmutex FUTEX;
+struct ark::os::unix::memory::futex::fmutex g_futex;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-struct ark::os::unix::memory::futex::CondVar CONDVAR;
-volatile int GLOBAL;
+struct ark::os::unix::memory::futex::CondVar g_condvar;
+volatile int g_global;
 
 constexpr std::chrono::duration DELAY = std::chrono::milliseconds(10U);
 
 // The thread just modifies shared data under locks
 void Writer()
 {
-    MutexLock(&FUTEX, false);
-    int new_val = GLOBAL + 1U;
+    MutexLock(&g_futex, false);
+    int newVal = g_global + 1U;
     std::this_thread::sleep_for(DELAY);
-    GLOBAL = new_val;
-    MutexUnlock(&FUTEX);
+    g_global = newVal;
+    MutexUnlock(&g_futex);
 }
 
 // The thread modifies shared data (meaning it reached Wait function)
@@ -43,18 +43,18 @@ void Writer()
 // There should not be any other writer in parallel
 void Waiter()
 {
-    MutexLock(&FUTEX, false);
-    GLOBAL++;
-    int old_val = GLOBAL;
+    MutexLock(&g_futex, false);
+    g_global++;
+    int oldVal = g_global;
     do {
         // spurious wake is possible
-        Wait(&CONDVAR, &FUTEX);
-    } while (old_val == GLOBAL);
-    MutexUnlock(&FUTEX);
-    int new_val = GLOBAL + 1U;
+        Wait(&g_condvar, &g_futex);
+    } while (oldVal == g_global);
+    MutexUnlock(&g_futex);
+    int newVal = g_global + 1U;
     // Check that waiter is correctly waken
-    ASSERT_EQ(new_val, GLOBAL + 1U);
-    GLOBAL = new_val;
+    ASSERT_EQ(newVal, g_global + 1U);
+    g_global = newVal;
 }
 
 // The thread modifies shared data (meaning it reached Wait function)
@@ -62,49 +62,49 @@ void Waiter()
 // There may be other writers in parallel
 void Syncwaiter()
 {
-    MutexLock(&FUTEX, false);
-    GLOBAL++;
-    int old_val = GLOBAL;
+    MutexLock(&g_futex, false);
+    g_global++;
+    int oldVal = g_global;
     do {
         // spurious wake is possible
-        Wait(&CONDVAR, &FUTEX);
-    } while (old_val == GLOBAL);
-    int new_val = GLOBAL + 1U;
+        Wait(&g_condvar, &g_futex);
+    } while (oldVal == g_global);
+    int newVal = g_global + 1U;
     // Check that waiter is correctly waken
-    ASSERT_EQ(new_val, GLOBAL + 1U);
-    GLOBAL = new_val;
-    MutexUnlock(&FUTEX);
+    ASSERT_EQ(newVal, g_global + 1U);
+    g_global = newVal;
+    MutexUnlock(&g_futex);
 }
 
 // The thread modifies shared data (meaning it reached TimedWait function)
 // Likely it is not waken by signal and is interrupted by timeout
 void Timedwaiter()
 {
-    MutexLock(&FUTEX, false);
-    GLOBAL++;
-    bool ret = TimedWait(&CONDVAR, &FUTEX, 1U, 0U, false);
+    MutexLock(&g_futex, false);
+    g_global++;
+    bool ret = TimedWait(&g_condvar, &g_futex, 1U, 0U, false);
     ASSERT_TRUE(ret);
     if (ret) {
         // Timeout
-        GLOBAL++;
-        MutexUnlock(&FUTEX);
+        g_global++;
+        MutexUnlock(&g_futex);
         return;
     }
-    MutexUnlock(&FUTEX);
+    MutexUnlock(&g_futex);
 }
 
 class FutexTest : public testing::Test {
 public:
     FutexTest()
     {
-        MutexInit(&FUTEX);
-        ConditionVariableInit(&CONDVAR);
+        MutexInit(&g_futex);
+        ConditionVariableInit(&g_condvar);
     }
 
     ~FutexTest() override
     {
-        MutexDestroy(&FUTEX);
-        ConditionVariableDestroy(&CONDVAR);
+        MutexDestroy(&g_futex);
+        ConditionVariableDestroy(&g_condvar);
     }
 
     NO_COPY_SEMANTIC(FutexTest);
@@ -117,18 +117,18 @@ protected:
 // If two values in critical section differ - it is an error
 TEST(FutexTest, LockUnlockTest)
 {
-    GLOBAL = 0;
+    g_global = 0;
     std::thread thr(Writer);
-    MutexLock(&FUTEX, false);
-    int val1 = GLOBAL;
+    MutexLock(&g_futex, false);
+    int val1 = g_global;
     // Wait a bit, to get a chance to Writer
     std::this_thread::sleep_for(DELAY);
-    int val2 = GLOBAL;
-    MutexUnlock(&FUTEX);
+    int val2 = g_global;
+    MutexUnlock(&g_futex);
     // Check that Writer cannot change GLOBAL in critical section
     ASSERT_EQ(val1, val2);
     thr.join();
-    val1 = GLOBAL;
+    val1 = g_global;
     // Check that both Writer and main correctly incremented in critical section
     ASSERT_EQ(val1, 1U);
 }
@@ -136,17 +136,17 @@ TEST(FutexTest, LockUnlockTest)
 // The test checks trylock operation
 TEST(FutexTest, TrylockTest)
 {
-    GLOBAL = 0;
+    g_global = 0;
     std::thread thr(Writer);
     do {
-    } while (!MutexLock(&FUTEX, true));
-    int new_val = GLOBAL + 1U;
+    } while (!MutexLock(&g_futex, true));
+    int newVal = g_global + 1U;
     // Wait a bit, to get a chance to Writer
     std::this_thread::sleep_for(DELAY);
-    GLOBAL = new_val;
-    MutexUnlock(&FUTEX);
+    g_global = newVal;
+    MutexUnlock(&g_futex);
     thr.join();
-    int val1 = GLOBAL;
+    int val1 = g_global;
     // Check that both Writer and main correctly incremented in critical section
     ASSERT_EQ(val1, 2U);
 }
@@ -154,7 +154,7 @@ TEST(FutexTest, TrylockTest)
 // The test checks work with multiple writers
 TEST(FutexTest, MultiWriteTest)
 {
-    GLOBAL = 0;
+    g_global = 0;
     std::thread thr(Writer);
     std::thread thr2(Writer);
     std::thread thr3(Writer);
@@ -165,7 +165,7 @@ TEST(FutexTest, MultiWriteTest)
     thr3.join();
     thr4.join();
     thr5.join();
-    int val1 = GLOBAL;
+    int val1 = g_global;
     // Check that threads correctly incremented in critical section
     ASSERT_EQ(val1, 5U);
 }
@@ -173,22 +173,22 @@ TEST(FutexTest, MultiWriteTest)
 // The test checks work with recursive futexes
 TEST(FutexTest, RecursiveFutexTest)
 {
-    GLOBAL = 0;
-    FUTEX.recursive_mutex = true;
+    g_global = 0;
+    g_futex.recursiveMutex = true;
     std::thread thr(Writer);
-    MutexLock(&FUTEX, false);
-    MutexLock(&FUTEX, false);
-    int val1 = GLOBAL;
-    MutexUnlock(&FUTEX);
+    MutexLock(&g_futex, false);
+    MutexLock(&g_futex, false);
+    int val1 = g_global;
+    MutexUnlock(&g_futex);
     // Wait a bit, to get a chance to Writer
     std::this_thread::sleep_for(DELAY);
     // Read after the first unlock to check, if we are still in critical section
-    int val2 = GLOBAL;
-    MutexUnlock(&FUTEX);
+    int val2 = g_global;
+    MutexUnlock(&g_futex);
     thr.join();
     // Check that Writer cannot change GLOBAL in recursive critical section
     ASSERT_EQ(val1, val2);
-    FUTEX.recursive_mutex = false;
+    g_futex.recursiveMutex = false;
 }
 
 // The test checks basic wait-notify actions
@@ -196,27 +196,27 @@ TEST(FutexTest, RecursiveFutexTest)
 // Then main send SignalCount
 TEST(FutexTest, WaitNotifyTest)
 {
-    GLOBAL = 0;
+    g_global = 0;
     std::thread thr(Waiter);
     bool cond = false;
     do {
         // MutexLock is neccessary to avoid interleaving before Wait()
-        MutexLock(&FUTEX, false);
-        cond = GLOBAL == 1;
-        MutexUnlock(&FUTEX);
+        MutexLock(&g_futex, false);
+        cond = g_global == 1;
+        MutexUnlock(&g_futex);
         std::this_thread::sleep_for(DELAY);
     } while (!cond);
     // Waiter reached Wait()
 
     // Lock for TSAN
-    MutexLock(&FUTEX, false);
-    GLOBAL++;
-    MutexUnlock(&FUTEX);
-    SignalCount(&CONDVAR, ark::os::unix::memory::futex::WAKE_ONE);
+    MutexLock(&g_futex, false);
+    g_global++;
+    MutexUnlock(&g_futex);
+    SignalCount(&g_condvar, ark::os::unix::memory::futex::WAKE_ONE);
     thr.join();
-    GLOBAL++;
+    g_global++;
     // Check that waiter is correctly finished
-    ASSERT_EQ(GLOBAL, 4U);
+    ASSERT_EQ(g_global, 4U);
 }
 
 // The test checks basic timedwait-notify actions
@@ -224,13 +224,13 @@ TEST(FutexTest, WaitNotifyTest)
 // Then main send SignalCount
 TEST(FutexTest, TimedwaitTest)
 {
-    GLOBAL = 0;
+    g_global = 0;
     std::thread thr(Timedwaiter);
     // Just wait for timeout
     thr.join();
-    GLOBAL++;
+    g_global++;
     // Check that waiter is correctly finished
-    ASSERT_EQ(GLOBAL, 3U);
+    ASSERT_EQ(g_global, 3U);
 }
 
 // The test checks wait-notifyAll operations in case of multiple waiters
@@ -238,7 +238,7 @@ TEST(FutexTest, TimedwaitTest)
 // Then main send SignalAll to waiters
 TEST(FutexTest, WakeAllTest)
 {
-    GLOBAL = 0;
+    g_global = 0;
     constexpr int NUM = 5;
     std::thread thr(Syncwaiter);
     std::thread thr2(Syncwaiter);
@@ -249,27 +249,27 @@ TEST(FutexTest, WakeAllTest)
     bool cond = false;
     do {
         // MutexLock is neccessary to avoid interleaving before Wait()
-        MutexLock(&FUTEX, false);
-        cond = GLOBAL == NUM;
-        MutexUnlock(&FUTEX);
+        MutexLock(&g_futex, false);
+        cond = g_global == NUM;
+        MutexUnlock(&g_futex);
         std::this_thread::sleep_for(DELAY);
     } while (!cond);
     // All threads reached Wait
 
     // Lock for TSAN
-    MutexLock(&FUTEX, false);
-    GLOBAL++;
-    MutexUnlock(&FUTEX);
-    SignalCount(&CONDVAR, ark::os::unix::memory::futex::WAKE_ALL);
+    MutexLock(&g_futex, false);
+    g_global++;
+    MutexUnlock(&g_futex);
+    SignalCount(&g_condvar, ark::os::unix::memory::futex::WAKE_ALL);
 
     thr.join();
     thr2.join();
     thr3.join();
     thr4.join();
     thr5.join();
-    GLOBAL++;
+    g_global++;
     // Check that waiter is correctly finished by timeout
-    ASSERT_EQ(GLOBAL, 2U * NUM + 2U);
+    ASSERT_EQ(g_global, 2U * NUM + 2U);
 }
 
 }  // namespace ark

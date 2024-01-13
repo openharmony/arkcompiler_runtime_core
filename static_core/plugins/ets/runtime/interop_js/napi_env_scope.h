@@ -24,10 +24,10 @@ namespace panda::ets::interop::js {
 
 class EtsJSNapiEnvScope {
 public:
-    explicit EtsJSNapiEnvScope(InteropCtx *ctx, napi_env new_env) : ctx_(ctx)
+    explicit EtsJSNapiEnvScope(InteropCtx *ctx, napi_env newEnv) : ctx_(ctx)
     {
-        saved_ = ctx_->js_env_;
-        ctx_->SetJSEnv(new_env);
+        saved_ = ctx_->jsEnv_;
+        ctx_->SetJSEnv(newEnv);
     }
 
     ~EtsJSNapiEnvScope()

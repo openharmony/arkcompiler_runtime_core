@@ -45,47 +45,47 @@ public:
                 return;
             }
         }
-        is_valid_ = true;
-        for (auto &param_type : param_types_) {
-            panda_proto_.GetRefTypes().push_back(param_type);
+        isValid_ = true;
+        for (auto &paramType : paramTypes_) {
+            pandaProto_.GetRefTypes().push_back(paramType);
         }
     }
 
     size_t ProcessParameter(const PandaString &signature, size_t i)
     {
-        EtsType param_type = GetTypeByFirstChar(signature[i]);
+        EtsType paramType = GetTypeByFirstChar(signature[i]);
         // Check that type is valid and return type is not void
-        if (param_type == EtsType::UNKNOWN || (param_type == EtsType::VOID && (i != signature.size() - 1))) {
+        if (paramType == EtsType::UNKNOWN || (paramType == EtsType::VOID && (i != signature.size() - 1))) {
             return PandaString::npos;
         }
-        panda_proto_.GetShorty().push_back(ets::ConvertEtsTypeToPandaType(param_type));
+        pandaProto_.GetShorty().push_back(ets::ConvertEtsTypeToPandaType(paramType));
 
-        if (param_type != EtsType::OBJECT) {
+        if (paramType != EtsType::OBJECT) {
             return i;
         }
-        size_t name_start = i;
+        size_t nameStart = i;
         i = ProcessObjectParameter(signature, i);
         if (i == PandaString::npos) {
             return i;
         }
-        param_types_.push_back(signature.substr(name_start, i + 1 - name_start));
+        paramTypes_.push_back(signature.substr(nameStart, i + 1 - nameStart));
         return i;
     }
 
     bool IsValid()
     {
-        return is_valid_;
+        return isValid_;
     }
 
     Method::Proto &GetProto()
     {
-        return panda_proto_;
+        return pandaProto_;
     }
 
 private:
-    PandaSmallVector<PandaString> param_types_;
-    Method::Proto panda_proto_;
-    bool is_valid_ {false};
+    PandaSmallVector<PandaString> paramTypes_;
+    Method::Proto pandaProto_;
+    bool isValid_ {false};
 
     size_t ProcessObjectParameter(const PandaString &signature, size_t i)
     {
@@ -101,9 +101,9 @@ private:
 
         if (signature[i] == 'L') {
             // Get object name bounded by 'L' and ';'
-            size_t prev_i = i;
+            size_t prevI = i;
             i = signature.find(';', i);
-            if (i == PandaString::npos || i == (prev_i + 1)) {
+            if (i == PandaString::npos || i == (prevI + 1)) {
                 return PandaString::npos;
             }
         }

@@ -60,9 +60,9 @@ public:
 
     bool IsPrimitive()
     {
-        auto component_type = GetCoreType()->ClassAddr<Class>()->GetComponentType();
-        ASSERT(component_type != nullptr);
-        return component_type->IsPrimitive();
+        auto componentType = GetCoreType()->ClassAddr<Class>()->GetComponentType();
+        ASSERT(componentType != nullptr);
+        return componentType->IsPrimitive();
     }
 
     static constexpr uint32_t GetDataOffset()
@@ -86,17 +86,16 @@ public:
     }
 
     template <class T>
-    static T *Create(EtsClass *array_class, uint32_t length, SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT)
+    static T *Create(EtsClass *arrayClass, uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
     {
-        return reinterpret_cast<T *>(coretypes::Array::Create(array_class->GetRuntimeClass(), length, space_type));
+        return reinterpret_cast<T *>(coretypes::Array::Create(arrayClass->GetRuntimeClass(), length, spaceType));
     }
 
     template <class T>
-    static T *CreateForPrimitive(EtsClassRoot root, uint32_t length,
-                                 SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT)
+    static T *CreateForPrimitive(EtsClassRoot root, uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
     {
-        EtsClass *array_class = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(root);
-        return Create<T>(array_class, length, space_type);
+        EtsClass *arrayClass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(root);
+        return Create<T>(arrayClass, length, spaceType);
     }
 
     NO_COPY_SEMANTIC(EtsArray);
@@ -121,18 +120,18 @@ protected:
 
 class EtsObjectArray : public EtsArray {
 public:
-    static EtsObjectArray *Create(EtsClass *object_class, uint32_t length,
-                                  panda::SpaceType space_type = panda::SpaceType::SPACE_TYPE_OBJECT)
+    static EtsObjectArray *Create(EtsClass *objectClass, uint32_t length,
+                                  panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         // Generate Array class name  "[L<object_class>;"
-        EtsClassLinker *class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-        PandaString array_class_name = PandaString("[") + object_class->GetDescriptor();
-        EtsClass *array_class = class_linker->GetClass(array_class_name.c_str(), true, object_class->GetClassLoader());
-        if (array_class == nullptr) {
+        EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+        PandaString arrayClassName = PandaString("[") + objectClass->GetDescriptor();
+        EtsClass *arrayClass = classLinker->GetClass(arrayClassName.c_str(), true, objectClass->GetClassLoader());
+        if (arrayClass == nullptr) {
             return nullptr;
         }
-        return EtsArray::Create<EtsObjectArray>(array_class, length, space_type);
+        return EtsArray::Create<EtsObjectArray>(arrayClass, length, spaceType);
     }
 
     void Set(uint32_t index, EtsObject *element)
@@ -150,9 +149,9 @@ public:
             GetImpl<std::invoke_result_t<decltype(&EtsObject::GetCoreType), EtsObject>>(index));
     }
 
-    static EtsObjectArray *FromCoreType(ObjectHeader *object_header)
+    static EtsObjectArray *FromCoreType(ObjectHeader *objectHeader)
     {
-        return reinterpret_cast<EtsObjectArray *>(object_header);
+        return reinterpret_cast<EtsObjectArray *>(objectHeader);
     }
 
     EtsObjectArray() = delete;
@@ -168,11 +167,11 @@ class EtsPrimitiveArray : public EtsArray {
 public:
     using ValueType = ClassType;
 
-    static EtsPrimitiveArray *Create(uint32_t length, SpaceType space_type = SpaceType::SPACE_TYPE_OBJECT)
+    static EtsPrimitiveArray *Create(uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         // NOLINTNEXTLINE(readability-magic-numbers)
-        return EtsArray::CreateForPrimitive<EtsPrimitiveArray>(ETS_CLASS_ROOT, length, space_type);
+        return EtsArray::CreateForPrimitive<EtsPrimitiveArray>(ETS_CLASS_ROOT, length, spaceType);
     }
     void Set(uint32_t index, ClassType element)
     {

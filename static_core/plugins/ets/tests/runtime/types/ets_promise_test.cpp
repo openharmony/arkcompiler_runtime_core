@@ -67,9 +67,9 @@ public:
     static std::vector<Member> GetMembers()
     {
         return std::vector<Member> {{"value", MEMBER_OFFSET(EtsPromise, value_)},
-                                    {"thenQueue", MEMBER_OFFSET(EtsPromise, then_queue_)},
-                                    {"catchQueue", MEMBER_OFFSET(EtsPromise, catch_queue_)},
-                                    {"linkedPromise", MEMBER_OFFSET(EtsPromise, linked_promise_)},
+                                    {"thenQueue", MEMBER_OFFSET(EtsPromise, thenQueue_)},
+                                    {"catchQueue", MEMBER_OFFSET(EtsPromise, catchQueue_)},
+                                    {"linkedPromise", MEMBER_OFFSET(EtsPromise, linkedPromise_)},
                                     {"eventPtr", MEMBER_OFFSET(EtsPromise, event_)},
                                     {"padding0", MEMBER_OFFSET(EtsPromise, padding0_)},
                                     {"state", MEMBER_OFFSET(EtsPromise, state_)}};
@@ -78,15 +78,15 @@ public:
 
 TEST_F(EtsPromiseTest, MemoryLayout)
 {
-    EtsClass *promise_class = vm_->GetClassLinker()->GetPromiseClass();
-    ASSERT_NE(nullptr, promise_class);
+    EtsClass *promiseClass = vm_->GetClassLinker()->GetPromiseClass();
+    ASSERT_NE(nullptr, promiseClass);
     std::vector<Member> members = EtsPromiseMembers::GetMembers();
-    ASSERT_EQ(members.size(), promise_class->GetInstanceFieldsNumber());
+    ASSERT_EQ(members.size(), promiseClass->GetInstanceFieldsNumber());
 
     // Check both EtsPromise and panda::Class<Promise> has the same number of fields
     // and at the same offsets
     for (const Member &memb : members) {
-        EtsField *field = promise_class->GetFieldIDByName(memb.name);
+        EtsField *field = promiseClass->GetFieldIDByName(memb.name);
         ASSERT_NE(nullptr, field);
         ASSERT_EQ(memb.offset, field->GetOffset()) << "Offsets of the field '" << memb.name << "' are different";
     }

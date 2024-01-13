@@ -24,8 +24,8 @@ namespace panda {
 
 template <class Value>
 template <class ForwardIterator>
-SimpleHistogram<Value>::SimpleHistogram(ForwardIterator start, ForwardIterator finish, helpers::ValueType type_of_value)
-    : type_of_value_(type_of_value)
+SimpleHistogram<Value>::SimpleHistogram(ForwardIterator start, ForwardIterator finish, helpers::ValueType typeOfValue)
+    : typeOfValue_(typeOfValue)
 {
     for (auto it = start; it != finish; ++it) {
         AddValue(*it);
@@ -36,9 +36,9 @@ template <class Value>
 PandaString SimpleHistogram<Value>::GetGeneralStatistic() const
 {
     PandaStringStream statistic;
-    statistic << "Sum: " << helpers::ValueConverter(sum_, type_of_value_) << " ";
-    statistic << "Avg: " << helpers::ValueConverter(GetAvg(), type_of_value_) << " ";
-    statistic << "Max: " << helpers::ValueConverter(max_, type_of_value_);
+    statistic << "Sum: " << helpers::ValueConverter(sum_, typeOfValue_) << " ";
+    statistic << "Avg: " << helpers::ValueConverter(GetAvg(), typeOfValue_) << " ";
+    statistic << "Max: " << helpers::ValueConverter(max_, typeOfValue_);
     return statistic.str();
 }
 
@@ -46,7 +46,7 @@ template <class Value>
 void SimpleHistogram<Value>::AddValue(const Value &element, size_t number)
 {
     sum_ += element * Value(number);
-    sum_of_squares_ += element * element * Value(number);
+    sumOfSquares_ += element * element * Value(number);
     if (count_ == 0) {
         min_ = element;
         max_ = element;
@@ -59,8 +59,8 @@ void SimpleHistogram<Value>::AddValue(const Value &element, size_t number)
 
 template <class Value>
 template <class ForwardIterator>
-Histogram<Value>::Histogram(ForwardIterator start, ForwardIterator finish, helpers::ValueType type_of_value)
-    : SimpleHistogram<Value>(type_of_value)
+Histogram<Value>::Histogram(ForwardIterator start, ForwardIterator finish, helpers::ValueType typeOfValue)
+    : SimpleHistogram<Value>(typeOfValue)
 {
     for (auto it = start; it != finish; ++it) {
         AddValue(*it);
@@ -68,12 +68,12 @@ Histogram<Value>::Histogram(ForwardIterator start, ForwardIterator finish, helpe
 }
 
 template <class Value>
-PandaString Histogram<Value>::GetTopDump(size_t count_top) const
+PandaString Histogram<Value>::GetTopDump(size_t countTop) const
 {
     PandaStringStream statistic;
     bool first = true;
     for (auto it : frequency_) {
-        if (count_top-- == 0) {
+        if (countTop-- == 0) {
             break;
         }
         if (!first) {

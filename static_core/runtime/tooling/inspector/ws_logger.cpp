@@ -24,9 +24,9 @@ namespace panda::tooling::inspector {
 void WsLogger::set_channels(Level channels)
 {
     if (channels != 0) {
-        dynamic_channels_ |= channels & static_channels_;
+        dynamicChannels_ |= channels & staticChannels_;
     } else {
-        dynamic_channels_ = 0;
+        dynamicChannels_ = 0;
     }
 }
 
@@ -52,7 +52,7 @@ void WsLogger::write(Level channel, const std::string &string) const
     Logger::Message message(level, component, false);
     auto &ms = message.GetStream();
 
-    if (channel_type_ == websocketpp::log::channel_type_hint::access) {
+    if (channelType_ == websocketpp::log::channel_type_hint::access) {
         ms << websocketpp::log::alevel::channel_name(channel) << ": ";
     }
 
@@ -61,7 +61,7 @@ void WsLogger::write(Level channel, const std::string &string) const
 
 Logger::Level WsLogger::channel_log_level(Level channel) const
 {
-    if (channel_type_ != websocketpp::log::channel_type_hint::error) {
+    if (channelType_ != websocketpp::log::channel_type_hint::error) {
         return Logger::Level::INFO;
     }
 

@@ -21,8 +21,8 @@
 namespace panda::mem {
 
 template <class LanguageConfig>
-GCLang<LanguageConfig>::GCLang(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
-    : GC(object_allocator, settings)
+GCLang<LanguageConfig>::GCLang(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
+    : GC(objectAllocator, settings)
 {
     if constexpr (LanguageConfig::LANG_TYPE == LANG_TYPE_DYNAMIC) {  // NOLINT
         auto allocator = GetInternalAllocator();
@@ -70,7 +70,7 @@ void GCLang<LanguageConfig>::UpdateRefsToMovedObjectsInPygoteSpace()
 template <class LanguageConfig>
 void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
 
     auto cb = [this](ManagedThread *thread) {
         UpdateRefsInVRegs(thread);
@@ -81,13 +81,13 @@ void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
     if constexpr (LanguageConfig::MT_MODE != MT_MODE_SINGLE) {  // NOLINT
         // Update refs inside monitors
         GetPandaVm()->GetMonitorPool()->EnumerateMonitors([this](Monitor *monitor) {
-            ObjectHeader *object_header = monitor->GetObject();
-            if (object_header != nullptr) {
-                MarkWord mark_word = object_header->AtomicGetMark();
-                if (mark_word.GetState() == MarkWord::ObjectState::STATE_GC) {
-                    MarkWord::MarkWordSize addr = mark_word.GetForwardingAddress();
+            ObjectHeader *objectHeader = monitor->GetObject();
+            if (objectHeader != nullptr) {
+                MarkWord markWord = objectHeader->AtomicGetMark();
+                if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
+                    MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
                     LOG_DEBUG_GC << "Update monitor " << std::hex << monitor << " object, old val = 0x" << std::hex
-                                 << object_header << ", new val = 0x" << addr;
+                                 << objectHeader << ", new val = 0x" << addr;
                     monitor->SetObject(reinterpret_cast<ObjectHeader *>(addr));
                 }
             }
@@ -98,7 +98,7 @@ void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
     if (GetPandaVm()->UpdateMovedStrings()) {
         // AOT string slots are pointing to strings from the StringTable,
         // so we should update it only if StringTable's pointers were updated.
-        root_manager_.UpdateAotStringRoots();
+        rootManager_.UpdateAotStringRoots();
     }
     // Update thread locals
     UpdateThreadLocals();

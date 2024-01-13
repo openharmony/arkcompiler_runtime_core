@@ -28,8 +28,8 @@ namespace panda::mem {
 #define LOG_PYGOTE_SPACE_ALLOCATOR(level) LOG(level, ALLOC) << "PygoteSpaceAllocator: "
 
 template <typename AllocConfigT>
-PygoteSpaceAllocator<AllocConfigT>::PygoteSpaceAllocator(MemStatsType *mem_stats)
-    : runslots_alloc_(mem_stats), mem_stats_(mem_stats)
+PygoteSpaceAllocator<AllocConfigT>::PygoteSpaceAllocator(MemStatsType *memStats)
+    : runslotsAlloc_(memStats), memStats_(memStats)
 {
     LOG_PYGOTE_SPACE_ALLOCATOR(DEBUG) << "Initializing of PygoteSpaceAllocator";
 }
@@ -44,7 +44,7 @@ PygoteSpaceAllocator<AllocConfigT>::~PygoteSpaceAllocator()
         cur = tmp;
     }
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    for (const auto &bitmap : live_bitmaps_) {
+    for (const auto &bitmap : liveBitmaps_) {
         allocator->Delete(bitmap->GetBitMap().data());
         allocator->Delete(bitmap);
     }
@@ -52,19 +52,19 @@ PygoteSpaceAllocator<AllocConfigT>::~PygoteSpaceAllocator()
 }
 
 template <typename AllocConfigT>
-inline void PygoteSpaceAllocator<AllocConfigT>::SetState(PygoteSpaceState new_state)
+inline void PygoteSpaceAllocator<AllocConfigT>::SetState(PygoteSpaceState newState)
 {
     // must move to next state
-    ASSERT(new_state > state_);
-    state_ = new_state;
+    ASSERT(newState > state_);
+    state_ = newState;
 
     if (state_ == STATE_PYGOTE_FORKED) {
         // build bitmaps for used pools
-        runslots_alloc_.memory_pool_.VisitAllPoolsWithOccupiedSize(
-            [this](void *mem, size_t used_size, size_t /* size */) { CreateLiveBitmap(mem, used_size); });
-        runslots_alloc_.IterateOverObjects([this](ObjectHeader *object) {
-            if (!live_bitmaps_.empty()) {
-                for (auto bitmap : live_bitmaps_) {
+        runslotsAlloc_.memoryPool_.VisitAllPoolsWithOccupiedSize(
+            [this](void *mem, size_t usedSize, size_t /* size */) { CreateLiveBitmap(mem, usedSize); });
+        runslotsAlloc_.IterateOverObjects([this](ObjectHeader *object) {
+            if (!liveBitmaps_.empty()) {
+                for (auto bitmap : liveBitmaps_) {
                     if (bitmap->IsAddrInRange(object)) {
                         bitmap->Set(object);
                         return;
@@ -74,7 +74,7 @@ inline void PygoteSpaceAllocator<AllocConfigT>::SetState(PygoteSpaceState new_st
         });
 
         // trim unused pages in runslots allocator
-        runslots_alloc_.TrimUnsafe();
+        runslotsAlloc_.TrimUnsafe();
 
         // only trim the last arena
         if (arena_ != nullptr && arena_->GetFreeSize() >= panda::os::mem::GetPageSize()) {
@@ -93,44 +93,44 @@ inline void *PygoteSpaceAllocator<AllocConfigT>::Alloc(size_t size, Alignment al
     // alloc from runslots firstly, if failed, try to alloc from new arena
     // NOTE(yxr) : will optimzie this later, currently we use runslots as much as possible before we have crossing map
     // or mark card table with object header, also it will reduce the bitmap count which will reduce the gc mark time.
-    void *obj = runslots_alloc_.template Alloc<true, false>(size, align);
+    void *obj = runslotsAlloc_.template Alloc<true, false>(size, align);
     if (obj == nullptr) {
         if (state_ == STATE_PYGOTE_INIT) {
             // try again in lock
-            static os::memory::Mutex pool_lock;
-            os::memory::LockHolder lock(pool_lock);
-            obj = runslots_alloc_.Alloc(size, align);
+            static os::memory::Mutex poolLock;
+            os::memory::LockHolder lock(poolLock);
+            obj = runslotsAlloc_.Alloc(size, align);
             if (obj != nullptr) {
                 return obj;
             }
 
-            auto pool = heap_space_->TryAllocPool(RunSlotsAllocator<AllocConfigT>::GetMinPoolSize(), space_type_,
-                                                  AllocatorType::RUNSLOTS_ALLOCATOR, this);
+            auto pool = heapSpace_->TryAllocPool(RunSlotsAllocator<AllocConfigT>::GetMinPoolSize(), spaceType_,
+                                                 AllocatorType::RUNSLOTS_ALLOCATOR, this);
             if (UNLIKELY(pool.GetMem() == nullptr)) {
                 return nullptr;
             }
-            if (!runslots_alloc_.AddMemoryPool(pool.GetMem(), pool.GetSize())) {
+            if (!runslotsAlloc_.AddMemoryPool(pool.GetMem(), pool.GetSize())) {
                 LOG(FATAL, ALLOC) << "PygoteSpaceAllocator: couldn't add memory pool to object allocator";
             }
             // alloc object again
-            obj = runslots_alloc_.Alloc(size, align);
+            obj = runslotsAlloc_.Alloc(size, align);
         } else {
             if (arena_ != nullptr) {
                 obj = arena_->Alloc(size, align);
             }
             if (obj == nullptr) {
-                auto new_arena =
-                    heap_space_->TryAllocArena(DEFAULT_ARENA_SIZE, space_type_, AllocatorType::ARENA_ALLOCATOR, this);
-                if (new_arena == nullptr) {
+                auto newArena =
+                    heapSpace_->TryAllocArena(DEFAULT_ARENA_SIZE, spaceType_, AllocatorType::ARENA_ALLOCATOR, this);
+                if (newArena == nullptr) {
                     return nullptr;
                 }
-                CreateLiveBitmap(new_arena, DEFAULT_ARENA_SIZE);
-                new_arena->LinkTo(arena_);
-                arena_ = new_arena;
+                CreateLiveBitmap(newArena, DEFAULT_ARENA_SIZE);
+                newArena->LinkTo(arena_);
+                arena_ = newArena;
                 obj = arena_->Alloc(size, align);
             }
-            live_bitmaps_.back()->Set(obj);  // mark live in bitmap
-            AllocConfigT::OnAlloc(size, space_type_, mem_stats_);
+            liveBitmaps_.back()->Set(obj);  // mark live in bitmap
+            AllocConfigT::OnAlloc(size, spaceType_, memStats_);
             AllocConfigT::MemoryInit(obj);
         }
     }
@@ -140,8 +140,8 @@ inline void *PygoteSpaceAllocator<AllocConfigT>::Alloc(size_t size, Alignment al
 template <typename AllocConfigT>
 inline void PygoteSpaceAllocator<AllocConfigT>::Free(void *mem)
 {
-    if (!live_bitmaps_.empty()) {
-        for (auto bitmap : live_bitmaps_) {
+    if (!liveBitmaps_.empty()) {
+        for (auto bitmap : liveBitmaps_) {
             if (bitmap->IsAddrInRange(mem)) {
                 bitmap->Clear(mem);
                 return;
@@ -153,8 +153,8 @@ inline void PygoteSpaceAllocator<AllocConfigT>::Free(void *mem)
         return;
     }
 
-    if (runslots_alloc_.ContainObject(reinterpret_cast<ObjectHeader *>(mem))) {
-        runslots_alloc_.Free(mem);
+    if (runslotsAlloc_.ContainObject(reinterpret_cast<ObjectHeader *>(mem))) {
+        runslotsAlloc_.Free(mem);
     }
 }
 
@@ -162,7 +162,7 @@ template <typename AllocConfigT>
 inline bool PygoteSpaceAllocator<AllocConfigT>::ContainObject(const ObjectHeader *object)
 {
     // see if in runslots firstly
-    if (runslots_alloc_.ContainObject(object)) {
+    if (runslotsAlloc_.ContainObject(object)) {
         return true;
     }
 
@@ -180,8 +180,8 @@ inline bool PygoteSpaceAllocator<AllocConfigT>::ContainObject(const ObjectHeader
 template <typename AllocConfigT>
 inline bool PygoteSpaceAllocator<AllocConfigT>::IsLive(const ObjectHeader *object)
 {
-    if (!live_bitmaps_.empty()) {
-        for (auto bitmap : live_bitmaps_) {
+    if (!liveBitmaps_.empty()) {
+        for (auto bitmap : liveBitmaps_) {
             if (bitmap->IsAddrInRange(object)) {
                 return bitmap->Test(object);
             }
@@ -192,26 +192,26 @@ inline bool PygoteSpaceAllocator<AllocConfigT>::IsLive(const ObjectHeader *objec
         return false;
     }
 
-    return runslots_alloc_.ContainObject(object) && runslots_alloc_.IsLive(object);
+    return runslotsAlloc_.ContainObject(object) && runslotsAlloc_.IsLive(object);
 }
 
 template <typename AllocConfigT>
-inline void PygoteSpaceAllocator<AllocConfigT>::CreateLiveBitmap(void *heap_begin, size_t heap_size)
+inline void PygoteSpaceAllocator<AllocConfigT>::CreateLiveBitmap(void *heapBegin, size_t heapSize)
 {
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
-    auto bitmap_data = allocator->Alloc(MarkBitmap::GetBitMapSizeInByte(heap_size));
-    ASSERT(bitmap_data != nullptr);
+    auto bitmapData = allocator->Alloc(MarkBitmap::GetBitMapSizeInByte(heapSize));
+    ASSERT(bitmapData != nullptr);
     auto bitmap = allocator->Alloc(sizeof(MarkBitmap));
     ASSERT(bitmap != nullptr);
-    auto bitmap_obj = new (bitmap) MarkBitmap(heap_begin, heap_size, bitmap_data);
-    bitmap_obj->ClearAllBits();
-    live_bitmaps_.emplace_back(bitmap_obj);
+    auto bitmapObj = new (bitmap) MarkBitmap(heapBegin, heapSize, bitmapData);
+    bitmapObj->ClearAllBits();
+    liveBitmaps_.emplace_back(bitmapObj);
 }
 
 template <typename AllocConfigT>
 inline void PygoteSpaceAllocator<AllocConfigT>::ClearLiveBitmaps()
 {
-    for (auto bitmap : live_bitmaps_) {
+    for (auto bitmap : liveBitmaps_) {
         bitmap->ClearAllBits();
     }
 }
@@ -221,8 +221,8 @@ template <typename Visitor>
 inline void PygoteSpaceAllocator<AllocConfigT>::IterateOverObjectsInRange(const Visitor &visitor, void *start,
                                                                           void *end)
 {
-    if (!live_bitmaps_.empty()) {
-        for (auto bitmap : live_bitmaps_) {
+    if (!liveBitmaps_.empty()) {
+        for (auto bitmap : liveBitmaps_) {
             auto [left, right] = bitmap->GetHeapRange();
             left = std::max(ToUintPtr(start), left);
             right = std::min(ToUintPtr(end), right);
@@ -234,44 +234,43 @@ inline void PygoteSpaceAllocator<AllocConfigT>::IterateOverObjectsInRange(const 
         }
     } else {
         ASSERT(arena_ == nullptr);
-        runslots_alloc_.IterateOverObjectsInRange(visitor, start, end);
+        runslotsAlloc_.IterateOverObjectsInRange(visitor, start, end);
     }
 }
 
 template <typename AllocConfigT>
-inline void PygoteSpaceAllocator<AllocConfigT>::IterateOverObjects(const ObjectVisitor &object_visitor)
+inline void PygoteSpaceAllocator<AllocConfigT>::IterateOverObjects(const ObjectVisitor &objectVisitor)
 {
-    if (!live_bitmaps_.empty()) {
-        for (auto bitmap : live_bitmaps_) {
-            bitmap->IterateOverMarkedChunks([&object_visitor](void *mem) {
-                object_visitor(static_cast<ObjectHeader *>(static_cast<void *>(mem)));
-            });
+    if (!liveBitmaps_.empty()) {
+        for (auto bitmap : liveBitmaps_) {
+            bitmap->IterateOverMarkedChunks(
+                [&objectVisitor](void *mem) { objectVisitor(static_cast<ObjectHeader *>(static_cast<void *>(mem))); });
         }
         if (state_ != STATE_PYGOTE_FORKED) {
-            runslots_alloc_.IterateOverObjects(object_visitor);
+            runslotsAlloc_.IterateOverObjects(objectVisitor);
         }
     } else {
         ASSERT(arena_ == nullptr);
-        runslots_alloc_.IterateOverObjects(object_visitor);
+        runslotsAlloc_.IterateOverObjects(objectVisitor);
     }
 }
 
 template <typename AllocConfigT>
-inline void PygoteSpaceAllocator<AllocConfigT>::VisitAndRemoveAllPools(const MemVisitor &mem_visitor)
+inline void PygoteSpaceAllocator<AllocConfigT>::VisitAndRemoveAllPools(const MemVisitor &memVisitor)
 {
     // IterateOverPools only used when allocator should be destroyed
     auto cur = arena_;
     while (cur != nullptr) {
         auto tmp = cur->GetNextArena();
-        heap_space_->FreeArena(cur);
+        heapSpace_->FreeArena(cur);
         cur = tmp;
     }
     arena_ = nullptr;  // avoid to duplicated free
-    runslots_alloc_.VisitAndRemoveAllPools(mem_visitor);
+    runslotsAlloc_.VisitAndRemoveAllPools(memVisitor);
 }
 
 template <typename AllocConfigT>
-inline void PygoteSpaceAllocator<AllocConfigT>::VisitAndRemoveFreePools(const MemVisitor &mem_visitor)
+inline void PygoteSpaceAllocator<AllocConfigT>::VisitAndRemoveFreePools(const MemVisitor &memVisitor)
 {
     // afte pygote fork, we don't change pygote space for free unused pools
     if (state_ == STATE_PYGOTE_FORKED) {
@@ -279,11 +278,11 @@ inline void PygoteSpaceAllocator<AllocConfigT>::VisitAndRemoveFreePools(const Me
     }
 
     // before pygote fork, call underlying allocator to free unused pools
-    runslots_alloc_.VisitAndRemoveFreePools(mem_visitor);
+    runslotsAlloc_.VisitAndRemoveFreePools(memVisitor);
 }
 
 template <typename AllocConfigT>
-inline void PygoteSpaceAllocator<AllocConfigT>::Collect(const GCObjectVisitor &gc_visitor)
+inline void PygoteSpaceAllocator<AllocConfigT>::Collect(const GCObjectVisitor &gcVisitor)
 {
     // the live bitmaps has been updated in gc process, need to do nothing here
     if (state_ == STATE_PYGOTE_FORKED) {
@@ -291,7 +290,7 @@ inline void PygoteSpaceAllocator<AllocConfigT>::Collect(const GCObjectVisitor &g
     }
 
     // before pygote fork, call underlying allocator to collect garbage
-    runslots_alloc_.Collect(gc_visitor);
+    runslotsAlloc_.Collect(gcVisitor);
 }
 
 #undef LOG_PYGOTE_SPACE_ALLOCATOR

@@ -49,44 +49,44 @@ using TaggedValue = coretypes::TaggedValue;
 using TaggedType = coretypes::TaggedType;
 using DynClass = coretypes::DynClass;
 
-GC::GC(ObjectAllocatorBase *object_allocator, const GCSettings &settings)
-    : gc_settings_(settings),
-      object_allocator_(object_allocator),
-      internal_allocator_(InternalAllocator<>::GetInternalAllocatorFromRuntime())
+GC::GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
+    : gcSettings_(settings),
+      objectAllocator_(objectAllocator),
+      internalAllocator_(InternalAllocator<>::GetInternalAllocatorFromRuntime())
 {
-    if (gc_settings_.UseTaskManagerForGC()) {
+    if (gcSettings_.UseTaskManagerForGC()) {
         // Create gc task queue for task manager
         auto *tm = taskmanager::TaskScheduler::GetTaskScheduler();
-        gc_workers_task_queue_ = tm->CreateAndRegisterTaskQueue<decltype(internal_allocator_->Adapter())>(
+        gcWorkersTaskQueue_ = tm->CreateAndRegisterTaskQueue<decltype(internalAllocator_->Adapter())>(
             taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, GC_TASK_QUEUE_PRIORITY);
-        ASSERT(gc_workers_task_queue_ != nullptr);
+        ASSERT(gcWorkersTaskQueue_ != nullptr);
     }
 }
 
 GC::~GC()
 {
     InternalAllocatorPtr allocator = GetInternalAllocator();
-    if (gc_worker_ != nullptr) {
-        allocator->Delete(gc_worker_);
+    if (gcWorker_ != nullptr) {
+        allocator->Delete(gcWorker_);
     }
-    if (gc_listeners_ptr_ != nullptr) {
-        allocator->Delete(gc_listeners_ptr_);
+    if (gcListenersPtr_ != nullptr) {
+        allocator->Delete(gcListenersPtr_);
     }
-    if (gc_barrier_set_ != nullptr) {
-        allocator->Delete(gc_barrier_set_);
+    if (gcBarrierSet_ != nullptr) {
+        allocator->Delete(gcBarrierSet_);
     }
-    if (cleared_references_ != nullptr) {
-        allocator->Delete(cleared_references_);
+    if (clearedReferences_ != nullptr) {
+        allocator->Delete(clearedReferences_);
     }
-    if (cleared_references_lock_ != nullptr) {
-        allocator->Delete(cleared_references_lock_);
+    if (clearedReferencesLock_ != nullptr) {
+        allocator->Delete(clearedReferencesLock_);
     }
-    if (workers_task_pool_ != nullptr) {
-        allocator->Delete(workers_task_pool_);
+    if (workersTaskPool_ != nullptr) {
+        allocator->Delete(workersTaskPool_);
     }
-    if (gc_workers_task_queue_ != nullptr) {
+    if (gcWorkersTaskQueue_ != nullptr) {
         taskmanager::TaskScheduler::GetTaskScheduler()->UnregisterAndDestroyTaskQueue<decltype(allocator->Adapter())>(
-            gc_workers_task_queue_);
+            gcWorkersTaskQueue_);
     }
 }
 
@@ -94,7 +94,7 @@ Logger::Buffer GC::GetLogPrefix() const
 {
     const char *phase = GCScopedPhase::GetPhaseAbbr(GetGCPhase());
     // Atomic with acquire order reason: data race with gc_counter_
-    size_t counter = gc_counter_.load(std::memory_order_acquire);
+    size_t counter = gcCounter_.load(std::memory_order_acquire);
 
     Logger::Buffer buffer;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -105,18 +105,18 @@ Logger::Buffer GC::GetLogPrefix() const
 
 GCType GC::GetType()
 {
-    return gc_type_;
+    return gcType_;
 }
 
 void GC::SetPandaVM(PandaVM *vm)
 {
     vm_ = vm;
-    reference_processor_ = vm->GetReferenceProcessor();
+    referenceProcessor_ = vm->GetReferenceProcessor();
 }
 
 NativeGcTriggerType GC::GetNativeGcTriggerType()
 {
-    return gc_settings_.GetNativeGcTriggerType();
+    return gcSettings_.GetNativeGcTriggerType();
 }
 
 size_t GC::SimpleNativeAllocationGcWatermark()
@@ -140,17 +140,17 @@ NO_THREAD_SAFETY_ANALYSIS void GC::WaitForIdleGC()
 
 inline void GC::TriggerGCForNative()
 {
-    auto native_gc_trigger_type = GetNativeGcTriggerType();
-    ASSERT_PRINT((native_gc_trigger_type == NativeGcTriggerType::NO_NATIVE_GC_TRIGGER) ||
-                     (native_gc_trigger_type == NativeGcTriggerType::SIMPLE_STRATEGY),
+    auto nativeGcTriggerType = GetNativeGcTriggerType();
+    ASSERT_PRINT((nativeGcTriggerType == NativeGcTriggerType::NO_NATIVE_GC_TRIGGER) ||
+                     (nativeGcTriggerType == NativeGcTriggerType::SIMPLE_STRATEGY),
                  "Unknown Native GC Trigger type");
-    switch (native_gc_trigger_type) {
+    switch (nativeGcTriggerType) {
         case NativeGcTriggerType::NO_NATIVE_GC_TRIGGER:
             break;
         case NativeGcTriggerType::SIMPLE_STRATEGY:
             // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or
             // ordering constraints imposed on other reads or writes
-            if (native_bytes_registered_.load(std::memory_order_relaxed) > SimpleNativeAllocationGcWatermark()) {
+            if (nativeBytesRegistered_.load(std::memory_order_relaxed) > SimpleNativeAllocationGcWatermark()) {
                 auto task = MakePandaUnique<GCTask>(GCTaskCause::NATIVE_ALLOC_CAUSE, time::GetCurrentTimeInNanos());
                 AddGCTask(false, std::move(task));
                 ManagedThread::GetCurrent()->SafepointPoll();
@@ -164,46 +164,46 @@ inline void GC::TriggerGCForNative()
 
 void GC::Initialize(PandaVM *vm)
 {
-    trace::ScopedTrace scoped_trace(__PRETTY_FUNCTION__);
+    trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
     // GC saved the PandaVM instance, so we get allocator from the PandaVM.
     auto allocator = GetInternalAllocator();
-    gc_listeners_ptr_ = allocator->template New<PandaVector<GCListener *>>(allocator->Adapter());
-    cleared_references_lock_ = allocator->New<os::memory::Mutex>();
-    os::memory::LockHolder holder(*cleared_references_lock_);
-    cleared_references_ = allocator->New<PandaVector<panda::mem::Reference *>>(allocator->Adapter());
+    gcListenersPtr_ = allocator->template New<PandaVector<GCListener *>>(allocator->Adapter());
+    clearedReferencesLock_ = allocator->New<os::memory::Mutex>();
+    os::memory::LockHolder holder(*clearedReferencesLock_);
+    clearedReferences_ = allocator->New<PandaVector<panda::mem::Reference *>>(allocator->Adapter());
     this->SetPandaVM(vm);
     InitializeImpl();
-    gc_worker_ = allocator->New<GCWorker>(this);
+    gcWorker_ = allocator->New<GCWorker>(this);
 }
 
 void GC::CreateWorkersTaskPool()
 {
-    ASSERT(workers_task_pool_ == nullptr);
+    ASSERT(workersTaskPool_ == nullptr);
     if (this->IsWorkerThreadsExist()) {
         auto allocator = GetInternalAllocator();
-        GCWorkersTaskPool *gc_task_pool = nullptr;
+        GCWorkersTaskPool *gcTaskPool = nullptr;
         if (this->GetSettings()->UseThreadPoolForGC()) {
             // Use internal gc thread pool
-            gc_task_pool = allocator->New<GCWorkersThreadPool>(this, this->GetSettings()->GCWorkersCount());
+            gcTaskPool = allocator->New<GCWorkersThreadPool>(this, this->GetSettings()->GCWorkersCount());
         } else {
             // Use common TaskManager
             ASSERT(this->GetSettings()->UseTaskManagerForGC());
-            gc_task_pool = allocator->New<GCWorkersTaskQueue>(this);
+            gcTaskPool = allocator->New<GCWorkersTaskQueue>(this);
         }
-        ASSERT(gc_task_pool != nullptr);
-        workers_task_pool_ = gc_task_pool;
+        ASSERT(gcTaskPool != nullptr);
+        workersTaskPool_ = gcTaskPool;
     }
 }
 
 void GC::DestroyWorkersTaskPool()
 {
-    if (workers_task_pool_ == nullptr) {
+    if (workersTaskPool_ == nullptr) {
         return;
     }
-    workers_task_pool_->WaitUntilTasksEnd();
+    workersTaskPool_->WaitUntilTasksEnd();
     auto allocator = this->GetInternalAllocator();
-    allocator->Delete(workers_task_pool_);
-    workers_task_pool_ = nullptr;
+    allocator->Delete(workersTaskPool_);
+    workersTaskPool_ = nullptr;
 }
 
 void GC::StartGC()
@@ -219,28 +219,28 @@ void GC::StopGC()
 
 void GC::SetupCpuAffinity()
 {
-    if (!gc_settings_.ManageGcThreadsAffinity()) {
+    if (!gcSettings_.ManageGcThreadsAffinity()) {
         return;
     }
     // Try to get CPU affinity fo GC Thread
-    if (UNLIKELY(!os::CpuAffinityManager::GetCurrentThreadAffinity(affinity_before_gc_))) {
-        affinity_before_gc_.Clear();
+    if (UNLIKELY(!os::CpuAffinityManager::GetCurrentThreadAffinity(affinityBeforeGc_))) {
+        affinityBeforeGc_.Clear();
         return;
     }
     // Try to use best + middle for preventing issues when best core is used in another thread,
     // and GC waits for it to finish.
     if (!os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::BEST | os::CpuPower::MIDDLE)) {
-        affinity_before_gc_.Clear();
+        affinityBeforeGc_.Clear();
     }
     // Some GCs don't use GC Workers
-    if (workers_task_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
-        static_cast<GCWorkersThreadPool *>(workers_task_pool_)->SetAffinityForGCWorkers();
+    if (workersTaskPool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
+        static_cast<GCWorkersThreadPool *>(workersTaskPool_)->SetAffinityForGCWorkers();
     }
 }
 
 void GC::SetupCpuAffinityAfterConcurrent()
 {
-    if (!gc_settings_.ManageGcThreadsAffinity()) {
+    if (!gcSettings_.ManageGcThreadsAffinity()) {
         return;
     }
     // Try to set GC Thread on best CPUs after concurrent
@@ -249,27 +249,27 @@ void GC::SetupCpuAffinityAfterConcurrent()
         os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::BEST | os::CpuPower::MIDDLE);
     }
     // Some GCs don't use GC Workers
-    if (workers_task_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
-        static_cast<GCWorkersThreadPool *>(workers_task_pool_)->SetAffinityForGCWorkers();
+    if (workersTaskPool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
+        static_cast<GCWorkersThreadPool *>(workersTaskPool_)->SetAffinityForGCWorkers();
     }
 }
 
-void GC::ResetCpuAffinity(bool before_concurrent)
+void GC::ResetCpuAffinity(bool beforeConcurrent)
 {
-    if (!gc_settings_.ManageGcThreadsAffinity()) {
+    if (!gcSettings_.ManageGcThreadsAffinity()) {
         return;
     }
-    if (!affinity_before_gc_.IsEmpty()) {
+    if (!affinityBeforeGc_.IsEmpty()) {
         // Set GC Threads on weak CPUs before concurrent if needed
-        if (before_concurrent && gc_settings_.UseWeakCpuForGcConcurrent()) {
+        if (beforeConcurrent && gcSettings_.UseWeakCpuForGcConcurrent()) {
             os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::WEAK);
         } else {  // else set on saved affinity
-            os::CpuAffinityManager::SetAffinityForCurrentThread(affinity_before_gc_);
+            os::CpuAffinityManager::SetAffinityForCurrentThread(affinityBeforeGc_);
         }
     }
     // Some GCs don't use GC Workers
-    if (workers_task_pool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
-        static_cast<GCWorkersThreadPool *>(workers_task_pool_)->UnsetAffinityForGCWorkers();
+    if (workersTaskPool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
+        static_cast<GCWorkersThreadPool *>(workersTaskPool_)->UnsetAffinityForGCWorkers();
     }
 }
 
@@ -283,27 +283,27 @@ void GC::RestoreCpuAffinity()
     ResetCpuAffinity(false);
 }
 
-bool GC::NeedRunGCAfterWaiting(size_t counter_before_waiting, const GCTask &task) const
+bool GC::NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) const
 {
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
     // should become visible
-    auto new_counter = gc_counter_.load(std::memory_order_acquire);
-    ASSERT(new_counter >= counter_before_waiting);
+    auto newCounter = gcCounter_.load(std::memory_order_acquire);
+    ASSERT(newCounter >= counterBeforeWaiting);
     // Atomic with acquire order reason: data race with last_cause_ with dependecies on reads after the load which
     // should become visible
-    return (new_counter == counter_before_waiting || last_cause_.load(std::memory_order_acquire) < task.reason);
+    return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason);
 }
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
 void GC::RunPhases(GCTask &task)
 {
     DCHECK_ALLOW_GARBAGE_COLLECTION;
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
     // should become visible
-    auto old_counter = gc_counter_.load(std::memory_order_acquire);
+    auto oldCounter = gcCounter_.load(std::memory_order_acquire);
     WaitForIdleGC();
-    if (!this->NeedRunGCAfterWaiting(old_counter, task)) {
+    if (!this->NeedRunGCAfterWaiting(oldCounter, task)) {
         SetGCPhase(GCPhase::GC_PHASE_IDLE);
         return;
     }
@@ -311,31 +311,31 @@ void GC::RunPhases(GCTask &task)
     this->GetTiming()->Reset();  // Clear records.
     // Atomic with release order reason: data race with last_cause_ with dependecies on writes before the store which
     // should become visible acquire
-    last_cause_.store(task.reason, std::memory_order_release);
-    if (gc_settings_.PreGCHeapVerification()) {
-        trace::ScopedTrace pre_heap_verifier_trace("PreGCHeapVeriFier");
-        size_t fail_count = VerifyHeap();
-        if (gc_settings_.FailOnHeapVerification() && fail_count > 0) {
-            LOG(FATAL, GC) << "Heap corrupted before GC, HeapVerifier found " << fail_count << " corruptions";
+    lastCause_.store(task.reason, std::memory_order_release);
+    if (gcSettings_.PreGCHeapVerification()) {
+        trace::ScopedTrace preHeapVerifierTrace("PreGCHeapVeriFier");
+        size_t failCount = VerifyHeap();
+        if (gcSettings_.FailOnHeapVerification() && failCount > 0) {
+            LOG(FATAL, GC) << "Heap corrupted before GC, HeapVerifier found " << failCount << " corruptions";
         }
     }
     // Atomic with acq_rel order reason: data race with gc_counter_ with dependecies on reads after the load and on
     // writes before the store
-    gc_counter_.fetch_add(1, std::memory_order_acq_rel);
-    if (gc_settings_.IsDumpHeap()) {
+    gcCounter_.fetch_add(1, std::memory_order_acq_rel);
+    if (gcSettings_.IsDumpHeap()) {
         PandaOStringStream os;
         os << "Heap dump before GC" << std::endl;
         GetPandaVm()->DumpHeap(&os);
         std::cerr << os.str() << std::endl;
     }
-    size_t bytes_in_heap_before_gc = GetPandaVm()->GetMemStats()->GetFootprintHeap();
-    LOG_DEBUG_GC << "Bytes in heap before GC " << std::dec << bytes_in_heap_before_gc;
+    size_t bytesInHeapBeforeGc = GetPandaVm()->GetMemStats()->GetFootprintHeap();
+    LOG_DEBUG_GC << "Bytes in heap before GC " << std::dec << bytesInHeapBeforeGc;
     {
-        GCScopedStats scoped_stats(GetPandaVm()->GetGCStats(), gc_type_ == GCType::STW_GC ? GetStats() : nullptr);
-        ScopedGcHung scoped_hung(&task);
+        GCScopedStats scopedStats(GetPandaVm()->GetGCStats(), gcType_ == GCType::STW_GC ? GetStats() : nullptr);
+        ScopedGcHung scopedHung(&task);
         GetPandaVm()->GetGCStats()->ResetLastPause();
 
-        FireGCStarted(task, bytes_in_heap_before_gc);
+        FireGCStarted(task, bytesInHeapBeforeGc);
         PreRunPhasesImpl();
         // NOLINTNEXTLINE(performance-unnecessary-value-param)
         RunPhasesImpl(task);
@@ -346,31 +346,31 @@ void GC::RunPhases(GCTask &task)
         // - Clear local part:
         ClearLocalInternalAllocatorPools();
 
-        size_t bytes_in_heap_after_gc = GetPandaVm()->GetMemStats()->GetFootprintHeap();
+        size_t bytesInHeapAfterGc = GetPandaVm()->GetMemStats()->GetFootprintHeap();
         // There is case than bytes_in_heap_after_gc > 0 and bytes_in_heap_before_gc == 0.
         // Because TLABs are registered during GC
-        if (bytes_in_heap_after_gc > 0 && bytes_in_heap_before_gc > 0) {
-            GetStats()->AddReclaimRatioValue(1 - static_cast<double>(bytes_in_heap_after_gc) / bytes_in_heap_before_gc);
+        if (bytesInHeapAfterGc > 0 && bytesInHeapBeforeGc > 0) {
+            GetStats()->AddReclaimRatioValue(1 - static_cast<double>(bytesInHeapAfterGc) / bytesInHeapBeforeGc);
         }
-        LOG_DEBUG_GC << "Bytes in heap after GC " << std::dec << bytes_in_heap_after_gc;
-        FireGCFinished(task, bytes_in_heap_before_gc, bytes_in_heap_after_gc);
+        LOG_DEBUG_GC << "Bytes in heap after GC " << std::dec << bytesInHeapAfterGc;
+        FireGCFinished(task, bytesInHeapBeforeGc, bytesInHeapAfterGc);
     }
-    ASSERT(task.collection_type != GCCollectionType::NONE);
-    LOG(INFO, GC) << "[" << gc_counter_ << "] [" << task.collection_type << " (" << task.reason << ")] "
+    ASSERT(task.collectionType != GCCollectionType::NONE);
+    LOG(INFO, GC) << "[" << gcCounter_ << "] [" << task.collectionType << " (" << task.reason << ")] "
                   << GetPandaVm()->GetGCStats()->GetStatistics();
 
-    if (gc_settings_.IsDumpHeap()) {
+    if (gcSettings_.IsDumpHeap()) {
         PandaOStringStream os;
         os << "Heap dump after GC" << std::endl;
         GetPandaVm()->DumpHeap(&os);
         std::cerr << os.str() << std::endl;
     }
 
-    if (gc_settings_.PostGCHeapVerification()) {
-        trace::ScopedTrace post_heap_verifier_trace("PostGCHeapVeriFier");
-        size_t fail_count = VerifyHeap();
-        if (gc_settings_.FailOnHeapVerification() && fail_count > 0) {
-            LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << fail_count << " corruptions";
+    if (gcSettings_.PostGCHeapVerification()) {
+        trace::ScopedTrace postHeapVerifierTrace("PostGCHeapVeriFier");
+        size_t failCount = VerifyHeap();
+        if (gcSettings_.FailOnHeapVerification() && failCount > 0) {
+            LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << failCount << " corruptions";
         }
     }
     this->RestoreCpuAffinity();
@@ -379,26 +379,26 @@ void GC::RunPhases(GCTask &task)
 }
 
 template <class LanguageConfig>
-GC *CreateGC(GCType gc_type, ObjectAllocatorBase *object_allocator, const GCSettings &settings)
+GC *CreateGC(GCType gcType, ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
 {
     GC *ret = nullptr;
     InternalAllocatorPtr allocator {InternalAllocator<>::GetInternalAllocatorFromRuntime()};
 
-    switch (gc_type) {
+    switch (gcType) {
         case GCType::EPSILON_GC:
-            ret = allocator->New<EpsilonGC<LanguageConfig>>(object_allocator, settings);
+            ret = allocator->New<EpsilonGC<LanguageConfig>>(objectAllocator, settings);
             break;
         case GCType::EPSILON_G1_GC:
-            ret = allocator->New<EpsilonG1GC<LanguageConfig>>(object_allocator, settings);
+            ret = allocator->New<EpsilonG1GC<LanguageConfig>>(objectAllocator, settings);
             break;
         case GCType::STW_GC:
-            ret = allocator->New<StwGC<LanguageConfig>>(object_allocator, settings);
+            ret = allocator->New<StwGC<LanguageConfig>>(objectAllocator, settings);
             break;
         case GCType::GEN_GC:
-            ret = allocator->New<GenGC<LanguageConfig>>(object_allocator, settings);
+            ret = allocator->New<GenGC<LanguageConfig>>(objectAllocator, settings);
             break;
         case GCType::G1_GC:
-            ret = allocator->New<G1GC<LanguageConfig>>(object_allocator, settings);
+            ret = allocator->New<G1GC<LanguageConfig>>(objectAllocator, settings);
             break;
         default:
             LOG(FATAL, GC) << "Unknown GC type";
@@ -412,49 +412,49 @@ bool GC::CheckGCCause(GCTaskCause cause) const
     return cause != GCTaskCause::INVALID_CAUSE;
 }
 
-bool GC::MarkObjectIfNotMarked(ObjectHeader *object_header)
+bool GC::MarkObjectIfNotMarked(ObjectHeader *objectHeader)
 {
-    ASSERT(object_header != nullptr);
-    if (IsMarked(object_header)) {
+    ASSERT(objectHeader != nullptr);
+    if (IsMarked(objectHeader)) {
         return false;
     }
-    MarkObject(object_header);
+    MarkObject(objectHeader);
     return true;
 }
 
-void GC::ProcessReference(GCMarkingStackType *objects_stack, const BaseClass *cls, const ObjectHeader *ref,
+void GC::ProcessReference(GCMarkingStackType *objectsStack, const BaseClass *cls, const ObjectHeader *ref,
                           const ReferenceProcessPredicateT &pred)
 {
-    ASSERT(reference_processor_ != nullptr);
-    reference_processor_->HandleReference(this, objects_stack, cls, ref, pred);
+    ASSERT(referenceProcessor_ != nullptr);
+    referenceProcessor_->HandleReference(this, objectsStack, cls, ref, pred);
 }
 
-void GC::AddReference(ObjectHeader *from_obj, ObjectHeader *object)
+void GC::AddReference(ObjectHeader *fromObj, ObjectHeader *object)
 {
     ASSERT(IsMarked(object));
     GCMarkingStackType references(this);
     // NOTE(alovkov): support stack with workers here & put all refs in stack and only then process altogether for once
     ASSERT(!references.IsWorkersTaskSupported());
-    references.PushToStack(from_obj, object);
+    references.PushToStack(fromObj, object);
     MarkReferences(&references, phase_);
-    if (gc_type_ != GCType::EPSILON_GC) {
+    if (gcType_ != GCType::EPSILON_GC) {
         ASSERT(references.Empty());
     }
 }
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-void GC::ProcessReferences(GCPhase gc_phase, const GCTask &task, const ReferenceClearPredicateT &pred)
+void GC::ProcessReferences(GCPhase gcPhase, const GCTask &task, const ReferenceClearPredicateT &pred)
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, REF_PROC) << "Start processing cleared references";
-    ASSERT(reference_processor_ != nullptr);
-    bool clear_soft_references = task.reason == GCTaskCause::OOM_CAUSE || IsExplicitFull(task);
-    reference_processor_->ProcessReferences(false, clear_soft_references, gc_phase, pred);
-    Reference *processed_ref = reference_processor_->CollectClearedReferences();
-    if (processed_ref != nullptr) {
-        os::memory::LockHolder holder(*cleared_references_lock_);
+    ASSERT(referenceProcessor_ != nullptr);
+    bool clearSoftReferences = task.reason == GCTaskCause::OOM_CAUSE || IsExplicitFull(task);
+    referenceProcessor_->ProcessReferences(false, clearSoftReferences, gcPhase, pred);
+    Reference *processedRef = referenceProcessor_->CollectClearedReferences();
+    if (processedRef != nullptr) {
+        os::memory::LockHolder holder(*clearedReferencesLock_);
         // NOTE(alovkov): ged rid of cleared_references_ and just enqueue refs here?
-        cleared_references_->push_back(processed_ref);
+        clearedReferences_->push_back(processedRef);
     }
 }
 
@@ -462,44 +462,44 @@ void GC::DestroyWorker()
 {
     // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
-    gc_running_.store(false, std::memory_order_seq_cst);
-    gc_worker_->FinalizeAndDestroyWorker();
+    gcRunning_.store(false, std::memory_order_seq_cst);
+    gcWorker_->FinalizeAndDestroyWorker();
 }
 
 void GC::CreateWorker()
 {
     // Atomic with seq_cst order reason: data race with gc_running_ with requirement for sequentially consistent order
     // where threads observe all modifications in the same order
-    gc_running_.store(true, std::memory_order_seq_cst);
-    ASSERT(gc_worker_ != nullptr);
-    gc_worker_->CreateAndStartWorker();
+    gcRunning_.store(true, std::memory_order_seq_cst);
+    ASSERT(gcWorker_ != nullptr);
+    gcWorker_->CreateAndStartWorker();
 }
 
 void GC::DisableWorkerThreads()
 {
-    gc_settings_.SetGCWorkersCount(0);
-    gc_settings_.SetParallelMarkingEnabled(false);
-    gc_settings_.SetParallelCompactingEnabled(false);
-    gc_settings_.SetParallelRefUpdatingEnabled(false);
+    gcSettings_.SetGCWorkersCount(0);
+    gcSettings_.SetParallelMarkingEnabled(false);
+    gcSettings_.SetParallelCompactingEnabled(false);
+    gcSettings_.SetParallelRefUpdatingEnabled(false);
 }
 
 void GC::EnableWorkerThreads()
 {
     const RuntimeOptions &options = Runtime::GetOptions();
-    gc_settings_.SetGCWorkersCount(options.GetGcWorkersCount());
-    gc_settings_.SetParallelMarkingEnabled(options.IsGcParallelMarkingEnabled() && (options.GetGcWorkersCount() != 0));
-    gc_settings_.SetParallelCompactingEnabled(options.IsGcParallelCompactingEnabled() &&
+    gcSettings_.SetGCWorkersCount(options.GetGcWorkersCount());
+    gcSettings_.SetParallelMarkingEnabled(options.IsGcParallelMarkingEnabled() && (options.GetGcWorkersCount() != 0));
+    gcSettings_.SetParallelCompactingEnabled(options.IsGcParallelCompactingEnabled() &&
+                                             (options.GetGcWorkersCount() != 0));
+    gcSettings_.SetParallelRefUpdatingEnabled(options.IsGcParallelRefUpdatingEnabled() &&
                                               (options.GetGcWorkersCount() != 0));
-    gc_settings_.SetParallelRefUpdatingEnabled(options.IsGcParallelRefUpdatingEnabled() &&
-                                               (options.GetGcWorkersCount() != 0));
 }
 
 void GC::PreZygoteFork()
 {
     DestroyWorker();
-    if (gc_settings_.UseTaskManagerForGC()) {
-        ASSERT(gc_workers_task_queue_ != nullptr);
-        ASSERT(gc_workers_task_queue_->IsEmpty());
+    if (gcSettings_.UseTaskManagerForGC()) {
+        ASSERT(gcWorkersTaskQueue_ != nullptr);
+        ASSERT(gcWorkersTaskQueue_->IsEmpty());
     }
 }
 
@@ -510,7 +510,7 @@ void GC::PostZygoteFork()
 
 class GC::PostForkGCTask : public GCTask {
 public:
-    PostForkGCTask(GCTaskCause gc_reason, uint64_t gc_target_time) : GCTask(gc_reason, gc_target_time) {}
+    PostForkGCTask(GCTaskCause gcReason, uint64_t gcTargetTime) : GCTask(gcReason, gcTargetTime) {}
 
     void Run(mem::GC &gc) override
     {
@@ -529,7 +529,7 @@ public:
 void GC::PreStartup()
 {
     // Add a delay GCTask.
-    if ((!Runtime::GetCurrent()->IsZygote()) && (!gc_settings_.RunGCInPlace())) {
+    if ((!Runtime::GetCurrent()->IsZygote()) && (!gcSettings_.RunGCInPlace())) {
         // divide 2 to temporarily set target footprint to a high value to disable GC during App startup.
         GetPandaVm()->GetGCTrigger()->SetMinTargetFootprint(Runtime::GetOptions().GetHeapSizeLimit() / 2);
         PreStartupImp();
@@ -542,25 +542,25 @@ void GC::PreStartup()
 }
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
-bool GC::AddGCTask(bool is_managed, PandaUniquePtr<GCTask> task)
+bool GC::AddGCTask(bool isManaged, PandaUniquePtr<GCTask> task)
 {
-    bool triggered_by_threshold = (task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
-    if (gc_settings_.RunGCInPlace()) {
-        auto *gc_task = task.get();
+    bool triggeredByThreshold = (task->reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
+    if (gcSettings_.RunGCInPlace()) {
+        auto *gcTask = task.get();
         if (IsGCRunning()) {
-            if (is_managed) {
-                return WaitForGCInManaged(*gc_task);
+            if (isManaged) {
+                return WaitForGCInManaged(*gcTask);
             }
-            return WaitForGC(*gc_task);
+            return WaitForGC(*gcTask);
         }
     } else {
-        if (triggered_by_threshold) {
+        if (triggeredByThreshold) {
             bool expect = true;
-            if (can_add_gc_task_.compare_exchange_strong(expect, false, std::memory_order_seq_cst)) {
-                return gc_worker_->AddTask(std::move(task));
+            if (canAddGcTask_.compare_exchange_strong(expect, false, std::memory_order_seq_cst)) {
+                return gcWorker_->AddTask(std::move(task));
             }
         } else {
-            return gc_worker_->AddTask(std::move(task));
+            return gcWorker_->AddTask(std::move(task));
         }
     }
     return false;
@@ -568,8 +568,8 @@ bool GC::AddGCTask(bool is_managed, PandaUniquePtr<GCTask> task)
 
 bool GC::IsReference(const BaseClass *cls, const ObjectHeader *ref, const ReferenceCheckPredicateT &pred)
 {
-    ASSERT(reference_processor_ != nullptr);
-    return reference_processor_->IsReference(cls, ref, pred);
+    ASSERT(referenceProcessor_ != nullptr);
+    return referenceProcessor_->IsReference(cls, ref, pred);
 }
 
 void GC::EnqueueReferences()
@@ -577,16 +577,16 @@ void GC::EnqueueReferences()
     while (true) {
         panda::mem::Reference *ref = nullptr;
         {
-            os::memory::LockHolder holder(*cleared_references_lock_);
-            if (cleared_references_->empty()) {
+            os::memory::LockHolder holder(*clearedReferencesLock_);
+            if (clearedReferences_->empty()) {
                 break;
             }
-            ref = cleared_references_->back();
-            cleared_references_->pop_back();
+            ref = clearedReferences_->back();
+            clearedReferences_->pop_back();
         }
         ASSERT(ref != nullptr);
-        ASSERT(reference_processor_ != nullptr);
-        reference_processor_->ScheduleForEnqueue(ref);
+        ASSERT(referenceProcessor_ != nullptr);
+        referenceProcessor_->ScheduleForEnqueue(ref);
     }
 }
 
@@ -594,21 +594,21 @@ bool GC::IsFullGC() const
 {
     // Atomic with relaxed order reason: data race with is_full_gc_ with no synchronization or ordering
     // constraints imposed on other reads or writes
-    return is_full_gc_.load(std::memory_order_relaxed);
+    return isFullGc_.load(std::memory_order_relaxed);
 }
 
 void GC::SetFullGC(bool value)
 {
     // Atomic with relaxed order reason: data race with is_full_gc_ with no synchronization or ordering
     // constraints imposed on other reads or writes
-    is_full_gc_.store(value, std::memory_order_relaxed);
+    isFullGc_.store(value, std::memory_order_relaxed);
 }
 
 void GC::NotifyNativeAllocations()
 {
     // Atomic with relaxed order reason: data race with native_objects_notified_ with no synchronization or ordering
     // constraints imposed on other reads or writes
-    native_objects_notified_.fetch_add(NOTIFY_NATIVE_INTERVAL, std::memory_order_relaxed);
+    nativeObjectsNotified_.fetch_add(NOTIFY_NATIVE_INTERVAL, std::memory_order_relaxed);
     TriggerGCForNative();
 }
 
@@ -619,12 +619,12 @@ void GC::RegisterNativeAllocation(size_t bytes)
     do {
         // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or ordering
         // constraints imposed on other reads or writes
-        allocated = native_bytes_registered_.load(std::memory_order_relaxed);
-    } while (!native_bytes_registered_.compare_exchange_weak(allocated, allocated + bytes));
+        allocated = nativeBytesRegistered_.load(std::memory_order_relaxed);
+    } while (!nativeBytesRegistered_.compare_exchange_weak(allocated, allocated + bytes));
     if (allocated > std::numeric_limits<size_t>::max() - bytes) {
         // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or ordering
         // constraints imposed on other reads or writes
-        native_bytes_registered_.store(std::numeric_limits<size_t>::max(), std::memory_order_relaxed);
+        nativeBytesRegistered_.store(std::numeric_limits<size_t>::max(), std::memory_order_relaxed);
     }
     TriggerGCForNative();
 }
@@ -632,22 +632,22 @@ void GC::RegisterNativeAllocation(size_t bytes)
 void GC::RegisterNativeFree(size_t bytes)
 {
     size_t allocated;
-    size_t new_freed_bytes;
+    size_t newFreedBytes;
     do {
         // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or ordering
         // constraints imposed on other reads or writes
-        allocated = native_bytes_registered_.load(std::memory_order_relaxed);
-        new_freed_bytes = std::min(allocated, bytes);
-    } while (!native_bytes_registered_.compare_exchange_weak(allocated, allocated - new_freed_bytes));
+        allocated = nativeBytesRegistered_.load(std::memory_order_relaxed);
+        newFreedBytes = std::min(allocated, bytes);
+    } while (!nativeBytesRegistered_.compare_exchange_weak(allocated, allocated - newFreedBytes));
 }
 
 size_t GC::GetNativeBytesFromMallinfoAndRegister() const
 {
-    size_t mallinfo_bytes = panda::os::mem::GetNativeBytesFromMallinfo();
+    size_t mallinfoBytes = panda::os::mem::GetNativeBytesFromMallinfo();
     // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or ordering
     // constraints imposed on other reads or writes
-    size_t all_bytes = mallinfo_bytes + native_bytes_registered_.load(std::memory_order_relaxed);
-    return all_bytes;
+    size_t allBytes = mallinfoBytes + nativeBytesRegistered_.load(std::memory_order_relaxed);
+    return allBytes;
 }
 
 bool GC::WaitForGC(GCTask task)
@@ -656,13 +656,13 @@ bool GC::WaitForGC(GCTask task)
     Runtime::GetCurrent()->GetNotificationManager()->GarbageCollectorStartEvent();
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
     // should become visible
-    auto old_counter = this->gc_counter_.load(std::memory_order_acquire);
-    Timing suspend_threads_timing;
+    auto oldCounter = this->gcCounter_.load(std::memory_order_acquire);
+    Timing suspendThreadsTiming;
     {
-        ScopedTiming t("SuspendThreads", suspend_threads_timing);
+        ScopedTiming t("SuspendThreads", suspendThreadsTiming);
         this->GetPandaVm()->GetRendezvous()->SafepointBegin();
     }
-    if (!this->NeedRunGCAfterWaiting(old_counter, task)) {
+    if (!this->NeedRunGCAfterWaiting(oldCounter, task)) {
         this->GetPandaVm()->GetRendezvous()->SafepointEnd();
         return false;
     }
@@ -683,13 +683,13 @@ bool GC::WaitForGC(GCTask task)
 
 bool GC::WaitForGCInManaged(const GCTask &task)
 {
-    Thread *base_thread = Thread::GetCurrent();
-    if (ManagedThread::ThreadIsManagedThread(base_thread)) {
-        ManagedThread *thread = ManagedThread::CastFromThread(base_thread);
+    Thread *baseThread = Thread::GetCurrent();
+    if (ManagedThread::ThreadIsManagedThread(baseThread)) {
+        ManagedThread *thread = ManagedThread::CastFromThread(baseThread);
         ASSERT(thread->GetMutatorLock()->HasLock());
-        [[maybe_unused]] bool is_daemon = MTManagedThread::ThreadIsMTManagedThread(base_thread) &&
-                                          MTManagedThread::CastFromThread(base_thread)->IsDaemon();
-        ASSERT(!is_daemon || thread->GetStatus() == ThreadStatus::RUNNING);
+        [[maybe_unused]] bool isDaemon = MTManagedThread::ThreadIsMTManagedThread(baseThread) &&
+                                         MTManagedThread::CastFromThread(baseThread)->IsDaemon();
+        ASSERT(!isDaemon || thread->GetStatus() == ThreadStatus::RUNNING);
         vm_->GetMutatorLock()->Unlock();
         thread->PrintSuspensionStackIfNeeded();
         WaitForGC(task);
@@ -707,17 +707,17 @@ void GC::EndConcurrentScopeRoutine() const {}
 
 void GC::PrintDetailedLog()
 {
-    for (auto &footprint : this->footprint_list_) {
+    for (auto &footprint : this->footprintList_) {
         LOG(INFO, GC) << footprint.first << " : " << footprint.second;
     }
     LOG(INFO, GC) << this->GetTiming()->Dump();
 }
 
-ConcurrentScope::ConcurrentScope(GC *gc, bool auto_start)
+ConcurrentScope::ConcurrentScope(GC *gc, bool autoStart)
 {
     LOG(DEBUG, GC) << "Start ConcurrentScope";
     gc_ = gc;
-    if (auto_start) {
+    if (autoStart) {
         Start();
     }
 }
@@ -745,13 +745,13 @@ NO_THREAD_SAFETY_ANALYSIS void ConcurrentScope::Start()
 void GC::WaitForGCOnPygoteFork(const GCTask &task)
 {
     // do nothing if no pygote space
-    auto pygote_space_allocator = object_allocator_->GetPygoteSpaceAllocator();
-    if (pygote_space_allocator == nullptr) {
+    auto pygoteSpaceAllocator = objectAllocator_->GetPygoteSpaceAllocator();
+    if (pygoteSpaceAllocator == nullptr) {
         return;
     }
 
     // do nothing if not at first pygote fork
-    if (pygote_space_allocator->GetState() != PygoteSpaceState::STATE_PYGOTE_INIT) {
+    if (pygoteSpaceAllocator->GetState() != PygoteSpaceState::STATE_PYGOTE_INIT) {
         return;
     }
 
@@ -761,7 +761,7 @@ void GC::WaitForGCOnPygoteFork(const GCTask &task)
     // looks all other threads have been stopped before pygote fork
 
     // 0. indicate that we're rebuilding pygote space
-    pygote_space_allocator->SetState(PygoteSpaceState::STATE_PYGOTE_FORKING);
+    pygoteSpaceAllocator->SetState(PygoteSpaceState::STATE_PYGOTE_FORKING);
 
     // 1. trigger gc
     WaitForGC(task);
@@ -770,53 +770,52 @@ void GC::WaitForGCOnPygoteFork(const GCTask &task)
     MoveObjectsToPygoteSpace();
 
     // 3. indicate that we have done
-    pygote_space_allocator->SetState(PygoteSpaceState::STATE_PYGOTE_FORKED);
+    pygoteSpaceAllocator->SetState(PygoteSpaceState::STATE_PYGOTE_FORKED);
 
     // 4. disable pygote for allocation
-    object_allocator_->DisablePygoteAlloc();
+    objectAllocator_->DisablePygoteAlloc();
 
     LOG(DEBUG, GC) << "== GC WaitForGCOnPygoteFork End ==";
 }
 
 bool GC::IsOnPygoteFork() const
 {
-    auto pygote_space_allocator = object_allocator_->GetPygoteSpaceAllocator();
-    return pygote_space_allocator != nullptr &&
-           pygote_space_allocator->GetState() == PygoteSpaceState::STATE_PYGOTE_FORKING;
+    auto pygoteSpaceAllocator = objectAllocator_->GetPygoteSpaceAllocator();
+    return pygoteSpaceAllocator != nullptr &&
+           pygoteSpaceAllocator->GetState() == PygoteSpaceState::STATE_PYGOTE_FORKING;
 }
 
 void GC::MoveObjectsToPygoteSpace()
 {
-    trace::ScopedTrace scoped_trace(__FUNCTION__);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, GC) << "MoveObjectsToPygoteSpace: start";
 
-    size_t all_size_move = 0;
-    size_t moved_objects_num = 0;
-    size_t bytes_in_heap_before_move = GetPandaVm()->GetMemStats()->GetFootprintHeap();
-    auto pygote_space_allocator = object_allocator_->GetPygoteSpaceAllocator();
-    ObjectVisitor move_visitor(
-        [this, &pygote_space_allocator, &moved_objects_num, &all_size_move](ObjectHeader *src) -> void {
-            size_t size = GetObjectSize(src);
-            auto dst = reinterpret_cast<ObjectHeader *>(pygote_space_allocator->Alloc(size));
-            ASSERT(dst != nullptr);
-            memcpy_s(dst, size, src, size);
-            all_size_move += size;
-            moved_objects_num++;
-            SetForwardAddress(src, dst);
-            LOG_DEBUG_GC << "object MOVED from " << std::hex << src << " to " << dst << ", size = " << std::dec << size;
-        });
+    size_t allSizeMove = 0;
+    size_t movedObjectsNum = 0;
+    size_t bytesInHeapBeforeMove = GetPandaVm()->GetMemStats()->GetFootprintHeap();
+    auto pygoteSpaceAllocator = objectAllocator_->GetPygoteSpaceAllocator();
+    ObjectVisitor moveVisitor([this, &pygoteSpaceAllocator, &movedObjectsNum, &allSizeMove](ObjectHeader *src) -> void {
+        size_t size = GetObjectSize(src);
+        auto dst = reinterpret_cast<ObjectHeader *>(pygoteSpaceAllocator->Alloc(size));
+        ASSERT(dst != nullptr);
+        memcpy_s(dst, size, src, size);
+        allSizeMove += size;
+        movedObjectsNum++;
+        SetForwardAddress(src, dst);
+        LOG_DEBUG_GC << "object MOVED from " << std::hex << src << " to " << dst << ", size = " << std::dec << size;
+    });
 
     // move all small movable objects to pygote space
-    object_allocator_->IterateRegularSizeObjects(move_visitor);
+    objectAllocator_->IterateRegularSizeObjects(moveVisitor);
 
-    LOG(DEBUG, GC) << "MoveObjectsToPygoteSpace: move_num = " << moved_objects_num << ", move_size = " << all_size_move;
+    LOG(DEBUG, GC) << "MoveObjectsToPygoteSpace: move_num = " << movedObjectsNum << ", move_size = " << allSizeMove;
 
-    if (all_size_move > 0) {
-        GetStats()->AddMemoryValue(all_size_move, MemoryTypeStats::MOVED_BYTES);
-        GetStats()->AddObjectsValue(moved_objects_num, ObjectTypeStats::MOVED_OBJECTS);
+    if (allSizeMove > 0) {
+        GetStats()->AddMemoryValue(allSizeMove, MemoryTypeStats::MOVED_BYTES);
+        GetStats()->AddObjectsValue(movedObjectsNum, ObjectTypeStats::MOVED_OBJECTS);
     }
-    if (bytes_in_heap_before_move > 0) {
-        GetStats()->AddCopiedRatioValue(static_cast<double>(all_size_move) / bytes_in_heap_before_move);
+    if (bytesInHeapBeforeMove > 0) {
+        GetStats()->AddCopiedRatioValue(static_cast<double>(allSizeMove) / bytesInHeapBeforeMove);
     }
 
     // Update because we moved objects from object_allocator -> pygote space
@@ -824,16 +823,16 @@ void GC::MoveObjectsToPygoteSpace()
     CommonUpdateRefsToMovedObjects();
 
     // Clear the moved objects in old space
-    object_allocator_->FreeObjectsMovedToPygoteSpace();
+    objectAllocator_->FreeObjectsMovedToPygoteSpace();
 
     LOG(DEBUG, GC) << "MoveObjectsToPygoteSpace: finish";
 }
 
 void GC::SetForwardAddress(ObjectHeader *src, ObjectHeader *dst)
 {
-    auto base_cls = src->ClassAddr<BaseClass>();
-    if (base_cls->IsDynamicClass()) {
-        auto cls = static_cast<HClass *>(base_cls);
+    auto baseCls = src->ClassAddr<BaseClass>();
+    if (baseCls->IsDynamicClass()) {
+        auto cls = static_cast<HClass *>(baseCls);
         // Note: During moving phase, 'src => dst'. Consider the src is a DynClass,
         //       since 'dst' is not in GC-status the 'manage-object' inside 'dst' won't be updated to
         //       'dst'. To fix it, we update 'manage-object' here rather than upating phase.
@@ -844,13 +843,13 @@ void GC::SetForwardAddress(ObjectHeader *src, ObjectHeader *dst)
     }
 
     // Set fwd address in src
-    bool update_res = false;
+    bool updateRes = false;
     do {
-        MarkWord mark_word = src->AtomicGetMark();
-        MarkWord fwd_mark_word =
-            mark_word.DecodeFromForwardingAddress(static_cast<MarkWord::MarkWordSize>(ToUintPtr(dst)));
-        update_res = src->AtomicSetMark<false>(mark_word, fwd_mark_word);
-    } while (!update_res);
+        MarkWord markWord = src->AtomicGetMark();
+        MarkWord fwdMarkWord =
+            markWord.DecodeFromForwardingAddress(static_cast<MarkWord::MarkWordSize>(ToUintPtr(dst)));
+        updateRes = src->AtomicSetMark<false>(markWord, fwdMarkWord);
+    } while (!updateRes);
 }
 
 void GC::UpdateRefsInVRegs(ManagedThread *thread)
@@ -858,22 +857,22 @@ void GC::UpdateRefsInVRegs(ManagedThread *thread)
     LOG_DEBUG_GC << "Update frames for thread: " << thread->GetId();
     for (auto pframe = StackWalker::Create(thread); pframe.HasFrame(); pframe.NextFrame()) {
         LOG_DEBUG_GC << "Frame for method " << pframe.GetMethod()->GetFullName();
-        auto iterator = [&pframe, this](auto &reg_info, auto &vreg) {
-            ObjectHeader *object_header = vreg.GetReference();
-            if (object_header == nullptr) {
+        auto iterator = [&pframe, this](auto &regInfo, auto &vreg) {
+            ObjectHeader *objectHeader = vreg.GetReference();
+            if (objectHeader == nullptr) {
                 return true;
             }
-            MarkWord mark_word = object_header->AtomicGetMark();
-            if (mark_word.GetState() == MarkWord::ObjectState::STATE_GC) {
-                MarkWord::MarkWordSize addr = mark_word.GetForwardingAddress();
-                LOG_DEBUG_GC << "Update vreg, vreg old val = " << std::hex << object_header << ", new val = 0x" << addr;
-                LOG_IF(reg_info.IsAccumulator(), DEBUG, GC) << "^ acc reg";
-                if (!pframe.IsCFrame() && reg_info.IsAccumulator()) {
+            MarkWord markWord = objectHeader->AtomicGetMark();
+            if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
+                MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
+                LOG_DEBUG_GC << "Update vreg, vreg old val = " << std::hex << objectHeader << ", new val = 0x" << addr;
+                LOG_IF(regInfo.IsAccumulator(), DEBUG, GC) << "^ acc reg";
+                if (!pframe.IsCFrame() && regInfo.IsAccumulator()) {
                     LOG_DEBUG_GC << "^ acc updated";
                     vreg.SetReference(reinterpret_cast<ObjectHeader *>(addr));
                 } else {
                     pframe.template SetVRegValue<std::is_same_v<decltype(vreg), interpreter::DynamicVRegisterRef &>>(
-                        reg_info, reinterpret_cast<ObjectHeader *>(addr));
+                        regInfo, reinterpret_cast<ObjectHeader *>(addr));
                 }
             }
             return true;
@@ -882,39 +881,39 @@ void GC::UpdateRefsInVRegs(ManagedThread *thread)
     }
 }
 
-const ObjectHeader *GC::PopObjectFromStack(GCMarkingStackType *objects_stack)
+const ObjectHeader *GC::PopObjectFromStack(GCMarkingStackType *objectsStack)
 {
-    auto *object = objects_stack->PopFromStack();
+    auto *object = objectsStack->PopFromStack();
     ASSERT(object != nullptr);
     return object;
 }
 
 bool GC::IsGenerational() const
 {
-    return IsGenerationalGCType(gc_type_);
+    return IsGenerationalGCType(gcType_);
 }
 
-void GC::FireGCStarted(const GCTask &task, size_t bytes_in_heap_before_gc)
+void GC::FireGCStarted(const GCTask &task, size_t bytesInHeapBeforeGc)
 {
-    for (auto listener : *gc_listeners_ptr_) {
+    for (auto listener : *gcListenersPtr_) {
         if (listener != nullptr) {
-            listener->GCStarted(task, bytes_in_heap_before_gc);
+            listener->GCStarted(task, bytesInHeapBeforeGc);
         }
     }
 }
 
-void GC::FireGCFinished(const GCTask &task, size_t bytes_in_heap_before_gc, size_t bytes_in_heap_after_gc)
+void GC::FireGCFinished(const GCTask &task, size_t bytesInHeapBeforeGc, size_t bytesInHeapAfterGc)
 {
-    for (auto listener : *gc_listeners_ptr_) {
+    for (auto listener : *gcListenersPtr_) {
         if (listener != nullptr) {
-            listener->GCFinished(task, bytes_in_heap_before_gc, bytes_in_heap_after_gc);
+            listener->GCFinished(task, bytesInHeapBeforeGc, bytesInHeapAfterGc);
         }
     }
 }
 
 void GC::FireGCPhaseStarted(GCPhase phase)
 {
-    for (auto listener : *gc_listeners_ptr_) {
+    for (auto listener : *gcListenersPtr_) {
         if (listener != nullptr) {
             listener->GCPhaseStarted(phase);
         }
@@ -923,7 +922,7 @@ void GC::FireGCPhaseStarted(GCPhase phase)
 
 void GC::FireGCPhaseFinished(GCPhase phase)
 {
-    for (auto listener : *gc_listeners_ptr_) {
+    for (auto listener : *gcListenersPtr_) {
         if (listener != nullptr) {
             listener->GCPhaseFinished(phase);
         }

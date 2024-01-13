@@ -44,19 +44,19 @@ class MemoryManager;
 
 class HeapManager {
 public:
-    bool Initialize(GCType gc_type, bool single_threaded, bool use_tlab, MemStatsType *mem_stats,
-                    InternalAllocatorPtr internal_allocator, bool create_pygote_space);
+    bool Initialize(GCType gcType, bool singleThreaded, bool useTlab, MemStatsType *memStats,
+                    InternalAllocatorPtr internalAllocator, bool createPygoteSpace);
 
     bool Finalize();
 
     [[nodiscard]] PANDA_PUBLIC_API ObjectHeader *AllocateObject(
         BaseClass *cls, size_t size, Alignment align = DEFAULT_ALIGNMENT, ManagedThread *thread = nullptr,
-        ObjectAllocatorBase::ObjMemInitPolicy obj_init_type = ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT);
+        ObjectAllocatorBase::ObjMemInitPolicy objInitType = ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT);
 
     template <bool IS_FIRST_CLASS_CLASS = false>
     [[nodiscard]] ObjectHeader *AllocateNonMovableObject(
         BaseClass *cls, size_t size, Alignment align = DEFAULT_ALIGNMENT, ManagedThread *thread = nullptr,
-        ObjectAllocatorBase::ObjMemInitPolicy obj_init_type = ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT);
+        ObjectAllocatorBase::ObjMemInitPolicy objInitType = ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT);
 
     /**
      * @brief Allocates memory for ExtFrame, but do not construct it
@@ -64,14 +64,14 @@ public:
      * @param ext_sz - size of frame extension in bytes
      * @return pointer to Frame
      */
-    [[nodiscard]] PANDA_PUBLIC_API Frame *AllocateExtFrame(size_t size, size_t ext_sz);
+    [[nodiscard]] PANDA_PUBLIC_API Frame *AllocateExtFrame(size_t size, size_t extSz);
 
     /**
      * @brief Frees memory occupied by ExtFrame
      * @param frame - pointer to Frame
      * @param ext_sz - size of frame extension in bytes
      */
-    void PANDA_PUBLIC_API FreeExtFrame(Frame *frame, size_t ext_sz);
+    void PANDA_PUBLIC_API FreeExtFrame(Frame *frame, size_t extSz);
 
     CodeAllocator *GetCodeAllocator() const;
 
@@ -79,14 +79,14 @@ public:
 
     bool UseTLABForAllocations()
     {
-        return use_tlab_for_allocations_;
+        return useTlabForAllocations_;
     }
 
     bool CreateNewTLAB(ManagedThread *thread);
 
     size_t GetTLABMaxAllocSize()
     {
-        return UseTLABForAllocations() ? object_allocator_.AsObjectAllocator()->GetTLABMaxAllocSize() : 0;
+        return UseTLABForAllocations() ? objectAllocator_.AsObjectAllocator()->GetTLABMaxAllocSize() : 0;
     }
 
     /**
@@ -114,10 +114,10 @@ public:
 
     size_t VerifyHeapReferences()
     {
-        trace::ScopedTrace scoped_trace(__FUNCTION__);
-        size_t fail_count = 0;
-        HeapObjectVerifier verifier(this, &fail_count);
-        object_allocator_->IterateOverObjects(verifier);
+        trace::ScopedTrace scopedTrace(__FUNCTION__);
+        size_t failCount = 0;
+        HeapObjectVerifier verifier(this, &failCount);
+        objectAllocator_->IterateOverObjects(verifier);
         return verifier.GetFailCount();
     }
 
@@ -145,7 +145,7 @@ public:
     void SetRegisterFinalizeReferenceFunc(RegisterFinalizeReferenceFunc func);
 
     bool IsObjectFinalized(BaseClass *cls);
-    void RegisterFinalizedObject(ObjectHeader *object, BaseClass *cls, bool is_object_finalizable);
+    void RegisterFinalizedObject(ObjectHeader *object, BaseClass *cls, bool isObjectFinalizable);
 
     void SetPandaVM(PandaVM *vm);
 
@@ -161,17 +161,17 @@ public:
 
     RuntimeNotificationManager *GetNotificationManager() const
     {
-        return notification_manager_;
+        return notificationManager_;
     }
 
     MemStatsType *GetMemStats() const
     {
-        return mem_stats_;
+        return memStats_;
     }
 
-    ALWAYS_INLINE void IterateOverObjects(const ObjectVisitor &object_visitor)
+    ALWAYS_INLINE void IterateOverObjects(const ObjectVisitor &objectVisitor)
     {
-        GetObjectAllocator()->IterateOverObjects(object_visitor);
+        GetObjectAllocator()->IterateOverObjects(objectVisitor);
     }
 
     ALWAYS_INLINE void PinObject(ObjectHeader *object)
@@ -204,7 +204,7 @@ public:
         return GetObjectAllocator().AsObjectAllocator()->ContainObject(obj);
     }
 
-    HeapManager() : target_utilization_(DEFAULT_TARGET_UTILIZATION) {}
+    HeapManager() : targetUtilization_(DEFAULT_TARGET_UTILIZATION) {}
 
     ~HeapManager() = default;
 
@@ -213,19 +213,19 @@ public:
 
 private:
     template <GCType GC_TYPE, MTModeT MT_MODE = MT_MODE_MULTI>
-    bool Initialize(MemStatsType *mem_stats, bool create_pygote_space)
+    bool Initialize(MemStatsType *memStats, bool createPygoteSpace)
     {
-        ASSERT(!is_initialized_);
-        is_initialized_ = true;
+        ASSERT(!isInitialized_);
+        isInitialized_ = true;
 
-        code_allocator_ = new (std::nothrow) CodeAllocator(mem_stats);
+        codeAllocator_ = new (std::nothrow) CodeAllocator(memStats);
         // For now, crossing map is shared by diffrent VMs.
         if (!CrossingMapSingleton::IsCreated()) {
             CrossingMapSingleton::Create();
         }
-        object_allocator_ = new (std::nothrow)
-            typename AllocConfig<GC_TYPE, MT_MODE>::ObjectAllocatorType(mem_stats, create_pygote_space);
-        return (code_allocator_ != nullptr) && (internal_allocator_ != nullptr) && (object_allocator_ != nullptr);
+        objectAllocator_ =
+            new (std::nothrow) typename AllocConfig<GC_TYPE, MT_MODE>::ObjectAllocatorType(memStats, createPygoteSpace);
+        return (codeAllocator_ != nullptr) && (internalAllocator_ != nullptr) && (objectAllocator_ != nullptr);
     }
 
     /**
@@ -240,24 +240,24 @@ private:
     void TriggerGCIfNeeded();
 
     void *TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread,
-                        ObjectAllocatorBase::ObjMemInitPolicy obj_init_type);
+                        ObjectAllocatorBase::ObjMemInitPolicy objInitType);
 
     void *AllocByTLAB(size_t size, ManagedThread *thread);
 
     void *AllocateMemoryForObject(size_t size, Alignment align, ManagedThread *thread,
-                                  ObjectAllocatorBase::ObjMemInitPolicy obj_init_type);
+                                  ObjectAllocatorBase::ObjMemInitPolicy objInitType);
 
     ObjectAllocatorPtr GetObjectAllocator();
 
     static constexpr float DEFAULT_TARGET_UTILIZATION = 0.5;
 
-    bool is_initialized_ = false;
-    bool use_runtime_internal_allocator_ {true};
-    CodeAllocator *code_allocator_ = nullptr;
-    InternalAllocatorPtr internal_allocator_ = nullptr;
-    ObjectAllocatorPtr object_allocator_ = nullptr;
+    bool isInitialized_ = false;
+    bool useRuntimeInternalAllocator_ {true};
+    CodeAllocator *codeAllocator_ = nullptr;
+    InternalAllocatorPtr internalAllocator_ = nullptr;
+    ObjectAllocatorPtr objectAllocator_ = nullptr;
 
-    bool use_tlab_for_allocations_ = false;
+    bool useTlabForAllocations_ = false;
 
     /// StackFrameAllocator is per thread
     StackFrameAllocator *GetCurrentStackFrameAllocator();
@@ -273,14 +273,14 @@ private:
      * To implement the getTargetHeapUtilization and nativeSetTargetHeapUtilization, I set a variable here.
      * It may need to be initialized, but now I give it a fixed initial value 0.5
      */
-    float target_utilization_;
+    float targetUtilization_;
 
-    IsObjectFinalizebleFunc is_object_finalizeble_func_ = nullptr;
-    RegisterFinalizeReferenceFunc register_finalize_reference_func_ = nullptr;
+    IsObjectFinalizebleFunc isObjectFinalizebleFunc_ = nullptr;
+    RegisterFinalizeReferenceFunc registerFinalizeReferenceFunc_ = nullptr;
     PandaVM *vm_ {nullptr};
-    MemStatsType *mem_stats_ {nullptr};
+    MemStatsType *memStats_ {nullptr};
     mem::GC *gc_ = nullptr;
-    RuntimeNotificationManager *notification_manager_ = nullptr;
+    RuntimeNotificationManager *notificationManager_ = nullptr;
 };
 
 }  // namespace panda::mem

@@ -25,7 +25,7 @@
 #ifdef PANDA_LLVM_IRTOC
 #include "llvm_compiler_creator.h"
 #include "llvm_options.h"
-#endif
+#endif  // PANDA_LLVM_IRTOC
 
 namespace panda::irtoc {
 
@@ -71,7 +71,7 @@ public:
     using Result = Expected<CompilationResult, const char *>;
 
 #ifdef PANDA_LLVM_IRTOC
-    Function() : llvm_compiler_(nullptr) {}
+    Function() : llvmCompiler_(nullptr) {}
 #else
     Function() = default;
 #endif
@@ -83,7 +83,7 @@ public:
     virtual void MakeGraphImpl() = 0;
     virtual const char *GetName() const = 0;
 
-    Result Compile(Arch arch, ArenaAllocator *allocator, ArenaAllocator *local_allocator);
+    Result Compile(Arch arch, ArenaAllocator *allocator, ArenaAllocator *localAllocator);
 
     auto GetCode() const
     {
@@ -109,13 +109,13 @@ public:
 
     const auto &GetRelocations() const
     {
-        return relocation_entries_;
+        return relocationEntries_;
     }
 
     const char *GetExternalFunction(size_t index) const
     {
-        CHECK_LT(index, external_functions_.size());
-        return external_functions_[index].c_str();
+        CHECK_LT(index, externalFunctions_.size());
+        return externalFunctions_[index].c_str();
     }
 
     SourceLanguage GetLanguage() const
@@ -125,56 +125,56 @@ public:
 
     uint32_t AddSourceDir(std::string_view dir)
     {
-        auto it = std::find(source_dirs_.begin(), source_dirs_.end(), dir);
-        if (it != source_dirs_.end()) {
-            return std::distance(source_dirs_.begin(), it);
+        auto it = std::find(sourceDirs_.begin(), sourceDirs_.end(), dir);
+        if (it != sourceDirs_.end()) {
+            return std::distance(sourceDirs_.begin(), it);
         }
-        source_dirs_.emplace_back(dir);
-        return source_dirs_.size() - 1;
+        sourceDirs_.emplace_back(dir);
+        return sourceDirs_.size() - 1;
     }
 
     uint32_t AddSourceFile(std::string_view filename)
     {
-        auto it = std::find(source_files_.begin(), source_files_.end(), filename);
-        if (it != source_files_.end()) {
-            return std::distance(source_files_.begin(), it);
+        auto it = std::find(sourceFiles_.begin(), sourceFiles_.end(), filename);
+        if (it != sourceFiles_.end()) {
+            return std::distance(sourceFiles_.begin(), it);
         }
-        source_files_.emplace_back(filename);
-        return source_files_.size() - 1;
+        sourceFiles_.emplace_back(filename);
+        return sourceFiles_.size() - 1;
     }
 
     uint32_t GetSourceFileIndex(const char *filename) const
     {
-        auto it = std::find(source_files_.begin(), source_files_.end(), filename);
-        ASSERT(it != source_files_.end());
-        return std::distance(source_files_.begin(), it);
+        auto it = std::find(sourceFiles_.begin(), sourceFiles_.end(), filename);
+        ASSERT(it != sourceFiles_.end());
+        return std::distance(sourceFiles_.begin(), it);
     }
 
     uint32_t GetSourceDirIndex(const char *dir) const
     {
-        auto it = std::find(source_dirs_.begin(), source_dirs_.end(), dir);
-        ASSERT(it != source_dirs_.end());
-        return std::distance(source_dirs_.begin(), it);
+        auto it = std::find(sourceDirs_.begin(), sourceDirs_.end(), dir);
+        ASSERT(it != sourceDirs_.end());
+        return std::distance(sourceDirs_.begin(), it);
     }
 
     Span<const std::string> GetSourceFiles() const
     {
-        return Span<const std::string>(source_files_);
+        return Span<const std::string>(sourceFiles_);
     }
 
     Span<const std::string> GetSourceDirs() const
     {
-        return Span<const std::string>(source_dirs_);
+        return Span<const std::string>(sourceDirs_);
     }
 
-    void SetArgsCount(size_t args_count)
+    void SetArgsCount(size_t argsCount)
     {
-        args_count_ = args_count;
+        argsCount_ = argsCount;
     }
 
     size_t GetArgsCount() const
     {
-        return GetArch() != Arch::AARCH32 ? args_count_ : 0U;
+        return GetArch() != Arch::AARCH32 ? argsCount_ : 0U;
     }
 
 #ifdef PANDA_LLVM_IRTOC
@@ -182,19 +182,19 @@ public:
 
     void SetLLVMCompiler(std::shared_ptr<llvmbackend::CompilerInterface> compiler)
     {
-        llvm_compiler_ = std::move(compiler);
+        llvmCompiler_ = std::move(compiler);
     }
 
 #endif  // PANDA_LLVM_IRTOC
 
     bool IsCompiledByLlvm() const
     {
-        return compilation_result_ == CompilationResult::LLVM;
+        return compilationResult_ == CompilationResult::LLVM;
     }
 
     CompilationResult GetCompilationResult()
     {
-        return compilation_result_;
+        return compilationResult_;
     }
 
     size_t GetCodeSize()
@@ -217,7 +217,7 @@ protected:
 
     void SetExternalFunctions(std::initializer_list<std::string> funcs)
     {
-        external_functions_ = funcs;
+        externalFunctions_ = funcs;
     }
 
     void SetLanguage(SourceLanguage lang)
@@ -256,27 +256,27 @@ private:
     compiler::Graph *graph_ {nullptr};
     SourceLanguage lang_ {SourceLanguage::PANDA_ASSEMBLY};
     std::vector<uint8_t> code_;
-    std::vector<std::string> external_functions_;
-    std::vector<std::string> source_dirs_;
-    std::vector<std::string> source_files_;
-    std::vector<compiler::RelocationInfo> relocation_entries_;
-    size_t args_count_ {0U};
-    CompilationResult compilation_result_ {CompilationResult::INVALID};
+    std::vector<std::string> externalFunctions_;
+    std::vector<std::string> sourceDirs_;
+    std::vector<std::string> sourceFiles_;
+    std::vector<compiler::RelocationInfo> relocationEntries_;
+    size_t argsCount_ {0U};
+    CompilationResult compilationResult_ {CompilationResult::INVALID};
 #ifdef PANDA_LLVM_IRTOC
-    std::shared_ptr<llvmbackend::CompilerInterface> llvm_compiler_ {nullptr};
+    std::shared_ptr<llvmbackend::CompilerInterface> llvmCompiler_ {nullptr};
 #ifdef PANDA_LLVM_INTERPRETER
     static constexpr std::array SKIPPED_HANDLERS = {
         "ExecuteImplFast",
         "ExecuteImplFastEH",
     };
-#endif
+#endif  // PANDA_LLVM_INTERPRETER
 #ifdef PANDA_LLVM_FASTPATH
     static constexpr std::array SKIPPED_FASTPATHS = {
         "IntfInlineCache",
         "StringHashCode",  // NOTE: To investigate if LLVM code is better (no MAdd)
         "StringHashCodeCompressed",
     };
-#endif
+#endif  // PANDA_LLVM_FASTPATH
 #endif  // PANDA_LLVM_IRTOC
 };
 }  // namespace panda::irtoc

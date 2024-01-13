@@ -28,19 +28,19 @@ struct MemberInfo {
     const char *name;
 };
 
-static void CheckOffsetOfFields(const char *class_name, const std::vector<MemberInfo> &members_list)
+static void CheckOffsetOfFields(const char *className, const std::vector<MemberInfo> &membersList)
 {
     ScopedManagedCodeThread scoped(ManagedThread::GetCurrent());
 
-    EtsClassLinker *ets_class_linker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    EtsClass *klass = ets_class_linker->GetClass(class_name);
+    EtsClassLinker *etsClassLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    EtsClass *klass = etsClassLinker->GetClass(className);
     ASSERT_NE(klass, nullptr);
-    ASSERT_EQ(klass->GetInstanceFieldsNumber(), members_list.size());
+    ASSERT_EQ(klass->GetInstanceFieldsNumber(), membersList.size());
 
-    for (const auto &member_info : members_list) {
-        EtsField *field = klass->GetFieldIDByOffset(member_info.offset);
+    for (const auto &memberInfo : membersList) {
+        EtsField *field = klass->GetFieldIDByOffset(memberInfo.offset);
         ASSERT_NE(field, nullptr);
-        EXPECT_STREQ(field->GetName(), member_info.name);
+        EXPECT_STREQ(field->GetName(), memberInfo.name);
     }
 }
 

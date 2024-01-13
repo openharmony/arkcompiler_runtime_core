@@ -18,6 +18,7 @@ llvm::FunctionType *GetEntrypointDeclaration(llvm::LLVMContext &ctx, llvm::Modul
 {
     constexpr auto GC_SPACE = panda::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE;
     // We hope that ARK will not use segmentated memory and size_t will have the same width as uintptr_t
+    // NOLINTNEXTLINE(readability-identifier-naming)
     auto size_type = llvm::Type::getIntNTy(ctx, module->getDataLayout().getPointerSizeInBits(0));
     switch (id) {
 % Compiler::entrypoints.each do |entrypoint|

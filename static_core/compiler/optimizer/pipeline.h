@@ -44,13 +44,13 @@ public:
     }
 
     template <TaskRunnerMode RUNNER_MODE>
-    static void Run(CompilerTaskRunner<RUNNER_MODE> task_runner);
+    static void Run(CompilerTaskRunner<RUNNER_MODE> taskRunner);
 
     static std::unique_ptr<Pipeline> Create(Graph *graph);
 
 private:
     template <TaskRunnerMode RUNNER_MODE>
-    static void RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> task_runner);
+    static void RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> taskRunner);
 
     Graph *graph_ {nullptr};
 };

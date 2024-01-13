@@ -15,8 +15,8 @@
 
 #include "ets_napi.h"
 #include <string>
-#include <cassert>
 #include <iostream>
+#include <cassert>
 #include <vector>
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -34,15 +34,15 @@ std::string GetString(EtsEnv *env, ets_string const &estr)
 }
 
 template <typename ValueType>
-std::vector<ValueType> EtsArrToVec(ValueType *buf, ets_size size_arr)
+std::vector<ValueType> EtsArrToVec(ValueType *buf, ets_size sizeArr)
 {
     if (buf == nullptr) {
         std::cerr << "Array empty, failed to get array";
         exit(1);
     }
     std::vector<ValueType> vec;
-    vec.reserve(size_arr);
-    for (ets_size i = 0; i < size_arr; i++) {
+    vec.reserve(sizeArr);
+    for (ets_size i = 0; i < sizeArr; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         vec.push_back(buf[i]);
     }
@@ -51,7 +51,7 @@ std::vector<ValueType> EtsArrToVec(ValueType *buf, ets_size size_arr)
 
 bool Equal(double a1, double a2)
 {
-    return std::abs(a1 - a2) < 0.000001;
+    return std::abs(a1 - a2) < 0.000001F;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

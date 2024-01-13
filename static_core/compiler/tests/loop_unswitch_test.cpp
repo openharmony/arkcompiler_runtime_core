@@ -1127,112 +1127,112 @@ public:
     ConditionComparatorTest()
     {
         GetGraph()->CreateStartBlock();
-        first_input = GetGraph()->FindOrCreateConstant(10U);
-        second_input = GetGraph()->FindOrCreateConstant(20U);
-        third_input = GetGraph()->FindOrCreateConstant(30U);
+        firstInput = GetGraph()->FindOrCreateConstant(10U);
+        secondInput = GetGraph()->FindOrCreateConstant(20U);
+        thirdInput = GetGraph()->FindOrCreateConstant(30U);
     }
     Inst *CreateInstIfImm(Inst *input, uint64_t imm, ConditionCode cc)
     {
         auto inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, input, imm, input->GetType(), cc);
         return inst;
     }
-    Inst *CreateInstIfImm(Inst *input0, Inst *input1, ConditionCode compare_cc, uint64_t imm, ConditionCode if_cc)
+    Inst *CreateInstIfImm(Inst *input0, Inst *input1, ConditionCode compareCc, uint64_t imm, ConditionCode ifCc)
     {
-        auto compare_inst =
-            GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, input0, input1, input0->GetType(), compare_cc);
-        auto inst = GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, compare_inst, imm,
-                                                compare_inst->GetType(), if_cc);
+        auto compareInst =
+            GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, input0, input1, input0->GetType(), compareCc);
+        auto inst =
+            GetGraph()->CreateInstIfImm(DataType::NO_TYPE, INVALID_PC, compareInst, imm, compareInst->GetType(), ifCc);
         return inst;
     }
 
-    Inst *first_input;   // NOLINT(misc-non-private-member-variables-in-classes)
-    Inst *second_input;  // NOLINT(misc-non-private-member-variables-in-classes)
-    Inst *third_input;   // NOLINT(misc-non-private-member-variables-in-classes)
+    Inst *firstInput;   // NOLINT(misc-non-private-member-variables-in-classes)
+    Inst *secondInput;  // NOLINT(misc-non-private-member-variables-in-classes)
+    Inst *thirdInput;   // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 TEST_F(ConditionComparatorTest, TestNoCompareInput)
 {
     {
-        auto if_imm0 = CreateInstIfImm(first_input, 10U, ConditionCode::CC_EQ);
-        auto if_imm1 = CreateInstIfImm(first_input, 10U, ConditionCode::CC_EQ);
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, 10U, ConditionCode::CC_EQ);
+        auto ifImm1 = CreateInstIfImm(firstInput, 10U, ConditionCode::CC_EQ);
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, true));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, 1U, ConditionCode::CC_EQ);
-        auto if_imm1 = CreateInstIfImm(second_input, 1U, ConditionCode::CC_EQ);
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, 1U, ConditionCode::CC_EQ);
+        auto ifImm1 = CreateInstIfImm(secondInput, 1U, ConditionCode::CC_EQ);
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, true));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, 1U, ConditionCode::CC_EQ);
-        auto if_imm1 = CreateInstIfImm(first_input, 1U, ConditionCode::CC_EQ);
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, 1U, ConditionCode::CC_EQ);
+        auto ifImm1 = CreateInstIfImm(firstInput, 1U, ConditionCode::CC_EQ);
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, true));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, 0U, ConditionCode::CC_EQ);
-        auto if_imm1 = CreateInstIfImm(first_input, 1U, ConditionCode::CC_EQ);
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, 0U, ConditionCode::CC_EQ);
+        auto ifImm1 = CreateInstIfImm(firstInput, 1U, ConditionCode::CC_EQ);
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, true));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, 1U, ConditionCode::CC_NE);
-        auto if_imm1 = CreateInstIfImm(first_input, 1U, ConditionCode::CC_EQ);
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, 1U, ConditionCode::CC_NE);
+        auto ifImm1 = CreateInstIfImm(firstInput, 1U, ConditionCode::CC_EQ);
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, true));
     }
 }
 
 TEST_F(ConditionComparatorTest, TestCompareInput)
 {
     {
-        auto if_imm0 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 10U, ConditionCode::CC_NE);
-        auto if_imm1 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 10U, ConditionCode::CC_NE);
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 10U, ConditionCode::CC_NE);
+        auto ifImm1 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 10U, ConditionCode::CC_NE);
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, true));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 1U, ConditionCode::CC_NE);
-        auto if_imm1 = CreateInstIfImm(first_input, third_input, ConditionCode::CC_LT, 1U, ConditionCode::CC_NE);
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 1U, ConditionCode::CC_NE);
+        auto ifImm1 = CreateInstIfImm(firstInput, thirdInput, ConditionCode::CC_LT, 1U, ConditionCode::CC_NE);
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, true));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 0U, ConditionCode::CC_NE);
-        auto if_imm1 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 0U, ConditionCode::CC_NE);
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 0U, ConditionCode::CC_NE);
+        auto ifImm1 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 0U, ConditionCode::CC_NE);
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, true));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 0U, ConditionCode::CC_NE);
-        auto if_imm1 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_GE, 0U, ConditionCode::CC_NE);
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, true));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
+        auto ifImm0 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 0U, ConditionCode::CC_NE);
+        auto ifImm1 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_GE, 0U, ConditionCode::CC_NE);
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, true));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 0U, ConditionCode::CC_NE);
-        auto if_imm1 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 0U, ConditionCode::CC_EQ);
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, true));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
+        auto ifImm0 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 0U, ConditionCode::CC_NE);
+        auto ifImm1 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 0U, ConditionCode::CC_EQ);
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, true));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_GE, 0U, ConditionCode::CC_NE);
-        auto if_imm1 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 0U, ConditionCode::CC_EQ);
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, false));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, true));
+        auto ifImm0 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_GE, 0U, ConditionCode::CC_NE);
+        auto ifImm1 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 0U, ConditionCode::CC_EQ);
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, false));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, true));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_GE, 0U, ConditionCode::CC_NE);
-        auto if_imm1 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_LT, 1U, ConditionCode::CC_EQ);
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, true));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
+        auto ifImm0 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_GE, 0U, ConditionCode::CC_NE);
+        auto ifImm1 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_LT, 1U, ConditionCode::CC_EQ);
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, true));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
     }
     {
-        auto if_imm0 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_GE, 0U, ConditionCode::CC_EQ);
-        auto if_imm1 = CreateInstIfImm(first_input, second_input, ConditionCode::CC_GE, 1U, ConditionCode::CC_EQ);
-        ASSERT_TRUE(IsConditionEqual(if_imm0, if_imm1, true));
-        ASSERT_FALSE(IsConditionEqual(if_imm0, if_imm1, false));
+        auto ifImm0 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_GE, 0U, ConditionCode::CC_EQ);
+        auto ifImm1 = CreateInstIfImm(firstInput, secondInput, ConditionCode::CC_GE, 1U, ConditionCode::CC_EQ);
+        ASSERT_TRUE(IsConditionEqual(ifImm0, ifImm1, true));
+        ASSERT_FALSE(IsConditionEqual(ifImm0, ifImm1, false));
     }
 }
 // NOLINTEND(readability-magic-numbers,readability-function-size)

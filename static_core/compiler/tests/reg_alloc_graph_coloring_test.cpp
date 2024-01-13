@@ -29,11 +29,11 @@ public:
     {
         ASSERT(param->IsParameter());
         ASSERT(param->GetNext()->IsSpillFill());
-        auto spill_fill = param->GetNext()->CastToSpillFill()->GetSpillFill(0U);
-        auto param_liveness = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetInstLifeIntervals(param);
-        EXPECT_EQ(param_liveness->GetReg(), spill_fill.SrcValue());
-        EXPECT_EQ(param_liveness->GetSibling()->GetReg(), spill_fill.DstValue());
-        return spill_fill;
+        auto spillFill = param->GetNext()->CastToSpillFill()->GetSpillFill(0U);
+        auto paramLiveness = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetInstLifeIntervals(param);
+        EXPECT_EQ(paramLiveness->GetReg(), spillFill.SrcValue());
+        EXPECT_EQ(paramLiveness->GetSibling()->GetReg(), spillFill.DstValue());
+        return spillFill;
     }
 };
 
@@ -77,13 +77,13 @@ TEST_F(RegAllocGraphColoringTest, Simple)
     EXPECT_NE(INS(0U).GetDstReg(), INS(2U).GetDstReg());
 
     auto arch = GetGraph()->GetArch();
-    size_t first_callee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0U;
-    EXPECT_LT(INS(0U).CastToParameter()->GetLocationData().DstValue(), first_callee);
-    EXPECT_LT(INS(1U).GetDstReg(), first_callee);
-    EXPECT_LT(INS(2U).GetDstReg(), first_callee);
-    EXPECT_LT(INS(5U).GetDstReg(), first_callee);
-    EXPECT_LT(INS(6U).GetDstReg(), first_callee);
-    EXPECT_LT(INS(7U).GetDstReg(), first_callee);
+    size_t firstCallee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0U;
+    EXPECT_LT(INS(0U).CastToParameter()->GetLocationData().DstValue(), firstCallee);
+    EXPECT_LT(INS(1U).GetDstReg(), firstCallee);
+    EXPECT_LT(INS(2U).GetDstReg(), firstCallee);
+    EXPECT_LT(INS(5U).GetDstReg(), firstCallee);
+    EXPECT_LT(INS(6U).GetDstReg(), firstCallee);
+    EXPECT_LT(INS(7U).GetDstReg(), firstCallee);
 }
 
 TEST_F(RegAllocGraphColoringTest, AffineComponent)
@@ -188,20 +188,20 @@ TEST_F(RegAllocGraphColoringTest, SimpleCall)
     }
     auto regalloc = RegAllocGraphColoring(GetGraph());
     auto arch = GetGraph()->GetArch();
-    size_t first_callee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0U;
+    size_t firstCallee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0U;
 
     auto result = regalloc.Run();
     ASSERT_TRUE(result);
     GraphChecker(GetGraph()).Check();
 
-    auto param1_sf = GetParameterSpillFilll(&INS(1U));
-    EXPECT_NE(param1_sf.DstValue(), INS(8U).GetDstReg());
-    EXPECT_NE(param1_sf.DstValue(), INS(2U).GetDstReg());
-    EXPECT_NE(param1_sf.DstValue(), INS(3U).GetDstReg());
+    auto param1Sf = GetParameterSpillFilll(&INS(1U));
+    EXPECT_NE(param1Sf.DstValue(), INS(8U).GetDstReg());
+    EXPECT_NE(param1Sf.DstValue(), INS(2U).GetDstReg());
+    EXPECT_NE(param1Sf.DstValue(), INS(3U).GetDstReg());
 
     // Check intervals in calle registers and splits
-    EXPECT_LT(INS(0U).GetDstReg(), first_callee);
-    EXPECT_GE(param1_sf.DstValue(), first_callee);
+    EXPECT_LT(INS(0U).GetDstReg(), firstCallee);
+    EXPECT_GE(param1Sf.DstValue(), firstCallee);
 }
 
 // Check fallback to Linearscan (spilling is not implemented yet)

@@ -45,7 +45,7 @@ panda_add_library(etsnapi_lib SHARED
 set_target_properties(etsnapi_lib PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${GEN_ETSNAPI_LIB_DIR})
 panda_target_link_libraries(etsnapi_lib arkruntime)
 panda_add_sanitizers(TARGET etsnapi_lib SANITIZERS ${PANDA_SANITIZERS_LIST})
-panda_target_include_directories(etsnapi_lib PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi)
+panda_target_include_directories(etsnapi_lib PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/napi ${PANDA_ROOT})
 
 panda_add_library(etsnapi_lib_new SHARED
     lib/EtsnapiVersionHookTest.cpp

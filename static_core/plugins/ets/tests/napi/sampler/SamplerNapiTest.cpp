@@ -14,6 +14,7 @@
  */
 
 #include "SamplerNapiTest.h"
+#include "libpandabase/utils/utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,7 +30,7 @@ ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSlowFunction([[maybe_unused]] Et
     for (ets_int i = 0; i < iterations; i++) {
         ++res;
     }
-    for (int k = 0; k < 4; ++k) {
+    for (size_t k = 0; k < 4U; ++k) {
         for (ets_int i = 0; i < iterations; i++) {
             res = res ^ i;
         }

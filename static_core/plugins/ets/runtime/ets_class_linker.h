@@ -36,19 +36,19 @@ class EtsCoroutine;
 
 class PANDA_PUBLIC_API EtsClassLinker {
 public:
-    static Expected<PandaUniquePtr<EtsClassLinker>, PandaString> Create(ClassLinker *class_linker);
+    static Expected<PandaUniquePtr<EtsClassLinker>, PandaString> Create(ClassLinker *classLinker);
     ~EtsClassLinker() = default;
 
     bool Initialize();
 
     bool InitializeClass(EtsCoroutine *coroutine, EtsClass *klass);
     EtsClass *GetClassRoot(EtsClassRoot root) const;
-    EtsClass *GetClass(const char *name, bool need_copy_descriptor = false,
-                       ClassLinkerContext *class_linker_context = nullptr,
-                       ClassLinkerErrorHandler *error_handler = nullptr);
+    EtsClass *GetClass(const char *name, bool needCopyDescriptor = false,
+                       ClassLinkerContext *classLinkerContext = nullptr,
+                       ClassLinkerErrorHandler *errorHandler = nullptr);
     EtsClass *GetClass(const panda_file::File &pf, panda_file::File::EntityId id,
-                       ClassLinkerContext *class_linker_context = nullptr,
-                       ClassLinkerErrorHandler *error_handler = nullptr);
+                       ClassLinkerContext *classLinkerContext = nullptr,
+                       ClassLinkerErrorHandler *errorHandler = nullptr);
     Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id);
     Method *GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine);
     EtsClass *GetPromiseClass();
@@ -69,9 +69,9 @@ public:
     NO_MOVE_SEMANTIC(EtsClassLinker);
 
 private:
-    explicit EtsClassLinker(ClassLinker *class_linker);
+    explicit EtsClassLinker(ClassLinker *classLinker);
 
-    ClassLinker *class_linker_ {};
+    ClassLinker *classLinker_ {};
     EtsClassLinkerExtension *ext_ {};
 
     friend class mem::Allocator;

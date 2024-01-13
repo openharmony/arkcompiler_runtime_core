@@ -120,7 +120,7 @@ public:
         using reference = value_type &;
         // NOLINTEND(readability-identifier-naming)
 
-        explicit Iterator(IteratorType *param_pointer) : pointer_(param_pointer) {}
+        explicit Iterator(IteratorType *paramPointer) : pointer_(paramPointer) {}
 
         IteratorType *operator->()
         {
@@ -571,42 +571,42 @@ private:
             return false;
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-        size_t size_required = buffer.size + size;
-        if (size_required > N) {
-            MoveToVector(size_required);
+        size_t sizeRequired = buffer.size + size;
+        if (sizeRequired > N) {
+            MoveToVector(sizeRequired);
             return false;
         }
         return true;
     }
 
-    void MoveStaticBufferData(VectorType &tmp_vector)
+    void MoveStaticBufferData(VectorType &tmpVector)
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         for (uint32_t i = 0; i < buffer.size; ++i) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            tmp_vector.emplace_back(std::move(buffer.data[i]));
+            tmpVector.emplace_back(std::move(buffer.data[i]));
         }
     }
 
-    void MoveToVector(size_t reserved_size)
+    void MoveToVector(size_t reservedSize)
     {
         ASSERT(IsStatic());
         allocator_ = reinterpret_cast<Allocator *>(bit_cast<uintptr_t>(allocator_) & ~1LLU);
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (USE_ALLOCATOR) {
             ASSERT(allocator_ != nullptr);
-            VectorType tmp_vector(allocator_->Adapter());
-            tmp_vector.reserve(reserved_size);
-            MoveStaticBufferData(tmp_vector);
+            VectorType tmpVector(allocator_->Adapter());
+            tmpVector.reserve(reservedSize);
+            MoveStaticBufferData(tmpVector);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            new (&vector) VectorType(std::move(tmp_vector));
+            new (&vector) VectorType(std::move(tmpVector));
             // NOLINTNEXTLINE(readability-misleading-indentation)
         } else {
-            VectorType tmp_vector;
-            tmp_vector.reserve(reserved_size);
-            MoveStaticBufferData(tmp_vector);
+            VectorType tmpVector;
+            tmpVector.reserve(reservedSize);
+            MoveStaticBufferData(tmpVector);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-            new (&vector) VectorType(std::move(tmp_vector));
+            new (&vector) VectorType(std::move(tmpVector));
         }
     }
 

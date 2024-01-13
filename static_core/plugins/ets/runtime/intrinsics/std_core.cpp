@@ -47,14 +47,14 @@ extern "C" EtsArray *StdCoreStackTraceLines()
     for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
         Method *method = stack.GetMethod();
         auto *source = method->GetClassSourceFile().data;
-        auto line_num = method->GetLineNumFromBytecodeOffset(stack.GetBytecodePc());
+        auto lineNum = method->GetLineNumFromBytecodeOffset(stack.GetBytecodePc());
 
         if (source == nullptr) {
             source = utf::CStringAsMutf8("<unknown>");
         }
 
         std::stringstream ss;
-        ss << method->GetClass()->GetName() << "." << method->GetName().data << " at " << source << ":" << line_num;
+        ss << method->GetClass()->GetName() << "." << method->GetName().data << " at " << source << ":" << lineNum;
         lines.push_back(ss.str());
     }
 
@@ -62,15 +62,15 @@ extern "C" EtsArray *StdCoreStackTraceLines()
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     auto *arr = panda::coretypes::Array::Create(klass, lines.size());
 
-    VMHandle<coretypes::Array> array_handle(coroutine, arr);
+    VMHandle<coretypes::Array> arrayHandle(coroutine, arr);
 
     for (panda::ArraySizeT i = 0; i < (panda::ArraySizeT)lines.size(); i++) {
         auto *str = coretypes::String::CreateFromMUtf8(utf::CStringAsMutf8(lines[i].data()), lines[i].length(), ctx,
                                                        thread->GetVM());
-        array_handle.GetPtr()->Set(i, str);
+        arrayHandle.GetPtr()->Set(i, str);
     }
 
-    return reinterpret_cast<EtsArray *>(array_handle.GetPtr());
+    return reinterpret_cast<EtsArray *>(arrayHandle.GetPtr());
 }
 
 extern "C" EtsVoid *StdCorePrintStackTrace()
@@ -99,8 +99,8 @@ extern "C" EtsVoid *LoadLibrary(panda::ets::EtsString *name)
     }
 
     auto coroutine = EtsCoroutine::GetCurrent();
-    auto name_str = name->GetMutf8();
-    if (name_str.empty()) {
+    auto nameStr = name->GetMutf8();
+    if (nameStr.empty()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::FILE_NOT_FOUND_EXCEPTION,
                           "The native library path is empty");
         return EtsVoid::GetInstance();
@@ -109,11 +109,11 @@ extern "C" EtsVoid *LoadLibrary(panda::ets::EtsString *name)
     ScopedNativeCodeThread snct(coroutine);
 
     auto env = coroutine->GetEtsNapiEnv();
-    if (!coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(name_str))) {
+    if (!coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr))) {
         ScopedManagedCodeThread smct(coroutine);
 
         PandaStringStream ss;
-        ss << "Cannot load native library " << name_str;
+        ss << "Cannot load native library " << nameStr;
 
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::EXCEPTION_IN_INITIALIZER_ERROR, ss.str());
     }

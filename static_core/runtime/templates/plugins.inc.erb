@@ -33,22 +33,22 @@ if (lang == <%= plugin_opts["lang_enum"] %>)
     }
 % end
 
-   static CoreLanguageContext core_ctx;
-   return &core_ctx;
+   static CoreLanguageContext coreCtx;
+   return &coreCtx;
 }
 
-panda_file::SourceLang RuntimeTypeToLang(const std::string &runtime_type) {
-    if (runtime_type == "core") {
+panda_file::SourceLang RuntimeTypeToLang(const std::string &runtimeType) {
+    if (runtimeType == "core") {
         return panda_file::SourceLang::PANDA_ASSEMBLY;
     }
 
 % Common::plugins.each do |plugin_lang, plugin_opts|
-    if (runtime_type == "<%= plugin_lang.downcase %>") {
+    if (runtimeType == "<%= plugin_lang.downcase %>") {
         return <%= plugin_opts["lang_enum"] %>;
     }
 % end
 
-    LOG(FATAL, RUNTIME) << "Incorrect runtime_type: " << runtime_type;
+    LOG(FATAL, RUNTIME) << "Incorrect runtime_type: " << runtimeType;
     UNREACHABLE();
     return panda::panda_file::SourceLang::PANDA_ASSEMBLY;
 }
@@ -69,13 +69,13 @@ std::string_view LangToRuntimeType(panda_file::SourceLang lang) {
     return "core";
 }
 
-bool HasRuntime(const std::string &runtime_type) {
-    if (runtime_type == "core") {
+bool HasRuntime(const std::string &runtimeType) {
+    if (runtimeType == "core") {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 
 % Common::plugins.each_key do |plugin_lang|
-    if (runtime_type == "<%= plugin_lang.downcase %>") {
+    if (runtimeType == "<%= plugin_lang.downcase %>") {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end

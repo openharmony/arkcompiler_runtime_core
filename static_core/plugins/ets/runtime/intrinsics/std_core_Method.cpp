@@ -44,37 +44,37 @@ EtsObject *TypeAPIMethodInvokeImplementation(EtsCoroutine *coro, EtsMethod *meth
         ASSERT(recv != nullptr);
         meth = recv->GetClass()->ResolveVirtualMethod(meth);
     }
-    size_t meth_args_count = meth->GetNumArgs();
-    PandaVector<Value> real_args {meth_args_count};
-    size_t first_real_arg = 0;
+    size_t methArgsCount = meth->GetNumArgs();
+    PandaVector<Value> realArgs {methArgsCount};
+    size_t firstRealArg = 0;
     if (!meth->IsStatic()) {
-        real_args[0] = Value(recv->GetCoreType());
-        first_real_arg = 1;
+        realArgs[0] = Value(recv->GetCoreType());
+        firstRealArg = 1;
     }
 
-    size_t args_length = args->GetLength();
-    if (meth_args_count - first_real_arg != args_length) {
+    size_t argsLength = args->GetLength();
+    if (methArgsCount - firstRealArg != argsLength) {
         UNREACHABLE();
     }
 
-    for (size_t i = 0; i < args_length; i++) {
+    for (size_t i = 0; i < argsLength; i++) {
         // issue #14003
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         auto arg = args->GetCoreType()->Get<ObjectHeader *>(i);
-        auto arg_type = meth->GetArgType(first_real_arg + i);
-        if (arg_type == EtsType::OBJECT) {
-            real_args[first_real_arg + i] = Value(arg);
+        auto argType = meth->GetArgType(firstRealArg + i);
+        if (argType == EtsType::OBJECT) {
+            realArgs[firstRealArg + i] = Value(arg);
             continue;
         }
-        EtsPrimitiveTypeEnumToComptimeConstant(arg_type, [&](auto type) -> void {
+        EtsPrimitiveTypeEnumToComptimeConstant(argType, [&](auto type) -> void {
             using T = EtsTypeEnumToCppType<decltype(type)::value>;
-            real_args[first_real_arg + i] =
+            realArgs[firstRealArg + i] =
                 Value(EtsBoxPrimitive<T>::FromCoreType(EtsObject::FromCoreType(arg))->GetValue());
         });
     }
 
-    ASSERT(meth->GetPandaMethod()->GetNumArgs() == real_args.size());
-    auto res = meth->GetPandaMethod()->Invoke(coro, real_args.data());
+    ASSERT(meth->GetPandaMethod()->GetNumArgs() == realArgs.size());
+    auto res = meth->GetPandaMethod()->Invoke(coro, realArgs.data());
     if (res.IsReference()) {
         return EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
     }
@@ -96,28 +96,28 @@ EtsObject *TypeAPIMethodInvoke(EtsString *desc, EtsObject *recv, EtsArray *args)
 {
     auto coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope {coro};
-    VMHandle<EtsObject> recv_handle {coro, recv->GetCoreType()};
-    VMHandle<EtsArray> args_handle {coro, args->GetCoreType()};
+    VMHandle<EtsObject> recvHandle {coro, recv->GetCoreType()};
+    VMHandle<EtsArray> argsHandle {coro, args->GetCoreType()};
     // this method shouldn't trigger gc, because class is loaded,
     // however static analyzer blames this line
     auto meth = EtsMethod::FromTypeDescriptor(desc->GetMutf8());
-    return TypeAPIMethodInvokeImplementation(coro, meth, recv_handle.GetPtr(), args_handle.GetPtr());
+    return TypeAPIMethodInvokeImplementation(coro, meth, recvHandle.GetPtr(), argsHandle.GetPtr());
 }
 
 EtsObject *TypeAPIMethodInvokeConstructor(EtsString *desc, EtsArray *args)
 {
     auto coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope {coro};
-    VMHandle<EtsArray> args_handle {coro, args->GetCoreType()};
-    VMHandle<EtsString> desc_handle {coro, desc->GetCoreType()};
+    VMHandle<EtsArray> argsHandle {coro, args->GetCoreType()};
+    VMHandle<EtsString> descHandle {coro, desc->GetCoreType()};
 
     auto meth = EtsMethod::FromTypeDescriptor(desc->GetMutf8());
     ASSERT(meth->IsConstructor());
     auto klass = meth->GetClass()->GetRuntimeClass();
-    auto inited_obj = ObjectHeader::Create(coro, klass);
-    ASSERT(inited_obj->ClassAddr<Class>() == klass);
-    VMHandle<EtsObject> ret {coro, inited_obj};
-    TypeAPIMethodInvokeImplementation(coro, meth, ret.GetPtr(), args_handle.GetPtr());
+    auto initedObj = ObjectHeader::Create(coro, klass);
+    ASSERT(initedObj->ClassAddr<Class>() == klass);
+    VMHandle<EtsObject> ret {coro, initedObj};
+    TypeAPIMethodInvokeImplementation(coro, meth, ret.GetPtr(), argsHandle.GetPtr());
     return ret.GetPtr();
 }
 }

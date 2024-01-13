@@ -65,15 +65,15 @@ public:
 
     struct StackMapSymbol {
         uint64_t idx;
-        uint64_t section_offset;
+        uint64_t sectionOffset;
     };
 
     static llvm::Expected<std::unique_ptr<CreatedObjectFile>> CopyOf(
-        llvm::MemoryBufferRef object_file_buffer,
-        const ObjectFilePostProcessor &object_file_post_processor = [](llvm::object::ObjectFile *) -> void {});
+        llvm::MemoryBufferRef objectFileBuffer,
+        const ObjectFilePostProcessor &objectFilePostProcessor = [](llvm::object::ObjectFile *) -> void {});
 
-    explicit CreatedObjectFile(std::unique_ptr<llvm::MemoryBuffer> object_file_buffer,
-                               std::unique_ptr<llvm::object::ObjectFile> object_file);
+    explicit CreatedObjectFile(std::unique_ptr<llvm::MemoryBuffer> objectFileBuffer,
+                               std::unique_ptr<llvm::object::ObjectFile> objectFile);
 
     llvm::object::ObjectFile *GetObjectFile() const;
 
@@ -81,7 +81,7 @@ public:
 
     SectionReference GetSection(const std::string &name) const;
 
-    SectionReference GetSectionByFunctionName(const std::string &full_function_name) const;
+    SectionReference GetSectionByFunctionName(const std::string &fullFunctionName) const;
 
     void WriteTo(std::string_view output) const;
 
@@ -89,8 +89,8 @@ public:
 
 private:
     std::unique_ptr<llvm::MemoryBuffer> buffer_;
-    std::unique_ptr<llvm::object::ObjectFile> object_file_;
-    std::map<llvm::StringRef, llvm::object::SectionRef> section_index_;
+    std::unique_ptr<llvm::object::ObjectFile> objectFile_;
+    std::map<llvm::StringRef, llvm::object::SectionRef> sectionIndex_;
 };
 
 }  // namespace panda::llvmbackend

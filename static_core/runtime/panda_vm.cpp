@@ -28,25 +28,25 @@
 
 namespace panda {
 /* static */
-PandaVM *PandaVM::Create(Runtime *runtime, const RuntimeOptions &options, std::string_view runtime_type)
+PandaVM *PandaVM::Create(Runtime *runtime, const RuntimeOptions &options, std::string_view runtimeType)
 {
-    LanguageContext ctx = runtime->GetLanguageContext(std::string(runtime_type));
+    LanguageContext ctx = runtime->GetLanguageContext(std::string(runtimeType));
     return ctx.CreateVM(runtime, options);
 }
 
 void PandaVM::VisitVmRoots(const GCRootVisitor &visitor)
 {
-    os::memory::LockHolder lock(mark_queue_lock_);
-    for (ObjectHeader *obj : mark_queue_) {
+    os::memory::LockHolder lock(markQueueLock_);
+    for (ObjectHeader *obj : markQueue_) {
         visitor(mem::GCRoot(mem::RootType::ROOT_VM, obj));
     }
 }
 
 void PandaVM::UpdateVmRefs()
 {
-    os::memory::LockHolder lock(mark_queue_lock_);
+    os::memory::LockHolder lock(markQueueLock_);
     // NOLINTNEXTLINE(modernize-loop-convert)
-    for (auto it = mark_queue_.begin(); it != mark_queue_.end(); ++it) {
+    for (auto it = markQueue_.begin(); it != markQueue_.end(); ++it) {
         if ((*it)->IsForwarded()) {
             *it = panda::mem::GetForwardAddress(*it);
         }
@@ -62,12 +62,12 @@ Expected<int, Runtime::Error> PandaVM::InvokeEntrypoint(Method *entrypoint, cons
     Expected<int, Runtime::Error> ret = InvokeEntrypointImpl(entrypoint, args);
     ManagedThread *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
-    bool has_exception = false;
+    bool hasException = false;
     {
         ScopedManagedCodeThread s(thread);
-        has_exception = thread->HasPendingException();
+        hasException = thread->HasPendingException();
     }
-    if (has_exception) {
+    if (hasException) {
         HandleUncaughtException();
         ret = EXIT_FAILURE;
     }
@@ -75,10 +75,10 @@ Expected<int, Runtime::Error> PandaVM::InvokeEntrypoint(Method *entrypoint, cons
     return ret;
 }
 
-void PandaVM::HandleLdaStr(Frame *frame, BytecodeId string_id)
+void PandaVM::HandleLdaStr(Frame *frame, BytecodeId stringId)
 {
     coretypes::String *str =
-        panda::Runtime::GetCurrent()->ResolveString(this, *frame->GetMethod(), string_id.AsFileId());
+        panda::Runtime::GetCurrent()->ResolveString(this, *frame->GetMethod(), stringId.AsFileId());
     frame->GetAccAsVReg().SetReference(str);
 }
 
@@ -89,16 +89,16 @@ std::unique_ptr<const panda_file::File> PandaVM::OpenPandaFile(std::string_view 
 
 coretypes::String *PandaVM::GetNonMovableString(const panda_file::File &pf, panda_file::File::EntityId id) const
 {
-    auto cached_string = GetStringTable()->GetInternalStringFast(pf, id);
-    if (cached_string == nullptr) {
+    auto cachedString = GetStringTable()->GetInternalStringFast(pf, id);
+    if (cachedString == nullptr) {
         return nullptr;
     }
 
-    if (!GetHeapManager()->IsObjectInNonMovableSpace(cached_string)) {
+    if (!GetHeapManager()->IsObjectInNonMovableSpace(cachedString)) {
         return nullptr;
     }
 
-    return cached_string;
+    return cachedString;
 }
 
 bool PandaVM::ShouldEnableDebug()
@@ -109,22 +109,22 @@ bool PandaVM::ShouldEnableDebug()
 // Intrusive GC test API
 void PandaVM::MarkObject(ObjectHeader *obj)
 {
-    os::memory::LockHolder lock(mark_queue_lock_);
-    mark_queue_.push_back(obj);
+    os::memory::LockHolder lock(markQueueLock_);
+    markQueue_.push_back(obj);
 }
 
 void PandaVM::IterateOverMarkQueue(const std::function<void(ObjectHeader *)> &visitor)
 {
-    os::memory::LockHolder lock(mark_queue_lock_);
-    for (ObjectHeader *obj : mark_queue_) {
+    os::memory::LockHolder lock(markQueueLock_);
+    for (ObjectHeader *obj : markQueue_) {
         visitor(obj);
     }
 }
 
 void PandaVM::ClearMarkQueue()
 {
-    os::memory::LockHolder lock(mark_queue_lock_);
-    mark_queue_.clear();
+    os::memory::LockHolder lock(markQueueLock_);
+    markQueue_.clear();
 }
 
 LoadableAgentHandle PandaVM::CreateDebuggerAgent()
@@ -140,23 +140,23 @@ PandaString PandaVM::GetClassesFootprint() const
 {
     ASSERT(GetLanguageContext().GetLanguageType() == LangTypeT::LANG_TYPE_STATIC);
     PandaVector<Class *> classes;
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->EnumerateClasses([&classes](Class *cls) {
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    classLinker->EnumerateClasses([&classes](Class *cls) {
         classes.push_back(cls);
         return true;
     });
 
-    PandaVector<uint64_t> footprint_of_classes(classes.size(), 0U);
-    GetHeapManager()->CountInstances(classes, true, footprint_of_classes.data());
+    PandaVector<uint64_t> footprintOfClasses(classes.size(), 0U);
+    GetHeapManager()->CountInstances(classes, true, footprintOfClasses.data());
 
-    PandaMultiMap<uint64_t, Class *> footprint_to_class;
+    PandaMultiMap<uint64_t, Class *> footprintToClass;
     for (size_t index = 0; index < classes.size(); ++index) {
-        footprint_to_class.insert({footprint_of_classes[index], classes[index]});
+        footprintToClass.insert({footprintOfClasses[index], classes[index]});
     }
 
     PandaStringStream statistic;
     PandaMultiMap<uint64_t, Class *>::reverse_iterator rit;
-    for (rit = footprint_to_class.rbegin(); rit != footprint_to_class.rend(); ++rit) {
+    for (rit = footprintToClass.rbegin(); rit != footprintToClass.rend(); ++rit) {
         if (rit->first == 0U) {
             break;
         }

@@ -17,6 +17,7 @@
 #include <array>
 #include <map>
 
+#include "libpandabase/utils/utils.h"
 #include "util/struct_field.h"
 
 #include "util/tests/verifier_test.h"
@@ -36,40 +37,40 @@ struct MyArr final {
 
     using Offset = StructField<int32_t, int32_t>;
 
-    std::map<char, Offset> elem_map = {{'0', Offset {0}},  {'1', Offset {4}},  {'2', Offset {8}},
-                                       {'3', Offset {12}}, {'4', Offset {16}}, {'5', Offset {20}}};
+    std::map<char, Offset> elemMap = {{'0', Offset {0}},  {'1', Offset {4}},  {'2', Offset {8}},
+                                      {'3', Offset {12}}, {'4', Offset {16}}, {'5', Offset {20}}};
     // NOLINTEND(misc-non-private-member-variables-in-classes,readability-magic-numbers)
 
     int32_t &Access(char id)
     {
-        auto it = elem_map.find(id);
-        ASSERT(it != elem_map.end());
+        auto it = elemMap.find(id);
+        ASSERT(it != elemMap.end());
         return it->second.Of(num0);
     }
 };
 
 TEST_F(VerifierTest, struct_field)
 {
-    std::vector<int32_t> vec(5);
-    vec[3] = 5;
-    int32_t &pos1 = vec[1];
-    StructField<int32_t, int32_t> s_f1 {8};
-    int32_t &pos2 = s_f1.Of(pos1);
-    EXPECT_EQ(pos2, 5);
+    std::vector<int32_t> vec(5U);
+    vec[3U] = 5_I;
+    int32_t &pos1 = vec[1U];
+    StructField<int32_t, int32_t> sF1 {8U};
+    int32_t &pos2 = sF1.Of(pos1);
+    EXPECT_EQ(pos2, 5_I);
 
-    std::array<int64_t, 3> arr {};
-    arr[2] = 5;
+    std::array<int64_t, 3U> arr {};
+    arr[2U] = 5L;
     int64_t &pos3 = arr[0];
     // NOLINTNEXTLINE(readability-magic-numbers)
-    StructField<int64_t, int64_t> s_f2 {16};
-    int64_t &pos4 = s_f2.Of(pos3);
-    EXPECT_EQ(pos4, 5);
+    StructField<int64_t, int64_t> sF2 {16U};
+    int64_t &pos4 = sF2.Of(pos3);
+    EXPECT_EQ(pos4, 5U);
 
-    MyArr my_arr;
-    EXPECT_EQ(my_arr.Access('3'), 3);
+    MyArr myArr;
+    EXPECT_EQ(myArr.Access('3'), 3_I);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    my_arr.Access('4') = 44;
-    EXPECT_EQ(my_arr.num4, 44);
+    myArr.Access('4') = 44_I;
+    EXPECT_EQ(myArr.num4, 44_I);
 }
 
 }  // namespace panda::verifier::test

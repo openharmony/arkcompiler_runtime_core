@@ -28,7 +28,7 @@ bool LoopIdioms::RunImpl()
     }
     GetGraph()->RunPass<LoopAnalyzer>();
     RunLoopsVisitor();
-    return is_applied_;
+    return isApplied_;
 }
 
 void LoopIdioms::InvalidateAnalyses()
@@ -40,7 +40,7 @@ void LoopIdioms::InvalidateAnalyses()
 bool LoopIdioms::TransformLoop(Loop *loop)
 {
     if (TryTransformArrayInitIdiom(loop)) {
-        is_applied_ = true;
+        isApplied_ = true;
         return true;
     }
     return false;
@@ -101,14 +101,13 @@ bool CanReplaceLoop(Loop *loop, Marker marker)
     return true;
 }
 
-bool IsLoopContainsArrayInitIdiom(StoreInst *store, Loop *loop, CountableLoopInfo &loop_info)
+bool IsLoopContainsArrayInitIdiom(StoreInst *store, Loop *loop, CountableLoopInfo &loopInfo)
 {
-    auto store_idx = store->GetIndex();
+    auto storeIdx = store->GetIndex();
 
-    return loop_info.const_step == 1UL && loop_info.index == store_idx &&
-           loop_info.normalized_cc == ConditionCode::CC_LT && AllUsesWithinLoop(store_idx, loop) &&
-           AllUsesWithinLoop(loop_info.update, loop) &&
-           AllUsesWithinLoop(loop_info.if_imm->GetInput(0).GetInst(), loop);
+    return loopInfo.constStep == 1UL && loopInfo.index == storeIdx && loopInfo.normalizedCc == ConditionCode::CC_LT &&
+           AllUsesWithinLoop(storeIdx, loop) && AllUsesWithinLoop(loopInfo.update, loop) &&
+           AllUsesWithinLoop(loopInfo.ifImm->GetInput(0).GetInst(), loop);
 }
 
 bool LoopIdioms::TryTransformArrayInitIdiom(Loop *loop)
@@ -123,23 +122,23 @@ bool LoopIdioms::TryTransformArrayInitIdiom(Loop *loop)
         return false;
     }
 
-    auto loop_info_opt = CountableLoopParser {*loop}.Parse();
-    if (!loop_info_opt.has_value()) {
+    auto loopInfoOpt = CountableLoopParser {*loop}.Parse();
+    if (!loopInfoOpt.has_value()) {
         return false;
     }
-    auto loop_info = *loop_info_opt;
-    if (!IsLoopContainsArrayInitIdiom(store, loop, loop_info)) {
+    auto loopInfo = *loopInfoOpt;
+    if (!IsLoopContainsArrayInitIdiom(store, loop, loopInfo)) {
         return false;
     }
-    ASSERT(loop_info.is_inc);
+    ASSERT(loopInfo.isInc);
 
     MarkerHolder holder {GetGraph()};
     Marker marker = holder.GetMarker();
     store->SetMarker(marker);
-    loop_info.update->SetMarker(marker);
-    loop_info.index->SetMarker(marker);
-    loop_info.if_imm->SetMarker(marker);
-    loop_info.if_imm->GetInput(0).GetInst()->SetMarker(marker);
+    loopInfo.update->SetMarker(marker);
+    loopInfo.index->SetMarker(marker);
+    loopInfo.ifImm->SetMarker(marker);
+    loopInfo.ifImm->GetInput(0).GetInst()->SetMarker(marker);
 
     if (!CanReplaceLoop(loop, marker)) {
         return false;
@@ -148,109 +147,109 @@ bool LoopIdioms::TryTransformArrayInitIdiom(Loop *loop)
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Array init idiom found in loop: " << loop->GetId()
                                         << "\n\tarray: " << *store->GetArray()
                                         << "\n\tvalue: " << *store->GetStoredValue()
-                                        << "\n\tinitial index: " << *loop_info.init << "\n\ttest: " << *loop_info.test
-                                        << "\n\tupdate: " << *loop_info.update << "\n\tstep: " << loop_info.const_step
-                                        << "\n\tindex: " << *loop_info.index;
+                                        << "\n\tinitial index: " << *loopInfo.init << "\n\ttest: " << *loopInfo.test
+                                        << "\n\tupdate: " << *loopInfo.update << "\n\tstep: " << loopInfo.constStep
+                                        << "\n\tindex: " << *loopInfo.index;
 
-    bool always_jump = false;
-    if (loop_info.init->IsConst() && loop_info.test->IsConst()) {
+    bool alwaysJump = false;
+    if (loopInfo.init->IsConst() && loopInfo.test->IsConst()) {
         auto iterations =
-            loop_info.test->CastToConstant()->GetIntValue() - loop_info.init->CastToConstant()->GetIntValue();
+            loopInfo.test->CastToConstant()->GetIntValue() - loopInfo.init->CastToConstant()->GetIntValue();
         if (iterations <= ITERATIONS_THRESHOLD) {
             COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
                 << "Loop will have " << iterations << " iterations, so intrinsics will not be generated";
             return false;
         }
-        always_jump = true;
+        alwaysJump = true;
     }
 
-    return ReplaceArrayInitLoop(loop, &loop_info, store, always_jump);
+    return ReplaceArrayInitLoop(loop, &loopInfo, store, alwaysJump);
 }
 
 Inst *LoopIdioms::CreateArrayInitIntrinsic(StoreInst *store, CountableLoopInfo *info)
 {
     auto type = store->GetType();
-    RuntimeInterface::IntrinsicId intrinsic_id;
+    RuntimeInterface::IntrinsicId intrinsicId;
     switch (type) {
         case DataType::BOOL:
         case DataType::INT8:
         case DataType::UINT8:
-            intrinsic_id = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_8;
+            intrinsicId = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_8;
             break;
         case DataType::INT16:
         case DataType::UINT16:
-            intrinsic_id = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_16;
+            intrinsicId = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_16;
             break;
         case DataType::INT32:
         case DataType::UINT32:
-            intrinsic_id = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_32;
+            intrinsicId = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_32;
             break;
         case DataType::INT64:
         case DataType::UINT64:
-            intrinsic_id = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_64;
+            intrinsicId = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_64;
             break;
         case DataType::FLOAT32:
-            intrinsic_id = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F32;
+            intrinsicId = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F32;
             break;
         case DataType::FLOAT64:
-            intrinsic_id = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F64;
+            intrinsicId = RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F64;
             break;
         default:
             return nullptr;
     }
 
-    auto fill_array = GetGraph()->CreateInstIntrinsic(DataType::VOID, store->GetPc(), intrinsic_id);
-    fill_array->ClearFlag(inst_flags::Flags::REQUIRE_STATE);
-    fill_array->ClearFlag(inst_flags::Flags::RUNTIME_CALL);
-    fill_array->SetInputs(GetGraph()->GetAllocator(), {{store->GetArray(), DataType::REFERENCE},
-                                                       {store->GetStoredValue(), store->GetStoredValue()->GetType()},
-                                                       {info->init, DataType::INT32},
-                                                       {info->test, DataType::INT32}});
-    return fill_array;
+    auto fillArray = GetGraph()->CreateInstIntrinsic(DataType::VOID, store->GetPc(), intrinsicId);
+    fillArray->ClearFlag(inst_flags::Flags::REQUIRE_STATE);
+    fillArray->ClearFlag(inst_flags::Flags::RUNTIME_CALL);
+    fillArray->SetInputs(GetGraph()->GetAllocator(), {{store->GetArray(), DataType::REFERENCE},
+                                                      {store->GetStoredValue(), store->GetStoredValue()->GetType()},
+                                                      {info->init, DataType::INT32},
+                                                      {info->test, DataType::INT32}});
+    return fillArray;
 }
 
-bool LoopIdioms::ReplaceArrayInitLoop(Loop *loop, CountableLoopInfo *loop_info, StoreInst *store, bool always_jump)
+bool LoopIdioms::ReplaceArrayInitLoop(Loop *loop, CountableLoopInfo *loopInfo, StoreInst *store, bool alwaysJump)
 {
-    auto inst = CreateArrayInitIntrinsic(store, loop_info);
+    auto inst = CreateArrayInitIntrinsic(store, loopInfo);
     if (inst == nullptr) {
         return false;
     }
     auto header = loop->GetHeader();
-    auto pre_header = loop->GetPreHeader();
+    auto preHeader = loop->GetPreHeader();
 
-    auto loop_succ = header->GetSuccessor(0) == header ? header->GetSuccessor(1) : header->GetSuccessor(0);
-    if (always_jump) {
+    auto loopSucc = header->GetSuccessor(0) == header ? header->GetSuccessor(1) : header->GetSuccessor(0);
+    if (alwaysJump) {
         ASSERT(loop->GetBlocks().size() == 1);
         // insert block before disconnecting header to properly handle Phi in loop_succ
-        auto block = header->InsertNewBlockToSuccEdge(loop_succ);
-        pre_header->ReplaceSucc(header, block, true);
+        auto block = header->InsertNewBlockToSuccEdge(loopSucc);
+        preHeader->ReplaceSucc(header, block, true);
         GetGraph()->DisconnectBlock(header, false, false);
         block->AppendInst(inst);
 
         COMPILER_LOG(INFO, LOOP_TRANSFORM) << "Replaced loop " << loop->GetId() << " with the instruction " << *inst
                                            << " inserted into the new block " << block->GetId();
     } else {
-        auto guard_block = pre_header->InsertNewBlockToSuccEdge(header);
-        auto sub = GetGraph()->CreateInstSub(DataType::INT32, inst->GetPc(), loop_info->test, loop_info->init);
+        auto guardBlock = preHeader->InsertNewBlockToSuccEdge(header);
+        auto sub = GetGraph()->CreateInstSub(DataType::INT32, inst->GetPc(), loopInfo->test, loopInfo->init);
         auto cmp = GetGraph()->CreateInstCompare(DataType::BOOL, inst->GetPc(), sub,
                                                  GetGraph()->FindOrCreateConstant(ITERATIONS_THRESHOLD),
                                                  DataType::INT32, ConditionCode::CC_LE);
-        auto if_imm =
+        auto ifImm =
             GetGraph()->CreateInstIfImm(DataType::NO_TYPE, inst->GetPc(), cmp, 0, DataType::BOOL, ConditionCode::CC_NE);
-        guard_block->AppendInst(sub);
-        guard_block->AppendInst(cmp);
-        guard_block->AppendInst(if_imm);
+        guardBlock->AppendInst(sub);
+        guardBlock->AppendInst(cmp);
+        guardBlock->AppendInst(ifImm);
 
-        auto merge_block = header->InsertNewBlockToSuccEdge(loop_succ);
-        auto intrinsic_block = GetGraph()->CreateEmptyBlock();
+        auto mergeBlock = header->InsertNewBlockToSuccEdge(loopSucc);
+        auto intrinsicBlock = GetGraph()->CreateEmptyBlock();
 
-        guard_block->AddSucc(intrinsic_block);
-        intrinsic_block->AddSucc(merge_block);
-        intrinsic_block->AppendInst(inst);
+        guardBlock->AddSucc(intrinsicBlock);
+        intrinsicBlock->AddSucc(mergeBlock);
+        intrinsicBlock->AppendInst(inst);
 
         COMPILER_LOG(INFO, LOOP_TRANSFORM) << "Inserted conditional jump into intinsic " << *inst << " before  loop "
-                                           << loop->GetId() << ", inserted blocks: " << intrinsic_block->GetId() << ", "
-                                           << guard_block->GetId() << ", " << merge_block->GetId();
+                                           << loop->GetId() << ", inserted blocks: " << intrinsicBlock->GetId() << ", "
+                                           << guardBlock->GetId() << ", " << mergeBlock->GetId();
     }
     return true;
 }

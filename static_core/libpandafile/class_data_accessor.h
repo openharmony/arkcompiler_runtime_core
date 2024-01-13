@@ -26,58 +26,58 @@ namespace panda::panda_file {
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class ClassDataAccessor {
 public:
-    ClassDataAccessor(const File &panda_file, File::EntityId class_id);
+    ClassDataAccessor(const File &pandaFile, File::EntityId classId);
 
     ~ClassDataAccessor() = default;
 
     File::EntityId GetSuperClassId() const
     {
-        return File::EntityId(super_class_off_);
+        return File::EntityId(superClassOff_);
     }
 
     bool IsInterface() const
     {
-        return (access_flags_ & ACC_INTERFACE) != 0;
+        return (accessFlags_ & ACC_INTERFACE) != 0;
     }
 
     bool IsPublic() const
     {
-        return (access_flags_ & ACC_PUBLIC) != 0;
+        return (accessFlags_ & ACC_PUBLIC) != 0;
     }
 
     bool IsProtected() const
     {
-        return (access_flags_ & ACC_PROTECTED) != 0;
+        return (accessFlags_ & ACC_PROTECTED) != 0;
     }
 
     bool IsPrivate() const
     {
-        return (access_flags_ & ACC_PRIVATE) != 0;
+        return (accessFlags_ & ACC_PRIVATE) != 0;
     }
 
     bool IsFinal() const
     {
-        return (access_flags_ & ACC_FINAL) != 0;
+        return (accessFlags_ & ACC_FINAL) != 0;
     }
 
     uint32_t GetAccessFlags() const
     {
-        return access_flags_;
+        return accessFlags_;
     }
 
     uint32_t GetFieldsNumber() const
     {
-        return num_fields_;
+        return numFields_;
     }
 
     uint32_t GetMethodsNumber() const
     {
-        return num_methods_;
+        return numMethods_;
     }
 
     uint32_t GetIfacesNumber() const
     {
-        return num_ifaces_;
+        return numIfaces_;
     }
 
     uint32_t GetAnnotationsNumber();
@@ -128,12 +128,12 @@ public:
 
     const File &GetPandaFile() const
     {
-        return panda_file_;
+        return pandaFile_;
     }
 
     File::EntityId GetClassId() const
     {
-        return class_id_;
+        return classId_;
     }
 
     const uint8_t *GetDescriptor() const
@@ -208,25 +208,25 @@ private:
 
     void SkipTypeAnnotations();
 
-    const File &panda_file_;
-    File::EntityId class_id_;
+    const File &pandaFile_;
+    File::EntityId classId_;
 
     File::StringData name_ {};
-    uint32_t super_class_off_;
-    uint32_t access_flags_;
-    uint32_t num_fields_ {0};
-    uint32_t num_methods_ {0};
-    uint32_t num_ifaces_ {0};
+    uint32_t superClassOff_;
+    uint32_t accessFlags_;
+    uint32_t numFields_ {0};
+    uint32_t numMethods_ {0};
+    uint32_t numIfaces_ {0};
 
-    Span<const uint8_t> ifaces_offsets_sp_ {nullptr, nullptr};
-    Span<const uint8_t> source_lang_sp_ {nullptr, nullptr};
-    Span<const uint8_t> runtime_annotations_sp_ {nullptr, nullptr};
-    Span<const uint8_t> annotations_sp_ {nullptr, nullptr};
-    Span<const uint8_t> runtime_type_annotation_sp_ {nullptr, nullptr};
-    Span<const uint8_t> type_annotation_sp_ {nullptr, nullptr};
-    Span<const uint8_t> source_file_sp_ {nullptr, nullptr};
-    Span<const uint8_t> fields_sp_ {nullptr, nullptr};
-    Span<const uint8_t> methods_sp_ {nullptr, nullptr};
+    Span<const uint8_t> ifacesOffsetsSp_ {nullptr, nullptr};
+    Span<const uint8_t> sourceLangSp_ {nullptr, nullptr};
+    Span<const uint8_t> runtimeAnnotationsSp_ {nullptr, nullptr};
+    Span<const uint8_t> annotationsSp_ {nullptr, nullptr};
+    Span<const uint8_t> runtimeTypeAnnotationSp_ {nullptr, nullptr};
+    Span<const uint8_t> typeAnnotationSp_ {nullptr, nullptr};
+    Span<const uint8_t> sourceFileSp_ {nullptr, nullptr};
+    Span<const uint8_t> fieldsSp_ {nullptr, nullptr};
+    Span<const uint8_t> methodsSp_ {nullptr, nullptr};
 
     size_t size_ {0};
 };

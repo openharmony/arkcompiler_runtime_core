@@ -28,13 +28,13 @@ namespace panda::mem::test {
 
 class MemStatsGCTest : public testing::Test {
 public:
-    void SetupRuntime(const std::string &gc_type)
+    void SetupRuntime(const std::string &gcType)
     {
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetUseTlabForAllocations(false);
-        options.SetGcType(gc_type);
+        options.SetGcType(gcType);
         options.SetRunGcInPlace(true);
         options.SetExplicitConcurrentGcEnabled(false);
         bool success = Runtime::Create(options);
@@ -44,7 +44,7 @@ public:
     }
 
     template <uint64_t OBJECT_COUNT>
-    void MemStatsTest(uint64_t tries, size_t object_size);
+    void MemStatsTest(uint64_t tries, size_t objectSize);
 
     void TearDown() override
     {
@@ -58,71 +58,71 @@ private:
 };
 
 template <uint64_t OBJECT_COUNT>
-void MemStatsGCTest::MemStatsTest(uint64_t tries, size_t object_size)
+void MemStatsGCTest::MemStatsTest(uint64_t tries, size_t objectSize)
 {
-    ASSERT(object_size >= sizeof(coretypes::String));
+    ASSERT(objectSize >= sizeof(coretypes::String));
     mem::MemStatsType *stats = thread_->GetVM()->GetMemStats();
     ASSERT_NE(stats, nullptr);
 
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-    ASSERT_NE(class_linker, nullptr);
-    auto allocator = class_linker->GetAllocator();
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ASSERT_NE(classLinker, nullptr);
+    auto allocator = classLinker->GetAllocator();
 
-    std::string simple_string;
-    for (size_t j = 0; j < object_size - sizeof(coretypes::String); j++) {
-        simple_string.append("x");
+    std::string simpleString;
+    for (size_t j = 0; j < objectSize - sizeof(coretypes::String); j++) {
+        simpleString.append("x");
     }
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto object_allocator = thread_->GetVM()->GetGC()->GetObjectAllocator();
+    auto objectAllocator = thread_->GetVM()->GetGC()->GetObjectAllocator();
     thread_->GetVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
 
-    size_t alloc_size = simple_string.size() + sizeof(coretypes::String);
-    size_t aligment_size = 0;
-    size_t aligment_diff = 0;
-    if (alloc_size < object_allocator->GetRegularObjectMaxSize()) {
-        aligment_size = 1UL << RunSlots<>::ConvertToPowerOfTwoUnsafe(alloc_size);
-        aligment_diff = aligment_size - alloc_size;
+    size_t allocSize = simpleString.size() + sizeof(coretypes::String);
+    size_t aligmentSize = 0;
+    size_t aligmentDiff = 0;
+    if (allocSize < objectAllocator->GetRegularObjectMaxSize()) {
+        aligmentSize = 1UL << RunSlots<>::ConvertToPowerOfTwoUnsafe(allocSize);
+        aligmentDiff = aligmentSize - allocSize;
     } else {
-        aligment_size = AlignUp(alloc_size, GetAlignmentInBytes(FREELIST_DEFAULT_ALIGNMENT));
-        aligment_diff = 2 * (aligment_size - alloc_size);
+        aligmentSize = AlignUp(allocSize, GetAlignmentInBytes(FREELIST_DEFAULT_ALIGNMENT));
+        aligmentDiff = 2U * (aligmentSize - allocSize);
     }
 
-    uint64_t allocated_objects = stats->GetTotalObjectsAllocated();
-    uint64_t allocated_bytes = stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT);
-    uint64_t freed_objects = stats->GetTotalObjectsFreed();
-    uint64_t freed_bytes = stats->GetFreed(SpaceType::SPACE_TYPE_OBJECT);
-    uint64_t diff_total = 0;
+    uint64_t allocatedObjects = stats->GetTotalObjectsAllocated();
+    uint64_t allocatedBytes = stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT);
+    uint64_t freedObjects = stats->GetTotalObjectsFreed();
+    uint64_t freedBytes = stats->GetFreed(SpaceType::SPACE_TYPE_OBJECT);
+    uint64_t diffTotal = 0;
     std::array<VMHandle<coretypes::String> *, OBJECT_COUNT> handlers {};
     for (size_t i = 0; i < tries; i++) {
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread_);
         for (uint64_t j = 0; j < OBJECT_COUNT; j++) {
-            coretypes::String *string_obj =
-                coretypes::String::CreateFromMUtf8(reinterpret_cast<const uint8_t *>(&simple_string[0]),
-                                                   simple_string.length(), ctx, Runtime::GetCurrent()->GetPandaVM());
-            ASSERT_NE(string_obj, nullptr);
-            handlers[j] = allocator->New<VMHandle<coretypes::String>>(thread_, string_obj);
+            coretypes::String *stringObj =
+                coretypes::String::CreateFromMUtf8(reinterpret_cast<const uint8_t *>(&simpleString[0]),
+                                                   simpleString.length(), ctx, Runtime::GetCurrent()->GetPandaVM());
+            ASSERT_NE(stringObj, nullptr);
+            handlers[j] = allocator->New<VMHandle<coretypes::String>>(thread_, stringObj);
         }
-        allocated_objects += OBJECT_COUNT;
-        allocated_bytes += OBJECT_COUNT * alloc_size;
-        diff_total += OBJECT_COUNT * aligment_diff;
-        ASSERT_EQ(allocated_objects, stats->GetTotalObjectsAllocated());
-        ASSERT_LE(allocated_bytes, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));
-        ASSERT_GE(allocated_bytes + diff_total, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));
+        allocatedObjects += OBJECT_COUNT;
+        allocatedBytes += OBJECT_COUNT * allocSize;
+        diffTotal += OBJECT_COUNT * aligmentDiff;
+        ASSERT_EQ(allocatedObjects, stats->GetTotalObjectsAllocated());
+        ASSERT_LE(allocatedBytes, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));
+        ASSERT_GE(allocatedBytes + diffTotal, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));
 
         // run GC
         thread_->GetVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
-        ASSERT_EQ(allocated_objects, stats->GetTotalObjectsAllocated());
-        ASSERT_LE(allocated_bytes, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));
-        ASSERT_GE(allocated_bytes + diff_total, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));
-        ASSERT_EQ(freed_objects, stats->GetTotalObjectsFreed());
-        ASSERT_LE(freed_bytes, stats->GetFreed(SpaceType::SPACE_TYPE_OBJECT));
-        ASSERT_GE(freed_bytes + diff_total, stats->GetFreed(SpaceType::SPACE_TYPE_OBJECT));
+        ASSERT_EQ(allocatedObjects, stats->GetTotalObjectsAllocated());
+        ASSERT_LE(allocatedBytes, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));
+        ASSERT_GE(allocatedBytes + diffTotal, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));
+        ASSERT_EQ(freedObjects, stats->GetTotalObjectsFreed());
+        ASSERT_LE(freedBytes, stats->GetFreed(SpaceType::SPACE_TYPE_OBJECT));
+        ASSERT_GE(freedBytes + diffTotal, stats->GetFreed(SpaceType::SPACE_TYPE_OBJECT));
 
         for (uint64_t j = 0; j < OBJECT_COUNT; j++) {
             allocator->Delete(handlers[j]);
         }
-        freed_objects += OBJECT_COUNT;
-        freed_bytes += OBJECT_COUNT * alloc_size;
+        freedObjects += OBJECT_COUNT;
+        freedBytes += OBJECT_COUNT * allocSize;
     }
 }
 
@@ -141,8 +141,8 @@ TEST_F(MemStatsGCTest, GenGcTest)
     constexpr uint64_t TRIES = 4;
 
     SetupRuntime("gen-gc");
-    for (size_t object_size : OBJECTS_SIZE) {
-        MemStatsTest<OBJECTS_COUNT>(TRIES, object_size);
+    for (size_t objectSize : OBJECTS_SIZE) {
+        MemStatsTest<OBJECTS_COUNT>(TRIES, objectSize);
     }
 }
 
@@ -152,8 +152,8 @@ TEST_F(MemStatsGCTest, StwGcTest)
     constexpr uint64_t TRIES = 10;
 
     SetupRuntime("stw");
-    for (size_t object_size : OBJECTS_SIZE) {
-        MemStatsTest<OBJECTS_COUNT>(TRIES, object_size);
+    for (size_t objectSize : OBJECTS_SIZE) {
+        MemStatsTest<OBJECTS_COUNT>(TRIES, objectSize);
     }
 }
 

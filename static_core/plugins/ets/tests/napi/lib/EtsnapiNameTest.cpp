@@ -14,14 +14,14 @@
  */
 
 #include "EtsnapiNameTest.h"
-#include <cassert>
+#include "libpandabase/macros.h"
 #include <iostream>
 
 // NOLINTBEGIN(readability-magic-numbers, readability-named-parameter)
 
 bool Equal(double a1, double a2)
 {
-    return std::abs(a1 - a2) < 0.000001;
+    return std::abs(a1 - a2) < 0.000001F;
 }
 
 extern "C" {
@@ -48,16 +48,16 @@ ETS_EXPORT ets_int ETS_CALL ETS_EtsnapiNameTest_methodOverloaded__Lstd_core_Obje
     [[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class, [[maybe_unused]] ets_object obj1,
     [[maybe_unused]] ets_string s, [[maybe_unused]] ets_object obj2)
 {
-    assert(obj1 == nullptr && s != nullptr && obj2 != nullptr);
-    return 4;
+    ASSERT(obj1 == nullptr && s != nullptr && obj2 != nullptr);
+    return 4U;
 }
 
 ETS_EXPORT ets_int ETS_CALL ETS_EtsnapiNameTest_methodOverloaded__I([[maybe_unused]] EtsEnv *,
                                                                     [[maybe_unused]] ets_class,
                                                                     [[maybe_unused]] ets_int i)
 {
-    assert(i == 2);
-    return 2;
+    ASSERT(i == 2U);
+    return 2U;
 }
 
 ETS_EXPORT ets_int ETS_CALL ETS_EtsnapiNameTest_methodOverloaded__ZBCDFIJS(
@@ -65,8 +65,8 @@ ETS_EXPORT ets_int ETS_CALL ETS_EtsnapiNameTest_methodOverloaded__ZBCDFIJS(
     [[maybe_unused]] ets_byte b, [[maybe_unused]] ets_char c, [[maybe_unused]] ets_double d,
     [[maybe_unused]] ets_float f, [[maybe_unused]] ets_int i, [[maybe_unused]] ets_long l, [[maybe_unused]] ets_short s)
 {
-    assert(boo && b == 1 && Equal(d, 2.2) && Equal(f, 3.3) && i == 4 && l == 5 && s == 6);
-    return 3;
+    ASSERT(boo && b == 1 && Equal(d, 2.2F) && Equal(f, 3.3F) && i == 4U && l == 5L && s == 6U);
+    return 3U;
 }
 
 ETS_EXPORT ets_int ETS_CALL ETS_EtsnapiNameTest_methodOverloaded__([[maybe_unused]] EtsEnv *,

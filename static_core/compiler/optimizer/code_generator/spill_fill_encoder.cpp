@@ -22,10 +22,10 @@ namespace panda::compiler {
 
 bool SpillFillEncoder::AreConsecutiveOps(const SpillFillData &pred, const SpillFillData &succ)
 {
-    bool same_src_type = pred.SrcType() == succ.SrcType();
-    bool same_dst_type = pred.DstType() == succ.DstType();
-    bool same_argument_type = pred.GetCommonType() == succ.GetCommonType();
-    if (!same_src_type || !same_dst_type || !same_argument_type) {
+    bool sameSrcType = pred.SrcType() == succ.SrcType();
+    bool sameDstType = pred.DstType() == succ.DstType();
+    bool sameArgumentType = pred.GetCommonType() == succ.GetCommonType();
+    if (!sameSrcType || !sameDstType || !sameArgumentType) {
         return false;
     }
 
@@ -61,35 +61,35 @@ bool SpillFillEncoder::CanCombineSpillFills(SpillFillData pred, SpillFillData su
     return AreConsecutiveOps(pred, succ);
 }
 
-void SpillFillEncoder::SortSpillFillData(ArenaVector<SpillFillData> *spill_fills)
+void SpillFillEncoder::SortSpillFillData(ArenaVector<SpillFillData> *spillFills)
 {
     constexpr size_t MAX_VECTOR_LEN = MAX_NUM_REGS + MAX_NUM_VREGS;
     // Don't sort vectors that are too large in order to reduce compilation duration.
-    if (spill_fills->size() > MAX_VECTOR_LEN) {
+    if (spillFills->size() > MAX_VECTOR_LEN) {
         COMPILER_LOG(DEBUG, CODEGEN) << "Bypass spill fills sorting because corresponding vector is too large: "
-                                     << spill_fills->size();
+                                     << spillFills->size();
         return;
     }
-    auto it = spill_fills->begin();
-    while (it != spill_fills->end()) {
+    auto it = spillFills->begin();
+    while (it != spillFills->end()) {
         // Sort spill fills only within group of consecutive SpillFillData elements sharing the same spill-fill type.
         // SpillFillData elements could not be reordered within whole spill_fills array, because some of these elements
         // may be inserted by SpillFillResolver to break cyclic dependency.
-        bool is_fill = it->SrcType() == LocationType::STACK && it->GetDst().IsAnyRegister();
-        bool is_spill = it->GetSrc().IsAnyRegister() && it->DstType() == LocationType::STACK;
-        if (!is_spill && !is_fill) {
+        bool isFill = it->SrcType() == LocationType::STACK && it->GetDst().IsAnyRegister();
+        bool isSpill = it->GetSrc().IsAnyRegister() && it->DstType() == LocationType::STACK;
+        if (!isSpill && !isFill) {
             ++it;
             continue;
         }
         auto next = std::next(it);
-        while (next != spill_fills->end() && it->SrcType() == next->SrcType() && it->DstType() == next->DstType()) {
+        while (next != spillFills->end() && it->SrcType() == next->SrcType() && it->DstType() == next->DstType()) {
             ++next;
         }
 
-        if (is_spill) {
+        if (isSpill) {
             std::sort(it, next, [](auto sf1, auto sf2) { return sf1.DstValue() > sf2.DstValue(); });
         } else {
-            ASSERT(is_fill);
+            ASSERT(isFill);
             std::sort(it, next, [](auto sf1, auto sf2) { return sf1.SrcValue() > sf2.SrcValue(); });
         }
 
@@ -104,7 +104,7 @@ SpillFillEncoder::SpillFillEncoder(Codegen *codegen, Inst *inst)
       encoder_(codegen->GetEncoder()),
       fl_(codegen->GetFrameLayout())
 {
-    sp_reg_ = codegen->GetTarget().GetStackReg();
+    spReg_ = codegen->GetTarget().GetStackReg();
 }
 
 void SpillFillEncoder::EncodeSpillFill()
@@ -114,21 +114,21 @@ void SpillFillEncoder::EncodeSpillFill()
     }
 
     // hint on how many consecutive ops current group contain
-    int consecutive_ops_hint = 0;
+    int consecutiveOpsHint = 0;
     for (auto it = inst_->GetSpillFills().begin(), end = inst_->GetSpillFills().end(); it != end;) {
         auto sf = *it;
-        auto next_it = std::next(it);
-        SpillFillData *next = next_it == end ? nullptr : &(*next_it);
+        auto nextIt = std::next(it);
+        SpillFillData *next = nextIt == end ? nullptr : &(*nextIt);
 
         // new group started
-        if (consecutive_ops_hint <= 0) {
-            consecutive_ops_hint = 1;
+        if (consecutiveOpsHint <= 0) {
+            consecutiveOpsHint = 1;
             // find how many consecutive SpillFillData have the same type, source and destination type
             // and perform read or write from consecutive stack slots.
-            for (auto group_it = it, next_group_it = std::next(it);
-                 next_group_it != end && AreConsecutiveOps(*group_it, *next_group_it); ++next_group_it) {
-                consecutive_ops_hint++;
-                group_it = next_group_it;
+            for (auto groupIt = it, nextGroupIt = std::next(it);
+                 nextGroupIt != end && AreConsecutiveOps(*groupIt, *nextGroupIt); ++nextGroupIt) {
+                consecutiveOpsHint++;
+                groupIt = nextGroupIt;
             }
         }
 
@@ -140,40 +140,40 @@ void SpillFillEncoder::EncodeSpillFill()
             }
             case LocationType::FP_REGISTER:
             case LocationType::REGISTER: {
-                adv = EncodeRegisterToX(sf, next, consecutive_ops_hint);
+                adv = EncodeRegisterToX(sf, next, consecutiveOpsHint);
                 break;
             }
             case LocationType::STACK_PARAMETER:
             case LocationType::STACK: {
-                adv = EncodeStackToX(sf, next, consecutive_ops_hint);
+                adv = EncodeStackToX(sf, next, consecutiveOpsHint);
                 break;
             }
             default:
                 UNREACHABLE();
         }
-        consecutive_ops_hint -= adv;
+        consecutiveOpsHint -= adv;
         std::advance(it, adv);
     }
 }
 
-void SpillFillEncoder::EncodeImmWithCorrectType(DataType::Type sf_type, MemRef dst_mem, ConstantInst *const_inst)
+void SpillFillEncoder::EncodeImmWithCorrectType(DataType::Type sfType, MemRef dstMem, ConstantInst *constInst)
 {
-    ASSERT(DataType::IsTypeNumeric(sf_type));
-    switch (sf_type) {
+    ASSERT(DataType::IsTypeNumeric(sfType));
+    switch (sfType) {
         case DataType::Type::FLOAT32: {
-            auto imm = const_inst->GetFloatValue();
-            encoder_->EncodeSti(imm, dst_mem);
+            auto imm = constInst->GetFloatValue();
+            encoder_->EncodeSti(imm, dstMem);
             break;
         }
         case DataType::Type::FLOAT64: {
-            auto imm = const_inst->GetDoubleValue();
-            encoder_->EncodeSti(imm, dst_mem);
+            auto imm = constInst->GetDoubleValue();
+            encoder_->EncodeSti(imm, dstMem);
             break;
         }
         default: {
-            auto imm = const_inst->GetRawValue();
-            auto store_size = Codegen::ConvertDataType(sf_type, codegen_->GetArch()).GetSize() / BYTE_SIZE;
-            encoder_->EncodeSti(imm, store_size, dst_mem);
+            auto imm = constInst->GetRawValue();
+            auto storeSize = Codegen::ConvertDataType(sfType, codegen_->GetArch()).GetSize() / BYTE_SIZE;
+            encoder_->EncodeSti(imm, storeSize, dstMem);
             break;
         }
     }
@@ -181,12 +181,12 @@ void SpillFillEncoder::EncodeImmWithCorrectType(DataType::Type sf_type, MemRef d
 
 size_t SpillFillEncoder::EncodeImmToX(const SpillFillData &sf)
 {
-    auto const_inst = graph_->GetSpilledConstant(sf.SrcValue());
-    ASSERT(const_inst->IsConst());
+    auto constInst = graph_->GetSpilledConstant(sf.SrcValue());
+    ASSERT(constInst->IsConst());
 
     if (sf.GetDst().IsAnyRegister()) {  // imm -> register
         auto type = sf.GetType();
-        if (graph_->IsDynamicMethod() && const_inst->GetType() == DataType::INT64) {
+        if (graph_->IsDynamicMethod() && constInst->GetType() == DataType::INT64) {
             type = DataType::UINT32;
         }
 
@@ -194,97 +194,97 @@ size_t SpillFillEncoder::EncodeImmToX(const SpillFillData &sf)
 #ifndef NDEBUG
         switch (type) {
             case DataType::FLOAT32:
-                imm = Imm(const_inst->GetFloatValue());
+                imm = Imm(constInst->GetFloatValue());
                 break;
             case DataType::FLOAT64:
-                imm = Imm(const_inst->GetDoubleValue());
+                imm = Imm(constInst->GetDoubleValue());
                 break;
             default:
                 ASSERT(DataType::IsTypeNumeric(type));
-                imm = Imm(const_inst->GetRawValue());
+                imm = Imm(constInst->GetRawValue());
                 break;
         }
 #else
-        imm = Imm(const_inst->GetRawValue());
+        imm = Imm(constInst->GetRawValue());
 #endif
-        auto dst_reg = GetDstReg(sf.GetDst(), Codegen::ConvertDataType(type, codegen_->GetArch()));
-        encoder_->EncodeMov(dst_reg, imm);
+        auto dstReg = GetDstReg(sf.GetDst(), Codegen::ConvertDataType(type, codegen_->GetArch()));
+        encoder_->EncodeMov(dstReg, imm);
         return 1U;
     }
 
     ASSERT(sf.GetDst().IsAnyStack());  // imm -> stack
-    auto dst_mem = codegen_->GetMemRefForSlot(sf.GetDst());
-    auto sf_type = sf.GetCommonType();
-    EncodeImmWithCorrectType(sf_type, dst_mem, const_inst);
+    auto dstMem = codegen_->GetMemRefForSlot(sf.GetDst());
+    auto sfType = sf.GetCommonType();
+    EncodeImmWithCorrectType(sfType, dstMem, constInst);
     return 1U;
 }
 
-size_t SpillFillEncoder::EncodeRegisterToX(const SpillFillData &sf, const SpillFillData *next, int consecutive_ops_hint)
+size_t SpillFillEncoder::EncodeRegisterToX(const SpillFillData &sf, const SpillFillData *next, int consecutiveOpsHint)
 {
     if (sf.GetDst().IsAnyRegister()) {  // register -> register
-        auto src_reg = codegen_->ConvertRegister(sf.SrcValue(), sf.GetType());
-        auto dst_reg = GetDstReg(sf.GetDst(), src_reg.GetType());
-        encoder_->EncodeMov(dst_reg, src_reg);
+        auto srcReg = codegen_->ConvertRegister(sf.SrcValue(), sf.GetType());
+        auto dstReg = GetDstReg(sf.GetDst(), srcReg.GetType());
+        encoder_->EncodeMov(dstReg, srcReg);
         return 1U;
     }
 
     ASSERT(sf.GetDst().IsAnyStack());
     auto offset = codegen_->GetStackOffset(sf.GetDst());
-    auto mem_ref = MemRef(sp_reg_, offset);
+    auto memRef = MemRef(spReg_, offset);
 
     if (sf.GetDst().IsStackArgument()) {  // register -> stack_arg
-        auto src_reg = codegen_->ConvertRegister(sf.SrcValue(), sf.GetType());
+        auto srcReg = codegen_->ConvertRegister(sf.SrcValue(), sf.GetType());
         // There is possible to have sequence to intrinsics with no getter/setter in interpreter:
         // compiled_code->c2i(push to frame)->interpreter(HandleCallVirtShort)->i2c(move to stack)->intrinsic
         // To do not fix it in interpreter, it is better to store 64-bits
-        if (src_reg.GetSize() < DOUBLE_WORD_SIZE && !src_reg.GetType().IsFloat()) {
-            src_reg = src_reg.As(Codegen::ConvertDataType(DataType::REFERENCE, codegen_->GetArch()));
+        if (srcReg.GetSize() < DOUBLE_WORD_SIZE && !srcReg.GetType().IsFloat()) {
+            srcReg = srcReg.As(Codegen::ConvertDataType(DataType::REFERENCE, codegen_->GetArch()));
         }
-        encoder_->EncodeStrz(src_reg, mem_ref);
+        encoder_->EncodeStrz(srcReg, memRef);
         return 1U;
     }
 
     // register -> stack
-    auto src_reg = codegen_->ConvertRegister(sf.SrcValue(), sf.GetCommonType());
+    auto srcReg = codegen_->ConvertRegister(sf.SrcValue(), sf.GetCommonType());
     // If address is no qword aligned and current group consist of even number of consecutive slots
     // then we can skip current operation.
     constexpr int COALESCE_OPS_LIMIT = 2;
-    auto skip_coalescing = (consecutive_ops_hint % COALESCE_OPS_LIMIT == 1) && (offset % QUAD_WORD_SIZE_BYTES != 0);
-    if (next != nullptr && CanCombineSpillFills(sf, *next, graph_) && !skip_coalescing) {
-        auto next_reg = codegen_->ConvertRegister(next->SrcValue(), next->GetCommonType());
-        encoder_->EncodeStp(src_reg, next_reg, mem_ref);
+    auto skipCoalescing = (consecutiveOpsHint % COALESCE_OPS_LIMIT == 1) && (offset % QUAD_WORD_SIZE_BYTES != 0);
+    if (next != nullptr && CanCombineSpillFills(sf, *next, graph_) && !skipCoalescing) {
+        auto nextReg = codegen_->ConvertRegister(next->SrcValue(), next->GetCommonType());
+        encoder_->EncodeStp(srcReg, nextReg, memRef);
         return 2U;
     }
-    encoder_->EncodeStr(src_reg, mem_ref);
+    encoder_->EncodeStr(srcReg, memRef);
     return 1U;
 }
 
-size_t SpillFillEncoder::EncodeStackToX(const SpillFillData &sf, const SpillFillData *next, int consecutive_ops_hint)
+size_t SpillFillEncoder::EncodeStackToX(const SpillFillData &sf, const SpillFillData *next, int consecutiveOpsHint)
 {
     auto offset = codegen_->GetStackOffset(sf.GetSrc());
-    auto src_mem = MemRef(sp_reg_, offset);
-    auto type_info = Codegen::ConvertDataType(sf.GetType(), codegen_->GetArch());
+    auto srcMem = MemRef(spReg_, offset);
+    auto typeInfo = Codegen::ConvertDataType(sf.GetType(), codegen_->GetArch());
 
     if (sf.GetDst().IsAnyRegister()) {  // stack -> register
         // If address is no qword aligned and current group consist of even number of consecutive slots
         // then we can skip current operation.
         constexpr int COALESCE_OPS_LIMIT = 2;
-        auto skip_coalescing = (consecutive_ops_hint % COALESCE_OPS_LIMIT == 1) && (offset % QUAD_WORD_SIZE_BYTES != 0);
-        if (next != nullptr && CanCombineSpillFills(sf, *next, graph_) && !skip_coalescing) {
-            auto cur_reg = codegen_->ConvertRegister(sf.DstValue(), sf.GetCommonType());
-            auto next_reg = codegen_->ConvertRegister(next->DstValue(), next->GetCommonType());
-            encoder_->EncodeLdp(cur_reg, next_reg, false, src_mem);
+        auto skipCoalescing = (consecutiveOpsHint % COALESCE_OPS_LIMIT == 1) && (offset % QUAD_WORD_SIZE_BYTES != 0);
+        if (next != nullptr && CanCombineSpillFills(sf, *next, graph_) && !skipCoalescing) {
+            auto curReg = codegen_->ConvertRegister(sf.DstValue(), sf.GetCommonType());
+            auto nextReg = codegen_->ConvertRegister(next->DstValue(), next->GetCommonType());
+            encoder_->EncodeLdp(curReg, nextReg, false, srcMem);
             return 2U;
         }
-        auto dst_reg = GetDstReg(sf.GetDst(), type_info);
-        encoder_->EncodeLdr(dst_reg, false, src_mem);
+        auto dstReg = GetDstReg(sf.GetDst(), typeInfo);
+        encoder_->EncodeLdr(dstReg, false, srcMem);
         return 1U;
     }
 
     // stack -> stack
     ASSERT(sf.GetDst().IsAnyStack());
-    auto dst_mem = codegen_->GetMemRefForSlot(sf.GetDst());
-    encoder_->EncodeMemCopy(src_mem, dst_mem, DOUBLE_WORD_SIZE);  // Stack slot is 64-bit wide
+    auto dstMem = codegen_->GetMemRefForSlot(sf.GetDst());
+    encoder_->EncodeMemCopy(srcMem, dstMem, DOUBLE_WORD_SIZE);  // Stack slot is 64-bit wide
     return 1U;
 }
 }  // namespace panda::compiler

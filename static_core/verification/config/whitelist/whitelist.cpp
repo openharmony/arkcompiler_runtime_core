@@ -21,28 +21,28 @@ namespace panda::verifier::debug {
 
 void DebugConfig::AddWhitelistMethodConfig(WhitelistKind kind, const PandaString &name)
 {
-    whitelist_names[static_cast<size_t>(kind)].push_back(name);
-    whitelist_not_empty = true;
+    whitelistNames[static_cast<size_t>(kind)].push_back(name);
+    whitelistNotEmpty = true;
 }
 
 bool DebugContext::InWhitelist(WhitelistKind kind, uint64_t id) const
 {
-    return config->whitelist_not_empty && whitelist.id[static_cast<size_t>(kind)]->count(id) > 0;
+    return config->whitelistNotEmpty && whitelist.id[static_cast<size_t>(kind)]->count(id) > 0;
 }
 
-void DebugContext::InsertIntoWhitelist(const PandaString &name, bool is_class_name, Method::UniqId id)
+void DebugContext::InsertIntoWhitelist(const PandaString &name, bool isClassName, Method::UniqId id)
 {
-    auto kinds_to_add = is_class_name
-                            ? std::initializer_list<WhitelistKind> {WhitelistKind::CLASS}
-                            : std::initializer_list<WhitelistKind> {WhitelistKind::METHOD, WhitelistKind::METHOD_CALL};
+    auto kindsToAdd = isClassName
+                          ? std::initializer_list<WhitelistKind> {WhitelistKind::CLASS}
+                          : std::initializer_list<WhitelistKind> {WhitelistKind::METHOD, WhitelistKind::METHOD_CALL};
 
-    for (auto kind : kinds_to_add) {
+    for (auto kind : kindsToAdd) {
         auto k = static_cast<size_t>(kind);
         auto &ids = whitelist.id[k];
-        auto &names = config->whitelist_names[k];
+        auto &names = config->whitelistNames[k];
         if (std::find(names.begin(), names.end(), name) != names.end()) {
             ids->insert(id);
-            LOG(DEBUG, VERIFIER) << "Method with " << (is_class_name ? "class " : "") << "name " << name << ", id 0x"
+            LOG(DEBUG, VERIFIER) << "Method with " << (isClassName ? "class " : "") << "name " << name << ", id 0x"
                                  << std::hex << id << " was added to whitelist";
         }
     }

@@ -15,6 +15,7 @@
 
 #include "macros.h"
 #include "unit_test.h"
+#include "libpandabase/utils/utils.h"
 #include "optimizer/optimizations/const_folding.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/code_generator/codegen.h"
@@ -36,7 +37,7 @@ public:
     }
 
     template <class T>
-    void CmpTest(T l, T r, int64_t result, DataType::Type src_type, bool fcmpg = false)
+    void CmpTest(T l, T r, int64_t result, DataType::Type srcType, bool fcmpg = false)
     {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
@@ -45,11 +46,11 @@ public:
             CONSTANT(1U, r);
             BASIC_BLOCK(2U, 1U)
             {
-                INST(2U, Opcode::Cmp).s32().SrcType(src_type).Inputs(0U, 1U);
+                INST(2U, Opcode::Cmp).s32().SrcType(srcType).Inputs(0U, 1U);
                 INST(3U, Opcode::Return).s32().Inputs(2U);
             }
         }
-        if (DataType::IsFloatType(src_type)) {
+        if (DataType::IsFloatType(srcType)) {
             INS(2U).CastToCmp()->SetFcmpg(fcmpg);
             ASSERT_EQ(INS(2U).CastToCmp()->IsFcmpg(), fcmpg);
         }
@@ -62,7 +63,7 @@ public:
     }
 
     template <class From, class To>
-    void CastTest(From src, To dst, DataType::Type dst_type)
+    void CastTest(From src, To dst, DataType::Type dstType)
     {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
@@ -71,33 +72,33 @@ public:
             BASIC_BLOCK(2U, 1U)
             {
                 INST(1U, Opcode::Cast).SrcType(INS(0U).GetType()).Inputs(0U);
-                INS(1U).SetType(dst_type);
+                INS(1U).SetType(dstType);
                 INST(2U, Opcode::Return).Inputs(1U);
-                INS(2U).SetType(dst_type);
+                INS(2U).SetType(dstType);
             }
         }
         ASSERT_EQ(ConstFoldingCast(&INS(1U)), true);
         GraphChecker(graph).Check();
 
         ConstantInst *inst = nullptr;
-        if (DataType::GetCommonType(dst_type) == DataType::INT64) {
+        if (DataType::GetCommonType(dstType) == DataType::INT64) {
             inst = graph->FindConstant(DataType::INT64, dst);
-        } else if (dst_type == DataType::FLOAT32) {
+        } else if (dstType == DataType::FLOAT32) {
             inst = graph->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(dst));
-        } else if (dst_type == DataType::FLOAT64) {
+        } else if (dstType == DataType::FLOAT64) {
             inst = graph->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(dst));
         }
         ASSERT(inst != nullptr);
         ASSERT_EQ(INS(2U).GetInput(0U).GetInst(), inst);
     }
 
-    void CheckCompareEqualInputs(DataType::Type param_type, ConditionCode cc, std::optional<uint64_t> result)
+    void CheckCompareEqualInputs(DataType::Type paramType, ConditionCode cc, std::optional<uint64_t> result)
     {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
         {
             PARAMETER(0U, 0U);
-            INS(0U).SetType(param_type);
+            INS(0U).SetType(paramType);
             BASIC_BLOCK(2U, 1U)
             {
                 INST(1U, Opcode::Compare).b().CC(cc).Inputs(0U, 0U);
@@ -220,14 +221,14 @@ TEST_F(ConstFoldingTest, NegDoubleTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 12.0);
+        CONSTANT(0U, 12.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(1U, Opcode::Neg).f64().Inputs(0U);
             INST(2U, Opcode::Return).f64().Inputs(1U);
         }
     }
-    double result = -12.0;
+    double result = -12.0_D;
     ASSERT_EQ(ConstFoldingNeg(&INS(1U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -278,14 +279,14 @@ TEST_F(ConstFoldingTest, AbsFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(-12.0));
+        CONSTANT(0U, static_cast<float>(-12.0F));
         BASIC_BLOCK(2U, 1U)
         {
             INST(1U, Opcode::Abs).f32().Inputs(0U);
             INST(2U, Opcode::Return).f32().Inputs(1U);
         }
     }
-    float result = 12.0;
+    float result = 12.0F;
     ASSERT_EQ(ConstFoldingAbs(&INS(1U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -297,14 +298,14 @@ TEST_F(ConstFoldingTest, AbsDoubleTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, -12.0);
+        CONSTANT(0U, -12.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(1U, Opcode::Abs).f64().Inputs(0U);
             INST(2U, Opcode::Return).f64().Inputs(1U);
         }
     }
-    double result = 12.0;
+    double result = 12.0_D;
     ASSERT_EQ(ConstFoldingAbs(&INS(1U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -437,15 +438,15 @@ TEST_F(ConstFoldingTest, AddFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(-2.0));
+        CONSTANT(0U, static_cast<float>(3.0F));
+        CONSTANT(1U, static_cast<float>(-2.0F));
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Add).f32().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f32().Inputs(2U);
         }
     }
-    float result = 1.0;
+    float result = 1.0F;
     ASSERT_EQ(ConstFoldingAdd(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -457,8 +458,8 @@ TEST_F(ConstFoldingTest, AddDoubleTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 3.0);
-        CONSTANT(1U, -2.0);
+        CONSTANT(0U, 3.0_D);
+        CONSTANT(1U, -2.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Add).f64().Inputs(0U, 1U);
@@ -559,15 +560,15 @@ TEST_F(ConstFoldingTest, SubFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, static_cast<float>(3.0F));
+        CONSTANT(1U, static_cast<float>(2.0F));
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Sub).f32().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f32().Inputs(2U);
         }
     }
-    float result = 1.0;
+    float result = 1.0F;
     ASSERT_EQ(ConstFoldingSub(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -579,8 +580,8 @@ TEST_F(ConstFoldingTest, SubDoubleTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 3.0);
-        CONSTANT(1U, 2.0);
+        CONSTANT(0U, 3.0_D);
+        CONSTANT(1U, 2.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Sub).f64().Inputs(0U, 1U);
@@ -694,15 +695,15 @@ TEST_F(ConstFoldingTest, MulFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, static_cast<float>(3.0F));
+        CONSTANT(1U, static_cast<float>(2.0F));
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Mul).f32().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f32().Inputs(2U);
         }
     }
-    float result = 6.0;
+    float result = 6.0F;
     ASSERT_EQ(ConstFoldingMul(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -714,15 +715,15 @@ TEST_F(ConstFoldingTest, MulDoubleTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 3.0);
-        CONSTANT(1U, 2.0);
+        CONSTANT(0U, 3.0_D);
+        CONSTANT(1U, 2.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Mul).f64().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
-    double result = 6.0;
+    double result = 6.0_D;
     ASSERT_EQ(ConstFoldingMul(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -898,15 +899,15 @@ TEST_F(ConstFoldingTest, DivFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, static_cast<float>(3.0F));
+        CONSTANT(1U, static_cast<float>(2.0F));
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Div).f32().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f32().Inputs(2U);
         }
     }
-    float result = 1.5;
+    float result = 1.5F;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -918,15 +919,15 @@ TEST_F(ConstFoldingTest, DivDoubleTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 3.0);
-        CONSTANT(1U, 2.0);
+        CONSTANT(0U, 3.0_D);
+        CONSTANT(1U, 2.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Div).f64().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
-    double result = 1.5;
+    double result = 1.5_D;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -958,15 +959,15 @@ TEST_F(ConstFoldingTest, MinFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, static_cast<float>(3.0F));
+        CONSTANT(1U, static_cast<float>(2.0F));
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Min).f32().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f32().Inputs(2U);
         }
     }
-    float result = 2.0;
+    float result = 2.0F;
     ASSERT_EQ(ConstFoldingMin(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -1025,15 +1026,15 @@ TEST_F(ConstFoldingTest, MinDoubleTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 3.0);
-        CONSTANT(1U, 2.0);
+        CONSTANT(0U, 3.0_D);
+        CONSTANT(1U, 2.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Min).f64().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
-    double result = 2.0;
+    double result = 2.0_D;
     ASSERT_EQ(ConstFoldingMin(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -1112,15 +1113,15 @@ TEST_F(ConstFoldingTest, MaxFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(2.0));
+        CONSTANT(0U, static_cast<float>(3.0F));
+        CONSTANT(1U, static_cast<float>(2.0F));
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Max).f32().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f32().Inputs(2U);
         }
     }
-    float result = 3.0;
+    float result = 3.0F;
     ASSERT_EQ(ConstFoldingMax(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -1179,15 +1180,15 @@ TEST_F(ConstFoldingTest, MaxDoubleTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 3.0);
-        CONSTANT(1U, 2.0);
+        CONSTANT(0U, 3.0_D);
+        CONSTANT(1U, 2.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Max).f64().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
-    double result = 3.0;
+    double result = 3.0_D;
     ASSERT_EQ(ConstFoldingMax(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -1223,7 +1224,7 @@ TEST_F(ConstFoldingTest, MaxDoubleNaNTest)
     GRAPH(GetGraph())
     {
         CONSTANT(0U, std::numeric_limits<double>::quiet_NaN());
-        CONSTANT(1U, 1.3);
+        CONSTANT(1U, 1.3_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Max).f64().Inputs(0U, 1U);
@@ -1614,15 +1615,15 @@ TEST_F(ConstFoldingTest, ModTestDouble)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 15.5);
-        CONSTANT(1U, 2.2);
+        CONSTANT(0U, 15.5_D);
+        CONSTANT(1U, 2.2_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Mod).f64().Inputs(0U, 1U);
             INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
-    double result = fmod(15.5, 2.2);
+    double result = fmod(15.5_D, 2.2_D);
     ASSERT_EQ(ConstFoldingMod(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -2400,8 +2401,8 @@ TEST_F(ConstFoldingTest, CompareZeroWithNullPtr)
         }
         ASSERT_TRUE(ConstFoldingCompare(&INS(2U)));
         ASSERT_TRUE(graph->RunPass<Cleanup>());
-        auto exp_graph = CreateEmptyGraph();
-        GRAPH(exp_graph)
+        auto expGraph = CreateEmptyGraph();
+        GRAPH(expGraph)
         {
             CONSTANT(0U, (cc == CC_EQ ? 1U : 0U));
             BASIC_BLOCK(2U, 1U)
@@ -2409,7 +2410,7 @@ TEST_F(ConstFoldingTest, CompareZeroWithNullPtr)
                 INST(3U, Opcode::Return).b().Inputs(0U);
             }
         }
-        ASSERT_TRUE(GraphComparator().Compare(graph, exp_graph));
+        ASSERT_TRUE(GraphComparator().Compare(graph, expGraph));
     }
 }
 
@@ -2495,8 +2496,8 @@ TEST_F(ConstFoldingTest, CompareTstNeTest1)
 
 TEST_F(ConstFoldingTest, CompareEqualInputsTest)
 {
-    for (int cc_int = CC_LT; cc_int <= CC_AE; ++cc_int) {
-        auto cc = static_cast<ConditionCode>(cc_int);
+    for (int ccInt = CC_LT; ccInt <= CC_AE; ++ccInt) {
+        auto cc = static_cast<ConditionCode>(ccInt);
         for (auto type : {DataType::INT32, DataType::INT64, DataType::FLOAT64}) {
             std::optional<bool> result;
             switch (cc) {
@@ -2647,8 +2648,8 @@ TEST_F(ConstFoldingTest, MulFloatZeroTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, static_cast<float>(3.0));
-        CONSTANT(1U, static_cast<float>(0.0));
+        CONSTANT(0U, static_cast<float>(3.0F));
+        CONSTANT(1U, static_cast<float>(0.0F));
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Mul).f32().Inputs(0U, 1U);
@@ -2664,7 +2665,7 @@ TEST_F(ConstFoldingTest, MulDoubleZeroTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, 3.0);
+        CONSTANT(0U, 3.0_D);
         CONSTANT(1U, 0.0);
         BASIC_BLOCK(2U, 1U)
         {
@@ -2862,30 +2863,30 @@ TEST_F(ConstFoldingTest, Constant32ShrBigOffsetTest)
 
 TEST_F(ConstFoldingTest, CastTest)
 {
-    uint8_t src_u8 = 0xff;
-    CastTest(src_u8, static_cast<int8_t>(src_u8), DataType::INT8);
-    CastTest(src_u8, static_cast<int16_t>(src_u8), DataType::INT16);
-    CastTest(src_u8, static_cast<uint16_t>(src_u8), DataType::UINT16);
+    uint8_t srcU8 = 0xff;
+    CastTest(srcU8, static_cast<int8_t>(srcU8), DataType::INT8);
+    CastTest(srcU8, static_cast<int16_t>(srcU8), DataType::INT16);
+    CastTest(srcU8, static_cast<uint16_t>(srcU8), DataType::UINT16);
 
-    int8_t src_i8 = -1;
-    CastTest(src_i8, static_cast<float>(src_i8), DataType::FLOAT32);
+    int8_t srcI8 = -1;
+    CastTest(srcI8, static_cast<float>(srcI8), DataType::FLOAT32);
 
-    uint16_t src_u16 = 0xffff;
-    CastTest(src_u16, static_cast<int8_t>(src_u16), DataType::INT8);
-    CastTest(src_u16, static_cast<double>(src_u16), DataType::FLOAT64);
-    CastTest(src_u16, src_u16, DataType::UINT16);
+    uint16_t srcU16 = 0xffff;
+    CastTest(srcU16, static_cast<int8_t>(srcU16), DataType::INT8);
+    CastTest(srcU16, static_cast<double>(srcU16), DataType::FLOAT64);
+    CastTest(srcU16, srcU16, DataType::UINT16);
 
-    int64_t src_i64 = -1;
-    CastTest(src_i64, static_cast<uint8_t>(src_i64), DataType::UINT8);
+    int64_t srcI64 = -1;
+    CastTest(srcI64, static_cast<uint8_t>(srcI64), DataType::UINT8);
 
-    int32_t src_i32 = -1;
-    CastTest(src_i32, static_cast<int8_t>(src_i32), DataType::INT8);
+    int32_t srcI32 = -1;
+    CastTest(srcI32, static_cast<int8_t>(srcI32), DataType::INT8);
 
-    float src_f = 0.25;
-    CastTest(src_f, src_f, DataType::FLOAT32);
+    float srcF = 0.25;
+    CastTest(srcF, srcF, DataType::FLOAT32);
 
-    double src_d = 0.25;
-    CastTest(src_d, src_d, DataType::FLOAT64);
+    double srcD = 0.25;
+    CastTest(srcD, srcD, DataType::FLOAT64);
 
     CastTest(FLT_MAX, static_cast<double>(FLT_MAX), DataType::FLOAT64);
     CastTest(FLT_MIN, static_cast<double>(FLT_MIN), DataType::FLOAT64);
@@ -2909,12 +2910,12 @@ TEST_F(ConstFoldingTest, CastTest)
     CastTest(DBL_MAX, INT32_MAX, DataType::INT32);
     CastTest(-DBL_MAX, INT32_MIN, DataType::INT32);
     CastTest(nan(""), static_cast<int32_t>(0U), DataType::INT32);
-    CastTest(64.0, static_cast<int32_t>(64.0), DataType::INT32);
+    CastTest(64.0_D, static_cast<int32_t>(64.0_D), DataType::INT32);
     // DOUBLE->INT64
     CastTest(DBL_MAX, INT64_MAX, DataType::INT64);
     CastTest(-DBL_MAX, INT64_MIN, DataType::INT64);
     CastTest(nan(""), static_cast<int64_t>(0U), DataType::INT64);
-    CastTest(64.0, static_cast<int64_t>(64.0), DataType::INT64);
+    CastTest(64.0_D, static_cast<int64_t>(64.0_D), DataType::INT64);
 }
 
 TEST_F(ConstFoldingTest, CmpTest)

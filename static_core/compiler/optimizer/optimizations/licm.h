@@ -24,7 +24,7 @@
 namespace panda::compiler {
 class Licm : public Optimization {
 public:
-    explicit Licm(Graph *graph, uint32_t hoist_limit = std::numeric_limits<uint32_t>::max());
+    explicit Licm(Graph *graph, uint32_t hoistLimit = std::numeric_limits<uint32_t>::max());
     NO_MOVE_SEMANTIC(Licm);
     NO_COPY_SEMANTIC(Licm);
     ~Licm() override = default;
@@ -33,7 +33,7 @@ public:
 
     bool IsEnable() const override
     {
-        return OPTIONS.IsCompilerLicm();
+        return g_options.IsCompilerLicm();
     }
 
     const char *GetPassName() const override
@@ -52,17 +52,17 @@ private:
     void LoopSearchDFS(Loop *loop);
     bool InstDominatesLoopExits(Inst *inst);
     bool InstInputDominatesPreheader(Inst *inst);
-    Inst *FindSaveStateForResolver(Inst *resolver, const BasicBlock *pre_header);
+    Inst *FindSaveStateForResolver(Inst *resolver, const BasicBlock *preHeader);
     void TryAppendHoistableInst(Inst *inst, BasicBlock *block, Loop *loop);
-    void MoveInstructions(BasicBlock *pre_header, Loop *loop);
+    void MoveInstructions(BasicBlock *preHeader, Loop *loop);
 
 private:
-    const uint32_t hoist_limit_ {0};
-    uint32_t hoisted_inst_count_ {0};
-    Marker marker_loop_exit_ {UNDEF_MARKER};
-    Marker marker_hoist_inst_ {UNDEF_MARKER};
+    const uint32_t hoistLimit_ {0};
+    uint32_t hoistedInstCount_ {0};
+    Marker markerLoopExit_ {UNDEF_MARKER};
+    Marker markerHoistInst_ {UNDEF_MARKER};
     SaveStateBridgesBuilder ssb_;
-    InstVector hoistable_instructions_;
+    InstVector hoistableInstructions_;
 };
 }  // namespace panda::compiler
 

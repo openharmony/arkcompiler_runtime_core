@@ -64,8 +64,8 @@ TEST(emittertests, test)
         }                        # 9
     )";
 
-    std::string source_filename = "source.pa";
-    auto res = p.Parse(source, source_filename);
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -75,11 +75,11 @@ TEST(emittertests, test)
 
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
-        ASSERT_TRUE(class_id.IsValid());
-        ASSERT_FALSE(pf->IsExternal(class_id));
+        auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        ASSERT_TRUE(classId.IsValid());
+        ASSERT_FALSE(pf->IsExternal(classId));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
         ASSERT_EQ(cda.GetSuperClassId().GetOffset(), 0U);
         ASSERT_EQ(cda.GetAccessFlags(), ACC_PUBLIC);
         ASSERT_EQ(cda.GetFieldsNumber(), 0U);
@@ -96,7 +96,7 @@ TEST(emittertests, test)
 
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
             ASSERT_FALSE(mda.IsExternal());
-            ASSERT_EQ(mda.GetClassId(), class_id);
+            ASSERT_EQ(mda.GetClassId(), classId);
             ASSERT_EQ(utf::CompareMUtf8ToMUtf8(pf->GetStringData(mda.GetNameId()).data, utf::CStringAsMutf8("main")),
                       0);
 
@@ -130,11 +130,11 @@ TEST(emittertests, test)
 
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
-        ASSERT_TRUE(class_id.IsValid());
-        ASSERT_FALSE(pf->IsExternal(class_id));
+        auto classId = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
+        ASSERT_TRUE(classId.IsValid());
+        ASSERT_FALSE(pf->IsExternal(classId));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
         ASSERT_EQ(cda.GetSuperClassId().GetOffset(), 0U);
         ASSERT_EQ(cda.GetAccessFlags(), 0);
         ASSERT_EQ(cda.GetFieldsNumber(), 2U);
@@ -145,7 +145,7 @@ TEST(emittertests, test)
         ASSERT_TRUE(cda.GetSourceFileId().has_value());
 
         EXPECT_EQ(std::string(reinterpret_cast<const char *>(pf->GetStringData(cda.GetSourceFileId().value()).data)),
-                  source_filename);
+                  sourceFilename);
 
         cda.EnumerateRuntimeAnnotations([](panda_file::File::EntityId) { ASSERT_TRUE(false); });
 
@@ -153,8 +153,8 @@ TEST(emittertests, test)
 
         struct FieldData {
             std::string name;
-            panda_file::Type::TypeId type_id;
-            uint32_t access_flags;
+            panda_file::Type::TypeId typeId;
+            uint32_t accessFlags;
         };
 
         std::vector<FieldData> fields {{"sf", panda_file::Type::TypeId::I32, ACC_STATIC},
@@ -163,13 +163,13 @@ TEST(emittertests, test)
         size_t i = 0;
         cda.EnumerateFields([&](panda_file::FieldDataAccessor &fda) {
             ASSERT_FALSE(fda.IsExternal());
-            ASSERT_EQ(fda.GetClassId(), class_id);
+            ASSERT_EQ(fda.GetClassId(), classId);
             ASSERT_EQ(utf::CompareMUtf8ToMUtf8(pf->GetStringData(fda.GetNameId()).data,
                                                utf::CStringAsMutf8(fields[i].name.c_str())),
                       0);
 
-            ASSERT_EQ(fda.GetType(), panda_file::Type(fields[i].type_id).GetFieldEncoding());
-            ASSERT_EQ(fda.GetAccessFlags(), fields[i].access_flags);
+            ASSERT_EQ(fda.GetType(), panda_file::Type(fields[i].typeId).GetFieldEncoding());
+            ASSERT_EQ(fda.GetAccessFlags(), fields[i].accessFlags);
 
             fda.EnumerateRuntimeAnnotations([](panda_file::File::EntityId) { ASSERT_TRUE(false); });
             fda.EnumerateAnnotations([](panda_file::File::EntityId) { ASSERT_TRUE(false); });
@@ -181,10 +181,10 @@ TEST(emittertests, test)
     }
 }
 
-uint8_t GetSpecialOpcode(uint32_t pc_inc, int32_t line_inc)
+uint8_t GetSpecialOpcode(uint32_t pcInc, int32_t lineInc)
 {
-    return (line_inc - panda_file::LineNumberProgramItem::LINE_BASE) +
-           (pc_inc * panda_file::LineNumberProgramItem::LINE_RANGE) + panda_file::LineNumberProgramItem::OPCODE_BASE;
+    return (lineInc - panda_file::LineNumberProgramItem::LINE_BASE) +
+           (pcInc * panda_file::LineNumberProgramItem::LINE_RANGE) + panda_file::LineNumberProgramItem::OPCODE_BASE;
 }
 
 TEST(emittertests, debuginfo)
@@ -210,18 +210,18 @@ TEST(emittertests, debuginfo)
         }
     )";
 
-    std::string source_filename = "source.pa";
-    auto res = p.Parse(source, source_filename);
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
     ASSERT_NE(pf, nullptr);
 
     std::string descriptor;
-    auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
-    ASSERT_TRUE(class_id.IsValid());
+    auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+    ASSERT_TRUE(classId.IsValid());
 
-    panda_file::ClassDataAccessor cda(*pf, class_id);
+    panda_file::ClassDataAccessor cda(*pf, classId);
 
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
         panda_file::CodeDataAccessor cdacc(*pf, mda.GetCodeId().value());
@@ -232,7 +232,7 @@ TEST(emittertests, debuginfo)
         ASSERT_EQ(dda.GetNumParams(), 0U);
 
         const uint8_t *program = dda.GetLineNumberProgram();
-        Span<const uint8_t> constant_pool = dda.GetConstantPool();
+        Span<const uint8_t> constantPool = dda.GetConstantPool();
 
         std::vector<uint8_t> opcodes {
             static_cast<uint8_t>(panda_file::LineNumberProgramItem::Opcode::SET_FILE),
@@ -244,31 +244,31 @@ TEST(emittertests, debuginfo)
         EXPECT_THAT(opcodes, ::testing::ElementsAreArray(program, opcodes.size()));
 
         size_t size {};
-        bool is_full {};
-        size_t constant_pool_offset = 0;
+        bool isFull {};
+        size_t constantPoolOffset = 0;
 
         uint32_t offset {};
 
-        std::tie(offset, size, is_full) = leb128::DecodeUnsigned<uint32_t>(&constant_pool[constant_pool_offset]);
-        constant_pool_offset += size;
-        ASSERT_TRUE(is_full);
+        std::tie(offset, size, isFull) = leb128::DecodeUnsigned<uint32_t>(&constantPool[constantPoolOffset]);
+        constantPoolOffset += size;
+        ASSERT_TRUE(isFull);
         EXPECT_EQ(
             std::string(reinterpret_cast<const char *>(pf->GetStringData(panda_file::File::EntityId(offset)).data)),
-            source_filename);
+            sourceFilename);
 
-        uint32_t pc_inc;
-        std::tie(pc_inc, size, is_full) = leb128::DecodeUnsigned<uint32_t>(&constant_pool[constant_pool_offset]);
-        constant_pool_offset += size;
-        ASSERT_TRUE(is_full);
-        EXPECT_EQ(pc_inc, 9U);
+        uint32_t pcInc;
+        std::tie(pcInc, size, isFull) = leb128::DecodeUnsigned<uint32_t>(&constantPool[constantPoolOffset]);
+        constantPoolOffset += size;
+        ASSERT_TRUE(isFull);
+        EXPECT_EQ(pcInc, 9U);
 
-        int32_t line_inc;
-        std::tie(line_inc, size, is_full) = leb128::DecodeSigned<int32_t>(&constant_pool[constant_pool_offset]);
-        constant_pool_offset += size;
-        ASSERT_TRUE(is_full);
-        EXPECT_EQ(line_inc, 12);
+        int32_t lineInc;
+        std::tie(lineInc, size, isFull) = leb128::DecodeSigned<int32_t>(&constantPool[constantPoolOffset]);
+        constantPoolOffset += size;
+        ASSERT_TRUE(isFull);
+        EXPECT_EQ(lineInc, 12);
 
-        EXPECT_EQ(constant_pool_offset, constant_pool.size());
+        EXPECT_EQ(constantPoolOffset, constantPool.size());
     });
 }
 
@@ -308,10 +308,10 @@ TEST(emittertests, exceptions)
 
     std::string descriptor;
 
-    auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
-    ASSERT_TRUE(class_id.IsValid());
+    auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+    ASSERT_TRUE(classId.IsValid());
 
-    panda_file::ClassDataAccessor cda(*pf, class_id);
+    panda_file::ClassDataAccessor cda(*pf, classId);
 
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
         panda_file::CodeDataAccessor cdacc(*pf, mda.GetCodeId().value());
@@ -319,29 +319,29 @@ TEST(emittertests, exceptions)
         ASSERT_EQ(cdacc.GetNumArgs(), 0U);
         ASSERT_EQ(cdacc.GetTriesSize(), 1);
 
-        cdacc.EnumerateTryBlocks([&](panda_file::CodeDataAccessor::TryBlock &try_block) {
-            EXPECT_EQ(try_block.GetStartPc(), 9);
-            EXPECT_EQ(try_block.GetLength(), 18);
-            EXPECT_EQ(try_block.GetNumCatches(), 3);
+        cdacc.EnumerateTryBlocks([&](panda_file::CodeDataAccessor::TryBlock &tryBlock) {
+            EXPECT_EQ(tryBlock.GetStartPc(), 9);
+            EXPECT_EQ(tryBlock.GetLength(), 18);
+            EXPECT_EQ(tryBlock.GetNumCatches(), 3);
 
             struct CatchInfo {
-                panda_file::File::EntityId type_id;
-                uint32_t handler_pc;
+                panda_file::File::EntityId typeId;
+                uint32_t handlerPc;
             };
 
             // NOLINTBEGIN(readability-magic-numbers)
-            std::vector<CatchInfo> catch_infos {{pf->GetClassId(GetTypeDescriptor("Exception1", &descriptor)), 4 * 9},
-                                                {pf->GetClassId(GetTypeDescriptor("Exception2", &descriptor)), 5 * 9},
-                                                {panda_file::File::EntityId(), 6 * 9}};
+            std::vector<CatchInfo> catchInfos {{pf->GetClassId(GetTypeDescriptor("Exception1", &descriptor)), 4 * 9},
+                                               {pf->GetClassId(GetTypeDescriptor("Exception2", &descriptor)), 5 * 9},
+                                               {panda_file::File::EntityId(), 6 * 9}};
             // NOLINTEND(readability-magic-numbers)
 
             size_t i = 0;
-            try_block.EnumerateCatchBlocks([&](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
-                auto idx = catch_block.GetTypeIdx();
+            tryBlock.EnumerateCatchBlocks([&](panda_file::CodeDataAccessor::CatchBlock &catchBlock) {
+                auto idx = catchBlock.GetTypeIdx();
                 auto id = idx != panda_file::INVALID_INDEX ? pf->ResolveClassIndex(mda.GetMethodId(), idx)
                                                            : panda_file::File::EntityId();
-                EXPECT_EQ(id, catch_infos[i].type_id);
-                EXPECT_EQ(catch_block.GetHandlerPc(), catch_infos[i].handler_pc);
+                EXPECT_EQ(id, catchInfos[i].typeId);
+                EXPECT_EQ(catchBlock.GetHandlerPc(), catchInfos[i].handlerPc);
                 ++i;
 
                 return true;
@@ -444,10 +444,10 @@ TEST(emittertests, language)
 
         std::string descriptor;
 
-        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
-        ASSERT_TRUE(class_id.IsValid());
+        auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        ASSERT_TRUE(classId.IsValid());
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_FALSE(cda.GetSourceLang());
 
@@ -472,10 +472,10 @@ TEST(emittertests, constructors)
 
         std::string descriptor;
 
-        auto class_id = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
-        ASSERT_TRUE(class_id.IsValid());
+        auto classId = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
+        ASSERT_TRUE(classId.IsValid());
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
             auto *name = utf::Mutf8AsCString(pf->GetStringData(mda.GetNameId()).data);
@@ -498,10 +498,10 @@ TEST(emittertests, constructors)
 
         std::string descriptor;
 
-        auto class_id = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
-        ASSERT_TRUE(class_id.IsValid());
+        auto classId = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
+        ASSERT_TRUE(classId.IsValid());
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
             auto *name = utf::Mutf8AsCString(pf->GetStringData(mda.GetNameId()).data);
@@ -535,7 +535,7 @@ TEST(emittertests, field_value)
 
     struct FieldData {
         std::string name;
-        panda_file::Type::TypeId type_id;
+        panda_file::Type::TypeId typeId;
         std::variant<int32_t, uint32_t, int64_t, uint64_t, float, double, std::string> value;
     };
 
@@ -562,108 +562,108 @@ TEST(emittertests, field_value)
     ASSERT_NE(pf, nullptr);
 
     std::string descriptor;
-    auto class_id = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
-    ASSERT_TRUE(class_id.IsValid());
-    ASSERT_FALSE(pf->IsExternal(class_id));
+    auto classId = pf->GetClassId(GetTypeDescriptor("R", &descriptor));
+    ASSERT_TRUE(classId.IsValid());
+    ASSERT_FALSE(pf->IsExternal(classId));
 
-    panda_file::ClassDataAccessor cda(*pf, class_id);
+    panda_file::ClassDataAccessor cda(*pf, classId);
     ASSERT_EQ(cda.GetFieldsNumber(), data.size());
 
-    auto panda_string_id = pf->GetClassId(GetTypeDescriptor("panda.String", &descriptor));
+    auto pandaStringId = pf->GetClassId(GetTypeDescriptor("panda.String", &descriptor));
 
     size_t idx = 0;
     cda.EnumerateFields([&](panda_file::FieldDataAccessor &fda) {
-        const FieldData &field_data = data[idx];
+        const FieldData &fieldData = data[idx];
 
         ASSERT_EQ(utf::CompareMUtf8ToMUtf8(pf->GetStringData(fda.GetNameId()).data,
-                                           utf::CStringAsMutf8(field_data.name.c_str())),
+                                           utf::CStringAsMutf8(fieldData.name.c_str())),
                   0);
 
-        panda_file::Type type(field_data.type_id);
-        uint32_t type_value;
+        panda_file::Type type(fieldData.typeId);
+        uint32_t typeValue;
         if (type.IsReference()) {
-            type_value = panda_string_id.GetOffset();
+            typeValue = pandaStringId.GetOffset();
         } else {
-            type_value = type.GetFieldEncoding();
+            typeValue = type.GetFieldEncoding();
         }
 
-        ASSERT_EQ(fda.GetType(), type_value);
+        ASSERT_EQ(fda.GetType(), typeValue);
 
-        switch (field_data.type_id) {
+        switch (fieldData.typeId) {
             case panda_file::Type::TypeId::U1: {
                 auto result = fda.GetValue<uint8_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<uint32_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<uint32_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::I8: {
                 auto result = fda.GetValue<int8_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<int32_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<int32_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::U8: {
                 auto result = fda.GetValue<uint8_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<uint32_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<uint32_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::I16: {
                 auto result = fda.GetValue<int16_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<int32_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<int32_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::U16: {
                 auto result = fda.GetValue<uint16_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<uint32_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<uint32_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::I32: {
                 auto result = fda.GetValue<int32_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<int32_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<int32_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::U32: {
                 auto result = fda.GetValue<uint32_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<uint32_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<uint32_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::I64: {
                 auto result = fda.GetValue<int64_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<int64_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<int64_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::U64: {
                 auto result = fda.GetValue<uint64_t>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<uint64_t>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<uint64_t>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::F32: {
                 auto result = fda.GetValue<float>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<float>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<float>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::F64: {
                 auto result = fda.GetValue<double>();
                 ASSERT_TRUE(result);
-                ASSERT_EQ(result.value(), std::get<double>(field_data.value));
+                ASSERT_EQ(result.value(), std::get<double>(fieldData.value));
                 break;
             }
             case panda_file::Type::TypeId::REFERENCE: {
                 auto result = fda.GetValue<uint32_t>();
                 ASSERT_TRUE(result);
 
-                panda_file::File::EntityId string_id(result.value());
-                auto val = std::get<std::string>(field_data.value);
+                panda_file::File::EntityId stringId(result.value());
+                auto val = std::get<std::string>(fieldData.value);
 
-                ASSERT_EQ(utf::CompareMUtf8ToMUtf8(pf->GetStringData(string_id).data, utf::CStringAsMutf8(val.c_str())),
+                ASSERT_EQ(utf::CompareMUtf8ToMUtf8(pf->GetStringData(stringId).data, utf::CStringAsMutf8(val.c_str())),
                           0);
                 break;
             }
@@ -692,12 +692,12 @@ TEST(emittertests, tagged_in_func_decl)
 
     std::string descriptor;
 
-    auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
-    ASSERT_TRUE(class_id.IsValid());
+    auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+    ASSERT_TRUE(classId.IsValid());
 
-    panda_file::ClassDataAccessor cda(*pf, class_id);
+    panda_file::ClassDataAccessor cda(*pf, classId);
 
-    size_t num_methods = 0;
+    size_t numMethods = 0;
     const auto tagged = panda_file::Type(panda_file::Type::TypeId::TAGGED);
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
         panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
@@ -705,9 +705,9 @@ TEST(emittertests, tagged_in_func_decl)
         ASSERT_EQ(1, pda.GetNumArgs());
         ASSERT_EQ(tagged, pda.GetArgType(0));
 
-        ++num_methods;
+        ++numMethods;
     });
-    ASSERT_EQ(1, num_methods);
+    ASSERT_EQ(1, numMethods);
 }
 
 TEST(emittertests, tagged_in_field_decl)
@@ -727,20 +727,20 @@ TEST(emittertests, tagged_in_field_decl)
 
     std::string descriptor;
 
-    auto class_id = pf->GetClassId(GetTypeDescriptor("Test", &descriptor));
-    ASSERT_TRUE(class_id.IsValid());
+    auto classId = pf->GetClassId(GetTypeDescriptor("Test", &descriptor));
+    ASSERT_TRUE(classId.IsValid());
 
-    panda_file::ClassDataAccessor cda(*pf, class_id);
+    panda_file::ClassDataAccessor cda(*pf, classId);
 
-    size_t num_fields = 0;
+    size_t numFields = 0;
     const auto tagged = panda_file::Type(panda_file::Type::TypeId::TAGGED);
     cda.EnumerateFields([&](panda_file::FieldDataAccessor &fda) {
         uint32_t type = fda.GetType();
         ASSERT_EQ(tagged.GetFieldEncoding(), type);
 
-        ++num_fields;
+        ++numFields;
     });
-    ASSERT_EQ(1, num_fields);
+    ASSERT_EQ(1, numFields);
 }
 
 TEST(emittertests, function_overloading_1)
@@ -764,53 +764,53 @@ TEST(emittertests, function_overloading_1)
 
     std::string descriptor {};
 
-    auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
-    ASSERT_TRUE(class_id.IsValid());
+    auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+    ASSERT_TRUE(classId.IsValid());
 
-    panda_file::ClassDataAccessor cda(*pf, class_id);
+    panda_file::ClassDataAccessor cda(*pf, classId);
 
-    size_t num_methods = 0;
+    size_t numMethods = 0;
 
-    std::unordered_map<panda_file::File::EntityId, panda_file::Type> id_to_arg_type {};
-    panda_file::File::EntityId id_f {};
+    std::unordered_map<panda_file::File::EntityId, panda_file::Type> idToArgType {};
+    panda_file::File::EntityId idF {};
 
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-        ++num_methods;
+        ++numMethods;
 
         panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
 
         if (pda.GetArgType(0) == panda_file::Type(panda_file::Type::TypeId::I32)) {
-            id_f = mda.GetMethodId();
+            idF = mda.GetMethodId();
 
             return;
         }
 
-        id_to_arg_type.emplace(mda.GetMethodId(), pda.GetArgType(0));
+        idToArgType.emplace(mda.GetMethodId(), pda.GetArgType(0));
     });
 
-    panda_file::MethodDataAccessor mda_f(*pf, id_f);
-    panda_file::CodeDataAccessor cda_f(*pf, mda_f.GetCodeId().value());
+    panda_file::MethodDataAccessor mdaF(*pf, idF);
+    panda_file::CodeDataAccessor cdaF(*pf, mdaF.GetCodeId().value());
 
-    const auto ins_sz = cda_f.GetCodeSize();
-    const auto ins_arr = cda_f.GetInstructions();
+    const auto insSz = cdaF.GetCodeSize();
+    const auto insArr = cdaF.GetInstructions();
 
-    auto bc_ins = BytecodeInstruction(ins_arr);
-    const auto bc_ins_last = bc_ins.JumpTo(ins_sz);
+    auto bcIns = BytecodeInstruction(insArr);
+    const auto bcInsLast = bcIns.JumpTo(insSz);
 
-    while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
-        const auto arg_method_idx = bc_ins.GetId().AsIndex();
-        const auto arg_method_id = pf->ResolveMethodIndex(id_f, arg_method_idx);
+    while (bcIns.GetAddress() != bcInsLast.GetAddress()) {
+        const auto argMethodIdx = bcIns.GetId().AsIndex();
+        const auto argMethodId = pf->ResolveMethodIndex(idF, argMethodIdx);
 
-        panda_file::MethodDataAccessor method_accessor(*pf, arg_method_id);
-        panda_file::ProtoDataAccessor proto_accessor(*pf, method_accessor.GetProtoId());
+        panda_file::MethodDataAccessor methodAccessor(*pf, argMethodId);
+        panda_file::ProtoDataAccessor protoAccessor(*pf, methodAccessor.GetProtoId());
 
-        ASSERT_EQ(proto_accessor.GetArgType(0), id_to_arg_type.at(arg_method_id));
-        ASSERT_EQ(std::string(utf::Mutf8AsCString(pf->GetStringData(method_accessor.GetNameId()).data)), "foo");
+        ASSERT_EQ(protoAccessor.GetArgType(0), idToArgType.at(argMethodId));
+        ASSERT_EQ(std::string(utf::Mutf8AsCString(pf->GetStringData(methodAccessor.GetNameId()).data)), "foo");
 
-        bc_ins = bc_ins.GetNext();
+        bcIns = bcIns.GetNext();
     }
 
-    ASSERT_EQ(3, num_methods);
+    ASSERT_EQ(3, numMethods);
 }
 
 TEST(emittertests, access_modifiers)
@@ -834,8 +834,8 @@ TEST(emittertests, access_modifiers)
         .function void C.f() <access.function=public> {}
     )";
 
-    std::string source_filename = "source.pa";
-    auto res = p.Parse(source, source_filename);
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -844,9 +844,9 @@ TEST(emittertests, access_modifiers)
     // Global
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_TRUE(cda.GetMethodsNumber() == 1);
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
@@ -859,9 +859,9 @@ TEST(emittertests, access_modifiers)
     // record A
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("A", &descriptor));
+        auto classId = pf->GetClassId(GetTypeDescriptor("A", &descriptor));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_TRUE(cda.IsPrivate());
         ASSERT_TRUE(cda.GetMethodsNumber() == 1);
@@ -875,18 +875,18 @@ TEST(emittertests, access_modifiers)
     // record B
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("B", &descriptor));
+        auto classId = pf->GetClassId(GetTypeDescriptor("B", &descriptor));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_TRUE(cda.IsPublic());
         ASSERT_TRUE(cda.GetFieldsNumber() == 3);
         auto i = 0;
-        auto access_predicates =
+        auto accessPredicates =
             std::array {&panda_file::FieldDataAccessor::IsPublic, &panda_file::FieldDataAccessor::IsProtected,
                         &panda_file::FieldDataAccessor::IsPrivate};
         cda.EnumerateFields([&](panda_file::FieldDataAccessor &fda) {
-            EXPECT_TRUE((fda.*access_predicates[i])());
+            EXPECT_TRUE((fda.*accessPredicates[i])());
 
             ++i;
         });
@@ -902,9 +902,9 @@ TEST(emittertests, access_modifiers)
     // record C
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("C", &descriptor));
+        auto classId = pf->GetClassId(GetTypeDescriptor("C", &descriptor));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_TRUE(cda.IsProtected());
         ASSERT_TRUE(cda.GetMethodsNumber() == 1);
@@ -925,8 +925,8 @@ TEST(emittertests, valid_inheritance)
         .record B <extends=A> {}
     )";
 
-    std::string source_filename = "source.pa";
-    auto res = p.Parse(source, source_filename);
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -941,8 +941,8 @@ TEST(emittertests, inheritance_undefined_record)
         .record A <extends=B> {}
     )";
 
-    std::string source_filename = "source.pa";
-    auto res = p.Parse(source, source_filename);
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -958,8 +958,8 @@ TEST(emittertests, primitive_inheritance)
         .record A <extends=u8> {}
     )";
 
-    std::string source_filename = "source.pa";
-    auto res = p.Parse(source, source_filename);
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -985,8 +985,8 @@ TEST(emittertests, final_modifier)
         .function void C.f3(i32 a0) <final> {}
     )";
 
-    std::string source_filename = "source.pa";
-    auto res = p.Parse(source, source_filename);
+    std::string sourceFilename = "source.pa";
+    auto res = p.Parse(source, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -995,9 +995,9 @@ TEST(emittertests, final_modifier)
     // Global
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        auto classId = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_TRUE(cda.GetMethodsNumber() == 1);
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
@@ -1010,9 +1010,9 @@ TEST(emittertests, final_modifier)
     // record A
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("A", &descriptor));
+        auto classId = pf->GetClassId(GetTypeDescriptor("A", &descriptor));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_TRUE(cda.IsFinal());
     }
@@ -1020,9 +1020,9 @@ TEST(emittertests, final_modifier)
     // record B
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("B", &descriptor));
+        auto classId = pf->GetClassId(GetTypeDescriptor("B", &descriptor));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_TRUE(cda.GetFieldsNumber() == 1);
         cda.EnumerateFields([&](panda_file::FieldDataAccessor &fda) { ASSERT_TRUE(fda.IsFinal()); });
@@ -1031,9 +1031,9 @@ TEST(emittertests, final_modifier)
     // record C
     {
         std::string descriptor;
-        auto class_id = pf->GetClassId(GetTypeDescriptor("C", &descriptor));
+        auto classId = pf->GetClassId(GetTypeDescriptor("C", &descriptor));
 
-        panda_file::ClassDataAccessor cda(*pf, class_id);
+        panda_file::ClassDataAccessor cda(*pf, classId);
 
         ASSERT_TRUE(cda.GetMethodsNumber() == 3);
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) { ASSERT_TRUE(mda.IsFinal()); });

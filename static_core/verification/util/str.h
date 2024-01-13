@@ -26,11 +26,11 @@ namespace panda::verifier {
 template <typename StrT, typename Gen>
 StrT Join(Gen gen, StrT delim = {", "})
 {
-    return FoldLeft(gen, StrT {""}, [need_delim = false, &delim](StrT accum, StrT str) mutable {
-        if (need_delim) {
+    return FoldLeft(gen, StrT {""}, [needDelim = false, &delim](StrT accum, StrT str) mutable {
+        if (needDelim) {
             accum += delim;
         }
-        need_delim = true;
+        needDelim = true;
         return accum + str;
     });
 }

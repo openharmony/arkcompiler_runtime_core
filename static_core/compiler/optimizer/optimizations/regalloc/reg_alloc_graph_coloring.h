@@ -30,7 +30,7 @@ namespace panda::compiler {
 class RegAllocGraphColoring : public RegAllocBase {
 public:
     explicit RegAllocGraphColoring(Graph *graph);
-    RegAllocGraphColoring(Graph *graph, size_t regs_count);
+    RegAllocGraphColoring(Graph *graph, size_t regsCount);
 
     const char *GetPassName() const override
     {
@@ -49,25 +49,25 @@ protected:
     bool Allocate() override;
 
 private:
-    void InitWorkingRanges(WorkingRanges *general_ranges, WorkingRanges *fp_ranges);
-    void FillPhysicalNodes(InterferenceGraph *ig, WorkingRanges *ranges, ArenaVector<ColorNode *> &physical_nodes);
-    void BuildIG(InterferenceGraph *ig, WorkingRanges *ranges, bool remat_constants = false);
+    void InitWorkingRanges(WorkingRanges *generalRanges, WorkingRanges *fpRanges);
+    void FillPhysicalNodes(InterferenceGraph *ig, WorkingRanges *ranges, ArenaVector<ColorNode *> &physicalNodes);
+    void BuildIG(InterferenceGraph *ig, WorkingRanges *ranges, bool rematConstants = false);
     IndexVector PrecolorIG(InterferenceGraph *ig);
     IndexVector PrecolorIG(InterferenceGraph *ig, const RegisterMap &map);
-    void BuildBias(InterferenceGraph *ig, const IndexVector &affinity_nodes);
-    void AddAffinityEdgesToPhi(InterferenceGraph *ig, const ColorNode &node, IndexVector *affinity_nodes);
-    void AddAffinityEdgesToSiblings(InterferenceGraph *ig, const ColorNode &node, IndexVector *affinity_nodes);
-    void AddAffinityEdgesToPhysicalNodes(InterferenceGraph *ig, IndexVector *affinity_nodes);
-    void AddAffinityEdge(InterferenceGraph *ig, IndexVector *affinity_nodes, const ColorNode &node, LifeIntervals *li);
-    bool AllocateRegisters(InterferenceGraph *ig, WorkingRanges *ranges, WorkingRanges *stack_ranges,
+    void BuildBias(InterferenceGraph *ig, const IndexVector &affinityNodes);
+    void AddAffinityEdgesToPhi(InterferenceGraph *ig, const ColorNode &node, IndexVector *affinityNodes);
+    void AddAffinityEdgesToSiblings(InterferenceGraph *ig, const ColorNode &node, IndexVector *affinityNodes);
+    void AddAffinityEdgesToPhysicalNodes(InterferenceGraph *ig, IndexVector *affinityNodes);
+    void AddAffinityEdge(InterferenceGraph *ig, IndexVector *affinityNodes, const ColorNode &node, LifeIntervals *li);
+    bool AllocateRegisters(InterferenceGraph *ig, WorkingRanges *ranges, WorkingRanges *stackRanges,
                            const RegisterMap &map);
-    bool AllocateSlots(InterferenceGraph *ig, WorkingRanges *stack_ranges);
+    bool AllocateSlots(InterferenceGraph *ig, WorkingRanges *stackRanges);
     void Remap(const InterferenceGraph &ig, const RegisterMap &map);
     bool MapSlots(const InterferenceGraph &ig);
-    void InitMap(RegisterMap *map, bool is_vector);
+    void InitMap(RegisterMap *map, bool isVector);
     void Presplit(WorkingRanges *ranges);
-    void SparseIG(InterferenceGraph *ig, unsigned regs_count, WorkingRanges *ranges, WorkingRanges *stack_ranges);
-    void SpillInterval(LifeIntervals *interval, WorkingRanges *ranges, WorkingRanges *stack_ranges);
+    void SparseIG(InterferenceGraph *ig, unsigned regsCount, WorkingRanges *ranges, WorkingRanges *stackRanges);
+    void SpillInterval(LifeIntervals *interval, WorkingRanges *ranges, WorkingRanges *stackRanges);
 };
 }  // namespace panda::compiler
 

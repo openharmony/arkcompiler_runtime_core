@@ -25,8 +25,8 @@ static inline std::string ExtractArrayBody(const std::string &text, const std::s
     auto beg = text.find(header);
     auto end = text.find('}', beg);
 
-    assert(beg != std::string::npos);
-    assert(end != std::string::npos);
+    ASSERT(beg != std::string::npos);
+    ASSERT(end != std::string::npos);
 
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
@@ -118,10 +118,10 @@ TEST(LiteralsTest, LiteralsTestDynamicValues)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    auto array_body = ExtractArrayBody(ss.str(), ".array array_0 {\n");
+    auto arrayBody = ExtractArrayBody(ss.str(), ".array array_0 {\n");
 
     std::string line;
-    std::stringstream arr {array_body};
+    std::stringstream arr {arrayBody};
     std::getline(arr, line);
     EXPECT_EQ("\tu1 1", line);
     std::getline(arr, line);

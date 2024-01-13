@@ -46,11 +46,11 @@ public:
 
     DwarfBuilder(Arch arch, ELFIO::elfio *elf);
 
-    bool BuildGraph(const Function *func, uint32_t code_offset, unsigned symbol);
+    bool BuildGraph(const Function *func, uint32_t codeOffset, unsigned symbol);
 
-    bool Finalize(uint32_t code_size);
+    bool Finalize(uint32_t codeSize);
 
-    Dwarf_Unsigned AddFile(const std::string &fname, Dwarf_Unsigned dir_index);
+    Dwarf_Unsigned AddFile(const std::string &fname, Dwarf_Unsigned dirIndex);
 
     Dwarf_Unsigned AddDir(const std::string &dname);
 
@@ -61,27 +61,27 @@ public:
 
     ELFIO::elfio *GetElfBuilder()
     {
-        return elf_builder_;
+        return elfBuilder_;
     }
 
     static int CreateSectionCallback([[maybe_unused]] char *name, [[maybe_unused]] int size,
                                      [[maybe_unused]] Dwarf_Unsigned type, [[maybe_unused]] Dwarf_Unsigned flags,
                                      [[maybe_unused]] Dwarf_Unsigned link, [[maybe_unused]] Dwarf_Unsigned info,
-                                     [[maybe_unused]] Dwarf_Unsigned *sect_name_index, [[maybe_unused]] void *user_data,
+                                     [[maybe_unused]] Dwarf_Unsigned *sectNameIndex, [[maybe_unused]] void *userData,
                                      [[maybe_unused]] int *error);
 
 private:
     std::vector<ELFIO::section *> sections_;
-    std::unordered_map<std::string, Dwarf_Unsigned> source_files_map_;
-    std::unordered_map<std::string, Dwarf_Unsigned> dirs_map_;
-    std::unordered_map<unsigned, unsigned> index_map_;
-    std::unordered_map<unsigned, ELFIO::relocation_section_accessor> rel_map_;
+    std::unordered_map<std::string, Dwarf_Unsigned> sourceFilesMap_;
+    std::unordered_map<std::string, Dwarf_Unsigned> dirsMap_;
+    std::unordered_map<unsigned, unsigned> indexMap_;
+    std::unordered_map<unsigned, ELFIO::relocation_section_accessor> relMap_;
 
-    ELFIO::elfio *elf_builder_ {nullptr};
+    ELFIO::elfio *elfBuilder_ {nullptr};
     Dwarf_P_Debug dwarf_ {nullptr};
-    Dwarf_P_Die compile_unit_die_ {nullptr};
-    Dwarf_P_Die prev_program_die_ {nullptr};
-    uint32_t code_size_ {0};
+    Dwarf_P_Die compileUnitDie_ {nullptr};
+    Dwarf_P_Die prevProgramDie_ {nullptr};
+    uint32_t codeSize_ {0};
     Arch arch_;
 };
 }  // namespace panda::irtoc

@@ -68,7 +68,7 @@ public:
         }
     }
 
-    void BigGcTask(bool need_additional_tasks)
+    void BigGcTask(bool needAdditionalTasks)
     {
         LoadForegroundTasks(FIRST_GC_STAGE_TASK_COUNT, [this]() { LoadRunner(FIRST_GC_STAGE_TASK_DURATION); });
         GetAndRunForegroundTasks();
@@ -82,7 +82,7 @@ public:
         GetAndRunForegroundTasks();
         TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(FOREGROUND_TASK);
 
-        if (need_additional_tasks) {
+        if (needAdditionalTasks) {
             LoadForegroundTasks(ADDITIONAL_GC_STAGE_TASK_COUNT,
                                 [this]() { LoadRunner(ADDITIONAL_GC_STAGE_TASK_DURATION); });
             GetAndRunForegroundTasks();
@@ -99,11 +99,11 @@ public:
 
     void LoadRunner(std::chrono::nanoseconds time)
     {
-        const auto start_time = std::chrono::system_clock::now();
+        const auto startTime = std::chrono::system_clock::now();
         do {
             // just calculations for load
             counter_ += std::log(CALCULATION_BASE * time.count());
-        } while ((std::chrono::system_clock::now() - start_time) < time);
+        } while ((std::chrono::system_clock::now() - startTime) < time);
     }
 
     void SetUp() override

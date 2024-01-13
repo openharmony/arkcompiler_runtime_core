@@ -19,28 +19,28 @@
 
 namespace panda::compiler {
 
-static void SaveCallerRegistersInFrame(RegMask mask, Encoder *encoder, const CFrameLayout &fl, bool is_fp)
+static void SaveCallerRegistersInFrame(RegMask mask, Encoder *encoder, const CFrameLayout &fl, bool isFp)
 {
     if (mask.none()) {
         return;
     }
-    auto fp_reg = Target(fl.GetArch()).GetFrameReg();
+    auto fpReg = Target(fl.GetArch()).GetFrameReg();
 
-    mask &= GetCallerRegsMask(fl.GetArch(), is_fp);
-    auto start_slot = fl.GetStackStartSlot() + fl.GetCallerLastSlot(is_fp);
-    encoder->SaveRegisters(mask, is_fp, -start_slot, fp_reg, GetCallerRegsMask(fl.GetArch(), is_fp));
+    mask &= GetCallerRegsMask(fl.GetArch(), isFp);
+    auto startSlot = fl.GetStackStartSlot() + fl.GetCallerLastSlot(isFp);
+    encoder->SaveRegisters(mask, isFp, -startSlot, fpReg, GetCallerRegsMask(fl.GetArch(), isFp));
 }
 
-static void RestoreCallerRegistersFromFrame(RegMask mask, Encoder *encoder, const CFrameLayout &fl, bool is_fp)
+static void RestoreCallerRegistersFromFrame(RegMask mask, Encoder *encoder, const CFrameLayout &fl, bool isFp)
 {
     if (mask.none()) {
         return;
     }
-    auto fp_reg = Target(fl.GetArch()).GetFrameReg();
+    auto fpReg = Target(fl.GetArch()).GetFrameReg();
 
-    mask &= GetCallerRegsMask(fl.GetArch(), is_fp);
-    auto start_slot = fl.GetStackStartSlot() + fl.GetCallerLastSlot(is_fp);
-    encoder->LoadRegisters(mask, is_fp, -start_slot, fp_reg, GetCallerRegsMask(fl.GetArch(), is_fp));
+    mask &= GetCallerRegsMask(fl.GetArch(), isFp);
+    auto startSlot = fl.GetStackStartSlot() + fl.GetCallerLastSlot(isFp);
+    encoder->LoadRegisters(mask, isFp, -startSlot, fpReg, GetCallerRegsMask(fl.GetArch(), isFp));
 }
 
 static bool InsnHasRuntimeCall(const Inst *inst)
@@ -71,9 +71,9 @@ static bool InsnHasRuntimeCall(const Inst *inst)
         if (!inst->IsIntrinsic()) {
             return true;
         }
-        auto intrinsic_id = inst->CastToIntrinsic()->GetIntrinsicId();
-        if (intrinsic_id != RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY &&
-            intrinsic_id != RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL) {
+        auto intrinsicId = inst->CastToIntrinsic()->GetIntrinsicId();
+        if (intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY &&
+            intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL) {
             return true;
         }
     }
@@ -99,25 +99,25 @@ void CodegenFastPath::GeneratePrologue()
 {
     SCOPED_DISASM_STR(this, "FastPath Prologue");
 
-    auto caller_regs = RegMask(GetCallerRegsMask(GetArch(), false));
-    auto args_num = GetRuntime()->GetMethodArgumentsCount(GetGraph()->GetMethod());
-    caller_regs &= GetUsedRegs() & ~GetTarget().GetParamRegsMask(args_num);
-    SaveCallerRegistersInFrame(caller_regs, GetEncoder(), GetFrameLayout(), false);
+    auto callerRegs = RegMask(GetCallerRegsMask(GetArch(), false));
+    auto argsNum = GetRuntime()->GetMethodArgumentsCount(GetGraph()->GetMethod());
+    callerRegs &= GetUsedRegs() & ~GetTarget().GetParamRegsMask(argsNum);
+    SaveCallerRegistersInFrame(callerRegs, GetEncoder(), GetFrameLayout(), false);
 
-    auto has_runtime_calls = HasRuntimeCalls(*GetGraph());
+    auto hasRuntimeCalls = HasRuntimeCalls(*GetGraph());
 
-    saved_registers_ = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
-    if (GetTarget().SupportLinkReg() && has_runtime_calls) {
-        saved_registers_ |= GetTarget().GetLinkReg().GetMask();
+    savedRegisters_ = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
+    if (GetTarget().SupportLinkReg() && hasRuntimeCalls) {
+        savedRegisters_ |= GetTarget().GetLinkReg().GetMask();
     }
 
     if (GetUsedVRegs().Any()) {
         SaveCallerRegistersInFrame(GetUsedVRegs() & GetCallerRegsMask(GetArch(), true), GetEncoder(), GetFrameLayout(),
                                    true);
-        saved_fp_registers_ = GetUsedVRegs() & VRegMask(GetCalleeRegsMask(GetArch(), true));
+        savedFpRegisters_ = GetUsedVRegs() & VRegMask(GetCalleeRegsMask(GetArch(), true));
     }
 
-    GetEncoder()->PushRegisters(saved_registers_, saved_fp_registers_, GetTarget().SupportLinkReg());
+    GetEncoder()->PushRegisters(savedRegisters_, savedFpRegisters_, GetTarget().SupportLinkReg());
 
     if (GetFrameInfo()->GetSpillsCount() != 0) {
         GetEncoder()->EncodeSub(
@@ -128,17 +128,17 @@ void CodegenFastPath::GeneratePrologue()
 
 RegMask CodegenFastPath::GetCallerRegistersToRestore() const
 {
-    RegMask caller_regs = GetUsedRegs() & RegMask(GetCallerRegsMask(GetArch(), false));
+    RegMask callerRegs = GetUsedRegs() & RegMask(GetCallerRegsMask(GetArch(), false));
 
-    auto args_num = GetRuntime()->GetMethodArgumentsCount(GetGraph()->GetMethod());
-    caller_regs &= ~GetTarget().GetParamRegsMask(args_num);
+    auto argsNum = GetRuntime()->GetMethodArgumentsCount(GetGraph()->GetMethod());
+    callerRegs &= ~GetTarget().GetParamRegsMask(argsNum);
 
-    if (auto ret_type {GetRuntime()->GetMethodReturnType(GetGraph()->GetMethod())};
-        ret_type != DataType::VOID && ret_type != DataType::NO_TYPE) {
-        ASSERT(!DataType::IsFloatType(ret_type));
-        caller_regs.reset(GetTarget().GetReturnRegId());
+    if (auto retType {GetRuntime()->GetMethodReturnType(GetGraph()->GetMethod())};
+        retType != DataType::VOID && retType != DataType::NO_TYPE) {
+        ASSERT(!DataType::IsFloatType(retType));
+        callerRegs.reset(GetTarget().GetReturnRegId());
     }
-    return caller_regs;
+    return callerRegs;
 }
 
 void CodegenFastPath::GenerateEpilogue()
@@ -158,7 +158,7 @@ void CodegenFastPath::GenerateEpilogue()
                                         GetFrameLayout(), true);
     }
 
-    GetEncoder()->PopRegisters(saved_registers_, saved_fp_registers_, GetTarget().SupportLinkReg());
+    GetEncoder()->PopRegisters(savedRegisters_, savedFpRegisters_, GetTarget().SupportLinkReg());
 
     GetEncoder()->EncodeReturn();
 }
@@ -191,35 +191,35 @@ void CodegenFastPath::IntrinsicSlowPathEntry(IntrinsicInst *inst)
 
 void CodegenFastPath::IntrinsicSaveRegisters([[maybe_unused]] IntrinsicInst *inst)
 {
-    RegMask callee_regs = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
+    RegMask calleeRegs = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
     // We need to save all caller regs, since caller doesn't care about registers at all (except parameters)
-    auto caller_regs = RegMask(GetCallerRegsMask(GetArch(), false));
-    auto caller_vregs = RegMask(GetCallerRegsMask(GetArch(), true));
+    auto callerRegs = RegMask(GetCallerRegsMask(GetArch(), false));
+    auto callerVregs = RegMask(GetCallerRegsMask(GetArch(), true));
 
     for (auto &input : inst->GetInputs()) {
-        callee_regs.reset(input.GetInst()->GetDstReg());
-        caller_regs.reset(input.GetInst()->GetDstReg());
+        calleeRegs.reset(input.GetInst()->GetDstReg());
+        callerRegs.reset(input.GetInst()->GetDstReg());
     }
     if (GetTarget().SupportLinkReg()) {
-        caller_regs.set(GetTarget().GetLinkReg().GetId());
+        callerRegs.set(GetTarget().GetLinkReg().GetId());
     }
-    GetEncoder()->PushRegisters(caller_regs | callee_regs, caller_vregs);
+    GetEncoder()->PushRegisters(callerRegs | calleeRegs, callerVregs);
 }
 
 void CodegenFastPath::IntrinsicRestoreRegisters([[maybe_unused]] IntrinsicInst *inst)
 {
-    RegMask callee_regs = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
+    RegMask calleeRegs = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
     // We need to restore all caller regs, since caller doesn't care about registers at all (except parameters)
-    auto caller_regs = RegMask(GetCallerRegsMask(GetArch(), false));
-    auto caller_vregs = RegMask(GetCallerRegsMask(GetArch(), true));
+    auto callerRegs = RegMask(GetCallerRegsMask(GetArch(), false));
+    auto callerVregs = RegMask(GetCallerRegsMask(GetArch(), true));
     for (auto &input : inst->GetInputs()) {
-        callee_regs.reset(input.GetInst()->GetDstReg());
-        caller_regs.reset(input.GetInst()->GetDstReg());
+        calleeRegs.reset(input.GetInst()->GetDstReg());
+        callerRegs.reset(input.GetInst()->GetDstReg());
     }
     if (GetTarget().SupportLinkReg()) {
-        caller_regs.set(GetTarget().GetLinkReg().GetId());
+        callerRegs.set(GetTarget().GetLinkReg().GetId());
     }
-    GetEncoder()->PopRegisters(caller_regs | callee_regs, caller_vregs);
+    GetEncoder()->PopRegisters(callerRegs | calleeRegs, callerVregs);
 }
 
 void CodegenFastPath::IntrinsicTailCall(IntrinsicInst *inst)
@@ -227,7 +227,7 @@ void CodegenFastPath::IntrinsicTailCall(IntrinsicInst *inst)
     CreateTailCall(inst, true);
 }
 
-void CodegenFastPath::CreateTailCall(IntrinsicInst *inst, bool is_fastpath)
+void CodegenFastPath::CreateTailCall(IntrinsicInst *inst, bool isFastpath)
 {
     auto encoder = GetEncoder();
 
@@ -238,32 +238,32 @@ void CodegenFastPath::CreateTailCall(IntrinsicInst *inst, bool is_fastpath)
     }
 
     /* Once we reach the slow path, we can release all temp registers, since slow path terminates execution */
-    auto temps_mask = GetTarget().GetTempRegsMask();
-    for (size_t reg = temps_mask.GetMinRegister(); reg <= temps_mask.GetMaxRegister(); reg++) {
-        if (temps_mask.Test(reg)) {
+    auto tempsMask = GetTarget().GetTempRegsMask();
+    for (size_t reg = tempsMask.GetMinRegister(); reg <= tempsMask.GetMaxRegister(); reg++) {
+        if (tempsMask.Test(reg)) {
             GetEncoder()->ReleaseScratchRegister(Reg(reg, INT32_TYPE));
         }
     }
 
-    if (is_fastpath) {
+    if (isFastpath) {
         RestoreCallerRegistersFromFrame(GetCallerRegistersToRestore(), encoder, GetFrameLayout(), false);
         if (GetUsedVRegs().Any()) {
             RestoreCallerRegistersFromFrame(GetUsedVRegs() & GetCallerRegsMask(GetArch(), true), encoder,
                                             GetFrameLayout(), true);
         }
     } else {
-        RegMask caller_regs = ~GetUsedRegs() & RegMask(GetCallerRegsMask(GetArch(), false));
-        auto args_num = GetRuntime()->GetMethodArgumentsCount(GetGraph()->GetMethod());
-        caller_regs &= ~GetTarget().GetParamRegsMask(args_num);
+        RegMask callerRegs = ~GetUsedRegs() & RegMask(GetCallerRegsMask(GetArch(), false));
+        auto argsNum = GetRuntime()->GetMethodArgumentsCount(GetGraph()->GetMethod());
+        callerRegs &= ~GetTarget().GetParamRegsMask(argsNum);
 
         if (GetUsedVRegs().Any()) {
-            VRegMask fp_caller_regs = ~GetUsedVRegs() & RegMask(GetCallerRegsMask(GetArch(), true));
-            SaveCallerRegistersInFrame(fp_caller_regs, encoder, GetFrameLayout(), true);
+            VRegMask fpCallerRegs = ~GetUsedVRegs() & RegMask(GetCallerRegsMask(GetArch(), true));
+            SaveCallerRegistersInFrame(fpCallerRegs, encoder, GetFrameLayout(), true);
         }
 
-        SaveCallerRegistersInFrame(caller_regs, encoder, GetFrameLayout(), false);
+        SaveCallerRegistersInFrame(callerRegs, encoder, GetFrameLayout(), false);
     }
-    encoder->PopRegisters(saved_registers_, saved_fp_registers_, GetTarget().SupportLinkReg());
+    encoder->PopRegisters(savedRegisters_, savedFpRegisters_, GetTarget().SupportLinkReg());
 
     /* First Imm is offset of the runtime entrypoint for Ark Irtoc */
     /* Second Imm is necessary for proper LLVM Irtoc FastPath compilation */

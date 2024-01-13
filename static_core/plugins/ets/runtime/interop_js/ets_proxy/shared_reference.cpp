@@ -25,18 +25,18 @@ namespace panda::ets::interop::js::ets_proxy {
 
 static void CBDoNothing([[maybe_unused]] napi_env env, [[maybe_unused]] void *data, [[maybe_unused]] void *hint) {}
 
-bool SharedReference::InitETSObject(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object, uint32_t ref_idx)
+bool SharedReference::InitETSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
     SetFlags(HasETSObject::Encode(true) | HasJSObject::Encode(false));
 
     auto env = ctx->GetJSEnv();
-    if (UNLIKELY(napi_ok != NapiWrap(env, js_object, this, FinalizeJSWeak, nullptr, &js_ref_))) {
+    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, this, FinalizeJSWeak, nullptr, &jsRef_))) {
         return false;
     }
 
-    ets_object->SetInteropHash(ref_idx);
-    ets_ref_ = ctx->Refstor()->Add(ets_object->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    if (UNLIKELY(ets_ref_ == nullptr)) {
+    etsObject->SetInteropHash(refIdx);
+    etsRef_ = ctx->Refstor()->Add(etsObject->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    if (UNLIKELY(etsRef_ == nullptr)) {
         INTEROP_LOG(ERROR) << "REFERENCE STORAGE OVERFLOW";
         ctx->ThrowJSError(env, "ets refstor overflow");
         return false;
@@ -44,26 +44,26 @@ bool SharedReference::InitETSObject(InteropCtx *ctx, EtsObject *ets_object, napi
     return true;
 }
 
-bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object, uint32_t ref_idx)
+bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
     SetFlags(HasETSObject::Encode(false) | HasJSObject::Encode(true));
 
     auto coro = EtsCoroutine::GetCurrent();
     auto env = ctx->GetJSEnv();
-    if (UNLIKELY(napi_ok != NapiWrap(env, js_object, this, CBDoNothing, nullptr, &js_ref_))) {
+    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, this, CBDoNothing, nullptr, &jsRef_))) {
         return false;
     }
-    NAPI_CHECK_FATAL(napi_reference_ref(env, js_ref_, nullptr));
+    NAPI_CHECK_FATAL(napi_reference_ref(env, jsRef_, nullptr));
 
-    LocalObjectHandle<EtsObject> handle(coro, ets_object);  // object may have no strong refs, so create one
-    handle->SetInteropHash(ref_idx);
+    LocalObjectHandle<EtsObject> handle(coro, etsObject);  // object may have no strong refs, so create one
+    handle->SetInteropHash(refIdx);
     // NOTE(vpukhov): reuse weakref from finalizationqueue
-    ets_ref_ = ctx->Refstor()->Add(ets_object->GetCoreType(), mem::Reference::ObjectType::WEAK);
+    etsRef_ = ctx->Refstor()->Add(etsObject->GetCoreType(), mem::Reference::ObjectType::WEAK);
 
-    auto box_long = EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), ToUintPtr(this));
-    if (UNLIKELY(box_long == nullptr ||
-                 !ctx->PushOntoFinalizationQueue(EtsCoroutine::GetCurrent(), handle.GetPtr(), box_long))) {
-        NAPI_CHECK_FATAL(napi_delete_reference(env, js_ref_));
+    auto boxLong = EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), ToUintPtr(this));
+    if (UNLIKELY(boxLong == nullptr ||
+                 !ctx->PushOntoFinalizationQueue(EtsCoroutine::GetCurrent(), handle.GetPtr(), boxLong))) {
+        NAPI_CHECK_FATAL(napi_delete_reference(env, jsRef_));
         return false;
     }
     return true;
@@ -71,22 +71,22 @@ bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *ets_object, napi_
 
 // NOTE(vpukhov): Circular interop references
 //                Present solution is dummy and consists of two strong refs
-bool SharedReference::InitHybridObject(InteropCtx *ctx, EtsObject *ets_object, napi_value js_object, uint32_t ref_idx)
+bool SharedReference::InitHybridObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
     SetFlags(HasETSObject::Encode(true) | HasJSObject::Encode(true));
 
     auto env = ctx->GetJSEnv();
-    if (UNLIKELY(napi_ok != NapiWrap(env, js_object, this, CBDoNothing, nullptr, &js_ref_))) {
+    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, this, CBDoNothing, nullptr, &jsRef_))) {
         return false;
     }
-    NAPI_CHECK_FATAL(napi_reference_ref(env, js_ref_, nullptr));
+    NAPI_CHECK_FATAL(napi_reference_ref(env, jsRef_, nullptr));
 
-    ets_object->SetInteropHash(ref_idx);
-    ets_ref_ = ctx->Refstor()->Add(ets_object->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    if (UNLIKELY(ets_ref_ == nullptr)) {
+    etsObject->SetInteropHash(refIdx);
+    etsRef_ = ctx->Refstor()->Add(etsObject->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    if (UNLIKELY(etsRef_ == nullptr)) {
         INTEROP_LOG(ERROR) << "REFERENCE STORAGE OVERFLOW";
         ctx->ThrowJSError(env, "ets refstor overflow");
-        NAPI_CHECK_FATAL(napi_delete_reference(env, js_ref_));
+        NAPI_CHECK_FATAL(napi_delete_reference(env, jsRef_));
         return false;
     }
     return true;
@@ -100,10 +100,10 @@ void SharedReference::FinalizeJSWeak([[maybe_unused]] napi_env env, void *data, 
     ScopedManagedCodeThread scope(coro);
 
     auto ref = reinterpret_cast<SharedReference *>(data);
-    ASSERT(ref->ets_ref_ != nullptr);
+    ASSERT(ref->etsRef_ != nullptr);
 
     ref->GetEtsObject(ctx)->DropInteropHash();
-    ctx->Refstor()->Remove(ref->ets_ref_);
+    ctx->Refstor()->Remove(ref->etsRef_);
     ctx->GetSharedRefStorage()->RemoveReference(ref);
 }
 
@@ -111,12 +111,12 @@ void SharedReference::FinalizeJSWeak([[maybe_unused]] napi_env env, void *data, 
 void SharedReference::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
 {
     ASSERT(cbarg->GetClass()->GetRuntimeClass() == ctx->GetBoxLongClass());
-    auto box_long = FromEtsObject<EtsBoxPrimitive<EtsLong>>(cbarg);
+    auto boxLong = FromEtsObject<EtsBoxPrimitive<EtsLong>>(cbarg);
 
-    auto shared_ref = ToNativePtr<SharedReference>(static_cast<uintptr_t>(box_long->GetValue()));
+    auto sharedRef = ToNativePtr<SharedReference>(static_cast<uintptr_t>(boxLong->GetValue()));
 
-    NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), shared_ref->js_ref_));
-    ctx->GetSharedRefStorage()->RemoveReference(shared_ref);
+    NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), sharedRef->jsRef_));
+    ctx->GetSharedRefStorage()->RemoveReference(sharedRef);
 }
 
 }  // namespace panda::ets::interop::js::ets_proxy

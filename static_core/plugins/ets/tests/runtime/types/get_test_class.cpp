@@ -22,28 +22,28 @@
 
 namespace panda::ets::test {
 
-EtsClass *GetTestClass(const char *source, const char *class_name, const std::string &source_filename)
+EtsClass *GetTestClass(const char *source, const char *className, const std::string &sourceFilename)
 {
     pandasm::Parser p;
 
-    auto res = p.Parse(source, source_filename);
+    auto res = p.Parse(source, sourceFilename);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
 
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
-    ASSERT(class_linker);
-    class_linker->AddPandaFile(std::move(pf));
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+    ASSERT(classLinker);
+    classLinker->AddPandaFile(std::move(pf));
 
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    EtsClassLinker *ets_class_linker = coroutine->GetPandaVM()->GetClassLinker();
+    EtsClassLinker *etsClassLinker = coroutine->GetPandaVM()->GetClassLinker();
 
-    EtsClass *klass = ets_class_linker->GetClass(class_name);
+    EtsClass *klass = etsClassLinker->GetClass(className);
     if (klass == nullptr) {
         return nullptr;
     }
 
-    ctx.InitializeClass(class_linker, coroutine, klass->GetRuntimeClass());
+    ctx.InitializeClass(classLinker, coroutine, klass->GetRuntimeClass());
 
     return klass;
 }

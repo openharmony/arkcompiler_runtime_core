@@ -52,10 +52,10 @@ using compiler::Graph;
 static bool RunIrtocOptimizations(Graph *graph);
 static bool RunIrtocInterpreterOptimizations(Graph *graph);
 
-Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAllocator *local_allocator)
+Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAllocator *localAllocator)
 {
     IrtocRuntimeInterface runtime;
-    graph_ = allocator->New<Graph>(allocator, local_allocator, arch, this, &runtime, false);
+    graph_ = allocator->New<Graph>(allocator, localAllocator, arch, this, &runtime, false);
     builder_ = std::make_unique<compiler::IrConstructor>();
 
     MakeGraphImpl();
@@ -68,42 +68,42 @@ Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAl
 #endif
 
     if (GetGraph()->GetMode().IsNative()) {
-        compiler::InPlaceCompilerTaskRunner task_runner;
-        task_runner.GetContext().SetGraph(GetGraph());
+        compiler::InPlaceCompilerTaskRunner taskRunner;
+        taskRunner.GetContext().SetGraph(GetGraph());
         bool success = true;
-        task_runner.AddCallbackOnFail(
-            [&success]([[maybe_unused]] compiler::InPlaceCompilerContext &compiler_ctx) { success = false; });
-        compiler::RunOptimizations<compiler::INPLACE_MODE>(std::move(task_runner));
+        taskRunner.AddCallbackOnFail(
+            [&success]([[maybe_unused]] compiler::InPlaceCompilerContext &compilerCtx) { success = false; });
+        compiler::RunOptimizations<compiler::INPLACE_MODE>(std::move(taskRunner));
         if (!success) {
             return Unexpected("RunOptimizations failed!");
         }
-        compilation_result_ = CompilationResult::ARK;
+        compilationResult_ = CompilationResult::ARK;
     } else {
         auto result = RunOptimizations();
         if (!result) {
             return result;
         }
-        compilation_result_ = result.Value();
+        compilationResult_ = result.Value();
     }
     builder_.reset(nullptr);
 
     auto code = GetGraph()->GetCode();
     SetCode(code);
 
-    ASSERT(compilation_result_ != CompilationResult::INVALID);
-    return compilation_result_;
+    ASSERT(compilationResult_ != CompilationResult::INVALID);
+    return compilationResult_;
 }
 
 Function::Result Function::RunOptimizations()
 {
     auto result = CompilationResult::INVALID;
     bool interpreter = GetGraph()->GetMode().IsInterpreter() || GetGraph()->GetMode().IsInterpreterEntry();
-    bool should_try_llvm = false;
+    bool shouldTryLlvm = false;
 #ifdef PANDA_LLVM_IRTOC
-    bool with_llvm_suffix = std::string_view {GetName()}.find(LLVM_SUFFIX) != std::string_view::npos;
-    if (with_llvm_suffix) {
+    bool withLlvmSuffix = std::string_view {GetName()}.find(LLVM_SUFFIX) != std::string_view::npos;
+    if (withLlvmSuffix) {
 #ifdef PANDA_LLVM_INTERPRETER
-        should_try_llvm = true;
+        shouldTryLlvm = true;
         // Functions with "_LLVM" suffix must be interpreter handlers from the irtoc_code_llvm.cpp
         LOG_IF(!interpreter, FATAL, IRTOC)
             << "'" << GetName() << "' must not contain '" << LLVM_SUFFIX << "', only interpreter handlers can";
@@ -112,10 +112,10 @@ Function::Result Function::RunOptimizations()
 #endif
     }
 #ifdef PANDA_LLVM_FASTPATH
-    should_try_llvm |= !interpreter;
+    shouldTryLlvm |= !interpreter;
 #endif
 #endif  // PANDA_LLVM_IRTOC
-    if (should_try_llvm) {
+    if (shouldTryLlvm) {
         result = CompileByLLVM();
         ASSERT(result == CompilationResult::LLVM || result == CompilationResult::ARK_BECAUSE_SKIP ||
                result == CompilationResult::ARK_BECAUSE_FALLBACK);
@@ -151,15 +151,15 @@ CompilationResult Function::CompileByLLVM()
     if (SkippedByLLVM()) {
         return CompilationResult::ARK_BECAUSE_SKIP;
     }
-    ASSERT(llvm_compiler_ != nullptr);
-    auto can = llvm_compiler_->CanCompile(GetGraph());
+    ASSERT(llvmCompiler_ != nullptr);
+    auto can = llvmCompiler_->CanCompile(GetGraph());
     if (!can.HasValue()) {
         LOG(FATAL, IRTOC) << can.Error() << "\n";
     }
     if (!can.Value()) {
         return CompilationResult::ARK_BECAUSE_FALLBACK;
     }
-    if (!llvm_compiler_->AddGraph(GetGraph())) {
+    if (!llvmCompiler_->AddGraph(GetGraph())) {
         LOG(FATAL, IRTOC) << "LLVM compilation failed on compilable code graph for " << GetName() << " unit";
     }
     return CompilationResult::LLVM;
@@ -170,16 +170,16 @@ CompilationResult Function::CompileByLLVM()
 void Function::ReportCompilationStatistic(std::ostream *out)
 {
     ASSERT(out != nullptr);
-    ASSERT(!OPTIONS.Validate());
-    std::string stats_level = OPTIONS.GetIrtocLlvmStats();
-    if (stats_level == "none") {
+    ASSERT(!g_options.Validate());
+    std::string statsLevel = g_options.GetIrtocLlvmStats();
+    if (statsLevel == "none") {
         return;
     }
-    if (stats_level != "full" && GetGraph()->IsDynamicMethod()) {
+    if (statsLevel != "full" && GetGraph()->IsDynamicMethod()) {
         return;
     }
-    if (stats_level == "short") {
-        if (compilation_result_ == CompilationResult::LLVM || compilation_result_ == CompilationResult::ARK) {
+    if (statsLevel == "short") {
+        if (compilationResult_ == CompilationResult::LLVM || compilationResult_ == CompilationResult::ARK) {
             return;
         }
     }
@@ -193,16 +193,16 @@ void Function::ReportCompilationStatistic(std::ostream *out)
 
 std::string_view Function::LLVMCompilationResultToString() const
 {
-    if (compilation_result_ == CompilationResult::ARK) {
+    if (compilationResult_ == CompilationResult::ARK) {
         return "ark";
     }
-    if (compilation_result_ == CompilationResult::LLVM) {
+    if (compilationResult_ == CompilationResult::LLVM) {
         return "ok";
     }
-    if (compilation_result_ == CompilationResult::ARK_BECAUSE_FALLBACK) {
+    if (compilationResult_ == CompilationResult::ARK_BECAUSE_FALLBACK) {
         return "fallback";
     }
-    if (compilation_result_ == CompilationResult::ARK_BECAUSE_SKIP) {
+    if (compilationResult_ == CompilationResult::ARK_BECAUSE_SKIP) {
         return "skip";
     }
     UNREACHABLE();
@@ -228,7 +228,7 @@ std::string_view Function::GraphModeToString()
 
 void Function::AddRelocation(const compiler::RelocationInfo &info)
 {
-    relocation_entries_.emplace_back(info);
+    relocationEntries_.emplace_back(info);
 }
 
 #ifdef PANDA_LLVM_IRTOC
@@ -254,20 +254,20 @@ bool Function::SkippedByLLVM()
 
 static bool RunIrtocInterpreterOptimizations(Graph *graph)
 {
-    compiler::OPTIONS.SetCompilerChecksElimination(false);
+    compiler::g_options.SetCompilerChecksElimination(false);
     // aantipina: re-enable Lse
-    compiler::OPTIONS.SetCompilerLse(false);
+    compiler::g_options.SetCompilerLse(false);
 #ifdef PANDA_COMPILER_TARGET_AARCH64
-    compiler::OPTIONS.SetCompilerMemoryCoalescing(false);
+    compiler::g_options.SetCompilerMemoryCoalescing(false);
 #endif
-    if (!compiler::OPTIONS.IsCompilerNonOptimizing()) {
+    if (!compiler::g_options.IsCompilerNonOptimizing()) {
         graph->RunPass<compiler::Peepholes>();
         graph->RunPass<compiler::BranchElimination>();
         graph->RunPass<compiler::ValNum>();
         graph->RunPass<compiler::IfMerging>();
         graph->RunPass<compiler::Cleanup>();
         graph->RunPass<compiler::Cse>();
-        graph->RunPass<compiler::Licm>(compiler::OPTIONS.GetCompilerLicmHoistLimit());
+        graph->RunPass<compiler::Licm>(compiler::g_options.GetCompilerLicmHoistLimit());
         graph->RunPass<compiler::RedundantLoopElimination>();
         graph->RunPass<compiler::LoopPeeling>();
         graph->RunPass<compiler::Lse>();
@@ -278,8 +278,8 @@ static bool RunIrtocInterpreterOptimizations(Graph *graph)
         graph->RunPass<compiler::Cleanup>();
         graph->RunPass<compiler::Cse>();
         graph->RunPass<compiler::ChecksElimination>();
-        graph->RunPass<compiler::LoopUnroll>(compiler::OPTIONS.GetCompilerLoopUnrollInstLimit(),
-                                             compiler::OPTIONS.GetCompilerLoopUnrollFactor());
+        graph->RunPass<compiler::LoopUnroll>(compiler::g_options.GetCompilerLoopUnrollInstLimit(),
+                                             compiler::g_options.GetCompilerLoopUnrollFactor());
         graph->RunPass<compiler::BalanceExpressions>();
         if (graph->RunPass<compiler::Peepholes>()) {
             graph->RunPass<compiler::BranchElimination>();
@@ -293,8 +293,8 @@ static bool RunIrtocInterpreterOptimizations(Graph *graph)
         graph->RunPass<compiler::Cleanup>();
         graph->RunPass<compiler::Lowering>();
         graph->RunPass<compiler::CodeSink>();
-        graph->RunPass<compiler::MemoryCoalescing>(compiler::OPTIONS.IsCompilerMemoryCoalescingAligned());
-        graph->RunPass<compiler::IfConversion>(compiler::OPTIONS.GetCompilerIfConversionLimit());
+        graph->RunPass<compiler::MemoryCoalescing>(compiler::g_options.IsCompilerMemoryCoalescingAligned());
+        graph->RunPass<compiler::IfConversion>(compiler::g_options.GetCompilerIfConversionLimit());
         graph->RunPass<compiler::MoveConstants>();
     }
 
@@ -312,15 +312,15 @@ static bool RunIrtocInterpreterOptimizations(Graph *graph)
 
 static bool RunIrtocOptimizations(Graph *graph)
 {
-    if (!compiler::OPTIONS.IsCompilerNonOptimizing()) {
+    if (!compiler::g_options.IsCompilerNonOptimizing()) {
         graph->RunPass<compiler::Peepholes>();
         graph->RunPass<compiler::ValNum>();
         graph->RunPass<compiler::Cse>();
         graph->RunPass<compiler::Cleanup>();
         graph->RunPass<compiler::Lowering>();
         graph->RunPass<compiler::CodeSink>();
-        graph->RunPass<compiler::MemoryCoalescing>(compiler::OPTIONS.IsCompilerMemoryCoalescingAligned());
-        graph->RunPass<compiler::IfConversion>(compiler::OPTIONS.GetCompilerIfConversionLimit());
+        graph->RunPass<compiler::MemoryCoalescing>(compiler::g_options.IsCompilerMemoryCoalescingAligned());
+        graph->RunPass<compiler::IfConversion>(compiler::g_options.GetCompilerIfConversionLimit());
         graph->RunPass<compiler::Cleanup>();
         graph->RunPass<compiler::Scheduler>();
         // Perform MoveConstants after Scheduler because Scheduler can rearrange constants

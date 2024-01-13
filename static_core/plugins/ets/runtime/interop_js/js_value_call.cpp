@@ -29,23 +29,23 @@ namespace panda::ets::interop::js {
 
 // Convert js->ets, throws ETS/JS exceptions
 template <typename FClsResolv, typename FStorePrim, typename FStoreRef>
-[[nodiscard]] static ALWAYS_INLINE inline bool ConvertNapiVal(InteropCtx *ctx, FClsResolv &resolve_ref_cls,
-                                                              FStorePrim &store_prim, FStoreRef &store_ref,
-                                                              panda_file::Type type, napi_value js_val)
+[[nodiscard]] static ALWAYS_INLINE inline bool ConvertNapiVal(InteropCtx *ctx, FClsResolv &resolveRefCls,
+                                                              FStorePrim &storePrim, FStoreRef &storeRef,
+                                                              panda_file::Type type, napi_value jsVal)
 {
     auto env = ctx->GetJSEnv();
 
-    auto unwrap_val = [&](auto conv_tag) {
-        using Convertor = typename decltype(conv_tag)::type;  // conv_tag acts as lambda template parameter
-        using cpptype = typename Convertor::cpptype;          // NOLINT(readability-identifier-naming)
-        auto res = Convertor::Unwrap(ctx, env, js_val);
+    auto unwrapVal = [&ctx, &env, &jsVal, &storeRef, &storePrim](auto convTag) {
+        using Convertor = typename decltype(convTag)::type;  // convTag acts as lambda template parameter
+        using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
+        auto res = Convertor::Unwrap(ctx, env, jsVal);
         if (UNLIKELY(!res.has_value())) {
             return false;
         }
         if constexpr (std::is_pointer_v<cpptype>) {
-            store_ref(AsEtsObject(res.value())->GetCoreType());
+            storeRef(AsEtsObject(res.value())->GetCoreType());
         } else {
-            store_prim(Value(res.value()).GetAsLong());
+            storePrim(Value(res.value()).GetAsLong());
         }
         return true;
     };
@@ -56,51 +56,51 @@ template <typename FClsResolv, typename FStorePrim, typename FStoreRef>
             return true;
         }
         case panda_file::Type::TypeId::U1:
-            return unwrap_val(helpers::TypeIdentity<JSConvertU1>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertU1>());
         case panda_file::Type::TypeId::I8:
-            return unwrap_val(helpers::TypeIdentity<JSConvertI8>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertI8>());
         case panda_file::Type::TypeId::U8:
-            return unwrap_val(helpers::TypeIdentity<JSConvertU8>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertU8>());
         case panda_file::Type::TypeId::I16:
-            return unwrap_val(helpers::TypeIdentity<JSConvertI16>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertI16>());
         case panda_file::Type::TypeId::U16:
-            return unwrap_val(helpers::TypeIdentity<JSConvertU16>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertU16>());
         case panda_file::Type::TypeId::I32:
-            return unwrap_val(helpers::TypeIdentity<JSConvertI32>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertI32>());
         case panda_file::Type::TypeId::U32:
-            return unwrap_val(helpers::TypeIdentity<JSConvertU32>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertU32>());
         case panda_file::Type::TypeId::I64:
-            return unwrap_val(helpers::TypeIdentity<JSConvertI64>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertI64>());
         case panda_file::Type::TypeId::U64:
-            return unwrap_val(helpers::TypeIdentity<JSConvertU64>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertU64>());
         case panda_file::Type::TypeId::F32:
-            return unwrap_val(helpers::TypeIdentity<JSConvertF32>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertF32>());
         case panda_file::Type::TypeId::F64:
-            return unwrap_val(helpers::TypeIdentity<JSConvertF64>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertF64>());
         case panda_file::Type::TypeId::REFERENCE: {
-            if (UNLIKELY(IsNullOrUndefined(env, js_val))) {
-                store_ref(nullptr);
+            if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
+                storeRef(nullptr);
                 return true;
             }
-            auto klass = resolve_ref_cls();
+            auto klass = resolveRefCls();
 
             // start fastpath
             if (klass == ctx->GetVoidClass()) {
-                return unwrap_val(helpers::TypeIdentity<JSConvertEtsVoid>());
+                return unwrapVal(helpers::TypeIdentity<JSConvertEtsVoid>());
             }
             if (klass == ctx->GetJSValueClass()) {
-                return unwrap_val(helpers::TypeIdentity<JSConvertJSValue>());
+                return unwrapVal(helpers::TypeIdentity<JSConvertJSValue>());
             }
             if (klass == ctx->GetStringClass()) {
-                return unwrap_val(helpers::TypeIdentity<JSConvertString>());
+                return unwrapVal(helpers::TypeIdentity<JSConvertString>());
             }
             // start slowpath
             auto refconv = JSRefConvertResolve<true>(ctx, klass);
             if (UNLIKELY(refconv == nullptr)) {
                 return false;
             }
-            ObjectHeader *res = refconv->Unwrap(ctx, js_val)->GetCoreType();
-            store_ref(res);
+            ObjectHeader *res = refconv->Unwrap(ctx, jsVal)->GetCoreType();
+            storeRef(res);
             return res != nullptr;
         }
         default: {
@@ -114,78 +114,78 @@ template <typename FClsResolv, typename FStorePrim, typename FStoreRef>
 // Convert ets->js, throws JS exceptions
 template <typename FClsResolv, typename FStore, typename FRead>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertEtsVal(InteropCtx *ctx,
-                                                             [[maybe_unused]] FClsResolv &resolve_ref_cls,
-                                                             FStore &store_res, panda_file::Type type, FRead &read_val)
+                                                             [[maybe_unused]] FClsResolv &resolveRefCls,
+                                                             FStore &storeRes, panda_file::Type type, FRead &readVal)
 {
     auto env = ctx->GetJSEnv();
 
-    auto wrap_prim = [&](auto conv_tag) -> bool {
-        using Convertor = typename decltype(conv_tag)::type;  // conv_tag acts as lambda template parameter
-        using cpptype = typename Convertor::cpptype;          // NOLINT(readability-identifier-naming)
-        napi_value res = Convertor::Wrap(env, read_val(helpers::TypeIdentity<cpptype>()));
-        store_res(res);
+    auto wrapPrim = [&env, &readVal, &storeRes](auto convTag) -> bool {
+        using Convertor = typename decltype(convTag)::type;  // convTag acts as lambda template parameter
+        using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
+        napi_value res = Convertor::Wrap(env, readVal(helpers::TypeIdentity<cpptype>()));
+        storeRes(res);
         return res != nullptr;
     };
 
-    auto wrap_ref = [&](auto conv_tag, ObjectHeader *ref) -> bool {
-        using Convertor = typename decltype(conv_tag)::type;  // conv_tag acts as lambda template parameter
-        using cpptype = typename Convertor::cpptype;          // NOLINT(readability-identifier-naming)
+    auto wrapRef = [&env, &storeRes](auto convTag, ObjectHeader *ref) -> bool {
+        using Convertor = typename decltype(convTag)::type;  // convTag acts as lambda template parameter
+        using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
         cpptype value = std::remove_pointer_t<cpptype>::FromEtsObject(EtsObject::FromCoreType(ref));
         napi_value res = Convertor::Wrap(env, value);
-        store_res(res);
+        storeRes(res);
         return res != nullptr;
     };
 
     switch (type.GetId()) {
         case panda_file::Type::TypeId::VOID: {
-            store_res(GetUndefined(env));
+            storeRes(GetUndefined(env));
             return true;
         }
         case panda_file::Type::TypeId::U1:
-            return wrap_prim(helpers::TypeIdentity<JSConvertU1>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertU1>());
         case panda_file::Type::TypeId::I8:
-            return wrap_prim(helpers::TypeIdentity<JSConvertI8>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertI8>());
         case panda_file::Type::TypeId::U8:
-            return wrap_prim(helpers::TypeIdentity<JSConvertU8>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertU8>());
         case panda_file::Type::TypeId::I16:
-            return wrap_prim(helpers::TypeIdentity<JSConvertI16>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertI16>());
         case panda_file::Type::TypeId::U16:
-            return wrap_prim(helpers::TypeIdentity<JSConvertU16>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertU16>());
         case panda_file::Type::TypeId::I32:
-            return wrap_prim(helpers::TypeIdentity<JSConvertI32>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertI32>());
         case panda_file::Type::TypeId::U32:
-            return wrap_prim(helpers::TypeIdentity<JSConvertU32>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertU32>());
         case panda_file::Type::TypeId::I64:
-            return wrap_prim(helpers::TypeIdentity<JSConvertI64>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertI64>());
         case panda_file::Type::TypeId::U64:
-            return wrap_prim(helpers::TypeIdentity<JSConvertU64>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertU64>());
         case panda_file::Type::TypeId::F32:
-            return wrap_prim(helpers::TypeIdentity<JSConvertF32>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertF32>());
         case panda_file::Type::TypeId::F64:
-            return wrap_prim(helpers::TypeIdentity<JSConvertF64>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertF64>());
         case panda_file::Type::TypeId::REFERENCE: {
-            ObjectHeader *ref = read_val(helpers::TypeIdentity<ObjectHeader *>());
+            ObjectHeader *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
             if (UNLIKELY(ref == nullptr)) {
-                store_res(GetNull(env));
+                storeRes(GetNull(env));
                 return true;
             }
             auto klass = ref->template ClassAddr<Class>();
 
-            ASSERT(resolve_ref_cls()->IsAssignableFrom(klass));
+            ASSERT(resolveRefCls()->IsAssignableFrom(klass));
             // start fastpath
             if (klass == ctx->GetVoidClass()) {
-                return wrap_ref(helpers::TypeIdentity<JSConvertEtsVoid>(), ref);
+                return wrapRef(helpers::TypeIdentity<JSConvertEtsVoid>(), ref);
             }
             if (klass == ctx->GetJSValueClass()) {
-                return wrap_ref(helpers::TypeIdentity<JSConvertJSValue>(), ref);
+                return wrapRef(helpers::TypeIdentity<JSConvertJSValue>(), ref);
             }
             if (klass == ctx->GetStringClass()) {
-                return wrap_ref(helpers::TypeIdentity<JSConvertString>(), ref);
+                return wrapRef(helpers::TypeIdentity<JSConvertString>(), ref);
             }
             // start slowpath
             auto refconv = JSRefConvertResolve(ctx, klass);
             auto res = refconv->Wrap(ctx, EtsObject::FromCoreType(ref));
-            store_res(res);
+            storeRes(res);
             return res != nullptr;
         }
         default: {
@@ -199,63 +199,62 @@ template <typename FClsResolv, typename FStore, typename FRead>
 using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
 
 template <bool IS_STATIC>
-napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                       EtsObject *this_obj)
+napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv, EtsObject *thisObj)
 {
     ASSERT_MANAGED_CODE();
 
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
 
     auto pf = method->GetPandaFile();
     panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-    pda.EnumerateTypes([](panda_file::Type /* unused */) {});  // preload reftypes span
+    pda.EnumerateTypes([](panda_file::Type) {});  // preload reftypes span
 
-    auto resolve_ref_cls = [&](uint32_t idx) {
-        auto klass = class_linker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
+    auto resolveRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
+        auto klass = classLinker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
         ASSERT(klass != nullptr);
         return klass;
     };
-    auto load_ref_cls = [&](uint32_t idx) {
-        return class_linker->GetClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
+    auto loadRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
+        return classLinker->GetClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
     };
 
     panda_file::ShortyIterator it(method->GetShorty());
-    auto ref_arg_idx = static_cast<uint32_t>(!(*it++).IsPrimitive());  // skip retval
+    auto refArgIdx = static_cast<uint32_t>(!(*it++).IsPrimitive());  // skip retval
 
     ASSERT(method->IsStatic() == IS_STATIC);
     static constexpr size_t ETS_ARGS_DISP = IS_STATIC ? 0 : 1;
 
-    auto const num_args = method->GetNumArgs() - ETS_ARGS_DISP;
-    if (UNLIKELY(num_args != jsargv.size())) {
+    auto const numArgs = method->GetNumArgs() - ETS_ARGS_DISP;
+    if (UNLIKELY(numArgs != jsargv.size())) {
         InteropCtx::ThrowJSTypeError(ctx->GetJSEnv(), std::string("CallEtsFunction: wrong argc"));
         return nullptr;
     }
 
-    auto ets_args = ctx->GetTempArgs<Value>(method->GetNumArgs());
+    auto etsArgs = ctx->GetTempArgs<Value>(method->GetNumArgs());
     {
-        HandleScope<ObjectHeader *> ets_handle_scope(coro);
+        HandleScope<ObjectHeader *> etsHandleScope(coro);
 
-        VMHandle<ObjectHeader> this_obj_handle {};
+        VMHandle<ObjectHeader> thisObjHandle {};
         if constexpr (!IS_STATIC) {
-            this_obj_handle = VMHandle<ObjectHeader>(coro, this_obj->GetCoreType());
+            thisObjHandle = VMHandle<ObjectHeader>(coro, thisObj->GetCoreType());
         } else {
-            (void)this_obj;
-            ASSERT(this_obj == nullptr);
+            (void)thisObj;
+            ASSERT(thisObj == nullptr);
         }
 
-        auto ets_boxed_args = ctx->GetTempArgs<ArgValueBox>(num_args);
+        auto etsBoxedArgs = ctx->GetTempArgs<ArgValueBox>(numArgs);
 
         // Convert and box in VMHandle if necessary
-        for (uint32_t arg_idx = 0; arg_idx < num_args; ++arg_idx, it.IncrementWithoutCheck()) {
+        for (uint32_t argIdx = 0; argIdx < numArgs; ++argIdx, it.IncrementWithoutCheck()) {
             panda_file::Type type = *it;
-            auto js_val = jsargv[arg_idx];
-            auto cls_resolver = [&]() { return load_ref_cls(ref_arg_idx++); };
-            auto store_prim = [&](uint64_t val) { ets_boxed_args[arg_idx] = val; };
-            auto store_ref = [&](ObjectHeader *obj) {
+            auto jsVal = jsargv[argIdx];
+            auto clsResolver = [&loadRefCls, &refArgIdx]() { return loadRefCls(refArgIdx++); };
+            auto storePrim = [&etsBoxedArgs, &argIdx](uint64_t val) { etsBoxedArgs[argIdx] = val; };
+            auto storeRef = [&coro, &etsBoxedArgs, &argIdx](ObjectHeader *obj) {
                 uintptr_t addr = VMHandle<ObjectHeader>(coro, obj).GetAddress();
-                ets_boxed_args[arg_idx] = reinterpret_cast<ObjectHeader **>(addr);
+                etsBoxedArgs[argIdx] = reinterpret_cast<ObjectHeader **>(addr);
             };
-            if (UNLIKELY(!ConvertNapiVal(ctx, cls_resolver, store_prim, store_ref, type, js_val))) {
+            if (UNLIKELY(!ConvertNapiVal(ctx, clsResolver, storePrim, storeRef, type, jsVal))) {
                 if (coro->HasPendingException()) {
                     ctx->ForwardEtsException(coro);
                 }
@@ -265,23 +264,23 @@ napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span
         }
 
         // Unbox VMHandles
-        for (size_t i = 0; i < num_args; ++i) {
-            ArgValueBox &box = ets_boxed_args[i];
+        for (size_t i = 0; i < numArgs; ++i) {
+            ArgValueBox &box = etsBoxedArgs[i];
             if (std::holds_alternative<ObjectHeader **>(box)) {
                 ObjectHeader **slot = std::get<1>(box);
-                ets_args[ETS_ARGS_DISP + i] = Value(slot != nullptr ? *slot : nullptr);
+                etsArgs[ETS_ARGS_DISP + i] = Value(slot != nullptr ? *slot : nullptr);
             } else {
-                ets_args[ETS_ARGS_DISP + i] = Value(std::get<0>(box));
+                etsArgs[ETS_ARGS_DISP + i] = Value(std::get<0>(box));
             }
         }
         if constexpr (!IS_STATIC) {
-            ets_args[0] = Value(this_obj_handle.GetPtr());
+            etsArgs[0] = Value(thisObjHandle.GetPtr());
         }
     }
 
     ctx->GetInteropFrames().push_back({coro->GetCurrentFrame(), false});
 
-    Value ets_res = method->Invoke(coro, ets_args->data());
+    Value etsRes = method->Invoke(coro, etsArgs->data());
 
     ctx->GetInteropFrames().pop_back();
 
@@ -290,25 +289,25 @@ napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span
         return nullptr;
     }
 
-    napi_value js_res;
+    napi_value jsRes;
     {
         auto type = method->GetReturnType();
-        auto cls_resolver = [&]() { return resolve_ref_cls(0); };
-        auto store_res = [&](napi_value res) { js_res = res; };
-        auto read_val = [&](auto type_tag) { return ets_res.GetAs<typename decltype(type_tag)::type>(); };
-        if (UNLIKELY(!ConvertEtsVal(ctx, cls_resolver, store_res, type, read_val))) {
+        auto clsResolver = [&resolveRefCls]() { return resolveRefCls(0); };
+        auto storeRes = [&jsRes](napi_value res) { jsRes = res; };
+        auto readVal = [&etsRes](auto typeTag) { return etsRes.GetAs<typename decltype(typeTag)::type>(); };
+        if (UNLIKELY(!ConvertEtsVal(ctx, clsResolver, storeRes, type, readVal))) {
             ASSERT(ctx->SanityJSExceptionPending());
             return nullptr;
         }
     }
-    return js_res;
+    return jsRes;
 }
 
 // Explicit instantiation
 template napi_value EtsCallImpl<false>(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                                       EtsObject *this_obj);
+                                       EtsObject *thisObj);
 template napi_value EtsCallImpl<true>(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                                      EtsObject *this_obj);
+                                      EtsObject *thisObj);
 
 napi_value CallEtsFunctionImpl(napi_env env, Span<napi_value> jsargv)
 {
@@ -327,29 +326,29 @@ napi_value CallEtsFunctionImpl(napi_env env, Span<napi_value> jsargv)
         return nullptr;
     }
 
-    auto call_target = GetString(env, jsargv[0]);
-    std::string package_name {};
-    std::string method_name {};
+    auto callTarget = GetString(env, jsargv[0]);
+    std::string packageName {};
+    std::string methodName {};
 
-    auto package_sep = call_target.rfind('.');
-    if (package_sep != std::string::npos) {
-        package_name = call_target.substr(0, package_sep + 1);
-        method_name = call_target.substr(package_sep + 1, call_target.size());
+    auto packageSep = callTarget.rfind('.');
+    if (packageSep != std::string::npos) {
+        packageName = callTarget.substr(0, packageSep + 1);
+        methodName = callTarget.substr(packageSep + 1, callTarget.size());
     } else {
-        method_name = call_target;
+        methodName = callTarget;
     }
 
-    auto entrypoint = package_name + std::string("ETSGLOBAL::") + method_name;
+    auto entrypoint = packageName + std::string("ETSGLOBAL::") + methodName;
     INTEROP_LOG(DEBUG) << "CallEtsFunction: method name: " << entrypoint;
 
-    auto method_res = Runtime::GetCurrent()->ResolveEntryPoint(entrypoint);
-    if (UNLIKELY(!method_res)) {
+    auto methodRes = Runtime::GetCurrent()->ResolveEntryPoint(entrypoint);
+    if (UNLIKELY(!methodRes)) {
         InteropCtx::ThrowJSError(env, "CallEtsFunction: can't resolve method " + entrypoint);
         return nullptr;
     }
 
-    ScopedManagedCodeThread managed_scope(coro);
-    return EtsCallImplStatic(coro, ctx, method_res.Value(), jsargv.SubSpan(1));
+    ScopedManagedCodeThread managedScope(coro);
+    return EtsCallImplStatic(coro, ctx, methodRes.Value(), jsargv.SubSpan(1));
 }
 
 napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
@@ -362,119 +361,119 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     napi_value athis;
     void *data;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, &athis, &data));
-    auto js_args = ctx->GetTempArgs<napi_value>(argc);
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, js_args->data(), &athis, &data));
+    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), &athis, &data));
 
-    auto shared_ref = static_cast<ets_proxy::SharedReference *>(data);
-    ASSERT(shared_ref != nullptr);
+    auto sharedRef = static_cast<ets_proxy::SharedReference *>(data);
+    ASSERT(sharedRef != nullptr);
 
-    ScopedManagedCodeThread managed_scope(coro);
-    auto ets_this = shared_ref->GetEtsObject(ctx);
-    ASSERT(ets_this != nullptr);
-    auto method = ets_this->GetClass()->GetMethod("invoke");
+    ScopedManagedCodeThread managedScope(coro);
+    auto etsThis = sharedRef->GetEtsObject(ctx);
+    ASSERT(etsThis != nullptr);
+    auto method = etsThis->GetClass()->GetMethod("invoke");
     ASSERT(method != nullptr);
 
-    return EtsCallImplInstance(coro, ctx, method->GetPandaMethod(), *js_args, ets_this);
+    return EtsCallImplInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
 }
 
 template <bool IS_NEWCALL, typename FSetupArgs>
-static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallImpl(FSetupArgs &setup_args, Method *method, uint8_t *args,
-                                                         uint8_t *in_stack_args)
+static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallImpl(FSetupArgs &setupArgs, Method *method, uint8_t *args,
+                                                         uint8_t *inStackArgs)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
 
     auto pf = method->GetPandaFile();
     panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-    pda.EnumerateTypes([](panda_file::Type /* unused */) {});  // preload reftypes span
+    pda.EnumerateTypes([](panda_file::Type) {});  // preload reftypes span
 
-    auto resolve_ref_cls = [&](uint32_t idx) {
-        auto klass = class_linker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
+    auto resolveRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
+        auto klass = classLinker->GetLoadedClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
         ASSERT(klass != nullptr);
         return klass;
     };
-    [[maybe_unused]] auto load_ref_cls = [&](uint32_t idx) {
-        return class_linker->GetClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
+    [[maybe_unused]] auto loadRefCls = [&classLinker, &pf, &pda, &ctx](uint32_t idx) {
+        return classLinker->GetClass(*pf, pda.GetReferenceType(idx), ctx->LinkerCtx());
     };
 
-    Span<uint8_t> in_gpr_args(args, arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
-    Span<uint8_t> in_fpr_args(in_gpr_args.end(), arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
-    arch::ArgReader<RUNTIME_ARCH> arg_reader(in_gpr_args, in_fpr_args, in_stack_args);
+    Span<uint8_t> inGprArgs(args, arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
+    Span<uint8_t> inFprArgs(inGprArgs.end(), arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
+    arch::ArgReader<RUNTIME_ARCH> argReader(inGprArgs, inFprArgs, inStackArgs);
 
     napi_env env = ctx->GetJSEnv();
-    NapiScope js_handle_scope(env);
+    NapiScope jsHandleScope(env);
 
-    napi_value js_this;
-    napi_value js_fn;
+    napi_value jsThis;
+    napi_value jsFn;
     panda_file::ShortyIterator it;
-    uint32_t num_args;
-    uint32_t ref_arg_idx;
+    uint32_t numArgs;
+    uint32_t refArgIdx;
     {
-        arg_reader.Read<Method *>();  // skip method
+        argReader.Read<Method *>();  // skip method
 
-        auto setup_res = setup_args(ctx, env, method, arg_reader);
-        if (UNLIKELY(!setup_res.has_value())) {
+        auto setupRes = setupArgs(ctx, env, method, argReader);
+        if (UNLIKELY(!setupRes.has_value())) {
             ctx->ForwardJSException(coro);
             return 0;
         }
-        std::tie(js_this, js_fn, it, num_args, ref_arg_idx) = setup_res.value();
+        std::tie(jsThis, jsFn, it, numArgs, refArgIdx) = setupRes.value();
 
-        if (UNLIKELY(GetValueType(env, js_fn) != napi_function)) {
+        if (UNLIKELY(GetValueType(env, jsFn) != napi_function)) {
             ctx->ThrowJSTypeError(env, "call target is not a function");
             ctx->ForwardJSException(coro);
             return 0;
         }
     }
 
-    auto jsargs = ctx->GetTempArgs<napi_value>(num_args);
+    auto jsargs = ctx->GetTempArgs<napi_value>(numArgs);
 
-    for (uint32_t arg_idx = 0; arg_idx < num_args; ++arg_idx, it.IncrementWithoutCheck()) {
-        auto cls_resolver = [&]() { return resolve_ref_cls(ref_arg_idx++); };
-        auto store_res = [&](napi_value res) { jsargs[arg_idx] = res; };
-        auto read_val = [&](auto type_tag) { return arg_reader.Read<typename decltype(type_tag)::type>(); };
-        if (UNLIKELY(!ConvertEtsVal(ctx, cls_resolver, store_res, *it, read_val))) {
+    for (uint32_t argIdx = 0; argIdx < numArgs; ++argIdx, it.IncrementWithoutCheck()) {
+        auto clsResolver = [&resolveRefCls, &refArgIdx]() { return resolveRefCls(refArgIdx++); };
+        auto storeRes = [&jsargs, &argIdx](napi_value res) { jsargs[argIdx] = res; };
+        auto readVal = [&argReader](auto typeTag) { return argReader.Read<typename decltype(typeTag)::type>(); };
+        if (UNLIKELY(!ConvertEtsVal(ctx, clsResolver, storeRes, *it, readVal))) {
             ctx->ForwardJSException(coro);
             return 0;
         }
     }
 
-    napi_value js_ret;
-    napi_status js_status;
+    napi_value jsRet;
+    napi_status jsStatus;
     {
         ctx->GetInteropFrames().push_back({coro->GetCurrentFrame(), true});
-        ScopedNativeCodeThread native_scope(coro);
+        ScopedNativeCodeThread nativeScope(coro);
 
         if constexpr (IS_NEWCALL) {
-            js_status = napi_new_instance(env, js_fn, jsargs->size(), jsargs->data(), &js_ret);
+            jsStatus = napi_new_instance(env, jsFn, jsargs->size(), jsargs->data(), &jsRet);
         } else {
-            js_status = napi_call_function(env, js_this, js_fn, jsargs->size(), jsargs->data(), &js_ret);
+            jsStatus = napi_call_function(env, jsThis, jsFn, jsargs->size(), jsargs->data(), &jsRet);
         }
 
         ctx->GetInteropFrames().pop_back();
     }
 
-    if (UNLIKELY(js_status != napi_ok)) {
-        INTEROP_FATAL_IF(js_status != napi_pending_exception);
+    if (UNLIKELY(jsStatus != napi_ok)) {
+        INTEROP_FATAL_IF(jsStatus != napi_pending_exception);
         ctx->ForwardJSException(coro);
         return 0;
     }
 
-    Value ets_ret;
+    Value etsRet;
 
     if constexpr (IS_NEWCALL) {
-        INTEROP_FATAL_IF(resolve_ref_cls(0) != ctx->GetJSValueClass());
-        auto res = JSConvertJSValue::Unwrap(ctx, env, js_ret);
+        INTEROP_FATAL_IF(resolveRefCls(0) != ctx->GetJSValueClass());
+        auto res = JSConvertJSValue::Unwrap(ctx, env, jsRet);
         if (!res.has_value()) {
             ctx->Fatal("newcall result unwrap failed, but shouldnt");
         }
-        ets_ret = Value(res.value()->GetCoreType());
+        etsRet = Value(res.value()->GetCoreType());
     } else {
         panda_file::Type type = method->GetReturnType();
-        auto cls_resolver = [&]() { return load_ref_cls(0); };
-        auto store_prim = [&](uint64_t val) { ets_ret = Value(val); };
-        auto store_ref = [&](ObjectHeader *obj) { ets_ret = Value(obj); };
-        if (UNLIKELY(!ConvertNapiVal(ctx, cls_resolver, store_prim, store_ref, type, js_ret))) {
+        auto clsResolver = [&loadRefCls]() { return loadRefCls(0); };
+        auto storePrim = [&etsRet](uint64_t val) { etsRet = Value(val); };
+        auto storeRef = [&etsRet](ObjectHeader *obj) { etsRet = Value(obj); };
+        if (UNLIKELY(!ConvertNapiVal(ctx, clsResolver, storePrim, storeRef, type, jsRet))) {
             if (NapiIsExceptionPending(env)) {
                 ctx->ForwardJSException(coro);
             }
@@ -483,102 +482,102 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallImpl(FSetupArgs &setup_args,
         }
     }
 
-    return static_cast<uint64_t>(ets_ret.GetAsLong());
+    return static_cast<uint64_t>(etsRet.GetAsLong());
 }
 
 static inline std::optional<std::pair<napi_value, napi_value>> CompilerResolveQualifiedJSCall(
-    napi_env env, napi_value js_val, coretypes::String *qname_str)
+    napi_env env, napi_value jsVal, coretypes::String *qnameStr)
 {
-    napi_value js_this {};
-    ASSERT(qname_str->IsMUtf8());
-    auto qname = std::string_view(utf::Mutf8AsCString(qname_str->GetDataMUtf8()), qname_str->GetMUtf8Length());
+    napi_value jsThis {};
+    ASSERT(qnameStr->IsMUtf8());
+    auto qname = std::string_view(utf::Mutf8AsCString(qnameStr->GetDataMUtf8()), qnameStr->GetMUtf8Length());
 
-    auto resolve_name = [&](const std::string &name) -> bool {
-        js_this = js_val;
+    auto resolveName = [&jsThis, &jsVal, &env](const std::string &name) -> bool {
+        jsThis = jsVal;
         INTEROP_LOG(DEBUG) << "JSRuntimeJSCall: resolve name: " << name;
-        napi_status rc = napi_get_named_property(env, js_val, name.c_str(), &js_val);
+        napi_status rc = napi_get_named_property(env, jsVal, name.c_str(), &jsVal);
         if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
             ASSERT(NapiIsExceptionPending(env));
             return false;
         }
         return true;
     };
-    js_this = js_val;
-    if (UNLIKELY(!WalkQualifiedName(qname, resolve_name))) {
+    jsThis = jsVal;
+    if (UNLIKELY(!WalkQualifiedName(qname, resolveName))) {
         return std::nullopt;
     }
-    return std::make_pair(js_this, js_val);
+    return std::make_pair(jsThis, jsVal);
 }
 
 template <bool IS_NEWCALL>
-static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallBase(Method *method, uint8_t *args, uint8_t *in_stack_args)
+static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallBase(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
     auto argsetup =
-        []([[maybe_unused]] InteropCtx * ctx, napi_env env, Method * methodd,
-           arch::ArgReader<RUNTIME_ARCH> & arg_reader) __attribute__((always_inline))
-            ->std::optional<std::tuple<napi_value, napi_value, panda_file::ShortyIterator, uint32_t, uint32_t>>
+        []([[maybe_unused]] InteropCtx * ctx, napi_env env, Method * methodd, arch::ArgReader<RUNTIME_ARCH> & argReader)
+            __attribute__((always_inline))
+                ->std::optional<std::tuple<napi_value, napi_value, panda_file::ShortyIterator, uint32_t, uint32_t>>
     {
         ASSERT(methodd->IsStatic());
 
         panda_file::ShortyIterator it(methodd->GetShorty());
-        uint32_t num_args = methodd->GetNumArgs() - 2;
-        uint32_t ref_arg_idx = !(*it++).IsPrimitive() + 2;
+        uint32_t numArgs = methodd->GetNumArgs() - 2;
+        uint32_t refArgIdx = !(*it++).IsPrimitive() + 2;
         it.IncrementWithoutCheck();
         it.IncrementWithoutCheck();
 
-        napi_value js_val = JSConvertJSValue::Wrap(env, arg_reader.Read<JSValue *>());
-        auto qname_str = arg_reader.Read<coretypes::String *>();
-        ASSERT(qname_str->ClassAddr<Class>()->IsStringClass());
-        auto res = CompilerResolveQualifiedJSCall(env, js_val, qname_str);
+        napi_value jsVal = JSConvertJSValue::Wrap(env, argReader.Read<JSValue *>());
+        auto qnameStr = argReader.Read<coretypes::String *>();
+        ASSERT(qnameStr->ClassAddr<Class>()->IsStringClass());
+        auto res = CompilerResolveQualifiedJSCall(env, jsVal, qnameStr);
         if (UNLIKELY(!res.has_value())) {
             ASSERT(NapiIsExceptionPending(env));
             return std::nullopt;
         }
-        return std::make_tuple(res->first, res->second, it, num_args, ref_arg_idx);
+        return std::make_tuple(res->first, res->second, it, numArgs, refArgIdx);
     };
-    return JSRuntimeJSCallImpl<IS_NEWCALL>(argsetup, method, args, in_stack_args);
+    return JSRuntimeJSCallImpl<IS_NEWCALL>(argsetup, method, args, inStackArgs);
 }
 
-extern "C" uint64_t JSRuntimeJSCall(Method *method, uint8_t *args, uint8_t *in_stack_args)
+extern "C" uint64_t JSRuntimeJSCall(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
-    return JSRuntimeJSCallBase</*IS_NEWCALL=*/false>(method, args, in_stack_args);
+    return JSRuntimeJSCallBase<false>(method, args, inStackArgs);  // IS_NEWCALL is false
 }
 extern "C" void JSRuntimeJSCallBridge(Method *method, ...);
 
-extern "C" uint64_t JSRuntimeJSNew(Method *method, uint8_t *args, uint8_t *in_stack_args)
+extern "C" uint64_t JSRuntimeJSNew(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
-    return JSRuntimeJSCallBase</*IS_NEWCALL=*/true>(method, args, in_stack_args);
+    return JSRuntimeJSCallBase<true>(method, args, inStackArgs);  // IS_NEWCALL is true
 }
 extern "C" void JSRuntimeJSNewBridge(Method *method, ...);
 
-extern "C" uint64_t JSRuntimeJSCallByValue(Method *method, uint8_t *args, uint8_t *in_stack_args)
+extern "C" uint64_t JSRuntimeJSCallByValue(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
     auto argsetup =
-        []([[maybe_unused]] InteropCtx * ctx, napi_env env, Method * methodd,
-           arch::ArgReader<RUNTIME_ARCH> & arg_reader) __attribute__((always_inline))
-            ->std::optional<std::tuple<napi_value, napi_value, panda_file::ShortyIterator, uint32_t, uint32_t>>
+        []([[maybe_unused]] InteropCtx * ctx, napi_env env, Method * methodd, arch::ArgReader<RUNTIME_ARCH> & argReader)
+            __attribute__((always_inline))
+                ->std::optional<std::tuple<napi_value, napi_value, panda_file::ShortyIterator, uint32_t, uint32_t>>
     {
         ASSERT(methodd->IsStatic());
 
         panda_file::ShortyIterator it(methodd->GetShorty());
-        uint32_t num_args = methodd->GetNumArgs() - 2;
-        uint32_t ref_arg_idx = static_cast<uint32_t>(!(*it++).IsPrimitive()) + 2;
+        uint32_t numArgs = methodd->GetNumArgs() - 2;
+        uint32_t refArgIdx = static_cast<uint32_t>(!(*it++).IsPrimitive()) + 2;
         it.IncrementWithoutCheck();
         it.IncrementWithoutCheck();
 
-        napi_value js_fn = JSConvertJSValue::Wrap(env, arg_reader.Read<JSValue *>());
-        napi_value js_this = JSConvertJSValue::Wrap(env, arg_reader.Read<JSValue *>());
+        napi_value jsFn = JSConvertJSValue::Wrap(env, argReader.Read<JSValue *>());
+        napi_value jsThis = JSConvertJSValue::Wrap(env, argReader.Read<JSValue *>());
 
-        return std::make_tuple(js_this, js_fn, it, num_args, ref_arg_idx);
+        return std::make_tuple(jsThis, jsFn, it, numArgs, refArgIdx);
     };
-    return JSRuntimeJSCallImpl</*IS_NEWCALL=*/false>(argsetup, method, args, in_stack_args);
+    return JSRuntimeJSCallImpl<false>(argsetup, method, args, inStackArgs);  // IS_NEWCALL is false
 }
 extern "C" void JSRuntimeJSCallByValueBridge(Method *method, ...);
 
-extern "C" uint64_t JSProxyCall(Method *method, uint8_t *args, uint8_t *in_stack_args)
+extern "C" uint64_t JSProxyCall(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
     auto argsetup =
-        [](InteropCtx * ctx, napi_env env, Method * methodd, arch::ArgReader<RUNTIME_ARCH> & arg_reader)
+        [](InteropCtx * ctx, napi_env env, Method * methodd, arch::ArgReader<RUNTIME_ARCH> & argReader)
             __attribute__((always_inline))
                 ->std::optional<std::tuple<napi_value, napi_value, panda_file::ShortyIterator, uint32_t, uint32_t>>
     {
@@ -586,39 +585,39 @@ extern "C" uint64_t JSProxyCall(Method *method, uint8_t *args, uint8_t *in_stack
         ASSERT(!methodd->IsStatic());
 
         panda_file::ShortyIterator it(methodd->GetShorty());
-        uint32_t num_args = methodd->GetNumArgs() - 1;
-        uint32_t ref_arg_idx = static_cast<uint32_t>(!(*it++).IsPrimitive());
+        uint32_t numArgs = methodd->GetNumArgs() - 1;
+        uint32_t refArgIdx = static_cast<uint32_t>(!(*it++).IsPrimitive());
 
-        auto *ets_this = arg_reader.Read<EtsObject *>();
-        Class *cls = ets_this->GetClass()->GetRuntimeClass();
+        auto *etsThis = argReader.Read<EtsObject *>();
+        Class *cls = etsThis->GetClass()->GetRuntimeClass();
         auto refconv = JSRefConvertResolve(ctx, cls);
-        napi_value js_this = refconv->Wrap(ctx, ets_this);
-        ASSERT(GetValueType(env, js_this) == napi_object);
-        const char *method_name = utf::Mutf8AsCString(methodd->GetName().data);
-        napi_value js_fn;
-        napi_status rc = napi_get_named_property(env, js_this, method_name, &js_fn);
+        napi_value jsThis = refconv->Wrap(ctx, etsThis);
+        ASSERT(GetValueType(env, jsThis) == napi_object);
+        const char *methodName = utf::Mutf8AsCString(methodd->GetName().data);
+        napi_value jsFn;
+        napi_status rc = napi_get_named_property(env, jsThis, methodName, &jsFn);
         if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
             ASSERT(NapiIsExceptionPending(env));
             return std::nullopt;
         }
-        return std::make_tuple(js_this, js_fn, it, num_args, ref_arg_idx);
+        return std::make_tuple(jsThis, jsFn, it, numArgs, refArgIdx);
     };
-    return JSRuntimeJSCallImpl</*IS_NEWCALL=*/false>(argsetup, method, args, in_stack_args);
+    return JSRuntimeJSCallImpl<false>(argsetup, method, args, inStackArgs);  // IS_NEWCALL is false
 }
 extern "C" void JSProxyCallBridge(Method *method, ...);
 
 template <bool IS_NEWCALL>
-static void InitJSCallSignatures(coretypes::String *cls_str)
+static void InitJSCallSignatures(coretypes::String *clsStr)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    auto class_linker = Runtime::GetCurrent()->GetClassLinker();
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    std::string class_descriptor(utf::Mutf8AsCString(cls_str->GetDataMUtf8()));
-    INTEROP_LOG(DEBUG) << "Intialize jscall signatures for " << class_descriptor;
-    EtsClass *ets_class = coro->GetPandaVM()->GetClassLinker()->GetClass(class_descriptor.c_str());
-    INTEROP_FATAL_IF(ets_class == nullptr);
-    auto klass = ets_class->GetRuntimeClass();
+    std::string classDescriptor(utf::Mutf8AsCString(clsStr->GetDataMUtf8()));
+    INTEROP_LOG(DEBUG) << "Intialize jscall signatures for " << classDescriptor;
+    EtsClass *etsClass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.c_str());
+    INTEROP_FATAL_IF(etsClass == nullptr);
+    auto klass = etsClass->GetRuntimeClass();
 
     INTEROP_LOG(DEBUG) << "Bind bridge call methods for " << utf::Mutf8AsCString(klass->GetDescriptor());
 
@@ -629,37 +628,37 @@ static void InitJSCallSignatures(coretypes::String *cls_str)
         ASSERT(method.IsStatic());
         auto pf = method.GetPandaFile();
         panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method.GetFileId()));
-        pda.EnumerateTypes([](panda_file::Type /* unused */) {});  // preload reftypes span
+        pda.EnumerateTypes([](panda_file::Type) {});  // preload reftypes span
 
-        void *method_ep = nullptr;
+        void *methodEp = nullptr;
         if constexpr (IS_NEWCALL) {
-            method_ep = reinterpret_cast<void *>(JSRuntimeJSNewBridge);
+            methodEp = reinterpret_cast<void *>(JSRuntimeJSNewBridge);
         } else {
-            uint32_t const arg_reftype_shift = method.GetReturnType().IsReference() ? 1 : 0;
+            uint32_t const argReftypeShift = method.GetReturnType().IsReference() ? 1 : 0;
             ASSERT(method.GetArgType(0).IsReference());  // arg0 is always a reference
             ASSERT(method.GetArgType(1).IsReference());  // arg1 is always a reference
-            auto cls1 = class_linker->GetClass(*pf, pda.GetReferenceType(1 + arg_reftype_shift), ctx->LinkerCtx());
+            auto cls1 = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), ctx->LinkerCtx());
             if (cls1->IsStringClass()) {
-                method_ep = reinterpret_cast<void *>(JSRuntimeJSCallBridge);
+                methodEp = reinterpret_cast<void *>(JSRuntimeJSCallBridge);
             } else {
                 ASSERT(cls1 == ctx->GetJSValueClass());
-                method_ep = reinterpret_cast<void *>(JSRuntimeJSCallByValueBridge);
+                methodEp = reinterpret_cast<void *>(JSRuntimeJSCallByValueBridge);
             }
         }
-        method.SetCompiledEntryPoint(method_ep);
+        method.SetCompiledEntryPoint(methodEp);
         method.SetNativePointer(nullptr);
     }
 }
 
-uint8_t JSRuntimeInitJSCallClass(EtsString *cls_str)
+uint8_t JSRuntimeInitJSCallClass(EtsString *clsStr)
 {
-    InitJSCallSignatures<false>(cls_str->GetCoreType());
+    InitJSCallSignatures<false>(clsStr->GetCoreType());
     return 1;
 }
 
-uint8_t JSRuntimeInitJSNewClass(EtsString *cls_str)
+uint8_t JSRuntimeInitJSNewClass(EtsString *clsStr)
 {
-    InitJSCallSignatures<true>(cls_str->GetCoreType());
+    InitJSCallSignatures<true>(clsStr->GetCoreType());
     return 1;
 }
 

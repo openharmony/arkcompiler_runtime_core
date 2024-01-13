@@ -40,7 +40,7 @@ public:
 
     static constexpr size_t WORKER_QUEUE_SIZE = 4;
 
-    explicit WorkerThread(FinishedTasksCallback callback, size_t tasks_count = WORKER_QUEUE_SIZE);
+    explicit WorkerThread(FinishedTasksCallback callback, size_t tasksCount = WORKER_QUEUE_SIZE);
     ~WorkerThread();
 
     /**
@@ -58,20 +58,20 @@ public:
 private:
     [[nodiscard]] Task PopTask();
 
-    void WorkerLoop(size_t tasks_count);
+    void WorkerLoop(size_t tasksCount);
 
     void ExecuteTasks();
 
     std::thread *thread_;
 
-    std::queue<Task> background_queue_;
-    std::queue<Task> foreground_queue_;
+    std::queue<Task> backgroundQueue_;
+    std::queue<Task> foregroundQueue_;
 
     size_t size_ {0};
 
-    TaskPropertiesCounterMap finished_tasks_counter_map_;
+    TaskPropertiesCounterMap finishedTasksCounterMap_;
 
-    FinishedTasksCallback finished_tasks_callback_;
+    FinishedTasksCallback finishedTasksCallback_;
 };
 
 }  // namespace panda::taskmanager

@@ -36,10 +36,10 @@ public:
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
-    llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysis_manager);
+    llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysisManager);
 
 private:
-    bool InsertAddrSpaceCast(llvm::Instruction *atomic_instruction);
+    bool InsertAddrSpaceCast(llvm::Instruction *atomicInstruction);
 };
 
 }  // namespace panda::llvmbackend::passes

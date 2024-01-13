@@ -18,22 +18,22 @@
 namespace panda::disasm {
 DisasmBackedDebugInfoExtractor::DisasmBackedDebugInfoExtractor(
     const panda_file::File &file,
-    std::function<void(panda_file::File::EntityId, std::string_view)> &&on_disasm_source_name)
+    std::function<void(panda_file::File::EntityId, std::string_view)> &&onDisasmSourceName)
     : panda_file::DebugInfoExtractor(&file),
-      source_name_prefix_("disasm://" + file.GetFilename() + ":"),
-      on_disasm_source_name_(std::move(on_disasm_source_name))
+      sourceNamePrefix_("disasm://" + file.GetFilename() + ":"),
+      onDisasmSourceName_(std::move(onDisasmSourceName))
 {
     disassembler_.SetFile(file);
 }
 
 const panda_file::LineNumberTable &DisasmBackedDebugInfoExtractor::GetLineNumberTable(
-    panda_file::File::EntityId method_id) const
+    panda_file::File::EntityId methodId) const
 {
-    if (GetDisassemblySourceName(method_id)) {
-        return GetDisassembly(method_id).line_table;
+    if (GetDisassemblySourceName(methodId)) {
+        return GetDisassembly(methodId).lineTable;
     }
 
-    return DebugInfoExtractor::GetLineNumberTable(method_id);
+    return DebugInfoExtractor::GetLineNumberTable(methodId);
 }
 
 const panda_file::ColumnNumberTable &DisasmBackedDebugInfoExtractor::GetColumnNumberTable(
@@ -44,109 +44,109 @@ const panda_file::ColumnNumberTable &DisasmBackedDebugInfoExtractor::GetColumnNu
 }
 
 const panda_file::LocalVariableTable &DisasmBackedDebugInfoExtractor::GetLocalVariableTable(
-    panda_file::File::EntityId method_id) const
+    panda_file::File::EntityId methodId) const
 {
-    if (GetDisassemblySourceName(method_id)) {
-        return GetDisassembly(method_id).local_variable_table;
+    if (GetDisassemblySourceName(methodId)) {
+        return GetDisassembly(methodId).localVariableTable;
     }
 
-    return DebugInfoExtractor::GetLocalVariableTable(method_id);
+    return DebugInfoExtractor::GetLocalVariableTable(methodId);
 }
 
 const std::vector<panda_file::DebugInfoExtractor::ParamInfo> &DisasmBackedDebugInfoExtractor::GetParameterInfo(
-    panda_file::File::EntityId method_id) const
+    panda_file::File::EntityId methodId) const
 {
-    if (GetDisassemblySourceName(method_id)) {
-        return GetDisassembly(method_id).parameter_info;
+    if (GetDisassemblySourceName(methodId)) {
+        return GetDisassembly(methodId).parameterInfo;
     }
 
-    return DebugInfoExtractor::GetParameterInfo(method_id);
+    return DebugInfoExtractor::GetParameterInfo(methodId);
 }
 
-const char *DisasmBackedDebugInfoExtractor::GetSourceFile(panda_file::File::EntityId method_id) const
+const char *DisasmBackedDebugInfoExtractor::GetSourceFile(panda_file::File::EntityId methodId) const
 {
-    if (auto &disassembly_source_name = GetDisassemblySourceName(method_id)) {
-        return disassembly_source_name->c_str();
+    if (auto &disassemblySourceName = GetDisassemblySourceName(methodId)) {
+        return disassemblySourceName->c_str();
     }
 
-    return DebugInfoExtractor::GetSourceFile(method_id);
+    return DebugInfoExtractor::GetSourceFile(methodId);
 }
 
-const char *DisasmBackedDebugInfoExtractor::GetSourceCode(panda_file::File::EntityId method_id) const
+const char *DisasmBackedDebugInfoExtractor::GetSourceCode(panda_file::File::EntityId methodId) const
 {
-    if (GetDisassemblySourceName(method_id)) {
-        return GetDisassembly(method_id).source_code.c_str();
+    if (GetDisassemblySourceName(methodId)) {
+        return GetDisassembly(methodId).sourceCode.c_str();
     }
 
-    return DebugInfoExtractor::GetSourceCode(method_id);
+    return DebugInfoExtractor::GetSourceCode(methodId);
 }
 
 const std::optional<std::string> &DisasmBackedDebugInfoExtractor::GetDisassemblySourceName(
-    panda_file::File::EntityId method_id) const
+    panda_file::File::EntityId methodId) const
 {
     os::memory::LockHolder lock(mutex_);
 
-    auto it = source_names_.find(method_id);
-    if (it != source_names_.end()) {
+    auto it = sourceNames_.find(methodId);
+    if (it != sourceNames_.end()) {
         return it->second;
     }
 
-    auto source_file = std::string(DebugInfoExtractor::GetSourceFile(method_id));
+    auto sourceFile = std::string(DebugInfoExtractor::GetSourceFile(methodId));
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_TARGET_MOBILE)
-    if (!source_file.empty()) {
+    if (!sourceFile.empty()) {
 #else
-    if (os::file::File::IsRegularFile(source_file)) {
+    if (os::file::File::IsRegularFile(sourceFile)) {
 #endif
-        return source_names_.emplace(method_id, std::nullopt).first->second;
+        return sourceNames_.emplace(methodId, std::nullopt).first->second;
     }
 
     std::ostringstream name;
-    name << source_name_prefix_ << method_id;
-    auto &source_name = source_names_.emplace(method_id, name.str()).first->second;
+    name << sourceNamePrefix_ << methodId;
+    auto &sourceName = sourceNames_.emplace(methodId, name.str()).first->second;
 
-    on_disasm_source_name_(method_id, *source_name);
+    onDisasmSourceName_(methodId, *sourceName);
 
-    return source_name;
+    return sourceName;
 }
 
 const DisasmBackedDebugInfoExtractor::Disassembly &DisasmBackedDebugInfoExtractor::GetDisassembly(
-    panda_file::File::EntityId method_id) const
+    panda_file::File::EntityId methodId) const
 {
     os::memory::LockHolder lock(mutex_);
 
-    auto it = disassemblies_.find(method_id);
+    auto it = disassemblies_.find(methodId);
     if (it != disassemblies_.end()) {
         return it->second;
     }
 
     pandasm::Function method("", SourceLanguage::PANDA_ASSEMBLY);
-    disassembler_.GetMethod(&method, method_id);
+    disassembler_.GetMethod(&method, methodId);
 
-    std::ostringstream source_code;
-    panda_file::LineNumberTable line_table;
-    disassembler_.Serialize(method, source_code, true, &line_table);
+    std::ostringstream sourceCode;
+    panda_file::LineNumberTable lineTable;
+    disassembler_.Serialize(method, sourceCode, true, &lineTable);
 
-    auto params_num = method.GetParamsNum();
-    std::vector<ParamInfo> parameter_info(params_num);
-    for (auto argument_num = 0U; argument_num < params_num; ++argument_num) {
-        parameter_info[argument_num].name = "a" + std::to_string(argument_num);
-        parameter_info[argument_num].signature = method.params[argument_num].type.GetDescriptor();
+    auto paramsNum = method.GetParamsNum();
+    std::vector<ParamInfo> parameterInfo(paramsNum);
+    for (auto argumentNum = 0U; argumentNum < paramsNum; ++argumentNum) {
+        parameterInfo[argumentNum].name = "a" + std::to_string(argumentNum);
+        parameterInfo[argumentNum].signature = method.params[argumentNum].type.GetDescriptor();
     }
 
     // We use -1 here as a number for Accumulator, because there is no other way
     // to specify Accumulator as a register for local variable
-    auto total_reg_num = method.GetTotalRegs();
-    panda_file::LocalVariableTable local_variable_table(total_reg_num + 1, panda_file::LocalVariableInfo {});
-    for (auto vreg_num = -1; vreg_num < static_cast<int32_t>(total_reg_num); ++vreg_num) {
-        local_variable_table[vreg_num + 1].reg_number = vreg_num;
-        local_variable_table[vreg_num + 1].name = vreg_num == -1 ? "acc" : "v" + std::to_string(vreg_num);
-        local_variable_table[vreg_num + 1].start_offset = 0;
-        local_variable_table[vreg_num + 1].end_offset = UINT32_MAX;
+    auto totalRegNum = method.GetTotalRegs();
+    panda_file::LocalVariableTable localVariableTable(totalRegNum + 1, panda_file::LocalVariableInfo {});
+    for (auto vregNum = -1; vregNum < static_cast<int32_t>(totalRegNum); ++vregNum) {
+        localVariableTable[vregNum + 1].regNumber = vregNum;
+        localVariableTable[vregNum + 1].name = vregNum == -1 ? "acc" : "v" + std::to_string(vregNum);
+        localVariableTable[vregNum + 1].startOffset = 0;
+        localVariableTable[vregNum + 1].endOffset = UINT32_MAX;
     }
 
     return disassemblies_
-        .emplace(method_id, Disassembly {source_code.str(), std::move(line_table), std::move(parameter_info),
-                                         std::move(local_variable_table)})
+        .emplace(methodId, Disassembly {sourceCode.str(), std::move(lineTable), std::move(parameterInfo),
+                                        std::move(localVariableTable)})
         .first->second;
 }
 }  // namespace panda::disasm

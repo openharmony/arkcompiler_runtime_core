@@ -55,14 +55,14 @@ private:
     static inline std::vector<Function *> units_;
     static inline bool initialized_ = false;
     Arch arch_ {RUNTIME_ARCH};
-    std::regex methods_regex_;
+    std::regex methodsRegex_;
     std::unique_ptr<ArenaAllocator> allocator_;
-    std::unique_ptr<ArenaAllocator> local_allocator_;
+    std::unique_ptr<ArenaAllocator> localAllocator_;
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    bool has_debug_info_ {false};
+    bool hasDebugInfo_ {false};
 #endif
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
-    UsedRegisters used_registers_;
+    UsedRegisters usedRegisters_;
 #endif
 };
 }  // namespace panda::irtoc

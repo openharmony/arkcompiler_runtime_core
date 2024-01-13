@@ -27,12 +27,12 @@ int Main(int argc, const char **argv)
         parser.Help();
         return 1;
     }
-    const Options &cli_options = parser.GetOptions();
+    const Options &cliOptions = parser.GetOptions();
 
     Logger::InitializeStdLogging(Logger::Level::INFO, Logger::ComponentMaskFromString("profiler"));
 
-    AsptConverter aspt_conv(cli_options.GetInput().c_str());
-    if (!aspt_conv.RunWithOptions(cli_options)) {
+    AsptConverter asptConv(cliOptions.GetInput().c_str());
+    if (!asptConv.RunWithOptions(cliOptions)) {
         return 1;
     }
 

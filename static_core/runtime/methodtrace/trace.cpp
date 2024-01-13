@@ -26,8 +26,9 @@
 
 namespace panda {
 
-Trace *volatile Trace::singleton_trace_ = nullptr;
-bool Trace::is_tracing_ = false;
+os::memory::Mutex g_traceLock;  // NOLINT(fuchsia-statically-constructed-objects)
+Trace *volatile Trace::singletonTrace_ = nullptr;
+bool Trace::isTracing_ = false;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 LanguageContext Trace::ctx_ = LanguageContext(nullptr);
 
@@ -48,98 +49,98 @@ static uint64_t RealTimeSecond()
     return static_cast<uint64_t>(current.tv_sec);
 }
 
-static void ThreadCpuClock(os::thread::NativeHandleType thread, clockid_t *clock_id)
+static void ThreadCpuClock(os::thread::NativeHandleType thread, clockid_t *clockId)
 {
-    pthread_getcpuclockid(thread, clock_id);
+    pthread_getcpuclockid(thread, clockId);
 }
 static uint64_t GetCpuMicroSecond()
 {
-    auto thread_self = os::thread::GetNativeHandle();
-    clockid_t clock_id;
-    ThreadCpuClock(thread_self, &clock_id);
+    auto threadSelf = os::thread::GetNativeHandle();
+    clockid_t clockId;
+    ThreadCpuClock(threadSelf, &clockId);
     timespec current {};
-    clock_gettime(clock_id, &current);
+    clock_gettime(clockId, &current);
     // NOTE(ht): Deleting OS-specific code, move to libpandabase, issue #3210
     return static_cast<uint64_t>(current.tv_sec) * UINT64_C(1000000) +  // 1000000 - time
            current.tv_nsec / UINT64_C(1000);                            // 1000 - time
 }
 
-Trace::Trace(PandaUniquePtr<panda::os::unix::file::File> trace_file, size_t buffer_size)
-    : trace_file_(std::move(trace_file)),
-      buffer_size_(std::max(TRACE_HEADER_REAL_LENGTH, buffer_size)),
-      trace_start_time_(SystemMicroSecond()),
-      base_cpu_time_(GetCpuMicroSecond()),
-      buffer_offset_(0)
+Trace::Trace(PandaUniquePtr<panda::os::unix::file::File> traceFile, size_t bufferSize)
+    : traceFile_(std::move(traceFile)),
+      bufferSize_(std::max(TRACE_HEADER_REAL_LENGTH, bufferSize)),
+      traceStartTime_(SystemMicroSecond()),
+      baseCpuTime_(GetCpuMicroSecond()),
+      bufferOffset_(0)
 {
-    buffer_ = MakePandaUnique<uint8_t[]>(buffer_size_);  // NOLINT(modernize-avoid-c-arrays)
-    if (memset_s(buffer_.get(), buffer_size_, 0, TRACE_HEADER_LENGTH) != EOK) {
+    buffer_ = MakePandaUnique<uint8_t[]>(bufferSize_);  // NOLINT(modernize-avoid-c-arrays)
+    if (memset_s(buffer_.get(), bufferSize_, 0, TRACE_HEADER_LENGTH) != EOK) {
         LOG(ERROR, RUNTIME) << __func__ << " memset error";
     }
-    WriteDataByte(buffer_.get(), MAGIC_VALUE, number_of_4_bytes_);
-    WriteDataByte(buffer_.get() + number_of_4_bytes_, TRACE_VERSION, number_of_2_bytes_);
-    WriteDataByte(buffer_.get() + number_of_4_bytes_ + number_of_2_bytes_, TRACE_HEADER_LENGTH, number_of_2_bytes_);
-    WriteDataByte(buffer_.get() + number_of_8_bytes_, trace_start_time_, number_of_8_bytes_);
-    WriteDataByte(buffer_.get() + number_of_8_bytes_ + number_of_8_bytes_, TRACE_ITEM_SIZE, number_of_2_bytes_);
+    WriteDataByte(buffer_.get(), MAGIC_VALUE, numberOf4Bytes_);
+    WriteDataByte(buffer_.get() + numberOf4Bytes_, TRACE_VERSION, numberOf2Bytes_);
+    WriteDataByte(buffer_.get() + numberOf4Bytes_ + numberOf2Bytes_, TRACE_HEADER_LENGTH, numberOf2Bytes_);
+    WriteDataByte(buffer_.get() + numberOf8Bytes_, traceStartTime_, numberOf8Bytes_);
+    WriteDataByte(buffer_.get() + numberOf8Bytes_ + numberOf8Bytes_, TRACE_ITEM_SIZE, numberOf2Bytes_);
     // Atomic with relaxed order reason: data race with buffer_offset_ with no synchronization or ordering constraints
     // imposed on other reads or writes
-    buffer_offset_.store(TRACE_HEADER_LENGTH, std::memory_order_relaxed);
+    bufferOffset_.store(TRACE_HEADER_LENGTH, std::memory_order_relaxed);
 }
 
 Trace::~Trace() = default;
 
-void Trace::StartTracing(const char *trace_filename, size_t buffer_size)
+void Trace::StartTracing(const char *traceFilename, size_t bufferSize)
 {
-    os::memory::LockHolder lock(TRACE_LOCK);
-    if (singleton_trace_ != nullptr) {
+    os::memory::LockHolder lock(g_traceLock);
+    if (singletonTrace_ != nullptr) {
         LOG(ERROR, RUNTIME) << "method tracing is running, ignoring new request";
         return;
     }
 
-    PandaString file_name(trace_filename);
-    if (file_name.empty()) {
-        file_name = "method";
-        file_name = file_name + ConvertToString(std::to_string(RealTimeSecond()));
-        file_name += ".trace";
+    PandaString fileName(traceFilename);
+    if (fileName.empty()) {
+        fileName = "method";
+        fileName = fileName + ConvertToString(std::to_string(RealTimeSecond()));
+        fileName += ".trace";
 #ifdef PANDA_TARGET_MOBILE
-        file_name = "/data/misc/trace/" + file_name;
+        fileName = "/data/misc/trace/" + fileName;
 #endif  // PANDA_TARGET_MOBILE
     }
 
-    auto trace_file = MakePandaUnique<panda::os::unix::file::File>(
-        panda::os::file::Open(file_name, panda::os::file::Mode::READWRITECREATE).GetFd());
-    if (!trace_file->IsValid()) {
-        LOG(ERROR, RUNTIME) << "Cannot OPEN/CREATE the trace file " << file_name;
+    auto traceFile = MakePandaUnique<panda::os::unix::file::File>(
+        panda::os::file::Open(fileName, panda::os::file::Mode::READWRITECREATE).GetFd());
+    if (!traceFile->IsValid()) {
+        LOG(ERROR, RUNTIME) << "Cannot OPEN/CREATE the trace file " << fileName;
         return;
     }
 
     panda_file::SourceLang lang = panda::plugins::RuntimeTypeToLang(Runtime::GetRuntimeType());
     ctx_ = Runtime::GetCurrent()->GetLanguageContext(lang);
 
-    singleton_trace_ = ctx_.CreateTrace(std::move(trace_file), buffer_size);
+    singletonTrace_ = ctx_.CreateTrace(std::move(traceFile), bufferSize);
 
-    Runtime::GetCurrent()->GetNotificationManager()->AddListener(singleton_trace_,
+    Runtime::GetCurrent()->GetNotificationManager()->AddListener(singletonTrace_,
                                                                  RuntimeNotificationManager::Event::METHOD_EVENTS);
-    is_tracing_ = true;
+    isTracing_ = true;
 }
 
 void Trace::StopTracing()
 {
-    os::memory::LockHolder lock(TRACE_LOCK);
-    if (singleton_trace_ == nullptr) {
+    os::memory::LockHolder lock(g_traceLock);
+    if (singletonTrace_ == nullptr) {
         LOG(ERROR, RUNTIME) << "need to stop method tracing, but no method tracing is running";
     } else {
         Runtime::GetCurrent()->GetNotificationManager()->RemoveListener(
-            singleton_trace_, RuntimeNotificationManager::Event::METHOD_EVENTS);
-        singleton_trace_->SaveTracingData();
-        is_tracing_ = false;
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(singleton_trace_);
-        singleton_trace_ = nullptr;
+            singletonTrace_, RuntimeNotificationManager::Event::METHOD_EVENTS);
+        singletonTrace_->SaveTracingData();
+        isTracing_ = false;
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(singletonTrace_);
+        singletonTrace_ = nullptr;
     }
 }
 
 void Trace::TriggerTracing()
 {
-    if (!is_tracing_) {
+    if (!isTracing_) {
         Trace::StartTracing("", FILE_SIZE);
     } else {
         Trace::StopTracing();
@@ -148,44 +149,42 @@ void Trace::TriggerTracing()
 
 void Trace::RecordThreadsInfo([[maybe_unused]] PandaOStringStream *os)
 {
-    os::memory::LockHolder lock(thread_info_lock_);
-    for (const auto &info : thread_info_set_) {
+    os::memory::LockHolder lock(threadInfoLock_);
+    for (const auto &info : threadInfoSet_) {
         (*os) << info;
     }
 }
 uint64_t Trace::GetAverageTime()
 {
     uint64_t begin = GetCpuMicroSecond();
-    for (int i = 0; i < loop_number_; i++) {
+    for (int i = 0; i < loopNumber_; i++) {
         GetCpuMicroSecond();
     }
     uint64_t delay = GetCpuMicroSecond() - begin;
-    return delay / divide_number_;
+    return delay / divideNumber_;
 }
 
-void Trace::RecordMethodsInfo(PandaOStringStream *os, const PandaSet<Method *> &called_methods)
+void Trace::RecordMethodsInfo(PandaOStringStream *os, const PandaSet<Method *> &calledMethods)
 {
-    for (const auto &method : called_methods) {
+    for (const auto &method : calledMethods) {
         (*os) << GetMethodDetailInfo(method);
     }
 }
 
-void Trace::WriteInfoToBuf(const ManagedThread *thread, Method *method, EventFlag event, uint32_t thread_time,
-                           uint32_t real_time)
+void Trace::WriteInfoToBuf(const ManagedThread *thread, Method *method, EventFlag event, uint32_t threadTime,
+                           uint32_t realTime)
 {
-    int32_t write_after_offset;
-    int32_t write_before_offset;
-
     // Atomic with relaxed order reason: data race with buffer_offset_ with no synchronization or ordering constraints
     // imposed on other reads or writes
-    write_before_offset = buffer_offset_.load(std::memory_order_relaxed);
+    int32_t writeBeforeOffset = bufferOffset_.load(std::memory_order_relaxed);
+    int32_t writeAfterOffset = 0;
     do {
-        write_after_offset = write_before_offset + TRACE_ITEM_SIZE;
-        if (buffer_size_ < static_cast<size_t>(write_after_offset)) {
+        writeAfterOffset = writeBeforeOffset + TRACE_ITEM_SIZE;
+        if (bufferSize_ < static_cast<size_t>(writeAfterOffset)) {
             overbrim_ = true;
             return;
         }
-    } while (!buffer_offset_.compare_exchange_weak(write_before_offset, write_after_offset, std::memory_order_relaxed));
+    } while (!bufferOffset_.compare_exchange_weak(writeBeforeOffset, writeAfterOffset, std::memory_order_relaxed));
 
     EventFlag flag = TRACE_METHOD_ENTER;
     switch (event) {
@@ -201,68 +200,67 @@ void Trace::WriteInfoToBuf(const ManagedThread *thread, Method *method, EventFla
         default:
             LOG(ERROR, RUNTIME) << "unrecognized events" << std::endl;
     }
-    uint32_t method_action_value = EncodeMethodAndEventToId(method, flag);
+    uint32_t methodActionValue = EncodeMethodAndEventToId(method, flag);
 
-    uint8_t *ptr;
-    ptr = buffer_.get() + write_before_offset;
-    WriteDataByte(ptr, thread->GetId(), number_of_2_bytes_);
+    uint8_t *ptr = buffer_.get() + writeBeforeOffset;
+    WriteDataByte(ptr, thread->GetId(), numberOf2Bytes_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    ptr += number_of_2_bytes_;
-    WriteDataByte(ptr, method_action_value, number_of_4_bytes_);
+    ptr += numberOf2Bytes_;
+    WriteDataByte(ptr, methodActionValue, numberOf4Bytes_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    ptr += number_of_4_bytes_;
-    WriteDataByte(ptr, thread_time, number_of_4_bytes_);
+    ptr += numberOf4Bytes_;
+    WriteDataByte(ptr, threadTime, numberOf4Bytes_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    ptr += number_of_4_bytes_;
-    WriteDataByte(ptr, real_time, number_of_4_bytes_);
+    ptr += numberOf4Bytes_;
+    WriteDataByte(ptr, realTime, numberOf4Bytes_);
 }
 
 uint32_t Trace::EncodeMethodAndEventToId(Method *method, EventFlag flag)
 {
-    uint32_t method_action_id = (EncodeMethodToId(method) << ENCODE_EVENT_BITS) | flag;
-    ASSERT(method == DecodeIdToMethod(method_action_id));
-    return method_action_id;
+    uint32_t methodActionId = (EncodeMethodToId(method) << ENCODE_EVENT_BITS) | flag;
+    ASSERT(method == DecodeIdToMethod(methodActionId));
+    return methodActionId;
 }
 
 uint32_t Trace::EncodeMethodToId(Method *method)
 {
-    os::memory::LockHolder lock(methods_lock_);
-    uint32_t method_id_value;
-    auto iter = method_id_pandamap_.find(method);
-    if (iter != method_id_pandamap_.end()) {
-        method_id_value = iter->second;
+    os::memory::LockHolder lock(methodsLock_);
+    uint32_t methodIdValue = 0;
+    auto iter = methodIdPandamap_.find(method);
+    if (iter != methodIdPandamap_.end()) {
+        methodIdValue = iter->second;
     } else {
-        method_id_value = methods_called_vector_.size();
-        methods_called_vector_.push_back(method);
-        method_id_pandamap_.emplace(method, method_id_value);
+        methodIdValue = methodsCalledVector_.size();
+        methodsCalledVector_.push_back(method);
+        methodIdPandamap_.emplace(method, methodIdValue);
     }
-    return method_id_value;
+    return methodIdValue;
 }
 
 Method *Trace::DecodeIdToMethod(uint32_t id)
 {
-    os::memory::LockHolder lock(methods_lock_);
-    return methods_called_vector_[id >> ENCODE_EVENT_BITS];
+    os::memory::LockHolder lock(methodsLock_);
+    return methodsCalledVector_[id >> ENCODE_EVENT_BITS];
 }
 
-void Trace::GetUniqueMethods(size_t buffer_length, PandaSet<Method *> *called_methods_set)
+void Trace::GetUniqueMethods(size_t bufferLength, PandaSet<Method *> *calledMethodsSet)
 {
-    uint8_t *data_begin = buffer_.get() + TRACE_HEADER_LENGTH;
-    uint8_t *data_end = buffer_.get() + buffer_length;
+    uint8_t *dataBegin = buffer_.get() + TRACE_HEADER_LENGTH;
+    uint8_t *dataEnd = buffer_.get() + bufferLength;
 
-    while (data_begin < data_end) {
+    while (dataBegin < dataEnd) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        uint32_t decoded_data = GetDataFromBuffer(data_begin + number_of_2_bytes_, number_of_4_bytes_);
-        Method *method = DecodeIdToMethod(decoded_data);
-        called_methods_set->insert(method);
+        uint32_t decodedData = GetDataFromBuffer(dataBegin + numberOf2Bytes_, numberOf4Bytes_);
+        Method *method = DecodeIdToMethod(decodedData);
+        calledMethodsSet->insert(method);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        data_begin += TRACE_ITEM_SIZE;
+        dataBegin += TRACE_ITEM_SIZE;
     }
 }
 
 void Trace::SaveTracingData()
 {
-    uint64_t elapsed = SystemMicroSecond() - trace_start_time_;
+    uint64_t elapsed = SystemMicroSecond() - traceStartTime_;
     PandaOStringStream ostream;
     ostream << TRACE_STAR_CHAR << "version\n";
     ostream << TRACE_VERSION << "\n";
@@ -270,12 +268,12 @@ void Trace::SaveTracingData()
     ostream << "clock=dual\n";
     ostream << "elapsed-time-usec=" << elapsed << "\n";
 
-    size_t buf_end;
+    size_t bufEnd;
     // Atomic with relaxed order reason: data race with buffer_offset_ with no synchronization or ordering constraints
     // imposed on other reads or writes
-    buf_end = buffer_offset_.load(std::memory_order_relaxed);
-    size_t num_records = (buf_end - TRACE_HEADER_LENGTH) / TRACE_ITEM_SIZE;
-    ostream << "num-method-calls=" << num_records << "\n";
+    bufEnd = bufferOffset_.load(std::memory_order_relaxed);
+    size_t numRecords = (bufEnd - TRACE_HEADER_LENGTH) / TRACE_ITEM_SIZE;
+    ostream << "num-method-calls=" << numRecords << "\n";
     ostream << "clock-call-overhead-nsec=" << GetAverageTime() << "\n";
     ostream << "pid=" << getpid() << "\n";
     ostream << "vm=panda\n";
@@ -284,45 +282,45 @@ void Trace::SaveTracingData()
     RecordThreadsInfo(&ostream);
     ostream << TRACE_STAR_CHAR << "methods\n";
 
-    PandaSet<Method *> called_methods_set;
-    GetUniqueMethods(buf_end, &called_methods_set);
+    PandaSet<Method *> calledMethodsSet;
+    GetUniqueMethods(bufEnd, &calledMethodsSet);
 
-    RecordMethodsInfo(&ostream, called_methods_set);
+    RecordMethodsInfo(&ostream, calledMethodsSet);
     ostream << TRACE_STAR_CHAR << "end\n";
-    PandaString methods_info(ostream.str());
+    PandaString methodsInfo(ostream.str());
 
-    trace_file_->WriteAll(reinterpret_cast<const void *>(methods_info.c_str()), methods_info.length());
-    trace_file_->WriteAll(buffer_.get(), buf_end);
-    trace_file_->Close();
+    traceFile_->WriteAll(reinterpret_cast<const void *>(methodsInfo.c_str()), methodsInfo.length());
+    traceFile_->WriteAll(buffer_.get(), bufEnd);
+    traceFile_->Close();
 }
 
 void Trace::MethodEntry(ManagedThread *thread, Method *method)
 {
-    os::memory::LockHolder lock(thread_info_lock_);
-    uint32_t thread_time = 0;
-    uint32_t real_time = 0;
-    GetTimes(&thread_time, &real_time);
-    WriteInfoToBuf(thread, method, EventFlag::TRACE_METHOD_ENTER, thread_time, real_time);
+    os::memory::LockHolder lock(threadInfoLock_);
+    uint32_t threadTime = 0;
+    uint32_t realTime = 0;
+    GetTimes(&threadTime, &realTime);
+    WriteInfoToBuf(thread, method, EventFlag::TRACE_METHOD_ENTER, threadTime, realTime);
 
     PandaOStringStream os;
-    auto thread_name = GetThreadName(thread);
-    os << thread->GetId() << "\t" << thread_name << "\n";
+    auto threadName = GetThreadName(thread);
+    os << thread->GetId() << "\t" << threadName << "\n";
     PandaString info = os.str();
-    thread_info_set_.insert(info);
+    threadInfoSet_.insert(info);
 }
 
 void Trace::MethodExit(ManagedThread *thread, Method *method)
 {
-    uint32_t thread_time = 0;
-    uint32_t real_time = 0;
-    GetTimes(&thread_time, &real_time);
-    WriteInfoToBuf(thread, method, EventFlag::TRACE_METHOD_EXIT, thread_time, real_time);
+    uint32_t threadTime = 0;
+    uint32_t realTime = 0;
+    GetTimes(&threadTime, &realTime);
+    WriteInfoToBuf(thread, method, EventFlag::TRACE_METHOD_EXIT, threadTime, realTime);
 }
 
-void Trace::GetTimes(uint32_t *thread_time, uint32_t *real_time)
+void Trace::GetTimes(uint32_t *threadTime, uint32_t *realTime)
 {
-    *thread_time = GetCpuMicroSecond() - base_cpu_time_;
-    *real_time = SystemMicroSecond() - trace_start_time_;
+    *threadTime = GetCpuMicroSecond() - baseCpuTime_;
+    *realTime = SystemMicroSecond() - traceStartTime_;
 }
 
 }  // namespace panda

@@ -50,19 +50,19 @@ public:
     inline void SetEnv(const std::string &path)
     {
         auto pos = path.rfind(Separator());
-        panda_path_ = path.substr(0, pos) + Separator() + ".." + Separator() + "bin" + Separator() + "ark";
-        source_path_ = path.substr(0, pos) + Separator() + ".." + Separator() + "tests" + Separator() + "panda" +
-                       Separator() + "bin";
+        pandaPath_ = path.substr(0, pos) + Separator() + ".." + Separator() + "bin" + Separator() + "ark";
+        sourcePath_ = path.substr(0, pos) + Separator() + ".." + Separator() + "tests" + Separator() + "panda" +
+                      Separator() + "bin";
     }
 
     inline std::string GetPanda() const
     {
-        return panda_path_;
+        return pandaPath_;
     }
 
     inline std::string GetBinPath() const
     {
-        return source_path_;
+        return sourcePath_;
     }
 
 public:
@@ -74,8 +74,8 @@ private:
     static constexpr std::string_view ASAN_NO_LEAKS = "detect_leaks=0";
 
 private:
-    std::string panda_path_;
-    std::string source_path_;
+    std::string pandaPath_;
+    std::string sourcePath_;
 };
 
 }  // namespace panda::cli::test

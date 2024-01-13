@@ -30,15 +30,15 @@ bool IfMerging::RunImpl()
     GetGraph()->RunPass<DominatorsTree>();
     // Do not try to fix LoopAnalyzer during optimization
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
-    is_applied_ = false;
-    true_branch_marker_ = GetGraph()->NewMarker();
+    isApplied_ = false;
+    trueBranchMarker_ = GetGraph()->NewMarker();
     ArenaVector<BasicBlock *> blocks(GetGraph()->GetVectorBlocks(), GetGraph()->GetLocalAllocator()->Adapter());
     for (auto block : blocks) {
         if (block == nullptr) {
             continue;
         }
         if (TryMergeEquivalentIfs(block) || TrySimplifyConstantPhi(block)) {
-            is_applied_ = true;
+            isApplied_ = true;
         }
     }
     GetGraph()->RemoveUnreachableBlocks();
@@ -46,9 +46,9 @@ bool IfMerging::RunImpl()
 #ifndef NDEBUG
     CheckDomTreeValid();
 #endif
-    GetGraph()->EraseMarker(true_branch_marker_);
+    GetGraph()->EraseMarker(trueBranchMarker_);
     COMPILER_LOG(DEBUG, IF_MERGING) << "If merging complete";
-    return is_applied_;
+    return isApplied_;
 }
 
 void IfMerging::InvalidateAnalyses()
@@ -63,21 +63,21 @@ void IfMerging::InvalidateAnalyses()
 // (After removing one If and joining blocks a new If may go to this block)
 bool IfMerging::TrySimplifyConstantPhi(BasicBlock *block)
 {
-    auto is_applied = false;
+    auto isApplied = false;
     while (TryRemoveConstantPhiIf(block)) {
-        is_applied = true;
+        isApplied = true;
     }
-    return is_applied;
+    return isApplied;
 }
 
 // Tries to remove If that compares phi with constant inputs to another constant
-bool IfMerging::TryRemoveConstantPhiIf(BasicBlock *if_block)
+bool IfMerging::TryRemoveConstantPhiIf(BasicBlock *ifBlock)
 {
-    auto if_imm = GetIfImm(if_block);
-    if (if_imm == nullptr || if_block->GetGraph() == nullptr || if_block->IsTry()) {
+    auto ifImm = GetIfImm(ifBlock);
+    if (ifImm == nullptr || ifBlock->GetGraph() == nullptr || ifBlock->IsTry()) {
         return false;
     }
-    auto input = if_imm->GetInput(0).GetInst();
+    auto input = ifImm->GetInput(0).GetInst();
     if (input->GetOpcode() != Opcode::Compare) {
         return false;
     }
@@ -85,11 +85,11 @@ bool IfMerging::TryRemoveConstantPhiIf(BasicBlock *if_block)
     auto lhs = compare->GetInput(0).GetInst();
     auto rhs = compare->GetInput(1).GetInst();
     if (rhs->IsConst() && lhs->GetOpcode() == Opcode::Phi &&
-        TryRemoveConstantPhiIf(if_imm, lhs->CastToPhi(), rhs->CastToConstant()->GetRawValue(), compare->GetCc())) {
+        TryRemoveConstantPhiIf(ifImm, lhs->CastToPhi(), rhs->CastToConstant()->GetRawValue(), compare->GetCc())) {
         return true;
     }
     if (lhs->IsConst() && rhs->GetOpcode() == Opcode::Phi &&
-        TryRemoveConstantPhiIf(if_imm, rhs->CastToPhi(), lhs->CastToConstant()->GetRawValue(),
+        TryRemoveConstantPhiIf(ifImm, rhs->CastToPhi(), lhs->CastToConstant()->GetRawValue(),
                                SwapOperandsConditionCode(compare->GetCc()))) {
         return true;
     }
@@ -102,51 +102,51 @@ IfImmInst *IfMerging::GetIfImm(BasicBlock *block)
     if (block->IsEmpty() || block->GetLastInst()->GetOpcode() != Opcode::IfImm) {
         return nullptr;
     }
-    auto if_imm = block->GetLastInst()->CastToIfImm();
-    if ((if_imm->GetCc() != CC_EQ && if_imm->GetCc() != CC_NE) || if_imm->GetImm() != 0) {
+    auto ifImm = block->GetLastInst()->CastToIfImm();
+    if ((ifImm->GetCc() != CC_EQ && ifImm->GetCc() != CC_NE) || ifImm->GetImm() != 0) {
         return nullptr;
     }
-    return if_imm;
+    return ifImm;
 }
 
 // If bb and its dominator end with the same IfImm instruction, removes IfImm in bb and returns true
 bool IfMerging::TryMergeEquivalentIfs(BasicBlock *bb)
 {
-    auto if_imm = GetIfImm(bb);
-    if (if_imm == nullptr || bb->GetGraph() == nullptr || bb->IsTry()) {
+    auto ifImm = GetIfImm(bb);
+    if (ifImm == nullptr || bb->GetGraph() == nullptr || bb->IsTry()) {
         return false;
     }
     if (bb->GetPredsBlocks().size() != MAX_SUCCS_NUM) {
         return false;
     }
     auto dom = bb->GetDominator();
-    auto dom_if = GetIfImm(dom);
-    if (dom_if == nullptr || dom_if->GetInput(0).GetInst() != if_imm->GetInput(0).GetInst()) {
+    auto domIf = GetIfImm(dom);
+    if (domIf == nullptr || domIf->GetInput(0).GetInst() != ifImm->GetInput(0).GetInst()) {
         return false;
     }
-    auto inverted_if = IsIfInverted(bb, dom_if);
-    if (inverted_if == std::nullopt) {
+    auto invertedIf = IsIfInverted(bb, domIf);
+    if (invertedIf == std::nullopt) {
         // Not applied, true and false branches of dominate If intersect
         return false;
     }
-    auto true_bb = if_imm->GetEdgeIfInputTrue();
-    auto false_bb = if_imm->GetEdgeIfInputFalse();
-    if (!MarkInstBranches(bb, true_bb, false_bb)) {
+    auto trueBb = ifImm->GetEdgeIfInputTrue();
+    auto falseBb = ifImm->GetEdgeIfInputFalse();
+    if (!MarkInstBranches(bb, trueBb, falseBb)) {
         // Not applied, there are instructions in bb used both in true and false branches
         return false;
     }
     COMPILER_LOG(DEBUG, IF_MERGING) << "Equivalent IfImm instructions were found. Dominant block id = " << dom->GetId()
                                     << ", dominated block id = " << bb->GetId();
-    bb->RemoveInst(if_imm);
-    SplitBlockWithEquivalentIf(bb, true_bb, *inverted_if);
+    bb->RemoveInst(ifImm);
+    SplitBlockWithEquivalentIf(bb, trueBb, *invertedIf);
     return true;
 }
 
 // In case If has constant phi input and can be removed, removes it and returns true
-bool IfMerging::TryRemoveConstantPhiIf(IfImmInst *if_imm, PhiInst *phi, uint64_t constant, ConditionCode cc)
+bool IfMerging::TryRemoveConstantPhiIf(IfImmInst *ifImm, PhiInst *phi, uint64_t constant, ConditionCode cc)
 {
     auto bb = phi->GetBasicBlock();
-    if (bb != if_imm->GetBasicBlock()) {
+    if (bb != ifImm->GetBasicBlock()) {
         return false;
     }
     for (auto input : phi->GetInputs()) {
@@ -154,9 +154,9 @@ bool IfMerging::TryRemoveConstantPhiIf(IfImmInst *if_imm, PhiInst *phi, uint64_t
             return false;
         }
     }
-    auto true_bb = if_imm->GetEdgeIfInputTrue();
-    auto false_bb = if_imm->GetEdgeIfInputFalse();
-    if (!MarkInstBranches(bb, true_bb, false_bb)) {
+    auto trueBb = ifImm->GetEdgeIfInputTrue();
+    auto falseBb = ifImm->GetEdgeIfInputFalse();
+    if (!MarkInstBranches(bb, trueBb, falseBb)) {
         // Not applied, there are instructions in bb used both in true and false branches
         return false;
     }
@@ -167,63 +167,63 @@ bool IfMerging::TryRemoveConstantPhiIf(IfImmInst *if_imm, PhiInst *phi, uint64_t
     }
 
     COMPILER_LOG(DEBUG, IF_MERGING) << "Comparison of constant and Phi instruction with constant inputs was found. "
-                                    << "Phi id = " << phi->GetId() << ", IfImm id = " << if_imm->GetId();
-    bb->RemoveInst(if_imm);
-    SplitBlockWithConstantPhi(bb, true_bb, phi, constant, cc);
+                                    << "Phi id = " << phi->GetId() << ", IfImm id = " << ifImm->GetId();
+    bb->RemoveInst(ifImm);
+    SplitBlockWithConstantPhi(bb, trueBb, phi, constant, cc);
     return true;
 }
 
 // Marks instructions in bb for moving to true or false branch
 // Returns true if it was possible
-bool IfMerging::MarkInstBranches(BasicBlock *bb, BasicBlock *true_bb, BasicBlock *false_bb)
+bool IfMerging::MarkInstBranches(BasicBlock *bb, BasicBlock *trueBb, BasicBlock *falseBb)
 {
     for (auto inst : bb->AllInstsSafeReverse()) {
         if (inst->IsNotRemovable() && inst != bb->GetLastInst()) {
             return false;
         }
-        auto true_branch = false;
-        auto false_branch = false;
+        auto trueBranch = false;
+        auto falseBranch = false;
         for (auto &user : inst->GetUsers()) {
-            auto user_branch = GetUserBranch(user.GetInst(), bb, true_bb, false_bb);
-            if (!user_branch) {
+            auto userBranch = GetUserBranch(user.GetInst(), bb, trueBb, falseBb);
+            if (!userBranch) {
                 // If instruction has users not in true or false branch, than splitting is
                 // impossible (even if the instruction is Phi)
                 return false;
             }
-            if (*user_branch) {
-                true_branch = true;
+            if (*userBranch) {
+                trueBranch = true;
             } else {
-                false_branch = true;
+                falseBranch = true;
             }
         }
         if (inst->IsPhi()) {
             // Phi instruction will be replaced with one of its inputs
             continue;
         }
-        if (true_branch && false_branch) {
+        if (trueBranch && falseBranch) {
             // If instruction is used in both branches, it would need to be copied -> not applied
             return false;
         }
-        if (true_branch) {
-            inst->SetMarker(true_branch_marker_);
+        if (trueBranch) {
+            inst->SetMarker(trueBranchMarker_);
         } else {
-            inst->ResetMarker(true_branch_marker_);
+            inst->ResetMarker(trueBranchMarker_);
         }
     }
     return true;
 }
 
-std::optional<bool> IfMerging::GetUserBranch(Inst *user_inst, BasicBlock *bb, BasicBlock *true_bb, BasicBlock *false_bb)
+std::optional<bool> IfMerging::GetUserBranch(Inst *userInst, BasicBlock *bb, BasicBlock *trueBb, BasicBlock *falseBb)
 {
-    auto user_bb = user_inst->GetBasicBlock();
-    if (user_bb == bb) {
-        return user_inst->IsMarked(true_branch_marker_);
+    auto userBb = userInst->GetBasicBlock();
+    if (userBb == bb) {
+        return userInst->IsMarked(trueBranchMarker_);
     }
-    if (IsDominateEdge(true_bb, user_bb)) {
+    if (IsDominateEdge(trueBb, userBb)) {
         // user_inst can be executed only in true branch of If
         return true;
     }
-    if (IsDominateEdge(false_bb, user_bb)) {
+    if (IsDominateEdge(falseBb, userBb)) {
         // user_inst can be executed only in false branch of If
         return false;
     }
@@ -233,75 +233,75 @@ std::optional<bool> IfMerging::GetUserBranch(Inst *user_inst, BasicBlock *bb, Ba
 
 // Returns true if edge_bb is always the first block in the path
 // from its predecessor to target_bb
-bool IfMerging::IsDominateEdge(BasicBlock *edge_bb, BasicBlock *target_bb)
+bool IfMerging::IsDominateEdge(BasicBlock *edgeBb, BasicBlock *targetBb)
 {
-    return edge_bb->IsDominate(target_bb) && edge_bb->GetPredsBlocks().size() == 1;
+    return edgeBb->IsDominate(targetBb) && edgeBb->GetPredsBlocks().size() == 1;
 }
 
-void IfMerging::SplitBlockWithEquivalentIf(BasicBlock *bb, BasicBlock *true_bb, bool inverted_if)
+void IfMerging::SplitBlockWithEquivalentIf(BasicBlock *bb, BasicBlock *trueBb, bool invertedIf)
 {
-    auto true_branch_bb = SplitBlock(bb);
+    auto trueBranchBb = SplitBlock(bb);
     // Phi instructions are replaced with one of their inputs
     for (auto inst : bb->PhiInstsSafe()) {
         for (auto it = inst->GetUsers().begin(); it != inst->GetUsers().end(); it = inst->GetUsers().begin()) {
-            auto user_inst = it->GetInst();
-            auto user_bb = user_inst->GetBasicBlock();
-            auto phi_input_block_index = (user_bb == true_branch_bb || IsDominateEdge(true_bb, user_bb)) ? 0 : 1;
-            if (inverted_if) {
-                phi_input_block_index = 1 - phi_input_block_index;
+            auto userInst = it->GetInst();
+            auto userBb = userInst->GetBasicBlock();
+            auto phiInputBlockIndex = (userBb == trueBranchBb || IsDominateEdge(trueBb, userBb)) ? 0 : 1;
+            if (invertedIf) {
+                phiInputBlockIndex = 1 - phiInputBlockIndex;
             }
-            user_inst->ReplaceInput(inst, inst->CastToPhi()->GetPhiInput(bb->GetPredecessor(phi_input_block_index)));
+            userInst->ReplaceInput(inst, inst->CastToPhi()->GetPhiInput(bb->GetPredecessor(phiInputBlockIndex)));
         }
         bb->RemoveInst(inst);
     }
 
     // True branches of both Ifs are disconnected from bb and connected to the new block
-    true_bb->ReplacePred(bb, true_branch_bb);
-    bb->RemoveSucc(true_bb);
-    auto true_pred = bb->GetPredecessor(inverted_if ? 1 : 0);
-    true_pred->ReplaceSucc(bb, true_branch_bb);
-    bb->RemovePred(true_pred);
+    trueBb->ReplacePred(bb, trueBranchBb);
+    bb->RemoveSucc(trueBb);
+    auto truePred = bb->GetPredecessor(invertedIf ? 1 : 0);
+    truePred->ReplaceSucc(bb, trueBranchBb);
+    bb->RemovePred(truePred);
 
-    FixDominatorsTree(true_branch_bb, bb);
+    FixDominatorsTree(trueBranchBb, bb);
 }
 
-void IfMerging::SplitBlockWithConstantPhi(BasicBlock *bb, BasicBlock *true_bb, PhiInst *phi, uint64_t constant,
+void IfMerging::SplitBlockWithConstantPhi(BasicBlock *bb, BasicBlock *trueBb, PhiInst *phi, uint64_t constant,
                                           ConditionCode cc)
 {
-    if (true_bb == bb) {
+    if (trueBb == bb) {
         // Avoid case when true_bb is bb itself
-        true_bb = bb->InsertNewBlockToSuccEdge(true_bb);
+        trueBb = bb->InsertNewBlockToSuccEdge(trueBb);
     }
-    auto true_branch_bb = SplitBlock(bb);
+    auto trueBranchBb = SplitBlock(bb);
     // Move Phi inputs corresponding to true branch to a new Phi instruction
-    auto true_branch_phi = GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
+    auto trueBranchPhi = GetGraph()->CreateInstPhi(phi->GetType(), phi->GetPc());
     for (auto i = phi->GetInputsCount(); i > 0U; --i) {
         auto inst = phi->GetInput(i - 1).GetInst();
         if (Compare(cc, inst->CastToConstant()->GetRawValue(), constant)) {
-            auto bb_index = phi->GetPhiInputBbNum(i - 1);
+            auto bbIndex = phi->GetPhiInputBbNum(i - 1);
             phi->RemoveInput(i - 1);
-            bb->GetPredBlockByIndex(bb_index)->ReplaceSucc(bb, true_branch_bb);
-            bb->RemovePred(bb_index);
-            true_branch_phi->AppendInput(inst);
+            bb->GetPredBlockByIndex(bbIndex)->ReplaceSucc(bb, trueBranchBb);
+            bb->RemovePred(bbIndex);
+            trueBranchPhi->AppendInput(inst);
         }
     }
     for (auto it = phi->GetUsers().begin(); it != phi->GetUsers().end();) {
-        auto user_inst = it->GetInst();
-        auto user_bb = user_inst->GetBasicBlock();
+        auto userInst = it->GetInst();
+        auto userBb = userInst->GetBasicBlock();
         // Skip list nodes that can be deleted inside ReplaceInput
-        while (it != phi->GetUsers().end() && it->GetInst() == user_inst) {
+        while (it != phi->GetUsers().end() && it->GetInst() == userInst) {
             ++it;
         }
-        if (user_bb == true_branch_bb || IsDominateEdge(true_bb, user_bb)) {
-            user_inst->ReplaceInput(phi, true_branch_phi);
+        if (userBb == trueBranchBb || IsDominateEdge(trueBb, userBb)) {
+            userInst->ReplaceInput(phi, trueBranchPhi);
         }
     }
     // Phi instructions with single inputs need to be removed
-    if (true_branch_phi->GetInputsCount() == 1) {
-        true_branch_phi->ReplaceUsers(true_branch_phi->GetInput(0).GetInst());
-        true_branch_phi->RemoveInputs();
+    if (trueBranchPhi->GetInputsCount() == 1) {
+        trueBranchPhi->ReplaceUsers(trueBranchPhi->GetInput(0).GetInst());
+        trueBranchPhi->RemoveInputs();
     } else {
-        true_branch_bb->AppendPhi(true_branch_phi);
+        trueBranchBb->AppendPhi(trueBranchPhi);
     }
     if (phi->GetInputsCount() == 1) {
         phi->ReplaceUsers(phi->GetInput(0).GetInst());
@@ -309,41 +309,41 @@ void IfMerging::SplitBlockWithConstantPhi(BasicBlock *bb, BasicBlock *true_bb, P
     }
 
     // True branches of both Ifs are disconnected from bb and connected to the new block
-    true_bb->ReplacePred(bb, true_branch_bb);
-    bb->RemoveSucc(true_bb);
-    FixDominatorsTree(true_branch_bb, bb);
+    trueBb->ReplacePred(bb, trueBranchBb);
+    bb->RemoveSucc(trueBb);
+    FixDominatorsTree(trueBranchBb, bb);
 }
 
 // Moves instructions that should be in the true branch to a new block and returns it
 BasicBlock *IfMerging::SplitBlock(BasicBlock *bb)
 {
-    auto true_branch_bb = GetGraph()->CreateEmptyBlock(bb->GetGuestPc());
+    auto trueBranchBb = GetGraph()->CreateEmptyBlock(bb->GetGuestPc());
     // Dominators tree will be fixed after connecting the new block
     GetGraph()->GetAnalysis<DominatorsTree>().SetValid(true);
     for (auto inst : bb->InstsSafeReverse()) {
-        if (inst->IsMarked(true_branch_marker_)) {
+        if (inst->IsMarked(trueBranchMarker_)) {
             bb->EraseInst(inst);
-            true_branch_bb->PrependInst(inst);
+            trueBranchBb->PrependInst(inst);
         }
     }
-    return true_branch_bb;
+    return trueBranchBb;
 }
 
 // Makes dominator tree valid after false_branch_bb was split into two blocks
-void IfMerging::FixDominatorsTree(BasicBlock *true_branch_bb, BasicBlock *false_branch_bb)
+void IfMerging::FixDominatorsTree(BasicBlock *trueBranchBb, BasicBlock *falseBranchBb)
 {
-    auto &dom_tree = GetGraph()->GetAnalysis<DominatorsTree>();
-    auto dom = false_branch_bb->GetDominator();
+    auto &domTree = GetGraph()->GetAnalysis<DominatorsTree>();
+    auto dom = falseBranchBb->GetDominator();
     // Dominator of bb will remain (maybe not immediate) dominator of blocks dominated by bb
-    for (auto dominated_block : false_branch_bb->GetDominatedBlocks()) {
-        dom_tree.SetDomPair(dom, dominated_block);
+    for (auto dominatedBlock : falseBranchBb->GetDominatedBlocks()) {
+        domTree.SetDomPair(dom, dominatedBlock);
     }
-    false_branch_bb->ClearDominatedBlocks();
+    falseBranchBb->ClearDominatedBlocks();
 
-    TryJoinSuccessorBlock(true_branch_bb);
-    TryJoinSuccessorBlock(false_branch_bb);
-    TryUpdateDominator(true_branch_bb);
-    TryUpdateDominator(false_branch_bb);
+    TryJoinSuccessorBlock(trueBranchBb);
+    TryJoinSuccessorBlock(falseBranchBb);
+    TryUpdateDominator(trueBranchBb);
+    TryUpdateDominator(falseBranchBb);
 }
 
 void IfMerging::TryJoinSuccessorBlock(BasicBlock *bb)

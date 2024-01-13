@@ -25,20 +25,20 @@ namespace panda::compiler {
 /// The file contains small analysis functions which can be used in different passes
 class Inst;
 // returns Store value, for StoreArrayPair and StoreArrayPairI saved not last store value in second_value
-Inst *InstStoredValue(Inst *inst, Inst **second_value);
+Inst *InstStoredValue(Inst *inst, Inst **secondValue);
 Inst *InstStoredValue(Inst *inst);
-bool HasOsrEntryBetween(Inst *dominate_inst, Inst *inst);
-bool HasOsrEntryBetween(BasicBlock *dominate_bb, BasicBlock *bb);
-bool HasTryBlockBetween(Inst *dominate_inst, Inst *inst);
+bool HasOsrEntryBetween(Inst *dominateInst, Inst *inst);
+bool HasOsrEntryBetween(BasicBlock *dominateBb, BasicBlock *bb);
+bool HasTryBlockBetween(Inst *dominateInst, Inst *inst);
 bool IsSuitableForImplicitNullCheck(const Inst *inst);
 bool IsInstNotNull(const Inst *inst);
 SaveStateInst *CopySaveState(Graph *graph, SaveStateInst *inst);
-bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Inst *start_from, Marker visited,
-                    Inst **failed_ss = nullptr);
-std::optional<bool> IsIfInverted(BasicBlock *phi_block, IfImmInst *if_imm);
+bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Inst *startFrom, Marker visited,
+                    Inst **failedSs = nullptr);
+std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm);
 
 // If object input has known class, return pointer to the class, else returns nullptr
-RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t input_num = 0);
+RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t inputNum = 0);
 
 inline bool IsInstInDifferentBlocks(Inst *i1, Inst *i2)
 {
@@ -52,7 +52,7 @@ class IsSaveState;
 class IsSaveStateCanTriggerGc;
 // returns true is there is SaveState/SafePoint between instructions
 template <typename T = IsSaveState>
-bool HasSaveStateBetween(Inst *dom_inst, Inst *inst);
+bool HasSaveStateBetween(Inst *domInst, Inst *inst);
 
 /**
  * Functions below are using for create bridge in SaveStates between source instruction and target instruction.
@@ -63,21 +63,21 @@ bool HasSaveStateBetween(Inst *dom_inst, Inst *inst);
 class SaveStateBridgesBuilder {
 public:
     ArenaVector<Inst *> *SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,
-                                                      Inst *stop_search = nullptr, BasicBlock *target_block = nullptr);
+                                                      Inst *stopSearch = nullptr, BasicBlock *targetBlock = nullptr);
     void CreateBridgeInSS(Inst *source, ArenaVector<Inst *> *bridges);
-    void SearchAndCreateMissingObjInSaveState(Graph *graph, Inst *source, Inst *target, Inst *stop_search = nullptr,
-                                              BasicBlock *target_block = nullptr);
+    void SearchAndCreateMissingObjInSaveState(Graph *graph, Inst *source, Inst *target, Inst *stopSearch = nullptr,
+                                              BasicBlock *targetBlock = nullptr);
     void FixInstUsageInSS(Graph *graph, Inst *inst);
     void FixSaveStatesInBB(BasicBlock *block);
     void FixPhisWithCheckInputs(BasicBlock *block);
     void DumpBridges(std::ostream &out, Inst *source, ArenaVector<Inst *> *bridges);
 
 private:
-    void SearchSSOnWay(BasicBlock *block, Inst *start_from, Inst *source_inst, Marker visited,
-                       ArenaVector<Inst *> *bridges, Inst *stop_search);
+    void SearchSSOnWay(BasicBlock *block, Inst *startFrom, Inst *sourceInst, Marker visited,
+                       ArenaVector<Inst *> *bridges, Inst *stopSearch);
     bool IsSaveStateForGc(Inst *inst);
-    void ProcessSSUserPreds(Graph *graph, Inst *inst, Inst *target_inst);
-    void SearchInSaveStateAndFillBridgeVector(Inst *inst, Inst *searched_inst, ArenaVector<Inst *> *bridges);
+    void ProcessSSUserPreds(Graph *graph, Inst *inst, Inst *targetInst);
+    void SearchInSaveStateAndFillBridgeVector(Inst *inst, Inst *searchedInst, ArenaVector<Inst *> *bridges);
     void FixUsageInstInOtherBB(BasicBlock *block, Inst *inst);
     void FixUsagePhiInBB(BasicBlock *block, Inst *inst);
     void DeleteUnrealObjInSaveState(Inst *ss);
@@ -91,7 +91,7 @@ private:
 
 class InstAppender {
 public:
-    explicit InstAppender(BasicBlock *block, Inst *insert_after = nullptr) : block_(block), prev_(insert_after) {}
+    explicit InstAppender(BasicBlock *block, Inst *insertAfter = nullptr) : block_(block), prev_(insertAfter) {}
     ~InstAppender() = default;
     DEFAULT_MOVE_SEMANTIC(InstAppender);
     NO_COPY_SEMANTIC(InstAppender);

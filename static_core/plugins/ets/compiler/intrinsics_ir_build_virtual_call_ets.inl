@@ -14,20 +14,20 @@
 */
 
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_RUNTIME_EQUALS: {
-    BuildStdRuntimeEquals(bc_inst, acc_read);
+    BuildStdRuntimeEquals(bcInst, accRead);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CHAR_AT: {
-    if (!TryBuildStringCharAtIntrinsic(bc_inst, acc_read)) {
-        BuildDefaultVirtualCallIntrinsic(bc_inst, is_range, acc_read);
+    if (!TryBuildStringCharAtIntrinsic(bcInst, accRead)) {
+        BuildDefaultVirtualCallIntrinsic(bcInst, isRange, accRead);
     }
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET_LENGTH: {
-    BuildStringLengthIntrinsic(bc_inst, acc_read);
+    BuildStringLengthIntrinsic(bcInst, accRead);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_EMPTY: {
-    BuildStringIsEmptyIntrinsic(bc_inst, acc_read);
+    BuildStringIsEmptyIntrinsic(bcInst, accRead);
     break;
 }

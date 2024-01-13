@@ -149,8 +149,8 @@ public:
             return true;
         }
 
-        auto sub_sp = sp_.SubSpan(offset_, bytes.size());
-        if (memcpy_s(sub_sp.data(), sub_sp.size(), bytes.data(), bytes.size()) != 0) {
+        auto subSp = sp_.SubSpan(offset_, bytes.size());
+        if (memcpy_s(subSp.data(), subSp.size(), bytes.data(), bytes.size()) != 0) {
             return false;
         }
         offset_ += bytes.size();
@@ -169,7 +169,7 @@ private:
 
 class FileWriter : public Writer {
 public:
-    explicit FileWriter(const std::string &file_name);
+    explicit FileWriter(const std::string &fileName);
 
     ~FileWriter() override;
 
@@ -178,7 +178,7 @@ public:
 
     void CountChecksum(bool counting) override
     {
-        count_checksum_ = counting;
+        countChecksum_ = counting;
     }
 
     bool WriteChecksum(size_t offset) override
@@ -212,7 +212,7 @@ private:
     FILE *file_;
     size_t offset_ {0};
     uint32_t checksum_;
-    bool count_checksum_ {false};
+    bool countChecksum_ {false};
 };
 
 }  // namespace panda::panda_file

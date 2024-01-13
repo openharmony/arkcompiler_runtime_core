@@ -30,57 +30,56 @@
 namespace panda::mem {
 
 template <typename LockConfigT>
-RegionAllocatorBase<LockConfigT>::RegionAllocatorBase(MemStatsType *mem_stats, GenerationalSpaces *spaces,
-                                                      SpaceType space_type, AllocatorType allocator_type,
-                                                      size_t init_space_size, bool extend, size_t region_size,
-                                                      size_t empty_tenured_regions_max_count)
-    : mem_stats_(mem_stats),
-      space_type_(space_type),
+RegionAllocatorBase<LockConfigT>::RegionAllocatorBase(MemStatsType *memStats, GenerationalSpaces *spaces,
+                                                      SpaceType spaceType, AllocatorType allocatorType,
+                                                      size_t initSpaceSize, bool extend, size_t regionSize,
+                                                      size_t emptyTenuredRegionsMaxCount)
+    : memStats_(memStats),
+      spaceType_(spaceType),
       spaces_(spaces),
-      region_pool_(region_size, extend, spaces,
-                   InternalAllocatorPtr(InternalAllocator<>::GetInternalAllocatorFromRuntime())),
-      region_space_(space_type, allocator_type, &region_pool_, empty_tenured_regions_max_count),
-      init_block_(0, nullptr)
+      regionPool_(regionSize, extend, spaces,
+                  InternalAllocatorPtr(InternalAllocator<>::GetInternalAllocatorFromRuntime())),
+      regionSpace_(spaceType, allocatorType, &regionPool_, emptyTenuredRegionsMaxCount),
+      initBlock_(0, nullptr)
 {
-    ASSERT(space_type_ == SpaceType::SPACE_TYPE_OBJECT || space_type_ == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT ||
-           space_type_ == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
-    init_block_ = NULLPOOL;
-    if (init_space_size > 0) {
-        ASSERT(init_space_size % region_size == 0);
-        init_block_ = spaces_->AllocSharedPool(init_space_size, space_type, AllocatorType::REGION_ALLOCATOR, this);
-        ASSERT(init_block_.GetMem() != nullptr);
-        ASSERT(init_block_.GetSize() >= init_space_size);
-        if (init_block_.GetMem() != nullptr) {
-            region_pool_.InitRegionBlock(ToUintPtr(init_block_.GetMem()),
-                                         ToUintPtr(init_block_.GetMem()) + init_space_size);
-            ASAN_POISON_MEMORY_REGION(init_block_.GetMem(), init_block_.GetSize());
+    ASSERT(spaceType_ == SpaceType::SPACE_TYPE_OBJECT || spaceType_ == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT ||
+           spaceType_ == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    ASSERT(regionSize != 0);
+    initBlock_ = NULLPOOL;
+    if (initSpaceSize > 0) {
+        ASSERT(initSpaceSize % regionSize == 0);
+        initBlock_ = spaces_->AllocSharedPool(initSpaceSize, spaceType, AllocatorType::REGION_ALLOCATOR, this);
+        ASSERT(initBlock_.GetMem() != nullptr);
+        ASSERT(initBlock_.GetSize() >= initSpaceSize);
+        if (initBlock_.GetMem() != nullptr) {
+            regionPool_.InitRegionBlock(ToUintPtr(initBlock_.GetMem()), ToUintPtr(initBlock_.GetMem()) + initSpaceSize);
+            ASAN_POISON_MEMORY_REGION(initBlock_.GetMem(), initBlock_.GetSize());
         }
     }
 }
 
 template <typename LockConfigT>
-RegionAllocatorBase<LockConfigT>::RegionAllocatorBase(MemStatsType *mem_stats, GenerationalSpaces *spaces,
-                                                      SpaceType space_type, AllocatorType allocator_type,
-                                                      RegionPool *shared_region_pool,
-                                                      size_t empty_tenured_regions_max_count)
-    : mem_stats_(mem_stats),
+RegionAllocatorBase<LockConfigT>::RegionAllocatorBase(MemStatsType *memStats, GenerationalSpaces *spaces,
+                                                      SpaceType spaceType, AllocatorType allocatorType,
+                                                      RegionPool *sharedRegionPool, size_t emptyTenuredRegionsMaxCount)
+    : memStats_(memStats),
       spaces_(spaces),
-      space_type_(space_type),
-      region_pool_(0, false, spaces, nullptr),  // unused
-      region_space_(space_type, allocator_type, shared_region_pool, empty_tenured_regions_max_count),
-      init_block_(0, nullptr)  // unused
+      spaceType_(spaceType),
+      regionPool_(0, false, spaces, nullptr),  // unused
+      regionSpace_(spaceType, allocatorType, sharedRegionPool, emptyTenuredRegionsMaxCount),
+      initBlock_(0, nullptr)  // unused
 {
-    ASSERT(space_type_ == SpaceType::SPACE_TYPE_OBJECT || space_type_ == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+    ASSERT(spaceType_ == SpaceType::SPACE_TYPE_OBJECT || spaceType_ == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
 }
 
 template <typename LockConfigT>
 template <typename AllocConfigT, OSPagesAllocPolicy OS_ALLOC_POLICY>
-Region *RegionAllocatorBase<LockConfigT>::CreateAndSetUpNewRegion(size_t region_size, RegionFlag region_type,
+Region *RegionAllocatorBase<LockConfigT>::CreateAndSetUpNewRegion(size_t regionSize, RegionFlag regionType,
                                                                   RegionFlag properties)
 {
-    Region *region = AllocRegion<OS_ALLOC_POLICY>(region_size, region_type, properties);
+    Region *region = AllocRegion<OS_ALLOC_POLICY>(regionSize, regionType, properties);
     if (LIKELY(region != nullptr)) {
-        if (region_type == RegionFlag::IS_EDEN) {
+        if (regionType == RegionFlag::IS_EDEN) {
             AllocConfigT::OnInitYoungRegion({region->Begin(), region->End()});
         }
         // Do memory barrier here to make sure all threads see references to bitmaps.
@@ -107,47 +106,47 @@ template <typename LockConfigT>
 PandaVector<Region *> RegionAllocatorBase<LockConfigT>::GetAllRegions()
 {
     PandaVector<Region *> vector;
-    os::memory::LockHolder lock(this->region_lock_);
+    os::memory::LockHolder lock(this->regionLock_);
     GetSpace()->IterateRegions([&](Region *region) { vector.push_back(region); });
     return vector;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-RegionAllocator<AllocConfigT, LockConfigT>::RegionAllocator(MemStatsType *mem_stats, GenerationalSpaces *spaces,
-                                                            SpaceType space_type, size_t init_space_size, bool extend,
-                                                            size_t empty_tenured_regions_max_count)
-    : RegionAllocatorBase<LockConfigT>(mem_stats, spaces, space_type, AllocatorType::REGION_ALLOCATOR, init_space_size,
-                                       extend, REGION_SIZE, empty_tenured_regions_max_count),
-      full_region_(nullptr, 0, 0),
-      eden_current_region_(&full_region_)
+RegionAllocator<AllocConfigT, LockConfigT>::RegionAllocator(MemStatsType *memStats, GenerationalSpaces *spaces,
+                                                            SpaceType spaceType, size_t initSpaceSize, bool extend,
+                                                            size_t emptyTenuredRegionsMaxCount)
+    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, AllocatorType::REGION_ALLOCATOR, initSpaceSize,
+                                       extend, REGION_SIZE, emptyTenuredRegionsMaxCount),
+      fullRegion_(nullptr, 0, 0),
+      edenCurrentRegion_(&fullRegion_)
 {
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-RegionAllocator<AllocConfigT, LockConfigT>::RegionAllocator(MemStatsType *mem_stats, GenerationalSpaces *spaces,
-                                                            SpaceType space_type, RegionPool *shared_region_pool,
-                                                            size_t empty_tenured_regions_max_count)
-    : RegionAllocatorBase<LockConfigT>(mem_stats, spaces, space_type, AllocatorType::REGION_ALLOCATOR,
-                                       shared_region_pool, empty_tenured_regions_max_count),
-      full_region_(nullptr, 0, 0),
-      eden_current_region_(&full_region_)
+RegionAllocator<AllocConfigT, LockConfigT>::RegionAllocator(MemStatsType *memStats, GenerationalSpaces *spaces,
+                                                            SpaceType spaceType, RegionPool *sharedRegionPool,
+                                                            size_t emptyTenuredRegionsMaxCount)
+    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, AllocatorType::REGION_ALLOCATOR, sharedRegionPool,
+                                       emptyTenuredRegionsMaxCount),
+      fullRegion_(nullptr, 0, 0),
+      edenCurrentRegion_(&fullRegion_)
 {
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <RegionFlag REGION_TYPE>
-void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t align_size)
+void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t alignSize)
 {
     static constexpr bool IS_ATOMIC = std::is_same_v<LockConfigT, RegionAllocatorLockConfig::CommonLock>;
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (REGION_TYPE == RegionFlag::IS_EDEN) {
-        void *mem = GetCurrentRegion<IS_ATOMIC, REGION_TYPE>()->template Alloc<IS_ATOMIC>(align_size);
+        void *mem = GetCurrentRegion<IS_ATOMIC, REGION_TYPE>()->template Alloc<IS_ATOMIC>(alignSize);
         if (mem != nullptr) {
             return mem;
         }
 
-        os::memory::LockHolder lock(this->region_lock_);
-        mem = GetCurrentRegion<IS_ATOMIC, REGION_TYPE>()->template Alloc<IS_ATOMIC>(align_size);
+        os::memory::LockHolder lock(this->regionLock_);
+        mem = GetCurrentRegion<IS_ATOMIC, REGION_TYPE>()->template Alloc<IS_ATOMIC>(alignSize);
         if (mem != nullptr) {
             return mem;
         }
@@ -156,7 +155,7 @@ void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t align_size
         if (LIKELY(region != nullptr)) {
             // Here we need memory barrier to make the allocation visible
             // in all threads before SetCurrentRegion
-            mem = region->template Alloc<IS_ATOMIC>(align_size);
+            mem = region->template Alloc<IS_ATOMIC>(alignSize);
             SetCurrentRegion<IS_ATOMIC, REGION_TYPE>(region);
         }
 
@@ -165,20 +164,20 @@ void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t align_size
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (REGION_TYPE == RegionFlag::IS_OLD) {
         void *mem = nullptr;
-        Region *region_to = PopFromRegionQueue<IS_ATOMIC, REGION_TYPE>();
-        if (region_to != nullptr) {
-            mem = region_to->template Alloc<false>(align_size);
+        Region *regionTo = PopFromRegionQueue<IS_ATOMIC, REGION_TYPE>();
+        if (regionTo != nullptr) {
+            mem = regionTo->template Alloc<false>(alignSize);
             if (mem != nullptr) {
-                PushToRegionQueue<IS_ATOMIC, REGION_TYPE>(region_to);
+                PushToRegionQueue<IS_ATOMIC, REGION_TYPE>(regionTo);
                 return mem;
             }
         }
 
-        os::memory::LockHolder lock(this->region_lock_);
-        region_to = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGION_TYPE);
-        if (LIKELY(region_to != nullptr)) {
-            mem = region_to->template Alloc<false>(align_size);
-            PushToRegionQueue<IS_ATOMIC, REGION_TYPE>(region_to);
+        os::memory::LockHolder lock(this->regionLock_);
+        regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGION_TYPE);
+        if (LIKELY(regionTo != nullptr)) {
+            mem = regionTo->template Alloc<false>(alignSize);
+            PushToRegionQueue<IS_ATOMIC, REGION_TYPE>(regionTo);
         }
 
         return mem;
@@ -192,25 +191,25 @@ template <RegionFlag REGION_TYPE, bool UPDATE_MEMSTATS>
 void *RegionAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align)
 {
     ASSERT(GetAlignmentInBytes(align) % GetAlignmentInBytes(DEFAULT_ALIGNMENT) == 0);
-    size_t align_size = AlignUp(size, GetAlignmentInBytes(align));
+    size_t alignSize = AlignUp(size, GetAlignmentInBytes(align));
     void *mem = nullptr;
     // for movable & regular size object, allocate it from a region
     // for nonmovable or large size object, allocate a seprate large region for it
     if (this->GetSpaceType() != SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT &&
-        LIKELY(align_size <= GetMaxRegularObjectSize())) {
-        mem = AllocRegular<REGION_TYPE>(align_size);
+        LIKELY(alignSize <= GetMaxRegularObjectSize())) {
+        mem = AllocRegular<REGION_TYPE>(alignSize);
     } else {
-        os::memory::LockHolder lock(this->region_lock_);
+        os::memory::LockHolder lock(this->regionLock_);
         Region *region = this->template CreateAndSetUpNewRegion<AllocConfigT>(
-            Region::RegionSize(align_size, REGION_SIZE), REGION_TYPE, IS_LARGE_OBJECT);
+            Region::RegionSize(alignSize, REGION_SIZE), REGION_TYPE, IS_LARGE_OBJECT);
         if (LIKELY(region != nullptr)) {
-            mem = region->Alloc<false>(align_size);
+            mem = region->Alloc<false>(alignSize);
         }
     }
     if (mem != nullptr) {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (UPDATE_MEMSTATS) {
-            AllocConfigT::OnAlloc(align_size, this->space_type_, this->mem_stats_);
+            AllocConfigT::OnAlloc(alignSize, this->spaceType_, this->memStats_);
             AllocConfigT::MemoryInit(mem);
         }
     }
@@ -241,14 +240,14 @@ TLAB *RegionAllocator<AllocConfigT, LockConfigT>::CreateTLAB(size_t size)
     TLAB *tlab = nullptr;
 
     {
-        os::memory::LockHolder lock(this->region_lock_);
+        os::memory::LockHolder lock(this->regionLock_);
         Region *region = nullptr;
         // first search in partial tlab map
-        auto largest_tlab = retained_tlabs_.begin();
-        if (largest_tlab != retained_tlabs_.end() && largest_tlab->first >= size) {
+        auto largestTlab = retainedTlabs_.begin();
+        if (largestTlab != retainedTlabs_.end() && largestTlab->first >= size) {
             LOG(DEBUG, ALLOC) << "Use retained tlabs region " << region;
-            region = largest_tlab->second;
-            retained_tlabs_.erase(largest_tlab);
+            region = largestTlab->second;
+            retainedTlabs_.erase(largestTlab);
             ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
         }
 
@@ -261,11 +260,11 @@ TLAB *RegionAllocator<AllocConfigT, LockConfigT>::CreateTLAB(size_t size)
         }
         if (region != nullptr) {
             tlab = CreateTLABInRegion(region, size);
-            auto remaining_size = region->GetRemainingSizeForTLABs();
-            if (remaining_size >= size) {
-                LOG(DEBUG, ALLOC) << "Add a region " << region << " with remained size " << remaining_size
+            auto remainingSize = region->GetRemainingSizeForTLABs();
+            if (remainingSize >= size) {
+                LOG(DEBUG, ALLOC) << "Add a region " << region << " with remained size " << remainingSize
                                   << " to retained_tlabs";
-                retained_tlabs_.insert(std::make_pair(remaining_size, region));
+                retainedTlabs_.insert(std::make_pair(remainingSize, region));
             }
         }
     }
@@ -278,7 +277,7 @@ TLAB *RegionAllocator<AllocConfigT, LockConfigT>::CreateRegionSizeTLAB()
 {
     TLAB *tlab = nullptr;
 
-    os::memory::LockHolder lock(this->region_lock_);
+    os::memory::LockHolder lock(this->regionLock_);
     Region *region = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, RegionFlag::IS_EDEN);
     if (LIKELY(region != nullptr)) {
         region->CreateTLABSupport();
@@ -315,8 +314,8 @@ PandaPriorityQueue<std::pair<uint32_t, Region *>> RegionAllocator<AllocConfigT, 
                 return;
             }
         }
-        auto garbage_bytes = region->GetGarbageBytes();
-        queue.push(std::pair<uint32_t, Region *>(garbage_bytes, region));
+        auto garbageBytes = region->GetGarbageBytes();
+        queue.push(std::pair<uint32_t, Region *>(garbageBytes, region));
     });
     return queue;
 }
@@ -336,8 +335,8 @@ PandaVector<Region *> RegionAllocator<AllocConfigT, LockConfigT>::GetAllSpecific
 
 template <typename AllocConfigT, typename LockConfigT>
 template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP>
-void RegionAllocator<AllocConfigT, LockConfigT>::CompactAllSpecificRegions(const GCObjectVisitor &death_checker,
-                                                                           const ObjectVisitorEx &move_handler)
+void RegionAllocator<AllocConfigT, LockConfigT>::CompactAllSpecificRegions(const GCObjectVisitor &deathChecker,
+                                                                           const ObjectVisitorEx &moveHandler)
 {
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (REGIONS_TYPE_FROM == REGIONS_TYPE_TO) {  // NOLINT(bugprone-suspicious-semicolon)
@@ -346,143 +345,141 @@ void RegionAllocator<AllocConfigT, LockConfigT>::CompactAllSpecificRegions(const
         ASSERT(REGIONS_TYPE_FROM != REGIONS_TYPE_TO);
         ResetCurrentRegion<false, REGIONS_TYPE_TO>();
     }
-    this->GetSpace()->IterateRegions([&](Region *region) {
+    this->GetSpace()->IterateRegions([this, &deathChecker, &moveHandler](Region *region) {
         if (!region->HasFlag(REGIONS_TYPE_FROM)) {
             return;
         }
-        CompactSpecificRegion<REGIONS_TYPE_FROM, REGIONS_TYPE_TO, USE_MARKED_BITMAP>(region, death_checker,
-                                                                                     move_handler);
+        CompactSpecificRegion<REGIONS_TYPE_FROM, REGIONS_TYPE_TO, USE_MARKED_BITMAP>(region, deathChecker, moveHandler);
     });
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP>
 void RegionAllocator<AllocConfigT, LockConfigT>::CompactSeveralSpecificRegions(const PandaVector<Region *> &regions,
-                                                                               const GCObjectVisitor &death_checker,
-                                                                               const ObjectVisitorEx &move_handler)
+                                                                               const GCObjectVisitor &deathChecker,
+                                                                               const ObjectVisitorEx &moveHandler)
 {
     for (auto i : regions) {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGIONS_TYPE_FROM == REGIONS_TYPE_TO) {
-            [[maybe_unused]] bool founded_region = IsInCurrentRegion<false, REGIONS_TYPE_TO>(i);
-            ASSERT(!founded_region);
+            [[maybe_unused]] bool foundedRegion = IsInCurrentRegion<false, REGIONS_TYPE_TO>(i);
+            ASSERT(!foundedRegion);
         }
-        CompactSpecificRegion<REGIONS_TYPE_FROM, REGIONS_TYPE_TO, USE_MARKED_BITMAP>(i, death_checker, move_handler);
+        CompactSpecificRegion<REGIONS_TYPE_FROM, REGIONS_TYPE_TO, USE_MARKED_BITMAP>(i, deathChecker, moveHandler);
     }
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP>
 void RegionAllocator<AllocConfigT, LockConfigT>::CompactSpecificRegion(Region *region,
-                                                                       const GCObjectVisitor &death_checker,
-                                                                       const ObjectVisitorEx &move_handler)
+                                                                       const GCObjectVisitor &deathChecker,
+                                                                       const ObjectVisitorEx &moveHandler)
 {
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (REGIONS_TYPE_FROM == REGIONS_TYPE_TO) {
         // It is bad if we compact one region into itself.
-        [[maybe_unused]] bool is_current_region = IsInCurrentRegion<true, REGIONS_TYPE_TO>(region);
-        ASSERT(!is_current_region);
+        [[maybe_unused]] bool isCurrentRegion = IsInCurrentRegion<true, REGIONS_TYPE_TO>(region);
+        ASSERT(!isCurrentRegion);
     }
-    auto create_new_region = [&]() {
-        os::memory::LockHolder lock(this->region_lock_);
-        Region *region_to = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGIONS_TYPE_TO);
-        ASSERT(region_to != nullptr);
-        return region_to;
+    auto createNewRegion = [&]() {
+        os::memory::LockHolder lock(this->regionLock_);
+        Region *regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGIONS_TYPE_TO);
+        ASSERT(regionTo != nullptr);
+        return regionTo;
     };
 
-    Region *region_to = PopFromRegionQueue<true, REGIONS_TYPE_TO>();
-    if (region_to == nullptr) {
-        region_to = create_new_region();
+    Region *regionTo = PopFromRegionQueue<true, REGIONS_TYPE_TO>();
+    if (regionTo == nullptr) {
+        regionTo = createNewRegion();
     }
-    size_t live_bytes = 0;
+    size_t liveBytes = 0;
     // Don't use atomic in this method because we work with not shared region
     auto visitor = [&](ObjectHeader *object) {
         // If we use mark-bitmap then we iterate over alive object, so no need death-checker
         if constexpr (!USE_MARKED_BITMAP) {
-            if (death_checker(object) != ObjectStatus::ALIVE_OBJECT) {
+            if (deathChecker(object) != ObjectStatus::ALIVE_OBJECT) {
                 return;
             }
         }
-        size_t object_size = GetObjectSize(object);
-        size_t aligned_size = AlignUp(object_size, DEFAULT_ALIGNMENT_IN_BYTES);
-        void *dst = region_to->template Alloc<false>(aligned_size);
+        size_t objectSize = GetObjectSize(object);
+        size_t alignedSize = AlignUp(objectSize, DEFAULT_ALIGNMENT_IN_BYTES);
+        void *dst = regionTo->template Alloc<false>(alignedSize);
         if (dst == nullptr) {
-            region_to->SetLiveBytes(region_to->GetLiveBytes() + live_bytes);
-            live_bytes = 0;
-            region_to = create_new_region();
-            dst = region_to->template Alloc<false>(aligned_size);
+            regionTo->SetLiveBytes(regionTo->GetLiveBytes() + liveBytes);
+            liveBytes = 0;
+            regionTo = createNewRegion();
+            dst = regionTo->template Alloc<false>(alignedSize);
         }
         // Don't initialize memory for an object here because we will use memcpy anyway
         ASSERT(dst != nullptr);
-        memcpy_s(dst, object_size, object, object_size);
+        memcpy_s(dst, objectSize, object, objectSize);
         // need to mark as alive moved object
-        ASSERT(region_to->GetLiveBitmap() != nullptr);
-        region_to->IncreaseAllocatedObjects();
-        region_to->GetLiveBitmap()->Set(dst);
-        live_bytes += aligned_size;
-        move_handler(object, static_cast<ObjectHeader *>(dst));
+        ASSERT(regionTo->GetLiveBitmap() != nullptr);
+        regionTo->IncreaseAllocatedObjects();
+        regionTo->GetLiveBitmap()->Set(dst);
+        liveBytes += alignedSize;
+        moveHandler(object, static_cast<ObjectHeader *>(dst));
     };
 
     ASSERT(region->HasFlag(REGIONS_TYPE_FROM));
 
-    const std::function<void(ObjectHeader *)> visitor_functor(visitor);
+    const std::function<void(ObjectHeader *)> visitorFunctor(visitor);
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (USE_MARKED_BITMAP) {
         region->GetMarkBitmap()->IterateOverMarkedChunks(
-            [&](void *object_addr) { visitor_functor(static_cast<ObjectHeader *>(object_addr)); });
+            [&visitorFunctor](void *objectAddr) { visitorFunctor(static_cast<ObjectHeader *>(objectAddr)); });
     } else {  // NOLINT(readability-misleading-indentation)
-        region->IterateOverObjects(visitor_functor);
+        region->IterateOverObjects(visitorFunctor);
     }
-    region_to->SetLiveBytes(region_to->GetLiveBytes() + live_bytes);
+    regionTo->SetLiveBytes(regionTo->GetLiveBytes() + liveBytes);
 
-    PushToRegionQueue<true, REGIONS_TYPE_TO>(region_to);
+    PushToRegionQueue<true, REGIONS_TYPE_TO>(regionTo);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 void RegionAllocator<AllocConfigT, LockConfigT>::ReserveRegionIfNeeded()
 {
-    if (reserved_region_ != nullptr) {
+    if (reservedRegion_ != nullptr) {
         return;
     }
-    reserved_region_ = this->GetSpace()->NewRegion(REGION_SIZE, RegionFlag::IS_OLD, RegionFlag::IS_RESERVED);
-    ASSERT(reserved_region_ != nullptr);
-    reserved_region_->RmvFlag(RegionFlag::IS_OLD);
+    reservedRegion_ = this->GetSpace()->NewRegion(REGION_SIZE, RegionFlag::IS_OLD, RegionFlag::IS_RESERVED);
+    ASSERT(reservedRegion_ != nullptr);
+    reservedRegion_->RmvFlag(RegionFlag::IS_OLD);
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 void RegionAllocator<AllocConfigT, LockConfigT>::ReleaseReservedRegion()
 {
-    ASSERT(reserved_region_ != nullptr);
+    ASSERT(reservedRegion_ != nullptr);
     this->GetSpace()->template FreeRegion<RegionSpace::ReleaseRegionsPolicy::NoRelease, OSPagesPolicy::NO_RETURN>(
-        reserved_region_);
-    reserved_region_ = nullptr;
+        reservedRegion_);
+    reservedRegion_ = nullptr;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool USE_MARKED_BITMAP>
-void RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegion(Region *region,
-                                                                    const GCObjectVisitor &death_checker,
-                                                                    const ObjectVisitor &alive_objects_handler)
+void RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker,
+                                                                    const ObjectVisitor &aliveObjectsHandler)
 {
     ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
     // We should create live bitmap here and copy alive object in marked bitmap to it
     region->CreateLiveBitmap();
     region->CloneMarkBitmapToLiveBitmap();
-    auto visitor = [&alive_objects_handler, &region](ObjectHeader *object) {
-        alive_objects_handler(object);
+    auto visitor = [&aliveObjectsHandler, &region](ObjectHeader *object) {
+        aliveObjectsHandler(object);
         region->IncreaseAllocatedObjects();
     };
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (USE_MARKED_BITMAP) {
         region->GetMarkBitmap()->IterateOverMarkedChunks(
-            [&visitor](void *object_addr) { visitor(static_cast<ObjectHeader *>(object_addr)); });
+            [&visitor](void *objectAddr) { visitor(static_cast<ObjectHeader *>(objectAddr)); });
     } else {  // NOLINT(readability-misleading-indentation)
-        auto live_check_visitor = [&visitor, &death_checker](ObjectHeader *object) {
-            if (death_checker(object) == ObjectStatus::ALIVE_OBJECT) {
+        auto liveCheckVisitor = [&visitor, &deathChecker](ObjectHeader *object) {
+            if (deathChecker(object) == ObjectStatus::ALIVE_OBJECT) {
                 visitor(object);
             }
         };
-        region->IterateOverObjects(live_check_visitor);
+        region->IterateOverObjects(liveCheckVisitor);
     }
     // We set not actual value here but we will update it later
     region->SetLiveBytes(region->GetAllocatedBytes());
@@ -501,7 +498,7 @@ void RegionAllocator<AllocConfigT, LockConfigT>::ResetAllSpecificRegions()
         this->GetSpace()->template FreeRegion<RegionSpace::ReleaseRegionsPolicy::NoRelease>(region);
     });
     if constexpr (REGIONS_TYPE == RegionFlag::IS_EDEN) {
-        retained_tlabs_.clear();
+        retainedTlabs_.clear();
     }
 }
 
@@ -510,9 +507,9 @@ template <RegionFlag REGIONS_TYPE, RegionSpace::ReleaseRegionsPolicy REGIONS_REL
           OSPagesPolicy OS_PAGES_POLICY, bool NEED_LOCK, typename Container>
 void RegionAllocator<AllocConfigT, LockConfigT>::ResetSeveralSpecificRegions(const Container &regions)
 {
-    os::memory::LockHolder<LockConfigT, NEED_LOCK> lock(this->region_lock_);
+    os::memory::LockHolder<LockConfigT, NEED_LOCK> lock(this->regionLock_);
     ASSERT(REGIONS_TYPE != RegionFlag::IS_EDEN);
-    ASSERT((REGIONS_TYPE != RegionFlag::IS_EDEN) || (retained_tlabs_.empty()));
+    ASSERT((REGIONS_TYPE != RegionFlag::IS_EDEN) || (retainedTlabs_.empty()));
     for (Region *region : regions) {
         ASSERT(!(IsInCurrentRegion<false, REGIONS_TYPE>(region)));
         ASSERT(region->HasFlag(REGIONS_TYPE));
@@ -522,19 +519,19 @@ void RegionAllocator<AllocConfigT, LockConfigT>::ResetSeveralSpecificRegions(con
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
 RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::RegionNonmovableAllocator(
-    MemStatsType *mem_stats, GenerationalSpaces *spaces, SpaceType space_type, size_t init_space_size, bool extend)
-    : RegionAllocatorBase<LockConfigT>(mem_stats, spaces, space_type, ObjectAllocator::GetAllocatorType(),
-                                       init_space_size, extend, REGION_SIZE, 0),
-      object_allocator_(mem_stats, space_type)
+    MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType, size_t initSpaceSize, bool extend)
+    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, ObjectAllocator::GetAllocatorType(), initSpaceSize,
+                                       extend, REGION_SIZE, 0),
+      objectAllocator_(memStats, spaceType)
 {
 }
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
 RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::RegionNonmovableAllocator(
-    MemStatsType *mem_stats, GenerationalSpaces *spaces, SpaceType space_type, RegionPool *shared_region_pool)
-    : RegionAllocatorBase<LockConfigT>(mem_stats, spaces, space_type, ObjectAllocator::GetAllocatorType(),
-                                       shared_region_pool, 0),
-      object_allocator_(mem_stats, space_type)
+    MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType, RegionPool *sharedRegionPool)
+    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, ObjectAllocator::GetAllocatorType(),
+                                       sharedRegionPool, 0),
+      objectAllocator_(memStats, spaceType)
 {
 }
 
@@ -542,19 +539,19 @@ template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
 void *RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::Alloc(size_t size, Alignment align)
 {
     ASSERT(GetAlignmentInBytes(align) % GetAlignmentInBytes(DEFAULT_ALIGNMENT) == 0);
-    size_t align_size = AlignUp(size, GetAlignmentInBytes(align));
-    ASSERT(align_size <= ObjectAllocator::GetMaxSize());
+    size_t alignSize = AlignUp(size, GetAlignmentInBytes(align));
+    ASSERT(alignSize <= ObjectAllocator::GetMaxSize());
 
-    void *mem = object_allocator_.Alloc(align_size);
+    void *mem = objectAllocator_.Alloc(alignSize);
     if (UNLIKELY(mem == nullptr)) {
         mem = NewRegionAndRetryAlloc(size, align);
         if (UNLIKELY(mem == nullptr)) {
             return nullptr;
         }
     }
-    auto live_bitmap = this->GetRegion(reinterpret_cast<ObjectHeader *>(mem))->GetLiveBitmap();
-    ASSERT(live_bitmap != nullptr);
-    live_bitmap->AtomicTestAndSet(mem);
+    auto liveBitmap = this->GetRegion(reinterpret_cast<ObjectHeader *>(mem))->GetLiveBitmap();
+    ASSERT(liveBitmap != nullptr);
+    liveBitmap->AtomicTestAndSet(mem);
     return mem;
 }
 
@@ -563,62 +560,61 @@ void RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::Free
 {
     this->GetRegion(reinterpret_cast<ObjectHeader *>(mem))->GetLiveBitmap()->AtomicTestAndClear(mem);
 
-    object_allocator_.Free(mem);
+    objectAllocator_.Free(mem);
 }
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
-void RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::Collect(
-    const GCObjectVisitor &death_checker)
+void RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::Collect(const GCObjectVisitor &deathChecker)
 {
-    os::memory::LockHolder lock(this->region_lock_);
-    object_allocator_.Collect(death_checker);
+    os::memory::LockHolder lock(this->regionLock_);
+    objectAllocator_.Collect(deathChecker);
 }
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
 void RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::VisitAndRemoveFreeRegions(
-    const RegionsVisitor &region_visitor)
+    const RegionsVisitor &regionVisitor)
 {
-    os::memory::LockHolder lock(this->region_lock_);
+    os::memory::LockHolder lock(this->regionLock_);
     // Add free region into vector to not do extra work with region_visitor
     // inside object_allocator_.
-    PandaVector<Region *> free_regions;
+    PandaVector<Region *> freeRegions;
 
-    object_allocator_.VisitAndRemoveFreePools([&free_regions](void *mem, [[maybe_unused]] size_t size) {
+    objectAllocator_.VisitAndRemoveFreePools([&freeRegions](void *mem, [[maybe_unused]] size_t size) {
         auto *region = AddrToRegion(mem);
         ASSERT(ToUintPtr(mem) + size == region->End());
         // We don't remove this region here, because don't want to do some extra work with visitor here.
-        free_regions.push_back(region);
+        freeRegions.push_back(region);
     });
 
-    if (!free_regions.empty()) {
-        region_visitor(free_regions);
+    if (!freeRegions.empty()) {
+        regionVisitor(freeRegions);
 
-        for (auto i : free_regions) {
+        for (auto i : freeRegions) {
             this->GetSpace()->FreeRegion(i);
         }
     }
 }
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
-void *RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::NewRegionAndRetryAlloc(size_t object_size,
+void *RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::NewRegionAndRetryAlloc(size_t objectSize,
                                                                                                     Alignment align)
 {
-    os::memory::LockHolder lock(this->region_lock_);
-    size_t pool_head_size = AlignUp(Region::HeadSize(), ObjectAllocator::PoolAlign());
-    ASSERT(AlignUp(pool_head_size + object_size, REGION_SIZE) == REGION_SIZE);
+    os::memory::LockHolder lock(this->regionLock_);
+    size_t poolHeadSize = AlignUp(Region::HeadSize(), ObjectAllocator::PoolAlign());
+    ASSERT(AlignUp(poolHeadSize + objectSize, REGION_SIZE) == REGION_SIZE);
     while (true) {
         Region *region = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, RegionFlag::IS_NONMOVABLE);
         if (UNLIKELY(region == nullptr)) {
             return nullptr;
         }
         ASSERT(region->GetLiveBitmap() != nullptr);
-        uintptr_t aligned_pool = ToUintPtr(region) + pool_head_size;
-        bool added_memory_pool = object_allocator_.AddMemoryPool(ToVoidPtr(aligned_pool), REGION_SIZE - pool_head_size);
-        ASSERT(added_memory_pool);
-        if (UNLIKELY(!added_memory_pool)) {
+        uintptr_t alignedPool = ToUintPtr(region) + poolHeadSize;
+        bool addedMemoryPool = objectAllocator_.AddMemoryPool(ToVoidPtr(alignedPool), REGION_SIZE - poolHeadSize);
+        ASSERT(addedMemoryPool);
+        if (UNLIKELY(!addedMemoryPool)) {
             LOG(FATAL, ALLOC) << "ObjectAllocator: couldn't add memory pool to allocator";
         }
-        void *mem = object_allocator_.Alloc(object_size, align);
+        void *mem = objectAllocator_.Alloc(objectSize, align);
         if (LIKELY(mem != nullptr)) {
             return mem;
         }
@@ -627,10 +623,10 @@ void *RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::New
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-RegionHumongousAllocator<AllocConfigT, LockConfigT>::RegionHumongousAllocator(MemStatsType *mem_stats,
+RegionHumongousAllocator<AllocConfigT, LockConfigT>::RegionHumongousAllocator(MemStatsType *memStats,
                                                                               GenerationalSpaces *spaces,
-                                                                              SpaceType space_type)
-    : RegionAllocatorBase<LockConfigT>(mem_stats, spaces, space_type, AllocatorType::REGION_ALLOCATOR, 0, true,
+                                                                              SpaceType spaceType)
+    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, AllocatorType::REGION_ALLOCATOR, 0, true,
                                        REGION_SIZE, 0)
 {
 }
@@ -640,21 +636,21 @@ template <bool UPDATE_MEMSTATS>
 void *RegionHumongousAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align)
 {
     ASSERT(GetAlignmentInBytes(align) % GetAlignmentInBytes(DEFAULT_ALIGNMENT) == 0);
-    size_t align_size = AlignUp(size, GetAlignmentInBytes(align));
+    size_t alignSize = AlignUp(size, GetAlignmentInBytes(align));
     Region *region = nullptr;
     void *mem = nullptr;
     // allocate a seprate large region for object
     {
-        os::memory::LockHolder lock(this->region_lock_);
+        os::memory::LockHolder lock(this->regionLock_);
         region = this->template CreateAndSetUpNewRegion<AllocConfigT, OSPagesAllocPolicy::ZEROED_MEMORY>(
-            Region::RegionSize(align_size, REGION_SIZE), IS_OLD, IS_LARGE_OBJECT);
+            Region::RegionSize(alignSize, REGION_SIZE), IS_OLD, IS_LARGE_OBJECT);
         if (LIKELY(region != nullptr)) {
-            mem = region->Alloc<false>(align_size);
+            mem = region->Alloc<false>(alignSize);
             ASSERT(mem != nullptr);
             ASSERT(region->GetLiveBitmap() != nullptr);
             // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
             if constexpr (UPDATE_MEMSTATS) {
-                AllocConfigT::OnAlloc(region->Size(), this->space_type_, this->mem_stats_);
+                AllocConfigT::OnAlloc(region->Size(), this->spaceType_, this->memStats_);
                 // We don't set up memory here because the requested memory should
                 // be zeroed
             }
@@ -667,38 +663,38 @@ void *RegionHumongousAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Al
 
 template <typename AllocConfigT, typename LockConfigT>
 void RegionHumongousAllocator<AllocConfigT, LockConfigT>::CollectAndRemoveFreeRegions(
-    const RegionsVisitor &region_visitor, const GCObjectVisitor &death_checker)
+    const RegionsVisitor &regionVisitor, const GCObjectVisitor &deathChecker)
 {
     // Add free region into vector to not do extra work with region_visitor during region iteration
-    PandaVector<Region *> free_regions;
+    PandaVector<Region *> freeRegions;
 
     {
-        os::memory::LockHolder lock(this->region_lock_);
-        this->GetSpace()->IterateRegions([&](Region *region) {
-            this->Collect(region, death_checker);
+        os::memory::LockHolder lock(this->regionLock_);
+        this->GetSpace()->IterateRegions([this, &deathChecker, &freeRegions](Region *region) {
+            this->Collect(region, deathChecker);
             if (region->HasFlag(IS_FREE)) {
-                free_regions.push_back(region);
+                freeRegions.push_back(region);
             }
         });
     }
 
-    if (!free_regions.empty()) {
-        region_visitor(free_regions);
+    if (!freeRegions.empty()) {
+        regionVisitor(freeRegions);
 
-        for (auto i : free_regions) {
-            os::memory::LockHolder lock(this->region_lock_);
+        for (auto i : freeRegions) {
+            os::memory::LockHolder lock(this->regionLock_);
             ResetRegion(i);
         }
     }
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-void RegionHumongousAllocator<AllocConfigT, LockConfigT>::Collect(Region *region, const GCObjectVisitor &death_checker)
+void RegionHumongousAllocator<AllocConfigT, LockConfigT>::Collect(Region *region, const GCObjectVisitor &deathChecker)
 {
     ASSERT(region->HasFlag(RegionFlag::IS_LARGE_OBJECT));
-    ObjectHeader *object_to_proceed = nullptr;
-    object_to_proceed = region->GetLargeObject();
-    if (death_checker(object_to_proceed) == ObjectStatus::DEAD_OBJECT) {
+    ObjectHeader *objectToProceed = nullptr;
+    objectToProceed = region->GetLargeObject();
+    if (deathChecker(objectToProceed) == ObjectStatus::DEAD_OBJECT) {
         region->AddFlag(RegionFlag::IS_FREE);
     }
 }

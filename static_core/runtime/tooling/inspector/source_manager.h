@@ -37,16 +37,16 @@ public:
     NO_COPY_SEMANTIC(SourceManager);
     NO_MOVE_SEMANTIC(SourceManager);
 
-    std::pair<ScriptId, bool> GetScriptId(PtThread thread, std::string_view file_name);
+    std::pair<ScriptId, bool> GetScriptId(PtThread thread, std::string_view fileName);
     [[nodiscard]] std::string_view GetSourceFileName(ScriptId id) const;
 
     void RemoveThread(PtThread thread);
 
 private:
     mutable os::memory::Mutex mutex_;
-    std::unordered_map<std::string, ScriptId> file_name_to_id_ GUARDED_BY(mutex_);
-    std::unordered_map<ScriptId, std::string_view> id_to_file_name_ GUARDED_BY(mutex_);
-    std::map<PtThread, std::unordered_set<ScriptId>> known_sources_ GUARDED_BY(mutex_);
+    std::unordered_map<std::string, ScriptId> fileNameToId_ GUARDED_BY(mutex_);
+    std::unordered_map<ScriptId, std::string_view> idToFileName_ GUARDED_BY(mutex_);
+    std::map<PtThread, std::unordered_set<ScriptId>> knownSources_ GUARDED_BY(mutex_);
 };
 }  // namespace panda::tooling::inspector
 

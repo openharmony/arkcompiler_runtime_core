@@ -35,12 +35,12 @@ namespace panda::mem {
 template <class LanguageConfig>
 class GCLang : public GC {
 public:
-    explicit GCLang(ObjectAllocatorBase *object_allocator, const GCSettings &settings);
+    explicit GCLang(ObjectAllocatorBase *objectAllocator, const GCSettings &settings);
     NO_COPY_SEMANTIC(GCLang);
     NO_MOVE_SEMANTIC(GCLang);
     void SetPandaVM(PandaVM *vm) override
     {
-        root_manager_.SetPandaVM(vm);
+        rootManager_.SetPandaVM(vm);
         GC::SetPandaVM(vm);
     }
 
@@ -51,24 +51,24 @@ protected:
     void UpdateRefsToMovedObjectsInPygoteSpace() override;
     void CommonUpdateRefsToMovedObjects() override;
 
-    void VisitRoots(const GCRootVisitor &gc_root_visitor, VisitGCRootFlags flags) override
+    void VisitRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) override
     {
-        trace::ScopedTrace scoped_trace(__FUNCTION__);
-        root_manager_.VisitNonHeapRoots(gc_root_visitor, flags);
+        trace::ScopedTrace scopedTrace(__FUNCTION__);
+        rootManager_.VisitNonHeapRoots(gcRootVisitor, flags);
     }
 
-    void VisitClassRoots(const GCRootVisitor &gc_root_visitor) override
+    void VisitClassRoots(const GCRootVisitor &gcRootVisitor) override
     {
-        trace::ScopedTrace scoped_trace(__FUNCTION__);
-        root_manager_.VisitClassRoots(gc_root_visitor);
+        trace::ScopedTrace scopedTrace(__FUNCTION__);
+        rootManager_.VisitClassRoots(gcRootVisitor);
     }
 
-    void VisitCardTableRoots(CardTable *card_table, const GCRootVisitor &gc_root_visitor,
-                             const MemRangeChecker &range_checker, const ObjectChecker &range_object_checker,
-                             const ObjectChecker &from_object_checker, uint32_t processed_flag) override
+    void VisitCardTableRoots(CardTable *cardTable, const GCRootVisitor &gcRootVisitor,
+                             const MemRangeChecker &rangeChecker, const ObjectChecker &rangeObjectChecker,
+                             const ObjectChecker &fromObjectChecker, uint32_t processedFlag) override
     {
-        root_manager_.VisitCardTableRoots(card_table, GetObjectAllocator(), gc_root_visitor, range_checker,
-                                          range_object_checker, from_object_checker, processed_flag);
+        rootManager_.VisitCardTableRoots(cardTable, GetObjectAllocator(), gcRootVisitor, rangeChecker,
+                                         rangeObjectChecker, fromObjectChecker, processedFlag);
     }
 
     void PreRunPhasesImpl() override;
@@ -78,27 +78,27 @@ protected:
 private:
     void UpdateVmRefs() override
     {
-        root_manager_.UpdateVmRefs();
+        rootManager_.UpdateVmRefs();
     }
 
     void UpdateGlobalObjectStorage() override
     {
-        root_manager_.UpdateGlobalObjectStorage();
+        rootManager_.UpdateGlobalObjectStorage();
     }
 
     void UpdateClassLinkerContextRoots() override
     {
-        root_manager_.UpdateClassLinkerContextRoots();
+        rootManager_.UpdateClassLinkerContextRoots();
     }
 
     void UpdateThreadLocals() override
     {
-        root_manager_.UpdateThreadLocals();
+        rootManager_.UpdateThreadLocals();
     }
 
     void ClearLocalInternalAllocatorPools() override;
 
-    RootManager<LanguageConfig> root_manager_ {};
+    RootManager<LanguageConfig> rootManager_ {};
     friend class RootManager<LanguageConfig>;
 };
 

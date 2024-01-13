@@ -53,9 +53,9 @@ public:
         return EtsObject::FromCoreType(this);
     }
 
-    static EtsSharedMemory *FromEtsObject(EtsObject *shared_mem)
+    static EtsSharedMemory *FromEtsObject(EtsObject *sharedMem)
     {
-        return reinterpret_cast<EtsSharedMemory *>(shared_mem);
+        return reinterpret_cast<EtsSharedMemory *>(sharedMem);
     }
 
     static EtsSharedMemory *Create(size_t length);
@@ -85,9 +85,9 @@ public:
 
     enum class WaitResult { OK = 0, NOT_EQUAL = 1, TIMED_OUT = 2 };
 
-    WaitResult WaitI32(uint32_t offset, int32_t expected_value, std::optional<uint64_t> timeout);
+    WaitResult WaitI32(uint32_t offset, int32_t expectedValue, std::optional<uint64_t> timeout);
 
-    WaitResult WaitI64(uint32_t offset, int64_t expected_value, std::optional<uint64_t> timeout);
+    WaitResult WaitI64(uint32_t offset, int64_t expectedValue, std::optional<uint64_t> timeout);
 
     int32_t NotifyI32(uint32_t offset, std::optional<uint32_t> count);
 

@@ -41,29 +41,29 @@ public:
      * Notable parameters:
      * @param type defines the schedule loop type for this worker: a separate thread or a coroutine ("FIBER")
      */
-    StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coro_manager,
-                            ScheduleLoopType type, PandaString name);
+    StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager, ScheduleLoopType type,
+                            PandaString name);
     ~StackfulCoroutineWorker() = default;
 
     /// @return false if the worker is stopped and does not schedule anything, otherwise true
     bool IsActive() const
     {
-        os::memory::LockHolder lock(runnables_lock_);
+        os::memory::LockHolder lock(runnablesLock_);
         return active_;
     }
 
     /// enable or disable the worker
     void SetActive(bool val)
     {
-        os::memory::LockHolder lock(runnables_lock_);
+        os::memory::LockHolder lock(runnablesLock_);
         active_ = val;
-        runnables_cv_.Signal();
+        runnablesCv_.Signal();
     }
 
     /// @return the moving average number of runnable coroutines in the queue
     double GetLoadFactor() const
     {
-        return load_factor_;
+        return loadFactor_;
     }
 
     PandaString GetName() const
@@ -81,7 +81,7 @@ public:
      * @param new_coro coroutine to add
      * @param prioritize if true, add to the beginning of the queue (otherwise to the end)
      */
-    void AddRunnableCoroutine(Coroutine *new_coro, bool prioritize = false);
+    void AddRunnableCoroutine(Coroutine *newCoro, bool prioritize = false);
 
     /**
      * @brief Block current coroutine till an event happens and switch context to the next ready one
@@ -132,10 +132,10 @@ private:
     static void ScheduleLoopProxy(void *worker);
 
     /* runnables queue management */
-    void PushToRunnableQueue(Coroutine *co, bool push_front = false);
+    void PushToRunnableQueue(Coroutine *co, bool pushFront = false);
     Coroutine *PopFromRunnableQueue();
     bool RunnableCoroutinesExist() const;
-    void WaitForRunnables() REQUIRES(runnables_lock_);
+    void WaitForRunnables() REQUIRES(runnablesLock_);
 
     /* scheduling machinery from high level functions to elementary helpers */
     /**
@@ -144,15 +144,15 @@ private:
      * scheduled for execution too. Upon that, the control flow will get back to this function and it will return.
      */
     void RequestScheduleImpl();
-    void BlockCurrentCoroAndScheduleNext() RELEASE(runnables_lock_) RELEASE(waiters_lock_);
-    void SuspendCurrentCoroAndScheduleNext() RELEASE(runnables_lock_);
+    void BlockCurrentCoroAndScheduleNext() RELEASE(runnablesLock_) RELEASE(waitersLock_);
+    void SuspendCurrentCoroAndScheduleNext() RELEASE(runnablesLock_);
     template <bool SUSPEND_AS_BLOCKED>
     void SuspendCurrentCoroGeneric();
     void BlockCurrentCoro();
     void SuspendCurrentCoro();
     /* "the lesser evil": keep thread safety annotations but duplicate the function body */
-    void ScheduleNextCoroUnlockRunnablesWaiters() RELEASE(runnables_lock_) RELEASE(waiters_lock_);
-    void ScheduleNextCoroUnlockRunnables() RELEASE(runnables_lock_);
+    void ScheduleNextCoroUnlockRunnablesWaiters() RELEASE(runnablesLock_) RELEASE(waitersLock_);
+    void ScheduleNextCoroUnlockRunnables() RELEASE(runnablesLock_);
     void ScheduleNextCoroUnlockNone();
     StackfulCoroutineContext *GetCurrentContext() const;
     StackfulCoroutineContext *PrepareNextRunnableContextForSwitch();
@@ -162,36 +162,36 @@ private:
     /// parse the finalization queue and destroy all coroutines from it
     void FinalizeTerminatedCoros();
     /// recalculate the load factor
-    void UpdateLoadFactor() REQUIRES(runnables_lock_);
+    void UpdateLoadFactor() REQUIRES(runnablesLock_);
     /**
      * This checker is called on a coroutine switch attempt. Issues fatal error in case when coroutine switch is
      * disabled.
      */
     void EnsureCoroutineSwitchEnabled();
 
-    StackfulCoroutineManager *coro_manager_;
-    Coroutine *schedule_loop_ctx_ = nullptr;
-    bool active_ GUARDED_BY(runnables_lock_) = true;
+    StackfulCoroutineManager *coroManager_;
+    Coroutine *scheduleLoopCtx_ = nullptr;
+    bool active_ GUARDED_BY(runnablesLock_) = true;
     os::thread::ThreadId id_;
 
     // runnable coroutines-related members
-    mutable os::memory::RecursiveMutex runnables_lock_;
-    os::memory::ConditionVariable runnables_cv_;
-    PandaDeque<Coroutine *> runnables_ GUARDED_BY(runnables_lock_);
+    mutable os::memory::RecursiveMutex runnablesLock_;
+    os::memory::ConditionVariable runnablesCv_;
+    PandaDeque<Coroutine *> runnables_ GUARDED_BY(runnablesLock_);
     // blocked coros-related members: Coroutine AWAITS CoroutineEvent
-    mutable os::memory::Mutex waiters_lock_;
-    PandaMap<CoroutineEvent *, Coroutine *> waiters_ GUARDED_BY(waiters_lock_);
+    mutable os::memory::Mutex waitersLock_;
+    PandaMap<CoroutineEvent *, Coroutine *> waiters_ GUARDED_BY(waitersLock_);
     // terminated coros (waiting for deletion)
-    PandaQueue<Coroutine *> finalization_queue_;
+    PandaQueue<Coroutine *> finalizationQueue_;
 
     /// the moving average number of coroutines in the runnable queue
-    std::atomic<double> load_factor_ = 0;
+    std::atomic<double> loadFactor_ = 0;
 
     /**
      * This counter is incremented on DisableCoroutineSwitch calls and decremented on EnableCoroutineSwitch calls.
      * The value 0 means that coroutine switch is ENABLED.
      */
-    uint32_t disable_coro_switch_counter_ = 0;
+    uint32_t disableCoroSwitchCounter_ = 0;
 
     PandaString name_;
 };

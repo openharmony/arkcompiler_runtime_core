@@ -51,7 +51,7 @@ public:
     };
 
     Location() : Location(Kind::INVALID) {}
-    explicit Location(Kind type, uintptr_t value = 0) : bit_fields_(KindField::Encode(type) | ValueField::Encode(value))
+    explicit Location(Kind type, uintptr_t value = 0) : bitFields_(KindField::Encode(type) | ValueField::Encode(value))
     {
         CHECK_LT(value, ValueField::Mask());
     }
@@ -69,7 +69,7 @@ public:
 
     bool operator==(Location rhs) const
     {
-        return bit_fields_ == rhs.bit_fields_;
+        return bitFields_ == rhs.bitFields_;
     }
 
     bool operator!=(Location rhs) const
@@ -79,7 +79,7 @@ public:
 
     bool operator<(Location rhs) const
     {
-        return bit_fields_ < rhs.bit_fields_;
+        return bitFields_ < rhs.bitFields_;
     }
 
     bool IsInvalid() const
@@ -135,7 +135,7 @@ public:
 
     Kind GetKind() const
     {
-        return KindField::Get(bit_fields_);
+        return KindField::Get(bitFields_);
     }
 
     Register GetRegister() const
@@ -163,7 +163,7 @@ public:
 
     unsigned GetValue() const
     {
-        return ValueField::Get(bit_fields_);
+        return ValueField::Get(bitFields_);
     }
 
     static Location MakeRegister(size_t id)
@@ -215,11 +215,11 @@ public:
     std::string ToString(Arch arch);
 
 private:
-    uint16_t bit_fields_;
+    uint16_t bitFields_;
 
     using KindField = BitField<Kind, 0, MinimumBitsToStore(Kind::LAST)>;
     using ValueField =
-        KindField::NextField<uintptr_t, sizeof(bit_fields_) * BITS_PER_BYTE - MinimumBitsToStore(Kind::LAST)>;
+        KindField::NextField<uintptr_t, sizeof(bitFields_) * BITS_PER_BYTE - MinimumBitsToStore(Kind::LAST)>;
 };
 
 static_assert(sizeof(Location) <= sizeof(uint16_t));
@@ -236,12 +236,12 @@ public:
 
     Location GetDstLocation() const
     {
-        return dst_location_;
+        return dstLocation_;
     }
 
     Location GetTmpLocation() const
     {
-        return tmp_location_;
+        return tmpLocation_;
     }
 
     void SetLocation(size_t index, Location location)
@@ -251,18 +251,18 @@ public:
 
     void SetDstLocation(Location location)
     {
-        dst_location_ = location;
+        dstLocation_ = location;
     }
 
     void SetTmpLocation(Location location)
     {
-        tmp_location_ = location;
+        tmpLocation_ = location;
     }
 
 private:
     Span<Location> locations_;
-    Location dst_location_;
-    Location tmp_location_;
+    Location dstLocation_;
+    Location tmpLocation_;
 };
 }  // namespace panda::compiler
 

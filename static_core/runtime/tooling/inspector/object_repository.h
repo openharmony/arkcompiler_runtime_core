@@ -41,7 +41,7 @@ public:
     RemoteObject CreateFrameObject(const PtFrame &frame, const std::map<std::string, TypedValue> &locals);
     RemoteObject CreateObject(TypedValue value);
 
-    std::vector<PropertyDescriptor> GetProperties(RemoteObjectId id, bool generate_preview);
+    std::vector<PropertyDescriptor> GetProperties(RemoteObjectId id, bool generatePreview);
 
 private:
     static constexpr RemoteObjectId GLOBAL_OBJECT_ID = 0;

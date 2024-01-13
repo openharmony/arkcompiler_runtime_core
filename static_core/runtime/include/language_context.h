@@ -45,11 +45,11 @@ class GCSettings;
 }  // namespace mem
 
 struct VerificationInitAPI {
-    std::vector<panda_file::Type::TypeId> primitive_roots_for_verification;
-    std::vector<const uint8_t *> array_elements_for_verification;
-    bool is_need_object_synthetic_class = false;
-    bool is_need_string_synthetic_class = false;
-    bool is_need_class_synthetic_class = false;
+    std::vector<panda_file::Type::TypeId> primitiveRootsForVerification;
+    std::vector<const uint8_t *> arrayElementsForVerification;
+    bool isNeedObjectSyntheticClass = false;
+    bool isNeedStringSyntheticClass = false;
+    bool isNeedClassSyntheticClass = false;
 };
 
 class LanguageContextBase {
@@ -142,7 +142,7 @@ public:
 
     virtual PandaVM *CreateVM(Runtime *runtime, const RuntimeOptions &options) const = 0;
 
-    virtual mem::GC *CreateGC(mem::GCType gc_type, mem::ObjectAllocatorBase *object_allocator,
+    virtual mem::GC *CreateGC(mem::GCType gcType, mem::ObjectAllocatorBase *objectAllocator,
                               const mem::GCSettings &settings) const = 0;
 
     virtual std::unique_ptr<ClassLinkerExtension> CreateClassLinkerExtension() const;
@@ -151,7 +151,7 @@ public:
 
     virtual PandaUniquePtr<tooling::PtLangExt> CreatePtLangExt() const;
 
-    virtual void ThrowException(ManagedThread *thread, const uint8_t *mutf8_name, const uint8_t *mutf8_msg) const;
+    virtual void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const;
 
     virtual void SetExceptionToVReg(
         [[maybe_unused]] interpreter::AccVRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
@@ -217,19 +217,19 @@ public:
         return nullptr;
     }
 
-    virtual bool InitializeClass([[maybe_unused]] ClassLinker *class_linker, [[maybe_unused]] ManagedThread *thread,
+    virtual bool InitializeClass([[maybe_unused]] ClassLinker *classLinker, [[maybe_unused]] ManagedThread *thread,
                                  [[maybe_unused]] Class *klass) const
     {
         return true;
     }
 
-    virtual size_t GetStringSize(const ObjectHeader *string_object) const
+    virtual size_t GetStringSize(const ObjectHeader *stringObject) const
     {
-        return string_object->ObjectSize();
+        return stringObject->ObjectSize();
     }
 
-    virtual Trace *CreateTrace([[maybe_unused]] PandaUniquePtr<panda::os::file::File> trace_file,
-                               [[maybe_unused]] size_t buffer_size) const
+    virtual Trace *CreateTrace([[maybe_unused]] PandaUniquePtr<panda::os::file::File> traceFile,
+                               [[maybe_unused]] size_t bufferSize) const
     {
         UNREACHABLE();
     }
@@ -259,8 +259,8 @@ public:
         return nullptr;
     }
 
-    virtual void RestoreEnv([[maybe_unused]] Frame *current_iframe,
-                            [[maybe_unused]] const StackWalker::EnvData &env_data) const
+    virtual void RestoreEnv([[maybe_unused]] Frame *currentIframe,
+                            [[maybe_unused]] const StackWalker::EnvData &envData) const
     {
     }
 
@@ -269,15 +269,14 @@ public:
         return true;
     }
 
-    virtual void InitializeOsrCframeSlots([[maybe_unused]] Span<uintptr_t> param_slots) const {}
+    virtual void InitializeOsrCframeSlots([[maybe_unused]] Span<uintptr_t> paramSlots) const {}
 
-    virtual uint64_t GetOsrEnv([[maybe_unused]] const Frame *iframe,
-                               [[maybe_unused]] compiler::VRegInfo vreg_info) const
+    virtual uint64_t GetOsrEnv([[maybe_unused]] const Frame *iframe, [[maybe_unused]] compiler::VRegInfo vregInfo) const
     {
         return 0;
     }
 
-    virtual void WrapClassInitializerException(ClassLinker *class_linker, ManagedThread *thread) const;
+    virtual void WrapClassInitializerException(ClassLinker *classLinker, ManagedThread *thread) const;
 };
 
 class LanguageContext {
@@ -319,10 +318,10 @@ public:
         return base_->CreateVM(runtime, options);
     }
 
-    mem::GC *CreateGC(mem::GCType gc_type, mem::ObjectAllocatorBase *object_allocator,
+    mem::GC *CreateGC(mem::GCType gcType, mem::ObjectAllocatorBase *objectAllocator,
                       const mem::GCSettings &settings) const
     {
-        return base_->CreateGC(gc_type, object_allocator, settings);
+        return base_->CreateGC(gcType, objectAllocator, settings);
     }
 
     std::unique_ptr<ClassLinkerExtension> CreateClassLinkerExtension()
@@ -340,9 +339,9 @@ public:
         return base_->CreatePtLangExt();
     }
 
-    void ThrowException(ManagedThread *thread, const uint8_t *mutf8_name, const uint8_t *mutf8_msg) const
+    void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const
     {
-        base_->ThrowException(thread, mutf8_name, mutf8_msg);
+        base_->ThrowException(thread, mutf8Name, mutf8Msg);
     }
 
     void SetExceptionToVReg(
@@ -587,19 +586,19 @@ public:
         return base_->CreateVTableBuilder();
     }
 
-    bool InitializeClass(ClassLinker *class_linker, ManagedThread *thread, Class *klass) const
+    bool InitializeClass(ClassLinker *classLinker, ManagedThread *thread, Class *klass) const
     {
-        return base_->InitializeClass(class_linker, thread, klass);
+        return base_->InitializeClass(classLinker, thread, klass);
     }
 
-    Trace *CreateTrace(PandaUniquePtr<panda::os::file::File> trace_file, size_t buffer_size) const
+    Trace *CreateTrace(PandaUniquePtr<panda::os::file::File> traceFile, size_t bufferSize) const
     {
-        return base_->CreateTrace(std::move(trace_file), buffer_size);
+        return base_->CreateTrace(std::move(traceFile), bufferSize);
     }
 
-    size_t GetStringSize(const ObjectHeader *string_object) const
+    size_t GetStringSize(const ObjectHeader *stringObject) const
     {
-        return base_->GetStringSize(string_object);
+        return base_->GetStringSize(stringObject);
     }
 
     VerificationInitAPI GetVerificationInitAPI() const
@@ -627,9 +626,9 @@ public:
         return base_->GetBootPandaFilesOpenMode();
     }
 
-    virtual void RestoreEnv(Frame *current_iframe, const StackWalker::EnvData &env_data) const
+    virtual void RestoreEnv(Frame *currentIframe, const StackWalker::EnvData &envData) const
     {
-        return base_->RestoreEnv(current_iframe, env_data);
+        return base_->RestoreEnv(currentIframe, envData);
     }
 
     virtual bool IsEnabledCHA() const
@@ -637,19 +636,19 @@ public:
         return base_->IsEnabledCHA();
     }
 
-    void InitializeOsrCframeSlots(Span<uintptr_t> param_slots) const
+    void InitializeOsrCframeSlots(Span<uintptr_t> paramSlots) const
     {
-        base_->InitializeOsrCframeSlots(param_slots);
+        base_->InitializeOsrCframeSlots(paramSlots);
     }
 
-    uint64_t GetOsrEnv(const Frame *iframe, compiler::VRegInfo vreg_info) const
+    uint64_t GetOsrEnv(const Frame *iframe, compiler::VRegInfo vregInfo) const
     {
-        return base_->GetOsrEnv(iframe, vreg_info);
+        return base_->GetOsrEnv(iframe, vregInfo);
     }
 
-    void WrapClassInitializerException(ClassLinker *class_linker, ManagedThread *thread) const
+    void WrapClassInitializerException(ClassLinker *classLinker, ManagedThread *thread) const
     {
-        base_->WrapClassInitializerException(class_linker, thread);
+        base_->WrapClassInitializerException(classLinker, thread);
     }
 
 private:
