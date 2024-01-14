@@ -68,7 +68,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    std::vector<uint8_t> new_method_id = {0xff, 0xff};
+    std::vector<uint8_t> new_method_id = {0x0c, 0x00}; // The known string id in the abc file
     std::vector<uint8_t> method_id = {0x0e, 0x00}; // The known method id in the abc file
 
     for (size_t i = buffer.size() - 1; i >= 0; --i) {
@@ -109,7 +109,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    std::vector<uint8_t> new_literal_id = {0xac, 0xfc};
+    std::vector<uint8_t> new_literal_id = {0x0e, 0x00}; // The known method id in the abc file
     std::vector<uint8_t> literal_id = {0x0f, 0x00}; // The known literal id in the abc file
 
     for (size_t i = 0; i < buffer.size(); ++i) {
@@ -152,7 +152,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    std::vector<uint8_t> new_string_id = {0xff, 0x00};
+    std::vector<uint8_t> new_string_id = {0x0f, 0x00}; // The known literal id in the abc file
     std::vector<uint8_t> string_id = {0x0c, 0x00}; // The known string id in the abc file
 
     for (size_t i = 0; i < buffer.size(); ++i) {

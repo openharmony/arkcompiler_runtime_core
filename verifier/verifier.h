@@ -34,8 +34,6 @@ namespace panda::verifier {
 using Opcode = BytecodeInstruction::Opcode;
 
 enum class ActionType {
-    CHECKCONSTPOOL,
-    CHECKCONSTPOOLIDX,
     CHECKCONSTPOOLCONTENT,
     COLLECTINFOS,
 };
@@ -58,25 +56,25 @@ public:
     std::unordered_map<uint32_t, uint32_t> inner_method_map_;
 
 private:
-    void GetMethodIds();
     void GetLiteralIds();
+    void GetConstantPoolIds();
+    bool CollectIdInInstructions(const panda_file::File::EntityId &method_id);
     void CollectModuleLiteralId(const panda_file::File::EntityId &field_id);
     bool CheckConstantPool(const verifier::ActionType type);
     size_t GetVRegCount(const BytecodeInstruction &bc_ins);
     bool CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id);
-    bool VerifyMethodId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
+    bool VerifyMethodId(const uint32_t &method_id) const;
+    bool VerifyLiteralId(const uint32_t &literal_id) const;
+    bool VerifyStringId(const uint32_t &literal_id) const;
     bool CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx);
     std::optional<int64_t> GetFirstImmFromInstruction(const BytecodeInstruction &bc_ins);
     std::optional<uint64_t> GetSlotNumberFromAnnotation(panda_file::MethodDataAccessor &method_accessor);
-    bool VerifyLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id,
-                         size_t idx);
     bool VerifyMethodIdInLiteralArray(const uint32_t &id);
     bool VerifyStringIdInLiteralArray(const uint32_t &id);
     bool VerifyLiteralIdInLiteralArray(const uint32_t &id);
     bool IsModuleLiteralId(const panda_file::File::EntityId &id) const;
     bool VerifySingleLiteralArray(const panda_file::File::EntityId &literal_id);
     bool VerifyLiteralArrays();
-    bool VerifyStringId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id);
     bool IsJumpInstruction(const Opcode &ins_opcode);
     bool VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const BytecodeInstruction &bc_ins_last,
                                const BytecodeInstruction &bc_ins_first);
@@ -85,10 +83,14 @@ private:
     bool VerifySlotNumber(panda_file::MethodDataAccessor &method_accessor, const uint32_t &slot_number,
                           const panda_file::File::EntityId &method_id);
     bool CheckConstantPoolMethodContent(const panda_file::File::EntityId &method_id);
-    bool CheckConstantPoolIndex(const panda_file::File::EntityId &method_id);
+    bool CheckConstantPoolIndex() const;
 
     std::unique_ptr<const panda_file::File> file_;
-    std::vector<panda_file::File::EntityId> method_ids_;
+    std::vector<uint32_t> method_string_literal_ids_;
+    std::vector<uint32_t> all_method_ids_;
+    std::unordered_set<uint32_t> ins_method_ids_;
+    std::unordered_set<uint32_t> ins_literal_ids_;
+    std::unordered_set<uint32_t> ins_string_ids_;
     std::unordered_set<uint32_t> module_literals_;
     static constexpr size_t DEFAULT_ARGUMENT_NUMBER = 3;
     static constexpr uint32_t FILE_CONTENT_OFFSET = 12U;
