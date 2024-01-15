@@ -101,6 +101,21 @@ function comparePrimitiveArray(actual :  {{.item.param_types[item.result_storage
  }
 {%- endif %}
 
+{%- if item.result_nature == "RegExpMatchArray" %}
+function compareRegExpMatchArray(actual : {{.item.method_return_type}}, expected : {{.item.expected_test_data_item_type}}) : boolean {
+  if (actual == null && expected == null) {
+    return true;
+  }
+  if (actual == null || expected == null) {
+    return false;
+  }
+  for (let i = 0; i < actual.length; i++) {
+     if (actual.result[i] != expected[i]) return false;
+   }
+  return true;
+}
+{%- endif %}
+
 {% if item.verify_region is defined %}
 function compareRegion(start_region : {{.item.method_return_type}}, end_region : {{.item.method_return_type}}, actual : {{.item.method_return_type}}) : boolean {
   if ( actual {{.item.start_region_check_operation}} start_region && actual {{.item.end_region_check_operation}} end_region ) return true;

@@ -57,7 +57,11 @@ function main(): int {
     {%- if item.param_nature[number] == "object" %}
       let {{.number}} : {{.item.param_types[number]}} = new {{.item.param_types[number]}}(TEST_DATA_{{.number|upper}}[i]);
     {%- else %}
-      let {{.number}} : {{.item.param_types[number]}} = (TEST_DATA_{{.number|upper}}[i]);
+      {%- if item.param_nature[number] == "regexp" %}
+        let {{.number}} : {{.item.param_types[number]}} = new {{.item.param_types[number]}}(TEST_DATA_{{.number|upper}}[i], "g");
+      {%- else %}
+        let {{.number}} : {{.item.param_types[number]}} = (TEST_DATA_{{.number|upper}}[i]);
+      {%- endif %}
     {%- endif %}
   {%- endfor %}
 

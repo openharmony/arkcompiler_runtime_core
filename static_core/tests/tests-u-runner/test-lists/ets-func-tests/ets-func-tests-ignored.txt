@@ -586,22 +586,19 @@ spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
 spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
 ### Issue 15312
-std/core/std_core_string_String_fromCharCode_005.ets
-std/core/std_core_string_String_search_String_002.ets
 std/core/std_core_string_String_localeCompare_string.ets
 std/core/std_core_string_String_localeCompare_string_001.ets
+std/core/std_core_string_String_localeCompare_string_002.ets
 ### Issue 15119
-std/core/std_core_string_String_fromCharCode_004.ets
-### Not implemented
-std/core/std_core_string_String_split_RegExp.ets
+std/core/std_core_string_String_fromCharCode_006.ets
+### Issue 15274
+std/core/std_core_string_String_localeCompare_string.ets
+std/core/std_core_string_String_localeCompare_string_001.ets
+### Issue 15304
 std/core/std_core_string_String_split_RegExp_int.ets
-std/core/std_core_string_String_split_RegExp_number.ets
-std/core/std_core_string_String_search_RegExp.ets
-std/core/std_core_string_String_search_String.ets
-std/core/std_core_string_String_replaceAll_RegExp_String.ets
+### Issue 15306
 std/core/std_core_string_String_replace_RegExp_String.ets
-std/core/std_core_string_String_match_RegExp.ets
-std/core/std_core_string_String_match_String.ets
+std/core/std_core_string_String_replaceAll_RegExp_String.ets
 ### Issue 14343
 spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_03.ets
 spec/import_export/07.export_directives/03.re-export_directives/re_export_all_2.ets
