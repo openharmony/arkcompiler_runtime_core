@@ -46,7 +46,7 @@ struct DebugConfig {
     PandaVector<std::pair<PandaString, Offsets>> managedBreakpoints;
     void AddBreakpointConfig(const PandaString &methodName, Offset offset);
 #else
-    void AddBreakpointConfig([[maybe_unused]] const PandaString &method_name, [[maybe_unused]] Offset offset) {}
+    void AddBreakpointConfig([[maybe_unused]] const PandaString &methodName, [[maybe_unused]] Offset offset) {}
 #endif
 
     std::array<PandaVector<PandaString>, static_cast<size_t>(WhitelistKind::LAST)> whitelistNames;
