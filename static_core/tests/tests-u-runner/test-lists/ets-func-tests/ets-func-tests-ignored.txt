@@ -383,6 +383,21 @@ spec/generic/genericTypeArgumentWithDefaultParameterValue_05.ets
 spec/generic/genericTypeArgumentWithDefaultParameterValue_06.ets
 ### Issue 14941
 spec/generic/issue14700_ArrayBackedConstructorWithobject.ets
+### Issue 15099
+spec/generic/issue15099_0.ets
+spec/generic/issue15099_1.ets
+spec/generic/issue15099_2.ets
+spec/generic/issue15099_3.ets
+spec/generic/issue15099_4.ets
+spec/generic/issue15099_5.ets
+spec/generic/issue15099_6.ets
+spec/generic/issue15099_7.ets
+spec/generic/issue15099_8.ets
+spec/generic/issue15099_9.ets
+spec/generic/issue15099_10.ets
+spec/generic/issue15099_11.ets
+spec/generic/issue15099_12.ets
+
 ### End of Generic
 ### Import-export issues
 ### Issue 14586
