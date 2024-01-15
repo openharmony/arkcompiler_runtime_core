@@ -711,3 +711,13 @@ spec/tuples/tuple_write_6.ets
 ### Issue 15493
 spec/tuples/tuple_write_7.ets
 ### end of tuples
+
+### Interfaces overriding issues
+### Negative tests
+spec/interfaces_overriding/interface_overriding_01.ets
+spec/interfaces_overriding/interface_overriding_02.ets
+spec/interfaces_overriding/interface_overriding_03.ets
+spec/interfaces_overriding/interface_overriding_04.ets
+spec/interfaces_overriding/interface_overriding_05.ets
+spec/interfaces_overriding/interface_overriding_06.ets
+### End of Interfaces overriding
