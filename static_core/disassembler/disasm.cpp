@@ -65,7 +65,7 @@ void PrintHelp(panda::PandArgParser &paParser)
     std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-void Disassemble(const Options &options)
+static void Disassemble(const Options &options)
 {
     auto inputFile = options.inputFile.GetValue();
     LOG(DEBUG, DISASSEMBLER) << "[initializing disassembler]\nfile: " << inputFile << "\n";
@@ -89,7 +89,7 @@ void Disassemble(const Options &options)
     resPa.close();
 }
 
-bool ProcessArgs(panda::PandArgParser &paParser, const Options &options, int argc, const char **argv)
+static bool ProcessArgs(panda::PandArgParser &paParser, const Options &options, int argc, const char **argv)
 {
     if (!paParser.Parse(argc, argv)) {
         PrintHelp(paParser);

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_PLUGINS_H__
-#define PANDA_VERIFICATION_PLUGINS_H__
+#ifndef PANDA_VERIFICATION_PLUGINS_H
+#define PANDA_VERIFICATION_PLUGINS_H
 
 #include "abs_int_inl_compat_checks.h"
 #include "source_lang_enum.h"
@@ -45,4 +45,4 @@ PANDA_PUBLIC_API Plugin const *GetLanguagePlugin(panda_file::SourceLang lang);
 
 }  // namespace panda::verifier::plugin
 
-#endif
+#endif  // PANDA_VERIFICATION_PLUGINS_H

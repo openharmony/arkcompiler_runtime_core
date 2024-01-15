@@ -34,7 +34,7 @@ from typing import List
 
 def load_test_meta(testpath: Path) -> dict:
     testpath = str(testpath)
-    # TODO: move to fsutils
+    # NOTE: move to fsutils
     with open(testpath, "r") as f:
         test = f.read()
 
@@ -92,8 +92,9 @@ def run_test(filepath: Path, runnerpath: Path) -> bool:
     Runs the tests and returns True if it passed.
     Takes into account the test's type (positive or negative)
     """
-    # TODO: Make a separate entity describes process of running the test.  
-    # TODO: Each instance or children (depends on design) have to the method 'run' with (status, message, payload) as result   
+    # NOTE: Make a separate entity describes process of running the test.
+    # NOTE: Each instance or children (depends on design)
+    # NOTE: have to the method 'run' with (status, message, payload) as result
     code = subprocess.run(
         ["java", "-jar", str(runnerpath), "-T", str(filepath)],
         stderr=subprocess.DEVNULL,

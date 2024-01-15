@@ -83,7 +83,7 @@ std::string panda::pandasm::Ins::OperandsToString(bool printArgs, size_t firstAr
     return ss.str();
 }
 
-std::string panda::pandasm::Ins::RegToString(const size_t idx, bool isFirst, bool printArgs, size_t firstArgIdx) const
+std::string panda::pandasm::Ins::RegToString(size_t idx, bool isFirst, bool printArgs, size_t firstArgIdx) const
 {
     if (idx >= regs.size()) {
         return std::string("");
@@ -106,7 +106,7 @@ std::string panda::pandasm::Ins::RegToString(const size_t idx, bool isFirst, boo
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::ImmToString(const size_t idx, bool isFirst) const
+std::string panda::pandasm::Ins::ImmToString(size_t idx, bool isFirst) const
 {
     if (idx >= imms.size()) {
         return std::string("");
@@ -130,7 +130,7 @@ std::string panda::pandasm::Ins::ImmToString(const size_t idx, bool isFirst) con
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::IdToString(const size_t idx, bool isFirst) const
+std::string panda::pandasm::Ins::IdToString(size_t idx, bool isFirst) const
 {
     if (idx >= ids.size()) {
         return std::string("");

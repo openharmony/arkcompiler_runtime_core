@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_PLATFORMS_UNIX_LIBPANDABASE_NATIVE_STACK_H
+#define PANDA_PLATFORMS_UNIX_LIBPANDABASE_NATIVE_STACK_H
+
 #include "os/thread.h"
 #include <string>
 #include <set>
@@ -41,3 +44,5 @@ PANDA_PUBLIC_API bool WriterOsFile(const void *buffer, size_t count, int fd);
 PANDA_PUBLIC_API std::string ChangeJaveStackFormat(const char *descriptor);
 
 }  // namespace panda::os::unix::native_stack
+
+#endif  // PANDA_PLATFORMS_UNIX_LIBPANDABASE_NATIVE_STACK_H

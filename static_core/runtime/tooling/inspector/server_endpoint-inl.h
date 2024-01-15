@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_RUNTIME_TOOLING_INSPECTOR_SERVER_ENDPOINT_INL_H
+#define PANDA_RUNTIME_TOOLING_INSPECTOR_SERVER_ENDPOINT_INL_H
+
 #ifndef CONFIG
 #error Define CONFIG before including this header
 #endif
@@ -74,3 +77,5 @@ void ServerEndpoint<CONFIG>::OnCall(
         });
 }
 }  // namespace panda::tooling::inspector
+
+#endif  // PANDA_RUNTIME_TOOLING_INSPECTOR_SERVER_ENDPOINT_INL_H

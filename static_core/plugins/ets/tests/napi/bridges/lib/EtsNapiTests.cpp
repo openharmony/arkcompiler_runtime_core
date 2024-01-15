@@ -21,7 +21,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-std::string GetString(EtsEnv *env, ets_string const &estr)
+static std::string GetString(EtsEnv *env, ets_string const &estr)
 {
     const char *cstr = env->GetStringUTFChars(estr, nullptr);
     if (cstr == nullptr) {
@@ -49,7 +49,7 @@ std::vector<ValueType> EtsArrToVec(ValueType *buf, ets_size sizeArr)
     return vec;
 }
 
-bool Equal(double a1, double a2)
+[[maybe_unused]] static bool Equal(double a1, double a2)
 {
     return std::abs(a1 - a2) < 0.000001F;
 }

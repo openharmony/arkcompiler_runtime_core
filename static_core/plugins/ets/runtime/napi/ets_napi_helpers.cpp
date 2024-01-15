@@ -100,10 +100,6 @@ extern "C" uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool isCritica
     while (it != end) {
         Type type = *it++;
         switch (type.GetId()) {
-            case TypeId::VOID:
-            case TypeId::INVALID:
-            case TypeId::TAGGED:
-                UNREACHABLE();
             case TypeId::U1:
                 counter.Count<bool>();
                 break;

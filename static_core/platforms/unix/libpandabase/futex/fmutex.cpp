@@ -16,7 +16,7 @@
 #include "fmutex.h"
 
 #ifdef MC_ON
-#include "time.h"
+#include <ctime>
 #define FAIL_WITH_MESSAGE(m) ASSERT(0)
 #define LOG_MESSAGE(l, m)
 #define HELPERS_TO_UNSIGNED(m) m
@@ -351,7 +351,7 @@ void ConditionVariableDestroy(struct CondVar *const cond)
 #endif  // PANDA_TARGET_MOBILE
 }
 
-int *GetCondAddr(struct CondVar *const v)
+static int *GetCondAddr(struct CondVar *const v)
 {
     return reinterpret_cast<int *>(&v->cond);
 }
@@ -360,7 +360,7 @@ const int64_t MILLISECONDS_PER_SEC = 1000;
 const int64_t NANOSECONDS_PER_MILLISEC = 1000000;
 const int64_t NANOSECONDS_PER_SEC = 1000000000;
 
-struct timespec ConvertTime(uint64_t ms, uint64_t ns)
+static struct timespec ConvertTime(uint64_t ms, uint64_t ns)
 {
     struct timespec time = {0, 0};
     auto seconds = static_cast<time_t>(ms / MILLISECONDS_PER_SEC);

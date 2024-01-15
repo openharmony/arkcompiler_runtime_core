@@ -28,7 +28,8 @@ from typing import List
 from utils.file_structure import walk_test_subdirs
 from utils.metainformation import InvalidMetaException, find_all_metas 
 from utils.fsutils import iter_files, write_file
-from utils.constants import SKIP_PREFIX, VARIABLE_START_STRING, YAML_EXTENSIONS, TEMPLATE_EXTENSION, OUT_EXTENSION, LIST_PREFIX 
+from utils.constants import SKIP_PREFIX, VARIABLE_START_STRING, YAML_EXTENSIONS
+from utils.constants import TEMPLATE_EXTENSION, OUT_EXTENSION, LIST_PREFIX
 from utils.exceptions import *
 from utils.test_parameters import load_params 
 
@@ -64,7 +65,9 @@ def split_into_tests(text: str, filepath: str) -> List[str]:
     try:
         start_indices = [metainfile[0] for metainfile in find_all_metas(text)]
     except InvalidMetaException as e:
-        raise InvalidFileFormatException(filepath=filepath, message=f"Error raised while splitting a rendered template: {e.message}")
+        raise InvalidFileFormatException(
+            filepath=filepath,
+            message=f"Error raised while splitting a rendered template: {e.message}")
 
     for i in range(1, len(start_indices)):
         left = start_indices[i - 1]
@@ -116,7 +119,9 @@ def process_tests(root: Path, outpath: Path):
 
 parser = argparse.ArgumentParser(description='Generate CTS tests from a set of templates.')
 parser.add_argument('tests_dir', help='Path to directory that contains tests templates and parameters')
-parser.add_argument('output_dir', help='Path to output directory. Output directory and all subdirectories are created automatically')
+parser.add_argument('output_dir',
+                    help='Path to output directory.'
+                         ' Output directory and all subdirectories are created automatically')
 
 
 def main():

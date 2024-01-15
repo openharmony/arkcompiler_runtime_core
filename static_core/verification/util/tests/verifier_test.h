@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H
+#define PANDA_VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H
+
 #include "include/runtime.h"
 
 #include <gtest/gtest.h>
@@ -44,3 +47,5 @@ protected:
     panda::MTManagedThread *thread_;
 };
 }  // namespace panda::verifier::test
+
+#endif  // PANDA_VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H

@@ -32,7 +32,7 @@
 #define GDB_PATH_STR XSTR(GDB_PATH)
 #endif
 
-void HandleTimeout(int sig)
+static void HandleTimeout(int sig)
 {
     if (sig != TIMEOUT_SIGNAL) {
         return;

@@ -23,7 +23,8 @@ from typing import Tuple
 
 from utils.constants import TEMPLATE_EXTENSION
 from utils.test_case import is_negative, strip_template
-from utils.file_structure import TestDirectory, walk_test_subdirs, build_directory_tree, print_tree, denormalize_section_name
+from utils.file_structure import TestDirectory, walk_test_subdirs, build_directory_tree
+from utils.file_structure import print_tree, denormalize_section_name
 from utils.spec import build_spec_tree
 
 def count_tests(dir: TestDirectory):
@@ -63,10 +64,14 @@ def print_table_of_contents(testpath: Path):
         section_name = denormalize_section_name(dir.name)
         right_space = 90 - len(left_space) - len(section_index) - len(section_name)
         if not dir.is_empty():
-            print(left_space, section_index, section_name, "." * right_space, f"templates: {n_templates}; tests: {pos_tests} pos, {neg_tests} neg.\n")
+            print(left_space, section_index, section_name, "." * right_space,
+                  f"templates: {n_templates}; tests: {pos_tests} pos, {neg_tests} neg.\n")
     
     print("\n=====")
-    print(f"TOTAL TESTS {total_positive_tests + total_negative_tests} | TOTAL TEMPLATES {total_templates} | TOTAL POSITIVE TESTS {total_positive_tests} | TOTAL NEGATIVE TESTS {total_negative_tests}")
+    print(f"TOTAL TESTS {total_positive_tests + total_negative_tests} | "
+          f"TOTAL TEMPLATES {total_templates} | "
+          f"TOTAL POSITIVE TESTS {total_positive_tests} | "
+          f"TOTAL NEGATIVE TESTS {total_negative_tests}")
 
 
 def find_diffs(test: TestDirectory, ethalon: TestDirectory, strict: bool = False, silent: bool = False):
@@ -86,7 +91,8 @@ def find_diffs(test: TestDirectory, ethalon: TestDirectory, strict: bool = False
                 if not tsd is None and not find_diffs(tsd, esd, strict=True, silent=True):
                     tsd_section_name = denormalize_section_name(tsd.name)
                     if not silent:
-                        print(f"[Missmath]: Subsection's name missmath [{esd_section_index}]: '{esd_section_name}' (spec) != '{tsd_section_name}' (tests).") 
+                        print(f"[Missmath]: Subsection's name missmath [{esd_section_index}]: "
+                              f"'{esd_section_name}' (spec) != '{tsd_section_name}' (tests).")
                 else:
                     if not silent:    
                         print(f"[NotFound]: Subsection [{esd_section_index}.{esd_section_name}] not fould in tests.")
@@ -103,10 +109,13 @@ def find_diffs(test: TestDirectory, ethalon: TestDirectory, strict: bool = False
             if not strict:
                 if not find_diffs(tsd, esd, strict=True, silent=True):
                     if not silent:    
-                        print(f"[Missmath]: Index missmath for [{esd_section_name}]: {esd_section_index} (spec) != {tsd_section_index} (tests) but content is equal.")   
+                        print(f"[Missmath]: Index missmath for [{esd_section_name}]: "
+                              f"{esd_section_index} (spec) != {tsd_section_index} (tests) but content is equal.")
                 else:
                     if not silent:
-                        print(f"[Missmath]: Subsection [{tsd_section_index}.{tsd_section_name}] from tests has a different index and content in compare with [{esd_section_index}.{esd_section_name}] from spec.")
+                        print(f"[Missmath]: Subsection [{tsd_section_index}.{tsd_section_name}] from tests has"
+                              f"a different index and content in compare with [{esd_section_index}.{esd_section_name}]"
+                              f"from spec.")
             continue
 
         find_diffs(tsd, esd)          

@@ -52,33 +52,6 @@ struct BSet {
     }
 };
 
-void ShowValue(const BSet &bitset, std::ostream &os)
-{
-    os << "BitSet{ .Indices {";
-    bool comma = false;
-    for (auto idx : bitset.indices) {
-        if (comma) {
-            os << ", ";
-        }
-        comma = true;
-        os << idx;
-    }
-    os << "}, ";
-    os << ".Bits = {";
-    for (size_t idx = 0; idx < bitset.bits.Size(); ++idx) {
-        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-        os << (static_cast<int>(bitset.bits[idx]) ? '1' : '0');
-        if (((idx + 1) & 0x7U) == 0) {
-            os << ' ';
-        }
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        if (((idx + 1) & 0x1FU) == 0) {
-            os << ' ';
-        }
-    }
-    os << "} }";
-}
-
 namespace rc {
 
 constexpr size_t MAX_VALUE = 1024U;

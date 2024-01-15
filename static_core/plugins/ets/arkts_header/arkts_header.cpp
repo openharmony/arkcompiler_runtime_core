@@ -24,7 +24,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "header_writer.h"
 
-void PrintHelp(panda::PandArgParser &paParser)
+static void PrintHelp(panda::PandArgParser &paParser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "arkts_header [options] INPUT_FILE OUTPUT_FILE" << std::endl << std::endl;
@@ -32,8 +32,9 @@ void PrintHelp(panda::PandArgParser &paParser)
     std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-bool ProcessArgs(panda::PandArgParser &paParser, const panda::PandArg<std::string> &input,
-                 panda::PandArg<std::string> &output, const panda::PandArg<bool> &help, int argc, const char **argv)
+static bool ProcessArgs(panda::PandArgParser &paParser, const panda::PandArg<std::string> &input,
+                        panda::PandArg<std::string> &output, const panda::PandArg<bool> &help, int argc,
+                        const char **argv)
 {
     if (!paParser.Parse(argc, argv)) {
         PrintHelp(paParser);

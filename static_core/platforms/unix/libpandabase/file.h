@@ -157,7 +157,6 @@ public:
     {
         std::array<char, PATH_MAX> buffer = {0};
         auto fp = realpath(relativePath.data(), buffer.data());
-
         if (fp == nullptr) {
             return Unexpected(Error(errno));
         }

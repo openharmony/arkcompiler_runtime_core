@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_JS_INTEROP_JS_INTEROP_INST_BUILDER_H
+#define PANDA_PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_JS_INTEROP_JS_INTEROP_INST_BUILDER_H
+
 template <RuntimeInterface::IntrinsicId ID, DataType::Type RET_TYPE, DataType::Type... PARAM_TYPES>
 friend struct IntrinsicBuilder;
 
@@ -29,3 +32,4 @@ void BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind c
 void BuildInteropCall(const BytecodeInstruction *bcInst, RuntimeInterface::InteropCallKind callKind,
                       RuntimeInterface::MethodPtr method, bool isRange, bool accRead);
 bool TryBuildInteropCall(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
+#endif  // PANDA_PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_JS_INTEROP_JS_INTEROP_INST_BUILDER_H

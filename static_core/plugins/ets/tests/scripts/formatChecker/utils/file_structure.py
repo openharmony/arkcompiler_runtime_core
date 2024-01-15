@@ -41,7 +41,9 @@ class TestDirectory:
     subdirs: 'List[TestDirectory]'
     
     
-    def __init__(self, path: Path, id: int = 0, name: str = "", parent: Union['TestDirectory', None] = None, subdirs: 'List[TestDirectory]' = []) -> None:
+    def __init__(self, path: Path, id: int = 0, name: str = "",
+                 parent: Union['TestDirectory', None] = None,
+                 subdirs: 'List[TestDirectory]' = None) -> None:
         self.path = path
 
         if id == 0 or name == "":
@@ -51,7 +53,10 @@ class TestDirectory:
             self.name = name 
         
         self.parent = parent
-        self.subdirs = list(subdirs)
+        if subdirs is None:
+            self.subdirs = [];
+        else:
+            self.subdirs = list(subdirs)
         
     
     def full_index(self) -> List[int]:
@@ -137,10 +142,12 @@ def print_tree(td: TestDirectory):
 def normalize_section_name(name: str) -> str:
     parts = name.split(".")
     if len(parts) != 2:
-        raise InvalidFileStructureException(filepath=name, message="Invalid section name format")
+        raise InvalidFileStructureException(filepath=name,
+                                            message="Invalid section name format")
     first, second = parts
     if not first.isdigit():
-        raise InvalidFileStructureException(filepath=name, message="Invalid section name format")
+        raise InvalidFileStructureException(filepath=name,
+                                            message="Invalid section name format")
     second = second.replace(" ",  "_").replace("-", "_").lower()
     return first + "." + "".join([c for c in second if c.isalpha() or c == "_"])
 

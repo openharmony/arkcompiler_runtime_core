@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFIER_VAR_BINDING_HPP
-#define _PANDA_VERIFIER_VAR_BINGING_HPP
+#ifndef PANDA_VERIFICATION_VALUE_VAR_BINDING_H
+#define PANDA_VERIFICATION_VALUE_VAR_BINDING_H
 
 #include "verifier/type_system.h"
 #include "verifier/value/variable.h"
@@ -46,4 +46,4 @@ private:
 };
 }  //  namespace panda::verifier
 
-#endif  // !_PANDA_VERIFIER_VAR_BINGING_HPP
+#endif  // PANDA_VERIFICATION_VALUE_VAR_BINDING_H

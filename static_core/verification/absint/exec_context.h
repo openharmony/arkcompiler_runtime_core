@@ -61,7 +61,6 @@ public:
     {
         RegContext &ctx = regContextOnCheckPoint_[addr];
         auto lub = RcUnion(&ctx, &currentRegContext_, typeSystem_);
-
         if (lub.HasInconsistentRegs()) {
             for (int regIdx : lub.InconsistentRegsNums()) {
                 if (!reporter(regIdx, currentRegContext_[regIdx], ctx[regIdx])) {

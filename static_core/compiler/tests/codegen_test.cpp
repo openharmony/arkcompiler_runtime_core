@@ -82,7 +82,7 @@ public:
     void CheckReturnValue(Graph *graph, T expectedValue);
 
     template <typename T>
-    void CheckBounds(size_t count);
+    void CheckBounds(uint64_t count);
 
     void TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t l, uint32_t r, ShiftType shiftType,
                                                uint32_t shift, uint32_t erv);

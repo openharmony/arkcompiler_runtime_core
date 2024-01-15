@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "libpandabase/macros.h"
+#ifndef PANDA_RUNTIME_TOOLING_TOOLS_H
+#define PANDA_RUNTIME_TOOLING_TOOLS_H
 
-#ifndef PANDA_RUNTIME_TOOLING_TOOLS_H_
-#define PANDA_RUNTIME_TOOLING_TOOLS_H_
+#include "libpandabase/macros.h"
 
 namespace panda::tooling {
 
@@ -43,4 +43,4 @@ private:
 
 }  // namespace panda::tooling
 
-#endif  // PANDA_RUNTIME_TOOLING_TOOLS_H_
+#endif  // PANDA_RUNTIME_TOOLING_TOOLS_H

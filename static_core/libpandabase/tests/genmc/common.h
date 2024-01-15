@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_LIBPANDABASE_TESTS_GENMC_COMMON_H
+#define PANDA_LIBPANDABASE_TESTS_GENMC_COMMON_H
+
 #include <pthread.h>
 #include <stdlib.h>
 #define MC_ON
@@ -20,7 +23,7 @@
 
 thread_local pthread_t current_tid;
 
-static int g_shared;
+inline int g_shared;
 
 // The function checks if a data race may be present:
 // it writes down the argument to the shared variable
@@ -31,3 +34,5 @@ inline void CheckGlobalVar(int index)
     int r = g_shared;
     ASSERT(r == index);
 }
+
+#endif  // PANDA_LIBPANDABASE_TESTS_GENMC_COMMON_H

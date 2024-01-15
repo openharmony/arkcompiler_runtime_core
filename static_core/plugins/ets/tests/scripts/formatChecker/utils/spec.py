@@ -42,7 +42,9 @@ def walk_spec(spec: list, parent: TestDirectory, specpath: str):
         
         s = dict(s)
         if not SPEC_SECTION_TITLE_FIELD_NAME in s:
-            raise InvalidFileFormatException(message=f"Spec section must contain the '{SPEC_SECTION_TITLE_FIELD_NAME}' field", filepath=specpath)
+            raise InvalidFileFormatException(
+                message=f"Spec section must contain the '{SPEC_SECTION_TITLE_FIELD_NAME}' field",
+                filepath=specpath)
 
         # Normalize name 
         name = normalize_section_name(str(s[SPEC_SECTION_TITLE_FIELD_NAME]))

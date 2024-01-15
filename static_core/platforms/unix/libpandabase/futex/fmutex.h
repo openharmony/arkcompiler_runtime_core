@@ -30,7 +30,7 @@
 #define ATOMIC_FETCH_ADD(addr, val, mem) atomic_fetch_add_explicit(addr, val, mem)
 #define ATOMIC_FETCH_SUB(addr, val, mem) atomic_fetch_sub_explicit(addr, val, mem)
 #define ATOMIC_CAS_WEAK(addr, old_val, new_val, mem1, mem2) \
-    atomic_compare_exchange_weak_explicit(addr, &old_val, new_val, mem1, mem2)
+    atomic_compare_exchange_weak_explicit((addr), &(old_val), (new_val), (mem1), (mem2))
 #define ASSERT(a) assert(a)
 #define LIKELY(a) a
 #define UNLIKELY(a) a
@@ -62,13 +62,13 @@ namespace ark::os::unix::memory::futex {
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern thread_local THREAD_ID current_tid;
 
-void MutexInit(struct fmutex *m);
-void MutexDestroy(struct fmutex *m);
-bool MutexLock(struct fmutex *m, bool trylock);
-bool MutexTryLockWithSpinning(struct fmutex *m);
-void MutexUnlock(struct fmutex *m);
-void MutexLockForOther(struct fmutex *m, THREAD_ID thread);
-void MutexUnlockForOther(struct fmutex *m, THREAD_ID thread);
+void MutexInit(struct fmutex *const m);
+void MutexDestroy(struct fmutex *const m);
+bool MutexLock(struct fmutex *const m, bool trylock);
+bool MutexTryLockWithSpinning(struct fmutex *const m);
+void MutexUnlock(struct fmutex *const m);
+void MutexLockForOther(struct fmutex *const m, THREAD_ID thread);
+void MutexUnlockForOther(struct fmutex *const m, THREAD_ID thread);
 
 #ifdef MC_ON
 // GenMC does not support syscalls(futex)
@@ -100,11 +100,11 @@ struct fmutex {
     bool recursiveMutex;
 };
 
-int *GetStateAddr(struct fmutex *m);
-void IncrementWaiters(struct fmutex *m);
-void DecrementWaiters(struct fmutex *m);
-int32_t GetWaiters(struct fmutex *m);
-bool IsHeld(struct fmutex *m, THREAD_ID thread);
+int *GetStateAddr(struct fmutex *const m);
+void IncrementWaiters(struct fmutex *const m);
+void DecrementWaiters(struct fmutex *const m);
+int32_t GetWaiters(struct fmutex *const m);
+bool IsHeld(struct fmutex *const m, THREAD_ID thread);
 __attribute__((visibility("default"))) bool MutexDoNotCheckOnTerminationLoop();
 __attribute__((visibility("default"))) void MutexIgnoreChecksOnTerminationLoop();
 
@@ -119,10 +119,10 @@ struct CondVar {
     ATOMIC(int32_t) waiters;
 };
 
-__attribute__((visibility("default"))) void ConditionVariableInit(struct CondVar *cond);
-__attribute__((visibility("default"))) void ConditionVariableDestroy(struct CondVar *cond);
-__attribute__((visibility("default"))) void SignalCount(struct CondVar *cond, int32_t toWake);
-__attribute__((visibility("default"))) void Wait(struct CondVar *cond, struct fmutex *m);
+__attribute__((visibility("default"))) void ConditionVariableInit(struct CondVar *const cond);
+__attribute__((visibility("default"))) void ConditionVariableDestroy(struct CondVar *const cond);
+__attribute__((visibility("default"))) void SignalCount(struct CondVar *const cond, int32_t toWake);
+__attribute__((visibility("default"))) void Wait(struct CondVar *const cond, struct fmutex *const m);
 __attribute__((visibility("default"))) bool TimedWait(struct CondVar *cond, struct fmutex *m, uint64_t ms, uint64_t ns,
                                                       bool isAbsolute);
 

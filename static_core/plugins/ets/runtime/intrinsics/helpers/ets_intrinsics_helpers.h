@@ -346,7 +346,6 @@ int GetMinmumDigits(FpType d, int *decpt, char *buf)
         GetBase(d, digits, decpt, buf, bufTmp, sizeof(bufTmp));
 
         bool same = StrToFp<FpType>(bufTmp, nullptr) == d;
-
         if (same) {
             // no need to keep the trailing zeros
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -488,7 +487,6 @@ EtsString *FpToString(FpType number, int radix)
     auto value = bit_cast<UnsignedIntType>(number);
     value += 1;
     float delta = static_cast<FpType>(HALF) * (bit_cast<FpType>(value) - number);
-
     if (delta == 0) {
         delta = number;
     }

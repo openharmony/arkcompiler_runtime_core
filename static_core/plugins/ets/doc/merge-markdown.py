@@ -29,7 +29,7 @@ def get_chapters(source_dir, target, build_dir):
 
     result = []
     for name in names:
-        result.append(os.path.join(build_dir, target + "-md", name + ".md"))
+        result.append(os.path.join(build_dir, f"{target}-md", f'{name}.md'))
 
     return result
 
@@ -44,7 +44,7 @@ def merge_chapters(chapters, dest_path):
 
                     # Hacks to avoid recipes subheaders
                     if (line.startswith("### Rule")):
-                        line = line.strip().replace("### Rule", "**Rule") + "**\n"
+                        line = '%s**\n' % line.strip().replace("### Rule", "**Rule")
                     if (line == "### TypeScript\n"):
                         line = "**TypeScript**\n"
                     if (line == "### ArkTS\n"):
@@ -70,7 +70,9 @@ def merge_chapters(chapters, dest_path):
                     line = line.replace("(recipes.md)", "(#recipes)")
 
                     # Fix link to quick-start dir
-                    line = line.replace("https://gitee.com/openharmony/docs/blob/master/en/application-dev/quick-start/", "../")
+                    line = line.replace(
+                        "https://gitee.com/openharmony/docs/blob/master/en/application-dev/quick-start/",
+                        "../")
 
                     dest_file.write(line)
 

@@ -59,7 +59,7 @@ public:
 
     void ApplyDeps(Context *ctx);
 
-    void Patch(std::pair<size_t, size_t> range);
+    void Patch(const std::pair<size_t, size_t> range);
 
     void Devour(CodePatcher &&p);
 

@@ -203,7 +203,9 @@ default_disabled_checks = [
 
     # CHECKER_IGNORE_NEXTLINE(AF0010)
     "-google-readability-avoid-underscore-in-googletest-name",
+    "-readability-avoid-const-params-in-decls"
 ]
+
 
 def run_clang_tidy(src_path: str, panda_dir: str, build_dir: str, compile_args: str) -> bool:
     # Used by ctcache to provide a wrapper for real clang-tidy that will check the cache
@@ -212,7 +214,7 @@ def run_clang_tidy(src_path: str, panda_dir: str, build_dir: str, compile_args: 
     if not cmd_path:
         cmd_path = 'clang-tidy-14'
     cmd  = [cmd_path]
-    cmd += ['-checks=*,' +','.join(default_disabled_checks)]
+    cmd += ['-checks=*,' + ','.join(default_disabled_checks)]
     cmd += ['--header-filter=.*']
     cmd += ['--config-file=' + os.path.join(panda_dir, '.clang-tidy')]
     cmd += [src_path]
@@ -331,6 +333,7 @@ def get_file_list(panda_dir: str, build_dir: str, filename_filter: str) -> list:
     file_list.sort(key=lambda tup: tup[0])
     return file_list
 
+
 # Remove noisy test files duplicates.
 def filter_test_file_duplicates(file_list: list) -> list:
     filtered = []
@@ -376,6 +379,7 @@ def filter_file_duplicated_options(file_list: list) -> list:
     filtered.sort(key=lambda tup: tup[0])
     return filtered;
 
+
 def filter_file_list(file_list: list) -> list:
     print('Files before filter:', len(file_list))
 
@@ -396,6 +400,7 @@ def verify_args(panda_dir: str, build_dir: str) -> str:
 
     return ""
 
+
 def check_headers_in_es2panda_sources(panda_dir):
     es2panda_dir = panda_dir + "/tools/es2panda"
     result = []
@@ -415,6 +420,7 @@ def check_headers_in_es2panda_sources(panda_dir):
             print(file)
         sys.exit(1)
 
+
 def check_file_list_for_system_headers_includes(file_list: list):
     system_headers = []
     regexp = re.compile("-I[^ ]*/third_party[^ ]*")
@@ -424,6 +430,7 @@ def check_file_list_for_system_headers_includes(file_list: list):
             system_headers.append((path, match.group()))
 
     return system_headers
+
 
 def get_proc_count(cmd_ard : int) -> int:
     if cmd_ard > 0:
@@ -450,7 +457,9 @@ if __name__ == "__main__":
         args.panda_dir, args.build_dir, args.filename_filter)
 
     if not file_list:
-        sys.exit("Can't be prepaired source list. Please check availble in build `dir compile_commands.json` and correcting of parameter `--filename-filter` if you use it.")
+        sys.exit("Can't be prepaired source list."
+                 "Please check availble in build `dir compile_commands.json`"
+                 "and correcting of parameter `--filename-filter` if you use it.")
 
     check_headers_in_es2panda_sources(args.panda_dir)
     print('Checked for system headers: Starting')

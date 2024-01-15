@@ -19,7 +19,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers, readability-named-parameter)
 
-bool Equal(double a1, double a2)
+[[maybe_unused]] static bool Equal(double a1, double a2)
 {
     return std::abs(a1 - a2) < 0.000001F;
 }

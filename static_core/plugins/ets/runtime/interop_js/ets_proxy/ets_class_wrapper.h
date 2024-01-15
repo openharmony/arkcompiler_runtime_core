@@ -40,7 +40,10 @@ public:
     // clang-format off
     static constexpr auto FIELD_ATTR         = static_cast<napi_property_attributes>(napi_writable | napi_enumerable);
     static constexpr auto METHOD_ATTR        = napi_default;
-    static constexpr auto STATIC_FIELD_ATTR  = static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_static);  // NOLINT(hicpp-signed-bitwise)
+    // NOLINTBEGIN(hicpp-signed-bitwise)
+    static constexpr auto STATIC_FIELD_ATTR  = static_cast<napi_property_attributes>(napi_writable | napi_enumerable |\
+                                                                       napi_static);
+    // NOLINTEND(hicpp-signed-bitwise)
     static constexpr auto STATIC_METHOD_ATTR = napi_static;
     // clang-format on
 

@@ -82,36 +82,36 @@ public:
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DefineVisit(InstName)                                    \
+#define DEFINE_VISIT(InstName)                                   \
     static void Visit##InstName(GraphVisitor *v, Inst *inst)     \
     {                                                            \
         static_cast<EscapeAnalysis *>(v)->Visit##InstName(inst); \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DefineVisitWithCallback(InstName, Callback)          \
+#define DEFINE_VISIT_WITH_CALLBACK(InstName, Callback)       \
     static void Visit##InstName(GraphVisitor *v, Inst *inst) \
     {                                                        \
         static_cast<EscapeAnalysis *>(v)->Callback(inst);    \
     }
 
-    DefineVisit(NewObject);
-    DefineVisit(LoadObject);
-    DefineVisit(StoreObject);
-    DefineVisit(NullCheck);
-    DefineVisit(SaveState);
-    DefineVisit(SafePoint);
-    DefineVisit(GetInstanceClass);
+    DEFINE_VISIT(NewObject);
+    DEFINE_VISIT(LoadObject);
+    DEFINE_VISIT(StoreObject);
+    DEFINE_VISIT(NullCheck);
+    DEFINE_VISIT(SaveState);
+    DEFINE_VISIT(SafePoint);
+    DEFINE_VISIT(GetInstanceClass);
 
-    DefineVisitWithCallback(Deoptimize, MaterializeDeoptSaveState);
-    DefineVisitWithCallback(DeoptimizeIf, MaterializeDeoptSaveState);
-    DefineVisitWithCallback(DeoptimizeCompare, MaterializeDeoptSaveState);
-    DefineVisitWithCallback(DeoptimizeCompareImm, MaterializeDeoptSaveState);
-    DefineVisitWithCallback(LoadAndInitClass, VisitSaveStateUser);
-    DefineVisitWithCallback(LoadClass, VisitSaveStateUser);
+    DEFINE_VISIT_WITH_CALLBACK(Deoptimize, MaterializeDeoptSaveState);
+    DEFINE_VISIT_WITH_CALLBACK(DeoptimizeIf, MaterializeDeoptSaveState);
+    DEFINE_VISIT_WITH_CALLBACK(DeoptimizeCompare, MaterializeDeoptSaveState);
+    DEFINE_VISIT_WITH_CALLBACK(DeoptimizeCompareImm, MaterializeDeoptSaveState);
+    DEFINE_VISIT_WITH_CALLBACK(LoadAndInitClass, VisitSaveStateUser);
+    DEFINE_VISIT_WITH_CALLBACK(LoadClass, VisitSaveStateUser);
 
-#undef DefineVisit
-#undef DefineVisitWithCallback
+#undef DEFINE_VISIT
+#undef DEFINE_VISIT_WITH_CALLBACK
 
     static void VisitCallStatic([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
     {

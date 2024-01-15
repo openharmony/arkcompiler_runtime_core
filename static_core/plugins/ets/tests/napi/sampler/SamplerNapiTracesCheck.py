@@ -25,7 +25,8 @@ file_name = args.file
 trace_list = ["LETSGLOBAL::CallNativeSlowFunction; LETSGLOBAL::NativeSlowFunction;",
               "LETSGLOBAL::CallNativeFastFunction; LETSGLOBAL::NativeFastFunction;",
               "LETSGLOBAL::CallNativeNAPIFastFunction; LETSGLOBAL::NativeNAPIFastFunction;",
-              "LETSGLOBAL::CallNativeNAPISlowFunction; LETSGLOBAL::NativeNAPISlowFunction; LETSGLOBAL::SlowETSFunction;"]
+              "LETSGLOBAL::CallNativeNAPISlowFunction; LETSGLOBAL::NativeNAPISlowFunction; "
+              "LETSGLOBAL::SlowETSFunction;"]
 
 trace_list_ignored = []
 

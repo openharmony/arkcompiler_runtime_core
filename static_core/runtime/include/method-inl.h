@@ -480,7 +480,6 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t byt
     auto &options = Runtime::GetOptions();
     uint32_t threshold = options.GetCompilerHotnessThreshold();
     uint32_t profThreshold = options.GetCompilerProfilingThreshold();
-
     if ((profThreshold < threshold) && !IsProfiling() && !HasCompiledCode() && !IsProfiled()) {
         SetHotnessCounter(threshold - profThreshold - 1);
         if (thread->GetVM()->IsStaticProfileEnabled()) {
