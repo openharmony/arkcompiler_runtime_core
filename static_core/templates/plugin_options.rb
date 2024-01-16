@@ -21,6 +21,28 @@ module Common
     @plugins
   end
 
+  def each_plugin_option(option)
+    @plugins.each do |plugin, plugin_opts|
+      next unless plugin_opts[option]
+      yield plugin_opts[option], plugin, plugin_opts
+    end
+  end
+
+  def each_plugin_suboption(option, suboption)
+    @plugins.each do |plugin, plugin_opts|
+      next unless plugin_opts[option]
+      next unless plugin_opts[option][suboption]
+      yield plugin_opts[option][suboption], plugin, plugin_opts
+    end
+  end
+
+  def include_plugin_files(option, suboption)
+    @plugins
+      .select { |plugin, plugin_opts| plugin_opts[option] && plugin_opts[option][suboption] }
+      .map { |plugin, plugin_opts| "#include \"#{plugin_opts[option][suboption]}\"" }
+      .join "\n"
+  end
+
   def assign_data_level(cur_hash, key, cur_data)
     if !cur_data && (cur_data.class == OpenStruct || cur_data.class == Array)
       return

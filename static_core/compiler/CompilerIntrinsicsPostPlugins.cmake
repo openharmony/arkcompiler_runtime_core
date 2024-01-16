@@ -176,6 +176,15 @@ panda_gen_file(
     OUTPUTFILE ${INTRINSICS_PEEPHOLE_INL_H}
 )
 
+set(PIPELINE_INCLUDES_H ${PANDA_BINARY_ROOT}/compiler/generated/pipeline_includes.h)
+panda_gen_file(
+    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    TEMPLATE ${PANDA_ROOT}/compiler/optimizer/templates/pipeline_includes.h.erb
+    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    EXTRA_DEPENDENCIES plugin_options_merge
+    OUTPUTFILE ${PIPELINE_INCLUDES_H}
+)
+
 add_custom_target(compiler_intrinsics DEPENDS
     plugin_options_gen
     ${INTRINSICS_CODEGEN_EXT_INL_H}
@@ -196,6 +205,7 @@ add_custom_target(compiler_intrinsics DEPENDS
     ${INTRINSICS_GRAPH_CHECKER_INL}
     ${INTRINSICS_INLINE_NATIVE_METHOD_INL}
     ${INTRINSICS_PEEPHOLE_INL_H}
+    ${PIPELINE_INCLUDES_H}
 )
 
 add_dependencies(arkcompiler compiler_intrinsics)

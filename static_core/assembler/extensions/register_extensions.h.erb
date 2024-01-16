@@ -18,9 +18,8 @@
 
 #include "extensions/extensions.h"
 
-% Common::plugins.each_value do |plugin_opts|
-%   next unless plugin_opts["Metadatas"]
-%   plugin_opts["Metadatas"].each_value do |new_class_opts|
+% Common::each_plugin_option "Metadatas" do |metadatas|
+%   metadatas.each_value do |new_class_opts|
 // NOLINTNEXTLINE(readability-duplicate-include)
 #include "<%= new_class_opts["header_path"] %>"
 %   end
@@ -34,11 +33,9 @@ namespace panda::pandasm::extensions {
 /* static */
 std::unique_ptr<<%= metadata %>> MetadataExtension::Create<%= metadata %>([[maybe_unused]] panda::panda_file::SourceLang lang)
 {
-%   Common::plugins.each_value do |plugin_opts|
-%     next unless plugin_opts["Metadatas"]
-%     next unless plugin_opts["Metadatas"][metadata]
+%   Common::each_plugin_suboption("Metadatas", metadata) do |new_class_opts, _, plugin_opts|
     if (lang == <%= plugin_opts["lang_enum"] %>) {
-        return std::make_unique <<%= plugin_opts["Metadatas"][metadata]["new_class_name"] %>>();
+        return std::make_unique <<%= new_class_opts["new_class_name"] %>>();
     }
 %   end
 

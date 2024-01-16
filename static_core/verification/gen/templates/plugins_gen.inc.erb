@@ -23,33 +23,22 @@
 #include "source_lang_enum.h"
 #include "verification/plugins.h"
 #include "verification/default_plugin.h"
-% Common::plugins.each do |plugin_lang, plugin_opts|
-%   next unless plugin_opts["Verification"]
-%   if plugin_opts["Verification"]["header"]
-#include "<%= plugin_opts["Verification"]["header"] %>"
-%   end
-% end
+<%= Common::include_plugin_files "Verification", "header" %>
 
 // NOLINTBEGIN(fuchsia-statically-constructed-objects)
 namespace panda::verifier::plugin {
 
-% Common::plugins.each do |plugin_lang, plugin_opts|
-%   next unless plugin_opts["Verification"]
-%   if plugin_opts["Verification"]["header"]
+% Common::each_plugin_suboption("Verification", "plugin_class") do |plugin_class, plugin_lang|
 // NOLINTNEXTLINE(readability-identifier-naming)
-static <%= plugin_opts["Verification"]["plugin_class"] %> <%= plugin_lang %>_PLUGIN;
-%   end
+static <%= plugin_class %> <%= plugin_lang %>_PLUGIN;
 % end
 static DefaultPlugin g_dflt;
 
 static std::unordered_map<panda_file::SourceLang, Plugin const *> const PLUGINS_MAP {
-% Common::plugins.each do |plugin_lang, plugin_opts|
+% Common::each_plugin_suboption("Verification", "plugin_class") do |_, plugin_lang|
 %   short_plugin_lang = plugin_lang == "JAVA" ? "JAVA_8" : plugin_lang
-%   next unless plugin_opts["Verification"]
-%   if plugin_opts["Verification"]["plugin_class"]
   { panda_file::SourceLang::<%= short_plugin_lang %>,
     &<%= plugin_lang %>_PLUGIN },
-%   end
 % end
   { panda_file::SourceLang::PANDA_ASSEMBLY, &g_dflt}
 };

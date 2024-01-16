@@ -61,14 +61,14 @@
 #include "optimizer/optimizations/adjust_arefs.h"
 #include "optimizer/optimizations/if_merging.h"
 
-#include "plugins/create_pipeline_includes.h"
+#include "compiler/generated/pipeline_includes.h"
 
 namespace panda::compiler {
 
 std::unique_ptr<Pipeline> Pipeline::Create(Graph *graph)
 {
     switch (graph->GetLanguage()) {
-#include "plugins/create_pipeline.h"
+#include "compiler/generated/create_pipeline.inl"
         default:
             return std::make_unique<Pipeline>(graph);
     }
@@ -225,7 +225,7 @@ bool Pipeline::RunOptimizations()
     graph->RunPass<LoopIdioms>();
     graph->RunPass<ChecksElimination>();
     graph->RunPass<LoopUnroll>(g_options.GetCompilerLoopUnrollInstLimit(), g_options.GetCompilerLoopUnrollFactor());
-#include <plugins/optimizations_after_unroll.h>
+    OptimizationsAfterUnroll(graph);
 
     /* to be removed once generic loop unrolling is implemented */
     ASSERT(graph->IsUnrollComplete());

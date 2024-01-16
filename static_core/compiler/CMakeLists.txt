@@ -690,6 +690,4 @@ endif()
 add_subdirectory(aot)
 add_subdirectory(aot/aot_builder aot_builder)
 
-declare_plugin_file("create_pipeline.h")
-declare_plugin_file("create_pipeline_includes.h")
-declare_plugin_file("optimizations_after_unroll.h")
+declare_plugin_file("create_pipeline.inl")

@@ -50,6 +50,16 @@ plugin_irtoc_plugins = []
 
 plugin_isa_paths = []
 
+plugin_create_pipeline_paths = []
+plugin_read_profile_paths = []
+plugin_destroy_profile_paths = []
+plugin_find_method_in_profile_paths = []
+plugin_dump_profile_paths = []
+plugin_clear_profile_paths = []
+plugin_profiling_includes_paths = []
+plugin_profiling_includes_disasm_paths = []
+plugin_get_profiling_any_type_paths = []
+
 plugin_enable_bytecode_optimizer = false
 
 # All paths and labels in the exported variables should be source-absolute.
@@ -167,26 +177,55 @@ foreach(plugin, ark_enabled_plugins) {
         [ "$_plugin_dir/${_plugin_vars.compiler_options_yaml_path}" ]
   }
   if (defined(_plugin_vars.runtime_yamls)) {
-    foreach(runtime_yaml, _plugin_vars.runtime_yamls) {
-      plugin_runtime_yamls += [ "$_plugin_dir/$runtime_yaml" ]
-    }
+    plugin_runtime_yamls +=
+        rebase_path(_plugin_vars.runtime_yamls, "", _plugin_dir)
   }
-
   if (defined(_plugin_vars.irtoc_scripts)) {
-    foreach(irtoc_script, _plugin_vars.irtoc_scripts) {
-      plugin_irtoc_scripts += [ "$_plugin_dir/$irtoc_script" ]
-    }
+    plugin_irtoc_scripts +=
+        rebase_path(_plugin_vars.irtoc_scripts, "", _plugin_dir)
   }
-
   if (defined(_plugin_vars.irtoc_plugins)) {
-    foreach(irtoc_plugin, _plugin_vars.irtoc_plugins) {
-      plugin_irtoc_plugins += [ "$_plugin_dir/$irtoc_plugin" ]
-    }
+    plugin_irtoc_plugins +=
+        rebase_path(_plugin_vars.irtoc_plugins, "", _plugin_dir)
+  }
+  if (defined(_plugin_vars.srcs_isa)) {
+    plugin_isa_paths += rebase_path(_plugin_vars.srcs_isa, "", _plugin_dir)
   }
 
-  if (defined(_plugin_vars.srcs_isa)) {
-    foreach(src, _plugin_vars.srcs_isa) {
-      plugin_isa_paths += [ "$_plugin_dir/$src" ]
-    }
+  if (defined(_plugin_vars.create_pipeline)) {
+    create_pipeline_paths +=
+        [ rebase_path(plugin_vars.create_pipeline, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.read_profile)) {
+    plugin_read_profile_paths +=
+        [ rebase_path(plugin_vars.read_profile, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.destroy_profile)) {
+    plugin_destroy_profile_paths +=
+        [ rebase_path(_plugin_vars.destroy_profile, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.find_method_in_profile)) {
+    plugin_find_method_in_profile_paths +=
+        [ rebase_path(_plugin_vars.find_method_in_profile, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.dump_profile)) {
+    plugin_dump_profile_paths +=
+        [ rebase_path(_plugin_vars.dump_profile, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.clear_profile)) {
+    plugin_clear_profile_paths +=
+        [ rebase_path(_plugin_vars.clear_profile, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.profiling_includes)) {
+    plugin_profiling_includes_paths +=
+        [ rebase_path(_plugin_vars.profiling_includes, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.profiling_includes_disasm)) {
+    plugin_profiling_includes_disasm_paths +=
+        [ rebase_path(_plugin_vars.profiling_includes_disasm, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.get_profiling_any_type)) {
+    plugin_get_profiling_any_type_paths +=
+        [ rebase_path(_plugin_vars.get_profiling_any_type, "", _plugin_dir) ]
   }
 }

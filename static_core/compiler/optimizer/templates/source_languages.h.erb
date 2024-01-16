@@ -24,9 +24,7 @@ namespace panda::compiler {
 
 enum class AnyBaseType : uint32_t {
     UNDEFINED_TYPE = 0,
-% Common::plugins.each do |plugin_lang, plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["list_types"]
+% Common::each_plugin_suboption("compiler_base_types", "list_types") do |option, plugin_lang, plugin_opts|
 %   plugin_opts["compiler_base_types"]["list_types"].each_with_index do |(type_name, _), index|
     <%= plugin_lang %>_<%= type_name %>,  // <%= index + 1%>
 %   end

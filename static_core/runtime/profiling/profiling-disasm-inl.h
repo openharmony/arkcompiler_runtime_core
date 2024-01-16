@@ -17,7 +17,7 @@
 #define PANDA_PROFILING_INL_H
 
 #include "profiling.h"
-#include "plugins/profiling_includes_disasm.h"
+#include "runtime/profiling/generated/profiling_includes_disasm.h"
 #include "runtime/include/profiling_gen.h"
 
 namespace panda::profiling {
@@ -27,7 +27,7 @@ inline Expected<ProfileContainer, const char *> ReadProfile([[maybe_unused]] std
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {
-#include "plugins/read_profile.h"
+#include "runtime/profiling/generated/read_profile.h"
         default:
             break;
     }
@@ -39,7 +39,7 @@ inline void DestroyProfile([[maybe_unused]] ProfileContainer profile,
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {
-#include "plugins/destroy_profile.h"
+#include "runtime/profiling/generated/destroy_profile.h"
         default:
             break;
     }
@@ -51,7 +51,7 @@ inline ProfileType FindMethodInProfile([[maybe_unused]] ProfileContainer profile
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {
-#include "plugins/find_method_in_profile.h"
+#include "runtime/profiling/generated/find_method_in_profile.h"
         default:
             LOG(FATAL, COMMON) << "FindMethodInProfile: No plugin found for the given language";
     }
@@ -63,7 +63,7 @@ inline void DumpProfile([[maybe_unused]] ProfileType profile, [[maybe_unused]] p
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {
-#include "plugins/dump_profile.h"
+#include "runtime/profiling/generated/dump_profile.h"
         default:
             break;
     }

@@ -21,17 +21,8 @@
 #include "profiling/profiling.h"
 #include "source_languages.h"
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["header_path_implementation_codegen"]
-#include "<%= plugin_opts["compiler_base_types"]["header_path_implementation_codegen"] %>"
-% end
-
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_extensions"]
-% next unless plugin_opts["compiler_extensions"]["main_header_path"]
-#include "<%= plugin_opts["compiler_extensions"]["main_header_path"] %>"
-% end
+<%= Common::include_plugin_files "compiler_base_types", "header_path_implementation_codegen" %>
+<%= Common::include_plugin_files "compiler_extensions", "main_header_path" %>
 
 namespace panda::compiler {
 
@@ -54,12 +45,10 @@ inline AnyBaseType NumericDataTypeToAnyType([[maybe_unused]] panda::compiler::Da
            type == panda::compiler::DataType::Type::FLOAT32 || type == panda::compiler::DataType::Type::FLOAT64);
 
     switch(language) {  // NOLINT(hicpp-multiway-paths-covered)
-% Common::plugins.each do |plugin_lang, plugin_opts|
-% next unless plugin_opts["language_config"]["lang_type"] == "dynamic"
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_resolve_numeric_type"]
+% Common::each_plugin_suboption("compiler_base_types", "func_resolve_numeric_type") do |func, plugin_lang, plugin_opts|
+% raise "Expected dynamic language" unless plugin_opts["language_config"]["lang_type"] == "dynamic"
     case panda::SourceLanguage::<%= plugin_lang %>:
-        return <%= plugin_opts["compiler_base_types"]["func_resolve_numeric_type"] %>(type);
+        return <%= func %>(type);
 % end
     default:
         ASSERT(false && "This feature is not supported for this language");
@@ -69,12 +58,10 @@ inline AnyBaseType NumericDataTypeToAnyType([[maybe_unused]] panda::compiler::Da
 
 inline AnyBaseType GetAnyStringType(panda::SourceLanguage language) {
     switch(language) {  // NOLINT(hicpp-multiway-paths-covered)
-% Common::plugins.each do |plugin_lang, plugin_opts|
-% next unless plugin_opts["language_config"]["lang_type"] == "dynamic"
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_resolve_string_type"]
+% Common::each_plugin_suboption("compiler_base_types", "func_resolve_string_type") do |func, plugin_lang, plugin_opts|
+% raise "Expected dynamic language" unless plugin_opts["language_config"]["lang_type"] == "dynamic"
     case panda::SourceLanguage::<%= plugin_lang %>:
-        return <%= plugin_opts["compiler_base_types"]["func_resolve_string_type"] %>();
+        return <%= func %>();
 % end
     default:
         ASSERT(false && "This feature is not supported for this language");
@@ -97,12 +84,10 @@ inline std::optional<bool> IsAnyTypeCanBeSubtypeOf([[maybe_unused]] panda::Sourc
                                                    [[maybe_unused]] profiling::AnyInputType superAllowedTypes = profiling::AnyInputType::DEFAULT,
                                                    [[maybe_unused]] profiling::AnyInputType allowedTypes = profiling::AnyInputType::DEFAULT) {
     switch(language) {  // NOLINT(hicpp-multiway-paths-covered)
-% Common::plugins.each do |plugin_lang, plugin_opts|
-% next unless plugin_opts["language_config"]["lang_type"] == "dynamic"
-% next unless plugin_opts["compiler_base_types"] != nil
-% next unless plugin_opts["compiler_base_types"]["func_is_any_type_can_be_subtype_of"] != nil
+% Common::each_plugin_suboption("compiler_base_types", "func_is_any_type_can_be_subtype_of") do |func, plugin_lang, plugin_opts|
+% raise "Expected dynamic language" unless plugin_opts["language_config"]["lang_type"] == "dynamic"
     case panda::SourceLanguage::<%= plugin_lang %>:
-        return <%= plugin_opts["compiler_base_types"]["func_is_any_type_can_be_subtype_of"] %>(superType, type, superAllowedTypes, allowedTypes);
+        return <%= func %>(superType, type, superAllowedTypes, allowedTypes);
 % end
     default:
         ASSERT(false && "This feature is not supported for this language");
@@ -114,11 +99,9 @@ inline panda::compiler::DataType::Type AnyBaseTypeToDataType([[maybe_unused]] An
     switch(anyType) {
         case AnyBaseType::UNDEFINED_TYPE:
             return panda::compiler::DataType::Type::ANY;
-% Common::plugins.each do |plugin_lang, plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["list_types"]
+% Common::each_plugin_suboption("compiler_base_types", "list_types") do |list_types, plugin_lang|
 %   has_bool_type = false
-%   plugin_opts["compiler_base_types"]["list_types"].each do |type_name, type_pair|
+%   list_types.each do |type_name, type_pair|
         case AnyBaseType::<%= plugin_lang %>_<%= type_name %>:
             return <%= type_pair %>;
 %     if (type_pair.include?("BOOL"))
@@ -141,10 +124,8 @@ inline const char *AnyTypeTypeToString(AnyBaseType anyType)
     static constexpr auto COUNT = static_cast<uint32_t>(AnyBaseType::COUNT);
     static constexpr std::array<const char *, COUNT> ANYBASETYPE_NAMES = {
         "UNDEFINED_TYPE",
-% Common::plugins.each do |plugin_lang, plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["list_types"]
-%   plugin_opts["compiler_base_types"]["list_types"].each_key do |type_name|
+% Common::each_plugin_suboption("compiler_base_types", "list_types") do |list_types, plugin_lang|
+%   list_types.each_key do |type_name|
         "<%= plugin_lang %>_<%= type_name %>",
 %   end
 % end
@@ -157,10 +138,8 @@ inline const char *AnyTypeTypeToString(AnyBaseType anyType)
 inline bool TryCompareAnyTypePluginGen([[maybe_unused]] const panda::compiler::CompareAnyTypeInst *cati,
                                        [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_compare_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_compare_implementation_codegen"] %>(cati, enc)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_compare_implementation_codegen") do |func|
+    if (<%= func %>(cati, enc)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -171,10 +150,8 @@ inline bool TryCompareAnyTypePluginGen([[maybe_unused]] const panda::compiler::C
 inline bool TryGetAnyTypeNamePluginGen([[maybe_unused]] const panda::compiler::GetAnyTypeNameInst *cati,
                                        [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_get_name_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_get_name_implementation_codegen"] %>(cati, enc)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_get_name_implementation_codegen") do |func|
+    if (<%= func %>(cati, enc)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -185,10 +162,8 @@ inline bool TryGetAnyTypeNamePluginGen([[maybe_unused]] const panda::compiler::G
 inline bool TryCastAnyTypeValuePluginGen([[maybe_unused]] const panda::compiler::CastAnyTypeValueInst *cati,
                                          [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_cast_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_cast_implementation_codegen"] %>(cati, enc)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_cast_implementation_codegen") do |func|
+    if (<%= func %>(cati, enc)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -199,10 +174,8 @@ inline bool TryCastAnyTypeValuePluginGen([[maybe_unused]] const panda::compiler:
 inline bool TryCastValueToAnyTypePluginGen([[maybe_unused]] const panda::compiler::CastValueToAnyTypeInst *cvai,
                                            [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_cast_to_any_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_cast_to_any_implementation_codegen"] %>(cvai, enc)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_cast_to_any_implementation_codegen") do |func|
+    if (<%= func %>(cvai, enc)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -213,10 +186,8 @@ inline bool TryCastValueToAnyTypePluginGen([[maybe_unused]] const panda::compile
 inline bool TryAnyTypeCheckPluginGen([[maybe_unused]] panda::compiler::AnyTypeCheckInst *checkInst,
                                      [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_any_type_check_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_any_type_check_implementation_codegen"] %>(checkInst, enc)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_any_type_check_implementation_codegen") do |func|
+    if (<%= func %>(checkInst, enc)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -227,10 +198,8 @@ inline bool TryAnyTypeCheckPluginGen([[maybe_unused]] panda::compiler::AnyTypeCh
 inline bool TryHclassCheckPluginGen([[maybe_unused]] panda::compiler::HclassCheckInst *checkInst,
                                      [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_hclass_check_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_hclass_check_implementation_codegen"] %>(checkInst, enc)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_hclass_check_implementation_codegen") do |func|
+    if (<%= func %>(checkInst, enc)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -240,10 +209,8 @@ inline bool TryHclassCheckPluginGen([[maybe_unused]] panda::compiler::HclassChec
 
 inline bool TryIsDynHeapObject([[maybe_unused]] compiler::AnyBaseType type) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_hclass_check_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_is_dyn_heap_object"] %>(type)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_is_dyn_heap_object") do |func|
+    if (<%= func %>(type)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -255,10 +222,8 @@ inline bool TryObjByIndexCheckPluginGen([[maybe_unused]] const panda::compiler::
                                         [[maybe_unused]] panda::compiler::EncodeVisitor *enc,
                                         [[maybe_unused]] LabelHolder::LabelId id) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_obj_by_index_check_implementation_codegen"]
-    if (<%= plugin_opts["compiler_base_types"]["func_obj_by_index_check_implementation_codegen"] %>(checkInst, enc, id)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_obj_by_index_check_implementation_codegen") do |func|
+    if (<%= func %>(checkInst, enc, id)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -269,10 +234,8 @@ inline bool TryObjByIndexCheckPluginGen([[maybe_unused]] const panda::compiler::
 inline bool TryLoadConstantPoolGen([[maybe_unused]] const panda::compiler::Inst *inst, 
                                    [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_load_constant_pool"]
-    if (<%= plugin_opts["compiler_base_types"]["func_load_constant_pool"] %>(inst, enc)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_load_constant_pool") do |func|
+    if (<%= func %>(inst, enc)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end
@@ -282,10 +245,8 @@ inline bool TryLoadConstantPoolGen([[maybe_unused]] const panda::compiler::Inst 
 inline bool TryLoadLexicalEnvGen([[maybe_unused]] const panda::compiler::Inst *inst, 
                                  [[maybe_unused]] panda::compiler::EncodeVisitor *enc) {
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_base_types"]
-% next unless plugin_opts["compiler_base_types"]["func_load_lexical_env"]
-    if (<%= plugin_opts["compiler_base_types"]["func_load_lexical_env"] %>(inst, enc)) {
+% Common::each_plugin_suboption("compiler_base_types", "func_load_lexical_env") do |func|
+    if (<%= func %>(inst, enc)) {
         return true; // NOLINT(readability-simplify-boolean-expr)
     }
 % end

@@ -23,12 +23,13 @@ add_custom_target(plugin_options_merge DEPENDS ${GEN_PLUGIN_OPTIONS_YAML})
 
 get_target_property(MERGE_PLUGINS merge_plugins PLUGINS)
 foreach(plugin_file ${MERGE_PLUGINS})
-    set(PLUGINS_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/plugins)
 
     string(REGEX REPLACE "[/\\.]" "_" plugin_target ${plugin_file})
     set(plugin_target_files "${plugin_target}__files")
 
     get_target_property(PLUGIN_FILES ${plugin_target_files} PLUGIN_FILES)
+    get_target_property(PLUGINS_BINARY_DIR ${plugin_target_files} GENERATED_DIR)
+    file(MAKE_DIRECTORY ${PLUGINS_BINARY_DIR})
 
     if (PLUGIN_FILES)
         add_custom_command(OUTPUT ${PLUGINS_BINARY_DIR}/${plugin_file}

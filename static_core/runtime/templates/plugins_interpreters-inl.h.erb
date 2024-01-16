@@ -16,9 +16,8 @@
 #ifndef PANDA_RUNTIME_GEN_PLUGINS_INTERPRETERS_INL_H_
 #define PANDA_RUNTIME_GEN_PLUGINS_INTERPRETERS_INL_H_
 
-% Common::plugins.each do |plugin_lang, plugin_opts|
-% next unless plugin_opts["additional_interpter_inl"]
-#include "<%= plugin_opts["additional_interpter_inl"] %>"
+% Common::each_plugin_option "additional_interpter_inl" do |additional_interpter_inl|
+#include "<%= additional_interpter_inl %>"
 % end
 
 #endif // PANDA_RUNTIME_GEN_PLUGINS_INTERPRETERS_INL_H_
