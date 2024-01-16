@@ -1,0 +1,101 @@
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          enum Enum { first = "A", second = "B", third = "B" }
+      use: |-
+          assert Enum.first.getValue() == "A"
+          assert Enum.second.getValue() == "B"
+          assert Enum.third.getValue() == "B"
+
+    - decl: |-
+          enum Enum { _first = "A", _second = "B", _third = "B" }
+      use: |-
+          assert Enum._first.toString() == "A"
+          assert Enum._second.toString() == "B"
+          assert Enum._third.toString() == "B"
+
+    - decl: |-
+          enum Enum { first = "A", second = "B", third = "B" }
+          let e1 = Enum.first
+          let e2 = Enum.second
+          let e3 = Enum.third
+      use: |-
+          assert "" + e1 + e2 + e3 == "ABB"
+
+    - decl: |-
+          enum Enum { first = "A", second = "B", third = "B" }
+          const e1 = Enum.first
+          const e2 = Enum.second
+          const e3 = Enum.third
+      use: |-
+          assert "" + e1 + e2 + e3 == "ABB"
+
+    - decl: |-
+          enum Enum { first = "A", second = "B", third = "B" }
+      use: |-
+          assert Enum.first as string == "A"
+          assert Enum.second as string == "B"
+          assert Enum.third as string == "B"
+
+    - decl: |-
+          const a = "ABC"
+          enum Enum { e1 = a, e2 = "DEF" }  // constant expression
+      use: |-
+          assert Enum.e1.toString() == "ABC"
+          assert Enum.e2.toString() == "DEF"
+
+    - decl: |-
+          const a = "ABC"
+          enum Enum { e1 = a + a, e2 = a + "DEF" }  // constant expressions
+      use: |-
+          assert Enum.e1.toString() == "ABCABC"
+          assert Enum.e2.toString() == "ABCDEF"
+
+    - decl: |-
+          enum Enum { e1 = "A", e2 = "B", e3 = "C" }
+      use: |-
+          let v = Enum.e3
+          switch (v) {
+              case Enum.e1: assert false; break;
+              case Enum.e2: assert false; break;
+              case Enum.e3: assert v.toString() == Enum.e3.toString(); break;
+          }
+
+    - decl: |-
+          enum Color { Red = "red", Green = "green", Blue = "blue" }
+      use: |-
+          let r: string = Color.Red
+          assert r == "red"
+          let g: string = Color.Green
+          assert g == "green"
+
+    - decl: |-
+          enum Color { Red = "red", Green = "green", Blue = "blue" }
+          function foo(p: string): boolean {
+              return p == "blue"
+          }
+      use: |-
+          assert foo(Color.Red) == false
+          assert foo(Color.Blue) == true
+
+    - decl: |-
+          enum Template {
+              t1 = `Line 1\nLine 2`,
+              t2 = `Line 3\nLine 4`
+            }
+      use: |-
+          let v = Template.t1
+          assert v.toString() == "Line 1\nLine 2"

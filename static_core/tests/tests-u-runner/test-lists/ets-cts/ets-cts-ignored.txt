@@ -2404,6 +2404,42 @@
 07.expressions/01.chaining_operator/chop1.ets
 # end of es2panda fails
 
+# 15297 Enum constants equality behavior is different from TS
+07.expressions/24.equality_expressions/02.value_equality_operators/enum_equality_1.ets
+07.expressions/24.equality_expressions/02.value_equality_operators/enum_equality_3.ets
+11.enumerations/01.enumeration_integer_values/enum_int_4.ets
+
+# 15299 Invalid Enum initialization value error
+11.enumerations/01.enumeration_integer_values/enum_int_1.ets
+
+# 14654 Cannot use constant expressions in enum initialization
+11.enumerations/01.enumeration_integer_values/enum_int_2.ets
+11.enumerations/01.enumeration_integer_values/enum_int_3.ets
+11.enumerations/01.enumeration_integer_values/enum_int_5.ets
+11.enumerations/02.enumeration_string_values/enum_str_10.ets
+11.enumerations/02.enumeration_string_values/enum_str_5.ets
+11.enumerations/02.enumeration_string_values/enum_str_6.ets
+
+# 15328 Enumeration with string values doesn't work in switch statement
+11.enumerations/02.enumeration_string_values/enum_str_7.ets
+
+# 13917 Casting of enum doesn't work as expected
+11.enumerations/01.enumeration_integer_values/enum_int_6.ets
+11.enumerations/01.enumeration_integer_values/enum_int_7.ets
+11.enumerations/01.enumeration_integer_values/enum_int_8.ets
+11.enumerations/02.enumeration_string_values/enum_str_4.ets
+11.enumerations/02.enumeration_string_values/enum_str_8.ets
+11.enumerations/02.enumeration_string_values/enum_str_9.ets
+11.enumerations/02.enumeration_string_values/enum_str_2.ets
+11.enumerations/02.enumeration_string_values/enum_str_3.ets
+
+# (Not implemented yet) Getting enumeration member name doesn't work as defined in 11.3
+11.enumerations/03.enumeration_operations/enum_member_name1.ets
+11.enumerations/03.enumeration_operations/enum_member_name2.ets
+11.enumerations/03.enumeration_operations/enum_member_name3.ets
+11.enumerations/03.enumeration_operations/enum_member_name4.ets
+11.enumerations/03.enumeration_operations/enum_member_name5.ets
+
 # es2panda fails: panda:14368 Expected CTE on casting to never
 03.types/08.reference_types/04.never_type/never_class_instance_4.ets
 03.types/08.reference_types/04.never_type/never_class_instance_neg_0.ets
