@@ -381,6 +381,8 @@ spec/generic/wrongUsingInT.ets
 spec/generic/genericTypeArgumentWithDefaultParameterValue_04.ets
 spec/generic/genericTypeArgumentWithDefaultParameterValue_05.ets
 spec/generic/genericTypeArgumentWithDefaultParameterValue_06.ets
+### Issue 14941
+spec/generic/issue14700_ArrayBackedConstructorWithobject.ets
 ### End of Generic
 ### Import-export issues
 ### Issue 14586
