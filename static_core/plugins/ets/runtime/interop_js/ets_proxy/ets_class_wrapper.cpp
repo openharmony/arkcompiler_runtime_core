@@ -75,7 +75,7 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
 
     napi_env env = ctx->GetJSEnv();
 
-    ASSERT(!IsNull(env, js_value));
+    ASSERT(!IsNull(env, jsValue));
 
     // Check if object has SharedReference
     SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);

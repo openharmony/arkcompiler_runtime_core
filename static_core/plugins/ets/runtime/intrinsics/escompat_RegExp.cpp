@@ -282,8 +282,7 @@ void SetResultField(PandaVector<VMMutableHandle<EtsString>> &handledMatches, Ets
     auto stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
 
     auto resultField = resultClass->GetDeclaredFieldIDByName(RESULT_FIELD_NAME);
-    VMHandle<EtsObjectArray> resultArray(coroutine,
-                                          EtsObjectArray::Create(stringClass, matches.size())->GetCoreType());
+    VMHandle<EtsObjectArray> resultArray(coroutine, EtsObjectArray::Create(stringClass, matches.size())->GetCoreType());
     VMHandle<EtsString> match;
     for (size_t i = 0; i < matches.size(); ++i) {
         if (isWide) {

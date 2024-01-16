@@ -30,34 +30,34 @@ namespace panda::ets::interop::js {
 
 // Convert js->ets for refs, throws ETS/JS exceptions
 template <typename FUnwrapVal, typename FClsResolv, typename FStoreRef>
-[[nodiscard]] static ALWAYS_INLINE inline bool ConvertNapiValRef(InteropCtx *ctx, FClsResolv &resolve_ref_cls,
-                                                                 FStoreRef &store_ref, napi_value js_val,
-                                                                 FUnwrapVal &unwrap_val)
+[[nodiscard]] static ALWAYS_INLINE inline bool ConvertNapiValRef(InteropCtx *ctx, FClsResolv &resolveRefCls,
+                                                                 FStoreRef &storeRef, napi_value jsVal,
+                                                                 FUnwrapVal &unwrapVal)
 {
     auto env = ctx->GetJSEnv();
 
-    if (UNLIKELY(IsNull(env, js_val))) {
-        store_ref(nullptr);
+    if (UNLIKELY(IsNull(env, jsVal))) {
+        storeRef(nullptr);
         return true;
     }
 
-    auto klass = resolve_ref_cls();
+    auto klass = resolveRefCls();
 
     // start fastpath
     if (klass == ctx->GetVoidClass()) {
-        return unwrap_val(helpers::TypeIdentity<JSConvertEtsVoid>());
+        return unwrapVal(helpers::TypeIdentity<JSConvertEtsVoid>());
     }
     if (klass == ctx->GetJSValueClass()) {
-        return unwrap_val(helpers::TypeIdentity<JSConvertJSValue>());
+        return unwrapVal(helpers::TypeIdentity<JSConvertJSValue>());
     }
     if (klass == ctx->GetStringClass()) {
-        return unwrap_val(helpers::TypeIdentity<JSConvertString>());
+        return unwrapVal(helpers::TypeIdentity<JSConvertString>());
     }
-    if (UNLIKELY(IsUndefined(env, js_val))) {
+    if (UNLIKELY(IsUndefined(env, jsVal))) {
         if (!klass->IsAssignableFrom(ctx->GetUndefinedClass())) {
             return false;
         }
-        store_ref(ctx->GetUndefinedObject()->GetCoreType());
+        storeRef(ctx->GetUndefinedObject()->GetCoreType());
         return true;
     }
     // start slowpath
@@ -65,8 +65,8 @@ template <typename FUnwrapVal, typename FClsResolv, typename FStoreRef>
     if (UNLIKELY(refconv == nullptr)) {
         return false;
     }
-    ObjectHeader *res = refconv->Unwrap(ctx, js_val)->GetCoreType();
-    store_ref(res);
+    ObjectHeader *res = refconv->Unwrap(ctx, jsVal)->GetCoreType();
+    storeRef(res);
     return res != nullptr;
 }
 
@@ -119,9 +119,9 @@ template <typename FClsResolv, typename FStorePrim, typename FStoreRef>
         case panda_file::Type::TypeId::F32:
             return unwrapVal(helpers::TypeIdentity<JSConvertF32>());
         case panda_file::Type::TypeId::F64:
-            return unwrap_val(helpers::TypeIdentity<JSConvertF64>());
+            return unwrapVal(helpers::TypeIdentity<JSConvertF64>());
         case panda_file::Type::TypeId::REFERENCE:
-            return ConvertNapiValRef(ctx, resolve_ref_cls, store_ref, js_val, unwrap_val);
+            return ConvertNapiValRef(ctx, resolveRefCls, storeRef, jsVal, unwrapVal);
         default: {
             ctx->Fatal(std::string("ConvertNapiVal: unsupported typeid ") +
                        panda_file::Type::GetSignatureByTypeId(type));
@@ -133,47 +133,47 @@ template <typename FClsResolv, typename FStorePrim, typename FStoreRef>
 // Convert ets->js for refs, throws JS exceptions
 template <typename FClsResolv, typename FStore, typename FRead>
 [[nodiscard]] static ALWAYS_INLINE inline bool ConvertEtsValRef(InteropCtx *ctx,
-                                                                [[maybe_unused]] FClsResolv &resolve_ref_cls,
-                                                                FStore &store_res, FRead &read_val)
+                                                                [[maybe_unused]] FClsResolv &resolveRefCls,
+                                                                FStore &storeRes, FRead &readVal)
 {
     auto env = ctx->GetJSEnv();
 
-    auto wrap_ref = [&](auto conv_tag, ObjectHeader *ref) -> bool {
-        using Convertor = typename decltype(conv_tag)::type;  // conv_tag acts as lambda template parameter
-        using cpptype = typename Convertor::cpptype;          // NOLINT(readability-identifier-naming)
+    auto wrapRef = [&env, &storeRes](auto convTag, ObjectHeader *ref) -> bool {
+        using Convertor = typename decltype(convTag)::type;  // conv_tag acts as lambda template parameter
+        using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
         cpptype value = std::remove_pointer_t<cpptype>::FromEtsObject(EtsObject::FromCoreType(ref));
         napi_value res = Convertor::Wrap(env, value);
-        store_res(res);
+        storeRes(res);
         return res != nullptr;
     };
 
-    ObjectHeader *ref = read_val(helpers::TypeIdentity<ObjectHeader *>());
+    ObjectHeader *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
     if (UNLIKELY(ref == nullptr)) {
-        store_res(GetNull(env));
+        storeRes(GetNull(env));
         return true;
     }
     if (UNLIKELY(ref == ctx->GetUndefinedObject()->GetCoreType())) {
-        store_res(GetUndefined(env));
+        storeRes(GetUndefined(env));
         return true;
     }
 
     auto klass = ref->template ClassAddr<Class>();
 
-    ASSERT(resolve_ref_cls()->IsAssignableFrom(klass));
+    ASSERT(resolveRefCls()->IsAssignableFrom(klass));
     // start fastpath
     if (klass == ctx->GetVoidClass()) {
-        return wrap_ref(helpers::TypeIdentity<JSConvertEtsVoid>(), ref);
+        return wrapRef(helpers::TypeIdentity<JSConvertEtsVoid>(), ref);
     }
     if (klass == ctx->GetJSValueClass()) {
-        return wrap_ref(helpers::TypeIdentity<JSConvertJSValue>(), ref);
+        return wrapRef(helpers::TypeIdentity<JSConvertJSValue>(), ref);
     }
     if (klass == ctx->GetStringClass()) {
-        return wrap_ref(helpers::TypeIdentity<JSConvertString>(), ref);
+        return wrapRef(helpers::TypeIdentity<JSConvertString>(), ref);
     }
     // start slowpath
     auto refconv = JSRefConvertResolve(ctx, klass);
     auto res = refconv->Wrap(ctx, EtsObject::FromCoreType(ref));
-    store_res(res);
+    storeRes(res);
     return res != nullptr;
 }
 
@@ -219,9 +219,9 @@ template <typename FClsResolv, typename FStore, typename FRead>
         case panda_file::Type::TypeId::F32:
             return wrapPrim(helpers::TypeIdentity<JSConvertF32>());
         case panda_file::Type::TypeId::F64:
-            return wrap_prim(helpers::TypeIdentity<JSConvertF64>());
+            return wrapPrim(helpers::TypeIdentity<JSConvertF64>());
         case panda_file::Type::TypeId::REFERENCE:
-            return ConvertEtsValRef(ctx, resolve_ref_cls, store_res, read_val);
+            return ConvertEtsValRef(ctx, resolveRefCls, storeRes, readVal);
         default: {
             ctx->Fatal(std::string("ConvertEtsVal: unsupported typeid ") +
                        panda_file::Type::GetSignatureByTypeId(type));

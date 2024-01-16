@@ -303,12 +303,12 @@ public:
 
     Class *GetJSValueClass() const
     {
-        return jsvalueClass_;
+        return jsValueClass_;
     }
 
     Class *GetJSErrorClass() const
     {
-        return jserrorClass_;
+        return jsErrorClass_;
     }
 
     Class *GetObjectClass() const
@@ -328,7 +328,7 @@ public:
 
     Class *GetUndefinedClass() const
     {
-        return undefined_class_;
+        return undefinedClass_;
     }
 
     Class *GetPromiseClass() const
@@ -455,17 +455,17 @@ private:
 
     JSRefConvertCache refconvertCache_;
 
-    Class *jsruntime_class_ {};
-    Class *jsvalue_class_ {};
-    Class *jserror_class_ {};
-    Class *object_class_ {};
-    Class *string_class_ {};
-    Class *void_class_ {};
-    Class *undefined_class_ {};
-    Class *promise_class_ {};
-    Class *error_class_ {};
-    Class *exception_class_ {};
-    Class *type_class_ {};
+    Class *jsRuntimeClass_ {};
+    Class *jsValueClass_ {};
+    Class *jsErrorClass_ {};
+    Class *objectClass_ {};
+    Class *stringClass_ {};
+    Class *voidClass_ {};
+    Class *undefinedClass_ {};
+    Class *promiseClass_ {};
+    Class *errorClass_ {};
+    Class *exceptionClass_ {};
+    Class *typeClass_ {};
 
     Class *boxIntClass_ {};
     Class *boxLongClass_ {};

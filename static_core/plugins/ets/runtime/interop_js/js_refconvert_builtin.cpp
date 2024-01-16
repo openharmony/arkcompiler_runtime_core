@@ -315,7 +315,7 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
             case napi_string:
                 return builtinConvert(helpers::TypeIdentity<JSConvertString>(), ctxx, env, jsValue);
             case napi_object:
-                return m_object_object(ctx, js_value);
+                return mObjectObject(ctx, jsValue);
             case napi_undefined:
                 return ctx->GetUndefinedObject();
             case napi_symbol:

@@ -45,8 +45,8 @@ public:
     // Convert js->ets, returns nullopt if failed, throws ETS/JS exceptions
     EtsObject *Unwrap(InteropCtx *ctx, napi_value jsValue)
     {
-        ASSERT(!IsNull(JSEnvFromInteropCtx(ctx), js_value));
-        return (this->*(this->unwrap_))(ctx, js_value);
+        ASSERT(!IsNull(JSEnvFromInteropCtx(ctx), jsValue));
+        return (this->*(this->unwrap_))(ctx, jsValue);
     }
 
     JSRefConvert() = delete;

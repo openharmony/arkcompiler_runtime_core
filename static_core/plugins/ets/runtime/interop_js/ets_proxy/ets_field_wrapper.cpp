@@ -138,11 +138,11 @@ struct EtsFieldAccessorREFERENCE {
     static bool Setter(InteropCtx *ctx, napi_env env, EtsHandle<EtsObject> etsObject, EtsFieldWrapper *etsFieldWrapper,
                        napi_value jsValue)
     {
-        EtsObject *ets_value;
-        if (IsNull(env, js_value)) {
-            ets_value = nullptr;
-        } else if (IsUndefined(env, js_value)) {
-            ets_value = ctx->GetUndefinedObject();
+        EtsObject *etsValue;
+        if (IsNull(env, jsValue)) {
+            etsValue = nullptr;
+        } else if (IsUndefined(env, jsValue)) {
+            etsValue = ctx->GetUndefinedObject();
         } else {
             JSRefConvert *refconv = etsFieldWrapper->GetRefConvert<true>(ctx);
             if (UNLIKELY(refconv == nullptr)) {
