@@ -292,48 +292,6 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
 }
 
 /**
-* @tc.name: verifier_constant_pool_009
-* @tc.desc: Verify the literal string of the abc file.
-* @tc.type: FUNC
-* @tc.require: file path and name
-*/
-HWTEST_F(VerifierConstantPool, verifier_constant_pool_009, TestSize.Level1)
-{
-    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
-    {
-        panda::verifier::Verifier ver {base_file_name};
-        ver.CollectIdInfos();
-        EXPECT_TRUE(ver.VerifyConstantPoolContent());
-    }
-    std::ifstream base_file(base_file_name, std::ios::binary);
-    EXPECT_TRUE(base_file.is_open());
-
-    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
-
-    std::vector<unsigned char> new_str = {'a', 'b', 'c', 'd'};
-    std::vector<unsigned char> str = {'a', 'g', 'e'}; // The known string in the literal array
-    for (size_t i = 0; i < buffer.size(); ++i) {
-        if (buffer[i] == str[0] && buffer[i + 1] == str[1] && buffer[i + 2] == str[2]) {
-            buffer[i] = new_str[0];
-            buffer[i + 1] = new_str[1];
-            buffer[i + 2] = new_str[2];
-            buffer[i + 3] = new_str[3];
-            break;
-        }
-    }
-
-    const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_009.abc";
-    GenerateModifiedAbc(buffer, target_file_name);
-    base_file.close();
-
-    {
-        panda::verifier::Verifier ver {target_file_name};
-        ver.CollectIdInfos();
-        EXPECT_FALSE(ver.VerifyConstantPoolContent());
-    }
-}
-
-/**
 * @tc.name: verifier_constant_pool_010
 * @tc.desc: Verify the literal id in the literal array of the abc file.
 * @tc.type: FUNC

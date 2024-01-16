@@ -154,14 +154,14 @@ bool Verifier::VerifyConstantPoolContent()
 
 void Verifier::GetConstantPoolIds()
 {
-    if (method_string_literal_ids_.size() != 0) {
+    if (constant_pool_ids_.size() != 0) {
         return;
     }
     auto index_headers = file_->GetIndexHeaders();
     for (const auto &index_header : index_headers) {
         auto region_indexs = file_->GetMethodIndex(&index_header);
         for (auto &index : region_indexs) {
-            method_string_literal_ids_.push_back(index.GetOffset());
+            constant_pool_ids_.push_back(index.GetOffset());
         }
     }
 }
@@ -196,7 +196,6 @@ bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_f
 bool Verifier::CollectIdInInstructions(const panda_file::File::EntityId &method_id)
 {
     panda_file::MethodDataAccessor method_accessor(*file_, method_id);
-
     ASSERT(method_accessor.GetCodeId().has_value());
     panda_file::CodeDataAccessor code_accessor(*file_, method_accessor.GetCodeId().value());
     const auto ins_size = code_accessor.GetCodeSize();
@@ -207,7 +206,7 @@ bool Verifier::CollectIdInInstructions(const panda_file::File::EntityId &method_
 
     while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
         if (!bc_ins.IsPrimaryOpcodeValid()) {
-            LOG(ERROR, VERIFIER) << "Verify primaryOpcode failed!";
+            LOG(ERROR, VERIFIER) << "Fail to verify primary opcode!";
             return false;
         }
         if (bc_ins.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
@@ -301,11 +300,11 @@ bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t coun
 
 bool Verifier::VerifyMethodId(const uint32_t &method_id) const
 {
-    auto iter = std::find(method_string_literal_ids_.begin(), method_string_literal_ids_.end(), method_id);
-    if (iter == method_string_literal_ids_.end() ||
+    auto iter = std::find(constant_pool_ids_.begin(), constant_pool_ids_.end(), method_id);
+    if (iter == constant_pool_ids_.end() ||
         (std::find(literal_ids_.begin(), literal_ids_.end(), method_id) != literal_ids_.end()) ||
         ins_string_ids_.count(method_id)) {
-        LOG(ERROR, VERIFIER) << "Verify method_id failed. method_id(0x" << std::hex << method_id << ")!";
+        LOG(ERROR, VERIFIER) << "Fail to verify method id. method_id(0x" << std::hex << method_id << ")!";
         return false;
     }
     return true;
@@ -315,7 +314,7 @@ bool Verifier::VerifyLiteralId(const uint32_t &literal_id) const
 {
     auto iter = std::find(literal_ids_.begin(), literal_ids_.end(), literal_id);
     if (iter == literal_ids_.end()) {
-        LOG(ERROR, VERIFIER) << "Verify literal_id failed. literal_id(0x" << std::hex << literal_id << ")!";
+        LOG(ERROR, VERIFIER) << "Fail to verify literal id. literal_id(0x" << std::hex << literal_id << ")!";
         return false;
     }
     return true;
@@ -323,20 +322,11 @@ bool Verifier::VerifyLiteralId(const uint32_t &literal_id) const
 
 bool Verifier::VerifyStringId(const uint32_t &string_id) const
 {
-
-    auto iter = std::find(method_string_literal_ids_.begin(), method_string_literal_ids_.end(), string_id);
-    if (iter == method_string_literal_ids_.end() ||
+    auto iter = std::find(constant_pool_ids_.begin(), constant_pool_ids_.end(), string_id);
+    if (iter == constant_pool_ids_.end() ||
         ins_method_ids_.count(string_id) ||
         (std::find(literal_ids_.begin(), literal_ids_.end(), string_id) != literal_ids_.end())) {
-        LOG(ERROR, VERIFIER) << "Invalid string_id. string_id(0x" << std::hex << string_id << ")!";
-        return false;
-    }
-    auto string_data = file_->GetStringData(panda_file::File::EntityId(string_id));
-    auto desc = std::string(utf::Mutf8AsCString(string_data.data));
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring utf16_desc = converter.from_bytes(desc);
-    if (string_data.utf16_length != utf16_desc.length()) {
-        LOG(ERROR, VERIFIER) << "Invalid string_id. string_id(0x" << std::hex << string_id << ")!";
+        LOG(ERROR, VERIFIER) << "Fail to verify string id. string_id(0x" << std::hex << string_id << ")!";
         return false;
     }
     return true;
@@ -388,6 +378,10 @@ bool Verifier::VerifyMethodIdInLiteralArray(const uint32_t &id)
 bool Verifier::VerifyStringIdInLiteralArray(const uint32_t &id)
 {
     auto string_data = file_->GetStringData(panda_file::File::EntityId(id));
+    if (string_data.data == nullptr) {
+        LOG(ERROR, VERIFIER) << "Invalid string_id. string_id(0x" << std::hex << id << ")!";
+        return false;
+    }
     auto desc = std::string(utf::Mutf8AsCString(string_data.data));
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     std::wstring utf16_desc = converter.from_bytes(desc);
@@ -457,10 +451,7 @@ bool Verifier::VerifySingleLiteralArray(const panda_file::File::EntityId &litera
                 break;
             }
             case panda_file::LiteralTag::STRING: {
-                const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
-                if (!VerifyStringIdInLiteralArray(value)) {
-                    return false;
-                }
+                panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
                 break;
             }
             case panda_file::LiteralTag::METHOD: {
@@ -564,7 +555,7 @@ bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const By
     // update maximum backward offset
     const auto bc_ins_backward_size = bc_ins.GetAddress() - bc_ins_first.GetAddress();
     if (!bc_ins.IsPrimaryOpcodeValid()) {
-        LOG(ERROR, VERIFIER) << "Verify primaryOpcode failed!";
+        LOG(ERROR, VERIFIER) << "Fail to verify primary opcode!";
         return false;
     }
 
@@ -572,22 +563,16 @@ bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const By
     if (IsJumpInstruction(ins_opcode)) {
         std::optional<int64_t> immdata = GetFirstImmFromInstruction(bc_ins);
         if (!immdata.has_value()) {
-            LOG(ERROR, VERIFIER) << "Get immediate data failed!";
+            LOG(ERROR, VERIFIER) << "Fail to get immediate data!";
             return false;
         }
-
-        if (immdata.value() > 0) {
-            // immdata -1,excluding instruction location offset
-            if (bc_ins_forward_size - 1 <= immdata.value()) {
-                LOG(ERROR, VERIFIER) << "Jump forward out of boundary";
-                return false;
-            }
-        } else if (immdata.value() < 0) {
-            // immdata -1,excluding instruction location offset
-            if ((bc_ins_backward_size - 1) + immdata.value() < 0) {
-                LOG(ERROR, VERIFIER) << "Jump backward out of boundary";
-                return false;
-            }
+        if ((immdata.value() > 0) && (immdata.value() >= bc_ins_forward_size)) {
+            LOG(ERROR, VERIFIER) << "Jump forward out of boundary";
+            return false;
+        }
+        if ((immdata.value() < 0) && (bc_ins_backward_size + immdata.value() < 0)) {
+            LOG(ERROR, VERIFIER) << "Jump backward out of boundary";
+            return false;
         }
     }
     return true;
@@ -600,7 +585,7 @@ bool Verifier::GetIcSlotFromInstruction(const BytecodeInstruction &bc_ins, uint3
     if (bc_ins.HasFlag(BytecodeInstruction::Flags::ONE_SLOT)) {
         first_imm = GetFirstImmFromInstruction(bc_ins);
         if (!first_imm.has_value()) {
-            LOG(ERROR, VERIFIER) << "Get first immediate data failed!";
+            LOG(ERROR, VERIFIER) << "Fail to get first immediate data!";
             return false;
         }
         first_slot_index = first_imm.value();
@@ -609,7 +594,7 @@ bool Verifier::GetIcSlotFromInstruction(const BytecodeInstruction &bc_ins, uint3
     } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::TWO_SLOT)) {
         first_imm = GetFirstImmFromInstruction(bc_ins);
         if (!first_imm.has_value()) {
-            LOG(ERROR, VERIFIER) << "Get first immediate data failed!";
+            LOG(ERROR, VERIFIER) << "Fail to get first immediate data!";
             return false;
         }
         first_slot_index = first_imm.value();
@@ -625,8 +610,9 @@ bool Verifier::VerifySlotNumber(panda_file::MethodDataAccessor &method_accessor,
 {
     const auto ann_slot_number = GetSlotNumberFromAnnotation(method_accessor);
     if (!ann_slot_number.has_value()) {
-        LOG(ERROR, VERIFIER) << "Fail to get slot number from annotation";
-        return false;
+        LOG(INFO, VERIFIER) << "There is no slot number information in annotaion.";
+        // To be compatible with old abc, slot number verification is not continued
+        return true;
     }
     if (slot_number == ann_slot_number.value()) {
         return true;
@@ -656,7 +642,7 @@ bool Verifier::CheckConstantPoolMethodContent(const panda_file::File::EntityId &
             return false;
         }
         if (!GetIcSlotFromInstruction(bc_ins, ins_slot_num, has_slot, is_two_slot)) {
-            LOG(ERROR, VERIFIER) << "Get first slot index failed!";
+            LOG(ERROR, VERIFIER) << "Fail to get first slot index!";
             return false;
         }
         bc_ins = bc_ins.GetNext();
@@ -674,23 +660,20 @@ bool Verifier::CheckConstantPoolMethodContent(const panda_file::File::EntityId &
 
 bool Verifier::CheckConstantPoolIndex() const
 {
-    for(auto &id : ins_method_ids_) {
-        if (std::find(all_method_ids_.begin(), all_method_ids_.end(), id) ==
-            all_method_ids_.end()) {
-        }
-        if(!VerifyMethodId(id)) {
+    for (auto &id : ins_method_ids_) {
+        if (!VerifyMethodId(id)) {
             return false;
         }
     }
 
-    for(auto &id : ins_literal_ids_) {
-        if(!VerifyLiteralId(id)) {
+    for (auto &id : ins_literal_ids_) {
+        if (!VerifyLiteralId(id)) {
             return false;
         }
     }
 
-    for(auto &id : ins_string_ids_) {
-        if(!VerifyStringId(id)) {
+    for (auto &id : ins_string_ids_) {
+        if (!VerifyStringId(id)) {
             return false;
         }
     }

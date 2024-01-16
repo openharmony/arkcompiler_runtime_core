@@ -86,7 +86,7 @@ private:
     bool CheckConstantPoolIndex() const;
 
     std::unique_ptr<const panda_file::File> file_;
-    std::vector<uint32_t> method_string_literal_ids_;
+    std::vector<uint32_t> constant_pool_ids_;
     std::vector<uint32_t> all_method_ids_;
     std::unordered_set<uint32_t> ins_method_ids_;
     std::unordered_set<uint32_t> ins_literal_ids_;
