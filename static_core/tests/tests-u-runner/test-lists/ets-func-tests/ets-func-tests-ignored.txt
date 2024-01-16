@@ -729,3 +729,11 @@ spec/interfaces_overriding/interface_overriding_04.ets
 spec/interfaces_overriding/interface_overriding_05.ets
 spec/interfaces_overriding/interface_overriding_06.ets
 ### End of Interfaces overriding
+### Issue 15281
+spec/types/number_to_string_1.ets
+spec/types/number_to_string_2.ets
+spec/types/float_to_string_1.ets
+spec/types/float_to_string_2.ets
+spec/types/double_to_string_1.ets
+spec/types/double_to_string_2.ets
+### Issue 15281 end
