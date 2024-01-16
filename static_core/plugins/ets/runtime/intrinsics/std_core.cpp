@@ -28,7 +28,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/types/ets_void.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 extern "C" EtsArray *StdCoreStackTraceLines()
 {
@@ -60,11 +60,11 @@ extern "C" EtsArray *StdCoreStackTraceLines()
 
     auto coroutine = Coroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    auto *arr = panda::coretypes::Array::Create(klass, lines.size());
+    auto *arr = ark::coretypes::Array::Create(klass, lines.size());
 
     VMHandle<coretypes::Array> arrayHandle(coroutine, arr);
 
-    for (panda::ArraySizeT i = 0; i < (panda::ArraySizeT)lines.size(); i++) {
+    for (ark::ArraySizeT i = 0; i < (ark::ArraySizeT)lines.size(); i++) {
         auto *str = coretypes::String::CreateFromMUtf8(utf::CStringAsMutf8(lines[i].data()), lines[i].length(), ctx,
                                                        thread->GetVM());
         arrayHandle.GetPtr()->Set(i, str);
@@ -75,7 +75,7 @@ extern "C" EtsArray *StdCoreStackTraceLines()
 
 extern "C" EtsVoid *StdCorePrintStackTrace()
 {
-    panda::PrintStackTrace();
+    ark::PrintStackTrace();
     return EtsVoid::GetInstance();
 }
 
@@ -89,7 +89,7 @@ static PandaString ResolveLibraryName(const PandaString &name)
 #endif  // PANDA_TARGET_UNIX
 }
 
-extern "C" EtsVoid *LoadLibrary(panda::ets::EtsString *name)
+extern "C" EtsVoid *LoadLibrary(ark::ets::EtsString *name)
 {
     ASSERT(name->AsObject()->IsStringClass());
 
@@ -127,4 +127,4 @@ extern "C" EtsVoid *StdSystemScheduleCoroutine()
     return ets::EtsVoid::GetInstance();
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

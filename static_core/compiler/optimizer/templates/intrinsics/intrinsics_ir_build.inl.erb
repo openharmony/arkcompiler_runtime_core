@@ -19,7 +19,7 @@ inline bool NeedSafePointAfterIntrinsic(RuntimeInterface::IntrinsicId intrinsic)
     switch (intrinsic) // NOLINT(hicpp-multiway-paths-covered)
     {
 % Compiler::intrinsics.select {|intrinsic| intrinsic.safepoint_after_call}.each do |intrinsic|
-    case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
+    case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
         return true;
 % end
     default:
@@ -39,7 +39,7 @@ void InstBuilder::AddArgNullcheckIfNeeded([[maybe_unused]] RuntimeInterface::Int
     switch (intrinsic)
     {
 % Compiler::intrinsics.select {|intrinsic| !intrinsic.need_nullcheck.empty?}.each do |intrinsic|
-    case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
+    case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
 % intrinsic.need_nullcheck.each do |arg_num|
         {
             auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, bcAddr, inst->GetInput(ARG_OFFSET + <%= arg_num %>).GetInst(), saveState);
@@ -62,7 +62,7 @@ inline bool IsVirtual([[maybe_unused]] RuntimeInterface::IntrinsicId intrinsic)
     switch (intrinsic)
     {
 % Compiler::intrinsics.select {|intrinsic| intrinsic.has_impl? && !intrinsic.static}.each do |intrinsic|
-    case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
+    case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
         return true;
 % end
     default:

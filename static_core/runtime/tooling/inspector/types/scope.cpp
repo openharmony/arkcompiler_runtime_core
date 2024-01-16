@@ -17,7 +17,7 @@
 
 #include "libpandabase/utils/json_builder.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 static const char *GetTypeString(Scope::Type type)
 {
     switch (type) {
@@ -46,4 +46,4 @@ std::function<void(JsonObjectBuilder &)> Scope::ToJson() const
         }
     };
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

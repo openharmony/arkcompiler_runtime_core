@@ -21,7 +21,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/mtmanaged_thread.h"
 
-namespace panda {
+namespace ark {
 
 inline Class *ClassLinker::GetClass(const Method &caller, panda_file::File::EntityId id,
                                     ClassLinkerErrorHandler *errorHandler /* = nullptr */)
@@ -74,6 +74,6 @@ inline Class *ClassLinker::GetLoadedClass(const panda_file::File &pf, panda_file
     return nullptr;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CLASS_LINKER_INL_H_

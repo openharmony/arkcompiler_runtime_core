@@ -20,7 +20,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class AdjustRefs : public Optimization {
 public:
     explicit AdjustRefs(Graph *graph);
@@ -60,6 +60,6 @@ private:
     Loop *loop_ = {nullptr};
     bool added_ = {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif

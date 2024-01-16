@@ -17,7 +17,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class MemLeakTest : public testing::Test {
 public:
@@ -80,4 +80,4 @@ TEST_F(MemLeakTest, MemLeak1MBTest)
 
 #endif  // NDEBUG
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

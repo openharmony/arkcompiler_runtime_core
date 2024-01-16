@@ -17,7 +17,7 @@
 #include <libpandabase/mem/ringbuf/lock_free_ring_buffer.h>
 #include <queue>
 
-namespace panda::mem {
+namespace ark::mem {
 static constexpr size_t ITERATIONS = 1000000;
 
 #ifdef PANDA_NIGHTLY_TEST_ON
@@ -124,4 +124,4 @@ TEST(LockFreeRingBufferTest, MultiThreadingTest)
     sum += popSum;  // can be without atomics because we use it after .join only -> HB
     ASSERT_EQ(sum, expectedSum);
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

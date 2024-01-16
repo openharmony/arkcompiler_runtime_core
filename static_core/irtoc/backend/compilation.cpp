@@ -26,12 +26,12 @@
 #include "dwarf_builder.h"
 #endif
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
 class UsedRegistersCollector : public vixl::aarch64::Disassembler {
 public:
-    explicit UsedRegistersCollector(panda::ArenaAllocator *allocator) : Disassembler(allocator) {}
+    explicit UsedRegistersCollector(ark::ArenaAllocator *allocator) : Disassembler(allocator) {}
 
     RegMask &GetUsedRegs(bool isFp)
     {
@@ -131,7 +131,7 @@ private:
 // it conflicts with elfio.
 static constexpr size_t EF_ARM_EABI_VER5 = 0x05000000;
 
-void Compilation::CollectUsedRegisters([[maybe_unused]] panda::ArenaAllocator *allocator)
+void Compilation::CollectUsedRegisters([[maybe_unused]] ark::ArenaAllocator *allocator)
 {
 #ifdef LLVM_INTERPRETER_CHECK_REGS_MASK
     if (arch_ == Arch::AARCH64) {
@@ -400,4 +400,4 @@ Compilation::Result Compilation::MakeElf(std::string_view output)
 
     return 0;
 }
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc

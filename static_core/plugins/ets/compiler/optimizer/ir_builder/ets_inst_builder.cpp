@@ -22,7 +22,7 @@
 #include "bytecode_instruction.h"
 #include "bytecode_instruction-inl.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 template <Opcode OPCODE>
 void InstBuilder::BuildLaunch(const BytecodeInstruction *bcInst, bool isRange, bool accRead)
@@ -180,4 +180,4 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::
     AddInstruction(intrinsic);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

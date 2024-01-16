@@ -55,18 +55,18 @@ using llvm::CastInst;
 using llvm::Instruction;
 using llvm::PHINode;
 
-using panda::llvmbackend::gc_utils::IsAllowedEscapedUser;
-using panda::llvmbackend::gc_utils::IsDerived;
-using panda::llvmbackend::gc_utils::IsGcFunction;
-using panda::llvmbackend::gc_utils::IsGcRefType;
+using ark::llvmbackend::gc_utils::IsAllowedEscapedUser;
+using ark::llvmbackend::gc_utils::IsDerived;
+using ark::llvmbackend::gc_utils::IsGcFunction;
+using ark::llvmbackend::gc_utils::IsGcRefType;
 
-using panda::llvmbackend::gc_utils::IsFunctionSupplemental;
+using ark::llvmbackend::gc_utils::IsFunctionSupplemental;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static llvm::cl::opt<bool> g_moveCmps("gc-intrusion-move-cmps", llvm::cl::Hidden, llvm::cl::init(true),
                                       llvm::cl::desc("Move comparisons closer to their usages"));
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 class GcRefLiveness {
     using BlockValuesMap = DenseMap<BasicBlock *, SetVector<Value *>>;
@@ -788,4 +788,4 @@ bool GcIntrusion::MoveComparisons(Function *function)
     return changed;
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

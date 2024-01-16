@@ -15,7 +15,7 @@
 
 #include "lexer.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 /*-------------------------------*/
 
@@ -400,4 +400,4 @@ void Lexer::AnalyzeLine()
 
 /*-------------------------------*/
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

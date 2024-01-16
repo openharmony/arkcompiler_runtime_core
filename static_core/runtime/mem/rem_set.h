@@ -18,7 +18,7 @@
 
 #include <limits>
 
-namespace panda::mem {
+namespace ark::mem {
 
 namespace test {
 class RemSetTest;
@@ -136,5 +136,5 @@ private:
 
     friend class test::RemSetTest;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_MEM_GC_G1_REM_SET_H

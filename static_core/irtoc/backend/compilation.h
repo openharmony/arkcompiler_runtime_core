@@ -18,7 +18,7 @@
 
 #include "function.h"
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 using compiler::Graph;
 
 class Compilation {
@@ -46,7 +46,7 @@ public:
     }
 
 private:
-    void CollectUsedRegisters(panda::ArenaAllocator *allocator);
+    void CollectUsedRegisters(ark::ArenaAllocator *allocator);
     void CheckUsedRegisters();
     Result Compile();
 
@@ -65,7 +65,7 @@ private:
     UsedRegisters usedRegisters_;
 #endif
 };
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define COMPILE(name)                                     \

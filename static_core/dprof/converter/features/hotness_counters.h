@@ -24,7 +24,7 @@
 
 #include <list>
 
-namespace panda::dprof {
+namespace ark::dprof {
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 inline const char HCOUNTERS_FEATURE_NAME[] = "hotness_counters.v1";
 
@@ -131,6 +131,6 @@ private:
     NO_COPY_SEMANTIC(HCountersFunctor);
     NO_MOVE_SEMANTIC(HCountersFunctor);
 };
-}  // namespace panda::dprof
+}  // namespace ark::dprof
 
 #endif  // DPROF_CONVERTER_FEATURES_HOTNESS_COUNTERS_H

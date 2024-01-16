@@ -18,7 +18,7 @@
 
 #include "runtime/include/itable_builder.h"
 
-namespace panda {
+namespace ark {
 
 class CoreITableBuilder : public ITableBuilder {
 public:
@@ -46,6 +46,6 @@ public:
     };
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CORE_CORE_ITABLE_BUILDER_H_

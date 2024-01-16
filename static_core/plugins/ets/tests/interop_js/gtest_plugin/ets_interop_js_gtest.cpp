@@ -29,7 +29,7 @@ extern "C" napi_status napi_fatal_exception([[maybe_unused]] napi_env env, [[may
 }
 #endif  // PANDA_TARGET_OHOS
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 napi_env EtsInteropTest::jsEnv_ = {};
 
@@ -121,6 +121,6 @@ static napi_value Init(napi_env env, napi_value exports)
     return exports;
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing
 
-NAPI_MODULE(GTEST_ADDON, panda::ets::interop::js::testing::Init)
+NAPI_MODULE(GTEST_ADDON, ark::ets::interop::js::testing::Init)

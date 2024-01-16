@@ -31,7 +31,7 @@
 #error "Unsupported platform"
 #endif
 
-namespace panda::os {
+namespace ark::os {
 
 class CpuSet {
 public:
@@ -197,6 +197,6 @@ private:
     static CpuSet weakCpuSet_;
 };
 
-}  // namespace panda::os
+}  // namespace ark::os
 
 #endif  // PANDA_LIBPANDABASE_OS_CPU_AFFINITY_H

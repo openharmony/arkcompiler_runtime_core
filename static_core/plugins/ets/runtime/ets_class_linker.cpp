@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "types/ets_field.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 EtsClassLinker::EtsClassLinker(ClassLinker *classLinker) : classLinker_(classLinker) {}
 
@@ -47,7 +47,7 @@ bool EtsClassLinker::InitializeClass(EtsCoroutine *coroutine, EtsClass *klass)
 
 EtsClass *EtsClassLinker::GetClassRoot(EtsClassRoot root) const
 {
-    return EtsClass::FromRuntimeClass(ext_->GetClassRoot(static_cast<panda::ClassRoot>(root)));
+    return EtsClass::FromRuntimeClass(ext_->GetClassRoot(static_cast<ark::ClassRoot>(root)));
 }
 
 EtsClass *EtsClassLinker::GetClass(const char *name, bool needCopyDescriptor, ClassLinkerContext *classLinkerContext,
@@ -127,4 +127,4 @@ EtsClass *EtsClassLinker::GetTypeAPIParameterClass()
     return EtsClass::FromRuntimeClass(ext_->GetTypeAPIParameterClass());
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

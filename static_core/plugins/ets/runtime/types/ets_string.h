@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 // Private inheritance, because need to disallow implicit conversion to core type
 class EtsString : private coretypes::String {
@@ -335,6 +335,6 @@ private:
     }
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_

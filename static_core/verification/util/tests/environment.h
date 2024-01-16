@@ -21,7 +21,7 @@
 #include <variant>
 #include <optional>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 using OptionValue = std::variant<std::string, int, bool>;
 
 class EnvOptions {
@@ -50,6 +50,6 @@ public:
 private:
     std::unordered_map<std::string, OptionValue> options_;
 };
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test
 
 #endif  // !_PANDA_VERIFIER_TESTS_ENV_HPP

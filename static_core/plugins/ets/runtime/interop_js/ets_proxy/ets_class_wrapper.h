@@ -27,11 +27,11 @@
 #include <node_api.h>
 #include <vector>
 
-namespace panda::ets {
+namespace ark::ets {
 class EtsClass;
-}  // namespace panda::ets
+}  // namespace ark::ets
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 using EtsClassWrappersCache = WrappersCache<EtsClass *, EtsClassWrapper>;
 
@@ -136,6 +136,6 @@ private:
     uint32_t numFields_ {};
 };
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H_

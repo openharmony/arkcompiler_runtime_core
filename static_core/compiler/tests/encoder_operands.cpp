@@ -29,7 +29,7 @@ static inline auto g_randomGen = std::mt19937_64(SEED);
 #include "optimizer/code_generator/operands.h"
 
 // NOLINTBEGIN(readability-isolate-declaration)
-namespace panda::compiler {
+namespace ark::compiler {
 TEST(Operands, TypeInfo)
 {
     uint8_t u8 = 0;
@@ -347,4 +347,4 @@ TEST(Operands, MemRef)
 }
 // NOLINTEND(readability-isolate-declaration)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

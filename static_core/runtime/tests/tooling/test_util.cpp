@@ -18,7 +18,7 @@
 #include "include/method.h"
 #include "include/tooling/pt_location.h"
 
-namespace panda::tooling::test {
+namespace ark::tooling::test {
 
 // NOLINTBEGIN(fuchsia-statically-constructed-objects)
 TestMap TestUtil::testMap_;
@@ -131,4 +131,4 @@ void SetExtractorFactoryForTest(TestExtractorFactory *factory)
 {
     TestUtil::SetExtractorFactory(factory);
 }
-}  // namespace panda::tooling::test
+}  // namespace ark::tooling::test

@@ -21,7 +21,7 @@
 #include "mem.h"
 #include "pool_map.h"
 
-namespace panda {
+namespace ark {
 class Arena;
 
 enum class OSPagesPolicy : bool {
@@ -217,6 +217,6 @@ private:
     std::string name_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_MEM_MEM_POOL_H

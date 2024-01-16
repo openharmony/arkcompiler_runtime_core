@@ -29,15 +29,15 @@
 #include <vector>
 #include "mem/gc/gc_types.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 class File;
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
-namespace panda {
+namespace ark {
 class Class;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 template <Arch ARCH, bool IS_JIT_MODE>
 class ElfBuilder;
 
@@ -83,7 +83,7 @@ private:
     friend class JitCodeDataProvider;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 // Next "C"-code need for enable interaction with gdb
 // Please read "JIT Compilation Interface" from gdb-documentation for more information

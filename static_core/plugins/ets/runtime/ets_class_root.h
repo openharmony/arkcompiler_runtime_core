@@ -19,7 +19,7 @@
 #include "libpandabase/utils/type_helpers.h"
 #include "runtime/include/class_root.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 enum class EtsClassRoot {
     VOID = helpers::ToUnderlying(ClassRoot::V),
@@ -111,6 +111,6 @@ inline EtsClassRoot ToEtsClassRoot(ClassRoot classRoot)
     UNREACHABLE();
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H_

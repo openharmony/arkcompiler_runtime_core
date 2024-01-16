@@ -18,7 +18,7 @@
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/gc_scope.h"
 
-namespace panda::mem {
+namespace ark::mem {
 GCScope<TRACE_TIMING>::GCScope(std::string_view name, GC *gc)
     : trace::ScopedTrace(name.data()), ScopedTiming(name, *gc->GetTiming())
 {
@@ -38,4 +38,4 @@ GCScope<TRACE_PHASE>::GCScope(std::string_view name, GC *gc, GCPhase phase)
     : trace::ScopedTrace(name.data()), GCScopedPhase(gc, phase)
 {
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

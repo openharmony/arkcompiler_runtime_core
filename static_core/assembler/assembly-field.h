@@ -23,7 +23,7 @@
 #include "extensions/extensions.h"
 #include "meta.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Field {
@@ -37,13 +37,13 @@ struct Field {
     size_t boundRight = 0;
     bool isDefined = true;
 
-    explicit Field(panda::panda_file::SourceLang lang)
+    explicit Field(ark::panda_file::SourceLang lang)
         : metadata(extensions::MetadataExtension::CreateFieldMetadata(lang))
     {
     }
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // !PANDA_ASSEMBLER_FIELD_H

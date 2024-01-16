@@ -22,7 +22,7 @@
 #include "utils/logger.h"
 #include "utils/asan_interface.h"
 
-namespace panda {
+namespace ark {
 
 inline Arena::Arena(size_t buffSize, void *buff) : Arena(buffSize, buff, ARENA_DEFAULT_ALIGNMENT) {}
 
@@ -148,6 +148,6 @@ inline void Arena::ExpandArena(const void *extraBuff, size_t size)
     size_ += size;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_MEM_ARENA_INL_H

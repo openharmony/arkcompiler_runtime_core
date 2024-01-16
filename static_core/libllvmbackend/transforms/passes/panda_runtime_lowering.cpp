@@ -36,11 +36,10 @@ using llvm::FunctionAnalysisManager;
 using llvm::Instruction;
 using llvm::Value;
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
-PandaRuntimeLowering PandaRuntimeLowering::Create(
-    llvmbackend::LLVMArkInterface *arkInterface,
-    [[maybe_unused]] const panda::llvmbackend::LLVMCompilerOptions *options)
+PandaRuntimeLowering PandaRuntimeLowering::Create(llvmbackend::LLVMArkInterface *arkInterface,
+                                                  [[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return PandaRuntimeLowering(arkInterface);
 }
@@ -156,4 +155,4 @@ bool PandaRuntimeLowering::IsRememberedCall(const llvm::Instruction &inst)
     return arkInterface_->IsRememberedCall(callInst.getFunction(), callInst.getCalledFunction());
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

@@ -25,7 +25,7 @@
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 static napi_value Version(napi_env env, [[maybe_unused]] napi_callback_info info)
 {
@@ -176,7 +176,7 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     bool useAot;
     napi_get_value_bool(env, argv[3U], &useAot);
 
-    bool res = panda::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
+    bool res = ark::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);
@@ -249,11 +249,11 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
         }
     }
 
-    auto addOpts = [&argStrings](base_options::Options *baseOptions, panda::RuntimeOptions *runtimeOptions) {
-        panda::PandArgParser paParser;
+    auto addOpts = [&argStrings](base_options::Options *baseOptions, ark::RuntimeOptions *runtimeOptions) {
+        ark::PandArgParser paParser;
         baseOptions->AddOptions(&paParser);
         runtimeOptions->AddOptions(&paParser);
-        panda::compiler::g_options.AddOptions(&paParser);
+        ark::compiler::g_options.AddOptions(&paParser);
 
         std::vector<const char *> fakeArgv;
         fakeArgv.reserve(argStrings.size());
@@ -271,7 +271,7 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
             LogError("Parse options failed: " + runtimeOptionsErr.value().GetMessage());
             return false;
         }
-        panda::compiler::CompilerLogger::SetComponents(panda::compiler::g_options.GetCompilerLog());
+        ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
         return true;
     };
 
@@ -303,6 +303,6 @@ static napi_value Init(napi_env env, napi_value exports)
     return exports;
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
-NAPI_MODULE(ETS_INTEROP_JS_NAPI, panda::ets::interop::js::Init)
+NAPI_MODULE(ETS_INTEROP_JS_NAPI, ark::ets::interop::js::Init)

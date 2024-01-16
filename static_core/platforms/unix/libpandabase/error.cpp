@@ -20,7 +20,7 @@
 
 #include <array>
 
-namespace panda::os {
+namespace ark::os {
 
 std::string Error::ToString() const
 {
@@ -44,4 +44,4 @@ std::string Error::ToString() const
     return res;
 }
 
-}  // namespace panda::os
+}  // namespace ark::os

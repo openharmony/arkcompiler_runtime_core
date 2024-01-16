@@ -20,7 +20,7 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda {
+namespace ark {
 
 constexpr size_t ARENA_DEFAULT_SIZE = SIZE_1M;
 constexpr Alignment ARENA_DEFAULT_ALIGNMENT = DEFAULT_ALIGNMENT;
@@ -205,7 +205,7 @@ private:
     DoubleLinkedAlignedArena *prev_ = nullptr;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 WEAK_FOR_LTO_END
 

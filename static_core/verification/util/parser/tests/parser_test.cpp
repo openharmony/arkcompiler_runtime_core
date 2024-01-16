@@ -19,7 +19,7 @@
 
 #include "util/parser/parser.h"
 
-namespace panda::parser::test {
+namespace ark::parser::test {
 namespace {
 struct Context {};
 struct smth;
@@ -209,4 +209,4 @@ TEST(VerifierParserTest, Parser)
     start = &(stringstring[0]);
     EXPECT_TRUE(STRINGSTRINGENDP(cont, start, end));
 }
-}  // namespace panda::parser::test
+}  // namespace ark::parser::test

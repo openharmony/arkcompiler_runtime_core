@@ -15,7 +15,7 @@
 
 #include "optimizer/analysis/liveness_use_table.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 UseTable::UseTable(ArenaAllocator *allocator) : table_(allocator->Adapter()), allocator_(allocator) {}
 
 void UseTable::AddUseOnFixedLocation(const Inst *inst, Location location, LifeNumber ln)
@@ -61,4 +61,4 @@ void UseTable::Dump(std::ostream &out, Arch arch) const
         out << std::endl;
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

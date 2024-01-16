@@ -17,7 +17,7 @@
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/inst.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 bool Canonicalization::RunImpl()
 {
@@ -127,4 +127,4 @@ void Canonicalization::VisitCompare([[maybe_unused]] GraphVisitor *v, Inst *inst
     }
 }
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

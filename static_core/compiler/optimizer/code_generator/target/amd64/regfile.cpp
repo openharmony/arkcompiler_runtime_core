@@ -22,7 +22,7 @@ Reserve registers.
 #include "target/amd64/target.h"
 #include "regfile.h"
 
-namespace panda::compiler::amd64 {
+namespace ark::compiler::amd64 {
 Amd64RegisterDescription::Amd64RegisterDescription(ArenaAllocator *allocator)
     : RegistersDescription(allocator, Arch::X86_64), usedRegs_(allocator->Adapter())
 {
@@ -102,4 +102,4 @@ void Amd64RegisterDescription::SetUsedRegs(const ArenaVector<Reg> &regs)
     }
 }
 
-}  // namespace panda::compiler::amd64
+}  // namespace ark::compiler::amd64

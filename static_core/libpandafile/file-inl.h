@@ -20,7 +20,7 @@
 #include "file.h"
 #include "utils/leb128.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 inline File::StringData File::GetStringData(EntityId id) const
 {
@@ -35,6 +35,6 @@ inline File::StringData File::GetStringData(EntityId id) const
     return strData;
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif

@@ -27,32 +27,32 @@
 
 namespace {
 
-using panda::panda_file::AnnotationItem;
-using panda::panda_file::ArrayValueItem;
-using panda::panda_file::BaseClassItem;
-using panda::panda_file::BaseFieldItem;
-using panda::panda_file::BaseMethodItem;
-using panda::panda_file::ClassItem;
-using panda::panda_file::CodeItem;
-using panda::panda_file::DebugInfoItem;
-using panda::panda_file::FieldItem;
-using panda::panda_file::FileWriter;
-using panda::panda_file::ForeignClassItem;
-using panda::panda_file::ForeignFieldItem;
-using panda::panda_file::ForeignMethodItem;
-using panda::panda_file::ItemContainer;
-using panda::panda_file::MemoryBufferWriter;
-using panda::panda_file::MethodHandleItem;
-using panda::panda_file::MethodItem;
-using panda::panda_file::MethodParamItem;
-using panda::panda_file::ParamAnnotationsItem;
-using panda::panda_file::PrimitiveTypeItem;
-using panda::panda_file::ScalarValueItem;
-using panda::panda_file::StringItem;
-using panda::panda_file::Type;
-using panda::panda_file::TypeItem;
-using panda::panda_file::ValueItem;
-using panda::panda_file::Writer;
+using ark::panda_file::AnnotationItem;
+using ark::panda_file::ArrayValueItem;
+using ark::panda_file::BaseClassItem;
+using ark::panda_file::BaseFieldItem;
+using ark::panda_file::BaseMethodItem;
+using ark::panda_file::ClassItem;
+using ark::panda_file::CodeItem;
+using ark::panda_file::DebugInfoItem;
+using ark::panda_file::FieldItem;
+using ark::panda_file::FileWriter;
+using ark::panda_file::ForeignClassItem;
+using ark::panda_file::ForeignFieldItem;
+using ark::panda_file::ForeignMethodItem;
+using ark::panda_file::ItemContainer;
+using ark::panda_file::MemoryBufferWriter;
+using ark::panda_file::MethodHandleItem;
+using ark::panda_file::MethodItem;
+using ark::panda_file::MethodParamItem;
+using ark::panda_file::ParamAnnotationsItem;
+using ark::panda_file::PrimitiveTypeItem;
+using ark::panda_file::ScalarValueItem;
+using ark::panda_file::StringItem;
+using ark::panda_file::Type;
+using ark::panda_file::TypeItem;
+using ark::panda_file::ValueItem;
+using ark::panda_file::Writer;
 
 std::unordered_map<Type::TypeId, PrimitiveTypeItem *> CreatePrimitiveTypes(ItemContainer *container)
 {
@@ -83,7 +83,7 @@ typename T::mapped_type Find(const T &map, typename T::key_type key)
 
 }  // anonymous namespace
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 /* static */
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
@@ -244,7 +244,7 @@ panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
         }
         case Value::Type::METHOD: {
             auto name = value->GetAsScalar()->GetValue<std::string>();
-            auto methodItem = static_cast<panda::panda_file::MethodItem *>(Find(methods, name));
+            auto methodItem = static_cast<ark::panda_file::MethodItem *>(Find(methods, name));
             out->emplace_back(methodItem);
             return &out->back();
         }
@@ -847,7 +847,7 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                 }
                 case panda_file::LiteralTag::ARRAY_STRING:
                     ASSERT(program.arrayTypes.find(Type(
-                               Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
+                               Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
                            program.arrayTypes.end());
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
                         std::string_view(std::get<std::string>(literal.value))));
@@ -1073,11 +1073,11 @@ bool AsmEmitter::MakeRecordItems(
 StringItem *AsmEmitter::GetMethodName(ItemContainer *items, const Function &func, const std::string &name)
 {
     if (func.metadata->IsCtor()) {
-        return items->GetOrCreateStringItem(panda::panda_file::GetCtorName(func.language));
+        return items->GetOrCreateStringItem(ark::panda_file::GetCtorName(func.language));
     }
 
     if (func.metadata->IsCctor()) {
-        return items->GetOrCreateStringItem(panda::panda_file::GetCctorName(func.language));
+        return items->GetOrCreateStringItem(ark::panda_file::GetCctorName(func.language));
     }
 
     return items->GetOrCreateStringItem(GetItemName(name));
@@ -1510,7 +1510,7 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
 
 /* static */
 bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps, bool emitDebugInfo,
-                      panda::panda_file::pgo::ProfileOptimizer *profileOpt)
+                      ark::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
     auto primitiveTypes = CreatePrimitiveTypes(items);
 
@@ -1556,8 +1556,7 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
 }
 
 bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::string, size_t> *stat,
-                      PandaFileToPandaAsmMaps *maps, bool debugInfo,
-                      panda::panda_file::pgo::ProfileOptimizer *profileOpt)
+                      PandaFileToPandaAsmMaps *maps, bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
     auto items = ItemContainer {};
     if (!Emit(&items, program, maps, debugInfo, profileOpt)) {
@@ -1572,8 +1571,7 @@ bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::stri
 }
 
 bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat,
-                      PandaFileToPandaAsmMaps *maps, bool debugInfo,
-                      panda::panda_file::pgo::ProfileOptimizer *profileOpt)
+                      PandaFileToPandaAsmMaps *maps, bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
     auto writer = FileWriter(filename);
     if (!writer) {
@@ -1670,7 +1668,7 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
                     const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
                     const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays) const
 {
-    auto labels = std::unordered_map<std::string_view, panda::Label> {};
+    auto labels = std::unordered_map<std::string_view, ark::Label> {};
 
     for (const auto &insn : ins) {
         if (insn.setLabel) {
@@ -1804,7 +1802,7 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, cons
             EmitLineNumber(program, constantPool, prevLineNumber, pcInc, i);
         }
 
-        if (panda::panda_file::IsDynamicLanguage(language) && emitDebugInfo) {
+        if (ark::panda_file::IsDynamicLanguage(language) && emitDebugInfo) {
             EmitColumnNumber(program, constantPool, prevColumnNumber, pcInc, i);
         }
 
@@ -1932,4 +1930,4 @@ std::string GetItemName(std::string name)
     return name.substr(superPos + 1);
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

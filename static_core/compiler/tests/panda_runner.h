@@ -22,7 +22,7 @@
 #include "assembler/assembly-parser.h"
 #include "include/runtime.h"
 
-namespace panda::test {
+namespace ark::test {
 
 extern "C" int PandaRunnerHookAArch64();
 extern "C" int PandaRunnerHook(uintptr_t lr, uintptr_t fp);
@@ -34,7 +34,7 @@ public:
 
     PandaRunner()
     {
-        auto execPath = panda::os::file::File::GetExecutablePath();
+        auto execPath = ark::os::file::File::GetExecutablePath();
 
         std::vector<std::string> bootPandaFiles = {execPath.Value() + "/../pandastdlib/arkstdlib.abc"};
 
@@ -157,6 +157,6 @@ private:
     std::unique_ptr<const panda_file::File> file_ {nullptr};
     std::optional<ssize_t> expectedResult_;
 };
-}  // namespace panda::test
+}  // namespace ark::test
 
 #endif  // PANDA_PANDA_RUNNER_H

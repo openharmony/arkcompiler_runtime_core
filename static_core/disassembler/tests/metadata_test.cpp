@@ -34,7 +34,7 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
 
 TEST(MetadataTest, test1)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record B <external>
 
 .record A {
@@ -56,10 +56,10 @@ TEST(MetadataTest, test1)
 .function u1 GGG() <native>
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -89,7 +89,7 @@ TEST(MetadataTest, test1)
 
 TEST(MetadataTest, ExternalFieldTest)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record B <external> {
     i32 fieldB <external>
 }
@@ -100,10 +100,10 @@ TEST(MetadataTest, ExternalFieldTest)
 }
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -135,7 +135,7 @@ TEST(MetadataTest, Access)
     };
 
     {
-        auto program = panda::pandasm::Parser().Parse(R"(
+        auto program = ark::pandasm::Parser().Parse(R"(
         .record A <access.record=public> {
             i64 a
         }
@@ -147,10 +147,10 @@ TEST(MetadataTest, Access)
         }
     )");
         ASSERT(program);
-        auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+        auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
 
-        panda::disasm::Disassembler d {};
+        ark::disasm::Disassembler d {};
         std::stringstream ss {};
 
         d.Disassemble(pf);
@@ -161,7 +161,7 @@ TEST(MetadataTest, Access)
         EXPECT_TRUE(matchString("[.record C][^.]*[.record=private]", ss.str()));
     }
     {
-        auto program = panda::pandasm::Parser().Parse(R"(
+        auto program = ark::pandasm::Parser().Parse(R"(
         .record A <access.record=protected> {
             i32 pub <access.field=public>
             i32 prt <access.field=protected>
@@ -173,10 +173,10 @@ TEST(MetadataTest, Access)
         .function void h() <access.function=private> {}
     )");
         ASSERT(program);
-        auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+        auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
 
-        panda::disasm::Disassembler d {};
+        ark::disasm::Disassembler d {};
         std::stringstream ss {};
 
         d.Disassemble(pf);
@@ -204,16 +204,16 @@ TEST(MetadataTest, Final)
     };
 
     {
-        auto program = panda::pandasm::Parser().Parse(R"(
+        auto program = ark::pandasm::Parser().Parse(R"(
             .record A <final> {
                 i64 a
             }
         )");
         ASSERT(program);
-        auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+        auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
 
-        panda::disasm::Disassembler d {};
+        ark::disasm::Disassembler d {};
         std::stringstream ss {};
 
         d.Disassemble(pf);
@@ -222,16 +222,16 @@ TEST(MetadataTest, Final)
         EXPECT_TRUE(matchString("[.record A][^.]*[final]>", ss.str()));
     }
     {
-        auto program = panda::pandasm::Parser().Parse(R"(
+        auto program = ark::pandasm::Parser().Parse(R"(
             .record A {
                 i32 fld <final>
             }
         )");
         ASSERT(program);
-        auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+        auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
 
-        panda::disasm::Disassembler d {};
+        ark::disasm::Disassembler d {};
         std::stringstream ss {};
 
         d.Disassemble(pf);
@@ -241,15 +241,15 @@ TEST(MetadataTest, Final)
         EXPECT_TRUE(matchString("[i32 fld][^<]*[final]>", str));
     }
     {
-        auto program = panda::pandasm::Parser().Parse(R"(
+        auto program = ark::pandasm::Parser().Parse(R"(
             .record A { }
             .function void A.f(A a0) <final> {}
         )");
         ASSERT(program);
-        auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+        auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
 
-        panda::disasm::Disassembler d {};
+        ark::disasm::Disassembler d {};
         std::stringstream ss {};
 
         d.Disassemble(pf);

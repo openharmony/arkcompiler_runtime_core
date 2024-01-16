@@ -27,7 +27,7 @@
 
 #include "runtime/mem/vm_handle-inl.h"
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 template <bool IS_STATIC>
 static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsCoroutine *coro, InteropCtx *ctx,
@@ -272,4 +272,4 @@ napi_property_descriptor EtsFieldWrapper::MakeStaticProperty(EtsClassWrapper *ow
     return DoMakeNapiProperty</*IS_STATIC=*/true>(this);
 }
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy

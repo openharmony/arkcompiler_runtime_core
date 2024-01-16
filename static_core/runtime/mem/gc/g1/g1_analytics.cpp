@@ -19,7 +19,7 @@
 #include "libpandabase/utils/type_converter.h"
 #include "runtime/mem/gc/card_table.h"
 
-namespace panda::mem {
+namespace ark::mem {
 G1Analytics::G1Analytics(uint64_t now) : previousYoungCollectionEnd_(now) {}
 
 void G1Analytics::ReportEvacuatedBytes(size_t bytes)
@@ -127,9 +127,9 @@ void G1Analytics::ReportCollectionEnd(GCTaskCause cause, uint64_t endTime, const
                                       bool dump)
 {
     auto edenLength = collectionSet.Young().size();
-    auto appTime = (currentYoungCollectionStart_ - previousYoungCollectionEnd_) / panda::os::time::MICRO_TO_NANO;
+    auto appTime = (currentYoungCollectionStart_ - previousYoungCollectionEnd_) / ark::os::time::MICRO_TO_NANO;
     auto allocationRate = static_cast<double>(edenLength) / appTime;
-    auto pauseTime = (endTime - currentYoungCollectionStart_) / panda::os::time::MICRO_TO_NANO;
+    auto pauseTime = (endTime - currentYoungCollectionStart_) / ark::os::time::MICRO_TO_NANO;
 
     if (dump && cause != GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) {
         DumpMetrics(collectionSet, pauseTime, allocationRate);
@@ -141,7 +141,7 @@ void G1Analytics::ReportCollectionEnd(GCTaskCause cause, uint64_t endTime, const
         auto liveObjectsPerRegion = static_cast<double>(liveObjects_) / edenLength;
         liveObjectsSeq_.Add(liveObjectsPerRegion);
 
-        auto evacuationTime = (evacuationEnd_ - evacuationStart_) / panda::os::time::MICRO_TO_NANO;
+        auto evacuationTime = (evacuationEnd_ - evacuationStart_) / ark::os::time::MICRO_TO_NANO;
         auto compactedRegions = edenLength - promotedRegions_;
         if (compactedRegions > 0) {
             auto copiedBytesPerRegion = static_cast<double>(copiedBytes_) / compactedRegions;
@@ -154,11 +154,11 @@ void G1Analytics::ReportCollectionEnd(GCTaskCause cause, uint64_t endTime, const
         }
 
         auto traversedObjects = liveObjects_ + totalRemsetRefsCount_;
-        auto markingTime = (markingEnd_ - markingStart_) / panda::os::time::MICRO_TO_NANO;
+        auto markingTime = (markingEnd_ - markingStart_) / ark::os::time::MICRO_TO_NANO;
         auto markingRate = static_cast<double>(traversedObjects) / markingTime;
         markingRateSeq_.Add(markingRate);
 
-        auto updateRefsTime = (updateRefsEnd_ - updateRefsStart_) / panda::os::time::MICRO_TO_NANO;
+        auto updateRefsTime = (updateRefsEnd_ - updateRefsStart_) / ark::os::time::MICRO_TO_NANO;
         auto updateRefsRate = static_cast<double>(traversedObjects) / updateRefsTime;
         updateRefsRateSeq_.Add(updateRefsRate);
 
@@ -170,7 +170,7 @@ void G1Analytics::ReportCollectionEnd(GCTaskCause cause, uint64_t endTime, const
         otherSeq_.Add(otherTime);
 
         if (dirtyCardsCount_ > 0) {
-            auto scanDirtyCardsTime = (scanDirtyCardsEnd_ - scanDirtyCardsStart_) / panda::os::time::MICRO_TO_NANO;
+            auto scanDirtyCardsTime = (scanDirtyCardsEnd_ - scanDirtyCardsStart_) / ark::os::time::MICRO_TO_NANO;
             scanDirtyCardsRateSeq_.Add(static_cast<double>(dirtyCardsCount_) / scanDirtyCardsTime);
         }
 
@@ -204,7 +204,7 @@ void G1Analytics::DumpMetrics(const CollectionSet &collectionSet, uint64_t pause
     auto expectedLiveObjects = edenLength * predictor_.Predict(liveObjectsSeq_);
     DumpMetric("live_objects", static_cast<double>(liveObjects_), expectedLiveObjects);
 
-    auto evacuationTime = (evacuationEnd_ - evacuationStart_) / panda::os::time::MICRO_TO_NANO;
+    auto evacuationTime = (evacuationEnd_ - evacuationStart_) / ark::os::time::MICRO_TO_NANO;
 
     auto compactedRegions = edenLength - promotedRegions_;
     auto expectedPromotedRegions = PredictPromotedRegions(edenLength);
@@ -232,13 +232,13 @@ void G1Analytics::DumpMetrics(const CollectionSet &collectionSet, uint64_t pause
     DumpPauseMetric("evacuation_time", evacuationTime, expectedCopyingTime + expectedPromotionTime, pauseTime);
 
     auto traversedObjects = liveObjects_ + remsetRefsCount_;
-    auto markingTime = (markingEnd_ - markingStart_) / panda::os::time::MICRO_TO_NANO;
+    auto markingTime = (markingEnd_ - markingStart_) / ark::os::time::MICRO_TO_NANO;
     auto markingRate = static_cast<double>(traversedObjects) / markingTime;
     DumpMetric("marking_rate", markingRate, predictor_.Predict(markingRateSeq_));
     auto expectedMarkingTime = PredictMarkingTimeInMicros(expectedLiveObjects, expectedRemsetRefsCount);
     DumpPauseMetric("marking_time", markingTime, expectedMarkingTime, pauseTime);
 
-    auto updateRefsTime = (updateRefsEnd_ - updateRefsStart_) / panda::os::time::MICRO_TO_NANO;
+    auto updateRefsTime = (updateRefsEnd_ - updateRefsStart_) / ark::os::time::MICRO_TO_NANO;
     auto updateRefsRate = static_cast<double>(traversedObjects) / updateRefsTime;
     DumpMetric("update_refs_rate", updateRefsRate, predictor_.Predict(updateRefsRateSeq_));
     auto expectedUpdateRefsTime = PredictUpdateRefsTimeInMicros(expectedLiveObjects, expectedRemsetRefsCount);
@@ -334,4 +334,4 @@ uint64_t G1Analytics::PredictCopyingTimeInMicros(size_t copiedBytes) const
 {
     return PredictTime(copiedBytes, copyingBytesRateSeq_);
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

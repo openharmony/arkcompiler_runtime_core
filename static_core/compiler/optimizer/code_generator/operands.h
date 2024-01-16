@@ -39,7 +39,7 @@ Arch-feature definitions
 #endif
 #endif
 
-namespace panda::compiler {
+namespace ark::compiler {
 constexpr uint8_t BYTE_SIZE = 8;
 constexpr uint8_t HALF_SIZE = 16;
 constexpr uint8_t WORD_SIZE = 32;
@@ -845,5 +845,5 @@ private:
     ShiftType type_ {INVALID_SHIFT};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_CODEGEN_REGISTERS_H

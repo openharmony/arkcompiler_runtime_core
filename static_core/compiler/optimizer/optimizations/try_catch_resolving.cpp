@@ -24,7 +24,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/try_catch_resolving.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 TryCatchResolving::TryCatchResolving(Graph *graph)
     : Optimization(graph),
       tryBlocks_(graph->GetLocalAllocator()->Adapter()),
@@ -258,4 +258,4 @@ void TryCatchResolving::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
     InvalidateBlocksOrderAnalyzes(GetGraph());
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

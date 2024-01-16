@@ -17,7 +17,7 @@
 
 #include "runtime/include/mem/allocator.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <typename T, AllocScope ALLOC_SCOPE_T>
 class AllocatorAdapter;
@@ -161,6 +161,6 @@ inline AllocatorAdapter<void, ALLOC_SCOPE_T> Allocator::Adapter()
     return AllocatorAdapter<void, ALLOC_SCOPE_T>(this);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_ALLOCATOR_ADAPTER_H

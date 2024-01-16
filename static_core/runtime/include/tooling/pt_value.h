@@ -18,7 +18,7 @@
 #include <cstdint>
 #include "libpandabase/macros.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 // Deprecated API
 class PtValueMeta {
 public:
@@ -68,6 +68,6 @@ public:
 private:
     int64_t value_;
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_VALUE_H

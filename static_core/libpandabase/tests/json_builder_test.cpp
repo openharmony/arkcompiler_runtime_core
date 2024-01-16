@@ -22,7 +22,7 @@
 #include <limits>
 #include <utility>
 
-namespace panda::test {
+namespace ark::test {
 // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
 MATCHER_P(StringifiesAs, string, "")
 {
@@ -147,4 +147,4 @@ TEST(JsonObjectBuilderTest, BuildsReferentially)
 
     EXPECT_EQ(std::move(builder).Build(), R"({"x":1,"y":"foo","z":{"_":{}}})");
 }
-}  // namespace panda::test
+}  // namespace ark::test

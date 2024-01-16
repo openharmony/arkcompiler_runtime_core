@@ -25,7 +25,7 @@
 #include "runtime/mem/rem_set.h"
 #include "runtime/mem/heap_space.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 enum RegionFlag {
     IS_UNUSED = 0U,
@@ -699,6 +699,6 @@ private:
     size_t desiredEdenLength_ {std::numeric_limits<size_t>::max()};
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_REGION_SPACE_H

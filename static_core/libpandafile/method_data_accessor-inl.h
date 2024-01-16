@@ -22,7 +22,7 @@
 #include "annotation_data_accessor.h"
 #include "proto_data_accessor.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 // static
 inline File::EntityId MethodDataAccessor::GetNameId(const File &pandaFile, File::EntityId methodId)
@@ -384,6 +384,6 @@ inline std::string MethodDataAccessor::GetFullName() const
     return utf::Mutf8AsCString(GetName().data);
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_

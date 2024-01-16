@@ -20,7 +20,7 @@
 #include "file_items.h"
 #include "modifiers.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class MethodDataAccessor {
@@ -229,6 +229,6 @@ private:
     size_t size_;
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_METHOD_DATA_ACCESSOR_H_

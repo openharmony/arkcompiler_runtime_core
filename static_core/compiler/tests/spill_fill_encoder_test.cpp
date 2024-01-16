@@ -16,7 +16,7 @@
 #include "unit_test.h"
 #include "optimizer/code_generator/spill_fill_encoder.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class SpillFillEncoderTest : public GraphTest {};
 
 bool operator==(const SpillFillData &left, const SpillFillData &right)
@@ -131,4 +131,4 @@ TEST_F(SpillFillEncoderTest, CanCombineSpillFills)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

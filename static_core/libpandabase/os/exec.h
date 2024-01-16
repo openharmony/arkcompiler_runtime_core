@@ -21,7 +21,7 @@
 #include "os/error.h"
 #include <array>
 
-namespace panda::os::exec {
+namespace ark::os::exec {
 
 PANDA_PUBLIC_API Expected<int, Error> Exec(Span<const char *> args);
 
@@ -32,6 +32,6 @@ decltype(auto) Exec(Args... args)
     return os::exec::Exec(Span(arguments));
 }
 
-}  // namespace panda::os::exec
+}  // namespace ark::os::exec
 
 #endif  // PANDA_LIBPANDABASE_OS_EXEC_H_

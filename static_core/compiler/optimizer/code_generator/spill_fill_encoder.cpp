@@ -18,7 +18,7 @@
 #include "optimizer/code_generator/spill_fill_encoder.h"
 #include "optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 bool SpillFillEncoder::AreConsecutiveOps(const SpillFillData &pred, const SpillFillData &succ)
 {
@@ -287,4 +287,4 @@ size_t SpillFillEncoder::EncodeStackToX(const SpillFillData &sf, const SpillFill
     encoder_->EncodeMemCopy(srcMem, dstMem, DOUBLE_WORD_SIZE);  // Stack slot is 64-bit wide
     return 1U;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

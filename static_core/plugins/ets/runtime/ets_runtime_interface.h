@@ -18,7 +18,7 @@
 #include "runtime/compiler.h"
 #include "cross_values.h"
 #include "plugins/ets/runtime/ets_vm.h"
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsRuntimeInterface : public PandaRuntimeInterface {
 public:
@@ -26,11 +26,11 @@ public:
     ClassPtr GetClass(MethodPtr method, IdType id) const override;
     size_t GetTlsPromiseClassPointerOffset(Arch arch) const override
     {
-        return panda::cross_values::GetEtsCoroutinePromiseClassOffset(arch);
+        return ark::cross_values::GetEtsCoroutinePromiseClassOffset(arch);
     }
     size_t GetTlsUndefinedObjectOffset(Arch arch) const override
     {
-        return panda::cross_values::GetEtsCoroutineUndefinedObjectOffset(arch);
+        return ark::cross_values::GetEtsCoroutineUndefinedObjectOffset(arch);
     }
     uint64_t GetUndefinedObject() const override;
     InteropCallKind GetInteropCallKind(MethodPtr methodPtr) const override;
@@ -50,6 +50,6 @@ public:
 #include "plugins/ets/runtime/interop_js/ets_interop_runtime_interface-inl.h"
 #endif
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_RUNTIME_INTERFACE_H

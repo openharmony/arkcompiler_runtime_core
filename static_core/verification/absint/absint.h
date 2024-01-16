@@ -27,12 +27,12 @@
 
 #include <optional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 VerificationContext PrepareVerificationContext(TypeSystem *typeSystem, Job const *job);
 
 VerificationStatus AbstractInterpret(VerificationContext &verifCtx, const uint8_t *pc);
 
 VerificationStatus VerifyMethod(VerificationContext &verifCtx);
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_ABSINT_HPP_

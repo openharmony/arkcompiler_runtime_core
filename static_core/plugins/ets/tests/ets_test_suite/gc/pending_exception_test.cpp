@@ -18,7 +18,7 @@
 #include "ets_vm.h"
 #include "libpandabase/test_utilities.h"
 
-namespace panda::test {
+namespace ark::test {
 class PendingEtsExceptionTest : public testing::TestWithParam<int> {
 public:
     void SetUp() override
@@ -60,4 +60,4 @@ DEATH_TEST_P(PendingEtsExceptionTest, MovingGcException)
 }
 
 INSTANTIATE_TEST_SUITE_P(MovingGcExceptionTests, PendingEtsExceptionTest, ::testing::Range(0, 8));
-}  // namespace panda::test
+}  // namespace ark::test

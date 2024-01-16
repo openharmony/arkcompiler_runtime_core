@@ -22,7 +22,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 std::string *Generator()
 {
@@ -48,4 +48,4 @@ TEST_F(VerifierTest, str)
     EXPECT_EQ(NumToStr(0x1C, 0x10), "1c");
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

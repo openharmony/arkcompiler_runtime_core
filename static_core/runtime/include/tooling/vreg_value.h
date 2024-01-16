@@ -19,7 +19,7 @@
 #include <cstdint>
 #include "libpandabase/macros.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class VRegValue {
 public:
     explicit VRegValue(int64_t value = 0) : value_(value) {}
@@ -42,6 +42,6 @@ public:
 private:
     int64_t value_;
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_RUNTIME_INCLUDE_TOOLING_VREG_VALUE_H

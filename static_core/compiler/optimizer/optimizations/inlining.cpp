@@ -28,7 +28,7 @@
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "events/events.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 using MethodPtr = RuntimeInterface::MethodPtr;
 
 // Explicitly instantiate both versions of CheckMethodCanBeInlined since they can be used in subclasses
@@ -1519,4 +1519,4 @@ bool Inlining::SkipBlock(const BasicBlock *block) const
     }
     return block->IsEndWithThrowOrDeoptimize();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

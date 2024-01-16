@@ -26,7 +26,7 @@
 #include "operand_types_print.h"
 #include "utils/number-utils.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 bool Parser::ParseRecordFields()
 {
@@ -394,17 +394,17 @@ bool Parser::ParseArrayElementType()
     std::replace(typeName.begin(), typeName.end(), '.', '/');
     auto typeWithSlash = Type(typeName, 0);
 
-    if (panda::pandasm::Type::IsPandaPrimitiveType(type.GetName())) {
+    if (ark::pandasm::Type::IsPandaPrimitiveType(type.GetName())) {
         if (IsConstArray()) {
-            currArrayElem_->tag = panda::pandasm::LiteralArray::GetArrayTagFromComponentType(type.GetId());
+            currArrayElem_->tag = ark::pandasm::LiteralArray::GetArrayTagFromComponentType(type.GetId());
         } else {
-            currArrayElem_->tag = panda::pandasm::LiteralArray::GetLiteralTagFromComponentType(type.GetId());
+            currArrayElem_->tag = ark::pandasm::LiteralArray::GetLiteralTagFromComponentType(type.GetId());
         }
 
         if (program_.arrayTypes.find(type) == program_.arrayTypes.end()) {
             program_.arrayTypes.emplace(type, 1);
         }
-    } else if (panda::pandasm::Type::IsStringType(typeWithSlash.GetName(), program_.lang)) {
+    } else if (ark::pandasm::Type::IsStringType(typeWithSlash.GetName(), program_.lang)) {
         if (IsConstArray()) {
             currArrayElem_->tag = panda_file::LiteralTag::ARRAY_STRING;
         } else {
@@ -838,7 +838,7 @@ void Parser::ParseAsLanguageDirective()
     }
 
     auto lang = context_.GiveToken();
-    auto res = panda::panda_file::LanguageFromString(lang);
+    auto res = ark::panda_file::LanguageFromString(lang);
     if (!res) {
         context_.err =
             GetError("Incorrect .language directive: Unknown language", Error::ErrorType::ERR_UNKNOWN_LANGUAGE);
@@ -2161,7 +2161,7 @@ bool Parser::ParseArrayName()
 void Parser::SetArrayInformation()
 {
     program_.literalarrayTable.try_emplace(std::string(context_.GiveToken().data(), context_.GiveToken().length()),
-                                           panda::pandasm::LiteralArray());
+                                           ark::pandasm::LiteralArray());
 
     currArray_ =
         &(program_.literalarrayTable.at(std::string(context_.GiveToken().data(), context_.GiveToken().length())));
@@ -2623,4 +2623,4 @@ uint8_t Parser::ParseMultiArrayHallmark()
     return counter;
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

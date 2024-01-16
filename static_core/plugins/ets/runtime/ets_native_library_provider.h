@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda::ets {
+namespace ark::ets {
 class NativeLibraryProvider {
 public:
     NativeLibraryProvider() = default;
@@ -37,6 +37,6 @@ private:
     mutable os::memory::RWLock lock_;
     PandaSet<EtsNativeLibrary> libraries_ GUARDED_BY(lock_);
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H_

@@ -20,7 +20,7 @@
 #include "runtime/include/cframe.h"
 #include "runtime/interpreter/frame.h"
 
-namespace panda {
+namespace ark {
 
 class StackWalkerBase {
 public:
@@ -157,6 +157,6 @@ private:
     FrameVariant frame_ {nullptr};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_TOOLING_SAMPLER_STACK_WALKER__BASE_H

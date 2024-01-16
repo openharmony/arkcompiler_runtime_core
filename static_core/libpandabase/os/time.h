@@ -30,7 +30,7 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda::os::time {
+namespace ark::os::time {
 
 static constexpr uint64_t MICRO_TO_NANO = 1000;
 static constexpr uint64_t MILLIS_TO_MICRO = 1000;
@@ -39,7 +39,7 @@ PANDA_PUBLIC_API uint64_t GetClockTimeInMicro();
 PANDA_PUBLIC_API uint64_t GetClockTimeInMilli();
 PANDA_PUBLIC_API uint64_t GetClockTimeInThreadCpuTime();
 
-}  // namespace panda::os::time
+}  // namespace ark::os::time
 
 WEAK_FOR_LTO_END
 

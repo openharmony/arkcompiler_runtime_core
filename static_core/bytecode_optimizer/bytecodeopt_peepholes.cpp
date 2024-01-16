@@ -17,7 +17,7 @@
 
 #include "libpandafile/bytecode_instruction-inl.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 bool BytecodeOptPeepholes::RunImpl()
 {
     VisitGraph();
@@ -154,4 +154,4 @@ void BytecodeOptPeepholes::VisitNewObject(GraphVisitor *v, Inst *inst)
     static_cast<BytecodeOptPeepholes *>(v)->SetIsApplied();
 }
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

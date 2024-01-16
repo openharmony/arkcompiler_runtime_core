@@ -17,7 +17,7 @@
 
 #include <dlfcn.h>
 
-namespace panda::os::library_loader {
+namespace ark::os::library_loader {
 Expected<LibraryHandle, Error> Load(std::string_view filename)
 {
     void *handle = dlopen(filename.data(), RTLD_LAZY);
@@ -27,4 +27,4 @@ Expected<LibraryHandle, Error> Load(std::string_view filename)
     char *msg = dlerror();
     return msg != nullptr ? Unexpected(Error(msg)) : Unexpected(Error("no error message"));
 }
-}  // namespace panda::os::library_loader
+}  // namespace ark::os::library_loader

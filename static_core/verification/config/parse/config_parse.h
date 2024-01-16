@@ -18,8 +18,8 @@
 
 #include "verification/config/config.h"
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 bool ParseConfig(const char *str, Section &cfg);
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config
 
 #endif  // PANDA_VERIF_CONFIG_PARSE_H_

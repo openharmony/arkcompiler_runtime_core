@@ -18,7 +18,7 @@
 
 #include "utils/type_helpers.h"
 
-namespace panda {
+namespace ark {
 
 /// SpaceType and GCCollectMode provide info when we should collect from some allocator or not
 enum class SpaceType : uint16_t {
@@ -79,6 +79,6 @@ inline const char *SpaceTypeToString(SpaceType type)
     }
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_MEM_SPACE_H

@@ -13,7 +13,7 @@
 
 module:
   name: bytecodeopt
-  namespace: panda::bytecodeopt
+  namespace: ark::bytecodeopt
 
 options:
 

@@ -18,7 +18,7 @@
 #include "libpandabase/utils/span.h"
 #include "runtime/include/mem/allocator.h"
 
-namespace panda {
+namespace ark {
 
 class Class;
 class Method;
@@ -125,6 +125,6 @@ private:
     Span<Entry> elements_ {nullptr, nullptr};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_ITABLE_H_

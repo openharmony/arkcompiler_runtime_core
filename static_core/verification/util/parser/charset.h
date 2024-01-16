@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-namespace panda::parser {
+namespace ark::parser {
 
 template <typename Char>
 class Charset {
@@ -90,6 +90,6 @@ private:
     };
 };
 
-}  // namespace panda::parser
+}  // namespace ark::parser
 
 #endif  // PANDA_VERIF_PARSER_CHARSET_H_

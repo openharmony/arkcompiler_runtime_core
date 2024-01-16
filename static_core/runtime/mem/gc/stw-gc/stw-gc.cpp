@@ -26,7 +26,7 @@
 #include "runtime/mem/gc/static/gc_marker_static-inl.h"
 #include "runtime/mem/gc/dynamic/gc_marker_dynamic-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 StwGC<LanguageConfig>::StwGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
@@ -167,7 +167,7 @@ void StwGC<LanguageConfig>::SweepImpl()
 }
 
 template <class LanguageConfig>
-void StwGC<LanguageConfig>::InitGCBits(panda::ObjectHeader *object)
+void StwGC<LanguageConfig>::InitGCBits(ark::ObjectHeader *object)
 {
     if (!marker_.IsReverseMark()) {
         object->SetUnMarkedForGC();
@@ -181,7 +181,7 @@ void StwGC<LanguageConfig>::InitGCBits(panda::ObjectHeader *object)
 }
 
 template <class LanguageConfig>
-void StwGC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *objHeader)
+void StwGC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] ark::ObjectHeader *objHeader)
 {
     LOG(FATAL, GC) << "TLABs are not supported by this GC";
 }
@@ -244,4 +244,4 @@ bool StwGC<LanguageConfig>::IsMarked(const ObjectHeader *object) const
 TEMPLATE_CLASS_LANGUAGE_CONFIG(StwGC);
 TEMPLATE_CLASS_LANGUAGE_CONFIG(StwGCMarker);
 
-}  // namespace panda::mem
+}  // namespace ark::mem

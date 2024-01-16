@@ -22,7 +22,7 @@
 
 #include <optional>
 
-namespace panda::mem {
+namespace ark::mem {
 
 namespace test {
 class HeapSpaceTest;
@@ -232,13 +232,13 @@ private:
     double minFreePercentage_ {0};
     double maxFreePercentage_ {0};
 
-    friend class panda::mem::test::RegionGarbageChoosingTest;
+    friend class ark::mem::test::RegionGarbageChoosingTest;
     template <typename ObjectAllocator, bool REGULAR_SPACE>
-    friend class panda::mem::test::RegionAllocatorTestBase;
-    friend class panda::mem::test::RegionAllocatorTest;
-    friend class panda::mem::test::RegionNonmovableObjectAllocatorTest;
-    friend class panda::mem::test::RemSetTest;
-    friend class panda::mem::test::HeapSpaceTest;
+    friend class ark::mem::test::RegionAllocatorTestBase;
+    friend class ark::mem::test::RegionAllocatorTest;
+    friend class ark::mem::test::RegionNonmovableObjectAllocatorTest;
+    friend class ark::mem::test::RemSetTest;
+    friend class ark::mem::test::HeapSpaceTest;
 };
 
 // Y - memory chunk is used for objects in young space
@@ -392,16 +392,16 @@ private:
     size_t youngSizeInSharedPools_ {0};
     size_t tenuredSizeInSharedPools_ {0};
 
-    friend class panda::mem::test::HeapSpaceTest;
-    friend class panda::mem::test::MemStatsGenGCTest;
-    friend class panda::mem::test::RegionGarbageChoosingTest;
+    friend class ark::mem::test::HeapSpaceTest;
+    friend class ark::mem::test::MemStatsGenGCTest;
+    friend class ark::mem::test::RegionGarbageChoosingTest;
     template <typename ObjectAllocator, bool REGULAR_SPACE>
-    friend class panda::mem::test::RegionAllocatorTestBase;
-    friend class panda::mem::test::RegionAllocatorTest;
-    friend class panda::mem::test::RegionNonmovableObjectAllocatorTest;
-    friend class panda::mem::test::RemSetTest;
+    friend class ark::mem::test::RegionAllocatorTestBase;
+    friend class ark::mem::test::RegionAllocatorTest;
+    friend class ark::mem::test::RegionNonmovableObjectAllocatorTest;
+    friend class ark::mem::test::RemSetTest;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_HEAP_SPACE_H

@@ -18,7 +18,7 @@
 
 #include "meta.h"
 
-namespace panda::pandasm::extensions::ets {
+namespace ark::pandasm::extensions::ets {
 
 class AnnotationHelper {
 public:
@@ -274,6 +274,6 @@ protected:
     void RemoveFlags(std::string_view attribute, std::string_view value) override;
 };
 
-}  // namespace panda::pandasm::extensions::ets
+}  // namespace ark::pandasm::extensions::ets
 
 #endif  // PANDA_ASSEMBLER_EXTENSIONS_ETS_META_H_

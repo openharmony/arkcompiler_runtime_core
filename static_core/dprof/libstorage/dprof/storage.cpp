@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-namespace panda::dprof {
+namespace ark::dprof {
 /* static */
 std::unique_ptr<AppData> AppData::CreateByParams(const std::string &name, uint64_t hash, uint32_t pid,
                                                  FeaturesMap &&featuresMap)
@@ -216,4 +216,4 @@ std::string AppDataStorage::MakeAppPath(const std::string &name, uint64_t hash, 
     str << storageDir_ << "/" << name << "@" << pid << "@" << hash;
     return str.str();
 }
-}  // namespace panda::dprof
+}  // namespace ark::dprof

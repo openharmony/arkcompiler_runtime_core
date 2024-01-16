@@ -17,7 +17,7 @@
 #include "liveness_analyzer.h"
 #include "live_registers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 namespace {
 struct Split {
@@ -149,4 +149,4 @@ LifeIntervalsTree *LifeIntervalsTree::BuildIntervalsTree(const ArenaVector<LifeI
     return alloc->New<LifeIntervalsTree>(root);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

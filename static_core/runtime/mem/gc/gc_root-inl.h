@@ -18,7 +18,7 @@
 
 #include "runtime/mem/gc/gc_root.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 std::ostream &operator<<(std::ostream &os, const RootManager<LanguageConfig> &rootManager)
@@ -28,6 +28,6 @@ std::ostream &operator<<(std::ostream &os, const RootManager<LanguageConfig> &ro
     return os;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_ROOT_INL_H

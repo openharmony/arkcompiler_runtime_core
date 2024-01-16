@@ -24,7 +24,7 @@
 #include "runtime/include/method.h"
 #include "utils/bit_utils.h"
 
-namespace panda {
+namespace ark {
 
 template <Arch ARCH = RUNTIME_ARCH>
 class CFrameStaticNativeMethodIterator {
@@ -478,6 +478,6 @@ private:
     ptrdiff_t stackEndSlot_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_CFRAME_ITERATORS

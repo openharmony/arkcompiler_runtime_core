@@ -18,7 +18,7 @@
 #include "include/runtime.h"
 #include <gtest/gtest.h>
 
-namespace panda::test {
+namespace ark::test {
 
 class HistogramTest : public testing::Test {
 public:
@@ -28,7 +28,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -93,7 +93,7 @@ public:
     };
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -170,4 +170,4 @@ TEST_F(HistogramTest, CheckGetTopDumpTest)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::test
+}  // namespace ark::test

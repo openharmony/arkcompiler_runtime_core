@@ -20,21 +20,21 @@
 #include "assembly-program.h"
 #include "ets_typeapi_create_panda_constants.h"
 
-namespace panda {
+namespace ark {
 template <typename T>
 class VMHandle;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 class Array;
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
-namespace panda::ets {
+namespace ark::ets {
 class EtsCoroutine;
 class EtsArray;
-}  // namespace panda::ets
+}  // namespace ark::ets
 
-namespace panda::ets {
+namespace ark::ets {
 class TypeCreatorCtx {
 public:
     pandasm::Program &Program()
@@ -266,6 +266,6 @@ private:
     bool finished_ = false;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_TYPEAPI_CREATE_H

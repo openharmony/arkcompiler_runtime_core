@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 struct SquareSum {
     int operator()(int x, int y) const
@@ -68,4 +68,4 @@ TEST_F(VerifierTest, function_traits)
     EXPECT_EQ(opMultMod10(2_I, 4_I, 2_I), 6_I);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

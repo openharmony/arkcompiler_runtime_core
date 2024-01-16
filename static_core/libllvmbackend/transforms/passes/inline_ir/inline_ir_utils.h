@@ -20,10 +20,10 @@ namespace llvm {
 class Module;
 }  // namespace llvm
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 bool RemoveDanglingAliases(llvm::Module &module);
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_INLINE_IR_INLINE_IR_UTILS_H

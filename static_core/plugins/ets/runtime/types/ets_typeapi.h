@@ -22,7 +22,7 @@
 #include "libpandafile/file.h"
 #include "types/ets_string.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 enum class EtsTypeAPIKind : EtsByte {
     NONE = 0x0U,
@@ -86,6 +86,6 @@ enum class EtsTypeAPIAttributes : EtsInt {
 
 enum class EtsTypeAPIAccessModifier : EtsByte { PUBLIC = 0, PRIVATE = 1, PROTECTED = 2 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_TYPEAPI_H_

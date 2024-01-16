@@ -20,7 +20,7 @@
 #include "runtime/include/class-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 
-namespace panda {
+namespace ark {
 
 class ClassLinker;
 
@@ -63,6 +63,6 @@ public:
     }
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_ITABLE_BUILDER_H_

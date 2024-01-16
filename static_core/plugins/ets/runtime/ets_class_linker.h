@@ -21,14 +21,14 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda {
+namespace ark {
 class Method;
 class ClassLinker;
 class ClassLinkerContext;
 class ClassLinkerErrorHandler;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsClass;
 class EtsClassLinkerExtension;
@@ -77,6 +77,6 @@ private:
     friend class mem::Allocator;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_H_

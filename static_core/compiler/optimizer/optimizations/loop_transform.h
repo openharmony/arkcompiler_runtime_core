@@ -21,7 +21,7 @@
 #include "optimizer/pass.h"
 #include "optimizer/analysis/loop_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 enum class LoopExitPoint : uint8_t { ALL_LOOP, LOOP_EXIT_HEADER, LOOP_EXIT_BACKEDGE };
 
 template <const LoopExitPoint EXIT_POINT>
@@ -136,6 +136,6 @@ protected:
         return outer;
     }
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_TRANSFORM_H

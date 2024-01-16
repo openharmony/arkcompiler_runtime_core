@@ -77,7 +77,7 @@ index 69032e8..a65f71a 100644
  
 -CodeHolder::CodeHolder() noexcept
 -  : _environment(),
-+CodeHolder::CodeHolder(panda::ArenaAllocator* pandaAllocator) noexcept
++CodeHolder::CodeHolder(ark::ArenaAllocator* pandaAllocator) noexcept
 +  : _pandaAllocator(pandaAllocator),
 +    _environment(),
      _baseAddress(Globals::kNoBaseAddress),
@@ -124,7 +124,7 @@ index 9b3466d..3fb88dc 100644
  public:
    ASMJIT_NONCOPYABLE(CodeHolder)
  
-+  panda::ArenaAllocator* _pandaAllocator{nullptr};
++  ark::ArenaAllocator* _pandaAllocator{nullptr};
 +
    //! Environment information.
    Environment _environment;
@@ -134,7 +134,7 @@ index 9b3466d..3fb88dc 100644
  
    //! Creates an uninitialized CodeHolder (you must init() it before it can be used).
 -  ASMJIT_API CodeHolder() noexcept;
-+  ASMJIT_API CodeHolder(panda::ArenaAllocator* pandaAllocator = nullptr) noexcept;
++  ASMJIT_API CodeHolder(ark::ArenaAllocator* pandaAllocator = nullptr) noexcept;
    //! Destroys the CodeHolder.
    ASMJIT_API ~CodeHolder() noexcept;
  
@@ -238,7 +238,7 @@ index 52e9f12..881771b 100644
      kMaxAlignment = 64
    };
  
-+  panda::ArenaAllocator* _pandaAllocator{nullptr};
++  ark::ArenaAllocator* _pandaAllocator{nullptr};
 +
    //! Pointer in the current block.
    uint8_t* _ptr;
@@ -248,13 +248,13 @@ index 52e9f12..881771b 100644
    //! reasonable value that depends on the usage of `Zone`. Greater block sizes
    //! are generally safer and perform better than unreasonably low block sizes.
 -  ASMJIT_INLINE explicit Zone(size_t blockSize, size_t blockAlignment = 1) noexcept {
-+  ASMJIT_INLINE explicit Zone(size_t blockSize, size_t blockAlignment = 1, panda::ArenaAllocator* pandaAllocator = nullptr) noexcept
++  ASMJIT_INLINE explicit Zone(size_t blockSize, size_t blockAlignment = 1, ark::ArenaAllocator* pandaAllocator = nullptr) noexcept
 +    : _pandaAllocator(pandaAllocator) {
      _init(blockSize, blockAlignment, nullptr);
    }
  
 -  ASMJIT_INLINE Zone(size_t blockSize, size_t blockAlignment, const Support::Temporary& temporary) noexcept {
-+  ASMJIT_INLINE Zone(size_t blockSize, size_t blockAlignment, const Support::Temporary& temporary, panda::ArenaAllocator* pandaAllocator = nullptr) noexcept
++  ASMJIT_INLINE Zone(size_t blockSize, size_t blockAlignment, const Support::Temporary& temporary, ark::ArenaAllocator* pandaAllocator = nullptr) noexcept
 +    : _pandaAllocator(pandaAllocator) {
      _init(blockSize, blockAlignment, &temporary);
    }

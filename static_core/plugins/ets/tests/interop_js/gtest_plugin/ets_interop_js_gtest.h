@@ -23,7 +23,7 @@
 
 #include "libpandabase/macros.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropTest : public ::testing::Test {
 public:
@@ -316,6 +316,6 @@ protected:
     std::string interopJsTestPath_;
 };
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing
 
 #endif  // !PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H_

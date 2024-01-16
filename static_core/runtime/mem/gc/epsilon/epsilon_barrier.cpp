@@ -17,11 +17,11 @@
 
 #include "libpandabase/utils/logger.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 extern "C" void CallEpsilonBarrier()
 {
     LOG(DEBUG, GC) << "EpsilonGC barrier";
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

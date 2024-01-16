@@ -22,7 +22,7 @@
 
 TEST(ExtractorTest, LineNumberTable)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
         .function void func() {
 
             nop
@@ -39,12 +39,12 @@ TEST(ExtractorTest, LineNumberTable)
     )");
     ASSERT(program);
 
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::panda_file::File::EntityId methodId;
+    ark::panda_file::File::EntityId methodId;
     std::string_view sourceName;
-    panda::disasm::DisasmBackedDebugInfoExtractor extractor(*pf, [&methodId, &sourceName](auto id, auto sn) {
+    ark::disasm::DisasmBackedDebugInfoExtractor extractor(*pf, [&methodId, &sourceName](auto id, auto sn) {
         methodId = id;
         sourceName = sn;
     });

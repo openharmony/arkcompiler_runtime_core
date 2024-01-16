@@ -21,7 +21,7 @@
 #include "asmjit/x86.h"
 #include "target_info.h"
 
-namespace panda::compiler::amd64 {
+namespace ark::compiler::amd64 {
 const size_t MAX_SCALAR_PARAM_ID = 5;  // %rdi, %rsi, %rdx, %rcx, %r8, %r9
 const size_t MAX_VECTOR_PARAM_ID = 7;  // %xmm0-%xmm7
 
@@ -618,7 +618,7 @@ public:
 
     static constexpr auto GetTarget()
     {
-        return panda::compiler::Target(Arch::X86_64);
+        return ark::compiler::Target(Arch::X86_64);
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -950,7 +950,7 @@ public:
 
     static constexpr auto GetTarget()
     {
-        return panda::compiler::Target(Arch::X86_64);
+        return ark::compiler::Target(Arch::X86_64);
     }
 
     bool IsValid() const override
@@ -987,6 +987,6 @@ public:
 
 private:
 };  // Amd64CallingConvention
-}  // namespace panda::compiler::amd64
+}  // namespace ark::compiler::amd64
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AMD64_TARGET_H

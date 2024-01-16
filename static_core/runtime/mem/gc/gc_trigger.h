@@ -23,7 +23,7 @@
 #include "libpandabase/utils/ring_buffer.h"
 #include "runtime/mem/gc/gc.h"
 
-namespace panda {
+namespace ark {
 
 class RuntimeOptions;
 
@@ -177,7 +177,7 @@ private:
     MemStatsType *memStats_;
     uint8_t skipGcCount_ {0};
 
-    friend class panda::test::GCTriggerTest;
+    friend class ark::test::GCTriggerTest;
 };
 
 /// Triggers when heap increased by adaptive strategy
@@ -205,7 +205,7 @@ private:
     RingBuffer<size_t, RECENT_THRESHOLDS_COUNT> recentTargetThresholds_;
     uint32_t adaptiveMultiplier_ {DEFAULT_INCREASE_MULTIPLIER};
 
-    friend class panda::test::GCTriggerTest;
+    friend class ark::test::GCTriggerTest;
 };
 
 /// Trigger always returns true after given start
@@ -334,6 +334,6 @@ GCTrigger *CreateGCTrigger(MemStatsType *memStats, HeapSpace *heapSpace, const G
                            InternalAllocatorPtr allocator);
 
 }  // namespace mem
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_THRESHOLD_H

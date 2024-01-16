@@ -19,7 +19,7 @@
 #include "plugins_entrypoints_gen.h"
 #include "runtime/include/thread.h"
 
-namespace panda {
+namespace ark {
 
 class Frame;
 
@@ -46,6 +46,6 @@ extern "C" void FreeFrameInterp(Frame *frame, ManagedThread *current);
 
 extern "C" void ThrowInstantiationErrorEntrypoint(Class *klass);
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H_

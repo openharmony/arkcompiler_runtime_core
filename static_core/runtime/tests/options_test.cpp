@@ -20,7 +20,7 @@
 #include "libpandabase/utils/pandargs.h"
 #include "options_test_base.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class RuntimeOptionsTest : public RuntimeOptionsTestBase {
 public:
@@ -50,7 +50,7 @@ TEST_F(RuntimeOptionsTest, TestCorrectOptions)
     ASSERT_TRUE(GetParser()->Parse(GetCorrectOptionsList()));
 }
 
-// Testing that panda::PandArgParser detect invalid options and types
+// Testing that ark::PandArgParser detect invalid options and types
 TEST_F(RuntimeOptionsTest, TestIncorrectOptions)
 {
     std::vector<std::string> invalidOptions;
@@ -64,7 +64,7 @@ TEST_F(RuntimeOptionsTest, TestTailArgumets)
 {
     GetParser()->EnableTail();
     std::vector<std::string> optionsVector = GetCorrectOptionsList();
-    panda::PandArg<std::string> file("file", "", "path to pandafile");
+    ark::PandArg<std::string> file("file", "", "path to pandafile");
 
     optionsVector.emplace_back("tail1");
     GetParser()->PushBackTail(&file);
@@ -87,4 +87,4 @@ TEST_F(RuntimeOptionsTest, TestLangSpecificOptions)
     ASSERT_EQ(GetRuntimeOptions()->GetGcTriggerType("core"), "no-gc-for-start-up");
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

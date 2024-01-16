@@ -20,7 +20,7 @@
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda {
+namespace ark {
 using InternalAllocatorPtr = mem::AllocatorPtr<mem::AllocatorPurpose::ALLOCATOR_PURPOSE_INTERNAL>;
 
 template <class T>
@@ -124,5 +124,5 @@ private:
 
     friend class ManagedThread;
 };
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_H

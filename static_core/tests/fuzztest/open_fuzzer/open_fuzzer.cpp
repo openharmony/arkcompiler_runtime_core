@@ -28,7 +28,7 @@ void OpenFuzzTest(const uint8_t *data, size_t size)
     (void)fclose(fp);
 
     {
-        panda::panda_file::File::Open(filename);
+        ark::panda_file::File::Open(filename);
     }
     // Remove the temp file
     (void)remove(filename);

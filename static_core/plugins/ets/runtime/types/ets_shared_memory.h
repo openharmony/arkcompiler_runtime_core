@@ -31,7 +31,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsSharedMemory : public ObjectHeader {
 public:
@@ -150,6 +150,6 @@ private:
     EtsLong waiter_;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H_

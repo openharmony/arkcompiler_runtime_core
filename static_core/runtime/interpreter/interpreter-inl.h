@@ -62,7 +62,7 @@
 
 // ALWAYS_INLINE is mandatory attribute for handlers. There are cases which will be failed without it.
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_PROFILE_ENABLED = false>
 void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh);
@@ -3311,7 +3311,7 @@ public:
 
         if (UNLIKELY(*frame == nullptr)) {
             current->DisableStackOverflowCheck();
-            panda::ThrowStackOverflowException(current);
+            ark::ThrowStackOverflowException(current);
             current->EnableStackOverflowCheck();
             this->MoveToExceptionHandler();
             return false;
@@ -3804,6 +3804,6 @@ void ExecuteImplInner(ManagedThread *thread, const uint8_t *pc, Frame *frame, bo
     ExecuteImplStub(thread, pc, frame, jumpToEh, impl);
 }
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_INL_H_

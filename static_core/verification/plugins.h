@@ -19,7 +19,7 @@
 #include "abs_int_inl_compat_checks.h"
 #include "source_lang_enum.h"
 
-namespace panda::verifier::plugin {
+namespace ark::verifier::plugin {
 
 class Plugin {
 public:
@@ -43,6 +43,6 @@ public:
 
 PANDA_PUBLIC_API Plugin const *GetLanguagePlugin(panda_file::SourceLang lang);
 
-}  // namespace panda::verifier::plugin
+}  // namespace ark::verifier::plugin
 
 #endif  // PANDA_VERIFICATION_PLUGINS_H

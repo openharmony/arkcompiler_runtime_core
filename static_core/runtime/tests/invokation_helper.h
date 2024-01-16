@@ -24,14 +24,14 @@
 #include "arch/helpers.h"
 #include "libpandafile/shorty_iterator.h"
 
-namespace panda::test {
+namespace ark::test {
 
 const void *GetInvokeHelperImpl();
 
 template <typename T>
 auto GetInvokeHelper()
 {
-    using Fn = T (*)(const uint8_t *, const uint8_t *, const uint8_t *, size_t, panda::ManagedThread *);
+    using Fn = T (*)(const uint8_t *, const uint8_t *, const uint8_t *, size_t, ark::ManagedThread *);
     return reinterpret_cast<Fn>(const_cast<void *>(GetInvokeHelperImpl()));
 }
 
@@ -178,6 +178,6 @@ coretypes::TaggedValue InvokeDynEntryPoint(Method *method, uint32_t numArgs, Arg
                                                      counter.GetStackSize(), thread);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test
 
 #endif  // PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H_

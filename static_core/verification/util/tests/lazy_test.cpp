@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST(Verifier, Lazy)
 {
@@ -69,4 +69,4 @@ TEST(Verifier, Lazy)
     EXPECT_EQ(result8, (std::vector<int> {1, 2, 3, -1, -2, -3, 5}));
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

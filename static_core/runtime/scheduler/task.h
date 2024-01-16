@@ -19,10 +19,10 @@
 #include "runtime/include/managed_thread.h"
 #include "runtime/scheduler/worker_thread.h"
 
-namespace panda::scheduler {
+namespace ark::scheduler {
 
 // Task is a user-level light-weight thread.
-class Task : public panda::ManagedThread {
+class Task : public ark::ManagedThread {
 public:
     explicit Task(PandaVM *vm, ObjectHeader *obj = nullptr);
     // We need to override this to call appropriate destructor in thread manager
@@ -56,7 +56,7 @@ public:
     {
         ManagedThread::UpdateGCRoots();
         if ((future_ != nullptr) && (future_->IsForwarded())) {
-            future_ = ::panda::mem::GetForwardAddress(future_);
+            future_ = ::ark::mem::GetForwardAddress(future_);
         }
     }
 
@@ -72,6 +72,6 @@ private:
     NO_MOVE_SEMANTIC(Task);
 };
 
-}  // namespace panda::scheduler
+}  // namespace ark::scheduler
 
 #endif  // PANDA_RUNTIME_SCHEDULER_TASK_H_

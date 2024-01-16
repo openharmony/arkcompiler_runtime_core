@@ -20,7 +20,7 @@
 
 #include <atomic>
 
-namespace panda {
+namespace ark {
 
 #ifndef NDEBUG
 constexpr bool IS_GC_ALLOW_CHECK = true;
@@ -75,6 +75,6 @@ using DisallowGarbageCollection = AssertGCScopeT<IS_GC_ALLOW_CHECK>;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DCHECK_ALLOW_GARBAGE_COLLECTION \
     ASSERT_PRINT(AssertGCScopeT<IS_GC_ALLOW_CHECK>::IsAllowed(), "disallow execute garbage collection.");
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_ASSERT_GC_SCOPE_H

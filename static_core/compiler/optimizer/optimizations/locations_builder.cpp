@@ -23,7 +23,7 @@
     template <Arch arch>        \
     type LocationsBuilder<arch>
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool RunLocationsBuilder(Graph *graph)
 {
     if (graph->GetCallingConvention() == nullptr) {
@@ -415,4 +415,4 @@ ParameterInfo *LocationsBuilder<ARCH>::GetResetParameterInfo()
     paramsInfo_->Reset();
     return paramsInfo_;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

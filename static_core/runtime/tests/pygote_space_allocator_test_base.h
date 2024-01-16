@@ -25,7 +25,7 @@
 #include "runtime/include/object_header.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class PygoteSpaceAllocatorTest : public testing::Test {
 public:
@@ -45,7 +45,7 @@ protected:
 
     Class *GetObjectClass()
     {
-        auto runtime = panda::Runtime::GetCurrent();
+        auto runtime = ark::Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         return runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::OBJECT);
     }
@@ -53,7 +53,7 @@ protected:
     void PygoteFork()
     {
         thread_->ManagedCodeEnd();
-        auto runtime = panda::Runtime::GetCurrent();
+        auto runtime = ark::Runtime::GetCurrent();
         runtime->PreZygoteFork();
         runtime->PostZygoteFork();
         thread_->ManagedCodeBegin();
@@ -88,7 +88,7 @@ protected:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread_ {nullptr};
+    ark::MTManagedThread *thread_ {nullptr};
 };
 
 inline void PygoteSpaceAllocatorTest::InitAllocTest()
@@ -96,12 +96,12 @@ inline void PygoteSpaceAllocatorTest::InitAllocTest()
     [[maybe_unused]] auto pygoteSpaceAllocator = GetPygoteSpaceAllocator();
     auto cls = GetObjectClass();
 
-    auto nonMovableHeader = panda::ObjectHeader::CreateNonMovable(cls);
+    auto nonMovableHeader = ark::ObjectHeader::CreateNonMovable(cls);
     ASSERT_NE(nonMovableHeader, nullptr);
     ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
     ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
 
-    auto movableHeader = panda::ObjectHeader::Create(cls);
+    auto movableHeader = ark::ObjectHeader::Create(cls);
     ASSERT_NE(nonMovableHeader, nullptr);
     ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movableHeader)));
 
@@ -117,11 +117,11 @@ inline void PygoteSpaceAllocatorTest::ForkedAllocTest()
 
     PygoteFork();
 
-    auto nonMovableHeader = panda::ObjectHeader::CreateNonMovable(cls);
+    auto nonMovableHeader = ark::ObjectHeader::CreateNonMovable(cls);
     ASSERT_NE(nonMovableHeader, nullptr);
     ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
 
-    auto movableHeader = panda::ObjectHeader::Create(cls);
+    auto movableHeader = ark::ObjectHeader::Create(cls);
     ASSERT_NE(movableHeader, nullptr);
     ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movableHeader)));
 }
@@ -132,11 +132,11 @@ inline void PygoteSpaceAllocatorTest::NonMovableLiveObjectAllocTest()
     auto cls = GetObjectClass();
     auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
-    auto nonMovableHeader = panda::ObjectHeader::CreateNonMovable(cls);
+    auto nonMovableHeader = ark::ObjectHeader::CreateNonMovable(cls);
     ASSERT_NE(nonMovableHeader, nullptr);
     ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
     ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
-    [[maybe_unused]] auto *ref = globalObjectStorage->Add(nonMovableHeader, panda::mem::Reference::ObjectType::GLOBAL);
+    [[maybe_unused]] auto *ref = globalObjectStorage->Add(nonMovableHeader, ark::mem::Reference::ObjectType::GLOBAL);
 
     PygoteFork();
 
@@ -159,11 +159,11 @@ inline void PygoteSpaceAllocatorTest::NonMovableUnliveObjectAllocTest()
     auto cls = GetObjectClass();
     auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
-    auto nonMovableHeader = panda::ObjectHeader::CreateNonMovable(cls);
+    auto nonMovableHeader = ark::ObjectHeader::CreateNonMovable(cls);
     ASSERT_NE(nonMovableHeader, nullptr);
     ASSERT_TRUE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(nonMovableHeader)));
     ASSERT_TRUE(pygoteSpaceAllocator->IsLive(static_cast<ObjectHeader *>(nonMovableHeader)));
-    [[maybe_unused]] auto *ref = globalObjectStorage->Add(nonMovableHeader, panda::mem::Reference::ObjectType::GLOBAL);
+    [[maybe_unused]] auto *ref = globalObjectStorage->Add(nonMovableHeader, ark::mem::Reference::ObjectType::GLOBAL);
 
     PygoteFork();
 
@@ -183,10 +183,10 @@ inline void PygoteSpaceAllocatorTest::MovableLiveObjectAllocTest()
     auto cls = GetObjectClass();
     auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
-    auto movableHeader = panda::ObjectHeader::Create(cls);
+    auto movableHeader = ark::ObjectHeader::Create(cls);
     ASSERT_NE(movableHeader, nullptr);
     ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movableHeader)));
-    [[maybe_unused]] auto *ref = globalObjectStorage->Add(movableHeader, panda::mem::Reference::ObjectType::GLOBAL);
+    [[maybe_unused]] auto *ref = globalObjectStorage->Add(movableHeader, ark::mem::Reference::ObjectType::GLOBAL);
 
     PygoteFork();
 
@@ -206,10 +206,10 @@ inline void PygoteSpaceAllocatorTest::MovableUnliveObjectAllocTest()
     auto cls = GetObjectClass();
     auto globalObjectStorage = thread_->GetVM()->GetGlobalObjectStorage();
 
-    auto movableHeader = panda::ObjectHeader::Create(cls);
+    auto movableHeader = ark::ObjectHeader::Create(cls);
     ASSERT_NE(movableHeader, nullptr);
     ASSERT_FALSE(pygoteSpaceAllocator->ContainObject(static_cast<ObjectHeader *>(movableHeader)));
-    [[maybe_unused]] auto *ref = globalObjectStorage->Add(movableHeader, panda::mem::Reference::ObjectType::GLOBAL);
+    [[maybe_unused]] auto *ref = globalObjectStorage->Add(movableHeader, ark::mem::Reference::ObjectType::GLOBAL);
 
     PygoteFork();
 
@@ -235,10 +235,10 @@ inline void PygoteSpaceAllocatorTest::MuchObjectAllocTest()
     PandaVector<Reference *> movableRefs;
     PandaVector<Reference *> nonMovableRefs;
     for (size_t i = 0; i < OBJ_NUM; i++) {
-        auto movable = panda::ObjectHeader::Create(cls);
-        movableRefs.push_back(globalObjectStorage->Add(movable, panda::mem::Reference::ObjectType::GLOBAL));
-        auto nonMovable = panda::ObjectHeader::CreateNonMovable(cls);
-        nonMovableRefs.push_back(globalObjectStorage->Add(nonMovable, panda::mem::Reference::ObjectType::GLOBAL));
+        auto movable = ark::ObjectHeader::Create(cls);
+        movableRefs.push_back(globalObjectStorage->Add(movable, ark::mem::Reference::ObjectType::GLOBAL));
+        auto nonMovable = ark::ObjectHeader::CreateNonMovable(cls);
+        nonMovableRefs.push_back(globalObjectStorage->Add(nonMovable, ark::mem::Reference::ObjectType::GLOBAL));
     }
 
     PygoteFork();
@@ -274,6 +274,6 @@ inline void PygoteSpaceAllocatorTest::MuchObjectAllocTest()
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_TESTS_PYGOTE_SPACE_ALLOCATOR_TEST_H_

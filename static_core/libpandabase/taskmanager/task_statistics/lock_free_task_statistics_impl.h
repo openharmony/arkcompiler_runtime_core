@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <atomic>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 class LockFreeTaskStatisticsImpl : public TaskStatistics {
     using TaskPropertiesAtomicCounterMap = std::unordered_map<TaskProperties, std::atomic_size_t, TaskProperties::Hash>;
@@ -46,6 +46,6 @@ private:
     std::unordered_map<TaskStatus, TaskPropertiesAtomicCounterMap> taskPropertiesCounterMap_;
 };
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_STATISTICS_LOCK_FREE_TASK_STATISTICS_IMPL_H

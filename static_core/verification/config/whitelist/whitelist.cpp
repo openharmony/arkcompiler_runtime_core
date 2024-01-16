@@ -17,7 +17,7 @@
 
 #include "utils/logger.h"
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
 void DebugConfig::AddWhitelistMethodConfig(WhitelistKind kind, const PandaString &name)
 {
@@ -48,4 +48,4 @@ void DebugContext::InsertIntoWhitelist(const PandaString &name, bool isClassName
     }
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug

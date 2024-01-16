@@ -33,7 +33,7 @@
 #include "runtime/include/tooling/debug_interface.h"
 #include "runtime/thread_manager.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class MemoryAllocationDumper : public RuntimeListener {
 public:
     explicit MemoryAllocationDumper(const PandaString &dumpFile, const Runtime *runtime) : runtime_(runtime)
@@ -106,6 +106,6 @@ private:
     NO_COPY_SEMANTIC(MemoryAllocationDumper);
     NO_MOVE_SEMANTIC(MemoryAllocationDumper);
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_RUNTIME_TOOLING_MEM_ALLOC_DUMPER_H

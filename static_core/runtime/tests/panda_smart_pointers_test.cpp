@@ -19,7 +19,7 @@
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class PandaSmartPointersTest : public testing::Test {
 public:
@@ -30,7 +30,7 @@ public:
         options.SetShouldInitializeIntrinsics(false);
         options.SetLimitStandardAlloc(true);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -44,7 +44,7 @@ public:
     NO_MOVE_SEMANTIC(PandaSmartPointersTest);
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
 };
 
 int ReturnValueFromUniqPtr(PandaUniquePtr<int> ptr)
@@ -86,4 +86,4 @@ TEST_F(PandaSmartPointersTest, MakePandaUniqueTest)
     ASSERT_EQ(uniqPtr2.get(), nullptr);
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

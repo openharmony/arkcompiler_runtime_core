@@ -13,7 +13,7 @@
 
 module:
   name: aspt_converter
-  namespace: panda::tooling::sampler
+  namespace: ark::tooling::sampler
 
 options:
 - name: input

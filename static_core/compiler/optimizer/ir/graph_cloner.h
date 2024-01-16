@@ -22,7 +22,7 @@
 #include "utils/arena_containers.h"
 #include "utils/hash.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 class Inst;
@@ -360,6 +360,6 @@ private:
     InstVector cloneInstructions_;
     SaveStateBridgesBuilder ssb_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H

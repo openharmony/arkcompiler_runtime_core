@@ -21,7 +21,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/mem/gc/card_table.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Base barrier set
 class GCBarrierSet {
@@ -266,6 +266,6 @@ private:
     os::memory::Mutex *queueLock_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_GC_BARRIER_H

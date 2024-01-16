@@ -22,7 +22,7 @@
 #include "mem/mem.h"
 #include "mem/mem_range.h"
 
-namespace panda::test::mem_range {
+namespace ark::test::mem_range {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -44,25 +44,25 @@ static uintptr_t RandomUintptr()
 }
 
 // function to generate MemRange randomly from given range
-static panda::mem::MemRange RandomMemRange(uintptr_t minStart, uintptr_t maxEnd)
+static ark::mem::MemRange RandomMemRange(uintptr_t minStart, uintptr_t maxEnd)
 {
     ASSERT(maxEnd > minStart);
 
     uintptr_t rand1 = minStart + RandomUintptr() % (maxEnd - minStart + 1U);
     uintptr_t rand2 = minStart + RandomUintptr() % (maxEnd - minStart + 1U);
     if (rand1 < rand2) {
-        return panda::mem::MemRange(rand1, rand2);
+        return ark::mem::MemRange(rand1, rand2);
     }
 
     if (rand1 > rand2) {
-        return panda::mem::MemRange(rand2, rand1);
+        return ark::mem::MemRange(rand2, rand1);
     }
 
     if (rand1 > 0U) {
-        return panda::mem::MemRange(rand1 - 1L, rand1);
+        return ark::mem::MemRange(rand1 - 1L, rand1);
     }
 
-    return panda::mem::MemRange(rand1, rand1 + 1U);
+    return ark::mem::MemRange(rand1, rand1 + 1U);
 }
 
 // test constructor and simple methods
@@ -73,7 +73,7 @@ TEST(MemRangeTest, BasicTest)
     constexpr uintptr_t LOWER_THAN_START = 0;
     constexpr uintptr_t HIGHER_THAN_END = 50000;
 
-    auto memRange = panda::mem::MemRange(START, END);
+    auto memRange = ark::mem::MemRange(START, END);
 
     // test correct start and end addresses
     ASSERT_EQ(START, memRange.GetStartAddress());
@@ -91,7 +91,7 @@ TEST(MemRangeTest, BasicTest)
     ASSERT_FALSE(memRange.IsAddressInRange(HIGHER_THAN_END));
 
     // test mem_range with the same start and end
-    auto memRangeWithOneElement = panda::mem::MemRange(START, START);
+    auto memRangeWithOneElement = ark::mem::MemRange(START, START);
 }
 
 // test constructor with incorrect args
@@ -100,7 +100,7 @@ TEST(MemRangeTest, AssertTest)
     constexpr uintptr_t MIN = 10000;
     constexpr uintptr_t MAX = 50000;
 
-    ASSERT_DEBUG_DEATH(panda::mem::MemRange(MAX, MIN), "");
+    ASSERT_DEBUG_DEATH(ark::mem::MemRange(MAX, MIN), "");
 }
 
 // test IsIntersect method
@@ -117,11 +117,11 @@ TEST(MemRangeTest, IntersectTest)
     constexpr uintptr_t START_5 = 10;
     constexpr uintptr_t END_5 = 100;
 
-    auto memRange1 = panda::mem::MemRange(START_1, END_1);
-    auto memRange2 = panda::mem::MemRange(START_2, END_2);
-    auto memRange3 = panda::mem::MemRange(START_3, END_3);
-    auto memRange4 = panda::mem::MemRange(START_4, END_4);
-    auto memRange5 = panda::mem::MemRange(START_5, END_5);
+    auto memRange1 = ark::mem::MemRange(START_1, END_1);
+    auto memRange2 = ark::mem::MemRange(START_2, END_2);
+    auto memRange3 = ark::mem::MemRange(START_3, END_3);
+    auto memRange4 = ark::mem::MemRange(START_4, END_4);
+    auto memRange5 = ark::mem::MemRange(START_5, END_5);
 
     // ranges are not intersecting
     ASSERT_FALSE(memRange1.IsIntersect(memRange2));
@@ -146,7 +146,7 @@ TEST(MemRangeTest, IntersectTest)
     ASSERT_TRUE(memRange1.IsIntersect(memRange1));
 }
 
-static void RandomTestInBoundsR1LR2(panda::mem::MemRange &memRange1, panda::mem::MemRange &memRange2)
+static void RandomTestInBoundsR1LR2(ark::mem::MemRange &memRange1, ark::mem::MemRange &memRange2)
 {
     for (uintptr_t i = memRange1.GetStartAddress(); i < MAX_PTR; i++) {
         if (i == memRange2.GetStartAddress()) {
@@ -162,7 +162,7 @@ static void RandomTestInBoundsR1LR2(panda::mem::MemRange &memRange1, panda::mem:
     }
 }
 
-static void RandomTestInBoundsR1GR2(panda::mem::MemRange &memRange1, panda::mem::MemRange &memRange2)
+static void RandomTestInBoundsR1GR2(ark::mem::MemRange &memRange1, ark::mem::MemRange &memRange2)
 {
     for (uintptr_t i = memRange2.GetStartAddress(); i < MAX_PTR; i++) {
         if (i == memRange1.GetStartAddress()) {
@@ -183,8 +183,8 @@ static void RandomTestInBounds(uintptr_t from, uintptr_t to, uint64_t numIter = 
 {
     ASSERT(from < to);
 
-    panda::mem::MemRange memRange1(0U, 1U);
-    panda::mem::MemRange memRange2(0U, 1U);
+    ark::mem::MemRange memRange1(0U, 1U);
+    ark::mem::MemRange memRange2(0U, 1U);
     // check intersection via cycle
     for (uint64_t iter = 0; iter < numIter; iter++) {
         memRange1 = RandomMemRange(from, to);
@@ -232,4 +232,4 @@ TEST(MemRangeTest, RandomIntersectTest)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::test::mem_range
+}  // namespace ark::test::mem_range

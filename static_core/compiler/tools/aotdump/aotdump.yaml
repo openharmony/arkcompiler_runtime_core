@@ -13,7 +13,7 @@
 
 module:
   name: aoutdump
-  namespace: panda::aoutdump
+  namespace: ark::aoutdump
 
 options:
   - name: output-file

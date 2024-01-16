@@ -23,11 +23,11 @@
 #include "pbc_iterator.h"
 #include "inst_builder.h"
 
-namespace panda {
+namespace ark {
 class Method;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 /// Build IR from panda bytecode
 class IrBuilder : public Optimization {
     struct Boundaries {
@@ -207,6 +207,6 @@ private:
     bool IsSuitableForInline(const BytecodeInstruction *inst) override;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_IR_BUILDER_H

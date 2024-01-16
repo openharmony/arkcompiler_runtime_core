@@ -22,7 +22,7 @@
 #include "optimizer/pass.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Represents a range of values that a variable might have.
  *
@@ -248,6 +248,6 @@ private:
 private:
     BoundsRangeInfo boundsRangeInfo_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_BOUNDS_ANALYSIS_H

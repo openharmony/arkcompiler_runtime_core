@@ -15,7 +15,7 @@
 
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 void GCWorkersTaskPool::IncreaseSolvedTasks()
 {
@@ -70,4 +70,4 @@ void GCWorkersTaskPool::WaitUntilTasksEnd()
     ResetTasks();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

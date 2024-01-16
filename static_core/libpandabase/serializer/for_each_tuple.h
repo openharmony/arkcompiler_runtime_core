@@ -18,7 +18,7 @@
 
 #include <tuple>
 
-namespace panda::serializer::internal {
+namespace ark::serializer::internal {
 
 template <typename Tuple, typename F, size_t... INDEX>
 void ForEachTupleImpl(Tuple &&tuple, F &&f, std::index_sequence<INDEX...> /* unused */)
@@ -35,6 +35,6 @@ void ForEachTuple(Tuple &&tuple, F &&f)
     ForEachTupleImpl(std::forward<Tuple>(tuple), std::forward<F>(f), sequence);
 }
 
-}  // namespace panda::serializer::internal
+}  // namespace ark::serializer::internal
 
 #endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_FOR_EACH_TUPLE_H_

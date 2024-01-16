@@ -27,7 +27,7 @@
 #include "runtime/mem/gc/bitmap.h"
 #include "runtime/mem/lock_config_helper.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_RUNSLOTS_ALLOCATOR(level) LOG(level, ALLOC) << "RunSlotsAllocator: "
@@ -447,6 +447,6 @@ T *RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocArray(size_t arrLength)
 
 #undef LOG_RUNSLOTS_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_H

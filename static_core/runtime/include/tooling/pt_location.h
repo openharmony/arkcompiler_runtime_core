@@ -20,7 +20,7 @@
 #include "libpandafile/file_items.h"
 #include "libpandabase/macros.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class PtLocation {
 public:
     using EntityId = panda_file::File::EntityId;
@@ -61,6 +61,6 @@ private:
     EntityId methodId_;
     uint32_t bytecodeOffset_ {0};
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_LOCATION_H

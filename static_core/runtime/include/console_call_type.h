@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_CONSOLE_CALL_TYPE_H
 #define PANDA_RUNTIME_CONSOLE_CALL_TYPE_H
 
-namespace panda {
+namespace ark {
 enum class ConsoleCallType {
     LOG,
     DEBUG,
@@ -24,6 +24,6 @@ enum class ConsoleCallType {
     ERROR,
     WARNING,
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CONSOLE_CALL_TYPE_H

@@ -21,7 +21,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 class EtsStringTest : public testing::Test {
 public:
     EtsStringTest()
@@ -626,6 +626,6 @@ TEST_F(EtsStringTest, Resolve)
     ASSERT_TRUE(string2->StringsAreEqual(reinterpret_cast<EtsObject *>(string3)));
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-magic-numbers)

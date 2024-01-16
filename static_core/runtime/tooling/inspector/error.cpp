@@ -17,7 +17,7 @@
 
 #include "utils/logger.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 bool HandleError(std::optional<Error> &&error)
 {
     if (error) {
@@ -26,4 +26,4 @@ bool HandleError(std::optional<Error> &&error)
     }
     return true;
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

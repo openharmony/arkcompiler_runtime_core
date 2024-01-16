@@ -19,7 +19,7 @@ class Initializer {
 public:
     Initializer()
     {
-        panda::trace::internal::DoInit();
+        ark::trace::internal::DoInit();
     }
 
     virtual ~Initializer() = default;

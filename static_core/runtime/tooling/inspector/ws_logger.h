@@ -22,7 +22,7 @@
 
 #include <string>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class WsLogger {
     using ChannelType = websocketpp::log::channel_type_hint::value;
     using Level = websocketpp::log::level;
@@ -55,6 +55,6 @@ private:
     const Level staticChannels_;
     Level dynamicChannels_ {0};
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_WS_LOGGER_H

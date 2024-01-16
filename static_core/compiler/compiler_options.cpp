@@ -15,7 +15,7 @@
 
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 CompilerOptions g_options("");
-}  // namespace panda::compiler
+}  // namespace ark::compiler

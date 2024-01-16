@@ -19,7 +19,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Check if loop is countable
  *
@@ -303,4 +303,4 @@ bool CountableLoopParser::IsConditionCodeAcceptable()
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -21,7 +21,7 @@
 #include "runtime/class_initializer.h"
 #include "runtime/core/core_class_linker_extension.h"
 
-namespace panda {
+namespace ark {
 
 class CoreLanguageContext : public LanguageContextBase {
 public:
@@ -287,6 +287,6 @@ public:
     }
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CORE_CORE_LANGUAGE_CONTEXT_H_

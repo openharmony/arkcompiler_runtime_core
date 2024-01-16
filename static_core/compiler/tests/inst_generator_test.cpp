@@ -20,7 +20,7 @@
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class InstGeneratorTest : public GraphTest {
 public:
     InstGeneratorTest()
@@ -139,7 +139,7 @@ TEST_F(InstGeneratorTest, AllInstTestAMD64)
     statGenAmd64.GenerateHTMLPage("CodegenStatisticAMD64.html");
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #ifdef USE_VIXL_ARM64
 #include "vixl_exec_module.h"
@@ -151,7 +151,7 @@ TEST_F(InstGeneratorTest, AllInstTestAMD64)
 #endif
 
 // NOLINTBEGIN(hicpp-signed-bitwise)
-namespace panda::compiler {
+namespace ark::compiler {
 class ArithGenerator : public CodegenStatisticGenerator {
     // Seed for random generator
     static constexpr uint64_t SEED = 0x1234;
@@ -958,4 +958,4 @@ TEST_F(InstGeneratorTest, AliasAnalysisSupportTest)
         }
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

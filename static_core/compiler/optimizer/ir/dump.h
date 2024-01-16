@@ -17,7 +17,7 @@
 
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 ArenaString IdToString(uint32_t id, ArenaAllocator *allocator, bool vReg = false, bool isPhi = false);
 
@@ -27,6 +27,6 @@ ArenaString BBId(const BasicBlock *block, ArenaAllocator *allocator);
 
 void DumpUsers(const Inst *inst, std::ostream *out);
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_DUMP_H

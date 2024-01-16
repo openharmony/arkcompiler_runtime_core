@@ -18,7 +18,7 @@
 
 #include "graph_cloner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Class unswitchs loop:
  * - Clone loop;
@@ -40,6 +40,6 @@ private:
     void ReplaceWithConstantCondition(Inst *ifInst);
     ArenaVector<Inst *> conditions_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_LOOP_UNSWITCHER_H

@@ -18,7 +18,7 @@
 #include <cstring>
 #include <cstdio>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 std::string GetVersion(const std::array<uint8_t, File::VERSION_SIZE> &v)
 {
@@ -34,4 +34,4 @@ std::string GetVersion(const std::array<uint8_t, File::VERSION_SIZE> &v)
     return versionstr;
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

@@ -18,13 +18,13 @@
 
 #include "runtime/include/language_context.h"
 
-namespace panda::plugins {
+namespace ark::plugins {
 
-LanguageContextBase *GetLanguageContextBase(panda::panda_file::SourceLang lang);
+LanguageContextBase *GetLanguageContextBase(ark::panda_file::SourceLang lang);
 PANDA_PUBLIC_API panda_file::SourceLang RuntimeTypeToLang(const std::string &runtimeType);
 std::string_view LangToRuntimeType(panda_file::SourceLang lang);
 bool HasRuntime(const std::string &runtimeType);
 
-}  // namespace panda::plugins
+}  // namespace ark::plugins
 
 #endif  // PANDA_PLUGINS_PLUGINS_H_

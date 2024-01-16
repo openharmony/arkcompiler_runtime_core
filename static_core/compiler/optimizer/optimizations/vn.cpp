@@ -20,7 +20,7 @@
 #include "optimizer/analysis/bounds_analysis.h"
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 
 inline bool IsNotCommutativeInst(Inst *inst)
@@ -350,4 +350,4 @@ bool ValNum::RunImpl()
     }
     return cseIsApplied_;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

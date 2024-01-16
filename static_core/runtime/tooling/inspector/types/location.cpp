@@ -26,7 +26,7 @@
 
 using namespace std::literals::string_literals;  // NOLINT(google-build-using-namespace)
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 Expected<Location, std::string> Location::FromJsonProperty(const JsonObject &object, const char *propertyName)
 {
     auto property = object.GetValue<JsonObject::JsonObjPointer>(propertyName);
@@ -59,4 +59,4 @@ std::function<void(JsonObjectBuilder &)> Location::ToJson() const
         jsonBuilder.AddProperty("lineNumber", lineNumber_ - 1);
     };
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

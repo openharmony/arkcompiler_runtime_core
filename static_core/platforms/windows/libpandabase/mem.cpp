@@ -30,7 +30,7 @@
 
 #define MAP_FAILED (reinterpret_cast<void *>(-1))
 
-namespace panda::os::mem {
+namespace ark::os::mem {
 
 static int mem_errno(const DWORD err, const int deferr)
 {
@@ -358,4 +358,4 @@ size_t GetNativeBytesFromMallinfo()
     return DEFAULT_NATIVE_BYTES_FROM_MALLINFO;
 }
 
-}  // namespace panda::os::mem
+}  // namespace ark::os::mem

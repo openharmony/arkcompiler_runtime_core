@@ -17,7 +17,7 @@
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/inst.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 static void ReplaceCheck(compiler::Inst *inst)
 {
@@ -102,4 +102,4 @@ bool CheckResolver::IsCheck(const compiler::Inst *inst)
     }
 }
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

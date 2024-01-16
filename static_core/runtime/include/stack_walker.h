@@ -23,7 +23,7 @@
 #include "runtime/interpreter/frame.h"
 #include "compiler/code_info/code_info.h"
 
-namespace panda {
+namespace ark {
 
 enum class UnwindPolicy {
     ALL,           // unwing all frames including inlined
@@ -404,6 +404,6 @@ private:
 static_assert((BoundaryFrame<FrameKind::INTERPRETER>::METHOD_OFFSET) * sizeof(uintptr_t) == Frame::GetMethodOffset());
 static_assert((BoundaryFrame<FrameKind::INTERPRETER>::FP_OFFSET) * sizeof(uintptr_t) == Frame::GetPrevFrameOffset());
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_STACK_WALKER_H

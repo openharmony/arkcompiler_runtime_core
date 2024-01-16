@@ -19,7 +19,7 @@
 #include "libpandabase/taskmanager/task.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// @brief GC workers task pool based on common TaskManager (TaskQueue)
 class GCWorkersTaskQueue final : public GCWorkersTaskPool {
@@ -49,6 +49,6 @@ private:
         taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::FOREGROUND};
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_WORKERS_GC_WORKERS_TASK_QUEUE_H

@@ -34,7 +34,7 @@
 #include <atomic>
 #include <array>
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_COMPONENT_ELEM(D, NAME, STR) D(NAME, NAME, STR)
@@ -453,7 +453,7 @@ private:
 #ifndef NDEBUG
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define _LOG_SUPPRESSION_CHECK(level, component) \
-    !panda::Logger::IsMessageSuppressed(panda::Logger::Level::level, panda::Logger::Component::component)
+    !ark::Logger::IsMessageSuppressed(ark::Logger::Level::level, ark::Logger::Component::component)
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define _LOG_SUPPRESSION_CHECK(level, component) true
@@ -462,23 +462,23 @@ private:
 // Explicit namespace is specified to allow using the logger out of panda namespace.
 // For example, in the main function.
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG(level, component, p)                                                                          \
-    panda::Logger::IsLoggingOnOrAbort(panda::Logger::Level::level, panda::Logger::Component::component) && \
-        _LOG_SUPPRESSION_CHECK(level, component) &&                                                        \
-        panda::Logger::Message(panda::Logger::Level::level, panda::Logger::Component::component, p).GetStream()
+#define _LOG(level, component, p)                                                                    \
+    ark::Logger::IsLoggingOnOrAbort(ark::Logger::Level::level, ark::Logger::Component::component) && \
+        _LOG_SUPPRESSION_CHECK(level, component) &&                                                  \
+        ark::Logger::Message(ark::Logger::Level::level, ark::Logger::Component::component, p).GetStream()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG(level, component) _LOG_##level(component, false)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_DFX(dfx_component)                                                                     \
-    panda::Logger::IsLoggingDfxOn() &&                                                             \
-        panda::Logger::Message(panda::Logger::Level::ERROR, panda::Logger::DFX, false).GetStream() \
-            << panda::Logger::StringfromDfxComponent(panda::Logger::LogDfxComponent::dfx_component) << " log:"
+#define LOG_DFX(dfx_component)                                                               \
+    ark::Logger::IsLoggingDfxOn() &&                                                         \
+        ark::Logger::Message(ark::Logger::Level::ERROR, ark::Logger::DFX, false).GetStream() \
+            << ark::Logger::StringfromDfxComponent(ark::Logger::LogDfxComponent::dfx_component) << " log:"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define GET_LOG_STREAM(level, component) \
-    panda::Logger::Message(panda::Logger::Level::level, panda::Logger::Component::component, false).GetStream()
+    ark::Logger::Message(ark::Logger::Level::level, ark::Logger::Component::component, false).GetStream()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PLOG(level, component) _LOG_##level(component, true)
@@ -497,7 +497,7 @@ private:
 #else
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_DEBUG(component, p) false && panda::DummyStream()
+#define _LOG_DEBUG(component, p) false && ark::DummyStream()
 
 #endif
 
@@ -513,6 +513,6 @@ private:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define _LOG_FATAL(component, p) _LOG(FATAL, component, p)
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_LIBPANDABASE_UTILS_LOGGER_H_

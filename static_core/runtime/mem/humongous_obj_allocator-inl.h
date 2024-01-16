@@ -19,7 +19,7 @@
 #include "runtime/mem/humongous_obj_allocator.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_HUMONGOUS_OBJ_ALLOCATOR(level) LOG(level, ALLOC) << "HumongousObjAllocator: "
@@ -507,6 +507,6 @@ bool HumongousObjAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader
 
 #undef LOG_HUMONGOUS_OBJ_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_HUMONGOUS_OBJ_ALLOCATOR_INL_H

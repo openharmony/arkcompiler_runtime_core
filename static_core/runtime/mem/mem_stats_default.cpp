@@ -15,7 +15,7 @@
 
 #include "runtime/mem/mem_stats_default.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 void MemStatsDefault::RecordAllocatedClass([[maybe_unused]] Class *cls) {}
 PandaString MemStatsDefault::GetAdditionalStatistics() const
@@ -23,4 +23,4 @@ PandaString MemStatsDefault::GetAdditionalStatistics() const
     return "";
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

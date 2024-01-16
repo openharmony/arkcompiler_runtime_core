@@ -29,7 +29,7 @@
 
 #include <string_view>
 
-namespace panda::os::library_loader {
+namespace ark::os::library_loader {
 class LibraryHandle;
 
 #if PANDA_TARGET_MACOS
@@ -88,6 +88,6 @@ private:
 
     NO_COPY_SEMANTIC(LibraryHandle);
 };
-}  // namespace panda::os::library_loader
+}  // namespace ark::os::library_loader
 
 #endif  // PANDA_LIBBASE_OS_LIBRARY_LOADER_H_

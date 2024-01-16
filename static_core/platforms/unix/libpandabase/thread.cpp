@@ -35,7 +35,7 @@
 #include <securec.h>
 #include <unistd.h>
 
-namespace panda::os::thread {
+namespace ark::os::thread {
 
 ThreadId GetCurrentThreadId()
 {
@@ -144,7 +144,7 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
                 uintptr_t stackHiAddr = ToUintPtr(*stackAddr) + *stackSize;
                 size_t stackSizeLimit = lim.rlim_cur;
                 // for some reason pthread interfaces subtract 1 page from size regardless of guard size
-                uintptr_t stackLoAddr = stackHiAddr - stackSizeLimit + panda::os::mem::GetPageSize();
+                uintptr_t stackLoAddr = stackHiAddr - stackSizeLimit + ark::os::mem::GetPageSize();
                 *stackSize = stackSizeLimit;
                 *stackAddr = ToVoidPtr(stackLoAddr);
             }
@@ -159,4 +159,4 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
     return s;
 }
 
-}  // namespace panda::os::thread
+}  // namespace ark::os::thread

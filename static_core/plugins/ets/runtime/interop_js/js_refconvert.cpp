@@ -18,7 +18,7 @@
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Class *klass)
 {
@@ -55,4 +55,4 @@ JSRefConvert *JSRefConvertCreate(InteropCtx *ctx, Class *klass)
 template JSRefConvert *JSRefConvertCreate<false>(InteropCtx *ctx, Class *klass);
 template JSRefConvert *JSRefConvertCreate<true>(InteropCtx *ctx, Class *klass);
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

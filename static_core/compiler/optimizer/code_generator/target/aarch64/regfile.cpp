@@ -22,7 +22,7 @@ Reserve registers.
 #include "target/aarch64/target.h"
 #include "regfile.h"
 
-namespace panda::compiler::aarch64 {
+namespace ark::compiler::aarch64 {
 Aarch64RegisterDescription::Aarch64RegisterDescription(ArenaAllocator *allocator)
     : RegistersDescription(allocator, Arch::AARCH64), usedRegs_(allocator->Adapter())
 {
@@ -121,4 +121,4 @@ void Aarch64RegisterDescription::SetUsedRegs(const ArenaVector<Reg> &regs)
     }
 }
 
-}  // namespace panda::compiler::aarch64
+}  // namespace ark::compiler::aarch64

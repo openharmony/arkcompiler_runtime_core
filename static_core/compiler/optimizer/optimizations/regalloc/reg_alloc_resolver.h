@@ -20,7 +20,7 @@
 #include "reg_alloc_base.h"
 #include "compiler/optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class RegAllocResolver {
 public:
@@ -94,5 +94,5 @@ private:
     ArenaVector<Location> inputLocations_;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_PHI_RESOLVER_H

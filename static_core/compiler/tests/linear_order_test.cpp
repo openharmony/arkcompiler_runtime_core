@@ -23,7 +23,7 @@
 #include "optimizer/optimizations/licm_conditions.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // NOLINTBEGIN(readability-magic-numbers)
 class LinearOrderTest : public AsmTest {
@@ -398,4 +398,4 @@ jump_label_0:
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

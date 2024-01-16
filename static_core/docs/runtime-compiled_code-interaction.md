@@ -18,22 +18,22 @@ Panda runtime as a set of functions aimed to execute managed code. The runtime c
 The document refers to the interpreter and the compiler modules.
 
 The interpreter is a part of the runtime aimed to execute bytecode of managed functions. The interpreter is responsible to manage
-hotness counter (see [Structure of `panda::Method`](#structure-of-pandamethod)) of managed functions.
+hotness counter (see [Structure of `ark::Method`](#structure-of-pandamethod)) of managed functions.
 
 The compiler is aimed to translate managed function's bytecode to native code. The compiler has an interface function
-`panda::CompilerInterface::CompileMethodSync` which starts compilation. When the function gets compiled the compiler
+`ark::CompilerInterface::CompileMethodSync` which starts compilation. When the function gets compiled the compiler
 changes its entrypoint to newly generated code. Next time when the function gets called native code will be executed.
 
 ## Calling convention
 Panda runtime and managed code must call functions according to the target calling convention.
-Compiled code of a managed function must accept one extra argument: the pointer to `panda::Method` which describes this function.
+Compiled code of a managed function must accept one extra argument: the pointer to `ark::Method` which describes this function.
 This argument must be the first argument.
 
 Example:  
 Consider a function int max(int a, int b).  
 When the compiler generates native code for this function for ARM target it must consider that
 the function accepts 3 arguments:  
-- a pointer to `panda::Method` in the register R0.  
+- a pointer to `ark::Method` in the register R0.  
 - `a` in the register R1  
 - `b` in the register R2  
 
@@ -41,31 +41,31 @@ The function must return the result in the register R0.
 
 ### Dynamic calling convention
 For dynamic languages a compiled function accepts all arguments in stack slots.
-Two additional arguments (`panda::Method*` and `uint32_t num_actual_args`) are passed in first two argument registers of the target calling convention. 
+Two additional arguments (`ark::Method*` and `uint32_t num_actual_args`) are passed in first two argument registers of the target calling convention. 
 
 The result of call is placed according to the target calling convention.
 
-## Structure of `panda::ManagedThread`
-`panda::ManagedThread` has the following fields that compiled code may use:
+## Structure of `ark::ManagedThread`
+`ark::ManagedThread` has the following fields that compiled code may use:
 
 | Field                | Type                  | Description |
 | ---                  | ----                  | ----------- |
 | sp_flag_             | bool*                 | Safepoint flag. See *Safepoints* in memory_management.md |
-| pending_exception_   | panda::ObjectHeader*  | A pointer to a thrown exception or 0 if there is no exception thrown. |
+| pending_exception_   | ark::ObjectHeader*  | A pointer to a thrown exception or 0 if there is no exception thrown. |
 | runtime_entrypoints_ | void*[]               | A table of runtime entrypoints (See [Runtime entrypoints](#runtime_entrypoints)). |
 | stack_frame_kind_    | StackFrameKind        | A kind of the current stack frame (compiled code or interpreter stack frame). |
 
-## Access to `panda::ManagedThread` from compiled code
-There is an allocated register for each target architecture to store a pointer to `panda::ManagedThread`. This register is called `thread register` and 
-must contains a valid pointer to `panda::ManagedThread` on entry to each compiled function.
+## Access to `ark::ManagedThread` from compiled code
+There is an allocated register for each target architecture to store a pointer to `ark::ManagedThread`. This register is called `thread register` and 
+must contains a valid pointer to `ark::ManagedThread` on entry to each compiled function.
 
 ## Runtime entrypoints
 Runtime serves compiled code via runtime entrypoints. A runtime entrypoint is a function which conforms to the target calling convention.  
-A table of the entrypoints is located in `panda::ManagedThread::runtime_entrypoints_` which could be accessed via `thread register`.
+A table of the entrypoints is located in `ark::ManagedThread::runtime_entrypoints_` which could be accessed via `thread register`.
 
-## Structure of `panda::Method`
-`panda::Method` describes a managed function in the runtime.
-This document refers to the following fields of `panda::Method`:
+## Structure of `ark::Method`
+`ark::Method` describes a managed function in the runtime.
+This document refers to the following fields of `ark::Method`:
 
 | Field | Description |
 | ----- | ----------- |
@@ -80,7 +80,7 @@ Panda runtime provides a command line option to tune the hotness counter thresho
 
 ### Entrypoint
 Entrypoint is a pointer to native code which can execute the function. This code must conform to the target calling convention and must accept
-one extra argument: a pointer to `panda::Method` ( See [Calling convention](#calling_convention)).  
+one extra argument: a pointer to `ark::Method` ( See [Calling convention](#calling_convention)).  
 The managed function could have compiled code or it could be executed by the interpreter.  
 In the case the function has compiled code the `compiled_entry_point_` must point to compiled code.  
 In the case the function is executed by the interpreter the `compiled_entry_point_` must point to a runtime function `CompiledCodeToInterpreterBridge` which calls the interpreter.
@@ -90,8 +90,8 @@ A stack frame contains data necessary to execute the function the frame belongs 
 The runtime can create several kinds of stack frames. But all the frames of managed code must have the structure described in [Compiled code stack frame](#compiled-code-stack-frame).
 
 ### Interpreter stack frame
-Interpreter stack frame is decribed by `panda::Frame` class. The class has fields to store virtual registers and a pointer to the previous stack frame.  
-All the consecutive interpreter stack frames are organized into a linked list. The field `panda::Frame::prev_` contains a pointer to the previous interpreter (or compiled bridge) frame.
+Interpreter stack frame is decribed by `ark::Frame` class. The class has fields to store virtual registers and a pointer to the previous stack frame.  
+All the consecutive interpreter stack frames are organized into a linked list. The field `ark::Frame::prev_` contains a pointer to the previous interpreter (or compiled bridge) frame.
 
 ### Compiled code stack frame
 Each compiled function is responsible to reserve stack frame for its purpose and then release it when the function doesn't need it. 
@@ -128,7 +128,7 @@ A compiled code stack frame must have the following structure:
 -----+----------------------+
   H  | Properties           |
   E  +----------------------+
-  A  | panda::Method*       |
+  A  | ark::Method*       |
   D  +----------------------+ <- Frame pointer
   E  | Frame pointer        |
   R  +----------------------+
@@ -138,7 +138,7 @@ A compiled code stack frame must have the following structure:
 Stack frame elements:  
 - data - arbitraty data necessary for function execution. May be omited.  
 - properties - define properties of the frame, f.e. whether it is OSR frame or not.
-- `panda::Method*` - a pointer to `panda::Method` which describes the called function.  
+- `ark::Method*` - a pointer to `ark::Method` which describes the called function.  
 - frame pointer - pointer to the previous frame. The value of `frame pointer` register at the moment of function entry.  
 - return address - address to which control will be transfered after the function gets returned.  
 
@@ -150,7 +150,7 @@ Panda contains special class for getting cframe layout: `class CFrameLayout`. Ev
 should be processed via this class,
 
 ## Calling a function from compiled code
-To call a managed function compiled code must resolve it (i.e. retreive a pointer to callee's `panda::Method`),
+To call a managed function compiled code must resolve it (i.e. retreive a pointer to callee's `ark::Method`),
 prepare arguments in the registers and the stack (if necessary) and jump to callee's entrypoint.  
 Resolving of a function could be done by calling the corresponding runtime entrypoint.
 
@@ -159,7 +159,7 @@ Calling `int max(int a, int b)` function from compiled code on ARM architecture 
 could be described by the following pseudocode:  
 ```
 // tr - thread register
-// r0 contains a pointer to the current `panda::Method`
+// r0 contains a pointer to the current `ark::Method`
 // 1st step: resolve `int max(int, int)`
 mov r1, MAX_INT_INT_ID // MAX_INT_INT_ID - identifier of int max(int, int) function
 ldr lr, [tr, #RESOLVE_RUNTIME_ENTRYPOINT_OFFSET]
@@ -219,17 +219,17 @@ When the interpreter handles a call instruction first it should resolve the call
 Depending on the callee's entrypoint there may be different cases.  
 If the entrypoint points to `CompiledCodeToInterpreterBridge` then the callee should be executed by the interpreter. In this case the interpreter calls itself directly.  
 In other cases the interpreter calls the function `InterpreterToCompiledCodeBridge` passing to it the resolved callee function,
-the call instruction, the interpreter's frame and the pointer to `panda::ManagedThread`.
+the call instruction, the interpreter's frame and the pointer to `ark::ManagedThread`.
 
 `InterpreterToCompiledCodeBridge` function does the following:  
 * Build a boundary stack frame.  
-* Set the pointer to `panda::ManagedThread` to the thread register.  
-* Change stack frame kind in `panda::ManagedThread::stack_frame_kind_` to compiled code stack frame.  
+* Set the pointer to `ark::ManagedThread` to the thread register.  
+* Change stack frame kind in `ark::ManagedThread::stack_frame_kind_` to compiled code stack frame.  
 * Prepare the arguments according to the target calling convention. The function uses the bytecode instruction (which must be a variant of `call` instruction)
     and interpreter's frame to retreive the function's arguments.  
 * Jump to the callee's entrypoint.  
 * After the return save the result to the interpreter stack frame.  
-* Change stack frame kind in `panda::ManagedThread::stack_frame_kind_` back to interpreter stack frame.  
+* Change stack frame kind in `ark::ManagedThread::stack_frame_kind_` back to interpreter stack frame.  
 * Drop the boundary stack frame.  
 
 `InterpreterToCompiledCodeBridge`'s boundary stack frame is necessary to link the interpreter's frame with the compiled code's frame.  
@@ -251,25 +251,25 @@ y r  |                |
 ```
 
 The structure of boundary frame is the same as a stack frame of compiled code.
-Instead of pointer to `panda::Method` the frame contains constant `INTERPRETER_TO_COMPILED_CODE_BRIDGE`.
+Instead of pointer to `ark::Method` the frame contains constant `INTERPRETER_TO_COMPILED_CODE_BRIDGE`.
 Frame pointer points to the previous interpreter frame.
 
 ## Transition from compiled code to the interpreter
 If a function should be executed by the interpreter it must have `CompiledCodeToInterpreterBridge` as an entrypoint.
 `CompiledCodeToInterpreterBridge` does the following:  
-* Change stack frame kind in `panda::ManagedThread::stack_frame_kind_` to interpreter stack frame.  
+* Change stack frame kind in `ark::ManagedThread::stack_frame_kind_` to interpreter stack frame.  
 * Creates a boundary stack frame which contains room for interpreter frame.  
 * Fill in the interpreter frame by the arguments passed to `CompiledCodeToInterpreterBridge` in the registers or via the stack.  
 * Call the interpreter.  
 * Store the result in registers or in the stack according to the target calling convention.  
 * Drop the boundary stack frame.  
-* Change stack frame kind in `panda::ManagedThread::stack_frame_kind_` back to compiled code stack frame.  
+* Change stack frame kind in `ark::ManagedThread::stack_frame_kind_` back to compiled code stack frame.  
 
 `CompiledCodeToInterpreterBridge`'s boundary stack frame is necessary to link the compiled code's frame with the interpreter's frame.
 Its structure is depicted below:  
 ```
 ---- +----------------+ <-+ stack pointer
-  s  | interpreter's  | -+ `panda::Frame::prev_`
+  s  | interpreter's  | -+ `ark::Frame::prev_`
 b t  | frame          |  |
 o a  +----------------+ <+ frame pointer
 u c  | frame pointer  |
@@ -285,15 +285,15 @@ y a  | BRIDGE         |
 ```
 
 The structure of boundary frame is the same as a stack frame of compiled code.
-Instead of a pointer to `panda::Method` the frame contains constant `COMPILED_CODE_TO_INTERPRETER_BRIDGE`.
+Instead of a pointer to `ark::Method` the frame contains constant `COMPILED_CODE_TO_INTERPRETER_BRIDGE`.
 Frame pointer points to the previous frame in compiled code stack frame.
-The field `panda::Frame::prev_` must point to the boundary frame pointer.
+The field `ark::Frame::prev_` must point to the boundary frame pointer.
 
 ## Stack traversing
 Stack traversing is performed by the runtime. When the runtime examinates a managed thread's stack the thread mustn't execute any managed code.
-Stack unwinding always starts from the top frame. Its kind could be determined from `panda::ManagedThread::stak_frame_kind_` field. A pointer
+Stack unwinding always starts from the top frame. Its kind could be determined from `ark::ManagedThread::stak_frame_kind_` field. A pointer
 to the top frame could be determined depends on the kind of the top stack frame:  
-* The top stack frame is an interpreter stack frame. Address of the interpreter's frame could be retrieved from `panda::ManagedThread::GetCurrentFrame()`.  
+* The top stack frame is an interpreter stack frame. Address of the interpreter's frame could be retrieved from `ark::ManagedThread::GetCurrentFrame()`.  
 * The top stack frame is a compiled code stack frame. `frame pointer` register contains the address of the top stack frame.
 
 Having a pointer to the top stack frame, its kind and structure the runtime can move to the next frame.
@@ -301,7 +301,7 @@ Moving to the next frame is done according to the table below:
 
 | Kind of the current stack frame | How to get a pointer to the next stack frame | Kind of the previous stack frame |
 | ------------------------------- | -------------------------------------------- | -------------------------------- |
-| Interpreter stack frame         | Read `panda::Frame::prev_` field             | Interpreter stack frame or COMPILED_CODE_TO_INTERPRETER boundary frame |
+| Interpreter stack frame         | Read `ark::Frame::prev_` field             | Interpreter stack frame or COMPILED_CODE_TO_INTERPRETER boundary frame |
 | INTERPRETER_TO_COMPILED_CODE_BRIDGE boundary stack frame | Read `pointer to the interpreter frame` from the stack | Interpreter stack frame |
 | COMPILED_CODE_TO_INTERPRETER_BRIDGE boundary stack frame | Read `frame pointer` from the stack | Compiled code stack frame |
 | Compiled code stack frame | Read `frame pointer` | Compiled code stack frame or INTERPRETER_TO_COMPILED_CODE_BRIDGE boundary frame|
@@ -332,7 +332,7 @@ E    | native frame   |
 x u  | of             |
 e t  | interpreter    |
 c e  |                |
----- +----------------+ <--- `panda::ManagedThread::GetCurrentFrame()`
+---- +----------------+ <--- `ark::ManagedThread::GetCurrentFrame()`
 b    | baz's          | -+
 o s  | interperer     |  |
 u t  | stack frame    |  |
@@ -348,7 +348,7 @@ y f  | TO_            |  |
 ---- +----------------+  |
      |      data      |  |
      +----------------+  |
- b   | panda::Method* |  |
+ b   | ark::Method* |  |
  a   +----------------+ <+
  r   | frame pointer  | -+
      +----------------+  |
@@ -380,9 +380,9 @@ c e  |                |  |
      |       ...      |
 ```
 
-The runtime determines kind of the top stack frame by reading `panda::ManagedThread::stack_frame_kind_` (the top stack frame kind must be interpreter stack frame). 
-`panda::ManagedThread::GetCurrentFrame()` method must return the pointer to `baz`'s interpreter stack frame. 
-To go to the previous frame the runtime reads the field `panda::Frame::prev_` which must point to `COMPILED_CODE_TO_INTERPRETER_BRIDGE` boundary stack frame. 
+The runtime determines kind of the top stack frame by reading `ark::ManagedThread::stack_frame_kind_` (the top stack frame kind must be interpreter stack frame). 
+`ark::ManagedThread::GetCurrentFrame()` method must return the pointer to `baz`'s interpreter stack frame. 
+To go to the previous frame the runtime reads the field `ark::Frame::prev_` which must point to `COMPILED_CODE_TO_INTERPRETER_BRIDGE` boundary stack frame. 
 It means that to get `bar`'s stack frame the runtime must read `frame pointer` and the kind of the next frame will be compiled code's frame. 
 At this step the runtime has a pointer to `bar`'s compiled code stack frame. To go to the next frame runtime reads `frame pointer` again and gets
 `INTERPRETER_TO_COMPILED_CODE_BRIDGE` boundary stack frame. To reach `foo`'s interpreter stack frame the runtime reads `pointer to the interpreter's frame` field.
@@ -395,10 +395,10 @@ When compiled code is combined from several managed functions (inlined functions
 
 Details in [deoptimization documentation](deoptimization.md)
 ## Throwing an exception
-Throwing an exeption from compiled code is performed by calling a runtime entrypoint `void ThrowException(panda::ObjectHeader* exception)`.  
+Throwing an exeption from compiled code is performed by calling a runtime entrypoint `void ThrowException(ark::ObjectHeader* exception)`.  
 The function `ThrowException` does the following:  
 * Saves all the callee-saved registers to the stack  
-* Stores the pointer to the exception object to `panda::ManagedThread::pending_exception_`  
+* Stores the pointer to the exception object to `ark::ManagedThread::pending_exception_`  
 * Unwind compiled code stack frames to find the corresponding exception handler by going from one stack frame to the previous and making checks.  
 
 If the corresponding catch handler is found in the current stack frame the runtime jumps to the handler.  
@@ -414,5 +414,5 @@ Details of stack travesing are described in [Stack traversing](#stack_traversing
 
 Finding a catch handler in a compiled code stack frame is performed according meta information generated by the compiler (See compiled_method_info.md).
 
-The interpreter must ignore the returned value if `panda::ManagedThread::pending_exception_` is not 0.
+The interpreter must ignore the returned value if `ark::ManagedThread::pending_exception_` is not 0.
 

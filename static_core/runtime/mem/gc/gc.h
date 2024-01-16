@@ -50,7 +50,7 @@
 #include "runtime/timing.h"
 #include "runtime/mem/region_allocator.h"
 
-namespace panda {
+namespace ark {
 class BaseClass;
 class HClass;
 class PandaVM;
@@ -70,14 +70,14 @@ namespace ecmascript {
 class EcmaReferenceProcessor;
 }  // namespace ecmascript
 }  // namespace mem
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 class Array;
 class DynClass;
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_DEBUG_GC LOG(DEBUG, GC) << this->GetLogPrefix()
@@ -197,10 +197,10 @@ public:
      * Initialize GC bits on object creation.
      * Required only for GCs with switched bits
      */
-    virtual void InitGCBits(panda::ObjectHeader *objHeader) = 0;
+    virtual void InitGCBits(ark::ObjectHeader *objHeader) = 0;
 
     /// Initialize GC bits on object creation for the TLAB allocation.
-    virtual void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader) = 0;
+    virtual void InitGCBitsForAllocationInTLAB(ark::ObjectHeader *objHeader) = 0;
 
     bool IsTLABsSupported() const
     {
@@ -598,7 +598,7 @@ protected:
     // it's possible if we make 2 GCs for one safepoint
     // max length of this vector - is 2
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    PandaVector<panda::mem::Reference *> *clearedReferences_ GUARDED_BY(clearedReferencesLock_) {nullptr};
+    PandaVector<ark::mem::Reference *> *clearedReferences_ GUARDED_BY(clearedReferencesLock_) {nullptr};
 
     os::memory::Mutex *clearedReferencesLock_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
 
@@ -606,7 +606,7 @@ protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     std::atomic<GCTaskCause> lastCause_ {GCTaskCause::INVALID_CAUSE};
 
-    bool IsExplicitFull(const panda::GCTask &task) const
+    bool IsExplicitFull(const ark::GCTask &task) const
     {
         return (task.reason == GCTaskCause::EXPLICIT_CAUSE) && !gcSettings_.IsExplicitConcurrentGcEnabled();
     }
@@ -764,9 +764,9 @@ private:
     class PostForkGCTask;
 
     friend class ecmascript::EcmaReferenceProcessor;
-    friend class panda::mem::test::MemStatsGenGCTest;
-    friend class panda::mem::test::ReferenceStorageTest;
-    friend class panda::mem::test::RemSetTest;
+    friend class ark::mem::test::MemStatsGenGCTest;
+    friend class ark::mem::test::ReferenceStorageTest;
+    friend class ark::mem::test::RemSetTest;
     friend class GCScopedPhase;
     friend class GlobalObjectStorage;
     // NOTE(maksenov): Avoid using specific ObjectHelpers class here
@@ -810,6 +810,6 @@ private:
     bool started_ = false;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_HMA

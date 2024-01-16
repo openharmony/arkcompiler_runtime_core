@@ -5,7 +5,7 @@ At the moment we have two compilation modes (in-place and in the background):
 - background mode starts compilation in worker thread of `taskmanager::TaskScheduler` (asynchronously) and the compilation process is divided into parts to make `taskmanager::Task` shorter
 
 
-On successful completion of compilation, `panda::TaskRunner` calls callbacks on successful completion, otherwise, callbacks on failure. It also calls finalize functions in both cases (see details in `libpandabase/task_runner.h`)
+On successful completion of compilation, `ark::TaskRunner` calls callbacks on successful completion, otherwise, callbacks on failure. It also calls finalize functions in both cases (see details in `libpandabase/task_runner.h`)
 
 Since we have a background (asynchronous) mode, we cannot get the compilation result directly (by the return value). Therefore, if we want to know the result of compilation or get a modified graph, we create a callback.
 
@@ -28,8 +28,8 @@ compiler::InPlaceCompilerTaskRunner task_runner;
 
 Method *method = ...;
 bool is_osr = ...;
-panda::ArenaAllocator allocator;
-panda::ArenaAllocator graph_local_allocator;
+ark::ArenaAllocator allocator;
+ark::ArenaAllocator graph_local_allocator;
 std::string method_name = ...;
 
 auto &task_ctx = task_runner.GetContext();
@@ -72,8 +72,8 @@ compiler::RuntimeInterface *runtime = ...;
 compiler::BackgroundCompilerTaskRunner task_runner(task_manager_queue, compiler_thread.get(), runtime);
 
 compiler::BackgroundCompilerContext::CompilerTask compiler_task = ...;
-std::unique_ptr<panda::ArenaAllocator> allocator = ...;
-std::unique_ptr<panda::ArenaAllocator> graph_local_allocator = ...;
+std::unique_ptr<ark::ArenaAllocator> allocator = ...;
+std::unique_ptr<ark::ArenaAllocator> graph_local_allocator = ...;
 std::string method_name = ...;
 
 auto &task_ctx = task_runner.GetContext();

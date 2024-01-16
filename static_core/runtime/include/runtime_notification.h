@@ -28,7 +28,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/handle_scope-inl.h"
 
-namespace panda {
+namespace ark {
 
 class Method;
 class Class;
@@ -598,6 +598,6 @@ private:
     PandaList<DebuggerListener *> debuggerListeners_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_RUNTIME_NOTIFICATION_H_

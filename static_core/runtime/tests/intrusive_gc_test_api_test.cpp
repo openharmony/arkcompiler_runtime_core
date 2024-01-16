@@ -31,7 +31,7 @@
 
 #include "test_utils.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class IntrusiveGCTestApiTest : public testing::TestWithParam<const char *> {
 public:
@@ -101,4 +101,4 @@ TEST_P(IntrusiveGCTestApiTest, TestMarkQueue)
 INSTANTIATE_TEST_SUITE_P(IntrusiveGCTestAPITestSuite, IntrusiveGCTestApiTest,
                          testing::Values("stw", "gen-gc", "g1-gc"));
 
-}  // namespace panda::mem
+}  // namespace ark::mem

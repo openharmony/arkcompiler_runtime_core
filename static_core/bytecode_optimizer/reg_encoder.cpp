@@ -17,7 +17,7 @@
 #include "common.h"
 #include "compiler/optimizer/ir/basicblock.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 static bool IsIntrinsicRange(Inst *inst)
 {
@@ -146,32 +146,32 @@ bool RegEncoder::RunImpl()
     return true;
 }
 
-static panda::compiler::DataType::Type GetRegType(panda::compiler::DataType::Type type)
+static ark::compiler::DataType::Type GetRegType(ark::compiler::DataType::Type type)
 {
-    if (type == panda::compiler::DataType::REFERENCE) {
+    if (type == ark::compiler::DataType::REFERENCE) {
         return type;
     }
-    if (panda::compiler::DataType::Is32Bits(type, Arch::NONE)) {
-        return panda::compiler::DataType::UINT32;
+    if (ark::compiler::DataType::Is32Bits(type, Arch::NONE)) {
+        return ark::compiler::DataType::UINT32;
     }
-    return panda::compiler::DataType::UINT64;
+    return ark::compiler::DataType::UINT64;
 }
 
-static bool RegNeedsRenumbering(panda::compiler::Register r)
+static bool RegNeedsRenumbering(ark::compiler::Register r)
 {
-    return r != panda::compiler::ACC_REG_ID && r != panda::compiler::INVALID_REG;
+    return r != ark::compiler::ACC_REG_ID && r != ark::compiler::INVALID_REG;
 }
 
-static panda::compiler::Register RenumberReg(const panda::compiler::Register r, const panda::compiler::Register delta)
+static ark::compiler::Register RenumberReg(const ark::compiler::Register r, const ark::compiler::Register delta)
 {
-    if (r == panda::compiler::ACC_REG_ID) {
+    if (r == ark::compiler::ACC_REG_ID) {
         return r;
     }
     return r + delta;
 }
 
-static void RenumberSpillFillRegs(panda::compiler::SpillFillInst *inst, const panda::compiler::Register minReg,
-                                  const panda::compiler::Register delta)
+static void RenumberSpillFillRegs(ark::compiler::SpillFillInst *inst, const ark::compiler::Register minReg,
+                                  const ark::compiler::Register delta)
 {
     for (auto &sf : inst->GetSpillFills()) {
         if (sf.SrcType() == compiler::LocationType::REGISTER && sf.SrcValue() >= minReg) {
@@ -729,4 +729,4 @@ void RegEncoder::VisitCatchPhi([[maybe_unused]] GraphVisitor *v, [[maybe_unused]
 void RegEncoder::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
 
 #include "generated/check_width.cpp"
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

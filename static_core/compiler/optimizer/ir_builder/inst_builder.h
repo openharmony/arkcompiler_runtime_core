@@ -27,7 +27,7 @@
 
 #include "bytecode_instruction.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 constexpr int64_t INVALID_OFFSET = std::numeric_limits<int64_t>::max();
 
 class InstBuilder {
@@ -543,6 +543,6 @@ private:
     size_t classId_;
 #include "intrinsics_ir_build.inl.h"
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_INST_BUILDER_H

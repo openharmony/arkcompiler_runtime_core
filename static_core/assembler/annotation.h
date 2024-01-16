@@ -28,7 +28,7 @@
 
 #include "macros.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 class AnnotationElement;
 
@@ -553,6 +553,6 @@ private:
     std::unique_ptr<Value> value_;
 };
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ANNOTATION_H

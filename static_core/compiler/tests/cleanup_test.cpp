@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/regalloc/cleanup_empty_blocks.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CleanupTest : public GraphTest {
 public:
     bool RunCleanupEmptyBlocks()
@@ -1937,4 +1937,4 @@ TEST_F(CleanupTest, DontRemoveCallInlinedWithBarrier)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

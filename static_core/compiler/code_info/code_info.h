@@ -23,7 +23,7 @@
 #include "utils/small_vector.h"
 #include "utils/span.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 /*
  *
@@ -606,6 +606,6 @@ void CodeInfo::EnumerateRoots(const StackMap &stackMap, Callback callback)
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_CODE_INFO_H

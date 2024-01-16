@@ -21,7 +21,7 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/basicblock.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BlockState;
 class LocationState;
 /*
@@ -235,6 +235,6 @@ private:
     ArenaVector<LocationState> stackParam_;
     ArenaVector<LocationState> stackArg_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_REG_ALLOC_VERIFIER_H

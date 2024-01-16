@@ -27,7 +27,7 @@
 
 #include <algorithm>
 
-namespace panda::verifier {
+namespace ark::verifier {
 /*
 Design decisions:
 1. regs - unordered map, for speed (compared to map) and space efficiency (compared to vector)
@@ -239,6 +239,6 @@ inline RegContext RcUnion(RegContext const *lhs, RegContext const *rhs, TypeSyst
     return result;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP_

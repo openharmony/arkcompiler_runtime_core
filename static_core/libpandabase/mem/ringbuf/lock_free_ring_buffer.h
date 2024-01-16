@@ -22,13 +22,13 @@
 #include "coherency_line_size.h"
 #include "libpandabase/utils/math_helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 /// Lock-free single-producer single-consumer ring-buffer. Push can take infinite amount of time if buffer is full.
 template <typename T, size_t RING_BUFFER_SIZE>
 class LockFreeBuffer {
 public:
     static_assert(RING_BUFFER_SIZE > 0U, "0 is invalid size for ring buffer");
-    static_assert(panda::helpers::math::IsPowerOfTwo(RING_BUFFER_SIZE));
+    static_assert(ark::helpers::math::IsPowerOfTwo(RING_BUFFER_SIZE));
     static constexpr size_t RING_BUFFER_SIZE_MASK = RING_BUFFER_SIZE - 1;
     static_assert(RING_BUFFER_SIZE_MASK > 0);
 
@@ -123,9 +123,9 @@ public:
 private:
     using Self = LockFreeBuffer<T, RING_BUFFER_SIZE>;
 
-    alignas(panda::COHERENCY_LINE_SIZE) std::atomic<size_t> tailIndex_;
+    alignas(ark::COHERENCY_LINE_SIZE) std::atomic<size_t> tailIndex_;
     std::atomic<size_t> headIndex_;
-    alignas(panda::COHERENCY_LINE_SIZE) std::array<T, RING_BUFFER_SIZE> buffer_;
+    alignas(ark::COHERENCY_LINE_SIZE) std::array<T, RING_BUFFER_SIZE> buffer_;
 
     size_t Increment(size_t n)
     {
@@ -145,5 +145,5 @@ private:
 #endif
     }
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif

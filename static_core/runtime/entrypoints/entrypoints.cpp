@@ -42,9 +42,9 @@
 #include "intrinsics.h"
 #include "runtime/interpreter/vregister_iterator.h"
 
-namespace panda {
+namespace ark {
 
-using panda::compiler::TraceId;
+using ark::compiler::TraceId;
 
 #undef LOG_ENTRYPOINTS
 
@@ -97,7 +97,7 @@ extern "C" NO_ADDRESS_SANITIZE void InterpreterEntryPoint(Method *method, Frame 
 
     if (callee->IsAbstract()) {
         ASSERT(pc == nullptr);
-        panda::ThrowAbstractMethodError(callee);
+        ark::ThrowAbstractMethodError(callee);
         HandlePendingException();
         UNREACHABLE();
     }
@@ -287,20 +287,20 @@ extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t
     auto length = static_cast<coretypes::String *>(obj)->GetLength();
     if (UNLIKELY(static_cast<uint32_t>(end) > length)) {
         ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
-        panda::ThrowStringIndexOutOfBoundsException(end, length);
+        ark::ThrowStringIndexOutOfBoundsException(end, length);
         HandlePendingException(UnwindPolicy::SKIP_INLINED);
         UNREACHABLE();
     }
     if (UNLIKELY(begin > end)) {
         ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
-        panda::ThrowStringIndexOutOfBoundsException(begin, length);
+        ark::ThrowStringIndexOutOfBoundsException(begin, length);
         HandlePendingException(UnwindPolicy::SKIP_INLINED);
         UNREACHABLE();
     }
 
     if (UNLIKELY(begin < 0)) {
         ASSERT(!ManagedThread::GetCurrent()->HasPendingException());
-        panda::ThrowStringIndexOutOfBoundsException(begin, length);
+        ark::ThrowStringIndexOutOfBoundsException(begin, length);
         HandlePendingException(UnwindPolicy::SKIP_INLINED);
         UNREACHABLE();
     }
@@ -406,7 +406,7 @@ extern "C" void CheckCastEntrypoint(const ObjectHeader *obj, Class *klass)
     // it is ok to get it here.
     Class *objKlass = obj == nullptr ? nullptr : obj->ClassAddr<Class>();
     if (UNLIKELY(objKlass != nullptr && !klass->IsAssignableFrom(objKlass))) {
-        panda::ThrowClassCastException(klass, objKlass);
+        ark::ThrowClassCastException(klass, objKlass);
         HandlePendingException();
         UNREACHABLE();
     }
@@ -464,7 +464,7 @@ extern "C" coretypes::String *ResolveStringAotEntrypoint(const Method *caller, F
     auto runtime = Runtime::GetCurrent();
     auto aotManager = runtime->GetClassLinker()->GetAotManager();
     auto vm = ManagedThread::GetCurrent()->GetVM();
-    auto str = runtime->ResolveStringFromCompiledCode(vm, *caller, panda::panda_file::File::EntityId(id));
+    auto str = runtime->ResolveStringFromCompiledCode(vm, *caller, ark::panda_file::File::EntityId(id));
     if (UNLIKELY(str == nullptr)) {
         return nullptr;
     }
@@ -815,7 +815,7 @@ extern "C" void CheckStoreArrayReferenceEntrypoint(coretypes::Array *array, Obje
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(!storeObj->IsInstanceOf(elementClass))) {
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-        panda::ThrowArrayStoreException(arrayClass, storeObj->ClassAddr<Class>());
+        ark::ThrowArrayStoreException(arrayClass, storeObj->ClassAddr<Class>());
         HandlePendingException();
         UNREACHABLE();
     }
@@ -963,19 +963,19 @@ extern "C" NO_ADDRESS_SANITIZE void DeoptimizeEntrypoint(uint64_t deoptimizeType
 {
     BEGIN_ENTRYPOINT();
     auto thread = ManagedThread::GetCurrent();
-    auto type = static_cast<panda::compiler::DeoptimizeType>(
-        deoptimizeType & ((1U << MinimumBitsToStore(panda::compiler::DeoptimizeType::COUNT)) - 1));
-    [[maybe_unused]] auto instId = deoptimizeType >> MinimumBitsToStore(panda::compiler::DeoptimizeType::COUNT);
-    LOG(INFO, INTEROP) << "DeoptimizeEntrypoint (reason: " << panda::compiler::DeoptimizeTypeToString(type)
+    auto type = static_cast<ark::compiler::DeoptimizeType>(
+        deoptimizeType & ((1U << MinimumBitsToStore(ark::compiler::DeoptimizeType::COUNT)) - 1));
+    [[maybe_unused]] auto instId = deoptimizeType >> MinimumBitsToStore(ark::compiler::DeoptimizeType::COUNT);
+    LOG(INFO, INTEROP) << "DeoptimizeEntrypoint (reason: " << ark::compiler::DeoptimizeTypeToString(type)
                        << ", inst_id: " << instId << ")\n";
 
     EVENT_DEOPTIMIZATION_REASON(std::string(StackWalker::Create(thread).GetMethod()->GetFullName()),
-                                panda::compiler::DeoptimizeTypeToString(type));
+                                ark::compiler::DeoptimizeTypeToString(type));
 
     ASSERT(!thread->HasPendingException());
     auto stack = StackWalker::Create(thread);
     Method *destroyMethod = nullptr;
-    if (type >= panda::compiler::DeoptimizeType::CAUSE_METHOD_DESTRUCTION) {
+    if (type >= ark::compiler::DeoptimizeType::CAUSE_METHOD_DESTRUCTION) {
         // Get pointer to top method
         destroyMethod = StackWalker::Create(thread, UnwindPolicy::SKIP_INLINED).GetMethod();
     }
@@ -1002,13 +1002,13 @@ coretypes::TaggedValue GetInitialTaggedValue(Method *method)
 extern "C" void LockObjectEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-    panda::intrinsics::ObjectMonitorEnter(obj);
+    ark::intrinsics::ObjectMonitorEnter(obj);
 }
 
 extern "C" void LockObjectSlowPathEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-    panda::intrinsics::ObjectMonitorEnter(obj);
+    ark::intrinsics::ObjectMonitorEnter(obj);
     if (!ManagedThread::GetCurrent()->HasPendingException()) {
         return;
     }
@@ -1020,13 +1020,13 @@ extern "C" void LockObjectSlowPathEntrypoint(ObjectHeader *obj)
 extern "C" void UnlockObjectEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-    panda::intrinsics::ObjectMonitorExit(obj);
+    ark::intrinsics::ObjectMonitorExit(obj);
 }
 
 extern "C" void UnlockObjectSlowPathEntrypoint(ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
-    panda::intrinsics::ObjectMonitorExit(obj);
+    ark::intrinsics::ObjectMonitorExit(obj);
     if (!ManagedThread::GetCurrent()->HasPendingException()) {
         return;
     }
@@ -1121,7 +1121,7 @@ extern "C" void *AllocFrameInterp(ManagedThread *current, size_t allocSz)
     void *mem = current->GetStackFrameAllocator()->Alloc<false>(allocSz);
     if (UNLIKELY(mem == nullptr)) {
         current->DisableStackOverflowCheck();
-        panda::ThrowStackOverflowException(current);
+        ark::ThrowStackOverflowException(current);
         current->EnableStackOverflowCheck();
     }
     return mem;
@@ -1212,7 +1212,7 @@ extern "C" uint32_t CheckCastByIdEntrypoint(ObjectHeader *obj, Class *klass)
     ASSERT(IsAddressInObjectsHeapOrNull(obj));
     Class *objKlass = obj == nullptr ? nullptr : obj->ClassAddr<Class>();
     if (UNLIKELY(objKlass != nullptr && !klass->IsAssignableFrom(objKlass))) {
-        panda::ThrowClassCastException(klass, objKlass);
+        ark::ThrowClassCastException(klass, objKlass);
         return 1;
     }
     return 0;
@@ -1355,7 +1355,7 @@ extern "C" bool CallCompilerSlowPathOSR(ManagedThread *thread, Method *method, F
     if constexpr (ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR) {
         ASSERT(ArchTraits<RUNTIME_ARCH>::SUPPORT_OSR);
         if (!frame->IsDeoptimized() && Runtime::GetOptions().IsCompilerEnableOsr()) {
-            frame->SetAcc(panda::interpreter::AccVRegister(acc, accTag));
+            frame->SetAcc(ark::interpreter::AccVRegister(acc, accTag));
             return method->DecrementHotnessCounter<false>(thread, insOffset + offset, &frame->GetAcc(), true);
         }
     }
@@ -1517,7 +1517,7 @@ extern "C" const uint8_t *FindCatchBlockInIFrames(ManagedThread *currThread, Fra
     pcOffset = FindCatchBlockInIFramesStackless(&currThread, &currFrame, pc);
     if (pcOffset == panda_file::INVALID_OFFSET) {
         if constexpr (RUNTIME_ARCH == Arch::AARCH64 || RUNTIME_ARCH == Arch::AARCH32 || RUNTIME_ARCH == Arch::X86_64) {
-            panda::FindCatchBlockInCallStack(currThread);
+            ark::FindCatchBlockInCallStack(currThread);
         }
         return pc;
     }
@@ -1542,7 +1542,7 @@ extern "C" coretypes::String *VmCreateString(ManagedThread *thread, Method *meth
     return thread->GetVM()->CreateString(method, ctorArg);
 }
 
-extern "C" void DebugPrintEntrypoint([[maybe_unused]] panda::Frame *frame, [[maybe_unused]] const uint8_t *pc,
+extern "C" void DebugPrintEntrypoint([[maybe_unused]] ark::Frame *frame, [[maybe_unused]] const uint8_t *pc,
                                      [[maybe_unused]] uint64_t accPayload, [[maybe_unused]] uint64_t accTag)
 {
     CHECK_STACK_WALKER;
@@ -1553,10 +1553,10 @@ extern "C" void DebugPrintEntrypoint([[maybe_unused]] panda::Frame *frame, [[may
 
     constexpr uint64_t STANDARD_DEBUG_INDENT = 5;
     PandaString accDump;
-    auto accVreg = panda::interpreter::VRegister(accPayload);
-    auto accTagVreg = panda::interpreter::VRegister(accTag);
+    auto accVreg = ark::interpreter::VRegister(accPayload);
+    auto accTagVreg = ark::interpreter::VRegister(accTag);
     if (frame->IsDynamic()) {
-        accDump = panda::interpreter::DynamicVRegisterRef(&accVreg).DumpVReg();
+        accDump = ark::interpreter::DynamicVRegisterRef(&accVreg).DumpVReg();
         LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "acc." << accDump;
 
         DynamicFrameHandler frameHandler(frame);
@@ -1565,7 +1565,7 @@ extern "C" void DebugPrintEntrypoint([[maybe_unused]] panda::Frame *frame, [[may
                                     << frameHandler.GetVReg(i).DumpVReg();
         }
     } else {
-        accDump = panda::interpreter::StaticVRegisterRef(&accVreg, &accTagVreg).DumpVReg();
+        accDump = ark::interpreter::StaticVRegisterRef(&accVreg, &accTagVreg).DumpVReg();
         LOG(DEBUG, INTERPRETER) << PandaString(STANDARD_DEBUG_INDENT, ' ') << "acc." << accDump;
 
         StaticFrameHandler frameHandler(frame);
@@ -1652,7 +1652,7 @@ static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(Obje
                      ->GetClassRoot(ClassRoot::ARRAY_U16);
 
     auto capacity = RecalculateCapacity(GetCapacity(sb), newsize);
-    auto *newstorage = panda::coretypes::Array::Create(klass, capacity);
+    auto *newstorage = ark::coretypes::Array::Create(klass, capacity);
     sb = reinterpret_cast<ObjectHeader *>(handle.GetPtr());
     str = str != nullptr ? strHandle.GetPtr() : nullptr;
 
@@ -1774,4 +1774,4 @@ extern "C" ObjectHeader *CoreStringBuilderString(ObjectHeader *sb, void *s)
     sb->SetFieldPrimitive<uint32_t>(SB_COUNT_OFFSET, newsize);
     return sb;
 }
-}  // namespace panda
+}  // namespace ark

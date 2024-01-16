@@ -18,7 +18,7 @@
 #include "runtime/include/object_header.h"
 #include "runtime/mem/gc/card_table.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class Region;
 class CardHandler {
 public:
@@ -37,6 +37,6 @@ protected:
 private:
     CardTable *cardTable_;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif

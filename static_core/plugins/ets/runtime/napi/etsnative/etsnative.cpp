@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/napi/ets_napi_internal.h"
 
-namespace panda::ets::napi {
+namespace ark::ets::napi {
 
 extern "C" ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vmArgs)
 {
@@ -31,4 +31,4 @@ extern "C" ETS_EXPORT ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInit
 {
     return _internal_ETS_CreateVM(pVm, pEnv, vmArgs);
 }
-}  // namespace panda::ets::napi
+}  // namespace ark::ets::napi

@@ -23,7 +23,7 @@
 
 // clang-format off
 /**
-*    panda::TaskRunner runner;
+*    ark::TaskRunner runner;
 *
 *    runner.AddFinalize(foo);
 *    runner.AddCallbackOnSuccess(foo1);
@@ -52,7 +52,7 @@
 */
 // clang-format on
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief TaskRunner class implements interface to add callbacks and set next tasks to be executed
@@ -291,6 +291,6 @@ private:
     Task taskOnFail_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_PANDA_TASK_RUNNER_H

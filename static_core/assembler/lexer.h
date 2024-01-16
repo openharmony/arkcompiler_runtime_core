@@ -28,7 +28,7 @@
 #include "isa.h"
 #include "utils/logger.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Token {
@@ -123,6 +123,6 @@ private:
  */
 std::string_view TokenTypeWhat(Token::Type t);
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_LEXER_H

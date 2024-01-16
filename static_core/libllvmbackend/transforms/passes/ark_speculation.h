@@ -19,11 +19,11 @@
 #include <llvm/Transforms/Scalar/SpeculativeExecution.h>
 #include <llvm/IR/PassManager.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 class ArkSpeculativeExecution : public llvm::SpeculativeExecutionPass {
     static constexpr bool ONLY_IF_DIVERGENT_TARGET = true;
@@ -32,12 +32,12 @@ public:
     static constexpr llvm::StringRef ARG_NAME = "wrap-speculative-execution";
 
     explicit ArkSpeculativeExecution() : llvm::SpeculativeExecutionPass(ONLY_IF_DIVERGENT_TARGET) {}
-    static bool ShouldInsert([[maybe_unused]] const panda::llvmbackend::LLVMCompilerOptions *options)
+    static bool ShouldInsert([[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
     {
         return true;
     }
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_ARK_SPECULATION_H

@@ -21,7 +21,7 @@
 #include "verification/util/str.h"
 
 % checks = Verification.compatibility_checks
-namespace panda::verifier {
+namespace ark::verifier {
 struct CheckResult {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     VerificationStatus status;
@@ -91,6 +91,6 @@ inline const CheckResult& Check<%= check_name.to_s %>(<%= type1 %> x, <%= type2 
 }
 % end
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_COMPAT_CHECKS_HPP_

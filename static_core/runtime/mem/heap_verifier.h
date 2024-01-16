@@ -20,7 +20,7 @@
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/rendezvous.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class HeapManager;
 class GCRoot;
@@ -166,6 +166,6 @@ private:
     PandaVector<MemRange> collectableMemRanges_;
     PandaVector<MemRange> aliveMemRanges_;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_HEAP_VERIFIER_H

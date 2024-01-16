@@ -24,10 +24,10 @@
 
 namespace {
 
-using panda::verifier::Config;
-using panda::verifier::config::Section;
+using ark::verifier::Config;
+using ark::verifier::config::Section;
 
-bool ProcessConfigSection(Config *cfg, const Section &section, const panda::PandaString &path = "")
+bool ProcessConfigSection(Config *cfg, const Section &section, const ark::PandaString &path = "")
 {
     auto &sectionHandlers = cfg->debugCfg.sectionHandlers;
     if (sectionHandlers.count(path) > 0) {
@@ -43,7 +43,7 @@ bool ProcessConfigSection(Config *cfg, const Section &section, const panda::Pand
 
 }  // namespace
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 
 void RegisterConfigHandler(Config *cfg, const PandaString &path, callable<bool(Config *, const Section &)> handler)
 {
@@ -56,4 +56,4 @@ bool ProcessConfig(Config *cfg, const Section &section)
     return ProcessConfigSection(cfg, section, section.name);
 }
 
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config

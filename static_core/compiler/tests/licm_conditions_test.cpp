@@ -16,7 +16,7 @@
 #include "unit_test.h"
 #include "optimizer/optimizations/licm_conditions.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LicmConditionsTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers,readability-function-size)
@@ -1769,4 +1769,4 @@ TEST_F(LicmConditionsTest, TestMergeChainsPhiHoisted)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 // NOLINTEND(readability-magic-numbers,readability-function-size)
-}  // namespace panda::compiler
+}  // namespace ark::compiler

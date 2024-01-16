@@ -160,7 +160,7 @@ end
 #include "irtoc_builder.cpp"
 #endif
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTBEGIN(readability-identifier-naming)
 // NOLINTNEXTLINE(readability-function-size)
 void InstBuilder::BuildInstruction(const BytecodeInstruction* instruction) {
@@ -241,4 +241,4 @@ bool IrBuilderExternalInliningAnalysis::IsSuitableForInline(const BytecodeInstru
     return false;
 }
 // NOLINTEND(readability-identifier-naming)
-}  // namespace panda::compiler
+}  // namespace ark::compiler

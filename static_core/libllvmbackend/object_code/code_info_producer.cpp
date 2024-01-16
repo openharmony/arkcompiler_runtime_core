@@ -25,7 +25,7 @@ static constexpr unsigned LOCATION_STEP = 2U;
 static constexpr unsigned START_OFFSET = 3U;
 static constexpr unsigned DWARF_AARCH64_BASE_REG = 19U;
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 CodeInfoProducer::CodeInfoProducer(Arch arch, LLVMArkInterface *compilation) : arch_(arch), compilation_(compilation) {}
 
@@ -48,7 +48,7 @@ void CodeInfoProducer::AddSymbol(Method *method, StackMapSymbol symbol)
 }
 
 /// Fill a CodeInfoBuilder with proper data for the passed METHOD.
-void CodeInfoProducer::Produce(Method *method, panda::compiler::CodeInfoBuilder *builder) const
+void CodeInfoProducer::Produce(Method *method, ark::compiler::CodeInfoBuilder *builder) const
 {
     builder->BeginMethod(0, compilation_->GetVirtualRegistersCount(method));
 
@@ -149,7 +149,7 @@ unsigned CodeInfoProducer::CollectRoots(const LLVMStackMap::RecordAccessor &reco
     return regMask;
 }
 
-void CodeInfoProducer::BuildSingleRegMap(panda::compiler::CodeInfoBuilder *builder,
+void CodeInfoProducer::BuildSingleRegMap(ark::compiler::CodeInfoBuilder *builder,
                                          const LLVMStackMap::RecordAccessor &record, int32_t methodIdIndex,
                                          int32_t vregsCount, uint64_t stackSize) const
 {
@@ -201,8 +201,8 @@ void CodeInfoProducer::BuildSingleRegMap(panda::compiler::CodeInfoBuilder *build
     }
 }
 
-void CodeInfoProducer::BuildRegMap(panda::compiler::CodeInfoBuilder *builder,
-                                   const LLVMStackMap::RecordAccessor &record, uint64_t stackSize) const
+void CodeInfoProducer::BuildRegMap(ark::compiler::CodeInfoBuilder *builder, const LLVMStackMap::RecordAccessor &record,
+                                   uint64_t stackSize) const
 {
     auto deoptCount = record.getLocation(LOCATION_DEOPT_COUNT).getSmallConstant();
     if (deoptCount == 0) {
@@ -298,4 +298,4 @@ void CodeInfoProducer::ConvertStackMaps(Method *method, CodeInfoBuilder *builder
         builder->EndStackMap();
     }
 }
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

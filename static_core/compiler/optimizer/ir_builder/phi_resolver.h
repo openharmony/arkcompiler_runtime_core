@@ -18,7 +18,7 @@
 #include "inst_builder.h"
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Resolve phi instructions in the given graph. Resolving phi is:
  *  - remove phi if it has only SafePoint in users
@@ -370,6 +370,6 @@ private:
     Marker hasRealUserMarker_ {UNDEF_MARKER};
     bool hasSaveStateInstOnly_ {true};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PHI_RESOLVER_H

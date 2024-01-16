@@ -15,7 +15,7 @@
 
 #include "disasm_backed_debug_info_extractor.h"
 
-namespace panda::disasm {
+namespace ark::disasm {
 DisasmBackedDebugInfoExtractor::DisasmBackedDebugInfoExtractor(
     const panda_file::File &file,
     std::function<void(panda_file::File::EntityId, std::string_view)> &&onDisasmSourceName)
@@ -149,4 +149,4 @@ const DisasmBackedDebugInfoExtractor::Disassembly &DisasmBackedDebugInfoExtracto
                                         std::move(localVariableTable)})
         .first->second;
 }
-}  // namespace panda::disasm
+}  // namespace ark::disasm

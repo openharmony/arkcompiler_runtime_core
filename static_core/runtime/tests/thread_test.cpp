@@ -17,7 +17,7 @@
 #include "runtime/include/runtime.h"
 #include "libpandabase/test_utilities.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class ThreadTest : public testing::Test {
 public:
@@ -173,4 +173,4 @@ DEATH_TEST_F(ThreadTest, TestAllConversions)
     thread->ManagedCodeEnd();
     AssertNative();
 }
-}  // namespace panda::test
+}  // namespace ark::test

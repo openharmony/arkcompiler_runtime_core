@@ -16,7 +16,7 @@
 
 #include "mem/mem.h"
 
-namespace panda {
+namespace ark {
 
 constexpr uint64_t SIZE_4G = (1ULL << 32U);  // NOLINT(hicpp-signed-bitwise)
 
@@ -25,7 +25,7 @@ static_assert(4194304_KB == SIZE_4G);  // NOLINT(readability-magic-numbers)
 static_assert(4096_MB == SIZE_4G);     // NOLINT(readability-magic-numbers)
 static_assert(4_GB == SIZE_4G);
 
-}  // namespace panda
+}  // namespace ark
 
 int main()
 {

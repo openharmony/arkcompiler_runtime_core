@@ -19,7 +19,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "plugins/ets/compiler/generated/interop_intrinsic_kinds.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 static bool IsForbiddenInst(Inst *inst)
 {
@@ -1161,4 +1161,4 @@ bool InteropIntrinsicOptimization::RunImpl()
     return IsApplied();
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

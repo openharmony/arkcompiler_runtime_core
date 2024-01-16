@@ -21,7 +21,7 @@
 #include "runtime/include/method.h"
 #include "runtime/include/stack_walker.h"
 
-namespace panda {
+namespace ark {
 
 void ThrowException(const LanguageContext &ctx, ManagedThread *thread, const uint8_t *mutf8Name,
                     const uint8_t *mutf8Msg);
@@ -109,6 +109,6 @@ inline void SetExceptionEvent([[maybe_unused]] events::ExceptionType type, [[may
 #endif
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_EXCEPTIONS_H_

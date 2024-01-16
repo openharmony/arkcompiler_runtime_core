@@ -38,7 +38,7 @@
 #include "runtime/coroutines/threaded_coroutine_manager.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 
-namespace panda::ets {
+namespace ark::ets {
 // Create MemoryManager by RuntimeOptions
 static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &options)
 {
@@ -69,7 +69,7 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
 void PandaEtsVM::PromiseListenerInfo::UpdateRefToMovedObject()
 {
     if (promise_->IsForwarded()) {
-        promise_ = EtsPromise::FromCoreType(panda::mem::GetForwardAddress(promise_));
+        promise_ = EtsPromise::FromCoreType(ark::mem::GetForwardAddress(promise_));
     }
 }
 
@@ -219,12 +219,12 @@ static void PreallocSpecialReference(PandaEtsVM *vm, mem::Reference *&ref, const
     if (obj == nullptr) {
         LOG(FATAL, RUNTIME) << "Cannot preallocate a special object " << desc;
     }
-    ref = vm->GetGlobalObjectStorage()->Add(obj->GetCoreType(), panda::mem::Reference::ObjectType::GLOBAL);
+    ref = vm->GetGlobalObjectStorage()->Add(obj->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
 }
 
 bool PandaEtsVM::Initialize()
 {
-    if (!intrinsics::Initialize(panda::panda_file::SourceLang::ETS)) {
+    if (!intrinsics::Initialize(ark::panda_file::SourceLang::ETS)) {
         LOG(ERROR, RUNTIME) << "Failed to initialize eTS intrinsics";
         return false;
     }
@@ -686,7 +686,7 @@ void PandaEtsVM::UpdateVmRefs()
         os::memory::LockHolder lock(finalizationQueueLock_);
         for (auto &entry : registeredFinalizationQueueInstances_) {
             if ((entry->GetCoreType())->IsForwarded()) {
-                entry = EtsObject::FromCoreType(panda::mem::GetForwardAddress(entry->GetCoreType()));
+                entry = EtsObject::FromCoreType(ark::mem::GetForwardAddress(entry->GetCoreType()));
             }
         }
     }
@@ -768,4 +768,4 @@ void PandaEtsVM::FirePromiseStateChanged(EtsHandle<EtsPromise> &promise)
     }
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

@@ -21,7 +21,7 @@
 
 #include <atomic>
 
-namespace panda::mem {
+namespace ark::mem {
 
 inline uint8_t CardTable::Card::GetCard() const
 {
@@ -141,6 +141,6 @@ void CardTable::VisitMarkedCompact(CardVisitor cardVisitor)
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_GC_CARD_TABLE_INL_H

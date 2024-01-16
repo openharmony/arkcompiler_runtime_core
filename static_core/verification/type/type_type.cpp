@@ -18,7 +18,7 @@
 #include "verification/type/type_system.h"
 #include "verification/util/mem.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 using Builtin = Type::Builtin;
 
 // NOLINTBEGIN(fuchsia-statically-constructed-objects,readability-identifier-naming)
@@ -763,4 +763,4 @@ Type Type::GetArrayElementType(TypeSystem *tsys) const
     }
     return Top();
 }
-}  // namespace panda::verifier
+}  // namespace ark::verifier

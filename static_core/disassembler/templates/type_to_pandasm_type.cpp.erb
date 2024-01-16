@@ -15,7 +15,7 @@
 
 #include "disassembler.h"
 
-namespace panda::disasm {
+namespace ark::disasm {
 
 pandasm::Type Disassembler::PFTypeToPandasmType(const panda_file::Type& type, panda_file::ProtoDataAccessor& pda,
                                                 size_t& refIdx) const {
@@ -65,4 +65,4 @@ pandasm::Type Disassembler::FieldTypeToPandasmType(const uint32_t& type) const {
     return fieldType;
 }
 
-} // namespace panda::disasm
+} // namespace ark::disasm

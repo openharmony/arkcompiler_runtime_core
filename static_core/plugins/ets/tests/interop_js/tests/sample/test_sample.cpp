@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropJsSampleTest : public EtsInteropTest {};
 
@@ -51,4 +51,4 @@ TEST_F(EtsInteropJsSampleTest, ets_sum_any_types)
     ASSERT_STREQ(ret.value().data(), RES.data());
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

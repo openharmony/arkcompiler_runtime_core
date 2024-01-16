@@ -30,7 +30,7 @@ extern "C" void ExecuteImplFast_LLVM(void *, void *, void *, void *);    // NOLI
 extern "C" void ExecuteImplFastEH_LLVM(void *, void *, void *, void *);  // NOLINT(readability-identifier-naming)
 #endif
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 enum InterpreterType { CPP = 0, IRTOC, LLVM };
 
@@ -162,4 +162,4 @@ void EnsureDebugMethodsInstantiation(void *handler)
     static_cast<InstructionHandlerBase<RuntimeInterface, true> *>(handler)->DebugDump();
 }
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter

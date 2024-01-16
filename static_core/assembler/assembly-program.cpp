@@ -18,7 +18,7 @@
 #include "assembly-program.h"
 #include "ide_helpers.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 std::string Program::JsonDump() const
 {
@@ -31,4 +31,4 @@ std::string Program::JsonDump() const
     return ss.str();
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

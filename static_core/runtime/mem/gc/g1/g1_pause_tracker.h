@@ -21,7 +21,7 @@
 #include "libpandabase/utils/time.h"
 #include "libpandabase/utils/ring_buffer.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Track G1 GC pause goal: pauses sum does not exceed max_gc_time in gc_pause_interval
 class G1PauseTracker {
@@ -47,14 +47,14 @@ public:
     public:
         ~Scope()
         {
-            owner_->AddPause(startTimeUs_, panda::time::GetCurrentTimeInMicros());
+            owner_->AddPause(startTimeUs_, ark::time::GetCurrentTimeInMicros());
         }
 
         NO_COPY_SEMANTIC(Scope);
         NO_MOVE_SEMANTIC(Scope);
 
     private:
-        explicit Scope(G1PauseTracker *owner) : owner_(owner), startTimeUs_(panda::time::GetCurrentTimeInMicros()) {}
+        explicit Scope(G1PauseTracker *owner) : owner_(owner), startTimeUs_(ark::time::GetCurrentTimeInMicros()) {}
 
         G1PauseTracker *owner_;
         int64_t startTimeUs_;
@@ -103,10 +103,10 @@ private:
 
     // Need to analyze real apps what size is required
     static constexpr int SIZE = 16;
-    panda::RingBuffer<PauseEntry, SIZE> pauses_;
+    ark::RingBuffer<PauseEntry, SIZE> pauses_;
     int64_t gcPauseIntervalUs_;
     int64_t maxGcTimeUs_;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_G1_G1_PAUSE_TRACKER_H

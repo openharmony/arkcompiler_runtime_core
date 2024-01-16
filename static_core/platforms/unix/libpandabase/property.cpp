@@ -19,7 +19,7 @@
 #include <sys/system_properties.h>
 #endif  // PANDA_TARGET_MOBILE
 
-namespace panda::os::unix::property {
+namespace ark::os::unix::property {
 
 bool GetPropertyBuffer([[maybe_unused]] const char *arkProp, [[maybe_unused]] std::string &out)
 {
@@ -33,4 +33,4 @@ bool GetPropertyBuffer([[maybe_unused]] const char *arkProp, [[maybe_unused]] st
     return false;
 }
 
-}  // namespace panda::os::unix::property
+}  // namespace ark::os::unix::property

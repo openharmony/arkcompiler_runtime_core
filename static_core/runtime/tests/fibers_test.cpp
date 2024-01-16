@@ -23,7 +23,7 @@
 #include "libpandabase/utils/utils.h"
 #include "runtime/fibers/fiber_context.h"
 
-namespace panda::fibers::test {
+namespace ark::fibers::test {
 
 /// The fixture
 class FibersTest : public testing::Test {
@@ -219,4 +219,4 @@ TEST_F(FibersDeathTest, AbortOnFiberReturn)
                 ".*");
 }
 
-}  // namespace panda::fibers::test
+}  // namespace ark::fibers::test

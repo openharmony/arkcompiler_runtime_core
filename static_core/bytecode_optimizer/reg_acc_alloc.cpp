@@ -18,7 +18,7 @@
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/inst.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 /// Decide if accumulator register gets dirty between two instructions.
 bool IsAccWriteBetween(compiler::Inst *srcInst, compiler::Inst *dstInst)
@@ -351,4 +351,4 @@ bool RegAccAlloc::RunImpl()
     return true;
 }
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

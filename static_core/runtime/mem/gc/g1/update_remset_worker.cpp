@@ -22,7 +22,7 @@
 #include "runtime/mem/object_helpers-inl.h"
 #include "runtime/mem/rem_set-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorker(G1GC<LanguageConfig> *gc,
@@ -30,7 +30,7 @@ UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorker(G1GC<LanguageConfig> *gc,
                                                        os::memory::Mutex *queueLock, size_t regionSize,
                                                        bool updateConcurrent, size_t minConcurrentCardsToProcess)
     : gc_(gc),
-      regionSizeBits_(panda::helpers::math::GetIntLog2(regionSize)),
+      regionSizeBits_(ark::helpers::math::GetIntLog2(regionSize)),
       minConcurrentCardsToProcess_(minConcurrentCardsToProcess),
       queue_(queue),
       queueLock_(queueLock),
@@ -294,4 +294,4 @@ void UpdateRemsetWorker<LanguageConfig>::ResumeWorkerAfterGCPause()
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(UpdateRemsetWorker);
-}  // namespace panda::mem
+}  // namespace ark::mem

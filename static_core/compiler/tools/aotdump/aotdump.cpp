@@ -44,9 +44,9 @@ using vixl::aarch64::Instruction;
 #include <elf.h>
 #include <regex>
 
-using namespace panda::compiler;  // NOLINT(google-build-using-namespace)
+using namespace ark::compiler;  // NOLINT(google-build-using-namespace)
 
-namespace panda::aoutdump {
+namespace ark::aoutdump {
 
 class TypePrinter {
 public:
@@ -96,7 +96,7 @@ public:
 
         ss << '(';
         bool firstArg = true;
-        // inject class name as the first argument of non static method for consitency with panda::Method::GetFullName
+        // inject class name as the first argument of non static method for consitency with ark::Method::GetFullName
         if (!mda.IsStatic()) {
             firstArg = false;
             ss << className;
@@ -126,14 +126,14 @@ private:
 
 class AotDump {
 public:
-    explicit AotDump(panda::ArenaAllocator *allocator) : allocator_(allocator) {}
+    explicit AotDump(ark::ArenaAllocator *allocator) : allocator_(allocator) {}
     NO_COPY_SEMANTIC(AotDump);
     NO_MOVE_SEMANTIC(AotDump);
     ~AotDump() = default;
 
     int Run(int argc, const char *argv[])  // NOLINT(modernize-avoid-c-arrays)
     {
-        panda::PandArgParser paParser;
+        ark::PandArgParser paParser;
         PandArg<std::string> inputFile {"input_file", "", "Input file path"};
         paParser.EnableTail();
         paParser.PushBackTail(&inputFile);
@@ -146,8 +146,8 @@ public:
         };
         std::unique_ptr<const char, decltype(finalizer)> tempFileRemover(nullptr, finalizer);
 
-        panda::Span<const char *> sp(argv, argc);
-        panda::aoutdump::Options options(sp[0]);
+        ark::Span<const char *> sp(argv, argc);
+        ark::aoutdump::Options options(sp[0]);
         options.AddOptions(&paParser);
         if (!paParser.Parse(argc, argv)) {
             std::cerr << "Parse options failed: " << paParser.GetErrorString() << std::endl;
@@ -177,7 +177,7 @@ public:
         return 0;
     }
 
-    void DumpAll(std::unique_ptr<AotFile> aotFile, panda::aoutdump::Options options)
+    void DumpAll(std::unique_ptr<AotFile> aotFile, ark::aoutdump::Options options)
     {
         std::ostream *outputStream;
         std::ofstream outFstream;
@@ -213,7 +213,7 @@ public:
         return true;
     }
 
-    void DumpHeader(std::ostream &stream, std::unique_ptr<panda::compiler::AotFile> &aotFile)
+    void DumpHeader(std::ostream &stream, std::unique_ptr<ark::compiler::AotFile> &aotFile)
     {
         auto aotHeader = aotFile->GetAotHeader();
         stream << "header:" << std::endl;
@@ -233,7 +233,7 @@ public:
         stream << "  strtab_offset: " << aotHeader->strtabOffset << std::endl;
     }
 
-    void DumpClassHashTable(std::ostream &stream, panda::compiler::AotPandaFile &aotPandaFile, PandaFileHelper &pfile)
+    void DumpClassHashTable(std::ostream &stream, ark::compiler::AotPandaFile &aotPandaFile, PandaFileHelper &pfile)
     {
         stream << "  class_hash_table:" << std::endl;
         constexpr int ALIGN_SIZE = 32;
@@ -258,8 +258,8 @@ public:
         }
     }
 
-    void DumpFiles(std::ostream &stream, std::unique_ptr<panda::compiler::AotFile> &aotFile,
-                   panda::aoutdump::Options &options)
+    void DumpFiles(std::ostream &stream, std::unique_ptr<ark::compiler::AotFile> &aotFile,
+                   ark::aoutdump::Options &options)
     {
         stream << "files:" << std::endl;
         for (decltype(auto) fileHeader : aotFile->FileHeaders()) {
@@ -407,25 +407,25 @@ public:
     }
 
 private:
-    [[maybe_unused]] panda::ArenaAllocator *allocator_;
+    [[maybe_unused]] ark::ArenaAllocator *allocator_;
 };
 
-}  // namespace panda::aoutdump
+}  // namespace ark::aoutdump
 
 int main(int argc, const char *argv[])
 {
     // NOLINTBEGIN(readability-magic-numbers)
-    panda::mem::MemConfig::Initialize(panda::operator""_MB(64ULL), panda::operator""_MB(64ULL),
-                                      panda::operator""_MB(64ULL), panda::operator""_MB(32ULL), 0, 0);
+    ark::mem::MemConfig::Initialize(ark::operator""_MB(64ULL), ark::operator""_MB(64ULL), ark::operator""_MB(64ULL),
+                                    ark::operator""_MB(32ULL), 0, 0);
     // NOLINTEND(readability-magic-numbers)
-    panda::PoolManager::Initialize();
-    auto allocator = new panda::ArenaAllocator(panda::SpaceType::SPACE_TYPE_COMPILER);
-    panda::aoutdump::AotDump aotdump(allocator);
+    ark::PoolManager::Initialize();
+    auto allocator = new ark::ArenaAllocator(ark::SpaceType::SPACE_TYPE_COMPILER);
+    ark::aoutdump::AotDump aotdump(allocator);
 
     auto result = aotdump.Run(argc, argv);
 
     delete allocator;
-    panda::PoolManager::Finalize();
-    panda::mem::MemConfig::Finalize();
+    ark::PoolManager::Finalize();
+    ark::mem::MemConfig::Finalize();
     return result;
 }

@@ -17,7 +17,7 @@
 #include "optimizer/ir_builder/inst_builder.h"
 #include "bytecode_instruction-inl.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /*
     FMOV: f -> n
     return CMP(AND(SHR(n, FP_FRACT_SIZE), FP_EXP_MASK), FP_EXP_MASK)
@@ -62,4 +62,4 @@ void InstBuilder::BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool 
     UpdateDefinitionAcc(cmp);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

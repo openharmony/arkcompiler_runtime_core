@@ -21,7 +21,7 @@
 #include <map>
 #include <unordered_map>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 constexpr llvm::StringRef RO_DATA_SECTION_PREFIX {".ro"};
 constexpr llvm::StringRef TEXT_SECTION_PREFIX {".text."};
@@ -101,5 +101,5 @@ private:
     std::map<llvm::StringRef, llvm::object::SectionRef> sectionIndex_;
 };
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_OBJECT_CODE_CREATED_OBJECT_FILE_H

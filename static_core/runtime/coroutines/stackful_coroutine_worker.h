@@ -19,7 +19,7 @@
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
 
-namespace panda {
+namespace ark {
 
 class StackfulCoroutineContext;
 class StackfulCoroutineManager;
@@ -198,6 +198,6 @@ private:
     PandaString name_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif /* PANDA_RUNTIME_COROUTINES_STACKFUL_COROUTINE_WORKER_H */

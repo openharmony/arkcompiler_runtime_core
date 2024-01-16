@@ -16,7 +16,7 @@
 #include "graph.h"
 #include "code_info/code_info.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 intptr_t AotData::GetEpTableOffset() const
 {
     return -(static_cast<size_t>(RuntimeInterface::IntrinsicId::COUNT) * PointerSize(graph_->GetArch()));
@@ -165,4 +165,4 @@ int32_t AotData::GetSlotId() const
     return -1 - IMM_3 * (gotPlt_->size() + gotClass_->size()) - IMM_2 * (gotVirtIndexes_->size() + gotString_->size()) -
            gotIntfInlineCache_->size() - gotCommon_->size();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

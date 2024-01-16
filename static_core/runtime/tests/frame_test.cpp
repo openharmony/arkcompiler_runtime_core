@@ -21,7 +21,7 @@
 #include "runtime/interpreter/frame.h"
 #include "runtime/tests/test_utils.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class FrameTest : public testing::Test {
 public:
@@ -33,7 +33,7 @@ public:
         // this test doesn't check GC logic - just to make test easier without any handles
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -47,15 +47,15 @@ public:
     NO_MOVE_SEMANTIC(FrameTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 template <bool IS_DYNAMIC = false>
 Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
 {
     uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
-    void *mem = aligned_alloc(8, panda::Frame::GetAllocSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), extSz));
-    return new (Frame::FromExt(mem, extSz)) panda::Frame(mem, method, prev, nregs);
+    void *mem = aligned_alloc(8, ark::Frame::GetAllocSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), extSz));
+    return new (Frame::FromExt(mem, extSz)) ark::Frame(mem, method, prev, nregs);
 }
 
 void FreeFrame(Frame *f)
@@ -66,7 +66,7 @@ void FreeFrame(Frame *f)
 
 TEST_F(FrameTest, Test)
 {
-    Frame *f = panda::test::CreateFrame(2, nullptr, nullptr);
+    Frame *f = ark::test::CreateFrame(2, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(f);
     frameHandler.GetVReg(0).SetReference(nullptr);
     EXPECT_TRUE(frameHandler.GetVReg(0).HasObject());
@@ -88,7 +88,7 @@ TEST_F(FrameTest, Test)
     EXPECT_EQ(frameHandler.GetVReg(0).GetLong(), v64);
 
     // NOLINTNEXTLINE(readability-magic-numbers)
-    ObjectHeader *ptr = panda::mem::AllocateNullifiedPayloadString(15);
+    ObjectHeader *ptr = ark::mem::AllocateNullifiedPayloadString(15);
     frameHandler.GetVReg(0).SetReference(ptr);
     frameHandler.GetVReg(1).MoveReference(frameHandler.GetVReg(0));
     EXPECT_TRUE(frameHandler.GetVReg(0).HasObject());
@@ -124,7 +124,7 @@ TEST_F(FrameTest, Test)
     EXPECT_EQ(frameHandler.GetVReg(0).GetDouble(), f64);
     EXPECT_EQ(frameHandler.GetVReg(0).GetAs<double>(), f64);
 
-    panda::test::FreeFrame(f);
+    ark::test::FreeFrame(f);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

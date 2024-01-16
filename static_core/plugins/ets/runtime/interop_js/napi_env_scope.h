@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include <node_api.h>
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 class EtsJSNapiEnvScope {
 public:
@@ -43,6 +43,6 @@ private:
     napi_env saved_ {};
 };
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NAPI_ENV_SCOPE_H_

@@ -18,7 +18,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 LinearOrder::LinearOrder(Graph *graph)
     : Analysis(graph),
       linearBlocks_(graph->GetAllocator()->Adapter()),
@@ -413,4 +413,4 @@ bool LinearOrder::RunImpl()
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -24,7 +24,7 @@
 #include <memory>
 #include <securec.h>
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_MALLOC_MEM_POOL(level) LOG(level, MEMORYPOOL) << "MallocMemPool: "
@@ -46,7 +46,7 @@ inline ArenaT *MallocMemPool::AllocArenaImpl(size_t size, [[maybe_unused]] Space
         maxAlignmentDrift = DEFAULT_ALIGNMENT_IN_BYTES - alignof(ArenaT);
     }
     size_t maxSize = size + sizeof(ArenaT) + maxAlignmentDrift;
-    auto ret = panda::os::mem::AlignedAlloc(std::max(DEFAULT_ALIGNMENT_IN_BYTES, alignof(ArenaT)), maxSize);
+    auto ret = ark::os::mem::AlignedAlloc(std::max(DEFAULT_ALIGNMENT_IN_BYTES, alignof(ArenaT)), maxSize);
     void *buff = reinterpret_cast<char *>(reinterpret_cast<std::uintptr_t>(ret) + sizeof(ArenaT));
     size_t sizeForBuff = maxSize - sizeof(ArenaT);
     buff = std::align(DEFAULT_ALIGNMENT_IN_BYTES, size, buff, sizeForBuff);
@@ -120,6 +120,6 @@ inline void *MallocMemPool::GetStartAddrPoolForAddrImpl([[maybe_unused]] const v
     return nullptr;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_MEM_MALLOC_MEM_POOL_INLINE_H

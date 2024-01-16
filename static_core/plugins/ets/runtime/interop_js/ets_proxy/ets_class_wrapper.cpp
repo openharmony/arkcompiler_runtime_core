@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/interop_js/napi_env_scope.h"
 #include "runtime/mem/local_object_handle.h"
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 class JSRefConvertEtsProxy : public JSRefConvert {
 public:
@@ -574,4 +574,4 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     return callRes != nullptr;
 }
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy

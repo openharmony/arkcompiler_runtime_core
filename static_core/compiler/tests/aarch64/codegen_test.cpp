@@ -29,7 +29,7 @@
 #include "tests/unit_test.h"
 #include <regex>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class VixlDisasmTest : public GraphTest {
 public:
@@ -871,4 +871,4 @@ const DecoderVisitor::FormToVisitorFnMap DecoderVisitor::FORM_TO_VISITOR = {
 
 // NOLINTEND(readability-magic-numbers,modernize-avoid-c-arrays)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

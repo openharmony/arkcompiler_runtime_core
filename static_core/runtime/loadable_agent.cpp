@@ -17,7 +17,7 @@
 
 #include "runtime/include/runtime.h"
 
-namespace panda {
+namespace ark {
 LibraryAgent::LibraryAgent(os::memory::Mutex &mutex, PandaString libraryPath, PandaString loadCallbackName,
                            PandaString unloadCallbackName)
     : lock_(mutex),
@@ -73,4 +73,4 @@ bool LibraryAgent::Unload()
 
     return true;
 }
-}  // namespace panda
+}  // namespace ark

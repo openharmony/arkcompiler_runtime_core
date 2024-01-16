@@ -19,7 +19,7 @@
 #include "optimizer/pass.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 
@@ -150,6 +150,6 @@ private:
     ArenaVector<int32_t> *semi_ {nullptr};
     BlocksVector *vertices_ {nullptr};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_DOMINATORS_TREE_H

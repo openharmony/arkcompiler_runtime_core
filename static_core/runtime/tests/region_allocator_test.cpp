@@ -28,7 +28,7 @@
 #include "runtime/tests/allocator_test_base.h"
 #include "runtime/mem/region_allocator-inl.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 using NonObjectRegionAllocator = RegionAllocator<EmptyAllocConfigWithCrossingMap>;
 
 static constexpr size_t YOUNG_SPACE_SIZE = 128_MB;
@@ -55,12 +55,12 @@ public:
         spaces_.memSpace_.Initialize(spaceSize, spaceSize);
         spaces_.InitializePercentages(0, PERCENT_100_D);
         spaces_.isInitialized_ = true;
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
         classLinker_ = Runtime::GetCurrent()->GetClassLinker();
         auto lang = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         auto *classLinkerExt = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang);
-        testClass_ = classLinkerExt->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+        testClass_ = classLinkerExt->CreateClass(nullptr, 0, 0, sizeof(ark::Class));
         testClass_->SetObjectSize(OBJECT_SIZE);
     }
     ~RegionAllocatorTestBase() override
@@ -92,7 +92,7 @@ protected:
     GenerationalSpaces spaces_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
     ClassLinker *classLinker_;
     RuntimeOptions options_;
 };
@@ -854,7 +854,7 @@ TEST_F(RegionHumongousObjectAllocatorTest, CollectTest)
     auto lang = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto *classLinkerExt = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang);
     for (size_t i = 0; i < ALLOCATION_COUNT; i++) {
-        auto testClass = classLinkerExt->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+        auto testClass = classLinkerExt->CreateClass(nullptr, 0, 0, sizeof(ark::Class));
         testClass->SetObjectSize(currentAllocSize);
         void *mem = allocator.Alloc(currentAllocSize);
         ASSERT_TRUE(mem != nullptr);
@@ -884,7 +884,7 @@ TEST_F(RegionHumongousObjectAllocatorTest, TestCollectAliveObject)
     RegionHumongousObjectAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
     auto lang = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto *classLinkerExt = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang);
-    auto testClass = classLinkerExt->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+    auto testClass = classLinkerExt->CreateClass(nullptr, 0, 0, sizeof(ark::Class));
     size_t objectSize = DEFAULT_REGION_SIZE + 1;
     testClass->SetObjectSize(objectSize);
     void *mem = allocator.Alloc(objectSize);
@@ -906,7 +906,7 @@ TEST_F(RegionHumongousObjectAllocatorTest, TestCollectDeadObject)
     RegionHumongousObjectAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
     auto lang = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto *classLinkerExt = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang);
-    auto testClass = classLinkerExt->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+    auto testClass = classLinkerExt->CreateClass(nullptr, 0, 0, sizeof(ark::Class));
     size_t objectSize = DEFAULT_REGION_SIZE + 1;
     testClass->SetObjectSize(objectSize);
     void *mem = allocator.Alloc(objectSize);
@@ -921,4 +921,4 @@ TEST_F(RegionHumongousObjectAllocatorTest, TestCollectDeadObject)
     ASSERT_TRUE(!hasRegion);
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

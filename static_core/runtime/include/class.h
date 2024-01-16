@@ -28,7 +28,7 @@
 #include "runtime/include/method.h"
 #include "libpandabase/macros.h"
 
-namespace panda {
+namespace ark {
 
 class ClassLinkerContext;
 class ManagedThread;
@@ -1009,6 +1009,6 @@ private:
 
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, const Class::State &state);
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CLASS_H_

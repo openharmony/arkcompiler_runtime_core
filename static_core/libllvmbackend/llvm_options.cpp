@@ -15,7 +15,7 @@
 
 #include "llvm_options.h"
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 Options g_options("");
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

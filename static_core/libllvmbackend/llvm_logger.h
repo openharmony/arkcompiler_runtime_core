@@ -20,7 +20,7 @@
 #include <bitset>
 #include <vector>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 #include "llvm_logger_components.inc"
 
 enum LLVMLoggerComponents : uint8_t {
@@ -64,14 +64,14 @@ private:
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LLVM_LOG(level, comp)                                                                          \
-    panda::llvmbackend::LLVMLogger::IsComponentEnabled(panda::llvmbackend::LLVMLoggerComponents::comp, \
-                                                       panda::Logger::Level::level) &&                 \
+#define LLVM_LOG(level, comp)                                                                      \
+    ark::llvmbackend::LLVMLogger::IsComponentEnabled(ark::llvmbackend::LLVMLoggerComponents::comp, \
+                                                     ark::Logger::Level::level) &&                 \
         LOG(level, LLVM) << "[" #comp "] "
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LLVM_LOG_IF(cond, level, comp) (cond) && LLVM_LOG(level, comp)
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  // LIBLLVMBACKEND_LLVM_LOGGER_H

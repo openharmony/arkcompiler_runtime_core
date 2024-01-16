@@ -28,7 +28,7 @@
 #include "optimizer/analysis/object_type_propagation.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // parent_index->{Vector<bound_check>, max_val, min_val}
 using GroupedBoundsChecks = ArenaUnorderedMap<Inst *, std::tuple<InstVector, int64_t, int64_t>>;
 // loop->len_array->GroupedBoundsChecks
@@ -180,6 +180,6 @@ private:
     bool isApplied_ {false};
     bool isLoopDeleted_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CHECKSELIMINATION_H

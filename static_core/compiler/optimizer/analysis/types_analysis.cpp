@@ -16,7 +16,7 @@
 #include "types_analysis.h"
 #include "optimizer/ir/inst.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool TypesAnalysis::RunImpl()
 {
     marker_ = GetGraph()->NewMarker();
@@ -70,4 +70,4 @@ void TypesAnalysis::VisitAnyTypeCheck(GraphVisitor *v, Inst *inst)
         self->MarkedPhiRec(input->CastToPhi(), type);
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

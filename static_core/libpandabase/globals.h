@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-namespace panda {
+namespace ark {
 
 static constexpr unsigned BITS_PER_BYTE = 8;
 static constexpr unsigned BITS_PER_UINT16 = sizeof(uint16_t) * BITS_PER_BYTE;
@@ -37,6 +37,6 @@ static constexpr bool DEBUG_BUILD = true;
 static constexpr bool DEBUG_BUILD = false;
 #endif
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_GLOBALS_H

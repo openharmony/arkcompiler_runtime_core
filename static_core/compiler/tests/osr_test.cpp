@@ -22,7 +22,7 @@
 #include <fstream>
 #include "libpandabase/utils/utils.h"
 
-namespace panda::test {
+namespace ark::test {
 class OsrTest : public testing::Test {
 public:
     OsrTest()
@@ -702,4 +702,4 @@ TEST_F(OsrTest, BoundTest)
 #endif
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::test
+}  // namespace ark::test

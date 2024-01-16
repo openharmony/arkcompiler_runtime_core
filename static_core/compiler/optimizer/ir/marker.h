@@ -21,7 +21,7 @@
 #include <cstdint>
 #include "macros.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 using Marker = uint32_t;
 constexpr uint32_t MARKERS_SHIFT = 2;
 constexpr uint32_t MARKERS_NUM = (1U << MARKERS_SHIFT);
@@ -127,6 +127,6 @@ private:
     friend class MarkerMgr;
     std::array<Marker, MARKERS_NUM> markers_ {};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_MARKER_H

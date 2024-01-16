@@ -18,7 +18,7 @@
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/optimizations/peepholes.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 static constexpr size_t STOREARRAY_INPUTS_NUM = 3;
 static constexpr size_t SINGLE_DIM_ARRAY_RANK = 1;
@@ -332,7 +332,7 @@ bool ConstArrayResolver::FillLiteral(compiler::StoreInst *storeArrayInst, pandas
     }
 
     auto stringType =
-        pandasm::Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(irInterface_->GetSourceLang()));
+        pandasm::Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(irInterface_->GetSourceLang()));
     if ((rawElemInst->GetOpcode() == Opcode::LoadString) && (componentTypeName == stringType.GetName())) {
         literal->tag = panda_file::LiteralTag::ARRAY_STRING;
         std::string stringValue = irInterface_->GetStringIdByOffset(rawElemInst->CastToLoadString()->GetTypeId());
@@ -343,4 +343,4 @@ bool ConstArrayResolver::FillLiteral(compiler::StoreInst *storeArrayInst, pandas
     return false;
 }
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

@@ -27,17 +27,17 @@
 #include <cstring>
 #include <cstdint>
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
-using panda::parser::Action;
-using panda::parser::Parser;
-using panda::verifier::config::Section;
+using ark::parser::Action;
+using ark::parser::Parser;
+using ark::verifier::config::Section;
 
 const auto &WhitelistMethodParser()
 {
     struct Whitelist;
 
-    using panda::parser::Charset;
+    using ark::parser::Charset;
     using P = Parser<PandaString, const char, const char *>::Next<Whitelist>;
     using P1 = P::P;
 
@@ -96,4 +96,4 @@ void RegisterConfigHandlerWhitelist(Config *dcfg)
     config::RegisterConfigHandler(dcfg, "config.debug.whitelist.verifier", CONFIG_DEBUG_WHITELIST_VERIFIER);
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug

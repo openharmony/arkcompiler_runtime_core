@@ -20,7 +20,7 @@
 
 #include "runtime/interpreter/vregister.h"
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 class AccVRegister : public VRegisterIface<AccVRegister> {
 public:
@@ -75,6 +75,6 @@ private:
     VRegister mirror_;
 };
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_ACC_VREGISTER_H_

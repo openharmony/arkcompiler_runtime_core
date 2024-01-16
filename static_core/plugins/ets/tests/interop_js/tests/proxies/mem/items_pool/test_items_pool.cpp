@@ -18,7 +18,7 @@
 #include "libpandabase/os/mem.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/mem/items_pool.h"
 
-namespace panda::ets::interop::js::ets_proxy::testing {
+namespace ark::ets::interop::js::ets_proxy::testing {
 
 class ItemsPoolTest {
     static constexpr size_t ARRAY_SIZE = 2045;
@@ -411,4 +411,4 @@ TEST_F(ItemsPoolGTest, test_IsValidItem)
     ASSERT_EQ(pool->IsValidItem(reinterpret_cast<decltype(item)>(dataEnd - sizeof(*item))), true);
 }
 
-}  // namespace panda::ets::interop::js::ets_proxy::testing
+}  // namespace ark::ets::interop::js::ets_proxy::testing

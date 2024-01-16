@@ -18,7 +18,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/mem/local_object_handle.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 [[nodiscard]] JSValue *JSValue::AttachFinalizer(EtsCoroutine *coro, JSValue *jsValue)
 {
@@ -162,4 +162,4 @@ napi_value JSValue::GetNapiValue(napi_env env)
     UNREACHABLE();
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

@@ -18,7 +18,7 @@
 
 #include <tuple>
 
-namespace panda::verifier {
+namespace ark::verifier {
 template <int...>
 struct Indices {
 };
@@ -125,6 +125,6 @@ private:
 
     BinOp binop_;
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_UTIL_FUNCTION_TRAITS_

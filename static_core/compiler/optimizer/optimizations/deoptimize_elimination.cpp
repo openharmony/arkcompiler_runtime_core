@@ -19,7 +19,7 @@
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 bool DeoptimizeElimination::RunImpl()
 {
@@ -313,4 +313,4 @@ void DeoptimizeElimination::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

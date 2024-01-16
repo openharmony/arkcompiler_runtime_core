@@ -19,7 +19,7 @@
 #include "runtime/interpreter/frame.h"
 #include "runtime/include/managed_thread.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 DanglingPointersChecker::DanglingPointersChecker(Graph *graph)
     : Analysis {graph},
       objectsUsers_ {graph->GetLocalAllocator()->Adapter()},
@@ -108,13 +108,13 @@ bool DanglingPointersChecker::IsFrameDef(Inst *inst)
         //       imm := ManagedThread::GetFrameOffset()
         auto instInput = inst->GetInput(0).GetInst();
         if (instInput == threadLivein_ &&
-            static_cast<LoadInstI *>(inst)->GetImm() == panda::ManagedThread::GetFrameOffset()) {
+            static_cast<LoadInstI *>(inst)->GetImm() == ark::ManagedThread::GetFrameOffset()) {
             return true;
         }
         // or
         //       inst_input := <frame_def>
         //       imm := Frame::GetPrevFrameOffset()
-        if (static_cast<LoadInstI *>(inst)->GetImm() == static_cast<uint64_t>(panda::Frame::GetPrevFrameOffset()) &&
+        if (static_cast<LoadInstI *>(inst)->GetImm() == static_cast<uint64_t>(ark::Frame::GetPrevFrameOffset()) &&
             IsFrameDef(instInput)) {
             return true;
         }
@@ -613,4 +613,4 @@ bool DanglingPointersChecker::CheckAccSyncCallRuntime()
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

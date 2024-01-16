@@ -29,7 +29,7 @@
 #include "runtime/tooling/sampler/thread_communicator.h"
 #include "runtime/tooling/sampler/lock_free_queue.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 namespace test {
 class SamplerTest;
@@ -147,6 +147,6 @@ private:
     NO_MOVE_SEMANTIC(Sampler);
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H

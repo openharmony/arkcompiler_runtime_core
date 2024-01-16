@@ -23,7 +23,7 @@
 #include "runtime/scheduler/task.h"
 #include "runtime/tests/class_linker_test_extension.h"
 
-namespace panda::scheduler::test {
+namespace ark::scheduler::test {
 
 class WorkerThreadTest : public testing::Test {
 public:
@@ -32,7 +32,7 @@ public:
         Logger::Initialize(base_options::Options(""));
 
         RuntimeOptions options;
-        auto execPath = panda::os::file::File::GetExecutablePath();
+        auto execPath = ark::os::file::File::GetExecutablePath();
         std::string pandaStdLib = execPath.Value() + "/../pandastdlib/arkstdlib.abc";
         options.SetBootPandaFiles({pandaStdLib});
         Runtime::Create(options);
@@ -74,4 +74,4 @@ TEST_F(WorkerThreadTest, SwitchTasksInOneWorkerThread)
     WorkerThread::DetachThread();
 }
 
-}  // namespace panda::scheduler::test
+}  // namespace ark::scheduler::test

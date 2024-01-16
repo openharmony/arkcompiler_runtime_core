@@ -53,10 +53,10 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/native_pointer.h"
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
-using DynClass = panda::coretypes::DynClass;
-using DynObject = panda::coretypes::DynObject;
+using DynClass = ark::coretypes::DynClass;
+using DynObject = ark::coretypes::DynObject;
 
 class InterpreterTestResolveCtorClass : public testing::Test {
 public:
@@ -69,7 +69,7 @@ public:
         options.SetVerifyCallStack(false);
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -83,12 +83,12 @@ public:
     NO_MOVE_SEMANTIC(InterpreterTestResolveCtorClass);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 TEST_F(InterpreterTestResolveCtorClass, ResolveCtorClass)
 {
-    auto pf = panda::panda_file::File::Open("../bin-gtests/pre-build/interpreter_test_resolve_ctor_class.abc");
+    auto pf = ark::panda_file::File::Open("../bin-gtests/pre-build/interpreter_test_resolve_ctor_class.abc");
     ASSERT_NE(pf, nullptr);
 
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
@@ -110,7 +110,7 @@ TEST_F(InterpreterTestResolveCtorClass, ResolveCtorClass)
     auto *ret = v.GetAs<ObjectHeader *>();
     ASSERT_NE(ret, nullptr);
 
-    ASSERT_EQ(ret->ClassAddr<panda::Class>()->GetName(), "R1");
+    ASSERT_EQ(ret->ClassAddr<ark::Class>()->GetName(), "R1");
 }
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test

@@ -19,7 +19,7 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *g_testBinFileName = "CallingMethodsTest.abc";
 
@@ -130,6 +130,6 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath18)
     EXPECT_DEATH(CallNonvirtualDoubleMethodListHelper(env_, nullptr, cCls, doubleId), "");
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)

@@ -21,7 +21,7 @@
 #include "runtime/include/exceptions.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 
 template <bool VERIFY>
 inline uint16_t String::At(int32_t index)
@@ -29,7 +29,7 @@ inline uint16_t String::At(int32_t index)
     auto length = GetLength();
     if (VERIFY) {
         if ((index < 0) || (index >= static_cast<int32_t>(length))) {
-            panda::ThrowStringIndexOutOfBoundsException(index, length);
+            ark::ThrowStringIndexOutOfBoundsException(index, length);
             return 0;
         }
     }
@@ -41,6 +41,6 @@ inline uint16_t String::At(int32_t index)
     return sp[index];
 }
 
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_CORETYPES_STRING_INL_H_

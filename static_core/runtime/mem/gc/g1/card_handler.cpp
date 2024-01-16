@@ -18,7 +18,7 @@
 #include "runtime/mem/object_helpers-inl.h"
 #include "runtime/mem/rem_set-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 bool CardHandler::Handle(CardTable::CardPtr cardPtr)
 {
     bool result = true;
@@ -51,4 +51,4 @@ bool CardHandler::Handle(CardTable::CardPtr cardPtr)
     }
     return result;
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

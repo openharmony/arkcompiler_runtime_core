@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_GC_PHASE_H
 #define PANDA_RUNTIME_MEM_GC_GC_PHASE_H
 
-namespace panda::mem {
+namespace ark::mem {
 
 enum class GCPhase {
     GC_PHASE_IDLE,  // GC waits for trigger event
@@ -47,6 +47,6 @@ constexpr bool IsMarking(GCPhase phase)
            phase == GCPhase::GC_PHASE_INITIAL_MARK || phase == GCPhase::GC_PHASE_REMARK;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_PHASE_H

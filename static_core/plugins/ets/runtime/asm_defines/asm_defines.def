@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 // NOLINTBEGIN(readability-identifier-naming)
-DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, panda::ets::EtsCoroutine::GetTlsPromiseClassPointerOffset())
-DEFINE_VALUE(ETS_COROUTINE_UNDEFINED_OBJECT_OFFSET, panda::ets::EtsCoroutine::GetTlsUndefinedObjectOffset())
+DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, ark::ets::EtsCoroutine::GetTlsPromiseClassPointerOffset())
+DEFINE_VALUE(ETS_COROUTINE_UNDEFINED_OBJECT_OFFSET, ark::ets::EtsCoroutine::GetTlsUndefinedObjectOffset())
 // NOLINTEND(readability-identifier-naming)

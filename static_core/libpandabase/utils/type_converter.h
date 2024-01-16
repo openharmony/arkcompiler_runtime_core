@@ -27,7 +27,7 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda::helpers {
+namespace ark::helpers {
 
 /**
  * @brief Class for presentation @param value_ in a readable format.
@@ -107,7 +107,7 @@ PANDA_PUBLIC_API ValueUnit MemoryConverter(uint64_t bytes);
  */
 PANDA_PUBLIC_API ValueUnit ValueConverter(uint64_t value, ValueType type);
 
-}  // namespace panda::helpers
+}  // namespace ark::helpers
 
 WEAK_FOR_LTO_END
 

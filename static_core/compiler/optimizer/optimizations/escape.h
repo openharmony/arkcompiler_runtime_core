@@ -31,7 +31,7 @@
 #include "compiler_logger.h"
 #include "utils/logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 using FieldId = uint64_t;
 using InstId = uint32_t;
 using BlockId = uint32_t;
@@ -393,6 +393,6 @@ private:
     CallInst *FindCallerInst(BasicBlock *target, Inst *start = nullptr);
     void FixPhiInputTypes();
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_ANALYSIS_ESCAPE_H

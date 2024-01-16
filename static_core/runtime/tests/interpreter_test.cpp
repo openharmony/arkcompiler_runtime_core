@@ -49,10 +49,10 @@
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
-using DynClass = panda::coretypes::DynClass;
-using DynObject = panda::coretypes::DynObject;
+using DynClass = ark::coretypes::DynClass;
+using DynObject = ark::coretypes::DynObject;
 
 class InterpreterTest : public testing::Test {
 public:
@@ -65,7 +65,7 @@ public:
         options.SetVerifyCallStack(false);
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -79,7 +79,7 @@ public:
     NO_MOVE_SEMANTIC(InterpreterTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 auto CreateFrame(uint32_t nregs, Method *method, Frame *prev)
@@ -185,9 +185,9 @@ TEST_F(InterpreterTest, TestMov)
     constexpr uint16_t V8_MAX = std::numeric_limits<uint8_t>::max();
     constexpr uint16_t V16_MAX = std::numeric_limits<uint16_t>::max();
 
-    ObjectHeader *obj1 = panda::mem::AllocateNullifiedPayloadString(1);
-    ObjectHeader *obj2 = panda::mem::AllocateNullifiedPayloadString(100);
-    ObjectHeader *obj3 = panda::mem::AllocateNullifiedPayloadString(200);
+    ObjectHeader *obj1 = ark::mem::AllocateNullifiedPayloadString(1);
+    ObjectHeader *obj2 = ark::mem::AllocateNullifiedPayloadString(100);
+    ObjectHeader *obj3 = ark::mem::AllocateNullifiedPayloadString(200);
 
     emitter.Movi(0U, IMM4_MAX);
     emitter.Movi(1U, IMM8_MAX);
@@ -290,7 +290,7 @@ TEST_F(InterpreterTest, TestLoadStoreAccumulator)
     constexpr int64_t IMM32_MAX = std::numeric_limits<int32_t>::max();
     constexpr int64_t IMM64_MAX = std::numeric_limits<int64_t>::max();
 
-    ObjectHeader *obj = panda::mem::AllocateNullifiedPayloadString(10U);
+    ObjectHeader *obj = ark::mem::AllocateNullifiedPayloadString(10U);
 
     emitter.Ldai(IMM8_MAX);
     emitter.Sta(0U);
@@ -389,7 +389,7 @@ TEST_F(InterpreterTest, TestLoadString)
     EXPECT_TRUE(f->GetAccAsVReg().HasObject());
 
     PandaString strSample = "TestLoadString";
-    panda::coretypes::String *strCore = panda::coretypes::String::Cast(f->GetAccAsVReg().GetReference());
+    ark::coretypes::String *strCore = ark::coretypes::String::Cast(f->GetAccAsVReg().GetReference());
 
     const char *str = reinterpret_cast<const char *>(strCore->GetDataMUtf8());
     size_t strLen = strCore->GetMUtf8Length() - 1;  // Reserved zero.
@@ -1758,7 +1758,7 @@ void TestLoadStoreObjectField(bool isStatic)
 
     Span<Field> fields = isStatic ? objectClass->GetStaticFields() : objectClass->GetInstanceFields();
     Field *field = &fields[0];
-    ObjectHeader *refValue = panda::mem::AllocateNullifiedPayloadString(1);
+    ObjectHeader *refValue = ark::mem::AllocateNullifiedPayloadString(1);
 
     frameHandler.GetVReg(2U).SetReference(refValue);
 
@@ -1852,7 +1852,7 @@ TEST_F(InterpreterTest, TestReturns)
         auto method = std::move(methodData.first);
         f->SetMethod(method.get());
 
-        ObjectHeader *obj = panda::mem::AllocateNullifiedPayloadString(1);
+        ObjectHeader *obj = ark::mem::AllocateNullifiedPayloadString(1);
         f->GetAccAsVReg().SetReference(obj);
 
         Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
@@ -2776,7 +2776,7 @@ public:
         options.SetVerifyCallStack(false);
         options.SetGcType("stw");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -2790,7 +2790,7 @@ public:
     NO_MOVE_SEMANTIC(InterpreterWithSTWTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame *prev, ManagedThread *current)
@@ -2857,14 +2857,14 @@ DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
 
     auto frameHandler2 = StaticFrameHandler(f2);
     for (size_t i = 0; i < vregNum2; i++) {
-        frameHandler2.GetVReg(i).SetReference(panda::mem::AllocNonMovableObject());
+        frameHandler2.GetVReg(i).SetReference(ark::mem::AllocNonMovableObject());
     }
 
     size_t extSz = CORE_EXT_FRAME_DATA_SIZE;
     size_t allocSz = sizeof(interpreter::VRegister) * vregNum2;
     memset_s(ToVoidPtr(ToUintPtr(f2) + extSz + sizeof(Frame)), allocSz, 0xff, allocSz);
 
-    panda::mem::GC *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
+    ark::mem::GC *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
 
     {
         ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
@@ -2872,7 +2872,7 @@ DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
         ASSERT_DEATH(task.Run(*gc), "");
     }
 
-    panda::FreeFrameInterp(f2, ManagedThread::GetCurrent());
+    ark::FreeFrameInterp(f2, ManagedThread::GetCurrent());
 
     f2 = CreateFrameWithSize(Frame::GetActualSize<false>(vregNum2), vregNum2, method1.get(), f1.get(),
                              ManagedThread::GetCurrent());
@@ -2883,9 +2883,9 @@ DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
         task.Run(*gc);
     }
 
-    panda::FreeFrameInterp(f2, ManagedThread::GetCurrent());
+    ark::FreeFrameInterp(f2, ManagedThread::GetCurrent());
 }
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test
 
 // NOLINTEND(readability-magic-numbers)

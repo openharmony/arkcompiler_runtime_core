@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include "libpandabase/macros.h"
-namespace panda::mem {
+namespace ark::mem {
 enum class RootType {
     ROOT_UNKNOWN = 0,
     ROOT_CLASS,
@@ -37,6 +37,6 @@ enum class RootType {
 };
 
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, RootType rootType);
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_ROOT_TYPE_H

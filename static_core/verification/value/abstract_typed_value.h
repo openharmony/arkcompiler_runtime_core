@@ -25,9 +25,9 @@
 
 #include "macros.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 class AbstractTypedValue {
-    using ValueOrigin = Origin<panda::BytecodeInstructionSafe>;
+    using ValueOrigin = Origin<ark::BytecodeInstructionSafe>;
 
 public:
     bool IsNone() const
@@ -41,11 +41,11 @@ public:
     AbstractTypedValue &operator=(AbstractTypedValue &&) = default;
     ~AbstractTypedValue() = default;
     AbstractTypedValue(Type type, AbstractValue value) : value_ {std::move(value)}, type_ {type} {}
-    AbstractTypedValue(const AbstractTypedValue &atv, const panda::BytecodeInstructionSafe &inst)
+    AbstractTypedValue(const AbstractTypedValue &atv, const ark::BytecodeInstructionSafe &inst)
         : value_ {atv.value_}, type_ {atv.type_}, origin_ {inst}
     {
     }
-    AbstractTypedValue(Type type, AbstractValue value, const panda::BytecodeInstructionSafe &inst)
+    AbstractTypedValue(Type type, AbstractValue value, const ark::BytecodeInstructionSafe &inst)
         : value_ {std::move(value)}, type_ {type}, origin_ {inst}
     {
     }
@@ -119,6 +119,6 @@ inline AbstractTypedValue AtvJoin(AbstractTypedValue const *lhs, AbstractTypedVa
     return {TpUnion(lhs->type_, rhs->GetAbstractType(), tsys), lhs->value_ & rhs->GetAbstractValue()};
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !_PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP

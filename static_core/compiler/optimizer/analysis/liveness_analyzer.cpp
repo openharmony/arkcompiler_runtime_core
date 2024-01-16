@@ -22,7 +22,7 @@
 #include "optimizer/optimizations/locations_builder.h"
 #include "optimizer/optimizations/regalloc/reg_type.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 LivenessAnalyzer::LivenessAnalyzer(Graph *graph)
     : Analysis(graph),
       allocator_(graph->GetAllocator()),
@@ -927,4 +927,4 @@ float CalcSpillWeight(const LivenessAnalyzer &la, LifeIntervals *interval)
     return useWeight;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

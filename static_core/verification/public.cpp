@@ -22,7 +22,7 @@
 #include "verification/jobs/service.h"
 #include "verification/jobs/job.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 Config *NewConfig()
 {
@@ -33,7 +33,7 @@ Config *NewConfig()
 
 bool LoadConfigFile(Config *config, std::string_view configFileName)
 {
-    return panda::verifier::config::LoadConfig(config, configFileName);
+    return ark::verifier::config::LoadConfig(config, configFileName);
 }
 
 void DestroyConfig(Config *config)
@@ -54,7 +54,7 @@ bool IsOnlyVerify(Config const *config)
     return config->opts.IsOnlyVerify();
 }
 
-Service *CreateService(Config const *config, panda::mem::InternalAllocatorPtr allocator, ClassLinker *linker,
+Service *CreateService(Config const *config, ark::mem::InternalAllocatorPtr allocator, ClassLinker *linker,
                        std::string const &cacheFileName)
 {
     if (!cacheFileName.empty()) {
@@ -131,7 +131,7 @@ static bool VerifyClass(Class *clazz)
     return true;
 }
 
-Status Verify(Service *service, panda::Method *method, VerificationMode mode)
+Status Verify(Service *service, ark::Method *method, VerificationMode mode)
 {
     using VStage = Method::VerificationStage;
     ASSERT(service != nullptr);
@@ -215,4 +215,4 @@ Status Verify(Service *service, panda::Method *method, VerificationMode mode)
     return Status::FAILED;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

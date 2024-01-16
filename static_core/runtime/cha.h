@@ -17,7 +17,7 @@
 
 #include "runtime/include/class.h"
 
-namespace panda {
+namespace ark {
 
 class ClassHierarchyAnalysis final {
 public:
@@ -40,6 +40,6 @@ private:
     os::memory::Mutex lock_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_CHA_H

@@ -35,7 +35,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::panda_file::test {
+namespace ark::panda_file::test {
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 static const char SOURCE_FILE[] = "asm.pa";
@@ -416,4 +416,4 @@ TEST_F(ExtractorTest, DebugInfoTestColumnNumber)
         }
     }
 }
-}  // namespace panda::panda_file::test
+}  // namespace ark::panda_file::test

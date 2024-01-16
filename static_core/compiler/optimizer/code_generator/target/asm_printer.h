@@ -39,7 +39,7 @@ class [[maybe_unused]] Amd64Encoder;
 #include <iostream>
 #include <string>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 template <class T>
 class PrinterLabelHolder final : public LabelHolder {
@@ -412,6 +412,6 @@ using Amd64AssemblyLabelHolder = PrinterLabelHolder<Amd64Encoder>;
 }  // namespace amd64
 #endif
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_ASM_PRINTER_H

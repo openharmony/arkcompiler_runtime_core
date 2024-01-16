@@ -24,7 +24,7 @@
 
 #include "object_code/created_object_file.h"
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class InsertingPassManager : public llvm::legacy::PassManager {
 public:
@@ -62,6 +62,6 @@ private:
     PassInserterFunction insertPasses_;
 };
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  //  LIBLLVMBACKEND_MIR_COMPILER_H

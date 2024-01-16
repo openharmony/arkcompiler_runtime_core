@@ -25,7 +25,7 @@
 
 static constexpr uint64_t TASK_WAIT_TIMEOUT = 500U;
 
-namespace panda {
+namespace ark {
 
 template <typename Task, typename ProcArg>
 class ProcessorInterface {
@@ -391,6 +391,6 @@ private:
     const char *threadName_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_THREAD_POOL_H_

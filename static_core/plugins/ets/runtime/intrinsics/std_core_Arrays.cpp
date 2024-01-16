@@ -18,7 +18,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 template <typename T>
 static EtsVoid *StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t dstStart, int32_t srcStart,
@@ -103,4 +103,4 @@ extern "C" EtsVoid *StdCoreDoubleCopyTo(EtsCharArray *src, EtsCharArray *dst, in
     return StdCoreCopyTo<uint64_t>(src->GetCoreType(), dst->GetCoreType(), dstStart, srcStart, srcEnd);
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

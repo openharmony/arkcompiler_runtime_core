@@ -18,7 +18,7 @@
 
 #include "compiler/optimizer/code_generator/codegen_native.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 /**
  * Code generation for functions that should be called inside interpreter
@@ -63,7 +63,7 @@ public:
 
     void GeneratePrologue() override
     {
-        GetEncoder()->SetFrameLayout(panda::CFrameLayout(GetGraph()->GetArch(), SPILL_SLOTS));
+        GetEncoder()->SetFrameLayout(ark::CFrameLayout(GetGraph()->GetArch(), SPILL_SLOTS));
         if (GetGraph()->GetMode().IsInterpreterEntry()) {
             ScopedDisasmPrinter printer(this, "Entrypoint Prologue");
             GetCallingConvention()->GenerateNativePrologue(*GetFrameInfo());
@@ -79,6 +79,6 @@ public:
     }
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_CODEGEN_INTERPRETER_H

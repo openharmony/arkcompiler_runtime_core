@@ -17,7 +17,7 @@
 #include "optimizer/ir/inst.h"
 #include "relocations.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 static void SaveCallerRegistersInFrame(RegMask mask, Encoder *encoder, const CFrameLayout &fl, bool isFp)
 {
@@ -280,4 +280,4 @@ void CodegenFastPath::CreateTailCall(IntrinsicInst *inst, bool isFastpath)
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

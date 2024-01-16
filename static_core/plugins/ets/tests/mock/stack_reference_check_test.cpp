@@ -20,7 +20,7 @@
 
 // NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-pro-type-vararg, readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *TEST_BIN_FILE_NAME = "StackReferenceCheckTest.abc";
 
@@ -152,6 +152,6 @@ TEST_F(StackReferenceCheckTest, invalidObjectStackTest)
     ASSERT_EQ(invalidRef, true);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-pro-type-vararg, readability-magic-numbers)

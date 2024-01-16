@@ -23,7 +23,7 @@
 #include "compiler/optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /*
  * For each instruction set destination register if it is assigned,
  * Pop inputs from stack and push result on stack if stack slot is assigned.
@@ -481,4 +481,4 @@ Inst *RegAllocResolver::SqueezeCatchPhiInputs(CatchPhiInst *catchPhi)
     return newCatchPhi;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -17,7 +17,7 @@
 
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 
-namespace panda::ets {
+namespace ark::ets {
 std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const PandaString &name)
 {
     {
@@ -72,4 +72,4 @@ void *NativeLibraryProvider::ResolveSymbol(const PandaString &name) const
 
     return nullptr;
 }
-}  // namespace panda::ets
+}  // namespace ark::ets

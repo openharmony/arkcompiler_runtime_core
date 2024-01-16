@@ -20,7 +20,7 @@
 #include <atomic>
 #include <cstdint>
 
-namespace panda {
+namespace ark {
 class IntrusiveTest {
 protected:
     static std::atomic<uint32_t> id_;
@@ -36,6 +36,6 @@ public:
         return IntrusiveTest::id_;
     }
 };
-}  // namespace panda
+}  // namespace ark
 #endif
 #endif  // PANDA_INTRUSIVE_TEST_H

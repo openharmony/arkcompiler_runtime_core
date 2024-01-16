@@ -36,7 +36,7 @@
 
 using icu::Normalizer2;
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 constexpr const uint32_t CHAR0X1FFC00 = 0x1ffc00;
 constexpr const uint16_t CHAR0XD800 = 0xd800;
@@ -47,15 +47,15 @@ EtsCharArray *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
     ASSERT(s != nullptr);
     ets_int length = s->GetLength();
     if (UNLIKELY(begin > end)) {
-        panda::ThrowStringIndexOutOfBoundsException(begin, length);
+        ark::ThrowStringIndexOutOfBoundsException(begin, length);
         return nullptr;
     }
     if (UNLIKELY(begin > length || begin < 0)) {
-        panda::ThrowStringIndexOutOfBoundsException(begin, length);
+        ark::ThrowStringIndexOutOfBoundsException(begin, length);
         return nullptr;
     }
     if (UNLIKELY(end > length)) {
-        panda::ThrowStringIndexOutOfBoundsException(end, length);
+        ark::ThrowStringIndexOutOfBoundsException(end, length);
         return nullptr;
     }
 
@@ -90,7 +90,7 @@ uint16_t StdCoreStringCharAt(EtsString *s, int32_t index)
     int32_t length = s->GetLength();
 
     if (UNLIKELY(index >= length || index < 0)) {
-        panda::ThrowStringIndexOutOfBoundsException(index, length);
+        ark::ThrowStringIndexOutOfBoundsException(index, length);
         return 0;
     }
 
@@ -358,7 +358,7 @@ ets_short StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsStrin
 
 ets_int StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, ets_int fromIndex)
 {
-    return panda::intrinsics::StringIndexOfU16(s, ch, fromIndex);
+    return ark::intrinsics::StringIndexOfU16(s, ch, fromIndex);
 }
 
 ets_int StdCoreStringIndexOf(EtsString *s, uint16_t ch)
@@ -397,4 +397,4 @@ EtsBoolean StdCoreStringIsCompressed(EtsString *thisStr)
     return ToEtsBoolean(thisStr->GetCoreType()->IsMUtf8());
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

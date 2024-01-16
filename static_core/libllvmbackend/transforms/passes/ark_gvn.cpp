@@ -30,7 +30,7 @@
 #include <llvm/ADT/Hashing.h>
 #include <llvm/ADT/StringSwitch.h>
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 using builtins::LoadClass;
 using builtins::LoadInitClass;
@@ -38,7 +38,7 @@ using builtins::LoadString;
 using builtins::ResolveVirtual;
 
 ArkGVN ArkGVN::Create(LLVMArkInterface *arkInterface,
-                      [[maybe_unused]] const panda::llvmbackend::LLVMCompilerOptions *options)
+                      [[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return ArkGVN(arkInterface);
 }
@@ -156,4 +156,4 @@ llvm::Value *ArkGVN::FindDominantCall(const ArkGVN::BuiltinKey &curBuiltin)
     }
     return nullptr;
 }
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

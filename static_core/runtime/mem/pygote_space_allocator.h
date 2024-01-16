@@ -27,11 +27,11 @@
 #include "runtime/mem/gc/bitmap.h"
 #include "runtime/mem/heap_space.h"
 
-namespace panda {
+namespace ark {
 class ObjectHeader;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 enum PygoteSpaceState {
     STATE_PYGOTE_INIT,     // before pygote fork, used for small non-movable objects
@@ -47,7 +47,7 @@ public:
     NO_COPY_SEMANTIC(PygoteSpaceAllocator);
     explicit PygoteSpaceAllocator(MemStatsType *memStats);
     ~PygoteSpaceAllocator();
-    void *Alloc(size_t size, Alignment alignment = panda::DEFAULT_ALIGNMENT);
+    void *Alloc(size_t size, Alignment alignment = ark::DEFAULT_ALIGNMENT);
 
     void Free(void *mem);
 
@@ -108,6 +108,6 @@ private:
     HeapSpace *heapSpace_ {nullptr};
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_PANDA_PYGOTE_SPACE_ALLOCATOR_H

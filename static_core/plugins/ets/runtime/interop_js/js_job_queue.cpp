@@ -30,7 +30,7 @@
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "intrinsics.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 static napi_value ThenCallback(napi_env env, napi_callback_info info)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
@@ -117,7 +117,7 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
     promiseHandle.GetPtr()->GetEventPtr()->SetHappened();
 
     auto jsval = JSValue::Create(coro, ctx, value);
-    panda::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
+    ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
 
     vm->GetCoroutineManager()->UnblockWaiters(promiseHandle.GetPtr()->GetEventPtr());
     vm->GetCoroutineManager()->Schedule();
@@ -169,4 +169,4 @@ void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
         addLinkProc();
     }
 }
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

@@ -25,7 +25,7 @@
 #include <tchar.h>
 #include <share.h>
 
-namespace panda::os::file {
+namespace ark::os::file {
 
 static int GetFlags(Mode mode)
 {
@@ -58,9 +58,9 @@ File Open(std::string_view filename, Mode mode)
     return File(fh);
 }
 
-}  // namespace panda::os::file
+}  // namespace ark::os::file
 
-namespace panda::os::windows::file {
+namespace ark::os::windows::file {
 
 Expected<std::string, Error> File::GetTmpPath()
 {
@@ -86,4 +86,4 @@ Expected<std::string, Error> File::GetExecutablePath()
     return (pos != std::string::npos) ? std::string(ws.begin(), ws.end()).substr(0, pos) : std::string("");
 }
 
-}  // namespace panda::os::windows::file
+}  // namespace ark::os::windows::file

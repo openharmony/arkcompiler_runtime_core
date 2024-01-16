@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <cmath>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 class TaskManagerGCCornerCaseTest : public ::testing::Test {
 public:
@@ -148,4 +148,4 @@ TEST_F(TaskManagerGCCornerCaseTest, TriggerGcInTaskManager)
     tm->UnregisterAndDestroyTaskQueue(queue);
 }
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

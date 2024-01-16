@@ -19,7 +19,7 @@
 #include "compiler/optimizer/ir/graph_visitor.h"
 #include "compiler/optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class ParameterInfo;
 
 template <Arch ARCH>  // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
@@ -90,6 +90,6 @@ private:
 };
 
 bool RunLocationsBuilder(Graph *graph);
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_LOCATIONS_BUILDER_H

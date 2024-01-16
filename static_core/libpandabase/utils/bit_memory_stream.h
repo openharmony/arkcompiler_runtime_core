@@ -22,7 +22,7 @@
 #include <array>
 #include <ios>
 
-namespace panda {
+namespace ark {
 
 template <typename Container>
 class BitMemoryStreamOut {
@@ -108,6 +108,6 @@ public:
     NO_MOVE_SEMANTIC(BitMemoryStreamIn);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_BIT_MEMORY_STREAM_H

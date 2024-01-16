@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, invalid_ref)
 {
@@ -38,4 +38,4 @@ TEST_F(VerifierTest, invalid_ref)
     EXPECT_TRUE(!invRef12.HasRef());
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

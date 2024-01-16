@@ -28,7 +28,7 @@
 #include "securec.h"
 #endif
 
-namespace panda {
+namespace ark {
 
 enum class BytecodeInstMode { FAST, SAFE };
 
@@ -462,6 +462,6 @@ public:
     }
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBANDAFILE_BYTECODE_INSTRUCTION_H_

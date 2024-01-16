@@ -22,7 +22,7 @@
 #include "runtime/mem/runslots_allocator-inl.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_PYGOTE_SPACE_ALLOCATOR(level) LOG(level, ALLOC) << "PygoteSpaceAllocator: "
@@ -77,8 +77,8 @@ inline void PygoteSpaceAllocator<AllocConfigT>::SetState(PygoteSpaceState newSta
         runslotsAlloc_.TrimUnsafe();
 
         // only trim the last arena
-        if (arena_ != nullptr && arena_->GetFreeSize() >= panda::os::mem::GetPageSize()) {
-            uintptr_t start = AlignUp(ToUintPtr(arena_->GetAllocatedEnd()), panda::os::mem::GetPageSize());
+        if (arena_ != nullptr && arena_->GetFreeSize() >= ark::os::mem::GetPageSize()) {
+            uintptr_t start = AlignUp(ToUintPtr(arena_->GetAllocatedEnd()), ark::os::mem::GetPageSize());
             uintptr_t end = ToUintPtr(arena_->GetArenaEnd());
             os::mem::ReleasePages(start, end);
         }
@@ -295,6 +295,6 @@ inline void PygoteSpaceAllocator<AllocConfigT>::Collect(const GCObjectVisitor &g
 
 #undef LOG_PYGOTE_SPACE_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_PANDA_PYGOTE_SPACE_ALLOCATOR_INL_H

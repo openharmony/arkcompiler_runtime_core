@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "ets_type.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsObject;
 
@@ -87,6 +87,6 @@ private:
     int64_t holder_ {0};
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_VALUE_H_

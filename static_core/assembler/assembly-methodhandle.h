@@ -18,14 +18,14 @@
 
 #include <string>
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 struct MethodHandle {
-    std::string itemName;                      // NOLINT(misc-non-private-member-variables-in-classes)
-    panda::panda_file::MethodHandleType type;  // NOLINT(misc-non-private-member-variables-in-classes)
-    MethodHandle(std::string s, panda::panda_file::MethodHandleType t) : itemName(std::move(s)), type(t) {}
+    std::string itemName;                    // NOLINT(misc-non-private-member-variables-in-classes)
+    ark::panda_file::MethodHandleType type;  // NOLINT(misc-non-private-member-variables-in-classes)
+    MethodHandle(std::string s, ark::panda_file::MethodHandleType t) : itemName(std::move(s)), type(t) {}
 };
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_METHODHANDLE_H

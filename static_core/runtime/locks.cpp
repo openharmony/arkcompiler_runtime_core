@@ -23,7 +23,7 @@
 #include <sanitizer/lsan_interface.h>
 #endif
 
-namespace panda {
+namespace ark {
 
 static bool g_isInitialized = false;
 
@@ -110,4 +110,4 @@ bool MutatorLock::HasLock() const
 }
 #endif  // !NDEBUG
 
-}  // namespace panda
+}  // namespace ark

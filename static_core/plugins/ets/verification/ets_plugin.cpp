@@ -20,7 +20,7 @@
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
-namespace panda::verifier::plugin {
+namespace ark::verifier::plugin {
 
 ManagedThread *EtsPlugin::CreateManagedThread() const
 {
@@ -59,4 +59,4 @@ Type EtsPlugin::NormalizeType(Type type, TypeSystem *types) const
     return result;
 }
 
-}  // namespace panda::verifier::plugin
+}  // namespace ark::verifier::plugin

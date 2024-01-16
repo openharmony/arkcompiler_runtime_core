@@ -19,12 +19,12 @@
 #include "libpandabase/taskmanager/task.h"
 #include "runtime/mem/gc/gc_queue.h"
 
-namespace panda {
+namespace ark {
 // Forward declaration for GCWorker
 class Thread;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 // Forward declaration for GCWorker
 class GC;
 
@@ -38,7 +38,7 @@ public:
     /**
      * @brief Create local gc tasks queue and structure for gc panda thread.
      * Don't start gc worker
-     * @see panda::Thread
+     * @see ark::Thread
      * @see CreateAndStartWorker
      * @see FinalizeAndDestroyWorker
      *
@@ -89,6 +89,6 @@ private:
     os::memory::Mutex gcTaskRunMutex_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_WORKERS_GC_WORKER_H

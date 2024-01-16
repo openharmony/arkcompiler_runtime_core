@@ -20,12 +20,12 @@
 namespace OHOS {
 void LiteralDataAccessorFuzzTest(const uint8_t *data, size_t size)
 {
-    auto pf = panda::panda_file::OpenPandaFileFromMemory(data, size);
+    auto pf = ark::panda_file::OpenPandaFileFromMemory(data, size);
     if (pf == nullptr) {
         return;
     }
-    panda::panda_file::File::EntityId literal_arrays_id = pf->GetLiteralArraysId();
-    panda::panda_file::LiteralDataAccessor(*pf, literal_arrays_id);
+    ark::panda_file::File::EntityId literal_arrays_id = pf->GetLiteralArraysId();
+    ark::panda_file::LiteralDataAccessor(*pf, literal_arrays_id);
 }
 }  // namespace OHOS
 

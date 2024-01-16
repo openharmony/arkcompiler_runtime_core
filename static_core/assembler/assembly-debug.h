@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <string>
 
-namespace panda::pandasm::debuginfo {
+namespace ark::pandasm::debuginfo {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Ins {
@@ -56,6 +56,6 @@ struct LocalVariable {
     uint32_t length = 0;
 };
 
-}  // namespace panda::pandasm::debuginfo
+}  // namespace ark::pandasm::debuginfo
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_DEBUG_H

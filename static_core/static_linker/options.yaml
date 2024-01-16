@@ -13,7 +13,7 @@
 
 module:
   name: static_linker
-  namespace: panda::static_linker
+  namespace: ark::static_linker
 
 options:
 

@@ -17,13 +17,13 @@
 
 #include "runtime/mem/allocator_adapter.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 void VerifierService::Init() {}
 
 void VerifierService::Destroy()
 {
-    panda::os::memory::LockHolder lck {lock_};
+    ark::os::memory::LockHolder lck {lock_};
     if (shutdown_) {
         return;
     }
@@ -43,7 +43,7 @@ void VerifierService::Destroy()
 
 TaskProcessor *VerifierService::GetProcessor(SourceLang lang)
 {
-    panda::os::memory::LockHolder lck {lock_};
+    ark::os::memory::LockHolder lck {lock_};
     if (shutdown_) {
         return nullptr;
     }
@@ -63,11 +63,11 @@ TaskProcessor *VerifierService::GetProcessor(SourceLang lang)
 
 void VerifierService::ReleaseProcessor(TaskProcessor *processor)
 {
-    panda::os::memory::LockHolder lck {lock_};
+    ark::os::memory::LockHolder lck {lock_};
     auto lang = processor->GetLang();
     ASSERT(processors_.count(lang) > 0);
     processors_.at(lang).queue.push_back(processor);
     condVar_.Signal();
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

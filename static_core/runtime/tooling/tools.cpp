@@ -16,7 +16,7 @@
 #include "runtime/tooling/tools.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 
 sampler::Sampler *Tools::GetSamplingProfiler()
 {
@@ -61,4 +61,4 @@ void Tools::StopSamplingProfiler()
     sampler_ = nullptr;
 }
 
-}  // namespace panda::tooling
+}  // namespace ark::tooling

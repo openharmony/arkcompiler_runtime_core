@@ -18,7 +18,7 @@
 #include "runtime/tests/intrusive-tests/intrusive_test_suite.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class IntrusiveClearInterruptedThreadTest : public testing::Test {
 public:
@@ -28,7 +28,7 @@ public:
         options_.SetShouldInitializeIntrinsics(false);
         options_.SetIntrusiveTest(CLEAR_INTERRUPTED_INTRUSIVE_TEST);
         Runtime::Create(options_);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -42,7 +42,7 @@ public:
     NO_MOVE_SEMANTIC(IntrusiveClearInterruptedThreadTest);
 
 protected:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
     RuntimeOptions options_;
 };
 
@@ -64,4 +64,4 @@ TEST_F(IntrusiveClearInterruptedThreadTest, ClearInterruptedTest)
     LOG(DEBUG, RUNTIME) << "Sleep was interrupted = " << is_interrupted;
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

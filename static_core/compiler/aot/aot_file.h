@@ -27,7 +27,7 @@
 #include <memory>
 #include <algorithm>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RuntimeInterface;
 
 class AotFile {
@@ -45,7 +45,7 @@ public:
         COUNT
     };
 
-    AotFile(panda::os::library_loader::LibraryHandle &&handle, Span<const uint8_t> aotData, Span<const uint8_t> code)
+    AotFile(ark::os::library_loader::LibraryHandle &&handle, Span<const uint8_t> aotData, Span<const uint8_t> code)
         : handle_(std::move(handle)), aotData_(aotData), code_(code)
     {
     }
@@ -92,7 +92,7 @@ public:
 
     auto GetClassHashTable(const PandaFileHeader &fileHeader) const
     {
-        return aotData_.SubSpan<const panda::panda_file::EntityPairHeader>(
+        return aotData_.SubSpan<const ark::panda_file::EntityPairHeader>(
             GetAotHeader()->classHashTablesOffset + fileHeader.classHashTableOffset, fileHeader.classHashTableSize);
     }
 
@@ -159,7 +159,7 @@ public:
     void PatchTable(RuntimeInterface *runtime);
 
 private:
-    panda::os::library_loader::LibraryHandle handle_ {nullptr};
+    ark::os::library_loader::LibraryHandle handle_ {nullptr};
     Span<const uint8_t> aotData_;
     Span<const uint8_t> code_;
 };
@@ -244,7 +244,7 @@ public:
         classHashTable_ = GetAotFile()->GetClassHashTable(*header_);
     }
 
-    panda::Span<const panda::panda_file::EntityPairHeader> GetClassHashTable() const
+    ark::Span<const ark::panda_file::EntityPairHeader> GetClassHashTable() const
     {
         return classHashTable_;
     }
@@ -252,8 +252,8 @@ public:
 private:
     AotFile *aotFile_ {nullptr};
     const PandaFileHeader *header_ {nullptr};
-    panda::Span<const panda::panda_file::EntityPairHeader> classHashTable_;
+    ark::Span<const ark::panda_file::EntityPairHeader> classHashTable_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_AOT_AOT_FILE_H

@@ -34,14 +34,14 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
 
 TEST(InstructionsTest, TestLanguagePandaAssembly)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
         .record A {}
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -52,7 +52,7 @@ TEST(InstructionsTest, TestLanguagePandaAssembly)
 
 TEST(InstructionsTest, TestCalls)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record B {}
 
 .function u8 B.Bhandler_unspec(B a0) {
@@ -133,10 +133,10 @@ TEST(InstructionsTest, TestCalls)
 }
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -204,7 +204,7 @@ TEST(InstructionsTest, TestCalls)
 
 TEST(InstructionsTest, TestNewarr)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .function u1 g(u1 a0) {
     newarr v0, a0, u1[]
     newarr v0, a0, i8[]
@@ -224,10 +224,10 @@ TEST(InstructionsTest, TestNewarr)
 
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -263,7 +263,7 @@ TEST(InstructionsTest, TestNewarr)
 
 TEST(InstructionsTest, TestCorrectReg)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record panda.String <external>
 
 .function panda.String handler(panda.String a0) <external>
@@ -277,14 +277,14 @@ TEST(InstructionsTest, TestCorrectReg)
     )");
 
     ASSERT(program);
-    panda::pandasm::Program *prog = &(program.Value());
+    ark::pandasm::Program *prog = &(program.Value());
     auto mainFunc = prog->functionTable.find("main:()");
     mainFunc->second.regsNum = 0;
 
-    auto pf = panda::pandasm::AsmEmitter::Emit(*prog);
+    auto pf = ark::pandasm::AsmEmitter::Emit(*prog);
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);

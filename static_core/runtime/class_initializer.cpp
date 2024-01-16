@@ -30,7 +30,7 @@
 #include "verification/util/is_system.h"
 #include "verify_app_install.h"
 
-namespace panda {
+namespace ark {
 template <MTModeT MODE>
 class ObjectLockConfig {
 };
@@ -276,7 +276,7 @@ bool ClassInitializer<MODE>::InitClassVerificationMode(Class *klass)
             if (!klass->IsVerified()) {
                 if (!VerifyClass(klass)) {
                     klass->SetState(Class::State::ERRONEOUS);
-                    panda::ThrowVerificationException(utf::Mutf8AsCString(klass->GetDescriptor()));
+                    ark::ThrowVerificationException(utf::Mutf8AsCString(klass->GetDescriptor()));
                     return false;
                 }
             }
@@ -504,4 +504,4 @@ bool ClassInitializer<MODE>::InitializeFields(Class *klass)
 template class ClassInitializer<MT_MODE_SINGLE>;
 template class ClassInitializer<MT_MODE_MULTI>;
 template class ClassInitializer<MT_MODE_TASK>;
-}  // namespace panda
+}  // namespace ark

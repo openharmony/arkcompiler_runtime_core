@@ -21,7 +21,7 @@
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
 
-namespace panda {
+namespace ark {
 class LoadableAgent {
 public:
     LoadableAgent() = default;
@@ -102,6 +102,6 @@ public:
         return inst;
     }
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_INCLUDE_LOADABLE_AGENT_H

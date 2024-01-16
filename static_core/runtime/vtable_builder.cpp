@@ -16,7 +16,7 @@
 #include "runtime/include/vtable_builder.h"
 #include "runtime/include/class_linker.h"
 
-namespace panda {
+namespace ark {
 
 // check max-specific method or not according to JVM specs chap5.4.3.3
 // we have to guarantee that while we are iterating itable, the child interface has to be accessed before father
@@ -37,4 +37,4 @@ bool IsMaxSpecificMethod(const Class *iface, const Method &method, size_t starti
     return true;
 }
 
-}  // namespace panda
+}  // namespace ark

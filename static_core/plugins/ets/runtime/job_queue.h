@@ -18,7 +18,7 @@
 
 #include "plugins/ets/runtime/types/ets_object.h"
 
-namespace panda::ets {
+namespace ark::ets {
 class JobQueue {
 public:
     JobQueue() = default;
@@ -37,5 +37,5 @@ public:
     NO_COPY_SEMANTIC(JobQueue);
     NO_MOVE_SEMANTIC(JobQueue);
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H_

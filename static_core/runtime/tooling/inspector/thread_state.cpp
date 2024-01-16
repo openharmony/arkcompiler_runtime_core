@@ -15,7 +15,7 @@
 
 #include "thread_state.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 std::vector<BreakpointId> ThreadState::GetBreakpointsByLocation(const PtLocation &location) const
 {
     std::vector<BreakpointId> hitBreakpoints;
@@ -223,4 +223,4 @@ void ThreadState::OnSingleStep(const PtLocation &location)
         paused_ = true;
     }
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

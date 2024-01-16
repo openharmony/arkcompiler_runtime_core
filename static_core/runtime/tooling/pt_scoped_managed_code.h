@@ -18,7 +18,7 @@
 
 #include "runtime/include/mtmanaged_thread.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class PtScopedManagedCode {
 public:
@@ -40,6 +40,6 @@ public:
 private:
     MTManagedThread *managedThread_;
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_SCOPED_MANAGED_CODE_H

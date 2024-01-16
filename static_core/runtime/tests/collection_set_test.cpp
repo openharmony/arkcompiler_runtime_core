@@ -21,7 +21,7 @@
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/mem/mem_stats_additional_info.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class CollectionSetTest : public testing::Test {
 public:
@@ -40,7 +40,7 @@ public:
     {
         delete allocator_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
         delete memStats_;
         InternalAllocator<>::ClearInternalAllocatorFromRuntime();
     }
@@ -170,4 +170,4 @@ TEST_F(CollectionSetTest, TestAddDifferentRegions)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::mem
+}  // namespace ark::mem

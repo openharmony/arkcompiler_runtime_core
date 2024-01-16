@@ -24,7 +24,7 @@
 #include "runtime/include/class_linker.h"
 #include "runtime/include/class_root.h"
 
-namespace panda::mem {
+namespace ark::mem {
 constexpr std::initializer_list<const char *> TESTED_GC = {"stw", "gen-gc", "g1-gc"};
 
 [[maybe_unused]] inline ObjectHeader *AllocateNullifiedPayloadString(size_t length)
@@ -38,7 +38,7 @@ constexpr std::initializer_list<const char *> TESTED_GC = {"stw", "gen-gc", "g1-
     ASSERT(stringClass != nullptr);
     mem::HeapManager *heapManager = vm->GetHeapManager();
     ASSERT(heapManager != nullptr);
-    return heapManager->AllocateObject(stringClass, panda::coretypes::String::ComputeSizeUtf16(length));
+    return heapManager->AllocateObject(stringClass, ark::coretypes::String::ComputeSizeUtf16(length));
 }
 
 inline ObjectHeader *AllocNonMovableObject()
@@ -80,6 +80,6 @@ public:
         return coretypes::String::CreateEmptyString(ctx, runtime->GetPandaVM());
     }
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_TEST_UTILS_H

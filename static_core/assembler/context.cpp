@@ -17,9 +17,9 @@
 #include "assembly-parser.h"
 #include "utils/number-utils.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
-void Context::Make(const std::vector<panda::pandasm::Token> &t)
+void Context::Make(const std::vector<ark::pandasm::Token> &t)
 {
     err = {};
 
@@ -207,4 +207,4 @@ Token::Type Context::operator*()
     return id;
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

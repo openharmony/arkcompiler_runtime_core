@@ -25,7 +25,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_resolver.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class IrBuilderTest : public AsmTest {
 public:
@@ -6536,4 +6536,4 @@ TEST_F(IrBuilderTest, CallVirtRange)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

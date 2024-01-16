@@ -21,7 +21,7 @@
 #include "compiler/optimizer/analysis/loop_analyzer.h"
 #include "compiler/optimizer/optimizations/regalloc/reg_alloc_base.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void SplitResolver::Run()
 {
@@ -198,4 +198,4 @@ SpillFillInst *SplitResolver::CreateSpillFillForSiblings(Inst *connectAt)
     return spillFill;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

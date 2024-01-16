@@ -19,7 +19,7 @@
 #include <array>
 #include "runtime/include/tooling/debug_interface.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class PtHookTypeInfo {
 public:
@@ -71,6 +71,6 @@ private:
     static constexpr size_t HOOKS_COUNT = static_cast<size_t>(PtHookType::PT_HOOK_TYPE_COUNT);
     std::array<bool, HOOKS_COUNT> isEnabled_;
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_HOOK_TYPE_INFO_H

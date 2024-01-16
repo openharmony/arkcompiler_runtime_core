@@ -38,14 +38,14 @@
 
 #include "runtime/osr.h"
 
-namespace panda {
+namespace ark {
 
 using compiler::RuntimeInterface;
 using compiler::UnresolvedTypesInterface;
 
-inline panda::Method *MethodCast(RuntimeInterface::MethodPtr method)
+inline ark::Method *MethodCast(RuntimeInterface::MethodPtr method)
 {
-    return static_cast<panda::Method *>(method);
+    return static_cast<ark::Method *>(method);
 }
 
 struct ScopedMutatorLock : public os::memory::ReadLockHolder<MutatorLock> {
@@ -111,9 +111,9 @@ public:
         return static_cast<unsigned>(CompilerInterface::ReturnReason::RET_DEOPTIMIZATION);
     }
 
-    panda::Class *ClassCast(ClassPtr cls) const
+    ark::Class *ClassCast(ClassPtr cls) const
     {
-        return static_cast<panda::Class *>(cls);
+        return static_cast<ark::Class *>(cls);
     }
 
     size_t GetStackOverflowCheckOffset() const override
@@ -224,7 +224,7 @@ public:
 
     uint32_t GetAccessFlagAbstractMask() const override
     {
-        return panda::ACC_ABSTRACT;
+        return ark::ACC_ABSTRACT;
     }
 
     uint32_t GetVTableIndex(MethodPtr method) const override
@@ -354,7 +354,7 @@ public:
 
     std::string GetBytecodeString(MethodPtr method, uintptr_t pc) const override;
 
-    panda::pandasm::LiteralArray GetLiteralArray(MethodPtr method, LiteralArrayId id) const override;
+    ark::pandasm::LiteralArray GetLiteralArray(MethodPtr method, LiteralArrayId id) const override;
 
     bool IsInterfaceMethod(MethodPtr parentMethod, MethodId id) const override;
 
@@ -376,12 +376,12 @@ public:
 
     /**********************************************************************************/
     /// Thread information
-    ::panda::mem::BarrierType GetPreType() const override;
+    ::ark::mem::BarrierType GetPreType() const override;
 
-    ::panda::mem::BarrierType GetPostType() const override;
+    ::ark::mem::BarrierType GetPostType() const override;
 
-    ::panda::mem::BarrierOperand GetBarrierOperand(::panda::mem::BarrierPosition barrierPosition,
-                                                   std::string_view operandName) const override;
+    ::ark::mem::BarrierOperand GetBarrierOperand(::ark::mem::BarrierPosition barrierPosition,
+                                                 std::string_view operandName) const override;
 
     /**********************************************************************************/
     /// Array information
@@ -398,7 +398,7 @@ public:
     /// String information
     bool IsCompressedStringsEnabled() const override
     {
-        return panda::coretypes::String::GetCompressedStringsEnabled();
+        return ark::coretypes::String::GetCompressedStringsEnabled();
     }
 
     ObjectPointerType GetNonMovableString(MethodPtr method, StringId id) const override;
@@ -416,7 +416,7 @@ public:
 
     bool IsTrackTlabAlloc() const override
     {
-        return panda::mem::PANDA_TRACK_TLAB_ALLOCATIONS ||
+        return ark::mem::PANDA_TRACK_TLAB_ALLOCATIONS ||
                Logger::IsLoggingOn(Logger::Level::DEBUG, Logger::Component::MM_OBJECT_EVENTS);
     }
 
@@ -471,7 +471,7 @@ public:
     /// Class information
     uint8_t GetClassInitializedValue() const override
     {
-        return static_cast<uint8_t>(panda::Class::State::INITIALIZED);
+        return static_cast<uint8_t>(ark::Class::State::INITIALIZED);
     }
 
     std::optional<IdType> FindClassIdInFile(MethodPtr method, ClassPtr cls) const;
@@ -504,10 +504,10 @@ public:
         return utf::Mutf8AsCString(FieldCast(field)->GetName().data);
     }
 
-    panda::Field *FieldCast(FieldPtr field) const
+    ark::Field *FieldCast(FieldPtr field) const
     {
         ASSERT(HasFieldMetadata(field));
-        return static_cast<panda::Field *>(field);
+        return static_cast<ark::Field *>(field);
     }
 
     FieldId GetFieldId(FieldPtr field) const override;
@@ -531,9 +531,9 @@ public:
 
     uintptr_t GetManagedType(uintptr_t klass) const override;
 
-    panda::Class *TypeCast(uintptr_t klass) const
+    ark::Class *TypeCast(uintptr_t klass) const
     {
-        return reinterpret_cast<panda::Class *>(klass);
+        return reinterpret_cast<ark::Class *>(klass);
     }
 
     uint8_t GetReferenceTypeMask() const override
@@ -628,7 +628,7 @@ public:
                       compiler::RuntimeInterface *runtimeIface)
         : codeAllocator_(codeAllocator),
           internalAllocator_(internalAllocator),
-          gdbDebugInfoAllocator_(panda::SpaceType::SPACE_TYPE_COMPILER, memStats),
+          gdbDebugInfoAllocator_(ark::SpaceType::SPACE_TYPE_COMPILER, memStats),
           runtimeIface_(runtimeIface)
     {
         noAsyncJit_ = options.IsNoAsyncJit();
@@ -772,6 +772,6 @@ private:
 uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceLang sourceLang);
 #endif
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COMPILER_H_

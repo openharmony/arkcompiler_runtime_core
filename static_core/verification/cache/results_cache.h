@@ -19,7 +19,7 @@
 #include <string>
 #include <cstdint>
 
-namespace panda::verifier {
+namespace ark::verifier {
 class VerificationResultCache {
 public:
     enum class Status { OK, FAILED, UNKNOWN };
@@ -33,6 +33,6 @@ private:
     struct Impl;
     static Impl *impl_;
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !_PANDA_VERIFIER_CACHE_RESULTS_CACHE_H__

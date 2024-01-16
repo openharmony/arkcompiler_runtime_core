@@ -25,11 +25,11 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/mem/gc/gc_phase.h"
 
-namespace panda {
+namespace ark {
 class BaseClass;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 class HeapManager;
 
@@ -107,5 +107,5 @@ private:
     std::atomic_uint64_t humongousObjectsFreed_ = 0;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_STATS_H

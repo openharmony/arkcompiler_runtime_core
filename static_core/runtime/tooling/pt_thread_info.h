@@ -24,7 +24,7 @@
 #include "pt_hook_type_info.h"
 #include "thread_sampling_info.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class PtThreadInfo {
 public:
     PtThreadInfo() = default;
@@ -73,6 +73,6 @@ private:
     NO_COPY_SEMANTIC(PtThreadInfo);
     NO_MOVE_SEMANTIC(PtThreadInfo);
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_THREAD_INFO_H

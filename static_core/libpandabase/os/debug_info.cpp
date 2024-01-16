@@ -24,7 +24,7 @@
 #include "debug_info.h"
 #include "utils/logger.h"
 
-namespace panda {
+namespace ark {
 
 class DwarfGuard {
 public:
@@ -642,4 +642,4 @@ bool DebugInfo::FindRangeForPc(uintptr_t pc, const Span<Dwarf_Ranges> &ranges, D
     return false;
 }
 
-}  // namespace panda
+}  // namespace ark

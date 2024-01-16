@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #include <poll.h>
 
-namespace panda::os::unix {
+namespace ark::os::unix {
 
 std::pair<UniqueFd, UniqueFd> CreatePipe()
 {
@@ -119,4 +119,4 @@ std::optional<Error> Dup2(const UniqueFd &source, const UniqueFd &target)
     return {};
 }
 
-}  // namespace panda::os::unix
+}  // namespace ark::os::unix

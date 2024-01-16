@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_value.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 // Arguments type separated from return type by ":". Object names bounded by 'L' and ';'
 class EtsMethodSignature {
@@ -139,6 +139,6 @@ private:
     }
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_METHOD_SIGNATURE_H_

@@ -24,7 +24,7 @@
 
 #include "get_language_specific_metadata.inc"
 
-namespace panda::disasm {
+namespace ark::disasm {
 
 void Disassembler::Disassemble(std::string_view filenameIn, const bool quiet, const bool skipStrings)
 {
@@ -523,7 +523,7 @@ void Disassembler::GetLiteralArrays()
     panda_file::LiteralDataAccessor litArrayAccessor(*file_, litArraysId);
     size_t numLitarrays = litArrayAccessor.GetLiteralNum();
     for (size_t index = 0; index < numLitarrays; index++) {
-        panda::pandasm::LiteralArray litAr;
+        ark::pandasm::LiteralArray litAr;
         GetLiteralArray(&litAr, index);
         prog_.literalarrayTable.emplace(std::to_string(index), litAr);
     }
@@ -895,8 +895,8 @@ void Disassembler::GetMetaData(pandasm::Function *method, const panda_file::File
     SetEntityAttribute(
         method, [&methodAccessor]() { return methodAccessor.IsFinal(); }, "final");
 
-    std::string ctorName = panda::panda_file::GetCtorName(fileLanguage_);
-    std::string cctorName = panda::panda_file::GetCctorName(fileLanguage_);
+    std::string ctorName = ark::panda_file::GetCtorName(fileLanguage_);
+    std::string cctorName = ark::panda_file::GetCctorName(fileLanguage_);
 
     const bool isCtor = (methodNameRaw == ctorName);
     const bool isCctor = (methodNameRaw == cctorName);
@@ -1121,7 +1121,7 @@ std::string Disassembler::ArrayValueToString(const panda_file::ArrayValue &value
 
 std::string Disassembler::GetFullMethodName(const panda_file::File::EntityId &methodId) const
 {
-    panda::panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
+    ark::panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
 
     const auto methodNameRaw = StringDataToString(file_->GetStringData(methodAccessor.GetNameId()));
 
@@ -1137,7 +1137,7 @@ std::string Disassembler::GetFullMethodName(const panda_file::File::EntityId &me
 
 std::string Disassembler::GetMethodSignature(const panda_file::File::EntityId &methodId) const
 {
-    panda::panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
+    ark::panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
 
     pandasm::Function method(GetFullMethodName(methodId), fileLanguage_);
     GetParams(&method, methodAccessor.GetProtoId());
@@ -1572,7 +1572,7 @@ void Disassembler::SerializeLocalVariableTable(const panda_file::LocalVariableTa
 
 void Disassembler::SerializeLanguage(std::ostream &os) const
 {
-    os << ".language " << panda::panda_file::LanguageToString(fileLanguage_) << "\n\n";
+    os << ".language " << ark::panda_file::LanguageToString(fileLanguage_) << "\n\n";
 }
 
 void Disassembler::SerializeFilename(std::ostream &os) const
@@ -1694,10 +1694,10 @@ std::string Disassembler::IDToString(BytecodeInstruction bcIns, panda_file::File
     return name.str();
 }
 
-panda::panda_file::SourceLang Disassembler::GetRecordLanguage(panda_file::File::EntityId classId) const
+ark::panda_file::SourceLang Disassembler::GetRecordLanguage(panda_file::File::EntityId classId) const
 {
     if (file_->IsExternal(classId)) {
-        return panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+        return ark::panda_file::SourceLang::PANDA_ASSEMBLY;
     }
 
     panda_file::ClassDataAccessor cda(*file_, classId);
@@ -1819,4 +1819,4 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
     return unknownExternalMethods;
 }
 
-}  // namespace panda::disasm
+}  // namespace ark::disasm

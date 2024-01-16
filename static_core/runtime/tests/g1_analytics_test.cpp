@@ -19,7 +19,7 @@
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class G1AnalyticsTest : public testing::Test {
 public:
     G1AnalyticsTest()
@@ -463,4 +463,4 @@ TEST_F(G1AnalyticsTest, PredictionTest)
     const double maxError = 1e-6;
     ASSERT_NEAR(expectedAllocationRate, analytics.PredictAllocationRate(), maxError);
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

@@ -25,7 +25,7 @@
 #include "runtime/mem/frame_allocator-inl.h"
 #include "runtime/tests/allocator_test_base.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class FrameAllocatorTest : public AllocatorTest<FrameAllocator<>> {
 public:
@@ -33,14 +33,14 @@ public:
     {
         static constexpr size_t INTERNAL_SIZE = 256_MB;
         static constexpr size_t FRAME_SIZE = 256_MB;
-        panda::mem::MemConfig::Initialize(0, INTERNAL_SIZE, 0, 0, FRAME_SIZE, 0);
+        ark::mem::MemConfig::Initialize(0, INTERNAL_SIZE, 0, 0, FRAME_SIZE, 0);
         // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
     }
 
     ~FrameAllocatorTest() override
     {
         // Logger::Destroy();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_MOVE_SEMANTIC(FrameAllocatorTest);
@@ -308,4 +308,4 @@ TEST_F(FrameAllocatorTest, CheckAddrInsideAllocator)
     CheckAddrInsideAllocator(true);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

@@ -17,7 +17,7 @@
 #include "runtime/include/runtime.h"
 #include "securec.h"
 
-namespace panda {
+namespace ark {
 int DynChunk::Expand(size_t newSize)
 {
     if (newSize > allocatedSize_) {
@@ -110,4 +110,4 @@ int DynChunk::EmitStr(const char *str)
 {
     return Emit(reinterpret_cast<const uint8_t *>(str), strlen(str) + 1);
 }
-}  // namespace panda
+}  // namespace ark

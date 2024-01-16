@@ -18,7 +18,7 @@
 
 #include "js_convert_base.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 template <typename Cpptype>
 struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptype> {
@@ -484,6 +484,6 @@ template <typename T>
     return !NapiThrownGeneric(rc);
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H

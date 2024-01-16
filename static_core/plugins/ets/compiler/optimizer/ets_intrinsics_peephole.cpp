@@ -17,7 +17,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     // Replaces
@@ -213,4 +213,4 @@ bool Peepholes::PeepholeStObjByName(GraphVisitor *v, IntrinsicInst *intrinsic)
     return false;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

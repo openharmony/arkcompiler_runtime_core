@@ -18,7 +18,7 @@
 
 #include "securec.h"
 
-namespace panda::terminate {
+namespace ark::terminate {
 #ifndef FUZZING_EXIT_ON_FAILED_ASSERT_FOR
 auto constexpr FUZZING_EXIT_ON_FAILED_ASSERT_FOR = "";
 #endif
@@ -53,4 +53,4 @@ auto constexpr FUZZING_EXIT_ON_FAILED_ASSERT_FOR = "";
     std::abort();
 }
 
-}  // namespace panda::terminate
+}  // namespace ark::terminate

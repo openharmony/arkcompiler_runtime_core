@@ -17,7 +17,7 @@
 
 #include <iostream>
 
-namespace panda::ets {
+namespace ark::ets {
 
 std::string MangleString(const std::string &name);
 
@@ -25,6 +25,6 @@ std::string MangleMethodName(const std::string &className, const std::string &me
 
 std::string MangleMethodNameWithSignature(const std::string &mangledName, const std::string &signature);
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_MANGLE_H

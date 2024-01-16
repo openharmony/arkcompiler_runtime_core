@@ -17,7 +17,7 @@
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/optimizations/code_sink.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CodeSinkTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -773,4 +773,4 @@ TEST_F(CodeSinkTest, UselessSinking)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

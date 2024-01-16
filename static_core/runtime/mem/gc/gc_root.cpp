@@ -27,7 +27,7 @@
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 GCRoot::GCRoot(RootType type, ObjectHeader *obj)
 {
@@ -215,7 +215,7 @@ void RootManager<LanguageConfig>::UpdateAotStringRoots()
         [](ObjectHeader **root) {
             auto rootValue = *root;
             if (rootValue->IsForwarded()) {
-                *root = ::panda::mem::GetForwardAddress(rootValue);
+                *root = ::ark::mem::GetForwardAddress(rootValue);
             }
         },
         [&hm](const ObjectHeader *root) { return hm->IsObjectInYoungSpace(root); });
@@ -303,4 +303,4 @@ VisitGCRootFlags operator|(VisitGCRootFlags left, VisitGCRootFlags right)
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(RootManager);
 
-}  // namespace panda::mem
+}  // namespace ark::mem

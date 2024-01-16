@@ -18,7 +18,7 @@
 #include "libpandabase/os/filesystem.h"
 #include "runtime/include/runtime.h"
 
-namespace panda {
+namespace ark {
 void RelayoutProfiler::WriteProfileData()
 {
     LOG(INFO, RUNTIME) << "start writing profile data!";
@@ -31,13 +31,13 @@ void RelayoutProfiler::WriteProfileData()
         PandaString fileName = file.first.substr(pos, file.first.length() - pos);
         PandaString profileFileName = profileRecordRoot + fileName + ".txt";
 
-        panda::os::unix::file::File profileFile =
-            panda::os::file::Open(profileFileName, panda::os::file::Mode::READWRITECREATE);
+        ark::os::unix::file::File profileFile =
+            ark::os::file::Open(profileFileName, ark::os::file::Mode::READWRITECREATE);
         if (!profileFile.IsValid()) {
             LOG(ERROR, RUNTIME) << "Cannot open the profile file " << profileFileName;
             return;
         }
-        panda::os::file::FileHolder fholder(profileFile);
+        ark::os::file::FileHolder fholder(profileFile);
 
         for (auto &item : file.second[RelayoutProfiler::RelayoutItemType::CLASS_ITEM]) {
             // write classItem
@@ -98,4 +98,4 @@ ProfileDataType *RelayoutProfiler::GetProfileData()
 {
     return &relayoutItems_;
 }
-}  // namespace panda
+}  // namespace ark

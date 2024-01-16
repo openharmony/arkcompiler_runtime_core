@@ -18,7 +18,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/ir/graph_cloner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LoopIdiomsTest : public GraphTest {
 protected:
     bool CheckFillArrayFull(DataType::Type arrayType, RuntimeInterface::IntrinsicId expectedIntrinsic)
@@ -531,4 +531,4 @@ TEST_F(LoopIdiomsTest, MismatchingConditions)
     ASSERT_TRUE(GetGraph()->RunPass<LoopIdioms>());
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

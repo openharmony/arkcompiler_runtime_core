@@ -16,7 +16,7 @@
 #include "dfx.h"
 #include "logger.h"
 
-namespace panda {
+namespace ark {
 DfxController *DfxController::dfxController_ = nullptr;
 os::memory::Mutex DfxController::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
 
@@ -192,4 +192,4 @@ void DfxController::Destroy()
     delete d;
 }
 
-}  // namespace panda
+}  // namespace ark

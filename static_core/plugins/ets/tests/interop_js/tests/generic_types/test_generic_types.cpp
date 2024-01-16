@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class GenericTypesTest : public EtsInteropTest {};
 
@@ -40,4 +40,4 @@ TEST_F(GenericTypesTest, check_js_primitives)
     ASSERT_TRUE(RunJsTestSuite("check_js_primitives.js"));
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

@@ -22,7 +22,7 @@
 
 #include "utils/expected.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 std::optional<Metadata::Error> Metadata::ValidateSize(std::string_view value) const
 {
@@ -45,9 +45,9 @@ bool ItemMetadata::IsForeign() const
     return GetAttribute("external");
 }
 
-static panda::pandasm::Value::Type GetType(std::string_view value)
+static ark::pandasm::Value::Type GetType(std::string_view value)
 {
-    using VType = panda::pandasm::Value::Type;
+    using VType = ark::pandasm::Value::Type;
     static std::unordered_map<std::string_view, VType> types {
         {"u1", VType::U1},         {"i8", VType::I8},        {"u8", VType::U8},
         {"i16", VType::I16},       {"u16", VType::U16},      {"i32", VType::I32},
@@ -515,4 +515,4 @@ std::optional<Metadata::Error> FieldMetadata::StoreValue(std::string_view attrib
 
 #include <meta_gen.h>
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

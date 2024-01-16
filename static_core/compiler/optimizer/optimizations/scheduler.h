@@ -19,7 +19,7 @@
 #include "optimizer/ir/graph.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Scheduler : public Optimization {
 public:
     explicit Scheduler(Graph *graph)
@@ -91,6 +91,6 @@ private:
     ArenaUnorderedMap<Inst *, uint32_t> prio_;
     ArenaUnorderedMap<Inst *, ArenaUnorderedMap<Inst *, uint32_t>> deps_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SCHEDULER_H

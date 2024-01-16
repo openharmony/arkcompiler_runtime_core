@@ -27,17 +27,16 @@
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
-using panda::llvmbackend::LLVMArkInterface;
-using panda::llvmbackend::gc_barriers::EmitPostWRB;
-using panda::llvmbackend::gc_barriers::EmitPreWRB;
-using panda::llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT;
-using panda::llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT;
-using panda::llvmbackend::runtime_calls::CreateEntrypointCallCommon;
-using panda::llvmbackend::runtime_calls::GetThreadRegValue;
+using ark::llvmbackend::LLVMArkInterface;
+using ark::llvmbackend::gc_barriers::EmitPostWRB;
+using ark::llvmbackend::gc_barriers::EmitPreWRB;
+using ark::llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT;
+using ark::llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT;
+using ark::llvmbackend::runtime_calls::CreateEntrypointCallCommon;
+using ark::llvmbackend::runtime_calls::GetThreadRegValue;
 
 namespace {
-llvm::CallInst *CreateEntrypointCallHelper(llvm::IRBuilder<> *builder,
-                                           panda::compiler::RuntimeInterface::EntrypointId id,
+llvm::CallInst *CreateEntrypointCallHelper(llvm::IRBuilder<> *builder, ark::compiler::RuntimeInterface::EntrypointId id,
                                            llvm::ArrayRef<llvm::Value *> arguments, LLVMArkInterface *arkInterface,
                                            llvm::CallInst *inst)
 {
@@ -56,7 +55,7 @@ llvm::CallInst *CreateEntrypointCallHelper(llvm::IRBuilder<> *builder,
 
     auto threadReg = GetThreadRegValue(builder, arkInterface);
     auto call = CreateEntrypointCallCommon(builder, threadReg, arkInterface,
-                                           static_cast<panda::llvmbackend::runtime_calls::EntrypointId>(id), arguments,
+                                           static_cast<ark::llvmbackend::runtime_calls::EntrypointId>(id), arguments,
                                            llvm::makeArrayRef(bundles));
     if (inst->hasFnAttr("inline-info")) {
         call->addFnAttr(inst->getFnAttr("inline-info"));
@@ -99,8 +98,8 @@ llvm::Value *SlowClassLoadingHelper(llvm::IRBuilder<> *builder, llvm::CallInst *
                                     llvm::BasicBlock *continuation, bool forceInit)
 {
     using llvm::Value;
-    auto eid = forceInit ? panda::compiler::RuntimeInterface::EntrypointId::CLASS_INIT_RESOLVER
-                         : panda::compiler::RuntimeInterface::EntrypointId::CLASS_RESOLVER;
+    auto eid = forceInit ? ark::compiler::RuntimeInterface::EntrypointId::CLASS_INIT_RESOLVER
+                         : ark::compiler::RuntimeInterface::EntrypointId::CLASS_RESOLVER;
     auto initialBb = builder->GetInsertBlock();
     auto function = initialBb->getParent();
     auto module = function->getParent();
@@ -108,7 +107,7 @@ llvm::Value *SlowClassLoadingHelper(llvm::IRBuilder<> *builder, llvm::CallInst *
 
     // Helper functions
     auto createUniqBasicBlockName = [&initialBb](const std::string &suffix) {
-        return panda::llvmbackend::LLVMArkInterface::GetUniqueBasicBlockName(initialBb->getName().str(), suffix);
+        return ark::llvmbackend::LLVMArkInterface::GetUniqueBasicBlockName(initialBb->getName().str(), suffix);
     };
     auto createBasicBlock = [&ctx, &initialBb, &createUniqBasicBlockName](const std::string &suffix) {
         auto name = createUniqBasicBlockName(suffix);
@@ -199,7 +198,7 @@ llvm::Value *PreWRBHelper(llvm::IRBuilder<> *builder, llvm::CallInst *inst, LLVM
 }
 }  // namespace
 
-namespace panda::llvmbackend::builtins {
+namespace ark::llvmbackend::builtins {
 
 llvm::Function *LenArray(llvm::Module *module)
 {
@@ -344,7 +343,7 @@ llvm::Value *LowerLoadString(llvm::IRBuilder<> *builder, llvm::CallInst *inst, L
 
     auto slotPtr = builder->CreateInBoundsGEP(arrayType, aotGot, {builder->getInt32(0), slotId});
     auto str = builder->CreateLoad(builder->getInt64Ty(), slotPtr);
-    auto limit = panda::compiler::RuntimeInterface::RESOLVE_STRING_AOT_COUNTER_LIMIT;
+    auto limit = ark::compiler::RuntimeInterface::RESOLVE_STRING_AOT_COUNTER_LIMIT;
     auto cmp = builder->CreateICmpULT(str, builder->getInt64(limit));
 
     llvm::Instruction *ifi;
@@ -358,7 +357,7 @@ llvm::Value *LowerLoadString(llvm::IRBuilder<> *builder, llvm::CallInst *inst, L
 
     builder->SetInsertPoint(ifi);
     auto method = function->arg_begin();
-    auto eid = panda::compiler::RuntimeInterface::EntrypointId::RESOLVE_STRING_AOT;
+    auto eid = ark::compiler::RuntimeInterface::EntrypointId::RESOLVE_STRING_AOT;
     auto freshStr = CreateEntrypointCallHelper(builder, eid, {method, typeId, slotPtr}, arkInterface, inst);
     freshStr->setName("fresh_str");
 
@@ -380,13 +379,13 @@ llvm::Value *LowerResolveVirtual(llvm::IRBuilder<> *builder, llvm::CallInst *ins
     auto thiz = inst->getOperand(0U);
     auto methodId = inst->getOperand(1U);
     if (!arkInterface->IsArm64() || !llvm::isa<llvm::ConstantInt>(methodId)) {
-        static constexpr auto ENTRYPOINT_ID = panda::compiler::RuntimeInterface::EntrypointId::RESOLVE_VIRTUAL_CALL_AOT;
+        static constexpr auto ENTRYPOINT_ID = ark::compiler::RuntimeInterface::EntrypointId::RESOLVE_VIRTUAL_CALL_AOT;
         auto offset = builder->getInt64(0);
         entrypointAddress =
             CreateEntrypointCallHelper(builder, ENTRYPOINT_ID, {method, thiz, methodId, offset}, arkInterface, inst);
     } else {
         auto offset = inst->getOperand(2U);
-        static constexpr auto ENTRYPOINT_ID = panda::compiler::RuntimeInterface::EntrypointId::INTF_INLINE_CACHE;
+        static constexpr auto ENTRYPOINT_ID = ark::compiler::RuntimeInterface::EntrypointId::INTF_INLINE_CACHE;
         entrypointAddress =
             CreateEntrypointCallHelper(builder, ENTRYPOINT_ID, {method, thiz, methodId, offset}, arkInterface, inst);
     }
@@ -424,4 +423,4 @@ llvm::Value *LowerBuiltin(llvm::IRBuilder<> *builder, llvm::CallInst *inst, LLVM
     }
     UNREACHABLE();
 }
-}  // namespace panda::llvmbackend::builtins
+}  // namespace ark::llvmbackend::builtins

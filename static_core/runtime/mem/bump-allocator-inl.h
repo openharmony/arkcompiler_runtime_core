@@ -21,7 +21,7 @@
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/alloc_config.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_BUMP_ALLOCATOR(level) LOG(level, ALLOC) << "BumpPointerAllocator: "
@@ -316,6 +316,6 @@ bool BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::IsLive(const Ob
 
 #undef LOG_BUMP_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_PANDA_BUMP_ALLOCATOR_INL_H

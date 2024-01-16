@@ -16,7 +16,7 @@
 #ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_
 #define PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_
 
-namespace panda::os::mem {
+namespace ark::os::mem {
 
 static constexpr uint32_t MMAP_PROT_NONE = 0;
 static constexpr uint32_t MMAP_PROT_READ = 1;
@@ -32,6 +32,6 @@ void *mmap([[maybe_unused]] void *addr, size_t len, uint32_t prot, int flags, in
 
 int munmap(void *addr, [[maybe_unused]] size_t len);
 
-}  // namespace panda::os::mem
+}  // namespace ark::os::mem
 
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_

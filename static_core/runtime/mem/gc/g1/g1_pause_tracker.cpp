@@ -18,16 +18,16 @@
 #include "utils/type_converter.h"
 #include "libpandabase/os/time.h"
 
-namespace panda::mem {
+namespace ark::mem {
 G1PauseTracker::G1PauseTracker(int64_t gcPauseIntervalMs, int64_t maxGcTimeMs)
-    : gcPauseIntervalUs_(gcPauseIntervalMs * panda::os::time::MILLIS_TO_MICRO),
-      maxGcTimeUs_(maxGcTimeMs * panda::os::time::MILLIS_TO_MICRO)
+    : gcPauseIntervalUs_(gcPauseIntervalMs * ark::os::time::MILLIS_TO_MICRO),
+      maxGcTimeUs_(maxGcTimeMs * ark::os::time::MILLIS_TO_MICRO)
 {
 }
 
 bool G1PauseTracker::AddPauseInNanos(int64_t startTimeNs, int64_t endTimeNs)
 {
-    return AddPause(startTimeNs / panda::os::time::MICRO_TO_NANO, endTimeNs / panda::os::time::MICRO_TO_NANO);
+    return AddPause(startTimeNs / ark::os::time::MICRO_TO_NANO, endTimeNs / ark::os::time::MICRO_TO_NANO);
 }
 
 bool G1PauseTracker::AddPause(int64_t startTimeUs, int64_t endTimeUs)
@@ -37,10 +37,10 @@ bool G1PauseTracker::AddPause(int64_t startTimeUs, int64_t endTimeUs)
     auto gcTime = CalculateIntervalPauseInMicros(endTimeUs);
     if (gcTime > maxGcTimeUs_) {
         LOG(DEBUG, GC) << "Target GC pause was exceeded: "
-                       << panda::helpers::TimeConverter(gcTime * panda::os::time::MICRO_TO_NANO) << " > "
-                       << panda::helpers::TimeConverter(maxGcTimeUs_ * panda::os::time::MICRO_TO_NANO)
+                       << ark::helpers::TimeConverter(gcTime * ark::os::time::MICRO_TO_NANO) << " > "
+                       << ark::helpers::TimeConverter(maxGcTimeUs_ * ark::os::time::MICRO_TO_NANO)
                        << " in time interval "
-                       << panda::helpers::TimeConverter(gcPauseIntervalUs_ * panda::os::time::MICRO_TO_NANO);
+                       << ark::helpers::TimeConverter(gcPauseIntervalUs_ * ark::os::time::MICRO_TO_NANO);
         return false;
     }
     return true;
@@ -101,4 +101,4 @@ int64_t G1PauseTracker::MinDelayBeforeMaxPauseInMicros(int64_t nowUs)
 {
     return MinDelayBeforePauseInMicros(nowUs, maxGcTimeUs_);
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

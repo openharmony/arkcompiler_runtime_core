@@ -28,7 +28,7 @@ class Instruction;
 class Module;
 }  // namespace llvm
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class DebugDataBuilder final {
 public:
@@ -50,6 +50,6 @@ private:
     llvm::DIBuilder *builder_;
 };
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  // LIBLLVMBACKEND_LOWERING_DEBUG_DATA_BUILDER_H

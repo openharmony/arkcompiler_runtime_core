@@ -31,12 +31,12 @@
 #include "runtime/interpreter/frame.h"
 #include "runtime/tests/test_utils.h"
 
-using TypeId = panda::panda_file::Type::TypeId;
-using Opcode = panda::BytecodeInstruction::Opcode;
+using TypeId = ark::panda_file::Type::TypeId;
+using Opcode = ark::BytecodeInstruction::Opcode;
 
 // NOLINTBEGIN(readability-magic-numbers,modernize-avoid-c-arrays)
 
-namespace panda::test {
+namespace ark::test {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static std::string g_gCallResult;
@@ -136,7 +136,7 @@ static void VoidNoArg(Method *method)
 template <bool IS_DYNAMIC = false>
 static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
 {
-    return panda::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
+    return ark::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
 }
 
 TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeVoidNoArg)
@@ -176,9 +176,9 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeInstanceVoidNoArg)
     Frame *frame = CreateFrame(1, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
 
-    ObjectHeader *obj1 = panda::mem::AllocateNullifiedPayloadString(5U);
+    ObjectHeader *obj1 = ark::mem::AllocateNullifiedPayloadString(5U);
     frameHandler.GetAccAsVReg().SetReference(obj1);
-    ObjectHeader *obj2 = panda::mem::AllocateNullifiedPayloadString(4U);
+    ObjectHeader *obj2 = ark::mem::AllocateNullifiedPayloadString(4U);
     frameHandler.GetVReg(0).SetReference(obj2);
 
     uint8_t insn[] = {static_cast<uint8_t>(Opcode::CALL_SHORT_V4_V4_ID16), 0x00, 0, 0, 0, 0};
@@ -515,7 +515,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, InvokeInstanceInt)
     callee.SetCompiledEntryPoint(reinterpret_cast<const void *>(InstanceVoidInt));
     Frame *frame = CreateFrame(2U, nullptr, nullptr);
     auto frameHandler = StaticFrameHandler(frame);
-    ObjectHeader *obj = panda::mem::AllocateNullifiedPayloadString(1);
+    ObjectHeader *obj = ark::mem::AllocateNullifiedPayloadString(1);
     frameHandler.GetVReg(0).SetReference(obj);
     frameHandler.GetVReg(1).Set(5U);
 
@@ -1145,6 +1145,6 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int9Double)
     FreeFrame(frame);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test
 
 // NOLINTEND(readability-magic-numbers,modernize-avoid-c-arrays)

@@ -18,7 +18,7 @@
 
 #include "optimizer/analysis/liveness_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RegAllocStat {
 public:
     explicit RegAllocStat(const ArenaVector<LifeIntervals *> &intervals);
@@ -45,6 +45,6 @@ private:
     size_t slots_ = 0;
     size_t vslots_ = 0;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_STAT_H

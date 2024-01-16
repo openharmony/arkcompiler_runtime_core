@@ -19,7 +19,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::mem {
+namespace ark::mem {
 template <class LanguageConfig>
 EpsilonGC<LanguageConfig>::EpsilonGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
     : GCLang<LanguageConfig>(objectAllocator, settings)
@@ -52,12 +52,12 @@ bool EpsilonGC<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 }
 
 template <class LanguageConfig>
-void EpsilonGC<LanguageConfig>::InitGCBits([[maybe_unused]] panda::ObjectHeader *objHeader)
+void EpsilonGC<LanguageConfig>::InitGCBits([[maybe_unused]] ark::ObjectHeader *objHeader)
 {
 }
 
 template <class LanguageConfig>
-void EpsilonGC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *objHeader)
+void EpsilonGC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] ark::ObjectHeader *objHeader)
 {
     LOG(FATAL, GC) << "TLABs are not supported by this GC";
 }
@@ -94,4 +94,4 @@ void EpsilonGC<LanguageConfig>::MarkReferences([[maybe_unused]] GCMarkingStackTy
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(EpsilonGC);
 
-}  // namespace panda::mem
+}  // namespace ark::mem

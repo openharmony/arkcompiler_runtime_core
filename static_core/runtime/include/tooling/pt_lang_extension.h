@@ -21,7 +21,7 @@
 
 // NOTE(maksenov): remove this file after refactoring js_runtime
 // NOTE(a.urakov): move here current InspectorExtension instead
-namespace panda::tooling {
+namespace ark::tooling {
 class PtMethod {
 public:
     PtMethod() = default;
@@ -63,6 +63,6 @@ public:
     NO_COPY_SEMANTIC(PtLangExt);
     NO_MOVE_SEMANTIC(PtLangExt);
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_LANG_EXTENSION_H

@@ -20,7 +20,7 @@
 #include <vector>
 #include <unistd.h>
 
-namespace panda::cli::test {
+namespace ark::cli::test {
 
 inline std::string Separator()
 {
@@ -78,4 +78,4 @@ private:
     std::string sourcePath_;
 };
 
-}  // namespace panda::cli::test
+}  // namespace ark::cli::test

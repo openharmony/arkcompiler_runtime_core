@@ -20,7 +20,7 @@
 #include "algorithm"
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 void Cse::LocalCse()
 {
     deletedInsts_.clear();
@@ -236,4 +236,4 @@ bool Cse::RunImpl()
     }
     return isApplied_;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

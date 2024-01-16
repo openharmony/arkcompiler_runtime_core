@@ -26,7 +26,7 @@
 #include "compiler_logger.h"
 #include "utils/logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Cse : public Optimization {
     using PairInsts = std::pair<Inst *, Inst *>;
     using PairVectorsInsts = std::pair<InstVector, InstVector>;
@@ -274,6 +274,6 @@ private:
     ArenaVector<std::pair<Inst *, PairInsts>> matchedTuple_;
     ArenaMap<Exp, InstVector, Cmpexp> candidates_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CSE_H

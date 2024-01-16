@@ -18,7 +18,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/analysis/loop_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 MoveConstants::MoveConstants(Graph *graph)
     : Optimization {graph},
@@ -185,4 +185,4 @@ BasicBlock *MoveConstants::FindCommonDominator()
     return commonDominator;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

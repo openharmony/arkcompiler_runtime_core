@@ -37,7 +37,7 @@ def generate(input_file, output_file)
     names = data.scan /DEFINE_VALUE\((\w+),/
     File.open(output_file, "w") do |file|
         file.puts $header
-        file.puts "namespace panda::cross_values {"
+        file.puts "namespace ark::cross_values {"
 
         names.sort_by(&:first).each do |define|
             file.puts %<
@@ -58,13 +58,13 @@ def generate(input_file, output_file)
 
         file.puts %<
 // Specific getter for TLS entrypoints offsets:
-[[maybe_unused]] static constexpr ptrdiff_t GetManagedThreadEntrypointOffset(Arch arch, panda::EntrypointId id)
+[[maybe_unused]] static constexpr ptrdiff_t GetManagedThreadEntrypointOffset(Arch arch, ark::EntrypointId id)
 {
     return GetManagedThreadEntrypointsOffset(arch) + static_cast<size_t>(id) * PointerSize(arch);
 }
 
 >
-        file.puts "}  // namespace panda::cross_values"
+        file.puts "}  // namespace ark::cross_values"
         file.puts
         file.puts "#endif  // CROSS_VALUES_CROSS_VALUES_H"
         file.puts

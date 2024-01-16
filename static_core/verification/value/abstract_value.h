@@ -22,7 +22,7 @@
 
 #include <variant>
 
-namespace panda::verifier {
+namespace ark::verifier {
 class AbstractValue {
 public:
     struct None {};
@@ -72,6 +72,6 @@ public:
 private:
     ContentsData contents_ {None {}};
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !_PANDA_VERIFIER_ABSTRACT_VALUE_HPP

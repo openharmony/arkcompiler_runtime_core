@@ -27,7 +27,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-namespace panda::coretypes::test {
+namespace ark::coretypes::test {
 
 class StringTest : public testing::Test {
 public:
@@ -60,7 +60,7 @@ public:
 
     void SetUp() override
     {
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -75,7 +75,7 @@ protected:
     static constexpr char SIMPLE_UTF8_STRING[SIMPLE_UTF8_STRING_LENGTH + 1] = "Hello, world!";
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
     unsigned seed_ {};
     RuntimeOptions options_;
 };
@@ -915,7 +915,7 @@ TEST_F(StringTest, CreateNewStingFromByteArray)
                                               Runtime::GetCurrent()->GetPandaVM());
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
-    Class *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(panda::ClassRoot::ARRAY_I8);
+    Class *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ark::ClassRoot::ARRAY_I8);
     Array *byteArray = Array::Create(klass, data.size() - 1);
     Span<uint8_t> sp(data.data(), data.size() - 1);
     for (uint32_t i = 0; i < data.size() - 1; i++) {
@@ -928,6 +928,6 @@ TEST_F(StringTest, CreateNewStingFromByteArray)
     ASSERT_EQ(String::StringsAreEqual(result, string1), true);
 }
 
-}  // namespace panda::coretypes::test
+}  // namespace ark::coretypes::test
 
 // NOLINTEND(readability-magic-numbers)

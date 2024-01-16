@@ -19,13 +19,13 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "runtime/handle_scope.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsHandleScope : public HandleScope<ObjectHeader *> {
 public:
     inline explicit EtsHandleScope(EtsCoroutine *coroutine) : HandleScope<ObjectHeader *>(coroutine) {};
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H_

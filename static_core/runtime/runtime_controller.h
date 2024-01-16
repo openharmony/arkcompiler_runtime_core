@@ -20,7 +20,7 @@
 
 #include "libpandabase/macros.h"
 
-namespace panda {
+namespace ark {
 
 /// For application related feature.
 class RuntimeController {
@@ -61,6 +61,6 @@ private:
     bool isMultiFramework_ {false};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif

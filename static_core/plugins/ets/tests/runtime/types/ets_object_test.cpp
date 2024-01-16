@@ -25,7 +25,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsObjectTest : public testing::Test {
 public:
@@ -276,6 +276,6 @@ TEST_F(EtsObjectTest, CompareAndSetFieldObject)
     ASSERT_EQ(barObj->GetFieldObject(foo2Field), fooObj1);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-magic-numbers)

@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/gc_marker.h"
 #include "runtime/include/coretypes/dyn_objects.h"
 
-namespace panda::mem {
+namespace ark::mem {
 template <typename Marker>
 void GCMarker<Marker, LANG_TYPE_DYNAMIC>::HandleObject(GCMarkingStackType *objectsStack, const ObjectHeader *object,
                                                        const BaseClass *baseCls)
@@ -124,15 +124,15 @@ void GCMarker<Marker, LANG_TYPE_DYNAMIC>::MarkInstance(GCMarkingStackType *objec
         return;
     }
     if (cls->IsHClass()) {
-        auto dynClass = static_cast<const panda::coretypes::DynClass *>(object);
+        auto dynClass = static_cast<const ark::coretypes::DynClass *>(object);
         HandleClass(objectsStack, dynClass);
     } else if (cls->IsArray()) {
-        auto *arrayObject = static_cast<const panda::coretypes::Array *>(object);
+        auto *arrayObject = static_cast<const ark::coretypes::Array *>(object);
         HandleArrayClass(objectsStack, arrayObject, cls);
     } else {
         HandleObject(objectsStack, object, cls);
     }
 }
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_DYNAMIC_GC_MARKER_DYNAMIC_INL_H

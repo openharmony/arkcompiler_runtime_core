@@ -26,7 +26,7 @@
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 class MemStatsGenGCTest : public testing::Test {
 public:
     using ObjVec = PandaVector<ObjectHeader *>;
@@ -137,10 +137,10 @@ public:
         [[maybe_unused]] bool success = Runtime::Create(options);
         ASSERT(success);
 
-        thread = panda::MTManagedThread::GetCurrent();
+        thread = ark::MTManagedThread::GetCurrent();
         gcType = Runtime::GetGCType(options, plugins::RuntimeTypeToLang(Runtime::GetRuntimeType()));
         [[maybe_unused]] auto gcLocal = thread->GetVM()->GetGC();
-        ASSERT(gcLocal->GetType() == panda::mem::GCTypeFromString(gcTypeParam));
+        ASSERT(gcLocal->GetType() == ark::mem::GCTypeFromString(gcTypeParam));
         ASSERT(gcLocal->IsGenerational());
         thread->ManagedCodeBegin();
     }
@@ -193,7 +193,7 @@ public:
     void TearDown() override {}
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread {};
+    ark::MTManagedThread *thread {};
     GCType gcType {};
 
     LanguageContext ctx {nullptr};
@@ -351,7 +351,7 @@ void MemStatsGenGCTest::DeleteHandles()
 template <class LanguageConfig>
 void MemStatsGenGCTest::PrepareTest()
 {
-    if constexpr (std::is_same<LanguageConfig, panda::PandaAssemblyLanguageConfig>::value) {
+    if constexpr (std::is_same<LanguageConfig, ark::PandaAssemblyLanguageConfig>::value) {
         DeleteHandles();
         ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         objectAllocator = thread->GetVM()->GetGC()->GetObjectAllocator();
@@ -607,8 +607,8 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
 
             {
                 HandleScope<ObjectHeader *> scope(thread);
-                PrepareTest<panda::PandaAssemblyLanguageConfig>();
-                auto *genMs = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
+                PrepareTest<ark::PandaAssemblyLanguageConfig>();
+                auto *genMs = GetGenMemStats<ark::PandaAssemblyLanguageConfig>();
                 RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));  // Heap doesn't have unexpected garbage now
@@ -710,8 +710,8 @@ TEST_F(MemStatsGenGCTest, YoungStatsGenGcTest)
 
             {
                 HandleScope<ObjectHeader *> scope(thread);
-                PrepareTest<panda::PandaAssemblyLanguageConfig>();
-                auto *genMs = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
+                PrepareTest<ark::PandaAssemblyLanguageConfig>();
+                auto *genMs = GetGenMemStats<ark::PandaAssemblyLanguageConfig>();
                 RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
@@ -750,8 +750,8 @@ TEST_F(MemStatsGenGCTest, TenuredStatsFullGenGcTest)
 
             {
                 HandleScope<ObjectHeader *> scope(thread);
-                PrepareTest<panda::PandaAssemblyLanguageConfig>();
-                auto *genMs = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
+                PrepareTest<ark::PandaAssemblyLanguageConfig>();
+                auto *genMs = GetGenMemStats<ark::PandaAssemblyLanguageConfig>();
                 RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
@@ -827,7 +827,7 @@ TEST_F(MemStatsGenGCTest, TenuredStatsMixGenGcTest)
 
             {
                 HandleScope<ObjectHeader *> scope(thread);
-                PrepareTest<panda::PandaAssemblyLanguageConfig>();
+                PrepareTest<ark::PandaAssemblyLanguageConfig>();
                 GCTaskCause mixedCause;
                 switch (gcType) {
                     case GCType::GEN_GC: {
@@ -840,7 +840,7 @@ TEST_F(MemStatsGenGCTest, TenuredStatsMixGenGcTest)
                     default:
                         UNREACHABLE();  // NIY
                 }
-                auto *genMs = GetGenMemStats<panda::PandaAssemblyLanguageConfig>();
+                auto *genMs = GetGenMemStats<ark::PandaAssemblyLanguageConfig>();
                 RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
 
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
@@ -929,4 +929,4 @@ TEST_F(MemStatsGenGCTest, TenuredStatsMixGenGcTest)
         }
     }
 }
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

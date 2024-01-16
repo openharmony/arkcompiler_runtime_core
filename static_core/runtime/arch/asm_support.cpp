@@ -23,7 +23,7 @@
 #include "runtime/include/thread.h"
 #include "plugins_defines.h"
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_VALUE(name, value) static_assert((name) == (value));
@@ -67,4 +67,4 @@ extern "C" void OsrEntryTopFrame([[maybe_unused]] Frame *frame, [[maybe_unused]]
 }
 #endif  // !defined(PANDA_TARGET_ARM64)
 
-}  // namespace panda
+}  // namespace ark

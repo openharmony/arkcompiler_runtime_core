@@ -17,7 +17,7 @@
 
 #include "runtime/include/vtable_builder.h"
 
-namespace panda {
+namespace ark {
 
 template <class SearchBySignature, class OverridePred>
 void VTableBuilderImpl<SearchBySignature, OverridePred>::BuildForInterface(panda_file::ClassDataAccessor *cda)
@@ -195,6 +195,6 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::UpdateClass(Class *klas
     vtable_.UpdateClass(klass);
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_VTABLE_BUILDER_H_

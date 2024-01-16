@@ -18,8 +18,8 @@
 #include <cstddef>
 #include "libpandabase/cpu_features.h"
 
-namespace panda {
+namespace ark {
 inline constexpr size_t COHERENCY_LINE_SIZE = CACHE_LINE_SIZE;
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_COHERENCY_LINE_SIZE_H_

@@ -16,7 +16,7 @@
 #include "libpandabase/taskmanager/task_scheduler.h"
 #include "runtime/mem/gc/workers/gc_workers_task_queue.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 GCWorkersTaskQueue::GCWorkersTaskQueue(GC *gc) : GCWorkersTaskPool(gc) {}
 
@@ -43,4 +43,4 @@ void GCWorkersTaskQueue::RunInCurrentThread()
     possibleGcTask->RunTask();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

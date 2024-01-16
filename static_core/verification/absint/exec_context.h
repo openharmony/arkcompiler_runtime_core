@@ -23,7 +23,7 @@
 
 #include "include/mem/panda_containers.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 enum class EntryPointType : size_t { METHOD_BODY, EXCEPTION_HANDLER, LAST = EXCEPTION_HANDLER };
 
@@ -194,6 +194,6 @@ private:
     TypeSystem *typeSystem_;
     RegContext currentRegContext_;
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP_

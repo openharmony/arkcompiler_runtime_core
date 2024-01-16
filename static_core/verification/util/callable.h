@@ -19,7 +19,7 @@
 #include <utility>
 #include <tuple>
 
-namespace panda::verifier {
+namespace ark::verifier {
 /*
 
 this is lightweight analogue of std::function.
@@ -112,6 +112,6 @@ public:
         return (method_.m != nullptr) || (method_.f != nullptr);
     }
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIF_PARSER_CALLABLE_H_

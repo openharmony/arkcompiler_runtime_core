@@ -23,7 +23,7 @@
 #include "libpandabase/utils/asan_interface.h"
 #include "libpandabase/utils/logger.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 static constexpr size_t PAGES_IN_RUNSLOTS = 1;
 static constexpr size_t RUNSLOTS_SIZE = PAGES_IN_RUNSLOTS * PAGE_SIZE;
@@ -303,6 +303,6 @@ private:
 
 static_assert(RunSlots<>::MinSlotSize() >= sizeof(uintptr_t));
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_RUNSLOTS_H

@@ -16,7 +16,7 @@
 #ifndef PANDA_DEBUG_H
 #define PANDA_DEBUG_H
 
-namespace panda::debug {
+namespace ark::debug {
 
 [[noreturn]] __attribute__((visibility("default"))) void AssertionFail(const char *expr, const char *file,
                                                                        unsigned line, const char *function);
@@ -27,6 +27,6 @@ inline void PrintStackTrace([[maybe_unused]] int skip = 1) {}
 void PrintStackTrace(int skip = 1);
 #endif
 
-}  // namespace panda::debug
+}  // namespace ark::debug
 
 #endif  // PANDA_DEBUG_H

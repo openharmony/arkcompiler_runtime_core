@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 
-namespace panda::ets {
+namespace ark::ets {
 void LambdaUtils::InvokeVoid(EtsCoroutine *coro, EtsObject *lambda)
 {
     EtsMethod *invoke = lambda->GetClass()->GetMethod("invoke");
@@ -28,4 +28,4 @@ void LambdaUtils::InvokeVoid(EtsCoroutine *coro, EtsObject *lambda)
     Value arg(lambda->GetCoreType());
     invoke->GetPandaMethod()->InvokeVoid(coro, &arg);
 }
-}  // namespace panda::ets
+}  // namespace ark::ets

@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace panda {
+namespace ark {
 
 class MMapMemPoolTest : public testing::Test {
 public:
@@ -361,4 +361,4 @@ TEST_F(MMapMemPoolTest, ReturnedToOsPlusZeroingMemoryTest)
     }
 }
 
-}  // namespace panda
+}  // namespace ark

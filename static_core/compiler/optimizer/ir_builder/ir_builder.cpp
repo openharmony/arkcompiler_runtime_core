@@ -23,7 +23,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "method_data_accessor-inl.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool IrBuilder::RunImpl()
 {
     COMPILER_LOG(INFO, IR_BUILDER) << "Start building ir for method: "
@@ -648,4 +648,4 @@ bool IrBuilderInliningAnalysis::RunImpl()
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

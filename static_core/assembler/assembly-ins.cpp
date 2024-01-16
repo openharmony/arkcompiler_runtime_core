@@ -16,9 +16,9 @@
 #include <iostream>
 #include "assembly-ins.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
-std::string panda::pandasm::Ins::RegsToString(bool &first, bool printArgs, size_t firstArgIdx) const
+std::string ark::pandasm::Ins::RegsToString(bool &first, bool printArgs, size_t firstArgIdx) const
 {
     std::stringstream translator;
     for (const auto &reg : this->regs) {
@@ -37,7 +37,7 @@ std::string panda::pandasm::Ins::RegsToString(bool &first, bool printArgs, size_
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::ImmsToString(bool &first) const
+std::string ark::pandasm::Ins::ImmsToString(bool &first) const
 {
     std::stringstream translator;
     for (const auto &imm : this->imms) {
@@ -58,7 +58,7 @@ std::string panda::pandasm::Ins::ImmsToString(bool &first) const
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::IdsToString(bool &first) const
+std::string ark::pandasm::Ins::IdsToString(bool &first) const
 {
     std::stringstream translator;
     for (const auto &id : this->ids) {
@@ -73,7 +73,7 @@ std::string panda::pandasm::Ins::IdsToString(bool &first) const
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::OperandsToString(bool printArgs, size_t firstArgIdx) const
+std::string ark::pandasm::Ins::OperandsToString(bool printArgs, size_t firstArgIdx) const
 {
     bool first = true;
     std::stringstream ss {};
@@ -83,7 +83,7 @@ std::string panda::pandasm::Ins::OperandsToString(bool printArgs, size_t firstAr
     return ss.str();
 }
 
-std::string panda::pandasm::Ins::RegToString(size_t idx, bool isFirst, bool printArgs, size_t firstArgIdx) const
+std::string ark::pandasm::Ins::RegToString(size_t idx, bool isFirst, bool printArgs, size_t firstArgIdx) const
 {
     if (idx >= regs.size()) {
         return std::string("");
@@ -106,7 +106,7 @@ std::string panda::pandasm::Ins::RegToString(size_t idx, bool isFirst, bool prin
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::ImmToString(size_t idx, bool isFirst) const
+std::string ark::pandasm::Ins::ImmToString(size_t idx, bool isFirst) const
 {
     if (idx >= imms.size()) {
         return std::string("");
@@ -130,7 +130,7 @@ std::string panda::pandasm::Ins::ImmToString(size_t idx, bool isFirst) const
     return translator.str();
 }
 
-std::string panda::pandasm::Ins::IdToString(size_t idx, bool isFirst) const
+std::string ark::pandasm::Ins::IdToString(size_t idx, bool isFirst) const
 {
     if (idx >= ids.size()) {
         return std::string("");
@@ -148,4 +148,4 @@ std::string panda::pandasm::Ins::IdToString(size_t idx, bool isFirst) const
 
     return translator.str();
 }
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

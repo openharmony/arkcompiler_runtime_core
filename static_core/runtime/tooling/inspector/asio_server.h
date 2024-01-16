@@ -23,7 +23,7 @@
 
 #include <cstdint>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class AsioServer final : public ServerEndpoint<AsioConfig> {
 public:
@@ -45,6 +45,6 @@ private:
 
     bool initialized_ {false};
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_ASIO_SERVER_H

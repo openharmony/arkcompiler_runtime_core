@@ -19,7 +19,7 @@
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/taskmanager/schedulable_task_queue_interface.h"
 
-namespace panda::taskmanager::internal {
+namespace ark::taskmanager::internal {
 
 /**
  * @brief TaskQueue is a thread-safe queue for tasks. Queues can be registered in TaskScheduler and used to execute
@@ -291,6 +291,6 @@ private:
     InternalTaskQueue backgroundTaskQueue_ GUARDED_BY(taskQueueStateLock_);
 };
 
-}  // namespace panda::taskmanager::internal
+}  // namespace ark::taskmanager::internal
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_H

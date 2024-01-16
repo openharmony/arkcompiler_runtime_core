@@ -19,7 +19,7 @@
 #include "runtime/include/thread_scopes.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 template <typename F>
 std::pair<int8_t, int8_t> EtsSharedMemory::ReadModifyWriteI8(int32_t index, const F &f)
@@ -41,6 +41,6 @@ std::pair<int8_t, int8_t> EtsSharedMemory::ReadModifyWriteI8(int32_t index, cons
     return std::pair(oldValue, newValue);
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_SHARED_MEMORY_INL_H

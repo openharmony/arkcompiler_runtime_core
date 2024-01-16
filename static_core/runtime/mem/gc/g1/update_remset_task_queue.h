@@ -20,7 +20,7 @@
 
 #include "libpandabase/taskmanager/task.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 class UpdateRemsetTaskQueue final : public UpdateRemsetWorker<LanguageConfig> {
@@ -49,6 +49,6 @@ private:
     bool hasTaskInTaskmanager_ GUARDED_BY(this->updateRemsetLock_) {false};
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_G1_UPDATE_REMSET_TASK_QUEUE_H

@@ -41,7 +41,7 @@
 #define panda_bit_utils_popcount __builtin_popcount      // NOLINT(cppcoreguidelines-macro-usage)
 #define panda_bit_utils_popcountll __builtin_popcountll  // NOLINT(cppcoreguidelines-macro-usage)
 
-namespace panda {
+namespace ark {
 
 template <typename T>
 constexpr int Clz(T x)
@@ -276,7 +276,7 @@ inline constexpr T ExtractBits(T value, size_t offset, size_t count)
 {
     static_assert(std::is_integral<T>::value, "T must be integral");
     static_assert(std::is_unsigned<T>::value, "T must be unsigned");
-    ASSERT(sizeof(value) * panda::BITS_PER_BYTE >= offset + count);
+    ASSERT(sizeof(value) * ark::BITS_PER_BYTE >= offset + count);
     return (value >> offset) & ((1U << count) - 1);
 }
 
@@ -316,13 +316,13 @@ inline To down_cast(const From &src) noexcept  // NOLINT(readability-identifier-
 template <typename T>
 inline constexpr uint32_t BitsNumInValue(const T v)
 {
-    return sizeof(v) * panda::BITS_PER_BYTE;
+    return sizeof(v) * ark::BITS_PER_BYTE;
 }
 
 template <typename T>
 inline constexpr uint32_t BitsNumInType()
 {
-    return sizeof(T) * panda::BITS_PER_BYTE;
+    return sizeof(T) * ark::BITS_PER_BYTE;
 }
 
 template <typename From, typename To>
@@ -350,6 +350,6 @@ constexpr To CastFloatToInt(From value)
     return res;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_UTILS_BIT_UTILS_H_

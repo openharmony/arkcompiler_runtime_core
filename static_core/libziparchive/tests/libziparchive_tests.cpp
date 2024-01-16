@@ -34,7 +34,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-namespace panda::test {
+namespace ark::test {
 
 #define GTEST_COUT std::cerr << "[          ] [ INFO ]"
 
@@ -746,4 +746,4 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile)
     remove(archivename);
     GTEST_COUT << "Success.\n";
 }
-}  // namespace panda::test
+}  // namespace ark::test

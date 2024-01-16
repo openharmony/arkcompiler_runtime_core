@@ -20,7 +20,7 @@
 #include "runtime/compiler.h"
 #include "runtime/include/mem/panda_string.h"
 
-namespace panda {
+namespace ark {
 
 class FileManager {
 public:
@@ -33,6 +33,6 @@ public:
     PANDA_PUBLIC_API static PandaString ResolveAnFilePath(std::string_view abcPath);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_FILE_MANAGER_H_

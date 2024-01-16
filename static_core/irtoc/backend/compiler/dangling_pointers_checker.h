@@ -20,7 +20,7 @@
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class DanglingPointersChecker : public Analysis {
 public:
     explicit DanglingPointersChecker(Graph *graph);
@@ -83,6 +83,6 @@ private:
     bool CheckUsers(CallInst *runtimeCallInst);
     bool CheckSuccessors(BasicBlock *bb, bool prevRes);
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif

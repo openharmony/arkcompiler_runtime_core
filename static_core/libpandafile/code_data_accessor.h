@@ -18,7 +18,7 @@
 
 #include "file-inl.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class CodeDataAccessor {
 public:
@@ -184,6 +184,6 @@ private:
     size_t size_ {0};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_CODE_DATA_ACCESSOR_H_

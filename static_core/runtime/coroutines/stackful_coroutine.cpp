@@ -19,7 +19,7 @@
 #include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 
-namespace panda {
+namespace ark {
 
 // clang-tidy cannot detect that we are going to initialize context_ via getcontext()
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
@@ -149,4 +149,4 @@ void StackfulCoroutineContext::EnterAwaitLoop()
     SetStatus(Coroutine::Status::AWAIT_LOOP);
 }
 
-}  // namespace panda
+}  // namespace ark

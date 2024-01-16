@@ -23,7 +23,7 @@
 #include "libpandabase/os/file.h"
 #include "utils/logger.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 struct VerificationResultCache::Impl {
     std::string filename;
@@ -49,8 +49,8 @@ void VerificationResultCache::Initialize(const std::string &filename)
     if (Enabled()) {
         return;
     }
-    using panda::os::file::Mode;
-    using panda::os::file::Open;
+    using ark::os::file::Mode;
+    using ark::os::file::Open;
     using Data = PandaVector<uint64_t>;
 
     auto file = Open(filename, Mode::READONLY);
@@ -99,8 +99,8 @@ void VerificationResultCache::Destroy(bool updateFile)
             data.reserve(set.size());
             data.insert(data.begin(), set.cbegin(), set.cend());
         });
-        using panda::os::file::Mode;
-        using panda::os::file::Open;
+        using ark::os::file::Mode;
+        using ark::os::file::Open;
         do {
             auto file = Open(impl_->filename, Mode::READWRITECREATE);
             if (!file.IsValid()) {
@@ -150,4 +150,4 @@ VerificationResultCache::Status VerificationResultCache::Check(uint64_t methodId
     return Status::UNKNOWN;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

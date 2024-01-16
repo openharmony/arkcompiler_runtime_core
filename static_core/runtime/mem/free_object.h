@@ -21,7 +21,7 @@
 #include "runtime/include/object_accessor.h"
 #include "libpandabase/macros.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class FreeObject : public ObjectHeader {
 public:
     uint32_t GetSize() const
@@ -51,6 +51,6 @@ private:
     coretypes::TaggedType taggedNext_ FIELD_UNUSED;
     coretypes::TaggedType taggedSize_ FIELD_UNUSED;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_FREE_OBJECT

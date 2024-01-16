@@ -20,7 +20,7 @@
 #include "optimizer/pass.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 
@@ -81,5 +81,5 @@ private:
     ArenaList<BasicBlock *> rpoBlocks_;
     ArenaVector<BasicBlock *> reorderedBlocks_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_LINEAR_ORDER_H

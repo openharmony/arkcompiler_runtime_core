@@ -18,7 +18,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace panda::disasm {
+namespace ark::disasm {
 
 // NOLINTNEXTLINE(readability-function-size)
 void Disassembler::GetInsInfo(const panda_file::File::EntityId& code_id, MethodInfo* method_info /* out */) const {
@@ -75,4 +75,4 @@ void Disassembler::GetInsInfo(const panda_file::File::EntityId& code_id, MethodI
     return;
 }
 
-} // namespace panda::disasm
+} // namespace ark::disasm

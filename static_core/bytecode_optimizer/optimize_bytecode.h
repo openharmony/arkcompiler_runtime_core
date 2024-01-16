@@ -22,11 +22,11 @@
 #include "ir_interface.h"
 #include "libpandabase/macros.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 PANDA_PUBLIC_API bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface = nullptr);
 PANDA_PUBLIC_API bool OptimizeBytecode(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
                                        const std::string &pandafileName, bool isDynamic = false,
                                        bool hasMemoryPool = false);
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPTIMIZER_OPTIMIZE_BYTECODE_H

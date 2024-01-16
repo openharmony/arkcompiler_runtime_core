@@ -18,10 +18,10 @@
 #include "irtoc/backend/function.h"
 #include "irtoc/backend/irtoc_runtime.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class DanglingPointersCheckerTest : public GraphTest {};
 
-class RelocationHandlerTest : public panda::irtoc::Function {
+class RelocationHandlerTest : public ark::irtoc::Function {
 public:
     void MakeGraphImpl() override {};
     const char *GetName() const override
@@ -42,7 +42,7 @@ public:
 //    correct_acc_store := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test0)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -78,7 +78,7 @@ TEST_F(DanglingPointersCheckerTest, test0)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Correct load accumulator from frame with two instructions:
@@ -88,7 +88,7 @@ TEST_F(DanglingPointersCheckerTest, test0)
 //    correct_acc_store := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test1)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -128,7 +128,7 @@ TEST_F(DanglingPointersCheckerTest, test1)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Incorrect load accumulator from fake frame with two instructions:
@@ -138,7 +138,7 @@ TEST_F(DanglingPointersCheckerTest, test1)
 //    correct_acc_store  := StoreI(LiveIn(frame).ptr, LiveIn(acc).ptr).Imm(frame_acc_offset)
 TEST_F(DanglingPointersCheckerTest, test2)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -175,7 +175,7 @@ TEST_F(DanglingPointersCheckerTest, test2)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Incorrect load accumulator from fake frame with two instructions:
@@ -185,7 +185,7 @@ TEST_F(DanglingPointersCheckerTest, test2)
 //    incorrect_acc_store := StoreI(LiveIn(frame).ptr, fake_acc_load).Imm(frame_acc_offset)
 TEST_F(DanglingPointersCheckerTest, test3)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -222,7 +222,7 @@ TEST_F(DanglingPointersCheckerTest, test3)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_FALSE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Incorrect load accumulator from fake frame with two instructions:
@@ -233,7 +233,7 @@ TEST_F(DanglingPointersCheckerTest, test3)
 // But acc type is integer: LiveIn(acc).u64; so the check is not performed
 TEST_F(DanglingPointersCheckerTest, test4)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -271,7 +271,7 @@ TEST_F(DanglingPointersCheckerTest, test4)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Correct load accumulator from last frame definition with two instructions:
@@ -282,7 +282,7 @@ TEST_F(DanglingPointersCheckerTest, test4)
 //    correct_acc_store := StoreI(last_frame_def, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test5)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -322,7 +322,7 @@ TEST_F(DanglingPointersCheckerTest, test5)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Correct load accumulator from last frame definition with one instructions:
@@ -332,7 +332,7 @@ TEST_F(DanglingPointersCheckerTest, test5)
 //    incorrect_acc_store := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test6)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -370,7 +370,7 @@ TEST_F(DanglingPointersCheckerTest, test6)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_FALSE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Correct load accumulator from last frame definition with one instructions:
@@ -380,7 +380,7 @@ TEST_F(DanglingPointersCheckerTest, test6)
 //    incorrect_acc_store := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
 TEST_F(DanglingPointersCheckerTest, test7)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -421,13 +421,13 @@ TEST_F(DanglingPointersCheckerTest, test7)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_FALSE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Use old accumulator after Call
 TEST_F(DanglingPointersCheckerTest, test8)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -464,7 +464,7 @@ TEST_F(DanglingPointersCheckerTest, test8)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_FALSE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // The correct graph. Not use old acc after call.
@@ -492,7 +492,7 @@ TEST_F(DanglingPointersCheckerTest, test8)
 
 TEST_F(DanglingPointersCheckerTest, test9)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -565,7 +565,7 @@ TEST_F(DanglingPointersCheckerTest, test9)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // The incorrect graph. Use old acc after call.
@@ -593,7 +593,7 @@ TEST_F(DanglingPointersCheckerTest, test9)
 
 TEST_F(DanglingPointersCheckerTest, test10)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -667,7 +667,7 @@ TEST_F(DanglingPointersCheckerTest, test10)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_FALSE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // The correct graph. Use Phi to define acc that has been changed in one branch.
@@ -695,7 +695,7 @@ TEST_F(DanglingPointersCheckerTest, test10)
 
 TEST_F(DanglingPointersCheckerTest, test11)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -743,7 +743,7 @@ TEST_F(DanglingPointersCheckerTest, test11)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Use object after call:
@@ -752,7 +752,7 @@ TEST_F(DanglingPointersCheckerTest, test11)
 //    frame_use := LoadI(frame_live_in).Imm(frame_acc_offset).i64
 TEST_F(DanglingPointersCheckerTest, test12)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -788,7 +788,7 @@ TEST_F(DanglingPointersCheckerTest, test12)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_FALSE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Use primitive after call:
@@ -798,7 +798,7 @@ TEST_F(DanglingPointersCheckerTest, test12)
 //    primitive_use := AddI(not_object).Imm(10).u64
 TEST_F(DanglingPointersCheckerTest, test13)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -835,7 +835,7 @@ TEST_F(DanglingPointersCheckerTest, test13)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Use skipped pointer inst after call:
@@ -845,7 +845,7 @@ TEST_F(DanglingPointersCheckerTest, test13)
 //    primitive := LoadI(pointer).Imm(0).u64
 TEST_F(DanglingPointersCheckerTest, test14)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -882,7 +882,7 @@ TEST_F(DanglingPointersCheckerTest, test14)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Use ref inst after call:
@@ -891,7 +891,7 @@ TEST_F(DanglingPointersCheckerTest, test14)
 //    primitive := LoadI(pointer).Imm(0).u64
 TEST_F(DanglingPointersCheckerTest, test15)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -929,7 +929,7 @@ TEST_F(DanglingPointersCheckerTest, test15)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_FALSE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Correct load accumulator from frame:
@@ -940,7 +940,7 @@ TEST_F(DanglingPointersCheckerTest, test15)
 //    correct_acc_tag_store := StoreI(acc_ptr, LiveIn(acc_tag).u64).Imm(acc_tag_offset).u64
 TEST_F(DanglingPointersCheckerTest, test16)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -974,7 +974,7 @@ TEST_F(DanglingPointersCheckerTest, test16)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Correct load accumulator and tag:
@@ -987,7 +987,7 @@ TEST_F(DanglingPointersCheckerTest, test16)
 //    correct_acc_tag_store := StoreI(acc_ptr, correct_acc_tag_load).Imm(acc_tag_offset).u64
 TEST_F(DanglingPointersCheckerTest, test17)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -1022,7 +1022,7 @@ TEST_F(DanglingPointersCheckerTest, test17)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Correct load accumulator and tag:
@@ -1036,7 +1036,7 @@ TEST_F(DanglingPointersCheckerTest, test17)
 //    correct_acc_tag_store := StoreI(acc_ptr, correct_acc_tag_load).Imm(acc_tag_offset).u64
 TEST_F(DanglingPointersCheckerTest, test18)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -1072,7 +1072,7 @@ TEST_F(DanglingPointersCheckerTest, test18)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_TRUE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // Correct load accumulator and tag:
@@ -1086,7 +1086,7 @@ TEST_F(DanglingPointersCheckerTest, test18)
 //    incorrect_acc_tag_store := StoreI(acc_ptr, LiveIn(acc_tag).u64).Imm(acc_tag_offset).u64
 TEST_F(DanglingPointersCheckerTest, test19)
 {
-    auto arch = panda::RUNTIME_ARCH;
+    auto arch = ark::RUNTIME_ARCH;
     SetGraphArch(arch);
     if (DanglingPointersChecker::regmap_.find(arch) == DanglingPointersChecker::regmap_.end()) {
         return;
@@ -1122,8 +1122,8 @@ TEST_F(DanglingPointersCheckerTest, test19)
     irtoc::IrtocRuntimeInterface runtime;
     GetGraph()->SetRuntime(&runtime);
 
-    ASSERT_FALSE(GetGraph()->RunPass<panda::compiler::DanglingPointersChecker>());
+    ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
 // NOLINTEND(readability-magic-numbers)
-}  // namespace panda::compiler
+}  // namespace ark::compiler

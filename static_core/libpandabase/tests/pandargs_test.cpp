@@ -17,7 +17,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::test {
+namespace ark::test {
 TEST(libpandargs, TestAPI)
 {
     static const bool REF_DEF_BOOL = false;
@@ -960,4 +960,4 @@ TEST(libpandargs, IncorrectCompoundArgs)
 
 // NOLINTEND(modernize-avoid-c-arrays)
 
-}  // namespace panda::test
+}  // namespace ark::test

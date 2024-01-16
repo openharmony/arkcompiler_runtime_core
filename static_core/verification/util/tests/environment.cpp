@@ -19,13 +19,13 @@
 
 #include <cstring>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 EnvOptions::EnvOptions(const char *envVarName)
 {
-    using panda::parser::Action;
-    using panda::parser::Charset;
-    using panda::parser::Parser;
+    using ark::parser::Action;
+    using ark::parser::Charset;
+    using ark::parser::Parser;
 
     struct Context {
         std::string name;
@@ -114,4 +114,4 @@ std::optional<OptionValue> EnvOptions::operator[](const std::string &name) const
     return {};
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

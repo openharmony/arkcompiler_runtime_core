@@ -19,7 +19,7 @@
 #include "runtime/thread_pool.h"
 #include "runtime/compiler_queue_interface.h"
 
-namespace panda {
+namespace ark {
 
 class CompilerProcessor : public ProcessorInterface<CompilerTask, Compiler *> {
 public:
@@ -86,6 +86,6 @@ private:
     ThreadPool<CompilerTask, CompilerProcessor, Compiler *> *threadPool_ {nullptr};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // RUTNIME_COMPILER_THREAD_POOL_WORKER_H

@@ -21,7 +21,7 @@
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/optimizations/regalloc/reg_type.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 namespace {
 std::string ToString(LocationState::State state)
 {
@@ -621,4 +621,4 @@ void RegAllocVerifier::TryHandleImplicitNullCheck(Inst *inst)
     nc->SetMarker(implicitNullCheckHandledMarker_);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

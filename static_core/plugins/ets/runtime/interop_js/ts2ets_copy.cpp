@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "runtime/handle_scope-inl.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 static inline EtsConvertorRef::ObjRoot ToObjRoot(uintptr_t ptr)
 {
@@ -99,7 +99,7 @@ public:
         loc_.StorePrimitive(val);
     }
 
-    void VisitString([[maybe_unused]] panda::Class *klass) override
+    void VisitString([[maybe_unused]] ark::Class *klass) override
     {
         TYPEVIS_CHECK_ERROR(GetValueType(env_, jsValue_) == napi_string, "string expected");
 
@@ -113,12 +113,12 @@ public:
 
         auto coro = EtsCoroutine::GetCurrent();
         auto vm = coro->GetVM();
-        auto str = panda::coretypes::String::CreateFromMUtf8(reinterpret_cast<uint8_t const *>(value.data()),
-                                                             vm->GetLanguageContext(), vm);
-        loc_.StoreReference(ToObjRoot(panda::VMHandle<panda::ObjectHeader>(coro, str).GetAddress()));
+        auto str = ark::coretypes::String::CreateFromMUtf8(reinterpret_cast<uint8_t const *>(value.data()),
+                                                           vm->GetLanguageContext(), vm);
+        loc_.StoreReference(ToObjRoot(ark::VMHandle<ark::ObjectHeader>(coro, str).GetAddress()));
     }
 
-    void VisitArray(panda::Class *klass) override
+    void VisitArray(ark::Class *klass) override
     {
         {
             bool isArray;
@@ -132,12 +132,12 @@ public:
         uint32_t len;
         TYPEVIS_NAPI_CHECK(napi_get_array_length(env_, jsValue_, &len));
 
-        panda::VMHandle<panda::ObjectHeader> etsArr(coro, panda::coretypes::Array::Create(klass, len));
+        ark::VMHandle<ark::ObjectHeader> etsArr(coro, ark::coretypes::Array::Create(klass, len));
 
-        panda::HandleScope<panda::ObjectHeader *> etsHandleScope(coro);
+        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
         auto *subType = klass->GetComponentType();
-        size_t elemSz = panda::Class::GetTypeSize(subType->GetType());
-        constexpr auto ELEMS_OFFS = panda::coretypes::Array::GetDataOffset();
+        size_t elemSz = ark::Class::GetTypeSize(subType->GetType());
+        constexpr auto ELEMS_OFFS = ark::coretypes::Array::GetDataOffset();
         for (size_t idx = 0; idx < len; ++idx) {
             napi_value jsElem;
             TYPEVIS_NAPI_CHECK(napi_get_element(env_, jsValue_, idx, &jsElem));
@@ -148,7 +148,7 @@ public:
         loc_.StoreReference(ToObjRoot(etsArr.GetAddress()));
     }
 
-    void VisitFieldReference(const panda::Field *field, panda::Class *klass) override
+    void VisitFieldReference(const ark::Field *field, ark::Class *klass) override
     {
         auto fname = reinterpret_cast<const char *>(field->GetName().data);
         napi_value subVal;
@@ -158,7 +158,7 @@ public:
         TYPEVIS_CHECK_FORWARD_ERROR(subVis.Error());
     }
 
-    void VisitFieldPrimitive(const panda::Field *field, panda::panda_file::Type type) override
+    void VisitFieldPrimitive(const ark::Field *field, ark::panda_file::Type type) override
     {
         auto fname = reinterpret_cast<const char *>(field->GetName().data);
         napi_value subVal;
@@ -168,7 +168,7 @@ public:
         TYPEVIS_CHECK_FORWARD_ERROR(subVis.Error());
     }
 
-    void VisitObject(panda::Class *klass) override
+    void VisitObject(ark::Class *klass) override
     {
         ASSERT(klass != InteropCtx::Current()->GetJSValueClass());
         TYPEVIS_CHECK_ERROR(GetValueType(env_, jsValue_) == napi_object, "object expected");
@@ -176,11 +176,11 @@ public:
 
         NapiScope jsHandleScope(env_);
         {
-            auto etsObj = panda::ObjectHeader::Create(coro, klass);
-            owner_ = ToObjRoot(panda::VMHandle<panda::ObjectHeader>(coro, etsObj).GetAddress());
+            auto etsObj = ark::ObjectHeader::Create(coro, klass);
+            owner_ = ToObjRoot(ark::VMHandle<ark::ObjectHeader>(coro, etsObj).GetAddress());
         }
 
-        panda::HandleScope<panda::ObjectHeader *> etsHandleScope(coro);
+        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
         Base::VisitObject(klass);
         TYPEVIS_ABRUPT_ON_ERROR();
         loc_.StoreReference(owner_);
@@ -253,27 +253,27 @@ public:
         TYPEVIS_NAPI_CHECK(napi_create_double(env_, etsVal, &jsValue_));
     }
 
-    void VisitString([[maybe_unused]] panda::Class *klass) override
+    void VisitString([[maybe_unused]] ark::Class *klass) override
     {
-        auto etsStr = static_cast<panda::coretypes::String *>(loc_.LoadReference());
+        auto etsStr = static_cast<ark::coretypes::String *>(loc_.LoadReference());
         TYPEVIS_NAPI_CHECK(napi_create_string_utf8(env_, reinterpret_cast<const char *>(etsStr->GetDataMUtf8()),
                                                    etsStr->GetMUtf8Length() - 1, &jsValue_));
     }
 
-    void VisitArray(panda::Class *klass) override
+    void VisitArray(ark::Class *klass) override
     {
         auto coro = EtsCoroutine::GetCurrent();
 
-        panda::HandleScope<panda::ObjectHeader *> etsHandleScope(coro);
-        auto etsArr = panda::VMHandle<panda::coretypes::Array>(coro, loc_.LoadReference());
+        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
+        auto etsArr = ark::VMHandle<ark::coretypes::Array>(coro, loc_.LoadReference());
         auto len = etsArr->GetLength();
 
         TYPEVIS_NAPI_CHECK(napi_create_array_with_length(env_, len, &jsValue_));
 
         NapiScope jsHandleScope(env_);
         auto *subType = klass->GetComponentType();
-        size_t elemSz = panda::Class::GetTypeSize(subType->GetType());
-        auto constexpr ELEMS_OFFS = panda::coretypes::Array::GetDataOffset();
+        size_t elemSz = ark::Class::GetTypeSize(subType->GetType());
+        auto constexpr ELEMS_OFFS = ark::coretypes::Array::GetDataOffset();
         for (size_t idx = 0; idx < len; ++idx) {
             EtsToJsConvertor subVis(env_, ToObjRoot(etsArr.GetAddress()), ELEMS_OFFS + elemSz * idx);
             subVis.VisitClass(subType);
@@ -282,7 +282,7 @@ public:
         }
     }
 
-    void VisitFieldReference(const panda::Field *field, panda::Class *klass) override
+    void VisitFieldReference(const ark::Field *field, ark::Class *klass) override
     {
         auto subVis = EtsToJsConvertor(env_, owner_, field->GetOffset());
         subVis.VisitReference(klass);
@@ -291,7 +291,7 @@ public:
         napi_set_named_property(env_, jsValue_, fname, subVis.jsValue_);
     }
 
-    void VisitFieldPrimitive(const panda::Field *field, panda::panda_file::Type type) override
+    void VisitFieldPrimitive(const ark::Field *field, ark::panda_file::Type type) override
     {
         auto subVis = EtsToJsConvertor(env_, owner_, field->GetOffset());
         subVis.VisitPrimitive(type);
@@ -300,7 +300,7 @@ public:
         napi_set_named_property(env_, jsValue_, fname, subVis.jsValue_);
     }
 
-    void VisitObject(panda::Class *klass) override
+    void VisitObject(ark::Class *klass) override
     {
         ASSERT(klass != InteropCtx::Current()->GetJSValueClass());
         auto coro = EtsCoroutine::GetCurrent();
@@ -309,10 +309,10 @@ public:
             return;
         }
 
-        panda::HandleScope<panda::ObjectHeader *> etsHandleScope(coro);
+        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
         {
             auto etsObj = loc_.LoadReference();
-            owner_ = ToObjRoot(panda::VMHandle<panda::ObjectHeader>(coro, etsObj).GetAddress());
+            owner_ = ToObjRoot(ark::VMHandle<ark::ObjectHeader>(coro, etsObj).GetAddress());
         }
 
         TYPEVIS_NAPI_CHECK(napi_create_object(env_, &jsValue_));
@@ -326,7 +326,7 @@ public:
         napi_deferred deferred;
         TYPEVIS_NAPI_CHECK(napi_create_promise(env_, &deferred, &jsValue_));
         auto *coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] HandleScope<panda::ObjectHeader *> handleScope(coro);
+        [[maybe_unused]] HandleScope<ark::ObjectHeader *> handleScope(coro);
         VMHandle<EtsPromise> promise(coro, reinterpret_cast<EtsPromise *>(loc_.LoadReference()));
         if (promise->GetState() != EtsPromise::STATE_PENDING) {
             VMHandle<EtsObject> value(coro, promise->GetValue(coro)->GetCoreType());
@@ -366,19 +366,19 @@ private:
 
 class JsToEtsArgsConvertor final : public EtsMethodVisitor {
 public:
-    JsToEtsArgsConvertor(panda::Method *method, napi_env env, napi_value *args, uint32_t numArgs, uint32_t argsStart)
+    JsToEtsArgsConvertor(ark::Method *method, napi_env env, napi_value *args, uint32_t numArgs, uint32_t argsStart)
         : EtsMethodVisitor(method), env_(env), jsargs_(args), numArgs_(numArgs), argsStart_(argsStart)
     {
         ASSERT(numArgs_ == method->GetNumArgs());
         etsargs_.resize(numArgs_);
     }
 
-    std::vector<panda::Value> GetResult()
+    std::vector<ark::Value> GetResult()
     {
-        std::vector<panda::Value> res;
+        std::vector<ark::Value> res;
         for (auto const &e : etsargs_) {
-            if (std::holds_alternative<panda::Value>(e)) {
-                res.emplace_back(std::get<panda::Value>(e));
+            if (std::holds_alternative<ark::Value>(e)) {
+                res.emplace_back(std::get<ark::Value>(e));
             } else {
                 res.emplace_back(*std::get<EtsConvertorRef::ObjRoot>(e));
             }
@@ -392,22 +392,22 @@ public:
     }
 
 private:
-    void VisitReturn([[maybe_unused]] panda::panda_file::Type type) override
+    void VisitReturn([[maybe_unused]] ark::panda_file::Type type) override
     {
         // do nothing
     }
-    void VisitReturn([[maybe_unused]] panda::Class *klass) override
+    void VisitReturn([[maybe_unused]] ark::Class *klass) override
     {
         // do nothing
     }
-    void VisitArgument(uint32_t idx, panda::panda_file::Type type) override
+    void VisitArgument(uint32_t idx, ark::panda_file::Type type) override
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         JsToEtsConvertor conv(env_, jsargs_[idx + argsStart_], &etsargs_[idx]);
         conv.VisitPrimitive(type);
         TYPEVIS_CHECK_FORWARD_ERROR(conv.Error());
     }
-    void VisitArgument(uint32_t idx, panda::Class *klass) override
+    void VisitArgument(uint32_t idx, ark::Class *klass) override
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         JsToEtsConvertor conv(env_, jsargs_[idx + argsStart_], &etsargs_[idx]);
@@ -424,48 +424,48 @@ private:
 
 class EtsArgsClassesCollector final : protected EtsMethodVisitor {
 public:
-    explicit EtsArgsClassesCollector(panda::Method *method) : EtsMethodVisitor(method) {}
+    explicit EtsArgsClassesCollector(ark::Method *method) : EtsMethodVisitor(method) {}
 
-    void GetResult(std::unordered_set<panda::Class *> &to)
+    void GetResult(std::unordered_set<ark::Class *> &to)
     {
         VisitMethod();
         to = std::move(set_);
     }
 
 private:
-    void VisitReturn([[maybe_unused]] panda::panda_file::Type type) override
+    void VisitReturn([[maybe_unused]] ark::panda_file::Type type) override
     {
         // do nothing
     }
-    void VisitReturn(panda::Class *klass) override
+    void VisitReturn(ark::Class *klass) override
     {
         AddClass(klass);
     }
-    void VisitArgument([[maybe_unused]] uint32_t idx, [[maybe_unused]] panda::panda_file::Type type) override
+    void VisitArgument([[maybe_unused]] uint32_t idx, [[maybe_unused]] ark::panda_file::Type type) override
     {
         // do nothing
     }
-    void VisitArgument([[maybe_unused]] uint32_t idx, panda::Class *klass) override
+    void VisitArgument([[maybe_unused]] uint32_t idx, ark::Class *klass) override
     {
         AddClass(klass);
     }
 
-    void AddClass(panda::Class *klass)
+    void AddClass(ark::Class *klass)
     {
         set_.insert(klass);
     }
 
-    std::unordered_set<panda::Class *> set_;
+    std::unordered_set<ark::Class *> set_;
 };
 
 class EtsClassesRecursionChecker final : public EtsTypeVisitor {
     using Base = EtsTypeVisitor;
 
     struct DFSData {
-        explicit DFSData(panda::Class *cls) : klass(cls) {}
+        explicit DFSData(ark::Class *cls) : klass(cls) {}
 
         // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-        panda::Class *klass = nullptr;
+        ark::Class *klass = nullptr;
 
         enum : uint8_t {
             MARK_W = 0,
@@ -475,13 +475,13 @@ class EtsClassesRecursionChecker final : public EtsTypeVisitor {
     };
 
 public:
-    static bool CheckClasses(panda::Method *method)
+    static bool CheckClasses(ark::Method *method)
     {
-        std::unordered_set<panda::Class *> classSet;
+        std::unordered_set<ark::Class *> classSet;
         EtsArgsClassesCollector collector(method);
         collector.GetResult(classSet);
 
-        std::unordered_map<panda::Class *, DFSData> dfsData;
+        std::unordered_map<ark::Class *, DFSData> dfsData;
         for (auto const &e : classSet) {
             dfsData.insert(std::make_pair(e, DFSData(e)));
         }
@@ -498,7 +498,7 @@ public:
     }
 
 private:
-    EtsClassesRecursionChecker(bool &loopFound, std::unordered_map<panda::Class *, DFSData> &dfs)
+    EtsClassesRecursionChecker(bool &loopFound, std::unordered_map<ark::Class *, DFSData> &dfs)
         : loopFound_(loopFound), dfs_(dfs)
     {
     }
@@ -512,26 +512,26 @@ private:
     void VisitF32() override {}
     void VisitF64() override {}
 
-    void VisitPrimitive([[maybe_unused]] const panda::panda_file::Type type) override {}
+    void VisitPrimitive([[maybe_unused]] const ark::panda_file::Type type) override {}
 
-    void VisitString([[maybe_unused]] panda::Class *klass) override {}
+    void VisitString([[maybe_unused]] ark::Class *klass) override {}
 
-    void VisitArray(panda::Class *klass) override
+    void VisitArray(ark::Class *klass) override
     {
         VisitClass(klass->GetComponentType());
     }
 
-    void VisitFieldPrimitive([[maybe_unused]] const panda::Field *field,
-                             [[maybe_unused]] panda::panda_file::Type type) override
+    void VisitFieldPrimitive([[maybe_unused]] const ark::Field *field,
+                             [[maybe_unused]] ark::panda_file::Type type) override
     {
     }
 
-    void VisitFieldReference([[maybe_unused]] const panda::Field *field, panda::Class *klass) override
+    void VisitFieldReference([[maybe_unused]] const ark::Field *field, ark::Class *klass) override
     {
         VisitReference(klass);
     }
 
-    void VisitReference(panda::Class *klass) override
+    void VisitReference(ark::Class *klass) override
     {
         auto str = klass->GetName();
         auto &data = Lookup(klass);
@@ -547,7 +547,7 @@ private:
         data.mark = DFSData::MARK_B;
     }
 
-    DFSData &Lookup(panda::Class *klass)
+    DFSData &Lookup(ark::Class *klass)
     {
         auto it = dfs_.find(klass);
         if (it == dfs_.end()) {
@@ -558,16 +558,16 @@ private:
     }
 
     bool &loopFound_;
-    std::unordered_map<panda::Class *, DFSData> &dfs_;
+    std::unordered_map<ark::Class *, DFSData> &dfs_;
 };
 
 class EtsToJsRetConvertor final : public EtsMethodVisitor {
 public:
-    EtsToJsRetConvertor(panda::Method *method, napi_env env, panda::Value ret) : EtsMethodVisitor(method), env_(env)
+    EtsToJsRetConvertor(ark::Method *method, napi_env env, ark::Value ret) : EtsMethodVisitor(method), env_(env)
     {
         if (ret.IsReference()) {
             auto coro = EtsCoroutine::GetCurrent();
-            ret_ = ToObjRoot(panda::VMHandle<panda::ObjectHeader>(coro, *ret.GetGCRoot()).GetAddress());
+            ret_ = ToObjRoot(ark::VMHandle<ark::ObjectHeader>(coro, *ret.GetGCRoot()).GetAddress());
         } else {
             ret_ = ret;
         }
@@ -584,7 +584,7 @@ public:
     }
 
 private:
-    void VisitReturn(panda::panda_file::Type type) override
+    void VisitReturn(ark::panda_file::Type type) override
     {
         if (type.GetId() == panda_file::Type::TypeId::VOID) {
             // Skip 'void' type because it doesn't require conversion
@@ -596,18 +596,18 @@ private:
         TYPEVIS_CHECK_FORWARD_ERROR(conv.Error());
         jsRet_ = conv.GetResult();
     }
-    void VisitReturn(panda::Class *klass) override
+    void VisitReturn(ark::Class *klass) override
     {
         EtsToJsConvertor conv(env_, &ret_);
         conv.VisitReference(klass);
         TYPEVIS_CHECK_FORWARD_ERROR(conv.Error());
         jsRet_ = conv.GetResult();
     }
-    void VisitArgument([[maybe_unused]] uint32_t idx, [[maybe_unused]] panda::panda_file::Type type) override
+    void VisitArgument([[maybe_unused]] uint32_t idx, [[maybe_unused]] ark::panda_file::Type type) override
     {
         // do nothing
     }
-    void VisitArgument([[maybe_unused]] uint32_t idx, [[maybe_unused]] panda::Class *klass) override
+    void VisitArgument([[maybe_unused]] uint32_t idx, [[maybe_unused]] ark::Class *klass) override
     {
         // do nothing
     }
@@ -636,7 +636,7 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
     auto methodName = std::string("ETSGLOBAL::") + GetString(env, jsargv[0]);
     INTEROP_LOG(INFO) << "InvokeEtsMethod: method name: " << methodName.c_str();
 
-    auto methodRes = panda::Runtime::GetCurrent()->ResolveEntryPoint(methodName);
+    auto methodRes = ark::Runtime::GetCurrent()->ResolveEntryPoint(methodName);
     if (!methodRes) {
         InteropCtx::ThrowJSError(env, "InvokeEtsMethod: can't resolve method " + methodName);
         return nullptr;
@@ -656,12 +656,12 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
         return nullptr;
     }
 
-    std::vector<panda::Value> args;
+    std::vector<ark::Value> args;
     {
         JsToEtsArgsConvertor js2ets(method, env, jsargv, jsargc - 1, 1);
 
         NapiScope jsHandleScope(env);
-        panda::HandleScope<panda::ObjectHeader *> etsHandleScope(coro);
+        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
 
         auto begin = std::chrono::steady_clock::now();
         js2ets.Process();
@@ -675,15 +675,14 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
         INTEROP_LOG(INFO) << "InvokeEtsMethod: js2ets elapsed time: " << t << "us";
     }
 
-    panda::Value etsRes = method->Invoke(coro, args.data());
+    ark::Value etsRes = method->Invoke(coro, args.data());
     if (UNLIKELY(coro->HasPendingException())) {
         NapiScope jsHandleScope(env);
-        panda::HandleScope<panda::ObjectHeader *> etsHandleScope(coro);
+        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
 
         auto exc = coro->GetException();
-        auto klass = exc->ClassAddr<panda::Class>();
-        auto data =
-            EtsConvertorRef::ValVariant(ToObjRoot(panda::VMHandle<panda::ObjectHeader>(coro, exc).GetAddress()));
+        auto klass = exc->ClassAddr<ark::Class>();
+        auto data = EtsConvertorRef::ValVariant(ToObjRoot(ark::VMHandle<ark::ObjectHeader>(coro, exc).GetAddress()));
         coro->ClearException();
 
         EtsToJsConvertor ets2js(env, &data);
@@ -701,7 +700,7 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
     napi_value jsRes;
     {
         NapiEscapableScope jsHandleScope(env);
-        panda::HandleScope<panda::ObjectHeader *> etsHandleScope(coro);
+        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
 
         auto begin = std::chrono::steady_clock::now();
         EtsToJsRetConvertor ets2js(method, env, etsRes);
@@ -727,4 +726,4 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
     return jsRes;
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

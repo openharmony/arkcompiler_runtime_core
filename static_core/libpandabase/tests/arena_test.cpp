@@ -22,21 +22,21 @@
 #include "gtest/gtest.h"
 #include "utils/logger.h"
 
-namespace panda {
+namespace ark {
 
 class ArenaTest : public testing::Test {
 public:
     ArenaTest()
     {
         static constexpr size_t INTERNAL_SIZE = 16_MB;
-        panda::mem::MemConfig::Initialize(0U, INTERNAL_SIZE, 0U, 0U, 0U, 0U);
+        ark::mem::MemConfig::Initialize(0U, INTERNAL_SIZE, 0U, 0U, 0U, 0U);
         PoolManager::Initialize();
     }
 
     ~ArenaTest() override
     {
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_MOVE_SEMANTIC(ArenaTest);
@@ -108,4 +108,4 @@ TEST_F(ArenaTest, ResizeAndResetTest)
     ResizeAndResetTestImplementation<DoubleLinkedAlignedArena<ARENA_ALIGNMENT>>(ARENA_SIZE, ALIGNED_ALLOC_SIZE);
 }
 
-}  // namespace panda
+}  // namespace ark

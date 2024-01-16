@@ -18,7 +18,7 @@
 #include "runtime/mem/object_helpers-inl.h"
 #include "runtime/mem/gc/dynamic/gc_dynamic_data.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 GCLang<LanguageConfig>::GCLang(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
@@ -123,4 +123,4 @@ void GCLang<LanguageConfig>::PreRunPhasesImpl()
 TEMPLATE_GC_IS_MUTATOR_ALLOWED()
 TEMPLATE_CLASS_LANGUAGE_CONFIG(GCLang);
 
-}  // namespace panda::mem
+}  // namespace ark::mem

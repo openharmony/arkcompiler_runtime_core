@@ -21,7 +21,7 @@
 #include <memory>
 #include <unordered_map>
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 template <typename Key, typename Wrapper>
 class WrappersCache {
@@ -57,6 +57,6 @@ private:
     std::unordered_map<Key, std::unique_ptr<Wrapper>> cache_;
 };
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_PROXY_WRAPPERS_CACHE_H_

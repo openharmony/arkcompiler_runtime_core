@@ -17,7 +17,7 @@
 
 #include "runtime/interpreter/math_helpers.h"
 
-namespace panda::interpreter::math_helpers::test {
+namespace ark::interpreter::math_helpers::test {
 
 // NOLINTBEGIN(hicpp-signed-bitwise)
 
@@ -284,4 +284,4 @@ TEST(MathHelpers, Fcmpg)
     TestFcmpg<double>();
 }
 
-}  // namespace panda::interpreter::math_helpers::test
+}  // namespace ark::interpreter::math_helpers::test

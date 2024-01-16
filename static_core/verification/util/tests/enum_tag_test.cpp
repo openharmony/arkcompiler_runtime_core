@@ -25,7 +25,7 @@ enum class Numbers { ONE, TWO, THREE, FOUR, FIVE };
 
 }  // namespace
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, EnumTag)
 {
@@ -44,4 +44,4 @@ TEST_F(VerifierTest, EnumTag)
     EXPECT_EQ(EnumTag3::GetValueFor(0UL), Numbers::ONE);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

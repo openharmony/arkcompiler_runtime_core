@@ -21,7 +21,7 @@
 #include <fstream>
 #include <thread>
 
-namespace panda::os {
+namespace ark::os {
 
 CpuSet::CpuSet() : cpuset_(0) {}
 
@@ -202,4 +202,4 @@ bool CpuAffinityManager::SetAffinityForCurrentThread(const CpuSet &cpuset)
     return SetAffinityForThread(0, cpuset);
 }
 
-}  // namespace panda::os
+}  // namespace ark::os

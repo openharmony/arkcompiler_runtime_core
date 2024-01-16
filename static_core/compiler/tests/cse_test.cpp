@@ -18,7 +18,7 @@
 #include "libpandabase/utils/utils.h"
 #include "optimizer/optimizations/cse.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CSETest : public GraphTest {
 public:
     CSETest() : isCseEnableDefault_(g_options.IsCompilerCse())
@@ -737,4 +737,4 @@ TEST_F(CSETest, CSETestNotApply2)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

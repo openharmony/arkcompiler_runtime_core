@@ -18,7 +18,7 @@
 #include "optimizer/optimizations/loop_unroll.h"
 #include "optimizer/optimizations/loop_peeling.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class GraphCreationTest : public CommonTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -73,4 +73,4 @@ TEST_F(GraphCreationTest, OsrModeGraph)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

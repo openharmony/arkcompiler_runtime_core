@@ -23,7 +23,7 @@
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include <atomic>
 
-namespace panda::mem {
+namespace ark::mem {
 
 GCBarrierSet::~GCBarrierSet() = default;
 
@@ -128,13 +128,13 @@ void GCG1BarrierSet::PostBarrier(const void *objAddr, size_t offset, void *store
         // If it is cross-region reference
         auto *card = cardTable_->GetCardPtr(ToUintPtr(objAddr) + offset);
         if (!card->IsYoung() && !card->IsMarked() &&
-            !panda::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_)) {
+            !ark::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_)) {
             LOG(DEBUG, GC) << "GC Interregion barrier write to " << objAddr << " value " << storedValAddr;
             card->Mark();
             Enqueue(card);
         }
     }
-    ASSERT(storedValAddr == nullptr || panda::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_) ||
+    ASSERT(storedValAddr == nullptr || ark::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_) ||
            CheckPostBarrier(cardTable_, objAddr, false));
 }
 
@@ -189,4 +189,4 @@ void GCG1BarrierSet::Enqueue(CardTable::CardPtr card)
         updatedRefsQueue_->push_back(card);
     }
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

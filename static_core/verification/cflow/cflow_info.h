@@ -26,7 +26,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 class Job;
 
 enum class InstructionType { NORMAL, JUMP, COND_JUMP, RETURN, THROW };
@@ -100,6 +100,6 @@ private:
 };
 
 PandaUniquePtr<CflowMethodInfo> GetCflowMethodInfo(Method const *method);
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFICATION_CFLOW_INFO_HPP_

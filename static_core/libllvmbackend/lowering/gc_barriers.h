@@ -18,16 +18,16 @@
 
 #include <llvm/IR/IRBuilder.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 class LLVMArkInterface;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend::gc_barriers {
+namespace ark::llvmbackend::gc_barriers {
 void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool isVolatileMem, llvm::BasicBlock *outBb,
                 LLVMArkInterface *arkInterface, llvm::Value *threadRegValue);
 
 void EmitPostWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, llvm::Value *offset, llvm::Value *value,
                  LLVMArkInterface *arkInterface, llvm::Value *threadRegValue, llvm::Value *frameRegValue);
-}  // namespace panda::llvmbackend::gc_barriers
+}  // namespace ark::llvmbackend::gc_barriers
 
 #endif  // LIBLLVMBACKEND_LOWERING_GC_BARRIERS_H

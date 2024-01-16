@@ -16,7 +16,7 @@
 #include "condition_chain_manager.h"
 #include "condition_chain.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 ConditionChainManager::ConditionChainManager(ArenaAllocator *allocator)
     : allocator_(allocator), conditionChainBb_(allocator->Adapter())
 {
@@ -89,4 +89,4 @@ void ConditionChainManager::Reset()
 {
     conditionChainBb_.clear();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -21,7 +21,7 @@
 #include <queue>
 #include <unordered_map>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 using TaskPropertiesCounterMap = std::unordered_map<TaskProperties, size_t, TaskProperties::Hash>;
 
@@ -74,6 +74,6 @@ private:
     FinishedTasksCallback finishedTasksCallback_;
 };
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_WORKER_THREAD_H

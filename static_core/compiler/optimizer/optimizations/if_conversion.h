@@ -19,7 +19,7 @@
 #include "optimizer/ir/graph.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 
@@ -59,6 +59,6 @@ private:
     static bool IsConditionChainPhi(Inst *phi);
     uint32_t GetIfcLimit(BasicBlock *bb);
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_IF_CONVERSION_H

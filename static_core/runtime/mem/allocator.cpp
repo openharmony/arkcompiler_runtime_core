@@ -30,7 +30,7 @@
 #include "runtime/mem/pygote_space_allocator-inl.h"
 #include "runtime/mem/tlab.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 Allocator::~Allocator() = default;
 
@@ -110,8 +110,8 @@ ObjectAllocatorNoGen<MT_MODE>::~ObjectAllocatorNoGen()
 }
 
 template <MTModeT MT_MODE>
-void *ObjectAllocatorNoGen<MT_MODE>::Allocate(size_t size, Alignment align,
-                                              [[maybe_unused]] panda::ManagedThread *thread, ObjMemInitPolicy objInit)
+void *ObjectAllocatorNoGen<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
+                                              ObjMemInitPolicy objInit)
 {
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
@@ -133,7 +133,7 @@ void *ObjectAllocatorNoGen<MT_MODE>::Allocate(size_t size, Alignment align,
 }
 
 template <MTModeT MT_MODE>
-void *ObjectAllocatorNoGen<MT_MODE>::AllocateNonMovable(size_t size, Alignment align, panda::ManagedThread *thread,
+void *ObjectAllocatorNoGen<MT_MODE>::AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
                                                         ObjMemInitPolicy objInit)
 {
     void *mem = nullptr;
@@ -265,7 +265,7 @@ bool ObjectAllocatorNoGen<MT_MODE>::IsLive(const ObjectHeader *obj)
 }
 
 template <MTModeT MT_MODE>
-void *ObjectAllocatorGen<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
+void *ObjectAllocatorGen<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                                             ObjMemInitPolicy objInit)
 {
     void *mem = nullptr;
@@ -283,7 +283,7 @@ void *ObjectAllocatorGen<MT_MODE>::Allocate(size_t size, Alignment align, [[mayb
 
 template <MTModeT MT_MODE>
 void *ObjectAllocatorGen<MT_MODE>::AllocateNonMovable(size_t size, Alignment align,
-                                                      [[maybe_unused]] panda::ManagedThread *thread,
+                                                      [[maybe_unused]] ark::ManagedThread *thread,
                                                       ObjMemInitPolicy objInit)
 {
     void *mem = nullptr;
@@ -449,7 +449,7 @@ size_t ObjectAllocatorNoGen<MT_MODE>::GetLargeObjectMaxSize()
 }
 
 template <MTModeT MT_MODE>
-TLAB *ObjectAllocatorNoGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] panda::ManagedThread *thread)
+TLAB *ObjectAllocatorNoGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] ark::ManagedThread *thread)
 {
     LOG(FATAL, ALLOC) << "TLAB is not supported for this allocator";
     return nullptr;
@@ -596,7 +596,7 @@ void ObjectAllocatorGen<MT_MODE>::ResetYoungAllocator()
 }
 
 template <MTModeT MT_MODE>
-TLAB *ObjectAllocatorGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] panda::ManagedThread *thread)
+TLAB *ObjectAllocatorGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] ark::ManagedThread *thread)
 {
     TLAB *newTlab = youngGenAllocator_->CreateNewTLAB(tlabSize_);
     if (newTlab != nullptr) {
@@ -740,4 +740,4 @@ template class ObjectAllocatorGen<MT_MODE_MULTI>;
 template class ObjectAllocatorNoGen<MT_MODE_SINGLE>;
 template class ObjectAllocatorNoGen<MT_MODE_MULTI>;
 
-}  // namespace panda::mem
+}  // namespace ark::mem

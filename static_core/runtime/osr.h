@@ -21,7 +21,7 @@
 #include "libpandabase/os/mutex.h"
 #include "include/method.h"
 
-namespace panda {
+namespace ark {
 
 extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const void *osrCode, void *cframePtr,
                                  uintptr_t *regBuffer, uintptr_t *fpRegBuffer);
@@ -69,6 +69,6 @@ private:
     PandaMap<const Method *, void *> codeMap_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_OSR_H

@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_ARCH_AMD64_MEMORY_HELPERS_H_
 #define PANDA_RUNTIME_ARCH_AMD64_MEMORY_HELPERS_H_
 
-namespace panda::arch_specific {
+namespace ark::arch_specific {
 
 // AMD64 has strict memory order, only compiler barrier is required
 inline void FullMemoryBarrier()
@@ -23,6 +23,6 @@ inline void FullMemoryBarrier()
     asm volatile("" : : : "memory");  // NOLINT(hicpp-no-assembler)
 }
 
-}  // namespace panda::arch_specific
+}  // namespace ark::arch_specific
 
 #endif  // PANDA_RUNTIME_ARCH_AMD64_MEMORY_HELPERS_H_

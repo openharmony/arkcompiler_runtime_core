@@ -30,7 +30,7 @@
 #include "runtime/mem/vm_handle.h"
 #include "runtime/tooling/default_inspector_extension.h"
 
-namespace panda {
+namespace ark {
 std::pair<Method *, uint32_t> LanguageContextBase::GetCatchMethodAndOffset(Method *method, ManagedThread *thread) const
 {
     uint32_t catchOffset = 0;
@@ -105,7 +105,7 @@ void LanguageContextBase::WrapClassInitializerException(ClassLinker *classLinker
         return;
     }
 
-    panda::ThrowException(ctx, thread, ctx.GetExceptionInInitializerErrorDescriptor(), nullptr);
+    ark::ThrowException(ctx, thread, ctx.GetExceptionInInitializerErrorDescriptor(), nullptr);
 }
 
-}  // namespace panda
+}  // namespace ark

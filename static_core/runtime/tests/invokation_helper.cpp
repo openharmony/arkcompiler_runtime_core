@@ -17,11 +17,11 @@
 
 extern "C" void InvokeHelper(...);
 
-namespace panda::test {
+namespace ark::test {
 
 const void *GetInvokeHelperImpl()
 {
     return reinterpret_cast<const void *>(InvokeHelper);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

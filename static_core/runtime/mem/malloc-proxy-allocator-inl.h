@@ -23,7 +23,7 @@
 #include "libpandabase/utils/asan_interface.h"
 #include "runtime/mem/malloc-proxy-allocator.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_MALLOCPROXY_ALLOCATOR(level) LOG(level, ALLOC) << "MallocProxyAllocator: "
@@ -85,5 +85,5 @@ void MallocProxyAllocator<AllocConfigT>::Free(void *mem)
 
 #undef LOG_MALLOCPROXY_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_MALLOC_PROXY_ALLOCATOR_INL_H

@@ -25,7 +25,7 @@
 #include "runtime/signal_handler.h"
 #include "runtime/coroutines/coroutine.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 static std::atomic<int> g_sCurrentHandlersCounter = 0;
 
@@ -518,4 +518,4 @@ void Sampler::ListenerThreadEntry(std::string outputFile)
     }
 }
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler

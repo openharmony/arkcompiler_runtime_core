@@ -38,7 +38,7 @@
 #include <variant>
 #include <cstdio>
 #include <map>
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
 const char *ARCHIVE_FILENAME = "classes.abc";
@@ -128,7 +128,7 @@ std::unique_ptr<const File> OpenPandaFileOrZip(std::string_view location, panda_
 void OpenPandaFileFromZipErrorHandler(ZipArchiveHandle &handle)
 {
     if (handle != nullptr) {
-        if (panda::CloseArchiveFile(handle) != ZIPARCHIVE_OK) {
+        if (ark::CloseArchiveFile(handle) != ZIPARCHIVE_OK) {
             LOG(ERROR, PANDAFILE) << "CloseArchiveFile failed!";
         }
     }
@@ -145,7 +145,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
         return nullptr;
     }
 
-    size_t sizeToMmap = AlignUp(uncompressedLength, panda::os::mem::GetPageSize());
+    size_t sizeToMmap = AlignUp(uncompressedLength, ark::os::mem::GetPageSize());
     void *mem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
     if (mem == nullptr) {
         CloseCurrentFile(handle);
@@ -265,7 +265,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         GetCurrentFileOffset(zipfile, &entry);
         file = HandleArchive(zipfile, fp, location, entry, archiveFilename, openMode);
         CloseCurrentFile(zipfile);
-        if (panda::CloseArchiveFile(zipfile) != 0) {
+        if (ark::CloseArchiveFile(zipfile) != 0) {
             LOG(ERROR, PANDAFILE) << "CloseArchive failed!";
             return nullptr;
         }
@@ -278,7 +278,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
 
 std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t size)
 {
-    size_t sizeToMmap = AlignUp(size, panda::os::mem::GetPageSize());
+    size_t sizeToMmap = AlignUp(size, ark::os::mem::GetPageSize());
     void *mem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
     if (mem == nullptr) {
         return nullptr;
@@ -630,4 +630,4 @@ File::EntityId File::GetClassIdFromClassHashTable(const uint8_t *mutf8Name) cons
     return File::EntityId();
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

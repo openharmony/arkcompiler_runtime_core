@@ -24,7 +24,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 struct MyArr final {
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes,readability-magic-numbers)
@@ -73,4 +73,4 @@ TEST_F(VerifierTest, struct_field)
     EXPECT_EQ(myArr.num4, 44_I);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

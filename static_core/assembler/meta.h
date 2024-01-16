@@ -29,7 +29,7 @@
 
 #include "assembly-type.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 class Metadata {
 public:
@@ -591,6 +591,6 @@ protected:
     void RemoveFlags(std::string_view attribute, std::string_view value) override;
 };
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_META_H

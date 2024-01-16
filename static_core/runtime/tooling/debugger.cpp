@@ -35,7 +35,7 @@
 #include "runtime/interpreter/frame.h"
 #include "runtime/handle_scope-inl.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 // NOTE(maksenov): remove PtProperty class
 static PtProperty FieldToPtProperty(Field *field)
 {
@@ -152,7 +152,7 @@ std::optional<Error> Debugger::RemoveBreakpoint(const PtLocation &location)
     return {};
 }
 
-static panda::Frame *GetPandaFrame(StackWalker *pstack, uint32_t frameDepth, bool *outIsNative = nullptr)
+static ark::Frame *GetPandaFrame(StackWalker *pstack, uint32_t frameDepth, bool *outIsNative = nullptr)
 {
     ASSERT(pstack != nullptr);
     StackWalker &stack = *pstack;
@@ -163,7 +163,7 @@ static panda::Frame *GetPandaFrame(StackWalker *pstack, uint32_t frameDepth, boo
     }
 
     bool isNative = false;
-    panda::Frame *frame = nullptr;
+    ark::Frame *frame = nullptr;
     if (stack.HasFrame()) {
         if (stack.IsCFrame()) {
             isNative = true;
@@ -179,13 +179,13 @@ static panda::Frame *GetPandaFrame(StackWalker *pstack, uint32_t frameDepth, boo
     return frame;
 }
 
-static panda::Frame *GetPandaFrame(ManagedThread *thread, uint32_t frameDepth = 0, bool *outIsNative = nullptr)
+static ark::Frame *GetPandaFrame(ManagedThread *thread, uint32_t frameDepth = 0, bool *outIsNative = nullptr)
 {
     auto stack = StackWalker::Create(thread);
     return GetPandaFrame(&stack, frameDepth, outIsNative);
 }
 
-static interpreter::StaticVRegisterRef GetThisAddrVRegByPandaFrame(panda::Frame *frame)
+static interpreter::StaticVRegisterRef GetThisAddrVRegByPandaFrame(ark::Frame *frame)
 {
     ASSERT(!frame->IsDynamic());
     ASSERT(frame->GetMethod()->GetNumArgs() > 0);
@@ -193,7 +193,7 @@ static interpreter::StaticVRegisterRef GetThisAddrVRegByPandaFrame(panda::Frame 
     return StaticFrameHandler(frame).GetVReg(thisRegNum);
 }
 
-static interpreter::DynamicVRegisterRef GetThisAddrVRegByPandaFrameDyn(panda::Frame *frame)
+static interpreter::DynamicVRegisterRef GetThisAddrVRegByPandaFrameDyn(ark::Frame *frame)
 {
     ASSERT(frame->IsDynamic());
     ASSERT(frame->GetMethod()->GetNumArgs() > 0);
@@ -202,8 +202,7 @@ static interpreter::DynamicVRegisterRef GetThisAddrVRegByPandaFrameDyn(panda::Fr
 }
 
 template <typename Callback>
-Expected<panda::Frame *, Error> GetPandaFrameByPtThread(PtThread thread, uint32_t frameDepth,
-                                                        Callback nativeFrameHandler)
+Expected<ark::Frame *, Error> GetPandaFrameByPtThread(PtThread thread, uint32_t frameDepth, Callback nativeFrameHandler)
 {
     ManagedThread *managedThread = thread.GetManagedThread();
     ASSERT(managedThread != nullptr);
@@ -218,7 +217,7 @@ Expected<panda::Frame *, Error> GetPandaFrameByPtThread(PtThread thread, uint32_
     }
 
     auto stack = StackWalker::Create(managedThread);
-    panda::Frame *frame = GetPandaFrame(&stack, frameDepth, nullptr);
+    ark::Frame *frame = GetPandaFrame(&stack, frameDepth, nullptr);
     if (frame == nullptr) {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (!std::is_same_v<decltype(nativeFrameHandler), std::nullptr_t>) {
@@ -231,7 +230,7 @@ Expected<panda::Frame *, Error> GetPandaFrameByPtThread(PtThread thread, uint32_
     return frame;
 }
 
-Expected<interpreter::StaticVRegisterRef, Error> Debugger::GetVRegByPandaFrame(panda::Frame *frame,
+Expected<interpreter::StaticVRegisterRef, Error> Debugger::GetVRegByPandaFrame(ark::Frame *frame,
                                                                                int32_t regNumber) const
 {
     if (regNumber == -1) {
@@ -246,7 +245,7 @@ Expected<interpreter::StaticVRegisterRef, Error> Debugger::GetVRegByPandaFrame(p
         Error(Error::Type::INVALID_REGISTER, std::string("Invalid register number: ") + std::to_string(regNumber)));
 }
 
-Expected<interpreter::DynamicVRegisterRef, Error> Debugger::GetVRegByPandaFrameDyn(panda::Frame *frame,
+Expected<interpreter::DynamicVRegisterRef, Error> Debugger::GetVRegByPandaFrameDyn(ark::Frame *frame,
                                                                                    int32_t regNumber) const
 {
     if (regNumber == -1) {
@@ -451,8 +450,8 @@ std::optional<Error> Debugger::RestartFrame(PtThread thread, uint32_t frameNumbe
     }
 
     auto stack = StackWalker::Create(managedThread);
-    panda::Frame *popFrame = nullptr;
-    panda::Frame *retryFrame = nullptr;
+    ark::Frame *popFrame = nullptr;
+    ark::Frame *retryFrame = nullptr;
     uint32_t currentFrameNumber = 0;
 
     while (stack.HasFrame()) {
@@ -484,7 +483,7 @@ std::optional<Error> Debugger::RestartFrame(PtThread thread, uint32_t frameNumbe
     // Set force pop frames from top to target
     stack.Reset(managedThread);
     while (stack.HasFrame()) {
-        panda::Frame *frame = stack.GetIFrame();
+        ark::Frame *frame = stack.GetIFrame();
         frame->SetForcePop();
         if (frame == popFrame) {
             break;
@@ -509,7 +508,7 @@ std::optional<Error> Debugger::NotifyFramePop(PtThread thread, uint32_t depth) c
     */
 
     bool isNative = false;
-    panda::Frame *popFrame = GetPandaFrame(managedThread, depth, &isNative);
+    ark::Frame *popFrame = GetPandaFrame(managedThread, depth, &isNative);
     if (popFrame == nullptr) {
         if (isNative) {
             return Error(Error::Type::OPAQUE_FRAME, std::string("Thread ") + std::to_string(thread.GetId()) +
@@ -657,7 +656,7 @@ bool Debugger::HandleStep(ManagedThread *managedThread, Method *method, const Pt
 
 void Debugger::HandleNotifyFramePop(ManagedThread *managedThread, Method *method, bool wasPoppedByException)
 {
-    panda::Frame *frame = GetPandaFrame(managedThread);
+    ark::Frame *frame = GetPandaFrame(managedThread);
     if (frame != nullptr && frame->IsNotifyPop()) {
         hooks_.FramePop(PtThread(managedThread), method, wasPoppedByException);
         frame->ClearNotifyPop();
@@ -949,4 +948,4 @@ PtDebugFrame::PtDebugFrame(Method *method, Frame *interpreterFrame) : method_(me
     bcOffset_ = interpreterFrame->GetBytecodeOffset();
 }
 
-}  // namespace panda::tooling
+}  // namespace ark::tooling

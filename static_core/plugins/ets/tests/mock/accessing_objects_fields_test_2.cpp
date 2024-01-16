@@ -19,7 +19,7 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *g_testBinFileName = "AccessingObjectsFieldsTest.abc";
 
@@ -131,6 +131,6 @@ TEST_F(AccessingObjectsFieldsTestDeath, SetTypeFieldDeathTests3)
     EXPECT_DEATH(env_->SetDoubleField(obj, nullptr, static_cast<ets_double>(0.0)), "");
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)

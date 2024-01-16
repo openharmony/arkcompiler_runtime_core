@@ -26,7 +26,7 @@
 #include <atomic>
 #include <ratio>
 
-namespace panda::mem {
+namespace ark::mem {
 
 namespace test {
 class MemStatsGenGCTest;
@@ -306,6 +306,6 @@ private:
     friend test::MemStatsGenGCTest;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_STATS_H

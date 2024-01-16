@@ -24,7 +24,7 @@
 #include "runtime/mem/mem_stats.h"
 #include "runtime/mem/mem_stats_default.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class MemStatsGCTest : public testing::Test {
 public:
@@ -39,7 +39,7 @@ public:
         options.SetExplicitConcurrentGcEnabled(false);
         bool success = Runtime::Create(options);
         ASSERT_TRUE(success) << "Cannot create Runtime";
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
 };
 
 template <uint64_t OBJECT_COUNT>
@@ -157,4 +157,4 @@ TEST_F(MemStatsGCTest, StwGcTest)
     }
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

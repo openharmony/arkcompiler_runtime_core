@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "runtime/include/field.h"
 
-namespace panda {
+namespace ark {
 
 namespace ets::interop::js {
 class InteropCtx;
@@ -31,9 +31,9 @@ class JSRefConvert;
 }  // namespace ets::interop::js
 
 class Field;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 class EtsClassWrapper;
 
@@ -84,6 +84,6 @@ private:
     uint32_t objOffset_ {};
 };
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_FIELD_WRAPPER_H_

@@ -24,7 +24,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "runtime/include/hclass.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 bool GCStaticObjectHelpers::IsClassObject(ObjectHeader *obj)
 {
@@ -145,7 +145,7 @@ bool GCStaticObjectHelpers::TraverseAllObjectsWithInfo(ObjectHeader *objectHeade
         return TraverseArray<INTERRUPTIBLE>(static_cast<coretypes::Array *>(objectHeader), cls, begin, end, handler);
     }
     if (cls->IsClassClass()) {
-        auto objectCls = panda::Class::FromClassObject(objectHeader);
+        auto objectCls = ark::Class::FromClassObject(objectHeader);
         if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
             if (!TraverseClass<INTERRUPTIBLE>(objectCls, handler)) {
                 return false;
@@ -264,6 +264,6 @@ bool GCDynamicObjectHelpers::TraverseAllObjectsWithInfo(ObjectHeader *objectHead
     return TraverseObject<INTERRUPTIBLE>(objectHeader, cls, handler);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_OBJECT_HELPERS_INL_H

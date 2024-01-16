@@ -21,11 +21,11 @@
 #include "runtime/include/object_header.h"
 #include "runtime/include/language_config.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 class DynClass;
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
-namespace panda::mem {
+namespace ark::mem {
 
 class GCMarkerBase {
 public:
@@ -365,6 +365,6 @@ public:
     explicit DefaultGCMarkerImpl(GC *gc) : Base(gc) {}
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_MARKER_H

@@ -24,7 +24,7 @@
 #include "runtime/include/gc_task.h"
 #include "runtime/include/mtmanaged_thread.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 const char LIB_IMONITOR[] = "libimonitor.so";
@@ -130,5 +130,5 @@ private:
     NO_MOVE_SEMANTIC(ScopedGcHung);
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // ARK_RUNTIME_GC_HUNG_H

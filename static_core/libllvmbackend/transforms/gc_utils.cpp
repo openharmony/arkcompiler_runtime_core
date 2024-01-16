@@ -16,7 +16,7 @@
 #include "gc_utils.h"
 #include "transforms/transform_utils.h"
 
-namespace panda::llvmbackend::gc_utils {
+namespace ark::llvmbackend::gc_utils {
 
 bool IsDerived(llvm::Value *val)
 {
@@ -145,4 +145,4 @@ bool HasBeenGcRef(const llvm::Value *val, bool any)
     return oneRef;
 }
 
-}  // namespace panda::llvmbackend::gc_utils
+}  // namespace ark::llvmbackend::gc_utils

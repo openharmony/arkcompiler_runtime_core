@@ -15,7 +15,7 @@
 
 #include "mem/mem_config.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 bool MemConfig::isInitialized_ = false;
 size_t MemConfig::initialHeapSizeLimit_ = 0;
@@ -25,4 +25,4 @@ size_t MemConfig::codeCacheSizeLimit_ = 0;
 size_t MemConfig::compilerMemorySizeLimit_ = 0;
 size_t MemConfig::framesMemorySizeLimit_ = 0;
 size_t MemConfig::nativeStacksMemorySizeLimit_ = 0;
-}  // namespace panda::mem
+}  // namespace ark::mem

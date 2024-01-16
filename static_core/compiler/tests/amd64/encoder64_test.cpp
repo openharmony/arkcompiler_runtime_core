@@ -93,9 +93,9 @@ static T RandomGen()
 
             case (3U): {
                 if constexpr (std::is_same_v<T, float>) {
-                    return panda::bit_cast<float, uint32_t>(gen & MASK_DENORMAL_FLOAT);
+                    return ark::bit_cast<float, uint32_t>(gen & MASK_DENORMAL_FLOAT);
                 } else {
-                    return panda::bit_cast<double, uint64_t>(gen & MASK_DENORMAL_DOUBLE);
+                    return ark::bit_cast<double, uint64_t>(gen & MASK_DENORMAL_DOUBLE);
                 }
             }
             default:
@@ -117,12 +117,12 @@ static T RandomGen()
     }
 }
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Encoder64Test : public ::testing::Test {
 public:
     Encoder64Test()
     {
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
+        ark::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
         encoder_ = Encoder::Create(allocator_, Arch::X86_64, false);
@@ -141,7 +141,7 @@ public:
         delete codeAlloc_;
         delete memStats_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_COPY_SEMANTIC(Encoder64Test);
@@ -3204,4 +3204,4 @@ TEST_F(Encoder64Test, JumpTestTest)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

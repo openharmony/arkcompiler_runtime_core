@@ -19,7 +19,7 @@
 #include <climits>
 #include <cstdlib>
 
-namespace panda::os {
+namespace ark::os {
 
 std::string GetAbsolutePath(std::string_view path)
 {
@@ -29,4 +29,4 @@ std::string GetAbsolutePath(std::string_view path)
     return res == nullptr ? std::string() : res;
 }
 
-}  // namespace panda::os
+}  // namespace ark::os

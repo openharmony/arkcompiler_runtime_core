@@ -19,7 +19,7 @@
 #include <string>
 #include "assembly-file-location.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 struct Label {
     std::string name;                          // NOLINT(misc-non-private-member-variables-in-classes)
@@ -33,6 +33,6 @@ struct Label {
     explicit Label(std::string s) : name(std::move(s)) {}
 };
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_LABEL_H

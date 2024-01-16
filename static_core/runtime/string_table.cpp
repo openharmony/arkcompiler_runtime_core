@@ -19,7 +19,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda {
+namespace ark {
 
 coretypes::String *StringTable::GetOrInternString(const uint8_t *mutf8Data, uint32_t utf16Length,
                                                   const LanguageContext &ctx)
@@ -225,7 +225,7 @@ bool StringTable::Table::UpdateMoved()
     for (auto it = table_.begin(), end = table_.end(); it != end;) {
         auto *object = it->second;
         if (object->IsForwarded()) {
-            ObjectHeader *fwdString = panda::mem::GetForwardAddress(object);
+            ObjectHeader *fwdString = ark::mem::GetForwardAddress(object);
             it->second = static_cast<coretypes::String *>(fwdString);
             LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwdString;
             updated = true;
@@ -246,7 +246,7 @@ void StringTable::Table::Sweep(const GCObjectVisitor &gcObjectVisitor)
         auto *object = it->second;
         if (object->IsForwarded()) {
             ASSERT(gcObjectVisitor(object) != ObjectStatus::DEAD_OBJECT);
-            ObjectHeader *fwdString = panda::mem::GetForwardAddress(object);
+            ObjectHeader *fwdString = ark::mem::GetForwardAddress(object);
             it->second = static_cast<coretypes::String *>(fwdString);
             ++it;
             LOG(DEBUG, GC) << "StringTable: forward " << std::hex << object << " -> " << fwdString;
@@ -400,4 +400,4 @@ coretypes::String *StringTable::InternalTable::InternStringNonMovable(coretypes:
     return result;
 }
 
-}  // namespace panda
+}  // namespace ark

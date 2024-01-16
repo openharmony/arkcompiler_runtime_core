@@ -30,7 +30,7 @@
 constexpr uint16_t PATH_MAX = 1024;
 #endif
 
-namespace panda {
+namespace ark {
 static constexpr size_t K_BITS_PER_BYTE = 8;
 
 static constexpr size_t K_LINE_HEADER_SIZE = 3 * sizeof(uint32_t) + sizeof(uint16_t);
@@ -514,12 +514,12 @@ bool ProfileDumpInfo::ProcessLine(SerializerBuffer &lineBuffer, uint32_t methodS
 bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytesWritten, bool force)
 {
     // NB! we using READWRITE mode to leave the creation job to framework layer.
-    panda::os::unix::file::File myfile = panda::os::file::Open(filename, panda::os::file::Mode::READWRITE);
+    ark::os::unix::file::File myfile = ark::os::file::Open(filename, ark::os::file::Mode::READWRITE);
     if (!myfile.IsValid()) {
         LOG(ERROR, RUNTIME) << "Cannot open the profile file" << filename;
         return false;
     }
-    panda::os::file::FileHolder fholder(myfile);
+    ark::os::file::FileHolder fholder(myfile);
     int fd = myfile.GetFd();
 
     LOG(INFO, RUNTIME) << "  Step3.2: starting merging ***";
@@ -569,4 +569,4 @@ bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytesW
     return result;
 }
 
-}  // namespace panda
+}  // namespace ark

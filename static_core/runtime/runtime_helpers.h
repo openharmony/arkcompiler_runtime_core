@@ -16,10 +16,10 @@
 #ifndef RUNTIME_RUNTIME_HELPERS_H_
 #define RUNTIME_RUNTIME_HELPERS_H_
 
-namespace panda {
+namespace ark {
 
 void PrintStackTrace();
 
-}  // namespace panda
+}  // namespace ark
 
 #endif

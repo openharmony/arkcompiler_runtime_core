@@ -20,7 +20,7 @@
 
 #include "websocketpp/logger/levels.hpp"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 void WsLogger::set_channels(Level channels)
 {
     if (channels != 0) {
@@ -86,4 +86,4 @@ Logger::Level WsLogger::channel_log_level(Level channel) const
             UNREACHABLE();
     }
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

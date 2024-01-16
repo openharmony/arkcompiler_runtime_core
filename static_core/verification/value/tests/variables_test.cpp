@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, Variables)
 {
@@ -53,4 +53,4 @@ TEST_F(VerifierTest, Variables)
     EXPECT_EQ(count, 4UL);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

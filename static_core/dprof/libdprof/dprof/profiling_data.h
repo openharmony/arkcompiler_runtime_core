@@ -21,7 +21,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace panda::dprof {
+namespace ark::dprof {
 class ProfilingData {
 public:
     ProfilingData(std::string appName, uint64_t hash, uint32_t pid)
@@ -40,6 +40,6 @@ private:
     using FeaturesDataMap = std::unordered_map<std::string, std::vector<uint8_t>>;
     FeaturesDataMap featuresDataMap_;
 };
-}  // namespace panda::dprof
+}  // namespace ark::dprof
 
 #endif  // DPROF_LIBDPROF_DPROF_PROFILING_DATA_H

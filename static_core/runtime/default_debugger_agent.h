@@ -19,7 +19,7 @@
 #include "runtime/include/loadable_agent.h"
 #include "runtime/include/runtime.h"
 
-namespace panda {
+namespace ark {
 class DefaultDebuggerAgent : public LibraryAgent, public LibraryAgentLoader<DefaultDebuggerAgent, false> {
 public:
     explicit DefaultDebuggerAgent(os::memory::Mutex &mutex);
@@ -33,6 +33,6 @@ private:
 
     Runtime::DebugSessionHandle debugSession_;
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_DEFAULT_DEBUGGER_AGENT_H

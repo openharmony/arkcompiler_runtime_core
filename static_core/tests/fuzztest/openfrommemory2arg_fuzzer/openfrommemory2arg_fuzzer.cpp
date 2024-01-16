@@ -20,11 +20,11 @@
 namespace OHOS {
 void OpenFromMemory2ArgFuzzTest(const uint8_t *data, size_t size)
 {
-    panda::os::mem::ConstBytePtr ptr(
+    ark::os::mem::ConstBytePtr ptr(
         reinterpret_cast<std::byte *>(reinterpret_cast<uintptr_t>(const_cast<uint8_t *>(data))), size,
         [](std::byte *, size_t) noexcept {});
     std::hash<const uint8_t *> hash;
-    panda::panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(data)));
+    ark::panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(data)));
 }
 }  // namespace OHOS
 

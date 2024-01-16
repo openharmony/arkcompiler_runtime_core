@@ -29,7 +29,7 @@
 #include "ets_object.h"
 #include "ets_array.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 constexpr size_t TYPEAPI_CTX_DATA_CCTOR_ARR_REG = 0;
 
@@ -274,4 +274,4 @@ void PandasmMethodCreator::Create()
         ctx_->AddError("duplicate function " + name_);
     }
 }
-}  // namespace panda::ets
+}  // namespace ark::ets

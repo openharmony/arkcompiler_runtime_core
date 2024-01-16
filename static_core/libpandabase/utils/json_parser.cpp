@@ -21,7 +21,7 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_JSON(level) LOG(level, COMMON) << "JsonParser: " << std::string(logRecursionLevel_, '\t')
 
-namespace panda {
+namespace ark {
 
 bool JsonObject::Parser::Parse(const std::string &text)
 {
@@ -374,6 +374,6 @@ bool JsonObject::Parser::IsWhitespace(int symbol)
 {
     return bool(std::isspace(static_cast<unsigned char>(symbol)));
 }
-}  // namespace panda
+}  // namespace ark
 
 #undef LOG_JSON

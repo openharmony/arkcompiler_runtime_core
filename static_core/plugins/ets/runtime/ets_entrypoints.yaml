@@ -27,8 +27,8 @@
   properties: []
   signature:
   - void
-  - panda::Method*
-  - panda::ObjectHeader*
+  - ark::Method*
+  - ark::ObjectHeader*
   - uint64_t*
 
 - name: CreateLaunchVirtualCoroutine
@@ -37,10 +37,10 @@
   properties: []
   signature:
   - void
-  - panda::Method*
-  - panda::ObjectHeader*
+  - ark::Method*
+  - ark::ObjectHeader*
   - uint64_t*
-  - panda::ObjectHeader*
+  - ark::ObjectHeader*
 
 - name: ArrayCopyTo1bSlowPath
   entrypoint: StdCoreByteCopyTo

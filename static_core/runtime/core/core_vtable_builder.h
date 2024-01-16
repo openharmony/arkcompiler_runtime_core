@@ -18,7 +18,7 @@
 
 #include "runtime/include/vtable_builder.h"
 
-namespace panda {
+namespace ark {
 
 struct CoreVTableSearchBySignature {
     bool operator()(const MethodInfo &info1, const MethodInfo &info2) const
@@ -37,6 +37,6 @@ struct CoreVTableOverridePred {
 
 using CoreVTableBuilder = VTableBuilderImpl<CoreVTableSearchBySignature, CoreVTableOverridePred>;
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H_

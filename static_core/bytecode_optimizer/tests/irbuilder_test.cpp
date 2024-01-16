@@ -15,7 +15,7 @@
 
 #include "common.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 TEST_F(IrBuilderTest, CallVirtShort)
 {
@@ -141,4 +141,4 @@ TEST_F(IrBuilderTest, CallVirtRange)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

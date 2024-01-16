@@ -29,7 +29,7 @@
 #include <malloc.h>
 #endif
 
-namespace panda::os::mem {
+namespace ark::os::mem {
 
 void MmapDeleter(std::byte *ptr, size_t size) noexcept
 {
@@ -151,7 +151,7 @@ static size_t GetCacheLineSizeFromOs()
     LOG_IF(sz <= 0, FATAL, RUNTIME) << "Can't get cache line size from OS";
     return static_cast<uint32_t>(sz);
 #else
-    return panda::CACHE_LINE_SIZE;
+    return ark::CACHE_LINE_SIZE;
 #endif
 }
 
@@ -360,4 +360,4 @@ size_t GetNativeBytesFromMallinfo()
     return mallinfoBytes;
 }
 
-}  // namespace panda::os::mem
+}  // namespace ark::os::mem

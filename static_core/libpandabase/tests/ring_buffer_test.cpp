@@ -17,7 +17,7 @@
 
 #include "utils/ring_buffer.h"
 
-namespace panda::test {
+namespace ark::test {
 static constexpr size_t DEFAULT_BUFFER_SIZE = 10U;
 
 TEST(RingBufferTest, InitializeTest)
@@ -131,4 +131,4 @@ TEST(RingBufferTest, PushPopToBufferTest)
     ASSERT_FALSE(buffer.full());
     ASSERT_EQ(buffer.begin(), buffer.end());
 }
-}  // namespace panda::test
+}  // namespace ark::test

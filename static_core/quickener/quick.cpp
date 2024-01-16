@@ -21,7 +21,7 @@
 #include "libpandabase/utils/pandargs.h"
 #include "libpandafile/file_writer.h"
 
-static void PrintHelp(panda::PandArgParser &pa_parser)
+static void PrintHelp(ark::PandArgParser &pa_parser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "arkquicker [options] INPUT_FILE OUTPUT_FILE" << std::endl << std::endl;
@@ -29,8 +29,8 @@ static void PrintHelp(panda::PandArgParser &pa_parser)
     std::cerr << pa_parser.GetHelpString() << std::endl;
 }
 
-static bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input,
-                        const panda::PandArg<std::string> &output, const panda::PandArg<bool> &help, int argc,
+static bool ProcessArgs(ark::PandArgParser &pa_parser, const ark::PandArg<std::string> &input,
+                        const ark::PandArg<std::string> &output, const ark::PandArg<bool> &help, int argc,
                         const char **argv)
 {
     if (!pa_parser.Parse(argc, argv)) {
@@ -43,20 +43,20 @@ static bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<st
         return false;
     }
 
-    panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR, panda::Logger::ComponentMask()
-                                                                         .set(panda::Logger::Component::QUICKENER)
-                                                                         .set(panda::Logger::Component::PANDAFILE));
+    ark::Logger::InitializeStdLogging(
+        ark::Logger::Level::ERROR,
+        ark::Logger::ComponentMask().set(ark::Logger::Component::QUICKENER).set(ark::Logger::Component::PANDAFILE));
 
     return true;
 }
 
 int main(int argc, const char **argv)
 {
-    panda::PandArg<bool> help("help", false, "Print this message and exit");
-    panda::PandArg<std::string> input("INPUT", "", "Path to the input binary file");
-    panda::PandArg<std::string> output("OUTPUT", "", "Path to the output binary file");
+    ark::PandArg<bool> help("help", false, "Print this message and exit");
+    ark::PandArg<std::string> input("INPUT", "", "Path to the input binary file");
+    ark::PandArg<std::string> output("OUTPUT", "", "Path to the output binary file");
 
-    panda::PandArgParser pa_parser;
+    ark::PandArgParser pa_parser;
 
     pa_parser.Add(&help);
     pa_parser.PushBackTail(&input);
@@ -67,24 +67,24 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    auto input_file = panda::panda_file::File::Open(input.GetValue());
+    auto input_file = ark::panda_file::File::Open(input.GetValue());
     if (!input_file) {
         LOG(ERROR, QUICKENER) << "Cannot open file '" << input.GetValue() << "'";
         return 1;
     }
-    panda::panda_file::FileReader reader(std::move(input_file));
+    ark::panda_file::FileReader reader(std::move(input_file));
     if (!reader.ReadContainer()) {
         LOG(ERROR, QUICKENER) << "Cannot read container";
         return 1;
     }
 
-    panda::panda_file::ItemContainer *container = reader.GetContainerPtr();
+    ark::panda_file::ItemContainer *container = reader.GetContainerPtr();
 
-    panda::quick::Quickener quickener(container, const_cast<panda::panda_file::File *>(reader.GetFilePtr()),
-                                      reader.GetItems());
+    ark::quick::Quickener quickener(container, const_cast<ark::panda_file::File *>(reader.GetFilePtr()),
+                                    reader.GetItems());
     quickener.QuickContainer();
 
-    auto writer = panda::panda_file::FileWriter(output.GetValue());
+    auto writer = ark::panda_file::FileWriter(output.GetValue());
     if (!writer) {
         PLOG(ERROR, QUICKENER) << "Cannot create file writer with path '" << output.GetValue() << "'";
         return 1;

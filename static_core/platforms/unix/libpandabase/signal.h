@@ -25,7 +25,7 @@
 #include "libpandabase/os/thread.h"
 #include "libpandabase/os/failure_retry.h"
 
-namespace panda::os::unix {
+namespace ark::os::unix {
 
 class SignalCtl {
 public:
@@ -208,6 +208,6 @@ private:
     std::function<void()> beforeThreadStopCallback_ {nullptr};
 };
 
-}  // namespace panda::os::unix
+}  // namespace ark::os::unix
 
 #endif  // PANDA_LIBPANDABASE_OS_UNIX_SIGNAL_H_

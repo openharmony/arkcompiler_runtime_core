@@ -18,12 +18,12 @@
 
 <%= Common::include_plugin_files "compiler_extensions", "pipeline_includes" %>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 inline void OptimizationsAfterUnroll([[maybe_unused]] Graph *graph) {
 <%= Common::include_plugin_files "compiler_extensions", "optimizations_after_unroll" %>
 }
 
-} // namespace panda::compiler
+} // namespace ark::compiler
 
 #endif // COMPILER_OPTIMIZER_TEMPLATES_PIPELINE_INCLUDES_H

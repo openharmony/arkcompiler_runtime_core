@@ -21,7 +21,7 @@
 #include <set>
 #include "libpandafile/file_item_container.h"
 
-namespace panda::static_linker {
+namespace ark::static_linker {
 
 struct Result {
     std::vector<std::string> errors;
@@ -56,6 +56,6 @@ struct Config {
 Config DefaultConfig();
 
 Result Link(const Config &conf, const std::string &output, const std::vector<std::string> &input);
-}  // namespace panda::static_linker
+}  // namespace ark::static_linker
 
 #endif

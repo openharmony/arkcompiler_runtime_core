@@ -36,7 +36,7 @@
 #include <unistd.h>
 #include <utility>
 
-namespace panda::os::unix::file {
+namespace ark::os::unix::file {
 
 class File {
 public:
@@ -233,6 +233,6 @@ private:
     }
 };
 
-}  // namespace panda::os::unix::file
+}  // namespace ark::os::unix::file
 
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_

@@ -185,7 +185,7 @@ module Constants
 
     REF_UINT = "DataType::GetIntTypeForReference(GetGraph()->GetArch())"
 
-    REGION_SIZE_BIT = "panda::helpers::math::GetIntLog2(mem::ObjectAllocatorG1<>::GetRegionSize())"
+    REGION_SIZE_BIT = "ark::helpers::math::GetIntLog2(mem::ObjectAllocatorG1<>::GetRegionSize())"
     MANAGED_THREAD_G1_POST_BARRIER_BUFFER_OFFSET = "cross_values::GetManagedThreadG1PostBarrierBufferOffset(GetArch())"
     G1_LOCK_BUFFER_DATA_OFFSET = "cross_values::GetG1LockBufferDataOffset(GetArch())"
     G1_LOCK_BUFFER_TAIL_OFFSET = "cross_values::GetG1LockBufferTailOffset(GetArch())"
@@ -214,9 +214,9 @@ module Constants
     STRING_CLASS_SIZE = "sizeof(coretypes::String)"
     STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"
     STRING_MUTF8_1B_MAX = "0x7f"
-    STRING_LENGTH_OFFSET = "panda::coretypes::STRING_LENGTH_OFFSET"
-    STRING_HASHCODE_OFFSET = "panda::coretypes::STRING_HASHCODE_OFFSET"
-    STRING_DATA_OFFSET = "panda::coretypes::STRING_DATA_OFFSET"
+    STRING_LENGTH_OFFSET = "ark::coretypes::STRING_LENGTH_OFFSET"
+    STRING_HASHCODE_OFFSET = "ark::coretypes::STRING_HASHCODE_OFFSET"
+    STRING_DATA_OFFSET = "ark::coretypes::STRING_DATA_OFFSET"
     STRING_EQUALS_UNROLL = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_EQUALS_UNROLL)"
     STRING_EQUALS_UNROLL_COMPRESSED = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_EQUALS_UNROLL_COMPRESSED)"
     ALIGNMENT_MASK = "~(TLAB_ALIGNMENT - 1)"
@@ -290,8 +290,8 @@ end
 macro(:anytoheapobj) do |arg|
   CastAnyTypeValue(arg)
     .AnyType("AnyBaseType::ECMASCRIPT_HEAP_OBJECT_TYPE")
-    .SetFlag("panda::compiler::inst_flags::Flags::NO_CSE")
-    .SetFlag("panda::compiler::inst_flags::Flags::NO_HOIST")
+    .SetFlag("ark::compiler::inst_flags::Flags::NO_CSE")
+    .SetFlag("ark::compiler::inst_flags::Flags::NO_HOIST")
     .ref
 end
 

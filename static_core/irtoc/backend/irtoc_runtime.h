@@ -26,7 +26,7 @@
 #include "runtime/include/hclass.h"
 #include "libpandabase/utils/bit_utils.h"
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 
 class IrtocRuntimeInterface : public compiler::RuntimeInterface {
 public:
@@ -89,21 +89,21 @@ public:
         return unit->GetArgsCount();
     }
 
-    ::panda::mem::BarrierType GetPreType() const override
+    ::ark::mem::BarrierType GetPreType() const override
     {
-        return ::panda::mem::BarrierType::PRE_SATB_BARRIER;
+        return ::ark::mem::BarrierType::PRE_SATB_BARRIER;
     }
 
-    ::panda::mem::BarrierType GetPostType() const override
+    ::ark::mem::BarrierType GetPostType() const override
     {
-        return ::panda::mem::BarrierType::POST_INTERREGION_BARRIER;
+        return ::ark::mem::BarrierType::POST_INTERREGION_BARRIER;
     }
 
-    ::panda::mem::BarrierOperand GetBarrierOperand([[maybe_unused]] ::panda::mem::BarrierPosition barrierPosition,
-                                                   [[maybe_unused]] std::string_view operandName) const override
+    ::ark::mem::BarrierOperand GetBarrierOperand([[maybe_unused]] ::ark::mem::BarrierPosition barrierPosition,
+                                                 [[maybe_unused]] std::string_view operandName) const override
     {
         ASSERT(operandName == "REGION_SIZE_BITS");
-        uint8_t regionSizeBits = helpers::math::GetIntLog2(panda::mem::G1_REGION_SIZE);
+        uint8_t regionSizeBits = helpers::math::GetIntLog2(ark::mem::G1_REGION_SIZE);
         return mem::BarrierOperand(mem::BarrierOperandType::UINT8_LITERAL, mem::BarrierOperandValue(regionSizeBits));
     }
 
@@ -141,6 +141,6 @@ public:
 #include "irtoc_interface_extensions.inl.h"
 };
 
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc
 
 #endif  // PANDA_IRTOC_RUNTIME_H

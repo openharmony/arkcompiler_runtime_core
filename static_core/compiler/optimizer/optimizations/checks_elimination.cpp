@@ -23,7 +23,7 @@
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 bool ChecksElimination::RunImpl()
 {
@@ -1238,4 +1238,4 @@ void ChecksElimination::ReplaceCheckMustThrowByUnconditionalDeoptimize()
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

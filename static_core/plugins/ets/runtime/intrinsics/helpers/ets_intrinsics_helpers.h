@@ -26,7 +26,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 
-namespace panda::ets::intrinsics::helpers {
+namespace ark::ets::intrinsics::helpers {
 
 inline constexpr double MIN_RADIX = 2;
 inline constexpr double MAX_RADIX = 36;
@@ -380,7 +380,7 @@ EtsString *FpToStringDecimalRadix(FpType number)
     }
 
     static constexpr FpType MIN_BOUND = 0.1;
-    using SignedIntType = panda::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, true>;
+    using SignedIntType = ark::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, true>;
 
     if (MIN_BOUND <= number && number < 1) {  // 0.1: 10 ** -1
         // Fast path. In this case, n==0, just need to calculate k and s.
@@ -473,7 +473,7 @@ EtsString *FpToString(FpType number, int radix)
         return helpers::FpToStringDecimalRadix(number);
     }
 
-    using UnsignedIntType = panda::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, false>;
+    using UnsignedIntType = ark::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, false>;
 
     bool negative = false;
     if (number < 0.0) {
@@ -506,9 +506,9 @@ EtsString *FpToString(FpType number, int radix)
     return EtsString::CreateFromMUtf8(result.c_str());
 }
 
-}  // namespace panda::ets::intrinsics::helpers
+}  // namespace ark::ets::intrinsics::helpers
 
-namespace panda::ets::intrinsics::helpers::flags {
+namespace ark::ets::intrinsics::helpers::flags {
 
 inline constexpr uint32_t NO_FLAGS = 0U;
 inline constexpr uint32_t ALLOW_BINARY = 1U << 0U;
@@ -516,6 +516,6 @@ inline constexpr uint32_t ALLOW_OCTAL = 1U << 1U;
 inline constexpr uint32_t ALLOW_HEX = 1U << 2U;
 inline constexpr uint32_t IGNORE_TRAILING = 1U << 3U;
 
-}  // namespace panda::ets::intrinsics::helpers::flags
+}  // namespace ark::ets::intrinsics::helpers::flags
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_

@@ -26,7 +26,7 @@
 
 #include "runtime/tooling/sampler/sample_info.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 using ModuleMap = std::unordered_map<uintptr_t, std::unique_ptr<const panda_file::File>>;
 using MethodMap = std::unordered_map<const panda_file::File *, std::unordered_map<uint32_t, std::string>>;
@@ -110,6 +110,6 @@ private:
     bool buildColdGraph_;
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_TOOLS_SAMPLER_TRACE_DUMPER_H

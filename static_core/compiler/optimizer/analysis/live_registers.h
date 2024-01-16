@@ -22,7 +22,7 @@
 #include "optimizer/pass.h"
 #include "optimizer/analysis/liveness_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 using LifeIntervalsIt = ArenaVector<LifeIntervals *>::iterator;
 class LifeIntervalsTreeNode {
@@ -182,5 +182,5 @@ private:
     LifeIntervalsTree *instLifeIntervalsTree_ {nullptr};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_LIVE_REGISTERS_H

@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/workers/gc_workers_thread_pool.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 bool GCWorkersProcessor::Init()
 {
@@ -95,4 +95,4 @@ void GCWorkersThreadPool::RunInCurrentThread()
     threadPool_->Help();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

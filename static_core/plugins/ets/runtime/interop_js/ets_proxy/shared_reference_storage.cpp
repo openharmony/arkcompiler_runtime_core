@@ -17,7 +17,7 @@
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 class SharedReferenceSanity {
 public:
@@ -121,4 +121,4 @@ bool SharedReferenceStorage::CheckAlive(void *data)
     return IsValidItem(sharedRef) && SharedReferenceSanity::CheckAlive(sharedRef);
 }
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy

@@ -20,7 +20,7 @@
 
 // NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-pro-type-vararg, readability-named-parameter)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *TEST_BIN_FILE_NAME = "RegisteringNativeMethodsTest.abc";
 
@@ -146,6 +146,6 @@ TEST_F(RegisteringNativeMethodsTest, UnregisterNativesTest)
     }
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-pro-type-vararg, readability-named-parameter)

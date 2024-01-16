@@ -20,8 +20,8 @@
 
 #include "verification/public.h"
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 bool LoadConfig(Config *cfg, std::string_view filename);
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config
 
 #endif  // PANDA_VERIFICATION_CONFIG_CONFIG_LOAD_H

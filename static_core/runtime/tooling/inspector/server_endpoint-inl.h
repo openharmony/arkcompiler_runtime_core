@@ -28,7 +28,7 @@
 #include <optional>
 #include <utility>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 template <>  // NOLINTNEXTLINE(misc-definitions-in-headers)
 ServerEndpoint<CONFIG>::ServerEndpoint() noexcept
 {
@@ -76,6 +76,6 @@ void ServerEndpoint<CONFIG>::OnCall(
                             std::placeholders::_1, std::cref(params)));
         });
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_RUNTIME_TOOLING_INSPECTOR_SERVER_ENDPOINT_INL_H

@@ -17,7 +17,7 @@
 
 #include "asmjit/x86.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 using namespace asmjit;
 
 class AsmJitTest : public ::testing::Test {};
@@ -146,4 +146,4 @@ TEST_F(AsmJitTest, AddExplicit)
     err = allocator.release(ro_ptr);
     ASSERT_FALSE(err);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

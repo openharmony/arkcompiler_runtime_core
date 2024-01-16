@@ -21,7 +21,7 @@
 
 #include "macros.h"
 
-namespace panda::os {
+namespace ark::os {
 
 class Error {
 public:
@@ -40,6 +40,6 @@ private:
     std::variant<int, std::string> err_;
 };
 
-}  // namespace panda::os
+}  // namespace ark::os
 
 #endif  // PANDA_LIBPANDABASE_UTILS_ERROR_H_

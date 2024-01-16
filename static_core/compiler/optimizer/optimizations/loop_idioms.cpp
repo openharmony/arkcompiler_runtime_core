@@ -18,7 +18,7 @@
 #include "optimizer/analysis/countable_loop_parser.h"
 #include "optimizer/optimizations/loop_idioms.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool LoopIdioms::RunImpl()
 {
     if (GetGraph()->GetArch() == Arch::AARCH32) {
@@ -254,4 +254,4 @@ bool LoopIdioms::ReplaceArrayInitLoop(Loop *loop, CountableLoopInfo *loopInfo, S
     return true;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

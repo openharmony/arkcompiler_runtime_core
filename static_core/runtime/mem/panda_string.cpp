@@ -21,7 +21,7 @@
 #include "libpandabase/macros.h"
 #include "runtime/include/coretypes/string.h"
 
-namespace panda {
+namespace ark {
 
 static constexpr int BASE = 10;
 
@@ -98,4 +98,4 @@ PandaString ConvertToString(coretypes::String *s)
     return ConvertToString(sp);
 }
 
-}  // namespace panda
+}  // namespace ark

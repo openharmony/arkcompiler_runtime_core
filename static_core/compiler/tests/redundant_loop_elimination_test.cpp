@@ -17,7 +17,7 @@
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/optimizations/redundant_loop_elimination.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RedundantLoopEliminationTest : public CommonTest {
 public:
     RedundantLoopEliminationTest() : graph_(CreateGraphStartEndBlocks()) {}
@@ -668,4 +668,4 @@ TEST_F(RedundantLoopEliminationTest, PotentiallyInfinitLoop)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

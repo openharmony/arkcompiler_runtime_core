@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-namespace panda::compiler {
+namespace ark::compiler {
 // This class dump graph in C1Visualizer format
 // Option: --compiler-visualizer-dump
 // Open dump files:
@@ -64,6 +64,6 @@ private:
     const char *passName_;
     uint32_t offset_ {0};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_VISUALIZER_PRINTER_H

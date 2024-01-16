@@ -15,7 +15,7 @@
 
 #include "lock_free_queue.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 void LockFreeQueue::Push(const FileInfo &data)
 {
@@ -113,4 +113,4 @@ bool LockFreeQueue::FindValue(uintptr_t data) const
     return false;
 }
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler

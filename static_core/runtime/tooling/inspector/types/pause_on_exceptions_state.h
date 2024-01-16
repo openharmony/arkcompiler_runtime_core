@@ -16,8 +16,8 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_PAUSE_ON_EXCEPTIONS_STATE_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_PAUSE_ON_EXCEPTIONS_STATE_H
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 enum class PauseOnExceptionsState { NONE = 0x0, CAUGHT = 0x1, UNCAUGHT = 0x2, ALL = 0x3 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_TYPES_PAUSE_ON_EXCEPTIONS_STATE_H

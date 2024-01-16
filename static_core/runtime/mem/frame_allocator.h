@@ -22,7 +22,7 @@
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/mem/mmap_mem_pool-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 //                                          Allocation flow looks like that:
 //
@@ -139,6 +139,6 @@ private:
     friend class FrameAllocatorTest;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_H

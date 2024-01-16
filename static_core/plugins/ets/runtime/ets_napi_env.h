@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/mem/ets_reference.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsCoroutine;
 class PandaEtsVM;
@@ -65,6 +65,6 @@ private:
     PandaUniquePtr<EtsReferenceStorage> referenceStorage_;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_NAPI_ENV_H

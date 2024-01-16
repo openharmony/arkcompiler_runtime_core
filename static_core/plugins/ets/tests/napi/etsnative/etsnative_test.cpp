@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsNativeTest : public testing::Test {};
 
@@ -46,4 +46,4 @@ TEST_F(EtsNativeTest, EtsNativeTest)
     ASSERT_EQ(etsVms, vm);
     ASSERT_TRUE(vm->DestroyEtsVM() == ETS_OK) << "Cannot destroy ETS VM";
 }
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

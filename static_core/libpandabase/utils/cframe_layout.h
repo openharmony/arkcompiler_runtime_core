@@ -18,7 +18,7 @@
 
 #include "arch.h"
 
-namespace panda {
+namespace ark {
 
 enum FrameBridgeKind {
     INTERPRETER_TO_COMPILED_CODE = 1,
@@ -114,22 +114,22 @@ public:
 
     constexpr size_t GetCalleeFpRegsStartSlot() const
     {
-        return GetCalleeRegsStartSlot() + ::panda::GetCalleeRegsCount(GetArch(), false);
+        return GetCalleeRegsStartSlot() + ::ark::GetCalleeRegsCount(GetArch(), false);
     }
 
     constexpr size_t GetCallerRegsStartSlot() const
     {
-        return GetCalleeFpRegsStartSlot() + ::panda::GetCalleeRegsCount(GetArch(), true);
+        return GetCalleeFpRegsStartSlot() + ::ark::GetCalleeRegsCount(GetArch(), true);
     }
 
     constexpr size_t GetCallerFpRegsStartSlot() const
     {
-        return GetCallerRegsStartSlot() + ::panda::GetCallerRegsCount(GetArch(), false);
+        return GetCallerRegsStartSlot() + ::ark::GetCallerRegsCount(GetArch(), false);
     }
 
     constexpr size_t GetSpillsStartSlot() const
     {
-        return GetCallerFpRegsStartSlot() + ::panda::GetCallerRegsCount(GetArch(), true);
+        return GetCallerFpRegsStartSlot() + ::ark::GetCallerRegsCount(GetArch(), true);
     }
 
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -245,12 +245,12 @@ public:
 
     constexpr size_t GetCalleeRegistersCount(bool isFp) const
     {
-        return panda::GetCalleeRegsCount(arch_, isFp);
+        return ark::GetCalleeRegsCount(arch_, isFp);
     }
 
     constexpr size_t GetCallerRegistersCount(bool isFp) const
     {
-        return panda::GetCallerRegsCount(arch_, isFp);
+        return ark::GetCallerRegsCount(arch_, isFp);
     }
 
     constexpr size_t GetSlotSize() const
@@ -351,6 +351,6 @@ using CFrameLocals = CFrameLayout::LocalsRegion;
 using CFrameSlots = CFrameLayout::SlotsRegion;
 using CFrameRegs = CFrameLayout::RegsRegion;
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_CFRAME_LAYOUT_H

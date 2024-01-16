@@ -38,9 +38,9 @@ using llvm::isa;
 using llvm::User;
 using llvm::Value;
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
-bool RemoveUnusedFunctions::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
+bool RemoveUnusedFunctions::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return options->doIrtocInline;
 }
@@ -70,7 +70,7 @@ llvm::PreservedAnalyses RemoveUnusedFunctions::run(llvm::Module &module, llvm::M
         }
     }
 
-    changed |= panda::llvmbackend::RemoveDanglingAliases(module);
+    changed |= ark::llvmbackend::RemoveDanglingAliases(module);
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 void RemoveUnusedFunctions::VisitValue(DenseSet<Function *> &usedFunctions, Value &value, DenseSet<Value *> &seenValues)
@@ -113,4 +113,4 @@ void RemoveUnusedFunctions::VisitValue(DenseSet<Function *> &usedFunctions, Valu
     }
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

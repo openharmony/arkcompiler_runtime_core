@@ -24,11 +24,11 @@
 #include <optional>
 #include <unordered_map>
 
-namespace panda::verifier {
+namespace ark::verifier {
 template <typename BoundVarValue>
 class VarBindings {
 public:
-    using EqualityRel = panda::type_system::Realtion<Variables::Var>;
+    using EqualityRel = ark::type_system::Realtion<Variables::Var>;
 
     void Equate(Variables::Var lhs, Variable::Var rhs)
     {
@@ -44,6 +44,6 @@ private:
     std::unordered_map<Variables::Var, BoundVarValue> Bindings_;
     EqualityRel Equality_;
 };
-}  //  namespace panda::verifier
+}  //  namespace ark::verifier
 
 #endif  // PANDA_VERIFICATION_VALUE_VAR_BINDING_H

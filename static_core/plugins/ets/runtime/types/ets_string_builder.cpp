@@ -25,11 +25,11 @@
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include <cstdint>
 
-namespace panda::ets {
+namespace ark::ets {
 
 /// StringBuilder fields offsets
-static constexpr uint32_t SB_BUFFER_OFFSET = panda::ObjectHeader::ObjectHeaderSize();
-static constexpr uint32_t SB_INDEX_OFFSET = SB_BUFFER_OFFSET + panda::OBJECT_POINTER_SIZE;
+static constexpr uint32_t SB_BUFFER_OFFSET = ark::ObjectHeader::ObjectHeaderSize();
+static constexpr uint32_t SB_INDEX_OFFSET = SB_BUFFER_OFFSET + ark::OBJECT_POINTER_SIZE;
 static constexpr uint32_t SB_LENGTH_OFFSET = SB_INDEX_OFFSET + sizeof(int32_t);
 static constexpr uint32_t SB_COMPRESS_OFFSET = SB_LENGTH_OFFSET + sizeof(int32_t);
 
@@ -90,7 +90,7 @@ static ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsC
     if (compress) {
         auto n = arr->GetLength();
         for (uint32_t i = 0; i < n; ++i) {
-            if (!panda::coretypes::String::IsASCIICharacter(arr->Get(i))) {
+            if (!ark::coretypes::String::IsASCIICharacter(arr->Get(i))) {
                 sb->SetFieldPrimitive<bool>(SB_COMPRESS_OFFSET, false);
                 break;
             }
@@ -326,4 +326,4 @@ EtsString *StringBuilderToString(ObjectHeader *sb)
     return s;
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

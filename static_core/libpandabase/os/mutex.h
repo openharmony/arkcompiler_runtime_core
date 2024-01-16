@@ -28,7 +28,7 @@
 #include <atomic>
 #include <pthread.h>
 
-namespace panda::os::memory {
+namespace ark::os::memory {
 
 // Dummy lock which locks nothing
 // but has the same methods as RWLock and Mutex.
@@ -222,6 +222,6 @@ private:
     NO_MOVE_SEMANTIC(WriteLockHolder);
 };
 
-}  // namespace panda::os::memory
+}  // namespace ark::os::memory
 
 #endif  // PAND_LIBPANDABASE_PBASE_OS_MACROS_H_

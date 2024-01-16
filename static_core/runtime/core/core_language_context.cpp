@@ -20,7 +20,7 @@
 #include "runtime/include/vtable_builder-inl.h"
 #include "runtime/handle_scope-inl.h"
 
-namespace panda {
+namespace ark {
 
 static Class *GetExceptionClass(const uint8_t *mutf8Name, ManagedThread *thread, ClassLinker *classLinker)
 {
@@ -166,4 +166,4 @@ VerificationInitAPI CoreLanguageContext::GetVerificationInitAPI() const
     return vApi;
 }
 
-}  // namespace panda
+}  // namespace ark

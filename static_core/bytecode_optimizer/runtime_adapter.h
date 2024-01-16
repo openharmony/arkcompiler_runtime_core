@@ -27,7 +27,7 @@
 #include "libpandafile/proto_data_accessor-inl.h"
 #include "libpandafile/type_helper.h"
 
-namespace panda {
+namespace ark {
 using compiler::RuntimeInterface;
 
 class BytecodeOptimizerRuntimeAdapter : public RuntimeInterface {
@@ -454,6 +454,6 @@ private:
 
     const panda_file::File &pandaFile_;
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H

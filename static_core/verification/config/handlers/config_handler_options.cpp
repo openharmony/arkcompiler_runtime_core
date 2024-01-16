@@ -35,7 +35,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
 namespace {
 
@@ -59,7 +59,7 @@ PandaString GetKeys(const M &map)
 
 }  // namespace
 
-using panda::verifier::config::Section;
+using ark::verifier::config::Section;
 
 void RegisterConfigHandlerOptions(Config *dcfg)
 {
@@ -122,4 +122,4 @@ void RegisterConfigHandlerOptions(Config *dcfg)
     config::RegisterConfigHandler(dcfg, "config.debug.options.verifier", CONFIG_DEBUG_OPTIONS_VERIFIER);
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug

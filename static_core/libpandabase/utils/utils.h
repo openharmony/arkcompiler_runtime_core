@@ -20,7 +20,7 @@
 
 #include <limits>
 
-namespace panda {
+namespace ark {
 // ----------------------------------------------------------------------------
 // User-defined suffixes
 constexpr int operator""_I(unsigned long long v)  // NOLINT(google-runtime-int)
@@ -64,5 +64,5 @@ inline uint32_t HexValue(uint32_t c)
 
 PANDA_PUBLIC_API uint32_t CountDigits(uint64_t v);
 
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_LIBPANDABASE_UTILS_UTILS_H

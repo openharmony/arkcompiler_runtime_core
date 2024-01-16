@@ -28,7 +28,7 @@
 #include "runtime/include/tooling/pt_thread.h"
 #include "libpandabase/os/mutex.h"
 
-namespace panda::tooling::test {
+namespace ark::tooling::test {
 using TestMap = std::unordered_map<panda_file::SourceLang, std::unordered_map<const char *, std::unique_ptr<ApiTest>>>;
 
 class TestUtil {
@@ -311,6 +311,6 @@ std::ostream &operator<<(std::ostream &out, std::nullptr_t);
     } while (0);
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-}  // namespace panda::tooling::test
+}  // namespace ark::tooling::test
 
 #endif  // PANDA_RUNTIME_DEBUG_TEST_TEST_UTIL_H

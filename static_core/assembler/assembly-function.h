@@ -35,7 +35,7 @@
 #include "ide_helpers.h"
 #include "meta.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Function {
@@ -64,19 +64,19 @@ struct Function {
         Type type;
         std::unique_ptr<ParamMetadata> metadata;
 
-        Parameter(Type t, panda::panda_file::SourceLang lang)
+        Parameter(Type t, ark::panda_file::SourceLang lang)
             : type(std::move(t)), metadata(extensions::MetadataExtension::CreateParamMetadata(lang))
         {
         }
     };
 
     std::string name;
-    panda::panda_file::SourceLang language;
+    ark::panda_file::SourceLang language;
     std::unique_ptr<FunctionMetadata> metadata;
 
-    std::unordered_map<std::string, panda::pandasm::Label> labelTable;
-    std::vector<panda::pandasm::Ins> ins; /* function instruction list */
-    std::vector<panda::pandasm::debuginfo::LocalVariable> localVariableDebug;
+    std::unordered_map<std::string, ark::pandasm::Label> labelTable;
+    std::vector<ark::pandasm::Ins> ins; /* function instruction list */
+    std::vector<ark::pandasm::debuginfo::LocalVariable> localVariableDebug;
     std::string sourceFile; /* The file in which the function is defined or empty */
     std::string sourceCode;
     std::vector<CatchBlock> catchBlocks;
@@ -97,12 +97,12 @@ struct Function {
         }
     }
 
-    void AddInstruction(const panda::pandasm::Ins &instruction)
+    void AddInstruction(const ark::pandasm::Ins &instruction)
     {
         ins.emplace_back(instruction);
     }
 
-    Function(std::string s, panda::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
+    Function(std::string s, ark::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
         : name(std::move(s)),
           language(lang),
           metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang)),
@@ -110,7 +110,7 @@ struct Function {
     {
     }
 
-    Function(std::string s, panda::panda_file::SourceLang lang)
+    Function(std::string s, ark::panda_file::SourceLang lang)
         : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang))
     {
     }
@@ -186,6 +186,6 @@ struct Function {
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_FUNCTION_H

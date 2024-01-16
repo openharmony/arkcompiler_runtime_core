@@ -18,7 +18,7 @@
 
 #include <tuple>
 
-namespace panda::serializer::internal {
+namespace ark::serializer::internal {
 
 template <size_t N>
 struct StructToTupleImpl;
@@ -60,6 +60,6 @@ auto StructToTuple(Struct &&str)
     return StructToTupleImpl<N> {}(std::forward<Struct>(str));
 }
 
-}  // namespace panda::serializer::internal
+}  // namespace ark::serializer::internal
 
 #endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_STRUCT_TO_TUPLE_H_

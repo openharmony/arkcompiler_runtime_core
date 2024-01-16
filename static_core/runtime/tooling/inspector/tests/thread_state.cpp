@@ -21,7 +21,7 @@
 
 // NOLINTBEGIN
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 class ThreadStateTest : public testing::Test {
     void SetUp()
     {
@@ -207,6 +207,6 @@ TEST_F(ThreadStateTest, OnException)
     ASSERT_TRUE(state.IsPaused());
 }
 
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
 // NOLINTEND

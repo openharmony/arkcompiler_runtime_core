@@ -21,7 +21,7 @@
 #include "runtime/mem/internal_allocator.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_INTERNAL_ALLOCATOR(level) LOG(level, ALLOC) << "InternalAllocator: "
@@ -119,6 +119,6 @@ void InternalAllocator<CONFIG>::VisitAndRemoveFreePools(MemVisitor memVisitor)
 
 #undef LOG_INTERNAL_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H

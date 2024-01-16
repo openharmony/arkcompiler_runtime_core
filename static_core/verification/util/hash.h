@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <tuple>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename T>
 size_t StdHash(const T &x)
@@ -30,7 +30,7 @@ size_t StdHash(const T &x)
     return std::hash<T> {}(x);
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 namespace std {
 
@@ -38,8 +38,8 @@ template <typename T1, typename T2>
 struct hash<std::pair<T1, T2>> {
     size_t operator()(const std::pair<T1, T2> &pair) const
     {
-        return panda::MergeHashes(panda::verifier::StdHash(pair.first),
-                                  panda::verifier::StdHash(pair.second));  // NOLINT
+        return ark::MergeHashes(ark::verifier::StdHash(pair.first),
+                                ark::verifier::StdHash(pair.second));  // NOLINT
     }
 };
 
@@ -49,7 +49,7 @@ struct hash<std::tuple<T...>> {
     size_t Helper(size_t tmpHash, const std::tuple<T...> &tuple) const
     {
         if constexpr (N < sizeof...(T)) {
-            size_t tmp_hash1 = panda::MergeHashes(tmpHash, panda::verifier::StdHash(std::get<N>(tuple)));  // NOLINT
+            size_t tmp_hash1 = ark::MergeHashes(tmpHash, ark::verifier::StdHash(std::get<N>(tuple)));  // NOLINT
             return Helper<N + 1>(tmp_hash1, tuple);
         }
 
@@ -58,7 +58,7 @@ struct hash<std::tuple<T...>> {
 
     size_t operator()(const std::tuple<T...> &tuple) const
     {
-        return Helper<1>(panda::verifier::StdHash(std::get<0>(tuple)), tuple);
+        return Helper<1>(ark::verifier::StdHash(std::get<0>(tuple)), tuple);
     }
 };
 

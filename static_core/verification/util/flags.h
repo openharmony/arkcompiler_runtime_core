@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-namespace panda::verifier {
+namespace ark::verifier {
 template <typename UInt, typename Enum, Enum...>
 class FlagsForEnum;
 
@@ -140,6 +140,6 @@ protected:
     constexpr static UInt MASK = Base::MASK << static_cast<UInt>(1);
     static_assert(MASK != 0, "too many flags for UInt size");
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_UTIL_FLAGS_H__

@@ -17,7 +17,7 @@
 
 #include "murmur3_hash.h"
 
-namespace panda {
+namespace ark {
 
 // Now, murmur3 hash is used by default
 template <uint32_t SEED_VALUE>
@@ -163,6 +163,6 @@ public:
         return MergeHashes(std::hash<T>()(x.first), std::hash<U>()(x.second));
     }
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_UTILS_HASH_H

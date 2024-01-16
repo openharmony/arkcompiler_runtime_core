@@ -23,7 +23,7 @@
 #include "runtime/include/language_context.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda {
+namespace ark {
 
 namespace mem::test {
 class MultithreadedInternStringTableTest;
@@ -173,6 +173,6 @@ private:
     friend class mem::test::MultithreadedInternStringTableTest;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_STRING_TABLE_H_

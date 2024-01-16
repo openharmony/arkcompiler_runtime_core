@@ -40,7 +40,7 @@
 #include "types/ets_typeapi.h"
 #include "types/ets_typeapi_create.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 namespace {
 
 EtsString *ErrorFromCtx(TypeCreatorCtx *ctx)
@@ -591,4 +591,4 @@ EtsString *TypeAPITypeCreatorCtxClassAddField(EtsLong classPtr, EtsString *name,
 }
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

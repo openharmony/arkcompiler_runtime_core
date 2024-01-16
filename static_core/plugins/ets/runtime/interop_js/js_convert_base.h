@@ -31,7 +31,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "types/ets_void.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 template <typename T>
 inline EtsObject *AsEtsObject(T *obj)
@@ -136,6 +136,6 @@ struct JSConvertBase {
 #define JSCONVERT_UNWRAP(type)                                                  \
     inline std::optional<JSConvert##type::cpptype> JSConvert##type::UnwrapImpl( \
         [[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] napi_env env, [[maybe_unused]] napi_value jsVal)
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_BASE_H

@@ -73,7 +73,7 @@
  * considered to add advanced analysis of array indices.
  */
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 AliasAnalysis::AliasAnalysis(Graph *graph) : Analysis(graph), pointsTo_(graph->GetAllocator()->Adapter()) {}
 
@@ -1528,4 +1528,4 @@ void AliasAnalysis::VisitDefault([[maybe_unused]] Inst *inst)
             return;
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

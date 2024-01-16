@@ -17,7 +17,7 @@
 
 #include "runtime/include/class_linker.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const MethodInfo &info2) const
 {
@@ -57,4 +57,4 @@ bool EtsVTableOverridePred::IsInSamePackage(const MethodInfo &info1, const Metho
     return isSamePackage;
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

@@ -19,7 +19,7 @@
 #include "runtime/include/language_config.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 UpdateRemsetTaskQueue<LanguageConfig>::UpdateRemsetTaskQueue(G1GC<LanguageConfig> *gc,
@@ -83,4 +83,4 @@ void UpdateRemsetTaskQueue<LanguageConfig>::DestroyWorkerImpl()
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(UpdateRemsetTaskQueue);
-}  // namespace panda::mem
+}  // namespace ark::mem

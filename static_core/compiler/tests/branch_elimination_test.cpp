@@ -17,7 +17,7 @@
 #include "optimizer/optimizations/branch_elimination.h"
 #include "optimizer/optimizations/cleanup.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 enum class RemainedSuccessor { TRUE_SUCCESSOR, FALSE_SUCCESSOR, BOTH };
 enum class DominantCondResult { FALSE, TRUE };
 enum class SwapInputs { FALSE, TRUE };
@@ -1718,4 +1718,4 @@ TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

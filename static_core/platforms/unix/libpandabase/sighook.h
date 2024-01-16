@@ -20,7 +20,7 @@
 #include <cstdint>
 #include "libpandabase/macros.h"
 
-namespace panda {
+namespace ark {
 
 #if PANDA_TARGET_MACOS && !defined _NSIG
 #define _NSIG NSIG
@@ -51,6 +51,6 @@ extern "C" PANDA_PUBLIC_API void AddSpecialSignalHandlerFn(int signal, SigchainA
 extern "C" PANDA_PUBLIC_API void RemoveSpecialSignalHandlerFn(int signal, bool (*fn)(int, siginfo_t *, void *));
 extern "C" void EnsureFrontOfChain(int signal);
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_LIBPANDABASE_OS_UNIX_SIGHOOK_H_

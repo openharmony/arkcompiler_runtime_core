@@ -15,7 +15,7 @@
 
 #include "code_data_accessor.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 CodeDataAccessor::CatchBlock::CatchBlock(Span<const uint8_t> data)
 {
@@ -48,4 +48,4 @@ CodeDataAccessor::CodeDataAccessor(const File &pandaFile, File::EntityId codeId)
     tryBlocksSp_ = sp;
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

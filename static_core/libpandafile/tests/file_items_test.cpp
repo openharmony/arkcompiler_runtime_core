@@ -23,7 +23,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::panda_file::test {
+namespace ark::panda_file::test {
 
 TEST(LineNumberProgramItem, EmitSpecialOpcode)
 {
@@ -51,4 +51,4 @@ TEST(LineNumberProgramItem, EmitSpecialOpcode)
     EXPECT_EQ(writer.GetData(), data);
 }
 
-}  // namespace panda::panda_file::test
+}  // namespace ark::panda_file::test

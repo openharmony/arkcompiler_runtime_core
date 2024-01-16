@@ -30,11 +30,11 @@
 #include "utils/logger.h"
 #include "utils/dfx.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 class ReferenceStorageTest;
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test
 
-namespace panda::mem {
+namespace ark::mem {
 
 /**
  * Storage for objects which need to handle by GC. GC will handle moving these objects and will not reclaim then until
@@ -127,7 +127,7 @@ private:
                type == Reference::ObjectType::WEAK);
     }
 
-    friend class ::panda::mem::test::ReferenceStorageTest;
+    friend class ::ark::mem::test::ReferenceStorageTest;
 
     class ArrayStorage {
 #ifndef NDEBUG
@@ -377,7 +377,7 @@ private:
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
                     LOG(INFO, GC) << "\t Index: " << GetSize() - num << ", Global reference: " << std::hex << ref
                                   << ", Object: " << std::hex << obj
-                                  << ", Class: " << obj->ClassAddr<panda::Class>()->GetName();
+                                  << ", Class: " << obj->ClassAddr<ark::Class>()->GetName();
                     num++;
                     if (num == DUMP_NUMS || num > GetSize()) {
                         break;
@@ -468,8 +468,8 @@ private:
             return storage_.size();
         }
 
-        friend class ::panda::mem::test::ReferenceStorageTest;
+        friend class ::ark::mem::test::ReferenceStorageTest;
     };
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_GLOBAL_OBJECT_STORAGE_H

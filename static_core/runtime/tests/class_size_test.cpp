@@ -23,7 +23,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "runtime/include/coretypes/tagged_value.h"
 
-namespace panda::test {
+namespace ark::test {
 
 using TaggedValue = coretypes::TaggedValue;
 static constexpr size_t OBJECT_POINTER_SIZE = sizeof(ObjectPointerType);
@@ -138,4 +138,4 @@ TEST(ClassSizeTest, TestHoleFilling)
     }
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

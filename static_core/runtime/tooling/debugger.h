@@ -36,7 +36,7 @@
 #include "runtime/include/tooling/debug_interface.h"
 #include "runtime/thread_manager.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 // Deprecated API
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class Breakpoint {
@@ -228,7 +228,7 @@ public:
 
     void GarbageCollectorFinish() override
     {
-        panda::MTManagedThread *self = panda::MTManagedThread::GetCurrent();
+        ark::MTManagedThread *self = ark::MTManagedThread::GetCurrent();
         if (self == nullptr) {
             return;
         }
@@ -272,8 +272,8 @@ public:
                 threadList->push_back(PtThread(managedThread));
                 return true;
             },
-            static_cast<unsigned int>(panda::EnumerationFlag::ALL),
-            static_cast<unsigned int>(panda::EnumerationFlag::VM_THREAD));
+            static_cast<unsigned int>(ark::EnumerationFlag::ALL),
+            static_cast<unsigned int>(ark::EnumerationFlag::VM_THREAD));
 
         return {};
     }
@@ -425,8 +425,8 @@ public:
     std::optional<Error> ClearPropertyModificationWatch(BaseClass *klass, PtProperty property) override;
 
 private:
-    Expected<interpreter::StaticVRegisterRef, Error> GetVRegByPandaFrame(panda::Frame *frame, int32_t regNumber) const;
-    Expected<interpreter::DynamicVRegisterRef, Error> GetVRegByPandaFrameDyn(panda::Frame *frame,
+    Expected<interpreter::StaticVRegisterRef, Error> GetVRegByPandaFrame(ark::Frame *frame, int32_t regNumber) const;
+    Expected<interpreter::DynamicVRegisterRef, Error> GetVRegByPandaFrameDyn(ark::Frame *frame,
                                                                              int32_t regNumber) const;
     std::optional<Error> CheckLocation(const PtLocation &location);
     bool IsBreakpoint(const PtLocation &location) const REQUIRES_SHARED(rwlock_);
@@ -575,6 +575,6 @@ private:
     uint32_t bcOffset_ {0};
     std::string pandaFile_;
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_RUNTIME_DEBUG_DEBUG_H

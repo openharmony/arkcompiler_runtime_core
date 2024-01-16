@@ -25,18 +25,18 @@
 
 #include <vector>
 
-namespace panda {
+namespace ark {
 template <bool IS_CONST>
 class BitVectorIterator;
-}  // namespace panda
+}  // namespace ark
 
 namespace std {  // NOLINT(cert-dcl58-cpp)
 template <bool IS_CONST>
 // NOLINTNEXTLINE(readability-identifier-naming)
-inline void fill(panda::BitVectorIterator<IS_CONST> first, panda::BitVectorIterator<IS_CONST> last, bool value);
+inline void fill(ark::BitVectorIterator<IS_CONST> first, ark::BitVectorIterator<IS_CONST> last, bool value);
 }  // namespace std
 
-namespace panda {
+namespace ark {
 
 class BitReference final {
     using WordType = uint32_t;
@@ -245,7 +245,7 @@ private:
     friend class BitVectorIterator<!IS_CONST>;
     template <bool IS_CONST_ITER>
     // NOLINTNEXTLINE(readability-redundant-declaration,readability-identifier-naming)
-    friend void std::fill(panda::BitVectorIterator<IS_CONST_ITER> first, panda::BitVectorIterator<IS_CONST_ITER> last,
+    friend void std::fill(ark::BitVectorIterator<IS_CONST_ITER> first, ark::BitVectorIterator<IS_CONST_ITER> last,
                           bool value);
 };
 
@@ -667,7 +667,7 @@ private:
 
 namespace internal {
 template <bool IS_CONST>
-inline void FillBitVector(panda::BitVectorIterator<IS_CONST> first, panda::BitVectorIterator<IS_CONST> last, bool value)
+inline void FillBitVector(ark::BitVectorIterator<IS_CONST> first, ark::BitVectorIterator<IS_CONST> last, bool value)
 {
     for (; first != last; ++first) {
         *first = value;
@@ -681,22 +681,22 @@ using BitVectorSpan = BitVectorBase<true>;
 using ArenaBitVector = BitVectorBase<false, ArenaAllocator>;
 using ArenaBitVectorSpan = BitVectorBase<true, ArenaAllocator>;
 
-}  // namespace panda
+}  // namespace ark
 
 namespace std {  // NOLINT(cert-dcl58-cpp)
 
 template <bool IS_CONST>
 // NOLINTNEXTLINE(readability-identifier-naming)
-inline void fill(panda::BitVectorIterator<IS_CONST> first, panda::BitVectorIterator<IS_CONST> last, bool value)
+inline void fill(ark::BitVectorIterator<IS_CONST> first, ark::BitVectorIterator<IS_CONST> last, bool value)
 {
     if (first.data_ != last.data_) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::fill(first.data_ + 1, last.data_, value ? ~0LLU : 0);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        panda::internal::FillBitVector(first, panda::BitVectorIterator<IS_CONST>(first.data_ + 1, 0), value);
-        panda::internal::FillBitVector(panda::BitVectorIterator<IS_CONST>(last.data_, 0), last, value);
+        ark::internal::FillBitVector(first, ark::BitVectorIterator<IS_CONST>(first.data_ + 1, 0), value);
+        ark::internal::FillBitVector(ark::BitVectorIterator<IS_CONST>(last.data_, 0), last, value);
     } else {
-        panda::internal::FillBitVector(first, last, value);
+        ark::internal::FillBitVector(first, last, value);
     }
 }
 

@@ -21,7 +21,7 @@
 
 // Find loops representing some idiom (like memcpy or memset) and replace
 // it with an intrinsics.
-namespace panda::compiler {
+namespace ark::compiler {
 
 struct CountableLoopInfo;
 
@@ -58,6 +58,6 @@ private:
     bool isApplied_ {false};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_IDIOMS_H

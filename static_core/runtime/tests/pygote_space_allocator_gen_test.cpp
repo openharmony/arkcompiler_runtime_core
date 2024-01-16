@@ -15,7 +15,7 @@
 
 #include "runtime/tests/pygote_space_allocator_test_base.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class PygoteSpaceAllocatorGenTest : public PygoteSpaceAllocatorTest {
 public:
@@ -31,7 +31,7 @@ public:
         options_.SetGcType("gen-gc");
         options_.SetExplicitConcurrentGcEnabled(false);
         Runtime::Create(options_);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -78,4 +78,4 @@ TEST_F(PygoteSpaceAllocatorGenTest, MuchObjectAllocTest)
     MuchObjectAllocTest();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

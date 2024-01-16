@@ -23,7 +23,6 @@ host_unittest_action("ArkplatformTest") {
 
   include_dirs = [
     "$ark_root/arkplatform/include",
-    "$ark_root/static_core/",
   ]
 
   configs = [ "$ark_root/arkplatform:arkplatform_public_config" ]

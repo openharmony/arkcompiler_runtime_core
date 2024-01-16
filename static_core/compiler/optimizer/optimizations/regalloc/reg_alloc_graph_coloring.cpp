@@ -25,7 +25,7 @@
 #include "optimizer/ir/graph.h"
 #include "reg_type.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph) : RegAllocBase(graph) {}
 RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, size_t regsCount) : RegAllocBase(graph, regsCount) {}
 
@@ -506,4 +506,4 @@ void RegAllocGraphColoring::Presplit(WorkingRanges *ranges)
         AddRange(split, &ranges->regular);
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -18,7 +18,7 @@
 #include "gtest/gtest.h"
 #include "os/filesystem.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class DebugInfoTest : public testing::Test {
 public:
@@ -49,4 +49,4 @@ TEST_F(DebugInfoTest, GetSourceFile)
     ASSERT_TRUE(os::GetAbsolutePath(sourceFilePath) == sourceFilePath);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

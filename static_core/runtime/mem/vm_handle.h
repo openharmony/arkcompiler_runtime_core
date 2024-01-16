@@ -20,7 +20,7 @@
 #include "runtime/include/managed_thread.h"
 #include "runtime/handle_scope.h"
 
-namespace panda {
+namespace ark {
 
 using TaggedType = coretypes::TaggedType;
 using TaggedValue = coretypes::TaggedValue;
@@ -98,6 +98,6 @@ public:
     NO_COPY_SEMANTIC(VMMutableHandle);
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(VMMutableHandle);
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // RUNTIME_MEM_OBJECT_VMHANDLE_H

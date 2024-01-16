@@ -33,7 +33,7 @@
 #include <chrono>
 #include <thread>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 size_t const MAX_THREADS = 64;
 
@@ -72,7 +72,7 @@ void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t threadN
             thread = plugin::GetLanguagePlugin(methodLang)->CreateManagedThread();
             currentLang = methodLang;
         }
-        if (panda::verifier::Verify(service, method, mode) != Status::OK) {
+        if (ark::verifier::Verify(service, method, mode) != Status::OK) {
             *result = false;
             LOG(ERROR, VERIFIER) << "Error: method " << method->GetFullName(true) << " failed to verify";
         }
@@ -389,9 +389,9 @@ int Main(int argc, const char **argv)
     return ret;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 int main(int argc, const char **argv)
 {
-    return panda::verifier::Main(argc, argv);
+    return ark::verifier::Main(argc, argv);
 }

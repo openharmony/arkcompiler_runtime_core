@@ -21,7 +21,7 @@
 #include "libpandabase/mem/arena_allocator.h"
 #include "libpandabase/utils/bit_field.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 
 class MethodProperties {
@@ -99,6 +99,6 @@ private:
     Inst *lastReturn_ {nullptr};
     FieldsTy fields_ {0};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_METHOD_PROPERTIES_H

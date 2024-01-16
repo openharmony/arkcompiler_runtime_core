@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace panda::compiler {
+namespace ark::compiler {
 constexpr int BITS_PER_BYTE = 8;
 constexpr int BITS_PER_INSTPTR = sizeof(intptr_t) * BITS_PER_BYTE;
 
@@ -56,6 +56,6 @@ constexpr uint32_t MAX_SCALE = 3;
 
 constexpr int MAX_SUCCS_NUM = 2;
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_CONSTANTS_H

@@ -19,7 +19,7 @@
 #include "libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.h"
 #include "libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.h"
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 TaskScheduler *TaskScheduler::instance_ = nullptr;
 
@@ -277,4 +277,4 @@ TaskScheduler::~TaskScheduler()
     LOG(DEBUG, RUNTIME) << "TaskScheduler: ~TaskScheduler: All threads finished jobs";
 }
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

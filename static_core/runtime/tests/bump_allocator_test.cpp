@@ -20,7 +20,7 @@
 #include "runtime/mem/bump-allocator-inl.h"
 #include "libpandabase/test_utilities.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <bool USE_TLABS>
 using NonObjectBumpAllocator =
@@ -38,20 +38,20 @@ public:
         seed_ = 0x0BADDEAD;
 #endif
         srand(seed_);
-        panda::mem::MemConfig::Initialize(0, 8_MB, 0, 0, 0, 0);
+        ark::mem::MemConfig::Initialize(0, 8_MB, 0, 0, 0, 0);
         PoolManager::Initialize();
     }
 
     ~BumpAllocatorTest() override
     {
         for (auto i : allocatedMemMmap_) {
-            panda::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
+            ark::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
         }
         for (auto i : allocatedArenas_) {
             delete i;
         }
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
         // Logger::Destroy();
     }
 
@@ -61,7 +61,7 @@ public:
 protected:
     Arena *AllocateArena(size_t size)
     {
-        void *mem = panda::os::mem::MapRWAnonymousRaw(size);
+        void *mem = ark::os::mem::MapRWAnonymousRaw(size);
         ASAN_UNPOISON_MEMORY_REGION(mem, size);
         std::pair<void *, size_t> newPair {mem, size};
         allocatedMemMmap_.push_back(newPair);
@@ -266,4 +266,4 @@ TEST_F(BumpAllocatorTest, CreateTooManyTLABS)
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

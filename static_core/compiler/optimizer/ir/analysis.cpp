@@ -19,7 +19,7 @@
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "compiler_logger.h"
-namespace panda::compiler {
+namespace ark::compiler {
 
 class BasicBlock;
 
@@ -808,4 +808,4 @@ void InstAppender::Append(std::initializer_list<Inst *> instructions)
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -34,7 +34,7 @@
 #include "runtime/core/core_class_linker_extension.h"
 #include "runtime/tests/class_linker_test_extension.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class ClassLinkerTest : public testing::Test {
 public:
@@ -48,7 +48,7 @@ public:
         // NOLINTNEXTLINE(readability-magic-numbers)
         options.SetHeapSizeLimit(64_MB);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -63,7 +63,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 static std::unique_ptr<ClassLinker> CreateClassLinker(ManagedThread *thread)
@@ -603,7 +603,7 @@ TEST_F(ClassLinkerTest, ArrayClass)
 }
 
 static Method *GetMethod(ClassLinker *classLinker, const char *className, const char *methodName,
-                         const panda::PandaString &signature)
+                         const ark::PandaString &signature)
 {
     PandaString descriptor;
     auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -940,8 +940,7 @@ TEST_F(ClassLinkerTest, Accesses)
         ASSERT_TRUE(f->IsPrivate());
 
         auto i = 0;
-        auto accessPredicates =
-            std::array {&panda::Field::IsPublic, &panda::Field::IsProtected, &panda::Field::IsPrivate};
+        auto accessPredicates = std::array {&ark::Field::IsPublic, &ark::Field::IsProtected, &ark::Field::IsPrivate};
         for (const auto &field : klass->GetFields()) {
             ASSERT_TRUE((field.*accessPredicates[i])());
             i++;
@@ -1081,4 +1080,4 @@ TEST_F(ClassLinkerTest, Final)
     }
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

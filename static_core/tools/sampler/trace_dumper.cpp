@@ -15,7 +15,7 @@
 
 #include "trace_dumper.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 void TraceDumper::DumpTraces(const SampleInfo &sample, size_t count)
 {
@@ -134,4 +134,4 @@ std::string MultipleCSVDumper::AddThreadIdToFilename(const std::string &filename
     return filenameWithThreadId;
 }
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler

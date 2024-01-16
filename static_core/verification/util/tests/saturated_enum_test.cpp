@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 enum class Numbers { ONE, TWO, THREE, FOUR, FIVE };
 
@@ -56,4 +56,4 @@ TEST_F(VerifierTest, saturated_enum)
     EXPECT_EQ(i, 2_I);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

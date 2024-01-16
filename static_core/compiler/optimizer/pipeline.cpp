@@ -63,7 +63,7 @@
 
 #include "compiler/generated/pipeline_includes.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 std::unique_ptr<Pipeline> Pipeline::Create(Graph *graph)
 {
@@ -268,4 +268,4 @@ template void Pipeline::Run<INPLACE_MODE>(CompilerTaskRunner<INPLACE_MODE>);
 template void Pipeline::RunRegAllocAndCodeGenPass<BACKGROUND_MODE>(CompilerTaskRunner<BACKGROUND_MODE>);
 template void Pipeline::RunRegAllocAndCodeGenPass<INPLACE_MODE>(CompilerTaskRunner<INPLACE_MODE>);
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

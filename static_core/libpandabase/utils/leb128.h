@@ -22,7 +22,7 @@
 #include <limits>
 #include <tuple>
 
-namespace panda::leb128 {
+namespace ark::leb128 {
 
 constexpr size_t PAYLOAD_WIDTH = 7;
 constexpr size_t PAYLOAD_MASK = 0x7f;
@@ -186,6 +186,6 @@ inline size_t SignedEncodingSize(T data)
     return MinimumBitsToStore(static_cast<UnsignedType>(udata | 1U)) / PAYLOAD_WIDTH + 1;
 }
 
-}  // namespace panda::leb128
+}  // namespace ark::leb128
 
 #endif  // PANDA_LIBPANDABASE_UTILS_LEB128_H_

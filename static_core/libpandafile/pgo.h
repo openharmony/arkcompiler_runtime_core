@@ -18,7 +18,7 @@
 
 #include "file_items.h"
 
-namespace panda::panda_file::pgo {
+namespace ark::panda_file::pgo {
 
 class ProfileOptimizer {
 public:
@@ -39,6 +39,6 @@ private:
     std::string profileFilePath_;
     std::vector<std::pair<std::string, std::string>> profileData_;
 };
-}  // namespace panda::panda_file::pgo
+}  // namespace ark::panda_file::pgo
 
 #endif  // LIBPANDAFILE_PGO_H

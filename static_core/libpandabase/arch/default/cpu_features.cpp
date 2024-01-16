@@ -15,7 +15,7 @@
 
 #include "cpu_features.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool CpuFeaturesHasCrc32()
 {
     return false;
@@ -25,4 +25,4 @@ bool CpuFeaturesHasJscvt()
 {
     return false;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

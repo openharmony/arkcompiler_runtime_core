@@ -20,18 +20,18 @@
 #include "verification/util/parser/parser.h"
 #include "verifier_messages.h"
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
 struct MessageSetContext {
-    panda::PandaVector<std::pair<size_t, size_t>> stack;
-    panda::PandaUnorderedSet<size_t> nums;
+    ark::PandaVector<std::pair<size_t, size_t>> stack;
+    ark::PandaUnorderedSet<size_t> nums;
 };
 
 inline const auto &MessageSetParser()
 {
-    using panda::parser::Action;
-    using panda::parser::Charset;
-    using panda::parser::Parser;
+    using ark::parser::Action;
+    using ark::parser::Charset;
+    using ark::parser::Parser;
 
     using P = Parser<MessageSetContext, const char, const char *>;
     using P1 = typename P::P;
@@ -46,7 +46,7 @@ inline const auto &MessageSetParser()
     static const auto NAME_HANDLER = [](Action a, MessageSetContext &c, auto from, auto to) {
         if (a == Action::PARSED) {
             std::string_view name {from, static_cast<size_t>(to - from)};
-            auto num = static_cast<size_t>(panda::verifier::StringToVerifierMessage(name));
+            auto num = static_cast<size_t>(ark::verifier::StringToVerifierMessage(name));
             c.stack.push_back(std::make_pair(num, num));
         }
         return true;
@@ -113,6 +113,6 @@ inline const auto &MessageSetParser()
     return ITEMS;
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug
 
 #endif  // PANDA_VERIFIER_DEBUG_MSG_SET_PARSER_H_

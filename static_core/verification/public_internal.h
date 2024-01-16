@@ -20,7 +20,7 @@
 #include "verification/jobs/service.h"
 #include "verification/config/context/context.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 struct Config {
     VerificationOptions opts;
@@ -35,6 +35,6 @@ struct Service {
     VerifierService *verifierService = nullptr;
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFICATION_PUBLIC_INTERNAL_H_

@@ -20,7 +20,7 @@
 #include "compiler/optimizer/ir/basicblock.h"
 #include "condition_chain.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class ConditionChainManager {
 public:
@@ -39,6 +39,6 @@ private:
     ArenaAllocator *allocator_;
     ArenaVector<BasicBlock *> conditionChainBb_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_MANAGER_H

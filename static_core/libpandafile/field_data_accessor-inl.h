@@ -23,7 +23,7 @@
 
 #include <type_traits>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 // static
 inline File::EntityId FieldDataAccessor::GetTypeId(const File &pandaFile, File::EntityId fieldId)
@@ -247,6 +247,6 @@ inline uint32_t FieldDataAccessor::GetTypeAnnotationsNumber()
     return n;
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_FIELD_DATA_ACCESSOR_INL_H_

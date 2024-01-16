@@ -29,7 +29,7 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/StringSaver.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 static llvm::llvm_shutdown_obj g_shutdown {};
 
@@ -66,8 +66,8 @@ LLVMCompiler::LLVMCompiler(Arch arch) : arch_(arch)
 
 bool LLVMCompiler::IsInliningDisabled()
 {
-    if (panda::compiler::g_options.WasSetCompilerInlining() && !g_options.WasSetLlvmInlining()) {
-        return !panda::compiler::g_options.IsCompilerInlining();
+    if (ark::compiler::g_options.WasSetCompilerInlining() && !g_options.WasSetLlvmInlining()) {
+        return !ark::compiler::g_options.IsCompilerInlining();
     }
     return !g_options.IsLlvmInlining();
 }
@@ -87,7 +87,7 @@ bool LLVMCompiler::IsInliningDisabled(compiler::RuntimeInterface *runtime, compi
         return true;
     }
 
-    auto skipList = panda::compiler::g_options.GetCompilerInliningBlacklist();
+    auto skipList = ark::compiler::g_options.GetCompilerInliningBlacklist();
     if (!skipList.empty()) {
         std::string methodName = runtime->GetMethodFullName(method);
         if (std::find(skipList.begin(), skipList.end(), methodName) != skipList.end()) {
@@ -98,13 +98,13 @@ bool LLVMCompiler::IsInliningDisabled(compiler::RuntimeInterface *runtime, compi
     return (runtime->GetMethodName(method).find("__noinline__") != std::string::npos);
 }
 
-panda::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOptions()
+ark::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOptions()
 {
-    panda::llvmbackend::LLVMCompilerOptions llvmCompilerOptions {};
-    llvmCompilerOptions.optimize = !panda::compiler::g_options.IsCompilerNonOptimizing();
+    ark::llvmbackend::LLVMCompilerOptions llvmCompilerOptions {};
+    llvmCompilerOptions.optimize = !ark::compiler::g_options.IsCompilerNonOptimizing();
     llvmCompilerOptions.optlevel = llvmCompilerOptions.optimize ? 2U : 0U;
     llvmCompilerOptions.gcIntrusionChecks = g_options.IsLlvmGcCheck();
-    llvmCompilerOptions.useSafepoint = panda::compiler::g_options.IsCompilerUseSafepoint();
+    llvmCompilerOptions.useSafepoint = ark::compiler::g_options.IsCompilerUseSafepoint();
     llvmCompilerOptions.dumpModuleAfterOptimizations = g_options.IsLlvmDumpAfter();
     llvmCompilerOptions.dumpModuleBeforeOptimizations = g_options.IsLlvmDumpBefore();
     llvmCompilerOptions.inlineModuleFile = g_options.GetLlvmInlineModule();
@@ -119,7 +119,7 @@ panda::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOpti
 
 void LLVMCompiler::InitializeDefaultLLVMOptions()
 {
-    if (panda::compiler::g_options.IsCompilerNonOptimizing()) {
+    if (ark::compiler::g_options.IsCompilerNonOptimizing()) {
         constexpr auto DISABLE = llvm::cl::boolOrDefault::BOU_FALSE;
         SetLLVMOption("fast-isel", DISABLE);
         SetLLVMOption("global-isel", DISABLE);
@@ -251,4 +251,4 @@ void LLVMCompiler::InitializeLLVMPasses()
     initializeGlobalISel(registry);
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

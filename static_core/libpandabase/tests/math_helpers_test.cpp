@@ -18,7 +18,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-namespace panda::helpers::math::test {
+namespace ark::helpers::math::test {
 
 // NOLINTBEGIN(readability-magic-numbers,hicpp-signed-bitwise)
 
@@ -74,4 +74,4 @@ TEST(MathHelpers, GetPowerOfTwoValue32)
 
 // NOLINTEND(readability-magic-numbers,hicpp-signed-bitwise)
 
-}  // namespace panda::helpers::math::test
+}  // namespace ark::helpers::math::test

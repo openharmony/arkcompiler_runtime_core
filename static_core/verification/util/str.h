@@ -21,7 +21,7 @@
 
 #include <type_traits>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename StrT, typename Gen>
 StrT Join(Gen gen, StrT delim = {", "})
@@ -78,6 +78,6 @@ PandaString OffsetToHexStr(Offset offset)
     constexpr size_t WIDTH = sizeof(Offset) + (std::is_signed_v<Offset> ? 1 : 0);
     return NumToStr(offset, BASE, WIDTH);
 }
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_UTIL_STR_HPP_

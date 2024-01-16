@@ -20,7 +20,7 @@
 #include "file_items.h"
 #include "libpandabase/macros.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 class ShortyIterator {
 public:
     ShortyIterator() = default;
@@ -99,6 +99,6 @@ private:
     uint16_t elemIdx_ {0};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_SHORTY_ITERATOR_H_

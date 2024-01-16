@@ -13,7 +13,7 @@
 
 module:
   name: dprof_daemon
-  namespace: panda::dprof
+  namespace: ark::dprof
 
 options:
 - name: log-level

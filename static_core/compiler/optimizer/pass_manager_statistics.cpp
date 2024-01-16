@@ -20,7 +20,7 @@
 
 #include <iomanip>
 
-namespace panda::compiler {
+namespace ark::compiler {
 PassManagerStatistics::PassManagerStatistics(Graph *graph)
     : graph_(graph),
       passStatList_(graph->GetAllocator()->Adapter()),
@@ -173,4 +173,4 @@ void PassManagerStatistics::DumpStatisticsCsv(char sep) const
     // Flush stream because it is declared `static`:
     csv << std::flush;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

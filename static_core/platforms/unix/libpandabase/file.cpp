@@ -21,7 +21,7 @@
 
 #include <fcntl.h>
 
-namespace panda::os::file {
+namespace ark::os::file {
 
 static int GetFlags(Mode mode)
 {
@@ -53,4 +53,4 @@ File Open(std::string_view filename, Mode mode)
     return File(open(filename.data(), GetFlags(mode), perm));
 }
 
-}  // namespace panda::os::file
+}  // namespace ark::os::file

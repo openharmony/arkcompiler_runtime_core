@@ -21,7 +21,7 @@
 
 #include <iomanip>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 #include "file_items_gen.inc"
 
@@ -1661,4 +1661,4 @@ bool MethodHandleItem::Write(Writer *writer)
     return writer->WriteUleb128(entity_->GetOffset());
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

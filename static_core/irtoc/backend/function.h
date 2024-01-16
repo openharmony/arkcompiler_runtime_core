@@ -27,7 +27,7 @@
 #include "llvm_options.h"
 #endif  // PANDA_LLVM_IRTOC
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 
 enum class CompilationResult {
     INVALID,
@@ -279,6 +279,6 @@ private:
 #endif  // PANDA_LLVM_FASTPATH
 #endif  // PANDA_LLVM_IRTOC
 };
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc
 
 #endif  // PANDA_FUNCTION_H

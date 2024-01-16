@@ -22,7 +22,7 @@
 
 #include <optional>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class ConstFoldingTest : public CommonTest {
 public:
     ConstFoldingTest() : graph_(CreateGraphStartEndBlocks()) {}
@@ -3040,4 +3040,4 @@ TEST_F(ConstFoldingTest, MinIntTest1)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

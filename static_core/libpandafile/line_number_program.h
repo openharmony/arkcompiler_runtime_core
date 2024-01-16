@@ -19,7 +19,7 @@
 #include "file-inl.h"
 #include "file_items.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class LineProgramState {
 public:
@@ -285,6 +285,6 @@ private:
     Handler *handler_;
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_LINE_NUMBER_PROGRAM_H

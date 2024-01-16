@@ -21,7 +21,7 @@
 
 #include "libpandafile/literal_data_accessor-inl.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 struct LiteralArray {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
@@ -175,10 +175,9 @@ struct LiteralArray {
         }
     };
 
-    std::vector<panda::pandasm::LiteralArray::Literal>
-        literals;  // NOLINT(misc-non-private-member-variables-in-classes)
+    std::vector<ark::pandasm::LiteralArray::Literal> literals;  // NOLINT(misc-non-private-member-variables-in-classes)
 
-    explicit LiteralArray(std::vector<panda::pandasm::LiteralArray::Literal> literalsVec)
+    explicit LiteralArray(std::vector<ark::pandasm::LiteralArray::Literal> literalsVec)
         : literals(std::move(literalsVec))
     {
     }
@@ -239,6 +238,6 @@ struct LiteralArray {
     }
 };
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_LITERALS_H

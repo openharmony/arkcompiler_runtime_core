@@ -21,7 +21,7 @@
 #include "events/events.h"
 #include <fstream>
 
-namespace panda::test {
+namespace ark::test {
 class CodegenRunnerTest : public testing::Test {
 public:
     CodegenRunnerTest()
@@ -352,7 +352,7 @@ TEST_F(CodegenRunnerTest, ObjectParams)
 
     for (auto &hookOn : {false, true}) {
         for (auto &mask : regMasks) {
-            panda::test::PandaRunner runner;
+            ark::test::PandaRunner runner;
             runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
             runner.GetCompilerOptions().SetCompilerInlining(false);
             runner.GetRuntimeOptions().SetCompilerHotnessThreshold(0U);
@@ -370,4 +370,4 @@ TEST_F(CodegenRunnerTest, ObjectParams)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::test
+}  // namespace ark::test

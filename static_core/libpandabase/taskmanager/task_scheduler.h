@@ -23,7 +23,7 @@
 #include <map>
 #include <random>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 /**
  * Task Manager can register 3 queues with different type of tasks
  *  - GC queue(ECMA)
@@ -249,6 +249,6 @@ private:
     std::map<size_t, internal::SchedulableTaskQueueInterface *> kineticPriorities_ GUARDED_BY(popFromTaskQueuesLock_);
 };
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_MANAGER_H

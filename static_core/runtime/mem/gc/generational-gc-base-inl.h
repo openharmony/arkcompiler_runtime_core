@@ -19,7 +19,7 @@
 #include <type_traits>
 #include "runtime/mem/gc/generational-gc-base.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 template <typename Marker, class... ReferenceCheckPredicate>
@@ -115,5 +115,5 @@ NO_THREAD_SAFETY_ANALYSIS void GenerationalGC<LanguageConfig>::MarkImpl(Marker *
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // RUNTIME_MEM_GC_GENERATIONAL_GC_BASE_INL_H

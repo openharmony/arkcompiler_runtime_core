@@ -19,13 +19,13 @@
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda {
+namespace ark {
 inline CompilerTask::~CompilerTask()
 {
     if (vm_ != nullptr) {
         vm_->CleanUpTask(method_);
     }
 }
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_INCLUDE_COMPILER_INTERFACE_INL_H

@@ -17,7 +17,7 @@
 
 #include "runtime/include/runtime.h"
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 // Runtime::GetCurrent() can not be used in .h files
 ObjectHeader *RuntimeInterface::CreateObject(ManagedThread *thread, Class *klass)
@@ -35,7 +35,7 @@ ObjectHeader *RuntimeInterface::CreateObject(ManagedThread *thread, Class *klass
 
     const auto &name = klass->GetName();
     PandaString pname(name.cbegin(), name.cend());
-    panda::ThrowInstantiationError(pname);
+    ark::ThrowInstantiationError(pname);
     return nullptr;
 }
 
@@ -44,4 +44,4 @@ ObjectHeader *RuntimeInterface::CreateObject(Class *klass)
     return CreateObject(ManagedThread::GetCurrent(), klass);
 }
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter

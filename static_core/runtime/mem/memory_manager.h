@@ -21,10 +21,10 @@
 #include <runtime/mem/gc/gc_types.h>
 #include <runtime/mem/heap_manager.h>
 
-namespace panda {
+namespace ark {
 class RuntimeOptions;
-}  // namespace panda
-namespace panda::mem {
+}  // namespace ark
+namespace ark::mem {
 
 class GCStats;
 class GCTrigger;
@@ -151,6 +151,6 @@ private:
     friend class mem::Allocator;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_MEMORY_MANAGER_H

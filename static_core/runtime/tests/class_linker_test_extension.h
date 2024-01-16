@@ -20,7 +20,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class ClassLinkerTestExtension : public ClassLinkerExtension {
 public:
@@ -104,7 +104,7 @@ public:
         return true;
     }
 
-    const void *GetNativeEntryPointFor(panda::Method * /*method*/) const override
+    const void *GetNativeEntryPointFor(ark::Method * /*method*/) const override
     {
         return nullptr;
     }
@@ -125,6 +125,6 @@ private:
     ManagedThread *thread_;
 };
 
-}  // namespace panda::test
+}  // namespace ark::test
 
 #endif  // PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H_

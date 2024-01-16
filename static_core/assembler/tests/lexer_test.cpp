@@ -21,7 +21,7 @@
 #include "../lexer.h"
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda::pandasm;
+using namespace ark::pandasm;
 
 TEST(lexertests, test1)
 {

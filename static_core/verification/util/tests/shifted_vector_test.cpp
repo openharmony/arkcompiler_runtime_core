@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, shifted_vector)
 {
@@ -46,4 +46,4 @@ TEST_F(VerifierTest, shifted_vector)
     EXPECT_EQ(shiftVec.At(4U), 4_I);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

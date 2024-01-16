@@ -17,7 +17,7 @@
 
 #include "runtime/coroutines/coroutine_context.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief Native context of a coroutine. std::thread-based implementation.
@@ -99,6 +99,6 @@ private:
     std::atomic<Coroutine::Status> status_ {Coroutine::Status::CREATED};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COROUTINES_THREADED_COROUTINE_H

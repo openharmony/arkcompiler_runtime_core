@@ -15,7 +15,7 @@
 
 #include "runtime/tests/interpreter/test_runtime_interface.h"
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
 RuntimeInterface::NullPointerExceptionData RuntimeInterface::npeData_;
 
@@ -48,13 +48,13 @@ uint32_t RuntimeInterface::catchBlockPcOffset_;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 RuntimeInterface::InvokeMethodHandler RuntimeInterface::invokeHandler_;
 
-DummyGC::DummyGC(panda::mem::ObjectAllocatorBase *objectAllocator, const panda::mem::GCSettings &settings)
+DummyGC::DummyGC(ark::mem::ObjectAllocatorBase *objectAllocator, const ark::mem::GCSettings &settings)
     : GC(objectAllocator, settings)
 {
 }
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-DummyGC RuntimeInterface::dummyGc_(nullptr, panda::mem::GCSettings());
+DummyGC RuntimeInterface::dummyGc_(nullptr, ark::mem::GCSettings());
 
 Method *RuntimeInterface::resolvedMethod_;
 
@@ -64,4 +64,4 @@ const void *RuntimeInterface::entryPoint_;
 
 uint32_t RuntimeInterface::jitThreshold_;
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test

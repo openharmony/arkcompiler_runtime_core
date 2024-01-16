@@ -21,7 +21,7 @@
 
 #include "runtime/mem/allocator_adapter.h"
 
-namespace panda {
+namespace ark {
 namespace coretypes {
 class String;
 }  // namespace coretypes
@@ -47,7 +47,7 @@ std::enable_if_t<std::is_arithmetic_v<T>, PandaString> ToPandaString(T value)
 }
 
 struct PandaStringHash {
-    using ArgumentType = panda::PandaString;
+    using ArgumentType = ark::PandaString;
     using ResultType = std::size_t;
 
     size_t operator()(const PandaString &str) const noexcept
@@ -63,18 +63,18 @@ inline std::string PandaStringToStd(const PandaString &pandastr)
     return str;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 namespace std {
 
 template <>
-struct hash<panda::PandaString> {
-    using ArgumentType = panda::PandaStringHash::ArgumentType;
-    using ResultType = panda::PandaStringHash::ResultType;
+struct hash<ark::PandaString> {
+    using ArgumentType = ark::PandaStringHash::ArgumentType;
+    using ResultType = ark::PandaStringHash::ResultType;
 
-    size_t operator()(const panda::PandaString &str) const noexcept
+    size_t operator()(const ark::PandaString &str) const noexcept
     {
-        return panda::PandaStringHash()(str);
+        return ark::PandaStringHash()(str);
     }
 };
 

@@ -27,7 +27,7 @@
 #include "runtime/handle_base-inl.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 
 bool String::compressedStringsEnabled_ = true;
 
@@ -466,7 +466,7 @@ static int32_t LastIndexOf(Span<const T1> &lhsSp, Span<const T2> &rhsSp, int32_t
     return -1;
 }
 
-static inline ALWAYS_INLINE std::pair<bool, int32_t> GetCompressionAndLength(panda::coretypes::String *string)
+static inline ALWAYS_INLINE std::pair<bool, int32_t> GetCompressionAndLength(ark::coretypes::String *string)
 {
     ASSERT(string->GetLength() <= static_cast<uint32_t>(std::numeric_limits<int32_t>::max()));
     ASSERT(string != nullptr);
@@ -492,19 +492,19 @@ int32_t String::IndexOf(String *rhs, int32_t pos)
     if (lhs_utf8 && rhs_utf8) {
         Span<const uint8_t> lhsSp(lhs->GetDataMUtf8(), lhs_count);
         Span<const uint8_t> rhsSp(rhs->GetDataMUtf8(), rhs_count);
-        return panda::coretypes::IndexOf(lhsSp, rhsSp, pos, max);
+        return ark::coretypes::IndexOf(lhsSp, rhsSp, pos, max);
     } else if (!lhs_utf8 && !rhs_utf8) {  // NOLINT(readability-else-after-return)
         Span<const uint16_t> lhsSp(lhs->GetDataUtf16(), lhs_count);
         Span<const uint16_t> rhsSp(rhs->GetDataUtf16(), rhs_count);
-        return panda::coretypes::IndexOf(lhsSp, rhsSp, pos, max);
+        return ark::coretypes::IndexOf(lhsSp, rhsSp, pos, max);
     } else if (rhs_utf8) {
         Span<const uint16_t> lhsSp(lhs->GetDataUtf16(), lhs_count);
         Span<const uint8_t> rhsSp(rhs->GetDataMUtf8(), rhs_count);
-        return panda::coretypes::IndexOf(lhsSp, rhsSp, pos, max);
+        return ark::coretypes::IndexOf(lhsSp, rhsSp, pos, max);
     } else {  // NOLINT(readability-else-after-return)
         Span<const uint8_t> lhsSp(lhs->GetDataMUtf8(), lhs_count);
         Span<const uint16_t> rhsSp(rhs->GetDataUtf16(), rhs_count);
-        return panda::coretypes::IndexOf(lhsSp, rhsSp, pos, max);
+        return ark::coretypes::IndexOf(lhsSp, rhsSp, pos, max);
     }
 }
 
@@ -531,19 +531,19 @@ int32_t String::LastIndexOf(String *rhs, int32_t pos)
     if (lhs_utf8 && rhs_utf8) {
         Span<const uint8_t> lhsSp(lhs->GetDataMUtf8(), lhs_count);
         Span<const uint8_t> rhsSp(rhs->GetDataMUtf8(), rhs_count);
-        return panda::coretypes::LastIndexOf(lhsSp, rhsSp, pos);
+        return ark::coretypes::LastIndexOf(lhsSp, rhsSp, pos);
     } else if (!lhs_utf8 && !rhs_utf8) {  // NOLINT(readability-else-after-return)
         Span<const uint16_t> lhsSp(lhs->GetDataUtf16(), lhs_count);
         Span<const uint16_t> rhsSp(rhs->GetDataUtf16(), rhs_count);
-        return panda::coretypes::LastIndexOf(lhsSp, rhsSp, pos);
+        return ark::coretypes::LastIndexOf(lhsSp, rhsSp, pos);
     } else if (rhs_utf8) {
         Span<const uint16_t> lhsSp(lhs->GetDataUtf16(), lhs_count);
         Span<const uint8_t> rhsSp(rhs->GetDataMUtf8(), rhs_count);
-        return panda::coretypes::LastIndexOf(lhsSp, rhsSp, pos);
+        return ark::coretypes::LastIndexOf(lhsSp, rhsSp, pos);
     } else {  // NOLINT(readability-else-after-return)
         Span<const uint8_t> lhsSp(lhs->GetDataMUtf8(), lhs_count);
         Span<const uint16_t> rhsSp(rhs->GetDataUtf16(), rhs_count);
-        return panda::coretypes::LastIndexOf(lhsSp, rhsSp, pos);
+        return ark::coretypes::LastIndexOf(lhsSp, rhsSp, pos);
     }
 }
 
@@ -1041,4 +1041,4 @@ String *String::AllocStringObject(size_t length, bool compressed, const Language
     return string;
 }
 
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes

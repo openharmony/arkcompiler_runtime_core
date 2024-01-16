@@ -42,8 +42,8 @@
     LOG(DEBUG, VERIFIER) << "CFLOW: " << std::hex << std::setw(sizeof(uint32_t) * 2) << std::setfill('0') \
                          << inst_.GetOffset() << std::dec << ": " << inst_
 
-namespace panda::verifier {
+namespace ark::verifier {
 #include <cflow_iterate_inl_gen.h>
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_CFLOW_ITER_INL_H_

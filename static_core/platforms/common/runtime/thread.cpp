@@ -15,7 +15,7 @@
 
 #include "runtime/include/thread.h"
 
-namespace panda {
+namespace ark {
 
 static thread_local Thread *g_sCurrentThread = nullptr;
 
@@ -31,4 +31,4 @@ Thread *Thread::GetCurrent()
     return g_sCurrentThread;
 }
 
-}  // namespace panda
+}  // namespace ark

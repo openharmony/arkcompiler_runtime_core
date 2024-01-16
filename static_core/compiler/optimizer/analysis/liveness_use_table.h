@@ -19,7 +19,7 @@
 #include "utils/arena_containers.h"
 #include "optimizer/ir/inst.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 using FixedUses = ArenaMap<LifeNumber, Register>;
 
 /// For each added instruction holds its uses on the fixed locations
@@ -37,6 +37,6 @@ private:
     ArenaUnorderedMap<const Inst *, FixedUses> table_;
     ArenaAllocator *allocator_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_USE_TABLE_H

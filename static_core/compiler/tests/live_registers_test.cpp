@@ -17,7 +17,7 @@
 #include "optimizer/analysis/live_registers.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // NOLINTBEGIN(readability-magic-numbers)
 class LiveRegistersTest : public GraphTest {};
@@ -295,4 +295,4 @@ TEST_F(LiveRegistersTest, IntervalWithLifetimeHole)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

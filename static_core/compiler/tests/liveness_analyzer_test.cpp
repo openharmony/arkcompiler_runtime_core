@@ -19,7 +19,7 @@
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/liveness_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 using LiveRanges = ArenaVector<LiveRange>;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -982,4 +982,4 @@ TEST_F(LivenessAnalyzerTest, UseHints)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

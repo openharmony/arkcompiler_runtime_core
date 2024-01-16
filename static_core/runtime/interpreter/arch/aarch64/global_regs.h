@@ -17,12 +17,12 @@
 
 #include <cstdint>
 
-namespace panda {
+namespace ark {
 class Frame;
 class ManagedThread;
-}  //  namespace panda
+}  //  namespace ark
 
-namespace panda::interpreter::arch::regs {
+namespace ark::interpreter::arch::regs {
 
 #ifndef FFIXED_REGISTERS
 #error "Need to compile source with -ffixed-x20 -ffixed-x21 -ffixed-x22 -ffixed-x23 -ffixed-x24 -ffixed-x25 -ffixed-x28"
@@ -118,6 +118,6 @@ ALWAYS_INLINE inline void SetThread(ManagedThread *thread)
     G_THREAD = thread;
 }
 
-}  // namespace panda::interpreter::arch::regs
+}  // namespace ark::interpreter::arch::regs
 
 #endif  // PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REG_VARS_H_

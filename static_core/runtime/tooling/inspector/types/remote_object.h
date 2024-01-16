@@ -27,11 +27,11 @@
 #include <variant>
 #include <vector>
 
-namespace panda {
+namespace ark {
 class JsonObjectBuilder;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class PropertyDescriptor;
 
 class RemoteObject {
@@ -187,6 +187,6 @@ private:
     Value value_;
     mutable std::vector<PreviewProperty> preview_;
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_REMOTE_OBJECT_H

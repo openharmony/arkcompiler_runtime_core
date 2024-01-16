@@ -29,9 +29,9 @@
 
 using llvm::convertToDeclaration;
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
-bool DiscardInlineModule::ShouldInsert([[maybe_unused]] const panda::llvmbackend::LLVMCompilerOptions *options)
+bool DiscardInlineModule::ShouldInsert([[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return true;
 }
@@ -80,4 +80,4 @@ bool DiscardInlineModule::ShouldKeep(const llvm::GlobalValue &globalValue) const
            || globalValue.hasLinkOnceLinkage();
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

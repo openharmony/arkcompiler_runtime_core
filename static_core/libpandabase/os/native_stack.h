@@ -25,19 +25,19 @@
 #include <string>
 #include <set>
 
-namespace panda::os::native_stack {
+namespace ark::os::native_stack {
 
 #if defined(PANDA_TARGET_UNIX)
 using FuncUnwindstack = os::unix::native_stack::FuncUnwindstack;
 const auto g_PandaThreadSigmask = pthread_sigmask;  // NOLINT(readability-identifier-naming)
-using DumpUnattachedThread = panda::os::unix::native_stack::DumpUnattachedThread;
-const auto DumpKernelStack = panda::os::unix::native_stack::DumpKernelStack;  // NOLINT(readability-identifier-naming)
-const auto GetNativeThreadNameForFile =                                       // NOLINT(readability-identifier-naming)
-    panda::os::unix::native_stack::GetNativeThreadNameForFile;
-const auto ReadOsFile = panda::os::unix::native_stack::ReadOsFile;      // NOLINT(readability-identifier-naming)
-const auto WriterOsFile = panda::os::unix::native_stack::WriterOsFile;  // NOLINT(readability-identifier-naming)
-const auto ChangeJaveStackFormat =                                      // NOLINT(readability-identifier-naming)
-    panda::os::unix::native_stack::ChangeJaveStackFormat;
+using DumpUnattachedThread = ark::os::unix::native_stack::DumpUnattachedThread;
+const auto DumpKernelStack = ark::os::unix::native_stack::DumpKernelStack;  // NOLINT(readability-identifier-naming)
+const auto GetNativeThreadNameForFile =                                     // NOLINT(readability-identifier-naming)
+    ark::os::unix::native_stack::GetNativeThreadNameForFile;
+const auto ReadOsFile = ark::os::unix::native_stack::ReadOsFile;      // NOLINT(readability-identifier-naming)
+const auto WriterOsFile = ark::os::unix::native_stack::WriterOsFile;  // NOLINT(readability-identifier-naming)
+const auto ChangeJaveStackFormat =                                    // NOLINT(readability-identifier-naming)
+    ark::os::unix::native_stack::ChangeJaveStackFormat;
 #else
 using FuncUnwindstack = bool (*)(pid_t, std::ostream &, int);
 class DumpUnattachedThread {
@@ -57,5 +57,5 @@ bool WriterOsFile(const void *buffer, size_t count, int fd);
 std::string ChangeJaveStackFormat(const char *descriptor);
 #endif  // PANDA_TARGET_UNIX
 
-}  // namespace panda::os::native_stack
+}  // namespace ark::os::native_stack
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_NATIVESTACK_H

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-bool IsDynamicLanguage([[maybe_unused]] panda::panda_file::SourceLang lang)
+bool IsDynamicLanguage([[maybe_unused]] ark::panda_file::SourceLang lang)
 {
 % Common::each_plugin_suboption("language_config", "lang_type") do |lang_type, _, plugin_opts|
     if (lang == <%= plugin_opts["lang_enum"] %>) {
@@ -24,7 +24,7 @@ bool IsDynamicLanguage([[maybe_unused]] panda::panda_file::SourceLang lang)
     return false;
 }
 
-std::optional<panda::panda_file::SourceLang> LanguageFromString([[maybe_unused]] std::string_view lang)
+std::optional<ark::panda_file::SourceLang> LanguageFromString([[maybe_unused]] std::string_view lang)
 {
 % Common::each_plugin_option "directive_name" do |directive_name, _, plugin_opts|
     if (lang == "<%= directive_name %>") {
@@ -33,13 +33,13 @@ std::optional<panda::panda_file::SourceLang> LanguageFromString([[maybe_unused]]
 %   end
 
     if (lang == "PandaAssembly") {
-        return panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+        return ark::panda_file::SourceLang::PANDA_ASSEMBLY;
     }
 
     return {};
 }
 
-const char *LanguageToString([[maybe_unused]] panda::panda_file::SourceLang lang)
+const char *LanguageToString([[maybe_unused]] ark::panda_file::SourceLang lang)
 {
 % Common::each_plugin_option "directive_name" do |directive_name, _, plugin_opts|
     if (lang == <%= plugin_opts["lang_enum"] %>) {
@@ -50,7 +50,7 @@ const char *LanguageToString([[maybe_unused]] panda::panda_file::SourceLang lang
     return "PandaAssembly";
 }
 
-const char *GetCtorName([[maybe_unused]] panda::panda_file::SourceLang lang)
+const char *GetCtorName([[maybe_unused]] ark::panda_file::SourceLang lang)
 {
 % Common::each_plugin_option "ctor_name" do |ctor_name, _, plugin_opts|
     if (lang == <%= plugin_opts["lang_enum"] %>) {
@@ -61,7 +61,7 @@ const char *GetCtorName([[maybe_unused]] panda::panda_file::SourceLang lang)
     return ".ctor";
 }
 
-const char *GetCctorName([[maybe_unused]] panda::panda_file::SourceLang lang)
+const char *GetCctorName([[maybe_unused]] ark::panda_file::SourceLang lang)
 {
 % Common::each_plugin_option "cctor_name" do |cctor_name, _, plugin_opts|
     if (lang == <%= plugin_opts["lang_enum"] %>) {
@@ -72,7 +72,7 @@ const char *GetCctorName([[maybe_unused]] panda::panda_file::SourceLang lang)
     return ".cctor";
 }
 
-const char *GetStringClassDescriptor([[maybe_unused]] panda::panda_file::SourceLang lang)
+const char *GetStringClassDescriptor([[maybe_unused]] ark::panda_file::SourceLang lang)
 {
 % Common::each_plugin_option "string_class_descriptor" do |string_class_descriptor, _, plugin_opts|
     if (lang == <%= plugin_opts["lang_enum"] %>) {

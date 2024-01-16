@@ -24,7 +24,7 @@
 
 #include <array>
 
-namespace panda::ets {
+namespace ark::ets {
 
 void EtsLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const
 {
@@ -103,4 +103,4 @@ VerificationInitAPI EtsLanguageContext::GetVerificationInitAPI() const
     return vApi;
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

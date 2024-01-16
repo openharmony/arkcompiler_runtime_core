@@ -32,7 +32,7 @@ Encoder (implementation of math and mem Low-level emitters)
 #include "elf.h"
 #endif  // PANDA_TARGET_MACOS
 
-namespace panda::compiler::aarch64 {
+namespace ark::compiler::aarch64 {
 using vixl::aarch64::CPURegister;
 using vixl::aarch64::MemOperand;
 
@@ -305,7 +305,7 @@ void Aarch64Encoder::LoadPcRelative(Reg reg, intptr_t offset, Reg regAddr)
 
         GetMasm()->adrp(VixlReg(regAddr), adrpImm);
 
-        offset = panda::helpers::ToUnsigned(addr) & (vixl::aarch64::kPageSize - 1);
+        offset = ark::helpers::ToUnsigned(addr) & (vixl::aarch64::kPageSize - 1);
         if (reg.GetId() != regAddr.GetId()) {
             EncodeAdd(regAddr, regAddr, Imm(offset));
             if (reg != INVALID_REGISTER) {
@@ -802,7 +802,7 @@ void Aarch64Encoder::EncodeGetTypeSize(Reg size, Reg type)
     constexpr uint8_t I32 = 0x7;
     constexpr uint8_t F64 = 0xa;
     constexpr uint8_t REF = 0xd;
-    constexpr uint8_t SMALLREF = panda::OBJECT_POINTER_SIZE < sizeof(uint64_t) ? 1 : 0;
+    constexpr uint8_t SMALLREF = ark::OBJECT_POINTER_SIZE < sizeof(uint64_t) ? 1 : 0;
     auto end = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
 
     GetMasm()->Mov(dreg, VixlImm(0));
@@ -2874,4 +2874,4 @@ size_t Aarch64Encoder::DisasmInstr([[maybe_unused]] std::ostream &stream, size_t
 #endif
     return pc + vixl::aarch64::kInstructionSize;
 }
-}  // namespace panda::compiler::aarch64
+}  // namespace ark::compiler::aarch64

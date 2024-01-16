@@ -17,7 +17,7 @@
 #include "os/filesystem.h"
 #include "events/events.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RuntimeInterface;
 
 Expected<bool, std::string> AotManager::AddFile(const std::string &fileName, RuntimeInterface *runtime, uint32_t gcType,
@@ -187,4 +187,4 @@ bool AotClassContextCollector::operator()(const panda_file::File &pf)
     return true;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

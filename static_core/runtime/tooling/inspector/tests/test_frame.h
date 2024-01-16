@@ -28,7 +28,7 @@
 
 // NOLINTBEGIN
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 class TestFrame : public PtFrame {
 public:
     explicit TestFrame(Method *method, uint32_t bytecode_offset) : method_(method), bytecode_offset_(bytecode_offset) {}
@@ -163,7 +163,7 @@ private:
     PandaVector<RegisterKind> arg_kinds_;
     RegisterKind acc_kind_ {PtFrame::RegisterKind::PRIMITIVE};
 };
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
 // NOLINTEND
 

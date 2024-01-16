@@ -18,7 +18,7 @@
 #include "compiler/background_task_runner.h"
 #include "compiler/compiler_task_runner.h"
 
-namespace panda {
+namespace ark {
 
 CompilerTaskManagerWorker::CompilerTaskManagerWorker(mem::InternalAllocatorPtr internalAllocator, Compiler *compiler)
     : CompilerWorker(internalAllocator, compiler)
@@ -101,4 +101,4 @@ void CompilerTaskManagerWorker::BackgroundCompileMethod(CompilerTask &&ctx)
     compiler::BackgroundCompilerTaskRunner::StartTask(std::move(taskRunner), std::move(backgroundTask));
 }
 
-}  // namespace panda
+}  // namespace ark

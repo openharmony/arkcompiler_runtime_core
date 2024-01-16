@@ -23,7 +23,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 Licm::Licm(Graph *graph, uint32_t hoistLimit)
     : Optimization(graph), hoistLimit_(hoistLimit), hoistableInstructions_(graph->GetLocalAllocator()->Adapter())
 {
@@ -361,4 +361,4 @@ bool Licm::IsInstHoistable(Inst *inst)
     }
     return InstInputDominatesPreheader(inst) && InstDominatesLoopExits(inst) && !GetGraph()->IsInstThrowable(inst);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

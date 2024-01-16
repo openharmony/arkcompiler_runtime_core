@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include "runtime/mem/internal_allocator-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class CrossingMapTest : public testing::Test {
 public:
@@ -33,7 +33,7 @@ public:
         seed_ = 0xDEADBEEF;
 #endif
         srand(seed_);
-        panda::mem::MemConfig::Initialize(MEMORY_POOL_SIZE, MEMORY_POOL_SIZE, 0, 0, 0, 0);
+        ark::mem::MemConfig::Initialize(MEMORY_POOL_SIZE, MEMORY_POOL_SIZE, 0, 0, 0, 0);
         PoolManager::Initialize();
         startAddr_ = GetPoolMinAddress();
         memStats_ = new mem::MemStatsType();
@@ -50,7 +50,7 @@ public:
         delete crossingMap_;
         delete static_cast<Allocator *>(internalAllocator_);
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
         // Logger::Destroy();
         delete memStats_;
     }
@@ -332,4 +332,4 @@ TEST_F(CrossingMapTest, InitializeCrosingMapForMemoryTest)
     GetCrossingMap()->InitializeCrossingMapForMemory(ToVoidPtr(GetPoolMinAddress()), GetPoolSize());
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

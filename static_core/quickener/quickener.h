@@ -24,7 +24,7 @@
 #include "debug_data_accessor.h"
 #include <cstdint>
 
-namespace panda::quick {
+namespace ark::quick {
 class Quickener final {
 public:
     Quickener(panda_file::ItemContainer *container, panda_file::File *file,
@@ -51,4 +51,4 @@ private:
 };
 
 #include <translation_table_gen.h>
-}  // namespace panda::quick
+}  // namespace ark::quick

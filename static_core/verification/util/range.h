@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename... T>
 class Range;
@@ -162,11 +162,11 @@ private:
 
 template <typename Int>
 Range(Int, Int, typename std::enable_if<std::is_integral<Int>::value, bool>::type b = true) -> Range<Int>;
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 namespace std {  // NOLINT(cert-dcl58-cpp)
 template <typename Int>
-string to_string(const panda::verifier::Range<Int> &range)  // NOLINT(readability-identifier-naming)
+string to_string(const ark::verifier::Range<Int> &range)  // NOLINT(readability-identifier-naming)
 {
     return string {"[ "} + to_string(range.Start()) + " .. " + to_string(range.Finish()) + " ]";
 }

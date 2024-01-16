@@ -19,7 +19,7 @@
 #include "mem/vm_handle.h"
 #include "runtime/include/class.h"
 
-namespace panda {
+namespace ark {
 
 namespace coretypes {
 class DynClass;
@@ -153,6 +153,6 @@ private:
     FIELD_UNUSED uint64_t data_ {0};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_HCLASS_H_

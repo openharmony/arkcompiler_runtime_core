@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsVoid : EtsObject {
 public:
@@ -59,6 +59,6 @@ private:
     NO_MOVE_SEMANTIC(EtsVoid);
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_VOID_H_

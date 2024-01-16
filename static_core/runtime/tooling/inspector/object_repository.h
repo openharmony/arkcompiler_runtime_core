@@ -23,7 +23,7 @@
 #include "runtime/tooling/inspector/types/numeric_id.h"
 #include "runtime/tooling/inspector/types/property_descriptor.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 /**
  * All manipulations with an object repository should be made
  * on the corresponding application thread with mutator lock held
@@ -56,6 +56,6 @@ private:
     std::map<RemoteObjectId, std::vector<PropertyDescriptor>> frames_;
     std::map<RemoteObjectId, VMHandle<ObjectHeader>> objects_;
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_OBJECT_REPOSITORY_H

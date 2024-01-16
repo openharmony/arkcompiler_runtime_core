@@ -16,9 +16,9 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H
 #define PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H
 
-namespace panda::ets::napi {
+namespace ark::ets::napi {
 const void *GetEtsNapiEntryPoint();
 const void *GetEtsNapiCriticalEntryPoint();
-}  // namespace panda::ets::napi
+}  // namespace ark::ets::napi
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H

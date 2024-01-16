@@ -19,11 +19,11 @@
 #include <string_view>
 #include <cstdint>
 
-namespace panda {
+namespace ark {
 class RuntimeOptions;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 enum class NativeGcTriggerType { INVALID_NATIVE_GC_TRIGGER, NO_NATIVE_GC_TRIGGER, SIMPLE_STRATEGY };
 inline NativeGcTriggerType NativeGcTriggerTypeFromString(std::string_view nativeGcTriggerTypeStr)
@@ -254,6 +254,6 @@ private:
     bool g1EnablePauseTimeGoal_ {false};
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_SETTINGS_H

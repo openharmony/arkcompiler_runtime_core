@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "runtime/mem/local_object_handle.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 // JSRefConvert adapter for builtin[] types
 template <typename Conv>
@@ -236,6 +236,6 @@ private:
     JSRefConvert *baseElemConv_ {};
 };
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REFCONVERT_ARRAY_H_

@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class JSExtendEtsTest : public EtsInteropTest {};
 
@@ -40,4 +40,4 @@ TEST_F(JSExtendEtsTest, inheritance)
     ASSERT_EQ(true, RunJsTestSuite("check_inheritance.js"));
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

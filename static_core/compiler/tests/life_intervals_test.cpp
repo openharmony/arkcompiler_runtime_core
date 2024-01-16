@@ -16,7 +16,7 @@
 #include "unit_test.h"
 #include "optimizer/analysis/liveness_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTBEGIN(readability-magic-numbers)
 class LifeIntervalsTest : public CommonTest {
 public:
@@ -410,4 +410,4 @@ TEST_F(LifeIntervalsTest, SplitAroundUses)
     }
 }
 // NOLINTEND(readability-magic-numbers)
-}  // namespace panda::compiler
+}  // namespace ark::compiler

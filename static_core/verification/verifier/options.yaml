@@ -13,7 +13,7 @@
 
 module:
   name: verifier
-  namespace: panda::verifier
+  namespace: ark::verifier
 
 options:
 - name: boot-panda-files

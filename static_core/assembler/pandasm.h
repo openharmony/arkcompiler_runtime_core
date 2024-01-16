@@ -18,34 +18,34 @@
 
 #include "utils/pandargs.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
-void PrintError(const panda::pandasm::Error &e, const std::string &msg);
+void PrintError(const ark::pandasm::Error &e, const std::string &msg);
 
-void PrintErrors(const panda::pandasm::ErrorList &warnings, const std::string &msg);
+void PrintErrors(const ark::pandasm::ErrorList &warnings, const std::string &msg);
 
-bool PrepareArgs(panda::PandArgParser &paParser, const panda::PandArg<std::string> &inputFile,
-                 const panda::PandArg<std::string> &outputFile, const panda::PandArg<std::string> &logFile,
-                 const panda::PandArg<bool> &help, const panda::PandArg<bool> &verbose, std::ifstream &inputfile,
-                 int argc, char **argv);
+bool PrepareArgs(ark::PandArgParser &paParser, const ark::PandArg<std::string> &inputFile,
+                 const ark::PandArg<std::string> &outputFile, const ark::PandArg<std::string> &logFile,
+                 const ark::PandArg<bool> &help, const ark::PandArg<bool> &verbose, std::ifstream &inputfile, int argc,
+                 char **argv);
 
-bool Tokenize(panda::pandasm::Lexer &lexer, std::vector<std::vector<panda::pandasm::Token>> &tokens,
+bool Tokenize(ark::pandasm::Lexer &lexer, std::vector<std::vector<ark::pandasm::Token>> &tokens,
               std::ifstream &inputfile);
 
-bool ParseProgram(panda::pandasm::Parser &parser, std::vector<std::vector<panda::pandasm::Token>> &tokens,
-                  const panda::PandArg<std::string> &inputFile,
-                  panda::Expected<panda::pandasm::Program, panda::pandasm::Error> &res);
+bool ParseProgram(ark::pandasm::Parser &parser, std::vector<std::vector<ark::pandasm::Token>> &tokens,
+                  const ark::PandArg<std::string> &inputFile,
+                  ark::Expected<ark::pandasm::Program, ark::pandasm::Error> &res);
 
-bool DumpProgramInJson(panda::pandasm::Program &program, const panda::PandArg<std::string> &scopesFile);
+bool DumpProgramInJson(ark::pandasm::Program &program, const ark::PandArg<std::string> &scopesFile);
 
-bool EmitProgramInBinary(panda::pandasm::Program &program, panda::PandArgParser &paParser,
-                         const panda::PandArg<std::string> &outputFile, panda::PandArg<bool> &optimize,
-                         panda::PandArg<bool> &sizeStat);
+bool EmitProgramInBinary(ark::pandasm::Program &program, ark::PandArgParser &paParser,
+                         const ark::PandArg<std::string> &outputFile, ark::PandArg<bool> &optimize,
+                         ark::PandArg<bool> &sizeStat);
 
-bool BuildFiles(panda::pandasm::Program &program, panda::PandArgParser &paParser,
-                const panda::PandArg<std::string> &outputFile, panda::PandArg<bool> &optimize,
-                panda::PandArg<bool> &sizeStat, panda::PandArg<std::string> &scopesFile);
+bool BuildFiles(ark::pandasm::Program &program, ark::PandArgParser &paParser,
+                const ark::PandArg<std::string> &outputFile, ark::PandArg<bool> &optimize, ark::PandArg<bool> &sizeStat,
+                ark::PandArg<std::string> &scopesFile);
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_PANDASM_H

@@ -20,7 +20,7 @@
 #include "file_items.h"
 #include "helpers.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 class ParamAnnotationsDataAccessor {
 public:
     class AnnotationArray {
@@ -136,6 +136,6 @@ private:
     size_t size_ {0};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_PARAM_ANNOTATIONS_DATA_ACCESSOR_H_

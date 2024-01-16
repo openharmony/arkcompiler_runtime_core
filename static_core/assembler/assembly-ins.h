@@ -29,7 +29,7 @@
 #include "isa.h"
 #include "lexer.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 enum class Opcode {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -125,7 +125,7 @@ struct Ins {
               const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
               const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
               const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays,
-              const std::unordered_map<std::string_view, panda::Label> &labels) const;
+              const std::unordered_map<std::string_view, ark::Label> &labels) const;
 
     size_t OperandListLength() const
     {
@@ -252,6 +252,6 @@ private:
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_INS_H

@@ -44,7 +44,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "runtime/thread_manager.h"
 
-namespace panda::mem {
+namespace ark::mem {
 using TaggedValue = coretypes::TaggedValue;
 using TaggedType = coretypes::TaggedType;
 using DynClass = coretypes::DynClass;
@@ -170,7 +170,7 @@ void GC::Initialize(PandaVM *vm)
     gcListenerManager_ = allocator->template New<GCListenerManager>();
     clearedReferencesLock_ = allocator->New<os::memory::Mutex>();
     os::memory::LockHolder holder(*clearedReferencesLock_);
-    clearedReferences_ = allocator->New<PandaVector<panda::mem::Reference *>>(allocator->Adapter());
+    clearedReferences_ = allocator->New<PandaVector<ark::mem::Reference *>>(allocator->Adapter());
     this->SetPandaVM(vm);
     InitializeImpl();
     gcWorker_ = allocator->New<GCWorker>(this);
@@ -575,7 +575,7 @@ bool GC::IsReference(const BaseClass *cls, const ObjectHeader *ref, const Refere
 void GC::EnqueueReferences()
 {
     while (true) {
-        panda::mem::Reference *ref = nullptr;
+        ark::mem::Reference *ref = nullptr;
         {
             os::memory::LockHolder holder(*clearedReferencesLock_);
             if (clearedReferences_->empty()) {
@@ -643,7 +643,7 @@ void GC::RegisterNativeFree(size_t bytes)
 
 size_t GC::GetNativeBytesFromMallinfoAndRegister() const
 {
-    size_t mallinfoBytes = panda::os::mem::GetNativeBytesFromMallinfo();
+    size_t mallinfoBytes = ark::os::mem::GetNativeBytesFromMallinfo();
     // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     size_t allBytes = mallinfoBytes + nativeBytesRegistered_.load(std::memory_order_relaxed);
@@ -953,4 +953,4 @@ void GC::OnWaitForIdleFail() {}
 
 TEMPLATE_GC_CREATE_GC();
 
-}  // namespace panda::mem
+}  // namespace ark::mem

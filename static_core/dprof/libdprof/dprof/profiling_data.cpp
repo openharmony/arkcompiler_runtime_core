@@ -20,7 +20,7 @@
 #include "ipc/ipc_message_protocol.h"
 #include "serializer/serializer.h"
 
-namespace panda::dprof {
+namespace ark::dprof {
 bool ProfilingData::SetFeatureDate(const std::string &featureName, std::vector<uint8_t> &&data)
 {
     auto it = featuresDataMap_.find(featureName);
@@ -81,4 +81,4 @@ bool ProfilingData::DumpAndResetFeatures()
     featuresDataMap_.clear();
     return true;
 }
-}  // namespace panda::dprof
+}  // namespace ark::dprof

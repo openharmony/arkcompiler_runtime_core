@@ -24,7 +24,7 @@
 #include "runtime/include/panda_vm.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 
-namespace panda {
+namespace ark {
 
 using compiler::CodeInfo;
 using compiler::VRegInfo;
@@ -280,4 +280,4 @@ static size_t GetStackParamsSize(const Frame *frame)
     return RoundUp(counter.GetOnlyStackSize(), 2U * SLOT_SIZE);
 }
 
-}  // namespace panda
+}  // namespace ark

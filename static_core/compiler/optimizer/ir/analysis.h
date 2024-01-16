@@ -20,7 +20,7 @@
 
 #include <optional>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 /// The file contains small analysis functions which can be used in different passes
 class Inst;
@@ -110,6 +110,6 @@ bool StoreValueCanBeObject(Inst *inst);
 
 bool IsConditionEqual(const Inst *inst0, const Inst *inst1, bool inverted);
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_ANALYSIS_H

@@ -16,7 +16,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 /* static */
 EtsObject *EtsObject::Create(EtsCoroutine *etsCoroutine, EtsClass *klass)
@@ -37,4 +37,4 @@ EtsObject *EtsObject::CreateNonMovable(EtsClass *klass)
     return static_cast<EtsObject *>(ObjectHeader::CreateNonMovable(klass->GetRuntimeClass()));
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

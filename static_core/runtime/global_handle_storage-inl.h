@@ -20,7 +20,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda {
+namespace ark {
 using InternalAllocatorPtr = mem::AllocatorPtr<mem::AllocatorPurpose::ALLOCATOR_PURPOSE_INTERNAL>;
 
 template <typename T>
@@ -91,7 +91,7 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::DealUpdateObject(std::ar
 {
     coretypes::TaggedValue obj(block->at(index).GetObject());
     if (obj.IsHeapObject() && obj.GetHeapObject()->IsForwarded()) {
-        coretypes::TaggedValue value(panda::mem::GetForwardAddress(obj.GetHeapObject()));
+        coretypes::TaggedValue value(ark::mem::GetForwardAddress(obj.GetHeapObject()));
         block->at(index).SetObject(value.GetRawData());
     }
 }
@@ -147,5 +147,5 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unu
 }
 
 template class GlobalHandleStorage<coretypes::TaggedType>;
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_GLOABL_HANDLE_STORAGE_INL_H

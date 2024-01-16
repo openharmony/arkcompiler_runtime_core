@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "runtime/include/gc_task.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class GcTaskTest : public testing::Test {};
 
@@ -28,4 +28,4 @@ TEST_F(GcTaskTest, TestPriority)
     ASSERT_LT(GCTaskCause::EXPLICIT_CAUSE, GCTaskCause::OOM_CAUSE);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

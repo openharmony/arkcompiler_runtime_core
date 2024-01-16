@@ -19,7 +19,7 @@
 #include <tuple>
 #include <gtest/gtest.h>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 constexpr size_t DEFAULT_SEED = 123456;
 constexpr size_t TIMEOUT = 1;
@@ -486,4 +486,4 @@ INSTANTIATE_TEST_SUITE_P(TaskStatisticsTypeSet, TaskSchedulerTest,
                          ::testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED,
                                            TaskStatisticsImplType::LOCK_FREE));
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

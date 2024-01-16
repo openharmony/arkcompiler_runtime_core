@@ -24,11 +24,11 @@
 #include <cstdint>
 #include <vector>
 
-namespace panda {
+namespace ark {
 class Method;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CompiledMethod {
 public:
     CompiledMethod(Arch arch, Method *method, size_t index) : arch_(arch), method_(method), index_(index) {}
@@ -107,6 +107,6 @@ private:
     CfiInfo cfiInfo_;
 #endif
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_AOT_COMPILED_METHOD_H

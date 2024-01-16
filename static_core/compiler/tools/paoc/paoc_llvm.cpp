@@ -22,11 +22,11 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_PAOC(level) LOG(level, COMPILER) << "PAOC: "
 
-namespace panda::paoc {
+namespace ark::paoc {
 
-using namespace panda::compiler;  // NOLINT(google-build-using-namespace)
+using namespace ark::compiler;  // NOLINT(google-build-using-namespace)
 
-void PaocLLVM::Clear(panda::mem::InternalAllocatorPtr allocator)
+void PaocLLVM::Clear(ark::mem::InternalAllocatorPtr allocator)
 {
     llvmAotCompiler_ = nullptr;
     Paoc::Clear(allocator);
@@ -80,7 +80,7 @@ bool PaocLLVM::EndLLVM()
     return true;
 }
 
-void PaocLLVM::PrepareLLVM(const panda::Span<const char *> &args)
+void PaocLLVM::PrepareLLVM(const ark::Span<const char *> &args)
 {
     ASSERT(IsLLVMAotMode());
     std::string cmdline;
@@ -111,7 +111,7 @@ bool PaocLLVM::AddGraphToLLVM(CompilingContext *ctx)
 
 void PaocLLVM::ValidateExtraOptions()
 {
-    auto llvmOptionsErr = panda::llvmbackend::g_options.Validate();
+    auto llvmOptionsErr = ark::llvmbackend::g_options.Validate();
 #ifdef NDEBUG
     if (!llvmbackend::g_options.GetLlvmBreakIrRegex().empty()) {
         LOG_PAOC(FATAL) << "--llvm-break-ir-regex is available only in debug builds";
@@ -131,6 +131,6 @@ compiler::LLVMAotBuilder *PaocLLVM::GetAotBuilder()
 {
     return static_cast<LLVMAotBuilder *>(aotBuilder_.get());
 }
-}  // namespace panda::paoc
+}  // namespace ark::paoc
 
 #undef LOG_PAOC

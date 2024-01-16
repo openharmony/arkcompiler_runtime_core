@@ -15,7 +15,7 @@
 
 #include "unit_test.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class GraphComparatorTest : public CommonTest {
 public:
     GraphComparatorTest() = default;
@@ -231,4 +231,4 @@ TEST_F(GraphComparatorTest, CompareDifferentInstCount)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

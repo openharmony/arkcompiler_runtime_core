@@ -21,7 +21,7 @@
 #include "types/ets_primitives.h"
 #include "types/ets_typeapi.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsCoroutine;
 
@@ -82,6 +82,6 @@ private:
     FIELD_UNUSED EtsByte accessMod_;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_TYPEAPI_METHOD_H

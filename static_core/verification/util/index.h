@@ -21,7 +21,7 @@
 
 #include <limits>
 
-namespace panda::verifier {
+namespace ark::verifier {
 // similar to std::optional, but much more effective for numeric types
 // when not all range of values is required and some value may be used
 // as dedicated invalid value
@@ -105,14 +105,14 @@ private:
     template <typename T>
     friend struct std::hash;
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 namespace std {
 template <typename Int, const Int I>
-struct hash<panda::verifier::Index<Int, I>> {
-    size_t operator()(const panda::verifier::Index<Int, I> &i) const noexcept
+struct hash<ark::verifier::Index<Int, I>> {
+    size_t operator()(const ark::verifier::Index<Int, I> &i) const noexcept
     {
-        return panda::verifier::StdHash(i.value_);
+        return ark::verifier::StdHash(i.value_);
     }
 };
 }  // namespace std

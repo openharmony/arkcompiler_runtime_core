@@ -15,7 +15,7 @@
 #ifndef PANDA_TOOLING_PT_REFERENCE_H
 #define PANDA_TOOLING_PT_REFERENCE_H
 
-namespace panda::tooling {
+namespace ark::tooling {
 class PtReference {};
 
 class PtGlobalReference : public PtReference {
@@ -29,6 +29,6 @@ public:
     static PtLocalReference *Create(PtReference *ref);
     static void Remove(PtLocalReference *localRef);
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_REFERENCE_H

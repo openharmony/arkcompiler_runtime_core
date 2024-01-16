@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
-namespace panda::ets {
+namespace ark::ets {
 class EtsReference final {
 public:
     DEFAULT_COPY_SEMANTIC(EtsReference);
@@ -147,6 +147,6 @@ public:
         return this;
     }
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_MEM_ETS_REFERENCE_H

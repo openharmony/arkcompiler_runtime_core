@@ -19,7 +19,7 @@
 #include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/ir/inst.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 inline bool HasLibCall(Inst *inst, Arch arch)
 {
     auto opcode = inst->GetOpcode();
@@ -54,6 +54,6 @@ inline bool HasLibCall(Inst *inst, Arch arch)
             UNREACHABLE();
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_LIB_CALL_INST_H

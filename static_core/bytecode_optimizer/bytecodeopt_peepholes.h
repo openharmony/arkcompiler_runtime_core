@@ -32,7 +32,7 @@
  * InitObject
  */
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 using compiler::BasicBlock;
 using compiler::CallInst;
@@ -87,6 +87,6 @@ private:
     bool isApplied_ {false};
 };
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPTIMIZER_BYTECODEOPT_PEEPHOLES_H

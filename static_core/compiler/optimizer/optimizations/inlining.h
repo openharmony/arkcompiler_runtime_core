@@ -26,7 +26,7 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage,-warnings-as-errors)
 #define LOG_INLINING(level) COMPILER_LOG(level, INLINING) << GetLogIndent()
 
-namespace panda::compiler {
+namespace ark::compiler {
 struct InlineContext {
     RuntimeInterface::MethodPtr method {};
     bool chaDevirtualize {false};
@@ -151,6 +151,6 @@ private:
     bool resolveWoInline_ {false};
     IClassHierarchyAnalysis *cha_ {nullptr};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_INLINING_H

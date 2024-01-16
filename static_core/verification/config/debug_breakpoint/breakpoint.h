@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
 using Offset = uint32_t;
 
@@ -36,9 +36,9 @@ bool ManagedBreakpointPresent(DebugContext const *ctx, Method::UniqId id);
 
 // this is a macro so it doesn't show up in the backtrace
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DBG_MANAGED_BRK(ctx, method_id, method_offset)                                   \
-    if (panda::verifier::debug::CheckManagedBreakpoint(ctx, method_id, method_offset)) { \
-        __builtin_trap();                                                                \
+#define DBG_MANAGED_BRK(ctx, method_id, method_offset)                                 \
+    if (ark::verifier::debug::CheckManagedBreakpoint(ctx, method_id, method_offset)) { \
+        __builtin_trap();                                                              \
     }
 #else
 inline bool CheckManagedBreakpoint([[maybe_unused]] DebugContext const *ctx, [[maybe_unused]] Method::UniqId id,
@@ -54,6 +54,6 @@ inline bool ManagedBreakpointPresent([[maybe_unused]] DebugContext const *ctx, [
 
 #define DBG_MANAGED_BRK(ctx, method_id, method_offset)
 #endif
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug
 
 #endif  // PANDA_VERIFIER_DEBUG_BREAKPOINT_H__

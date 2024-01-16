@@ -15,7 +15,7 @@
 
 #include "default_config.h"
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 const char VERIFIER_DEBUG_DEFAULT_CONFIG[] =
@@ -38,4 +38,4 @@ const char VERIFIER_DEBUG_DEFAULT_CONFIG[] =
     "  }\n"
     "}\n";
 
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config

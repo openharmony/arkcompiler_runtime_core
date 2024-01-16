@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/workers/gc_workers_tasks.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// @brief Base abstract class for GC workers task pool
 class GCWorkersTaskPool {
@@ -109,6 +109,6 @@ private:
     std::atomic_size_t sendedTasks_ {0U};
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_WORKERS_GC_WORKERS_TASK_POOL_H

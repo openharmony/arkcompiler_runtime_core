@@ -17,7 +17,7 @@
 #include "codegen.h"
 #include <mutex>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // clang-format off
 static constexpr std::array INDENT_STRINGS = {
@@ -220,4 +220,4 @@ ScopedDisasmPrinter::~ScopedDisasmPrinter()
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

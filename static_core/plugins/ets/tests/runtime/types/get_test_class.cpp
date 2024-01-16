@@ -20,7 +20,7 @@
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 EtsClass *GetTestClass(const char *source, const char *className, const std::string &sourceFilename)
 {
@@ -48,4 +48,4 @@ EtsClass *GetTestClass(const char *source, const char *className, const std::str
     return klass;
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

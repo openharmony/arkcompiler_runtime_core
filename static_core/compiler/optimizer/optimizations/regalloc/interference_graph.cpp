@@ -20,7 +20,7 @@
 #include "optimizer/analysis/liveness_analyzer.h"
 #include "utils/small_vector.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool GraphMatrix::AddEdge(unsigned a, unsigned b)
 {
     auto it = matrix_.begin() + FindEdge(a, b);
@@ -255,4 +255,4 @@ void InterferenceGraph::Dump(const std::string &name, bool skipPhysical, std::os
 
     out << "}\n";
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

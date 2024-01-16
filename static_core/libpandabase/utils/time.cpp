@@ -17,7 +17,7 @@
 #include "time.h"
 #include <chrono>
 
-namespace panda::time {
+namespace ark::time {
 
 template <class T>
 static uint64_t GetCurrentTime(bool needSystem)
@@ -46,4 +46,4 @@ uint64_t GetCurrentTimeInNanos(bool needSystem)
     return GetCurrentTime<std::chrono::nanoseconds>(needSystem);
 }
 
-}  // namespace panda::time
+}  // namespace ark::time

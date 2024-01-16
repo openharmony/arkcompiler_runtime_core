@@ -21,7 +21,7 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsNativeInterfaceArrayTest : public MockEtsNapiTestBaseClass {};
 
@@ -425,7 +425,7 @@ TEST_F(EtsNativeInterfaceArrayTest, NewObjectArrayTest)
     }
     ASSERT_EQ(etsRes, src);
 
-    panda::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
+    ark::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
     auto *objectArr = s.Convert<EtsObjectArray>(array);
     auto *desc = objectArr->GetClass()->GetDescriptor();
 
@@ -434,6 +434,6 @@ TEST_F(EtsNativeInterfaceArrayTest, NewObjectArrayTest)
     ASSERT_THAT(std::vector<char>(desc, desc + len), ::testing::ElementsAreArray(expectedDesc, len));
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)

@@ -18,7 +18,7 @@
 
 #include "runtime/regexp/ecmascript/regexp_parser.h"
 
-namespace panda {
+namespace ark {
 
 template <class T>
 struct RegExpMatchResult {
@@ -554,5 +554,5 @@ private:
     uint32_t stateSize_ = 0;
     uint8_t *stateStack_ = nullptr;
 };
-}  // namespace panda
+}  // namespace ark
 #endif  // core_REGEXP_REGEXP_EXECUTOR_H

@@ -31,7 +31,7 @@
 
 #include "libpandabase/utils/utf.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 namespace {
 class FileReaderDebugInfoUpdater : public DebugInfoUpdater<FileReaderDebugInfoUpdater> {
@@ -1113,7 +1113,7 @@ void FileReader::UpdateDebugInfo(DebugInfoItem *debugInfoItem, File::EntityId de
 
 void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverseDone)
 {
-    using Flags = panda::BytecodeInst<panda::BytecodeInstMode::FAST>::Flags;
+    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
 
     auto *classMap = container_.GetClassMap();
 
@@ -1181,7 +1181,7 @@ void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, F
 
 void FileReader::ComputeLayoutAndUpdateIndices()
 {
-    using Flags = panda::BytecodeInst<panda::BytecodeInstMode::FAST>::Flags;
+    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
 
     std::map<BaseItem *, File::EntityId> reverseDone;
     for (const auto &it : itemsDone_) {
@@ -1288,4 +1288,4 @@ void FileReader::ComputeLayoutAndUpdateIndices()
     }
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

@@ -19,7 +19,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::test {
+namespace ark::test {
 
 TEST(BitUtils, ReverseBytesUint32)
 {
@@ -64,4 +64,4 @@ TEST(BitUtils, RoundDown)
     ASSERT_EQ(RoundDown(8U, 4U), 8U);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

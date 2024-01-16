@@ -23,7 +23,7 @@
 #include "runtime/include/method.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::test {
+namespace ark::test {
 
 inline std::string Separator()
 {
@@ -51,7 +51,7 @@ protected:
 
         options_.SetGcType("gen-gc");
 
-        auto execPath = panda::os::file::File::GetExecutablePath();
+        auto execPath = ark::os::file::File::GetExecutablePath();
         std::string pandaStdLib =
             execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
         options_.SetBootPandaFiles({pandaStdLib});
@@ -83,12 +83,12 @@ protected:
 
         Runtime::Create(options_);
 
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
     RuntimeOptions options_;
 };
 
@@ -2274,4 +2274,4 @@ TEST_F(PandaExceptionTest, AbstractMethodInitObjectRangeJIT)
     ASSERT_EQ(result.GetAs<int64_t>(), expectedResult) << "Unexpected error";
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

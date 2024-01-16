@@ -16,7 +16,7 @@
 #include "libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.h"
 #include "libpandabase/taskmanager/task.h"
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 SimpleTaskStatisticsImpl::SimpleTaskStatisticsImpl()
 {
@@ -91,4 +91,4 @@ void SimpleTaskStatisticsImpl::ResetCountersWithTaskProperties(TaskProperties pr
     }
 }
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

@@ -34,17 +34,17 @@
 #include "paoc_llvm.h"
 #endif
 
-using namespace panda::compiler;  // NOLINT(google-build-using-namespace)
+using namespace ark::compiler;  // NOLINT(google-build-using-namespace)
 
-namespace panda::paoc {
+namespace ark::paoc {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_PAOC(level) LOG(level, COMPILER) << "PAOC: "
 
 Paoc::CompilingContext::CompilingContext(Method *methodPtr, size_t methodIndex, std::ofstream *statisticsDump)
     : method(methodPtr),
-      allocator(panda::SpaceType::SPACE_TYPE_COMPILER, PandaVM::GetCurrent()->GetMemStats(), true),
-      graphLocalAllocator(panda::SpaceType::SPACE_TYPE_COMPILER, PandaVM::GetCurrent()->GetMemStats(), true),
+      allocator(ark::SpaceType::SPACE_TYPE_COMPILER, PandaVM::GetCurrent()->GetMemStats(), true),
+      graphLocalAllocator(ark::SpaceType::SPACE_TYPE_COMPILER, PandaVM::GetCurrent()->GetMemStats(), true),
       index(methodIndex),
       stats(statisticsDump)
 {
@@ -75,16 +75,16 @@ class Paoc::PaocInitializer {
 public:
     explicit PaocInitializer(Paoc *paoc) : paoc_(paoc) {}
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    int Init(const panda::Span<const char *> &args)
+    int Init(const ark::Span<const char *> &args)
     {
         ASSERT(args.Data() != nullptr);
-        panda::PandArgParser paParser;
+        ark::PandArgParser paParser;
 
         paoc_->runtimeOptions_ = std::make_unique<decltype(paoc_->runtimeOptions_)::element_type>(args[0]);
         paoc_->runtimeOptions_->AddOptions(&paParser);
         paoc_->paocOptions_ = std::make_unique<decltype(paoc_->paocOptions_)::element_type>(args[0]);
         paoc_->paocOptions_->AddOptions(&paParser);
-        panda::compiler::g_options.AddOptions(&paParser);
+        ark::compiler::g_options.AddOptions(&paParser);
 
         base_options::Options baseOptions("");
         baseOptions.AddOptions((&paParser));
@@ -138,7 +138,7 @@ private:
         }
 #endif
         paoc_->runtimeOptions_->SetArkAot(true);
-        if (!panda::Runtime::Create(*paoc_->runtimeOptions_)) {
+        if (!ark::Runtime::Create(*paoc_->runtimeOptions_)) {
             std::cerr << "Failed to create runtime!\n";
             return -1;
         }
@@ -148,10 +148,10 @@ private:
 
     int InitCompiler()
     {
-        CompilerLogger::Init(panda::compiler::g_options.GetCompilerLog());
+        CompilerLogger::Init(ark::compiler::g_options.GetCompilerLog());
 
-        if (panda::compiler::g_options.IsCompilerEnableEvents()) {
-            EventWriter::Init(panda::compiler::g_options.GetCompilerEventsPath());
+        if (ark::compiler::g_options.IsCompilerEnableEvents()) {
+            EventWriter::Init(ark::compiler::g_options.GetCompilerEventsPath());
         }
         ValidateCompilerOptions();
 
@@ -168,15 +168,15 @@ private:
             paoc_->statisticsDump_ = std::ofstream(paoc_->paocOptions_->GetPaocDumpStatsCsv(), std::ofstream::trunc);
         }
         InitPaocMode();
-        paoc_->codeAllocator_ = new ArenaAllocator(panda::SpaceType::SPACE_TYPE_INTERNAL, nullptr, true);
-        paoc_->loader_ = panda::Runtime::GetCurrent()->GetClassLinker();
+        paoc_->codeAllocator_ = new ArenaAllocator(ark::SpaceType::SPACE_TYPE_INTERNAL, nullptr, true);
+        paoc_->loader_ = ark::Runtime::GetCurrent()->GetClassLinker();
 
         return 0;
     }
 
     void ValidateCompilerOptions()
     {
-        auto compilerOptionsErr = panda::compiler::g_options.Validate();
+        auto compilerOptionsErr = ark::compiler::g_options.Validate();
         if (compilerOptionsErr) {
             LOG_PAOC(FATAL) << compilerOptionsErr.value().GetMessage();
         }
@@ -267,7 +267,7 @@ private:
             arch = GetArchFromString(compiler::g_options.GetCompilerCrossArch());
             crossCompilation = arch != RUNTIME_ARCH;
         }
-        panda::compiler::g_options.AdjustCpuFeatures(crossCompilation);
+        ark::compiler::g_options.AdjustCpuFeatures(crossCompilation);
 
         if (arch == Arch::NONE) {
             LOG_PAOC(ERROR) << "Invalid --compiler-cross-arch option:" << compiler::g_options.GetCompilerCrossArch();
@@ -283,8 +283,8 @@ private:
         // Initialize GC:
         auto runtimeLang = paoc_->runtimeOptions_->GetRuntimeType();
         // Fix it in issue 8164:
-        auto gcType = panda::mem::GCTypeFromString(paoc_->runtimeOptions_->GetGcType(runtimeLang));
-        ASSERT(gcType != panda::mem::GCType::INVALID_GC);
+        auto gcType = ark::mem::GCTypeFromString(paoc_->runtimeOptions_->GetGcType(runtimeLang));
+        ASSERT(gcType != ark::mem::GCType::INVALID_GC);
 
         paoc_->aotBuilder_->SetGcType(static_cast<uint32_t>(gcType));
 
@@ -294,12 +294,12 @@ private:
         paoc_->aotBuilder_->SetGenerateSymbols(paoc_->paocOptions_->IsPaocGenerateSymbols());
 #endif
 #ifdef PANDA_COMPILER_DEBUG_INFO
-        paoc_->aotBuilder_->SetEmitDebugInfo(panda::compiler::g_options.IsCompilerEmitDebugInfo());
+        paoc_->aotBuilder_->SetEmitDebugInfo(ark::compiler::g_options.IsCompilerEmitDebugInfo());
 #endif
         return true;
     }
 
-    bool InitPaocClusters(panda::PandArgParser *paParser)
+    bool InitPaocClusters(ark::PandArgParser *paParser)
     {
         std::ifstream fstream(paoc_->paocOptions_->GetPaocClusters());
         if (!fstream) {
@@ -316,7 +316,7 @@ private:
     Paoc *paoc_ {nullptr};
 };
 
-int Paoc::Run(const panda::Span<const char *> &args)
+int Paoc::Run(const ark::Span<const char *> &args)
 {
     if (PaocInitializer(this).Init(args) != 0) {
         return -1;
@@ -356,7 +356,7 @@ int Paoc::Run(const panda::Span<const char *> &args)
     return ShouldIgnoreFailures() ? 0 : (errorOccurred ? 1 : 0);
 }
 
-void Paoc::RunAotMode(const panda::Span<const char *> &args)
+void Paoc::RunAotMode(const ark::Span<const char *> &args)
 {
     std::string cmdline;
     for (auto arg : args) {
@@ -397,13 +397,13 @@ void Paoc::RunAotMode(const panda::Span<const char *> &args)
     LOG_PAOC(DEBUG) << "Successfully compiled to " << outputFile;
 }
 
-void Paoc::Clear(panda::mem::InternalAllocatorPtr allocator)
+void Paoc::Clear(ark::mem::InternalAllocatorPtr allocator)
 {
     delete codeAllocator_;
     codeAllocator_ = nullptr;
     allocator->Delete(slowPathData_);
     methodsList_.clear();
-    panda::Runtime::Destroy();
+    ark::Runtime::Destroy();
 }
 
 void Paoc::StartAotFile(const panda_file::File &pfileRef)
@@ -428,7 +428,7 @@ bool Paoc::CompileFiles()
 {
     auto pfiles = paocOptions_->GetPaocPandaFiles();
     bool errorOccurred = false;
-    auto *vm = panda::Runtime::GetCurrent()->GetPandaVM();
+    auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
     for (auto &fileName : pfiles) {
         // Load panda file
         const panda_file::File *pfile;
@@ -489,7 +489,7 @@ bool Paoc::CompilePandaFile(const panda_file::File &pfileRef)
     bool errorOccurred = false;
     for (auto &classId : classes) {
         panda_file::File::EntityId id(classId);
-        panda::Class *klass = ResolveClass(pfileRef, id);
+        ark::Class *klass = ResolveClass(pfileRef, id);
         std::string className = ClassHelper::GetName(pfileRef.GetStringData(id).data);
 
         if (!PossibleToCompile(pfileRef, klass, id)) {
@@ -523,7 +523,7 @@ bool Paoc::CompilePandaFile(const panda_file::File &pfileRef)
     return !errorOccurred;
 }
 
-panda::Class *Paoc::ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId)
+ark::Class *Paoc::ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId)
 {
     ErrorHandler handler;
     ScopedMutatorLock lock;
@@ -540,7 +540,7 @@ panda::Class *Paoc::ResolveClass(const panda_file::File &pfileRef, panda_file::F
  * Check if it is possible to compile a class.
  * @return true if the class isn't external, abstract, interface and isn't an array class.
  */
-bool Paoc::PossibleToCompile(const panda_file::File &pfileRef, const panda::Class *klass,
+bool Paoc::PossibleToCompile(const panda_file::File &pfileRef, const ark::Class *klass,
                              panda_file::File::EntityId classId)
 {
     std::string className = ClassHelper::GetName(pfileRef.GetStringData(classId).data);
@@ -680,7 +680,7 @@ bool Paoc::CompileInGraph(CompilingContext *ctx, std::string methodName, bool is
     bool success = true;
     taskRunner.AddCallbackOnFail([&success]([[maybe_unused]] InPlaceCompilerContext &compilerCtx) { success = false; });
     auto arch = ChooseArch(Arch::NONE);
-    bool isDynamic = panda::panda_file::IsDynamicLanguage(ctx->method->GetClass()->GetSourceLang());
+    bool isDynamic = ark::panda_file::IsDynamicLanguage(ctx->method->GetClass()->GetSourceLang());
     compiler::CompileInGraph<compiler::INPLACE_MODE>(runtime_, isDynamic, arch, std::move(taskRunner));
     return success;
 }
@@ -724,7 +724,7 @@ bool Paoc::CompileOsr(CompilingContext *ctx)
 bool Paoc::TryCreateGraph(CompilingContext *ctx)
 {
     auto sourceLang = ctx->method->GetClass()->GetSourceLang();
-    bool isDynamic = panda::panda_file::IsDynamicLanguage(sourceLang);
+    bool isDynamic = ark::panda_file::IsDynamicLanguage(sourceLang);
 
     ctx->graph = ctx->allocator.New<Graph>(&ctx->allocator, &ctx->graphLocalAllocator, aotBuilder_->GetArch(),
                                            ctx->method, runtime_, false, nullptr, isDynamic);
@@ -850,7 +850,7 @@ bool Paoc::ShouldIgnoreFailures()
     return compiler::g_options.IsCompilerIgnoreFailures();
 }
 
-void Paoc::PrintUsage(const panda::PandArgParser &paParser)
+void Paoc::PrintUsage(const ark::PandArgParser &paParser)
 {
     std::cerr << "Usage: ark_aot [OPTIONS] --paoc-panda-files <list>\n";
     std::cerr << "    --paoc-panda-files          list of input panda files, it is a mandatory option\n";
@@ -930,7 +930,7 @@ bool Paoc::CompareBootFiles(std::string filename, std::string paocLocation)
 bool Paoc::LoadPandaFiles()
 {
     bool errorOccurred = false;
-    auto *vm = panda::Runtime::GetCurrent()->GetPandaVM();
+    auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
     auto pfiles = runtimeOptions_->GetPandaFiles();
     for (auto &fileName : pfiles) {
         auto pfile = vm->OpenPandaFile(fileName);
@@ -963,15 +963,15 @@ void Paoc::BuildClassHashTable(const panda_file::File &pfileRef)
 
 #undef LOG_PAOC
 
-}  // namespace panda::paoc
+}  // namespace ark::paoc
 
 int main(int argc, const char *argv[])
 {
 #ifdef PANDA_LLVM_AOT
-    panda::paoc::PaocLLVM paoc;
+    ark::paoc::PaocLLVM paoc;
 #else
-    panda::paoc::Paoc paoc;
+    ark::paoc::Paoc paoc;
 #endif
-    panda::Span<const char *> args(argv, argc);
+    ark::Span<const char *> args(argv, argc);
     return paoc.Run(args);
 }

@@ -16,10 +16,10 @@
 #ifndef PANDA_TERMINATE_H
 #define PANDA_TERMINATE_H
 
-namespace panda::terminate {
+namespace ark::terminate {
 
 [[noreturn]] void Terminate(const char *file);
 
-}  // namespace panda::terminate
+}  // namespace ark::terminate
 
 #endif  // PANDA_TERMINATE_H

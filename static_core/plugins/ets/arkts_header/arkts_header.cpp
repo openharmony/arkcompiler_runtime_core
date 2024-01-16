@@ -24,7 +24,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "header_writer.h"
 
-static void PrintHelp(panda::PandArgParser &paParser)
+static void PrintHelp(ark::PandArgParser &paParser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "arkts_header [options] INPUT_FILE OUTPUT_FILE" << std::endl << std::endl;
@@ -32,9 +32,8 @@ static void PrintHelp(panda::PandArgParser &paParser)
     std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-static bool ProcessArgs(panda::PandArgParser &paParser, const panda::PandArg<std::string> &input,
-                        panda::PandArg<std::string> &output, const panda::PandArg<bool> &help, int argc,
-                        const char **argv)
+static bool ProcessArgs(ark::PandArgParser &paParser, const ark::PandArg<std::string> &input,
+                        ark::PandArg<std::string> &output, const ark::PandArg<bool> &help, int argc, const char **argv)
 {
     if (!paParser.Parse(argc, argv)) {
         PrintHelp(paParser);
@@ -51,19 +50,19 @@ static bool ProcessArgs(panda::PandArgParser &paParser, const panda::PandArg<std
         output.SetValue(outputFilename);
     }
 
-    panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR,
-                                        panda::Logger::ComponentMask().set(panda::Logger::Component::ETS_NAPI));
+    ark::Logger::InitializeStdLogging(ark::Logger::Level::ERROR,
+                                      ark::Logger::ComponentMask().set(ark::Logger::Component::ETS_NAPI));
 
     return true;
 }
 
 int main(int argc, const char **argv)
 {
-    panda::PandArg<bool> help("help", false, "Print this message and exit");
-    panda::PandArg<std::string> input("INPUT", "", "Input binary file");
-    panda::PandArg<std::string> output("OUTPUT", "", "Output header file");
+    ark::PandArg<bool> help("help", false, "Print this message and exit");
+    ark::PandArg<std::string> input("INPUT", "", "Input binary file");
+    ark::PandArg<std::string> output("OUTPUT", "", "Output header file");
 
-    panda::PandArgParser paParser;
+    ark::PandArgParser paParser;
 
     paParser.Add(&help);
     paParser.PushBackTail(&input);
@@ -74,13 +73,13 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    auto inputFile = panda::panda_file::File::Open(input.GetValue());
+    auto inputFile = ark::panda_file::File::Open(input.GetValue());
     if (!inputFile) {
         LOG(ERROR, ETS_NAPI) << "Cannot open file '" << input.GetValue() << "'";
         return 1;
     }
 
-    panda::ets::header_writer::HeaderWriter writer(std::move(inputFile), output.GetValue());
+    ark::ets::header_writer::HeaderWriter writer(std::move(inputFile), output.GetValue());
 
     auto createdHeader = writer.PrintFunction();
     if (!createdHeader) {

@@ -18,7 +18,7 @@
 #include "dump.h"
 #include "visualizer_printer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 void VisualizerPrinter::Print()
 {
     PrintBeginTag("cfg");
@@ -129,4 +129,4 @@ void VisualizerPrinter::PrintInst(Inst *inst)
     DumpUsers(inst, output_);
     (*output_) << " <|@\n";
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

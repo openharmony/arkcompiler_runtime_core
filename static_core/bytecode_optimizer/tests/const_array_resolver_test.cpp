@@ -16,7 +16,7 @@
 #include "common.h"
 #include "const_array_resolver.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -406,4 +406,4 @@ TEST_F(CommonTest, ConstArrayResolverArraySizeNotConstant)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

@@ -21,7 +21,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
 void DebugContext::AddMethod(const Method &method, bool isDebug)
 {
@@ -43,4 +43,4 @@ void DebugContext::AddMethod(const Method &method, bool isDebug)
     }
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug

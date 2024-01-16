@@ -40,7 +40,7 @@
 #include "runtime/include/tooling/pt_lang_extension.h"
 #include "runtime/include/typed_value.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class PtLangExt;
 
 class Error {
@@ -595,6 +595,6 @@ public:
     NO_COPY_SEMANTIC(DebugInterface);
     NO_MOVE_SEMANTIC(DebugInterface);
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_RUNTIME_DEBUG_DEBUG_INTERFACE_H

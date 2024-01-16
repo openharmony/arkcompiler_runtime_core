@@ -16,7 +16,7 @@
 #include "debug_data_accessor.h"
 #include "helpers.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 DebugInfoDataAccessor::DebugInfoDataAccessor(const File &pandaFile, File::EntityId debugInfoId)
     : pandaFile_(pandaFile), debugInfoId_(debugInfoId)
@@ -28,4 +28,4 @@ DebugInfoDataAccessor::DebugInfoDataAccessor(const File &pandaFile, File::Entity
     parametersSp_ = sp;
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

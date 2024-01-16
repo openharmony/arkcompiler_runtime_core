@@ -14,15 +14,15 @@
  */
 
 // NOLINTNEXTLINE(readability-function-size)
-llvm::FunctionType *GetEntrypointDeclaration(llvm::LLVMContext &ctx, llvm::Module *module, panda::compiler::RuntimeInterface::EntrypointId id)
+llvm::FunctionType *GetEntrypointDeclaration(llvm::LLVMContext &ctx, llvm::Module *module, ark::compiler::RuntimeInterface::EntrypointId id)
 {
-    constexpr auto GC_SPACE = panda::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE;
+    constexpr auto GC_SPACE = ark::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE;
     // We hope that ARK will not use segmentated memory and size_t will have the same width as uintptr_t
     // NOLINTNEXTLINE(readability-identifier-naming)
     auto size_type = llvm::Type::getIntNTy(ctx, module->getDataLayout().getPointerSizeInBits(0));
     switch (id) {
 % Compiler::entrypoints.each do |entrypoint|
-        case panda::compiler::RuntimeInterface::EntrypointId::<%= entrypoint.enum_name %>:
+        case ark::compiler::RuntimeInterface::EntrypointId::<%= entrypoint.enum_name %>:
             return llvm::FunctionType::get(<%= llvm_type_getter(entrypoint.signature[0], 'GC_SPACE') %>,
                        {<%= entrypoint.signature[1..-1].select {|t| t != '...' }.map { |t| llvm_type_getter(t, 'GC_SPACE') }.join(', ') %>},
                        <%= entrypoint.variadic? %>);

@@ -17,17 +17,17 @@
 
 #include "managed_thread.h"
 
-namespace panda {
+namespace ark {
 class MTManagedThread : public ManagedThread {
 public:
     ThreadId GetInternalId();
 
     PANDA_PUBLIC_API static MTManagedThread *Create(
         Runtime *runtime, PandaVM *vm,
-        panda::panda_file::SourceLang threadLang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        ark::panda_file::SourceLang threadLang = ark::panda_file::SourceLang::PANDA_ASSEMBLY);
 
     explicit MTManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
-                             panda::panda_file::SourceLang threadLang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+                             ark::panda_file::SourceLang threadLang = ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     ~MTManagedThread() override;
 
     MonitorPool *GetMonitorPool();
@@ -380,6 +380,6 @@ private:
     NO_MOVE_SEMANTIC(MTManagedThread);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MTMANAGED_THREAD_H

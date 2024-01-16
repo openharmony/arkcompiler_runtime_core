@@ -32,7 +32,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class GetMethodTest : public testing::Test {
 public:
@@ -45,7 +45,7 @@ public:
         options.SetVerifyCallStack(false);
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -59,7 +59,7 @@ public:
     NO_MOVE_SEMANTIC(GetMethodTest);
 
 private:
-    panda::MTManagedThread *thread_ = nullptr;
+    ark::MTManagedThread *thread_ = nullptr;
 };
 
 TEST_F(GetMethodTest, GetMethod)
@@ -114,4 +114,4 @@ TEST_F(GetMethodTest, GetMethod)
     }
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

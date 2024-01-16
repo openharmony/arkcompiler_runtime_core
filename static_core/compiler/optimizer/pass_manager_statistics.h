@@ -19,7 +19,7 @@
 #include <chrono>
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 class Pass;
 
@@ -100,6 +100,6 @@ private:
 
     bool enableIrStat_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_PASS_STATISTICS_H

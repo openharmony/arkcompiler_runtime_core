@@ -24,7 +24,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsArrayTest : public testing::Test {
 public:
@@ -154,6 +154,6 @@ TEST_F(EtsArrayTest, EtsObjectArray)
     TestEtsObjectArray("LBall;", source, 10000U);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-magic-numbers)

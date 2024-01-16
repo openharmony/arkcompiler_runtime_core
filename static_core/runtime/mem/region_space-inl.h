@@ -18,7 +18,7 @@
 #include "runtime/mem/region_space.h"
 #include "libpandabase/utils/asan_interface.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class RegionAllocCheck {
 public:
@@ -197,6 +197,6 @@ bool RegionSpace::IsLive(const ObjectHeader *object) const
     return region != nullptr && region->IsInAllocRange(object);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_REGION_SPACE_INL_H

@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/loop_transform.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LoopUnswitch : public LoopTransform<LoopExitPoint::LOOP_EXIT_BACKEDGE> {
 public:
     explicit LoopUnswitch(Graph *graph, uint32_t maxLevel, uint32_t maxInsns)
@@ -47,6 +47,6 @@ private:
     const uint32_t maxInsns_ {0};
     bool isApplied_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNSWITCH_H

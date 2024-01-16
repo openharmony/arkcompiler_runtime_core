@@ -31,7 +31,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace panda::fibers {
+namespace ark::fibers {
 
 /**
  * This set of functions implements user mode context switch functionality.
@@ -84,6 +84,6 @@ extern "C" int UpdateContextKeepStack(FiberContext *ctx, FiberEntry func, void *
 /// @brief Copies the context stored in @param src to @param dst
 extern "C" PANDA_PUBLIC_API void CopyContext(FiberContext *dst, const FiberContext *src);
 
-}  // namespace panda::fibers
+}  // namespace ark::fibers
 
 #endif /* PANDA_RUNTIME_FIBERS_FIBER_CONTEXT_H_ */

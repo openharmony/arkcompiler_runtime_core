@@ -21,7 +21,7 @@
 #include "libpandabase/utils/utils.h"
 #include "plugins/ets/tests/mock/mock_test_helper.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class AccessingObjectsFieldsTestBase : public MockEtsNapiTestBaseClass {
 protected:
@@ -29,6 +29,6 @@ protected:
     explicit AccessingObjectsFieldsTestBase(const char *testBinFileName) : MockEtsNapiTestBaseClass(testBinFileName) {};
 };
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 #endif  // PANDA_PLUGINS_ETS_TESTS_MOCK_ACCESSING_OBJECTS_FIELDS_TEST_HELPER_H

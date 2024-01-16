@@ -22,7 +22,7 @@
 #include "runtime/tooling/inspector/types/numeric_id.h"
 #include "runtime/tooling/inspector/types/pause_on_exceptions_state.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class DebuggableThread {
 public:
     DebuggableThread(
@@ -121,6 +121,6 @@ private:
     std::optional<std::function<void(ObjectRepository &)>> request_ GUARDED_BY(mutex_);
     os::memory::ConditionVariable requestDone_ GUARDED_BY(mutex_);
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_DEBUGGABLE_THREAD_H

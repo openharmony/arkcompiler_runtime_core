@@ -33,7 +33,7 @@
 
 #include <limits>
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 class StringTableTest : public testing::TestWithParam<const char *> {
 public:
     static constexpr size_t G1_YOUNG_TEST_SIZE = 1_MB;
@@ -57,7 +57,7 @@ public:
         options.SetCompilerEnableJit(false);
         Runtime::Create(options);
 
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
     }
 
     NO_COPY_SEMANTIC(StringTableTest);
@@ -189,13 +189,13 @@ public:
 
         storage->Remove(ref2);
 
-        thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
+        thread_->GetVM()->GetGC()->WaitForGCInManaged(ark::GCTask(ark::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
         ASSERT_EQ(table->Size(), tableInitSize + expectedTableSize);
 
         storage->Remove(ref1);
         storage->Remove(ref3);
-        thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
+        thread_->GetVM()->GetGC()->WaitForGCInManaged(ark::GCTask(ark::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
         ASSERT_EQ(table->Size(), tableInitSize);
     }
@@ -229,13 +229,13 @@ public:
 
         storage->Remove(ref2);
 
-        thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
+        thread_->GetVM()->GetGC()->WaitForGCInManaged(ark::GCTask(ark::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
         ASSERT_EQ(table->Size(), tableInitSize + expectedTableSize);
 
         storage->Remove(ref1);
         storage->Remove(ref3);
-        thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
+        thread_->GetVM()->GetGC()->WaitForGCInManaged(ark::GCTask(ark::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
         ASSERT_EQ(table->Size(), tableInitSize);
     }
@@ -278,13 +278,13 @@ public:
 
         storage->Remove(ref2);
 
-        thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
+        thread_->GetVM()->GetGC()->WaitForGCInManaged(ark::GCTask(ark::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
         ASSERT_EQ(table->Size(), tableInitSize + expectedTableSize);
 
         storage->Remove(ref1);
         storage->Remove(ref3);
-        thread_->GetVM()->GetGC()->WaitForGCInManaged(panda::GCTask(panda::GCTaskCause::EXPLICIT_CAUSE));
+        thread_->GetVM()->GetGC()->WaitForGCInManaged(ark::GCTask(ark::GCTaskCause::EXPLICIT_CAUSE));
         // Collect all heap for EXPLICIT_CAUSE
         ASSERT_EQ(table->Size(), tableInitSize);
     }
@@ -348,7 +348,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    ark::MTManagedThread *thread_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 TEST_P(StringTableTest, StringTableGCsTest)
@@ -357,6 +357,6 @@ TEST_P(StringTableTest, StringTableGCsTest)
 }
 
 INSTANTIATE_TEST_SUITE_P(StringTableTestOnDiffGCs, StringTableTest, ::testing::ValuesIn(TESTED_GC));
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test
 
 #endif  // STRING_TABLE_BASE_TEST_H

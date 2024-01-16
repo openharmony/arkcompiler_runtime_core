@@ -16,7 +16,7 @@
 #include "check_resolver.h"
 #include "common.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -44,4 +44,4 @@ TEST_F(CommonTest, CheckResolverLenArray)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

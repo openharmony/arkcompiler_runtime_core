@@ -21,7 +21,7 @@
 #include "isa.h"
 #include "libpandabase/macros.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 class Type {
 public:
@@ -174,7 +174,7 @@ public:
     static PANDA_PUBLIC_API Type FromName(std::string_view name, bool ignorePrimitive = false);
 
     static PANDA_PUBLIC_API bool IsPandaPrimitiveType(const std::string &name);
-    static bool IsStringType(const std::string &name, panda::panda_file::SourceLang lang);
+    static bool IsStringType(const std::string &name, ark::panda_file::SourceLang lang);
 
 private:
     static PANDA_PUBLIC_API std::string GetName(std::string_view componentName, size_t rank);
@@ -185,14 +185,14 @@ private:
     panda_file::Type::TypeId typeId_ {panda_file::Type::TypeId::VOID};
 };
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 namespace std {
 
 template <>
-class hash<panda::pandasm::Type> {
+class hash<ark::pandasm::Type> {
 public:
-    size_t operator()(const panda::pandasm::Type &type) const
+    size_t operator()(const ark::pandasm::Type &type) const
     {
         return std::hash<std::string>()(type.GetName());
     }

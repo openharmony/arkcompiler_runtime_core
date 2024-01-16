@@ -27,7 +27,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/mem/refstorage/reference.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 /**
  * Class tracks GC tasks already processed by GC.
@@ -512,4 +512,4 @@ extern "C" void StdGCRegisterNativeFree(EtsLong size)
     coroutine->GetVM()->GetGC()->RegisterNativeFree(ClampToSizeT(size));
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

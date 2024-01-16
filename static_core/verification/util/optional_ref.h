@@ -22,7 +22,7 @@
 // included for nullopt_t
 #include <optional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename T>
 struct OptionalRef;
@@ -142,6 +142,6 @@ private:
     friend struct OptionalConstRef<T>;
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_UTIL_OPTIONAL_REF_H

@@ -17,7 +17,7 @@
 
 #include "optimizer/ir/inst.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Loop;
 
 /**
@@ -64,6 +64,6 @@ private:
     CountableLoopInfo loopInfo_ {};
     bool isHeadLoopExit_ = false;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_COUNTABLE_LOOP_PARSER_H

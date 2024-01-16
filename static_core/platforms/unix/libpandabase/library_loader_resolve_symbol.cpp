@@ -17,7 +17,7 @@
 
 #include <dlfcn.h>
 
-namespace panda::os::library_loader {
+namespace ark::os::library_loader {
 
 Expected<void *, Error> ResolveSymbol(const LibraryHandle &handle, std::string_view name)
 {
@@ -35,4 +35,4 @@ void CloseHandle(void *handle)
         dlclose(handle);
     }
 }
-}  // namespace panda::os::library_loader
+}  // namespace ark::os::library_loader

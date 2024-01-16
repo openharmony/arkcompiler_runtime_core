@@ -24,12 +24,12 @@
 #include <functional>
 #include <string>
 
-namespace panda {
+namespace ark {
 class JsonObject;
 class JsonObjectBuilder;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class Location {
 public:
     Location(ScriptId scriptId, size_t lineNumber) : scriptId_(scriptId), lineNumber_(lineNumber) {}
@@ -52,6 +52,6 @@ private:
     ScriptId scriptId_;
     size_t lineNumber_;
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_TYPES_LOCATION_H

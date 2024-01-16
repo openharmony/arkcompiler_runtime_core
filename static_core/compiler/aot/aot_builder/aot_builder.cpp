@@ -23,7 +23,7 @@
 
 #include <numeric>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 /// Fills text section in the ELF builder by the code from the methods in AotBuilder.
 class CodeDataProvider : public ElfSectionDataProvider {
@@ -304,7 +304,7 @@ void AotBuilder::AddClassHashTable(const panda_file::File &pandaFile)
         return;
     }
 
-    size_t hashTableSize = panda::helpers::math::GetPowerOfTwoValue32(numClasses);
+    size_t hashTableSize = ark::helpers::math::GetPowerOfTwoValue32(numClasses);
     std::vector<panda_file::EntityPairHeader> entityPairs;
     std::vector<unsigned int> conflictEntityTable;
     entityPairs.resize(hashTableSize);
@@ -375,4 +375,4 @@ void AotBuilder::ResolveConflictClassHashTable(const panda_file::File &pandaFile
     classHashTablesSize_.emplace_back(entityPairs.size());
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

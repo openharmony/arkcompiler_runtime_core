@@ -29,7 +29,7 @@
 #include "libpandabase/mem/alloc_tracker.h"
 #endif  // TRACK_INTERNAL_ALLOCATIONS
 
-namespace panda::mem {
+namespace ark::mem {
 
 namespace test {
 class InternalAllocatorTest;
@@ -171,6 +171,6 @@ private:
     friend class test::InternalAllocatorTest;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_INTERNAL_ALLOCATOR_H

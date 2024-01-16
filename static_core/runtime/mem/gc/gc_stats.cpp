@@ -20,7 +20,7 @@
 #include "runtime/mem/gc/gc_stats.h"
 #include "runtime/mem/mem_stats.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 PandaString GCStats::GetStatistics()
 {
@@ -358,4 +358,4 @@ PandaString GCInstanceStats::GetAllSpacesDump(GCType gcType)
     return statistic.str();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

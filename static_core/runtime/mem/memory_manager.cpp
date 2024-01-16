@@ -22,7 +22,7 @@
 #include <runtime/mem/gc/gc_stats.h>
 #include <runtime/mem/heap_manager.h>
 
-namespace panda::mem {
+namespace ark::mem {
 
 static HeapManager *CreateHeapManager(InternalAllocatorPtr internalAllocator, const MemoryManager::HeapOptions &options,
                                       GCType gcType, MemStatsType *memStats)
@@ -137,4 +137,4 @@ void MemoryManager::StopGC()
     gc_->StopGC();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

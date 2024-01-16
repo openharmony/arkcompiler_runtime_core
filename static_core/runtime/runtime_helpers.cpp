@@ -21,7 +21,7 @@
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda {
+namespace ark {
 
 void PrintStackTrace()
 {
@@ -36,4 +36,4 @@ void PrintStackTrace()
     LOG(ERROR, RUNTIME) << "====================== Stack trace end ======================";
 }
 
-}  // namespace panda
+}  // namespace ark

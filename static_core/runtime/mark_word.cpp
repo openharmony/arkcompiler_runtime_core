@@ -17,7 +17,7 @@
 
 #include "runtime/mark_word.h"
 
-namespace panda {
+namespace ark {
 
 template <bool HASH_POLICY>
 inline uint32_t MarkWord::GetHashConfigured() const
@@ -96,6 +96,6 @@ inline bool MarkWord::IsHashed() const
     return IsHashedConfigured<CONFIG_IS_HASH_IN_OBJ_HEADER>();
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MARK_WORD_CPP_

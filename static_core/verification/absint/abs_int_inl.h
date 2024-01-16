@@ -127,7 +127,7 @@ conflicting contexts modulo used registers set. It is complex solution, but very
 
 // NOTE(vdyadov): regain laziness, strict evaluation is very expensive!
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 class AbsIntInstructionHandler {
 public:
@@ -1772,7 +1772,7 @@ public:
             return false;
         }
 
-        PandaString expectedName = panda::panda_file::GetCtorName(ctor->GetClass()->GetSourceLang());
+        PandaString expectedName = ark::panda_file::GetCtorName(ctor->GetClass()->GetSourceLang());
         if (!ctor->IsConstructor() || ctor->IsStatic() || expectedName != StringDataToString(ctor->GetName())) {
             SHOW_MSG(InitobjCallsNotConstructor)
             LOG_VERIFIER_INITOBJ_CALLS_NOT_CONSTRUCTOR(ctor->GetFullName());
@@ -3243,7 +3243,7 @@ public:
                 // !!!!!! NOTE: need to check all possible TypeId-s against formal_id
                 TypeId actualId = actualType.ToTypeId();
                 if (actualId != TypeId::INVALID) {
-                    checkResult = panda::verifier::CheckMethodArgs(formalId, actualId);
+                    checkResult = ark::verifier::CheckMethodArgs(formalId, actualId);
                 } else {
                     // special case, where type after contexts LUB operation is inexact one, like
                     // integral32_Type()
@@ -3257,7 +3257,7 @@ public:
                         LOG_VERIFIER_CALL_FORMAL_ACTUAL_DIFFERENT(ToString(formalType), ToString(actualType));
                         END_SHOW_MSG();
                     } else {
-                        checkResult = panda::verifier::CheckMethodArgs(formalId, actualId);
+                        checkResult = ark::verifier::CheckMethodArgs(formalId, actualId);
                     }
                 }
                 if (!checkResult.IsOk()) {
@@ -4261,6 +4261,6 @@ private:
         return PandaString {field->GetClass()->GetName()} + "." + utf::Mutf8AsCString(field->GetName().data);
     }
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H

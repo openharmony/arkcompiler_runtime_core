@@ -16,7 +16,7 @@
 #include "abs_int_inl.h"
 #include "handle_gen.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 bool AbsIntInstructionHandler::IsRegDefined(int reg)
 {
@@ -180,4 +180,4 @@ void AbsIntInstructionHandler::Sync()
 #endif
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

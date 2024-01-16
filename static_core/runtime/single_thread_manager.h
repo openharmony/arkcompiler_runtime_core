@@ -17,7 +17,7 @@
 
 #include "runtime/thread_manager.h"
 
-namespace panda {
+namespace ark {
 class SingleThreadManager : public ThreadManager {
 public:
     NO_COPY_SEMANTIC(SingleThreadManager);
@@ -63,6 +63,6 @@ protected:
         return cb(GetMainThread());
     }
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_SINGLE_THREAD_MANAGER_H

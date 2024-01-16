@@ -13,7 +13,7 @@
 
 module:
   name: llvm
-  namespace: panda::llvmbackend
+  namespace: ark::llvmbackend
   descritpition: LLVM AOT compiler for panda
 
 options:

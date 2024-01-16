@@ -24,7 +24,7 @@
 
 #include <variant>
 
-namespace panda::verifier {
+namespace ark::verifier {
 class TypeSystem;
 
 class Type {
@@ -226,12 +226,12 @@ struct MethodSignature {
     }
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 namespace std {
 template <>
-struct hash<panda::verifier::Type> {
-    size_t operator()(panda::verifier::Type tp) const
+struct hash<ark::verifier::Type> {
+    size_t operator()(ark::verifier::Type tp) const
     {
         return hash<uintptr_t>()(tp.content_);
     }

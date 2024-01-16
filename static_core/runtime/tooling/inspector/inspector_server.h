@@ -36,7 +36,7 @@
 #include <string_view>
 #include <vector>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class Server;  // NOLINT(fuchsia-virtual-inheritance)
 
 class InspectorServer final {
@@ -115,6 +115,6 @@ private:
     SessionManager sessionManager_;
     SourceManager sourceManager_;
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_INSPECTOR_SERVER_H

@@ -24,7 +24,7 @@
 
 // NOLINTBEGIN
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 
 static constexpr const char *g_source = R"(
     .record Test {}
@@ -56,7 +56,7 @@ protected:
         options.SetShouldInitializeIntrinsics(false);
         options.SetShouldLoadBootPandaFiles(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
 
         thread_->ManagedCodeBegin();
 
@@ -81,12 +81,12 @@ protected:
 
     static const std::string fileName;
     static DebugInfoCache cache;
-    static panda::MTManagedThread *thread_;
+    static ark::MTManagedThread *thread_;
     static Method *methodFoo;
 };
 
 DebugInfoCache DebugInfoCacheTest::cache {};
-panda::MTManagedThread *DebugInfoCacheTest::thread_ = nullptr;
+ark::MTManagedThread *DebugInfoCacheTest::thread_ = nullptr;
 const std::string DebugInfoCacheTest::fileName = "source.abc";
 Method *DebugInfoCacheTest::methodFoo = nullptr;
 
@@ -193,6 +193,6 @@ TEST_F(DebugInfoCacheTest, GetSourceLocation)
               breaks.end());
 }
 
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
 // NOLINTEND

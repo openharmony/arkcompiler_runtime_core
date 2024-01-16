@@ -17,7 +17,7 @@
 
 #include "macros.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 bool EventLoop::Kill()
 {
     return running_.exchange(false);
@@ -32,4 +32,4 @@ void EventLoop::Run()
         RunOne();
     }
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

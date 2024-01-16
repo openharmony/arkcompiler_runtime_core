@@ -20,7 +20,7 @@
 #include "mem/panda_containers.h"
 #include "mem/panda_string.h"
 
-namespace panda {
+namespace ark {
 
 template <class Value>
 template <class ForwardIterator>
@@ -92,6 +92,6 @@ void Histogram<Value>::AddValue(const Value &element, size_t number)
     SimpleHistogram<Value>::AddValue(element, number);
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_HISTOGRAM_INL_H_

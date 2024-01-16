@@ -19,7 +19,7 @@
 #include <cmath>
 #include "libpandabase/macros.h"
 
-namespace panda {
+namespace ark {
 class Sequence {
 public:
     void Add(double val)
@@ -69,5 +69,5 @@ private:
     double variance_ {0.0};
     static constexpr double DEFAULT_INCREMENTAL_FACTOR = 0.3;
 };
-}  // namespace panda
+}  // namespace ark
 #endif

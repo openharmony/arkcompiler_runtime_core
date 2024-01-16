@@ -35,7 +35,7 @@
 #include "runtime/tests/test_utils.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions,-warnings-as-errors)
 class ExplicitGC : public testing::Test {
@@ -54,7 +54,7 @@ public:
 
     void SetupRuntime(const std::string &gcType, bool isExplicitFull) const
     {
-        panda::Logger::ComponentMask componentMask;
+        ark::Logger::ComponentMask componentMask;
         componentMask.set(Logger::Component::GC);
 
         Logger::InitializeStdLogging(Logger::Level::INFO, componentMask);
@@ -219,4 +219,4 @@ TEST_F(ExplicitGC, TestGenGCWithFullExplicit)
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

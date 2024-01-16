@@ -17,7 +17,7 @@
 #include "runtime/include/thread.h"
 #include "plugins/ets/runtime/types/ets_void.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 /**
  * The function register FinalizationQueue instance in ETS VM.
@@ -31,4 +31,4 @@ extern "C" EtsVoid *StdFinalizationQueueRegisterInstance(EtsObject *instance)
     return EtsVoid::GetInstance();
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

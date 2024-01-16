@@ -25,7 +25,7 @@
 #include "libpandabase/mem/stack_like_allocator-inl.h"
 #include "runtime/tests/allocator_test_base.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class StackLikeAllocatorTest : public AllocatorTest<StackLikeAllocator<>> {
 public:
     NO_COPY_SEMANTIC(StackLikeAllocatorTest);
@@ -33,14 +33,14 @@ public:
     StackLikeAllocatorTest()
     {
         static constexpr size_t INTERNAL_MEMORY_SIZE = 256_MB;
-        panda::mem::MemConfig::Initialize(0, INTERNAL_MEMORY_SIZE, 0, 0, INTERNAL_MEMORY_SIZE, 0);
+        ark::mem::MemConfig::Initialize(0, INTERNAL_MEMORY_SIZE, 0, 0, INTERNAL_MEMORY_SIZE, 0);
         // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
     }
 
     ~StackLikeAllocatorTest() override
     {
         // Logger::Destroy();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
 protected:
@@ -197,4 +197,4 @@ TEST_F(StackLikeAllocatorTest, CheckAddrInsideAllocator)
     ASSERT_FALSE(alloc.Contains(invalidAddr));
     free(invalidAddr);  // NOLINT(cppcoreguidelines-no-malloc)
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

@@ -28,7 +28,7 @@
 #include "runtime/monitor_pool.h"
 #include "runtime/handle_base-inl.h"
 
-namespace panda {
+namespace ark {
 
 namespace object_header_traits {
 
@@ -38,12 +38,12 @@ std::atomic<uint32_t> g_hashSeed = std::atomic<uint32_t>(LINEAR_SEED + std::time
 }  // namespace object_header_traits
 
 /* static */
-ObjectHeader *ObjectHeader::CreateObject(ManagedThread *thread, panda::BaseClass *klass, bool nonMovable)
+ObjectHeader *ObjectHeader::CreateObject(ManagedThread *thread, ark::BaseClass *klass, bool nonMovable)
 {
     ASSERT(klass != nullptr);
 #ifndef NDEBUG
     if (!klass->IsDynamicClass()) {
-        auto cls = static_cast<panda::Class *>(klass);
+        auto cls = static_cast<ark::Class *>(klass);
         ASSERT(cls->IsInstantiable());
         ASSERT(!cls->IsArrayClass());
         ASSERT(!cls->IsStringClass());
@@ -65,7 +65,7 @@ ObjectHeader *ObjectHeader::CreateObject(ManagedThread *thread, panda::BaseClass
     return obj;
 }
 
-ObjectHeader *ObjectHeader::CreateObject(panda::BaseClass *klass, bool nonMovable)
+ObjectHeader *ObjectHeader::CreateObject(ark::BaseClass *klass, bool nonMovable)
 {
     return CreateObject(ManagedThread::GetCurrent(), klass, nonMovable);
 }
@@ -210,10 +210,10 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
     }
     // copy remaining memory by object pointer
     for (std::size_t i = wordsToCopyEnd; i < objectPointersToCopyEnd; i += OBJECT_POINTER_SIZE) {
-        reinterpret_cast<std::atomic<panda::ObjectPointerType> *>(&dstSp[i])->store(
+        reinterpret_cast<std::atomic<ark::ObjectPointerType> *>(&dstSp[i])->store(
             // Atomic with relaxed order reason: data race with src_handle with no synchronization or ordering
             // constraints imposed on other reads or writes
-            reinterpret_cast<std::atomic<panda::ObjectPointerType> *>(&srcSp[i])->load(std::memory_order_relaxed),
+            reinterpret_cast<std::atomic<ark::ObjectPointerType> *>(&srcSp[i])->load(std::memory_order_relaxed),
             std::memory_order_relaxed);
     }
     // copy remaining memory by bytes
@@ -280,12 +280,12 @@ size_t ObjectHeader::ObjectSizeStatic(BaseClass *baseKlass) const
     }
 
     if (klass->IsClassClass()) {
-        auto cls = panda::Class::FromClassObject(const_cast<ObjectHeader *>(this));
+        auto cls = ark::Class::FromClassObject(const_cast<ObjectHeader *>(this));
         if (cls != nullptr) {
-            return panda::Class::GetClassObjectSizeFromClass(cls, klass->GetSourceLang());
+            return ark::Class::GetClassObjectSizeFromClass(cls, klass->GetSourceLang());
         }
     }
     return baseKlass->GetObjectSize();
 }
 
-}  // namespace panda
+}  // namespace ark

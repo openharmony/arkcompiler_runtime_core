@@ -23,7 +23,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "utils/expected.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RuntimeInterface;
 
 class AotManager {
@@ -175,6 +175,6 @@ private:
     PandaString *acc_;
     bool useAbsPath_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_AOT_AOT_MANAGER_H

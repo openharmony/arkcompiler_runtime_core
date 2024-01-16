@@ -26,7 +26,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "inst_checker_gen.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // ---- Below extended ASSERT and ASSERT_DO for GraphChecker ----
 
@@ -2559,4 +2559,4 @@ VisitBinaryShiftedRegister(AddSR) VisitBinaryShiftedRegister(SubSR) VisitBinaryS
 #undef ASSERT_DO_EXT
 #undef ASSERT_DO_EXT_VISITOR
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -17,7 +17,7 @@
 
 #include "runtime/coroutines/coroutine.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief Native context of a coroutine.
@@ -63,6 +63,6 @@ private:
     Coroutine *co_ = nullptr;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COROUTINES_COROUTINE_CONTEXT_H

@@ -19,7 +19,7 @@
 #include "libpandafile/file.h"
 #include "libpandafile/file_items.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 // Must be synchronized with
 // plugins/ecmascript/es2panda/compiler/scripts/signatures.yaml
@@ -123,6 +123,6 @@ inline std::string ConvertEtsPrimitiveTypeToString(const EtsType type)
     }
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H_

@@ -19,11 +19,11 @@
 
 #include "runtime/mem/mem_stats.h"
 
-namespace panda {
+namespace ark {
 class Class;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Default implementation of MemStats in release mode.
 class MemStatsDefault : public MemStats<MemStatsDefault> {
@@ -41,5 +41,5 @@ public:
 };
 
 extern template class MemStats<MemStatsDefault>;
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H

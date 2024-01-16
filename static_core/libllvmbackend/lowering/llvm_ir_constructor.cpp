@@ -26,11 +26,11 @@
 #include "transforms/builtins.h"
 #include "transforms/runtime_calls.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 #define ONLY_NEEDSAFEPOINT
 #include <intrinsics_ir_build.inl>
 #undef ONLY_NEEDSAFEPOINT
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #include <llvm/IR/InlineAsm.h>
 #include <llvm/IR/IntrinsicsAArch64.h>
@@ -38,20 +38,20 @@ namespace panda::compiler {
 #include <llvm/IR/Verifier.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
-using panda::llvmbackend::DebugDataBuilder;
-using panda::llvmbackend::LLVMArkInterface;
-using panda::llvmbackend::builtins::LenArray;
-using panda::llvmbackend::builtins::LoadClass;
-using panda::llvmbackend::builtins::LoadInitClass;
-using panda::llvmbackend::builtins::LoadString;
-using panda::llvmbackend::builtins::PostWRB;
-using panda::llvmbackend::builtins::PreWRB;
-using panda::llvmbackend::builtins::ResolveVirtual;
-using panda::llvmbackend::gc_barriers::EmitPostWRB;
-using panda::llvmbackend::gc_barriers::EmitPreWRB;
-using panda::llvmbackend::irtoc_function_utils::IsNoAliasIrtocFunction;
+using ark::llvmbackend::DebugDataBuilder;
+using ark::llvmbackend::LLVMArkInterface;
+using ark::llvmbackend::builtins::LenArray;
+using ark::llvmbackend::builtins::LoadClass;
+using ark::llvmbackend::builtins::LoadInitClass;
+using ark::llvmbackend::builtins::LoadString;
+using ark::llvmbackend::builtins::PostWRB;
+using ark::llvmbackend::builtins::PreWRB;
+using ark::llvmbackend::builtins::ResolveVirtual;
+using ark::llvmbackend::gc_barriers::EmitPostWRB;
+using ark::llvmbackend::gc_barriers::EmitPreWRB;
+using ark::llvmbackend::irtoc_function_utils::IsNoAliasIrtocFunction;
 #ifndef NDEBUG
-using panda::llvmbackend::irtoc_function_utils::IsPtrIgnIrtocFunction;
+using ark::llvmbackend::irtoc_function_utils::IsPtrIgnIrtocFunction;
 #endif
 
 static constexpr unsigned VECTOR_SIZE_8 = 8;
@@ -143,7 +143,7 @@ inline std::string GetTypeName(llvm::Type *type)
 #endif
 }  // namespace
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 #include <can_compile_intrinsics_gen.inl>
 
@@ -2018,11 +2018,11 @@ ArenaVector<llvm::OperandBundleDef> LLVMIrConstructor::CreateSaveStateBundle(Ins
 void LLVMIrConstructor::CreatePreWRB(Inst *inst, llvm::Value *mem)
 {
     auto barrierType = GetGraph()->GetRuntime()->GetPreType();
-    if (barrierType == panda::mem::BarrierType::PRE_WRB_NONE) {
+    if (barrierType == ark::mem::BarrierType::PRE_WRB_NONE) {
         ASSERT(GetGraph()->SupportManagedCode());
         return;
     }
-    ASSERT(barrierType == panda::mem::BarrierType::PRE_SATB_BARRIER);
+    ASSERT(barrierType == ark::mem::BarrierType::PRE_SATB_BARRIER);
 
     if (llvmbackend::g_options.IsLlvmBuiltinWrb() && !arkInterface_->IsIrtocMode()) {
         auto builtin = PreWRB(func_->getParent(), mem->getType()->getPointerAddressSpace());
@@ -2037,12 +2037,12 @@ void LLVMIrConstructor::CreatePreWRB(Inst *inst, llvm::Value *mem)
 void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value *offset, llvm::Value *value)
 {
     auto barrierType = GetGraph()->GetRuntime()->GetPostType();
-    if (barrierType == panda::mem::BarrierType::POST_WRB_NONE) {
+    if (barrierType == ark::mem::BarrierType::POST_WRB_NONE) {
         ASSERT(GetGraph()->SupportManagedCode());
         return;
     }
-    ASSERT(barrierType == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-           barrierType == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
+    ASSERT(barrierType == ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+           barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER);
 
     Inst *secondValue;
     Inst *val = InstStoredValue(inst, &secondValue);
@@ -2523,7 +2523,7 @@ llvm::Value *LLVMIrConstructor::CoerceValue(llvm::Value *value, DataType::Type s
  * Used in irtoc C++ inlining.
  *
  * When we compile irtoc handlers, we do not have ark's types.
- * For example, panda::Frame is missing.
+ * For example, ark::Frame is missing.
  * LLVM AOT uses i8* or i64 instead
  *
  * For example, the irtoc handler could look like:
@@ -2554,12 +2554,12 @@ llvm::Value *LLVMIrConstructor::CoerceValue(llvm::Value *value, llvm::Type *targ
 
     if (!valueType->isPointerTy() && targetType->isPointerTy()) {
         // DataType::POINTER to targetType.
-        // Example: i64 -> %"class.panda::Frame"*
+        // Example: i64 -> %"class.ark::Frame"*
         return builder_.CreateIntToPtr(value, targetType);
     }
     if (valueType->isPointerTy() && !targetType->isPointerTy()) {
         // valueType to DataType::POINTER
-        // Example: %"class.panda::coretypes::String"* -> i64
+        // Example: %"class.ark::coretypes::String"* -> i64
         return builder_.CreatePtrToInt(value, targetType);
     }
 
@@ -4496,7 +4496,7 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
     arkInterface_->PutFunction(graph_->GetMethod(), func_);
 
     if (graph->SupportManagedCode()) {
-        func_->setGC(std::string {panda::llvmbackend::LLVMArkInterface::GC_STRATEGY});
+        func_->setGC(std::string {ark::llvmbackend::LLVMArkInterface::GC_STRATEGY});
     }
 
     auto klassId = graph_->GetRuntime()->GetClassIdForMethod(graph_->GetMethod());
@@ -4745,4 +4745,4 @@ void LLVMIrConstructor::BreakIrIfNecessary()
 
 #include "llvm_ir_constructor_gen.inl"
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

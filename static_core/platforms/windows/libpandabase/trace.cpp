@@ -17,7 +17,7 @@
 #include "macros.h"
 #include "utils/logger.h"
 
-namespace panda::trace::internal {
+namespace ark::trace::internal {
 
 int g_traceMarkerFd = -1;
 
@@ -47,4 +47,4 @@ void DoInt64TracePoint([[maybe_unused]] const char *str, [[maybe_unused]] int64_
     UNREACHABLE();
 }
 
-}  // end namespace panda::trace::internal
+}  // end namespace ark::trace::internal

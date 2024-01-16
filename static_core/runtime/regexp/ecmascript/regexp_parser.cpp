@@ -51,11 +51,11 @@ int FromUtf8(int c, int l, const uint8_t *p, const uint8_t **pp)
     for (int i = 0; i < l; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         b = *p++;
-        if (b < panda::utf::UTF8_2B_SECOND || b >= panda::utf::UTF8_2B_FIRST) {
+        if (b < ark::utf::UTF8_2B_SECOND || b >= ark::utf::UTF8_2B_FIRST) {
             return INVALID_UNICODE_FROM_UTF8;
         }
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        c = (c << 6) | (b & panda::utf::UTF8_2B_THIRD);  // 6: Maximum Unicode range
+        c = (c << 6) | (b & ark::utf::UTF8_2B_THIRD);  // 6: Maximum Unicode range
     }
     if (c < UTF8_MIN_CODE[l - 1]) {
         return INVALID_UNICODE_FROM_UTF8;
@@ -95,7 +95,7 @@ int UnicodeFromUtf8(const uint8_t *p, int maxLen, const uint8_t **pp)
 }
 }  // namespace
 
-namespace panda {
+namespace ark {
 static constexpr uint32_t CACHE_SIZE = 128;
 static constexpr uint32_t CHAR_MAXS = 128;
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
@@ -1526,4 +1526,4 @@ int RegExpParser::IsIdentFirst(uint32_t c)
     }
     return static_cast<int>(u_isIDStart(c));
 }
-}  // namespace panda
+}  // namespace ark

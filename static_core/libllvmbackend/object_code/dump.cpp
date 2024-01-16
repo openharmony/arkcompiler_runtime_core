@@ -15,7 +15,7 @@
 
 #include "llvm_aot_compiler.h"
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 void CodeInfoProducer::DumpStackMap(const std::unique_ptr<const LLVMStackMap> &stackmap, std::ostream &stream)
 {
@@ -127,4 +127,4 @@ void CodeInfoProducer::DumpStackMapLocation(const LLVMStackMap::LocationAccessor
     stream << std::endl;
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

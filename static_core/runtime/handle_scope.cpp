@@ -16,7 +16,7 @@
 #include "runtime/handle_scope.h"
 #include "runtime/include/thread-inl.h"
 
-namespace panda {
+namespace ark {
 // For JS TaggedType
 template <>
 uintptr_t HandleScope<coretypes::TaggedType>::NewHandle(coretypes::TaggedType value)
@@ -34,4 +34,4 @@ uintptr_t HandleScope<ObjectHeader *>::NewHandle(ObjectHeader *value)
     handleCount_++;
     return addr;
 }
-}  // namespace panda
+}  // namespace ark

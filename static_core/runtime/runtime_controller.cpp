@@ -24,7 +24,7 @@
 #include "libpandabase/utils/logger.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda {
+namespace ark {
 
 /// Data directory of applications for default user.
 constexpr std::string_view DIR_DATA_DATA = "/data/data/";
@@ -81,4 +81,4 @@ bool RuntimeController::CanLoadPandaFile(const std::string &path) const
     return true;
 }
 
-}  // namespace panda
+}  // namespace ark

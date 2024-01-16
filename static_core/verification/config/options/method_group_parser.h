@@ -19,14 +19,14 @@
 #include "verification/util/parser/parser.h"
 #include "runtime/include/mem/panda_string.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename Parser, typename RegexHandler>
 const auto &MethodGroupParser(RegexHandler &regexHandler)
 {
-    using panda::parser::Action;
-    using panda::parser::Charset;
-    // using panda::parser::Parser;
+    using ark::parser::Action;
+    using ark::parser::Charset;
+    // using ark::parser::Parser;
 
     struct MethodGroup;
 
@@ -54,6 +54,6 @@ const auto &MethodGroupParser(RegexHandler &regexHandler)
     return REGEX;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_DEBUG_METHOD_GROUP_PARSER_H_

@@ -22,7 +22,7 @@
 #include "types/ets_string.h"
 #include "types/ets_class.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsFieldTest : public testing::Test {
 public:
@@ -129,4 +129,4 @@ TEST_F(EtsFieldTest, AllMethods)
     TestFieldMethods(source, "LDrawer;", "drawCounter", "A", false);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

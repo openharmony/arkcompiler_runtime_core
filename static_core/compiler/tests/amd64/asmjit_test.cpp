@@ -19,7 +19,7 @@
 
 #include "mem/pool_manager.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 using namespace asmjit;  // NOLINT(google-build-using-namespace)
 
 class AsmJitTest : public ::testing::Test {
@@ -27,7 +27,7 @@ public:
     AsmJitTest()
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
+        ark::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
     }
@@ -36,7 +36,7 @@ public:
     {
         delete allocator_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_MOVE_SEMANTIC(AsmJitTest);
@@ -224,4 +224,4 @@ TEST_F(AsmJitTest, AddExplicit)
     err = allocator.release(roPtr);
     ASSERT_FALSE(err);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -22,7 +22,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, index)
 {
@@ -103,4 +103,4 @@ TEST_F(VerifierTest, index_hash)
     EXPECT_EQ(iSet.count(7_I), 1);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

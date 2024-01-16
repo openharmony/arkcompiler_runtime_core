@@ -19,7 +19,7 @@
 #include "debug_data_accessor.h"
 #include "helpers.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 template <class Callback>
 inline void DebugInfoDataAccessor::EnumerateParameters(const Callback &cb)
@@ -78,6 +78,6 @@ inline void DebugInfoDataAccessor::SkipLineNumberProgram()
     GetLineNumberProgram();
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_DEBUG_DATA_ACCESSOR_INL_H_

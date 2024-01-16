@@ -24,7 +24,7 @@
 #include "vixl_exec_module.h"
 #endif
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTBEGIN(readability-magic-numbers)
 class LoopUnrollTest : public GraphTest {
 public:
@@ -1973,4 +1973,4 @@ TEST_F(LoopUnrollTest, UnrollNeedSaveStateBridge)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

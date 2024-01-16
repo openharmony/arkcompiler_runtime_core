@@ -18,7 +18,7 @@ Low-level calling convention
 #include "target/aarch32/target.h"
 #include <cmath>
 
-namespace panda::compiler::aarch32 {
+namespace ark::compiler::aarch32 {
 using vixl::aarch32::RegisterList;
 using vixl::aarch32::SRegister;
 using vixl::aarch32::SRegisterList;
@@ -321,4 +321,4 @@ void Aarch32CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo
 
     encoder->EncodeReturn();
 }
-}  // namespace panda::compiler::aarch32
+}  // namespace ark::compiler::aarch32

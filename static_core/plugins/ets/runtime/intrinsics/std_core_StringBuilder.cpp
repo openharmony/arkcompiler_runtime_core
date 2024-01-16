@@ -27,7 +27,7 @@
 #include "runtime/arch/memory_helpers.h"
 #include <unistd.h>
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 EtsString *StdCoreStringBuilderConcatStrings(EtsString *lhs, EtsString *rhs)
 {
@@ -111,4 +111,4 @@ EtsString *StdCoreStringBuilderToString(ObjectHeader *sb)
     return StringBuilderToString(sb);
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

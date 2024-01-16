@@ -26,7 +26,7 @@
 #include "runtime/interpreter/runtime_interface.h"
 #include "tools/sampler/aspt_converter.h"
 
-namespace panda::tooling::sampler::test {
+namespace ark::tooling::sampler::test {
 
 inline std::string Separator()
 {
@@ -54,7 +54,7 @@ public:
         options.SetRunGcInPlace(true);
         options.SetVerifyCallStack(false);
         options.SetInterpreterType("cpp");
-        auto execPath = panda::os::file::File::GetExecutablePath();
+        auto execPath = ark::os::file::File::GetExecutablePath();
         std::string pandaStdLib =
             execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
         options.SetBootPandaFiles({pandaStdLib});
@@ -63,7 +63,7 @@ public:
         auto pf = panda_file::OpenPandaFileOrZip(g_pandaFileName);
         Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf));
 
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
     }
 
     void TearDown() override
@@ -122,7 +122,7 @@ public:
     }
 
 protected:
-    panda::MTManagedThread *thread_ {nullptr};
+    ark::MTManagedThread *thread_ {nullptr};
     uintptr_t pfId_ {0};
     uint32_t checksum_ {0};
 };
@@ -164,8 +164,7 @@ TEST_F(SamplerTest, SamplerInitTest)
 
 void RunManagedThread(std::atomic<bool> *syncFlag)
 {
-    auto *mThr =
-        panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
+    auto *mThr = ark::MTManagedThread::Create(ark::Runtime::GetCurrent(), ark::Runtime::GetCurrent()->GetPandaVM());
     mThr->ManagedCodeBegin();
 
     *syncFlag = true;
@@ -180,8 +179,7 @@ void RunManagedThread(std::atomic<bool> *syncFlag)
 
 void RunManagedThreadAndSaveThreadId(std::atomic<bool> *syncFlag, os::thread::ThreadId *id)
 {
-    auto *mThr =
-        panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
+    auto *mThr = ark::MTManagedThread::Create(ark::Runtime::GetCurrent(), ark::Runtime::GetCurrent()->GetPandaVM());
     mThr->ManagedCodeBegin();
 
     *id = os::thread::GetCurrentThreadId();
@@ -197,8 +195,7 @@ void RunManagedThreadAndSaveThreadId(std::atomic<bool> *syncFlag, os::thread::Th
 
 void RunNativeThread(std::atomic<bool> *syncFlag)
 {
-    auto *mThr =
-        panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
+    auto *mThr = ark::MTManagedThread::Create(ark::Runtime::GetCurrent(), ark::Runtime::GetCurrent()->GetPandaVM());
 
     *syncFlag = true;
     while (*syncFlag) {
@@ -673,7 +670,7 @@ TEST_F(SamplerTest, WriteModuleEventTest)
     ASSERT_NE(sp, nullptr);
     ASSERT_EQ(sp->Start(streamTestFilename), true);
 
-    auto execPath = panda::os::file::File::GetExecutablePath();
+    auto execPath = ark::os::file::File::GetExecutablePath();
     std::string pandafile =
         execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
 
@@ -744,4 +741,4 @@ TEST_F(SamplerTest, ProfilerSamplerSignalHandlerTest)
     }
 }
 
-}  // namespace panda::tooling::sampler::test
+}  // namespace ark::tooling::sampler::test

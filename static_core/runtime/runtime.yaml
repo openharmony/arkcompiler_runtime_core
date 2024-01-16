@@ -24,7 +24,7 @@ coretypes:
 
 # Namespace that contains intrinsics implementation. For functions from
 # this namespace declaration in intrinsics.h will be generated
-intrinsics_namespace: panda::intrinsics
+intrinsics_namespace: ark::intrinsics
 
 # NB! The `space` property allows to group intrinsics and control
 # which intrinsics are loaded during startup. By default only "core"
@@ -42,7 +42,7 @@ intrinsics:
     ret: i32
     args:
       - i32
-  impl: panda::intrinsics::AbsI32
+  impl: ark::intrinsics::AbsI32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathAbsI64
@@ -54,7 +54,7 @@ intrinsics:
     ret: i64
     args:
       - i64
-  impl: panda::intrinsics::AbsI64
+  impl: ark::intrinsics::AbsI64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathAbsF32
@@ -66,7 +66,7 @@ intrinsics:
     ret: f32
     args:
       - f32
-  impl: panda::intrinsics::AbsF32
+  impl: ark::intrinsics::AbsF32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathAbsF64
@@ -78,7 +78,7 @@ intrinsics:
     ret: f64
     args:
       - f64
-  impl: panda::intrinsics::AbsF64
+  impl: ark::intrinsics::AbsF64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMinI32
@@ -89,7 +89,7 @@ intrinsics:
   signature:
     ret: i32
     args: [i32, i32]
-  impl: panda::intrinsics::MinI32
+  impl: ark::intrinsics::MinI32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMinI64
@@ -100,7 +100,7 @@ intrinsics:
   signature:
     ret: i64
     args: [i64, i64]
-  impl: panda::intrinsics::MinI64
+  impl: ark::intrinsics::MinI64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMinF32
@@ -111,7 +111,7 @@ intrinsics:
   signature:
     ret: f32
     args: [f32, f32]
-  impl: panda::intrinsics::MinF32
+  impl: ark::intrinsics::MinF32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMinF64
@@ -122,7 +122,7 @@ intrinsics:
   signature:
     ret: f64
     args: [f64, f64]
-  impl: panda::intrinsics::MinF64
+  impl: ark::intrinsics::MinF64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMaxI32
@@ -133,7 +133,7 @@ intrinsics:
   signature:
     ret: i32
     args: [i32, i32]
-  impl: panda::intrinsics::MaxI32
+  impl: ark::intrinsics::MaxI32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMaxI64
@@ -144,7 +144,7 @@ intrinsics:
   signature:
     ret: i64
     args: [i64, i64]
-  impl: panda::intrinsics::MaxI64
+  impl: ark::intrinsics::MaxI64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMaxF32
@@ -155,7 +155,7 @@ intrinsics:
   signature:
     ret: f32
     args: [f32, f32]
-  impl: panda::intrinsics::MaxF32
+  impl: ark::intrinsics::MaxF32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathMaxF64
@@ -166,7 +166,7 @@ intrinsics:
   signature:
     ret: f64
     args: [f64, f64]
-  impl: panda::intrinsics::MaxF64
+  impl: ark::intrinsics::MaxF64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: DoubleIsInf
@@ -178,7 +178,7 @@ intrinsics:
     ret: u1
     args:
       - f64
-  impl: panda::intrinsics::IsInfF64
+  impl: ark::intrinsics::IsInfF64
   codegen_func: CreateFloatIsInf
   llvm_codegen_func: EmitIsInf
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
@@ -192,7 +192,7 @@ intrinsics:
     ret: u1
     args:
       - f32
-  impl: panda::intrinsics::IsInfF32
+  impl: ark::intrinsics::IsInfF32
   codegen_func: CreateFloatIsInf
   llvm_codegen_func: EmitIsInf
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
@@ -206,7 +206,7 @@ intrinsics:
     ret: f32
     args:
       - f32
-  impl: panda::intrinsics::SinF32
+  impl: ark::intrinsics::SinF32
   llvm_impl: sin
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
@@ -219,7 +219,7 @@ intrinsics:
     ret: f64
     args:
       - f64
-  impl: panda::intrinsics::SinF64
+  impl: ark::intrinsics::SinF64
   llvm_impl: sin
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
@@ -232,7 +232,7 @@ intrinsics:
     ret: f32
     args:
       - f32
-  impl: panda::intrinsics::CosF32
+  impl: ark::intrinsics::CosF32
   llvm_impl: cos
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
@@ -245,7 +245,7 @@ intrinsics:
     ret: f64
     args:
       - f64
-  impl: panda::intrinsics::CosF64
+  impl: ark::intrinsics::CosF64
   llvm_impl: cos
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
@@ -259,7 +259,7 @@ intrinsics:
     args:
       - f32
       - f32
-  impl: panda::intrinsics::PowF32
+  impl: ark::intrinsics::PowF32
   llvm_impl: pow
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
@@ -273,7 +273,7 @@ intrinsics:
     args:
       - f64
       - f64
-  impl: panda::intrinsics::PowF64
+  impl: ark::intrinsics::PowF64
   llvm_impl: pow
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
@@ -286,7 +286,7 @@ intrinsics:
     ret: f32
     args:
       - f32
-  impl: panda::intrinsics::SqrtF32
+  impl: ark::intrinsics::SqrtF32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathSqrtF64
@@ -298,7 +298,7 @@ intrinsics:
     ret: f64
     args:
       - f64
-  impl: panda::intrinsics::SqrtF64
+  impl: ark::intrinsics::SqrtF64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathCalculateDouble
@@ -310,7 +310,7 @@ intrinsics:
   signature:
     ret: f64
     args: [u32, f64]
-  impl: panda::intrinsics::CalculateDouble
+  impl: ark::intrinsics::CalculateDouble
 
 - name: MathCalculateFloat
   space: core
@@ -321,7 +321,7 @@ intrinsics:
   signature:
     ret: f32
     args: [u32, f32]
-  impl: panda::intrinsics::CalculateFloat
+  impl: ark::intrinsics::CalculateFloat
 
 - name: IOPrintString
   space: core
@@ -332,7 +332,7 @@ intrinsics:
     ret: void
     args:
       - panda.String
-  impl: panda::intrinsics::PrintString
+  impl: ark::intrinsics::PrintString
   clear_flags: [require_state, runtime_call]
 
 - name: IOPrintF32
@@ -344,7 +344,7 @@ intrinsics:
     ret: void
     args:
       - f32
-  impl: panda::intrinsics::PrintF32
+  impl: ark::intrinsics::PrintF32
   clear_flags: [require_state, runtime_call]
 
 - name: IOPrintF64
@@ -356,7 +356,7 @@ intrinsics:
     ret: void
     args:
       - f64
-  impl: panda::intrinsics::PrintF64
+  impl: ark::intrinsics::PrintF64
   clear_flags: [require_state, runtime_call]
 
 - name: IOPrintI32
@@ -368,7 +368,7 @@ intrinsics:
     ret: void
     args:
       - i32
-  impl: panda::intrinsics::PrintI32
+  impl: ark::intrinsics::PrintI32
   clear_flags: [require_state, runtime_call]
 
 - name: IOPrintU32
@@ -380,7 +380,7 @@ intrinsics:
     ret: void
     args:
       - u32
-  impl: panda::intrinsics::PrintU32
+  impl: ark::intrinsics::PrintU32
   clear_flags: [require_state, runtime_call]
 
 - name: IOPrintI64
@@ -392,7 +392,7 @@ intrinsics:
     ret: void
     args:
       - i64
-  impl: panda::intrinsics::PrintI64
+  impl: ark::intrinsics::PrintI64
   clear_flags: [require_state, runtime_call]
 
 - name: IOPrintU64
@@ -404,7 +404,7 @@ intrinsics:
     ret: void
     args:
       - u64
-  impl: panda::intrinsics::PrintU64
+  impl: ark::intrinsics::PrintU64
   clear_flags: [require_state, runtime_call]
 
 - name: SystemCompileMethod
@@ -416,7 +416,7 @@ intrinsics:
   signature:
     ret: u8
     args: [panda.String]
-  impl: panda::intrinsics::CompileMethod
+  impl: ark::intrinsics::CompileMethod
 
 - name: SystemExit
   space: core
@@ -427,7 +427,7 @@ intrinsics:
     ret: void
     args:
       - i32
-  impl: panda::intrinsics::SystemExit
+  impl: ark::intrinsics::SystemExit
   clear_flags: [require_state, runtime_call]
 
 - name: SystemNanoTime
@@ -438,7 +438,7 @@ intrinsics:
   signature:
     ret: i64
     args: []
-  impl: panda::intrinsics::NanoTime
+  impl: ark::intrinsics::NanoTime
   clear_flags: [require_state, runtime_call]
 
 - name: SystemAssert
@@ -449,7 +449,7 @@ intrinsics:
   signature:
     ret: void
     args: [u1]
-  impl: panda::intrinsics::Assert
+  impl: ark::intrinsics::Assert
   clear_flags: [require_state, runtime_call]
 
 - name: SystemAssertPrint
@@ -460,7 +460,7 @@ intrinsics:
   signature:
     ret: void
     args: [u1, panda.String]
-  impl: panda::intrinsics::AssertPrint
+  impl: ark::intrinsics::AssertPrint
   clear_flags: [require_state, runtime_call]
 
 - name: SystemScheduleCoroutine
@@ -471,7 +471,7 @@ intrinsics:
   signature:
     ret: void
     args: []
-  impl: panda::intrinsics::SystemScheduleCoroutine
+  impl: ark::intrinsics::SystemScheduleCoroutine
 
 - name: SystemCoroutineGetWorkerId
   space: core
@@ -481,7 +481,7 @@ intrinsics:
   signature:
     ret: i32
     args: []
-  impl: panda::intrinsics::SystemCoroutineGetWorkerId
+  impl: ark::intrinsics::SystemCoroutineGetWorkerId
 
 - name: CheckTag
   space: core
@@ -491,7 +491,7 @@ intrinsics:
   signature:
     ret: void
     args: [i64, i64]
-  impl: panda::intrinsics::CheckTag
+  impl: ark::intrinsics::CheckTag
   clear_flags: [require_state, runtime_call]
 
 - name: ConvertStringToI32
@@ -502,7 +502,7 @@ intrinsics:
   signature:
     ret: i32
     args: [panda.String]
-  impl: panda::intrinsics::ConvertStringToI32
+  impl: ark::intrinsics::ConvertStringToI32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToU32
@@ -513,7 +513,7 @@ intrinsics:
   signature:
     ret: u32
     args: [panda.String]
-  impl: panda::intrinsics::ConvertStringToU32
+  impl: ark::intrinsics::ConvertStringToU32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToI64
@@ -524,7 +524,7 @@ intrinsics:
   signature:
     ret: i64
     args: [panda.String]
-  impl: panda::intrinsics::ConvertStringToI64
+  impl: ark::intrinsics::ConvertStringToI64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToU64
@@ -535,7 +535,7 @@ intrinsics:
   signature:
     ret: u64
     args: [panda.String]
-  impl: panda::intrinsics::ConvertStringToU64
+  impl: ark::intrinsics::ConvertStringToU64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToF32
@@ -546,7 +546,7 @@ intrinsics:
   signature:
     ret: f32
     args: [panda.String]
-  impl: panda::intrinsics::ConvertStringToF32
+  impl: ark::intrinsics::ConvertStringToF32
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ConvertStringToF64
@@ -557,7 +557,7 @@ intrinsics:
   signature:
     ret: f64
     args: [panda.String]
-  impl: panda::intrinsics::ConvertStringToF64
+  impl: ark::intrinsics::ConvertStringToF64
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: ObjectCreateNonMovable
@@ -568,7 +568,7 @@ intrinsics:
   signature:
     ret: panda.Object
     args: [panda.Class]
-  impl: panda::intrinsics::ObjectCreateNonMovable
+  impl: ark::intrinsics::ObjectCreateNonMovable
   set_flags: [can_throw]
 
 - name: ObjectMonitorEnter
@@ -579,7 +579,7 @@ intrinsics:
   signature:
     ret: void
     args: [panda.Object]
-  impl: panda::intrinsics::ObjectMonitorEnter
+  impl: ark::intrinsics::ObjectMonitorEnter
 
 - name: ObjectMonitorExit
   space: core
@@ -589,7 +589,7 @@ intrinsics:
   signature:
     ret: void
     args: [panda.Object]
-  impl: panda::intrinsics::ObjectMonitorExit
+  impl: ark::intrinsics::ObjectMonitorExit
 
 - name: ObjectWait
   space: core
@@ -599,7 +599,7 @@ intrinsics:
   signature:
     ret: void
     args: [panda.Object]
-  impl: panda::intrinsics::ObjectWait
+  impl: ark::intrinsics::ObjectWait
   set_flags: [heap_inv]
 
 - name: ObjectTimedWait
@@ -610,7 +610,7 @@ intrinsics:
   signature:
     ret: void
     args: [panda.Object, u64]
-  impl: panda::intrinsics::ObjectTimedWait
+  impl: ark::intrinsics::ObjectTimedWait
   set_flags: [heap_inv]
 
 - name: ObjectTimedWaitNanos
@@ -621,7 +621,7 @@ intrinsics:
   signature:
     ret: void
     args: [panda.Object, u64, u64]
-  impl: panda::intrinsics::ObjectTimedWaitNanos
+  impl: ark::intrinsics::ObjectTimedWaitNanos
   set_flags: [heap_inv]
 
 - name: ObjectNotify
@@ -632,7 +632,7 @@ intrinsics:
   signature:
     ret: void
     args: [panda.Object]
-  impl: panda::intrinsics::ObjectNotify
+  impl: ark::intrinsics::ObjectNotify
   clear_flags: [require_state, runtime_call]
 
 - name: ObjectNotifyAll
@@ -643,5 +643,5 @@ intrinsics:
   signature:
     ret: void
     args: [panda.Object]
-  impl: panda::intrinsics::ObjectNotifyAll
+  impl: ark::intrinsics::ObjectNotifyAll
   clear_flags: [require_state, runtime_call]

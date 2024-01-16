@@ -23,7 +23,7 @@
 
 #include <regex>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 #include "cpu_features.inc"
 
@@ -140,5 +140,5 @@ private:
     std::bitset<CPU_FEATURES_NUM> features_;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_COMPILER_OPTIONS_H

@@ -26,7 +26,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 
-namespace panda {
+namespace ark {
 
 class DProfilerListener : public RuntimeListener {
 public:
@@ -103,4 +103,4 @@ void DProfiler::Dump()
     profilingData_->DumpAndResetFeatures();
 }
 
-}  // namespace panda
+}  // namespace ark

@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include "mem/alloc_tracker.h"
 
-namespace panda {
+namespace ark {
 
 struct Header {
     uint32_t numItems = 0;
@@ -158,4 +158,4 @@ TEST(DetailAllocTrackerTest, MultithreadedAlloc)
     ASSERT_EQ(1U, hdr.numStacktraces);
 }
 
-}  // namespace panda
+}  // namespace ark

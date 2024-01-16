@@ -24,7 +24,7 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Branch Elimination optimization finds `if-true` blocks with resolvable conditional instruction.
  * Condition can be resolved in the following ways:
@@ -463,4 +463,4 @@ std::optional<bool> BranchElimination::TryResolveResult(Inst *condition, Inst *d
     // So `condition` result is resolved via table
     return COND_RELATION[condition->CastToCompare()->GetCc()][dominantCc];
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -18,7 +18,7 @@
 
 #include <chrono>
 
-namespace panda::os::time {
+namespace ark::os::time {
 
 template <class T>
 static uint64_t GetClockTime(clockid_t clock)
@@ -31,6 +31,6 @@ static uint64_t GetClockTime(clockid_t clock)
     return 0;
 }
 
-}  // namespace panda::os::time
+}  // namespace ark::os::time
 
 #endif  // PANDA_LIBPANDABASE_OS_UNIX_TIME_H

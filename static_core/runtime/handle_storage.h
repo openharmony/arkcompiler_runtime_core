@@ -20,7 +20,7 @@
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda {
+namespace ark {
 class LocalScope;
 class EscapeLocalScope;
 
@@ -79,5 +79,5 @@ private:
     friend class EscapeLocalScope;
     friend class EscapeHandleScope<T>;
 };
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_HANDLE_STORAGE_H

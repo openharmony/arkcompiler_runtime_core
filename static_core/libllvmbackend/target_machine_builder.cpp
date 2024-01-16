@@ -18,7 +18,7 @@
 
 #include <llvm/MC/TargetRegistry.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 llvm::Expected<std::unique_ptr<llvm::TargetMachine>> TargetMachineBuilder::Build()
 {
@@ -44,4 +44,4 @@ TargetMachineBuilder &TargetMachineBuilder::SetFeatures(const std::vector<std::s
     features_ = llvm::join(features.cbegin(), features.cend(), ",");
     return *this;
 }
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

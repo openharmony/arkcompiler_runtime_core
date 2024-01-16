@@ -37,7 +37,7 @@ auto DerefPtrRef(T &&v) -> std::conditional_t<std::is_pointer_v<T>, std::remove_
 }
 }  // namespace
 
-namespace panda::static_linker {
+namespace ark::static_linker {
 
 void Context::Merge()
 {
@@ -269,7 +269,7 @@ void Context::MergeMethod(const panda_file::FileReader *reader, panda_file::Clas
     }
 }
 
-bool Context::IsSameType(panda::panda_file::TypeItem *nevv, panda::panda_file::TypeItem *old)
+bool Context::IsSameType(ark::panda_file::TypeItem *nevv, ark::panda_file::TypeItem *old)
 {
     if (nevv->GetType().IsPrimitive()) {
         if (!old->GetType().IsPrimitive()) {
@@ -350,7 +350,7 @@ void Context::MergeForeignMethod(const panda_file::FileReader *reader, panda_fil
     ASSERT(knownItems_.find(fm) == knownItems_.end());
     ASSERT(knownItems_.find(fm->GetClassItem()) != knownItems_.end());
     auto clz = static_cast<panda_file::BaseClassItem *>(knownItems_[fm->GetClassItem()]);
-    std::vector<panda::static_linker::Context::ErrorDetail> details = {{"method", fm}};
+    std::vector<ark::static_linker::Context::ErrorDetail> details = {{"method", fm}};
     auto res = TryFindMethod(clz, fm, &details);
     if (std::holds_alternative<bool>(res) || conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
         if (std::get<bool>(res) || conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
@@ -759,4 +759,4 @@ panda_file::StringItem *Context::StringFromOld(const panda_file::StringItem *s)
     }
     return cont_.GetOrCreateStringItem(GetStr(s));
 }
-}  // namespace panda::static_linker
+}  // namespace ark::static_linker

@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <string>
 
-namespace panda::os::dfx_option {
+namespace ark::os::dfx_option {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DFX_OPTION_ELEM(D, NAME, STR) D(NAME, DfxOptionHandler::DfxOptionId::NAME##_ID, STR)
@@ -80,5 +80,5 @@ public:
     static std::string StringFromDfxOption(DfxOptionHandler::DfxOption dfxOption);
 };
 
-}  // namespace panda::os::dfx_option
+}  // namespace ark::os::dfx_option
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_DFX_OPTION_H

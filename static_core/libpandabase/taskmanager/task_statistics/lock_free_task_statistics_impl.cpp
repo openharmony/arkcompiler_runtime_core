@@ -16,7 +16,7 @@
 #include "libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.h"
 #include <atomic>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 LockFreeTaskStatisticsImpl::LockFreeTaskStatisticsImpl()
 {
@@ -91,4 +91,4 @@ void LockFreeTaskStatisticsImpl::ResetCountersWithTaskProperties(TaskProperties 
     }
 }
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

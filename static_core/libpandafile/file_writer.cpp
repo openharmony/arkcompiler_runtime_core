@@ -16,7 +16,7 @@
 #include "file_writer.h"
 #include "zlib.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 FileWriter::FileWriter(const std::string &fileName) : checksum_(adler32(0, nullptr, 0))
 {
@@ -63,4 +63,4 @@ bool FileWriter::WriteBytes(const std::vector<uint8_t> &bytes)
     return true;
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

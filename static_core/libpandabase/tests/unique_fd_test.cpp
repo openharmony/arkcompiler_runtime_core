@@ -19,7 +19,7 @@
 #include <utility>
 #include <unistd.h>
 
-namespace panda::os::unique_fd {
+namespace ark::os::unique_fd {
 
 enum TestValue { DEFAULT_VALUE = -1L, STDIN_VALUE, STDOUT_VALUE, STDERR_VALUE };
 
@@ -140,4 +140,4 @@ TEST(UniqueFd, Reset)
     EXPECT_EQ(fdD.Get(), dupDf.stferrValue);
 }
 
-}  // namespace panda::os::unique_fd
+}  // namespace ark::os::unique_fd

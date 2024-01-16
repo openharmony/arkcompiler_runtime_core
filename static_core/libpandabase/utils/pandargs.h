@@ -32,7 +32,7 @@
 
 #include "macros.h"
 
-namespace panda {
+namespace ark {
 class PandArgBase;
 // NOLINTNEXTLINE(readability-identifier-naming)
 using sub_args_t = std::vector<PandArgBase *>;
@@ -1046,6 +1046,6 @@ private:
     arg_list_t remainder_ = arg_list_t();
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_UTILS_PANDARGS_H_

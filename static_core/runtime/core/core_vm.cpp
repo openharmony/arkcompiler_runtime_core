@@ -24,7 +24,7 @@
 #include "runtime/mem/gc/reference-processor/empty_reference_processor.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 
-namespace panda::core {
+namespace ark::core {
 
 // Create MemoryManager by RuntimeOptions
 static mem::MemoryManager *CreateMM(const LanguageContext &ctx, mem::InternalAllocatorPtr internalAllocator,
@@ -111,7 +111,7 @@ PandaCoreVM::~PandaCoreVM()
 
 bool PandaCoreVM::Initialize()
 {
-    if (!intrinsics::Initialize(panda::panda_file::SourceLang::PANDA_ASSEMBLY)) {
+    if (!intrinsics::Initialize(ark::panda_file::SourceLang::PANDA_ASSEMBLY)) {
         LOG(ERROR, RUNTIME) << "Failed to initialize Core intrinsics";
         return false;
     }
@@ -136,7 +136,7 @@ void PandaCoreVM::PreAllocOOMErrorObject()
         LOG(FATAL, RUNTIME) << "Cannot preallocate OOM Error object";
         return;
     }
-    oomObjRef_ = globalObjectStorage->Add(oomObj, panda::mem::Reference::ObjectType::GLOBAL);
+    oomObjRef_ = globalObjectStorage->Add(oomObj, ark::mem::Reference::ObjectType::GLOBAL);
 }
 
 bool PandaCoreVM::InitializeFinish()
@@ -327,4 +327,4 @@ void PandaCoreVM::UpdateVmRefs()
     LOG(DEBUG, GC) << "=== PTRoots Update moved. END ===";
 }
 
-}  // namespace panda::core
+}  // namespace ark::core

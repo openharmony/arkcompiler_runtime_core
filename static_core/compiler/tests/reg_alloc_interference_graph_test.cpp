@@ -18,7 +18,7 @@
 #include <utility>
 #include <algorithm>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RegAllocInterferenceTest : public GraphTest {};
 
 namespace {
@@ -295,4 +295,4 @@ TEST_F(RegAllocInterferenceTest, AssignColors)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

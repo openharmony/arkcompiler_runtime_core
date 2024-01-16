@@ -18,7 +18,7 @@
 
 #include "utils/bit_field.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class VRegInfo final {
 public:
@@ -248,6 +248,6 @@ inline std::ostream &operator<<(std::ostream &os, const VRegInfo &vreg)
     return os;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_COMPILER_CODE_INFO_VREG_INFO_H

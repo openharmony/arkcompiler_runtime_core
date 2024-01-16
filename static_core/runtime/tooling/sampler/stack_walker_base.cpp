@@ -15,7 +15,7 @@
 
 #include "runtime/tooling/sampler/stack_walker_base.h"
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 StackWalkerBase::StackWalkerBase(void *fp, bool isFrameCompiled)
@@ -112,4 +112,4 @@ void StackWalkerBase::NextFromIFrame()
     }
 }
 
-}  // namespace panda
+}  // namespace ark

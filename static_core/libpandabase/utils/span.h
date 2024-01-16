@@ -21,7 +21,7 @@
 #include <cstddef>
 #include <iterator>
 
-namespace panda {
+namespace ark {
 
 /// Similar to std::span that will come in C++20.
 template <class T>
@@ -258,5 +258,5 @@ Span<std::byte> AsWritableBytes(Span<T> s) noexcept
     return {reinterpret_cast<std::byte *>(s.Data()), s.SizeBytes()};
 }
 
-}  // namespace panda
+}  // namespace ark
 #endif  // LIBPANDABASE_UTILS_SPAN_H_

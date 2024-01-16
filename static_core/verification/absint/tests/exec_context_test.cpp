@@ -30,7 +30,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, AbsIntExecContext)
 {
@@ -142,6 +142,6 @@ TEST_F(VerifierTest, AbsIntExecContext)
     DestroyConfig(config);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test
 
 // NOLINTEND(readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)

@@ -20,7 +20,7 @@
 #include "optimizer/pass.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class MemoryCoalescing : public Optimization {
     using Optimization::Optimization;
 
@@ -85,6 +85,6 @@ private:
 private:
     bool alignedOnly_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  //  COMPILER_OPTIMIZER_OPTIMIZATIONS_MEMORY_COALESCING_H

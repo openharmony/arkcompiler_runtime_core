@@ -18,7 +18,7 @@
 
 #include "mem_pool.h"
 
-namespace panda {
+namespace ark {
 
 // Simple Mem Pool without cache
 class MallocMemPool : public MemPool<MallocMemPool> {
@@ -52,6 +52,6 @@ private:
     friend class MemPool<MallocMemPool>;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_MEM_MALLOC_MEM_POOL_H

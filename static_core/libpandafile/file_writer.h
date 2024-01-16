@@ -27,7 +27,7 @@
 #include <limits>
 #include <vector>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class Writer {
 public:
@@ -221,6 +221,6 @@ private:
     bool countChecksum_ {false};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_FILE_WRITER_H_

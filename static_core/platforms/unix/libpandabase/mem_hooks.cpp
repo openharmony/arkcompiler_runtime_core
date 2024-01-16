@@ -20,7 +20,7 @@
 #include "mem_hooks.h"
 #include "libpandabase/utils/span.h"
 
-namespace panda::os::unix::mem_hooks {
+namespace ark::os::unix::mem_hooks {
 
 size_t PandaHooks::allocViaStandard_ = 0;
 bool PandaHooks::isActive_ = false;
@@ -139,47 +139,47 @@ void PandaHooks::Disable()
 #endif  // PANDA_USE_MEMORY_HOOKS
 }
 
-}  // namespace panda::os::unix::mem_hooks
+}  // namespace ark::os::unix::mem_hooks
 
 #ifdef PANDA_USE_MEMORY_HOOKS
 
 // NOLINTNEXTLINE(readability-redundant-declaration,readability-identifier-naming)
 void *malloc(size_t size) noexcept
 {
-    if (panda::os::mem_hooks::PandaHooks::realMalloc_ == nullptr) {
-        panda::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
+    if (ark::os::mem_hooks::PandaHooks::realMalloc_ == nullptr) {
+        ark::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
     }
-    if (panda::os::mem_hooks::PandaHooks::IsActive()) {
+    if (ark::os::mem_hooks::PandaHooks::IsActive()) {
         void *caller = __builtin_return_address(0);
-        return panda::os::mem_hooks::PandaHooks::MallocHook(size, caller);
+        return ark::os::mem_hooks::PandaHooks::MallocHook(size, caller);
     }
-    return panda::os::mem_hooks::PandaHooks::realMalloc_(size);
+    return ark::os::mem_hooks::PandaHooks::realMalloc_(size);
 }
 
 // NOLINTNEXTLINE(readability-redundant-declaration,readability-identifier-naming)
 void *memalign(size_t alignment, size_t size) noexcept
 {
-    if (panda::os::mem_hooks::PandaHooks::realMemalign_ == nullptr) {
-        panda::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
+    if (ark::os::mem_hooks::PandaHooks::realMemalign_ == nullptr) {
+        ark::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
     }
-    if (panda::os::mem_hooks::PandaHooks::IsActive()) {
+    if (ark::os::mem_hooks::PandaHooks::IsActive()) {
         void *caller = __builtin_return_address(0);
-        return panda::os::mem_hooks::PandaHooks::MemalignHook(alignment, size, caller);
+        return ark::os::mem_hooks::PandaHooks::MemalignHook(alignment, size, caller);
     }
-    return panda::os::mem_hooks::PandaHooks::realMemalign_(alignment, size);
+    return ark::os::mem_hooks::PandaHooks::realMemalign_(alignment, size);
 }
 
 // NOLINTNEXTLINE(readability-redundant-declaration,readability-identifier-naming)
 void free(void *ptr) noexcept
 {
-    if (panda::os::mem_hooks::PandaHooks::realFree_ == nullptr) {
-        panda::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
+    if (ark::os::mem_hooks::PandaHooks::realFree_ == nullptr) {
+        ark::os::unix::mem_hooks::PandaHooks::SaveRealFunctions();
     }
-    if (panda::os::mem_hooks::PandaHooks::IsActive()) {
+    if (ark::os::mem_hooks::PandaHooks::IsActive()) {
         void *caller = __builtin_return_address(0);
-        return panda::os::mem_hooks::PandaHooks::FreeHook(ptr, caller);
+        return ark::os::mem_hooks::PandaHooks::FreeHook(ptr, caller);
     }
-    return panda::os::mem_hooks::PandaHooks::realFree_(ptr);
+    return ark::os::mem_hooks::PandaHooks::realFree_(ptr);
 }
 
 #endif  // PANDA_USE_MEMORY_HOOKS

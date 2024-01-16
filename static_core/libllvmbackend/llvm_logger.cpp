@@ -15,7 +15,7 @@
 
 #include "llvm_logger.h"
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 std::bitset<LLVMLoggerComponents::LOG_COMPONENTS_NUM> LLVMLogger::components_(0);
 
 // clang-format off
@@ -45,4 +45,4 @@ void LLVMLogger::SetComponents(const std::vector<std::string>& args)
 }
 // clang-format on
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

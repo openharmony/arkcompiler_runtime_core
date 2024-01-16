@@ -15,7 +15,7 @@
 
 #ifndef PANDA_LIBPANDABASE_UTILS_RANGE_H_
 #define PANDA_LIBPANDABASE_UTILS_RANGE_H_
-namespace panda {
+namespace ark {
 
 template <class It>
 class Range {
@@ -51,6 +51,6 @@ private:
     It end_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif

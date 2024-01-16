@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 /*static*/
 EtsPromise *EtsPromise::Create(EtsCoroutine *etsCoroutine)
@@ -27,4 +27,4 @@ EtsPromise *EtsPromise::Create(EtsCoroutine *etsCoroutine)
     return reinterpret_cast<EtsPromise *>(etsObject);
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

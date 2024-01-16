@@ -18,7 +18,7 @@
 #include "runtime/compiler_queue_interface.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * The simple queue works as FIFO without any other logic: it stores all tasks to a list and extracts the first one.
@@ -66,6 +66,6 @@ private:
     const char *queueName_ = "simple compilation queue";
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COMPILER_QUEUE_H_

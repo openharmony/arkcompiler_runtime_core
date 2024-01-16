@@ -33,14 +33,14 @@ static inline std::string ExtractRecordBody(const std::string &text, const std::
 
 TEST(RecordTest, EmptyRecord)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record A {}
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -58,7 +58,7 @@ TEST(RecordTest, EmptyRecord)
 
 TEST(RecordTest, RecordWithFields)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record A {
     u1 a
     i8 b
@@ -74,10 +74,10 @@ TEST(RecordTest, RecordWithFields)
 }
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -115,7 +115,7 @@ TEST(RecordTest, RecordWithFields)
 
 TEST(RecordTest, RecordWithRecord)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record A {
     i64 aw
 }
@@ -126,10 +126,10 @@ TEST(RecordTest, RecordWithRecord)
 }
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);

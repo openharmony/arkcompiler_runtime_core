@@ -34,7 +34,7 @@
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 bool HeapManager::Initialize(GCType gcType, bool singleThreaded, bool useTlab, MemStatsType *memStats,
                              InternalAllocatorPtr internalAllocator, bool createPygoteSpace)
@@ -409,4 +409,4 @@ template ObjectHeader *HeapManager::AllocateNonMovableObject<true>(BaseClass *cl
 template ObjectHeader *HeapManager::AllocateNonMovableObject<false>(
     BaseClass *cls, size_t size, Alignment align, ManagedThread *thread,
     ObjectAllocatorBase::ObjMemInitPolicy obj_init_type);
-}  // namespace panda::mem
+}  // namespace ark::mem

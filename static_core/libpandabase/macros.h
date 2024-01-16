@@ -140,7 +140,7 @@
 #if !defined(NDEBUG)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_FAIL(expr) panda::debug::AssertionFail(expr, __FILE__, __LINE__, __FUNCTION__)
+#define ASSERT_FAIL(expr) ark::debug::AssertionFail(expr, __FILE__, __LINE__, __FUNCTION__)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_OP(lhs, op, rhs)                                                                                \
@@ -151,7 +151,7 @@
             std::cerr << "CHECK FAILED: " << #lhs << " " #op " " #rhs << std::endl;                            \
             std::cerr << "      VALUES: " << __lhs << " " #op " " << __rhs << std::endl;                       \
             std::cerr << "          IN: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << std::endl; \
-            panda::PrintStack(std::cerr);                                                                      \
+            ark::PrintStack(std::cerr);                                                                        \
             std::abort();                                                                                      \
         }                                                                                                      \
     } while (0)

@@ -18,7 +18,7 @@
 
 #include "runtime/mem/gc/gc_marker.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <typename Marker>
 void GCMarker<Marker, LANG_TYPE_STATIC>::HandleObject(GCMarkingStackType *objectsStack, const ObjectHeader *object,
@@ -119,11 +119,11 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *object
     ASSERT(!baseCls->IsDynamicClass());
     const auto *cls = static_cast<const Class *>(baseCls);
     if (cls->IsObjectArrayClass()) {
-        auto *arrayObject = static_cast<const panda::coretypes::Array *>(object);
+        auto *arrayObject = static_cast<const ark::coretypes::Array *>(object);
         HandleArrayClass(objectsStack, arrayObject, cls);
     } else if (cls->IsClassClass()) {
         // Handle Class handles static fields only, so we need to Handle regular fields explicitly too
-        auto objectCls = panda::Class::FromClassObject(object);
+        auto objectCls = ark::Class::FromClassObject(object);
         if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
             HandleClass(objectsStack, objectCls);
         }
@@ -137,6 +137,6 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::MarkInstance(GCMarkingStackType *object
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_STATIC_GC_MARKER_STATIC_INL_H

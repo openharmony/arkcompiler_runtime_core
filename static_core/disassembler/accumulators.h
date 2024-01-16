@@ -22,9 +22,9 @@
 
 #include "libpandafile/debug_info_extractor.h"
 
-namespace panda::disasm {
+namespace ark::disasm {
 using LabelTable = std::map<size_t, std::string>;
-using IdList = std::vector<panda::panda_file::File::EntityId>;
+using IdList = std::vector<ark::panda_file::File::EntityId>;
 
 struct MethodInfo {
     std::string methodInfo;
@@ -58,6 +58,6 @@ struct ProgAnnotations {
     std::map<std::string, AnnotationList> methodAnnotations;
     std::map<std::string, RecordAnnotations> recordAnnotations;
 };
-}  // namespace panda::disasm
+}  // namespace ark::disasm
 
 #endif

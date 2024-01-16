@@ -27,13 +27,13 @@
 
 #include <llvm/Object/StackMapParser.h>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LLVMAotBuilder;
 class CompiledMethod;
 class Graph;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 /// Spreads methods to compile between modules
 class Spreader {
@@ -75,12 +75,12 @@ private:
 
 class LLVMAotCompiler final : public LLVMCompiler {
 public:
-    Expected<bool, std::string> CanCompile(panda::compiler::Graph *graph) override;
+    Expected<bool, std::string> CanCompile(ark::compiler::Graph *graph) override;
 
-    explicit LLVMAotCompiler(panda::compiler::RuntimeInterface *runtime, panda::ArenaAllocator *allocator,
-                             panda::compiler::LLVMAotBuilder *aotBuilder, std::string cmdline, std::string filename);
+    explicit LLVMAotCompiler(ark::compiler::RuntimeInterface *runtime, ark::ArenaAllocator *allocator,
+                             ark::compiler::LLVMAotBuilder *aotBuilder, std::string cmdline, std::string filename);
 
-    bool AddGraph(panda::compiler::Graph *graph) override;
+    bool AddGraph(ark::compiler::Graph *graph) override;
 
     void CompileAll() override;
 
@@ -104,9 +104,9 @@ private:
 
     static std::vector<std::string> GetFeaturesForArch(Arch arch);
 
-    bool AddGraphToModule(panda::compiler::Graph *graph, WrappedModule &module, AddGraphMode addGraphMode);
+    bool AddGraphToModule(ark::compiler::Graph *graph, WrappedModule &module, AddGraphMode addGraphMode);
 
-    panda::compiler::CompiledMethod AdaptCode(panda::Method *method, Span<const uint8_t> machineCode);
+    ark::compiler::CompiledMethod AdaptCode(ark::Method *method, Span<const uint8_t> machineCode);
 
     void PrepareAotGot(WrappedModule *wrappedModule);
 
@@ -118,28 +118,28 @@ private:
 
     void CompileModule(WrappedModule &module);
 
-    void AddInlineMethodByDepth(WrappedModule &module, panda::compiler::Graph *caller,
+    void AddInlineMethodByDepth(WrappedModule &module, ark::compiler::Graph *caller,
                                 compiler::RuntimeInterface::MethodPtr method, int32_t depth);
 
-    void AddInlineFunctionsByDepth(WrappedModule &module, panda::compiler::Graph *caller, int32_t depth);
+    void AddInlineFunctionsByDepth(WrappedModule &module, ark::compiler::Graph *caller, int32_t depth);
 
-    llvm::Expected<panda::compiler::Graph *> CreateGraph(ArenaAllocator &allocator, ArenaAllocator &localAllocator,
-                                                         Method &method);
+    llvm::Expected<ark::compiler::Graph *> CreateGraph(ArenaAllocator &allocator, ArenaAllocator &localAllocator,
+                                                       Method &method);
 
 private:
     llvm::ExitOnError exitOnErr_;
 
-    ArenaVector<panda::Method *> methods_;
-    panda::compiler::LLVMAotBuilder *aotBuilder_;
+    ArenaVector<ark::Method *> methods_;
+    ark::compiler::LLVMAotBuilder *aotBuilder_;
     std::string cmdline_;
     std::string filename_;
 
     bool compiled_ {false};
     bool irFailed_ {false};
 
-    panda::compiler::RuntimeInterface *runtime_;
+    ark::compiler::RuntimeInterface *runtime_;
     std::unique_ptr<Spreader> spreader_;
     uint32_t compiledModules_ {0};
 };
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_AOT_COMPILER_H

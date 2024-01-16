@@ -23,7 +23,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class DeoptimizeElimination : public Optimization, public GraphVisitor {
     using Optimization::Optimization;
@@ -143,6 +143,6 @@ private:
     ArenaUnorderedMap<BasicBlock *, BlockType> blocksType_;
     InstVector deoptimizeMustThrow_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_DEOPTIMIZEELIMINATION_H

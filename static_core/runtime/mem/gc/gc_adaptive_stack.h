@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/workers/gc_workers_tasks.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class GC;
 
@@ -117,6 +117,6 @@ private:
     GC *gc_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_H

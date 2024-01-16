@@ -16,7 +16,7 @@
 #include "reg_alloc_stat.h"
 #include "optimizer/ir/datatype.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 RegAllocStat::RegAllocStat(const ArenaVector<LifeIntervals *> &intervals)
 {
     std::vector<bool> usedRegs(INVALID_REG);
@@ -44,4 +44,4 @@ RegAllocStat::RegAllocStat(const ArenaVector<LifeIntervals *> &intervals)
     slots_ = static_cast<size_t>(std::count(usedSlots.begin(), usedSlots.end(), true));
     vslots_ = static_cast<size_t>(std::count(usedVslots.begin(), usedVslots.end(), true));
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

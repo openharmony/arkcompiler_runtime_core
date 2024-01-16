@@ -20,7 +20,7 @@
 #include "libpandabase/taskmanager/task_statistics/task_statistics.h"
 #include <unordered_map>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 /// SimpleTaskStatisticsImpl use lock for every used status to protect counters
 class SimpleTaskStatisticsImpl : public TaskStatistics {
@@ -47,6 +47,6 @@ private:
     std::unordered_map<TaskStatus, TaskPropertiesCounterMap> taskPropertiesCounterMap_;
 };
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_STATISTICS_SIMPLE_TASK_STATISTICS_IMPL_H

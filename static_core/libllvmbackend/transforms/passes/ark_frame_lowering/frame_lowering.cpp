@@ -38,7 +38,7 @@ class FrameLoweringPass : public MachineFunctionPass {
 public:
     static constexpr StringRef PASS_NAME = "ARK-LLVM Frame builder";
 
-    explicit FrameLoweringPass(panda::llvmbackend::LLVMArkInterface *arkInterface = nullptr)
+    explicit FrameLoweringPass(ark::llvmbackend::LLVMArkInterface *arkInterface = nullptr)
         : MachineFunctionPass(id_), arkInterface_ {arkInterface}
     {
     }
@@ -160,7 +160,7 @@ public:
             if ((idx >= XMM0_IDX && idx < XMM0_IDX + XMM_COUNT) || (idx >= XMM16_IDX && idx < XMM16_IDX + XMM_COUNT)) {
                 std::get<1>(masks) |= 1U << (idx - XMM0_IDX);
             } else {
-                idx = panda::compiler::ConvertRegNumberX86(idx);
+                idx = ark::compiler::ConvertRegNumberX86(idx);
                 std::get<0>(masks) |= 1U << (idx - RAX_IDX);
             }
         };
@@ -205,13 +205,13 @@ public:
 
     static char id_;  // NOLINT(readability-identifier-naming)
 private:
-    panda::llvmbackend::LLVMArkInterface *arkInterface_ {nullptr};
+    ark::llvmbackend::LLVMArkInterface *arkInterface_ {nullptr};
 };
 char FrameLoweringPass::id_ = 0;  // NOLINT(readability-identifier-naming)
 
 }  // namespace
 
-MachineFunctionPass *panda::llvmbackend::CreateFrameLoweringPass(panda::llvmbackend::LLVMArkInterface *arkInterface)
+MachineFunctionPass *ark::llvmbackend::CreateFrameLoweringPass(ark::llvmbackend::LLVMArkInterface *arkInterface)
 {
     return new FrameLoweringPass(arkInterface);
 }

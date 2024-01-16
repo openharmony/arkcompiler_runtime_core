@@ -17,7 +17,7 @@
 #include "utils/logger.h"
 #include "ipc_unix_socket.h"
 
-namespace panda::dprof::ipc {
+namespace ark::dprof::ipc {
 bool SendMessage(int fd, const Message &message)
 {
     Message::Id messageId = message.GetId();
@@ -77,4 +77,4 @@ int RecvMessage(int fd, Message &message)
     message = Message(messageId, std::move(data));
     return 1;
 }
-}  // namespace panda::dprof::ipc
+}  // namespace ark::dprof::ipc

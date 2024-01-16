@@ -19,7 +19,7 @@
 
 #include <llvm/IR/IRBuilder.h>
 
-namespace panda::llvmbackend::runtime_calls {
+namespace ark::llvmbackend::runtime_calls {
 
 llvm::Value *GetAddressToTLS(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset)
 {
@@ -89,4 +89,4 @@ llvm::Value *GetRealFrameRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *
     return builder->CreateCall(readReg, {frameReg});
 }
 
-}  // namespace panda::llvmbackend::runtime_calls
+}  // namespace ark::llvmbackend::runtime_calls

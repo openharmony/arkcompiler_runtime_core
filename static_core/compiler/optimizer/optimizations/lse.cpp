@@ -23,7 +23,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/optimizations/lse.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 static std::string LogInst(const Inst *inst)
 {
@@ -1155,4 +1155,4 @@ bool Lse::RunImpl()
     COMPILER_LOG(DEBUG, LSE_OPT) << "Load-Store Elimination complete";
     return applied_;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

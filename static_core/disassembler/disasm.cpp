@@ -22,25 +22,25 @@
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Options {
-    panda::PandArg<bool> help {"help", false, "Print this message and exit"};
-    panda::PandArg<bool> verbose {"verbose", false, "enable informative code output"};
-    panda::PandArg<bool> quiet {"quiet", false, "enables all of the --skip-* flags"};
-    panda::PandArg<bool> skipStrings {
+    ark::PandArg<bool> help {"help", false, "Print this message and exit"};
+    ark::PandArg<bool> verbose {"verbose", false, "enable informative code output"};
+    ark::PandArg<bool> quiet {"quiet", false, "enables all of the --skip-* flags"};
+    ark::PandArg<bool> skipStrings {
         "skip-string-literals", false,
         "replaces string literals with their respectie id's, thus shortening emitted code size"};
-    panda::PandArg<bool> withSeparators {"with_separators", false,
-                                         "adds comments that separate sections in the output file"};
-    panda::PandArg<bool> debug {
+    ark::PandArg<bool> withSeparators {"with_separators", false,
+                                       "adds comments that separate sections in the output file"};
+    ark::PandArg<bool> debug {
         "debug", false, "enable debug messages (will be printed to standard output if no --debug-file was specified) "};
-    panda::PandArg<std::string> debugFile {"debug-file", "",
-                                           "(--debug-file FILENAME) set debug file name. default is std::cout"};
-    panda::PandArg<std::string> inputFile {"input_file", "", "Path to the source binary code"};
-    panda::PandArg<std::string> outputFile {"output_file", "", "Path to the generated assembly code"};
-    panda::PandArg<std::string> profile {"profile", "", "Path to the profile"};
-    panda::PandArg<bool> version {"version", false,
-                                  "Ark version, file format version and minimum supported file format version"};
+    ark::PandArg<std::string> debugFile {"debug-file", "",
+                                         "(--debug-file FILENAME) set debug file name. default is std::cout"};
+    ark::PandArg<std::string> inputFile {"input_file", "", "Path to the source binary code"};
+    ark::PandArg<std::string> outputFile {"output_file", "", "Path to the generated assembly code"};
+    ark::PandArg<std::string> profile {"profile", "", "Path to the profile"};
+    ark::PandArg<bool> version {"version", false,
+                                "Ark version, file format version and minimum supported file format version"};
 
-    explicit Options(panda::PandArgParser &paParser)
+    explicit Options(ark::PandArgParser &paParser)
     {
         paParser.Add(&help);
         paParser.Add(&verbose);
@@ -57,7 +57,7 @@ struct Options {
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-void PrintHelp(panda::PandArgParser &paParser)
+void PrintHelp(ark::PandArgParser &paParser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "ark_disasm [options] input_file output_file" << std::endl << std::endl;
@@ -70,7 +70,7 @@ static void Disassemble(const Options &options)
     auto inputFile = options.inputFile.GetValue();
     LOG(DEBUG, DISASSEMBLER) << "[initializing disassembler]\nfile: " << inputFile << "\n";
 
-    panda::disasm::Disassembler disasm {};
+    ark::disasm::Disassembler disasm {};
     disasm.Disassemble(inputFile, options.quiet.GetValue(), options.skipStrings.GetValue());
     auto verbose = options.verbose.GetValue();
     if (verbose) {
@@ -89,7 +89,7 @@ static void Disassemble(const Options &options)
     resPa.close();
 }
 
-static bool ProcessArgs(panda::PandArgParser &paParser, const Options &options, int argc, const char **argv)
+static bool ProcessArgs(ark::PandArgParser &paParser, const Options &options, int argc, const char **argv)
 {
     if (!paParser.Parse(argc, argv)) {
         PrintHelp(paParser);
@@ -97,8 +97,8 @@ static bool ProcessArgs(panda::PandArgParser &paParser, const Options &options, 
     }
 
     if (options.version.GetValue()) {
-        panda::PrintPandaVersion();
-        panda::panda_file::PrintBytecodeVersion();
+        ark::PrintPandaVersion();
+        ark::panda_file::PrintBytecodeVersion();
         return false;
     }
 
@@ -110,17 +110,15 @@ static bool ProcessArgs(panda::PandArgParser &paParser, const Options &options, 
     if (options.debug.GetValue()) {
         auto debugFile = options.debugFile.GetValue();
         if (debugFile.empty()) {
-            panda::Logger::InitializeStdLogging(
-                panda::Logger::Level::DEBUG,
-                panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
+            ark::Logger::InitializeStdLogging(ark::Logger::Level::DEBUG,
+                                              ark::Logger::ComponentMask().set(ark::Logger::Component::DISASSEMBLER));
         } else {
-            panda::Logger::InitializeFileLogging(
-                debugFile, panda::Logger::Level::DEBUG,
-                panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
+            ark::Logger::InitializeFileLogging(debugFile, ark::Logger::Level::DEBUG,
+                                               ark::Logger::ComponentMask().set(ark::Logger::Component::DISASSEMBLER));
         }
     } else {
-        panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR,
-                                            panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
+        ark::Logger::InitializeStdLogging(ark::Logger::Level::ERROR,
+                                          ark::Logger::ComponentMask().set(ark::Logger::Component::DISASSEMBLER));
     }
 
     return true;
@@ -128,7 +126,7 @@ static bool ProcessArgs(panda::PandArgParser &paParser, const Options &options, 
 
 int main(int argc, const char **argv)
 {
-    panda::PandArgParser paParser;
+    ark::PandArgParser paParser;
     Options options {paParser};
 
     if (!ProcessArgs(paParser, options, argc, argv)) {

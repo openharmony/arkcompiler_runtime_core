@@ -27,7 +27,7 @@
 
 // NB: Include carefully. May lead to macro collisions between LLVM and Panda headers.
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class PandaSectionMemoryManager : public llvm::SectionMemoryManager {
 public:
@@ -88,6 +88,6 @@ private:
     llvm::RuntimeDyld runtimeDyLd_ {memoryManager_, memoryManager_};
 };
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  //  LIBLLVMBACKEND_OBJECT_CODE_ARK_AOT_LINKER_H

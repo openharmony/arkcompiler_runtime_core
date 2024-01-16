@@ -18,17 +18,17 @@
 
 #include "libpandafile/file.h"
 
-namespace panda {
+namespace ark {
 class Method;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsAnnotation {
 public:
     static panda_file::File::EntityId FindAsyncAnnotation(Method *method);
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H_

@@ -23,7 +23,7 @@
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PEEPHOLE_IS_APPLIED(visitor, inst) (visitor)->SetIsApplied((inst), true, __FILE__, __LINE__)
@@ -233,6 +233,6 @@ private:
 
     bool isApplied_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_PEEPHOLES_H

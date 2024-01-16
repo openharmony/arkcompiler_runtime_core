@@ -13,22 +13,22 @@
 
 coretypes:
 - managed_class: std.core.Object
-  mirror_class: panda::ets::EtsObject
+  mirror_class: ark::ets::EtsObject
 
 - managed_class: std.core.void
-  mirror_class: panda::ets::EtsVoid
+  mirror_class: ark::ets::EtsVoid
 
 - managed_class: std.core.String
-  mirror_class: panda::ets::EtsString
+  mirror_class: ark::ets::EtsString
 
 - managed_class: std.core.Class
-  mirror_class: panda::ets::EtsClass
+  mirror_class: ark::ets::EtsClass
 
 - managed_class: std.interop.js.JSValue
-  mirror_class: panda::ets::interop::js::JSValue
+  mirror_class: ark::ets::interop::js::JSValue
 
 
-intrinsics_namespace: panda::ets::interop::js::intrinsics
+intrinsics_namespace: ark::ets::interop::js::intrinsics
 
 
 ####################
@@ -43,7 +43,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeFinalizationQueueCallbackIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeFinalizationQueueCallbackIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeNewJSValueDouble
@@ -54,7 +54,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ f64 ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeNewJSValueDoubleIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueDoubleIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeNewJSValueString
@@ -65,7 +65,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ std.core.String ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeNewJSValueStringIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueStringIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeNewJSValueObject
@@ -76,7 +76,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ std.core.Object ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeNewJSValueObjectIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueObjectIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetValueDouble
@@ -87,7 +87,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ std.interop.js.JSValue ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueDoubleIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueDoubleIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetValueBoolean
@@ -98,7 +98,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.interop.js.JSValue ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueBooleanIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueBooleanIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetValueString
@@ -109,7 +109,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.interop.js.JSValue ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueStringIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueStringIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetValueObject
@@ -120,7 +120,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args: [ std.interop.js.JSValue, std.core.Object ] # 2nd argument is ClassClass
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetPropertyJSValue
@@ -131,7 +131,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ std.interop.js.JSValue, std.core.String ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetPropertyDouble
@@ -142,7 +142,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ std.interop.js.JSValue, std.core.String ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetPropertyDoubleIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyDoubleIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetPropertyString
@@ -153,7 +153,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.interop.js.JSValue, std.core.String ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetPropertyStringIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyStringIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeSetPropertyJSValue
@@ -164,7 +164,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.interop.js.JSValue, std.core.String, std.interop.js.JSValue ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeSetPropertyJSValueIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyJSValueIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeSetPropertyDouble
@@ -175,7 +175,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.interop.js.JSValue, std.core.String, f64 ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeSetPropertyDoubleIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyDoubleIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeSetPropertyString
@@ -186,7 +186,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.interop.js.JSValue, std.core.String, std.core.String ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeSetPropertyStringIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyStringIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetElementJSValue
@@ -197,7 +197,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ std.interop.js.JSValue, i32 ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetElementJSValueIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetElementJSValueIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetElementDouble
@@ -208,7 +208,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ std.interop.js.JSValue, i32 ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetElementDoubleIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetElementDoubleIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetUndefined
@@ -219,7 +219,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetUndefinedIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetUndefinedIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetNull
@@ -230,7 +230,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetNullIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetNullIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeGetGlobal
@@ -241,7 +241,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeGetGlobalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeGetGlobalIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeCreateObject
@@ -252,7 +252,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeCreateObjectIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateObjectIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeInstanceOf
@@ -263,7 +263,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeInstanceOfIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeInitJSCallClass
@@ -274,7 +274,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.core.String ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeInitJSCallClassIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeInitJSCallClassIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeInitJSNewClass
@@ -285,7 +285,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.core.String ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeInitJSNewClassIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeInitJSNewClassIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeCreateLambdaProxy
@@ -296,7 +296,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ std.core.Object ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeCreateLambdaProxyIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateLambdaProxyIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeLoadModule
@@ -307,7 +307,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ std.core.String ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeLoadModuleIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeLoadModuleIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeStrictEqual
@@ -318,7 +318,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
-    impl: panda::ets::interop::js::intrinsics::JSRuntimeStrictEqualIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeStrictEqualIntrinsic
     clear_flags: [ ]
 
 #######################
@@ -330,7 +330,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [ptr, ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerGetJSNamedPropertyIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerGetJSNamedPropertyIntrinsic
     interop_intrinsic_kind: creates_local
     clear_flags: [ ]
 
@@ -340,7 +340,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [ptr, std.core.String]
-    impl: panda::ets::interop::js::intrinsics::CompilerResolveQualifiedJSCallIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerResolveQualifiedJSCallIntrinsic
     interop_intrinsic_kind: creates_local
     clear_flags: [ ]
 
@@ -350,7 +350,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerJSCallCheckIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerJSCallCheckIntrinsic
     interop_intrinsic_kind: need_scope
     clear_flags: [ ]
 
@@ -361,7 +361,7 @@ intrinsics:
       ret: ptr
       args: [ptr, ptr, u32]
       stackrange: true
-    impl: panda::ets::interop::js::intrinsics::CompilerJSCallFunctionIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerJSCallFunctionIntrinsic
     interop_intrinsic_kind: creates_local
     clear_flags: [ ]
 
@@ -372,7 +372,7 @@ intrinsics:
       ret: void
       args: [ptr, ptr, u32]
       stackrange: true
-    impl: panda::ets::interop::js::intrinsics::CompilerJSCallVoidFunctionIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerJSCallVoidFunctionIntrinsic
     interop_intrinsic_kind: need_scope
     clear_flags: [ ]
 
@@ -383,7 +383,7 @@ intrinsics:
       ret: ptr
       args: [ptr, u32]
       stackrange: true
-    impl: panda::ets::interop::js::intrinsics::CompilerJSNewInstanceIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerJSNewInstanceIntrinsic
     interop_intrinsic_kind: creates_local
     clear_flags: [ ]
 
@@ -393,7 +393,7 @@ intrinsics:
     signature:
       ret: void
       args: [ ]
-    impl: panda::ets::interop::js::intrinsics::CompilerCreateLocalScopeIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerCreateLocalScopeIntrinsic
     clear_flags: [ ]
 
   - name: CompilerDestroyLocalScope
@@ -402,7 +402,7 @@ intrinsics:
     signature:
       ret: void
       args: [ ]
-    impl: panda::ets::interop::js::intrinsics::CompilerDestroyLocalScopeIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerDestroyLocalScopeIntrinsic
     clear_flags: [ ]
 
 ########################################################
@@ -414,7 +414,7 @@ intrinsics:
     signature:
       ret: ptr
       args: []
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertVoidToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertVoidToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -424,7 +424,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [u1]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertU1ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertU1ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -434,7 +434,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [u8]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertU8ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertU8ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -444,7 +444,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [i8]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertI8ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertI8ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -454,7 +454,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [u16]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertU16ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertU16ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -464,7 +464,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [i16]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertI16ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertI16ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -474,7 +474,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [u32]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertU32ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertU32ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -484,7 +484,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [i32]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertI32ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertI32ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -494,7 +494,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [u64]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertU64ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertU64ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -504,7 +504,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [i64]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertI64ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertI64ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -514,7 +514,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [f32]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertF32ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertF32ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -524,7 +524,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [f64]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertF64ToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertF64ToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -534,7 +534,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [std.core.Object]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertRefTypeToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertRefTypeToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -544,7 +544,7 @@ intrinsics:
     signature:
       ret: ptr
       args: [std.interop.js.JSValue]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertJSValueToLocalIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertJSValueToLocalIntrinsic
     interop_intrinsic_kind: wrap
     clear_flags: [no_dce]
 
@@ -557,7 +557,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU1Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU1Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -568,7 +568,7 @@ intrinsics:
     signature:
       ret: u8
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU8Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU8Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -579,7 +579,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToI8Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToI8Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -590,7 +590,7 @@ intrinsics:
     signature:
       ret: u16
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU16Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU16Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -601,7 +601,7 @@ intrinsics:
     signature:
       ret: i16
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToI16Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToI16Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -612,7 +612,7 @@ intrinsics:
     signature:
       ret: u32
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU32Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU32Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -623,7 +623,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToI32Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToI32Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -634,7 +634,7 @@ intrinsics:
     signature:
       ret: u64
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToU64Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU64Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -645,7 +645,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToI64Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToI64Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -656,7 +656,7 @@ intrinsics:
     signature:
       ret: f32
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToF32Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToF32Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -667,7 +667,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToF64Intrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToF64Intrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -678,7 +678,7 @@ intrinsics:
     signature:
       ret: std.interop.js.JSValue
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToJSValueIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToJSValueIntrinsic
     interop_intrinsic_kind: unwrap
     clear_flags: [no_dce]
   
@@ -688,7 +688,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToStringIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToStringIntrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]
@@ -699,7 +699,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args: [ptr, ptr]
-    impl: panda::ets::interop::js::intrinsics::CompilerConvertLocalToRefTypeIntrinsic
+    impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToRefTypeIntrinsic
     interop_intrinsic_kind: unwrap
     set_flags: [can_throw]
     clear_flags: [ ]

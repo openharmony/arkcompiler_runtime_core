@@ -24,7 +24,7 @@
 #include "runtime/interpreter/frame.h"
 #include "runtime/thread_pool_queue.h"
 
-namespace panda {
+namespace ark {
 
 namespace coretypes {
 class Array;
@@ -236,6 +236,6 @@ public:
     NO_MOVE_SEMANTIC(CompilerInterface);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COMPILER_INTERFACE_H_

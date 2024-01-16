@@ -19,7 +19,7 @@
 #include <limits>
 #include "macros.h"
 
-namespace panda {
+namespace ark {
 
 /*
  * Auxiliary static class that provides access to bits range within an integer value.
@@ -138,6 +138,6 @@ public:
     }
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_UTILS_BIT_FIELD_H_

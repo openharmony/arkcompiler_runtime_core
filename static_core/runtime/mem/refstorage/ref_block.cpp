@@ -14,7 +14,7 @@
  */
 #include "ref_block.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 RefBlock::RefBlock(RefBlock *prev)
 {
@@ -153,4 +153,4 @@ void RefBlock::PrintBlock()
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

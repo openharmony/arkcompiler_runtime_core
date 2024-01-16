@@ -28,7 +28,7 @@
 
 #include <iostream>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename... Tag>
 class TagPack {
@@ -382,15 +382,15 @@ public:
     ~TaggedIndex() = default;
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 namespace std {
 
 template <typename... TagsAndInt>
-struct hash<panda::verifier::TaggedIndex<TagsAndInt...>> {
-    size_t operator()(const panda::verifier::TaggedIndex<TagsAndInt...> &i) const noexcept
+struct hash<ark::verifier::TaggedIndex<TagsAndInt...>> {
+    size_t operator()(const ark::verifier::TaggedIndex<TagsAndInt...> &i) const noexcept
     {
-        return panda::verifier::StdHash(i.value_);
+        return ark::verifier::StdHash(i.value_);
     }
 };
 

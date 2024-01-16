@@ -21,7 +21,7 @@
 
 #include "verification/type/type_system.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 using SourceLang = panda_file::SourceLang;
 class TaskProcessor;
@@ -61,8 +61,8 @@ private:
     mem::InternalAllocatorPtr allocator_;
     ClassLinker *linker_;
 
-    panda::os::memory::Mutex lock_;
-    panda::os::memory::ConditionVariable condVar_ GUARDED_BY(lock_);
+    ark::os::memory::Mutex lock_;
+    ark::os::memory::ConditionVariable condVar_ GUARDED_BY(lock_);
     PandaUnorderedMap<panda_file::SourceLang, LangData> processors_ GUARDED_BY(lock_);
 
     bool shutdown_ {false};
@@ -88,6 +88,6 @@ private:
     TypeSystem typeSystem_ {service_, lang_};
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  //  PANDA_VERIFIER_JOBS_SERVICE_H

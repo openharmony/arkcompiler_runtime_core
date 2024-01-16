@@ -36,18 +36,18 @@
 #include <llvm/Pass.h>
 #include <llvm/Support/FileSystem.h>
 
-using panda::compiler::LLVMIrConstructor;
+using ark::compiler::LLVMIrConstructor;
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
-std::unique_ptr<IrtocCompilerInterface> CreateLLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime,
-                                                                panda::ArenaAllocator *allocator, panda::Arch arch)
+std::unique_ptr<IrtocCompilerInterface> CreateLLVMIrtocCompiler(ark::compiler::RuntimeInterface *runtime,
+                                                                ark::ArenaAllocator *allocator, ark::Arch arch)
 {
     return std::make_unique<LLVMIrtocCompiler>(runtime, allocator, arch, "irtoc_file_name.hack");
 }
 
-LLVMIrtocCompiler::LLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime, panda::ArenaAllocator *allocator,
-                                     panda::Arch arch, std::string filename)
+LLVMIrtocCompiler::LLVMIrtocCompiler(ark::compiler::RuntimeInterface *runtime, ark::ArenaAllocator *allocator,
+                                     ark::Arch arch, std::string filename)
     : LLVMCompiler(arch),
       methods_(allocator->Adapter()),
       filename_(std::move(filename)),
@@ -57,20 +57,20 @@ LLVMIrtocCompiler::LLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime,
     auto llvmCompilerOptions = InitializeLLVMCompilerOptions();
 
     // clang-format off
-    targetMachine_ = cantFail(panda::llvmbackend::TargetMachineBuilder {}
+    targetMachine_ = cantFail(ark::llvmbackend::TargetMachineBuilder {}
                                 .SetCPU(GetCPUForArch(arch))
                                 .SetOptLevel(static_cast<llvm::CodeGenOpt::Level>(llvmCompilerOptions.optlevel))
                                 .SetFeatures(GetFeaturesForArch(GetArch()))
                                 .SetTriple(GetTripleForArch(GetArch()))
                                 .Build());
     // clang-format on
-    mirCompiler_ = std::make_unique<MIRCompiler>(
-        targetMachine_, [this](panda::llvmbackend::InsertingPassManager *manager) -> void {
+    mirCompiler_ =
+        std::make_unique<MIRCompiler>(targetMachine_, [this](ark::llvmbackend::InsertingPassManager *manager) -> void {
             manager->InsertBefore(&llvm::FEntryInserterID,
-                                  panda::llvmbackend::CreatePatchReturnHandlerStackAdjustmentPass(&arkInterface_));
+                                  ark::llvmbackend::CreatePatchReturnHandlerStackAdjustmentPass(&arkInterface_));
         });
-    optimizer_ = std::make_unique<panda::llvmbackend::LLVMOptimizer>(llvmCompilerOptions, &arkInterface_,
-                                                                     mirCompiler_->GetTargetMachine());
+    optimizer_ = std::make_unique<ark::llvmbackend::LLVMOptimizer>(llvmCompilerOptions, &arkInterface_,
+                                                                   mirCompiler_->GetTargetMachine());
     InitializeModule();
 
     debugData_ = std::make_unique<DebugDataBuilder>(module_.get(), filename_);
@@ -78,7 +78,7 @@ LLVMIrtocCompiler::LLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime,
 
 std::vector<std::string> LLVMIrtocCompiler::GetFeaturesForArch(Arch arch)
 {
-    if (arch == Arch::X86_64 && panda::compiler::g_options.IsCpuFeatureEnabled(compiler::SSE42)) {
+    if (arch == Arch::X86_64 && ark::compiler::g_options.IsCpuFeatureEnabled(compiler::SSE42)) {
         return {std::string("+sse4.2")};
     }
     return {};
@@ -145,7 +145,7 @@ bool LLVMIrtocCompiler::AddGraph(compiler::Graph *graph)
     return true;
 }
 
-Expected<bool, std::string> LLVMIrtocCompiler::CanCompile(panda::compiler::Graph *graph)
+Expected<bool, std::string> LLVMIrtocCompiler::CanCompile(ark::compiler::Graph *graph)
 {
     LLVM_LOG(DEBUG, INFRA) << "LLVM checking graph for method " << arkInterface_.GetUniqMethodName(graph->GetMethod());
     return LLVMIrConstructor::CanCompile(graph);
@@ -245,4 +245,4 @@ CompiledCode LLVMIrtocCompiler::GetCompiledCode(std::string_view functionName)
     code.code = reference.GetMemory();
     return code;
 }
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

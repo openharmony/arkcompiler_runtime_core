@@ -28,12 +28,12 @@
 #include "runtime/mem/gc/card_table.h"
 #include "runtime/mem/gc/gc_root_type.h"
 
-namespace panda {
+namespace ark {
 class PandaVM;
 class ManagedThread;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 class GCAdaptiveStack;
 
@@ -144,6 +144,6 @@ private:
     PandaVM *vm_ {nullptr};
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_ROOT_H

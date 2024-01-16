@@ -18,7 +18,7 @@
 #include "libpandabase/utils/logger.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_TLAB_ALLOCATOR(level) LOG(level, ALLOC) << "TLAB: "
@@ -120,4 +120,4 @@ bool TLAB::IsLive(const ObjectHeader *obj)
 
 #undef LOG_TLAB_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem

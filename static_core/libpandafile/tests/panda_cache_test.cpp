@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 
-namespace panda {
+namespace ark {
 
 class Method;
 class Field;
@@ -332,4 +332,4 @@ TEST(PandaCache, TestManyThreadsClassCache)
 }
 
 }  // namespace panda_file::test
-}  // namespace panda
+}  // namespace ark

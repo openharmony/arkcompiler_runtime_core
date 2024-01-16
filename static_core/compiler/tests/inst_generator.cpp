@@ -15,7 +15,7 @@
 
 #include "inst_generator.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 Graph *GraphCreator::GenerateGraph(Inst *inst)
 {
     Graph *graph;
@@ -1269,4 +1269,4 @@ void StatisticGenerator::GenerateHTMLPage(const std::string &fileName)
              << "</html>";
     htmlPage.close();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

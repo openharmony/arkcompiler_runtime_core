@@ -19,7 +19,7 @@
 #include <memory>
 #include "runtime/tooling/sampler/sample_info.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 class LockFreeQueue {
 public:
@@ -79,6 +79,6 @@ private:
     std::atomic<size_t> size_;
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_RUNTIME_TOOLING_SAMPLER_LOCK_FREE_QUEUE_H

@@ -16,7 +16,7 @@
 #include "helpers.h"
 #include "method_handle_data_accessor.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 MethodHandleDataAccessor::MethodHandleDataAccessor(const File &pandaFile, File::EntityId methodHandleId)
     : pandaFile_(pandaFile), methodHandleId_(methodHandleId)
@@ -29,4 +29,4 @@ MethodHandleDataAccessor::MethodHandleDataAccessor(const File &pandaFile, File::
     size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - methodHandleId_.GetOffset();
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

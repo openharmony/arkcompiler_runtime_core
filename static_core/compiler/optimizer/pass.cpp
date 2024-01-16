@@ -16,7 +16,7 @@
 #include "pass.h"
 #include "optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool Pass::Run()
 {
     if (IsAnalysis() && IsValid()) {
@@ -32,4 +32,4 @@ bool Pass::Run()
     }
     return res;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

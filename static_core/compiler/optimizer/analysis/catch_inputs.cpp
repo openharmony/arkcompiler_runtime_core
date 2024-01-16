@@ -18,7 +18,7 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 namespace {
 bool IsCatch(BasicBlock *bb)
 {
@@ -61,4 +61,4 @@ bool CatchInputs::RunImpl()
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

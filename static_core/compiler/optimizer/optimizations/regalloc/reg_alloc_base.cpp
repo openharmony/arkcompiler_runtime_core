@@ -25,7 +25,7 @@
 #include "reg_alloc_resolver.h"
 #include "reg_alloc_stat.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 RegAllocBase::RegAllocBase(Graph *graph)
     : RegAllocBase(graph, graph->GetArchUsedRegs(), graph->GetArchUsedVRegs(), MAX_NUM_STACK_SLOTS)
@@ -296,4 +296,4 @@ bool TryToSpillConstant(LifeIntervals *interval, Graph *graph)
     return true;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

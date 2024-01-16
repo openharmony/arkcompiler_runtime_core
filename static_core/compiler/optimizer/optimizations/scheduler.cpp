@@ -20,7 +20,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /* Instruction scheduling.
  * Current decisions/limitations
  *
@@ -480,4 +480,4 @@ uint32_t Scheduler::SchedWithGlued(Inst *inst, SchedulerPriorityQueue *waiting, 
 
     return amount;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

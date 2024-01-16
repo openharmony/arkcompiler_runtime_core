@@ -22,7 +22,7 @@
 
 #define DEBUG_TYPE "expand-atomics"
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 ExpandAtomics::ExpandAtomics() = default;
 
@@ -86,4 +86,4 @@ bool ExpandAtomics::InsertAddrSpaceCast(llvm::Instruction *atomicInstruction)
     return true;
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

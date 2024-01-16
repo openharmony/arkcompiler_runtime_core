@@ -18,8 +18,8 @@
 
 #include "compiler/optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool RegAlloc(Graph *graph);
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_H

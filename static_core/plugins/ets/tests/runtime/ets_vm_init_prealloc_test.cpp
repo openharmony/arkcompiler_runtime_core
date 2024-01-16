@@ -29,7 +29,7 @@
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsVMInitPreallocTest : public testing::Test {
 public:
@@ -71,7 +71,7 @@ TEST_F(EtsVMInitPreallocTest, PreallocatedOOMObjectTest)
 
     ASSERT_NE(oomObj, nullptr);
 
-    auto oomClass = oomObj->ClassAddr<panda::Class>();
+    auto oomClass = oomObj->ClassAddr<ark::Class>();
     ASSERT_NE(oomClass->GetDescriptor(), nullptr);
 
     auto ctx = coroutine->GetLanguageContext();
@@ -80,4 +80,4 @@ TEST_F(EtsVMInitPreallocTest, PreallocatedOOMObjectTest)
     ASSERT_STREQ(descriptorGot, descriptorExp);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

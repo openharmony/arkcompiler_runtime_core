@@ -29,7 +29,7 @@
 #include <string>
 #include <unordered_set>
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 extern os::memory::Mutex g_traceLock;
@@ -80,7 +80,7 @@ public:
     uint64_t GetAverageTime();
 
 protected:
-    explicit Trace(PandaUniquePtr<panda::os::unix::file::File> traceFile, size_t bufferSize);
+    explicit Trace(PandaUniquePtr<ark::os::unix::file::File> traceFile, size_t bufferSize);
     uint32_t EncodeMethodToId(Method *method);
     virtual PandaString GetThreadName(ManagedThread *thread) = 0;
     virtual PandaString GetMethodDetailInfo(Method *method) = 0;
@@ -134,7 +134,7 @@ private:
 
     static Trace *volatile singletonTrace_ GUARDED_BY(g_traceLock);
 
-    PandaUniquePtr<panda::os::unix::file::File> traceFile_;
+    PandaUniquePtr<ark::os::unix::file::File> traceFile_;
     const size_t bufferSize_;
 
     PandaUniquePtr<uint8_t[]> buffer_;  // NOLINT(modernize-avoid-c-arrays)
@@ -153,6 +153,6 @@ private:
     NO_MOVE_SEMANTIC(Trace);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_DPROFILER_TRACE_H_

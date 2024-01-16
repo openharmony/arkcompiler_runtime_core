@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-namespace panda::ets {
-}  // namespace panda::ets
+namespace ark::ets {
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_ENTRYPOINTS_H

@@ -18,7 +18,7 @@
 
 #include <sys/mman.h>
 
-namespace panda::os::mem {
+namespace ark::os::mem {
 
 static constexpr uint32_t MMAP_PROT_NONE = PROT_NONE;
 static constexpr uint32_t MMAP_PROT_READ = PROT_READ;
@@ -30,5 +30,5 @@ static constexpr uint32_t MMAP_FLAG_PRIVATE = MAP_PRIVATE;
 static constexpr uint32_t MMAP_FLAG_FIXED = MAP_FIXED;
 static constexpr uint32_t MMAP_FLAG_ANONYMOUS = MAP_ANONYMOUS;
 
-}  // namespace panda::os::mem
+}  // namespace ark::os::mem
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_

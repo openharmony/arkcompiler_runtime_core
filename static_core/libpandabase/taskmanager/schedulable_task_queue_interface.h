@@ -19,7 +19,7 @@
 #include "libpandabase/taskmanager/task_queue_interface.h"
 #include <optional>
 
-namespace panda::taskmanager::internal {
+namespace ark::taskmanager::internal {
 
 class SchedulableTaskQueueInterface : public TaskQueueInterface {
 public:
@@ -74,6 +74,6 @@ public:
     void virtual UnsetNewTasksCallback() = 0;
 };
 
-}  // namespace panda::taskmanager::internal
+}  // namespace ark::taskmanager::internal
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_SCHEDULABLE_TASK_QUEUE_INTERFACE_H

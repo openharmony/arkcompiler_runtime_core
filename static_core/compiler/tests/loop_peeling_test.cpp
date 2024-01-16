@@ -18,7 +18,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/ir/graph_cloner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // NOLINTBEGIN(readability-magic-numbers)
 class LoopPeelingTest : public GraphTest {
@@ -970,4 +970,4 @@ TEST_F(LoopPeelingTest, NeedSaveStateBridge)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

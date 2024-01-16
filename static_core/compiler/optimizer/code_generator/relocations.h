@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class RelocationInfo {
 public:
@@ -33,6 +33,6 @@ public:
     virtual void AddRelocation(const RelocationInfo &info) = 0;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_RELOCATIONS_H

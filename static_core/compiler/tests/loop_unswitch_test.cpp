@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/loop_unswitch.h"
 #include "optimizer/optimizations/branch_elimination.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTBEGIN(readability-magic-numbers,readability-function-size)
 class LoopUnswitchTest : public GraphTest {
 public:
@@ -1236,4 +1236,4 @@ TEST_F(ConditionComparatorTest, TestCompareInput)
     }
 }
 // NOLINTEND(readability-magic-numbers,readability-function-size)
-}  // namespace panda::compiler
+}  // namespace ark::compiler

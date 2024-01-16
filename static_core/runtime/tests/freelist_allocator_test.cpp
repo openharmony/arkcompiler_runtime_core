@@ -25,7 +25,7 @@
 #include "runtime/mem/freelist_allocator-inl.h"
 #include "runtime/tests/allocator_test_base.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 using NonObjectFreeListAllocator = FreeListAllocator<EmptyAllocConfigWithCrossingMap>;
 
@@ -41,7 +41,7 @@ public:
         options_.SetShouldLoadBootPandaFiles(false);
         options_.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options_);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
         if (!CrossingMapSingleton::IsCreated()) {
             CrossingMapSingleton::Create();
@@ -105,7 +105,7 @@ protected:
     }
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
     std::vector<Pool> allocatedPoolsByPoolManager_;
     RuntimeOptions options_;
     bool crossingmapManualHandling_ {false};
@@ -276,7 +276,7 @@ TEST_F(FreeListAllocatorTest, AllocateTheWholePoolFreeAndAllocateAgainTest)
 {
     size_t minSizePowerOfTwo;
     if ((FREELIST_ALLOCATOR_MIN_SIZE & (FREELIST_ALLOCATOR_MIN_SIZE - 1)) == 0U) {
-        minSizePowerOfTwo = panda::helpers::math::GetIntLog2(FREELIST_ALLOCATOR_MIN_SIZE);
+        minSizePowerOfTwo = ark::helpers::math::GetIntLog2(FREELIST_ALLOCATOR_MIN_SIZE);
     } else {
         // NOLINTNEXTLINE(readability-magic-numbers)
         minSizePowerOfTwo = ceil(std::log(FREELIST_ALLOCATOR_MIN_SIZE) / std::log(2.0F));
@@ -453,4 +453,4 @@ TEST_F(FreeListAllocatorTest, AlignTest)
     allocator.Free(ptr4);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

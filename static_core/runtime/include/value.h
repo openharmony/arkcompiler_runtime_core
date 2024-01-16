@@ -24,7 +24,7 @@
 #include "runtime/bridge/bridge.h"
 #include "runtime/include/coretypes/tagged_value.h"
 
-namespace panda {
+namespace ark {
 
 class ObjectHeader;
 
@@ -94,6 +94,6 @@ private:
     std::variant<int64_t, ObjectHeader *> value_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_VALUE_H_

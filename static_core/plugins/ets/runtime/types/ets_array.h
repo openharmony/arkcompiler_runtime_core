@@ -24,7 +24,7 @@
 #include "plugins/ets/runtime/ets_class_root.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 // Private inheritance, because need to disallow implicit conversion to core type
 class EtsArray : private coretypes::Array {
@@ -103,7 +103,7 @@ public:
 
 protected:
     // Use type alias to allow using into derived classes
-    using ObjectHeader = ::panda::ObjectHeader;
+    using ObjectHeader = ::ark::ObjectHeader;
 
     template <class T>
     void SetImpl(uint32_t idx, T elem)
@@ -121,7 +121,7 @@ protected:
 class EtsObjectArray : public EtsArray {
 public:
     static EtsObjectArray *Create(EtsClass *objectClass, uint32_t length,
-                                  panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT)
+                                  ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         // Generate Array class name  "[L<object_class>;"
@@ -181,7 +181,7 @@ private:
 
     using WordType = uintptr_t;
     using AtomicWord = std::atomic<WordType>;
-    using AtomicRef = std::atomic<panda::ObjectPointerType>;
+    using AtomicRef = std::atomic<ark::ObjectPointerType>;
 
     static constexpr const std::size_t WORD_SIZE = sizeof(WordType);
 
@@ -245,6 +245,6 @@ using EtsLongArray = EtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>;
 using EtsFloatArray = EtsPrimitiveArray<EtsFloat, EtsClassRoot::FLOAT_ARRAY>;
 using EtsDoubleArray = EtsPrimitiveArray<EtsDouble, EtsClassRoot::DOUBLE_ARRAY>;
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H_

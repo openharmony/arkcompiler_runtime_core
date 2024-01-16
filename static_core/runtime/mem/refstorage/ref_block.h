@@ -24,11 +24,11 @@
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/gc/gc_root.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 class ReferenceStorageTest;
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test
 
-namespace panda::mem {
+namespace ark::mem {
 
 class RefBlock {
     using SlotBitMap = uint64_t;
@@ -169,10 +169,10 @@ private:
         PrintBlock();
         std::cout << std::endl << "Dump block finish --------------" << std::endl;
     }
-    friend class panda::mem::test::ReferenceStorageTest;
-    friend class panda::mem::ReferenceStorage;
+    friend class ark::mem::test::ReferenceStorageTest;
+    friend class ark::mem::ReferenceStorage;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_REF_BLOCK_H

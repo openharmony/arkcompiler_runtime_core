@@ -20,7 +20,7 @@
 #include "unzip.h"
 #include "zip.h"
 
-namespace panda {
+namespace ark {
 
 constexpr int ZIPARCHIVE_OK = 0;
 constexpr int ZIPARCHIVE_ERR = 1;
@@ -169,6 +169,6 @@ int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t bufSize);
  */
 int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void *pbuf, size_t bufSize,
                            int append = APPEND_STATUS_CREATE, int level = Z_BEST_COMPRESSION);
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_LIBZIPARCHIVE_ZIP_ARCHIVE_H_

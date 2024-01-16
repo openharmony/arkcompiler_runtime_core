@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropJsIntrinsTest : public EtsInteropTest {
 public:
@@ -134,4 +134,4 @@ TEST_F(EtsInteropJsIntrinsTest, test_finalizers)
     ASSERT_EQ(true, CallEtsMethod<bool>("test_finalizers"));
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

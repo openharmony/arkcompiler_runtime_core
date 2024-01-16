@@ -22,14 +22,14 @@
 
 #include <string>
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
 template <typename Parser, typename Handler>
 const auto &LiteralParser(Handler &handler)
 {
-    using panda::parser::Action;
-    using panda::parser::Charset;
-    // using panda::parser::Parser;
+    using ark::parser::Action;
+    using ark::parser::Charset;
+    // using ark::parser::Parser;
 
     struct Literal;
 
@@ -49,9 +49,9 @@ const auto &LiteralParser(Handler &handler)
 
 inline const auto &LiteralsParser()
 {
-    using panda::parser::Action;
-    using panda::parser::Charset;
-    using panda::parser::Parser;
+    using ark::parser::Action;
+    using ark::parser::Charset;
+    using ark::parser::Parser;
 
     struct Literals;
 
@@ -74,6 +74,6 @@ inline const auto &LiteralsParser()
     return LITERALS;
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug
 
 #endif  // !PANDA_VERIFIER_DEBUG_LITERAL_PARSER_H_

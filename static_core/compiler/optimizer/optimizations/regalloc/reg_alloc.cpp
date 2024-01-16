@@ -21,7 +21,7 @@
 #include "reg_alloc_linear_scan.h"
 #include "reg_alloc_resolver.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 static constexpr size_t INST_LIMIT_FOR_GRAPH_COLORING = 5000;
 
 bool IsGraphColoringEnable(const Graph *graph)
@@ -68,4 +68,4 @@ bool RegAlloc(Graph *graph)
     }
     return raPassed;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

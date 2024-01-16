@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/napi_env_scope.h"
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 napi_value GetETSFunction(napi_env env, std::string_view classDescriptor, std::string_view methodName)
 {
@@ -72,4 +72,4 @@ napi_value GetETSClass(napi_env env, std::string_view classDescriptor)
     return etsClassWrapper->GetJsCtor(env);
 }
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy

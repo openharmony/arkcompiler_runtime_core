@@ -17,7 +17,7 @@
 #include "runtime/mem/internal_allocator-inl.h"
 #include "runtime/include/thread.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_INTERNAL_ALLOCATOR(level) LOG(level, ALLOC) << "InternalAllocator: "
@@ -181,8 +181,8 @@ void *InternalAllocator<CONFIG>::AllocViaPandaAllocators(size_t size, Alignment 
         } else {  // NOLINT(readability-misleading-indentation)
             static_assert(ALLOC_SCOPE_T == AllocScope::LOCAL);
             LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use thread-local RunSlotsAllocator";
-            ASSERT(panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator() != nullptr);
-            res = AllocInRunSlots(panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator(), size, align,
+            ASSERT(ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator() != nullptr);
+            res = AllocInRunSlots(ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator(), size, align,
                                   LocalSmallObjectAllocator::GetMinPoolSize());
             if (res == nullptr) {
                 return nullptr;
@@ -250,7 +250,7 @@ void InternalAllocator<CONFIG>::FreeViaPandaAllocators(void *ptr)
                 LOG_INTERNAL_ALLOCATOR(DEBUG) << "free via thread-local RunSlotsAllocator";
                 // It is a thread-local internal allocator instance
                 LocalSmallObjectAllocator *localAllocator =
-                    panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
+                    ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
                 ASSERT(PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(ptr).GetAllocatorHeaderAddr() ==
                        localAllocator);
                 localAllocator->Free(ptr);
@@ -285,7 +285,7 @@ typename InternalAllocator<CONFIG>::LocalSmallObjectAllocator *InternalAllocator
         auto localAllocator =
             allocator->New<LocalSmallObjectAllocator>(allocator->GetMemStats(), SpaceType::SPACE_TYPE_INTERNAL);
         LOG_INTERNAL_ALLOCATOR(DEBUG) << "Set up local internal allocator at addr " << localAllocator
-                                      << " for the thread " << panda::Thread::GetCurrent();
+                                      << " for the thread " << ark::Thread::GetCurrent();
         return localAllocator;
     }
     return nullptr;
@@ -350,4 +350,4 @@ template void *InternalAllocator<InternalAllocatorConfig::MALLOC_ALLOCATOR>::All
 
 #undef LOG_INTERNAL_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem

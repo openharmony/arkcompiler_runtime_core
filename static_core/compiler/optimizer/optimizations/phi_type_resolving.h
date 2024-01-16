@@ -20,7 +20,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /*
  * PhiTypeResolving finds Phi instructions of Any type whose inputs are CastValueToAnyType instructions with the same
  * primitive type, and creates single CastValueToAnyType instructions with Phi of this primitive type as an input
@@ -46,6 +46,6 @@ private:
     ArenaVector<Inst *> phis_;
     AnyBaseType anyType_ {AnyBaseType::UNDEFINED_TYPE};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_PHI_TYPE_RESOLVING_H

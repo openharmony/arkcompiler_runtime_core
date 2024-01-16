@@ -22,7 +22,7 @@
 #include "libpandabase/utils/time.h"
 #include "libpandabase/utils/span.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 struct PCodeItem;
 struct PCodeMetaInfo;
 
@@ -45,12 +45,12 @@ private:
 
 private:
     static std::map<const std::string, PCodeItem *> aexItemMap_;
-    static panda::os::memory::Mutex jitItemLock_;
-    static panda::os::memory::Mutex aexItemLock_;
+    static ark::os::memory::Mutex jitItemLock_;
+    static ark::os::memory::Mutex aexItemLock_;
 
     NO_COPY_SEMANTIC(DebugInf);
     NO_MOVE_SEMANTIC(DebugInf);
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_RUNTIME_DEBUG_DEBUG_INF_H

@@ -19,7 +19,7 @@
 #include "libpandafile/file.h"
 #include "runtime/include/field.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsClass;
 class EtsString;
@@ -113,6 +113,6 @@ public:
     NO_MOVE_SEMANTIC(EtsField);
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H_

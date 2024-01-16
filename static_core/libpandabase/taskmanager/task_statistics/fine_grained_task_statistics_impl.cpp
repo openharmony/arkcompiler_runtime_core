@@ -16,7 +16,7 @@
 #include "libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.h"
 #include "libpandabase/taskmanager/task.h"
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 FineGrainedTaskStatisticsImpl::FineGrainedTaskStatisticsImpl()
 {
@@ -75,4 +75,4 @@ void FineGrainedTaskStatisticsImpl::ResetCountersWithTaskProperties(TaskProperti
     }
 }
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

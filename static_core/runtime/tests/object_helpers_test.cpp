@@ -26,7 +26,7 @@
 #include "runtime/include/coretypes/string.h"
 #include "runtime/mem/object_helpers-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 inline std::string Separator()
 {
@@ -45,7 +45,7 @@ public:
         options.SetLoadRuntimes({"core"});
         options.SetGcType("epsilon");
         options.SetGcTriggerType("debug-never");
-        auto execPath = panda::os::file::File::GetExecutablePath();
+        auto execPath = ark::os::file::File::GetExecutablePath();
         std::string pandaStdLib =
             execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "pandastdlib.bin";
         options.SetBootPandaFiles({pandaStdLib});
@@ -286,4 +286,4 @@ TEST_F(StaticObjectHelpersTest, TestArray)
     ASSERT_EQ(1, count);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

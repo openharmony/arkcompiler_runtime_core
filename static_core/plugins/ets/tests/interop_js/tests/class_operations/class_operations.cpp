@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropClassOperationsTest : public EtsInteropTest {
 public:
@@ -135,4 +135,4 @@ TEST_F(EtsInteropClassOperationsTest, TestNamespace)
     ASSERT_EQ(ret, 0);
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

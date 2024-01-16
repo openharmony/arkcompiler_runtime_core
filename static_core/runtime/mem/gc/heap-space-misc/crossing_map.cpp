@@ -17,7 +17,7 @@
 
 #include <cstring>
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_CROSSING_MAP(level) LOG(level, GC) << "CrossingMap: "
@@ -325,4 +325,4 @@ void *CrossingMap::FindObjInMap(size_t mapNum)
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

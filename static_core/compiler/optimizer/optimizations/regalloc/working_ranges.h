@@ -19,7 +19,7 @@
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 using InstructionsRanges = ArenaDeque<LifeIntervals *>;
 
 struct WorkingRanges {
@@ -38,5 +38,5 @@ static inline void AddRange(LifeIntervals *interval, InstructionsRanges *dest)
                                  [](const auto &lhs, const auto &rhs) { return lhs->GetBegin() < rhs->GetBegin(); });
     dest->insert(iter, interval);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_WORKING_RANGES_H

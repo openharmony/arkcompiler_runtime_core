@@ -18,7 +18,7 @@
 #include <cstdint>
 #include "libpandabase/macros.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 /* We are using the fact that on every operating system some of the process's virtual memory space
    is unavailable for allocation -- for example, it may be reserved for kernel memory.
@@ -90,6 +90,6 @@ ALWAYS_INLINE inline uintptr_t ConstructWithTag(int tag, uintptr_t v)
     return NOT_POINTER | (static_cast<uintptr_t>(tag) << TAG_SHIFT) | v;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif /* PANDA_VERIFICATION_UTIL_MEM_H */

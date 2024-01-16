@@ -21,13 +21,13 @@
 #include "operands.h"
 #include "registers_description.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class ConstructorTest : public ::testing::Test {
 public:
     ConstructorTest()
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
+        ark::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
     }
@@ -66,7 +66,7 @@ public:
 #endif
         delete allocator_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_COPY_SEMANTIC(ConstructorTest);
@@ -232,4 +232,4 @@ TEST_F(ConstructorTest, CallingConvention)
     callconv = CallingConvention::Create(GetAllocator(), encoder, regfile, Arch::NONE);
     ASSERT_EQ(callconv, nullptr);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -20,7 +20,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * TypesAnalysis sets assumed types(dynamic type) to phi instruction.
  * If a PHI is user of a CastValueToAnyType, the type of CastValueToAnyType is set as assumed type of the PHI
@@ -57,6 +57,6 @@ private:
     void MarkedPhiRec(PhiInst *phi, AnyBaseType type);
     Marker marker_ {UNDEF_MARKER};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_TYPES_ANALISYS_H

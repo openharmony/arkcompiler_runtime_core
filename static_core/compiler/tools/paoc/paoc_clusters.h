@@ -27,7 +27,7 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_PAOC_CLUSTERS(level) LOG(level, COMPILER) << "PAOC_CLUSTERS: "
 
-namespace panda {
+namespace ark {
 
 /**
  * Implements `--paoc-clusters` option.
@@ -300,6 +300,6 @@ private:
 
 #undef LOG_PAOC_CLUSTERS
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // COMPILER_TOOLS_PAOC_CLUSTERS_H

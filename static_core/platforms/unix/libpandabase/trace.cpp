@@ -25,7 +25,7 @@ static const char PANDA_TRACE_KEY[] = "PANDA_TRACE";
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 static const char TRACE_MARKER_PATH[] = "/sys/kernel/debug/tracing/trace_marker";
 
-namespace panda::trace::internal {
+namespace ark::trace::internal {
 
 PANDA_PUBLIC_API int g_traceMarkerFd = -1;
 bool DoInit()
@@ -89,4 +89,4 @@ void DoInt64TracePoint(const char *str, int64_t val)
     WRITE_MESSAGE("C|%d|%s|%" PRId64, getpid(), str, val);
 }
 
-}  // end namespace panda::trace::internal
+}  // end namespace ark::trace::internal

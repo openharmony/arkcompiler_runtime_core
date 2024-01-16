@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropStrictEqualityTest : public EtsInteropTest {};
 
@@ -69,4 +69,4 @@ TEST_F(EtsInteropStrictEqualityTest, TestNotStrictNotEqualFalse)
     ASSERT_EQ(ret, true);
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

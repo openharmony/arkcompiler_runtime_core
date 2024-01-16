@@ -28,7 +28,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class DebugInfoCache final {
 public:
     DebugInfoCache() = default;
@@ -88,6 +88,6 @@ private:
     std::unordered_map<std::string_view, std::pair<const panda_file::File &, panda_file::File::EntityId>> disassemblies_
         GUARDED_BY(disassembliesMutex_);
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_DEBUG_INFO_CACHE_H

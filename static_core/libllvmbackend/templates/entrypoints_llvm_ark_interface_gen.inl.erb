@@ -14,12 +14,12 @@
  */
 
 // NOLINTNEXTLINE(readability-function-size)
-const char *GetEntrypointInternalName(panda::compiler::RuntimeInterface::EntrypointId id)
+const char *GetEntrypointInternalName(ark::compiler::RuntimeInterface::EntrypointId id)
 {
 #ifndef NDEBUG
     switch (id) {
 % Compiler::entrypoints.each do |entrypoint|
-        case panda::compiler::RuntimeInterface::EntrypointId::<%= entrypoint.enum_name %>:
+        case ark::compiler::RuntimeInterface::EntrypointId::<%= entrypoint.enum_name %>:
             return "<%= entrypoint.llvm_internal_name %>";
 % end
         default:
@@ -30,7 +30,7 @@ const char *GetEntrypointInternalName(panda::compiler::RuntimeInterface::Entrypo
 #else
     switch (id) {
 % Compiler::entrypoints.each_with_index do |entrypoint, index|
-        case panda::compiler::RuntimeInterface::EntrypointId::<%= entrypoint.enum_name %>:
+        case ark::compiler::RuntimeInterface::EntrypointId::<%= entrypoint.enum_name %>:
             return "<%= 'e_' + index.to_s(16) %>";
 % end
         default:

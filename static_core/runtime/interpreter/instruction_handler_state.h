@@ -19,7 +19,7 @@
 #include "runtime/interpreter/state.h"
 #include "runtime/jit/profiling_data.h"
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 class InstructionHandlerState {
 public:
@@ -139,6 +139,6 @@ private:
     uint16_t opcodeExtension_ {0};
 };
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_

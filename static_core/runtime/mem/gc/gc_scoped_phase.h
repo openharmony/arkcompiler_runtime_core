@@ -22,7 +22,7 @@
 #include "runtime/mem/mem_stats_additional_info.h"
 #include "runtime/mem/mem_stats_default.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // forward declarations:
 class GC;
@@ -99,6 +99,6 @@ private:
     PandaString GetGCName();
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // GC_SCOPED_PHASE_H

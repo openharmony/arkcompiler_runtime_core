@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_VREGISTER_ITERATOR_H_
 #define PANDA_RUNTIME_VREGISTER_ITERATOR_H_
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 template <BytecodeInstruction::Format FORMAT>
 class VRegisterIterator {
@@ -84,6 +84,6 @@ public:
     }
 };
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H_

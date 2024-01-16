@@ -20,7 +20,7 @@
 #include "proto_data_accessor-inl.h"
 #include "utils/utf.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 static const char *GetStringFromConstantPool(const File &pf, uint32_t offset)
 {
     return utf::Mutf8AsCString(pf.GetStringData(File::EntityId(offset)).data);
@@ -319,4 +319,4 @@ std::vector<File::EntityId> DebugInfoExtractor::GetMethodIdList() const
     }
     return list;
 }
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

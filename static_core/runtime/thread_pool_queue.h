@@ -20,7 +20,7 @@
 
 static constexpr size_t QUEUE_SIZE_MAX_SIZE = 1000;
 
-namespace panda {
+namespace ark {
 
 class TaskInterface {
 public:
@@ -69,6 +69,6 @@ private:
     const size_t queueMaxSize_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_THREAD_POOL_QUEUE_H_

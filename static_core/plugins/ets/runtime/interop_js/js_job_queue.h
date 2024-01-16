@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/job_queue.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 class JSValue;
 class JsJobQueue : public JobQueue {
@@ -30,5 +30,5 @@ public:
 private:
     void CreatePromiseLink(JSValue *jsPromise, EtsPromise *etsPromise);
 };
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_JS_INTEROP_JOB_QUEUE_H_

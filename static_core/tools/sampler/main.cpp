@@ -16,11 +16,11 @@
 #include "libpandabase/utils/logger.h"
 #include "tools/sampler/aspt_converter.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 int Main(int argc, const char **argv)
 {
-    panda::Span<const char *> sp(argv, argc);
+    ark::Span<const char *> sp(argv, argc);
 
     ArgsParser parser;
     if (!parser.Parse(sp)) {
@@ -39,9 +39,9 @@ int Main(int argc, const char **argv)
     return 0;
 }
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 int main(int argc, const char **argv)
 {
-    return panda::tooling::sampler::Main(argc, argv);
+    return ark::tooling::sampler::Main(argc, argv);
 }

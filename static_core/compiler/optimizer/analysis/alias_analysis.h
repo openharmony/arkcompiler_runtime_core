@@ -22,7 +22,7 @@
 #include "utils/arena_containers.h"
 #include "utils/hash.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 
@@ -433,6 +433,6 @@ private:
     PointerPairVector *copy_ {nullptr};
     ArenaSet<Inst *> *inputsSet_ {nullptr};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_ALIAS_ANALYSIS_H

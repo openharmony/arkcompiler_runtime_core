@@ -23,9 +23,9 @@
 #include <utility>
 #include <optional>
 
-namespace panda::os::unix {
+namespace ark::os::unix {
 
-using UniqueFd = panda::os::unique_fd::UniqueFd;
+using UniqueFd = ark::os::unique_fd::UniqueFd;
 
 std::pair<UniqueFd, UniqueFd> CreatePipe();
 
@@ -41,6 +41,6 @@ Expected<size_t, Error> WaitForEvent(const UniqueFd *handles, size_t size, Event
 
 std::optional<Error> Dup2(const UniqueFd &source, const UniqueFd &target);
 
-}  // namespace panda::os::unix
+}  // namespace ark::os::unix
 
 #endif  // PANDA_LIBPANDABASE_OS_UNIX_PIPE_H

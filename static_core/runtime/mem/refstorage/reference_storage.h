@@ -21,7 +21,7 @@
 #include "runtime/mem/internal_allocator.h"
 #include "ref_block.h"
 
-namespace panda {
+namespace ark {
 class ObjectHeader;
 namespace mem {
 class Reference;
@@ -29,9 +29,9 @@ namespace test {
 class ReferenceStorageTest;
 }  // namespace test
 }  // namespace mem
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Storage stores all References for proper interaction with GC.
 class ReferenceStorage {
@@ -143,7 +143,7 @@ private:
 
     bool StackReferenceCheck(const Reference *stackRef);
 
-    friend class panda::mem::test::ReferenceStorageTest;
+    friend class ark::mem::test::ReferenceStorageTest;
 };
 
 /**
@@ -202,6 +202,6 @@ private:
     NO_MOVE_SEMANTIC(ReferenceHandle);
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_REFERENCES_STORAGE_H

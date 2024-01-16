@@ -16,7 +16,7 @@
 #include "unit_test.h"
 #include "optimizer/optimizations/move_constants.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class MoveConstantsTest : public GraphTest {};
 
@@ -763,4 +763,4 @@ TEST_F(MoveConstantsTest, CatchPhiUser)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

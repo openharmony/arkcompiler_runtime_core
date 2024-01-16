@@ -23,7 +23,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 
-namespace panda {
+namespace ark {
 
 uint8_t *StackfulCoroutineManager::AllocCoroutineStack()
 {
@@ -529,4 +529,4 @@ void StackfulCoroutineManager::DestroyNativeCoroutine(Coroutine *co)
     DestroyEntrypointlessCoroutine(co);
 }
 
-}  // namespace panda
+}  // namespace ark

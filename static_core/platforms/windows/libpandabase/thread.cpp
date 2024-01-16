@@ -22,7 +22,7 @@
 #include <processthreadsapi.h>
 #include <thread>
 
-namespace panda::os::thread {
+namespace ark::os::thread {
 ThreadId GetCurrentThreadId()
 {
     // The function is provided by mingw
@@ -96,4 +96,4 @@ void ThreadJoin(NativeHandleType pthreadHandle, void **ret)
 {
     pthread_join(reinterpret_cast<pthread_t>(pthreadHandle), ret);
 }
-}  // namespace panda::os::thread
+}  // namespace ark::os::thread

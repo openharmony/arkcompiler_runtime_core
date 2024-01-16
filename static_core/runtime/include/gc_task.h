@@ -20,7 +20,7 @@
 
 #include "runtime/include/mem/allocator.h"
 
-namespace panda {
+namespace ark {
 
 class ManagedThread;
 
@@ -99,6 +99,6 @@ private:
 std::ostream &operator<<(std::ostream &os, const GCTaskCause &cause);
 std::ostream &operator<<(std::ostream &os, const GCCollectionType &collectionType);
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_GC_TASK_H_

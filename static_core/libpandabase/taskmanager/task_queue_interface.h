@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <queue>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 class TaskQueueId {
 public:
@@ -130,6 +130,6 @@ private:
     std::atomic_uint8_t priority_;
 };
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_QUEUE_INTERFACE_H

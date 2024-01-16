@@ -17,7 +17,7 @@
 
 #include "optimizer/optimizations/scheduler.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class SchedulerTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -554,4 +554,4 @@ TEST_F(SchedulerTest, VolatileLoadObject)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

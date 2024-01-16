@@ -21,7 +21,7 @@
 #include "libpandabase/utils/bit_utils.h"
 #include "runtime/include/mem/panda_string.h"
 
-namespace panda {
+namespace ark {
 
 /* static */
 const uint8_t *ClassHelper::GetDescriptor(const uint8_t *name, PandaString *storage)
@@ -119,4 +119,4 @@ const uint8_t *ClassHelper::GetTypeDescriptor(const PandaString &name, PandaStri
     return utf::CStringAsMutf8(storage->c_str());
 }
 
-}  // namespace panda
+}  // namespace ark

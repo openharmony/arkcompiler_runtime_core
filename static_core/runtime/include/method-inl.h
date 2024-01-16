@@ -35,7 +35,7 @@
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/osr.h"
 
-namespace panda {
+namespace ark {
 
 inline void FrameDeleter::operator()(Frame *frame) const
 {
@@ -212,7 +212,7 @@ ValueT Method::InvokeInterpretedCode(ManagedThread *thread, uint32_t numActualAr
     Frame *currentFrame = thread->GetCurrentFrame();
     PandaUniquePtr<Frame, FrameDeleter> frame = InitFrame<InvokeHelper>(thread, numActualArgs, args, currentFrame);
     if (UNLIKELY(frame.get() == nullptr)) {
-        panda::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
+        ark::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
         return GetReturnValueFromException<InvokeHelper, ValueT>();
     }
 
@@ -298,7 +298,7 @@ inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const
 
     if (!Verify()) {
         auto ctx = Runtime::GetCurrent()->GetLanguageContext(*this);
-        panda::ThrowVerificationException(ctx, GetFullName());
+        ark::ThrowVerificationException(ctx, GetFullName());
         // 'res' is not a heap object.
         // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
         return res;
@@ -310,7 +310,7 @@ inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const
         interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(nregs, nregs, this, currentFrame),
         FrameDeleter(thread));
     if (UNLIKELY(frame.get() == nullptr)) {
-        panda::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
+        ark::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
         return res;
     }
 
@@ -339,7 +339,7 @@ Frame *Method::EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, 
     PandaUniquePtr<Frame, FrameDeleter> frame =
         InitFrameWithNumVRegs<InvokeHelper, ValueT, true>(thread, numVregs, numArgs, args, currentFrame);
     if (UNLIKELY(frame.get() == nullptr)) {
-        panda::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
+        ark::ThrowOutOfMemoryError("CreateFrame failed: " + GetFullName());
         return nullptr;
     }
 
@@ -525,7 +525,7 @@ inline bool Method::TryVerify()
     if (!IsIntrinsic() && (GetVerificationStage() != Method::VerificationStage::VERIFIED_OK)) {
         if (UNLIKELY(!Verify())) {
             auto ctx = Runtime::GetCurrent()->GetLanguageContext(*this);
-            panda::ThrowVerificationException(ctx, GetFullName());
+            ark::ThrowVerificationException(ctx, GetFullName());
             return false;
         }
     }
@@ -607,6 +607,6 @@ void Method::EnumerateExceptionHandlers(Callback callback) const
     });
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // !PANDA_RUNTIME_METHOD_INL_H_

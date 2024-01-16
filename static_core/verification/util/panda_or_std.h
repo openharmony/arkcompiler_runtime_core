@@ -23,7 +23,7 @@
 #include "runtime/include/mem/panda_smart_pointers.h"
 #endif
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 // Panda's allocator by default, standard allocator if Rapidcheck is enabled because it doesn't link Panda's libraries
 #ifdef PANDA_RAPIDCHECK
@@ -40,7 +40,7 @@ using MPandaUniquePtr = std::unique_ptr<T>;
 #define MMakePandaUnique std::make_unique
 #else
 template <typename T>
-using MPandaAllocator = panda::mem::AllocatorAdapter<T>;
+using MPandaAllocator = ark::mem::AllocatorAdapter<T>;
 
 template <typename T>
 using MPandaVector = PandaVector<T>;
@@ -51,6 +51,6 @@ using MPandaUniquePtr = PandaUniquePtr<T>;
 #define MMakePandaUnique MakePandaUnique
 #endif
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFICATION_UTIL_PANDA_OR_STD_H

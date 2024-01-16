@@ -19,11 +19,11 @@
 #include <map>
 #include "runtime_interface.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 class File;
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 
 class SharedSlowPathData {
@@ -130,6 +130,6 @@ private:
     std::map<std::pair<const File *, uint64_t>, int32_t> *gotCommon_;
     bool useCha_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_AOT_DATA_H

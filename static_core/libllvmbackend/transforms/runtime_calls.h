@@ -20,13 +20,13 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/IRBuilder.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class LLVMArkInterface;
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend::runtime_calls {
+namespace ark::llvmbackend::runtime_calls {
 
 llvm::Value *GetAddressToTLS(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset);
 llvm::Value *LoadTLSValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset,
@@ -44,6 +44,6 @@ llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Val
 llvm::Value *GetThreadRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface);
 llvm::Value *GetRealFrameRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface);
 
-}  // namespace panda::llvmbackend::runtime_calls
+}  // namespace ark::llvmbackend::runtime_calls
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_RUNTIME_CALLS_H

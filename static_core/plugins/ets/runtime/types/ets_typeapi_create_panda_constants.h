@@ -19,7 +19,7 @@
 #include <array>
 #include <string_view>
 
-namespace panda::ets::typeapi_create_consts {
+namespace ark::ets::typeapi_create_consts {
 inline constexpr std::string_view ATTR_ACCESS = "ets.access";
 inline constexpr std::string_view ATTR_ACCESS_VAL_PUBLIC = "public";
 inline constexpr std::string_view ATTR_ACCESS_VAL_PROTECTED = "protected";
@@ -51,6 +51,6 @@ inline constexpr std::string_view TYPE_TYPE_CREATOR_CTX =
 static_assert(TYPE_TYPE_CREATOR_CTX.back() != '.');
 
 inline constexpr std::string_view CREATOR_CTX_DATA_PREFIX = "TypeAPI$CtxData$";
-}  // namespace panda::ets::typeapi_create_consts
+}  // namespace ark::ets::typeapi_create_consts
 
 #endif  // PANDA_PLUGINS_ETS_TYPEAPI_CREATE_PANDA_CONSTANTS_H

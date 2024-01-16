@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 int Func(int x, int y)
 {
@@ -54,4 +54,4 @@ TEST_F(VerifierTest, callable)
     EXPECT_EQ(cal(3_I, 7_I), 15_I);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

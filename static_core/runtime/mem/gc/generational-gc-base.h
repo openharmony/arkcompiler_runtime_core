@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/include/mem/allocator.h"
 
-namespace panda::mem {
+namespace ark::mem {
 namespace test {
 class MemStatsGenGCTest;
 }  // namespace test
@@ -289,5 +289,5 @@ private:
     friend class test::MemStatsGenGCTest;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // RUNTIME_MEM_GC_GENERATIONAL_GC_BASE_H

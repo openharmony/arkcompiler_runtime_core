@@ -18,7 +18,7 @@
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/mem/pool_map.h"
 
-namespace panda::mem {
+namespace ark::mem {
 static constexpr size_t STACK_LIKE_ALLOCATOR_DEFAUL_MAX_SIZE = 48_MB;
 
 //                                          Allocation flow looks like that:
@@ -88,6 +88,6 @@ private:
     void *reservedEndAddr_ {nullptr};
     void *allocatedEndAddr_ {nullptr};
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_LIBPANDABASE_MEM_STACK_LIKE_ALLOCATOR_H

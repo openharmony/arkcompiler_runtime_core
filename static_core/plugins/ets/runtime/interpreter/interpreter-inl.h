@@ -29,7 +29,7 @@
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 
-namespace panda::ets {
+namespace ark::ets {
 template <class RuntimeIfaceT, bool IS_DYNAMIC, bool IS_DEBUG, bool IS_PROFILE_ENABLED>
 class InstructionHandler : public interpreter::InstructionHandler<RuntimeIfaceT, IS_DYNAMIC, IS_DEBUG> {
 public:
@@ -200,7 +200,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
+            auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -213,13 +213,13 @@ public:
 
             auto method = LookupGetterByName<panda_file::Type::TypeId::I32>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
                                           /* is_range= */ false, /* accept_acc= */ false,
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
                             " does not have field and getter with name " +
                             utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -244,7 +244,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
+            auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -257,13 +257,13 @@ public:
 
             auto method = LookupGetterByName<panda_file::Type::TypeId::I64>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
                                           /* is_range= */ false, /* accept_acc= */ false,
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
                             " does not have field and getter with name " +
                             utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -288,7 +288,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
+            auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -303,13 +303,13 @@ public:
 
             auto method = LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
                                           /* is_range= */ false, /* accept_acc= */ false,
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
                             " does not have field and getter with name " +
                             utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -334,7 +334,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
+            auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -347,13 +347,13 @@ public:
 
             auto method = LookupSetterByName<panda_file::Type::TypeId::I32>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
                                           /* is_range= */ false, /* accept_acc= */ false,
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
                             " does not have field and setter with name " +
                             utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -378,7 +378,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
+            auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -391,13 +391,13 @@ public:
 
             auto method = LookupSetterByName<panda_file::Type::TypeId::I64>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
                                           /* is_range= */ false, /* accept_acc= */ false,
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
                             " does not have field and setter with name " +
                             utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -422,7 +422,7 @@ public:
             RuntimeIfaceT::ThrowNullPointerException();
             this->MoveToExceptionHandler();
         } else {
-            auto klass = static_cast<panda::Class *>(obj->ClassAddr<panda::BaseClass>());
+            auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
             auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
@@ -437,13 +437,13 @@ public:
 
             auto method = LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<panda::interpreter::FrameHelperDefault, FORMAT,
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
                                           /* is_dynamic = */ false,
                                           /* is_range= */ false, /* accept_acc= */ false,
                                           /* initobj= */ false, /* call = */ false>(method);
                 return;
             }
-            auto errorMsg = "Class " + panda::ConvertToString(klass->GetName()) +
+            auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
                             " does not have field and setter with name " +
                             utf::Mutf8AsCString(rawField->GetName().data);
             ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -638,5 +638,5 @@ private:
         return method;
     }
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 #endif  // PLUGINS_ETS_INTERPRETER_INTERPRETER_INL_H

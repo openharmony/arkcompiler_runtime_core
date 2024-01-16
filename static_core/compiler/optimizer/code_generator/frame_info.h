@@ -20,7 +20,7 @@
 #include "libpandabase/utils/bit_field.h"
 #include "libpandabase/mem/mem.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class Encoder;
 class Graph;
@@ -151,6 +151,6 @@ private:
     int16_t fpCallersOffset_ {0};
     int16_t fpCalleesOffset_ {0};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_FRAME_INFO_H

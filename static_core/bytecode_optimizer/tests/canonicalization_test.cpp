@@ -16,7 +16,7 @@
 #include "canonicalization.h"
 #include "common.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -57,4 +57,4 @@ TEST_F(CommonTest, CanonicalizationSwapCompareInputs)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

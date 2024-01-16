@@ -33,7 +33,7 @@ Codegen Hi-Level implementation
 #include "libpandabase/utils/utils.h"
 #include <iomanip>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class OsrEntryStub {
     void FixIntervals(Codegen *codegen, Encoder *encoder)
@@ -1789,7 +1789,7 @@ void Codegen::FinalizeCall(CallInst *call)
 }
 
 template <typename T>
-static T GetBarrierOperandValue(RuntimeInterface *runtime, panda::mem::BarrierPosition position, std::string_view name)
+static T GetBarrierOperandValue(RuntimeInterface *runtime, ark::mem::BarrierPosition position, std::string_view name)
 {
     auto operand = runtime->GetBarrierOperand(position, name);
     return std::get<T>(operand.GetValue());
@@ -1869,10 +1869,10 @@ void Codegen::EncodePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool che
     }
 
     auto barrierType {GetRuntime()->GetPostType()};
-    ASSERT(barrierType == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-           barrierType == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
+    ASSERT(barrierType == ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+           barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER);
 
-    if (barrierType == panda::mem::BarrierType::POST_INTERREGION_BARRIER) {
+    if (barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER) {
         CreatePostInterRegionBarrier(inst, mem, reg1, reg2, checkObject);
     } else {
         auto base {mem.GetBase().As(refType)};
@@ -1921,11 +1921,11 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2)
 
     if (!GetGraph()->SupportsIrtocBarriers() || !GetGraph()->IsOfflineCompilationMode()) {
         auto barrierType = GetRuntime()->GetPostType();
-        if (barrierType == panda::mem::BarrierType::POST_WRB_NONE) {
+        if (barrierType == ark::mem::BarrierType::POST_WRB_NONE) {
             return;
         }
-        ASSERT(barrierType == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-               barrierType == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
+        ASSERT(barrierType == ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+               barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER);
     }
 
     // For dynamic methods, another check
@@ -2016,7 +2016,7 @@ void CheckObj(Encoder *enc, Codegen *cg, Reg base, Reg reg1, LabelHolder::LabelI
 
     ScopedTmpReg tmp(enc, cg->ConvertDataType(DataType::REFERENCE, cg->GetArch()));
     auto regionSizeBit = GetBarrierOperandValue<uint8_t>(
-        cg->GetRuntime(), panda::mem::BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS");
+        cg->GetRuntime(), ark::mem::BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS");
     enc->EncodeXor(tmp, base, reg1);
     enc->EncodeShr(tmp, tmp, Imm(regionSizeBit));
     enc->EncodeJump(skipLabel, tmp, Condition::EQ);
@@ -2116,7 +2116,7 @@ void Codegen::CreateOnlineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg
     auto enc {GetEncoder()};
 
     bool hasObj2 {reg2.IsValid() && reg1 != reg2};
-    if (GetRuntime()->GetPostType() == panda::mem::BarrierType::POST_INTERREGION_BARRIER) {
+    if (GetRuntime()->GetPostType() == ark::mem::BarrierType::POST_INTERREGION_BARRIER) {
         if (hasObj2) {
             CreateOnlineIrtocPostWrbRegionTwoRegs(inst, mem, reg1, reg2, checkObject);
         } else {
@@ -2141,7 +2141,7 @@ void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg
 {
     SCOPED_DISASM_STR(this, "Post IR-WRB");
     auto *enc = GetEncoder();
-    ASSERT(GetRuntime()->GetPostType() == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
+    ASSERT(GetRuntime()->GetPostType() == ark::mem::BarrierType::POST_INTERREGION_BARRIER);
     ASSERT(reg1 != INVALID_REGISTER);
 
     auto label = GetEncoder()->CreateLabel();
@@ -2150,8 +2150,8 @@ void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg
         CheckObject(reg1, label);
     }
 
-    auto regionSizeBit = GetBarrierOperandValue<uint8_t>(
-        GetRuntime(), panda::mem::BarrierPosition::BARRIER_POSITION_POST, "REGION_SIZE_BITS");
+    auto regionSizeBit = GetBarrierOperandValue<uint8_t>(GetRuntime(), ark::mem::BarrierPosition::BARRIER_POSITION_POST,
+                                                         "REGION_SIZE_BITS");
 
     auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, GetArch()))};
     ScopedTmpReg tmp(enc, ConvertDataType(DataType::REFERENCE, GetArch()));
@@ -2205,7 +2205,7 @@ void Codegen::CalculateCardIndex(Reg baseReg, ScopedTmpReg *tmp, ScopedTmpReg *t
     auto tmp1Type = tmp1->GetReg().GetType();
     auto *enc = GetEncoder();
     auto cardBits =
-        GetBarrierOperandValue<uint8_t>(GetRuntime(), panda::mem::BarrierPosition::BARRIER_POSITION_POST, "CARD_BITS");
+        GetBarrierOperandValue<uint8_t>(GetRuntime(), ark::mem::BarrierPosition::BARRIER_POSITION_POST, "CARD_BITS");
 
     ASSERT(baseReg != INVALID_REGISTER);
     if (baseReg.GetSize() < Reg(*tmp).GetSize()) {
@@ -2223,7 +2223,7 @@ void Codegen::CreatePostInterGenerationalBarrier(Reg base)
     SCOPED_DISASM_STR(this, "Post IG-WRB");
     auto runtime = GetRuntime();
     auto *enc = GetEncoder();
-    ASSERT(runtime->GetPostType() == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER);
+    ASSERT(runtime->GetPostType() == ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER);
     ScopedTmpReg tmp(enc);
     ScopedTmpReg tmp1(enc);
     // * load AddressOf(MIN_ADDR) -> min_addr
@@ -2231,7 +2231,7 @@ void Codegen::CreatePostInterGenerationalBarrier(Reg base)
         GetEncoder()->EncodeLdr(tmp, false, MemRef(ThreadReg(), runtime->GetTlsCardTableMinAddrOffset(GetArch())));
     } else {
         auto minAddress = reinterpret_cast<uintptr_t>(
-            GetBarrierOperandValue<void *>(runtime, panda::mem::BarrierPosition::BARRIER_POSITION_POST, "MIN_ADDR"));
+            GetBarrierOperandValue<void *>(runtime, ark::mem::BarrierPosition::BARRIER_POSITION_POST, "MIN_ADDR"));
         enc->EncodeMov(tmp, Imm(minAddress));
     }
     // * card_index = (AddressOf(obj.field) - min_addr) >> CARD_BITS   // shift right
@@ -2242,14 +2242,14 @@ void Codegen::CreatePostInterGenerationalBarrier(Reg base)
                                 MemRef(ThreadReg(), runtime->GetTlsCardTableAddrOffset(GetArch())));
     } else {
         auto cardTableAddr = reinterpret_cast<uintptr_t>(GetBarrierOperandValue<uint8_t *>(
-            runtime, panda::mem::BarrierPosition::BARRIER_POSITION_POST, "CARD_TABLE_ADDR"));
+            runtime, ark::mem::BarrierPosition::BARRIER_POSITION_POST, "CARD_TABLE_ADDR"));
         enc->EncodeMov(tmp1, Imm(cardTableAddr));
     }
     // * card_addr = card_table_addr + card_index
     enc->EncodeAdd(tmp, tmp1, tmp);
     // * store card_addr <- DIRTY_VAL
     auto dirtyVal =
-        GetBarrierOperandValue<uint8_t>(runtime, panda::mem::BarrierPosition::BARRIER_POSITION_POST, "DIRTY_VAL");
+        GetBarrierOperandValue<uint8_t>(runtime, ark::mem::BarrierPosition::BARRIER_POSITION_POST, "DIRTY_VAL");
 
     auto tmp1B = ConvertRegister(tmp1.GetReg().GetId(), DataType::INT8);
     enc->EncodeMov(tmp1B, Imm(dirtyVal));
@@ -4718,7 +4718,7 @@ void Codegen::CreateStringHashCode([[maybe_unused]] IntrinsicInst *inst, Reg dst
     auto entrypoint = GetRuntime()->IsCompressedStringsEnabled() ? EntrypointId::STRING_HASH_CODE_COMPRESSED
                                                                  : EntrypointId::STRING_HASH_CODE;
     auto strReg = src[FIRST_OPERAND];
-    auto mref = MemRef(strReg, panda::coretypes::String::GetHashcodeOffset());
+    auto mref = MemRef(strReg, ark::coretypes::String::GetHashcodeOffset());
     auto slowPath = CreateSlowPath<SlowPathStringHashCode>(inst, entrypoint);
     slowPath->SetDstReg(dst);
     slowPath->SetSrcReg(strReg);
@@ -5666,4 +5666,4 @@ Reg Codegen::ConvertInstTmpReg(const Inst *inst) const
     return ConvertInstTmpReg(inst, Is64BitsArch(GetArch()) ? DataType::INT64 : DataType::INT32);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -22,7 +22,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 constexpr uint64_t GC_WAIT_TIMEOUT = 500U;
 
@@ -89,6 +89,6 @@ private:
     const char *queueName_ = "GC queue ordered by time";
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_GC_QUEUE_H

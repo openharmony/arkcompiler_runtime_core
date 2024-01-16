@@ -23,7 +23,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "test_utils.h"
 
-namespace panda::test {
+namespace ark::test {
 class GCTriggerTest : public testing::Test {
 public:
     GCTriggerTest()
@@ -34,7 +34,7 @@ public:
         options.SetGcTriggerType("adaptive-heap-trigger");
 
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -129,7 +129,7 @@ TEST(SchedGCOnNthAllocTriggerTest, TestTrigger)
     options.SetGcTriggerType("debug-never");
     options.SetGcUseNthAllocTrigger(true);
     Runtime::Create(options);
-    ManagedThread *thread = panda::ManagedThread::GetCurrent();
+    ManagedThread *thread = ark::ManagedThread::GetCurrent();
     thread->ManagedCodeBegin();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     PandaVM *vm = Runtime::GetCurrent()->GetPandaVM();
@@ -162,7 +162,7 @@ TEST(PauseTimeGoalTriggerTest, TestTrigger)
     options.SetYoungSpaceSize(YOUNG_SIZE);
     options.SetInitYoungSpaceSize(YOUNG_SIZE);
     Runtime::Create(options);
-    auto *thread = panda::ManagedThread::GetCurrent();
+    auto *thread = ark::ManagedThread::GetCurrent();
     {
         ScopedManagedCodeThread s(thread);
         HandleScope<ObjectHeader *> scope(thread);
@@ -175,14 +175,14 @@ TEST(PauseTimeGoalTriggerTest, TestTrigger)
         GCChecker checker;
         vm->GetGC()->AddListener(&checker);
 
-        auto *pauseTimeGoalTrigger = static_cast<panda::mem::PauseTimeGoalTrigger *>(trigger);
+        auto *pauseTimeGoalTrigger = static_cast<ark::mem::PauseTimeGoalTrigger *>(trigger);
         constexpr size_t INIT_TARGET_FOOTPRINT = 1258291;
         ASSERT_EQ(INIT_TARGET_FOOTPRINT, pauseTimeGoalTrigger->GetTargetFootprint());
 
         constexpr size_t ARRAY_LENGTH = 5 * 32 * 1024;  // big enough to provoke several collections
         VMHandle<coretypes::String> dummy(thread, coretypes::String::CreateEmptyString(ctx, vm));
         VMHandle<coretypes::Array> array(
-            thread, panda::mem::ObjectAllocator::AllocArray(ARRAY_LENGTH, ClassRoot::ARRAY_STRING, false));
+            thread, ark::mem::ObjectAllocator::AllocArray(ARRAY_LENGTH, ClassRoot::ARRAY_STRING, false));
 
         size_t expectedCounter = 1;
         size_t startIdx = 0;
@@ -218,4 +218,4 @@ TEST(PauseTimeGoalTriggerTest, TestTrigger)
     }
     Runtime::Destroy();
 }
-}  // namespace panda::test
+}  // namespace ark::test

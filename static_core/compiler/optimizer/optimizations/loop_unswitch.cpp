@@ -20,7 +20,7 @@
 #include "optimizer/ir/loop_unswitcher.h"
 #include "loop_unswitch.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool LoopUnswitch::RunImpl()
 {
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Run " << GetPassName();
@@ -90,4 +90,4 @@ bool LoopUnswitch::TransformLoop(Loop *loop)
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

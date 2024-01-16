@@ -23,7 +23,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 struct LineTableEntry {
     uint32_t offset;
@@ -93,6 +93,6 @@ private:
     std::unordered_map<File::EntityId, MethodDebugInfo> methods_;
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_

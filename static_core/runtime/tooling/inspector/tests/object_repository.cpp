@@ -28,7 +28,7 @@
 
 // NOLINTBEGIN
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 
 static constexpr const char *g_source = R"(
     .record Test {}
@@ -47,7 +47,7 @@ protected:
         options.SetShouldInitializeIntrinsics(false);
         options.SetShouldLoadBootPandaFiles(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
 
         pandasm::Parser p;
@@ -82,12 +82,12 @@ protected:
     static constexpr int64_t I64_VALUE = 200000000000002;
     static constexpr double F64_VALUE = 6.547;
 
-    static panda::MTManagedThread *thread_;
+    static ark::MTManagedThread *thread_;
     static Method *methodFoo;
     static ObjectHeader *clsObject;
 };
 
-panda::MTManagedThread *ObjectRepositoryTest::thread_ = nullptr;
+ark::MTManagedThread *ObjectRepositoryTest::thread_ = nullptr;
 Method *ObjectRepositoryTest::methodFoo = nullptr;
 ObjectHeader *ObjectRepositoryTest::clsObject = nullptr;
 
@@ -173,6 +173,6 @@ TEST_F(ObjectRepositoryTest, S)
     ASSERT_THAT(ToObject(properties[1].ToJson()),
                 GetFrameObjectProperties("ref", testing::Pointee(GetObjectProperties(testing::_, testing::_, "1"))));
 }
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
 // NOLINTEND

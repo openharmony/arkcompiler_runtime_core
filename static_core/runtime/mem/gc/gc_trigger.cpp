@@ -24,7 +24,7 @@
 #include "runtime/mem/gc/gc_trigger.h"
 #include "utils/logger.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 static constexpr size_t PERCENT_100 = 100;
 
@@ -429,4 +429,4 @@ size_t PauseTimeGoalTrigger::ComputeTarget(size_t heapSizeBeforeGc, size_t heapS
     }
     return heapSize + std::max(delta, minExtraSize_);
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

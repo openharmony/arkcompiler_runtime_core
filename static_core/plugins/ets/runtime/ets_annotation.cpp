@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "runtime/include/method.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 /*static*/
 panda_file::File::EntityId EtsAnnotation::FindAsyncAnnotation(Method *method)
@@ -38,4 +38,4 @@ panda_file::File::EntityId EtsAnnotation::FindAsyncAnnotation(Method *method)
     return asyncAnnId;
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

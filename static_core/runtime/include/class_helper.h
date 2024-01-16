@@ -23,7 +23,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/object_header_config.h"
 
-namespace panda {
+namespace ark {
 
 // Small helper
 template <class Config>
@@ -212,6 +212,6 @@ Str ClassHelper::GetNameUndecorated(const uint8_t *descriptor)
     return result;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_KLASS_HELPER_H_

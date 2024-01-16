@@ -24,7 +24,7 @@
 
 #include <functional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 struct MethodOption {
     enum class InfoType { CONTEXT, REG_CHANGES, CFLOW, JOBFILL };
@@ -239,6 +239,6 @@ private:
     static VerifierMessageDefault messageDefaults_[];
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_DEBUG_OPTIONS_METHOD_OPTIONS_H_

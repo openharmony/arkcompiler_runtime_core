@@ -37,10 +37,10 @@
 #include "utils/utf.h"
 #include "bytecode_instruction-inl.h"
 
-namespace panda::test {
+namespace ark::test {
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda::pandasm;
+using namespace ark::pandasm;
 
 static const uint8_t *GetTypeDescriptor(const std::string &name, std::string *storage)
 {
@@ -1040,4 +1040,4 @@ TEST(emittertests, final_modifier)
     }
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

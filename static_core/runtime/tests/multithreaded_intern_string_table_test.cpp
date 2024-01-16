@@ -29,7 +29,7 @@
 #include <climits>
 #include <functional>
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 static constexpr uint32_t TEST_THREADS = 8;
 static constexpr uint32_t TEST_ITERS = 1000;
@@ -66,7 +66,7 @@ public:
     void SetUp() override
     {
         table_ = new StringTable();
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -135,7 +135,7 @@ public:
     std::mutex mutex;
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
 
     std::mutex preLock_;
     std::condition_variable preCv_;
@@ -152,7 +152,7 @@ private:
 void TestThreadEntry(MultithreadedInternStringTableTest *test)
 {
     auto *thisThread =
-        panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
+        ark::MTManagedThread::Create(ark::Runtime::GetCurrent(), ark::Runtime::GetCurrent()->GetPandaVM());
     thisThread->ManagedCodeBegin();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     // NOLINTNEXTLINE(readability-magic-numbers)
@@ -172,7 +172,7 @@ void TestConcurrentInsertion(const std::array<std::array<uint8_t, 4U>, TEST_ARRA
                              MultithreadedInternStringTableTest *test)
 {
     auto *thisThread =
-        panda::MTManagedThread::Create(panda::Runtime::GetCurrent(), panda::Runtime::GetCurrent()->GetPandaVM());
+        ark::MTManagedThread::Create(ark::Runtime::GetCurrent(), ark::Runtime::GetCurrent()->GetPandaVM());
     thisThread->ManagedCodeBegin();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto *table = test->GetTable();
@@ -227,4 +227,4 @@ TEST_F(MultithreadedInternStringTableTest, CheckInternReturnsSameString)
         threads[i].join();
     }
 }
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

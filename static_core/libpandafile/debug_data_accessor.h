@@ -20,7 +20,7 @@
 
 #include "utils/span.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class DebugInfoDataAccessor {
 public:
@@ -86,6 +86,6 @@ private:
     size_t size_ {0};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H_

@@ -21,13 +21,13 @@
 #include <map>
 #include "libpandabase/macros.h"
 
-namespace panda::os::unix::property {
+namespace ark::os::unix::property {
 
 static const char ARK_DFX_PROP[] = "ark.dfx.options";     // NOLINT(modernize-avoid-c-arrays)
 static const char ARK_TRACE_PROP[] = "ark.trace.enable";  // NOLINT(modernize-avoid-c-arrays)
 
 PANDA_PUBLIC_API bool GetPropertyBuffer(const char *arkProp, std::string &out);  // NOLINT(google-runtime-references)
 
-}  // namespace panda::os::unix::property
+}  // namespace ark::os::unix::property
 
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_PROP_H_

@@ -30,20 +30,20 @@
 #include "runtime/mem/heap_manager.h"
 #include "runtime/include/coretypes/tagged_value.h"
 
-namespace panda {
+namespace ark {
 class ManagedThread;
 class PandaVM;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 template <BytecodeInstruction::Format FORMAT, bool IS_DYNAMIC = false>
 class DimIterator;
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 class DynClass;
-using ArraySizeT = panda::ArraySizeT;
-using ArraySsizeT = panda::ArraySsizeT;
+using ArraySizeT = ark::ArraySizeT;
+using ArraySsizeT = ark::ArraySsizeT;
 
 class Array : public ObjectHeader {
 public:
@@ -55,17 +55,17 @@ public:
         return reinterpret_cast<Array *>(object);
     }
 
-    PANDA_PUBLIC_API static Array *Create(panda::Class *arrayClass, const uint8_t *data, ArraySizeT length,
-                                          panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT);
+    PANDA_PUBLIC_API static Array *Create(ark::Class *arrayClass, const uint8_t *data, ArraySizeT length,
+                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT);
 
-    PANDA_PUBLIC_API static Array *Create(panda::Class *arrayClass, ArraySizeT length,
-                                          panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT);
+    PANDA_PUBLIC_API static Array *Create(ark::Class *arrayClass, ArraySizeT length,
+                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT);
 
     PANDA_PUBLIC_API static Array *Create(DynClass *dynarrayclass, ArraySizeT length,
-                                          panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT);
+                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT);
 
-    static Array *CreateTagged(const PandaVM *vm, panda::BaseClass *arrayClass, ArraySizeT length,
-                               panda::SpaceType spaceType = panda::SpaceType::SPACE_TYPE_OBJECT,
+    static Array *CreateTagged(const PandaVM *vm, ark::BaseClass *arrayClass, ArraySizeT length,
+                               ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT,
                                TaggedValue initValue = TaggedValue::Undefined());
 
     static size_t ComputeSize(size_t elemSize, ArraySizeT length)
@@ -197,13 +197,13 @@ public:
         if constexpr (IS_DYN) {
             elemSize = TaggedValue::TaggedTypeSize();
         } else {  // NOLINT(readability-misleading-indentation)
-            elemSize = ClassAddr<panda::Class>()->GetComponentSize();
+            elemSize = ClassAddr<ark::Class>()->GetComponentSize();
         }
         return GetDataOffset() + idx * elemSize;
     }
 
     template <class DimIterator>
-    static Array *CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *klass, uint32_t nargs,
+    static Array *CreateMultiDimensionalArray(ManagedThread *thread, ark::Class *klass, uint32_t nargs,
                                               const DimIterator &iter, size_t dimIdx = 0);
 
 private:
@@ -225,10 +225,10 @@ static_assert(Array::GetDataOffset() % sizeof(uint64_t) == 0);
 
 #ifdef PANDA_TARGET_64
 constexpr uint32_t ARRAY_LENGTH_OFFSET = 8U;
-static_assert(ARRAY_LENGTH_OFFSET == panda::coretypes::Array::GetLengthOffset());
+static_assert(ARRAY_LENGTH_OFFSET == ark::coretypes::Array::GetLengthOffset());
 constexpr uint32_t ARRAY_DATA_OFFSET = 16U;
-static_assert(ARRAY_DATA_OFFSET == panda::coretypes::Array::GetDataOffset());
+static_assert(ARRAY_DATA_OFFSET == ark::coretypes::Array::GetDataOffset());
 #endif
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H_

@@ -21,7 +21,7 @@
 #include "runtime/include/class.h"
 #include "runtime/include/method.h"
 
-namespace panda {
+namespace ark {
 class RelayoutProfiler {
 public:
     enum RelayoutItemType { CLASS_ITEM, STRING_ITEM, CODE_ITEM };
@@ -59,5 +59,5 @@ private:
 using ProfileDataType =
     PandaUnorderedMap<PandaString,
                       PandaUnorderedMap<RelayoutProfiler::RelayoutItemType, PandaSet<PandaString>, std::hash<int>>>;
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_RELAYOUT_PROFILER_H

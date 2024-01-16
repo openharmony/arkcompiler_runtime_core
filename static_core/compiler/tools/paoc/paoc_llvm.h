@@ -20,22 +20,22 @@
 #include "llvm_options.h"
 #include "paoc.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LLVMAotBuilder;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::paoc {
+namespace ark::paoc {
 
 class PaocLLVM : public Paoc {
 protected:
     void AddExtraOptions(PandArgParser *parser) override
     {
-        panda::llvmbackend::g_options.AddOptions(parser);
+        ark::llvmbackend::g_options.AddOptions(parser);
     }
     void ValidateExtraOptions() override;
-    void Clear(panda::mem::InternalAllocatorPtr allocator) override;
+    void Clear(ark::mem::InternalAllocatorPtr allocator) override;
     LLVMCompilerStatus TryLLVM(CompilingContext *ctx) override;
-    void PrepareLLVM(const panda::Span<const char *> &args) override;
+    void PrepareLLVM(const ark::Span<const char *> &args) override;
     bool EndLLVM() override;
 
     std::unique_ptr<compiler::AotBuilder> CreateAotBuilder() override;
@@ -49,5 +49,5 @@ private:
     std::unique_ptr<llvmbackend::CompilerInterface> llvmAotCompiler_ {nullptr};
 };
 
-}  // namespace panda::paoc
+}  // namespace ark::paoc
 #endif  // PANDA_PAOC_LLVM_H

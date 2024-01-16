@@ -18,7 +18,7 @@
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_graph_coloring.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RegAllocCommonTest : public GraphTest {
 public:
     template <typename Checker>
@@ -332,4 +332,4 @@ TEST_F(RegAllocCommonTest, TempRegisters)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

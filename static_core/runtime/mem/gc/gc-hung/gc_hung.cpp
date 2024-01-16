@@ -29,7 +29,7 @@
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/type_converter.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /*
  * If the macro HUNG_SYSTEM_SERVER_ONLY was defined, the module only
@@ -335,4 +335,4 @@ GcHung *GcHung::Current()
     return instance_;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

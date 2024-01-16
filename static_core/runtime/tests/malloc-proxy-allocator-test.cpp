@@ -21,7 +21,7 @@
 #include "runtime/mem/malloc-proxy-allocator-inl.h"
 #include "runtime/tests/allocator_test_base.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 using MallocProxyNonObjectAllocator = MallocProxyAllocator<EmptyAllocConfigWithCrossingMap>;
 
@@ -95,4 +95,4 @@ TEST_F(MallocProxyAllocatorTest, AdapterTest)
     delete memStats;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

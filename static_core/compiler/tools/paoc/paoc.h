@@ -23,12 +23,12 @@
 #include "utils/expected.h"
 #include "utils/span.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 class SharedSlowPathData;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::paoc {
+namespace ark::paoc {
 
 struct SkipInfo {
     bool isFirstCompiled;
@@ -39,7 +39,7 @@ enum class PaocMode : uint8_t { AOT, JIT, OSR, LLVM };
 
 class Paoc {
 public:
-    int Run(const panda::Span<const char *> &args);
+    int Run(const ark::Span<const char *> &args);
 
 protected:
     enum class LLVMCompilerStatus { FALLBACK = 0, COMPILED = 1, SKIP = 2, ERROR = 3 };
@@ -53,13 +53,13 @@ protected:
         void DumpStatistics() const;
 
     public:
-        Method *method {nullptr};                   // NOLINT(misc-non-private-member-variables-in-classes)
-        panda::ArenaAllocator allocator;            // NOLINT(misc-non-private-member-variables-in-classes)
-        panda::ArenaAllocator graphLocalAllocator;  // NOLINT(misc-non-private-member-variables-in-classes)
-        panda::compiler::Graph *graph {nullptr};    // NOLINT(misc-non-private-member-variables-in-classes)
-        size_t index;                               // NOLINT(misc-non-private-member-variables-in-classes)
-        std::ofstream *stats {nullptr};             // NOLINT(misc-non-private-member-variables-in-classes)
-        bool compilationStatus {true};              // NOLINT(misc-non-private-member-variables-in-classes)
+        Method *method {nullptr};                 // NOLINT(misc-non-private-member-variables-in-classes)
+        ark::ArenaAllocator allocator;            // NOLINT(misc-non-private-member-variables-in-classes)
+        ark::ArenaAllocator graphLocalAllocator;  // NOLINT(misc-non-private-member-variables-in-classes)
+        ark::compiler::Graph *graph {nullptr};    // NOLINT(misc-non-private-member-variables-in-classes)
+        size_t index;                             // NOLINT(misc-non-private-member-variables-in-classes)
+        std::ofstream *stats {nullptr};           // NOLINT(misc-non-private-member-variables-in-classes)
+        bool compilationStatus {true};            // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
     virtual std::unique_ptr<compiler::AotBuilder> CreateAotBuilder()
@@ -68,12 +68,12 @@ protected:
     }
 
 private:
-    void RunAotMode(const panda::Span<const char *> &args);
+    void RunAotMode(const ark::Span<const char *> &args);
     void StartAotFile(const panda_file::File &pfileRef);
     bool CompileFiles();
     bool CompilePandaFile(const panda_file::File &pfileRef);
-    panda::Class *ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId);
-    bool PossibleToCompile(const panda_file::File &pfileRef, const panda::Class *klass,
+    ark::Class *ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId);
+    bool PossibleToCompile(const panda_file::File &pfileRef, const ark::Class *klass,
                            panda_file::File::EntityId classId);
     bool Compile(Class *klass, const panda_file::File &pfileRef);
 
@@ -85,7 +85,7 @@ private:
     bool CompileAot(CompilingContext *ctx);
     bool FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t codeAddress);
     void PrintError(const std::string &error);
-    void PrintUsage(const panda::PandArgParser &paParser);
+    void PrintUsage(const ark::PandArgParser &paParser);
     bool IsMethodInList(const std::string &methodFullName);
     bool Skip(Method *method);
     static std::string GetFileLocation(const panda_file::File &pfileRef, std::string location);
@@ -110,7 +110,7 @@ protected:
     virtual void AddExtraOptions([[maybe_unused]] PandArgParser *parser) {}
     virtual void ValidateExtraOptions() {}
 
-    panda::paoc::Options *GetPaocOptions()
+    ark::paoc::Options *GetPaocOptions()
     {
         return paocOptions_.get();
     }
@@ -130,8 +130,8 @@ protected:
         return mode_ == PaocMode::LLVM;
     }
 
-    virtual void Clear(panda::mem::InternalAllocatorPtr allocator);
-    virtual void PrepareLLVM([[maybe_unused]] const panda::Span<const char *> &args)
+    virtual void Clear(ark::mem::InternalAllocatorPtr allocator);
+    virtual void PrepareLLVM([[maybe_unused]] const ark::Span<const char *> &args)
     {
         LOG(FATAL, COMPILER) << "--paoc-mode=llvm is not supported in this configuration";
     }
@@ -149,8 +149,8 @@ protected:
     std::unique_ptr<compiler::AotBuilder> aotBuilder_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
-    std::unique_ptr<panda::RuntimeOptions> runtimeOptions_ {nullptr};
-    std::unique_ptr<panda::paoc::Options> paocOptions_ {nullptr};
+    std::unique_ptr<ark::RuntimeOptions> runtimeOptions_ {nullptr};
+    std::unique_ptr<ark::paoc::Options> paocOptions_ {nullptr};
 
     compiler::RuntimeInterface *runtime_ {nullptr};
 
@@ -172,5 +172,5 @@ private:
     std::ofstream statisticsDump_;
 };
 
-}  // namespace panda::paoc
+}  // namespace ark::paoc
 #endif  // PANDA_PAOC_H

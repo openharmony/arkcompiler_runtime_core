@@ -25,7 +25,7 @@
 #include <vector>
 #include <list>
 
-namespace panda {
+namespace ark {
 
 class BytecodeEmitter;
 
@@ -125,6 +125,6 @@ private:
     std::list<uint32_t> pcList_;
     std::vector<uint8_t> bytecode_;
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // BYTECODE_EMITTER_H

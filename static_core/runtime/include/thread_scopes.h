@@ -18,7 +18,7 @@
 
 #include "mtmanaged_thread.h"
 
-namespace panda {
+namespace ark {
 
 class PANDA_PUBLIC_API ScopedNativeCodeThread {
 public:
@@ -83,6 +83,6 @@ private:
     NO_MOVE_SEMANTIC(ScopedChangeThreadStatus);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_THREAD_SCOPES_H_

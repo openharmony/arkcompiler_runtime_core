@@ -24,7 +24,7 @@
 #include <cmath>
 #include <functional>
 
-namespace panda {
+namespace ark {
 
 namespace mem {
 class GCRoot;
@@ -292,7 +292,7 @@ inline ObjectStatus GCKillEmAllVisitor([[maybe_unused]] const ObjectHeader *mem)
     return ObjectStatus::DEAD_OBJECT;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 // If the OS has this macro, do not redefine it.
 #ifndef PAGE_SIZE

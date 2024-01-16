@@ -21,13 +21,13 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class InternalAllocatorTest : public testing::Test {
 public:
     InternalAllocatorTest()
     {
-        panda::mem::MemConfig::Initialize(0, MEMORY_POOL_SIZE, 0, 0, 0, 0);
+        ark::mem::MemConfig::Initialize(0, MEMORY_POOL_SIZE, 0, 0, 0, 0);
         PoolManager::Initialize();
         memStats_ = new mem::MemStatsType();
         allocator_ = new InternalAllocatorT<InternalAllocatorConfig::PANDA_ALLOCATORS>(memStats_);
@@ -37,7 +37,7 @@ public:
     {
         delete static_cast<Allocator *>(allocator_);
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
         delete memStats_;
     }
 
@@ -258,4 +258,4 @@ TEST_F(InternalAllocatorTest, MoveContainerTest)
     allocator_->Delete(dequeTmp);
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

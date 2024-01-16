@@ -32,7 +32,7 @@
 
 // NOLINTBEGIN
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 template <typename PropertyType>
 constexpr const char *PropertyTypeName();
 
@@ -199,9 +199,9 @@ auto JsonElementsAreArray(const Container<testing::Matcher<PropertyType>, Param.
 
     return ElementsAreArray(elements);
 }
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
-namespace panda {
+namespace ark {
 std::ostream &operator<<(std::ostream &os, const JsonObject::Value &value);
 
 inline std::ostream &operator<<(std::ostream &os, const JsonObject &object)
@@ -255,7 +255,7 @@ inline std::ostream &operator<<(std::ostream &os, const JsonObject::Value &value
 
     UNREACHABLE();
 }
-}  // namespace panda
+}  // namespace ark
 
 // NOLINTEND
 

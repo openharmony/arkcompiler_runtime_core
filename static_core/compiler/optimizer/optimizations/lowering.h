@@ -22,7 +22,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class Lowering : public Optimization, public GraphVisitor {
     using Optimization::Optimization;
@@ -407,6 +407,6 @@ private:
 private:
     SaveStateBridgesBuilder ssb_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOWERING_H

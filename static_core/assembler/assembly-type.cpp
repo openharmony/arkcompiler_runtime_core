@@ -17,7 +17,7 @@
 
 #include "assembly-type.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static std::unordered_map<std::string_view, std::string_view> g_primitiveTypes = {
@@ -132,9 +132,9 @@ Type Type::FromName(std::string_view name, bool ignorePrimitive)
 }
 
 /* static */
-bool Type::IsStringType(const std::string &name, panda::panda_file::SourceLang lang)
+bool Type::IsStringType(const std::string &name, ark::panda_file::SourceLang lang)
 {
-    auto stringType = Type::FromDescriptor(panda::panda_file::GetStringClassDescriptor(lang));
+    auto stringType = Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(lang));
     return name == stringType.GetName();
 }
 
@@ -145,4 +145,4 @@ bool Type::IsPandaPrimitiveType(const std::string &name)
     return it != g_primitiveTypes.cend();
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

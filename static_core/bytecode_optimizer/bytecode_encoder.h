@@ -20,7 +20,7 @@
 
 #include "compiler/optimizer/code_generator/encode.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 class BytecodeEncoder final : public compiler::Encoder {
 public:
     explicit BytecodeEncoder(ArenaAllocator *allocator) : Encoder(allocator, Arch::NONE) {}
@@ -66,6 +66,6 @@ public:
         return false;
     }
 };  // BytecodeEncoder
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPTIMIZER_BYTECODE_ENCODER_H

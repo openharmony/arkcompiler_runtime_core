@@ -17,7 +17,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/inst.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool ObjectTypePropagation::RunImpl()
 {
     VisitGraph();
@@ -193,4 +193,4 @@ ObjectTypeInfo ObjectTypePropagation::GetPhiTypeInfo(Inst *inst)
     return typeInfo;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

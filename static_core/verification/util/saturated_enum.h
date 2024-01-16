@@ -20,7 +20,7 @@
 
 #include <utility>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 /*
  NOTE: default value?
@@ -164,6 +164,6 @@ protected:
     }
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_UTIL_SATURATED_ENUM_H__

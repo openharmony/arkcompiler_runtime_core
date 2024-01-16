@@ -19,7 +19,7 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/math_helpers.h"
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 namespace testing {
 class ItemsPoolTest;
@@ -139,6 +139,6 @@ private:
     friend testing::ItemsPoolTest;
 };
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H_

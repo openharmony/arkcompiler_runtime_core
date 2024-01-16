@@ -28,7 +28,7 @@
 
 #include "plugins_defines.h"
 
-namespace panda {
+namespace ark {
 // NOLINTBEGIN(hicpp-no-assembler)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -40,4 +40,4 @@ namespace panda {
 #include "asm_defines.def"
 // NOLINTEND(hicpp-no-assembler)
 
-}  // namespace panda
+}  // namespace ark

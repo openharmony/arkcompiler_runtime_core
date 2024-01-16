@@ -19,7 +19,7 @@
 #include "types/ets_field.h"
 #include "types/ets_string.h"
 
-namespace panda::ets::intrinsics::helpers {
+namespace ark::ets::intrinsics::helpers {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define RETURN_IF_CONVERSION_END(p, end, result) \
@@ -363,4 +363,4 @@ double GetStdDoubleArgument(ObjectHeader *obj)
     return obj->GetFieldPrimitive<double>(offset);
 }
 
-}  // namespace panda::ets::intrinsics::helpers
+}  // namespace ark::ets::intrinsics::helpers

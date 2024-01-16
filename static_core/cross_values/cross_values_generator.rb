@@ -23,7 +23,7 @@ HEADER = %{
 #define CROSS_VALUES_GENERATED_VALUES_#{ARGV[2]}_VALUES_GEN_H
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-namespace panda::cross_values::#{ARGV[2]} \{
+namespace ark::cross_values::#{ARGV[2]} \{
 
 }
 
@@ -36,7 +36,7 @@ def generate(input_file, output_file)
   defines.sort_by(&:first).each do |define|
     output += "static constexpr ptrdiff_t #{define[0]}_VAL = #{define[1]};\n"
   end
-  output +=  "}  // namespace panda::cross_values::#{ARGV[2]}\n\n"
+  output +=  "}  // namespace ark::cross_values::#{ARGV[2]}\n\n"
   output +=  "#endif  // CROSS_VALUES_GENERATED_VALUES_#{ARGV[2]}_VALUES_GEN_H\n"
 
   File.open(output_file, "w") do |file|

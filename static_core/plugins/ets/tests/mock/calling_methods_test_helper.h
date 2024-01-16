@@ -22,7 +22,7 @@
 #include "plugins/ets/tests/mock/mock_test_helper.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class CallingMethodsTestBase : public MockEtsNapiTestBaseClass {
 protected:
@@ -254,6 +254,6 @@ protected:
 }
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 #endif  // PANDA_PLUGINS_ETS_TESTS_MOCK_CALLING_METHODS_TEST_HELPER_H

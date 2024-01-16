@@ -31,7 +31,7 @@
 #endif
 #endif
 
-namespace panda::compiler {
+namespace ark::compiler {
 InlineIntrinsics::InlineIntrinsics(Graph *graph)
     : Optimization(graph),
       types_ {graph->GetLocalAllocator()->Adapter()},
@@ -208,4 +208,4 @@ bool InlineIntrinsics::TryInline(IntrinsicInst *intrinsic)
     return false;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

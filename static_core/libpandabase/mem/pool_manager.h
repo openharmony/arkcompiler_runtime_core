@@ -19,7 +19,7 @@
 #include "mmap_mem_pool.h"
 #include "arena-inl.h"
 
-namespace panda {
+namespace ark {
 enum class PoolType { MALLOC, MMAP };
 
 class PoolManager {
@@ -44,6 +44,6 @@ private:
     static MmapMemPool *mmapMemPool_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_POOL_MANAGER_H

@@ -22,9 +22,9 @@ namespace llvm {
 class MachineFunctionPass;
 }  // namespace llvm
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 class LLVMArkInterface;
 llvm::MachineFunctionPass *CreateFrameLoweringPass(LLVMArkInterface *arkInterface);
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  //  LIBLLVMBACKEND_TRANSFORMS_PASSES_ARK_FRAME_LOWERING_FRAME_LOWERING_H

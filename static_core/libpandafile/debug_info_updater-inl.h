@@ -21,7 +21,7 @@
 #include "debug_data_accessor-inl.h"
 #include "line_number_program.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 /* T is a CRTP with following methods:
  *   StringItem *GetOrCreateStringItem(const std::string &s)
@@ -254,6 +254,6 @@ private:
         return static_cast<T *>(this);
     }
 };
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_DEBUG_INFO_UPDATER_INL_H_

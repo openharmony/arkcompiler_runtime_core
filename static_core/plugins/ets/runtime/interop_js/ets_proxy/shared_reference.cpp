@@ -21,7 +21,7 @@
 
 #include <node_api.h>
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 static void CBDoNothing([[maybe_unused]] napi_env env, [[maybe_unused]] void *data, [[maybe_unused]] void *hint) {}
 
@@ -119,4 +119,4 @@ void SharedReference::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
     ctx->GetSharedRefStorage()->RemoveReference(sharedRef);
 }
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy

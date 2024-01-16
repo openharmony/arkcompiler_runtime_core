@@ -26,7 +26,7 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/ManagedStatic.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class LLVMCompiler : public CompilerInterface {
 public:
@@ -39,11 +39,11 @@ public:
 
 protected:
     bool IsInliningDisabled();
-    bool IsInliningDisabled(panda::compiler::Graph *graph);
+    bool IsInliningDisabled(ark::compiler::Graph *graph);
 
     bool IsInliningDisabled(compiler::RuntimeInterface *runtime, compiler::RuntimeInterface::MethodPtr method);
 
-    panda::llvmbackend::LLVMCompilerOptions InitializeLLVMCompilerOptions();
+    ark::llvmbackend::LLVMCompilerOptions InitializeLLVMCompilerOptions();
     void InitializeDefaultLLVMOptions();
     void InitializeLLVMOptions();
 
@@ -69,5 +69,5 @@ private:
     Arch arch_;
     llvm::LLVMContext context_;
 };
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_COMPILER_H

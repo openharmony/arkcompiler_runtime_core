@@ -49,7 +49,7 @@
     ASSERT_DO((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPassVisitor(v);)
 // --------------------------------------------------------------
 
-namespace panda::compiler {
+namespace ark::compiler {
 inline std::ostream &operator<<(std::ostream &os, const std::initializer_list<Opcode> &opcs)
 {
     os << "[ ";
@@ -498,7 +498,7 @@ private:
     int loadUndefinedInstCounter_ = 0;
     std::string passName_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #undef ASSERT_DO_EXT
 #undef ASSERT_DO_EXT_VISITOR

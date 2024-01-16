@@ -21,7 +21,7 @@
 
 #include <ctime>
 
-namespace panda::os::memory {
+namespace ark::os::memory {
 
 std::atomic_bool Mutex::no_check_for_deadlock_ = false;
 
@@ -209,4 +209,4 @@ bool ConditionVariable::TimedWait(Mutex *mutex, uint64_t ms, uint64_t ns, bool i
     return false;
 }
 
-}  // namespace panda::os::memory
+}  // namespace ark::os::memory

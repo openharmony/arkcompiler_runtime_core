@@ -21,7 +21,7 @@
 #include "optimizer/ir/inst.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RegAllocBase;
 
 /*
@@ -142,6 +142,6 @@ private:
 
 #include "optimizer/ir/visitor.inc"
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SPILL_FILLS_RESOLVER_H

@@ -20,7 +20,7 @@
 #include <ostream>
 #include <vector>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 enum class TaskStatisticsImplType : uint8_t { SIMPLE, FINE_GRAINED, LOCK_FREE };
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, TaskStatisticsImplType type);
@@ -99,6 +99,6 @@ protected:
     std::vector<TaskProperties> allTaskProperties_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_STATISTICS_TASK_STATISTICS_H

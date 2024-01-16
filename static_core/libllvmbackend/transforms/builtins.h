@@ -19,11 +19,11 @@
 #include <llvm/ADT/Triple.h>
 #include <llvm/IR/IRBuilder.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 class LLVMArkInterface;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend::builtins {
+namespace ark::llvmbackend::builtins {
 llvm::Function *LenArray(llvm::Module *module);
 llvm::Function *LoadClass(llvm::Module *module);
 llvm::Function *LoadInitClass(llvm::Module *module);
@@ -32,7 +32,7 @@ llvm::Function *PostWRB(llvm::Module *module);
 llvm::Function *LoadString(llvm::Module *module);
 llvm::Function *ResolveVirtual(llvm::Module *module);
 llvm::Value *LowerBuiltin(llvm::IRBuilder<> *builder, llvm::CallInst *inst,
-                          panda::llvmbackend::LLVMArkInterface *arkInterface);
+                          ark::llvmbackend::LLVMArkInterface *arkInterface);
 constexpr auto BUILTIN_SECTION = ".builtins";
 constexpr auto LEN_ARRAY_BUILTIN = "__builtin_lenarray";
 constexpr auto LOAD_CLASS_BUILTIN = "__builtin_load_class";
@@ -42,6 +42,6 @@ constexpr auto PRE_WRB_GCADR_BUILTIN = "__builtin_pre_wrb_gcadr";
 constexpr auto POST_WRB_BUILTIN = "__builtin_post_wrb";
 constexpr auto LOAD_STRING_BUILTIN = "__builtin_load_string";
 constexpr auto RESOLVE_VIRTUAL_BUILTIN = "__builtin_resolve_virtual";
-}  // namespace panda::llvmbackend::builtins
+}  // namespace ark::llvmbackend::builtins
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_BUILTINS_H

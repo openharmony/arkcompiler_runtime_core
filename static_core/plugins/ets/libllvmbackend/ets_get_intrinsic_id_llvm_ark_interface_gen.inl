@@ -15,8 +15,8 @@
 
 LLVMArkInterface::IntrinsicId LLVMArkInterface::GetEtsIntrinsicId(const llvm::Instruction *inst) const
 {
-    if (static_cast<panda::SourceLanguage>(sourceLanguages_.lookup(inst->getParent()->getParent())) !=
-        panda::SourceLanguage::ETS) {
+    if (static_cast<ark::SourceLanguage>(sourceLanguages_.lookup(inst->getParent()->getParent())) !=
+        ark::SourceLanguage::ETS) {
         return NO_INTRINSIC_ID_CONTINUE;
     }
 

@@ -19,7 +19,7 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *g_testBinFileName = "RegisterNativeAllocationTest.abc";
 
@@ -64,7 +64,7 @@ TEST_F(RegisterNativeAllocationTest, testNativeAllocation)
 
     size_t heapFreedBeforeMethod;
     {
-        panda::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
+        ark::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
         heapFreedBeforeMethod = memStats->GetFreedHeap();
     }
 
@@ -74,13 +74,13 @@ TEST_F(RegisterNativeAllocationTest, testNativeAllocation)
 
     size_t heapFreedAfterMethod;
     {
-        panda::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
+        ark::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env_));
         heapFreedAfterMethod = memStats->GetFreedHeap();
     }
 
     ASSERT_GT(heapFreedAfterMethod, heapFreedBeforeMethod);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)

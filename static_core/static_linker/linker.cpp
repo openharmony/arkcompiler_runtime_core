@@ -38,7 +38,7 @@ void PrintTime(std::ostream &o, uint64_t micros)
 
 }  // namespace
 
-namespace panda::static_linker {
+namespace ark::static_linker {
 Config DefaultConfig()
 {
     return Config {};
@@ -145,4 +145,4 @@ std::ostream &operator<<(std::ostream &o, const Result::Stats &s)
     return o;
 }
 
-}  // namespace panda::static_linker
+}  // namespace ark::static_linker

@@ -13,7 +13,7 @@
 
 module:
   name: runtime
-  namespace: panda
+  namespace: ark
 
 options:
 - name: boot-panda-files

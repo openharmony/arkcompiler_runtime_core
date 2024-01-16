@@ -22,7 +22,7 @@
 #include "runtime/include/runtime_options.h"
 #include "libpandabase/utils/pandargs.h"
 
-namespace panda::test {
+namespace ark::test {
 class RuntimeOptionsTestBase : public testing::Test {
 public:
     NO_COPY_SEMANTIC(RuntimeOptionsTestBase);
@@ -39,7 +39,7 @@ public:
 
     void TearDown() override {}
 
-    panda::PandArgParser *GetParser()
+    ark::PandArgParser *GetParser()
     {
         return &paParser_;
     }
@@ -64,9 +64,9 @@ private:
     virtual void LoadCorrectOptionsList() = 0;
 
     RuntimeOptions runtimeOptions_;
-    panda::PandArgParser paParser_;
+    ark::PandArgParser paParser_;
     std::vector<std::string> correctOptionsList_;
 };
-}  // namespace panda::test
+}  // namespace ark::test
 
 #endif  // PANDA_RUNTIME_TESTS_OPTIONS_TEST_BASE_H

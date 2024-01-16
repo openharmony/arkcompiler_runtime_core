@@ -22,7 +22,7 @@
 #include "libpandafile/method_data_accessor-inl.h"
 #include "compiler/optimizer/ir/constants.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 class BytecodeOptIrInterface {
 public:
     explicit BytecodeOptIrInterface(const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
@@ -147,6 +147,6 @@ private:
     const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps_ {nullptr};
     std::unordered_map<size_t, pandasm::Ins *> pcInsMap_;
 };
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_IR_INTERFACE_H

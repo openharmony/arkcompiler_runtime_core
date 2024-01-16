@@ -22,7 +22,7 @@
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class OptimizeMemoryBarriers : public Optimization, public GraphVisitor {
 public:
@@ -102,6 +102,6 @@ private:
     InstVector barriersInsts_;
     bool isApplied_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  //  COMPILER_OPTIMIZER_OPTIMIZATIONS_MEMORY_BARRIERS_H

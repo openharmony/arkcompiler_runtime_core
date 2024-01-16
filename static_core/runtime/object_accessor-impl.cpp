@@ -22,7 +22,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda {
+namespace ark {
 
 /* static */
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
@@ -64,6 +64,6 @@ inline
     return thread->GetPostBarrierType();
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP_

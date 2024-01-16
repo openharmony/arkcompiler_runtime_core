@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 EtsTypeAPIField *EtsTypeAPIField::Create(EtsCoroutine *etsCoroutine)
 {
@@ -26,4 +26,4 @@ EtsTypeAPIField *EtsTypeAPIField::Create(EtsCoroutine *etsCoroutine)
     return reinterpret_cast<EtsTypeAPIField *>(etsObject);
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

@@ -68,7 +68,7 @@
  *  * num_locals + num_temps + num_max_range_input is stored to graph with SetStackSlotsCount
  */
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 struct RegContent {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     compiler::Register reg;
@@ -93,9 +93,9 @@ using RegContentVec = ArenaVector<std::pair<compiler::Register, RegContent>>;
 
 enum class RegEncoderState { IDLE, RENUMBER_ARGS, RESERVE_TEMPS, INSERT_SPILLS };
 
-using panda::compiler::BasicBlock;
-using panda::compiler::Inst;
-using panda::compiler::Opcode;
+using ark::compiler::BasicBlock;
+using ark::compiler::Inst;
+using ark::compiler::Opcode;
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class RegEncoder : public compiler::Optimization, public compiler::GraphVisitor {
@@ -211,6 +211,6 @@ private:
 
     bool success_ {true};
 };
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_REG_ENCODER_H

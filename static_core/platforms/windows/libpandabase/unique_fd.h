@@ -18,7 +18,7 @@
 
 #include "libpandabase/macros.h"
 
-namespace panda::os::unique_fd {
+namespace ark::os::unique_fd {
 
 inline int DupCloexec([[maybe_unused]] int fd)
 {
@@ -26,6 +26,6 @@ inline int DupCloexec([[maybe_unused]] int fd)
     UNREACHABLE();
 }
 
-}  // namespace panda::os::unique_fd
+}  // namespace ark::os::unique_fd
 
 #endif  // PANDA_LIBPANDABASE_OS_WINDOWS_UNIQUE_FD_H_

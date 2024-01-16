@@ -29,7 +29,7 @@
 #error "Wrong build type, please add VIXL in build"
 #endif  // USE_VIXL_ARM32
 
-namespace panda::compiler::aarch32 {
+namespace ark::compiler::aarch32 {
 constexpr uint32_t AVAILABLE_DOUBLE_WORD_REGISTERS = 4;
 
 static inline constexpr const uint8_t UNDEF_REG = std::numeric_limits<uint8_t>::max();
@@ -456,7 +456,7 @@ public:
 
     static constexpr auto GetTarget()
     {
-        return panda::compiler::Target(Arch::AARCH32);
+        return ark::compiler::Target(Arch::AARCH32);
     }
 
     void SetMaxAllocatedBytes(size_t size) override
@@ -867,7 +867,7 @@ public:
 
     static constexpr auto GetTarget()
     {
-        return panda::compiler::Target(Arch::AARCH32);
+        return ark::compiler::Target(Arch::AARCH32);
     }
 
     bool IsValid() const override
@@ -906,6 +906,6 @@ private:
     uint8_t PushRegs(RegMask regs, VRegMask vregs, bool isCallee);
     uint8_t PopRegs(RegMask regs, VRegMask vregs, bool isCallee);
 };  // Aarch32CallingConvention
-}  // namespace panda::compiler::aarch32
+}  // namespace ark::compiler::aarch32
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH32_TARGET_H

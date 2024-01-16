@@ -19,7 +19,7 @@
 namespace OHOS {
 void OpenPandaFileFromMemoryFuzzTest(const uint8_t *data, size_t size)
 {
-    panda::panda_file::OpenPandaFileFromMemory(data, size);
+    ark::panda_file::OpenPandaFileFromMemory(data, size);
 }
 }  // namespace OHOS
 

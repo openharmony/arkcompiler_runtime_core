@@ -16,7 +16,7 @@
 #include "codegen_boundary.h"
 #include "utils/cframe_layout.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 static void PushStackRegister(Encoder *encoder, Target target, Reg threadReg, size_t tlsFrameOffset)
 {
@@ -196,4 +196,4 @@ void CodegenBoundary::RemoveBoundaryFrame(const BasicBlock *bb) const
                            MemRef(GetTarget().GetStackReg(), FP_OFFSET * GetTarget().WordSize()));
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

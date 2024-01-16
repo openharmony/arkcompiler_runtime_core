@@ -20,10 +20,10 @@
 #include "runtime/include/thread.h"
 #include "runtime/interpreter/frame.h"
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh = false);
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_H_

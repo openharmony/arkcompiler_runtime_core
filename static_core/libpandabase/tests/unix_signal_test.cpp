@@ -16,21 +16,21 @@
 #include <gtest/gtest.h>
 #include "platforms/unix/libpandabase/signal.h"
 
-namespace panda::os::unix {
+namespace ark::os::unix {
 
-bool operator==(const ::panda::os::unix::SignalCtl &l, const ::panda::os::unix::SignalCtl &r)
+bool operator==(const ::ark::os::unix::SignalCtl &l, const ::ark::os::unix::SignalCtl &r)
 {
     return 0U == memcmp(&l, &r, sizeof(l));
 }
 
-bool operator!=(const ::panda::os::unix::SignalCtl &l, const ::panda::os::unix::SignalCtl &r)
+bool operator!=(const ::ark::os::unix::SignalCtl &l, const ::ark::os::unix::SignalCtl &r)
 {
     return !(l == r);
 }
 
-}  // namespace panda::os::unix
+}  // namespace ark::os::unix
 
-namespace panda::test {
+namespace ark::test {
 
 class UnixSignal : public ::testing::Test {
 protected:
@@ -277,4 +277,4 @@ TEST_F(UnixSignal, ThreadCallbacks)
     ASSERT_EQ(sigActionCount_, 1000U + SIGQUIT + 2000U);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

@@ -18,7 +18,7 @@
 
 #include <iterator>
 
-namespace panda {
+namespace ark {
 
 /// Iterable concept
 
@@ -145,7 +145,7 @@ template <class T>
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 constexpr bool is_bounded_array_v = is_bounded_array<T>::value;
 
-}  // namespace panda
+}  // namespace ark
 
 // NOLINTEND(readability-identifier-naming)
 

@@ -21,7 +21,7 @@
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool LoopUnroll::RunImpl()
 {
     COMPILER_LOG(DEBUG, LOOP_TRANSFORM) << "Run " << GetPassName();
@@ -350,4 +350,4 @@ void LoopUnroll::FixCompareInst(const CountableLoopInfo &loopInfo, BasicBlock *h
         andInst->InsertBefore(overflowCompare);
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

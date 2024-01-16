@@ -20,7 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 constexpr size_t AOT_HEADER_MAGIC_SIZE = 4;
 constexpr size_t AOT_HEADER_VERSION_SIZE = 4;
@@ -78,6 +78,6 @@ struct MethodHeader {
     uint32_t codeSize;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_AOT_AOT_HEADERS_H

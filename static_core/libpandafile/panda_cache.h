@@ -23,7 +23,7 @@
 #include <atomic>
 #include <vector>
 
-namespace panda {
+namespace ark {
 
 class Method;
 class Field;
@@ -63,18 +63,18 @@ public:
 
     inline uint32_t GetMethodIndex(File::EntityId id) const
     {
-        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), methodCacheSize_);
+        return ark::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), methodCacheSize_);
     }
 
     inline uint32_t GetFieldIndex(File::EntityId id) const
     {
         // lowest one or two bits is very likely same between different fields
-        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), fieldCacheSize_, 2U);
+        return ark::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), fieldCacheSize_, 2U);
     }
 
     inline uint32_t GetClassIndex(File::EntityId id) const
     {
-        return panda::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), classCacheSize_);
+        return ark::helpers::math::PowerOfTwoTableSlot(id.GetOffset(), classCacheSize_);
     }
 
     inline Method *GetMethodFromCache(File::EntityId id) const
@@ -215,9 +215,9 @@ private:
     static constexpr uint32_t DEFAULT_FIELD_CACHE_SIZE = 1024U;
     static constexpr uint32_t DEFAULT_METHOD_CACHE_SIZE = 1024U;
     static constexpr uint32_t DEFAULT_CLASS_CACHE_SIZE = 1024U;
-    static_assert(panda::helpers::math::IsPowerOfTwo(DEFAULT_FIELD_CACHE_SIZE));
-    static_assert(panda::helpers::math::IsPowerOfTwo(DEFAULT_METHOD_CACHE_SIZE));
-    static_assert(panda::helpers::math::IsPowerOfTwo(DEFAULT_CLASS_CACHE_SIZE));
+    static_assert(ark::helpers::math::IsPowerOfTwo(DEFAULT_FIELD_CACHE_SIZE));
+    static_assert(ark::helpers::math::IsPowerOfTwo(DEFAULT_METHOD_CACHE_SIZE));
+    static_assert(ark::helpers::math::IsPowerOfTwo(DEFAULT_CLASS_CACHE_SIZE));
 
     const uint32_t methodCacheSize_;
     const uint32_t fieldCacheSize_;
@@ -229,6 +229,6 @@ private:
 };
 
 }  // namespace panda_file
-}  // namespace panda
+}  // namespace ark
 
 #endif

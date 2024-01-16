@@ -20,7 +20,7 @@
 #include "optimizer/pass.h"
 #include "compiler_options.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 class RegAccAlloc : public compiler::Optimization {
     using Optimization::Optimization;
@@ -56,6 +56,6 @@ private:
     compiler::Marker accMarker_ {0};
 };
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  //  PANDA_REG_ACC_ALLOC_H

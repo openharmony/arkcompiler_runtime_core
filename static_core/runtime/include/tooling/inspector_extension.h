@@ -24,7 +24,7 @@
 #include <functional>
 #include <string>
 
-namespace panda::tooling {
+namespace ark::tooling {
 // NOTE(a.urakov): move to PtLangExt after the refactoring will be done
 
 class InspectorExtension {
@@ -44,6 +44,6 @@ public:
     virtual void EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler) = 0;
     virtual void EnumerateGlobals(const PropertyHandler &handler) = 0;
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_INSPECTOR_EXTENSION_H

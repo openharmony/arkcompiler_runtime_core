@@ -21,7 +21,7 @@
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
 
-namespace panda {
+namespace ark {
 
 /// @brief describes the set of adjustable parameters for CoroutineManager and its descendants initialization
 struct CoroutineManagerConfig {
@@ -227,6 +227,6 @@ private:
     NO_MOVE_SEMANTIC(ScopedDisableCoroutineSwitch);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif /* PANDA_RUNTIME_COROUTINES_COROUTINE_MANAGER_H */

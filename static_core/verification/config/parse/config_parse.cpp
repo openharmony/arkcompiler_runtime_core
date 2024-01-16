@@ -22,11 +22,11 @@
 #include <cctype>
 #include <vector>
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 
-using panda::parser::Action;
-using panda::parser::Parser;
-using panda::verifier::config::Section;
+using ark::parser::Action;
+using ark::parser::Parser;
+using ark::verifier::config::Section;
 
 namespace {
 
@@ -37,11 +37,11 @@ struct Context {
 
 }  // namespace
 
-using P = panda::parser::Parser<Context, const char, const char *>;
+using P = ark::parser::Parser<Context, const char, const char *>;
 
 bool ParseConfig(const char *str, Section &cfg)
 {
-    using panda::parser::Charset;
+    using ark::parser::Charset;
     using P1 = P::P;
     using P2 = P1::P;
     using P3 = P2::P;
@@ -128,4 +128,4 @@ bool ParseConfig(const char *str, Section &cfg)
     return false;
 }
 
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config

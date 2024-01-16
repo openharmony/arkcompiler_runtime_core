@@ -21,7 +21,7 @@
 
 // NOLINTBEGIN(readability-identifier-naming, readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *TEST_BIN_FILE_NAME = "ClinitNativeTest.abc";
 
@@ -62,7 +62,7 @@ protected:
 
 static bool IsInitialized(EtsEnv *env, ets_class cls)
 {
-    panda::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
+    ark::ets::napi::ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsClass *internal_class = s.ToInternalType(cls);
     if (!internal_class->IsInitialized()) {
         return false;
@@ -128,6 +128,6 @@ TEST_F(ClinitNativeTest, TestAllocObject)
     ASSERT_TRUE(IsInitialized(env, testClass));
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-identifier-naming, readability-magic-numbers)

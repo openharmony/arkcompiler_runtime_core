@@ -18,7 +18,7 @@
 #include "macros.h"
 #include "runtime/include/language_config.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // Base class for all GC language-specific data holders.
 // Can be extended for different language types.
@@ -48,6 +48,6 @@ private:
 #endif  // NDEBUG
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_EXTENSION_DATA_H

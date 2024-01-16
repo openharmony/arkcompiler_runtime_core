@@ -17,7 +17,7 @@
 
 #include "runtime/mem/gc/g1/g1-gc.h"
 
-namespace panda::mem {
+namespace ark::mem {
 /**
  * Gets reference fields from an object and puts it to the ref collection.
  * The ref collection has limited size. If there is no room in the ref collection
@@ -37,7 +37,7 @@ public:
     bool operator()(ObjectHeader *object, ObjectHeader *field, uint32_t offset, [[maybe_unused]] bool isVolatile)
     {
         if (!gc_->InGCSweepRange(field)) {
-            allCrossRegionRefsProcessed_ &= panda::mem::IsSameRegion(object, field, regionSizeBits_);
+            allCrossRegionRefsProcessed_ &= ark::mem::IsSameRegion(object, field, regionSizeBits_);
             return true;
         }
         RefVector *refVector = refs_->back();
@@ -72,5 +72,5 @@ private:
     // object stack pointer which will be used to store unmarked objects if it is not nullptr
     GCMarkingStackType *objectsStack_ = nullptr;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_GC_G1_REF_CACHE_BUILDER_H

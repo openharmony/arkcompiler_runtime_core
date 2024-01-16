@@ -23,7 +23,7 @@
 #include <variant>
 #include <memory>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class Codegen;
 class Encoder;
@@ -186,6 +186,6 @@ private:
 #define SCOPED_DISASM_STR(codegen, str) (void)codegen
 #endif
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_DISASSEMBLY_H

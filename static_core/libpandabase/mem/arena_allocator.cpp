@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 
-namespace panda {
+namespace ark {
 
 template <bool USE_OOM_HANDLER>
 ArenaAllocatorT<USE_OOM_HANDLER>::ArenaAllocatorT(SpaceType spaceType, BaseMemStats *memStats,
@@ -175,4 +175,4 @@ size_t ArenaAllocatorT<USE_OOM_HANDLER>::GetAllocatedSize() const
 template class ArenaAllocatorT<true>;
 template class ArenaAllocatorT<false>;
 
-}  // namespace panda
+}  // namespace ark

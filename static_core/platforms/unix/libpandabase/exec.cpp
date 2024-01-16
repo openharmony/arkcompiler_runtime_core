@@ -19,7 +19,7 @@
 #include "os/failure_retry.h"
 #include "sys/wait.h"
 
-namespace panda::os::exec {
+namespace ark::os::exec {
 
 Expected<int, Error> Exec(Span<const char *> args)
 {
@@ -48,4 +48,4 @@ Expected<int, Error> Exec(Span<const char *> args)
     return Unexpected(Error("Process finished improperly"));
 }
 
-}  // namespace panda::os::exec
+}  // namespace ark::os::exec

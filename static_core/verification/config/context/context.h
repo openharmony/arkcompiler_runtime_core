@@ -31,14 +31,13 @@
 #include <unordered_set>
 #include <vector>
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
 enum class WhitelistKind : uint8_t { METHOD, METHOD_CALL, CLASS, LAST };
 
 struct DebugConfig {
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    PandaUnorderedMap<PandaString, panda::verifier::callable<bool(Config *cfg, const config::Section &)>>
-        sectionHandlers;
+    PandaUnorderedMap<PandaString, ark::verifier::callable<bool(Config *cfg, const config::Section &)>> sectionHandlers;
 
 #ifndef NDEBUG
     // note: this is assumed to be small so stored as a vector (not even sorted, so we use a linear search)
@@ -101,6 +100,6 @@ private:
     void InsertIntoWhitelist(const PandaString &name, bool isClassName, Method::UniqId id);
     bool InWhitelist(WhitelistKind kind, uint64_t id) const;
 };
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug
 
 #endif  // !PANDA_VERIFIER_DEBUG_CONTEXT_H_

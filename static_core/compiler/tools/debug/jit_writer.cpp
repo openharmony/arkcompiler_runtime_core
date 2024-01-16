@@ -17,7 +17,7 @@
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
 
-namespace panda::compiler {
+namespace ark::compiler {
 class JitCodeDataProvider : public ElfSectionDataProvider {
 public:
     explicit JitCodeDataProvider(JitDebugWriter *jitDebugWriter) : jitDebugWriter_(jitDebugWriter) {}
@@ -133,6 +133,6 @@ bool JitDebugWriter::WriteImpl()
     code_ = builder.GetTextSectionData();
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif

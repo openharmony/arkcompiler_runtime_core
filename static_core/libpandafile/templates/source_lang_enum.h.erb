@@ -22,23 +22,23 @@
 #include "libpandabase/macros.h"
 #include "source_language.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 using SourceLang = SourceLanguage;
 
 constexpr uint8_t LANG_COUNT = <%= Common::plugins.length + 1 %>;
 
-constexpr std::array<SourceLang, panda::panda_file::LANG_COUNT> LANG_ITERATOR = {
+constexpr std::array<SourceLang, ark::panda_file::LANG_COUNT> LANG_ITERATOR = {
 % Common::plugins.each do |plugin_lang, plugin_opts|
     <%= plugin_opts["lang_enum"] %>,
 % end
-    panda::panda_file::SourceLang::PANDA_ASSEMBLY
+    ark::panda_file::SourceLang::PANDA_ASSEMBLY
 };
 
 static constexpr size_t GetLangArrIndex(panda_file::SourceLang lang)
 {
-    for (size_t index = 0; index < panda::panda_file::LANG_ITERATOR.size(); ++index) {
-        if (panda::panda_file::LANG_ITERATOR[index] == lang) {
+    for (size_t index = 0; index < ark::panda_file::LANG_ITERATOR.size(); ++index) {
+        if (ark::panda_file::LANG_ITERATOR[index] == lang) {
             return index;
         }
     }
@@ -53,8 +53,8 @@ static constexpr size_t GetLangArrIndex(panda_file::SourceLang lang)
 % Common::plugins.each_value do |plugin_opts|
     <%= plugin_opts["lang_enum"] %>, \
 % end
-    panda::panda_file::SourceLang::PANDA_ASSEMBLY
+    ark::panda_file::SourceLang::PANDA_ASSEMBLY
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_SOURCE_LANG_ENUM_H

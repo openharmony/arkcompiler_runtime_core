@@ -23,7 +23,7 @@
 #include "runtime/include/coretypes/class.h"
 #include <node_api.h>
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 namespace testing {
 class JSValueOffsets;
@@ -272,6 +272,6 @@ private:
 
 static_assert(JSValue::GetTypeOffset() == sizeof(ObjectHeader));
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H_

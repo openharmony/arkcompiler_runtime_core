@@ -16,7 +16,7 @@
 #include "helpers.h"
 #include "method_data_accessor.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 MethodDataAccessor::MethodDataAccessor(const File &pandaFile, File::EntityId methodId)
     : pandaFile_(pandaFile), methodId_(methodId)
@@ -42,4 +42,4 @@ MethodDataAccessor::MethodDataAccessor(const File &pandaFile, File::EntityId met
     }
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

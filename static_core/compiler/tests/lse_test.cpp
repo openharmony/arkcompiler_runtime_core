@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/lse.h"
 #include "optimizer/optimizations/peepholes.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LSETest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -3971,4 +3971,4 @@ TEST_F(LSETest, EliminateOverSaveStateDeoptimize)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  //  namespace panda::compiler
+}  //  namespace ark::compiler

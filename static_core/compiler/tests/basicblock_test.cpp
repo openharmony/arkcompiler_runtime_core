@@ -18,7 +18,7 @@
 #include "unit_test.h"
 #include <set>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlockTest : public GraphTest {
 public:
     template <typename T>
@@ -558,4 +558,4 @@ TEST_F(BasicBlockTest, IfLikelyUnlikelyTest)
     ASSERT_EQ(&BB(3U), blocks2.back());
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

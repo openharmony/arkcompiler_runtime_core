@@ -24,7 +24,7 @@
 
 #include <string>
 
-namespace panda {
+namespace ark {
 
 os::memory::Mutex g_traceLock;  // NOLINT(fuchsia-statically-constructed-objects)
 Trace *volatile Trace::singletonTrace_ = nullptr;
@@ -65,7 +65,7 @@ static uint64_t GetCpuMicroSecond()
            static_cast<uint64_t>(current.tv_nsec) / UINT64_C(1000);     // 1000 - time
 }
 
-Trace::Trace(PandaUniquePtr<panda::os::unix::file::File> traceFile, size_t bufferSize)
+Trace::Trace(PandaUniquePtr<ark::os::unix::file::File> traceFile, size_t bufferSize)
     : traceFile_(std::move(traceFile)),
       bufferSize_(std::max(TRACE_HEADER_REAL_LENGTH, bufferSize)),
       traceStartTime_(SystemMicroSecond()),
@@ -106,14 +106,14 @@ void Trace::StartTracing(const char *traceFilename, size_t bufferSize)
 #endif  // PANDA_TARGET_MOBILE
     }
 
-    auto traceFile = MakePandaUnique<panda::os::unix::file::File>(
-        panda::os::file::Open(fileName, panda::os::file::Mode::READWRITECREATE).GetFd());
+    auto traceFile = MakePandaUnique<ark::os::unix::file::File>(
+        ark::os::file::Open(fileName, ark::os::file::Mode::READWRITECREATE).GetFd());
     if (!traceFile->IsValid()) {
         LOG(ERROR, RUNTIME) << "Cannot OPEN/CREATE the trace file " << fileName;
         return;
     }
 
-    panda_file::SourceLang lang = panda::plugins::RuntimeTypeToLang(Runtime::GetRuntimeType());
+    panda_file::SourceLang lang = ark::plugins::RuntimeTypeToLang(Runtime::GetRuntimeType());
     ctx_ = Runtime::GetCurrent()->GetLanguageContext(lang);
 
     singletonTrace_ = ctx_.CreateTrace(std::move(traceFile), bufferSize);
@@ -325,4 +325,4 @@ void Trace::GetTimes(uint32_t *threadTime, uint32_t *realTime)
     *realTime = SystemMicroSecond() - traceStartTime_;
 }
 
-}  // namespace panda
+}  // namespace ark

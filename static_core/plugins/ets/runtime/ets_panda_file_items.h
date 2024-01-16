@@ -18,7 +18,7 @@
 
 #include <string_view>
 
-namespace panda::ets::panda_file_items {
+namespace ark::ets::panda_file_items {
 
 // clang-format off
 namespace class_descriptors {
@@ -104,6 +104,6 @@ static constexpr std::string_view CCTOR = "<cctor>";
 static constexpr std::string_view CTOR  = "<ctor>";
 // clang-format on
 
-}  // namespace panda::ets::panda_file_items
+}  // namespace ark::ets::panda_file_items
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_PANDA_FILE_ITEMS_H_

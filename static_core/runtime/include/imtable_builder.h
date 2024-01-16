@@ -20,7 +20,7 @@
 #include "runtime/include/class-inl.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 
-namespace panda {
+namespace ark {
 
 class ClassLinker;
 
@@ -34,7 +34,7 @@ public:
 
     void UpdateClass(Class *klass);
 
-    bool AddMethod(panda::Span<panda::Method *> imtable, uint32_t imtableSize, uint32_t id, Method *method);
+    bool AddMethod(ark::Span<ark::Method *> imtable, uint32_t imtableSize, uint32_t id, Method *method);
 
     void DumpIMTable(Class *klass);
 
@@ -58,6 +58,6 @@ private:
     size_t imtSize_ = 0;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_IMTABLE_BUILDER_H_

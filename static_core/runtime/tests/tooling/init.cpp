@@ -20,7 +20,7 @@
 #include "runtime/tests/tooling/test_runner.h"
 #include "test_util.h"
 
-namespace panda::tooling::test {
+namespace ark::tooling::test {
 extern const char *GetCurrentTestName();
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
@@ -46,4 +46,4 @@ extern "C" int StopDebugger()
     g_gRunner.reset();
     return 0;
 }
-}  // namespace panda::tooling::test
+}  // namespace ark::tooling::test

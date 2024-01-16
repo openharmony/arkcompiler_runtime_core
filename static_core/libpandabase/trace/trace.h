@@ -20,7 +20,7 @@
 #include <sstream>
 #include "macros.h"
 
-namespace panda::trace {
+namespace ark::trace {
 
 namespace internal {
 extern int g_traceMarkerFd;
@@ -116,10 +116,10 @@ public:
 }  // namespace internal
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define SCOPED_TRACE_STREAM                                                                    \
-    ::panda::trace::internal::ScopeTraceStremHelperEnd MERGE_WORDS(end_trace_point, __LINE__); \
-    UNLIKELY(::panda::trace::IsEnabled()) && ::panda::trace::internal::ScopeTraceStremHelperBegin().GetStream()
+#define SCOPED_TRACE_STREAM                                                                  \
+    ::ark::trace::internal::ScopeTraceStremHelperEnd MERGE_WORDS(end_trace_point, __LINE__); \
+    UNLIKELY(::ark::trace::IsEnabled()) && ::ark::trace::internal::ScopeTraceStremHelperBegin().GetStream()
 
-}  // namespace panda::trace
+}  // namespace ark::trace
 
 #endif  // PANDA_TRACE_H_

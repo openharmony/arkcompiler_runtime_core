@@ -31,11 +31,11 @@
 #include "utils/arena_containers.h"
 #include "libpandabase/mem/mem.h"
 
-namespace panda {
+namespace ark {
 class Thread;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 enum class ClassType {
     UNRESOLVED_CLASS = 0,
     OBJECT_CLASS,
@@ -467,10 +467,10 @@ public:
         return std::string();
     }
 
-    virtual panda::pandasm::LiteralArray GetLiteralArray([[maybe_unused]] MethodPtr method,
-                                                         [[maybe_unused]] LiteralArrayId id) const
+    virtual ark::pandasm::LiteralArray GetLiteralArray([[maybe_unused]] MethodPtr method,
+                                                       [[maybe_unused]] LiteralArrayId id) const
     {
-        return panda::pandasm::LiteralArray();
+        return ark::pandasm::LiteralArray();
     }
 
     virtual bool IsInterfaceMethod([[maybe_unused]] MethodPtr parentMethod, [[maybe_unused]] MethodId id) const
@@ -507,15 +507,15 @@ public:
     // Method offsets
     uint32_t GetAccessFlagsOffset(Arch arch) const
     {
-        return panda::cross_values::GetMethodAccessFlagsOffset(arch);
+        return ark::cross_values::GetMethodAccessFlagsOffset(arch);
     }
     uint32_t GetVTableIndexOffset(Arch arch) const
     {
-        return panda::cross_values::GetMethodVTableIndexOffset(arch);
+        return ark::cross_values::GetMethodVTableIndexOffset(arch);
     }
     uint32_t GetClassOffset(Arch arch) const
     {
-        return panda::cross_values::GetMethodClassOffset(arch);
+        return ark::cross_values::GetMethodClassOffset(arch);
     }
     uint32_t GetBaseClassFlagsOffset(Arch arch) const
     {
@@ -523,11 +523,11 @@ public:
     }
     uint32_t GetCompiledEntryPointOffset(Arch arch) const
     {
-        return panda::cross_values::GetMethodCompiledEntryPointOffset(arch);
+        return ark::cross_values::GetMethodCompiledEntryPointOffset(arch);
     }
     uint32_t GetPandaFileOffset(Arch arch) const
     {
-        return panda::cross_values::GetMethodPandaFileOffset(arch);
+        return ark::cross_values::GetMethodPandaFileOffset(arch);
     }
 
     virtual uint32_t GetCallableMask() const
@@ -538,35 +538,35 @@ public:
     /// Exec state information
     size_t GetTlsFrameKindOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadFrameKindOffset(arch);
+        return ark::cross_values::GetManagedThreadFrameKindOffset(arch);
     }
     uint32_t GetFlagAddrOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadFlagOffset(arch);
+        return ark::cross_values::GetManagedThreadFlagOffset(arch);
     }
     size_t GetTlsFrameOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadFrameOffset(arch);
+        return ark::cross_values::GetManagedThreadFrameOffset(arch);
     }
     size_t GetExceptionOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadExceptionOffset(arch);
+        return ark::cross_values::GetManagedThreadExceptionOffset(arch);
     }
     size_t GetTlsNativePcOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadNativePcOffset(arch);
+        return ark::cross_values::GetManagedThreadNativePcOffset(arch);
     }
     size_t GetTlsCardTableAddrOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadCardTableAddrOffset(arch);
+        return ark::cross_values::GetManagedThreadCardTableAddrOffset(arch);
     }
     size_t GetTlsCardTableMinAddrOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadCardTableMinAddrOffset(arch);
+        return ark::cross_values::GetManagedThreadCardTableMinAddrOffset(arch);
     }
     size_t GetTlsPreWrbEntrypointOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadPreWrbEntrypointOffset(arch);
+        return ark::cross_values::GetManagedThreadPreWrbEntrypointOffset(arch);
     }
     virtual size_t GetTlsPromiseClassPointerOffset([[maybe_unused]] Arch arch) const
     {
@@ -580,21 +580,20 @@ public:
     {
         return 0;
     }
-    virtual ::panda::mem::BarrierType GetPreType() const
+    virtual ::ark::mem::BarrierType GetPreType() const
     {
-        return ::panda::mem::BarrierType::PRE_WRB_NONE;
+        return ::ark::mem::BarrierType::PRE_WRB_NONE;
     }
 
-    virtual ::panda::mem::BarrierType GetPostType() const
+    virtual ::ark::mem::BarrierType GetPostType() const
     {
-        return ::panda::mem::BarrierType::POST_WRB_NONE;
+        return ::ark::mem::BarrierType::POST_WRB_NONE;
     }
 
-    virtual ::panda::mem::BarrierOperand GetBarrierOperand(
-        [[maybe_unused]] ::panda::mem::BarrierPosition barrierPosition,
-        [[maybe_unused]] std::string_view operandName) const
+    virtual ::ark::mem::BarrierOperand GetBarrierOperand([[maybe_unused]] ::ark::mem::BarrierPosition barrierPosition,
+                                                         [[maybe_unused]] std::string_view operandName) const
     {
-        return ::panda::mem::BarrierOperand(::panda::mem::BarrierOperandType::PRE_WRITE_BARRIER_ADDRESS, false);
+        return ::ark::mem::BarrierOperand(::ark::mem::BarrierOperandType::PRE_WRITE_BARRIER_ADDRESS, false);
     }
 
     virtual uint32_t GetTlsGlobalObjectOffset([[maybe_unused]] Arch arch) const
@@ -615,7 +614,7 @@ public:
 
     uint32_t GetClassArraySize(Arch arch) const
     {
-        return panda::cross_values::GetCoretypesArrayClassSize(arch);
+        return ark::cross_values::GetCoretypesArrayClassSize(arch);
     }
 
     virtual uint32_t GetArrayElementSize([[maybe_unused]] MethodPtr method, [[maybe_unused]] IdType id) const
@@ -646,11 +645,11 @@ public:
     // Array offsets
     uint32_t GetArrayDataOffset(Arch arch) const
     {
-        return panda::cross_values::GetCoretypesArrayDataOffset(arch);
+        return ark::cross_values::GetCoretypesArrayDataOffset(arch);
     }
     uint32_t GetArrayLengthOffset(Arch arch) const
     {
-        return panda::cross_values::GetCoretypesArrayLengthOffset(arch);
+        return ark::cross_values::GetCoretypesArrayLengthOffset(arch);
     }
 
     /// String information
@@ -677,11 +676,11 @@ public:
     // String offsets
     uint32_t GetStringDataOffset(Arch arch) const
     {
-        return panda::cross_values::GetCoretypesStringDataOffset(arch);
+        return ark::cross_values::GetCoretypesStringDataOffset(arch);
     }
     uint32_t GetStringLengthOffset(Arch arch) const
     {
-        return panda::cross_values::GetCoretypesStringLengthOffset(arch);
+        return ark::cross_values::GetCoretypesStringLengthOffset(arch);
     }
     uintptr_t GetStringClassPointerTlsOffset(Arch arch) const
     {
@@ -692,7 +691,7 @@ public:
 
     uint32_t GetThreadObjectOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadObjectOffset(arch);
+        return ark::cross_values::GetManagedThreadObjectOffset(arch);
     }
 
     /// TLAB information
@@ -715,19 +714,19 @@ public:
     // TLAB offsets
     size_t GetCurrentTLABOffset(Arch arch) const
     {
-        return panda::cross_values::GetManagedThreadTlabOffset(arch);
+        return ark::cross_values::GetManagedThreadTlabOffset(arch);
     }
     size_t GetTLABStartPointerOffset(Arch arch) const
     {
-        return panda::cross_values::GetTlabMemoryStartAddrOffset(arch);
+        return ark::cross_values::GetTlabMemoryStartAddrOffset(arch);
     }
     size_t GetTLABFreePointerOffset(Arch arch) const
     {
-        return panda::cross_values::GetTlabCurFreePositionOffset(arch);
+        return ark::cross_values::GetTlabCurFreePositionOffset(arch);
     }
     size_t GetTLABEndPointerOffset(Arch arch) const
     {
-        return panda::cross_values::GetTlabMemoryEndAddrOffset(arch);
+        return ark::cross_values::GetTlabMemoryEndAddrOffset(arch);
     }
 
     /// Object information
@@ -794,19 +793,19 @@ public:
     // Offset of class in ObjectHeader
     uint32_t GetObjClassOffset(Arch arch) const
     {
-        return panda::cross_values::GetObjectHeaderClassPointerOffset(arch);
+        return ark::cross_values::GetObjectHeaderClassPointerOffset(arch);
     }
 
     // Offset of the managed object in the BaseClass
     uint32_t GetManagedClassOffset(Arch arch) const
     {
-        return panda::cross_values::GetBaseClassManagedObjectOffset(arch);
+        return ark::cross_values::GetBaseClassManagedObjectOffset(arch);
     }
 
     // Offset of mark word in ObjectHeader
     uint32_t GetObjMarkWordOffset(Arch arch) const
     {
-        return panda::cross_values::GetObjectHeaderMarkWordOffset(arch);
+        return ark::cross_values::GetObjectHeaderMarkWordOffset(arch);
     }
 
     uint64_t GetTaggedTagMask() const
@@ -881,35 +880,35 @@ public:
     // Vtable offset in Class
     uint32_t GetVTableOffset(Arch arch) const
     {
-        return panda::cross_values::GetClassVtableOffset(arch);
+        return ark::cross_values::GetClassVtableOffset(arch);
     }
 
     // returns base offset in Class(for array)
     uint32_t GetClassBaseOffset(Arch arch) const
     {
-        return panda::cross_values::GetClassBaseOffset(arch);
+        return ark::cross_values::GetClassBaseOffset(arch);
     }
 
     // returns component type offset in Class(for array)
     uint32_t GetClassComponentTypeOffset(Arch arch) const
     {
-        return panda::cross_values::GetClassComponentTypeOffset(arch);
+        return ark::cross_values::GetClassComponentTypeOffset(arch);
     }
 
     // returns type offset in Class(for array)
     uint32_t GetClassTypeOffset(Arch arch) const
     {
-        return panda::cross_values::GetClassTypeOffset(arch);
+        return ark::cross_values::GetClassTypeOffset(arch);
     }
 
     uint32_t GetClassStateOffset(Arch arch) const
     {
-        return panda::cross_values::GetClassStateOffset(arch);
+        return ark::cross_values::GetClassStateOffset(arch);
     }
 
     uint32_t GetClassMethodsOffset(Arch arch) const
     {
-        return panda::cross_values::GetClassMethodsOffset(arch);
+        return ark::cross_values::GetClassMethodsOffset(arch);
     }
 
     /// Field information
@@ -981,13 +980,13 @@ public:
     // Return offset of the managed object in the class
     uint32_t GetFieldClassOffset(Arch arch) const
     {
-        return panda::cross_values::GetFieldClassOffset(arch);
+        return ark::cross_values::GetFieldClassOffset(arch);
     }
 
     // Return offset of the managed object in the class
     uint32_t GetFieldOffsetOffset(Arch arch) const
     {
-        return panda::cross_values::GetFieldOffsetOffset(arch);
+        return ark::cross_values::GetFieldOffsetOffset(arch);
     }
 
     virtual size_t GetPropertyBoxOffset([[maybe_unused]] Arch arch) const
@@ -1121,7 +1120,7 @@ public:
 
     uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
     {
-        return cross_values::GetManagedThreadEntrypointOffset(arch, panda::EntrypointId(static_cast<uint8_t>(id)));
+        return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(static_cast<uint8_t>(id)));
     }
 
     virtual EntrypointId GetGlobalVarEntrypointId()
@@ -1417,6 +1416,6 @@ inline const char *DeoptimizeTypeToString(DeoptimizeType deoptType)
     ASSERT(idx < COUNT);
     return DEOPT_TYPE_NAMES[idx];
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_RUNTIME_INTERFACE_H

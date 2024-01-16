@@ -21,7 +21,7 @@
 #include "runtime/include/value.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda::arch {
+namespace ark::arch {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ARCH_COPY_METHOD_ARGS_DISPATCH      \
@@ -580,6 +580,6 @@ private:
     const uint8_t *stackArgs_;
 };
 
-}  // namespace panda::arch
+}  // namespace ark::arch
 
 #endif  // PANDA_RUNTIME_ARCH_HELPERS_H_

@@ -19,7 +19,7 @@
 
 #include "libpandabase/utils/time.h"
 
-namespace panda::time {
+namespace ark::time {
 
 constexpr size_t TIME_BUFF_LENGTH = 100;
 
@@ -69,4 +69,4 @@ PandaString GetCurrentTimeString(const char *format)
     return ConvertToString(!date.empty() ? date : "1970-01-01 00:00:00");
 }
 
-}  // namespace panda::time
+}  // namespace ark::time

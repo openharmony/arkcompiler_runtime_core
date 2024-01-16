@@ -21,15 +21,15 @@
 
 #include "libpandabase/macros.h"
 
-namespace panda {
+namespace ark {
 namespace base_options {
 class Options;
 }  // namespace base_options
 
 class RuntimeOptions;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::ets {
+namespace ark::ets {
 
 PANDA_PUBLIC_API bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, bool useJit, bool useAot);
 
@@ -42,6 +42,6 @@ PANDA_PUBLIC_API std::pair<bool, int> ExecuteMain();
 PANDA_PUBLIC_API bool BindNative(const char *classDescriptor, const char *methodName, void *impl);
 
 PANDA_PUBLIC_API void LogError(const std::string &msg);
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif

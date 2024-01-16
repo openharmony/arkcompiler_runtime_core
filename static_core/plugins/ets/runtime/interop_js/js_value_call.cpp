@@ -26,7 +26,7 @@
 
 #include "runtime/mem/vm_handle-inl.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 // Convert js->ets for refs, throws ETS/JS exceptions
 template <typename FUnwrapVal, typename FClsResolv, typename FStoreRef>
@@ -696,4 +696,4 @@ uint8_t JSRuntimeInitJSNewClass(EtsString *clsStr)
     return 1;
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

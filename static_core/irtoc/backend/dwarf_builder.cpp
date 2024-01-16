@@ -24,7 +24,7 @@
 
 #include <numeric>
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 template <typename T>
 static constexpr bool IsDwarfBadAddr(T v)
 {
@@ -272,4 +272,4 @@ Dwarf_Unsigned DwarfBuilder::AddDir(const std::string &dname)
     dirsMap_[dname] = index;
     return index;
 }
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc

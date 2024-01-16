@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda {
+namespace ark {
 
 Rendezvous::Rendezvous(PandaVM *pandaVm) : mutatorLock_(pandaVm->GetMutatorLock()) {}
 
@@ -57,4 +57,4 @@ ScopedSuspendAllThreadsRunning::~ScopedSuspendAllThreadsRunning()
     rendezvous_->GetMutatorLock()->ReadLock();
 }
 
-}  // namespace panda
+}  // namespace ark

@@ -20,7 +20,7 @@
 #include "libpandabase/macros.h"
 #include "runtime/include/mem/panda_string.h"
 
-namespace panda::time {
+namespace ark::time {
 
 constexpr size_t MILLISECONDS_IN_SECOND = 1000;
 constexpr size_t PRECISION_FOR_TIME = 3;
@@ -43,6 +43,6 @@ PandaString GetCurrentTimeString();
 
 PandaString GetCurrentTimeString(const char *format);
 
-}  // namespace panda::time
+}  // namespace ark::time
 
 #endif  // PANDA_RUNTIME_UTILS_H_

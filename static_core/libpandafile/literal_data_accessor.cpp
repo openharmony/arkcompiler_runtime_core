@@ -15,7 +15,7 @@
 
 #include "literal_data_accessor.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 LiteralDataAccessor::LiteralDataAccessor(const File &pandaFile, File::EntityId literalDataId)
     : pandaFile_(pandaFile), literalDataId_(literalDataId)
@@ -24,4 +24,4 @@ LiteralDataAccessor::LiteralDataAccessor(const File &pandaFile, File::EntityId l
     literalDataSp_ = pandaFile_.GetSpanFromId(literalDataId_);
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

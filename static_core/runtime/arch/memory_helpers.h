@@ -27,7 +27,7 @@
 #error "Unsupported target"
 #endif
 
-namespace panda::arch {
+namespace ark::arch {
 
 // Forces system-wide full memory synchronization
 // NB! It is assumed all panda targets provide such synchronization, which might not be true on all CPU architectures
@@ -38,6 +38,6 @@ inline void FullMemoryBarrier()
     arch_specific::FullMemoryBarrier();
 }
 
-}  // namespace panda::arch
+}  // namespace ark::arch
 
 #endif  // PANDA_RUNTIME_ARCH_HELPERS_H_

@@ -19,7 +19,7 @@
 #include "optimizer/pass.h"
 #include "optimizer/analysis/countable_loop_parser.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 
@@ -243,6 +243,6 @@ BasicBlock *GetLoopOutsideSuccessor(Loop *loop);
 // NOLINTNEXTLINE(readability-redundant-declaration)
 bool IsLoopSingleBackEdgeExitPoint(Loop *loop);
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_LOOP_ANALYSIS_H

@@ -24,7 +24,7 @@
 #include "libpandafile/class_data_accessor-inl.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 
-namespace panda::ets::header_writer {
+namespace ark::ets::header_writer {
 
 class HeaderWriter {
 public:
@@ -83,6 +83,6 @@ private:
     bool needHeader_ = false;
 };
 
-}  // namespace panda::ets::header_writer
+}  // namespace ark::ets::header_writer
 
 #endif  // PANDA_PLUGINS_ETS_ARKTS_HEADER_HEADER_WRITER_H_

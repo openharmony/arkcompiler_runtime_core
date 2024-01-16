@@ -21,7 +21,7 @@
 #include "libpandabase/macros.h"
 #include "compiler/compiler_task_runner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 
 /**
@@ -55,6 +55,6 @@ private:
     Graph *graph_ {nullptr};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_PIPELINE_H

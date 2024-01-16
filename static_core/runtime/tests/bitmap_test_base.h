@@ -22,14 +22,14 @@
 
 #include "runtime/mem/gc/bitmap.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class BitmapTest : public testing::Test {
 public:
     static constexpr ObjectPointerType HEAP_STARTING_ADDRESS = static_cast<ObjectPointerType>(0x10000000);
 };
 
-using BitmapWordType = panda::mem::Bitmap::BitmapWordType;
+using BitmapWordType = ark::mem::Bitmap::BitmapWordType;
 
 class BitmapVerify {
 public:
@@ -178,6 +178,6 @@ TEST_F(BitmapTest, AtomicClearSetTest)
     ASSERT_TRUE(!bm.AtomicTest(object));
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H

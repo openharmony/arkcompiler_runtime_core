@@ -23,7 +23,7 @@
 #include <node_api.h>
 #include <unordered_map>
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 class InteropCtx;
 class JSRefConvertCache;
@@ -32,7 +32,7 @@ class JSRefConvertCache;
 inline JSRefConvertCache *RefConvertCacheFromInteropCtx(InteropCtx *ctx);
 inline napi_env JSEnvFromInteropCtx(InteropCtx *ctx);
 
-// Conversion interface for some panda::Class objects
+// Conversion interface for some ark::Class objects
 class JSRefConvert {
 public:
     // Convert ets->js, returns nullptr if failed, throws JS exceptions
@@ -76,7 +76,7 @@ private:
     const UnwrapT unwrap_;
 };
 
-// Fast cache to find convertor for some panda::Class
+// Fast cache to find convertor for some ark::Class
 class JSRefConvertCache {
 public:
     JSRefConvert *Lookup(Class *klass)
@@ -184,6 +184,6 @@ inline bool IsStdClass(EtsClass *klass)
     return IsStdClass(klass->GetRuntimeClass());
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REFCONVERT_H_

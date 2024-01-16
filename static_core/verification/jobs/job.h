@@ -29,7 +29,7 @@
 #include <functional>
 #include <optional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 class Job {
 public:
     Job(Service *service, Method const *method, const MethodOptions &options)
@@ -172,6 +172,6 @@ private:
         types_.emplace(offset, *type);
     }
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_JOB_QUEUE_JOB_H_

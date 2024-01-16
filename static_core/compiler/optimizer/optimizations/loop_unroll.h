@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/loop_transform.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Loop unroll optimization
  * @param inst_limit - the maximum number of loop instructions after its unrolling
@@ -66,6 +66,6 @@ private:
     const uint32_t unrollFactor_ {0};
     bool isApplied_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_UNROLL_H

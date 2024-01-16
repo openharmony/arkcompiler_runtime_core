@@ -18,7 +18,7 @@
 #include "assembly-emitter.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::test {
+namespace ark::test {
 
 inline std::string Separator()
 {
@@ -68,7 +68,7 @@ TEST_F(IntrinsicsBlacklistTest, DisableIntrinsic)
     RuntimeOptions options;
     options.SetLoadRuntimes({"core"});
     options.SetIntrinsicsBlacklist({"Math::absI32"});
-    auto execPath = panda::os::file::File::GetExecutablePath();
+    auto execPath = ark::os::file::File::GetExecutablePath();
     std::string pandaStdLib =
         execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
     options.SetBootPandaFiles({pandaStdLib});
@@ -82,4 +82,4 @@ TEST_F(IntrinsicsBlacklistTest, DisableIntrinsic)
     // There are no implementations of Math.absI32 other than intrinsic, so execution should be aborted
     ASSERT_DEATH(Runtime::GetCurrent()->Execute("_GLOBAL::main", {}), "");
 }
-}  // namespace panda::test
+}  // namespace ark::test

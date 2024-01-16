@@ -28,7 +28,7 @@
 #include "libpandabase/utils/small_vector.h"
 #include "runtime/mem/allocator_adapter.h"
 
-namespace panda {
+namespace ark {
 
 template <class T>
 using PandaForwardList = std::forward_list<T, mem::AllocatorAdapter<T>>;
@@ -119,6 +119,6 @@ template <class Key, class Value, class Hash = std::hash<Key>, class KeyEqual = 
 using PandaUnorderedMultiMapTL =
     std::unordered_multimap<Key, Value, Hash, KeyEqual,
                             mem::AllocatorAdapter<std::pair<const Key, Value>, mem::AllocScope::LOCAL>>;
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MEM_PANDA_CONTAINERS_H

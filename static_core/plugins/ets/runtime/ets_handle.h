@@ -21,7 +21,7 @@
 #include "runtime/mem/vm_handle.h"
 #include "runtime/handle_scope-inl.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 template <typename T>
 class EtsHandle : public VMHandle<T> {
@@ -54,6 +54,6 @@ private:
     }
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H_

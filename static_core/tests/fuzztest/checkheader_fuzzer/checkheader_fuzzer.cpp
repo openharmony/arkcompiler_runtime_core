@@ -28,11 +28,10 @@ void CheckHeaderFuzzTest(const uint8_t *data, size_t size)
     (void)fwrite(data, sizeof(uint8_t), size, fp);
     (void)fseek(fp, 0, SEEK_SET);
 
-    auto file = panda::os::file::File(fileno(fp));
-    panda::os::mem::ConstBytePtr ptr =
-        panda::os::mem::MapFile(file, panda::os::mem::MMAP_PROT_READ, panda::os::mem::MMAP_FLAG_PRIVATE, size, 0)
-            .ToConst();
-    panda::panda_file::CheckHeader(ptr, filename);
+    auto file = ark::os::file::File(fileno(fp));
+    ark::os::mem::ConstBytePtr ptr =
+        ark::os::mem::MapFile(file, ark::os::mem::MMAP_PROT_READ, ark::os::mem::MMAP_FLAG_PRIVATE, size, 0).ToConst();
+    ark::panda_file::CheckHeader(ptr, filename);
     (void)fclose(fp);
     (void)remove(filename);
 }

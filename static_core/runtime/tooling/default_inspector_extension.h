@@ -18,7 +18,7 @@
 
 #include "runtime/include/tooling/inspector_extension.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class StaticDefaultInspectorExtension : public InspectorExtension {
 public:
     explicit StaticDefaultInspectorExtension(panda_file::SourceLang lang) : lang_(lang) {}
@@ -53,6 +53,6 @@ public:
         const std::function<void(const std::string &, TypedValue, bool, bool, bool)> &handler) override;
     void EnumerateGlobals([[maybe_unused]] const PropertyHandler &handler) override {}
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_RUNTIME_TOOLING_INSPECTOR_DEFAULT_INSPECTOR_EXTENSION_H

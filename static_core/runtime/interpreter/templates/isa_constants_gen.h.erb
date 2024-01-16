@@ -16,12 +16,12 @@
 #ifndef PANDA_INTERPRETER_ISA_CONSTANTS_H_
 #define PANDA_INTERPRETER_ISA_CONSTANTS_H_
 
-namespace panda::interpreter {
+namespace ark::interpreter {
     constexpr auto NUM_PREFIXED = <%= Panda::instructions.select(&:prefix).size %>;
     constexpr auto NUM_NON_PREFIXED_OPS = <%= Panda::instructions.size %> - NUM_PREFIXED + 1;  // +1 is for EXCEPTION_HANDLER
     constexpr auto NUM_PREFIXES = <%= Panda::prefixes.size %>;
     // NOLINTNEXTLINE(readability-magic-numbers)
     static_assert(NUM_NON_PREFIXED_OPS + NUM_PREFIXES <= 210, "Too many first-level-dispatch opcodes in use, please review the ISA");
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_ISA_CONSTANTS_H_

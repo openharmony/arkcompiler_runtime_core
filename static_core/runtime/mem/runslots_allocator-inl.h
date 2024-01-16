@@ -21,7 +21,7 @@
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/runslots_allocator.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_RUNSLOTS_ALLOCATOR(level) LOG(level, ALLOC) << "RunSlotsAllocator: "
@@ -403,9 +403,9 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::TrimUnsafe()
     }
 
     memoryPool_.VisitAllPoolsWithOccupiedSize([](void *mem, size_t usedSize, size_t size) {
-        uintptr_t start = AlignUp(ToUintPtr(mem) + usedSize, panda::os::mem::GetPageSize());
+        uintptr_t start = AlignUp(ToUintPtr(mem) + usedSize, ark::os::mem::GetPageSize());
         uintptr_t end = ToUintPtr(mem) + size;
-        if (end >= start + panda::os::mem::GetPageSize()) {
+        if (end >= start + ark::os::mem::GetPageSize()) {
             os::mem::ReleasePages(start, end);
         }
     });
@@ -913,5 +913,5 @@ bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListEleme
 
 #undef LOG_RUNSLOTS_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_RUNSLOTS_ALLOCATOR_INL_H

@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-namespace panda::leb128::test {
+namespace ark::leb128::test {
 
 // NOLINTBEGIN(readability-magic-numbers,fuchsia-statically-constructed-objects)
 
@@ -202,4 +202,4 @@ TEST(Leb128, EncodeSigned)
 
 // NOLINTEND(readability-magic-numbers,fuchsia-statically-constructed-objects)
 
-}  // namespace panda::leb128::test
+}  // namespace ark::leb128::test

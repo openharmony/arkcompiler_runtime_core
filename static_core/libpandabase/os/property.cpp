@@ -15,7 +15,7 @@
 
 #include "property.h"
 
-namespace panda::os::property {
+namespace ark::os::property {
 
 #if !defined(PANDA_TARGET_UNIX)
 bool GetPropertyBuffer(const char * /* ark_prop */, std::string & /* out */)
@@ -24,4 +24,4 @@ bool GetPropertyBuffer(const char * /* ark_prop */, std::string & /* out */)
 }
 #endif  // PANDA_TARGET_UNIX
 
-}  // namespace panda::os::property
+}  // namespace ark::os::property

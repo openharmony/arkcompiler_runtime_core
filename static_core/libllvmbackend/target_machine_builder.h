@@ -18,7 +18,7 @@
 
 #include <llvm/Target/TargetMachine.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class TargetMachineBuilder {
 public:
@@ -50,5 +50,5 @@ private:
     std::string cpu_;
     llvm::Triple triple_;
 };
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_TARGET_MACHINE_BUILDER_H

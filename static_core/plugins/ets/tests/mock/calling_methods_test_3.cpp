@@ -19,7 +19,7 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *g_testBinFileName = "CallingMethodsTest.abc";
 
@@ -440,6 +440,6 @@ TEST_F(MethodsTest, CallMethodsTestGeneral13)
                      static_cast<ets_double>(0.0));
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, readability-magic-numbers)

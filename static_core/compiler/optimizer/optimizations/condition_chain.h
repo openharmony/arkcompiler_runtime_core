@@ -18,7 +18,7 @@
 
 #include "compiler/optimizer/ir/basicblock.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class ConditionChainManager;
 
 /*
@@ -127,6 +127,6 @@ private:
     size_t multiplePredecessorsSuccessorIndex_;
     size_t singlePredecessorSuccessorIndex_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_H

@@ -17,8 +17,8 @@
 
 #include "ets_napi.h"
 
-namespace panda::ets::napi {
+namespace ark::ets::napi {
 const ETS_NativeInterface *GetNativeInterface();
-}  // namespace panda::ets::napi
+}  // namespace ark::ets::napi
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_NATIVE_INTERFACE_H

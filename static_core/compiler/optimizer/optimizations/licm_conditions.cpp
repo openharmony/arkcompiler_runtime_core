@@ -19,7 +19,7 @@
 #include "optimizer/analysis/dominators_tree.h"
 #include "licm_conditions.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool LicmConditions::RunImpl()
 {
     conditionChainManager_.Reset();
@@ -415,4 +415,4 @@ void LicmConditions::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
     InvalidateBlocksOrderAnalyzes(GetGraph());
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

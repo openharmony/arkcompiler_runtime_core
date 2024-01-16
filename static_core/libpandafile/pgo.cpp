@@ -16,7 +16,7 @@
 #include "pgo.h"
 #include "utils/logger.h"
 
-namespace panda::panda_file::pgo {
+namespace ark::panda_file::pgo {
 
 /* static */
 std::string ProfileOptimizer::GetNameInfo(const std::unique_ptr<BaseItem> &item)
@@ -125,4 +125,4 @@ void ProfileOptimizer::ProfileGuidedRelayout(std::list<std::unique_ptr<BaseItem>
     items.sort(Cmp);
 }
 
-}  // namespace panda::panda_file::pgo
+}  // namespace ark::panda_file::pgo

@@ -23,7 +23,7 @@
 #include <functional>
 #include <variant>
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Represents Pre and Post barrier
 enum BarrierPosition : uint8_t {
@@ -202,6 +202,6 @@ private:
     BarrierOperandValue barrierOperandValue_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_LIBPANDABASE_MEM_GC_BARRIER_H

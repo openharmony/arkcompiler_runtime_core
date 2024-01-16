@@ -17,6 +17,6 @@
 #include "macros.h"
 #include "register_extensions.h"
 
-namespace panda::pandasm::extensions {
+namespace ark::pandasm::extensions {
 
-}  // namespace panda::pandasm::extensions
+}  // namespace ark::pandasm::extensions

@@ -15,9 +15,9 @@
 
 #include "assembly-parser.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 // NOLINTNEXTLINE(readability-function-size)
-inline std::string OperandTypePrint(panda::pandasm::Opcode op) {
+inline std::string OperandTypePrint(ark::pandasm::Opcode op) {
     switch (op) {
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
 %    insn = group.first
@@ -49,4 +49,4 @@ inline std::string OperandTypePrint(panda::pandasm::Opcode op) {
             return "undefined";
     }
 }
-} // namespace panda::pandasm
+} // namespace ark::pandasm

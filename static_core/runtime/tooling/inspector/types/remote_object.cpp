@@ -29,9 +29,9 @@
 #include <utility>
 #include <variant>
 
-using panda::helpers::string::Format;
+using ark::helpers::string::Format;
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 void RemoteObject::GeneratePreview(const std::vector<PropertyDescriptor> &properties) const
 {
     preview_.clear();
@@ -281,4 +281,4 @@ std::function<void(JsonObjectBuilder &)> RemoteObject::Type::ToJson() const
 
     return result;
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

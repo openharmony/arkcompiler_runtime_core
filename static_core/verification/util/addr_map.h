@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace panda::verifier {
+namespace ark::verifier {
 class AddrMap {
 public:
     AddrMap() = delete;
@@ -215,6 +215,6 @@ private:
     Range<uintptr_t> addrRange_;
     BitVector bitMap_;
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !_PANDA_VERIFIER_ADDR_MAP_HPP_

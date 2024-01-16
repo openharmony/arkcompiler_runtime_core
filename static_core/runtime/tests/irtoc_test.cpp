@@ -29,7 +29,7 @@ extern "C" size_t IrtocTestReturnBeforeLabel(size_t);
 
 using TestCfgFunc = uint64_t (*)(void *, uint64_t);
 
-namespace panda::test {
+namespace ark::test {
 
 TEST(Irtoc, AddValues)
 {
@@ -162,4 +162,4 @@ TEST(Irtoc, ReturnBeforeLabel)
     EXPECT_EQ(IrtocTestReturnBeforeLabel(146U), 1U);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

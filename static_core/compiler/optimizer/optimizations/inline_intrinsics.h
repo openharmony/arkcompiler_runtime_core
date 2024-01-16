@@ -21,7 +21,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /*
  * InlineIntrinsics(based on the results of the TypesAnalysis) tries to replace dynamic intrinsics to static
  * instructions For intrinsics that use bytecode profile for inlining (with flag inline_need_types set to true),
@@ -57,6 +57,6 @@ private:
     ArenaVector<Inst *> savedInputs_;
     ArenaVector<RuntimeInterface::NamedAccessProfileData> namedAccessProfile_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_INLINE_INTRINSICS_H

@@ -19,7 +19,7 @@
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/mem/gc/gc_extension_data.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class GCDynamicData : public GCExtensionData {
 public:
     explicit GCDynamicData(InternalAllocatorPtr a) : allocator_(a)
@@ -49,6 +49,6 @@ private:
     NO_MOVE_SEMANTIC(GCDynamicData);
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_DYNAMIC_DATA_H

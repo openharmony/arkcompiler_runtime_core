@@ -15,7 +15,7 @@
 
 #include "panda_runner.h"
 
-namespace panda::test {
+namespace ark::test {
 
 int PandaRunnerHookAArch64()
 {
@@ -34,4 +34,4 @@ int PandaRunnerHook(uintptr_t lr, uintptr_t fp)
     ManagedThread::GetCurrent()->SetNativePc(lr);
     return PandaRunner::callback_(lr, fp);
 }
-}  // namespace panda::test
+}  // namespace ark::test

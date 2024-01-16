@@ -23,7 +23,7 @@
 #include "runtime/include/object_accessor.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 
-namespace panda {
+namespace ark {
 
 /* static */
 template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
@@ -478,6 +478,6 @@ inline void ObjectAccessor::SetClass(ObjectHeader *obj, BaseClass *newClass)
         barrierSet->PostBarrier(ToVoidPtr(ToUintPtr(obj)), 0, newClass->GetManagedObject());
     }
 }
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H_

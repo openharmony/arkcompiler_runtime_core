@@ -18,7 +18,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class PandaContainersTest : public testing::Test {
 public:
@@ -30,7 +30,7 @@ public:
         options.SetLimitStandardAlloc(true);
         options.SetInternalAllocatorType("panda_allocators");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -52,14 +52,14 @@ public:
     NO_MOVE_SEMANTIC(PandaContainersTest);
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
 };
 
 constexpr size_t MAX_SIZE = InternalAllocator<>::LocalSmallObjectAllocator::GetMaxSize();
 TEST_F(PandaContainersTest, LocalTest)
 {
     ASSERT(!Runtime::GetCurrent()->GetOptions().UseMallocForInternalAllocations());
-    auto localAllocator = panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
+    auto localAllocator = ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
     ASSERT_EQ(GetLocalObjects(localAllocator), 0);
     {
         PandaVectorTL<uint8_t> vectorLocal;
@@ -90,7 +90,7 @@ TEST_F(PandaContainersTest, LocalTest)
 // Check that, when we use GLOBAL scope, there is no memory in thread-local allocator
 TEST_F(PandaContainersTest, GlobalTest)
 {
-    auto localAllocator = panda::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
+    auto localAllocator = ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator();
     ASSERT_EQ(GetLocalObjects(localAllocator), 0);
     {
         PandaVector<uint8_t> vectorGlobal;
@@ -110,4 +110,4 @@ TEST_F(PandaContainersTest, GlobalTest)
     ASSERT_EQ(GetLocalObjects(localAllocator), 0);
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

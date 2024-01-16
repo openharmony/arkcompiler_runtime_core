@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::cli::test {
+namespace ark::cli::test {
 
 std::string glob_argv0 = "";
 
@@ -76,11 +76,11 @@ TEST_F(PandaOptionsTest, PandaFiles)
     }
 }
 
-}  // namespace panda::cli::test
+}  // namespace ark::cli::test
 
 int main(int argc, char **argv)
 {
-    panda::cli::test::glob_argv0 = argv[0];
+    ark::cli::test::glob_argv0 = argv[0];
     // CHECKER_IGNORE_NEXTLINE(AF0010)
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

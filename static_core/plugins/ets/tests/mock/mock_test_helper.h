@@ -21,7 +21,7 @@
 
 #include "plugins/ets/runtime/napi/ets_scoped_objects_fix.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class MockEtsNapiTestBaseClass : public testing::Test {
 protected:
@@ -68,6 +68,6 @@ protected:
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 #endif  // PANDA_PLUGINS_ETS_TESTS_MOCK_MOCK_TEST_HELPER_H

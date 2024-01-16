@@ -44,7 +44,7 @@
  * flow input. Then we clear its NO_DCE flag such that it can be removed by DCE pass. We set
  * the NO_DCE flag for the insts that should be keeped.
  */
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 class CheckResolver : public compiler::Optimization {
 public:
@@ -62,6 +62,6 @@ public:
     }
 };
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_CHECK_RESOLVER_H

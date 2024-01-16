@@ -20,7 +20,7 @@
 #include "runtime/include/mtmanaged_thread.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::verifier::plugin {
+namespace ark::verifier::plugin {
 
 ManagedThread *DefaultPlugin::CreateManagedThread() const
 {
@@ -58,4 +58,4 @@ Type DefaultPlugin::NormalizeType(Type type, TypeSystem *types) const
     return result;
 }
 
-}  // namespace panda::verifier::plugin
+}  // namespace ark::verifier::plugin

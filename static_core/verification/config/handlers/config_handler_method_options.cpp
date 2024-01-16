@@ -31,9 +31,9 @@
 
 #include "utils/logger.h"
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
-using panda::verifier::config::Section;
+using ark::verifier::config::Section;
 
 namespace {
 
@@ -191,7 +191,7 @@ void RegisterConfigHandlerMethodOptions(Config *dcfg)
         if (!defaultPresent) {
             // take default section from inlined config
             Section cfg;
-            if (!ParseConfig(panda::verifier::config::VERIFIER_DEBUG_DEFAULT_CONFIG, cfg)) {
+            if (!ParseConfig(ark::verifier::config::VERIFIER_DEBUG_DEFAULT_CONFIG, cfg)) {
                 LOG(ERROR, VERIFIER) << "Cannot parse default verifier config";
                 return false;
             }
@@ -219,7 +219,7 @@ void SetDefaultMethodOptions(Config *dcfg)
     if (!options.IsOptionsPresent("default")) {
         // take default section from inlined config
         Section cfg;
-        if (!ParseConfig(panda::verifier::config::VERIFIER_DEBUG_DEFAULT_CONFIG, cfg)) {
+        if (!ParseConfig(ark::verifier::config::VERIFIER_DEBUG_DEFAULT_CONFIG, cfg)) {
             LOG(FATAL, VERIFIER) << "Cannot parse default internal config. Internal error.";
         }
         if (!MethodOptionsProcessor()(dcfg, cfg["debug"]["method_options"]["verifier"]["default"])) {
@@ -228,4 +228,4 @@ void SetDefaultMethodOptions(Config *dcfg)
     }
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug

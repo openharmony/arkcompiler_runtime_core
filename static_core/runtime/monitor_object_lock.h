@@ -19,7 +19,7 @@
 #include "runtime/handle_scope.h"
 #include "runtime/mem/vm_handle.h"
 
-namespace panda {
+namespace ark {
 class ObjectLock {
 public:
     PANDA_PUBLIC_API explicit ObjectLock(ObjectHeader *obj);
@@ -41,6 +41,6 @@ private:
     HandleScope<ObjectHeader *> scope_;
     VMHandle<ObjectHeader> objHandler_;
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MONITOR_OBJECT_LOCK_H_

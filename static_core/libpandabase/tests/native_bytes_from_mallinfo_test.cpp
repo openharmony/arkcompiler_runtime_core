@@ -19,12 +19,12 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::test::mem {
+namespace ark::test::mem {
 
 TEST(Mem, GetNativeBytesFromMallinfoTest)
 {
 #if (!defined(PANDA_ASAN_ON)) && (!defined(PANDA_TSAN_ON)) && (defined(__GLIBC__) || defined(PANDA_TARGET_MOBILE))
-    size_t oldBytes = panda::os::mem::GetNativeBytesFromMallinfo();
+    size_t oldBytes = ark::os::mem::GetNativeBytesFromMallinfo();
     // NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-no-malloc,clang-analyzer-unix.Malloc,modernize-loop-convert)
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     void *p1[1000U];
@@ -32,7 +32,7 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
         p1[i] = malloc(64U);
         ASSERT_NE(p1[i], nullptr);
     }
-    size_t newBytes = panda::os::mem::GetNativeBytesFromMallinfo();
+    size_t newBytes = ark::os::mem::GetNativeBytesFromMallinfo();
     ASSERT_TRUE(newBytes > oldBytes);
 
     oldBytes = newBytes;
@@ -42,7 +42,7 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
         p2[i] = malloc(4U * 1024U * 1024U);
         ASSERT_NE(p2[i], nullptr);
     }
-    newBytes = panda::os::mem::GetNativeBytesFromMallinfo();
+    newBytes = ark::os::mem::GetNativeBytesFromMallinfo();
     ASSERT_TRUE(newBytes > oldBytes);
 
     oldBytes = newBytes;
@@ -50,7 +50,7 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
         free(p1[i]);
         p1[i] = nullptr;
     }
-    newBytes = panda::os::mem::GetNativeBytesFromMallinfo();
+    newBytes = ark::os::mem::GetNativeBytesFromMallinfo();
     ASSERT_TRUE(newBytes < oldBytes);
 
     oldBytes = newBytes;
@@ -59,12 +59,12 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
         p2[i] = nullptr;
     }
     // NOLINTEND(readability-magic-numbers,cppcoreguidelines-no-malloc,clang-analyzer-unix.Malloc,modernize-loop-convert)
-    newBytes = panda::os::mem::GetNativeBytesFromMallinfo();
+    newBytes = ark::os::mem::GetNativeBytesFromMallinfo();
     ASSERT_TRUE(newBytes < oldBytes);
 #else
-    size_t bytes = panda::os::mem::GetNativeBytesFromMallinfo();
-    ASSERT_EQ(bytes, panda::os::mem::DEFAULT_NATIVE_BYTES_FROM_MALLINFO);
+    size_t bytes = ark::os::mem::GetNativeBytesFromMallinfo();
+    ASSERT_EQ(bytes, ark::os::mem::DEFAULT_NATIVE_BYTES_FROM_MALLINFO);
 #endif
 }
 
-}  // namespace panda::test::mem
+}  // namespace ark::test::mem

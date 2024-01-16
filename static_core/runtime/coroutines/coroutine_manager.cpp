@@ -16,7 +16,7 @@
 #include <optional>
 #include "runtime/coroutines/coroutine_manager.h"
 
-namespace panda {
+namespace ark {
 
 CoroutineManager::CoroutineManager(CoroutineFactory factory) : coFactory_(factory)
 {
@@ -138,4 +138,4 @@ void CoroutineManager::FreeCoroutineId(uint32_t id)
     coroutineIds_.reset(id);
 }
 
-}  // namespace panda
+}  // namespace ark

@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/if_merging.h"
 #include "optimizer/optimizations/branch_elimination.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class IfMergingTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -1409,4 +1409,4 @@ TEST_F(IfMergingTest, ConstantPhiDontRemoveLoop)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

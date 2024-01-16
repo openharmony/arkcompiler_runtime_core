@@ -18,8 +18,8 @@
 
 #include "runtime/mem/region_allocator.h"
 
-namespace panda::mem {
-constexpr size_t G1_REGION_SIZE = panda::mem::RegionAllocator<panda::mem::ObjectAllocConfig>::REGION_SIZE;
-}  // namespace panda::mem
+namespace ark::mem {
+constexpr size_t G1_REGION_SIZE = ark::mem::RegionAllocator<ark::mem::ObjectAllocConfig>::REGION_SIZE;
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_GC_G1_G1_ALLOCATOR_CONSTANTS_H

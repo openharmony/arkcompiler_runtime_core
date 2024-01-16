@@ -20,7 +20,7 @@
 #include "runtime/mem/local_object_handle.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 
-namespace panda {
+namespace ark {
 
 template <typename T>
 template <typename P, typename>
@@ -35,6 +35,6 @@ inline VMHandle<T>::VMHandle(mem::GlobalObjectStorage *globalStorage, mem::Refer
     ASSERT(reference != nullptr);
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // RUNTIME_MEM_OBJECT_VMHANDLE_INL_H
