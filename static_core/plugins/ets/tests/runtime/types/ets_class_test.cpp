@@ -168,6 +168,30 @@ TEST_F(EtsClassTest, GetInstanceFieldsNumber)
     }
 }
 
+TEST_F(EtsClassTest, GetFieldIndexByName)
+{
+    const char *source = R"(
+            .language eTS
+            .record TestObject {}
+            .record A {
+                TestObject obj_x
+                TestObject obj_y
+                TestObject obj_z
+                TestObject obj_k
+            }
+        )";
+
+    EtsClass *klass = GetTestClass(source, "LA;");
+    ASSERT_NE(klass, nullptr);
+
+    std::unordered_set<std::uint32_t> descSetIndex = {0, 1, 2, 3};
+    ASSERT_TRUE(descSetIndex.count(klass->GetFieldIndexByName("obj_x")) > 0);
+    descSetIndex.erase(klass->GetFieldIndexByName("obj_x"));
+    ASSERT_TRUE(descSetIndex.count(klass->GetFieldIndexByName("obj_k")) > 0);
+    descSetIndex.erase(klass->GetFieldIndexByName("obj_k"));
+    ASSERT_TRUE(descSetIndex.count(klass->GetFieldIndexByName("obj_p")) == 0);
+}
+
 TEST_F(EtsClassTest, GetFieldIDByName)
 {
     const char *source = R"(
@@ -196,6 +220,36 @@ TEST_F(EtsClassTest, GetFieldIDByName)
 
     ASSERT_EQ(fieldX, klass->GetFieldIDByOffset(fieldX->GetOffset()));
     ASSERT_EQ(fieldY, klass->GetFieldIDByOffset(fieldY->GetOffset()));
+}
+
+TEST_F(EtsClassTest, GetDeclaredFieldIDByName)
+{
+    const char *source = R"(
+        .language eTS
+        .record Ball {
+            f32 BALL_RADIUS
+            i32 BALL_SPEED
+            f32 vx
+            i32 vy
+        }
+    )";
+
+    EtsClass *klass = GetTestClass(source, "LBall;");
+    ASSERT_NE(klass, nullptr);
+
+    EtsField *field1 = klass->GetDeclaredFieldIDByName("BALL_RADIUS");
+    ASSERT_NE(field1, nullptr);
+    ASSERT_TRUE(!strcmp(field1->GetName(), "BALL_RADIUS"));
+
+    EtsField *field2 = klass->GetDeclaredFieldIDByName("BALL_NUM");
+    ASSERT_EQ(field2, nullptr);
+
+    EtsField *field3 = klass->GetDeclaredFieldIDByName("vx");
+    ASSERT_NE(field3, nullptr);
+    ASSERT_TRUE(!strcmp(field3->GetName(), "vx"));
+
+    ASSERT_EQ(field1, klass->GetFieldIDByOffset(field1->GetOffset()));
+    ASSERT_EQ(field3, klass->GetFieldIDByOffset(field3->GetOffset()));
 }
 
 TEST_F(EtsClassTest, GetStaticFieldIDByName)
@@ -423,6 +477,104 @@ TEST_F(EtsClassTest, GetMethod)
     EtsMethod *methodFoo1FromKlassB = klassB->GetMethod("foo1");
     ASSERT_NE(methodFoo1FromKlassB, nullptr);
     ASSERT_TRUE(!strcmp(methodFoo1FromKlassB->GetName(), "foo1"));
+}
+
+TEST_F(EtsClassTest, GetMethodByIndex)
+{
+    const char *source = R"(
+        .language eTS
+        .record N {}
+        .record A {}
+        .record B <ets.extends = A> {}
+        .record TestObject {}
+
+        .function void A.foo1() {
+            return.void
+        }
+        .function void A.foo2() {
+            return.void
+        }
+        .function TestObject B.foo3(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
+            return
+        }
+    )";
+
+    EtsClass *klassA = GetTestClass(source, "LA;");
+    EtsClass *klassB = GetTestClass(source, "LB;");
+    ASSERT_NE(klassA, nullptr);
+    ASSERT_NE(klassB, nullptr);
+
+    // test Method:GetMethodsNum
+    std::size_t klassAMethodSize = 2;
+    std::size_t klassBMethodSize = 3;
+    ASSERT_EQ(klassAMethodSize, klassA->GetMethodsNum());
+    ASSERT_EQ(klassBMethodSize, klassB->GetMethodsNum());
+
+    EtsClass *klassN = GetTestClass(source, "LN;");
+    ASSERT_NE(klassN, nullptr);
+    ASSERT_FALSE(klassN->GetMethodsNum());
+
+    std::unordered_set<std::string> descSetA = {"foo1", "foo2"};
+    for (std::size_t i = 0; i < klassAMethodSize; ++i) {
+        ASSERT_TRUE(descSetA.count(klassA->GetMethodByIndex(i)->GetName()) > 0);
+        descSetA.erase(klassA->GetMethodByIndex(i)->GetName());
+    }
+
+    std::unordered_set<std::string> descSetB = {"foo1", "foo2", "foo3"};
+    for (std::size_t i = 0; i < klassBMethodSize; ++i) {
+        ASSERT_TRUE(descSetB.count(klassB->GetMethodByIndex(i)->GetName()) > 0);
+        descSetB.erase(klassB->GetMethodByIndex(i)->GetName());
+    }
+}
+
+TEST_F(EtsClassTest, GetMethods)
+{
+    const char *source = R"(
+        .language eTS
+        .record N {}
+        .record A {}
+        .record B <ets.extends = A> {}
+        .record TestObject {}
+
+        .function void A.foo1() {
+            return.void
+        }
+        .function void A.foo2() {
+            return.void
+        }
+        .function TestObject B.foo3(i32 a0, i32 a1, f32 a2, f64 a3, f32 a4) {
+            return
+        }
+    )";
+
+    EtsClass *klassA = GetTestClass(source, "LA;");
+    EtsClass *klassB = GetTestClass(source, "LB;");
+    ASSERT_NE(klassA, nullptr);
+    ASSERT_NE(klassB, nullptr);
+
+    std::unordered_set<std::string> descSetA = {"foo1", "foo2"};
+    auto etsMethodsA = PandaVector<EtsMethod *>();
+    etsMethodsA = klassA->GetMethods();
+    std::size_t etsMethodsASize = etsMethodsA.size();
+    for (std::size_t i = 0; i < etsMethodsASize; ++i) {
+        ASSERT_TRUE(descSetA.count(etsMethodsA.at(i)->GetName()) > 0);
+        descSetA.erase(etsMethodsA.at(i)->GetName());
+    }
+
+    std::unordered_set<std::string> descSetB = {"foo1", "foo2", "foo3"};
+    auto etsMethodsB = PandaVector<EtsMethod *>();
+    etsMethodsB = klassB->GetMethods();
+    std::size_t etsMethodsBSize = etsMethodsB.size();
+    for (std::size_t i = 0; i < etsMethodsBSize; ++i) {
+        ASSERT_TRUE(descSetB.count(etsMethodsB.at(i)->GetName()) > 0);
+        descSetB.erase(etsMethodsB.at(i)->GetName());
+    }
+
+    EtsClass *klassN = GetTestClass(source, "LN;");
+    ASSERT_NE(klassN, nullptr);
+    auto etsMethodsC = PandaVector<EtsMethod *>();
+    etsMethodsC = klassN->GetMethods();
+    ASSERT_TRUE(etsMethodsC.empty());
 }
 
 static void TestGetPrimitiveClass(const char *primitiveName)
