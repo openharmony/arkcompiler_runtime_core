@@ -37,9 +37,57 @@ export BUILD=/path/to/panda/build
 python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUILD
 ```
 
-### Supported test suites
+### Supported ETS test suites
 
--   `--parser` - parser (aka regression) tests
+-   `--parser` - parser (aka regression)
+    Tests folders:
+      - `ets_frontend/ets2panda/test/parser/ets`
+      - `ets_frontend/ets2panda/test/compiler/ets`
+-   `--ets-func-tests` - tests for ArkTS: standard library and ets func tests
+    Tests folder: `plugins/ets/tests/ets_func_tests/`
+    Chapters:
+      - `all`
+      - `algorithms-dir`
+      - `escompat-dir`
+      - `regression-dir`
+      - `spec-dir`
+      - `std-containers-dir`
+      - `std-core-dir`
+      - `std-math-dir`
+      - `std-time-dir`
+      - `std-serialization-dir`
+      - `chapter-1-of-4`
+      - `chapter-2-of-4`
+      - `chapter-3-of-4`
+      - `chapter-4-of-4`
+-   `--ets-runtime` - ETS runtime tests
+    Tests folder: `ets_frontend/ets2panda/test/runtime/ets`
+-   `--ets-cts` - CTS language specification tests
+    Tests folder: `plugins/ets/tests/ets-templates`
+    Chapters:
+      - `all`
+      - `chapter02` - `02.lexical_elements`
+      - `chapter03` - `03.types`
+      - `chapter04` - `04.names_declarations_and_scopes`
+      - `chapter05` - `05.generics`
+      - `chapter06` - `06.conversions_and_contexts`
+      - `chapter07` - `07.expressions`
+      - `chapter08` - `08.statements`
+      - `chapter09` - `09.classes`
+      - `chapter10` - `10.interfaces`
+      - `chapter11` - `11.enumerations`
+      - `chapter12` - `12.errors`
+      - `chapter13` - `13.modules_and_compilation_units`
+      - `chapter14` - `14.semantic_rules`
+      - `chapter17` - `17.experimental_features`
+      - `chapters02-05`
+      - `chapters06-09`
+      - `chapters10-12`
+      - `chapters13-17`
+
+### Supported JS test suites
+
+-   `--parser` - parser (aka regression)
 -   `--hermes` - Hermes JS runtime tests. To run tests from the Hermes suite, specify environment variables `HERMES_REVISION` and `HERMES_URL` in the `.env` file.
 -   `--test262` - Test262 JS parser and runtime tests. To run tests from the test262 suite, specify environment variables `TEST262_REVISION` and `TEST262_URL` in the `.env` file.
 -   `--ets-func-tests` - tests for ArkTS: standard library and ets func tests
