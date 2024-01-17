@@ -201,12 +201,12 @@ private:
     Options options_ {""};
 };
 
-static bool g_gDone = false;
+static bool g_done = false;
 
 static void SignalHandler(int sig)
 {
     if (sig == SIGINT || sig == SIGHUP || sig == SIGTERM) {
-        g_gDone = true;
+        g_done = true;
     }
 }
 
@@ -255,7 +255,7 @@ static int Main(panda::Span<const char *> args)
 
     LOG(INFO, DPROF) << "Daemon is ready for connections";
     // Main loop
-    while (!g_gDone) {
+    while (!g_done) {
         os::unique_fd::UniqueFd clientSock(::accept4(sock.Get(), nullptr, nullptr, SOCK_CLOEXEC));
         if (!clientSock.IsValid()) {
             if (errno == EINTR) {
