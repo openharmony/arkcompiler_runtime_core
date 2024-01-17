@@ -74,8 +74,9 @@ In a qualified name *N.x* (where *N* is a simple name, and ``x`` is an
 identifier that can follow a sequence of identifiers separated with '.'
 tokens), *N* can name the following:
 
--  A compilition unit (see :ref:`Modules and Compilation Units`) with ``x``
-   to name its exported entity;
+-  The name of a compilation unit (see :ref:`Modules and Compilation Units`)
+   introduced as a result of ``import * as N`` (see :ref:`Bind All with Qualified Access`)
+   with ``x`` to name the exported entity;
 
 -  A class or interface type (see :ref:`Classes`, :ref:`Interfaces`) with ``x``
    to name its static member;
@@ -96,6 +97,7 @@ tokens), *N* can name the following:
    method
    token
    separator
+   static member
 
 |
 
@@ -572,7 +574,7 @@ Variable Declarations
 .. meta:
     frontend_status: Done
     todo: spec issue: missing the default value for unsigned types - but would be better to remove entirely, just reference to 3.6 Default Value
-    todo: es2panda bug: A local variable must be explicitly given a value before if is used, by either
+    todo: es2panda bug: A local variable must be explicitly given a value before it is used, by either
     todo: "Every variable in program must have a value before its value is used" - Can't be guaranteed in compile time that a non-nullable array component is initialized. initialization or assignment. But we got no error if don't init a primitive typed local var.
 
 A *variable declaration* introduces a new named variable that can be assigned
@@ -601,10 +603,11 @@ When a variable is introduced by a variable declaration, type *T* of the
 variable is determined as follows:
 
 -  *T* is the type specified in a type annotation (if any) of the declaration.
-   If *'?'* is used after the name of the variable, then the type of the
-   variable is *type* | *undefined.* If the declaration also has an initializer,
-   then the initializer expression must be compatible with *T* (see
-   :ref:`Type Compatibility with Initializer`).
+
+   - If *'?'* is used after the name of the variable, then the actual type *T*
+     of the variable is *type* | *undefined*.
+   - If the declaration also has an initializer, then the initializer expression
+     type must be compatible with *T* (see :ref:`Type Compatibility with Initializer`).
 
 -  If no type annotation is available, then *T* is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
@@ -653,16 +656,19 @@ occurs.
 If an initializer expression is provided, then additional restrictions apply
 to the content of the expression as described in :ref:`Exceptions and Initialization Expression`.
 
-If a variable is declared as *readonly*, then its type must be *array*, and
-the restrictions on its operations can be applied to the variable as described
-in :ref:`Readonly Parameters`.
+If the type of a variable declaration has the prefix *readonly*, then the
+type must be of *array* kind, and the restrictions on its operations are
+applied to the variable as described in :ref:`Readonly Parameters`.
+
+A :index:`compile-time error` occurs if a non-array type has the prefix
+*readonly*.
 
 .. code-block:: typescript
    :linenos:
 
     function foo (p: number[]) {
        let x: readonly number [] = p
-       x[0] = 666 // Compile-time error
+       x[0] = 666 // Compile-time error as array itself is readonly
        console.log (x[0]) // read operation is OK
     }
 
@@ -794,11 +800,11 @@ is inferred from the initializer as follows:
 -  If the initializer expression is the *null* literal, then the type is
    *Object* \| *null*.
 
--  If the intializer expresion is of union type comprised of numeric literals
+-  If the initializer expression is of union type comprised of numeric literals
    only, then the type is the smallest numeric type all numeric literals fit
    into.
 
--  If the intializer expresion is of union type comprised of literals of a
+-  If the initializer expression is of union type comprised of literals of a
    single type *T*, then the type is *T*.
 
 -  If the type can be inferred from the initializer expression, then the type
@@ -843,7 +849,7 @@ Function Declarations
     frontend_status: Partly
 
 *Function declarations* specify names, signatures, and bodies when
-introducing *named functions*.
+introducing *named functions*. A function body is a block (see :ref:`Block`).
 
 .. code-block:: abnf
 
@@ -860,18 +866,14 @@ introducing *named functions*.
 Function *overload signature* allows calling a function in different ways (see
 :ref:`Function Overload Signatures`).
 
-In a *native function* (see :ref:`Native Functions`), the body is omitted.
-
 If a function is declared as *generic* (see :ref:`Generics`), then its type
 parameters must be specified.
 
-Native functions are described in Experimental Features (see
-:ref:`Native Functions`).
+The ``native`` modifier indicates that the function is 
+a *native function* (see :ref:`Native Functions` in Experimental Features).
+A compile-time error occurs if a *native function* has a body.
 
 Functions must be declared on the top level (see :ref:`Top-Level Statements`).
-
-Function expressions must be used to define lambdas (see
-:ref:`Lambda Expressions`).
 
 .. index::
    function declaration
@@ -1258,16 +1260,18 @@ the following conditions:
 
 -  If there is no return statement, or if all return statements have no
    expressions, then the return type is *void* (see :ref:`void Type`).
--  If there is at least one return statement with an expression, and the
-   type of each expression in each return statement is *R*, then the
-   return type is *R*.
+-  If there are *k* return statements (where *k* is 1 or more) with
+   the same type expression *R*, then the *R* is the return type.
 -  If there are *k* return statements (where *k* is 2 or more) with
    expressions of types (*T*:sub:`1`, ``...``, *T*:sub:`k`), and *R*
-   is the *least upper bound* (see :ref:`Least Upper Bound`) of these types,
-   then the return type is *R*.
+   is the *union type* (see :ref:`Union Types`) of these types
+   (*T*:sub:`1` | ... | *T*:sub:`k`), 
+   and its normalized version (see :ref:`Union Types Normalization`) is the the
+   return type.
 -  If the function is *async*, the return type is inferred by using the rules
    above, and the type *T* is not *Promise* type, then the return type
    is *Promise<T>*.
+
 
 Future compiler implementations are to infer the return type in more cases.
 The type inference is presented in the example below:
@@ -1281,7 +1285,6 @@ The type inference is presented in the example below:
    native function
    return statement
    expression
-   least upper bound
    function
    implementation
 
@@ -1303,11 +1306,21 @@ The type inference is presented in the example below:
         else
             return new Derived2()
     }
-    /* Return type of bar will be inferred as Base which is 
-       LUB for Derived1 and Derived2 */
+    // Return type of bar will be Derived1|Derived2 union type
+
+    function boo (condition: boolean) {
+        if (condition) return 1
+    }
+    // That is a compile time error as there is an execution path with no return
+
 
 If a particular type inference case is not recognized by the compiler, then
 a corresponding :index:`compile-time error` occurs.
+
+If the function return type is not *void* and
+there is an execution path in the function or method body which has no
+return statement (see :ref:`Return Statements`),
+then a :index:`compile-time error` occurs.
 
 |
 
@@ -1382,7 +1395,6 @@ either exported or non-exported.
    function
    implementation
    overload signature
-   least upper bound
    compatibility
 
 .. raw:: pdf

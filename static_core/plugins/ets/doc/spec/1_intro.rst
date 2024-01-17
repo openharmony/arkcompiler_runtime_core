@@ -171,7 +171,7 @@ automatic or semi-automatic transition from other languages (currently,
 Lexical and Syntactic Notation
 ******************************
 
-This section introduces the notation nown as *context-free grammar*. It is
+This section introduces the notation known as *context-free grammar*. It is
 used in this specification to define the lexical and syntactic structure of
 a program.
 
@@ -581,9 +581,10 @@ as used in other languages, application areas, or industries.
      member declarations).
 
    static member
-     -- a constant variable (variable of a primitive type, or type *String*)
-     that is declared constant and initialized with a compile-time constant
-     expression.
+     -- a class or interface member that is not related to a particular class 
+     instance. A static member can be used across an entire program by using
+     a qualified name notation (qualification is the name of a class or
+     an interface).
 
    linearization
      -- de-nesting of all nested types in a union type to present them in

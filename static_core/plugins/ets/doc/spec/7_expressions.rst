@@ -161,17 +161,6 @@ with values that can be determined at compile time.
 
 .. index::
    expression
-   declaration of type
-   class
-   interface
-   field initializer
-   static initializer
-   constructor declaration
-   method declaration
-   annotation
-   function body
-   package declaration
-   top-level declaration
    constant expression
    compile time
 
@@ -567,7 +556,7 @@ A *qualifiedName* that is not a *simple name* refers to the following:
 .. code-block:: typescript
    :linenos:
 
-    import * as packageName from "someFile"
+    import * as compilationUnitName from "someFile"
 
     class Type {}
 
@@ -575,9 +564,9 @@ A *qualifiedName* that is not a *simple name* refers to the following:
       let local: Type = parameter /* here 'parameter' is the
           expression in the form of simple name */
       local = new Type () /* here 'local' is the expression in the
-          form of qualified name */
-      local = packageName.someGlobalVariable /* here qualifiedName
-          refers to a global variable imported from some package */
+          form of simple name */
+      local = compilationUnitName.someGlobalVariable /* here qualifiedName
+          refers to a global variable imported from some compilation unit */
     }
 
 |
@@ -706,8 +695,6 @@ of an assignment, call parameter type, or type of a cast expression:
    assignment
    call parameter type
    cast expression
-
-|
 
 .. code-block:: typescript
    :linenos:
@@ -1365,208 +1352,6 @@ is a class type, or a class that is a subtype of *T*.
    class type
    class
 
-|
-
-.. _Method Call Expression:
-
-Method Call Expression
-**********************
-
-.. meta:
-    frontend_status: Done
-
-A method call expression calls a static or instance method of a class or
-an interface.
-
-.. index::
-   method call expression
-   static method
-   instance method
-   class
-   interface
-
-.. code-block:: abnf
-
-    methodCallExpression:
-        objectReference ('.' | '?.) identifier typeArguments? arguments block?
-        ;
-
-The syntax form that has a block associated with the method call is a special
-form called '*trailing lambda call*' (see :ref:`Trailing Lambda` for details.
-
-A compile-time error occurs if *typeArguments* is present, and any of type
-arguments is a wildcard (see :ref:`Type Arguments`).
-
-A method call with '?.' (see :ref:`Chaining Operator`) is
-called a '*safe method call*' because it handles nullish values safely.
-
-Resolving a method at compile time is more complicated than resolving a field
-because method overloading (see :ref:`Class Method Overloading`) can occur.
-
-There are several steps that determine and check the method to be called at
-compile time (see :ref:`Step 1 Selection of Type to Use`,
-:ref:`Step 2 Selection of Method`, and
-:ref:`Step 3 Semantic Correctness Check`).
-
-.. index::
-   compile-time error
-   type argument
-   wildcard
-   method call
-   chaining operator
-   safe method call
-   nullish value
-   method resolution
-   compile time
-   field resolution
-   method overloading
-   semantic correctness check
-
-|
-
-.. _Step 1 Selection of Type to Use:
-
-Step 1: Selection of Type to Use
-================================
-
-.. meta:
-    frontend_status: Done
-
-The object reference and the method identifier are used to determine the
-type in which to search the method. The following options must be considered:
-
-+----------------------------------+-----------------------------------------------+
-| Form of object reference         | Type to use                                   |
-+==================================+===============================================+
-| *typeReference.identifier*       | Type denoted by *typeReference*.              |
-+----------------------------------+-----------------------------------------------+
-| *expression.identifier*, where   | *T* if *T* is a class or interface,           |
-| *expression* is of type *T*      | *T*’s constraint                              |
-|                                  | (:ref:`Type Parameter Constraint`) if *T* is  |
-|                                  | a type parameter. A compile-time error occurs |
-|                                  | otherwise.                                    |
-+----------------------------------+-----------------------------------------------+
-| *super.identifier*               | The superclass of the class that contains     |
-|                                  | the method call.                              |
-+----------------------------------+-----------------------------------------------+
-
-.. index::
-   type
-   object reference
-   method identifier
-   compile-time error
-   expression
-   identifier
-   interface
-   superclass
-   class
-   method call
-   type parameter constraint
-
-|
-
-.. _Step 2 Selection of Method:
-
-Step 2: Selection of Method
-===========================
-
-.. meta:
-    frontend_status: Done
-
-After the type to use is known, the call method must be determined.
-
-The goal is to select one from all potentially applicable methods.
-
-As there is more than one applicable method, the *most specific* method must
-be selected. The method selection process is as follows:
-
-.. index::
-   method selection
-   call method
-   type
-   most specific method
-   applicable method
-
-#. All potentially applicable methods (i.e., all methods with the given name
-   that are accessible at the point of call) must be found.
-
-#. If there are several overloaded methods, the overload resolution (see :ref:`Overload Resolution`)
-   must be performed without boxing/unboxing, and with no consideration to the
-   *rest* (see :ref:`Rest Parameter`) and *optional* (see :ref:`Optional Parameters`)
-   parameters.
-
-#. If the method is not selected, the overload resolution (see :ref:`Overload Resolution`)
-   must be performed with boxing/unboxing.
-
-#. If the method is still not selected, the overload resolution (see :ref:`Overload Resolution`)
-   must be performed with boxing/unboxing, and with consideration to the *rest*
-   (see :ref:`Rest Parameter`) and *optional* (see :ref:`Optional Parameters`)
-   parameters.
-
-.. index::
-   method selection
-   call method
-   applicable method
-   overloaded method
-   access
-   method
-   point of call
-   overload resolution
-   boxing
-   unboxing
-   rest parameter
-   optional parameter
-
-A compile-time error occurs if:
-
--  There is no method to select; or
--  There are more than one applicable methods.
-
-.. index::
-   compile-time error
-   method selection
-   applicable method
-
-|
-
-.. _Step 3 Semantic Correctness Check:
-
-Step 3: Semantic Correctness Check
-==================================
-
-.. meta:
-    frontend_status: Done
-
-At this step, the single method to call (the *most specific* method) is known,
-and the following set of semantic checks must be performed:
-
--  If the method call has the form *typeReference.identifier*, then the method
-   must be declared ``static``. Otherwise, a compile-time error occurs.
-
--  If the method call has the form *expression.identifier*, then the method
-   must not be declared ``static``. Otherwise, a compile-time error occurs.
-
--  If the method call has the form *super.identifier*, then the method must
-   not be declared ``abstract``. Otherwise, a compile-time error occurs.
-
--  If the last argument of a method call has the spread operator '``...``',
-   then *objectReference* that follows that argument must refer to an array
-   whose type is compatible (see :ref:`Type Compatibility`) with the type
-   specified in the last parameter of the method declaration.
-
-.. index::
-   semantic correctness check
-   most specific method
-   method call
-   static method call
-   compile-time error
-   abstract method call
-   type argument
-   method declaration
-   argument
-   spread operator
-   compatible type
-   type compatibility
 
 |
 
@@ -1630,7 +1415,6 @@ Accessing Current Object Fields
 
 .. meta:
     frontend_status: Partly
-    todo: ?. should be obligatory when accessing fields of a nullable object
 
 An object reference used for Field Access must be a non-nullish reference
 type *T*. Otherwise, a compile-time error occurs.
@@ -1792,6 +1576,388 @@ is not *T*).
    qualified name
 
 
+
+|
+
+.. _Method Call Expression:
+
+Method Call Expression
+**********************
+
+.. meta:
+    frontend_status: Done
+
+A method call expression calls a static or instance method of a class or
+an interface.
+
+.. index::
+   method call expression
+   static method
+   instance method
+   class
+   interface
+
+.. code-block:: abnf
+
+    methodCallExpression:
+        objectReference ('.' | '?.) identifier typeArguments? arguments block?
+        ;
+
+The syntax form that has a block associated with the method call is a special
+form called '*trailing lambda call*' (see :ref:`Trailing Lambda` for details.
+
+A compile-time error occurs if *typeArguments* is present, and any of type
+arguments is a wildcard (see :ref:`Type Arguments`).
+
+A method call with '?.' (see :ref:`Chaining Operator`) is
+called a '*safe method call*' because it handles nullish values safely.
+
+Resolving a method at compile time is more complicated than resolving a field
+because method overloading (see :ref:`Class Method Overloading`) can occur.
+
+There are several steps that determine and check the method to be called at
+compile time (see :ref:`Step 1 Selection of Type to Use`,
+:ref:`Step 2 Selection of Method`, and
+:ref:`Step 3 Semantic Correctness Check`).
+
+.. index::
+   compile-time error
+   type argument
+   wildcard
+   method call
+   chaining operator
+   safe method call
+   nullish value
+   method resolution
+   compile time
+   field resolution
+   method overloading
+   semantic correctness check
+
+|
+
+.. _Step 1 Selection of Type to Use:
+
+Step 1: Selection of Type to Use
+================================
+
+.. meta:
+    frontend_status: Done
+
+The object reference and the method identifier are used to determine the
+type in which to search the method. The following options must be considered:
+
++----------------------------------+-----------------------------------------------+
+| Form of object reference         | Type to use                                   |
++==================================+===============================================+
+| *typeReference.identifier*       | Type denoted by *typeReference*.              |
++----------------------------------+-----------------------------------------------+
+| *expression.identifier*, where   | *T* if *T* is a class or interface,           |
+| *expression* is of type *T*      | *T*’s constraint                              |
+|                                  | (:ref:`Type Parameter Constraint`) if *T* is  |
+|                                  | a type parameter. A compile-time error occurs |
+|                                  | otherwise.                                    |
++----------------------------------+-----------------------------------------------+
+| *super.identifier*               | The superclass of the class that contains     |
+|                                  | the method call.                              |
++----------------------------------+-----------------------------------------------+
+
+.. index::
+   type
+   object reference
+   method identifier
+   compile-time error
+   expression
+   identifier
+   interface
+   superclass
+   class
+   method call
+   type parameter constraint
+
+|
+
+.. _Step 2 Selection of Method:
+
+Step 2: Selection of Method
+===========================
+
+.. meta:
+    frontend_status: Done
+
+After the type to use is known, the call method must be determined.
+The goal is to select one from all potentially applicable methods.
+
+As there is more than one applicable method, the *most specific* method must
+be selected. The method selection process results with the set of 
+applicable methods and is described in :ref:`Function or method selection`.
+
+.. index::
+   method selection
+   call method
+   type
+   most specific method
+   applicable method
+   overload resolution
+
+A compile-time error occurs if:
+
+-  The set of applicable methods is empty; or
+-  The set of applicable methods has more than one candidate.
+
+.. index::
+   compile-time error
+   method selection
+   applicable method
+
+|
+
+.. _Step 3 Semantic Correctness Check:
+
+Step 3: Semantic Correctness Check
+==================================
+
+.. meta:
+    frontend_status: Done
+
+At this step, the single method to call (the *most specific* method) is known,
+and the following set of semantic checks must be performed:
+
+-  If the method call has the form *typeReference.identifier*, then the method
+   must be declared ``static``. Otherwise, a compile-time error occurs.
+
+-  If the method call has the form *expression.identifier*, then the method
+   must not be declared ``static``. Otherwise, a compile-time error occurs.
+
+-  If the method call has the form *super.identifier*, then the method must
+   not be declared ``abstract``. Otherwise, a compile-time error occurs.
+
+-  If the last argument of a method call has the spread operator '``...``',
+   then *objectReference* that follows that argument must refer to an array
+   whose type is compatible (see :ref:`Type Compatibility`) with the type
+   specified in the last parameter of the method declaration.
+
+.. index::
+   semantic correctness check
+   most specific method
+   method call
+   static method call
+   compile-time error
+   abstract method call
+   type argument
+   method declaration
+   argument
+   spread operator
+   compatible type
+   type compatibility
+
+|
+
+.. _Function or method selection:
+
+Function or method selection
+============================
+
+The function selection is the process of choosing the functions
+or methods that are applicable for the given function or method call.
+The choosing algorithm is described below:
+
+1. An empty list of applicable candidates is created.
+
+2. The argument types are taken from the call and compose the list 
+TA = ( *ta*:sub:`1` , *ta*:sub:`2` , ... *ta*:sub:`n` ) where *ta*:sub:`i`
+is the type of the *i*’th argument, and n is the number of the function
+or method call arguments.
+
+3. Suppose there is a set of M candidates (functions or methods with
+the same name) that are accessible at the point of call. 
+The following actions are performed for every candidate:
+
+3.1 If the number of parameters if the *j*’th candidate is not equal to n
+then the candidate is excluded from the M set.
+
+3.2 For each candidate from the M set, the following check is performed.
+Each type *ta*:sub:`i` from the list TA is compared with the type of the
+*i*’th candidate parameter. The comparison is performed using 
+the rules of type compatibility (see :ref:`Type Compatibility`) but without 
+consideration for possible boxing conversions (see :ref:`Boxing Conversions`)
+and unboxing conversions (see :ref:`Unboxing Conversions`).
+Also, no considerations to the rest parameter (see :ref:`Rest Parameter`) and
+optional parameters (see :ref:`Optional Parameters`) parameters are performed.
+
+If the candidate satisfies the check, it is added to the list of applicable 
+candidates.
+
+3.3 After all candidates are considered, and if the list of applicable
+candidates is empty then the step 3.2 is performed again. On this step each type
+*ta*:sub:`i` is compared with the type of the *i*’th candidate parameter, 
+and type compatibility rules do consider possible boxing and unboxing conversion.
+
+If the candidate satisfies the check, it is added to the list of applicable 
+candidates.
+
+If the candidate satisfies the check, it is added to the list of applicable candidates.
+
+3.4 After all candidates are considered, and if the list of applicable candidates
+is empty then the step 3.2 is performed again. On this step each type *ta*:sub:`i`
+is compared with the type of the *i*’th candidate parameter, and type 
+compatibility rules do consider possible boxing and unboxing conversion as well as
+rest and optional parameters.
+
+The list of applicable candidates is ready.
+
+Examples:
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {}
+   class Derived extends Base {}
+
+   foo (p: Base)
+   foo (p: Derived)
+   foo (new Derived) // two applicable candidates for this call
+
+   foo (p: A | B)
+   foo (p: A | C)
+   foo(new A) // two applicable candidates for this call
+
+   foo (p1: Base)
+   foo (p2: Base|SomeOtherType)
+   foo (...p3: Base[])
+   foo (new Base) // three applicable candidates for this call
+
+|
+
+.. _Function Call Expression:
+
+Function Call Expression
+************************
+
+.. meta:
+    frontend_status: Partly
+
+A *function call expression* is used to call a function (see
+:ref:`Function Types`) or a lambda expression (see :ref:`Lambda Expressions`):
+
+.. code-block:: abnf
+
+    functionCallExpression:
+        expression ('?.' | typeArguments)? arguments block?
+        ;
+
+A special syntactic form that contains a block associated with the function
+call is called '*trailing lambda call*' (see :ref:`Trailing Lambda` for
+details).
+
+A compile-time error occurs if:
+
+-  The *typeArguments* clause is present, and any of the type arguments is a
+   wildcard (see :ref:`Type Arguments`).
+-  The *expression* type is different than the function type.
+-  The *expression* type is nullish but no '?.' (see :ref:`Chaining Operator`)
+   is present.
+
+.. index::
+   function call expression
+   function call
+   lambda expression
+   compile-time error
+   type argument
+   wildcard
+   expression type
+   function type
+   nullish type
+   chaining operator
+
+If the operator '?.' (see :ref:`Chaining Operator`) is present, and the
+*expression* evaluates to a nullish value, then:
+
+-  The *arguments* are not evaluated;
+-  The call is not performed; and
+-  The result of the *functionCallExpression* is *undefined*.
+
+The function call is *safe* because it handles nullish values properly.
+
+:ref:`Step 1 Selection of Function` and :ref:`Step 2 Semantic Correctness Check`
+below specify the steps to follow to determine what function is being called.
+
+.. index::
+   chaining operator
+   expression
+   evaluation
+   nullish value
+   semantic correctness check
+   undefined
+   function call
+
+|
+
+.. _Step 1 Selection of Function:
+
+Step 1: Selection of Function
+=============================
+
+.. meta:
+    frontend_status: Done
+
+One function must be selected from all potentially applicable functions as a
+function can be overloaded.
+
+The *most specific* function must be selected where there are more than one
+applicable functions.
+
+The function selection process results with the set of applicable functions
+and is described in :ref:`Function or method selection`.
+
+.. index::
+   function selection
+   overloaded function
+   applicable function
+
+A compile-time error occurs if:
+
+-  The set of applicable function is empty; or
+-  The set of applicable functions has more than one candidate.
+
+.. index::
+   compile-time error
+   function
+   function selection
+   applicable function
+
+|
+
+.. _Step 2 Semantic Correctness Check:
+
+Step 2: Semantic Correctness Check
+==================================
+
+.. meta:
+    frontend_status: Done
+
+The single function to call is known at this step. The following semantic
+check must be performed:
+
+If the last argument of the function call has the spread operator '``...``',
+then *objectReference* that follows the argument must refer to an array
+of a type compatible with that specified in the last parameter of the
+function declaration (see :ref:`Type Compatibility`).
+
+.. index::
+   semantic correctness check
+   function
+   semantic check
+   argument
+   spread operator
+   array
+   compatible type
+   type compatibility
+   function declaration
+   parameter
+
+|
+
 .. _Indexing Expression:
 
 Indexing Expression
@@ -1875,9 +2041,9 @@ A numeric types conversion (see :ref:`Primitive Types Conversions`) is
 performed on *index expression* to ensure that the resultant type is *int*.
 Otherwise, a compile-time error occurs.
 
-If the type of *object reference expression* after applying of the
-operator '?.' is an array type *T*\[], then the type of the indexing expression
-is *T*.
+If the type of *object reference expression* after applying of the chaining
+operator '?.' (see :ref:`Chaining Operator`) is an array type *T*\[], then the
+type of the indexing expression is *T*.
 
 The result of an indexing expression is a variable of type *T* (i.e., a
 variable within the array selected by the value of that *index expression*).
@@ -1891,7 +2057,7 @@ elements can be modified by changing the resultant variable fields:
    indexing expression
    array indexing
    object reference expression
-   optional operator
+   chaining operator
    array type
    index expression
    numeric type
@@ -2063,164 +2229,7 @@ An indexing expression evaluated at runtime behaves as follows:
    record instance
    key
 
-|
 
-.. _Function Call Expression:
-
-Function Call Expression
-************************
-
-.. meta:
-    frontend_status: Partly
-
-A *function call expression* is used to call a function (see
-:ref:`Function Types`) or a lambda expression (see :ref:`Lambda Expressions`):
-
-.. code-block:: abnf
-
-    functionCallExpression:
-        expression ('?.' | typeArguments)? arguments block?
-        ;
-
-A special syntactic form that contains a block associated with the function
-call is called '*trailing lambda call*' (see :ref:`Trailing Lambda` for
-details).
-
-A compile-time error occurs if:
-
--  The *typeArguments* clause is present, and any of the type arguments is a
-   wildcard (see :ref:`Type Arguments`).
--  The *expression* type is different than the function type.
--  The *expression* type is nullish but no '?.' (see :ref:`Chaining Operator`)
-   is present.
-
-.. index::
-   function call expression
-   function call
-   lambda expression
-   compile-time error
-   type argument
-   wildcard
-   expression type
-   function type
-   nullish type
-   chaining operator
-
-If the operator '?.' (see :ref:`Chaining Operator`) is present, and the
-*expression* evaluates to a nullish value, then:
-
--  The *arguments* are not evaluated;
--  The call is not performed; and
--  The result of the *functionCallExpression* is *undefined*.
-
-The function call is *safe* because it handles nullish values properly.
-
-:ref:`Step 1 Selection of Function` and :ref:`Step 2 Semantic Correctness Check`
-below specify the steps to follow to determine what function is being called.
-
-.. index::
-   chaining operator
-   expression
-   evaluation
-   nullish value
-   semantic correctness check
-   undefined
-   function call
-
-|
-
-.. _Step 1 Selection of Function:
-
-Step 1: Selection of Function
-=============================
-
-.. meta:
-    frontend_status: Done
-
-One function must be selected from all potentially applicable functions as a
-function can be overloaded.
-
-The *most specific* function must be selected where there are more than one
-applicable functions.
-
-The function selection process is described below:
-
-.. index::
-   function selection
-   overloaded function
-   applicable function
-
-#. All potentially applicable functions (i.e., all functions with the given
-   name that are accessible at the point of call) must be found.
-
-#. If there are several overloaded functions, then the overload resolution (see :ref:`Overload Resolution`)
-   must be performed without boxing/unboxing, and with no consideration to
-   *rest* (see :ref:`Rest Parameter`) and *optional* (see :ref:`Optional Parameters`)
-   parameters.
-
-#. If the function is not selected, then the overload resolution (see :ref:`Overload Resolution`)
-   must be performed with boxing/unboxing.
-
-#. If the function is not selected, then the overload resolution (see :ref:`Overload Resolution`)
-   must be performed with boxing/unboxing, and with consideration to *rest*
-   (see :ref:`Rest Parameter`) and *optional* (see :ref:`Optional Parameters`)
-   parameters.
-
-
-.. index::
-   potentially applicable function
-   applicable function
-   function
-   access
-   point of call
-   overloaded function
-   overload resolution
-   boxing
-   unboxing
-   rest parameter
-   optional parameter
-
-A compile-time error occurs if:
-
--  There is no function to select; or
-
--  There are more than one applicable functions.
-
-.. index::
-   compile-time error
-   function
-   function selection
-   applicable function
-
-|
-
-.. _Step 2 Semantic Correctness Check:
-
-Step 2: Semantic Correctness Check
-==================================
-
-.. meta:
-    frontend_status: Done
-
-The single function to call is known at this step. The following semantic
-check must be performed:
-
-If the last argument of the function call has the spread operator '``...``',
-then *objectReference* that follows the argument must refer to an array
-of a type compatible with that specified in the last parameter of the
-function declaration (see :ref:`Type Compatibility`).
-
-.. index::
-   semantic correctness check
-   function
-   semantic check
-   argument
-   spread operator
-   array
-   compatible type
-   type compatibility
-   function declaration
-   parameter
 
 |
 
@@ -2232,13 +2241,13 @@ Chaining Operator
 .. meta:
     frontend_status: Partly
 
-The *chaining operator* ``expression ?.`` is used to effectively
-access values of *nullish* types. It can be used in the following contexts:
+The *chaining operator* ``?.`` is used to effectively access values of
+*nullish* types. It can be used in the following contexts:
 
-- :ref:`Method Call Expression`, 
 - :ref:`Field Access Expressions`, 
-- :ref:`Indexing Expression`,
-- :ref:`Function Call Expression`.
+- :ref:`Method Call Expression`, 
+- :ref:`Function Call Expression`,
+- :ref:`Indexing Expression`.
 
 If the value of the expression to the left of ``?.`` is *undefined* or *null*,
 then the evaluation of the entire surrounding expression is omitted. The
@@ -2328,10 +2337,13 @@ A *class instance creation expression* can throw an error as specified in
 A class instance creation expression is *standalone* if it has no assignment
 or call context (see :ref:`Assignment-like Contexts`).
 
-The execution of a class instance creation expression is perfomed in two steps:
+The execution of a class instance creation expression is performed as follows:
 
 -  A new instance of the class is created;
--  The constructor of the class is called to fully initialize the created instance.
+-  Initial values are given to all new instance fields with initializers, and
+   then to new instance fields with default values;
+-  The constructor of the class is called to fully initialize the created
+   instance.
 
 The validity of the constructor call is similar to the validity of the method
 call as discussed in :ref:`Step 3 Semantic Correctness Check`, except the cases
@@ -2450,9 +2462,16 @@ InstanceOf Expression
 Any *instanceof* expression is of type *boolean*.
 
 The *expression* operand of the operator ``instanceof`` must be of a
-reference type, except type parameter or union type that contains type
-parameter after normalization (see :ref:`Union Types Normalization`).
-Otherwise, a compile-time error occurs.
+reference type. Otherwise, a compile-time error occurs.
+
+A compile-time error occurs if *type* operand of the operator ``instanceof`` is
+one of the following:
+
+   - Type parameter (see :ref:`Generic Parameters`),
+   - Union type that contains type parameter after normalization
+     (see :ref:`Union Types Normalization`),
+   - *Generic type* (see :ref:`Generics`)---this temporary limitation
+     is expected to be removed in the future.
 
 If the type of *expression* at compile time is compatible with *type* (see
 :ref:`Type Compatibility`), then the result of the *instanceof* expression
@@ -2684,8 +2703,8 @@ equals the *nullish* value:
 A compile-time error occurs if the left-hand-side expression is not a
 reference type.
 
-The type of a nullish-coalescing expression is the *least upper bound* (see
-:ref:`Least Upper Bound`) of the non-nullish variant of the types of the
+The type of a nullish-coalescing expression is *union type* (see
+:ref:`Union Types`) of the non-nullish variant of the types used in the
 left-hand-side and right-hand-side expressions.
 
 The semantics of a nullish-coalescing expression is represented in the
@@ -2698,6 +2717,9 @@ following example:
 
     let x = expression1
     if (x == null) x = expression2
+    
+    // Type of x is Type(expression1)|Type(expression2)
+
 
 A compile-time error occurs if the nullish-coalescing operator is mixed
 with conditional-and or conditional-or operators without parentheses.
@@ -2706,7 +2728,6 @@ with conditional-and or conditional-or operators without parentheses.
    compile-time error
    reference type
    nullish-coalescing expression
-   least upper bound (LUB)
    non-nullish type
    expression
    nullish-coalescing operator
@@ -3291,6 +3312,7 @@ IEEE 754 arithmetic:
    two’s-complement format
    floating-type multiplication
    operand value
+   IEEE 754
 
 -  The result is NaN if:
 
@@ -3337,6 +3359,7 @@ possible overflow, underflow, or loss of information.
    multiplication operator
    error
    loss of information
+   IEEE 754
 
 |
 
@@ -3412,6 +3435,7 @@ arithmetic:
    NaN
    infinity
    operand
+   IEEE 754
 
 -  If the result is not NaN, then the sign of the result is:
 
@@ -3468,6 +3492,7 @@ despite possible overflow, underflow, division by zero, or loss of information.
    loss of information
    division
    division operator
+   IEEE 754
 
 |
 
@@ -3543,6 +3568,7 @@ can compute the IEEE 754 remainder operation.
    floating-point operation
    truncating division
    rounding division
+   IEEE 754
 
 The result of a floating-point remainder operation is determined in compliance
 with the IEEE 754 arithmetic:
@@ -3569,6 +3595,7 @@ with the IEEE 754 arithmetic:
    infinity
    divisor
    dividend
+   IEEE 754
 
 -  If infinity, zero, or NaN are not involved, then the floating-point remainder
    *r* from the division of the dividend *n* by the divisor *d* is determined
@@ -3743,6 +3770,7 @@ IEEE 754 arithmetic:
    overflow
    floating-point addition
    associativity
+   IEEE 754
 
 -  The result is NaN if:
 
@@ -3815,6 +3843,7 @@ possible overflow, underflow, or loss of information.
    overflow
    additive operator
    error
+   IEEE 754
 
 |
 
@@ -3953,7 +3982,8 @@ The relational operators group left-to-right.
 A relational expression is always of type *boolean*.
 
 Two kinds of relational expressions are described below. The kind of a
-relational expression depends on the types of operands.
+relational expression depends on the types of operands. It is a compile time
+error if at leats one type of operands is different from types described below.
 
 .. index::
    numerical comparison operator
@@ -4021,6 +4051,7 @@ standard specification as follows:
    positive infinity
    positive zero
    negative zero
+   IEEE 754
 
 Based on the above presumption, the following rules apply to integer operands,
 or floating-point operands other than NaN:
@@ -4071,6 +4102,26 @@ Results of all string comparisons are defined as follows:
    operator
    string comparison
    string value
+
+.. _Boolean Comparison Operators:
+
+Boolean Comparison Operators <, <=, >, and >=
+=============================================
+
+.. meta:
+    frontend_status: None
+
+Results of all boolean comparisons are defined as follows:
+
+-  The operator '<' delivers *true* if the left-hand operand is *false* and 
+   the right-hand operand is true, or *false* otherwise.
+-  The operator '<=' delivers *true* if the left-hand operand is *false* and 
+   the right-hand operand is *true* or *false*, or *false* otherwise.
+-  The operator '>' delivers *true* if the left-hand operand is *true* and 
+   the right-hand operand is *false*, or *false* otherwise.
+-  The operator '>=' delivers *true* if the left-hand operand is *true* and 
+   the right-hand operand is *false* or *true*, or *false* otherwise.
+
 
 
 |
@@ -4181,6 +4232,7 @@ following IEEE 754 standard rules:
    operand
    conversion
    integer equality test
+   IEEE 754
 
 -  The result of ':math:`==`' is *false* but the result of ':math:`!=`' is
    *true* if either operand is NaN.

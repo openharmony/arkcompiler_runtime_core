@@ -239,18 +239,17 @@ A list of statements in braces (see :ref:`Block`) is used to combine the
 .. meta:
     frontend_status: Done
 
-|LANG| has four kinds of loops. Each kind of loops can have an optional label
-which can be used only by ``break`` and ``continue`` statements contained in
-the body of the loop. The label is characterized by an *identifier* as shown
+|LANG| has four kinds of loops. A loop of each kind can have an optional loop
+label that can be used only by ``break`` and ``continue`` statements contained
+in the body of the loop. The label is characterized by an *identifier* as shown
 below:
 
 .. index::
    loop statement
    loop
-   optional label
+   loop label
    break statement
    continue statement
-   identifier
 
 .. code-block:: abnf
 

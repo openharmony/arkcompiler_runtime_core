@@ -18,7 +18,7 @@ Implementation Details
 .. meta:
     frontend_status: None
 
-Some implementation details are temporarily placed in this section.
+Important implementation details are discussed in this section.
 
 .. _Import Path Lookup:
 
@@ -38,6 +38,36 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
     ``name/*.ets``.
 
 
+.. _How to get type via reflection:
 
+How to get type via reflection
+******************************
+
+The |LANG|  standard library (see :ref:`Standard Library`) provides a pseudo
+generic static method 'Type.for<*T*>()' to be processed by the compiler in a
+specific way during compialtion. A call to this method allows getting a
+variable of type *Type* that represents type *T* at runtime. Type *T* can
+be any valid type.
+
+.. code-block:: typescript
+   :linenos:
+
+    let type_of_int: Type = Type.for<int>()
+    let type_of_string: Type = Type.for<String>()
+    let type_of_array_of_int: Type = Type.for<int[]>()
+    let type_of_number: Type = Type.for<number>()
+    let type_of_Object: Type = Type.for<Object>()
+
+    class UserClass {}
+    let type_of_user_class: Type = Type.for<UserClass>()
+
+    interface SomeInterface {}
+    let type_of_interface: Type = Type.for<SomeInterface>()
+
+
+
+.. raw:: pdf
+
+   PageBreak
 
 
