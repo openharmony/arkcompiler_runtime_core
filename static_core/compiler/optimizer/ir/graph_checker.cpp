@@ -2382,7 +2382,7 @@ void GraphChecker::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[m
         }
 
         if (outputType == DataType::INT32 && inputType == DataType::INT64) {
-            [[maybe_unused]] int64_t value = inputInst->CastToConstant()->GetInt64Value();
+            [[maybe_unused]] auto value = static_cast<int64_t>(inputInst->CastToConstant()->GetInt64Value());
             ASSERT_DO_EXT_VISITOR(
                 value == static_cast<int32_t>(value),
                 (std::cerr << "Integral constant input not coercible to INT32:\n", inst->Dump(&std::cerr)));

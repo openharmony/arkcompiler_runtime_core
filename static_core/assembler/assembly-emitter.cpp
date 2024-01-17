@@ -1487,8 +1487,8 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
         code->SetNumVregs(func.regsNum);
         code->SetNumArgs(func.GetParamsNum());
 
-        size_t numIns =
-            std::count_if(func.ins.begin(), func.ins.end(), [](auto it) { return it.opcode != Opcode::INVALID; });
+        auto numIns = static_cast<uint32_t>(
+            std::count_if(func.ins.begin(), func.ins.end(), [](auto it) { return it.opcode != Opcode::INVALID; }));
         code->SetNumInstructions(numIns);
 
         auto *bytes = code->GetInstructions();
@@ -1754,9 +1754,9 @@ void Function::EmitNumber(panda_file::LineNumberProgramItem *program, std::vecto
 }
 
 void Function::EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
-                              int32_t &prevLineNumber, uint32_t &pcInc, size_t instructionNumber) const
+                              uint32_t &prevLineNumber, uint32_t &pcInc, size_t instructionNumber) const
 {
-    int32_t lineInc = GetLineNumber(instructionNumber) - prevLineNumber;
+    auto lineInc = GetLineNumber(instructionNumber) - prevLineNumber;
     if (lineInc != 0) {
         prevLineNumber = GetLineNumber(instructionNumber);
         EmitNumber(program, constantPool, pcInc, lineInc);
@@ -1787,10 +1787,10 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debugItem, cons
     }
 
     uint32_t pcInc = 0;
-    int32_t prevLineNumber = GetLineNumber(0);
+    uint32_t prevLineNumber = GetLineNumber(0);
     uint32_t prevColumnNumber = std::numeric_limits<uint32_t>::max();
     BytecodeInstruction bi(bytecode.data());
-    debugItem->SetLineNumber(static_cast<uint32_t>(prevLineNumber));
+    debugItem->SetLineNumber(prevLineNumber);
 
     for (size_t i = 0; i < ins.size(); i++) {
         if (emitDebugInfo) {

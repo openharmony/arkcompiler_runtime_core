@@ -447,7 +447,7 @@ panda_file::Type Method::GetEffectiveReturnType() const
     return panda_file::GetEffectiveType(GetReturnType());
 }
 
-int32_t Method::GetLineNumFromBytecodeOffset(uint32_t bcOffset) const
+size_t Method::GetLineNumFromBytecodeOffset(uint32_t bcOffset) const
 {
     panda_file::MethodDataAccessor mda(*(pandaFile_), fileId_);
     return panda_file::debug_helpers::GetLineNumber(mda, bcOffset, pandaFile_);
@@ -545,21 +545,17 @@ void Method::StartProfiling()
     }
     ASSERT(std::is_sorted(vcalls.begin(), vcalls.end()));
 
-    auto data = allocator->Alloc(RoundUp(RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
-                                                     sizeof(CallSiteInlineCache) * vcalls.size(),
-                                                 alignof(BranchData)) +
-                                             sizeof(BranchData) * branches.size(),
-                                         alignof(ThrowData)) +
-                                 sizeof(ThrowData) * throws.size());
+    auto vcallDataOffset = RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
+    auto branchesDataOffset =
+        RoundUp(vcallDataOffset + sizeof(CallSiteInlineCache) * vcalls.size(), alignof(BranchData));
+    auto throwsDataOffset = RoundUp(branchesDataOffset + sizeof(BranchData) * branches.size(), alignof(ThrowData));
+    auto data = allocator->Alloc(throwsDataOffset + sizeof(ThrowData) * throws.size());
+
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto vcallsMem = reinterpret_cast<uint8_t *>(data) + RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
-    auto branchesDataOffset = RoundUp(RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache)) +
-                                          sizeof(CallSiteInlineCache) * vcalls.size(),
-                                      alignof(BranchData));
+    auto vcallsMem = reinterpret_cast<uint8_t *>(data) + vcallDataOffset;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto branchesMem = reinterpret_cast<uint8_t *>(data) + branchesDataOffset;
 
-    auto throwsDataOffset = RoundUp(branchesDataOffset + sizeof(BranchData) * branches.size(), alignof(ThrowData));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto throwsMem = reinterpret_cast<uint8_t *>(data) + throwsDataOffset;
 

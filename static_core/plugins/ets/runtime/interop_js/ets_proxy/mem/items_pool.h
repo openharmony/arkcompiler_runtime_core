@@ -100,7 +100,6 @@ public:
         paddedItem->~PaddedItem();
     }
 
-    // NOTE:
     //  This method only checks the validity of the item in the allocated interval
     //  This method does not check whether the item has been allocated or not
     bool IsValidItem(const Item *item) const

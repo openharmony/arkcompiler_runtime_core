@@ -88,7 +88,7 @@ BoundsRange BoundsRange::Abs() const
     auto val1 = left_ == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(left_);
     auto val2 = right_ == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : std::abs(right_);
     auto right = std::max(val1, val2);
-    auto left = 0;
+    int64_t left = 0;
     // NOLINTNEXTLINE (hicpp-signed-bitwise)
     if ((left_ ^ right_) >= 0) {
         left = std::min(val1, val2);
@@ -246,7 +246,7 @@ BoundsRange BoundsRange::And(const BoundsRange &range)
     if (!range.IsConst()) {
         return BoundsRange();
     }
-    uint64_t n = range.GetLeft();
+    auto n = static_cast<uint64_t>(range.GetLeft());
     static constexpr uint32_t BITS_63 = 63;
     if ((n >> BITS_63) == 1) {
         return BoundsRange();

@@ -904,7 +904,8 @@ void ChecksElimination::InsertDeoptimizationForIndexOverflow(CountableLoopInfo *
     auto loopCc = countableLoopInfo->normalizedCc;
     if (loopCc == CC_LT || loopCc == CC_LE) {
         auto loopUpper = countableLoopInfo->test;
-        auto step = countableLoopInfo->constStep;
+        ASSERT(countableLoopInfo->constStep < INT64_MAX);
+        auto step = static_cast<int64_t>(countableLoopInfo->constStep);
         auto indexType = countableLoopInfo->index->GetType();
         ASSERT(indexType == DataType::INT32);
         auto maxUpper = BoundsRange::GetMax(indexType) - step + (loopCc == CC_LT ? 1 : 0);

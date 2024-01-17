@@ -613,7 +613,7 @@ Inst *Lowering::LowerAddSub(Inst *inst)
     ASSERT(pred->GetOpcode() == Opcode::Constant);
 
     auto graph = pred->GetBasicBlock()->GetGraph();
-    int64_t val = pred->CastToConstant()->GetIntValue();
+    auto val = static_cast<int64_t>(pred->CastToConstant()->GetIntValue());
     DataType::Type type = inst->GetType();
     uint32_t size = (type == DataType::UINT64 || type == DataType::INT64) ? WORD_SIZE : HALF_SIZE;
     if (!graph->GetEncoder()->CanEncodeImmAddSubCmp(val, size, false)) {
@@ -650,7 +650,7 @@ void Lowering::LowerMulDivMod(Inst *inst)
         return;
     }
 
-    int64_t val = pred->CastToConstant()->GetIntValue();
+    auto val = static_cast<int64_t>(pred->CastToConstant()->GetIntValue());
     DataType::Type type = inst->GetType();
     uint32_t size = (type == DataType::UINT64 || type == DataType::INT64) ? WORD_SIZE : HALF_SIZE;
     if (!graph->GetEncoder()->CanEncodeImmMulDivMod(val, size)) {

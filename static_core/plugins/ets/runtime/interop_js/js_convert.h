@@ -50,15 +50,15 @@ struct JSConvertNumeric : public JSConvertBase<JSConvertNumeric<Cpptype>, Cpptyp
         if constexpr (sizeof(Cpptype) >= sizeof(int32_t)) {
             int64_t val;
             NAPI_CHECK_FATAL(napi_get_value_int64(env, jsVal, &val));
-            etsVal = val;
+            etsVal = static_cast<Cpptype>(val);
         } else if constexpr (std::is_signed_v<Cpptype>) {
             int32_t val;
             NAPI_CHECK_FATAL(napi_get_value_int32(env, jsVal, &val));
-            etsVal = val;
+            etsVal = static_cast<Cpptype>(val);
         } else {
             uint32_t val;
             NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsVal, &val));
-            etsVal = val;
+            etsVal = static_cast<Cpptype>(val);
         }
         return etsVal;
     }

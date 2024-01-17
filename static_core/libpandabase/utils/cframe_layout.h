@@ -55,7 +55,7 @@ public:
     template <class CFrameLayoutT>
     static constexpr ssize_t GetOffsetFromSpInBytes(const CFrameLayoutT &fl)
     {
-        return GetOffsetFromSpInSlots(fl) * fl.GetSlotSize();
+        return GetOffsetFromSpInSlots(fl) * static_cast<ssize_t>(fl.GetSlotSize());
     }
 
 private:

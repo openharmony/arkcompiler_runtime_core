@@ -1546,7 +1546,7 @@ void ScalarReplacement::UpdateSaveStates()
         bool isCall = site->IsCall();
         ASSERT(!isCall || static_cast<CallInst *>(site)->IsInlined());
         // Remove virtual inputs (i.e. objects that are not alive)
-        for (ssize_t inputIdx = site->GetInputsCount() - 1; inputIdx >= 0; --inputIdx) {
+        for (ssize_t inputIdx = static_cast<ssize_t>(site->GetInputsCount()) - 1; inputIdx >= 0; --inputIdx) {
             if (!virtual_objects.GetBit(inputIdx)) {
                 continue;
             }

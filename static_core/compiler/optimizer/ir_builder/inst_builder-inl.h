@@ -521,7 +521,7 @@ Inst *InstBuilder::GetArgDefinition(const BytecodeInstruction *bcInst, size_t id
         return GetArgDefinitionRange(bcInst, idx);
     }
     if (accRead) {
-        size_t accPos = bcInst->GetImm64();
+        auto accPos = static_cast<size_t>(bcInst->GetImm64());
         if (idx < accPos) {
             return GetDefinition(bcInst->GetVReg(idx));
         }

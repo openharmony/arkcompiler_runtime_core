@@ -256,7 +256,7 @@ void CheckTag(int64_t reg, int64_t expected)
                   << "Tag = " << tag << std::endl;
         std::cerr << "Expected = " << expected << std::endl;
         panda::PrintStack(std::cerr);
-        std::abort();
+        Runtime::Abort();
     }
 }
 

@@ -389,23 +389,23 @@ int RegisterUserMask(int how, const sigset_t *newSet, sigset_t *oldSet,
 // when use ADDRESS_SANITIZER, will exposed a bug,try to define 'sigaction' will happen SIGSEGV
 #ifdef USE_ADDRESS_SANITIZER
 // NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" int sigaction([[maybe_unused]] int __sig, [[maybe_unused]] const struct sigaction *__restrict __act,
-                         [[maybe_unused]] struct sigaction *__oact)  // NOLINT(readability-identifier-naming)
+extern "C" int sigaction([[maybe_unused]] int sig, [[maybe_unused]] const struct sigaction *__restrict act,
+                         [[maybe_unused]] struct sigaction *oact)  // NOLINT(readability-identifier-naming)
 {
     if (!InitRealSignalFun()) {
         return -1;
     }
-    return RegisterUserHandler(__sig, __act, __oact, g_realSigaction);
+    return RegisterUserHandler(sig, act, oact, g_realSigaction);
 }
 #else
 // NOLINTNEXTLINE(readability-identifier-naming)
-extern "C" int sigactionStub([[maybe_unused]] int __sig, [[maybe_unused]] const struct sigaction *__restrict __act,
-                             [[maybe_unused]] struct sigaction *__oact)  // NOLINT(readability-identifier-naming)
+extern "C" int sigactionStub([[maybe_unused]] int sig, [[maybe_unused]] const struct sigaction *__restrict act,
+                             [[maybe_unused]] struct sigaction *oact)  // NOLINT(readability-identifier-naming)
 {
     if (!InitRealSignalFun()) {
         return -1;
     }
-    return RegisterUserHandler(__sig, __act, __oact, g_realSigaction);
+    return RegisterUserHandler(sig, act, oact, g_realSigaction);
 }
 #endif  // USE_ADDRESS_SANITIZER
 

@@ -41,11 +41,11 @@ intptr_t AotData::GetEntrypointOffset(uint64_t pc, int32_t slotId) const
     // Initialize offset by offset to the origin of the entrypoint table
     intptr_t offset = GetEpTableOffset();
     // Increment/decrement offset to specified slot
-    offset += slotId * PointerSize(graph_->GetArch());
+    offset += slotId * static_cast<intptr_t>(PointerSize(graph_->GetArch()));
     // Decrement by sum of method code start address and current pc
-    offset -= (codeAddress_ + pc);
+    offset -= static_cast<intptr_t>(codeAddress_ + pc);
     // Decrement by header size that prepend method code
-    offset -= CodeInfo::GetCodeOffset(graph_->GetArch());
+    offset -= static_cast<intptr_t>(CodeInfo::GetCodeOffset(graph_->GetArch()));
     return offset;
 }
 

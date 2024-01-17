@@ -54,7 +54,7 @@ inline const auto &MessageSetParser()
 
     static const auto NUM_HANDLER = [](Action a, MessageSetContext &c, auto from) {
         if (a == Action::PARSED) {
-            size_t num = std::strtol(from, nullptr, 0);
+            auto num = static_cast<size_t>(std::strtol(from, nullptr, 0));
             c.stack.push_back(std::make_pair(num, num));
         }
         return true;

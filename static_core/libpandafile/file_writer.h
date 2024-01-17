@@ -183,9 +183,15 @@ public:
 
     bool WriteChecksum(size_t offset) override
     {
-        fseek(file_, static_cast<int64_t>(offset), SEEK_SET);
+        if (fseek(file_, static_cast<int64_t>(offset), SEEK_SET) != 0) {
+            LOG(FATAL, RUNTIME) << "Unable to write checksum by offset: " << static_cast<int64_t>(offset);
+            UNREACHABLE();
+        }
         auto res = Write<uint32_t>(checksum_);
-        fseek(file_, static_cast<int64_t>(offset), SEEK_END);
+        if (fseek(file_, static_cast<int64_t>(offset), SEEK_END) != 0) {
+            LOG(FATAL, RUNTIME) << "Unable to write checksum by offset: " << static_cast<int64_t>(offset);
+            UNREACHABLE();
+        }
         return res;
     }
 

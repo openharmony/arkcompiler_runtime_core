@@ -104,8 +104,8 @@ private:
     const uint8_t numberOf4Bytes_ = 4;
     const uint8_t numberOf8Bytes_ = 8;
 
-    const int32_t loopNumber_ = 10000;
-    const int32_t divideNumber_ = 10;
+    const uint32_t loopNumber_ = 10000;
+    const uint32_t divideNumber_ = 10;
 
     PandaUniquePtr<RuntimeListener> listener_;
 
@@ -143,7 +143,7 @@ private:
 
     const uint64_t baseCpuTime_;
 
-    std::atomic<int32_t> bufferOffset_;
+    std::atomic<uint32_t> bufferOffset_;
 
     bool overbrim_ {false};
 

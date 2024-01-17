@@ -53,7 +53,7 @@ void MonitorAnalysis::MarkedMonitorRec(BasicBlock *bb, int32_t numMonitors)
             --numMonitors;
         }
     }
-    enteredMonitorsCount_->at(bb->GetId()) = numMonitors;
+    enteredMonitorsCount_->at(bb->GetId()) = static_cast<uint32_t>(numMonitors);
     if (numMonitors == 0) {
         return;
     }

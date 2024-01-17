@@ -454,7 +454,7 @@ public:
         std::vector<bool> regSet(vregsCount);
 
         uint32_t remainingRegisters = vregsCount;
-        for (int sindex = stackMap.GetRow(); sindex >= 0 && remainingRegisters > 0; sindex--) {
+        for (int sindex = static_cast<int64_t>(stackMap.GetRow()); sindex >= 0 && remainingRegisters > 0; sindex--) {
             stackMap = GetStackMap(sindex);
             if (!stackMap.HasVRegMaskIndex()) {
                 continue;
@@ -474,7 +474,7 @@ public:
             for (size_t i = 0; i < end; i += BITS_PER_UINT32) {
                 uint32_t mask = vregMask.Read(i, std::min<uint32_t>(end - i, BITS_PER_UINT32));
                 while (mask != 0) {
-                    uint32_t regIdx = Ctz(mask);
+                    auto regIdx = static_cast<size_t>(Ctz(mask));
                     if (!regSet[i + regIdx]) {
                         auto vregIndex = vregsMap_.GetRow(mapIndex);
                         if (vregIndex.GetIndex() != StackMap::NO_VALUE) {
@@ -531,8 +531,9 @@ public:
 
     size_t CountSpillSlots()
     {
-        auto frameSlots = GetFrameSize() / PointerSize(RUNTIME_ARCH);
-        auto spillsCount = frameSlots - (CFrameSlots::Start() + GetRegsCount(RUNTIME_ARCH) + 1U);
+        size_t frameSlots = GetFrameSize() / PointerSize(RUNTIME_ARCH);
+        static_assert(CFrameSlots::Start() >= 0);
+        size_t spillsCount = frameSlots - (static_cast<size_t>(CFrameSlots::Start()) + GetRegsCount(RUNTIME_ARCH) + 1U);
         // Reverse 'CFrameLayout::AlignSpillCount' counting
         if (RUNTIME_ARCH == Arch::AARCH32) {
             spillsCount = spillsCount / 2U - 1;

@@ -116,7 +116,6 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
     // truncate the arg val
     double digitAbs = std::isnan(d) ? 0 : d;
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
-
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -151,7 +150,6 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
     // truncate the arg val
     double digitAbs = std::isnan(d) ? 0 : d;
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
-
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION + 1)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -186,7 +184,6 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
     // truncate the arg val
     double digitAbs = std::isnan(d) ? 0 : d;
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
-
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),

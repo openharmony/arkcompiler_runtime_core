@@ -174,11 +174,11 @@ void CFrame::SetVRegValue(const VRegInfo &vreg, uint64_t value, SlotType **calle
             bool isFp = vreg.GetLocation() == VRegInfo::Location::FP_REGISTER;
             if ((GetCallerRegsMask(ARCH, isFp) & (1U << vreg.GetValue())).Any()) {
                 CFrameLayout fl(ARCH, 0);
-                auto regNum = locationValue - GetFirstCallerReg(ARCH, isFp);
-                regNum = fl.GetCallerLastSlot(isFp) - regNum;
+                auto regNum = locationValue - static_cast<int>(GetFirstCallerReg(ARCH, isFp));
+                regNum = static_cast<int>(fl.GetCallerLastSlot(isFp)) - regNum;
                 SetValueToSlot(regNum, value);
                 if (!ArchTraits<ARCH>::IS_64_BITS && vreg.Has64BitValue()) {
-                    SetValueToSlot(static_cast<int>(regNum) - 1, value >> BITS_PER_UINT32);
+                    SetValueToSlot(regNum - 1, value >> BITS_PER_UINT32);
                 }
                 break;
             }

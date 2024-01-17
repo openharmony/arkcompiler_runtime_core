@@ -226,7 +226,8 @@ public:
                 }
                 default: {
                     auto opcodeValue = static_cast<uint8_t>(opcode);
-                    auto adjustOpcode = opcodeValue - LineNumberProgramItem::OPCODE_BASE;
+                    ASSERT(opcodeValue >= LineNumberProgramItem::OPCODE_BASE);
+                    uint32_t adjustOpcode = opcodeValue - LineNumberProgramItem::OPCODE_BASE;
                     uint32_t pcDiff = adjustOpcode / LineNumberProgramItem::LINE_RANGE;
                     int32_t lineDiff =
                         adjustOpcode % LineNumberProgramItem::LINE_RANGE + LineNumberProgramItem::LINE_BASE;

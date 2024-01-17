@@ -804,7 +804,7 @@ public:
     }
 
     void RemoveThrowableInst(const Inst *inst);
-    void ReplaceThrowableInst(Inst *inst, Inst *newInst);
+    void ReplaceThrowableInst(Inst *oldInst, Inst *newInst);
 
     const auto &GetThrowableInstHandlers(const Inst *inst) const
     {

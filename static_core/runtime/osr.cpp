@@ -150,7 +150,7 @@ extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const 
             ASSERT(vreg.GetVRegType() == VRegInfo::VRegType::VREG);
             value = iframe->GetVReg(vreg.GetIndex()).GetValue();
         } else {
-            value = ctx.GetOsrEnv(iframe, vreg);
+            value = static_cast<int64_t>(ctx.GetOsrEnv(iframe, vreg));
         }
 #ifdef PANDA_USE_32_BIT_POINTER
         if (vreg.IsObject()) {
@@ -162,10 +162,12 @@ extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const 
                 cframe.SetVRegValue(vreg, value, nullptr);
                 break;
             case VRegInfo::Location::REGISTER:
-                regBuffer[vreg.GetValue()] = value;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                regBuffer[vreg.GetValue()] = value;
                 break;
             case VRegInfo::Location::FP_REGISTER:
-                fpRegBuffer[vreg.GetValue()] = value;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                fpRegBuffer[vreg.GetValue()] = static_cast<uintptr_t>(value);
                 break;
             // NOLINTNEXTLINE(bugprone-branch-clone)
             case VRegInfo::Location::CONSTANT:

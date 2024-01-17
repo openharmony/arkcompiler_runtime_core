@@ -38,7 +38,7 @@ static uint64_t SystemMicroSecond()
     clock_gettime(CLOCK_MONOTONIC, &current);
     // NOTE(ht): Deleting OS-specific code, move to libpandabase, issue #3210
     return static_cast<uint64_t>(current.tv_sec) * UINT64_C(1000000) +  // 1000000 - time
-           current.tv_nsec / UINT64_C(1000);                            // 1000 - time
+           static_cast<uint64_t>(current.tv_nsec) / UINT64_C(1000);     // 1000 - time
 }
 
 static uint64_t RealTimeSecond()
@@ -62,7 +62,7 @@ static uint64_t GetCpuMicroSecond()
     clock_gettime(clockId, &current);
     // NOTE(ht): Deleting OS-specific code, move to libpandabase, issue #3210
     return static_cast<uint64_t>(current.tv_sec) * UINT64_C(1000000) +  // 1000000 - time
-           current.tv_nsec / UINT64_C(1000);                            // 1000 - time
+           static_cast<uint64_t>(current.tv_nsec) / UINT64_C(1000);     // 1000 - time
 }
 
 Trace::Trace(PandaUniquePtr<panda::os::unix::file::File> traceFile, size_t bufferSize)
@@ -157,7 +157,7 @@ void Trace::RecordThreadsInfo([[maybe_unused]] PandaOStringStream *os)
 uint64_t Trace::GetAverageTime()
 {
     uint64_t begin = GetCpuMicroSecond();
-    for (int i = 0; i < loopNumber_; i++) {
+    for (uint32_t i = 0; i < loopNumber_; i++) {
         GetCpuMicroSecond();
     }
     uint64_t delay = GetCpuMicroSecond() - begin;
@@ -174,10 +174,12 @@ void Trace::RecordMethodsInfo(PandaOStringStream *os, const PandaSet<Method *> &
 void Trace::WriteInfoToBuf(const ManagedThread *thread, Method *method, EventFlag event, uint32_t threadTime,
                            uint32_t realTime)
 {
+    uint32_t writeAfterOffset;
+    uint32_t writeBeforeOffset;
+
     // Atomic with relaxed order reason: data race with buffer_offset_ with no synchronization or ordering constraints
     // imposed on other reads or writes
-    int32_t writeBeforeOffset = bufferOffset_.load(std::memory_order_relaxed);
-    int32_t writeAfterOffset = 0;
+    writeBeforeOffset = bufferOffset_.load(std::memory_order_relaxed);
     do {
         writeAfterOffset = writeBeforeOffset + TRACE_ITEM_SIZE;
         if (bufferSize_ < static_cast<size_t>(writeAfterOffset)) {

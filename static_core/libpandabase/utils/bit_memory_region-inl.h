@@ -42,14 +42,14 @@ void BitMemoryRegion<Base>::Dump(std::ostream &os) const
     static constexpr size_t BITS_PER_WORD = sizeof(size_t) * BITS_PER_BYTE;
     if (Size() >= BITS_PER_WORD) {
         bool isZero = true;
-        size_t width = BITS_PER_WORD - (BITS_PER_HEX_DIGIT - Size() % BITS_PER_HEX_DIGIT);
-        for (ssize_t i = Size() - width; i >= 0; i -= width) {
+        auto width = static_cast<ssize_t>(BITS_PER_WORD - (BITS_PER_HEX_DIGIT - Size() % BITS_PER_HEX_DIGIT));
+        for (auto i = static_cast<ssize_t>(Size()) - width; i >= 0; i -= width) {
             auto val = Read(i, width);
             DumpVal(os, val, isZero, static_cast<int>(width / BITS_PER_HEX_DIGIT));
             if (i == 0) {
                 break;
             }
-            width = std::min<size_t>(i, BITS_PER_WORD);
+            width = static_cast<ssize_t>(std::min<size_t>(i, BITS_PER_WORD));
         }
         if (isZero) {
             os << '0';

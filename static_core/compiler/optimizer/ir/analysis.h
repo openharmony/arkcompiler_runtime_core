@@ -65,7 +65,7 @@ public:
     ArenaVector<Inst *> *SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,
                                                       Inst *stopSearch = nullptr, BasicBlock *targetBlock = nullptr);
     void CreateBridgeInSS(Inst *source, ArenaVector<Inst *> *bridges);
-    void SearchAndCreateMissingObjInSaveState(Graph *graph, Inst *source, Inst *target, Inst *stopSearch = nullptr,
+    void SearchAndCreateMissingObjInSaveState(Graph *graph, Inst *source, Inst *target, Inst *stopSearchInst = nullptr,
                                               BasicBlock *targetBlock = nullptr);
     void FixInstUsageInSS(Graph *graph, Inst *inst);
     void FixSaveStatesInBB(BasicBlock *block);

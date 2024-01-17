@@ -398,7 +398,8 @@ static void GetPrimitiveTypeArrayRegion(EtsEnv *env, ets_array array, ets_size s
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsArray *internalArray = s.ToInternalType(array);
-    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internalArray->GetLength()) {
+    // NOLINTNEXTLINE(bugprone-misplaced-widening-cast)
+    if (start < 0 || len < 0 || static_cast<size_t>(start + len) > internalArray->GetLength()) {
         PandaStringStream ss;
         ss << "Array index out of bounds: start = " << start << ", len = " << len
            << ", array size = " << internalArray->GetLength();
@@ -417,7 +418,8 @@ static void SetPrimitiveTypeArrayRegion(EtsEnv *env, ets_array array, ets_size s
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsArray *internalArray = s.ToInternalType(array);
-    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internalArray->GetLength()) {
+    // NOLINTNEXTLINE(bugprone-misplaced-widening-cast)
+    if (start < 0 || len < 0 || static_cast<size_t>(start + len) > internalArray->GetLength()) {
         PandaStringStream ss;
         ss << "Array index out of bounds: start = " << start << ", len = " << len
            << ", array size = " << internalArray->GetLength();
@@ -2459,7 +2461,8 @@ NO_UB_SANITIZE static void GetStringRegion(EtsEnv *env, ets_string str, ets_size
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsString *internalString = s.ToInternalType(str);
-    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internalString->GetUtf16Length()) {
+    // NOLINTNEXTLINE(bugprone-misplaced-widening-cast)
+    if (start < 0 || len < 0 || static_cast<size_t>(start + len) > internalString->GetUtf16Length()) {
         PandaStringStream ss;
         ss << "String index out of bounds: start = " << start << ", len = " << len
            << ", string size = " << internalString->GetUtf16Length();
@@ -2477,7 +2480,8 @@ NO_UB_SANITIZE static void GetStringUTFRegion(EtsEnv *env, ets_string str, ets_s
 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsString *internalString = s.ToInternalType(str);
-    if (start < 0 || len < 0 || static_cast<size_t>(start) + len > internalString->GetUtf16Length()) {
+    // NOLINTNEXTLINE(bugprone-misplaced-widening-cast)
+    if (start < 0 || len < 0 || static_cast<size_t>(start + len) > internalString->GetUtf16Length()) {
         PandaStringStream ss;
         ss << "String index out of bounds: start = " << start << ", len = " << len
            << ", string size = " << internalString->GetUtf16Length();

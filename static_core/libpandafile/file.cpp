@@ -465,14 +465,12 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode openM
     os::file::FileHolder fhHolder(file);
 
     auto res = file.GetFileSize();
-
     if (!res) {
         PLOG(ERROR, PANDAFILE) << "Failed to get size of panda file '" << filename << "'";
         return nullptr;
     }
 
     size_t size = res.Value();
-
     if (size < sizeof(File::Header)) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "' - has not header";
         return nullptr;
@@ -582,7 +580,6 @@ File::EntityId File::GetClassId(const uint8_t *mutf8Name) const
 
     auto it = std::lower_bound(ClassIdxIterator::Begin(*this, classIdx), ClassIdxIterator::End(*this, classIdx),
                                mutf8Name, utf::Mutf8Less());
-
     if (!it.IsValid()) {
         return EntityId();
     }

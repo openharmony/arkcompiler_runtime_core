@@ -15,7 +15,8 @@
 
 import * as fs from "fs";
 
-import { Command, OptionValues } from "commander";
+import { Command } from 'commander';
+import type { OptionValues } from 'commander';
 
 function assertOptionIsDefined(opts: OptionValues, opt: string): void {
   if (opts[opt] === undefined) {

@@ -23,10 +23,10 @@
 #include <utility>
 
 // NOLINTNEXTLINE(hicpp-signed-bitwise)
-static constexpr int32_t U16_SURROGATE_OFFSET = (0xd800 << 10UL) + 0xdc00 - 0x10000;
+static constexpr uint32_t U16_SURROGATE_OFFSET = (0xd800 << 10UL) + 0xdc00 - 0x10000;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define U16_GET_SUPPLEMENTARY(lead, trail) \
-    ((static_cast<int32_t>(lead) << 10UL) + static_cast<int32_t>(trail) - U16_SURROGATE_OFFSET)
+    ((static_cast<uint32_t>(lead) << 10UL) + static_cast<uint32_t>(trail) - U16_SURROGATE_OFFSET)
 
 namespace panda::utf {
 

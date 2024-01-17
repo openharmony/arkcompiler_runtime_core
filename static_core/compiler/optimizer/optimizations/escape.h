@@ -218,7 +218,7 @@ private:
                 auto mask = span[maskIdx];
                 size_t maskOffset = 0;
                 while (mask != 0) {
-                    size_t offset = Ctz(mask);
+                    auto offset = static_cast<size_t>(Ctz(mask));
                     mask = (mask >> offset) >> 1U;
                     maskOffset += offset;
                     size_t liveIdx = maskIdx * sizeof(mask) * BITS_PER_BYTE + maskOffset;

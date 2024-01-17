@@ -97,9 +97,9 @@ public:
           usePositions_(allocator->Adapter()),
           location_(Location::Invalid()),
           type_(DataType::NO_TYPE),
-          isPreassigned_(),
-          isPhysical_(),
-          isSplitSibling_()
+          isPreassigned_(0),
+          isPhysical_(0),
+          isSplitSibling_(0)
     {
 #ifndef NDEBUG
         finalized_ = 0;

@@ -28,8 +28,8 @@ class LoopUnswitcher : public GraphCloner {
 public:
     static Inst *FindUnswitchInst(Loop *loop);
     static bool IsSmallLoop(Loop *loop);
-    static void EstimateInstructionsCount(const Loop *loop, const Inst *unswitchInst, uint32_t *loopSize,
-                                          uint32_t *trueCount, uint32_t *falseCount);
+    static void EstimateInstructionsCount(const Loop *loop, const Inst *unswitchInst, int64_t *loopSize,
+                                          int64_t *trueCount, int64_t *falseCount);
     explicit LoopUnswitcher(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator);
     Loop *UnswitchLoop(Loop *loop, Inst *inst);
 
