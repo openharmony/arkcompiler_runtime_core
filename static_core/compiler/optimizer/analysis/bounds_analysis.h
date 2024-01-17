@@ -122,11 +122,11 @@ public:
 
     static RangePair TryNarrowBoundsByCC(ConditionCode cc, RangePair const &ranges);
 
-    static int64_t AddWithOverflowCheck(int64_t left, int64_t right);
+    static std::optional<int64_t> AddWithOverflowCheck(int64_t left, int64_t right);
 
-    static int64_t MulWithOverflowCheck(int64_t left, int64_t right);
+    static std::optional<int64_t> MulWithOverflowCheck(int64_t left, int64_t right);
 
-    static int64_t DivWithOverflowCheck(int64_t left, int64_t right);
+    static std::optional<int64_t> DivWithOverflowCheck(int64_t left, int64_t right);
 
     static constexpr int64_t MAX_RANGE_VALUE = INT64_MAX;
     static constexpr int64_t MIN_RANGE_VALUE = INT64_MIN;
@@ -234,6 +234,16 @@ private:
     static void CalcNewBoundsRangeUnary(GraphVisitor *v, const Inst *inst);
     template <Opcode OPC>
     static void CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeAdd(const BoundsRangeInfo *bri, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeSub(const BoundsRangeInfo *bri, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeMod(const BoundsRangeInfo *bri, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeMul(const BoundsRangeInfo *bri, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeDiv(const BoundsRangeInfo *bri, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeShr(const BoundsRangeInfo *bri, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeAShr(const BoundsRangeInfo *bri, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeShl(const BoundsRangeInfo *bri, const Inst *inst);
+    static BoundsRange CalcNewBoundsRangeAnd(const BoundsRangeInfo *bri, const Inst *inst);
+    static bool CheckBoundsRange(const BoundsRangeInfo *bri, const Inst *inst);
 
 private:
     BoundsRangeInfo boundsRangeInfo_;
