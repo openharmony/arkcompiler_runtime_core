@@ -515,19 +515,22 @@ bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const Annotat
 }
 
 template <class T>
-static void AddDependencyByIndex(MethodItem *method, const Ins &insn,
+static bool AddDependencyByIndex(MethodItem *method, const Ins &insn,
                                  const std::unordered_map<std::string, T *> &items, size_t idx = 0)
 {
-    ASSERT(idx < insn.ids.size());
+    if (idx >= insn.ids.size()) {
+        return false;
+    };
     const auto &id = insn.ids[idx];
     auto it = items.find(id);
     ASSERT(it != items.cend());
     auto *item = it->second;
     ASSERT(item->GetIndexType() != panda_file::IndexType::NONE);
     method->AddIndexDependency(item);
+    return true;
 }
 
-static void AddBytecodeIndexDependencies(MethodItem *method, const Function &func,
+static bool AddBytecodeIndexDependencies(MethodItem *method, const Function &func,
                                          const AsmEmitter::AsmEntityCollections &entities)
 {
     for (const auto &insn : func.ins) {
@@ -536,31 +539,46 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Function &fun
         }
 
         if (insn.opcode == Opcode::DEFINECLASSWITHBUFFER) {
-            AddDependencyByIndex(method, insn, entities.method_items);
-            AddDependencyByIndex(method, insn, entities.literalarray_items, 1);
+            if (!AddDependencyByIndex(method, insn, entities.method_items)) {
+                return false;
+            }
+            if (!AddDependencyByIndex(method, insn, entities.literalarray_items, 1)) {
+                return false;
+            }
             continue;
         }
 
         if (insn.opcode == Opcode::CALLRUNTIME_DEFINESENDABLECLASS) {
-            AddDependencyByIndex(method, insn, entities.method_items);
-            AddDependencyByIndex(method, insn, entities.literalarray_items, 1);
+            if (!AddDependencyByIndex(method, insn, entities.method_items)) {
+                return false;
+            }
+            if (!AddDependencyByIndex(method, insn, entities.literalarray_items, 1)) {
+                return false;
+            }
             continue;
         }
 
         if (insn.HasFlag(InstFlags::METHOD_ID)) {
-            AddDependencyByIndex(method, insn, entities.method_items);
+            if (!AddDependencyByIndex(method, insn, entities.method_items)) {
+                return false;
+            }
             continue;
         }
 
         if (insn.HasFlag(InstFlags::STRING_ID)) {
-            AddDependencyByIndex(method, insn, entities.string_items);
+            if (!AddDependencyByIndex(method, insn, entities.string_items)) {
+                return false;
+            }
             continue;
         }
 
         if (insn.HasFlag(InstFlags::LITERALARRAY_ID)) {
-            AddDependencyByIndex(method, insn, entities.literalarray_items);
+            if (!AddDependencyByIndex(method, insn, entities.literalarray_items)) {
+                return false;
+            }
         }
     }
+    return true;
 }
 
 /* static */
@@ -1171,7 +1189,9 @@ bool AsmEmitter::MakeFunctionDebugInfoAndAnnotations(ItemContainer *items, const
         auto *method = static_cast<MethodItem *>(Find(entities.method_items, name));
 
         SetCodeAndDebugInfo(items, method, func, emit_debug_info);
-        AddBytecodeIndexDependencies(method, func, entities);
+        if (!AddBytecodeIndexDependencies(method, func, entities)) {
+            return false;
+        }
 
         method->SetSourceLang(func.language);
 
