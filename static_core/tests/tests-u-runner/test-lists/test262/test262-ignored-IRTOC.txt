@@ -26,7 +26,8 @@ language/statements/try/tco-catch-finally.js
 language/statements/try/tco-catch.js
 language/statements/try/tco-finally.js
 language/statements/while/tco-body.js
-
+# #15159
+built-ins/Array/prototype/reduceRight/15.4.4.22-2-10.js
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js
 

@@ -588,6 +588,8 @@ spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
 ### Issue 14675, 14769, 14841
 escompat/ArrayBufferTest2.ets
 ### End of 14675, 14769, 14841
+### issue 15177
+escompat/ReflectGetBadCases.ets
 ### issue 14836 begin
 spec/indexable/idx-s01-0010.ets
 spec/indexable/idx-s01-0011.ets
