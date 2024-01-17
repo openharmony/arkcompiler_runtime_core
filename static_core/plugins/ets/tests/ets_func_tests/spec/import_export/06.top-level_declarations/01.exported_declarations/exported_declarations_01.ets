@@ -17,6 +17,7 @@
  desc: 13.06 Top-level Declarations
  name: 13.compilation_units_packages_and_modules/13.06.top-level_declarations/13.06.01.exported_declaration/exported_declaration_01
  tags: 
+ files: [./to_export.ets]
  ---*/
 import * from "./to_export"
 
