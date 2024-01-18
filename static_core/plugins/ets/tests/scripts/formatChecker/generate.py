@@ -42,10 +42,12 @@ env = Environment(
     variable_start_string=VARIABLE_START_STRING
 )
 
-def render_template(filepath: str, params=dict()) -> str:
+def render_template(filepath: str, params=None) -> str:
     """
     Renders a single template and returns result as string 
     """
+    if params is None:
+        params = dict()
     try:
         template = env.get_template(filepath)
         return template.render(**params)

@@ -107,7 +107,7 @@ class Template:
 
     def __parse_yaml(self, text: str) -> Dict[str, Any]:
         try:
-            result: Dict[str, Any] = yaml.load(text, Loader=yaml.SafeLoader)
+            result: Dict[str, Any] = yaml.load(text, Loader=yaml.FullLoader)
         except Exception as exc:
             raise InvalidFileFormatException(message=f"Could not load YAML in test params: {str(exc)}",
                                              filepath=self.test_path) from exc
