@@ -659,3 +659,9 @@ spec/expressions/equality/equality_primitive_01_number_equal_number_012.ets
 spec/expressions/equality/equality_primitive_01_short_equal_short.ets
 spec/expressions/equality/equality_primitive_01_short_equal_short_015.ets
 ###
+
+### accessors
+### Issue 15396
+spec/accessors/issue-13330_7.ets
+spec/accessors/issue-13330_8.ets
+### end of accessors
