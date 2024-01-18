@@ -365,6 +365,14 @@ void SetIndexField(EtsObject *regexpExecArrayObj, uint32_t index)
     regexpExecArray->SetFieldPrimitive<EtsDouble>(indexField, static_cast<EtsDouble>(index));
 }
 
+void SetLastIndexField(EtsObject *regexp, EtsField *lastIndexField, bool global, bool sticky, EtsDouble value)
+{
+    if (!global && !sticky) {
+        return;
+    }
+    regexp->SetFieldPrimitive<EtsDouble>(lastIndexField, value);
+}
+
 extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *str)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
@@ -392,9 +400,7 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *str)
     }
     EtsInt stringLength = strHandle->GetLength();
     if (lastIndex > stringLength) {
-        if (global || sticky) {
-            regexp.GetPtr()->SetFieldPrimitive<EtsDouble>(lastIndexField, 0.0);
-        }
+        SetLastIndexField(regexp.GetPtr(), lastIndexField, global, sticky, 0.0);
         SetUnsuccessfulMatchLegacyProperties(regexpClass);
         SetIsCorrectField(regexpExecArrayObject.GetPtr(), false);
         return regexpExecArrayObject.GetPtr();
@@ -402,19 +408,13 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *str)
 
     auto execResult = Execute(regexp.GetPtr(), strHandle.GetPtr(), stringLength, lastIndex, hasIndices);
     if (!execResult.isSuccess) {
-        if (global || sticky) {
-            regexp.GetPtr()->SetFieldPrimitive<EtsDouble>(lastIndexField, 0.0);
-        }
+        SetLastIndexField(regexp.GetPtr(), lastIndexField, global, sticky, 0.0);
         SetUnsuccessfulMatchLegacyProperties(regexpClass);
         SetIsCorrectField(regexpExecArrayObject.GetPtr(), false);
         return regexpExecArrayObject.GetPtr();
     }
 
-    uint32_t endIndex = execResult.endIndex;
-    if (global || sticky) {
-        regexp.GetPtr()->SetFieldPrimitive<EtsDouble>(lastIndexField, static_cast<EtsDouble>(endIndex));
-    }
-
+    SetLastIndexField(regexp.GetPtr(), lastIndexField, global, sticky, static_cast<EtsDouble>(execResult.endIndex));
     SetIsCorrectField(regexpExecArrayObject.GetPtr(), true);
     SetIndexField(regexpExecArrayObject.GetPtr(), execResult.index);
     SetInputField(regexpExecArrayObject.GetPtr(), strHandle.GetPtr());

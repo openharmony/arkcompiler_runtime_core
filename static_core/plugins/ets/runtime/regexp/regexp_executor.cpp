@@ -38,50 +38,55 @@ RegExpMatchResult<PandaString> RegExpExecutor::GetResult(bool isSuccess, bool ha
     PandaVector<std::pair<bool, PandaString>> captures;
     PandaVector<std::pair<uint32_t, uint32_t>> indices;
     result.isSuccess = isSuccess;
-    if (isSuccess) {
-        for (uint32_t i = 0; i < GetCaptureCount(); i++) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            CaptureState *captureState = &GetCaptureResultList()[i];
-            if (i == 0) {
-                result.index = captureState->captureStart - GetInputPtr();
-                if (IsWideChar()) {
-                    result.index /= WIDE_CHAR_SIZE;
-                }
-            }
-            int32_t len = captureState->captureEnd - captureState->captureStart;
-            PandaString res;
-            if ((captureState->captureStart != nullptr && captureState->captureEnd != nullptr) && (len >= 0)) {
-                if (IsWideChar()) {
-                    // create utf-16
-                    res = PandaString(reinterpret_cast<const char *>(captureState->captureStart), len);
-                } else {
-                    // create utf-8 string
-                    PandaVector<uint8_t> buffer(len + 1);
-                    uint8_t *dest = buffer.data();
-                    if (memcpy_s(dest, len + 1, reinterpret_cast<const uint8_t *>(captureState->captureStart), len) !=
-                        EOK) {
-                        LOG(FATAL, COMMON) << "memcpy_s failed";
-                        UNREACHABLE();
-                    }
-                    dest[len] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    res = PandaString(reinterpret_cast<const char *>(buffer.data()), len);
-                }
-                captures.push_back({true, res});
-                indices.emplace_back(GetIndices(captureState));
-            }
-        }
-        result.captures = std::move(captures);
-        if (hasIndices) {
-            result.indices = std::move(indices);
-        } else {
-            result.indices = {};
-        }
-        result.endIndex = GetCurrentPtr() - GetInputPtr();
-        if (IsWideChar()) {
-            result.endIndex /= WIDE_CHAR_SIZE;
-        }
-    }
     result.isWide = IsWideChar();
+    if (!isSuccess) {
+        return result;
+    }
+
+    for (uint32_t i = 0; i < GetCaptureCount(); i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        CaptureState *captureState = &GetCaptureResultList()[i];
+        if (i == 0) {
+            result.index = captureState->captureStart - GetInputPtr();
+            if (IsWideChar()) {
+                result.index /= WIDE_CHAR_SIZE;
+            }
+        }
+
+        int32_t len = captureState->captureEnd - captureState->captureStart;
+        if (captureState->captureStart == nullptr || captureState->captureEnd == nullptr || len < 0) {
+            continue;
+        }
+
+        PandaString res;
+        if (IsWideChar()) {
+            // create utf-16
+            res = PandaString(reinterpret_cast<const char *>(captureState->captureStart), len);
+        } else {
+            // create utf-8 string
+            PandaVector<uint8_t> buffer(len + 1);
+            uint8_t *dest = buffer.data();
+            if (memcpy_s(dest, len + 1, reinterpret_cast<const uint8_t *>(captureState->captureStart), len) != EOK) {
+                LOG(FATAL, COMMON) << "memcpy_s failed";
+                UNREACHABLE();
+            }
+            dest[len] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            res = PandaString(reinterpret_cast<const char *>(buffer.data()), len);
+        }
+        captures.push_back({true, res});
+        indices.emplace_back(GetIndices(captureState));
+    }
+    result.captures = std::move(captures);
+    if (hasIndices) {
+        result.indices = std::move(indices);
+    } else {
+        result.indices = {};
+    }
+    result.endIndex = GetCurrentPtr() - GetInputPtr();
+    if (IsWideChar()) {
+        result.endIndex /= WIDE_CHAR_SIZE;
+    }
+
     return result;
 }
 }  // namespace panda::ets

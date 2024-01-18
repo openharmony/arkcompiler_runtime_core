@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <type_traits>
+#include "macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
@@ -21,6 +23,7 @@
 #include "runtime/mem/local_object_handle.h"
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
+#include "types/ets_object.h"
 
 namespace panda::ets::interop::js {
 
@@ -76,25 +79,28 @@ static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
     return cache->Insert(etsClass, std::move(wrapper));
 }
 
-// NOLINTNEXTLINE(readability-function-size)
-static void RegisterCompatConvertors(InteropCtx *ctx)
-{
-    /******************************************************************************/
-    // Helpers
+namespace {
 
-    namespace descriptors = panda_file_items::class_descriptors;
+namespace descriptors = panda_file_items::class_descriptors;
 
-    auto notImplemented = [](char const *name) __attribute__((noreturn, noinline))
+constexpr const ets_proxy::EtsClassWrapper::OverloadsMap *NO_OVERLOADS = nullptr;
+constexpr const char *NO_MIRROR = nullptr;
+
+class CompatConvertorsRegisterer {
+private:
+    [[noreturn]] void NotImplemented(char const *name) __attribute__((noinline))
     {
         InteropCtx::Fatal(std::string("compat.") + name + " box is not implemented");
-    };
-    auto notAssignable = [](char const *name) __attribute__((noinline))->EtsObject *
+    }
+
+    EtsObject *NotAssignable(char const *name) __attribute__((noinline))
     {
         JSConvertTypeCheckFailed(name);
         return nullptr;
     };
 
-    auto stdCtorRef = [](InteropCtx *ctxx, char const *name) {
+    napi_ref StdCtorRef(InteropCtx *ctxx, char const *name)
+    {
         napi_env env = ctxx->GetJSEnv();
         napi_value val;
         NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), name, &val));
@@ -102,222 +108,213 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
         napi_ref ref;
         NAPI_CHECK_FATAL(napi_create_reference(env, val, 1, &ref));
         return ref;
-    };
-    auto checkInstanceof = [](napi_env env, napi_value val, napi_ref ctorRef) {
+    }
+
+    bool CheckInstanceof(napi_env env, napi_value val, napi_ref ctorRef)
+    {
         bool result;
         NAPI_CHECK_FATAL(napi_instanceof(env, val, GetReferenceValue(env, ctorRef), &result));
         return result;
-    };
+    }
 
-    auto builtinConvert = [](auto convTag, InteropCtx *ctxx, napi_env env, napi_value jsValue) -> EtsObject * {
-        auto res = decltype(convTag)::type::UnwrapImpl(ctxx, env, jsValue);
+    template <typename ConvTag>
+    EtsObject *BuiltinConvert(InteropCtx *inCtx, napi_env env, napi_value jsValue)
+    {
+        auto res = ConvTag::UnwrapImpl(inCtx, env, jsValue);
         if (UNLIKELY(!res.has_value())) {
             return nullptr;
         }
         return AsEtsObject(res.value());
-    };
-
-    napi_value jsGlobalEts;
-    {
-        auto env = ctx->GetJSEnv();
-        NAPI_CHECK_FATAL(napi_create_object(env, &jsGlobalEts));
-        NAPI_CHECK_FATAL(napi_set_named_property(env, GetGlobal(env), "ets", jsGlobalEts));
     }
 
-    auto registerClass = [ctx, jsGlobalEts](std::string_view descriptor, char const *jsBuiltinName = nullptr,
-                                            const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr) {
-        ets_proxy::EtsClassWrapper *wclass = RegisterEtsProxyForStdClass(ctx, descriptor, jsBuiltinName, overloads);
-        auto env = ctx->GetJSEnv();
+    void RegisterExceptions()
+    {
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS {
+            {utf::CStringAsMutf8("<ctor>"), "Lstd/core/String;:V"}};
+        wError_ = RegisterClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
+        RegisterClass(descriptors::EXCEPTION, nullptr, &W_ERROR_OVERLOADS);
+
+        static const std::array STD_EXCEPTIONS_LIST = {
+            // Errors
+            std::make_tuple("Lstd/core/AssertionError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/DivideByZeroError;", NO_MIRROR, NO_OVERLOADS),
+            std::make_tuple("Lstd/core/NullPointerError;", NO_MIRROR, NO_OVERLOADS),
+            std::make_tuple("Lstd/core/UncatchedExceptionError;", NO_MIRROR, NO_OVERLOADS),
+            std::make_tuple("Lstd/core/RangeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            // Exceptions
+            std::make_tuple("Lstd/core/NullPointerException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/NoDataException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/ArgumentOutOfRangeException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/IndexOutOfBoundsException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalStateException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/ArithmeticException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/ClassCastException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/ClassNotFoundException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/UnsupportedOperationException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/ArrayStoreException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/NegativeArraySizeException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalMonitorStateException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalArgumentException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/InvalidDate;", NO_MIRROR, NO_OVERLOADS),
+        };
+        for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
+            RegisterClass(descr, mirror, ovl);
+        }
+    }
+
+    ets_proxy::EtsClassWrapper *RegisterClass(std::string_view descriptor, char const *jsBuiltinName = nullptr,
+                                              const ets_proxy::EtsClassWrapper::OverloadsMap *overloads = nullptr)
+    {
+        ets_proxy::EtsClassWrapper *wclass = RegisterEtsProxyForStdClass(ctx_, descriptor, jsBuiltinName, overloads);
+        auto env = ctx_->GetJSEnv();
         auto name = wclass->GetEtsClass()->GetRuntimeClass()->GetName();
         auto jsCtor = wclass->GetJsCtor(env);
-        NAPI_CHECK_FATAL(napi_set_named_property(env, jsGlobalEts, name.c_str(), jsCtor));
+        NAPI_CHECK_FATAL(napi_set_named_property(env, jsGlobalEts_, name.c_str(), jsCtor));
         if (jsBuiltinName != nullptr) {
-            NAPI_CHECK_FATAL(napi_set_named_property(env, jsGlobalEts, jsBuiltinName, jsCtor));
+            NAPI_CHECK_FATAL(napi_set_named_property(env, jsGlobalEts_, jsBuiltinName, jsCtor));
         }
         return wclass;
-    };
-
-    constexpr const ets_proxy::EtsClassWrapper::OverloadsMap *NO_OVERLOADS = nullptr;
-    constexpr const char *NO_MIRROR = nullptr;
-
-    /******************************************************************************/
-    // Definitions for StdClasses
-
-    auto wObject = registerClass(descriptors::OBJECT, "Object");
-
-    static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS {
-        {utf::CStringAsMutf8("<ctor>"), "Lstd/core/String;:V"}};
-    auto wError = registerClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
-    registerClass(descriptors::EXCEPTION, nullptr, &W_ERROR_OVERLOADS);
-
-    static const std::array STD_EXCEPTIONS_LIST = {
-        // Errors
-        std::make_tuple("Lstd/core/AssertionError;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/DivideByZeroError;", NO_MIRROR, NO_OVERLOADS),
-        std::make_tuple("Lstd/core/NullPointerError;", NO_MIRROR, NO_OVERLOADS),
-        std::make_tuple("Lstd/core/UncatchedExceptionError;", NO_MIRROR, NO_OVERLOADS),
-        std::make_tuple("Lstd/core/RangeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        // Exceptions
-        std::make_tuple("Lstd/core/NullPointerException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/NoDataException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/ArgumentOutOfRangeException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/IndexOutOfBoundsException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/IllegalStateException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/ArithmeticException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/ClassCastException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/ClassNotFoundException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/UnsupportedOperationException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/ArrayStoreException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/NegativeArraySizeException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/IllegalMonitorStateException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/IllegalArgumentException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-        std::make_tuple("Lstd/core/InvalidDate;", NO_MIRROR, NO_OVERLOADS),
-    };
-    for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
-        registerClass(descr, mirror, ovl);
     }
 
-    static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
-        {utf::CStringAsMutf8("at"), "I:Lstd/core/Object;"},
-        {utf::CStringAsMutf8("$_get"), "D:Lstd/core/Object;"},
-        {utf::CStringAsMutf8("$_set"), "DLstd/core/Object;:Lstd/core/void;"},
-        {utf::CStringAsMutf8("with"), "DLstd/core/Object;:Lescompat/Array;"},
-        {utf::CStringAsMutf8("map"), "LFunctionalInterface-std-core-Object-std-core-Object-0;:Lescompat/Array;"},
-        {utf::CStringAsMutf8("forEach"), "LFunctionalInterface-std-core-Object-std-core-void-0;:Lstd/core/void;"},
-        {utf::CStringAsMutf8("pop"), ":Lstd/core/Object;"},
-        {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
-        {utf::CStringAsMutf8("flat"), ":Lescompat/Array;"},
-        {utf::CStringAsMutf8("join"), "Lstd/core/Object;:Lstd/core/String;"},
-        // NOTE(kprokopenko) make [Lstd/core/Object;:D when #14756 is fixed
-        {utf::CStringAsMutf8("push"), "Lstd/core/Object;:D"},
-        {utf::CStringAsMutf8("some"), "LFunctionalInterface-std-core-Object-u1-0;:Z"},
-        {utf::CStringAsMutf8("sort"), ":Lescompat/Array;"},
-        {utf::CStringAsMutf8("every"), "LFunctionalInterface-std-core-Object-u1-0;:Z"},
-        {utf::CStringAsMutf8("shift"), ":Lstd/core/Object;"},
-        {utf::CStringAsMutf8("slice"), "Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
-        {utf::CStringAsMutf8("<ctor>"), ":V"},
-        {utf::CStringAsMutf8("filter"), "LFunctionalInterface-std-core-Object-u1-0;:Lescompat/Array;"},
-        {utf::CStringAsMutf8("<get>length"), ":D"},
-        {utf::CStringAsMutf8("reduce"),
-         "LFunctionalInterface-std-core-Object-std-core-Object-std-core-Object-0;:Lstd/core/Object;"},
-        {utf::CStringAsMutf8("splice"), "DLstd/core/Object;[Lstd/core/Object;:Lescompat/Array;"},
-        {utf::CStringAsMutf8("findLast"), "LFunctionalInterface-std-core-Object-u1-0;:Lstd/core/Object;"},
-        {utf::CStringAsMutf8("toSorted"), ":Lescompat/Array;"},
-        {utf::CStringAsMutf8("findIndex"), "LFunctionalInterface-std-core-Object-u1-0;:D"},
-        {utf::CStringAsMutf8("toSpliced"), "II:Lescompat/Array;"},
-        {utf::CStringAsMutf8("copyWithin"), "II:Lescompat/Array;"},
-        {utf::CStringAsMutf8("toReversed"), ":Lescompat/Array;"},
-        {utf::CStringAsMutf8("indexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
-        {utf::CStringAsMutf8("includes"), "Lstd/core/Object;Lstd/core/Object;:Z"},
-        {utf::CStringAsMutf8("lastIndexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
-        {utf::CStringAsMutf8("reduceRight"),
-         "LFunctionalInterface-std-core-Object-std-core-Object-std-core-Object-0;:Lstd/core/Object;"},
-        {utf::CStringAsMutf8("find"), "LFunctionalInterface-std-core-Object-u1-0;:Lstd/core/Object;"},
-        {utf::CStringAsMutf8("isArray"), "Lstd/core/Object;:Z"},
-        {utf::CStringAsMutf8("flatMap"),
-         "LFunctionalInterface-std-core-Object-f64-std-core-Object-0;:Lescompat/Array;"},
-        {utf::CStringAsMutf8("toLocaleString"), ":Lstd/core/String;"},
-    };
-    auto wArray = registerClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
+    void RegisterArray()
+    {
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_ARRAY_OVERLOADS = {
+            {utf::CStringAsMutf8("at"), "I:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("$_get"), "D:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("$_set"), "DLstd/core/Object;:Lstd/core/void;"},
+            {utf::CStringAsMutf8("with"), "DLstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("map"), "LFunctionalInterface-std-core-Object-std-core-Object-0;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("forEach"), "LFunctionalInterface-std-core-Object-std-core-void-0;:Lstd/core/void;"},
+            {utf::CStringAsMutf8("pop"), ":Lstd/core/Object;"},
+            {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("flat"), ":Lescompat/Array;"},
+            {utf::CStringAsMutf8("join"), "Lstd/core/Object;:Lstd/core/String;"},
+            // NOTE(kprokopenko) make [Lstd/core/Object;:D when #14756 is fixed
+            {utf::CStringAsMutf8("push"), "Lstd/core/Object;:D"},
+            {utf::CStringAsMutf8("some"), "LFunctionalInterface-std-core-Object-u1-0;:Z"},
+            {utf::CStringAsMutf8("sort"), ":Lescompat/Array;"},
+            {utf::CStringAsMutf8("every"), "LFunctionalInterface-std-core-Object-u1-0;:Z"},
+            {utf::CStringAsMutf8("shift"), ":Lstd/core/Object;"},
+            {utf::CStringAsMutf8("slice"), "Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("<ctor>"), ":V"},
+            {utf::CStringAsMutf8("filter"), "LFunctionalInterface-std-core-Object-u1-0;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("<get>length"), ":D"},
+            {utf::CStringAsMutf8("reduce"),
+             "LFunctionalInterface-std-core-Object-std-core-Object-std-core-Object-0;:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("splice"), "DLstd/core/Object;[Lstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("findLast"), "LFunctionalInterface-std-core-Object-u1-0;:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("toSorted"), ":Lescompat/Array;"},
+            {utf::CStringAsMutf8("findIndex"), "LFunctionalInterface-std-core-Object-u1-0;:D"},
+            {utf::CStringAsMutf8("toSpliced"), "II:Lescompat/Array;"},
+            {utf::CStringAsMutf8("copyWithin"), "II:Lescompat/Array;"},
+            {utf::CStringAsMutf8("toReversed"), ":Lescompat/Array;"},
+            {utf::CStringAsMutf8("indexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
+            {utf::CStringAsMutf8("includes"), "Lstd/core/Object;Lstd/core/Object;:Z"},
+            {utf::CStringAsMutf8("lastIndexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
+            {utf::CStringAsMutf8("reduceRight"),
+             "LFunctionalInterface-std-core-Object-std-core-Object-std-core-Object-0;:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("find"), "LFunctionalInterface-std-core-Object-u1-0;:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("isArray"), "Lstd/core/Object;:Z"},
+            {utf::CStringAsMutf8("flatMap"),
+             "LFunctionalInterface-std-core-Object-f64-std-core-Object-0;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("toLocaleString"), ":Lstd/core/String;"},
+        };
+        wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
 
-    NAPI_CHECK_FATAL(napi_object_seal(ctx->GetJSEnv(), jsGlobalEts));
-    /******************************************************************************/
-    // JS built-in matchers for StdClasses
+        NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
+    }
 
-    auto mArray = [=](InteropCtx *ctxx, napi_value jsValue, bool verified = true) -> EtsObject * {
+    EtsObject *MArray(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
+    {
         napi_env env = ctxx->GetJSEnv();
         bool isInstanceof;
         if (!verified) {
             NAPI_CHECK_FATAL(napi_is_array(env, jsValue, &isInstanceof));
             if (!isInstanceof) {
-                return notAssignable("Array");
+                return NotAssignable("Array");
             }
         }
-        return wArray->CreateJSBuiltinProxy(ctxx, jsValue);
-    };
-    wArray->SetJSBuiltinMatcher(mArray);
+        return wArray_->CreateJSBuiltinProxy(ctxx, jsValue);
+    }
 
-    // NOTE(vpukhov): compat: obtain from class wrappers when implemented
-    napi_ref ctorTypeerror = stdCtorRef(ctx, "TypeError");
-    napi_ref ctorRangeerror = stdCtorRef(ctx, "RangeError");
-    napi_ref ctorReferenceerror = stdCtorRef(ctx, "ReferenceError");
-
-    auto mError = [=](InteropCtx *ctxx, napi_value jsValue, bool verified = true) -> EtsObject * {
+    EtsObject *MError(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
+    {
         napi_env env = ctxx->GetJSEnv();
         bool isInstanceof;
         if (!verified) {
             NAPI_CHECK_FATAL(napi_is_error(env, jsValue, &isInstanceof));
             if (!isInstanceof) {
-                return notAssignable("Error");
+                return NotAssignable("Error");
             }
         }
         // NOTE(vpukhov): compat: remove when compat/Error is implemented
-        return builtinConvert(helpers::TypeIdentity<JSConvertJSError>(), ctxx, env, jsValue);
+        return BuiltinConvert<JSConvertJSError>(ctxx, env, jsValue);
 
-        if (checkInstanceof(env, jsValue, ctorTypeerror)) {
-            notImplemented("TypeError");
+        if (CheckInstanceof(env, jsValue, ctorTypeError_)) {
+            NotImplemented("TypeError");
         }
-        if (checkInstanceof(env, jsValue, ctorRangeerror)) {
-            notImplemented("RangeError");
+        if (CheckInstanceof(env, jsValue, ctorRangeError_)) {
+            NotImplemented("RangeError");
         }
-        if (checkInstanceof(env, jsValue, ctorReferenceerror)) {
-            notImplemented("ReferenceError");
+        if (CheckInstanceof(env, jsValue, ctorReferenceError_)) {
+            NotImplemented("ReferenceError");
         }
-        notImplemented("Error");
-    };
-    wError->SetJSBuiltinMatcher(mError);
+        NotImplemented("Error");
+    }
 
-    auto mObjectObject = [=](InteropCtx *ctxx, napi_value jsValue) -> EtsObject * {
+    EtsObject *MObjectObject(InteropCtx *ctxx, napi_value jsValue)
+    {
         napi_env env = ctxx->GetJSEnv();
         bool isInstanceof;
         NAPI_CHECK_FATAL(napi_is_array(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return mArray(ctxx, jsValue);
+            return MArray(ctxx, jsValue);
         }
         NAPI_CHECK_FATAL(napi_is_arraybuffer(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return builtinConvert(helpers::TypeIdentity<JSConvertArrayBuffer>(), ctxx, env, jsValue);
+            return BuiltinConvert<JSConvertArrayBuffer>(ctxx, env, jsValue);
         }
         NAPI_CHECK_FATAL(napi_is_typedarray(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            notImplemented("TypedArray");
+            NotImplemented("TypedArray");
         }
         NAPI_CHECK_FATAL(napi_is_promise(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return builtinConvert(helpers::TypeIdentity<JSConvertPromise>(), ctxx, env, jsValue);
+            return BuiltinConvert<JSConvertPromise>(ctxx, env, jsValue);
         }
         NAPI_CHECK_FATAL(napi_is_error(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            return mError(ctxx, jsValue);
+            return MError(ctxx, jsValue);
         }
         NAPI_CHECK_FATAL(napi_is_date(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            notImplemented("Date");
+            NotImplemented("Date");
         }
         NAPI_CHECK_FATAL(napi_is_dataview(env, jsValue, &isInstanceof));
         if (isInstanceof) {
-            notImplemented("DataView");
+            NotImplemented("DataView");
         }
         // NOTE(vpukhov): Boolean, Number...
-        return builtinConvert(helpers::TypeIdentity<JSConvertJSValue>(), ctxx, env, jsValue);
-    };
+        return BuiltinConvert<JSConvertJSValue>(ctxx, env, jsValue);
+    }
 
-    auto mObject = [=](InteropCtx *ctxx, napi_value jsValue, bool verified = true) -> EtsObject * {
+    EtsObject *MObject(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
+    {
         napi_env env = ctxx->GetJSEnv();
         (void)verified;  // ignored for Object
 
         napi_valuetype jsType = GetValueType(env, jsValue);
         switch (jsType) {
             case napi_boolean:
-                return builtinConvert(helpers::TypeIdentity<JSConvertStdlibBoolean>(), ctxx, env, jsValue);
+                return BuiltinConvert<JSConvertStdlibBoolean>(ctxx, env, jsValue);
             case napi_number:
-                return builtinConvert(helpers::TypeIdentity<JSConvertStdlibDouble>(), ctxx, env, jsValue);
+                return BuiltinConvert<JSConvertStdlibDouble>(ctxx, env, jsValue);
             case napi_string:
-                return builtinConvert(helpers::TypeIdentity<JSConvertString>(), ctxx, env, jsValue);
+                return BuiltinConvert<JSConvertString>(ctxx, env, jsValue);
             case napi_object:
-                return mObjectObject(ctx, jsValue);
+                return MObjectObject(ctx_, jsValue);
             case napi_undefined:
-                return ctx->GetUndefinedObject();
+                return ctx_->GetUndefinedObject();
             case napi_symbol:
                 [[fallthrough]];
             case napi_function:
@@ -325,13 +322,82 @@ static void RegisterCompatConvertors(InteropCtx *ctx)
             case napi_external:
                 [[fallthrough]];
             case napi_bigint:
-                return builtinConvert(helpers::TypeIdentity<JSConvertJSValue>(), ctxx, env, jsValue);
+                return BuiltinConvert<JSConvertJSValue>(ctxx, env, jsValue);
             default:
                 ASSERT(!IsNullOrUndefined(env, jsValue));
                 InteropCtx::Fatal("Bad jsType in Object value matcher");
         };
-    };
-    wObject->SetJSBuiltinMatcher(mObject);
+    }
+
+public:
+    explicit CompatConvertorsRegisterer(InteropCtx *ctx) : ctx_(ctx)
+    {
+        auto env = ctx_->GetJSEnv();
+        NAPI_CHECK_FATAL(napi_create_object(env, &jsGlobalEts_));
+        NAPI_CHECK_FATAL(napi_set_named_property(env, GetGlobal(env), "ets", jsGlobalEts_));
+    }
+
+    DEFAULT_MOVE_SEMANTIC(CompatConvertorsRegisterer);
+
+    DEFAULT_COPY_SEMANTIC(CompatConvertorsRegisterer);
+
+    ~CompatConvertorsRegisterer() = default;
+
+    void Run()
+    {
+        wObject_ = RegisterClass(descriptors::OBJECT, "Object");
+
+        RegisterExceptions();
+
+        RegisterArray();
+
+        // NOTE(vpukhov): compat: obtain from class wrappers when implemented
+        ctorTypeError_ = StdCtorRef(ctx_, "TypeError");
+        ctorRangeError_ = StdCtorRef(ctx_, "RangeError");
+        ctorReferenceError_ = StdCtorRef(ctx_, "ReferenceError");
+
+        ASSERT(wError_ != nullptr);
+        wError_->SetJSBuiltinMatcher(
+            [self = *this](InteropCtx *ctxx, napi_value jsValue, bool verified = true) mutable {
+                return self.MError(ctxx, jsValue, verified);
+            });
+
+        ASSERT(wObject_ != nullptr);
+        wObject_->SetJSBuiltinMatcher(
+            [self = *this](InteropCtx *ctxx, napi_value jsValue, bool verified = true) mutable {
+                return self.MObject(ctxx, jsValue, verified);
+            });
+
+        ASSERT(wArray_ != nullptr);
+        wArray_->SetJSBuiltinMatcher(
+            [self = *this](InteropCtx *ctxx, napi_value jsValue, bool verified = true) mutable {
+                return self.MArray(ctxx, jsValue, verified);
+            });
+    }
+
+private:
+    InteropCtx *ctx_;
+    napi_value jsGlobalEts_ {};
+    ets_proxy::EtsClassWrapper *wError_ {};
+    ets_proxy::EtsClassWrapper *wObject_ {};
+    ets_proxy::EtsClassWrapper *wArray_ {};
+
+    napi_ref ctorTypeError_ {nullptr};
+    napi_ref ctorRangeError_ {nullptr};
+    napi_ref ctorReferenceError_ {nullptr};
+};
+
+static_assert(std::is_trivially_copy_constructible_v<CompatConvertorsRegisterer>);
+static_assert(std::is_trivially_copy_assignable_v<CompatConvertorsRegisterer>);
+static_assert(std::is_trivially_move_constructible_v<CompatConvertorsRegisterer>);
+static_assert(std::is_trivially_move_assignable_v<CompatConvertorsRegisterer>);
+static_assert(std::is_trivially_destructible_v<CompatConvertorsRegisterer>);
+
+}  // namespace
+
+static void RegisterCompatConvertors(InteropCtx *ctx)
+{
+    CompatConvertorsRegisterer(ctx).Run();
 }
 
 void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
