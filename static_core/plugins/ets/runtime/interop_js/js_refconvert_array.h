@@ -127,7 +127,7 @@ template <ClassRoot CLASS_ROOT, typename Conv>
 static inline void RegisterBuiltinArrayConvertor(JSRefConvertCache *cache, EtsClassLinkerExtension *ext)
 {
     auto aklass = ext->GetClassRoot(CLASS_ROOT);
-    cache->Insert(aklass, std::unique_ptr<JSRefConvert>(new JSRefConvertBuiltinArray<Conv>(aklass)));
+    cache->Insert(aklass, std::make_unique<JSRefConvertBuiltinArray<Conv>>(aklass));
 }
 
 // JSRefConvert adapter for reference[] types

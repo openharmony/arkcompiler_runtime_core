@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <pthread.h>
-#include <stdlib.h>
 #define MC_ON
 #include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
 

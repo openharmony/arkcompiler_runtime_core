@@ -198,7 +198,8 @@ if __name__ == "__main__":
     if not files_list:
         sys.exit("Can't be prepaired source list. Please check availble in build `dir compile_commands.json` and correcting of parameter `--filename-filter` if you use it.")
 
-    check_file_list(files_list, arguments.panda_dir, arguments.build_dir, arguments.fix_dir, arguments.clang_rules_autofix)
+    check_file_list(files_list, arguments.panda_dir, arguments.build_dir,
+                    arguments.fix_dir, arguments.clang_rules_autofix)
 
     res = apply_fixies(arguments.fix_dir, arguments.panda_dir)
 

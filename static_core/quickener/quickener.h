@@ -15,6 +15,9 @@
 #ifndef PANDA_QUICKENER_QUICKENER_H
 #define PANDA_QUICKENER_QUICKENER_H
 
+#ifndef PANDA_QUICKENER_QUICKENER_H
+#define PANDA_QUICKENER_QUICKENER_H
+
 #include "file.h"
 #include "file_item_container.h"
 #include "file_items.h"

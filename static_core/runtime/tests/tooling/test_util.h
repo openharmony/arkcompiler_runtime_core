@@ -31,6 +31,8 @@
 namespace ark::tooling::test {
 using TestMap = std::unordered_map<panda_file::SourceLang, std::unordered_map<const char *, std::unique_ptr<ApiTest>>>;
 
+const char *GetCurrentTestName();
+
 class TestUtil {
 public:
     static void RegisterTest(panda_file::SourceLang language, const char *testName, std::unique_ptr<ApiTest> test)

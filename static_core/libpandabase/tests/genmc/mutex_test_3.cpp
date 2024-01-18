@@ -14,7 +14,7 @@
  */
 
 #include <pthread.h>
-#include <stdlib.h>
+#include <cstdlib>
 #define MC_ON
 #include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
 
