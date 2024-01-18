@@ -12,6 +12,7 @@
 # limitations under the License.
 
 add_subdirectory(bridges)
+add_subdirectory(etsnative)
 add_subdirectory(sampler)
 add_subdirectory(sampler_sig_stack)
 

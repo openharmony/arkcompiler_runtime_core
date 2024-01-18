@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/napi/ets_napi_internal.h"
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 
 #include <vector>
@@ -264,4 +265,15 @@ extern "C" ETS_EXPORT ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInit
 
     return ETS_OK;
 }
+
+// We have separate shared library with ets_napi called libetsnative.so
+// libetsnative.so contains same three ETS_* functions as libarkruntime.so
+// libarktuntime.so exposes three _internal_ETS_* aliases
+// And libetsnative.so ETS_* functions just forward calls to _internal_ETS_* functions
+extern "C" ETS_EXPORT ets_int _internal_ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vmArgs)
+    __attribute__((alias("ETS_GetDefaultVMInitArgs")));
+extern "C" ETS_EXPORT ets_int _internal_ETS_GetCreatedVMs(EtsVM **vmBuf, ets_size bufLen, ets_size *nVms)
+    __attribute__((alias("ETS_GetCreatedVMs")));
+extern "C" ETS_EXPORT ets_int _internal_ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArgs)
+    __attribute__((alias("ETS_CreateVM")));
 }  // namespace panda::ets::napi

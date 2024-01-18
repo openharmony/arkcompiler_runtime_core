@@ -106,7 +106,7 @@ linux_tools() {
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_WITH_ECMASCRIPT=ON"
-    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin"
+    local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative"
     build_panda "$linux_build_dir" "$LINUX_CMAKE_ARGS" "$linux_build_targets"
     copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
 }
@@ -130,7 +130,7 @@ ohos() {
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_ETS_INTEROP_JS=ON \
         -DPANDA_WITH_ECMASCRIPT=ON"
-    local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin"
+    local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin etsnative"
     build_panda "$ohos_build_dir" "$TARGET_CMAKE_ARGS" "$ohos_build_targets"
     copy_into_sdk "$ohos_build_dir" "$taget_sdk_dir" "$SCRIPT_DIR"/ohos_arm64.txt
 

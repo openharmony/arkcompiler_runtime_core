@@ -118,3 +118,5 @@ if (PANDA_ETS_INTEROP_JS)
     #   Implementation of intrinsics should be built in 'arkruntime_obj' target
     panda_target_sources(arkruntime_obj PRIVATE ${ETS_EXT_SOURCES}/interop_js/intrinsics/std_js_jsruntime.cpp)
 endif()
+
+add_subdirectory(napi)
