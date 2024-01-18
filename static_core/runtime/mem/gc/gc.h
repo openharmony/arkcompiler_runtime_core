@@ -233,15 +233,14 @@ public:
 
     void AddListener(GCListener *listener)
     {
-        ASSERT(gcListenersPtr_ != nullptr);
-        gcListenersPtr_->push_back(listener);
+        ASSERT(gcListenerManager_ != nullptr);
+        gcListenerManager_->AddListener(listener);
     }
 
     void RemoveListener(GCListener *listener)
     {
-        ASSERT(gcListenersPtr_ != nullptr);
-        auto it = std::find(gcListenersPtr_->begin(), gcListenersPtr_->end(), listener);
-        *it = nullptr;
+        ASSERT(gcListenerManager_ != nullptr);
+        gcListenerManager_->RemoveListener(listener);
     }
 
     GCBarrierSet *GetBarrierSet()
@@ -698,10 +697,40 @@ private:
     virtual void UpdateThreadLocals() = 0;
     NativeGcTriggerType GetNativeGcTriggerType();
 
+    class GCListenerManager {
+    public:
+        GCListenerManager() = default;
+        NO_COPY_SEMANTIC(GCListenerManager);
+        NO_MOVE_SEMANTIC(GCListenerManager);
+        ~GCListenerManager() = default;
+
+        void AddListener(GCListener *newListener);
+        void RemoveListener(GCListener *newListener);
+
+        void NormalizeListenersOnStartGC();
+
+        template <class Visitor>
+        void IterateOverListeners(const Visitor &visitor)
+        {
+            os::memory::LockHolder lh(listenerLock_);
+            for (auto *gcListener : currentListeners_) {
+                if (gcListener != nullptr) {
+                    visitor(gcListener);
+                }
+            }
+        }
+
+    private:
+        os::memory::Mutex listenerLock_;
+        PandaUnorderedSet<GCListener *> currentListeners_ GUARDED_BY(listenerLock_);
+        PandaUnorderedSet<GCListener *> newListeners_ GUARDED_BY(listenerLock_);
+        PandaUnorderedSet<GCListener *> listenersForRemove_ GUARDED_BY(listenerLock_);
+    };
+
     volatile std::atomic<GCPhase> phase_ {GCPhase::GC_PHASE_IDLE};
     GCType gcType_ {GCType::INVALID_GC};
     GCSettings gcSettings_;
-    PandaVector<GCListener *> *gcListenersPtr_ {nullptr};
+    GCListenerManager *gcListenerManager_ {nullptr};
     GCBarrierSet *gcBarrierSet_ {nullptr};
     ObjectAllocatorBase *objectAllocator_ {nullptr};
     InternalAllocatorPtr internalAllocator_ {nullptr};
@@ -713,7 +742,6 @@ private:
     std::atomic<size_t> nativeObjectsNotified_ = 0;
 
     ReferenceProcessor *referenceProcessor_ {nullptr};
-    std::atomic_bool allowSoftReferenceProcessing_ = false;
 
     // NOTE(ipetrov): choose suitable priority
     static constexpr size_t GC_TASK_QUEUE_PRIORITY = 6U;
