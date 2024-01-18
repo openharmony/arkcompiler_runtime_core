@@ -49,6 +49,7 @@ public:
         WEAK = 3,
         /// Global references which can be used without Frames. Addresses of references aren't changed
         GLOBAL_FIXED = LOCAL,
+        ENUM_SIZE
     };
 
     DEFAULT_COPY_SEMANTIC(Reference);

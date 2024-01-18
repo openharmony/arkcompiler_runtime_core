@@ -15,9 +15,6 @@
 #ifndef PANDA_TESTS_PANDA_RUN_COMMON_H
 #define PANDA_TESTS_PANDA_RUN_COMMON_H
 
-#ifndef PANDA_TESTS_PANDA_RUN_COMMON_H
-#define PANDA_TESTS_PANDA_RUN_COMMON_H
-
 #include "os/exec.h"
 
 #include <gtest/gtest.h>
