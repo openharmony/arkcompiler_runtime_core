@@ -60,7 +60,7 @@ class LinuxCommands:
                 stderr=subprocess.PIPE,
         ) as proc:
             try:
-                stdout = proc.communicate()
+                stdout = proc.communicate(timeout=5400)
             except subprocess.TimeoutExpired:
                 Log.all(_LOGGER, f"Timeout when try execute {command}")
         return stdout

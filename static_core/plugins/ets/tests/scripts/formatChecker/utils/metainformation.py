@@ -84,6 +84,6 @@ def __parse_meta(meta: str) -> dict:
 
     yaml_string = meta[len(META_START_STRING):-len(META_END_STRING)]
     try:
-        return yaml.load(yaml_string, Loader=yaml.Loader)
+        return yaml.safe_load(yaml_string)
     except Exception as e:
         raise InvalidMetaException(str(e))
