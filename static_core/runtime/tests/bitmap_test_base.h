@@ -104,9 +104,7 @@ static void RunTest(TestFn &&fn)
 
             size_t manual = 0;
             for (ObjectPointerType k = offset; k < end; k += K_ALIGNMENT) {
-                if (bm.Test(ToVoidPtr(heapBegin + k))) {
-                    manual++;
-                }
+                manual += bm.Test(ToVoidPtr(heapBegin + k)) ? 1U : 0U;
             }
 
             fn(&bm, heapBegin + offset, heapBegin + end, manual);
