@@ -33,13 +33,13 @@ class RegisterNativeAllocationTest : public CallingMethodsTestGeneral {
     {
         std::vector<EtsVMOption> optionsVector;
 
-        optionsVector = {{EtsOptionType::EtsGcType, "g1-gc"},
-                         {EtsOptionType::EtsRunGcInPlace, nullptr},
-                         {EtsOptionType::EtsNoJit, nullptr},
-                         {EtsOptionType::EtsBootFile, std::getenv("PANDA_STD_LIB")}};
+        optionsVector = {{EtsOptionType::ETS_GC_TYPE, "g1-gc"},
+                         {EtsOptionType::ETS_RUN_GC_IN_PLACE, nullptr},
+                         {EtsOptionType::ETS_NO_JIT, nullptr},
+                         {EtsOptionType::ETS_BOOT_FILE, std::getenv("PANDA_STD_LIB")}};
 
         if (testBinFileName_ != nullptr) {
-            optionsVector.push_back({EtsOptionType::EtsBootFile, testBinFileName_});
+            optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, testBinFileName_});
         }
 
         EtsVMInitArgs vmArgs;

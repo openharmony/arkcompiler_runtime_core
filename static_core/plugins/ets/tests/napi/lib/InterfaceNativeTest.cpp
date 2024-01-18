@@ -19,7 +19,6 @@
 #include <string>
 
 extern "C" {
-
 ETS_EXPORT void ETS_CALL ETS_InterfaceNativeTest_callMethod(EtsEnv *env, [[maybe_unused]] ets_class cls)
 {
     ets_method method = env->GetStaticp_method(cls, "staticLongMethod", "I:J");

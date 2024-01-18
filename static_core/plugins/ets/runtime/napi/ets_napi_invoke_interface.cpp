@@ -114,34 +114,34 @@ static void *g_logPrintFunction = nullptr;
 
 static void EtsMobileLogPrint(int id, int level, const char *component, const char *fmt, const char *msg)
 {
-    int etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelUnknown;
+    int etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_UNKNOWN;
     switch (level) {
         case panda::Logger::PandaLog2MobileLog::UNKNOWN:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelUnknown;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_UNKNOWN;
             break;
         case panda::Logger::PandaLog2MobileLog::DEFAULT:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelDefault;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_DEFAULT;
             break;
         case panda::Logger::PandaLog2MobileLog::VERBOSE:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelVerbose;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_VERBOSE;
             break;
         case panda::Logger::PandaLog2MobileLog::DEBUG:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelDebug;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_DEBUG;
             break;
         case panda::Logger::PandaLog2MobileLog::INFO:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelInfo;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_INFO;
             break;
         case panda::Logger::PandaLog2MobileLog::WARN:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelWarn;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_WARN;
             break;
         case panda::Logger::PandaLog2MobileLog::ERROR:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelError;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_ERROR;
             break;
         case panda::Logger::PandaLog2MobileLog::FATAL:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelFatal;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_FATAL;
             break;
         case panda::Logger::PandaLog2MobileLog::SILENT:
-            etsLevel = EtsMobileLogggerLevel::EtsMobileLogLevelSilent;
+            etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_SILENT;
             break;
         default:
             LOG(ERROR, RUNTIME) << "No such mobile log option";
@@ -150,6 +150,60 @@ static void EtsMobileLogPrint(int id, int level, const char *component, const ch
     auto logPrintCallback = reinterpret_cast<FuncMobileLogPrint>(g_logPrintFunction);
     ASSERT(logPrintCallback != nullptr);
     logPrintCallback(id, etsLevel, component, fmt, msg);
+}
+
+static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, std::vector<std::string> &bootPandaFiles,
+                               std::vector<std::string> &aotFiles, std::vector<std::string> &arkFiles,
+                               base_options::Options &baseOptions, Span<const EtsVMOption> &options)
+{
+    for (auto &o : options) {
+        auto extraStr = reinterpret_cast<const char *>(o.extraInfo);
+
+        switch (o.option) {
+            case EtsOptionType::ETS_LOG_LEVEL:
+                baseOptions.SetLogLevel(extraStr);
+                break;
+            case EtsOptionType::ETS_MOBILE_LOG:
+                g_logPrintFunction = const_cast<void *>(o.extraInfo);
+                runtimeOptions.SetMobileLog(reinterpret_cast<void *>(EtsMobileLogPrint));
+                break;
+            case EtsOptionType::ETS_BOOT_FILE:
+                bootPandaFiles.emplace_back(extraStr);
+                break;
+            case EtsOptionType::ETS_AOT_FILE:
+                aotFiles.emplace_back(extraStr);
+                break;
+            case EtsOptionType::ETS_ARK_FILE:
+                arkFiles.emplace_back(extraStr);
+                break;
+            case EtsOptionType::ETS_JIT:
+                runtimeOptions.SetCompilerEnableJit(true);
+                break;
+            case EtsOptionType::ETS_NO_JIT:
+                runtimeOptions.SetCompilerEnableJit(false);
+                break;
+            case EtsOptionType::ETS_AOT:
+                runtimeOptions.SetEnableAn(true);
+                break;
+            case EtsOptionType::ETS_NO_AOT:
+                runtimeOptions.SetEnableAn(false);
+                break;
+            case EtsOptionType::ETS_GC_TRIGGER_TYPE:
+                runtimeOptions.SetGcTriggerType(extraStr);
+                break;
+            case EtsOptionType::ETS_GC_TYPE:
+                runtimeOptions.SetGcType(extraStr);
+                break;
+            case EtsOptionType::ETS_RUN_GC_IN_PLACE:
+                runtimeOptions.SetRunGcInPlace(true);
+                break;
+            case EtsOptionType::ETS_INTERPRETER_TYPE:
+                runtimeOptions.SetInterpreterType(extraStr);
+                break;
+            default:
+                LOG(ERROR, RUNTIME) << "No such option";
+        }
+    }
 }
 
 static bool ParseOptions(const EtsVMInitArgs *args, RuntimeOptions &runtimeOptions)
@@ -162,54 +216,7 @@ static bool ParseOptions(const EtsVMInitArgs *args, RuntimeOptions &runtimeOptio
     runtimeOptions.SetLoadRuntimes({"ets"});
 
     Span<const EtsVMOption> options(args->options, args->nOptions);
-    for (auto &o : options) {
-        auto extraStr = reinterpret_cast<const char *>(o.extraInfo);
-
-        switch (o.option) {
-            case EtsOptionType::EtsLogLevel:
-                baseOptions.SetLogLevel(extraStr);
-                break;
-            case EtsOptionType::EtsMobileLog:
-                g_logPrintFunction = const_cast<void *>(o.extraInfo);
-                runtimeOptions.SetMobileLog(reinterpret_cast<void *>(EtsMobileLogPrint));
-                break;
-            case EtsOptionType::EtsBootFile:
-                bootPandaFiles.emplace_back(extraStr);
-                break;
-            case EtsOptionType::EtsAotFile:
-                aotFiles.emplace_back(extraStr);
-                break;
-            case EtsOptionType::EtsArkFile:
-                arkFiles.emplace_back(extraStr);
-                break;
-            case EtsOptionType::EtsJit:
-                runtimeOptions.SetCompilerEnableJit(true);
-                break;
-            case EtsOptionType::EtsNoJit:
-                runtimeOptions.SetCompilerEnableJit(false);
-                break;
-            case EtsOptionType::EtsAot:
-                runtimeOptions.SetEnableAn(true);
-                break;
-            case EtsOptionType::EtsNoAot:
-                runtimeOptions.SetEnableAn(false);
-                break;
-            case EtsOptionType::EtsGcTriggerType:
-                runtimeOptions.SetGcTriggerType(extraStr);
-                break;
-            case EtsOptionType::EtsGcType:
-                runtimeOptions.SetGcType(extraStr);
-                break;
-            case EtsOptionType::EtsRunGcInPlace:
-                runtimeOptions.SetRunGcInPlace(true);
-                break;
-            case EtsOptionType::EtsInterpreterType:
-                runtimeOptions.SetInterpreterType(extraStr);
-                break;
-            default:
-                LOG(ERROR, RUNTIME) << "No such option";
-        }
-    }
+    ParseOptionsHelper(runtimeOptions, bootPandaFiles, aotFiles, arkFiles, baseOptions, options);
 
     Logger::Initialize(baseOptions);
 

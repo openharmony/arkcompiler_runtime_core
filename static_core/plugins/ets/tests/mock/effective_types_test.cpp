@@ -39,8 +39,8 @@ protected:
     {
         std::vector<EtsVMOption> options_vector;
 
-        options_vector = {{EtsOptionType::EtsBootFile, std::getenv("PANDA_STD_LIB")},
-                          {EtsOptionType::EtsBootFile, TEST_BIN_FILE_NAME}};
+        options_vector = {{EtsOptionType::ETS_BOOT_FILE, std::getenv("PANDA_STD_LIB")},
+                          {EtsOptionType::ETS_BOOT_FILE, TEST_BIN_FILE_NAME}};
 
         EtsVMInitArgs vm_args;
         vm_args.version = ETS_NAPI_VERSION_1_0;
@@ -93,7 +93,7 @@ TEST_F(EffectiveTypeTest, TestGetStaticMethod)
 {
     ets_class testClass = env->FindClass("EffectiveTypes");
     ASSERT_NE(testClass, nullptr);
-    std::array<EtsNativeMethod, 4> native_methods {
+    std::array<EtsNativeMethod, 4_I> native_methods {
         EtsNativeMethod {"foo", "I:I", reinterpret_cast<void *>(effective_types_foo_I)},
         EtsNativeMethod {"foo", "D:I", reinterpret_cast<void *>(effective_types_foo_D)},
         EtsNativeMethod {"foo", ":D", reinterpret_cast<void *>(effective_types_foo)},

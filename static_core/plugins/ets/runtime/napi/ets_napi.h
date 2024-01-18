@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INTEROP_ETS_NAPI_H_
-#define PANDA_RUNTIME_INTEROP_ETS_NAPI_H_
+#ifndef PANDA_RUNTIME_INTEROP_ETS_NAPI_H
+#define PANDA_RUNTIME_INTEROP_ETS_NAPI_H
 
 // NOLINTBEGIN(modernize-use-using, readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 
@@ -146,10 +146,10 @@ typedef struct {
 
 // The object reference types
 typedef enum {
-    EtsInvalidRefType = 0,
-    EtsLocalRefType = 1,
-    EtsGlobalRefType = 2,
-    EtsWeakGlobalRefType = 3
+    ETS_INVALID_REF_TYPE = 0,
+    ETS_LOCAL_REF_TYPE = 1,
+    ETS_GLOBAL_REF_TYPE = 2,
+    ETS_WEAK_GLOBAL_REF_TYPE = 3
 } ets_objectRefType;
 
 #ifdef __cplusplus
@@ -442,19 +442,19 @@ struct ETS_NativeInterface {
 
 // Invocation API Functions
 typedef enum {
-    EtsLogLevel,
-    EtsMobileLog,
-    EtsBootFile,
-    EtsAotFile,
-    EtsArkFile,
-    EtsJit,
-    EtsNoJit,
-    EtsAot,
-    EtsNoAot,
-    EtsGcTriggerType,
-    EtsGcType,
-    EtsRunGcInPlace,
-    EtsInterpreterType
+    ETS_LOG_LEVEL,
+    ETS_MOBILE_LOG,
+    ETS_BOOT_FILE,
+    ETS_AOT_FILE,
+    ETS_ARK_FILE,
+    ETS_JIT,
+    ETS_NO_JIT,
+    ETS_AOT,
+    ETS_NO_AOT,
+    ETS_GC_TRIGGER_TYPE,
+    ETS_GC_TYPE,
+    ETS_RUN_GC_IN_PLACE,
+    ETS_INTERPRETER_TYPE
 } EtsOptionType;
 
 typedef struct EtsVMOption {
@@ -469,15 +469,15 @@ typedef struct EtsVMInitArgs {
 } EtsVMInitArgs;
 
 typedef enum {
-    EtsMobileLogLevelUnknown = 0,
-    EtsMobileLogLevelDefault,
-    EtsMobileLogLevelVerbose,
-    EtsMobileLogLevelDebug,
-    EtsMobileLogLevelInfo,
-    EtsMobileLogLevelWarn,
-    EtsMobileLogLevelError,
-    EtsMobileLogLevelFatal,
-    EtsMobileLogLevelSilent
+    ETS_MOBILE_LOG_LEVEL_UNKNOWN = 0,
+    ETS_MOBILE_LOG_LEVEL_DEFAULT,
+    ETS_MOBILE_LOG_LEVEL_VERBOSE,
+    ETS_MOBILE_LOG_LEVEL_DEBUG,
+    ETS_MOBILE_LOG_LEVEL_INFO,
+    ETS_MOBILE_LOG_LEVEL_WARN,
+    ETS_MOBILE_LOG_LEVEL_ERROR,
+    ETS_MOBILE_LOG_LEVEL_FATAL,
+    ETS_MOBILE_LOG_LEVEL_SILENT
 } EtsMobileLogggerLevel;
 
 #ifdef __cplusplus
@@ -503,1039 +503,1039 @@ struct ETS_InvokeInterface {
 
 struct __EtsVM {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    const struct ETS_InvokeInterface *invoke_interface;
+    const struct ETS_InvokeInterface *invokeInterface;
 
 #ifdef __cplusplus
     ets_int DestroyEtsVM()
     {
-        return invoke_interface->DestroyEtsVM(this);
+        return invokeInterface->DestroyEtsVM(this);
     }
 
     ets_int GetEnv(EtsEnv **pEnv, ets_int version)
     {
-        return invoke_interface->GetEnv(this, pEnv, version);
+        return invokeInterface->GetEnv(this, pEnv, version);
     }
 #endif
 };
 
 struct __EtsEnv {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    const struct ETS_NativeInterface *native_interface;
+    const struct ETS_NativeInterface *nativeInterface;
 
 #ifdef __cplusplus
 
     ets_int GetVersion()
     {
-        return native_interface->GetVersion(this);
+        return nativeInterface->GetVersion(this);
     }
     // DefineClass,
     ets_class FindClass(const char *name)
     {
-        return native_interface->FindClass(this, name);
+        return nativeInterface->FindClass(this, name);
     }
     // FromReflectedMethod,
     // FromReflectedField,
     // ToReflectedMethod,
     ets_class GetSuperclass(ets_class cls)
     {
-        return native_interface->GetSuperclass(this, cls);
+        return nativeInterface->GetSuperclass(this, cls);
     }
     ets_boolean IsAssignableFrom(ets_class cls1, ets_class cls2)
     {
-        return native_interface->IsAssignableFrom(this, cls1, cls2);
+        return nativeInterface->IsAssignableFrom(this, cls1, cls2);
     }
     // ToReflectedField,
     ets_int ThrowError(ets_error obj)
     {
-        return native_interface->ThrowError(this, obj);
+        return nativeInterface->ThrowError(this, obj);
     }
     ets_int ThrowErrorNew(ets_class cls, const char *message)
     {
-        return native_interface->ThrowErrorNew(this, cls, message);
+        return nativeInterface->ThrowErrorNew(this, cls, message);
     }
     ets_error ErrorOccurred()
     {
-        return native_interface->ErrorOccurred(this);
+        return nativeInterface->ErrorOccurred(this);
     }
     void ErrorDescribe()
     {
-        native_interface->ErrorDescribe(this);
+        nativeInterface->ErrorDescribe(this);
     }
     void ErrorClear()
     {
-        native_interface->ErrorClear(this);
+        nativeInterface->ErrorClear(this);
     }
     void FatalError(const char *message)
     {
-        native_interface->FatalError(this, message);
+        nativeInterface->FatalError(this, message);
     }
     ets_int PushLocalFrame(ets_int capacity)
     {
-        return native_interface->PushLocalFrame(this, capacity);
+        return nativeInterface->PushLocalFrame(this, capacity);
     }
     ets_object PopLocalFrame(ets_object result)
     {
-        return native_interface->PopLocalFrame(this, result);
+        return nativeInterface->PopLocalFrame(this, result);
     }
     ets_object NewGlobalRef(ets_object obj)
     {
-        return native_interface->NewGlobalRef(this, obj);
+        return nativeInterface->NewGlobalRef(this, obj);
     }
     void DeleteGlobalRef(ets_object globalRef)
     {
-        native_interface->DeleteGlobalRef(this, globalRef);
+        nativeInterface->DeleteGlobalRef(this, globalRef);
     }
     void DeleteLocalRef(ets_object localRef)
     {
-        native_interface->DeleteLocalRef(this, localRef);
+        nativeInterface->DeleteLocalRef(this, localRef);
     }
     ets_boolean IsSameObject(ets_object ref1, ets_object ref2)
     {
-        return native_interface->IsSameObject(this, ref1, ref2);
+        return nativeInterface->IsSameObject(this, ref1, ref2);
     }
     ets_object NewLocalRef(ets_object ref)
     {
-        return native_interface->NewLocalRef(this, ref);
+        return nativeInterface->NewLocalRef(this, ref);
     }
     ets_int EnsureLocalCapacity(ets_int capacity)
     {
-        return native_interface->EnsureLocalCapacity(this, capacity);
+        return nativeInterface->EnsureLocalCapacity(this, capacity);
     }
     ets_object AllocObject(ets_class cls)
     {
-        return native_interface->AllocObject(this, cls);
+        return nativeInterface->AllocObject(this, cls);
     }
     ets_object NewObject(ets_class cls, ets_method p_method, ...)
     {
         va_list args;
         va_start(args, p_method);
-        ets_object ret = native_interface->NewObjectList(this, cls, p_method, args);
+        ets_object ret = nativeInterface->NewObjectList(this, cls, p_method, args);
         va_end(args);
         return ret;
     }
     ets_object NewObjectList(ets_class cls, ets_method p_method, va_list args)
     {
-        return native_interface->NewObjectList(this, cls, p_method, args);
+        return nativeInterface->NewObjectList(this, cls, p_method, args);
     }
     ets_object NewObjectArray(ets_class cls, ets_method p_method, const ets_value *args)
     {
-        return native_interface->NewObjectArray(this, cls, p_method, args);
+        return nativeInterface->NewObjectArray(this, cls, p_method, args);
     }
     ets_class GetObjectClass(ets_object obj)
     {
-        return native_interface->GetObjectClass(this, obj);
+        return nativeInterface->GetObjectClass(this, obj);
     }
     ets_boolean IsInstanceOf(ets_object obj, ets_class cls)
     {
-        return native_interface->IsInstanceOf(this, obj, cls);
+        return nativeInterface->IsInstanceOf(this, obj, cls);
     }
     ets_method Getp_method(ets_class cls, const char *name, const char *sig)
     {
-        return native_interface->Getp_method(this, cls, name, sig);
+        return nativeInterface->Getp_method(this, cls, name, sig);
     }
     ets_object CallObjectMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_object res = native_interface->CallObjectMethodList(this, obj, method_id, args);
+        ets_object res = nativeInterface->CallObjectMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_object CallObjectMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallObjectMethodList(this, obj, method_id, args);
+        return nativeInterface->CallObjectMethodList(this, obj, method_id, args);
     }
     ets_object CallObjectMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallObjectMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallObjectMethodArray(this, obj, method_id, args);
     }
     ets_boolean CallBooleanMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_boolean res = native_interface->CallBooleanMethodList(this, obj, method_id, args);
+        ets_boolean res = nativeInterface->CallBooleanMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_boolean CallBooleanMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallBooleanMethodList(this, obj, method_id, args);
+        return nativeInterface->CallBooleanMethodList(this, obj, method_id, args);
     }
     ets_boolean CallBooleanMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallBooleanMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallBooleanMethodArray(this, obj, method_id, args);
     }
     ets_byte CallByteMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_byte res = native_interface->CallByteMethodList(this, obj, method_id, args);
+        ets_byte res = nativeInterface->CallByteMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_byte CallByteMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallByteMethodList(this, obj, method_id, args);
+        return nativeInterface->CallByteMethodList(this, obj, method_id, args);
     }
     ets_byte CallByteMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallByteMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallByteMethodArray(this, obj, method_id, args);
     }
     ets_char CallCharMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_char res = native_interface->CallCharMethodList(this, obj, method_id, args);
+        ets_char res = nativeInterface->CallCharMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_char CallCharMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallCharMethodList(this, obj, method_id, args);
+        return nativeInterface->CallCharMethodList(this, obj, method_id, args);
     }
     ets_char CallCharMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallCharMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallCharMethodArray(this, obj, method_id, args);
     }
     ets_short CallShortMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_short res = native_interface->CallShortMethodList(this, obj, method_id, args);
+        ets_short res = nativeInterface->CallShortMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_short CallShortMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallShortMethodList(this, obj, method_id, args);
+        return nativeInterface->CallShortMethodList(this, obj, method_id, args);
     }
     ets_short CallShortMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallShortMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallShortMethodArray(this, obj, method_id, args);
     }
     ets_int CallIntMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_int res = native_interface->CallIntMethodList(this, obj, method_id, args);
+        ets_int res = nativeInterface->CallIntMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_int CallIntMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallIntMethodList(this, obj, method_id, args);
+        return nativeInterface->CallIntMethodList(this, obj, method_id, args);
     }
     ets_int CallIntMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallIntMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallIntMethodArray(this, obj, method_id, args);
     }
     ets_long CallLongMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_long res = native_interface->CallLongMethodList(this, obj, method_id, args);
+        ets_long res = nativeInterface->CallLongMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_long CallLongMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallLongMethodList(this, obj, method_id, args);
+        return nativeInterface->CallLongMethodList(this, obj, method_id, args);
     }
     ets_long CallLongMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallLongMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallLongMethodArray(this, obj, method_id, args);
     }
     ets_float CallFloatMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_float res = native_interface->CallFloatMethodList(this, obj, method_id, args);
+        ets_float res = nativeInterface->CallFloatMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_float CallFloatMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallFloatMethodList(this, obj, method_id, args);
+        return nativeInterface->CallFloatMethodList(this, obj, method_id, args);
     }
     ets_float CallFloatMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallFloatMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallFloatMethodArray(this, obj, method_id, args);
     }
     ets_double CallDoubleMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_double res = native_interface->CallDoubleMethodList(this, obj, method_id, args);
+        ets_double res = nativeInterface->CallDoubleMethodList(this, obj, method_id, args);
         va_end(args);
         return res;
     }
     ets_double CallDoubleMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        return native_interface->CallDoubleMethodList(this, obj, method_id, args);
+        return nativeInterface->CallDoubleMethodList(this, obj, method_id, args);
     }
     ets_double CallDoubleMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallDoubleMethodArray(this, obj, method_id, args);
+        return nativeInterface->CallDoubleMethodArray(this, obj, method_id, args);
     }
     void CallVoidMethod(ets_object obj, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        native_interface->CallVoidMethodList(this, obj, method_id, args);
+        nativeInterface->CallVoidMethodList(this, obj, method_id, args);
         va_end(args);
     }
     void CallVoidMethodList(ets_object obj, ets_method method_id, va_list args)
     {
-        native_interface->CallVoidMethodList(this, obj, method_id, args);
+        nativeInterface->CallVoidMethodList(this, obj, method_id, args);
     }
     void CallVoidMethodArray(ets_object obj, ets_method method_id, const ets_value *args)
     {
-        native_interface->CallVoidMethodArray(this, obj, method_id, args);
+        nativeInterface->CallVoidMethodArray(this, obj, method_id, args);
     }
     ets_object CallNonvirtualObjectMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_object res = native_interface->CallNonvirtualObjectMethodList(this, obj, cls, method_id, args);
+        ets_object res = nativeInterface->CallNonvirtualObjectMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_object CallNonvirtualObjectMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualObjectMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualObjectMethodList(this, obj, cls, method_id, args);
     }
     ets_object CallNonvirtualObjectMethodArray(ets_object obj, ets_class cls, ets_method method_id,
                                                const ets_value *args)
     {
-        return native_interface->CallNonvirtualObjectMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualObjectMethodArray(this, obj, cls, method_id, args);
     }
     ets_boolean CallNonvirtualBooleanMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_boolean res = native_interface->CallNonvirtualBooleanMethodList(this, obj, cls, method_id, args);
+        ets_boolean res = nativeInterface->CallNonvirtualBooleanMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_boolean CallNonvirtualBooleanMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualBooleanMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualBooleanMethodList(this, obj, cls, method_id, args);
     }
     ets_boolean CallNonvirtualBooleanMethodArray(ets_object obj, ets_class cls, ets_method method_id,
                                                  const ets_value *args)
     {
-        return native_interface->CallNonvirtualBooleanMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualBooleanMethodArray(this, obj, cls, method_id, args);
     }
     ets_byte CallNonvirtualByteMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_byte res = native_interface->CallNonvirtualByteMethodList(this, obj, cls, method_id, args);
+        ets_byte res = nativeInterface->CallNonvirtualByteMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_byte CallNonvirtualByteMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualByteMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualByteMethodList(this, obj, cls, method_id, args);
     }
     ets_byte CallNonvirtualByteMethodArray(ets_object obj, ets_class cls, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallNonvirtualByteMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualByteMethodArray(this, obj, cls, method_id, args);
     }
     ets_char CallNonvirtualCharMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_char res = native_interface->CallNonvirtualCharMethodList(this, obj, cls, method_id, args);
+        ets_char res = nativeInterface->CallNonvirtualCharMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_char CallNonvirtualCharMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualCharMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualCharMethodList(this, obj, cls, method_id, args);
     }
     ets_char CallNonvirtualCharMethodArray(ets_object obj, ets_class cls, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallNonvirtualCharMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualCharMethodArray(this, obj, cls, method_id, args);
     }
     ets_short CallNonvirtualShortMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_short res = native_interface->CallNonvirtualShortMethodList(this, obj, cls, method_id, args);
+        ets_short res = nativeInterface->CallNonvirtualShortMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_short CallNonvirtualShortMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualShortMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualShortMethodList(this, obj, cls, method_id, args);
     }
     ets_short CallNonvirtualShortMethodArray(ets_object obj, ets_class cls, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallNonvirtualShortMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualShortMethodArray(this, obj, cls, method_id, args);
     }
     ets_int CallNonvirtualIntMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_int res = native_interface->CallNonvirtualIntMethodList(this, obj, cls, method_id, args);
+        ets_int res = nativeInterface->CallNonvirtualIntMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_int CallNonvirtualIntMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualIntMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualIntMethodList(this, obj, cls, method_id, args);
     }
     ets_int CallNonvirtualIntMethodArray(ets_object obj, ets_class cls, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallNonvirtualIntMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualIntMethodArray(this, obj, cls, method_id, args);
     }
     ets_long CallNonvirtualLongMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_long res = native_interface->CallNonvirtualLongMethodList(this, obj, cls, method_id, args);
+        ets_long res = nativeInterface->CallNonvirtualLongMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_long CallNonvirtualLongMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualLongMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualLongMethodList(this, obj, cls, method_id, args);
     }
     ets_long CallNonvirtualLongMethodArray(ets_object obj, ets_class cls, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallNonvirtualLongMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualLongMethodArray(this, obj, cls, method_id, args);
     }
     ets_float CallNonvirtualFloatMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_float res = native_interface->CallNonvirtualFloatMethodList(this, obj, cls, method_id, args);
+        ets_float res = nativeInterface->CallNonvirtualFloatMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_float CallNonvirtualFloatMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualFloatMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualFloatMethodList(this, obj, cls, method_id, args);
     }
     ets_float CallNonvirtualFloatMethodArray(ets_object obj, ets_class cls, ets_method method_id, const ets_value *args)
     {
-        return native_interface->CallNonvirtualFloatMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualFloatMethodArray(this, obj, cls, method_id, args);
     }
     ets_double CallNonvirtualDoubleMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_double res = native_interface->CallNonvirtualDoubleMethodList(this, obj, cls, method_id, args);
+        ets_double res = nativeInterface->CallNonvirtualDoubleMethodList(this, obj, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_double CallNonvirtualDoubleMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallNonvirtualDoubleMethodList(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualDoubleMethodList(this, obj, cls, method_id, args);
     }
     ets_double CallNonvirtualDoubleMethodArray(ets_object obj, ets_class cls, ets_method method_id,
                                                const ets_value *args)
     {
-        return native_interface->CallNonvirtualDoubleMethodArray(this, obj, cls, method_id, args);
+        return nativeInterface->CallNonvirtualDoubleMethodArray(this, obj, cls, method_id, args);
     }
     void CallNonvirtualVoidMethod(ets_object obj, ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        native_interface->CallNonvirtualVoidMethodList(this, obj, cls, method_id, args);
+        nativeInterface->CallNonvirtualVoidMethodList(this, obj, cls, method_id, args);
         va_end(args);
     }
     void CallNonvirtualVoidMethodList(ets_object obj, ets_class cls, ets_method method_id, va_list args)
     {
-        native_interface->CallNonvirtualVoidMethodList(this, obj, cls, method_id, args);
+        nativeInterface->CallNonvirtualVoidMethodList(this, obj, cls, method_id, args);
     }
     void CallNonvirtualVoidMethodArray(ets_object obj, ets_class cls, ets_method method_id, const ets_value *args)
     {
-        native_interface->CallNonvirtualVoidMethodArray(this, obj, cls, method_id, args);
+        nativeInterface->CallNonvirtualVoidMethodArray(this, obj, cls, method_id, args);
     }
     ets_field Getp_field(ets_class cls, const char *name, const char *sig)
     {
-        return native_interface->Getp_field(this, cls, name, sig);
+        return nativeInterface->Getp_field(this, cls, name, sig);
     }
     ets_object GetObjectField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetObjectField(this, obj, p_field);
+        return nativeInterface->GetObjectField(this, obj, p_field);
     }
     ets_boolean GetBooleanField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetBooleanField(this, obj, p_field);
+        return nativeInterface->GetBooleanField(this, obj, p_field);
     }
     ets_byte GetByteField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetByteField(this, obj, p_field);
+        return nativeInterface->GetByteField(this, obj, p_field);
     }
     ets_char GetCharField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetCharField(this, obj, p_field);
+        return nativeInterface->GetCharField(this, obj, p_field);
     }
     ets_short GetShortField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetShortField(this, obj, p_field);
+        return nativeInterface->GetShortField(this, obj, p_field);
     }
     ets_int GetIntField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetIntField(this, obj, p_field);
+        return nativeInterface->GetIntField(this, obj, p_field);
     }
     ets_long GetLongField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetLongField(this, obj, p_field);
+        return nativeInterface->GetLongField(this, obj, p_field);
     }
     ets_float GetFloatField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetFloatField(this, obj, p_field);
+        return nativeInterface->GetFloatField(this, obj, p_field);
     }
     ets_double GetDoubleField(ets_object obj, ets_field p_field)
     {
-        return native_interface->GetDoubleField(this, obj, p_field);
+        return nativeInterface->GetDoubleField(this, obj, p_field);
     }
     void SetObjectField(ets_object obj, ets_field p_field, ets_object value)
     {
-        return native_interface->SetObjectField(this, obj, p_field, value);
+        return nativeInterface->SetObjectField(this, obj, p_field, value);
     }
     void SetBooleanField(ets_object obj, ets_field p_field, ets_boolean value)
     {
-        return native_interface->SetBooleanField(this, obj, p_field, value);
+        return nativeInterface->SetBooleanField(this, obj, p_field, value);
     }
     void SetByteField(ets_object obj, ets_field p_field, ets_byte value)
     {
-        return native_interface->SetByteField(this, obj, p_field, value);
+        return nativeInterface->SetByteField(this, obj, p_field, value);
     }
     void SetCharField(ets_object obj, ets_field p_field, ets_char value)
     {
-        return native_interface->SetCharField(this, obj, p_field, value);
+        return nativeInterface->SetCharField(this, obj, p_field, value);
     }
     void SetShortField(ets_object obj, ets_field p_field, ets_short value)
     {
-        return native_interface->SetShortField(this, obj, p_field, value);
+        return nativeInterface->SetShortField(this, obj, p_field, value);
     }
     void SetIntField(ets_object obj, ets_field p_field, ets_int value)
     {
-        return native_interface->SetIntField(this, obj, p_field, value);
+        return nativeInterface->SetIntField(this, obj, p_field, value);
     }
     void SetLongField(ets_object obj, ets_field p_field, ets_long value)
     {
-        return native_interface->SetLongField(this, obj, p_field, value);
+        return nativeInterface->SetLongField(this, obj, p_field, value);
     }
     void SetFloatField(ets_object obj, ets_field p_field, ets_float value)
     {
-        return native_interface->SetFloatField(this, obj, p_field, value);
+        return nativeInterface->SetFloatField(this, obj, p_field, value);
     }
     void SetDoubleField(ets_object obj, ets_field p_field, ets_double value)
     {
-        return native_interface->SetDoubleField(this, obj, p_field, value);
+        return nativeInterface->SetDoubleField(this, obj, p_field, value);
     }
     ets_method GetStaticp_method(ets_class cls, const char *name, const char *sig)
     {
-        return native_interface->GetStaticp_method(this, cls, name, sig);
+        return nativeInterface->GetStaticp_method(this, cls, name, sig);
     }
     ets_object CallStaticObjectMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_object res = native_interface->CallStaticObjectMethodList(this, cls, method_id, args);
+        ets_object res = nativeInterface->CallStaticObjectMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_object CallStaticObjectMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticObjectMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticObjectMethodList(this, cls, method_id, args);
     }
     ets_object CallStaticObjectMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticObjectMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticObjectMethodArray(this, cls, method_id, args);
     }
     ets_boolean CallStaticBooleanMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_boolean res = native_interface->CallStaticBooleanMethodList(this, cls, method_id, args);
+        ets_boolean res = nativeInterface->CallStaticBooleanMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_boolean CallStaticBooleanMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticBooleanMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticBooleanMethodList(this, cls, method_id, args);
     }
     ets_boolean CallStaticBooleanMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticBooleanMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticBooleanMethodArray(this, cls, method_id, args);
     }
     ets_byte CallStaticByteMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_byte res = native_interface->CallStaticByteMethodList(this, cls, method_id, args);
+        ets_byte res = nativeInterface->CallStaticByteMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_byte CallStaticByteMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticByteMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticByteMethodList(this, cls, method_id, args);
     }
     ets_byte CallStaticByteMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticByteMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticByteMethodArray(this, cls, method_id, args);
     }
     ets_char CallStaticCharMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_char res = native_interface->CallStaticCharMethodList(this, cls, method_id, args);
+        ets_char res = nativeInterface->CallStaticCharMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_char CallStaticCharMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticCharMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticCharMethodList(this, cls, method_id, args);
     }
     ets_char CallStaticCharMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticCharMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticCharMethodArray(this, cls, method_id, args);
     }
     ets_short CallStaticShortMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_short res = native_interface->CallStaticShortMethodList(this, cls, method_id, args);
+        ets_short res = nativeInterface->CallStaticShortMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_short CallStaticShortMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticShortMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticShortMethodList(this, cls, method_id, args);
     }
     ets_short CallStaticShortMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticShortMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticShortMethodArray(this, cls, method_id, args);
     }
     ets_int CallStaticIntMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_int res = native_interface->CallStaticIntMethodList(this, cls, method_id, args);
+        ets_int res = nativeInterface->CallStaticIntMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_int CallStaticIntMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticIntMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticIntMethodList(this, cls, method_id, args);
     }
     ets_int CallStaticIntMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticIntMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticIntMethodArray(this, cls, method_id, args);
     }
     ets_long CallStaticLongMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_long res = native_interface->CallStaticLongMethodList(this, cls, method_id, args);
+        ets_long res = nativeInterface->CallStaticLongMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_long CallStaticLongMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticLongMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticLongMethodList(this, cls, method_id, args);
     }
     ets_long CallStaticLongMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticLongMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticLongMethodArray(this, cls, method_id, args);
     }
     ets_float CallStaticFloatMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_float res = native_interface->CallStaticFloatMethodList(this, cls, method_id, args);
+        ets_float res = nativeInterface->CallStaticFloatMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_float CallStaticFloatMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticFloatMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticFloatMethodList(this, cls, method_id, args);
     }
     ets_float CallStaticFloatMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticFloatMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticFloatMethodArray(this, cls, method_id, args);
     }
     ets_double CallStaticDoubleMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        ets_double res = native_interface->CallStaticDoubleMethodList(this, cls, method_id, args);
+        ets_double res = nativeInterface->CallStaticDoubleMethodList(this, cls, method_id, args);
         va_end(args);
         return res;
     }
     ets_double CallStaticDoubleMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        return native_interface->CallStaticDoubleMethodList(this, cls, method_id, args);
+        return nativeInterface->CallStaticDoubleMethodList(this, cls, method_id, args);
     }
     ets_double CallStaticDoubleMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        return native_interface->CallStaticDoubleMethodArray(this, cls, method_id, args);
+        return nativeInterface->CallStaticDoubleMethodArray(this, cls, method_id, args);
     }
     void CallStaticVoidMethod(ets_class cls, ets_method method_id, ...)
     {
         va_list args;
         va_start(args, method_id);
-        native_interface->CallStaticVoidMethodList(this, cls, method_id, args);
+        nativeInterface->CallStaticVoidMethodList(this, cls, method_id, args);
         va_end(args);
     }
     void CallStaticVoidMethodList(ets_class cls, ets_method method_id, va_list args)
     {
-        native_interface->CallStaticVoidMethodList(this, cls, method_id, args);
+        nativeInterface->CallStaticVoidMethodList(this, cls, method_id, args);
     }
     void CallStaticVoidMethodArray(ets_class cls, ets_method method_id, ets_value *args)
     {
-        native_interface->CallStaticVoidMethodArray(this, cls, method_id, args);
+        nativeInterface->CallStaticVoidMethodArray(this, cls, method_id, args);
     }
     ets_field GetStaticp_field(ets_class cls, const char *name, const char *sig)
     {
-        return native_interface->GetStaticp_field(this, cls, name, sig);
+        return nativeInterface->GetStaticp_field(this, cls, name, sig);
     }
     ets_object GetStaticObjectField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticObjectField(this, cls, p_field);
+        return nativeInterface->GetStaticObjectField(this, cls, p_field);
     }
     ets_boolean GetStaticBooleanField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticBooleanField(this, cls, p_field);
+        return nativeInterface->GetStaticBooleanField(this, cls, p_field);
     }
     ets_byte GetStaticByteField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticByteField(this, cls, p_field);
+        return nativeInterface->GetStaticByteField(this, cls, p_field);
     }
     ets_char GetStaticCharField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticCharField(this, cls, p_field);
+        return nativeInterface->GetStaticCharField(this, cls, p_field);
     }
     ets_short GetStaticShortField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticShortField(this, cls, p_field);
+        return nativeInterface->GetStaticShortField(this, cls, p_field);
     }
     ets_int GetStaticIntField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticIntField(this, cls, p_field);
+        return nativeInterface->GetStaticIntField(this, cls, p_field);
     }
     ets_long GetStaticLongField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticLongField(this, cls, p_field);
+        return nativeInterface->GetStaticLongField(this, cls, p_field);
     }
     ets_float GetStaticFloatField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticFloatField(this, cls, p_field);
+        return nativeInterface->GetStaticFloatField(this, cls, p_field);
     }
     ets_double GetStaticDoubleField(ets_class cls, ets_field p_field)
     {
-        return native_interface->GetStaticDoubleField(this, cls, p_field);
+        return nativeInterface->GetStaticDoubleField(this, cls, p_field);
     }
     void SetStaticObjectField(ets_class cls, ets_field p_field, ets_object value)
     {
-        return native_interface->SetStaticObjectField(this, cls, p_field, value);
+        return nativeInterface->SetStaticObjectField(this, cls, p_field, value);
     }
     void SetStaticBooleanField(ets_class cls, ets_field p_field, ets_boolean value)
     {
-        return native_interface->SetStaticBooleanField(this, cls, p_field, value);
+        return nativeInterface->SetStaticBooleanField(this, cls, p_field, value);
     }
     void SetStaticByteField(ets_class cls, ets_field p_field, ets_byte value)
     {
-        return native_interface->SetStaticByteField(this, cls, p_field, value);
+        return nativeInterface->SetStaticByteField(this, cls, p_field, value);
     }
     void SetStaticCharField(ets_class cls, ets_field p_field, ets_char value)
     {
-        return native_interface->SetStaticCharField(this, cls, p_field, value);
+        return nativeInterface->SetStaticCharField(this, cls, p_field, value);
     }
     void SetStaticShortField(ets_class cls, ets_field p_field, ets_short value)
     {
-        return native_interface->SetStaticShortField(this, cls, p_field, value);
+        return nativeInterface->SetStaticShortField(this, cls, p_field, value);
     }
     void SetStaticIntField(ets_class cls, ets_field p_field, ets_int value)
     {
-        return native_interface->SetStaticIntField(this, cls, p_field, value);
+        return nativeInterface->SetStaticIntField(this, cls, p_field, value);
     }
     void SetStaticLongField(ets_class cls, ets_field p_field, ets_long value)
     {
-        return native_interface->SetStaticLongField(this, cls, p_field, value);
+        return nativeInterface->SetStaticLongField(this, cls, p_field, value);
     }
     void SetStaticFloatField(ets_class cls, ets_field p_field, ets_float value)
     {
-        return native_interface->SetStaticFloatField(this, cls, p_field, value);
+        return nativeInterface->SetStaticFloatField(this, cls, p_field, value);
     }
     void SetStaticDoubleField(ets_class cls, ets_field p_field, ets_double value)
     {
-        return native_interface->SetStaticDoubleField(this, cls, p_field, value);
+        return nativeInterface->SetStaticDoubleField(this, cls, p_field, value);
     }
     ets_string NewString(const ets_char *unicode_chars, ets_size len)
     {
-        return native_interface->NewString(this, unicode_chars, len);
+        return nativeInterface->NewString(this, unicode_chars, len);
     }
     ets_size GetStringLength(ets_string string)
     {
-        return native_interface->GetStringLength(this, string);
+        return nativeInterface->GetStringLength(this, string);
     }
     const ets_char *GetStringChars(ets_string string, ets_boolean *is_copy)
     {
-        return native_interface->GetStringChars(this, string, is_copy);
+        return nativeInterface->GetStringChars(this, string, is_copy);
     }
     void ReleaseStringChars(ets_string string, const ets_char *chars)
     {
-        native_interface->ReleaseStringChars(this, string, chars);
+        nativeInterface->ReleaseStringChars(this, string, chars);
     }
     ets_string NewStringUTF(const char *bytes)
     {
-        return native_interface->NewStringUTF(this, bytes);
+        return nativeInterface->NewStringUTF(this, bytes);
     }
     ets_size GetStringUTFLength(ets_string string)
     {
-        return native_interface->GetStringUTFLength(this, string);
+        return nativeInterface->GetStringUTFLength(this, string);
     }
     const char *GetStringUTFChars(ets_string string, ets_boolean *is_copy)
     {
-        return native_interface->GetStringUTFChars(this, string, is_copy);
+        return nativeInterface->GetStringUTFChars(this, string, is_copy);
     }
     void ReleaseStringUTFChars(ets_string string, const char *chars)
     {
-        native_interface->ReleaseStringUTFChars(this, string, chars);
+        nativeInterface->ReleaseStringUTFChars(this, string, chars);
     }
     ets_size GetArrayLength(ets_array array)
     {
-        return native_interface->GetArrayLength(this, array);
+        return nativeInterface->GetArrayLength(this, array);
     }
     ets_objectArray NewObjectsArray(ets_size length, ets_class element_class, ets_object initial_element)
     {
-        return native_interface->NewObjectsArray(this, length, element_class, initial_element);
+        return nativeInterface->NewObjectsArray(this, length, element_class, initial_element);
     }
     ets_object GetObjectArrayElement(ets_objectArray array, ets_size index)
     {
-        return native_interface->GetObjectArrayElement(this, array, index);
+        return nativeInterface->GetObjectArrayElement(this, array, index);
     }
 
     void SetObjectArrayElement(ets_objectArray array, ets_size index, ets_object value)
     {
-        native_interface->SetObjectArrayElement(this, array, index, value);
+        nativeInterface->SetObjectArrayElement(this, array, index, value);
     }
 
     // SetObjectArrayElement,
     ets_booleanArray NewBooleanArray(ets_size length)
     {
-        return native_interface->NewBooleanArray(this, length);
+        return nativeInterface->NewBooleanArray(this, length);
     }
     ets_byteArray NewByteArray(ets_size length)
     {
-        return native_interface->NewByteArray(this, length);
+        return nativeInterface->NewByteArray(this, length);
     }
     ets_charArray NewCharArray(ets_size length)
     {
-        return native_interface->NewCharArray(this, length);
+        return nativeInterface->NewCharArray(this, length);
     }
     ets_shortArray NewShortArray(ets_size length)
     {
-        return native_interface->NewShortArray(this, length);
+        return nativeInterface->NewShortArray(this, length);
     }
     ets_intArray NewIntArray(ets_size length)
     {
-        return native_interface->NewIntArray(this, length);
+        return nativeInterface->NewIntArray(this, length);
     }
     ets_longArray NewLongArray(ets_size length)
     {
-        return native_interface->NewLongArray(this, length);
+        return nativeInterface->NewLongArray(this, length);
     }
     ets_floatArray NewFloatArray(ets_size length)
     {
-        return native_interface->NewFloatArray(this, length);
+        return nativeInterface->NewFloatArray(this, length);
     }
     ets_doubleArray NewDoubleArray(ets_size length)
     {
-        return native_interface->NewDoubleArray(this, length);
+        return nativeInterface->NewDoubleArray(this, length);
     }
     ets_boolean *PinBooleanArray(ets_booleanArray array)
     {
-        return native_interface->PinBooleanArray(this, array);
+        return nativeInterface->PinBooleanArray(this, array);
     }
     ets_byte *PinByteArray(ets_byteArray array)
     {
-        return native_interface->PinByteArray(this, array);
+        return nativeInterface->PinByteArray(this, array);
     }
     ets_char *PinCharArray(ets_charArray array)
     {
-        return native_interface->PinCharArray(this, array);
+        return nativeInterface->PinCharArray(this, array);
     }
     ets_short *PinShortArray(ets_shortArray array)
     {
-        return native_interface->PinShortArray(this, array);
+        return nativeInterface->PinShortArray(this, array);
     }
     ets_int *PinIntArray(ets_intArray array)
     {
-        return native_interface->PinIntArray(this, array);
+        return nativeInterface->PinIntArray(this, array);
     }
     ets_long *PinLongArray(ets_longArray array)
     {
-        return native_interface->PinLongArray(this, array);
+        return nativeInterface->PinLongArray(this, array);
     }
     ets_float *PinFloatArray(ets_floatArray array)
     {
-        return native_interface->PinFloatArray(this, array);
+        return nativeInterface->PinFloatArray(this, array);
     }
     ets_double *PinDoubleArray(ets_doubleArray array)
     {
-        return native_interface->PinDoubleArray(this, array);
+        return nativeInterface->PinDoubleArray(this, array);
     }
     void UnpinBooleanArray(ets_booleanArray array)
     {
-        return native_interface->UnpinBooleanArray(this, array);
+        return nativeInterface->UnpinBooleanArray(this, array);
     }
     void UnpinByteArray(ets_byteArray array)
     {
-        return native_interface->UnpinByteArray(this, array);
+        return nativeInterface->UnpinByteArray(this, array);
     }
     void UnpinCharArray(ets_charArray array)
     {
-        return native_interface->UnpinCharArray(this, array);
+        return nativeInterface->UnpinCharArray(this, array);
     }
     void UnpinShortArray(ets_shortArray array)
     {
-        return native_interface->UnpinShortArray(this, array);
+        return nativeInterface->UnpinShortArray(this, array);
     }
     void UnpinIntArray(ets_intArray array)
     {
-        return native_interface->UnpinIntArray(this, array);
+        return nativeInterface->UnpinIntArray(this, array);
     }
     void UnpinLongArray(ets_longArray array)
     {
-        return native_interface->UnpinLongArray(this, array);
+        return nativeInterface->UnpinLongArray(this, array);
     }
     void UnpinFloatArray(ets_floatArray array)
     {
-        return native_interface->UnpinFloatArray(this, array);
+        return nativeInterface->UnpinFloatArray(this, array);
     }
     void UnpinDoubleArray(ets_doubleArray array)
     {
-        return native_interface->UnpinDoubleArray(this, array);
+        return nativeInterface->UnpinDoubleArray(this, array);
     }
     void GetBooleanArrayRegion(ets_booleanArray array, ets_size start, ets_size len, ets_boolean *buf)
     {
-        return native_interface->GetBooleanArrayRegion(this, array, start, len, buf);
+        return nativeInterface->GetBooleanArrayRegion(this, array, start, len, buf);
     }
     void GetByteArrayRegion(ets_byteArray array, ets_size start, ets_size len, ets_byte *buf)
     {
-        return native_interface->GetByteArrayRegion(this, array, start, len, buf);
+        return nativeInterface->GetByteArrayRegion(this, array, start, len, buf);
     }
     void GetCharArrayRegion(ets_charArray array, ets_size start, ets_size len, ets_char *buf)
     {
-        return native_interface->GetCharArrayRegion(this, array, start, len, buf);
+        return nativeInterface->GetCharArrayRegion(this, array, start, len, buf);
     }
     void GetShortArrayRegion(ets_shortArray array, ets_size start, ets_size len, ets_short *buf)
     {
-        return native_interface->GetShortArrayRegion(this, array, start, len, buf);
+        return nativeInterface->GetShortArrayRegion(this, array, start, len, buf);
     }
     void GetIntArrayRegion(ets_intArray array, ets_size start, ets_size len, ets_int *buf)
     {
-        return native_interface->GetIntArrayRegion(this, array, start, len, buf);
+        return nativeInterface->GetIntArrayRegion(this, array, start, len, buf);
     }
     void GetLongArrayRegion(ets_longArray array, ets_size start, ets_size len, ets_long *buf)
     {
-        return native_interface->GetLongArrayRegion(this, array, start, len, buf);
+        return nativeInterface->GetLongArrayRegion(this, array, start, len, buf);
     }
     void GetFloatArrayRegion(ets_floatArray array, ets_size start, ets_size len, ets_float *buf)
     {
-        return native_interface->GetFloatArrayRegion(this, array, start, len, buf);
+        return nativeInterface->GetFloatArrayRegion(this, array, start, len, buf);
     }
     void GetDoubleArrayRegion(ets_doubleArray array, ets_size start, ets_size len, ets_double *buf)
     {
-        return native_interface->GetDoubleArrayRegion(this, array, start, len, buf);
+        return nativeInterface->GetDoubleArrayRegion(this, array, start, len, buf);
     }
     void SetBooleanArrayRegion(ets_booleanArray array, ets_size start, ets_size length, const ets_boolean *buf)
     {
-        native_interface->SetBooleanArrayRegion(this, array, start, length, buf);
+        nativeInterface->SetBooleanArrayRegion(this, array, start, length, buf);
     }
     void SetByteArrayRegion(ets_byteArray array, ets_size start, ets_size length, const ets_byte *buf)
     {
-        native_interface->SetByteArrayRegion(this, array, start, length, buf);
+        nativeInterface->SetByteArrayRegion(this, array, start, length, buf);
     }
     void SetCharArrayRegion(ets_charArray array, ets_size start, ets_size length, const ets_char *buf)
     {
-        native_interface->SetCharArrayRegion(this, array, start, length, buf);
+        nativeInterface->SetCharArrayRegion(this, array, start, length, buf);
     }
     void SetShortArrayRegion(ets_shortArray array, ets_size start, ets_size length, const ets_short *buf)
     {
-        native_interface->SetShortArrayRegion(this, array, start, length, buf);
+        nativeInterface->SetShortArrayRegion(this, array, start, length, buf);
     }
     void SetIntArrayRegion(ets_intArray array, ets_size start, ets_size length, const ets_int *buf)
     {
-        native_interface->SetIntArrayRegion(this, array, start, length, buf);
+        nativeInterface->SetIntArrayRegion(this, array, start, length, buf);
     }
     void SetLongArrayRegion(ets_longArray array, ets_size start, ets_size length, const ets_long *buf)
     {
-        native_interface->SetLongArrayRegion(this, array, start, length, buf);
+        nativeInterface->SetLongArrayRegion(this, array, start, length, buf);
     }
     void SetFloatArrayRegion(ets_floatArray array, ets_size start, ets_size length, const ets_float *buf)
     {
-        native_interface->SetFloatArrayRegion(this, array, start, length, buf);
+        nativeInterface->SetFloatArrayRegion(this, array, start, length, buf);
     }
     void SetDoubleArrayRegion(ets_doubleArray array, ets_size start, ets_size length, const ets_double *buf)
     {
-        native_interface->SetDoubleArrayRegion(this, array, start, length, buf);
+        nativeInterface->SetDoubleArrayRegion(this, array, start, length, buf);
     }
     ets_int RegisterNatives(ets_class cls, const EtsNativeMethod *methods, ets_int nMethods)
     {
-        return native_interface->RegisterNatives(this, cls, methods, nMethods);
+        return nativeInterface->RegisterNatives(this, cls, methods, nMethods);
     }
     ets_int UnregisterNatives(ets_class cls)
     {
-        return native_interface->UnregisterNatives(this, cls);
+        return nativeInterface->UnregisterNatives(this, cls);
     }
     ets_int GetEtsVM(EtsVM **vm)
     {
-        return native_interface->GetEtsVM(this, vm);
+        return nativeInterface->GetEtsVM(this, vm);
     }
     void GetStringRegion(ets_string str, ets_size start, ets_size len, ets_char *buf)
     {
-        native_interface->GetStringRegion(this, str, start, len, buf);
+        nativeInterface->GetStringRegion(this, str, start, len, buf);
     }
     void GetStringUTFRegion(ets_string str, ets_size start, ets_size len, char *buf)
     {
-        native_interface->GetStringUTFRegion(this, str, start, len, buf);
+        nativeInterface->GetStringUTFRegion(this, str, start, len, buf);
     }
     ets_weak NewWeakGlobalRef(ets_object obj)
     {
-        return native_interface->NewWeakGlobalRef(this, obj);
+        return nativeInterface->NewWeakGlobalRef(this, obj);
     }
     void DeleteWeakGlobalRef(ets_weak obj)
     {
-        native_interface->DeleteWeakGlobalRef(this, obj);
+        nativeInterface->DeleteWeakGlobalRef(this, obj);
     }
     ets_boolean ErrorCheck()
     {
-        return native_interface->ErrorCheck(this);
+        return nativeInterface->ErrorCheck(this);
     }
     // NewDirectByteBuffer,
     // GetDirectBufferAddress,
     // GetDirectBufferCapacity,
     ets_objectRefType GetObjectRefType(ets_object obj)
     {
-        return native_interface->GetObjectRefType(this, obj);
+        return nativeInterface->GetObjectRefType(this, obj);
     }
 
     // Promise
     ets_status PromiseCreate(ets_deferred *deferred, ets_object *promise)
     {
-        return native_interface->PromiseCreate(this, deferred, promise);
+        return nativeInterface->PromiseCreate(this, deferred, promise);
     }
     ets_status DeferredResolve(ets_deferred deferred, ets_object resolution)
     {
-        return native_interface->DeferredResolve(this, deferred, resolution);
+        return nativeInterface->DeferredResolve(this, deferred, resolution);
     }
     ets_status DeferredReject(ets_deferred deferred, ets_object rejection)
     {
-        return native_interface->DeferredReject(this, deferred, rejection);
+        return nativeInterface->DeferredReject(this, deferred, rejection);
     }
 #endif
 };
 
 // NOLINTEND(modernize-use-using, readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 
-#endif  // PANDA_RUNTIME_INTEROP_ETS_NAPI_H_
+#endif  // PANDA_RUNTIME_INTEROP_ETS_NAPI_H

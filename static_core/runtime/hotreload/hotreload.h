@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_HOTRELOAD_HOTRELOAD_H_
-#define PANDA_RUNTIME_HOTRELOAD_HOTRELOAD_H_
+#ifndef PANDA_RUNTIME_HOTRELOAD_HOTRELOAD_H
+#define PANDA_RUNTIME_HOTRELOAD_HOTRELOAD_H
 
 #include "libpandabase/macros.h"
 #include "libpandafile/file.h"
@@ -120,4 +120,4 @@ protected:
 
 }  // namespace panda::hotreload
 
-#endif  // PANDA_RUNTIME_HOTRELOAD_HOTRELOAD_H_
+#endif  // PANDA_RUNTIME_HOTRELOAD_HOTRELOAD_H

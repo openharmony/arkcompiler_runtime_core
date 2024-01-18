@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_PLUGINS_ETS_TESTS_NAPI_SAMPLER_SIG_STACK_SAMPLER_ASM_TEST_H
+#define PANDA_PLUGINS_ETS_TESTS_NAPI_SAMPLER_SIG_STACK_SAMPLER_ASM_TEST_H
+
 #include <ets_napi.h>
 
 #ifdef __cplusplus
@@ -28,3 +31,5 @@ ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_NativeSumEightElements(EtsEnv *, ets_c
 #ifdef __cplusplus
 }
 #endif
+
+#endif  // PANDA_PLUGINS_ETS_TESTS_NAPI_SAMPLER_SIG_STACK_SAMPLER_ASM_TEST_H

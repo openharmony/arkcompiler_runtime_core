@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath5)
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath12)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -85,7 +85,37 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath5)
     EXPECT_DEATH(env_->CallNonvirtualDoubleMethod(nullptr, cls, doubleId, static_cast<ets_double>(1.0),
                                                   static_cast<ets_int>(121_I)),
                  "");
+}
 
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath13)
+{
+    testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+    ets_class cls = env_->FindClass("C");
+    ASSERT_NE(cls, nullptr);
+
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ASSERT_NE(voidId, nullptr);
+    ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
+    ASSERT_NE(objectId, nullptr);
+    ets_method booleanId = env_->Getp_method(cls, "boolean_method", "ZI:Z");
+    ASSERT_NE(booleanId, nullptr);
+    ets_method byteId = env_->Getp_method(cls, "byte_method", "BI:B");
+    ASSERT_NE(byteId, nullptr);
+    ets_method charId = env_->Getp_method(cls, "char_method", "CI:C");
+    ASSERT_NE(charId, nullptr);
+    ets_method shortId = env_->Getp_method(cls, "short_method", "SI:S");
+    ASSERT_NE(shortId, nullptr);
+    ets_method intId = env_->Getp_method(cls, "int_method", ":I");
+    ASSERT_NE(intId, nullptr);
+    ets_method longId = env_->Getp_method(cls, "long_method", "JI:J");
+    ASSERT_NE(longId, nullptr);
+    ets_method floatId = env_->Getp_method(cls, "float_method", "FI:F");
+    ASSERT_NE(floatId, nullptr);
+    ets_method doubleId = env_->Getp_method(cls, "double_method", "DI:D");
+    ASSERT_NE(doubleId, nullptr);
+
+    // Call<type>Method part
     ets_class dCls = env_->FindClass("D");
     ASSERT_NE(dCls, nullptr);
     ets_object obj = env_->AllocObject(dCls);
