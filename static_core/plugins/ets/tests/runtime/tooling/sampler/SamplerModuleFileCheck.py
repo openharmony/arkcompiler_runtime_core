@@ -59,8 +59,14 @@ class ModulesDumpTest():
 
     def module_file_check(self):
         etsstdlib_abc_path = os.path.join(self._binary_dir, "plugins", "ets", "etsstdlib.abc")
-        sampler_test_abc_path = os.path.join(self._binary_dir, "plugins", "ets", "tests",
-                                             "runtime", "tooling", "sampler", "SamplerTest.abc")
+        sampler_test_abc_path = os.path.join(self._binary_dir,
+                                             "plugins",
+                                             "ets",
+                                             "tests",
+                                             "runtime",
+                                             "tooling",
+                                             "sampler",
+                                             "SamplerTest.abc")
 
         etsstdlib_abc_path = os.path.realpath(etsstdlib_abc_path)
         sampler_test_abc_path = os.path.realpath(sampler_test_abc_path)
@@ -83,8 +89,12 @@ class ModulesDumpTest():
                 expected_checksum: numpy.uint32 = self._checksum_name_map[pathname]
 
                 if (checksum != expected_checksum):
-                    print("SamplerModuleFileCheck: for file", pathname,
-                          "checksum is not equal", expected_checksum, "vs", checksum)
+                    print("SamplerModuleFileCheck: for file",
+                          pathname,
+                          "checksum is not equal",
+                          expected_checksum,
+                          "vs",
+                          checksum)
                     return False
 
         if (len(modules_from_file) != len(modules_list)):

@@ -72,16 +72,14 @@ bool AsptConverter::BuildModulesMap()
 
         if (modulesMap_.find(mdl.ptr) == modulesMap_.end()) {
             auto pfUnique = panda_file::OpenPandaFileOrZip(filepath.c_str());
-
             if (mdl.checksum != pfUnique->GetHeader()->checksum) {
-                LOG(FATAL, PROFILER) << "Сhecksum of panda files isn't equal";
+                LOG(FATAL, PROFILER) << "Checksum of panda files isn't equal";
                 return false;
             }
 
             modulesMap_.insert({mdl.ptr, std::move(pfUnique)});
         }
     }
-
     return !modulesMap_.empty();
 }
 
@@ -127,22 +125,27 @@ void AsptConverter::BuildMethodsMap()
             continue;
         }
         auto classesSpan = pf->GetClasses();
-        for (auto id : classesSpan) {
-            if (pf->IsExternal(panda_file::File::EntityId(id))) {
-                continue;
-            }
-            panda_file::ClassDataAccessor cda(*pf, panda_file::File::EntityId(id));
-            cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-                std::string methodName = utf::Mutf8AsCString(mda.GetName().data);
-                std::string className = utf::Mutf8AsCString(cda.GetDescriptor());
-                if (className[className.length() - 1] == ';') {
-                    className.pop_back();
-                }
-                std::string fullName = className + "::";
-                fullName += methodName;
-                methodsMap_[pf][mda.GetMethodId().GetOffset()] = std::move(fullName);
-            });
+        BuildMethodsMapHelper(pf, classesSpan);
+    }
+}
+
+void AsptConverter::BuildMethodsMapHelper(const panda_file::File *pf, Span<const uint32_t> &classesSpan)
+{
+    for (auto id : classesSpan) {
+        if (pf->IsExternal(panda_file::File::EntityId(id))) {
+            continue;
         }
+        panda_file::ClassDataAccessor cda(*pf, panda_file::File::EntityId(id));
+        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+            std::string methodName = utf::Mutf8AsCString(mda.GetName().data);
+            std::string className = utf::Mutf8AsCString(cda.GetDescriptor());
+            if (className[className.length() - 1] == ';') {
+                className.pop_back();
+            }
+            std::string fullName = className + "::";
+            fullName += methodName;
+            methodsMap_[pf][mda.GetMethodId().GetOffset()] = std::move(fullName);
+        });
     }
 }
 

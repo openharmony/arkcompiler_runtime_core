@@ -38,8 +38,8 @@ protected:
     {
         std::vector<EtsVMOption> options_vector;
 
-        options_vector = {{EtsOptionType::EtsBootFile, std::getenv("PANDA_STD_LIB")},
-                          {EtsOptionType::EtsBootFile, TEST_BIN_FILE_NAME}};
+        options_vector = {{EtsOptionType::ETS_BOOT_FILE, std::getenv("PANDA_STD_LIB")},
+                          {EtsOptionType::ETS_BOOT_FILE, TEST_BIN_FILE_NAME}};
 
         EtsVMInitArgs vm_args;
         vm_args.version = ETS_NAPI_VERSION_1_0;
@@ -62,7 +62,7 @@ protected:
 
 static ets_boolean StrCheck(EtsEnv *env, ets_string ets_str)
 {
-    return env->GetObjectRefType(static_cast<ets_object>(ets_str)) == EtsLocalRefType ? ETS_TRUE : ETS_FALSE;
+    return env->GetObjectRefType(static_cast<ets_object>(ets_str)) == ETS_LOCAL_REF_TYPE ? ETS_TRUE : ETS_FALSE;
 }
 
 TEST_F(StackReferenceCheckTest, SingleObjectStackTest)
@@ -98,10 +98,10 @@ TEST_F(StackReferenceCheckTest, SingleObjectStackTest)
 static ets_boolean MultiStrCheck(EtsEnv *env, ets_string ets_str1, ets_string ets_str2, ets_string ets_str3,
                                  ets_string ets_str4)
 {
-    bool res1 = env->GetObjectRefType(static_cast<ets_object>(ets_str1)) == EtsLocalRefType;
-    bool res2 = env->GetObjectRefType(static_cast<ets_object>(ets_str2)) == EtsLocalRefType;
-    bool res3 = env->GetObjectRefType(static_cast<ets_object>(ets_str3)) == EtsLocalRefType;
-    bool res4 = env->GetObjectRefType(static_cast<ets_object>(ets_str4)) == EtsLocalRefType;
+    bool res1 = env->GetObjectRefType(static_cast<ets_object>(ets_str1)) == ETS_LOCAL_REF_TYPE;
+    bool res2 = env->GetObjectRefType(static_cast<ets_object>(ets_str2)) == ETS_LOCAL_REF_TYPE;
+    bool res3 = env->GetObjectRefType(static_cast<ets_object>(ets_str3)) == ETS_LOCAL_REF_TYPE;
+    bool res4 = env->GetObjectRefType(static_cast<ets_object>(ets_str4)) == ETS_LOCAL_REF_TYPE;
     return (res1 && res2 && res3 && res4) ? ETS_TRUE : ETS_FALSE;
 }
 
@@ -148,8 +148,8 @@ TEST_F(StackReferenceCheckTest, MultiObjectStackTest)
 TEST_F(StackReferenceCheckTest, invalidObjectStackTest)
 {
     int a = 42;
-    bool invalid_ref = env->GetObjectRefType(reinterpret_cast<ets_string>(&a)) == EtsInvalidRefType;
-    ASSERT_EQ(invalid_ref, true);
+    bool invalidRef = env->GetObjectRefType(reinterpret_cast<ets_string>(&a)) == ETS_INVALID_REF_TYPE;
+    ASSERT_EQ(invalidRef, true);
 }
 
 }  // namespace panda::ets::test

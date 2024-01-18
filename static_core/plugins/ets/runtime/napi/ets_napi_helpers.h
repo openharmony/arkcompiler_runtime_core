@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H
 
 namespace panda::ets::napi {
 const void *GetEtsNapiEntryPoint();
 const void *GetEtsNapiCriticalEntryPoint();
 }  // namespace panda::ets::napi
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H

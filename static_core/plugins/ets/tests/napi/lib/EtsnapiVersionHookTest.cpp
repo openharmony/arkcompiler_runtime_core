@@ -17,9 +17,7 @@
 #include <ostream>
 
 extern "C" {
-
 // NOLINTBEGIN(readability-named-parameter, cppcoreguidelines-pro-type-vararg, readability-identifier-naming)
-
 ETS_EXPORT ets_string ETS_CALL ETS_EtsnapiVersionHookTest_hello(EtsEnv *env, [[maybe_unused]] ets_class)
 {
     return env->NewStringUTF("Hello");

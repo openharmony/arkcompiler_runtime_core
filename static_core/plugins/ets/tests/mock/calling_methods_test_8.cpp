@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath8)
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath17)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -52,18 +52,7 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath8)
     ASSERT_NE(byteId, nullptr);
     ets_method charId = env_->Getp_method(cCls, "char_method", "CI:C");
     ASSERT_NE(charId, nullptr);
-    ets_method shortId = env_->Getp_method(cCls, "short_method", "SI:S");
-    ASSERT_NE(shortId, nullptr);
-    ets_method intId = env_->Getp_method(cCls, "int_method", ":I");
-    ASSERT_NE(intId, nullptr);
-    ets_method longId = env_->Getp_method(cCls, "long_method", "JI:J");
-    ASSERT_NE(longId, nullptr);
-    ets_method floatId = env_->Getp_method(cCls, "float_method", "FI:F");
-    ASSERT_NE(floatId, nullptr);
-    ets_method doubleId = env_->Getp_method(cCls, "double_method", "DI:D");
-    ASSERT_NE(doubleId, nullptr);
 
-    // CallNonvirtual<Type>MethodArray part
     EXPECT_DEATH(CallNonvirtualVoidMethodListHelper(env_, nullptr, cCls, voidId, static_cast<ets_int>(42_I),
                                                     static_cast<ets_int>(121_I)),
                  "");
@@ -77,6 +66,43 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath8)
     EXPECT_DEATH(CallNonvirtualCharMethodListHelper(env_, nullptr, cCls, charId, static_cast<ets_char>(10U),
                                                     static_cast<ets_int>(121_I)),
                  "");
+
+    EXPECT_DEATH(CallNonvirtualVoidMethodListHelper(env_, obj, cCls, nullptr), "");
+    EXPECT_DEATH(CallNonvirtualObjectMethodListHelper(env_, obj, cCls, nullptr, nullptr), "");
+    EXPECT_DEATH(CallNonvirtualBooleanMethodListHelper(env_, obj, cCls, nullptr), "");
+    EXPECT_DEATH(CallNonvirtualByteMethodListHelper(env_, obj, cCls, nullptr), "");
+    EXPECT_DEATH(CallNonvirtualCharMethodListHelper(env_, obj, cCls, nullptr), "");
+
+    EXPECT_DEATH(CallNonvirtualVoidMethodListHelper(env_, nullptr, cCls, voidId), "");
+    EXPECT_DEATH(CallNonvirtualObjectMethodListHelper(env_, nullptr, cCls, objectId, nullptr), "");
+    EXPECT_DEATH(CallNonvirtualBooleanMethodListHelper(env_, nullptr, cCls, booleanId), "");
+    EXPECT_DEATH(CallNonvirtualByteMethodListHelper(env_, nullptr, cCls, byteId), "");
+    EXPECT_DEATH(CallNonvirtualCharMethodListHelper(env_, nullptr, cCls, charId), "");
+}
+
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath18)
+{
+    testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+    ets_class cCls = env_->FindClass("C");
+    ASSERT_NE(cCls, nullptr);
+    ets_class dCls = env_->FindClass("D");
+    ASSERT_NE(dCls, nullptr);
+    ets_object obj = env_->AllocObject(dCls);
+    ASSERT_NE(obj, nullptr);
+
+    ets_method shortId = env_->Getp_method(cCls, "short_method", "SI:S");
+    ASSERT_NE(shortId, nullptr);
+    ets_method intId = env_->Getp_method(cCls, "int_method", ":I");
+    ASSERT_NE(intId, nullptr);
+    ets_method longId = env_->Getp_method(cCls, "long_method", "JI:J");
+    ASSERT_NE(longId, nullptr);
+    ets_method floatId = env_->Getp_method(cCls, "float_method", "FI:F");
+    ASSERT_NE(floatId, nullptr);
+    ets_method doubleId = env_->Getp_method(cCls, "double_method", "DI:D");
+    ASSERT_NE(doubleId, nullptr);
+
+    // CallNonvirtual<Type>MethodArray part
     EXPECT_DEATH(CallNonvirtualShortMethodListHelper(env_, nullptr, cCls, shortId, static_cast<ets_short>(42_I),
                                                      static_cast<ets_int>(121_I)),
                  "");
@@ -91,22 +117,12 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath8)
                                                       static_cast<ets_int>(121_I)),
                  "");
 
-    EXPECT_DEATH(CallNonvirtualVoidMethodListHelper(env_, obj, cCls, nullptr), "");
-    EXPECT_DEATH(CallNonvirtualObjectMethodListHelper(env_, obj, cCls, nullptr, nullptr), "");
-    EXPECT_DEATH(CallNonvirtualBooleanMethodListHelper(env_, obj, cCls, nullptr), "");
-    EXPECT_DEATH(CallNonvirtualByteMethodListHelper(env_, obj, cCls, nullptr), "");
-    EXPECT_DEATH(CallNonvirtualCharMethodListHelper(env_, obj, cCls, nullptr), "");
     EXPECT_DEATH(CallNonvirtualShortMethodListHelper(env_, obj, cCls, nullptr), "");
     EXPECT_DEATH(CallNonvirtualIntMethodListHelper(env_, obj, cCls, nullptr), "");
     EXPECT_DEATH(CallNonvirtualLongMethodListHelper(env_, obj, cCls, nullptr), "");
     EXPECT_DEATH(CallNonvirtualFloatMethodListHelper(env_, obj, cCls, nullptr), "");
     EXPECT_DEATH(CallNonvirtualDoubleMethodListHelper(env_, obj, cCls, nullptr), "");
 
-    EXPECT_DEATH(CallNonvirtualVoidMethodListHelper(env_, nullptr, cCls, voidId), "");
-    EXPECT_DEATH(CallNonvirtualObjectMethodListHelper(env_, nullptr, cCls, objectId, nullptr), "");
-    EXPECT_DEATH(CallNonvirtualBooleanMethodListHelper(env_, nullptr, cCls, booleanId), "");
-    EXPECT_DEATH(CallNonvirtualByteMethodListHelper(env_, nullptr, cCls, byteId), "");
-    EXPECT_DEATH(CallNonvirtualCharMethodListHelper(env_, nullptr, cCls, charId), "");
     EXPECT_DEATH(CallNonvirtualShortMethodListHelper(env_, nullptr, cCls, shortId), "");
     EXPECT_DEATH(CallNonvirtualIntMethodListHelper(env_, nullptr, cCls, intId), "");
     EXPECT_DEATH(CallNonvirtualLongMethodListHelper(env_, nullptr, cCls, longId), "");
