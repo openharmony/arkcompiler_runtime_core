@@ -127,8 +127,8 @@ def test_cmake_checker(directory):
         shutil.rmtree(temp_dir)
 
 if __name__ == "__main__":
-    directory = sys.argv[1]
+    arg_directory = sys.argv[1]
     if len(sys.argv) == 3:
-        test_cmake_checker(directory)
+        test_cmake_checker(arg_directory)
     else:
-        run_cmake_checker(directory)
+        run_cmake_checker(arg_directory)

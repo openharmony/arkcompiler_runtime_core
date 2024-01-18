@@ -141,14 +141,12 @@ def coverage(testpath: Path, specpath: Path):
 
     test_tree = TestDirectory(id=-1, name="root", path=testpath, parent=None)
     build_directory_tree(test_tree)
-    
-    #print_tree(ethalon_tree)
     print(f"=====\nDIFF tests='{str(testpath)}'; spec='{str(specpath)}'")
     find_diffs(test_tree, ethalon_tree)
 
     testsNum, specNum = calc_tests_and_spec_stat(test_tree, ethalon_tree)
-    coverage = int(float(testsNum) / float(specNum) * 100)
-    print(f"=====\nCOVEARGE: {coverage}%")
+    coverage_p = int(float(testsNum) / float(specNum) * 100)
+    print(f"=====\nCOVEARGE: {coverage_p}%")
     
 
 

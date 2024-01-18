@@ -179,27 +179,28 @@ def apply_fixies(fix_dir, panda_dir):
 
 
 if __name__ == "__main__":
-    args = get_args()
-    file_list = []
+    arguments = get_args()
+    files_list = []
 
-    args.build_dir = str(os.path.abspath(args.build_dir))
-    args.panda_dir = str(os.path.abspath(args.panda_dir))
-    args.fix_dir = str(os.path.abspath(args.fix_dir))
+    arguments.build_dir = str(os.path.abspath(arguments.build_dir))
+    arguments.panda_dir = str(os.path.abspath(arguments.panda_dir))
+    arguments.fix_dir = str(os.path.abspath(arguments.fix_dir))
 
-    args.fix_dir = tempfile.mkdtemp(prefix='renamer_fixies_', dir=args.fix_dir)
+    arguments.fix_dir = os.path.join(arguments.fix_dir, "renamer_fixes")
+    os.mkdir(arguments.fix_dir)
 
-    if not os.path.exists(os.path.join(args.build_dir, 'compile_commands.json')):
+    if not os.path.exists(os.path.join(arguments.build_dir, 'compile_commands.json')):
         sys.exit("Error: Missing file `compile_commands.json` in build directory")
 
-    file_list = get_file_list(
-        args.panda_dir, args.build_dir, args.filename_filter)
+    files_list = get_file_list(
+        arguments.panda_dir, arguments.build_dir, arguments.filename_filter)
 
-    if not file_list:
+    if not files_list:
         sys.exit("Can't be prepaired source list. Please check availble in build `dir compile_commands.json` and correcting of parameter `--filename-filter` if you use it.")
 
-    check_file_list(file_list, args.panda_dir, args.build_dir, args.fix_dir, args.clang_rules_autofix)
+    check_file_list(files_list, arguments.panda_dir, arguments.build_dir, arguments.fix_dir, arguments.clang_rules_autofix)
 
-    res = apply_fixies(args.fix_dir, args.panda_dir)
+    res = apply_fixies(arguments.fix_dir, arguments.panda_dir)
 
     if res:
         print("Clang-tidy renamer was applyed successfully! Please review changes")

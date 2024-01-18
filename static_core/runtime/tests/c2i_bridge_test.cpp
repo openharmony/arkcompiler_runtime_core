@@ -66,9 +66,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetGcType("epsilon");
-#if 0
-        options.SetNoAsyncJit(true);
-#endif
+        // NOTE: Can be testes with SetNoAsyncJit(true)
 
         Runtime::Create(options);
         thread_ = MTManagedThread::GetCurrent();
@@ -149,7 +147,6 @@ public:
 
         pandasm::Parser p;
         auto res = p.Parse(out.str());
-        // ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
         classLinker->AddPandaFile(std::move(pf));
 
@@ -308,7 +305,7 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeObjNoArg)
     ASSERT_EQ(res, nullptr);
 }
 
-/// Args tests:
+/// Arguments tests
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeInt)
 {
     auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32}, {5L});

@@ -260,8 +260,6 @@ public:
     {
         ASSERT_PRINT(IsHeapObject(), "can not convert TaggedValue to HeapObject :" << std::hex << value_);
         // NOTE(vpukhov): weakref ignored
-        // ASSERT_PRINT((value_ & TAG_WEAK_FILTER) == 0U,
-        //             "can not convert TaggedValue to HeapObject :" << std::hex << value_);
         return reinterpret_cast<ObjectHeader *>(value_ & (~TAG_WEAK_MASK));
     }
 

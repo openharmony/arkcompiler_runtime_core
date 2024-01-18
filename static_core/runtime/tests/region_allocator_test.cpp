@@ -106,12 +106,12 @@ public:
         return allocator.GetSpace()->GetPool()->GetFreeRegionsNumInRegionBlock();
     }
 
-    size_t static constexpr RegionSize()
+    static size_t constexpr RegionSize()
     {
         return NonObjectRegionAllocator::REGION_SIZE;
     }
 
-    size_t static constexpr GetRegionsNumber()
+    static size_t constexpr GetRegionsNumber()
     {
         return TEST_REGION_SPACE_SIZE / NonObjectRegionAllocator::REGION_SIZE;
     }

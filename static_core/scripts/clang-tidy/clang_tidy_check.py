@@ -443,43 +443,43 @@ def get_proc_count(cmd_ard : int) -> int:
     return multiprocessing.cpu_count()
 
 if __name__ == "__main__":
-    args = get_args()
-    file_list = []
+    arguments = get_args()
+    files_list = []
 
-    if not os.path.exists(os.path.join(args.build_dir, 'compile_commands.json')):
+    if not os.path.exists(os.path.join(arguments.build_dir, 'compile_commands.json')):
         sys.exit("Error: Missing file `compile_commands.json` in build directory")
 
-    err_msg = verify_args(args.panda_dir, args.build_dir)
+    err_msg = verify_args(arguments.panda_dir, arguments.build_dir)
     if err_msg:
         sys.exit(err_msg)
 
-    file_list = get_file_list(
-        args.panda_dir, args.build_dir, args.filename_filter)
+    files_list = get_file_list(
+        arguments.panda_dir, arguments.build_dir, arguments.filename_filter)
 
-    if not file_list:
+    if not files_list:
         sys.exit("Can't be prepaired source list."
                  "Please check availble in build `dir compile_commands.json`"
                  "and correcting of parameter `--filename-filter` if you use it.")
 
-    check_headers_in_es2panda_sources(args.panda_dir)
+    check_headers_in_es2panda_sources(arguments.panda_dir)
     print('Checked for system headers: Starting')
-    system_headers = check_file_list_for_system_headers_includes(file_list)
+    system_headers = check_file_list_for_system_headers_includes(files_list)
     if system_headers:
         err_msg = "Error: third_party includes should be marked as system\n"
-        for path, system_header in system_headers:
-            err_msg += path + " error: " + system_header + "\n"
+        for e_path, e_system_header in system_headers:
+            err_msg += e_path + " error: " + e_system_header + "\n"
         sys.exit(err_msg)
     print('Checked for system headers: Done')
 
-    if not args.full:
-        file_list = filter_file_list(file_list)
+    if not arguments.full:
+        files_list = filter_file_list(files_list)
     else:
         # Disable ctcache in full mode to handle cases when caching works incorrectly
         os.environ['CTCACHE_DISABLE'] = '1'
 
-    proc_count = get_proc_count(args.proc_count)
-    print('clang-tidy proc_count: ' + str(proc_count))
-    if not check_file_list(file_list, args.panda_dir, args.build_dir, proc_count):
+    process_count = get_proc_count(arguments.proc_count)
+    print('clang-tidy proc_count: ' + str(process_count))
+    if not check_file_list(files_list, arguments.panda_dir, arguments.build_dir, process_count):
         sys.exit("Failed: Clang-tidy get errors")
 
     print("Clang-tidy was passed successfully!")
