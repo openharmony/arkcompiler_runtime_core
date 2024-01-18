@@ -82,14 +82,15 @@ void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
         // Update refs inside monitors
         GetPandaVm()->GetMonitorPool()->EnumerateMonitors([this](Monitor *monitor) {
             ObjectHeader *objectHeader = monitor->GetObject();
-            if (objectHeader != nullptr) {
-                MarkWord markWord = objectHeader->AtomicGetMark();
-                if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
-                    MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
-                    LOG_DEBUG_GC << "Update monitor " << std::hex << monitor << " object, old val = 0x" << std::hex
-                                 << objectHeader << ", new val = 0x" << addr;
-                    monitor->SetObject(reinterpret_cast<ObjectHeader *>(addr));
-                }
+            if (objectHeader == nullptr) {
+                return true;
+            }
+            MarkWord markWord = objectHeader->AtomicGetMark();
+            if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
+                MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
+                LOG_DEBUG_GC << "Update monitor " << std::hex << monitor << " object, old val = 0x" << std::hex
+                             << objectHeader << ", new val = 0x" << addr;
+                monitor->SetObject(reinterpret_cast<ObjectHeader *>(addr));
             }
             return true;
         });

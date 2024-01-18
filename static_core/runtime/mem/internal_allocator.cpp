@@ -191,46 +191,48 @@ void *InternalAllocator<CONFIG>::AllocViaPandaAllocators(size_t size, Alignment 
     } else if (alignedSize <= FreeListAllocatorT::GetMaxSize()) {
         LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use FreeListAllocator";
         res = freelistAllocator_->Alloc(size, align);
-        if (res == nullptr) {
-            // Get rid of extra pool adding to the allocator
-            static os::memory::Mutex poolLock;
-            os::memory::LockHolder lock(poolLock);
-            while (true) {
-                res = freelistAllocator_->Alloc(size, align);
-                if (res != nullptr) {
-                    break;
-                }
-                LOG_INTERNAL_ALLOCATOR(DEBUG) << "FreeListAllocator didn't allocate memory, try to add new pool";
-                size_t poolSize = FreeListAllocatorT::GetMinPoolSize();
-                auto pool = PoolManager::GetMmapMemPool()->AllocPool(
-                    poolSize, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::FREELIST_ALLOCATOR, freelistAllocator_);
-                if (UNLIKELY(pool.GetMem() == nullptr)) {
-                    return nullptr;
-                }
-                freelistAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
+        if (res != nullptr) {
+            return res;
+        }
+        // Get rid of extra pool adding to the allocator
+        static os::memory::Mutex poolLock;
+        os::memory::LockHolder lock(poolLock);
+        while (true) {
+            res = freelistAllocator_->Alloc(size, align);
+            if (res != nullptr) {
+                break;
             }
+            LOG_INTERNAL_ALLOCATOR(DEBUG) << "FreeListAllocator didn't allocate memory, try to add new pool";
+            size_t poolSize = FreeListAllocatorT::GetMinPoolSize();
+            auto pool = PoolManager::GetMmapMemPool()->AllocPool(poolSize, SpaceType::SPACE_TYPE_INTERNAL,
+                                                                 AllocatorType::FREELIST_ALLOCATOR, freelistAllocator_);
+            if (UNLIKELY(pool.GetMem() == nullptr)) {
+                return nullptr;
+            }
+            freelistAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
         }
     } else {
         LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use HumongousObjAllocator";
         res = humongousAllocator_->Alloc(size, align);
-        if (res == nullptr) {
-            // Get rid of extra pool adding to the allocator
-            static os::memory::Mutex poolLock;
-            os::memory::LockHolder lock(poolLock);
-            while (true) {
-                res = humongousAllocator_->Alloc(size, align);
-                if (res != nullptr) {
-                    break;
-                }
-                LOG_INTERNAL_ALLOCATOR(DEBUG) << "HumongousObjAllocator didn't allocate memory, try to add new pool";
-                size_t poolSize = HumongousObjAllocatorT::GetMinPoolSize(size);
-                auto pool = PoolManager::GetMmapMemPool()->AllocPool(
-                    poolSize, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::HUMONGOUS_ALLOCATOR, humongousAllocator_);
-                if (UNLIKELY(pool.GetMem() == nullptr)) {
-                    return nullptr;
-                }
-                humongousAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
+        if (res != nullptr) {
+            return res;
+        }
+        // Get rid of extra pool adding to the allocator
+        static os::memory::Mutex poolLock;
+        os::memory::LockHolder lock(poolLock);
+        while (true) {
+            res = humongousAllocator_->Alloc(size, align);
+            if (res != nullptr) {
+                break;
             }
+            LOG_INTERNAL_ALLOCATOR(DEBUG) << "HumongousObjAllocator didn't allocate memory, try to add new pool";
+            size_t poolSize = HumongousObjAllocatorT::GetMinPoolSize(size);
+            auto pool = PoolManager::GetMmapMemPool()->AllocPool(
+                poolSize, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::HUMONGOUS_ALLOCATOR, humongousAllocator_);
+            if (UNLIKELY(pool.GetMem() == nullptr)) {
+                return nullptr;
+            }
+            humongousAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
         }
     }
     return res;

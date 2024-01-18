@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RUNTIME_MEM_OBJECT_LOCAL_OBJECT_HANDLE_H_
-#define RUNTIME_MEM_OBJECT_LOCAL_OBJECT_HANDLE_H_
+#ifndef RUNTIME_MEM_OBJECT_LOCAL_OBJECT_HANDLE_H
+#define RUNTIME_MEM_OBJECT_LOCAL_OBJECT_HANDLE_H
 
 #include "libpandabase/macros.h"
 #include "runtime/include/managed_thread.h"
@@ -70,4 +70,4 @@ private:
 
 }  // namespace ark
 
-#endif  // RUNTIME_MEM_OBJECT_LOCAL_OBJECT_HANDLE_H_
+#endif  // RUNTIME_MEM_OBJECT_LOCAL_OBJECT_HANDLE_H

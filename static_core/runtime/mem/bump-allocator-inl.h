@@ -298,17 +298,19 @@ bool BumpPointerAllocator<AllocConfigT, LockConfigT, USE_TLABS>::IsLive(const Ob
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (USE_TLABS) {
         bool result = false;
-        tlabManager_.IterateOverTLABs([&](TLAB *tlab) {
+        auto objectVisitor = [&result, obj](ObjectHeader *objectHeader) {
+            if (objectHeader == obj) {
+                result = true;
+            }
+        };
+        auto tlabVisitor = [&objectVisitor, obj](TLAB *tlab) {
             if (tlab->ContainObject(obj)) {
-                tlab->IterateOverObjects([&](ObjectHeader *objectHeader) {
-                    if (objectHeader == obj) {
-                        result = true;
-                    }
-                });
+                tlab->IterateOverObjects(objectVisitor);
                 return false;
             }
             return true;
-        });
+        };
+        tlabManager_.IterateOverTLABs(tlabVisitor);
         return result;
     }
     return false;
