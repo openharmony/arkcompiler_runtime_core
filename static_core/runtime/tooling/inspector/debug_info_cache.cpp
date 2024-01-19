@@ -90,22 +90,25 @@ std::unordered_set<PtLocation, HashLocation> DebugInfoCache::GetContinueToLocati
         [](auto, auto &) { return true; },
         [sourceFile](auto, auto &debugInfo, auto methodId) { return debugInfo.GetSourceFile(methodId) == sourceFile; },
         [lineNumber, &locations](auto pandaFile, auto &, auto methodId, auto &entry, auto next) {
-            if (entry.line == lineNumber) {
-                uint32_t nextOffset;
-                if (next == nullptr) {
-                    panda_file::MethodDataAccessor mda(*pandaFile, methodId);
-                    if (auto codeId = mda.GetCodeId()) {
-                        nextOffset = panda_file::CodeDataAccessor(*pandaFile, *codeId).GetCodeSize();
-                    } else {
-                        nextOffset = 0;
-                    }
-                } else {
-                    nextOffset = next->offset;
-                }
+            if (entry.line != lineNumber) {
+                // continue enumeration
+                return true;
+            }
 
-                for (auto o = entry.offset; o < nextOffset; o++) {
-                    locations.emplace(pandaFile->GetFilename().data(), methodId, o);
+            uint32_t nextOffset;
+            if (next == nullptr) {
+                panda_file::MethodDataAccessor mda(*pandaFile, methodId);
+                if (auto codeId = mda.GetCodeId()) {
+                    nextOffset = panda_file::CodeDataAccessor(*pandaFile, *codeId).GetCodeSize();
+                } else {
+                    nextOffset = 0;
                 }
+            } else {
+                nextOffset = next->offset;
+            }
+
+            for (auto o = entry.offset; o < nextOffset; o++) {
+                locations.emplace(pandaFile->GetFilename().data(), methodId, o);
             }
             return true;
         });
@@ -119,19 +122,20 @@ std::vector<PtLocation> DebugInfoCache::GetBreakpointLocations(
     std::vector<PtLocation> locations;
     sourceFiles.clear();
     // clang-format off
-    EnumerateLineEntries([](auto, auto &) { return true; },
-                        [&sourceFileFilter](auto, auto &debugInfo, auto methodId) {
-                            return sourceFileFilter(debugInfo.GetSourceFile(methodId));
-                        },
-                        [lineNumber, &sourceFiles, &locations](auto pandaFile, auto &debugInfo, auto methodId,
-                                                               auto &entry, auto /* next */) {
-                            if (entry.line == lineNumber) {
-                                sourceFiles.insert(debugInfo.GetSourceFile(methodId));
-                                locations.emplace_back(pandaFile->GetFilename().data(), methodId, entry.offset);
-                            }
+    EnumerateLineEntries(
+        [](auto, auto &) { return true; },
+        [&sourceFileFilter](auto, auto &debugInfo, auto methodId) {
+            return sourceFileFilter(debugInfo.GetSourceFile(methodId));
+        },
+        [lineNumber, &sourceFiles, &locations](auto pandaFile, auto &debugInfo, auto methodId,
+                                               auto &entry, auto /* next */) {
+            if (entry.line == lineNumber) {
+                sourceFiles.insert(debugInfo.GetSourceFile(methodId));
+                locations.emplace_back(pandaFile->GetFilename().data(), methodId, entry.offset);
+            }
 
-                            return true;
-                        });
+            return true;
+        });
     // clang-format on
     return locations;
 }
@@ -140,39 +144,47 @@ std::set<size_t> DebugInfoCache::GetValidLineNumbers(std::string_view sourceFile
                                                      bool restrictToFunction)
 {
     std::set<size_t> lineNumbers;
-    EnumerateLineEntries([](auto, auto &) { return true; },
-                         [sourceFile, startLine, restrictToFunction](auto, auto &debugInfo, auto methodId) {
-                             if (debugInfo.GetSourceFile(methodId) != sourceFile) {
-                                 return false;
-                             }
+    auto lineHandler = [startLine, endLine, &lineNumbers](auto, auto &, auto, auto &entry, auto /* next */) {
+        if (entry.line >= startLine && entry.line < endLine) {
+            lineNumbers.insert(entry.line);
+        }
 
-                             bool hasLess = false;
-                             bool hasGreater = false;
-                             if (restrictToFunction) {
-                                 for (auto &entry : debugInfo.GetLineNumberTable(methodId)) {
-                                     if (entry.line <= startLine) {
-                                         hasLess = true;
-                                     }
+        return true;
+    };
 
-                                     if (entry.line >= startLine) {
-                                         hasGreater = true;
-                                     }
+    if (restrictToFunction) {
+        auto methodFilter = [sourceFile, startLine](auto, auto &debugInfo, auto methodId) {
+            if (debugInfo.GetSourceFile(methodId) != sourceFile) {
+                return false;
+            }
 
-                                     if (hasLess && hasGreater) {
-                                         break;
-                                     }
-                                 }
-                             }
+            bool hasLess = false;
+            bool hasGreater = false;
+            for (auto &entry : debugInfo.GetLineNumberTable(methodId)) {
+                if (entry.line <= startLine) {
+                    hasLess = true;
+                }
 
-                             return !restrictToFunction || (hasLess && hasGreater);
-                         },
-                         [startLine, endLine, &lineNumbers](auto, auto &, auto, auto &entry, auto /* next */) {
-                             if (entry.line >= startLine && entry.line < endLine) {
-                                 lineNumbers.insert(entry.line);
-                             }
+                if (entry.line >= startLine) {
+                    hasGreater = true;
+                }
 
-                             return true;
-                         });
+                if (hasLess && hasGreater) {
+                    break;
+                }
+            }
+
+            return hasLess && hasGreater;
+        };
+        EnumerateLineEntries([](auto, auto &) { return true; }, methodFilter, lineHandler);
+    } else {
+        EnumerateLineEntries([](auto, auto &) { return true; },
+                             [sourceFile](auto, auto &debugInfo, auto methodId) {
+                                 return (debugInfo.GetSourceFile(methodId) == sourceFile);
+                             },
+                             lineHandler);
+    }
+
     return lineNumbers;
 }
 

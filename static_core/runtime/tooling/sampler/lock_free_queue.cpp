@@ -29,17 +29,18 @@ void LockFreeQueue::Push(const FileInfo &data)
         Node *next = tail->next.load(std::memory_order_acquire);
         // Atomic with acquire order reason: to sync with push in other threads
         Node *tail2 = tail_.load(std::memory_order_acquire);
-        if (tail == tail2) {
-            if (next == nullptr) {
-                if (tail->next.compare_exchange_weak(next, newNode)) {
-                    tail_.compare_exchange_strong(tail, newNode);
-                    ++size_;
-                    return;
-                }
-            } else {
-                Node *newTail = next;
-                tail_.compare_exchange_strong(tail, newTail);
+        if (tail != tail2) {
+            continue;
+        }
+        if (next == nullptr) {
+            if (tail->next.compare_exchange_weak(next, newNode)) {
+                tail_.compare_exchange_strong(tail, newNode);
+                ++size_;
+                return;
             }
+        } else {
+            Node *newTail = next;
+            tail_.compare_exchange_strong(tail, newTail);
         }
     }
 }
@@ -56,23 +57,24 @@ void LockFreeQueue::Pop(FileInfo &ret)
         Node *next = head->next.load(std::memory_order_acquire);
         // Atomic with acquire order reason: to sync with push in other threads
         Node *head2 = head_.load(std::memory_order_acquire);
-        if (head == head2) {
-            if (head == tail) {
-                ASSERT(next != nullptr);
-                Node *newTail = next;
-                tail_.compare_exchange_strong(tail, newTail);
-            } else {
-                if (next == nullptr) {
-                    continue;
-                }
-                ASSERT(next->data != nullptr);
-                ret = *(next->data);
-                Node *newHead = next;
-                if (head_.compare_exchange_weak(head, newHead)) {
-                    delete head;
-                    --size_;
-                    return;
-                }
+        if (head != head2) {
+            continue;
+        }
+        if (head == tail) {
+            ASSERT(next != nullptr);
+            Node *newTail = next;
+            tail_.compare_exchange_strong(tail, newTail);
+        } else {
+            if (next == nullptr) {
+                continue;
+            }
+            ASSERT(next->data != nullptr);
+            ret = *(next->data);
+            Node *newHead = next;
+            if (head_.compare_exchange_weak(head, newHead)) {
+                delete head;
+                --size_;
+                return;
             }
         }
     }
