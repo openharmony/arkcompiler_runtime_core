@@ -11,6 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/sanitizers/sanitizers.gni")
 import("//build/ohos_var.gni")
+
 enable_arkplatform = true
 enable_static_vm = true
+if (is_asan && use_hwasan) {
+  enable_arkplatform = false
+  enable_static_vm = false
+}
