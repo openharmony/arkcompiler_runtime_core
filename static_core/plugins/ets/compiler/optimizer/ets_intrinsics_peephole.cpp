@@ -48,6 +48,52 @@ bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
     return false;
 }
 
+Inst *GetStringFromLength(Inst *inst)
+{
+    Inst *lenArray = inst;
+    if (inst->GetBasicBlock()->GetGraph()->GetRuntime()->IsCompressedStringsEnabled()) {
+        if (inst->GetOpcode() != Opcode::Shr || inst->GetType() != DataType::INT32) {
+            return nullptr;
+        }
+        auto input1 = inst->GetInput(1).GetInst();
+        if (!input1->IsConst() || input1->CastToConstant()->GetRawValue() != 1) {
+            return nullptr;
+        }
+        lenArray = inst->GetInput(0).GetInst();
+    }
+
+    if (lenArray->GetOpcode() != Opcode::LenArray || !lenArray->CastToLenArray()->IsString()) {
+        return nullptr;
+    }
+    return lenArray->GetDataFlowInput(0);
+}
+
+bool Peepholes::PeepholeStringSubstring([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    // Replaces
+    //      string
+    //      Intrinsic.StdCoreStringSubstring string, 0, string.Length -> .....
+    // with
+    //      string -> .....
+
+    auto string = intrinsic->GetDataFlowInput(0);
+    auto begin = intrinsic->GetInput(1).GetInst();
+    auto end = intrinsic->GetInput(2).GetInst();
+    if (!begin->IsConst() || begin->GetType() != DataType::INT64) {
+        return false;
+    }
+    if (static_cast<int64_t>(begin->CastToConstant()->GetRawValue()) > 0) {
+        return false;
+    }
+    if (GetStringFromLength(end) != string) {
+        return false;
+    }
+    intrinsic->ReplaceUsers(string);
+    intrinsic->ClearFlag(inst_flags::NO_DCE);
+
+    return true;
+}
+
 template <bool IS_STORE>
 bool TryInsertFieldInst(IntrinsicInst *intrinsic, RuntimeInterface::ClassPtr klassPtr,
                         RuntimeInterface::FieldPtr rawField, size_t fieldId)
