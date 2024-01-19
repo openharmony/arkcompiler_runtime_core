@@ -269,6 +269,7 @@ TEST_F(SamplerTest, SamplerCheckThreadIdTest)
     while (!syncFlag1) {
         ;
     }
+    // only one additional managed thread must be running
     ASSERT_EQ(ExtractManagedThreads(sp).size(), 2UL);
     bool isPassed = false;
 
@@ -353,6 +354,7 @@ TEST_F(SamplerTest, SamplerCollectNativeThreadTest)
     ASSERT_NE(ExtractSamplerTid(sp), 0);
     ASSERT_EQ(ExtractIsActive(sp), true);
 
+    // two additional threads must be running - a managed and a native one
     ASSERT_EQ(ExtractManagedThreads(sp).size(), 3UL);
     std::thread nativeThread3(RunNativeThread, &syncFlag3);
     while (!syncFlag3) {
@@ -426,7 +428,7 @@ static void CommunicatorStressWritterThread(const ThreadCommunicator *com, const
         // If the sample write failed we retrying to send it
         if (!com->SendSample(sample)) {
             std::cerr << "Failed to send a sample" << std::endl;
-            abort();
+            Runtime::Abort();
         }
     }
 }
@@ -446,7 +448,7 @@ TEST_F(SamplerTest, ThreadCommunicatorMultithreadTest)
         // If the sample write failed we retrying to send it
         if (!communicator.ReadSample(&sampleOutput)) {
             std::cerr << "Failed to read a sample" << std::endl;
-            abort();
+            Runtime::Abort();
         }
         ASSERT_EQ(sampleOutput, sampleInput);
     }

@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_INFO_H_
-#define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_INFO_H_
+#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_INFO_H
+#define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_INFO_H
 
-#include <cstring>
-#include <string>
 #include <array>
+#include <cstring>
+#include <securec.h>
+#include <string>
 
 #include "libpandabase/macros.h"
 #include "libpandabase/os/thread.h"
@@ -78,14 +79,16 @@ inline uintptr_t ReadUintptrTBitMisaligned(const void *ptr)
      * To avoid of UB we should read misaligned adresses with memcpy
      */
     uintptr_t value = 0;
-    memcpy(&value, ptr, sizeof(value));
+    [[maybe_unused]] int r = memcpy_s(&value, sizeof(value), ptr, sizeof(value));
+    ASSERT(r == 0);
     return value;
 }
 
 inline uint32_t ReadUint32TBitMisaligned(const void *ptr)
 {
     uint32_t value = 0;
-    memcpy(&value, ptr, sizeof(value));
+    [[maybe_unused]] int r = memcpy_s(&value, sizeof(value), ptr, sizeof(value));
+    ASSERT(r == 0);
     return value;
 }
 
@@ -189,4 +192,4 @@ struct hash<panda::tooling::sampler::FileInfo> {
 
 }  // namespace std
 
-#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_INFO_H_
+#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_INFO_H

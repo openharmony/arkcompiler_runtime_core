@@ -168,39 +168,16 @@ void Inspector::ThreadStart(PtThread thread)
         inspectorServer_.CallTargetAttachedToTarget(thread);
     }
 
-    auto [it, inserted] = threads_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(thread),
-        std::forward_as_tuple(
-            thread.GetManagedThread(), [](auto &, auto &, auto) {},
-            [this, thread](auto &objectRepository, auto &hitBreakpoints, auto exception) {
-                auto exceptionRemoteObject = exception != nullptr
-                                                 ? objectRepository.CreateObject(TypedValue::Reference(exception))
-                                                 : std::optional<RemoteObject>();
-
-                inspectorServer_.CallDebuggerPaused(
-                    thread, hitBreakpoints, exceptionRemoteObject, [this, thread, &objectRepository](auto &handler) {
-                        FrameId frameId = 0;
-                        HandleError(debugger_.EnumerateFrames(
-                            thread, [this, &objectRepository, &handler, &frameId](const PtFrame &frame) {
-                                std::string_view sourceFile;
-                                std::string_view methodName;
-                                size_t lineNumber;
-                                debugInfoCache_.GetSourceLocation(frame, sourceFile, methodName, lineNumber);
-
-                                auto scopeChain = std::vector {
-                                    Scope(Scope::Type::LOCAL,
-                                          objectRepository.CreateFrameObject(frame, debugInfoCache_.GetLocals(frame))),
-                                    Scope(Scope::Type::GLOBAL, objectRepository.CreateGlobalObject())};
-
-                                handler(frameId++, methodName, sourceFile, lineNumber, scopeChain);
-
-                                return true;
-                            }));
-                    });
-            },
-            [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.Unlock(); },
-            [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.ReadLock(); }, []() {},
-            [this, thread]() { inspectorServer_.CallDebuggerResumed(thread); }));
+    // NOLINTBEGIN(modernize-avoid-bind)
+    auto [it, inserted] =
+        threads_.emplace(std::piecewise_construct, std::forward_as_tuple(thread),
+                         std::forward_as_tuple(
+                             thread.GetManagedThread(), [](auto &, auto &, auto) {},
+                             std::bind(&Inspector::DebuggableThreadPostSuspend, this, thread, _1, _2, _3),
+                             [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.Unlock(); },
+                             [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.ReadLock(); }, []() {},
+                             [this, thread]() { inspectorServer_.CallDebuggerResumed(thread); }));
+    // NOLINTEND(modernize-avoid-bind)
     (void)inserted;
     ASSERT(inserted);
 
@@ -371,5 +348,33 @@ std::vector<PropertyDescriptor> Inspector::GetProperties(PtThread thread, Remote
 std::string Inspector::GetSourceCode(std::string_view sourceFile)
 {
     return debugInfoCache_.GetSourceCode(sourceFile);
+}
+
+void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &objectRepository,
+                                            const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception)
+{
+    auto exceptionRemoteObject = exception != nullptr ? objectRepository.CreateObject(TypedValue::Reference(exception))
+                                                      : std::optional<RemoteObject>();
+
+    inspectorServer_.CallDebuggerPaused(
+        thread, hitBreakpoints, exceptionRemoteObject, [this, thread, &objectRepository](auto &handler) {
+            FrameId frameId = 0;
+            HandleError(
+                debugger_.EnumerateFrames(thread, [this, &objectRepository, &handler, &frameId](const PtFrame &frame) {
+                    std::string_view sourceFile;
+                    std::string_view methodName;
+                    size_t lineNumber;
+                    debugInfoCache_.GetSourceLocation(frame, sourceFile, methodName, lineNumber);
+
+                    auto scopeChain =
+                        std::vector {Scope(Scope::Type::LOCAL,
+                                           objectRepository.CreateFrameObject(frame, debugInfoCache_.GetLocals(frame))),
+                                     Scope(Scope::Type::GLOBAL, objectRepository.CreateGlobalObject())};
+
+                    handler(frameId++, methodName, sourceFile, lineNumber, scopeChain);
+
+                    return true;
+                }));
+        });
 }
 }  // namespace panda::tooling::inspector

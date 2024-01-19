@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_H_
-#define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_H_
+#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_H
+#define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_H
 
 #include "libpandabase/macros.h"
 
@@ -56,4 +56,4 @@ private:
 
 }  // namespace panda::tooling::sampler
 
-#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_H_
+#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_H

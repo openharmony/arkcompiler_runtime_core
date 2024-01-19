@@ -41,6 +41,9 @@ class Server;  // NOLINT(fuchsia-virtual-inheritance)
 
 class InspectorServer final {
 public:
+    using FrameInfoHandler =
+        std::function<void(FrameId, std::string_view, std::string_view, size_t, const std::vector<Scope> &)>;
+
     explicit InspectorServer(Server &server);
     ~InspectorServer() = default;
 
@@ -54,10 +57,9 @@ public:
     void OnOpen(std::function<void()> &&handler);
     void OnFail(std::function<void()> &&handler);
 
-    void CallDebuggerPaused(
-        PtThread thread, const std::vector<BreakpointId> &hitBreakpoints, const std::optional<RemoteObject> &exception,
-        const std::function<void(const std::function<void(FrameId, std::string_view, std::string_view, size_t,
-                                                          const std::vector<Scope> &)> &)> &enumerateFrames);
+    void CallDebuggerPaused(PtThread thread, const std::vector<BreakpointId> &hitBreakpoints,
+                            const std::optional<RemoteObject> &exception,
+                            const std::function<void(const FrameInfoHandler &)> &enumerateFrames);
     void CallDebuggerResumed(PtThread thread);
     void CallDebuggerScriptParsed(PtThread thread, ScriptId id, std::string_view sourceFile);
     void CallRuntimeConsoleApiCalled(PtThread thread, ConsoleCallType type, uint64_t timestamp,
@@ -92,7 +94,22 @@ public:
     void OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler);
 
 private:
+    struct CallFrameInfo {
+        FrameId frameId;
+        std::string_view sourceFile;
+        std::string_view methodName;
+        size_t lineNumber;
+    };
+
     void SendTargetAttachedToTarget(const std::string &sessionId);
+    void EnumerateCallFrames(JsonArrayBuilder &callFrames, PtThread thread,
+                             const std::function<void(const FrameInfoHandler &)> &enumerateFrames);
+    void AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallFrameInfo &callFrameInfo,
+                          const std::vector<Scope> &scopeChain, PtThread thread);
+    static void AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
+                                  const std::vector<BreakpointId> &hitBreakpoints);
+    void AddBreakpointByUrlLocations(JsonArrayBuilder &locations, const std::set<std::string_view> &sourceFiles,
+                                     size_t lineNumber, PtThread thread);
 
     Server &server_;
     SessionManager sessionManager_;
