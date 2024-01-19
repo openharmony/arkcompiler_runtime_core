@@ -220,6 +220,8 @@ check_ubuntu_version
 mkdir -p "${BUILD_DIR}"
 
 if [[ "${BUILD_SPEC}" == "yes" ]]; then
+    echo "spec: Validating ${SCRIPT_DIR}/spec"
+    python3 ${SCRIPT_DIR}/validate-spec.py ${SCRIPT_DIR}/spec
     build_sphinx_document spec "${SCRIPT_DIR}/spec"
 fi
 
