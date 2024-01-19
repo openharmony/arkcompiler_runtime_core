@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+type P = (Promise<String> | null)
 
 function return_value(i: int): String {
     return "value " + i;
 }
 
 function n_cor_launch(n_cor: int): int {
-    let p: Promise<String>[] = new Promise<String>[n_cor];
+    let p: P[] = new P[n_cor];
     for (let i = 0; i < n_cor; ++i) {
         p[i] = launch return_value(i);
     }
@@ -36,10 +37,12 @@ function throw_exception(): Object {
     throw new Error();
 }
 
+type Q = (Promise<Object> | null)
+
 function n_cor_exection_launch(n_cor: int): int { 
-    let p: Promise<Object>[] = new Promise<Object>[n_cor]
+    let p: Q[] = new Q[n_cor];
     for (let i = 0; i < n_cor; ++i) {
-        p[i] = launch throw_exception(); 
+        p[i] = launch throw_exception();
     }
     for (let i = 0; i < n_cor; ++i) {
         try {
