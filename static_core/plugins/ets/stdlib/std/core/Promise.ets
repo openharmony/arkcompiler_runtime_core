@@ -62,7 +62,7 @@ export final class Promise<T> {
         if (this.state != Promise.STATE_PENDING) {
             Promise.addToJobQueue(fn as Object);
         } else {
-            this.thenQueue = this.pushToQueue(fn as Object, this.thenQueue);
+            this.pushToThenQueue(fn as Object);
         }
         return promise;
     }
@@ -85,7 +85,7 @@ export final class Promise<T> {
         if (this.state != Promise.STATE_PENDING) {
             Promise.addToJobQueue(fn as Object);
         } else {
-            this.thenQueue = this.pushToQueue(fn as Object, this.thenQueue);
+            this.pushToThenQueue(fn as Object);
         }
         return promise;
     }
@@ -108,8 +108,8 @@ export final class Promise<T> {
         if (this.state != Promise.STATE_PENDING) {
             Promise.addToJobQueue(fn as Object);
         } else {
-            this.thenQueue = this.pushToQueue(fn as Object, this.thenQueue);
-            this.catchQueue = this.pushToQueue(fn as Object, this.catchQueue);
+            this.pushToThenQueue(fn as Object);
+            this.pushToCatchQueue(fn as Object);
         }
         return promise;
     }
@@ -129,7 +129,7 @@ export final class Promise<T> {
         if (this.state == Promise.STATE_REJECTED) {
             Promise.addToJobQueue(fn as Object);
         } else if (this.state == Promise.STATE_PENDING) {
-            this.catchQueue = this.pushToQueue(fn as Object, this.catchQueue);
+            this.pushToCatchQueue(fn as Object);
         }
         return promise;
     }
@@ -153,8 +153,8 @@ export final class Promise<T> {
         if (this.state != Promise.STATE_PENDING) {
             Promise.addToJobQueue(fn as Object);
         } else {
-            this.thenQueue = this.pushToQueue(fn as Object, this.thenQueue);
-            this.catchQueue = this.pushToQueue(fn as Object, this.catchQueue);
+            this.pushToThenQueue(fn as Object);
+            this.pushToCatchQueue(fn as Object);
         }
         return promise;
     }
@@ -210,17 +210,32 @@ export final class Promise<T> {
         return p;
     }
 
-    private static pushToQueue(job: Object, queue: Object[] | null): Object[] {
-        let oldLength = 0;
-        if (queue != null) {
-            oldLength = queue.length;
+    private static ensureCapacity(queue: Object[] | null, size: int): Object[] | null {
+        if (size == 0) {
+            return new Object[2];
         }
-        let newQueue = new Object[oldLength + 1];
-        for (let i = 0; i < oldLength; ++i) {
-            newQueue[i] = queue?.[i]!;
+        if (size == queue.length) {
+            let newQueue = new Object[size * 2];
+            for (let i = 0; i < size; ++i) {
+                newQueue[i] = queue?.[i]!;
+            }
+            return newQueue;
         }
-        newQueue[oldLength] = job;
-        return newQueue;
+        return queue;
+    }
+
+    private pushToThenQueue(job: Object): void {
+        // length property of thenQueue Objet array represents its capacity, thenQueueSize represents its current size
+        this.thenQueue = this.ensureCapacity(this.thenQueue, this.thenQueueSize);
+        (this.thenQueue)?.[this.thenQueueSize] = job;
+        ++this.thenQueueSize;
+    }
+
+    private pushToCatchQueue(job: Object): void {
+        // length property of catchQueue Objet array represents its capacity, catchQueueSize represents its current size
+        this.catchQueue = this.ensureCapacity(this.catchQueue, this.catchQueueSize);
+        (this.catchQueue)?.[this.catchQueueSize] = job;
+        ++this.catchQueueSize;  
     }
 
     public native awaitResolution(): T;
@@ -242,7 +257,8 @@ export final class Promise<T> {
     private catchQueue: Object[] | null = null;
     private linkedPromise: Object | null = null;
     private eventPtr: long;
-    private padding0: int;
+    private thenQueueSize: int = 0;
+    private catchQueueSize: int = 0;
     private state: int = Promise.STATE_PENDING;
 }
 

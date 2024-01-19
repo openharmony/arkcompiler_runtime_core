@@ -75,16 +75,28 @@ public:
             ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, thenQueue_)));
     }
 
+    EtsInt GetThenQueueSize()
+    {
+        return thenQueueSize_;
+    }
+
     EtsObjectArray *GetCatchQueue(EtsCoroutine *coro)
     {
         return EtsObjectArray::FromCoreType(
             ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, catchQueue_)));
     }
 
+    EtsInt GetCatchQueueSize()
+    {
+        return catchQueueSize_;
+    }
+
     void ClearQueues(EtsCoroutine *coro)
     {
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, thenQueue_), nullptr);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, catchQueue_), nullptr);
+        thenQueueSize_ = 0;
+        catchQueueSize_ = 0;
     }
 
     CoroutineEvent *GetEventPtr()
@@ -223,7 +235,8 @@ private:
         catchQueue_;  // the queue of 'catch' callback which will be called when the Promise gets rejected
     ObjectPointer<EtsObject> linkedPromise_;  // linked JS promise as JSValue (if exists)
     EtsLong event_;
-    uint32_t padding0_;
+    EtsInt thenQueueSize_;
+    EtsInt catchQueueSize_;
     uint32_t state_;  // the Promise's state
 
     friend class test::EtsPromiseMembers;

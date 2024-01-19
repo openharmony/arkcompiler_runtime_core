@@ -69,7 +69,7 @@ export function main(): int {
         }
         return value
     });
-    Coroutine.Schedule();
+    await byteP;
     check("byteFunc");
 
     reset();
@@ -82,7 +82,7 @@ export function main(): int {
         }
         return value
     });
-    Coroutine.Schedule();
+    await charP;
     check("charFunc");
 
     reset();
@@ -95,7 +95,7 @@ export function main(): int {
         }
         return value
     });
-    Coroutine.Schedule();
+    await shortP;
     check("shortFunc");
 
     reset();
@@ -108,7 +108,7 @@ export function main(): int {
         }
         return value
     });
-    Coroutine.Schedule();
+    await intP;
     check("intFunc");
 
     reset();
@@ -122,7 +122,7 @@ export function main(): int {
         }
         return value
     });
-    Coroutine.Schedule();
+    await longP;
     check("longFunc");
 
     reset();
@@ -136,7 +136,7 @@ export function main(): int {
         }
         return value
     });
-    Coroutine.Schedule();
+    await floatP;
     check("floatFunc");
 
     reset();
@@ -149,7 +149,7 @@ export function main(): int {
         }
         return value
     });
-    Coroutine.Schedule();
+    await doubleP;
     check("doubleFunc");
     return 0;
 }
