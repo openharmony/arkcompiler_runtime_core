@@ -26,8 +26,13 @@ config("arkfile_public_config") {
     "//third_party/zlib/contrib/minizip",
   ]
 
+  defines = []
   if (is_ohos && !is_standard_system) {
-    defines = [ "ENABLE_FULL_FILE_FIELDS" ]
+    defines += [ "ENABLE_FULL_FILE_FIELDS" ]
+  }
+
+  if (use_libfuzzer) {
+    defines += [ "FUZZ_TEST" ]
   }
 }
 
