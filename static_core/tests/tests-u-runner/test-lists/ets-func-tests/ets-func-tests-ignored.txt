@@ -397,7 +397,15 @@ spec/generic/issue15099_9.ets
 spec/generic/issue15099_10.ets
 spec/generic/issue15099_11.ets
 spec/generic/issue15099_12.ets
-
+### Issue 15089
+spec/generic/issue15089_01.ets
+spec/generic/issue15089_02.ets
+spec/generic/issue15089_03.ets
+spec/generic/issue15089_04.ets
+spec/generic/issue15089_05.ets
+spec/generic/issue15089_06.ets
+spec/generic/issue15089_07.ets
+spec/generic/issue15089_08.ets
 ### End of Generic
 ### Import-export issues
 ### Issue 14586
