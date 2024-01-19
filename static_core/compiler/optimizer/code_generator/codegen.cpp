@@ -5187,7 +5187,9 @@ void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);      // index
     auto dst0 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(0), type);                 // first value
     auto dst1 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(1), type);                 // second value
-    int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch());
+    uint64_t index = inst->CastToLoadArrayPair()->GetImm();
+    int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
+                     (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     ScopedTmpReg tmp(enc->GetEncoder());
 
     int32_t scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
@@ -5234,7 +5236,9 @@ void EncodeVisitor::VisitStoreArrayPair(GraphVisitor *visitor, Inst *inst)
     auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), type);  // first value
     constexpr int32_t IMM_3 = 3;
     auto src3 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_3), type);  // second value
-    int32_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch());
+    uint64_t index = inst->CastToStoreArrayPair()->GetImm();
+    int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
+                     (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     int32_t scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
 
     auto tmp = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::REFERENCE);

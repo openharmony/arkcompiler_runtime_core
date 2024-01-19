@@ -362,10 +362,10 @@ TEST_F(MemoryCoalescingTest, UnalignedStores)
         {
             INST(4U, Opcode::AddI).s32().Inputs(1U).Imm(0x4U);
             INST(6U, Opcode::AddI).s32().Inputs(1U).Imm(0x5U);
-            INST(12U, Opcode::StoreArrayPair).s32().Inputs(0U, 4U, 2U, 3U);
+            INST(12U, Opcode::StoreArrayPair).s32().Inputs(0U, 1U, 2U, 3U).Imm(0x4U);
 
             INST(9U, Opcode::AddI).s32().Inputs(4U).Imm(0x1U);
-            INST(13U, Opcode::StoreArrayPair).s32().Inputs(0U, 4U, 3U, 2U);
+            INST(13U, Opcode::StoreArrayPair).s32().Inputs(0U, 1U, 3U, 2U).Imm(0x4U);
             INST(11U, Opcode::ReturnVoid).v0id();
         }
     }

@@ -622,7 +622,7 @@ private:
         if (first->CanThrow() || second->CanThrow()) {
             pload->SetFlag(compiler::inst_flags::CAN_THROW);
         }
-
+        MemoryCoalescing::RemoveAddI(pload);
         return pload;
     }
 
@@ -657,7 +657,7 @@ private:
         if (first->CanThrow() || second->CanThrow()) {
             pstore->SetFlag(compiler::inst_flags::CAN_THROW);
         }
-
+        MemoryCoalescing::RemoveAddI(pstore);
         return pstore;
     }
 
@@ -709,6 +709,22 @@ static void ReplaceLoadByPair(Inst *load, Inst *pairedLoad, int32_t dstIdx)
     pairedLoad->InsertAfter(pairGetter);
 }
 
+void MemoryCoalescing::RemoveAddI(Inst *inst)
+{
+    auto opcode = inst->GetOpcode();
+    ASSERT(opcode == Opcode::LoadArrayPair || opcode == Opcode::StoreArrayPair);
+    auto input1 = inst->GetInput(1).GetInst();
+    if (input1->GetOpcode() == Opcode::AddI) {
+        uint64_t imm = input1->CastToAddI()->GetImm();
+        if (opcode == Opcode::LoadArrayPair) {
+            inst->CastToLoadArrayPair()->SetImm(imm);
+        } else if (opcode == Opcode::StoreArrayPair) {
+            inst->CastToStoreArrayPair()->SetImm(imm);
+        }
+        inst->SetInput(1, input1->GetInput(0).GetInst());
+    }
+}
+
 /**
  * This optimization coalesces two loads (stores) that read (write) values from (to) the consecutive memory into
  * a single operation.
@@ -748,7 +764,7 @@ bool MemoryCoalescing::RunImpl()
         }
         bb->RemoveInst(pair.second.first);
         bb->RemoveInst(pair.second.second);
-    };
+    }
 
     if (!collector.GetPairs().empty()) {
         SaveStateBridgesBuilder ssb;

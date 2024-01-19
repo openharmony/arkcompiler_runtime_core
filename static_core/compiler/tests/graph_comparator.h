@@ -149,6 +149,8 @@ public:
         CHECK(LoadPairPart, GetImm)
         CHECK(StoreArrayI, GetImm)
         CHECK(StoreArrayPairI, GetImm)
+        CHECK(LoadArrayPair, GetImm)
+        CHECK(StoreArrayPair, GetImm)
         CHECK(BoundsCheckI, GetImm)
         CHECK(ReturnI, GetImm)
         CHECK(AddI, GetImm)

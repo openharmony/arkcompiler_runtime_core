@@ -946,6 +946,15 @@ bool LoadPairPartInst::DumpInputs(std::ostream *out) const
     return true;
 }
 
+bool LoadArrayPairInst::DumpInputs(std::ostream *out) const
+{
+    Inst::DumpInputs(out);
+    if (GetImm() > 0) {
+        (*out) << ", 0x" << std::hex << GetImm() << std::dec;
+    }
+    return true;
+}
+
 bool LoadArrayPairInstI::DumpInputs(std::ostream *out) const
 {
     Inst *arrInput = GetInput(0).GetInst();
@@ -954,6 +963,15 @@ bool LoadArrayPairInstI::DumpInputs(std::ostream *out) const
     (*out) << InstId(arrInput, allocator);
     PrintIfValidLocation(GetLocation(0), graph->GetArch(), out, true);
     (*out) << ", 0x" << std::hex << GetImm() << std::dec;
+    return true;
+}
+
+bool StoreArrayPairInst::DumpInputs(std::ostream *out) const
+{
+    Inst::DumpInputs(out);
+    if (GetImm() > 0) {
+        (*out) << ", 0x" << std::hex << GetImm() << std::dec;
+    }
     return true;
 }
 

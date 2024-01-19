@@ -536,6 +536,12 @@ public:
             case Opcode::DeoptimizeCompareImm:
                 inst->CastToDeoptimizeCompareImm()->SetImm(imm);
                 break;
+            case Opcode::LoadArrayPair:
+                inst->CastToLoadArrayPair()->SetImm(imm);
+                break;
+            case Opcode::StoreArrayPair:
+                inst->CastToStoreArrayPair()->SetImm(imm);
+                break;
             default:
                 UNREACHABLE();
         }
