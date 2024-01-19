@@ -1939,10 +1939,6 @@
 06.contexts_and_conversions/02.kinds_of_conversion/02.reference_types_conversions/ref_widening_42.ets
 # end of es2panda fails
 
-# es2panda fails: panda#14766 Cannot get toString() from array
-06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_8.ets
-# end of es2panda fails
-
 # es2panda fails: panda#14748 Aborts on array literal with function elements
 06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/identity_call.ets
 # end of es2panda fails
