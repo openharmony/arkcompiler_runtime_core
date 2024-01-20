@@ -59,7 +59,8 @@ public:
      * @param param param to pass to the EP
      */
     Coroutine *CreateNativeCoroutine(Runtime *runtime, PandaVM *vm,
-                                     Coroutine::NativeEntrypointInfo::NativeEntrypointFunc entry, void *param);
+                                     Coroutine::NativeEntrypointInfo::NativeEntrypointFunc entry, void *param,
+                                     PandaString name);
     /// destroy the "native" coroutine created earlier
     void DestroyNativeCoroutine(Coroutine *co);
 
@@ -67,6 +68,8 @@ public:
 
     /// called when a coroutine worker thread ends its execution
     void OnWorkerShutdown();
+    /// called when a coroutine worker thread starts its execution
+    void OnWorkerStartup();
 
     /* debugging tools */
     /**
@@ -140,7 +143,7 @@ private:
     PandaVector<StackfulCoroutineWorker *> workers_ GUARDED_BY(workersLock_);
     size_t activeWorkersCount_ GUARDED_BY(workersLock_) = 0;
     mutable os::memory::RecursiveMutex workersLock_;
-    mutable os::memory::ConditionVariable workersShutdownCv_;
+    mutable os::memory::ConditionVariable workersCv_;
 
     // events that control program completion
     mutable os::memory::Mutex programCompletionLock_;

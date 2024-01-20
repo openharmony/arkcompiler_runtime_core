@@ -107,6 +107,7 @@ public:
     bool InGCSweepRange(const ObjectHeader *object) const override;
 
     void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers) override;
+    void OnThreadCreate(ManagedThread *thread) override;
 
     void PreZygoteFork() override;
     void PostZygoteFork() override;
@@ -400,6 +401,21 @@ private:
     size_t CalculateDesiredEdenLengthByPauseDelay();
     size_t CalculateDesiredEdenLengthByPauseDuration();
 
+    template <bool ENABLE_BARRIER>
+    void UpdatePreWrbEntrypointInThreads();
+
+    void EnablePreWrbInThreads()
+    {
+        UpdatePreWrbEntrypointInThreads<true>();
+    }
+
+    void DisablePreWrbInThreads()
+    {
+        UpdatePreWrbEntrypointInThreads<false>();
+    }
+
+    void EnsurePreWrbDisabledInThreads();
+
     G1GCPauseMarker<LanguageConfig> marker_;
     G1GCConcurrentMarker<LanguageConfig> concMarker_;
     G1GCMixedMarker<LanguageConfig> mixedMarker_;
@@ -409,6 +425,8 @@ private:
     std::atomic<bool> interruptConcurrentFlag_ {false};
     /// Function called in the post WRB
     std::function<void(const void *, const void *)> postQueueFunc_ {nullptr};
+    /// Current pre WRB entrypoint: either nullptr or the real function
+    ObjRefProcessFunc currentPreWrbEntrypoint_ {nullptr};
     /**
      * After first process it stores humongous objects only, after marking them it's still store them for updating
      * pointers from Humongous

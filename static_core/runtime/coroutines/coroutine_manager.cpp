@@ -48,7 +48,8 @@ void CoroutineManager::DestroyMainCoroutine()
     DeleteCoroutineContext(context);
 }
 
-Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent)
+Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, PandaVM *vm, bool makeCurrent,
+                                                           PandaString name)
 {
     if (GetCoroutineCount() >= GetCoroutineCountLimit()) {
         // resource limit reached
@@ -59,7 +60,7 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
         // do not proceed if we cannot create a context for the new coroutine
         return nullptr;
     }
-    auto *co = coFactory_(runtime, vm, "_coro_", ctx, std::nullopt);
+    auto *co = coFactory_(runtime, vm, std::move(name), ctx, std::nullopt);
     ASSERT(co != nullptr);
     co->InitBuffers();
     if (makeCurrent) {

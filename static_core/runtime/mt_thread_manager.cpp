@@ -256,6 +256,20 @@ void MTThreadManager::ResumeAllThreads()
     });
 }
 
+void MTThreadManager::RegisterThread(MTManagedThread *thread)
+{
+    os::memory::LockHolder lock(threadLock_);
+    thread->GetVM()->GetGC()->OnThreadCreate(thread);
+    threadsCount_++;
+#ifndef NDEBUG
+    registeredThreadsCount_++;
+#endif  // NDEBUG
+    threads_.emplace_back(thread);
+    for (uint32_t i = suspendNewCount_; i > 0; i--) {
+        thread->SuspendImpl(true);
+    }
+}
+
 bool MTThreadManager::UnregisterExitedThread(MTManagedThread *thread)
 {
     ASSERT(MTManagedThread::GetCurrent() == thread);

@@ -22,6 +22,7 @@
 #include "runtime/mem/gc/dynamic/gc_marker_dynamic-inl.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
+#include "runtime/mem/gc/g1/g1-helpers.h"
 #include "runtime/mem/gc/g1/ref_cache_builder.h"
 #include "runtime/mem/gc/g1/update_remset_task_queue.h"
 #include "runtime/mem/gc/g1/update_remset_thread.h"
@@ -52,57 +53,6 @@ static bool IsCardTableClear(CardTable *cardTable)
     return clear;
 }
 #endif
-
-static inline GCG1BarrierSet *GetG1BarrierSet()
-{
-    Thread *thread = Thread::GetCurrent();
-    ASSERT(thread != nullptr);
-    GCBarrierSet *barrierSet = thread->GetBarrierSet();
-    ASSERT(barrierSet != nullptr);
-    return static_cast<GCG1BarrierSet *>(barrierSet);
-}
-
-extern "C" void PreWrbFuncEntrypoint(void *oldValue)
-{
-    // The cast below is needed to truncate high 32bits from 64bit pointer
-    // in case object pointers have 32bit.
-    oldValue = ToVoidPtr(ToObjPtr(oldValue));
-    ASSERT(IsAddressInObjectsHeap(oldValue));
-    ASSERT(IsAddressInObjectsHeap(static_cast<const ObjectHeader *>(oldValue)->ClassAddr<BaseClass>()));
-    LOG(DEBUG, GC) << "G1GC pre barrier val = " << std::hex << oldValue;
-    auto *thread = ManagedThread::GetCurrent();
-    // thread can't be null here because pre-barrier is called only in concurrent-mark, but we don't process
-    // weak-references in concurrent mark
-    ASSERT(thread != nullptr);
-    auto bufferVec = thread->GetPreBuff();
-    bufferVec->push_back(static_cast<ObjectHeader *>(oldValue));
-}
-
-// PostWrbUpdateCardFuncEntrypoint
-extern "C" void PostWrbUpdateCardFuncEntrypoint(const void *from, const void *to)
-{
-    ASSERT(from != nullptr);
-    ASSERT(to != nullptr);
-    // The cast below is needed to truncate high 32bits from 64bit pointer
-    // in case object pointers have 32bit.
-    from = ToVoidPtr(ToObjPtr(from));
-    GCG1BarrierSet *barriers = GetG1BarrierSet();
-    ASSERT(barriers != nullptr);
-    auto cardTable = barriers->GetCardTable();
-    ASSERT(cardTable != nullptr);
-    // No need to keep remsets for young->young
-    // NOTE(dtrubenkov): add assert that we do not have young -> young reference here
-    auto *card = cardTable->GetCardPtr(ToUintPtr(from));
-    LOG(DEBUG, GC) << "G1GC post queue add ref: " << std::hex << from << " -> " << ToVoidPtr(ToObjPtr(to))
-                   << " from_card: " << cardTable->GetMemoryRange(card);
-    // NOTE(dtrubenkov): remove !card->IsYoung() after it will be encoded in compiler barrier
-    if ((card->IsClear()) && (!card->IsYoung())) {
-        // NOTE(dtrubenkov): either encode this in compiler barrier or remove from Interpreter barrier (if move to
-        // INT/JIT parts then don't check IsClear here cause it will be marked already)
-        card->Mark();
-        barriers->Enqueue(card);
-    }
-}
 
 /* static */
 template <class LanguageConfig>
@@ -712,10 +662,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
             this->memStats_.Reset();
             if (NeedToRunGC(task)) {
                 // Check there is no concurrent mark running by another thread.
-                [[maybe_unused]] auto callback = [](ManagedThread *thread) {
-                    return thread->GetPreWrbEntrypoint() == nullptr;
-                };
-                ASSERT(this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback));
+                EnsurePreWrbDisabledInThreads();
 
                 if (NeedFullGC(task)) {
                     task.collectionType = GCCollectionType::FULL;
@@ -731,11 +678,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
                         // concurrent marking.
                         isMixed = isMixedGcRequired_.load(std::memory_order_acquire);
                     }
-                    if (isMixed) {
-                        task.collectionType = GCCollectionType::MIXED;
-                    } else {
-                        task.collectionType = GCCollectionType::YOUNG;
-                    }
+                    task.collectionType = isMixed ? GCCollectionType::MIXED : GCCollectionType::YOUNG;
                     auto collectibleRegions = GetCollectibleRegions(task, isMixed);
                     if (!collectibleRegions.empty() && HaveEnoughSpaceToMove(collectibleRegions)) {
                         // Ordinary collection flow
@@ -869,19 +812,41 @@ bool G1GC<LanguageConfig>::ScheduleMixedGCAndConcurrentMark(panda::GCTask &task)
 }
 
 template <class LanguageConfig>
+template <bool ENABLE_BARRIER>
+void G1GC<LanguageConfig>::UpdatePreWrbEntrypointInThreads()
+{
+    ObjRefProcessFunc entrypointFunc = nullptr;
+    if constexpr (ENABLE_BARRIER) {
+        auto addr = this->GetBarrierSet()->GetBarrierOperand(panda::mem::BarrierPosition::BARRIER_POSITION_PRE,
+                                                             "STORE_IN_BUFF_TO_MARK_FUNC");
+        entrypointFunc = std::get<ObjRefProcessFunc>(addr.GetValue());
+    }
+    auto setEntrypoint = [this, &entrypointFunc](ManagedThread *thread) {
+        void *entrypointFuncUntyped = reinterpret_cast<void *>(entrypointFunc);
+        ASSERT(thread->GetPreWrbEntrypoint() != entrypointFuncUntyped);
+        thread->SetPreWrbEntrypoint(entrypointFuncUntyped);
+
+        // currentPreWrbEntrypoint_ is not required to be set multiple times, but this has to be done under the
+        // EnumerateThreads()'s lock, hence the repetition
+        currentPreWrbEntrypoint_ = entrypointFunc;
+        return true;
+    };
+    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(setEntrypoint);
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::EnsurePreWrbDisabledInThreads()
+{
+    [[maybe_unused]] auto callback = [](ManagedThread *thread) { return thread->GetPreWrbEntrypoint() == nullptr; };
+    ASSERT(this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback));
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunConcurrentMark(panda::GCTask &task)
 {
     ASSERT(collectionSet_.empty());
     // Init concurrent marking
-    auto addr = this->GetBarrierSet()->GetBarrierOperand(panda::mem::BarrierPosition::BARRIER_POSITION_PRE,
-                                                         "STORE_IN_BUFF_TO_MARK_FUNC");
-    auto preWrbEntrypoint = std::get<void (*)(void *)>(addr.GetValue());
-    auto callback = [&preWrbEntrypoint](ManagedThread *thread) {
-        ASSERT(thread->GetPreWrbEntrypoint() == nullptr);
-        thread->SetPreWrbEntrypoint(reinterpret_cast<void *>(preWrbEntrypoint));
-        return true;
-    };
-    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(callback);
+    EnablePreWrbInThreads();
 
     if (this->GetSettings()->BeforeG1ConcurrentHeapVerification()) {
         trace::ScopedTrace postHeapVerifierTrace("PostGCHeapVeriFier before concurrent");
@@ -1449,12 +1414,8 @@ void G1GC<LanguageConfig>::ConcurrentMarking(panda::GCTask &task)
     // weak refs shouldn't be added to the queue on concurrent-mark
     ASSERT(this->GetReferenceProcessor()->GetReferenceQueueSize() == 0);
 
-    auto setEntrypoint = [](ManagedThread *thread) {
-        ASSERT(thread->GetPreWrbEntrypoint() != nullptr);
-        thread->SetPreWrbEntrypoint(nullptr);
-        return true;
-    };
-    this->GetPandaVm()->GetThreadManager()->EnumerateThreads(setEntrypoint);
+    DisablePreWrbInThreads();
+
     concurrentMarkingFlag_ = false;
     if (!interruptConcurrentFlag_) {
         Remark(task);
@@ -1812,6 +1773,14 @@ void G1GC<LanguageConfig>::OnThreadTerminate(ManagedThread *thread, mem::Buffers
             allocator->Delete(localBuffer);
         }
     }
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::OnThreadCreate(ManagedThread *thread)
+{
+    // Any access to other threads' data (including MAIN's) might cause a race here
+    // so don't do this please.
+    thread->SetPreWrbEntrypoint(reinterpret_cast<void *>(currentPreWrbEntrypoint_));
 }
 
 template <class LanguageConfig>

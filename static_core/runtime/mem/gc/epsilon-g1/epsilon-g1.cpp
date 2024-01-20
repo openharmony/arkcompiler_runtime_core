@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
+#include "runtime/mem/gc/g1/g1-helpers.h"
 #include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
-
-extern "C" void PreWrbFuncEntrypoint(void *);
 
 namespace panda::mem {
 template <class LanguageConfig>

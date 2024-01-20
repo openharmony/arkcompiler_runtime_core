@@ -22,16 +22,20 @@ namespace panda {
 
 StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager,
                                                  ScheduleLoopType type, PandaString name)
-    : coroManager_(coroManager), id_(os::thread::GetCurrentThreadId()), name_(std::move(name))
+    : runtime_(runtime),
+      vm_(vm),
+      coroManager_(coroManager),
+      id_(os::thread::GetCurrentThreadId()),
+      name_(std::move(name))
 {
     if (type == ScheduleLoopType::THREAD) {
-        scheduleLoopCtx_ =
-            coroManager->CreateEntrypointlessCoroutine(runtime, vm, false);  // false value is make_current
         std::thread t(&StackfulCoroutineWorker::ThreadProc, this);
         os::thread::SetThreadName(t.native_handle(), name_.c_str());
         t.detach();
+        // will create the schedule loop coroutine in the thread proc in order to set the stack protector correctly
     } else {
-        scheduleLoopCtx_ = coroManager->CreateNativeCoroutine(runtime, vm, ScheduleLoopProxy, this);
+        scheduleLoopCtx_ =
+            coroManager->CreateNativeCoroutine(runtime, vm, ScheduleLoopProxy, this, "[fiber_sch] " + GetName());
         PushToRunnableQueue(scheduleLoopCtx_);
     }
 }
@@ -145,13 +149,16 @@ void StackfulCoroutineWorker::PrintRunnables(const PandaString &requester)
 void StackfulCoroutineWorker::ThreadProc()
 {
     id_ = os::thread::GetCurrentThreadId();
+    scheduleLoopCtx_ = coroManager_->CreateEntrypointlessCoroutine(runtime_, vm_, false, "[thr_sch] " + GetName());
     scheduleLoopCtx_->GetContext<StackfulCoroutineContext>()->SetWorker(this);
     Coroutine::SetCurrent(scheduleLoopCtx_);
     scheduleLoopCtx_->RequestResume();
     scheduleLoopCtx_->NativeCodeBegin();
-    ScheduleLoopBody();
-    coroManager_->DestroyEntrypointlessCoroutine(scheduleLoopCtx_);
+    coroManager_->OnWorkerStartup();
 
+    ScheduleLoopBody();
+
+    coroManager_->DestroyEntrypointlessCoroutine(scheduleLoopCtx_);
     ASSERT(id_ == os::thread::GetCurrentThreadId());
     coroManager_->OnWorkerShutdown();
 }
