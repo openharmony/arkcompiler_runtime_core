@@ -17,6 +17,7 @@
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.h"
 #include "libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.h"
+#include "libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.h"
 
 namespace panda::taskmanager {
 
@@ -31,6 +32,9 @@ TaskScheduler::TaskScheduler(size_t workersCount, TaskStatisticsImplType taskSta
             break;
         case TaskStatisticsImplType::SIMPLE:
             taskStatistics_ = new SimpleTaskStatisticsImpl();
+            break;
+        case TaskStatisticsImplType::LOCK_FREE:
+            taskStatistics_ = new LockFreeTaskStatisticsImpl();
             break;
         default:
             UNREACHABLE();
