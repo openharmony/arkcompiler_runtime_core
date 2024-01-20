@@ -429,6 +429,11 @@ set(ETS_FUNC_TESTS_GROUPS
    "regression-dir"
 )
 
+set(TIMEOUT 60)
+if(PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER)
+    set(TIMEOUT 120)
+endif()
+
 # TODO(nsizov): remove this if when runner will be able to resole host tools
 if(NOT CMAKE_CROSSCOMPILING)
     set(ETS_FUNC_TESTS_DEPENDENCIES ark ark_aot es2panda verifier)
@@ -442,7 +447,8 @@ if(NOT CMAKE_CROSSCOMPILING)
                                                 --processes=1
                                                 --build-dir ${CMAKE_BINARY_DIR}
                                                 --chapter ${CURRENT_GROUP}
-                                                --timeout=60
+                                                --es2panda-timeout=${TIMEOUT}
+                                                --timeout=${TIMEOUT}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
         add_dependencies(ets-func-tests-run-int-${CURRENT_GROUP} ${ETS_FUNC_TESTS_DEPENDENCIES})
         add_dependencies(ets-func-tests-run-int ets-func-tests-run-int-${CURRENT_GROUP})
@@ -458,7 +464,8 @@ if(NOT CMAKE_CROSSCOMPILING)
                                                 --ark-args='--compiler-ignore-failures=false'
                                                 --build-dir ${CMAKE_BINARY_DIR}
                                                 --chapter ${CURRENT_GROUP}
-                                                --timeout=60
+                                                --es2panda-timeout=${TIMEOUT}
+                                                --timeout=${TIMEOUT}
                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
         add_dependencies(ets-func-tests-run-jit-${CURRENT_GROUP} ${ETS_FUNC_TESTS_DEPENDENCIES})
         add_dependencies(ets-func-tests-run-jit ets-func-tests-run-jit-${CURRENT_GROUP})
