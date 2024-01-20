@@ -154,12 +154,58 @@ public:
         return reinterpret_cast<EtsObjectArray *>(objectHeader);
     }
 
+    void CopyDataTo(EtsObjectArray *dst)
+    {
+        ASSERT(dst != nullptr);
+        ASSERT(GetLength() <= dst->GetLength());
+
+        if (std::size_t count = GetLength() * OBJECT_POINTER_SIZE) {
+            Span<uint8_t> srcSpan(GetData<uint8_t>(), count);
+            Span<uint8_t> dstSpan(dst->GetData<uint8_t>(), count);
+            CopyData(srcSpan, dstSpan);
+            // Call barriers.
+            // PreBarrier isn't needed as links inside the source object arn't changed.
+            auto *barrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
+            if (!mem::IsEmptyBarrier(barrierSet->GetPostType())) {
+                barrierSet->PostBarrier(dst, 0, dst->ObjectSize());
+            }
+        }
+    }
+
     EtsObjectArray() = delete;
     ~EtsObjectArray() = delete;
 
 private:
     NO_COPY_SEMANTIC(EtsObjectArray);
     NO_MOVE_SEMANTIC(EtsObjectArray);
+
+    using WordType = uintptr_t;
+    using AtomicWord = std::atomic<WordType>;
+    using AtomicRef = std::atomic<panda::ObjectPointerType>;
+
+    static constexpr const std::size_t WORD_SIZE = sizeof(WordType);
+
+    void CopyData(Span<uint8_t> &src, Span<uint8_t> &dst)
+    {
+        ASSERT((src.Size() % OBJECT_POINTER_SIZE) == 0);
+        ASSERT(src.Size() <= dst.Size());
+
+        // WORDs and REFERENCEs must be loaded/stored atomically
+        constexpr const std::memory_order ORDER = std::memory_order_relaxed;
+        // 1. copy by words if any
+        std::size_t i = 0;
+        std::size_t stop = (src.Size() / WORD_SIZE) * WORD_SIZE;
+        for (; i < stop; i += WORD_SIZE) {
+            // Atomic with parameterized order reason: memory order defined as constexpr
+            reinterpret_cast<AtomicWord *>(&dst[i])->store(reinterpret_cast<AtomicWord *>(&src[i])->load(ORDER), ORDER);
+        }
+        // 2. copy by references if any
+        stop = ((src.Size() - i) / OBJECT_POINTER_SIZE) * OBJECT_POINTER_SIZE;
+        for (; i < stop; i += OBJECT_POINTER_SIZE) {
+            // Atomic with parameterized order reason: memory order defined as constexpr
+            reinterpret_cast<AtomicRef *>(&dst[i])->store(reinterpret_cast<AtomicRef *>(&src[i])->load(ORDER), ORDER);
+        }
+    }
 };
 
 template <class ClassType, EtsClassRoot ETS_CLASS_ROOT>

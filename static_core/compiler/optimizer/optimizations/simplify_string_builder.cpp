@@ -70,17 +70,18 @@ bool SimplifyStringBuilder::IsMethodStringBuilderConstructorWithStringArg(Inst *
 
 bool SimplifyStringBuilder::IsMethodStringBuilderToString(Inst *inst)
 {
-    if (inst->GetOpcode() != Opcode::CallVirtual) {
-        return false;
+    if (inst->GetOpcode() == Opcode::CallVirtual) {
+        auto call = inst->CastToCallVirtual();
+        if (call->IsInlined()) {
+            return false;
+        }
+        return GetGraph()->GetRuntime()->IsMethodStringBuilderToString(call->GetCallMethod());
     }
-
-    auto call = inst->CastToCallVirtual();
-    if (call->IsInlined()) {
-        return false;
+    if (inst->IsIntrinsic()) {
+        auto intrinsic = inst->CastToIntrinsic();
+        return GetGraph()->GetRuntime()->IsIntrinsicStringBuilderToString(intrinsic->GetIntrinsicId());
     }
-
-    auto runtime = GetGraph()->GetRuntime();
-    return runtime->IsMethodStringBuilderToString(call->GetCallMethod());
+    return false;
 }
 
 InstIter SimplifyStringBuilder::SkipToStringBuilderConstructor(InstIter begin, InstIter end)

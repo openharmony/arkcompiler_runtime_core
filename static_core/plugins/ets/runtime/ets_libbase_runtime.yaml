@@ -794,6 +794,17 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
+  - name: StdCoreStringIsCompressed
+    space: ets
+    class_name: std.core.String
+    method_name: isCompressed
+    static: false
+    signature:
+        ret: u1
+        args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringIsCompressed
+    clear_flags: [ ]
+
 ##########################
 # std.core.StringBuilder #
 ##########################
@@ -883,7 +894,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [i64]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderLong
+    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendLong
 
   - name: StdCoreSbAppendInt
     space: ets
@@ -894,7 +905,29 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [i32]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderInt
+    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendInt
+
+  - name: StdCoreSbAppendByte
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    set_flags: [heap_inv, can_throw]
+    signature:
+      ret: std.core.StringBuilder
+      args: [i8]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendByte
+
+  - name: StdCoreSbAppendShort
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    set_flags: [heap_inv, can_throw]
+    signature:
+      ret: std.core.StringBuilder
+      args: [i16]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendShort
 
   - name: StdCoreSbAppendChar
     space: ets
@@ -905,9 +938,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [u16]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderChar
-    codegen_func: CreateStringBuilderChar
-    codegen_arch: [arm64, amd64]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendChar
 
   - name: StdCoreSbAppendBool
     space: ets
@@ -918,9 +949,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [u1]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderBool
-    codegen_func: CreateStringBuilderBool
-    codegen_arch: [arm64, amd64]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendBool
 
   - name: StdCoreSbAppendString
     space: ets
@@ -931,9 +960,19 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [std.core.String]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderString
-    codegen_func: CreateStringBuilderString
-    codegen_arch: [arm64, amd64]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendString
+
+  - name: StdCoreSbToString
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: toString
+    static: false
+    set_flags: [heap_inv, can_throw]
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringBuilderToString
+    clear_flags: [ ]
 
 #################
 # escompat.Date #

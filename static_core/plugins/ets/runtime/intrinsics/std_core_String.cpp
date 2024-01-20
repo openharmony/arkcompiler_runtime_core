@@ -388,4 +388,10 @@ int32_t StdCoreStringHashCode(EtsString *thisStr)
     return thisStr->GetCoreType()->GetHashcode();
 }
 
+EtsBoolean StdCoreStringIsCompressed(EtsString *thisStr)
+{
+    ASSERT(thisStr != nullptr);
+    return ToEtsBoolean(thisStr->GetCoreType()->IsMUtf8());
+}
+
 }  // namespace panda::ets::intrinsics

@@ -57,6 +57,7 @@ void ThrowNullPointerException()
 void ThrowNullPointerException(const LanguageContext &ctx, ManagedThread *thread)
 {
     ThrowException(ctx, thread, ctx.GetNullPointerExceptionClassDescriptor(), nullptr);
+    SetExceptionEvent(events::ExceptionType::NULL_CHECK, thread);
 }
 
 void ThrowStackOverflowException(ManagedThread *thread)
@@ -80,6 +81,7 @@ void ThrowArrayIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::
 
     ThrowException(ctx, thread, ctx.GetArrayIndexOutOfBoundsExceptionClassDescriptor(),
                    utf::CStringAsMutf8(msg.c_str()));
+    SetExceptionEvent(events::ExceptionType::BOUND_CHECK, thread);
 }
 
 void ThrowIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::ArraySsizeT length)
@@ -110,6 +112,7 @@ void ThrowStringIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes:
 
     ThrowException(ctx, thread, ctx.GetStringIndexOutOfBoundsExceptionClassDescriptor(),
                    utf::CStringAsMutf8(msg.c_str()));
+    SetExceptionEvent(events::ExceptionType::BOUND_CHECK, thread);
 }
 
 void ThrowNegativeArraySizeException(coretypes::ArraySsizeT size)
@@ -128,6 +131,7 @@ void ThrowNegativeArraySizeException(const PandaString &msg)
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
     ThrowException(ctx, thread, ctx.GetNegativeArraySizeExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
+    SetExceptionEvent(events::ExceptionType::NEGATIVE_SIZE, thread);
 }
 
 void ThrowArithmeticException()
@@ -135,6 +139,7 @@ void ThrowArithmeticException()
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
     ThrowException(ctx, thread, ctx.GetArithmeticExceptionClassDescriptor(), utf::CStringAsMutf8("/ by zero"));
+    SetExceptionEvent(events::ExceptionType::ARITHMETIC, thread);
 }
 
 void ThrowClassCastException(const Class *dstType, const Class *srcType)
@@ -146,6 +151,7 @@ void ThrowClassCastException(const Class *dstType, const Class *srcType)
     msg = srcType->GetName() + " cannot be cast to " + dstType->GetName();
 
     ThrowException(ctx, thread, ctx.GetClassCastExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
+    SetExceptionEvent(events::ExceptionType::CAST_CHECK, thread);
 }
 
 void ThrowAbstractMethodError(const Method *method)
@@ -159,6 +165,7 @@ void ThrowAbstractMethodError(const Method *method)
     msg += "\"";
 
     ThrowException(ctx, thread, ctx.GetAbstractMethodErrorClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
+    SetExceptionEvent(events::ExceptionType::ABSTRACT_METHOD, thread);
 }
 
 void ThrowIncompatibleClassChangeErrorForMethodConflict(const Method *method)
@@ -172,6 +179,7 @@ void ThrowIncompatibleClassChangeErrorForMethodConflict(const Method *method)
     msg += "\"";
 
     ThrowException(ctx, thread, ctx.GetIncompatibleClassChangeErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
+    SetExceptionEvent(events::ExceptionType::ICCE_METHOD_CONFLICT, thread);
 }
 
 void ThrowArrayStoreException(const Class *arrayClass, const Class *elementClass)
@@ -361,6 +369,7 @@ void ThrowOutOfMemoryError(ManagedThread *thread, const PandaString &msg)
     thread->SetThrowingOOM(true);
     ThrowException(ctx, thread, ctx.GetOutOfMemoryErrorClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
     thread->SetThrowingOOM(false);
+    SetExceptionEvent(events::ExceptionType::NATIVE, thread);
 }
 
 void ThrowOutOfMemoryError(const PandaString &msg)
@@ -397,6 +406,7 @@ void ThrowInstantiationError(const PandaString &msg)
     auto ctx = GetLanguageContext(thread);
 
     ThrowException(ctx, thread, ctx.GetInstantiationErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
+    SetExceptionEvent(events::ExceptionType::INSTANTIATION_ERROR, thread);
 }
 
 void ThrowNoClassDefFoundError(const PandaString &msg)

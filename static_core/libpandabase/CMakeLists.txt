@@ -38,6 +38,7 @@ set(SOURCES
     ${PANDA_ROOT}/libpandabase/utils/logger.cpp
     ${PANDA_ROOT}/libpandabase/utils/dfx.cpp
     ${PANDA_ROOT}/libpandabase/utils/terminate.cpp
+    ${PANDA_ROOT}/libpandabase/utils/utils.cpp
     ${PANDA_ROOT}/libpandabase/trace/trace.cpp
     ${PANDA_ROOT}/libpandabase/os/filesystem.cpp
     ${PANDA_ROOT}/libpandabase/os/native_stack.cpp
@@ -91,6 +92,7 @@ set(WINDOWS_SOURCES
     ${PANDA_ROOT}/libpandabase/utils/dfx.cpp
     ${PANDA_ROOT}/libpandabase/utils/time.cpp
     ${PANDA_ROOT}/libpandabase/utils/utf.cpp
+    ${PANDA_ROOT}/libpandabase/utils/utils.cpp
     ${PANDA_ROOT}/libpandabase/utils/json_builder.cpp
     ${PANDA_ROOT}/libpandabase/utils/json_parser.cpp
     ${PANDA_ROOT}/libpandabase/utils/type_converter.cpp

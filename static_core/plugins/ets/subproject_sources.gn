@@ -114,6 +114,7 @@ srcs_runtime = [
   "runtime/types/ets_promise.cpp",
   "runtime/types/ets_shared_memory.cpp",
   "runtime/types/ets_object.cpp",
+  "runtime/types/ets_string_builder.cpp",
   "runtime/types/ets_typeapi_parameter.cpp",
   "runtime/types/ets_typeapi_method.cpp",
   "runtime/types/ets_typeapi_field.cpp",

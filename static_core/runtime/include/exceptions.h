@@ -101,6 +101,14 @@ void ThrowCloneNotSupportedException();
 
 void HandlePendingException(UnwindPolicy policy = UnwindPolicy::ALL);
 
+inline void SetExceptionEvent([[maybe_unused]] events::ExceptionType type, [[maybe_unused]] ManagedThread *thread)
+{
+#ifdef PANDA_EVENTS_ENABLED
+    auto stack = StackWalker::Create(thread);
+    EVENT_EXCEPTION(std::string(stack.GetMethod()->GetFullName()), stack.GetBytecodePc(), stack.GetNativePc(), type);
+#endif
+}
+
 }  // namespace panda
 
 #endif  // PANDA_RUNTIME_EXCEPTIONS_H_

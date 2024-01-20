@@ -1114,6 +1114,11 @@ public:
         return 0;
     }
 
+    virtual bool IsIntrinsicStringBuilderToString([[maybe_unused]] IntrinsicId id) const
+    {
+        return false;
+    }
+
     uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
     {
         return cross_values::GetManagedThreadEntrypointOffset(arch, panda::EntrypointId(static_cast<uint8_t>(id)));

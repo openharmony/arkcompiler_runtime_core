@@ -306,6 +306,12 @@ public:
 
     static bool CanBeCompressedMUtf8(const uint8_t *mutf8Data);
 
+    static bool IsASCIICharacter(uint16_t data)
+    {
+        // \0 is not considered ASCII in Modified-UTF8
+        return data - 1U < utf::UTF8_1B_MAX;
+    }
+
 protected:
     void SetLength(uint32_t length, bool compressed = false)
     {
@@ -326,6 +332,8 @@ protected:
     uint32_t ComputeHashcode();
     static bool CanBeCompressed(const uint16_t *utf16Data, uint32_t utf16Length);
     static void CopyUtf16AsMUtf8(const uint16_t *utf16From, uint8_t *mutf8To, uint32_t utf16Length);
+    static String *AllocStringObject(size_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm = nullptr,
+                                     bool movable = true);
 
 private:
     PANDA_PUBLIC_API static bool compressedStringsEnabled_;
@@ -334,12 +342,6 @@ private:
         STRING_COMPRESSED,
         STRING_UNCOMPRESSED,
     };
-
-    static bool IsASCIICharacter(uint16_t data)
-    {
-        // \0 is not considered ASCII in Modified-UTF8
-        return data - 1U < utf::UTF8_1B_MAX;
-    }
 
     static bool CanBeCompressedMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length);
     static bool CanBeCompressedUtf16(const uint16_t *utf16Data, uint32_t utf16Length, uint16_t non);
@@ -358,9 +360,6 @@ private:
     template <typename T>
     /// Check that two spans are equal. Should have the same length.
     static bool StringsAreEquals(Span<const T> &str1, Span<const T> &str2);
-
-    static String *AllocStringObject(size_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm = nullptr,
-                                     bool movable = true);
 
     // In last bit of length_ we store if this string is compressed or not.
     uint32_t length_;

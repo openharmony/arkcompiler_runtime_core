@@ -15,9 +15,12 @@
 
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
+#include "runtime/include/class.h"
 #include "runtime/include/exceptions.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_string_builder.h"
+#include "plugins/ets/runtime/types/ets_array.h"
 #include "libpandabase/utils/utf.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -68,29 +71,44 @@ EtsString *StdCoreToStringLong(EtsLong i)
     return EtsString::CreateFromMUtf8(s.c_str());
 }
 
-ObjectHeader *StdCoreStringBuilderBool(ObjectHeader *sb, EtsBoolean v)
+ObjectHeader *StdCoreStringBuilderAppendString(ObjectHeader *sb, EtsString *str)
 {
-    return CoreStringBuilderBool(sb, v);
+    return StringBuilderAppendString(sb, str);
 }
 
-ObjectHeader *StdCoreStringBuilderChar(ObjectHeader *sb, EtsChar c)
+ObjectHeader *StdCoreStringBuilderAppendBool(ObjectHeader *sb, EtsBoolean v)
 {
-    return CoreStringBuilderChar(sb, c);
+    return StringBuilderAppendBool(sb, v);
 }
 
-ObjectHeader *StdCoreStringBuilderInt(ObjectHeader *sb, int32_t n)
+ObjectHeader *StdCoreStringBuilderAppendChar(ObjectHeader *sb, EtsChar v)
 {
-    return CoreStringBuilderInt(sb, n);
+    return StringBuilderAppendChar(sb, v);
 }
 
-ObjectHeader *StdCoreStringBuilderLong(ObjectHeader *sb, int64_t n)
+ObjectHeader *StdCoreStringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
 {
-    return CoreStringBuilderLong(sb, n);
+    return StringBuilderAppendLong(sb, v);
 }
 
-ObjectHeader *StdCoreStringBuilderString(ObjectHeader *sb, EtsString *s)
+ObjectHeader *StdCoreStringBuilderAppendByte(ObjectHeader *sb, EtsByte v)
 {
-    return CoreStringBuilderString(sb, s);
+    return StringBuilderAppendLong(sb, static_cast<EtsLong>(v));
+}
+
+ObjectHeader *StdCoreStringBuilderAppendShort(ObjectHeader *sb, EtsShort v)
+{
+    return StringBuilderAppendLong(sb, static_cast<EtsLong>(v));
+}
+
+ObjectHeader *StdCoreStringBuilderAppendInt(ObjectHeader *sb, EtsInt v)
+{
+    return StringBuilderAppendLong(sb, static_cast<EtsLong>(v));
+}
+
+EtsString *StdCoreStringBuilderToString(ObjectHeader *sb)
+{
+    return StringBuilderToString(sb);
 }
 
 }  // namespace panda::ets::intrinsics

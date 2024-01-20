@@ -39,6 +39,7 @@ public:
     uint64_t GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const override;
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
     bool IsMethodStringBuilderToString(MethodPtr method) const override;
+    bool IsIntrinsicStringBuilderToString(IntrinsicId id) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;

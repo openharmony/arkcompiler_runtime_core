@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,26 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function foo(n: int): int { return (n * 17 + 7) % 141;}
-function main(): int {
-    let c: char[] = new char[10000];
-    let sb: StringBuilder = new StringBuilder();
-    for (let i = 0; i < 10000000; ++i) {
-        let n: int = foo(i);
-        try {
-            let s: String = new String(c);
-            sb.append(s);
-            n += 100;
-        } catch (e: OutOfMemoryError) {
-            if (n != foo(i)) {
-                return 3;
-            }
-            // Expected exception caught
-            return 0;
-        } catch (e) {
-            // Unexpected exception caught
-            return 1;
+
+#include <cstdint>
+#include "libpandabase/utils/utils.h"
+
+namespace panda {
+
+uint32_t CountDigits(uint64_t v)
+{
+    constexpr uint64_t POW10_1 = 10ULL;
+    constexpr uint64_t POW10_2 = 100ULL;
+    constexpr uint64_t POW10_3 = 1000ULL;
+    constexpr uint64_t POW10_4 = 10000ULL;
+    uint32_t count = 1U;
+    while (v >= POW10_1) {
+        if (v < POW10_2) {
+            return count + 1U;
         }
+        if (v < POW10_3) {
+            return count + 2U;
+        }
+        if (v < POW10_4) {
+            return count + 3U;
+        }
+        count += 4U;
+        v /= POW10_4;
     }
-    return 2;
+    return count;
 }
+
+}  // namespace panda

@@ -321,6 +321,18 @@ public:
 
     NO_COPY_SEMANTIC(EtsString);
     NO_MOVE_SEMANTIC(EtsString);
+
+private:
+    friend EtsString *StringBuilderToString(ObjectHeader *sb);
+
+    static EtsString *AllocateNonInitializedString(uint32_t length, bool compressed)
+    {
+        ASSERT(length != 0);
+        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        return reinterpret_cast<EtsString *>(
+            coretypes::String::AllocStringObject(length, compressed, ctx, Runtime::GetCurrent()->GetPandaVM()));
+    }
 };
 
 }  // namespace panda::ets
