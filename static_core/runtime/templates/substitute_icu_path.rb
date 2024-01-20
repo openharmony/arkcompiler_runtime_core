@@ -20,6 +20,6 @@ template = File.read(File.expand_path(ARGV[0]))
 output = File.open(File.expand_path(ARGV[1]), 'w')
 PANDA_THIRD_PARTY_SOURCES_DIR = ARGV[2]
 
-t = ERB.new(template, 0, "%<>")
+t = ERB.new(template)
 output.write(t.result)
 output.close

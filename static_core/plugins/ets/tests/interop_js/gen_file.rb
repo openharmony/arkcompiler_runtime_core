@@ -19,6 +19,6 @@ template = File.read(File.expand_path(ARGV[0]))
 output = File.open(@gen_path, 'w')
 ARGV[2].split(',').each { |r| require File.expand_path(r) } if ARGV.length > 2
 
-t = ERB.new(template, 0, "%<>")
+t = ERB.new(template, trim_mode: '%<>')
 output.write(t.result)
 output.close

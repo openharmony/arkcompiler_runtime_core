@@ -52,12 +52,25 @@ def check_option(optparser, options, key)
   exit false
 end
 
-def check_version
+def major_minor_version
   major, minor, = RUBY_VERSION.split('.').map(&:to_i)
-  major > 2 || (major == 2 && minor >= 5)
+  [major, minor]
 end
 
-raise "Update your ruby version, #{RUBY_VERSION} is not supported" unless check_version
+def check_version(min_major, min_minor)
+  major, minor = major_minor_version
+  major > min_major || (major == min_major && minor >= min_minor)
+end
+
+def erb_new(str, trim_mode: nil)
+  if check_version(2, 6)
+    ERB.new(str, trim_mode: trim_mode)
+  else
+    ERB.new(str, nil, trim_mode)
+  end
+end
+
+raise "Update your ruby version, #{RUBY_VERSION} is not supported" unless check_version(2, 5)
 
 options = OpenStruct.new
 
@@ -92,7 +105,7 @@ end
 check_option(optparser, options, :template)
 template = File.read(File.expand_path(options.template))
 output = options.output ? File.open(File.expand_path(options.output), 'w') : $stdout
-t = ERB.new(template, nil, '%-')
+t = erb_new(template, trim_mode: '%-')
 t.filename = options.template
 output.write(t.result(create_sandbox))
 output.close

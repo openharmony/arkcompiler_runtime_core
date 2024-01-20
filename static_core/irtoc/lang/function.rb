@@ -326,7 +326,7 @@ class Function
         inst = create_instruction(name, inputs)
         inst.annotation = Kernel.send(:caller)[0].split(':in')[0]
         caller_data = caller_locations[0]
-        file_path = File.expand_path(caller_data.absolute_path)
+        file_path = File.expand_path(caller_data.path)
         inst.debug_info.dir = add_source_dir(File.dirname(file_path))
         inst.debug_info.file = add_source_file(File.basename(file_path))
         inst.debug_info.line = caller_data.lineno
@@ -339,7 +339,7 @@ class Function
   def Intrinsic(name, *inputs)
     inst = create_instruction(:Intrinsic, inputs).IntrinsicId("RuntimeInterface::IntrinsicId::INTRINSIC_#{name}")
     caller_data = caller_locations[0]
-    file_path = File.expand_path(caller_data.absolute_path)
+    file_path = File.expand_path(caller_data.path)
     inst.debug_info.dir = add_source_dir(File.dirname(file_path))
     inst.debug_info.file = add_source_file(File.basename(file_path))
     inst.debug_info.line = caller_data.lineno

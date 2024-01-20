@@ -133,7 +133,7 @@ end
 def template(name, inst, indent, context = {})
   @inst_yaml ||= YAML.load_file(File.join(File.dirname(__FILE__), 'inst_templates.yaml'))
   raise "Template '#{name}' not found in templates file" unless @inst_yaml['templates'].key? name
-  indent + ERB.new(@inst_yaml['templates'][name], nil, '%-').result(binding).gsub("\n", "\n#{indent}")
+  indent + erb_new(@inst_yaml['templates'][name], trim_mode: '%-').result(binding).gsub("\n", "\n#{indent}")
 end
 
 def get_cc(inst)
