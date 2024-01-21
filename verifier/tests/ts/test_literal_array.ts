@@ -20,8 +20,8 @@ class ClassB {
     this.bProperty = bProp;
   }
 
-  bMethod() {
-    console.log('Method from ClassB');
+  bMethod(): void {
+    console.log('你好: Method from ClassB');
   }
 }
 
@@ -32,7 +32,7 @@ class ClassA {
     this.classBInstance = new ClassB('Some value for ClassB');
   }
 
-  aMethod() {
+  aMethod(): void {
     console.log('Method from ClassA');
     this.classBInstance.bMethod();
   }

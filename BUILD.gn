@@ -66,6 +66,7 @@ group("ark_host_windows_tools_packages") {
     deps += [
       "$ark_root/assembler:ark_asm($build_root/toolchain/mingw:mingw_x86_64)",
       "$ark_root/disassembler:ark_disasm($build_root/toolchain/mingw:mingw_x86_64)",
+      "$ark_root/verifier:ark_verifier($build_root/toolchain/mingw:mingw_x86_64)",
     ]
   }
 
@@ -84,6 +85,7 @@ group("ark_host_mac_tools_packages") {
         "$ark_root/libpandabase:libarkbase($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/libpandafile:libarkfile($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/libziparchive:libarkziparchive($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/verifier:ark_verifier($build_root/toolchain/mac:clang_arm64)",
       ]
     } else {
       deps += [
@@ -92,6 +94,7 @@ group("ark_host_mac_tools_packages") {
         "$ark_root/libpandabase:libarkbase($build_root/toolchain/mac:clang_x64)",
         "$ark_root/libpandafile:libarkfile($build_root/toolchain/mac:clang_x64)",
         "$ark_root/libziparchive:libarkziparchive($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/verifier:ark_verifier($build_root/toolchain/mac:clang_x64)",
       ]
     }
   }
