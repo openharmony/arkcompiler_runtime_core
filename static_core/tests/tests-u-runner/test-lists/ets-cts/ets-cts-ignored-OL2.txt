@@ -1,0 +1,3 @@
+# 15521  Incorrect test result with --opt-level=2
+17.experimental_features/05.statements/03.assert_statement/assert_8.ets
+17.experimental_features/05.statements/03.assert_statement/assert_9.ets

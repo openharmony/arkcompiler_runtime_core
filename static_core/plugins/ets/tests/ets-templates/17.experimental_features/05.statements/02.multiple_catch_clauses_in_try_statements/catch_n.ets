@@ -13,32 +13,18 @@
  * limitations under the License.
  */
 
+{% for t in cases %}
 /*---
 desc: >-
-    A catch clause consists of two parts:
-    - Catch identifier that provides access to the object associated with the error thrown; and
-    - Block of code that handles the situation.
+  A compile-time error occurs if:
+    - the default catch clause is not the last catch clause in a try statement.
+    - An exception parameter (if any) type reference is not the class Exception or a class derived from Exception or class Error or derived from it.
+tags: [compile-only, negative]
 ---*/
 
-class ZeroDivisor extends Error {}
+{{t.defs}}
 
-function divide(a: number, b: number): number {
-    if (b == 0)
-        throw new ZeroDivisor()
-    return a / b
+function main(): int {
+    {{t.use|indent}}
 }
-
-function process(a: number, b: number): number {
-    try {
-        let res = divide(a, b)
-        return res
-    }
-    catch (e) {
-        return e instanceof ZeroDivisor? -1 : 0
-    }
-}
-
-function main() {
-    assert process(4, 2) == 2
-    assert process(4, 0) == -1
-}
+{% endfor %}

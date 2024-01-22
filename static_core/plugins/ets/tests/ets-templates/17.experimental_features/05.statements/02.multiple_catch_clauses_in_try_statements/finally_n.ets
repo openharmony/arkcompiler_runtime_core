@@ -13,32 +13,21 @@
  * limitations under the License.
  */
 
+{% for t in cases %}
 /*---
 desc: >-
-    A catch clause consists of two parts:
-    - Catch identifier that provides access to the object associated with the error thrown; and
-    - Block of code that handles the situation.
+    A finally clause defines a set of actions as a block which is
+    executed regardless how try-catch was fulfilled normally or abruptly.
+tags: [compile-only, negative]
 ---*/
 
-class ZeroDivisor extends Error {}
+class Ex extends Exception {}
 
-function divide(a: number, b: number): number {
-    if (b == 0)
-        throw new ZeroDivisor()
-    return a / b
-}
+let t1 = 1, t2 = 2  // global vars, never changed in tests
 
-function process(a: number, b: number): number {
-    try {
-        let res = divide(a, b)
-        return res
-    }
-    catch (e) {
-        return e instanceof ZeroDivisor? -1 : 0
-    }
-}
+{{t.defs}}
 
-function main() {
-    assert process(4, 2) == 2
-    assert process(4, 0) == -1
+function main(): int {
+    {{t.use|indent}}
 }
+{% endfor %}

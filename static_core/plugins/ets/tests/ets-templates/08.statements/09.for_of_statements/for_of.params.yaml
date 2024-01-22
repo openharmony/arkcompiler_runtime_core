@@ -15,12 +15,12 @@
 cases:
     - use: |-
           let arr: int[] = new int[0]
-          for (let v: int of arr) res += v
+          for (let v of arr) res += v
           if (res == "") return 0;
 
     - use: |-
           let arr: int[]|null = new int[0]
-          for (let v: int of arr!) res += v
+          for (let v of arr!) res += v
           if (res == "") return 0;
 
     - use: |-
@@ -43,8 +43,8 @@ cases:
 
     - use: |-
           const v: int = 0;
-          for (let v: int of [1,2,3,4]) res += v
-          if (res == "1234") return 0;
+          for (let v of [1,2,3,4]) res += v
+          if (res == "1234" && v == 0) return 0;
 
     - use: |-
           let v: int
@@ -52,7 +52,7 @@ cases:
           if (res == "1234") return 0;
 
     - use: |-
-          for (const ch: char of [c'1', c'2', c'3', c'4']) res += ch
+          for (const ch of [c'1', c'2', c'3', c'4']) res += ch
           if (res == "1234") return 0;
 
     - use: |-
@@ -91,7 +91,7 @@ cases:
 
     - use: |-
           let arr: int[] = [1,2,3]
-          for (let v: int of arr) {v *= 2; res += v }
+          for (let v of arr) {v *= 2; res += v }
           if (res == "246") return 0;
 
     - use: |-
@@ -105,5 +105,41 @@ cases:
               return [s, s, s];
           }
       use: |-
-          for (let v: String of foo<String>("A")) res += v
+          for (let v of foo<String>("A")) res += v
           if (res == "AAA") return 0;
+
+    - use: |-
+          let s: string|null = null
+          try {
+              for (let v of s!) res += v
+          } catch (e: NullPointerException) {
+              res = "OK"
+          }
+          if (res == "OK") return 0;
+
+    - use: |-
+          let s: string|undefined = undefined
+          try {
+              for (let v of s!) res += v
+          } catch (e: NullPointerException) {
+              res = "OK"
+          }
+          if (res == "OK") return 0;
+
+    - use: |-
+          let s: number[]|null = null
+          try {
+              for (let v of s!) res += v
+          } catch (e: NullPointerException) {
+              res = "OK"
+          }
+          if (res == "OK") return 0;
+
+    - use: |-
+          let s: number[]|undefined = undefined
+          try {
+              for (let v of s!) res += v
+          } catch (e: NullPointerException) {
+              res = "OK"
+          }
+          if (res == "OK") return 0;

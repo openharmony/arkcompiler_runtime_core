@@ -14,31 +14,33 @@
 ---
 cases:
     - use: |-
-        try {
-            if (t1 == t2) throw new Er()
-            return 1;
-        } finally {  // not the last block
-            return 0;
-        } catch (e) {
-            return 1;
-        }
+          try {}
+          return 0;
 
     - use: |-
-        try {
-            if (t1 == t2) throw new Er()
-            return 1;
-        } catch (e) {
-            return 1;
-        } finally {
-            return 0;
-        } finally {
-            return 0;  // another finally block
-        }
+          try {
+              if (t1 != t2) throw new Error()
+          }
+          return 0;
 
     - use: |-
-        try {
-            if (t1 == t2) throw new Er()
-            return 1;
-        } finally
-            // not a block
-            return 0;
+          try {
+              try {
+                  if (t1 != t2) throw new Error()
+              }
+          } catch (e) {
+              return 0;
+          } finally {
+              return 1;
+          }
+
+    - use: |-
+          try {
+              try {
+                  if (t1 != t2) throw new Error()
+              } catch (e) {
+                  return 0;
+              } finally {
+                  return 1;
+              }
+          }

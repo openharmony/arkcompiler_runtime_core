@@ -12,33 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+{%- for c in cases %}
 
 /*---
 desc: >-
-    A catch clause consists of two parts:
-    - Catch identifier that provides access to the object associated with the error thrown; and
-    - Block of code that handles the situation.
+    An assert statement can have one or two expressions. The first expression
+    is of type boolean; the optional second expression is of type string.
+tags: {{c.tags}}
 ---*/
+{{c.decl}}
 
-class ZeroDivisor extends Error {}
-
-function divide(a: number, b: number): number {
-    if (b == 0)
-        throw new ZeroDivisor()
-    return a / b
+function main(): int {
+    {{c.use|indent}}
+    return 0
 }
-
-function process(a: number, b: number): number {
-    try {
-        let res = divide(a, b)
-        return res
-    }
-    catch (e) {
-        return e instanceof ZeroDivisor? -1 : 0
-    }
-}
-
-function main() {
-    assert process(4, 2) == 2
-    assert process(4, 0) == -1
-}
+{% endfor %}

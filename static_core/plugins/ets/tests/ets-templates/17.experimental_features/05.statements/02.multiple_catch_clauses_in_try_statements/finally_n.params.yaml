@@ -15,7 +15,9 @@
 cases:
     - use: |-
         try {
-            if (t1 == t2) throw new Er()
+            if (t1 == t2) throw new Ex()
+            return 1;
+        } catch (e: Ex) {
             return 1;
         } finally {  // not the last block
             return 0;
@@ -25,7 +27,9 @@ cases:
 
     - use: |-
         try {
-            if (t1 == t2) throw new Er()
+            if (t1 == t2) throw new Ex()
+            return 1;
+        } catch (e: Ex) {
             return 1;
         } catch (e) {
             return 1;
@@ -37,8 +41,12 @@ cases:
 
     - use: |-
         try {
-            if (t1 == t2) throw new Er()
+            if (t1 == t2) throw new Ex()
+            return 1;
+        } catch (e: Ex) {
+            return 1;
+        } catch (e) {
             return 1;
         } finally
-            // not a block
+            // single statement, not a block
             return 0;
