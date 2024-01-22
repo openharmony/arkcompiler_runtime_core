@@ -59,6 +59,7 @@ struct IntrinsicsAPI {
     uint8_t (*JSRuntimeInitJSNewClass)(EtsString *cls_name);
     JSValue *(*JSRuntimeLoadModule)(EtsString *module);
     uint8_t (*JSRuntimeStrictEqual)(JSValue *lhs, JSValue *rhs);
+    EtsString *(*JSValueToString)(JSValue *obj);
     void *(*CompilerGetJSNamedProperty)(void *val, char *propName);
     void *(*CompilerGetJSProperty)(void *val, void *prop);
     void *(*CompilerGetJSElement)(void *val, int32_t index);

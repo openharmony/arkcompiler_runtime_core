@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@ package std.interop.js;
 export final class JSValue {
     private __internal_field_0: long;
     private __internal_field_1: long;
+
+    public native toString(): String;
 }
 
 // NOTE: vpukhov. decide what to do with nullish JSValues

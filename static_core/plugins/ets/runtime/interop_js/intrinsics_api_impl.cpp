@@ -97,6 +97,8 @@ static uint8_t JSRuntimeGetValueBoolean(JSValue *etsJsValue)
 
 static EtsString *JSRuntimeGetValueString(JSValue *etsJsValue)
 {
+    ASSERT(etsJsValue != nullptr);
+
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     auto env = ctx->GetJSEnv();
@@ -347,6 +349,39 @@ static uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unuse
     bool result = true;
     NAPI_CHECK_FATAL(napi_strict_equals(env, lhs->GetNapiValue(env), rhs->GetNapiValue(env), &result));
     return static_cast<uint8_t>(result);
+}
+
+static EtsString *JSValueToString(JSValue *object)
+{
+    ASSERT(object != nullptr);
+
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    napi_env env = ctx->GetJSEnv();
+
+    napi_value strObj;
+    napi_status status;
+    {
+        auto napiValue = object->GetNapiValue(env);
+
+        ScopedNativeCodeThread nativeScope(coro);  // NOTE: Scope(Native/Managed)CodeThread should be optional here
+        status = napi_coerce_to_string(env, napiValue, &strObj);
+    }
+    if (UNLIKELY(status != napi_ok)) {
+        INTEROP_FATAL_IF(status != napi_string_expected && status != napi_pending_exception);
+        ctx->ForwardJSException(coro);
+        return nullptr;
+    }
+
+    auto res = JSConvertString::UnwrapWithNullCheck(ctx, env, strObj);
+    if (UNLIKELY(!res.has_value())) {
+        if (NapiIsExceptionPending(env)) {
+            ctx->ForwardJSException(coro);
+        }
+        ASSERT(ctx->SanityETSExceptionPending());
+        return nullptr;
+    }
+    return res.value();
 }
 
 static inline napi_value ToLocal(void *value)
@@ -716,6 +751,7 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeInitJSNewClass,
     JSRuntimeLoadModule,
     JSRuntimeStrictEqual,
+    JSValueToString,
     CompilerGetJSNamedProperty,
     CompilerGetJSProperty,
     CompilerGetJSElement,
