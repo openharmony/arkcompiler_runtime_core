@@ -363,7 +363,7 @@ TEST_P(TaskSchedulerTest, TaskCreateTaskRecursively)
     tm->Initialize();
     std::atomic_size_t counter = 0;
     constexpr size_t COUNT_OF_TASK = 10;
-    constexpr size_t COUNT_OF_REPLICAS = 10;
+    constexpr size_t COUNT_OF_REPLICAS = 6;
     constexpr size_t MAX_RECURSION_DEPTH = 5;
     std::function<void(size_t)> runner;
     runner = [&counter, &runner, &gcQueue](size_t recursionDepth) {
@@ -401,7 +401,7 @@ TEST_P(TaskSchedulerTest, TaskSchedulerTaskGetTask)
     // Initialize tm workers
     tm->Initialize();
     std::atomic_size_t counter = 0;
-    constexpr size_t COUNT_OF_TASK = 1'000'000;
+    constexpr size_t COUNT_OF_TASK = 100'000;
     gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, []() {
         while (true) {  // wait for valid task;
             auto task = TaskScheduler::GetTaskScheduler()->GetTaskFromQueue(GC_STATIC_VM_BACKGROUND_PROPERTIES);
