@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ function main(): void {
     s.set(2, 2)
     s.set(3, 3)
     s.set(1, 4)
-    assert s.size() == 3 : "size"
+    assert s.size == 3 : "size"
     assert s.has(1) : "has 1"
     assert s.has(2) : "has 2"
     assert s.has(3) : "has 3"

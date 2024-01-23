@@ -806,3 +806,22 @@ spec/functions/Issue-14273_3.ets
 ### Issue 15763
 spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
 ### Issue 15763 end
+
+### Functional interface overriding, type erased generics
+std/core/std_core_array_map_short_array_func_short_int_short_array.ets
+std/core/std_core_array_map_boolean_array_func_boolean_int_boolean_array.ets
+std/core/std_core_array_map_byte_array_func_byte.ets
+std/core/std_core_array_map_char_array_func_char_int_char_array.ets
+std/core/std_core_array_map_double_array_func_double.ets
+std/core/std_core_array_map_boolean_array_func_boolean.ets
+std/core/std_core_array_map_char_array_func_char.ets
+std/core/std_core_array_map_long_array_func_long.ets
+std/core/std_core_array_map_float_array_func_float.ets
+std/core/std_core_array_map_int_array_func_int_int_int_array.ets
+std/core/std_core_array_map_int_array_func_int.ets
+std/core/std_core_array_map_double_array_func_double_int_double_array.ets
+std/core/std_core_array_map_byte_array_func_byte_int_byte_array.ets
+std/core/std_core_array_map_short_array_func_short.ets
+std/core/std_core_array_map_float_array_func_float_int_float_array.ets
+std/core/std_core_array_map_long_array_func_long_int_long_array.ets
+

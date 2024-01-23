@@ -210,13 +210,16 @@ function toSplicedArg1(): int {
         arr.push(dd[i]);
     }
     let newArr = arr.toSpliced(1);
-    if ((newArr.at(0)! != 0) || (newArr.at(1) != 3) ||
-        (newArr.at(2) != 4) || (newArr.at(3) != 0) ||
-        (newArr.at(4) != 6) || (newArr.length != 5)) {
+    if ((newArr.at(0) != 1) || (newArr.length != 1)) {
         return fail;
     }
-    if ((arr.at(0)! != 1) || (arr.length != 1)) {
+    if (arr.length != dd.length) {
         return fail;
+    }
+    for (let i = 0; i < dd.length; i++) {
+        if (arr[i] != dd[i]) {
+            return fail;
+        }
     }
     return success;
 }
@@ -227,14 +230,18 @@ function toSplicedArg2(): int {
         arr.push(dd[i]);
     }
     let newArr = arr.toSpliced(1, 2);
-    if ((newArr.at(0)! != 0) || (newArr.at(1) != 3) ||
-        (newArr.length != 2)) {
+    if ((newArr.length != 4) || (newArr[0] != 1) ||
+        (newArr[1] != 4) || (newArr[2] != 0) ||
+        (newArr[3] != 6)) {
         return fail;
     }
-    if ((arr.at(0)! != 1) || (arr.at(1) != 4) ||
-        (arr.at(2) != 0) || (arr.at(3) != 6) ||
-        (arr.length != 4)) {
+    if (arr.length != dd.length) {
         return fail;
+    }
+    for (let i = 0; i < dd.length; i++) {
+        if (arr[i] != dd[i]) {
+            return fail;
+        }
     }
     return success;
 }

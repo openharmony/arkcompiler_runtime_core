@@ -51,7 +51,7 @@ function createSetAddAndCheckHasValue(): int {
 
 function createEmptySet(): int {
     let set: Set<char> = new Set<char>;
-    return set.size() as int;
+    return set.size as int;
 }
 
 function createSetAndGetValues(): int {
@@ -103,7 +103,7 @@ function createSetAddAndRemove(): int {
     set.add(c'b');
     set.add(c'c');
     set.delete(c'c');
-    let result = set.size() == 2 ? 0 : 1;
+    let result = set.size == 2 ? 0 : 1;
     return result;
 }
 
@@ -113,14 +113,14 @@ function createSetAddAndClear(): int {
     set.add(c'b');
     set.add(c'c');
     set.clear();
-    let result = set.size() == 0 ? 0 : 1;
+    let result = set.size == 0 ? 0 : 1;
     return result;
 }
 
 function createSetAndAdd(): int {
     let set: Set<char> = new Set<char>;
     set.add(c'a');
-    let result = set.size() == 1 ? 0 : 1;
+    let result = set.size == 1 ? 0 : 1;
     return result;
 }
 

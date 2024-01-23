@@ -39,18 +39,15 @@ sub:
           - paramOf(*tricky)
           - paramOf(*tricky)
       - method: Math.atanh
-        ignored: true
         params:
           - paramOf(*tricky)
       - method: Math.cbrt
-        ignored: true
         params:
           - paramOf(*tricky)
       - method: Math.ceil
         params:
           - paramOf(*tricky)
       - method: Math.clz32
-        ignored: true
         params:
           - paramOf(*tricky)
       - method: Math.cos
@@ -72,13 +69,11 @@ sub:
         params:
           - paramOf(*tricky)
       - method: Math.hypot
-        ignored: true
         params: []
         rest:
           - combinationRest(2.7, 3.14, -1, 0, 2, "Infinity")
           - combinationRest(2.7, "Infinity", "NaN", 0)
       - method: Math.imul
-        ignored: true
         params:
           - paramOf(*tricky)
           - paramOf(*tricky)
@@ -86,7 +81,6 @@ sub:
         params:
           - paramOf(*tricky)
       - method: Math.log10
-        ignored: true
         params:
           - paramOf("1e22", *tricky)
       - method: Math.log1p
@@ -96,13 +90,11 @@ sub:
         params:
           - paramOf(*tricky)
       - method: Math.max
-        ignored: true
         params: []
         rest:
           - combinationRest "NaN", "-Infinity", "Infinity", "1.1", "NaN"
           - combinationRest "-0.0", "0.0", "-1.0", "20.1"
       - method: Math.min
-        ignored: true
         params: []
         rest:
           - combinationRest "NaN", "-Infinity", "Infinity", "1.1", "NaN"
@@ -113,10 +105,9 @@ sub:
           - paramOf(*tricky)
           - paramOf(*tricky)
       - method: Math.pow
-        ignored: true
         params:
           - paramOf(2.7, 3.14, -1, 2, -3, -0.5)
-          - paramOf(11, 12, 0.5, 0.1, 1, 0, 2, 5, -8, "Infinity", "-Infinity", 1e10, -1e10, 1000000000000000.1)
+          - paramOf(11, 12, 0.5, 0.1, 1, 0, 2, 5, -8, 1e10, -1e10, 1000000000000000.1)
       - method: Math.round
         params:
           - paramOf(*tricky)
@@ -133,15 +124,12 @@ sub:
         params:
           - paramOf(*tricky)
       - method: Math.tan
-        ignored: true
         params:
           - paramOf(*tricky)
       - method: Math.tanh
-        ignored: true
         params:
           - paramOf(*tricky)
       - method: Math.trunc
-        ignored: true
         params:
           - paramOf(*tricky)
       - expr: Math.E

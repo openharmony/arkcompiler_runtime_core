@@ -21,8 +21,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // concat(...items: ConcatArray<T>[]): T[];
     // Typing and previous overload have to cover it
 
-    // TODO(ivan-tyulyandin): blocked by tuples implementation
-    // entries(): IterableIterator<[number, T]>;
+    //entries(): IterableIterator<[number, T]>;
 
     every(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): boolean;
     every(predicate: (value: T, index: number) => boolean): boolean;
@@ -37,14 +36,23 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // Typing and previous overload have to cover it
 
     // TODO(ivan-tyulyandin): blocked by undefined implementation
-    find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined;
+    //find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined;
     find(predicate: (value: T, index: number) => boolean): T | undefined;
+    find(predicate: (value: T) => boolean): T | undefined;
     // find<S extends T>(predicate: (value: T, index: number, obj: readonly T[]) => value is S, thisArg?: any): S | undefined;
     // Typing and previous overload have to cover it
 
-    findIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number;
+    //findLast(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined;
+    findLast(predicate: (value: T, index: number) => boolean): T | undefined;
+    findLast(predicate: (value: T) => boolean): T | undefined;
+
+    //findIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number;
     findIndex(predicate: (value: T, index: number) => boolean): number;
     findIndex(predicate: (value: T) => boolean): number;
+
+    //findLastIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number;
+    findLastIndex(predicate: (value: T, index: number) => boolean): number;
+    findLastIndex(predicate: (value: T) => boolean): number;
 
     // TODO(ivan-tyulyandin): TBD, FlatArray is non-subset type
     // flat<A, D extends number = 1>(
@@ -58,7 +66,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     //     thisArg?: This,
     // ): U[];
 
-    forEach(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => void): void;
+    //forEach(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => void): void;
     forEach(callbackfn: (value: T, index: number) => void): void;
     forEach(callbackfn: (value: T) => void): void;
 
@@ -66,27 +74,27 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     indexOf(searchElement: T, fromIndex: Number | undefined): number;
 
-    // TODO(kprokopenko): blocked by internal issue
     //keys(): IterableIterator<number>;
 
     lastIndexOf(searchElement: T, fromIndex: Number | undefined): number;
 
-    map<U>(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U>;
+    //map<U>(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U>;
     map<U>(callbackfn: (value: T, index: number) => U): Array<U>;
     map<U>(callbackfn: (value: T) => U): Array<U>;
 
-    reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
+    //reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
     reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T): T;
     reduce(callbackfn: (previousValue: T, currentValue: T) => T): T;
-    reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
-    reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
-    reduce<U>(callbackfn: (previousValue: U, currentValue: T) => T, initialValue: U): U;
 
-    reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
+    //reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
+    reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
+    reduce<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
+
+    //reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
     reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T): T;
     reduceRight(callbackfn: (previousValue: T, currentValue: T) => T): T;
 
-    reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
+    //reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
 
@@ -100,7 +108,4 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // All objects in ArkTS have such method, no need to define it here
 
     values(): IterableIterator<T>;
-
-    // TODO(ivan-tyulyandin): blocked by internal issue #11979
-    //get length(): number;
 }

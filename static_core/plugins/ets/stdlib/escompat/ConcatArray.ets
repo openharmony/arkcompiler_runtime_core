@@ -20,5 +20,5 @@ export interface ConcatArray<T> extends ArrayLike<T> {
 
     join(separator: String | undefined): string;
 
-    slice(start: Number | undefined, end: Number | undefined): Array<T>;
+    //slice(start?: Number, end?: Number): Array<T>;
 }

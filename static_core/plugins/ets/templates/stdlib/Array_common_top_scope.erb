@@ -1,0 +1,56 @@
+%#
+%# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+%# Licensed under the Apache License, Version 2.0 (the "License");
+%# you may not use this file except in compliance with the License.
+%# You may obtain a copy of the License at
+%#
+%# http://www.apache.org/licenses/LICENSE-2.0
+%#
+%# Unless required by applicable law or agreed to in writing, software
+%# distributed under the License is distributed on an "AS IS" BASIS,
+%# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%# See the License for the specific language governing permissions and
+%# limitations under the License.
+%#
+
+class ArrayValuesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx.this_generic %> implements IterableIterator<<%= ctx.el_type %>> {
+    private parent: <%= ctx.this_type %>
+    private idx: int = 0
+
+    constructor(parent: <%= ctx.this_type %>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<<%= ctx.el_type %>> {
+        if (this.idx >= <%= ctx.array_len_int.('this.parent') %>) {
+            return new IteratorResult<<%= ctx.el_type %>>()
+        }
+        return new IteratorResult<<%= ctx.el_type %>>(<%= ctx.get_unsafe.('this.parent', 'this.idx++') %>)
+    }
+
+    override iterator(): IterableIterator<<%= ctx.el_type %>> {
+        return this;
+    }
+}
+
+class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx.this_generic %> implements IterableIterator<[number, <%= ctx.el_type %>]> {
+    private parent: <%= ctx.this_type %>
+    private idx: int = 0
+
+    constructor(parent: <%= ctx.this_type %>) {
+        this.parent = parent
+    }
+
+    override next(): IteratorResult<[number, <%= ctx.el_type %>]> {
+        if (this.idx >= <%= ctx.array_len_int.('this.parent') %>) {
+            return new IteratorResult<[number, <%= ctx.el_type %>]>()
+        }
+        const i = this.idx++;
+        const vl: [number, <%= ctx.el_type %>] = [i as number, <%= ctx.get_unsafe.('this.parent', 'i') %>]
+        return new IteratorResult<[number, <%= ctx.el_type %>]>(vl);
+    }
+
+    override iterator(): IterableIterator<[number, <%= ctx.el_type %>]> {
+        return this;
+    }
+}

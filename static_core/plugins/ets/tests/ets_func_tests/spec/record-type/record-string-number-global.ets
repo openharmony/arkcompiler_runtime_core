@@ -24,7 +24,7 @@ let map: Record<String, Number> = {
 };
 
 function main() {
-  assert map.size() == 2
+  assert map.size == 2
   assert map.get("hello") == 10
   assert map.get("world") == 20
 }

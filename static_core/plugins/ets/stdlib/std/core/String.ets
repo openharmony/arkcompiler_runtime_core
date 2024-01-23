@@ -20,27 +20,6 @@ const MAX_CODE_UNIT = 0xFFFF
 
 type StringOrRegExp = String | RegExp
 
-// NOTE(kprokopenko) merge with same functions from Array<T>
-function normalizeIndex(idx: int, len: int): int {
-    if (idx < -len) {
-        return 0
-    }
-    if (idx < 0) {
-        return len + idx
-    }
-    if (idx > len) {
-        return len
-    }
-    return idx
-}
-
-function asIntOrDefault(n: Number | undefined, def: int): int {
-    if (__runtimeIsSameReference(n, undefined)) {
-        return def
-    }
-    return (n! as Object as Number) as number as int;
-}
-
 /**
  * Unicode string
  */
@@ -1081,7 +1060,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         }
         try {
             for (let repeat = 1; repeat < count; repeat++) {
-                copyTo(resChars, resChars, repeat * length, 0, length);
+                copyWithin(resChars, repeat * length, 0, length);
             }
         } catch (e) {
             throw new Error("impossible")

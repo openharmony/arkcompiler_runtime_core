@@ -95,24 +95,23 @@ end
 class ThreadPool
     def initialize(threads_num)
         @threads_num = threads_num
-        @threads = Set.new
-        @threads_done = Set.new
+        @threads = []
+    end
+
+    def filter_threads
+        @threads.filter! { |t| t.alive? }
     end
 
     def run(*args, &block)
         # wait while at least 1 task completes
         while @threads.size >= @threads_num
             sleep 0.05
+            filter_threads
         end
         t = Thread.new do
-            me = Thread.current
-            @threads << me
             yield *args
         rescue => e
           puts e.full_message(highlight: true, order: :top)
-        ensure
-            @threads_done << me
-            @threads.delete me
         end
         @threads << t
     end
@@ -120,7 +119,7 @@ class ThreadPool
     def join()
         while @threads.size != 0
             sleep 0.15
-            @threads.subtract(@threads_done)
+            filter_threads
         end
     end
 end
@@ -189,7 +188,7 @@ class Generator
         if sub["method"] || sub["expr"]
             conf.ret_type = sub["ret_type"]
             if sub["expr"]
-                name = conf.category + sub["expr"].gsub(/[^a-zA-Z0-9_]/, '_')
+                name = conf.category + sub["expr"].gsub(/\s+/, '').gsub(/[^a-zA-Z0-9_=]/, '_')
                 is_expr = true
             else
                 name = conf.category + sub["method"]
@@ -295,12 +294,14 @@ class Generator
 
             # verify ets
             if $options[:"run-ets"]
-                puts "run ets for #{k} #{chunk_id}"
                 panda_build = $options[:"run-ets"]
                 abc_path = File.join $options[:tmp], "#{k}#{chunk_id}.abc"
                 get_command_output("#{panda_build}/bin/es2panda", "--extension=ets", "--opt-level=2", "--output", abc_path, ets_path)
-                get_command_output("#{panda_build}/bin/ark", "--no-async-jit=true", "--gc-trigger-type=debug", "--boot-panda-files", "#{panda_build}/plugins/ets/etsstdlib.abc", "--load-runtimes=ets", abc_path, "ETSGLOBAL::main")
-                puts "✔✔✔ ets for #{k} #{chunk_id}"
+                res = get_command_output("#{panda_build}/bin/ark", "--no-async-jit=true", "--gc-trigger-type=debug", "--boot-panda-files", "#{panda_build}/plugins/ets/etsstdlib.abc", "--load-runtimes=ets", abc_path, "ETSGLOBAL::main")
+                res.strip!
+                if res.size != 0
+                    puts "✔✔✔ ets for #{k} #{chunk_id}\n#{res.gsub(/^/, "\t")}"
+                end
             end
         }
     rescue
@@ -336,13 +337,8 @@ class Generator
         res = new_res
         res.map! { |r|
             p = OpenStruct.new
-            p.ts = deep_copy(r)
-            p.ets = r
-            # NOTE(kprokopenko): legacy code for rest parameters,
-            # remove after dev branch and everything else is merged into master
-            while r.size < types_supp.size
-                r.push "undefined"
-            end
+            r.map! { |e| e.kind_of?(String) ? e.strip : e }
+            p.ts = p.ets = r
             p
         }
         return res

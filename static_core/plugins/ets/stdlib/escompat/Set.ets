@@ -15,7 +15,7 @@
 
 package escompat;
 
-export interface ReadonlySet<T> /* TODO(kprokopenko): extends Iterable */ {
+export interface ReadonlySet<T> extends Iterable<T> {
     /**
      * Checks if a value is in the Set
      *
@@ -60,19 +60,19 @@ export interface ReadonlySet<T> /* TODO(kprokopenko): extends Iterable */ {
      * Despite name, returns elements from the Set
      * @returns an iterable of the values in the set
      */
-    //keys(): ValuesIterator<T>;
+    //keys(): IterableIterator<T>;
 
     /**
      * Returns elements from the Set
      *
      * @returns an iterable of the values in the set
      */
-    //values(): ValuesIterator<T>;
+    values(): IterableIterator<T>;
 
     /**
      * @returns an iterable of [v,v] pairs for every value `v` in the set.
      */
-    //entries(): MapIterator<T, T>;
+    //entries(): IterableIterator<[T, T]>;
 }
 
 final class ListNode {
@@ -101,7 +101,7 @@ final class SetIterator<R> implements IterableIterator<R> {
         return res
     }
 
-    override iterator(): Iterator<R> {
+    override iterator(): IterableIterator<R> {
         return this
     }
 }
@@ -114,26 +114,48 @@ export final class Set<K> implements ReadonlySet<K> {
     private buckets: Array<Array<ListNode>> = new Array<Array<ListNode>>()
     private sizeVal: int = 0
 
-    /**
-     * Constructs an empty Set
-     */
-    constructor() {
-        this.buckets.push(new Array<ListNode>())
+    internal static hashOf(a: NullishType): int {
+        if (__runtimeEquals(a, null)) {
+            return 0;
+        }
+        if (__runtimeEquals(a, undefined)) {
+            return 1;
+        }
+        return a!.$_hashCode();
     }
 
     /**
-     * Constructs a Set with same elements
-     * @param iterable collection of elements to add to a set
+     * Constructs a Set from collection
+     * @param iter initial collection
      */
-    constructor(iterable: Iterable<K>) {
-        this()
-        iteratorForEach<K>(iterable.iterator(), (x: K): void => {
-            this.add(x)
-        })
+    constructor(iter?: ArrayLike<K> | Iterable<K> | null) {
+        this.buckets.push(new Array<ListNode>())
+        if (!__runtimeIsSameReference(iter, undefined) && !__runtimeIsSameReference(iter, null)) {
+            // NOTE(kprokopenko): dealing with this overload is tricky
+            // with banned `instanceof` generic, so it is delegated to array here
+            const vals = Array.from<K>(iter!);
+            for (let i = 1; i < vals.actualLength; i++) {
+                this.buckets.push(new Array<ListNode>())
+            }
+            for (let i = 0; i < vals.actualLength; i++) {
+                this.add(vals[i])
+            }
+        }
+    }
+
+    internal toStringVals(): String {
+        return Array.from<K>(this.values()).toString()
+    }
+
+    override toString(): String {
+        return "Set[" + this.toStringVals() + "]"
     }
 
     private getBucket(v: NullishType): Array<ListNode> {
-        return this.buckets.at(hashOf(v) % this.buckets.length)!
+        let idx = Set.hashOf(v) % this.buckets.actualLength;
+        idx += this.buckets.actualLength;
+        idx %= this.buckets.actualLength;
+        return this.buckets[idx]
     }
 
     internal static __asGeneric<T>(x: Object): (x: T) => void {
@@ -144,7 +166,7 @@ export final class Set<K> implements ReadonlySet<K> {
         const iter = new SetIterator<ListNode>(this.listRoot.next, this.listRoot, (x: ListNode): ListNode => x)
         const oldSize = this.buckets.length
         for (let i = 0; i < oldSize; i++) {
-            const a = this.buckets.at(i)!
+            const a = this.buckets[i]
             // TODO(kprokopenko): find a better solution
             while (a.length != 0) {
                 a.pop()
@@ -153,7 +175,7 @@ export final class Set<K> implements ReadonlySet<K> {
         }
         const fn: (v: Object) => void = (v: Object): void => {
             const x = v as ListNode
-            this.getBucket(x.val!).push(x)
+            this.getBucket(x.val).push(x)
         };
         // internal issue #13655
         iteratorForEach<ListNode>(iter, Set.__asGeneric<ListNode>(fn as Object))
@@ -165,21 +187,21 @@ export final class Set<K> implements ReadonlySet<K> {
      * @param v the value to put into the Set
      * @returns this
      */
-    add(v: K): Set<K> {
+    add(v: K): this {
         // insert into buckets
         const buck = this.getBucket(v as NullishType)
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val!.equals(v as Object)) {
-                node.val = v as Object
+            if (__runtimeSameValueZero(node.val, v)) {
+                node.val = v
                 return this
             }
         }
 
         // not found, add to insertion-ordered list
         const node = new ListNode()
-        node.val = v as Object
+        node.val = v
         const t = this.listRoot
         node.next = t
         node.prev = t.prev
@@ -201,7 +223,7 @@ export final class Set<K> implements ReadonlySet<K> {
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val!.equals(v)) {
+            if (__runtimeSameValueZero(node.val, v)) {
                 return node.val as K
             }
         }
@@ -216,7 +238,15 @@ export final class Set<K> implements ReadonlySet<K> {
      * @returns true if the value is in the Set
      */
     override has(v: K): boolean {
-        return !__runtimeIsSameReference(this.get(v as NullishType) as NullishType, undefined);
+        const buck = this.getBucket(v)
+        const buckSize = buck.length
+        for (let i = 0; i < buckSize; i++) {
+            const node = buck.$_get(i)
+            if (__runtimeSameValueZero(node.val, v)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -224,7 +254,7 @@ export final class Set<K> implements ReadonlySet<K> {
      *
      * @returns number of unique elements in the Set
      */
-    override size(): number {
+    override get size(): number {
         return this.sizeVal;
     }
 
@@ -234,15 +264,15 @@ export final class Set<K> implements ReadonlySet<K> {
      * @param v the value to remove
      */
     delete(v: K): boolean {
-        return this.deleteImpl(v as Object)
+        return this.deleteImpl(v)
     }
 
-    internal deleteImpl(v: Object): boolean {
+    internal deleteImpl(v: NullishType): boolean {
         const buck = this.getBucket(v)
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val!.equals(v)) {
+            if (__runtimeSameValueZero(node.val, v)) {
                 node.prev.next = node.next
                 node.next.prev = node.prev
                 buck.fill(buck.pop()!, i, i + 1)
@@ -281,20 +311,25 @@ export final class Set<K> implements ReadonlySet<K> {
      *
      * @returns an iterable of the values in the set
      */
-    /* override */ values(): IterableIterator<K> {
+    override values(): IterableIterator<K> {
         return this.mappedIterator<K>((x: ListNode): K => {
-            return x.val! as K
+            return x.val as K
         })
+    }
+
+    override iterator(): IterableIterator<K> {
+        return this.values();
     }
 
     /**
      * @returns an iterable of [v,v] pairs for every value `v` in the set.
      */
-    /* override */ entries(): IterableIterator<Entry<K, K>> {
+    /* override */ entries(): IterableIterator<[K, K]> {
         return this.mappedIterator<Object>((x: ListNode): Object => {
             const v = x.val as K;
-            return new Entry<K, K>(v, v)
-        }) as IterableIterator<Entry<K, K>>
+            const res: [K, K] = [v, v]
+            return res
+        }) as IterableIterator<[K, K]>
     }
 
     /**

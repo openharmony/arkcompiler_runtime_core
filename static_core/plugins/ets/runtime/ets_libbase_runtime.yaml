@@ -1354,6 +1354,18 @@ intrinsics:
 ############
 # std.core #
 ############
+  - name: StdCoreAllocGenericArray
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: __alloc_array
+    static: true
+    signature:
+      ret: std.core.Object[]
+      args:
+        - i32
+    impl: ark::ets::intrinsics::StdCoreAllocGenericArray
+    set_flags: []
+
   - name: StdCoreBoolCopyTo
     space: ets
     class_name: std.core.ETSGLOBAL

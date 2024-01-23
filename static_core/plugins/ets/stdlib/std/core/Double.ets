@@ -331,7 +331,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
             if (this.value == r) {
                 return true;
             }
-            return Double.compare(this.value, r);
+            return false // Double.compare(this.value, r);
         }
         return false;
     }

@@ -24,7 +24,7 @@ function main() {
     20: "world",
   };
 
-  assert map.size() == 2
+  assert map.size == 2
   assert map.get(10) == "hello"
   assert map.get(20) == "world"
 }

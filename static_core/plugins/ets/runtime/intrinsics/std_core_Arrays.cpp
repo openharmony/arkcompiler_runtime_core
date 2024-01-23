@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "ets_class_root.h"
 #include "intrinsics.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
+#include "types/ets_array.h"
 
 namespace ark::ets::intrinsics {
 
@@ -53,6 +55,12 @@ static EtsVoid *StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int3
     }
 
     return static_cast<EtsVoid *>(nullptr);
+}
+
+extern "C" ObjectHeader *StdCoreAllocGenericArray(ets_int len)
+{
+    auto klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
+    return EtsObjectArray::Create(klass, len)->GetCoreType();
 }
 
 extern "C" EtsVoid *StdCoreBoolCopyTo(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart, int32_t srcStart,

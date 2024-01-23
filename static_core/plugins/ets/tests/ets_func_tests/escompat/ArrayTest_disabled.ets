@@ -193,7 +193,7 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
         return this.buffer[index as int] as T;
     }
 
-    public override lengthMakeProp(): number {
+    public get length(): number {
         return this.actualLength as number;
     }
 
@@ -239,7 +239,7 @@ class IterableImplTest<T> implements IterableIterator<T> {
         return new IteratorResult<T>(this.parent.at(this.idx++)!);
     }
 
-    override iterator(): Iterator<T> {
+    override iterator(): IterableIterator<T> {
         return this;
     }
 }

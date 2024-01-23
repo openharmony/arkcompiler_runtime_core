@@ -1,0 +1,844 @@
+%# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+%# Licensed under the Apache License, Version 2.0 (the "License");
+%# you may not use this file except in compliance with the License.
+%# You may obtain a copy of the License at
+%#
+%# http://www.apache.org/licenses/LICENSE-2.0
+%#
+%# Unless required by applicable law or agreed to in writing, software
+%# distributed under the License is distributed on an "AS IS" BASIS,
+%# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%# See the License for the specific language governing permissions and
+%# limitations under the License.
+%
+% require_relative 'Array_code'
+
+/**
+ * Takes an integer value and returns the item at that index,
+ * allowing for positive and negative integers. Negative integers count back
+ * from the last item in the array.
+ *
+ * @param index Zero-based index of the array element to be returned.
+ * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
+ *
+ * @returns The element in the array matching the given index.
+ * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ */
+<%= access_public %> <%= override %> at<%= this_generic %>(<%= this_arg %>index: number): <%= el_type_boxed %> | undefined {
+    return <%= this_call.('at') %>index as int)
+}
+
+/**
+ * Creates a new `Array` from this `Array` instance and given `Array` instance.
+ *
+ * @param other to concatenate into a new array.
+ *
+ * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+ */
+// <%= access_public %> <%= override %> concat<%= this_generic %>(<%= this_arg %>...items: (<%= el_type %> | Concat<%= this_type %>)[]): <%= this_type %> {
+//     throw new Error("not implemented")
+// }
+
+<%= access_public %> concat<%= this_generic %>(<%= this_arg %>...items: ConcatArray<<%= el_type %>>[]): <%= this_type %> {
+    let totalAdd = <%= this_len_int %>;
+    for (let i = 0; i < items.length; i++) {
+        totalAdd += items[i].length as int
+    }
+
+    const buf = <%= make_buffer.('totalAdd') %>;
+
+    for (let i = 0; i < <%= this_len_int %>; i++) {
+        buf[i] = <%= get_unsafe.(this, 'i') %>;
+    }
+
+    let insertTo = <%= this_len_int %>;
+    for (let i = 0; i < items.length; i++) {
+        const arr = items[i]
+        const len = arr.length as int
+        for (let j = 0; j < len; j++) {
+            buf[insertTo++] = arr.$_get(j)
+        }
+    }
+
+    return <%= from_buffer.('buf') %>;
+}
+
+/**
+ * Takes an integer value and returns the item at that index,
+ * allowing for positive and negative integers. Negative integers count back
+ * from the last item in the array.
+ *
+ * @param index Zero-based index of the array element to be returned.
+ * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
+ *
+ * @returns The element in the array matching the given index.
+ * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+ */
+<%= access_public %> at<%= this_generic %>(<%= this_arg %>index: int): <%= el_type_boxed %> | undefined {
+    let len = <%= this_len_int %>;
+    let k: int;
+    if (index >= 0) {
+        k = index;
+    } else {
+        k = len + index;
+    }
+
+    if (k < 0 || k >= len) {
+        return undefined;
+    }
+
+    return <%= get_unsafe.(this, 'k') %>;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ *
+ * @param target index at which to copy the sequence
+ *
+ * @param start index at which to start copying elements from
+ *
+ * @param end index at which to end copying elements from
+ *
+ * @returns this array after transformation
+ */
+<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: number, start: number, end?: Number): <%= this_return_type %> {
+    <%= this_call.('copyWithin') %>target as int, start as int, asIntOrDefault(end, <%= this_len_int %>));
+    return <%= this %>;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ *
+ * @param target index at which to copy the sequence
+ *
+ * @param start index at which to start copying elements from
+ *
+ * @param end index at which to end copying elements from
+ *
+ * @returns this array after transformation
+ */
+<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int, start: int, end: int): <%= this_return_type %> {
+    target = normalizeIndex(target, <%= this_len_int %>)
+    start = normalizeIndex(start, <%= this_len_int %>)
+    end = normalizeIndex(end, <%= this_len_int %>)
+
+    if (end <= start) {
+        return <%= this %>;
+    }
+
+    if (target <= start) {
+        while (start < end) {
+            const read = <%= get_unsafe.(this, 'start++') %>;
+            <%= set_unsafe.(this, 'target++', 'read') %>;
+        }
+    } else {
+        let len = end - start;
+        if (target + len > <%= this_len_int %>) {
+            len = <%= this_len_int %> - target
+        }
+        for (let i = 0; i < len; i++) {
+            const read = <%= get_unsafe.(this, 'start + len - 1 - i') %>;
+            <%= set_unsafe.(this, 'target + len - 1 - i', 'read') %>;
+        }
+    }
+
+    return <%= this %>;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ *
+ * @param target index at which to copy the sequence
+ *
+ * @param start index at which to start copying elements from
+ *
+ * @returns this array after transformation
+ */
+<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int, start: int): <%= this_return_type %> {
+    <%= this_call.('copyWithin') %>target, start, <%= this_len_int %>);
+    return <%= this %>;
+}
+
+/**
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ *
+ * @param target index at which to copy the sequence
+ *
+ * @returns this array after transformation
+ */
+<%= access_public %> copyWithin<%= this_generic %>(<%= this_arg %>target: int): <%= this_return_type %> {
+    <%= this_call.('copyWithin') %>target, 0, <%= this_len_int %>);
+    return <%= this %>;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index
+ *
+ * @param value to fill the array with
+ *
+ * @param start index at which to start filling
+ *
+ * @param end index at which to end filling, but not including
+ *
+ * @returns this array after transformation
+ */
+<%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start?: Number, end?: Number): <%= this_return_type %> {
+    <%= this_call.('fill') %>value, asIntOrDefault(start, 0), asIntOrDefault(end, <%= this_len_int %>));
+    return <%= this %>;
+}
+
+/**
+ * Changes all elements in the Array to a static value, from a start index to an end index
+ *
+ * @param value to fill the array with
+ *
+ * @param start index at which to start filling
+ *
+ * @param end index at which to end filling, but not including
+ *
+ * @returns this array after transformation
+ */
+<%= access_public %> fill<%= this_generic %>(<%= this_arg %>value: <%= el_type %>, start: int, end: int): <%= this_return_type %> {
+    start = normalizeIndex(start, <%= this_len_int %>);
+    end = normalizeIndex(end, <%= this_len_int %>)
+
+    for (let i = start; i < end; i++) {
+        <%= set_unsafe.(this, 'i', 'value') %>;
+    }
+
+    return <%= this %>;
+}
+
+% Data::get_lambda_data.each { |lambda_args_params|
+%   lambda_params_num, lambda_args, lambda_params = lambda_args_params
+
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> find<%= this_generic %>(<%= this_arg %>predicate: (value: <%= el_type %><%= lambda_params %>) => boolean): <%= el_type_boxed %> | undefined {
+    const res = <%= this_call.('findIndex') %>predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return <%= get_unsafe.(this, 'res as int') %>;
+}
+
+/**
+ * Returns the index of the first element in an array that satisfies the provided testing function
+ *
+ * @param fn testing function
+ *
+ * @returns found element index or -1 otherwise
+ */
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> findIndex<%= this_generic %>(<%= this_arg %>fn: (value: <%= el_type %><%= lambda_params %>) => boolean): number {
+    for (let i = 0; i < <%= this_len_int %>; i++) {
+        if (fn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param fn testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> findLast<%= this_generic %>(<%= this_arg %>fn: (elem: <%= el_type %><%= lambda_params %>) => boolean): <%= el_type_boxed %> | undefined {
+    for (let i = <%= this_len_int %> - 1; i >= 0; i--) {
+        const val = <%= get_unsafe.(this, 'i') %>;
+        if (fn(val<%= lambda_args %>)) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Tests whether all elements in the array pass the test
+ * implemented by the provided function. It returns a Boolean value.
+ *
+ * @param fn function to execute for each element in the array.
+ * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ *
+ * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ */
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> every<%= this_generic %>(<%= this_arg %>fn: (v: <%= el_type %><%= lambda_params %>) => boolean): boolean {
+    for (let i = 0; i < <%= this_len_int %>; i++) {
+        if (!fn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)) {
+            return false
+        }
+    }
+    return true;
+}
+
+/**
+ * Tests whether at least one element in the array pass the test
+ * implemented by the provided function. It returns a Boolean value.
+ *
+ * @param fn function to execute for each element in the array.
+ * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ *
+ * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> some<%= this_generic %>(<%= this_arg %>fn: (v: <%= el_type %><%= lambda_params %>) => boolean): boolean {
+    for (let i = 0; i < <%= this_len_int %>; i++) {
+        if (fn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)) {
+            return true
+        }
+    }
+    return false
+}
+
+%   if lambda_params_num != 1
+/**
+ * Constructs a new `Array` instance and populates it with
+ * portion of a given array, filtered down to just the elements from the
+ * given array that pass the test implemented by the provided function.
+ *
+ * @param fn test function, applied to each element of an array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ */
+// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> filter<%= this_generic %>(<%= this_arg %>fn: (v: <%= el_type %><%= lambda_params %>) => boolean): <%= this_type %> {
+    return <%= this_call.('filter') %>(v: <%= el_type %>, i: number): boolean => fn(v<%= lambda_args %>));
+}
+%   end
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param fn testing function
+ *
+ * @returns index of first element satisfying to fn, -1 if no such element
+ */
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> findLastIndex<%= this_generic %>(<%= this_arg %>fn: (element: <%= el_type %><%= lambda_params %>) => boolean): number {
+    for(let i = <%= this_len_int %> - 1; i >= 0; i--) {
+        if (fn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Executes a user-supplied "reducer" callback function on each element of the array,
+ * in order, passing in the return value from the calculation on the preceding element.
+ * The final result of running the reducer across all elements of the array is a single value.
+ * Order is from left-to-right.
+ *
+ * @param fn reduce function
+ *
+ * @returns a result after applying fn over all elements of the Array
+ */
+// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> reduce<%= this_generic %>(<%= this_arg %>fn: (a: <%= el_type %>, b: <%= el_type %><%= lambda_params %>) => <%= el_type %>): <%= el_type %> {
+    if (<%= this_len_int %> == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: <%= el_type %> = <%= get_unsafe.(this, '0') %>;
+    for(let i = 1; i < <%= this_len_int %>; i++) {
+        acc = fn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
+    }
+    return acc
+}
+
+/**
+ * Executes a user-supplied "reducer" callback function on each element of the array,
+ * in order, passing in the return value from the calculation on the preceding element.
+ * The final result of running the reducer across all elements of the array is a single value.
+ * Order is from left-to-right.
+ *
+ * @param fn reduce function
+ *
+ * @param initialValue initial value
+ *
+ * @returns a result after applying fn over all elements of the Array
+ */
+// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> reduce<<%= this_generic_one %>U = <%= el_type %>>(<%= this_arg %>fn: (previousValue: U, currentValue: <%= el_type %><%= lambda_params %>) => U, initialValue: U): U {
+    let acc = initialValue
+    for(let i = 0; i < <%= this_len_int %>; i++) {
+        acc = fn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
+    }
+    return acc
+}
+
+/**
+ * Executes a user-supplied "reducer" callback function on each element of the array,
+ * in order, passing in the return value from the calculation on the preceding element.
+ * The final result of running the reducer across all elements of the array is a single value.
+ * Order is from right-to-left.
+ *
+ * @param fn reduce function
+ *
+ * @returns a result after applying fn over all elements of the Array
+ */
+// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> reduceRight<%= this_generic %>(<%= this_arg %>fn: (a: <%= el_type %>, b: <%= el_type %><%= lambda_params %>) => <%= el_type %>): <%= el_type %> {
+    if (<%= this_len_int %> == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: <%= el_type %> = <%= get_unsafe.(this, "#{this_len_int} - 1") %>;
+    for(let i = <%= this_len_int %> - 2; i >= 0; i--) {
+        acc = fn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
+    }
+    return acc
+}
+
+/**
+ * Executes a user-supplied "reducer" callback function on each element of the array,
+ * in order, passing in the return value from the calculation on the preceding element.
+ * The final result of running the reducer across all elements of the array is a single value.
+ * Order is from right-to-left.
+ *
+ * @param fn reduce function
+ *
+ * @param initVal start value
+ *
+ * @returns a result after applying fn over all elements of the Array
+ */
+// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> reduceRight<<%= this_generic_one %>U>(<%= this_arg %>fn: (a: U, b: <%= el_type %><%= lambda_params %>) => U, initVal: U): U {
+    let acc = initVal
+    for(let i = <%= this_len_int %> - 1; i >= 0; i--) {
+        acc = fn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
+    }
+    return acc
+}
+
+/**
+ * Executes a provided function once for each array element.
+ *
+ * @param fn to apply for each element of the Array
+ */
+// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
+<%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> forEach<%= this_generic %>(<%= this_arg %>fn: (a: <%= el_type %><%= lambda_params %>) => void): void {
+    for(let i = 0; i < <%= this_len_int %>; i++) {
+        fn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)
+    }
+}
+
+% }
+
+/**
+ * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
+ * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ *
+ * @param start zero-based index at which to start extraction
+ *
+ * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
+ *
+ * @returns `Array` instance, constructed from extracted elements of `this` instance.
+ */
+<%= access_public %> slice<%= this_generic %>(<%= this_arg %>start?: Number, end?: Number): <%= this_type %> {
+    const len: int = <%= this_len_int %>;
+    return <%= this_call.('slice') %>asIntOrDefault(start, 0), asIntOrDefault(end, len))
+}
+
+/**
+ * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
+ * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ *
+ * @param start zero-based index at which to start extraction
+ *
+ * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
+ *
+ * @returns `Array` instance, constructed from extracted elements of `this` instance.
+ */
+<%= access_public %> slice<%= this_generic %>(<%= this_arg %>start: int, end: int): <%= this_type %> {
+    const len: int = <%= this_len_int %>;
+    const relStart = normalizeIndex(start, len)
+    const relEnd = normalizeIndex(end, len)
+
+    let count = relEnd - relStart;
+    if (count < 0) {
+        count = 0;
+    }
+    let res = <%= make_buffer.('count') %>
+    for (let i = 0; i < count; i++) {
+        res[i] = <%= get_unsafe.(this, 'relStart + i') %>;
+    }
+
+    return <%= from_buffer.('res') %>
+}
+
+/**
+ * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
+ * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ *
+ * @param start zero-based index at which to start extraction
+ *
+ * @returns `Array` instance, constructed from extracted elements of `this` instance.
+ */
+<%= access_public %> slice<%= this_generic %>(<%= this_arg %>start: int): <%= this_type %> {
+    return <%= this_call.('slice') %>start, Int.MAX_VALUE as int);
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array,
+ * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ *
+ * @param element element to locate in the array.
+ * @param fromIndex zero-based index at which to start searching backwards.
+ * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
+ * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
+ * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
+ *
+ * @returns The last index of the element in the array; -1 if not found.
+ */
+<%= access_public %> lastIndexOf<%= this_generic %>(<%= this_arg %>element: <%= el_type %>, fromIndex: int): int {
+    if (<%= this_len_int %> == 0) {
+        return -1;
+    }
+    let n = fromIndex;
+    let k: int;
+    if (n >= 0) {
+        k = min(<%= this_len_int %> - 1, n);
+    } else {
+        k = <%= this_len_int %> + n;
+    }
+
+    while (k >= 0) {
+        if (__runtimeEquals(<%= get_unsafe.(this, 'k') %>, element)) {
+            return k;
+        }
+        k--;
+    }
+    return -1;
+}
+
+/**
+ * Returns the last index at which a given element can be found in the array,
+ * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ *
+ * @param element element to locate in the array.
+ * @param fromIndex zero-based index at which to start searching backwards.
+ * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
+ * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
+ * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
+ *
+ * @returns The last index of the element in the array; -1 if not found.
+ */
+<%= access_public %> <%= override %> lastIndexOf<%= this_generic %>(<%= this_arg %>element: <%= el_type %>, fromIndex?: Number): number {
+    return <%= this_call.('lastIndexOf') %>element, asIntOrDefault(fromIndex, <%= this_len_int %> - 1));
+}
+
+/**
+ * Creates and returns a new string by concatenating all of the elements in an `Array`,
+ * separated by a specified separator string.
+ * If the array has only one item, then that item will be returned without using the separator.
+ *
+ * @param sep specifies a separator
+ *
+ * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+ */
+<%= access_public %> <%= override %> join<%= this_generic %>(<%= this_arg %>sep?: String): string {
+    const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
+    let sb = new StringBuilder();
+    for (let i: int = 0; i < <%= this_len_int %>; i++) {
+        if (i != 0) {
+            sb.append(sepReal);
+        }
+        sb.append(new String(<%= get_unsafe.(this, 'i') %>));
+    }
+
+    return sb.toString();
+}
+
+/**
+ * Returns a string representing the specified array and its elements.
+ *
+ * @returns string representation
+ */
+<%= access_public %> <%= override %> toString<%= this_generic %>(<%= this_arg %>): string {
+    return <%= this_call.('join') %>",");
+}
+
+/**
+ * Returns a locale string representing the specified array and its elements.
+ *
+ * @param locales
+ *
+ * @param options
+ *
+ * @returns string representation
+ */
+<%= access_public %> toLocaleString<%= this_generic %>(<%= this_arg %>locales: Object, options: Object): string {
+    throw new Error("Array.toLocaleString: not implemented")
+}
+
+/**
+ * Returns a locale string representing the specified array and its elements.
+ *
+ * @param options
+ *
+ * @returns string representation
+ */
+<%= access_public %> toLocaleString<%= this_generic %>(<%= this_arg %>locales: Object): string {
+    return <%= this_call.('toLocaleString') %>new Object(), new Object())
+}
+
+/**
+ * Returns a locale string representing the specified array and its elements.
+ *
+ * @returns string representation
+ */
+<%= access_public %> <%= override %> toLocaleString<%= this_generic %>(<%= this_arg %>): string {
+    return <%= this_call.('toLocaleString') %>new Object(), new Object())
+}
+
+/**
+ * Copying version of the splice() method.
+ *
+ * @param start index
+ *
+ * @param delete number of items after start index
+ *
+ * @returns a new Array with some elements removed and/or replaced at a given index.
+ */
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start?: Number, delete?: Number): <%= this_type %> {
+    const len = <%= this_len_int %>;
+    return <%= this_call.('toSpliced') %>asIntOrDefault(start, len), asIntOrDefault(delete, len))
+}
+
+/**
+ * Copying version of the splice() method.
+ *
+ * @param start index
+ *
+ * @param delete number of items after start index
+ *
+ * @returns a new Array with some elements removed and/or replaced at a given index.
+ */
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: number, delete: number, ...items: <%= el_type %>[]): <%= this_type %> {
+    const len = <%= this_len_int %>;
+    return <%= this_call.('toSpliced') %>start as int, delete as int, ...items)
+}
+
+/**
+ * Copying version of the splice() method.
+ *
+ * @param start index
+ *
+ * @param delete number of items after start index
+ *
+ * @returns a new Array with some elements removed and/or replaced at a given index.
+ */
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: int, delete: int, ...items: <%= el_type %>[]): <%= this_type %> {
+    const len = <%= this_len_int %>;
+    start = normalizeIndex(start, len);
+    if (delete < 0) {
+        delete = 0;
+    } else if (delete > len) {
+        delete = len;
+    }
+    if (start > len - delete) {
+        delete = len - start
+    }
+    const res = <%= make_buffer.('len - delete + items.length') %>;
+    for (let i = 0; i < start; i++) {
+        res[i] = <%= get_unsafe.(this, 'i') %>
+    }
+    for (let i = 0; i < items.length; i++) {
+        res[start + i] = items[i]
+    }
+    for (let i = start + delete; i < len; i++) {
+        res[i - delete + items.length] = <%= get_unsafe.(this, 'i') %>
+    }
+    return <%= from_buffer.('res') %>;
+}
+
+/**
+ * Copying version of the splice() method.
+ *
+ * @param start index
+ *
+ * @returns a new Array with some elements removed and/or replaced at a given index.
+ */
+<%= access_public %> toSpliced<%= this_generic %>(<%= this_arg %>start: int): <%= this_type %> {
+    return <%= this_call.('toSpliced') %>start, <%= this_len_int %>)
+}
+
+/**
+ * Checks whether an Array includes a certain value among its entries,
+ * returning true or false as appropriate.
+ *
+ * @param val value to search
+ *
+ * @param fromIndex start index
+ *
+ * @returns true if val is in Array
+ */
+<%= access_public %> <%= override %> includes<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex?: Number): boolean {
+    const len = <%= this_len_int %>;
+    const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
+% if ['float', 'double', 'number'].include?(el_type)
+    if (isNaN(val)) {
+        for (let i = fi; i < len; i++) {
+            if (isNaN(<%= get_unsafe.(this, 'i') %>)) {
+                return true;
+            }
+        }
+        return false;
+    }
+% end
+% if ['boolean', 'byte', 'short', 'int', 'long', 'char', 'float', 'double', 'number'].include?(el_type)
+    for (let i = fi; i < len; i++) {
+        if (val == <%= get_unsafe.(this, 'i') %>) {
+            return true;
+        }
+    }
+% else
+    for (let i = fi; i < len; i++) {
+        if (__runtimeSameValueZero(val, <%= get_unsafe.(this, 'i') %>)) {
+            return true;
+        }
+    }
+% end
+    return false;
+}
+
+/**
+ * Returns the first index at which a given element
+ * can be found in the array, or -1 if it is not present.
+ *
+ * @param val value to search
+ *
+ * @param fromIndex index to search from
+ *
+ * @returns index of val, -1 otherwise
+ */
+<%= access_public %> indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex: int): int {
+    fromIndex = normalizeIndex(fromIndex, <%= this_len_int %>)
+    for (let i = fromIndex; i < <%= this_len_int %>; i++) {
+        if (__runtimeEquals(val, <%= get_unsafe.(this, 'i') %>)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Returns the first index at which a given element
+ * can be found in the array, or -1 if it is not present.
+ *
+ * @param val value to search
+ *
+ * @param fromIndex index to search from
+ *
+ * @returns index of val, -1 otherwise
+ */
+<%= access_public %> <%= override %> indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex?: Number): number {
+    return <%= this_call.('indexOf') %>val, asIntOrDefault(fromIndex, 0))
+}
+
+/**
+ * Copying version of the sort() method.
+ * It returns a new array with the elements sorted in ascending order.
+ *
+ * @returns sorted copy of hte current instance using default comparator
+ */
+<%= access_public %> toSorted<%= this_generic %>(<%= this_arg %>): <%= this_type %> {
+    let arr = <%= clone_this %>;
+    <%= arr_method_call.('arr', 'sort') %>)
+    return arr
+}
+
+/**
+ * Copying version of the sort() method.
+ * It returns a new array with the elements sorted in ascending order.
+ *
+ * @param comparator function to compare to elements of the Array
+ *
+ * @returns sorted copy of the current instance comparator
+ */
+<%= access_public %> toSorted<%= this_generic %>(<%= this_arg %>comparator: (a: <%= el_type %>, b: <%= el_type %>) => number): <%= this_type %> {
+    let arr = <%= clone_this %>;
+    <%= arr_method_call.('arr', 'sort') %>comparator)
+    return arr
+}
+
+/**
+ * Modifies `this` instance of `Array` class and populates
+ * it with same elements ordered towards the direction opposite to that previously stated.
+ *
+ * @note Mutating method
+ */
+<%= access_public %> reverse<%= this_generic %>(<%= this_arg %>): <%= this_return_type %> {
+    for (let i = 0; i < <%= this_len_int %> / 2; i++) {
+        const tmp = <%= get_unsafe.(this, 'i') %>;
+        const idx_r = <%= this_len_int %> - 1 - i;
+        const val_r = <%= get_unsafe.(this, 'idx_r') %>;
+        <%= set_unsafe.(this, 'i', 'val_r') %>;
+        <%= set_unsafe.(this, 'idx_r', 'tmp') %>;
+    }
+    return <%= this %>;
+}
+
+/**
+ * Copying version of the reverse() method.
+ * It returns a new array with the elements in reversed order.
+ *
+ * @returns reversed copy of the current Array
+ */
+<%= access_public %> toReversed<%= this_generic %>(<%= this_arg %>): <%= this_type %> {
+    let arr = <%= make_buffer.(this_len_int) %>
+    for(let i = 0; i < <%= this_len_int %>; i++) {
+        arr[<%= this_len_int %> - 1 - i] = <%= get_unsafe.(this, 'i') %>
+    }
+    return <%= from_buffer.('arr') %>
+}
+
+/**
+ * Copying version of using the bracket notation to change the value of a given index.
+ * It returns a new Array with the element at the given index replaced with the given value.
+ *
+ * @param index to replace
+ *
+ * @param value new value
+ *
+ * @returns a new Array with the element at the given index replaced with the given value
+ */
+<%= access_public %> with<%= this_generic %>(<%= this_arg %>index: number, value: <%= el_type %>): <%= this_type %> {
+    return <%= this_call.('with') %>index as int, value)
+}
+
+/**
+ * Copying version of using the bracket notation to change the value of a given index.
+ * It returns a new Array with the element at the given index replaced with the given value.
+ *
+ * @param index to replace
+ *
+ * @param value new value
+ *
+ * @returns a new Array with the element at the given index replaced with the given value
+ */
+<%= access_public %> with<%= this_generic %>(<%= this_arg %>index: int, value: <%= el_type %>): <%= this_type %> {
+    if (index < 0) {
+        index += <%= this_len_int %>;
+    }
+    if (index >= <%= this_len_int %>) {
+        throw new RangeError("Invalid index")
+    }
+    let arr = <%= clone_this %>;
+    <%= set_unsafe.('arr', 'index', 'value') %>;
+    return arr
+}
+
+/**
+ * Returns an iterator over all values
+ */
+<%= access_public %> <%= override %> values<%= this_generic %>(<%= this_arg %>): IterableIterator<<%= el_type %>> {
+    return new ArrayValuesIterator_<%= el_type %><%= this_iterator_generic || this_generic %>(<%= this %>);
+}
+
+/**
+ * Returns an iterator over all entries
+ */
+<%= access_public %> /* <%= override %> */ entries<%= this_generic %>(<%= this_arg %>): IterableIterator<[number, <%= el_type %>]> {
+    return new ArrayEntriesIterator_<%= el_type %><%= this_iterator_generic || this_generic %>(<%= this %>);
+}

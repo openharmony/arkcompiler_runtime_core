@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 - {
-    method_name: copyOf,
+    method_name: slice,
     method_nature: function,
     result_nature: array,
     result_type: "boolean[]",
@@ -47,7 +47,7 @@
       },
   }
 - {
-    method_name: copyOf,
+    method_name: slice,
     method_nature: function,
     result_nature: array,
     result_type: "byte[]",
@@ -77,7 +77,7 @@
       },
   }
 - {
-    method_name: copyOf,
+    method_name: slice,
     method_nature: function,
     result_nature: array,
     result_type: "short[]",
@@ -107,7 +107,7 @@
       },
   }
 - {
-    method_name: copyOf,
+    method_name: slice,
     result_nature: array,
     method_nature: function,
     result_type: "int[]",
@@ -137,7 +137,7 @@
       },
   }
 - {
-    method_name: copyOf,
+    method_name: slice,
     method_nature: function,
     result_nature: array,
     result_type: "long[]",
@@ -167,7 +167,7 @@
       },
   }
 - {
-    method_name: copyOf,
+    method_name: slice,
     method_nature: function,
     result_nature: array,
     result_type: "float[]",
@@ -202,7 +202,7 @@
       },
   }
 - {
-    method_name: copyOf,
+    method_name: slice,
     method_nature: function,
     result_nature: array,
     result_type: "double[]",
@@ -238,7 +238,7 @@
       },
   }
 - {
-    method_name: copyOf,
+    method_name: slice,
     method_nature: function,
     result_nature: array,
     result_type: "char[]",

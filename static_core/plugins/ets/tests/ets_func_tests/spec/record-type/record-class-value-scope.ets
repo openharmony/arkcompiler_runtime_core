@@ -45,7 +45,7 @@ function main() {
     "Chloe": C,
   };
 
-  assert map.size() == 3
+  assert map.size == 3
   assert map.get("John") == J
   assert map.get("Alice") == A
   assert map.get("Chloe") == C
