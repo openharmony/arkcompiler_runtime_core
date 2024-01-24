@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,14 @@
  * limitations under the License.
  */
 
-let counter = 0;
+package std.debug.concurrency;
 
-function add(a: int): String {
-    counter += a;
-    return "Some dummy string"
-}
+export final class CoroutineExtras {
+    public static POLICY_DEFAULT = 0;
+    public static POLICY_NON_MAIN = 1;
 
-export function main(): int {
-    launch add(5);
-    Coroutine.Schedule();
-    if (counter != 5) {
-        console.println("Invalid counter: expected 5 but was " + counter);
-        return 1;
-    }
-    return 0;
+    // returns coroutine worker id, which is the same for coros which are running within the same worker thread
+    public static native getWorkerId(): int;
+    // sets default coroutine affinity
+    public static native setSchedulingPolicy(policy: int): void;
 }

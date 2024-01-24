@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
+#include "plugins/ets/runtime/types/ets_atomic_flag.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_declaration.h"
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_

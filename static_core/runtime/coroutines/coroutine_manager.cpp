@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,16 @@ void CoroutineManager::FreeCoroutineId(uint32_t id)
     os::memory::LockHolder lock(idsLock_);
     ASSERT(coroutineIds_[id]);
     coroutineIds_.reset(id);
+}
+
+void CoroutineManager::SetSchedulingPolicy(CoroutineSchedulingPolicy policy)
+{
+    schedulingPolicy_ = policy;
+}
+
+CoroutineSchedulingPolicy CoroutineManager::GetSchedulingPolicy() const
+{
+    return schedulingPolicy_;
 }
 
 }  // namespace ark

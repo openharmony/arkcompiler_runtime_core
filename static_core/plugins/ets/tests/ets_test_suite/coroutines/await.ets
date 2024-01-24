@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,6 @@
 
 let flag = false
 
-/* konstanting (#I67QXC):
- * currently we have to return an object from any coroutine. This will change
- * once I add autoboxing for the primitive return values
- */
 function set_flag(): String {
     flag = true
     return "Paragliding is awesome!!\n"

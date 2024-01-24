@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -427,7 +427,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
 
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
-    auto *coro = cm->Launch(evt, impl, std::move(args), CoroutineAffinity::SAME_WORKER);
+    auto *coro = cm->Launch(evt, impl, std::move(args), CoroutineLaunchMode::SAME_WORKER);
     if (UNLIKELY(coro == nullptr)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch

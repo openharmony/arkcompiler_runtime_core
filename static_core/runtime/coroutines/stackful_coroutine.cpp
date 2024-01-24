@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,6 +90,8 @@ void StackfulCoroutineContext::CleanUp()
     RetrieveStackInfo(contextStackP, contextStackSize, contextGuardSize);
     ASAN_UNPOISON_MEMORY_REGION(contextStackP, contextStackSize);
 #endif  // PANDA_ASAN_ON
+    worker_ = nullptr;
+    affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
 }
 
 /*static*/ void StackfulCoroutineContext::CoroThreadProc(void *ctx)

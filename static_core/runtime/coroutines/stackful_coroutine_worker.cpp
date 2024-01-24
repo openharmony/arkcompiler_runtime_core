@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,13 +21,16 @@
 namespace ark {
 
 StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager,
-                                                 ScheduleLoopType type, PandaString name)
+                                                 ScheduleLoopType type, PandaString name, size_t id)
     : runtime_(runtime),
       vm_(vm),
       coroManager_(coroManager),
-      id_(os::thread::GetCurrentThreadId()),
-      name_(std::move(name))
+      threadId_(os::thread::GetCurrentThreadId()),
+      name_(std::move(name)),
+      id_(id)
 {
+    ASSERT(id <= stackful_coroutines::MAX_WORKER_ID);
+    LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << id_ << " name=" << name_;
     if (type == ScheduleLoopType::THREAD) {
         std::thread t(&StackfulCoroutineWorker::ThreadProc, this);
         os::thread::SetThreadName(t.native_handle(), name_.c_str());
@@ -148,7 +151,7 @@ void StackfulCoroutineWorker::PrintRunnables(const PandaString &requester)
 
 void StackfulCoroutineWorker::ThreadProc()
 {
-    id_ = os::thread::GetCurrentThreadId();
+    threadId_ = os::thread::GetCurrentThreadId();
     scheduleLoopCtx_ = coroManager_->CreateEntrypointlessCoroutine(runtime_, vm_, false, "[thr_sch] " + GetName());
     scheduleLoopCtx_->GetContext<StackfulCoroutineContext>()->SetWorker(this);
     Coroutine::SetCurrent(scheduleLoopCtx_);
@@ -159,7 +162,7 @@ void StackfulCoroutineWorker::ThreadProc()
     ScheduleLoopBody();
 
     coroManager_->DestroyEntrypointlessCoroutine(scheduleLoopCtx_);
-    ASSERT(id_ == os::thread::GetCurrentThreadId());
+    ASSERT(threadId_ == os::thread::GetCurrentThreadId());
     coroManager_->OnWorkerShutdown();
 }
 
