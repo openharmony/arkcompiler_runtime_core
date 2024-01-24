@@ -720,6 +720,16 @@ spec/types/float_to_string_2.ets
 spec/types/double_to_string_1.ets
 spec/types/double_to_string_2.ets
 ### Issue 15281 end
+### Issue 13952
+spec/interfaces/method_overload1.ets
+spec/interfaces/method_overload2.ets
+spec/interfaces/method_overload3.ets
+spec/interfaces/method_overload4.ets
+### Issue 13952 end
+### Issue 15542
+spec/interfaces/method_overload5.ets
+spec/interfaces/method_overload6.ets
+spec/interfaces/method_overload7.ets
 ### BigInt64Array
 std/core/std_core_typedarrays__BigInt64Array.ets
 ### BigInt64Array end
