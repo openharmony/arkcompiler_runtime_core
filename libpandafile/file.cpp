@@ -596,22 +596,27 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
 
 void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_version, const std::string_view &filename)
 {
+#ifdef FUZZ_TEST
+#define LOG_LEVEL ERROR
+#else
+#define LOG_LEVEL FATAL
+#endif
     if (file_version == version) {
         return;
     }
     if (file_version < minVersion) {
-        LOG(FATAL, PANDAFILE) << "Unable to open file '" << filename << "' with abc file version "
+        LOG(LOG_LEVEL, PANDAFILE) << "Unable to open file '" << filename << "' with abc file version "
             << VersionToString(file_version)
             << ". Minimum supported abc file version on the current system image is " << VersionToString(minVersion)
             << ". Please upgrade the sdk tools to generate supported version of abc files "
             << "or execute the abc file on former version of system image";
     } else if (file_version > version) {
-        LOG(FATAL, PANDAFILE) << "Unable to open file '" << filename << "' with abc file version "
+        LOG(LOG_LEVEL, PANDAFILE) << "Unable to open file '" << filename << "' with abc file version "
             << VersionToString(file_version)
             << ". Maximum supported abc file version on the current system image is " << VersionToString(version)
             << ". Please upgrade the system image or use former version of SDK tools to generate abc files";
     } else if (incompatibleVersion.count(file_version) != 0) {
-        LOG(FATAL, PANDAFILE) << "Unable to open file '" << filename << "' with  abc file version "
+        LOG(LOG_LEVEL, PANDAFILE) << "Unable to open file '" << filename << "' with  abc file version "
             << VersionToString(file_version) << ". Current system image version is "
             << VersionToString(version) << ", while abc file version is " << VersionToString(file_version)
             << ". The version "<< VersionToString(file_version)
@@ -619,6 +624,7 @@ void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_versio
             << ". Please use sdk tools and system image in pairs "
             << "and make the version of sdk tools and system image consistent";
     }
+#undef LOG_LEVEL
 }
 /* static */
 std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)

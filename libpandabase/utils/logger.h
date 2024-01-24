@@ -485,7 +485,8 @@ private:
         panda::Logger::Message(panda::Logger::Level::level, panda::Logger::Component::component, p).GetStream()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, component) _LOG_##level(component, false)
+#define LOG_TRANSFORM(level, component) _LOG_##level(component, false)
+#define LOG(level, component) LOG_TRANSFORM(level, component)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define GET_LOG_STREAM(level, component) \
