@@ -25,6 +25,9 @@ public:
 
     double Predict(const panda::Sequence &seq) const
     {
+        if (seq.IsEmpty()) {
+            return 0;
+        }
         return seq.GetMean() + confidenceFactor_ * seq.GetStdDev();
     }
 

@@ -612,7 +612,7 @@ void G1GC<LanguageConfig>::UpdateCollectionSet(const CollectionSet &collectibleR
 {
     collectionSet_ = collectibleRegions;
     for (auto r : collectionSet_) {
-        // we don't need to reset flag, because we don't reuse collection_set region
+        // we don't need to reset flag, because we don't reuse collectionSet region
         r->AddFlag(RegionFlag::IS_COLLECTION_SET);
         LOG_DEBUG_GC << "dump region: " << *r;
     }
@@ -657,6 +657,11 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
     size_t bytesInHeapBeforeMove = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     {
         ScopedTiming t("G1 GC", *this->GetTiming());
+        uint64_t startCollectionTime = 0;
+        if (this->GetSettings()->G1EnablePauseTimeGoal()) {
+            startCollectionTime = panda::time::GetCurrentTimeInNanos();
+            analytics_.ReportCollectionStart(startCollectionTime);
+        }
         {
             GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
             this->memStats_.Reset();
@@ -668,29 +673,18 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
                     task.collectionType = GCCollectionType::FULL;
                     RunFullGC(task);
                 } else {
-                    bool isMixed = false;
-                    if (task.reason == GCTaskCause::MIXED && !interruptConcurrentFlag_) {
-                        regionGarbageRateThreshold_ = 0;
-                        isMixed = true;
-                    } else {
-                        // Atomic with acquire order reason: to see changes made by GC thread (which do concurrent
-                        // marking and than set is_mixed_gc_required_) in mutator thread which waits for the end of
-                        // concurrent marking.
-                        isMixed = isMixedGcRequired_.load(std::memory_order_acquire);
-                    }
-                    task.collectionType = isMixed ? GCCollectionType::MIXED : GCCollectionType::YOUNG;
-                    auto collectibleRegions = GetCollectibleRegions(task, isMixed);
-                    if (!collectibleRegions.empty() && HaveEnoughSpaceToMove(collectibleRegions)) {
-                        // Ordinary collection flow
-                        RunMixedGC(task, collectibleRegions);
-                    } else {
-                        LOG_DEBUG_GC << "Failed to run gc: "
-                                     << (collectibleRegions.empty() ? "nothing to collect in movable space"
-                                                                    : "not enough free regions to move");
-                    }
+                    TryRunMixedGC(task);
                 }
             }
         }
+
+        if (this->GetSettings()->G1EnablePauseTimeGoal()) {
+            auto endCollectionTime = panda::time::GetCurrentTimeInNanos();
+            g1PauseTracker_.AddPauseInNanos(startCollectionTime, endCollectionTime);
+            analytics_.ReportCollectionEnd(task.reason, endCollectionTime, collectionSet_, true);
+        }
+        collectionSet_.clear();
+
         if (task.reason == GCTaskCause::MIXED) {
             // There was forced a mixed GC. This GC type sets specific settings.
             // So we need to restore them.
@@ -723,6 +717,46 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
     }
     CollectionSet collectionSet = GetFullCollectionSet();
     PrepareYoungRegionsForFullGC(collectionSet);
+    CollectAndMoveTenuredRegions(collectionSet);
+    // Reserve a region to prevent OOM in case a lot of garbage in tenured space
+    GetG1ObjectAllocator()->ReserveRegionIfNeeded();
+    CollectAndMoveYoungRegions(collectionSet);
+    ReleasePagesInFreePools();
+    this->SetFullGC(false);
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::TryRunMixedGC(panda::GCTask &task)
+{
+    bool isMixed = false;
+    if (task.reason == GCTaskCause::MIXED && !interruptConcurrentFlag_) {
+        regionGarbageRateThreshold_ = 0;
+        isMixed = true;
+    } else {
+        // Atomic with acquire order reason: to see changes made by GC thread (which do concurrent
+        // marking and than set isMixedGcRequired_) in mutator thread which waits for the end of
+        // concurrent marking.
+        isMixed = isMixedGcRequired_.load(std::memory_order_acquire);
+    }
+    task.collectionType = isMixed ? GCCollectionType::MIXED : GCCollectionType::YOUNG;
+    // Handle pending dirty cards here to be able to estimate scanning time while adding old regions to
+    // collection set
+    HandlePendingDirtyCards();
+    auto collectibleRegions = GetCollectibleRegions(task, isMixed);
+    if (!collectibleRegions.empty() && HaveEnoughSpaceToMove(collectibleRegions)) {
+        // Ordinary collection flow
+        RunMixedGC(task, collectibleRegions);
+    } else {
+        LOG_DEBUG_GC << "Failed to run gc: "
+                     << (collectibleRegions.empty() ? "nothing to collect in movable space"
+                                                    : "not enough free regions to move");
+    }
+    ReenqueueDirtyCards();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::CollectAndMoveTenuredRegions(const CollectionSet &collectionSet)
+{
     auto curRegionIt = collectionSet.Tenured().begin();
     auto endRegionIt = collectionSet.Tenured().end();
     while (curRegionIt != endRegionIt) {
@@ -731,25 +765,31 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
         while ((curRegionIt != endRegionIt) && (HaveEnoughRegionsToMove(cs.Movable().size() + 1))) {
             Region *region = *curRegionIt;
             curRegionIt++;
-            if (region->GetGarbageBytes() == 0) {
-                double regionFragmentation = region->GetFragmentation();
-                if (regionFragmentation < this->GetSettings()->G1FullGCRegionFragmentationRate()) {
-                    LOG_DEBUG_GC << "Skip region " << *region << " because it has no garbage inside";
-                    continue;
-                }
-                LOG_DEBUG_GC << "Add region " << *region
-                             << " to a collection set because it has a big fragmentation = " << regionFragmentation;
-            } else {
+            if (region->GetGarbageBytes() > 0) {
                 LOG_DEBUG_GC << "Add region " << *region << " to a collection set";
+                cs.AddRegion(region);
+                continue;
             }
+
+            double regionFragmentation = region->GetFragmentation();
+            if (regionFragmentation < this->GetSettings()->G1FullGCRegionFragmentationRate()) {
+                LOG_DEBUG_GC << "Skip region " << *region << " because it has no garbage inside";
+                continue;
+            }
+
+            LOG_DEBUG_GC << "Add region " << *region
+                         << " to a collection set because it has a big fragmentation = " << regionFragmentation;
             cs.AddRegion(region);
         }
         UpdateCollectionSet(cs);
         CollectAndMove<true>(cs);
         LOG_DEBUG_GC << "Iterative full GC, collected " << cs.size() << " regions";
     }
-    // Reserve a region to prevent OOM in case a lot of garbage in tenured space
-    GetG1ObjectAllocator()->ReserveRegionIfNeeded();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::CollectAndMoveYoungRegions(const CollectionSet &collectionSet)
+{
     if (!collectionSet.Young().empty()) {
         CollectionSet cs(collectionSet.Young());
         if (HaveEnoughSpaceToMove(cs)) {
@@ -763,45 +803,42 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
                         << PoolManager::GetMmapMemPool()->GetObjectUsedBytes();
         }
     }
-    {
-        ScopedTiming releasePages("Release Pages in Free Pools", *this->GetTiming());
-        bool useGcWorkers = this->GetSettings()->GCWorkersCount() != 0;
-        if (useGcWorkers) {
-            if (!this->GetWorkersTaskPool()->AddTask(GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS)) {
-                PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
-            }
-        } else {
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ReleasePagesInFreePools()
+{
+    ScopedTiming releasePages("Release Pages in Free Pools", *this->GetTiming());
+    bool useGcWorkers = this->GetSettings()->GCWorkersCount() != 0;
+    if (useGcWorkers) {
+        if (!this->GetWorkersTaskPool()->AddTask(GCWorkersTaskTypes::TASK_RETURN_FREE_PAGES_TO_OS)) {
             PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
         }
+    } else {
+        PoolManager::GetMmapMemPool()->ReleasePagesInFreePools();
     }
-    this->SetFullGC(false);
-    collectionSet_.clear();
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunMixedGC(panda::GCTask &task, const CollectionSet &collectionSet)
 {
     auto startTime = panda::time::GetCurrentTimeInNanos();
-    analytics_.ReportCollectionStart(startTime);
     LOG_DEBUG_GC << "Collect regions size:" << collectionSet.size();
     UpdateCollectionSet(collectionSet);
     RunPhasesForRegions(task, collectionSet);
     auto endTime = panda::time::GetCurrentTimeInNanos();
     this->GetStats()->AddTimeValue(endTime - startTime, TimeTypeStats::YOUNG_TOTAL_TIME);
-    g1PauseTracker_.AddPauseInNanos(startTime, endTime);
-    analytics_.ReportCollectionEnd(endTime, collectionSet);
-    collectionSet_.clear();
 }
 
 template <class LanguageConfig>
 bool G1GC<LanguageConfig>::ScheduleMixedGCAndConcurrentMark(panda::GCTask &task)
 {
     // Atomic with acquire order reason: to see changes made by GC thread (which do concurrent marking and than set
-    // is_mixed_gc_required_) in mutator thread which waits for the end of concurrent marking.
+    // isMixedGcRequired_) in mutator thread which waits for the end of concurrent marking.
     if (isMixedGcRequired_.load(std::memory_order_acquire)) {
         if (!HaveGarbageRegions()) {
             // Atomic with release order reason: to see changes made by GC thread (which do concurrent marking and
-            // than set is_mixed_gc_required_) in mutator thread which waits for the end of concurrent marking.
+            // than set isMixedGcRequired_) in mutator thread which waits for the end of concurrent marking.
             isMixedGcRequired_.store(false, std::memory_order_release);
         }
         return false;  // don't run concurrent mark
@@ -864,6 +901,23 @@ bool G1GC<LanguageConfig>::HaveGarbageRegions()
     // Use GetTopGarbageRegions because it doesn't return current regions
     auto regions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
     return HaveGarbageRegions(regions);
+}
+
+template <class LanguageConfig>
+size_t G1GC<LanguageConfig>::GetOldCollectionSetCandidatesNumber()
+{
+    auto regions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
+    size_t count = 0;
+    while (!regions.empty()) {
+        auto *region = regions.top().second;
+        double garbageRate = static_cast<double>(region->GetGarbageBytes()) / region->Size();
+        if (garbageRate < regionGarbageRateThreshold_) {
+            break;
+        }
+        regions.pop();
+        count++;
+    }
+    return count;
 }
 
 template <class LanguageConfig>
@@ -1033,11 +1087,9 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
     uint64_t youngPauseTime;
     {
         time::Timer timer(&youngPauseTime, true);
-        HandlePendingDirtyCards();
         MemRange dirtyCardsRange = MixedMarkAndCacheRefs(task, collectibleRegions);
         ClearDirtyAndYoungCards(dirtyCardsRange);
         CollectAndMove<false>(collectibleRegions);
-        ReenqueueDirtyCards();
         ClearRefsFromRemsetsCache();
         this->GetObjectGenAllocator()->InvalidateSpaceData();
     }
@@ -1073,6 +1125,8 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
         IterateOverRefsInMemRange(memRange, region, builder);
         return builder.AllCrossRegionRefsProcessed();
     };
+
+    analytics_.ReportMarkingStart(panda::time::GetCurrentTimeInNanos());
     MemRange dirtyCardsRange = CacheRefsFromRemsets(refsChecker);
 
     auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
@@ -1100,7 +1154,6 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
         }
     };
 
-    analytics_.ReportMarkingStart(panda::time::GetCurrentTimeInNanos());
     {
         GCScope<TRACE_TIMING> markingCollectionSetRootsTrace("Marking roots collection-set", this);
 
@@ -1118,7 +1171,7 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
     auto refClearPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
     this->GetPandaVm()->HandleReferences(task, refClearPred);
 
-    analytics_.ReportMarkingEnd(panda::time::GetCurrentTimeInNanos());
+    analytics_.ReportMarkingEnd(panda::time::GetCurrentTimeInNanos(), GetUniqueRemsetRefsCount());
 
     // HandleReferences could write a new barriers - so we need to handle them before moving
     ProcessDirtyCards();
@@ -1423,7 +1476,7 @@ void G1GC<LanguageConfig>::ConcurrentMarking(panda::GCTask &task)
         auto garbageRegions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
         if (HaveGarbageRegions(garbageRegions)) {
             // Atomic with release order reason: to see changes made by GC thread (which do concurrent marking
-            // and than set is_mixed_gc_required_) in mutator thread which waits for the end of concurrent
+            // and than set isMixedGcRequired_) in mutator thread which waits for the end of concurrent
             // marking.
             isMixedGcRequired_.store(true, std::memory_order_release);
         }
@@ -1601,7 +1654,7 @@ CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(panda::GCTask const &t
     ASSERT(!this->IsFullGC());
     ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
     auto g1Allocator = this->GetG1ObjectAllocator();
-    LOG_DEBUG_GC << "Start GetCollectibleRegions is_mixed: " << isMixed << " reason: " << task.reason;
+    LOG_DEBUG_GC << "Start GetCollectibleRegions isMixed: " << isMixed << " reason: " << task.reason;
     CollectionSet collectionSet(g1Allocator->GetYoungRegions());
     if (isMixed) {
         if (!this->GetSettings()->G1EnablePauseTimeGoal()) {
@@ -1610,9 +1663,9 @@ CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(panda::GCTask const &t
             AddOldRegionsAccordingPauseTimeGoal(collectionSet);
         }
     }
-    LOG_DEBUG_GC << "collectible_regions size: " << collectionSet.size() << " young " << collectionSet.Young().size()
+    LOG_DEBUG_GC << "collectibleRegions size: " << collectionSet.size() << " young " << collectionSet.Young().size()
                  << " old " << std::distance(collectionSet.Young().end(), collectionSet.end())
-                 << " reason: " << task.reason << " is_mixed: " << isMixed;
+                 << " reason: " << task.reason << " isMixed: " << isMixed;
     return collectionSet;
 }
 
@@ -1643,43 +1696,57 @@ void G1GC<LanguageConfig>::AddOldRegionsMaxAllowed(CollectionSet &collectionSet)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet)
 {
-    auto gcPauseTimeBudget =
-        static_cast<int64_t>(this->GetSettings()->GetG1MaxGcPauseInMillis() * panda::os::time::MILLIS_TO_MICRO);
-    auto regions = this->GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
+    auto gcPauseTimeBudget = this->GetSettings()->GetG1MaxGcPauseInMillis() * panda::os::time::MILLIS_TO_MICRO;
+    auto candidates = this->GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
     // add at least one old region to guarantee a progress in mixed collection
-    auto *topRegion = regions.top().second;
+    auto *topRegion = candidates.top().second;
     collectionSet.AddRegion(topRegion);
+    auto expectedYoungCollectionTime = analytics_.PredictYoungCollectionTimeInMicros(collectionSet);
     auto expectedTopRegionCollectionTime = analytics_.PredictOldCollectionTimeInMicros(topRegion);
+    auto totalPredictedPause = expectedYoungCollectionTime + expectedTopRegionCollectionTime;
     if (gcPauseTimeBudget < expectedTopRegionCollectionTime) {
         LOG_DEBUG_GC << "Not enough budget to add more than one old region";
+        analytics_.ReportPredictedMixedPause(totalPredictedPause);
         return;
     }
     gcPauseTimeBudget -= expectedTopRegionCollectionTime;
-    auto predictionError = analytics_.EstimatePredictionErrorInMicros();
-    if (gcPauseTimeBudget < predictionError) {
-        LOG_DEBUG_GC << "Not enough budget to add old regions";
-        return;
-    }
-    gcPauseTimeBudget -= predictionError;
-    auto expectedYoungCollectionTime = analytics_.PredictYoungCollectionTimeInMicros(collectionSet.Young().size());
     if (gcPauseTimeBudget < expectedYoungCollectionTime) {
         LOG_DEBUG_GC << "Not enough budget to add old regions";
+        analytics_.ReportPredictedMixedPause(totalPredictedPause);
         return;
     }
     gcPauseTimeBudget -= expectedYoungCollectionTime;
+    auto expectedScanDirtyCardsTime = analytics_.PredictScanDirtyCardsTime(dirtyCards_.size());
+    if (gcPauseTimeBudget < expectedScanDirtyCardsTime) {
+        LOG_DEBUG_GC << "Not enough budget to add old regions after scanning dirty cards";
+        analytics_.ReportPredictedMixedPause(totalPredictedPause);
+        return;
+    }
+    gcPauseTimeBudget -= expectedScanDirtyCardsTime;
+    totalPredictedPause += expectedScanDirtyCardsTime;
 
-    regions.pop();
-    while (!regions.empty()) {
-        auto &scoreAndRegion = regions.top();
+    candidates.pop();
+    totalPredictedPause += AddMoreOldRegionsAccordingPauseTimeGoal(collectionSet, candidates, gcPauseTimeBudget);
+    analytics_.ReportPredictedMixedPause(totalPredictedPause);
+}
+
+template <class LanguageConfig>
+uint64_t G1GC<LanguageConfig>::AddMoreOldRegionsAccordingPauseTimeGoal(
+    CollectionSet &collectionSet, PandaPriorityQueue<std::pair<uint32_t, Region *>> candidates,
+    uint64_t gcPauseTimeBudget)
+{
+    uint64_t time = 0;
+    while (!candidates.empty()) {
+        auto &scoreAndRegion = candidates.top();
         auto *garbageRegion = scoreAndRegion.second;
         ASSERT(!garbageRegion->HasFlag(IS_EDEN));
         ASSERT(!garbageRegion->HasPinnedObjects());
         ASSERT(!garbageRegion->HasFlag(IS_RESERVED));
         ASSERT(garbageRegion->GetAllocatedBytes() != 0U);
 
-        regions.pop();
+        candidates.pop();
 
-        double garbageRate = static_cast<double>(garbageRegion->GetGarbageBytes()) / garbageRegion->GetAllocatedBytes();
+        auto garbageRate = static_cast<double>(garbageRegion->GetGarbageBytes()) / garbageRegion->GetAllocatedBytes();
         if (garbageRate < regionGarbageRateThreshold_) {
             LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec
                          << garbageRate << " %, don't add to collection set";
@@ -1687,18 +1754,19 @@ void G1GC<LanguageConfig>::AddOldRegionsAccordingPauseTimeGoal(CollectionSet &co
         }
 
         auto expectedRegionCollectionTime = analytics_.PredictOldCollectionTimeInMicros(garbageRegion);
-
         if (gcPauseTimeBudget < expectedRegionCollectionTime) {
             LOG_DEBUG_GC << "Not enough budget to add old regions anymore";
             break;
         }
 
         gcPauseTimeBudget -= expectedRegionCollectionTime;
+        time += expectedRegionCollectionTime;
 
         LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec << garbageRate
                      << " %, add to collection set";
         collectionSet.AddRegion(garbageRegion);
     }
+    return time;
 }
 
 template <class LanguageConfig>
@@ -1949,8 +2017,10 @@ MemRange G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &r
     uintptr_t minDirtyAddr = cardTable->GetMinAddress() + cardTable->GetCardsCount() * cardTable->GetCardSize();
     uintptr_t maxDirtyAddr = cardTable->GetMinAddress();
 
+    size_t remsetSize = 0;
     ASSERT(IsCardTableClear(cardTable));
-    auto visitor = [cardTable, &minDirtyAddr, &maxDirtyAddr, &refsChecker](Region *r, const MemRange &range) {
+    auto visitor = [cardTable, &minDirtyAddr, &maxDirtyAddr, &remsetSize, &refsChecker](Region *r,
+                                                                                        const MemRange &range) {
         // Use the card table to mark the ranges we already processed.
         // Each card is uint8_t. Use it as a bitmap. Set bit means the corresponding memory
         // range is processed.
@@ -1963,26 +2033,31 @@ MemRange G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &r
             if (minDirtyAddr > cardAddr) {
                 minDirtyAddr = cardAddr;
             }
-            if (maxDirtyAddr < cardAddr + cardTable->GetCardSize()) {
-                maxDirtyAddr = cardAddr + cardTable->GetCardSize();
+            if (maxDirtyAddr < cardAddr + CardTable::GetCardSize()) {
+                maxDirtyAddr = cardAddr + CardTable::GetCardSize();
             }
+            remsetSize++;
             return refsChecker(range, r);
         }
         // some cross region refs might be not processed
         return false;
     };
-    analytics_.ReportScanRemsetStart(panda::time::GetCurrentTimeInNanos());
     for (auto region : collectionSet_) {
         region->GetRemSet()->Iterate(RemsetRegionPredicate, visitor);
     }
-    analytics_.ReportScanRemsetEnd(panda::time::GetCurrentTimeInNanos());
+
+    analytics_.ReportRemsetSize(remsetSize, GetUniqueRemsetRefsCount());
 
     if (!this->IsFullGC()) {
+        auto dirtyCardsCount = dirtyCards_.size();
+        analytics_.ReportScanDirtyCardsStart(panda::time::GetCurrentTimeInNanos());
         CacheRefsFromDirtyCards(visitor);
+        analytics_.ReportScanDirtyCardsEnd(panda::time::GetCurrentTimeInNanos(), dirtyCardsCount);
 #ifndef NDEBUG
         uniqueCardsInitialized_ = true;
 #endif  // NDEBUG
     }
+
     if (minDirtyAddr > maxDirtyAddr) {
         minDirtyAddr = maxDirtyAddr;
     }
@@ -2210,26 +2285,28 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDelay()
 template <class LanguageConfig>
 size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
 {
-    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
-    // on other reads or writes
-    if (isMixedGcRequired_.load(std::memory_order_relaxed)) {
-        // Schedule next mixed collections as often as possible to maximize old regions collection
-        return 1;
-    }
-
     // Calculate desired_eden_size according to pause time goal
     size_t minEdenLength = 1;
     size_t maxEdenLength =
         GetG1ObjectAllocator()->GetHeapSpace()->GetMaxYoungSize() / GetG1ObjectAllocator()->GetRegionSize();
 
-    auto predictionError = analytics_.EstimatePredictionErrorInMicros();
-    auto maxPause =
-        static_cast<int64_t>(this->GetSettings()->GetG1MaxGcPauseInMillis() * panda::os::time::MILLIS_TO_MICRO);
-    auto edenLengthPredicate = [this, predictionError, maxPause](size_t edenLength) {
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    if (isMixedGcRequired_.load(std::memory_order_relaxed)) {
+        auto oldCandidates = GetOldCollectionSetCandidatesNumber();
+        if (oldCandidates >= maxEdenLength) {
+            // Schedule next mixed collections as often as possible to maximize old regions collection
+            return 1;
+        }
+        maxEdenLength -= oldCandidates;
+    }
+
+    auto maxPause = this->GetSettings()->GetG1MaxGcPauseInMillis() * panda::os::time::MILLIS_TO_MICRO;
+    auto edenLengthPredicate = [this, maxPause](size_t edenLength) {
         if (!HaveEnoughRegionsToMove(edenLength)) {
             return false;
         }
-        auto pauseTime = predictionError + analytics_.PredictYoungCollectionTimeInMicros(edenLength);
+        auto pauseTime = analytics_.PredictYoungCollectionTimeInMicros(edenLength);
         return pauseTime <= maxPause;
     };
 
@@ -2303,6 +2380,16 @@ bool G1GC<LanguageConfig>::Trigger(PandaUniquePtr<GCTask> task)
         return false;
     }
     return GenerationalGC<LanguageConfig>::Trigger(std::move(task));
+}
+
+template <class LanguageConfig>
+size_t G1GC<LanguageConfig>::GetUniqueRemsetRefsCount() const
+{
+    size_t count = 0;
+    for (const auto *v : uniqueRefsFromRemsets_) {
+        count += v->size();
+    }
+    return count;
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GC);

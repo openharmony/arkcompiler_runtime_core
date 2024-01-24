@@ -159,6 +159,7 @@ private:
     void CreateUpdateRemsetWorker();
     void ProcessDirtyCards();
     bool HaveGarbageRegions();
+    size_t GetOldCollectionSetCandidatesNumber();
 
     bool HaveGarbageRegions(const PandaPriorityQueue<std::pair<uint32_t, Region *>> &regions);
 
@@ -199,6 +200,9 @@ private:
     void RunPhasesImpl(GCTask &task) override;
 
     void RunFullGC(panda::GCTask &task);
+    void TryRunMixedGC(panda::GCTask &task);
+    void CollectAndMoveTenuredRegions(const CollectionSet &collectionSet);
+    void CollectAndMoveYoungRegions(const CollectionSet &collectionSet);
 
     void RunMixedGC(panda::GCTask &task, const CollectionSet &collectionSet);
 
@@ -338,6 +342,10 @@ private:
     CollectionSet GetCollectibleRegions(panda::GCTask const &task, bool isMixed);
     void AddOldRegionsMaxAllowed(CollectionSet &collectionSet);
     void AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet);
+    uint64_t AddMoreOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet,
+                                                     PandaPriorityQueue<std::pair<uint32_t, Region *>> candidates,
+                                                     uint64_t gcPauseTimeBudget);
+    void ReleasePagesInFreePools();
 
     CollectionSet GetFullCollectionSet();
 
@@ -415,6 +423,8 @@ private:
     }
 
     void EnsurePreWrbDisabledInThreads();
+
+    size_t GetUniqueRemsetRefsCount() const;
 
     G1GCPauseMarker<LanguageConfig> marker_;
     G1GCConcurrentMarker<LanguageConfig> concMarker_;
