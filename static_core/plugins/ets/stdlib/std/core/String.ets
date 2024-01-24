@@ -741,13 +741,13 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         }
         let s = this.getLength()
         if (s == 0) {
-            let z = String.splitMatch(this, 0, separator )
+            let z = String.splitMatch(this, 0, separator)
             if (z != -1) {
                 return new String[0]
             }
             return [(this)]
         }
-        let splittedStrings = new ArrayAsListString()
+        let splittedStrings = new NullableStringArray(s)
         let lastStart = 0
         for (let lastEnd = 0; lastEnd < s;) {
             let separatorRight = String.splitMatch(this, lastEnd, separator)
@@ -756,7 +756,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
                 let substr = this.substring(lastStart, lastEnd)
                 splittedStrings.pushBack(substr)
                 if (splittedStrings.size() == lim) {
-                    return splittedStrings.toArray()
+                    return splittedStrings.toArray() as String[]
                 }
                 lastStart = separatorRight
                 lastEnd = lastStart
@@ -766,7 +766,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         }
         let substr = this.substring(lastStart, s)
         splittedStrings.pushBack(substr)
-        return splittedStrings.toArray()
+        return splittedStrings.toArray() as String[]
     }
 
     /**
@@ -1556,8 +1556,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         }
         let preceding = this.substring(0, position)
         let following = this.substring(position + searchLength)
-        let captures = new ArrayAsListString()
-        let replacement = String.getSubstitution(searchValue, this, position as int, captures.toArray(), undefined, replaceValue)
+        let replacement = String.getSubstitution(searchValue, this, position as int, new String[0], undefined, replaceValue)
         return preceding + replacement + following
     }
 
@@ -1638,8 +1637,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
             let p = arrayMatchPositions[i].unboxed()
             let preserved = this.substring(endOfLastMatch, p)
-            let captures = new ArrayAsListString()
-            let replacement = String.getSubstitution(searchValue, this, p, captures.toArray(), undefined, replaceValue)
+            let replacement = String.getSubstitution(searchValue, this, p, new String[0], undefined, replaceValue)
             result = result + preserved + replacement
             endOfLastMatch = p + searchLength
         }
@@ -1691,10 +1689,10 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
             let p = arrayMatchPositions[i].unboxed()
             let preserved = this.substring(endOfLastMatch, p)
-            let args = new ArrayAsListObject()
+            let args = new NullableObjectArray(2)
             args.pushBack(Double.valueOf(p))
             args.pushBack(this)
-            let replacement = replacer(searchValue, args.toArray())
+            let replacement = replacer(searchValue, args.toArray() as Object[])
             result = result + preserved + replacement
             endOfLastMatch = p + searchLength
         }

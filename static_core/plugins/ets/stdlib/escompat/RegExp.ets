@@ -452,13 +452,13 @@ export class RegExp extends Object {
             let matched = result.get(0);
             let matchLength = matched.getLength();
             let position = max(min(result.index, lengthS), 0) as int;
-            let captures = new ArrayAsListString();
+            let captures = new NullableStringArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.get(n);
                 captures.pushBack(capN)
             }
             let namedCaptures = /*result.groups*/ undefined;
-            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), namedCaptures, replaceValue)
+            let replacement = String.getSubstitution(matched, str, position as int, captures.toArray() as String[], namedCaptures, replaceValue)
             if (position >= nextSourcePosition) {
                 accumulatedResult += str.substring(nextSourcePosition, position) + replacement
                 nextSourcePosition = position + matchLength
@@ -501,7 +501,7 @@ export class RegExp extends Object {
             let matched = result.get(0);
             let matchLength = matched.getLength();
             let position = max(min(result.index, lengthS), 0) as int;
-            let args = new ArrayAsListObject();
+            let args = new NullableObjectArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.get(n);
                 args.pushBack(capN)
@@ -512,7 +512,7 @@ export class RegExp extends Object {
             if (namedCaptures != undefined) {
                 args.pushBack(namedCaptures as Object)
             }
-            let replacement = replacer(matched, args.toArray());
+            let replacement = replacer(matched, args.toArray() as Object[]);
             if (position >= nextSourcePosition) {
                 accumulatedResult += str.substring(nextSourcePosition, position) + replacement
                 nextSourcePosition = position + matchLength
@@ -529,12 +529,11 @@ export class RegExp extends Object {
         let unicodeMatching = this.unicode
         let newFlags = this.sticky ? this.flags : this.flags + "y";
         let splitter = new RegExp(this.pattern_, newFlags)
-        let splittedStrings = new ArrayAsListString()
         let lim: long;
         if (limit == undefined) {
             lim = (1 << 32) -1
         } else if (limit! == 0) {
-            return splittedStrings.toArray()
+            return new String[0]
         } else {
             lim = limit!.unboxed() as long
         }
@@ -542,11 +541,11 @@ export class RegExp extends Object {
         if (size == 0) {
             let z = splitter.exec(str)
             if (z != null) {
-                return splittedStrings.toArray()
+                return new String[0]
             }
-            splittedStrings.pushBack(str)
-            return splittedStrings.toArray()
+            return [str]
         }
+        let splittedStrings = new NullableStringArray()
         let lastStart = 0
         for (let lastEnd = 0; lastEnd < size;) {
             splitter.lastIndex = lastEnd
@@ -561,7 +560,7 @@ export class RegExp extends Object {
                     let substr = str.substring(lastStart, lastEnd)
                     splittedStrings.pushBack(substr)
                     if (splittedStrings.size() == lim) {
-                        return splittedStrings.toArray()
+                        return splittedStrings.toArray() as String[]
                     }
                     lastStart = separatorRight
                     let numberOfCaptures = z!.length;
@@ -569,7 +568,7 @@ export class RegExp extends Object {
                         let nextCapture = z!.get(i);
                         splittedStrings.pushBack(nextCapture)
                         if (splittedStrings.size() == lim) {
-                            return splittedStrings.toArray()
+                            return splittedStrings.toArray() as String[]
                         }
                     }
                     lastEnd = lastStart
@@ -578,15 +577,15 @@ export class RegExp extends Object {
         }
         let substr = str.substring(lastStart, size)
         splittedStrings.pushBack(substr)
-        return splittedStrings.toArray()
+        return splittedStrings.toArray() as String[]
     }
 
     public match(str: String): RegExpMatchArray | null {
         if (!this.global) {
             return this.exec(str)
         }
-        this.lastIndex = 0
-        let matches = new ArrayAsListString()
+        this.lastIndex = 0;
+        let matches = new NullableStringArray();
         let n = 0
         while (true) {
             let result = this.exec(str)
@@ -594,7 +593,7 @@ export class RegExp extends Object {
                 if (n == 0) {
                     return null
                 }
-                return new RegExpMatchArray(-1, "", matches.toArray())
+                return new RegExpMatchArray(-1, "", matches.toArray() as String[])
             }
             else {
                 let matchStr = result!.get(0)
