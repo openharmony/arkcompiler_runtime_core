@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,16 +126,6 @@ uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
     return static_cast<uint8_t>(owner->StringsAreEqual(s));
 }
 
-int32_t StdCoreStringSearch(EtsString *thisStr, EtsString *reg)
-{
-    PandaVector<uint8_t> buf;
-    auto thisS = std::string(thisStr->ConvertToStringView(&buf));
-    auto regex = std::string(reg->ConvertToStringView(&buf));
-
-    std::regex e(regex);
-    return std::sregex_iterator(thisS.begin(), thisS.end(), e)->position();
-}
-
 EtsString *StdCoreStringMatch(EtsString *thisStr, EtsString *reg)
 {
     PandaVector<uint8_t> buf;
@@ -248,24 +238,10 @@ uint8_t StdCoreStringIsWellFormed(EtsString *thisStr)
     return UINT8_C(1);
 }
 
-EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *locale)
+EtsString *ToLowerCase(EtsString *thisStr, const icu::Locale &locale)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-
-    icu::Locale loc;
-    UErrorCode status = U_ZERO_ERROR;
-    if (locale != nullptr) {
-        PandaVector<uint8_t> buf;
-        std::string_view locTag = locale->ConvertToStringView(&buf);
-        icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
-        loc = icu::Locale::forLanguageTag(sp, status);
-        if (UNLIKELY(U_FAILURE(status))) {
-            std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
-            ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
-            return nullptr;
-        }
-    }
 
     icu::UnicodeString utf16Str;
     if (thisStr->IsUtf16()) {
@@ -274,29 +250,14 @@ EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *locale)
         utf16Str = icu::UnicodeString {utf::Mutf8AsCString(thisStr->GetDataMUtf8()),
                                        static_cast<int32_t>(thisStr->GetLength())};
     }
-
-    auto res = utf16Str.toLower(loc);
+    auto res = utf16Str.toLower(locale);
     return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
 }
 
-EtsString *StdCoreStringToLocaleUpperCase(EtsString *thisStr, EtsString *locale)
+EtsString *ToUpperCase(EtsString *thisStr, const icu::Locale &locale)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-
-    icu::Locale loc;
-    UErrorCode status = U_ZERO_ERROR;
-    if (locale != nullptr) {
-        PandaVector<uint8_t> buf;
-        std::string_view locTag = locale->ConvertToStringView(&buf);
-        icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
-        loc = icu::Locale::forLanguageTag(sp, status);
-        if (UNLIKELY(U_FAILURE(status))) {
-            std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
-            ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
-            return nullptr;
-        }
-    }
 
     icu::UnicodeString utf16Str;
     if (thisStr->IsUtf16()) {
@@ -305,28 +266,70 @@ EtsString *StdCoreStringToLocaleUpperCase(EtsString *thisStr, EtsString *locale)
         utf16Str = icu::UnicodeString {utf::Mutf8AsCString(thisStr->GetDataMUtf8()),
                                        static_cast<int32_t>(thisStr->GetLength())};
     }
-
-    auto res = utf16Str.toUpper(loc);
+    auto res = utf16Str.toUpper(locale);
     return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
 }
 
-ets_short StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsString *localeStr)
+UErrorCode ParseSingleBCP47LanguageTag(EtsString *langTag, icu::Locale &locale)
 {
-    ASSERT(thisStr != nullptr && cmpStr != nullptr);
-    icu::Locale loc;
+    PandaVector<uint8_t> buf;
+    std::string_view locTag = langTag->ConvertToStringView(&buf);
+    icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
     UErrorCode status = U_ZERO_ERROR;
-    if (localeStr != nullptr) {
-        PandaVector<uint8_t> buf;
-        std::string_view locTag = localeStr->ConvertToStringView(&buf);
-        icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
-        loc = icu::Locale::forLanguageTag(sp, status);
-        if (UNLIKELY(U_FAILURE(status))) {
-            EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-            std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
-            ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
-            return 0;
-        }
+    locale = icu::Locale::forLanguageTag(sp, status);
+    return status;
+}
+
+EtsString *StdCoreStringToUpperCase(EtsString *thisStr)
+{
+    return ToUpperCase(thisStr, icu::Locale::getDefault());
+}
+
+EtsString *StdCoreStringToLowerCase(EtsString *thisStr)
+{
+    return ToLowerCase(thisStr, icu::Locale::getDefault());
+}
+
+EtsString *StdCoreStringToLocaleUpperCase(EtsString *thisStr, EtsString *langTag)
+{
+    ASSERT(langTag != nullptr);
+
+    icu::Locale locale;
+    auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, locale);
+    if (UNLIKELY(U_FAILURE(localeParseStatus))) {
+        auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return nullptr;
     }
+    return ToUpperCase(thisStr, locale);
+}
+
+EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *langTag)
+{
+    ASSERT(langTag != nullptr);
+
+    icu::Locale locale;
+    auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, locale);
+    if (UNLIKELY(U_FAILURE(localeParseStatus))) {
+        auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return nullptr;
+    }
+    return ToLowerCase(thisStr, locale);
+}
+
+ets_short StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsString *langTag)
+{
+    ASSERT(thisStr != nullptr && cmpStr != nullptr && langTag != nullptr);
+
+    icu::Locale locale;
+    auto status = ParseSingleBCP47LanguageTag(langTag, locale);
+    if (UNLIKELY(U_FAILURE(status))) {
+        auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return 0;
+    }
+
     icu::UnicodeString source;
     if (thisStr->IsUtf16()) {
         source = icu::UnicodeString {thisStr->GetDataUtf16(), static_cast<int32_t>(thisStr->GetUtf16Length())};
@@ -342,10 +345,10 @@ ets_short StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsStrin
             icu::UnicodeString {utf::Mutf8AsCString(cmpStr->GetDataMUtf8()), static_cast<int32_t>(cmpStr->GetLength())};
     }
     status = U_ZERO_ERROR;
-    std::unique_ptr<icu::Collator> myCollator(icu::Collator::createInstance(loc, status));
+    std::unique_ptr<icu::Collator> myCollator(icu::Collator::createInstance(locale, status));
     if (UNLIKELY(U_FAILURE(status))) {
         icu::UnicodeString dispName;
-        loc.getDisplayName(dispName);
+        locale.getDisplayName(dispName);
         std::string localeName;
         dispName.toUTF8String(localeName);
         LOG(FATAL, ETS) << "Failed to create the collator for " << localeName;

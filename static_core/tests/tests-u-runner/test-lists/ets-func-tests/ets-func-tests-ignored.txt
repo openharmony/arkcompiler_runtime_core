@@ -71,13 +71,8 @@ std/math/std_math_sqrt_double.ets
 std/math/std_math_tanh_double.ets
 std/math/std_math_trunc_double.ets
 ### Issue 11712 end
-### Issue 12527
-std/core/std_core_char_instance_Char_isWhiteSpace.ets
-std/core/std_core_char_instance_Char_isWhiteSpace_001.ets
-std/core/std_core_char_static_Char_isWhiteSpace.ets
-std/core/std_core_char_static_Char_isWhiteSpace_003.ets
-### Issue 12527 end
 ### Issue 12782 begin
+
 std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_byte_array_int_int.ets
 std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_byte_array_int.ets
 std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_char_array_int_int.ets
@@ -180,6 +175,12 @@ spec/unions/union_14722_01.ets
 spec/unions/union_14722_02.ets
 ### Issue 14585
 spec/unions/union_param_11_01.ets
+### Issue 15312
+spec/unions/union_assignment_01.ets
+spec/unions/union_assignment_02.ets
+spec/unions/union_binary_01.ets
+spec/unions/union_binary_03.ets
+spec/unions/union_plus_01.ets
 ### End of Unions
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
@@ -204,6 +205,14 @@ spec/conditional-expression/nullish_expr/expr/undefined-object-expression.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-while.ets
+### Issue 14736 begin
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-1.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-2.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-3.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-4.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-7.ets
+spec/conditional-expression/nullish_expr/expr/nonnull-object-expression-8.ets
+### Issue 14736 end
 ### issue 14258
 spec/conditional-expression/string/expr/string-expression-assert.ets
 ### issue 14299 (incorrect behavior for tests with boxed type like new Short(0))
@@ -274,6 +283,11 @@ spec/struct-type/test-use-struct-with-not-user-type_0.ets
 spec/struct-type/test-use-struct-with-not-user-type_1.ets
 spec/struct-type/test-use-struct-with-not-user-type_2.ets
 ### EOF Negative tests
+### Temporary disabled test accroding task I8EM2T
+spec/struct-type/test-struct-no-annotation.ets
+spec/struct-type/test-use-struct-as-name_0.ets
+spec/struct-type/test-use-struct-as-name_1.ets
+### EOF Temporary disabled test accroding task I8EM2T
 ### EOF ArkUI struct
 
 ### Start enum
@@ -513,6 +527,10 @@ spec/nullables/nullable-lambda-default-param_5.ets
 spec/generic/issue14751.ets
 ### Issue 14752
 spec/generic/issue14752.ets
+### Issue 13438
+spec/generic/issue13438_0.ets
+spec/generic/issue13438_1.ets
+spec/generic/issue14498.ets
 ### Issue 14498
 spec/generic/generic_03.ets
 ### Issue 13642
@@ -560,10 +578,35 @@ spec/import_export/06.top-level_declarations/01.exported_declarations/exported_d
 spec/import_export/07.export_directives/01.selective_export_directive/selective_export_directive_01.ets
 spec/import_export/07.export_directives/01.selective_export_directive/re-export_directive_02.ets
 spec/import_export/07.export_directives/03.re-export_directives/re-export_directive_02.ets
+spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_04.ets
 ### Issue 14658
 spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
 spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
+### Issue 15312
+std/core/std_core_string_String_fromCharCode_005.ets
+std/core/std_core_string_String_search_String_002.ets
+std/core/std_core_string_String_localeCompare_string.ets
+std/core/std_core_string_String_localeCompare_string_001.ets
+### Issue 15119
+std/core/std_core_string_String_fromCharCode_004.ets
+### Not implemented
+std/core/std_core_string_String_split_RegExp.ets
+std/core/std_core_string_String_split_RegExp_int.ets
+std/core/std_core_string_String_split_RegExp_number.ets
+std/core/std_core_string_String_search_RegExp.ets
+std/core/std_core_string_String_search_String.ets
+std/core/std_core_string_String_replaceAll_RegExp_String.ets
+std/core/std_core_string_String_replace_RegExp_String.ets
+std/core/std_core_string_String_match_RegExp.ets
+std/core/std_core_string_String_match_String.ets
+### Issue 14343
+spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_03.ets
+spec/import_export/07.export_directives/03.re-export_directives/re_export_all_2.ets
+### Issue 13934
+spec/import_export/07.export_directives/01.selective_export_directive/selective_export_directive_03.ets
+### Issue 14571
+spec/import_export/07.export_directives/02.export_type_directives/import_type_alias_with_qualified_access.ets
 ### Negative tests
 spec/import_export/03.import_directives/import_unexported_class.ets
 spec/import_export/03.import_directives/non_linux_path_separators.ets
@@ -584,6 +627,8 @@ spec/import_export/07.export_directives/02.export_type_directives/to_export_nega
 spec/import_export/07.export_directives/03.re-export_directives/re-export_all.ets
 spec/import_export/07.export_directives/03.re-export_directives/re-export_not_all.ets
 spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
+spec/import_export/07.export_directives/03.re-export_directives/to_export_2.ets
+spec/import_export/07.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 ### End of Import-export
 ### Issue 14675, 14769, 14841
 escompat/ArrayBufferTest2.ets
@@ -619,3 +664,80 @@ spec/functions/overrideModifier_03.ets
 spec/functions/subtypingWithFunctionsRequiresExplicitType_02.ets
 spec/functions/subtypingWithFunctionsRequiresExplicitType_03.ets
 ### End functions issues
+### Built-In Component Two Way Value Synchronization
+### Negative tests
+arkui/dollar_dollar_06.ets
+arkui/dollar_dollar_07.ets
+### Used only with ARKUI plugin
+arkui/dollar_dollar_01.ets
+arkui/dollar_dollar_02.ets
+arkui/dollar_dollar_03.ets
+arkui/dollar_dollar_04.ets
+arkui/dollar_dollar_05.ets
+arkui/dollar_dollar_08.ets
+arkui/dollar_dollar_09.ets
+arkui/dollar_dollar_10.ets
+arkui/dollar_dollar_11.ets
+arkui/dollar_dollar_12.ets
+arkui/dollar_dollar_13.ets
+### End Of Built-In Component Two Way Value Synchronization
+### Annotations issues
+### Issue 14040 -> Annotations not yet implemented
+spec/annotations/annotation_@Builder.ets
+spec/annotations/annotation_@Builder_2.ets
+spec/annotations/annotation_@Component.ets
+spec/annotations/annotation_@Consume.ets
+spec/annotations/annotation_@Entry.ets
+spec/annotations/annotation_@Link.ets
+spec/annotations/annotation_@Link_2.ets
+spec/annotations/annotation_@LocalStorageLink.ets
+spec/annotations/annotation_@ObjectLink.ets
+spec/annotations/annotation_@Observed.ets
+spec/annotations/annotation_@Prop.ets
+spec/annotations/annotation_@Provide.ets
+spec/annotations/annotation_@State.ets
+spec/annotations/annotation_@State_2.ets
+spec/annotations/annotation_@State_3.ets
+spec/annotations/annotation_@StorageLink.ets
+spec/annotations/annotation_@StorageLink_2.ets
+spec/annotations/annotation_@Watch.ets
+spec/annotations/annotation_@Watch_2.ets
+### End of Issue 14040
+### End of Annotations
+### Issue 14738 begin
+spec/bigint/bigint-arithmetic-comparison-18.ets
+spec/bigint/bigint-arithmetic-comparison-19.ets
+### Issue 14738 end
+### Issue 14476 begin
+spec/bigint/bigint-arithmetic-dec-2.ets
+spec/bigint/bigint-arithmetic-inc-2.ets
+### Issue 14476 end
+### Issue I8MB96 begin
+spec/bigint/bigint-arithmetic-mul-3-operands.ets
+spec/bigint/bigint-arithmetic-mul-4-operands.ets
+spec/bigint/bigint-arithmetic-div-3-operands.ets
+spec/bigint/bigint-arithmetic-div-4-operands.ets
+spec/bigint/bigint-arithmetic-expr-4-operands.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-1.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-2.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-3.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-4.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-5.ets
+### Issue I8MB96 end
+### Issue 14907 begin
+spec/bigint/bigint-arithmetic-add-2-operands-union.ets
+spec/bigint/bigint-arithmetic-div-2-operands-union.ets
+spec/bigint/bigint-arithmetic-mul-2-operands-union.ets
+spec/bigint/bigint-arithmetic-sub-2-union.ets
+### Issue 14907 end
+### Issue 15096
+algorithms/SampleAppTest.ets
+### for of is not implemented
+spec/for_of/for-of-s01-string-01.ets
+spec/for_of/for_of_08.ets
+spec/for_of/for_of_09.ets
+spec/for_of/for_of_10.ets
+spec/for_of/for_of_11.ets
+spec/for_of/for-of-s01-array-08.ets
+spec/for_of/for-of-s01-array-10.ets
+### end for of

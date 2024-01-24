@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
 
     /**
      * Constructs a new Double instance with initial value zero
+     *
      */
     public constructor() {
         this.value = 0.0;
@@ -32,6 +33,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Constructs a new Double instance with provided initial value
      *
      * @param value the initial value
+     *
      */
     public constructor(value: double) {
         this.value = value;
@@ -41,6 +43,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Constructs a new Double instance with provided initial value
      *
      * @param value the initial value
+     *
      */
     public constructor(value: Double) {
         this.value = value.doubleValue();
@@ -59,6 +62,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Returns value of this instance as a primitive
      *
      * @returns value of this instance
+     * @tag arkts
      */
     public unboxed(): double {
         return this.value;
@@ -70,6 +74,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param value value to box
      *
      * @returns boxed value
+     * @tag arkts
      */
     public static valueOf(value: double): Double {
         // TODO(ivan-tyulyandin): caching is possible
@@ -90,62 +95,74 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     /**
      * Minimal value that this type can have as a double
      * the workarond for libc's double literal parsing bug
+     *
      */
     public static readonly MIN_VALUE: double = 4.9e-300 / 1.e+24;
 
     /**
      * Maximal value that this type can have as a double
+     *
      */
     public static readonly MAX_VALUE: double = 1.7976931348623157e+308;
 
     /**
      * Maximal integer value that can be used as a double without loss of precision
+     *
      */
     public static readonly MAX_SAFE_INTEGER: double = 9007199254740991;
 
     /**
      * Minimal integer value that can be used as a double without loss of precision
+     *
      */
     public static readonly MIN_SAFE_INTEGER: double = -9007199254740991;
 
     /**
      * Size of this type in bits
+     * @tag arkts
      */
     public static readonly BIT_SIZE: byte = 64;
 
     /**
      * Size of this type in bytes
+     * @tag arkts
      */
     public static readonly BYTE_SIZE: byte = 8;
 
     /**
      * Represents the NaN value according to IEEE-754 specification
+     *
      */
     public static readonly NaN: double = 0.0 / 0.0;
 
     /**
      * Represents the +Infinity value according to IEEE-754 specification
+     *
      */
     public static readonly POSITIVE_INFINITY: double = 1.0 / 0.0;
 
     /**
      * Represents the -Infinity value according to IEEE-754 specification
+     *
      */
     public static readonly NEGATIVE_INFINITY: double = -1.0 / 0.0;
 
     /**
      * Number of significant precision bits in this floating type
+     * @tag arkts
      */
     public static readonly PRECISION: byte = 53;
 
     /**
      * Minimal possible difference between two double values.
      * For double (IEEE-754 binary64) it is 2^(-52) and its bit representation is 0x3cb0000000000000.
+     * @tag arkts
      */
     public static readonly DELTA: double = Double.bitCastFromLong(0x3cb0000000000000);
 
     /**
      * Minimal possible difference between two double values
+     *
      */
     public static readonly EPSILON: double = Double.DELTA;
 
@@ -154,6 +171,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Returns value of this instance
      *
      * @returns value as byte
+     * @tag arkts
      */
     public override byteValue(): byte {
         return this.value as byte;
@@ -163,6 +181,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Returns value of this instance
      *
      * @returns value as short
+     * @tag arkts
      */
     public override shortValue(): short {
         return this.value as short;
@@ -172,6 +191,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Returns value of this instance
      *
      * @returns value as int
+     * @tag arkts
      */
     public override intValue(): int {
         return this.value as int;
@@ -181,6 +201,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Returns value of this instance
      *
      * @returns value as long
+     * @tag arkts
      */
     public override longValue(): long {
         return this.value as long;
@@ -190,6 +211,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Returns value of this instance
      *
      * @returns value as float
+     * @tag arkts
      */
     public override floatValue(): float {
         return this.value as float;
@@ -199,6 +221,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Returns value of this instance
      *
      * @returns value as double
+     * @tag arkts
      */
     public override doubleValue(): double {
         return this.value;
@@ -213,19 +236,28 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Double object to compare with
      *
      * @returns result of the comparison
+     * @tag arkts
      */
     public override compareTo(other: Double): int {
         return (this.value - other.unboxed()) as int;
     }
 
-    /* toString(d: double, r: int): String -- returns a string representation of d by radix r
+    /**
+     * toString(d: double, r: int): String -- returns a string representation of d by radix r
+     * @tag arkts
      */
     public static native toString(d: double, r: int): String;
 
+    /**
+     * @tag arkts
+     */
     public static toString(d: double): String {
         return Double.toString(d, 10);
     }
 
+    /**
+     * @tag arkts
+     */
     public toString(r: int): String {
         return Double.toString(this.value, r);
     }
@@ -234,6 +266,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Converts this object to a string
      *
      * @returns result of the conversion
+     *
      */
     public override toString(): String {
         return Double.toString(this.value, 10);
@@ -245,6 +278,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @remark
      * Implemented as native function,  @see `toLocaleString()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#741).
      * @returns result of the conversion in a local representation
+     *
      */
     public native toLocaleString(locale: String): String;
 
@@ -252,6 +286,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Without an argument method returns just toString value
      *
      * @returns result of the conversion
+     *
      */
     public toLocaleString(): String {
         return Double.toString(this.value, 10);
@@ -261,8 +296,9 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Returns a hash code (integer representation) for this instance
      *
      * @returns representation of this instance
+     * @tag arkts
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         return this.intValue();
     }
 
@@ -274,6 +310,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param rhs right-hand side double for comparison
      *
      * @returns true if lhs and rhs are equal with respect to Double.DELTA
+     * @tag arkts
      */
     public static compare(lhs: double, rhs: double): boolean {
         return (abs(lhs - rhs) <= Double.DELTA)
@@ -286,10 +323,15 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      * @returns true if provided object and this instance have same value, false otherwise
      * Returns false if type of provided object is not the same as this type
+     * @tag arkts
      */
     public override equals(other: NullishType): boolean {
         if (other instanceof Double) {
-            return Double.compare(this.value, (other as Double).unboxed());
+            const r = (other as Double).unboxed();
+            if (this.value == r) {
+                return true;
+            }
+            return Double.compare(this.value, r);
         }
         return false;
     }
@@ -300,6 +342,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param v the double to test
      *
      * @returns true if the argument is NaN
+     *
      */
     public static isNaN(v: double): boolean {
         // IEEE-754 feature
@@ -310,6 +353,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * isNaN() checks if the underlying double is NaN (not a number)
      *
      * @returns true if the underlying double is NaN
+     * @tag arkts
      */
     public isNaN(): boolean {
         return Double.isNaN(this.value);
@@ -321,6 +365,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param v the double to test
      *
      * @returns true if the argument is a floating point value
+     *
      */
     public static isFinite(v: double): boolean {
         return !(Double.isNaN(v) || (v == Double.POSITIVE_INFINITY) || (v == Double.NEGATIVE_INFINITY));
@@ -330,6 +375,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * isFinite() checks if the underlying double is a floating point value (not a NaN or infinity)
      *
      * @returns true if the underlying double is a floating point value
+     * @tag arkts
      */
     public isFinite(): boolean {
         return Double.isFinite(this.value);
@@ -341,6 +387,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param v the double to test
      *
      * @returns true if the argument is similar to an integer value
+     *
      */
     public static isInteger(v: double): boolean {
         // In the language % works as C fmod that differs with IEEE-754 % definition
@@ -351,6 +398,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Checks if the underlying double is similar to an integer value
      *
      * @returns true if the underlying double is similar to an integer value
+     * @tag arkts
      */
     public isInteger(): boolean {
         return Double.isInteger(this.value);
@@ -362,6 +410,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param v the double to test
      *
      * @returns true if the argument is integer ans less than MAX_SAFE_INTEGER
+     *
      */
     public static isSafeInteger(v: double): boolean {
         return Double.isInteger(v) && (abs(v) <= Double.MAX_SAFE_INTEGER);
@@ -371,6 +420,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Checks if double is a safe integer value
      *
      * @returns true if the underlying double is a safe integer
+     * @tag arkts
      */
     public isSafeInteger(): boolean {
         return Double.isSafeInteger(this.value);
@@ -383,6 +433,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Right hand side of the addition
      *
      * @returns Result of the addition
+     * @tag arkts
      */
     public add(other: Double): Double {
         return Double.valueOf((this.value + other.doubleValue()) as double)
@@ -394,6 +445,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Right hand side of the subtraction
      *
      * @returns Result of the subtraction
+     * @tag arkts
      */
     public sub(other: Double): Double {
         return Double.valueOf((this.value - other.doubleValue()) as double)
@@ -405,6 +457,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Right hand side of the multiplication
      *
      * @returns Result of the multiplication
+     * @tag arkts
      */
     public mul(other: Double): Double {
         return Double.valueOf((this.value * other.doubleValue()) as double)
@@ -416,6 +469,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Right hand side of the division
      *
      * @returns Result of the division
+     * @tag arkts
      */
     public div(other: Double): Double {
         return Double.valueOf((this.value / other.doubleValue()) as double)
@@ -427,6 +481,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Right hand side of the comparison
      *
      * @returns true if this value is less than provided, false otherwise
+     * @tag arkts
      */
     public isLessThan(other: Double): boolean {
         return this.value < other.doubleValue();
@@ -438,6 +493,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Right hand side of the comparison
      *
      * @returns true if this value is less than or equal to provided, false otherwise
+     * @tag arkts
      */
     public isLessEqualThan(other: Double): boolean {
         return this.value <= other.doubleValue();
@@ -449,6 +505,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Right hand side of the comparison
      *
      * @returns true if this value is greater than provided, false otherwise
+     * @tag arkts
      */
     public isGreaterThan(other: Double): boolean {
         return this.value > other.doubleValue();
@@ -460,6 +517,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param other Right hand side of the comparison
      *
      * @returns true if this value is greater than or equal to provided, false otherwise
+     * @tag arkts
      */
     public isGreaterEqualThan(other: Double): boolean {
         return this.value >= other.doubleValue();
@@ -484,6 +542,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Implemented as native function,  @see `parseFloat()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#653).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parsefloat
+     *
     */
     public static native parseFloat(s: String): double;
 
@@ -507,6 +566,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
+     *
     */
     public static native parseInt(s: String, r: int): double;
 
@@ -516,6 +576,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param s the string to convert
      *
      * @returns the result of parsing
+     *
     */
     public static parseInt(s: String): double {
         return Double.parseInt(s, 10);
@@ -540,7 +601,8 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @remark
      * Implemented as native function,  @see `toExponential()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#673).
      *
-     * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.toexponential
+     * ECMA reference: https://tc39.es/ecma262/multipage/doubles-and-dates.html#sec-double.prototype.toexponential
+     *
     */
     public native toExponential(d: double): String;
 
@@ -548,8 +610,9 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * toExponential() returns std.core.String representing the underlying double in exponential notation
      *
      * @returns the result of conversion
+     *
     */
-    public toExponential():String {
+    public toExponential(): String {
         return this.toExponential(0);
     }
 
@@ -570,6 +633,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Implemented as native function,  @see `toPrecision()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#683).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.toprecision
+     *
     */
     public native toPrecision(d: double): String;
 
@@ -579,6 +643,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *                       to spec
      *
      * @returns the result of conversion
+     *
     */
     public toPrecision(): String {
         return this.toString();
@@ -604,6 +669,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * Implemented as native function,  @see `toFixed()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#693).
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.tofixed
+     *
     */
     public native toFixed(d: double): String;
 
@@ -611,6 +677,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * toFixed(double) returns std.core.String representing the underlying double using fixed-point notation
      *
      * @returns the result of conversion
+     *
     */
     public toFixed(): String {
         return this.toFixed(0);
@@ -621,6 +688,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param bits bits to convert
      *
      * @returns double - converted value
+     * @tag arkts
      */
     public static native bitCastFromLong(bits: long): double
 
@@ -629,6 +697,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @param val value to convert
      *
      * @returns long - bit representation
+     * @tag arkts
      */
     public static native bitCastToLong(val: double): long
 
@@ -640,6 +709,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @throws JSONTypeError if json does not encode a valid double
      *
      * @returns Double - double value decoded from JSON
+     * @tag arkts
      */
     static createFromJSONValue(json: JSONValue): Double {
         if (json instanceof JSONNumber) {

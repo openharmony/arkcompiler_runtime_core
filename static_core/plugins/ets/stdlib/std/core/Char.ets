@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,23 +126,23 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     }
 
     /**
-     * hashCode(char) returns a hashcode of the char.
+     * $_hashCode(char) returns a hashcode of the char.
      *
      * @param value the char to be hash coded.
      *
      * @returns the hash code.
      */
-    public static hashCode(value: char): int {
+    public static $_hashCode(value: char): int {
         return value as int;
     }
 
     /**
-     * hashCode() returns a hashcode of the underlying char.
+     * $_hashCode() returns a hashcode of the underlying char.
      *
      * @returns the hash code.
      */
-    public override hashCode(): int {
-        return Char.hashCode(this.value);
+    public override $_hashCode(): int {
+        return Char.$_hashCode(this.value);
     }
 
     public static readonly CHAR_BIT_SIZE = 16;
@@ -469,9 +469,82 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      * @returns true if the char is a whitespace.
      */
     public static isWhiteSpace(value: char): boolean {
-        return (value == c' ') || (value == c'\t')
-            || (value == c'\n') || (value == c'\r')
-            || (value == c'\v') || (value == c'\f');
+        // 0x0020 -- space
+        if (value == 0x0020) {
+            return true
+        }
+
+        // (0x000E, 0x00A0) -- common non-whitespace characters
+        if (0x000E < value && value < 0x00A0) {
+            return false
+        }
+
+        // 0x0009 -- horizontal tab
+        if (value < 0x0009) {
+            return false
+        }
+        // 0x000A -- line feed or new line
+        // 0x000B -- vertical tab
+        // 0x000C -- formfeed
+        // 0x000D -- horizontal tab
+        if (value <= 0x000D) {
+            return true
+        }
+
+        // 0x00A0 -- no-break space
+        if (value == 0x00A0) {
+            return true
+        }
+
+        // 0x1680 -- Ogham space mark
+        if (value == 0x1680) {
+            return true
+        }
+
+        // 0x2000 -- en quad
+        if (value < 0x2000) {
+            return false
+        }
+        // 0x2001 -- em quad
+        // 0x2002 -- en space
+        // 0x2003 -- em space
+        // 0x2004 -- three-per-em space
+        // 0x2005 -- four-per-em space
+        // 0x2006 -- six-per-em space
+        // 0x2007 -- figure space
+        // 0x2008 -- punctuation space
+        // 0x2009 -- thin space
+        // 0x200A -- hair space
+        if (value <= 0x200A) {
+            return true
+        }
+
+        // 0x2028 -- line separator
+        if (value == 0x2028) {
+            return true
+        }
+        // 0x2029 -- paragraph separator
+        if (value == 0x2029) {
+            return true
+        }
+        // 0x202F -- narrow no-break space
+        if (value == 0x202F) {
+            return true
+        }
+        // 0x205F -- medium mathematical space
+        if (value == 0x205F) {
+            return true
+        }
+        // 0xFEFF -- byte order mark
+        if (value == 0xFEFF) {
+            return true
+        }
+        // 0x3000 -- ideographic space
+        if (value == 0x3000) {
+            return true
+        }
+
+        return false
     }
 
     /**

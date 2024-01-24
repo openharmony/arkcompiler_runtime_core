@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,6 +121,14 @@ static EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj
 
     if (etsJsValue == nullptr) {
         return nullptr;
+    }
+
+    // NOTE(kprokopenko): awful solution, see #14765
+    if (etsJsValue->AsObject() == ctx->GetUndefinedObject()) {
+        if (Class::FromClassObject(clsObj->GetCoreType()) == ctx->GetVoidClass()) {
+            return reinterpret_cast<EtsObject *>(EtsVoid::GetInstance());
+        }
+        return etsJsValue->AsObject();
     }
 
     auto env = ctx->GetJSEnv();
@@ -537,7 +545,7 @@ JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
+    if (UNLIKELY(IsNull(env, jsVal))) {
         return nullptr;
     }
 
@@ -620,6 +628,7 @@ EtsString *CompilerConvertLocalToString(void *value)
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
 
+    // NOTE(kprokopenko): can't assign undefined to EtsString *, see #14765
     if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
         return nullptr;
     }
@@ -644,8 +653,12 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
 
-    if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
+    if (UNLIKELY(IsNull(env, jsVal))) {
         return nullptr;
+    }
+
+    if (UNLIKELY(IsUndefined(env, jsVal))) {
+        return ctx->GetUndefinedObject();
     }
 
     // start slowpath

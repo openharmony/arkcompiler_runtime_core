@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ function compareStringBuilderWithString(actual : StringBuilder, expected : Strin
   }
 {%- endif %}
 
-{%- if item.result_nature == "primitive" or item.method_return_type == "UTF_16_CodePoint" or item.method_return_type == "char" or item.method_return_type == "byte" or item.method_return_type == "short" or item.method_return_type == "int" or item.method_return_type == "long" or item.method_return_type == "boolean" %}
+{%- if item.result_nature == "primitive" or item.method_return_type == "UTF_16_CodePoint" or item.method_return_type == "char" or item.method_return_type == "byte" or item.method_return_type == "short" or item.method_return_type == "int" or item.method_return_type == "long" or item.method_return_type == "boolean" or item.method_return_type == "number" %}
 {%- if item.method_return_type != "void" %}
 function comparePrimitiveValue(actual : {{.item.method_return_type}}, expected : {{.item.method_return_type}}) : boolean {
 {%- else %}

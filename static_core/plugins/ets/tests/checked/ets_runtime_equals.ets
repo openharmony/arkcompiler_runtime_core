@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,10 +34,10 @@
 function main(): int {
     let obj1: Object = new Object();
     let obj2: Object = new Object();
-    if (runtime.equals(obj1, null)) return 1;
-    if (runtime.equals(obj1, obj2)) return 2;
-    if (!runtime.equals(null, null)) return 3;
-    if (!runtime.equals(obj1, obj1)) return 4;
+    if (runtime.isSameReference(obj1, null)) return 1;
+    if (runtime.isSameReference(obj1, obj2)) return 2;
+    if (!runtime.isSameReference(null, null)) return 3;
+    if (!runtime.isSameReference(obj1, obj1)) return 4;
     if (obj1 == null) return 5;
     if (obj1 == obj2) return 6;
 

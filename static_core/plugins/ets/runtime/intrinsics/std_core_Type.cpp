@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,24 +55,24 @@ EtsString *TypeAPIGetTypeDescriptor(EtsObject *object)
     return EtsString::CreateFromMUtf8(object->GetClass()->GetDescriptor());
 }
 
-static EtsByte DetermineEtsType(const PandaString &typeDesc, const EtsClass *refType)
+static EtsByte GetRefTypeKind(const PandaString &td, const EtsClass *refType)
 {
     auto result = static_cast<EtsByte>(EtsTypeAPIKind::NONE);
-    if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
+    if (td == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::BOOLEAN);
-    } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
+    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::BYTE);
-    } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
+    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::CHAR);
-    } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
+    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::SHORT);
-    } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
+    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::INT);
-    } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
+    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::LONG);
-    } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
+    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::FLOAT);
-    } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
+    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::DOUBLE);
     } else if (refType->IsInterface()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::INTERFACE);
@@ -88,7 +88,7 @@ static EtsByte DetermineEtsType(const PandaString &typeDesc, const EtsClass *ref
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
     } else if (refType->IsUndefined()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
-    } else if (typeDesc == panda::ets::panda_file_items::class_descriptors::VOID) {
+    } else if (td == panda::ets::panda_file_items::class_descriptors::VOID) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
     } else {
         result = static_cast<EtsByte>(EtsTypeAPIKind::CLASS);
@@ -96,35 +96,32 @@ static EtsByte DetermineEtsType(const PandaString &typeDesc, const EtsClass *ref
     return result;
 }
 
-static EtsByte DetermineTypeId(const panda::panda_file::Type &valType)
+static EtsByte GetValTypeKind(EtsValueTypeDesc td)
 {
     EtsByte kind;
-    switch (valType.GetId()) {
-        case panda_file::Type::TypeId::VOID:
-            kind = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
-            break;
-        case panda_file::Type::TypeId::U1:
+    switch (td) {
+        case EtsValueTypeDesc::BOOLEAN:
             kind = static_cast<uint8_t>(EtsTypeAPIKind::BOOLEAN) | static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK);
             break;
-        case panda_file::Type::TypeId::I8:
+        case EtsValueTypeDesc::BYTE:
             kind = static_cast<uint8_t>(EtsTypeAPIKind::BYTE) | static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK);
             break;
-        case panda_file::Type::TypeId::U16:
+        case EtsValueTypeDesc::CHAR:
             kind = static_cast<uint8_t>(EtsTypeAPIKind::CHAR) | static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK);
             break;
-        case panda_file::Type::TypeId::I16:
+        case EtsValueTypeDesc::SHORT:
             kind = static_cast<uint8_t>(EtsTypeAPIKind::SHORT) | static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK);
             break;
-        case panda_file::Type::TypeId::I32:
+        case EtsValueTypeDesc::INT:
             kind = static_cast<uint8_t>(EtsTypeAPIKind::INT) | static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK);
             break;
-        case panda_file::Type::TypeId::I64:
+        case EtsValueTypeDesc::LONG:
             kind = static_cast<uint8_t>(EtsTypeAPIKind::LONG) | static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK);
             break;
-        case panda_file::Type::TypeId::F32:
+        case EtsValueTypeDesc::FLOAT:
             kind = static_cast<uint8_t>(EtsTypeAPIKind::FLOAT) | static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK);
             break;
-        case panda_file::Type::TypeId::F64:
+        case EtsValueTypeDesc::DOUBLE:
             kind = static_cast<uint8_t>(EtsTypeAPIKind::DOUBLE) | static_cast<uint8_t>(ETS_TYPE_KIND_VALUE_MASK);
             break;
         default:
@@ -144,16 +141,21 @@ EtsByte TypeAPIGetTypeKind(EtsString *td)
     if (typeDesc[0] == METHOD_PREFIX) {
         return static_cast<EtsByte>(EtsTypeAPIKind::METHOD);
     }
+    // Is machine-level void
+    if (typeDesc[0] == VOID_PRIMITIVE_TYPE_DESC) {
+        return static_cast<EtsByte>(EtsTypeAPIKind::VOID);
+    }
     // Is RefType?
     if (typeDesc[0] == CLASS_TYPE_PREFIX || typeDesc[0] == ARRAY_TYPE_PREFIX) {
         auto refType = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClass(typeDesc.c_str());
-        ASSERT(refType != nullptr);
+        if (refType == nullptr) {
+            return static_cast<EtsByte>(EtsTypeAPIKind::NONE);
+        }
         PandaEtsVM::GetCurrent()->GetClassLinker()->InitializeClass(EtsCoroutine::GetCurrent(), refType);
-        return DetermineEtsType(typeDesc, refType);
+        return GetRefTypeKind(typeDesc, refType);
     }
     // Is ValueType?
-    auto valType = panda::panda_file::Type::GetTypeIdBySignature(typeDesc[0]);
-    return DetermineTypeId(valType);
+    return GetValTypeKind(static_cast<EtsValueTypeDesc>(typeDesc[0]));
 }
 
 EtsBoolean TypeAPIIsValueType(EtsString *td)

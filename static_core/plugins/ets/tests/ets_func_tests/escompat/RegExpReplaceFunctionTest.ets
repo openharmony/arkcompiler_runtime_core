@@ -1,0 +1,172 @@
+/*
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function test1(shor: String): int {
+    let failure = 0
+    let ctr = new Int(0);
+
+    let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
+        failure += checkTestResult(str, "x")
+        failure += checkTestResult(args[0] as Double, new Double(0.0))
+        failure += checkTestResult(args[1] as String, shor)
+        let ans = ctr.toString();
+        ctr++;
+        return ans;
+    }
+    failure += checkTestResult(shor.replace("x", lambda), "0axbxcx")
+    failure += checkTestResult(ctr.unboxed(), 1)
+    return failure
+}
+
+function test2(shor: String): int {
+    let failure = 0
+    let ctr = new Int(0);
+
+    let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
+        failure += checkTestResult(str, "x")
+        failure += checkTestResult(args[0] as Double, new Double(0.0))
+        failure += checkTestResult(args[1] as String, shor)
+        let ans = ctr.toString();
+        ctr++;
+        return ans;
+    }
+    failure += checkTestResult(shor.replace(new RegExp("x"), lambda), "0axbxcx")
+    failure += checkTestResult(ctr.unboxed(), 1)
+    return failure
+}
+
+
+function test3(shor: String): int {
+    let failure = 0
+    let ctr = new Int(0);
+
+    let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
+        failure += checkTestResult(str, "x")
+        failure += checkTestResult(args[0] as Double, new Double((ctr.unboxed() * 2) as double))
+        failure += checkTestResult(args[1] as String, shor)
+        let ans = ctr.toString();
+        ctr++;
+        return ans;
+    }
+    failure += checkTestResult(shor.replace(new RegExp("x", "g"), lambda), "0a1b2c3")
+    failure += checkTestResult(ctr.unboxed(), 4)
+    return failure
+}
+
+function test4(shor: String): int {
+    let failure = 0
+    let ctr = new Int(0);
+
+    let test : String[] = ["a", "b", "c"]
+    let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
+        failure += checkTestResult(str, "x")
+        failure += checkTestResult(args[0] as String, "x")
+        failure += checkTestResult(args[1] as String, test[ctr.unboxed()])
+        failure += checkTestResult(args[2] as Double, new Double((ctr.unboxed() * 2) as double))
+        failure += checkTestResult(args[3] as String, shor)
+        let ans = ctr.toString();
+        ctr++;
+        return ans;
+    }
+    failure += checkTestResult(shor.replace(new RegExp("(x)(?=(.))", "g"), lambda), "0a1b2cx")
+    failure += checkTestResult(ctr.unboxed(), 3)
+    return failure
+}
+
+function test5(shor: String): int {
+    let failure = 0
+
+    let lambda : (str: String, args: Object[]) => String = (str: String, args: Object[]) : String => {
+        failure += checkTestResult("d", RegExp.lastMatch)
+        failure += checkTestResult("d", RegExp.$1)
+        return str.toUpperCase()
+    }
+    failure += checkTestResult(shor.replace(new RegExp("(.)", "g"), lambda), "ABCD")
+    return failure
+}
+
+function test6(): int {
+    let longstring = "xyzzy"
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    longstring = longstring + longstring
+    let str = "<" + longstring + ">"
+    let actual = str.replace(new RegExp("<(.*)>", "g"), "$1$1")
+    return checkTestResult(actual, longstring + longstring)
+}
+
+function main(): int {
+    let str = "xaxbxcx"
+    let failure = 0
+    failure += test1(str)
+    failure += test2(str)
+    failure += test3(str)
+    failure += test4(str)
+    failure += test5("abcd")
+    // failure += test6()
+    console.println(failure)
+    return failure
+}
+
+function checkTestResult(actual : String, expected : String) : int {
+  if (actual.equals(expected))  return 0
+  return 1
+}
+
+function checkTestResult(actual : Int, expected : Int) : int {
+    if (actual.equals(expected))  return 0
+  return 1
+}
+
+const DBL_EPSILON : double = 1.0e-6;
+const doubleEpsilon: double = 2.22045e-16
+function checkTestResult(actual : Double, expected : Double) : int {
+    if (expected.isNaN()) {
+        if (actual.isNaN()) return 0;
+        else return 1;
+    }
+
+    if (expected == Double.POSITIVE_INFINITY) {
+        if (actual == Double.POSITIVE_INFINITY) return 0;
+        else return 1;
+    }
+
+    if (expected == Double.NEGATIVE_INFINITY) {
+        if (actual == Double.NEGATIVE_INFINITY) return 0;
+        else return 1;
+    }
+    if (actual == expected) {
+        return 0;
+    }
+    let diff : double;
+    if (actual > expected) {
+        diff = actual - expected;
+    } else {
+        diff = expected - actual;
+    }
+    if (diff < DBL_EPSILON) {
+        return 0;
+    } else {
+        return 1;
+    }
+}

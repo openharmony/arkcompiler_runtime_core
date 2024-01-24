@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +25,10 @@ namespace panda::ets {
 
 class RegExpExecutor : public panda::RegExpExecutor {
 public:
-    RegExpMatchResult<VMHandle<EtsString>> GetResult(bool isSuccess) const;
+    RegExpMatchResult<PandaString> GetResult(bool isSuccess, bool hasIndices) const;
+
+private:
+    std::pair<uint32_t, uint32_t> GetIndices(CaptureState *captureState) const;
 };
 }  // namespace panda::ets
 

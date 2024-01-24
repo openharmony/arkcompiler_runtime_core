@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,21 +13,12 @@
 
 ---
 cases:
-  - { vtype: float, vval: 1.0 as float, rtype: int, rval: 1 }
-  - { vtype: Float, vval: new Float(1.0 as float), rtype: int, rval: 1 }
-  - { vtype: double, vval: 1.0, rtype: int, rval: 1 }
-  - { vtype: Double, vval: new Double(1.0 as double), rtype: int, rval: 1 }
   - { vtype: boolean, vval: 'true', rtype: int, rval: 1 }
   - { vtype: Boolean, vval: new Boolean(false), rtype: int, rval: 1 }
   - { vtype: String, vval: '0', rtype: int, rval: 1 }
-  - { vtype: int, vval: 1, rtype: float, rval: 1.0 as float }
-  - { vtype: int, vval: 1, rtype: Float, rval: new Float(1.0 as float) }
-  - { vtype: int, vval: 1, rtype: double, rval: 1.0 as double }
-  - { vtype: int, vval: 1, rtype: Double, rval: new Double(1.0 as double) }
   - { vtype: int, vval: 1, rtype: boolean, rval: 'true' }
   - { vtype: int, vval: 1, rtype: Boolean, rval: new Boolean(true) }
   - { vtype: int, vval: 1, rtype: String, rval: '1' }
-  - { vtype: double, vval: 1.0, rtype: float, rval: 1.0 as float }
 
 ops:
   - { op: '<<', name: shl }

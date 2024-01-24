@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,7 +99,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      *
      * @returns representation of this instance
      */
-    public override hashCode(): int {
+    public override $_hashCode(): int {
         if (this.value) {
             return 1;
         }
@@ -129,7 +129,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @returns result of the comparison
      */
     public override compareTo(other: Boolean): int {
-        return this.hashCode() - other.hashCode();
+        return this.$_hashCode() - other.$_hashCode();
     }
 
     /**

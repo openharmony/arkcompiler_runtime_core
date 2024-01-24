@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,10 @@ function main(): void {
     s.add(3)
     s.add(1)
     assert s.size() == 3 : "size"
-    const it = s.values()
     assert s.has(1) : "has 1"
     assert s.has(2) : "has 2"
     assert s.has(3) : "has 3"
+    const it = s.values()
     assert it.next().value! == 1 : "it1"
     assert it.next().value! == 2 : "it2"
     assert it.next().value! == 3 : "it3"
@@ -38,7 +38,7 @@ class BadHash {
         this.value = value
     }
 
-    override hashCode(): int {
+    override $_hashCode(): int {
         return 0
     }
 
@@ -81,7 +81,7 @@ function test_obj(): void {
 
     for (let i = 0; i < 100; i++) {
         const c = new Object()
-        if (a.hashCode() != c.hashCode()) {
+        if (a.$_hashCode() != c.$_hashCode()) {
             return;
         }
     }

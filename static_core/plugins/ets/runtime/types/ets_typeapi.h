@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,10 +49,11 @@ enum class EtsTypeAPIKind : EtsByte {
     NUL = 0x13U,
 
     ENUM = 0x14U
-
 };
 
 constexpr EtsByte ETS_TYPE_KIND_VALUE_MASK = 1U << 6U;
+
+constexpr EtsChar VOID_PRIMITIVE_TYPE_DESC = 'V';
 
 enum class EtsValueTypeDesc : EtsChar {
     BOOLEAN = 'Z',

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,8 +139,10 @@ struct EtsFieldAccessorREFERENCE {
                        napi_value jsValue)
     {
         EtsObject *etsValue;
-        if (IsNullOrUndefined(env, jsValue)) {
+        if (IsNull(env, jsValue)) {
             etsValue = nullptr;
+        } else if (IsUndefined(env, jsValue)) {
+            etsValue = ctx->GetUndefinedObject();
         } else {
             JSRefConvert *refconv = etsFieldWrapper->GetRefConvert<true>(ctx);
             if (UNLIKELY(refconv == nullptr)) {

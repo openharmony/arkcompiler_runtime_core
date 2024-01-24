@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,28 +22,26 @@
  *
  * @returns joined elements of arr with delimiter between
  */
-{% if T != "boolean"%}
 export function join(arr: {{T}}[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+{% if T == "NullishType"%}
+        if (__runtimeIsSameReference(arr[i], null)) {
+            sb.append("null")
+        } else if (__runtimeIsSameReference(arr[i], undefined)) {
+            sb.append("undefined")
+        } else {
+            sb.append(arr[i]!.toString())
+        }
+{% elif T != "boolean" %}
         sb.append(arr[i])
-        if (i != len - 1) {
-            sb.append(delimiter);
-        }
-    }
-    return sb.toString();
-}
 {% else %}
-export function join(arr: boolean[], delimiter: String): String {
-    let sb: StringBuilder = new StringBuilder();
-    let len: int = arr.length;
-    for (let i: int = 0; i < len; i++) {
         sb.append(arr[i] ? "true" : "false")
+{% endif %}
         if (i != len - 1) {
             sb.append(delimiter);
         }
     }
     return sb.toString();
 }
-{% endif %}

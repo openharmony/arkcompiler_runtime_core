@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,11 @@ inline napi_value GetGlobal(napi_env env)
     napi_value jsValueGlobal {};
     NAPI_CHECK_FATAL(napi_get_global(env, &jsValueGlobal));
     return jsValueGlobal;
+}
+
+inline bool IsNull(napi_env env, napi_value val)
+{
+    return GetValueType(env, val) == napi_null;
 }
 
 inline bool IsUndefined(napi_env env, napi_value val)

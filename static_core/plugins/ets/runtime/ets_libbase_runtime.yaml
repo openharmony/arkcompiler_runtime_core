@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -619,17 +619,7 @@ intrinsics:
       args: [ std.core.String, std.core.String ]
     impl: panda::ets::intrinsics::StdCoreStringLocaleCmp
     clear_flags: [ ]
-
-  - name: StdCoreStringSearch
-    space: ets
-    class_name: std.core.String
-    method_name: search
-    static: false
-    signature:
-      ret: i32
-      args: [ std.core.String ]
-    impl: panda::ets::intrinsics::StdCoreStringSearch
-    clear_flags: [ ]
+    set_flags: [can_throw]
 
   - name: StdCoreStringNormalizeNFC
     space: ets
@@ -679,6 +669,30 @@ intrinsics:
     clear_flags: [ ]
     set_flags: [can_throw]
 
+  - name: StdCoreStringToLowerCase
+    space: ets
+    class_name: std.core.String
+    method_name: toLowerCase
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringToLowerCase
+    clear_flags: [ ]
+    set_flags: [can_throw]
+
+  - name: StdCoreStringToUpperCase
+    space: ets
+    class_name: std.core.String
+    method_name: toUpperCase
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: panda::ets::intrinsics::StdCoreStringToUpperCase
+    clear_flags: [ ]
+    set_flags: [can_throw]
+
   - name: StdCoreStringToLocaleLowerCase
     space: ets
     class_name: std.core.String
@@ -689,6 +703,7 @@ intrinsics:
       args: [ std.core.String ]
     impl: panda::ets::intrinsics::StdCoreStringToLocaleLowerCase
     clear_flags: [ ]
+    set_flags: [can_throw]
 
   - name: StdCoreStringToLocaleUpperCase
     space: ets
@@ -700,6 +715,7 @@ intrinsics:
       args: [ std.core.String ]
     impl: panda::ets::intrinsics::StdCoreStringToLocaleUpperCase
     clear_flags: [ ]
+    set_flags: [can_throw]
 
   - name: StdCoreStringIsWellFormed
     space: ets
@@ -784,7 +800,7 @@ intrinsics:
   - name: StdCoreStringHashCode
     space: ets
     class_name: std.core.String
-    method_name: hashCode
+    method_name: $_hashCode
     static: false
     signature:
       ret: i32
@@ -1931,15 +1947,15 @@ intrinsics:
 # std.core.Runtime #
 ####################
 
-  - name: StdRuntimeEquals
+  - name: StdCoreRuntimeIsSameReference
     space: ets
     class_name: std.core.Runtime
-    method_name: equals
+    method_name: isSameReference
     static: false
     signature:
       ret: u1
       args: [ std.core.Object, std.core.Object ]
-    impl: panda::ets::intrinsics::StdCoreRuntimeEquals
+    impl: panda::ets::intrinsics::StdCoreRuntimeIsSameReference
     clear_flags: [ ]
 
   - name: StdRuntimeGetHashCode
@@ -1977,19 +1993,22 @@ intrinsics:
     method_name: compile
     static: false
     signature:
-      ret: std.core.void
+      ret: escompat.RegExp
       args: []
     impl: panda::ets::intrinsics::EscompatRegExpCompile
+    set_flags: [heap_inv]
+
 
   - name: EscompatRegExpExec
     space: ets
     class_name: escompat.RegExp
-    method_name: exec
+    method_name: execImpl
     static: false
     signature:
-      ret: escompat.RegExpExecResult
+      ret: escompat.RegExpExecArray
       args: [ std.core.String ]
     impl: panda::ets::intrinsics::EscompatRegExpExec
+    set_flags: [heap_inv]
 
 ###################
 # std.core.Type   #
@@ -2575,7 +2594,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, std.core.Object ]
     impl: panda::ets::intrinsics::ValueAPISetFieldObject
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldBoolean
     space: ets
@@ -2586,7 +2605,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, u1 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldBoolean
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldByte
     space: ets
@@ -2597,7 +2616,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i8 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByte
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldChar
     space: ets
@@ -2608,7 +2627,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, u16 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldChar
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldShort
     space: ets
@@ -2619,7 +2638,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i16 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldShort
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldInt
     space: ets
@@ -2630,7 +2649,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i32 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldInt
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldLong
     space: ets
@@ -2641,7 +2660,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i64 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldLong
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldFloat
     space: ets
@@ -2652,7 +2671,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f32 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldFloat
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldDouble
     space: ets
@@ -2663,7 +2682,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f64 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldDouble
-    clear_flags: [ ]
+    flags: [heap_inv]
 
 
 
@@ -2676,7 +2695,8 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, std.core.Object ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameObject
-    clear_flags: [ ]
+    flags: [heap_inv]
+
 
   - name: ValueAPISetFieldByNameBoolean
     space: ets
@@ -2687,7 +2707,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, u1 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameBoolean
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameByte
     space: ets
@@ -2698,7 +2718,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i8 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameByte
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameChar
     space: ets
@@ -2709,7 +2729,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, u16 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameChar
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameShort
     space: ets
@@ -2720,7 +2740,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i16 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameShort
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameInt
     space: ets
@@ -2731,7 +2751,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i32 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameInt
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameLong
     space: ets
@@ -2742,7 +2762,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i64 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameLong
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameFloat
     space: ets
@@ -2753,7 +2773,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, f32 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameFloat
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameDouble
     space: ets
@@ -2764,7 +2784,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, f64 ]
     impl: panda::ets::intrinsics::ValueAPISetFieldByNameDouble
-    clear_flags: [ ]
+    flags: [heap_inv]
 
 
 
@@ -2788,7 +2808,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, std.core.Object ]
     impl: panda::ets::intrinsics::ValueAPISetElementObject
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetElementBoolean
     space: ets
@@ -2799,7 +2819,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, u1 ]
     impl: panda::ets::intrinsics::ValueAPISetElementBoolean
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetElementByte
     space: ets
@@ -2810,7 +2830,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i8 ]
     impl: panda::ets::intrinsics::ValueAPISetElementByte
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetElementChar
     space: ets
@@ -2821,7 +2841,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, u16 ]
     impl: panda::ets::intrinsics::ValueAPISetElementChar
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetElementShort
     space: ets
@@ -2832,7 +2852,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i16 ]
     impl: panda::ets::intrinsics::ValueAPISetElementShort
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetElementInt
     space: ets
@@ -2843,7 +2863,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i32 ]
     impl: panda::ets::intrinsics::ValueAPISetElementInt
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetElementLong
     space: ets
@@ -2854,7 +2874,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, i64 ]
     impl: panda::ets::intrinsics::ValueAPISetElementLong
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetElementFloat
     space: ets
@@ -2865,7 +2885,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f32 ]
     impl: panda::ets::intrinsics::ValueAPISetElementFloat
-    clear_flags: [ ]
+    flags: [heap_inv]
 
   - name: ValueAPISetElementDouble
     space: ets
@@ -2876,7 +2896,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object, i64, f64 ]
     impl: panda::ets::intrinsics::ValueAPISetElementDouble
-    clear_flags: [ ]
+    flags: [heap_inv]
 
 
   - name: ValueAPIGetElementObject

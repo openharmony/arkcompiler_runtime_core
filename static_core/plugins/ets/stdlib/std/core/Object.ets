@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ export class Object {
    *
    * @returns representation of this instance
    */
-  public hashCode(): int {
+  public $_hashCode(): int {
     return runtime.getHashCode(this);
   }
 
@@ -61,7 +61,7 @@ export class Object {
    * @returns true if provided object and this instance have same references, false otherwise
    */
   public equals(to: NullishType): boolean {
-    return runtime.equals(this, to);
+    return runtime.isSameReference(this, to);
   }
 
   /**
@@ -385,6 +385,19 @@ export class Object {
    */
   public static hasOwn(target: Object, index: number): boolean {
     return target.hasOwnProperty(index)
+  }
+
+  /**
+   * Same as `===` operator
+   *
+   * @param l left operand
+   *
+   * @param r right operand
+   *
+   * @returns true if and only if l === r
+   */
+  public static isWrongName(l: NullishType, r: NullishType): boolean {
+    return __runtimeEquals(l, r)
   }
 }
 

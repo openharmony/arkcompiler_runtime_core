@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,12 +30,12 @@ const etsArrLen = x => x['<get>length'].call(x);
 
 { // Test ETS Array<Object>
   let arr = CreateEtsSample();
-  let sliced = arr.slice(1);
+  let sliced = arr.slice(1, undefined);
   ASSERT_EQ(sliced.at(0), 'foo');
   ASSERT_EQ(etsArrLen(sliced), etsArrLen(arr) - 1);
-  // NOTE(oignatenko) uncomment below after interop will be supported for this method signature
-  // let sliced1 = arr.slice(1, 2);
-  // ASSERT_EQ(sliced1.at(0), 'foo');
+  const IDX_2 = 2;
+  let sliced1 = arr.slice(1, IDX_2);
+  ASSERT_EQ(sliced1.at(0), 'foo');
 }
 
 GCJSRuntimeCleanup();

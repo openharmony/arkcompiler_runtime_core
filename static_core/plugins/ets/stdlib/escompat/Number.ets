@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 package escompat;
 
 /**
- * `Number` values represent floating-point numbers like 6 or -3.14.
+ * `Number` values represent floating-point numbers like 6 or -3.14
  */
 export type Number = Double;
 

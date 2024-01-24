@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -303,12 +303,12 @@ public:
 
     Class *GetJSValueClass() const
     {
-        return jsvalueClass_;
+        return jsValueClass_;
     }
 
     Class *GetJSErrorClass() const
     {
-        return jserrorClass_;
+        return jsErrorClass_;
     }
 
     Class *GetObjectClass() const
@@ -324,6 +324,11 @@ public:
     Class *GetVoidClass() const
     {
         return voidClass_;
+    }
+
+    Class *GetUndefinedClass() const
+    {
+        return undefinedClass_;
     }
 
     Class *GetPromiseClass() const
@@ -430,6 +435,11 @@ public:
         return etsProxyRefStorage_.get();
     }
 
+    EtsObject *GetUndefinedObject()
+    {
+        return EtsObject::FromCoreType(GetPandaEtsVM()->GetUndefinedObject());
+    }
+
 private:
     explicit InteropCtx(EtsCoroutine *coro, napi_env env);
 
@@ -445,12 +455,13 @@ private:
 
     JSRefConvertCache refconvertCache_;
 
-    Class *jsruntimeClass_ {};
-    Class *jsvalueClass_ {};
-    Class *jserrorClass_ {};
+    Class *jsRuntimeClass_ {};
+    Class *jsValueClass_ {};
+    Class *jsErrorClass_ {};
     Class *objectClass_ {};
     Class *stringClass_ {};
     Class *voidClass_ {};
+    Class *undefinedClass_ {};
     Class *promiseClass_ {};
     Class *errorClass_ {};
     Class *exceptionClass_ {};

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@ public:
     static constexpr auto FLAG_DOTALL = (1U << 3U);
     static constexpr auto FLAG_UTF16 = (1U << 4U);
     static constexpr auto FLAG_STICKY = (1U << 5U);
+    static constexpr auto FLAG_HASINDICES = (1U << 6U);
     static const uint32_t KEY_EOF = UINT32_MAX;
     static constexpr int CLASS_RANGE_BASE = 0x40000000;
     static constexpr uint32_t NUM_CAPTURE__OFFSET = 4;

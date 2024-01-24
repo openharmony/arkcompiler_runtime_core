@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,8 +52,7 @@ function reflectGetClass(): int {
     result += (Reflect.get(p, "y") as Number == 20) ? 0 : 1
     result += (Reflect.get(p, "z") as Number == 30) ? 0 : 1
 
-    // TODO(kirill-mitkin): Investigate problem with setting static field, failed on heap_verifier 'ETS arm64 FastVerify JIT g1-gc opt 2 with repeats [func-tests]'
-    // result += (Reflect.get(p, "axisnum") == undefined) ? 0 : 1
+    result += (Reflect.get(p, "axisnum") == undefined) ? 0 : 1
     result += (Reflect.get(p, "qwerty") == undefined) ? 0 : 1
     result += (Reflect.get(p, 1) == null) ? 0 : 1
 

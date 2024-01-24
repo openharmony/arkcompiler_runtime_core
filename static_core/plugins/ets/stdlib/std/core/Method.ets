@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@ package std.core;
 native function TypeAPIMethodInvoke(methodDesc: string, recv: NullishType, args: NullishType[]): NullishType
 native function TypeAPIMethodInvokeConstructor(methodDesc: string, args: NullishType[]): Object
 
+/**
+ * Represents method of class or interface
+ */
 export final class Method extends Object {
     private td: TypeDesc
     private name: string
@@ -26,8 +29,13 @@ export final class Method extends Object {
 
     private constructor () {}
 
+    /**
+     * Returns function type of this method
+     *
+     * @returns method's {@link MethodType}
+     */
     public getType(): MethodType {
-        return Type.resolve(this.td) as MethodType
+        return Type.resolve(this.td)! as MethodType
     }
 
     public getName(): string {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,7 +94,7 @@ function createMapAddAndCheckHasKey(): int {
 
 function createEmptyMap(): int {
     let map: Map<char, double> = new Map<char, double>();
-    return map.size();
+    return map.size() as int;
 }
 
 function createMapAddAndGet(): int {
@@ -247,7 +247,7 @@ function createMapAddAndClear(): int {
     map.set(c'c', 3.0);
     map.clear();
 
-    return map.size();
+    return map.size() as int;
 }
 
 function createMapAndAdd(): int {

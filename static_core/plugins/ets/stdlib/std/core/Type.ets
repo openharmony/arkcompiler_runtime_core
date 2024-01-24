@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,8 +129,7 @@ export class ValueTypeDesc {
     public static readonly DOUBLE: TypeDesc    = "D"
 }
 
-const UndefinedTD: TypeDesc = "UNDEFINED" // TODO(shumilov-petr): get td from runtime
-const ObjectTD = "Lstd/core/Object;" // TODO(shumilov-petr): get td from runtime
+const ObjectTD = "Lstd/core/Object;" // NOTE(shumilov-petr): get td from runtime
 
 export const ObjectType: ClassType = new ClassType(ObjectTD)
 
@@ -161,12 +160,24 @@ export class AccessModifier {
     private constructor() {}
 }
 
+/**
+ * Represents abstract Type
+ */
 export abstract class Type extends Object {
     internal td: TypeDesc
 
-    public static resolve(td: TypeDesc): Type {
+    /**
+     * Resolves type by its type descriptor
+     *
+     * @param td type descriptor
+     *
+     * @returns instance with corresponging type descriptor
+     */
+    public static resolve(td: TypeDesc): Type | null {
         let kind = TypeAPIGetTypeKind(td) & TypeKindMask
         switch (kind) {
+            case TypeKind.NONE:
+                return null
             case TypeKind.VOID:
                 return VoidType.REF
 
@@ -211,39 +222,95 @@ export abstract class Type extends Object {
             case TypeKind.ENUM:
                 return new EnumType(td)
             default:
-                // TODO(shumilov-petr): unknown type, need exception
+                // TODO(shumilov-petr): unknown type, need error
                 assert(false)
         }
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: boolean): Type {
         return BooleanType.VAL
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: char): Type {
         return CharType.VAL
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: byte): Type {
         return ByteType.VAL
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: short): Type {
         return ShortType.VAL
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: int): Type {
         return IntType.VAL
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: long): Type {
         return LongType.VAL
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: float): Type {
         return FloatType.VAL
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: double): Type {
         return DoubleType.VAL
     }
@@ -252,7 +319,7 @@ export abstract class Type extends Object {
 
     public static of(o: NullishType): Type {
         let td = TypeAPIGetTypeDescriptor(o)
-        return Type.resolve(td)
+        return Type.resolve(td)!
     }
 
     // -----
@@ -261,76 +328,195 @@ export abstract class Type extends Object {
         return BooleanType.REF
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: Char): Type {
         return CharType.REF
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: Byte): Type {
         return ByteType.REF
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: Short): Type {
         return ShortType.REF
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: Int): Type {
         return IntType.REF
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: Long): Type {
         return LongType.REF
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: Float): Type {
         return FloatType.REF
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: Double): Type {
         return DoubleType.REF
     }
 
     // -----
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: string): Type {
         return StringType.REF
     }
 
     // -----
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: boolean[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.BOOLEAN)
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: char[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.CHAR)
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: byte[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.BYTE)
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: short[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.SHORT)
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: int[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.INT)
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: long[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.LONG)
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: float[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.FLOAT)
     }
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: double[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v), ValueTypeDesc.DOUBLE)
     }
 
     // -----
 
+    /**
+     * Returns Type of value
+     *
+     * @param v value
+     *
+     * @returns Type instance of this value
+     */
     public static of(v: Object[]): Type {
         return ArrayType.getInstance(TypeAPIGetTypeDescriptor(v))
     }
@@ -380,6 +566,11 @@ export abstract class Type extends Object {
 
     public abstract getName(): string
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public abstract getLiteral(): string
 
     public override toString(): string {
@@ -390,6 +581,9 @@ export abstract class Type extends Object {
     }
 }
 
+/**
+ * Represents null type
+ */
 export final class NullType extends Type {
     public static readonly REF: NullType = new NullType()
 
@@ -397,28 +591,62 @@ export final class NullType extends Type {
         this.td = TypeAPIGetTypeDescriptor(null)
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return true
     }
 
+    /**
+     * Returns name of type
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns type name
+     */
     public override getName(): string {
         return "null"
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         return "null"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a DoubleType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has NullType
+     */
     public override equals(to: NullishType): boolean {
-        return (to instanceof NullType);
+        return to instanceof NullType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -433,29 +661,61 @@ export final class UndefinedType extends Type {
     public static readonly REF: UndefinedType = new UndefinedType()
 
     private constructor() {
-        this.td = UndefinedTD
+        this.td = TypeAPIGetTypeDescriptor(undefined)
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return true
     }
 
+    /**
+     * Returns name of type if exists and empty string otherwise
+     *
+     * @returns type name
+     */
     public override getName(): string {
         return "undefined"
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         return "undefined"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a UndefinedType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has UndefinedType
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof UndefinedType
     }
@@ -465,6 +725,9 @@ export final class UndefinedType extends Type {
     }
 }
 
+/**
+ * Represents void type
+ */
 export final class VoidType extends Type {
     public static readonly REF: VoidType = new VoidType()
 
@@ -472,26 +735,58 @@ export final class VoidType extends Type {
         this.td = TypeAPIGetTypeDescriptor(Void)
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return true
     }
 
+    /**
+     * Returns name of type if exists and empty string otherwise
+     *
+     * @returns type name
+     */
     public override getName(): string {
         return "void"
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         return "void"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a VoidType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has VoidType
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof VoidType
     }
@@ -504,7 +799,11 @@ export final class VoidType extends Type {
     }
 }
 
-
+/**
+ * Represents char type
+ *
+ * @note Boxed Char and primitive char both have CharType
+ */
 export final class CharType extends Type {
     public static readonly VAL: CharType = new CharType(ValueTypeDesc.CHAR, true)
     public static readonly REF: CharType = new CharType(TypeAPIGetTypeDescriptor(new Char()), false)
@@ -516,18 +815,41 @@ export final class CharType extends Type {
         this.isValue = isValue
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Returns name of type
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns name of type
+     */
+    //TODO(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -535,6 +857,11 @@ export final class CharType extends Type {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         if (this.isValue) {
             return "char"
@@ -555,7 +882,11 @@ export final class CharType extends Type {
     }
 }
 
-
+/**
+ * Represents boolean type
+ *
+ * @note Boxed Boolean and primitive boolean both have BooleanType
+ */
 export final class BooleanType extends Type {
     public static readonly VAL: BooleanType = new BooleanType(ValueTypeDesc.BOOLEAN, true)
     public static readonly REF: BooleanType = new BooleanType(TypeAPIGetTypeDescriptor(new Boolean()), false)
@@ -567,18 +898,41 @@ export final class BooleanType extends Type {
         this.isValue = isValue
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Returns name of type
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns name of type
+     */
+    //TODO(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -586,6 +940,11 @@ export final class BooleanType extends Type {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         if (this.isValue) {
             return "boolean"
@@ -606,6 +965,11 @@ export final class BooleanType extends Type {
     }
 }
 
+/**
+ * Represents byte type
+ *
+ * @note Boxed Byte and primitive byte both have ByteType
+ */
 export final class ByteType extends Type {
     public static readonly VAL: ByteType = new ByteType(ValueTypeDesc.BYTE, true)
     public static readonly REF: ByteType = new ByteType(TypeAPIGetTypeDescriptor(new Byte()), false)
@@ -617,18 +981,41 @@ export final class ByteType extends Type {
         this.isValue = isValue
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Returns name of type
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns name of type
+     */
+    //TODO(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -636,6 +1023,11 @@ export final class ByteType extends Type {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         if (this.isValue) {
             return "byte"
@@ -659,7 +1051,11 @@ export final class ByteType extends Type {
     }
 }
 
-
+/**
+ * Represents short type
+ *
+ * @note Boxed Short and primitive short both have ShortType
+ */
 export final class ShortType extends Type {
     public static readonly VAL: ShortType = new ShortType(ValueTypeDesc.SHORT, true)
     public static readonly REF: ShortType = new ShortType(TypeAPIGetTypeDescriptor(new Short()), false)
@@ -671,18 +1067,41 @@ export final class ShortType extends Type {
         this.isValue = isValue
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Returns name of type
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns name of type
+     */
+    //TODO(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -690,6 +1109,11 @@ export final class ShortType extends Type {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         if (this.isValue) {
             return "short"
@@ -697,6 +1121,14 @@ export final class ShortType extends Type {
         return "Short"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a ShortType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has ShortType and
+     * this type and other type both are reference or value
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof ShortType && this.isValue != (to as ShortType).isReference()
     }
@@ -713,7 +1145,11 @@ export final class ShortType extends Type {
     }
 }
 
-
+/**
+ * Represents int type
+ *
+ * @note Boxed Int and primitive int both have IntType
+ */
 export final class IntType extends Type {
     public static readonly VAL: IntType = new IntType(ValueTypeDesc.INT, true)
     public static readonly REF: IntType = new IntType(TypeAPIGetTypeDescriptor(new Int()), false)
@@ -725,18 +1161,41 @@ export final class IntType extends Type {
         this.isValue = isValue
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Returns name of type if exists and empty string otherwise
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns type name
+     */
+    //TODO(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -744,6 +1203,11 @@ export final class IntType extends Type {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         if (this.isValue) {
             return "int"
@@ -751,6 +1215,14 @@ export final class IntType extends Type {
         return "Int"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a IntType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has IntType and
+     * this type and other type both are reference or value
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof IntType && this.isValue != (to as IntType).isReference()
     }
@@ -767,7 +1239,11 @@ export final class IntType extends Type {
     }
 }
 
-
+/**
+ * Represents long type
+ *
+ * @note Boxed Long and primitive long both have LongType
+ */
 export final class LongType extends Type {
     public static readonly VAL = new LongType(ValueTypeDesc.LONG, true)
     public static readonly REF = new LongType(TypeAPIGetTypeDescriptor(new Long()), false)
@@ -779,18 +1255,41 @@ export final class LongType extends Type {
         this.isValue = isValue
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Returns name of type if exists and empty string otherwise
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns type name
+     */
+    //TODO(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -798,6 +1297,11 @@ export final class LongType extends Type {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         if (this.isValue) {
             return "long"
@@ -805,6 +1309,14 @@ export final class LongType extends Type {
         return "Long"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a LongType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has LongType and
+     * this type and other type both are reference or value
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof LongType && this.isValue != (to as LongType).isReference()
     }
@@ -821,7 +1333,11 @@ export final class LongType extends Type {
     }
 }
 
-
+/**
+ * Represents float type
+ *
+ * @note Boxed Float and primitive float both have FloatType
+ */
 export final class FloatType extends Type {
     public static readonly VAL: FloatType = new FloatType(ValueTypeDesc.FLOAT, true)
     public static readonly REF: FloatType = new FloatType(TypeAPIGetTypeDescriptor(new Float()), false)
@@ -833,18 +1349,41 @@ export final class FloatType extends Type {
         this.isValue = isValue
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Returns name of type
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns name of type
+     */
+    //TODO(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -852,6 +1391,11 @@ export final class FloatType extends Type {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         if (this.isValue) {
             return "float"
@@ -859,6 +1403,14 @@ export final class FloatType extends Type {
         return "Float"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a FloatType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has FloatType and
+     * this type and other type both are reference or value
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof FloatType && this.isValue != (to as FloatType).isReference()
     }
@@ -875,7 +1427,11 @@ export final class FloatType extends Type {
     }
 }
 
-
+/**
+ * Represents double type
+ *
+ * @note Boxed Double and primitive double both have DoubleType
+ */
 export final class DoubleType extends Type {
     public static readonly VAL: DoubleType = new DoubleType(ValueTypeDesc.DOUBLE, true)
     public static readonly REF: DoubleType = new DoubleType(TypeAPIGetTypeDescriptor(new Double()), false)
@@ -887,18 +1443,41 @@ export final class DoubleType extends Type {
         this.isValue = isValue
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return !this.isValue
     }
 
+    /**
+     * Returns name of type
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns name of type
+     */
+    //TODO(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -906,6 +1485,11 @@ export final class DoubleType extends Type {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         if (this.isValue) {
             return "double"
@@ -913,6 +1497,14 @@ export final class DoubleType extends Type {
         return "Double"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a DoubleType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has DoubleType and
+     * this type and other type both are reference or value
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof DoubleType && this.isValue != (to as DoubleType).isReference()
     }
@@ -929,7 +1521,9 @@ export final class DoubleType extends Type {
     }
 }
 
-
+/**
+ * Represents type of classes
+ */
 export final class ClassType extends Type {
     private readonly attrs: int
 
@@ -938,43 +1532,115 @@ export final class ClassType extends Type {
         this.attrs = TypeAPIGetClassAttributes(td)
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return false
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return true
     }
 
+    /**
+     * Returns name of type
+     *
+     * @returns type name
+     */
     public override getName(): string {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         // TODO(shumilov-petr): not implemented
         return "class{...}"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a ClassType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has ClassType and their names are the same
+     */
     public override equals(to: NullishType): boolean {
         return (to instanceof ClassType) && (to as ClassType).td == this.td
     }
 
+    /**
+     * Returns base type of this class
+     * If this type is the type of Object class then returns this
+     *
+     * @returns base type of class
+     */
     public getBaseType(): ClassType {
-        return Type.resolve(TypeAPIGetBaseType(this.td)) as ClassType
+        return Type.resolve(TypeAPIGetBaseType(this.td))! as ClassType
     }
 
+    /**
+     * Returns number of direct superinterfaces of this class
+     *
+     * @returns number of interfaces that was implemented by this class directly
+     */
     public getInterfacesNum(): long {
         return TypeAPIGetInterfacesNum(this.td)
     }
 
+    /**
+     * Returns ith direct superinterface of this class
+     *
+     * @param i index
+     *
+     * @throws error when i greater then num of interfaces
+     *
+     * @returns type of ith superinterface
+     */
     public getInterface(i: long): InterfaceType {
-        return Type.resolve(TypeAPIGetInterface(this.td, i)) as InterfaceType
+        return Type.resolve(TypeAPIGetInterface(this.td, i))! as InterfaceType
     }
 
+    /**
+     * Returns number of all fields
+     * including static, instance and also fields of all its superclasses
+     *
+     * @returns number of fields
+     *
+     * @example
+     *
+     * ```
+     * class A {
+     *     a : int
+     * }
+     *
+     * class B extends A {
+     *     b : int
+     * }
+     * ```
+     * let bType class type of B, then `bType.getFieldsNum()` returns 2
+     * Note that Object class also is super class of B
+     */
     public getFieldsNum(): long {
         return TypeAPIGetFieldsNum(this.td)
     }
@@ -983,6 +1649,16 @@ export final class ClassType extends Type {
         return TypeAPIGetOwnFieldsNum(this.td)
     }
 
+    /**
+     * Returns ith Field of this class
+     *
+     * @param i index (using flat semantic)
+     *
+     * @throws error when i greater then number of fields
+     *
+     * @returns ith Field
+     */
+    //TODO(kirill-mitkin): add error
     public getField(i: long): Field {
         return TypeAPIGetField(this.td, i)
     }
@@ -991,26 +1667,85 @@ export final class ClassType extends Type {
         return TypeAPIGetOwnField(this.td, i)
     }
 
+    /**
+     * Find Field by name
+     *
+     * @param name name of field
+     *
+     * @throws error when class doesn't have field with this name
+     *
+     * @returns Field instance with this name
+     */
+    //TODO(kirill-mitkin): add error
     public getFieldByName(name: string): Field {
         return TypeAPIGetFieldByName(this.td, name)
     }
 
+    /**
+     * Returns number of methods of this class
+     * including static methods and methods of super classes
+     * @example
+     *
+     * ```
+     * class A {
+     *     a(): void {}
+     * }
+     *
+     * class B extends A {
+     *     b(): void {}
+     * }
+     * ```
+     * let bType class type of B, then `bType.getMethodsNum()` returns at least 2
+     * Note that Object class also super class of B
+     * @returns number of methods
+     */
     public getMethodsNum(): long {
         return TypeAPIGetMethodsNum(this.td)
     }
 
+    /**
+     * Returns ith Method of this class
+     *
+     * @param i index (using flat semantic)
+     *
+     * @throws error when i greater then number of methods
+     *
+     * @returns ith method
+     */
+    //TODO(kirill-mitkin): add error
     public getMethod(i: long): Method {
         return TypeAPIGetMethod(this.td, i)
     }
 
+    /**
+     * Returns number of constructors of this class
+     * Note that constructors of super class isn't considered as constructors of this class
+     *
+     * @returns number of constructors
+     */
     public getConstructorsNum(): long {
         return TypeAPIGetConstructorsNum(this.td)
     }
 
+    /**
+     * Returns ith constructor of this class
+     *
+     * @param i index
+     *
+     * @throws error then i greater then number of constructors
+     *
+     * @returns {@link Method} instance representing ith constructor
+     */
+    //TODO(kirill-mitkin): add error
     public getConstructor(i: long): Method {
         return TypeAPIGetConstructor(this.td, i)
     }
 
+    /**
+     * Checks for existence of empty constructor of this class
+     *
+     * @returns true if there is empty constructor of this class
+     */
     public hasEmptyConstructor(): boolean {
         let num = this.getConstructorsNum()
         for (let i = 0; i < num; i++) {
@@ -1036,16 +1771,36 @@ export final class ClassType extends Type {
         return false
     }
 
+    /**
+     * Returns number of type parameters of this class
+     *
+     * @returns number of type parameters
+     */
     public getTypeParametersNum(): long {
         // TODO(shumilov-petr): not implemented
         throw new Error("Not implemented")
     }
 
+    /**
+     * Returns ith type parameter of this class
+     *
+     * @param i index
+     *
+     * @throws error then i greater then number of type parameters
+     *
+     * @returns TODO(kirill-mitkin): we cannot return concrete type in this method
+     */
     public getTypeParameter(i: long): Type {
         // TODO(shumilov-petr): not implemented
         throw new Error("Not implemented")
     }
 
+    /**
+     * Makes instance of this type by invoking
+     * empty constructor of this class
+     *
+     * @throws error when class doesn't have an empty constructor
+     */
     public make(): Object {
         const emptyArgs = new NullishType[0]
         return this.make(emptyArgs)
@@ -1145,7 +1900,9 @@ export final class ClassType extends Type {
     }
 }
 
-
+/**
+ * Represents interface type
+ */
 export final class InterfaceType extends Type {
     public constructor() {}
     
@@ -1153,27 +1910,60 @@ export final class InterfaceType extends Type {
         this.td = td
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return false
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return true
     }
 
+    /**
+     * Returns name of type
+     *
+     * @returns name of type
+     */
     public override getName(): string {
         return TypeAPIGetTypeName(this.td)
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         // TODO(shumilov-petr): not implemented
         return "interface{...}"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a InterfaceType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has InterfaceType and
+     * their names are the same
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof InterfaceType && this.td == (to as InterfaceType).td
     }
@@ -1194,22 +1984,63 @@ export final class InterfaceType extends Type {
     }
 
     public getInterface(i: long): InterfaceType {
-        return Type.resolve(TypeAPIGetInterface(this.td, i)) as InterfaceType
+        return Type.resolve(TypeAPIGetInterface(this.td, i))! as InterfaceType
     }
 
+    /**
+     * Returns number of methods of this interface
+     * including static methods and methods of super interfaces
+     * @example
+     *
+     * ```
+     * class A {
+     *     a(): void {}
+     * }
+     *
+     * class B extends A {
+     *     b(): void {}
+     * }
+     * ```
+     * let bType interface type of B, then `bType.getMethodsNum()` returns at least 2
+     * Note that Object class also super class of B
+     * @returns number of methods
+     */
     public getMethodsNum(): long {
         return TypeAPIGetMethodsNum(this.td)
     }
 
+    /**
+     * Returns ith Method of this interface
+     *
+     * @param i index (using flat semantic)
+     *
+     * @throws error when i greater then number of methods
+     *
+     * @returns ith method
+     */
     public getMethod(i: long): Method {
         return TypeAPIGetMethod(this.td, i)
     }
 
+    /**
+     * Returns number of type parameters of this class
+     *
+     * @returns number of type parameters
+     */
     public getTypeParametersNum(): long {
         // TODO(shumilov-petr): not implemented
         throw new Error("Not implemented")
     }
 
+    /**
+     * Returns ith type parameter of this class
+     *
+     * @param i index
+     *
+     * @throws error then i greater then number of type parameters
+     *
+     * @returns TODO(kirill-mitkin): we cannot return concrete type in this method
+     */
     public getTypeParameter(i: long): Type {
         // TODO(shumilov-petr): not implemented
         throw new Error("Not implemented")
@@ -1261,7 +2092,9 @@ export final class InterfaceType extends Type {
     }
 }
 
-
+/**
+ * Represents array type
+ */
 export final class ArrayType extends Type {
     private elemTD: TypeDesc
 
@@ -1332,36 +2165,86 @@ export final class ArrayType extends Type {
         return ArrayType.getInstance(td, TypeAPIGetArrayElementType(td))
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return false
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return false
     }
 
+    /**
+     * Returns name of type
+     *
+     * @throws error in case of absence of name
+     *
+     * @returns name of type
+     */
     public override getName(): string {
         return ""
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         return this.getElementType().toString() + "[]"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a ArrayType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has ArrayType and
+     * their element types are the same
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof ArrayType && (to as ArrayType).getElementType().equals(this.getElementType())
     }
 
+    /**
+     * Returns element type of this array
+     *
+     * @returns element type
+     */
     public getElementType(): Type {
-        return Type.resolve(this.elemTD)
+        return Type.resolve(this.elemTD)!
     }
 
-    public make(length : long): Object {
-        let td = this.getElementType()
+    /**
+     * Makes instance of this array with provided length
+     * Each element are instantiated using default value
+     * If element type is class value then empty constructor are called
+     *
+     * @param length of array
+     *
+     * @throws error if element type doesn't have default value
+     *
+     * @returns new instance of array
+     */
+    public make(length: long): Object {
         return TypeAPIMakeArrayInstance(this.elemTD, length)
     }
 
@@ -1411,7 +2294,11 @@ export final class TupleType extends Type {
     }
 }
 
-
+/**
+ * Represents function type
+ *
+ * @note lambdas, functions and methods have function type
+ */
 export abstract class FunctionType extends Type {
     private readonly attrs: int
 
@@ -1420,59 +2307,138 @@ export abstract class FunctionType extends Type {
         this.attrs = TypeAPIGetFunctionAttributes(td)
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return false
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return false
     }
 
+    /**
+     * Returns name of type
+     *
+     * @returns name of type
+     */
     public override getName(): string {
         return ""
     }
 
+    /**
+     * Returns return type of function type
+     *
+     * @returns result type
+     */
     public getResultType(): Type {
-        return Type.resolve(TypeAPIGetResultType(this.td))
+        return Type.resolve(TypeAPIGetResultType(this.td))!
     }
 
+    /**
+     * Checks whether function type throws some exception
+     *
+     * @returns true if function type throws some exception
+     */
     public isThrowing(): boolean {
         return (this.attrs & Attributes.THROWING) != 0
     }
 
+    /**
+     * Checks whether function type has native modifier
+     *
+     * @returns true if function type has native modifier
+     */
     public isNative(): boolean {
         return (this.attrs & Attributes.NATIVE) != 0
     }
 
+    /**
+     * Checks whether function type has async modifier
+     *
+     * @returns true if function type has async modifier
+     */
     public isAsync(): boolean {
         return (this.attrs & Attributes.ASYNC) != 0
     }
 
+    /**
+     * Checks whether function result type is never
+     *
+     * @returns true if function result type is never
+     */
     public isNeverResult(): boolean {
         return (this.attrs & Attributes.NEVERRESULT) != 0
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a FunctionType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has FunctionType and
+     * they both has same signatures
+     */
     public override equals(to: NullishType): boolean {
         return (to! instanceof FunctionType) && (to! as FunctionType).td == this.td
     }
 
+    /**
+     * Returns number of parameters
+     * For static methods reciever type counted as parameter
+     * For instance methods reciever type isn't counted as parameter
+     *
+     * @returns number of parameters
+     */
     public getParametersNum(): long {
         return TypeAPIGetParametersNum(this.td)
     }
 
+    /**
+     * Returns ith parameter of function type
+     *
+     * @return Parameter, corresponding ith parameter in signature
+     */
     public getParameter(i: long): Parameter {
         return TypeAPIGetParameter(this.td, i)
     }
 
+    /**
+     * Returns number of type parameters of this class
+     *
+     * @returns number of type parameters
+     */
     public getTypeParametersNum(): long {
         // TODO(shumilov-petr): not implemented
         return 0
     }
 
+    /**
+     * Returns ith type parameter of this class
+     *
+     * @param i index
+     *
+     * @throws error then i greater then number of type parameters
+     *
+     * @returns TODO(kirill-mitkin): we cannot return concrete type in this method
+     */
     public getTypeParameter(i: long): Type {
         // TODO(shumilov-petr): not implemented
         throw new Error("not implemented")
@@ -1490,6 +2456,11 @@ export final class LambdaType extends FunctionType {
         return "$lambda_signature"
     }
 
+    /**
+     * Make instance of function with this function type
+     *
+     * @returns instance with this function type
+     */
     public make(): Object {
         // TODO(kprokopenko): not implemented
         throw new Error("Not implemented")
@@ -1544,7 +2515,7 @@ export final class MethodType extends FunctionType {
     }
 
     public getReceiverType(): Type {
-        return Type.resolve(TypeAPIGetReceiverType(this.td))
+        return Type.resolve(TypeAPIGetReceiverType(this.td))!
     }
 
     public override assignableFrom(other: Type): boolean {
@@ -1556,7 +2527,9 @@ export final class MethodType extends FunctionType {
     }
 }
 
-
+/**
+ * Represents string type
+ */
 export final class StringType extends Type {
     public static readonly REF: StringType = new StringType()
 
@@ -1564,28 +2537,61 @@ export final class StringType extends Type {
         this.td = TypeAPIGetTypeDescriptor("")
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return false
     }
 
+    /**
+     * Returns name of type
+     *
+     * @returns type name
+     */
     public override getName(): string {
         // TODO(shumilov-petr): not implemented
         return ""
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         // TODO(shumilov-petr): not implemented
         return "string"
     }
 
+
+    /**
+     * Checks for equality this instance with provided object, treated as a StringType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has StringType
+     */
     public override equals(to: NullishType): boolean {
         return to instanceof StringType
     }
@@ -1599,7 +2605,9 @@ export final class StringType extends Type {
     }
 }
 
-
+/**
+ * Represents enum type
+ */
 export final class EnumType extends Type {
     internal constructor(td: TypeDesc) {
         this.td = td
@@ -1616,28 +2624,60 @@ export final class EnumType extends Type {
         return this.getName() == rt.getName()
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return false
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return false
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return true
     }
 
+    /**
+     * Returns name of type
+     *
+     * @returns type name
+     */
     public override getName(): string {
         // TODO(shumilov-petr): not implemented
         return ""
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         // TODO(shumilov-petr): not implemented
         return "enum {...}"
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a EnumType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has EnumType and their names are the same
+     */
     public override equals(to: NullishType): boolean {
         // TODO(shumilov-petr): not implemented
         return false
@@ -1673,7 +2713,9 @@ export final class EnumType extends Type {
     }
 }
 
-
+/**
+ * Represents union type
+ */
 export final class UnionType extends Type {
     internal constructor(td: TypeDesc) {
         this.td = td
@@ -1703,23 +2745,48 @@ export final class UnionType extends Type {
         return false
     }
 
+    /**
+     * Checks whether type is primitive or composite
+     *
+     * @returns true if type is primitive and false otherwise
+     */
     public override isPrimitive(): boolean {
         return false
     }
 
+    /**
+     * Checks whether type is reference or composite
+     *
+     * @returns true if type is reference and false otherwise
+     */
     public override isReference(): boolean {
         return true
     }
 
+    /**
+     * Checks whether type has name
+     *
+     * @returns true if type has name
+     */
     public override hasName(): boolean {
         return false
     }
 
+    /**
+     * Returns name of type
+     *
+     * @returns type name
+     */
     public override getName(): string {
         // TODO(shumilov-petr): not implemented
         return ""
     }
 
+    /**
+     * Returns literal of type if exists
+     *
+     * @returns type literal
+     */
     public override getLiteral(): string {
         // TODO(shumilov-petr): not implemented
         return "(... | ...)"
@@ -1735,6 +2802,13 @@ export final class UnionType extends Type {
         throw new Error("Not implemented")
     }
 
+    /**
+     * Checks for equality this instance with provided object, treated as a UnionType
+     *
+     * @param to object to be checked against
+     *
+     * @returns true if object also has UnionType and their cases are the same
+     */
     public override equals(to: NullishType): boolean {
         // TODO(shumilov-petr): not implemented
         return false

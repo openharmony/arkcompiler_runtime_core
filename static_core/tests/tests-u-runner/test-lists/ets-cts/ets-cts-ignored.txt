@@ -1,3 +1,8 @@
+# FIXME(igelhaus): stabilize fe_dev202312
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_61.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_68.ets
+# end of stabilize fe_dev202312
+
 # es2panda fails: panda#14417 Escaping in string interpolation expressions
 02.lexical_elements/09.literals/06.template_literals/templ_01.ets
 07.expressions/30.string_interpolation_expressions/siexp_7.ets
@@ -1819,10 +1824,6 @@
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_7.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_8.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_9.ets
-02.lexical_elements/09.literals/03.bigint_literals/bigint_literals_0.ets
-02.lexical_elements/09.literals/03.bigint_literals/bigint_literals_1.ets
-02.lexical_elements/09.literals/03.bigint_literals/bigint_literals_2.ets
-02.lexical_elements/09.literals/03.bigint_literals/bigint_literals_3.ets
 03.types/08.reference_types/07.function_types/function_type_2.ets
 03.types/08.reference_types/07.function_types/function_type_3.ets
 03.types/08.reference_types/07.function_types/function_type_4.ets
@@ -2615,6 +2616,10 @@
 07.expressions/13.function_call_expression/fcall_8.ets
 # end of es2panda fails
 
+# Disable struct test according I8EM2T
+13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_struct.ets
+# end of Disable struct test according I8EM2T
+
 # es2panda fails: panda:14622 Following function call block is always taken as trailing lambda
 17.experimental_features/10.trailing_lambda/trlambda_func_8.ets
 17.experimental_features/10.trailing_lambda/trlambda_met_8.ets
@@ -2643,3 +2648,23 @@
 # es2panda fails: This test shouldn't expect to throw compile time error
 04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_neg_3.ets
 # end of es2panda fails
+
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_1.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_3.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_5.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_7.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_global_0.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_global_1.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_0.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_1.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_2.ets
+13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_3.ets
+
+# 15095
+09.classes/06.method_declarations/10.hiding_by_class_methods/hiding_instance_static_method.ets
+09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.ets
+# end 15095
+# 14595
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_2.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_1.ets
+# end 14595

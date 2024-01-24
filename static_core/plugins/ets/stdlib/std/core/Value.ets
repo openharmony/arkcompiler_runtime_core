@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,6 +132,9 @@ native function ValueAPIGetElementLong(obj: Object, i: long): long
 
 native function ValueAPIGetElementObject(obj: Object, i: long): Object
 
+/**
+ * Represents abstract value
+ */
 export abstract class Value extends Object {
     public static of(v: boolean): Value {
         return new BooleanValue(BooleanType.VAL, v)
@@ -201,6 +204,13 @@ export abstract class Value extends Object {
 
     // -----
 
+    /**
+     * Returns value of this object
+     *
+     * @param o object instance
+     *
+     * @returns {@link Value} of this object
+     */
     public static of(o: NullishType): Value {
         if (o instanceof Value) {
             return o as Value
@@ -289,6 +299,10 @@ export abstract class Value extends Object {
     public abstract getData(): NullishType
 }
 
+
+/**
+ * Represents value of object of class type
+ */
 export final class ClassValue extends Value {
     private typ: ClassType
     private data: Object
@@ -306,10 +320,24 @@ export final class ClassValue extends Value {
         this.data = data
     }
 
+    /**
+     * Returns number of fields of this value
+     *
+     * @returns number of fields
+     */
     public getFieldsNum(): long {
         return this.typ.getFieldsNum()
     }
 
+    /**
+     * Returns ith field of value
+     *
+     * @param i index
+     *
+     * @throws error when i greater then field's number
+     *
+     * @returns field {@link Value}
+     */
     public getField(i: long): Value {
         let f = this.typ.getField(i)
         if (f.isStatic()) {
@@ -367,6 +395,16 @@ export final class ClassValue extends Value {
         return Value.of(ValueAPIGetFieldByNameObject(this.data, name))
     }
 
+    /**
+     * Sets field value by it's name
+     *
+     * @param name of field
+     *
+     * @param val @{link Value}
+     *
+     * @throws error if this value doesn't have field with {@link name}
+     * or type of {@link val} doesn't assignable to type of this value
+     */
     public setFieldByName(name: string, val: Value) {
         let f = this.typ.getFieldByName(name)
         if (f.isStatic()) {
@@ -404,6 +442,16 @@ export final class ClassValue extends Value {
         }
     }
 
+    /**
+     * Sets field value by it's index
+     *
+     * @param i of field
+     *
+     * @param val @{link Value}
+     *
+     * @throws error if this value doesn't have field with {@link index}'th index
+     * or type of {@link val} doesn't assignable to type of this value
+     */
     public setField(i: long, val: Value) {
         let f = this.typ.getField(i)
         if (f.isStatic()) {
@@ -459,6 +507,9 @@ export final class ClassValue extends Value {
     }
 }
 
+/**
+ * Represents array value
+ */
 export final class ArrayValue extends Value {
     private typ: ArrayType
     private data: Object
@@ -505,6 +556,15 @@ export final class ArrayValue extends Value {
         return Value.of(ValueAPIGetElementObject(this.data, i))
     }
 
+    /**
+     * Sets i'th element of array
+     *
+     * @param i index
+     *
+     * @param val {@link Value} to be set
+     *
+     * @throws error if of {@link val} cannot be assign to i'th element of array
+     */
     public setElement(i: long, val: Value) {
         let et = this.typ.getElementType()
         let vt = val.getType()
@@ -579,6 +639,9 @@ export final class LambdaValue extends Value {
     }
 }
 
+/**
+ * Represents boolean value
+ */
 export final class BooleanValue extends Value {
     private typ: BooleanType
     private data: boolean
@@ -609,6 +672,9 @@ export final class BooleanValue extends Value {
     }
 }
 
+/**
+ * Represents byte value
+ */
 export final class ByteValue extends Value {
     private typ: ByteType
     private data: byte
@@ -639,6 +705,9 @@ export final class ByteValue extends Value {
     }
 }
 
+/**
+ * Represents short value
+ */
 export final class ShortValue extends Value {
     private typ: ShortType
     private data: short
@@ -669,6 +738,9 @@ export final class ShortValue extends Value {
     }
 }
 
+/**
+ * Represents char value
+ */
 export final class CharValue extends Value {
     private typ: CharType
     private data: char
@@ -699,6 +771,9 @@ export final class CharValue extends Value {
     }
 }
 
+/**
+ * Represents int value
+ */
 export final class IntValue extends Value {
     private typ: IntType
     private data: int
@@ -729,6 +804,9 @@ export final class IntValue extends Value {
     }
 }
 
+/**
+ * Represents float value
+ */
 export final class FloatValue extends Value {
     private typ: FloatType
     private data: float
@@ -759,6 +837,9 @@ export final class FloatValue extends Value {
     }
 }
 
+/**
+ * Represents double value
+ */
 export final class DoubleValue extends Value {
     private typ: DoubleType
     private data: double
@@ -789,6 +870,9 @@ export final class DoubleValue extends Value {
     }
 }
 
+/**
+ * Represents long value
+ */
 export final class LongValue extends Value {
     private typ: LongType
     private data: long
@@ -819,6 +903,9 @@ export final class LongValue extends Value {
     }
 }
 
+/**
+ * Represents string value
+ */
 export final class StringValue extends Value {
     private typ: StringType
     private data: string
@@ -841,6 +928,9 @@ export final class StringValue extends Value {
     }
 }
 
+/**
+ * Represents null value
+ */
 export final class NullValue extends Value {
     public static readonly INSTANCE = new NullValue()
 
@@ -859,6 +949,9 @@ export final class NullValue extends Value {
     }
 }
 
+/**
+ * Represents undefined value
+ */
 export final class UndefinedValue extends Value {
     public static readonly INSTANCE = new UndefinedValue()
 

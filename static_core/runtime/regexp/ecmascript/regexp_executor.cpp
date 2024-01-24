@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -331,4 +331,218 @@ void RegExpExecutor::ReAllocStack(uint32_t stackLen)
         stateStackSize_ = newStackSize;
     }
 }
+
+uint32_t RegExpExecutor::GetChar(const uint8_t **pp, const uint8_t *end) const
+{
+    uint32_t c;
+    const uint8_t *cptr = *pp;
+    if (!isWideChar_) {
+        c = *cptr;
+        *pp += 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    } else {
+        uint16_t c1 = *(reinterpret_cast<const uint16_t *>(cptr));
+        c = c1;
+        cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (U16_IS_LEAD(c) && IsUtf16() && cptr < end) {
+            c1 = *(reinterpret_cast<const uint16_t *>(cptr));
+            if (U16_IS_TRAIL(c1)) {
+                c = static_cast<uint32_t>(U16_GET_SUPPLEMENTARY(c, c1));  // NOLINT(hicpp-signed-bitwise)
+                cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            }
+        }
+        *pp = cptr;
+    }
+    return c;
+}
+
+uint32_t RegExpExecutor::PeekChar(const uint8_t *p, const uint8_t *end) const
+{
+    uint32_t c;
+    const uint8_t *cptr = p;
+    if (!isWideChar_) {
+        c = *cptr;
+    } else {
+        uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
+        c = c1;
+        cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (U16_IS_LEAD(c) && IsUtf16() && cptr < end) {
+            c1 = *reinterpret_cast<const uint16_t *>(cptr);
+            if (U16_IS_TRAIL(c1)) {
+                c = static_cast<uint32_t>(U16_GET_SUPPLEMENTARY(c, c1));  // NOLINT(hicpp-signed-bitwise)
+            }
+        }
+    }
+    return c;
+}
+
+void RegExpExecutor::AdvancePtr(const uint8_t **pp, const uint8_t *end) const
+{
+    const uint8_t *cptr = *pp;
+    if (!isWideChar_) {
+        *pp += 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    } else {
+        uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
+        cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (U16_IS_LEAD(c1) && IsUtf16() && cptr < end) {
+            c1 = *reinterpret_cast<const uint16_t *>(cptr);
+            if (U16_IS_TRAIL(c1)) {
+                cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            }
+        }
+        *pp = cptr;
+    }
+}
+
+uint32_t RegExpExecutor::PeekPrevChar(const uint8_t *p, const uint8_t *start) const
+{
+    uint32_t c;
+    const uint8_t *cptr = p;
+    if (!isWideChar_) {
+        c = cptr[-1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    } else {
+        cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
+        c = c1;
+        if (U16_IS_TRAIL(c) && IsUtf16() && cptr > start) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            c1 = reinterpret_cast<const uint16_t *>(cptr)[-1];
+            if (U16_IS_LEAD(c1)) {
+                c = static_cast<uint32_t>(U16_GET_SUPPLEMENTARY(c1, c));  // NOLINT(hicpp-signed-bitwise)
+            }
+        }
+    }
+    return c;
+}
+
+uint32_t RegExpExecutor::GetPrevChar(const uint8_t **pp, const uint8_t *start) const
+{
+    uint32_t c;
+    const uint8_t *cptr = *pp;
+    if (!isWideChar_) {
+        c = cptr[-1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        cptr -= 1;     // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        *pp = cptr;
+    } else {
+        cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
+        c = c1;
+        if (U16_IS_TRAIL(c) && IsUtf16() && cptr > start) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            c1 = reinterpret_cast<const uint16_t *>(cptr)[-1];
+            if (U16_IS_LEAD(c1)) {
+                c = static_cast<uint32_t>(U16_GET_SUPPLEMENTARY(c1, c));  // NOLINT(hicpp-signed-bitwise)
+                cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            }
+        }
+        *pp = cptr;
+    }
+    return c;
+}
+
+void RegExpExecutor::PrevPtr(const uint8_t **pp, const uint8_t *start) const
+{
+    const uint8_t *cptr = *pp;
+    if (!isWideChar_) {
+        cptr -= 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        *pp = cptr;
+    } else {
+        cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
+        if (U16_IS_TRAIL(c1) && IsUtf16() && cptr > start) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            c1 = reinterpret_cast<const uint16_t *>(cptr)[-1];
+            if (U16_IS_LEAD(c1)) {
+                cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            }
+        }
+        *pp = cptr;
+    }
+}
+
+bool RegExpExecutor::HandleOpBackReferenceMatch(const uint8_t *captureStart, const uint8_t *captureEnd, uint8_t opCode)
+{
+    const uint8_t *refCptr = captureStart;
+    bool isMatched = true;
+    while (refCptr < captureEnd) {
+        if (IsEOF()) {
+            isMatched = false;
+            break;
+        }
+        // NOLINTNEXTLINE(readability-identifier-naming)
+        uint32_t c1 = GetChar(&refCptr, captureEnd);
+        // NOLINTNEXTLINE(readability-identifier-naming)
+        uint32_t c2 = GetChar(&currentPtr_, inputEnd_);
+        if (IsIgnoreCase()) {
+            c1 = static_cast<uint32_t>(RegExpParser::Canonicalize(c1, IsUtf16()));
+            c2 = static_cast<uint32_t>(RegExpParser::Canonicalize(c2, IsUtf16()));
+        }
+        if (c1 != c2) {
+            isMatched = false;
+            break;
+        }
+    }
+    if (!isMatched) {
+        if (MatchFailed()) {
+            return false;
+        }
+    } else {
+        Advance(opCode);
+    }
+    return true;
+}
+
+bool RegExpExecutor::HandleOpBackwardBackReferenceMatch(const uint8_t *captureStart, const uint8_t *captureEnd,
+                                                        uint8_t opCode)
+{
+    const uint8_t *refCptr = captureEnd;
+    bool isMatched = true;
+    while (refCptr > captureStart) {
+        if (GetCurrentPtr() == input_) {
+            isMatched = false;
+            break;
+        }
+        // NOLINTNEXTLINE(readability-identifier-naming)
+        uint32_t c1 = GetPrevChar(&refCptr, captureStart);
+        // NOLINTNEXTLINE(readability-identifier-naming)
+        uint32_t c2 = GetPrevChar(&currentPtr_, input_);
+        if (IsIgnoreCase()) {
+            c1 = static_cast<uint32_t>(RegExpParser::Canonicalize(c1, IsUtf16()));
+            c2 = static_cast<uint32_t>(RegExpParser::Canonicalize(c2, IsUtf16()));
+        }
+        if (c1 != c2) {
+            isMatched = false;
+            break;
+        }
+    }
+    if (!isMatched) {
+        if (MatchFailed()) {
+            return false;
+        }
+    } else {
+        Advance(opCode);
+    }
+    return true;
+}
+
+bool RegExpExecutor::HandleOpBackReference(const DynChunk &byteCode, uint8_t opCode)
+{
+    uint32_t captureIndex = byteCode.GetU8(GetCurrentPC() + 1);
+    if (captureIndex >= nCapture_) {
+        return !MatchFailed();
+    }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    const uint8_t *captureStart = captureResultList_[captureIndex].captureStart;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    const uint8_t *captureEnd = captureResultList_[captureIndex].captureEnd;
+    if (captureStart == nullptr || captureEnd == nullptr) {
+        Advance(opCode);
+        return true;
+    }
+
+    if (opCode == RegExpOpCode::OP_BACKREFERENCE) {
+        return HandleOpBackReferenceMatch(captureStart, captureEnd, opCode);
+    }
+    return HandleOpBackwardBackReferenceMatch(captureStart, captureEnd, opCode);
+}
+
 }  // namespace panda

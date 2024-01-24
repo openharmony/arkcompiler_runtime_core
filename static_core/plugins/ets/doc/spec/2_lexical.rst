@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -32,7 +32,7 @@ Use of Unicode Characters
     frontend_status: Done
 
 The |LANG| programming language uses characters of the Unicode Character
-set [1]_ as its terminal symbols, and represents text in sequences of
+set [1]_ as its terminal symbols. It represents text in sequences of
 16-bit code units using the Unicode UTF-16 encoding.
 
 The term *Unicode code point* is used in this specification only where such
@@ -57,7 +57,11 @@ Lexical Input Elements
     frontend_status: Done
 
 The language has lexical input elements of the following types:
-:ref:`White Spaces`, :ref:`Line Separators`, :ref:`Tokens`, and :ref:`Comments`.
+
+-  :ref:`White Spaces`,
+-  :ref:`Line Separators`,
+-  :ref:`Tokens`, and
+-  :ref:`Comments`.
 
 |
 
@@ -69,11 +73,8 @@ White Spaces
 .. meta:
     frontend_status: Done
 
-White spaces are lexical input elements that separate tokens from one another
-to improve the source code readability and avoid ambiguities. White spaces are
-ignored by the syntactic grammar.
-
-White spaces include the following:
+White spaces are lexical input elements that separate tokens from one another.
+Whitespaces never occur within a token. White spaces include the following:
 
 - Space (U+0020),
 
@@ -87,7 +88,9 @@ White spaces include the following:
 
 - Zero-width no-break space (U+FEFF).
 
-White spaces can occur within comments but not within any kind of token.
+
+White spaces improve source code readability and help avoiding ambiguities.
+White spaces are ignored by the syntactic grammar, but can occur within a comment.
 
 .. index::
    lexical input element
@@ -107,10 +110,7 @@ Line Separators
     frontend_status: Done
 
 Line separators are lexical input elements that divide sequences of Unicode
-input characters into lines, and separate tokens from one another to improve
-the source code readability.
-
-Line separators include the following:
+input characters into lines. Line separators include the following:
 
 - Newline character (U+000A or ASCII <LF>),
 
@@ -120,7 +120,8 @@ Line separators include the following:
 
 - Paragraph separator character (U+2029 or ASCII <PS>).
 
-Any sequence of line separators is considered a single separator.
+Line separators separate tokens from one another and improve source code
+readability. Any sequence of line separators is considered a single separator.
 
 |
 
@@ -133,16 +134,21 @@ Tokens
     frontend_status: Done
 
 Tokens form the vocabulary of the language. There are four classes of tokens:
-:ref:`Identifiers`, :ref:`Keywords`, :ref:`Operators and Punctuators`,
-and :ref:`Literals`.
+
+-  :ref:`Identifiers`,
+-  :ref:`Keywords`,
+-  :ref:`Operators and Punctuators`, and
+-  :ref:`Literals`.
+
 
 Token is the only lexical input element that can act as a terminal symbol
 of the syntactic grammar. In the process of tokenization, the next token is
-always the longest sequence of characters that form a valid token. White
-spaces (see :ref:`White spaces`) are ignored, except when they separate
-tokens that would otherwise merge into a single token.
+always the longest sequence of characters that form a valid token. Tokens
+are separated by white spaces (see :ref:`White spaces`). Without white spaces,
+tokens merge into a single token. White spaces are ignored by the syntactic
+grammar.
 
-In many cases line separators are treated as white spaces, except where line
+Line separators are often treated as white spaces, except where line
 separators have special meanings. See :ref:`Semicolons` for more details.
 
 .. index::
@@ -178,8 +184,11 @@ specified by the Unicode Standard.
 The first character in an identifier must be '\$', '\_', or any Unicode
 code point with the Unicode property 'ID_Start'[2]_. Other characters
 must be Unicode code points with the Unicode property, or one of the following
-characters: '\$' (\\U+0024), 'Zero-Width Non-Joiner' (<ZWNJ>, \\U+200C), or
-'Zero-Width Joiner' (<ZWNJ>, \\U+200D).
+characters:
+
+-  '\$' (\\U+0024),
+-  'Zero-Width Non-Joiner' (<ZWNJ>, \\U+200C), or
+-  'Zero-Width Joiner' (<ZWNJ>, \\U+200D).
 
 .. index::
    identifier
@@ -223,9 +232,10 @@ Keywords
     todo: of, default: soft keyword in spec, hard keyword in implementation
 
 *Keywords* are the reserved words that have permanently predefined meanings
-in the language.
+in |LANG|. Keywords are always lowercase. Keywords can be of four kinds as
+discussed below.
 
-The following keywords are reserved in any context (*hard keywords*), and
+1. The following keywords are reserved in any context (*hard keywords*), and
 cannot be used as identifiers:
 
 .. index::
@@ -264,7 +274,7 @@ cannot be used as identifiers:
 | do            | instanceof    | public        |               |
 +---------------+---------------+---------------+---------------+
 
-The following words have special meaning in certain contexts (*soft
+2. The following words have special meaning in certain contexts (*soft
 keywords*) but are valid identifiers elsewhere:
 
 .. index::
@@ -284,7 +294,7 @@ keywords*) but are valid identifiers elsewhere:
 | finally       | keyof         | rethrows      |               |
 +---------------+---------------+---------------+---------------+
 
-The following words cannot be used as user-defined type names but are
+3. The following words cannot be used as user-defined type names but are
 not otherwise restricted:
 
 .. index::
@@ -302,7 +312,7 @@ not otherwise restricted:
 | char          | long          | undefined     |               |
 +---------------+---------------+---------------+---------------+
 
-The following identifiers are also treated as keywords reserved for
+4. The following identifiers are also treated as *soft keywords* reserved for
 the future use (or used in TS):
 
 .. index::
@@ -315,7 +325,6 @@ the future use (or used in TS):
 | is            | typeof        | var           | yield         |
 +---------------+---------------+---------------+---------------+
 
-Keywords are always lowercase.
 
 |
 
@@ -328,12 +337,11 @@ Operators and Punctuators
     frontend_status: Partly
     todo: note: ?? and ?. are not implemented yet
 
-*Operators* are tokens that denote various actions to be performed on values.
-The examples are addition, subtraction, comparisons, and other.
+*Operators* are tokens that denote various actions to be performed on values:
+addition, subtraction, comparison, and other.
 
-*Punctuators* are tokens used to separate, complete, or otherwise organize
-program elements and parts. The examples are commas, semicolons, parentheses,
-square brackets, etc.
+*Punctuators* are tokens that separate, complete, or otherwise organize program
+elements and parts: commas, semicolons, parentheses, square brackets, etc.
 
 The following character sequences represent operators and punctuators:
 
@@ -387,7 +395,7 @@ Literals
       | CharLiteral
       ;
 
-See :ref:`Char Literals` for the experimental *char literal*.
+See :ref:`Character Literals` for the experimental *char literal*.
 
 .. index::
    literal
@@ -450,7 +458,7 @@ an exponential part. Integer literals can be written with bases 16
       '0' [bB] ( [01] | [01] [01_]* [01] )
       ;
 
-Examples are presented below:
+It is presented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -530,9 +538,7 @@ a float type suffix:
         'f'
         ;
 
-Examples are presented below:
-
-|
+It is presented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -550,9 +556,8 @@ Underscore characters in such positions do not change the values of literals.
 However, an underscore character must not be the very first and the very
 last symbol of an integer literal.
 
-A floating-point literal is of type *float* if *float type suffix* is present
-and is of type *double* otherwise (type *number* is an alias to
-*double*). 
+A floating-point literal is of type *float* if *float type suffix* is present.
+Otherwise, it is of type *double* (type *number* is an alias to *double*).
 
 A compile-time error occurs if a non-zero floating-point literal is
 too large for its type.
@@ -579,9 +584,9 @@ BigInt Literals
 .. meta:
     frontend_status: None
 
-*BigInt literals* represent integer numbers with unlimited number of digits.
-BigInt literals use decimal base only. A BigInt literal is a sequence of
-digits followed by the symbol 'n'.
+*BigInt* literals represent integer numbers with unlimited number of digits.
+*BigInt* literals use decimal base only. A *BigInt* literal is a sequence of
+digits followed by the symbol 'n':
 
 .. code-block:: abnf
 
@@ -590,7 +595,7 @@ digits followed by the symbol 'n'.
       | [1-9] ('_'? [0-9])* 'n'
       ;
 
-Examples are presented below:
+It is presented by the examples below:
 
 .. code-block:: typescript
 
@@ -600,13 +605,13 @@ Examples are presented below:
 The underscore character '_' used between successive digits can be used to
 denote a BigInt literal and improve readability. Underscore characters in
 such positions do not change the values of literals. However, an underscore
-character must not be the very first and the very last symbol of a BigInt
+character must not be the very first or the very last symbol of a *BigInt*
 literal.
 
-BigInt literals are always of type *bigint*. 
+*BigInt* literals are always of type *bigint*. 
 
 Strings that represent numbers or any integer values can be converted to
-*bigint* by using the built-in functions. See the example below:
+*bigint* by using the built-in functions:
 
 .. code-block:: typescript
 
@@ -622,7 +627,7 @@ Strings that represent numbers or any integer values can be converted to
 
 Two other static functions allow taking *bitsCount* lower bits of a
 BigInt number and return them as a result. Signed and unsigned versions
-are possible:
+are both possible:
 
 .. code-block:: typescript
 
@@ -639,7 +644,7 @@ Boolean Literals
 .. meta:
     frontend_status: Done
 
-The two *Boolean literal* values are represented by the keywords
+The two *Boolean* literal values are represented by the keywords
 ``true`` and ``false``.
 
 .. code-block:: abnf
@@ -649,7 +654,7 @@ The two *Boolean literal* values are represented by the keywords
         ’true’ | ’false’
         ;
 
-Boolean literals are of type *boolean*.
+*Boolean* literals are of type *boolean*.
 
 .. index::
    keyword
@@ -666,11 +671,11 @@ String Literals
     frontend_status: Done
     todo: "" sample is invalid: SyntaxError: Newline is not allowed in strings
 
-*String literals* consist of zero or more characters enclosed between
+*String* literals consist of zero or more characters enclosed between
 single or double quotes. A special form of string literals is
 *template literal* (see :ref:`Template Literals`).
 
-String literals are of type *string*. Type *string* is a predefined reference
+*String* literals are of type *string*. Type *string* is a predefined reference
 type (see :ref:`String Type`).
 
 .. index::
@@ -704,13 +709,13 @@ type (see :ref:`String Type`).
         | ~[1-9xu\r\n]
         ;
 
-Normally, characters in string literals represent themselves. However,
+Normally, characters in *string* literals represent themselves. However,
 certain non-graphic characters can be represented by explicit specifications
 or Unicode codes. Such constructs are called *escape sequences*.
 
-Escape sequences can represent graphic characters within a string literal, e.g.,
-single quotes '``’``', double quotes '``”``', backslashes '``\``', and some
-others.
+Escape sequences can represent graphic characters within a *string* literal,
+e.g., single quotes '``’``', double quotes '``”``', backslashes '``\``', and
+some others.
 
 .. index::
    string literal
@@ -744,18 +749,18 @@ by one of the following characters:
 
 -  ``\`` (backslash, U+005c),
 
--  ``x`` and two hexadecimal digits, like ``7F``,
+-  ``x`` and two hexadecimal digits (like ``7F``),
 
--  ``u`` and four hexadecimal digits, forming a fixed Unicode escape
-   sequence like ``\u005c``,
+-  ``u`` and four hexadecimal digits (forming a fixed Unicode escape
+   sequence like ``\u005c``),
 
--  ``u{`` and at least one hexadecimal digit, followed by ``}``, forming
-   a bounded Unicode escape sequence like ``\u{5c}``, and
+-  ``u{`` and at least one hexadecimal digit followed by ``}`` (forming
+   a bounded Unicode escape sequence like ``\u{5c}``), and
 
 -  any single character except digits from ‘1’ to ‘9’ and characters ‘x’,
    ‘u’, CR, and LF.
 
-Examples are provided below:
+The examples are provided below:
 
 .. code-block:: typescript
    :linenos:
@@ -781,7 +786,7 @@ Template Literals
 Multi-line string literals that can include embedded expressions are called
 *template literals*.
 
-A *template literal* with an embedded expression is a *template string*.
+A *template* literal with an embedded expression is a *template string*.
 
 A *template string* is not exactly a literal because its value cannot be
 evaluated at compile time. The evaluation of a template string is called
@@ -810,8 +815,6 @@ See :ref:`String Interpolation Expressions` for the grammar of *embeddedExpressi
 
 An example of a multi-line string is provided below:
 
-|
-
 .. code-block:: typescript
    :linenos:
 
@@ -820,7 +823,7 @@ An example of a multi-line string is provided below:
                     which should be enclosed in 
                     backticks`
 
-Template literals are of type *string*, which is a predefined reference
+*Template* literals are of type *string*, which is a predefined reference
 type (see :ref:`string Type`).
 
 |
@@ -833,7 +836,7 @@ Null Literal
 .. meta:
     frontend_status: Done
 
-'*Null literal*' is the only literal to denote a reference without pointing
+*Null literal* is the only literal to denote a reference without pointing
 at any entity. It is represented by the keyword ``null``. 
 
 .. code-block:: abnf
@@ -842,10 +845,10 @@ at any entity. It is represented by the keyword ``null``.
         'null' 
         ;
 
-The *null literal* denotes the null reference that represents an absence
-of a value, and is a valid value only for types ``T | null`` (see
-:ref:`Nullish Types`). The null literal is of type *null* (see
-:ref:`null Type`) and is, by definition, the only value of this type.
+The *null literal* denotes the null reference that represents the absence
+of a value. The *null literal* is, by definition, the only value of type
+*null* (see :ref:`null Type`). This value is valid only for types *T* | *null*
+(see :ref:`Nullish Types`).
 
 .. index::
    null literal
@@ -860,8 +863,8 @@ of a value, and is a valid value only for types ``T | null`` (see
 Undefined Literal
 ========================
 
-'*Undefined literal*' is the only literal to denote a reference with a value
-that is not defined. '*Undefined literal*' is the only value of type
+*Undefined literal* is the only literal to denote a reference with a value
+that is not defined. *Undefined literal* is the only value of type
 *undefined* (see :ref:`undefined Type`). It is represented by the keyword
 ``undefined``.
 
@@ -898,7 +901,7 @@ between them is allowed but ignored.
 with the first subsequent sequence of characters '\*/'. Any character or
 sequence of characters between them is allowed but ignored.
 
-This particularly means that comments cannot be nested.
+Comments cannot be nested.
 
 .. index::
    comment
@@ -915,8 +918,8 @@ Semicolons
 .. meta:
     frontend_status: Done
 
-In most cases declarations and statements are terminated by a line separator
-(see :ref:`Line Separators`). In some cases a semicolon must be used to separate
+Declarations and statements are usually terminated by a line separator (see
+:ref:`Line Separators`). In some cases, a semicolon must be used to separate
 syntax productions written in one line, or to avoid ambiguity.
 
 .. index::

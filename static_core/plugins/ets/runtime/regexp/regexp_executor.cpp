@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,61 +14,79 @@
  */
 
 #include "plugins/ets/runtime/regexp/regexp_executor.h"
+#include "include/coretypes/string.h"
+#include "include/mem/panda_string.h"
 #include "runtime/handle_scope-inl.h"
+#include "types/ets_array.h"
 
 namespace panda::ets {
-RegExpMatchResult<VMHandle<EtsString>> RegExpExecutor::GetResult(bool isSuccess) const
+
+std::pair<uint32_t, uint32_t> RegExpExecutor::GetIndices(CaptureState *captureState) const
 {
-    auto *thread = ManagedThread::GetCurrent();
-    RegExpMatchResult<VMHandle<EtsString>> result;
-    PandaVector<std::pair<bool, VMHandle<EtsString>>> captures;
-    result.isSuccess = isSuccess;
-    if (isSuccess) {
-        for (uint32_t i = 0; i < GetCaptureCount(); i++) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            CaptureState *captureState = &GetCaptureResultList()[i];
-            if (i == 0) {
-                result.index = captureState->captureStart - GetInputPtr();
-                if (IsWideChar()) {
-                    result.index /= WIDE_CHAR_SIZE;
-                }
-            }
-            int32_t len = captureState->captureEnd - captureState->captureStart;
-            std::pair<bool, VMHandle<EtsString>> pair;
-            if ((captureState->captureStart != nullptr && captureState->captureEnd != nullptr) && (len >= 0)) {
-                pair.first = false;
-                if (IsWideChar()) {
-                    // create utf-16 string
-                    pair.second = VMHandle<EtsString>(
-                        thread, EtsString::CreateFromUtf16(
-                                    reinterpret_cast<const uint16_t *>(captureState->captureStart), len / 2)
-                                    ->GetCoreType());
-                } else {
-                    // create utf-8 string
-                    PandaVector<uint8_t> buffer(len + 1);
-                    uint8_t *dest = buffer.data();
-                    if (memcpy_s(dest, len + 1, reinterpret_cast<const uint8_t *>(captureState->captureStart), len) !=
-                        EOK) {
-                        LOG(FATAL, COMMON) << "memcpy_s failed";
-                        UNREACHABLE();
-                    }
-                    dest[len] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    pair.second = VMHandle<EtsString>(
-                        thread,
-                        EtsString::CreateFromUtf8(reinterpret_cast<const char *>(buffer.data()), len)->GetCoreType());
-                }
-            } else {
-                // undefined
-                pair.first = true;
-            }
-            captures.emplace_back(pair);
-        }
-        result.captures = std::move(captures);
-        result.endIndex = GetCurrentPtr() - GetInputPtr();
-        if (IsWideChar()) {
-            result.endIndex /= WIDE_CHAR_SIZE;
-        }
+    uint8_t *begin = GetInputPtr();
+    uint32_t start = captureState->captureStart - begin;
+    uint32_t end = captureState->captureEnd - begin;
+    if (IsWideChar()) {
+        return {start / WIDE_CHAR_SIZE, end / WIDE_CHAR_SIZE};
     }
+    return {start, end};
+}
+
+RegExpMatchResult<PandaString> RegExpExecutor::GetResult(bool isSuccess, bool hasIndices) const
+{
+    RegExpMatchResult<PandaString> result;
+    PandaVector<std::pair<bool, PandaString>> captures;
+    PandaVector<std::pair<uint32_t, uint32_t>> indices;
+    result.isSuccess = isSuccess;
+    result.isWide = IsWideChar();
+    if (!isSuccess) {
+        return result;
+    }
+
+    for (uint32_t i = 0; i < GetCaptureCount(); i++) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        CaptureState *captureState = &GetCaptureResultList()[i];
+        if (i == 0) {
+            result.index = captureState->captureStart - GetInputPtr();
+            if (IsWideChar()) {
+                result.index /= WIDE_CHAR_SIZE;
+            }
+        }
+
+        int32_t len = captureState->captureEnd - captureState->captureStart;
+        if (captureState->captureStart == nullptr || captureState->captureEnd == nullptr || len < 0) {
+            continue;
+        }
+
+        PandaString res;
+        if (IsWideChar()) {
+            // create utf-16
+            res = PandaString(reinterpret_cast<const char *>(captureState->captureStart), len);
+        } else {
+            // create utf-8 string
+            PandaVector<uint8_t> buffer(len + 1);
+            uint8_t *dest = buffer.data();
+            if (memcpy_s(dest, len + 1, reinterpret_cast<const uint8_t *>(captureState->captureStart), len) != EOK) {
+                LOG(FATAL, COMMON) << "memcpy_s failed";
+                UNREACHABLE();
+            }
+            dest[len] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            res = PandaString(reinterpret_cast<const char *>(buffer.data()), len);
+        }
+        captures.push_back({true, res});
+        indices.emplace_back(GetIndices(captureState));
+    }
+    result.captures = std::move(captures);
+    if (hasIndices) {
+        result.indices = std::move(indices);
+    } else {
+        result.indices = {};
+    }
+    result.endIndex = GetCurrentPtr() - GetInputPtr();
+    if (IsWideChar()) {
+        result.endIndex /= WIDE_CHAR_SIZE;
+    }
+
     return result;
 }
 }  // namespace panda::ets

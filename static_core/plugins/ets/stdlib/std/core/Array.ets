@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ function checkRange(arrLen: int, startIndex: int, endIndex: int): boolean {
     return ((0 <= startIndex) && (startIndex <= endIndex) && (endIndex <= arrLen));
 }
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ function checkRange(arrLen: int, startIndex: int, endIndex: int): boolean {
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,7 +106,7 @@ export function fill(arr: boolean[], value: boolean): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,7 +200,7 @@ export function copyOf(arr: boolean[]): boolean[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -567,7 +567,7 @@ export function test_sortAllOn(arr: boolean[]) {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -670,7 +670,7 @@ export function includes(arr: boolean[], key: boolean): boolean {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -743,7 +743,7 @@ function lastIndexOf(arr: boolean[], key: boolean, fromIndex: int): int throws {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -885,7 +885,7 @@ export function upperBoundSearch(arr: boolean[], key: boolean): int {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -935,7 +935,7 @@ export function reverse(arr: boolean[]): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -958,12 +958,13 @@ export function reverse(arr: boolean[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
 export function join(arr: boolean[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+
         sb.append(arr[i] ? "true" : "false")
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -971,9 +972,8 @@ export function join(arr: boolean[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1015,7 +1015,7 @@ export function forEach(arr: boolean[], fn: (value: boolean) => void): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1063,7 +1063,7 @@ export function map(arr: boolean[], fn: (value: boolean) => boolean): boolean[] 
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1143,7 +1143,7 @@ export function filter(arr: boolean[], fn: (value: boolean) => boolean): boolean
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1163,7 +1163,7 @@ export function filter(arr: boolean[], fn: (value: boolean) => boolean): boolean
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1225,7 +1225,7 @@ export function fill(arr: byte[], value: byte): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1319,7 +1319,7 @@ export function copyOf(arr: byte[]): byte[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2112,7 +2112,7 @@ export function test_sortAllOn(arr: byte[]) {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2215,7 +2215,7 @@ export function includes(arr: byte[], key: byte): boolean {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2288,7 +2288,7 @@ function lastIndexOf(arr: byte[], key: byte, fromIndex: int): int throws {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2430,7 +2430,7 @@ export function upperBoundSearch(arr: byte[], key: byte): int {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2480,7 +2480,7 @@ export function reverse(arr: byte[]): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2503,12 +2503,13 @@ export function reverse(arr: byte[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
 export function join(arr: byte[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+
         sb.append(arr[i])
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -2516,9 +2517,8 @@ export function join(arr: byte[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2560,7 +2560,7 @@ export function forEach(arr: byte[], fn: (value: byte) => void): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2608,7 +2608,7 @@ export function map(arr: byte[], fn: (value: byte) => byte): byte[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2688,7 +2688,7 @@ export function filter(arr: byte[], fn: (value: byte) => boolean): byte[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2708,7 +2708,7 @@ export function filter(arr: byte[], fn: (value: byte) => boolean): byte[] {
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2770,7 +2770,7 @@ export function fill(arr: short[], value: short): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2864,7 +2864,7 @@ export function copyOf(arr: short[]): short[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3639,7 +3639,7 @@ export function test_sortAllOn(arr: short[]) {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3742,7 +3742,7 @@ export function includes(arr: short[], key: short): boolean {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3815,7 +3815,7 @@ function lastIndexOf(arr: short[], key: short, fromIndex: int): int throws {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3957,7 +3957,7 @@ export function upperBoundSearch(arr: short[], key: short): int {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4007,7 +4007,7 @@ export function reverse(arr: short[]): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4030,12 +4030,13 @@ export function reverse(arr: short[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
 export function join(arr: short[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+
         sb.append(arr[i])
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -4043,9 +4044,8 @@ export function join(arr: short[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4087,7 +4087,7 @@ export function forEach(arr: short[], fn: (value: short) => void): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4135,7 +4135,7 @@ export function map(arr: short[], fn: (value: short) => short): short[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4215,7 +4215,7 @@ export function filter(arr: short[], fn: (value: short) => boolean): short[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4235,7 +4235,7 @@ export function filter(arr: short[], fn: (value: short) => boolean): short[] {
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4297,7 +4297,7 @@ export function fill(arr: int[], value: int): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4391,7 +4391,7 @@ export function copyOf(arr: int[]): int[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5166,7 +5166,7 @@ export function test_sortAllOn(arr: int[]) {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5269,7 +5269,7 @@ export function includes(arr: int[], key: int): boolean {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5342,7 +5342,7 @@ function lastIndexOf(arr: int[], key: int, fromIndex: int): int throws {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5484,7 +5484,7 @@ export function upperBoundSearch(arr: int[], key: int): int {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5534,7 +5534,7 @@ export function reverse(arr: int[]): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5557,12 +5557,13 @@ export function reverse(arr: int[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
 export function join(arr: int[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+
         sb.append(arr[i])
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -5570,9 +5571,8 @@ export function join(arr: int[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5614,7 +5614,7 @@ export function forEach(arr: int[], fn: (value: int) => void): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5662,7 +5662,7 @@ export function map(arr: int[], fn: (value: int) => int): int[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5742,7 +5742,7 @@ export function filter(arr: int[], fn: (value: int) => boolean): int[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5762,7 +5762,7 @@ export function filter(arr: int[], fn: (value: int) => boolean): int[] {
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5824,7 +5824,7 @@ export function fill(arr: long[], value: long): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -5918,7 +5918,7 @@ export function copyOf(arr: long[]): long[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -6693,7 +6693,7 @@ export function test_sortAllOn(arr: long[]) {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -6796,7 +6796,7 @@ export function includes(arr: long[], key: long): boolean {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -6869,7 +6869,7 @@ function lastIndexOf(arr: long[], key: long, fromIndex: int): int throws {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7011,7 +7011,7 @@ export function upperBoundSearch(arr: long[], key: long): int {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7061,7 +7061,7 @@ export function reverse(arr: long[]): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7084,12 +7084,13 @@ export function reverse(arr: long[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
 export function join(arr: long[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+
         sb.append(arr[i])
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -7097,9 +7098,8 @@ export function join(arr: long[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7141,7 +7141,7 @@ export function forEach(arr: long[], fn: (value: long) => void): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7189,7 +7189,7 @@ export function map(arr: long[], fn: (value: long) => long): long[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7269,7 +7269,7 @@ export function filter(arr: long[], fn: (value: long) => boolean): long[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7289,7 +7289,7 @@ export function filter(arr: long[], fn: (value: long) => boolean): long[] {
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7351,7 +7351,7 @@ export function fill(arr: float[], value: float): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7445,7 +7445,7 @@ export function copyOf(arr: float[]): float[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8220,7 +8220,7 @@ export function test_sortAllOn(arr: float[]) {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8323,7 +8323,7 @@ export function includes(arr: float[], key: float): boolean {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8396,7 +8396,7 @@ function lastIndexOf(arr: float[], key: float, fromIndex: int): int throws {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8538,7 +8538,7 @@ export function upperBoundSearch(arr: float[], key: float): int {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8588,7 +8588,7 @@ export function reverse(arr: float[]): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8611,12 +8611,13 @@ export function reverse(arr: float[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
 export function join(arr: float[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+
         sb.append(arr[i])
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -8624,9 +8625,8 @@ export function join(arr: float[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8668,7 +8668,7 @@ export function forEach(arr: float[], fn: (value: float) => void): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8716,7 +8716,7 @@ export function map(arr: float[], fn: (value: float) => float): float[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8796,7 +8796,7 @@ export function filter(arr: float[], fn: (value: float) => boolean): float[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8816,7 +8816,7 @@ export function filter(arr: float[], fn: (value: float) => boolean): float[] {
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8878,7 +8878,7 @@ export function fill(arr: double[], value: double): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -8972,7 +8972,7 @@ export function copyOf(arr: double[]): double[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9747,7 +9747,7 @@ export function test_sortAllOn(arr: double[]) {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9850,7 +9850,7 @@ export function includes(arr: double[], key: double): boolean {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -9923,7 +9923,7 @@ function lastIndexOf(arr: double[], key: double, fromIndex: int): int throws {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10065,7 +10065,7 @@ export function upperBoundSearch(arr: double[], key: double): int {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10115,7 +10115,7 @@ export function reverse(arr: double[]): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10138,12 +10138,13 @@ export function reverse(arr: double[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
 export function join(arr: double[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+
         sb.append(arr[i])
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -10151,9 +10152,8 @@ export function join(arr: double[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10195,7 +10195,7 @@ export function forEach(arr: double[], fn: (value: double) => void): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10243,7 +10243,7 @@ export function map(arr: double[], fn: (value: double) => double): double[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10323,7 +10323,7 @@ export function filter(arr: double[], fn: (value: double) => boolean): double[] 
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10343,7 +10343,7 @@ export function filter(arr: double[], fn: (value: double) => boolean): double[] 
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10405,7 +10405,7 @@ export function fill(arr: char[], value: char): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -10499,7 +10499,7 @@ export function copyOf(arr: char[]): char[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11274,7 +11274,7 @@ export function test_sortAllOn(arr: char[]) {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11377,7 +11377,7 @@ export function includes(arr: char[], key: char): boolean {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11450,7 +11450,7 @@ function lastIndexOf(arr: char[], key: char, fromIndex: int): int throws {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11592,7 +11592,7 @@ export function upperBoundSearch(arr: char[], key: char): int {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11642,7 +11642,7 @@ export function reverse(arr: char[]): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11665,12 +11665,13 @@ export function reverse(arr: char[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
 export function join(arr: char[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
+
         sb.append(arr[i])
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -11678,9 +11679,8 @@ export function join(arr: char[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11722,7 +11722,7 @@ export function forEach(arr: char[], fn: (value: char) => void): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11770,7 +11770,7 @@ export function map(arr: char[], fn: (value: char) => char): char[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11850,7 +11850,7 @@ export function filter(arr: char[], fn: (value: char) => boolean): char[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11866,11 +11866,11 @@ export function filter(arr: char[], fn: (value: char) => boolean): char[] {
 
 
 //
-// Methods for Object[]
+// Methods for NullishType[]
 //
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11900,7 +11900,7 @@ export function filter(arr: char[], fn: (value: char) => boolean): char[] {
  * fill(arr, value, 0, arr.length)
  * ```
  */
-export function fill(arr: Object[], value: Object, startIndex: int, endIndex: int): void throws {
+export function fill(arr: NullishType[], value: NullishType, startIndex: int, endIndex: int): void throws {
     if (!checkRange(arr.length, startIndex, endIndex)){
         throw new ArrayIndexOutOfBoundsException("fill: bounds verification failed")
     }
@@ -11922,7 +11922,7 @@ export function fill(arr: Object[], value: Object, startIndex: int, endIndex: in
  * fill(arr, value)
  * ```
  */
-export function fill(arr: Object[], value: Object): void {
+export function fill(arr: NullishType[], value: NullishType): void {
     try {
         fill(arr, value, 0, arr.length);
     } catch (e) {
@@ -11932,7 +11932,7 @@ export function fill(arr: Object[], value: Object): void {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11966,7 +11966,7 @@ export function fill(arr: Object[], value: Object): void {
  * ```
  */
 // TODO(petr-shumilov): make intrinsic
-export function copyTo(src: Object[], dst: Object[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: NullishType[], dst: NullishType[], dstStart: int, srcStart: int, srcEnd: int): void throws {
     if (!checkRange(src.length, srcStart, srcEnd)) {
         throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
     }
@@ -12000,8 +12000,8 @@ export function copyTo(src: Object[], dst: Object[], dstStart: int, srcStart: in
  * copyOf(arr, 0, arr.length)
  * ```
  */
-export function copyOf(arr: Object[], startIndex: int, endIndex: int): Object[] throws {
-    let res: Object[] = new Object[endIndex - startIndex];
+export function copyOf(arr: NullishType[], startIndex: int, endIndex: int): NullishType[] throws {
+    let res: NullishType[] = new NullishType[endIndex - startIndex];
     copyTo(arr, res, 0, startIndex, endIndex);
     return res;
 }
@@ -12020,29 +12020,29 @@ export function copyOf(arr: Object[], startIndex: int, endIndex: int): Object[] 
  * copyOf(arr, 1)
  * ```
  */
-export function copyOf(arr: Object[], startIndex: int): Object[] throws {
+export function copyOf(arr: NullishType[], startIndex: int): NullishType[] throws {
     return copyOf(arr, startIndex, arr.length);
 }
 
 /*
- * copyOf(arr: Object[]) creates a copy of src array
+ * copyOf(arr: NullishType[]) creates a copy of src array
  *
  * @param arr source array to be copied
  *
  * @returns copy of arr
  */
-export function copyOf(arr: Object[]): Object[] {
+export function copyOf(arr: NullishType[]): NullishType[] {
     try {
         return copyOf(arr, 0, arr.length);
     } catch (e) {
         // TODO(ivan-tyulyandin): code below is an overcheck, but will be helpful in case of strange exceptions
         assert false : "copyOf: should be unreacheable since indicies have to be correct by design, " + e.toString()
     }
-    return new Object[0]
+    return new NullishType[0]
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12057,7 +12057,7 @@ export function copyOf(arr: Object[]): Object[] {
  */
 
 
-function bubbleSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+function bubbleSort(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     let was = true
     while (was) {
         was = false
@@ -12072,7 +12072,7 @@ function bubbleSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: 
     }
 }
 
-function insertionSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+function insertionSort(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     if (startIndex != 0) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
@@ -12103,7 +12103,7 @@ function insertionSort(arr: Object[], startIndex: int, endIndex: int, mustPreced
         }
     }
 }
-function heapSortUp(arr: Object[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+function heapSortUp(arr: NullishType[], idxFromStart: int, startIndex: int, heapRoot: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     const tmp = arr[startIndex + idxFromStart]
     while (startIndex + idxFromStart > heapRoot) {
         const p = (idxFromStart - 1) / 2
@@ -12117,7 +12117,7 @@ function heapSortUp(arr: Object[], idxFromStart: int, startIndex: int, heapRoot:
 }
 
 // Build max heap with root in startIndex given its children are roots of valid heaps
-function heapSortDown(arr: Object[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+function heapSortDown(arr: NullishType[], idxFromStart: int, startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     let heapRoot = startIndex + idxFromStart
     let arrIndex = heapRoot
     let childIndex = startIndex + idxFromStart * 2 + 1
@@ -12140,7 +12140,7 @@ function heapSortDown(arr: Object[], idxFromStart: int, startIndex: int, endInde
     heapSortUp(arr, arrIndex - startIndex, startIndex, heapRoot, mustPrecede)
 }
 
-export function heapSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+export function heapSort(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     let len = endIndex - startIndex
     for (let i = len / 2 - 1; i >= 0; i--) {
         heapSortDown(arr, i, startIndex, endIndex, mustPrecede)
@@ -12156,7 +12156,7 @@ export function heapSort(arr: Object[], startIndex: int, endIndex: int, mustPrec
 }
 
 // Put median of three array elements to arr[index1]
-function median3(arr: Object[], index1: int, index2: int, index3: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+function median3(arr: NullishType[], index1: int, index2: int, index3: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     let swap_idx = index2
     if (mustPrecede(arr[index1], arr[index2])) {
         if (mustPrecede(arr[index3], arr[index1])) {
@@ -12180,7 +12180,7 @@ function median3(arr: Object[], index1: int, index2: int, index3: int, mustPrece
 
 // Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
 // Elements equal to pivot go to the right
-function quickSortSplit(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): int {
+function quickSortSplit(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): int {
     const pivot = arr[startIndex]
     let i = startIndex + 1
     let j = endIndex - 1
@@ -12214,7 +12214,7 @@ function quickSortSplit(arr: Object[], startIndex: int, endIndex: int, mustPrece
 
 // Split range [startIndex, endIndex) by pivot arr[startIndex] and return pivot position
 // Elements equal to pivot go to the left
-function quickSortSplitLeft(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): int {
+function quickSortSplitLeft(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): int {
     const pivot = arr[startIndex]
     let i = startIndex + 1
     let j = endIndex - 1
@@ -12246,7 +12246,7 @@ function quickSortSplitLeft(arr: Object[], startIndex: int, endIndex: int, mustP
 }
 
 
-function quickSortImpl3(arr: Object[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+function quickSortImpl3(arr: NullishType[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
@@ -12266,7 +12266,7 @@ function quickSortImpl3(arr: Object[], startIndex: int, endIndex: int, maxDepth:
     }
     insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
-function quickSortImpl40(arr: Object[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+function quickSortImpl40(arr: NullishType[], startIndex: int, endIndex: int, maxDepth: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex, mustPrecede)
@@ -12287,7 +12287,7 @@ function quickSortImpl40(arr: Object[], startIndex: int, endIndex: int, maxDepth
     insertionSort(arr, startIndex, endIndex, mustPrecede)
 }
 
-function quickSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+function quickSort(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     let size = endIndex - startIndex
     if (size <= 1) {
         return
@@ -12317,7 +12317,7 @@ function quickSort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (
  * sort(arr, 0, arr.length)
  * ```
  */
-export function sort(arr: Object[], startIndex: int, endIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+export function sort(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new ArrayIndexOutOfBoundsError("sort: bounds verification failed")
     }
@@ -12334,18 +12334,18 @@ export function sort(arr: Object[], startIndex: int, endIndex: int, mustPrecede:
  *
  * @param arr an array to sort
  */
-export function sort(arr: Object[], mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+export function sort(arr: NullishType[], mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     sort(arr, 0, arr.length, mustPrecede);
 }
 
-export function sort(arr: Object[], startIndex: int, mustPrecede: (lhs: Object, rhs: Object) => boolean): void {
+export function sort(arr: NullishType[], startIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
     sort(arr, startIndex, arr.length, mustPrecede)
 }
 
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12377,7 +12377,7 @@ export function sort(arr: Object[], startIndex: int, mustPrecede: (lhs: Object, 
  * indexOf([1,2,3,4], 4, 0, 3) == KEY_NOT_FOUND // true since value 4 is not in half-open range [0,3)
  * ```
  */
-export function indexOf(arr: Object[], key: Object, startIndex: int, endIndex: int): int throws {
+export function indexOf(arr: NullishType[], key: NullishType, startIndex: int, endIndex: int): int throws {
     if (!checkRange(arr.length, startIndex, endIndex)) {
         throw new ArrayIndexOutOfBoundsException("indexOf: bounds verification failed")
     }
@@ -12402,7 +12402,7 @@ export function indexOf(arr: Object[], key: Object, startIndex: int, endIndex: i
  *
  * @returns index of key if found in arr, otherwise KEY_NOT_FOUND
  */
-export function indexOf(arr: Object[], key: Object, fromIndex: int): int throws {
+export function indexOf(arr: NullishType[], key: NullishType, fromIndex: int): int throws {
     return indexOf(arr, key, fromIndex, arr.length)
 }
 
@@ -12420,7 +12420,7 @@ export function indexOf(arr: Object[], key: Object, fromIndex: int): int throws 
  * indexOf([1,2,3,4], 4) == 3
  * ```
  */
-export function indexOf(arr: Object[], key: Object): int {
+export function indexOf(arr: NullishType[], key: NullishType): int {
     try {
         return indexOf(arr, key, 0, arr.length)
     } catch (e) {
@@ -12444,12 +12444,12 @@ export function indexOf(arr: Object[], key: Object): int {
  * includes([1,2,3,4], 4) == true
  * ```
  */
-export function includes(arr: Object[], key: Object): boolean {
+export function includes(arr: NullishType[], key: NullishType): boolean {
     return indexOf(arr, key) != KEY_NOT_FOUND;
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12476,14 +12476,14 @@ export function includes(arr: Object[], key: Object): boolean {
  *
  * @returns index of key if found in arr(smallerIndex; largerIndex], otherwise KEY_NOT_FOUND
  */
-export function lastIndexOf(arr: Object[], key: Object, smallerIndex: int, largerIndex: int): int throws {
+export function lastIndexOf(arr: NullishType[], key: NullishType, smallerIndex: int, largerIndex: int): int throws {
     if (!checkRange(arr.length, smallerIndex + 1, largerIndex + 1)) {
         throw new ArrayIndexOutOfBoundsException("lastIndexOf: bounds verification failed")
     }
 
     for (let i: int = largerIndex; i > smallerIndex; i--) {
         
-        if (arr[i].equals(key)) {
+        if (__runtimeEquals(arr[i], key)) {
             return i;
         } 
     }
@@ -12499,7 +12499,7 @@ export function lastIndexOf(arr: Object[], key: Object, smallerIndex: int, large
  *
  * @returns last index of key if found in arr, otherwise KEY_NOT_FOUND
  */
-export function lastIndexOf(arr: Object[], key: Object): int {
+export function lastIndexOf(arr: NullishType[], key: NullishType): int {
     try {
         return lastIndexOf(arr, key, arr.length - 1)
     } catch (e) {
@@ -12508,7 +12508,7 @@ export function lastIndexOf(arr: Object[], key: Object): int {
 }
 
 /*
- * lastIndexOf(arr: Object[], key: Object, fromIndex: int) tries to find entry of key into arr which is not greater than fromIndex
+ * lastIndexOf(arr: NullishType[], key: NullishType, fromIndex: int) tries to find entry of key into arr which is not greater than fromIndex
  *
  * @param arr array to find a key
  *
@@ -12518,12 +12518,12 @@ export function lastIndexOf(arr: Object[], key: Object): int {
  *
  * @returns last index of key if found in arr, otherwise KEY_NOT_FOUND
  */
-function lastIndexOf(arr: Object[], key: Object, fromIndex: int): int throws {
+function lastIndexOf(arr: NullishType[], key: NullishType, fromIndex: int): int throws {
     return lastIndexOf(arr, key, -1, fromIndex)
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12539,7 +12539,7 @@ function lastIndexOf(arr: Object[], key: Object, fromIndex: int): int throws {
 
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12562,8 +12562,8 @@ function lastIndexOf(arr: Object[], key: Object, fromIndex: int): int throws {
  *
  * @returns concatenation of the arguments
  */
-export function concat(a: Object[], b: Object[]): Object[] {
-    let res: Object[] = new Object[a.length + b.length]
+export function concat(a: NullishType[], b: NullishType[]): NullishType[] {
+    let res: NullishType[] = new NullishType[a.length + b.length]
     try {
         copyTo(a, res, 0, 0, a.length);
         copyTo(b, res, a.length, 0, b.length);
@@ -12579,17 +12579,17 @@ export function concat(a: Object[], b: Object[]): Object[] {
  *
  * @param arr an array to be reversed
  */
-export function reverse(arr: Object[]): void {
+export function reverse(arr: NullishType[]): void {
     let arrLen: int = arr.length;
     for (let i: int = 0; i < arrLen / 2; i++) {
-        let tmp: Object = arr[i];
+        let tmp: NullishType = arr[i];
         arr[i] = arr[arrLen - i - 1];
         arr[arrLen - i - 1] = tmp;
     }
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12612,12 +12612,19 @@ export function reverse(arr: Object[]): void {
  *
  * @returns joined elements of arr with delimiter between
  */
-
-export function join(arr: Object[], delimiter: String): String {
+export function join(arr: NullishType[], delimiter: String): String {
     let sb: StringBuilder = new StringBuilder();
     let len: int = arr.length;
     for (let i: int = 0; i < len; i++) {
-        sb.append(arr[i])
+
+        if (__runtimeIsSameReference(arr[i], null)) {
+            sb.append("null")
+        } else if (__runtimeIsSameReference(arr[i], undefined)) {
+            sb.append("undefined")
+        } else {
+            sb.append(arr[i]!.toString())
+        }
+
         if (i != len - 1) {
             sb.append(delimiter);
         }
@@ -12625,9 +12632,8 @@ export function join(arr: Object[], delimiter: String): String {
     return sb.toString();
 }
 
-
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12649,7 +12655,7 @@ export function join(arr: Object[], delimiter: String): String {
  * @param fn a function to apply
  * fn takes a value to test, index of some array and reference to it. Can be used, e.g., to write a function with use of adjacent elements
  */
-export function forEach(arr: Object[], fn: (value: Object, index: int, self: Object[]) => void): void {
+export function forEach(arr: NullishType[], fn: (value: NullishType, index: int, self: NullishType[]) => void): void {
     for (let i: int = 0; i < arr.length; i++) {
         fn(arr[i], i, arr);
     }
@@ -12662,14 +12668,14 @@ export function forEach(arr: Object[], fn: (value: Object, index: int, self: Obj
  *
  * @param fn a function to apply
  */
-export function forEach(arr: Object[], fn: (value: Object) => void): void {
+export function forEach(arr: NullishType[], fn: (value: NullishType) => void): void {
     for (let i: int = 0; i < arr.length; i++) {
         fn(arr[i]);
     }
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12691,8 +12697,8 @@ export function forEach(arr: Object[], fn: (value: Object) => void): void {
  * @param fn a function to apply
  * fn takes a value, index of some array and reference to it. Can be used, e.g., to write a function with use of adjacent elements
  */
-export function map(arr: Object[], fn: (value: Object, index: int, self: Object[]) => Object): Object[] {
-    let res: Object[] = new Object[arr.length];
+export function map(arr: NullishType[], fn: (value: NullishType, index: int, self: NullishType[]) => NullishType): NullishType[] {
+    let res: NullishType[] = new NullishType[arr.length];
     for (let i: int = 0; i < arr.length; i++) {
         res[i] = fn(arr[i], i, arr);
     }
@@ -12706,10 +12712,10 @@ export function map(arr: Object[], fn: (value: Object, index: int, self: Object[
  *
  * @param fn a function to apply for each element of arr
  *
- * @returns Object[] - a copy of arr where for each element fn was applied
+ * @returns NullishType[] - a copy of arr where for each element fn was applied
  */
-export function map(arr: Object[], fn: (value: Object) => Object): Object[] {
-    let res: Object[] = new Object[arr.length];
+export function map(arr: NullishType[], fn: (value: NullishType) => NullishType): NullishType[] {
+    let res: NullishType[] = new NullishType[arr.length];
     for (let i: int = 0; i < arr.length; i++) {
         res[i] = fn(arr[i]);
     }
@@ -12717,7 +12723,7 @@ export function map(arr: Object[], fn: (value: Object) => Object): Object[] {
 }
 
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12741,7 +12747,7 @@ export function map(arr: Object[], fn: (value: Object) => Object): Object[] {
  *
  * @returns an array of elements from arr where fn returned true
  */
-export function filter(arr: Object[], fn: (value: Object, index: int, self: Object[]) => boolean): Object[] {
+export function filter(arr: NullishType[], fn: (value: NullishType, index: int, self: NullishType[]) => boolean): NullishType[] {
     let resNum: int = 0;
     let indicator: boolean[] = new boolean[arr.length];
 
@@ -12752,7 +12758,7 @@ export function filter(arr: Object[], fn: (value: Object, index: int, self: Obje
         }
     }
 
-    let res: Object[] = new Object[resNum];
+    let res: NullishType[] = new NullishType[resNum];
     let j: int = 0;
     for (let i: int = 0; i < arr.length; i++) {
         if (indicator[i]) {
@@ -12773,7 +12779,7 @@ export function filter(arr: Object[], fn: (value: Object, index: int, self: Obje
  *
  * @returns an array of elements from arr where fn(arr[i]) returned true
  */
-export function filter(arr: Object[], fn: (value: Object) => boolean): Object[] {
+export function filter(arr: NullishType[], fn: (value: NullishType) => boolean): NullishType[] {
     let resNum: int = 0;
     let indicator: boolean[] = new boolean[arr.length];
 
@@ -12784,7 +12790,7 @@ export function filter(arr: Object[], fn: (value: Object) => boolean): Object[] 
         }
     }
 
-    let res: Object[] = new Object[resNum];
+    let res: NullishType[] = new NullishType[resNum];
     let j: int = 0;
     for (let i: int = 0; i < arr.length; i++) {
         if (indicator[i]) {

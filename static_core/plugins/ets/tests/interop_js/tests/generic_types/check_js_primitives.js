@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,8 @@ const { check_generic_value } = require("generic_types.test.js");
 // Null
 check_generic_value(null);
 
-// Undefined (ArkTS doesn't support the undefined type)
-ASSERT_THROWS(Error, () => (check_generic_value(undefined)));
+// Undefined
+check_generic_value(undefined);
 
 // Boolean
 check_generic_value(false);

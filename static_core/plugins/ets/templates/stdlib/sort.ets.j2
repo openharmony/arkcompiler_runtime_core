@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 {% for arg, fwdArg, prec in [('', '', '(%s < %s)'), (', mustPrecede: (lhs: ' + T + ', rhs: ' + T + ') => boolean', ', mustPrecede', 'mustPrecede(%s, %s)')] %}
-{%- if T == 'Object' and arg == '' %}
+{%- if T == 'NullishType' and arg == '' %}
 {%- continue %}
 {%- elif T == 'boolean' and arg == '' %}
 {%- set prec = '((%s) ? 1 : 0) < ((%s) ? 1 : 0)' %}
@@ -313,7 +313,7 @@ export function sort(arr: {{T}}[], startIndex: int, mustPrecede: (lhs: {{T}}, rh
     sort(arr, startIndex, arr.length, mustPrecede)
 }
 
-{% if T != "Object" -%}
+{% if T != "NullishType" -%}
 
 {%- if T == 'byte' %}
 function countSort(arr: byte[], startIndex: int, endIndex: int): void {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,20 +15,19 @@
 
 package escompat;
 
-class ArrayKeysIterator implements IterableIterator<number> {
-    // NOTE(kprokopenko): must contain array to update keys on update, but blocked by frontend
-    private parent: int //Array<T>
+class ArrayKeysIterator<T> implements IterableIterator<number> {
+    private parent: Array<T>
     private idx: int = 0
 
-    constructor(parent: int) {
+    constructor(parent: Array<T>) {
         this.parent = parent
     }
 
     override next(): IteratorResult<number> {
-        if (this.idx >= this.parent) {
+        if (this.idx >= this.parent.actualLength) {
             return new IteratorResult<number>()
         }
-        return new IteratorResult<number>(false, this.idx++ as number)
+        return new IteratorResult<number>(this.idx++ as number)
     }
 
     override iterator(): IterableIterator<number> {
@@ -48,7 +47,7 @@ class ArrayValuesIterator<T> implements IterableIterator<T> {
         if (this.idx >= this.parent.length) {
             return new IteratorResult<T>()
         }
-        return new IteratorResult<T>(false, this.parent.at(this.idx++)!)
+        return new IteratorResult<T>(this.parent.at(this.idx++)!)
     }
 
     override iterator(): IterableIterator<T> {
@@ -56,39 +55,89 @@ class ArrayValuesIterator<T> implements IterableIterator<T> {
     }
 }
 
+function normalizeIndex(idx: int, len: int): int {
+    if (idx < -len) {
+        return 0
+    }
+    if (idx < 0) {
+        return len + idx
+    }
+    if (idx > len) {
+        return len
+    }
+    return idx
+}
+
+class FromBuffer {}
+const FROM_BUFFER = new FromBuffer()
+
+function indexWithDefault(n: Number | undefined, def: int): int {
+    if (__runtimeIsSameReference(n, undefined)) {
+        return def
+    }
+    return (n! as Object as Number) as number as int;
+}
+
+function stringOf(a: NullishType): String {
+    if (__runtimeIsSameReference(a, null)) {
+        return "null"
+    }
+    if (__runtimeIsSameReference(a, undefined)) {
+        return "undefined"
+    }
+    return a!.toString()
+}
+
+function hashOf(a: NullishType): int {
+    if (__runtimeEquals(a, null)) {
+        return 0;
+    }
+    if (__runtimeEquals(a, undefined)) {
+        return 1;
+    }
+    return a!.$_hashCode();
+}
+
 /**
  * Represents JS API-compatible Array
  */
-export final class Array<T> implements ReadonlyArray<T> {
+export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
     private buffer: NullishType[]
-    private actualLength: int
+    internal actualLength: int
 
-    /* override */ get length(): number {
+    // TODO(kprokopenko): override
+    get length(): number {
         return this.actualLength as number
     }
 
-    /**
-     * Creates a new instance of Array
-     */
-    public constructor() {
-        this.buffer = new NullishType[4]
-        this.actualLength = 0
+    public /* override */ $_get(index: number): T {
+        return this.$_get(index as int)
     }
 
-    $_get(i: number): T {
-        const idx = i as int
-        if (idx < 0 || idx >= this.actualLength) {
+    public $_set(i: number, val: T): void {
+        this.$_set(i as int, val)
+    }
+
+    public $_get(idx: int): T {
+        if (idx >= this.actualLength) {
             throw new RangeError("Out of bounds")
         }
         return this.buffer[idx] as T
     }
 
-    $_set(i: number, val: T): void {
-        let idx = i as int
-        if (idx < 0 || idx >= this.actualLength) {
+    private $_get_unsafe(idx: int): T {
+        return this.buffer[idx] as T
+    }
+
+    public $_set(idx: int, val: T): void {
+        if (idx >= this.actualLength) {
             throw new RangeError("Out of bounds")
         }
         this.buffer[idx] = val as Object
+    }
+
+    private $_set_unsafe(idx: int, val: T): void {
+        this.buffer[idx] = val as NullishType
     }
 
     /**
@@ -96,18 +145,18 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public constructor(arrayLen: number) {
         this.buffer = new NullishType[arrayLen as int];
-        this.actualLength = arrayLen as int // NOTE(kprokopenko): this is incorrect! null-safety
+        this.actualLength = arrayLen as int // TODO(kprokopenko): this is incorrect! null-safety
     }
 
-    private static objEquals<Y>(a: Y | null, b: Y | null): boolean {
-        if (a == null) {
-            return b == null
-        }
-        if (b == null) {
-            return false
-        }
-        // TODO: is a.equals(null) a valid code? in some language it is
-        return (a as Object).equals(b as Object)
+    internal constructor(_tag: FromBuffer, buf: NullishType[]) {
+        this.buffer = buf
+        this.actualLength = buf.length
+    }
+
+    // TODO(kprokopenko): remove when #14731 gets fixed and remove `first` from next overload
+    public constructor() {
+        this.buffer = new NullishType[4]
+        this.actualLength = 0
     }
 
     /**
@@ -115,12 +164,14 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @param d Array initializer
      */
-    public constructor(d: T[]) {
-        this.buffer = new NullishType[d.length];
-        this.actualLength = d.length
+    public constructor(first: T, ...d: T[]) {
+        this.buffer = new NullishType[d.length + 1];
+        this.actualLength = d.length + 1
+
+        this.$_set_unsafe(0, first);
 
         for (let k: int = 0; k < d.length; k++) {
-            this.$_set(k, d[k]);
+            this.$_set_unsafe(k + 1, d[k]);
         }
     }
 
@@ -133,9 +184,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
      *
      * @returns The element in the array matching the given index.
-     * Returns null if `index` < `-length()` or `index` >= `length()`.
+     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
      */
-    public override at(index: number): T | null {
+    public /* override */ at(index: number): T | undefined {
         return this.at(index as int)
     }
 
@@ -148,9 +199,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
      *
      * @returns The element in the array matching the given index.
-     * Returns null if `index` < `-length()` or `index` >= `length()`.
+     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
      */
-    public at(index: int): T | null {
+    public at(index: int): T | undefined {
         let len = this.actualLength;
         let k: int;
         if (index >= 0) {
@@ -160,10 +211,10 @@ export final class Array<T> implements ReadonlyArray<T> {
         }
 
         if (k < 0 || k >= len) {
-            return null;
+            return undefined;
         }
 
-        return this.$_get(k);
+        return this.$_get_unsafe(k);
     }
 
     /**
@@ -180,11 +231,11 @@ export final class Array<T> implements ReadonlyArray<T> {
         let idx = 0;
 
         for (let i = 0; i < this.actualLength; i++) {
-            res[idx] = this.$_get(i);
+            res[idx] = this.$_get_unsafe(i);
             idx++;
         }
         for (let i = 0; i < other.actualLength; i++) {
-            res[idx] = other.$_get(i);
+            res[idx] = other.$_get_unsafe(i);
             idx++;
         }
 
@@ -198,7 +249,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
      */
-    // public override concat(...items: (T | ConcatArray<T>)[]): Array<T> {
+    // public /* override */ concat(...items: (T | ConcatArray<T>)[]): Array<T> {
     //     throw new Error("not implemented")
         // See for-body
 
@@ -215,9 +266,29 @@ export final class Array<T> implements ReadonlyArray<T> {
     // }
 
     // Typing and previous overload have to cover it
-    // public override concat(...items: ConcatArray<T>[]): T[] {
-    //     throw new Error("not implemented")
-    // }
+    public concat(...items: ConcatArray<T>[]): Array<T> {
+        let totalAdd = this.actualLength
+        for (let i = 0; i < items.length; i++) {
+            totalAdd += items[i].lengthMakeProp() as int
+        }
+
+        const res = new Array<T>(totalAdd)
+
+        for (let i = 0; i < this.actualLength; i++) {
+            res.buffer[i] = this.buffer[i]
+        }
+
+        let insertTo = this.actualLength
+        for (let i = 0; i < items.length; i++) {
+            const arr = items[i]
+            const len = arr.lengthMakeProp() as int
+            for (let j = 0; j < len; j++) {
+                res.buffer[insertTo++] = arr.$_get(j) as NullishType
+            }
+        }
+
+        return res;
+    }
 
     /**
      * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
@@ -230,8 +301,8 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: number, start: number, end: number): Array<T> {
-        return this.copyWithin(target as int, start as int, end as int);
+    public copyWithin(target: number, start: number, end: Number | undefined): Array<T> {
+        return this.copyWithin(target as int, start as int, indexWithDefault(end, this.actualLength));
     }
 
     /**
@@ -246,49 +317,25 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns this array after transformation
      */
     public copyWithin(target: int, start: int, end: int): Array<T> {
-        if (target >= this.actualLength || start >= this.actualLength) {
+        target = normalizeIndex(target, this.actualLength)
+        start = normalizeIndex(start, this.actualLength)
+        end = normalizeIndex(end, this.actualLength)
+
+        if (end <= start) {
             return this;
-        }
-
-        if (start < 0) {
-            if (start < -this.actualLength) {
-                start = 0;
-            } else {
-                start = start + this.actualLength;
-            }
-        }
-
-        if (end < 0) {
-            if (end < -this.actualLength) {
-                end = 0;
-            } else {
-                end = end + this.actualLength;
-            }
-        }
-
-        if (end >= this.actualLength) {
-            end = this.actualLength;
-        }
-
-        if (target < 0) {
-            if (target < -this.actualLength) {
-                target = 0;
-            } else {
-                target = target + this.actualLength;
-            }
         }
 
         if (target <= start) {
             while (start < end) {
-                this.$_set(target++, this.$_get(start++));
+                this.$_set_unsafe(target++, this.$_get_unsafe(start++));
             }
         } else {
-            let diff = target - start;
-            while (target >= start) {
-                if (target + diff < this.actualLength && target < end) {
-                    this.$_set(target + diff, this.$_get(target));
-                }
-                --target;
+            let len = end - start;
+            if (target + len > this.actualLength) {
+                len = this.actualLength - target
+            }
+            for (let i = 0; i < len; i++) {
+                this.$_set_unsafe(target + len - 1 - i, this.$_get_unsafe(start + len - 1 - i))
             }
         }
 
@@ -304,32 +351,8 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns this array after transformation
      */
-    public copyWithin(target: number, start: number): Array<T> {
-        return this.copyWithin(target as int, start as int)
-    }
-
-    /**
-     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
-     *
-     * @param target index at which to copy the sequence
-     *
-     * @param start index at which to start copying elements from
-     *
-     * @returns this array after transformation
-     */
     public copyWithin(target: int, start: int): Array<T> {
         return this.copyWithin(target, start, this.actualLength);
-    }
-
-    /**
-     * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
-     *
-     * @param target index at which to copy the sequence
-     *
-     * @returns this array after transformation
-     */
-    public copyWithin(target: number): Array<T> {
-        return this.copyWithin(target as int)
     }
 
     /**
@@ -354,8 +377,8 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns this array after transformation
      */
-    public fill(value: T, start: number, end: number): Array<T> {
-        return this.fill(value, start as int, end as int)
+    public fill(value: T, start: Number | undefined, end: Number | undefined): Array<T> {
+        return this.fill(value, indexWithDefault(start, 0), indexWithDefault(end, this.actualLength));
     }
 
     /**
@@ -370,77 +393,38 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns this array after transformation
      */
     public fill(value: T, start: int, end: int): Array<T> {
-        if (start >= this.actualLength) {
-            return this;
-        }
-
-        if (start < 0) {
-            if (start < -this.actualLength) {
-                start = 0;
-            } else {
-                start = start + this.actualLength;
-            }
-        }
-
-        if (end < 0) {
-            if (end < -this.actualLength) {
-                end = 0;
-            } else {
-                end = end + this.actualLength;
-            }
-        }
-
-        if (end >= this.actualLength) {
-            end = this.actualLength;
-        }
-
-        if (end < start) {
-            return this;
-        }
+        start = normalizeIndex(start, this.actualLength);
+        end = normalizeIndex(end, this.actualLength)
 
         for (let i = start; i < end; i++) {
-            this.$_set(i, value);
+            this.$_set_unsafe(i, value);
         }
 
         return this;
     }
 
-    /**
-     * Changes all elements in the Array to a static value, from a start index to an end index
-     *
-     * @param value to fill the array with
-     *
-     * @param start index at which to start filling
-     *
-     * @returns this array after transformation
-     */
-    public fill(value: T, start: number): Array<T> {
-        return this.fill(value, start as int, 0)
-    }
-
-    /**
-     * Changes all elements in the Array to a static value
-     *
-     * @param value to fill the array with
-     *
-     * @returns this array after transformation
-     */
-    public fill(value: T): Array<T> {
-        return this.fill(value, 0, this.actualLength);
-    }
-
-    // NOTE(ivan-tyulyandin): blocked by undefined implementation
-    public override find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | null {
+    /*
+    public override find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
-            return null
+            return undefined
         }
         return this.$_get(res as int)
     }
-    public override find(predicate: (value: T, index: number) => boolean): T | null {
+    */
+
+    public find(predicate: (value: T, index: number, obj: Array<T>) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
-            return null
+            return undefined
+        }
+        return this.$_get(res as int)
+    }
+
+    public /* override */ find(predicate: (value: T, index: number) => boolean): T | undefined {
+        const res = this.findIndex(predicate)
+        if (res == -1) {
+            return undefined
         }
         return this.$_get(res as int)
     }
@@ -452,15 +436,16 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @param fn testing function
      *
-     * @returns found element or null otherwise
+     * @returns found element or undefined otherwise
      */
-    public find(fn: (elem: T) => boolean): T | null {
+    public find(fn: (elem: T) => boolean): T | undefined {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get(i))) {
-                return this.$_get(i);
+            const val = this.$_get_unsafe(i);
+            if (fn(val)) {
+                return val;
             }
         }
-        return null;
+        return undefined;
     }
 
     /**
@@ -470,27 +455,29 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(fn: (value: T, index: number) => boolean): number {
+    public /* override */ findIndex(fn: (value: T, index: number) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get(i), i)) {
+            if (fn(this.$_get_unsafe(i), i)) {
                 return i;
             }
         }
         return -1;
     }
 
+    /*
     public override findIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
-            if (predicate(this.$_get(i), i, this)) {
+            if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i;
             }
         }
         return -1;
     }
+    */
 
     public findIndex(predicate: (value: T, index: number, obj: Array<T>) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
-            if (predicate(this.$_get(i), i, this)) {
+            if (predicate(this.$_get_unsafe(i), i, this)) {
                 return i;
             }
         }
@@ -504,9 +491,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(fn: (value: T) => boolean): number {
+    public /* override */ findIndex(fn: (value: T) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get(i))) {
+            if (fn(this.$_get_unsafe(i))) {
                 return i;
             }
         }
@@ -519,15 +506,16 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @param fn testing function
      *
-     * @returns found element or null otherwise
+     * @returns found element or undefined otherwise
      */
-    public findLast(fn: (elem: T) => boolean): T | null {
+    public findLast(fn: (elem: T) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            if (fn(this.$_get(i))) {
-                return this.$_get(i);
+            const val = this.$_get_unsafe(i);
+            if (fn(val)) {
+                return val;
             }
         }
-        return null;
+        return undefined;
     }
 
     /**
@@ -539,28 +527,20 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
      */
-    public override join(sep: string): string {
+    public /* override */ join(sep: String | undefined): string {
+        const sepReal = __runtimeEquals(sep, undefined) ? "," : sep!
         let sb = new StringBuilder();
         for (let i: int = 0; i < this.actualLength; i++) {
             if (i != 0) {
-            sb.append(sep);
+                sb.append(sepReal);
             }
-            sb.append((this.$_get(i) as Object).toString());
+            sb.append(stringOf(this.$_get_unsafe(i) as NullishType));
         }
 
         return sb.toString();
     }
 
-    /**
-     * Creates and returns a new string by concatenating all of the elements in an `Array`,
-     * separated by a comma. If the array has only one item, then that item will be returned without using the separator.
-     *
-     * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
-     */
-    public override join(): string {
-        return this.join(",");
-    }
-
+/*
     /**
      * Creates a new `Array` object and populates
      * it with the results of calling a provided function on every element in `this` instance of `Array` class.
@@ -570,12 +550,13 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns `Array` instance, constructed from `this` and given function.
      */
     public override map<U>(fn: (value: T, index: number, arr: ReadonlyArray<T>) => U): Array<U> {
-        let res = new U[this.actualLength];
+        let res = new NullishType[this.actualLength];
         for (let i = 0; i < this.actualLength; i++) {
-            res[i] = fn(this.$_get(i), i, this);
+            res[i] = fn(this.$_get_unsafe(i), i, this);
         }
-        return new Array<U>(res);
+        return new Array<U>(FROM_BUFFER, res);
     }
+*/
 
     /**
      * Creates a new `Array` object and populates
@@ -586,11 +567,11 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns `Array` instance, constructed from `this` and given function.
      */
     public map<U>(fn: (value: T, index: number, arr: Array<T>) => U): Array<U> {
-        let res = new U[this.actualLength];
+        let res = new NullishType[this.actualLength];
         for (let i = 0; i < this.actualLength; i++) {
-            res[i] = fn(this.$_get(i), i, this);
+            res[i] = fn(this.$_get_unsafe(i), i, this) as NullishType;
         }
-        return new Array<U>(res);
+        return new Array<U>(FROM_BUFFER, res);
     }
 
     /**
@@ -601,12 +582,12 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(fn: (v: T, k: number) => U): Array<U> {
-        let res = new U[this.actualLength];
+    public /* override */ map<U>(fn: (v: T, k: number) => U): Array<U> {
+        let res = new NullishType[this.actualLength];
         for (let i = 0; i < this.actualLength; i++) {
-            res[i] = fn(this.$_get(i), i);
+            res[i] = fn(this.$_get_unsafe(i), i) as NullishType;
         }
-        return new Array<U>(res);
+        return new Array<U>(FROM_BUFFER, res);
     }
 
     /**
@@ -617,14 +598,15 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(fn: (v: T) => U): Array<U> {
-        let res = new U[this.actualLength];
+    public /* override */ map<U>(fn: (v: T) => U): Array<U> {
+        let res = new NullishType[this.actualLength];
         for (let i = 0; i < this.actualLength; i++) {
-            res[i] = fn(this.$_get(i));
+            res[i] = fn(this.$_get_unsafe(i)) as NullishType;
         }
-        return new Array<U>(res);
+        return new Array<U>(FROM_BUFFER, res);
     }
 
+/*
     /**
      * Tests whether all elements in the array pass the test
      * implemented by the provided function. It returns a Boolean value.
@@ -636,12 +618,13 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public override every(fn: (v: T, k: number, arr: ReadonlyArray<T>) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get(i), i, this)) {
+            if (!fn(this.$_get_unsafe(i), i, this)) {
                 return false
             }
         }
         return true;
     }
+*/
 
     /**
      * Tests whether all elements in the array pass the test
@@ -654,7 +637,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public every(fn: (v: T, k: number, arr: Array<T>) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get(i), i, this)) {
+            if (!fn(this.$_get_unsafe(i), i, this)) {
                 return false
             }
         }
@@ -670,9 +653,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(fn: (v: T, k: number) => boolean): boolean {
+    public /* override */ every(fn: (v: T, k: number) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get(i), i)) {
+            if (!fn(this.$_get_unsafe(i), i)) {
                 return false
             }
         }
@@ -690,7 +673,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public every(fn: (v: T, k: int) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get(i), i)) {
+            if (!fn(this.$_get_unsafe(i), i)) {
                 return false
             }
         }
@@ -706,9 +689,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(fn: (v: T) => boolean): boolean {
+    public /* override */ every(fn: (v: T) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get(i))) {
+            if (!fn(this.$_get_unsafe(i))) {
                 return false
             }
         }
@@ -724,9 +707,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public override some(fn: (v: T, k: number) => boolean): boolean {
+    public /* override */ some(fn: (v: T, k: number) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get(i), i)) { return true }
+            if (fn(this.$_get_unsafe(i), i)) { return true }
         }
         return false
     }
@@ -742,7 +725,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public some(fn: (v: T, k: int) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get(i), i)) { return true }
+            if (fn(this.$_get_unsafe(i), i)) { return true }
         }
         return false
     }
@@ -756,9 +739,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public override some(fn: (v: T) => boolean): boolean {
+    public /* override */ some(fn: (v: T) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get(i))) { return true }
+            if (fn(this.$_get_unsafe(i))) { return true }
         }
         return false
     }
@@ -771,13 +754,14 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public reverse(): Array<T> {
         for (let i = 0; i < this.actualLength / 2; i++) {
-            const tmp = this.$_get(i)
-            this.$_set(i, this.$_get(this.actualLength - 1 - i))
-            this.$_set(this.actualLength - 1 - i, tmp)
+            const tmp = this.$_get_unsafe(i)
+            this.$_set_unsafe(i, this.$_get_unsafe(this.actualLength - 1 - i))
+            this.$_set_unsafe(this.actualLength - 1 - i, tmp)
         }
         return this;
     }
 
+/* // TODO(kprokopenko): blocked by #14713
     /**
      * Creates a new `Array` instance from `Object[]` primitive array.
      *
@@ -785,8 +769,8 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `Array` intance constructed from `Object[]` primitive array.
      */
-    public static from<T>(arr: T[]): Array<T> {
-        return new Array<T>(arr);
+    public static from<T>(arr: ArrayLike<T> | Iterable<T>): Array<T> {
+        return Array.from<T, T>(arr, (x: T, k: number): T => x)
     }
 
     /**
@@ -800,147 +784,29 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `Array` intance constructed from `Object[]` primitive array and given function.
      */
-    public static from<T, U>(arr: T[], fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
-        let d = new Array<T>(arr);
-        return d.map<U>(fn);
-    }
-
-    /**
-     * Creates a new `Array` instance from `Object[]` primitive array.
-     *
-     * @param arr primitive 'Object' array, converted to `Array` instance.
-     *
-     * @param fn map function to call on every element of the array.
-     * Every value to be added to the array is first passed through this function, and `fn`'s return value
-     * is added to the array instead.
-     *
-     * @returns `Array` intance constructed from `Object[]` primitive array and given function.
-     */
-    public static from<T, U>(arr: T[], fn: (v: T, k: number) => U): Array<U> {
-        let d = new Array<T>(arr);
-        return d.map<U>(fn);
-    }
-
-    /**
-     * Creates a new `Array` instance from `Object[]` primitive array.
-     *
-     * @param arr primitive 'Object' array, converted to `Array` instance.
-     *
-     * @param fn map function to call on every element of the array.
-     * Every value to be added to the array is first passed through this function, and `fn`'s return value
-     * is added to the array instead.
-     *
-     * @returns `Array` intance constructed from `Object[]` primitive array and given function.
-     */
-    public static from<T, U>(arr: T[], fn: (v: T) => U): Array<U> {
-        let d = new Array<T>(arr);
-        return d.map<U>(fn);
-    }
-
-    /**
-     * Converts every single character of source string to `string` instance
-     * and returns `string[]` primitive array for all characters of a source string.
-     *
-     * @param str source string to be converted to array of character's `string`
-     *
-     * @returns `string[]` primitive array constructed from characters of a given source string.
-     */
-    private static charStrings(str: string): string[] {
-        let chars = str.getChars();
-        let strs = new string[chars.length];
-        for (let i = 0; i < chars.length; i++) {
-            strs[i] = new string([chars[i]]);
-        }
-        return strs;
-    }
-
-    /**
-     * Creates a new `Array` instance from characters of `string` and mapping function.
-     *
-     * @param str source string to be converted to array of character's `string`
-     *
-     * @param fn map function to call on every character of source string.
-     *
-     * @returns `Array` intance constructed from characters of source `string` and given function.
-     */
-    public static from<U>(str: string, fn: (v: string, k: number, arr: Array<string>) => U): Array<U> {
-        let strs = Array.charStrings(str);
-        let d: Array<string> = Array.from<string>(strs);
-        return d.map<U>(fn);
-    }
-
-    /**
-     * Creates a new `Array` instance from characters of `string` and mapping function.
-     *
-     * @param str source string to be converted to array of character's `string`
-     *
-     * @param fn map function to call on every character of source string.
-     *
-     * @returns `Array` intance constructed from characters of source `string` and given function.
-     */
-    public static from<U>(str: string, fn: (v: string, k: number) => U): Array<U> {
-        let strs = Array.charStrings(str);
-        let d: Array<string> = Array.from<string>(strs);
-        return d.map<U>(fn);
-    }
-
-    /**
-     * Creates a new `Array` instance from characters of `string` and mapping function.
-     *
-     * @param str source string to be converted to array of character's `string`
-     *
-     * @param fn map function to call on every character of source string.
-     *
-     * @returns `Array` intance constructed from characters of source `string` and given function.
-     */
-    public static from<U>(str: string, fn: (v: string) => U): Array<U> {
-        let strs = Array.charStrings(str);
-        let d = Array.from<string>(strs);
-        return d.map<U>(fn);
-    }
-
-    /**
-     * Creates a new `Array` instance from characters of `string`.
-     *
-     * @param str source string to be converted to array of character's `string`
-     *
-     * @returns `Array` intance constructed from characters of source `string`.
-     */
-    public static from(str: string): string[] {
-        return Array.charStrings(str);
-    }
-
-    /**
-     * Constructs new `Object[]` primitive array filtered down to
-     * just the elements from the given array that pass the test implemented by the provided function.
-     *
-     * @param fn test function, applied to each element of an array.
-     *
-     * @returns Primitive array of `Object`s, constructed from `this` and given filtering function.
-     */
-    private filterArray(fn: (v: T, k: int) => boolean): Array<T> {
-        let resNum = 0;
-        let indicator: boolean[] = new boolean[this.actualLength];
-
-        for (let i: int = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get(i), i)) {
-                indicator[i] = true;
-                resNum++;
+    public static from<T, U>(arr: ArrayLike<T> | Iterable<T>, fn: (v: T, k: number) => U): Array<U> {
+        if (arr instanceof ArrayLike) {
+            const arrLike = arr as ArrayLike<T>
+            const len = arrLike.lengthMakeProp()
+            assert len >= 0
+            const ret = new NullishType[len as int]
+            for (let i = 0; i < len; i++) {
+                ret[i] = fn(arrLike.$_get(i) as T, i);
             }
+            return new Array<U>(FROM_BUFFER, ret)
         }
-
-        let res = new T[resNum];
-        let j: int = 0;
-        for (let i: int = 0; i < this.actualLength; i++) {
-            if (indicator[i]) {
-                res[j] = this.$_get(i);
-                j++;
-            }
-        }
-
-        return new Array<T>(res);
+        const ret = new Array<U>();
+        const idx = new int[1]
+        idx[0] = 0
+        iteratorForEach((arr as Iterable<T>).iterator(), (x: T): void => {
+            ret.push(fn(x, idx[0]))
+            idx[0] += 1
+        })
+        return ret;
     }
+*/
 
+/*
     /**
      * Constructs a new `Array` instance and populates it with
      * portion of a given array, filtered down to just the elements from the
@@ -951,8 +817,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
     public override filter(fn: (v: T, k: number, arr: ReadonlyArray<T>) => boolean): Array<T> {
-        return this.filterArray((v: T, k: int): boolean => fn(v, k, this));
+        return this.filter((v: T, k: number): boolean => fn(v, k, this));
     }
+*/
 
     /**
      * Constructs a new `Array` instance and populates it with
@@ -964,7 +831,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
     public filter(fn: (v: T, k: number, arr: Array<T>) => boolean): Array<T> {
-        return this.filterArray((v: T, k: int): boolean => fn(v, k, this));
+        return this.filter((v: T, k: number): boolean => fn(v, k, this));
     }
 
     /**
@@ -976,21 +843,16 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    public override filter(fn: (v: T, k: number) => boolean): Array<T> {
-        return this.filterArray((v: T, k: int): boolean => fn(v, k));
-    }
+    public /* override */ filter(fn: (v: T, k: number) => boolean): Array<T> {
+        const res = new Array<T>()
 
-    /**
-     * Constructs a new `Array` instance and populates it with
-     * portion of a given array, filtered down to just the elements from the
-     * given array that pass the test implemented by the provided function.
-     *
-     * @param fn test function, applied to each element of an array.
-     *
-     * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
-     */
-    public filter(fn: (v: T, k: int) => boolean): Array<T> {
-        return this.filterArray(fn);
+        for (let i: int = 0; i < this.actualLength; i++) {
+            const val = this.$_get_unsafe(i)
+            if (fn(val, i)) {
+                res.push(val)
+            }
+        }
+        return res;
     }
 
     /**
@@ -1002,8 +864,8 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    public override filter(fn: (v: T) => boolean): Array<T> {
-        return this.filterArray((v: T, k: int): boolean => fn(v));
+    public /* override */ filter(fn: (v: T) => boolean): Array<T> {
+        return this.filter((v: T, k: number): boolean => fn(v));
     }
 
     /**
@@ -1016,8 +878,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public override slice(start: number, end: number): Array<T> {
-        return this.slice(start as int, end as int)
+    public /* override */ slice(start: Number | undefined, end: Number | undefined): Array<T> {
+        const len: int = this.actualLength;
+        return this.slice(indexWithDefault(start, 0), indexWithDefault(end, len))
     }
 
     /**
@@ -1031,56 +894,20 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
     public slice(start: int, end: int): Array<T> {
-        let len: int = this.actualLength;
-        let relativeStart = start;
-        let k: int;
-        let _final: int;
+        const len: int = this.actualLength;
+        const relStart = normalizeIndex(start, len)
+        const relEnd = normalizeIndex(end, len)
 
-        if (relativeStart == (Int.MIN_VALUE as int)) {
-            k = 0;
-        } else if (relativeStart < 0) {
-            k = max(len + (relativeStart), 0);
-        } else {
-            k = min(relativeStart, len);
+        let count = relEnd - relStart;
+        if (count < 0) {
+            count = 0;
+        }
+        let res = new NullishType[count];
+        for (let i = 0; i < count; i++) {
+            res[i] = this.$_get_unsafe(relStart + i) as NullishType;
         }
 
-        let relativeEnd: int;
-        if (end == (Int.MAX_VALUE as int)) {
-            relativeEnd = len;
-        } else {
-            relativeEnd = end;
-        }
-
-        if (relativeEnd == (Int.MIN_VALUE as int)) {
-            _final = 0;
-        } else if (relativeEnd < 0) {
-            _final = max(len + relativeEnd, 0);
-        } else {
-            _final = min(relativeEnd, len);
-        }
-        let count = max(_final - k, 0);
-
-        let res = new T[count];
-        let n = 0;
-        while (k < _final) {
-            res[n] = this.$_get(k);
-            k++;
-            n++;
-        }
-
-        return new Array<T>(res);
-    }
-
-    /**
-     * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
-     * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
-     *
-     * @param start zero-based index at which to start extraction
-     *
-     * @returns `Array` instance, constructed from extracted elements of `this` instance.
-     */
-    public override slice(start: number): Array<T> {
-        return this.slice(start as int)
+        return new Array<T>(FROM_BUFFER, res);
     }
 
     /**
@@ -1096,74 +923,6 @@ export final class Array<T> implements ReadonlyArray<T> {
     }
 
     /**
-     * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
-     *
-     * @returns `Array` instance, constructed all elements of `this` instance.
-     *
-     * @note This method creates full copy of original `Array` instance.
-     */
-    public override slice(): Array<T> {
-        return this.slice(Int.MIN_VALUE as int, Int.MAX_VALUE as int);
-    }
-
-    /**
-     * Helper function for sorting given primitive `Object[]` array using comparator.
-     * Primitive array is sorted using "Quick sort" algorithm.
-     *
-     * @param a: Object[] - primitive array of `Object[]` to be sorted
-     *
-     * @param lo0: int - left index of an subarray to be sorted.
-     *
-     * @param hi0: int - right index of an subarray to be sorted.
-     *
-     * @param comparator: (a: Object, b: Object): int - comparison function. Returns one of values -1, 0, 1
-     * (_less_, _equal_, _greater_ respectively).
-     *
-     * @note Modifies array `a`.
-     */
-    private doSort(a: T[], lo0: int, hi0: int, comparator: (a: T, b: T) => number): void {
-        let lo = lo0;
-        let hi = hi0;
-
-        if (lo >= hi) {
-            return;
-        } else if (lo == (hi - 1)) {
-            if (comparator(a[lo], a[hi]) > 0) {
-                let t = a[lo];
-                a[lo] = a[hi];
-                a[hi] = t;
-            }
-            return;
-        }
-        let m = (lo + hi) / 2;
-        let pivot = a[m];
-        a[m] = a[hi];
-        a[hi] = pivot;
-
-        while (lo < hi) {
-            while ((comparator(a[lo], pivot) <= 0) && (lo < hi)) {
-                lo++;
-            }
-
-            while ((comparator(pivot, a[hi]) <= 0) && (lo < hi)) {
-                hi--;
-            }
-
-            if (lo < hi) {
-                let t = a[lo];
-                a[lo] = a[hi];
-                a[hi] = t;
-            }
-        }
-
-        a[hi0] = a[hi];
-        a[hi] = pivot;
-
-        this.doSort(a, lo0, lo - 1, comparator);
-        this.doSort(a, hi + 1, hi0, comparator);
-    }
-
-    /**
      * Default comparison function for sort algorithm.
      * Objects are compared as string. Both objects are convereted to string
      * using `toString()` method and compared using `compareTo() method of `string` class.
@@ -1174,9 +933,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns  Returns one of values -1, 0, 1 (_less_, _equal_, _greater_ respectively).
      */
-    private static defaultComparator<T>(a: T, b: T): number {
-        let sa = (a as Object).toString();
-        let sb = (b as Object).toString();
+    private static defaultComparator(a: NullishType, b: NullishType): number {
+        let sa = stringOf(a);
+        let sb = stringOf(b);
         return sa.compareTo(sb);
     }
 
@@ -1185,11 +944,11 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns Copy of an `Array`'s primitive array data.
      */
-    private copyArray(): T[] {
+    private copyArray(): NullishType[] {
         let len: int = this.actualLength;
-        let res = new T[len];
+        let res = new NullishType[len];
         for (let i = 0; i < len; i++) {
-            res[i] = this.$_get(i);
+            res[i] = this.$_get_unsafe(i) as NullishType;
         }
         return res;
     }
@@ -1205,10 +964,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      * NOTE clarify UTF-16 or UTF-8
      */
     public sort(comparator: (a: T, b: T) => number): Array<T> {
-        let res = this.copyArray();
-        this.doSort(res, 0, res.length-1, comparator);
-        this.buffer = res as NullishType[];
-        this.actualLength = this.buffer.length
+        sort(this.buffer, 0, this.actualLength, (l: NullishType, r: NullishType): boolean => {
+            return comparator(l as T, r as T) < 0;
+        });
         return this;
     }
 
@@ -1222,7 +980,10 @@ export final class Array<T> implements ReadonlyArray<T> {
      * NOTE clarify UTF-16 or UTF-8
      */
     public sort(): Array<T> {
-        return this.sort(Array.defaultComparator)
+        sort(this.buffer, 0, this.actualLength, (l: NullishType, r: NullishType): boolean => {
+            return Array.defaultComparator(l, r) < 0;
+        });
+        return this;
     }
 
     /**
@@ -1237,11 +998,11 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public override lastIndexOf(element: T, fromIndex: number): number {
+    public /* override */ lastIndexOf(element: T, fromIndex: Number | undefined): number {
         if (this.actualLength == 0) {
             return -1;
         }
-        let n = fromIndex as int;
+        let n = indexWithDefault(fromIndex, this.actualLength - 1);
         let k: int;
         if (n >= 0) {
             k = min(this.actualLength - 1, n);
@@ -1250,7 +1011,7 @@ export final class Array<T> implements ReadonlyArray<T> {
         }
 
         while (k >= 0) {
-            if (Array.objEquals<Object>(this.$_get(k) as NullableType, element as NullableType)) {
+            if (__runtimeEquals(this.$_get_unsafe(k) as NullishType, element as NullishType)) {
                 return k;
             }
             k--;
@@ -1259,197 +1020,12 @@ export final class Array<T> implements ReadonlyArray<T> {
     }
 
     /**
-     * Returns the last index at which a given element can be found in the array,
-     * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
-     *
-     * @param element element to locate in the array.
-     * @param fromIndex zero-based index at which to start searching backwards.
-     * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
-     * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
-     * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
-     *
-     * @returns The last index of the element in the array; -1 if not found.
-     */
-    // NOTE(ivan-tyulyandin): investigate, an overloading issue
-    // public lastIndexOf(element: T, fromIndex: int): int {
-    //     if (this.actualLength == 0) {
-    //         return -1;
-    //     }
-    //     let n = fromIndex;
-    //     let k: int;
-    //     if (n >= 0) {
-    //         k = min(this.actualLength - 1, n);
-    //     } else {
-    //         k = this.actualLength + n;
-    //     }
-
-    //     while (k >= 0) {
-    //         if (this.$_get(k).equals(element)) {
-    //             return k;
-    //         }
-    //         k--;
-    //     }
-    //     return -1;
-    // }
-
-    /**
-     * Returns the last index at which a given element can be found in the array,
-     * or -1 if it is not present.
-     *
-     * @param element to find in the array.
-     *
-     * @returns The last index of the element in the array; -1 if not found.
-     */
-    public override lastIndexOf(element: T): number {
-        return this.lastIndexOf(element, this.actualLength - 1);
-    }
-
-    /**
-     * Returns the last index at which a given element can be found in the array,
-     * or -1 if it is not present.
-     *
-     * @param element to find in the array.
-     *
-     * @returns The last index of the element in the array; -1 if not found.
-     */
-    // No overload by return type
-    // public lastIndexOf(element: T): int {
-    //     return this.lastIndexOf(element, this.actualLength - 1);
-    // }
-
-    /**
-     * Inserts values into Array
-     *
-     * @param beforeIndex
-     *
-     * @param values
-     *
-     * @returns a shallow copy of the underlying array and inserted data
-     */
-    private insertValues(beforeIndex: int, values: T[]): T[] {
-        let len = this.actualLength + values.length;
-        let res = new T[len];
-        let n = beforeIndex;
-        let k: int;
-
-        if (n >= 0) {
-            k = min(this.actualLength - 1, n);
-        } else {
-            k = this.actualLength + n;
-        }
-
-        if (k < 0) {
-            k = 0;
-        }
-
-        let idx = 0;
-
-        for (let i = 0; i < k; i++) {
-            res[idx] = this.$_get(i);
-            idx++;
-        }
-        for (let i = 0; i < values.length; i++) {
-            res[idx] = values[i];
-            idx++;
-        }
-
-        for (let i = k; i < this.actualLength; i++) {
-            res[idx] = this.$_get(i);
-            idx++
-        }
-
-        return res;
-    }
-
-    /**
-     * Removes values from Array
-     *
-     * @param index
-     *
-     * @param count
-     *
-     * @returns a shallow copy of the underlying array without removed data
-     */
-    private removeMany(index: int, count: int): T[] {
-        assert count > 0;
-
-        let n = index;
-        let k: int;
-
-        if (n >= 0) {
-            k = min(this.actualLength - 1, n);
-        } else {
-            k = this.actualLength + n;
-        }
-
-        if (k < 0) {
-            k = 0;
-        }
-
-        let m = min(k + count-1, this.actualLength-1);
-
-        let idx = 0;
-
-        let res = new T[this.actualLength - (m - k + 1)];
-
-        for (let i = 0; i < k; i++) {
-            res[idx] = this.$_get(i);
-            idx++;
-        }
-
-        for (let i = m + 1; i < this.actualLength; i++) {
-            res[idx] = this.$_get(i);
-            idx++
-        }
-
-        return res;
-    }
-
-    /**
-     * Checks if two `Array` instances have the same content.
-     *
-     * @param other `Array` instance to be compared with.
-     *
-     * @returns `true` if `other` is `Array` instance, both `this` and `other` have
-     * same `length()` and all elements are `equals()`, `false` otherwise.
-     */
-    public override equals(other: NullishType): boolean {
-        if (!(other instanceof Array)) {
-            return false;
-        }
-        let a = other as Array<Object>;
-        if (this.actualLength != a.length) {
-            return false;
-        }
-
-        for (let i = 0; i < this.actualLength; i++) {
-            if (!Array.objEquals<Object>(this.$_get(i) as NullableType, a.$_get(i) as NullableType)) {
-                return false
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Returns a string representing the specified array and its elements.
      *
      * @returns string representation
      */
     public override toString(): string {
-        let str = new StringBuilder()
-        for (let i = 0; i < this.actualLength; i++) {
-            const d: NullableType = this.$_get(i) as NullableType
-            if (d == null) {
-                str.append("null")
-            } else {
-                str.append(d!.toString())
-            }
-            if(i != this.actualLength - 1) {
-                str.append(c',')
-            }
-        }
-        return str.toString()
+        return this.join(",");
     }
 
     /**
@@ -1481,7 +1057,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns string representation
      */
-    public override toLocaleString(): string {
+    public /* override */ toLocaleString(): string {
         return this.toLocaleString(new Object(), new Object())
     }
 
@@ -1491,11 +1067,11 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns shifted element, i.e. that was at index zero
      */
-    public shift(): T | null {
+    public shift(): T | undefined {
         if(this.actualLength == 0) {
-            return null
+            return undefined
         }
-        let obj = this.$_get(0)
+        let obj = this.$_get_unsafe(0)
         const other = this.slice(1, this.actualLength)
         this.buffer = other.buffer
         this.actualLength = other.actualLength
@@ -1508,14 +1084,22 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns removed element
      */
-    public pop(): T | null {
+    public pop(): T | undefined {
         if(this.actualLength == 0) {
-            return null
+            return undefined
         }
-        let obj = this.$_get(this.actualLength - 1)
+        let obj = this.$_get_unsafe(this.actualLength - 1)
         this.buffer[this.actualLength - 1] = null
         this.actualLength--
         return obj
+    }
+
+    // TODO(kprokopenko): remove when #14756 is fixed and rename below fucntion to push
+    public push(val: T): number {
+        this.ensureUnusedCapacity(1)
+        this.buffer[this.actualLength] = val as NullishType
+        this.actualLength += 1
+        return this.actualLength
     }
 
     /**
@@ -1523,17 +1107,23 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns new length
      */
-    public push(val: T): number {
-        if (this.actualLength == this.buffer.length) {
-            const copy = new NullishType[this.buffer.length * 2 + 1]
+    public pushECMA(...val: T[]): number {
+        this.ensureUnusedCapacity(val.length)
+        for (let i = 0; i < val.length; i++) {
+            this.buffer[this.actualLength + i] = val[i] as NullishType;
+        }
+        this.actualLength += val.length
+        return this.actualLength
+    }
+
+    private ensureUnusedCapacity(cap: int): void {
+        if (this.actualLength + cap > this.buffer.length) {
+            const copy = new NullishType[this.buffer.length * 2 + cap]
             for (let i = 0; i < this.actualLength; i++) {
                 copy[i] = this.buffer[i]
             }
             this.buffer = copy
         }
-        this.actualLength += 1
-        this.$_set(this.actualLength - 1, val)
-        return this.actualLength
     }
 
     /**
@@ -1546,8 +1136,8 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns an Array with deleted elements
      */
-    public splice(start: number, delete: number): Array<T> {
-        return this.splice(start as int, delete as int)
+    public splice(start: number, delete: Number | undefined, ...items: T[]): Array<T> {
+        return this.splice(start as int, indexWithDefault(delete, this.actualLength), ...items)
     }
 
     /**
@@ -1560,21 +1150,42 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns an Array with deleted elements
      */
-    public splice(start: int, delete: int): Array<T> {
-        if(start + delete > this.actualLength){
+    public splice(start: int, delete: int, ...items: T[]): Array<T> {
+        start = normalizeIndex(start, this.actualLength)
+        if (delete < 0) {
+            delete = 0;
+        }
+        if (start > this.actualLength - delete) {
             delete = this.actualLength - start
         }
-        let len = this.actualLength - delete
+        // this: [left middle right], we must replace middle with `items`
+
+        this.ensureUnusedCapacity(items.length - delete)
+        const oldLen = this.actualLength
+        this.actualLength = this.actualLength - delete + items.length
+
         let ret = new Array<T>(delete)
         let lastSet = start
-        for(let i: int = start; i < this.actualLength; i++) {
-            if (i < start + delete) {
-                ret.$_set(i - start, this.$_get(i))
-            } else {
-                this.$_set(lastSet++, this.$_get(i))
+        // left part remains unchanged
+        // copy excluded part
+        for (let i = 0; i < delete; i++) {
+            ret.buffer[i] = this.buffer[start + i]
+        }
+        // move right part to the right of the buffer
+        const rightLen = oldLen - start - delete
+        if (items.length > delete) {
+            for (let i = 0; i < rightLen; i++) {
+                this.buffer[this.actualLength - 1 - i] = this.buffer[oldLen - 1 - i]
+            }
+        } else {
+            for (let i = 0; i < rightLen; i++) {
+                this.buffer[start + items.length + i] = this.buffer[start + delete + i]
             }
         }
-        this.actualLength = lastSet
+        // insert middle part
+        for (let i = 0; i < items.length; i++) {
+            this.buffer[start + i] = items[i] as NullishType
+        }
         return ret
     }
 
@@ -1660,20 +1271,23 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns true if val is in Array
      */
-    public override includes(val: T, fromIndex: number): boolean {
-        return this.indexOf(val, fromIndex) != -1
-    }
-
-    /**
-     * Checks whether an Array includes a certain value among its entries,
-     * returning true or false as appropriate.
-     *
-     * @param val value to search
-     *
-     * @returns true if val is in Array
-     */
-    public override includes(val: T): boolean {
-        return this.indexOf(val) != -1
+    public /* override */ includes(val: T, fromIndex: Number | undefined): boolean {
+        const found = this.indexOfInt(val, indexWithDefault(fromIndex, 0));
+        if (found != -1) {
+            return true;
+        }
+        if (val instanceof Number && isNaN(val as Object as Number)) {
+            const frm = normalizeIndex(indexWithDefault(fromIndex, 0), this.actualLength)
+            return this.findIndex((v: T, idx: number): boolean => {
+                if (idx < frm) {
+                    return false;
+                }
+                if (v instanceof Number) {
+                    return isNaN(v as Object as Number)
+                }
+            }) != -1
+        }
+        return false;
     }
 
     /**
@@ -1686,9 +1300,10 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns index of val, -1 otherwise
      */
-    public override indexOf(val: T, fromIndex: number): number {
-        for (let i = fromIndex as int; i < this.actualLength; i++) {
-            if (Array.objEquals<T>(val, this.$_get(i))) {
+    private indexOfInt(val: T, fromIndex: int): int {
+        fromIndex = normalizeIndex(fromIndex, this.actualLength)
+        for (let i = fromIndex; i < this.actualLength; i++) {
+            if (__runtimeEquals(val as NullishType, this.$_get_unsafe(i) as NullishType)) {
                 return i
             }
         }
@@ -1701,10 +1316,24 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @param val value to search
      *
+     * @param fromIndex index to search from
+     *
      * @returns index of val, -1 otherwise
      */
-    public override indexOf(val: T): number {
-        return this.indexOf(val, 0)
+    public /* override */ indexOf(val: T, fromIndex: Number|undefined): number {
+        return this.indexOfInt(val, indexWithDefault(fromIndex, 0))
+    }
+
+    /**
+     * Returns the first index at which a given element
+     * can be found in the array, or -1 if it is not present.
+     *
+     * @param val value to search
+     *
+     * @returns index of val, -1 otherwise
+     */
+    public /* override */ indexOf(val: T): number {
+        return this.indexOfInt(val, 0)
     }
 
     /**
@@ -1718,7 +1347,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public findLastIndex(fn: (element : T) => boolean): int {
         for(let i = this.actualLength - 1; i >= 0; i--) {
-            if (fn(this.$_get(i))) {
+            if (fn(this.$_get_unsafe(i))) {
                 return i
             }
         }
@@ -1732,7 +1361,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns sorted copy of hte current instance using default comparator
      */
     public toSorted(): Array<T> {
-        let arr = new Array<T>(this.copyArray())
+        let arr = new Array<T>(FROM_BUFFER, this.copyArray())
         arr.sort()
         return arr
     }
@@ -1746,7 +1375,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns sorted copy of the current instance comparator
      */
     public toSorted(comparator: (a: T, b: T) => number): Array<T> {
-        let arr = new Array<T>(this.copyArray())
+        let arr = new Array<T>(FROM_BUFFER, this.copyArray())
         arr.sort(comparator)
         return arr
     }
@@ -1756,24 +1385,20 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @param arr
      *
-     * @returns true is arr is a non-null array, false otherwise
+     * @returns true is arr is a non-nullish array, false otherwise
      */
-    public static isArray<T>(arr: T[]): boolean {
-        if(arr == null){
+    public static isArray(o: NullishType): boolean {
+        if (o instanceof Array) {
+            return true
+        }
+        /// TODO(kprokopenko) remove null checks
+        if (__runtimeIsSameReference(o, null)) {
             return false
         }
-        return true
-    }
-
-    /**
-     * Checks whether the passed value is an Array.
-     *
-     * @param arr
-     *
-     * @returns true is arr is a non-null and non-empty array, false otherwise
-     */
-    public static isArray<T>(arr: Array<T>): boolean {
-        return true
+        if (__runtimeIsSameReference(o, undefined)) {
+            return false
+        }
+        return (Type.of(o!) instanceof ArrayType)
     }
 
     /**
@@ -1783,15 +1408,14 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns reversed copy of the current Array
      */
     public toReversed(): Array<T> {
-        let arr = new T[this.actualLength]
-        let count = this.actualLength - 1
+        let arr = new NullishType[this.actualLength]
         for(let i = 0; i < this.actualLength; i++) {
-            arr[count] = this.$_get(i)
-            count--
+            arr[this.actualLength - 1 - i] = this.$_get_unsafe(i) as NullishType
         }
-        return new Array<T>(arr)
+        return new Array<T>(FROM_BUFFER, arr)
     }
 
+/*
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
      * in order, passing in the return value from the calculation on the preceding element.
@@ -1806,12 +1430,13 @@ export final class Array<T> implements ReadonlyArray<T> {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get(0)
+        let acc: T = this.$_get_unsafe(0)
         for(let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
+*/
 
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
@@ -1827,9 +1452,9 @@ export final class Array<T> implements ReadonlyArray<T> {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get(0)
+        let acc: T = this.$_get_unsafe(0)
         for(let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
@@ -1844,13 +1469,13 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduce(fn: (a: T, b: T, index: number) => T): T {
+    public /* override */ reduce(fn: (a: T, b: T, index: number) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get(0)
+        let acc: T = this.$_get_unsafe(0)
         for(let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get(i), i)
+            acc = fn(acc, this.$_get_unsafe(i), i)
         }
         return acc
     }
@@ -1865,13 +1490,13 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduce(fn: (a: T, b: T) => T): T {
+    public /* override */ reduce(fn: (a: T, b: T) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get(0)
+        let acc: T = this.$_get_unsafe(0)
         for(let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get(i))
+            acc = fn(acc, this.$_get_unsafe(i))
         }
         return acc
     }
@@ -1891,11 +1516,12 @@ export final class Array<T> implements ReadonlyArray<T> {
     public reduce(fn: (previousValue: T, currentValue: T, currentIndex: number, arr: Array<T>) => T, initialValue: T): T {
         let acc: T = initialValue
         for(let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
 
+/*
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
      * in order, passing in the return value from the calculation on the preceding element.
@@ -1911,7 +1537,28 @@ export final class Array<T> implements ReadonlyArray<T> {
     public override reduce(fn: (previousValue: T, currentValue: T, currentIndex: number, arr: ReadonlyArray<T>) => T, initialValue: T): T {
         let acc: T = initialValue
         for(let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+        }
+        return acc
+    }
+*/
+
+    /**
+     * Executes a user-supplied "reducer" callback function on each element of the array,
+     * in order, passing in the return value from the calculation on the preceding element.
+     * The final result of running the reducer across all elements of the array is a single value.
+     * Order is from left-to-right.
+     *
+     * @param fn reduce function
+     *
+     * @param initialValue initial value
+     *
+     * @returns a result after applying fn over all elements of the Array
+     */
+    public /* override */ reduce(fn: (previousValue: T, currentValue: T, currentIndex: number) => T, initialValue: T): T {
+        let acc: T = initialValue
+        for(let i = 0; i < this.actualLength; i++) {
+            acc = fn(acc, this.$_get_unsafe(i), i)
         }
         return acc
     }
@@ -1928,34 +1575,15 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduce(fn: (previousValue: T, currentValue: T, currentIndex: number) => T, initialValue: T): T {
+    public /* override */ reduce(fn: (previousValue: T, currentValue: T) => T, initialValue: T): T {
         let acc: T = initialValue
         for(let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get(i), i)
+            acc = fn(acc, this.$_get_unsafe(i))
         }
         return acc
     }
 
-    /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
-     *
-     * @param fn reduce function
-     *
-     * @param initialValue initial value
-     *
-     * @returns a result after applying fn over all elements of the Array
-     */
-    public override reduce(fn: (previousValue: T, currentValue: T) => T, initialValue: T): T {
-        let acc: T = initialValue
-        for(let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get(i))
-        }
-        return acc
-    }
-
+/*
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
      * in order, passing in the return value from the calculation on the preceding element.
@@ -1970,12 +1598,13 @@ export final class Array<T> implements ReadonlyArray<T> {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get(this.actualLength - 1)
+        let acc: T = this.$_get_unsafe(this.actualLength - 1)
         for(let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
+*/
 
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
@@ -1991,9 +1620,9 @@ export final class Array<T> implements ReadonlyArray<T> {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get(this.actualLength - 1)
+        let acc: T = this.$_get_unsafe(this.actualLength - 1)
         for(let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
@@ -2008,13 +1637,13 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T, index: number) => T): T {
+    public /* override */ reduceRight(fn: (a: T, b: T, index: number) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get(this.actualLength - 1)
+        let acc: T = this.$_get_unsafe(this.actualLength - 1)
         for(let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get(i), i)
+            acc = fn(acc, this.$_get_unsafe(i), i)
         }
         return acc
     }
@@ -2029,17 +1658,18 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T) => T): T {
+    public /* override */ reduceRight(fn: (a: T, b: T) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        let acc: T = this.$_get(this.actualLength - 1)
+        let acc: T = this.$_get_unsafe(this.actualLength - 1)
         for(let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get(i))
+            acc = fn(acc, this.$_get_unsafe(i))
         }
         return acc
     }
 
+/*
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
      * in order, passing in the return value from the calculation on the preceding element.
@@ -2055,10 +1685,11 @@ export final class Array<T> implements ReadonlyArray<T> {
     public override reduceRight(fn: (a: T, b: T, index: number, arr: ReadonlyArray<T>) => T, initVal: T): T {
         let acc: T = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
+*/
 
     /**
      * Executes a user-supplied "reducer" callback function on each element of the array,
@@ -2075,7 +1706,7 @@ export final class Array<T> implements ReadonlyArray<T> {
     public reduceRight(fn: (a: T, b: T, index: number, arr: Array<T>) => T, initVal: T): T {
         let acc: T = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get(i), i as number, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
@@ -2092,10 +1723,10 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T, index: number) => T, initVal: T): T {
+    public /* override */ reduceRight(fn: (a: T, b: T, index: number) => T, initVal: T): T {
         let acc: T = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get(i), i)
+            acc = fn(acc, this.$_get_unsafe(i), i)
         }
         return acc
     }
@@ -2112,14 +1743,15 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T) => T, initVal: T): T {
+    public /* override */ reduceRight(fn: (a: T, b: T) => T, initVal: T): T {
         let acc: T = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get(i))
+            acc = fn(acc, this.$_get_unsafe(i))
         }
         return acc
     }
 
+/*
     /**
      * Executes a provided function once for each array element.
      *
@@ -2127,9 +1759,10 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public override forEach(fn: (a: T, index: number, arr: ReadonlyArray<T>) => void): void {
         for(let i = 0; i < this.actualLength; i++) {
-            fn(this.$_get(i), i, this)
+            fn(this.$_get_unsafe(i), i, this)
         }
     }
+*/
 
     /**
      * Executes a provided function once for each array element.
@@ -2138,7 +1771,7 @@ export final class Array<T> implements ReadonlyArray<T> {
      */
     public forEach(fn: (a: T, index: number, arr: Array<T>) => void): void {
         for(let i = 0; i < this.actualLength; i++) {
-            fn(this.$_get(i), i, this)
+            fn(this.$_get_unsafe(i), i, this)
         }
     }
 
@@ -2147,9 +1780,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @param fn to apply for each element of the Array
      */
-    public override forEach(fn: (a: T, index: number) => void): void {
+    public /* override */ forEach(fn: (a: T, index: number) => void): void {
         for(let i = 0; i < this.actualLength; i++) {
-            fn(this.$_get(i), i)
+            fn(this.$_get_unsafe(i), i)
         }
     }
 
@@ -2158,9 +1791,9 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @param fn to apply for each element of the Array
      */
-    public override forEach(fn: (a: T) => void): void {
+    public /* override */ forEach(fn: (a: T) => void): void {
         for(let i = 0; i < this.actualLength; i++) {
-            fn(this.$_get(i))
+            fn(this.$_get_unsafe(i))
         }
     }
 
@@ -2172,9 +1805,14 @@ export final class Array<T> implements ReadonlyArray<T> {
      *
      * @returns a newly created Array
      */
-    //public static of<T>(...values: T[]): Array<T> {
-    //    return new Array<T>(values)
-    //}
+    public static of<T>(...values: T[]): Array<T> {
+        const ret = new Array<T>()
+        ret.ensureUnusedCapacity(values.length)
+        for (let i = 0; i < values.length; i++) {
+            ret.push(values[i])
+        }
+        return ret;
+    }
 
     /**
      * Adds the specified elements to the beginning of an Array
@@ -2185,20 +1823,19 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns new length of the Array
      */
     public unshift(...values: T[]): number {
-        let valLen = values.length as int
-        let resLen = valLen + this.actualLength
-        let arr = new NullishType[resLen];
-        for (let i: int = 0; i < valLen; ++i) {
-            arr[i] = values[i] as NullishType
+        let buffer = this.buffer
+        if (this.buffer.length <= values.length + this.actualLength) {
+            buffer = new NullishType[this.buffer.length * 2 + values.length]
         }
-        let curPlace = 0
-        for (let i: int = valLen; i < resLen; ++i) {
-            arr[i] = this.buffer[curPlace];
-            ++curPlace
+        for (let i = 0; i < this.actualLength; i++) {
+            buffer[this.actualLength + values.length - i - 1] = this.buffer[this.actualLength - 1 - i];
         }
-        this.buffer = arr;
-        this.actualLength = resLen
-        return this.actualLength
+        for (let i = 0; i < values.length; i++) {
+            buffer[i] = values[i] as NullishType;
+        }
+        this.buffer = buffer
+        this.actualLength += values.length;
+        return this.actualLength;
     }
 
     /**
@@ -2226,12 +1863,15 @@ export final class Array<T> implements ReadonlyArray<T> {
      * @returns a new Array with the element at the given index replaced with the given value
      */
     public with(index: int, value: T): Array<T> {
-        let arr = new T[this.actualLength]
-        for(let i: int = 0; i < this.actualLength; i++) {
-            arr[i] = this.$_get(i)
+        if (index < 0) {
+            index += this.actualLength
         }
-        arr[index] = value
-        return new Array<T>(arr)
+        if (index >= this.actualLength) {
+            throw new RangeError("Invalid index")
+        }
+        let arr = this.copyArray()
+        arr[index] = value as NullishType
+        return new Array<T>(FROM_BUFFER, arr)
     }
 
     /**
@@ -2329,14 +1969,21 @@ export final class Array<T> implements ReadonlyArray<T> {
      * Returns an iterator over all indices
      */
     public /* override */ keys(): IterableIterator<Number> { // NOTE(kprokopenko): must be number, blocked by frontend
-        return new ArrayKeysIterator(this.actualLength)
+        return new ArrayKeysIterator<T>(this)
     }
 
     /**
      * Returns an iterator over all values
      */
-    public override values(): IterableIterator<T> {
+    public /* override */ values(): IterableIterator<T> {
         return new ArrayValuesIterator<T>(this)
+    }
+
+    /**
+     * Returns an iterator over all values
+     */
+    public override iterator(): IterableIterator<T> {
+        return this.values()
     }
 
     /**

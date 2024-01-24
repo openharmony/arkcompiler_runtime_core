@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@ class jscall {
     native static str$s(top: JSValue, qname: String, a0: String): String;
 
     native static any$a(top: JSValue, qname: String, v0: JSValue): JSValue;
+    native static any$a$obj(top: JSValue, qname: String, v0: JSValue): NullishType;
     native static any$b(top: JSValue, qname: String, v0: boolean): JSValue;
     native static any$n(top: JSValue, qname: String, v0: double): JSValue;
     native static any$s(top: JSValue, qname: String, v0: String): JSValue;
@@ -111,15 +112,19 @@ function js_sum_wrapper_num_str(a: double, b: String): String {
 function test_undefined(): boolean {
     let v = JSRuntime.getUndefined();
     let r = "undefined:undefined";
-    if (jscall.any$a(jsvars.m, ".Identity", v) != null) {
+    if (jscall.any$a$obj(jsvars.m, ".Identity", v) !== undefined) {
         return false;
     }
     return r == vstringify(v);
 }
+
 function test_null(): boolean {
     let v = JSRuntime.getNull();
     let r = "object:null";
-    return r == vstringify(jscall.any$a(jsvars.m, ".Identity", v));
+    if (jscall.any$a(jsvars.m, ".Identity", v) !== null) {
+        return false;
+    }
+    return r == vstringify(v);
 }
 function test_boolean(): boolean {
     let v = true;

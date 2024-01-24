@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,9 @@ struct RegExpMatchResult {
     uint32_t index = 0;
     // first value is true if result is undefined
     PandaVector<std::pair<bool, T>> captures;
+    PandaVector<std::pair<uint32_t, uint32_t>> indices;
     bool isSuccess = false;
+    bool isWide = false;
 };
 
 class RegExpExecutor {
@@ -362,78 +364,11 @@ public:
         return true;
     }
 
-    inline bool HandleOpBackReference(const DynChunk &byteCode, uint8_t opCode)
-    {
-        uint32_t captureIndex = byteCode.GetU8(GetCurrentPC() + 1);
-        if (captureIndex >= nCapture_) {
-            return !MatchFailed();
-        }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const uint8_t *captureStart = captureResultList_[captureIndex].captureStart;
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        const uint8_t *captureEnd = captureResultList_[captureIndex].captureEnd;
-        if (captureStart == nullptr || captureEnd == nullptr) {
-            Advance(opCode);
-            return true;
-        }
-        bool isMatched = true;
-        if (opCode == RegExpOpCode::OP_BACKREFERENCE) {
-            const uint8_t *refCptr = captureStart;
-            while (refCptr < captureEnd) {
-                if (IsEOF()) {
-                    isMatched = false;
-                    break;
-                }
-                // NOLINTNEXTLINE(readability-identifier-naming)
-                uint32_t c1 = GetChar(&refCptr, captureEnd);
-                // NOLINTNEXTLINE(readability-identifier-naming)
-                uint32_t c2 = GetChar(&currentPtr_, inputEnd_);
-                if (IsIgnoreCase()) {
-                    c1 = static_cast<uint32_t>(RegExpParser::Canonicalize(c1, IsUtf16()));
-                    c2 = static_cast<uint32_t>(RegExpParser::Canonicalize(c2, IsUtf16()));
-                }
-                if (c1 != c2) {
-                    isMatched = false;
-                    break;
-                }
-            }
-            if (!isMatched) {
-                if (MatchFailed()) {
-                    return false;
-                }
-            } else {
-                Advance(opCode);
-            }
-        } else {
-            const uint8_t *refCptr = captureEnd;
-            while (refCptr > captureStart) {
-                if (GetCurrentPtr() == input_) {
-                    isMatched = false;
-                    break;
-                }
-                // NOLINTNEXTLINE(readability-identifier-naming)
-                uint32_t c1 = GetPrevChar(&refCptr, captureStart);
-                // NOLINTNEXTLINE(readability-identifier-naming)
-                uint32_t c2 = GetPrevChar(&currentPtr_, input_);
-                if (IsIgnoreCase()) {
-                    c1 = static_cast<uint32_t>(RegExpParser::Canonicalize(c1, IsUtf16()));
-                    c2 = static_cast<uint32_t>(RegExpParser::Canonicalize(c2, IsUtf16()));
-                }
-                if (c1 != c2) {
-                    isMatched = false;
-                    break;
-                }
-            }
-            if (!isMatched) {
-                if (MatchFailed()) {
-                    return false;
-                }
-            } else {
-                Advance(opCode);
-            }
-        }
-        return true;
-    }
+    bool HandleOpBackReference(const DynChunk &byteCode, uint8_t opCode);
+
+    bool HandleOpBackReferenceMatch(const uint8_t *captureStart, const uint8_t *captureEnd, uint8_t opCode);
+
+    bool HandleOpBackwardBackReferenceMatch(const uint8_t *captureStart, const uint8_t *captureEnd, uint8_t opCode);
 
     inline void Advance(uint8_t opCode, uint32_t offset = 0)
     {
@@ -456,132 +391,17 @@ public:
         AdvancePtr(&currentPtr_, inputEnd_);
     }
 
-    uint32_t GetChar(const uint8_t **pp, const uint8_t *end) const
-    {
-        uint32_t c;
-        const uint8_t *cptr = *pp;
-        if (!isWideChar_) {
-            c = *cptr;
-            *pp += 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        } else {
-            uint16_t c1 = *(reinterpret_cast<const uint16_t *>(cptr));
-            c = c1;
-            cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (U16_IS_LEAD(c) && IsUtf16() && cptr < end) {
-                c1 = *(reinterpret_cast<const uint16_t *>(cptr));
-                if (U16_IS_TRAIL(c1)) {
-                    c = static_cast<uint32_t>(U16_GET_SUPPLEMENTARY(c, c1));  // NOLINT(hicpp-signed-bitwise)
-                    cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                }
-            }
-            *pp = cptr;
-        }
-        return c;
-    }
+    uint32_t GetChar(const uint8_t **pp, const uint8_t *end) const;
 
-    uint32_t PeekChar(const uint8_t *p, const uint8_t *end) const
-    {
-        uint32_t c;
-        const uint8_t *cptr = p;
-        if (!isWideChar_) {
-            c = *cptr;
-        } else {
-            uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
-            c = c1;
-            cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (U16_IS_LEAD(c) && IsUtf16() && cptr < end) {
-                c1 = *reinterpret_cast<const uint16_t *>(cptr);
-                if (U16_IS_TRAIL(c1)) {
-                    c = static_cast<uint32_t>(U16_GET_SUPPLEMENTARY(c, c1));  // NOLINT(hicpp-signed-bitwise)
-                }
-            }
-        }
-        return c;
-    }
+    uint32_t PeekChar(const uint8_t *p, const uint8_t *end) const;
 
-    void AdvancePtr(const uint8_t **pp, const uint8_t *end) const
-    {
-        const uint8_t *cptr = *pp;
-        if (!isWideChar_) {
-            *pp += 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        } else {
-            uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
-            cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (U16_IS_LEAD(c1) && IsUtf16() && cptr < end) {
-                c1 = *reinterpret_cast<const uint16_t *>(cptr);
-                if (U16_IS_TRAIL(c1)) {
-                    cptr += WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                }
-            }
-            *pp = cptr;
-        }
-    }
+    void AdvancePtr(const uint8_t **pp, const uint8_t *end) const;
 
-    uint32_t PeekPrevChar(const uint8_t *p, const uint8_t *start) const
-    {
-        uint32_t c;
-        const uint8_t *cptr = p;
-        if (!isWideChar_) {
-            c = cptr[-1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        } else {
-            cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
-            c = c1;
-            if (U16_IS_TRAIL(c) && IsUtf16() && cptr > start) {
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                c1 = reinterpret_cast<const uint16_t *>(cptr)[-1];
-                if (U16_IS_LEAD(c1)) {
-                    c = static_cast<uint32_t>(U16_GET_SUPPLEMENTARY(c1, c));  // NOLINT(hicpp-signed-bitwise)
-                }
-            }
-        }
-        return c;
-    }
+    uint32_t PeekPrevChar(const uint8_t *p, const uint8_t *start) const;
 
-    uint32_t GetPrevChar(const uint8_t **pp, const uint8_t *start) const
-    {
-        uint32_t c;
-        const uint8_t *cptr = *pp;
-        if (!isWideChar_) {
-            c = cptr[-1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            cptr -= 1;     // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            *pp = cptr;
-        } else {
-            cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
-            c = c1;
-            if (U16_IS_TRAIL(c) && IsUtf16() && cptr > start) {
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                c1 = reinterpret_cast<const uint16_t *>(cptr)[-1];
-                if (U16_IS_LEAD(c1)) {
-                    c = static_cast<uint32_t>(U16_GET_SUPPLEMENTARY(c1, c));  // NOLINT(hicpp-signed-bitwise)
-                    cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                }
-            }
-            *pp = cptr;
-        }
-        return c;
-    }
+    uint32_t GetPrevChar(const uint8_t **pp, const uint8_t *start) const;
 
-    void PrevPtr(const uint8_t **pp, const uint8_t *start) const
-    {
-        const uint8_t *cptr = *pp;
-        if (!isWideChar_) {
-            cptr -= 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            *pp = cptr;
-        } else {
-            cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            uint16_t c1 = *reinterpret_cast<const uint16_t *>(cptr);
-            if (U16_IS_TRAIL(c1) && IsUtf16() && cptr > start) {
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                c1 = reinterpret_cast<const uint16_t *>(cptr)[-1];
-                if (U16_IS_LEAD(c1)) {
-                    cptr -= WIDE_CHAR_SIZE;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                }
-            }
-            *pp = cptr;
-        }
-    }
+    void PrevPtr(const uint8_t **pp, const uint8_t *start) const;
 
     bool MatchFailed(bool isMatched = false);
 

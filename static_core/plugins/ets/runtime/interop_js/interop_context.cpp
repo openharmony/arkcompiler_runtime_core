@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,12 +48,13 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
 
     namespace descriptors = panda_file_items::class_descriptors;
 
-    jsruntimeClass_ = cacheClass(descriptors::JS_RUNTIME);
-    jsvalueClass_ = cacheClass(descriptors::JS_VALUE);
-    jserrorClass_ = cacheClass(descriptors::JS_ERROR);
+    jsRuntimeClass_ = cacheClass(descriptors::JS_RUNTIME);
+    jsValueClass_ = cacheClass(descriptors::JS_VALUE);
+    jsErrorClass_ = cacheClass(descriptors::JS_ERROR);
     objectClass_ = cacheClass(descriptors::OBJECT);
     stringClass_ = cacheClass(descriptors::STRING);
     voidClass_ = cacheClass(descriptors::VOID);
+    undefinedClass_ = cacheClass(descriptors::INTERNAL_UNDEFINED);
     promiseClass_ = cacheClass(descriptors::PROMISE);
     errorClass_ = cacheClass(descriptors::ERROR);
     exceptionClass_ = cacheClass(descriptors::EXCEPTION);
@@ -68,7 +69,7 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     RegisterBuiltinJSRefConvertors(this);
 
     {
-        auto method = EtsClass::FromRuntimeClass(jsruntimeClass_)->GetMethod("createFinalizationQueue");
+        auto method = EtsClass::FromRuntimeClass(jsRuntimeClass_)->GetMethod("createFinalizationQueue");
         ASSERT(method != nullptr);
         auto res = method->GetPandaMethod()->Invoke(coro, nullptr);
         ASSERT(!coro->HasPendingException());
@@ -130,7 +131,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     ASSERT(!coro->HasPendingException());
 
     if (IsNullOrUndefined(ctx->GetJSEnv(), val)) {
-        ctx->ThrowETSError(coro, "interop/js throws null");
+        ctx->ThrowETSError(coro, "interop/js throws undefined/null");
         return;
     }
 

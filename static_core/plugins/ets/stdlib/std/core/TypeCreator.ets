@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,10 @@ class AllowedAttributes {
 }
 
 /**
- * Exception that is thrown when exception in create-api occurs
+ * Error that is thrown when exception in create-api occurs
  * @note both messages and causes may be different on each platforms
  */
-export class TypeAPICreateException extends Exception {
+export class TypeAPICreateError extends Error {
     public constructor(msg: string) {
         super(msg)
     }
@@ -49,7 +49,7 @@ export abstract class TypeCreator {
      * Forces creation of `this` creator and creators it depends on
      * @returns created Type instance
      */
-    public create(): Type throws {
+    public create(): Type {
         if (this.typ == null) {
             const ctx = new TypeCreatorCtx()
             try {
@@ -65,19 +65,19 @@ export abstract class TypeCreator {
      * Traverses all types on which this `TypeCreator` depends
      * @param collector callback to be called with every type
      */
-    internal abstract collectTypes(collector: CollectTypesCB): void throws
+    internal abstract collectTypes(collector: CollectTypesCB): void
 
     /**
      * Must declare up to the point where future type descriptor is determinated
      * @param ctx current context
      */
-    internal abstract declare(ctx: TypeCreatorCtx): void throws
+    internal abstract declare(ctx: TypeCreatorCtx): void
 
     /**
      * Defines rest of the body, called after {@link declare}
      * @param ctx current context
      */
-    internal abstract define(ctx: TypeCreatorCtx): void throws
+    internal abstract define(ctx: TypeCreatorCtx): void
 
     /** Makes class sealed in stdlib */
     internal constructor() {}
@@ -85,8 +85,8 @@ export abstract class TypeCreator {
     /**
      * Functions that verifies that this can be modified
      */
-    protected checkNotCreated(): void throws {
-        if (this.typ != null) throw new TypeAPICreateException("type already created, no modifications allowed")
+    protected checkNotCreated(): void {
+        if (this.typ != null) throw new TypeAPICreateError("type already created, no modifications allowed")
     }
 
     /**
@@ -193,7 +193,7 @@ final class TypeCreatorCtx {
      * checks that context is errorneous
      * used after long-returning types (that can't throw an exception explicitly)
      */
-    internal checkError(): void throws {
+    internal checkError(): void {
         this.checkError(TypeCreatorCtx.getError(this.ctxPtr))
     }
 
@@ -202,7 +202,7 @@ final class TypeCreatorCtx {
      * @param ptr pointer to one of items allocated in the context
      * @returns `ptr`
      */
-    internal checkCtxItemPtr(ptr: long): long throws {
+    internal checkCtxItemPtr(ptr: long): long {
         if (ptr == 0) {
             this.checkError()
         }
@@ -228,7 +228,7 @@ final class TypeCreatorCtx {
      * Runs entire type creation routine, including all types collection
      * @param first creator with must be created
      */
-    public create(first: TypeCreator): void throws {
+    public create(first: TypeCreator): void {
         const all = new Set<TypeCreator>()
         const visited = new Set<TypeCreator>()
 
@@ -310,7 +310,7 @@ final class TypeCreatorCtx {
      * Example: lambdas of body methods.
      * @returns id of saved object that can be passed to runtime intrinsics
      */
-    internal registerObject(o: Object): int throws {
+    internal registerObject(o: Object): int {
         const r = this.objects.length
         this.objects.push(o)
         return r as int
@@ -318,11 +318,11 @@ final class TypeCreatorCtx {
 
     /**
      * Checks if ctx function returned an error
-     * @throws TypeAPICreateException if error was found
+     * @throws TypeAPICreateError if error was found
      */
-    internal checkError(arg: string | null): void throws {
+    internal checkError(arg: string | null): void {
         if (arg != null) {
-            throw new TypeAPICreateException(arg as string)
+            throw new TypeAPICreateError(arg as string)
         }
     }
 }
@@ -350,7 +350,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * Forces creation of `this` creator and creators it depends on
      * @returns created Type instance
      */
-    public override create(): ClassType throws {
+    public override create(): ClassType {
         return super.create() as ClassType
     }
 
@@ -359,7 +359,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * @param base new base
      * @returns this
      */
-    public addBaseType(base: ClassType): ClassTypeCreator throws {
+    public addBaseType(base: ClassType): ClassTypeCreator {
         this.checkNotCreated()
         this.base = TypeOrCreator.from(base)
         return this;
@@ -370,7 +370,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * @param base new base
      * @returns this
      */
-    public addBaseType(base: ClassTypeCreator): ClassTypeCreator throws {
+    public addBaseType(base: ClassTypeCreator): ClassTypeCreator {
         this.checkNotCreated()
         this.base = TypeOrCreator.from(base)
         return this;
@@ -381,7 +381,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * @param iface interface to implement
      * @returns this
      */
-    public addInterface(iface: InterfaceType): ClassTypeCreator throws {
+    public addInterface(iface: InterfaceType): ClassTypeCreator {
         this.ifaces.push(TypeOrCreator.from(iface))
         return this;
     }
@@ -391,7 +391,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * @param iface interface to implement
      * @returns this
      */
-    public addInterface(iface: InterfaceTypeCreator): ClassTypeCreator throws {
+    public addInterface(iface: InterfaceTypeCreator): ClassTypeCreator {
         this.ifaces.push(TypeOrCreator.from(iface))
         return this;
     }
@@ -401,13 +401,13 @@ export final class ClassTypeCreator extends TypeCreator {
      * @param fld field to add
      * @returns this
      */
-    public addField(fld: FieldCreator): ClassTypeCreator throws {
+    public addField(fld: FieldCreator): ClassTypeCreator {
         fld.frozen.freeze()
         this.fields.push(fld)
         return this;
     }
 
-    internal override collectTypes(collector: CollectTypesCB): void throws {
+    internal override collectTypes(collector: CollectTypesCB): void {
         collector(this.base)
         for (let i = 0; i < this.ifaces.length; i++) {
             collector(this.ifaces.$_get(i))
@@ -424,12 +424,12 @@ export final class ClassTypeCreator extends TypeCreator {
         }
     }
 
-    internal override declare(ctx: TypeCreatorCtx): void throws {
+    internal override declare(ctx: TypeCreatorCtx): void {
         assert this.ctxItemPtr == 0
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.classCreate(ctx.ctxPtr, this.name, this.attrs.get()))
     }
 
-    internal override define(ctx: TypeCreatorCtx): void throws {
+    internal override define(ctx: TypeCreatorCtx): void {
         const classPtr = this.ctxItemPtr
         ctx.checkError(TypeCreatorCtx.classSetBase(classPtr, this.base.getTypeDescriptor()))
         for (let i = 0; i < this.ifaces.length; i++) {
@@ -451,7 +451,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * @returns this
      * @note prevents future modifications of `mb`
      */
-    public addMethod(mb: MethodCreator): ClassTypeCreator throws {
+    public addMethod(mb: MethodCreator): ClassTypeCreator {
         mb.frozen.freeze()
         this.methods.push(mb)
         return this;
@@ -462,7 +462,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * @param attrs attribute to set
      * @returns this
      */
-    public addAttributes(attrs: int): ClassTypeCreator throws {
+    public addAttributes(attrs: int): ClassTypeCreator {
         this.attrs.add(attrs)
         return this;
     }
@@ -471,7 +471,7 @@ export final class ClassTypeCreator extends TypeCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addFinal(): ClassTypeCreator throws {
+    public addFinal(): ClassTypeCreator {
         this.attrs.add(Attributes.FINAL, true)
     }
 }
@@ -497,7 +497,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
      * Forces creation of `this` creator and creators it depends on
      * @returns created Type instance
      */
-    public override create(): InterfaceType throws {
+    public override create(): InterfaceType {
         return super.create() as InterfaceType
     }
 
@@ -506,7 +506,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
      * @param iface interface to implement
      * @returns this
      */
-    public addInterface(base: InterfaceType): InterfaceTypeCreator throws {
+    public addInterface(base: InterfaceType): InterfaceTypeCreator {
         this.checkNotCreated()
         this.bases.push(TypeOrCreator.from(base))
         return this;
@@ -517,7 +517,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
      * @param iface interface to implement
      * @returns this
      */
-    public addInterface(base: InterfaceTypeCreator): InterfaceTypeCreator throws {
+    public addInterface(base: InterfaceTypeCreator): InterfaceTypeCreator {
         this.checkNotCreated()
         this.bases.push(TypeOrCreator.from(base))
         return this;
@@ -528,7 +528,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
      * @param fld property description
      * @returns this
      */
-    public addField(fld: FieldCreator): InterfaceTypeCreator throws {
+    public addField(fld: FieldCreator): InterfaceTypeCreator {
         const getter = new MethodCreator(fld.name).addResult(fld.typ).addGetter()
         this.addMethod(getter)
         if (!fld.attrs.has(Attributes.READONLY)) {
@@ -543,9 +543,9 @@ export final class InterfaceTypeCreator extends TypeCreator {
      * @param mc method to add
      * @returns this
      */
-    public addMethod(mc: MethodCreator): InterfaceTypeCreator throws {
+    public addMethod(mc: MethodCreator): InterfaceTypeCreator {
         if ((mc.attrs.has(Attributes.STATIC))) {
-            throw new TypeAPICreateException("interface can't have static method " + mc)
+            throw new TypeAPICreateError("interface can't have static method " + mc)
         }
         mc.addAbstract()
         mc.addAccessModifier(AccessModifier.PUBLIC)
@@ -554,7 +554,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
         return this;
     }
 
-    internal override collectTypes(collector: CollectTypesCB): void throws {
+    internal override collectTypes(collector: CollectTypesCB): void {
         for (let i = 0; i < this.bases.length; i++) {
             collector(this.bases.$_get(i))
         }
@@ -567,7 +567,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
         }
     }
 
-    internal override define(ctx: TypeCreatorCtx): void throws {
+    internal override define(ctx: TypeCreatorCtx): void {
         const classPtr = this.ctxItemPtr
         for (let i = 0; i < this.bases.length; i++) {
             ctx.checkError(TypeCreatorCtx.interfaceAddBase(classPtr, this.bases.$_get(i).getTypeDescriptor()))
@@ -578,7 +578,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
         }
     }
 
-    internal override declare(ctx: TypeCreatorCtx): void throws {
+    internal override declare(ctx: TypeCreatorCtx): void {
         assert this.ctxItemPtr == 0
         this.ctxItemPtr = ctx.checkCtxItemPtr(TypeCreatorCtx.interfaceCreate(ctx.ctxPtr, this.name))
     }
@@ -599,7 +599,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      * Forces creation of `this` creator and creators it depends on
      * @returns created Type instance
      */
-    public override create(): LambdaType throws {
+    public override create(): LambdaType {
         return super.create() as LambdaType
     }
 
@@ -608,11 +608,11 @@ export final class LambdaTypeCreator extends TypeCreator {
      * @param param parameter to add
      * @returns this
      */
-    public addParameter(param: ParameterCreator): LambdaTypeCreator throws {
+    public addParameter(param: ParameterCreator): LambdaTypeCreator {
         this.checkNotCreated()
         param.frozen.freeze()
         if (param.name != null && param.name != '' + this.params.length) {
-            throw new TypeAPICreateException("can't have such lambda parameter name")
+            throw new TypeAPICreateError("can't have such lambda parameter name")
         }
         this.params.push(param)
         return this;
@@ -623,7 +623,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      * @param typ type of result
      * @returns this
      */
-    public addResult(typ: Type): LambdaTypeCreator throws {
+    public addResult(typ: Type): LambdaTypeCreator {
         return this.addResult(TypeOrCreator.from(typ));
     }
 
@@ -632,7 +632,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      * @param typ type of result
      * @returns this
      */
-    public addResult(typ: TypeCreator): LambdaTypeCreator throws {
+    public addResult(typ: TypeCreator): LambdaTypeCreator {
         return this.addResult(TypeOrCreator.from(typ));
     }
 
@@ -641,7 +641,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      * @param typ type of result
      * @returns this
      */
-    internal addResult(typ: TypeOrCreator): LambdaTypeCreator throws {
+    internal addResult(typ: TypeOrCreator): LambdaTypeCreator {
         this.checkNotCreated()
         this.result = typ
         return this;
@@ -652,7 +652,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      * @param attrs attribute to set
      * @returns this
      */
-    public addAttributes(attrs: int): LambdaTypeCreator throws {
+    public addAttributes(attrs: int): LambdaTypeCreator {
         this.attrs.add(attrs)
         return this;
     }
@@ -661,7 +661,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addThrowing(): LambdaTypeCreator throws {
+    public addThrowing(): LambdaTypeCreator {
         this.attrs.add(Attributes.THROWING, true)
     }
 
@@ -669,18 +669,18 @@ export final class LambdaTypeCreator extends TypeCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addAsync(): LambdaTypeCreator throws {
+    public addAsync(): LambdaTypeCreator {
         this.attrs.add(Attributes.ASYNC, true)
     }
 
-    internal override collectTypes(collector: CollectTypesCB): void throws {
+    internal override collectTypes(collector: CollectTypesCB): void {
         collector(this.result)
         for (let i = 0; i < this.params.length; i++) {
             collector(this.params.$_get(i).typ)
         }
     }
 
-    internal override declare(ctx: TypeCreatorCtx): void throws {
+    internal override declare(ctx: TypeCreatorCtx): void {
         assert this.ctxItemPtr == 0
         const ftPtr = TypeCreatorCtx.lambdaTypeCreate(ctx.ctxPtr, this.attrs.get())
         this.ctxItemPtr = ftPtr
@@ -692,7 +692,7 @@ export final class LambdaTypeCreator extends TypeCreator {
         ctx.checkError(TypeCreatorCtx.lambdaTypeAdd(ftPtr))
     }
 
-    internal override define(ctx: TypeCreatorCtx): void throws {
+    internal override define(ctx: TypeCreatorCtx): void {
     }
 }
 
@@ -706,11 +706,11 @@ interface Freezable {
 /**
  * Checks if modificatiosn are allowed
  * @param freezable to check if modifications are allowed
- * @throws TypeAPICreateException if it is frozen
+ * @throws TypeAPICreateError if it is frozen
  */
-function checkNotFrozen(freezable: Freezable): void throws {
+function checkNotFrozen(freezable: Freezable): void {
     if (freezable.isFrozen()) {
-        throw new TypeAPICreateException("modifying frozen entity")
+        throw new TypeAPICreateError("modifying frozen entity")
     }
 }
 
@@ -768,9 +768,9 @@ class HasAttributes {
     /**
      * @enabled flag if attribute should be set to `true` or `false`
      */
-    add(attr: int, enabled: boolean): void throws {
+    add(attr: int, enabled: boolean): void {
         if ((attr & this.allowed) != attr) {
-            throw new TypeAPICreateException("disallowed attribute")
+            throw new TypeAPICreateError("disallowed attribute")
         }
         let newAttributes = this.attrs
         if (enabled) {
@@ -787,9 +787,9 @@ class HasAttributes {
     /**
      * @params attributes to be added
      */
-    add(attrs: int): void throws {
+    add(attrs: int): void {
         if ((attrs & this.allowed) != attrs) {
-            throw new TypeAPICreateException("disallowed attributes")
+            throw new TypeAPICreateError("disallowed attributes")
         }
         if ((this.attrs & attrs) != attrs) {
             checkNotFrozen(this.frozen)
@@ -813,7 +813,7 @@ class HasAccessMod {
         return this.accessMod;
     }
 
-    set(accessMod: int): void throws {
+    set(accessMod: int): void {
         if (this.accessMod == accessMod) {
             return
         }
@@ -855,7 +855,7 @@ export final class FieldCreator {
      * @param attrs attribute to set
      * @returns this
      */
-    public addAttributes(attrs: int): FieldCreator throws {
+    public addAttributes(attrs: int): FieldCreator {
         this.attrs.add(attrs)
         return this;
     }
@@ -865,7 +865,7 @@ export final class FieldCreator {
      * @param accessMod new access modifier
      * @returns this
      */
-    public addAccessModifier(accessMod: int): FieldCreator throws {
+    public addAccessModifier(accessMod: int): FieldCreator {
         this.accessMod.set(accessMod);
         return this;
     }
@@ -914,7 +914,7 @@ export final class ParameterCreator {
      * @param name sets parameter name
      * @note by default name is index of parameter
      */
-    public addName(name: string): ParameterCreator throws {
+    public addName(name: string): ParameterCreator {
         this.name = name
         return this;
     }
@@ -924,7 +924,7 @@ export final class ParameterCreator {
      * @param attrs attribute to set
      * @returns this
      */
-    public addAttributes(attrs: int): ParameterCreator throws {
+    public addAttributes(attrs: int): ParameterCreator {
         this.attrs.add(attrs)
         return this;
     }
@@ -933,7 +933,7 @@ export final class ParameterCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addRest(): ParameterCreator throws {
+    public addRest(): ParameterCreator {
         this.attrs.add(Attributes.REST, true)
         return this;
     }
@@ -942,7 +942,7 @@ export final class ParameterCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addOptional(): ParameterCreator throws {
+    public addOptional(): ParameterCreator {
         this.attrs.add(Attributes.OPTIONAL, true)
         return this;
     }
@@ -971,7 +971,7 @@ export final class MethodCreator {
      * Adds body to method
      * @param body new body; null can be used in abstract methods
      */
-    public addBody(body: CallableBody | null): MethodCreator throws {
+    public addBody(body: CallableBody | null): MethodCreator {
         checkNotFrozen(this.frozen)
         this.body = body
         return this;
@@ -982,7 +982,7 @@ export final class MethodCreator {
      * @param param parameter to add
      * @returns this
      */
-    public addParameter(param: ParameterCreator): MethodCreator throws {
+    public addParameter(param: ParameterCreator): MethodCreator {
         checkNotFrozen(this.frozen)
         param.frozen.freeze()
         this.params.push(param)
@@ -994,7 +994,7 @@ export final class MethodCreator {
      * @param typ type of result
      * @returns this
      */
-    public addResult(typ: Type): MethodCreator throws {
+    public addResult(typ: Type): MethodCreator {
         return this.addResult(TypeOrCreator.from(typ))
     }
 
@@ -1003,7 +1003,7 @@ export final class MethodCreator {
      * @param typ type of result
      * @returns this
      */
-    public addResult(typ: TypeCreator): MethodCreator throws {
+    public addResult(typ: TypeCreator): MethodCreator {
         return this.addResult(TypeOrCreator.from(typ))
     }
 
@@ -1012,7 +1012,7 @@ export final class MethodCreator {
      * @param typ type of result
      * @returns this
      */
-    internal addResult(typ: TypeOrCreator): MethodCreator throws {
+    internal addResult(typ: TypeOrCreator): MethodCreator {
         checkNotFrozen(this.frozen)
         this.result = typ
         return this;
@@ -1023,7 +1023,7 @@ export final class MethodCreator {
      * @param attrs attribute to set
      * @returns this
      */
-    public addAttributes(attrs: int): MethodCreator throws {
+    public addAttributes(attrs: int): MethodCreator {
         this.attrs.add(attrs)
         return this;
     }
@@ -1032,7 +1032,7 @@ export final class MethodCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addConstructor(): MethodCreator throws {
+    public addConstructor(): MethodCreator {
         return this.addConstructor(true)
     }
 
@@ -1040,7 +1040,7 @@ export final class MethodCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addConstructor(isCtor: boolean): MethodCreator throws {
+    public addConstructor(isCtor: boolean): MethodCreator {
         this.attrs.add(Attributes.CONSTRUCTOR, isCtor);
         return this;
     }
@@ -1049,7 +1049,7 @@ export final class MethodCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addStatic(isStatic: boolean): MethodCreator throws {
+    public addStatic(isStatic: boolean): MethodCreator {
         this.attrs.add(Attributes.STATIC, isStatic);
         return this;
     }
@@ -1058,7 +1058,7 @@ export final class MethodCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addGetter(): MethodCreator throws {
+    public addGetter(): MethodCreator {
         this.attrs.add(Attributes.GETTER, true)
         return this;
     }
@@ -1067,7 +1067,7 @@ export final class MethodCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addSetter(): MethodCreator throws {
+    public addSetter(): MethodCreator {
         this.attrs.add(Attributes.SETTER, true)
         return this;
     }
@@ -1076,7 +1076,7 @@ export final class MethodCreator {
      * Adds attribute with same name
      * @returns this
      */
-    public addAbstract(): MethodCreator throws {
+    public addAbstract(): MethodCreator {
         this.attrs.add(Attributes.ABSTRACT, true)
         return this;
     }
@@ -1086,7 +1086,7 @@ export final class MethodCreator {
      * @param accessMod new access modifier
      * @returns this
      */
-    public addAccessModifier(accessMod: int): MethodCreator throws {
+    public addAccessModifier(accessMod: int): MethodCreator {
         this.accessMod.set(accessMod);
         return this;
     }
@@ -1094,7 +1094,7 @@ export final class MethodCreator {
     /**
      * adds method to interface or class
      */
-    internal addToCtxItemPtr(ctx: TypeCreatorCtx, classOrIfacePtr: long): void throws {
+    internal addToCtxItemPtr(ctx: TypeCreatorCtx, classOrIfacePtr: long): void {
         const fptr = ctx.checkCtxItemPtr(TypeCreatorCtx.methodCreate(classOrIfacePtr, this.name, this.attrs.get()))
         ctx.checkError(TypeCreatorCtx.methodAddAccessMod(fptr, this.accessMod.get()))
         for (let a = 0; a < this.params.length; a++) {
@@ -1123,7 +1123,7 @@ export final class MethodCreator {
             } else if (body instanceof CallableBodyDefault) {
                 ctx.checkError(TypeCreatorCtx.methodAddBodyDefault(fptr))
             } else {
-                throw new TypeAPICreateException("body not supported" + this.body)
+                throw new TypeAPICreateError("body not supported" + this.body)
             }
         }
         ctx.checkError(TypeCreatorCtx.methodAdd(fptr))
@@ -1170,10 +1170,10 @@ export final class CallableBodyFunction extends CallableBody {
      * @example new CallableBodyFunction((self: Object, i: int): void {} as Object)
      * @note in case of instance methods zero argument is a reciever
      */
-    public constructor(m: Object) throws {
+    public constructor(m: Object) {
         super()
         if (!(Type.of(m) instanceof LambdaType)) {
-            throw new TypeAPICreateException("can't encapsulate non-functional type")
+            throw new TypeAPICreateError("can't encapsulate non-functional type")
         }
         this.body = m
     }
