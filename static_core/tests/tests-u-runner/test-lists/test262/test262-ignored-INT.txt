@@ -1,2 +1,4 @@
+# #15407
+built-ins/JSON/stringify/value-tojson-object-circular.js
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js

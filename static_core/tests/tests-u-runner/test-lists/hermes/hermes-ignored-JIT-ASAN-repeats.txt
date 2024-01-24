@@ -1,6 +1,4 @@
 long-proto-chain.js
-# #13578
-add.js
 # #13793
 setter-stack-overflow.js
 # #9753

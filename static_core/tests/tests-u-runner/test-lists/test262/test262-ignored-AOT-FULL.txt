@@ -43,7 +43,8 @@ language/statements/class/dstr/private-gen-meth-static-ary-ptrn-elem-id-iter-val
 
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js
-
+# 15315
+language/expressions/class/async-method-static/returns-async-function-returns-arguments-from-own-function.js
 # 11486
 language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-add.js
 language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-bitand.js

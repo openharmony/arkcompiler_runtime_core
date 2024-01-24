@@ -28,6 +28,10 @@ language/statements/try/tco-finally.js
 language/statements/while/tco-body.js
 # #15081
 language/statements/class/elements/after-same-line-method-rs-privatename-identifier-initializer-alt.js
+# #15408
+language/statements/for-await-of/async-gen-dstr-var-async-ary-ptrn-rest-id-elision.js
+# #15397
+language/expressions/class/elements/after-same-line-static-async-gen-rs-private-method-alt.js
 # #9970
 built-ins/RegExp/from-regexp-like-get-source-err.js
 # #9965

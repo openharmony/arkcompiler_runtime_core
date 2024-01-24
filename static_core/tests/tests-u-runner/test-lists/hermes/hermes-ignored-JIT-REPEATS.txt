@@ -1,4 +1,2 @@
-# #13578
-add.js
 # #9753
 arguments-proxy.js
