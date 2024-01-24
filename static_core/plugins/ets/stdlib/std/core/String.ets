@@ -1030,7 +1030,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns a copy of the original String
      */
     public override toString(): String {
-        return new String(this);
+        return this;
     }
 
     /**

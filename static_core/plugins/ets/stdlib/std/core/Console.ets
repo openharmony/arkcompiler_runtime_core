@@ -212,7 +212,7 @@ export final class Console {
     //----------------------------------------
 
     /**
-     * Prints an object to the console and puts newline
+     * Prints an nullish object to the console and puts newline
      *
      * @param i value to print
      */
