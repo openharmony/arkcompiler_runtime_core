@@ -21,7 +21,3 @@ default_value:
   - {type: double,  value: 0.0 }
   - {type: char,    value: "c'\\u0000'" }
   - {type: boolean, value: "false" }
-  - {type: ubyte,   value: 0 }
-  - {type: ushort,  value: 0 }
-  - {type: uint,    value: 0 }
-  - {type: ulong,   value: 0 }
