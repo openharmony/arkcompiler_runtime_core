@@ -16,6 +16,8 @@
 #ifndef PANDA_RELOCATIONS_H
 #define PANDA_RELOCATIONS_H
 
+#include <cstdint>
+
 namespace panda::compiler {
 
 class RelocationInfo {

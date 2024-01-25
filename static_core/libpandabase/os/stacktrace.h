@@ -15,6 +15,7 @@
 #ifndef PANDA_STACKTRACE_H
 #define PANDA_STACKTRACE_H
 
+#include <cstdint>
 #include <vector>
 #include <iostream>
 
