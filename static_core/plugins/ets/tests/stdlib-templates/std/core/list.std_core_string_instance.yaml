@@ -168,6 +168,25 @@
   }
 
 - {
+    method_name: repeat,
+    object_type: String,
+    method_throws: true,
+    init_object_data_type: "String[]",
+    init_object_type: String,
+    init_object_data: '["", " ", "123", "a", "ф", "dф", "你好", "a你", "", " ", "123", "a", "ф", "dф", "你好", "a你"]',
+    param_init_data_types: {"param1": "number[]"},
+    param_types: {"param1": number},
+    param_nature: {"param1": primitive},
+    param_list: {"param1": "[1,1.0,1,1,1.5,1,1,1.9,3,3,3,3,3.2,3,3.8,3]"},
+    method_return_type: String,
+    expected_data_item_type: String,
+    expected_data_type: "String[]",
+
+    expected_test_data:  '["", " ", "123", "a", "ф", "dф", "你好", "a你", "", "   ", "123123123", "aaa", "ффф", "dфdфdф", "你好你好你好", "a你a你a你"]',
+    verify_test_result_function: compareStringTrivial,
+  }
+
+- {
     method_name: equals,
     object_type: String,
     init_object_data_type: "String[]",
@@ -202,6 +221,7 @@
     expected_test_data: "[true, true, true, true, true, false, false, false, false, false, true, true, false, false]",
     verify_test_result_function: comparePrimitiveValue,
   }
+
 - {
     method_name: endsWith,
     object_type: String,
@@ -216,10 +236,28 @@
     expected_data_item_type: char,
     expected_data_type: "boolean[]",
 
-
     expected_test_data: "[false, false, false, false, false, true, true, true, true, true]",
     verify_test_result_function: comparePrimitiveValue,
   }
+
+- {
+    method_name: endsWith,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_type: String,
+    init_object_data: '[" abc", "abcde", "abcdefghij", "abcdefhgcdefgh", "abcdefhgcdefgh", "abcdefhgcdefgh", "aBcdefghijbc", "abcdABCD", "abcd ", " abcd"]',
+    
+    param_init_data_types: {"param1": "String[]", "param2": "number[]"},
+    param_types: {"param1": String, "param2": number},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": '["a", "c", "abc", "bc", "cd", "bb", "B", "A", " ", "d"]', "param2": "[2, 3.8, 5.9, 3.9, -2, -2.6, -1, 5.0, 5, 5]"},
+    
+    method_return_type: boolean,
+    expected_data_type: "boolean[]",
+    expected_test_data: "[true, true, false, true, false, false, false, true, true, true]",
+    verify_test_result_function: comparePrimitiveValue,
+  }
+
 - {
     method_name: concat,
     object_type: String,
@@ -237,6 +275,25 @@
     expected_test_data: '[" ", "aa12", "ффabc", "你好чиж"]',
     verify_test_result_function: compareStringTrivial,
   }
+
+- {
+    method_name: concat,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_type: String,
+    init_object_data: '["", "aa", "фф", "你好"]',
+    param_init_data_types: {"param1": "String[]", "param2": "String[]"},
+    param_types: {"param1": String, "param2": String},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": '[" ", "12", "abc", "чиж"]', "param2": '["hello", "哈哈", "哼哼", "Yeah!"]'},
+    method_return_type: String,
+    expected_data_item_type: String,
+    expected_data_type: "String[]",
+
+    expected_test_data: '[" hello", "aa12哈哈", "ффabc哼哼", "你好чижYeah!"]',
+    verify_test_result_function: compareStringTrivial,
+  }
+
 - {
     method_name: compareTo,
     object_type: String,
@@ -271,6 +328,23 @@
 
     expected_test_data: "[c'a', c'и', c'世', c'4']",
     verify_test_result_function: comparePrimitiveValue,
+  }
+
+- {
+    method_name: charAt,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_type: String,
+    init_object_data: '["abcdefghij", "чижикпыжик", "你好世界你你好世界你好", "1234567890"]',
+    param_init_data_types: {"param1": "number[]"},
+    param_types: {"param1": number},
+    param_nature: {"param1": primitive},
+    param_list: {"param1": "[0,1,2,3]"},
+    method_return_type: String,
+    expected_data_item_type: String,
+    expected_data_type: "String[]",
+    expected_test_data: '["a", "и", "世", "4"]',
+    verify_test_result_function: compareStringTrivial,
   }
 
 - {
@@ -363,27 +437,6 @@
     init_object_type: String,
     init_object_data: '["abcdefhghijk", "abcdefhghijk", "abcdefhghijk", "☃★♲"]',
 
-    param_init_data_types: {"param1": "int[]", "param2": "int[]"},
-    param_types: {"param1": int, "param2": int},
-    param_nature: {"param1": primitive, "param2": primitive},
-    param_list: {"param1": "[0, 1, 0, 0]", "param2": "[0, 1, 11, 3]"},
-
-    method_return_type: int,
-    expected_data_item_type: int,
-    expected_data_type: "int[]",
-
-    expected_test_data:  "[0, 0, 11, 3]",
-    verify_test_result_function: comparePrimitiveValue,
-  }
-
-- {
-    method_name: codePointCount,
-    method_throws: true,
-    object_type: String,
-    init_object_data_type: "String[]",
-    init_object_type: String,
-    init_object_data: '["abcdefhghijk", "abcdefhghijk", "abcdefhghijk", "☃★♲"]',
-
     param_init_data_types: {"param1": "number[]", "param2": "number[]"},
     param_types: {"param1": number, "param2": number},
     param_nature: {"param1": primitive, "param2": primitive},
@@ -396,6 +449,26 @@
     expected_test_data:  "[0, 0, 11, 3]",
     verify_test_result_function: comparePrimitiveValue,
   }
+
+- {
+  method_name: codePointAt,
+  object_type: String,
+  init_object_data_type: "String[]",
+  init_object_type: String,
+  init_object_data: '["abcdefhghijk", "abcdefhghijk", "abcdefhghijk"]',
+
+  param_init_data_types: {"param1": "number[]"},
+  param_types: {"param1": number},
+  param_nature: {"param1": primitive},
+  param_list: {"param1": "[0, 1, 10]"},
+
+  method_return_type: number,
+  expected_data_item_type: number,
+  expected_data_type: "number[]",
+
+  expected_test_data:  "[0x61, 0x62, 0x6a]",
+  verify_test_result_function: comparePrimitiveValue,
+}
 
 - {
     method_name: indexOf,
@@ -579,6 +652,24 @@
     verify_test_result_function: comparePrimitiveValue
   }
 
+- {
+    method_name: startsWith,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["abcdefhgcdefgh", "abcdefhgcdefgh", "abcdefhgcdefgh", "abcdefhgcdefgh", "abcd", "abcd", "abcd", "abcd", "abcd", "abcd", "abcd"]',
+
+    param_init_data_types: {"param1": "String[]", "param2": "number[]"},
+    param_types: {"param1": String, "param2": number},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": '["abc", "cde", "abc", "cde", "abc", "abce", "", "", "", "d", "d"]', "param2": "[0, 2.2, 5.9, 8, -2, -2.6, -2, 2, 10.1, 3, 4]"},
+
+    method_return_type: boolean,
+
+    expected_data_type: "boolean[]",
+    expected_test_data: "[true, true, false, true, true, false, true, true, true, true, false]",
+    verify_test_result_function: comparePrimitiveValue
+  }
+
   # Selects a substring of this String, starting at a specified index and ending at index before another specified index.
 - {
     method_name: substring,
@@ -590,6 +681,25 @@
     param_types: {"param1": int, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": "[0, 1, 2]", "param2": "[3, 4, 5]"},
+
+    method_return_type: String,
+
+
+    expected_data_type: "String[]",
+    expected_test_data: '["abc", "bcd", "cde"]',
+    verify_test_result_function: compareStringTrivial
+ }
+
+- {
+    method_name: substring,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
+
+    param_init_data_types: {"param1": "number[]", "param2": "number[]"},
+    param_types: {"param1": number, "param2": number},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": "[0.9, 1.1, 2.5]", "param2": "[3, 4.2, 5]"},
 
     method_return_type: String,
 
@@ -611,6 +721,25 @@
     param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": '["abc", "ijk", "ijkab", "", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]', "param2": "[0, 4, 9, 100, -100, 1]"},
+
+    method_return_type: boolean,
+
+    expected_data_type: "boolean[]",
+    expected_test_data: "[true, true, false, true, true, false]",
+    verify_test_result_function: comparePrimitiveValue
+}
+
+- {
+    method_name: contains,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
+    "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
+
+    param_init_data_types: {"param1": "String[]", "param2": "number[]"},
+    param_types: {"param1": String, "param2": number},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": '["abc", "ijk", "ijkab", "", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]', "param2": "[0, 4, 9, 100.8, -100.2, 1]"},
 
     method_return_type: boolean,
 
@@ -660,6 +789,25 @@
     verify_test_result_function: compareFloatPointValue
  }
 
+- {
+    method_name: indexOf,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
+    "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
+    "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
+
+    param_init_data_types: {"param1": "String[]", "param2": "number[]"},
+    param_types: {"param1": String, "param2": number},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijk", "", "", ""]', "param2": "[0, 2.9, 8, 12.4, 0, 2.8, 8, 12.04, 23, -2, -2, 22, 23.5]"},
+    method_return_type: double,
+
+    expected_data_type: "double[]",
+    expected_test_data: "[0, 11, 11, -1,  8, 8, 8, 19, -1, 8, 0, 22, 22]",
+    verify_test_result_function: compareFloatPointValue
+ }
+
   # Finds the first occurrence of a character in this String. The search starts from the specified index.
 
 - {
@@ -701,6 +849,26 @@
     expected_data_type: "double[]",
     expected_test_data: "[0, 11, 11, 0,  8, 8, 8, 19, 19, -1, -1, 22, 22, 14, 0]",
     verify_test_result_function: compareFloatPointValue
+ }
+
+- {
+    method_name: lastIndexOf,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
+    "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
+    "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
+    "abcdefhgijkabcdefghijk"]',
+
+    param_init_data_types: {"param1": "String[]", "param2": "number[]"},
+    param_types: {"param1": String, "param2": number},
+    param_nature: {"param1": primitive, "param2": primitive},
+    param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijkl", "eabc", "", "", "", ""]', "param2": "[4.54, 14.88, 100.66, -1.9, 8, 15, 18, 19, 40, 40.66, 40, 28.7, 22, 14.06, -5]"},
+    method_return_type: number,
+
+    expected_data_type: "number[]",
+    expected_test_data: "[0, 11, 11, 0,  8, 8, 8, 19, 19, -1, -1, 22, 22, 14, 0]",
+    verify_test_result_function: comparePrimitiveValue
  }
 
   # Finds the last occurrence of a character in this String. The search starts from the specified index and goes backward.
@@ -1000,6 +1168,24 @@
   }
 
 - {
+    method_name: fontsize,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["Click me", "Click me", ""]',
+
+    param_types: {nameParam: number},
+    param_nature: {nameParam: primitive},
+    param_init_data_types: {nameParam: "number[]"},
+    param_list: {nameParam: "[0, 1, 2]"},
+
+    method_return_type: String,
+    expected_test_data_item_type: String,
+    expected_data_type: "String[]",
+    expected_test_data: '["<font size=\"0\">Click me</font>", "<font size=\"1\">Click me</font>", "<font size=\"2\"></font>"]',
+    verify_test_result_function: compareStringTrivial
+  }
+
+- {
     object_type: String,
     method_name: includes,
 
@@ -1010,6 +1196,25 @@
     param_nature: {inputs: primitive},
     param_init_data_types: {inputs: "String[]"},
     param_list: {inputs: '["me", "Me", "Him", ""]'},
+
+    method_return_type: boolean,
+    expected_test_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    expected_test_data: '[true, false, false, true]',
+    verify_test_result_function: comparePrimitiveValue
+  }
+
+- {
+    object_type: String,
+    method_name: includes,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["Click me", "Click me", "", "Click him"]',
+
+    param_types: {inputs1: String, inputs2: number},
+    param_nature: {inputs1: primitive, inputs2: primitive},
+    param_init_data_types: {inputs1: "String[]", inputs2: "number[]"},
+    param_list: {inputs1: '["me", "me", "Him", ""]', inputs2: '[0, 7, 0, 4]'},
 
     method_return_type: boolean,
     expected_test_data_item_type: boolean,
@@ -1034,6 +1239,25 @@
     expected_test_data_item_type: char,
     expected_data_type: "char[]",
     expected_test_data: '[67 as char, 1050 as char]',
+    verify_test_result_function: comparePrimitiveValue
+  }
+
+- {
+    object_type: String,
+    method_name: charCodeAt,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["Click me", "Клик тут"]',
+
+    param_types: {inputs: number},
+    param_nature: {inputs: primitive},
+    param_init_data_types: {inputs: "number[]"},
+    param_list: {inputs: '[0, 0]'},
+
+    method_return_type: number,
+    expected_test_data_item_type: number,
+    expected_data_type: "number[]",
+    expected_test_data: '[67, 1050]',
     verify_test_result_function: comparePrimitiveValue
   }
 
@@ -1105,10 +1329,50 @@
     init_object_data_type: "String[]",
     init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
 
+    param_types: {fillLength: number, fillStr: string},
+    param_nature: {fillLength: primitive, fillStr: primitive},
+    param_init_data_types: {fillLength: "number[]", fillStr: "string[]"},
+    param_list: {fillLength: '[11, 11, 5, -2]', fillStr: '["be", "*", "be", "be"]'},
+
+    method_return_type: "String",
+    expected_test_data_item_type: "String",
+    expected_data_type: "String[]",
+    expected_test_data: '["Pad mebebeb", "***********", "Do not pad", "Do not pad"]',
+    verify_test_result_function: compareStringTrivial
+
+  }
+
+- {
+    object_type: String,
+    method_name: padEnd,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
+
     param_types: {fillLength: int},
     param_nature: {fillLength: primitive},
     param_init_data_types: {fillLength: "int[]"},
     param_list: {fillLength: '[10, 10, 5, -2]'},
+
+    method_return_type: "String",
+    expected_test_data_item_type: "String",
+    expected_data_type: "String[]",
+    expected_test_data: '["Pad me    ","          ", "Do not pad", "Do not pad"]',
+    verify_test_result_function: compareStringTrivial
+
+  }
+
+- {
+    object_type: String,
+    method_name: padEnd,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
+
+    param_types: {fillLength: number},
+    param_nature: {fillLength: primitive},
+    param_init_data_types: {fillLength: "number[]"},
+    param_list: {fillLength: '[10, 10.9, 5, -2]'},
 
     method_return_type: "String",
     expected_test_data_item_type: "String",
@@ -1165,6 +1429,26 @@
     init_object_data_type: "String[]",
     init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
 
+    param_types: {fillLength: number, fillStr: string},
+    param_nature: {fillLength: primitive, fillStr: primitive},
+    param_init_data_types: {fillLength: "number[]", fillStr: "string[]"},
+    param_list: {fillLength: '[11, 11, 5.2, -2]', fillStr: '["be", "*", "be", "be"]'},
+
+    method_return_type: "String",
+    expected_test_data_item_type: "String",
+    expected_data_type: "String[]",
+    expected_test_data: '["bebebPad me", "***********", "Do not pad", "Do not pad"]',
+    verify_test_result_function: compareStringTrivial
+
+  }
+
+- {
+    object_type: String,
+    method_name: padStart,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
+
     param_types: {fillLength: int},
     param_nature: {fillLength: primitive},
     param_init_data_types: {fillLength: "int[]"},
@@ -1177,6 +1461,27 @@
     verify_test_result_function: compareStringTrivial
 
   }
+
+- {
+    object_type: String,
+    method_name: padStart,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
+
+    param_types: {fillLength: number},
+    param_nature: {fillLength: primitive},
+    param_init_data_types: {fillLength: "number[]"},
+    param_list: {fillLength: '[10, 10, 5.2, -2]'},
+
+    method_return_type: "String",
+    expected_test_data_item_type: "String",
+    expected_data_type: "String[]",
+    expected_test_data: '["    Pad me", "          ", "Do not pad", "Do not pad"]',
+    verify_test_result_function: compareStringTrivial
+
+  }
+
 
 - {
     method_name: substr,
@@ -1198,6 +1503,27 @@
     verify_test_result_function: compareStringTrivial,
   }
 
+- {
+    method_name: substr,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_type: String,
+    init_object_data: '["abcdefhghijk", "abcdefhghijk", "abcdefhghijk", "abcdefhghijk"]',
+
+    param_init_data_types: {"begin": "number[]"},
+    param_types: {"begin": number},
+    param_nature: {"begin": primitive},
+    param_list: {"begin": "[0, 1, 10, 11]"},
+    method_return_type: String,
+    expected_data_item_type: String,
+    expected_data_type: "String[]",
+
+
+    expected_test_data:  '["abcdefhghijk", "bcdefhghijk", "jk", "k"]',
+    verify_test_result_function: compareStringTrivial,
+  }
+
+
   # Selects a substring of this String, starting at a specified index and ending at index before another specified index.
 - {
     method_name: substr,
@@ -1209,6 +1535,25 @@
     param_types: {"begin": int, "length": int},
     param_nature: {"begin": primitive, "length": primitive},
     param_list: {"begin": "[0, 1, 2]", "length": "[3, 3, 3]"},
+
+    method_return_type: String,
+
+
+    expected_data_type: "String[]",
+    expected_test_data: '["abc", "bcd", "cde"]',
+    verify_test_result_function: compareStringTrivial
+ }
+
+- {
+    method_name: substr,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
+
+    param_init_data_types: {"begin": "number[]", "length": "number[]"},
+    param_types: {"begin": number, "length": number},
+    param_nature: {"begin": primitive, "length": primitive},
+    param_list: {"begin": "[0, 1, 2.2]", "length": "[3, 3.2, 3]"},
 
     method_return_type: String,
 
@@ -1281,8 +1626,8 @@
     init_object_data_type: "String[]",
     init_object_data: '["The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog."]',
 
-    param_init_data_types: {"begin": "int[]", "end": "int[]"},
-    param_types: {"begin": int, end: int},
+    param_init_data_types: {"begin": "number[]", "end": "number[]"},
+    param_types: {"begin": number, "end": number},
     param_nature: {"begin": primitive, "end": primitive},
     param_list: {"begin": "[4, -9]", "end": "[19, -5]"},
 
@@ -1291,6 +1636,62 @@
 
     expected_data_type: "String[]",
     expected_test_data: '["quick brown fox", "lazy"]',
+    verify_test_result_function: compareStringTrivial
+  }
+
+- {
+    method_name: slice,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog."]',
+
+    param_init_data_types: {"begin": "Number[]", "end": "Number[]"},
+    param_types: {"begin": Number, "end": Number},
+    param_nature: {"begin": primitive, "end": primitive},
+    param_list: {"begin": '[4, -9, 0x00, 0x01]', "end": '[19, 0x68, 4, 8]'},
+
+    method_return_type: String,
+
+
+    expected_data_type: "String[]",
+    expected_test_data: '["quick brown fox", "lazy dog.", "The ", "he quic"]',
+    verify_test_result_function: compareStringTrivial
+  }
+
+- {
+    method_name: slice,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog."]',
+
+    param_init_data_types: {"begin": "int[]", "end": "int[]"},
+    param_types: {"begin": int, "end": int},
+    param_nature: {"begin": primitive, "end": primitive},
+    param_list: {"begin": "[4, -9]", "end": "[19, -5]"},
+
+    method_return_type: String,
+
+
+    expected_data_type: "String[]",
+    expected_test_data: '["quick brown fox", "lazy"]',
+    verify_test_result_function: compareStringTrivial
+  }
+
+- {
+    method_name: slice,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_data: '["The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog."]',
+
+    param_init_data_types: {},
+    param_types: {},
+    param_nature: {},
+    param_list: {},
+
+    method_return_type: String,
+
+    expected_data_type: "String[]",
+    expected_test_data: '["The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog."]',
     verify_test_result_function: compareStringTrivial
   }
 
@@ -1354,17 +1755,17 @@
     object_type: String,
 
     init_object_data_type: "String[]",
-    init_object_data: '["Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie"]',
+    init_object_data: '["Normalize me", "祝福世界和平", "\u1E9B\u0323", "\u1E9B\u0323", "𝒉𝒆𝒍𝒍𝒐", "𝒉𝒆𝒍𝒍𝒐", "①", "①"]',
 
-    param_types: {form: String},
-    param_nature: {form: primitive},
-    param_init_data_types: {form: "String[]"},
-    param_list: {form: '["NFC", "NFC", "NFC", "NFC"]'},
+    param_types: { formStr: String},
+    param_nature: {formStr: primitive},
+    param_init_data_types: {formStr: "string[]"},
+    param_list: {formStr: '["NFC", "NFD", "NFKC", "NFKD", "NFD", "NFKD", "NFC", "NFKC"]'},
 
     method_return_type: "String",
     expected_test_data_item_type: "String",
     expected_data_type: "String[]",
-    expected_test_data: '["Normalize me", "Amélie", "Amélie", "Amélie"]',
+    expected_test_data: '["Normalize me", "祝福世界和平", "\u1E69", "\u0073\u0323\u0307", "𝒉𝒆𝒍𝒍𝒐", "hello", "①", "1"]',
     verify_test_result_function: compareStringTrivial
   }
 
@@ -1700,6 +2101,26 @@
     expected_test_data_item_type: "String[]",
     expected_data_type: "String[][]",
     expected_test_data: '[["e", "m", "p", "t", "y"], [""], ["e"]]',
+    verify_test_result_function: comparePrimitiveArray
+  }
+
+- {
+    method_name: split,
+    object_type: String,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "value0", "value0", "empty", "empty"]',
+
+    param_types: {pattern: String, limit: number},
+    param_nature: {pattern: primitive, limit: primitive},
+    param_init_data_types: {pattern: "String[]", limit: "number[]"},
+    param_list: {pattern: [ "*", "*", "*", "*", "8", "*", "", ""], limit: [0, 1.2, 2, -2, 1, 10.5, 3, 10]},
+
+    method_return_type: "String[]",
+    result_nature: "array",
+    expected_test_data_item_type: "String[]",
+    expected_data_type: "String[][]",
+    expected_test_data: '[[], [""], ["", "value0"], ["", "value0", "value1", "value2", "value3", "value4", ""], ["value0"], ["value0"], ["e", "m", "p"], ["e", "m", "p", "t", "y"]]',
     verify_test_result_function: comparePrimitiveArray
   }
 
