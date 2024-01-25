@@ -57,6 +57,10 @@ function(panda_ets_interop_js_checked_test)
         set(WITH_LLVM "--with-llvm")
     endif()
 
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+        set(RELEASE_OPT "--release")
+    endif()
+
     add_custom_target(${TARGET}
         COMMAND ${CHECKER} --source ${ARG_FILE}
                         --panda \"${RUN_COMMAND}\"
@@ -68,6 +72,7 @@ function(panda_ets_interop_js_checked_test)
                         --command-token \"//!\"
                         --arch ${ARCHITECTURE}
                         ${WITH_LLVM}
+                        ${RELEASE_OPT}
         WORKING_DIRECTORY ${TEST_DIR}
         COMMENT "Running ${TARGET} checked test"
         DEPENDS ${JS_LAUNCHER} ${TARGET_TEST_PACKAGE} ets_interop_js_napi ${ETS_CONFIG})
