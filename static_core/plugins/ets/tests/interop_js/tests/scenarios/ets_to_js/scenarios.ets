@@ -229,6 +229,52 @@ function ets_concat_strings_rest_params(...args: String[]): String {
     return str;
 }
 
+function function_arg_type_conflict_array(): Array<Object> {
+    let arr = new Array<Object>();
+    arr.push(123);
+    arr.push("foo");
+    return arr;
+}
+
+function function_arg_type_conflict_boolean(): Boolean {
+    return Boolean.valueOf(true);
+}
+
+function function_arg_type_conflict_string(): string {
+    return 'foo';
+}
+
+function function_arg_type_conflict_arraybuffer(): ArrayBuffer {
+    let arr = new ArrayBuffer(10);
+    //arr.set(0, 123 as byte);
+    return arr;
+}
+
+function function_arg_type_conflict_dataview(): DataView {
+    const buffer = new ArrayBuffer(8);
+    const view = new DataView(buffer);
+    view.setInt32(0, 123);
+    return view;
+}
+
+function function_arg_type_conflict_date(): Date {
+    return new Date(1);
+}
+
+function function_arg_type_conflict_error(): Error {
+    return new Error("foo");
+}
+
+function function_arg_type_conflict_map(): Map<string, string> {
+    const map = new Map<string, string>();
+    map.set('foo', 'bar');
+    return map;
+}
+
+function function_arg_type_conflict_object(): Object {
+    return new Object();
+}
+
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup

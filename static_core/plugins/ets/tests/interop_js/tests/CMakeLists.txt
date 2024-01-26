@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,6 @@
 # limitations under the License.
 
 set(INTEROP_JS_TESTS_SOURCE_DIR ${PANDA_ETS_PLUGIN_SOURCE}/tests/interop_js/tests)
-
 set(ETS_CONFIG "${PANDA_BINARY_ROOT}/tests/ets_interop_js/arktsconfig.json")
 file(WRITE ${ETS_CONFIG}
     "{\n"
