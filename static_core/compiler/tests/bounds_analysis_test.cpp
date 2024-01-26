@@ -150,28 +150,28 @@ TEST_F(BoundsAnalysisTest, DivTest)
 
 TEST_F(BoundsAnalysisTest, OverflowTest)
 {
-    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(INT64_MAX, INT64_MAX), INT64_MAX);
-    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(INT64_MAX, 1U), INT64_MAX);
-    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(1U, INT64_MAX), INT64_MAX);
-    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(INT64_MIN, INT64_MIN), INT64_MIN);
-    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(INT64_MIN, -1L), INT64_MIN);
-    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(-1L, INT64_MIN), INT64_MIN);
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(INT64_MAX, INT64_MAX), std::nullopt);
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(INT64_MAX, 1U), std::nullopt);
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(1U, INT64_MAX), std::nullopt);
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(INT64_MIN, INT64_MIN), std::nullopt);
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(INT64_MIN, -1L), std::nullopt);
+    ASSERT_EQ(BoundsRange::AddWithOverflowCheck(-1L, INT64_MIN), std::nullopt);
 
     ASSERT_EQ(BoundsRange::MulWithOverflowCheck(0U, INT64_MAX), 0U);
     ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, 0U), 0U);
     ASSERT_EQ(BoundsRange::MulWithOverflowCheck(0U, INT64_MIN), 0U);
     ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, 0U), 0U);
 
-    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, INT64_MAX), INT64_MAX);
-    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, 2U), INT64_MAX);
-    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, INT64_MIN), INT64_MAX);
-    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, -2L), INT64_MAX);
-    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, INT64_MIN), INT64_MIN);
-    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, -2L), INT64_MIN);
-    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, INT64_MAX), INT64_MIN);
-    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, 2U), INT64_MIN);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, INT64_MAX), std::nullopt);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, 2U), std::nullopt);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, INT64_MIN), std::nullopt);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, -2L), std::nullopt);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, INT64_MIN), std::nullopt);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MAX, -2L), std::nullopt);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, INT64_MAX), std::nullopt);
+    ASSERT_EQ(BoundsRange::MulWithOverflowCheck(INT64_MIN, 2U), std::nullopt);
 
-    ASSERT_EQ(BoundsRange::DivWithOverflowCheck(INT64_MIN, -1L), INT64_MIN);
+    ASSERT_EQ(BoundsRange::DivWithOverflowCheck(INT64_MIN, -1L), std::nullopt);
 }
 
 TEST_F(BoundsAnalysisTest, BoundsNarrowing)
@@ -635,6 +635,43 @@ TEST_F(BoundsAnalysisTest, AndTest)
     EXPECT_EQ(BoundsRange().And(BoundsRange(0x3U)), BoundsRange(0U, 0x3U));
     EXPECT_EQ(BoundsRange().And(BoundsRange(-1L)), BoundsRange());
     EXPECT_EQ(BoundsRange().And(BoundsRange(0x8000000000000000U)), BoundsRange());
+}
+
+TEST_F(BoundsAnalysisTest, UINT64_INPUTS)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::LoadObject).u64().Inputs(0U);
+            INST(2U, Opcode::LoadObject).u64().Inputs(0U);
+            INST(3U, Opcode::Add).i64().Inputs(1U, 2U);
+            INST(4U, Opcode::Return).u64().Inputs(3U);
+        }
+    }
+    auto bri = GetGraph()->GetBoundsRangeInfo();
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(1U)), BoundsRange(0U, INT64_MAX));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(3U)), BoundsRange(INT64_MIN, INT64_MAX));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(4U)), BoundsRange(0U, INT64_MAX));
+}
+
+TEST_F(BoundsAnalysisTest, Different_types)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 2U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::Div).i64().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).i64().Inputs(2U);
+        }
+    }
+    auto bri = GetGraph()->GetBoundsRangeInfo();
+    ASSERT_EQ(bri->FindBoundsRange(&BB(0U), &INS(0U)), BoundsRange(0U, INT64_MAX));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(2U)), BoundsRange(INT64_MIN, INT64_MAX));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(3U)), BoundsRange(INT64_MIN, INT64_MAX));
 }
 // NOLINTEND(readability-magic-numbers)
 

@@ -353,9 +353,6 @@ void ChecksElimination::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
         return lenArray == userInst->GetInput(0) && index == userInst->GetInput(1);
     });
 
-    if (index->GetType() == DataType::UINT64) {
-        return;
-    }
     auto bri = block->GetGraph()->GetBoundsRangeInfo();
     auto lenArrayRange = bri->FindBoundsRange(block, lenArray);
     auto indexRange = bri->FindBoundsRange(block, index);
@@ -641,10 +638,6 @@ bool ChecksElimination::TryRemoveCheckByBounds(Inst *inst, Inst *input)
     static_assert(OPC == Opcode::ZeroCheck || OPC == Opcode::NegativeCheck || OPC == Opcode::NotPositiveCheck ||
                   OPC == Opcode::NullCheck);
     ASSERT(inst->GetOpcode() == OPC);
-    if (input->GetType() == DataType::UINT64) {
-        return false;
-    }
-
     auto block = inst->GetBasicBlock();
     auto bri = block->GetGraph()->GetBoundsRangeInfo();
     auto range = bri->FindBoundsRange(block, input);

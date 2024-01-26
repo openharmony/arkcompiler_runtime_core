@@ -104,7 +104,10 @@ BoundsRange BoundsRange::Add(const BoundsRange &range) const
 {
     auto left = AddWithOverflowCheck(left_, range.GetLeft());
     auto right = AddWithOverflowCheck(right_, range.GetRight());
-    return BoundsRange(left, right);
+    if (!left || !right) {
+        return BoundsRange();
+    }
+    return BoundsRange(left.value(), right.value());
 }
 
 /**
@@ -117,7 +120,10 @@ BoundsRange BoundsRange::Sub(const BoundsRange &range) const
     auto left = AddWithOverflowCheck(left_, negRight);
     auto negLeft = (range.GetLeft() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetLeft());
     auto right = AddWithOverflowCheck(right_, negLeft);
-    return BoundsRange(left, right);
+    if (!left || !right) {
+        return BoundsRange();
+    }
+    return BoundsRange(left.value(), right.value());
 }
 
 /**
@@ -130,8 +136,11 @@ BoundsRange BoundsRange::Mul(const BoundsRange &range) const
     auto m2 = MulWithOverflowCheck(left_, range.GetRight());
     auto m3 = MulWithOverflowCheck(right_, range.GetLeft());
     auto m4 = MulWithOverflowCheck(right_, range.GetRight());
-    auto left = std::min(m1, std::min(m2, std::min(m3, m4)));
-    auto right = std::max(m1, std::max(m2, std::max(m3, m4)));
+    if (!m1 || !m2 || !m3 || !m4) {
+        return BoundsRange();
+    }
+    auto left = std::min(m1.value(), std::min(m2.value(), std::min(m3.value(), m4.value())));
+    auto right = std::max(m1.value(), std::max(m2.value(), std::max(m3.value(), m4.value())));
     return BoundsRange(left, right);
 }
 
@@ -146,8 +155,11 @@ BoundsRange BoundsRange::Div(const BoundsRange &range) const
     }
     auto m1 = DivWithOverflowCheck(left_, range.GetLeft());
     auto m2 = DivWithOverflowCheck(right_, range.GetLeft());
-    auto left = std::min(m1, m2);
-    auto right = std::max(m1, m2);
+    if (!m1 || !m2) {
+        return BoundsRange();
+    }
+    auto left = std::min(m1.value(), m2.value());
+    auto right = std::max(m1.value(), m2.value());
     return BoundsRange(left, right);
 }
 
@@ -349,7 +361,6 @@ int64_t BoundsRange::GetMin(DataType::Type type)
 int64_t BoundsRange::GetMax(DataType::Type type)
 {
     ASSERT(!IsFloatType(type));
-    ASSERT(type != DataType::UINT64);
     switch (type) {
         case DataType::BOOL:
             return 1;
@@ -365,8 +376,8 @@ int64_t BoundsRange::GetMax(DataType::Type type)
             return INT16_MAX;
         case DataType::INT32:
             return INT32_MAX;
-        // NOLINTNEXTLINE(bugprone-branch-clone)
         case DataType::INT64:
+        case DataType::UINT64:
             return INT64_MAX;
         case DataType::REFERENCE:
             return INT64_MAX;
@@ -581,8 +592,8 @@ BoundsRange::RangePair BoundsRange::TryNarrowBoundsByCC(ConditionCode cc, Bounds
     return ranges;
 }
 
-/// Return (left + right) or if overflows or underflows return max or min of range type.
-int64_t BoundsRange::AddWithOverflowCheck(int64_t left, int64_t right)
+/// Return (left + right) or if overflows or underflows return nullopt of range type.
+std::optional<int64_t> BoundsRange::AddWithOverflowCheck(int64_t left, int64_t right)
 {
     if (right == 0) {
         return left;
@@ -592,17 +603,17 @@ int64_t BoundsRange::AddWithOverflowCheck(int64_t left, int64_t right)
             // No overflow.
             return left + right;
         }
-        return MAX_RANGE_VALUE;
+        return std::nullopt;
     }
     if (left >= (MIN_RANGE_VALUE - right)) {
         // No overflow.
         return left + right;
     }
-    return MIN_RANGE_VALUE;
+    return std::nullopt;
 }
 
-/// Return (left * right) or if overflows or underflows return max or min of range type.
-int64_t BoundsRange::MulWithOverflowCheck(int64_t left, int64_t right)
+/// Return (left * right) or if overflows or underflows return nullopt of range type.
+std::optional<int64_t> BoundsRange::MulWithOverflowCheck(int64_t left, int64_t right)
 {
     if (left == 0 || right == 0) {
         return 0;
@@ -614,17 +625,17 @@ int64_t BoundsRange::MulWithOverflowCheck(int64_t left, int64_t right)
         return left * right;
     }
     if ((right > 0 && left > 0) || (right < 0 && left < 0)) {
-        return MAX_RANGE_VALUE;
+        return std::nullopt;
     }
-    return MIN_RANGE_VALUE;
+    return std::nullopt;
 }
 
-/// Return (left / right) or MIN_RANGE VALUE for MIN_RANGE_VALUE / -1.
-int64_t BoundsRange::DivWithOverflowCheck(int64_t left, int64_t right)
+/// Return (left / right) or nullopt VALUE for MIN_RANGE_VALUE / -1.
+std::optional<int64_t> BoundsRange::DivWithOverflowCheck(int64_t left, int64_t right)
 {
     ASSERT(right != 0);
     if (left == MIN_RANGE_VALUE && right == -1) {
-        return MIN_RANGE_VALUE;
+        return std::nullopt;
     }
     return left / right;
 }
@@ -853,9 +864,6 @@ void BoundsAnalysis::VisitIfImm(GraphVisitor *v, Inst *inst)
         return;
     }
     auto compare = input->CastToCompare();
-    if (compare->GetOperandsType() == DataType::UINT64) {
-        return;
-    }
     auto op0 = compare->GetInput(0).GetInst();
     auto op1 = compare->GetInput(1).GetInst();
     if ((DataType::GetCommonType(op0->GetType()) != DataType::INT64 && op0->GetType() != DataType::REFERENCE) ||
@@ -884,8 +892,7 @@ void BoundsAnalysis::VisitIfImm(GraphVisitor *v, Inst *inst)
 
 void BoundsAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
 {
-    if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::UINT64 || inst->GetType() == DataType::ANY ||
-        inst->GetType() == DataType::POINTER) {
+    if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::ANY || inst->GetType() == DataType::POINTER) {
         return;
     }
     auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
@@ -1053,7 +1060,7 @@ void BoundsAnalysis::CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *b
 template <Opcode OPC>
 void BoundsAnalysis::CalcNewBoundsRangeUnary(GraphVisitor *v, const Inst *inst)
 {
-    if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::REFERENCE || inst->GetType() == DataType::UINT64) {
+    if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::REFERENCE) {
         return;
     }
     auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
@@ -1074,79 +1081,191 @@ void BoundsAnalysis::CalcNewBoundsRangeUnary(GraphVisitor *v, const Inst *inst)
     bri->SetBoundsRange(inst->GetBasicBlock(), inst, range.FitInType(inst->GetType()));
 }
 
-template <Opcode OPC>
-void BoundsAnalysis::CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst)
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeAdd(const BoundsRangeInfo *bri, const Inst *inst)
 {
-    if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::REFERENCE || inst->GetType() == DataType::UINT64) {
-        return;
-    }
-    auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
     auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
     auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
     auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
     auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
     auto lenArray0 = range0.GetLenArray();
     auto lenArray1 = range1.GetLenArray();
-    BoundsRange range;
-    if constexpr (OPC == Opcode::Add) {  // NOLINT
-        range = range0.Add(range1);
-        if (!range.IsMaxRange(inst->GetType())) {
-            if (BoundsRange(0).IsMoreOrEqual(range1) && lenArray0 != nullptr) {
-                range.SetLenArray(lenArray0);
-            } else if (BoundsRange(0).IsMoreOrEqual(range0) && lenArray1 != nullptr) {
-                range.SetLenArray(lenArray1);
-            } else if (IsLenArray(input0) && range1.IsNegative()) {
-                range.SetLenArray(input0);
-            } else if (IsLenArray(input1) && range0.IsNegative()) {
-                range.SetLenArray(input1);
-            }
-        }
-    } else if constexpr (OPC == Opcode::Sub) {  // NOLINT
-        range = range0.Sub(range1);
-        if (!range.IsMaxRange(inst->GetType())) {
-            if (range1.IsNotNegative() && lenArray0 != nullptr) {
-                range.SetLenArray(lenArray0);
-            } else if (IsLenArray(input0) && range1.IsMore(BoundsRange(0))) {
-                range.SetLenArray(input0);
-            }
-        }
-    } else if constexpr (OPC == Opcode::Mod) {  // NOLINT
-        range = range0.Mod(range1);
-        if (lenArray1 != nullptr && range1.IsNotNegative()) {
-            range.SetLenArray(lenArray1);
-        } else if (lenArray0 != nullptr) {
-            // a % b always has the same sign as a, so if a < LenArray, then (a % b) < LenArray
+
+    BoundsRange range = range0.Add(range1);
+    if (!range.IsMaxRange(inst->GetType())) {
+        if (BoundsRange(0).IsMoreOrEqual(range1) && lenArray0 != nullptr) {
             range.SetLenArray(lenArray0);
-        } else if (IsLenArray(input1)) {
+        } else if (BoundsRange(0).IsMoreOrEqual(range0) && lenArray1 != nullptr) {
+            range.SetLenArray(lenArray1);
+        } else if (IsLenArray(input0) && range1.IsNegative()) {
+            range.SetLenArray(input0);
+        } else if (IsLenArray(input1) && range0.IsNegative()) {
             range.SetLenArray(input1);
         }
-    } else if constexpr (OPC == Opcode::Mul) {  // NOLINT
-        if (!range0.IsMaxRange() || !range1.IsMaxRange()) {
-            range = range0.Mul(range1);
-        }
-    } else if constexpr (OPC == Opcode::Div) {  // NOLINT
-        range = range0.Div(range1);
-        if (range0.IsNotNegative() && range1.IsNotNegative() && lenArray0 != nullptr) {
-            range.SetLenArray(lenArray0);
-        }
-    } else if constexpr (OPC == Opcode::Shr) {  // NOLINT
-        range = range0.Shr(range1, inst->GetType());
-        if (range0.IsNotNegative() && lenArray0 != nullptr) {
-            range.SetLenArray(lenArray0);
-        }
-    } else if constexpr (OPC == Opcode::AShr) {  // NOLINT
-        range = range0.AShr(range1, inst->GetType());
-        if (lenArray0 != nullptr) {
-            range.SetLenArray(lenArray0);
-        }
-    } else if constexpr (OPC == Opcode::Shl) {  // NOLINT
-        range = range0.Shl(range1, inst->GetType());
-    } else if constexpr (OPC == Opcode::And) {
-        range = range0.And(range1);
-    } else {
-        UNREACHABLE();
     }
-    // clang on
+    return range;
+}
+
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeSub(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+    auto lenArray0 = range0.GetLenArray();
+
+    BoundsRange range = range0.Sub(range1);
+    if (!range.IsMaxRange(inst->GetType())) {
+        if (range1.IsNotNegative() && lenArray0 != nullptr) {
+            range.SetLenArray(lenArray0);
+        } else if (IsLenArray(input0) && range1.IsMore(BoundsRange(0))) {
+            range.SetLenArray(input0);
+        }
+    }
+    return range;
+}
+
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeMod(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+    auto lenArray0 = range0.GetLenArray();
+    auto lenArray1 = range1.GetLenArray();
+
+    BoundsRange range = range0.Mod(range1);
+    if (lenArray1 != nullptr && range1.IsNotNegative()) {
+        range.SetLenArray(lenArray1);
+    } else if (lenArray0 != nullptr) {
+        // a % b always has the same sign as a, so if a < LenArray, then (a % b) < LenArray
+        range.SetLenArray(lenArray0);
+    } else if (IsLenArray(input1)) {
+        range.SetLenArray(input1);
+    }
+    return range;
+}
+
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeMul(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+
+    if (!range0.IsMaxRange() || !range1.IsMaxRange()) {
+        return range0.Mul(range1);
+    }
+    return BoundsRange();
+}
+
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeDiv(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+    auto lenArray0 = range0.GetLenArray();
+
+    BoundsRange range = range0.Div(range1);
+    if (range0.IsNotNegative() && range1.IsNotNegative() && lenArray0 != nullptr) {
+        range.SetLenArray(lenArray0);
+    }
+    return range;
+}
+
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeShr(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+    auto lenArray0 = range0.GetLenArray();
+
+    BoundsRange range = range0.Shr(range1, inst->GetType());
+    if (range0.IsNotNegative() && lenArray0 != nullptr) {
+        range.SetLenArray(lenArray0);
+    }
+    return range;
+}
+
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeAShr(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+    auto lenArray0 = range0.GetLenArray();
+
+    BoundsRange range = range0.AShr(range1, inst->GetType());
+    if (lenArray0 != nullptr) {
+        range.SetLenArray(lenArray0);
+    }
+    return range;
+}
+
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeShl(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+
+    return range0.Shl(range1, inst->GetType());
+}
+
+BoundsRange BoundsAnalysis::CalcNewBoundsRangeAnd(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+
+    return range0.And(range1);
+}
+
+bool BoundsAnalysis::CheckBoundsRange(const BoundsRangeInfo *bri, const Inst *inst)
+{
+    auto input0 = inst->GetDataFlowInput(inst->GetInput(0).GetInst());
+    auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
+    auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
+    auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
+    return (input0->GetType() != DataType::UINT64 || !range0.IsMaxRange(DataType::UINT64) ||
+            range0.GetLenArray() != nullptr) &&
+           (input1->GetType() != DataType::UINT64 || !range1.IsMaxRange(DataType::UINT64) ||
+            range1.GetLenArray() != nullptr);
+}
+
+template <Opcode OPC>
+void BoundsAnalysis::CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst)
+{
+    if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::REFERENCE) {
+        return;
+    }
+    auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
+    BoundsRange range;
+    if (CheckBoundsRange(bri, inst)) {
+        if constexpr (OPC == Opcode::Add) {  // NOLINT
+            range = CalcNewBoundsRangeAdd(bri, inst);
+        } else if constexpr (OPC == Opcode::Sub) {  // NOLINT
+            range = CalcNewBoundsRangeSub(bri, inst);
+        } else if constexpr (OPC == Opcode::Mod) {  // NOLINT
+            range = CalcNewBoundsRangeMod(bri, inst);
+        } else if constexpr (OPC == Opcode::Mul) {  // NOLINT
+            range = CalcNewBoundsRangeMul(bri, inst);
+        } else if constexpr (OPC == Opcode::Div) {  // NOLINT
+            range = CalcNewBoundsRangeDiv(bri, inst);
+        } else if constexpr (OPC == Opcode::Shr) {  // NOLINT
+            range = CalcNewBoundsRangeShr(bri, inst);
+        } else if constexpr (OPC == Opcode::AShr) {  // NOLINT
+            range = CalcNewBoundsRangeAShr(bri, inst);
+        } else if constexpr (OPC == Opcode::Shl) {  // NOLINT
+            range = CalcNewBoundsRangeShl(bri, inst);
+        } else if constexpr (OPC == Opcode::And) {
+            range = CalcNewBoundsRangeAnd(bri, inst);
+        } else {
+            UNREACHABLE();
+        }
+    }
     bri->SetBoundsRange(inst->GetBasicBlock(), inst, range.FitInType(inst->GetType()));
 }
 
