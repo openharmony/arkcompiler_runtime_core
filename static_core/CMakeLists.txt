@@ -338,6 +338,8 @@ if(PANDA_WITH_TESTS)
 
     add_subdirectory(scripts)
 
+    set(TYPESCRIPT_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript)
+    add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/typescript)
 endif()
 
 # ----- Aliases ----------------------------------------------------------------
