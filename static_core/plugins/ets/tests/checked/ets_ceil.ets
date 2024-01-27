@@ -32,6 +32,10 @@
 //! ASM_INST      "Intrinsic.StdMathCeil"
 //! ASM           x64: /roundsd.*2,/, arm64: "frintp"
 
+//! CHECKER       Math.ceil LLVM AOT
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_LLVM      options: "--compiler-regex='.*main.*'"
+
 function main(): int {
     if (ceil(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;
     if (ceil(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 2;

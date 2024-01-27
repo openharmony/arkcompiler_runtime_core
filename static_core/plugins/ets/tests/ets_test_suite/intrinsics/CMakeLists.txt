@@ -54,11 +54,6 @@ foreach(test ${intrinsics_tests})
     endif()
 
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${extra_options})
-    add_dependencies(ets_test_suite_intrinsics
-        ${target}-ets-jit
-        ${target}-ets-int)
-    if (NOT CMAKE_CROSSCOMPILING)
-        add_dependencies(ets_test_suite_intrinsics ${target}-ets-aot)
-    endif()
+    add_dependencies(ets_test_suite_intrinsics ${target})
 endforeach()
 

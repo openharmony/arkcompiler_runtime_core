@@ -16,7 +16,16 @@
 #include "llvm_optimizer.h"
 
 #include "passes/ark_inlining.h"
+#include "passes/ark_gvn.h"
 #include "passes/ark_speculation.h"
+#include "passes/insert_safepoints.h"
+#include "passes/gc_intrusion.h"
+#include "passes/gc_intrusion_check.h"
+#include "passes/intrinsics_lowering.h"
+#include "passes/gep_propagation.h"
+#include "passes/panda_runtime_lowering.h"
+#include "passes/prune_deopt.h"
+#include "passes/fixup_poisons.h"
 #include "passes/expand_atomics.h"
 
 #include "passes/inline_ir/cleanup_inline_module.h"
@@ -69,7 +78,8 @@ std::string PreprocessPipelineFile(const std::string &filename)
 {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        llvm::report_fatal_error(llvm::Twine("Cant open pipeline file: `") + filename + "`", false);
+        llvm::report_fatal_error(llvm::Twine("Cant open pipeline file: `") + filename + "`",
+                                 false); /* gen_crash_diag = false */
     }
     std::string rawData((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
@@ -96,15 +106,19 @@ std::string PreprocessPipelineFile(const std::string &filename)
 }
 
 #include <pipeline_irtoc_gen.inc>
+#include <pipeline_gen.inc>
 
-std::string GetOptimizationPipeline(const std::string &filename)
+std::string GetOptimizationPipeline(const std::string &filename, bool isIrtoc)
 {
     std::string pipeline;
     if (!filename.empty()) {
         pipeline = PreprocessPipelineFile(filename);
-    } else {
-        // PIPELINE_IRTOC variable is defined in pipeline_irtoc_gen.inc
+    } else if (isIrtoc) {
+        /* PIPELINE_IRTOC variable is defined in pipeline_irtoc_gen.inc */
         pipeline = std::string {PIPELINE_IRTOC};
+    } else {
+        /* PIPELINE variable is defined in pipeline_gen.inc */
+        pipeline = std::string {PIPELINE};
     }
     return pipeline;
 }
@@ -138,6 +152,9 @@ void LLVMOptimizer::ProcessInlineModule(llvm::Module *inlineModule) const
     passBuilder.crossRegisterProxies(loopAm, functionAm, cgsccAm, moduleAm);
 
     AddPassIf(modulePm, llvm::CanonicalizeAliasesPass(), true);
+    // Sanitizers create unnamed globals
+    // 1. https://github.com/rust-lang/rust/issues/45220
+    // 2. https://github.com/rust-lang/rust/pull/50684/files
     AddPassIf(modulePm, llvm::NameAnonGlobalPass(), true);
     AddPassIf(modulePm, pass::MarkInlineModule(), true);
     AddPassIf(modulePm, pass::CleanupInlineModule(), true);
@@ -194,15 +211,27 @@ void LLVMOptimizer::DoOptimizeModule(llvm::Module *module) const
     passBuilder.registerLoopAnalyses(loopAm);
     passBuilder.crossRegisterProxies(loopAm, functionAm, cgsccAm, moduleAm);
 
+    auto isIrtocMode = arkInterface_->IsIrtocMode();
+
     panda::libllvmbackend::PassParser passParser(arkInterface_);
     passParser.RegisterParserCallbacks(passBuilder, options_);
 
     llvm::ModulePassManager modulePm;
     if (options_.optimize) {
-        cantFail(passBuilder.parsePassPipeline(modulePm, GetOptimizationPipeline(options_.pipelineFile)));
+        cantFail(passBuilder.parsePassPipeline(modulePm, GetOptimizationPipeline(options_.pipelineFile, isIrtocMode)));
     } else {
         namespace pass = panda::llvmbackend::passes;
         llvm::FunctionPassManager functionPm;
+        if (!isIrtocMode) {
+            AddPassIf(functionPm, pass::PruneDeopt());
+            AddPassIf(functionPm, pass::ArkGVN(arkInterface_));
+            AddPassIf(functionPm, pass::IntrinsicsLowering(arkInterface_));
+            AddPassIf(functionPm, pass::PandaRuntimeLowering(arkInterface_));
+            AddPassIf(functionPm, pass::InsertSafepoints(), options_.useSafepoint);
+            AddPassIf(functionPm, pass::GepPropagation());
+            AddPassIf(functionPm, pass::GcIntrusion());
+            AddPassIf(functionPm, pass::GcIntrusionCheck(), options_.gcIntrusionChecks);
+        }
         AddPassIf(functionPm, pass::ExpandAtomics());
         modulePm.addPass(createModuleToFunctionPassAdaptor(std::move(functionPm)));
     }

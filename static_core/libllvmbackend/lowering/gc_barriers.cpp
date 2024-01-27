@@ -17,6 +17,8 @@
 
 #include "llvm_ark_interface.h"
 #include "metadata.h"
+#include "transforms/builtins.h"
+#include "transforms/runtime_calls.h"
 
 #include "compiler/optimizer/ir/basicblock.h"
 
@@ -91,6 +93,13 @@ void EmitPostWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, llvm::Value *offs
     auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, tlsOffset);
     auto callee = builder->CreateLoad(ptrTy, addr, "post_wrb_one_object_addr");
 
+    if (!arkInterface->IsIrtocMode()) {
+        // LLVM AOT, only 3 parameters
+        auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy}, false);
+        auto call = builder->CreateCall(funcTy, callee, {mem, offset, value});
+        call->setCallingConv(llvm::CallingConv::ArkFast3);
+        return;
+    }
     if (arkInterface->IsArm64()) {
         // Arm64 Irtoc, 4 params (add thread)
         auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy, ptrTy}, false);

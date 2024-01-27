@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "libpandabase/macros.h"
 #include "created_object_file.h"
+
+#include "transforms/transform_utils.h"
 
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/FileSystem.h>
@@ -36,8 +37,7 @@ CreatedObjectFile::CreatedObjectFile(std::unique_ptr<llvm::MemoryBuffer> objectF
     }
 }
 
-llvm::Expected<std::unique_ptr<CreatedObjectFile>> CreatedObjectFile::CopyOf(
-    llvm::MemoryBufferRef objectFileBuffer, const ObjectFilePostProcessor &objectFilePostProcessor)
+llvm::Expected<std::unique_ptr<CreatedObjectFile>> CreatedObjectFile::CopyOf(llvm::MemoryBufferRef objectFileBuffer)
 {
     auto copy = llvm::MemoryBuffer::getMemBufferCopy(objectFileBuffer.getBuffer());
     auto elf = llvm::object::ObjectFile::createObjectFile(copy->getMemBufferRef());
@@ -45,7 +45,6 @@ llvm::Expected<std::unique_ptr<CreatedObjectFile>> CreatedObjectFile::CopyOf(
         return elf.takeError();
     }
     auto file = cantFail(std::move(elf));
-    objectFilePostProcessor(file.get());
     return std::make_unique<CreatedObjectFile>(std::move(copy), std::move(file));
 }
 
@@ -84,6 +83,35 @@ SectionReference CreatedObjectFile::GetSectionByFunctionName(const std::string &
     LLVM_DEBUG(llvm::dbgs() << "Got section by function = " << fullFunctionName
                             << " section's size = " << sectionReference.GetSize() << "\n");
     return sectionReference;
+}
+
+std::unordered_map<std::string, CreatedObjectFile::StackMapSymbol> CreatedObjectFile::GetStackMapInfo() const
+{
+    std::unordered_map<std::string, StackMapSymbol> info;
+    ASSERT(sectionIndex_.find(RELA_LLVM_STACKMAPS_SECTION) != sectionIndex_.end() &&
+           "Attempt to access unknown section '.rela.llvm_stackmaps'");
+    const auto &section = sectionIndex_.at(RELA_LLVM_STACKMAPS_SECTION);
+    uint32_t counter = 0;
+    for (auto relocation : section.relocations()) {
+        const auto &symbol = relocation.getSymbol();
+        info.insert({cantFail(symbol->getName()).str(), {counter++, cantFail(symbol->getValue())}});
+    }
+    return info;
+}
+
+std::vector<SectionReference> CreatedObjectFile::GetRoDataSections() const
+{
+    std::vector<SectionReference> references;
+    for (const auto &[name, section] : sectionIndex_) {
+        const auto &sectionName = cantFail(section.getName());
+        if (sectionName.startswith(RO_DATA_SECTION_PREFIX)) {
+            auto contents = cantFail(section.getContents());
+            auto memory = reinterpret_cast<const uint8_t *>(contents.data());
+            references.emplace_back(memory, contents.size(), name.str(), section.getAlignment());
+        }
+    }
+
+    return references;
 }
 
 void CreatedObjectFile::WriteTo(std::string_view output) const

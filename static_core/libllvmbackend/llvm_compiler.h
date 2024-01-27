@@ -24,6 +24,7 @@
 #include <llvm/ADT/Triple.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/CommandLine.h>
+#include <llvm/Support/ManagedStatic.h>
 
 namespace panda::llvmbackend {
 
@@ -37,6 +38,11 @@ public:
     }
 
 protected:
+    bool IsInliningDisabled();
+    bool IsInliningDisabled(panda::compiler::Graph *graph);
+
+    bool IsInliningDisabled(compiler::RuntimeInterface *runtime, compiler::RuntimeInterface::MethodPtr method);
+
     panda::llvmbackend::LLVMCompilerOptions InitializeLLVMCompilerOptions();
     void InitializeDefaultLLVMOptions();
     void InitializeLLVMOptions();

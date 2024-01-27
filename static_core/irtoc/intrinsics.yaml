@@ -25,6 +25,7 @@ intrinsics:
   builtin: true
   codegen_arch: [amd64, arm64, arm32]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitSlowPathEntry
   signature:
     ret: void
     args: []
@@ -38,6 +39,7 @@ intrinsics:
   static: true
   codegen_arch: [amd64, arm64, arm32]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitNothing
   signature:
     ret: void
     args: []
@@ -51,6 +53,7 @@ intrinsics:
   static: true
   codegen_arch: [amd64, arm64, arm32]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitNothing
   signature:
     ret: void
     args: []
@@ -64,6 +67,7 @@ intrinsics:
   static: true
   codegen_arch: [amd64, arm64, arm32]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitUnreachable
   signature:
     ret: void
     args: []
@@ -78,6 +82,7 @@ intrinsics:
   static: true
   codegen_arch: [ amd64, arm64, arm32 ]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitTailCall
   signature:
     ret: void
     args: []
@@ -92,6 +97,7 @@ intrinsics:
   static: true
   codegen_arch: [amd64, arm64, arm32]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitInterpreterReturn
   signature:
     ret: void
     args: []
@@ -106,6 +112,7 @@ intrinsics:
   builtin: true
   codegen_arch: [arm64, arm32]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitExclusiveLoadWithAcquire
   signature:
       ret: void
       args: []
@@ -120,6 +127,7 @@ intrinsics:
   builtin: true
   codegen_arch: [arm64, arm32]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitExclusiveStoreWithRelease
   signature:
       ret: void
       args: []
@@ -134,6 +142,7 @@ intrinsics:
   builtin: true
   codegen_arch: [amd64]
   codegen_func: "CreateIrtocIntrinsic"
+  # llvm_codegen_func: unused for arm64
   signature:
       ret: void
       args: []
@@ -148,6 +157,7 @@ intrinsics:
   builtin: true
   codegen_arch: [arm64, amd64]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitMemoryFenceFull
   signature:
       ret: void
       args: []
@@ -162,6 +172,7 @@ intrinsics:
   builtin: true
   codegen_arch: [arm64]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitCompressEightUtf16ToUtf8CharsUsingSimd
   signature:
       ret: void
       args: []
@@ -176,6 +187,7 @@ intrinsics:
   builtin: true
   codegen_arch: [arm64]
   codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitCompressSixteenUtf16ToUtf8CharsUsingSimd
   signature:
       ret: void
       args: []

@@ -51,7 +51,7 @@ LLVMIrtocCompiler::LLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime,
     : LLVMCompiler(arch),
       methods_(allocator->Adapter()),
       filename_(std::move(filename)),
-      arkInterface_(runtime, GetTripleForArch(arch))
+      arkInterface_(runtime, GetTripleForArch(arch), nullptr)
 {
     InitializeSpecificLLVMOptions(arch);
     auto llvmCompilerOptions = InitializeLLVMCompilerOptions();
@@ -130,7 +130,9 @@ bool LLVMIrtocCompiler::AddGraph(compiler::Graph *graph)
         llvmFunction->addFnAttr("target-features", GetFastPathFeatures());
     }
 
-    bool builtIr = ctor.BuildIr();
+    bool noInline = IsInliningDisabled(graph);
+
+    bool builtIr = ctor.BuildIr(noInline);
     if (!builtIr) {
         irFailed_ = true;
         LLVM_LOG(ERROR, INFRA) << "LLVM failed to build IR for method " << arkInterface_.GetUniqMethodName(method);
@@ -153,6 +155,10 @@ void LLVMIrtocCompiler::CompileAll()
 {
     // Compile even if there are no methods because we have to produce an object file, even an empty one
     ASSERT_PRINT(!HasCompiledCode(), "Cannot compile twice");
+
+    LLVM_LOG_IF(g_options.IsLlvmDumpObj(), FATAL, INFRA)
+        << "Do not use '--llvm-dump-obj' in irtoc mode. Instead, look at the object file from '--irtoc-output-llvm' "
+           "option value";
 
     optimizer_->OptimizeModule(module_.get());
     debugData_->Finalize();

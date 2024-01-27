@@ -43,6 +43,11 @@
 //! INST_NEXT  /IfImm EQ i32/
 //! RUN        entry: "ETSGLOBAL::main"
 
+//! CHECKER String.length() with LLVMAOT
+//! SKIP_IF    @architecture == "arm32"
+//! RUN_LLVM   options: "--compiler-regex='.*main.*'"
+//! RUN        entry: "ETSGLOBAL::main"
+
 function newString(): String {
     return new String("abcde");
 }

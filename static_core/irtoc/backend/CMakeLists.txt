@@ -131,7 +131,7 @@ function(irtoc_compile)
                 COMMAND ${LLVM_LINK} ${ARG_LLVM_BACKEND_INLINE_MODULE_FILES} -o ${llvm_inline_module_bc}
                 COMMAND_EXPAND_LISTS
                 COMMENT "Linking ${ARG_OUTPUT}"
-                DEPENDS ${ARG_LLVM_BACKEND_INLINE_MODULE_FILES}
+                DEPENDS ${ARG_LLVM_BACKEND_INLINE_MODULE_FILES} irtoc_int_llvm_inl_module
         )
         set(command_comment "Building ${IRTOC_OUTPUT}")
         string(APPEND command_comment ", ${IRTOC_OUTPUT_LLVM}")

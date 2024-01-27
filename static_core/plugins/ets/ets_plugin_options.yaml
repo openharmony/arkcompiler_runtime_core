@@ -74,3 +74,9 @@
       runtime_defines:
         defines_header_path: plugins/ets/runtime/asm_defines/defines.h
         asm_defines_def: plugins/ets/runtime/asm_defines/asm_defines.def
+      llvmbackend_extensions:
+        - emit_intrinsic: plugins/ets/libllvmbackend/ets_emit_intrinsic_llvm_ir_constructor_gen.inl
+        - get_intrinsic_id_inc: plugins/ets/libllvmbackend/ets_get_intrinsic_id_llvm_ark_interface_gen.inl
+        - get_intrinsic_id_func: GetEtsIntrinsicId
+        - llvm_ir_constructor: plugins/ets/libllvmbackend/ets_llvm_ir_constructor_gen.inl
+        - llvm_ir_constructor_h: plugins/ets/libllvmbackend/ets_llvm_ir_constructor_h_gen.inl

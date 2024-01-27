@@ -22,7 +22,7 @@
 
 //! CHECKER       AOT IR Builder inlining max int
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*test_i32.*'"
+//! RUN_AOT       options: "--compiler-regex='.*test_i32.*'"
 //! METHOD        "ETSGLOBAL::test_i32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 6
@@ -38,7 +38,7 @@
 
 //! CHECKER       AOT IR Builder inlining max long
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*test_i64.*'"
+//! RUN_AOT       options: "--compiler-regex='.*test_i64.*'"
 //! METHOD        "ETSGLOBAL::test_i64"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 6
@@ -54,7 +54,7 @@
 
 //! CHECKER       AOT IR Builder inlining max float
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*test_f32.*'"
+//! RUN_AOT       options: "--compiler-regex='.*test_f32.*'"
 //! METHOD        "ETSGLOBAL::test_f32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Max/, 8
@@ -70,7 +70,7 @@
 
 //! CHECKER       AOT IR Builder inlining max double
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*test_f64.*'"
+//! RUN_AOT       options: "--compiler-regex='.*test_f64.*'"
 //! METHOD        "ETSGLOBAL::test_f64"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Max/

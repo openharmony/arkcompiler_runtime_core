@@ -74,6 +74,22 @@ uintptr_t PandaRuntimeInterface::GetIntrinsicAddress(bool runtimeCall, [[maybe_u
         using Fp = float (*)(float, float);
         return reinterpret_cast<uintptr_t>(static_cast<Fp>(fmodf));
     }
+    case IntrinsicId::LIB_CALL_LDEXP: {
+        using Fp = double (*)(double, int);
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(ldexp));
+    }
+    case IntrinsicId::LIB_CALL_LDEXPF: {
+        using Fp = float (*)(float, int);
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(ldexpf));
+    }
+    case IntrinsicId::LIB_CALL_EXP2: {
+        using Fp = double (*)(double);
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(exp2));
+    }
+    case IntrinsicId::LIB_CALL_EXP2F: {
+        using Fp = float (*)(float);
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(exp2f));
+    }
     case IntrinsicId::LIB_CALL_MEM_COPY: {
         using Fp = void *(*)(void *, const void *, size_t);
         return reinterpret_cast<uintptr_t>(static_cast<Fp>(memcpy));

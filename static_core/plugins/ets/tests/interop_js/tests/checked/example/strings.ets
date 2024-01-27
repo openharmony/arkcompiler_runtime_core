@@ -40,7 +40,7 @@
 //! INST_NEXT    "Intrinsic.StdCoreStringEquals"
 
 //! CHECKER      Check string interop AOT (slow)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::testString --compiler-enable-fast-interop=false"
+//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::testString --compiler-enable-fast-interop=false"
 //! METHOD       "testString"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /CallStatic.*jscall::invoke/

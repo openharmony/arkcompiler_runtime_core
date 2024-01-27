@@ -52,6 +52,12 @@
   clear_flags: <%= intrinsic.respond_to?(:clear_flags) ? intrinsic.clear_flags : [] %>
   set_flags: <%= intrinsic.respond_to?(:set_flags) ? intrinsic.set_flags : [] %>
   additional_temps: <%= intrinsic.respond_to?(:additional_temps) ? intrinsic.additional_temps : 0 %>
+% if intrinsic.respond_to?(:llvm_impl)
+  llvm_impl: <%= intrinsic.llvm_impl %>
+% end
+% if intrinsic.respond_to?(:llvm_codegen_func)
+  llvm_codegen_func: <%= intrinsic.llvm_codegen_func %>
+% end
 %   if intrinsic.respond_to?(:codegen_func)
   codegen_func: <%= intrinsic.codegen_func %>
   codegen_arch: <%= intrinsic.respond_to?(:codegen_arch) ? intrinsic.codegen_arch : ['amd64', 'arm32', 'arm64'] %>

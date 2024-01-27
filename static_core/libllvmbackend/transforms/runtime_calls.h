@@ -32,10 +32,14 @@ llvm::Value *GetAddressToTLS(llvm::IRBuilder<> *builder, LLVMArkInterface *arkIn
 llvm::Value *LoadTLSValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface, uintptr_t tlsOffset,
                           llvm::Type *type);
 
+llvm::FunctionCallee GetPandaRuntimeFunctionCallee(int entrypoint, llvm::FunctionType *functionProto,
+                                                   llvm::IRBuilder<> *builder, llvm::StringRef prefix = "");
+
 using EntrypointId = int;
 llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Value *threadRegValue,
                                            LLVMArkInterface *arkInterface, EntrypointId eid,
-                                           llvm::ArrayRef<llvm::Value *> arguments = llvm::None);
+                                           llvm::ArrayRef<llvm::Value *> arguments = llvm::None,
+                                           llvm::ArrayRef<llvm::OperandBundleDef> bundle = llvm::None);
 
 llvm::Value *GetThreadRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface);
 llvm::Value *GetRealFrameRegValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface);

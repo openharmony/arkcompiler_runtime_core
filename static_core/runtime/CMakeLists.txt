@@ -377,6 +377,7 @@ elseif (PANDA_LLVM_INTERPRETER AND PANDA_LLVM_INTERPRETER_INLINING)
             intrinsics_gen_compiler
             instructions_gen_compiler
             isa_gen_compiler
+            profiling_gen
             runtime_intrinsics_inl
             OUTPUT_VARIABLE outputs
     )
@@ -663,6 +664,7 @@ if(PANDA_WITH_TESTS)
     arkbase
     arkfile
     entrypoints_gen
+    profiling_gen
     runtime_language_context
     runtime_intrinsics_inl
     source_languages_h

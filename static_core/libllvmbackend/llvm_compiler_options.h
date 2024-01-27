@@ -23,8 +23,10 @@ struct LLVMCompilerOptions {
     // Options obtained using llvmbackend.yaml
     bool optimize;
     int optlevel;
+    bool gcIntrusionChecks;
     bool inlining;
     bool recursiveInlining;
+    bool useSafepoint;
     bool dumpModuleBeforeOptimizations;
     bool dumpModuleAfterOptimizations;
     std::string inlineModuleFile;

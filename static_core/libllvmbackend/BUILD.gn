@@ -37,6 +37,7 @@ if (is_llvmbackend) {
   }
 
   libllvmbackend_sources = [
+    "llvm_aot_compiler.cpp",
     "llvm_ark_interface.cpp",
     "llvm_compiler.cpp",
     "llvm_irtoc_compiler.cpp",
@@ -47,12 +48,25 @@ if (is_llvmbackend) {
     "lowering/gc_barriers.cpp",
     "lowering/irtoc_function_utils.cpp",
     "lowering/llvm_ir_constructor.cpp",
+    "lowering/wrapped_module.cpp",
     "mir_compiler.cpp",
+    "object_code/ark_aot_linker.cpp",
+    "object_code/code_info_producer.cpp",
     "object_code/created_object_file.cpp",
+    "object_code/dump.cpp",
     "target_machine_builder.cpp",
+    "transforms/builtins.cpp",
+    "transforms/gc_utils.cpp",
     "transforms/llvm_optimizer.cpp",
+    "transforms/passes/ark_frame_lowering/frame_builder.cpp",
+    "transforms/passes/ark_frame_lowering/frame_lowering.cpp",
+    "transforms/passes/ark_gvn.cpp",
     "transforms/passes/ark_inlining.cpp",
     "transforms/passes/expand_atomics.cpp",
+    "transforms/passes/fixup_poisons.cpp",
+    "transforms/passes/gc_intrusion.cpp",
+    "transforms/passes/gc_intrusion_check.cpp",
+    "transforms/passes/gep_propagation.cpp",
     "transforms/passes/inline_ir/cleanup_inline_module.cpp",
     "transforms/passes/inline_ir/discard_inline_module.cpp",
     "transforms/passes/inline_ir/inline_ir_utils.cpp",
@@ -60,6 +74,10 @@ if (is_llvmbackend) {
     "transforms/passes/inline_ir/mark_inline_module.cpp",
     "transforms/passes/inline_ir/patch_return_handler_stack_adjustment.cpp",
     "transforms/passes/inline_ir/remove_unused_functions.cpp",
+    "transforms/passes/insert_safepoints.cpp",
+    "transforms/passes/intrinsics_lowering.cpp",
+    "transforms/passes/panda_runtime_lowering.cpp",
+    "transforms/passes/prune_deopt.cpp",
     "transforms/runtime_calls.cpp",
   ]
 
@@ -71,6 +89,7 @@ if (is_llvmbackend) {
     configs = [
       ":libllvmbackend_public_config",
       "$ark_root:ark_config",
+      "$ark_root/compiler/aot/aot_builder:aotbuilder_public_config",
       "$ark_root/libpandabase:arkbase_public_config",
       "$ark_root/libpandafile:arkfile_public_config",
       "$ark_root/runtime:arkruntime_public_config",
@@ -86,15 +105,23 @@ if (is_llvmbackend) {
       ":libllvmbackend_get_intrinsic_id_llvm_ark_interface_gen_inl",
       ":libllvmbackend_intrinsic_names_gen_inl",
       ":libllvmbackend_intrinsics_gen_inl",
+      ":libllvmbackend_intrinsics_llvm_codegen_inl",
       ":libllvmbackend_llvm_ir_constructor_gen_h_inl",
       ":libllvmbackend_llvm_ir_constructor_gen_inl",
       ":libllvmbackend_llvm_logger_components_inc",
       ":libllvmbackend_llvm_options_gen_h",
       ":libllvmbackend_llvm_passes_inl",
+      ":libllvmbackend_pipeline_gen_inc",
       ":libllvmbackend_pipeline_irtoc_gen_inc",
       "$ark_root/compiler:libarkcompiler",
       "$ark_root/libpandabase:libarkbase",
     ]
+
+    # TODO: don't exclude these targets from OHOS build
+    if (ark_standalone_build) {
+      deps += [ "$ark_root/compiler/aot/aot_builder:aotbuilder" ]
+    }
+
     part_name = ark_part_name
     subsystem_name = ark_subsystem_name
   }
@@ -126,6 +153,14 @@ if (is_llvmbackend) {
     data_file = "$intrinsics_yaml"
     requires = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
     output_file = "$target_gen_dir/intrinsic_names_gen.inl"
+    extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
+  }
+
+  ark_gen_file("libllvmbackend_intrinsics_llvm_codegen_inl") {
+    template_file = "$llvmbackend_templates_dir/intrinsic_llvm_codegen.inl.erb"
+    data_file = "$intrinsics_yaml"
+    requires = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
+    output_file = "$target_gen_dir/intrinsics_llvm_codegen.inl"
     extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
   }
 
@@ -165,6 +200,59 @@ if (is_llvmbackend) {
     data_file = "llvmbackend.yaml"
     requires = [ "$ark_root/templates/common.rb" ]
     output_file = "$target_gen_dir/llvm_logger_components.inc"
+  }
+
+  ark_gen_file("libllvmbackend_emit_intrinsic_llvm_ir_constructor_gen_inl") {
+    extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+    template_file = "templates/emit_intrinsic_llvm_ir_constructor_gen.inl.erb"
+    data_file = "$ark_plugin_options_yaml"
+    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    output_file = "$target_gen_dir/emit_intrinsic_llvm_ir_constructor_gen.inl"
+  }
+
+  ark_gen_file("libllvmbackend_llvm_ir_constructor_gen_inl") {
+    extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+    template_file = "templates/llvm_ir_constructor_gen.inl.erb"
+    data_file = "$ark_plugin_options_yaml"
+    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    output_file = "$target_gen_dir/llvm_ir_constructor_gen.inl"
+  }
+
+  ark_gen_file("libllvmbackend_llvm_ir_constructor_gen_h_inl") {
+    extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+    template_file = "templates/llvm_ir_constructor_gen.h.inl.erb"
+    data_file = "$ark_plugin_options_yaml"
+    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    output_file = "$target_gen_dir/llvm_ir_constructor_gen.h.inl"
+  }
+
+  ark_gen_file("libllvmbackend_get_intrinsic_id_llvm_ark_interface_gen_h_inl") {
+    extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+    template_file =
+        "templates/get_intrinsic_id_llvm_ark_interface_gen.h.inl.erb"
+    data_file = "$ark_plugin_options_yaml"
+    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    output_file =
+        "$target_gen_dir/get_intrinsic_id_llvm_ark_interface_gen.h.inl"
+  }
+
+  ark_gen_file("libllvmbackend_get_intrinsic_id_llvm_ark_interface_gen_inl") {
+    extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+    template_file = "templates/get_intrinsic_id_llvm_ark_interface_gen.inl.erb"
+    data_file = "$ark_plugin_options_yaml"
+    requires = [ "$ark_root/templates/plugin_options.rb" ]
+    output_file = "$target_gen_dir/get_intrinsic_id_llvm_ark_interface_gen.inl"
+  }
+
+  action("libllvmbackend_pipeline_gen_inc") {
+    script = "$llvmbackend_templates_dir/pipeline.rb"
+    outputs = [ "$target_gen_dir/pipeline_gen.inc" ]
+    args = [
+      "-d",
+      rebase_path("$llvmbackend_dir/transforms/pipeline.cfg"),
+      "-o",
+      rebase_path("$target_gen_dir/pipeline_gen.inc"),
+    ]
   }
 
   ##### IRTOC

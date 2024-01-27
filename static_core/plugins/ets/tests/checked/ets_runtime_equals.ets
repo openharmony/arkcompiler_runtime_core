@@ -22,10 +22,9 @@
 //! INST_NOT      "CallVirtual "
 //! INST_NOT      "Intrinsic"
 
-
 //! CHECKER       Runtime equals AOT
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*main.*'"
+//! RUN_AOT       options: "--compiler-regex='.*main.*'"
 //! METHOD        "ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_NOT      "Intrinsic"

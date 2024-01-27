@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "libpandabase/macros.h"
 #include "target_machine_builder.h"
+#include "transforms/transform_utils.h"
 
 #include <llvm/MC/TargetRegistry.h>
 
@@ -22,7 +22,7 @@ namespace panda::llvmbackend {
 
 llvm::Expected<std::unique_ptr<llvm::TargetMachine>> TargetMachineBuilder::Build()
 {
-    ASSERT(triple_.getArch() != llvm::Triple::UnknownArch && "Triple's arch must be set");
+    ASSERT(triple_.getArch() != llvm::Triple::UnknownArch);
     std::string error;
     auto target = llvm::TargetRegistry::lookupTarget("", triple_, error);
     if (!error.empty()) {

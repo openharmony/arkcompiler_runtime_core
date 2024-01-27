@@ -15,10 +15,9 @@
 
 #include "runtime_calls.h"
 #include "llvm_ark_interface.h"
+#include "transforms/transform_utils.h"
 
 #include <llvm/IR/IRBuilder.h>
-
-#include "libpandabase/macros.h"
 
 namespace panda::llvmbackend::runtime_calls {
 
@@ -36,19 +35,33 @@ llvm::Value *LoadTLSValue(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInter
     return builder->CreateLoad(type, addr);
 }
 
+llvm::FunctionCallee GetPandaRuntimeFunctionCallee(int entrypoint, llvm::FunctionType *functionProto,
+                                                   llvm::IRBuilder<> *builder, llvm::StringRef prefix)
+{
+    auto module = builder->GetInsertBlock()->getModule();
+    auto table = module->getGlobalVariable("__aot_got");
+    auto arrayType = llvm::ArrayType::get(builder->getInt64Ty(), 0);
+    auto epAddrPtr = builder->CreateConstInBoundsGEP2_32(arrayType, table, 0, entrypoint);
+    auto entrypointAddress = builder->CreateLoad(builder->getInt64Ty(), epAddrPtr, prefix + "_addr");
+    auto calleePointer = builder->CreateIntToPtr(entrypointAddress, llvm::PointerType::get(functionProto, 0));
+    return llvm::FunctionCallee(functionProto, calleePointer);
+}
+
 llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Value *threadRegValue,
                                            LLVMArkInterface *arkInterface, EntrypointId eid,
-                                           llvm::ArrayRef<llvm::Value *> arguments)
+                                           llvm::ArrayRef<llvm::Value *> arguments,
+                                           llvm::ArrayRef<llvm::OperandBundleDef> bundle)
 {
+    ASSERT(arkInterface->DeoptsEnabled() || bundle.empty());
     auto tlsOffset = arkInterface->GetEntrypointTlsOffset(eid);
-    auto [function_proto, function_name] = arkInterface->GetEntrypointCallee(eid);
+    auto [functionProto, functionName] = arkInterface->GetEntrypointCallee(eid);
 
     auto threadRegPtr = builder->CreateIntToPtr(threadRegValue, builder->getPtrTy());
     auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, tlsOffset);
-    auto callee = builder->CreateLoad(builder->getPtrTy(), addr, function_name + "_addr");
+    auto callee = builder->CreateLoad(builder->getPtrTy(), addr, functionName + "_addr");
 
-    auto calleeFuncTy = llvm::cast<llvm::FunctionType>(function_proto);
-    auto call = builder->CreateCall(calleeFuncTy, callee, arguments);
+    auto calleeFuncTy = llvm::cast<llvm::FunctionType>(functionProto);
+    auto call = builder->CreateCall(calleeFuncTy, callee, arguments, bundle);
     return call;
 }
 

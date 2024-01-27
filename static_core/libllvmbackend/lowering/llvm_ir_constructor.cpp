@@ -14,6 +14,7 @@
  */
 
 #include "optimizer/code_generator/codegen.h"
+#include "runtime/include/coretypes/string.h"
 
 #include "llvm_ir_constructor.h"
 
@@ -22,7 +23,14 @@
 #include "llvm_logger.h"
 #include "llvm_options.h"
 #include "metadata.h"
+#include "transforms/builtins.h"
 #include "transforms/runtime_calls.h"
+
+namespace panda::compiler {
+#define ONLY_NEEDSAFEPOINT
+#include <intrinsics_ir_build.inl>
+#undef ONLY_NEEDSAFEPOINT
+}  // namespace panda::compiler
 
 #include <llvm/IR/InlineAsm.h>
 #include <llvm/IR/IntrinsicsAArch64.h>
@@ -32,6 +40,13 @@
 
 using panda::llvmbackend::DebugDataBuilder;
 using panda::llvmbackend::LLVMArkInterface;
+using panda::llvmbackend::builtins::LenArray;
+using panda::llvmbackend::builtins::LoadClass;
+using panda::llvmbackend::builtins::LoadInitClass;
+using panda::llvmbackend::builtins::LoadString;
+using panda::llvmbackend::builtins::PostWRB;
+using panda::llvmbackend::builtins::PreWRB;
+using panda::llvmbackend::builtins::ResolveVirtual;
 using panda::llvmbackend::gc_barriers::EmitPostWRB;
 using panda::llvmbackend::gc_barriers::EmitPreWRB;
 using panda::llvmbackend::irtoc_function_utils::IsNoAliasIrtocFunction;
@@ -43,28 +58,39 @@ static constexpr unsigned VECTOR_SIZE_8 = 8;
 static constexpr unsigned VECTOR_SIZE_16 = 16;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_TYPE(input, expected_type)                                                                  \
-    ASSERT_DO((input)->getType() == (expected_type),                                                       \
+#define ASSERT_TYPE(input, expectedType)                                                                   \
+    ASSERT_DO((input)->getType() == (expectedType),                                                        \
               std::cerr << "Unexpected data type: " << GetTypeName((input)->getType()) << ". Should be a " \
-                        << GetTypeName(expected_type) << "." << std::endl)
+                        << GetTypeName(expectedType) << "." << std::endl)
 
-// arm64: { dispatch: 24, pc: 20, frame: 23, acc: 21, acc_tag: 22, moffset: 25, method_ptr: 26 },
-constexpr auto AARCH64_PC = 20;
-constexpr auto AARCH64_ACC = 21;
-constexpr auto AARCH64_ACC_TAG = 22;
-constexpr auto AARCH64_FP = 23;
-constexpr auto AARCH64_DISPATCH = 24;
-constexpr auto AARCH64_MOFFSET = 25;
-constexpr auto AARCH64_METHOD_PTR = 26;
-constexpr auto AARCH64_REAL_FP = 29;
+// Max integer that can be represented in float/double without losing precision
+constexpr float MaxIntAsExactFloat()
+{
+    return static_cast<float>((1U << static_cast<unsigned>(std::numeric_limits<float>::digits)) - 1);
+}
 
-// x86_64: { dispatch: 8, pc: 4, frame: 5, acc: 11, acc_tag: 3 }
-constexpr auto X86_64_PC = 4;       // renamed r10
-constexpr auto X86_64_ACC = 11;     // renamed r3 (rbx)
-constexpr auto X86_64_ACC_TAG = 3;  // renamed r11
-constexpr auto X86_64_FP = 5;       // renamed r9
-constexpr auto X86_64_DISPATCH = 8;
-constexpr auto X86_64_REAL_FP = 9;  // renamed r5 (rbp)
+constexpr double MaxIntAsExactDouble()
+{
+    return static_cast<double>((1ULL << static_cast<unsigned>(std::numeric_limits<double>::digits)) - 1);
+}
+
+// arm64: { dispatch: 24, pc: 20, frame: 23, acc: 21, accTag: 22, moffset: 25, methodPtr: 26 },
+static constexpr auto AARCH64_PC = 20;
+static constexpr auto AARCH64_ACC = 21;
+static constexpr auto AARCH64_ACC_TAG = 22;
+static constexpr auto AARCH64_FP = 23;
+static constexpr auto AARCH64_DISPATCH = 24;
+static constexpr auto AARCH64_MOFFSET = 25;
+static constexpr auto AARCH64_METHOD_PTR = 26;
+static constexpr auto AARCH64_REAL_FP = 29;
+
+// x86_64: { dispatch: 8, pc: 4, frame: 5, acc: 11, accTag: 3 }
+static constexpr auto X86_64_PC = 4;       // renamed r10
+static constexpr auto X86_64_ACC = 11;     // renamed r3 (rbx)
+static constexpr auto X86_64_ACC_TAG = 3;  // renamed r11
+static constexpr auto X86_64_FP = 5;       // renamed r9
+static constexpr auto X86_64_DISPATCH = 8;
+static constexpr auto X86_64_REAL_FP = 9;  // renamed r5 (rbp)
 
 namespace {
 inline llvm::Function *CreateFunctionDeclaration(llvm::FunctionType *functionType, const std::string &name,
@@ -82,12 +108,8 @@ inline llvm::Function *CreateFunctionDeclaration(llvm::FunctionType *functionTyp
     }
 
     function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, module);
-
-    // Prevens emitting `.eh_frame` section
     function->setDoesNotThrow();
-
     function->setVisibility(llvm::GlobalValue::ProtectedVisibility);
-
     function->setSectionPrefix(name);
 
     return function;
@@ -125,6 +147,33 @@ namespace panda::compiler {
 
 #include <can_compile_intrinsics_gen.inl>
 
+static void MarkNormalBlocksRecursive(BasicBlock *block, Marker normal)
+{
+    [[maybe_unused]] size_t expected = 0;
+    bool processSucc = true;
+    auto last = block->GetLastInst();
+    if (last != nullptr) {
+        // Any successors of blocks with terminators are either TryEnd or Catch blocks
+        if (last->GetFlag(inst_flags::TERMINATOR)) {
+            processSucc = false;
+        }
+        if (last->GetOpcode() == Opcode::IfImm || last->GetOpcode() == Opcode::If) {
+            expected = 1;
+        }
+    }
+    for (size_t i = 0; i < block->GetSuccsBlocks().size(); i++) {
+        auto succ = block->GetSuccessor(i);
+        if (succ->IsCatch()) {
+            ASSERT_DO(i > expected, (std::cerr << "Catch block found too early in successors: at index " << i));
+            continue;
+        }
+        ASSERT_DO(i <= expected, (std::cerr << "Unexpected non-catch successor block at index " << i));
+        if (processSucc && !succ->SetMarker(normal)) {
+            MarkNormalBlocksRecursive(succ, normal);
+        }
+    }
+}
+
 // Use that only to pass it into method like rvalue
 static inline std::string CreateBasicBlockName(Inst *inst, const std::string &bbName)
 {
@@ -154,7 +203,35 @@ static inline bool IsUnsignedInteger(DataType::Type type)
     return IsInteger(type) && !DataType::IsTypeSigned(type);
 }
 
-static inline llvm::ICmpInst::Predicate ICmpCodeConvert(ConditionCode cc)
+static bool IsAlwaysThrowMethod(Graph *graph)
+{
+    if (!g_options.IsCompilerInliningSkipAlwaysThrowMethods()) {
+        return false;
+    }
+    // Erased end block if it wasn't connected, should be infinite loop in the graph
+    if (graph->GetEndBlock() == nullptr) {
+        return true;
+    }
+    // check that end block could be reached only through throw-blocks
+    for (auto pred : graph->GetEndBlock()->GetPredsBlocks()) {
+        if (pred->GetLastInst() == nullptr || pred->GetLastInst()->GetOpcode() != Opcode::Throw) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static inline bool IsAlwaysThrowBasicBlock(Inst *inst)
+{
+    if (!g_options.IsCompilerInliningSkipThrowBlocks()) {
+        return false;
+    }
+
+    auto bbLastInst = inst->GetBasicBlock()->GetLastInst();
+    return bbLastInst->GetOpcode() == Opcode::Throw || bbLastInst->GetOpcode() == Opcode::Deoptimize;
+}
+
+static llvm::ICmpInst::Predicate ICmpCodeConvert(ConditionCode cc)
 {
     switch (cc) {
         case ConditionCode::CC_EQ:
@@ -183,7 +260,7 @@ static inline llvm::ICmpInst::Predicate ICmpCodeConvert(ConditionCode cc)
     }
 }
 
-static inline llvm::FCmpInst::Predicate FCmpCodeConvert(ConditionCode conditionCode)
+static llvm::FCmpInst::Predicate FCmpCodeConvert(ConditionCode conditionCode)
 {
     switch (conditionCode) {
         case ConditionCode::CC_EQ:
@@ -212,6 +289,65 @@ static inline llvm::FCmpInst::Predicate FCmpCodeConvert(ConditionCode conditionC
     }
 }
 
+static DeoptimizeType GetDeoptimizationType(Inst *inst)
+{
+    switch (inst->GetOpcode()) {
+        case Opcode::NullCheck:
+            return DeoptimizeType::NULL_CHECK;
+        case Opcode::DeoptimizeIf:
+            return inst->CastToDeoptimizeIf()->GetDeoptimizeType();
+        case Opcode::BoundsCheck:
+            return DeoptimizeType::BOUNDS_CHECK_WITH_DEOPT;
+        case Opcode::NegativeCheck:
+            return DeoptimizeType::NEGATIVE_CHECK;
+        case Opcode::ZeroCheck:
+            return DeoptimizeType::ZERO_CHECK;
+        case Opcode::SubOverflowCheck:
+            return DeoptimizeType::OVERFLOW;
+        default:
+            ASSERT_DO(false, (std::cerr << "Unexpected inst to GetDeoptimizationType, inst:" << std::endl,
+                              inst->Dump(&std::cerr)));
+            UNREACHABLE();
+    }
+}
+
+static llvm::CallingConv::ID GetFastPathCallingConv(uint32_t numArgs)
+{
+    ASSERT(numArgs <= 5U);
+    switch (numArgs) {
+        case 0U:
+            return llvm::CallingConv::ArkFast0;
+        case 1U:
+            return llvm::CallingConv::ArkFast1;
+        case 2U:
+            return llvm::CallingConv::ArkFast2;
+        case 3U:
+            return llvm::CallingConv::ArkFast3;
+        case 4U:
+            return llvm::CallingConv::ArkFast4;
+        case 5U:
+            return llvm::CallingConv::ArkFast5;
+        default:
+            UNREACHABLE();
+    }
+}
+
+static RuntimeInterface::EntrypointId GetAllocateArrayTlabEntrypoint(size_t elementSize)
+{
+    switch (elementSize) {
+        case sizeof(uint8_t):
+            return RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB8;
+        case sizeof(uint16_t):
+            return RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB16;
+        case sizeof(uint32_t):
+            return RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB32;
+        case sizeof(uint64_t):
+            return RuntimeInterface::EntrypointId::ALLOCATE_ARRAY_TLAB64;
+        default:
+            UNREACHABLE();
+    }
+}
+
 static size_t GetRealFrameReg(Arch arch)
 {
     switch (arch) {
@@ -224,40 +360,123 @@ static size_t GetRealFrameReg(Arch arch)
     }
 }
 
+/**
+ * Call when we are sure that instruction shouldn't appear for translating but
+ * eventually we've tried to translate it.
+ */
+static void UnexpectedLowering([[maybe_unused]] Inst *inst)
+{
+    ASSERT_DO(false, (std::cerr << "Unexpected attempt to lower: ", inst->Dump(&std::cerr, true)));
+    UNREACHABLE();
+}
+
+bool LLVMIrConstructor::IsSafeCast(Inst *inst, unsigned int index)
+{
+    auto trueType = inst->GetInput(index).GetInst()->GetType();
+    auto instType = inst->GetInputType(index);
+    bool signTheSame = IsSignedInteger(trueType) == IsSignedInteger(instType);
+    bool extending = DataType::GetTypeSize(trueType, GetGraph()->GetArch()) <=
+                     DataType::GetTypeSize(instType, GetGraph()->GetArch());
+    return signTheSame || extending;
+}
+
 bool LLVMIrConstructor::TryEmitIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId arkId)
 {
+    auto module = func_->getParent();
+    auto f32Ty = builder_.getFloatTy();
+    auto f64Ty = builder_.getDoubleTy();
+    llvm::Function *llvmId = nullptr;
+
     switch (arkId) {
-        case RuntimeInterface::IntrinsicId::INTRINSIC_UNREACHABLE:
-            return EmitUnreachable();
-        case RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY:
-            return EmitSlowPathEntry(inst);
-        case RuntimeInterface::IntrinsicId::INTRINSIC_LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE:
-            return EmitExclusiveLoadWithAcquire(inst);
-        case RuntimeInterface::IntrinsicId::INTRINSIC_STORE_RELEASE_MARK_WORD_EXCLUSIVE:
-            return EmitExclusiveStoreWithRelease(inst);
-        // LLVM encodes them using calling conventions
-        case RuntimeInterface::IntrinsicId::INTRINSIC_SAVE_REGISTERS_EP:
-        case RuntimeInterface::IntrinsicId::INTRINSIC_RESTORE_REGISTERS_EP:
-            return true;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_INTERPRETER_RETURN:
-            return EmitInterpreterReturn();
-        case RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL:
-            return EmitTailCall(inst);
-        case RuntimeInterface::IntrinsicId::INTRINSIC_DATA_MEMORY_BARRIER_FULL:
-            return EmitMemoryFence(memory_order::FULL);
-        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD:
-            return EmitCompressUtf16ToUtf8CharsUsingSimd<VECTOR_SIZE_8>(inst);
-        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_SIXTEEN_UTF16_TO_UTF8_CHARS_USING_SIMD:
-            return EmitCompressUtf16ToUtf8CharsUsingSimd<VECTOR_SIZE_16>(inst);
+#include "intrinsics_llvm_codegen.inl"
+#ifndef NDEBUG
+        // Must be lowered earlier in IrBuilder, impossible to meet
+        case RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_EXIT:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_I32:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_I64:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_F32:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_F64:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_SQRT_F32:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_SQRT_F64:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_I32:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_I64:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_F32:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_F64:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_I32:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_I64:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_F32:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_F64:
+            UNREACHABLE();
+        // Can appear only after LLVM optimizations
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY:
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEM_SET:
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE:
+            UNREACHABLE();
+#include "emit_intrinsic_llvm_ir_constructor_gen.inl"
+#endif
         default:
             return false;
     }
-    return false;
+
+    ASSERT(llvmId != nullptr);
+    ASSERT(!inst->CanThrow());
+
+    arkInterface_->GetOrCreateRuntimeFunctionType(func_->getContext(), func_->getParent(),
+                                                  LLVMArkInterface::RuntimeCallType::INTRINSIC,
+                                                  static_cast<LLVMArkInterface::EntrypointId>(arkId));
+
+    auto args = GetIntrinsicArguments(llvmId->getFunctionType(), inst);
+    auto llvmIntrinsicCall = llvm::CallInst::Create(llvmId, args, "", GetCurrentBasicBlock());
+    ValueMapAdd(inst, llvmIntrinsicCall);
+    return true;
 }
 
 // Specific intrinsic Emitters
 
-bool LLVMIrConstructor::EmitUnreachable()
+bool LLVMIrConstructor::EmitFastPath(Inst *inst, RuntimeInterface::EntrypointId eid, uint32_t numArgs)
+{
+    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
+    for (uint32_t i = 0; i < numArgs; i++) {
+        args.push_back(GetInputValue(inst, i));
+    }
+    auto call = CreateFastPathCall(inst, eid, args);
+
+    auto retType = GetType(inst->GetType());
+    if (!retType->isVoidTy()) {
+        ValueMapAdd(inst, call);
+    }
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringEquals(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_EQUALS_COMPRESSED, 2U);
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendBool(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_BUILDER_BOOL, 2U);
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendChar(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_BUILDER_CHAR, 2U);
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendString(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_BUILDER_STRING_COMPRESSED, 2U);
+}
+
+bool LLVMIrConstructor::EmitIsInf(Inst *inst)
+{
+    auto result = CreateIsInf(GetInputValue(inst, 0));
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitUnreachable([[maybe_unused]] Inst *inst)
 {
     auto bb = GetCurrentBasicBlock();
     if (bb->empty() || !llvm::isa<llvm::ReturnInst>(*(bb->rbegin()))) {
@@ -265,6 +484,11 @@ bool LLVMIrConstructor::EmitUnreachable()
         builder_.CreateCall(trap, {});
         builder_.CreateUnreachable();
     }
+    return true;
+}
+
+bool LLVMIrConstructor::EmitNothing([[maybe_unused]] Inst *inst)
+{
     return true;
 }
 
@@ -345,8 +569,9 @@ bool LLVMIrConstructor::EmitExclusiveStoreWithRelease(Inst *inst)
     return true;
 }
 
-bool LLVMIrConstructor::EmitInterpreterReturn()
+bool LLVMIrConstructor::EmitInterpreterReturn([[maybe_unused]] Inst *inst)
 {
+    // We only support it for Irtoc interpreters on AArch64
     ASSERT(GetGraph()->GetMode().IsInterpreter());
 
     // This constant is hardcoded in codegen_interpreter.h and in interpreter.irt
@@ -380,7 +605,7 @@ bool LLVMIrConstructor::EmitInterpreterReturn()
         CreateInt32ImmAsm(&builder_, "ldp  x29, x30, [sp], $0", dslotSize);
         CreateBlackBoxAsm(&builder_, "ret");
     } else {
-        // Currently there is no vector regs usage in x86_64 handlers
+        // Currently there is no vector regs usage at x86_64 handlers
         ASSERT(calleeVregsMask.count() == 0);
         auto regShift = DOUBLE_WORD_SIZE_BYTES *
                         (fl.GetSpillsCount() + fl.GetCallerRegistersCount(false) + fl.GetCallerRegistersCount(true));
@@ -435,28 +660,189 @@ bool LLVMIrConstructor::EmitTailCall(Inst *inst)
     return true;
 }
 
-bool LLVMIrConstructor::EmitMemoryFence(memory_order::Order order)
+bool LLVMIrConstructor::EmitCompressEightUtf16ToUtf8CharsUsingSimd(Inst *inst)
 {
-    CreateMemoryFence(order);
+    CreateCompressUtf16ToUtf8CharsUsingSimd<VECTOR_SIZE_8>(inst);
     return true;
 }
 
-template <uint32_t VECTOR_SIZE>
-bool LLVMIrConstructor::EmitCompressUtf16ToUtf8CharsUsingSimd(Inst *inst)
+bool LLVMIrConstructor::EmitCompressSixteenUtf16ToUtf8CharsUsingSimd(Inst *inst)
 {
-    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
-    ASSERT(inst->GetInputType(0) == DataType::POINTER);
-    ASSERT(inst->GetInputType(1) == DataType::POINTER);
-    static_assert(VECTOR_SIZE == VECTOR_SIZE_8 || VECTOR_SIZE == VECTOR_SIZE_16, "Unexpected vector size");
-    auto intrinsicId = llvm::Intrinsic::AARCH64Intrinsics::aarch64_neon_ld2;
-    auto vecTy = llvm::VectorType::get(builder_.getInt8Ty(), VECTOR_SIZE, false);
+    CreateCompressUtf16ToUtf8CharsUsingSimd<VECTOR_SIZE_16>(inst);
+    return true;
+}
 
-    auto u16Ptr = GetInputValue(inst, 0);  // ptr to src array of utf16 chars
-    auto u8Ptr = GetInputValue(inst, 1);   // ptr to dst array of utf8 chars
-    auto ld2 = llvm::Intrinsic::getDeclaration(func_->getParent(), intrinsicId, {vecTy, u16Ptr->getType()});
-    auto vld2 = builder_.CreateCall(ld2, {u16Ptr});
-    auto u8Vec = builder_.CreateExtractValue(vld2, {0});
-    builder_.CreateStore(u8Vec, u8Ptr);
+bool LLVMIrConstructor::EmitMemoryFenceFull([[maybe_unused]] Inst *inst)
+{
+    CreateMemoryFence(memory_order::FULL);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemoryFenceRelease([[maybe_unused]] Inst *inst)
+{
+    CreateMemoryFence(memory_order::RELEASE);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemoryFenceAcquire([[maybe_unused]] Inst *inst)
+{
+    CreateMemoryFence(memory_order::ACQUIRE);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitFround(Inst *inst)
+{
+    llvm::Value *input = GetInputValue(inst, 0);
+    ASSERT_TYPE(input, builder_.getDoubleTy());
+    auto isNan = CreateIsNan(input);
+    auto floatCasted = builder_.CreateCast(llvm::Instruction::FPTrunc, input, builder_.getFloatTy());
+    auto casted = builder_.CreateCast(llvm::Instruction::FPExt, floatCasted, builder_.getDoubleTy());
+    llvm::Value *nan = llvm::ConstantFP::getQNaN(builder_.getDoubleTy());
+    auto result = builder_.CreateSelect(isNan, nan, casted);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitCtlz(Inst *inst)
+{
+    auto result = CreateZerosCount(inst, llvm::Intrinsic::ctlz);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitCttz(Inst *inst)
+{
+    auto result = CreateZerosCount(inst, llvm::Intrinsic::cttz);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitSignbit(Inst *inst)
+{
+    auto num = GetInputValue(inst, 0);
+    auto bitcast = builder_.CreateBitCast(num, builder_.getInt64Ty());
+    auto cmp = builder_.CreateICmpSLT(bitcast, builder_.getInt64(0));
+    ValueMapAdd(inst, cmp);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitIsInteger(Inst *inst)
+{
+    auto result = CreateIsInteger(inst, GetInputValue(inst, 0));
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitIsSafeInteger(Inst *inst)
+{
+    auto &ctx = func_->getContext();
+    auto input = GetInputValue(inst, 0);
+    ASSERT(input->getType()->isDoubleTy() || input->getType()->isFloatTy());
+    auto isInteger = CreateIsInteger(inst, input);
+
+    auto maxSafe = input->getType()->isDoubleTy() ? llvm::ConstantFP::get(builder_.getDoubleTy(), MaxIntAsExactDouble())
+                                                  : llvm::ConstantFP::get(builder_.getFloatTy(), MaxIntAsExactFloat());
+
+    auto initialBb = GetCurrentBasicBlock();
+    auto isSafeIntegerBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "is_safe_integer"), func_);
+    auto continueBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "is_safe_integer_continue"), func_);
+
+    builder_.CreateCondBr(isInteger, isSafeIntegerBb, continueBb);
+
+    SetCurrentBasicBlock(isSafeIntegerBb);
+    // fabs(v) <= MaxSafeInteger
+    auto inputAbs = builder_.CreateUnaryIntrinsic(llvm::Intrinsic::fabs, input);
+    auto cmp = builder_.CreateFCmp(llvm::CmpInst::FCMP_OLE, inputAbs, maxSafe);
+    builder_.CreateBr(continueBb);
+
+    SetCurrentBasicBlock(continueBb);
+    auto result = builder_.CreatePHI(builder_.getInt1Ty(), 2U);
+    result->addIncoming(builder_.getInt1(false), initialBb);
+    result->addIncoming(cmp, isSafeIntegerBb);
+
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitRawBitcastToInt(Inst *inst)
+{
+    llvm::Value *input = GetInputValue(inst, 0);
+    ASSERT_TYPE(input, builder_.getFloatTy());
+    auto result = builder_.CreateBitCast(input, builder_.getInt32Ty());
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitRawBitcastToLong(Inst *inst)
+{
+    llvm::Value *input = GetInputValue(inst, 0);
+    ASSERT_TYPE(input, builder_.getDoubleTy());
+    auto result = builder_.CreateBitCast(input, builder_.getInt64Ty());
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitRawBitcastFromInt(Inst *inst)
+{
+    llvm::Value *input = GetInputValue(inst, 0);
+    ASSERT_TYPE(input, builder_.getInt32Ty());
+    auto result = builder_.CreateBitCast(input, builder_.getFloatTy());
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitRawBitcastFromLong(Inst *inst)
+{
+    llvm::Value *input = GetInputValue(inst, 0);
+    ASSERT_TYPE(input, builder_.getInt64Ty());
+    auto result = builder_.CreateBitCast(input, builder_.getDoubleTy());
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringGetCharsTlab(Inst *inst)
+{
+    auto offset = GetGraph()->GetRuntime()->GetArrayU16ClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, offset, builder_.getPtrTy());
+    auto eid = RuntimeInterface::EntrypointId::STRING_GET_CHARS_TLAB_COMPRESSED;
+    auto result = CreateEntrypointCall(eid, inst,
+                                       {GetInputValue(inst, 0), GetInputValue(inst, 1), GetInputValue(inst, 2), klass});
+    result->setCallingConv(llvm::CallingConv::ArkFast4);
+    result->addRetAttr(llvm::Attribute::NonNull);
+    result->addRetAttr(llvm::Attribute::NoAlias);
+    WrapArkCall(inst, result);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringHashCode(Inst *inst)
+{
+    ASSERT(GetGraph()->GetRuntime()->IsCompressedStringsEnabled());
+    auto string = GetInputValue(inst, 0);
+    auto offset = coretypes::String::GetHashcodeOffset();
+    auto gep = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), string, offset);
+    auto hashCode = builder_.CreateLoad(builder_.getInt32Ty(), gep);
+    auto isZero = builder_.CreateICmpEQ(hashCode, llvm::Constant::getNullValue(hashCode->getType()));
+    auto fastPath = GetCurrentBasicBlock();
+    auto slowPath = llvm::BasicBlock::Create(func_->getContext(), "hash_code_slow_path", func_);
+    auto continuation = llvm::BasicBlock::Create(func_->getContext(), "hash_code_continuation", func_);
+    auto branchWeights = llvm::MDBuilder(func_->getContext())
+                             .createBranchWeights(llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT,
+                                                  llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT);
+    builder_.CreateCondBr(isZero, slowPath, continuation, branchWeights);
+    SetCurrentBasicBlock(slowPath);
+
+    auto newHashCode =
+        CreateEntrypointCall(RuntimeInterface::EntrypointId::STRING_HASH_CODE_COMPRESSED, inst, {string});
+    newHashCode->setCallingConv(llvm::CallingConv::ArkFast1);
+    builder_.CreateBr(continuation);
+    SetCurrentBasicBlock(continuation);
+
+    auto result = builder_.CreatePHI(hashCode->getType(), 2U);
+    result->addIncoming(hashCode, fastPath);
+    result->addIncoming(newHashCode, slowPath);
+    ValueMapAdd(inst, result);
+
     return true;
 }
 
@@ -521,11 +907,14 @@ llvm::Value *LLVMIrConstructor::GetInputValueFromConstant(ConstantInst *constant
 
 // Initializers. BuildIr calls them
 
-void LLVMIrConstructor::BuildBasicBlocks()
+void LLVMIrConstructor::BuildBasicBlocks(Marker normal)
 {
     auto &context = func_->getContext();
     for (auto block : graph_->GetBlocksRPO()) {
         if (block->IsEndBlock()) {
+            continue;
+        }
+        if (!block->IsMarked(normal)) {
             continue;
         }
         auto bb = llvm::BasicBlock::Create(context, llvm::StringRef("bb") + llvm::Twine(block->GetId()), func_);
@@ -543,10 +932,10 @@ void LLVMIrConstructor::BuildBasicBlocks()
     }
 }
 
-void LLVMIrConstructor::BuildInstructions()
+void LLVMIrConstructor::BuildInstructions(Marker normal)
 {
     for (auto block : graph_->GetBlocksRPO()) {
-        if (block->IsEndBlock()) {
+        if (block->IsEndBlock() || !block->IsMarked(normal)) {
             continue;
         }
         SetCurrentBasicBlock(GetTailBlock(block));
@@ -558,31 +947,425 @@ void LLVMIrConstructor::BuildInstructions()
             VisitInstruction(inst);
         }
 
-        if ((block->GetSuccsBlocks().size() == 1 && !block->GetSuccessor(0)->IsEndBlock())) {
+        if (block->IsTryBegin()) {
+            ASSERT(block->GetSuccsBlocks().size() > 1);
+            ASSERT(block->GetSuccessor(0)->IsMarked(normal) && !block->GetSuccessor(1)->IsMarked(normal));
+            ASSERT(!block->GetLastInst()->IsControlFlow());
+            builder_.CreateBr(GetHeadBlock(block->GetSuccessor(0)));
+        }
+        if (((block->GetSuccsBlocks().size() == 1 && !block->GetSuccessor(0)->IsEndBlock()) || block->IsTryEnd()) &&
+            block->GetSuccessor(0)->IsMarked(normal)) {
+            ASSERT(block->IsTryEnd() ? !block->GetSuccessor(1)->IsMarked(normal) : true);
             builder_.CreateBr(GetHeadBlock(block->GetSuccessor(0)));
         }
         ReplaceTailBlock(block, GetCurrentBasicBlock());
     }
 }
 
-void LLVMIrConstructor::FillPhiInputs()
+void LLVMIrConstructor::FillPhiInputs(BasicBlock *block, Marker normal)
 {
-    for (auto block : graph_->GetBlocksRPO()) {
-        if (block->IsStartBlock() || block->IsEndBlock()) {
-            continue;
-        }
-        for (auto inst : block->PhiInsts()) {
-            auto phi = llvm::cast<llvm::PHINode>(GetMappedValue(inst, inst->GetType()));
-            for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-                auto inputBlock = block->GetPredBlockByIndex(i);
-                auto input = GetInputValue(inst, i);
-                phi->addIncoming(input, GetTailBlock(inputBlock));
+    if (block->IsStartBlock() || block->IsEndBlock() || !block->IsMarked(normal)) {
+        return;
+    }
+    for (auto inst : block->PhiInsts()) {
+        auto phi = llvm::cast<llvm::PHINode>(GetMappedValue(inst, inst->GetType()));
+        for (size_t i = 0; i < inst->GetInputsCount(); i++) {
+            auto inputBlock = block->GetPredBlockByIndex(i);
+            if (!inputBlock->IsMarked(normal)) {
+                continue;
             }
+
+            auto input = GetInputValue(inst, i);
+            phi->addIncoming(input, GetTailBlock(inputBlock));
         }
     }
 }
 
 // Creator functions for internal usage
+
+llvm::CallInst *LLVMIrConstructor::CreateEntrypointCall(RuntimeInterface::EntrypointId eid, Inst *inst,
+                                                        llvm::ArrayRef<llvm::Value *> args)
+{
+    arkInterface_->GetOrCreateRuntimeFunctionType(func_->getContext(), func_->getParent(),
+                                                  LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+                                                  static_cast<LLVMArkInterface::EntrypointId>(eid));
+
+    // Sanity assert to not misuse this scenario
+    ASSERT(inst != nullptr);
+
+    llvm::CallInst *call;
+    auto threadReg = GetThreadRegValue();
+    if (GetGraph()->SupportManagedCode() && (inst->CanThrow() || inst->CanDeoptimize())) {
+        bool noReturn = GetGraph()->GetRuntime()->IsEntrypointNoreturn(eid);
+        call = llvmbackend::runtime_calls::CreateEntrypointCallCommon(
+            &builder_, threadReg, arkInterface_, static_cast<llvmbackend::runtime_calls::EntrypointId>(eid), args,
+            CreateSaveStateBundle(inst, noReturn));
+    } else {
+        call = llvmbackend::runtime_calls::CreateEntrypointCallCommon(
+            &builder_, threadReg, arkInterface_, static_cast<llvmbackend::runtime_calls::EntrypointId>(eid), args);
+    }
+    if (inst->RequireState()) {
+        debugData_->SetLocation(call, inst->GetPc());
+    }
+    return call;
+}
+
+llvm::CallInst *LLVMIrConstructor::CreateIntrinsicCall(Inst *inst)
+{
+    auto entryId = inst->CastToIntrinsic()->GetIntrinsicId();
+    auto rtFunctionTy = arkInterface_->GetOrCreateRuntimeFunctionType(
+        func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::INTRINSIC,
+        static_cast<LLVMArkInterface::EntrypointId>(entryId));
+    auto arguments = GetIntrinsicArguments(rtFunctionTy, inst);
+    return CreateIntrinsicCall(inst, entryId, arguments);
+}
+
+llvm::CallInst *LLVMIrConstructor::CreateIntrinsicCall(Inst *inst, RuntimeInterface::IntrinsicId entryId,
+                                                       llvm::ArrayRef<llvm::Value *> arguments)
+{
+    auto rtFunctionTy = arkInterface_->GetOrCreateRuntimeFunctionType(
+        func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::INTRINSIC,
+        static_cast<LLVMArkInterface::EntrypointId>(entryId));
+    auto rtFunctionName = arkInterface_->GetRuntimeFunctionName(LLVMArkInterface::RuntimeCallType::INTRINSIC,
+                                                                static_cast<LLVMArkInterface::EntrypointId>(entryId));
+    auto intrinsicOffset = static_cast<int>(entryId);
+    auto callee = llvmbackend::runtime_calls::GetPandaRuntimeFunctionCallee(intrinsicOffset, rtFunctionTy, &builder_,
+                                                                            rtFunctionName);
+    llvm::CallInst *result;
+    if (inst->CanThrow()) {
+        ASSERT_PRINT(inst->GetSaveState() != nullptr, "Intrinsic with can_throw does not have a savestate");
+        result = builder_.CreateCall(callee, arguments, CreateSaveStateBundle(inst));
+    } else {
+        result = builder_.CreateCall(callee, arguments);
+    }
+
+    if (inst->RequireState()) {
+        debugData_->SetLocation(result, inst->GetPc());
+    }
+    if (NeedSafePointAfterIntrinsic(entryId) && g_options.IsCompilerUseSafepoint()) {
+        result->addFnAttr(llvm::Attribute::get(result->getContext(), "needs-extra-safepoint"));
+        result->getFunction()->addFnAttr("needs-extra-safepoint");
+    }
+
+    return result;
+}
+
+// Helper function. Regardless of where we use `alloca` to pass args, we want to do all of them in the
+// first basic block. This should allow LLVM to combine allocas into prologue
+llvm::Value *LLVMIrConstructor::CreateAllocaForArgs(llvm::Type *type, uint32_t arraySize)
+{
+    auto currentBb = GetCurrentBasicBlock();
+    auto &firstBb = func_->getEntryBlock();
+    auto inst = firstBb.getFirstNonPHI();
+    builder_.SetInsertPoint(inst);
+    llvm::AllocaInst *result;
+
+    if (llvm::isa<llvm::AllocaInst>(inst)) {
+        auto alloca = llvm::cast<llvm::AllocaInst>(inst);
+        ASSERT(alloca->getAllocatedType() == type);
+        ASSERT(llvm::isa<llvm::ConstantInt>(alloca->getArraySize()));
+        auto allocaSize = llvm::cast<llvm::ConstantInt>(alloca->getArraySize())->getZExtValue();
+        if (allocaSize < arraySize) {
+            alloca->setOperand(0, builder_.getInt32(arraySize));
+        }
+        result = alloca;
+    } else {
+        result = builder_.CreateAlloca(type, builder_.getInt32(arraySize), "call_arg_buffer");
+    }
+
+    SetCurrentBasicBlock(currentBb);
+    return result;
+}
+
+llvm::CallInst *LLVMIrConstructor::CreateFastPathCall(Inst *inst, RuntimeInterface::EntrypointId eid,
+                                                      llvm::ArrayRef<llvm::Value *> args)
+{
+    auto call = CreateEntrypointCall(eid, inst, args);
+    ASSERT_PRINT(!args.empty(), "For zero arguments convention should be chosen in more accurate way");
+    call->setCallingConv(GetFastPathCallingConv(args.size()));
+    WrapArkCall(inst, call);
+    return call;
+}
+
+// IsInstance Helpers
+
+llvm::Value *LLVMIrConstructor::CreateIsInstanceEntrypointCall(Inst *inst)
+{
+    auto object = GetInputValue(inst, 0);
+    auto classPtr = GetInputValue(inst, 1);
+    return CreateEntrypointCall(RuntimeInterface::EntrypointId::IS_INSTANCE, inst, {object, classPtr});
+}
+
+llvm::Value *LLVMIrConstructor::CreateIsInstanceObject(llvm::Value *klassObj)
+{
+    auto typeOffset = GetGraph()->GetRuntime()->GetClassTypeOffset(GetGraph()->GetArch());
+    auto typeMask = GetGraph()->GetRuntime()->GetReferenceTypeMask();
+    auto typePtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klassObj, typeOffset);
+    auto typeLdr = builder_.CreateLoad(builder_.getInt8Ty(), typePtr);
+    auto cmpLocal =
+        builder_.CreateICmpEQ(builder_.getInt32(typeMask), builder_.CreateZExt(typeLdr, builder_.getInt32Ty()));
+    return builder_.CreateZExt(cmpLocal, builder_.getInt8Ty(), "isinstance_object_out");
+}
+
+llvm::Value *LLVMIrConstructor::CreateIsInstanceOther(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+{
+    auto initialBb = GetCurrentBasicBlock();
+    auto &ctx = func_->getContext();
+    auto loopHeaderBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "other_loop_h"), func_);
+    auto loopBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "other_loop"), func_);
+    auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "other_out"), func_);
+    builder_.CreateBr(loopHeaderBb);
+
+    SetCurrentBasicBlock(loopHeaderBb);
+    auto typeOffset = GetGraph()->GetRuntime()->GetClassBaseOffset(GetGraph()->GetArch());
+    auto loopPhi = builder_.CreatePHI(builder_.getPtrTy(), 2U, "loop_in");
+    auto typePtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), loopPhi, typeOffset);
+    auto typeLdr = builder_.CreateLoad(builder_.getPtrTy(), typePtr);
+    auto cmpLocal = builder_.CreateIsNotNull(typeLdr);
+    loopPhi->addIncoming(klassObj, initialBb);
+    loopPhi->addIncoming(typeLdr, loopBb);
+    builder_.CreateCondBr(cmpLocal, loopBb, outBb);
+
+    SetCurrentBasicBlock(loopBb);
+    cmpLocal = builder_.CreateICmpEQ(typeLdr, klassId);
+    builder_.CreateCondBr(cmpLocal, outBb, loopHeaderBb);
+
+    SetCurrentBasicBlock(outBb);
+    auto outPhi = builder_.CreatePHI(builder_.getInt8Ty(), 2U, "isinstance_other_out");
+    outPhi->addIncoming(builder_.getInt8(1), loopBb);
+    outPhi->addIncoming(builder_.getInt8(0), loopHeaderBb);
+    return outPhi;
+}
+
+llvm::Value *LLVMIrConstructor::CreateIsInstanceArray(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+{
+    auto &ctx = func_->getContext();
+    auto initialBb = GetCurrentBasicBlock();
+    auto secondLoadBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "array_second_load"), func_);
+    auto slowPath = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "array_slow_path"), func_);
+    auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "array_out"), func_);
+
+    auto componentOffset = GetGraph()->GetRuntime()->GetClassComponentTypeOffset(GetGraph()->GetArch());
+    auto typePtrObj = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klassObj, componentOffset);
+    auto typeLdrObj = builder_.CreateLoad(builder_.getPtrTy(), typePtrObj);
+    auto cmpLocal = builder_.CreateIsNotNull(typeLdrObj);
+    builder_.CreateCondBr(cmpLocal, secondLoadBb, outBb);
+
+    SetCurrentBasicBlock(secondLoadBb);
+    auto typePtrKlass = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klassId, componentOffset);
+    auto typeLdrKlass = builder_.CreateLoad(builder_.getPtrTy(), typePtrKlass);
+    cmpLocal = builder_.CreateICmpEQ(typeLdrObj, typeLdrKlass);
+    auto branchWeights = llvm::MDBuilder(ctx).createBranchWeights(
+        llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT,     // if other comparisons are enough
+        llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT);  // else
+    builder_.CreateCondBr(cmpLocal, outBb, slowPath, branchWeights);
+
+    SetCurrentBasicBlock(slowPath);
+    auto slowPathResult = CreateIsInstanceEntrypointCall(inst);
+    builder_.CreateBr(outBb);
+
+    SetCurrentBasicBlock(outBb);
+    auto outPhi = builder_.CreatePHI(builder_.getInt8Ty(), 3U, "isinstance_array_out");
+    outPhi->addIncoming(builder_.getInt8(0), initialBb);
+    outPhi->addIncoming(builder_.getInt8(1), secondLoadBb);
+    outPhi->addIncoming(slowPathResult, slowPath);
+    return outPhi;
+}
+
+llvm::Value *LLVMIrConstructor::CreateIsInstanceArrayObject(Inst *inst, llvm::Value *klassObj)
+{
+    auto &ctx = func_->getContext();
+    auto initialBb = GetCurrentBasicBlock();
+    auto checkMaskBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "array_object_check_mask"), func_);
+    auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "array_object_out"), func_);
+
+    auto componentOffset = GetGraph()->GetRuntime()->GetClassComponentTypeOffset(GetGraph()->GetArch());
+    auto typePtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klassObj, componentOffset);
+    auto typeLdr = builder_.CreateLoad(builder_.getPtrTy(), typePtr);
+    auto cmpLocal = builder_.CreateIsNotNull(typeLdr);
+    builder_.CreateCondBr(cmpLocal, checkMaskBb, outBb);
+
+    SetCurrentBasicBlock(checkMaskBb);
+    auto typeOffset = GetGraph()->GetRuntime()->GetClassTypeOffset(GetGraph()->GetArch());
+    auto typeMask = GetGraph()->GetRuntime()->GetReferenceTypeMask();
+    auto typePtrElem = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), typeLdr, typeOffset);
+    auto typeLdrElem = builder_.CreateLoad(builder_.getInt8Ty(), typePtrElem);
+    cmpLocal =
+        builder_.CreateICmpEQ(builder_.getInt32(typeMask), builder_.CreateZExt(typeLdrElem, builder_.getInt32Ty()));
+    auto cmpExt = builder_.CreateZExt(cmpLocal, builder_.getInt8Ty());
+    builder_.CreateBr(outBb);
+
+    SetCurrentBasicBlock(outBb);
+    auto outPhi = builder_.CreatePHI(builder_.getInt8Ty(), 2U, "isinstance_array_object_out");
+    outPhi->addIncoming(builder_.getInt8(0), initialBb);
+    outPhi->addIncoming(cmpExt, checkMaskBb);
+    return outPhi;
+}
+
+llvm::Value *LLVMIrConstructor::CreateIsInstanceInnerBlock(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+{
+    auto klassType = inst->CastToIsInstance()->GetClassType();
+    switch (klassType) {
+        case ClassType::OBJECT_CLASS: {
+            return CreateIsInstanceObject(klassObj);
+        }
+        case ClassType::OTHER_CLASS: {
+            return CreateIsInstanceOther(inst, klassObj, klassId);
+        }
+        case ClassType::ARRAY_CLASS: {
+            return CreateIsInstanceArray(inst, klassObj, klassId);
+        }
+        case ClassType::ARRAY_OBJECT_CLASS: {
+            return CreateIsInstanceArrayObject(inst, klassObj);
+        }
+        case ClassType::INTERFACE_CLASS: {
+            return CreateIsInstanceEntrypointCall(inst);
+        }
+        default: {
+            UNREACHABLE();
+        }
+    }
+}
+
+// IsInstance Helpers End
+
+// CheckCast Helpers
+
+void LLVMIrConstructor::CreateCheckCastEntrypointCall(Inst *inst)
+{
+    auto object = GetInputValue(inst, 0);
+    auto classPtr = GetInputValue(inst, 1);
+    CreateEntrypointCall(RuntimeInterface::EntrypointId::CHECK_CAST, inst, {object, classPtr});
+}
+
+void LLVMIrConstructor::CreateCheckCastObject(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+{
+    auto typeOffset = GetGraph()->GetRuntime()->GetClassTypeOffset(GetGraph()->GetArch());
+    auto typeMask = GetGraph()->GetRuntime()->GetReferenceTypeMask();
+    auto typePtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klassObj, typeOffset);
+    auto typeLdr = builder_.CreateLoad(builder_.getInt8Ty(), typePtr);
+    auto src = GetInputValue(inst, 0);
+    auto zext = builder_.CreateZExt(typeLdr, builder_.getInt32Ty());
+    auto deoptimize = builder_.CreateICmpNE(builder_.getInt32(typeMask), zext);
+
+    auto exception = RuntimeInterface::EntrypointId::CLASS_CAST_EXCEPTION;
+    CreateDeoptimizationBranch(inst, deoptimize, exception, {klassId, src});
+}
+
+void LLVMIrConstructor::CreateCheckCastOther(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+{
+    auto initialBb = GetCurrentBasicBlock();
+    auto src = GetInputValue(inst, 0);
+
+    auto &ctx = func_->getContext();
+    auto loopHeaderBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "other_loop_h"), func_);
+    auto loopBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "other_loop"), func_);
+    auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "other_out"), func_);
+    builder_.CreateBr(loopHeaderBb);
+
+    SetCurrentBasicBlock(loopHeaderBb);
+    auto typeOffset = GetGraph()->GetRuntime()->GetClassBaseOffset(GetGraph()->GetArch());
+    auto loopPhi = builder_.CreatePHI(builder_.getPtrTy(), 2U, "loop_in");
+    auto typePtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), loopPhi, typeOffset);
+    auto typeLdr = builder_.CreateLoad(builder_.getPtrTy(), typePtr);
+    auto deoptimize = builder_.CreateIsNull(typeLdr);
+    loopPhi->addIncoming(klassObj, initialBb);
+    loopPhi->addIncoming(typeLdr, loopBb);
+
+    auto exception = RuntimeInterface::EntrypointId::CLASS_CAST_EXCEPTION;
+    CreateDeoptimizationBranch(inst, deoptimize, exception, {klassId, src});
+    builder_.CreateBr(loopBb);
+
+    SetCurrentBasicBlock(loopBb);
+    auto cmp = builder_.CreateICmpEQ(typeLdr, klassId);
+    builder_.CreateCondBr(cmp, outBb, loopHeaderBb);
+
+    SetCurrentBasicBlock(outBb);
+}
+
+void LLVMIrConstructor::CreateCheckCastArray(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+{
+    auto src = GetInputValue(inst, 0);
+
+    auto &ctx = func_->getContext();
+    auto slowPath = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "array_slow_path"), func_);
+    auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "array_out"), func_);
+
+    auto componentOffset = GetGraph()->GetRuntime()->GetClassComponentTypeOffset(GetGraph()->GetArch());
+    auto typePtrObj = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klassObj, componentOffset);
+    auto typeLdrObj = builder_.CreateLoad(builder_.getPtrTy(), typePtrObj);
+
+    auto deoptimize = builder_.CreateIsNull(typeLdrObj);
+    auto exception = RuntimeInterface::EntrypointId::CLASS_CAST_EXCEPTION;
+    CreateDeoptimizationBranch(inst, deoptimize, exception, {klassId, src});
+
+    auto typePtrKlass = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klassId, componentOffset);
+    auto typeLdrKlass = builder_.CreateLoad(builder_.getPtrTy(), typePtrKlass);
+    auto cmpLocal = builder_.CreateICmpEQ(typeLdrObj, typeLdrKlass);
+    auto branchWeights = llvm::MDBuilder(ctx).createBranchWeights(
+        llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT,     // if other comparisons are enough
+        llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT);  // else
+    builder_.CreateCondBr(cmpLocal, outBb, slowPath, branchWeights);
+
+    SetCurrentBasicBlock(slowPath);
+    CreateCheckCastEntrypointCall(inst);
+    builder_.CreateBr(outBb);
+
+    SetCurrentBasicBlock(outBb);
+}
+
+void LLVMIrConstructor::CreateCheckCastArrayObject(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+{
+    auto src = GetInputValue(inst, 0);
+
+    auto componentOffset = GetGraph()->GetRuntime()->GetClassComponentTypeOffset(GetGraph()->GetArch());
+    auto typePtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klassObj, componentOffset);
+    auto typeLdr = builder_.CreateLoad(builder_.getPtrTy(), typePtr);
+
+    auto deoptimize = builder_.CreateIsNull(typeLdr);
+    auto exception = RuntimeInterface::EntrypointId::CLASS_CAST_EXCEPTION;
+    CreateDeoptimizationBranch(inst, deoptimize, exception, {klassId, src});
+
+    auto typeOffset = GetGraph()->GetRuntime()->GetClassTypeOffset(GetGraph()->GetArch());
+    auto typeMask = GetGraph()->GetRuntime()->GetReferenceTypeMask();
+    auto typePtrElem = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), typeLdr, typeOffset);
+    auto typeLdrElem = builder_.CreateLoad(builder_.getInt8Ty(), typePtrElem);
+    deoptimize =
+        builder_.CreateICmpNE(builder_.getInt32(typeMask), builder_.CreateZExt(typeLdrElem, builder_.getInt32Ty()));
+    CreateDeoptimizationBranch(inst, deoptimize, exception, {klassId, src});
+}
+
+void LLVMIrConstructor::CreateCheckCastInner(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+{
+    auto klassType = inst->CastToCheckCast()->GetClassType();
+    switch (klassType) {
+        case ClassType::OBJECT_CLASS: {
+            CreateCheckCastObject(inst, klassObj, klassId);
+            break;
+        }
+        case ClassType::OTHER_CLASS: {
+            CreateCheckCastOther(inst, klassObj, klassId);
+            break;
+        }
+        case ClassType::ARRAY_CLASS: {
+            CreateCheckCastArray(inst, klassObj, klassId);
+            break;
+        }
+        case ClassType::ARRAY_OBJECT_CLASS: {
+            CreateCheckCastArrayObject(inst, klassObj, klassId);
+            break;
+        }
+        case ClassType::INTERFACE_CLASS: {
+            CreateCheckCastEntrypointCall(inst);
+            break;
+        }
+        default: {
+            UNREACHABLE();
+        }
+    }
+}
+
+// CheckCast Helpers End
 
 void LLVMIrConstructor::CreateInterpreterReturnRestoreRegs(RegMask &regMask, size_t offset, bool fp)
 {
@@ -624,6 +1407,27 @@ void LLVMIrConstructor::CreateInterpreterReturnRestoreRegs(RegMask &regMask, siz
         CreateInt32ImmAsm(&builder_, asmString, startRegOffset);
         startRegOffset += dslotSize;
     }
+}
+
+llvm::Value *LLVMIrConstructor::CreateLoadClassById(Inst *inst, uint32_t typeId, bool forceInitialization)
+{
+    auto builtin = forceInitialization ? LoadInitClass(func_->getParent()) : LoadClass(func_->getParent());
+
+    auto typeIdVal = builder_.getInt32(typeId);
+    auto slotIdVal = builder_.getInt32(arkInterface_->GetClassIndexInAotGot(func_, typeId, forceInitialization));
+
+    // remember two functions, later we will use it in panda_runtime_lowering pass
+    arkInterface_->GetOrCreateRuntimeFunctionType(
+        func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+        static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::CLASS_RESOLVER));
+    arkInterface_->GetOrCreateRuntimeFunctionType(
+        func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+        static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::CLASS_INIT_RESOLVER));
+
+    auto callInst = builder_.CreateCall(builtin, {typeIdVal, slotIdVal}, CreateSaveStateBundle(inst));
+    debugData_->SetLocation(callInst, inst->GetPc());
+
+    return callInst;
 }
 
 llvm::Value *LLVMIrConstructor::CreateBinaryOp(Inst *inst, llvm::Instruction::BinaryOps opcode)
@@ -718,7 +1522,7 @@ llvm::Value *LLVMIrConstructor::CreateSignDivMod(Inst *inst, llvm::Instruction::
 
 llvm::Value *LLVMIrConstructor::CreateAArch64SignDivMod(Inst *inst, llvm::Instruction::BinaryOps opcode, llvm::Value *x,
                                                         llvm::Value *y)
-{  // LLVM opcodes SDiv/SRem don't fully suit our needs (int_min/-1 case is UB),
+{  // LLVM opcodes SDiv/SRem don't fully suit our needs (intMin/-1 case is UB),
     // but for now we inline assembly only for arm64 sdiv
     auto targetType = inst->GetType();
     bool target64 = (targetType == DataType::INT64);
@@ -763,15 +1567,15 @@ llvm::Value *LLVMIrConstructor::CreateFloatComparison(CmpInst *cmpInst, llvm::Va
     llvm::CmpInst::Predicate greaterThanPredicate;
     llvm::CmpInst::Predicate lessThanPredicate;
     if (cmpInst->IsFcmpg()) {
-        // if x or y is nan then greater_than_predicate yields true
+        // if x or y is nan then greaterThanPredicate yields true
         greaterThanPredicate = llvm::CmpInst::FCMP_UGT;
         lessThanPredicate = llvm::CmpInst::FCMP_OLT;
     } else if (cmpInst->IsFcmpl()) {
         greaterThanPredicate = llvm::CmpInst::FCMP_OGT;
-        // if x or y is nan then less_than_predicate yields true
+        // if x or y is nan then lessThanPredicate yields true
         lessThanPredicate = llvm::CmpInst::FCMP_ULT;
     } else {
-        ASSERT_PRINT(false, "cmp_inst must be either Fcmpg, or Fcmpl");
+        ASSERT_PRINT(false, "cmpInst must be either Fcmpg, or Fcmpl");
         UNREACHABLE();
     }
     // x > y || (inst == Fcmpg && (x == NaN || y == NaN))
@@ -801,10 +1605,140 @@ llvm::Value *LLVMIrConstructor::CreateIntegerComparison(CmpInst *inst, llvm::Val
     return builder_.CreateSelect(lessThan, negativeOne, castComparisonResult);
 }
 
+llvm::Value *LLVMIrConstructor::CreateNewObjectWithRuntime(Inst *inst)
+{
+    // Obtain Class
+    auto initClass = GetInputValue(inst, 0);
+    auto eid = RuntimeInterface::EntrypointId::CREATE_OBJECT_BY_CLASS;
+    auto runtimeCall = CreateEntrypointCall(eid, inst, {initClass});
+    auto newObjInst = inst->CastToNewObject();
+    auto srcInst = newObjInst->GetInput(0).GetInst();
+    if (srcInst->GetOpcode() != Opcode::LoadAndInitClass ||
+        GetGraph()->GetRuntime()->CanUseTlabForClass(srcInst->CastToLoadAndInitClass()->GetClass())) {
+        MarkAsAllocation(runtimeCall);
+    }
+    return runtimeCall;
+}
+
+llvm::Value *LLVMIrConstructor::CreateLoadMethodUsingVTable(llvm::Value *thiz, CallInst *call)
+{
+    ASSERT(thiz != nullptr);
+    ASSERT(call != nullptr);
+    ASSERT(GetGraph()->GetAotData()->GetUseCha());
+    constexpr uint32_t SHIFT_64_BITS = 3;
+    constexpr uint32_t SHIFT_32_BITS = 2;
+
+    auto runtime = GetGraph()->GetRuntime();
+    auto classp = CreateLoadClassFromObject(thiz);
+    auto arch = GetGraph()->GetArch();
+
+    // Get index
+    auto vtableIndex = runtime->GetVTableIndex(call->GetCallMethod());
+    // Load from VTable, address = klass + ((index << shift) + vtableOffset)
+    auto totalOffset =
+        runtime->GetVTableOffset(arch) + (vtableIndex << (Is64BitsArch(arch) ? SHIFT_64_BITS : SHIFT_32_BITS));
+    auto methPtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), classp, totalOffset);
+    return builder_.CreateLoad(builder_.getPtrTy(), methPtr);
+}
+
+llvm::Value *LLVMIrConstructor::CreateResolveVirtualCall(Inst *inst, llvm::Value *thiz, uint32_t methodId)
+{
+    ASSERT(thiz->getType()->isPointerTy());
+
+    auto builtin = ResolveVirtual(func_->getParent());
+    arkInterface_->GetOrCreateRuntimeFunctionType(
+        func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+        static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::RESOLVE_VIRTUAL_CALL_AOT));
+    arkInterface_->GetOrCreateRuntimeFunctionType(
+        func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+        static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::INTF_INLINE_CACHE));
+
+    auto zero = builder_.getInt64(0);
+    auto arrayType = llvm::ArrayType::get(builder_.getInt64Ty(), 0);
+    auto offset = builder_.CreateIntToPtr(zero, arrayType->getPointerTo());
+    auto callInst =
+        builder_.CreateCall(builtin, {thiz, ToSizeT(builder_.getInt32(methodId)), offset}, CreateSaveStateBundle(inst));
+    WrapArkCall(inst, callInst);
+    return builder_.CreateIntToPtr(callInst, builder_.getPtrTy());
+}
+
+llvm::Value *LLVMIrConstructor::CreateLoadClassFromObject(llvm::Value *object)
+{
+    ASSERT(object->getType()->isPointerTy());
+
+    auto dataOff = GetGraph()->GetRuntime()->GetObjClassOffset(GetGraph()->GetArch());
+    auto ptrData = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), object, dataOff);
+    static_assert(OBJECT_POINTER_SIZE == 4U);
+    // object + offset stores the Class* as i32
+    auto classAddress = builder_.CreateLoad(builder_.getInt32Ty(), ptrData);
+    return builder_.CreateIntToPtr(classAddress, builder_.getPtrTy());
+}
+
+llvm::Value *LLVMIrConstructor::CreateLoadManagedClassFromClass(llvm::Value *klass)
+{
+    ASSERT(klass->getType()->isPointerTy());
+    auto dataOff = GetGraph()->GetRuntime()->GetManagedClassOffset(GetGraph()->GetArch());
+    auto ptrData = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klass, dataOff);
+    return builder_.CreateLoad(builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE), ptrData);
+}
+
+llvm::Value *LLVMIrConstructor::CreateIsInf(llvm::Value *input)
+{
+    llvm::Type *type = nullptr;
+    uint64_t infMaskInt;
+    if (input->getType()->isFloatTy()) {
+        constexpr uint32_t INF_MASK_FLOAT = 0xff000000;
+        infMaskInt = INF_MASK_FLOAT;
+        type = builder_.getInt32Ty();
+    } else {
+        ASSERT_TYPE(input, builder_.getDoubleTy());
+        constexpr uint64_t INF_MASK_DOUBLE = 0xffe0000000000000;
+        infMaskInt = INF_MASK_DOUBLE;
+        type = builder_.getInt64Ty();
+    }
+
+    auto infMask = llvm::ConstantInt::get(type, infMaskInt);
+    auto one = llvm::ConstantInt::get(type, 1);
+    auto castedInput = builder_.CreateBitCast(input, type);
+    auto shiftedInput = builder_.CreateShl(castedInput, one);
+    auto result = builder_.CreateICmpEQ(shiftedInput, infMask);
+    return result;
+}
+
+llvm::Value *LLVMIrConstructor::CreateIsInteger(Inst *inst, llvm::Value *input)
+{
+    auto &ctx = func_->getContext();
+    ASSERT(input->getType()->isDoubleTy() || input->getType()->isFloatTy());
+
+    auto isInf = CreateIsInf(input);
+    auto epsilon = input->getType()->isDoubleTy()
+                       ? llvm::ConstantFP::get(builder_.getDoubleTy(), std::numeric_limits<double>::epsilon())
+                       : llvm::ConstantFP::get(builder_.getFloatTy(), std::numeric_limits<float>::epsilon());
+
+    auto initialBb = GetCurrentBasicBlock();
+    auto notInfBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "is_integer_not_inf"), func_);
+    auto continueBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "is_integer_continue"), func_);
+
+    builder_.CreateCondBr(isInf, continueBb, notInfBb);
+
+    SetCurrentBasicBlock(notInfBb);
+    // fabs(v - trunc(v)) <= epsilon
+    auto truncated = builder_.CreateUnaryIntrinsic(llvm::Intrinsic::trunc, input);
+    auto diff = builder_.CreateFSub(input, truncated);
+    auto diffAbs = builder_.CreateUnaryIntrinsic(llvm::Intrinsic::fabs, diff);
+    auto cmp = builder_.CreateFCmp(llvm::CmpInst::FCMP_OLE, diffAbs, epsilon);
+    builder_.CreateBr(continueBb);
+
+    SetCurrentBasicBlock(continueBb);
+    auto result = builder_.CreatePHI(builder_.getInt1Ty(), 2U);
+    result->addIncoming(builder_.getInt1(false), initialBb);
+    result->addIncoming(cmp, notInfBb);
+
+    return result;
+}
+
 llvm::Value *LLVMIrConstructor::CreateCastToInt(Inst *inst)
 {
-    ASSERT(inst->GetInputsCount() == 1);
-
     llvm::Value *input = GetInputValue(inst, 0);
     auto sourceType = input->getType();
     auto targetType = inst->GetType();
@@ -847,10 +1781,254 @@ llvm::Value *LLVMIrConstructor::CreateStoreWithOrdering(llvm::Value *value, llvm
     return store;
 }
 
+llvm::Value *LLVMIrConstructor::CreateZerosCount(Inst *inst, llvm::Intrinsic::ID llvmId)
+{
+    ASSERT(IsSafeCast(inst, 0));
+    auto zeroDefined = llvm::ConstantInt::getFalse(func_->getContext());
+    return builder_.CreateBinaryIntrinsic(llvmId, GetInputValue(inst, 0), zeroDefined, nullptr);
+}
+
+llvm::Value *LLVMIrConstructor::CreateRoundArm64(Inst *inst, bool is64)
+{
+    auto input = GetInputValue(inst, 0);
+
+    auto sourceType = is64 ? builder_.getDoubleTy() : builder_.getFloatTy();
+    auto targetType = is64 ? builder_.getInt64Ty() : builder_.getInt32Ty();
+
+    double constexpr HALF = 0.5;
+    auto half = llvm::ConstantFP::get(sourceType, HALF);
+    auto zero = is64 ? builder_.getInt64(0) : builder_.getInt32(0);
+
+    auto initialBb = GetCurrentBasicBlock();
+    auto &ctx = func_->getContext();
+    auto module = func_->getParent();
+
+    // lround - fcvtas instruction (positive solved fine, NaN mapped to 0, but negatives ties wrong way)
+    auto decl = llvm::Intrinsic::getDeclaration(module, llvm::Intrinsic::lround, {targetType, sourceType});
+    llvm::Value *round = llvm::CallInst::Create(decl, input, "", initialBb);
+
+    // Check if rounded value less than zero (if not negative rounding is done)
+    auto negative = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "neg"), func_);
+    auto done = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "cont"), func_);
+    auto lessThan = builder_.CreateICmpSLT(round, zero);
+    builder_.CreateCondBr(lessThan, negative, done);
+
+    // Negative input case, add 1 iff "input - round(input) == 0.5"
+    SetCurrentBasicBlock(negative);
+    // frinta instruction
+    auto floatRound = builder_.CreateUnaryIntrinsic(llvm::Intrinsic::round, input, nullptr);
+    auto sub = builder_.CreateBinOp(llvm::Instruction::FSub, input, floatRound);
+    auto one = is64 ? builder_.getInt64(1) : builder_.getInt32(1);
+    auto add = builder_.CreateBinOp(llvm::Instruction::Add, round, one);
+    auto equal = builder_.CreateFCmp(llvm::CmpInst::FCMP_OEQ, sub, half);
+    auto roundMayInc = builder_.CreateSelect(equal, add, round);
+    builder_.CreateBr(done);
+
+    // Continue block
+    SetCurrentBasicBlock(done);
+    auto roundPhi = builder_.CreatePHI(targetType, 2U);
+    roundPhi->addIncoming(round, initialBb);
+    roundPhi->addIncoming(roundMayInc, negative);
+    return roundPhi;
+}
+
+llvm::Value *LLVMIrConstructor::CreateNewStringFromCharsTlab(Inst *inst, llvm::Value *offset, llvm::Value *length,
+                                                             llvm::Value *array)
+{
+    auto entryId = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB_COMPRESSED;
+    ArenaVector<llvm::Value *> arguments(GetGraph()->GetLocalAllocator()->Adapter());
+    auto callConv = llvm::CallingConv::ArkFast3;
+    if (llvm::isa<llvm::Constant>(offset) && llvm::cast<llvm::Constant>(offset)->isNullValue()) {
+        entryId = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB_COMPRESSED;
+    } else {
+        arguments.push_back(offset);
+        callConv = llvm::CallingConv::ArkFast4;
+    }
+    arguments.push_back(length);
+    arguments.push_back(array);
+    auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
+    arguments.push_back(klass);
+    auto result = CreateEntrypointCall(entryId, inst, arguments);
+    result->setCallingConv(callConv);
+    WrapArkCall(inst, result);
+    MarkAsAllocation(result);
+    return result;
+}
+
+llvm::Value *LLVMIrConstructor::CreateNewStringFromStringTlab(Inst *inst, llvm::Value *stringVal)
+{
+    auto entryId = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_STRING_TLAB_COMPRESSED;
+    auto result = CreateEntrypointCall(entryId, inst, {stringVal});
+    result->setCallingConv(llvm::CallingConv::ArkFast1);
+    WrapArkCall(inst, result);
+    MarkAsAllocation(result);
+    return result;
+}
+
+llvm::Value *LLVMIrConstructor::CreateLaunchArgsArray(CallInst *callInst, uint32_t argStart)
+{
+    // Last arg is SaveState
+    auto callArgsCount = callInst->GetInputsCount() - 1U - argStart;
+
+    auto ltype = builder_.getInt64Ty();
+    auto dtype = DataType::INT64;
+
+    auto callArgs = CreateAllocaForArgs(ltype, callArgsCount);
+
+    // Store actual call arguments
+    for (size_t i = 0; i < callArgsCount; i++) {
+        auto arg = GetInputValue(callInst, argStart + i);
+        if (dtype != callInst->GetInputType(argStart + i)) {
+            arg = CoerceValue(arg, callInst->GetInputType(argStart + i), dtype);
+        }
+        auto gep = builder_.CreateConstInBoundsGEP1_32(ltype, callArgs, i);
+        builder_.CreateStore(arg, gep);
+    }
+
+    return callArgs;
+}
+
+void LLVMIrConstructor::CreateLaunchCall([[maybe_unused]] CallInst *callInst)
+{
+#ifdef PANDA_WITH_ETS
+    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
+
+    if (callInst->GetOpcode() == Opcode::CallResolvedLaunchStatic ||
+        callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
+        args.push_back(GetInputValue(callInst, 0));
+        args.push_back(GetInputValue(callInst, 1));
+
+        auto argStart = callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual ? 3U : 2U;
+        auto callArgs = CreateLaunchArgsArray(callInst, argStart);
+
+        args.push_back(callArgs);
+
+        if (callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
+            args.push_back(GetInputValue(callInst, 2U));
+        }
+    } else {
+        if (callInst->GetOpcode() != Opcode::CallLaunchVirtual) {
+            ASSERT_DO(false, (std::cerr << "Unexpected Launch Call: \n", callInst->Dump(&std::cerr, true)));
+            UNREACHABLE();
+        }
+
+        args.push_back(CreateLoadMethodUsingVTable(GetInputValue(callInst, 1), callInst));
+        args.push_back(GetInputValue(callInst, 0));
+
+        auto callArgs = CreateLaunchArgsArray(callInst, 2U);
+        args.push_back(callArgs);
+        args.push_back(GetInputValue(callInst, 1));
+    }
+
+    auto eid = callInst->IsStaticLaunchCall() ? RuntimeInterface::EntrypointId::CREATE_LAUNCH_STATIC_COROUTINE
+                                              : RuntimeInterface::EntrypointId::CREATE_LAUNCH_VIRTUAL_COROUTINE;
+
+    CreateEntrypointCall(eid, callInst, args);
+#else
+    UNREACHABLE();
+#endif
+}
+
+void LLVMIrConstructor::CreateDeoptimizationBranch(Inst *inst, llvm::Value *deoptimize,
+                                                   RuntimeInterface::EntrypointId exception,
+                                                   llvm::ArrayRef<llvm::Value *> arguments)
+{
+    ASSERT_TYPE(deoptimize, builder_.getInt1Ty());
+    ASSERT(exception != RuntimeInterface::EntrypointId::DEOPTIMIZE || inst->CanDeoptimize());
+    auto &ctx = func_->getContext();
+
+    /* Create basic blocks for continuation and throw */
+    auto continuation = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "cont"), func_);
+    auto throwPath = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "deopt"), func_);
+
+    /* Creating branch */
+    auto branchWeights = llvm::MDBuilder(ctx).createBranchWeights(
+        llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT,  // if unlikely(deoptimize) then throw
+        llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT);   // else continue
+    builder_.CreateCondBr(deoptimize, throwPath, continuation, branchWeights);
+
+    /* Creating throw block */
+    SetCurrentBasicBlock(throwPath);
+
+    if (inst->CanDeoptimize()) {
+        // If inst CanDeoptimize then call Deoptimize to bail out into interpreter, do not throw exception
+        exception = RuntimeInterface::EntrypointId::DEOPTIMIZE;
+        auto type = helpers::ToUnderlying(GetDeoptimizationType(inst)) |
+                    (inst->GetId() << MinimumBitsToStore(DeoptimizeType::COUNT));
+        auto call = CreateEntrypointCall(exception, inst, {builder_.getInt64(type)});
+        call->addFnAttr(llvm::Attribute::get(call->getContext(), "may-deoptimize"));
+    } else {
+        CreateEntrypointCall(exception, inst, arguments);
+    }
+    builder_.CreateUnreachable();
+
+    /* Continue */
+    SetCurrentBasicBlock(continuation);
+}
+
+ArenaVector<llvm::OperandBundleDef> LLVMIrConstructor::CreateSaveStateBundle(Inst *inst, bool noReturn)
+{
+    ASSERT_PRINT(inst->CanThrow() || inst->CanDeoptimize(),
+                 "Attempt to create a regmap for instruction that doesn't throw (or deoptimize)");
+    ArenaVector<llvm::OperandBundleDef> bundle(GetGraph()->GetLocalAllocator()->Adapter());
+    if (!arkInterface_->DeoptsEnabled()) {
+        return bundle;
+    }
+    SaveStateInst *ss = inst->GetSaveState();
+    ArenaVector<llvm::Value *> vals(GetGraph()->GetLocalAllocator()->Adapter());
+
+    // Put a function as a delimiter in inlining chain
+    vals.push_back(func_);
+    // Put methodId needed for inline info
+    vals.push_back(builder_.getInt32(GetGraph()->GetRuntime()->GetMethodId(GetGraph()->GetMethod())));
+    // Put bytecode pc for inlining chain as well
+    vals.push_back(builder_.getInt32(ss->GetPc()));
+    // Put a marker if catch has been met
+    uint32_t flags = (inst->RequireRegMap() ? 1U : 0U) | (noReturn ? 2U : 0U);
+    vals.push_back(builder_.getInt32(flags));
+    // Put a number of interpreter registers for the method
+    auto vregCount = arkInterface_->GetVirtualRegistersCount(GetGraph()->GetMethod());
+    vals.push_back(builder_.getInt32(vregCount));
+
+    for (size_t i = 0; i < ss->GetInputsCount(); ++i) {
+        if (ss->GetVirtualRegister(i).Value() == VirtualRegister::BRIDGE) {
+            continue;
+        }
+        // Put a virtual register index
+        vals.push_back(builder_.getInt32(ss->GetVirtualRegister(i).Value()));
+        // Put a virtual register type
+        auto metatype = IrTypeToMetainfoType(ss->GetInputType(i));
+        uint32_t undertype = static_cast<std::underlying_type_t<VRegInfo::Type>>(metatype);
+        vals.push_back(builder_.getInt32(undertype));
+        // Put a virtual register value
+        auto value = GetInputValue(ss, i);
+        if (!value->getType()->isPointerTy()) {
+            ASSERT(value->getType()->getScalarSizeInBits() <= 64U);
+            auto intVal = builder_.CreateBitCast(value, builder_.getIntNTy(value->getType()->getScalarSizeInBits()));
+            vals.push_back(builder_.CreateZExt(intVal, builder_.getInt64Ty()));
+        } else {
+            vals.push_back(value);
+        }
+    }
+    bundle.assign({llvm::OperandBundleDef {"deopt", vals}});
+    return bundle;
+}
+
 void LLVMIrConstructor::CreatePreWRB(Inst *inst, llvm::Value *mem)
 {
-    ASSERT(GetGraph()->GetRuntime()->GetPreType() == panda::mem::BarrierType::PRE_SATB_BARRIER);
+    auto barrierType = GetGraph()->GetRuntime()->GetPreType();
+    if (barrierType == panda::mem::BarrierType::PRE_WRB_NONE) {
+        ASSERT(GetGraph()->SupportManagedCode());
+        return;
+    }
+    ASSERT(barrierType == panda::mem::BarrierType::PRE_SATB_BARRIER);
 
+    if (llvmbackend::g_options.IsLlvmBuiltinWrb() && !arkInterface_->IsIrtocMode()) {
+        auto builtin = PreWRB(func_->getParent(), mem->getType()->getPointerAddressSpace());
+        builder_.CreateCall(builtin, {mem, builder_.getInt1(IsVolatileMemInst(inst))});
+        return;
+    }
     auto &ctx = func_->getContext();
     auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "pre_wrb_out"), func_);
     EmitPreWRB(&builder_, mem, IsVolatileMemInst(inst), outBb, arkInterface_, GetThreadRegValue());
@@ -858,8 +2036,13 @@ void LLVMIrConstructor::CreatePreWRB(Inst *inst, llvm::Value *mem)
 
 void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value *offset, llvm::Value *value)
 {
-    ASSERT(GetGraph()->GetRuntime()->GetPostType() == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-           GetGraph()->GetRuntime()->GetPostType() == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
+    auto barrierType = GetGraph()->GetRuntime()->GetPostType();
+    if (barrierType == panda::mem::BarrierType::POST_WRB_NONE) {
+        ASSERT(GetGraph()->SupportManagedCode());
+        return;
+    }
+    ASSERT(barrierType == panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+           barrierType == panda::mem::BarrierType::POST_INTERREGION_BARRIER);
 
     Inst *secondValue;
     Inst *val = InstStoredValue(inst, &secondValue);
@@ -869,9 +2052,14 @@ void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value 
         return;
     }
 
-    ASSERT(GetGraph()->GetMode().IsInterpreter());
+    if (llvmbackend::g_options.IsLlvmBuiltinWrb() && !arkInterface_->IsIrtocMode()) {
+        auto builtin = PostWRB(func_->getParent());
+        builder_.CreateCall(builtin, {mem, offset, value});
+        return;
+    }
+    ASSERT(!llvmbackend::g_options.IsLlvmBuiltinWrb() || GetGraph()->GetMode().IsInterpreter());
     llvm::Value *frameRegValue = nullptr;
-    if (GetGraph()->GetArch() == Arch::X86_64) {
+    if (arkInterface_->IsIrtocMode() && GetGraph()->GetArch() == Arch::X86_64) {
         frameRegValue = GetRealFrameRegValue();
     }
     EmitPostWRB(&builder_, mem, offset, value, arkInterface_, GetThreadRegValue(), frameRegValue);
@@ -968,7 +2156,7 @@ llvm::CallInst *LLVMIrConstructor::CreateTailCallInterpreter(Inst *inst)
     ASSERT(ccValues_.at(4U) != nullptr);  // dispatch
     if (GetGraph()->GetArch() == Arch::AARCH64) {
         ASSERT(ccValues_.at(5U) != nullptr);  // moffset
-        ASSERT(ccValues_.at(6U) != nullptr);  // method_ptr
+        ASSERT(ccValues_.at(6U) != nullptr);  // methodPtr
         ASSERT(ccValues_.at(7U) != nullptr);  // thread
     } else {
         static constexpr unsigned REAL_FRAME_POINER = 6U;
@@ -981,11 +2169,34 @@ llvm::CallInst *LLVMIrConstructor::CreateTailCallInterpreter(Inst *inst)
     return builder_.CreateCall(functionType, ptr, ccValues_);
 }
 
+template <uint32_t VECTOR_SIZE>
+void LLVMIrConstructor::CreateCompressUtf16ToUtf8CharsUsingSimd(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(inst->GetInputType(0) == DataType::POINTER);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+    static_assert(VECTOR_SIZE == VECTOR_SIZE_8 || VECTOR_SIZE == VECTOR_SIZE_16, "Unexpected vector size");
+    auto intrinsicId = llvm::Intrinsic::AARCH64Intrinsics::aarch64_neon_ld2;
+    auto vecTy = llvm::VectorType::get(builder_.getInt8Ty(), VECTOR_SIZE, false);
+
+    auto u16Ptr = GetInputValue(inst, 0);  // ptr to src array of utf16 chars
+    auto u8Ptr = GetInputValue(inst, 1);   // ptr to dst array of utf8 chars
+    auto ld2 = llvm::Intrinsic::getDeclaration(func_->getParent(), intrinsicId, {vecTy, u16Ptr->getType()});
+    auto vld2 = builder_.CreateCall(ld2, {u16Ptr});
+    auto u8Vec = builder_.CreateExtractValue(vld2, {0});
+    builder_.CreateStore(u8Vec, u8Ptr);
+}
+
 // Getters
 
 llvm::FunctionType *LLVMIrConstructor::GetEntryFunctionType()
 {
     ArenaVector<llvm::Type *> argTypes(graph_->GetLocalAllocator()->Adapter());
+
+    // Method*
+    if (graph_->SupportManagedCode()) {
+        argTypes.push_back(builder_.getPtrTy());
+    }
 
     // ArkInt have fake parameters
     if (graph_->GetMode().IsInterpreter()) {
@@ -1018,8 +2229,98 @@ llvm::FunctionType *LLVMIrConstructor::GetEntryFunctionType()
     return llvm::FunctionType::get(GetType(retType), makeArrayRef(argTypes.data(), argTypes.size()), false);
 }
 
+llvm::Value *LLVMIrConstructor::ToSizeT(llvm::Value *value)
+{
+    auto entrypointSizeType = GetEntrypointSizeType();
+    if (value->getType() == entrypointSizeType) {
+        return value;
+    }
+    ASSERT(value->getType()->getIntegerBitWidth() < entrypointSizeType->getBitWidth());
+    return builder_.CreateZExt(value, entrypointSizeType);
+}
+
+llvm::Value *LLVMIrConstructor::ToSSizeT(llvm::Value *value)
+{
+    auto entrypointSizeType = GetEntrypointSizeType();
+    if (value->getType() == entrypointSizeType) {
+        return value;
+    }
+    ASSERT(value->getType()->getIntegerBitWidth() < entrypointSizeType->getBitWidth());
+    return builder_.CreateSExt(value, entrypointSizeType);
+}
+
+ArenaVector<llvm::Value *> LLVMIrConstructor::GetArgumentsForCall(llvm::Value *callee, CallInst *call, bool skipFirst)
+{
+    ASSERT(callee->getType()->isPointerTy());
+    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
+    args.push_back(callee);
+
+    // SaveState skipping - last arg
+    for (size_t i = skipFirst ? 1 : 0; i < call->GetInputsCount() - 1; i++) {
+        auto arg = GetInputValue(call, i);
+        auto type = call->GetInputType(i);
+        if (DataType::IsLessInt32(type)) {
+            arg = CoerceValue(arg, type, DataType::INT32);
+        }
+        args.push_back(arg);
+    }
+
+    return args;
+}
+
+ArenaVector<llvm::Value *> LLVMIrConstructor::GetIntrinsicArguments(llvm::FunctionType *intrinsicFunctionType,
+                                                                    Inst *inst)
+{
+    ASSERT(intrinsicFunctionType != nullptr);
+    ASSERT(inst != nullptr);
+
+    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
+    for (size_t i = 0; i < intrinsicFunctionType->getNumParams(); i++) {
+        // Skip SaveState
+        if (inst->GetInput(i).GetInst()->IsSaveState()) {
+            continue;
+        }
+        args.push_back(GetInputValue(inst, i));
+    }
+    return args;
+}
+
+llvm::FunctionType *LLVMIrConstructor::GetFunctionTypeForCall(CallInst *call)
+{
+    ArenaVector<llvm::Type *> argTypes(GetGraph()->GetLocalAllocator()->Adapter());
+
+    if (GetGraph()->SupportManagedCode()) {
+        // Callee
+        argTypes.push_back(builder_.getPtrTy());
+    }
+
+    auto runtime = GetGraph()->GetRuntime();
+    auto methodPtr = GetGraph()->GetMethod();
+    auto methodId = call->GetCallMethodId();
+    // For instance methods pass implicit object argument
+    if (!runtime->IsMethodStatic(methodPtr, methodId)) {
+        argTypes.push_back(builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+    }
+
+    for (size_t i = 0; i < runtime->GetMethodArgumentsCount(methodPtr, methodId); i++) {
+        auto ptype = runtime->GetMethodArgumentType(methodPtr, methodId, i);
+        argTypes.push_back(GetType(ptype));
+    }
+
+    auto retType = runtime->GetMethodReturnType(methodPtr, methodId);
+    // Ugly fix CallVirtual opcode for SaveState-excluded run codegen statistics
+    if (methodPtr == nullptr) {
+        retType = call->GetType();
+    }
+    ASSERT(call->GetType() == retType);
+    return llvm::FunctionType::get(GetType(retType), argTypes, false);
+}
+
 llvm::Value *LLVMIrConstructor::GetThreadRegValue()
 {
+    if (GetGraph()->SupportManagedCode()) {
+        return llvmbackend::runtime_calls::GetThreadRegValue(&builder_, arkInterface_);
+    }
     auto regInput = std::find(cc_.begin(), cc_.end(), GetThreadReg(GetGraph()->GetArch()));
     ASSERT(regInput != cc_.end());
     auto threadRegValue = func_->arg_begin() + std::distance(cc_.begin(), regInput);
@@ -1028,6 +2329,9 @@ llvm::Value *LLVMIrConstructor::GetThreadRegValue()
 
 llvm::Value *LLVMIrConstructor::GetRealFrameRegValue()
 {
+    if (GetGraph()->SupportManagedCode()) {
+        return llvmbackend::runtime_calls::GetRealFrameRegValue(&builder_, arkInterface_);
+    }
     ASSERT(GetGraph()->GetMode().IsFastPath() || GetGraph()->GetArch() == Arch::X86_64);
     auto regInput = std::find(cc_.begin(), cc_.end(), GetRealFrameReg(GetGraph()->GetArch()));
     ASSERT(regInput != cc_.end());
@@ -1066,6 +2370,20 @@ llvm::Type *LLVMIrConstructor::GetType(DataType::Type pandaType)
     }
 }
 
+/**
+ * Return exact llvm::Type corresponding to the panda type.
+ *
+ * Use this method when exact panda type is indeed required.
+ * It is the case for:
+ * - array loads and stores. If 32-bit version were used, then the neighbour array elements would be overwritten or read
+ * - object field loads and stores. The reason the same as in the case above.
+ * - object static field loads and stores. The reason the same as in the cases above.
+ * - comparisons. Sometimes boolean is compared with i32 or other integral type.
+ *   The exact type could be obtained from the compareInst->GetOperandsType(),
+ *   which should be used to coerce its operands
+ * - Runtime calls. Some runtime call function declarations have narrower types than 32-bit version. To invoke them
+ *   the argument should be coerced to the exact type.
+ */
 llvm::Type *LLVMIrConstructor::GetExactType(DataType::Type targetType)
 {
     switch (targetType) {
@@ -1139,6 +2457,27 @@ llvm::Instruction::CastOps LLVMIrConstructor::GetCastOp(DataType::Type from, Dat
 
 // Various other helpers
 
+/**
+ * Coerce given {@code value} with {@code sourceType} to the {@code targetType}.
+ *
+ * The method may perform truncation or widening cast, or leave the original
+ * {@code value}, if no cast is necessary.
+ *
+ * For integer {@code value} when widening cast is performed the sign of the {@code sourceType} is taken
+ * into account:
+ * * {@code value} is zero extended if the {@code sourceType} is unsigned integer
+ * * {@code value} is sign extended if the {@code sourceType} is signed integer
+ *
+ * Reference types are returned as is.
+ *
+ * Currently Ark Bytecode:
+ * * does not differentiate between ints of sizes less than 32 bits, and treats them all as i32/u32
+ * * leaves resolution of such conversions to the discretion of bytecodes accepting them
+ * * assumes implicit casts between small integers
+ *
+ * Sometimes it causes inconsistencies in LLVM since Ark Compiler IR input has implicit casts too,
+ * but LLVM does not permit such conversions.  This function perform those casts if necessary.
+ */
 llvm::Value *LLVMIrConstructor::CoerceValue(llvm::Value *value, DataType::Type sourceType, DataType::Type targetType)
 {
     ASSERT(value != nullptr);
@@ -1180,6 +2519,32 @@ llvm::Value *LLVMIrConstructor::CoerceValue(llvm::Value *value, DataType::Type s
     return builder_.CreateCast(castOp, value, targetLlvmType);
 }
 
+/**
+ * Used in irtoc C++ inlining.
+ *
+ * When we compile irtoc handlers, we do not have ark's types.
+ * For example, panda::Frame is missing.
+ * LLVM AOT uses i8* or i64 instead
+ *
+ * For example, the irtoc handler could look like:
+ *
+ * @code
+ * void MyHandler(i8* myMbject) {
+ *    var clone = CloneObjectEntrypoint(myObject);
+ * }
+ * @endcode
+ *
+ * When we compile interpreter handlers with cpp inlining we have the definition of CloneObjectEntrypoint:
+ *
+ * @code
+ * ObjectHeader *CloneObjectEntrypoint(ObjectHeader *obj) {
+ *   ...
+ * }
+ * @endcode
+ *
+ * and we must invoke the CloneObjectEntrypoint with ObjectHeader* argument, not i8*.
+ * The CoerceValue method converts i8* to ObjectHeader*
+ */
 llvm::Value *LLVMIrConstructor::CoerceValue(llvm::Value *value, llvm::Type *targetType)
 {
     auto valueType = value->getType();
@@ -1188,12 +2553,12 @@ llvm::Value *LLVMIrConstructor::CoerceValue(llvm::Value *value, llvm::Type *targ
     }
 
     if (!valueType->isPointerTy() && targetType->isPointerTy()) {
-        // DataType::POINTER to target_type.
+        // DataType::POINTER to targetType.
         // Example: i64 -> %"class.panda::Frame"*
         return builder_.CreateIntToPtr(value, targetType);
     }
     if (valueType->isPointerTy() && !targetType->isPointerTy()) {
-        // value_type to DataType::POINTER
+        // valueType to DataType::POINTER
         // Example: %"class.panda::coretypes::String"* -> i64
         return builder_.CreatePtrToInt(value, targetType);
     }
@@ -1281,6 +2646,38 @@ void LLVMIrConstructor::FillValueMapForUsers(Inst *inst, llvm::Value *value, Dat
     }
 }
 
+void LLVMIrConstructor::InitializeEntryBlock(bool noInline)
+{
+    if (noInline || IsAlwaysThrowMethod(GetGraph())) {
+        ASSERT(!arkInterface_->IsIrtocMode() && GetGraph()->SupportManagedCode());
+        func_->addFnAttr(llvm::Attribute::NoInline);
+        // This type of linkage prevents return value propagation.
+        // llvm::GlobalValue::isDefinitionExact becomes false and as a result
+        // llvm::canTrackReturnsInterprocedurally() also false.
+        func_->setLinkage(llvm::Function::WeakAnyLinkage);
+    }
+
+    if (GetGraph()->SupportManagedCode()) {
+        func_->addParamAttr(GetMethodArgument()->getArgNo(), llvm::Attribute::NonNull);
+        if (!GetGraph()->GetRuntime()->IsMethodStatic(GetGraph()->GetMethod())) {
+            func_->addParamAttr(GetArgument(0)->getArgNo(), llvm::Attribute::NonNull);
+        }
+    }
+}
+
+void LLVMIrConstructor::MarkAsAllocation(llvm::CallInst *call)
+{
+    llvm::AttrBuilder builder {call->getContext()};
+    /**
+     * When we add allockind(alloc) attribute, then llvm can assume that the function is allocation function.
+     * With this assumption llvm can remove dead allocations
+     */
+    builder.addAllocKindAttr(llvm::AllocFnKind::Alloc);
+    call->addFnAttr(builder.getAttribute(llvm::Attribute::AllocKind));
+    call->addRetAttr(llvm::Attribute::NonNull);
+    call->addRetAttr(llvm::Attribute::NoAlias);
+}
+
 // Instruction Visitors
 
 // Constant and NullPtr are processed directly in GetInputValue
@@ -1298,6 +2695,7 @@ void LLVMIrConstructor::VisitLiveIn(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     ASSERT(inst->GetBasicBlock()->IsStartBlock());
+    ASSERT(!ctor->GetGraph()->SupportManagedCode());
 
     auto regInput = std::find(ctor->cc_.begin(), ctor->cc_.end(), inst->CastToLiveIn()->GetDstReg());
     ASSERT(regInput != ctor->cc_.end());
@@ -1310,7 +2708,7 @@ void LLVMIrConstructor::VisitParameter(GraphVisitor *v, Inst *inst)
 {
     ASSERT(inst->GetBasicBlock()->IsStartBlock());
     auto ctor = static_cast<LLVMIrConstructor *>(v);
-    ASSERT(ctor->GetGraph()->GetMode().IsFastPath());
+    ASSERT(ctor->GetGraph()->SupportManagedCode() || ctor->GetGraph()->GetMode().IsFastPath());
     auto n = ctor->GetArgument(inst->CastToParameter()->GetArgNumber());
     ctor->ValueMapAdd(inst, n, false);
 }
@@ -1337,9 +2735,18 @@ void LLVMIrConstructor::VisitReturn(GraphVisitor *v, Inst *inst)
     ctor->builder_.CreateRet(ret);
 }
 
+// No-op "pseudo" instructions
+void LLVMIrConstructor::VisitTry([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
+void LLVMIrConstructor::VisitSaveState([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
+void LLVMIrConstructor::VisitSaveStateDeoptimize([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
+void LLVMIrConstructor::VisitSafePoint([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
+// NOP and Deoptimize* required after adding CheckElim* passes
+void LLVMIrConstructor::VisitNOP([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst) {}
+
 void LLVMIrConstructor::VisitLiveOut(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
+    ASSERT(!ctor->GetGraph()->SupportManagedCode());
     auto input = ctor->GetInputValue(inst, 0);
 
     auto regInput = std::find(ctor->cc_.begin(), ctor->cc_.end(), inst->GetDstReg());
@@ -1352,6 +2759,338 @@ void LLVMIrConstructor::VisitLiveOut(GraphVisitor *v, Inst *inst)
     auto value = ctor->CoerceValue(input, ctor->GetExactType(inst->GetType()));
     ctor->ccValues_[idx] = value;
     ctor->ValueMapAdd(inst, value, false);
+}
+
+void LLVMIrConstructor::VisitSubOverflowCheck(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto dtype = inst->GetType();
+    auto ltype = ctor->GetExactType(dtype);
+    auto src0 = ctor->GetInputValue(inst, 0);
+    auto src1 = ctor->GetInputValue(inst, 1);
+    ASSERT(inst->GetInputType(0) == inst->GetInputType(1));
+
+    auto arch = ctor->GetGraph()->GetArch();
+    auto dtypeSize = DataType::GetTypeSize(dtype, arch);
+    auto srcTypeSize = DataType::GetTypeSize(inst->GetInputType(0), arch);
+    ASSERT(DataType::Is32Bits(dtype, arch) || DataType::Is64Bits(dtype, arch));
+    if (srcTypeSize < dtypeSize) {
+        src0 = ctor->builder_.CreateSExt(src0, ltype);
+        src1 = ctor->builder_.CreateSExt(src1, ltype);
+    }
+    if (dtypeSize < srcTypeSize) {
+        src0 = ctor->builder_.CreateTrunc(src0, ltype);
+        src1 = ctor->builder_.CreateTrunc(src1, ltype);
+    }
+
+    auto ssubOverflow = ctor->builder_.CreateBinaryIntrinsic(llvm::Intrinsic::ssub_with_overflow, src0, src1);
+    auto result = ctor->builder_.CreateExtractValue(ssubOverflow, {0}, "ssub");
+    auto deoptimize = ctor->builder_.CreateExtractValue(ssubOverflow, {1}, "obit");
+
+    auto exception = RuntimeInterface::EntrypointId::DEOPTIMIZE;
+    ctor->CreateDeoptimizationBranch(inst, deoptimize, exception);
+
+    ctor->ValueMapAdd(inst, result, false);
+}
+
+void LLVMIrConstructor::VisitDeoptimize(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto type = inst->CastToDeoptimize()->GetDeoptimizeType();
+    auto exception = RuntimeInterface::EntrypointId::DEOPTIMIZE;
+    uint64_t value = static_cast<uint64_t>(type) | (inst->GetId() << MinimumBitsToStore(DeoptimizeType::COUNT));
+    auto call = ctor->CreateEntrypointCall(exception, inst, {ctor->builder_.getInt64(value)});
+    call->addFnAttr(llvm::Attribute::get(call->getContext(), "may-deoptimize"));
+    ctor->builder_.CreateUnreachable();
+}
+
+void LLVMIrConstructor::VisitDeoptimizeIf(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto exception = RuntimeInterface::EntrypointId::DEOPTIMIZE;
+    auto deoptimize = ctor->builder_.CreateIsNotNull(ctor->GetInputValue(inst, 0));
+    ctor->CreateDeoptimizationBranch(inst, deoptimize, exception);
+}
+
+void LLVMIrConstructor::VisitNegativeCheck(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto val = ctor->GetInputValue(inst, 0);
+
+    auto deoptimize = ctor->builder_.CreateICmpSLT(val, llvm::Constant::getNullValue(val->getType()));
+    auto exception = RuntimeInterface::EntrypointId::NEGATIVE_ARRAY_SIZE_EXCEPTION;
+    ctor->CreateDeoptimizationBranch(inst, deoptimize, exception, {ctor->ToSSizeT(val)});
+
+    ctor->ValueMapAdd(inst, val, false);
+}
+
+void LLVMIrConstructor::VisitZeroCheck(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto val = ctor->GetInputValue(inst, 0);
+
+    auto deoptimize = ctor->builder_.CreateIsNull(val);
+    auto exception = RuntimeInterface::EntrypointId::ARITHMETIC_EXCEPTION;
+    ctor->CreateDeoptimizationBranch(inst, deoptimize, exception);
+
+    ctor->ValueMapAdd(inst, val, false);
+}
+
+void LLVMIrConstructor::VisitNullCheck(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto obj = ctor->GetInputValue(inst, 0);
+
+    auto deoptimize = ctor->builder_.CreateIsNull(obj);
+    auto exception = RuntimeInterface::EntrypointId::NULL_POINTER_EXCEPTION;
+    ctor->CreateDeoptimizationBranch(inst, deoptimize, exception);
+
+    ctor->ValueMapAdd(inst, obj, false);
+}
+
+void LLVMIrConstructor::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto length = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(length, ctor->builder_.getInt32Ty());
+    auto index = ctor->GetInputValue(inst, 1);
+    ASSERT(index->getType()->isIntegerTy());
+
+    auto deoptimize = ctor->builder_.CreateICmpUGE(index, length);
+    RuntimeInterface::EntrypointId exception;
+    if (inst->CastToBoundsCheck()->IsArray()) {
+        exception = RuntimeInterface::EntrypointId::ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+    } else {
+        exception = RuntimeInterface::EntrypointId::STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+    }
+    ctor->CreateDeoptimizationBranch(inst, deoptimize, exception, {ctor->ToSSizeT(index), ctor->ToSizeT(length)});
+
+    ctor->ValueMapAdd(inst, index, false);
+}
+
+void LLVMIrConstructor::VisitRefTypeCheck(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto array = ctor->GetInputValue(inst, 0);
+    auto ref = ctor->GetInputValue(inst, 1);
+
+    auto &ctx = ctor->func_->getContext();
+    auto compareBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "comparison"), ctor->func_);
+    auto compBaseBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "comp_base"), ctor->func_);
+    auto slowPathBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "slow_path"), ctor->func_);
+    auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "out"), ctor->func_);
+
+    auto runtime = ctor->GetGraph()->GetRuntime();
+    auto entrypoint = RuntimeInterface::EntrypointId::CHECK_STORE_ARRAY_REFERENCE;
+    auto arch = ctor->GetGraph()->GetArch();
+
+    auto cmp = ctor->builder_.CreateIsNotNull(ref);
+    ctor->builder_.CreateCondBr(cmp, compareBb, outBb);
+
+    // Get element class from array
+    ctor->SetCurrentBasicBlock(compareBb);
+    auto arrayClass = ctor->CreateLoadClassFromObject(array);
+    auto elementTypeOffset = runtime->GetClassComponentTypeOffset(arch);
+    auto int8Ty = ctor->builder_.getInt8Ty();
+    auto elementClassPtr = ctor->builder_.CreateConstInBoundsGEP1_32(int8Ty, arrayClass, elementTypeOffset);
+    auto elementClass = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), elementClassPtr);
+    // And class from stored object
+    auto refClass = ctor->CreateLoadClassFromObject(ref);
+
+    // Unlike other checks, there's another check in the runtime function, so don't use CreateDeoptimizationBranch
+    cmp = ctor->builder_.CreateICmpNE(elementClass, refClass);
+    auto branchWeights =
+        llvm::MDBuilder(ctx).createBranchWeights(llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT,
+                                                 llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT);
+    ctor->builder_.CreateCondBr(cmp, compBaseBb, outBb, branchWeights);
+
+    // If the array's element class is Object (Base class is null) - no further check needed
+    ctor->SetCurrentBasicBlock(compBaseBb);
+    auto baseTypeOffset = runtime->GetClassBaseOffset(arch);
+    auto baseClassPtr = ctor->builder_.CreateConstInBoundsGEP1_32(int8Ty, elementClass, baseTypeOffset);
+    auto baseClass = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), baseClassPtr);
+    auto notObjectArray = ctor->builder_.CreateIsNotNull(baseClass);
+    ctor->builder_.CreateCondBr(notObjectArray, slowPathBb, outBb);
+
+    ctor->SetCurrentBasicBlock(slowPathBb);
+    ctor->CreateEntrypointCall(entrypoint, inst, {array, ref});
+    ctor->builder_.CreateBr(outBb);
+
+    ctor->SetCurrentBasicBlock(outBb);
+    ctor->ValueMapAdd(inst, ref, false);
+}
+
+void LLVMIrConstructor::VisitLoadString(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    llvm::Value *result;
+    if (g_options.IsCompilerAotLoadStringPlt() &&
+        !ctor->GetGraph()->GetRuntime()->IsMethodStaticConstructor(ctor->GetGraph()->GetMethod())) {
+        auto aotData = ctor->GetGraph()->GetAotData();
+        ASSERT(aotData != nullptr);
+
+        auto typeId = inst->CastToLoadString()->GetTypeId();
+        auto typeVal = ctor->builder_.getInt32(typeId);
+        auto slotVal = ctor->builder_.getInt32(aotData->GetStringSlotId(typeId));
+        ctor->arkInterface_->GetOrCreateRuntimeFunctionType(
+            ctor->func_->getContext(), ctor->func_->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+            static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::RESOLVE_STRING_AOT));
+
+        auto builtin = LoadString(ctor->func_->getParent());
+        auto call = ctor->builder_.CreateCall(builtin, {typeVal, slotVal}, ctor->CreateSaveStateBundle(inst));
+        ctor->debugData_->SetLocation(call, inst->GetPc());
+        result = call;
+    } else {
+        auto stringType = ctor->builder_.getInt32(inst->CastToLoadString()->GetTypeId());
+        auto entrypointId = RuntimeInterface::EntrypointId::RESOLVE_STRING;
+        result = ctor->CreateEntrypointCall(entrypointId, inst, {ctor->GetMethodArgument(), stringType});
+    }
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitLenArray(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto array = ctor->GetInputValue(inst, 0);
+    auto runtime = ctor->GetGraph()->GetRuntime();
+    bool isString = !inst->CastToLenArray()->IsArray();
+    auto &builder = ctor->builder_;
+
+    auto arrayInput = inst->GetDataFlowInput(0);
+    // Try to extract array length from constructor
+    if (arrayInput->GetOpcode() == Opcode::NewArray) {
+        auto size = ctor->GetInputValue(arrayInput, NewArrayInst::INDEX_SIZE);
+        ctor->ValueMapAdd(inst, size);
+        return;
+    }
+    auto builtin = LenArray(ctor->func_->getParent());
+    auto arch = ctor->GetGraph()->GetArch();
+    auto offset = isString ? runtime->GetStringLengthOffset(arch) : runtime->GetArrayLengthOffset(arch);
+    auto len = ctor->builder_.CreateCall(builtin, {array, builder.getInt32(offset)});
+
+    ctor->ValueMapAdd(inst, len);
+}
+
+void LLVMIrConstructor::VisitLoadArray(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto loadArray = inst->CastToLoadArray();
+
+    auto array = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(array, ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+
+    auto dtype = inst->GetType();
+    auto ltype = ctor->GetExactType(dtype);
+    auto arch = ctor->GetGraph()->GetArch();
+    uint32_t dataOffset = ctor->GetGraph()->GetRuntime()->GetArrayDataOffset(arch);
+    if (!loadArray->IsArray()) {
+        dataOffset = ctor->GetGraph()->GetRuntime()->GetStringDataOffset(arch);
+    }
+    auto ptrData = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), array, dataOffset);
+
+    llvm::Value *ptrElem = ctor->builder_.CreateInBoundsGEP(ltype, ptrData, ctor->GetInputValue(inst, 1));
+
+    llvm::Value *n = ctor->builder_.CreateLoad(ltype, ptrElem);
+    ctor->ValueMapAdd(inst, n);
+}
+
+void LLVMIrConstructor::VisitLoadCompressedStringChar(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto loadString = inst->CastToLoadCompressedStringChar();
+
+    ASSERT(inst->GetType() == DataType::UINT16);
+
+    auto array = ctor->GetInputValue(loadString, 0);
+    auto index = ctor->GetInputValue(loadString, 1);
+    auto length = ctor->GetInputValue(loadString, 2);
+
+    ASSERT(ctor->GetGraph()->GetRuntime()->GetStringCompressionMask() == 1U);
+    auto compressionMask = ctor->builder_.getInt32(ctor->GetGraph()->GetRuntime()->GetStringCompressionMask());
+    auto dataOff = ctor->GetGraph()->GetRuntime()->GetStringDataOffset(ctor->GetGraph()->GetArch());
+    auto chars = ctor->builder_.CreateConstInBoundsGEP1_64(ctor->builder_.getInt8Ty(), array, dataOff);
+    auto isCompressed = ctor->builder_.CreateIsNull(ctor->builder_.CreateAnd(length, compressionMask));
+
+    /**
+     * int32_t CompressedCharAt(uint8_t *string, int32_t index) {
+     *     int32_t length = LenArray(string, LENGTH_OFFSET, SHIFT);
+     *     bool isCompressed = (length & COMPRESSION_MASK) == 0;
+     *     uint8_t *chars = string + DATA_OFFSET;
+     *
+     *     uint16_t c;
+     *     if (isCompressed) {
+     *         // compressedBb
+     *         c = static_cast<uint16_t>(chars[index]);
+     *     } else {
+     *         // uncompressedBb
+     *         c = reinterpret_cast<uint16_t *>(chars)[index];
+     *     }
+     *     // Coercing
+     *     return static_cast<int32_t>(c);
+     * }
+     */
+    auto compressedBb =
+        llvm::BasicBlock::Create(ctor->func_->getContext(), CreateBasicBlockName(inst, "compressed_bb"), ctor->func_);
+    auto uncompressedBb =
+        llvm::BasicBlock::Create(ctor->func_->getContext(), CreateBasicBlockName(inst, "uncompressed_bb"), ctor->func_);
+    auto continuation =
+        llvm::BasicBlock::Create(ctor->func_->getContext(), CreateBasicBlockName(inst, "char_at_cont"), ctor->func_);
+    ctor->builder_.CreateCondBr(isCompressed, compressedBb, uncompressedBb);
+    llvm::Value *compressedChar;
+    {
+        ctor->SetCurrentBasicBlock(compressedBb);
+        ASSERT_TYPE(chars, ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+        auto charAt = ctor->builder_.CreateInBoundsGEP(ctor->builder_.getInt8Ty(), chars, index);
+        auto character = ctor->builder_.CreateLoad(ctor->builder_.getInt8Ty(), charAt);
+        compressedChar = ctor->builder_.CreateSExt(character, ctor->builder_.getInt16Ty());
+        ctor->builder_.CreateBr(continuation);
+    }
+
+    llvm::Value *uncompressedChar;
+    {
+        ctor->SetCurrentBasicBlock(uncompressedBb);
+        auto u16CharAt = ctor->builder_.CreateInBoundsGEP(ctor->builder_.getInt16Ty(), chars, index);
+        uncompressedChar = ctor->builder_.CreateLoad(ctor->builder_.getInt16Ty(), u16CharAt);
+        ctor->builder_.CreateBr(continuation);
+    }
+    ctor->SetCurrentBasicBlock(continuation);
+
+    auto charAt = ctor->builder_.CreatePHI(ctor->builder_.getInt16Ty(), 2U);
+    charAt->addIncoming(compressedChar, compressedBb);
+    charAt->addIncoming(uncompressedChar, uncompressedBb);
+    ctor->ValueMapAdd(inst, charAt);
+}
+
+void LLVMIrConstructor::VisitStoreArray(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto array = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(array, ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+    auto value = ctor->GetInputValue(inst, 2U);
+
+    auto dtype = DataType::IsReference(inst->GetType()) ? DataType::UINT32 : inst->GetType();
+    auto arch = ctor->GetGraph()->GetArch();
+    auto ltype = ctor->GetExactType(dtype);
+    auto dataOff = ctor->GetGraph()->GetRuntime()->GetArrayDataOffset(arch);
+    auto ptrData = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), array, dataOff);
+    auto index = ctor->GetInputValue(inst, 1);
+    auto ptrElem = ctor->builder_.CreateInBoundsGEP(ltype, ptrData, index);
+
+    // Pre
+    if (inst->CastToStoreArray()->GetNeedBarrier()) {
+        ctor->CreatePreWRB(inst, ptrElem);
+    }
+    // Write
+    ctor->builder_.CreateStore(value, ptrElem);
+    // Post
+    if (inst->CastToStoreArray()->GetNeedBarrier()) {
+        auto indexOffset = ctor->builder_.CreateBinOp(llvm::Instruction::Shl, index,
+                                                      ctor->builder_.getInt32(DataType::ShiftByType(dtype, arch)));
+        auto offset = ctor->builder_.CreateBinOp(llvm::Instruction::Add, indexOffset, ctor->builder_.getInt32(dataOff));
+        ctor->CreatePostWRB(inst, array, offset, value);
+    }
 }
 
 void LLVMIrConstructor::VisitLoad(GraphVisitor *v, Inst *inst)
@@ -1440,6 +3179,132 @@ void LLVMIrConstructor::VisitStoreI(GraphVisitor *v, Inst *inst)
     if (inst->CastToStoreI()->GetNeedBarrier()) {
         ctor->CreatePostWRB(inst, srcPtr, ctor->builder_.getInt32(index), value);
     }
+}
+
+void LLVMIrConstructor::VisitLoadObject(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto obj = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(obj, ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+
+    auto field = inst->CastToLoadObject()->GetObjField();
+    auto dataOff = ctor->GetGraph()->GetRuntime()->GetFieldOffset(field);
+    auto ptrData = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), obj, dataOff);
+
+    auto n = ctor->CreateLoadWithOrdering(inst, ptrData, ToAtomicOrdering(inst->CastToLoadObject()->GetVolatile()));
+    ctor->ValueMapAdd(inst, n);
+}
+
+void LLVMIrConstructor::VisitStoreObject(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto obj = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(obj, ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+    auto value = ctor->GetInputValue(inst, 1);
+
+    auto field = inst->CastToStoreObject()->GetObjField();
+    auto dataOff = ctor->GetGraph()->GetRuntime()->GetFieldOffset(field);
+
+    auto ptrData = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), obj, dataOff);
+
+    // Pre
+    if (inst->CastToStoreObject()->GetNeedBarrier()) {
+        ctor->CreatePreWRB(inst, ptrData);
+    }
+    // Write
+    ctor->CreateStoreWithOrdering(value, ptrData, ToAtomicOrdering(inst->CastToStoreObject()->GetVolatile()));
+    // Post
+    if (inst->CastToStoreObject()->GetNeedBarrier()) {
+        ctor->CreatePostWRB(inst, obj, ctor->builder_.getInt32(dataOff), value);
+    }
+}
+
+void LLVMIrConstructor::VisitResolveObjectField(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto typeId = ctor->builder_.getInt32(inst->CastToResolveObjectField()->GetTypeId());
+
+    auto entrypointId = RuntimeInterface::EntrypointId::GET_FIELD_OFFSET;
+    auto offset = ctor->CreateEntrypointCall(entrypointId, inst, {ctor->GetMethodArgument(), typeId});
+
+    ctor->ValueMapAdd(inst, offset);
+}
+
+void LLVMIrConstructor::VisitLoadResolvedObjectField(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto obj = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(obj, ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+
+    auto offset = ctor->GetInputValue(inst, 1);
+    auto ptrData = ctor->builder_.CreateInBoundsGEP(ctor->builder_.getInt8Ty(), obj, offset);
+
+    auto n = ctor->CreateLoadWithOrdering(inst, ptrData, LLVMArkInterface::VOLATILE_ORDER);
+    ctor->ValueMapAdd(inst, n);
+}
+
+void LLVMIrConstructor::VisitStoreResolvedObjectField(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto obj = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(obj, ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+    auto value = ctor->GetInputValue(inst, 1);
+
+    auto offset = ctor->GetInputValue(inst, 2);
+    auto ptrData = ctor->builder_.CreateInBoundsGEP(ctor->builder_.getInt8Ty(), obj, offset);
+
+    // Pre
+    if (inst->CastToStoreResolvedObjectField()->GetNeedBarrier()) {
+        ctor->CreatePreWRB(inst, ptrData);
+    }
+    // Write
+    ctor->CreateStoreWithOrdering(value, ptrData, LLVMArkInterface::VOLATILE_ORDER);
+    // Post
+    if (inst->CastToStoreResolvedObjectField()->GetNeedBarrier()) {
+        ctor->CreatePostWRB(inst, obj, offset, value);
+    }
+}
+
+void LLVMIrConstructor::VisitResolveObjectFieldStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto resolverInst = inst->CastToResolveObjectFieldStatic();
+
+    auto entrypoint = RuntimeInterface::EntrypointId::GET_UNKNOWN_STATIC_FIELD_MEMORY_ADDRESS;
+
+    auto typeId = ctor->builder_.getInt32(resolverInst->GetTypeId());
+    auto slotPtr = llvm::Constant::getNullValue(ctor->builder_.getPtrTy());
+
+    auto ptrInt = ctor->CreateEntrypointCall(entrypoint, inst, {ctor->GetMethodArgument(), typeId, slotPtr});
+    auto n = ctor->builder_.CreateIntToPtr(ptrInt, ctor->builder_.getPtrTy());
+    ctor->ValueMapAdd(inst, n);
+}
+
+void LLVMIrConstructor::VisitLoadResolvedObjectFieldStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto offset = ctor->GetInputValue(inst, 0);
+
+    auto casted = ctor->builder_.CreateIntToPtr(offset, ctor->builder_.getPtrTy());
+    auto n = ctor->CreateLoadWithOrdering(inst, casted, LLVMArkInterface::VOLATILE_ORDER);
+    ctor->ValueMapAdd(inst, n);
+}
+
+void LLVMIrConstructor::VisitStoreResolvedObjectFieldStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    [[maybe_unused]] auto storeInst = inst->CastToStoreResolvedObjectFieldStatic();
+
+    ASSERT(!DataType::IsReference(inst->GetType()));
+    ASSERT(!storeInst->GetNeedBarrier());
+
+    auto value = ctor->GetInputValue(inst, 1);
+    auto destPtr = ctor->GetInputValue(inst, 0);
+
+    [[maybe_unused]] auto dtype = inst->GetType();
+    ASSERT(value->getType()->getScalarSizeInBits() == DataType::GetTypeSize(dtype, ctor->GetGraph()->GetArch()));
+    ctor->CreateStoreWithOrdering(value, destPtr, LLVMArkInterface::VOLATILE_ORDER);
 }
 
 void LLVMIrConstructor::VisitBitcast(GraphVisitor *v, Inst *inst)
@@ -1668,14 +3533,61 @@ void LLVMIrConstructor::VisitMod(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto type = inst->GetType();
-    ASSERT(IsInteger(type));
     llvm::Value *n;
-    if (IsSignedInteger(type)) {
-        n = ctor->CreateSignDivMod(inst, llvm::Instruction::SRem);
+    if (IsFloatType(type)) {
+        n = ctor->CreateBinaryOp(inst, llvm::Instruction::FRem);
+    } else if (IsInteger(type)) {
+        if (IsSignedInteger(type)) {
+            n = ctor->CreateSignDivMod(inst, llvm::Instruction::SRem);
+        } else {
+            n = ctor->CreateBinaryOp(inst, llvm::Instruction::URem);
+        }
     } else {
-        n = ctor->CreateBinaryOp(inst, llvm::Instruction::URem);
+        UNREACHABLE();
     }
     ctor->ValueMapAdd(inst, n);
+}
+
+void LLVMIrConstructor::VisitMin(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(g_options.IsCompilerEncodeIntrinsics());
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto operType = inst->CastToMin()->GetType();
+    llvm::Value *x = ctor->GetInputValue(inst, 0);
+    llvm::Value *y = ctor->GetInputValue(inst, 1);
+    llvm::Intrinsic::ID llvmId = 0;
+
+    if (DataType::IsFloatType(operType)) {
+        llvmId = llvm::Intrinsic::minimum;
+    } else if (IsInteger(operType)) {
+        llvmId = DataType::IsTypeSigned(operType) ? llvm::Intrinsic::smin : llvm::Intrinsic::umin;
+    } else {
+        ASSERT_DO(false, (std::cerr << "Min is not supported for type " << DataType::ToString(operType)));
+        UNREACHABLE();
+    }
+    auto min = ctor->builder_.CreateBinaryIntrinsic(llvmId, x, y);
+    ctor->ValueMapAdd(inst, min);
+}
+
+void LLVMIrConstructor::VisitMax(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(g_options.IsCompilerEncodeIntrinsics());
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto operType = inst->CastToMax()->GetType();
+    llvm::Value *x = ctor->GetInputValue(inst, 0);
+    llvm::Value *y = ctor->GetInputValue(inst, 1);
+    llvm::Intrinsic::ID llvmId = 0;
+
+    if (DataType::IsFloatType(operType)) {
+        llvmId = llvm::Intrinsic::maximum;
+    } else if (IsInteger(operType)) {
+        llvmId = DataType::IsTypeSigned(operType) ? llvm::Intrinsic::smax : llvm::Intrinsic::umax;
+    } else {
+        ASSERT_DO(false, (std::cerr << "Max is not supported for type " << DataType::ToString(operType)));
+        UNREACHABLE();
+    }
+    auto max = ctor->builder_.CreateBinaryIntrinsic(llvmId, x, y);
+    ctor->ValueMapAdd(inst, max);
 }
 
 void LLVMIrConstructor::VisitCompare(GraphVisitor *v, Inst *inst)
@@ -1736,7 +3648,6 @@ void LLVMIrConstructor::VisitNeg(GraphVisitor *v, Inst *inst)
 
 void LLVMIrConstructor::VisitNot(GraphVisitor *v, Inst *inst)
 {
-    ASSERT(inst->GetInputsCount() == 1);
     ASSERT(IsInteger(inst->GetInputType(0)));
 
     auto ctor = static_cast<LLVMIrConstructor *>(v);
@@ -1776,6 +3687,7 @@ void LLVMIrConstructor::VisitIfImm(GraphVisitor *v, Inst *inst)
 void LLVMIrConstructor::VisitIf(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
+    ASSERT(!ctor->GetGraph()->SupportManagedCode());
     auto x = ctor->GetInputValue(inst, 0);
     auto y = ctor->GetInputValue(inst, 1);
     ASSERT(x->getType()->isIntOrPtrTy());
@@ -1866,23 +3778,676 @@ void LLVMIrConstructor::VisitPhi(GraphVisitor *v, Inst *inst)
     ctor->ValueMapAdd(inst, phi);
 }
 
+void LLVMIrConstructor::VisitMultiArray(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto type = ctor->GetInputValue(inst, 0);
+    auto sizesCount = inst->GetInputsCount() - 2U;
+    auto lsizesCount = ctor->builder_.getInt32(sizesCount);
+    ArenaVector<llvm::Value *> args(ctor->GetGraph()->GetLocalAllocator()->Adapter());
+    args.push_back(type);
+    args.push_back(lsizesCount);
+
+    auto ltype = ctor->builder_.getInt64Ty();
+    auto dtype = DataType::INT64;
+    if (!Is64BitsArch(ctor->GetGraph()->GetArch())) {
+        ltype = ctor->builder_.getInt32Ty();
+        dtype = DataType::INT32;
+    }
+
+    auto sizes = ctor->CreateAllocaForArgs(ltype, sizesCount);
+
+    // Store multi-array sizes
+    for (size_t i = 1; i < sizesCount + 1; i++) {
+        auto size = ctor->GetInputValue(inst, i);
+        if (dtype != inst->GetInputType(i)) {
+            size = ctor->CoerceValue(size, inst->GetInputType(i), dtype);
+        }
+        auto gep = ctor->builder_.CreateConstInBoundsGEP1_32(ltype, sizes, i - 1);
+        ctor->builder_.CreateStore(size, gep);
+    }
+
+    args.push_back(sizes);
+
+    auto entrypointId = RuntimeInterface::EntrypointId::CREATE_MULTI_ARRAY;
+    auto result = ctor->CreateEntrypointCall(entrypointId, inst, args);
+    ctor->MarkAsAllocation(result);
+    if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
+        ctor->CreateMemoryFence(memory_order::RELEASE);
+    }
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitInitEmptyString(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto eid = RuntimeInterface::EntrypointId::CREATE_EMPTY_STRING;
+    auto result = ctor->CreateEntrypointCall(eid, inst);
+    ctor->MarkAsAllocation(result);
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitInitString(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto strInit = inst->CastToInitString();
+    auto arg = ctor->GetInputValue(inst, 0);
+    if (strInit->IsFromString()) {
+        auto result = ctor->CreateNewStringFromStringTlab(inst, arg);
+        ctor->ValueMapAdd(inst, result);
+    } else {
+        auto runtime = ctor->GetGraph()->GetRuntime();
+        auto arch = ctor->GetGraph()->GetArch();
+        auto lengthOffset = runtime->GetArrayLengthOffset(arch);
+        auto lengthPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), arg, lengthOffset);
+        auto length = ctor->builder_.CreateLoad(ctor->builder_.getInt32Ty(), lengthPtr);
+        auto result = ctor->CreateNewStringFromCharsTlab(
+            inst, llvm::Constant::getNullValue(ctor->builder_.getInt32Ty()), length, arg);
+        ctor->ValueMapAdd(inst, result);
+    }
+}
+
+void LLVMIrConstructor::VisitNewArray(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto method = inst->CastToNewArray()->GetMethod();
+
+    auto type = ctor->GetInputValue(inst, 0);
+    auto size = ctor->ToSizeT(ctor->GetInputValue(inst, 1));
+    auto arrayType = inst->CastToNewArray()->GetTypeId();
+    auto runtime = ctor->GetGraph()->GetRuntime();
+    auto maxTlabSize = runtime->GetTLABMaxSize();
+    llvm::CallInst *result;
+    if (maxTlabSize == 0) {
+        auto entrypointId = RuntimeInterface::EntrypointId::CREATE_ARRAY;
+        result = ctor->CreateEntrypointCall(entrypointId, inst, {type, size});
+        ctor->MarkAsAllocation(result);
+        ctor->ValueMapAdd(inst, result);
+        return;
+    }
+
+    auto lenInst = inst->GetDataFlowInput(0);
+    auto classArraySize = runtime->GetClassArraySize(ctor->GetGraph()->GetArch());
+    uint64_t arraySize = 0;
+    uint64_t elementSize = runtime->GetArrayElementSize(method, arrayType);
+    uint64_t alignment = runtime->GetTLABAlignment();
+    ASSERT(alignment != 0);
+
+    if (lenInst->GetOpcode() == Opcode::Constant) {
+        ASSERT(lenInst->GetType() == DataType::INT64);
+        arraySize = lenInst->CastToConstant()->GetIntValue() * elementSize + classArraySize;
+        arraySize = (arraySize & ~(alignment - 1U)) + ((arraySize % alignment) != 0U ? alignment : 0U);
+        if (arraySize > maxTlabSize) {
+            auto entrypointId = RuntimeInterface::EntrypointId::CREATE_ARRAY;
+            result = ctor->CreateEntrypointCall(entrypointId, inst, {type, size});
+            ctor->MarkAsAllocation(result);
+            ctor->ValueMapAdd(inst, result);
+            return;
+        }
+    }
+    auto eid = GetAllocateArrayTlabEntrypoint(elementSize);
+    result = ctor->CreateFastPathCall(inst, eid, {type, size});
+    ctor->MarkAsAllocation(result);
+    if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
+        ctor->CreateMemoryFence(memory_order::RELEASE);
+    }
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitNewObject(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto newObjInst = inst->CastToNewObject();
+    auto srcInst = newObjInst->GetInput(0).GetInst();
+
+    auto runtime = ctor->GetGraph()->GetRuntime();
+    auto maxTlabSize = runtime->GetTLABMaxSize();
+    if (maxTlabSize == 0 || srcInst->GetOpcode() != Opcode::LoadAndInitClass) {
+        auto runtimeCall = ctor->CreateNewObjectWithRuntime(inst);
+        ctor->ValueMapAdd(inst, runtimeCall);
+        return;
+    }
+
+    auto klass = srcInst->CastToLoadAndInitClass()->GetClass();
+    if (klass == nullptr || !runtime->CanUseTlabForClass(klass)) {
+        auto runtimeCall = ctor->CreateNewObjectWithRuntime(inst);
+        ctor->ValueMapAdd(inst, runtimeCall);
+        return;
+    }
+    auto classSize = runtime->GetClassSize(klass);
+    auto alignment = runtime->GetTLABAlignment();
+    ASSERT(alignment != 0);
+
+    classSize = (classSize & ~(alignment - 1U)) + ((classSize % alignment) != 0U ? alignment : 0U);
+    if (classSize > maxTlabSize) {
+        auto runtimeCall = ctor->CreateNewObjectWithRuntime(inst);
+        ctor->ValueMapAdd(inst, runtimeCall);
+        return;
+    }
+
+    auto initClass = ctor->GetInputValue(inst, 0);
+    auto klassSize = ctor->ToSizeT(ctor->builder_.getInt32(classSize));
+    auto eid = RuntimeInterface::EntrypointId::ALLOCATE_OBJECT_TLAB;
+    auto runtimeCall = ctor->CreateFastPathCall(inst, eid, {initClass, klassSize});
+    ctor->MarkAsAllocation(runtimeCall);
+    if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
+        ctor->CreateMemoryFence(memory_order::RELEASE);
+    }
+    ctor->ValueMapAdd(inst, runtimeCall);
+}
+
+void LLVMIrConstructor::VisitCallStatic(GraphVisitor *v, Inst *inst)
+{
+    auto call = inst->CastToCallStatic();
+    ASSERT(!call->IsInlined());
+
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto methodPtr = ctor->GetGraph()->GetMethod();
+    auto methodId = call->GetCallMethodId();
+    auto callee = ctor->GetGraph()->GetRuntime()->GetMethodById(methodPtr, methodId);
+    ASSERT(callee != nullptr);
+    // Create a declare statement if we haven't met this function yet
+    llvm::Function *func = ctor->arkInterface_->GetFunctionByMethodPtr(callee);
+    if (func == nullptr) {
+        /**
+         * Optimistically assume we can compile callee and just haven't met
+         * it yet.  So, create function declaration.
+         */
+        auto methodName = ctor->arkInterface_->GetUniqMethodName(callee);
+        auto functionProto = ctor->GetFunctionTypeForCall(call);
+        auto function = CreateFunctionDeclaration(functionProto, methodName, ctor->func_->getParent());
+        function->addFnAttr("frame-pointer", "all");
+
+        ctor->arkInterface_->PutFunction(callee, function);
+        func = function;
+    }
+    ctor->arkInterface_->RememberFunctionCall(ctor->func_, func, methodId);
+
+    // Replaced to real callee in the PandaRuntimeLowering
+    auto args = ctor->GetArgumentsForCall(ctor->GetMethodArgument(), call);
+    auto result = ctor->builder_.CreateCall(func, args, ctor->CreateSaveStateBundle(inst));
+    ctor->debugData_->SetLocation(result, inst->GetPc());
+
+    if (inst->GetType() != DataType::VOID) {
+        ctor->ValueMapAdd(inst, result);
+    }
+
+    if (ctor->GetGraph()->GetRuntime()->IsMethodExternal(methodPtr, callee) || IsAlwaysThrowBasicBlock(inst)) {
+        result->addAttributeAtIndex(llvm::AttributeList::FunctionIndex, llvm::Attribute::NoInline);
+    }
+}
+
+void LLVMIrConstructor::VisitResolveStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto call = inst->CastToResolveStatic();
+
+    auto slotPtr = llvm::Constant::getNullValue(ctor->builder_.getPtrTy());
+    static constexpr auto ENTRYPOINT_ID = RuntimeInterface::EntrypointId::GET_UNKNOWN_CALLEE_METHOD;
+    auto methodPtr = ctor->CreateEntrypointCall(
+        ENTRYPOINT_ID, inst,
+        {ctor->GetMethodArgument(), ctor->ToSizeT(ctor->builder_.getInt32(call->GetCallMethodId())), slotPtr});
+    auto method = ctor->builder_.CreateIntToPtr(methodPtr, ctor->builder_.getPtrTy());
+
+    ctor->ValueMapAdd(inst, method);
+}
+
+void LLVMIrConstructor::VisitCallResolvedStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto call = inst->CastToCallResolvedStatic();
+
+    auto method = ctor->GetInputValue(inst, 0);
+
+    // Since we are creating call through raw pointer, we need clear type, without frame.
+    llvm::FunctionType *fType = ctor->GetFunctionTypeForCall(call);
+    auto args = ctor->GetArgumentsForCall(method, call, true);  // skip first input
+
+    auto offset = ctor->GetGraph()->GetRuntime()->GetCompiledEntryPointOffset(ctor->GetGraph()->GetArch());
+    auto entrypointPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), method, offset);
+    auto entrypoint = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), entrypointPtr);
+
+    auto result = ctor->builder_.CreateCall(fType, entrypoint, args, ctor->CreateSaveStateBundle(inst));
+    if (inst->GetType() != DataType::VOID) {
+        ctor->ValueMapAdd(inst, result);
+    }
+    ctor->WrapArkCall(inst, result);
+}
+
+void LLVMIrConstructor::VisitCallVirtual(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto graph = ctor->GetGraph();
+    auto call = inst->CastToCallVirtual();
+    auto runtime = ctor->GetGraph()->GetRuntime();
+    ASSERT_PRINT(graph->GetAotData()->GetUseCha(),
+                 std::string("GetUseCha must be 'true' but was 'false' for method = '") +
+                     runtime->GetMethodFullName(graph->GetMethod()) + "'");
+
+    llvm::Value *thiz = ctor->GetInputValue(inst, 0);
+    llvm::Value *method;
+    if (runtime->IsInterfaceMethod(call->GetCallMethod())) {
+        method = ctor->CreateResolveVirtualCall(inst, thiz, call->GetCallMethodId());
+    } else {
+        method = ctor->CreateLoadMethodUsingVTable(thiz, call);
+    }
+
+    // Since we are creating call through raw pointer, we need clear type, without frame.
+    llvm::FunctionType *fType = ctor->GetFunctionTypeForCall(call);
+
+    auto args = ctor->GetArgumentsForCall(method, call);
+    auto offset = runtime->GetCompiledEntryPointOffset(graph->GetArch());
+    auto entrypointPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), method, offset);
+    auto entrypoint = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), entrypointPtr);
+
+    auto result = ctor->builder_.CreateCall(fType, entrypoint, args, ctor->CreateSaveStateBundle(inst));
+    if (inst->GetType() != DataType::VOID) {
+        ctor->ValueMapAdd(inst, result);
+    }
+    ctor->WrapArkCall(inst, result);
+}
+
+void LLVMIrConstructor::VisitResolveVirtual(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto resolver = inst->CastToResolveVirtual();
+    llvm::Value *thiz = ctor->GetInputValue(inst, 0);
+    llvm::Value *method;
+
+    method = ctor->CreateResolveVirtualCall(inst, thiz, resolver->GetCallMethodId());
+
+    ASSERT(method->getType()->isPointerTy());
+    ctor->ValueMapAdd(inst, method);
+}
+
+void LLVMIrConstructor::VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto call = inst->CastToCallResolvedVirtual();
+
+    auto method = ctor->GetInputValue(inst, 0);
+    // Since we are creating call through raw pointer, we need clear type, without frame.
+    llvm::FunctionType *fType = ctor->GetFunctionTypeForCall(call);
+
+    auto args = ctor->GetArgumentsForCall(method, call, true);
+    auto offset = ctor->GetGraph()->GetRuntime()->GetCompiledEntryPointOffset(ctor->GetGraph()->GetArch());
+    auto entrypointPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), method, offset);
+    auto entrypoint = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), entrypointPtr);
+
+    auto result = ctor->builder_.CreateCall(fType, entrypoint, args, ctor->CreateSaveStateBundle(inst));
+    if (inst->GetType() != DataType::VOID) {
+        ctor->ValueMapAdd(inst, result);
+    }
+    ctor->WrapArkCall(inst, result);
+}
+
+void LLVMIrConstructor::VisitAbs(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(g_options.IsCompilerEncodeIntrinsics());
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    DataType::Type pandaType = inst->GetInputType(0);
+    auto argument = ctor->GetInputValue(inst, 0);
+    llvm::Value *result = nullptr;
+    if (DataType::IsFloatType(pandaType)) {
+        result = ctor->builder_.CreateUnaryIntrinsic(llvm::Intrinsic::fabs, argument, nullptr);
+    } else if (IsInteger(pandaType)) {
+        result = ctor->builder_.CreateBinaryIntrinsic(llvm::Intrinsic::abs, argument, ctor->builder_.getFalse());
+    } else {
+        ASSERT_DO(false, (std::cerr << "Abs is not supported for type " << DataType::ToString(pandaType)));
+        UNREACHABLE();
+    }
+    ASSERT(result != nullptr);
+    ctor->ValueMapAdd(inst, result);
+}
+
 void LLVMIrConstructor::VisitIntrinsic(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto entryId = inst->CastToIntrinsic()->GetIntrinsicId();
 
-    // Some intrinsics are lowered into some code or LLVM intrinsics. For LLVM intrinsics final decision about
-    // lowering into code or call is made later in IntrinsicsLowering
+    // Some Ark intrinsics are lowered into code or LLVM intrinsics, the IntrinsicsLowering pass
+    // makes final desicion for them to be lowered into code or calling Ark entrypoint.
     if (g_options.IsCompilerEncodeIntrinsics()) {
         bool lowered = ctor->TryEmitIntrinsic(inst, entryId);
         if (lowered) {
             return;
         }
-        // Every intrinsic that panda can encode should be lowered
-        ASSERT(!EncodesBuiltin(ctor->GetGraph()->GetRuntime(), entryId, ctor->GetGraph()->GetArch()));
+    }
+    // Create call otherwise
+    auto result = ctor->CreateIntrinsicCall(inst);
+    if (inst->GetType() != DataType::VOID) {
+        ctor->ValueMapAdd(inst, result);
+    }
+}
+
+void LLVMIrConstructor::VisitMonitor(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    MonitorInst *monitor = inst->CastToMonitor();
+    auto object = ctor->GetInputValue(inst, 0);
+    auto eid = monitor->IsEntry() ? RuntimeInterface::EntrypointId::MONITOR_ENTER_FAST_PATH
+                                  : RuntimeInterface::EntrypointId::MONITOR_EXIT_FAST_PATH;
+    auto call = ctor->CreateEntrypointCall(eid, inst, {object});
+    call->setCallingConv(llvm::CallingConv::ArkFast1);
+
+    ctor->WrapArkCall(inst, call);
+}
+
+void LLVMIrConstructor::VisitSqrt(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(g_options.IsCompilerEncodeIntrinsics());
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto argument = ctor->GetInputValue(inst, 0);
+    auto result = ctor->builder_.CreateUnaryIntrinsic(llvm::Intrinsic::sqrt, argument, nullptr);
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitInitClass(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto classId = inst->CastToInitClass()->GetTypeId();
+
+    auto constexpr INITIALIZED = true;
+    ctor->CreateLoadClassById(inst, classId, INITIALIZED);
+}
+
+void LLVMIrConstructor::VisitLoadClass(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto classId = inst->CastToLoadClass()->GetTypeId();
+
+    auto constexpr INITIALIZED = true;
+    auto clsPtr = ctor->CreateLoadClassById(inst, classId, !INITIALIZED);
+    ctor->ValueMapAdd(inst, clsPtr);
+}
+
+void LLVMIrConstructor::VisitLoadAndInitClass(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto classId = inst->CastToLoadAndInitClass()->GetTypeId();
+
+    auto constexpr INITIALIZED = true;
+    auto clsPtr = ctor->CreateLoadClassById(inst, classId, INITIALIZED);
+    ctor->ValueMapAdd(inst, clsPtr);
+}
+
+void LLVMIrConstructor::VisitUnresolvedLoadAndInitClass(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto classId = inst->CastToUnresolvedLoadAndInitClass()->GetTypeId();
+
+    auto constexpr INITIALIZED = true;
+    auto clsPtr = ctor->CreateLoadClassById(inst, classId, INITIALIZED);
+    ctor->ValueMapAdd(inst, clsPtr);
+}
+
+void LLVMIrConstructor::VisitLoadStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto klass = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(klass, ctor->builder_.getPtrTy());
+
+    auto offset = ctor->GetGraph()->GetRuntime()->GetFieldOffset(inst->CastToLoadStatic()->GetObjField());
+    auto fieldPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), klass, offset);
+
+    auto n = ctor->CreateLoadWithOrdering(inst, fieldPtr, ToAtomicOrdering(inst->CastToLoadStatic()->GetVolatile()));
+    ctor->ValueMapAdd(inst, n);
+}
+
+void LLVMIrConstructor::VisitStoreStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto klass = ctor->GetInputValue(inst, 0);
+    ASSERT_TYPE(klass, ctor->builder_.getPtrTy());
+    auto value = ctor->GetInputValue(inst, 1);
+
+    auto offset = ctor->GetGraph()->GetRuntime()->GetFieldOffset(inst->CastToStoreStatic()->GetObjField());
+    auto fieldPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), klass, offset);
+
+    // Pre
+    if (inst->CastToStoreStatic()->GetNeedBarrier()) {
+        ctor->CreatePreWRB(inst, fieldPtr);
+    }
+    // Write
+    ctor->CreateStoreWithOrdering(value, fieldPtr, ToAtomicOrdering(inst->CastToStoreStatic()->GetVolatile()));
+    // Post
+    if (inst->CastToStoreStatic()->GetNeedBarrier()) {
+        auto managed = ctor->CreateLoadManagedClassFromClass(klass);
+        ctor->CreatePostWRB(inst, managed, ctor->builder_.getInt32(0), value);
+    }
+}
+
+void LLVMIrConstructor::VisitUnresolvedStoreStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto unresolvedStore = inst->CastToUnresolvedStoreStatic();
+
+    ASSERT(unresolvedStore->GetNeedBarrier());
+    ASSERT(DataType::IsReference(inst->GetType()));
+
+    auto typeId = ctor->builder_.getInt32(unresolvedStore->GetTypeId());
+    auto value = ctor->GetInputValue(inst, 0);
+
+    auto entrypoint = RuntimeInterface::EntrypointId::UNRESOLVED_STORE_STATIC_BARRIERED;
+    ctor->CreateEntrypointCall(entrypoint, inst, {ctor->GetMethodArgument(), typeId, value});
+}
+
+void LLVMIrConstructor::VisitLoadConstArray(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto arrayType = inst->CastToLoadConstArray()->GetTypeId();
+
+    llvm::Value *result = ctor->CreateEntrypointCall(RuntimeInterface::EntrypointId::RESOLVE_LITERAL_ARRAY, inst,
+                                                     {ctor->GetMethodArgument(), ctor->builder_.getInt32(arrayType)});
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitFillConstArray(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(!DataType::IsReference(inst->GetType()));
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto &builder = ctor->builder_;
+
+    auto runtime = ctor->GetGraph()->GetRuntime();
+    auto arrayType = inst->CastToFillConstArray()->GetTypeId();
+    auto arch = ctor->GetGraph()->GetArch();
+    auto src = ctor->GetInputValue(inst, 0);
+    auto offset = runtime->GetArrayDataOffset(arch);
+    auto arraySize = inst->CastToFillConstArray()->GetImm() << DataType::ShiftByType(inst->GetType(), arch);
+    auto arrayPtr = builder.CreateConstInBoundsGEP1_64(builder.getInt8Ty(), src, offset);
+
+    ASSERT(arraySize != 0);
+
+    auto arrOffset = runtime->GetOffsetToConstArrayData(inst->CastToFillConstArray()->GetMethod(), arrayType);
+    auto pfOffset = runtime->GetPandaFileOffset(arch);
+    auto fileOffset = runtime->GetBinaryFileBaseOffset(arch);
+
+    auto pfPtrPtr = builder.CreateConstInBoundsGEP1_64(builder.getInt8Ty(), ctor->GetMethodArgument(), pfOffset);
+    auto pfPtr = builder.CreateLoad(builder.getPtrTy(), pfPtrPtr);
+    auto filePtrPtr = builder.CreateConstInBoundsGEP1_64(builder.getInt8Ty(), pfPtr, fileOffset);
+    auto filePtr = builder.CreateLoad(builder.getPtrTy(), filePtrPtr);
+    auto constArrPtr = builder.CreateConstInBoundsGEP1_64(builder.getInt8Ty(), filePtr, arrOffset);
+
+    auto align = llvm::MaybeAlign(0);
+    /**
+     * LLVM AOT may replace `@llvm.memcpy.inline` with call to ark's `LIB_CALL_MEM_COPY`, see `MustLowerMemCpy` in
+     * libllvmbackend/llvm_ark_interface.cpp.
+     */
+    builder.CreateMemCpyInline(arrayPtr, align, constArrPtr, align, builder.getInt64(arraySize));
+}
+
+void LLVMIrConstructor::VisitIsInstance(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto isInstance = inst->CastToIsInstance();
+    auto klassType = isInstance->GetClassType();
+    auto object = ctor->GetInputValue(inst, 0);
+    llvm::Value *result;
+    if (klassType == ClassType::UNRESOLVED_CLASS) {
+        result = ctor->CreateIsInstanceEntrypointCall(inst);
+    } else {
+        auto &ctx = ctor->func_->getContext();
+        auto preBb = ctor->GetCurrentBasicBlock();
+        auto contBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "isinstance_cont"), ctor->func_);
+
+        if (!inst->CastToIsInstance()->GetOmitNullCheck()) {
+            auto notnullBb =
+                llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "isinstance_notnull"), ctor->func_);
+            auto isNullObj = ctor->builder_.CreateIsNull(object);
+            ctor->builder_.CreateCondBr(isNullObj, contBb, notnullBb);
+            ctor->SetCurrentBasicBlock(notnullBb);
+        }
+
+        llvm::Value *innerResult = nullptr;
+        auto klassId = ctor->GetInputValue(inst, 1);
+        auto klassObj = ctor->CreateLoadClassFromObject(object);
+        auto notnullPostBb = ctor->GetCurrentBasicBlock();
+        auto cmp = ctor->builder_.CreateICmpEQ(klassId, klassObj);
+        if (klassType == ClassType::FINAL_CLASS) {
+            innerResult = ctor->builder_.CreateZExt(cmp, ctor->builder_.getInt8Ty());
+        } else {
+            auto innerBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "isinstance_inner"), ctor->func_);
+            ctor->builder_.CreateCondBr(cmp, contBb, innerBb);
+            ctor->SetCurrentBasicBlock(innerBb);
+            innerResult = ctor->CreateIsInstanceInnerBlock(inst, klassObj, klassId);
+        }
+        auto incomingBlock = ctor->GetCurrentBasicBlock();
+        ctor->builder_.CreateBr(contBb);
+
+        ctor->SetCurrentBasicBlock(contBb);
+        unsigned amount = 1 + (preBb == notnullPostBb ? 0 : 1) + (notnullPostBb == incomingBlock ? 0 : 1);
+        auto resultPhi = ctor->builder_.CreatePHI(ctor->builder_.getInt8Ty(), amount);
+        if (preBb != notnullPostBb) {
+            resultPhi->addIncoming(ctor->builder_.getInt8(0), preBb);
+        }
+        if (notnullPostBb != incomingBlock) {
+            resultPhi->addIncoming(ctor->builder_.getInt8(1), notnullPostBb);
+        }
+        resultPhi->addIncoming(innerResult, incomingBlock);
+        result = resultPhi;
     }
 
-    UNREACHABLE();
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitCheckCast(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto checkCast = inst->CastToCheckCast();
+    auto klassType = checkCast->GetClassType();
+    auto src = ctor->GetInputValue(inst, 0);
+
+    auto &ctx = ctor->func_->getContext();
+    auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "checkcast_out"), ctor->func_);
+
+    // Nullptr check can be omitted sometimes
+    if (!inst->CastToCheckCast()->GetOmitNullCheck()) {
+        auto contBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "checkcast_cont"), ctor->func_);
+        auto isNullptr = ctor->builder_.CreateIsNull(src);
+        ctor->builder_.CreateCondBr(isNullptr, outBb, contBb);
+        ctor->SetCurrentBasicBlock(contBb);
+    }
+
+    if (klassType == ClassType::UNRESOLVED_CLASS) {
+        ctor->CreateCheckCastEntrypointCall(inst);
+    } else if (klassType == ClassType::INTERFACE_CLASS) {
+        constexpr auto ENTRYPOINT_ID = RuntimeInterface::EntrypointId::CHECK_CAST_INTERFACE;
+        auto interface = ctor->GetInputValue(inst, 1);
+        auto entrypointCall = ctor->CreateFastPathCall(inst, ENTRYPOINT_ID, {src, interface});
+        entrypointCall->addFnAttr(llvm::Attribute::get(entrypointCall->getContext(), "may-deoptimize"));
+    } else {
+        auto klassId = ctor->GetInputValue(inst, 1);
+        auto klassObj = ctor->CreateLoadClassFromObject(src);
+        if (klassType == ClassType::FINAL_CLASS) {
+            auto cmpNe = ctor->builder_.CreateICmpNE(klassId, klassObj);
+            auto exception = RuntimeInterface::EntrypointId::CLASS_CAST_EXCEPTION;
+            ctor->CreateDeoptimizationBranch(inst, cmpNe, exception, {klassId, src});
+        } else {
+            auto cmpEq = ctor->builder_.CreateICmpEQ(klassId, klassObj);
+            auto innerBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "checkcast_inner"), ctor->func_);
+            ctor->builder_.CreateCondBr(cmpEq, outBb, innerBb);
+            ctor->SetCurrentBasicBlock(innerBb);
+            ctor->CreateCheckCastInner(inst, klassObj, klassId);
+        }
+    }
+    ctor->builder_.CreateBr(outBb);
+    ctor->SetCurrentBasicBlock(outBb);
+}
+
+void LLVMIrConstructor::VisitLoadType(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto constexpr INITIALIZED = true;
+    auto klass = ctor->CreateLoadClassById(inst, inst->CastToLoadType()->GetTypeId(), !INITIALIZED);
+    auto result = ctor->CreateLoadManagedClassFromClass(klass);
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitUnresolvedLoadType(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto constexpr INITIALIZED = true;
+    auto klass = ctor->CreateLoadClassById(inst, inst->CastToUnresolvedLoadType()->GetTypeId(), !INITIALIZED);
+    auto result = ctor->CreateLoadManagedClassFromClass(klass);
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitThrow(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto obj = ctor->GetInputValue(inst, 0);
+
+    auto exception = RuntimeInterface::EntrypointId::THROW_EXCEPTION;
+    ctor->CreateEntrypointCall(exception, inst, {obj});
+    ctor->builder_.CreateUnreachable();
+}
+
+void LLVMIrConstructor::VisitCatchPhi([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    UnexpectedLowering(inst);
+}
+
+void LLVMIrConstructor::VisitLoadRuntimeClass(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto offset = ctor->GetGraph()->GetRuntime()->GetTlsPromiseClassPointerOffset(ctor->GetGraph()->GetArch());
+    auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_, offset,
+                                                           ctor->builder_.getPtrTy());
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitLoadUndefined(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto offset = ctor->GetGraph()->GetRuntime()->GetTlsUndefinedObjectOffset(ctor->GetGraph()->GetArch());
+    auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_, offset,
+                                                           ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+    ctor->ValueMapAdd(inst, result);
+}
+
+void LLVMIrConstructor::VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    ctor->CreateLaunchCall(inst->CastToCallLaunchVirtual());
+}
+
+void LLVMIrConstructor::VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    ctor->CreateLaunchCall(inst->CastToCallResolvedLaunchStatic());
+}
+
+void LLVMIrConstructor::VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    ctor->CreateLaunchCall(inst->CastToCallResolvedLaunchVirtual());
 }
 
 void LLVMIrConstructor::VisitDefault([[maybe_unused]] Inst *inst)
@@ -1930,17 +4495,30 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
     func_ = CreateFunctionDeclaration(funcProto, methodName, module);
     arkInterface_->PutFunction(graph_->GetMethod(), func_);
 
+    if (graph->SupportManagedCode()) {
+        func_->setGC(std::string {panda::llvmbackend::LLVMArkInterface::GC_STRATEGY});
+    }
+
     auto klassId = graph_->GetRuntime()->GetClassIdForMethod(graph_->GetMethod());
     auto klassIdMd = llvm::ConstantAsMetadata::get(builder_.getInt32(klassId));
     func_->addMetadata(llvmbackend::LLVMArkInterface::FUNCTION_MD_CLASS_ID, *llvm::MDNode::get(*context, {klassIdMd}));
+
+    if (!arkInterface_->IsIrtocMode()) {
+        func_->addMetadata("use-ark-frame", *llvm::MDNode::get(*context, {}));
+    }
 }
 
-bool LLVMIrConstructor::BuildIr()
+bool LLVMIrConstructor::BuildIr(bool preventInlining)
 {
     LLVM_LOG(DEBUG, IR) << "Building IR for LLVM";
 
     // Set Argument Names
+    // Special arguments
     auto it = func_->arg_begin();
+    if (graph_->SupportManagedCode()) {
+        (it++)->setName("method");
+    }
+    // Actual arguments
     auto idx = 0;
     while (it != func_->arg_end()) {
         std::stringstream name;
@@ -1953,14 +4531,33 @@ bool LLVMIrConstructor::BuildIr()
     arkInterface_->RememberFunctionOrigin(func_, method);
     debugData_->BeginSubprogram(func_, runtime->GetFullFileName(method), runtime->GetMethodId(method));
 
+    auto normalMarkerHolder = MarkerHolder(graph_);
+    auto normal = normalMarkerHolder.GetMarker();
+
+    graph_->GetStartBlock()->SetMarker(normal);
+    MarkNormalBlocksRecursive(graph_->GetStartBlock(), normal);
+
     // First step - create blocks, leaving LLVM EntryBlock untouched
-    BuildBasicBlocks();
+    BuildBasicBlocks(normal);
+    InitializeEntryBlock(preventInlining || !graph_->GetTryBeginBlocks().empty());
     // Second step - visit all instructions, including StartBlock, but not filling PHI inputs
-    BuildInstructions();
+    BuildInstructions(normal);
     // Third step is to fill the PHIs inputs
-    FillPhiInputs();
+
+    for (auto block : graph_->GetBlocksRPO()) {
+        FillPhiInputs(block, normal);
+    }
 
     debugData_->EndSubprogram(func_);
+
+#ifndef NDEBUG
+    // Only for tests
+    BreakIrIfNecessary();
+#endif
+
+    if (!arkInterface_->IsIrtocMode()) {
+        func_->addFnAttr("frame-pointer", "all");
+    }
 
     // verifyFunction returns false if there are no errors. But we return true if everything is ok.
     auto verified = !verifyFunction(*func_, &llvm::errs());
@@ -1968,6 +4565,104 @@ bool LLVMIrConstructor::BuildIr()
         func_->print(llvm::errs());
     }
     return verified;
+}
+
+void LLVMIrConstructor::InsertArkFrameInfo(llvm::Module *module, Arch arch)
+{
+    constexpr std::string_view ARK_CALLER_SLOTS_MD = "ark.frame.info";
+    ASSERT(module->getNamedMetadata(ARK_CALLER_SLOTS_MD) == nullptr);
+    auto arkFrameInfoMd = module->getOrInsertNamedMetadata(ARK_CALLER_SLOTS_MD);
+    auto builder = llvm::IRBuilder<>(module->getContext());
+
+    // The fist param is a difference between Ark's fp and the start of LLVM frame.
+    auto md = llvm::ConstantAsMetadata::get(builder.getInt32(0U));
+    arkFrameInfoMd->addOperand(llvm::MDNode::get(module->getContext(), {md}));
+
+    // The second param contains offsets of caller-saved registers inside the ark's frame
+    std::vector<size_t> callParamsRegs;
+    switch (arch) {
+        case Arch::AARCH64: {
+            auto src = ArchCallingConvention<Arch::AARCH64>::Target::CALL_PARAMS_REGS;
+            callParamsRegs = std::vector<size_t>(src.begin(), src.end());
+            break;
+        }
+        case Arch::X86_64: {
+            auto src = ArchCallingConvention<Arch::X86_64>::Target::CALL_PARAMS_REGS;
+            callParamsRegs = std::vector<size_t>(src.begin(), src.end());
+            break;
+        }
+        default:
+            UNREACHABLE();
+    }
+
+    CFrameLayout frameLayout(arch, 0);
+    const auto callerRegsSlotStart = frameLayout.GetCallerFirstSlot(false);
+    const auto callerRegsCount = frameLayout.GetCallerRegistersCount(false);
+    std::vector<llvm::Metadata *> argOffsets;
+    for (auto paramRegId : callParamsRegs) {
+        int slot = callerRegsSlotStart + (callerRegsCount - 1 - paramRegId);
+        slot += frameLayout.GetStackStartSlot();
+        constexpr auto FP_ORIGIN = CFrameLayout::OffsetOrigin::FP;
+        constexpr auto OFFSET_IN_BYTES = CFrameLayout::OffsetUnit::BYTES;
+        auto offset = -frameLayout.GetOffset<FP_ORIGIN, OFFSET_IN_BYTES>(slot);
+        ASSERT(std::numeric_limits<int32_t>::min() <= offset);
+        ASSERT(offset <= std::numeric_limits<int32_t>::max());
+        if (arch == Arch::AARCH64) {
+            offset -= frameLayout.GetSlotSize() * 2U;
+        }
+        argOffsets.push_back(llvm::ConstantAsMetadata::get(builder.getInt32(offset)));
+    }
+    arkFrameInfoMd->addOperand(llvm::MDNode::get(module->getContext(), argOffsets));
+
+    // The third param is actual frame size
+    auto val = frameLayout.GetFrameSize<CFrameLayout::OffsetUnit::BYTES>();
+    // LLVM will store LR & FP
+    if (arch == Arch::AARCH64) {
+        val -= frameLayout.GetSlotSize() * 2U;
+    }
+    auto vmd = llvm::ConstantAsMetadata::get(builder.getInt32(val));
+    arkFrameInfoMd->addOperand(llvm::MDNode::get(module->getContext(), {vmd}));
+}
+
+void LLVMIrConstructor::ProvideSafepointPoll(llvm::Module *module, LLVMArkInterface *arkInterface, Arch arch)
+{
+    // Has been already provided
+    ASSERT(module->getFunction(LLVMArkInterface::GC_SAFEPOINT_POLL_NAME) == nullptr);
+    auto &ctx = module->getContext();
+    auto builder = llvm::IRBuilder<>(ctx);
+
+    // Create a gc.safepoint_poll itself
+    auto pollFtype = llvm::FunctionType::get(builder.getVoidTy(), false);
+    auto poll = llvm::Function::Create(pollFtype, llvm::Function::ExternalLinkage,
+                                       LLVMArkInterface::GC_SAFEPOINT_POLL_NAME, module);
+    poll->setDoesNotThrow();
+
+    // Creating a body
+    auto entry = llvm::BasicBlock::Create(ctx, "bb", poll);
+    builder.SetInsertPoint(entry);
+
+    int64_t flagAddrOffset = arkInterface->GetRuntime()->GetFlagAddrOffset(arch);
+    auto trigger =
+        llvmbackend::runtime_calls::LoadTLSValue(&builder, arkInterface, flagAddrOffset, builder.getInt16Ty());
+    auto needSafepoint = builder.CreateICmpNE(trigger, builder.getInt16(0), "need_safepoint");
+    // Create a ret instuction immediately to split bb right before it
+    auto ret = builder.CreateRetVoid();
+
+    // Split into IF-THEN before RET and insert a safepoint call into THEN block
+    auto weights =
+        llvm::MDBuilder(ctx).createBranchWeights(llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT,
+                                                 llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT);
+
+    builder.SetInsertPoint(llvm::SplitBlockAndInsertIfThen(needSafepoint, ret, false, weights));
+    builder.GetInsertBlock()->setName("safepoint");
+    auto eid = RuntimeInterface::EntrypointId::SAFEPOINT;
+    arkInterface->GetOrCreateRuntimeFunctionType(ctx, module, LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+                                                 static_cast<LLVMArkInterface::EntrypointId>(eid));
+    auto threadReg = llvmbackend::runtime_calls::GetThreadRegValue(&builder, arkInterface);
+    auto spCall = llvmbackend::runtime_calls::CreateEntrypointCallCommon(
+        &builder, threadReg, arkInterface, static_cast<llvmbackend::runtime_calls::EntrypointId>(eid));
+
+    spCall->addFnAttr(llvm::Attribute::get(ctx, "safepoint"));
 }
 
 Expected<bool, std::string> LLVMIrConstructor::CanCompile(Graph *graph)
@@ -1980,6 +4675,10 @@ Expected<bool, std::string> LLVMIrConstructor::CanCompile(Graph *graph)
         for (auto inst : basicBlock->AllInsts()) {
             bool canCompile = LLVMIrConstructor::CanCompile(inst);
             if (!canCompile) {
+                // It means we have one of the following cases:
+                // * meet some brand-new opcode in Ark Compiler IR
+                // * dynamic intrinsic call (in non-dynamic method!)
+                // * not yet patched SLOW_PATH_ENTRY call in Irtoc code
                 LLVM_LOG(ERROR, ENTRY) << GetOpcodeString(inst->GetOpcode())
                                        << " unexpected in LLVM lowering. Method = "
                                        << graph->GetRuntime()->GetMethodFullName(graph->GetMethod());
@@ -2021,5 +4720,29 @@ bool LLVMIrConstructor::CanCompile(Inst *inst)
     }
 #undef INST_DEF
 }
+
+#ifndef NDEBUG
+void LLVMIrConstructor::BreakIrIfNecessary()
+{
+    if (llvmbackend::g_options.GetLlvmBreakIrRegex().empty()) {
+        return;
+    }
+
+    std::regex regex {llvmbackend::g_options.GetLlvmBreakIrRegex()};
+
+    if (!std::regex_match(func_->getName().str(), regex)) {
+        return;
+    }
+
+    LLVM_LOG(DEBUG, IR) << "Breaking IR for '" << func_->getName().str() << "' because it matches regex = '"
+                        << llvmbackend::g_options.GetLlvmBreakIrRegex() << "'";
+
+    for (auto &basicBlock : *func_) {
+        basicBlock.getTerminator()->eraseFromParent();
+    }
+}
+#endif
+
+#include "llvm_ir_constructor_gen.inl"
 
 }  // namespace panda::compiler

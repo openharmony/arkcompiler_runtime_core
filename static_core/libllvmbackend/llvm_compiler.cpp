@@ -31,6 +31,8 @@
 
 namespace panda::llvmbackend {
 
+static llvm::llvm_shutdown_obj g_shutdown {};
+
 LLVMCompiler::LLVMCompiler(Arch arch) : arch_(arch)
 {
 #ifndef REQUIRED_LLVM_VERSION
@@ -46,7 +48,7 @@ LLVMCompiler::LLVMCompiler(Arch arch) : arch_(arch)
     if (currentLlvmLibVersion != STRINGIFY(REQUIRED_LLVM_VERSION)) {
         llvm::report_fatal_error(llvm::Twine("Incompatible LLVM version " + currentLlvmLibVersion + ". " +
                                              std::string(STRINGIFY(REQUIRED_LLVM_VERSION)) + " is required."),
-                                 false);
+                                 false); /* gen_crash_diag = false */
     }
 #undef STR
 #undef STRINGIFY
@@ -62,16 +64,54 @@ LLVMCompiler::LLVMCompiler(Arch arch) : arch_(arch)
     LLVMLogger::Init(g_options.GetLlvmLog());
 }
 
+bool LLVMCompiler::IsInliningDisabled()
+{
+    if (panda::compiler::g_options.WasSetCompilerInlining() && !g_options.WasSetLlvmInlining()) {
+        return !panda::compiler::g_options.IsCompilerInlining();
+    }
+    return !g_options.IsLlvmInlining();
+}
+
+bool LLVMCompiler::IsInliningDisabled(compiler::Graph *graph)
+{
+    ASSERT(graph != nullptr);
+    return IsInliningDisabled(graph->GetRuntime(), graph->GetMethod());
+}
+
+bool LLVMCompiler::IsInliningDisabled(compiler::RuntimeInterface *runtime, compiler::RuntimeInterface::MethodPtr method)
+{
+    ASSERT(runtime != nullptr);
+    ASSERT(method != nullptr);
+
+    if (IsInliningDisabled()) {
+        return true;
+    }
+
+    auto skipList = panda::compiler::g_options.GetCompilerInliningBlacklist();
+    if (!skipList.empty()) {
+        std::string methodName = runtime->GetMethodFullName(method);
+        if (std::find(skipList.begin(), skipList.end(), methodName) != skipList.end()) {
+            return true;
+        }
+    }
+
+    return (runtime->GetMethodName(method).find("__noinline__") != std::string::npos);
+}
+
 panda::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOptions()
 {
     panda::llvmbackend::LLVMCompilerOptions llvmCompilerOptions {};
     llvmCompilerOptions.optimize = !panda::compiler::g_options.IsCompilerNonOptimizing();
     llvmCompilerOptions.optlevel = llvmCompilerOptions.optimize ? 2U : 0U;
+    llvmCompilerOptions.gcIntrusionChecks = g_options.IsLlvmGcCheck();
+    llvmCompilerOptions.useSafepoint = panda::compiler::g_options.IsCompilerUseSafepoint();
     llvmCompilerOptions.dumpModuleAfterOptimizations = g_options.IsLlvmDumpAfter();
     llvmCompilerOptions.dumpModuleBeforeOptimizations = g_options.IsLlvmDumpBefore();
     llvmCompilerOptions.inlineModuleFile = g_options.GetLlvmInlineModule();
     llvmCompilerOptions.pipelineFile = g_options.GetLlvmPipeline();
 
+    llvmCompilerOptions.inlining = !IsInliningDisabled();
+    llvmCompilerOptions.recursiveInlining = g_options.IsLlvmRecursiveInlining();
     llvmCompilerOptions.doIrtocInline = !llvmCompilerOptions.inlineModuleFile.empty();
 
     return llvmCompilerOptions;
@@ -114,6 +154,9 @@ void LLVMCompiler::SetLLVMOption(const char *option, T val)
 
 // Instantiate for irtoc_compiler.cpp
 template void LLVMCompiler::SetLLVMOption(const char *option, bool val);
+// Instantiate for aot_compiler.cpp
+template void LLVMCompiler::SetLLVMOption(const char *option, unsigned int val);
+template void LLVMCompiler::SetLLVMOption(const char *option, uint64_t val);
 
 llvm::Triple LLVMCompiler::GetTripleForArch(Arch arch)
 {

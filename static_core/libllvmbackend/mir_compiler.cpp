@@ -55,7 +55,7 @@ llvm::Expected<std::unique_ptr<CreatedObjectFile>> MIRCompiler::CompileModule(ll
     auto memBuffer = std::make_unique<llvm::SmallVectorMemoryBuffer>(std::move(rawBuffer),
                                                                      module.getModuleIdentifier() + "-object-buffer");
 
-    return CreatedObjectFile::CopyOf(memBuffer->getMemBufferRef(), objectFilePostProcessor_);
+    return CreatedObjectFile::CopyOf(memBuffer->getMemBufferRef());
 }
 
 }  // namespace panda::llvmbackend

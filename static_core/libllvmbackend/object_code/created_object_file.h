@@ -23,6 +23,12 @@
 
 namespace panda::llvmbackend {
 
+constexpr llvm::StringRef RO_DATA_SECTION_PREFIX {".ro"};
+constexpr llvm::StringRef TEXT_SECTION_PREFIX {".text."};
+constexpr llvm::StringRef AOT_GOT_SECTION {".aot_got"};
+constexpr llvm::StringRef RELA_LLVM_STACKMAPS_SECTION {".rela.llvm_stackmaps"};
+constexpr llvm::StringRef LLVM_STACKMAPS_SECTION {".llvm_stackmaps"};
+
 class SectionReference {
 public:
     SectionReference() = default;
@@ -68,9 +74,7 @@ public:
         uint64_t sectionOffset;
     };
 
-    static llvm::Expected<std::unique_ptr<CreatedObjectFile>> CopyOf(
-        llvm::MemoryBufferRef objectFileBuffer,
-        const ObjectFilePostProcessor &objectFilePostProcessor = [](llvm::object::ObjectFile *) -> void {});
+    static llvm::Expected<std::unique_ptr<CreatedObjectFile>> CopyOf(llvm::MemoryBufferRef objectFileBuffer);
 
     explicit CreatedObjectFile(std::unique_ptr<llvm::MemoryBuffer> objectFileBuffer,
                                std::unique_ptr<llvm::object::ObjectFile> objectFile);
@@ -82,6 +86,10 @@ public:
     SectionReference GetSection(const std::string &name) const;
 
     SectionReference GetSectionByFunctionName(const std::string &fullFunctionName) const;
+
+    std::vector<SectionReference> GetRoDataSections() const;
+
+    std::unordered_map<std::string, StackMapSymbol> GetStackMapInfo() const;
 
     void WriteTo(std::string_view output) const;
 

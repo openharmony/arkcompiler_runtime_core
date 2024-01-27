@@ -32,7 +32,7 @@ if (NOT CMAKE_CROSSCOMPILING AND PANDA_LLVM_INTERPRETER_INLINING)
     message(STATUS "LLVM_LINK ${LLVM_LINK}")
 endif()
 
-if (PANDA_LLVM_AOT)
+if (PANDA_BUILD_LLVM_BACKEND)
     add_custom_target(copy-libLLVM.so
         COMMENT "Copying libLLVM-${LLVM_VERSION_MAJOR}.so"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${LIB_LLVM}" "${PANDA_BINARY_ROOT}/lib/libLLVM-${LLVM_VERSION_MAJOR}.so")
