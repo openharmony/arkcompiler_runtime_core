@@ -23,7 +23,8 @@ void RegisterMap::SetMask(const LocationMask &regMask, size_t priorityReg)
     codegenRegMap_.clear();
 
     // Firstly map registers available for register allocator starting with the highest priority one
-    for (size_t reg = priorityReg; reg < regMask.GetSize(); ++reg) {
+    auto maskSize = regMask.GetSize();
+    for (size_t reg = priorityReg; reg < maskSize; ++reg) {
         if (!regMask.IsSet(reg)) {
             codegenRegMap_.push_back(reg);
         }
@@ -39,7 +40,7 @@ void RegisterMap::SetMask(const LocationMask &regMask, size_t priorityReg)
     availableRegsCount_ = codegenRegMap_.size();
 
     // Now map unavailable registers, since they can be assigned to the instructions
-    for (size_t reg = 0; reg < regMask.GetSize(); ++reg) {
+    for (size_t reg = 0; reg < maskSize; ++reg) {
         if (regMask.IsSet(reg)) {
             codegenRegMap_.push_back(reg);
         }
@@ -58,7 +59,8 @@ void RegisterMap::SetCallerFirstMask(const LocationMask &regMask, size_t firstCa
     }
 
     // Add caller registers after callees onece
-    for (size_t reg = lastCalleeReg + 1; reg < regMask.GetSize(); ++reg) {
+    auto maskSize = regMask.GetSize();
+    for (size_t reg = lastCalleeReg + 1; reg < maskSize; ++reg) {
         if (!regMask.IsSet(reg)) {
             codegenRegMap_.push_back(reg);
         }
@@ -74,7 +76,7 @@ void RegisterMap::SetCallerFirstMask(const LocationMask &regMask, size_t firstCa
     availableRegsCount_ = codegenRegMap_.size();
 
     // Now map unavailable registers, since they can be assigned to the instructions
-    for (size_t reg = 0; reg < regMask.GetSize(); ++reg) {
+    for (size_t reg = 0; reg < maskSize; ++reg) {
         if (regMask.IsSet(reg)) {
             codegenRegMap_.push_back(reg);
         }

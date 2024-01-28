@@ -21,23 +21,6 @@
 #include "utils/small_vector.h"
 
 namespace ark::compiler {
-bool GraphMatrix::AddEdge(unsigned a, unsigned b)
-{
-    auto it = matrix_.begin() + FindEdge(a, b);
-    bool oldVal = *it;
-    *it = true;
-    return oldVal;
-}
-
-bool GraphMatrix::AddAffinityEdge(unsigned a, unsigned b)
-{
-    auto it = matrix_.begin() + FindAffinityEdge(a, b);
-    bool oldVal = *it;
-    *it = true;
-    return oldVal;
-}
-
-// -------------------------------------------------------
 
 ColorNode *InterferenceGraph::AllocNode()
 {
@@ -187,7 +170,8 @@ const char *GetNodeShape(const InterferenceGraph &ig, unsigned i)
     if (ig.GetNode(i).IsPhysical()) {
         shape = "box";
     } else {
-        for (unsigned j = 0; j < ig.Size(); j++) {
+        auto size = ig.Size();
+        for (unsigned j = 0; j < size; j++) {
             if (i != j && ig.HasEdge(i, j) && ig.GetNode(j).IsPhysical()) {
                 shape = "hexagon";
                 break;

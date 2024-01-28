@@ -68,7 +68,6 @@ function(run_deterministic_tests ETS_SRC TARGET)
         SET(ARG_ITER_NUM 10)
     endif()
 
-    
     get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
 
     set(TEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${SRC_FNAME}")
@@ -484,6 +483,9 @@ if(PANDA_TEST_COMPILE_STDLIB)
     set (ARK_AOT_RUNNER ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh)
     if (NOT PANDA_CI_TESTING_MODE STREQUAL "Nightly")
        set (COMPILER_OPTIONS "--compiler-check-final=true")
+       if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+          set (COMPILER_OPTIONS ${COMPILER_OPTIONS} "--compiler-inst-graph-coloring-limit=2000")
+       endif()
     endif()
     set (COMPILER_OPTIONS_NO_INLINE "--compiler-inlining=false" ${COMPILER_OPTIONS})
     set (COMPILER_OPTIONS_GC_STW "--gc-type=stw" ${COMPILER_OPTIONS})

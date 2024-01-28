@@ -15,6 +15,7 @@
 
 #include "reg_alloc.h"
 #include "cleanup_empty_blocks.h"
+#include "optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "reg_alloc_graph_coloring.h"
@@ -22,9 +23,8 @@
 #include "reg_alloc_resolver.h"
 
 namespace ark::compiler {
-static constexpr size_t INST_LIMIT_FOR_GRAPH_COLORING = 5000;
 
-bool IsGraphColoringEnable(const Graph *graph)
+bool IsGraphColoringEnable(Graph *graph)
 {
     if (graph->GetArch() == Arch::AARCH32 || !graph->IsAotMode() || !g_options.IsCompilerAotRa()) {
         return false;
@@ -34,7 +34,7 @@ bool IsGraphColoringEnable(const Graph *graph)
     for (auto bb : graph->GetBlocksRPO()) {
         instCount += bb->CountInsts();
     }
-    return instCount < INST_LIMIT_FOR_GRAPH_COLORING;
+    return instCount < g_options.GetCompilerInstGraphColoringLimit();
 }
 
 bool ShouldSkipAllocation(Graph *graph)
@@ -58,10 +58,17 @@ bool RegAlloc(Graph *graph)
     if (graph->IsBytecodeOptimizer()) {
         RegAllocResolver(graph).ResolveCatchPhis();
         raPassed = graph->RunPass<RegAllocGraphColoring>(VIRTUAL_FRAME_SIZE);
-    } else if (IsGraphColoringEnable(graph)) {
-        raPassed = graph->RunPass<RegAllocGraphColoring>();
     } else {
-        raPassed = graph->RunPass<RegAllocLinearScan>();
+        if (IsGraphColoringEnable(graph)) {
+            raPassed = graph->RunPass<RegAllocGraphColoring>();
+            if (!raPassed) {
+                LOG(WARNING, COMPILER) << "RA graph coloring algorithm failed. Linear scan will be used.";
+                graph->InvalidateAnalysis<LivenessAnalyzer>();
+            }
+        }
+        if (!raPassed) {
+            raPassed = graph->RunPass<RegAllocLinearScan>();
+        }
     }
     if (raPassed) {
         CleanupEmptyBlocks(graph);
