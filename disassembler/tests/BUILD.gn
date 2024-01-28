@@ -34,6 +34,7 @@ disasm_column_test_js_files = [
   "column-number3",
   "column-number4",
   "column-number5",
+  "line-number1",
 ]
 
 disasm_test_js_files = [
@@ -109,6 +110,7 @@ disasm_include_dirs = [
 script_sources = [
   "disassembler_annotations_test.cpp",
   "disassembler_column_number_test.cpp",
+  "disassembler_line_number_test.cpp",
   "disassembler_string_test.cpp",
 ]
 

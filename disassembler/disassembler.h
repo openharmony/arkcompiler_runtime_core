@@ -80,6 +80,7 @@ public:
     }
 
     std::vector<size_t> GetColumnNumber();
+    std::vector<size_t> GetLineNumber();
 
 private:
     void GetLiteralArrays();
