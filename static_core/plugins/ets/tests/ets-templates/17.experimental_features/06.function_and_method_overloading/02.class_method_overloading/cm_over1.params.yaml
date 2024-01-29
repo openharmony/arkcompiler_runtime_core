@@ -1,0 +1,529 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          // override-equivalent signatures
+          class A {
+              meth(p: number) {}
+              meth(p: double) {}
+          }
+      use: return
+      tags: negative, compile-only
+
+    - decl: |-
+          type B = A
+          // override-equivalent signatures
+          class A {
+              meth(p: A) {}
+              meth(p: B) {}
+          }
+      use: return
+      tags: negative, compile-only
+
+    - decl: |-
+          // override-equivalent signatures
+          class A {
+              meth(p: A|string|null) {}
+              meth(p: string|A|null) {}
+          }
+      use: return
+      tags: negative, compile-only
+
+    - decl: |-
+          // primitives and boxed
+          class A {
+              meth(p: Object): string { return "Object" } // should never be called
+              meth(p: byte): string { return "byte" }
+              meth(p: Byte): string { return "Byte" }
+              meth(p: short): string { return "short" }
+              meth(p: Short): string { return "Short" }
+              meth(p: int): string { return "int" }
+              meth(p: Int): string { return "Int" }
+              meth(p: long): string { return "long" }
+              meth(p: Long): string { return "Long" }
+              meth(p: char): string { return "char" }
+              meth(p: Char): string { return "Char" }
+              meth(p: boolean): string { return "boolean" }
+              meth(p: Boolean): string { return "Boolean" }
+              meth(p: float): string { return "float" }
+              meth(p: Float): string { return "Float" }
+              meth(p: double): string { return "double" }
+              meth(p: Double): string { return "Double" }
+          }
+      use: |-
+          let a: A = new A()
+          assert a.meth(new Byte(-1 as byte)) == "Byte"
+          assert a.meth(new Short(-1 as short)) == "Short"
+          assert a.meth(new Int(-1 as int)) == "Int"
+          assert a.meth(new Long(-1 as long)) == "Long"
+          assert a.meth(new Char(c'A')) == "Char"
+          assert a.meth(new Boolean(false)) == "Boolean"
+          assert a.meth(new Float(3.14 as float)) == "Float"
+          assert a.meth(new Double(3.14)) == "Double"
+          assert a.meth(-1 as long) == "long"
+          assert a.meth(-1 as int) == "int"
+          assert a.meth(-1 as short) == "short"
+          assert a.meth(-1 as byte) == "byte"
+          assert a.meth(c'A') == "char"
+          assert a.meth(false) == "boolean"
+          assert a.meth(3.14) == "double"
+          assert a.meth(3.14 as float) == "float"
+
+    - decl: |-
+          // primitives and boxed, with sub/superclass
+          abstract class B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: byte): string { return "" }
+              meth(p: Byte): string { return "Byte" }
+              meth(p: short): string { return "" }
+              meth(p: Short): string { return "Short" }
+              meth(p: int): string { return "" }
+              meth(p: Int): string { return "" }
+              meth(p: long): string { return "" }
+              meth(p: Long): string { return "" }
+              meth(p: char): string { return "" }
+              meth(p: Char): string { return "Char" }
+              meth(p: boolean): string { return "boolean" }
+              meth(p: Boolean): string { return "" }
+              meth(p: float): string { return "float" }
+              meth(p: Float): string { return "" }
+              meth(p: double): string { return "" }
+              abstract meth(p: Double): string
+          }
+          class A extends B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: byte): string { return "byte" }
+              meth(p: short): string { return "short" }
+              meth(p: int): string { return "int" }
+              meth(p: Int): string { return "Int" }
+              meth(p: long): string { return "long" }
+              meth(p: Long): string { return "Long" }
+              meth(p: char): string { return "char" }
+              meth(p: Boolean): string { return "Boolean" }
+              meth(p: Float): string { return "Float" }
+              meth(p: double): string { return "double" }
+              meth(p: Double): string { return "Double" }
+          }
+      use: |-
+          let a: A = new A()
+          assert a.meth(new Byte(-1 as byte)) == "Byte"
+          assert a.meth(new Short(-1 as short)) == "Short"
+          assert a.meth(new Int(-1 as int)) == "Int"
+          assert a.meth(new Long(-1 as long)) == "Long"
+          assert a.meth(new Char(c'A')) == "Char"
+          assert a.meth(new Boolean(false)) == "Boolean"
+          assert a.meth(new Float(3.14 as float)) == "Float"
+          assert a.meth(new Double(3.14)) == "Double"
+          assert a.meth(-1 as long) == "long"
+          assert a.meth(-1 as int) == "int"
+          assert a.meth(-1 as short) == "short"
+          assert a.meth(-1 as byte) == "byte"
+          assert a.meth(c'A') == "char"
+          assert a.meth(false) == "boolean"
+          assert a.meth(3.14) == "double"
+          assert a.meth(3.14 as float) == "float"
+
+    - decl: |-
+          // enums
+          enum Color { Red, Green=82, Blue }
+          enum Size { S="small", M="medium", L="large" }
+          class A {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: int): string { return "int" }
+              meth(p: string): string { return "string" }
+              meth(p: Color): string { return "Color" }
+              meth(p: Size): string { return "Size" }
+          }
+      use: |-
+          let a: A = new A()
+          assert a.meth(-1) == "int"
+          assert a.meth(Color.Red) == "Color"
+          assert a.meth(-2 as short) == "short"
+          assert a.meth("abc") == "string"
+          assert a.meth(Size.L) == "Size"
+          assert a.meth(42 as byte) == "int"
+
+    - decl: |-
+          // enums, with sub/superclass
+          enum Color { Red, Green=82, Blue }
+          enum Size { S="small", M="medium", L="large" }
+          abstract class B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: int): string { return "int" }
+              meth(p: Color): string { return "" }
+              meth(p: Size): string { return "Size" }
+              abstract meth(p: string): string
+          }
+          class A extends B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: string): string { return "string" }
+              meth(p: Color): string { return "Color" }
+          }
+      use: |-
+          let a: A = new A()
+          assert a.meth(-1) == "int"
+          assert a.meth(Color.Red) == "Color"
+          assert a.meth(-2 as short) == "short"
+          assert a.meth("abc") == "string"
+          assert a.meth(Size.L) == "Size"
+          assert a.meth(42 as byte) == "int"
+
+    - decl: |-
+          // arrays
+          enum Color { Red, Green = 82, Blue }
+          enum Size { S="small", M="medium", L="large" }
+          class A {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: A[]): string { return "A" }
+              meth(p: Object[]): string { return "Object" }
+              meth(p: byte[]): string { return "byte" }
+              meth(p: short[]): string { return "short" }
+              meth(p: int[]): string { return "int" }
+              meth(p: long[]): string { return "long" }
+              meth(p: char[]): string { return "char" }
+              meth(p: boolean[]): string { return "boolean" }
+              meth(p: float[]): string { return "float" }
+              meth(p: double[]): string { return "double" }
+              meth(p: Byte[]): string { return "Byte" }
+              meth(p: Short[]): string { return "Short" }
+              meth(p: Int[]): string { return "Int" }
+              meth(p: Long[]): string { return "Long" }
+              meth(p: Char[]): string { return "Char" }
+              meth(p: Boolean[]): string { return "Boolean" }
+              meth(p: Float[]): string { return "Float" }
+              meth(p: Double[]): string { return "Double" }
+              meth(p: Color[]): string { return "Color" }
+              meth(p: Size[]): string { return "Size" }
+          }
+      use: |-
+          let a: A = new A()
+          assert a.meth([-1 as byte]) == "byte"
+          assert a.meth([-1 as short]) == "short"
+          assert a.meth([-1 as int]) == "int"
+          assert a.meth([-1 as long]) == "long"
+          assert a.meth([c'A']) == "char"
+          assert a.meth([false]) == "boolean"
+          assert a.meth([3.14 as float]) == "float"
+          assert a.meth([3.14]) == "double"
+          assert a.meth([new Byte(-1 as byte)]) == "Byte"
+          assert a.meth([new Short(-1 as short)]) == "Short"
+          assert a.meth([new Int(-1)]) == "Int"
+          assert a.meth([new Long(-1 as long)]) == "Long"
+          assert a.meth([new Char(c'A')]) == "Char"
+          assert a.meth([new Boolean(false)]) == "Boolean"
+          assert a.meth([new Float(3.14 as float)]) == "Float"
+          assert a.meth([new Double(3.14)]) == "Double"
+          assert a.meth([new Object()]) == "Object"
+          assert a.meth([Color.Red]) == "Color"
+          assert a.meth([Size.M]) == "Size"
+          assert a.meth(new A[1]) == "A"
+
+    - decl: |-
+          // arrays, from sub/superclass
+          enum Color { Red, Green = 82, Blue }
+          enum Size { S="small", M="medium", L="large" }
+          class B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: A[]): string { return "A" }
+              meth(p: Object[]): string { return "" }
+              meth(p: byte[]): string { return "" }
+              meth(p: short[]): string { return "short" }
+              meth(p: int[]): string { return "int" }
+              meth(p: long[]): string { return "" }
+              meth(p: char[]): string { return "" }
+              meth(p: boolean[]): string { return "boolean" }
+              meth(p: float[]): string { return "" }
+              meth(p: double[]): string { return "" }
+              meth(p: Byte[]): string { return "" }
+              meth(p: Short[]): string { return "" }
+              meth(p: Int[]): string { return "" }
+              meth(p: Long[]): string { return "" }
+              meth(p: Char[]): string { return "" }
+              meth(p: Boolean[]): string { return "" }
+              meth(p: Float[]): string { return "Float" }
+              meth(p: Double[]): string { return "" }
+              meth(p: Color[]): string { return "" }
+              meth(p: Size[]): string { return "Size" }
+          }
+          class A extends B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: Object[]): string { return "Object" }
+              meth(p: byte[]): string { return "byte" }
+              meth(p: long[]): string { return "long" }
+              meth(p: char[]): string { return "char" }
+              meth(p: float[]): string { return "float" }
+              meth(p: double[]): string { return "double" }
+              meth(p: Byte[]): string { return "Byte" }
+              meth(p: Short[]): string { return "Short" }
+              meth(p: Int[]): string { return "Int" }
+              meth(p: Long[]): string { return "Long" }
+              meth(p: Char[]): string { return "Char" }
+              meth(p: Boolean[]): string { return "Boolean" }
+              meth(p: Double[]): string { return "Double" }
+              meth(p: Color[]): string { return "Color" }
+          }
+      use: |-
+          let a: A = new A()
+          assert a.meth([-1 as byte]) == "byte"
+          assert a.meth([-1 as short]) == "short"
+          assert a.meth([-1 as int]) == "int"
+          assert a.meth([-1 as long]) == "long"
+          assert a.meth([c'A']) == "char"
+          assert a.meth([false]) == "boolean"
+          assert a.meth([3.14 as float]) == "float"
+          assert a.meth([3.14]) == "double"
+          assert a.meth([new Byte(-1 as byte)]) == "Byte"
+          assert a.meth([new Short(-1 as short)]) == "Short"
+          assert a.meth([new Int(-1)]) == "Int"
+          assert a.meth([new Long(-1 as long)]) == "Long"
+          assert a.meth([new Char(c'A')]) == "Char"
+          assert a.meth([new Boolean(false)]) == "Boolean"
+          assert a.meth([new Float(3.14 as float)]) == "Float"
+          assert a.meth([new Double(3.14)]) == "Double"
+          assert a.meth([new Object()]) == "Object"
+          assert a.meth([Color.Red]) == "Color"
+          assert a.meth([Size.M]) == "Size"
+          assert a.meth(new A[1]) == "A"
+
+    - decl: |-
+          // tuples
+          type T = [number, string]
+          type R = [number, boolean]
+          class A {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: T): string { return "T" }
+              meth(p: R): string { return "R" }
+              meth(p: number[]): string { return "number" }
+              meth(p: string[]): string { return "string" }
+              meth(p: boolean): string { return "boolean" }
+          }
+      use: |-
+          let a: A = new A()
+          let t: T = [3.14, "abc"]
+          assert a.meth(t) == "T"
+          let r: R = [3.14, false]
+          assert a.meth(r) == "R"
+          assert a.meth([3.14]) == "number"
+          assert a.meth(["abc"]) == "string"
+          assert a.meth(true) == "boolean"
+
+    - decl: |-
+          // tuples with sub/superclass
+          type T = [number, string]
+          type R = [number, boolean]
+          abstract class B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: T): string { return "" }
+              meth(p: R): string { return "R" }
+              meth(p: number[]): string { return "" }
+              meth(p: string[]): string { return "string" }
+              meth(p: boolean): string { return "boolean" }
+          }
+          class A extends B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: [number, string]): string { return "T" }
+              meth(p: number[]): string { return "number" }
+          }
+      use: |-
+          let a: A = new A()
+          let t: T = [3.14, "abc"]
+          assert a.meth(t) == "T"
+          let r: R = [3.14, false]
+          assert a.meth(r) == "R"
+          assert a.meth([3.14, 3.14]) == "number"
+          assert a.meth(["abc", "xyz"]) == "string"
+          assert a.meth(true) == "boolean"
+
+    - decl: |-
+          // unions
+          type U=number|string
+          type V=Boolean|Double
+          class A {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: U): string { return "U" }
+              meth(p: V): string { return "V" }
+              meth(p: number): string { return "number" }
+              meth(p: Boolean): string { return "Boolean" }
+              meth(p: string): string { return "string" }
+          }
+      use: |-
+          let a: A = new A()
+          let u: U = 3.14
+          assert a.meth(u) == "U"
+          u = "abc"
+          assert a.meth(u) == "U"
+          let v: V = new Boolean(true)
+          assert a.meth(v) == "V"
+          v = new Double(1.5)
+          assert a.meth(v) == "V"
+          assert a.meth(3.14) == "number"
+          assert a.meth(new Boolean(false)) == "Boolean"
+          assert a.meth("abc") == "string"
+
+    - decl: |-
+          // unions with sub/superclass
+          type U=number|string
+          type V=Boolean|Double
+          class B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: U): string { return "U" }
+              meth(p: V): string { return "" }
+              meth(p: Boolean): string { return "" }
+              meth(p: string): string { return "string" }
+          }
+          class A extends B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: V): string { return "V" }
+              meth(p: number): string { return "number" }
+              meth(p: Boolean): string { return "Boolean" }
+          }
+      use: |-
+          let a: A = new A()
+          let u: U = 3.14
+          assert a.meth(u) == "U"
+          u = "abc"
+          assert a.meth(u) == "U"
+          let v: V = new Boolean(true)
+          assert a.meth(v) == "V"
+          v = new Double(1.5)
+          assert a.meth(v) == "V"
+          assert a.meth(3.14) == "number"
+          assert a.meth(new Boolean(false)) == "Boolean"
+          assert a.meth("abc") == "string"
+
+    - decl: |-
+          // function types
+          type FF=(p: number) => string
+          type EE=(p: string) => number
+          class A {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: () => void): string { return "void-void" }
+              meth(p: (p: number) => void): string { return "number-void" }
+              meth(p: FF): string { return "FF" }
+              meth(p: EE): string { return "EE" }
+          }
+          function fff(v: number): string {
+              return " " + v + " "
+          }
+          function eee(v: string): number {
+              return v == "" ? 0.0 : 1.0
+          }
+          function foo() {
+              assert false
+          }
+      use: |-
+          let a: A = new A()
+          assert a.meth(foo) == "void-void"
+          assert a.meth((v: number): void => { assert v == 0.0 }) == "number-void"
+          assert a.meth(fff) == "FF"
+          assert a.meth(eee) == "EE"
+
+    - decl: |-
+          // function types with sub/superclass
+          type FF=(p: number) => string
+          type EE=(p: string) => number
+          abstract class B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: () => void): string { return "" }
+              meth(p: FF): string { return "FF" }
+              meth(p: EE): string { return "" }
+          }
+          class A extends B {
+              meth(p: Object): string { return "" } // should never be called
+              meth(p: () => void): string { return "void-void" }
+              meth(p: (p: number) => void): string { return "number-void" }
+              meth(p: (p: string) => number): string { return "EE" }
+          }
+          function fff(v: number): string {
+              return " " + v + " "
+          }
+          function eee(v: string): number {
+              return v == "" ? 0.0 : 1.0
+          }
+          function foo() {
+              assert false
+          }
+      use: |-
+          let a: A = new A()
+          assert a.meth(foo) == "void-void"
+          assert a.meth((v: number): void => { assert v == 0.0 }) == "number-void"
+          assert a.meth(fff) == "FF"
+          let v: EE = eee
+          assert a.meth(v) == "EE"
+
+    - decl: |-
+          // nullish types
+          type S=string
+          type SN=string|null
+          type SU=string|undefined
+          type SNU=string|null|undefined
+          class A {
+              meth(p: Object|null|undefined): string { return "" } // should never be called
+              meth(p: SN): string { return "SN" }
+              meth(p: SU): string { return "SU" }
+              meth(p: SNU): string { return "SNU" }
+              meth(p: S): string { return "S" }
+          }
+      use: |-
+          let a: A = new A()
+          let s: S = "ABC"
+          assert a.meth(s) == "S"
+          let sn: SN = "ABC"
+          assert a.meth(sn) == "SN"
+          let su: SU = "ABC"
+          assert a.meth(su) == "SU"
+          let snu: SNU = "ABC"
+          assert a.meth(snu) == "SNU"
+          sn = null
+          assert a.meth(sn) == "SN"
+          su = undefined
+          assert a.meth(su) == "SU"
+          snu = undefined
+          assert a.meth(snu) == "SNU"
+
+    - decl: |-
+          // nullish types with sub/superclass
+          type S=string
+          type SN=string|null
+          type SU=string|undefined
+          type SNU=string|null|undefined
+          class B {
+              meth(p: Object|null|undefined): string { return "" } // should never be called
+              meth(p: SN): string { return "" }
+              meth(p: SU): string { return "SU" }
+              meth(p: S): string { return "" }
+          }
+          class A extends B {
+              meth(p: Object|null|undefined): string { return "" } // should never be called
+              meth(p: SN): string { return "SN" }
+              meth(p: SNU): string { return "SNU" }
+              meth(p: S): string { return "S" }
+          }
+      use: |-
+          let a: A = new A()
+          let s: S = "ABC"
+          assert a.meth(s) == "S"
+          let sn: SN = "ABC"
+          assert a.meth(sn) == "SN"
+          let su: SU = "ABC"
+          assert a.meth(su) == "SU"
+          let snu: SNU = "ABC"
+          assert a.meth(snu) == "SNU"
+          sn = null
+          assert a.meth(sn) == "SN"
+          su = undefined
+          assert a.meth(su) == "SU"
+          snu = undefined
+          assert a.meth(snu) == "SNU"
