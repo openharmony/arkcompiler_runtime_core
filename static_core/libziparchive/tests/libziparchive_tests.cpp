@@ -58,12 +58,12 @@ static void GenerateZipfile(const char *data, const char *archivename, int n, ch
     for (i = (n - 1); i >= 0; --i) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ret = sprintf_s(archiveFilename, MAX_DIR_SIZE, "%u.txt", i);
-        if (ret != -1) {
+        if (ret == -1) {
             ASSERT_EQ(1, 0) << "sprintf_s failed!";
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ret = sprintf_s(buf, MAX_BUFFER_SIZE, "%u %s %u", (n - 1) - i, data, i);
-        if (ret != -1) {
+        if (ret == -1) {
             ASSERT_EQ(1, 0) << "sprintf_s failed!";
         }
         ret = CreateOrAddFileIntoZip(archivename, archiveFilename, buf, strlen(buf) + 1, APPEND_STATUS_ADDINZIP, level);
@@ -76,7 +76,7 @@ static void GenerateZipfile(const char *data, const char *archivename, int n, ch
     // Append a file into directory entry for testing
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ret = sprintf_s(buf, MAX_BUFFER_SIZE, "%u %s %u", n, data, n);
-    if (ret != -1) {
+    if (ret == -1) {
         ASSERT_EQ(1, 0) << "sprintf_s failed!";
     }
     ret = CreateOrAddFileIntoZip(archivename, "directory/indirectory.txt", buf, strlen(buf) + 1, APPEND_STATUS_ADDINZIP,
@@ -99,7 +99,7 @@ static void UnzipFileCheckDirectory(const char *archivename, char *filename, int
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     int ret = sprintf_s(filename, MAX_DIR_SIZE, "directory/");
-    if (ret != -1) {
+    if (ret == -1) {
         ASSERT_EQ(1, 0) << "sprintf_s failed!";
     }
 
@@ -158,12 +158,12 @@ static void UnzipFileCheckTxt(const char *archivename, char *filename, const cha
     for (int i = 0; i < n; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ret = sprintf_s(filename, MAX_DIR_SIZE, "%u.txt", i);
-        if (ret != -1) {
+        if (ret == -1) {
             ASSERT_EQ(1, 0) << "sprintf_s failed!";
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ret = sprintf_s(buf, MAX_BUFFER_SIZE, "%u %s %u", (n - 1) - i, data, i);
-        if (ret != -1) {
+        if (ret == -1) {
             ASSERT_EQ(1, 0) << "sprintf_s failed!";
         }
 
@@ -396,12 +396,12 @@ static void UnzipFileCheckInDirectory(const char *archivename, char *filename, c
     {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ret = sprintf_s(filename, MAX_DIR_SIZE, "directory/indirectory.txt");
-        if (ret != -1) {
+        if (ret == -1) {
             ASSERT_EQ(1, 0) << "sprintf_s failed!";
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ret = sprintf_s(buf, MAX_BUFFER_SIZE, "%u %s %u", n, data, n);
-        if (ret != -1) {
+        if (ret == -1) {
             ASSERT_EQ(1, 0) << "sprintf_s failed!";
         }
 
@@ -648,7 +648,7 @@ TEST(LIBZIPARCHIVE, UnZipFile)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ret = sprintf_s(filename, MAX_DIR_SIZE, "classes.abc");
-    if (ret != -1) {
+    if (ret == -1) {
         ASSERT_EQ(1, 0) << "sprintf_s failed!";
     }
 
@@ -712,7 +712,7 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedFile)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ret = sprintf_s(filename, MAX_DIR_SIZE, "classes.abc");
-    if (ret != -1) {
+    if (ret == -1) {
         ASSERT_EQ(1, 0) << "sprintf_s failed!";
     }
 
@@ -770,14 +770,14 @@ TEST(LIBZIPARCHIVE, UnZipUncompressedPandaFile)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ret = sprintf_s(filename, MAX_DIR_SIZE, "class.abc");
-    if (ret != -1) {
+    if (ret == -1) {
         ASSERT_EQ(1, 0) << "sprintf_s failed!";
     }
 
     UnzipFileCheckPandaFile(archivename, filename, pfData, ret, Z_NO_COMPRESSION);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ret = sprintf_s(filename, MAX_DIR_SIZE, "classes.abc");
-    if (ret != -1) {
+    if (ret == -1) {
         ASSERT_EQ(1, 0) << "sprintf_s failed!";
     }
 

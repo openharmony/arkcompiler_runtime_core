@@ -52,10 +52,10 @@ String *String::CreateFromString(String *str, const LanguageContext &ctx, PandaV
     // After memcpy we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (str->IsUtf16()) {
-        memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), str->GetDataUtf16(),
-                 ComputeDataSizeUtf16(length));
+        std::copy_n(reinterpret_cast<uint8_t *>(str->GetDataUtf16()), ComputeDataSizeUtf16(length),
+                    reinterpret_cast<uint8_t *>(string->GetDataUtf16()));
     } else {
-        memcpy_s(string->GetDataMUtf8(), string->GetLength(), str->GetDataMUtf8(), length);
+        std::copy_n(str->GetDataMUtf8(), length, string->GetDataMUtf8());
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // String is supposed to be a constant object, so all its data should be visible by all threads
@@ -77,7 +77,7 @@ String *String::CreateFromMUtf8(const uint8_t *mutf8Data, size_t mutf8Length, ui
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (canBeCompressed) {
-        memcpy_s(string->GetDataMUtf8(), string->GetLength(), mutf8Data, utf16Length);
+        std::copy_n(mutf8Data, utf16Length, string->GetDataMUtf8());
     } else {
         utf::ConvertMUtf8ToUtf16(mutf8Data, mutf8Length, string->GetDataUtf16());
     }
@@ -146,7 +146,8 @@ String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
     if (canBeCompressed) {
         CopyUtf16AsMUtf8(utf16Data, string->GetDataMUtf8(), utf16Length);
     } else {
-        memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), utf16Data, utf16Length << 1UL);
+        std::copy_n(reinterpret_cast<const uint8_t *>(utf16Data), utf16Length << 1UL,
+                    reinterpret_cast<uint8_t *>(string->GetDataUtf16()));
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // String is supposed to be a constant object, so all its data should be visible by all threads
@@ -203,7 +204,8 @@ String *String::CreateNewStringFromChars(uint32_t offset, uint32_t length, Array
     if (canBeCompressed) {
         CopyUtf16AsMUtf8(src, string->GetDataMUtf8(), length);
     } else {
-        memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()), src, length << 1UL);
+        std::copy_n(reinterpret_cast<const uint8_t *>(src), length << 1UL,
+                    reinterpret_cast<uint8_t *>(string->GetDataUtf16()));
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // String is supposed to be a constant object, so all its data should be visible by all threads
@@ -943,13 +945,13 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t utf16Length,
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             CopyUtf16AsMUtf8(src->GetDataUtf16() + start, string->GetDataMUtf8(), utf16Length);
         } else {
-            memcpy_s(string->GetDataUtf16(), ComputeDataSizeUtf16(string->GetLength()),
-                     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                     src->GetDataUtf16() + start, utf16Length << 1UL);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            std::copy_n(reinterpret_cast<const uint8_t *>(src->GetDataUtf16() + start), utf16Length << 1UL,
+                        reinterpret_cast<uint8_t *>(string->GetDataUtf16()));
         }
     } else {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        memcpy_s(string->GetDataMUtf8(), string->GetLength(), src->GetDataMUtf8() + start, utf16Length);
+        std::copy_n(src->GetDataMUtf8() + start, utf16Length, string->GetDataMUtf8());
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // String is supposed to be a constant object, so all its data should be visible by all threads
@@ -987,9 +989,9 @@ String *String::Concat(String *string1, String *string2, const LanguageContext &
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (compressed) {
         Span<uint8_t> sp(newString->GetDataMUtf8(), newLength);
-        memcpy_s(sp.Data(), sp.SizeBytes(), string1->GetDataMUtf8(), length1);
+        std::copy_n(string1->GetDataMUtf8(), length1, sp.Data());
         sp = sp.SubSpan(length1);
-        memcpy_s(sp.Data(), sp.SizeBytes(), string2->GetDataMUtf8(), length2);
+        std::copy_n(string2->GetDataMUtf8(), length2, sp.Data());
     } else {
         Span<uint16_t> sp(newString->GetDataUtf16(), newLength);
         if (!string1->IsUtf16()) {
@@ -997,7 +999,8 @@ String *String::Concat(String *string1, String *string2, const LanguageContext &
                 sp[i] = string1->At<false>(i);
             }
         } else {
-            memcpy_s(sp.Data(), sp.SizeBytes(), string1->GetDataUtf16(), length1 << 1U);
+            std::copy_n(reinterpret_cast<uint8_t *>(string1->GetDataUtf16()), length1 << 1U,
+                        reinterpret_cast<uint8_t *>(sp.Data()));
         }
         sp = sp.SubSpan(length1);
         if (!string2->IsUtf16()) {
@@ -1005,7 +1008,8 @@ String *String::Concat(String *string1, String *string2, const LanguageContext &
                 sp[i] = string2->At<false>(i);
             }
         } else {
-            memcpy_s(sp.Data(), sp.SizeBytes(), string2->GetDataUtf16(), length2 << 1U);
+            std::copy_n(reinterpret_cast<uint8_t *>(string2->GetDataUtf16()), length2 << 1U,
+                        reinterpret_cast<uint8_t *>(sp.Data()));
         }
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();

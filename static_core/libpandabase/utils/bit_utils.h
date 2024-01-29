@@ -22,6 +22,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <algorithm>
 
 #include <limits>
 #include <type_traits>
@@ -300,7 +301,7 @@ inline To bit_cast(const From &src) noexcept  // NOLINT(readability-identifier-n
 {
     static_assert(sizeof(To) == sizeof(From), "size of the types must be equal");
     To dst;
-    memcpy_s(&dst, sizeof(To), &src, sizeof(To));
+    std::copy_n(reinterpret_cast<const uint8_t *>(&src), sizeof(To), reinterpret_cast<uint8_t *>(&dst));
     return dst;
 }
 
@@ -309,7 +310,7 @@ inline To down_cast(const From &src) noexcept  // NOLINT(readability-identifier-
 {
     static_assert(sizeof(To) <= sizeof(From), "size of the types must be lesser");
     To dst;
-    memcpy_s(&dst, sizeof(To), &src, sizeof(To));
+    std::copy_n(reinterpret_cast<const uint8_t *>(&src), sizeof(To), reinterpret_cast<uint8_t *>(&dst));
     return dst;
 }
 
