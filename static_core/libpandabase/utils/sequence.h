@@ -17,12 +17,14 @@
 #define LIBPANDABASE_UTILS_SEQUENCE_H
 
 #include <cmath>
+#include "libpandabase/macros.h"
 
 namespace panda {
 class Sequence {
 public:
     void Add(double val)
     {
+        ASSERT(std::isfinite(val));
         if (empty_) {
             mean_ = val;
             variance_ = 0.0;

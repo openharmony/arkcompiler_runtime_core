@@ -20,13 +20,12 @@
 #include "runtime/include/runtime.h"
 
 namespace panda::mem {
-// NOLINTBEGIN(readability-magic-numbers)
 class G1AnalyticsTest : public testing::Test {
 public:
     G1AnalyticsTest()
     {
         RuntimeOptions options;
-        options.SetHeapSizeLimit(64_MB);
+        options.SetHeapSizeLimit(HEAP_SIZE);
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetGcType("epsilon");
@@ -61,126 +60,407 @@ public:
         return cs;
     }
 
+    static constexpr uint64_t START_TIME = 1686312829587000000U;
+
 private:
     static constexpr size_t ALL_REGIONS_NUM = 32;
+    static constexpr size_t HEAP_SIZE = 64_MB;
     std::list<Region> regions_;
 };
 
+static void FillAnalyticsUndefinedBehaviorTest(G1Analytics &analytics, const CollectionSet &collectionSet, uint64_t now)
+{
+    analytics.ReportCollectionStart(now);
+    {
+        const size_t remsetSize = 100;
+        const size_t remsetRefsCount = 1000;
+        analytics.ReportRemsetSize(remsetSize, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 200'000;
+        analytics.ReportScanDirtyCardsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 250'000;
+        const size_t dirtyCardsCount = 2;
+        analytics.ReportScanDirtyCardsEnd(now + delta, dirtyCardsCount);
+    }
+    {
+        const uint64_t delta = 1'000'000;
+        analytics.ReportMarkingStart(now + delta);
+    }
+    {
+        const uint64_t delta = 2'000'000;
+        const size_t remsetRefsCount = 10000;
+        analytics.ReportMarkingEnd(now + delta, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 3'000'000;
+        analytics.ReportEvacuationStart(now + delta);
+    }
+    {
+        const uint64_t delta = 6'000'000;
+        analytics.ReportEvacuationEnd(now + delta);
+        analytics.ReportUpdateRefsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 7'000'000;
+        analytics.ReportUpdateRefsEnd(now + delta);
+    }
+    {
+        const uint64_t delta = 10'000'000;
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+    }
+}
+
 TEST_F(G1AnalyticsTest, UndefinedBehaviorTest)
 {
-    uint64_t now = 1686312829587000000U;
-    G1Analytics analytics(now - 20'000'000U);
-    ASSERT_EQ(0, analytics.PredictYoungCollectionTimeInMicros(16U));
+    const size_t edenLength = 16;
+    uint64_t now = START_TIME;
+    const auto startTimeDelta = -20'000'000;
+    auto startTime = now + startTimeDelta;
+    G1Analytics analytics(startTime);
+    ASSERT_EQ(0, analytics.PredictYoungCollectionTimeInMicros(edenLength));
 
-    auto collectionSet = CreateCollectionSet(16U);
+    auto collectionSet = CreateCollectionSet(edenLength);
+    FillAnalyticsUndefinedBehaviorTest(analytics, collectionSet, now);
+
+    const uint64_t expectedTime = 7'000;
+    ASSERT_EQ(expectedTime, analytics.PredictYoungCollectionTimeInMicros(edenLength));
+}
+
+static void FillAnalyticsPause0AllPromotedUndefinedBehaviorTest(G1Analytics &analytics,
+                                                                const CollectionSet &collectionSet, uint64_t now)
+{
     analytics.ReportCollectionStart(now);
-    analytics.ReportMarkingStart(now + 1'000'000U);
-    analytics.ReportMarkingEnd(now + 2'000'000U);
-    analytics.ReportEvacuationStart(now + 3'000'000U);
-    analytics.ReportEvacuationEnd(now + 6'000'000U);
-    analytics.ReportCollectionEnd(now + 10'000'000U, collectionSet);
+    {
+        const size_t remsetSize = 100;
+        const size_t remsetRefsCount = 1000;
+        analytics.ReportRemsetSize(remsetSize, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 200'000;
+        analytics.ReportScanDirtyCardsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 250'000;
+        const size_t dirtyCardsCount = 2;
+        analytics.ReportScanDirtyCardsEnd(now + delta, dirtyCardsCount);
+    }
+    {
+        const uint64_t delta = 1'000'000;
+        analytics.ReportMarkingStart(now + delta);
+    }
+    {
+        const uint64_t delta = 2'000'000;
+        const size_t remsetRefsCount = 12000;
+        analytics.ReportMarkingEnd(now + delta, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 3'000'000;
+        analytics.ReportEvacuationStart(now + delta);
+    }
+    {
+        const uint64_t delta = 6'000'000;
+        analytics.ReportEvacuationEnd(now + delta);
+        analytics.ReportUpdateRefsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 7'000'000;
+        analytics.ReportUpdateRefsEnd(now + delta);
+    }
+    for (size_t i = 0; i < collectionSet.Young().size(); i++) {
+        analytics.ReportPromotedRegion();
+    }
+    {
+        const uint64_t delta = 10'000'000;
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+    }
+}
 
-    ASSERT_EQ(0, analytics.PredictYoungCollectionTimeInMicros(16U));
+static void FillAnalyticsPause1AllPromotedUndefinedBehaviorTest(G1Analytics &analytics,
+                                                                const CollectionSet &collectionSet, uint64_t now)
+{
+    analytics.ReportCollectionStart(now);
+    {
+        const size_t liveObjects = 32000;
+        analytics.ReportLiveObjects(liveObjects);
+    }
+    {
+        const size_t remsetSize = 100;
+        const size_t remsetRefsCount = 1000;
+        analytics.ReportRemsetSize(remsetSize, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 200'000;
+        analytics.ReportScanDirtyCardsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 250'000;
+        const size_t dirtyCardsCount = 2;
+        analytics.ReportScanDirtyCardsEnd(now + delta, dirtyCardsCount);
+    }
+    {
+        const uint64_t delta = 1'000'000;
+        analytics.ReportMarkingStart(now + delta);
+    }
+    {
+        const uint64_t delta = 2'000'000;
+        const size_t remsetRefsCount = 11000;
+        analytics.ReportMarkingEnd(now + delta, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 3'000'000;
+        analytics.ReportEvacuationStart(now + delta);
+    }
+    {
+        const uint64_t delta = 6'000'000;
+        analytics.ReportEvacuationEnd(now + delta);
+        analytics.ReportUpdateRefsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 7'000'000;
+        analytics.ReportUpdateRefsEnd(now + delta);
+    }
+    {
+        const uint64_t delta = 10'000'000;
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+    }
 }
 
 TEST_F(G1AnalyticsTest, AllPromotedUndefinedBehaviorTest)
 {
-    uint64_t now = 1686312829587000000U;
-    G1Analytics analytics(now - 20'000'000U);
-    ASSERT_EQ(0, analytics.PredictYoungCollectionTimeInMicros(16U));
+    uint64_t now = START_TIME;
+    const auto startTimeDelta = -20'000'000;
+    auto startTime = now + startTimeDelta;
+    const size_t edenLength = 16;
+    G1Analytics analytics(startTime);
+    ASSERT_EQ(0, analytics.PredictYoungCollectionTimeInMicros(edenLength));
 
-    auto collectionSet = CreateCollectionSet(16U);
-    analytics.ReportCollectionStart(now);
-    analytics.ReportMarkingStart(now + 1'000'000U);
-    analytics.ReportMarkingEnd(now + 2'000'000U);
-    analytics.ReportEvacuationStart(now + 3'000'000U);
-    analytics.ReportEvacuationEnd(now + 6'000'000U);
-    for (size_t i = 0; i < 16U; i++) {
-        analytics.ReportPromotedRegion();
+    auto collectionSet = CreateCollectionSet(edenLength);
+    FillAnalyticsPause0AllPromotedUndefinedBehaviorTest(analytics, collectionSet, now);
+    {
+        const uint64_t expectedTime = 7'800;
+        ASSERT_EQ(expectedTime, analytics.PredictYoungCollectionTimeInMicros(edenLength));
     }
-    analytics.ReportCollectionEnd(now + 10'000'000U, collectionSet);
 
-    ASSERT_EQ(800U, analytics.PredictYoungCollectionTimeInMicros(16U));
+    const uint64_t nextPauseDelta = 20'000'000;
+    now += nextPauseDelta;
 
-    now += 20'000'000U;
+    FillAnalyticsPause1AllPromotedUndefinedBehaviorTest(analytics, collectionSet, now);
 
+    {
+        const uint64_t expectedTime = 7'732;
+        ASSERT_EQ(expectedTime, analytics.PredictYoungCollectionTimeInMicros(edenLength));
+    }
+}
+
+static void FillAnalyticsPause0PredictionTest(G1Analytics &analytics, const CollectionSet &collectionSet, uint64_t now)
+{
     analytics.ReportCollectionStart(now);
-    analytics.ReportLiveObjects(32000U);
-    analytics.ReportMarkingStart(now + 1'000'000U);
-    analytics.ReportMarkingEnd(now + 2'000'000U);
-    analytics.ReportEvacuationStart(now + 3'000'000U);
-    analytics.ReportEvacuationEnd(now + 6'000'000U);
-    analytics.ReportCollectionEnd(now + 10'000'000U, collectionSet);
+    {
+        const size_t remsetSize = 100;
+        const size_t remsetRefsCount = 1000;
+        analytics.ReportRemsetSize(remsetSize, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 200'000;
+        analytics.ReportScanDirtyCardsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 250'000;
+        const size_t dirtyCardsCount = 2;
+        analytics.ReportScanDirtyCardsEnd(now + delta, dirtyCardsCount);
+    }
+    {
+        const uint64_t delta = 1'000'000;
+        analytics.ReportMarkingStart(now + delta);
+    }
+    {
+        const uint64_t delta = 2'000'000;
+        const size_t remsetRefsCount = 12000;
+        analytics.ReportMarkingEnd(now + delta, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 3'000'000;
+        analytics.ReportEvacuationStart(now + delta);
+    }
+    {
+        const uint64_t delta = 6'000'000;
+        analytics.ReportEvacuationEnd(now + delta);
+        const size_t evacuatedBytes = 2 * 1024 * 1024;
+        analytics.ReportEvacuatedBytes(evacuatedBytes);
+        const size_t liveObjects = 32000;
+        analytics.ReportLiveObjects(liveObjects);
+    }
+    {
+        const uint64_t delta = 6'000'000;
+        analytics.ReportUpdateRefsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 7'000'000;
+        analytics.ReportUpdateRefsEnd(now + delta);
+    }
+    {
+        const uint64_t delta = 10'000'000;
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+    }
+}
 
-    ASSERT_EQ(833L, analytics.PredictYoungCollectionTimeInMicros(16U));
+static void FillAnalyticsPause1PredictionTest(G1Analytics &analytics, const CollectionSet &collectionSet, uint64_t now)
+{
+    analytics.ReportCollectionStart(now);
+
+    {
+        const size_t remsetSize = 110;
+        const size_t remsetRefsCount = 1500;
+        analytics.ReportRemsetSize(remsetSize, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 900'000;
+        analytics.ReportScanDirtyCardsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 950'000;
+        const size_t dirtyCardsCount = 2;
+        analytics.ReportScanDirtyCardsEnd(now + delta, dirtyCardsCount);
+    }
+    {
+        const uint64_t delta = 1'000'000;
+        analytics.ReportMarkingStart(now + delta);
+    }
+    {
+        const uint64_t delta = 2'500'000;
+        const size_t remsetRefsCount = 12000;
+        analytics.ReportMarkingEnd(now + delta, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 3'000'000;
+        analytics.ReportEvacuationStart(now + delta);
+    }
+    {
+        const uint64_t delta = 6'500'000;
+        analytics.ReportEvacuationEnd(now + delta);
+        const size_t evacuatedBytes = 2 * 1024 * 1024;
+        analytics.ReportEvacuatedBytes(evacuatedBytes);
+        analytics.ReportPromotedRegion();
+        analytics.ReportPromotedRegion();
+        const size_t liveObjects = 30000;
+        analytics.ReportLiveObjects(liveObjects);
+    }
+    {
+        const uint64_t delta = 6'000'000;
+        analytics.ReportUpdateRefsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 7'500'000;
+        analytics.ReportUpdateRefsEnd(now + delta);
+    }
+    const uint64_t delta = 10'000'000;
+    analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+}
+
+static void FillAnalyticsPause2PredictionTest(G1Analytics &analytics, const CollectionSet &collectionSet, uint64_t now)
+{
+    analytics.ReportCollectionStart(now);
+    {
+        const size_t remsetSize = 120;
+        const size_t remsetRefsCount = 1600;
+        analytics.ReportRemsetSize(remsetSize, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 900'000;
+        analytics.ReportScanDirtyCardsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 950'000;
+        const size_t dirtyCardsCount = 2;
+        analytics.ReportScanDirtyCardsEnd(now + delta, dirtyCardsCount);
+    }
+    {
+        const uint64_t delta = 1'000'000;
+        analytics.ReportMarkingStart(now + delta);
+    }
+    {
+        const uint64_t delta = 3'000'000;
+        const size_t remsetRefsCount = 13000;
+        analytics.ReportMarkingEnd(now + delta, remsetRefsCount);
+    }
+    {
+        const uint64_t delta = 3'000'000;
+        analytics.ReportEvacuationStart(now + delta);
+    }
+    {
+        const uint64_t delta = 7'000'000;
+        analytics.ReportEvacuationEnd(now + delta);
+        const size_t evacuatedBytes = 2 * 1024 * 1024;
+        analytics.ReportEvacuatedBytes(evacuatedBytes);
+        analytics.ReportPromotedRegion();
+        const size_t liveObjects = 33000;
+        analytics.ReportLiveObjects(liveObjects);
+    }
+    {
+        const uint64_t delta = 7'000'000;
+        analytics.ReportUpdateRefsStart(now + delta);
+    }
+    {
+        const uint64_t delta = 8'500'000;
+        analytics.ReportUpdateRefsEnd(now + delta);
+    }
+    const uint64_t delta = 11'000'000;
+    analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
 }
 
 TEST_F(G1AnalyticsTest, PredictionTest)
 {
-    uint64_t now = 1686312829587000000U;
-    G1Analytics analytics(now - 20'000'000U);
+    uint64_t now = START_TIME;
+    const auto startTimeDelta = -20'000'000;
+    auto startTime = now + startTimeDelta;
+    G1Analytics analytics(startTime);
 
-    auto collectionSet = CreateCollectionSet(16U);
-    analytics.ReportCollectionStart(now);
-    analytics.ReportScanRemsetStart(now + 500'000U);
-    analytics.ReportScanRemsetEnd(now + 900'000U);
-    analytics.ReportMarkingStart(now + 1'000'000U);
-    analytics.ReportMarkingEnd(now + 2'000'000U);
-    analytics.ReportEvacuationStart(now + 3'000'000U);
-    analytics.ReportEvacuationEnd(now + 6'000'000U);
-    analytics.ReportEvacuatedBytes(2_MB);
-    analytics.ReportLiveObjects(32000U);
-    analytics.ReportUpdateRefsStart(now + 6'000'000U);
-    analytics.ReportUpdateRefsEnd(now + 7'000'000U);
-    analytics.ReportCollectionEnd(now + 10'000'000U, collectionSet);
+    {
+        const size_t edenLength = 16;
+        auto collectionSet = CreateCollectionSet(edenLength);
+        FillAnalyticsPause0PredictionTest(analytics, collectionSet, now);
 
-    ASSERT_EQ(5'000L, analytics.EstimatePredictionErrorInMicros());
-    ASSERT_EQ(5'400L, analytics.PredictYoungCollectionTimeInMicros(16U));
-    ASSERT_NEAR(0.0008_D, analytics.PredictAllocationRate(), 1e-6_D);
+        const size_t expectedTime = 10'000;
+        ASSERT_EQ(expectedTime, analytics.PredictYoungCollectionTimeInMicros(edenLength));
+        const double expectedAllocationRate = 0.0008;
+        const double maxError = 1e-6;
+        ASSERT_NEAR(expectedAllocationRate, analytics.PredictAllocationRate(), maxError);
+    }
 
-    now += 20'000'000U;
+    const uint64_t nextPauseDelta = 20'000'000;
+    now += nextPauseDelta;
 
-    collectionSet = CreateCollectionSet(10U);
-    analytics.ReportCollectionStart(now);
-    analytics.ReportScanRemsetStart(now + 500'000U);
-    analytics.ReportScanRemsetEnd(now + 900'000U);
-    analytics.ReportMarkingStart(now + 1'000'000U);
-    analytics.ReportMarkingEnd(now + 2'500'000U);
-    analytics.ReportEvacuationStart(now + 3'000'000U);
-    analytics.ReportEvacuationEnd(now + 6'500'000U);
-    analytics.ReportEvacuatedBytes(2_MB);
-    analytics.ReportPromotedRegion();
-    analytics.ReportPromotedRegion();
-    analytics.ReportLiveObjects(30000U);
-    analytics.ReportUpdateRefsStart(now + 6'000'000U);
-    analytics.ReportUpdateRefsEnd(now + 7'500'000U);
-    analytics.ReportCollectionEnd(now + 10'000'000U, collectionSet);
+    {
+        const size_t edenLength = 10;
+        auto collectionSet = CreateCollectionSet(edenLength);
+        FillAnalyticsPause1PredictionTest(analytics, collectionSet, now);
 
-    ASSERT_EQ(5'005L, analytics.EstimatePredictionErrorInMicros());
-    ASSERT_EQ(5'069L, analytics.PredictYoungCollectionTimeInMicros(10U));
-    ASSERT_NEAR(0.000905_D, analytics.PredictAllocationRate(), 1e-6_D);
+        const uint64_t expectedTime = 9'266;
+        ASSERT_EQ(expectedTime, analytics.PredictYoungCollectionTimeInMicros(edenLength));
+        const double expectedAllocationRate = 0.000905;
+        const double maxError = 1e-6;
+        ASSERT_NEAR(expectedAllocationRate, analytics.PredictAllocationRate(), maxError);
+    }
 
-    now += 20'000'000U;
+    now += nextPauseDelta;
 
-    collectionSet = CreateCollectionSet(14U, 10U);
-    analytics.ReportCollectionStart(now);
-    analytics.ReportScanRemsetStart(now + 500'000U);
-    analytics.ReportScanRemsetEnd(now + 900'000U);
-    analytics.ReportMarkingStart(now + 1'000'000U);
-    analytics.ReportMarkingEnd(now + 3'000'000U);
-    analytics.ReportEvacuationStart(now + 3'000'000U);
-    analytics.ReportEvacuationEnd(now + 7'000'000U);
-    analytics.ReportEvacuatedBytes(2_MB);
-    analytics.ReportPromotedRegion();
-    analytics.ReportLiveObjects(33000U);
-    analytics.ReportUpdateRefsStart(now + 7'000'000U);
-    analytics.ReportUpdateRefsEnd(now + 8'500'000U);
-    analytics.ReportCollectionEnd(now + 11'000'000U, collectionSet);
+    const size_t edenLength = 14;
+    const size_t oldLength = 10;
+    auto collectionSet = CreateCollectionSet(edenLength, oldLength);
+    FillAnalyticsPause2PredictionTest(analytics, collectionSet, now);
 
-    ASSERT_EQ(5'005L, analytics.EstimatePredictionErrorInMicros());
-    ASSERT_EQ(6'526L, analytics.PredictYoungCollectionTimeInMicros(14U));
-    ASSERT_EQ(127L, analytics.PredictOldCollectionTimeInMicros(64U * 1024U, 100U));
-    ASSERT_NEAR(0.001151_D, analytics.PredictAllocationRate(), 1e-6_D);
+    const uint64_t expectedTime = 10'772;
+    ASSERT_EQ(expectedTime, analytics.PredictYoungCollectionTimeInMicros(edenLength));
+    const uint64_t expectedOldTime = 110;
+    const size_t remsetSize = 50;
+    const size_t liveBytes = 64 * 1024;
+    const size_t liveObjects = 100;
+    ASSERT_EQ(expectedOldTime, analytics.PredictOldCollectionTimeInMicros(remsetSize, liveBytes, liveObjects));
+    const double expectedAllocationRate = 0.001151;
+    const double maxError = 1e-6;
+    ASSERT_NEAR(expectedAllocationRate, analytics.PredictAllocationRate(), maxError);
 }
-// NOLINTEND(readability-magic-numbers)
 }  // namespace panda::mem

@@ -344,7 +344,7 @@ Region *RegionSpace::NewRegion(size_t regionSize, RegionFlag edenOrOldOrNonmovab
     auto youngRegionFlag = IsYoungRegionFlag(edenOrOldOrNonmovable);
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
     // on other reads or writes
-    if (youngRegionFlag && youngRegionsInUse_.load(std::memory_order_relaxed) > desiredEdenLength_) {
+    if (youngRegionFlag && youngRegionsInUse_.load(std::memory_order_relaxed) >= desiredEdenLength_) {
         return nullptr;
     }
     if (youngRegionFlag && (!emptyYoungRegions_.empty())) {
