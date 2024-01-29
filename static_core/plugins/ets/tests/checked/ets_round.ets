@@ -33,6 +33,11 @@
 //! ASM           x64: /roundsd.*3,/, arm64: "frinta"
 //! RUN           entry: "ETSGLOBAL::main"
 
+//! CHECKER       Math.round LLVM AOT
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_LLVM      options: "--compiler-regex='.*main.*'"
+//! RUN           entry: "ETSGLOBAL::main"
+
 function main(): int {
     if (round(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;
     if (round(Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 2;

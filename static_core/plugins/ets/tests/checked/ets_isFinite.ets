@@ -25,7 +25,7 @@
 
 //! CHECKER      AOT IR Builder inlining double 
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex='.*check_isfinite_f64.*'"
+//! RUN_AOT      options: "--compiler-regex='.*check_isfinite_f64.*'"
 //! METHOD       "ETSGLOBAL::check_isfinite_f64"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Bitcast/
@@ -47,7 +47,7 @@
 
 //! CHECKER      AOT IR Builder inlining float
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex='.*check_isfinite_f32.*'"
+//! RUN_AOT     options: "--compiler-regex='.*check_isfinite_f32.*'"
 //! METHOD       "ETSGLOBAL::check_isfinite_f32"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Bitcast/

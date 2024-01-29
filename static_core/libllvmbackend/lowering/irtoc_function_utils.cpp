@@ -29,19 +29,22 @@ constexpr std::array NOALIAS_IRTOC_FUNC = {
 #endif
 };
 
-constexpr std::array PTR_IGN_IRTOC_FUNC = {"ResolveStringByIdEntrypoint"sv,
-                                           "ResolveLiteralArrayByIdEntrypoint"sv,
-                                           "ResolveTypeByIdEntrypoint"sv,
-                                           "GetCalleeMethodFromBytecodeId"sv,
-                                           "GetInstructionsByMethod"sv,
-                                           "GetFieldByIdEntrypoint"sv,
-                                           "GetStaticFieldByIdEntrypoint"sv,
-                                           "FindCatchBlockInIFrames"sv,
-                                           "ResolveVirtualMethod"sv,
-                                           "GetMethodClassById"sv,
-                                           "VmCreateString"sv,
-                                           "AllocFrameInterp"sv,
-                                           "InitializeFrame"sv};
+constexpr std::array PTR_IGN_IRTOC_FUNC = {
+    "ResolveStringByIdEntrypoint"sv,
+    "ResolveLiteralArrayByIdEntrypoint"sv,
+    "ResolveTypeByIdEntrypoint"sv,
+    "GetCalleeMethodFromBytecodeId"sv,
+    "GetInstructionsByMethod"sv,
+    "GetFieldByIdEntrypoint"sv,
+    "GetStaticFieldByIdEntrypoint"sv,
+    "FindCatchBlockInIFrames"sv,
+    "ResolveVirtualMethod"sv,
+    "GetMethodClassById"sv,
+    "VmCreateString"sv,
+    "AllocFrameInterp"sv,
+    "InitializeFrame"sv,
+    "memmove"sv,
+};
 
 namespace panda::llvmbackend::irtoc_function_utils {
 bool IsNoAliasIrtocFunction(const std::string &externalName)

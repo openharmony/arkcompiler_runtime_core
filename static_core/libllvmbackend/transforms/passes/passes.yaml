@@ -68,6 +68,64 @@ llvm_passes:
   type: [scc]
   setup: default
 
+- name: PruneDeopt
+  description: >
+    Remove deopt bundles when possible otherwise change a record format inside bundles.
+  type: [function]
+  setup: default
+
+- name: ArkGVN
+  description: >
+    The pass removes dominated builtins and replaces it by
+    the dominating value if possible.
+  type: [function]
+  setup: custom
+
+- name: IntrinsicsLowering
+  description: >
+    The pass replaces intrinsic instructions and FRem with corresponding
+    panda function calls.
+  type: [function]
+  setup: custom
+
+- name: PandaRuntimeLowering
+  description: >
+    Lower direct function calls with calls through Ark runtime
+  type: [function]
+  setup: custom
+
+- name: InsertSafepoints
+  description: >
+    The pass places garbage collection safepoints at appropriate
+    locations in the IR.
+  type: [function]
+  setup: default
+
+- name: GepPropagation
+  description: >
+    The pass copies a sequence of instructions that has a GC reference
+    as an input.
+  type: [function]
+  setup: default
+
+- name: GcIntrusion
+  description: >
+    The pass replaces calls with calls using @llvm.experimental.gc.statepoint.
+  type: [function]
+  setup: default
+
+- name: GcIntrusionCheck
+  description: >
+    Transform calls into statepoints to support garbage collection.
+  type: [function]
+  setup: default
+
+- name: FixupPoisons
+  description: >
+    Replace poisons with null pointers
+  type: [function]
+  setup: default
+
 - name: ExpandAtomics
   description: >
     Expand atomic operations' pointer operand into 64-bit pointer

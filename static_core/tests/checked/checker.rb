@@ -163,6 +163,7 @@ class Checker
     @ir_files = []
     @architecture = options.arch
     @aot_file = ''
+    @llvm_paoc = false
 
     # Events scope for 'events.csv'
     @events_scope = nil
@@ -178,6 +179,10 @@ class Checker
 
     Dir.mkdir(@cwd) unless File.exists?(@cwd)
     clear_data
+  end
+
+  def set_llvm_paoc()
+    @llvm_paoc = true
   end
 
   def append_line(line)
@@ -303,6 +308,14 @@ class Checker
     File.open("#{@cwd}/console.out", "w") { |file| file.write(output) }
 
     @events_scope = SearchScope.from_file("#{@cwd}/events.csv", 'Events')
+  end
+
+  def RUN_AOT(**args)
+    if @llvm_paoc
+      RUN_LLVM(**args)
+    else
+      RUN_PAOC(**args)
+    end
   end
 
   def RUN_LLVM(**args)
@@ -573,15 +586,26 @@ end
 def read_checks(options)
   checks = []
   check = nil
+  check_llvm = nil
+  with_aot = false
   checker_start = "#{options.command_token} CHECKER"
   disabled_checker_start = "#{options.command_token} DISABLED_CHECKER"
   File.readlines(options.source).each do |line|
     if check
       unless line.start_with? options.command_token
+        if with_aot
+          checks << check_llvm
+        end
+        with_aot = false
         check = nil
+        check_llvm = nil
         next
       end
+      if line.include? "RUN_AOT"
+        with_aot = true
+      end
       check.append_line(line[options.command_token.size..-1]) unless check == :disabled_check
+      check_llvm.append_line(line[options.command_token.size..-1]) unless check == :disabled_check
     else
       next unless line.start_with? options.command_token
       if line.start_with? checker_start
@@ -589,6 +613,8 @@ def read_checks(options)
         raise "Checker with name '#{name}'' already exists" if checks.any? { |x| x.name == name }
 
         check = Checker.new(options, name)
+        check_llvm = Checker.new(options, "#{name} LLVMAOT")
+        check_llvm.set_llvm_paoc()
         checks << check
       else
         raise "Line '#{line.strip}' does not belong to any checker" unless line.start_with? disabled_checker_start

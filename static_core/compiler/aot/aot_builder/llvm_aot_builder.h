@@ -23,7 +23,7 @@ namespace panda::compiler {
 class LLVMAotBuilder : public AotBuilder {
 public:
     std::unordered_map<std::string, size_t> GetSectionsAddresses(const std::string &cmdline,
-                                                                 const std::string &file_name);
+                                                                 const std::string &fileName);
 
     const std::vector<CompiledMethod> &GetMethods()
     {
@@ -32,49 +32,49 @@ public:
 
     const std::vector<compiler::MethodHeader> &GetMethodHeaders()
     {
-        return method_headers_;
+        return methodHeaders_;
     }
 
     /**
      * Put method header for a given method.
      * The method will be patched later (see AdjustMethod below).
      */
-    void AddMethodHeader(Method *method, size_t method_index)
+    void AddMethodHeader(Method *method, size_t methodIndex)
     {
-        auto &method_header = method_headers_.emplace_back();
-        methods_.emplace_back(arch_, method, method_index);
-        method_header.method_id = method->GetFileId().GetOffset();
-        method_header.code_offset = UNPATCHED_CODE_OFFSET;
-        method_header.code_size = UNPATCHED_CODE_SIZE;
-        current_bitmap_->SetBit(method_index);
+        auto &methodHeader = methodHeaders_.emplace_back();
+        methods_.emplace_back(arch_, method, methodIndex);
+        methodHeader.methodId = method->GetFileId().GetOffset();
+        methodHeader.codeOffset = UNPATCHED_CODE_OFFSET;
+        methodHeader.codeSize = UNPATCHED_CODE_SIZE;
+        currentBitmap_->SetBit(methodIndex);
     }
 
     /// Adjust a method's header according to the supplied method
     void AdjustMethodHeader(const CompiledMethod &method, size_t index)
     {
-        MethodHeader &method_header = method_headers_[index];
-        method_header.code_offset = current_code_size_;
-        method_header.code_size = method.GetOverallSize();
-        current_code_size_ += method_header.code_size;
-        current_code_size_ = RoundUp(current_code_size_, GetCodeAlignment(arch_));
+        MethodHeader &methodHeader = methodHeaders_[index];
+        methodHeader.codeOffset = currentCodeSize_;
+        methodHeader.codeSize = method.GetOverallSize();
+        currentCodeSize_ += methodHeader.codeSize;
+        currentCodeSize_ = RoundUp(currentCodeSize_, GetCodeAlignment(arch_));
     }
 
     /// Adjust a method stored in this aot builder according to the supplied method
     void AdjustMethod(const CompiledMethod &method, size_t index)
     {
         ASSERT(methods_.at(index).GetMethod() == method.GetMethod());
-        ASSERT(method_headers_.at(index).code_size == method.GetOverallSize());
+        ASSERT(methodHeaders_.at(index).codeSize == method.GetOverallSize());
         methods_.at(index).SetCode(method.GetCode());
         methods_.at(index).SetCodeInfo(method.GetCodeInfo());
     }
 
 private:
-    static constexpr auto UNPATCHED_CODE_OFFSET = std::numeric_limits<decltype(MethodHeader::code_offset)>::max();
-    static constexpr auto UNPATCHED_CODE_SIZE = std::numeric_limits<decltype(MethodHeader::code_size)>::max();
+    static constexpr auto UNPATCHED_CODE_OFFSET = std::numeric_limits<decltype(MethodHeader::codeOffset)>::max();
+    static constexpr auto UNPATCHED_CODE_SIZE = std::numeric_limits<decltype(MethodHeader::codeSize)>::max();
 
     template <Arch ARCH>
     std::unordered_map<std::string, size_t> GetSectionsAddressesImpl(const std::string &cmdline,
-                                                                     const std::string &file_name);
+                                                                     const std::string &fileName);
 };
 }  // namespace panda::compiler
 #endif  // COMPILER_AOT_AOT_BUILDER_LLVM_AOT_BUILDER_H

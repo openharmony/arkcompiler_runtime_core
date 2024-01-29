@@ -180,6 +180,7 @@ intrinsics:
       - f64
   impl: panda::intrinsics::IsInfF64
   codegen_func: CreateFloatIsInf
+  llvm_codegen_func: EmitIsInf
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: FloatIsInf
@@ -193,6 +194,7 @@ intrinsics:
       - f32
   impl: panda::intrinsics::IsInfF32
   codegen_func: CreateFloatIsInf
+  llvm_codegen_func: EmitIsInf
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathSinF32
@@ -205,6 +207,7 @@ intrinsics:
     args:
       - f32
   impl: panda::intrinsics::SinF32
+  llvm_impl: sin
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathSinF64
@@ -217,6 +220,7 @@ intrinsics:
     args:
       - f64
   impl: panda::intrinsics::SinF64
+  llvm_impl: sin
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathCosF32
@@ -229,6 +233,7 @@ intrinsics:
     args:
       - f32
   impl: panda::intrinsics::CosF32
+  llvm_impl: cos
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathCosF64
@@ -241,6 +246,7 @@ intrinsics:
     args:
       - f64
   impl: panda::intrinsics::CosF64
+  llvm_impl: cos
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathPowF32
@@ -254,6 +260,7 @@ intrinsics:
       - f32
       - f32
   impl: panda::intrinsics::PowF32
+  llvm_impl: pow
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathPowF64
@@ -267,6 +274,7 @@ intrinsics:
       - f64
       - f64
   impl: panda::intrinsics::PowF64
+  llvm_impl: pow
   clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 - name: MathSqrtF32

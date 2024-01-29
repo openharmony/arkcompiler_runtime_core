@@ -18,7 +18,7 @@
 function(:MemmoveInterposer,
           params: {dst: 'ptr', src: 'ptr', size: 'u32', dummy1: 'u32', dummy2: 'u32'},
           mode: [:FastPath]) {
-    Call(dst, src, size).Method("memmove").void
+    Call(dst, src, size).Method("memmove").ptr
     ReturnVoid().void
 }
 

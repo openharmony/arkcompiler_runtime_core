@@ -53,6 +53,10 @@ function(panda_ets_interop_js_checked_test)
     SET(OPTIONS "--run-gc-in-place")
     set(PAOC_OPTIONS ${OPTIONS} "--load-runtimes=ets" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
 
+    if (PANDA_LLVM_AOT)
+        set(WITH_LLVM "--with-llvm")
+    endif()
+
     add_custom_target(${TARGET}
         COMMAND ${CHECKER} --source ${ARG_FILE}
                         --panda \"${RUN_COMMAND}\"
@@ -63,6 +67,7 @@ function(panda_ets_interop_js_checked_test)
                         --paoc-options \"${PAOC_OPTIONS}\"
                         --command-token \"//!\"
                         --arch ${ARCHITECTURE}
+                        ${WITH_LLVM}
         WORKING_DIRECTORY ${TEST_DIR}
         COMMENT "Running ${TARGET} checked test"
         DEPENDS ${JS_LAUNCHER} ${TARGET_TEST_PACKAGE} ets_interop_js_napi ${ETS_CONFIG})

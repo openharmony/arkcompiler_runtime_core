@@ -1,0 +1,174 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "tests/unit_test.h"
+#include "tests/inst_generator.h"
+#include "llvm_aot_compiler.h"
+#include "libpandafile/file_item_container.h"
+
+#include "aot/aot_builder/llvm_aot_builder.h"
+
+using panda::compiler::Opcode;
+
+namespace panda::llvmbackend {
+class LLVMCodegenTest : public panda::compiler::GraphTest {};
+
+class LLVMCodegenStatisticGenerator : public panda::compiler::StatisticGenerator {
+public:
+    using StatisticGenerator::StatisticGenerator;
+
+    void GenerateOp(Opcode op)
+    {
+        ASSERT(op != Opcode::Builtin);
+        if (op == Opcode::Intrinsic || op == Opcode::SpillFill || op == Opcode::ReturnInlined) {
+            return;
+        }
+        auto it = instGenerator_.Generate(op);
+        ASSERT(it.begin() != it.end());
+        if ((*(it.begin()))->IsLowLevel()) {
+            return;
+        }
+        FullInstStat fullInstStat = tmplt_;
+        for (auto &i : it) {
+            auto graph = graphCreator_.GenerateGraph(i);
+            panda::compiler::LLVMAotBuilder aotBuilder;
+            graph->SetRuntime(graphCreator_.GetRuntime());
+            aotBuilder.SetArch(graph->GetArch());
+            aotBuilder.SetRuntime(graph->GetRuntime());
+
+            bool status = false;
+            LLVMAotCompiler llvm(graph->GetRuntime(), graphCreator_.GetAllocator(), &aotBuilder, "", "inst-gen.abc");
+            auto can = llvm.CanCompile(graph);
+            ASSERT(can.HasValue());
+            if (can.HasValue() && can.Value()) {
+                if (graph->GetAotData() == nullptr) {
+                    uintptr_t codeAddress = aotBuilder.GetCurrentCodeAddress();
+                    auto aotData = graph->GetAllocator()->New<compiler::AotData>(
+                        nullptr, graph, codeAddress, aotBuilder.GetIntfInlineCacheIndex(), aotBuilder.GetGotPlt(),
+                        aotBuilder.GetGotVirtIndexes(), aotBuilder.GetGotClass(), aotBuilder.GetGotString(),
+                        aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon(), nullptr);
+                    aotData->SetUseCha(true);
+                    graph->SetAotData(aotData);
+                }
+                llvm.AddGraph(graph);
+                status = !llvm.IsIrFailed();
+                if (!status) {
+                    graph->Dump(&std::cerr);
+                }
+                // If CanCompile is true, the code must be compiled
+                ASSERT(status);
+            }
+            // NOLINTNEXTLINE(hicpp-signed-bitwise)
+            fullInstStat[(i)->GetType()] &= static_cast<int>(status);
+            allInstNumber_++;
+            positiveInstNumber_ += static_cast<int>(status);
+            // To consume less memory
+            graph->~Graph();
+            graphCreator_.GetAllocator()->Resize(0);
+        }
+        statistic_.first.insert({op, fullInstStat});
+    }
+
+    void GenerateIntrinsic(compiler::Inst *i)
+    {
+        ASSERT(graphCreator_.GetAllocator()->GetAllocatedSize() == 0);
+
+        auto intrinsicsId = (i)->CastToIntrinsic()->GetIntrinsicId();
+        auto graph = graphCreator_.GenerateGraph(i);
+        panda::compiler::LLVMAotBuilder aotBuilder;
+        aotBuilder.SetArch(graph->GetArch());
+        graph->SetRuntime(graphCreator_.GetRuntime());
+        aotBuilder.SetRuntime(graph->GetRuntime());
+        ASSERT(compiler::g_options.IsCompilerEncodeIntrinsics());
+        bool encodes = EncodesBuiltin(graph->GetRuntime(), intrinsicsId, graph->GetArch());
+        if (!encodes) {
+            compiler::g_options.SetCompilerEncodeIntrinsics(false);
+        }
+
+        bool status = false;
+        LLVMAotCompiler llvm(graph->GetRuntime(), graphCreator_.GetAllocator(), &aotBuilder, "", "inst-gen.abc");
+        auto can = llvm.CanCompile(graph);
+        if (can.HasValue() && can.Value()) {
+            if (graph->GetAotData() == nullptr) {
+                uintptr_t codeAddress = aotBuilder.GetCurrentCodeAddress();
+                auto aotData = graph->GetAllocator()->New<compiler::AotData>(
+                    nullptr, graph, codeAddress, aotBuilder.GetIntfInlineCacheIndex(), aotBuilder.GetGotPlt(),
+                    aotBuilder.GetGotVirtIndexes(), aotBuilder.GetGotClass(), aotBuilder.GetGotString(),
+                    aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon(), nullptr);
+                aotData->SetUseCha(true);
+                graph->SetAotData(aotData);
+            }
+            llvm.AddGraph(graph);
+            status = !llvm.IsIrFailed();
+            if (!status) {
+                graph->Dump(&std::cerr);
+            }
+            // If CanCompile is true, the code must be compiled
+            ASSERT(status);
+        }
+        if (!encodes) {
+            compiler::g_options.SetCompilerEncodeIntrinsics(true);
+        }
+
+        statistic_.second[intrinsicsId] = status;
+        allInstNumber_++;
+        positiveInstNumber_ += static_cast<int>(status);
+        graph->~Graph();
+        graphCreator_.GetAllocator()->Resize(0);
+    }
+
+    void Generate() override
+    {
+        for (const auto &op : instGenerator_.GetMap()) {
+            GenerateOp(op.first);
+        }
+        auto intrinsics = instGenerator_.Generate(Opcode::Intrinsic);
+        for (auto &i : intrinsics) {
+            GenerateIntrinsic(i);
+        }
+        for (auto i = 0; i != static_cast<int>(Opcode::NUM_OPCODES); ++i) {
+            auto opc = static_cast<Opcode>(i);
+            if (opc == Opcode::NOP || opc == Opcode::Intrinsic || opc == Opcode::Builtin) {
+                continue;
+            }
+            allOpcodeNumber_++;
+            implementedOpcodeNumber_ += static_cast<int>(statistic_.first.find(opc) != statistic_.first.end());
+        }
+    }
+};
+
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+TEST_F(LLVMCodegenTest, AllInstTest)
+{
+    ArenaAllocator instAlloc {SpaceType::SPACE_TYPE_COMPILER};
+    panda::compiler::InstGenerator instGen(instAlloc);
+
+    ArenaAllocator localAlloc {SpaceType::SPACE_TYPE_COMPILER};
+    ArenaAllocator graphAlloc {SpaceType::SPACE_TYPE_COMPILER};
+    panda::compiler::GraphCreator graphCreator {graphAlloc, localAlloc};
+
+    // ARM64
+    LLVMCodegenStatisticGenerator statGenArm64(instGen, graphCreator);
+    statGenArm64.Generate();
+    statGenArm64.GenerateHTMLPage("LLVMCodegenStatisticARM64.html");
+
+    // AMD64
+    graphCreator.SetRuntimeTargetArch(Arch::X86_64);
+    LLVMCodegenStatisticGenerator statGenAmd64(instGen, graphCreator);
+    statGenAmd64.Generate();
+    statGenAmd64.GenerateHTMLPage("LLVMCodegenStatisticAMD64.html");
+}
+
+}  // namespace panda::llvmbackend

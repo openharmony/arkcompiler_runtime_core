@@ -17,6 +17,29 @@ module:
   descritpition: LLVM AOT compiler for panda
 
 options:
+  - name: llvm-allow-breakage
+    type: bool
+    default: false
+    description: Skip errors during LLVM IR generation
+  - name: llvm-fallback
+    type: bool
+    default: true
+    description: Use Ark Compiler as fallback
+  - name: llvm-safemode
+    type: bool
+    default: false
+    description: Compile only simple functions (no calls/loops)
+  - name: llvm-inlining
+    type: bool
+    default: true
+    description: >
+      Enable inlining optimization. Default value is overridden by explicit
+      --compiler-inlining which in turn can be overridden by passing this
+      option explicitly
+  - name: llvm-recursive-inlining
+    type: bool
+    default: true
+    description: Enable inlining for recursive calls
   - name: llvm-dump-before
     type: bool
     default: false
@@ -25,6 +48,25 @@ options:
     type: bool
     default: false
     description: Whether generated LLVM module should be dumped after optimization passes are run
+  - name: llvm-dump-codeinfo
+    type: bool
+    default: false
+    description: Print generated code info
+  - name: llvm-dump-obj
+    type: bool
+    default: false
+    description: >
+      Whether llvm backend should dump generated object files.
+      The object files will be dumped to a "llvm-output-{module-number}.o" files in the current working directory,
+      if a file exists it will be overwritten
+  - name: llvm-dump-stackmaps
+    type: bool
+    default: false
+    description: Dump a textual representation of .llvm_stackmaps section into "llvm-stackmaps.txt"
+  - name: llvm-gc-check
+    type: bool
+    default: false
+    description: Run invariant checks after GC intrusion pass
   - name: llvm-log
     type: arg_list_t
     default:
@@ -44,14 +86,31 @@ options:
     description: >
       File with a sequence of llvm's passes, that will be involved into optimization
       pipeline.
+  - name: llvm-deopts
+    type: bool
+    default: true
+    description: Generate deoptimizations
   - name: llvm-options
     type: std::string
     default: ""
     description: String with command line options that directly passed into llvm.
+  - name: llvm-builtin-wrb
+    type: bool
+    default: true
+    description: Whether WRB are generated via builtin.
   - name: llvm-inline-module
     type: std::string
     default: ""
     description: A supplemental LLVM IR bitcode module with additional functions to be inlined
+  - name: llvm-methods-per-module
+    type: uint64_t
+    default: 4096
+    description: Number of methods to compile in one llvm module
+  - name: llvm-break-ir-regex
+    type: std::string
+    default: ""
+    description: Debug only. LLVM compiler will break IR on purpose for the functions matching the regex
+    tags: [debug, test]
   - name: llvm-cpu
     type: std::string
     default: "cortex-a55"

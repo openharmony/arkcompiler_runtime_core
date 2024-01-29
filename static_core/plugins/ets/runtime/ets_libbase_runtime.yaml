@@ -54,6 +54,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::intrinsics::SinF64
+    llvm_impl: sin
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathCos
@@ -65,6 +66,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::intrinsics::CosF64
+    llvm_impl: cos
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathPower
@@ -76,6 +78,7 @@ intrinsics:
       ret: f64
       args: [ f64, f64 ]
     impl: panda::intrinsics::PowF64
+    llvm_impl: pow
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathSqrt
@@ -87,6 +90,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::intrinsics::SqrtF64
+    llvm_impl: sqrt
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathAbs
@@ -307,6 +311,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::ets::intrinsics::StdMathFloor
+    llvm_impl: floor
     codegen_func: CreateMathFloor
     can_encode_func: CheckSSE42
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -320,6 +325,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::ets::intrinsics::StdMathRound
+    llvm_impl: round
     codegen_func: CreateMathRoundAway
     can_encode_func: CheckSSE42
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -333,6 +339,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::ets::intrinsics::StdMathTrunc
+    llvm_impl: trunc
     codegen_func: CreateMathTrunc
     can_encode_func: CheckSSE42
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -348,6 +355,7 @@ intrinsics:
     impl: panda::ets::intrinsics::StdMathCeil
     codegen_func: CreateMathCeil
     can_encode_func: CheckSSE42
+    llvm_impl: ceil
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathLog
@@ -359,6 +367,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::ets::intrinsics::StdMathLog
+    llvm_impl: log
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathRem
@@ -393,6 +402,7 @@ intrinsics:
       args: [ i64 ]
     impl: panda::ets::intrinsics::StdMathClz64
     codegen_func: CreateCountLeadingZeroBits
+    llvm_codegen_func: EmitCtlz
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathClz32
@@ -405,6 +415,7 @@ intrinsics:
       args: [ i32 ]
     impl: panda::ets::intrinsics::StdMathClz32
     codegen_func: CreateCountLeadingZeroBits
+    llvm_codegen_func: EmitCtlz
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathSignbit
@@ -416,6 +427,7 @@ intrinsics:
       ret: u1
       args: [ f64 ]
     impl: panda::ets::intrinsics::StdMathSignbit
+    llvm_codegen_func: EmitSignbit
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathImul
@@ -438,6 +450,7 @@ intrinsics:
       ret: f64
       args: [ f64 ]
     impl: panda::ets::intrinsics::StdMathFround
+    llvm_codegen_func: EmitFround
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
 ####################
@@ -558,6 +571,7 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreStringGetChars
     codegen_func: CreateStringGetCharsTlab
     codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitStringGetCharsTlab
     set_flags: [can_throw]
     clear_flags: [ ]
 
@@ -605,6 +619,7 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreStringEquals
     codegen_func: CreateStringEquals
     codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitStringEquals
     peephole_func: PeepholeStringEquals
     need_param_locations: true
     clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
@@ -783,6 +798,7 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreStringSubstring
     codegen_func: CreateStringSubstringTlab
     codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitStdStringSubstring
     peephole_func: PeepholeStringSubstring
     set_flags: [can_throw]
 
@@ -808,6 +824,7 @@ intrinsics:
     impl: panda::ets::intrinsics::StdCoreStringHashCode
     codegen_func: CreateStringHashCode
     codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitStringHashCode
     clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
   - name: StdCoreStringIsCompressed
@@ -1099,6 +1116,7 @@ intrinsics:
       args: [f32]
     impl: panda::ets::intrinsics::StdCoreFloatIsFinite
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
   - name: StdFloatBitCastFromInt
     space: ets
     class_name: std.core.Float
@@ -1108,7 +1126,9 @@ intrinsics:
       ret: f32
       args: [i32]
     impl: panda::ets::intrinsics::StdCoreFloatBitCastFromInt
+    llvm_codegen_func: EmitRawBitcastFromInt
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
   - name: StdFloatBitCastToInt
     space: ets
     class_name: std.core.Float
@@ -1118,6 +1138,7 @@ intrinsics:
       ret: i32
       args: [f32]
     impl: panda::ets::intrinsics::StdCoreFloatBitCastToInt
+    llvm_codegen_func: EmitRawBitcastToInt
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdFloatIsInteger
@@ -1130,6 +1151,7 @@ intrinsics:
       args: [f32]
     impl: panda::ets::intrinsics::StdCoreFloatIsInteger
     codegen_func: CreateFloatIsInteger
+    llvm_codegen_func: EmitIsInteger
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdFloatIsSafeInteger
@@ -1142,6 +1164,7 @@ intrinsics:
       args: [f32]
     impl: panda::ets::intrinsics::StdCoreFloatIsSafeInteger
     codegen_func: CreateFloatIsSafeInteger
+    llvm_codegen_func: EmitIsSafeInteger
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
 ###################
@@ -1248,7 +1271,9 @@ intrinsics:
       ret: f64
       args: [i64]
     impl: panda::ets::intrinsics::StdCoreDoubleBitCastFromLong
+    llvm_codegen_func: EmitRawBitcastFromLong
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
+
   - name: StdDoubleBitCastToLong
     space: ets
     class_name: std.core.Double
@@ -1258,6 +1283,7 @@ intrinsics:
       ret: i64
       args: [f64]
     impl: panda::ets::intrinsics::StdCoreDoubleBitCastToLong
+    llvm_codegen_func: EmitRawBitcastToLong
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdDoubleIsInteger
@@ -1270,6 +1296,7 @@ intrinsics:
       args: [f64]
     impl: panda::ets::intrinsics::StdCoreDoubleIsInteger
     codegen_func: CreateFloatIsInteger
+    llvm_codegen_func: EmitIsInteger
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdDoubleIsSafeInteger
@@ -1282,6 +1309,7 @@ intrinsics:
       args: [f64]
     impl: panda::ets::intrinsics::StdCoreDoubleIsSafeInteger
     codegen_func: CreateFloatIsSafeInteger
+    llvm_codegen_func: EmitIsSafeInteger
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
 ############
@@ -1304,6 +1332,7 @@ intrinsics:
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
+    llvm_codegen_func: EmitArrayCopyTo
 
   - name: StdCoreCharCopyTo
     space: ets
@@ -1322,6 +1351,7 @@ intrinsics:
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
+    llvm_codegen_func: EmitArrayCopyTo
 
   - name: StdCoreByteCopyTo
     space: ets
@@ -1340,6 +1370,7 @@ intrinsics:
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
+    llvm_codegen_func: EmitArrayCopyTo
 
   - name: StdCoreShortCopyTo
     space: ets
@@ -1358,6 +1389,7 @@ intrinsics:
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
+    llvm_codegen_func: EmitArrayCopyTo
 
   - name: StdCoreIntCopyTo
     space: ets
@@ -1376,6 +1408,7 @@ intrinsics:
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
+    llvm_codegen_func: EmitArrayCopyTo
 
   - name: StdCoreLongCopyTo
     space: ets
@@ -1394,6 +1427,7 @@ intrinsics:
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
+    llvm_codegen_func: EmitArrayCopyTo
 
   - name: StdCoreFloatCopyTo
     space: ets
@@ -1412,6 +1446,7 @@ intrinsics:
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
+    llvm_codegen_func: EmitArrayCopyTo
 
   - name: StdCoreDoubleCopyTo
     space: ets
@@ -1430,6 +1465,7 @@ intrinsics:
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
+    llvm_codegen_func: EmitArrayCopyTo
 
 ############
 # std.core #

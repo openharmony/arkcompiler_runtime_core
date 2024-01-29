@@ -1109,8 +1109,8 @@ add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/intrinsic-f32-05.pa
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/floatcast-test-0.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-01.pa" SKIP_VERIFICATION)
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-02.pa" SKIP_VERIFICATION)
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-03.pa" LLVMAOT_OPTIONS --llvm-dump-after AOT_DEBUG_LOG_MESSAGE "'%common.ret.op = phi i32 \\[ %[0-9]\\+, %black_hole \\], \\[ 1, %bb0_i7..cont...i \\]\\|=r'")
-add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-04.pa" LLVMAOT_OPTIONS --llvm-dump-after AOT_DEBUG_LOG_MESSAGE "'%common.ret.op = phi i32 \\[ %[0-9]\\+, %black_hole \\], \\[ 0, %bb0_i7..cont...i \\]\\|%v17 = phi i32 \\[ 0, %bb3 \\]'")
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-03.pa")
+add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/try-catch-04.pa")
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/cts-assembly/rodatas-01.pa")
 
 add_test_file(FILE "${CMAKE_CURRENT_SOURCE_DIR}/regression/allocate-252-params.pa")

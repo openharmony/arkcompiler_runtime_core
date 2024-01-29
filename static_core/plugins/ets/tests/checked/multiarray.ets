@@ -38,6 +38,11 @@
 //! RUN             options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::main2", result: 1
 //! EVENT           /DeoptimizationReason,ETSGLOBAL::main2,BOUNDS_CHECK/
 
+//! CHECKER         LenArray and MultiArray with LLVM AOT
+//! SKIP_IF         @architecture == "arm32"
+//! RUN_LLVM        options: "--compiler-regex='.*main2.*'"
+//! RUN             options: "--compiler-enable-jit=false", entry: "ETSGLOBAL::main2", result: 1
+
 //! CHECKER         Test check don't optimize LenArray of String in MultiArray
 //! RUN             force_jit: true, options: "--compiler-regex='.*main3.*'", entry: "ETSGLOBAL::main3"
 //! EVENT           /Compilation,ETSGLOBAL::main3,.*,COMPILED/

@@ -43,15 +43,13 @@ class MIRCompiler {
 public:
     using PassInserterFunction = std::function<void(InsertingPassManager *manager)>;
 
-    explicit MIRCompiler(
-        std::shared_ptr<llvm::TargetMachine> targetMachine, PassInserterFunction insertPasses,
-        CreatedObjectFile::ObjectFilePostProcessor objectFilePostProcessor = [](llvm::object::ObjectFile *) {})
-        : targetMachine_(std::move(targetMachine)),
-          insertPasses_(std::move(insertPasses)),
-          objectFilePostProcessor_(std::move(objectFilePostProcessor))
+    // Construct a compile functor with the given target builder.
+    explicit MIRCompiler(std::shared_ptr<llvm::TargetMachine> targetMachine, PassInserterFunction insertPasses)
+        : targetMachine_(std::move(targetMachine)), insertPasses_(std::move(insertPasses))
     {
     }
 
+    // Compile a Module to an ObjectFile.
     llvm::Expected<std::unique_ptr<CreatedObjectFile>> CompileModule(llvm::Module &module);
 
     std::shared_ptr<llvm::TargetMachine> GetTargetMachine()
@@ -62,7 +60,6 @@ public:
 private:
     std::shared_ptr<llvm::TargetMachine> targetMachine_;
     PassInserterFunction insertPasses_;
-    CreatedObjectFile::ObjectFilePostProcessor objectFilePostProcessor_;
 };
 
 }  // namespace panda::llvmbackend

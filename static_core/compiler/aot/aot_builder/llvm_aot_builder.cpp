@@ -18,17 +18,17 @@
 namespace panda::compiler {
 
 std::unordered_map<std::string, size_t> LLVMAotBuilder::GetSectionsAddresses(const std::string &cmdline,
-                                                                             const std::string &file_name)
+                                                                             const std::string &fileName)
 {
     switch (arch_) {
         case Arch::AARCH32:
-            return GetSectionsAddressesImpl<Arch::AARCH32>(cmdline, file_name);
+            return GetSectionsAddressesImpl<Arch::AARCH32>(cmdline, fileName);
         case Arch::AARCH64:
-            return GetSectionsAddressesImpl<Arch::AARCH64>(cmdline, file_name);
+            return GetSectionsAddressesImpl<Arch::AARCH64>(cmdline, fileName);
         case Arch::X86:
-            return GetSectionsAddressesImpl<Arch::X86>(cmdline, file_name);
+            return GetSectionsAddressesImpl<Arch::X86>(cmdline, fileName);
         case Arch::X86_64:
-            return GetSectionsAddressesImpl<Arch::X86_64>(cmdline, file_name);
+            return GetSectionsAddressesImpl<Arch::X86_64>(cmdline, fileName);
         default:
             LOG(ERROR, COMPILER) << "LLVMAotBuilder: Unsupported arch";
             UNREACHABLE();
@@ -37,36 +37,36 @@ std::unordered_map<std::string, size_t> LLVMAotBuilder::GetSectionsAddresses(con
 
 template <Arch ARCH>
 std::unordered_map<std::string, size_t> LLVMAotBuilder::GetSectionsAddressesImpl(const std::string &cmdline,
-                                                                                 const std::string &file_name)
+                                                                                 const std::string &fileName)
 {
     ElfBuilder<ARCH> builder;
-    // string_table_ is the only field modified by PrepareElfBuilder not idempotently
-    auto old_string_table_size = string_table_.size();
+    // stringTable_ is the only field modified by PrepareElfBuilder not idempotently
+    auto oldStringTableSize = stringTable_.size();
 
-    PrepareElfBuilder(builder, cmdline, file_name);
-    builder.Build(file_name);
+    PrepareElfBuilder(builder, cmdline, fileName);
+    builder.Build(fileName);
 
-    string_table_.resize(old_string_table_size);
+    stringTable_.resize(oldStringTableSize);
 
-    auto text_section = builder.GetTextSection();
-    auto ro_data_sections = builder.GetRoDataSections();
-    auto aot_section = builder.GetAotSection();
-    auto got_section = builder.GetGotSection();
+    auto textSection = builder.GetTextSection();
+    auto roDataSections = builder.GetRoDataSections();
+    auto aotSection = builder.GetAotSection();
+    auto gotSection = builder.GetGotSection();
 
     static constexpr auto FIRST_ENTRYPOINT_OFFSET =
         static_cast<int32_t>(RuntimeInterface::IntrinsicId::COUNT) * PointerSize(ARCH);
 
-    std::unordered_map<std::string, size_t> section_addresses {
-        {text_section->GetName(), text_section->GetOffset()},
-        {aot_section->GetName(), aot_section->GetOffset()},
+    std::unordered_map<std::string, size_t> sectionAddresses {
+        {textSection->GetName(), textSection->GetOffset()},
+        {aotSection->GetName(), aotSection->GetOffset()},
         // At runtime the .text section is placed right after the .aot_got section
         // without any padding, so we must use the first entrypoint address as a start
         // of the .aot_got section.
-        {got_section->GetName(), text_section->GetOffset() - FIRST_ENTRYPOINT_OFFSET}};
-    for (auto section : *ro_data_sections) {
-        section_addresses.emplace(section->GetName(), section->GetOffset());
+        {gotSection->GetName(), textSection->GetOffset() - FIRST_ENTRYPOINT_OFFSET}};
+    for (auto section : *roDataSections) {
+        sectionAddresses.emplace(section->GetName(), section->GetOffset());
     }
-    return section_addresses;
+    return sectionAddresses;
 }
 
 }  // namespace panda::compiler

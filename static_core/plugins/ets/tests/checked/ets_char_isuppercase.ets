@@ -15,7 +15,7 @@
 
 //! CHECKER AOT IR Builder inlining Char.isUpperCase()
 //! SKIP_IF    @architecture == "arm32"
-//! RUN_PAOC   options: "--compiler-regex='.*main.*'"
+//! RUN_AOT    options: "--compiler-regex='.*main.*'"
 //! METHOD     "ETSGLOBAL::callIsUpperCase"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic/

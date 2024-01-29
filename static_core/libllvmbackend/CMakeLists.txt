@@ -29,9 +29,20 @@ set(SOURCES
         lowering/gc_barriers.cpp
         lowering/irtoc_function_utils.cpp
         lowering/llvm_ir_constructor.cpp
+        lowering/wrapped_module.cpp
+        object_code/ark_aot_linker.cpp
+        object_code/code_info_producer.cpp
         object_code/created_object_file.cpp
+        object_code/dump.cpp
+        transforms/passes/ark_gvn.cpp
         transforms/passes/ark_inlining.cpp
+        transforms/passes/ark_frame_lowering/frame_lowering.cpp
+        transforms/passes/ark_frame_lowering/frame_builder.cpp
         transforms/passes/expand_atomics.cpp
+        transforms/passes/fixup_poisons.cpp
+        transforms/passes/gc_intrusion.cpp
+        transforms/passes/gc_intrusion_check.cpp
+        transforms/passes/gep_propagation.cpp
         transforms/passes/inline_ir/cleanup_inline_module.cpp
         transforms/passes/inline_ir/discard_inline_module.cpp
         transforms/passes/inline_ir/inline_ir_utils.cpp
@@ -39,8 +50,14 @@ set(SOURCES
         transforms/passes/inline_ir/mark_inline_module.cpp
         transforms/passes/inline_ir/patch_return_handler_stack_adjustment.cpp
         transforms/passes/inline_ir/remove_unused_functions.cpp
+        transforms/passes/insert_safepoints.cpp
+        transforms/passes/intrinsics_lowering.cpp
+        transforms/passes/panda_runtime_lowering.cpp
+        transforms/passes/prune_deopt.cpp
         transforms/llvm_optimizer.cpp
         transforms/runtime_calls.cpp
+        transforms/gc_utils.cpp
+        transforms/builtins.cpp
         llvm_ark_interface.cpp
         llvm_compiler.cpp
         llvm_irtoc_compiler.cpp
@@ -58,6 +75,17 @@ endif()
 
 set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GENERATED_DIR})
+
+set(PIPELINE_CFG ${CMAKE_CURRENT_LIST_DIR}/transforms/pipeline.cfg)
+set(PIPELINE_GEN_INC ${GENERATED_DIR}/pipeline_gen.inc)
+add_custom_command(
+    OUTPUT ${PIPELINE_GEN_INC}
+    COMMAND ruby ${CMAKE_CURRENT_LIST_DIR}/templates/pipeline.rb
+    -d ${PIPELINE_CFG}
+    -o ${PIPELINE_GEN_INC}
+    DEPENDS ${PIPELINE_CFG}
+)
+add_custom_target(llvmbackend_pipeline_gen DEPENDS ${PIPELINE_CFG} ${PIPELINE_GEN_INC})
 
 set(PIPELINE_IRTOC_CFG ${CMAKE_CURRENT_LIST_DIR}/transforms/pipeline_irtoc.cfg)
 set(PIPELINE_IRTOC_GEN_INC ${GENERATED_DIR}/pipeline_irtoc_gen.inc)
@@ -114,11 +142,21 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
     TARGET_NAME intrinsic_names_gen_llvmbackend
 )
 
+panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
+    TEMPLATES intrinsics_llvm_codegen.inl.erb
+    SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
+    DESTINATION ${GENERATED_DIR}
+    REQUIRES ${CMAKE_CURRENT_LIST_DIR}/templates/intrinsics.rb
+    EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
+    TARGET_NAME intrinsic_llvm_codegen_llvmbackend
+)
+
 panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/entrypoints.yaml
     TEMPLATES entrypoints_gen.inl.erb
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
     REQUIRES ${CMAKE_CURRENT_LIST_DIR}/templates/entrypoints.rb
+    EXTRA_DEPENDENCIES entrypoints_yaml_merge
 )
 
 panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/entrypoints.yaml
@@ -126,6 +164,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/entrypoints.yaml
     SOURCE ${CMAKE_CURRENT_LIST_DIR}/templates
     DESTINATION ${GENERATED_DIR}
     REQUIRES ${CMAKE_CURRENT_LIST_DIR}/templates/entrypoints.rb
+    EXTRA_DEPENDENCIES entrypoints_yaml_merge
     TARGET_NAME entrypoints_llvm_ark_interface_gen_llvmbackend
 )
 
@@ -142,6 +181,7 @@ panda_add_library(llvmbackend SHARED ${SOURCES})
 
 add_custom_target(llvmbackend_gen_files COMMENT "Umbrella target for llvmbackend generated files")
 add_dependencies(llvmbackend_gen_files
+    llvmbackend_pipeline_gen
     llvmbackend_pipeline_irtoc_gen
     llvmbackend_options_gen
     llvmbackend_passes_gen
@@ -149,11 +189,12 @@ add_dependencies(llvmbackend_gen_files
     intrinsics_gen_llvmbackend
     can_compile_intrinsics_gen_llvmbackend
     intrinsic_names_gen_llvmbackend
+    intrinsic_llvm_codegen_llvmbackend
     entrypoints_llvm_ark_interface_gen_llvmbackend
     llvmbackend_logger_components_gen
 )
 
-add_dependencies(llvmbackend llvmbackend_gen_files)
+add_dependencies(llvmbackend llvmbackend_gen_files copy-libLLVM.so)
 add_dependencies(panda_gen_files llvmbackend_gen_files)
 
 panda_target_include_directories(llvmbackend SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
@@ -164,7 +205,7 @@ panda_target_include_directories(llvmbackend
         PUBLIC ${GENERATED_DIR}
 )
 
-panda_target_link_libraries(llvmbackend arkcompiler arkbase arkfile ${LIB_LLVM})
+panda_target_link_libraries(llvmbackend arkcompiler arkbase arkfile aot_builder ${LIB_LLVM})
 
 if (NOT (PANDA_TARGET_MOBILE))
     panda_target_link_libraries(llvmbackend rt)
@@ -173,3 +214,29 @@ endif()
 panda_target_compile_options(llvmbackend PUBLIC "-Wno-unused-parameter")
 
 panda_target_compile_definitions(llvmbackend PUBLIC REQUIRED_LLVM_VERSION=15.0.4-ark14)
+
+if (PANDA_LLVM_AOT AND PANDA_TARGET_AMD64 AND PANDA_COMPILER_TARGET_AARCH64 AND PANDA_WITH_TESTS)
+    set(PANDA_LLVM_AOT_TESTS_SOURCES
+        ${PANDA_ROOT}/compiler/tests/unit_test.cpp
+        ${PANDA_ROOT}/compiler/tests/inst_generator.cpp
+        tests/inst_generator_test.cpp
+    )
+    set(PANDA_LLVM_AOT_TESTS_LIBRARIES arkcompiler arkbase arkassembler arkruntime llvmbackend)
+
+    panda_add_gtest(
+        CONTAINS_MAIN
+        NAME llvm_aot_unit_tests
+        SOURCES
+        ${PANDA_LLVM_AOT_TESTS_SOURCES}
+        LIBRARIES
+        ${PANDA_LLVM_AOT_TESTS_LIBRARIES}
+        SANITIZERS
+            ${PANDA_SANITIZERS_LIST}
+    )
+
+    panda_target_include_directories(llvm_aot_unit_tests SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
+    panda_target_include_directories(llvm_aot_unit_tests PRIVATE .)
+    panda_target_include_directories(llvm_aot_unit_tests PRIVATE ${PANDA_ROOT}/compiler
+        PUBLIC "$<TARGET_PROPERTY:arkruntime,INTERFACE_INCLUDE_DIRECTORIES>")
+    panda_target_compile_options(llvm_aot_unit_tests PUBLIC "-Wno-unused-parameter")
+endif()

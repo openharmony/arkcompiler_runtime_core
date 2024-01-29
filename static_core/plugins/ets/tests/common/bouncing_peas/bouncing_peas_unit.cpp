@@ -368,7 +368,43 @@ TEST(EtsVMConfing, PeasAOT)
 #define ETS_UNIT_STRING(s) ETS_UNIT_STRING_STEP(s)
     stdlibAbc = ETS_UNIT_STRING(STDLIB_ABC);
     pathAbc = ETS_UNIT_STRING(PATH_ABC);
-    pathAn = ETS_UNIT_STRING(PATH_AN);
+    pathAn = ETS_UNIT_STRING(PATH_AN_ARK);
+#undef ETS_UNIT_STRING
+#undef ETS_UNIT_STRING_STEP
+#endif
+
+    ASSERT_FALSE(stdlibAbc.empty());
+    ASSERT_FALSE(pathAbc.empty());
+    ASSERT_FALSE(pathAn.empty());
+
+    ASSERT_TRUE(panda::ets::CreateRuntime(stdlibAbc, pathAbc, false, true));
+    EXPECT_TRUE(InitExports());
+    auto res = panda::ets::ExecuteMain();
+    EXPECT_TRUE(res.first == true);
+    EXPECT_TRUE(res.second == 0);
+    ASSERT_TRUE(panda::ets::DestroyRuntime());
+}
+
+TEST(EtsVMConfing, PeasLLVMAOT)
+{
+#ifdef HOST_CROSSCOMPILING
+    GTEST_SKIP();
+#endif
+
+#ifndef PANDA_LLVM_AOT
+    GTEST_SKIP();
+#endif
+
+    std::string stdlibAbc;
+    std::string pathAbc;
+    std::string pathAn;
+
+#if defined(STDLIB_ABC) && defined(PATH_ABC)
+#define ETS_UNIT_STRING_STEP(s) #s
+#define ETS_UNIT_STRING(s) ETS_UNIT_STRING_STEP(s)
+    stdlibAbc = ETS_UNIT_STRING(STDLIB_ABC);
+    pathAbc = ETS_UNIT_STRING(PATH_ABC);
+    pathAn = ETS_UNIT_STRING(PATH_AN_LLVM);
 #undef ETS_UNIT_STRING
 #undef ETS_UNIT_STRING_STEP
 #endif

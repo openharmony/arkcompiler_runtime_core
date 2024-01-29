@@ -14,12 +14,11 @@
  */
 
 #include "expand_atomics.h"
+#include "llvm_ark_interface.h"
+#include "transforms/transform_utils.h"
 
 #include <llvm/ADT/STLExtras.h>
 #include <llvm/IR/Instructions.h>
-
-#include "libpandabase/macros.h"
-#include "llvm_ark_interface.h"
 
 #define DEBUG_TYPE "expand-atomics"
 
@@ -36,7 +35,6 @@ llvm::PreservedAnalyses ExpandAtomics::run(llvm::Function &function,
         return llvm::PreservedAnalyses::all();
     }
 
-    // Cast 32-bit pointers to 0 address space to support atomic operations on X86
     for (auto &basicBlock : function) {
         llvm::SmallVector<llvm::Instruction *> instructions;
         for (auto &instruction : basicBlock) {

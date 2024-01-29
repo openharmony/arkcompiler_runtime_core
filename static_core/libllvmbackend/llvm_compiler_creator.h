@@ -21,11 +21,19 @@
 #include "utils/arch.h"
 
 namespace panda::compiler {
+class AotBuilder;
+class LLVMAotBuilder;
 class Graph;
 class RuntimeInterface;
 }  // namespace panda::compiler
 
 namespace panda::llvmbackend {
+
+std::unique_ptr<CompilerInterface> CreateLLVMAotCompiler(panda::compiler::RuntimeInterface *runtime,
+                                                         panda::ArenaAllocator *allocator,
+                                                         panda::compiler::LLVMAotBuilder *aotBuilder,
+                                                         const std::string &cmdline, const std::string &filename);
+
 std::unique_ptr<IrtocCompilerInterface> CreateLLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime,
                                                                 panda::ArenaAllocator *allocator, panda::Arch arch);
 }  // namespace panda::llvmbackend

@@ -61,7 +61,7 @@ import { cons, car, cdr, sum, TreeNode, DynObject, Empty, make_swappable, Static
 //! INST_COUNT   "Intrinsic.CompilerDestroyLocalScope", 1
 
 //! CHECKER      Several js function calls AOT (slow)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::call_sequence --compiler-enable-fast-interop=false"
+//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::call_sequence --compiler-enable-fast-interop=false"
 //! METHOD       "call_sequence"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /CallStatic.*jscall::invoke/
@@ -164,6 +164,10 @@ function call_sequence(): int {
 //! INST         /CallStatic.*JSRuntime::getValueInt/
 //! RUN          entry: "call_chain"
 
+//! CHECKER      Chain of js function calls LLVMAOT (slow)
+//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::call_chain --compiler-enable-fast-interop=false"
+//! RUN          entry: "call_chain"
+
 //! CHECKER      Chain of js function calls AOT (fast)
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::call_chain --compiler-interop-try-single-scope=false"
 //! METHOD       "call_chain"
@@ -248,6 +252,10 @@ function call_chain(): int {
 //! INST_COUNT   /CallStatic.*jsnew::invoke/, 3
 //! INST_COUNT   /CallStatic.*jscall::invoke/, 1
 //! INST_COUNT   /CallStatic.*JSRuntime::getValueInt/, 1
+//! RUN          entry: "new_chain"
+
+//! CHECKER      Chain of js new calls LLVMAOT (slow)
+//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::new_chain --compiler-enable-fast-interop=false"
 //! RUN          entry: "new_chain"
 
 //! CHECKER      Chain of js new calls AOT (fast)
@@ -338,6 +346,10 @@ function new_chain(): int {
 //! INST_NEXT    "Intrinsic.JSRuntimeStrictEqual"
 //! RUN          entry: "load_store_chain"
 
+//! CHECKER      JS load and store LLVMAOT (slow)
+//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::load_store_chain --compiler-enable-fast-interop=false"
+//! RUN          entry: "load_store_chain"
+
 //! CHECKER      JS load and store AOT (fast)
 //! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::load_store_chain"
 //! METHOD       "load_store_chain"
@@ -412,6 +424,10 @@ function load_store_chain(): int {
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /CallStatic.*jsnew::invoke/, 1
 //! INST_COUNT   /CallStatic.*jscall::invoke/, 5
+//! RUN          entry: "method_call"
+
+//! CHECKER      Define object method in js and call it from ets, LLVMAOT (slow)
+//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::method_call --compiler-enable-fast-interop=false"
 //! RUN          entry: "method_call"
 
 //! CHECKER      Define object method in js and call it from ets, AOT (fast)
@@ -505,6 +521,10 @@ function method_call(): int {
 //! INST_NEXT    /CallStatic.*JSRuntime::getValueInt/
 //! RUN          entry: "static_method_call"
 
+//! CHECKER      Call JS static method and access static property, LLVMAOT (slow)
+//! RUN_LLVM     options: "--compiler-regex=ETSGLOBAL::static_method_call --compiler-enable-fast-interop=false"
+//! RUN          entry: "static_method_call"
+
 //! CHECKER         Call JS static method and access static property, AOT (fast)
 //! RUN_PAOC        options: "--compiler-regex=ETSGLOBAL::static_method_call"
 //! METHOD          "static_method_call"
@@ -571,7 +591,7 @@ class EtsClass {
 //! INST_NEXT  /CallStatic.*JSRuntime::getValueInt/
 
 //! CHECKER      Use ets object from js, AOT (slow)
-//! RUN_PAOC     options: "--compiler-regex=ETSGLOBAL::js_call_ets_object --compiler-enable-fast-interop=false"
+//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::js_call_ets_object --compiler-enable-fast-interop=false"
 //! METHOD       "js_call_ets_object"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /CallStatic.*jscall::invoke/
