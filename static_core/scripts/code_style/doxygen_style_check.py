@@ -56,7 +56,8 @@ def print_correct_style() -> None:
     lines = ["\nPlease, for single-line doxygen comments use the following formats:",\
              "'/// TEXT' - used for commenting on an empty line", "or",\
              "'///< TEXT' - used for commenting after declared/defined variables in the same line",\
-             "\nand for multi-line doxygen comments use the following Javadoc format:\n/**\n * TEXT\n * TEXT\n * TEXT\n */"]
+             "\nand for multi-line doxygen comments use the following Javadoc format:"
+             "\n/**\n * TEXT\n * TEXT\n * TEXT\n */"]
     for line in lines:
         print(line)
 
@@ -111,7 +112,8 @@ def check_additional_slashes(src_path: str, strings: list) -> bool:
     fine_comments_lines = []
     strings = list(set(strings)) # Only unique strings left
     for i in range(0, len(strings)):
-        str_indexes = [s.start() for s in re.finditer(re.escape(strings[i]), text)] # Used to find all occurencies of a given string
+        # Next line is used to find all occurencies of a given string
+        str_indexes = [s.start() for s in re.finditer(re.escape(strings[i]), text)]
         for j in range(0, len(str_indexes)):
             line_num = text[:str_indexes[j]].count('\n') + 1
             pattern_to_check = re.search(r' */// [^ ]+?[^\n]*', lines[line_num - 1])
@@ -129,7 +131,9 @@ def check_additional_slashes(src_path: str, strings: list) -> bool:
         if fine_comments_lines[i] + 1 == fine_comments_lines[i + 1]:
             err_msg = "%s:%s" % (src_path, fine_comments_lines[i])
             print(err_msg)
-            print("Please, use '///' only for single-line comments:\n%s\n%s\n" % (lines[fine_comments_lines[i] - 1], lines[fine_comments_lines[i + 1] - 1]))
+            print("Please, use '///' only for single-line comments:\n%s\n%s\n" % (
+                lines[fine_comments_lines[i] - 1],
+                lines[fine_comments_lines[i + 1] - 1]))
             found_wrong_comment = True
             break
     if found_wrong_comment:
@@ -170,9 +174,12 @@ def run_doxygen_check(src_path: str, msg: str) -> bool:
     qt_style = re.compile(r'/\*![^\n]*')
     slashes_with_exclamation_style = re.compile(r'//![^\n]*')
     # Allowed styles
-    javadoc_style = re.compile(r' */\*\*[\w\W]*?\*/') # Allowed if number of lines in a comment is >= 2
-    additional_slashes_style = re.compile(r'/// *[^< ][^\n]*') # Allowed to comment only one line. Otherwise javadoc style should be used
-    less_than_slashes_style = re.compile(r'/// *< *[^\n]*') # Allowed to comment declared/defined variables in the same line
+    # Allowed if number of lines in a comment is >= 2
+    javadoc_style = re.compile(r' */\*\*[\w\W]*?\*/')
+    # Allowed to comment only one line. Otherwise javadoc style should be used
+    additional_slashes_style = re.compile(r'/// *[^< ][^\n]*')
+    # Allowed to comment declared/defined variables in the same line
+    less_than_slashes_style = re.compile(r'/// *< *[^\n]*')
 
     regexps_for_fine_styles = [javadoc_style, additional_slashes_style, less_than_slashes_style]
     regexps_for_wrong_styles = [qt_style, slashes_with_exclamation_style]

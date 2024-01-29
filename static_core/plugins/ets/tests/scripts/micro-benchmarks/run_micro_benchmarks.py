@@ -76,7 +76,10 @@ class EtsBenchmarksRunner:
         self.current_bench_name = None
         self.source_dir = os.path.join(SRC_PATH, "..", "..", "micro-benchmarks")
         self.wrapper_asm_filepath = os.path.join(self.source_dir, "wrapper", "test_wrapper.pa")
-        self.stdlib_path = os.path.join(args.libdir, "etsstdlib.abc") if self.is_device else os.path.join(args.bindir, "..", "plugins", "ets", "etsstdlib.abc")
+        if self.is_device:
+            self.stdlib_path = os.path.join(args.libdir, "etsstdlib.abc")
+        else:
+            self.stdlib_path = os.path.join(args.bindir, "..", "plugins", "ets", "etsstdlib.abc")
         self.ark_asm = os.path.join(args.bindir, "ark_asm")
         self.ark_aot = os.path.join(args.bindir, "ark_aot")
         self.ark = os.path.join(args.bindir, "ark")
@@ -108,7 +111,13 @@ class EtsBenchmarksRunner:
         return False
 
     def compile_aot_test(self, bin_filepath, aot_filepath):
-        cmd = self.prefix + [self.ark_aot, "--paoc-mode=aot", f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets", "--compiler-ignore-failures=false"] + self.aot_opts + ["--paoc-panda-files", bin_filepath, "--paoc-output", aot_filepath]
+        cmd = self.prefix + [
+            self.ark_aot, "--paoc-mode=aot", f"--boot-panda-files={self.stdlib_path}",
+            "--load-runtimes=ets", "--compiler-ignore-failures=false"
+            ] + self.aot_opts + [
+            "--paoc-panda-files", bin_filepath,
+            "--paoc-output", aot_filepath
+            ]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         self.dump_stdout(stdout, "aot")
@@ -141,7 +150,8 @@ class EtsBenchmarksRunner:
         current_output_dir = os.path.join(self.host_output_dir, self.current_bench_name)
         tmp_asm_file_path = os.path.join(current_output_dir, "test.pa")
         os.system(f"mkdir -p {current_output_dir}")
-        open(tmp_asm_file_path,"w").write(open(self.wrapper_asm_filepath,"r").read() + open(base_asm_file_path,"r").read())
+        open(tmp_asm_file_path, "w").write(open(self.wrapper_asm_filepath, "r").read() + \
+            open(base_asm_file_path, "r").read())
         if self.is_device:
             device_current_output_dir = os.path.join(self.device_output_dir, self.current_bench_name)
             os.system(f"adb shell mkdir -p {device_current_output_dir}")
@@ -337,9 +347,14 @@ def main():
     all_tests_amount = len(stats.failed_exec) + len(stats.failed_aot_compile) + len(stats.failed_compile) + len(stats.passed)
     logger.info("\n=====")
     if args.mode == "aot":
-        logger.info(f"TESTS {all_tests_amount} | FAILED (compile) {len(stats.failed_compile)} | FAILED (aot compile) {len(stats.failed_aot_compile)} | FAILED (exec) {len(stats.failed_exec)}\n")
+        logger.info(f"TESTS {all_tests_amount} | "
+                    f"FAILED (compile) {len(stats.failed_compile)} | "
+                    f"FAILED (aot compile) {len(stats.failed_aot_compile)} | "
+                    f"FAILED (exec) {len(stats.failed_exec)}\n")
     else:
-        logger.info(f"TESTS {all_tests_amount} | FAILED (compile) {len(stats.failed_compile)} | FAILED (exec) {len(stats.failed_exec)}\n")
+        logger.info(f"TESTS {all_tests_amount} | "
+                    f"FAILED (compile) {len(stats.failed_compile)} | "
+                    f"FAILED (exec) {len(stats.failed_exec)}\n")
     dump_time_stats(logger, stats)
 
     if parse_results(logger, stats, args.mode, args.interpreter_type) == False:

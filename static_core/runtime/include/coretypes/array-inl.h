@@ -239,7 +239,6 @@ Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *k
                                           const DimIterator &iter, size_t dimIdx)
 {
     auto arrSize = iter.Get(dimIdx);
-
     if (arrSize < 0) {
         panda::ThrowNegativeArraySizeException(arrSize);
         return nullptr;

@@ -22,7 +22,7 @@ REPO_DIR=${1:-""}
 GITEE_USER=${2:-"openharmony-sig"}
 
 # Check args
-if [[ -z $REPO_DIR || -z $GITEE_USER ]]; then
+if [[ -z "$REPO_DIR" || -z "$GITEE_USER" ]]; then
   echo "Usage: $0 repo_dir [gitee_user (openharmony-sig by default)]"
   exit 1
 fi

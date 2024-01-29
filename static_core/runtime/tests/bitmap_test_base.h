@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H
+#define PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H
+
 #include <cstdlib>
 #include <memory>
 #include <vector>
@@ -51,7 +54,7 @@ private:
     void *end_;
 };
 
-static inline size_t FnRounddown(size_t val, size_t alignment)
+inline size_t FnRounddown(size_t val, size_t alignment)
 {
     size_t mask = ~((static_cast<size_t>(1) * alignment) - 1);
     return val & mask;
@@ -176,3 +179,5 @@ TEST_F(BitmapTest, AtomicClearSetTest)
 }
 
 }  // namespace panda::mem
+
+#endif  // PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H

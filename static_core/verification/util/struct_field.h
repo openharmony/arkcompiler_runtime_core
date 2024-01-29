@@ -16,8 +16,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#ifndef PANDA_VERIFIER_UTIL_STRUCT_FIELD_H__
-#define PANDA_VERIFIER_UTIL_STRUCT_FIELD_H__
+#ifndef PANDA_VERIFICATION_UTIL_STRUCT_FIELD_H
+#define PANDA_VERIFICATION_UTIL_STRUCT_FIELD_H
 
 namespace panda::verifier {
 template <typename S, typename T>
@@ -32,4 +32,4 @@ struct StructField {
 };
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_UTIL_STRUCT_FIELD_H__
+#endif  // PANDA_VERIFICATION_UTIL_STRUCT_FIELD_H

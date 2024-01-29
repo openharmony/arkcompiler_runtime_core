@@ -21,14 +21,14 @@
 
 namespace panda::tooling::inspector::test {
 template <typename T>
-static JsonObject ToJson(const T &object)
+inline JsonObject ToJson(const T &object)
 {
     JsonObjectBuilder jsonBuilder;
     object.ToJson()(jsonBuilder);
     return JsonObject(std::move(jsonBuilder).Build());
 }
 
-static JsonObject ToObject(std::function<void(JsonObjectBuilder &)> &&params)
+inline JsonObject ToObject(std::function<void(JsonObjectBuilder &)> &&params)
 {
     JsonObjectBuilder jsonBuilder;
     params(jsonBuilder);

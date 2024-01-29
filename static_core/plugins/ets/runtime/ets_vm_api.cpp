@@ -106,7 +106,8 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
 
 bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, const bool useJit, const bool useAot)
 {
-    auto addOpts = [&](base_options::Options *baseOptions, panda::RuntimeOptions *runtimeOptions) {
+    auto addOpts = [&stdlibAbc, &pathAbc, useJit, useAot](base_options::Options *baseOptions,
+                                                          panda::RuntimeOptions *runtimeOptions) {
         baseOptions->SetLogLevel("info");
         runtimeOptions->SetBootPandaFiles({stdlibAbc, pathAbc});
         runtimeOptions->SetPandaFiles({pathAbc});

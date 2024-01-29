@@ -419,7 +419,8 @@ TEST(BytecodeEmitter, JmpFwd_IMM32)
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-void JcmpBwd_V8_IMM8(Opcode opcode, const std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> &emitJcmp)
+static void JcmpBwd_V8_IMM8(Opcode opcode,
+                            const std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> &emitJcmp)
 {
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
@@ -441,7 +442,8 @@ void JcmpBwd_V8_IMM8(Opcode opcode, const std::function<void(BytecodeEmitter *, 
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-void JcmpFwd_V8_IMM8(Opcode opcode, const std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> &emitJcmp)
+static void JcmpFwd_V8_IMM8(Opcode opcode,
+                            const std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> &emitJcmp)
 {
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
@@ -466,8 +468,8 @@ void JcmpFwd_V8_IMM8(Opcode opcode, const std::function<void(BytecodeEmitter *, 
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-void JcmpBwd_V8_IMM16(Opcode opcode,
-                      const std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> &emitJcmp)
+static void JcmpBwd_V8_IMM16(Opcode opcode,
+                             const std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> &emitJcmp)
 {
     {
         // Test min imm value
@@ -511,8 +513,8 @@ void JcmpBwd_V8_IMM16(Opcode opcode,
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-void JcmpFwd_V8_IMM16(Opcode opcode,
-                      const std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> &emitJcmp)
+static void JcmpFwd_V8_IMM16(Opcode opcode,
+                             const std::function<void(BytecodeEmitter *, uint8_t, const Label &label)> &emitJcmp)
 {
     {
         // Test min imm
@@ -598,7 +600,7 @@ TEST(BytecodeEmitter, Jne_V8_IMM16)
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-void Jcmpz_IMM8(Opcode opcode, const std::function<void(BytecodeEmitter *, const Label &label)> &emit_jcmp)
+static void Jcmpz_IMM8(Opcode opcode, const std::function<void(BytecodeEmitter *, const Label &label)> &emit_jcmp)
 {
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
@@ -613,7 +615,7 @@ void Jcmpz_IMM8(Opcode opcode, const std::function<void(BytecodeEmitter *, const
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-void Jcmpz_IMM16(Opcode opcode, const std::function<void(BytecodeEmitter *, const Label &label)> &emit_jcmp)
+static void Jcmpz_IMM16(Opcode opcode, const std::function<void(BytecodeEmitter *, const Label &label)> &emit_jcmp)
 {
     BytecodeEmitter emitter;
     Label label = emitter.CreateLabel();
@@ -785,7 +787,7 @@ TEST(BytecodeEmitter, TwoJumpsToOneLabel)
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
 }
 
-void TestNoneFormat(Opcode opcode, const std::function<void(BytecodeEmitter *)> &emit)
+static void TestNoneFormat(Opcode opcode, const std::function<void(BytecodeEmitter *)> &emit)
 {
     BytecodeEmitter emitter;
     emit(&emitter);

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2021-2023 Huawei Device Co., Ltd.

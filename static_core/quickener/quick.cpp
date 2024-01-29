@@ -21,7 +21,7 @@
 #include "libpandabase/utils/pandargs.h"
 #include "libpandafile/file_writer.h"
 
-void PrintHelp(panda::PandArgParser &pa_parser)
+static void PrintHelp(panda::PandArgParser &pa_parser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "arkquicker [options] INPUT_FILE OUTPUT_FILE" << std::endl << std::endl;
@@ -29,9 +29,9 @@ void PrintHelp(panda::PandArgParser &pa_parser)
     std::cerr << pa_parser.GetHelpString() << std::endl;
 }
 
-bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input,
-                 const panda::PandArg<std::string> &output, const panda::PandArg<bool> &help, int argc,
-                 const char **argv)
+static bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input,
+                        const panda::PandArg<std::string> &output, const panda::PandArg<bool> &help, int argc,
+                        const char **argv)
 {
     if (!pa_parser.Parse(argc, argv)) {
         PrintHelp(pa_parser);

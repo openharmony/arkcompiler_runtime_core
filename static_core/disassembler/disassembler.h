@@ -82,7 +82,7 @@ public:
     }
 
 private:
-    void DisassembleImpl(bool quiet = false, bool skipStrings = false);
+    void DisassembleImpl(const bool quiet = false, const bool skipStrings = false);
     static inline bool IsSystemType(const std::string &typeName);
 
     void GetRecord(pandasm::Record *record, const panda_file::File::EntityId &recordId);
@@ -122,7 +122,7 @@ private:
 
     void GetLanguageSpecificMetadata();
 
-    std::string AnnotationTagToString(char tag) const;
+    std::string AnnotationTagToString(const char tag) const;
 
     std::string ScalarValueToString(const panda_file::ScalarValue &value, const std::string &type);
     std::string ArrayValueToString(const panda_file::ArrayValue &value, const std::string &type, size_t idx);

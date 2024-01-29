@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_PLATFORMS_UNIX_LIBPANDABASE_CPU_AFFINITY_H
+#define PANDA_PLATFORMS_UNIX_LIBPANDABASE_CPU_AFFINITY_H
+
 #include <sched.h>
 
 namespace panda::os {
 using CpuSetType = cpu_set_t;
 }  // namespace panda::os
+
+#endif  // PANDA_PLATFORMS_UNIX_LIBPANDABASE_CPU_AFFINITY_H
