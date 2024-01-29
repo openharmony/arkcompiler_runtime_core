@@ -17,7 +17,7 @@
 #define PANDA_PROFILING_INL_H
 
 #include "profiling.h"
-#include "plugins/profiling_includes.h"
+#include "runtime/profiling/generated/profiling_includes.h"
 #include "runtime/include/profiling_gen.h"
 
 namespace panda::profiling {
@@ -27,7 +27,7 @@ inline void ClearProfile([[maybe_unused]] const BytecodeInstruction &inst, [[may
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {
-#include "plugins/clear_profile.h"
+#include "runtime/profiling/generated/clear_profile.h"
         default:
             break;
     }

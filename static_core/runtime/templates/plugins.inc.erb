@@ -15,20 +15,18 @@
 
 #include "runtime/core/core_language_context.h"
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["lang_context_header_path"]
-#include "<%= plugin_opts["lang_context_header_path"] %>"
+% Common::each_plugin_option "lang_context_header_path" do |lang_context_header_path|
+#include "<%= lang_context_header_path %>"
 % end
 
 namespace panda::plugins {
 
 LanguageContextBase* GetLanguageContextBase([[maybe_unused]] panda::panda_file::SourceLang lang)
 {
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["lang_context_class"]
+% Common::each_plugin_option "lang_context_class" do |lang_context_class, _, plugin_opts|
 if (lang == <%= plugin_opts["lang_enum"] %>)
     {
-        static <%= plugin_opts["lang_context_class"] %> ctx;
+        static <%= lang_context_class %> ctx;
         return &ctx;
     }
 % end

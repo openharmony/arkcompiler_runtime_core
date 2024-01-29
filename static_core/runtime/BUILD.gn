@@ -84,6 +84,13 @@ group("arkruntime_header_deps") {
     ":language_config_gen_inc",
     ":libarkruntime_options_gen_h",
     ":libarkruntime_shorty_values_h",
+    ":plugin_clear_profile_h",
+    ":plugin_destroy_profile_h",
+    ":plugin_dump_profile_h",
+    ":plugin_find_method_in_profile_h",
+    ":plugin_profiling_includes_disasm_h",
+    ":plugin_profiling_includes_h",
+    ":plugin_read_profile_h",
     ":plugins_asm_defines_def",
     ":plugins_defines_h",
     ":plugins_entrypoints_gen_h",
@@ -725,4 +732,46 @@ ark_gen_file("plugins_asm_defines_def") {
   data_file = "$ark_plugin_options_yaml"
   requires = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/plugins_asm_defines.def"
+}
+
+generated_file("plugin_read_profile_h") {
+  outputs = [ "$target_gen_dir/profiling/generated/read_profile.h" ]
+  contents = plugin_read_profile_paths
+  output_conversion = "list lines"
+}
+generated_file("plugin_clear_profile_h") {
+  outputs = [ "$target_gen_dir/profiling/generated/clear_profile.h" ]
+  contents = plugin_clear_profile_paths
+  output_conversion = "list lines"
+}
+generated_file("plugin_destroy_profile_h") {
+  outputs = [ "$target_gen_dir/profiling/generated/destroy_profile.h" ]
+  contents = plugin_destroy_profile_paths
+  output_conversion = "list lines"
+}
+generated_file("plugin_dump_profile_h") {
+  outputs = [ "$target_gen_dir/profiling/generated/dump_profile.h" ]
+  contents = plugin_dump_profile_paths
+  output_conversion = "list lines"
+}
+generated_file("plugin_find_method_in_profile_h") {
+  outputs = [ "$target_gen_dir/profiling/generated/find_method_in_profile.h" ]
+  contents = plugin_find_method_in_profile_paths
+  output_conversion = "list lines"
+}
+generated_file("plugin_profiling_includes_disasm_h") {
+  outputs =
+      [ "$target_gen_dir/profiling/generated/profiling_includes_disasm.h" ]
+  contents = plugin_profiling_includes_disasm_paths
+  output_conversion = "list lines"
+}
+generated_file("plugin_profiling_includes_h") {
+  outputs = [ "$target_gen_dir/profiling/generated/profiling_includes.h" ]
+  contents = plugin_profiling_includes_paths
+  output_conversion = "list lines"
+}
+generated_file("get_profiling_any_type_h") {
+  outputs = [ "$target_gen_dir/profiling/generated/get_profiling_any_type.h" ]
+  contents = plugin_get_profiling_any_type_paths
+  output_conversion = "list lines"
 }

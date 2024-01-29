@@ -129,51 +129,6 @@ config("ark_config") {
     ]
   }
 
-  # In GN build we just create merged files, without any content. Because no languages are involved in GN build.
-  if (current_toolchain == default_toolchain) {
-    generated_file("create_pipeline") {
-      outputs = [ "$target_gen_dir/plugins/create_pipeline.h" ]
-      contents = ""
-    }
-    generated_file("create_pipeline_includes") {
-      outputs = [ "$target_gen_dir/plugins/create_pipeline_includes.h" ]
-      contents = ""
-    }
-    generated_file("optimizations_after_unroll") {
-      outputs = [ "$target_gen_dir/plugins/optimizations_after_unroll.h" ]
-      contents = ""
-    }
-
-    generated_file("clear_profile") {
-      outputs = [ "$target_gen_dir/plugins/clear_profile.h" ]
-      contents = ""
-    }
-    generated_file("destroy_profile") {
-      outputs = [ "$target_gen_dir/plugins/destroy_profile.h" ]
-      contents = ""
-    }
-    generated_file("dump_profile") {
-      outputs = [ "$target_gen_dir/plugins/dump_profile.h" ]
-      contents = ""
-    }
-    generated_file("find_method_in_profile") {
-      outputs = [ "$target_gen_dir/plugins/find_method_in_profile.h" ]
-      contents = ""
-    }
-    generated_file("profiling_includes_disasm") {
-      outputs = [ "$target_gen_dir/plugins/profiling_includes_disasm.h" ]
-      contents = ""
-    }
-    generated_file("profiling_includes") {
-      outputs = [ "$target_gen_dir/plugins/profiling_includes.h" ]
-      contents = ""
-    }
-    generated_file("read_profile") {
-      outputs = [ "$target_gen_dir/plugins/read_profile.h" ]
-      contents = ""
-    }
-  }
-
   include_dirs = [
     "$ark_root",
     get_label_info(":create_pipeline(${default_toolchain})", "target_gen_dir"),

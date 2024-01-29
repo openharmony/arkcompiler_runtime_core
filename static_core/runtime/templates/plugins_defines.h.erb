@@ -18,9 +18,6 @@
 #ifndef DEFINES_H_
 #define DEFINES_H_
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["runtime_defines"]
-#include "<%= plugin_opts["runtime_defines"]["defines_header_path"] %>"
-% end
+<%= Common::include_plugin_files "runtime_defines", "defines_header_path" %>
 
 #endif  // DEFINES_H_

@@ -16,10 +16,9 @@
 #ifndef PANDA_RUNTIME_GEN_PLUGINS_ENTRYPOINTS_H_
 #define PANDA_RUNTIME_GEN_PLUGINS_ENTRYPOINTS_H_
 
-% Common::plugins.each do |plugin_lang, plugin_opts|
-% next unless plugin_opts["entrypoints_header_path"]
+% Common::each_plugin_option "entrypoints_header_path" do |entrypoints_header_path, plugin_lang|
 #ifdef PANDA_WITH_<%= plugin_lang %>
-#include "<%= plugin_opts["entrypoints_header_path"] %>"
+#include "<%= entrypoints_header_path %>"
 #endif
 % end
 

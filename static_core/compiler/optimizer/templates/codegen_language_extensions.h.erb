@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_extensions"]
-% next unless plugin_opts["compiler_extensions"]["header_path_implementation_codegen"]
-#include "<%= plugin_opts["compiler_extensions"]["header_path_implementation_codegen"] %>"
-% end
+<%= Common::include_plugin_files "compiler_extensions", "header_path_implementation_codegen" %>
 
 inline void CreateLoadObjectDynamic([[maybe_unused]] Inst *inst)
 {
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_extensions"]
-% next unless plugin_opts["compiler_extensions"]["load_object_dynamic_codegen"]
-    if (<%= plugin_opts["compiler_extensions"]["load_object_dynamic_codegen"] %>(inst)) {
+% Common::each_plugin_suboption("compiler_extensions", "load_object_dynamic_codegen") do |load_object_dynamic_codegen|
+    if (<%= load_object_dynamic_codegen %>(inst)) {
         return;
     }
 % end
@@ -35,10 +29,8 @@ inline void CreateLoadObjectDynamic([[maybe_unused]] Inst *inst)
 
 inline void CreateStoreObjectDynamic([[maybe_unused]] Inst *inst)
 {
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_extensions"]
-% next unless plugin_opts["compiler_extensions"]["store_object_dynamic_codegen"]
-    if (<%= plugin_opts["compiler_extensions"]["store_object_dynamic_codegen"] %>(inst)) {
+% Common::each_plugin_suboption("compiler_extensions", "store_object_dynamic_codegen") do |store_object_dynamic_codegen|
+    if (<%= store_object_dynamic_codegen %>(inst)) {
         return;
     }
 % end
@@ -49,10 +41,8 @@ inline void CreateStoreObjectDynamic([[maybe_unused]] Inst *inst)
 
 inline void CreateLaunchCall([[maybe_unused]] CallInst *inst)
 {
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["compiler_extensions"]
-% next unless plugin_opts["compiler_extensions"]["launch_call_codegen"]
-    if (<%= plugin_opts["compiler_extensions"]["launch_call_codegen"] %>(inst)) {
+% Common::each_plugin_suboption("compiler_extensions", "launch_call_codegen") do |launch_call_codegen|
+    if (<%= launch_call_codegen %>(inst)) {
         return;
     }
 % end

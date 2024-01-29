@@ -36,9 +36,6 @@ if (PANDA_ETS_INTEROP_JS)
     ${PANDA_ETS_PLUGIN_SOURCE}/compiler/optimizer/optimizations/interop_js/interop_intrinsic_optimization.cpp
   )
 
-  add_merge_plugin(PLUGIN_NAME "create_pipeline_includes.h" INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/plugin_files/plugin_create_pipeline_includes.h")
-  add_merge_plugin(PLUGIN_NAME "optimizations_after_unroll.h" INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/plugin_files/plugin_optimizations_after_unroll.h")
-
   set(INTEROP_INTRINSIC_KINDS_H ${PANDA_BINARY_ROOT}/plugins/${plugin_name}/compiler/generated/interop_intrinsic_kinds.h)
   panda_gen_file(
       DATAFILE ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml

@@ -20,12 +20,8 @@ namespace panda::disasm {
 void Disassembler::GetLanguageSpecificMetadata() {
     LOG(DEBUG, DISASSEMBLER) << "\n[getting language-specific annotations]\n";
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["Disasm"]
-% if plugin_opts["Disasm"]["language_interface_path"]
+% Common::each_plugin_suboption("Disasm", "language_interface_path") do |_, _, plugin_opts|
     Get<%= plugin_opts["directive_name"] %>Metadata();
-
-% end
 % end
 }
 } // namespace panda::disasm

@@ -67,7 +67,7 @@ endforeach()
 # [some_core_file.cpp]
 #   void GetWordSize(Language lang) {
 #     switch (lang) {
-#       #include "plugins/get_word_size.h"
+#       #include "some_component/generated/get_word_size.h"
 #     }
 #   }
 #
@@ -80,7 +80,7 @@ endforeach()
 #       return 4;
 #   break;
 #
-# After that, content of `plugins/get_word_size.h` file will be filled by all files passed via `add_to_embedded_plugin`.
+# After that, content of `some_component/generated/get_word_size.h` file will be filled by all files passed via `add_merge_plugin`.
 # In our case it will be just one file `plugin_get_word_size.h`.
 
 add_custom_target(merge_plugins)
@@ -90,7 +90,9 @@ set_target_properties(merge_plugins PROPERTIES PLUGINS "")
 function(declare_plugin_file NAME)
     string(REGEX REPLACE "[/\\.]" "_" plugin_files_target "${NAME}__files")
     add_custom_target(${plugin_files_target})
-    set_target_properties(${plugin_files_target} PROPERTIES PLUGIN_FILES "")
+    set_target_properties(${plugin_files_target} PROPERTIES
+        PLUGIN_FILES ""
+        GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
     get_target_property(PLUGINS merge_plugins PLUGINS)
     list(APPEND PLUGINS ${NAME})

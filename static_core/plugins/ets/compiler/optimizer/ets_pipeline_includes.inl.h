@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#ifdef PANDA_ETS_INTEROP_JS
-if (graph->GetLanguage() == panda_file::SourceLang::ETS) {
-    graph->RunPass<InteropIntrinsicOptimization>(g_options.IsCompilerInteropTrySingleScope());
-}
-#endif
+#ifndef PLUGINS_ETS_COMPILER_OPTIMIZER_ETS_PIPELINE_INCLUDES_H
+#define PLUGINS_ETS_COMPILER_OPTIMIZER_ETS_PIPELINE_INCLUDES_H
+
+#include "plugins/ets/compiler/optimizer/optimizations/interop_js/interop_intrinsic_optimization.h"
+
+#endif  // PLUGINS_ETS_COMPILER_OPTIMIZER_ETS_PIPELINE_INCLUDES_H

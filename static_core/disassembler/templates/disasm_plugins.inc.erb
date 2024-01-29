@@ -16,11 +16,6 @@
 #ifndef DISASSEMBLER_TEMPLATES_DISASM_PLUGINS_INC_INCLUDED
 #define DISASSEMBLER_TEMPLATES_DISASM_PLUGINS_INC_INCLUDED
 
-% Common::plugins.each_value do |plugin_opts|
-% next unless plugin_opts["Disasm"]
-% if plugin_opts["Disasm"]["language_interface_path"]
-#include "<%= plugin_opts["Disasm"]["language_interface_path"] %>"
-% end
-% end
+<%= Common::include_plugin_files "Disasm", "language_interface_path" %>
 
 #endif

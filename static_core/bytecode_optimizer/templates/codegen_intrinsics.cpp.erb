@@ -23,11 +23,9 @@ void BytecodeGen::VisitIntrinsic(GraphVisitor *visitor, Inst *instBase)
     auto enc = static_cast<BytecodeGen *>(visitor);
 
     switch (inst->GetIntrinsicId()) {
-% Common::plugins.each do |plugin_lang, plugin_opts|
+% Common::each_plugin_suboption("bytecodeopt", "codegen_intrinsics_inc") do |codegen_intrinsics_inc, plugin_lang|
     // Lang <%= plugin_lang %>
-% next unless plugin_opts["bytecodeopt"]
-% next unless plugin_opts["bytecodeopt"]["codegen_intrinsics_inc"]
-    #include "<%= plugin_opts["bytecodeopt"]["codegen_intrinsics_inc"] %>"
+    #include "<%= codegen_intrinsics_inc %>"
 % end
         default: {
             enc->success_ = false;

@@ -13,9 +13,8 @@
 # limitations under the License.
 %>
 
-% Common::plugins.each do |plugin_lang, plugin_opts|
-%   next unless plugin_opts["irtoc_files"]
-%   plugin_opts["irtoc_files"].each do |name, file|
+% Common::each_plugin_option "irtoc_files" do |irtoc_files|
+%   irtoc_files.each do |name, file|
 <%= file %>
 %   end
 % end

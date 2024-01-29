@@ -218,6 +218,8 @@ ohos_shared_library("libarktscompiler") {
     ":libarkcompiler_opcodes_h_deoptimize_elimination_call_visitors_inl",
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
+    ":pipeline_includes_h",
+    ":plugin_create_pipeline_inl",
     ":source_languages_h",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase",
@@ -306,6 +308,8 @@ ohos_source_set("libarktscompiler_frontend_static") {
     ":libarkcompiler_opcodes_h_deoptimize_elimination_call_visitors_inl",
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
+    ":pipeline_includes_h",
+    ":plugin_create_pipeline_inl",
     ":source_languages_h",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
@@ -516,6 +520,14 @@ ark_gen_file("ir_dyn_base_types_h") {
   output_file = "$target_gen_dir/generated/ir-dyn-base-types.h"
 }
 
+ark_gen_file("pipeline_includes_h") {
+  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  template_file = "optimizer/templates/pipeline_includes.h.erb"
+  data_file = "$ark_plugin_options_yaml"
+  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  output_file = "$target_gen_dir/generated/pipeline_includes.h"
+}
+
 ark_gen_file("source_languages_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "optimizer/templates/source_languages.h.erb"
@@ -573,6 +585,12 @@ if (enable_irtoc) {
     requires = [ "$ark_root/templates/plugin_options.rb" ]
     output_file =
         "$target_gen_dir/generated/irtoc_interface_extensions_includes.inl.h"
+  }
+
+  generated_file("plugin_create_pipeline_inl") {
+    outputs = [ "$target_gen_dir/generated/create_pipeline.inl" ]
+    contents = plugin_create_pipeline_paths
+    output_conversion = "list lines"
   }
 
   action("irtoc_builder_cpp") {
