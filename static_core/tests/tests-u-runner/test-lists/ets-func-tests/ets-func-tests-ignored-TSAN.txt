@@ -1,0 +1,9 @@
+### panda#15005: skip to stabilize fe_dev_202312
+spec/unions/union_cast_05.ets
+### End of panda#15005
+### Issue 14040
+spec/struct-type/test-struct-no-annotation.ets
+### EOF Issue 14040
+### Undefined type
+spec/undefined-type/undefined-union-array-type_2.ets
+### End of Undefined type
