@@ -21,24 +21,34 @@
 
 namespace ark::ets::interop::js {
 
-template <typename FUnwrapVal, typename FStore>
-[[nodiscard]] static ALWAYS_INLINE inline bool ConvertRefArgToEts(InteropCtx *ctx, ProtoReader &protoReader,
-                                                                  FStore &storeRes, napi_value jsVal,
-                                                                  FUnwrapVal &unwrapVal)
+template <typename Convertor, typename FStore>
+static ALWAYS_INLINE bool UnwrapVal(InteropCtx *ctx, napi_env env, napi_value jsVal, FStore &storeRes)
+{
+    using cpptype = typename Convertor::cpptype;  // NOLINT(readability-identifier-naming)
+    auto res = Convertor::Unwrap(ctx, env, jsVal);
+    if (UNLIKELY(!res.has_value())) {
+        return false;
+    }
+    if constexpr (std::is_pointer_v<cpptype>) {
+        storeRes(AsEtsObject(res.value())->GetCoreType());
+    } else {
+        storeRes(Value(res.value()).GetAsLong());
+    }
+    return true;
+}
+
+template <typename FStore>
+[[nodiscard]] static ALWAYS_INLINE inline bool ConvertRefArgToEts(InteropCtx *ctx, Class *klass, FStore &storeRes,
+                                                                  napi_value jsVal)
 {
     auto env = ctx->GetJSEnv();
 
-    if (IsNull(env, jsVal)) {
-        storeRes(nullptr);
-        return true;
-    }
-    auto klass = protoReader.GetClass();
     // start fastpath
     if (klass == ctx->GetJSValueClass()) {
-        return unwrapVal(helpers::TypeIdentity<JSConvertJSValue>());
+        return UnwrapVal<JSConvertJSValue>(ctx, env, jsVal, storeRes);
     }
     if (klass == ctx->GetStringClass()) {
-        return unwrapVal(helpers::TypeIdentity<JSConvertString>());
+        return UnwrapVal<JSConvertString>(ctx, env, jsVal, storeRes);
     }
     if (IsUndefined(env, jsVal)) {
         if (UNLIKELY(!klass->IsAssignableFrom(ctx->GetUndefinedClass()))) {
@@ -58,27 +68,16 @@ template <typename FUnwrapVal, typename FStore>
 }
 
 template <typename FStore>
-[[nodiscard]] static ALWAYS_INLINE inline bool ConvertArgToEts(InteropCtx *ctx, ProtoReader &protoReader,
-                                                               FStore &storeRes, napi_value jsVal)
+[[nodiscard]] static ALWAYS_INLINE inline bool ConvertPrimArgToEts(InteropCtx *ctx, panda_file::Type::TypeId id,
+                                                                   FStore &storeRes, napi_value jsVal)
 {
     auto env = ctx->GetJSEnv();
 
     auto unwrapVal = [&ctx, &env, &jsVal, &storeRes](auto convTag) {
         using Convertor = typename decltype(convTag)::type;  // convTag acts as lambda template parameter
-        using cpptype = typename Convertor::cpptype;         // NOLINT(readability-identifier-naming)
-        auto res = Convertor::Unwrap(ctx, env, jsVal);
-        if (UNLIKELY(!res.has_value())) {
-            return false;
-        }
-        if constexpr (std::is_pointer_v<cpptype>) {
-            storeRes(AsEtsObject(res.value())->GetCoreType());
-        } else {
-            storeRes(Value(res.value()).GetAsLong());
-        }
-        return true;
+        return UnwrapVal<Convertor>(ctx, env, jsVal, storeRes);
     };
-
-    switch (protoReader.GetType().GetId()) {
+    switch (id) {
         case panda_file::Type::TypeId::VOID: {
             return true;  // do nothing
         }
@@ -104,8 +103,109 @@ template <typename FStore>
             return unwrapVal(helpers::TypeIdentity<JSConvertF32>());
         case panda_file::Type::TypeId::F64:
             return unwrapVal(helpers::TypeIdentity<JSConvertF64>());
+        default:
+            UNREACHABLE();
+    }
+}
+
+template <typename FStore, typename GetClass>
+[[nodiscard]] static ALWAYS_INLINE inline bool ConvertArgToEts(InteropCtx *ctx, panda_file::Type type, FStore &storeRes,
+                                                               const GetClass &getClass, napi_value jsVal)
+{
+    auto id = type.GetId();
+    auto env = ctx->GetJSEnv();
+    if (id == panda_file::Type::TypeId::REFERENCE) {
+        if (IsNull(env, jsVal)) {
+            storeRes(nullptr);
+            return true;
+        }
+        return ConvertRefArgToEts(ctx, getClass(), storeRes, jsVal);
+    }
+    return ConvertPrimArgToEts(ctx, id, storeRes, jsVal);
+}
+
+template <typename FStore>
+[[nodiscard]] static ALWAYS_INLINE inline bool ConvertArgToEts(InteropCtx *ctx, ProtoReader &protoReader,
+                                                               FStore &storeRes, napi_value jsVal)
+{
+    return ConvertArgToEts(
+        ctx, protoReader.GetType(), storeRes, [&protoReader]() { return protoReader.GetClass(); }, jsVal);
+}
+
+template <typename RestParamsArray>
+static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, ProtoReader &protoReader,
+                                           Span<napi_value> jsargv)
+{
+    const size_t numRestParams = jsargv.size();
+
+    RestParamsArray *objArr = [&]() {
+        if constexpr (std::is_same_v<RestParamsArray, EtsObjectArray>) {
+            EtsClass *etsClass = EtsClass::FromRuntimeClass(protoReader.GetClass()->GetComponentType());
+            return RestParamsArray::Create(etsClass, numRestParams);
+        } else {
+            return RestParamsArray::Create(numRestParams);
+        }
+    }();
+
+    auto convertValue = [](auto val) -> typename RestParamsArray::ValueType {
+        constexpr bool IS_VAL_PTR = std::is_pointer_v<decltype(val)> || std::is_null_pointer_v<decltype(val)>;
+        constexpr bool IS_OBJ_ARR = std::is_same_v<RestParamsArray, EtsObjectArray>;
+        // Clang-tidy gives false positive error.
+        if constexpr (IS_OBJ_ARR) {
+            if constexpr (IS_VAL_PTR) {
+                return EtsObject::FromCoreType(static_cast<ObjectHeader *>(val));
+            }
+        }
+        if constexpr (!IS_OBJ_ARR) {
+            if constexpr (!IS_VAL_PTR) {
+                return *reinterpret_cast<typename RestParamsArray::ValueType *>(&val);
+            }
+        }
+        UNREACHABLE();
+    };
+
+    VMHandle<RestParamsArray> restArgsArray(coro, objArr->GetCoreType());
+    for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
+        auto jsVal = jsargv[restArgIdx];
+        auto store = [&convertValue, restArgIdx, &restArgsArray](auto val) {
+            restArgsArray.GetPtr()->Set(restArgIdx, convertValue(val));
+        };
+        auto klass = protoReader.GetClass()->GetComponentType();
+        auto klassCb = [klass]() { return klass; };
+        if (UNLIKELY(!ConvertArgToEts(ctx, klass->GetType(), store, klassCb, jsVal))) {
+            if (coro->HasPendingException()) {
+                ctx->ForwardEtsException(coro);
+            }
+            ASSERT(ctx->SanityJSExceptionPending());
+            return nullptr;
+        }
+    }
+    return reinterpret_cast<ObjectHeader **>(restArgsArray.GetAddress());
+}
+
+[[maybe_unused]] static ObjectHeader **PackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, ProtoReader &protoReader,
+                                                          Span<napi_value> jsargv)
+{
+    panda_file::Type restParamsItemType = protoReader.GetClass()->GetComponentType()->GetType();
+    switch (restParamsItemType.GetId()) {
+        case panda_file::Type::TypeId::U1:
+            return DoPackRestParameters<EtsBooleanArray>(coro, ctx, protoReader, jsargv);
+        case panda_file::Type::TypeId::I8:
+            return DoPackRestParameters<EtsByteArray>(coro, ctx, protoReader, jsargv);
+        case panda_file::Type::TypeId::I16:
+            return DoPackRestParameters<EtsShortArray>(coro, ctx, protoReader, jsargv);
+        case panda_file::Type::TypeId::U16:
+            return DoPackRestParameters<EtsCharArray>(coro, ctx, protoReader, jsargv);
+        case panda_file::Type::TypeId::I32:
+            return DoPackRestParameters<EtsIntArray>(coro, ctx, protoReader, jsargv);
+        case panda_file::Type::TypeId::I64:
+            return DoPackRestParameters<EtsLongArray>(coro, ctx, protoReader, jsargv);
+        case panda_file::Type::TypeId::F32:
+            return DoPackRestParameters<EtsFloatArray>(coro, ctx, protoReader, jsargv);
+        case panda_file::Type::TypeId::F64:
+            return DoPackRestParameters<EtsDoubleArray>(coro, ctx, protoReader, jsargv);
         case panda_file::Type::TypeId::REFERENCE:
-            return ConvertRefArgToEts(ctx, protoReader, storeRes, jsVal, unwrapVal);
+            return DoPackRestParameters<EtsObjectArray>(coro, ctx, protoReader, jsargv);
         default:
             UNREACHABLE();
     }

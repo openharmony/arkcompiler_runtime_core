@@ -308,32 +308,33 @@ static JSValue *JSRuntimeLoadModule(EtsString *module)
     PandaString moduleName = module->GetMutf8();
     auto [mod, func] = ResolveModuleName(moduleName);
 
-    NapiScope jsHandleScope(env);
-
-    napi_value requireFn;
-    NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), func.data(), &requireFn));
-
-    INTEROP_FATAL_IF(GetValueType(env, requireFn) != napi_function);
     napi_value modObj;
     {
-        napi_value jsName;
-        NAPI_CHECK_FATAL(napi_create_string_utf8(env, mod.data(), NAPI_AUTO_LENGTH, &jsName));
-        std::array<napi_value, 1> args = {jsName};
-        napi_value recv;
-        NAPI_CHECK_FATAL(napi_get_undefined(env, &recv));
-        auto status = (napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj));
+        ScopedNativeCodeThread etsNativeScope(coro);
+        NapiScope jsHandleScope(env);
 
-        if (status == napi_pending_exception) {
-            napi_value exp;
-            NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
-            NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
-            INTEROP_LOG(FATAL) << "Unable to load module due to exception";
-            UNREACHABLE();
+        napi_value requireFn;
+        NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), func.data(), &requireFn));
+
+        INTEROP_FATAL_IF(GetValueType(env, requireFn) != napi_function);
+        {
+            napi_value jsName;
+            NAPI_CHECK_FATAL(napi_create_string_utf8(env, mod.data(), NAPI_AUTO_LENGTH, &jsName));
+            std::array<napi_value, 1> args = {jsName};
+            napi_value recv;
+            NAPI_CHECK_FATAL(napi_get_undefined(env, &recv));
+            auto status = (napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj));
+            if (status == napi_pending_exception) {
+                napi_value exp;
+                NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
+                NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
+                INTEROP_LOG(FATAL) << "Unable to load module due to exception";
+                UNREACHABLE();
+            }
+            INTEROP_FATAL_IF(status != napi_ok);
         }
-
-        INTEROP_FATAL_IF(status != napi_ok);
+        INTEROP_FATAL_IF(IsUndefined(env, modObj));
     }
-    INTEROP_FATAL_IF(IsUndefined(env, modObj));
 
     return JSValue::CreateRefValue(coro, ctx, modObj, napi_object);
 }

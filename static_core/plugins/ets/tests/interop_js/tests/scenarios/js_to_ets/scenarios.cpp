@@ -168,4 +168,10 @@ TEST_F(EtsInteropScenariosJsToEts, Test_optional_call)
     ASSERT_EQ(ret, true);
 }
 
+TEST_F(EtsInteropScenariosJsToEts, Test_rest_params)
+{
+    auto ret = CallEtsMethod<bool>("Test_rest_params");
+    ASSERT_EQ(ret, true);
+}
+
 }  // namespace ark::ets::interop::js::testing

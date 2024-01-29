@@ -55,9 +55,17 @@ public:
     ALWAYS_INLINE EtsMethod *GetMethod(uint32_t parametersNum) const
     {
         if (LIKELY(parametersNum < entries_.size())) {
-            return entries_[parametersNum];
+            if (LIKELY(entries_[parametersNum] != nullptr)) {
+                return entries_[parametersNum];
+            }
         }
-        return nullptr;
+        // Try rest params
+        for (size_t params = std::min(static_cast<size_t>(parametersNum), entries_.size() - 1); params > 0; params--) {
+            if (entries_[params] != nullptr && entries_[params]->GetPandaMethod()->HasVarArgs()) {
+                return entries_[params];
+            }
+        }
+        return entries_.front();
     }
 
     template <typename Callback>
@@ -96,7 +104,8 @@ private:
           entries_(PandaVector<EtsMethod *>(singleMethod->GetParametersNum() + 1)),
           anyMethod_(singleMethod)
     {
-        entries_[singleMethod->GetParametersNum()] = singleMethod;
+        entries_[singleMethod->GetParametersNum() -
+                 static_cast<unsigned int>(singleMethod->GetPandaMethod()->HasVarArgs())] = singleMethod;
     }
 
     EtsClass *const enclosingClass_;

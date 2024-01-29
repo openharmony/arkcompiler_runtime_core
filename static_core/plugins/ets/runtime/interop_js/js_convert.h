@@ -412,7 +412,7 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     EtsHandle<EtsArrayBuffer> buf(currentCoro,
                                   reinterpret_cast<EtsArrayBuffer *>(EtsObject::Create(currentCoro, arraybufKlass)));
     buf->SetByteLength(static_cast<EtsInt>(byteLength));
-    buf->SetData(currentCoro, EtsArray::CreateForPrimitive<EtsByteArray>(EtsClassRoot::BYTE_ARRAY, byteLength));
+    buf->SetData(currentCoro, EtsByteArray::Create(byteLength));
     std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, buf->GetData()->GetData<EtsByte>());
     return buf.GetPtr();
 }

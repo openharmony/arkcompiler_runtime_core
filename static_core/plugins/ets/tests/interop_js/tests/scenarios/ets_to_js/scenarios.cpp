@@ -173,4 +173,9 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_return_type_primitive)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_return_type_primitive.js"));
 }
 
+TEST_F(EtsInteropScenariosEtsToJs, test_rest_params)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_rest_params_call.js"));
+}
+
 }  // namespace ark::ets::interop::js::testing

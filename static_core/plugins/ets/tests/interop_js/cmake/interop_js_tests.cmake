@@ -52,7 +52,7 @@ function(panda_ets_interop_js_gtest TARGET)
     set(INTEROP_TESTS_DIR "${PANDA_BINARY_ROOT}/tests/ets_interop_js")
     panda_ets_interop_js_plugin(${TARGET}
         SOURCES ${ARG_CPP_SOURCES}
-        LIBRARIES ets_interop_js_gtest ${ARG_LIBRARIES}
+        LIBRARIES ets_interop_js_gtest ets_interop_js_napi ${ARG_LIBRARIES}
         LIBRARY_OUTPUT_DIRECTORY "${INTEROP_TESTS_DIR}/lib/module"
     )
 

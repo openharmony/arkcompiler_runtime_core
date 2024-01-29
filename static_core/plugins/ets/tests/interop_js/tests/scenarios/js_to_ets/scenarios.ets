@@ -18,7 +18,9 @@ import { standaloneFunctionJs, ClassWithMethodJs, newInterfaceWithMethod, ClassW
     functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
     functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
     genericTypeReturnValue, functionArgTypeOptionalPrimitive, functionArgTypePrimitive,
-    functionReturnTypePrimitive } from "pure_js"
+    functionReturnTypePrimitive, js_sum_rest_params,
+    js_multiply_1arg_by_sum_rest_params, js_multiply_sum2args_by_sum_rest_params,
+    js_concat_strings_rest_params } from "pure_js"
 
 import {
     optional_call,
@@ -160,4 +162,14 @@ function Test_function_arg_type_primitive(): boolean {
 function Test_function_return_type_primitive(): boolean {
     let res: boolean = functionReturnTypePrimitive() as boolean;
     return typeof res === "boolean";
+}
+
+function Test_rest_params() {
+    // NOTE: casts due to bug in frontend
+    assert js_sum_rest_params(1, 2, 3) as Int == (1+2+3)
+    assert js_multiply_1arg_by_sum_rest_params(1, 2, 3, 4) as Int == (1) * (2+3+4)
+    assert js_multiply_sum2args_by_sum_rest_params(1, 2, 3, 4, 5) as Int == (1+2)*(3+4+5);
+    assert js_concat_strings_rest_params() as String == "";
+    assert js_concat_strings_rest_params("a", "b", "c") as String == "abc";
+    return true;
 }

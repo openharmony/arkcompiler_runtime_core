@@ -174,6 +174,61 @@ function function_return_type_primitive(): number {
     return 1;
 }
 
+function ets_sum_rest_params(...args: number[]): number {
+    let sum = 0;
+    for (let n of args) {
+        sum += n;
+    }
+    return sum;
+}
+
+function ets_multiply_1arg_by_sum_rest_params(arg0: number, ...args: number[]): number {
+    let sum = 0;
+    for (let n of args) {
+        sum += n;
+    }
+    return arg0 * sum;
+}
+
+function ets_multiply_sum2args_by_sum_rest_params(arg0: number, arg1: number, ...args: number[]): number {
+    let sum = 0;
+    for (let n of args) {
+        sum += n;
+    }
+    return sum * (arg0 + arg1);
+}
+
+class RestParamsTest {
+    x = 2;
+    foo() {
+        return 1;
+    }
+    sum_ints(...args: Int[]) {
+        let sum = 0;
+        for (let n of args) {
+            sum += n;
+        }
+        return sum;
+    }
+};
+
+function ets_call_foo_rest_params(...args: RestParamsTest[]): number {
+    let sum = 0;
+    for (let s of args) {
+        sum += s.foo();
+        sum += s.x;
+    }
+    return sum;
+}
+
+function ets_concat_strings_rest_params(...args: String[]): String {
+    let str = "";
+    for (let s of args) {
+        str += s;
+    }
+    return str;
+}
+
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup

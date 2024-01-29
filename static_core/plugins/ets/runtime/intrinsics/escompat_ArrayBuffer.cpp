@@ -45,7 +45,7 @@ extern "C" ObjectHeader *EtsArrayBufferFrom(EtsObject *obj)
     }
     auto byteLength = static_cast<EtsInt>(array->GetLength() * array->GetElementSize());
     buf->SetByteLength(byteLength);
-    auto *data = EtsArray::CreateForPrimitive<EtsByteArray>(EtsClassRoot::BYTE_ARRAY, byteLength);
+    auto *data = EtsByteArray::Create(byteLength);
     buf->SetData(coro, data);
     if (UNLIKELY(buf->GetData() == nullptr)) {
         return nullptr;

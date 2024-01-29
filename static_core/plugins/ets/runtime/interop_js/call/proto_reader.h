@@ -81,6 +81,11 @@ public:
         return method_;
     }
 
+    ALWAYS_INLINE const Method *GetMethod() const
+    {
+        return method_;
+    }
+
 private:
     panda_file::ShortyIterator it_ {};
     uint32_t refArgIdx_ {};
