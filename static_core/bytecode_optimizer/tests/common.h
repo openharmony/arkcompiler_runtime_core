@@ -780,6 +780,34 @@ public:
 
     enum CheckConstArrayTypes { ACCESS, SKIP_MULTIDIM_ARRAYS };
 
+    static compiler::Inst *CheckAllInsts(const BasicBlock *bb, CheckConstArrayTypes type,
+                                         compiler::Inst *constArrayDefInst)
+    {
+        for (auto inst : bb->AllInsts()) {
+            switch (type) {
+                case CheckConstArrayTypes::ACCESS: {
+                    if (inst->GetOpcode() == Opcode::LoadConstArray) {
+                        constArrayDefInst = inst;
+                        continue;
+                    }
+                    if (inst->GetOpcode() == Opcode::LoadArray) {
+                        EXPECT_TRUE(constArrayDefInst != nullptr);
+                        EXPECT_TRUE(inst->CastToLoadArray()->GetArray() == constArrayDefInst);
+                    }
+                    continue;
+                }
+                case CheckConstArrayTypes::SKIP_MULTIDIM_ARRAYS: {
+                    EXPECT_TRUE(inst->GetOpcode() != Opcode::LoadConstArray);
+                    continue;
+                }
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        return constArrayDefInst;
+    }
+
     void CheckConstArray(ark::pandasm::Program *prog, const char *className, const std::string &funcName,
                          CheckConstArrayTypes type)
     {
@@ -792,27 +820,7 @@ public:
 
         compiler::Inst *constArrayDefInst {nullptr};
         for (auto bb : GetGraph()->GetBlocksRPO()) {
-            for (auto inst : bb->AllInsts()) {
-                switch (type) {
-                    case CheckConstArrayTypes::ACCESS: {
-                        if (inst->GetOpcode() == Opcode::LoadConstArray) {
-                            constArrayDefInst = inst;
-                            continue;
-                        }
-                        if (inst->GetOpcode() == Opcode::LoadArray) {
-                            EXPECT_TRUE(constArrayDefInst != nullptr);
-                            EXPECT_TRUE(inst->CastToLoadArray()->GetArray() == constArrayDefInst);
-                        }
-                        continue;
-                    }
-                    case CheckConstArrayTypes::SKIP_MULTIDIM_ARRAYS: {
-                        EXPECT_TRUE(inst->GetOpcode() != Opcode::LoadConstArray);
-                        continue;
-                    }
-                    default:
-                        UNREACHABLE();
-                }
-            }
+            constArrayDefInst = CheckAllInsts(bb, type, constArrayDefInst);
         }
 
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());

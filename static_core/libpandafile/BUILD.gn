@@ -50,6 +50,7 @@ libarkfile_sources = [
   "class_data_accessor.cpp",
   "code_data_accessor.cpp",
   "debug_data_accessor.cpp",
+  "debug_helpers.cpp",
   "debug_info_extractor.cpp",
   "field_data_accessor.cpp",
   "file.cpp",

@@ -59,26 +59,30 @@ public:
 
         // Enmuate all methods and put them to local cache.
         ark::panda_file::ext::MethodSymEntry *found = nullptr;
+
+        auto callBack = [this, offset, &found](ark::panda_file::MethodDataAccessor &mda) -> void {
+            if (mda.GetCodeId().has_value()) {
+                ark::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
+                ark::panda_file::ext::MethodSymEntry entry;
+                entry.id = mda.GetCodeId().value();
+                entry.length = ca.GetCodeSize();
+                entry.name = std::string(ark::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data));
+
+                auto ret = methodSymbols_.emplace(offset, entry);
+                if (mda.GetCodeId().value().GetOffset() <= offset &&
+                    offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
+                    found = &ret.first->second;
+                }
+            }
+        };
+
         for (uint32_t id : pandaFile_->GetClasses()) {
             if (pandaFile_->IsExternal(ark::panda_file::File::EntityId(id))) {
                 continue;
             }
-            ark::panda_file::ClassDataAccessor cda {*pandaFile_, ark::panda_file::File::EntityId(id)};
-            cda.EnumerateMethods([&](ark::panda_file::MethodDataAccessor &mda) -> void {
-                if (mda.GetCodeId().has_value()) {
-                    ark::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
-                    ark::panda_file::ext::MethodSymEntry entry;
-                    entry.id = mda.GetCodeId().value();
-                    entry.length = ca.GetCodeSize();
-                    entry.name = std::string(ark::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data));
 
-                    auto ret = methodSymbols_.emplace(offset, entry);
-                    if (mda.GetCodeId().value().GetOffset() <= offset &&
-                        offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
-                        found = &ret.first->second;
-                    }
-                }
-            });
+            ark::panda_file::ClassDataAccessor cda {*pandaFile_, ark::panda_file::File::EntityId(id)};
+            cda.EnumerateMethods(callBack);
         }
         return found;
     }

@@ -131,11 +131,9 @@ static bool VerifyClass(Class *clazz)
     return true;
 }
 
-Status Verify(Service *service, ark::Method *method, VerificationMode mode)
+static std::optional<Status> CheckBeforeVerification(Service *service, ark::Method *method, VerificationMode mode)
 {
     using VStage = Method::VerificationStage;
-    ASSERT(service != nullptr);
-
     if (method->IsIntrinsic()) {
         return Status::OK;
     }
@@ -177,6 +175,22 @@ Status Verify(Service *service, ark::Method *method, VerificationMode mode)
             return cachedStatus;
         }
     }
+
+    return std::nullopt;
+}
+
+Status Verify(Service *service, ark::Method *method, VerificationMode mode)
+{
+    using VStage = Method::VerificationStage;
+    ASSERT(service != nullptr);
+
+    auto status = CheckBeforeVerification(service, method, mode);
+    if (status) {
+        return status.value();
+    }
+
+    auto uniqId = method->GetUniqId();
+    auto methodName = method->GetFullName();
 
     auto lang = method->GetClass()->GetSourceLang();
     auto *processor = service->verifierService->GetProcessor(lang);

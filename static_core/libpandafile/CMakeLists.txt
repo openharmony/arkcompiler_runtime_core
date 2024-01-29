@@ -51,6 +51,7 @@ set(SOURCES
     annotation_data_accessor.cpp
     bytecode_emitter.cpp
     debug_data_accessor.cpp
+    debug_helpers.cpp
     field_data_accessor.cpp
     file.cpp
     file_reader.cpp

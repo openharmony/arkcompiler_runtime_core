@@ -138,25 +138,7 @@ private:
 };
 
 size_t GetLineNumber(ark::panda_file::MethodDataAccessor mda, uint32_t bcOffset,
-                     const ark::panda_file::File *pandaDebugFile)
-{
-    auto debugInfoId = mda.GetDebugInfoId();
-    if (!debugInfoId) {
-        return -1;
-    }
-
-    ark::panda_file::DebugInfoDataAccessor dda(*pandaDebugFile, debugInfoId.value());
-    const uint8_t *program = dda.GetLineNumberProgram();
-
-    ark::panda_file::LineProgramState state(*pandaDebugFile, ark::panda_file::File::EntityId(0), dda.GetLineStart(),
-                                            dda.GetConstantPool());
-
-    BytecodeOffsetResolver resolver(&state, bcOffset);
-    ark::panda_file::LineNumberProgramProcessor<BytecodeOffsetResolver> programProcessor(program, &resolver);
-    programProcessor.Process();
-
-    return resolver.GetLine();
-}
+                     const ark::panda_file::File *pandaDebugFile);
 
 }  // namespace ark::panda_file::debug_helpers
 

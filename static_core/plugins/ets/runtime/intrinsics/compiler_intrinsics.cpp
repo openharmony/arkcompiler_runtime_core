@@ -90,6 +90,57 @@ ark::Method *TryGetCallee(ark::Method *method, Field *rawField, uint32_t pc, ark
 }
 
 template <panda_file::Type::TypeId FIELD_TYPE, class T>
+static T GetFieldPrimitiveType(Field *field, const VMHandle<ObjectHeader> &handleObj)
+{
+    switch (field->GetTypeId()) {
+        case panda_file::Type::TypeId::U1:
+        case panda_file::Type::TypeId::U8: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            return handleObj.GetPtr()->template GetFieldPrimitive<uint8_t>(*field);
+        }
+        case panda_file::Type::TypeId::I8: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            return handleObj.GetPtr()->template GetFieldPrimitive<int8_t>(*field);
+        }
+        case panda_file::Type::TypeId::I16: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            return handleObj.GetPtr()->template GetFieldPrimitive<int16_t>(*field);
+        }
+        case panda_file::Type::TypeId::U16: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            return handleObj.GetPtr()->template GetFieldPrimitive<uint16_t>(*field);
+        }
+        case panda_file::Type::TypeId::I32: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            return handleObj.GetPtr()->template GetFieldPrimitive<int32_t>(*field);
+        }
+        case panda_file::Type::TypeId::U32: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            return handleObj.GetPtr()->template GetFieldPrimitive<uint32_t>(*field);
+        }
+        case panda_file::Type::TypeId::I64: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I64);
+            return handleObj.GetPtr()->template GetFieldPrimitive<int64_t>(*field);
+        }
+        case panda_file::Type::TypeId::U64: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I64);
+            return handleObj.GetPtr()->template GetFieldPrimitive<uint64_t>(*field);
+        }
+        case panda_file::Type::TypeId::F32: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::F32);
+            return handleObj.GetPtr()->template GetFieldPrimitive<float>(*field);
+        }
+        case panda_file::Type::TypeId::F64: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::F64);
+            return handleObj.GetPtr()->template GetFieldPrimitive<double>(*field);
+        }
+        default:
+            UNREACHABLE();
+            return handleObj.GetPtr()->template GetFieldPrimitive<T>(*field);
+    }
+}
+
+template <panda_file::Type::TypeId FIELD_TYPE, class T>
 T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::ObjectHeader *obj)
 {
     ASSERT(method != nullptr);
@@ -108,53 +159,7 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
             if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
                 return handleObj.GetPtr()->GetFieldObject(*field);
             } else {
-                switch (field->GetTypeId()) {
-                    case panda_file::Type::TypeId::U1:
-                    case panda_file::Type::TypeId::U8: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<uint8_t>(*field);
-                    }
-                    case panda_file::Type::TypeId::I8: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<int8_t>(*field);
-                    }
-                    case panda_file::Type::TypeId::I16: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<int16_t>(*field);
-                    }
-                    case panda_file::Type::TypeId::U16: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<uint16_t>(*field);
-                    }
-                    case panda_file::Type::TypeId::I32: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<int32_t>(*field);
-                    }
-                    case panda_file::Type::TypeId::U32: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<uint32_t>(*field);
-                    }
-                    case panda_file::Type::TypeId::I64: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I64);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<int64_t>(*field);
-                    }
-                    case panda_file::Type::TypeId::U64: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I64);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<uint64_t>(*field);
-                    }
-                    case panda_file::Type::TypeId::F32: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::F32);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<float>(*field);
-                    }
-                    case panda_file::Type::TypeId::F64: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::F64);
-                        return handleObj.GetPtr()->template GetFieldPrimitive<double>(*field);
-                    }
-                    default:
-                        UNREACHABLE();
-                        break;
-                }
-                return handleObj.GetPtr()->template GetFieldPrimitive<T>(*field);
+                return GetFieldPrimitiveType<FIELD_TYPE, T>(field, handleObj);
             }
         }
 
@@ -167,6 +172,67 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
     }
     LookUpException<false>(klass, rawField);
     UNREACHABLE();
+}
+
+template <panda_file::Type::TypeId FIELD_TYPE, class T>
+static void SetTypedFieldPrimitive(Field *field, const VMHandle<ObjectHeader> &handleObj, T storeValue)
+{
+    switch (field->GetTypeId()) {
+        case panda_file::Type::TypeId::U1:
+        case panda_file::Type::TypeId::U8: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<uint8_t>(storeValue));
+            return;
+        }
+        case panda_file::Type::TypeId::I8: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<int8_t>(storeValue));
+            return;
+        }
+        case panda_file::Type::TypeId::I16: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<int16_t>(storeValue));
+            return;
+        }
+        case panda_file::Type::TypeId::U16: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<uint16_t>(storeValue));
+            return;
+        }
+        case panda_file::Type::TypeId::I32: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<int32_t>(storeValue));
+            return;
+        }
+        case panda_file::Type::TypeId::U32: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<uint32_t>(storeValue));
+            return;
+        }
+        case panda_file::Type::TypeId::I64: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I64);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<int64_t>(storeValue));
+            return;
+        }
+        case panda_file::Type::TypeId::U64: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I64);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<uint64_t>(storeValue));
+            return;
+        }
+        case panda_file::Type::TypeId::F32: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::F32);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, storeValue);
+            return;
+        }
+        case panda_file::Type::TypeId::F64: {
+            ASSERT(FIELD_TYPE == panda_file::Type::TypeId::F64);
+            handleObj.GetPtr()->SetFieldPrimitive(*field, storeValue);
+            return;
+        }
+        default: {
+            UNREACHABLE();
+        }
+    }
 }
 
 template <panda_file::Type::TypeId FIELD_TYPE, class T>
@@ -188,63 +254,8 @@ void CompilerEtsStObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::O
             if constexpr (FIELD_TYPE == panda_file::Type::TypeId::REFERENCE) {
                 UNREACHABLE();
             } else {
-                switch (field->GetTypeId()) {
-                    case panda_file::Type::TypeId::U1:
-                    case panda_file::Type::TypeId::U8: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<uint8_t>(storeValue));
-                        return;
-                    }
-                    case panda_file::Type::TypeId::I8: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<int8_t>(storeValue));
-                        return;
-                    }
-                    case panda_file::Type::TypeId::I16: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<int16_t>(storeValue));
-                        return;
-                    }
-                    case panda_file::Type::TypeId::U16: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<uint16_t>(storeValue));
-                        return;
-                    }
-                    case panda_file::Type::TypeId::I32: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<int32_t>(storeValue));
-                        return;
-                    }
-                    case panda_file::Type::TypeId::U32: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I32);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<uint32_t>(storeValue));
-                        return;
-                    }
-                    case panda_file::Type::TypeId::I64: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I64);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<int64_t>(storeValue));
-                        return;
-                    }
-                    case panda_file::Type::TypeId::U64: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::I64);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, static_cast<uint64_t>(storeValue));
-                        return;
-                    }
-                    case panda_file::Type::TypeId::F32: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::F32);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, storeValue);
-                        return;
-                    }
-                    case panda_file::Type::TypeId::F64: {
-                        ASSERT(FIELD_TYPE == panda_file::Type::TypeId::F64);
-                        handleObj.GetPtr()->SetFieldPrimitive(*field, storeValue);
-                        return;
-                    }
-                    default: {
-                        UNREACHABLE();
-                        return;
-                    }
-                }
+                SetTypedFieldPrimitive<FIELD_TYPE, T>(field, handleObj, storeValue);
+                return;
             }
         }
 
