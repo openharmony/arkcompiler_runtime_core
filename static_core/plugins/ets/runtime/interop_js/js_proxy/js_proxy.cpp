@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ static std::unique_ptr<uint8_t[]> MakeProxyDescriptor(const uint8_t *descriptorP
 
     proxyDescriptor[0] = 'L';
     proxyDescriptor[1] = '$';
-    memcpy(&proxyDescriptor[2U], &descriptor[1], descriptor.size() - 2U);
+    std::copy_n(&descriptor[1], descriptor.size() - 2U, &proxyDescriptor[2U]);
     proxyDescriptor[proxyDescriptor.size() - 3U] = '$';
     proxyDescriptor[proxyDescriptor.size() - 2U] = ';';
     proxyDescriptor[proxyDescriptor.size() - 1U] = '\0';

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ extern "C" ObjectHeader *EtsArrayBufferFrom(EtsObject *obj)
     if (UNLIKELY(buf->GetData() == nullptr)) {
         return nullptr;
     }
-    memcpy(buf->GetData()->GetData<EtsByte>(), array->GetData<EtsByte>(), byteLength);
+    std::copy_n(array->GetData<EtsByte>(), byteLength, buf->GetData()->GetData<EtsByte>());
     return buf.GetPtr();
 }
 }  // namespace panda::ets::intrinsics

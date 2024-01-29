@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,7 +184,7 @@ private:
     std::enable_if_t<std::is_trivially_copyable_v<T>> SetData(T val)
     {
         static_assert(sizeof(data_) >= sizeof(T));
-        memcpy(&data_, &val, sizeof(T));
+        std::copy_n(reinterpret_cast<uint8_t *>(&val), sizeof(T), reinterpret_cast<uint8_t *>(&data_));
     }
 
     template <typename T>
@@ -192,7 +192,7 @@ private:
     {
         static_assert(sizeof(data_) >= sizeof(T));
         T val;
-        memcpy(&val, &data_, sizeof(T));
+        std::copy_n(reinterpret_cast<const uint8_t *>(&data_), sizeof(T), reinterpret_cast<uint8_t *>(&val));
         return val;
     }
 
