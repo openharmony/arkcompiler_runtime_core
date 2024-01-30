@@ -296,6 +296,8 @@ LLVMAotCompiler::LLVMAotCompiler(ark::compiler::RuntimeInterface *runtime, ark::
     SetLLVMOption("spp-no-call", true);
     // Set limit to skip Safepoints on entry for small functions
     SetLLVMOption("isp-on-entry-limit", ark::compiler::g_options.GetCompilerSafepointEliminationLimit());
+    SetLLVMOption("enable-implicit-null-checks", ark::compiler::g_options.IsCompilerImplicitNullCheck());
+    SetLLVMOption("imp-null-check-page-size", static_cast<int>(runtime->GetProtectedMemorySize()));
     if (arch == Arch::AARCH64) {
         SetLLVMOption("aarch64-enable-ptr32", true);
     }
@@ -617,6 +619,21 @@ void LLVMAotCompiler::CompileModule(WrappedModule &module)
             auto fullMethodName = module.GetLLVMArkInterface()->GetUniqMethodName(method);
             if (stackmapInfo.find(fullMethodName) != stackmapInfo.end()) {
                 module.GetCodeInfoProducer()->AddSymbol(static_cast<Method *>(method), stackmapInfo.at(fullMethodName));
+            }
+        }
+    }
+
+    if (file->HasSection(".llvm_faultmaps")) {
+        auto section = file->GetSection(".llvm_faultmaps");
+        module.GetCodeInfoProducer()->SetFaultMaps(section.GetMemory(), section.GetSize());
+
+        auto faultMapInfo = file->GetFaultMapInfo();
+
+        for (auto method : module.GetMethods()) {
+            auto fullMethodName = module.GetLLVMArkInterface()->GetUniqMethodName(method);
+            if (faultMapInfo.find(fullMethodName) != faultMapInfo.end()) {
+                module.GetCodeInfoProducer()->AddFaultMapSymbol(static_cast<Method *>(method),
+                                                                faultMapInfo.at(fullMethodName));
             }
         }
     }

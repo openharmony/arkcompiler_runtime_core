@@ -23,7 +23,7 @@ struct LLVMCompilerOptions;
 }  // namespace ark::llvmbackend
 
 namespace llvm {
-class OperandBundleUse;
+struct OperandBundleUse;
 }  // namespace llvm
 
 namespace ark::llvmbackend::passes {

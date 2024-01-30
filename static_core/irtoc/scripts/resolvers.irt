@@ -89,7 +89,7 @@ function(:ClassResolver,
   klass := call_runtime(Constants::RESOLVE_CLASS, caller, class_id).ptr
 
   StoreI(slot, klass).Imm(0).ptr
-  If(LoadI(klass).Imm(Constants::CLASS_STATE_OFFSET).u32, "CLASS_STATE_INITIALIZED").EQ {
+  If(LoadI(klass).Imm(Constants::CLASS_STATE_OFFSET).u32, "CLASS_STATE_INITIALIZED").Likely.EQ {
     StoreI(slot, klass).Imm("-WordSize()").ptr
   }
 
@@ -116,11 +116,11 @@ function(:ClassInitResolver,
 
   StoreI(slot, klass).Imm("WordSize()").ptr
 
-  # After INITIALIZE_CLASS_BY_ID the class may be in INITILIZED or INITIALIZING state.
+  # After INITIALIZE_CLASS_BY_ID the class may be in INITIALIZED or INITIALIZING state.
   # Second case occurs when class initialization is triggered again during static constructor execution.
   # In this case we can't write class into the cache, because other thread would mistakenly think
   # that the class is already initialized instead of waiting for its initialization.
-  If(LoadI(klass).Imm(Constants::CLASS_STATE_OFFSET).u32, "CLASS_STATE_INITIALIZED").EQ {
+  If(LoadI(klass).Imm(Constants::CLASS_STATE_OFFSET).u32, "CLASS_STATE_INITIALIZED").Likely.EQ {
     StoreI(slot, klass).Imm(0).ptr
   }
 

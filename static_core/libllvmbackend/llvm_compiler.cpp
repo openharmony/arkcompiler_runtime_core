@@ -152,11 +152,12 @@ void LLVMCompiler::SetLLVMOption(const char *option, T val)
     static_cast<llvm::cl::opt<T> *>(entry->second)->setValue(val);
 }
 
-// Instantiate for irtoc_compiler.cpp
+// Instantiate for llvm_irtoc_compiler.cpp
 template void LLVMCompiler::SetLLVMOption(const char *option, bool val);
-// Instantiate for aot_compiler.cpp
+// Instantiate for llvm_aot_compiler.cpp
 template void LLVMCompiler::SetLLVMOption(const char *option, unsigned int val);
 template void LLVMCompiler::SetLLVMOption(const char *option, uint64_t val);
+template void LLVMCompiler::SetLLVMOption(const char *option, int val);
 
 llvm::Triple LLVMCompiler::GetTripleForArch(Arch arch)
 {

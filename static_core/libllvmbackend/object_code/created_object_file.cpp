@@ -99,6 +99,18 @@ std::unordered_map<std::string, CreatedObjectFile::StackMapSymbol> CreatedObject
     return info;
 }
 
+std::unordered_map<std::string, uint32_t> CreatedObjectFile::GetFaultMapInfo() const
+{
+    std::unordered_map<std::string, uint32_t> info;
+    const auto &section = sectionIndex_.at(".rela.llvm_faultmaps");
+    uint32_t counter = 0;
+    for (auto relocation : section.relocations()) {
+        const auto &symbol = relocation.getSymbol();
+        info.insert({cantFail(symbol->getName()).str(), counter++});
+    }
+    return info;
+}
+
 std::vector<SectionReference> CreatedObjectFile::GetRoDataSections() const
 {
     std::vector<SectionReference> references;

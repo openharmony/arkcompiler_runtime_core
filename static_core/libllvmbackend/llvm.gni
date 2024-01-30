@@ -14,15 +14,12 @@
 _llvm_major_version = "15"
 _llvm_middle_version = "0"
 _llvm_minor_version = "4"
-llvm_ark_suffix = "ark14"
 
 llvm_version = "$_llvm_major_version.$_llvm_middle_version.$_llvm_minor_version"
 
 declare_args() {
-  llvm_dir = ""
+  llvm_dir = "../../../../prebuilts/clang/ohos/linux-x86_64/llvm"
 }
-
-assert(llvm_dir != "")
 
 llvm_include_dir = "$llvm_dir/include"
 llvm_lib_file = "$llvm_dir/lib/libLLVM-$_llvm_major_version.so"

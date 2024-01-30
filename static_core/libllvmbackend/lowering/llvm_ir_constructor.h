@@ -210,8 +210,7 @@ private:
     llvm::Value *CoerceValue(llvm::Value *value, llvm::Type *targetType);
 
     void ValueMapAdd(Inst *inst, llvm::Value *value, bool setName = true);
-    void FillValueMapForUsers(Inst *inst, llvm::Value *value, DataType::Type type,
-                              ArenaUnorderedMap<DataType::Type, llvm::Value *> *typeMap);
+    void FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, llvm::Value *> *map, Inst *inst, llvm::Value *value);
 
     void WrapArkCall(Inst *orig, llvm::CallInst *call)
     {
