@@ -29,9 +29,10 @@ Recipes
 
 |CB_ERROR|
 
-|LANG| does not support Objects with name properties that are numbers or
-strings. Use classes to access data by property names. Use arrays to access
-data by numeric indices.
+|LANG| does not support Objects with name properties that are numbers, or
+computed values. String literals and constant enum string members are allowed
+as property names. Use classes to access data by property names. Use arrays
+to access data by numeric indices.
 
 |CB_BAD|
 ~~~~~~~~
@@ -817,9 +818,9 @@ that are either declared in the class, or accessible via inheritance. Accessing
 any other fields is prohibited, and causes compile-time errors.
 
 To access a field, use ``obj.field`` syntax, indexed access (``obj["field"]``)
-is not supported. An exception are all typed arrays from the standard library
-(for example, ``Int32Array``), which support access to their elements through
-``container[index]`` syntax.
+is not supported. All typed arrays from the standard library (for example,
+``Int32Array``) that support access to their elements through
+``container[index]`` syntax, tuples, Record objects, and enums are exceptions.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3605,7 +3606,7 @@ be used instead to statically "combine" methods to data together.
 .. meta:
     :keywords: GlobalThis
 
-|CB_ERROR|
+|CB_WARNING|
 
 |LANG| does not support both global scope and ``globalThis`` because untyped
 objects with dynamically changed layout are not supported.
@@ -4214,7 +4215,7 @@ Any other decorator will cause a compile-time error.
 .. meta:
     :keywords: ClassAsObject
 
-|CB_ERROR|
+|CB_WARNING|
 
 |LANG| does not support using classes as objects (assigning them to variables,
 etc.) because in |LANG|, a ``class`` declaration introduces a new type,
