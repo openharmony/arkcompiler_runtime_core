@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_QUICKENER_QUICKENER_H
+#define PANDA_QUICKENER_QUICKENER_H
 
 #include "file.h"
 #include "file_item_container.h"
@@ -52,3 +54,5 @@ private:
 
 #include <translation_table_gen.h>
 }  // namespace ark::quick
+
+#endif  // PANDA_QUICKENER_QUICKENER_H

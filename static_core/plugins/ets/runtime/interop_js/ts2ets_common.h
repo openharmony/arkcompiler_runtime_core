@@ -12,5 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TS2ETS_COMMON_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TS2ETS_COMMON_H
 
 /* Compatibility header */
+
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TS2ETS_COMMON_H

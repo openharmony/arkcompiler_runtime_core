@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_TESTS_PANDA_RUN_COMMON_H
+#define PANDA_TESTS_PANDA_RUN_COMMON_H
 
 #include "os/exec.h"
 
@@ -79,3 +81,5 @@ private:
 };
 
 }  // namespace ark::cli::test
+
+#endif  // PANDA_TESTS_PANDA_RUN_COMMON_H

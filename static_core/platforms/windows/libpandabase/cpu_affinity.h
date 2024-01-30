@@ -12,7 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_PLATFORMS_WINDOWS_LIBPANDABASE_CPU_AFFINITY_H
+#define PANDA_PLATFORMS_WINDOWS_LIBPANDABASE_CPU_AFFINITY_H
 
 namespace ark::os {
 using CpuSetType = unsigned long;
 }  // namespace ark::os
+
+#endif  // PANDA_PLATFORMS_WINDOWS_LIBPANDABASE_CPU_AFFINITY_H
