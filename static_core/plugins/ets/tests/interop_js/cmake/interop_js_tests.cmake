@@ -60,6 +60,7 @@ function(panda_ets_interop_js_gtest TARGET)
     panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
         ETS_SOURCES ${ARG_ETS_SOURCES}
         ETS_CONFIG ${ARG_ETS_CONFIG}
+        ETS_VERIFICATOR_ERRORS "ForLoopCorrectlyInitializedForAll"
     )
     add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
 

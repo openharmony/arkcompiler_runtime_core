@@ -758,7 +758,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         idx[0] = 0
         iteratorForEach((arr as Iterable<T>).iterator(), (x: T): void => {
             ret.push(fn(x, idx[0] as number))
-            idx[0] += 1
+            idx[0] = idx[0] + 1
         })
         return ret;
     }

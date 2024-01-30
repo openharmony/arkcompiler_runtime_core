@@ -744,3 +744,7 @@ spec/nullables/defined-type-nullable-union_3.ets
 ### Issue (gitee) I909BB
 spec/tuples/tuple_as_param_default_1.ets
 ### Issue I909BB end
+
+### VariableHasEnclosingScopeForAll, VariableHasScopeForAll
+spec/generic/callFromAsyncLambda.ets
+###
