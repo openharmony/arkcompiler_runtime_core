@@ -40,6 +40,8 @@ std/math/std_math_mod_double_double.ets
 std/math/std_math_rem_double_double.ets
 std/math/std_math_imul_float_float.ets
 ### Issue 11544 end
+### Issue 15134
+std/time/DateChangeTest.ets
 ### Issue 10874
 std/math/std_math_clz64_long.ets
 ### Issue 11712 begin
