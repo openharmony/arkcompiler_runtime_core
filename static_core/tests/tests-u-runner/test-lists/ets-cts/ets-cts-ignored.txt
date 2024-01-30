@@ -726,7 +726,6 @@
 
 # es2panda fails: panda#14062
 07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_1.ets
-07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_2.ets
 07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_6.ets
 07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_8.ets
 # end of es2panda fails

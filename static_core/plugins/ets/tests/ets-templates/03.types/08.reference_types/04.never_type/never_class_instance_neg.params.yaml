@@ -40,7 +40,7 @@ types:
           assert x.length == 10
 
     - use: |-
-          let x: never[] = [] as never[]
+          let x: never[] = [new never] as never[]
 
     - use: |-
           let x: never[] = [null, null, null]

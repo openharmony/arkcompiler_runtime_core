@@ -43,3 +43,6 @@ types:
           assert x === null
           x = undefined
           assert x === undefined
+
+    - use: |-
+          let x: never[] = [] as never[]
