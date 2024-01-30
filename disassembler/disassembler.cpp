@@ -1946,4 +1946,15 @@ std::vector<size_t> Disassembler::GetColumnNumber()
     return columnNumber;
 }
 
+std::vector<size_t> Disassembler::GetLineNumber()
+{
+    std::vector<size_t> lineNumber;
+    for (const auto &method_info : prog_info_.methods_info) {
+        for (const auto &line_number : method_info.second.line_number_table) {
+            lineNumber.push_back(line_number.line);
+        }
+    }
+    return lineNumber;
+}
+
 }  // namespace panda::disasm
