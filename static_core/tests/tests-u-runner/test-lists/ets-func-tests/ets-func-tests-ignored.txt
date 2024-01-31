@@ -739,3 +739,8 @@ std/core/std_core_string_String_codePointAt_number.ets
 spec/nullables/defined-type-nullable-union_2.ets
 spec/nullables/defined-type-nullable-union_3.ets
 ###
+
+## Tuples overloading issue(s)
+### Issue (gitee) I909BB
+spec/tuples/tuple_as_param_default_1.ets
+### Issue I909BB end
