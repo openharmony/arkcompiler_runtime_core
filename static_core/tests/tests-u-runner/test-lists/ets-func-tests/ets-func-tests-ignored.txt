@@ -789,3 +789,7 @@ spec/09.classes/constructor-inheritance/issue14720_4.ets
 spec/09.classes/constructor-inheritance/issue14720_5.ets
 spec/09.classes/constructor-inheritance/issue14720_6.ets
 ### Issue 14720 end
+
+## Issue 15553
+spec/functions/Issue-14273_0.ets
+spec/functions/Issue-14273_3.ets
