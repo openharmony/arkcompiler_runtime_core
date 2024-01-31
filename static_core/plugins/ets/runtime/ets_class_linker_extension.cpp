@@ -232,6 +232,9 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     if (!CacheClass(&typeapiParameterClass_, PARAMETER.data())) {
         return false;
     }
+    if (!CacheClass(&stringBuilderClass_, STRING_BUILDER.data())) {
+        return false;
+    }
 
     coroutine->SetPromiseClass(promiseClass_);
     // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields

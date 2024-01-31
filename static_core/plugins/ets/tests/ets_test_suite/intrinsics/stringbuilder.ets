@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,36 +36,51 @@ const n1: number = Number.MIN_VALUE
 const n2: number = 0.0
 const n3: number = Number.MAX_VALUE
 
+enum StringKind { Normal = 0, Empty = 1, Null = 2 };
+
+// This is a sort of String factory, which is capable to
+// generate Normal, Empty and Null strings.
+function getString(kind: StringKind)
+{
+    if (kind == StringKind.Normal) {
+        return new String("This is a normal string");
+    } else if (kind == StringKind.Empty) {
+        return new String("");
+    }
+    assert kind == StringKind.Null;
+    return nullString;
+}
+
 function main(): int {
     try {
         // =============== Test 1 ===============
-        let sb: StringBuilder = new StringBuilder(chArray);
-        sb.append(' ')
-          .append("abcΣΨΩ0123456789")
-          .append(' ')
-          .append(true)
-          .append(' ')
-          .append(false)
-          .append(' ')
-          .append(57 as byte)
-          .append(' ')
-          .append(127 as byte)
-          .append(' ')
-          .append(32767 as short)
-          .append(' ')
-          .append(128934675 as int)
-          .append(' ')
-          .append(701234987654321 as long)
-          .append(' ')
-          .append(emptyString)
-          .append(nullString);
+        let sb1: StringBuilder = new StringBuilder(chArray);
+        sb1.append(' ')
+           .append("abcΣΨΩ0123456789")
+           .append(' ')
+           .append(true)
+           .append(' ')
+           .append(false)
+           .append(' ')
+           .append(57 as byte)
+           .append(' ')
+           .append(127 as byte)
+           .append(' ')
+           .append(32767 as short)
+           .append(' ')
+           .append(128934675 as int)
+           .append(' ')
+           .append(701234987654321 as long)
+           .append(' ')
+           .append(emptyString)
+           .append(nullString);
 
-        const golden = "!@#$% abcΣΨΩ0123456789 true false 57 127 32767 128934675 701234987654321 null"
-        let actual: String = sb.toString();
-        if (actual != golden) {
+        const golden1 = "!@#$% abcΣΨΩ0123456789 true false 57 127 32767 128934675 701234987654321 null"
+        let actual1: String = sb1.toString();
+        if (actual1 != golden1) {
             console.println("FAIL");
-            console.println("Golden " + "(len=" + golden.getLength() + ")" + ": " + golden);
-            console.println("Actual " + "(len=" + actual.getLength() + ")" + ": " + actual);
+            console.println("Golden " + "(len=" + golden1.getLength() + ")" + ": " + golden1);
+            console.println("Actual " + "(len=" + actual1.getLength() + ")" + ": " + actual1);
             return 1;
         }
 
@@ -98,21 +113,53 @@ function main(): int {
         // =============== Test 4 ===============
         // An element of array may be changed after StringBuilder is constructed from the array.
         // So StringBuilder must add a copy of the array to the buffer.
-        let arr: char[] = new char[3];
-        arr[0] = c'a';
-        arr[1] = c'b';
-        arr[2] = c'c';
-        let sb2: StringBuilder = new StringBuilder(arr);
-        arr[1] = c'β';
-        if (sb2.toString() != "abc") {
+        let arr4: char[] = new char[3];
+        arr4[0] = c'a';
+        arr4[1] = c'b';
+        arr4[2] = c'c';
+        let sb4: StringBuilder = new StringBuilder(arr4);
+        arr4[1] = c'β';
+        if (sb4.toString() != "abc") {
             console.println("FAIL");
             return 4;
         }
+
+        // =============== Test 5 ===============
+        // Test Codegen implementation of StringBuilder.append(String).
+        // The test try to cover all the cases encoded by Codegen::CreateStringBuilderAppendString.
+        const golden5: String = "abcΣΨΩ0123456789 | This is a normal string |  | null | null"
+        // Local Null String to test IsNullPtr() branch of CreateStringBuilderAppendString.
+        let nullString5: String;
+        let sb5: StringBuilder = new StringBuilder();
+        sb5.append("abcΣΨΩ0123456789").append(" | ")
+          .append(getString(StringKind.Normal)).append(" | ")
+          .append(getString(StringKind.Empty)).append(" | ")
+          .append(getString(StringKind.Null)).append(" | ")
+          .append(nullString5);
+        if (golden5 != sb5.toString()) {
+            console.println("FAIL");
+            console.println("Golden string: " + golden5);
+            console.println("Actual string: " + sb5.toString());
+            return 5;
+        }
+
+        // =============== Test 6 ===============
+        // Test Codegen implementation of StringBuilder.append(String).
+        // String.join() make use of StingBuilder.append(String)
+        const golden6: String = "|pRef|AbCd|SUF|:|pRef|Xtt|SUF|:|pRef|G|SUF|";
+        let actual6: String = String.join(["AbCd", "Xtt", "G"], ":", "|pRef|", "|SUF|");
+        if (!actual6.equals(golden6 as Object)) {
+            console.println("FAIL");
+            console.println("Golden string: " + golden6);
+            console.println("Actual string: " + actual6);
+            return 6;
+        }
+
     } catch(e) {
+        console.println(e);
         console.println("FAIL");
         return 127;
     }
-
     console.println("PASS");
     return 0;
 }

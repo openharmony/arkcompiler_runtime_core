@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -241,7 +241,12 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
 {
     auto graph = static_cast<LocationsBuilder *>(visitor)->GetGraph();
     auto intrinsic = inst->CastToIntrinsic();
-    if (intrinsic->IsNativeCall() || IntrinsicNeedsParamLocations(intrinsic->GetIntrinsicId())) {
+    auto id = intrinsic->GetIntrinsicId();
+    if (graph->GetRuntime()->IsIntrinsicStringBuilderAppendString(id)) {
+        // Needs an additional temp register to pass a buffer's slot address to CreatePreWRB
+        inst->SetFlag(inst_flags::REQUIRE_TMP);
+    }
+    if (intrinsic->IsNativeCall() || IntrinsicNeedsParamLocations(id)) {
         auto pinfo = static_cast<LocationsBuilder *>(visitor)->GetResetParameterInfo();
         if (intrinsic->IsMethodFirstInput()) {
             pinfo->GetNextLocation(GetWordType());
@@ -252,14 +257,13 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
             }
         }
         size_t explicitArgs;
-        if (IsStackRangeIntrinsic(intrinsic->GetIntrinsicId(), &explicitArgs)) {
+        if (IsStackRangeIntrinsic(id, &explicitArgs)) {
             static_cast<LocationsBuilder *>(visitor)->ProcessManagedCallStackRange(inst, explicitArgs, pinfo);
         } else {
             static_cast<LocationsBuilder *>(visitor)->ProcessManagedCall(inst, pinfo);
         }
         return;
     }
-
     ArenaAllocator *allocator = static_cast<LocationsBuilder *>(visitor)->GetGraph()->GetAllocator();
     LocationsInfo *locations = allocator->New<LocationsInfo>(allocator, inst);
     auto inputsCount = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);

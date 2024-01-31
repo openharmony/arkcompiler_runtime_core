@@ -102,6 +102,11 @@ EtsClass *EtsClassLinker::GetArrayBufferClass()
     return EtsClass::FromRuntimeClass(ext_->GetArrayBufferClass());
 }
 
+EtsClass *EtsClassLinker::GetStringBuilderClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetStringBuilderClass());
+}
+
 EtsClass *EtsClassLinker::GetSharedMemoryClass()
 {
     return EtsClass::FromRuntimeClass(ext_->GetSharedMemoryClass());

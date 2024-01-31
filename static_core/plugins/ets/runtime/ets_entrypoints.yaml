@@ -237,3 +237,21 @@
     - ark::ObjectHeader*  # string builder
     - uint8_t             # boolean
     - ark::ObjectHeader*  # array class pointer
+
+- name: StringBuilderAppendStringSlowPath
+  entrypoint: StringBuilderAppendStringEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string class pointer
+
+- name: StringBuilderAppendNullStringSlowPath
+  entrypoint: StringBuilderAppendNullStringEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder

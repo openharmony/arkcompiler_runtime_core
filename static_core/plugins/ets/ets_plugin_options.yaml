@@ -37,6 +37,9 @@
         ir_build_inl_h: plugins/ets/compiler/intrinsics_ir_build_ets.inl.h
         intrinsics_peephole_inl_h: plugins/ets/compiler/intrinsics_peephole_ets.inl.h
 
+      Tests:
+        inst_generator_test: plugins/ets/tests/compiler/inst_generator_test_ext.inc
+
       Disasm:
         language_interface_path: plugins/ets/disassembler/disasm_ets_plugin.inc
 

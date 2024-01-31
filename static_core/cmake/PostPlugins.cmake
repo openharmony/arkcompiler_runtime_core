@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -62,6 +62,7 @@ include(libpandafile/LibpandafilePostPlugins.cmake)
 include(compiler/CompilerInstTemplatesPostPlugins.cmake)
 include(compiler/CompilerIntrinsicsPostPlugins.cmake)
 include(compiler/CompilerOptionsPostPlugins.cmake)
+include(compiler/CompilerInstTestPostPlugins.cmake)
 include(disassembler/DisassemblerPostPlugins.cmake)
 include(isa/IsaPostPlugins.cmake)
 include(irtoc/templates/IrtocPostPlugins.cmake)

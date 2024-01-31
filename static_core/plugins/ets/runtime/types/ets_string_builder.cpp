@@ -213,6 +213,17 @@ static inline EtsCharArray *LongToCharArray(EtsLong v)
     return arr;
 }
 
+ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb)
+{
+    ASSERT(sb != nullptr);
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    // May trigger GC
+    EtsCharArray *arr = NullToCharArray();
+    return AppendCharArrayToBuffer<false>(sbHandle, arr);
+}
+
 /**
  * Implementation of public native append(s: String): StringBuilder.
  * Inserts the string 's' into a free buffer slot:
@@ -230,12 +241,7 @@ ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str)
     ASSERT(sb != nullptr);
 
     if (str == nullptr) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-        VMHandle<EtsObject> sbHandle(coroutine, sb);
-        // May trigger GC
-        EtsCharArray *arr = NullToCharArray();
-        return AppendCharArrayToBuffer<false>(sbHandle, arr);
+        return StringBuilderAppendNullString(sb);
     }
     if (str->GetLength() == 0) {
         return sb;

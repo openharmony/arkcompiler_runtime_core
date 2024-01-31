@@ -136,9 +136,32 @@ bool HasTryBlockBetween(Inst *dominateInst, Inst *inst)
     return FindBlockBetween<IsTryBlock>(dominateInst->GetBasicBlock(), bb, marker.GetMarker());
 }
 
+bool IsSbAppendStringIntrinsic(Inst *inst)
+{
+    if (UNLIKELY(!inst->IsIntrinsic())) {
+        return false;
+    }
+    auto id = inst->CastToIntrinsic()->GetIntrinsicId();
+    return inst->GetBasicBlock()->GetGraph()->GetRuntime()->IsIntrinsicStringBuilderAppendString(id);
+}
+
+Inst *IntrinsicStoredValue(Inst *inst)
+{
+    ASSERT(inst->IsIntrinsic());
+    if (IsSbAppendStringIntrinsic(inst)) {
+        // input 0 - StringBuilder reference
+        // input 1 - String reference to be stored
+        return inst->GetInput(1).GetInst();
+    }
+    UNREACHABLE();
+    return nullptr;
+}
+
 Inst *InstStoredValue(Inst *inst, Inst **secondValue)
 {
-    ASSERT_PRINT(inst->IsStore(), "Attempt to take a stored value on non-store instruction");
+    ASSERT_PRINT(inst->IsStore() || IsSbAppendStringIntrinsic(inst),
+                 "Attempt to take a stored value on non-store instruction");
+
     Inst *val = nullptr;
     *secondValue = nullptr;
     switch (inst->GetOpcode()) {
@@ -170,6 +193,10 @@ Inst *InstStoredValue(Inst *inst, Inst **secondValue)
             val = inst->GetInput(1).GetInst();
             auto secondInst = inst->GetInput(2).GetInst();
             *secondValue = inst->GetDataFlowInput(secondInst);
+            break;
+        }
+        case Opcode::Intrinsic: {
+            val = IntrinsicStoredValue(inst);
             break;
         }
         case Opcode::FillConstArray: {

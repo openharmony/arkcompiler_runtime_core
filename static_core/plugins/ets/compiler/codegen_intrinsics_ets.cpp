@@ -14,6 +14,9 @@
  */
 #include "operands.h"
 #include "codegen.h"
+#include "compiler/optimizer/ir/analysis.h"
+#include "runtime/include/coretypes/string.h"
+#include "runtime/include/coretypes/array.h"
 
 namespace ark::compiler {
 
@@ -42,6 +45,26 @@ public:
     Reg Value() const
     {
         return value_;
+    }
+    bool DstCanBeUsedAsTemp() const
+    {
+        return (dst_.GetId() != builder_.GetId() && dst_.GetId() != value_.GetId());
+    }
+    MemRef SbBufferAddr() const
+    {
+        return MemRef(builder_, RuntimeInterface::GetSbBufferOffset());
+    }
+    MemRef SbIndexAddr() const
+    {
+        return MemRef(builder_, RuntimeInterface::GetSbIndexOffset());
+    }
+    MemRef SbCompressAddr() const
+    {
+        return MemRef(builder_, RuntimeInterface::GetSbCompressOffset());
+    }
+    MemRef SbLengthAddr() const
+    {
+        return MemRef(builder_, RuntimeInterface::GetSbLengthOffset());
     }
 };
 
@@ -145,6 +168,132 @@ void Codegen::CreateStringBuilderAppendBool(IntrinsicInst *inst, Reg dst, SRCREG
 {
     SbAppendArgs args(dst, src[FIRST_OPERAND], src[SECOND_OPERAND]);
     GenerateSbAppendCall(this, inst, args, EntrypointId::STRING_BUILDER_APPEND_BOOL);
+}
+
+static inline void EncodeSbAppendNullString(Codegen *cg, IntrinsicInst *inst, Reg dst, Reg builder)
+{
+    auto entrypoint = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_NULL_STRING_SLOW_PATH;
+    cg->CallRuntime(inst, entrypoint, dst, {}, builder);
+}
+
+static inline void EncodeSbInsertStringIntoSlot(Codegen *cg, IntrinsicInst *inst, Reg slot, SbAppendArgs args)
+{
+    ASSERT(slot.IsValid());
+    auto slotMemRef = MemRef(slot.As(Codegen::ConvertDataType(DataType::REFERENCE, cg->GetArch())));
+    RegMask preserved(MakeMask(args.Builder().GetId(), args.Value().GetId(), slot.GetId()));
+    cg->CreatePreWRB(inst, slotMemRef, preserved);
+    cg->GetEncoder()->EncodeStr(args.Value(), slotMemRef);
+    preserved.Reset(slot.GetId());
+    cg->CreatePostWRB(inst, slotMemRef, args.Value(), INVALID_REGISTER, preserved);
+}
+
+static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppendArgs &args,
+                                 LabelHolder::LabelId labelReturn, LabelHolder::LabelId labelSlowPath)
+{
+    auto *enc = cg->GetEncoder();
+    ScopedTmpReg tmp1(enc);
+    ScopedTmpRegLazy tmp2(enc, false);
+    auto reg0 = cg->ConvertInstTmpReg(inst, DataType::REFERENCE);
+    auto reg1 = tmp1.GetReg().As(INT32_TYPE);
+    auto reg2 = INVALID_REGISTER;
+    if (args.DstCanBeUsedAsTemp() && args.Dst().GetId() != reg0.GetId()) {
+        reg2 = args.Dst().As(INT32_TYPE);
+    } else {
+        tmp2.Acquire();
+        reg2 = tmp2.GetReg().As(INT32_TYPE);
+    }
+    auto labelInsertStringIntoSlot = enc->CreateLabel();
+    auto labelFastPathDone = enc->CreateLabel();
+    auto labelIncIndex = enc->CreateLabel();
+    // Jump to slowPath if buffer is full and needs to be reallocated
+    enc->EncodeLdr(reg0, false, args.SbBufferAddr());
+    enc->EncodeLdr(reg1, false, MemRef(reg0, coretypes::Array::GetLengthOffset()));
+    enc->EncodeLdr(reg2, false, args.SbIndexAddr());
+    enc->EncodeJump(labelSlowPath, reg2, reg1, Condition::HS);
+    // Compute an address of a free slot so as not to reload SbIndex again
+    enc->EncodeShl(reg1, reg2, Imm(compiler::DataType::ShiftByType(compiler::DataType::REFERENCE, cg->GetArch())));
+    enc->EncodeAdd(reg0, reg0, Imm(coretypes::Array::GetDataOffset()));
+    enc->EncodeAdd(reg0, reg0, reg1);
+    // Process string length and compression
+    enc->EncodeLdr(reg1, false, MemRef(args.Value(), ark::coretypes::STRING_LENGTH_OFFSET));
+    // Do nothing if length of string is equal to 0.
+    // The least significant bit indicates COMPRESSED/UNCOMPRESSED,
+    // thus if (unpacked length <= 1) then the actual length is equal to 0.
+    enc->EncodeJump(labelFastPathDone, reg1, Imm(1), Condition::LS);
+    // Skip setting 'compress' to false if the string is compressed.
+    enc->EncodeJumpTest(labelIncIndex, reg1, Imm(1), Condition::TST_EQ);
+    // Otherwise set 'compress' to false
+    enc->EncodeSti(0, 1, args.SbCompressAddr());
+    // Increment 'index' field
+    enc->BindLabel(labelIncIndex);
+    enc->EncodeAdd(reg2, reg2, Imm(1));
+    enc->EncodeStr(reg2, args.SbIndexAddr());
+    // Unpack length of string
+    enc->EncodeShr(reg1, reg1, Imm(1));
+    // Add length of string to the current length of StringBuilder
+    enc->EncodeLdr(reg2, false, args.SbLengthAddr());
+    enc->EncodeAdd(reg2, reg2, reg1);
+    enc->EncodeStr(reg2, args.SbLengthAddr());
+    // Insert the string into the slot:
+    // - reg0 contains an address of the slot
+    // - release temps for barriers
+    enc->BindLabel(labelInsertStringIntoSlot);
+    tmp1.Release();
+    tmp2.Release();
+    EncodeSbInsertStringIntoSlot(cg, inst, reg0, args);
+    // Return the reference to StringBuilder
+    enc->BindLabel(labelFastPathDone);
+    enc->EncodeMov(args.Dst(), args.Builder());
+    enc->EncodeJump(labelReturn);
+}
+
+void Codegen::CreateStringBuilderAppendString(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    using StringLengthType = std::result_of<decltype (&coretypes::String::GetLength)(coretypes::String)>::type;
+    static_assert(TypeInfo::GetScalarTypeBySize(sizeof(ark::ArraySizeT) * CHAR_BIT) == INT32_TYPE);
+    static_assert(TypeInfo::GetScalarTypeBySize(sizeof(StringLengthType) * CHAR_BIT) == INT32_TYPE);
+    ASSERT(GetArch() != Arch::AARCH32);
+
+    auto *enc = GetEncoder();
+    if (!IsCompressedStringsEnabled()) {
+        LOG(WARNING, COMPILER) << "String compression must be enabled";
+        enc->SetFalseResult();
+        return;
+    }
+    auto builder = src[FIRST_OPERAND];
+    auto *strInst = inst->GetInput(1).GetInst();
+    if (strInst->IsNullPtr()) {
+        EncodeSbAppendNullString(this, inst, dst, builder);
+        return;
+    }
+    auto labelReturn = enc->CreateLabel();
+    auto labelSlowPath = enc->CreateLabel();
+    auto str = src[SECOND_OPERAND];
+    if (IsInstNotNull(strInst)) {
+        EncodeSbAppendString(this, inst, SbAppendArgs(dst, builder, str), labelReturn, labelSlowPath);
+    } else {
+        auto labelStrNotNull = enc->CreateLabel();
+        enc->EncodeJump(labelStrNotNull, str, Condition::NE);
+        EncodeSbAppendNullString(this, inst, dst, builder);
+        enc->EncodeJump(labelReturn);
+        enc->BindLabel(labelStrNotNull);
+        EncodeSbAppendString(this, inst, SbAppendArgs(dst, builder, str), labelReturn, labelSlowPath);
+    }
+    // Slow path
+    static constexpr auto ENTRYPOINT_ID = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_STRING_SLOW_PATH;
+    enc->BindLabel(labelSlowPath);
+    if (GetGraph()->IsAotMode()) {
+        auto klassOffs = GetRuntime()->GetStringClassPointerTlsOffset(GetArch());
+        ScopedTmpReg klass(enc);
+        GetEncoder()->EncodeLdr(klass, false, MemRef(ThreadReg(), klassOffs));
+        CallRuntime(inst, ENTRYPOINT_ID, dst, {}, builder, str, klass);
+    } else {
+        auto klassPtr = GetRuntime()->GetStringClass(GetGraph()->GetMethod());
+        auto klass = TypedImm(reinterpret_cast<uintptr_t>(klassPtr));
+        CallRuntime(inst, ENTRYPOINT_ID, dst, {}, builder, str, klass);
+    }
+    // Return
+    enc->BindLabel(labelReturn);
 }
 
 }  // namespace ark::compiler
