@@ -27,6 +27,21 @@
     verify_test_result_function: comparePrimitiveValue,
   }
 - {
+    method_name: valueOf,
+    object_type: Boolean,
+    init_object_data_type: "boolean[]",
+    init_object_data: "[true, false]",
+    param_init_data_types: {} ,
+    param_types: {},
+    param_nature: {},
+    method_return_type: boolean,
+    expected_data_item_type: boolean,
+    expected_data_type: "boolean[]",
+    param_list: {},
+    expected_test_data: "[true, false]",
+    verify_test_result_function: comparePrimitiveValue,
+  }
+- {
     method_name: toString,
     object_type: Boolean,
     init_object_data_type: "boolean[]",
@@ -162,4 +177,4 @@
     verify_test_result_function: comparePrimitiveValue,
   }
 
-  
+

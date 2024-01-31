@@ -34,7 +34,21 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      * @param value value to construct class instance with
      */
     public constructor(value: boolean) {
-        this.value = value;
+        this.value = value
+    }
+
+
+    /**
+     * Constructs a new Boolean with provided value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: boolean | undefined) {
+        if (value == undefined) {
+            this.value = false
+        } else {
+            this.value = value!
+        }
     }
 
     /**
@@ -78,6 +92,16 @@ export final class Boolean extends Object implements Comparable<Boolean> {
         };
         return Boolean.FALSE;
     }
+
+    /**
+     * Returns the value of this instance as primitive
+     *
+     * @returns primitive boolean value
+     */
+    public valueOf(): boolean {
+        return this.value
+    }
+
 
     /**
      * Checks for equality this instance with provided object, treated as a Boolean
