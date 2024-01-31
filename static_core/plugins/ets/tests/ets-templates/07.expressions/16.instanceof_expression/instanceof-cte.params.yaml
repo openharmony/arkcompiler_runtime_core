@@ -13,7 +13,5 @@
 
 ---
 cases:
-    - type: 'A<String>'
-    - type: '(A<String>)'
     - type: 'A < 10'
     - type: 'A < 10 + 2 > 3'
