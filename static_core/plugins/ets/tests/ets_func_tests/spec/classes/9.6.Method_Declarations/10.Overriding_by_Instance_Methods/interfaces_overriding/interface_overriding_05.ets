@@ -15,24 +15,24 @@
 
 /*---
  desc: 10.06 Interface Method Declarations
- name: 10.interfaces/10.06.interface_method _declarations/10.06.02_inheritance_and_overriding/interface_overriding_03
- tags: [negative]
+ name: 10.interfaces/10.06.interface_method _declarations/10.06.02_inheritance_and_overriding/interface_overriding_05
+ tags: [negative, compile-only]
  ---*/
 
 interface A {
-  foo(): A
+  static foo(): A {}
 }
 
 interface AA extends A {
-  foo(): string
+  foo(): AA
 }
 
 class B implements AA {
   private value: string;
 
-  foo(): string {
-    this.value = "foo(): string"
-    return value;
+  foo(): AA {
+    this.value = "foo(): AA"
+    return new B();
   }
 
   getValue(): string {
@@ -43,7 +43,7 @@ class B implements AA {
 function main() {
   let b = new B()
   b.foo()
-  assert b.getValue() == "foo(): string"
+  assert b.getValue() == "foo(): AA"
 }
 
 

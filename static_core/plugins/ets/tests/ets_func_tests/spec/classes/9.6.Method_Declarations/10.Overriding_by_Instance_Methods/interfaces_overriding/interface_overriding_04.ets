@@ -16,7 +16,7 @@
 /*---
  desc: 10.06 Interface Method Declarations
  name: 10.interfaces/10.06.interface_method _declarations/10.06.02_inheritance_and_overriding/interface_overriding_04
- tags: [negative]
+ tags: []
  ---*/
 
 interface A {

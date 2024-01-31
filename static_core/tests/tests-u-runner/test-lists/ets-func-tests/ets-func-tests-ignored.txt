@@ -38,8 +38,6 @@ std/math/std_math_mod_double_double.ets
 std/math/std_math_rem_double_double.ets
 std/math/std_math_imul_float_float.ets
 ### Issue 11544 end
-### Issue 15134
-### std/time/DateChangeTest.ets
 ### Issue 10874
 std/math/std_math_clz64_long.ets
 ### Issue 12782 begin
@@ -718,6 +716,17 @@ spec/interfaces_overriding/interface_overriding_04.ets
 spec/interfaces_overriding/interface_overriding_05.ets
 spec/interfaces_overriding/interface_overriding_06.ets
 ### End of Interfaces overriding
+### Overriding issues
+### Issue 15571
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_01.ets
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_02.ets
+### Issue 15572
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
+### Isse 15201
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.ets
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.ets
+### End of Overriding
 ### Issue 15281
 spec/types/number_to_string_1.ets
 spec/types/number_to_string_2.ets

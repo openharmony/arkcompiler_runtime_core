@@ -15,35 +15,21 @@
 
 /*---
  desc: 10.06 Interface Method Declarations
- name: 10.interfaces/10.06.interface_method _declarations/10.06.02_inheritance_and_overriding/interface_overriding_05
- tags: [negative]
+ name: 10.interfaces/10.06.interface_method _declarations/10.06.02_inheritance_and_overriding/interface_overriding_07
+ tags: []
  ---*/
 
 interface A {
-  static foo(): A {}
+  set length(v: number)
 }
 
-interface AA extends A {
-  foo(): AA
-}
-
-class B implements AA {
-  private value: string;
-
-  foo(): AA {
-    this.value = "foo(): AA"
-    return new B();
-  }
-
-  getValue(): string {
-    return this.value;
-  }
+class C implements A {
+    set length(v: number) {
+        assert v == 5
+    }
 }
 
 function main() {
-  let b = new B()
-  b.foo()
-  assert b.getValue() == "foo(): AA"
+    const c: C = new C()
+    c.length = 5
 }
-
-

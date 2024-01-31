@@ -15,37 +15,23 @@
 
 /*---
  desc: 10.06 Interface Method Declarations
- name: 10.interfaces/10.06.interface_method _declarations/10.06.02_inheritance_and_overriding/interface_overriding_02
- tags: [negative]
+ name: 10.interfaces/10.06.interface_method _declarations/10.06.02_inheritance_and_overriding/interface_overriding_06
+ tags: []
  ---*/
 
-interface I {
-  foo(): I
-  
-  bar(): I
-}
-
-interface A extends I {
-  foo(): A
+interface A {
+  private foo(): A {}
 }
 
 interface AA extends A {
   foo(): AA
-
-  bar(): AA
 }
-
 
 class B implements AA {
   private value: string;
 
   foo(): AA {
     this.value = "foo(): AA"
-    return new B();
-  }
-
-  bar(): AA {
-    this.value = "bar(): AA"
     return new B();
   }
 
@@ -56,8 +42,6 @@ class B implements AA {
 
 function main() {
   let b = new B()
-  b.bar()
-  assert b.getValue() == "bar(): AA"
+  b.foo()
+  assert b.getValue() == "foo(): AA"
 }
-
-
