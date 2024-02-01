@@ -114,6 +114,29 @@ TEST_F(AccessingObjectsFieldsTest, GetTypeField)
     EXPECT_EQ(env_->GetIntField(aObj, aMemberId), static_cast<ets_int>(1));
 }
 
+struct ClassMembers {
+    ets_field member0;
+    ets_field member1;
+    ets_field member2;
+    ets_field member3;
+    ets_field member4;
+    ets_field member5;
+    ets_field member6;
+    ets_field member7;
+};
+
+static void SetterHelper(EtsEnv *env, ets_object obj, ClassMembers &members)
+{
+    env->SetBooleanField(obj, members.member0, static_cast<ets_boolean>(1));
+    env->SetByteField(obj, members.member1, static_cast<ets_byte>(1));
+    env->SetCharField(obj, members.member2, static_cast<ets_char>(1));
+    env->SetShortField(obj, members.member3, static_cast<ets_short>(1));
+    env->SetIntField(obj, members.member4, static_cast<ets_int>(1));
+    env->SetLongField(obj, members.member5, static_cast<ets_long>(1));
+    env->SetFloatField(obj, members.member6, static_cast<ets_float>(1.0F));
+    env->SetDoubleField(obj, members.member7, static_cast<ets_double>(1.0));
+}
+
 TEST_F(AccessingObjectsFieldsTest, SetTypeField)
 {
     ets_class cls = env_->FindClass("F");
@@ -151,14 +174,8 @@ TEST_F(AccessingObjectsFieldsTest, SetTypeField)
     ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
     ASSERT_NE(aMemberId, nullptr);
 
-    env_->SetBooleanField(obj, member0Id, static_cast<ets_boolean>(1));
-    env_->SetByteField(obj, member1Id, static_cast<ets_byte>(1));
-    env_->SetCharField(obj, member2Id, static_cast<ets_char>(1));
-    env_->SetShortField(obj, member3Id, static_cast<ets_short>(1));
-    env_->SetIntField(obj, member4Id, static_cast<ets_int>(1));
-    env_->SetLongField(obj, member5Id, static_cast<ets_long>(1));
-    env_->SetFloatField(obj, member6Id, static_cast<ets_float>(1.0F));
-    env_->SetDoubleField(obj, member7Id, static_cast<ets_double>(1.0));
+    ClassMembers members {member0Id, member1Id, member2Id, member3Id, member4Id, member5Id, member6Id, member7Id};
+    SetterHelper(env_, obj, members);
 
     env_->SetIntField(aObj, aMemberId, static_cast<ets_int>(5_I));
     env_->SetObjectField(obj, member8Id, aObj);
@@ -297,6 +314,45 @@ TEST_F(AccessingObjectsFieldsTest, SetStaticField)
     EXPECT_EQ(env_->GetStaticLongField(cls, member5Id), static_cast<ets_long>(50_I));
     EXPECT_FLOAT_EQ(env_->GetStaticFloatField(cls, member6Id), static_cast<ets_float>(60.0F));
     EXPECT_DOUBLE_EQ(env_->GetStaticDoubleField(cls, member7Id), static_cast<ets_double>(70.0F));
+
+    ets_object setAObj = env_->GetStaticObjectField(cls, member8Id);
+    ASSERT_NE(setAObj, nullptr);
+    EXPECT_EQ(env_->IsInstanceOf(setAObj, aCls), ETS_TRUE);
+    EXPECT_EQ(env_->GetIntField(setAObj, aMemberId), static_cast<ets_int>(5_I));
+}
+
+TEST_F(AccessingObjectsFieldsTest, SetStaticField2)
+{
+    ets_class cls = env_->FindClass("F_static");
+    ASSERT_NE(cls, nullptr);
+
+    ets_field member0Id = env_->GetStaticp_field(cls, "member0", "Z");
+    ASSERT_NE(member0Id, nullptr);
+    ets_field member1Id = env_->GetStaticp_field(cls, "member1", "B");
+    ASSERT_NE(member1Id, nullptr);
+    ets_field member2Id = env_->GetStaticp_field(cls, "member2", "C");
+    ASSERT_NE(member2Id, nullptr);
+    ets_field member3Id = env_->GetStaticp_field(cls, "member3", "S");
+    ASSERT_NE(member3Id, nullptr);
+    ets_field member4Id = env_->GetStaticp_field(cls, "member4", "I");
+    ASSERT_NE(member4Id, nullptr);
+    ets_field member5Id = env_->GetStaticp_field(cls, "member5", "J");
+    ASSERT_NE(member5Id, nullptr);
+    ets_field member6Id = env_->GetStaticp_field(cls, "member6", "F");
+    ASSERT_NE(member6Id, nullptr);
+    ets_field member7Id = env_->GetStaticp_field(cls, "member7", "D");
+    ASSERT_NE(member7Id, nullptr);
+    ets_field member8Id = env_->GetStaticp_field(cls, "member8", "LA;");
+    ASSERT_NE(member8Id, nullptr);
+
+    ets_class aCls = env_->FindClass("A");
+    ASSERT_NE(aCls, nullptr);
+    ets_field aMemberId = env_->Getp_field(aCls, "member", "I");
+    ASSERT_NE(aMemberId, nullptr);
+    ets_object aObj = env_->GetStaticObjectField(cls, member8Id);
+    ASSERT_NE(aObj, nullptr);
+
+    env_->SetIntField(aObj, aMemberId, static_cast<ets_int>(5_I));
 
     env_->SetStaticBooleanField(nullptr, member0Id, static_cast<ets_boolean>(1));
     env_->SetStaticByteField(nullptr, member1Id, static_cast<ets_byte>(10_I));

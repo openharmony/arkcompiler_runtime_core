@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_INVOKE_INTERFACE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_INVOKE_INTERFACE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_INVOKE_INTERFACE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_INVOKE_INTERFACE_H
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
 
@@ -25,4 +25,4 @@ const ETS_InvokeInterface *GetInvokeInterface();
 bool CheckVersionEtsNapi(ets_int version);
 }  // namespace panda::ets::napi
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_INVOKE_INTERFACE_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_INVOKE_INTERFACE_H

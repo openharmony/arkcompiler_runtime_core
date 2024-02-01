@@ -25,7 +25,6 @@
 }
 
 extern "C" {
-
 ETS_EXPORT ets_int ETS_CALL ETS_ETSGLOBAL_nativeInGlobal([[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class)
 {
     return 1;

@@ -268,15 +268,15 @@ public:
     bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, bool enableJit,
                        const std::string &pathAn = "")
     {
-        std::vector<EtsVMOption> options = {{EtsOptionType::EtsLogLevel, "info"},
-                                            {EtsOptionType::EtsBootFile, stdlibAbc.c_str()},
-                                            {EtsOptionType::EtsBootFile, pathAbc.c_str()},
-                                            {EtsOptionType::EtsArkFile, pathAbc.c_str()},
-                                            {EtsOptionType::EtsGcTriggerType, "heap-trigger"},
-                                            {enableJit ? EtsOptionType::EtsJit : EtsOptionType::EtsNoJit, nullptr}};
+        std::vector<EtsVMOption> options = {{EtsOptionType::ETS_LOG_LEVEL, "info"},
+                                            {EtsOptionType::ETS_BOOT_FILE, stdlibAbc.c_str()},
+                                            {EtsOptionType::ETS_BOOT_FILE, pathAbc.c_str()},
+                                            {EtsOptionType::ETS_ARK_FILE, pathAbc.c_str()},
+                                            {EtsOptionType::ETS_GC_TRIGGER_TYPE, "heap-trigger"},
+                                            {enableJit ? EtsOptionType::ETS_JIT : EtsOptionType::ETS_NO_JIT, nullptr}};
         if (!pathAn.empty()) {
-            options.emplace_back(EtsVMOption {EtsOptionType::EtsAot, nullptr});
-            options.emplace_back(EtsVMOption {EtsOptionType::EtsAotFile, pathAn.c_str()});
+            options.emplace_back(EtsVMOption {EtsOptionType::ETS_AOT, nullptr});
+            options.emplace_back(EtsVMOption {EtsOptionType::ETS_AOT_FILE, pathAn.c_str()});
         }
 
         EtsVMInitArgs args = {ETS_NAPI_VERSION_1_0, static_cast<ets_int>(options.size()), options.data()};

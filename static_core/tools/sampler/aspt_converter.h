@@ -66,6 +66,8 @@ public:
     static DumpType GetDumpTypeFromOptions(const Options &cliOptions);
 
 private:
+    void BuildMethodsMapHelper(const panda_file::File *pf, Span<const uint32_t> &classesSpan);
+
     SampleReader reader_;
 
     std::vector<FileInfo> modules_;

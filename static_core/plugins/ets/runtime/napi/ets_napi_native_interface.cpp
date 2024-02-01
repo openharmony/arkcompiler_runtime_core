@@ -330,7 +330,6 @@ static EtsClass *GetInternalClass(EtsEnv *env, ets_class cls, ScopedManagedCodeF
     EtsCoroutine *corutine = PandaEtsNapiEnv::ToPandaEtsEnv(env)->GetEtsCoroutine();
     EtsClassLinker *classLinker = corutine->GetPandaVM()->GetClassLinker();
     bool isInitialized = classLinker->InitializeClass(corutine, klass);
-
     if (!isInitialized) {
         LOG(ERROR, ETS_NAPI) << "Cannot initialize class: " << klass->GetDescriptor();
         return nullptr;
@@ -406,7 +405,10 @@ static void GetPrimitiveTypeArrayRegion(EtsEnv *env, ets_array array, ets_size s
         return;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    memcpy_s(buf, len * sizeof(T), internalArray->GetData<T>() + start, len * sizeof(T));
+    auto res = memcpy_s(buf, len * sizeof(T), internalArray->GetData<T>() + start, len * sizeof(T));
+    if (res != 0) {
+        UNREACHABLE();
+    }
 }
 
 template <typename T>
@@ -424,8 +426,13 @@ static void SetPrimitiveTypeArrayRegion(EtsEnv *env, ets_array array, ets_size s
         s.ThrowNewException(EtsNapiException::ARRAY_INDEX_OUT_OF_BOUNDS, ss.str().c_str());
         return;
     }
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    memcpy_s(internalArray->GetData<std::remove_const_t<T>>() + start, len * sizeof(T), buf, len * sizeof(T));
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto res =
+        memcpy_s(internalArray->GetData<std::remove_const_t<T>>() + start, len * sizeof(T), buf, len * sizeof(T));
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    if (res != 0) {
+        UNREACHABLE();
+    }
 }
 
 // ETS NAPI implementation
@@ -2601,17 +2608,17 @@ NO_UB_SANITIZE static ets_objectRefType GetObjectRefType(EtsEnv *env, ets_object
     ETS_NAPI_DEBUG_TRACE(env);
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     if (UNLIKELY(obj == nullptr || !s.IsValidRef(obj))) {
-        return EtsInvalidRefType;
+        return ETS_INVALID_REF_TYPE;
     }
 
     switch (mem::ReferenceStorage::GetObjectType(reinterpret_cast<panda::mem::Reference *>(obj))) {
         case panda::mem::Reference::ObjectType::GLOBAL:
-            return EtsGlobalRefType;
+            return ETS_GLOBAL_REF_TYPE;
         case panda::mem::Reference::ObjectType::WEAK:
-            return EtsWeakGlobalRefType;
+            return ETS_WEAK_GLOBAL_REF_TYPE;
         case panda::mem::Reference::ObjectType::LOCAL:
         case panda::mem::Reference::ObjectType::STACK:
-            return EtsLocalRefType;
+            return ETS_LOCAL_REF_TYPE;
         default:
             UNREACHABLE();
     }

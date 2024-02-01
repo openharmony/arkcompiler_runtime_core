@@ -80,6 +80,35 @@ TEST_F(MethodsTest, CallMethodsTestGeneral2)
     ASSERT_EQ(floatId, floatIdNoSig);
     ets_method doubleIdNoSig = env_->Getp_method(cls, "double_method", nullptr);
     ASSERT_EQ(doubleId, doubleIdNoSig);
+}
+
+TEST_F(MethodsTest, CallMethodsTestGeneral3)
+{
+    ets_class cls = env_->FindClass("C");
+    ASSERT_NE(cls, nullptr);
+    ets_object obj = env_->AllocObject(cls);
+    ASSERT_NE(obj, nullptr);
+
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ASSERT_NE(voidId, nullptr);
+    ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
+    ASSERT_NE(objectId, nullptr);
+    ets_method booleanId = env_->Getp_method(cls, "boolean_method", "ZI:Z");
+    ASSERT_NE(booleanId, nullptr);
+    ets_method byteId = env_->Getp_method(cls, "byte_method", "BI:B");
+    ASSERT_NE(byteId, nullptr);
+    ets_method charId = env_->Getp_method(cls, "char_method", "CI:C");
+    ASSERT_NE(charId, nullptr);
+    ets_method shortId = env_->Getp_method(cls, "short_method", "SI:S");
+    ASSERT_NE(shortId, nullptr);
+    ets_method intId = env_->Getp_method(cls, "int_method", ":I");
+    ASSERT_NE(intId, nullptr);
+    ets_method longId = env_->Getp_method(cls, "long_method", "JI:J");
+    ASSERT_NE(longId, nullptr);
+    ets_method floatId = env_->Getp_method(cls, "float_method", "FI:F");
+    ASSERT_NE(floatId, nullptr);
+    ets_method doubleId = env_->Getp_method(cls, "double_method", "DI:D");
+    ASSERT_NE(doubleId, nullptr);
 
     // Call<Type>Method part
     env_->CallVoidMethod(obj, voidId, static_cast<ets_int>(42_I), static_cast<ets_int>(121_I));
@@ -105,8 +134,28 @@ TEST_F(MethodsTest, CallMethodsTestGeneral2)
                     static_cast<ets_float>(0.0F));
     EXPECT_DOUBLE_EQ(env_->CallDoubleMethod(obj, doubleId, static_cast<ets_double>(1.0), static_cast<ets_int>(121_I)),
                      static_cast<ets_double>(0.0));
+}
 
-    // Call<Type>MethodArray part
+TEST_F(MethodsTest, CallMethodsTestGeneral4)
+{
+    ets_class cls = env_->FindClass("C");
+    ASSERT_NE(cls, nullptr);
+    ets_object obj = env_->AllocObject(cls);
+    ASSERT_NE(obj, nullptr);
+    ets_class aCls = env_->FindClass("A");
+    ASSERT_NE(aCls, nullptr);
+
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ASSERT_NE(voidId, nullptr);
+    ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
+    ASSERT_NE(objectId, nullptr);
+    ets_method booleanId = env_->Getp_method(cls, "boolean_method", "ZI:Z");
+    ASSERT_NE(booleanId, nullptr);
+    ets_method byteId = env_->Getp_method(cls, "byte_method", "BI:B");
+    ASSERT_NE(byteId, nullptr);
+    ets_method charId = env_->Getp_method(cls, "char_method", "CI:C");
+    ASSERT_NE(charId, nullptr);
+
     ets_value intTmp;
     intTmp.i = 121_I;
     ets_value tmp;
@@ -129,6 +178,32 @@ TEST_F(MethodsTest, CallMethodsTestGeneral2)
     tmp.c = static_cast<ets_char>(1);
     const std::vector<ets_value> charArgs = {tmp, intTmp};
     EXPECT_EQ(env_->CallCharMethodArray(obj, charId, charArgs.data()), static_cast<ets_char>(0));
+}
+
+TEST_F(MethodsTest, CallMethodsTestGeneral5)
+{
+    ets_class cls = env_->FindClass("C");
+    ASSERT_NE(cls, nullptr);
+    ets_object obj = env_->AllocObject(cls);
+    ASSERT_NE(obj, nullptr);
+    ets_class aCls = env_->FindClass("A");
+    ASSERT_NE(aCls, nullptr);
+
+    ets_method shortId = env_->Getp_method(cls, "short_method", "SI:S");
+    ASSERT_NE(shortId, nullptr);
+    ets_method intId = env_->Getp_method(cls, "int_method", ":I");
+    ASSERT_NE(intId, nullptr);
+    ets_method longId = env_->Getp_method(cls, "long_method", "JI:J");
+    ASSERT_NE(longId, nullptr);
+    ets_method floatId = env_->Getp_method(cls, "float_method", "FI:F");
+    ASSERT_NE(floatId, nullptr);
+    ets_method doubleId = env_->Getp_method(cls, "double_method", "DI:D");
+    ASSERT_NE(doubleId, nullptr);
+
+    // Call<Type>MethodArray part
+    ets_value intTmp;
+    intTmp.i = 121_I;
+    ets_value tmp;
 
     tmp.s = static_cast<ets_short>(1);
     const std::vector<ets_value> shortArgs = {tmp, intTmp};
@@ -147,6 +222,37 @@ TEST_F(MethodsTest, CallMethodsTestGeneral2)
     tmp.j = static_cast<ets_double>(1.0);
     const std::vector<ets_value> doubleArgs = {tmp, intTmp};
     EXPECT_DOUBLE_EQ(env_->CallDoubleMethodArray(obj, doubleId, doubleArgs.data()), static_cast<ets_double>(0.0));
+}
+
+TEST_F(MethodsTest, CallMethodsTestGeneral6)
+{
+    ets_class cls = env_->FindClass("C");
+    ASSERT_NE(cls, nullptr);
+    ets_object obj = env_->AllocObject(cls);
+    ASSERT_NE(obj, nullptr);
+    ets_class aCls = env_->FindClass("A");
+    ASSERT_NE(aCls, nullptr);
+
+    ets_method voidId = env_->Getp_method(cls, "void_method", "II:Lstd/core/void;");
+    ASSERT_NE(voidId, nullptr);
+    ets_method objectId = env_->Getp_method(cls, "object_method", ":LA;");
+    ASSERT_NE(objectId, nullptr);
+    ets_method booleanId = env_->Getp_method(cls, "boolean_method", "ZI:Z");
+    ASSERT_NE(booleanId, nullptr);
+    ets_method byteId = env_->Getp_method(cls, "byte_method", "BI:B");
+    ASSERT_NE(byteId, nullptr);
+    ets_method charId = env_->Getp_method(cls, "char_method", "CI:C");
+    ASSERT_NE(charId, nullptr);
+    ets_method shortId = env_->Getp_method(cls, "short_method", "SI:S");
+    ASSERT_NE(shortId, nullptr);
+    ets_method intId = env_->Getp_method(cls, "int_method", ":I");
+    ASSERT_NE(intId, nullptr);
+    ets_method longId = env_->Getp_method(cls, "long_method", "JI:J");
+    ASSERT_NE(longId, nullptr);
+    ets_method floatId = env_->Getp_method(cls, "float_method", "FI:F");
+    ASSERT_NE(floatId, nullptr);
+    ets_method doubleId = env_->Getp_method(cls, "double_method", "DI:D");
+    ASSERT_NE(doubleId, nullptr);
 
     // Call<type>MethodList part
     CallVoidMethodListHelper(env_, obj, voidId, static_cast<ets_int>(42_I), static_cast<ets_int>(121_I));
@@ -175,7 +281,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral2)
         static_cast<ets_double>(0.0));
 }
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath2)
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath3)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -216,7 +322,11 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath2)
         EXPECT_DEATH(CallNonvirtualFloatMethodListHelper(env_, nullptr, nullptr, nullptr, nullptr), "");
         EXPECT_DEATH(CallNonvirtualDoubleMethodListHelper(env_, nullptr, nullptr, nullptr, nullptr), "");
     }
+}
 
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath4)
+{
+    testing::FLAGS_gtest_death_test_style = "threadsafe";
     {
         ets_class dCls = env_->FindClass("D");
         ASSERT_NE(dCls, nullptr);

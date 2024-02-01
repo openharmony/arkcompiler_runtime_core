@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_TESTS_NATIVE_NATIVE_TEST_HELPER_H_
-#define PANDA_PLUGINS_ETS_TESTS_NATIVE_NATIVE_TEST_HELPER_H_
+#ifndef PANDA_PLUGINS_ETS_TESTS_NATIVE_NATIVE_TEST_HELPER_H
+#define PANDA_PLUGINS_ETS_TESTS_NATIVE_NATIVE_TEST_HELPER_H
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -68,15 +68,15 @@ protected:
 
         // clang-format off
         std::vector<EtsVMOption> optionsVector{
-            {EtsOptionType::EtsGcType, "epsilon"},
-            {EtsOptionType::EtsNoJit, nullptr},
-            {EtsOptionType::EtsBootFile, stdlib}
+            {EtsOptionType::ETS_GC_TYPE, "epsilon"},
+            {EtsOptionType::ETS_NO_JIT, nullptr},
+            {EtsOptionType::ETS_BOOT_FILE, stdlib}
         };
         // clang-format on
 
         abcPath_ = std::getenv("ARK_ETS_GTEST_ABC_PATH");
         if (abcPath_ != nullptr) {
-            optionsVector.push_back({EtsOptionType::EtsBootFile, abcPath_});
+            optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, abcPath_});
         }
 
         EtsVMInitArgs vmArgs;
@@ -101,4 +101,4 @@ protected:
 
 }  // namespace panda::ets::test
 
-#endif  // PANDA_PLUGINS_ETS_TESTS_NATIVE_NATIVE_TEST_HELPER_H_
+#endif  // PANDA_PLUGINS_ETS_TESTS_NATIVE_NATIVE_TEST_HELPER_H

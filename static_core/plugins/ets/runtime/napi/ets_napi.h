@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INTEROP_ETS_NAPI_H_
-#define PANDA_RUNTIME_INTEROP_ETS_NAPI_H_
+#ifndef PANDA_RUNTIME_INTEROP_ETS_NAPI_H
+#define PANDA_RUNTIME_INTEROP_ETS_NAPI_H
 
 // NOLINTBEGIN(modernize-use-using, readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 
@@ -146,10 +146,10 @@ typedef struct {
 
 // The object reference types
 typedef enum {
-    EtsInvalidRefType = 0,
-    EtsLocalRefType = 1,
-    EtsGlobalRefType = 2,
-    EtsWeakGlobalRefType = 3
+    ETS_INVALID_REF_TYPE = 0,
+    ETS_LOCAL_REF_TYPE = 1,
+    ETS_GLOBAL_REF_TYPE = 2,
+    ETS_WEAK_GLOBAL_REF_TYPE = 3
 } ets_objectRefType;
 
 #ifdef __cplusplus
@@ -442,19 +442,19 @@ struct ETS_NativeInterface {
 
 // Invocation API Functions
 typedef enum {
-    EtsLogLevel,
-    EtsMobileLog,
-    EtsBootFile,
-    EtsAotFile,
-    EtsArkFile,
-    EtsJit,
-    EtsNoJit,
-    EtsAot,
-    EtsNoAot,
-    EtsGcTriggerType,
-    EtsGcType,
-    EtsRunGcInPlace,
-    EtsInterpreterType
+    ETS_LOG_LEVEL,
+    ETS_MOBILE_LOG,
+    ETS_BOOT_FILE,
+    ETS_AOT_FILE,
+    ETS_ARK_FILE,
+    ETS_JIT,
+    ETS_NO_JIT,
+    ETS_AOT,
+    ETS_NO_AOT,
+    ETS_GC_TRIGGER_TYPE,
+    ETS_GC_TYPE,
+    ETS_RUN_GC_IN_PLACE,
+    ETS_INTERPRETER_TYPE
 } EtsOptionType;
 
 typedef struct EtsVMOption {
@@ -469,15 +469,15 @@ typedef struct EtsVMInitArgs {
 } EtsVMInitArgs;
 
 typedef enum {
-    EtsMobileLogLevelUnknown = 0,
-    EtsMobileLogLevelDefault,
-    EtsMobileLogLevelVerbose,
-    EtsMobileLogLevelDebug,
-    EtsMobileLogLevelInfo,
-    EtsMobileLogLevelWarn,
-    EtsMobileLogLevelError,
-    EtsMobileLogLevelFatal,
-    EtsMobileLogLevelSilent
+    ETS_MOBILE_LOG_LEVEL_UNKNOWN = 0,
+    ETS_MOBILE_LOG_LEVEL_DEFAULT,
+    ETS_MOBILE_LOG_LEVEL_VERBOSE,
+    ETS_MOBILE_LOG_LEVEL_DEBUG,
+    ETS_MOBILE_LOG_LEVEL_INFO,
+    ETS_MOBILE_LOG_LEVEL_WARN,
+    ETS_MOBILE_LOG_LEVEL_ERROR,
+    ETS_MOBILE_LOG_LEVEL_FATAL,
+    ETS_MOBILE_LOG_LEVEL_SILENT
 } EtsMobileLogggerLevel;
 
 #ifdef __cplusplus
@@ -1538,4 +1538,4 @@ struct __EtsEnv {
 
 // NOLINTEND(modernize-use-using, readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 
-#endif  // PANDA_RUNTIME_INTEROP_ETS_NAPI_H_
+#endif  // PANDA_RUNTIME_INTEROP_ETS_NAPI_H
