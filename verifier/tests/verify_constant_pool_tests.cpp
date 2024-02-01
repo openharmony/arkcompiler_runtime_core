@@ -194,7 +194,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
     unsigned char new_opcode = 0xff;
-    std::vector<unsigned char> opcode_imm8 = {0x4f, 0x17}; // The known instruction in the abc file
+    std::vector<unsigned char> opcode_imm8 = {0x4f, 0x13}; // The known instruction in the abc file
     for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
         if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
             buffer[i] = new_opcode;
@@ -233,7 +233,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
     unsigned char new_imm8 = 0x4f;
-    std::vector<unsigned char> opcode_imm8 = {0x4f, 0x17}; // The known jump instruction in the abc file
+    std::vector<unsigned char> opcode_imm8 = {0x4f, 0x13}; // The known jump instruction in the abc file
     for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
         if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
             buffer[i + 1] = new_imm8;
