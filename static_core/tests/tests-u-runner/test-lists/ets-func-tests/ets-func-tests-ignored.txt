@@ -39,7 +39,7 @@ std/math/std_math_rem_double_double.ets
 std/math/std_math_imul_float_float.ets
 ### Issue 11544 end
 ### Issue 15134
-std/time/DateChangeTest.ets
+### std/time/DateChangeTest.ets
 ### Issue 10874
 std/math/std_math_clz64_long.ets
 ### Issue 12782 begin
@@ -215,6 +215,12 @@ spec/enum/issue14633_1.ets
 ### End enum
 
 ### lambda issues begin
+### Issue 15579
+spec/lambda/issue15579_0.ets
+spec/lambda/issue15579_1.ets
+spec/lambda/issue15579_2.ets
+spec/lambda/issue15579_3.ets
+spec/lambda/issue15579_4.ets
 ### Issue 14054
 spec/lambda/callAsyncMethodFromAsyncLambda1.ets
 spec/lambda/callMethodFromAsyncLambda1.ets
