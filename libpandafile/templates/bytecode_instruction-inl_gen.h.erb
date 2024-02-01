@@ -244,7 +244,7 @@ ALWAYS_INLINE inline uint16_t BytecodeInst<Mode>::GetVReg(size_t idx /* = 0 */) 
 }
 
 template <const BytecodeInstMode Mode>
-template <typename BytecodeInst<Mode>::Format format, size_t idx /* = 0 */>
+template <typename BytecodeInst<Mode>::Format format, size_t idx /* = 0 */, bool is_signed /* = true */>
 inline auto BytecodeInst<Mode>::GetImm() const {  // NOLINTNEXTLINE(readability-function-size)
     static_assert(HasImm(format, idx), "Instruction doesn't have imm operand with such index");
 
@@ -262,7 +262,7 @@ inline auto BytecodeInst<Mode>::GetImm() const {  // NOLINTNEXTLINE(readability-
     if constexpr (format == Format::<%= fmt.pretty.upcase %>) {
         constexpr std::array<size_t, <%= n %>> OFFSETS{<%= offsets.join(", ") %>};
         constexpr std::array<size_t, <%= n %>> WIDTHS{<%= widths.join(", ") %>};
-        return Read<OFFSETS[idx], WIDTHS[idx], true>();
+        return Read<OFFSETS[idx], WIDTHS[idx], is_signed>();
     }
 
 % end
@@ -428,13 +428,31 @@ template<const BytecodeInstMode Mode> inline bool BytecodeInst<Mode>::CanThrow()
 template<const BytecodeInstMode Mode> std::ostream& operator<<(std::ostream& os, const BytecodeInst<Mode>& inst) {
     switch(inst.GetOpcode()) {
 % Panda::instructions.each do |inst|
+%   imm_count = 0
+%   reg_count = 0
+%   id_count = 0
     case BytecodeInst<Mode>::Opcode::<%= inst.opcode.upcase %>:
         os << "<%= inst.mnemonic %>";
 %   sep = " "
-%   inst.each_operand do |op, idx|
-%     op_str = "\"#{sep}v\" << inst.template GetVReg<BytecodeInst<Mode>::Format::#{inst.format.pretty.upcase}, #{idx}>()" if op.reg?
-%     op_str = "\"#{sep}\" << inst.template GetImm<BytecodeInst<Mode>::Format::#{inst.format.pretty.upcase}, #{idx}>()" if op.imm?
-%     op_str = "\"#{sep}id\" << inst.template GetId<BytecodeInst<Mode>::Format::#{inst.format.pretty.upcase}, #{idx}>()" if op.id?
+%   inst.operands.each do |op|
+%     if op.imm?
+%       if op.is_float_imm?
+%         op_str = "\"#{sep}\" << bit_cast<double>(inst.template GetImm<BytecodeInst<Mode>::Format::#{inst.format.pretty.upcase}, #{imm_count}, true>())";
+%       elsif op.is_unsigned_imm?
+%         op_str = "\"#{sep}\" << inst.template GetImm<BytecodeInst<Mode>::Format::#{inst.format.pretty.upcase}, #{imm_count}, false>()";
+%       elsif op.is_signed_imm?
+%         op_str = "\"#{sep}\" << inst.template GetImm<BytecodeInst<Mode>::Format::#{inst.format.pretty.upcase}, #{imm_count}, true>()";
+%       else
+%          raise "Incorrect imm type #{op.type}"
+%       end
+%       imm_count += 1
+%     elsif op.reg?
+%       op_str = "\"#{sep}v\" << inst.template GetVReg<BytecodeInst<Mode>::Format::#{inst.format.pretty.upcase}, #{reg_count}>()";
+%       reg_count += 1
+%     elsif op.id?
+%       op_str = "\"#{sep}id\" << inst.template GetId<BytecodeInst<Mode>::Format::#{inst.format.pretty.upcase}, #{id_count}>()";
+%       id_count += 1
+%     end
         os << <%= op_str %>;
 %     sep = ', '
 %   end

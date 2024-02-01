@@ -190,7 +190,7 @@ int64_t InstBuilder::GetInstructionJumpOffset(const BytecodeInstruction* inst) {
     // NOLINTNEXTLINE(bugprone-branch-clone)
     case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:
 %   if inst.jump?
-        return inst->GetImm<BytecodeInstruction::Format::<%= inst.format.pretty.upcase %>, 0>();
+        return inst->GetImm<BytecodeInstruction::Format::<%= inst.format.pretty.upcase %>, 0, true>();
 %   else
         return INVALID_OFFSET;
 %   end
@@ -291,7 +291,7 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
 %     end
 %     has_ic_slot = inst.properties.include?('ic_slot') || inst.properties.include?('jit_ic_slot')
 %     if is_range_call
-            size_t args_count = <%= num_inputs %>U + static_cast<size_t>(bc_inst->GetImm<<%= format %>, <%= has_ic_slot ? 1 : 0 %>>());
+            size_t args_count = <%= num_inputs %>U + static_cast<size_t>(bc_inst->GetImm<<%= format %>, <%= has_ic_slot ? 1 : 0 %>, false>());
 %     else
             size_t args_count {<%= num_inputs %>U};
 %     end
@@ -314,7 +314,7 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
             AddInstruction(inst_save_state);
 %     params_arr.each do |param|
 %       if param.imm?
-            auto imm<%= imm_index %> = static_cast<uint32_t>(bc_inst->GetImm<<%= format %>, <%= imm_index %>>());
+            auto imm<%= imm_index %> = static_cast<uint32_t>(bc_inst->GetImm<<%= format %>, <%= imm_index %>, false>());
             inst->AddImm(GetGraph()->GetAllocator(), imm<%= imm_index %>);
 %           imm_index = imm_index + 1
 %       elsif param.reg?

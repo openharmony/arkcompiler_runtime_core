@@ -245,7 +245,7 @@ public:
     template <Format format, size_t idx = 0>
     uint16_t GetVReg() const;
 
-    template <Format format, size_t idx = 0>
+    template <Format format, size_t idx = 0, bool is_signed = true>
     auto GetImm() const;
 
     BytecodeId GetId(size_t idx = 0) const;

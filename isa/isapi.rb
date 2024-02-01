@@ -360,6 +360,18 @@ class Operand
     @name == :imm
   end
 
+  def is_float_imm?
+    %i[f32 f64].include?(@type.to_sym)
+  end
+
+  def is_signed_imm?
+    %i[i8 i16 i32 i64].include?(@type.to_sym)
+  end
+
+  def is_unsigned_imm?
+    %i[u1 u2 u8 u16 u32 u64].include?(@type.to_sym)
+  end
+
   def id?
     %i[method_id type_id field_id string_id literalarray_id].include?(@name)
   end

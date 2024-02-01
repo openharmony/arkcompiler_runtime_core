@@ -167,10 +167,19 @@ host_unittest_action("DisasmScriptTest") {
   }
 }
 
+host_unittest_action("DisasmImmTest") {
+  module_out_path = module_output_path
+  sources = [ "disassembler_imm_tests.cpp" ]
+  include_dirs = disasm_include_dirs
+  configs = disasm_test_configs
+  deps = disasm_test_deps
+}
+
 group("host_unittest") {
   testonly = true
   deps = [
     ":DisasmDebugTestAction",
+    ":DisasmImmTestAction",
     ":DisasmModuleTestAction",
     ":DisasmScriptTestAction",
   ]
