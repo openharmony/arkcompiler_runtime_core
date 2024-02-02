@@ -172,7 +172,7 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
     private buffer: NullishType[]
     internal actualLength: int
 
-    public override at(index: number): T | undefined {
+    public at(index: number): T | undefined {
         let len = this.actualLength;
         let k: int;
         if (index >= 0) {
@@ -186,7 +186,7 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
         return this.$_get(k as number);
     }
 
-    public override $_get(index: number): T {
+    public $_get(index: number): T {
         if ((index as int  < 0) || (index as int >= this.actualLength)) {
             throw new RangeError("Out of bounds");
         }

@@ -757,7 +757,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         const idx = new int[1]
         idx[0] = 0
         iteratorForEach((arr as Iterable<T>).iterator(), (x: T): void => {
-            ret.push(fn(x, idx[0]))
+            ret.push(fn(x, idx[0] as number))
             idx[0] += 1
         })
         return ret;
@@ -1374,7 +1374,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         }
         let acc = this.$_get_unsafe(0)
         for(let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
@@ -1395,7 +1395,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         }
         let acc: T = this.$_get_unsafe(0)
         for(let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i)
+            acc = fn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
     }
@@ -1437,7 +1437,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
     public /* override */ reduce<U>(fn: (previousValue: U, currentValue: T, currentIndex: number, arr: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
         for(let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
@@ -1457,7 +1457,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
     public /* override */ reduce<U>(fn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U {
         let acc = initialValue
         for(let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i)
+            acc = fn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
     }
@@ -1499,7 +1499,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1)
         for(let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i, this)
+            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
@@ -1520,7 +1520,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1)
         for(let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i)
+            acc = fn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
     }
@@ -1582,7 +1582,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
     public /* override */ reduceRight<U>(fn: (a: U, b: T, index: number) => U, initVal: U): U {
         let acc = initVal
         for(let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i)
+            acc = fn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
     }
@@ -1626,7 +1626,7 @@ export final class Array<T> implements /* ReadonlyArray<T>, */ Iterable<T> {
      */
     public /* override */ forEach(fn: (a: T, index: number) => void): void {
         for(let i = 0; i < this.actualLength; i++) {
-            fn(this.$_get_unsafe(i), i)
+            fn(this.$_get_unsafe(i), i as number)
         }
     }
 

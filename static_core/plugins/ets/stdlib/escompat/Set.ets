@@ -291,7 +291,7 @@ export final class Set<K> implements ReadonlySet<K> {
      * @returns an iterable of [v,v] pairs for every value `v` in the set.
      */
     /* override */ entries(): IterableIterator<Entry<K, K>> {
-        return this.mappedIterator<Entry<K, K>>((x: ListNode): NullishType => {
+        return this.mappedIterator<Object>((x: ListNode): Object => {
             const v = x.val as K;
             return new Entry<K, K>(v, v)
         }) as IterableIterator<Entry<K, K>>
