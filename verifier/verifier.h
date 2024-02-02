@@ -65,7 +65,7 @@ private:
     bool CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id);
     bool VerifyMethodId(const uint32_t &method_id) const;
     bool VerifyLiteralId(const uint32_t &literal_id) const;
-    bool VerifyStringId(const uint32_t &literal_id) const;
+    bool VerifyStringId(const uint32_t &string_id) const;
     bool CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx);
     std::optional<int64_t> GetFirstImmFromInstruction(const BytecodeInstruction &bc_ins);
     std::optional<uint64_t> GetSlotNumberFromAnnotation(panda_file::MethodDataAccessor &method_accessor);
