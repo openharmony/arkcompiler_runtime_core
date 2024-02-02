@@ -61,7 +61,7 @@ export class Atomics {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray.at(indexedPosition)
+            let oldValue = typedArray[indexedPosition] as byte
             let newValue = (oldValue + value) as byte
             typedArray.set(indexedPosition, newValue)
             return oldValue
@@ -75,7 +75,7 @@ export class Atomics {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray.at(indexedPosition)
+            let oldValue = typedArray[indexedPosition] as byte
             let newValue = (oldValue & value) as byte
             typedArray.set(indexedPosition, newValue)
             return oldValue
@@ -89,7 +89,7 @@ export class Atomics {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray.at(indexedPosition)
+            let oldValue = typedArray[indexedPosition] as byte
             if (oldValue == expectedValue) {
                 typedArray.set(indexedPosition, replacementValue)
             }
@@ -104,7 +104,7 @@ export class Atomics {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray.at(indexedPosition)
+            let oldValue = typedArray[indexedPosition] as byte
             typedArray.set(indexedPosition, value)
             return oldValue
         } else {
@@ -117,7 +117,7 @@ export class Atomics {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
-            return typedArray.at(indexedPosition)
+            return typedArray[indexedPosition] as byte
         } else {
             let mem = (buffer as SharedArrayBuffer).getSharedMemory()
             return mem.atomicLoadI8(indexedPosition)
@@ -128,7 +128,7 @@ export class Atomics {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray.at(indexedPosition)
+            let oldValue = typedArray[indexedPosition] as byte
             let newValue = (oldValue + value) as byte
             typedArray.set(indexedPosition, newValue)
             return oldValue
@@ -154,7 +154,7 @@ export class Atomics {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray.at(indexedPosition)
+            let oldValue = typedArray[indexedPosition] as byte
             let newValue = (oldValue - value) as byte
             typedArray.set(indexedPosition, newValue)
             return oldValue
@@ -168,7 +168,7 @@ export class Atomics {
         let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
         let buffer = typedArray.buffer
         if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray.at(indexedPosition)
+            let oldValue = typedArray[indexedPosition] as byte
             let newValue = (oldValue ^ value) as byte
             typedArray.set(indexedPosition, newValue)
             return oldValue

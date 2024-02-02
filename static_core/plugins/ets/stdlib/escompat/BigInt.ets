@@ -99,8 +99,24 @@ export class BigInt {
         this.sign = bigint.sign;
     }
 
+    internal static fromULong(val: long): BigInt {
+        // NOTE (ikorobkov): needs to check by tests
+        // let a: long = (val >> 63) & 1
+        // a = a << 63
+        // let b = val & 0x7fffffffffffffff
+        // let c = a + b
+        // return new BigInt(c)
+        return new BigInt(0 as number)
+    }
+
+    internal getULong(): long {
+        const s = "BigInt.getULong: not implemented"
+        return 0
+    }
+
     internal getLong(): long {
-        throw new Error("BigInt.getLong: not implemented")
+        const s = "BigInt.getLong: not implemented"
+        return 0
     }
 
     public equals(to: BigInt): boolean {

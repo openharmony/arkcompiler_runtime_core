@@ -492,6 +492,9 @@ export final class ClassValue extends Value {
         let res = new StringBuilder("{")
         for (let i = 0; i < fnum; i++) {
             const f = this.typ.getField(i)
+            if (f.isStatic()) {
+                continue
+            }
             const fv = this.getField(i)
             res.append(f.getName())
             res.append(": ")

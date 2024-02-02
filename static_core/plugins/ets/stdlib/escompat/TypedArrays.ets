@@ -17,17 +17,74 @@
 
 package escompat;
 
+class Int8ArrayIteratorKeys implements IterableIterator<Number> {
+    private length: int
+    private idx: int = 0
+
+    constructor(parent: Int8Array) {
+        this.length = parent.length as int
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.length) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.idx++))
+    }
+}
+
+class Int8ArrayIterator implements IterableIterator<Number> {
+    private parent: Int8Array
+    private idx: int = 0
+
+    constructor(parent: Int8Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
+    }
+}
+
+
 /**
  * JS Int8Array API-compatible class
  */
-export final class Int8Array {
-    public static readonly BYTES_PER_ELEMENT : number = 1
+export final class Int8Array implements Iterable<Number> {
+    public static readonly BYTES_PER_ELEMENT: number = 1
 
     /**
      * Creates an empty Int8Array.
      */
     public constructor() {
-        this(new ArrayBuffer(0), 0, 0)
+        this(0 as int)
+    }
+
+    /**
+     * Creates an Int8Array with respect to data accessed via Iterable<Number> interface
+     */
+    public constructor(elements: Iterable<Number>) {
+        // NOTE (ikorobkov): dealing with this overload is tricky
+        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+        let arr = Array.from<Number>(elements)
+        this.byteLength = arr.length * Int8Array.BYTES_PER_ELEMENT as int
+        this.length = arr.length
+        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.byteOffset = 0
+        for (let i: int = 0; i < this.length as int; ++i) {
+            this.$_set(i, arr.at(i)!.byteValue())
+        }
     }
 
     /**
@@ -39,45 +96,98 @@ export final class Int8Array {
      *
      * @param length size of elements of type byte in newly created Int8Array
      */
-    public constructor(buf: Buffer, byteOffset: number, length: number) {
-        this(buf, byteOffset as int, length as int)
-    }
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+        let intByteOffset: int = 0
+        if (byteOffset != undefined) {
+            intByteOffset = byteOffset!.intValue()
+            if (intByteOffset < 0) {
+                throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
+            }
+        }
+        let intByteLength: int
+        if (buf instanceof ArrayBuffer) {
+            intByteLength = (buf as ArrayBuffer).getByteLength()
+        } else if (buf instanceof SharedArrayBuffer) {
+            intByteLength = (buf as SharedArrayBuffer).getByteLength()
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        intByteLength = intByteLength - intByteOffset
+        if (intByteLength < 0) {
+            throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+        }
 
-    /**
-     * Creates an Int8Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type byte in newly created Int8Array
-     */
-    public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Int8Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
+        let intLength: int
+        if (length != undefined) {
+            intLength = length!.intValue()
+            if (intLength > intByteLength / Int8Array.BYTES_PER_ELEMENT as int) {
+                throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+            }
+        } else {
+            intLength = intByteLength / Int8Array.BYTES_PER_ELEMENT as int
         }
-        if (byteOffset % Int8Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("byteOffset should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
+        if (intLength < 0) {
+            throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
         }
-
-        if (this.length as int * Int8Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
-            throw new RangeError("Range Error: attempt to create Int8Array where length * Int8Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
+        if (intLength < intByteLength / Int8Array.BYTES_PER_ELEMENT as int) {
+            intByteLength = intLength * Int8Array.BYTES_PER_ELEMENT as int
         }
-        this.byteLength = buf.getByteLength() - byteOffset
-        this.byteOffset = byteOffset
-        this.length = length
+        this.byteLength = intByteLength
+        this.byteOffset = intByteOffset
+        this.length = intLength
         this.buffer = buf
     }
 
     /**
-     * Creates an Int8Array with respect to buf and byteOffset.
+     * Creates an Int8Array with respect to data, byteOffset and length.
      *
      * @param buf data initializer
      *
      * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type byte in newly created Int8Array
      */
-    public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Int8Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+        this(buf, byteOffset, undefined)
+    }
+
+    /**
+     * Creates an Int8Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type byte in newly created Int8Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Int8Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type byte in newly created Int8Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+        this(buf, new Number(byteOffset), undefined)
+    }
+
+    /**
+     * Creates an Int8Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type byte in newly created Int8Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -87,8 +197,8 @@ export final class Int8Array {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: Buffer, byteOffset: number) {
-        this(buf, byteOffset as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
     }
 
     /**
@@ -96,8 +206,37 @@ export final class Int8Array {
      *
      * @param buf data initializer
      */
-    public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Int8Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+        if (buf instanceof ArrayBuffer) {
+            this.byteLength = (buf as ArrayBuffer).getByteLength()
+            if (this.byteLength % Int8Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Int8Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as ArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof SharedArrayBuffer) {
+            this.byteLength = (buf as SharedArrayBuffer).getByteLength();
+            if (this.byteLength % Int8Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 1 as Int8Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Int8Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as SharedArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof ArrayLike) {
+            // NOTE (ikorobkov): dealing with this overload is tricky
+            // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+            let arr = Array.from<Number>((buf as ArrayLike<Number>))
+            this.byteLength = arr.length as int * Int8Array.BYTES_PER_ELEMENT as int
+            this.length = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.length as int; ++i) {
+                this.$_set(i, arr.$_get(i).byteValue())
+            }
+        } else {
+            throw new Error("unexpected type of buf")
+        }
     }
 
     /**
@@ -106,10 +245,13 @@ export final class Int8Array {
      * @param length data initializer
      */
     public constructor(length: int) {
+        if (length < 0) {
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
+        }
         this.length = length
         this.byteLength = length * Int8Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength)
+        this.buffer = new ArrayBuffer(this.byteLength as int)
     }
 
     /**
@@ -127,9 +269,145 @@ export final class Int8Array {
      * @param other data initializer
      */
     public constructor(other: Int8Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
+        if (other.buffer instanceof ArrayBuffer) {
+            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+        } else if (other.buffer instanceof SharedArrayBuffer) {
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
         this.byteLength = other.byteLength
         this.length = other.length
+        this.byteOffset = 0
+    }
+
+    
+    internal zeroIfInfinity(val: number): number {
+        if ((val == Infinity) || (val == -Infinity)) {
+            return 0 as number
+        }
+        return val as number
+    }
+
+    internal zeroIfInfinity(val: byte): byte {
+        if ((val == Infinity) || (val == -Infinity)) {
+            return 0 as byte
+        }
+        return val
+    }
+    
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: number): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: number): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val)
+        this.setUnsafe(index, v as byte)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val as byte)
+        this.setUnsafe(index, v as byte)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: byte): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: byte): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val)
+        this.setUnsafe(index, v)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: number): number {
+        this.$_get(index as int)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: int): number {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        return this.getUnsafe(index) as number
+    }
+
+    
+    /**
+     * Returns an instance of primitive type at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public at(index: number): Number | undefined {
+        return this.at(index as int)
     }
 
     /**
@@ -139,28 +417,20 @@ export final class Int8Array {
      *
      * @returns a primitive at index
      */
-    public at(index: number): number {
-        return this.at(index as int) as double as number
-    }
-
-    /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: int): byte {
-        if (index < 0) {
-            index = this.length as int + index
+    public at(index: int): Number | undefined {
+        if ((index == Infinity as int) || (index == -Infinity as int)) {
+            return undefined
         }
-        let byteIndex = index * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res: byte = 0
-        for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = this.buffer.at(byteIndex as int + i) as byte
-            res = (res | byteVal << (8 * i)) as byte;
+        let k: int;
+        if (index >= 0) {
+            k = index;
+        } else {
+            k = this.length as int + index
         }
-        return res
+        if (k < 0 || k >= this.length as int) {
+            return undefined
+        }
+        return new Number(this.getUnsafe(k))
     }
 
     /**
@@ -224,7 +494,7 @@ export final class Int8Array {
         }
 
         for (let i = startPos; i < endPos; ++i) {
-            this.set(insertPos + i - startPos, this.at(i))
+            this.set(insertPos + i - startPos, this.getUnsafe(i))
         }
     }
 
@@ -289,7 +559,7 @@ export final class Int8Array {
      * @returns modified Int8Array
      */
     public fill(value: number, start: number, end: number): Int8Array {
-        return this.fill(value as double as int as byte, start as int, end as int)
+        return this.fill(value as byte, start as int, end as int)
     }
 
     /**
@@ -332,7 +602,7 @@ export final class Int8Array {
      * @returns modified Int8Array
      */
     public fill(value: number, start: number): Int8Array {
-        return this.fill(value as double as int as byte, start as int)
+        return this.fill(value as byte, start as int)
     }
 
     /**
@@ -366,7 +636,7 @@ export final class Int8Array {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.set(insertPos as int, val as double as int as byte)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -378,16 +648,7 @@ export final class Int8Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: byte): void {
-        if (insertPos < 0 || insertPos >= this.length as int) {
-            throw new RangeError("set: insertPos is out-of-bounds")
-        }
-
-        let startByte = insertPos * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let bits = val;
-        for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-            this.buffer.set(startByte + i, byteVal)
-        }
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -401,7 +662,8 @@ export final class Int8Array {
      */
     public set(arr: number[], insertPos: number): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos as int + i, arr[i] as double as int as byte)
+            let v = this.zeroIfInfinity(arr[i])
+            this.setUnsafe(insertPos as int + i, v as byte)
         }
     }
 
@@ -416,11 +678,12 @@ export final class Int8Array {
      */
     public set(arr: byte[], insertPos: int): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos + i, arr[i])
+            let v = this.zeroIfInfinity(arr[i])
+            this.setUnsafe(insertPos + i, v)
         }
     }
 
-
+    
     /**
      * Copies all elements of arr to the current Int8Array.
      *
@@ -474,8 +737,11 @@ export final class Int8Array {
      *
      * @returns true if e is in Int8Array, false otherwise
      */
-    public includes(e: number, fromIndex: number): boolean {
-        return this.includes(e as double as int as byte, fromIndex as int)
+    public includes(e: number, fromIndex?: Number): boolean {
+        if (fromIndex == undefined) {
+            return this.includes(e as byte, 0 as int)
+        }
+        return this.includes(e as byte, fromIndex!.intValue())
     }
 
     /**
@@ -489,25 +755,18 @@ export final class Int8Array {
      */
     public includes(e: byte, fromIndex: int): boolean {
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return false;
+            }
+            if (tmp!.byteValue() == e) {
                 return true
             }
         }
         return false
     }
 
-
-    /**
-     * Checks if specified argument is in Int8Array
-     *
-     * @param e search element
-     *
-     * @returns true if e is in Int8Array, false otherwise
-     */
-    public includes(e: number): boolean {
-        return this.includes(e as double as int as byte, 0)
-    }
-
+    
     /**
      * Checks if specified argument is in Int8Array
      *
@@ -528,8 +787,11 @@ export final class Int8Array {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as double as int as byte, fromIndex as int)
+    public indexOf(e: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.indexOf(e as byte, 0)
+        }
+        return this.indexOf(e as byte, fromIndex!.intValue())
     }
 
     /**
@@ -553,25 +815,18 @@ export final class Int8Array {
             }
         }
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.byteValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Returns index of specified element
-     *
-     * @param e search element
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(e: number): number {
-        return this.indexOf(e as double as int as byte)
-    }
-
+    
     /**
      * Returns index of specified element
      *
@@ -590,25 +845,19 @@ export final class Int8Array {
      *
      * @returns joined representation
      */
-    public join(s: string): string {
+    public join(s?: String): string {
+        if (s == undefined) {
+            return this.join(",")
+        }
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(s)
+            res.append(this.getUnsafe(i) as number)
+            res.append(s!)
         }
         if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
+            res.append(this.getUnsafe(this.length as int - 1) as number)
         }
         return res.toString()
-    }
-
-    /**
-     * Joins data to a string
-     *
-     * @returns joined representation with comma separator
-     */
-    public join(): string {
-        return this.join(",")
     }
 
     /**
@@ -616,13 +865,8 @@ export final class Int8Array {
      *
      * @returns iterator over keys
      */
-    public keys(): Iterator<Int> {
-        throw new Error("not implemented")
-        // let ret: Int[] = new Int[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = i;
-        // }
-        // return new ValuesIterator<Int>(ret);
+    public keys(): IterableIterator<Number> {
+        return new Int8ArrayIteratorKeys(this)
     }
 
     /**
@@ -636,8 +880,26 @@ export final class Int8Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as double as int as byte, fromIndex as int)
+    public lastIndexOf(val: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.lastIndexOf(val as byte, 0 as int)
+        }
+        return this.lastIndexOf(val as byte, fromIndex!.intValue()) as number
+    }
+
+    /**
+     * Moves backwards starting at fromIndex to 0 and search val.
+     *
+     * @param val a value to search
+     *
+     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     *
+     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     */
+    public lastIndexOf(val: byte, fromIndex: number): number {
+        return this.lastIndexOf(val, fromIndex as int) as number
     }
 
     /**
@@ -660,25 +922,18 @@ export final class Int8Array {
         }
 
         for (let i = fromIndex; i >= 0; --i) {
-            if (this.at(i) == val) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.byteValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Moves backwards and search val.
-     *
-     * @param val a value to search
-     *
-     * @returns right-most index of val. -1 if val not found
-     */
-    public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as double as int as byte, this.length as int - 1)
-    }
-
+    
     /**
      * Moves backwards and search val.
      *
@@ -690,7 +945,7 @@ export final class Int8Array {
         return this.lastIndexOf(val, this.length as int - 1)
     }
 
-   /**
+    /**
     * Creates a new Int8Array using initializer
     *
     * @param data initializer
@@ -707,11 +962,12 @@ export final class Int8Array {
      * @returns a new Int8Array using reversed data from the current one
      */
     public reverse(): Int8Array {
-        let res = new Int8Array(this)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(this.length as int - 1 - i, this.at(i))
+        for (let i: int = 0; i < this.length as int / 2 as int; i++) {
+            const tmp = this.getUnsafe(this.length as int - 1 - i)
+            this.setUnsafe(this.length as int - 1 - i, this.getUnsafe(i))
+            this.setUnsafe(i, tmp)
         }
-        return res
+        return this
     }
 
     /**
@@ -725,7 +981,52 @@ export final class Int8Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-     public slice(begin: number, end: number): Int8Array {
+    public slice(begin?: Number, end?: Number): Int8Array {
+        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a slice of current Int8Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int8Array with elements of current Int8Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: number): Int8Array {
+        return this.slice(begin as int, end as int)
+    }
+
+    /**
+     * Creates a slice of current Int8Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int8Array with elements of current Int8Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: int): Int8Array {
+        return this.slice(begin as int, end as int)
+    }
+
+        /**
+     * Creates a slice of current Int8Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int8Array with elements of current Int8Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: int, end: number): Int8Array {
         return this.slice(begin as int, end as int)
     }
 
@@ -741,8 +1042,22 @@ export final class Int8Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int8Array {
-        let buf = this.buffer.sliceInternal(begin * Int8Array.BYTES_PER_ELEMENT as int, end * Int8Array.BYTES_PER_ELEMENT as int)
-        return new Int8Array(buf)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        if (this.buffer instanceof ArrayBuffer) {
+            let buf = (this.buffer as ArrayBuffer).slice(relStart * Int8Array.BYTES_PER_ELEMENT as int, relEnd * Int8Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+            return new Int8Array(buf)
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Int8Array.BYTES_PER_ELEMENT as int, relEnd * Int8Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
+            return new Int8Array(buf)
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
     }
 
     /**
@@ -768,83 +1083,97 @@ export final class Int8Array {
     }
 
     /**
-     * Creates a slice of current Int8 with all elements.
-     *
-     * @returns a new Int8Array with elements of current Int8Array
-     */
-    public slice(): Int8Array {
-        return new Int8Array(this)
-    }
-
-    /**
-     * Sorts in-place according to the numeric ordering
-     *
-     * @returns sorted Int8Array
-     */
-    public sort(): Int8Array {
-        let newF: (a: number, b: number) => number = (a: number, b: number): number => {
-            const a1 = a as double as int as byte
-            const b1 = b as double as int as byte
-            return a1 < b1 ? -1 : a1 == b1 ? 0 : 1
-        }
-        return this.sort(newF)
-    }
-
-    /**
-     * Creates a Int8Array with the same underlying ArrayBuffer
+     * Creates a Int8Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int8Array with the same underlying ArrayBuffer
+     * @returns new Int8Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin?: Number, end?: Number): Int8Array {
+        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a Int8Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int8Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: number, end: number): Int8Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int8Array with the same underlying ArrayBuffer
+     * Creates a Int8Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int8Array with the same underlying ArrayBuffer
+     * @returns new Int8Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: number, end: int): Int8Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+        /**
+     * Creates a Int8Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int8Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: int, end: number): Int8Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+    /**
+     * Creates a Int8Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int8Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: int, end: int): Int8Array {
-        return new Int8Array(this.buffer, begin * Int8Array.BYTES_PER_ELEMENT as int, end - begin)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        return new Int8Array(this.buffer, relStart * Int8Array.BYTES_PER_ELEMENT as int, count)
     }
 
     /**
-     * Creates a Int8Array with the same ArrayBuffer
+     * Creates a Int8Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int8Array with the same ArrayBuffer
+     * @returns new Int8Array with the same ArrayBufferLike
      */
     public subarray(begin: number): Int8Array {
-        return this.subarray(begin as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
-     * Creates a Int8Array with the same ArrayBuffer
+     * Creates a Int8Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int8Array with the same ArrayBuffer
+     * @returns new Int8Array with the same ArrayBufferLike
      */
     public subarray(begin: int): Int8Array {
-        return this.subarray(begin, this.length as int)
-    }
-
-    /**
-     * Creates a Int8Array with the same ArrayBuffer
-     *
-     * @returns new Int8Array with the same ArrayBuffer
-     */
-    public subarray(): Int8Array {
-        return this.subarray(0, this.length as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
@@ -904,15 +1233,7 @@ export final class Int8Array {
      * @returns a string representation of the Int8Array
      */
     public override toString(): string {
-        let res = new StringBuilder();
-        for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(c',')
-        }
-        if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
-        }
-        return res.toString()
+        return this.join(",")
     }
 
     /**
@@ -920,13 +1241,24 @@ export final class Int8Array {
      *
      * @returns an iterator
      */
-    public values(): Iterator<Byte> {
-        throw new Error("not implemented")
-        // const ret = new Byte[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = this.at(i);
-        // }
-        // return new ValuesIterator<Byte>(ret);
+    public values(): IterableIterator<Number> {
+        return new Int8ArrayIterator(this)
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public override iterator(): IterableIterator<Number> {
+        return this.values()
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public $_iterator(): IterableIterator<Number> {
+        return this.values()
     }
 
     /**
@@ -939,7 +1271,7 @@ export final class Int8Array {
      * @returns an Int8Array with replaced value on index
      */
     public with(index: number, value: number): Int8Array {
-        return this.with(index as int, value as double as int as byte)
+        return this.with(index as int, value as byte)
     }
 
     /**
@@ -958,509 +1290,7 @@ export final class Int8Array {
     }
 
     /// === with element lambda functions ===
-    /**
-     * Checks that all elements of Int8Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public every(fn: (element: byte) => boolean): boolean {
-    //     let newF: (element: byte, index: int, array: Int8Array) => boolean =
-    //         (element: byte, index: int, array: Int8Array): boolean => { return fn(element) }
-    //     return this.every(newF)
-    // }
-    /**
-     * creates a new Int8Array from current Int8Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public filter(fn: (val: byte) => boolean): Int8Array {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public find(fn: (val: byte) => boolean): byte {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public findIndex(fn: (val: byte) => boolean): int {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public findLast(fn: (val: byte) => boolean): byte {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public findLastIndex(fn: (val: byte) => boolean): int {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Int8Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public forEach(fn: (val: byte) => byte): void {
-    //     let newF: (val: byte, index: int, array: Int8Array) => byte =
-    //         (val: byte, index: int, array: Int8Array): byte => { return fn(val) }
-    //     this.forEach(newF)
-    // }
-
-   /**
-    * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array
-    *
-    * @param fn a function to apply for each element of current Int8Array
-    *
-    * @returns a new Int8Array where for each element from current Int8Array fn was applied
-    */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public map(fn: (val: byte) => byte): Int8Array {
-    //     let newF: (val: byte, index: int) => byte =
-    //         (val: byte, index: int): byte => { return fn(val) }
-    //     return this.map(newF)
-    // }
-
-    /**
-     * Checks that at least one element of Int8Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // public some(fn: (element: byte) => boolean): boolean {
-    //     let newF: (element: byte, index: int, array: Int8Array) => boolean =
-    //         (element: byte, index: int, array: Int8Array): boolean => { return fn(element) }
-    //     return this.some(newF)
-    // }
-
-    // TODO(kprokopenko): this may be not skipped
-    /**
-     * Sorts in-place
-     *
-     * @param fn comparator
-     *
-     * @returns sorted Int8Array
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public sort(fn: (a: byte, b: byte) => int): Int8Array {
-    //     let arr: byte[] = new byte[this.length as int]
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         arr[i] = this.at(i)
-    //     }
-    //     // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-    //     /*
-    //         let mustPrecede: (a: byte, b: byte) => boolean =
-    //             (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
-    //         sort(arr, mustPrecede)
-    //         for (let i = 0; i < this.length as int; ++i) {
-    //             this.set(i, arr[i])
-    //         }
-    //     */
-    //     return this;
-    // }
-
-    /**
-     * Checks that at least one element of Int8Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // public some(fn: (element: byte, index: int, array: Int8Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (fn(this.at(i), i, this)) {
-    //             return true
-    //         }
-    //     }
-    //     return false
-    // }
-
-    // /**
-    //  * Checks that at least one element of Int8Array satisfies the passed function
-    //  *
-    //  * @param fn check function
-    //  *
-    //  * @returns true if some element satisfies fn
-    //  */
-    // public some(fn: (element: byte, index: int) => boolean): boolean {
-    //     let newF: (element: byte, index: int, array: Int8Array) => boolean =
-    //         (element: byte, index: int, array: Int8Array): boolean => { return fn(element, index) }
-    //     return this.some(newF)
-    // }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // NOTE: to enable overloads with 'byte' we need to enhance generics support
-    // public reduce(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte, init: byte): byte {
-    //     let acc = init
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using left-to-right traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduce(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte): byte {
-    //     let acc = this.at(0)
-    //     for (let i = 1; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // NOTE: to enable overloads with 'int' we need to enhance generics support
-    // public reduceRight(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte, init: byte): byte {
-    //     let acc = init
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using right-to-left traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduceRight(fn: (acc: byte, curVal: byte, curIndex: int, array: Int8Array) => byte): byte {
-    //     let acc: byte = this.at(this.length as int - 1)
-    //     for (let i = this.length as int - 2; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-    * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array.
-    *
-    * @param fn a function to apply for each element of current Int8Array
-    *
-    * @returns a new Int8Array where for each element from current Int8Array fn was applied
-    */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public map(fn: (val: byte, index: int) => byte): Int8Array {
-    //     let resBuf = new ArrayBuffer(this.length as int * Int8Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Int8Array(resBuf)
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         res.set(i, fn(this.at(i), i))
-    //     }
-    //     return res
-    // }
-
-    /**
-     * Checks that all elements of Int8Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public every(fn: (element: byte, index: int, array: Int8Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (!fn(this.at(i), i, this)) {
-    //             return false
-    //         }
-    //     }
-    //     return true
-    // }
-
-    /**
-     * Checks that all elements of Int8Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public every(fn: (element: byte, index: int) => boolean): boolean {
-    //     let newF: (element: byte, index: int, array: Int8Array) => boolean =
-    //         (element: byte, index: int, array: Int8Array): boolean => { return fn(element, index) }
-    //     return this.every(newF)
-    // }
-
-    /**
-     * Creates a new Int8Array from current Int8Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public filter(fn: (val: byte, index: int, array: Int8Array) => boolean): Int8Array {
-    //     let markers = new boolean[this.length as int]
-    //     let resLen = 0
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         markers[i] = fn(this.at(i), i, this)
-    //         if (markers[i]) {
-    //             ++resLen
-    //         }
-    //     }
-    //     let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Int8Array(resBuf)
-    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
-    //         if (markers[i]) {
-    //             res.set(j, this.at(i))
-    //             ++j
-    //         }
-    //     }
-    //     return res
-    // }
-
-    /**
-     * creates a new Int8Array from current Int8Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
-     */
-    // public filter(fn: (val: byte, index: int) => boolean): Int8Array {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Int8Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return byte | undefined as in JS
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public find(fn: (val: byte, index: int, array: Int8Array) => boolean): byte {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Int8Array.find: not implemented if element was not found")
-    // }
-
-    /**
-     * Finds the first element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public find(fn: (val: byte, index: int) => boolean): byte {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findIndex(fn: (val: byte, index: int, array: Int8Array) => boolean): int {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the first element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findIndex(fn: (val: byte, index: int) => boolean): int {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public findLast(fn: (val: byte, index: int, array: Int8Array) => boolean): byte {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Int8Array.findLast: not implemented if an element was not found")
-    // }
-
-    /**
-     * Finds the last element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // public findLast(fn: (val: byte, index: int) => boolean): byte {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public findLastIndex(fn: (val: byte, index: int, array: Int8Array) => boolean): int {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the last element in the Int8Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // public findLastIndex(fn: (val: byte, index: int) => boolean): int {
-    //     let newF: (val: byte, index: int, array: Int8Array) => boolean =
-    //         (val: byte, index: int, array: Int8Array): boolean => { return fn(val, index) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Int8Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'byte' we need to enhance generics support
-    // public forEach(fn: (val: byte, index: int, array: Int8Array) => byte): void {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         this.set(i, fn(this.at(i), i, this))
-    //     }
-    //     throw new Error("Int8Array.forEach: has to return undefined, but returns void for now")
-    // }
-
-    /**
-     * Applies a function over all elements of Int8Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // public forEach(fn: (val: byte, index: int) => byte): void {
-    //     let newF: (val: byte, index: int, array: Int8Array) => byte =
-    //         (val: byte, index: int, array: Int8Array): byte => { return fn(val, index) }
-    //     this.forEach(newF)
-    // }
-
-    /**
-     * Creates an Int8Array from array-like argument
-     *
-     * @param o array-like object to initialize Int8Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Int8Array
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public from(o: Object, mapFn: (e: Object, index: int) => byte): Int8Array {
-    //     throw new Error("Int8Array.from: not implemented")
-    // }
-
+    
     /**
      * Checks that all elements of Int8Array satisfy the passed function
      *
@@ -1473,6 +1303,7 @@ export final class Int8Array {
             (element: number, index: number, array: Int8Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Int8Array from current Int8Array based on a condition fn
      *
@@ -1493,7 +1324,7 @@ export final class Int8Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number) => boolean): byte {
+    public find(fn: (val: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
             (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
         return this.find(newF)
@@ -1509,7 +1340,7 @@ export final class Int8Array {
     public findIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
             (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as double as number
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -1522,7 +1353,7 @@ export final class Int8Array {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
             (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
-        return this.findLast(newF) as double as number
+        return this.findLast(newF) as number
     }
 
     /**
@@ -1535,7 +1366,7 @@ export final class Int8Array {
     public findLastIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
             (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as double as number
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -1543,7 +1374,6 @@ export final class Int8Array {
      *
      * @param fn function to apply
      *
-     * @returns undefined
      */
     public forEach(fn: (val: number) => byte): void {
         let newF: (val: number, index: number, array: Int8Array) => byte =
@@ -1577,30 +1407,42 @@ export final class Int8Array {
         return this.some(newF)
     }
 
-    // TODO(kprokopenko): this may be not skipped
+    // NOTE (kprokopenko): this may be not skipped
     /**
      * Sorts in-place
      *
-     * @param fn comparator
+     * @param fn comparator —  used to determine the order of the elements.
+     * fn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int8Array
      */
-    public sort(fn: (a: number, b: number) => number): Int8Array {
+    public sort(fn?: (a: number, b: number) => number): Int8Array {
         let arr: byte[] = new byte[this.length as int]
         for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
+            arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: byte, b: byte) => boolean =
-                (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
+        if (fn == undefined) {
+            // NOTE (ikorobkov): needs to add signature for sort(byte[])
+            //sort(arr)
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        */
-        return this;
-    }
+        }
+        else {
+            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+            /*
+                let mustPrecede: (a: byte, b: byte) => boolean =
+                    (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
+                sort(arr, mustPrecede)
+                for (let i = 0; i < this.length as int; ++i) {
+                    this.set(i, arr[i])
+                }
+            */
+        }
+        return this
+    } 
 
     /**
      * Checks that at least one element of Int8Array satisfies the passed function
@@ -1611,7 +1453,7 @@ export final class Int8Array {
      */
     public some(fn: (element: number, index: number, array: Int8Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i) as double as number, i as double as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -1627,7 +1469,7 @@ export final class Int8Array {
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Int8Array) => boolean =
-            (element: number, index: number, array: Int8Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Int8Array): boolean => { return fn(element, index as number) }
         return this.some(newF)
     }
 
@@ -1643,7 +1485,7 @@ export final class Int8Array {
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int8Array) => number, init: number): number {
         let acc = init
         for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -1656,9 +1498,9 @@ export final class Int8Array {
      * @returns reduction result
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int8Array) => number): number {
-        let acc = this.at(0) as double as number
+        let acc = this.getUnsafe(0) as number
         for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -1673,9 +1515,9 @@ export final class Int8Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int8Array) => number, init: number): number {
-        let acc = init as double as number
+        let acc = init as number
         for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -1688,9 +1530,9 @@ export final class Int8Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int8Array) => number): number {
-        let acc: number = this.at(this.length as int - 1) as double as number
+        let acc: number = this.getUnsafe(this.length as int - 1) as number
         for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -1704,9 +1546,9 @@ export final class Int8Array {
     */
     public map(fn: (val: number, index: number) => number): Int8Array {
         let resBuf = new ArrayBuffer(this.length as int * Int8Array.BYTES_PER_ELEMENT as int)
-        let res = new Int8Array(resBuf)
+        let res = new Int8Array(resBuf, 0, resBuf.getByteLength() / Int8Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as byte)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number) as byte)
         }
         return res
     }
@@ -1720,7 +1562,7 @@ export final class Int8Array {
      */
     public every(fn: (element: number, index: number, array: Int8Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i) as double as number, i as double as number, this)) {
+            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -1736,7 +1578,20 @@ export final class Int8Array {
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Int8Array) => boolean =
-            (element: number, index: number, array: Int8Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Int8Array): boolean => { return fn(element, index) }
+        return this.every(newF)
+    }
+
+    /**
+     * Checks that all elements of Int8Array satisfy the passed function
+     *
+     * @param fn check function
+     *
+     * @returns true if all elements satisfy fn
+     */
+    public every(fn: () => boolean): boolean {
+        let newF: (element: number, index: number, array: Int8Array) => boolean =
+            (element: number, index: number, array: Int8Array): boolean => { return fn() }
         return this.every(newF)
     }
 
@@ -1751,16 +1606,16 @@ export final class Int8Array {
         let markers = new boolean[this.length as int]
         let resLen = 0
         for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i) as double as number, i as double as number, this)
+            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
         let resBuf = new ArrayBuffer(resLen * Int8Array.BYTES_PER_ELEMENT as int)
-        let res = new Int8Array(resBuf)
+        let res = new Int8Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
-                res.set(j, this.at(i))
+                res.set(j, this.getUnsafe(i))
                 ++j
             }
         }
@@ -1776,7 +1631,20 @@ export final class Int8Array {
      */
     public filter(fn: (val: number, index: number) => boolean): Int8Array {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as number) }
+        return this.filter(newF)
+    }
+
+    /**
+     * creates a new Int8Array from current Int8Array based on a condition fn
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns a new Int8Array with elements from current Int8Array that satisfy condition fn
+     */
+    public filter(fn: () => boolean): Int8Array {
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn() }
         return this.filter(newF)
     }
 
@@ -1786,16 +1654,19 @@ export final class Int8Array {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return byte | undefined as in JS
+     * NOTE: return byte | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Int8Array) => boolean): byte {
+    public find(fn: (val: number, index: number, array: Int8Array) => boolean): Number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            if (val == undefined) {
+                return undefined
+            }
+            if (fn(val!.valueOf(), i as number, this)) {
                 return val
             }
         }
-        throw new Error("Int8Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
@@ -1805,9 +1676,9 @@ export final class Int8Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number, index: number) => boolean): byte {
+    public find(fn: (val: number, index: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index) }
         return this.find(newF)
     }
 
@@ -1820,12 +1691,12 @@ export final class Int8Array {
      */
     public findIndex(fn: (val: number, index: number, array: Int8Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
-                return i as double as number
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return i as number
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -1837,8 +1708,21 @@ export final class Int8Array {
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as double as number) }
-        return this.findIndex(newF) as double as number
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as number) }
+        return this.findIndex(newF) as number
+    }
+
+    /**
+     * Finds an index of the first element in the Int8Array that satisfies the condition
+     *
+     * @param fn condition
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (val: number, index: number, array: Int8Array) => boolean =
+            (val: number, index: number, array: Int8Array): boolean => { return fn() }
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -1850,8 +1734,8 @@ export final class Int8Array {
      */
     public findLast(fn: (val: number, index: number, array: Int8Array) => boolean): byte {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return val
             }
         }
@@ -1867,7 +1751,7 @@ export final class Int8Array {
      */
     public findLast(fn: (val: number, index: number) => boolean): byte {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val as double as number, index as double as number) }
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val as number, index as number) }
         return this.findLast(newF)
     }
 
@@ -1880,12 +1764,12 @@ export final class Int8Array {
      */
     public findLastIndex(fn: (val: number, index: number, array: Int8Array) => boolean): number {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return i
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -1897,8 +1781,8 @@ export final class Int8Array {
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as double as number) }
-        return this.findLastIndex(newF) as double as number
+            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as number) }
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -1910,9 +1794,8 @@ export final class Int8Array {
      */
     public forEach(fn: (val: number, index: number, array: Int8Array) => byte): void {
         for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i) as double as number, i as double as number, this))
+            fn(this.getUnsafe(i) as number, i as number, this)
         }
-        throw new Error("Int8Array.forEach: has to return undefined, but returns void for now")
     }
 
     /**
@@ -1924,7 +1807,20 @@ export final class Int8Array {
      */
     public forEach(fn: (val: number, index: number) => byte): void {
         let newF: (val: number, index: number, array: Int8Array) => byte =
-            (val: number, index: number, array: Int8Array): byte => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int8Array): byte => { return fn(val, index as number) }
+        this.forEach(newF)
+    }
+
+    /**
+     * Applies a function over all elements of Int8Array
+     *
+     * @param fn function to apply
+     *
+     * @returns undefined
+     */
+    public forEach(fn: () => byte): void {
+        let newF: (val: number, index: number, array: Int8Array) => byte =
+            (val: number, index: number, array: Int8Array): byte => { return fn() }
         this.forEach(newF)
     }
 
@@ -1941,10 +1837,48 @@ export final class Int8Array {
         throw new Error("Int8Array.from: not implemented")
     }
 
-    /** Underlying ArrayBuffer */
-    public readonly buffer: Buffer
+    internal getUnsafe(index: int): byte {
+        let byteIndex = index * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let res : byte = 0
+        let byteVal : byte;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                res = (res | byteVal << (8 * i)) as byte;
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i: int = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
+                res = (res | byteVal << (8 * i)) as byte;
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        return res
+    }
 
-    /** Byte offset within the underlying ArrayBuffer */
+    internal setUnsafe(insertPos: int, val: byte): void {
+        let startByte = insertPos * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let bits = val;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i = 0; i < Int8Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+    }
+
+    /** Underlying ArrayBufferLike */
+    public readonly buffer: ArrayBufferLike
+
+    /** Byte offset within the underlying ArrayBufferLike */
     public readonly byteOffset: number
 
     /** Number of bytes used */
@@ -1957,67 +1891,184 @@ export final class Int8Array {
     public readonly name = "Int8Array"
 }
 
+class Int16ArrayIteratorKeys implements IterableIterator<Number> {
+    private length: int
+    private idx: int = 0
+
+    constructor(parent: Int16Array) {
+        this.length = parent.length as int
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.length) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.idx++))
+    }
+}
+
+class Int16ArrayIterator implements IterableIterator<Number> {
+    private parent: Int16Array
+    private idx: int = 0
+
+    constructor(parent: Int16Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
+    }
+}
+
+
 /**
  * JS Int16Array API-compatible class
  */
-export final class Int16Array {
-    public static readonly BYTES_PER_ELEMENT : number = 2
+export final class Int16Array implements Iterable<Number> {
+    public static readonly BYTES_PER_ELEMENT: number = 2
 
     /**
      * Creates an empty Int16Array.
      */
     public constructor() {
-        this(new ArrayBuffer(0), 0, 0)
+        this(0 as int)
     }
 
     /**
-     * Creates an Int16Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type short in newly created Int16Array
+     * Creates an Int16Array with respect to data accessed via Iterable<Number> interface
      */
-    public constructor(buf: Buffer, byteOffset: number, length: number) {
-        this(buf, byteOffset as int, length as int)
-    }
-
-    /**
-     * Creates an Int16Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type short in newly created Int16Array
-     */
-    public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Int16Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
+    public constructor(elements: Iterable<Number>) {
+        // NOTE (ikorobkov): dealing with this overload is tricky
+        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+        let arr = Array.from<Number>(elements)
+        this.byteLength = arr.length * Int16Array.BYTES_PER_ELEMENT as int
+        this.length = arr.length
+        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.byteOffset = 0
+        for (let i: int = 0; i < this.length as int; ++i) {
+            this.$_set(i, arr.at(i)!.shortValue())
         }
-        if (byteOffset % Int16Array.BYTES_PER_ELEMENT as int != 0) {
+    }
+
+    /**
+     * Creates an Int16Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type short in newly created Int16Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+        let intByteOffset: int = 0
+        if (byteOffset != undefined) {
+            intByteOffset = byteOffset!.intValue()
+            if (intByteOffset < 0) {
+                throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
+            }
+        }
+        let intByteLength: int
+        if (buf instanceof ArrayBuffer) {
+            intByteLength = (buf as ArrayBuffer).getByteLength()
+        } else if (buf instanceof SharedArrayBuffer) {
+            intByteLength = (buf as SharedArrayBuffer).getByteLength()
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        intByteLength = intByteLength - intByteOffset
+        if (intByteLength < 0) {
+            throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+        }
+
+        if (intByteLength % Int16Array.BYTES_PER_ELEMENT as int != 0) {
+            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
+        }
+        if (intByteOffset % Int16Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length as int * Int16Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
-            throw new RangeError("Range Error: attempt to create Int16Array where length * Int16Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
+        let intLength: int
+        if (length != undefined) {
+            intLength = length!.intValue()
+            if (intLength > intByteLength / Int16Array.BYTES_PER_ELEMENT as int) {
+                throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+            }
+        } else {
+            intLength = intByteLength / Int16Array.BYTES_PER_ELEMENT as int
         }
-        this.byteLength = buf.getByteLength() - byteOffset
-        this.byteOffset = byteOffset
-        this.length = length
+        if (intLength < 0) {
+            throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
+        }
+        if (intLength < intByteLength / Int16Array.BYTES_PER_ELEMENT as int) {
+            intByteLength = intLength * Int16Array.BYTES_PER_ELEMENT as int
+        }
+        this.byteLength = intByteLength
+        this.byteOffset = intByteOffset
+        this.length = intLength
         this.buffer = buf
     }
 
     /**
-     * Creates an Int16Array with respect to buf and byteOffset.
+     * Creates an Int16Array with respect to data, byteOffset and length.
      *
      * @param buf data initializer
      *
      * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type short in newly created Int16Array
      */
-    public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Int16Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+        this(buf, byteOffset, undefined)
+    }
+
+    /**
+     * Creates an Int16Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type short in newly created Int16Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Int16Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type short in newly created Int16Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+        this(buf, new Number(byteOffset), undefined)
+    }
+
+    /**
+     * Creates an Int16Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type short in newly created Int16Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -2027,8 +2078,8 @@ export final class Int16Array {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: Buffer, byteOffset: number) {
-        this(buf, byteOffset as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
     }
 
     /**
@@ -2036,8 +2087,37 @@ export final class Int16Array {
      *
      * @param buf data initializer
      */
-    public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Int16Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+        if (buf instanceof ArrayBuffer) {
+            this.byteLength = (buf as ArrayBuffer).getByteLength()
+            if (this.byteLength % Int16Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Int16Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as ArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof SharedArrayBuffer) {
+            this.byteLength = (buf as SharedArrayBuffer).getByteLength();
+            if (this.byteLength % Int16Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 2 as Int16Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Int16Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as SharedArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof ArrayLike) {
+            // NOTE (ikorobkov): dealing with this overload is tricky
+            // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+            let arr = Array.from<Number>((buf as ArrayLike<Number>))
+            this.byteLength = arr.length as int * Int16Array.BYTES_PER_ELEMENT as int
+            this.length = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.length as int; ++i) {
+                this.$_set(i, arr.$_get(i).shortValue())
+            }
+        } else {
+            throw new Error("unexpected type of buf")
+        }
     }
 
     /**
@@ -2046,10 +2126,13 @@ export final class Int16Array {
      * @param length data initializer
      */
     public constructor(length: int) {
+        if (length < 0) {
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
+        }
         this.length = length
         this.byteLength = length * Int16Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength)
+        this.buffer = new ArrayBuffer(this.byteLength as int)
     }
 
     /**
@@ -2067,9 +2150,145 @@ export final class Int16Array {
      * @param other data initializer
      */
     public constructor(other: Int16Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
+        if (other.buffer instanceof ArrayBuffer) {
+            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+        } else if (other.buffer instanceof SharedArrayBuffer) {
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
         this.byteLength = other.byteLength
         this.length = other.length
+        this.byteOffset = 0
+    }
+
+    
+    internal zeroIfInfinity(val: number): number {
+        if ((val == Infinity) || (val == -Infinity)) {
+            return 0 as number
+        }
+        return val as number
+    }
+
+    internal zeroIfInfinity(val: short): short {
+        if ((val == Infinity) || (val == -Infinity)) {
+            return 0 as short
+        }
+        return val
+    }
+    
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: number): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: number): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val)
+        this.setUnsafe(index, v as short)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val as short)
+        this.setUnsafe(index, v as short)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: short): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: short): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val)
+        this.setUnsafe(index, v)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: number): number {
+        this.$_get(index as int)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: int): number {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        return this.getUnsafe(index) as number
+    }
+
+    
+    /**
+     * Returns an instance of primitive type at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public at(index: number): Number | undefined {
+        return this.at(index as int)
     }
 
     /**
@@ -2079,29 +2298,20 @@ export final class Int16Array {
      *
      * @returns a primitive at index
      */
-    public at(index: number): number {
-        return this.at(index as int) as double as number
-    }
-
-    /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: int): short {
-        if (index < 0) {
-            index = this.length as int + index
+    public at(index: int): Number | undefined {
+        if ((index == Infinity as int) || (index == -Infinity as int)) {
+            return undefined
         }
-        let byteIndex = index * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res: short = 0
-        for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = this.buffer.at(byteIndex as int + i) as short
-            byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as short;
+        let k: int;
+        if (index >= 0) {
+            k = index;
+        } else {
+            k = this.length as int + index
         }
-        return res
+        if (k < 0 || k >= this.length as int) {
+            return undefined
+        }
+        return new Number(this.getUnsafe(k))
     }
 
     /**
@@ -2165,7 +2375,7 @@ export final class Int16Array {
         }
 
         for (let i = startPos; i < endPos; ++i) {
-            this.set(insertPos + i - startPos, this.at(i))
+            this.set(insertPos + i - startPos, this.getUnsafe(i))
         }
     }
 
@@ -2230,7 +2440,7 @@ export final class Int16Array {
      * @returns modified Int16Array
      */
     public fill(value: number, start: number, end: number): Int16Array {
-        return this.fill(value as double as int as short, start as int, end as int)
+        return this.fill(value as short, start as int, end as int)
     }
 
     /**
@@ -2273,7 +2483,7 @@ export final class Int16Array {
      * @returns modified Int16Array
      */
     public fill(value: number, start: number): Int16Array {
-        return this.fill(value as double as int as short, start as int)
+        return this.fill(value as short, start as int)
     }
 
     /**
@@ -2307,7 +2517,7 @@ export final class Int16Array {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.set(insertPos as int, val as double as int as short)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -2319,16 +2529,7 @@ export final class Int16Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: short): void {
-        if (insertPos < 0 || insertPos >= this.length as int) {
-            throw new RangeError("set: insertPos is out-of-bounds")
-        }
-
-        let startByte = insertPos * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let bits = val;
-        for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-            this.buffer.set(startByte + i, byteVal)
-        }
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -2342,7 +2543,8 @@ export final class Int16Array {
      */
     public set(arr: number[], insertPos: number): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos as int + i, arr[i] as double as int as short)
+            let v = this.zeroIfInfinity(arr[i])
+            this.setUnsafe(insertPos as int + i, v as short)
         }
     }
 
@@ -2357,11 +2559,12 @@ export final class Int16Array {
      */
     public set(arr: short[], insertPos: int): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos + i, arr[i])
+            let v = this.zeroIfInfinity(arr[i])
+            this.setUnsafe(insertPos + i, v)
         }
     }
 
-
+    
     /**
      * Copies all elements of arr to the current Int16Array.
      *
@@ -2389,7 +2592,6 @@ export final class Int16Array {
      *
      * @returns new Int16Array
      */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
     public from(o: Object, mapFn: (e: Object) => short): Int16Array {
         let newF: (e: Object, index: number) => short =
             (e: Object, index: number): short => { return mapFn(e) }
@@ -2416,8 +2618,11 @@ export final class Int16Array {
      *
      * @returns true if e is in Int16Array, false otherwise
      */
-    public includes(e: number, fromIndex: number): boolean {
-        return this.includes(e as double as int as short, fromIndex as int)
+    public includes(e: number, fromIndex?: Number): boolean {
+        if (fromIndex == undefined) {
+            return this.includes(e as short, 0 as int)
+        }
+        return this.includes(e as short, fromIndex!.intValue())
     }
 
     /**
@@ -2431,25 +2636,18 @@ export final class Int16Array {
      */
     public includes(e: short, fromIndex: int): boolean {
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return false;
+            }
+            if (tmp!.shortValue() == e) {
                 return true
             }
         }
         return false
     }
 
-
-    /**
-     * Checks if specified argument is in Int16Array
-     *
-     * @param e search element
-     *
-     * @returns true if e is in Int16Array, false otherwise
-     */
-    public includes(e: number): boolean {
-        return this.includes(e as double as int as short, 0)
-    }
-
+    
     /**
      * Checks if specified argument is in Int16Array
      *
@@ -2470,8 +2668,11 @@ export final class Int16Array {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as double as int as short, fromIndex as int)
+    public indexOf(e: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.indexOf(e as short, 0)
+        }
+        return this.indexOf(e as short, fromIndex!.intValue())
     }
 
     /**
@@ -2495,25 +2696,18 @@ export final class Int16Array {
             }
         }
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.shortValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Returns index of specified element
-     *
-     * @param e search element
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(e: number): number {
-        return this.indexOf(e as double as int as short)
-    }
-
+    
     /**
      * Returns index of specified element
      *
@@ -2532,25 +2726,19 @@ export final class Int16Array {
      *
      * @returns joined representation
      */
-    public join(s: string): string {
+    public join(s?: String): string {
+        if (s == undefined) {
+            return this.join(",")
+        }
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(s)
+            res.append(this.getUnsafe(i) as number)
+            res.append(s!)
         }
         if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
+            res.append(this.getUnsafe(this.length as int - 1) as number)
         }
         return res.toString()
-    }
-
-    /**
-     * Joins data to a string
-     *
-     * @returns joined representation with comma separator
-     */
-    public join(): string {
-        return this.join(",")
     }
 
     /**
@@ -2558,13 +2746,8 @@ export final class Int16Array {
      *
      * @returns iterator over keys
      */
-    public keys(): Iterator<Int> {
-        throw new Error("not implemented")
-        // let ret: Int[] = new Int[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = i;
-        // }
-        // return new ValuesIterator<Int>(ret);
+    public keys(): IterableIterator<Number> {
+        return new Int16ArrayIteratorKeys(this)
     }
 
     /**
@@ -2578,8 +2761,26 @@ export final class Int16Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as double as int as short, fromIndex as int)
+    public lastIndexOf(val: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.lastIndexOf(val as short, 0 as int)
+        }
+        return this.lastIndexOf(val as short, fromIndex!.intValue()) as number
+    }
+
+    /**
+     * Moves backwards starting at fromIndex to 0 and search val.
+     *
+     * @param val a value to search
+     *
+     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     *
+     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     */
+    public lastIndexOf(val: short, fromIndex: number): number {
+        return this.lastIndexOf(val, fromIndex as int) as number
     }
 
     /**
@@ -2602,25 +2803,18 @@ export final class Int16Array {
         }
 
         for (let i = fromIndex; i >= 0; --i) {
-            if (this.at(i) == val) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.shortValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Moves backwards and search val.
-     *
-     * @param val a value to search
-     *
-     * @returns right-most index of val. -1 if val not found
-     */
-    public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as double as int as short, this.length as int - 1)
-    }
-
+    
     /**
      * Moves backwards and search val.
      *
@@ -2632,7 +2826,7 @@ export final class Int16Array {
         return this.lastIndexOf(val, this.length as int - 1)
     }
 
-   /**
+    /**
     * Creates a new Int16Array using initializer
     *
     * @param data initializer
@@ -2649,11 +2843,12 @@ export final class Int16Array {
      * @returns a new Int16Array using reversed data from the current one
      */
     public reverse(): Int16Array {
-        let res = new Int16Array(this)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(this.length as int - 1 - i, this.at(i))
+        for (let i: int = 0; i < this.length as int / 2 as int; i++) {
+            const tmp = this.getUnsafe(this.length as int - 1 - i)
+            this.setUnsafe(this.length as int - 1 - i, this.getUnsafe(i))
+            this.setUnsafe(i, tmp)
         }
-        return res
+        return this
     }
 
     /**
@@ -2667,7 +2862,52 @@ export final class Int16Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-     public slice(begin: number, end: number): Int16Array {
+    public slice(begin?: Number, end?: Number): Int16Array {
+        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a slice of current Int16Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int16Array with elements of current Int16Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: number): Int16Array {
+        return this.slice(begin as int, end as int)
+    }
+
+    /**
+     * Creates a slice of current Int16Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int16Array with elements of current Int16Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: int): Int16Array {
+        return this.slice(begin as int, end as int)
+    }
+
+        /**
+     * Creates a slice of current Int16Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int16Array with elements of current Int16Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: int, end: number): Int16Array {
         return this.slice(begin as int, end as int)
     }
 
@@ -2683,8 +2923,22 @@ export final class Int16Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int16Array {
-        let buf = this.buffer.sliceInternal(begin * Int16Array.BYTES_PER_ELEMENT as int, end * Int16Array.BYTES_PER_ELEMENT as int)
-        return new Int16Array(buf)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        if (this.buffer instanceof ArrayBuffer) {
+            let buf = (this.buffer as ArrayBuffer).slice(relStart * Int16Array.BYTES_PER_ELEMENT as int, relEnd * Int16Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+            return new Int16Array(buf)
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Int16Array.BYTES_PER_ELEMENT as int, relEnd * Int16Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
+            return new Int16Array(buf)
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
     }
 
     /**
@@ -2710,83 +2964,97 @@ export final class Int16Array {
     }
 
     /**
-     * Creates a slice of current Int16 with all elements.
-     *
-     * @returns a new Int16Array with elements of current Int16Array
-     */
-    public slice(): Int16Array {
-        return new Int16Array(this)
-    }
-
-    /**
-     * Sorts in-place according to the numeric ordering
-     *
-     * @returns sorted Int16Array
-     */
-    public sort(): Int16Array {
-        let newF: (a: number, b: number) => number = (a: number, b: number): number => {
-            const a1 = a as double as int as short
-            const b1 = b as double as int as short
-            return a1 < b1 ? -1 : a1 == b1 ? 0 : 1
-        }
-        return this.sort(newF)
-    }
-
-    /**
-     * Creates a Int16Array with the same underlying ArrayBuffer
+     * Creates a Int16Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int16Array with the same underlying ArrayBuffer
+     * @returns new Int16Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin?: Number, end?: Number): Int16Array {
+        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a Int16Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int16Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: number, end: number): Int16Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int16Array with the same underlying ArrayBuffer
+     * Creates a Int16Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int16Array with the same underlying ArrayBuffer
+     * @returns new Int16Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: number, end: int): Int16Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+        /**
+     * Creates a Int16Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int16Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: int, end: number): Int16Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+    /**
+     * Creates a Int16Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int16Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: int, end: int): Int16Array {
-        return new Int16Array(this.buffer, begin * Int16Array.BYTES_PER_ELEMENT as int, end - begin)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        return new Int16Array(this.buffer, relStart * Int16Array.BYTES_PER_ELEMENT as int, count)
     }
 
     /**
-     * Creates a Int16Array with the same ArrayBuffer
+     * Creates a Int16Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int16Array with the same ArrayBuffer
+     * @returns new Int16Array with the same ArrayBufferLike
      */
     public subarray(begin: number): Int16Array {
-        return this.subarray(begin as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
-     * Creates a Int16Array with the same ArrayBuffer
+     * Creates a Int16Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int16Array with the same ArrayBuffer
+     * @returns new Int16Array with the same ArrayBufferLike
      */
     public subarray(begin: int): Int16Array {
-        return this.subarray(begin, this.length as int)
-    }
-
-    /**
-     * Creates a Int16Array with the same ArrayBuffer
-     *
-     * @returns new Int16Array with the same ArrayBuffer
-     */
-    public subarray(): Int16Array {
-        return this.subarray(0, this.length as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
@@ -2846,15 +3114,7 @@ export final class Int16Array {
      * @returns a string representation of the Int16Array
      */
     public override toString(): string {
-        let res = new StringBuilder();
-        for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(c',')
-        }
-        if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
-        }
-        return res.toString()
+        return this.join(",")
     }
 
     /**
@@ -2862,13 +3122,24 @@ export final class Int16Array {
      *
      * @returns an iterator
      */
-    public values(): Iterator<Short> {
-        throw new Error("not implemented")
-        // const ret = new Short[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = this.at(i);
-        // }
-        // return new ValuesIterator<Short>(ret);
+    public values(): IterableIterator<Number> {
+        return new Int16ArrayIterator(this)
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public override iterator(): IterableIterator<Number> {
+        return this.values()
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public $_iterator(): IterableIterator<Number> {
+        return this.values()
     }
 
     /**
@@ -2881,7 +3152,7 @@ export final class Int16Array {
      * @returns an Int16Array with replaced value on index
      */
     public with(index: number, value: number): Int16Array {
-        return this.with(index as int, value as double as int as short)
+        return this.with(index as int, value as short)
     }
 
     /**
@@ -2900,509 +3171,7 @@ export final class Int16Array {
     }
 
     /// === with element lambda functions ===
-    /**
-     * Checks that all elements of Int16Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public every(fn: (element: short) => boolean): boolean {
-    //     let newF: (element: short, index: int, array: Int16Array) => boolean =
-    //         (element: short, index: int, array: Int16Array): boolean => { return fn(element) }
-    //     return this.every(newF)
-    // }
-    /**
-     * creates a new Int16Array from current Int16Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public filter(fn: (val: short) => boolean): Int16Array {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public find(fn: (val: short) => boolean): short {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public findIndex(fn: (val: short) => boolean): int {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public findLast(fn: (val: short) => boolean): short {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public findLastIndex(fn: (val: short) => boolean): int {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Int16Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public forEach(fn: (val: short) => short): void {
-    //     let newF: (val: short, index: int, array: Int16Array) => short =
-    //         (val: short, index: int, array: Int16Array): short => { return fn(val) }
-    //     this.forEach(newF)
-    // }
-
-   /**
-    * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array
-    *
-    * @param fn a function to apply for each element of current Int16Array
-    *
-    * @returns a new Int16Array where for each element from current Int16Array fn was applied
-    */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public map(fn: (val: short) => short): Int16Array {
-    //     let newF: (val: short, index: int) => short =
-    //         (val: short, index: int): short => { return fn(val) }
-    //     return this.map(newF)
-    // }
-
-    /**
-     * Checks that at least one element of Int16Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public some(fn: (element: short) => boolean): boolean {
-    //     let newF: (element: short, index: int, array: Int16Array) => boolean =
-    //         (element: short, index: int, array: Int16Array): boolean => { return fn(element) }
-    //     return this.some(newF)
-    // }
-
-    // TODO(kprokopenko): this may be not skipped
-    /**
-     * Sorts in-place
-     *
-     * @param fn comparator
-     *
-     * @returns sorted Int16Array
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public sort(fn: (a: short, b: short) => int): Int16Array {
-    //     let arr: short[] = new short[this.length as int]
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         arr[i] = this.at(i)
-    //     }
-    //     // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-    //     /*
-    //         let mustPrecede: (a: short, b: short) => boolean =
-    //             (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
-    //         sort(arr, mustPrecede)
-    //         for (let i = 0; i < this.length as int; ++i) {
-    //             this.set(i, arr[i])
-    //         }
-    //     */
-    //     return this;
-    // }
-
-    /**
-     * Checks that at least one element of Int16Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public some(fn: (element: short, index: int, array: Int16Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (fn(this.at(i), i, this)) {
-    //             return true
-    //         }
-    //     }
-    //     return false
-    // }
-
-    /**
-     * Checks that at least one element of Int16Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public some(fn: (element: short, index: int) => boolean): boolean {
-    //     let newF: (element: short, index: int, array: Int16Array) => boolean =
-    //         (element: short, index: int, array: Int16Array): boolean => { return fn(element, index) }
-    //     return this.some(newF)
-    // }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // NOTE: to enable overloads with 'short' we need to enhance generics support
-    // public reduce(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short, init: short): short {
-    //     let acc = init
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using left-to-right traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduce(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short): short {
-    //     let acc = this.at(0)
-    //     for (let i = 1; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public reduceRight(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short, init: short): short {
-    //     let acc = init
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using right-to-left traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduceRight(fn: (acc: short, curVal: short, curIndex: int, array: Int16Array) => short): short {
-    //     let acc: short = this.at(this.length as int - 1)
-    //     for (let i = this.length as int - 2; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-    * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array.
-    *
-    * @param fn a function to apply for each element of current Int16Array
-    *
-    * @returns a new Int16Array where for each element from current Int16Array fn was applied
-    */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public map(fn: (val: short, index: int) => short): Int16Array {
-    //     let resBuf = new ArrayBuffer(this.length as int * Int16Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Int16Array(resBuf)
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         res.set(i, fn(this.at(i), i))
-    //     }
-    //     return res
-    // }
-
-    /**
-     * Checks that all elements of Int16Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // public every(fn: (element: short, index: int, array: Int16Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (!fn(this.at(i), i, this)) {
-    //             return false
-    //         }
-    //     }
-    //     return true
-    // }
-
-    /**
-     * Checks that all elements of Int16Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // public every(fn: (element: short, index: int) => boolean): boolean {
-    //     let newF: (element: short, index: int, array: Int16Array) => boolean =
-    //         (element: short, index: int, array: Int16Array): boolean => { return fn(element, index) }
-    //     return this.every(newF)
-    // }
-
-    /**
-     * Creates a new Int16Array from current Int16Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public filter(fn: (val: short, index: int, array: Int16Array) => boolean): Int16Array {
-    //     let markers = new boolean[this.length as int]
-    //     let resLen = 0
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         markers[i] = fn(this.at(i), i, this)
-    //         if (markers[i]) {
-    //             ++resLen
-    //         }
-    //     }
-    //     let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Int16Array(resBuf)
-    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
-    //         if (markers[i]) {
-    //             res.set(j, this.at(i))
-    //             ++j
-    //         }
-    //     }
-    //     return res
-    // }
-
-    /**
-     * creates a new Int16Array from current Int16Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
-     */
-    // public filter(fn: (val: short, index: int) => boolean): Int16Array {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Int16Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return short | undefined as in JS
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public find(fn: (val: short, index: int, array: Int16Array) => boolean): short {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Int16Array.find: not implemented if element was not found")
-    // }
-
-    /**
-     * Finds the first element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // public find(fn: (val: short, index: int) => boolean): short {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public findIndex(fn: (val: short, index: int, array: Int16Array) => boolean): int {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the first element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public findIndex(fn: (val: short, index: int) => boolean): int {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public findLast(fn: (val: short, index: int, array: Int16Array) => boolean): short {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Int16Array.findLast: not implemented if an element was not found")
-    // }
-
-    /**
-     * Finds the last element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // public findLast(fn: (val: short, index: int) => boolean): short {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public findLastIndex(fn: (val: short, index: int, array: Int16Array) => boolean): int {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the last element in the Int16Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // public findLastIndex(fn: (val: short, index: int) => boolean): int {
-    //     let newF: (val: short, index: int, array: Int16Array) => boolean =
-    //         (val: short, index: int, array: Int16Array): boolean => { return fn(val, index) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Int16Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'short' we need to enhance generics support
-    // public forEach(fn: (val: short, index: int, array: Int16Array) => short): void {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         this.set(i, fn(this.at(i), i, this))
-    //     }
-    //     throw new Error("Int16Array.forEach: has to return undefined, but returns void for now")
-    // }
-
-    /**
-     * Applies a function over all elements of Int16Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // public forEach(fn: (val: short, index: int) => short): void {
-    //     let newF: (val: short, index: int, array: Int16Array) => short =
-    //         (val: short, index: int, array: Int16Array): short => { return fn(val, index) }
-    //     this.forEach(newF)
-    // }
-
-    /**
-     * Creates an Int16Array from array-like argument
-     *
-     * @param o array-like object to initialize Int16Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Int16Array
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public from(o: Object, mapFn: (e: Object, index: int) => short): Int16Array {
-    //     throw new Error("Int16Array.from: not implemented")
-    // }
-
+    
     /**
      * Checks that all elements of Int16Array satisfy the passed function
      *
@@ -3415,6 +3184,7 @@ export final class Int16Array {
             (element: number, index: number, array: Int16Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Int16Array from current Int16Array based on a condition fn
      *
@@ -3435,7 +3205,7 @@ export final class Int16Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number) => boolean): short {
+    public find(fn: (val: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
             (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
         return this.find(newF)
@@ -3451,7 +3221,7 @@ export final class Int16Array {
     public findIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
             (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as double as number
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -3464,7 +3234,7 @@ export final class Int16Array {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
             (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
-        return this.findLast(newF) as double as number
+        return this.findLast(newF) as number
     }
 
     /**
@@ -3477,7 +3247,7 @@ export final class Int16Array {
     public findLastIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
             (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as double as number
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -3485,7 +3255,6 @@ export final class Int16Array {
      *
      * @param fn function to apply
      *
-     * @returns undefined
      */
     public forEach(fn: (val: number) => short): void {
         let newF: (val: number, index: number, array: Int16Array) => short =
@@ -3519,30 +3288,42 @@ export final class Int16Array {
         return this.some(newF)
     }
 
-    // TODO(kprokopenko): this may be not skipped
+    // NOTE (kprokopenko): this may be not skipped
     /**
      * Sorts in-place
      *
-     * @param fn comparator
+     * @param fn comparator —  used to determine the order of the elements.
+     * fn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int16Array
      */
-    public sort(fn: (a: number, b: number) => number): Int16Array {
+    public sort(fn?: (a: number, b: number) => number): Int16Array {
         let arr: short[] = new short[this.length as int]
         for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
+            arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: short, b: short) => boolean =
-                (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
+        if (fn == undefined) {
+            // NOTE (ikorobkov): needs to add signature for sort(short[])
+            //sort(arr)
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        */
-        return this;
-    }
+        }
+        else {
+            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+            /*
+                let mustPrecede: (a: short, b: short) => boolean =
+                    (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
+                sort(arr, mustPrecede)
+                for (let i = 0; i < this.length as int; ++i) {
+                    this.set(i, arr[i])
+                }
+            */
+        }
+        return this
+    } 
 
     /**
      * Checks that at least one element of Int16Array satisfies the passed function
@@ -3553,7 +3334,7 @@ export final class Int16Array {
      */
     public some(fn: (element: number, index: number, array: Int16Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i) as double as number, i as double as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -3569,7 +3350,7 @@ export final class Int16Array {
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Int16Array) => boolean =
-            (element: number, index: number, array: Int16Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Int16Array): boolean => { return fn(element, index as number) }
         return this.some(newF)
     }
 
@@ -3585,7 +3366,7 @@ export final class Int16Array {
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int16Array) => number, init: number): number {
         let acc = init
         for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -3598,9 +3379,9 @@ export final class Int16Array {
      * @returns reduction result
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int16Array) => number): number {
-        let acc = this.at(0) as double as number
+        let acc = this.getUnsafe(0) as number
         for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -3615,9 +3396,9 @@ export final class Int16Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int16Array) => number, init: number): number {
-        let acc = init as double as number
+        let acc = init as number
         for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -3630,9 +3411,9 @@ export final class Int16Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int16Array) => number): number {
-        let acc: number = this.at(this.length as int - 1) as double as number
+        let acc: number = this.getUnsafe(this.length as int - 1) as number
         for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -3646,9 +3427,9 @@ export final class Int16Array {
     */
     public map(fn: (val: number, index: number) => number): Int16Array {
         let resBuf = new ArrayBuffer(this.length as int * Int16Array.BYTES_PER_ELEMENT as int)
-        let res = new Int16Array(resBuf)
+        let res = new Int16Array(resBuf, 0, resBuf.getByteLength() / Int16Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as short)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number) as short)
         }
         return res
     }
@@ -3662,7 +3443,7 @@ export final class Int16Array {
      */
     public every(fn: (element: number, index: number, array: Int16Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i) as double as number, i as double as number, this)) {
+            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -3678,7 +3459,20 @@ export final class Int16Array {
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Int16Array) => boolean =
-            (element: number, index: number, array: Int16Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Int16Array): boolean => { return fn(element, index) }
+        return this.every(newF)
+    }
+
+    /**
+     * Checks that all elements of Int16Array satisfy the passed function
+     *
+     * @param fn check function
+     *
+     * @returns true if all elements satisfy fn
+     */
+    public every(fn: () => boolean): boolean {
+        let newF: (element: number, index: number, array: Int16Array) => boolean =
+            (element: number, index: number, array: Int16Array): boolean => { return fn() }
         return this.every(newF)
     }
 
@@ -3693,16 +3487,16 @@ export final class Int16Array {
         let markers = new boolean[this.length as int]
         let resLen = 0
         for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i) as double as number, i as double as number, this)
+            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
         let resBuf = new ArrayBuffer(resLen * Int16Array.BYTES_PER_ELEMENT as int)
-        let res = new Int16Array(resBuf)
+        let res = new Int16Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
-                res.set(j, this.at(i))
+                res.set(j, this.getUnsafe(i))
                 ++j
             }
         }
@@ -3718,7 +3512,20 @@ export final class Int16Array {
      */
     public filter(fn: (val: number, index: number) => boolean): Int16Array {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as number) }
+        return this.filter(newF)
+    }
+
+    /**
+     * creates a new Int16Array from current Int16Array based on a condition fn
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns a new Int16Array with elements from current Int16Array that satisfy condition fn
+     */
+    public filter(fn: () => boolean): Int16Array {
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn() }
         return this.filter(newF)
     }
 
@@ -3728,16 +3535,19 @@ export final class Int16Array {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return short | undefined as in JS
+     * NOTE: return short | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Int16Array) => boolean): short {
+    public find(fn: (val: number, index: number, array: Int16Array) => boolean): Number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            if (val == undefined) {
+                return undefined
+            }
+            if (fn(val!.valueOf(), i as number, this)) {
                 return val
             }
         }
-        throw new Error("Int16Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
@@ -3747,9 +3557,9 @@ export final class Int16Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number, index: number) => boolean): short {
+    public find(fn: (val: number, index: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index) }
         return this.find(newF)
     }
 
@@ -3762,12 +3572,12 @@ export final class Int16Array {
      */
     public findIndex(fn: (val: number, index: number, array: Int16Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
-                return i as double as number
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return i as number
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -3779,8 +3589,21 @@ export final class Int16Array {
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as double as number) }
-        return this.findIndex(newF) as double as number
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as number) }
+        return this.findIndex(newF) as number
+    }
+
+    /**
+     * Finds an index of the first element in the Int16Array that satisfies the condition
+     *
+     * @param fn condition
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (val: number, index: number, array: Int16Array) => boolean =
+            (val: number, index: number, array: Int16Array): boolean => { return fn() }
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -3792,8 +3615,8 @@ export final class Int16Array {
      */
     public findLast(fn: (val: number, index: number, array: Int16Array) => boolean): short {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return val
             }
         }
@@ -3809,7 +3632,7 @@ export final class Int16Array {
      */
     public findLast(fn: (val: number, index: number) => boolean): short {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val as double as number, index as double as number) }
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val as number, index as number) }
         return this.findLast(newF)
     }
 
@@ -3822,12 +3645,12 @@ export final class Int16Array {
      */
     public findLastIndex(fn: (val: number, index: number, array: Int16Array) => boolean): number {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return i
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -3839,8 +3662,8 @@ export final class Int16Array {
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as double as number) }
-        return this.findLastIndex(newF) as double as number
+            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as number) }
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -3852,9 +3675,8 @@ export final class Int16Array {
      */
     public forEach(fn: (val: number, index: number, array: Int16Array) => short): void {
         for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i) as double as number, i as double as number, this))
+            fn(this.getUnsafe(i) as number, i as number, this)
         }
-        throw new Error("Int16Array.forEach: has to return undefined, but returns void for now")
     }
 
     /**
@@ -3866,7 +3688,20 @@ export final class Int16Array {
      */
     public forEach(fn: (val: number, index: number) => short): void {
         let newF: (val: number, index: number, array: Int16Array) => short =
-            (val: number, index: number, array: Int16Array): short => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int16Array): short => { return fn(val, index as number) }
+        this.forEach(newF)
+    }
+
+    /**
+     * Applies a function over all elements of Int16Array
+     *
+     * @param fn function to apply
+     *
+     * @returns undefined
+     */
+    public forEach(fn: () => short): void {
+        let newF: (val: number, index: number, array: Int16Array) => short =
+            (val: number, index: number, array: Int16Array): short => { return fn() }
         this.forEach(newF)
     }
 
@@ -3883,10 +3718,50 @@ export final class Int16Array {
         throw new Error("Int16Array.from: not implemented")
     }
 
-    /** Underlying ArrayBuffer */
-    public readonly buffer: Buffer
+    internal getUnsafe(index: int): short {
+        let byteIndex = index * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let res : short = 0
+        let byteVal : short;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as short;
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i: int = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as short;
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        return res
+    }
 
-    /** Byte offset within the underlying ArrayBuffer */
+    internal setUnsafe(insertPos: int, val: short): void {
+        let startByte = insertPos * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let bits = val;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i = 0; i < Int16Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+    }
+
+    /** Underlying ArrayBufferLike */
+    public readonly buffer: ArrayBufferLike
+
+    /** Byte offset within the underlying ArrayBufferLike */
     public readonly byteOffset: number
 
     /** Number of bytes used */
@@ -3899,67 +3774,184 @@ export final class Int16Array {
     public readonly name = "Int16Array"
 }
 
+class Int32ArrayIteratorKeys implements IterableIterator<Number> {
+    private length: int
+    private idx: int = 0
+
+    constructor(parent: Int32Array) {
+        this.length = parent.length as int
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.length) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.idx++))
+    }
+}
+
+class Int32ArrayIterator implements IterableIterator<Number> {
+    private parent: Int32Array
+    private idx: int = 0
+
+    constructor(parent: Int32Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
+    }
+}
+
+
 /**
  * JS Int32Array API-compatible class
  */
-export final class Int32Array {
-    public static readonly BYTES_PER_ELEMENT : number = 4
+export final class Int32Array implements Iterable<Number> {
+    public static readonly BYTES_PER_ELEMENT: number = 4
 
     /**
      * Creates an empty Int32Array.
      */
     public constructor() {
-        this(new ArrayBuffer(0), 0, 0)
+        this(0 as int)
     }
 
     /**
-     * Creates an Int32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type int in newly created Int32Array
+     * Creates an Int32Array with respect to data accessed via Iterable<Number> interface
      */
-    public constructor(buf: Buffer, byteOffset: number, length: number) {
-        this(buf, byteOffset as int, length as int)
-    }
-
-    /**
-     * Creates an Int32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type int in newly created Int32Array
-     */
-    public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Int32Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
+    public constructor(elements: Iterable<Number>) {
+        // NOTE (ikorobkov): dealing with this overload is tricky
+        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+        let arr = Array.from<Number>(elements)
+        this.byteLength = arr.length * Int32Array.BYTES_PER_ELEMENT as int
+        this.length = arr.length
+        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.byteOffset = 0
+        for (let i: int = 0; i < this.length as int; ++i) {
+            this.$_set(i, arr.at(i)!.intValue())
         }
-        if (byteOffset % Int32Array.BYTES_PER_ELEMENT as int != 0) {
+    }
+
+    /**
+     * Creates an Int32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type int in newly created Int32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+        let intByteOffset: int = 0
+        if (byteOffset != undefined) {
+            intByteOffset = byteOffset!.intValue()
+            if (intByteOffset < 0) {
+                throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
+            }
+        }
+        let intByteLength: int
+        if (buf instanceof ArrayBuffer) {
+            intByteLength = (buf as ArrayBuffer).getByteLength()
+        } else if (buf instanceof SharedArrayBuffer) {
+            intByteLength = (buf as SharedArrayBuffer).getByteLength()
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        intByteLength = intByteLength - intByteOffset
+        if (intByteLength < 0) {
+            throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+        }
+
+        if (intByteLength % Int32Array.BYTES_PER_ELEMENT as int != 0) {
+            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
+        }
+        if (intByteOffset % Int32Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length as int * Int32Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
-            throw new RangeError("Range Error: attempt to create Int32Array where length * Int32Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
+        let intLength: int
+        if (length != undefined) {
+            intLength = length!.intValue()
+            if (intLength > intByteLength / Int32Array.BYTES_PER_ELEMENT as int) {
+                throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+            }
+        } else {
+            intLength = intByteLength / Int32Array.BYTES_PER_ELEMENT as int
         }
-        this.byteLength = buf.getByteLength() - byteOffset
-        this.byteOffset = byteOffset
-        this.length = length
+        if (intLength < 0) {
+            throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
+        }
+        if (intLength < intByteLength / Int32Array.BYTES_PER_ELEMENT as int) {
+            intByteLength = intLength * Int32Array.BYTES_PER_ELEMENT as int
+        }
+        this.byteLength = intByteLength
+        this.byteOffset = intByteOffset
+        this.length = intLength
         this.buffer = buf
     }
 
     /**
-     * Creates an Int32Array with respect to buf and byteOffset.
+     * Creates an Int32Array with respect to data, byteOffset and length.
      *
      * @param buf data initializer
      *
      * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type int in newly created Int32Array
      */
-    public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Int32Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+        this(buf, byteOffset, undefined)
+    }
+
+    /**
+     * Creates an Int32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type int in newly created Int32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Int32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type int in newly created Int32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+        this(buf, new Number(byteOffset), undefined)
+    }
+
+    /**
+     * Creates an Int32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type int in newly created Int32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -3969,8 +3961,8 @@ export final class Int32Array {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: Buffer, byteOffset: number) {
-        this(buf, byteOffset as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
     }
 
     /**
@@ -3978,8 +3970,37 @@ export final class Int32Array {
      *
      * @param buf data initializer
      */
-    public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Int32Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+        if (buf instanceof ArrayBuffer) {
+            this.byteLength = (buf as ArrayBuffer).getByteLength()
+            if (this.byteLength % Int32Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Int32Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as ArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof SharedArrayBuffer) {
+            this.byteLength = (buf as SharedArrayBuffer).getByteLength();
+            if (this.byteLength % Int32Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Int32Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Int32Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as SharedArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof ArrayLike) {
+            // NOTE (ikorobkov): dealing with this overload is tricky
+            // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+            let arr = Array.from<Number>((buf as ArrayLike<Number>))
+            this.byteLength = arr.length as int * Int32Array.BYTES_PER_ELEMENT as int
+            this.length = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.length as int; ++i) {
+                this.$_set(i, arr.$_get(i).intValue())
+            }
+        } else {
+            throw new Error("unexpected type of buf")
+        }
     }
 
     /**
@@ -3988,10 +4009,13 @@ export final class Int32Array {
      * @param length data initializer
      */
     public constructor(length: int) {
+        if (length < 0) {
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
+        }
         this.length = length
         this.byteLength = length * Int32Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength)
+        this.buffer = new ArrayBuffer(this.byteLength as int)
     }
 
     /**
@@ -4009,9 +4033,120 @@ export final class Int32Array {
      * @param other data initializer
      */
     public constructor(other: Int32Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
+        if (other.buffer instanceof ArrayBuffer) {
+            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+        } else if (other.buffer instanceof SharedArrayBuffer) {
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
         this.byteLength = other.byteLength
         this.length = other.length
+        this.byteOffset = 0
+    }
+
+    
+    internal zeroIfInfinity(val: number): number {
+        if ((val == Infinity) || (val == -Infinity)) {
+            return 0 as number
+        }
+        return val as number
+    }
+
+    internal zeroIfInfinity(val: int): int {
+        if ((val == Infinity) || (val == -Infinity)) {
+            return 0 as int
+        }
+        return val
+    }
+    
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: number): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: number): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val)
+        this.setUnsafe(index, v as int)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val)
+        this.setUnsafe(index, v)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: number): number {
+        this.$_get(index as int)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: int): number {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        return this.getUnsafe(index) as number
+    }
+
+    
+    /**
+     * Returns an instance of primitive type at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public at(index: number): Number | undefined {
+        return this.at(index as int)
     }
 
     /**
@@ -4021,29 +4156,20 @@ export final class Int32Array {
      *
      * @returns a primitive at index
      */
-    public at(index: number): number {
-        return this.at(index as int) as double as number
-    }
-
-    /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: int): int {
-        if (index < 0) {
-            index = this.length as int + index
+    public at(index: int): Number | undefined {
+        if ((index == Infinity as int) || (index == -Infinity as int)) {
+            return undefined
         }
-        let byteIndex = index * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res: int = 0
-        for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = this.buffer.at(byteIndex as int + i) as int
-            byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+        let k: int;
+        if (index >= 0) {
+            k = index;
+        } else {
+            k = this.length as int + index
         }
-        return res
+        if (k < 0 || k >= this.length as int) {
+            return undefined
+        }
+        return new Number(this.getUnsafe(k))
     }
 
     /**
@@ -4107,7 +4233,7 @@ export final class Int32Array {
         }
 
         for (let i = startPos; i < endPos; ++i) {
-            this.set(insertPos + i - startPos, this.at(i))
+            this.set(insertPos + i - startPos, this.getUnsafe(i))
         }
     }
 
@@ -4172,7 +4298,7 @@ export final class Int32Array {
      * @returns modified Int32Array
      */
     public fill(value: number, start: number, end: number): Int32Array {
-        return this.fill(value as double as int as int, start as int, end as int)
+        return this.fill(value as int, start as int, end as int)
     }
 
     /**
@@ -4215,7 +4341,7 @@ export final class Int32Array {
      * @returns modified Int32Array
      */
     public fill(value: number, start: number): Int32Array {
-        return this.fill(value as double as int as int, start as int)
+        return this.fill(value as int, start as int)
     }
 
     /**
@@ -4249,7 +4375,7 @@ export final class Int32Array {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.set(insertPos as int, val as double as int as int)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -4261,16 +4387,7 @@ export final class Int32Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: int): void {
-        if (insertPos < 0 || insertPos >= this.length as int) {
-            throw new RangeError("set: insertPos is out-of-bounds")
-        }
-
-        let startByte = insertPos * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let bits = val;
-        for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-            this.buffer.set(startByte + i, byteVal)
-        }
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -4284,7 +4401,8 @@ export final class Int32Array {
      */
     public set(arr: number[], insertPos: number): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos as int + i, arr[i] as double as int as int)
+            let v = this.zeroIfInfinity(arr[i])
+            this.setUnsafe(insertPos as int + i, v as int)
         }
     }
 
@@ -4299,11 +4417,12 @@ export final class Int32Array {
      */
     public set(arr: int[], insertPos: int): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos + i, arr[i])
+            let v = this.zeroIfInfinity(arr[i])
+            this.setUnsafe(insertPos + i, v)
         }
     }
 
-
+    
     /**
      * Copies all elements of arr to the current Int32Array.
      *
@@ -4357,8 +4476,11 @@ export final class Int32Array {
      *
      * @returns true if e is in Int32Array, false otherwise
      */
-    public includes(e: number, fromIndex: number): boolean {
-        return this.includes(e as double as int as int, fromIndex as int)
+    public includes(e: number, fromIndex?: Number): boolean {
+        if (fromIndex == undefined) {
+            return this.includes(e as int, 0 as int)
+        }
+        return this.includes(e as int, fromIndex!.intValue())
     }
 
     /**
@@ -4372,25 +4494,18 @@ export final class Int32Array {
      */
     public includes(e: int, fromIndex: int): boolean {
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return false;
+            }
+            if (tmp!.intValue() == e) {
                 return true
             }
         }
         return false
     }
 
-
-    /**
-     * Checks if specified argument is in Int32Array
-     *
-     * @param e search element
-     *
-     * @returns true if e is in Int32Array, false otherwise
-     */
-    public includes(e: number): boolean {
-        return this.includes(e as double as int as int, 0)
-    }
-
+    
     /**
      * Checks if specified argument is in Int32Array
      *
@@ -4411,8 +4526,11 @@ export final class Int32Array {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as double as int as int, fromIndex as int)
+    public indexOf(e: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.indexOf(e as int, 0)
+        }
+        return this.indexOf(e as int, fromIndex!.intValue())
     }
 
     /**
@@ -4436,25 +4554,18 @@ export final class Int32Array {
             }
         }
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.intValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Returns index of specified element
-     *
-     * @param e search element
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(e: number): number {
-        return this.indexOf(e as double as int as int)
-    }
-
+    
     /**
      * Returns index of specified element
      *
@@ -4473,25 +4584,19 @@ export final class Int32Array {
      *
      * @returns joined representation
      */
-    public join(s: string): string {
+    public join(s?: String): string {
+        if (s == undefined) {
+            return this.join(",")
+        }
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(s)
+            res.append(this.getUnsafe(i) as number)
+            res.append(s!)
         }
         if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
+            res.append(this.getUnsafe(this.length as int - 1) as number)
         }
         return res.toString()
-    }
-
-    /**
-     * Joins data to a string
-     *
-     * @returns joined representation with comma separator
-     */
-    public join(): string {
-        return this.join(",")
     }
 
     /**
@@ -4499,13 +4604,8 @@ export final class Int32Array {
      *
      * @returns iterator over keys
      */
-    public keys(): Iterator<Int> {
-        throw new Error("not implemented")
-        // let ret: Int[] = new Int[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = i;
-        // }
-        // return new ValuesIterator<Int>(ret);
+    public keys(): IterableIterator<Number> {
+        return new Int32ArrayIteratorKeys(this)
     }
 
     /**
@@ -4519,8 +4619,26 @@ export final class Int32Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as double as int as int, fromIndex as int)
+    public lastIndexOf(val: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.lastIndexOf(val as int, 0 as int)
+        }
+        return this.lastIndexOf(val as int, fromIndex!.intValue()) as number
+    }
+
+    /**
+     * Moves backwards starting at fromIndex to 0 and search val.
+     *
+     * @param val a value to search
+     *
+     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     *
+     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     */
+    public lastIndexOf(val: int, fromIndex: number): number {
+        return this.lastIndexOf(val, fromIndex as int) as number
     }
 
     /**
@@ -4543,25 +4661,18 @@ export final class Int32Array {
         }
 
         for (let i = fromIndex; i >= 0; --i) {
-            if (this.at(i) == val) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.intValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Moves backwards and search val.
-     *
-     * @param val a value to search
-     *
-     * @returns right-most index of val. -1 if val not found
-     */
-    public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as double as int as int, this.length as int - 1)
-    }
-
+    
     /**
      * Moves backwards and search val.
      *
@@ -4573,7 +4684,7 @@ export final class Int32Array {
         return this.lastIndexOf(val, this.length as int - 1)
     }
 
-   /**
+    /**
     * Creates a new Int32Array using initializer
     *
     * @param data initializer
@@ -4590,11 +4701,12 @@ export final class Int32Array {
      * @returns a new Int32Array using reversed data from the current one
      */
     public reverse(): Int32Array {
-        let res = new Int32Array(this)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(this.length as int - 1 - i, this.at(i))
+        for (let i: int = 0; i < this.length as int / 2 as int; i++) {
+            const tmp = this.getUnsafe(this.length as int - 1 - i)
+            this.setUnsafe(this.length as int - 1 - i, this.getUnsafe(i))
+            this.setUnsafe(i, tmp)
         }
-        return res
+        return this
     }
 
     /**
@@ -4608,7 +4720,52 @@ export final class Int32Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-     public slice(begin: number, end: number): Int32Array {
+    public slice(begin?: Number, end?: Number): Int32Array {
+        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a slice of current Int32Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int32Array with elements of current Int32Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: number): Int32Array {
+        return this.slice(begin as int, end as int)
+    }
+
+    /**
+     * Creates a slice of current Int32Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int32Array with elements of current Int32Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: int): Int32Array {
+        return this.slice(begin as int, end as int)
+    }
+
+        /**
+     * Creates a slice of current Int32Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Int32Array with elements of current Int32Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: int, end: number): Int32Array {
         return this.slice(begin as int, end as int)
     }
 
@@ -4624,8 +4781,22 @@ export final class Int32Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Int32Array {
-        let buf = this.buffer.sliceInternal(begin * Int32Array.BYTES_PER_ELEMENT as int, end * Int32Array.BYTES_PER_ELEMENT as int)
-        return new Int32Array(buf)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        if (this.buffer instanceof ArrayBuffer) {
+            let buf = (this.buffer as ArrayBuffer).slice(relStart * Int32Array.BYTES_PER_ELEMENT as int, relEnd * Int32Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+            return new Int32Array(buf)
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Int32Array.BYTES_PER_ELEMENT as int, relEnd * Int32Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
+            return new Int32Array(buf)
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
     }
 
     /**
@@ -4651,83 +4822,97 @@ export final class Int32Array {
     }
 
     /**
-     * Creates a slice of current Int32 with all elements.
-     *
-     * @returns a new Int32Array with elements of current Int32Array
-     */
-    public slice(): Int32Array {
-        return new Int32Array(this)
-    }
-
-    /**
-     * Sorts in-place according to the numeric ordering
-     *
-     * @returns sorted Int32Array
-     */
-    public sort(): Int32Array {
-        let newF: (a: number, b: number) => number = (a: number, b: number): number => {
-            const a1 = a as double as int as int
-            const b1 = b as double as int as int
-            return a1 < b1 ? -1 : a1 == b1 ? 0 : 1
-        }
-        return this.sort(newF)
-    }
-
-    /**
-     * Creates a Int32Array with the same underlying ArrayBuffer
+     * Creates a Int32Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int32Array with the same underlying ArrayBuffer
+     * @returns new Int32Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin?: Number, end?: Number): Int32Array {
+        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a Int32Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int32Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: number, end: number): Int32Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Int32Array with the same underlying ArrayBuffer
+     * Creates a Int32Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Int32Array with the same underlying ArrayBuffer
+     * @returns new Int32Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: number, end: int): Int32Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+        /**
+     * Creates a Int32Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int32Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: int, end: number): Int32Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+    /**
+     * Creates a Int32Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Int32Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: int, end: int): Int32Array {
-        return new Int32Array(this.buffer, begin * Int32Array.BYTES_PER_ELEMENT as int, end - begin)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        return new Int32Array(this.buffer, relStart * Int32Array.BYTES_PER_ELEMENT as int, count)
     }
 
     /**
-     * Creates a Int32Array with the same ArrayBuffer
+     * Creates a Int32Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int32Array with the same ArrayBuffer
+     * @returns new Int32Array with the same ArrayBufferLike
      */
     public subarray(begin: number): Int32Array {
-        return this.subarray(begin as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
-     * Creates a Int32Array with the same ArrayBuffer
+     * Creates a Int32Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Int32Array with the same ArrayBuffer
+     * @returns new Int32Array with the same ArrayBufferLike
      */
     public subarray(begin: int): Int32Array {
-        return this.subarray(begin, this.length as int)
-    }
-
-    /**
-     * Creates a Int32Array with the same ArrayBuffer
-     *
-     * @returns new Int32Array with the same ArrayBuffer
-     */
-    public subarray(): Int32Array {
-        return this.subarray(0, this.length as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
@@ -4787,15 +4972,7 @@ export final class Int32Array {
      * @returns a string representation of the Int32Array
      */
     public override toString(): string {
-        let res = new StringBuilder();
-        for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(c',')
-        }
-        if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
-        }
-        return res.toString()
+        return this.join(",")
     }
 
     /**
@@ -4803,13 +4980,24 @@ export final class Int32Array {
      *
      * @returns an iterator
      */
-    public values(): Iterator<Int> {
-        throw new Error("not implemented")
-        // const ret = new Int[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = this.at(i);
-        // }
-        // return new ValuesIterator<Int>(ret);
+    public values(): IterableIterator<Number> {
+        return new Int32ArrayIterator(this)
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public override iterator(): IterableIterator<Number> {
+        return this.values()
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public $_iterator(): IterableIterator<Number> {
+        return this.values()
     }
 
     /**
@@ -4822,7 +5010,7 @@ export final class Int32Array {
      * @returns an Int32Array with replaced value on index
      */
     public with(index: number, value: number): Int32Array {
-        return this.with(index as int, value as double as int as int)
+        return this.with(index as int, value as int)
     }
 
     /**
@@ -4841,508 +5029,7 @@ export final class Int32Array {
     }
 
     /// === with element lambda functions ===
-    /**
-     * Checks that all elements of Int32Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public every(fn: (element: int) => boolean): boolean {
-    //     let newF: (element: int, index: int, array: Int32Array) => boolean =
-    //         (element: int, index: int, array: Int32Array): boolean => { return fn(element) }
-    //     return this.every(newF)
-    // }
-    /**
-     * creates a new Int32Array from current Int32Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public filter(fn: (val: int) => boolean): Int32Array {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public find(fn: (val: int) => boolean): int {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findIndex(fn: (val: int) => boolean): int {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLast(fn: (val: int) => boolean): int {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLastIndex(fn: (val: int) => boolean): int {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Int32Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public forEach(fn: (val: int) => int): void {
-    //     let newF: (val: int, index: int, array: Int32Array) => int =
-    //         (val: int, index: int, array: Int32Array): int => { return fn(val) }
-    //     this.forEach(newF)
-    // }
-
-   /**
-    * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array
-    *
-    * @param fn a function to apply for each element of current Int32Array
-    *
-    * @returns a new Int32Array where for each element from current Int32Array fn was applied
-    */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public map(fn: (val: int) => int): Int32Array {
-    //     let newF: (val: int, index: int) => int =
-    //         (val: int, index: int): int => { return fn(val) }
-    //     return this.map(newF)
-    // }
-
-    /**
-     * Checks that at least one element of Int32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public some(fn: (element: int) => boolean): boolean {
-    //     let newF: (element: int, index: int, array: Int32Array) => boolean =
-    //         (element: int, index: int, array: Int32Array): boolean => { return fn(element) }
-    //     return this.some(newF)
-    // }
-
-    // // TODO(kprokopenko): this may be not skipped
-    // /**
-    //  * Sorts in-place
-    //  *
-    //  * @param fn comparator
-    //  *
-    //  * @returns sorted Int32Array
-    //  */
-    // public sort(fn: (a: int, b: int) => int): Int32Array {
-    //     let arr: int[] = new int[this.length as int]
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         arr[i] = this.at(i)
-    //     }
-    //     // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-    //     /*
-    //         let mustPrecede: (a: int, b: int) => boolean =
-    //             (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
-    //         sort(arr, mustPrecede)
-    //         for (let i = 0; i < this.length as int; ++i) {
-    //             this.set(i, arr[i])
-    //         }
-    //     */
-    //     return this;
-    // }
-
-    // /**
-    //  * Checks that at least one element of Int32Array satisfies the passed function
-    //  *
-    //  * @param fn check function
-    //  *
-    //  * @returns true if some element satisfies fn
-    //  */
-    // public some(fn: (element: int, index: int, array: Int32Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (fn(this.at(i), i, this)) {
-    //             return true
-    //         }
-    //     }
-    //     return false
-    // }
-
-    // /**
-    //  * Checks that at least one element of Int32Array satisfies the passed function
-    //  *
-    //  * @param fn check function
-    //  *
-    //  * @returns true if some element satisfies fn
-    //  */
-    // public some(fn: (element: int, index: int) => boolean): boolean {
-    //     let newF: (element: int, index: int, array: Int32Array) => boolean =
-    //         (element: int, index: int, array: Int32Array): boolean => { return fn(element, index) }
-    //     return this.some(newF)
-    // }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // NOTE: to enable overloads with 'int' we need to enhance generics support
-    // public reduce(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int, init: int): int {
-    //     let acc = init
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using left-to-right traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduce(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int): int {
-    //     let acc = this.at(0)
-    //     for (let i = 1; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public reduceRight(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int, init: int): int {
-    //     let acc = init
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using right-to-left traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduceRight(fn: (acc: int, curVal: int, curIndex: int, array: Int32Array) => int): int {
-    //     let acc: int = this.at(this.length as int - 1)
-    //     for (let i = this.length as int - 2; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-    * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array.
-    *
-    * @param fn a function to apply for each element of current Int32Array
-    *
-    * @returns a new Int32Array where for each element from current Int32Array fn was applied
-    */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public map(fn: (val: int, index: int) => int): Int32Array {
-    //     let resBuf = new ArrayBuffer(this.length as int * Int32Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Int32Array(resBuf)
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         res.set(i, fn(this.at(i), i))
-    //     }
-    //     return res
-    // }
-
-    /**
-     * Checks that all elements of Int32Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public every(fn: (element: int, index: int, array: Int32Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (!fn(this.at(i), i, this)) {
-    //             return false
-    //         }
-    //     }
-    //     return true
-    // }
-
-    /**
-     * Checks that all elements of Int32Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // public every(fn: (element: int, index: int) => boolean): boolean {
-    //     let newF: (element: int, index: int, array: Int32Array) => boolean =
-    //         (element: int, index: int, array: Int32Array): boolean => { return fn(element, index) }
-    //     return this.every(newF)
-    // }
-
-    /**
-     * Creates a new Int32Array from current Int32Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public filter(fn: (val: int, index: int, array: Int32Array) => boolean): Int32Array {
-    //     let markers = new boolean[this.length as int]
-    //     let resLen = 0
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         markers[i] = fn(this.at(i), i, this)
-    //         if (markers[i]) {
-    //             ++resLen
-    //         }
-    //     }
-    //     let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Int32Array(resBuf)
-    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
-    //         if (markers[i]) {
-    //             res.set(j, this.at(i))
-    //             ++j
-    //         }
-    //     }
-    //     return res
-    // }
-
-    /**
-     * creates a new Int32Array from current Int32Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
-     */
-    // public filter(fn: (val: int, index: int) => boolean): Int32Array {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Int32Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return int | undefined as in JS
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public find(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Int32Array.find: not implemented if element was not found")
-    // }
-
-    /**
-     * Finds the first element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // public find(fn: (val: int, index: int) => boolean): int {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findIndex(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the first element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findIndex(fn: (val: int, index: int) => boolean): int {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLast(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Int32Array.findLast: not implemented if an element was not found")
-    // }
-
-    /**
-     * Finds the last element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLast(fn: (val: int, index: int) => boolean): int {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLastIndex(fn: (val: int, index: int, array: Int32Array) => boolean): int {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the last element in the Int32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // public findLastIndex(fn: (val: int, index: int) => boolean): int {
-    //     let newF: (val: int, index: int, array: Int32Array) => boolean =
-    //         (val: int, index: int, array: Int32Array): boolean => { return fn(val, index) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Int32Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public forEach(fn: (val: int, index: int, array: Int32Array) => int): void {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         this.set(i, fn(this.at(i), i, this))
-    //     }
-    //     throw new Error("Int32Array.forEach: has to return undefined, but returns void for now")
-    // }
-
-    /**
-     * Applies a function over all elements of Int32Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // public forEach(fn: (val: int, index: int) => int): void {
-    //     let newF: (val: int, index: int, array: Int32Array) => int =
-    //         (val: int, index: int, array: Int32Array): int => { return fn(val, index) }
-    //     this.forEach(newF)
-    // }
-
-    /**
-     * Creates an Int32Array from array-like argument
-     *
-     * @param o array-like object to initialize Int32Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Int32Array
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public from(o: Object, mapFn: (e: Object, index: int) => int): Int32Array {
-    //     throw new Error("Int32Array.from: not implemented")
-    // }
-
+    
     /**
      * Checks that all elements of Int32Array satisfy the passed function
      *
@@ -5355,6 +5042,7 @@ export final class Int32Array {
             (element: number, index: number, array: Int32Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Int32Array from current Int32Array based on a condition fn
      *
@@ -5375,7 +5063,7 @@ export final class Int32Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number) => boolean): int {
+    public find(fn: (val: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
             (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
         return this.find(newF)
@@ -5391,7 +5079,7 @@ export final class Int32Array {
     public findIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
             (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as double as number
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -5404,7 +5092,7 @@ export final class Int32Array {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
             (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
-        return this.findLast(newF) as double as number
+        return this.findLast(newF) as number
     }
 
     /**
@@ -5417,7 +5105,7 @@ export final class Int32Array {
     public findLastIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
             (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as double as number
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -5425,7 +5113,6 @@ export final class Int32Array {
      *
      * @param fn function to apply
      *
-     * @returns undefined
      */
     public forEach(fn: (val: number) => int): void {
         let newF: (val: number, index: number, array: Int32Array) => int =
@@ -5459,30 +5146,42 @@ export final class Int32Array {
         return this.some(newF)
     }
 
-    // TODO(kprokopenko): this may be not skipped
+    // NOTE (kprokopenko): this may be not skipped
     /**
      * Sorts in-place
      *
-     * @param fn comparator
+     * @param fn comparator —  used to determine the order of the elements.
+     * fn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int32Array
      */
-    public sort(fn: (a: number, b: number) => number): Int32Array {
+    public sort(fn?: (a: number, b: number) => number): Int32Array {
         let arr: int[] = new int[this.length as int]
         for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
+            arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: int, b: int) => boolean =
-                (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
+        if (fn == undefined) {
+            // NOTE (ikorobkov): needs to add signature for sort(int[])
+            //sort(arr)
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        */
-        return this;
-    }
+        }
+        else {
+            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+            /*
+                let mustPrecede: (a: int, b: int) => boolean =
+                    (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
+                sort(arr, mustPrecede)
+                for (let i = 0; i < this.length as int; ++i) {
+                    this.set(i, arr[i])
+                }
+            */
+        }
+        return this
+    } 
 
     /**
      * Checks that at least one element of Int32Array satisfies the passed function
@@ -5493,7 +5192,7 @@ export final class Int32Array {
      */
     public some(fn: (element: number, index: number, array: Int32Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i) as double as number, i as double as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -5509,7 +5208,7 @@ export final class Int32Array {
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Int32Array) => boolean =
-            (element: number, index: number, array: Int32Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Int32Array): boolean => { return fn(element, index as number) }
         return this.some(newF)
     }
 
@@ -5525,7 +5224,7 @@ export final class Int32Array {
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int32Array) => number, init: number): number {
         let acc = init
         for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -5538,9 +5237,9 @@ export final class Int32Array {
      * @returns reduction result
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Int32Array) => number): number {
-        let acc = this.at(0) as double as number
+        let acc = this.getUnsafe(0) as number
         for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -5555,9 +5254,9 @@ export final class Int32Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int32Array) => number, init: number): number {
-        let acc = init as double as number
+        let acc = init as number
         for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -5570,9 +5269,9 @@ export final class Int32Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Int32Array) => number): number {
-        let acc: number = this.at(this.length as int - 1) as double as number
+        let acc: number = this.getUnsafe(this.length as int - 1) as number
         for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -5586,9 +5285,9 @@ export final class Int32Array {
     */
     public map(fn: (val: number, index: number) => number): Int32Array {
         let resBuf = new ArrayBuffer(this.length as int * Int32Array.BYTES_PER_ELEMENT as int)
-        let res = new Int32Array(resBuf)
+        let res = new Int32Array(resBuf, 0, resBuf.getByteLength() / Int32Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as int)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number) as int)
         }
         return res
     }
@@ -5602,7 +5301,7 @@ export final class Int32Array {
      */
     public every(fn: (element: number, index: number, array: Int32Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i) as double as number, i as double as number, this)) {
+            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -5618,7 +5317,20 @@ export final class Int32Array {
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Int32Array) => boolean =
-            (element: number, index: number, array: Int32Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Int32Array): boolean => { return fn(element, index) }
+        return this.every(newF)
+    }
+
+    /**
+     * Checks that all elements of Int32Array satisfy the passed function
+     *
+     * @param fn check function
+     *
+     * @returns true if all elements satisfy fn
+     */
+    public every(fn: () => boolean): boolean {
+        let newF: (element: number, index: number, array: Int32Array) => boolean =
+            (element: number, index: number, array: Int32Array): boolean => { return fn() }
         return this.every(newF)
     }
 
@@ -5633,16 +5345,16 @@ export final class Int32Array {
         let markers = new boolean[this.length as int]
         let resLen = 0
         for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i) as double as number, i as double as number, this)
+            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
         let resBuf = new ArrayBuffer(resLen * Int32Array.BYTES_PER_ELEMENT as int)
-        let res = new Int32Array(resBuf)
+        let res = new Int32Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
-                res.set(j, this.at(i))
+                res.set(j, this.getUnsafe(i))
                 ++j
             }
         }
@@ -5658,7 +5370,20 @@ export final class Int32Array {
      */
     public filter(fn: (val: number, index: number) => boolean): Int32Array {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as number) }
+        return this.filter(newF)
+    }
+
+    /**
+     * creates a new Int32Array from current Int32Array based on a condition fn
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns a new Int32Array with elements from current Int32Array that satisfy condition fn
+     */
+    public filter(fn: () => boolean): Int32Array {
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn() }
         return this.filter(newF)
     }
 
@@ -5668,16 +5393,19 @@ export final class Int32Array {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return int | undefined as in JS
+     * NOTE: return int | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Int32Array) => boolean): int {
+    public find(fn: (val: number, index: number, array: Int32Array) => boolean): Number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            if (val == undefined) {
+                return undefined
+            }
+            if (fn(val!.valueOf(), i as number, this)) {
                 return val
             }
         }
-        throw new Error("Int32Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
@@ -5687,9 +5415,9 @@ export final class Int32Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number, index: number) => boolean): int {
+    public find(fn: (val: number, index: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index) }
         return this.find(newF)
     }
 
@@ -5702,12 +5430,12 @@ export final class Int32Array {
      */
     public findIndex(fn: (val: number, index: number, array: Int32Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
-                return i as double as number
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return i as number
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -5719,8 +5447,21 @@ export final class Int32Array {
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as double as number) }
-        return this.findIndex(newF) as double as number
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as number) }
+        return this.findIndex(newF) as number
+    }
+
+    /**
+     * Finds an index of the first element in the Int32Array that satisfies the condition
+     *
+     * @param fn condition
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (val: number, index: number, array: Int32Array) => boolean =
+            (val: number, index: number, array: Int32Array): boolean => { return fn() }
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -5732,8 +5473,8 @@ export final class Int32Array {
      */
     public findLast(fn: (val: number, index: number, array: Int32Array) => boolean): int {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return val
             }
         }
@@ -5749,7 +5490,7 @@ export final class Int32Array {
      */
     public findLast(fn: (val: number, index: number) => boolean): int {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val as double as number, index as double as number) }
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val as number, index as number) }
         return this.findLast(newF)
     }
 
@@ -5762,12 +5503,12 @@ export final class Int32Array {
      */
     public findLastIndex(fn: (val: number, index: number, array: Int32Array) => boolean): number {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return i
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -5779,8 +5520,8 @@ export final class Int32Array {
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as double as number) }
-        return this.findLastIndex(newF) as double as number
+            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as number) }
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -5792,9 +5533,8 @@ export final class Int32Array {
      */
     public forEach(fn: (val: number, index: number, array: Int32Array) => int): void {
         for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i) as double as number, i as double as number, this))
+            fn(this.getUnsafe(i) as number, i as number, this)
         }
-        throw new Error("Int32Array.forEach: has to return undefined, but returns void for now")
     }
 
     /**
@@ -5806,7 +5546,20 @@ export final class Int32Array {
      */
     public forEach(fn: (val: number, index: number) => int): void {
         let newF: (val: number, index: number, array: Int32Array) => int =
-            (val: number, index: number, array: Int32Array): int => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Int32Array): int => { return fn(val, index as number) }
+        this.forEach(newF)
+    }
+
+    /**
+     * Applies a function over all elements of Int32Array
+     *
+     * @param fn function to apply
+     *
+     * @returns undefined
+     */
+    public forEach(fn: () => int): void {
+        let newF: (val: number, index: number, array: Int32Array) => int =
+            (val: number, index: number, array: Int32Array): int => { return fn() }
         this.forEach(newF)
     }
 
@@ -5823,10 +5576,50 @@ export final class Int32Array {
         throw new Error("Int32Array.from: not implemented")
     }
 
-    /** Underlying ArrayBuffer */
-    public readonly buffer: Buffer
+    internal getUnsafe(index: int): int {
+        let byteIndex = index * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let res : int = 0
+        let byteVal : int;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as int;
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i: int = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as int;
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        return res
+    }
 
-    /** Byte offset within the underlying ArrayBuffer */
+    internal setUnsafe(insertPos: int, val: int): void {
+        let startByte = insertPos * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let bits = val;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i = 0; i < Int32Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+    }
+
+    /** Underlying ArrayBufferLike */
+    public readonly buffer: ArrayBufferLike
+
+    /** Byte offset within the underlying ArrayBufferLike */
     public readonly byteOffset: number
 
     /** Number of bytes used */
@@ -5839,67 +5632,184 @@ export final class Int32Array {
     public readonly name = "Int32Array"
 }
 
+class BigInt64ArrayIteratorKeys implements IterableIterator<Number> {
+    private length: int
+    private idx: int = 0
+
+    constructor(parent: BigInt64Array) {
+        this.length = parent.length as int
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.length) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.idx++))
+    }
+}
+
+class BigInt64ArrayIterator implements IterableIterator<BigInt> {
+    private parent: BigInt64Array
+    private idx: int = 0
+
+    constructor(parent: BigInt64Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<BigInt> {
+        return this;
+    }
+
+    override next(): IteratorResult<BigInt> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<BigInt>()
+        }
+        return new IteratorResult<BigInt>(false, new BigInt(this.parent[this.idx++]))
+    }
+}
+
+
 /**
  * JS BigInt64Array API-compatible class
  */
-export final class BigInt64Array {
-    public static readonly BYTES_PER_ELEMENT : number = 8
+export final class BigInt64Array implements Iterable<BigInt> {
+    public static readonly BYTES_PER_ELEMENT: number = 8
 
     /**
      * Creates an empty BigInt64Array.
      */
     public constructor() {
-        this(new ArrayBuffer(0), 0, 0)
+        this(0 as int)
     }
 
     /**
-     * Creates an BigInt64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type long in newly created BigInt64Array
+     * Creates an BigInt64Array with respect to data accessed via Iterable<Number> interface
      */
-    public constructor(buf: Buffer, byteOffset: number, length: number) {
-        this(buf, byteOffset as int, length as int)
-    }
-
-    /**
-     * Creates an BigInt64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type long in newly created BigInt64Array
-     */
-    public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
+    public constructor(elements: Iterable<BigInt>) {
+        // NOTE (ikorobkov): dealing with this overload is tricky
+        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+        let arr = Array.from<BigInt>(elements)
+        this.byteLength = arr.length * BigInt64Array.BYTES_PER_ELEMENT as int
+        this.length = arr.length
+        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.byteOffset = 0
+        for (let i: int = 0; i < this.length as int; ++i) {
+            this.$_set(i, arr.at(i)!.getLong())
         }
-        if (byteOffset % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
+    }
+
+    /**
+     * Creates an BigInt64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type long in newly created BigInt64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+        let intByteOffset: int = 0
+        if (byteOffset != undefined) {
+            intByteOffset = byteOffset!.intValue()
+            if (intByteOffset < 0) {
+                throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
+            }
+        }
+        let intByteLength: int
+        if (buf instanceof ArrayBuffer) {
+            intByteLength = (buf as ArrayBuffer).getByteLength()
+        } else if (buf instanceof SharedArrayBuffer) {
+            intByteLength = (buf as SharedArrayBuffer).getByteLength()
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        intByteLength = intByteLength - intByteOffset
+        if (intByteLength < 0) {
+            throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+        }
+
+        if (intByteLength % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
+            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
+        }
+        if (intByteOffset % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
-            throw new RangeError("Range Error: attempt to create BigInt64Array where length * BigInt64Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
+        let intLength: int
+        if (length != undefined) {
+            intLength = length!.intValue()
+            if (intLength > intByteLength / BigInt64Array.BYTES_PER_ELEMENT as int) {
+                throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+            }
+        } else {
+            intLength = intByteLength / BigInt64Array.BYTES_PER_ELEMENT as int
         }
-        this.byteLength = buf.getByteLength() - byteOffset
-        this.byteOffset = byteOffset
-        this.length = length
+        if (intLength < 0) {
+            throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
+        }
+        if (intLength < intByteLength / BigInt64Array.BYTES_PER_ELEMENT as int) {
+            intByteLength = intLength * BigInt64Array.BYTES_PER_ELEMENT as int
+        }
+        this.byteLength = intByteLength
+        this.byteOffset = intByteOffset
+        this.length = intLength
         this.buffer = buf
     }
 
     /**
-     * Creates an BigInt64Array with respect to buf and byteOffset.
+     * Creates an BigInt64Array with respect to data, byteOffset and length.
      *
      * @param buf data initializer
      *
      * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type long in newly created BigInt64Array
      */
-    public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+        this(buf, byteOffset, undefined)
+    }
+
+    /**
+     * Creates an BigInt64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type long in newly created BigInt64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an BigInt64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type long in newly created BigInt64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+        this(buf, new Number(byteOffset), undefined)
+    }
+
+    /**
+     * Creates an BigInt64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type long in newly created BigInt64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -5909,8 +5819,8 @@ export final class BigInt64Array {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: Buffer, byteOffset: number) {
-        this(buf, byteOffset as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
     }
 
     /**
@@ -5918,8 +5828,37 @@ export final class BigInt64Array {
      *
      * @param buf data initializer
      */
-    public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+        if (buf instanceof ArrayBuffer) {
+            this.byteLength = (buf as ArrayBuffer).getByteLength()
+            if (this.byteLength % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / BigInt64Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as ArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof SharedArrayBuffer) {
+            this.byteLength = (buf as SharedArrayBuffer).getByteLength();
+            if (this.byteLength % BigInt64Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as BigInt64Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / BigInt64Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as SharedArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof ArrayLike) {
+            // NOTE (ikorobkov): dealing with this overload is tricky
+            // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+            let arr = Array.from<Number>((buf as ArrayLike<Number>))
+            this.byteLength = arr.length as int * BigInt64Array.BYTES_PER_ELEMENT as int
+            this.length = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.length as int; ++i) {
+                this.$_set(i, arr.$_get(i).longValue())
+            }
+        } else {
+            throw new Error("unexpected type of buf")
+        }
     }
 
     /**
@@ -5928,10 +5867,13 @@ export final class BigInt64Array {
      * @param length data initializer
      */
     public constructor(length: int) {
+        if (length < 0) {
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
+        }
         this.length = length
         this.byteLength = length * BigInt64Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength)
+        this.buffer = new ArrayBuffer(this.byteLength as int)
     }
 
     /**
@@ -5949,9 +5891,145 @@ export final class BigInt64Array {
      * @param other data initializer
      */
     public constructor(other: BigInt64Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
+        if (other.buffer instanceof ArrayBuffer) {
+            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+        } else if (other.buffer instanceof SharedArrayBuffer) {
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
         this.byteLength = other.byteLength
         this.length = other.length
+        this.byteOffset = 0
+    }
+
+    
+    internal zeroIfInfinity(val: BigInt): BigInt {
+        if ((val.getLong() == Infinity) || (val.getLong() == -Infinity)) {
+            return new BigInt(0)
+        }
+        return new BigInt(val)
+    }
+
+    internal zeroIfInfinity(val: long): long {
+        if ((val == Infinity) || (val == -Infinity)) {
+            return 0 as long
+        }
+        return val
+    }
+    
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: BigInt): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: BigInt): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val)
+        this.setUnsafe(index, v.getLong())
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val as long)
+        this.setUnsafe(index, v as long)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: long): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: long): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        let v = this.zeroIfInfinity(val)
+        this.setUnsafe(index, v)
+    }
+
+    /**
+     * Returns an instance of BigInt at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: number): BigInt {
+        this.$_get(index as int)
+    }
+
+    /**
+     * Returns an instance of BigInt at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: int): BigInt {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        return new BigInt(this.getUnsafe(index))
+    }
+
+    
+    /**
+     * Returns an instance of primitive type at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public at(index: number): BigInt | undefined {
+        return this.at(index as int)
     }
 
     /**
@@ -5961,29 +6039,20 @@ export final class BigInt64Array {
      *
      * @returns a primitive at index
      */
-    public at(index: number): BigInt {
-        return new BigInt(this.at(index as int))
-    }
-
-    /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: int): long {
-        if (index < 0) {
-            index = this.length as int + index
+    public at(index: int): BigInt | undefined {
+        if ((index == Infinity as int) || (index == -Infinity as int)) {
+            return undefined
         }
-        let byteIndex = index * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res: long = 0
-        for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = this.buffer.at(byteIndex as int + i) as long
-            byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+        let k: int;
+        if (index >= 0) {
+            k = index;
+        } else {
+            k = this.length as int + index
         }
-        return res
+        if (k < 0 || k >= this.length as int) {
+            return undefined
+        }
+        return new BigInt(this.getUnsafe(k))
     }
 
     /**
@@ -6047,7 +6116,7 @@ export final class BigInt64Array {
         }
 
         for (let i = startPos; i < endPos; ++i) {
-            this.set(insertPos + i - startPos, this.at(i))
+            this.set(insertPos + i - startPos, this.getUnsafe(i))
         }
     }
 
@@ -6189,7 +6258,7 @@ export final class BigInt64Array {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: BigInt): void {
-        this.set(insertPos as int, val.getLong())
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -6201,16 +6270,7 @@ export final class BigInt64Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: long): void {
-        if (insertPos < 0 || insertPos >= this.length as int) {
-            throw new RangeError("set: insertPos is out-of-bounds")
-        }
-
-        let startByte = insertPos * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let bits = val;
-        for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-            this.buffer.set(startByte + i, byteVal)
-        }
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -6224,7 +6284,8 @@ export final class BigInt64Array {
      */
     public set(arr: BigInt[], insertPos: number): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos as int + i, arr[i].getLong())
+            let v = this.zeroIfInfinity(arr[i])
+            this.setUnsafe(insertPos as int + i, v.getLong())
         }
     }
 
@@ -6239,11 +6300,12 @@ export final class BigInt64Array {
      */
     public set(arr: long[], insertPos: int): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos + i, arr[i])
+            let v = this.zeroIfInfinity(arr[i])
+            this.setUnsafe(insertPos + i, v)
         }
     }
 
-
+    
     /**
      * Copies all elements of arr to the current BigInt64Array.
      *
@@ -6297,8 +6359,11 @@ export final class BigInt64Array {
      *
      * @returns true if e is in BigInt64Array, false otherwise
      */
-    public includes(e: BigInt, fromIndex: number): boolean {
-        return this.includes(e.getLong(), fromIndex as int)
+    public includes(e: BigInt, fromIndex?: Number): boolean {
+        if (fromIndex == undefined) {
+            return this.includes(e.getLong(), 0 as int)
+        }
+        return this.includes(e.getLong(), fromIndex!.intValue())
     }
 
     /**
@@ -6312,25 +6377,18 @@ export final class BigInt64Array {
      */
     public includes(e: long, fromIndex: int): boolean {
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return false;
+            }
+            if (tmp!.getLong() == e) {
                 return true
             }
         }
         return false
     }
 
-
-    /**
-     * Checks if specified argument is in BigInt64Array
-     *
-     * @param e search element
-     *
-     * @returns true if e is in BigInt64Array, false otherwise
-     */
-    public includes(e: BigInt): boolean {
-        return this.includes(e.getLong(), 0)
-    }
-
+    
     /**
      * Checks if specified argument is in BigInt64Array
      *
@@ -6351,8 +6409,11 @@ export final class BigInt64Array {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: BigInt, fromIndex: number): number {
-        return this.indexOf(e.getLong(), fromIndex as int)
+    public indexOf(e: BigInt, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.indexOf(e.getLong(), 0)
+        }
+        return this.indexOf(e.getLong(), fromIndex!.intValue())
     }
 
     /**
@@ -6376,25 +6437,18 @@ export final class BigInt64Array {
             }
         }
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.getLong() == e) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Returns index of specified element
-     *
-     * @param e search element
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(e: BigInt): number {
-        return this.indexOf(e.getLong())
-    }
-
+    
     /**
      * Returns index of specified element
      *
@@ -6413,25 +6467,19 @@ export final class BigInt64Array {
      *
      * @returns joined representation
      */
-    public join(s: string): string {
+    public join(s?: String): string {
+        if (s == undefined) {
+            return this.join(",")
+        }
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(s)
+            res.append(new BigInt(this.getUnsafe(i)))
+            res.append(s!)
         }
         if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
+            res.append(new BigInt(this.getUnsafe(this.length as int - 1)))
         }
         return res.toString()
-    }
-
-    /**
-     * Joins data to a string
-     *
-     * @returns joined representation with comma separator
-     */
-    public join(): string {
-        return this.join(",")
     }
 
     /**
@@ -6439,13 +6487,8 @@ export final class BigInt64Array {
      *
      * @returns iterator over keys
      */
-    public keys(): Iterator<Int> {
-        throw new Error("not implemented")
-        // let ret: Int[] = new Int[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = i;
-        // }
-        // return new ValuesIterator<Int>(ret);
+    public keys(): IterableIterator<Number> {
+        return new BigInt64ArrayIteratorKeys(this)
     }
 
     /**
@@ -6459,8 +6502,26 @@ export final class BigInt64Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
-    public lastIndexOf(val: BigInt, fromIndex: number): number {
-        return this.lastIndexOf(val.getLong(), fromIndex as int)
+    public lastIndexOf(val: BigInt, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.lastIndexOf(val.getLong(), 0 as int)
+        }
+        return this.lastIndexOf(val.getLong(), fromIndex!.intValue()) as number
+    }
+
+    /**
+     * Moves backwards starting at fromIndex to 0 and search val.
+     *
+     * @param val a value to search
+     *
+     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     *
+     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     */
+    public lastIndexOf(val: long, fromIndex: number): number {
+        return this.lastIndexOf(val, fromIndex as int) as number
     }
 
     /**
@@ -6483,25 +6544,18 @@ export final class BigInt64Array {
         }
 
         for (let i = fromIndex; i >= 0; --i) {
-            if (this.at(i) == val) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.getLong() == val) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Moves backwards and search val.
-     *
-     * @param val a value to search
-     *
-     * @returns right-most index of val. -1 if val not found
-     */
-    public lastIndexOf(val: BigInt): number {
-        return this.lastIndexOf(val.getLong(), this.length as int - 1)
-    }
-
+    
     /**
      * Moves backwards and search val.
      *
@@ -6513,7 +6567,7 @@ export final class BigInt64Array {
         return this.lastIndexOf(val, this.length as int - 1)
     }
 
-   /**
+    /**
     * Creates a new BigInt64Array using initializer
     *
     * @param data initializer
@@ -6530,11 +6584,12 @@ export final class BigInt64Array {
      * @returns a new BigInt64Array using reversed data from the current one
      */
     public reverse(): BigInt64Array {
-        let res = new BigInt64Array(this)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(this.length as int - 1 - i, this.at(i))
+        for (let i: int = 0; i < this.length as int / 2 as int; i++) {
+            const tmp = this.getUnsafe(this.length as int - 1 - i)
+            this.setUnsafe(this.length as int - 1 - i, this.getUnsafe(i))
+            this.setUnsafe(i, tmp)
         }
-        return res
+        return this
     }
 
     /**
@@ -6548,7 +6603,52 @@ export final class BigInt64Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-     public slice(begin: number, end: number): BigInt64Array {
+    public slice(begin?: Number, end?: Number): BigInt64Array {
+        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a slice of current BigInt64Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new BigInt64Array with elements of current BigInt64Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: number): BigInt64Array {
+        return this.slice(begin as int, end as int)
+    }
+
+    /**
+     * Creates a slice of current BigInt64Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new BigInt64Array with elements of current BigInt64Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: int): BigInt64Array {
+        return this.slice(begin as int, end as int)
+    }
+
+        /**
+     * Creates a slice of current BigInt64Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new BigInt64Array with elements of current BigInt64Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: int, end: number): BigInt64Array {
         return this.slice(begin as int, end as int)
     }
 
@@ -6564,8 +6664,22 @@ export final class BigInt64Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): BigInt64Array {
-        let buf = this.buffer.sliceInternal(begin * BigInt64Array.BYTES_PER_ELEMENT as int, end * BigInt64Array.BYTES_PER_ELEMENT as int)
-        return new BigInt64Array(buf)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        if (this.buffer instanceof ArrayBuffer) {
+            let buf = (this.buffer as ArrayBuffer).slice(relStart * BigInt64Array.BYTES_PER_ELEMENT as int, relEnd * BigInt64Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+            return new BigInt64Array(buf)
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * BigInt64Array.BYTES_PER_ELEMENT as int, relEnd * BigInt64Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
+            return new BigInt64Array(buf)
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
     }
 
     /**
@@ -6591,83 +6705,97 @@ export final class BigInt64Array {
     }
 
     /**
-     * Creates a slice of current BigInt64 with all elements.
-     *
-     * @returns a new BigInt64Array with elements of current BigInt64Array
-     */
-    public slice(): BigInt64Array {
-        return new BigInt64Array(this)
-    }
-
-    /**
-     * Sorts in-place according to the numeric ordering
-     *
-     * @returns sorted BigInt64Array
-     */
-    public sort(): BigInt64Array {
-        let newF: (a: BigInt, b: BigInt) => number = (a: BigInt, b: BigInt): number => {
-            const a1 = a.getLong()
-            const b1 = b.getLong()
-            return a1 < b1 ? -1 : a1 == b1 ? 0 : 1
-        }
-        return this.sort(newF)
-    }
-
-    /**
-     * Creates a BigInt64Array with the same underlying ArrayBuffer
+     * Creates a BigInt64Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new BigInt64Array with the same underlying ArrayBuffer
+     * @returns new BigInt64Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin?: Number, end?: Number): BigInt64Array {
+        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a BigInt64Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new BigInt64Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: number, end: number): BigInt64Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a BigInt64Array with the same underlying ArrayBuffer
+     * Creates a BigInt64Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new BigInt64Array with the same underlying ArrayBuffer
+     * @returns new BigInt64Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: number, end: int): BigInt64Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+        /**
+     * Creates a BigInt64Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new BigInt64Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: int, end: number): BigInt64Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+    /**
+     * Creates a BigInt64Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new BigInt64Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: int, end: int): BigInt64Array {
-        return new BigInt64Array(this.buffer, begin * BigInt64Array.BYTES_PER_ELEMENT as int, end - begin)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        return new BigInt64Array(this.buffer, relStart * BigInt64Array.BYTES_PER_ELEMENT as int, count)
     }
 
     /**
-     * Creates a BigInt64Array with the same ArrayBuffer
+     * Creates a BigInt64Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new BigInt64Array with the same ArrayBuffer
+     * @returns new BigInt64Array with the same ArrayBufferLike
      */
     public subarray(begin: number): BigInt64Array {
-        return this.subarray(begin as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
-     * Creates a BigInt64Array with the same ArrayBuffer
+     * Creates a BigInt64Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new BigInt64Array with the same ArrayBuffer
+     * @returns new BigInt64Array with the same ArrayBufferLike
      */
     public subarray(begin: int): BigInt64Array {
-        return this.subarray(begin, this.length as int)
-    }
-
-    /**
-     * Creates a BigInt64Array with the same ArrayBuffer
-     *
-     * @returns new BigInt64Array with the same ArrayBuffer
-     */
-    public subarray(): BigInt64Array {
-        return this.subarray(0, this.length as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
@@ -6727,15 +6855,7 @@ export final class BigInt64Array {
      * @returns a string representation of the BigInt64Array
      */
     public override toString(): string {
-        let res = new StringBuilder();
-        for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(c',')
-        }
-        if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
-        }
-        return res.toString()
+        return this.join(",")
     }
 
     /**
@@ -6743,13 +6863,24 @@ export final class BigInt64Array {
      *
      * @returns an iterator
      */
-    public values(): Iterator<Long> {
-        throw new Error("not implemented")
-        // const ret = new Long[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = this.at(i);
-        // }
-        // return new ValuesIterator<Long>(ret);
+    public values(): IterableIterator<BigInt> {
+        return new BigInt64ArrayIterator(this)
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public override iterator(): IterableIterator<BigInt> {
+        return this.values()
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public $_iterator(): IterableIterator<BigInt> {
+        return this.values()
     }
 
     /**
@@ -6781,358 +6912,7 @@ export final class BigInt64Array {
     }
 
     /// === with element lambda functions ===
-
-    /**
-     * Checks that at least one element of BigInt64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public some(fn: (element: long, index: int, array: BigInt64Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (fn(this.at(i), i, this)) {
-    //             return true
-    //         }
-    //     }
-    //     return false
-    // }
-
-    /**
-     * Checks that at least one element of BigInt64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // public some(fn: (element: long, index: int) => boolean): boolean {
-    //     let newF: (element: long, index: int, array: BigInt64Array) => boolean =
-    //         (element: long, index: int, array: BigInt64Array): boolean => { return fn(element, index) }
-    //     return this.some(newF)
-    // }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public reduce(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long, init: long): long {
-    //     let acc = init
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    // public reduce(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long): long {
-    //     let acc = this.at(0)
-    //     for (let i = 1; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public reduceRight(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long, init: long): long {
-    //     let acc = init
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @returns reduction result
-     */
-    // public reduceRight(fn: (acc: long, curVal: long, curIndex: int, array: BigInt64Array) => long): long {
-    //     let acc: long = this.at(this.length as int - 1)
-    //     for (let i = this.length as int - 2; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-    * Creates a new BigInt64Array using fn(arr[i]) over all elements of current BigInt64Array.
-    *
-    * @param fn a function to apply for each element of current BigInt64Array
-    *
-    * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
-    */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public map(fn: (val: long, index: int) => long): BigInt64Array {
-    //     let resBuf = new ArrayBuffer(this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int)
-    //     let res = new BigInt64Array(resBuf)
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         res.set(i, fn(this.at(i), i))
-    //     }
-    //     return res
-    // }
-
-    /**
-     * Checks that all elements of BigInt64Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public every(fn: (element: long, index: int, array: BigInt64Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (!fn(this.at(i), i, this)) {
-    //             return false
-    //         }
-    //     }
-    //     return true
-    // }
-
-    /**
-     * Checks that all elements of BigInt64Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // public every(fn: (element: long, index: int) => boolean): boolean {
-    //     let newF: (element: long, index: int, array: BigInt64Array) => boolean =
-    //         (element: long, index: int, array: BigInt64Array): boolean => { return fn(element, index) }
-    //     return this.every(newF)
-    // }
-
-    /**
-     * Creates a new BigInt64Array from current BigInt64Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public filter(fn: (val: long, index: int, array: BigInt64Array) => boolean): BigInt64Array {
-    //     let markers = new boolean[this.length as int]
-    //     let resLen = 0
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         markers[i] = fn(this.at(i), i, this)
-    //         if (markers[i]) {
-    //             ++resLen
-    //         }
-    //     }
-    //     let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT as int)
-    //     let res = new BigInt64Array(resBuf)
-    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
-    //         if (markers[i]) {
-    //             res.set(j, this.at(i))
-    //             ++j
-    //         }
-    //     }
-    //     return res
-    // }
-
-    /**
-     * creates a new BigInt64Array from current BigInt64Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
-     */
-    // public filter(fn: (val: long, index: int) => boolean): BigInt64Array {
-    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the BigInt64Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return long | undefined as in JS
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public find(fn: (val: long, index: int, array: BigInt64Array) => boolean): long {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("BigInt64Array.find: not implemented if element was not found")
-    // }
-
-    /**
-     * Finds the first element in the BigInt64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // public find(fn: (val: long, index: int) => boolean): long {
-    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the BigInt64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findIndex(fn: (val: long, index: int, array: BigInt64Array) => boolean): int {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the first element in the BigInt64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // public findIndex(fn: (val: long, index: int) => boolean): int {
-    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the BigInt64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLast(fn: (val: long, index: int, array: BigInt64Array) => boolean): long {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("BigInt64Array.findLast: not implemented if an element was not found")
-    // }
-
-    /**
-     * Finds the last element in the BigInt64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // public findLast(fn: (val: long, index: int) => boolean): long {
-    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the BigInt64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLastIndex(fn: (val: long, index: int, array: BigInt64Array) => boolean): int {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the last element in the BigInt64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // public findLastIndex(fn: (val: long, index: int) => boolean): int {
-    //     let newF: (val: long, index: int, array: BigInt64Array) => boolean =
-    //         (val: long, index: int, array: BigInt64Array): boolean => { return fn(val, index) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of BigInt64Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public forEach(fn: (val: long, index: int, array: BigInt64Array) => long): void {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         this.set(i, fn(this.at(i), i, this))
-    //     }
-    //     throw new Error("BigInt64Array.forEach: has to return undefined, but returns void for now")
-    // }
-
-    /**
-     * Applies a function over all elements of BigInt64Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // public forEach(fn: (val: long, index: int) => long): void {
-    //     let newF: (val: long, index: int, array: BigInt64Array) => long =
-    //         (val: long, index: int, array: BigInt64Array): long => { return fn(val, index) }
-    //     this.forEach(newF)
-    // }
-
-    /**
-     * Creates an BigInt64Array from array-like argument
-     *
-     * @param o array-like object to initialize BigInt64Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new BigInt64Array
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public from(o: Object, mapFn: (e: Object, index: int) => long): BigInt64Array {
-    //     throw new Error("BigInt64Array.from: not implemented")
-    // }
-
+    
     /**
      * Checks that all elements of BigInt64Array satisfy the passed function
      *
@@ -7145,6 +6925,7 @@ export final class BigInt64Array {
             (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new BigInt64Array from current BigInt64Array based on a condition fn
      *
@@ -7165,7 +6946,7 @@ export final class BigInt64Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: BigInt) => boolean): long {
+    public find(fn: (val: BigInt) => boolean): BigInt | undefined {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
             (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
         return this.find(newF)
@@ -7181,7 +6962,7 @@ export final class BigInt64Array {
     public findIndex(fn: (val: BigInt) => boolean): number {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
             (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as double as number
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -7207,7 +6988,7 @@ export final class BigInt64Array {
     public findLastIndex(fn: (val: BigInt) => boolean): number {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
             (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as double as number
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -7215,7 +6996,6 @@ export final class BigInt64Array {
      *
      * @param fn function to apply
      *
-     * @returns undefined
      */
     public forEach(fn: (val: BigInt) => long): void {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => long =
@@ -7249,30 +7029,42 @@ export final class BigInt64Array {
         return this.some(newF)
     }
 
-    // TODO(kprokopenko): this may be not skipped
+    // NOTE (kprokopenko): this may be not skipped
     /**
      * Sorts in-place
      *
-     * @param fn comparator
+     * @param fn comparator —  used to determine the order of the elements.
+     * fn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted BigInt64Array
      */
-    public sort(fn: (a: BigInt, b: BigInt) => number): BigInt64Array {
+    public sort(fn?: (a: BigInt, b: BigInt) => number): BigInt64Array {
         let arr: long[] = new long[this.length as int]
         for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
+            arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: long, b: long) => boolean =
-                (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
+        if (fn == undefined) {
+            // NOTE (ikorobkov): needs to add signature for sort(long[])
+            //sort(arr)
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        */
-        return this;
-    }
+        }
+        else {
+            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+            /*
+                let mustPrecede: (a: long, b: long) => boolean =
+                    (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
+                sort(arr, mustPrecede)
+                for (let i = 0; i < this.length as int; ++i) {
+                    this.set(i, arr[i])
+                }
+            */
+        }
+        return this
+    } 
 
     /**
      * Checks that at least one element of BigInt64Array satisfies the passed function
@@ -7283,7 +7075,7 @@ export final class BigInt64Array {
      */
     public some(fn: (element: BigInt, index: number, array: BigInt64Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (fn(new BigInt(this.at(i)), i as double as number, this)) {
+            if (fn(new BigInt(this.getUnsafe(i)), i as number, this)) {
                 return true
             }
         }
@@ -7299,7 +7091,7 @@ export final class BigInt64Array {
      */
     public some(fn: (element: BigInt, index: number) => boolean): boolean {
         let newF: (element: BigInt, index: number, array: BigInt64Array) => boolean =
-            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element, index as double as number) }
+            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element, index as number) }
         return this.some(newF)
     }
 
@@ -7315,7 +7107,7 @@ export final class BigInt64Array {
     public reduce(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigInt64Array) => BigInt, init: BigInt): BigInt {
         let acc = init
         for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, new BigInt(this.at(i)), i as double as number, this)
+            acc = fn(acc, new BigInt(this.getUnsafe(i)), i as number, this)
         }
         return acc
     }
@@ -7328,9 +7120,9 @@ export final class BigInt64Array {
      * @returns reduction result
      */
     public reduce(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigInt64Array) => BigInt): BigInt {
-        let acc = new BigInt(this.at(0))
+        let acc = new BigInt(this.getUnsafe(0))
         for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, new BigInt(this.at(i)), i as double as number, this)
+            acc = fn(acc, new BigInt(this.getUnsafe(i)), i as number, this)
         }
         return acc
     }
@@ -7347,7 +7139,7 @@ export final class BigInt64Array {
     public reduceRight(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigInt64Array) => BigInt, init: BigInt): BigInt {
         let acc = new BigInt(init)
         for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, new BigInt(this.at(i)), i as double as number, this)
+            acc = fn(acc, new BigInt(this.getUnsafe(i)), i as number, this)
         }
         return acc
     }
@@ -7360,9 +7152,9 @@ export final class BigInt64Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigInt64Array) => BigInt): BigInt {
-        let acc: BigInt = new BigInt(this.at(this.length as int - 1))
+        let acc: BigInt = new BigInt(this.getUnsafe(this.length as int - 1))
         for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, new BigInt(this.at(i)), i as double as number, this)
+            acc = fn(acc, new BigInt(this.getUnsafe(i)), i as number, this)
         }
         return acc
     }
@@ -7376,9 +7168,9 @@ export final class BigInt64Array {
     */
     public map(fn: (val: BigInt, index: number) => BigInt): BigInt64Array {
         let resBuf = new ArrayBuffer(this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int)
-        let res = new BigInt64Array(resBuf)
+        let res = new BigInt64Array(resBuf, 0, resBuf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(new BigInt(this.at(i)), i as double as number).getLong())
+            res.set(i, fn(new BigInt(this.getUnsafe(i)), i as number).getLong())
         }
         return res
     }
@@ -7392,7 +7184,7 @@ export final class BigInt64Array {
      */
     public every(fn: (element: BigInt, index: number, array: BigInt64Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(new BigInt(this.at(i)), i as double as number, this)) {
+            if (!fn(new BigInt(this.getUnsafe(i)), i as number, this)) {
                 return false
             }
         }
@@ -7408,7 +7200,20 @@ export final class BigInt64Array {
      */
     public every(fn: (element: BigInt, index: number) => boolean): boolean {
         let newF: (element: BigInt, index: number, array: BigInt64Array) => boolean =
-            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element, index as double as number) }
+            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn(element, index) }
+        return this.every(newF)
+    }
+
+    /**
+     * Checks that all elements of BigInt64Array satisfy the passed function
+     *
+     * @param fn check function
+     *
+     * @returns true if all elements satisfy fn
+     */
+    public every(fn: () => boolean): boolean {
+        let newF: (element: BigInt, index: number, array: BigInt64Array) => boolean =
+            (element: BigInt, index: number, array: BigInt64Array): boolean => { return fn() }
         return this.every(newF)
     }
 
@@ -7423,16 +7228,16 @@ export final class BigInt64Array {
         let markers = new boolean[this.length as int]
         let resLen = 0
         for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(new BigInt(this.at(i)), i as double as number, this)
+            markers[i] = fn(new BigInt(this.getUnsafe(i)), i as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
         let resBuf = new ArrayBuffer(resLen * BigInt64Array.BYTES_PER_ELEMENT as int)
-        let res = new BigInt64Array(resBuf)
+        let res = new BigInt64Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
-                res.set(j, this.at(i))
+                res.set(j, this.getUnsafe(i))
                 ++j
             }
         }
@@ -7448,7 +7253,20 @@ export final class BigInt64Array {
      */
     public filter(fn: (val: BigInt, index: number) => boolean): BigInt64Array {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as double as number) }
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as number) }
+        return this.filter(newF)
+    }
+
+    /**
+     * creates a new BigInt64Array from current BigInt64Array based on a condition fn
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns a new BigInt64Array with elements from current BigInt64Array that satisfy condition fn
+     */
+    public filter(fn: () => boolean): BigInt64Array {
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn() }
         return this.filter(newF)
     }
 
@@ -7458,16 +7276,19 @@ export final class BigInt64Array {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return long | undefined as in JS
+     * NOTE: return long | undefined as in JS
      */
-    public find(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): long {
+    public find(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): BigInt | undefined {
         for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
-            if (fn(new BigInt(val), i as double as number, this)) {
+            if (val == undefined) {
+                return undefined
+            }
+            if (fn(val!, i as number, this)) {
                 return val
             }
         }
-        throw new Error("BigInt64Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
@@ -7477,9 +7298,9 @@ export final class BigInt64Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: BigInt, index: number) => boolean): long {
+    public find(fn: (val: BigInt, index: number) => boolean): BigInt | undefined {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as double as number) }
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index) }
         return this.find(newF)
     }
 
@@ -7492,12 +7313,12 @@ export final class BigInt64Array {
      */
     public findIndex(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(new BigInt(val), i as double as number, this)) {
-                return i as double as number
+            let val = this.getUnsafe(i)
+            if (fn(new BigInt(val), i as number, this)) {
+                return i as number
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -7509,8 +7330,21 @@ export final class BigInt64Array {
      */
     public findIndex(fn: (val: BigInt, index: number) => boolean): number {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as double as number) }
-        return this.findIndex(newF) as double as number
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as number) }
+        return this.findIndex(newF) as number
+    }
+
+    /**
+     * Finds an index of the first element in the BigInt64Array that satisfies the condition
+     *
+     * @param fn condition
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn() }
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -7522,8 +7356,8 @@ export final class BigInt64Array {
      */
     public findLast(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): long {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(new BigInt(val), i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(new BigInt(val), i as number, this)) {
                 return val
             }
         }
@@ -7539,7 +7373,7 @@ export final class BigInt64Array {
      */
     public findLast(fn: (val: BigInt, index: number) => boolean): long {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(new BigInt(val), index as double as number) }
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(new BigInt(val), index as number) }
         return this.findLast(newF)
     }
 
@@ -7552,12 +7386,12 @@ export final class BigInt64Array {
      */
     public findLastIndex(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): number {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(new BigInt(val), i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(new BigInt(val), i as number, this)) {
                 return i
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -7569,8 +7403,8 @@ export final class BigInt64Array {
      */
     public findLastIndex(fn: (val: BigInt, index: number) => boolean): number {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as double as number) }
-        return this.findLastIndex(newF) as double as number
+            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as number) }
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -7582,9 +7416,8 @@ export final class BigInt64Array {
      */
     public forEach(fn: (val: BigInt, index: number, array: BigInt64Array) => long): void {
         for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(new BigInt(this.at(i)), i as double as number, this))
+            fn(new BigInt(this.getUnsafe(i)), i as number, this)
         }
-        throw new Error("BigInt64Array.forEach: has to return undefined, but returns void for now")
     }
 
     /**
@@ -7596,7 +7429,20 @@ export final class BigInt64Array {
      */
     public forEach(fn: (val: BigInt, index: number) => long): void {
         let newF: (val: BigInt, index: number, array: BigInt64Array) => long =
-            (val: BigInt, index: number, array: BigInt64Array): long => { return fn(val, index as double as number) }
+            (val: BigInt, index: number, array: BigInt64Array): long => { return fn(val, index as number) }
+        this.forEach(newF)
+    }
+
+    /**
+     * Applies a function over all elements of BigInt64Array
+     *
+     * @param fn function to apply
+     *
+     * @returns undefined
+     */
+    public forEach(fn: () => long): void {
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => long =
+            (val: BigInt, index: number, array: BigInt64Array): long => { return fn() }
         this.forEach(newF)
     }
 
@@ -7613,10 +7459,50 @@ export final class BigInt64Array {
         throw new Error("BigInt64Array.from: not implemented")
     }
 
-    /** Underlying ArrayBuffer */
-    public readonly buffer: Buffer
+    internal getUnsafe(index: int): long {
+        let byteIndex = index * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let res : long = 0
+        let byteVal : long;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as long;
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i: int = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as long;
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        return res
+    }
 
-    /** Byte offset within the underlying ArrayBuffer */
+    internal setUnsafe(insertPos: int, val: long): void {
+        let startByte = insertPos * BigInt64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let bits = val;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i = 0; i < BigInt64Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+    }
+
+    /** Underlying ArrayBufferLike */
+    public readonly buffer: ArrayBufferLike
+
+    /** Byte offset within the underlying ArrayBufferLike */
     public readonly byteOffset: number
 
     /** Number of bytes used */
@@ -7629,67 +7515,184 @@ export final class BigInt64Array {
     public readonly name = "BigInt64Array"
 }
 
+class Float32ArrayIteratorKeys implements IterableIterator<Number> {
+    private length: int
+    private idx: int = 0
+
+    constructor(parent: Float32Array) {
+        this.length = parent.length as int
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.length) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.idx++))
+    }
+}
+
+class Float32ArrayIterator implements IterableIterator<Number> {
+    private parent: Float32Array
+    private idx: int = 0
+
+    constructor(parent: Float32Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
+    }
+}
+
+
 /**
  * JS Float32Array API-compatible class
  */
-export final class Float32Array {
-    public static readonly BYTES_PER_ELEMENT : number = 4
+export final class Float32Array implements Iterable<Number> {
+    public static readonly BYTES_PER_ELEMENT: number = 4
 
     /**
      * Creates an empty Float32Array.
      */
     public constructor() {
-        this(new ArrayBuffer(0), 0, 0)
+        this(0 as int)
     }
 
     /**
-     * Creates an Float32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type float in newly created Float32Array
+     * Creates an Float32Array with respect to data accessed via Iterable<Number> interface
      */
-    public constructor(buf: Buffer, byteOffset: number, length: number) {
-        this(buf, byteOffset as int, length as int)
-    }
-
-    /**
-     * Creates an Float32Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type float in newly created Float32Array
-     */
-    public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Float32Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
+    public constructor(elements: Iterable<Number>) {
+        // NOTE (ikorobkov): dealing with this overload is tricky
+        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+        let arr = Array.from<Number>(elements)
+        this.byteLength = arr.length * Float32Array.BYTES_PER_ELEMENT as int
+        this.length = arr.length
+        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.byteOffset = 0
+        for (let i: int = 0; i < this.length as int; ++i) {
+            this.$_set(i, arr.at(i)!.floatValue())
         }
-        if (byteOffset % Float32Array.BYTES_PER_ELEMENT as int != 0) {
+    }
+
+    /**
+     * Creates an Float32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type float in newly created Float32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+        let intByteOffset: int = 0
+        if (byteOffset != undefined) {
+            intByteOffset = byteOffset!.intValue()
+            if (intByteOffset < 0) {
+                throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
+            }
+        }
+        let intByteLength: int
+        if (buf instanceof ArrayBuffer) {
+            intByteLength = (buf as ArrayBuffer).getByteLength()
+        } else if (buf instanceof SharedArrayBuffer) {
+            intByteLength = (buf as SharedArrayBuffer).getByteLength()
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        intByteLength = intByteLength - intByteOffset
+        if (intByteLength < 0) {
+            throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+        }
+
+        if (intByteLength % Float32Array.BYTES_PER_ELEMENT as int != 0) {
+            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
+        }
+        if (intByteOffset % Float32Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length as int * Float32Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
-            throw new RangeError("Range Error: attempt to create Float32Array where length * Float32Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
+        let intLength: int
+        if (length != undefined) {
+            intLength = length!.intValue()
+            if (intLength > intByteLength / Float32Array.BYTES_PER_ELEMENT as int) {
+                throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+            }
+        } else {
+            intLength = intByteLength / Float32Array.BYTES_PER_ELEMENT as int
         }
-        this.byteLength = buf.getByteLength() - byteOffset
-        this.byteOffset = byteOffset
-        this.length = length
+        if (intLength < 0) {
+            throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
+        }
+        if (intLength < intByteLength / Float32Array.BYTES_PER_ELEMENT as int) {
+            intByteLength = intLength * Float32Array.BYTES_PER_ELEMENT as int
+        }
+        this.byteLength = intByteLength
+        this.byteOffset = intByteOffset
+        this.length = intLength
         this.buffer = buf
     }
 
     /**
-     * Creates an Float32Array with respect to buf and byteOffset.
+     * Creates an Float32Array with respect to data, byteOffset and length.
      *
      * @param buf data initializer
      *
      * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type float in newly created Float32Array
      */
-    public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Float32Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+        this(buf, byteOffset, undefined)
+    }
+
+    /**
+     * Creates an Float32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type float in newly created Float32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Float32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type float in newly created Float32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+        this(buf, new Number(byteOffset), undefined)
+    }
+
+    /**
+     * Creates an Float32Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type float in newly created Float32Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -7699,8 +7702,8 @@ export final class Float32Array {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: Buffer, byteOffset: number) {
-        this(buf, byteOffset as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
     }
 
     /**
@@ -7708,8 +7711,37 @@ export final class Float32Array {
      *
      * @param buf data initializer
      */
-    public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Float32Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+        if (buf instanceof ArrayBuffer) {
+            this.byteLength = (buf as ArrayBuffer).getByteLength()
+            if (this.byteLength % Float32Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Float32Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as ArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof SharedArrayBuffer) {
+            this.byteLength = (buf as SharedArrayBuffer).getByteLength();
+            if (this.byteLength % Float32Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 4 as Float32Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Float32Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as SharedArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof ArrayLike) {
+            // NOTE (ikorobkov): dealing with this overload is tricky
+            // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+            let arr = Array.from<Number>((buf as ArrayLike<Number>))
+            this.byteLength = arr.length as int * Float32Array.BYTES_PER_ELEMENT as int
+            this.length = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.length as int; ++i) {
+                this.$_set(i, arr.$_get(i).floatValue())
+            }
+        } else {
+            throw new Error("unexpected type of buf")
+        }
     }
 
     /**
@@ -7718,10 +7750,13 @@ export final class Float32Array {
      * @param length data initializer
      */
     public constructor(length: int) {
+        if (length < 0) {
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
+        }
         this.length = length
         this.byteLength = length * Float32Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength)
+        this.buffer = new ArrayBuffer(this.byteLength as int)
     }
 
     /**
@@ -7739,9 +7774,128 @@ export final class Float32Array {
      * @param other data initializer
      */
     public constructor(other: Float32Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
+        if (other.buffer instanceof ArrayBuffer) {
+            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+        } else if (other.buffer instanceof SharedArrayBuffer) {
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
         this.byteLength = other.byteLength
         this.length = other.length
+        this.byteOffset = 0
+    }
+
+    
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: number): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: number): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        this.setUnsafe(index, val as float)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        this.setUnsafe(index, val as float)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: float): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: float): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        this.setUnsafe(index, val)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: number): number {
+        this.$_get(index as int)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: int): number {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        return this.getUnsafe(index) as number
+    }
+
+    
+    /**
+     * Returns an instance of primitive type at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public at(index: number): Number | undefined {
+        return this.at(index as int)
     }
 
     /**
@@ -7751,29 +7905,20 @@ export final class Float32Array {
      *
      * @returns a primitive at index
      */
-    public at(index: number): number {
-        return this.at(index as int) as double as number
-    }
-
-    /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: int): float {
-        if (index < 0) {
-            index = this.length as int + index
+    public at(index: int): Number | undefined {
+        if ((index == Infinity as int) || (index == -Infinity as int)) {
+            return undefined
         }
-        let byteIndex = index * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res: int = 0
-        for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = this.buffer.at(byteIndex as int + i) as int
-            byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int;
+        let k: int;
+        if (index >= 0) {
+            k = index;
+        } else {
+            k = this.length as int + index
         }
-        return Float.bitCastFromInt(res)
+        if (k < 0 || k >= this.length as int) {
+            return undefined
+        }
+        return new Number(this.getUnsafe(k))
     }
 
     /**
@@ -7837,7 +7982,7 @@ export final class Float32Array {
         }
 
         for (let i = startPos; i < endPos; ++i) {
-            this.set(insertPos + i - startPos, this.at(i))
+            this.set(insertPos + i - startPos, this.getUnsafe(i))
         }
     }
 
@@ -7902,7 +8047,7 @@ export final class Float32Array {
      * @returns modified Float32Array
      */
     public fill(value: number, start: number, end: number): Float32Array {
-        return this.fill(value as double as int as float, start as int, end as int)
+        return this.fill(value as float, start as int, end as int)
     }
 
     /**
@@ -7945,7 +8090,7 @@ export final class Float32Array {
      * @returns modified Float32Array
      */
     public fill(value: number, start: number): Float32Array {
-        return this.fill(value as double as int as float, start as int)
+        return this.fill(value as float, start as int)
     }
 
     /**
@@ -7979,7 +8124,7 @@ export final class Float32Array {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.set(insertPos as int, val as double as int as float)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -7991,16 +8136,7 @@ export final class Float32Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: float): void {
-        if (insertPos < 0 || insertPos >= this.length as int) {
-            throw new RangeError("set: insertPos is out-of-bounds")
-        }
-
-        let startByte = insertPos * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let bits = Float.bitCastToInt(val);
-        for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-            this.buffer.set(startByte + i, byteVal)
-        }
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -8014,7 +8150,7 @@ export final class Float32Array {
      */
     public set(arr: number[], insertPos: number): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos as int + i, arr[i] as double as int as float)
+            this.setUnsafe(insertPos as int + i, arr[i] as float)
         }
     }
 
@@ -8029,11 +8165,11 @@ export final class Float32Array {
      */
     public set(arr: float[], insertPos: int): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos + i, arr[i])
+            this.setUnsafe(insertPos + i, arr[i])
         }
     }
 
-
+    
     /**
      * Copies all elements of arr to the current Float32Array.
      *
@@ -8087,8 +8223,11 @@ export final class Float32Array {
      *
      * @returns true if e is in Float32Array, false otherwise
      */
-    public includes(e: number, fromIndex: number): boolean {
-        return this.includes(e as double as int as float, fromIndex as int)
+    public includes(e: number, fromIndex?: Number): boolean {
+        if (fromIndex == undefined) {
+            return this.includes(e as float, 0 as int)
+        }
+        return this.includes(e as float, fromIndex!.intValue())
     }
 
     /**
@@ -8102,25 +8241,18 @@ export final class Float32Array {
      */
     public includes(e: float, fromIndex: int): boolean {
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return false;
+            }
+            if (tmp!.floatValue() == e) {
                 return true
             }
         }
         return false
     }
 
-
-    /**
-     * Checks if specified argument is in Float32Array
-     *
-     * @param e search element
-     *
-     * @returns true if e is in Float32Array, false otherwise
-     */
-    public includes(e: number): boolean {
-        return this.includes(e as double as int as float, 0)
-    }
-
+    
     /**
      * Checks if specified argument is in Float32Array
      *
@@ -8141,8 +8273,11 @@ export final class Float32Array {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as double as int as float, fromIndex as int)
+    public indexOf(e: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.indexOf(e as float, 0)
+        }
+        return this.indexOf(e as float, fromIndex!.intValue())
     }
 
     /**
@@ -8166,25 +8301,18 @@ export final class Float32Array {
             }
         }
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.floatValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Returns index of specified element
-     *
-     * @param e search element
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(e: number): number {
-        return this.indexOf(e as double as int as float)
-    }
-
+    
     /**
      * Returns index of specified element
      *
@@ -8203,25 +8331,19 @@ export final class Float32Array {
      *
      * @returns joined representation
      */
-    public join(s: string): string {
+    public join(s?: String): string {
+        if (s == undefined) {
+            return this.join(",")
+        }
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(s)
+            res.append(this.getUnsafe(i) as number)
+            res.append(s!)
         }
         if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
+            res.append(this.getUnsafe(this.length as int - 1) as number)
         }
         return res.toString()
-    }
-
-    /**
-     * Joins data to a string
-     *
-     * @returns joined representation with comma separator
-     */
-    public join(): string {
-        return this.join(",")
     }
 
     /**
@@ -8229,13 +8351,8 @@ export final class Float32Array {
      *
      * @returns iterator over keys
      */
-    public keys(): Iterator<Int> {
-        throw new Error("not implemented")
-        // let ret: Int[] = new Int[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = i;
-        // }
-        // return new ValuesIterator<Int>(ret);
+    public keys(): IterableIterator<Number> {
+        return new Float32ArrayIteratorKeys(this)
     }
 
     /**
@@ -8249,8 +8366,26 @@ export final class Float32Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as double as int as float, fromIndex as int)
+    public lastIndexOf(val: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.lastIndexOf(val as float, 0 as int)
+        }
+        return this.lastIndexOf(val as float, fromIndex!.intValue()) as number
+    }
+
+    /**
+     * Moves backwards starting at fromIndex to 0 and search val.
+     *
+     * @param val a value to search
+     *
+     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     *
+     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     */
+    public lastIndexOf(val: float, fromIndex: number): number {
+        return this.lastIndexOf(val, fromIndex as int) as number
     }
 
     /**
@@ -8273,25 +8408,18 @@ export final class Float32Array {
         }
 
         for (let i = fromIndex; i >= 0; --i) {
-            if (this.at(i) == val) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.floatValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-
-    /**
-     * Moves backwards and search val.
-     *
-     * @param val a value to search
-     *
-     * @returns right-most index of val. -1 if val not found
-     */
-    public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as double as int as float, this.length as int - 1)
-    }
-
+    
     /**
      * Moves backwards and search val.
      *
@@ -8303,7 +8431,7 @@ export final class Float32Array {
         return this.lastIndexOf(val, this.length as int - 1)
     }
 
-   /**
+    /**
     * Creates a new Float32Array using initializer
     *
     * @param data initializer
@@ -8320,11 +8448,12 @@ export final class Float32Array {
      * @returns a new Float32Array using reversed data from the current one
      */
     public reverse(): Float32Array {
-        let res = new Float32Array(this)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(this.length as int - 1 - i, this.at(i))
+        for (let i: int = 0; i < this.length as int / 2 as int; i++) {
+            const tmp = this.getUnsafe(this.length as int - 1 - i)
+            this.setUnsafe(this.length as int - 1 - i, this.getUnsafe(i))
+            this.setUnsafe(i, tmp)
         }
-        return res
+        return this
     }
 
     /**
@@ -8338,7 +8467,52 @@ export final class Float32Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-     public slice(begin: number, end: number): Float32Array {
+    public slice(begin?: Number, end?: Number): Float32Array {
+        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a slice of current Float32Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Float32Array with elements of current Float32Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: number): Float32Array {
+        return this.slice(begin as int, end as int)
+    }
+
+    /**
+     * Creates a slice of current Float32Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Float32Array with elements of current Float32Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: int): Float32Array {
+        return this.slice(begin as int, end as int)
+    }
+
+        /**
+     * Creates a slice of current Float32Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Float32Array with elements of current Float32Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: int, end: number): Float32Array {
         return this.slice(begin as int, end as int)
     }
 
@@ -8354,8 +8528,22 @@ export final class Float32Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Float32Array {
-        let buf = this.buffer.sliceInternal(begin * Float32Array.BYTES_PER_ELEMENT as int, end * Float32Array.BYTES_PER_ELEMENT as int)
-        return new Float32Array(buf)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        if (this.buffer instanceof ArrayBuffer) {
+            let buf = (this.buffer as ArrayBuffer).slice(relStart * Float32Array.BYTES_PER_ELEMENT as int, relEnd * Float32Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+            return new Float32Array(buf)
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Float32Array.BYTES_PER_ELEMENT as int, relEnd * Float32Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
+            return new Float32Array(buf)
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
     }
 
     /**
@@ -8381,83 +8569,97 @@ export final class Float32Array {
     }
 
     /**
-     * Creates a slice of current Float32 with all elements.
-     *
-     * @returns a new Float32Array with elements of current Float32Array
-     */
-    public slice(): Float32Array {
-        return new Float32Array(this)
-    }
-
-    /**
-     * Sorts in-place according to the numeric ordering
-     *
-     * @returns sorted Float32Array
-     */
-    public sort(): Float32Array {
-        let newF: (a: number, b: number) => number = (a: number, b: number): number => {
-            const a1 = a as double as int as float
-            const b1 = b as double as int as float
-            return a1 < b1 ? -1 : a1 == b1 ? 0 : 1
-        }
-        return this.sort(newF)
-    }
-
-    /**
-     * Creates a Float32Array with the same underlying ArrayBuffer
+     * Creates a Float32Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float32Array with the same underlying ArrayBuffer
+     * @returns new Float32Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin?: Number, end?: Number): Float32Array {
+        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a Float32Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Float32Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: number, end: number): Float32Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Float32Array with the same underlying ArrayBuffer
+     * Creates a Float32Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float32Array with the same underlying ArrayBuffer
+     * @returns new Float32Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: number, end: int): Float32Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+        /**
+     * Creates a Float32Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Float32Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: int, end: number): Float32Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+    /**
+     * Creates a Float32Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Float32Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: int, end: int): Float32Array {
-        return new Float32Array(this.buffer, begin * Float32Array.BYTES_PER_ELEMENT as int, end - begin)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        return new Float32Array(this.buffer, relStart * Float32Array.BYTES_PER_ELEMENT as int, count)
     }
 
     /**
-     * Creates a Float32Array with the same ArrayBuffer
+     * Creates a Float32Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Float32Array with the same ArrayBuffer
+     * @returns new Float32Array with the same ArrayBufferLike
      */
     public subarray(begin: number): Float32Array {
-        return this.subarray(begin as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
-     * Creates a Float32Array with the same ArrayBuffer
+     * Creates a Float32Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Float32Array with the same ArrayBuffer
+     * @returns new Float32Array with the same ArrayBufferLike
      */
     public subarray(begin: int): Float32Array {
-        return this.subarray(begin, this.length as int)
-    }
-
-    /**
-     * Creates a Float32Array with the same ArrayBuffer
-     *
-     * @returns new Float32Array with the same ArrayBuffer
-     */
-    public subarray(): Float32Array {
-        return this.subarray(0, this.length as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
@@ -8517,15 +8719,7 @@ export final class Float32Array {
      * @returns a string representation of the Float32Array
      */
     public override toString(): string {
-        let res = new StringBuilder();
-        for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(c',')
-        }
-        if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
-        }
-        return res.toString()
+        return this.join(",")
     }
 
     /**
@@ -8533,13 +8727,24 @@ export final class Float32Array {
      *
      * @returns an iterator
      */
-    public values(): Iterator<Float> {
-        throw new Error("not implemented")
-        // const ret = new Float[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = this.at(i);
-        // }
-        // return new ValuesIterator<Float>(ret);
+    public values(): IterableIterator<Number> {
+        return new Float32ArrayIterator(this)
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public override iterator(): IterableIterator<Number> {
+        return this.values()
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public $_iterator(): IterableIterator<Number> {
+        return this.values()
     }
 
     /**
@@ -8552,7 +8757,7 @@ export final class Float32Array {
      * @returns an Float32Array with replaced value on index
      */
     public with(index: number, value: number): Float32Array {
-        return this.with(index as int, value as double as int as float)
+        return this.with(index as int, value as float)
     }
 
     /**
@@ -8571,509 +8776,7 @@ export final class Float32Array {
     }
 
     /// === with element lambda functions ===
-    /**
-     * Checks that all elements of Float32Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public every(fn: (element: float) => boolean): boolean {
-    //     let newF: (element: float, index: int, array: Float32Array) => boolean =
-    //         (element: float, index: int, array: Float32Array): boolean => { return fn(element) }
-    //     return this.every(newF)
-    // }
-    /**
-     * creates a new Float32Array from current Float32Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public filter(fn: (val: float) => boolean): Float32Array {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public find(fn: (val: float) => boolean): float {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public findIndex(fn: (val: float) => boolean): int {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public findLast(fn: (val: float) => boolean): float {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public findLastIndex(fn: (val: float) => boolean): int {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Float32Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public forEach(fn: (val: float) => float): void {
-    //     let newF: (val: float, index: int, array: Float32Array) => float =
-    //         (val: float, index: int, array: Float32Array): float => { return fn(val) }
-    //     this.forEach(newF)
-    // }
-
-   /**
-    * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array
-    *
-    * @param fn a function to apply for each element of current Float32Array
-    *
-    * @returns a new Float32Array where for each element from current Float32Array fn was applied
-    */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public map(fn: (val: float) => float): Float32Array {
-    //     let newF: (val: float, index: int) => float =
-    //         (val: float, index: int): float => { return fn(val) }
-    //     return this.map(newF)
-    // }
-
-    /**
-     * Checks that at least one element of Float32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public some(fn: (element: float) => boolean): boolean {
-    //     let newF: (element: float, index: int, array: Float32Array) => boolean =
-    //         (element: float, index: int, array: Float32Array): boolean => { return fn(element) }
-    //     return this.some(newF)
-    // }
-
-    // TODO(kprokopenko): this may be not skipped
-    /**
-     * Sorts in-place
-     *
-     * @param fn comparator
-     *
-     * @returns sorted Float32Array
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public sort(fn: (a: float, b: float) => int): Float32Array {
-    //     let arr: float[] = new float[this.length as int]
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         arr[i] = this.at(i)
-    //     }
-    //     // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-    //     /*
-    //         let mustPrecede: (a: float, b: float) => boolean =
-    //             (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
-    //         sort(arr, mustPrecede)
-    //         for (let i = 0; i < this.length as int; ++i) {
-    //             this.set(i, arr[i])
-    //         }
-    //     */
-    //     return this;
-    // }
-
-    /**
-     * Checks that at least one element of Float32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // public some(fn: (element: float, index: int, array: Float32Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (fn(this.at(i), i, this)) {
-    //             return true
-    //         }
-    //     }
-    //     return false
-    // }
-
-    // /**
-    //  * Checks that at least one element of Float32Array satisfies the passed function
-    //  *
-    //  * @param fn check function
-    //  *
-    //  * @returns true if some element satisfies fn
-    //  */
-    // public some(fn: (element: float, index: int) => boolean): boolean {
-    //     let newF: (element: float, index: int, array: Float32Array) => boolean =
-    //         (element: float, index: int, array: Float32Array): boolean => { return fn(element, index) }
-    //     return this.some(newF)
-    // }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // NOTE: to enable overloads with 'float' we need to enhance generics support
-    // public reduce(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float, init: float): float {
-    //     let acc = init
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using left-to-right traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduce(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float): float {
-    //     let acc = this.at(0)
-    //     for (let i = 1; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public reduceRight(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float, init: float): float {
-    //     let acc = init
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using right-to-left traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduceRight(fn: (acc: float, curVal: float, curIndex: int, array: Float32Array) => float): float {
-    //     let acc: float = this.at(this.length as int - 1)
-    //     for (let i = this.length as int - 2; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-    * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array.
-    *
-    * @param fn a function to apply for each element of current Float32Array
-    *
-    * @returns a new Float32Array where for each element from current Float32Array fn was applied
-    */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public map(fn: (val: float, index: int) => float): Float32Array {
-    //     let resBuf = new ArrayBuffer(this.length as int * Float32Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Float32Array(resBuf)
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         res.set(i, fn(this.at(i), i))
-    //     }
-    //     return res
-    // }
-
-    /**
-     * Checks that all elements of Float32Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public every(fn: (element: float, index: int, array: Float32Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (!fn(this.at(i), i, this)) {
-    //             return false
-    //         }
-    //     }
-    //     return true
-    // }
-
-    /**
-     * Checks that all elements of Float32Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // public every(fn: (element: float, index: int) => boolean): boolean {
-    //     let newF: (element: float, index: int, array: Float32Array) => boolean =
-    //         (element: float, index: int, array: Float32Array): boolean => { return fn(element, index) }
-    //     return this.every(newF)
-    // }
-
-    /**
-     * Creates a new Float32Array from current Float32Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public filter(fn: (val: float, index: int, array: Float32Array) => boolean): Float32Array {
-    //     let markers = new boolean[this.length as int]
-    //     let resLen = 0
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         markers[i] = fn(this.at(i), i, this)
-    //         if (markers[i]) {
-    //             ++resLen
-    //         }
-    //     }
-    //     let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Float32Array(resBuf)
-    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
-    //         if (markers[i]) {
-    //             res.set(j, this.at(i))
-    //             ++j
-    //         }
-    //     }
-    //     return res
-    // }
-
-    /**
-     * creates a new Float32Array from current Float32Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
-     */
-    // public filter(fn: (val: float, index: int) => boolean): Float32Array {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Float32Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return float | undefined as in JS
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public find(fn: (val: float, index: int, array: Float32Array) => boolean): float {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Float32Array.find: not implemented if element was not found")
-    // }
-
-    /**
-     * Finds the first element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public find(fn: (val: float, index: int) => boolean): float {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public findIndex(fn: (val: float, index: int, array: Float32Array) => boolean): int {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the first element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // public findIndex(fn: (val: float, index: int) => boolean): int {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public findLast(fn: (val: float, index: int, array: Float32Array) => boolean): float {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Float32Array.findLast: not implemented if an element was not found")
-    // }
-
-    /**
-     * Finds the last element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public findLast(fn: (val: float, index: int) => boolean): float {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public findLastIndex(fn: (val: float, index: int, array: Float32Array) => boolean): int {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the last element in the Float32Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // public findLastIndex(fn: (val: float, index: int) => boolean): int {
-    //     let newF: (val: float, index: int, array: Float32Array) => boolean =
-    //         (val: float, index: int, array: Float32Array): boolean => { return fn(val, index) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Float32Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'float' we need to enhance generics support
-    // public forEach(fn: (val: float, index: int, array: Float32Array) => float): void {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         this.set(i, fn(this.at(i), i, this))
-    //     }
-    //     throw new Error("Float32Array.forEach: has to return undefined, but returns void for now")
-    // }
-
-    /**
-     * Applies a function over all elements of Float32Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // public forEach(fn: (val: float, index: int) => float): void {
-    //     let newF: (val: float, index: int, array: Float32Array) => float =
-    //         (val: float, index: int, array: Float32Array): float => { return fn(val, index) }
-    //     this.forEach(newF)
-    // }
-
-    /**
-     * Creates an Float32Array from array-like argument
-     *
-     * @param o array-like object to initialize Float32Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Float32Array
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public from(o: Object, mapFn: (e: Object, index: int) => float): Float32Array {
-    //     throw new Error("Float32Array.from: not implemented")
-    // }
-
+    
     /**
      * Checks that all elements of Float32Array satisfy the passed function
      *
@@ -9086,6 +8789,7 @@ export final class Float32Array {
             (element: number, index: number, array: Float32Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Float32Array from current Float32Array based on a condition fn
      *
@@ -9106,7 +8810,7 @@ export final class Float32Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number) => boolean): float {
+    public find(fn: (val: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
             (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
         return this.find(newF)
@@ -9122,7 +8826,7 @@ export final class Float32Array {
     public findIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
             (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as double as number
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -9135,7 +8839,7 @@ export final class Float32Array {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
             (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
-        return this.findLast(newF) as double as number
+        return this.findLast(newF) as number
     }
 
     /**
@@ -9148,7 +8852,7 @@ export final class Float32Array {
     public findLastIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
             (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as double as number
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -9156,7 +8860,6 @@ export final class Float32Array {
      *
      * @param fn function to apply
      *
-     * @returns undefined
      */
     public forEach(fn: (val: number) => float): void {
         let newF: (val: number, index: number, array: Float32Array) => float =
@@ -9190,30 +8893,42 @@ export final class Float32Array {
         return this.some(newF)
     }
 
-    // TODO(kprokopenko): this may be not skipped
+    // NOTE (kprokopenko): this may be not skipped
     /**
      * Sorts in-place
      *
-     * @param fn comparator
+     * @param fn comparator —  used to determine the order of the elements.
+     * fn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Float32Array
      */
-    public sort(fn: (a: number, b: number) => number): Float32Array {
+    public sort(fn?: (a: number, b: number) => number): Float32Array {
         let arr: float[] = new float[this.length as int]
         for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
+            arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: float, b: float) => boolean =
-                (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
+        if (fn == undefined) {
+            // NOTE (ikorobkov): needs to add signature for sort(float[])
+            //sort(arr)
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        */
-        return this;
-    }
+        }
+        else {
+            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+            /*
+                let mustPrecede: (a: float, b: float) => boolean =
+                    (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
+                sort(arr, mustPrecede)
+                for (let i = 0; i < this.length as int; ++i) {
+                    this.set(i, arr[i])
+                }
+            */
+        }
+        return this
+    } 
 
     /**
      * Checks that at least one element of Float32Array satisfies the passed function
@@ -9224,7 +8939,7 @@ export final class Float32Array {
      */
     public some(fn: (element: number, index: number, array: Float32Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i) as double as number, i as double as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -9240,7 +8955,7 @@ export final class Float32Array {
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Float32Array) => boolean =
-            (element: number, index: number, array: Float32Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Float32Array): boolean => { return fn(element, index as number) }
         return this.some(newF)
     }
 
@@ -9256,7 +8971,7 @@ export final class Float32Array {
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Float32Array) => number, init: number): number {
         let acc = init
         for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -9269,9 +8984,9 @@ export final class Float32Array {
      * @returns reduction result
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Float32Array) => number): number {
-        let acc = this.at(0) as double as number
+        let acc = this.getUnsafe(0) as number
         for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -9286,9 +9001,9 @@ export final class Float32Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Float32Array) => number, init: number): number {
-        let acc = init as double as number
+        let acc = init as number
         for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -9301,9 +9016,9 @@ export final class Float32Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Float32Array) => number): number {
-        let acc: number = this.at(this.length as int - 1) as double as number
+        let acc: number = this.getUnsafe(this.length as int - 1) as number
         for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -9317,9 +9032,9 @@ export final class Float32Array {
     */
     public map(fn: (val: number, index: number) => number): Float32Array {
         let resBuf = new ArrayBuffer(this.length as int * Float32Array.BYTES_PER_ELEMENT as int)
-        let res = new Float32Array(resBuf)
+        let res = new Float32Array(resBuf, 0, resBuf.getByteLength() / Float32Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as float)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number) as float)
         }
         return res
     }
@@ -9333,7 +9048,7 @@ export final class Float32Array {
      */
     public every(fn: (element: number, index: number, array: Float32Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i) as double as number, i as double as number, this)) {
+            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -9349,7 +9064,20 @@ export final class Float32Array {
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Float32Array) => boolean =
-            (element: number, index: number, array: Float32Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Float32Array): boolean => { return fn(element, index) }
+        return this.every(newF)
+    }
+
+    /**
+     * Checks that all elements of Float32Array satisfy the passed function
+     *
+     * @param fn check function
+     *
+     * @returns true if all elements satisfy fn
+     */
+    public every(fn: () => boolean): boolean {
+        let newF: (element: number, index: number, array: Float32Array) => boolean =
+            (element: number, index: number, array: Float32Array): boolean => { return fn() }
         return this.every(newF)
     }
 
@@ -9364,16 +9092,16 @@ export final class Float32Array {
         let markers = new boolean[this.length as int]
         let resLen = 0
         for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i) as double as number, i as double as number, this)
+            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
         let resBuf = new ArrayBuffer(resLen * Float32Array.BYTES_PER_ELEMENT as int)
-        let res = new Float32Array(resBuf)
+        let res = new Float32Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
-                res.set(j, this.at(i))
+                res.set(j, this.getUnsafe(i))
                 ++j
             }
         }
@@ -9389,7 +9117,20 @@ export final class Float32Array {
      */
     public filter(fn: (val: number, index: number) => boolean): Float32Array {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as number) }
+        return this.filter(newF)
+    }
+
+    /**
+     * creates a new Float32Array from current Float32Array based on a condition fn
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns a new Float32Array with elements from current Float32Array that satisfy condition fn
+     */
+    public filter(fn: () => boolean): Float32Array {
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn() }
         return this.filter(newF)
     }
 
@@ -9399,16 +9140,19 @@ export final class Float32Array {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return float | undefined as in JS
+     * NOTE: return float | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Float32Array) => boolean): float {
+    public find(fn: (val: number, index: number, array: Float32Array) => boolean): Number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            if (val == undefined) {
+                return undefined
+            }
+            if (fn(val!.valueOf(), i as number, this)) {
                 return val
             }
         }
-        throw new Error("Float32Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
@@ -9418,9 +9162,9 @@ export final class Float32Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number, index: number) => boolean): float {
+    public find(fn: (val: number, index: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index) }
         return this.find(newF)
     }
 
@@ -9433,12 +9177,12 @@ export final class Float32Array {
      */
     public findIndex(fn: (val: number, index: number, array: Float32Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
-                return i as double as number
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return i as number
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -9450,8 +9194,21 @@ export final class Float32Array {
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as double as number) }
-        return this.findIndex(newF) as double as number
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as number) }
+        return this.findIndex(newF) as number
+    }
+
+    /**
+     * Finds an index of the first element in the Float32Array that satisfies the condition
+     *
+     * @param fn condition
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (val: number, index: number, array: Float32Array) => boolean =
+            (val: number, index: number, array: Float32Array): boolean => { return fn() }
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -9463,8 +9220,8 @@ export final class Float32Array {
      */
     public findLast(fn: (val: number, index: number, array: Float32Array) => boolean): float {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return val
             }
         }
@@ -9480,7 +9237,7 @@ export final class Float32Array {
      */
     public findLast(fn: (val: number, index: number) => boolean): float {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val as double as number, index as double as number) }
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val as number, index as number) }
         return this.findLast(newF)
     }
 
@@ -9493,12 +9250,12 @@ export final class Float32Array {
      */
     public findLastIndex(fn: (val: number, index: number, array: Float32Array) => boolean): number {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return i
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -9510,8 +9267,8 @@ export final class Float32Array {
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as double as number) }
-        return this.findLastIndex(newF) as double as number
+            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as number) }
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -9523,9 +9280,8 @@ export final class Float32Array {
      */
     public forEach(fn: (val: number, index: number, array: Float32Array) => float): void {
         for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i) as double as number, i as double as number, this))
+            fn(this.getUnsafe(i) as number, i as number, this)
         }
-        throw new Error("Float32Array.forEach: has to return undefined, but returns void for now")
     }
 
     /**
@@ -9537,7 +9293,20 @@ export final class Float32Array {
      */
     public forEach(fn: (val: number, index: number) => float): void {
         let newF: (val: number, index: number, array: Float32Array) => float =
-            (val: number, index: number, array: Float32Array): float => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Float32Array): float => { return fn(val, index as number) }
+        this.forEach(newF)
+    }
+
+    /**
+     * Applies a function over all elements of Float32Array
+     *
+     * @param fn function to apply
+     *
+     * @returns undefined
+     */
+    public forEach(fn: () => float): void {
+        let newF: (val: number, index: number, array: Float32Array) => float =
+            (val: number, index: number, array: Float32Array): float => { return fn() }
         this.forEach(newF)
     }
 
@@ -9554,10 +9323,50 @@ export final class Float32Array {
         throw new Error("Float32Array.from: not implemented")
     }
 
-    /** Underlying ArrayBuffer */
-    public readonly buffer: Buffer
+    internal getUnsafe(index: int): float {
+        let byteIndex = index * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let res : int = 0
+        let byteVal : int;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as int;
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i: int = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as int;
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        return Float.bitCastFromInt(res)
+    }
 
-    /** Byte offset within the underlying ArrayBuffer */
+    internal setUnsafe(insertPos: int, val: float): void {
+        let startByte = insertPos * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let bits = Float.bitCastToInt(val);
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i = 0; i < Float32Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+    }
+
+    /** Underlying ArrayBufferLike */
+    public readonly buffer: ArrayBufferLike
+
+    /** Byte offset within the underlying ArrayBufferLike */
     public readonly byteOffset: number
 
     /** Number of bytes used */
@@ -9570,67 +9379,184 @@ export final class Float32Array {
     public readonly name = "Float32Array"
 }
 
+class Float64ArrayIteratorKeys implements IterableIterator<Number> {
+    private length: int
+    private idx: int = 0
+
+    constructor(parent: Float64Array) {
+        this.length = parent.length as int
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.length) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.idx++))
+    }
+}
+
+class Float64ArrayIterator implements IterableIterator<Number> {
+    private parent: Float64Array
+    private idx: int = 0
+
+    constructor(parent: Float64Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<Number> {
+        return this;
+    }
+
+    override next(): IteratorResult<Number> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<Number>()
+        }
+        return new IteratorResult<Number>(false, new Number(this.parent[this.idx++]))
+    }
+}
+
+
 /**
  * JS Float64Array API-compatible class
  */
-export final class Float64Array {
-    public static readonly BYTES_PER_ELEMENT : number = 8
+export final class Float64Array implements Iterable<Number> {
+    public static readonly BYTES_PER_ELEMENT: number = 8
 
     /**
      * Creates an empty Float64Array.
      */
     public constructor() {
-        this(new ArrayBuffer(0), 0, 0)
+        this(0 as int)
     }
 
     /**
-     * Creates an Float64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type double in newly created Float64Array
+     * Creates an Float64Array with respect to data accessed via Iterable<Number> interface
      */
-    public constructor(buf: Buffer, byteOffset: number, length: number) {
-        this(buf, byteOffset as int, length as int)
-    }
-
-    /**
-     * Creates an Float64Array with respect to data, byteOffset and length.
-     *
-     * @param buf data initializer
-     *
-     * @param byteOffset byte offset from begin of the buf
-     *
-     * @param length size of elements of type double in newly created Float64Array
-     */
-    public constructor(buf: Buffer, byteOffset: int, length: int) {
-        if (buf.getByteLength() % Float64Array.BYTES_PER_ELEMENT as int != 0) {
-            throw new RangeError("ArrayBuffer.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
+    public constructor(elements: Iterable<Number>) {
+        // NOTE (ikorobkov): dealing with this overload is tricky
+        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+        let arr = Array.from<Number>(elements)
+        this.byteLength = arr.length * Float64Array.BYTES_PER_ELEMENT as int
+        this.length = arr.length
+        this.buffer = new ArrayBuffer(this.byteLength as int)
+        this.byteOffset = 0
+        for (let i: int = 0; i < this.length as int; ++i) {
+            this.$_set(i, arr.at(i)!.doubleValue())
         }
-        if (byteOffset % Float64Array.BYTES_PER_ELEMENT as int != 0) {
+    }
+
+    /**
+     * Creates an Float64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type double in newly created Float64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
+        let intByteOffset: int = 0
+        if (byteOffset != undefined) {
+            intByteOffset = byteOffset!.intValue()
+            if (intByteOffset < 0) {
+                throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
+            }
+        }
+        let intByteLength: int
+        if (buf instanceof ArrayBuffer) {
+            intByteLength = (buf as ArrayBuffer).getByteLength()
+        } else if (buf instanceof SharedArrayBuffer) {
+            intByteLength = (buf as SharedArrayBuffer).getByteLength()
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        intByteLength = intByteLength - intByteOffset
+        if (intByteLength < 0) {
+            throw new RangeError("Range Error: byteLength " + intByteLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+        }
+
+        if (intByteLength % Float64Array.BYTES_PER_ELEMENT as int != 0) {
+            throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
+        }
+        if (intByteOffset % Float64Array.BYTES_PER_ELEMENT as int != 0) {
             throw new RangeError("byteOffset should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
         }
 
-        if (this.length as int * Float64Array.BYTES_PER_ELEMENT as int > buf.getByteLength()) {
-            throw new RangeError("Range Error: attempt to create Float64Array where length * Float64Array.BYTES_PER_ELEMENT > ArrayBuffer.byteLength")
+        let intLength: int
+        if (length != undefined) {
+            intLength = length!.intValue()
+            if (intLength > intByteLength / Float64Array.BYTES_PER_ELEMENT as int) {
+                throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
+            }
+        } else {
+            intLength = intByteLength / Float64Array.BYTES_PER_ELEMENT as int
         }
-        this.byteLength = buf.getByteLength() - byteOffset
-        this.byteOffset = byteOffset
-        this.length = length
+        if (intLength < 0) {
+            throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer")
+        }
+        if (intLength < intByteLength / Float64Array.BYTES_PER_ELEMENT as int) {
+            intByteLength = intLength * Float64Array.BYTES_PER_ELEMENT as int
+        }
+        this.byteLength = intByteLength
+        this.byteOffset = intByteOffset
+        this.length = intLength
         this.buffer = buf
     }
 
     /**
-     * Creates an Float64Array with respect to buf and byteOffset.
+     * Creates an Float64Array with respect to data, byteOffset and length.
      *
      * @param buf data initializer
      *
      * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type double in newly created Float64Array
      */
-    public constructor(buf: Buffer, byteOffset: int) {
-        this(buf, byteOffset, buf.getByteLength() / Float64Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined) {
+        this(buf, byteOffset, undefined)
+    }
+
+    /**
+     * Creates an Float64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type double in newly created Float64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number, length: number) {
+        this(buf, new Number(byteOffset), new Number(length))
+    }
+
+    /**
+     * Creates an Float64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type double in newly created Float64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: number) {
+        this(buf, new Number(byteOffset), undefined)
+    }
+
+    /**
+     * Creates an Float64Array with respect to data, byteOffset and length.
+     *
+     * @param buf data initializer
+     *
+     * @param byteOffset byte offset from begin of the buf
+     *
+     * @param length size of elements of type double in newly created Float64Array
+     */
+    public constructor(buf: ArrayBufferLike, byteOffset: int, length: int) {
+        this(buf, new Number(byteOffset), new Number(length))
     }
 
     /**
@@ -9640,8 +9566,8 @@ export final class Float64Array {
      *
      * @param byteOffset byte offset from begin of the buf
      */
-    public constructor(buf: Buffer, byteOffset: number) {
-        this(buf, byteOffset as int)
+    public constructor(buf: ArrayBufferLike, byteOffset: int) {
+        this(buf, new Number(byteOffset), undefined)
     }
 
     /**
@@ -9649,8 +9575,37 @@ export final class Float64Array {
      *
      * @param buf data initializer
      */
-    public constructor(buf: Buffer) {
-        this(buf, 0, buf.getByteLength() / Float64Array.BYTES_PER_ELEMENT as int)
+    public constructor(buf: ArrayLike<Number> | ArrayBufferLike) {
+        if (buf instanceof ArrayBuffer) {
+            this.byteLength = (buf as ArrayBuffer).getByteLength()
+            if (this.byteLength % Float64Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Float64Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as ArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof SharedArrayBuffer) {
+            this.byteLength = (buf as SharedArrayBuffer).getByteLength();
+            if (this.byteLength % Float64Array.BYTES_PER_ELEMENT as int != 0) {
+               throw new RangeError("ArrayBufferLike.byteLength should be multiple of 8 as Float64Array.BYTES_PER_ELEMENT")
+            }
+            this.length = this.byteLength as int / Float64Array.BYTES_PER_ELEMENT as int
+            this.buffer = buf as SharedArrayBuffer
+            this.byteOffset = 0
+        } else if (buf instanceof ArrayLike) {
+            // NOTE (ikorobkov): dealing with this overload is tricky
+            // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
+            let arr = Array.from<Number>((buf as ArrayLike<Number>))
+            this.byteLength = arr.length as int * Float64Array.BYTES_PER_ELEMENT as int
+            this.length = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.length as int; ++i) {
+                this.$_set(i, arr.$_get(i).doubleValue())
+            }
+        } else {
+            throw new Error("unexpected type of buf")
+        }
     }
 
     /**
@@ -9659,10 +9614,13 @@ export final class Float64Array {
      * @param length data initializer
      */
     public constructor(length: int) {
+        if (length < 0) {
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
+        }
         this.length = length
         this.byteLength = length * Float64Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
-        this.buffer = new ArrayBuffer(this.byteLength)
+        this.buffer = new ArrayBuffer(this.byteLength as int)
     }
 
     /**
@@ -9680,9 +9638,104 @@ export final class Float64Array {
      * @param other data initializer
      */
     public constructor(other: Float64Array) {
-        this.buffer = other.buffer.sliceInternal(0, other.byteLength as int)
+        if (other.buffer instanceof ArrayBuffer) {
+            this.buffer = (other.buffer as ArrayBuffer).slice(0 as int, other.byteLength as int) as ArrayBuffer
+        } else if (other.buffer instanceof SharedArrayBuffer) {
+            this.buffer = (other.buffer as SharedArrayBuffer).slice(0 as int, other.byteLength as int) as SharedArrayBuffer
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
         this.byteLength = other.byteLength
         this.length = other.length
+        this.byteOffset = 0
+    }
+
+    
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: number): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: number): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        this.setUnsafe(index, val as double)
+    }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        this.setUnsafe(index, val as double)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: number): number {
+        this.$_get(index as int)
+    }
+
+    /**
+     * Returns an instance of number at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: int): number {
+        if (index < 0 || index >= this.length as int) {
+            throw new RangeError("invalid offset")
+        }
+        return this.getUnsafe(index) as number
+    }
+
+    
+    /**
+     * Returns an instance of primitive type at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public at(index: number): Number | undefined {
+        return this.at(index as int)
     }
 
     /**
@@ -9692,29 +9745,20 @@ export final class Float64Array {
      *
      * @returns a primitive at index
      */
-    public at(index: number): number {
-        return this.at(index as int) as double as number
-    }
-
-    /**
-     * Returns an instance of primitive type at passed index.
-     *
-     * @param index index to look at
-     *
-     * @returns a primitive at index
-     */
-    public at(index: int): double {
-        if (index < 0) {
-            index = this.length as int + index
+    public at(index: int): Number | undefined {
+        if ((index == Infinity as int) || (index == -Infinity as int)) {
+            return undefined
         }
-        let byteIndex = index * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let res: long = 0
-        for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = this.buffer.at(byteIndex as int + i) as long
-            byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as long;
+        let k: int;
+        if (index >= 0) {
+            k = index;
+        } else {
+            k = this.length as int + index
         }
-        return Double.bitCastFromLong(res)
+        if (k < 0 || k >= this.length as int) {
+            return undefined
+        }
+        return new Number(this.getUnsafe(k))
     }
 
     /**
@@ -9778,7 +9822,7 @@ export final class Float64Array {
         }
 
         for (let i = startPos; i < endPos; ++i) {
-            this.set(insertPos + i - startPos, this.at(i))
+            this.set(insertPos + i - startPos, this.getUnsafe(i))
         }
     }
 
@@ -9843,7 +9887,7 @@ export final class Float64Array {
      * @returns modified Float64Array
      */
     public fill(value: number, start: number, end: number): Float64Array {
-        return this.fill(value as double as int as double, start as int, end as int)
+        return this.fill(value as double, start as int, end as int)
     }
 
     /**
@@ -9886,7 +9930,7 @@ export final class Float64Array {
      * @returns modified Float64Array
      */
     public fill(value: number, start: number): Float64Array {
-        return this.fill(value as double as int as double, start as int)
+        return this.fill(value as double, start as int)
     }
 
     /**
@@ -9920,7 +9964,7 @@ export final class Float64Array {
      * @param insertPos index to change
      */
     public set(insertPos: number, val: number): void {
-        this.set(insertPos as int, val as double as int as double)
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -9932,16 +9976,7 @@ export final class Float64Array {
      * @param insertPos index to change
      */
     public set(insertPos: int, val: double): void {
-        if (insertPos < 0 || insertPos >= this.length as int) {
-            throw new RangeError("set: insertPos is out-of-bounds")
-        }
-
-        let startByte = insertPos * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
-        let bits = Double.bitCastToLong(val);
-        for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
-            let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
-            this.buffer.set(startByte + i, byteVal)
-        }
+        this.$_set(insertPos, val)
     }
 
     /**
@@ -9955,7 +9990,7 @@ export final class Float64Array {
      */
     public set(arr: number[], insertPos: number): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos as int + i, arr[i] as double as int as double)
+            this.setUnsafe(insertPos as int + i, arr[i] as double)
         }
     }
 
@@ -9970,11 +10005,11 @@ export final class Float64Array {
      */
     public set(arr: double[], insertPos: int): void {
         for (let i = 0; i < arr.length as int; ++i) {
-            this.set(insertPos + i, arr[i])
+            this.setUnsafe(insertPos + i, arr[i])
         }
     }
 
-
+    
 
     /**
      * Copies all elements of arr to the current Float64Array.
@@ -10020,8 +10055,11 @@ export final class Float64Array {
      *
      * @returns true if e is in Float64Array, false otherwise
      */
-    public includes(e: number, fromIndex: number): boolean {
-        return this.includes(e as double as int as double, fromIndex as int)
+    public includes(e: number, fromIndex?: Number): boolean {
+        if (fromIndex == undefined) {
+            return this.includes(e as double, 0 as int)
+        }
+        return this.includes(e as double, fromIndex!.intValue())
     }
 
     /**
@@ -10035,25 +10073,18 @@ export final class Float64Array {
      */
     public includes(e: double, fromIndex: int): boolean {
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return false;
+            }
+            if (tmp!.doubleValue() == e) {
                 return true
             }
         }
         return false
     }
 
-
-
-    /**
-     * Checks if specified argument is in Float64Array
-     *
-     * @param e search element
-     *
-     * @returns true if e is in Float64Array, false otherwise
-     */
-    public includes(e: double): boolean {
-        return this.includes(e, 0)
-    }
+    
 
     /**
      * Returns index of specified element
@@ -10064,8 +10095,11 @@ export final class Float64Array {
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as double as int as double, fromIndex as int)
+    public indexOf(e: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.indexOf(e as double, 0)
+        }
+        return this.indexOf(e as double, fromIndex!.intValue())
     }
 
     /**
@@ -10089,25 +10123,18 @@ export final class Float64Array {
             }
         }
         for (let i = fromIndex; i < this.length as int; ++i) {
-            if (this.at(i) == e) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.doubleValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-
-
-    /**
-     * Returns index of specified element
-     *
-     * @param e search element
-     *
-     * @returns index of element if it presents, -1 otherwise
-     */
-    public indexOf(e: double): int {
-        return this.indexOf(e, 0)
-    }
+    
 
     /**
      * Joins data to a string
@@ -10116,25 +10143,19 @@ export final class Float64Array {
      *
      * @returns joined representation
      */
-    public join(s: string): string {
+    public join(s?: String): string {
+        if (s == undefined) {
+            return this.join(",")
+        }
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(s)
+            res.append(this.getUnsafe(i) as number)
+            res.append(s!)
         }
         if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
+            res.append(this.getUnsafe(this.length as int - 1) as number)
         }
         return res.toString()
-    }
-
-    /**
-     * Joins data to a string
-     *
-     * @returns joined representation with comma separator
-     */
-    public join(): string {
-        return this.join(",")
     }
 
     /**
@@ -10142,13 +10163,8 @@ export final class Float64Array {
      *
      * @returns iterator over keys
      */
-    public keys(): Iterator<Int> {
-        throw new Error("not implemented")
-        // let ret: Int[] = new Int[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = i;
-        // }
-        // return new ValuesIterator<Int>(ret);
+    public keys(): IterableIterator<Number> {
+        return new Float64ArrayIteratorKeys(this)
     }
 
     /**
@@ -10162,8 +10178,26 @@ export final class Float64Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as double as int as double, fromIndex as int)
+    public lastIndexOf(val: number, fromIndex?: Number): number {
+        if (fromIndex == undefined) {
+            return this.lastIndexOf(val as double, 0 as int)
+        }
+        return this.lastIndexOf(val as double, fromIndex!.intValue()) as number
+    }
+
+    /**
+     * Moves backwards starting at fromIndex to 0 and search val.
+     *
+     * @param val a value to search
+     *
+     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     *
+     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     */
+    public lastIndexOf(val: double, fromIndex: number): number {
+        return this.lastIndexOf(val, fromIndex as int) as number
     }
 
     /**
@@ -10186,27 +10220,20 @@ export final class Float64Array {
         }
 
         for (let i = fromIndex; i >= 0; --i) {
-            if (this.at(i) == val) {
+            let tmp = this.at(i)
+            if (tmp == undefined) {
+                return -1
+            }
+            if (tmp!.doubleValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-
+    
 
     /**
-     * Moves backwards and search val.
-     *
-     * @param val a value to search
-     *
-     * @returns right-most index of val. -1 if val not found
-     */
-    public lastIndexOf(val: double): int {
-        return this.lastIndexOf(val, this.length as int - 1)
-    }
-
-   /**
     * Creates a new Float64Array using initializer
     *
     * @param data initializer
@@ -10223,11 +10250,12 @@ export final class Float64Array {
      * @returns a new Float64Array using reversed data from the current one
      */
     public reverse(): Float64Array {
-        let res = new Float64Array(this)
-        for (let i = 0; i < this.length as int; ++i) {
-            res.set(this.length as int - 1 - i, this.at(i))
+        for (let i: int = 0; i < this.length as int / 2 as int; i++) {
+            const tmp = this.getUnsafe(this.length as int - 1 - i)
+            this.setUnsafe(this.length as int - 1 - i, this.getUnsafe(i))
+            this.setUnsafe(i, tmp)
         }
-        return res
+        return this
     }
 
     /**
@@ -10241,7 +10269,52 @@ export final class Float64Array {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-     public slice(begin: number, end: number): Float64Array {
+    public slice(begin?: Number, end?: Number): Float64Array {
+        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a slice of current Float64Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Float64Array with elements of current Float64Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: number): Float64Array {
+        return this.slice(begin as int, end as int)
+    }
+
+    /**
+     * Creates a slice of current Float64Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Float64Array with elements of current Float64Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: number, end: int): Float64Array {
+        return this.slice(begin as int, end as int)
+    }
+
+        /**
+     * Creates a slice of current Float64Array using range [begin, end)
+     *
+     * @param begin start index to be taken into slice
+     *
+     * @param end last index to be taken into slice
+     *
+     * @returns a new Float64Array with elements of current Float64Array[begin;end) where end index is excluded
+     *
+     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
+     */
+    public slice(begin: int, end: number): Float64Array {
         return this.slice(begin as int, end as int)
     }
 
@@ -10257,8 +10330,22 @@ export final class Float64Array {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): Float64Array {
-        let buf = this.buffer.sliceInternal(begin * Float64Array.BYTES_PER_ELEMENT as int, end * Float64Array.BYTES_PER_ELEMENT as int)
-        return new Float64Array(buf)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        if (this.buffer instanceof ArrayBuffer) {
+            let buf = (this.buffer as ArrayBuffer).slice(relStart * Float64Array.BYTES_PER_ELEMENT as int, relEnd * Float64Array.BYTES_PER_ELEMENT as int) as ArrayBuffer
+            return new Float64Array(buf)
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            let buf = (this.buffer as SharedArrayBuffer).slice(relStart * Float64Array.BYTES_PER_ELEMENT as int, relEnd * Float64Array.BYTES_PER_ELEMENT as int) as SharedArrayBuffer
+            return new Float64Array(buf)
+        } else {
+            throw new Error("unexpected type of buffer")
+        }
     }
 
     /**
@@ -10284,83 +10371,97 @@ export final class Float64Array {
     }
 
     /**
-     * Creates a slice of current Float64 with all elements.
-     *
-     * @returns a new Float64Array with elements of current Float64Array
-     */
-    public slice(): Float64Array {
-        return new Float64Array(this)
-    }
-
-    /**
-     * Sorts in-place according to the numeric ordering
-     *
-     * @returns sorted Float64Array
-     */
-    public sort(): Float64Array {
-        let newF: (a: number, b: number) => number = (a: number, b: number): number => {
-            const a1 = a as double as int as double
-            const b1 = b as double as int as double
-            return a1 < b1 ? -1 : a1 == b1 ? 0 : 1
-        }
-        return this.sort(newF)
-    }
-
-    /**
-     * Creates a Float64Array with the same underlying ArrayBuffer
+     * Creates a Float64Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float64Array with the same underlying ArrayBuffer
+     * @returns new Float64Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin?: Number, end?: Number): Float64Array {
+        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+    }
+
+    /**
+     * Creates a Float64Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Float64Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: number, end: number): Float64Array {
         return this.subarray(begin as int, end as int)
     }
 
     /**
-     * Creates a Float64Array with the same underlying ArrayBuffer
+     * Creates a Float64Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
      * @param end last index, exclusive
      *
-     * @returns new Float64Array with the same underlying ArrayBuffer
+     * @returns new Float64Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: number, end: int): Float64Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+        /**
+     * Creates a Float64Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Float64Array with the same underlying ArrayBufferLike
+     */
+    public subarray(begin: int, end: number): Float64Array {
+        return this.subarray(begin as int, end as int)
+    }
+
+    /**
+     * Creates a Float64Array with the same underlying ArrayBufferLike
+     *
+     * @param begin start index, inclusive
+     *
+     * @param end last index, exclusive
+     *
+     * @returns new Float64Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: int, end: int): Float64Array {
-        return new Float64Array(this.buffer, begin * Float64Array.BYTES_PER_ELEMENT as int, end - begin)
+        const len: int = this.length as int
+        const relStart = normalizeIndex(begin, len)
+        const relEnd = normalizeIndex(end, len)
+        let count = relEnd - relStart
+        if (count < 0) {
+            count = 0
+        }
+        return new Float64Array(this.buffer, relStart * Float64Array.BYTES_PER_ELEMENT as int, count)
     }
 
     /**
-     * Creates a Float64Array with the same ArrayBuffer
+     * Creates a Float64Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Float64Array with the same ArrayBuffer
+     * @returns new Float64Array with the same ArrayBufferLike
      */
     public subarray(begin: number): Float64Array {
-        return this.subarray(begin as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
-     * Creates a Float64Array with the same ArrayBuffer
+     * Creates a Float64Array with the same ArrayBufferLike
      *
      * @param begin start index, inclusive
      *
-     * @returns new Float64Array with the same ArrayBuffer
+     * @returns new Float64Array with the same ArrayBufferLike
      */
     public subarray(begin: int): Float64Array {
-        return this.subarray(begin, this.length as int)
-    }
-
-    /**
-     * Creates a Float64Array with the same ArrayBuffer
-     *
-     * @returns new Float64Array with the same ArrayBuffer
-     */
-    public subarray(): Float64Array {
-        return this.subarray(0, this.length as int)
+        return this.subarray(begin as int, this.length as int)
     }
 
     /**
@@ -10420,15 +10521,7 @@ export final class Float64Array {
      * @returns a string representation of the Float64Array
      */
     public override toString(): string {
-        let res = new StringBuilder();
-        for (let i = 0; i < this.length as int - 1; ++i) {
-            res.append(this.at(i))
-            res.append(c',')
-        }
-        if (this.length as int > 0) {
-            res.append(this.at(this.length as int - 1))
-        }
-        return res.toString()
+        return this.join(",")
     }
 
     /**
@@ -10436,13 +10529,24 @@ export final class Float64Array {
      *
      * @returns an iterator
      */
-    public values(): Iterator<Double> {
-        throw new Error("not implemented")
-        // const ret = new Double[this.length];
-        // for (let i: int = 0; i < this.length; i++) {
-        //     ret[i] = this.at(i);
-        // }
-        // return new ValuesIterator<Double>(ret);
+    public values(): IterableIterator<Number> {
+        return new Float64ArrayIterator(this)
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public override iterator(): IterableIterator<Number> {
+        return this.values()
+    }
+
+    /**
+     * Iteratorable interface implementation
+     * @returns iterator over all elements
+     */
+    public $_iterator(): IterableIterator<Number> {
+        return this.values()
     }
 
     /**
@@ -10455,7 +10559,7 @@ export final class Float64Array {
      * @returns an Float64Array with replaced value on index
      */
     public with(index: number, value: number): Float64Array {
-        return this.with(index as int, value as double as int as double)
+        return this.with(index as int, value as double)
     }
 
     /**
@@ -10474,360 +10578,7 @@ export final class Float64Array {
     }
 
     /// === with element lambda functions ===
-
-    /**
-     * Checks that at least one element of Float64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public some(fn: (element: double, index: int, array: Float64Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (fn(this.at(i), i, this)) {
-    //             return true
-    //         }
-    //     }
-    //     return false
-    // }
-
-    // /**
-    //  * Checks that at least one element of Float64Array satisfies the passed function
-    //  *
-    //  * @param fn check function
-    //  *
-    //  * @returns true if some element satisfies fn
-    //  */
-    // public some(fn: (element: double, index: int) => boolean): boolean {
-    //     let newF: (element: double, index: int, array: Float64Array) => boolean =
-    //         (element: double, index: int, array: Float64Array): boolean => { return fn(element, index) }
-    //     return this.some(newF)
-    // }
-
-    /**
-     * Reduces data into a single value using left-to-right traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // NOTE: to enable overloads with 'int' we need to enhance generics support
-    // public reduce(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double, init: double): double {
-    //     let acc = init
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using left-to-right traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduce(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double): double {
-    //     let acc = this.at(0)
-    //     for (let i = 1; i < this.length as int; ++i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-     * Reduces data into a single value using right-to-left traversal
-     *
-     * @param fn condition
-     *
-     * @param init initial value
-     *
-     * @returns reduction result
-     */
-    // NOTE: to enable overloads with 'int' we need to enhance generics support
-    // public reduceRight(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double, init: double): double {
-    //     let acc = init
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    // /**
-    //  * Reduces data into a single value using right-to-left traversal
-    //  *
-    //  * @param fn condition
-    //  *
-    //  * @returns reduction result
-    //  */
-    // public reduceRight(fn: (acc: double, curVal: double, curIndex: int, array: Float64Array) => double): double {
-    //     let acc: double = this.at(this.length as int - 1)
-    //     for (let i = this.length as int - 2; i >= 0; --i) {
-    //         acc = fn(acc, this.at(i), i, this)
-    //     }
-    //     return acc
-    // }
-
-    /**
-    * Creates a new Float64Array using fn(arr[i]) over all elements of current Float64Array.
-    *
-    * @param fn a function to apply for each element of current Float64Array
-    *
-    * @returns a new Float64Array where for each element from current Float64Array fn was applied
-    */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public map(fn: (val: double, index: int) => double): Float64Array {
-    //     let resBuf = new ArrayBuffer(this.length as int * Float64Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Float64Array(resBuf)
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         res.set(i, fn(this.at(i), i))
-    //     }
-    //     return res
-    // }
-
-    /**
-     * Checks that all elements of Float64Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public every(fn: (element: double, index: int, array: Float64Array) => boolean): boolean {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         if (!fn(this.at(i), i, this)) {
-    //             return false
-    //         }
-    //     }
-    //     return true
-    // }
-
-    /**
-     * Checks that all elements of Float64Array satisfy the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if all elements satisfy fn
-     */
-    // public every(fn: (element: double, index: int) => boolean): boolean {
-    //     let newF: (element: double, index: int, array: Float64Array) => boolean =
-    //         (element: double, index: int, array: Float64Array): boolean => { return fn(element, index) }
-    //     return this.every(newF)
-    // }
-
-    /**
-     * Creates a new Float64Array from current Float64Array based on a condition fn.
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public filter(fn: (val: double, index: int, array: Float64Array) => boolean): Float64Array {
-    //     let markers = new boolean[this.length as int]
-    //     let resLen = 0
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         markers[i] = fn(this.at(i), i, this)
-    //         if (markers[i]) {
-    //             ++resLen
-    //         }
-    //     }
-    //     let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT as int)
-    //     let res = new Float64Array(resBuf)
-    //     for (let i = 0, j = 0; i < this.length as int; ++i) {
-    //         if (markers[i]) {
-    //             res.set(j, this.at(i))
-    //             ++j
-    //         }
-    //     }
-    //     return res
-    // }
-
-    /**
-     * creates a new Float64Array from current Float64Array based on a condition fn
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public filter(fn: (val: double, index: int) => boolean): Float64Array {
-    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
-    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-    //     return this.filter(newF)
-    // }
-
-    /**
-     * Finds the first element in the Float64Array that satisfies the condition
-     *
-     * @param fn the condition to apply for each element
-     *
-     * @returns the first element that satisfies fn
-     * TODO: return double | undefined as in JS
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public find(fn: (val: double, index: int, array: Float64Array) => boolean): double {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Float64Array.find: not implemented if element was not found")
-    // }
-
-    /**
-     * Finds the first element in the Float64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the first element that satisfies fn
-     */
-    // public find(fn: (val: double, index: int) => boolean): double {
-    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
-    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-    //     return this.find(newF)
-    // }
-
-    /**
-     * Finds an index of the first element in the Float64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findIndex(fn: (val: double, index: int, array: Float64Array) => boolean): int {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the first element in the Float64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the first element that satisfies fn
-     */
-    // public findIndex(fn: (val: double, index: int) => boolean): int {
-    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
-    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-    //     return this.findIndex(newF)
-    // }
-
-    /**
-     * Finds the last element in the Float64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLast(fn: (val: double, index: int, array: Float64Array) => boolean): double {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return val
-    //         }
-    //     }
-    //     throw new Error("Float64Array.findLast: not implemented if an element was not found")
-    // }
-
-    /**
-     * Finds the last element in the Float64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the last element that satisfies fn
-     */
-    // public findLast(fn: (val: double, index: int) => boolean): double {
-    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
-    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-    //     return this.findLast(newF)
-    // }
-
-    /**
-     * Finds an index of the last element in the Float64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLastIndex(fn: (val: double, index: int, array: Float64Array) => boolean): int {
-    //     for (let i = this.length as int - 1; i >= 0; --i) {
-    //         let val = this.at(i)
-    //         if (fn(val, i, this)) {
-    //             return i
-    //         }
-    //     }
-    //     return -1
-    // }
-
-    /**
-     * Finds an index of the last element in the Float64Array that satisfies the condition
-     *
-     * @param fn condition
-     *
-     * @returns the index of the last element that satisfies fn, -1 otherwise
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public findLastIndex(fn: (val: double, index: int) => boolean): int {
-    //     let newF: (val: double, index: int, array: Float64Array) => boolean =
-    //         (val: double, index: int, array: Float64Array): boolean => { return fn(val, index) }
-    //     return this.findLastIndex(newF)
-    // }
-
-    /**
-     * Applies a function over all elements of Float64Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public forEach(fn: (val: double, index: int, array: Float64Array) => double): void {
-    //     for (let i = 0; i < this.length as int; ++i) {
-    //         this.set(i, fn(this.at(i), i, this))
-    //     }
-    //     throw new Error("Float64Array.forEach: has to return undefined, but returns void for now")
-    // }
-
-    /**
-     * Applies a function over all elements of Float64Array
-     *
-     * @param fn function to apply
-     *
-     * @returns undefined
-     */
-    // public forEach(fn: (val: double, index: int) => double): void {
-    //     let newF: (val: double, index: int, array: Float64Array) => double =
-    //         (val: double, index: int, array: Float64Array): double => { return fn(val, index) }
-    //     this.forEach(newF)
-    // }
-
-    /**
-     * Creates an Float64Array from array-like argument
-     *
-     * @param o array-like object to initialize Float64Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Float64Array
-     */
-    // TODO: to enable overloads with 'int' we need to enhance generics support
-    // public from(o: Object, mapFn: (e: Object, index: int) => double): Float64Array {
-    //     throw new Error("Float64Array.from: not implemented")
-    // }
-
+    
     /**
      * Checks that all elements of Float64Array satisfy the passed function
      *
@@ -10840,6 +10591,7 @@ export final class Float64Array {
             (element: number, index: number, array: Float64Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Float64Array from current Float64Array based on a condition fn
      *
@@ -10860,7 +10612,7 @@ export final class Float64Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number) => boolean): double {
+    public find(fn: (val: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
             (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
         return this.find(newF)
@@ -10876,7 +10628,7 @@ export final class Float64Array {
     public findIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
             (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as double as number
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -10889,7 +10641,7 @@ export final class Float64Array {
     public findLast(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
             (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
-        return this.findLast(newF) as double as number
+        return this.findLast(newF) as number
     }
 
     /**
@@ -10902,7 +10654,7 @@ export final class Float64Array {
     public findLastIndex(fn: (val: number) => boolean): number {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
             (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
-        return this.findLastIndex(newF) as double as number
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -10910,7 +10662,6 @@ export final class Float64Array {
      *
      * @param fn function to apply
      *
-     * @returns undefined
      */
     public forEach(fn: (val: number) => double): void {
         let newF: (val: number, index: number, array: Float64Array) => double =
@@ -10944,30 +10695,42 @@ export final class Float64Array {
         return this.some(newF)
     }
 
-    // TODO(kprokopenko): this may be not skipped
+    // NOTE (kprokopenko): this may be not skipped
     /**
      * Sorts in-place
      *
-     * @param fn comparator
+     * @param fn comparator —  used to determine the order of the elements.
+     * fn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Float64Array
      */
-    public sort(fn: (a: number, b: number) => number): Float64Array {
+    public sort(fn?: (a: number, b: number) => number): Float64Array {
         let arr: double[] = new double[this.length as int]
         for (let i = 0; i < this.length as int; ++i) {
-            arr[i] = this.at(i)
+            arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: double, b: double) => boolean =
-                (a: double, b: double): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
+        if (fn == undefined) {
+            // NOTE (ikorobkov): needs to add signature for sort(double[])
+            //sort(arr)
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        */
-        return this;
-    }
+        }
+        else {
+            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+            /*
+                let mustPrecede: (a: double, b: double) => boolean =
+                    (a: double, b: double): boolean => { return (fn(a, b) <= 0) }
+                sort(arr, mustPrecede)
+                for (let i = 0; i < this.length as int; ++i) {
+                    this.set(i, arr[i])
+                }
+            */
+        }
+        return this
+    } 
 
     /**
      * Checks that at least one element of Float64Array satisfies the passed function
@@ -10978,7 +10741,7 @@ export final class Float64Array {
      */
     public some(fn: (element: number, index: number, array: Float64Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (fn(this.at(i) as double as number, i as double as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -10994,7 +10757,7 @@ export final class Float64Array {
      */
     public some(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Float64Array) => boolean =
-            (element: number, index: number, array: Float64Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Float64Array): boolean => { return fn(element, index as number) }
         return this.some(newF)
     }
 
@@ -11010,7 +10773,7 @@ export final class Float64Array {
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Float64Array) => number, init: number): number {
         let acc = init
         for (let i = 0; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -11023,9 +10786,9 @@ export final class Float64Array {
      * @returns reduction result
      */
     public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Float64Array) => number): number {
-        let acc = this.at(0) as double as number
+        let acc = this.getUnsafe(0) as number
         for (let i = 1; i < this.length as int; ++i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -11040,9 +10803,9 @@ export final class Float64Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Float64Array) => number, init: number): number {
-        let acc = init as double as number
+        let acc = init as number
         for (let i = this.length as int - 1; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -11055,9 +10818,9 @@ export final class Float64Array {
      * @returns reduction result
      */
     public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Float64Array) => number): number {
-        let acc: number = this.at(this.length as int - 1) as double as number
+        let acc: number = this.getUnsafe(this.length as int - 1) as number
         for (let i = this.length as int - 2; i >= 0; --i) {
-            acc = fn(acc, this.at(i) as double as number, i as double as number, this)
+            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
         }
         return acc
     }
@@ -11071,9 +10834,9 @@ export final class Float64Array {
     */
     public map(fn: (val: number, index: number) => number): Float64Array {
         let resBuf = new ArrayBuffer(this.length as int * Float64Array.BYTES_PER_ELEMENT as int)
-        let res = new Float64Array(resBuf)
+        let res = new Float64Array(resBuf, 0, resBuf.getByteLength() / Float64Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.length as int; ++i) {
-            res.set(i, fn(this.at(i) as double as number, i as double as number) as double as int as double)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number) as double)
         }
         return res
     }
@@ -11087,7 +10850,7 @@ export final class Float64Array {
      */
     public every(fn: (element: number, index: number, array: Float64Array) => boolean): boolean {
         for (let i = 0; i < this.length as int; ++i) {
-            if (!fn(this.at(i) as double as number, i as double as number, this)) {
+            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -11103,7 +10866,20 @@ export final class Float64Array {
      */
     public every(fn: (element: number, index: number) => boolean): boolean {
         let newF: (element: number, index: number, array: Float64Array) => boolean =
-            (element: number, index: number, array: Float64Array): boolean => { return fn(element, index as double as number) }
+            (element: number, index: number, array: Float64Array): boolean => { return fn(element, index) }
+        return this.every(newF)
+    }
+
+    /**
+     * Checks that all elements of Float64Array satisfy the passed function
+     *
+     * @param fn check function
+     *
+     * @returns true if all elements satisfy fn
+     */
+    public every(fn: () => boolean): boolean {
+        let newF: (element: number, index: number, array: Float64Array) => boolean =
+            (element: number, index: number, array: Float64Array): boolean => { return fn() }
         return this.every(newF)
     }
 
@@ -11118,16 +10894,16 @@ export final class Float64Array {
         let markers = new boolean[this.length as int]
         let resLen = 0
         for (let i = 0; i < this.length as int; ++i) {
-            markers[i] = fn(this.at(i) as double as number, i as double as number, this)
+            markers[i] = fn(this.getUnsafe(i) as number, i as number, this)
             if (markers[i]) {
                 ++resLen
             }
         }
         let resBuf = new ArrayBuffer(resLen * Float64Array.BYTES_PER_ELEMENT as int)
-        let res = new Float64Array(resBuf)
+        let res = new Float64Array(resBuf, 0)
         for (let i = 0, j = 0; i < this.length as int; ++i) {
             if (markers[i]) {
-                res.set(j, this.at(i))
+                res.set(j, this.getUnsafe(i))
                 ++j
             }
         }
@@ -11143,7 +10919,20 @@ export final class Float64Array {
      */
     public filter(fn: (val: number, index: number) => boolean): Float64Array {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as number) }
+        return this.filter(newF)
+    }
+
+    /**
+     * creates a new Float64Array from current Float64Array based on a condition fn
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns a new Float64Array with elements from current Float64Array that satisfy condition fn
+     */
+    public filter(fn: () => boolean): Float64Array {
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn() }
         return this.filter(newF)
     }
 
@@ -11153,16 +10942,19 @@ export final class Float64Array {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return double | undefined as in JS
+     * NOTE: return double | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Float64Array) => boolean): double {
+    public find(fn: (val: number, index: number, array: Float64Array) => boolean): Number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
             let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            if (val == undefined) {
+                return undefined
+            }
+            if (fn(val!.valueOf(), i as number, this)) {
                 return val
             }
         }
-        throw new Error("Float64Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
@@ -11172,9 +10964,9 @@ export final class Float64Array {
      *
      * @returns the first element that satisfies fn
      */
-    public find(fn: (val: number, index: number) => boolean): double {
+    public find(fn: (val: number, index: number) => boolean): Number | undefined {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index) }
         return this.find(newF)
     }
 
@@ -11187,12 +10979,12 @@ export final class Float64Array {
      */
     public findIndex(fn: (val: number, index: number, array: Float64Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
-                return i as double as number
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return i as number
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -11204,8 +10996,21 @@ export final class Float64Array {
      */
     public findIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as double as number) }
-        return this.findIndex(newF) as double as number
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as number) }
+        return this.findIndex(newF) as number
+    }
+
+    /**
+     * Finds an index of the first element in the Float64Array that satisfies the condition
+     *
+     * @param fn condition
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (val: number, index: number, array: Float64Array) => boolean =
+            (val: number, index: number, array: Float64Array): boolean => { return fn() }
+        return this.findIndex(newF) as number
     }
 
     /**
@@ -11217,8 +11022,8 @@ export final class Float64Array {
      */
     public findLast(fn: (val: number, index: number, array: Float64Array) => boolean): double {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return val
             }
         }
@@ -11234,7 +11039,7 @@ export final class Float64Array {
      */
     public findLast(fn: (val: number, index: number) => boolean): double {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val as double as number, index as double as number) }
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val as number, index as number) }
         return this.findLast(newF)
     }
 
@@ -11247,12 +11052,12 @@ export final class Float64Array {
      */
     public findLastIndex(fn: (val: number, index: number, array: Float64Array) => boolean): number {
         for (let i = this.length as int - 1; i >= 0; --i) {
-            let val = this.at(i)
-            if (fn(val as double as number, i as double as number, this)) {
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
                 return i
             }
         }
-        return -1 as double as number
+        return -1 as number
     }
 
     /**
@@ -11264,8 +11069,8 @@ export final class Float64Array {
      */
     public findLastIndex(fn: (val: number, index: number) => boolean): number {
         let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as double as number) }
-        return this.findLastIndex(newF) as double as number
+            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as number) }
+        return this.findLastIndex(newF) as number
     }
 
     /**
@@ -11277,9 +11082,8 @@ export final class Float64Array {
      */
     public forEach(fn: (val: number, index: number, array: Float64Array) => double): void {
         for (let i = 0; i < this.length as int; ++i) {
-            this.set(i, fn(this.at(i) as double as number, i as double as number, this))
+            fn(this.getUnsafe(i) as number, i as number, this)
         }
-        throw new Error("Float64Array.forEach: has to return undefined, but returns void for now")
     }
 
     /**
@@ -11291,7 +11095,20 @@ export final class Float64Array {
      */
     public forEach(fn: (val: number, index: number) => double): void {
         let newF: (val: number, index: number, array: Float64Array) => double =
-            (val: number, index: number, array: Float64Array): double => { return fn(val, index as double as number) }
+            (val: number, index: number, array: Float64Array): double => { return fn(val, index as number) }
+        this.forEach(newF)
+    }
+
+    /**
+     * Applies a function over all elements of Float64Array
+     *
+     * @param fn function to apply
+     *
+     * @returns undefined
+     */
+    public forEach(fn: () => double): void {
+        let newF: (val: number, index: number, array: Float64Array) => double =
+            (val: number, index: number, array: Float64Array): double => { return fn() }
         this.forEach(newF)
     }
 
@@ -11308,10 +11125,50 @@ export final class Float64Array {
         throw new Error("Float64Array.from: not implemented")
     }
 
-    /** Underlying ArrayBuffer */
-    public readonly buffer: Buffer
+    internal getUnsafe(index: int): double {
+        let byteIndex = index * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let res : long = 0
+        let byteVal : long;
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as ArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as long;
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i: int = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
+                byteVal = (this.buffer as SharedArrayBuffer).at(byteIndex as int + i)
+                byteVal &= 0xff
+                res = (res | byteVal << (8 * i)) as long;
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+        return Double.bitCastFromLong(res)
+    }
 
-    /** Byte offset within the underlying ArrayBuffer */
+    internal setUnsafe(insertPos: int, val: double): void {
+        let startByte = insertPos * Float64Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
+        let bits = Double.bitCastToLong(val);
+        if (this.buffer instanceof ArrayBuffer) {
+            for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as ArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else if (this.buffer instanceof SharedArrayBuffer) {
+            for (let i = 0; i < Float64Array.BYTES_PER_ELEMENT as int; ++i) {
+                let byteVal = ((bits >>> (i * 8)) & 0xff) as byte
+                (this.buffer as SharedArrayBuffer).set(startByte + i, byteVal)
+            }
+        } else {
+            throw new Error("unexpected type of ArrayBufferLike")
+        }
+    }
+
+    /** Underlying ArrayBufferLike */
+    public readonly buffer: ArrayBufferLike
+
+    /** Byte offset within the underlying ArrayBufferLike */
     public readonly byteOffset: number
 
     /** Number of bytes used */

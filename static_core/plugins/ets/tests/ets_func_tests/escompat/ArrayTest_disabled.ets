@@ -54,9 +54,9 @@ function createWithArrayOfNumber(): int {
     //NOTE (ikorobkov): uncomment when Rest parameters will be supported by Array
     // let first = new Number(0);
     // let arr = new Array<Number>(first, ...d);
-    // if (arr.at(0).valueOf() != first.valueOf()) { return fail; }
+    // if (arr[0].valueOf() != first.valueOf()) { return fail; }
     // for(let i: int = 0; i < d.length; ++i) {
-    //     if(arr.at(i+1) != d[i]) {
+    //     if(arr[i+1]! != d[i]) {
     //        return fail;
     //     }
     // }
@@ -73,8 +73,8 @@ function findWithFuncArg3ReadonlyArray(): int {
     // }
     // let fnPositive = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() == 12 && index > 0; };
     // let fnNegative = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() < 0 && index > 0; };
-    // let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem == undefined && index < 0; };
-    // let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem == null && index > 0; };
+    // let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj.at(index) == undefined && index < 0; };
+    // let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj.at(index) == null && index > 0; };
     // if (arr.find(fnPositive) != 12) { return fail; }
     // if (arr.find(fnNegative) != -1) { return fail; }
     // if (arr.find(fnUndefined) != undefined) { return fail; }
@@ -91,8 +91,8 @@ function findIndexFuncArg3ReadonlyArray(): int {
     //}
     // let fnPositive = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() == 12 && index > 0; };
     // let fnNegative = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() < 0 && index > 0; };
-    // let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem == undefined && index < 0; };
-    // let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem == null && index > 0; };
+    // let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj.at(index) == undefined && index < 0; };
+    // let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj.at(index) == null && index > 0; };
     // if (arr.findIndex(fnPositive) != 9) { return fail; }
     // if (arr.findIndex(fnNegative) != 1) { return fail; }
     // if (arr.findIndex(fnUndefined) != -1) { return fail; }
@@ -105,7 +105,7 @@ function mapFuncArg3ReadonlyArray(): int {
     //NOTE (ikorobkov): uncomment when ReadonlyArray will be supported
     // let fn = (v: Number, index: number, arr: ReadonlyArray<Number>): Number => {
     //     if ((index < 4) && (index < arr.length)) {
-    //         return new Number(arr.at(index).valueOf() * arr.at(index).valueOf());
+    //         return new Number(arr[index].valueOf() * arr[index].valueOf());
     //     } else {
     //         return new Number(0);
     //     }
@@ -123,11 +123,11 @@ function mapFuncArg3ReadonlyArray(): int {
     // let tmp: Number;
     // for (let i: int = 0; i < res.length; ++i) {
     //     if (i < 4) {
-    //         tmp = new Number(arr.at(i).valueOf() * arr.at(i).valueOf());
+    //         tmp = new Number(arr[i].valueOf() * arr[i].valueOf());
     //     } else {
     //         tmp = new Number(0);
     //     }
-    //     if (res.at(i).valueOf() != tmp.valueOf()) {
+    //     if (res[i].valueOf() != tmp.valueOf()) {
     //         return fail;
     //     }
     // }
@@ -139,7 +139,7 @@ function everyFuncArg3ReadonlyArray(): int {
     //NOTE (ikorobkov): uncomment when ReadonlyArray will be supported
     // let fn = (v: Number, index: number, arr: ReadonlyArray<Number>): Number => {
     //     if ((index < 4) && (index < arr.length)) {
-    //         return new Number(arr.at(index).valueOf() * arr.at(index).valueOf());
+    //         return new Number(arr[index].valueOf() * arr[index].valueOf());
     //     } else {
     //         return new Number(0);
     //     }
@@ -157,92 +157,95 @@ function everyFuncArg3ReadonlyArray(): int {
     // let tmp: Number;
     // for (let i: int = 0; i < res.length; ++i) {
     //     if (i < 4) {
-    //         tmp = new Number(arr.at(i).valueOf() * arr.at(i).valueOf());
+    //         tmp = new Number(arr[i].valueOf() * arr[i].valueOf());
     //     } else {
     //         tmp = new Number(0);
     //     }
-    //     if (res.at(i).valueOf() != tmp.valueOf()) {
+    //     if (res[i).valueOf() != tmp.valueOf()) {
     //         return fail;
     //     }
     // }
     // return success;
 }
 
-class ArrayLikeImplTest<T> implements ArrayLike<T> {
-    private buffer: NullishType[]
-    internal actualLength: int
+// NOTE (ikorobkov): uncomment when Array will have implementation of from<T,U>(arr: ArrayLike<T>|Iterable<T>, fn: (v: T, k: number) => U)
+//
+// class ArrayLikeImplTest<T> implements ArrayLike<T> {
+//     private buffer: NullishType[]
+//     internal actualLength: int
+//
+//     public at(index: number): T | undefined {
+//         let len = this.actualLength;
+//         let k: int;
+//         if (index >= 0) {
+//             k = index as int;
+//         } else {
+//             k = len + index as int;
+//         }
+//         if (k < 0 || k >= len) {
+//             return undefined;
+//         }
+//         return this.$_get(k as number);
+//     }
+//
+//     public $_get(index: number): T {
+//         if ((index as int  < 0) || (index as int >= this.actualLength)) {
+//             throw new RangeError("Out of bounds");
+//         }
+//         return this.buffer[index as int] as T;
+//     }
+//
+//     public override lengthMakeProp(): number {
+//         return this.actualLength as number;
+//     }
+//
+//     public push(val: T): number {
+//         this.ensureUnusedCapacity(1);
+//         this.buffer[this.actualLength] = val as NullishType;
+//         this.actualLength += 1;
+//         return this.actualLength;
+//     }
+//
+//     private ensureUnusedCapacity(cap: int): void {
+//         if (this.actualLength + cap > this.buffer.length) {
+//             const copy = new NullishType[this.buffer.length * 2 + cap];
+//             for (let i = 0; i < this.actualLength; i++) {
+//                 copy[i] = this.buffer[i];
+//             }
+//             this.buffer = copy;
+//         }
+//     }
+//
+//     public constructor() {
+//         this.buffer = new NullishType[4]
+//         this.actualLength = 0
+//     }
+// }
 
-    public at(index: number): T | undefined {
-        let len = this.actualLength;
-        let k: int;
-        if (index >= 0) {
-            k = index as int;
-        } else {
-            k = len + index as int;
-        }
-        if (k < 0 || k >= len) {
-            return undefined;
-        }
-        return this.$_get(k as number);
-    }
-
-    public $_get(index: number): T {
-        if ((index as int  < 0) || (index as int >= this.actualLength)) {
-            throw new RangeError("Out of bounds");
-        }
-        return this.buffer[index as int] as T;
-    }
-
-    public get length(): number {
-        return this.actualLength as number;
-    }
-
-    public push(val: T): number {
-        this.ensureUnusedCapacity(1);
-        this.buffer[this.actualLength] = val as NullishType;
-        this.actualLength += 1;
-        return this.actualLength;
-    }
-
-    private ensureUnusedCapacity(cap: int): void {
-        if (this.actualLength + cap > this.buffer.length) {
-            const copy = new NullishType[this.buffer.length * 2 + cap];
-            for (let i = 0; i < this.actualLength; i++) {
-                copy[i] = this.buffer[i];
-            }
-            this.buffer = copy;
-        }
-    }
-
-    public constructor() {
-        this.buffer = new NullishType[4]
-        this.actualLength = 0
-    }
-}
-
-class IterableImplTest<T> implements IterableIterator<T> {
-    private parent: Array<T>
-    private idx: int = 0
-
-    constructor() {
-        this.parent = new Array<T>;
-    }
-
-    constructor(parent: Array<T>) {
-        this.parent = parent;
-    }
-
-    override next(): IteratorResult<T> {
-        if (this.idx >= this.parent.length) {
-            return new IteratorResult<T>();
-        }
-        return new IteratorResult<T>(this.parent.at(this.idx++)!);
-    }
-
-    override iterator(): IterableIterator<T> {
-        return this;
-    }
-}
+// NOTE (ikorobkov): uncomment when issue #15523 will be done
+// class IterableImplTest<T> implements IterableIterator<T> {
+//     private parent: Array<T>
+//     private idx: int = 0
+//
+//     constructor() {
+//         this.parent = new Array<T>;
+//     }
+//
+//     constructor(parent: Array<T>) {
+//         this.parent = parent;
+//     }
+//
+//     override next(): IteratorResult<T> {
+//         if (this.idx >= this.parent.length) {
+//             return new IteratorResult<T>();
+//         }
+//         return new IteratorResult<T>(this.parent[this.idx++]!);
+//     }
+//
+//     override iterator(): Iterator<T> {
+//         return this;
+//     }
+// }
 
 function fromArg1(): int {
     return success;
@@ -256,7 +259,7 @@ function fromArg1(): int {
     //     return fail;
     // }
     // for (let i: int = 0; i < arr1.length; ++i) {
-    //     if (arr1.at(i) != arr2.at(i)) {
+    //     if (arr1[i] != arr2[i]) {
     //         return fail;
     //     }
     // }
@@ -276,7 +279,7 @@ function fromArg2(): int {
     //     return fail;
     // }
     // for (let i: int = 0; i < arr1.length; ++i) {
-    //     if (arr1.at(i) != arr2.at(i) + i) {
+    //     if (arr1[i] != arr2[i] + i) {
     //         return fail;
     //     }
     // }
@@ -299,7 +302,7 @@ function fromArrayLikeAndIterable(): int {
     //     return fail;
     // }
     // for (let i = 0; i < res.length; ++i) {
-    //     if (res.at(i).valueOf() != arrLike.at(i as number).valueOf()) {
+    //     if (res[i].valueOf() != arrLike.at(i as number)!.valueOf()) {
     //         return fail;
     //     }
     // }
@@ -315,7 +318,7 @@ function fromArrayLikeAndIterable(): int {
     //     return fail;
     // }
     // for (let i = 0; i < res.length; ++i) {
-    //     if (res.at(i).valueOf() != tmp.at(i).valueOf()) {
+    //     if (res[i].valueOf() != tmp[i].valueOf()) {
     //         return fail;
     //     }
     // }
@@ -346,7 +349,7 @@ function fromArrayLikeAndIterableAndFunc(): int {
     //     return fail;
     // }
     // for (let i = 0; i < res.length; ++i) {
-    //     if (res.at(i).valueOf() != arrLike.at(i as number).valueOf() * 2) {
+    //     if (res[i].valueOf() != arrLike.at(i as number)!.valueOf() * 2) {
     //         return fail;
     //     }
     // }
@@ -362,7 +365,7 @@ function fromArrayLikeAndIterableAndFunc(): int {
     //     return fail;
     // }
     // for (let i = 0; i < res.length; ++i) {
-    //     if (res.at(i).valueOf() != tmp.at(i).valueOf() * 2) {
+    //     if (res[i].valueOf() != tmp[i].valueOf() * 2) {
     //         return fail;
     //     }
     // }
@@ -373,7 +376,7 @@ function filterFuncArg3ReadonlyArray(): int {
     return success;
     //NOTE (ikorobkov): uncomment when ReadonlyArray will be supported
     // let fnTrue = (v: Number, index: number, arr: ReadonlyArray<Number>): boolean => {
-    //     return arr.at(index).valueOf() == v.valueOf() && v.valueOf() > -1000;
+    //     return arr[index].valueOf() == v.valueOf() && v.valueOf() > -1000;
     // }
     // let arrEmpty = new Array<Number>;
     // if (arrEmpty.filter(fnTrue).length != 0) { return fail; }
@@ -384,10 +387,10 @@ function filterFuncArg3ReadonlyArray(): int {
     // let res = arr.filter(fnTrue);
     // if (res.length != arr.length) { return fail; }
     // for(let i: int = 0; i < arr.length; ++i) {
-    //     if (res.at(i) != arr.at(i)) { return fail; }
+    //     if (res[i] != arr[i]) { return fail; }
     // }
     // let fnFalse = (v: Number, index: number, arr: ReadonlyArray<Number>): boolean => {
-    //     return arr.at(index) == v && v == undefined;
+    //     return arr.at(index) == undefined;
     // }
     // if (arr.filter(fnFalse).length != 0) { return fail; }
     // return success;
@@ -400,7 +403,7 @@ function reduceFuncArg4ReadonlyArray(): int {
     //     if (index < 0 || index >= arr.length) {
     //         return new Number(-1);
     //     }
-    //     return new Number(a.valueOf() + b.valueOf() + arr.at(index).valueOf());
+    //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
     // let arrEmpty = new Array<Number>;
     // let hasException: boolean = false;
@@ -428,7 +431,7 @@ function reduceFuncArg4ReadonlyArrayWithInitialValue(): int {
     //     if (index < 0 || index >= arr.length) {
     //         return new Number(-1);
     //     }
-    //     return new Number(a.valueOf() + b.valueOf() + arr.at(index).valueOf());
+    //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
     // let arrEmpty = new Array<Number>;
     // let initialValue = new Number(0);
@@ -438,7 +441,7 @@ function reduceFuncArg4ReadonlyArrayWithInitialValue(): int {
     // for(let i: int = 0; i < d.length; ++i) {
     //     arr.push(d[i]);
     // }
-    // initialValue = -arr.at(0);
+    // initialValue = -arr[0];
     // res = arr.reduce(fn, initialValue);
     // if (res.valueOf() != 996) { return fail; }
     // if (res.valueOf() ==  -1) { return fail; }
@@ -452,7 +455,7 @@ function reduceRightFuncArg4ReadonlyArray(): int {
     //     if (index < 0 || index >= arr.length) {
     //         return new Number(-1);
     //     }
-    //     return new Number(a.valueOf() + b.valueOf() + arr.at(index).valueOf());
+    //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
     // let arrEmpty = new Array<Number>;
     // let hasException: boolean = false;
@@ -477,11 +480,11 @@ function reduceRightFuncArg4ReadonlyArray(): int {
 function reduceRightFuncArg4ReadonlyArrayWithInitialValue(): int {
     return success;
     //NOTE (ikorobkov): uncomment when ReadonlyArray will be supported
-    // let fn = (a: Number, b: Number, index: number, arr: Array<Number>): Number => {
+    // let fn = (a: Number, b: Number, index: number, arr: ReadonlyArray<Number>): Number => {
     //     if (index < 0 || index >= arr.length) {
     //         return new Number(-1);
     //     }
-    //     return new Number(a.valueOf() + b.valueOf() + arr.at(index).valueOf());
+    //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
     // let arrEmpty = new Array<Number>;
     // let initialValue = new Number(0);
@@ -491,7 +494,7 @@ function reduceRightFuncArg4ReadonlyArrayWithInitialValue(): int {
     // for(let i: int = 0; i < d.length; ++i) {
     //     arr.push(d[i]);
     // }
-    // initialValue = -arr.at(0);
+    // initialValue = -arr[0];
     // res = arr.reduce(fn, initialValue);
     // if (res.valueOf() != 996) { return fail; }
     // if (res.valueOf() ==  -1) { return fail; }
@@ -502,11 +505,11 @@ function forEachFuncArg3ReadonlyArray(): int {
     return success;
     //NOTE (ikorobkov): uncomment when ReadonlyArray will be supported
     // let s = new String;
-    // let fn = (a: Number, index: number, arr: Array<Number>): void => {
+    // let fn = (a: Number, index: number, arr: ReadonlyArray<Number>): void => {
     //     if (index < 0 && index >= arr.length) {
     //         s = "";
     //     } else {
-    //         let tmp = new Number(arr.at(index).valueOf() + a.valueOf());
+    //         let tmp = new Number(arr[index].valueOf() + a.valueOf());
     //         s += tmp.toString() + ",";
     //     }
     // }
