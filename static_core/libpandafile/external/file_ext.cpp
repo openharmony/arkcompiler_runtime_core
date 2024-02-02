@@ -87,6 +87,35 @@ public:
         return found;
     }
 
+    ark::panda_file::ext::MethodSymEntry *EnumerateAllMethods(uint32_t id, uint64_t offset,
+                                                              ark::panda_file::ext::MethodSymEntry *found)
+    {
+        ark::panda_file::ClassDataAccessor cda {*pandaFile_, ark::panda_file::File::EntityId(id)};
+        cda.EnumerateMethods([this, &cda, &offset, &found](ark::panda_file::MethodDataAccessor &mda) -> void {
+            if (mda.GetCodeId().has_value()) {
+                ark::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
+                ark::panda_file::ext::MethodSymEntry entry;
+                entry.id = mda.GetCodeId().value();
+                entry.length = ca.GetCodeSize();
+                entry.name = std::string(ark::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data));
+
+                auto ret = methodSymbols_.emplace(offset, entry);
+                if (mda.GetCodeId().value().GetOffset() <= offset &&
+                    offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
+                    size_t lineNumber = GetExtFileLineNumber(mda, offset - mda.GetCodeId().value().GetOffset());
+                    found = &ret.first->second;
+                    ark::panda_file::File::EntityId idNew(lineNumber);
+                    auto nameId = cda.GetDescriptor();
+                    found->id = idNew;
+                    found->name = ark::os::native_stack::ChangeJaveStackFormat(reinterpret_cast<const char *>(nameId)) +
+                                  "." + found->name;
+                }
+            }
+        });
+
+        return found;
+    }
+
     ark::panda_file::ext::MethodSymEntry *QueryMethodSymAndLineByOffset(uint64_t offset)
     {
         auto it = methodSymbols_.upper_bound(offset);
@@ -100,29 +129,8 @@ public:
             if (pandaFile_->IsExternal(ark::panda_file::File::EntityId(id))) {
                 continue;
             }
-            ark::panda_file::ClassDataAccessor cda {*pandaFile_, ark::panda_file::File::EntityId(id)};
-            cda.EnumerateMethods([&](ark::panda_file::MethodDataAccessor &mda) -> void {
-                if (mda.GetCodeId().has_value()) {
-                    ark::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
-                    ark::panda_file::ext::MethodSymEntry entry;
-                    entry.id = mda.GetCodeId().value();
-                    entry.length = ca.GetCodeSize();
-                    entry.name = std::string(ark::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data));
 
-                    auto ret = methodSymbols_.emplace(offset, entry);
-                    if (mda.GetCodeId().value().GetOffset() <= offset &&
-                        offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
-                        size_t lineNumber = GetExtFileLineNumber(mda, offset - mda.GetCodeId().value().GetOffset());
-                        found = &ret.first->second;
-                        ark::panda_file::File::EntityId idNew(lineNumber);
-                        auto nameId = cda.GetDescriptor();
-                        found->id = idNew;
-                        found->name =
-                            ark::os::native_stack::ChangeJaveStackFormat(reinterpret_cast<const char *>(nameId)) + "." +
-                            found->name;
-                    }
-                }
-            });
+            found = EnumerateAllMethods(id, offset, found);
         }
         return found;
     }

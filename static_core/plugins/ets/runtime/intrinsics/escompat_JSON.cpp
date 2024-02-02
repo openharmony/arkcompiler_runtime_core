@@ -140,6 +140,29 @@ void EtsTypedPrimitiveArrayToJSON(ark::JsonArrayBuilder &jsonBuilder, ark::ets::
     }
 }
 
+void EtsBoxedClassToJSON(ark::JsonArrayBuilder &jsonBuilder, const char *typeDesc, ark::ets::EtsObject *d)
+{
+    if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
+        jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::FromCoreType(d)->GetValue());
+    } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BYTE) {
+        jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsByte>::FromCoreType(d)->GetValue());
+    } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_CHAR) {
+        jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsChar>::FromCoreType(d)->GetValue());
+    } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_SHORT) {
+        jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsShort>::FromCoreType(d)->GetValue());
+    } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_INT) {
+        jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsInt>::FromCoreType(d)->GetValue());
+    } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_LONG) {
+        jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsLong>::FromCoreType(d)->GetValue());
+    } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
+        jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsFloat>::FromCoreType(d)->GetValue());
+    } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
+        jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsDouble>::FromCoreType(d)->GetValue());
+    } else {
+        UNREACHABLE();
+    }
+}
+
 ark::JsonArrayBuilder EtsArrayToJSON(ark::ets::EtsArray *arrPtr)
 {
     auto jsonBuilder = ark::JsonArrayBuilder();
@@ -152,34 +175,19 @@ ark::JsonArrayBuilder EtsArrayToJSON(ark::ets::EtsArray *arrPtr)
             auto d = arrObjPtr->Get(i);
             auto dCls = d->GetClass();
             auto typeDesc = dCls->GetDescriptor();
+            auto arrayClassCb = [d](ark::JsonArrayBuilder &x) {
+                x = EtsArrayToJSON(reinterpret_cast<ark::ets::EtsArray *>(d));
+            };
+            auto objectCb = [d](ark::JsonObjectBuilder &x) { x = ObjectToJSON(d); };
             if (dCls->IsStringClass()) {
                 auto sPtr = reinterpret_cast<ark::ets::EtsString *>(d);
                 jsonBuilder.Add(EtsStringToView(sPtr));
             } else if (dCls->IsArrayClass()) {
-                jsonBuilder.Add(
-                    [d](ark::JsonArrayBuilder &x) { x = EtsArrayToJSON(reinterpret_cast<ark::ets::EtsArray *>(d)); });
+                jsonBuilder.Add(arrayClassCb);
             } else if (dCls->IsBoxedClass()) {
-                if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
-                    jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::FromCoreType(d)->GetValue());
-                } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BYTE) {
-                    jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsByte>::FromCoreType(d)->GetValue());
-                } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_CHAR) {
-                    jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsChar>::FromCoreType(d)->GetValue());
-                } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_SHORT) {
-                    jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsShort>::FromCoreType(d)->GetValue());
-                } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_INT) {
-                    jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsInt>::FromCoreType(d)->GetValue());
-                } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_LONG) {
-                    jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsLong>::FromCoreType(d)->GetValue());
-                } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
-                    jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsFloat>::FromCoreType(d)->GetValue());
-                } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
-                    jsonBuilder.Add(ark::ets::EtsBoxPrimitive<ark::ets::EtsDouble>::FromCoreType(d)->GetValue());
-                } else {
-                    UNREACHABLE();
-                }
+                EtsBoxedClassToJSON(jsonBuilder, typeDesc, d);
             } else {
-                jsonBuilder.Add([d](ark::JsonObjectBuilder &x) { x = ObjectToJSON(d); });
+                jsonBuilder.Add(objectCb);
             }
         }
     }

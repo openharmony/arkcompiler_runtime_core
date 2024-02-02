@@ -459,6 +459,57 @@ void FillLiteralArrayData(const panda_file::File *pfile, pandasm::LiteralArray *
     }
 }
 
+static void FillLiteralArrayTyped(const panda_file::File *pfile, pandasm::LiteralArray &litArray,
+                                  const panda_file::LiteralTag &tag,
+                                  const panda_file::LiteralDataAccessor::LiteralValue &value)
+{
+    switch (tag) {
+        case panda_file::LiteralTag::ARRAY_U1: {
+            FillLiteralArrayData<bool>(pfile, &litArray, tag, value);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I8:
+        case panda_file::LiteralTag::ARRAY_U8: {
+            FillLiteralArrayData<uint8_t>(pfile, &litArray, tag, value);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I16:
+        case panda_file::LiteralTag::ARRAY_U16: {
+            FillLiteralArrayData<uint16_t>(pfile, &litArray, tag, value);
+            break;
+        }
+        // in the case of ARRAY_STRING, the array stores strings ids
+        case panda_file::LiteralTag::ARRAY_STRING:
+        case panda_file::LiteralTag::ARRAY_I32:
+        case panda_file::LiteralTag::ARRAY_U32: {
+            FillLiteralArrayData<uint32_t>(pfile, &litArray, tag, value);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I64:
+        case panda_file::LiteralTag::ARRAY_U64: {
+            FillLiteralArrayData<uint64_t>(pfile, &litArray, tag, value);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_F32: {
+            FillLiteralArrayData<float>(pfile, &litArray, tag, value);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_F64: {
+            FillLiteralArrayData<double>(pfile, &litArray, tag, value);
+            break;
+        }
+        case panda_file::LiteralTag::TAGVALUE:
+        case panda_file::LiteralTag::ACCESSOR:
+        case panda_file::LiteralTag::NULLVALUE: {
+            break;
+        }
+        default: {
+            UNREACHABLE();
+            break;
+        }
+    }
+}
+
 ark::pandasm::LiteralArray PandaRuntimeInterface::GetLiteralArray(MethodPtr m, LiteralArrayId id) const
 {
     auto method = MethodCast(m);
@@ -467,57 +518,12 @@ ark::pandasm::LiteralArray PandaRuntimeInterface::GetLiteralArray(MethodPtr m, L
     pandasm::LiteralArray litArray;
 
     panda_file::LiteralDataAccessor litArrayAccessor(*pfile, pfile->GetLiteralArraysId());
-    // clang-format off
-    litArrayAccessor.EnumerateLiteralVals(panda_file::File::EntityId(id),
-                                            [&litArray, pfile](const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                               const panda_file::LiteralTag &tag) {
-                                                switch (tag) {
-                                                    case panda_file::LiteralTag::ARRAY_U1: {
-                                                        FillLiteralArrayData<bool>(pfile, &litArray, tag, value);
-                                                        break;
-                                                    }
-                                                    case panda_file::LiteralTag::ARRAY_I8:
-                                                    case panda_file::LiteralTag::ARRAY_U8: {
-                                                        FillLiteralArrayData<uint8_t>(pfile, &litArray, tag, value);
-                                                        break;
-                                                    }
-                                                    case panda_file::LiteralTag::ARRAY_I16:
-                                                    case panda_file::LiteralTag::ARRAY_U16: {
-                                                        FillLiteralArrayData<uint16_t>(pfile, &litArray, tag, value);
-                                                        break;
-                                                    }
-                                                    // in the case of ARRAY_STRING, the array stores strings ids
-                                                    case panda_file::LiteralTag::ARRAY_STRING:
-                                                    case panda_file::LiteralTag::ARRAY_I32:
-                                                    case panda_file::LiteralTag::ARRAY_U32: {
-                                                        FillLiteralArrayData<uint32_t>(pfile, &litArray, tag, value);
-                                                        break;
-                                                    }
-                                                    case panda_file::LiteralTag::ARRAY_I64:
-                                                    case panda_file::LiteralTag::ARRAY_U64: {
-                                                        FillLiteralArrayData<uint64_t>(pfile, &litArray, tag, value);
-                                                        break;
-                                                    }
-                                                    case panda_file::LiteralTag::ARRAY_F32: {
-                                                        FillLiteralArrayData<float>(pfile, &litArray, tag, value);
-                                                        break;
-                                                    }
-                                                    case panda_file::LiteralTag::ARRAY_F64: {
-                                                        FillLiteralArrayData<double>(pfile, &litArray, tag, value);
-                                                        break;
-                                                    }
-                                                    case panda_file::LiteralTag::TAGVALUE:
-                                                    case panda_file::LiteralTag::ACCESSOR:
-                                                    case panda_file::LiteralTag::NULLVALUE: {
-                                                        break;
-                                                    }
-                                                    default: {
-                                                        UNREACHABLE();
-                                                        break;
-                                                    }
-                                                }
-                                            });
-    // clang-format on
+
+    litArrayAccessor.EnumerateLiteralVals(
+        panda_file::File::EntityId(id),
+        [&litArray, pfile](const panda_file::LiteralDataAccessor::LiteralValue &value,
+                           const panda_file::LiteralTag &tag) { FillLiteralArrayTyped(pfile, litArray, tag, value); });
+
     return litArray;
 }
 

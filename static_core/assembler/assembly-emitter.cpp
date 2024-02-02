@@ -846,9 +846,11 @@ void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                     break;
                 }
                 case panda_file::LiteralTag::ARRAY_STRING:
+                    // clang-format off
                     ASSERT(program.arrayTypes.find(Type(
-                               Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
-                           program.arrayTypes.end());
+                        Type::FromDescriptor(ark::panda_file::GetStringClassDescriptor(program.lang)), 1)) !=
+                        program.arrayTypes.end());
+                    // clang-format on
                     value = std::make_unique<ScalarValue>(ScalarValue::Create<Value::Type::STRING>(
                         std::string_view(std::get<std::string>(literal.value))));
                     break;
