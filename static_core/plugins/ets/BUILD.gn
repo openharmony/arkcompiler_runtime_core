@@ -52,10 +52,7 @@ group("ark_host_mac_tools_packages") {
 }
 
 config("ark_config") {
-  defines = [
-    "PANDA_WITH_ETS",
-    "USE_ETS_NAPI_CRITICAL_BY_DEFAULT",
-  ]
+  defines = [ "PANDA_WITH_ETS" ]
 }
 
 # TODO(nsizov): Fix and clean after PR480 is merged
