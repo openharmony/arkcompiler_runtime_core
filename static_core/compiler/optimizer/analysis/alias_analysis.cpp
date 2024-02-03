@@ -223,9 +223,13 @@ void AliasAnalysis::DumpChains(std::ostream *out) const
     for (auto &pair : *chains_) {
         sortedKeys.push_back(pair.first);
     }
+    if (sortedKeys.empty()) {
+        (*out) << "\nThe chains is empty" << std::endl;
+        return;
+    }
     std::sort(sortedKeys.begin(), sortedKeys.end(), PointerLess);
 
-    (*out) << "The chains are the following:" << std::endl;
+    (*out) << "\nThe chains are the following: {" << std::endl;
     for (auto &p : sortedKeys) {
         (*out) << "\t";
         p.Dump(out);
@@ -244,6 +248,31 @@ void AliasAnalysis::DumpChains(std::ostream *out) const
         }
         (*out) << "}" << std::endl;
     }
+    (*out) << "}" << std::endl;
+}
+
+void AliasAnalysis::DumpDirect(std::ostream *out) const
+{
+    (*out) << "\nThe direct are the following:" << std::endl;
+    for (auto &pair : *direct_) {
+        (*out) << "{ ";
+        pair.first.Dump(out);
+        (*out) << " , ";
+        pair.second.Dump(out);
+        (*out) << " }" << std::endl;
+    }
+}
+
+void AliasAnalysis::DumpCopy(std::ostream *out) const
+{
+    (*out) << "\nThe copy are the following:" << std::endl;
+    for (auto &pair : *copy_) {
+        (*out) << "{ ";
+        pair.first.Dump(out);
+        (*out) << " , ";
+        pair.second.Dump(out);
+        (*out) << " }" << std::endl;
+    }
 }
 
 void AliasAnalysis::Dump(std::ostream *out) const
@@ -252,9 +281,13 @@ void AliasAnalysis::Dump(std::ostream *out) const
     for (auto &pair : pointsTo_) {
         sortedKeys.push_back(pair.first);
     }
+    if (sortedKeys.empty()) {
+        (*out) << "\nThe solution set is empty" << std::endl;
+        return;
+    }
     std::sort(sortedKeys.begin(), sortedKeys.end(), PointerLess);
 
-    (*out) << "The solution set is the following:" << std::endl;
+    (*out) << "\nThe solution set is the following:" << std::endl;
     for (auto &p : sortedKeys) {
         (*out) << "\t";
         p.Dump(out);
@@ -1121,6 +1154,62 @@ void AliasAnalysis::VisitStoreArrayPair(GraphVisitor *v, Inst *inst)
     visitor->AddCopyEdge(obj, elSnd);
     visitor->AddCopyEdge(valFst, elFst);
     visitor->AddCopyEdge(valSnd, elSnd);
+}
+
+void AliasAnalysis::VisitLoadObjectPair(GraphVisitor *v, Inst *inst)
+{
+    if (!inst->IsReferenceOrAny()) {
+        return;
+    }
+    auto visitor = static_cast<AliasAnalysis *>(v);
+    auto typedInst = inst->CastToLoadObjectPair();
+    uint32_t typeId0 = typedInst->GetTypeId0();
+    uint32_t typeId1 = typedInst->GetTypeId1();
+    ASSERT(typedInst->GetObjectType() != ObjectType::MEM_STATIC);
+    Inst *dfobj = inst->GetDataFlowInput(0);
+    Pointer obj = Pointer::CreateObject(dfobj);
+    Pointer field0 = Pointer::CreateObjectField(dfobj, typeId0, typedInst->GetObjField0());
+    Pointer field1 = Pointer::CreateObjectField(dfobj, typeId1, typedInst->GetObjField1());
+
+    Pointer to = Pointer::CreateObject(inst);
+
+    field0.SetVolatile(typedInst->GetVolatile());
+    field1.SetVolatile(typedInst->GetVolatile());
+
+    visitor->AddCopyEdge(obj, field0);
+    visitor->AddCopyEdge(field0, to);
+    visitor->AddCopyEdge(obj, field1);
+    visitor->AddCopyEdge(field1, to);
+
+    for (auto &user : inst->GetUsers()) {
+        visitor->AddCopyEdge(obj, Pointer::CreateObject(user.GetInst()));
+    }
+}
+
+void AliasAnalysis::VisitStoreObjectPair(GraphVisitor *v, Inst *inst)
+{
+    if (!inst->IsReferenceOrAny()) {
+        return;
+    }
+    auto visitor = static_cast<AliasAnalysis *>(v);
+    auto typedInst = inst->CastToStoreObjectPair();
+    uint32_t typeId0 = typedInst->GetTypeId0();
+    uint32_t typeId1 = typedInst->GetTypeId1();
+    ASSERT(typedInst->GetObjectType() != ObjectType::MEM_STATIC);
+    Inst *dfobj = inst->GetDataFlowInput(0);
+    Pointer obj = Pointer::CreateObject(dfobj);
+    Pointer field0 = Pointer::CreateObjectField(dfobj, typeId0, typedInst->GetObjField0());
+    Pointer val0 = Pointer::CreateObject(inst->GetDataFlowInput(1));
+    Pointer field1 = Pointer::CreateObjectField(dfobj, typeId1, typedInst->GetObjField1());
+    Pointer val1 = Pointer::CreateObject(inst->GetDataFlowInput(2));
+
+    field0.SetVolatile(typedInst->GetVolatile());
+    field1.SetVolatile(typedInst->GetVolatile());
+
+    visitor->AddCopyEdge(obj, field0);
+    visitor->AddCopyEdge(val0, field0);
+    visitor->AddCopyEdge(obj, field1);
+    visitor->AddCopyEdge(val1, field1);
 }
 
 void AliasAnalysis::VisitLoadArrayPairI(GraphVisitor *v, Inst *inst)

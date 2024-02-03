@@ -5200,6 +5200,28 @@ void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
     enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
 }
 
+void EncodeVisitor::VisitLoadObjectPair(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    auto loadObj = inst->CastToLoadObjectPair();
+    if (loadObj->GetNeedBarrier()) {
+        // Consider inserting barriers for GC
+    }
+    auto type = inst->GetType();
+    auto typeInput = inst->GetInput(0).GetInst()->GetType();
+    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), typeInput);  // obj
+    auto dst0 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(0), type);
+    auto dst1 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(1), type);
+
+    auto graph = enc->cg_->GetGraph();
+    auto field0 = loadObj->GetObjField0();
+    size_t offset0 = GetObjectOffset(graph, loadObj->GetObjectType(), field0, loadObj->GetTypeId0());
+    auto mem = MemRef(src, offset0);
+    auto prevOffset = enc->GetEncoder()->GetCursorOffset();
+    enc->GetEncoder()->EncodeLdp(dst0, dst1, IsTypeSigned(type), mem);
+    enc->GetCodegen()->TryInsertImplicitNullCheck(inst, prevOffset);
+}
+
 void EncodeVisitor::VisitLoadArrayPairI(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
@@ -5257,6 +5279,39 @@ void EncodeVisitor::VisitStoreArrayPair(GraphVisitor *visitor, Inst *inst)
         enc->GetEncoder()->EncodeAdd(tmpOffset, tmpOffset, Imm(offset));
         auto mem1 = MemRef(src0, tmpOffset, 0);
         enc->GetCodegen()->CreatePostWRB(inst, mem1, src2, src3);
+    }
+}
+
+void EncodeVisitor::VisitStoreObjectPair(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<EncodeVisitor *>(visitor);
+    auto encoder = enc->GetEncoder();
+    auto storeObj = inst->CastToStoreObjectPair();
+    ASSERT(storeObj->GetObjectType() == ObjectType::MEM_OBJECT || storeObj->GetObjectType() == ObjectType::MEM_STATIC);
+    auto codegen = enc->GetCodegen();
+    auto type = inst->GetType();
+    auto src0 = codegen->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // obj
+    auto src1 = codegen->ConvertRegister(inst->GetSrcReg(1), type);                 // store value 1
+    auto src2 = codegen->ConvertRegister(inst->GetSrcReg(2), type);                 // store value 2
+
+    auto graph = enc->cg_->GetGraph();
+    auto field0 = storeObj->GetObjField0();
+    auto field1 = storeObj->GetObjField1();
+    size_t offset0 = GetObjectOffset(graph, storeObj->GetObjectType(), field0, storeObj->GetTypeId0());
+    size_t offset1 = GetObjectOffset(graph, storeObj->GetObjectType(), field1, storeObj->GetTypeId1());
+    if (!codegen->OffsetFitReferenceTypeSize(offset1)) {
+        // such code should not be executed
+        encoder->EncodeAbort();
+    }
+    auto mem = MemRef(src0, offset0);
+    if (storeObj->GetNeedBarrier()) {
+        codegen->CreatePreWRB(inst, mem, MakeMask(src1.GetId(), src2.GetId()));
+    }
+    auto prevOffset = encoder->GetCursorOffset();
+    encoder->EncodeStp(src1, src2, mem);
+    codegen->TryInsertImplicitNullCheck(inst, prevOffset);
+    if (storeObj->GetNeedBarrier()) {
+        codegen->CreatePostWRB(inst, mem, src1, src2);
     }
 }
 
@@ -5530,6 +5585,12 @@ static bool GetNeedBarrierProperty(const Inst *inst)
     }
     if (op == Opcode::StoreObject) {
         return inst->CastToStoreObject()->GetNeedBarrier();
+    }
+    if (op == Opcode::LoadObjectPair) {
+        return inst->CastToLoadObjectPair()->GetNeedBarrier();
+    }
+    if (op == Opcode::StoreObjectPair) {
+        return inst->CastToStoreObjectPair()->GetNeedBarrier();
     }
     if (op == Opcode::LoadArray) {
         return inst->CastToLoadArray()->GetNeedBarrier();

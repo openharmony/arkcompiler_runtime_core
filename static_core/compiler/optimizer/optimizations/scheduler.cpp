@@ -43,7 +43,7 @@ bool Scheduler::RunImpl()
             }
         }
     }
-    COMPILER_LOG(DEBUG, SCHEDULER) << GetPassName() << " complete";
+    COMPILER_LOG(DEBUG, SCHEDULER) << GetPassName() << " completed";
     return result;
 }
 
@@ -61,7 +61,7 @@ void Scheduler::AddDep(uint32_t *prio, Inst *from, Inst *to, uint32_t latency, I
     // Update instruction priority - "how high instruction is in dependency tree"
     *prio = std::max(*prio, latency + prio_[to]);
 
-    // Do not add cross-barrier depenedencies into deps_
+    // Do not add cross-barrier dependencies into deps_
     if (barrier == nullptr || old_[to] > old_[barrier]) {
         if (deps_.at(from).count(to) == 1) {
             uint32_t oldLatency = deps_.at(from).at(to);
@@ -244,11 +244,35 @@ void Scheduler::ProcessSpecial(Inst *inst, uint32_t *prio, Inst *lastBarrier)
     special_.push_back(inst);
 }
 
+void Scheduler::ScheduleBarrierInst(Inst **inst)
+{
+    sched_.push_back((*inst));
+    if ((*inst)->WithGluedInsts()) {
+        auto next = (*inst)->GetNext();
+        auto nnext = next->GetNext();
+        ASSERT(next->GetOpcode() == Opcode::LoadPairPart && nnext->GetOpcode() == Opcode::LoadPairPart);
+        sched_.push_back(next);
+        sched_.push_back(nnext);
+        *inst = nnext;
+        for (auto pair : deps_.at(next)) {
+            uint32_t numDeps = numDeps_[pair.first];
+            ASSERT(numDeps > 0);
+            numDeps--;
+            numDeps_[pair.first] = numDeps;
+        }
+        for (auto pair : deps_.at(nnext)) {
+            uint32_t numDeps = numDeps_[pair.first];
+            ASSERT(numDeps > 0);
+            numDeps--;
+            numDeps_[pair.first] = numDeps;
+        }
+    }
+}
+
 // Rearranges instructions in the basic block using list scheduling algorithm.
 bool Scheduler::ScheduleBasicBlock(BasicBlock *bb)
 {
     COMPILER_LOG(DEBUG, SCHEDULER) << "Schedule BB " << bb->GetId();
-
     if (!BuildAllDeps(bb)) {
         return false;
     }
@@ -281,7 +305,7 @@ bool Scheduler::ScheduleBasicBlock(BasicBlock *bb)
             }
             if (barrier) {
                 ASSERT(inst->GetOpcode() != Opcode::LoadPairPart);
-                sched_.push_back(inst);
+                ScheduleBarrierInst(&inst);
                 cycle++;
             }
             numInst = 0;
@@ -412,7 +436,7 @@ uint32_t Scheduler::SchedWithGlued(Inst *inst, SchedulerPriorityQueue *waiting, 
     now.push(inst);
 
     // Add glued instructions into 'now'
-    if (inst->GetOpcode() == Opcode::LoadArrayPair || inst->GetOpcode() == Opcode::LoadArrayPairI) {
+    if (inst->WithGluedInsts()) {
         for (auto &userItem : inst->GetUsers()) {
             auto user = userItem.GetInst();
             ASSERT(user->GetOpcode() == Opcode::LoadPairPart);
@@ -436,7 +460,7 @@ uint32_t Scheduler::SchedWithGlued(Inst *inst, SchedulerPriorityQueue *waiting, 
             asap = std::max(asap, cycle + pair.second);
             asap_[pair.first] = asap;
 
-            // Adjust num_deps
+            // Adjust numDeps
             uint32_t numDeps = numDeps_[pair.first];
             ASSERT(numDeps > 0);
             numDeps--;

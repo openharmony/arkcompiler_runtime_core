@@ -157,6 +157,11 @@ void OptimizeMemoryBarriers::VisitStoreObject(GraphVisitor *v, Inst *inst)
     static_cast<OptimizeMemoryBarriers *>(v)->CheckInput(inst->GetInput(inst->GetInputsCount() - 1).GetInst());
 }
 
+void OptimizeMemoryBarriers::VisitStoreObjectPair(GraphVisitor *v, Inst *inst)
+{
+    static_cast<OptimizeMemoryBarriers *>(v)->CheckTwoInputs(inst->GetInput(0).GetInst(), inst->GetInput(1).GetInst());
+}
+
 void OptimizeMemoryBarriers::VisitStoreObjectDynamic(GraphVisitor *v, Inst *inst)
 {
     static_cast<OptimizeMemoryBarriers *>(v)->CheckInput(inst->GetInput(inst->GetInputsCount() - 1).GetInst());

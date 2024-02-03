@@ -1323,6 +1323,22 @@ void GraphChecker::VisitLoadArrayPair([[maybe_unused]] GraphVisitor *v, Inst *in
                           (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(inst);
 }
+void GraphChecker::VisitLoadObjectPair([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    ASSERT_DO_EXT_VISITOR(MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
+                          (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
+    CheckMemoryInstruction(inst);
+    auto loadObj = inst->CastToLoadObjectPair();
+    ASSERT(loadObj->GetObjectType() == MEM_OBJECT || loadObj->GetObjectType() == MEM_STATIC);
+    ASSERT(loadObj->GetVolatile() == false);
+    auto field0 = loadObj->GetObjField0();
+    auto field1 = loadObj->GetObjField1();
+    auto graph = static_cast<GraphChecker *>(v)->GetGraph();
+    [[maybe_unused]] size_t offset0 = GetObjectOffset(graph, loadObj->GetObjectType(), field0, loadObj->GetTypeId0());
+    [[maybe_unused]] size_t offset1 = GetObjectOffset(graph, loadObj->GetObjectType(), field1, loadObj->GetTypeId1());
+    [[maybe_unused]] size_t fieldSize = GetTypeSize(inst->GetType(), graph->GetArch()) / BYTE_SIZE;
+    ASSERT((offset0 + fieldSize == offset1) || (offset1 + fieldSize == offset0));
+}
 void GraphChecker::VisitLoadArrayPairI([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     ASSERT_DO_EXT_VISITOR(MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
@@ -1337,14 +1353,16 @@ void GraphChecker::VisitLoadPairPart([[maybe_unused]] GraphVisitor *v, Inst *ins
     CheckMemoryInstruction(inst);
     [[maybe_unused]] auto op1 = inst->GetInputs()[0].GetInst();
     [[maybe_unused]] auto idx = inst->CastToLoadPairPart()->GetImm();
-    ASSERT_DO_EXT_VISITOR(op1->GetOpcode() == Opcode::LoadArrayPair || op1->GetOpcode() == Opcode::LoadArrayPairI,
+    ASSERT_DO_EXT_VISITOR(op1->WithGluedInsts(),
                           (std::cerr << "Input instruction is not a Pair\n", inst->Dump(&std::cerr)));
     if (op1->GetOpcode() == Opcode::LoadArrayPairI) {
         ASSERT_DO_EXT_VISITOR(idx < op1->CastToLoadArrayPairI()->GetDstCount(),
                               (std::cerr << "Pair index is out of bounds\n", inst->Dump(&std::cerr)));
-    } else {
+    } else if (op1->GetOpcode() == Opcode::LoadArrayPair) {
         ASSERT_DO_EXT_VISITOR(idx < op1->CastToLoadArrayPair()->GetDstCount(),
                               (std::cerr << "Pair index is out of bounds\n", inst->Dump(&std::cerr)));
+    } else {
+        ASSERT(op1->GetOpcode() == Opcode::LoadObjectPair);
     }
     ASSERT_DO_EXT_VISITOR(
         CheckCommonTypes(inst, inst->GetInputs()[0].GetInst()),
@@ -1359,10 +1377,11 @@ void GraphChecker::VisitLoadPairPart([[maybe_unused]] GraphVisitor *v, Inst *ins
             break;
         }
     }
-    ASSERT_DO_EXT_VISITOR(
-        prev != nullptr && prev == op1,
-        (std::cerr << "LoadPairPart(s) instructions must follow immediately after appropriate LoadArrayPair(I)\n",
-         inst->Dump(&std::cerr)));
+    ASSERT_DO_EXT_VISITOR(prev != nullptr && prev == op1,
+                          (std::cerr << "LoadPairPart(s) instructions must follow immediately after appropriate "
+                                        "LoadArrayPair(I) or LoadObjectPair\n",
+                           inst->Dump(&std::cerr), prev->Dump(&std::cerr),
+                           inst->GetBasicBlock()->GetGraph()->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitStoreArrayPair([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -1379,6 +1398,31 @@ void GraphChecker::VisitStoreArrayPair([[maybe_unused]] GraphVisitor *v, Inst *i
     [[maybe_unused]] bool needBarrier = inst->CastToStoreArrayPair()->GetNeedBarrier();
     ASSERT_DO_EXT_VISITOR(needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
                           (std::cerr << "StoreArrayPair has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
+}
+
+void GraphChecker::VisitStoreObjectPair([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    auto storeObj = inst->CastToStoreObjectPair();
+    bool needBarrier = storeObj->GetNeedBarrier();
+    CheckMemoryInstruction(inst, needBarrier);
+    ASSERT_DO_EXT_VISITOR(
+        CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
+        (std::cerr << "Types of store and the first store input are not compatible\n", inst->Dump(&std::cerr)));
+    ASSERT_DO_EXT_VISITOR(
+        CheckCommonTypes(inst, inst->GetInputs()[2].GetInst()),
+        (std::cerr << "Types of store and the second store input are not compatible\n", inst->Dump(&std::cerr)));
+    ASSERT_DO_EXT_VISITOR(needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
+                          (std::cerr << "StoreObjectPair has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
+
+    ASSERT(storeObj->GetObjectType() == MEM_OBJECT || storeObj->GetObjectType() == MEM_STATIC);
+    ASSERT(storeObj->GetVolatile() == false);
+    auto field0 = storeObj->GetObjField0();
+    auto field1 = storeObj->GetObjField1();
+    auto graph = static_cast<GraphChecker *>(v)->GetGraph();
+    [[maybe_unused]] size_t offset0 = GetObjectOffset(graph, storeObj->GetObjectType(), field0, storeObj->GetTypeId0());
+    [[maybe_unused]] size_t offset1 = GetObjectOffset(graph, storeObj->GetObjectType(), field1, storeObj->GetTypeId1());
+    [[maybe_unused]] size_t fieldSize = GetTypeSize(inst->GetType(), graph->GetArch()) / BYTE_SIZE;
+    ASSERT((offset0 + fieldSize == offset1) || (offset1 + fieldSize == offset0));
 }
 
 void GraphChecker::VisitStoreArrayPairI([[maybe_unused]] GraphVisitor *v, Inst *inst)

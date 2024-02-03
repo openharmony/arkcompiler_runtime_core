@@ -295,6 +295,13 @@ inline uint8_t GetTypeSize(Type type, Arch arch)
     // NOLINTNEXTLINE(readability-magic-numbers, cppcoreguidelines-avoid-magic-numbers)
     return 8U << ShiftByType(type, arch);
 }
+
+inline uint8_t GetTypeByteSize(Type type, Arch arch)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers, cppcoreguidelines-avoid-magic-numbers)
+    return 1U << ShiftByType(type, arch);
+}
+
 }  // namespace DataType
 }  // namespace panda::compiler
 

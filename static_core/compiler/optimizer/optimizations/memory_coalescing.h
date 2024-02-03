@@ -75,8 +75,12 @@ private:
 
     Inst *ReplaceLoadArray(Inst *first, Inst *second, Inst *insertAfter);
     Inst *ReplaceLoadArrayI(Inst *first, Inst *second, Inst *insertAfter);
+    Inst *ReplaceLoadObject(Inst *first, Inst *second, Inst *insertAfter);
     Inst *ReplaceStoreArray(Inst *first, Inst *second, Inst *insertAfter);
     Inst *ReplaceStoreArrayI(Inst *first, Inst *second, Inst *insertAfter);
+    Inst *ReplaceStoreObject(Inst *first, Inst *second, Inst *insertAfter);
+
+    void CheckForObjectCandidates(Inst *inst, Inst *obj, uint8_t fieldSize, size_t fieldOffset);
 
 private:
     bool alignedOnly_;

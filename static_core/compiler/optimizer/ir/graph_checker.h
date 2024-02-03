@@ -174,11 +174,13 @@ private:
     static void VisitLoadArray([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadArrayI([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadArrayPair([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitLoadObjectPair([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadArrayPairI([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadPairPart([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitStore([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitStoreI([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitStoreArrayPair([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitStoreObjectPair([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitStoreArrayPairI([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitStoreArray([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitStoreArrayI([[maybe_unused]] GraphVisitor *v, Inst *inst);

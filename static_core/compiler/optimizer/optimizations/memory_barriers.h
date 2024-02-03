@@ -80,6 +80,7 @@ private:
     static void VisitStoreArray(GraphVisitor *v, Inst *inst);
     static void VisitStoreArrayI(GraphVisitor *v, Inst *inst);
     static void VisitStoreObject(GraphVisitor *v, Inst *inst);
+    static void VisitStoreObjectPair(GraphVisitor *v, Inst *inst);
     static void VisitStoreObjectDynamic(GraphVisitor *v, Inst *inst);
     static void VisitStoreStatic(GraphVisitor *v, Inst *inst);
     static void VisitStore(GraphVisitor *v, Inst *inst);

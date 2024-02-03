@@ -169,6 +169,8 @@ if (PANDA_TARGET_AMD64 OR (PANDA_TARGET_ARM64 AND NOT PANDA_ENABLE_ADDRESS_SANIT
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/verify_aot_tests/verify_aot_test.pa AUX_FILES verify_aot_tests_file1 verify_aot_tests_file2)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/zero_const_in_save_state.pa)
     panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/loop-unroll-constant.pa)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory-coalescing.pa)
+    panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory-coalescing1.pa)
     if (PANDA_LLVM_AOT)
         panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/virtual_to_static.pa)
 
