@@ -153,7 +153,7 @@ makes a *package* even more independent from the environment.
 
 In addition to the notion of *generic constructs*, the *declaration-site
 variance* feature is also considered. The idea of the feature is briefly
-described below, and in greater detail in :ref:`Generics Declaration-Site Variance`.
+described below, and in greater detail in :ref:`Declaration-Site Variance`.
 
 .. index::
    package
@@ -271,7 +271,7 @@ below.
 -  Comparison operators that produce a value of type *boolean*:
 
    +  Character comparison operators '<', '<=', '>', and '>=' (see :ref:`Numerical Comparison Operators`);
-   +  Character equality operators '==' and '!=' (see :ref:`Value Equality Operators`);
+   +  Character equality operators '==' and '!=' (see :ref:`Value Equality for Characters`);
 
 -  Character operators that produce a value of type *char*;
 
@@ -1176,6 +1176,9 @@ A class may be declared *final* to prevent its extension. A class declared
 *final* cannot have subclasses, and no method of a *final* class can be
 overridden.
 
+If a class type *F* expression is declared *final*, then
+only a class *F* object can be its value.
+
 A :index:`compile-time error` occurs if the *extends* clause of a class
 declaration contains another class that is *final*.
 
@@ -1680,7 +1683,7 @@ check can be used to get enumeration variable back by applying 'as' conversion.
     let c: Commands = Commands.Open
     let o: Object = c // Autoboxing of enum type to its reference version
     // Such reference version type has no name, but can be detected by instanceof
-    if (o.instanceof (Commands)) {
+    if (o instanceof Commands) {
        c = o as Commands // And explicitly converted back by 'as' conversion
     }
 
@@ -1755,12 +1758,16 @@ There is an additional method for instances of any enumeration type:
 -  'getValue()' returns a value of enumeration constant which is
    either of ``int`` or ``string`` type.
 
+-  'getName()' returns a name of enumeration constant which is
+   of ``string`` type.
+
 .. code-block:: typescript
    :linenos:
 
       enum Color { Red, Green = 10, Blue }
       let c: Color = Color.Green
       console.log(c.getValue()) // prints 10
+      console.log(c.getName()) // prints Green
 
 **Note**: ``c.toString()`` returns the same value as ``c.getValue()``; its
 type must be converted to *string* for enumeration constants of a numeric type.
@@ -2806,10 +2813,16 @@ Qualified import or alias in import can be used to access the imported entity.
 
 |
 
-.. _Generics Declaration-Site Variance:
+.. _Generics Experimental:
 
-Generics: Declaration-Site Variance
-***********************************
+Generics Experimental
+*********************
+
+.. _Declaration-Site Variance:
+
+Declaration-Site Variance
+=========================
+
 
 Optionally, a type parameter can have keywords ``in`` or ``out`` (a
 *variance modifier*, which specifies the variance of the type parameter).
@@ -2864,6 +2877,52 @@ types *A* <: *B*) as follows:
    parameterized type
    subtyping
    declaration-site variance
+
+.. _NonNullish Type Parameter:
+
+NonNullish Type Parameter
+=========================
+
+When some generic class has a type parameter with nullish union type constraint
+then a special syntax for the type annonation can be used to get a non-nullish
+version of the type parameter variable. An example below illustates such
+possibility.
+
+.. code-block:: typescript
+   :linenos:
+
+      class A<T> {  // in fact it extens Object|null|undefined
+          foo (p: T): T! { // foo returns non-nullish value of p
+             return p!
+          }
+      }
+
+      class B<T extends SomeType | null> {
+          foo (p: T): T! { // foo returns non-nullish value of p
+             return p!
+          }
+      }
+
+      class C<T extends SomeType | undefined> {
+          foo (p: T): T! { // foo returns non-nullish value of p
+             return p!
+          }
+      }
+
+      let a = new A<Object>
+      let b = new B<SomeType>
+      let c = new C<SomeType>
+
+      let result: Object = new Object  // Type of result is non-nullish !
+      result = a.foo(result)
+      result = b.foo(new SomeType)
+      result = c.foo(new SomeType)
+
+      // All such assignments are type-valid as well
+      result = a.foo(void)      // void! => never
+      result = b.foo(null)      // null! => never
+      result = c.foo(undefined) // undefined! => never
+
 
 .. raw:: pdf
 

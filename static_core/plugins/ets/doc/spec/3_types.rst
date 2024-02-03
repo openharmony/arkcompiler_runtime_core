@@ -94,7 +94,7 @@ the value of the predefined value type: *Number*, *Byte*, *Short*, *Int*,
 *Long*, *Float*, *Double*, *Char*, and *Boolean*.
 
 The predefined value types are called *primitive types*. Primitive type names
-are reserved, i.e., it cannot be used for user-defined type names.
+are reserved, i.e., they cannot be used for user-defined type names.
 
 Type *double* is an alias to *number*. Type *Double* is an alias
 to *Number*.
@@ -195,7 +195,7 @@ Using Types
 .. meta:
     frontend_status: Done
 
-A type can be referred to in a source code by the following:
+A type can be referred to in source code by the following:
 
 -  A reserved name for a primitive type;
 -  A type reference for a named type (see :ref:`Named Types`), or a type alias
@@ -239,7 +239,7 @@ It is presented by the example below:
 Parentheses in types (where a type is a combination of array, function, or
 union types) are used to specify the required type structure.
 Without parentheses, the symbol '``|``' that constructs a union type
-has the lowest precedence.
+has the lowest precedence as presented in the following example:
 
 .. index::
    array type
@@ -249,8 +249,6 @@ has the lowest precedence.
    symbol
    construct
    precedence
-
-It is presented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -276,7 +274,7 @@ It is presented by the example below:
     d = null // ok, d is nullable
     d = (): string => { return "hi" } // ok
 
-
+|
 
 .. _Named Types:
 
@@ -329,13 +327,15 @@ Type References
 
 A type reference refers to a type by one of the following:
 
--  *Simple* or *qualified* type name (see :ref:`Names`), or
--  Type alias (see :ref:`Type Alias Declaration`).
+-  *Simple* or *qualified* type name (see :ref:`Names`),
+-  Type alias (see :ref:`Type Alias Declaration`), or
+-  Type parameter (see :ref:`Generic Parameters`) name with '!' sign
+   (see :ref:`NonNullish Type Parameter`).
 
 
 If the referred type is a class or an interface type, then each identifier in
 a name or an alias can be optionally followed by a type argument (see
-:ref:`Type Arguments`).
+:ref:`Type Arguments`):
 
 .. index::
    type reference
@@ -351,6 +351,7 @@ a name or an alias can be optionally followed by a type argument (see
 
     typeReference:
         typeReferencePart ('.' typeReferencePart)*
+        |  Identifier '!'
         ;
 
     typeReferencePart:
@@ -420,7 +421,7 @@ below.
 -  Comparison operators that produce a value of type *boolean*:
 
    +  Numerical comparison operators '<', '<=', '>', and '>=' (see :ref:`Numerical Comparison Operators`);
-   +  Numerical equality operators '==' and '!=' (see :ref:`Value Equality Operators`);
+   +  Numerical equality operators '==' and '!=' (see :ref:`Value Equality for Numeric Types`);
 
 -  Numerical operators that produce a value of type *int*, *long*, or *bigint*:
 
@@ -493,7 +494,7 @@ The classes *Byte*, *Short*, *Int*, and *Long* predefine
 constructors, methods, and constants that are parts of the |LANG| standard
 library (see :ref:`Standard Library`).
 
-If one operand is not *long*, then the numeric promotion (see
+If one operand is not of type *long*, then the numeric promotion (see
 :ref:`Primitive Types Conversions`) must be used first to widen
 it to type *long*.
 
@@ -503,22 +504,22 @@ If neither operand is of type *long*, then:
 -  The result of the numerical operator is of type *int*.
 
 
-If one operand is not *int*, or neither operand is *int*, then the
-numeric promotion must be used first to widen it to type *int*.
+If one operand (or neither operand) is of type *int*, then the numeric
+promotion must be used first to widen it to type *int*.
 
 Any integer type value can be cast to or from any numeric type.
 
-Casts between the *integer* and *boolean* types are not possible.
+Casts between types *integer* and *boolean* are not allowed.
 
 The integer operators cannot indicate an overflow or an underflow.
 
 An integer operator can throw errors (see :ref:`Error Handling`) as follows:
 
 -  An integer division operator '/' (see :ref:`Division`), and an
-   integer remainder operator '%' (see :ref:`Remainder`) throw the
+   integer remainder operator '%' (see :ref:`Remainder`) throw
    *ArithmeticError* if their right-hand operand is zero.
 -  An increment operator '++' and a decrement operator '--' (see
-   :ref:`Additive Expressions`) throw the *OutOfMemoryError* if boxing
+   :ref:`Additive Expressions`) throw *OutOfMemoryError* if boxing
    conversion (see :ref:`Boxing Conversions`) is required
    but the available memory is not sufficient to perform it.
 
@@ -581,7 +582,7 @@ discussed below.
    - Numerical comparison operators '<', '<=', '>', and '>=' (see
      :ref:`Numerical Comparison Operators`);
    - Numerical equality operators '==' and '!=' (see
-     :ref:`Value Equality Operators`);
+     :ref:`Value Equality for Numeric Types`);
 
 -  Numerical operators that produce values of type *float* or *double*:
 
@@ -604,8 +605,8 @@ discussed below.
 -  Cast operator (see :ref:`Cast Expressions`) that converts a floating-point
    value to a value of any specified numeric type;
 -  The string concatenation operator '+' (see :ref:`String Concatenation`) that,
-   if one operand is *string* and the other is a *floating-point* operand,
-   converts the *floating-point* operand to a *string* with a value
+   if one operand is of type *string* and the other is of type *floating-point*,
+   converts the type *floating-point* operand to type *string* with a value
    represented in the decimal form (without the loss of information), and then
    creates a concatenation of the two strings as a new *string*.
 
@@ -641,9 +642,8 @@ discussed below.
    numeric type
    string
 
-The classes *Float* and *Double*, and the math library predefine 
-constructors, methods, and constants that are parts of the |LANG| standard
-library (see :ref:`Standard Library`).
+The classes *Float* and *Double* predefine constructors, methods, and constants
+that are parts of the |LANG| standard library (see :ref:`Standard Library`).
 
 An operation is called a *floating-point operation* if at least one of the
 operands in a binary operator is of the *floating-point* type (even if the
@@ -686,7 +686,7 @@ Any floating-point type value can be cast to or from any numeric type.
    binary operator
    floating-point type
 
-Casts between *floating-point* and *boolean* types are not possible.
+Casts between types *floating-point* and *boolean* are not allowed.
 
 Operators on floating-point numbers, except the remainder operator (see
 :ref:`Remainder`), behave in compliance with the IEEE 754 Standard.
@@ -737,7 +737,7 @@ produces NaN.
 All numeric operations with a NaN operand result in NaN.
 
 A floating-point operator (the increment '++' operator and decrement '--'
-operator, see :ref:`Additive Expressions`) can throw the *OutOfMemoryError*
+operator, see :ref:`Additive Expressions`) can throw *OutOfMemoryError*
 (see :ref:`Error Handling`) if boxing conversion (see
 :ref:`Boxing Conversions`) is required but the available
 memory is not sufficient to perform it.
@@ -777,7 +777,7 @@ Numeric Types Hierarchy
 .. meta:
     frontend_status: Partly
 
-Integer types and floating-point types are *numeric types*.
+*Integer* and *floating-point* types are *numeric types*.
 
 Larger types include smaller types or their values:
 
@@ -785,10 +785,9 @@ Larger types include smaller types or their values:
 
 A value of a smaller type can be assigned to a variable of a larger type.
 
-Type *bigint* does not belong to the hierarchy. 
-There is no implicit conversions from numeric types to *bigint*, 
-use standard library class *BigInt* to create bigint values
-from numeric types.
+Type *bigint* does not belong to the hierarchy. There is no implicit conversion
+from a numeric type to *bigint*. Standard library class *BigInt* must be used
+to create *bigint* values from numeric types.
 
 .. index::
    numeric type
@@ -820,7 +819,7 @@ Boolean Types and Operations
 .. meta:
     frontend_status: Done
 
-Type *boolean* represents logical values *true* and *false* that
+Type *boolean* represents logical values ``true`` and ``false`` that
 correspond to the class type *Boolean*.
 
 The boolean operators are as follows:
@@ -832,15 +831,16 @@ The boolean operators are as follows:
    conditional-or operator '``||``' (see :ref:`Conditional-Or Expression`);
 -  Conditional operator '?:' (see :ref:`Conditional Expressions`);
 -  String concatenation operator '+' (see :ref:`String Concatenation`)
-   that converts the *boolean* operand to *string* (``true`` or ``false``),
-   and then creates a concatenation of the two strings as a new *string*.
+   that converts an operand of type *boolean* to type *string* (``true`` or
+   ``false``), and then creates a concatenation of the two strings as a new
+   *string*.
 
 
 The conversion of an integer or floating-point expression *x* to a boolean
 value must follow the *C* language convention---any nonzero value is converted
-to *true*, and the value of zero is converted to *false*.
-In other words, the result of conversion of expression *x* to the boolean
-type is always the same as the result of comparison *x != 0*.
+to ``true``, and the value of zero is converted to ``false``. In other words,
+the result of expression *x*  conversion to type *boolean* is always the same
+as the result of comparison *x != 0*.
 
 .. index::
    boolean
@@ -942,12 +942,13 @@ The operations on references to objects are as follows:
    :ref:`Field Access Expressions`);
 -  Call expression (see :ref:`Method Call Expression` and :ref:`Function Call Expression`);
 -  Cast expression (see :ref:`Cast Expressions`);
--  String concatenation operator (see :ref:`String Concatenation`)
-   that---given a *string* operand and a reference---calls the *toString*
-   method of the referenced object, converts the reference to a *string*,
-   and creates a concatenation of the two strings as a new *string*;
+-  String concatenation operator (see :ref:`String Concatenation`) that---given
+   an operand of type *string* and a reference---calls the *toString* method
+   of the referenced object, converts the reference to type *string*, and
+   creates a concatenation of the two strings as a new *string*;
 -  ``instanceof`` operator (see :ref:`InstanceOf Expression`);
--  Reference equality operators '==' and '!=' (see :ref:`Reference Equality Operators`);
+-  ``typeof`` operator (see :ref:`TypeOf Expression`);
+-  Reference equality operators '==' and '!=' (see :ref:`Reference Equality`);
 -  Conditional operator '?:' (see :ref:`Conditional Expressions`).
 
 
@@ -1036,9 +1037,8 @@ to type *Object*).
     frontend_status: Done
 
 Type *string* is a predefined type. It stores sequences of characters as
-Unicode UTF-16 code units.
-
-Type *string* includes all string literals, e.g., '*abc*'.
+Unicode UTF-16 code units. Type *string* includes all string literals, e.g.,
+'*abc*'.
 
 The value of a string object cannot be changed after it is created, i.e.,
 a string object is immutable.
@@ -1058,7 +1058,7 @@ then the string concatenation operator '+' (see :ref:`String Concatenation`)
 implicitly creates a new string object.
 
 Using *string* is recommended in all cases (although the name *String*
-also refers to the type *string*).
+also refers to type *string*).
 
 .. index::
    string type
@@ -1111,8 +1111,8 @@ throws an error or exception).
 *void* Type
 ===========
 
-The *void* type has no instances (no values). It is typically used as the
-return type if a function or a method returns no value.
+Type *void* has no instances (no values). It is typically used as the
+return type if a function or a method returns no value:
 
 .. code-block:: typescript
    :linenos:
@@ -1191,9 +1191,8 @@ Two basic operations with array elements take elements out of, and put
 elements into an array by using the operator ``[]`` and index expression.
 
 Another important operation is the read-only field *length*. It allows
-knowing the number of elements in the array.
-
-The example of syntax for the built-in array type is presented below:
+knowing the number of elements in the array. An example of syntax for
+the built-in array type is presented below:
 
 .. index::
    array element
@@ -1246,7 +1245,7 @@ A type alias can set a name for an array type (see :ref:`Type Alias Declaration`
 
     type Matrix = number[][] /* Two-dimensional array */
 
-As an object, an array is assignable to a variable of type *Object*:
+An array as an object is assignable to a variable of type *Object*:
 
 .. code-block:: typescript
    :linenos:
@@ -1336,7 +1335,7 @@ A type alias can set a name for a *function type* (see
     let op: BinaryOp
 
 If the function type contains the '``throws``' mark (see
-:ref:`Throwing Functions`), then it is the *throwing function type* .
+:ref:`Throwing Functions`), then it is the *throwing function type*.
 
 Function types assignability is described in :ref:`Assignment-like Contexts`,
 and conversions in :ref:`Function Types Conversions`.
@@ -1356,7 +1355,7 @@ and conversions in :ref:`Function Types Conversions`.
 *null* Type
 ===========
 
-The only value of type *null* is represented by the keyword  ``null``
+The only value of type *null* is represented by the keyword ``null``
 (see :ref:`Null Literal`).
 
 Using type *null* as type annotation is not recommended, except in
@@ -1429,7 +1428,7 @@ have its own type.
 The operator ``[]`` (square brackets) is used to access the elements of
 a tuple in a manner similar to that used to access elements of an array.
 
-The index expression is of *integer* type. The index of the 1st tuple
+An index expression belongs to *integer* type. The index of the 1st tuple
 element is *0*. Only constant expressions can be used as the index to get
 the access to tuple elements.
 
@@ -1444,7 +1443,7 @@ the access to tuple elements.
 *Object* (see :ref:`Object Class Type`) is the super type for any tuple type.
 
 An empty tuple is a corner case. It is only added to support compatibility
-with |TS|.
+with |TS|:
 
 .. code-block:: typescript
    :linenos:
@@ -1535,11 +1534,10 @@ Different mechanisms can be used to get values of particular types from a
     type Animal = Cat | Dog | Frog | number
 
     let animal: Animal = new Cat()
-    if (animal instanceof Frog) { // animal is of type Frog here
-        let frog: Frog = animal as Frog // Use as conversion here
-        animal.leap()
+    if (animal instanceof Frog) { 
+	    // animal is of type Frog here, conversion can be used:
+        let frog: Frog = animal as Frog
         frog.leap()
-        // As a result frog leaps twice
     }
 
     animal.sleep () // Any animal can sleep
@@ -1585,6 +1583,7 @@ to a value that does not belong to the values of that union type:
        values of type BMW_ModelCode
     */
 
+|
 
 .. _Union Types Normalization:
 
@@ -1612,6 +1611,12 @@ another:
 #. All nested union types are linearized.
 #. Identical types within the union type are replaced for a single type.
 #. Identical literals within the union type are replaced for a single literal.
+
+   - if list of union types contains a primitve numeric type or a literal and a
+     boxed version of the same or different primitve numeric type then it is
+     compile-time error - invalid union type and normalization process is
+     aborted.
+
 #. If at least one type in the union is *Object*, then the entire union type is
    reduced to type *Object*.
 #. If there is type *never* among union types, then it is removed.
@@ -1619,10 +1624,6 @@ another:
    (see :ref:`Numeric Types Hierarchy`) numeric type is to stay in the union
    while the others are removed. All numeric literals (if any) that fit into
    the largest numeric type in a union are removed.
-#. If there is a non-empty group of union types of the predefined class
-   type that wrap predefined numeric types then all of them are replaced with
-   their predefined numeric types and the largest type is defined. After that 
-   its wrapper predefined class type is left within the union type.
 #. If a literal of union type belongs to the values of a type that is part
    of the union, then the literal is removed.
 #. This step is performed recursively until no mutually compatible types remain
@@ -1649,6 +1650,8 @@ another:
 The result of the normalization process is a normalized union type. The process
 is presented in the examples below:
 
+|
+
 .. code-block:: typescript
    :linenos:
 
@@ -1657,6 +1660,10 @@ is presented in the examples below:
     1 | 1 | 1  =>  1                             // Identical values elimination
 
     number | number => number                    // Identical types elimination
+
+    number | Number                              // Compile-time error
+    Int | float                                  // Compile-time error
+    Int | 3.14                                   // Compile-time error
 
     int|short|float|2 => float                   // the largest numeric type stays
     int|long|2.71828 => long|2.71828             // the largest numeric type stays and the literal
@@ -1699,7 +1706,7 @@ Keyof Types
 A special form of union types are *keyof* types built with help of the
 keyword *keyof*. The keyword *keyof* is applied to the class or interface type
 (see :ref:`Classes` and :ref:`Interfaces`). The resultant new type is a union
-of names of all members of the class or interface type. 
+of names of all members of the class or interface type.
 
 
 .. code-block:: abnf
@@ -1749,14 +1756,15 @@ Nullish Types
 .. code-block:: abnf
 
     nullishType:
-        type '|' ( 'null' | 'undefined' )
+          type '|' 'null' (| 'undefined')?
+        | type '|' 'undefined' ('|' 'null')?
         ;
 
 All predefined and user-defined type declarations create non-nullish types.
 Non-nullish types cannot have a *null* or *undefined* value at runtime.
 
 *T* \| *null* or *T* \| *undefined* can be used as the type to specify a
-nullish version of type *T*. 
+nullish version of type *T*.
 
 A variable declared to have type *T* \| *null* can hold the values of type *T*
 and its derived types, or the value *null*. Such a type is called a *nullable
@@ -1764,6 +1772,9 @@ type*.
 
 A variable declared to have type *T* \| *undefined* can hold the values of
 type *T* and its derived types, or the value *undefined*.
+
+A variable declared to have type *T* \| *null* \| *undefined* can hold values
+of type *T* (and its derived types), and the values *undefined* or *null*.
 
 A nullish type is a reference type (see :ref:`Union Types`).
 A reference that is *null* or *undefined* is called a *nullish* value.
@@ -2026,7 +2037,7 @@ The wrapper must raise an error if:
 
 - A new expression is not supported by the underlying object; or
 - The signature of the constructor of the underlying object is not compatible
-  with the types of the call arguments.
+  with the types of call arguments.
 
 .. index::
    DynamicObject
@@ -2083,7 +2094,7 @@ Default Values for Types
 .. meta:
     frontend_status: Partly
 
-**Note**: This is part of the |LANG|'s experimental mode.
+**Note**: This is the |LANG|'s experimental feature.
 
 Some types use so-called *default values* for variables without explicit
 initialization (see :ref:`Variable Declarations`), including the following:
@@ -2100,9 +2111,9 @@ All other types, including reference types and enumeration types, have no
 default values. Variables of such types must be initialized explicitly with
 a value before the first use of a type.
 
-.. The default values of primitive types and *string* are as follows:
+.. Default values of primitive types are as follows:
 
-The default values of primitive types are as follows:
+Default values of primitive types are as follows:
 
 .. index::
    default value

@@ -68,9 +68,9 @@ the constant expression is omitted, then the value of the enum constant
 is set implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
 
 A compile-time error occurs if ``integer`` and ``string`` type enumeration
-constants are mixed in one enumeration.
+constants are combined in one enumeration.
 
-In addition, all enumeration constant names are to be unique. Otherwise,
+In addition, all enumeration constant names must be unique. Otherwise,
 a compile-time error occurs.
 
 .. code-block:: typescript
@@ -130,8 +130,8 @@ the values of the constants are set by the following rules:
 -  The value of the first constant without an explicit value is assigned to
    zero.
 -  A constant with an explicit value has that explicit value.
--  A constant that is not first and has no explicit value takes the value of
-   the immediately preceding constant plus one.
+-  A constant that is not the first and has no explicit value takes the value
+   of the immediately preceding constant plus one.
 
 .. index::
    constant

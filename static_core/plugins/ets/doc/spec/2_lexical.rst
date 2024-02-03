@@ -249,29 +249,29 @@ cannot be used as identifiers:
 +---------------+---------------+---------------+---------------+
 |               |               |               |               |
 +===============+===============+===============+===============+
-| abstract      | else          | interface     | return        |
+| abstract      | else          | internal      | static        |
 +---------------+---------------+---------------+---------------+
-| as            | enum          | internal      | static        |
+| as            | enum          | launch        | switch        |
 +---------------+---------------+---------------+---------------+
-| assert        | export        | launch        | switch        |
+| assert        | export        | let           | super         |
 +---------------+---------------+---------------+---------------+
-| async         | extends       | let           | super         |
+| async         | extends       | native        | this          |
 +---------------+---------------+---------------+---------------+
-| await         | false         | native        | this          |
+| await         | false         | new           | throw         |
 +---------------+---------------+---------------+---------------+
-| break         | final         | new           | throw         |
+| break         | final         | null          | true          |
 +---------------+---------------+---------------+---------------+
-| case          | for           | null          | true          |
+| case          | for           | override      | try           |
 +---------------+---------------+---------------+---------------+
-| class         | function      | override      | try           |
+| class         | function      | package       | while         |
 +---------------+---------------+---------------+---------------+
-| const         | if            | package       | type          |
+| const         | if            | private       |               |
 +---------------+---------------+---------------+---------------+
-| constructor   | implements    | private       | while         |
+| constructor   | implements    | protected     |               |
 +---------------+---------------+---------------+---------------+
-| continue      | import        | protected     |               |
+| continue      | import        | public        |               |
 +---------------+---------------+---------------+---------------+
-| do            | instanceof    | public        |               |
+| do            | interface     | return        |               |
 +---------------+---------------+---------------+---------------+
 
 2. The following words have special meaning in certain contexts (*soft
@@ -285,14 +285,17 @@ keywords*) but are valid identifiers elsewhere:
 +---------------+---------------+---------------+---------------+
 |               |               |               |               |
 +===============+===============+===============+===============+
-| catch         | from          | of            | set           |
+| catch         | get           | out           | throws        |
 +---------------+---------------+---------------+---------------+
-| declare       | get           | out           | struct        |
+| declare       | in            | readonly      | type          |
 +---------------+---------------+---------------+---------------+
-| default       | in            | readonly      | throws        |
+| default       | instanceof    | rethrows      | typeof        |
 +---------------+---------------+---------------+---------------+
-| finally       | keyof         | rethrows      |               |
+| finally       | keyof         | set           |               |
 +---------------+---------------+---------------+---------------+
+| from          | of            | struct        |               |
++---------------+---------------+---------------+---------------+
+
 
 3. The following words cannot be used as user-defined type names but are
 not otherwise restricted:
@@ -319,11 +322,11 @@ the future use (or used in TS):
    identifier
    keyword
 
-+---------------+---------------+---------------+---------------+
-|               |               |               |               |
-+===============+===============+===============+===============+
-| is            | typeof        | var           | yield         |
-+---------------+---------------+---------------+---------------+
++---------------+---------------+---------------+
+|               |               |               |
++===============+===============+===============+
+| is            | var           | yield         |
++---------------+---------------+---------------+
 
 
 |
@@ -338,7 +341,8 @@ Operators and Punctuators
     todo: note: ?? and ?. are not implemented yet
 
 *Operators* are tokens that denote various actions to be performed on values:
-addition, subtraction, comparison, and other.
+addition, subtraction, comparison, and other. The keywords *instanceof* and
+*typeof* also act as operators.
 
 *Punctuators* are tokens that separate, complete, or otherwise organize program
 elements and parts: commas, semicolons, parentheses, square brackets, etc.

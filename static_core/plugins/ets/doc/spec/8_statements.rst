@@ -18,7 +18,7 @@ Statements
 .. meta:
     frontend_status: Done
 
-Statements are designed to control the execution.
+Statements are designed to control the execution:
 
 .. code-block:: abnf
 
@@ -80,7 +80,7 @@ Expression Statements
 .. meta:
     frontend_status: Done
 
-Any expression can be used as a statement.
+Any expression can be used as a statement:
 
 .. code-block:: abnf
 
@@ -106,7 +106,7 @@ Block
 .. meta:
     frontend_status: Done
 
-A sequence of statements enclosed in balanced braces forms a *block*.
+A sequence of statements enclosed in balanced braces forms a *block*:
 
 .. code-block:: abnf
 
@@ -149,7 +149,7 @@ Local declarations define new mutable or immutable variables or
 types within the enclosing context.
 
 *Let* and *const* declarations have the initialization part that
-presumes execution. They actually act as statements.
+presumes execution, and actually act as statements:
 
 .. code-block:: abnf
 
@@ -187,7 +187,7 @@ The visibility of a local declaration name is determined by the function
     todo: ambiguous wording in the spec: "Any 'else' matches the first 'if' of an if statement" - what first means?
 
 An ``if`` statement allows executing alternative statements (if provided) under
-certain conditions.
+certain conditions:
 
 .. code-block:: abnf
 
@@ -196,12 +196,12 @@ certain conditions.
         ('else' statement2)?
         ;
 
-If an expression, which represents a condition, is successfully evaluated
-as *true*, then *statement1* is executed. Otherwise, *statement2* is executed
+If an expression represents a condition and is successfully evaluated as
+*true*, then *statement1* is executed. Otherwise, *statement2* is executed
 (if provided). A compile-time error occurs if the expression type is not
 *boolean*.
 
-Any ``else`` matches the first ``if`` of an ``if`` statement.
+Any ``else`` matches the first ``if`` of an ``if`` statement:
 
 .. index::
    if statement
@@ -272,7 +272,7 @@ below:
 .. meta:
     frontend_status: Done
 
-A ``while`` statement and a ``do`` statement evaluate an *expression*, and
+A ``while`` statement and a ``do`` statement evaluate an *expression* and
 execute a *statement* repeatedly till the *expression* value is *true*.
 The key difference is that *whileStatement* first evaluates and checks the
 *expression* value, and *doStatement* first executes the *statement*:
@@ -354,7 +354,7 @@ The key difference is that *whileStatement* first evaluates and checks the
     frontend_status: Done
 
 A ``for-of`` loop iterates elements of *array* or *string*, or an instance
-of *iterable* class or interface (see :ref:`Iterable Types`).
+of *iterable* class or interface (see :ref:`Iterable Types`):
 
 
 .. index::
@@ -448,7 +448,7 @@ feature (see :ref:`For-of Type Annotation`).
     todo: break with label causes compile time assertion
 
 A ``break`` statement transfers control out of the enclosing *loopStatement*
-or *switchStatement*.
+or *switchStatement*:
 
 .. index::
    break statement
@@ -499,7 +499,7 @@ A compile-time error occurs if the *breakStatement* is not found within
     todo: continue with label causes compile time assertion
 
 A ``continue`` statement stops the execution of the current loop iteration,
-and transfers control to the next iteration. Appropriate checks of the loop
+and transfers control to the next iteration. Appropriate checks of loop
 exit conditions depend on the kind of the loop.
 
 .. code-block:: abnf
@@ -588,9 +588,9 @@ surrounding function or method. If an *expression* is provided,
 the resultant value is the evaluated *expression*.
 
 In case of constructors, class initializers, and top-level statements, the
-control leaves the scope of the construction in question, but no result is
-required. Other statements of the surrounding function, method body,
-class initializer, or top-level statement are not executed.
+control is transferred out of the scope of the construction in question, but
+no result is required. Other statements of the surrounding function, method
+body, class initializer, or top-level statement are not executed.
 
 .. index::
    execution
@@ -748,7 +748,7 @@ determines the equality.
 A ``throw`` statement causes *exception* or *error* to be thrown (see
 :ref:`Error Handling`). It immediately transfers control, and can exit multiple
 statements, constructors, functions, and method calls until a ``try`` statement
-(see :ref:`Try Statements`) is found that catches the thrown value; if no
+(see :ref:`Try Statements`) is found that catches the thrown value. If no
 ``try`` statement is found, then *UncatchedExceptionError* is thrown.
 
 .. code-block:: abnf
@@ -758,7 +758,7 @@ statements, constructors, functions, and method calls until a ``try`` statement
         ;
 
 The *expression*’s type must be assignable (see :ref:`Assignment`) to
-type *Exception* or *Error*. A compile-time error occurs otherwise.
+type *Exception* or *Error*. Otherwise, a compile-time error occurs.
 
 This implies that the thrown object is never *null*.
 
@@ -879,8 +879,8 @@ The type of *catch identifier* is *Object*.
    catch identifier
    Object
 
-For the details of *typed catch clause* see
-:ref:`Multiple Catch Clauses in Try Statements`.
+See :ref:`Multiple Catch Clauses in Try Statements` for the details of
+*typed catch clause*.
 
 .. index::
    typed catch clause
@@ -937,11 +937,9 @@ abruptly.
         'finally' block
         ;
 
-The ``finally`` block is executed without regard to how (by reaching
+A ``finally`` block is executed without regard to how (by reaching
 *exception*, *error*, *return*, or *try-catch* end) the program control
-is transferred out.
-
-A ``finally`` block is particularly useful to ensure
+is transferred out. The ``finally`` block is particularly useful to ensure
 proper resource management.
 
 Any required actions (e.g., flush buffers and close file descriptors)

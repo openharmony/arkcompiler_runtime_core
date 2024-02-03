@@ -15,13 +15,13 @@
 Support for GUI Programming
 ###########################
 
-This section describes built-in mechanisms that |LANG| provides to create
+This section describes the built-in mechanisms that |LANG| provides to create
 graphical user interface (GUI) programs. The section is based on the ArkUI
 Declarative Core Language Specification available at
 <https://gitee.com/arkui-finland/arkui-edsl-core-spec/blob/master/arkui-core-spec.md>.
 
 ArkUI provides a set of extensions of the standard to declaratively describe
-the programs’ GUI and the interaction between the GUI components. |LANG| aims
+the programs’ GUI, and the interaction between the GUI components. |LANG| aims
 to adopt ArkUI syntax and semantics as long as they do not contradict |LANG|.
 
 This section is actively under development, and some of its parts can be still
@@ -86,7 +86,7 @@ GUI Structs
 perspective, a GUI struct is a restricted form of a non-primitive type
 that is designed to define GUI expressively and efficiently.
 
-Each GUI struct is required to implement its *builder* (i.e., a method
+Each GUI struct is required to implement its *builder* (i.e., the method
 responsible for the visual rendering of components).
 
 .. index::
@@ -225,8 +225,8 @@ the following is not allowed:
 
     -  Calling builders by name.
 
-    -  Calling builders by reference stored in the *@BuilderParam*-annotated
-       struct field.
+    -  Calling builders by the reference stored in the
+       *@BuilderParam*-annotated struct field.
 
     -  Calling a predefined builder *ForEach* for iterative rendering.
 
@@ -338,8 +338,8 @@ between a child component *at an arbitrary nesting level*, and a parent
 component.
 
 An *@Consume*-annotated field in a child component shares the same value with
-a field in the parent component. The parent component’s source field must be
-annotated with *@Provide*.
+a field in the parent component. The source field of the parent component must
+be annotated with *@Provide*.
 
 The annotation *@Consume* is applicable only to member fields of GUI structs.
 
@@ -392,8 +392,8 @@ applicable only to GUI structs.
 between a child component and a parent component.
 
 An *@Link*-annotated field in a child component shares the same value with a
-field in the parent component. The parent component’s source field must be
-annotated with *@State*, *@StorageLink*, or *@Link*.
+field in the parent component. The source field of the parent component must
+be annotated with *@State*, *@StorageLink*, or *@Link*.
 
 The annotation *@Link* is applicable only to member fields of GUI structs.
 
@@ -684,7 +684,7 @@ structs.
 =================
 
 *@StorageProp* is a field-level annotation that specifies a callback to
-be executed when the annotated field’s value changes.
+be executed when the value of the annotated field changes.
 
 The annotation *@StorageProp* is applicable only to member fields of GUI
 structs with the following annotations:
@@ -734,9 +734,10 @@ Callable Types
     frontend_status: Done
 
 A type is *callable* if the name of the type can be used in a call expression.
-A call expression that uses a type's name is called a *type call expression*.
-Only class and struct types can be callable. To make a type callable, a static
-method with the name '*invoke*' or '*instantiate*' must be defined or inherited.
+A call expression that uses the name of a type is called a *type call
+expression*. Only class and struct types can be callable. To make a type
+callable, a static method with the name '*invoke*' or '*instantiate*' must
+be defined or inherited:
 
 .. code-block:: typescript
    :linenos:
@@ -841,7 +842,7 @@ contain corresponding arguments:
 A :index:`compile-time error` occurs in a *type call expression* with type *T*,
 if:
 
-- *T* has no method 'invoke' or 'instantiate'; or
+- *T* has neither method 'invoke' nor  method 'instantiate'; or
 - *T* has the method 'instantiate' but its first parameter is not a 'factory'.
 
 .. code-block:: typescript

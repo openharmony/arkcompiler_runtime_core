@@ -62,16 +62,25 @@ Names
 A name refers to any declared entity.
 
 *Simple names* consist of a single identifier. *Qualified names* consist
-of a sequence of identifiers with the '.' tokens as separators.
+of a sequence of identifiers with the '.' tokens as separators:
 
-A qualified name *N.x* (where *N* is a simple or qualified name, and ``x``
-is an identifier) can refer to a *member* of a package, or a reference type
-(see :ref:`Reference Types`). *N* can name the following:
+.. code-block:: abnf
 
--  A package, of which ``x`` is a member;
--  A reference type, or a variable of a reference type (see
-   :ref:`Reference Types`), of which ``x`` names a member (a field or a
-   method).
+    qualifiedName:
+      Identifier ('.' Identifier )*
+      ;
+
+In a qualified name *N.x* (where *N* is a simple name, and ``x`` is an
+identifier that can follow a sequence of identifiers separated with '.'
+tokens), *N* can name the following:
+
+-  A compilition unit (see :ref:`Modules and Compilation Units`) with ``x``
+   to name its exported entity;
+
+-  A class or interface type (see :ref:`Classes`, :ref:`Interfaces`) with ``x``
+   to name its static member;
+
+-  A variable of a class or interface type with ``x`` to name its member.
 
 .. index::
    name
@@ -87,12 +96,6 @@ is an identifier) can refer to a *member* of a package, or a reference type
    method
    token
    separator
-
-.. code-block:: abnf
-
-    qualifiedName:
-      (Identifier '.')* Identifier
-      ;
 
 |
 
@@ -192,7 +195,7 @@ Scopes
     frontend_status: Done
 
 The *scope* of a name is the region of program code within which the entity
-declared by that name can be referred to without the qualification of the name.
+declared by that name can be referred to without having the name qualified.
 It means that a name is accessible in some context if it can be used in this
 context by its *simple* name.
 
@@ -461,7 +464,7 @@ introduced by using type alias (particularly for a generic type).
     type Dictionary = Map<string, string>
     type MapOfString<T> = Map<T, string>
 
-A type alias acts only as a new name. It neither changes the meaning of the
+A type alias acts as a new name only. It neither changes the meaning of the
 original type nor introduces a new type.
 
 .. code-block:: typescript
@@ -574,8 +577,6 @@ Variable Declarations
 
 A *variable declaration* introduces a new named variable that can be assigned
 an initial value:
-
-|
 
 .. code-block:: abnf
 
@@ -704,7 +705,7 @@ A *constant declaration* introduces a named variable with a mandatory
 explicit value.
 
 The value of a constant cannot be changed by an assignment expression
-(see :ref:`Assignment`). However, if the constant is an object or array, then
+(see :ref:`Assignment`). If the constant is an object or array, then
 its properties or items can be modified.
 
 .. code-block:: abnf
@@ -768,7 +769,7 @@ Type Compatibility with Initializer
 .. meta:
     frontend_status: Done
 
-If a variable or constant declaration contains the type annotation *T* and the
+If a variable or constant declaration contains type annotation *T* and
 initializer expression *E*, then the type of *E* must be compatible with *T*, 
 see :ref:`Assignment-like Contexts`.
 
@@ -787,24 +788,24 @@ Type Inference from Initializer
     frontend_status: Partly
     todo: spec issue: "If initializer expression is a null literal('null') the compiler error should be reported". Why is it striked out? "let a = null" should be CTE A: spec will be changed, a will have "Object|null tyoe"
 
-If a declaration does not contain the explicit type annotation, 
-its type if inferred from the initializer according to the following:
+If a declaration does not contain an explicit type annotation, then its type
+is inferred from the initializer as follows:
 
--  If the initializer expression is the *null* literal, the type is *Object* \| *null* .
+-  If the initializer expression is the *null* literal, then the type is
+   *Object* \| *null*.
 
--  If the intializer expresion is of a union type which consists of 
-   numeric literals only, the type is the smallest numeric type, 
-   so that all numeric literals fit that type.
+-  If the intializer expresion is of union type comprised of numeric literals
+   only, then the type is the smallest numeric type all numeric literals fit
+   into.
 
--  If the intializer expresion is of a union type which consists of 
-   literals where all literals are of the same type *T*, the type is *T*, 
+-  If the intializer expresion is of union type comprised of literals of a
+   single type *T*, then the type is *T*.
 
--  The type of the initializer expression, 
-   if the type can be inferred from the expression itself.
+-  If the type can be inferred from the initializer expression, then the type
+   is that of the initializer expression.
 
-A compile-time error occurs 
-if the type of the initializer cannot be inferred from the expression itself,
-see :ref:`Object Literal` for example. 
+If the type of the initializer cannot be inferred from the expression itself,
+then a compile-time error occurs (see :ref:`Object Literal`):
 
 .. index::
    type
@@ -971,8 +972,8 @@ If a parameter type is prefixed with *readonly*, then there are additional
 restrictions on the parameter as described in :ref:`Readonly Parameters`.
 
 The last parameter of a function can be a *rest parameter*
-(see :ref:`Rest Parameter`) or a sequence of *optional parameters*
-(see :ref:`Optional Parameters`). Such a construction allows omitting
+(see :ref:`Rest Parameter`), or a sequence of *optional parameters*
+(see :ref:`Optional Parameters`). This construction allows omitting
 the corresponding argument when calling a function. If a parameter is not
 *optional*, then each function call must contain an argument corresponding
 to that parameter. Non-optional parameters are called the *required parameters*.
@@ -1012,11 +1013,9 @@ Readonly Parameters
 If the parameter type is prefixed with *readonly*, then the type must be of
 array type *T*\[]. Otherwise, a compile-time error occurs.
 
-The meaning of the *readonly* parameter is that the array content cannot be
-modified by a function or a method body. Any operation that modifies the array
-content causes a compile-time error.
-
-The same applies to variables as discussed in :ref:`Variable Declarations`.
+The *readonly* parameter indicates that the array content cannot be modified
+by a function or by a method body. A compile-time error if the array content
+is modified by an operation:
 
 .. code-block:: typescript
    :linenos:
@@ -1025,6 +1024,8 @@ The same applies to variables as discussed in :ref:`Variable Declarations`.
         let element = array[0] // OK, one can get array element
         array[0] = element // Compile-time error, array is readonly
     }
+
+It applies to variables as discussed in :ref:`Variable Declarations`.
 
 
 |
@@ -1076,12 +1077,12 @@ omitted in a function call.
     pair(1, 2) // prints: 1 2
     pair(1) // prints: 1 7
 
-The second form is a short notation for a parameter of a union type
+The second form is a short notation for a parameter of union type
 *T* | *undefined* with the default value *undefined*. It means that
 *identifier '?' ':' type* is equivalent to
 *identifier ':' type | undefined = undefined*.
 If a type is of the value type kind, then implicit boxing must be applied
-(similarly to :ref:`Union Types`) as follows:
+(as in :ref:`Union Types`) as follows:
 *identifier '?' ':' valueType* is equivalent to
 *identifier ':' referenceTypeForValueType | undefined = undefined*.
 
@@ -1128,10 +1129,9 @@ Rest Parameter
 .. meta:
     frontend_status: Done
 
-A *rest parameter* allows functions or methods to take unbounded numbers
-of arguments.
-
-*Rest parameters* have the '``...``' symbol mark before the parameter name.
+*Rest parameters* allow functions or methods to take unbounded numbers of
+arguments. *Rest parameters* have the symbol '``...``' mark before the
+parameter name:
 
 .. code-block:: typescript
    :linenos:
@@ -1149,7 +1149,7 @@ A :index:`compile-time error` occurs if a rest parameter:
 -  Has a type that is not an array type.
 
 A function that has a rest parameter of type *T*\[] can accept any
-number of arguments of type *T*.
+number of arguments of type *T*:
 
 .. index::
    rest parameter
@@ -1177,7 +1177,7 @@ number of arguments of type *T*.
     sum(1, 2, 3) // returns 6
 
 If an argument of type *T*\[] is prefixed with the *spread* operator
-'``...``', then only one argument can be accepted.
+'``...``', then only one argument can be accepted:
 
 .. code-block:: typescript
    :linenos:
@@ -1210,7 +1210,7 @@ Shadowing Parameters
 If the name of a parameter is identical to the name of a top-level
 variable accessible within the body of a function or a method with that
 parameter, then the name of the parameter shadows the name of the
-top-level variable within the body of that function or method.
+top-level variable within the body of that function or method:
 
 .. code-block:: typescript
    :linenos:
@@ -1269,11 +1269,8 @@ the following conditions:
    above, and the type *T* is not *Promise* type, then the return type
    is *Promise<T>*.
 
-Future compiler implementation are to infer return type in more cases. If
-the particular type inference case is not recognized by the compiler,
-then a corresponding :index:`compile-time error` occurs.
-
-Type inference is presented in the example below:
+Future compiler implementations are to infer the return type in more cases.
+The type inference is presented in the example below:
 
 .. index::
    return type
@@ -1309,6 +1306,9 @@ Type inference is presented in the example below:
     /* Return type of bar will be inferred as Base which is 
        LUB for Derived1 and Derived2 */
 
+If a particular type inference case is not recognized by the compiler, then
+a corresponding :index:`compile-time error` occurs.
+
 |
 
 .. _Function Overload Signatures:
@@ -1321,7 +1321,7 @@ Function Overload Signatures
 
 The |LANG| language allows specifying a function that can have several
 *overload signatures* with the same name followed by one implementation
-function body.
+function body:
 
 .. code-block:: abnf
 

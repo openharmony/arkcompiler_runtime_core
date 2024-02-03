@@ -25,7 +25,7 @@ type that:
 -  Has no instance variables;
 -  Usually declares one or more methods;
 -  Allows otherwise unrelated classes to provide implementations for the
-   methods and so implement the interface.
+   methods, and so implement the interface.
 
 .. index::
    interface declaration
@@ -44,14 +44,14 @@ Interfaces cannot be instantiated directly.
 
 Interfaces can be *top-level* and local (see :ref:`Local Classes And Interfaces`).
 
-An interface can declare a *direct extension* of one or more other interfaces.
-In that case the interface inherits all members from the interfaces it extends
-(except any members that it *overrides* or *hides*).
+An interface can be declared a *direct extension* of one or more other
+interfaces. In that case the interface inherits all members from the interfaces
+it extends (except any members it *overrides* or *hides*).
 
 A class can be declared to *directly implement* one or more interfaces. Any
 instance of the class implements all methods specified by the interface(s).
 A class implements all interfaces that its direct superclasses and direct
-superinterfaces implement. Such interface inheritance allows objects to
+superinterfaces implement. The interface inheritance allows objects to
 support common behaviors without sharing a superclass.
 
 .. index::
@@ -329,24 +329,24 @@ An interface without a direct superinterface implicitly declares the following:
 
    -  Abstract-member method *m* (see :ref:`Interface Method Declarations`)
       with signature *s*;
-   -  Return type *r* and *throws* clause *t* that correspond to each *public*
+   -  Return type *r* and '``throws``' clause *t* that correspond to each *public*
       instance method *m* with signature *s*;
-   -  Return type *r* and *throws* clause *t* declared in *Object* (see
+   -  Return type *r* and '``throws``' clause *t* declared in *Object* (see
       :ref:`Object Class Type`);
 
 
 ---if the interface does not explicitly declare an abstract method (see
 :ref:`Interface Method Declarations`) with the same signature and return
-type, and a compatible *throws* clause.
+type, and a compatible '``throws``' clause.
 
 
 A compile-time error occurs if the interface explicitly declares:
 
-   -  A method *m* that *Object* declares as *final*.
+   -  Method *m* that *Object* declares as *final*.
    -  A method with a signature that is override-equivalent (see
-      :ref:`Signatures`) to an *Object*’s *public* method, but is not
+      :ref:`Signatures`) to the *Object*’s *public* method, but is not
       *abstract*, and has a different return type or an incompatible
-      *throws* clause.
+      '``throws``' clause.
 
 .. index::
    interface member
@@ -511,7 +511,7 @@ Interface Method Overload Signatures
     frontend_status: None
 
 |LANG| allows specifying a method that can have several *overload signatures*
-but the same name.
+but a single name.
 
 .. code-block:: abnf
 
@@ -519,14 +519,14 @@ but the same name.
         identifier signature
         ;
 
-Calling a method with *overload signatures* means that the overload signature
-implemented by the method called is textually the last.
+Calling a method with *overload signatures* means that that the method called
+implements the overload signature that is textually the last.
 
-*Overload signatures* compatibility requirements are discussed in
+The *Overload signature* compatibility requirements are discussed in
 :ref:`Overload Signature Compatibility`.
 
 In the example below, one overload signature is parameterless, and the other
-who have one parameter each:
+two have one parameter each:
 
 .. code-block:: typescript
    :linenos:
@@ -592,7 +592,7 @@ direct superinterfaces if **all** of the following is true:
 -  *m* is a member of *I*’s direct superinterface *J*;
 -  *I* declares no method with a signature that is compatible with the
    signature of *m* (see :ref:`Compatible Signature`);
--  No method :math:`m'` that is a member of the *I*’s direct superinterface
+-  No method :math:`m'` that is a member of *I*’s direct superinterface
    :math:`J'` (where *m* is distinct from :math:`m'`, and *J* from :math:`J'`)
    overrides the declaration of the method *m* from :math:`J'`.
 
@@ -676,7 +676,7 @@ The following kinds of relationships are described in :ref:`Requirements in Over
 
 -  The relationship between the return type of an interface and that of any
    overridden interface method.
--  The relationship between the *throws* clause of an interface method and
+-  The relationship between the '``throws``' clause of an interface method and
    that of any overridden interface method.
 -  The relationship between the signatures of an interface method and that
    of any overridden interface method.
@@ -718,7 +718,7 @@ inherited by *I*.
 However, the interface *I* inherits all methods that are abstract.
 
 A compile-time error occurs if one of the inherited methods for every other
-inherited method is not return-type-substitutable. A *throws* clause causes
+inherited method is not return-type-substitutable. A '``throws``' clause causes
 no error in such cases.
 
 The same method declaration can use multiple paths of inheritance from an

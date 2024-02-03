@@ -259,7 +259,7 @@ Bind All with Unqualified Access
 
 If an alias is not set, then the import binding '\*' binds all entities,
 exported from the compilation unit as defined by the *import path*, to the
-declaration scope of the current module as simple names.
+declaration scope of the current module, as simple names.
 
 +-------------------------------+--+-------------------------------+
 | Import                        |  |  Usage                        |
@@ -396,7 +396,7 @@ The module’s import path is now irrelevant:
 |                                 |  |        not accessible */             |
 +---------------------------------+--+--------------------------------------+
 
-One import statement can list several names:
+A single import statement can list several names:
 
 +-------------------------------------+--+---------------------------------+
 | Import                              |  | Usage                           |
@@ -618,7 +618,7 @@ The compiler uses the following rule to define the kind of imported
 compilation units, and the exact placement of the source code:
 
 -  If import path refers to a folder denoted by the last name in the resolved
-   file path, then the compiler imports the package which resides in the
+   file path, then the compiler imports the package that resides in the
    folder. The source code of the package is all the |LANG| source files in
    the folder.
 
@@ -767,9 +767,9 @@ Top-Level Declarations
 .. meta:
     frontend_status: Done
 
-*Top-level type declarations* declare top-level types (*class*,
-*interface*, or *enum*), top-level variables, constants, or
-functions, and can be exported.
+*Top-level type declarations* declare top-level types (*class*, *interface*,
+or *enum*), top-level variables, constants, or functions. Top-level type
+declarations can be exported.
 
 .. code-block:: abnf
 
@@ -938,9 +938,8 @@ If a class or an interface is exported in this manner, then its usage is
 limited similarly to the limitations described for *import type* directives
 (see :ref:`Type Binding`).
 
-A compile-time error occurs if a class or interface was already declared as
-exported, but *export type* is later applied to the same class or interface
-name.
+A compile-time error occurs if a class or interface is declared exported,
+but then *export type* is applied to the same class or interface name.
 
 The following example is an illustration of how this can be used:
 
@@ -1039,14 +1038,15 @@ The sequence above is equal to the following:
    top-level statement
    sequence
 
-- If a separate is imported by some other module then semantics of the top-level
-  statements is to initialize the imported module. This means that all top-level
-  statements are executed only once before the call to any other function, or
-  access to any top-level variable of the separate module.
-- If a separate module is used a program then top-level statements are used as a
-  program entry point (see :ref:`Program Entry Point main`). If the separate
-  module has the ``main`` function, it is executed after execution of the
-  top-level statements.
+- If a separate module is imported by some other module, then the semantics of
+  top-level statements is to initialize the imported module. It means that all
+  top-level statements are executed only once before a call to any other
+  function, or before the access to any top-level variable of the separate
+  module.
+- If a separate module is used a program, then top-level statements are used as
+  a program entry point (see :ref:`Program Entry Point main`). If the separate
+  module has the ``main`` function, then it is executed after the execution of
+  the top-level statements.
 
 .. code-block:: typescript
    :linenos:
@@ -1062,10 +1062,10 @@ The sequence above is equal to the following:
          console.log ("B.main")
       }
 
-The output will be:
+The output is as follows:
 
-A. Top-level statements
-B. Main
+A. Top-level statements,
+B. Main.
 
 .. code-block:: typescript
    :linenos:
@@ -1076,13 +1076,8 @@ B. Main
          console.log ("B.main")
       }
 
-The output will be:
-
-A. Top-level statements
-B. Main
-
-A :index:`compile-time error` occurs if a top-level statements contain a return
-statement (:ref:`Expression Statements`).
+A :index:`compile-time error` occurs if a top-level statement contains a
+return statement (:ref:`Expression Statements`).
 
 .. index::
    top-level statement
@@ -1105,23 +1100,23 @@ Program Entry Point (`main`)
 .. meta:
     frontend_status: Partly
 
-Separate modules can act as the programs (applications) and there are two kinds
-of program (application) entry points:
+Separate modules can act as programs (applications). The two kinds of program
+(application) entry points are as follows:
 
-- top-level statements  (see :ref:`Top-Level Statements`)
-- top-level ``main`` function (see below)
+- Top-level statements (see :ref:`Top-Level Statements`);
+- Top-level ``main`` function (see below).
 
-Thus separate module may have:
+Thus, a separate module may have:
 
-- only top-level ``main`` function (it is the entry point)
-- only top-level statements (they are the entry point)
-- both top-level statements and ``main`` function (the same as above + ``main``
-  is called after top-level statements execution is completed)
+- Only a top-level ``main`` function (that is the entry point);
+- Only top-level statements (that are entry points);
+- Both top-level ``main`` function and statements (same as above, plus ``main``
+  is called after the top-level statement execution is completed).
 
 The top-level ``main`` function must have either no parameters, or one
-parameter of string ``[]`` type, which provides access to the program
-command-line arguments. Its return type is either ``void`` or ``int``.
-No overloading is allowed for the entry point function.
+parameter of string  type ``[]`` that provides access to the arguments of
+program command-line. Its return type is either ``void`` or ``int``.
+No overloading is allowed for an entry point function.
 
 Different forms of valid and invalid entry points are shown in the example
 below:
