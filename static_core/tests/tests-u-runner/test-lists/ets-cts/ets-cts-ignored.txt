@@ -1860,6 +1860,7 @@
 04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_8.ets
 04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_9.ets
 04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_13.ets
+04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_15.ets
 04.names_declarations_and_scopes/08.function_declarations/07.function_overload_signatures/overload.ets
 07.expressions/24.equality_expressions/01.reference_equality_operators/type_conversion_of_one_operand_to_another_type.ets
 07.expressions/29.conditional_expressions/02.numeric_conditional_expressions/numeric_condition_expression_type_5.ets
@@ -1936,10 +1937,6 @@
 06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/identity.ets
 06.contexts_and_conversions/02.kinds_of_conversion/02.reference_types_conversions/ref_widening_40.ets
 06.contexts_and_conversions/02.kinds_of_conversion/02.reference_types_conversions/ref_widening_42.ets
-# end of es2panda fails
-
-# es2panda fails: panda#14766 Cannot get toString() from array
-06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_8.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14748 Aborts on array literal with function elements
@@ -2084,18 +2081,7 @@
 # end of es2panda fails
 
 # es2panda fails: panda#13130
-02.lexical_elements/07.keywords/types_0.ets
-02.lexical_elements/07.keywords/types_1.ets
-02.lexical_elements/07.keywords/types_3.ets
-02.lexical_elements/07.keywords/types_4.ets
-02.lexical_elements/07.keywords/types_5.ets
-02.lexical_elements/07.keywords/types_6.ets
-02.lexical_elements/07.keywords/types_7.ets
-02.lexical_elements/07.keywords/types_9.ets
 02.lexical_elements/07.keywords/types_11.ets
-02.lexical_elements/07.keywords/types_n_10.ets
-02.lexical_elements/07.keywords/types_n_2.ets
-02.lexical_elements/07.keywords/types_n_8.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14014
@@ -2272,7 +2258,6 @@
 # end of es2panda fails
 
 # es2panda fails: panda#13203
-09.classes/01.class_declaration/06.implementing_interface_properties/getter_setter_implementation.ets
 10.interfaces/05.interface_properties/getter_setter_form.ets
 10.interfaces/05.interface_properties/interface_property_declaration.ets
 10.interfaces/05.interface_properties/readonly_simple_form_0.ets
@@ -2629,6 +2614,44 @@
 17.experimental_features/10.trailing_lambda/trlambda_static_met_8.ets
 # end of es2panda fails
 
+# 15205 Defined tuple type is inaccessible to instanceof typecheck
+03.types/08.reference_types/10.tuple_types/tt_1.ets
+03.types/08.reference_types/10.tuple_types/tt_2.ets
+
+# 15236 Cannot access tuple element from array of tuples
+03.types/08.reference_types/10.tuple_types/tt_4.ets
+
+# 15238 Cannot cast tuple to Object
+03.types/08.reference_types/10.tuple_types/tt_5.ets
+
+#15241 Cannot use tuple type in type parameter constraint
+03.types/08.reference_types/10.tuple_types/tt_9.ets
+
+# 15242 Ensure-Not-Nullish expression for nullish tuple not recognized
+03.types/08.reference_types/10.tuple_types/tt_17.ets
+
+# es2panda fails: panda#15191 es2panda complains on tuple type value in function call argument
+03.types/08.reference_types/10.tuple_types/tt_6.ets
+03.types/08.reference_types/10.tuple_types/tt_7.ets
+03.types/08.reference_types/10.tuple_types/tt_8.ets
+03.types/08.reference_types/10.tuple_types/tt_10.ets
+03.types/08.reference_types/10.tuple_types/tt_13.ets
+
+# es2panda fails: panda#15188 es2panda aborts on enum in tuple type
+03.types/08.reference_types/10.tuple_types/tt2_24.ets
+
+# es2panda fails: panda#15188 es2panda aborts on union in tuple type
+03.types/08.reference_types/10.tuple_types/tt2_29.ets
+03.types/08.reference_types/10.tuple_types/tt2_30.ets
+03.types/08.reference_types/10.tuple_types/tt2_31.ets
+03.types/08.reference_types/10.tuple_types/tt2_32.ets
+
+# 15243 No CTE on wrong value type in tuple initialization
+03.types/08.reference_types/10.tuple_types/tt_n_12.ets
+
+# 15271 Tuple type couldn't be converted
+03.types/08.reference_types/10.tuple_types/tt_18.ets
+
 # es2panda fails: panda:14623 Cannot reference 'this' in this context
 17.experimental_features/10.trailing_lambda/trlambda_met_1.ets
 17.experimental_features/10.trailing_lambda/trlambda_met_3.ets
@@ -2671,3 +2694,17 @@
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_2.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_1.ets
 # end 14595
+
+# es2panda: panda#13442 Reworking the equality expression so it aligns with the specification changes
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_11.ets
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_13.ets
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_59.ets
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_60.ets
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_61.ets
+03.types/08.reference_types/10.tuple_types/tt2_15.ets
+# temporarily excluded:
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_36.ets
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_37.ets
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_38.ets
+07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_39.ets
+# end of es2panda fails

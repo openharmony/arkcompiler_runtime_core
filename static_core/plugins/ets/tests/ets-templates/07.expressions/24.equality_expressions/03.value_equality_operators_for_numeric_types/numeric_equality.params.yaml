@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,6 +21,14 @@ numeric_eq:
   - {left: "0", right: "0.5", op: "!=", result:  "true"}
   - {left: "0", right: "-0", op: "==", result:  "true"}
 
+  - {left:  "new Int(5)", right:  "new Int(5)", op: "==", result:  "true"}
+  - {left:  "new Long(10)", right: "new Long(5)", op: "!=", result: "true"}
+  - {left:  "new Short(5 as short)", right:  "new Short(5 as short)", op: "!=", result:  "false"}
+  - {left:  "new Byte(10 as byte)", right: "new Byte(5 as byte)", op: "==", result: "false"}
+  - {left: "new Int(1)", right:  "new Number(1.0)", op: "==", result: "true"}
+  - {left: "new Long()", right: "new Number(0.5)", op: "!=", result:  "true"}
+  - {left: "new Byte()", right: "new Int(-0)", op: "==", result:  "true"}
+
   - {left: "0.1", right: "Double.POSITIVE_INFINITY", op: "!=", result:  "true"}
   - {left: "0.1", right: "Double.POSITIVE_INFINITY", op: "==", result:  "false"}
   - {left: "Double.POSITIVE_INFINITY", right: "0.1", op: "!=", result:  "true"}
@@ -30,6 +38,15 @@ numeric_eq:
   - {left: "0.1", right: "Double.NEGATIVE_INFINITY", op: "!=", result:  "true"}
   - {left: "0.1", right: "Double.NEGATIVE_INFINITY", op: "==", result:  "false"}
 
+  - {left: "new Number(0.1)", right: "new Number(Double.POSITIVE_INFINITY)", op: "!=", result:  "true"}
+  - {left: "new Number(0.1)", right: "new Number(Double.POSITIVE_INFINITY)", op: "==", result:  "false"}
+  - {left: "new Number(Double.POSITIVE_INFINITY)", right: "new Number(0.1)", op: "!=", result:  "true"}
+  - {left: "new Number(Double.POSITIVE_INFINITY)", right: "new Number(0.1)", op: "==", result:  "false"}
+  - {left: "new Number(Double.NEGATIVE_INFINITY)", right: "new Number(0.1)", op: "!=", result:  "true"}
+  - {left: "new Number(Double.NEGATIVE_INFINITY)", right: "new Number(0.1)", op: "==", result:  "false"}
+  - {left: "new Number(0.1)", right: "new Number(Double.NEGATIVE_INFINITY)", op: "!=", result:  "true"}
+  - {left: "new Number(0.1)", right: "new Number(Double.NEGATIVE_INFINITY)", op: "==", result:  "false"}
+
   - {left: "Double.NEGATIVE_INFINITY", right: "Double.NEGATIVE_INFINITY", op: "==", result:  "true"}
   - {left: "Double.NEGATIVE_INFINITY", right: "Double.NEGATIVE_INFINITY", op: "!=", result:  "false"}
   - {left: "Double.POSITIVE_INFINITY", right: "Double.POSITIVE_INFINITY", op: "==", result:  "true"}
@@ -37,10 +54,22 @@ numeric_eq:
   - {left: "Double.NEGATIVE_INFINITY", right: "Double.POSITIVE_INFINITY", op: "==", result:  "false"}
   - {left: "Double.POSITIVE_INFINITY", right: "Double.NEGATIVE_INFINITY", op: "!=", result:  "true"}
 
+  - {left: "new Number(Double.NEGATIVE_INFINITY)", right: "new Number(Double.NEGATIVE_INFINITY)", op: "==", result:  "true"}
+  - {left: "new Number(Double.NEGATIVE_INFINITY)", right: "new Number(Double.NEGATIVE_INFINITY)", op: "!=", result:  "false"}
+  - {left: "new Number(Double.POSITIVE_INFINITY)", right: "new Number(Double.POSITIVE_INFINITY)", op: "==", result:  "true"}
+  - {left: "new Number(Double.POSITIVE_INFINITY)", right: "new Number(Double.POSITIVE_INFINITY)", op: "!=", result:  "false"}
+  - {left: "new Number(Double.NEGATIVE_INFINITY)", right: "new Number(Double.POSITIVE_INFINITY)", op: "==", result:  "false"}
+  - {left: "new Number(Double.POSITIVE_INFINITY)", right: "new Number(Double.NEGATIVE_INFINITY)", op: "!=", result:  "true"}
+
   - {left: "Double.NaN", right: "Double.NaN", op: "!=", result:  "true"}
   - {left: "Double.NaN", right: "Double.NaN", op: "==", result:  "false"}
   - {left: "Double.NaN", right: "0.1", op: "==", result:  "false"}
   - {left: "Double.NaN", right: "0.1", op: "!=", result:  "true"}
+
+  - {left: "new Number(Double.NaN)", right: "new Number(Double.NaN)", op: "!=", result:  "true"}
+  - {left: "new Number(Double.NaN)", right: "new Number(Double.NaN)", op: "==", result:  "false"}
+  - {left: "new Number(Double.NaN)", right: "new Number(0.1)", op: "==", result:  "false"}
+  - {left: "new Number(Double.NaN)", right: "new Number(0.1)", op: "!=", result:  "true"}
 
   - {left: "0.1", right: "0.0", op: "!=", result:  "true"}
   - {left: "0.1", right: "0.0", op: "==", result:  "false"}
@@ -48,3 +77,10 @@ numeric_eq:
   - {left: "-0.0", right: "+0.0", op: "==", result:  "true"}
   - {left: "+0.0", right: "-0.0", op: "!=", result:  "false"}
   - {left: "-0.0", right: "+0.0", op: "!=", result:  "false"}
+
+  - {left: "new Float(0.1)", right: "new Double(0.0)", op: "!=", result:  "true"}
+  - {left: "new Double(0.1)", right: "new Float(0.0)", op: "==", result:  "false"}
+  - {left: "new Number(+0.0)", right: "new Double(-0.0)", op: "==", result:  "true"}
+  - {left: "new Double(-0.0)", right: "new Float(+0.0)", op: "==", result:  "true"}
+  - {left: "new Float(+0.0)", right: "new Number(-0.0)", op: "!=", result:  "false"}
+  - {left: "new Float(-0.0)", right: "new Double(+0.0)", op: "!=", result:  "false"}

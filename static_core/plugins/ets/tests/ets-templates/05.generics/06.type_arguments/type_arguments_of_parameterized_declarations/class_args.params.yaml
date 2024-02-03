@@ -58,27 +58,24 @@ cases:
     bound: ' extends X[]|null'
 
   - use: |-
-      let v: A<A<X>[]> = new A<A<X>[]>(new A<X>[0])
+      let v: A<A<X>[]> = new A<A<X>[]>([new A<X>(new X())])
 
   - use: |-
-      let v: A<A<X[]>[]> = new A<A<X[]>[]>(new A<X[]>[0])
-
+      let v: A<A<X[]>[]> = new A<A<X[]>[]>([new A<X[]>(new X[1])])
   - use: |-
       let v: A<I[]> = new A<I[]>(new I[0])
 
   - use: |-
-      let v: A<A<I>[]> = new A<A<I>[]>(new A<I>[0])
+      let v: A<A<I>[]> = new A<A<I>[]>([new A<I>(new X())])
+  - use: |-
+      let v: A<A<I[]>[]> = new A<A<I[]>[]>([new A<I[]>(new I[0])])
 
   - use: |-
-      let v: A<A<I[]>[]> = new A<A<I[]>[]>(new A<I[]>[0])
-
-  - use: |-
-      let v: A<Color[]> = new A<Color[]>(new Color[0])
+      let v: A<Color[]> = new A<Color[]>([Color.Red])
     bound: ' extends Color[]|null'
 
   - use: |-
-      let v: A<A<Color[]>[]> = new A<A<Color[]>[]>(new A<Color[]>[0])
-
+      let v: A<A<Color[]>[]> = new A<A<Color[]>[]>([new A<Color[]>([Color.Red])])
   - use: |-
       let v: A<int[]> = new A<int[]>([1, 2, 3])
 
@@ -104,22 +101,22 @@ cases:
       type B = X[]
 
   - use: |-
-      let v: A<B> = new A<B>(new A<X>[0])
+      let v: A<B> = new A<B>([new A<X>(new X())])
     decl: |-
       type B = A<X>[]
 
   - use: |-
-      let v: A<B> = new A<B>(new A<X>[0])
+      let v: A<B> = new A<B>([new A<X>(new X())])
     decl: |-
       type B = A<X|null>[]
     bound: ' extends Object|null'
 
   - use: |-
-      let v: A<B> = new A<B>(new A<X[]>[0])
+      let v: A<B> = new A<B>([new A<X[]>(new X[1])])
     decl: |-
       type B = A<X[]>[]
 
   - use: |-
-      let v: A<A<B>[]> = new A<A<B>[]>(new A<B>[0])
+      let v: A<A<B>[]> = new A<A<B>[]>([new A<B>([new X()])])
     decl: |-
       type B = X[]

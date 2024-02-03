@@ -28,9 +28,9 @@ class C2 {
 }
 
 
-function main() : int {
-    let objectC1 : C1 = new C1();
-    let objectC2 : C2 = new C2();
+function main(): int {
+    let objectC1: C1 = new C1();
+    let objectC2: C2 = new C2();
     if (objectC1 || objectC2) {
         return 0;
     } else {

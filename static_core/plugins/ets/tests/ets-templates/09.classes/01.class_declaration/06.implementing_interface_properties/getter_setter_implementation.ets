@@ -23,14 +23,14 @@ interface I {
 }
 
 class B implements I {
-    private text : string = "";
+    private _text : string = "";
 
     get text(): string {
-        return this.text;
+        return this._text;
     }
 
     set text(s: string): void {
-        this.text = s;
+        this._text = s;
     }
 }
 

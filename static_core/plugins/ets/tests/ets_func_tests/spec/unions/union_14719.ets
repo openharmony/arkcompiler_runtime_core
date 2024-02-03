@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,17 @@ tags: [compile-only]
 ---*/
 
 class Node {
-    protected onChildInserted: ((node: Node) => void) | undefined;
-    readonly kind: int;
+  protected onChildInserted: ((node: Node) => void) | undefined;
+  readonly kind: int;
 
-    constructor() {}
+  constructor() {}
 
+  check() {
+    assert this.onChildInserted == undefined
+  }
 }
 
 function main(): void {
+  let node: Node = new Node()
+  node.check()
 }

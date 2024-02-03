@@ -16,7 +16,7 @@
 /*---
  desc: 13.06 Top-level Declarations
  name: 13.compilation_units_packages_and_modules/13.06.top-level_declarations/13.06.01.exported_declaration/to_export
- tags: [not-a-test]
+ tags: [not-a-test, compile-only]
  ---*/
 
 export class Point {

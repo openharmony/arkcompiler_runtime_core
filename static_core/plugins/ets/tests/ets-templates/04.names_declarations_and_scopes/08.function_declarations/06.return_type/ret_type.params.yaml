@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -171,3 +171,27 @@ function_decls:
       call: |-
           let v: Promise<Boolean> = foo()
           assert foo() instanceof Promise
+
+    - decl: |-
+        let s = new Object()
+        function foo() {    // infer true|boolean[]
+           if (s != null)
+               return true;
+           else
+               return [true];
+        }
+      call: |-
+       let v = foo();
+
+    - decl: |-
+          class B<T, U> {}
+          let s = 1
+
+          function foo<T>() {  // infer  B<T, Long|Error>
+              if (s == 0)
+                  return new B<T, Long>();
+              else
+                  return new B<T, Error>();
+          }
+      call: |-
+          let v = foo<Boolean>();

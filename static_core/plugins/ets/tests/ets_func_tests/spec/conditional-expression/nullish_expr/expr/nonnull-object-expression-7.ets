@@ -24,8 +24,8 @@ class C1 {
 }
 
 
-function main() : int {
-    let objectC1 : C1 = new C1();
+function main(): int {
+    let objectC1: C1 = new C1();
     if (objectC1 || null) {
         return 0;
     } else {
