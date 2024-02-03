@@ -83,44 +83,19 @@ void InspectorServer::OnFail(std::function<void()> &&handler)
     });
 }
 
-void InspectorServer::CallDebuggerPaused(
-    PtThread thread, const std::vector<BreakpointId> &hitBreakpoints, const std::optional<RemoteObject> &exception,
-    const std::function<void(const std::function<void(FrameId, std::string_view, std::string_view, size_t,
-                                                      const std::vector<Scope> &)> &)> &enumerateFrames)
+void InspectorServer::CallDebuggerPaused(PtThread thread, const std::vector<BreakpointId> &hitBreakpoints,
+                                         const std::optional<RemoteObject> &exception,
+                                         const std::function<void(const FrameInfoHandler &)> &enumerateFrames)
 {
     auto sessionId = sessionManager_.GetSessionIdByThread(thread);
 
     server_.Call(sessionId, "Debugger.paused", [&](auto &params) {
         params.AddProperty("callFrames", [this, thread, &enumerateFrames](JsonArrayBuilder &callFrames) {
-            enumerateFrames([this, thread, &callFrames](auto frameId, auto methodName, auto sourceFile, auto lineNumber,
-                                                        auto &scopeChain) {
-                callFrames.Add([&](JsonObjectBuilder &callFrame) {
-                    auto [script_id, is_new] = sourceManager_.GetScriptId(thread, sourceFile);
-
-                    if (is_new) {
-                        CallDebuggerScriptParsed(thread, script_id, sourceFile);
-                    }
-
-                    callFrame.AddProperty("callFrameId", std::to_string(frameId));
-                    callFrame.AddProperty("functionName", methodName.data());
-                    callFrame.AddProperty("location", Location(script_id, lineNumber).ToJson());
-                    callFrame.AddProperty("url", sourceFile.data());
-
-                    callFrame.AddProperty("scopeChain", [&](JsonArrayBuilder &scopeChainBuilder) {
-                        for (auto &scope : scopeChain) {
-                            scopeChainBuilder.Add(scope.ToJson());
-                        }
-                    });
-
-                    callFrame.AddProperty("canBeRestarted", true);
-                });
-            });
+            EnumerateCallFrames(callFrames, thread, enumerateFrames);
         });
 
         params.AddProperty("hitBreakpoints", [&hitBreakpoints](JsonArrayBuilder &hitBreakpointsBuilder) {
-            for (auto id : hitBreakpoints) {
-                hitBreakpointsBuilder.Add(std::to_string(id));
-            }
+            AddHitBreakpoints(hitBreakpointsBuilder, hitBreakpoints);
         });
 
         if (exception) {
@@ -422,17 +397,7 @@ void InspectorServer::OnCallDebuggerSetBreakpointByUrl(
 
         result.AddProperty("breakpointId", std::to_string(*id));
         result.AddProperty("locations", [this, lineNumber, &sourceFiles, thread](JsonArrayBuilder &locations) {
-            for (auto sourceFile : sourceFiles) {
-                locations.Add([this, lineNumber, thread, sourceFile](JsonObjectBuilder &location) {
-                    auto [script_id, is_new] = sourceManager_.GetScriptId(thread, sourceFile);
-
-                    if (is_new) {
-                        CallDebuggerScriptParsed(thread, script_id, sourceFile);
-                    }
-
-                    Location(script_id, lineNumber).ToJson()(location);
-                });
-            }
+            AddBreakpointByUrlLocations(locations, sourceFiles, lineNumber, thread);
         });
     });
 }
@@ -572,5 +537,66 @@ void InspectorServer::SendTargetAttachedToTarget(const std::string &sessionId)
         });
         params.AddProperty("waitingForDebugger", true);
     });
+}
+
+void InspectorServer::EnumerateCallFrames(JsonArrayBuilder &callFrames, PtThread thread,
+                                          const std::function<void(const FrameInfoHandler &)> &enumerateFrames)
+{
+    enumerateFrames(
+        [this, thread, &callFrames](auto frameId, auto methodName, auto sourceFile, auto lineNumber, auto &scopeChain) {
+            CallFrameInfo callFrameInfo {frameId, sourceFile, methodName, lineNumber};
+            AddCallFrameInfo(callFrames, callFrameInfo, scopeChain, thread);
+        });
+}
+
+void InspectorServer::AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallFrameInfo &callFrameInfo,
+                                       const std::vector<Scope> &scopeChain, PtThread thread)
+{
+    callFrames.Add([&](JsonObjectBuilder &callFrame) {
+        auto [scriptId, isNew] = sourceManager_.GetScriptId(thread, callFrameInfo.sourceFile);
+
+        if (isNew) {
+            CallDebuggerScriptParsed(thread, scriptId, callFrameInfo.sourceFile);
+        }
+
+        callFrame.AddProperty("callFrameId", std::to_string(callFrameInfo.frameId));
+        callFrame.AddProperty("functionName", callFrameInfo.methodName.data());
+        callFrame.AddProperty("location", Location(scriptId, callFrameInfo.lineNumber).ToJson());
+        callFrame.AddProperty("url", callFrameInfo.sourceFile.data());
+
+        callFrame.AddProperty("scopeChain", [&](JsonArrayBuilder &scopeChainBuilder) {
+            for (auto &scope : scopeChain) {
+                scopeChainBuilder.Add(scope.ToJson());
+            }
+        });
+
+        callFrame.AddProperty("canBeRestarted", true);
+    });
+}
+
+/* static */
+void InspectorServer::AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
+                                        const std::vector<BreakpointId> &hitBreakpoints)
+{
+    for (auto id : hitBreakpoints) {
+        hitBreakpointsBuilder.Add(std::to_string(id));
+    }
+}
+
+void InspectorServer::AddBreakpointByUrlLocations(JsonArrayBuilder &locations,
+                                                  const std::set<std::string_view> &sourceFiles, size_t lineNumber,
+                                                  PtThread thread)
+{
+    for (auto sourceFile : sourceFiles) {
+        locations.Add([this, lineNumber, thread, sourceFile](JsonObjectBuilder &location) {
+            auto [scriptId, isNew] = sourceManager_.GetScriptId(thread, sourceFile);
+
+            if (isNew) {
+                CallDebuggerScriptParsed(thread, scriptId, sourceFile);
+            }
+
+            Location(scriptId, lineNumber).ToJson()(location);
+        });
+    }
 }
 }  // namespace panda::tooling::inspector

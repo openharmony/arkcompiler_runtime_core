@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H_
-#define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H_
+#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H
+#define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H
 
 #include <csignal>
 
@@ -40,8 +40,8 @@ class Sampler final : public RuntimeListener {
 public:
     ~Sampler() override = default;
 
-    PANDA_PUBLIC_API static Sampler *Create();
-    PANDA_PUBLIC_API static void Destroy(Sampler *sampler);
+    static PANDA_PUBLIC_API Sampler *Create();
+    static PANDA_PUBLIC_API void Destroy(Sampler *sampler);
 
     // Need to get comunicator inside the signal handler
     static const ThreadCommunicator &GetSampleCommunicator()
@@ -149,4 +149,4 @@ private:
 
 }  // namespace panda::tooling::sampler
 
-#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H_
+#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLING_PROFILER_H

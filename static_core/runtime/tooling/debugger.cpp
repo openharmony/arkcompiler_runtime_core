@@ -881,13 +881,13 @@ bool Debugger::RemovePropertyWatch(panda_file::File::EntityId classId, panda_fil
 }
 
 template <class VRegRef>
-static inline uint64_t GetVRegValue(VRegRef reg)
+static uint64_t GetVRegValue(VRegRef reg)
 {
     return reg.HasObject() ? reinterpret_cast<uintptr_t>(reg.GetReference()) : reg.GetLong();
 }
 
 template <class VRegRef>
-static inline PtFrame::RegisterKind GetVRegKind([[maybe_unused]] VRegRef reg)
+static PtFrame::RegisterKind GetVRegKind([[maybe_unused]] VRegRef reg)
 {
     if constexpr (std::is_same<VRegRef, interpreter::DynamicVRegisterRef>::value) {
         return PtFrame::RegisterKind::TAGGED;
@@ -897,10 +897,10 @@ static inline PtFrame::RegisterKind GetVRegKind([[maybe_unused]] VRegRef reg)
 }
 
 template <class FrameHandler>
-static inline void FillRegisters(Frame *interpreterFrame, PandaVector<uint64_t> &vregs,
-                                 PandaVector<PtFrame::RegisterKind> &vregKinds, size_t nregs,
-                                 PandaVector<uint64_t> &args, PandaVector<PtFrame::RegisterKind> &argKinds,
-                                 size_t nargs, uint64_t &acc, PtFrame::RegisterKind &accKind)
+static void FillRegisters(Frame *interpreterFrame, PandaVector<uint64_t> &vregs,
+                          PandaVector<PtFrame::RegisterKind> &vregKinds, size_t nregs, PandaVector<uint64_t> &args,
+                          PandaVector<PtFrame::RegisterKind> &argKinds, size_t nargs, uint64_t &acc,
+                          PtFrame::RegisterKind &accKind)
 {
     FrameHandler frameHandler(interpreterFrame);
 
