@@ -5199,6 +5199,50 @@ TEST_F(ChecksEliminationTest, NegOverflowAndZeroCheck3)
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
 }
 
+TEST_F(ChecksEliminationTest, OsrMode)
+{
+    auto osrGraph = CreateOsrGraph();
+    GRAPH(osrGraph)
+    {
+        PARAMETER(0U, 0U).u32();
+        PARAMETER(42U, 1U).ref();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(15U, Opcode::SaveState).Inputs(42U).SrcVregs({42U});
+            INST(16U, Opcode::NullCheck).ref().Inputs(42U, 15U);
+            INST(17U, Opcode::LenArray).s32().Inputs(16U);
+        }
+        BASIC_BLOCK(3U, 5U, 4U)
+        {
+            INST(3U, Opcode::Phi).s32().Inputs(0U, 7U);
+            INST(4U, Opcode::SaveStateOsr).Inputs(3U, 42U).SrcVregs({1U, 42U});
+            INST(5U, Opcode::Compare).b().SrcType(DataType::Type::INT32).CC(CC_LE).Inputs(3U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
+        }
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(7U, Opcode::Sub).s32().Inputs(3U, 2U);
+            INST(8U, Opcode::SaveState).Inputs(42U).SrcVregs({42U});
+            INST(9U, Opcode::NullCheck).ref().Inputs(42U, 8U);
+            INST(10U, Opcode::LenArray).s32().Inputs(9U);
+        }
+        BASIC_BLOCK(5U, 6U)
+        {
+            INST(11U, Opcode::SaveState).Inputs(42U).SrcVregs({42U});
+            INST(12U, Opcode::NullCheck).ref().Inputs(42U, 11U);
+            INST(13U, Opcode::LenArray).s32().Inputs(12U);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(14U, Opcode::Return).u32().Inputs(3U);
+        }
+    }
+    ASSERT_FALSE(osrGraph->RunPass<ChecksElimination>());
+}
+
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace panda::compiler

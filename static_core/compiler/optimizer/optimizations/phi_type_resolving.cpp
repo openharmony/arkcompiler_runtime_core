@@ -79,7 +79,7 @@ bool PhiTypeResolving::CheckInputsAnyTypesRec(Inst *phi)
         ++inputNum;
         auto inputInst = phi->GetDataFlowInput(input.GetInst());
         if (GetGraph()->IsOsrMode()) {
-            if (HasOsrEntryBetween(inputInst->GetBasicBlock(), phi->CastToPhi()->GetPhiInputBb(inputNum))) {
+            if (HasOsrEntryBetween<BasicBlock>(inputInst->GetBasicBlock(), phi->CastToPhi()->GetPhiInputBb(inputNum))) {
                 return false;
             }
         }

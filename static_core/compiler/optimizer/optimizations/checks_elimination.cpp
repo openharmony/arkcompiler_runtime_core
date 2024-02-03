@@ -453,9 +453,9 @@ void ChecksElimination::ReplaceUsersAndRemoveCheck(Inst *instDel, Inst *instRep)
 {
     auto block = instDel->GetBasicBlock();
     auto graph = block->GetGraph();
-    if (graph->IsOsrMode() && block->GetLoop() != instRep->GetBasicBlock()->GetLoop()) {
-        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Check couldn't be deleted, becouse in OSR mode we can't replace "
-                                            "instructions with instructions from another loop";
+    if (HasOsrEntryBetween(instRep, instDel)) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Check couldn't be deleted, because in OSR mode we can't replace "
+                                            "instructions with instructions placed before OSR entry";
         return;
     }
     instDel->ReplaceUsers(instRep);
@@ -809,7 +809,7 @@ void ChecksElimination::InsertBoundsCheckDeoptimization(ConditionCode cc, Inst *
 {
     auto block = insertAfter->GetBasicBlock();
     Inst *newLeft = nullptr;
-    if (val == 0) {
+    if (val == 0 && left != nullptr) {
         newLeft = left;
     } else if (left == nullptr) {
         ASSERT(newLeftOpcode == Opcode::Add);
