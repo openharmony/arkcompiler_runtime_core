@@ -157,6 +157,12 @@ properties:
     description: The intruction occupies one ic slot.
   - tag: two_slot
     description: The intruction occupies two ic slots.
+  - tag: eight_bit_ic
+    description: The instruction occupies ic slots of 8 bit width.
+  - tag: sixteen_bit_ic
+    description: The instruction occupies ic slots of 16 bit width.
+  - tag: eight_sixteen_bit_ic
+    description: The instruction occupies ic slots of both 8 and 16 bit width.
 
 exceptions:
   - tag: x_none
@@ -389,12 +395,12 @@ groups:
         acc: inout:top
         opcode_idx: [0x67, 0xab]
         format: [op_imm_8, op_imm_16]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: closeiterator imm, v:in:top
         acc: out:top
         opcode_idx: [0x68, 0xac]
         format: [op_imm_8_v_8, op_imm_16_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: deprecated.getiteratornext v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0x02]
@@ -404,27 +410,27 @@ groups:
         acc: inout:top
         opcode_idx: [0xd7]
         format: [op_imm_8]
-        properties: [ic_slot]
+        properties: [ic_slot, eight_bit_ic]
       - sig: ldprivateproperty imm1, imm2, imm3
         acc: inout:top
         opcode_idx: [0xd8]
         format: [op_imm1_8_imm2_16_imm3_16]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_bit_ic]
       - sig: stprivateproperty imm1, imm2, imm3, v:in:top
         acc: in:top
         opcode_idx: [0xd9]
         format: [op_imm1_8_imm2_16_imm3_16_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_bit_ic]
       - sig: testin imm1, imm2, imm3
         acc: inout:top
         opcode_idx: [0xda]
         format: [op_imm1_8_imm2_16_imm3_16]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_bit_ic]
       - sig: definefieldbyname imm, string_id, v:in:top
         acc: in:top
         opcode_idx: [0xdb]
         format: [op_imm_8_id_16_v_8]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_bit_ic]
 
   - title: object creaters
     description: instructions which create objects
@@ -449,7 +455,7 @@ groups:
         acc: out:top
         opcode_idx: [0x05, 0x80]
         format: [op_imm_8, op_imm_16]
-        properties: [ic_slot, one_slot]
+        properties: [ic_slot, one_slot, eight_sixteen_bit_ic]
       - sig: creategeneratorobj v:in:top
         acc: out:top
         opcode_idx: [0xb1]
@@ -471,7 +477,7 @@ groups:
         acc: out:top
         opcode_idx: [0x06, 0x81]
         format: [op_imm_8_id_16, op_imm_16_id_16]
-        properties: [ic_slot, one_slot, literalarray_id]
+        properties: [ic_slot, one_slot, eight_sixteen_bit_ic, literalarray_id]
       - sig: deprecated.createarraywithbuffer imm
         acc: out:top
         opcode_idx: [0x03]
@@ -481,7 +487,7 @@ groups:
         opcode_idx: [0x07, 0x82]
         acc: out:top
         format: [op_imm_8_id_16, op_imm_16_id_16]
-        properties: [ic_slot, one_slot, literalarray_id]
+        properties: [ic_slot, one_slot, eight_sixteen_bit_ic, literalarray_id]
       - sig: deprecated.createobjectwithbuffer imm
         acc: out:top
         opcode_idx: [0x04]
@@ -491,17 +497,17 @@ groups:
         acc: out:top
         opcode_idx: [0x71, 0x72]
         format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: newobjapply imm, v:in:top
         acc: inout:top
         opcode_idx: [0xb4, 0xb5]
         format: [op_imm_8_v_8, op_imm_16_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: newobjrange imm1, imm2, v:in:top
         acc: out:top
         opcode_idx: [0x08, 0x83]
         format: [op_imm1_8_imm2_8_v_8, op_imm1_16_imm2_8_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: wide.newobjrange imm, v:in:top
         acc: out:top
         opcode_idx: [0x01]
@@ -555,92 +561,92 @@ groups:
         acc: inout:top
         opcode_idx: [0x0a]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: sub2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x0b]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: mul2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x0c]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: div2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x0d]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: mod2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x0e]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: eq imm, v:in:top
         acc: inout:top
         opcode_idx: [0x0f]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: noteq imm, v:in:top
         acc: inout:top
         opcode_idx: [0x10]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: less imm, v:in:top
         acc: inout:top
         opcode_idx: [0x11]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: lesseq imm, v:in:top
         acc: inout:top
         opcode_idx: [0x12]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: greater imm, v:in:top
         acc: inout:top
         opcode_idx: [0x13]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: greatereq imm, v:in:top
         acc: inout:top
         opcode_idx: [0x14]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: shl2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x15]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: shr2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x16]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: ashr2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x17]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: and2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x18]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: or2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x19]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: xor2 imm, v:in:top
         acc: inout:top
         opcode_idx: [0x1a]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: exp imm, v:in:top
         acc: inout:top
         opcode_idx: [0x1b]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
 
   - title: unary operations 
     description: unary operations
@@ -661,12 +667,12 @@ groups:
         acc: inout:top
         opcode_idx: [0x1c, 0x84]
         format: [op_imm_8, op_imm_16]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, sixteen_bit_ic]
       - sig: tonumber imm
         acc: inout:top
         opcode_idx: [0x1d]
         format: [op_imm_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: deprecated.tonumber v:in:top
         acc: inout:top
         opcode_idx: [0x05]
@@ -676,7 +682,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x1e]
         format: [op_imm_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: deprecated.tonumeric v:in:top
         opcode_idx: [0x06]
         acc: inout:top
@@ -686,7 +692,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x1f]
         format: [op_imm_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: deprecated.neg v:in:top
         acc: out:top
         opcode_idx: [0x07]
@@ -696,7 +702,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x20]
         format: [op_imm_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: deprecated.not v:in:top
         acc: out:top
         opcode_idx: [0x08]
@@ -706,7 +712,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x21]
         format: [op_imm_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: deprecated.inc v:in:top
         acc: out:top
         opcode_idx: [0x09]
@@ -716,7 +722,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x22]
         format: [op_imm_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: deprecated.dec v:in:top
         acc: out:top
         opcode_idx: [0x0a]
@@ -750,22 +756,22 @@ groups:
         acc: inout:top
         opcode_idx: [0x25]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: instanceof imm, v:in:top
         acc: inout:top
         opcode_idx: [0x26]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: strictnoteq imm, v:in:top
         acc: inout:top
         opcode_idx: [0x27]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
       - sig: stricteq imm, v:in:top
         acc: inout:top
         opcode_idx: [0x28]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, one_slot]
+        properties: [jit_ic_slot, one_slot, eight_bit_ic]
 
   - title: call runtime functions
     description: instructions which call runtime functions
@@ -792,13 +798,13 @@ groups:
         opcode_idx: [0x01]
         prefix: callruntime
         format: [pref_op_imm_8_v1_8_v2_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_bit_ic]
       - sig: callruntime.definefieldbyindex imm1, imm2, v:in:top
         acc: in:top
         opcode_idx: [0x02]
         prefix: callruntime
         format: [pref_op_imm1_8_imm2_32_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_bit_ic]
       - sig: callruntime.topropertykey
         acc: inout:top
         opcode_idx: [0x03]
@@ -815,19 +821,19 @@ groups:
         opcode_idx: [0x05]
         format: [pref_op_imm1_8_imm2_16_imm3_16_v_8]
         prefix: callruntime
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_bit_ic]
       - sig: callruntime.callinit imm, v:in:top
         acc: in:top
         opcode_idx: [0x06]
         format: [pref_op_imm_8_v_8]
         prefix: callruntime
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: callruntime.definesendableclass imm1, method_id, literalarray_id, imm2, v:in:top
         acc: out:top
         opcode_idx: [0x07]
         format: [pref_op_imm1_16_id1_16_id2_16_imm2_16_v_8]
         prefix: callruntime
-        properties: [method_id, ic_slot, one_slot, literalarray_id]
+        properties: [method_id, ic_slot, one_slot, sixteen_bit_ic, literalarray_id]
       - sig: callruntime.ldsendableclass imm
         acc: out:top
         opcode_idx: [0x08]
@@ -917,7 +923,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x29]
         format: [op_imm_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: deprecated.callarg0 v:in:top
         acc: out:top
         opcode_idx: [0x0b]
@@ -927,7 +933,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x2a]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: deprecated.callarg1 v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0x0c]
@@ -937,7 +943,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x2b]
         format: [op_imm_8_v1_8_v2_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: deprecated.callargs2 v1:in:top, v2:in:top, v3:in:top
         acc: out:top
         opcode_idx: [0x0d]
@@ -947,7 +953,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x2c]
         format: [op_imm_8_v1_8_v2_8_v3_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: deprecated.callargs3 v1:in:top, v2:in:top, v3:in:top, v4:in:top
         acc: out:top
         opcode_idx: [0x0e]
@@ -957,7 +963,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x73]
         format: [op_imm1_8_imm2_8_v_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: wide.callrange imm, v:in:top
         acc: inout:top
         opcode_idx: [0x04]
@@ -972,12 +978,12 @@ groups:
         acc: inout:top
         opcode_idx: [0xb9]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: apply imm, v1:in:top, v2:in:top
         acc: inout:top
         opcode_idx: [0xba]
         format: [op_imm_8_v1_8_v2_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: deprecated.callspread v1:in:top, v2:in:top, v3:in:top
         acc: out:top
         opcode_idx: [0x10]
@@ -987,27 +993,27 @@ groups:
         acc: inout:top
         opcode_idx: [0x2d]
         format: [op_imm_8_v_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: callthis1 imm, v1:in:top, v2:in:top
         acc: inout:top
         opcode_idx: [0x2e]
         format: [op_imm_8_v1_8_v2_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: callthis2 imm, v1:in:top, v2:in:top, v3:in:top
         acc: inout:top
         opcode_idx: [0x2f]
         format: [op_imm_8_v1_8_v2_8_v3_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: callthis3 imm, v1:in:top, v2:in:top, v3:in:top, v4:in:top
         acc: inout:top
         opcode_idx: [0x30]
         format: [op_imm_8_v1_8_v2_8_v3_8_v4_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: callthisrange imm1, imm2, v:in:top
         acc: inout:top
         opcode_idx: [0x31]
         format: [op_imm1_8_imm2_8_v_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: wide.callthisrange imm, v:in:top
         acc: inout:top
         opcode_idx: [0x05]
@@ -1022,7 +1028,7 @@ groups:
         acc: out:top
         opcode_idx: [0x32]
         format: [op_imm1_8_imm2_8_v_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: wide.supercallthisrange imm, v:in:top
         acc: out:top
         opcode_idx: [0x06]
@@ -1032,7 +1038,7 @@ groups:
         acc: inout:top
         opcode_idx: [0xbb]
         format: [op_imm1_8_imm2_8_v_8]
-        properties: [jit_ic_slot, two_slot]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic]
       - sig: wide.supercallarrowrange imm, v:in:top
         acc: inout:top
         opcode_idx: [0x07]
@@ -1062,17 +1068,17 @@ groups:
         acc: out:top
         opcode_idx: [0x33, 0x74]
         format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
-        properties: [method_id, ic_slot, one_slot]
+        properties: [method_id, ic_slot, one_slot, eight_sixteen_bit_ic]
       - sig: definemethod imm1, method_id, imm2
         acc: inout:top
         opcode_idx: [0x34, 0xbe]
         format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
-        properties: [method_id, ic_slot, one_slot]
+        properties: [method_id, ic_slot, one_slot, eight_sixteen_bit_ic]
       - sig: defineclasswithbuffer imm1, method_id, literalarray_id, imm2, v:in:top
         acc: out:top
         opcode_idx: [0x35, 0x75]
         format: [op_imm1_8_id1_16_id2_16_imm2_16_v_8, op_imm1_16_id1_16_id2_16_imm2_16_v_8]
-        properties: [method_id, ic_slot, one_slot, literalarray_id]
+        properties: [method_id, ic_slot, one_slot, eight_sixteen_bit_ic, literalarray_id]
       - sig: deprecated.defineclasswithbuffer method_id, imm1, imm2, v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0x12]
@@ -1117,7 +1123,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x76, 0xc1]
         format: [op_imm_8, op_imm_16]
-        properties: [ic_slot, one_slot]
+        properties: [ic_slot, one_slot, eight_sixteen_bit_ic]
       - sig: deprecated.gettemplateobject v:in:top
         acc: inout:top
         opcode_idx: [0x15]
@@ -1171,7 +1177,7 @@ groups:
         acc: in:top
         opcode_idx: [0x77, 0xc7]
         format: [op_imm_8_v_8, op_imm_16_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: deprecated.setobjectwithproto v1:in:top, v2:in:top
         acc: none
         opcode_idx: [0x1a]
@@ -1181,7 +1187,7 @@ groups:
         acc: inout:top
         opcode_idx: [0x37, 0x85]
         format: [op_imm_8_v_8, op_imm_16_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: deprecated.ldobjbyvalue v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0x1b]
@@ -1191,17 +1197,17 @@ groups:
         acc: in:top
         opcode_idx: [0x38, 0x86]
         format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: stownbyvalue imm, v1:in:top, v2:in:top
         acc: in:top
         opcode_idx: [0x78, 0xc8]
         format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: ldsuperbyvalue imm, v:in:top
         acc: inout:top
         opcode_idx: [0x39, 0x87]
         format: [op_imm_8_v_8, op_imm_16_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: deprecated.ldsuperbyvalue v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0x1c]
@@ -1211,12 +1217,12 @@ groups:
         acc: in:top
         opcode_idx: [0xc9, 0xca]
         format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: ldobjbyindex imm1, imm2
         acc: inout:top
         opcode_idx: [0x3a, 0x88]
         format: [op_imm1_8_imm2_16, op_imm1_16_imm2_16]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: wide.ldobjbyindex imm
         acc: inout:top
         opcode_idx: [0x08]
@@ -1231,7 +1237,7 @@ groups:
         acc: in:top
         opcode_idx: [0x3b, 0x89]
         format: [op_imm1_8_v_8_imm2_16, op_imm1_16_v_8_imm2_16]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: wide.stobjbyindex v:in:top, imm
         acc: in:top
         opcode_idx: [0x09]
@@ -1241,7 +1247,7 @@ groups:
         acc: in:top
         opcode_idx: [0x79, 0xcb]
         format: [op_imm1_8_v_8_imm2_16, op_imm1_16_v_8_imm2_16]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: wide.stownbyindex v:in:top, imm
         acc: in:top
         opcode_idx: [0x0a]
@@ -1331,27 +1337,27 @@ groups:
         acc: out:top
         opcode_idx: [0x3f, 0x8c]
         format: [op_imm_8_id_16, op_imm_16_id_16]
-        properties: [string_id, ic_slot, one_slot]
+        properties: [string_id, ic_slot, one_slot, eight_sixteen_bit_ic]
       - sig: trystglobalbyname imm, string_id
         acc: in:top
         opcode_idx: [0x40, 0x8d]
         format: [op_imm_8_id_16, op_imm_16_id_16]
-        properties: [string_id, ic_slot, one_slot]
+        properties: [string_id, ic_slot, one_slot, eight_sixteen_bit_ic]
       - sig: ldglobalvar imm, string_id
         acc: out:top
         opcode_idx: [0x41]
         format: [op_imm_16_id_16]
-        properties: [string_id, ic_slot, one_slot]
+        properties: [string_id, ic_slot, one_slot, sixteen_bit_ic]
       - sig: stglobalvar imm, string_id
         acc: in:top
         opcode_idx: [0x7f]
         format: [op_imm_16_id_16]
-        properties: [string_id, ic_slot, one_slot]
+        properties: [string_id, ic_slot, one_slot, sixteen_bit_ic]
       - sig: ldobjbyname imm, string_id
         acc: inout:top
         opcode_idx: [0x42, 0x90]
         format: [op_imm_8_id_16, op_imm_16_id_16]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: deprecated.ldobjbyname string_id, v:in:top
         acc: out:top
         opcode_idx: [0x25]
@@ -1362,17 +1368,17 @@ groups:
         acc: in:top
         opcode_idx: [0x43, 0x91]
         format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: stownbyname imm, string_id, v:in:top
         acc: in:top
         opcode_idx: [0x7a, 0xcc]
         format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: ldsuperbyname imm, string_id
         acc: inout:top
         opcode_idx: [0x46, 0x92]
         format: [op_imm_8_id_16, op_imm_16_id_16]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: deprecated.ldsuperbyname string_id, v:in:top
         acc: out:top
         opcode_idx: [0x26]
@@ -1383,7 +1389,7 @@ groups:
         acc: in:top
         opcode_idx: [0xd0, 0xd1]
         format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: ldlocalmodulevar imm
         opcode_idx: [0x7d]
         acc: out:top
@@ -1412,7 +1418,7 @@ groups:
         acc: in:top
         opcode_idx: [0x47]
         format: [op_imm_16_id_16]
-        properties: [string_id, ic_slot, one_slot]
+        properties: [string_id, ic_slot, one_slot, sixteen_bit_ic]
       - sig: deprecated.stconsttoglobalrecord string_id
         acc: in:top
         opcode_idx: [0x28]
@@ -1423,7 +1429,7 @@ groups:
         acc: in:top
         opcode_idx: [0x48]
         format: [op_imm_16_id_16]
-        properties: [string_id, ic_slot, one_slot]
+        properties: [string_id, ic_slot, one_slot, sixteen_bit_ic]
       - sig: deprecated.stlettoglobalrecord string_id
         acc: in:top
         opcode_idx: [0x29]
@@ -1450,12 +1456,12 @@ groups:
         acc: in:top
         opcode_idx: [0x99, 0xd2]
         format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: stownbynamewithnameset imm, string_id, v:in:top
         acc: in:top
         opcode_idx: [0x8e, 0xd4]
         format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: ldbigint string_id
         acc: out:top
         opcode_idx: [0xd3]
@@ -1465,22 +1471,22 @@ groups:
         acc: out:top
         opcode_idx: [0x49, 0x93]
         format: [op_imm_8_id_16, op_imm_16_id_16]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: stthisbyname imm, string_id
         acc: in:top
         opcode_idx: [0x4a, 0x94]
         format: [op_imm_8_id_16, op_imm_16_id_16]
-        properties: [string_id, ic_slot, two_slot]
+        properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: ldthisbyvalue imm
         acc: inout:top
         opcode_idx: [0x4b, 0x95]
         format: [op_imm_8, op_imm_16]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: stthisbyvalue imm, v:in:top
         acc: in:top
         opcode_idx: [0x4c, 0x96]
         format: [op_imm_8_v_8, op_imm_16_v_8]
-        properties: [ic_slot, two_slot]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
       - sig: wide.ldpatchvar imm
         acc: out:top
         opcode_idx: [0x12]
