@@ -952,7 +952,7 @@ public:
         ASSERT(CurrentInst()->IsSaveState());
         auto &inputs = instInputsMap_[CurrentInstIndex()];
         auto &vregs = saveStateInstVregsMap_[CurrentInstIndex()];
-        for (int i = inputs.size() - 1; i >= 0; i--) {
+        for (auto i = static_cast<int>(inputs.size()) - 1; i >= 0; i--) {
             if (instMap_.count(inputs[i]) == 0) {
                 inputs.erase(inputs.begin() + i);
                 vregs.erase(vregs.begin() + i);
@@ -1318,9 +1318,9 @@ public:
 
     void UpdateSpecialFlags()
     {
-        int maxId = graph_->GetCurrentInstructionId();
+        size_t maxId = graph_->GetCurrentInstructionId();
         for (auto pair : instMap_) {
-            auto id = pair.first;
+            auto id = static_cast<size_t>(pair.first);
             auto inst = pair.second;
             UpdateSpecialFlagsForReference(inst);
             if (inst->GetOpcode() == Opcode::Try) {

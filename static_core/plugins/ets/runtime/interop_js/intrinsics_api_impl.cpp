@@ -344,7 +344,8 @@ static JSValue *JSRuntimeLoadModule(EtsString *module)
             napi_value exp;
             NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
             NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
-            std::abort();
+            INTEROP_LOG(FATAL) << "Unable to load module due to exception";
+            UNREACHABLE();
         }
 
         INTEROP_FATAL_IF(status != napi_ok);

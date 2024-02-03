@@ -88,13 +88,6 @@ public:
             it.Next(n);
             return it;
         }
-        Iterator operator-(int32_t n) const
-        {
-            ASSERT(helpers::ToUnsigned(n) <= bit_);
-            Iterator it(*this);
-            it.Next(-n);
-            return it;
-        }
 
         uint32_t operator*()
         {
@@ -104,7 +97,7 @@ public:
         void Next(uint32_t val)
         {
             ASSERT(val != 0);
-            int step = (val > 0) ? 1 : -1;
+            size_t step = 1U;
             for (; val != 0; val--) {
                 for (bit_ += step; bit_ > 0 && bit_ != region_.Size() && !region_.ReadBit(bit_); bit_ += step) {
                 }
@@ -225,7 +218,7 @@ public:
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         data_[index] |= (value << shift);
         size_t endBits = BITS_PER_BYTE - shift;
-        for (int i = 1; endBits < length; i++, endBits += BITS_PER_BYTE) {
+        for (size_t i = 1; endBits < length; i++, endBits += BITS_PER_BYTE) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             data_[index + i] &= ~(mask >> endBits);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)

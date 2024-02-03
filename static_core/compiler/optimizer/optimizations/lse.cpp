@@ -720,9 +720,9 @@ void Lse::MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps)
 }
 
 /// Merge heap values for passed block from its direct predecessors.
-int Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk)
+size_t Lse::MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk)
 {
-    int aliasCalls = 0;
+    size_t aliasCalls = 0;
     for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
         auto &heap = heaps->at(eqClass).first;
         auto &blockHeap = heap.at(block);
@@ -1073,7 +1073,7 @@ void Lse::TryToHoistLoadFromLoop(Loop *loop, HeapEqClasses *heaps,
 void Lse::ProcessAllBBs(LseVisitor &visitor, HeapEqClasses *heaps, Marker phiFixupMrk)
 {
     InstVector invs(GetGraph()->GetLocalAllocator()->Adapter());
-    int aliasCalls = 0;
+    size_t aliasCalls = 0;
     for (auto block : GetGraph()->GetBlocksRPO()) {
         COMPILER_LOG(DEBUG, LSE_OPT) << "Processing BB " << block->GetId();
         InitializeHeap(block, heaps);

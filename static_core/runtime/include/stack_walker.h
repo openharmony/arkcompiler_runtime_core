@@ -377,7 +377,7 @@ public:
         {
             for (size_t i = 0; i < VRegInfo::ENV_COUNT; i++) {
                 auto vreg = vregList[vregList.size() - (VRegInfo::ENV_COUNT - i)];
-                envData_[i] = cframe.GetVRegValue<true>(vreg, codeInfo, calleeStack).GetValue();
+                envData_[i] = static_cast<EnvType>(cframe.GetVRegValue<true>(vreg, codeInfo, calleeStack).GetValue());
             }
         }
 

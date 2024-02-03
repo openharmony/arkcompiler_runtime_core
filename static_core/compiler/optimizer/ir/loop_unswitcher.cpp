@@ -299,21 +299,23 @@ static uint32_t EstimateUnswitchInstructionsCount(BasicBlock *bb, const BasicBlo
     return count;
 }
 
-void LoopUnswitcher::EstimateInstructionsCount(const Loop *loop, const Inst *unswitchInst, uint32_t *loopSize,
-                                               uint32_t *trueCount, uint32_t *falseCount)
+void LoopUnswitcher::EstimateInstructionsCount(const Loop *loop, const Inst *unswitchInst, int64_t *loopSize,
+                                               int64_t *trueCount, int64_t *falseCount)
 {
     ASSERT(loop->GetBackEdges().size() == 1);
     ASSERT(loop->GetInnerLoops().empty());
-    *loopSize = CountLoopInstructions(loop);
+    *loopSize = static_cast<int64_t>(CountLoopInstructions(loop));
     auto backEdge = loop->GetBackEdges()[0];
     auto graph = backEdge->GetGraph();
 
     auto trueMarker = graph->NewMarker();
-    *trueCount = EstimateUnswitchInstructionsCount(loop->GetHeader(), backEdge, unswitchInst, true, trueMarker);
+    *trueCount = static_cast<int64_t>(
+        EstimateUnswitchInstructionsCount(loop->GetHeader(), backEdge, unswitchInst, true, trueMarker));
     graph->EraseMarker(trueMarker);
 
     auto falseMarker = graph->NewMarker();
-    *falseCount = EstimateUnswitchInstructionsCount(loop->GetHeader(), backEdge, unswitchInst, false, falseMarker);
+    *falseCount = static_cast<int64_t>(
+        EstimateUnswitchInstructionsCount(loop->GetHeader(), backEdge, unswitchInst, false, falseMarker));
     graph->EraseMarker(falseMarker);
 }
 }  // namespace panda::compiler

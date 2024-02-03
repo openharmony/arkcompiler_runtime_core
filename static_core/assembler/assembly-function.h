@@ -146,7 +146,7 @@ struct Function {
     void EmitNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool, uint32_t pcInc,
                     int32_t lineInc) const;
     void EmitLineNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,
-                        int32_t &prevLineNumber, uint32_t &pcInc, size_t instructionNumber) const;
+                        uint32_t &prevLineNumber, uint32_t &pcInc, size_t instructionNumber) const;
 
     // column number is only for dynamic language now
     void EmitColumnNumber(panda_file::LineNumberProgramItem *program, std::vector<uint8_t> *constantPool,

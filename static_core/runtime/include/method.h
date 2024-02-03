@@ -760,7 +760,7 @@ public:
         return CalcUniqId(pandaFile_, fileId_);
     }
 
-    int32_t GetLineNumFromBytecodeOffset(uint32_t bcOffset) const;
+    size_t GetLineNumFromBytecodeOffset(uint32_t bcOffset) const;
 
     panda_file::File::StringData GetClassSourceFile() const;
 

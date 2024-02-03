@@ -22,8 +22,7 @@ namespace panda::ets {
 
 class EtsRuntimeInterface : public PandaRuntimeInterface {
 public:
-    /**********************************************************************************/
-    /// Object information
+    // Object information
     ClassPtr GetClass(MethodPtr method, IdType id) const override;
     size_t GetTlsPromiseClassPointerOffset(Arch arch) const override
     {

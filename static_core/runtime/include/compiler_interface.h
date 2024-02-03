@@ -47,6 +47,7 @@ public:
         isOsr_ = task.isOsr_;
         vm_ = task.vm_;
         task.vm_ = nullptr;
+        task.method_ = nullptr;
     }
 
     CompilerTask &operator=(CompilerTask &&task)
@@ -55,6 +56,7 @@ public:
         isOsr_ = task.isOsr_;
         vm_ = task.vm_;
         task.vm_ = nullptr;
+        task.method_ = nullptr;
         return *this;
     }
 

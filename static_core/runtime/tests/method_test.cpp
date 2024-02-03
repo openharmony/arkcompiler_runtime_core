@@ -457,7 +457,7 @@ static int32_t StackTraceEntryPoint(Method * /* unused */)
     for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
         auto pc = stack.GetBytecodePc();
         auto *methodFromFrame = stack.GetMethod();
-        auto lineNum = methodFromFrame->GetLineNumFromBytecodeOffset(pc);
+        auto lineNum = static_cast<int32_t>(methodFromFrame->GetLineNumFromBytecodeOffset(pc));
         std::string funcName(utf::Mutf8AsCString(methodFromFrame->GetName().data));
         trace.push_back({funcName, lineNum});
     }

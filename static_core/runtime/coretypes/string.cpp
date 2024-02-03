@@ -363,7 +363,7 @@ template <typename T1, typename T2>
 static int32_t IndexOf(Span<const T1> &lhsSp, Span<const T2> &rhsSp, int32_t pos, int32_t max)
 {
     int32_t maxTailedLen = 1;
-    int32_t tailedEnd = rhsSp.size() - 1;
+    auto tailedEnd = static_cast<int32_t>(rhsSp.size() - 1);
     int32_t maxTailedEnd = tailedEnd;
     // Phase 1: search in the beginning of string while computing maximal tailed-substring length
     auto searchChar = rhsSp[tailedEnd];

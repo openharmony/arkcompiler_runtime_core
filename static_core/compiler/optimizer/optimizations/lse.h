@@ -127,7 +127,7 @@ public:
 private:
     void InitializeHeap(BasicBlock *block, HeapEqClasses *heaps);
     void MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps);
-    int MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk);
+    size_t MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk);
     void FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk);
     const char *GetEliminationCode(Inst *inst, Inst *origin);
     void ApplyHoistToCandidate(Loop *loop, Inst *alive);

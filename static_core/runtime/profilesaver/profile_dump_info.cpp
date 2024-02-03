@@ -49,9 +49,9 @@ static bool WriteBuffer(int fd, const uint8_t *buffer, size_t byteCount)
         if (bytesWritten == -1) {
             return false;
         }
-        byteCount -= bytesWritten;
+        byteCount -= static_cast<size_t>(bytesWritten);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        buffer += bytesWritten;
+        buffer += static_cast<size_t>(bytesWritten);
     }
     return true;
 }
@@ -105,9 +105,9 @@ ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::SerializerBuffer::FillFromFd(
             *error += "Profile IO error for " + source + ConvertToString(os::Error(errno).ToString());
             return PROFILE_LOAD_IO_ERROR;
         }
-        byteCount -= bytesRead;
+        byteCount -= static_cast<size_t>(bytesRead);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        buffer += bytesRead;
+        buffer += static_cast<size_t>(bytesRead);
     }
     return PROFILE_LOAD_SUCCESS;
 }

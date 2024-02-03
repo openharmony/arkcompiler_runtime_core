@@ -540,7 +540,7 @@ Register Graph::GetZeroReg() const
 Register Graph::GetArchTempReg() const
 {
     auto tempMask = Target(GetArch()).GetTempRegsMask();
-    for (ssize_t reg = RegMask::Size() - 1; reg >= 0; reg--) {
+    for (ssize_t reg = static_cast<ssize_t>(RegMask::Size()) - 1; reg >= 0; reg--) {
         if (tempMask[reg] && const_cast<Graph *>(this)->GetArchUsedRegs()[reg]) {
             return reg;
         }

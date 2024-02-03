@@ -611,7 +611,7 @@ function visitImportDefaultAs(
       }
     });
 
-    if (nameSpecifiers.length != 0) {
+    if (nameSpecifiers.length !== 0) {
       const clause = ctx.factory.createImportClause(
         importClause.isTypeOnly,
         importClause.name,

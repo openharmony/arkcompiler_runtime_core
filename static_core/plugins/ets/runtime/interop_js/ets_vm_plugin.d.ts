@@ -14,4 +14,4 @@
  */
 
 export function version(): string;
-export function call(methodName: string, ...args: any): any;
+export function call<T>(methodName: string, ...args: T[]): unknown;

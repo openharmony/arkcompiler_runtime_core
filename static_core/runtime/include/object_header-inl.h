@@ -39,25 +39,31 @@ inline bool ObjectHeader::IsInstanceOf(const Class *klass) const
     return klass->IsAssignableFrom(ClassAddr<Class>());
 }
 
-template <class T, bool IS_VOLATILE /* = false */>
+template <class T, bool IS_VOLATILE>  // IS_VOLATILE is false by default
 inline T ObjectHeader::GetFieldPrimitive(size_t offset) const
 {
     return ObjectAccessor::GetPrimitive<T, IS_VOLATILE>(this, offset);
 }
 
-template <class T, bool IS_VOLATILE /* = false */>
+template <class T, bool IS_VOLATILE>  // IS_VOLATILE is false by default
 inline void ObjectHeader::SetFieldPrimitive(size_t offset, T value)
 {
     ObjectAccessor::SetPrimitive<T, IS_VOLATILE>(this, offset, value);
 }
 
-template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+// IS_VOLATILE is false by default
+// NEED_WRITE_BARRIER is true by default
+// IS_DYN is false by default
+template <bool IS_VOLATILE, bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectHeader::GetFieldObject(int offset) const
 {
     return ObjectAccessor::GetObject<IS_VOLATILE, NEED_READ_BARRIER, IS_DYN>(this, offset);
 }
 
-template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// IS_VOLATILE is false by default
+// NEED_WRITE_BARRIER is true by default
+// IS_DYN is false by default
+template <bool IS_VOLATILE, bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void ObjectHeader::SetFieldObject(size_t offset, ObjectHeader *value)
 {
     ObjectAccessor::SetObject<IS_VOLATILE, NEED_WRITE_BARRIER, IS_DYN>(this, offset, value);

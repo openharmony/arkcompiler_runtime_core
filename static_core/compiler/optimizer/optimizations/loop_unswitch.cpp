@@ -41,7 +41,7 @@ bool LoopUnswitch::TransformLoop(Loop *loop)
 {
     loops_.push(loop);
 
-    int32_t budget = maxInsns_;
+    int64_t budget = maxInsns_;
     for (uint32_t level = 0; !loops_.empty() && level < maxLevel_ && budget > 0; ++level) {
         auto levelSize = loops_.size();
         while (levelSize-- != 0) {
@@ -60,9 +60,9 @@ bool LoopUnswitch::TransformLoop(Loop *loop)
                 continue;
             }
 
-            uint32_t loopSize = 0;
-            uint32_t trueCount = 0;
-            uint32_t falseCount = 0;
+            int64_t loopSize = 0;
+            int64_t trueCount = 0;
+            int64_t falseCount = 0;
             LoopUnswitcher::EstimateInstructionsCount(loop, unswitchInst, &loopSize, &trueCount, &falseCount);
             if (trueCount + falseCount >= budget + loopSize) {
                 break;

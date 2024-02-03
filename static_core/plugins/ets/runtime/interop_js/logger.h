@@ -49,7 +49,10 @@ inline std::string EtsLogMakeString(const char *fmt, ...)
 
     std::string res;
     res.resize(static_cast<size_t>(len));
-    vsnprintf(res.data(), len + 1, fmt, apCopy);
+    if (vsnprintf(res.data(), len + 1, fmt, apCopy) < 0) {
+        LOG(FATAL, ETS) << "interop_js: Cannot convert message to result string";
+        UNREACHABLE();
+    }
 
     va_end(apCopy);
     va_end(ap);

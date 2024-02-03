@@ -51,7 +51,7 @@ static inline Region *ObjectToRegion(const ObjectHeader *object)
 
 static inline bool IsSameRegion(const void *o1, const void *o2, size_t regionSizeBits)
 {
-    return (((ToUintPtr(o1) ^ ToUintPtr(o2)) >> regionSizeBits) == 0);
+    return ((ToUintPtr(o1) ^ ToUintPtr(o2)) >> regionSizeBits) == 0;
 }
 
 /// Return the region which corresponds to the address.

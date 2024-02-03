@@ -39,7 +39,7 @@ public:
     {
         CFrameLayout cframeLayout(ARCH, 0);
 
-        const ptrdiff_t inRegsStartSlot = cframeLayout.GetCallerRegsStartSlot() -
+        const ptrdiff_t inRegsStartSlot = static_cast<int64_t>(cframeLayout.GetCallerRegsStartSlot()) -
                                           cframeLayout.GetStackStartSlot()
                                           // skipped the slot to align the stack
                                           + ((ARCH == Arch::X86_64) ? 1 : 0);
@@ -394,7 +394,8 @@ public:
         size_t constexpr GPR_FN_ARGS_NUM = 0U;    // Depends on dyn callconv
         CFrameLayout cframeLayout(ARCH, 0);
 
-        ptrdiff_t const gprEndSlot = cframeLayout.GetCallerRegsStartSlot() - 1 - cframeLayout.GetStackStartSlot();
+        ptrdiff_t const gprEndSlot =
+            static_cast<int64_t>(cframeLayout.GetCallerRegsStartSlot()) - 1 - cframeLayout.GetStackStartSlot();
         ptrdiff_t const gprStartSlot = gprEndSlot + GPR_ARGS_MAX;
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -428,7 +429,7 @@ public:
 
     CFrameDynamicNativeMethodIterator &operator++()
     {
-        size_t inc = sizeof(interpreter::VRegister) / sizeof(SlotType);
+        auto inc = static_cast<int64_t>(sizeof(interpreter::VRegister) / sizeof(SlotType));
         if (gprStartSlot_ > gprEndSlot_) {
             gprStartSlot_ -= inc;
             ++vregNum_;

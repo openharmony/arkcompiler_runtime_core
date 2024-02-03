@@ -37,7 +37,6 @@ PandaString GCStats::GetStatistics()
     size_t allocatedNow = memStats_->GetFootprintHeap();
     ASSERT(allocatedNow <= totalHeap);
     uint16_t percent = round((1 - (allocatedNow * 1.0 / totalHeap)) * MAX_PERCENT);
-    ASSERT(percent <= MAX_PERCENT);
     statistic << percent << "% free, " << helpers::MemoryConverter(allocatedNow) << "/"
               << helpers::MemoryConverter(totalHeap) << ", ";
     bool initialMarkPause = GetPhasePause(PauseTypeStats::INITIAL_MARK_PAUSE) != 0U;

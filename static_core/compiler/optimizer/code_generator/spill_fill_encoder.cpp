@@ -151,7 +151,7 @@ void SpillFillEncoder::EncodeSpillFill()
             default:
                 UNREACHABLE();
         }
-        consecutiveOpsHint -= adv;
+        consecutiveOpsHint -= static_cast<int>(adv);
         std::advance(it, adv);
     }
 }

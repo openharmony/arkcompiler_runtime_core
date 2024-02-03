@@ -1515,7 +1515,6 @@ extern "C" const uint8_t *FindCatchBlockInIFrames(ManagedThread *currThread, Fra
     uint32_t pcOffset = panda_file::INVALID_OFFSET;
 
     pcOffset = FindCatchBlockInIFramesStackless(&currThread, &currFrame, pc);
-
     if (pcOffset == panda_file::INVALID_OFFSET) {
         if constexpr (RUNTIME_ARCH == Arch::AARCH64 || RUNTIME_ARCH == Arch::AARCH32 || RUNTIME_ARCH == Arch::X86_64) {
             panda::FindCatchBlockInCallStack(currThread);
@@ -1680,7 +1679,7 @@ static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(Obje
 
 static ObjectHeader *StoreNumber(ObjectHeader *sb, int64_t n)
 {
-    auto num = n < 0 ? -static_cast<uint64_t>(n) : n;
+    auto num = n < 0 ? -static_cast<uint64_t>(n) : static_cast<uint64_t>(n);
     auto size = CountDigits(num) + static_cast<uint32_t>(n < 0);
     auto count = GetCountValue(sb);
     auto newsize = count + size;

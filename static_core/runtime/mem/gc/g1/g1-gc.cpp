@@ -1509,10 +1509,12 @@ void G1GC<LanguageConfig>::PauseTimeGoalDelay()
             ConcurrentScope concurrentScope(this);
             os::memory::LockHolder lh(concurrentMarkMutex_);
             while (!interruptConcurrentFlag_ && remained > 0) {
-                auto ms = remained / panda::os::time::MILLIS_TO_MICRO;
-                auto ns = (remained - ms * panda::os::time::MILLIS_TO_MICRO) * panda::os::time::MICRO_TO_NANO;
+                auto ms = static_cast<uint64_t>(remained) / panda::os::time::MILLIS_TO_MICRO;
+                auto ns = (static_cast<uint64_t>(remained) - ms * panda::os::time::MILLIS_TO_MICRO) *
+                          panda::os::time::MICRO_TO_NANO;
                 concurrentMarkCondVar_.TimedWait(&concurrentMarkMutex_, ms, ns);
-                remained -= panda::time::GetCurrentTimeInMicros() - start;
+                auto d = static_cast<int64_t>(panda::time::GetCurrentTimeInMicros() - start);
+                remained -= d;
             }
         }
     }

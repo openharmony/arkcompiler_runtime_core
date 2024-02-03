@@ -255,12 +255,10 @@ void *MapRWAnonymousFixedRaw(void *mem, size_t size, bool forcePoison)
 #if defined(PANDA_ASAN_ON) || defined(PANDA_TSAN_ON) || defined(USE_THREAD_SANITIZER)
     // If this assert fails, please decrease the size of the memory for you program
     // or don't run it with ASAN or TSAN.
-    if (!((reinterpret_cast<uintptr_t>(mem) > MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS) ||
-          ((reinterpret_cast<uintptr_t>(mem) + size) < MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS))) {
-        ASSERT((reinterpret_cast<uintptr_t>(mem) > MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS) ||
-               ((reinterpret_cast<uintptr_t>(mem) + size) < MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS));
-        std::abort();
-    }
+    LOG_IF((reinterpret_cast<uintptr_t>(mem) <= MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS) &&
+               ((reinterpret_cast<uintptr_t>(mem) + size) >= MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS),
+           FATAL, RUNTIME)
+        << "Unable to mmap mem [" << reinterpret_cast<uintptr_t>(mem) << "] because of ASAN or TSAN";
 #endif
     ASSERT(size % GetPageSize() == 0);
     void *result =  // NOLINTNEXTLINE(hicpp-signed-bitwise)

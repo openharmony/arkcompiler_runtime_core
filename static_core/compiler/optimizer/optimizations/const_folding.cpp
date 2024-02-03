@@ -299,12 +299,12 @@ bool ConstFoldingAbs(Inst *inst)
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64: {
                 ASSERT(DataType::IsTypeSigned(inst->GetType()));
-                int64_t value = cnst->GetIntValue();
+                auto value = static_cast<int64_t>(cnst->GetIntValue());
                 if (value == INT64_MIN) {
                     newCnst = cnst;
                     break;
                 }
-                uint64_t uvalue = (value < 0) ? -value : value;
+                auto uvalue = static_cast<uint64_t>((value < 0) ? -value : value);
                 newCnst = ConstFoldingCreateIntConst(inst, ConvertIntToInt(uvalue, inst->GetType()));
                 break;
             }

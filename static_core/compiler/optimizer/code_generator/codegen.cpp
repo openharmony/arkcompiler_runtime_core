@@ -114,7 +114,7 @@ public:
         auto lr = codegen->GetTarget().GetLinkReg();
         auto fl = codegen->GetFrameLayout();
         codegen->CreateStackMap(saveState_->CastToSaveStateOsr());
-        ssize_t slot = CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1;
+        ssize_t slot = CFrameLayout::LOCALS_START_SLOT + CFrameLayout::GetLocalsCount() - 1U;
         encoder->EncodeStp(
             codegen->FpReg(), lr,
             MemRef(codegen->FpReg(),
@@ -1833,7 +1833,8 @@ void Codegen::CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved, bool store
         // store pair doesn't support index and scalar
         ASSERT(!mem.HasIndex() && !mem.HasScale());
         // calculate offset for second store
-        auto secondOffset = 1U << DataType::ShiftByType(DataType::REFERENCE, enc->GetArch());
+        // NOLINTNEXTLINE(bugprone-misplaced-widening-cast)
+        auto secondOffset = static_cast<ssize_t>(1U << DataType::ShiftByType(DataType::REFERENCE, enc->GetArch()));
         if (mem.HasDisp()) {
             secondOffset += mem.GetDisp();
         }
@@ -2844,7 +2845,7 @@ void EncodeVisitor::VisitReturnI(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto codegen = enc->GetCodegen();
     auto rzero = enc->GetRegfile()->GetZeroReg();
-    int64_t immVal = inst->CastToReturnI()->GetImm();
+    auto immVal = inst->CastToReturnI()->GetImm();
     Imm imm = codegen->ConvertImmWithExtend(immVal, inst->GetType());
 
     auto returnReg = codegen->GetTarget().GetReturnReg(codegen->ConvertDataType(inst->GetType(), codegen->GetArch()));
@@ -3050,8 +3051,8 @@ void EncodeVisitor::VisitStoreArray(GraphVisitor *visitor, Inst *inst)
     auto index = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);
     constexpr int64_t IMM_2 = 2;
     auto storedValue = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), inst->GetType());
-    int32_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch());
-    int32_t scale = DataType::ShiftByType(inst->GetType(), enc->GetCodegen()->GetArch());
+    auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch());
+    auto scale = DataType::ShiftByType(inst->GetType(), enc->GetCodegen()->GetArch());
 
     auto memRef = [enc, inst, array, index, offset, scale]() {
         if (inst->CastToStoreArray()->GetNeedBarrier()) {
@@ -3113,11 +3114,11 @@ void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // array
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);      // index
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                   // load value
-    int32_t offset = instLoadArray->IsArray() ? runtime->GetArrayDataOffset(enc->GetCodegen()->GetArch())
-                                              : runtime->GetStringDataOffset(enc->GetArch());
+    auto offset = instLoadArray->IsArray() ? runtime->GetArrayDataOffset(enc->GetCodegen()->GetArch())
+                                           : runtime->GetStringDataOffset(enc->GetArch());
     auto encoder = enc->GetEncoder();
     auto arch = encoder->GetArch();
-    int32_t shift = DataType::ShiftByType(type, arch);
+    auto shift = DataType::ShiftByType(type, arch);
     ScopedTmpReg scopedTmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
     auto tmp = scopedTmp.GetReg();
     encoder->EncodeAdd(tmp, src0, Imm(offset));
@@ -3136,10 +3137,10 @@ void EncodeVisitor::VisitLoadCompressedStringChar(GraphVisitor *visitor, Inst *i
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);      // index
     auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(2), DataType::INT32);      // length
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                   // load value
-    int32_t offset = runtime->GetStringDataOffset(enc->GetArch());
+    auto offset = runtime->GetStringDataOffset(enc->GetArch());
     auto encoder = enc->GetEncoder();
     auto arch = encoder->GetArch();
-    int32_t shift = DataType::ShiftByType(type, arch);
+    auto shift = DataType::ShiftByType(type, arch);
     ScopedTmpReg scopedTmp(encoder, Codegen::ConvertDataType(DataType::GetIntTypeForReference(arch), arch));
     auto tmp = scopedTmp.GetReg();
 
@@ -3355,7 +3356,6 @@ void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
     // Static constructor invoked only once, so there is no sense in replacing regular
     // ResolveString runtime call with optimized version that will only slow down constructor's execution.
     auto isCctor = graph->GetRuntime()->IsMethodStaticConstructor(method);
-    ObjectPointerType stringPtr {0};
 
     if (graph->IsAotMode() && g_options.IsCompilerAotLoadStringPlt() && !isCctor) {
         auto aotData = graph->GetAotData();
@@ -3374,12 +3374,17 @@ void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)
                             Condition::LT);
         encoder->EncodeMov(dst, Reg(tmpDst.GetReg().GetId(), dst.GetType()));
         slowPath->BindBackLabel(encoder);
-    } else if (!graph->IsAotMode() && (stringPtr = graph->GetRuntime()->GetNonMovableString(method, stringType)) != 0) {
-        encoder->EncodeMov(dst, Imm(stringPtr));
-        EVENT_JIT_USE_RESOLVED_STRING(graph->GetRuntime()->GetMethodName(method), stringType);
-    } else {
-        enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_STRING, dst, TypedImm(stringType));
+        return;
     }
+    if (!graph->IsAotMode()) {
+        ObjectPointerType stringPtr = graph->GetRuntime()->GetNonMovableString(method, stringType);
+        if (stringPtr != 0) {
+            encoder->EncodeMov(dst, Imm(stringPtr));
+            EVENT_JIT_USE_RESOLVED_STRING(graph->GetRuntime()->GetMethodName(method), stringType);
+            return;
+        }
+    }
+    enc->GetCodegen()->CallRuntimeWithMethod(inst, method, EntrypointId::RESOLVE_STRING, dst, TypedImm(stringType));
 }
 
 void EncodeVisitor::VisitLoadObject(GraphVisitor *visitor, Inst *inst)
@@ -4801,8 +4806,8 @@ void EncodeVisitor::VisitStoreArrayI(GraphVisitor *visitor, Inst *inst)
     auto value = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
 
     auto index = inst->CastToStoreArrayI()->GetImm();
-    int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
-                     (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
+    auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
+                  (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     if (!enc->GetCodegen()->OffsetFitReferenceTypeSize(offset)) {
         // such code should not be executed
         enc->GetEncoder()->EncodeAbort();
@@ -4833,10 +4838,10 @@ void EncodeVisitor::VisitLoadArrayI(GraphVisitor *visitor, Inst *inst)
     uint32_t index = instLoadArrayI->GetImm();
     auto type = inst->GetType();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    int64_t dataOffset = instLoadArrayI->IsArray() ? runtime->GetArrayDataOffset(enc->GetArch())
-                                                   : runtime->GetStringDataOffset(enc->GetArch());
+    auto dataOffset = instLoadArrayI->IsArray() ? runtime->GetArrayDataOffset(enc->GetArch())
+                                                : runtime->GetStringDataOffset(enc->GetArch());
     uint32_t shift = DataType::ShiftByType(type, enc->GetArch());
-    int64_t offset = dataOffset + (index << shift);
+    auto offset = dataOffset + (index << shift);
     auto mem = MemRef(arrayReg, offset);
     auto encoder = enc->GetEncoder();
     auto arch = enc->GetArch();
@@ -4854,7 +4859,7 @@ void EncodeVisitor::VisitLoadCompressedStringCharI(GraphVisitor *visitor, Inst *
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0));                   // array
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);  // length
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);               // load value
-    int32_t offset = runtime->GetStringDataOffset(enc->GetArch());
+    auto offset = runtime->GetStringDataOffset(enc->GetArch());
     auto encoder = enc->GetEncoder();
     auto arch = encoder->GetArch();
     int32_t shift = DataType::ShiftByType(type, arch);
@@ -5188,8 +5193,8 @@ void EncodeVisitor::VisitLoadArrayPair(GraphVisitor *visitor, Inst *inst)
     auto dst0 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(0), type);                 // first value
     auto dst1 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(1), type);                 // second value
     uint64_t index = inst->CastToLoadArrayPair()->GetImm();
-    int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
-                     (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
+    auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
+                  (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     ScopedTmpReg tmp(enc->GetEncoder());
 
     int32_t scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
@@ -5233,8 +5238,8 @@ void EncodeVisitor::VisitLoadArrayPairI(GraphVisitor *visitor, Inst *inst)
     auto dst0 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(0), type);                 // first value
     auto dst1 = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(1), type);                 // second value
     uint64_t index = inst->CastToLoadArrayPairI()->GetImm();
-    int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
-                     (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
+    auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
+                  (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     auto mem = MemRef(src0, offset);
 
     auto prevOffset = enc->GetEncoder()->GetCursorOffset();
@@ -5254,14 +5259,14 @@ void EncodeVisitor::VisitStoreArrayPair(GraphVisitor *visitor, Inst *inst)
     auto type = inst->GetType();
     auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // array
     auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::INT32);      // index
-    constexpr int32_t IMM_2 = 2;
+    constexpr auto IMM_2 = 2U;
     auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), type);  // first value
-    constexpr int32_t IMM_3 = 3;
+    constexpr auto IMM_3 = 3U;
     auto src3 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_3), type);  // second value
     uint64_t index = inst->CastToStoreArrayPair()->GetImm();
-    int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
-                     (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
-    int32_t scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
+    auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
+                  (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
+    auto scale = DataType::ShiftByType(type, enc->GetCodegen()->GetArch());
 
     auto tmp = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::REFERENCE);
     enc->GetEncoder()->EncodeAdd(tmp, src0, Shift(src1, scale));
@@ -5325,8 +5330,8 @@ void EncodeVisitor::VisitStoreArrayPairI(GraphVisitor *visitor, Inst *inst)
     auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), type);  // second value
 
     auto index = inst->CastToStoreArrayPairI()->GetImm();
-    int64_t offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
-                     (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
+    auto offset = enc->cg_->GetGraph()->GetRuntime()->GetArrayDataOffset(enc->GetCodegen()->GetArch()) +
+                  (index << DataType::ShiftByType(type, enc->GetCodegen()->GetArch()));
     if (!enc->GetCodegen()->OffsetFitReferenceTypeSize(offset)) {
         // such code should not be executed
         enc->GetEncoder()->EncodeAbort();
@@ -5508,15 +5513,6 @@ void EncodeVisitor::VisitCastValueToAnyType(GraphVisitor *visitor, Inst *inst)
 {
     auto enc = static_cast<EncodeVisitor *>(visitor);
     const auto *cvai = inst->CastToCastValueToAnyType();
-
-    /* // NOTE(vpukhov): AnyConst
-    if (cvai->GetInputType(0) == DataType::Type::ANY) {
-        enc->GetEncoder()->EncodeAbort();
-        UNREACHABLE();
-        return;
-    }
-    */
-
     if (TryCastValueToAnyTypePluginGen(cvai, enc)) {
         return;
     }

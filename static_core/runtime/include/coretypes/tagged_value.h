@@ -404,8 +404,9 @@ inline int32_t JsCastDoubleToInt(double d, size_t bits)
     } else if (exp < static_cast<int>(bits + DOUBLE_SIGNIFICAND_SIZE)) {
         // Still has significand bits after mod 2^<bits>
         // Get low <bits> bits by shift left <64 - bits> and shift right <64 - bits>
+        ASSERT(exp > 0);
         uint64_t value = (((u64 & DOUBLE_SIGNIFICAND_MASK) | DOUBLE_HIDDEN_BIT)
-                          << (exp - DOUBLE_SIGNIFICAND_SIZE + INT64_BITS - bits)) >>
+                          << (static_cast<size_t>(exp) - DOUBLE_SIGNIFICAND_SIZE + INT64_BITS - bits)) >>
                          (INT64_BITS - bits);
         ret = static_cast<int32_t>(value);
         if ((u64 & DOUBLE_SIGN_MASK) == DOUBLE_SIGN_MASK && ret != INT32_MIN) {
