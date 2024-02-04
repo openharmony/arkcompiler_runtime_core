@@ -72,7 +72,9 @@ add_dependencies(tests ets_tests)
 set_property(GLOBAL PROPERTY ets_stash_list "")
 
 if(TARGET es2panda_tests)
-    add_dependencies(ets_tests es2panda_tests)
+    if(NOT PANDA_ENABLE_THREAD_SANITIZER OR PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+        add_dependencies(ets_tests es2panda_tests)
+    endif()
 endif()
 
 if(PANDA_WITH_RUNTIME)
