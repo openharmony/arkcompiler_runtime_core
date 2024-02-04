@@ -259,7 +259,7 @@ bool Verifier::CheckConstantPool(const verifier::ActionType type)
             panda_file::ClassDataAccessor class_accessor {*file_, record_id};
             bool check_res = true;
             class_accessor.EnumerateMethods([&](panda_file::MethodDataAccessor &method_accessor) -> void {
-                check_res &= CheckConstantPoolActions(type, method_accessor.GetMethodId());
+                check_res = check_res && CheckConstantPoolActions(type, method_accessor.GetMethodId());
             });
             if (!check_res) {
                 return false;
