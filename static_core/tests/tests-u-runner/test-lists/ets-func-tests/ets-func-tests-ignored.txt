@@ -386,6 +386,12 @@ spec/generic/issue15089_05.ets
 spec/generic/issue15089_06.ets
 spec/generic/issue15089_07.ets
 spec/generic/issue15089_08.ets
+### Issue 15623
+spec/generic/issue15380_0.ets
+### Issue 15380
+spec/generic/issue15380_1.ets
+spec/generic/issue15380_2.ets
+spec/generic/issue15380_3.ets
 ### End of Generic
 ### Import-export issues
 ### Issue 14586
