@@ -27,7 +27,7 @@ not explicitly exported.
 A variable, function, class, interface, or other declarations exported from a
 different compilation unit must be imported first.
 
-Compilation units are **separate modules** or **packages**. Packages are
+Compilation units are *separate modules* or *packages*. Packages are
 described in the chapter Experimental Features (see :ref:`Packages`).
 
 .. code-block:: abnf
@@ -255,15 +255,15 @@ Bind All with Qualified Access
 .. meta:
     frontend_status: Done
 
-The import binding '\* as A' binds the single named entity 'A' to the
+The import binding ``* as A`` binds the single named entity *A* to the
 declaration scope of the current module.
 
-A qualified name, which consists of 'A' and the name of entity '*A.name*',
+A qualified name, which consists of *A* and the name of entity ``A.name``,
 is used to access any entity exported from the compilation unit as defined
 by the *import path*.
 
 +---------------------------------+--+-------------------------------+
-| Import                          |  |  Usage                        |
+| **Import**                      |  | **Usage**                     |
 +=================================+==+===============================+
 |                                                                    |
 +---------------------------------+--+-------------------------------+
@@ -300,23 +300,23 @@ Simple Name Binding
 .. meta:
     frontend_status: Done
 
-The import binding '*qualifiedName*' has two cases as follows:
+The import binding ``qualifiedName`` has two cases as follows:
 
--  A simple name (like *foo*); or
+-  A simple name (like ``foo``); or
 
--  A name containing several identifiers (like *A.foo*).
+-  A name containing several identifiers (like ``A.foo``).
 
 
-The import binding '*ident*' binds an exported entity with the name '*ident*'
-to the declaration scope of the current module. The name '*ident*' can only
-correspond to several entities, where '*ident*' denotes several overloaded
+The import binding ``ident`` binds an exported entity with the name ``ident``
+to the declaration scope of the current module. The name ``ident`` can only
+correspond to several entities, where ``ident`` denotes several overloaded
 functions (see :ref:`Function and Method Overloading`).
 
-The import binding '*ident* as A' binds an exported entity (entities) with the
-name '*A*' to the declaration scope of the current module.
+The import binding ``ident* as A`` binds an exported entity (entities) with the
+name *A* to the declaration scope of the current module.
 
-The bound entity is not accessible as '*ident*' because this binding does not
-bind '*ident*'.
+The bound entity is not accessible as ``ident`` because this binding does not
+bind ``ident``.
 
 .. index::
    import binding
@@ -342,7 +342,7 @@ This is shown in the following module:
 The module’s import path is now irrelevant:
 
 +---------------------------------+--+--------------------------------------+
-| Import                          |  |  Usage                               |
+| **Import**                      |  | **Usage**                            |
 +=================================+==+======================================+
 |                                                                           |
 +---------------------------------+--+--------------------------------------+
@@ -363,7 +363,7 @@ The module’s import path is now irrelevant:
 A single import statement can list several names:
 
 +-------------------------------------+--+---------------------------------+
-| Import                              |  | Usage                           |
+| **Import**                          |  | **Usage**                       |
 +=====================================+==+=================================+
 |                                                                          |
 +-------------------------------------+--+---------------------------------+
@@ -431,7 +431,7 @@ applied to a single name:
    declaration scope
 
 +-----------------------------+----------------------------+------------------------------+
-| Case                        | Sample                     | Rule                         |
+| **Case**                    | **Sample**                 | **Rule**                     |
 +=============================+============================+==============================+
 |                             | .. code-block:: typescript |                              |
 | A name is explicitly used   |                            | Ok. The compile-time         |
@@ -460,14 +460,22 @@ applied to a single name:
 |                             |                            | - sin is not accessible.     |
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
-| A name is explicitly        |                            | Ok. Both variants            |
-| used with alias and         |                            |   can be used:               |
+| A name is explicitly        |                            | Ok. Both variants can be     |
+| used with alias and         |                            | used:                        |
 | implicitly with alias.      |     import {sin as Sine}   |                              |
 |                             |        from "..."          | - Sine is accessible;        |
 |                             |                            |                              |
 |                             |     import * as M          | - M.sin is accessible.       |
 |                             |        from "..."          |                              |
 +-----------------------------+----------------------------+------------------------------+
+
+
+
+(table cont'd)
+
++-----------------------------+----------------------------+------------------------------+
+| **Case**                    | **Sample**                 | **Rule**                     |
++=============================+============================+==============================+
 |                             | .. code-block:: typescript |                              |
 | A name is explicitly used   |                            | Compile-time error.          |
 | with alias several times.   |                            | Or warning?                  |
@@ -560,14 +568,14 @@ Import Path
 ===========
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Import path is a string literal---represented as a combination of the
-slash character '/' and a sequence alpha-numeric characters---that determines
-how an imported compilation unit must be placed.
+slash character '``/``' and a sequence alpha-numeric characters---that
+determines how an imported compilation unit must be placed.
 
-The slash character '/' is used in import paths irrespective of the host system.
-The backslash character is not used in this context.
+The slash character '``/``' is used in import paths irrespective of the host
+system. The backslash character is not used in this context.
 
 In most file systems, an import path looks like a file path. *Relative* (see
 below) and *non-relative* import paths have different *resolutions* that map
@@ -606,7 +614,7 @@ compilation units, and the exact placement of the source code:
    resolving
    filename
 
-A *relative import path* starts with './' or '../' as in the following
+A *relative import path* starts with '``./``' or '``../``' as in the following
 examples:
 
 .. code-block:: typescript
@@ -649,8 +657,8 @@ For example, the compilation configuration file can contain the following lines:
         "std": "/arkts/stdlib"
     }
 
-In the example above, '*/net/http*' is resolved to '*/home/project/net/http*',
-and '*std/components/treemap*' to '*/arkts/stdlib/components/treemap*'.
+In the example above, ``/net/http`` is resolved to ``/home/project/net/http``,
+and ``std/components/treemap`` to ``/arkts/stdlib/components/treemap``.
 
 File name, placement, and format are implementation-specific.
 
@@ -716,8 +724,8 @@ Top-Level Declarations
 .. meta:
     frontend_status: Done
 
-*Top-level declarations* declare top-level types (*class*, *interface*,
-or *enum*), top-level variables, constants, or functions. Top-level
+*Top-level declarations* declare top-level types (``class``, ``interface``,
+or ``enum``), top-level variables, constants, or functions. Top-level
 declarations can be exported.
 
 .. code-block:: abnf
@@ -725,7 +733,6 @@ declarations can be exported.
     topDeclaration:
         ('export' 'default'?)?
         ( typeDeclaration
-        | typeAlias
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
@@ -776,7 +783,7 @@ unit they are declared in.
 In addition, only one top-level declaration can be exported by using the default
 export scheme. It allows specifying no declared name when importing (see
 :ref:`Default Import Binding` for details). A :index:`compile-time error`
-occurs if more than one top-level declaration is marked as *default*.
+occurs if more than one top-level declaration is marked as ``default``.
 
 .. code-block:: typescript
    :linenos:
@@ -911,7 +918,7 @@ Re-Export Directive
 ===================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 In addition to exporting what is declared in the module, it is possible to
 re-export declarations that are part of other modules' export. Only

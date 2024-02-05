@@ -69,12 +69,9 @@ superinterface.
 A newly declared method can hide, implement, or override a method
 declared in a superclass or superinterface.
 
-Every class defines two scopes (see :ref:`Scopes`): one for instance members,
-and the other for static members. This means that two members of a class can
-have the same name if one is static while the other is not.
-
-The body of the declaration of a method (see :ref:`Method Declarations`)
-comprises the scope of a declaration (see :ref:`Scopes`).
+Every class defines two class-level scopes (see :ref:`Scopes`): one for
+instance members, and the other for static members. This means that two members
+of a class can have the same name if one is static while the other is not.
 
 .. index::
    class declaration
@@ -100,12 +97,12 @@ Class Declarations
 .. meta:
     frontend_status: Done
 
-Every class declaration defines a **Class type**, i.e., a new named
+Every class declaration defines a *class type*, i.e., a new named
 reference type.
 
-The class name is specified by the *identifier* inside a class declaration.
+The class name is specified by an *identifier* inside a class declaration.
 
-If *typeParameters* are defined in a class declaration, then that class
+If ``typeParameters`` are defined in a class declaration, then that class
 is a *generic class* (see :ref:`Generic Declarations`).
 
 .. index::
@@ -160,7 +157,7 @@ Abstract Classes
 .. meta:
     frontend_status: Done
 
-A class with the modifier ``abstract`` is known as *abstract* class.
+A class with the modifier ``abstract`` is known as abstract class.
 Abstract classes can be used to represent notions that are common
 to some set of more concrete notions.
 
@@ -262,13 +259,12 @@ Class Extension Clause
 .. meta:
     frontend_status: Done
 
-All classes except class *Object* can contain the *extends* clause that
+All classes except class ``Object`` can contain the ``extends`` clause that
 specifies the *base class*, or the *direct superclass* of the current class.
-A class that has no *extends* clause, and is not *Object*, is assumed to have
-the *extends* *Object* clause.
+A class that has no *extends* clause, and is not ``Object``, is assumed to have
+the ``extends`` ``Object`` clause.
 
-The class that inherits from its superclass is called *subclass* of that
-superclass.
+A class that inherits from its superclass is the *subclass* of that superclass.
 
 .. index::
    class
@@ -277,7 +273,6 @@ superclass.
    direct superclass
    base class
    superclass
-   
 
 .. code-block:: abnf
 
@@ -287,18 +282,18 @@ superclass.
 
 A :index:`compile-time error` occurs if:
 
--  An *extends* clause appears in the definition of the class *Object*,
+-  An ``extends`` clause appears in the definition of the class ``Object``,
    which is the top of the type hierarchy, and has no superclass.
 
--  The class type named by *typeReference* is not accessible (see
+-  The class type named by ``typeReference`` is not accessible (see
    :ref:`Scopes`).
 
--  The ‘extends’ graph has a cycle.
+-  The *extends* graph has a cycle.
 
--  *typeReference* refers directly, or as alias of types *primitive*, *enum*,
-   *union*, *interface*, or *function*.
+-  typeReference refers directly, or as alias of types ``primitive``, ``enum``,
+   ``union``, ``interface``, or ``function``.
 
--  Any type argument of *typeReference* is a wildcard type argument.
+-  Any type argument of ``typeReference`` is a wildcard type argument.
 
 
 *Class extension* implies that a class inherits all members of the direct
@@ -375,8 +370,8 @@ Class Implementation Clause
 .. meta:
     frontend_status: Done
 
-A class can implement one or more interfaces. Interfaces that
-are to be implemented by a class are listed in the *implements* clause.
+A class can implement one or more interfaces. Interfaces that are to
+be implemented by a class are listed in the ``implements`` clause.
 Interfaces listed in this clause are *direct superinterfaces*
 of the class.
 
@@ -392,13 +387,13 @@ of the class.
 
 A :index:`compile-time error` occurs if:
 
--  *typeReference* fails to name an accessible interface type (see
+-  ``typeReference`` fails to name an accessible interface type (see
    :ref:`Scopes`).
 
--  Any type argument of *typeReference* is a wildcard type argument.
+-  Any type argument of ``typeReference`` is a wildcard type argument.
 
 -  An interface is repeated as a direct superinterface in a single
-   *implements* clause (even if that interface is named differently).
+   ``implements`` clause (even if that interface is named differently).
 
 .. index::
    class declaration
@@ -410,25 +405,24 @@ A :index:`compile-time error` occurs if:
    direct superinterface
    implements clause
 
-For the class declaration *C* <*F*:sub:`1`,..., *F*:sub:`n`> (:math:`n\geq{}0`,
+For the class declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> (:math:`n\geq{}0`,
 :math:`C\neq{}Object`):
 
-- *Direct superinterfaces* of the class type *C* <*F*:sub:`1`,..., *F*:sub:`n`>
-  are the types specified in the *implements* clause of the declaration of *C*
-  (if there is an *implements* clause).
+- *Direct superinterfaces* of the class type ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
+  are the types specified in the ``implements`` clause of the declaration of *C*
+  (if there is an ``implements`` clause).
 
 
-For the generic class declaration *C* <*F*:sub:`1`,..., *F*:sub:`n`> (*n* > *0*):
+For the generic class declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> (*n* > *0*):
 
 -  *Direct superinterfaces* of the parameterized class type *C*
-   < *T*:sub:`1`,..., *T*:sub:`n`> are all types *I*
-   <*U*:sub:`1`:math:`\theta{}`,..., *U*:sub:`k`:math:`\theta{}`> if:
+   < ``T``:sub:`1` ``,..., T``:sub:`n`> are all types *I*
+   < ``U``:sub:`1`:math:`\theta{}` ``,..., U``:sub:`k`:math:`\theta{}`> if:
 
-    - *T*:sub:`i` (:math:`1\leq{}i\leq{}n`) is a type;
-    - *I* <*U*:sub:`1`,..., *U*:sub:`k`> is the direct superinterface of
-      *C* <*F*:sub:`1`,..., *F*:sub:`n`>; and
-    - :math:`\theta{}` is the substitution [*F*:sub:`1`:= *T*:sub:`1`,...,
-      *F*:sub:`n`:= *T*:sub:`n`].
+    - ``T``:sub:`i` (:math:`1\leq{}i\leq{}n`) is a type;
+    - ``I`` <``U``:sub:`1` ``,..., U``:sub:`k`> is the direct superinterface of
+      ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>; and
+    - :math:`\theta{}` is the substitution [``F``:sub:`1` ``:= T``:sub:`1` ``,..., F``:sub:`n` ``:= T``:sub:`n`].
 
 .. index::
    class declaration
@@ -472,8 +466,8 @@ subtype of:
 
 If a class is not declared *abstract*, then:
 
--  Any *abstract* method of each direct superinterface is implemented
-   (see :ref:`Overriding by Instance Methods`) by a declaration in that class.
+-  Any abstract method of each direct superinterface is implemented (see
+   :ref:`Overriding by Instance Methods`) by a declaration in that class.
 -  The declaration of the existing method is inherited from a direct superclass,
    or a direct superinterface.
 
@@ -621,7 +615,7 @@ Class Members
 Class members are as follows:
 
 -  Members inherited from their direct superclass (see :ref:`Inheritance`),
-   except class *Object* that cannot have a direct superclass.
+   except class ``Object`` that cannot have a direct superclass.
 -  Members declared in a direct superinterface (see
    :ref:`Superinterfaces and Subinterfaces`).
 -  Members declared in the class body (see :ref:`Class Body`).
@@ -660,7 +654,7 @@ A *method* is defined by the following:
 #. *Argument type*, i.e., the list of types of arguments applicable to the
    method member.
 #. *Return type*, i.e., the return type of the method member.
-#. A *throws*/*rethrows* clause, i.e., an indication of the ability of a
+#. A ``throws``/``rethrows`` clause, i.e., an indication of the ability of a
    member method to raise exceptions.
 
 Members can be as follows:
@@ -709,10 +703,10 @@ Access Modifiers
 Access modifiers define how a class member or a constructor can be accessed.
 Accessibility in |LANG| can be of the following kinds:
 
--  *private*,
--  *internal*,
--  *protected*, or
--  *public*.
+-  Private,
+-  Internal,
+-  Protected, or
+-  Public.
 
 The desired accessibility of class members and constructors can be explicitly
 specified by the corresponding *access modifiers*:
@@ -865,6 +859,7 @@ Field Declarations
     todo: more work - when interface fields are implemented
 
 *Field declarations* represent data members in class instances.
+Fields are actually class instance variables (see :ref:`Variable Declarations`).
 
 .. code-block:: abnf
 
@@ -946,24 +941,25 @@ Static Fields
 .. meta:
     frontend_status: Done
 
-There are two categories of class or interface fields:
- 
-- Class, or static fields
+There are two categories of class or interface fields as follows:
 
-Static fields are declared with the ``static`` modifier. They are not parts 
-of class instances. There is one copy of a static field, irrespective of how 
-many instances of that class (even if zero) are eventually created.
+- Static fields
 
-Static fields are accessed using a qualified name notation (where the class 
-or interface name is used as a qualifier, see :ref:`Names`) in any place 
-where the class or interface name is accessible.
+  Static fields are declared with the modifier ``static``. A static field
+  is not part of a class instance. There is one copy of a static field
+  irrespective of how many instances of the class (even if zero) are
+  eventually created.
 
-- Instance, or non-static fields.
+  Static fields are accessed by using a qualified name notation at any place
+  the class or interface name is accessible (see :ref:`Names` if class or
+  interface name is used as a qualifier).
 
-Instance fields belong to each instance of the class. An instance field 
-is created for, and associated with a newly-created instance of a class 
-or its superclass. Instance fields are accessible via the name
-of the instance.
+- Instance, or non-static fields
+
+  Instance fields belong to each instance of the class. An instance field
+  is created for, and associated with a newly-created instance of a class,
+  or of its superclass. An instance field is accessible via the name of the
+  instance.
 
 .. index::
    static field
@@ -991,7 +987,7 @@ Both static and non-static fields can be declared *readonly fields*.
 
 A static readonly field must be initialized as follows:
 
--  By using a field *initializer*, or
+-  By using a field initializer, or
 -  As a result of a class initializer (see :ref:`Class Initializer`).
 
 
@@ -1145,7 +1141,7 @@ Method Declarations
 
 *Overloading signature* of a method allows calling a method in different ways.
 
-The *identifier* of *classMethodDeclaration* is the method name that can be
+The identifier of ``classMethodDeclaration`` is the method name that can be
 used to refer to a method (see :ref:`Method Call Expression`).
 
 A :index:`compile-time error` occurs if:
@@ -1169,16 +1165,15 @@ A :index:`compile-time error` occurs if:
 
 |
 
-.. _Class Static Methods:
+.. _Static Methods:
 
-Class (Static) Methods
-======================
+Static Methods
+==============
 
 .. meta:
     frontend_status: Done
 
-A method declared with the modifier ``static`` is a *class method*.
-Another name for class methods is *static methods*.
+A method declared in a class with the modifier ``static`` is a *static method*.
 
 A :index:`compile-time error` occurs if:
 
@@ -1187,8 +1182,7 @@ A :index:`compile-time error` occurs if:
 -  The header or body of a class method includes the name of a type parameter
    of the surrounding declaration.
 
-
-Class methods are always called without reference to a particular object. As
+Static methods are always called without reference to a particular object. As
 a result, a :index:`compile-time error` occurs if keywords ``this`` or ``super``
 are used inside a static method.
 
@@ -1603,7 +1597,7 @@ overrides another method *m*:sub:`I` (declared in interface *I*) from *C* if
 -  *C* does not inherit *m*:sub:`I`;
 -  The signature of *m*:sub:`C` is a subsignature of the signature of
    *m*:sub:`I` (see :ref:`Override-Equivalent Signatures`); and
--  *m*:sub:`I` is *public*.
+-  *m*:sub:`I` is ``public``.
 
 
 A method call expression (see :ref:`Method Call Expression`) containing the
@@ -1612,11 +1606,11 @@ keyword ``super`` can be used to call an overridden method.
 Among the methods that override each other, return types can vary if they are
 reference types.
 
-The specialization of return type to a subtype (i.e., *covariant returns*)
-is based on the concept of *return-type-substitutability*. For example, the
-method declaration *d*:sub:`1` with return type *R*:sub:`1` is
-return-type-substitutable for another method *d*:sub:`2` with return type
-*R*:sub:`2` if:
+The specialization of return type to a subtype (i.e., *covariant*
+:ref:`Covariance` return) is based on the concept of
+*return-type-substitutability*. For example, the method declaration *d*:sub:`1`
+with return type *R*:sub:`1` is return-type-substitutable for another method
+*d*:sub:`2` with return type *R*:sub:`2` if:
 
 -  *R*:sub:`1` is a primitive type (*R*:sub:`2` is identical to *R*:sub:`1`); or
 -  *R*:sub:`1` is a reference type (*R*:sub:`1` adapted to type parameters of
@@ -1640,7 +1634,8 @@ return-type-substitutable for another method *d*:sub:`2` with return type
    return type
    reference type
    return-type-substitutability
-   covariant return
+   covariant
+   covariance
    primitive type
    subtype
    type parameter
@@ -1700,12 +1695,11 @@ Requirements in Overriding and Hiding
 The method declaration *d*:sub:`1` with return type *R*:sub:`1` can override or
 hide the declaration of another method *d*:sub:`2` with return type *R*:sub:`2`
 if *d*:sub:`1` is return-type-substitutable for *d*:sub:`2` (see
-:ref:`Requirements in Overriding and Hiding` and
 :ref:`Overriding by Instance Methods`). Otherwise, a compile-time error occurs.
 
 A method that overrides or hides another method (including the methods that
-implement abstract methods defined in interfaces) cannot change '``throws``' or
-'``rethrows``' clauses of the overridden or hidden method.
+implement abstract methods defined in interfaces) cannot change ``throws`` or
+``rethrows`` clauses of the overridden or hidden method.
 
 A compile-time error occurs if a type declaration *T* has a member method
 *m*:sub:`1`, but there is also a method *m*:sub:`2` declared in *T* or a
@@ -1786,8 +1780,8 @@ override-equivalent methods consists of at least one abstract method, and
 zero or more default methods.
 
 A compile-time error occurs if one of the inherited methods is not
-return-type-substitutable for every other inherited method (except '``throws``'
-and '``rethrows``' clauses that cause no error in this case).
+return-type-substitutable for every other inherited method (except ``throws``
+and ``rethrows`` clauses that cause no error in this case).
 
 The same method declaration can be inherited from an interface in a number
 of ways, causing no compile-time error on its own.
@@ -1839,7 +1833,7 @@ a getter or a setter.
 Accessor modifiers are a subset of method modifiers. The allowed accessor
 modifiers have exactly the same meaning as the corresponding method modifiers.
 See :ref:`Abstract Methods` for the modifier ``abstract``,
-:ref:`Class Static Methods` for the modifier ``static``, :ref:`Final Methods`
+:ref:`Static Methods` for the modifier ``static``, :ref:`Final Methods`
 for the modifier ``final``, and :ref:`Override Methods` for the modifier
 ``override``.
 
@@ -2018,18 +2012,20 @@ Constructors are called by the following:
 
 -  Class instance creation expressions (see :ref:`New Expressions`);
 -  Conversions and concatenations caused by the string concatenation operator
-   ':math:`+`' (see :ref:`String Concatenation`); and
+   '``+``' (see :ref:`String Concatenation`); and
 -  Explicit constructor calls from other constructors (see :ref:`Constructor Body`).
 
 Access to constructors is governed by access modifiers (see
 :ref:`Access Modifiers` and :ref:`Scopes`). Declaring a constructor
-inaccessible can prevent class instantiation.
+inaccessible prevents class instantiation from using this constructor.
+If the only constructor is declared inaccessible, then no class instance
+can be created.
 
 A compile-time error occurs if two constructors in a class are declared, and
 have identical signatures.
 
-See :ref:`Throwing Functions` for '``throws``' mark, and
-:ref:`Rethrowing Functions` for '``rethrows``' mark.
+See :ref:`Throwing Functions` for the ``throws``, and :ref:`Rethrowing Functions`
+for the ``rethrows`` mark.
 
 .. index::
    constructor
@@ -2149,20 +2145,52 @@ Constructor Body
 .. meta:
     frontend_status: Done
 
-The first statement in a constructor body can be an explicit call of another
-same-class constructor, or of the direct superclass (see
-:ref:`Explicit Constructor Call`):
+The constructor body must provide correct initialization of new class instances.
+Constructors have two variations:
+
+- *Primiry constructor* that initializes its instance [1]_ own fields directly;
+
+- *Secondary constuctor* that uses another same-class constructor to initialize
+  its instance fields.
+
+The syntax of both variations is the same:
 
 .. code-block:: abnf
 
     constructorBody:
-        '{' constructorCall? statement* '}'
+        '{' statement* constructorCall? statement* '}'
         ;
 
     constructorCall:
         'this' arguments
         | 'super' arguments
         ;
+
+
+The high-level sequence of a *primary constructor* body includes the following:
+
+1. Optional arbitrary code that does not use ``this`` or ``super``.
+
+2. Mandatory call to ``super([arguments])`` (see :ref:`Explicit Constructor Call`)
+   if a class has an extension clause (see :ref:`Class Extension Clause`).
+   
+3. Implicitly added compiler-generated code that:
+
+    - Sets default values for instance own fields.
+    
+    - Executes instance own field initializers in a valid order determined by
+      the compiler. If the compiler detects a circular reference, then a
+      compile-time error occurs.
+
+4. Arbitary code that guarantees all remaining instance fields (if any) are
+   initialized but does not:
+
+    - Use the value of an instance field before its initialization.
+    - Call any instance method before all instance own fields are initialized.
+
+5. Optional arbitrary code.
+
+The example below shows *primary constuctors*:
 
 .. code-block:: typescript
    :linenos:
@@ -2189,31 +2217,53 @@ same-class constructor, or of the direct superclass (see
 .. index::
    statement
    constructor body
-   explicit call
-   constructor
+   constructor call
    direct superclass
+
+
+The high-level sequence of a *secondary constructor* body includes the following:
+
+1. Optional arbitrary code that does not use ``this`` or ``super``.
+
+2. Call to another same-class constructor ``this([arguments])`` with arguments.
+
+3. Optional arbitrary code.
+
+The example below shows *primary* and *secondary* constuctors:
+
+.. code-block:: typescript
+   :linenos:
+
+    class ColoredPoint extends Point {
+      static readonly WHITE = 0
+      static readonly BLACK = 1
+      color: number
+
+      // primary constructor:   
+      constructor(x: number, y: number, color: number) {
+        super(x, y) // calls base class constructor as class has 'extends'
+        this.color = color
+      }
+      // secondary constructor: 
+      constructor(color: number) {
+        this(0, 0, color) 
+      }
+    }
+
 
 A compile-time error occurs if a constructor calls itself, directly or
 indirectly, through a series of one or more explicit constructor calls
 using ``this``.
 
-The constructor body must implicitly begin with a superclass constructor
-call '``super()``' (call of the constructor’s direct superclass that takes
-no argument), if the constructor body does not begin with an explicit
-constructor call. The constructor so declared is a part of the primordial
-class *Object*.
-
 A constructor body looks like a method body (see :ref:`Method Body`), except
-that explicit constructor calls are possible, and explicit return of a value
+the semantics described above, and explicit return of a value
 (see :ref:`Return Statements`) is prohibited. However, a return statement
 without an expression can be used in a constructor body.
 
 A constructor body must not use fields of a created object before the fields
-are initialized; *this* cannot be passed as an argument until each object
-field receives an initial value. The check can be performed by the compiler
-that reports a compile-time error if a violation is detected. In difficult
-corner cases checks must be performed at runtime. The check raises an exception
-if an attempt to work with a non-initialized object field is detected.
+are initialized; ``this`` cannot be passed as an argument until each object
+field receives an initial value. These checks are performed by the compiler
+that reports a compile-time error if a violation is detected. 
 
 .. index::
    compile-time error
@@ -2375,15 +2425,14 @@ Default Constructor
     frontend_status: Done
 
 If a class contains no constructor declaration, then a default constructor
-is implicitly declared. The default constructor has the following form:
+is implicitly declared. This guarantees that every class has effectively at
+least one constructor. The default constructor has the following form:
 
--  The access modifier of the default constructor and of the class is the same
-   (if the class has no access modifier, then the default constructor has the
-   internal access (see :ref:`Scopes`).
+-  The access modifier of the default constructor is ``public`` (see :ref:`Access Modifiers`).
 
--  The default constructor has no '``throws``' or '``rethrows``' clauses.
+-  The default constructor has no ``throws`` or ``rethrows`` clauses.
 
--  The body of the default constructor contains a call to the the superclass
+-  The body of the default constructor contains a call to the superclass
    constructor with no arguments except the primordial class ``Object``. The
    body of the default constructor for the primordial class ``Object`` is empty.
 
@@ -2391,7 +2440,7 @@ A compile-time error occurs if a default constructor is implicit, but
 the superclass:
 
 -  Has no accessible constructor without parameters; and
--  Has a constructor without parameters but with '``throws``' or '``rethrows``'
+-  Has a constructor without parameters but with ``throws`` or ``rethrows``
    clauses.
 
 .. code-block:: typescript
@@ -2416,9 +2465,9 @@ the superclass:
        private constructor () {}
    }
    class B extends A {} // No constructor in B
-   // During compialtion of B 
+   // During compilation of B
    class B extends A { constructor () { super () } } // Default constructor added
-   // And it leads to conpile-time error as default constructor calls super()
+   // And it leads to compile-time error as default constructor calls super()
    // which is private and inaccessible
 
    // Example of an error case #2
@@ -2426,9 +2475,9 @@ the superclass:
        constructor () throws {}
    }
    class B extends A {} // No constructor in B
-   // During compialtion of B 
+   // During compilation of B
    class B extends A { constructor () { super () } } // Default constructor added
-   // And it leads to conpile-time error as default constructor is not marked as throws
+   // And it leads to compile-time error as default constructor is not marked as throws
    // but it call super() which throws
 
 
@@ -2541,6 +2590,11 @@ surrounding class members are not accessible from local classes:
       }
     }
 
+
+-------------
+
+.. [1]
+   Class own fields here means fields declared in the class.
 
 .. raw:: pdf
 

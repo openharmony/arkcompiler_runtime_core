@@ -33,7 +33,7 @@ helpful and powerful.
 programming paradigms, and combines  them safely and consistently.
 
 At the same time, |LANG| does not support features that allow software
-developers writing dangerous, unsafe, or inefficient code. In particular,
+developers to write dangerous, unsafe, or inefficient code. In particular,
 the language uses the strong static typing principle. It allows no dynamic
 type changes, as object types are determined by their declarations. Their
 semantic correctness is checked at compile time.
@@ -69,7 +69,7 @@ The following major aspects characterize the |LANG| language as a whole:
    The |LANG| language supports the *component programming approach*. It
    presumes that software is designed and implemented as a composition
    of *compilation units*. A compilation unit is typically represented as
-   a *module* or as a package.
+   a *module* or as a *package*.
 
    A module in |LANG| is a standalone, independently compiled unit that
    combines various programming resources (types, classes, functions, and so
@@ -97,8 +97,8 @@ The following major aspects characterize the |LANG| language as a whole:
    into a concrete list by providing additional information (the type of
    list elements).
 
-   Supported by many programming languages, a similar feature (‘generics’
-   or ‘templates’) serves as the basis of the generic programming
+   Supported by many programming languages, a similar feature (*generics*
+   or *templates*) serves as the basis of the generic programming
    paradigm. It enables making programs and program structures more
    generic and reusable.
 
@@ -116,8 +116,8 @@ The following major aspects characterize the |LANG| language as a whole:
 
    |LANG| provides an efficient application development solution for a wide
    range of devices. The language ecosystem is a developer-friendly, uniform
-   programming environment for a range of popular platforms (‘cross-platform
-   development’). It can generate optimized applications capable of operating
+   programming environment for a range of popular platforms (*cross-platform
+   development*). It can generate optimized applications capable of operating
    under the limitations of lightweight devices, or realizing the full
    potential of any specific target hardware.
 
@@ -179,7 +179,7 @@ a program.
    context-free grammar
 
 The |LANG| lexical notation defines a set of productions (rules) that specify
-the structure of the elementary language parts called 'tokens'. All tokens are
+the structure of the elementary language parts called *tokens*. All tokens are
 defined in :ref:`Lexical Elements`. The set of tokens (identifiers, keywords,
 numbers/numeric literals, operator signs, delimiters), special characters
 (white spaces and line separators), and comments comprises the language’s
@@ -222,8 +222,8 @@ production:
 - Is comprised of an abstract symbol (*nonterminal*) as its left-hand side,
   and a sequence of one or more *nonterminal* and *terminal* symbols as its
   *right-hand side*.
-- Includes the ':' character as a separator between the left-hand and the
-  right-hand sides, and the ';' character as the end marker.
+- Includes the '``:``' character as a separator between the left-hand and the
+  right-hand sides, and the '``;``' character as the end marker.
 
 .. index::
    lexical grammar
@@ -250,16 +250,16 @@ Grammars can use the following additional symbols---sometimes called
 *metasymbols*---in the right-hand side of a grammar production along
 with terminal and nonterminal symbols:
 
--  Vertical line '\|' to specify alternatives.
+-  Vertical line '``|``' to specify alternatives.
 
--  Question mark '?' to specify the optional (zero- or one-time) occurrence
+-  Question mark '``?``' to specify the optional (zero- or one-time) occurrence
    of the preceding terminal or nonterminal.
 
--  Asterisk '\*' to mark a *terminal* or *nonterminal* that can occur zero
+-  Asterisk '``*``' to mark a *terminal* or *nonterminal* that can occur zero
    or more times.
 
--  Parentheses '(' and ')' to enclose any sequence of terminals and/or
-   nonterminals marked with the '?' or '\*' metasymbols.
+-  Parentheses '``(``' and '``)``' to enclose any sequence of terminals and/or
+   nonterminals marked with the '``?``' or '``*``' metasymbols.
 
 .. index::
    terminal
@@ -283,9 +283,9 @@ The production below is an example that specifies a list of expressions:
 
 This production introduces the following structure defined by the
 nonterminal *expressionList*. The expression list must consist of the
-sequence of *expression*\ s separated by the ‘,’ terminal symbol. The
+sequence of *expression*\ s separated by the terminal symbol ‘``,``’. The
 sequence must have at least one *expression*. The list is optionally
-terminated by the ‘,’ terminal symbol.
+terminated by the terminal symbol ‘``,``’.
 
 All grammar rules are presented in the Grammar section of this specification.
 
@@ -334,7 +334,7 @@ as used in other languages, application areas, or industries.
      operator, while formally being a binary operator, has a conventional
      form like a[i].
 
-     Some languages treat operators as 'syntactic sugar'---a conventional
+     Some languages treat operators as *syntactic sugar*---a conventional
      version of a more common construct, i.e., *function call*. Therefore,
      an operator like ``a+b`` is conceptually treated as the call ``+(a,b)``,
      where the operator sign plays the role of the function name, and the
@@ -342,8 +342,8 @@ as used in other languages, application areas, or industries.
 
    operation sign
      -- a language token that signifies an operator and conventionally
-     denotes a usual mathematical operator, for example, '+' for additional
-     operator, '/' for division etc. However, some languages allow using
+     denotes a usual mathematical operator, for example, '``+``' for additional
+     operator, '``/``' for division etc. However, some languages allow using
      identifiers to denote operators, and/or arbitrarily combining characters
      that are not tokens in the alphabet of that language, i.e., operator
      signs.
@@ -359,9 +359,9 @@ as used in other languages, application areas, or industries.
      evaluation.
 
    metasymbol
-     -- additional symbols '\|', '?', '\*', '(', and ')' that can be used
-     along with terminal and nonterminal symbols in the right-hand side
-     of a grammar production.
+     -- additional symbols '``|``', '``?``', '``*``', '``(``', and '``)``' that
+     can be used along with terminal and nonterminal symbols in the right-hand
+     side of a grammar production.
 
    goal symbol
      -- sentence that consists of a single distinguished nonterminal
@@ -413,8 +413,8 @@ as used in other languages, application areas, or industries.
      parameters of the named type.
 
    nullable type 
-     -- variable declared to have the value *null*, or `type T | null` that can
-     hold values of type *T* and its derived types.
+     -- variable declared to have the value ``null``, or ``type T | null``
+     that can hold values of type ``T`` and its derived types.
 
    nullish value
      -- reference which is null or undefined.
@@ -423,8 +423,8 @@ as used in other languages, application areas, or industries.
      -- name that consists of a single identifier.
      
    qualified name
-     -- name that consists of a sequence of identifiers separated with the ‘.’
-     token.
+     -- name that consists of a sequence of identifiers separated with the
+     token ‘``.``’.
 
    scope of a name
      -- region of the program code within which the entity---as declared by
@@ -479,8 +479,9 @@ as used in other languages, application areas, or industries.
      Grammar is a range of productions. Each production comprises an
      abstract symbol (nonterminal) as its left-hand side, and a sequence
      of nonterminal and terminal symbols as its right-hand side.
-     Each production has the character ‘:’ as a separator between the left-hand
-     and right-hand sides, and the character ‘;’ as the end marker.
+     Each production has the character ‘``:``’ as a separator between the
+     left-hand and right-hand sides, and the character ‘``;``’ as the end
+     marker.
 
    production
      -- a sequence of terminal and nonterminal symbols that a programming
@@ -512,7 +513,7 @@ as used in other languages, application areas, or industries.
 
    method
      -- ordered 4-tuple consisting of type parameters, argument types,
-     return type, and a '*throws*'/'*rethrows*' clause.
+     return type, and a ``throws``/``rethrows`` clause.
 
    abstract declaration
      -- ordinary interface method declaration that specifies the method’s name
@@ -521,11 +522,11 @@ as used in other languages, application areas, or industries.
    truthiness
      -- concept that extends the Boolean logic to operands and results
      of non-Boolean types, and allows treating the value of any valid
-     expression of a non-void type as *Truthy* or *Falsy*, depending on
+     expression of a non-void type as ``Truthy`` or ``Falsy``, depending on
      the kind of the value type.
 
    default *catch* clause
-     -- *catch* clause that has its exception parameter type omitted, and can
+     -- ``catch`` clause that has its exception parameter type omitted, and can
      handle any exception or error that is not handled by a preceding clause.
 
    overloading
@@ -589,6 +590,25 @@ as used in other languages, application areas, or industries.
    linearization
      -- de-nesting of all nested types in a union type to present them in
      the form of a flat line that has no more union types included.
+
+   fit (into)
+     -- belong, or be implicitly convertible (see :ref:`Widening Primitive Conversions`)
+     to an entity.
+
+   match
+     -- correspond to an entity.
+
+   own
+     -- of a member textually declared in a class, interface, type, etc., as
+     opposed to members inherited from base class (superclass), base interfaces
+     (superinteraface), base type (supertype), etc.
+
+   supercomponent (base component, parent component)
+     -- component from which another component is derived.
+
+   subcomponent (derived component, child component)
+     -- component produced by, inherited from, and dependent from another
+     component.
 
 
 .. raw:: pdf

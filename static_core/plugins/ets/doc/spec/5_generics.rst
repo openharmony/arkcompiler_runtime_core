@@ -196,7 +196,7 @@ means ``extends Object|null|undefined``.
 If type parameter *T* has type constraint *S*, then the actual type of the
 generic instantiation must be a subtype of *S*. If the constraint *S* is a
 non-nullish type (see :ref:`Nullish Types`), then *T* is non-nullish too.
-If the type parameter is constrained with the *keyof T*, then valid
+If the type parameter is constrained with the ``keyof T``, then valid
 instantiations of this parameter can be the values of the union type created
 from string names of *T* or the union type itself:
 
@@ -309,13 +309,17 @@ that substitute corresponding type parameters of the generic:
    type parameter
    generic
 
-*G* < *T*:sub:`1`, ``...``, *T*:sub:`n`>
+*G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`>
 
----where <*T*:sub:`1`, ``...``, *T*:sub:`n`> is the list of type arguments
+---where <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is the list of type arguments
 for the generic declaration *G*.
 
-If *C*:sub:`1`, ``...``, *C*:sub:`n` is the constraint for the corresponding
-type parameters *T*:sub:`1`, ``...``, *T*:sub:`n` of a generic declaration,
+..
+   lines 312, 314, 336 - initially the type was *T*:sub:`1`, ``...``, *T*:sub:`n`
+   lines 321, 322 - initially *C*:sub:`1`, ``...``, *C*:sub:`n` and *T*:sub:`1`, ``...``, *T*:sub:`n` 
+
+If ``C``:sub:`1`, ``...``, ``C``:sub:`n` is the constraint for the corresponding
+type parameters ``T``:sub:`1`, ``...``, ``T``:sub:`n` of a generic declaration,
 then *T*:sub:`i` is a subtype of each constraint type *C*:sub:`i` (see
 :ref:`Subtyping`). All subtypes of the type listed in the corresponding
 constraint have each type argument *T*:sub:`i` of the parameterized
@@ -329,7 +333,7 @@ declaration ranging over them.
    subtype
    constraint
 
-A generic instantiation *G* < *T*:sub:`1`, ``...``, *T*:sub:`n`> is
+A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 *well-formed* if **all** of the following is true:
 
 -  The generic declaration name is *G*.
@@ -377,7 +381,7 @@ Type Parameter Default
 Type parameters of generic types can have defaults. This situation allows
 dropping a type argument when a particular type of instantiation is used.
 However, a compile-time error occurs if a type parameter without a
-default value follows a type parameter with a default value in the
+default type follows a type parameter with a default type in the
 declaration of a generic type.
 
 The examples below illustrate this for both classes and functions:
@@ -386,13 +390,11 @@ The examples below illustrate this for both classes and functions:
    type parameter
    generic type
    type argument
-   default type parameter
-   optional type parameter
+   type parameter default
    instantiation
    class
    function
    compile-time error
-   default value
 
 .. code-block:: typescript
    :linenos:
@@ -428,8 +430,7 @@ Type Arguments
 Type arguments can be reference types or wildcards.
 
 If a value type is specified as a type argument in the generic instantiation,
-then the boxing conversion applies to the type (see
-:ref:`Boxing Conversions`).
+then the boxing conversion applies to the type (see :ref:`Boxing Conversions`).
 
 .. code-block:: abnf
 
@@ -468,14 +469,20 @@ function.
         | 'out' typeReference?
         ;
 
+
+.. _Type Argument Variance:
+
+Type Argument Variance
+======================
+
 The variance for type arguments can be specified with wildcards (*use-site
 variance*). It allows changing type variance of an *invariant* type parameter.
 
 **Note**: This description of *use-site variance* modifiers is tentative.
 The details are to be specified in the future versions of |LANG|.
 
-The syntax to signify a covariant type argument, or a wildcard with an
-upper bound (*T* is a *typeReference*) is as follows:
+The syntax to signify a *covariant* :ref:`Covariance` type argument, or a
+wildcard with an upper bound (*T* is a ``typeReference``) is as follows:
 
 .. index::
    variance
@@ -493,8 +500,8 @@ upper bound (*T* is a *typeReference*) is as follows:
    This syntax restricts the methods available, and allows accessing only
    the methods that do not use *T*, or use *T* in out-position.
 
-The syntax to signify a contravariant type argument, or a wildcard with a
-lower bound (*T* is a *typeReference*) is as follows:
+The syntax to signify a contravariant :ref:`Contravariance` type argument, or
+a wildcard with a lower bound (*T* is a ``typeReference``) is as follows:
 
 -  ``in`` *T*
 
@@ -516,8 +523,10 @@ equivalent.
 A compile-time error occurs if:
 
 -  A wildcard is used in a parameterization of a function; or
--  A covariant wildcard is specified for a contravariant type parameter; or
--  A contravariant wildcard is specified for a covariant type parameter.
+-  A *covariant* :ref:`Covariance` wildcard is specified for a *contravariant*
+   :ref:`Contravariance` type parameter; or
+-  A *contravariant* wildcard is specified for a *covariant* :ref:`Covariance`
+   type parameter.
 
 .. index::
    compile-time error
@@ -533,10 +542,10 @@ The rules below apply to the subtyping (see :ref:`Subtyping`) of two
 non-equivalent types *A* <: *B*, and an invariant type parameter *F* in
 case of use-site variance:
 
--  *T* <out *A*> <: *T* <out *B*>;
--  *T* <in *A*> :> *T* <in *B*>;
--  *T* <*A*> <: *T* <out *A*>;
--  *T* <*A*> <: *T* <in *A*>.
+-  ``T <out A>`` <: ``T <out B>``;
+-  ``T <in A>`` :> ``T <in B>``;
+-  ``T* <A>`` <: ``T <out A>``;
+-  ``T <A>`` <: ``T <in A>``.
 
 .. index::
    subtyping
@@ -568,7 +577,7 @@ Any two type arguments are considered *provably distinct* if:
 Utility Types
 *************
 
-|LANG| supports several embedded types, called '*utility*' types.
+|LANG| supports several embedded types, called *utility* types.
 They allow constructing new types, and extend their functionality.
 
 .. index::
@@ -586,7 +595,7 @@ Partial Utility Type
 .. meta:
     frontend_status: None
 
-The type *Partial<T>* constructs a type with all properties of *T* set to
+Type ``Partial<T>`` constructs a type with all properties of *T* set to
 optional. *T* must be a class or an interface type:
 
 .. code-block:: typescript
@@ -605,7 +614,7 @@ optional. *T* must be a class or an interface type:
     
     process({title: "aa"}) // description is undefined
 
-In the example above, the type *Partial<Issue>* is transformed to a distinct
+In the example above, type ``Partial<Issue>`` is transformed to a distinct
 type that is analogous:
 
 .. code-block:: typescript
@@ -626,7 +635,7 @@ Required Utility Type
 .. meta:
     frontend_status: None
 
-The type *Required<T>* is opposite to *Partial<T>*.
+Type ``Required<T>`` is opposite to ``Partial<T>``.
 It constructs a type with all properties of *T* set to
 be required (not optional). *T* must be a class or an interface type.
 
@@ -644,7 +653,7 @@ be required (not optional). *T* must be a class or an interface type.
     
 
 
-The type defined in the example above, the type *Required<Issue>*
+The type defined in the example above, the type ``Required<Issue>``
 is transformed to a distinct type that is analogous:
 
 .. code-block:: typescript
@@ -665,7 +674,7 @@ Readonly Utility Type
 .. meta:
     frontend_status: None
 
-The type *Readonly<T>* constructs a type with all properties of *T* set to
+Type ``Readonly<T>`` constructs a type with all properties of *T* set to
 readonly. It means that the properties of the constructed value cannot be
 reassigned. *T* must be a class or an interface type:
 
@@ -679,7 +688,7 @@ reassigned. *T* must be a class or an interface type:
     const myIssue: Readonly<Issue> = {
         title: "One"
     };
- 
+
     myIssue.title = "Two" // compile-time error: readonly property
 
 |
@@ -692,11 +701,11 @@ Record Utility Type
 .. meta:
     frontend_status: None
 
-The type *Record<K, V>* constructs a container that maps keys (of type *K*)
+Type ``Record<K, V>`` constructs a container that maps keys (of type *K*)
 to values (of type *V*).
 
-The type *K* is restricted to *number* types, *string* types, *union* types
-constructed from these types, and also literals of these types.
+The type *K* is restricted to ``number`` types, type ``string``, union types
+constructed from these types, and literals of these types.
 
 A compile-time error occurs if any other type, or literal of any other type
 is used in place of this type:
@@ -722,14 +731,14 @@ is used in place of this type:
 
 There are no restrictions on type *V*. 
 
-A special form of object literals is supported for instances of *Record*
-types (see :ref:`Object Literal of Record Type`).
+A special form of object literals is supported for instances of type ``Record``
+(see :ref:`Object Literal of Record Type`).
 
 Access to ``Record<K, V>`` values is performed by an *indexing expression*
-like *r[index]*, where *r* is an instance of the type *Record*, and *index*
+like *r[index]*, where *r* is an instance of type ``Record``, and *index*
 is the expression of type *K*. The result of an indexing expression is of type
-*V* if *K* is a union that contains literal types only; otherwise, it is of
-type *V* | *undefined*. See :ref:`Record Indexing Expression` for details.
+*V* if *K* is a union that contains literal types only. Otherwise, it is of
+type ``V | undefined``. See :ref:`Record Indexing Expression` for details.
 
 .. index::
    object literal
@@ -754,7 +763,7 @@ type *V* | *undefined*. See :ref:`Record Indexing Expression` for details.
     console.log(x['key2']) // prints 8
 
 In the example above, *K* is a union of literal types. The result of an
-indexing expression is of type *V*. In this case it is *number*.
+indexing expression is of type *V*. In this case it is ``number``.
 
 
 .. raw:: pdf

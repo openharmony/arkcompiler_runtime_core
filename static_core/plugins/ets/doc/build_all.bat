@@ -13,6 +13,7 @@
 
 @echo off
 echo Building all ArkTS docs ...
+call build_annotations.bat
 call build_cookbook.bat
 call build_stdlib.bat
 call build_tutorial.bat

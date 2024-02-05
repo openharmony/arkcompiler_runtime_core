@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -45,9 +45,9 @@ execution:
 
 This specification uses the terms as follows:
 
--  "*error*" to denote runtime errors, and
+-  *error* to denote runtime errors, and
 
--  "*exception*" to denote failures.
+-  *exception* to denote failures.
 
 
 The difference between these two terms is that *exceptions* are the
@@ -59,18 +59,18 @@ On the contrary, *errors* indicate that there is a failure of the
 program logic, or even of the hardware. The program can recover in
 some but not all cases.
 
-As a result, *exceptions* can be handled in a much more effective
-manner than *errors*.
+As a result, exceptions can be handled in a much more effective
+manner than errors.
 
 .. index::
    error
    exception
    runtime
 
-Some modern programming languages support only *exceptions*; others
-support only *errors*. |LANG| is based on the presumption that both
-*exceptions* and *errors* must be supported. *Exception* and
-*Error* as predefined types are discussed below.
+Some modern programming languages support only exceptions; others
+support only errors. |LANG| is based on the presumption that both
+*exceptions* and *errors* must be supported. ``Exception`` and
+``Error`` as predefined types are discussed below.
 
 Exceptions are described in the chapter Experimental Features (see
 :ref:`Exceptions`) of this specification.
@@ -85,13 +85,13 @@ Exceptions are described in the chapter Experimental Features (see
 Errors
 ******
 
-*Error* is the base class of all errors. Defining a new error class is
+``Error`` is the base class of all errors. Defining a new error class is
 normally not required because error classes for various cases (e.g.,
-*DivideByZeroError*) are defined in the standard library (see
+``DivideByZeroError``) are defined in the standard library (see
 :ref:`Standard Library`).
 
-However, a developer can define a new error by using *Error*, or any
-derived class as the base of the new class. An example of the *error*
+However, a developer can define a new error by using ``Error``, or any
+derived class as the base of the new class. An example of ``Error``
 handling is provided below:
 
 .. index::
@@ -118,20 +118,20 @@ handling is provided below:
 
 
 A compile-time error occurs if a generic class is directly or indirectly
-a subclass of *Error*.
+a subclass of ``Error``.
 
-In most cases, *errors* are caused by the Virtual Machine, or by the
+In most cases, errors are caused by the Virtual Machine, or by the
 standard libraries.
 
 The ``throw`` statements (see :ref:`Throw Statements`) allow throwing both
-*exceptions* and *errors*. Throwing *exceptions* provide a structured way to
+exceptions and errors. Throwing exceptions provide a structured way to
 handle a range of unexpected situations in the application code. Throwing
-*errors* in such a context is not recommended.
+errors in such a context is not recommended.
 
 The ``try`` statements (see :ref:`Try Statements`) are used to handle
-*errors* in a manner similar to the handling of *exceptions*.
+errors in a manner similar to the handling of exceptions.
 
-**Note**: Not every *error* can be recovered.
+**Note**: Not every error can be recovered.
 
 .. index::
    compile-time error

@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -179,20 +179,18 @@ Builder Function Syntax Conventions
 The following syntax conventions apply to any builder function (component’s
 main builder, component’s custom builder, or stand-alone global custom builder):
 
--  The required result of :math:`C(\{...\})` for any predefined or
-   custom component *C* is to initialize the component with the data
-   from the :math:`\{...\}` block, and to render it. Concrete semantics
-   depends on the implementation. For illustrative purposes, it can be
-   expressed as :math:`(new C(\{...\})).build()`, where the object
-   literal :math:`\{...\}` is handled as an initializer of the
+-  The required result of ``C({...})`` for any predefined or custom component
+   *C* is to initialize the component with the data from the ``{...}`` block,
+   and to render it. Concrete semantics depends on the implementation. For
+   illustrative purposes, it can be expressed as ``(new C({...})).build()``,
+   where the object literal ``{...}`` is handled as an initializer of the
    component’s fields.
 
--  The required result of :math:`C() \{...\}` for any predefined or
-   custom component *C* is to initialize the component, and to render it
-   by passing the data from the :math:`\{...\}` block to the component’s
-   builder function. Specific semantics depends on the implementation.
-   For illustrative purposes, it can be expressed as
-   :math:`new C().build(\{...\})`, where the :math:`\{...\}` block is
+-  The required result of ``C() {...}`` for any predefined or custom component
+   *C* is to initialize the component, and to render it by passing the data
+   from the ``{...}`` block to the component’s builder function. Specific
+   semantics depends on the implementation. For illustrative purposes, it can
+   be expressed as ``new C().build({...})``, where the ``{...}`` block is
    handled as a lambda to be passed as an argument to the builder.
 
 .. index::
@@ -226,14 +224,14 @@ the following is not allowed:
     -  Calling builders by name.
 
     -  Calling builders by the reference stored in the
-       *@BuilderParam*-annotated struct field.
+       ``@BuilderParam``-annotated struct field.
 
-    -  Calling a predefined builder *ForEach* for iterative rendering.
+    -  Calling a predefined builder ``ForEach`` for iterative rendering.
 
     -  Calling a function that does not mutate the program state (note that all
        logging functions are thus prohibited, as they mutate the state).
 
-    - Using conditional *if ... else* syntax.
+    - Using conditional ``if ... else`` syntax.
 
 .. index::
     builder
@@ -260,8 +258,8 @@ Annotations List
 
 .. _@Builder Annotation:
 
-@Builder Annotation
-===================
+``@Builder`` Annotation
+=======================
 
 *Function-level annotation for defining a custom builder* is applicable to
 the following:
@@ -288,8 +286,8 @@ the following:
 
 .. _@BuilderParam Annotation:
 
-@BuilderParam Annotation
-========================
+``@BuilderParam`` Annotation
+============================
 
 *Field-level annotation for defining a reference to a custom builder* is
 applicable only to member fields of GUI structs.
@@ -310,8 +308,8 @@ applicable only to member fields of GUI structs.
 
 .. _@Component Annotation:
 
-@Component Annotation
-=====================
+``@Component`` Annotation
+=========================
 
 *Struct-level annotation for marking a struct as a GUI struct* is applicable to
 any struct as long as it complies with the limitations imposed onto GUI structs.
@@ -330,18 +328,18 @@ any struct as long as it complies with the limitations imposed onto GUI structs.
 
 .. _@Consume Annotation:
 
-@Consume Annotation
-===================
+``@Consume`` Annotation
+=======================
 
-*@Consume* is a field-level annotation that establishes two-way synchronization
+``@Consume`` is a field-level annotation that establishes two-way synchronization
 between a child component *at an arbitrary nesting level*, and a parent
 component.
 
-An *@Consume*-annotated field in a child component shares the same value with
+An ``@Consume``-annotated field in a child component shares the same value with
 a field in the parent component. The source field of the parent component must
-be annotated with *@Provide*.
+be annotated with ``@Provide``.
 
-The annotation *@Consume* is applicable only to member fields of GUI structs.
+The annotation ``@Consume`` is applicable only to member fields of GUI structs.
 
 .. index::
     field-level annotation
@@ -363,8 +361,8 @@ The annotation *@Consume* is applicable only to member fields of GUI structs.
 
 .. _@Entry Annotation:
 
-@Entry Annotation
-=================
+``@Entry`` Annotation
+=====================
 
 *Struct-level annotation to indicate the topmost component on the page* is
 applicable only to GUI structs.
@@ -385,17 +383,17 @@ applicable only to GUI structs.
 
 .. _@Link Annotation:
 
-@Link Annotation
-================
+``@Link`` Annotation
+====================
 
-*@Link* is a field-level annotation that establishes two-way synchronization
+``@Link`` is a field-level annotation that establishes two-way synchronization
 between a child component and a parent component.
 
-An *@Link*-annotated field in a child component shares the same value with a
+An ``@Link``-annotated field in a child component shares the same value with a
 field in the parent component. The source field of the parent component must
-be annotated with *@State*, *@StorageLink*, or *@Link*.
+be annotated with ``@State``, ``@StorageLink``, or ``@Link``.
 
-The annotation *@Link* is applicable only to member fields of GUI structs.
+The annotation ``@Link`` is applicable only to member fields of GUI structs.
 
 .. index::
    field-level annotation
@@ -419,13 +417,13 @@ The annotation *@Link* is applicable only to member fields of GUI structs.
 
 .. _@LocalStorageLink Annotation:
 
-@LocalStorageLink Annotation
-============================
+``@LocalStorageLink`` Annotation
+================================
 
-*@LocalStorageLink* is a field-level annotation that establishes two-way
-synchronization with a property inside a *LocalStorage*.
+``@LocalStorageLink`` is a field-level annotation that establishes two-way
+synchronization with a property inside a ``LocalStorage``.
 
-The *@LocalStorageLink* annotation is applicable only to member fields of
+The ``@LocalStorageLink`` annotation is applicable only to member fields of
 GUI structs.
 
 .. code-block:: abnf
@@ -445,14 +443,14 @@ GUI structs.
 
 .. _@LocalStorageProp Annotation:
 
-@LocalStorageProp Annotation
-============================
+``@LocalStorageProp`` Annotation
+================================
 
-*@LocalStorageProp* is a field-level annotation that establishes one-way
-synchronization with a property inside a *LocalStorage*. The synchronization
-of value is unidirectional from the *LocalStorage* to the annotated field.
+``@LocalStorageProp`` is a field-level annotation that establishes one-way
+synchronization with a property inside a ``LocalStorage``. The synchronization
+of value is unidirectional from the ``LocalStorage`` to the annotated field.
 
-The annotation *@LocalStorageProp* is applicable only to member fields of GUI
+The annotation ``@LocalStorageProp`` is applicable only to member fields of GUI
 structs.
 
 .. index::
@@ -473,13 +471,13 @@ structs.
 
 .. _@ObjectLink Annotation:
 
-@ObjectLink Annotation
-======================
+``@ObjectLink`` Annotation
+==========================
 
-*@ObjectLink* is a field-level annotation that establishes two-way
-synchronization with objects of *@Observed*-annotated classes.
+``@ObjectLink`` is a field-level annotation that establishes two-way
+synchronization with objects of ``@Observed``-annotated classes.
 
-The annotation *@ObjectLink* is applicable only to member fields of GUI structs.
+The annotation ``@ObjectLink`` is applicable only to member fields of GUI structs.
 
 .. code-block:: abnf
 
@@ -498,14 +496,14 @@ The annotation *@ObjectLink* is applicable only to member fields of GUI structs.
 
 .. _@Observed Annotation:
 
-@Observed Annotation
-====================
+``@Observed`` Annotation
+========================
 
-*@Observed* is a class-level annotation that establishes two-way synchronization
-between instances of an *@Observed*-annotated class, and *@ObjectLink*-annotated
-member fields of GUI structs.
+``@Observed`` is a class-level annotation that establishes two-way
+synchronization between instances of an ``@Observed``-annotated class, and
+``@ObjectLink``-annotated member fields of GUI structs.
 
-The annotation *@Observed* is applicable only to non-GUI classes.
+The annotation ``@Observed`` is applicable only to non-GUI classes.
 
 .. index::
     class-level annotation
@@ -524,23 +522,23 @@ The annotation *@Observed* is applicable only to non-GUI classes.
 
 .. _@Prop Annotation:
 
-@Prop Annotation
-================
+``@Prop`` Annotation
+====================
 
-The annotation *@Prop* has the same semantics as *@State*, and only differs in
-how the variable must be initialized and updated:
+The annotation ``@Prop`` has the same semantics as ``@State``, and only differs
+in how the variable must be initialized and updated:
 
--  An *@Prop*-annotated field must be initialized with a primitive or
+-  An ``@Prop``-annotated field must be initialized with a primitive or
    a reference type value provided by its parent component. It must not be
    initialized locally.
 
--  An *@Prop*-annotated field can be modified locally, but the change
+-  An ``@Prop``-annotated field can be modified locally, but the change
    does not propagate back to its parent component. Whenever that data
-   source changes, the *@Prop*-annotated field is updated, and any
+   source changes, the ``@Prop``-annotated field is updated, and any
    locally-made changes are overwritten. Hence, the sync of the value is
-   uni-directional from the parent to the owning component.
+   unidirectional from the parent to the owning component.
 
-This annotation *@Prop* is applicable only to member fields of GUI structs.
+This annotation ``@Prop`` is applicable only to member fields of GUI structs.
 
 .. index::
     annotation
@@ -552,7 +550,7 @@ This annotation *@Prop* is applicable only to member fields of GUI structs.
     propagation
     parent component
     overwriting
-    uni-directional value
+    unidirectional value
     GUI struct
 
 .. code-block:: abnf
@@ -565,16 +563,16 @@ This annotation *@Prop* is applicable only to member fields of GUI structs.
 
 .. _@Provide Annotation:
 
-@Provide Annotation
-===================
+``@Provide`` Annotation
+=======================
 
-The annotation *@Provide* has the same semantics as *@State* with the
+The annotation ``@Provide`` has the same semantics as ``@State`` with the
 following additional features:
 
--  An *@Provide*-annotated field automatically becomes available to all
+-  An ``@Provide``-annotated field automatically becomes available to all
    components that are descendants of the providing component.
 
-The annotation *@Provide* is applicable only to member fields of GUI structs.
+The annotation ``@Provide`` is applicable only to member fields of GUI structs.
 
 .. index::
     annotation
@@ -596,14 +594,14 @@ The annotation *@Provide* is applicable only to member fields of GUI structs.
 
 .. _@State Annotation:
 
-@State Annotation
-=================
+``@State`` Annotation
+=====================
 
-*@State* is a field-level annotation, which indicates that the annotated field
-holds a part of component’s state. Changing any *@State*-field triggers
+``@State`` is a field-level annotation, which indicates that the annotated field
+holds a part of component’s state. Changing any ``@State``-field triggers
 component re-rendering.
 
-The annotation *@State* is applicable only to member fields of GUI structs.
+The annotation ``@State`` is applicable only to member fields of GUI structs.
 
 .. index::
     field-level annotation
@@ -625,13 +623,13 @@ The annotation *@State* is applicable only to member fields of GUI structs.
 
 .. _@StorageLink Annotation:
 
-@StorageLink Annotation
-=======================
+``@StorageLink`` Annotation
+===========================
 
-*@StorageLink* is a field-level annotation that establishes two-way
-synchronization with a property inside an *AppStorage*.
+``@StorageLink`` is a field-level annotation that establishes two-way
+synchronization with a property inside an ``AppStorage``.
 
-The annotation *@StorageLink* is applicable only to member fields of GUI
+The annotation ``@StorageLink`` is applicable only to member fields of GUI
 structs.
 
 .. index::
@@ -651,21 +649,21 @@ structs.
 
 .. _@StorageProp Annotation:
 
-@StorageProp Annotation
-=======================
+``@StorageProp`` Annotation
+===========================
 
-*@StorageProp* is a field-level annotation that establishes one-way
-synchronization with a property inside an *AppStorage*. The synchronization
-of value is uni-directional from the *AppStorage* to the annotated field.
+``@StorageProp`` is a field-level annotation that establishes one-way
+synchronization with a property inside an ``AppStorage``. The synchronization
+of value is unidirectional from the ``AppStorage`` to the annotated field.
 
-The annotation *@StorageProp* is applicable only to member fields of GUI
+The annotation ``@StorageProp`` is applicable only to member fields of GUI
 structs.
 
 .. index::
     annotation
     field-level annotation
     one-way synchronization
-    uni-directional value
+    unidirectional value
     annotated field
     member field
     GUI struct
@@ -680,34 +678,34 @@ structs.
 
 .. _@Watch Annotation:
 
-@Watch Annotation
-=================
+``@Watch`` Annotation
+=====================
 
-*@StorageProp* is a field-level annotation that specifies a callback to
+``@StorageProp`` is a field-level annotation that specifies a callback to
 be executed when the value of the annotated field changes.
 
-The annotation *@StorageProp* is applicable only to member fields of GUI
+The annotation ``@StorageProp`` is applicable only to member fields of GUI
 structs with the following annotations:
 
--  *@Consume*,
+-  ``@Consume``,
 
--  *@Link*,
+-  ``@Link``,
 
--  *@LocalStorageLink*,
+-  ``@LocalStorageLink``,
 
--  *@LocalStorageProp*,
+-  ``@LocalStorageProp``,
 
--  *@ObjectLink*,
+-  ``@ObjectLink``,
 
--  *@Prop*,
+-  ``@Prop``,
 
--  *@Provide*,
+-  ``@Provide``,
 
--  *@State*,
+-  ``@State``,
 
--  *@StorageLink*, and
+-  ``@StorageLink``, and
 
--  *@StorageProp*.
+-  ``@StorageProp``.
 
 .. index::
     field-level annotation
@@ -736,8 +734,8 @@ Callable Types
 A type is *callable* if the name of the type can be used in a call expression.
 A call expression that uses the name of a type is called a *type call
 expression*. Only class and struct types can be callable. To make a type
-callable, a static method with the name '*invoke*' or '*instantiate*' must
-be defined or inherited:
+callable, a static method with the name ``invoke`` or ``instantiate`` must be
+defined or inherited:
 
 .. code-block:: typescript
    :linenos:
@@ -748,12 +746,12 @@ be defined or inherited:
     C() // prints: invoked
     C.invoke() // also prints: invoked
     
-In the above example, '*C()*' is a *type call expression*. It is the short
-form of the normal method call '*C.invoke()*'. Using an explicit call is always
-valid for the methods '*invoke*' and '*instantiate*'.
+In the above example, ``C()`` is a *type call expression*. It is the short
+form of the normal method call ``C.invoke()``. Using an explicit call is always
+valid for the methods ``invoke`` and ``instantiate``.
 
-**Note**: Only a constructor---not the methods '*invoke*' or
-'*instantiate*'---is called in a *new expression*:
+**Note**: Only a constructor---not the methods ``invoke`` or ``instantiate``---is
+called in a *new expression*:
 
 .. code-block:: typescript
    :linenos:
@@ -764,11 +762,11 @@ valid for the methods '*invoke*' and '*instantiate*'.
     }
     let x = new C() // constructor is called
 
-The methods '*invoke*' and '*instantiate*' are similar but have differences as
+The methods ``invoke`` and ``instantiate`` are similar but have differences as
 discussed below.
 
-A :index:`compile-time error` occurs if a callable type contains both
-the '*invoke*' and '*instantiate*' methods.
+A :index:`compile-time error` occurs if a callable type contains both the
+``invoke`` and ``instantiate`` methods.
 
 |
 
@@ -777,10 +775,9 @@ the '*invoke*' and '*instantiate*' methods.
 Callable Types with Invoke Method
 =================================
 
-The method '*invoke*' can have an arbitrary signature. It can be
-used in a *type call expression* in either case.
-If the signature has parameters, then the call must contain corresponding
-arguments.
+The method ``invoke`` can have an arbitrary signature. It can be used in a
+*type call expression* in either case. If the signature has parameters, then
+the call must contain corresponding arguments.
 
 .. code-block:: typescript
    :linenos:
@@ -799,14 +796,14 @@ arguments.
 Callable Types with Instantiate Method
 ======================================
 
-The method '*instantiate*' can have an arbitrary signature by itself.
+The method ``instantiate`` can have an arbitrary signature by itself.
 If it is to be used in a *type call expression*, then its first parameter
-must be a 'factory' (i.e., it must be a *parameterless function type
+must be a ``factory`` (i.e., it must be a *parameterless function type
 returning some class or struct type*).
 The method can have or not have other parameters, and those parameters can
 be arbitrary.
 
-In a *type call expression*, the argument corresponding to the 'factory'
+In a *type call expression*, the argument corresponding to the ``factory``
 parameter is passed implicitly:
 
 .. code-block:: typescript
@@ -822,7 +819,7 @@ parameter is passed implicitly:
     // Explicit call of 'instantiate' requires explicit 'factory':
     let y = C.instantiate(() => { return new C()})
 
-If the method '*instantiate*' has additional parameters, then the call must
+If the method ``instantiate`` has additional parameters, then the call must
 contain corresponding arguments:
 
 .. code-block:: typescript
@@ -842,8 +839,9 @@ contain corresponding arguments:
 A :index:`compile-time error` occurs in a *type call expression* with type *T*,
 if:
 
-- *T* has neither method 'invoke' nor  method 'instantiate'; or
-- *T* has the method 'instantiate' but its first parameter is not a 'factory'.
+- *T* has neither method ``invoke`` nor  method ``instantiate``; or
+- *T* has the method ``instantiate`` but its first parameter is not
+  a ``factory``.
 
 .. code-block:: typescript
    :linenos:
@@ -918,13 +916,13 @@ Otherwise, compile-time error occurs.
 Unary operator '$$'
 ===================
 
-A prefix unary operator '$$' is used to pass primitive types by reference.
+A prefix unary operator '``$$``' is used to pass primitive types by reference.
 It is added to |LANG| to support the legacy ArkUI code.
 As the use of this operator is deprecated, it is to be removed in the future
 versions of the language.
 
-The operator '$$' can be followed by an identifier. The code '*$$this.a*' is
-considered to be the same as '*$$ this.a*' and '*$$(this.a)*'.
+The operator '$$' can be followed by an identifier. The code ``$$this.a`` is
+considered to be the same as ``$$ this.a`` and ``$$(this.a)``.
 
 
 |

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,14 +35,15 @@ version = sphinx_common_conf.version
 release = sphinx_common_conf.release
 
 rst_prolog = '''
-.. role:: kw
-  :class: doc-keyword
+.. role:: kw(code)
+   :language: typescript
 
 '''
 
 if tags.has('ispdf'):
     rst_prolog += '''
-.. |nbsp| unicode:: U+000A
+.. |nbsp| unicode:: U+0020
+
 '''
 else:
     rst_prolog += '''
@@ -58,7 +59,7 @@ today_fmt = sphinx_common_conf.default_today_fmt
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['rst2pdf.pdfbuilder']
+extensions = ['sphinx_markdown_builder']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
