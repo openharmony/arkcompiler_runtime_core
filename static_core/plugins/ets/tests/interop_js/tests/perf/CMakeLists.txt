@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,4 +40,13 @@ foreach(TEST ${PERF_TESTS})
         LAUNCHER_ARGS ${TEST} ${WARMUP} ${ITERS}
     )
     add_dependencies(ets_interop_js_perf_tests ets_interop_js_perf_test_${TEST})
+
+    panda_ets_interop_js_test(ets_interop_js_perf_test_frontend_${TEST}
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_frontend.ets
+        JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_test.js
+        LAUNCHER_ARGS ${TEST} ${WARMUP} ${ITERS}
+        ETS_CONFIG "${PANDA_BINARY_ROOT}/tests/ets_interop_js/arktsconfig.json"
+        ETS_VERIFICATOR_ERRORS "ForLoopCorrectlyInitializedForAll"
+    )
+    add_dependencies(ets_interop_js_perf_tests ets_interop_js_perf_test_frontend_${TEST})
 endforeach()

@@ -29,6 +29,6 @@ bool TryFuseCastAndSetProperty(IntrinsicInst *intrinsic, RuntimeInterface::Intri
 static bool PeepholeJSRuntimeNewJSValueString(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeJSRuntimeNewJSValueDouble(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeJSRuntimeNewJSValueBoolean(GraphVisitor *v, IntrinsicInst *intrinsic);
+static bool PeepholeResolveQualifiedJSCall(GraphVisitor *v, IntrinsicInst *intrinsic);
 #endif
-
 #endif  // PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_PEEPHOLE_ETS_INL_H

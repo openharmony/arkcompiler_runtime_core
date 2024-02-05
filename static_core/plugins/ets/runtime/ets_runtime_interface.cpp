@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,23 +105,27 @@ compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallK
     }
 
     auto method = MethodCast(methodPtr);
-    auto pf = method->GetPandaFile();
-    panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
-
-    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method);
-    auto linkerCtx = static_cast<EtsClassLinkerExtension *>(classLinker->GetExtension(ctx))->GetBootContext();
 
     ScopedMutatorLock lock;
 
     ASSERT(method->GetArgType(0).IsReference());  // arg0 is always a reference
-    ASSERT(method->GetArgType(1).IsReference());  // arg1 is always a reference
-    uint32_t const argReftypeShift = method->GetReturnType().IsReference() ? 1 : 0;
-    auto cls = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), linkerCtx);
-    if (cls->IsStringClass()) {
-        return InteropCallKind::CALL;
+    if (method->GetArgType(1).IsReference()) {
+        auto pf = method->GetPandaFile();
+        panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method);
+        auto linkerCtx = static_cast<EtsClassLinkerExtension *>(classLinker->GetExtension(ctx))->GetBootContext();
+        uint32_t const argReftypeShift = method->GetReturnType().IsReference() ? 1 : 0;
+        auto cls = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), linkerCtx);
+        if (!cls->IsStringClass()) {
+            return InteropCallKind::CALL_BY_VALUE;
+        }
+    } else {
+        // arg1 and arg2 are start position and length of qualified name
+        ASSERT(method->GetArgType(1).GetId() == panda_file::Type::TypeId::I32);
+        ASSERT(method->GetArgType(2U).GetId() == panda_file::Type::TypeId::I32);
     }
-    return InteropCallKind::CALL_BY_VALUE;
+    return InteropCallKind::CALL;
 }
 
 char *EtsRuntimeInterface::GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const
@@ -210,4 +214,5 @@ EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderConcatStri
 {
     return IntrinsicId::INTRINSIC_STD_CORE_STRING_BUILDER_CONCAT_STRINGS;
 }
+
 }  // namespace ark::ets

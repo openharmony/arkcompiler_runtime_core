@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@ function runTest(test, warmup, iters) {
     console.log("Running test " + test);
     let penv = process.env;
     let etsVm = require(penv.MODULE_PATH + "/ets_interop_js_napi.node");
+    // NB: Consider setting compiler-enable-jit=false for local run
     const etsVmRes = etsVm.createRuntime({
         "log-level": "info",
         "log-components": "ets_interop_js",
@@ -33,6 +34,7 @@ function runTest(test, warmup, iters) {
     }
 
     globalThis.js_code = require("./code.js");
+    globalThis.require = require;
 
     if (warmup > 0) {
         etsVm.call(test, warmup);

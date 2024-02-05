@@ -675,6 +675,10 @@ class UserList {
         {
             return user_ != other.user_;
         }
+        bool operator==(const UserIterator &other)
+        {
+            return user_ == other.user_;
+        }
         U &operator*()
         {
             return *user_;
@@ -5005,6 +5009,8 @@ public:
         return GetField<Relocate>();
     }
 
+    uint32_t GetTypeId() = delete;  // only method field of TypeIdMixin is used
+
     void DumpOpcode(std::ostream *out) const override;
     bool DumpInputs(std::ostream *out) const override;
 
@@ -6358,7 +6364,7 @@ public:
 
     enum class ObjectType { UNKNOWN, CLASS, METHOD, CONSTANT_POOL, STRING, PANDA_FILE_OFFSET, LAST };
 
-    LoadImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, void *obj,
+    LoadImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, const void *obj,
                       ObjectType objType = ObjectType::CLASS)
         : Base(opcode, type, pc), obj_(reinterpret_cast<uint64_t>(obj))
     {
@@ -7560,7 +7566,7 @@ public:
     }
 };
 
-inline bool IsVolatileMemInst(Inst *inst)
+inline bool IsVolatileMemInst(const Inst *inst)
 {
     switch (inst->GetOpcode()) {
         case Opcode::LoadObject:

@@ -581,9 +581,9 @@ class Checker
   def METHOD(method)
     return if @options.release
 
-    @ir_files = Dir["#{@cwd}/ir_dump/*#{method.sub('::', '_')}*.ir"]
+    @ir_files = Dir["#{@cwd}/ir_dump/*#{method.gsub(/::|[<>]/, '_')}*.ir"]
     @ir_files.sort!
-    raise_error "IR dumps not found for method: #{method.sub('::', '_')}" if @ir_files.empty?
+    raise_error "IR dumps not found for method: #{method.gsub(/::|[<>]/, '_')}" if @ir_files.empty?
     @current_method = method
     @current_file_index = 0
   end

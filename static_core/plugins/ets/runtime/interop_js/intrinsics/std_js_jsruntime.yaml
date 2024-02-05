@@ -362,15 +362,46 @@ intrinsics:
     interop_intrinsic_kind: creates_local
     clear_flags: [can_throw, heap_inv]
 
+  - name: CompilerGetJSProperty
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [ptr, ptr]
+    impl: ark::ets::interop::js::intrinsics::CompilerGetJSPropertyIntrinsic
+    interop_intrinsic_kind: creates_local
+    clear_flags: [ ]
+
+  - name: CompilerGetJSElement
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [ptr, i32]
+    impl: ark::ets::interop::js::intrinsics::CompilerGetJSElementIntrinsic
+    interop_intrinsic_kind: creates_local
+    clear_flags: [can_throw, heap_inv]
+
+  # Not implemented, must be removed before codegen
   - name: CompilerResolveQualifiedJSCall
     space: ets
     compiler_only: true
     signature:
       ret: ptr
-      args: [ptr, std.core.String]
-    impl: ark::ets::interop::js::intrinsics::CompilerResolveQualifiedJSCallIntrinsic
+      args: [ptr, u32, u32, u32]
     interop_intrinsic_kind: creates_local
-    clear_flags: [can_throw, heap_inv]
+    peephole_func: PeepholeResolveQualifiedJSCall
+    clear_flags: [ no_dce ]
+  
+  # Not implemented, must be removed before codegen
+  - name: CompilerLoadResolvedJSFunction
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: [ptr]
+    interop_intrinsic_kind: creates_local
+    clear_flags: [ no_dce ]
 
   - name: CompilerJSCallCheck
     space: ets
@@ -432,6 +463,25 @@ intrinsics:
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::CompilerDestroyLocalScopeIntrinsic
     clear_flags: [can_throw, heap_inv]
+
+  - name: CompilerLoadJSConstantPool
+    space: ets
+    compiler_only: true
+    signature:
+      ret: ptr
+      args: []
+    impl: ark::ets::interop::js::intrinsics::CompilerLoadJSConstantPoolIntrinsic
+    interop_intrinsic_kind: creates_local
+    clear_flags: [no_dce ]
+
+  - name: CompilerInitJSCallClassForCtx
+    space: ets
+    compiler_only: true
+    signature:
+      ret: void
+      args: [ ptr ] # LoadAndInitClass inst
+    impl: ark::ets::interop::js::intrinsics::CompilerInitJSCallClassForCtxIntrinsic
+    clear_flags: [ no_cse, no_hoist ]
 
 ########################################################
 # Internal intrinsics, convert ets value to napi_value #

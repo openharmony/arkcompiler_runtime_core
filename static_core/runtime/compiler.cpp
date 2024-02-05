@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -686,9 +686,40 @@ bool PandaRuntimeInterface::IsFieldVolatile(FieldPtr field) const
     return FieldCast(field)->IsVolatile();
 }
 
+bool PandaRuntimeInterface::IsFieldFinal(FieldPtr field) const
+{
+    return FieldCast(field)->IsFinal();
+}
+
+bool PandaRuntimeInterface::IsFieldReadonly(FieldPtr field) const
+{
+    return FieldCast(field)->IsReadonly();
+}
+
 bool PandaRuntimeInterface::HasFieldMetadata(FieldPtr field) const
 {
     return (reinterpret_cast<uintptr_t>(field) & 1U) == 0;
+}
+
+uint64_t PandaRuntimeInterface::GetStaticFieldValue(FieldPtr fieldPtr) const
+{
+    auto *field = FieldCast(fieldPtr);
+    auto type = GetFieldType(fieldPtr);
+    auto klass = field->GetClass();
+    ASSERT(compiler::DataType::GetCommonType(type) == compiler::DataType::INT64);
+    // NB: must be sign-extended for signed types at call-site
+    switch (compiler::DataType::ShiftByType(type, Arch::NONE)) {
+        case 0U:
+            return klass->GetFieldPrimitive<uint8_t>(*field);
+        case 1U:
+            return klass->GetFieldPrimitive<uint16_t>(*field);
+        case 2U:
+            return klass->GetFieldPrimitive<uint32_t>(*field);
+        case 3U:
+            return klass->GetFieldPrimitive<uint64_t>(*field);
+        default:
+            UNREACHABLE();
+    }
 }
 
 RuntimeInterface::FieldId PandaRuntimeInterface::GetFieldId(FieldPtr field) const

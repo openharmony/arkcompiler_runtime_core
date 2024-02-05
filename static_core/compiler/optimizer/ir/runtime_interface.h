@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -369,6 +369,11 @@ public:
     virtual bool IsMethodStringBuilderToString([[maybe_unused]] MethodPtr method) const
     {
         return false;
+    }
+
+    virtual FieldPtr GetInteropConstantPoolOffsetField([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
     }
 
     virtual std::string GetFileName([[maybe_unused]] MethodPtr method) const
@@ -972,9 +977,24 @@ public:
         return false;
     }
 
+    virtual bool IsFieldFinal([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldReadonly([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
     virtual bool HasFieldMetadata([[maybe_unused]] FieldPtr field) const
     {
         return false;
+    }
+
+    virtual uint64_t GetStaticFieldValue([[maybe_unused]] FieldPtr fieldPtr) const
+    {
+        return 0;
     }
 
     virtual std::string GetFieldName([[maybe_unused]] FieldPtr field) const
@@ -1159,7 +1179,7 @@ public:
     }
 
     virtual void GetInfoForInteropCallArgsConversion(
-        [[maybe_unused]] MethodPtr methodPtr,
+        [[maybe_unused]] MethodPtr methodPtr, [[maybe_unused]] uint32_t skipArgs,
         [[maybe_unused]] ArenaVector<std::pair<IntrinsicId, DataType::Type>> *intrinsics) const
     {
         UNREACHABLE();
@@ -1177,6 +1197,13 @@ public:
     }
 
     virtual uint64_t GetFuncPropNameOffset([[maybe_unused]] MethodPtr methodPtr, [[maybe_unused]] uint32_t strId) const
+    {
+        UNREACHABLE();
+    }
+
+    virtual uint32_t GetAnnotationElementUniqueIndex([[maybe_unused]] MethodPtr methodPtr,
+                                                     [[maybe_unused]] const char *annotation,
+                                                     [[maybe_unused]] uint32_t index)
     {
         UNREACHABLE();
     }

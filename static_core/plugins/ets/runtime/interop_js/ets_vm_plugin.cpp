@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -180,6 +180,8 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);
+        napi_add_env_cleanup_hook(
+            env, [](void *) { DestroyRuntime(); }, nullptr);
         InteropCtx::Init(coro, env);
     }
     napi_value napiRes;
@@ -279,6 +281,8 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);
+        napi_add_env_cleanup_hook(
+            env, [](void *) { DestroyRuntime(); }, nullptr);
         InteropCtx::Init(coro, env);
     }
     napi_value napiRes;

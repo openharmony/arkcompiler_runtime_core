@@ -53,9 +53,10 @@ std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> prox
 {
     Class *cls = etsClass->GetRuntimeClass();
     ASSERT(!IsProxyClass(cls));
+    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    auto methodsBuffer = new uint8_t[proxyMethods.size() * sizeof(Method)];
-    Span<Method> implMethods {reinterpret_cast<Method *>(methodsBuffer), proxyMethods.size()};
+    Span<Method> implMethods {classLinker->GetAllocator()->AllocArray<Method>(proxyMethods.size()),
+                              proxyMethods.size()};
 
     for (size_t i = 0; i < proxyMethods.size(); ++i) {
         auto *m = proxyMethods[i];
@@ -70,17 +71,14 @@ std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> prox
     Span<Class *> interfaces {};
     ClassLinkerContext *context = cls->GetLoadContext();
 
-    ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    Class *proxyCls =
-        classLinker->BuildClass(descriptor.get(), true, accessFlags, {implMethods.data(), implMethods.size()}, fields,
-                                baseClass, interfaces, context, false);
+    Class *proxyCls = classLinker->BuildClass(descriptor.get(), true, accessFlags, implMethods, fields, baseClass,
+                                              interfaces, context, false);
     proxyCls->SetState(Class::State::INITIALIZING);
     proxyCls->SetState(Class::State::INITIALIZED);
 
     ASSERT(IsProxyClass(proxyCls));
 
     auto jsProxy = std::unique_ptr<JSProxy>(new JSProxy(EtsClass::FromRuntimeClass(proxyCls)));
-    jsProxy->proxyMethods_.reset(reinterpret_cast<Method *>(methodsBuffer));
     return jsProxy;
 }
 

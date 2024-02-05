@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -497,7 +497,10 @@ public:
     FieldPtr GetFieldByOffset(size_t offset) const override;
     uintptr_t GetFieldClass(FieldPtr field) const override;
     bool IsFieldVolatile(FieldPtr field) const override;
+    bool IsFieldFinal(FieldPtr field) const override;
+    bool IsFieldReadonly(FieldPtr field) const override;
     bool HasFieldMetadata(FieldPtr field) const override;
+    uint64_t GetStaticFieldValue(FieldPtr fieldPtr) const override;
 
     std::string GetFieldName(FieldPtr field) const override
     {

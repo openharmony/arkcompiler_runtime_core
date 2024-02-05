@@ -678,7 +678,6 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
     auto pc = GetPc(bcInst->GetAddress());
     // Create SaveState instruction
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
-
     // Create NullCheck instruction
     auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc,
                                                  GetDefinition(bcInst->GetVReg(IS_ACC_WRITE ? 0 : 1)), saveState);
@@ -692,15 +691,16 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
 
     // Create LoadObject instruction
     Inst *inst;
-    ResolveObjectFieldInst *resolveField = nullptr;
+    AddInstruction(saveState, nullCheck);
     if (field == nullptr || ForceUnresolved()) {
         // 1. Create an instruction to resolve an object's field
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), fieldId,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
         }
-        resolveField =
+        auto *resolveField =
             graph_->CreateInstResolveObjectField(DataType::UINT32, pc, saveState, fieldId, GetGraph()->GetMethod());
+        AddInstruction(resolveField);
         // 2. Create an instruction to load a value from the resolved field
         auto loadField = graph_->CreateInstLoadResolvedObjectField(type, pc, nullCheck, resolveField, fieldId,
                                                                    GetGraph()->GetMethod());
@@ -708,16 +708,15 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
     } else {
         auto loadField = graph_->CreateInstLoadObject(type, pc, nullCheck, fieldId, GetGraph()->GetMethod(), field,
                                                       runtime->IsFieldVolatile(field));
+        // 'final' field can be reassigned e. g. with reflection, but 'readonly' cannot
+        // `IsInConstructor` check should not be necessary, but need proper frontend support first
+        if (runtime->IsFieldReadonly(field) && !IsInConstructor</* IS_STATIC= */ false>()) {
+            loadField->ClearFlag(inst_flags::NO_CSE);
+        }
         inst = loadField;
     }
 
-    AddInstruction(saveState);
-    AddInstruction(nullCheck);
-    if (resolveField != nullptr) {
-        AddInstruction(resolveField);
-    }
     AddInstruction(inst);
-
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (IS_ACC_WRITE) {
         UpdateDefinitionAcc(inst);
@@ -801,14 +800,10 @@ void InstBuilder::BuildStoreObject(const BytecodeInstruction *bcInst, DataType::
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-Inst *InstBuilder::BuildLoadStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, size_t typeId,
-                                       Inst *saveState)
+Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, size_t typeId, Inst *saveState)
 {
-    AddInstruction(saveState);
-
     uint32_t classId;
     auto field = GetRuntime()->ResolveField(GetMethod(), typeId, !GetGraph()->IsAotMode(), &classId);
-    auto pc = GetPc(bcInst->GetAddress());
 
     if (field == nullptr || ForceUnresolved()) {
         // The static field is unresolved, so we have to resolve it and then load
@@ -832,6 +827,11 @@ Inst *InstBuilder::BuildLoadStaticInst(const BytecodeInstruction *bcInst, DataTy
                                                         GetGraph()->GetMethod(), GetRuntime()->GetClassForField(field));
     auto loadField = graph_->CreateInstLoadStatic(type, pc, initClass, typeId, GetGraph()->GetMethod(), field,
                                                   GetRuntime()->IsFieldVolatile(field));
+    // 'final' field can be reassigned e. g. with reflection, but 'readonly' cannot
+    // `IsInConstructor` check should not be necessary, but need proper frontend support first
+    if (GetRuntime()->IsFieldReadonly(field) && !IsInConstructor</* IS_STATIC= */ true>()) {
+        loadField->ClearFlag(inst_flags::NO_CSE);
+    }
     AddInstruction(initClass);
     return loadField;
 }
@@ -857,7 +857,8 @@ void InstBuilder::BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::T
         type = GetRuntime()->GetFieldTypeById(GetMethod(), fieldId);
     }
     auto saveState = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
-    Inst *inst = BuildLoadStaticInst(bcInst, type, fieldId, saveState);
+    AddInstruction(saveState);
+    Inst *inst = BuildLoadStaticInst(GetPc(bcInst->GetAddress()), type, fieldId, saveState);
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
 }

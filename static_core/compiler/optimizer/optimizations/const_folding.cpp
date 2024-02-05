@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1047,6 +1047,25 @@ bool ConstFoldingSqrt(Inst *inst)
             newCnst = inst->GetBasicBlock()->GetGraph()->FindOrCreateConstant(std::sqrt(cnst->GetDoubleValue()));
         }
         inst->ReplaceUsers(newCnst);
+        return true;
+    }
+    return false;
+}
+
+bool ConstFoldingLoadStatic(Inst *inst)
+{
+    auto field = inst->CastToLoadStatic()->GetObjField();
+    ASSERT(field != nullptr);
+    if (DataType::GetCommonType(inst->GetType()) != DataType::INT64) {
+        return false;
+    }
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    auto runtime = graph->GetRuntime();
+
+    auto klass = runtime->GetClassForField(field);
+    if (runtime->IsFieldReadonly(field) && runtime->IsClassInitialized(reinterpret_cast<uintptr_t>(klass))) {
+        auto value = runtime->GetStaticFieldValue(field);
+        inst->ReplaceUsers(graph->FindOrCreateConstant(ConvertIntToInt(value, inst->GetType())));
         return true;
     }
     return false;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,8 +52,9 @@ private:
     void LoopSearchDFS(Loop *loop);
     bool InstDominatesLoopExits(Inst *inst);
     bool InstInputDominatesPreheader(Inst *inst);
-    Inst *FindSaveStateForResolver(Inst *resolver, const BasicBlock *preHeader);
+    Inst *FindSaveStateForHoist(Inst *hoisted, const BasicBlock *preHeader, Inst **insertBefore);
     void TryAppendHoistableInst(Inst *inst, BasicBlock *block, Loop *loop);
+    void UnmarkHoistUsers(Inst *inst);
     void MoveInstructions(BasicBlock *preHeader, Loop *loop);
 
 private:

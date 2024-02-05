@@ -119,7 +119,7 @@ function test_call_hoist_scope_start(): int {
 //! INST_COUNT   "Intrinsic.CompilerDestroyLocalScope", 1
 //! PASS_AFTER   "DeoptimizeElimination"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 2
+//! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 1
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 1 # conversion of JSRuntimeGetPropertyJSValue to local, NOTE(aefremov): remove
 //! INST_COUNT   "Intrinsic.CompilerConvertLocalToF64", 1
 //! INST_NOT     "Intrinsic.CompilerConvertLocalToJSValue"
@@ -194,7 +194,7 @@ function small_loop_with_scopes(): int {
 //! INST_COUNT   "Intrinsic.CompilerDestroyLocalScope", 1
 //! PASS_AFTER   "DeoptimizeElimination"
 //! PASS_AFTER_NEXT "Cleanup"
-//! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 4
+//! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 1
 //! INST_COUNT   "Intrinsic.CompilerConvertLocalToJSValue", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 3
 

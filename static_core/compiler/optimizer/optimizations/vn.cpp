@@ -124,6 +124,14 @@ static void AddSpecialTraits(Inst *inst, VnObject *obj)
         case Opcode::CastValueToAnyType:
             obj->Add(static_cast<VnObject::ObjType>(inst->CastToCastValueToAnyType()->GetAnyType()));
             break;
+        case Opcode::LoadStatic:
+            ASSERT(inst->CastToLoadStatic()->GetObjField() != nullptr);
+            obj->Add(reinterpret_cast<VnObject::DoubleObjType>(inst->CastToLoadStatic()->GetObjField()));
+            break;
+        case Opcode::LoadObject:
+            ASSERT(inst->CastToLoadObject()->GetObjField() != nullptr);
+            obj->Add(reinterpret_cast<VnObject::DoubleObjType>(inst->CastToLoadObject()->GetObjField()));
+            break;
         default:
             break;
     }

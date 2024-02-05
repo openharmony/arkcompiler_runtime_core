@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ bool ConstFoldingXor(Inst *inst);
 bool ConstFoldingCmp(Inst *inst);
 bool ConstFoldingCompare(Inst *inst);
 bool ConstFoldingSqrt(Inst *inst);
+bool ConstFoldingLoadStatic(Inst *inst);
 
 // NB: casting may be required to create constants of the desired array type for creating LiteralArrays (in Bytecode
 // Optimizer ConstArrayResolver pass) If a constant is used to initialize an array (is_literal_data == true), it must be

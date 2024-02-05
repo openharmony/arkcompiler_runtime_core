@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,8 @@
 //! INST         "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT    "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT    "Intrinsic.CompilerResolveQualifiedJSCall"
-//! INST_NEXT    /LoadImmediate.*string/
-//! INST_NEXT    "Intrinsic.CompilerGetJSNamedProperty"
+//! INST_NOT     /LoadImmediate.*string/
+//! INST_NEXT    "Intrinsic.CompilerLoadResolvedJSFunction"
 //! INST_NEXT    "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT    "Intrinsic.CompilerConvertRefTypeToLocal"
 //! INST_NEXT    "Intrinsic.CompilerJSCallFunction"
@@ -57,8 +57,8 @@
 //! INST         "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT    "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT    "Intrinsic.CompilerResolveQualifiedJSCall"
-//! INST_NEXT    /LoadImmediate.*PandaFileOffset/
-//! INST_NEXT    "Intrinsic.CompilerGetJSNamedProperty"
+//! INST_NOT     /LoadImmediate.*PandaFileOffset/
+//! INST_NEXT    "Intrinsic.CompilerLoadResolvedJSFunction"
 //! INST_NEXT    "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT    "Intrinsic.CompilerConvertRefTypeToLocal"
 //! INST_NEXT    "Intrinsic.CompilerJSCallFunction"

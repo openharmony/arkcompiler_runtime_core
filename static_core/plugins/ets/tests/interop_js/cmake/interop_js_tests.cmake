@@ -89,8 +89,8 @@ function(panda_ets_interop_js_test TARGET)
     cmake_parse_arguments(
         ARG
         ""
-        "JS_LAUNCHER"
-        "ABC_FILE;CPP_SOURCES;ETS_SOURCES;LAUNCHER_ARGS"
+        "JS_LAUNCHER;ETS_CONFIG"
+        "ABC_FILE;CPP_SOURCES;ETS_SOURCES;LAUNCHER_ARGS;ETS_VERIFICATOR_ERRORS"
         ${ARGN}
     )
 
@@ -100,6 +100,8 @@ function(panda_ets_interop_js_test TARGET)
     panda_ets_package(${TARGET_TEST_PACKAGE}
         ABC_FILE ${ARG_ABC_FILE}
         ETS_SOURCES ${ARG_ETS_SOURCES}
+        ETS_CONFIG ${ARG_ETS_CONFIG}
+        ETS_VERIFICATOR_ERRORS ${ARG_ETS_VERIFICATOR_ERRORS}
     )
     set(OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_interop_js_output.txt")
 

@@ -107,6 +107,9 @@ public:
     template <class Callback>
     bool EnumerateAnnotationsWithEarlyStop(const Callback &cb);
 
+    template <class Callback>
+    auto EnumerateAnnotation(const char *name, const Callback &cb);
+
     std::optional<SourceLang> GetSourceLang();
 
     std::optional<File::EntityId> GetSourceFileId();

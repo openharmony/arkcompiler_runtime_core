@@ -100,6 +100,9 @@ static const IntrinsicsAPI S_INTRINSICS_API = {
     NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
+    NotImplementedAdapter,
+    NotImplementedAdapter,
+    NotImplementedAdapter,
     // clang-format on
 };
 
@@ -266,9 +269,14 @@ void *CompilerGetJSNamedPropertyIntrinsic(void *val, void *propName)
     return S_INTRINSICS_API->CompilerGetJSNamedProperty(val, reinterpret_cast<char *>(propName));
 }
 
-void *CompilerResolveQualifiedJSCallIntrinsic(void *val, EtsString *qnameStr)
+void *CompilerGetJSPropertyIntrinsic(void *val, void *prop)
 {
-    return S_INTRINSICS_API->CompilerResolveQualifiedJSCall(val, qnameStr);
+    return S_INTRINSICS_API->CompilerGetJSProperty(val, prop);
+}
+
+void *CompilerGetJSElementIntrinsic(void *val, int32_t index)
+{
+    return S_INTRINSICS_API->CompilerGetJSElement(val, index);
 }
 
 void *CompilerJSCallCheckIntrinsic(void *fn)
@@ -345,6 +353,16 @@ void CompilerCreateLocalScopeIntrinsic()
 void CompilerDestroyLocalScopeIntrinsic()
 {
     S_INTRINSICS_API->CompilerDestroyLocalScope();
+}
+
+void *CompilerLoadJSConstantPoolIntrinsic()
+{
+    return S_INTRINSICS_API->CompilerLoadJSConstantPool();
+}
+
+void CompilerInitJSCallClassForCtxIntrinsic(void *klass)
+{
+    return S_INTRINSICS_API->CompilerInitJSCallClassForCtx(klass);
 }
 
 }  // namespace intrinsics
