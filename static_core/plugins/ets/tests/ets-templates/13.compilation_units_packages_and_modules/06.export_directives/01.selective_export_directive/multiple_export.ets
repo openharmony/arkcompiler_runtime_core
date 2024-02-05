@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,16 +14,11 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Enum type methods (values)
+tags: [not-a-test, compile-only]
 ---*/
 
-enum Color {Red = 1, Green = 10, Blue = 100}
+function foo(): void {}
+function bar(): void {}
+function baz(): void {}
 
-function main(): void {
-  let colors = Color.values();
-  let res = 0
-  for (let x of colors) {
-      res += x.getValue()
-  }
-  assert res == 111
-}
+export { foo, bar, baz }

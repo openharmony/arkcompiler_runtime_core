@@ -14,12 +14,8 @@ limitations under the License.
 ---*/
 
 /*---
-desc: c.toString() returns the same value as c.getValue().toString().
+tags: [not-a-test, compile-only]
 ---*/
 
-enum Color {Red = 1, Green = 2, Blue}
-
-function main(): void {
-  let c: Color = Color.Green
-  assert c.toString() == (c.getValue() as Int).toString()
-}
+const CONSTANT_A: int = 42
+export { CONSTANT_A }

@@ -11,11 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of identifiers
-identifiers:
-  - debug
-  - test
-  - main
-  - x
-  - y
-  - z
+--- # A list of top level declarations
+cases:
+  - importFile: 'no_export'
+    importStmt: 'import { Something } from "./no_export"'
+  - importFile: 'export_nothing'
+    importStmt: 'import { Nothing } from "./export_nothing"'
+  - importFile: 'single_as_export'
+    importStmt: 'import { CONSTANT_A } from "./single_as_export"'
+  - importFile: 'export_as_same_name'
+    importStmt: 'import * from "./export_as_same_name"'

@@ -14,13 +14,11 @@ limitations under the License.
 ---*/
 
 /*---
-desc: getName() returns a name of enumeration constant which is of string type.
+tags: [not-a-test, compile-only]
 ---*/
 
-enum Color {Red, Green, blue}
+function foo(): void {}
+function bar(): void {}
+function baz(): void {}
 
-function main(): void {
-  assert Color.Red.getName() === "Red"
-  assert Color.Green.getName() === "Green"
-  assert Color.blue.getName() === "blue"
-}
+export { foo, bar as barBar, baz }

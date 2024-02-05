@@ -14,16 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Trailing commas are not allowed in enum constant lists
+desc: Re-export directive, all names should be available
+tags: [compile-only]
 ---*/
 
-enum Color {
-    Red,
-    Green,
-    Blue,
-}
+import { ClassA, InterfaceA, foo, BAR } from './module_all'
 
-function main(): void {
-  assert Color.values().length == 3;
+function main(): int {
+    return 0
 }
-
