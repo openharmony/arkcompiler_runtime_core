@@ -2378,10 +2378,6 @@
 07.expressions/12.indexing_expression/indx3d.ets
 # end of es2panda fails
 
-# es2panda fails: panda:14391 Cannot cast enum to the same enum type
-06.conversions_and_contexts/05.casting_contexts/identity.ets
-# end of es2panda fails
-
 # es2panda fails: equality not yet implemented
 07.expressions/24.equality_expressions/eq_1.ets
 07.expressions/24.equality_expressions/eq_12.ets
