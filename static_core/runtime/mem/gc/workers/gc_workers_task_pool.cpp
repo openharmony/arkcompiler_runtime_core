@@ -27,7 +27,7 @@ void GCWorkersTaskPool::IncreaseSolvedTasks()
 
         // Here we use double check to be sure that IncreaseSolvedTasks method will release
         // all_solved_tasks_cond_var_lock_ before GCWorkersTaskPool deleting in GC::DestroyWorkersTaskPool method
-        if (solvedTasksOldValue + 1U > solvedTasksSnapshot_) {
+        if (solvedTasksOldValue >= solvedTasksSnapshot_ && solvedTasksOldValue + 1U == sendedTasks_) {
             solvedTasksSnapshot_ = solvedTasksOldValue + 1U;
         }
     }
@@ -63,11 +63,11 @@ void GCWorkersTaskPool::WaitUntilTasksEnd()
         // Here we use double check to be sure that IncreaseSolvedTasks method will release
         // all_solved_tasks_cond_var_lock_ before GCWorkersTaskPool deleting in GC::DestroyWorkersTaskPool method
         if (solvedTasks_ == sendedTasks_ && solvedTasks_ == solvedTasksSnapshot_) {
+            ResetTasks();
             break;
         }
         allSolvedTasksCondVar_.TimedWait(&allSolvedTasksCondVarLock_, ALL_GC_TASKS_FINISH_WAIT_TIMEOUT);
     }
-    ResetTasks();
 }
 
 }  // namespace panda::mem
