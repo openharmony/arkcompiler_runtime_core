@@ -664,9 +664,18 @@ spec/expressions/equality/equality_primitive_01_short_equal_short_015.ets
 ###
 
 ### accessors
+spec/accessors/issue-15142_6.ets
 ### Issue 15396
 spec/accessors/issue-13330_7.ets
 spec/accessors/issue-13330_8.ets
+### Issue 15644
+spec/accessors/issue-15142_5.ets
+### Issue 15646
+spec/accessors/issue-15142_9.ets
+spec/accessors/issue-15142_10.ets
+### Issue 15647
+spec/accessors/issue-15142_7.ets
+spec/accessors/issue-15142_8.ets
 ### end of accessors
 
 ### tuples
