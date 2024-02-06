@@ -14,10 +14,6 @@
 ---
 cases:
   - { type: long, val: 10, len: 10 }
-  - { type: float, val: 10.0, len: 10 }
-  - { type: double, val: 20.0, len: 20 }
   - { type: Long, val: new Long(1 as long), len: 1 }
-  - { type: Float, val: new Float(1.0 as float), len: 1 }
-  - { type: Double, val: new Double(2.0 as double), len: 2 }
   - { type: Integral, val: 0, len: 0 }
   - { type: Floating, val: 0.0, len: 0 }

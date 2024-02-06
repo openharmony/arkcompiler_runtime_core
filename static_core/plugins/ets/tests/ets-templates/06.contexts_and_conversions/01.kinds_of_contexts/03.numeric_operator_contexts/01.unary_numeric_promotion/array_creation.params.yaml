@@ -20,3 +20,7 @@ cases:
   - { type: Short, val: new Short(0x1ff as short), len: 511 }
   - { type: Char, val: new Char(c' '), len: 32 }
   - { type: Int, val: new Int(128), len: 128 }
+  - { type: float, val: 10.0, len: 10 }
+  - { type: double, val: 20.0, len: 20 }
+  - { type: Float, val: new Float(1.0 as float), len: 1 }
+  - { type: Double, val: new Double(2.0 as double), len: 2 }
