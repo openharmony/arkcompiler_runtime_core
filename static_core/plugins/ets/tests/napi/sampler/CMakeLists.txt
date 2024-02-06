@@ -69,10 +69,10 @@ add_dependencies(sampler_etsnapi_es2panda sampler_etsnapi_lib)
 set(ETS_ENTRY_POINT "main")
 if (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "FastVerify")
     set(ETS_ENTRY_POINT "release_main")
-    # NOTE(kurnevichstanislav): fix SIGSEGV in sampler tests with TaskManager (#14278)
-    set(RUNTIME_ARGUMENTS ${RUNTIME_ARGUMENTS} --ets.workers-type=threadpool)
 endif()
 
+# NOTE(kurnevichstanislav): fix SIGSEGV in sampler tests with TaskManager (#14278)
+set(RUNTIME_ARGUMENTS ${RUNTIME_ARGUMENTS} --ets.workers-type=threadpool)
 
 foreach(c_arg ${COMPILER_ARGUMENTS_LIST})
     foreach(i_arg ${INTERPRETER_ARGUMENTS_LIST})
