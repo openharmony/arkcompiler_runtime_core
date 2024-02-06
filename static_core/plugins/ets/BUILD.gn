@@ -31,7 +31,10 @@ foreach(plugin, ark_enabled_plugins) {
 }
 
 group("ark_packages") {
-  deps = [ "$ark_es2panda_root/aot:es2panda" ]
+  deps = [
+    "$ark_es2panda_root/aot:es2panda",
+    "runtime/napi/etsnative:etsnative",
+  ]
   if (with_stdlib) {
     deps += [ ":etsstdlib" ]
   }
