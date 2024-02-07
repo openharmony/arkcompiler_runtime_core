@@ -38,6 +38,7 @@ file(WRITE ${ETS_CONFIG}
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_with_lambda/dynamic_with_lambda.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_enum/dynamic_enum.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/perf/code.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_object/dynamic_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"convert.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
     "    }\n"
     "  }\n"
@@ -142,6 +143,12 @@ panda_ets_interop_js_gtest(ets_interop_dynamic_with_lambda
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_with_lambda/dynamic_with_lambda.cpp
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_with_lambda/dynamic_with_lambda.ets
     ETS_CONFIG ${ETS_CONFIG}
+)
+
+panda_ets_interop_js_gtest(ets_interop_js_test_dynamic_call
+        CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_call.cpp
+        ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_call.ets
+        ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_dynamic_enum
