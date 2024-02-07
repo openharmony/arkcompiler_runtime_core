@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,13 +32,13 @@ CLEAR_BUILD_DIRS=false
 RUN_ONLY=false
 
 function usage() {
-  echo "Usage: $0 [-cr] <path_to_repo> <path_to_build_dir>"
-  echo "   -c: clear existing build directory"
-  echo "   -r: run tests only (instrumentation should have been already performed)"
-  echo "Environment variable INTRUSIVE_TESTS_RELATIVE_DIR sets a directory with intrusive test set"
-  echo "Environment variable INSTRUMENTATION_TARGETS sets a directory with a taget for intrusive tests"
-  echo "Environment variable TSAN_SUPPRESSIONS sets a path to file with suppressions for thread sanitizer"
-  exit 1
+    echo "Usage: $0 [-cr] <path_to_repo> <path_to_build_dir>"
+    echo "   -c: clear existing build directory"
+    echo "   -r: run tests only (instrumentation should have been already performed)"
+    echo "Environment variable INTRUSIVE_TESTS_RELATIVE_DIR sets a directory with intrusive test set"
+    echo "Environment variable INSTRUMENTATION_TARGETS sets a directory with a taget for intrusive tests"
+    echo "Environment variable TSAN_SUPPRESSIONS sets a path to file with suppressions for thread sanitizer"
+    exit 1
 }
 
 # The following environment variables might be defined: INTRUSIVE_TESTS_RELATIVE_DIR, INSTRUMENTATION_TARGETS, TSAN_SUPPRESSIONS.
@@ -57,20 +57,20 @@ if [[ -n "$TSAN_SUPPRESSIONS" ]]; then
 fi
 
 function run_tests() {
-  echo "Run intrusive tests"
-  ${BUILD_TOOL} -k1 -j${NPROC_PER_JOB} ${BUILD_TARGETS}
+    echo "Run intrusive tests"
+    ${BUILD_TOOL} -k1 -j${NPROC_PER_JOB} ${BUILD_TARGETS}
 }
 
 function clear_dir() {
-  TARGET_DIR=$1
-  if [[ -d $TARGET_DIR ]]; then
-    if [[ "$CLEAR_BUILD_DIRS" = true ]]; then
-      rm -rf $TARGET_DIR
-    else
-      echo "Directory $TARGET_DIR is not empty. Clear it or use flag -c"
-      exit 1
+    TARGET_DIR=$1
+    if [[ -d $TARGET_DIR ]]; then
+        if [[ "$CLEAR_BUILD_DIRS" = true ]]; then
+            rm -rf $TARGET_DIR
+        else
+            echo "Directory $TARGET_DIR is not empty. Clear it or use flag -c"
+            exit 1
+        fi
     fi
-  fi
 }
 
 while getopts "h?cr" opt; do
@@ -108,15 +108,15 @@ BUILD_DIR=$ARTIFACTS_DIR/build
 INTERMEDIATE_PANDA_DIR=$ARTIFACTS_DIR/instrumented
 CLADE_DIR=$BUILD_DIR/clade
 if ! mkdir -p ${BUILD_DIR}; then
-  echo "Cannot create build directory ${BUILD_DIR}"
-  usage
+    echo "Cannot create build directory ${BUILD_DIR}"
+    usage
 fi
 
 cd $BUILD_DIR
 
 if [[ "$RUN_ONLY" = true ]]; then
-  run_tests
-  exit 0
+    run_tests
+    exit 0
 fi
 
 echo "Copy sources into intermediate directory for instrumentation"
@@ -128,21 +128,21 @@ cp -rL $ROOT_DIR $INTERMEDIATE_PANDA_DIR
 
 echo "Configure build"
 if ! cmake $INTERMEDIATE_PANDA_DIR -GNinja -DPANDA_C2ABC_UPGRADE_LEGACY=true -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} ${CMAKE_OPTIONS}; then
-  echo "Cannot configure build"
-  exit 1
+    echo "Cannot configure build"
+    exit 1
 fi
 
 echo "Build ARK and tests to create a commands graph"
 if ! clade -e CmdGraph --config '{"SrcGraph.requires":["CC","CXX"]}' ${BUILD_TOOL} -k1 -j${NPROC_PER_JOB} ${INSTRUMENTATION_TARGETS}; then
-  echo "Cannot build ARK and tests to create a commands graph"
-  exit 1
+    echo "Cannot build ARK and tests to create a commands graph"
+    exit 1
 fi
 
 echo "Run instrumentation"
 INSTRUMENTATOR=$INTERMEDIATE_PANDA_DIR/scripts/intrusive-testing/intrusive_instrumentator.py
 if ! python3 $INSTRUMENTATOR $INTERMEDIATE_PANDA_DIR $CLADE_DIR/cmds.txt $INTERMEDIATE_PANDA_DIR/${INTRUSIVE_TESTS_RELATIVE_DIR}; then
-  echo "Cannot run instrumentation"
-  exit 1
+    echo "Cannot run instrumentation"
+    exit 1
 fi
 
 run_tests

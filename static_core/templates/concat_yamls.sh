@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,8 +20,7 @@ shift
 
 rm -f "${OUTPUT_FILE}"
 
-for YAML_FILE_PATH in "${@}"
-do
+for YAML_FILE_PATH in "${@}"; do
     echo "Adding yaml file: ${YAML_FILE_PATH} to ${OUTPUT_FILE}"
     cat "${YAML_FILE_PATH}" >> "${OUTPUT_FILE}"
     echo >> "${OUTPUT_FILE}"

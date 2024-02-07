@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,7 +25,7 @@ OHOS_SDK_NATIVE="$(realpath "$1")"
 SDK_BUILD_ROOT="$(realpath "$2")"
 PANDA_SDK_BUILD_TYPE="${3:-"$BUILD_TYPE_RELEASE"}"
 
-usage() {
+function usage() {
     echo "$(basename "${BASH_SOURCE[0]}") path/to/ohos/sdk/native path/to/panda/sdk/destination build_type:[$BUILD_TYPE_RELEASE,$BUILD_TYPE_FAST_VERIFY,$BUILD_TYPE_DEBUG]"
     exit 1
 }
@@ -51,7 +51,7 @@ fi
 PANDA_SDK_PATH="$SDK_BUILD_ROOT/sdk"
 
 # Arguments: build_dir, cmake_arguments, ninja_targets
-build_panda() {
+function build_panda() {
     local build_dir="$1"
     local cmake_arguments="$2"
     local ninja_targets="$3"
@@ -78,7 +78,7 @@ build_panda() {
 }
 
 # Arguments: src, dst, file_list, include_pattern
-copy_into_sdk() {
+function copy_into_sdk() {
     local src="$1"
     local dst="$2"
     local file_list="$3"
@@ -98,20 +98,20 @@ copy_into_sdk() {
     done
 }
 
-linux_tools() {
+function linux_tools() {
     echo "> Building linux tools..."
     local linux_build_dir="$SDK_BUILD_ROOT/linux_host_tools"
-    local LINUX_CMAKE_ARGS=" \
+    local linux_cmake_args=" \
         -DPANDA_CROSS_AARCH64_TOOLCHAIN_FILE=cmake/toolchain/cross-ohos-musl-aarch64.cmake \
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_WITH_ECMASCRIPT=ON"
     local linux_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative"
-    build_panda "$linux_build_dir" "$LINUX_CMAKE_ARGS" "$linux_build_targets"
+    build_panda "$linux_build_dir" "$linux_cmake_args" "$linux_build_targets"
     copy_into_sdk "$linux_build_dir" "$PANDA_SDK_PATH/linux_host_tools" "$SCRIPT_DIR"/linux_host_tools.txt
 }
 
-windows_tools() {
+function windows_tools() {
     echo "> Building windows tools..."
     local windows_build_dir="$SDK_BUILD_ROOT/windows_host_tools"
     local windows_cmake_args="-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-x86_64-w64-mingw32-static.cmake"
@@ -120,18 +120,18 @@ windows_tools() {
     copy_into_sdk "$windows_build_dir" "$PANDA_SDK_PATH/windows_host_tools" "$SCRIPT_DIR"/windows_host_tools.txt
 }
 
-ohos() {
+function ohos() {
     echo "> Building runtime for OHOS ARM64..."
     local ohos_build_dir="$SDK_BUILD_ROOT/ohos_arm64"
     local taget_sdk_dir="$PANDA_SDK_PATH/ohos_arm64"
-    local TARGET_CMAKE_ARGS=" \
+    local target_cmake_args=" \
         -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-ohos-musl-aarch64.cmake \
         -DTOOLCHAIN_SYSROOT=$OHOS_SDK_NATIVE/sysroot \
         -DTOOLCHAIN_CLANG_ROOT=$OHOS_SDK_NATIVE/llvm \
         -DPANDA_ETS_INTEROP_JS=ON \
         -DPANDA_WITH_ECMASCRIPT=ON"
     local ohos_build_targets="ark ark_aot arkruntime arkassembler ets_interop_js_napi e2p_test_plugin etsnative"
-    build_panda "$ohos_build_dir" "$TARGET_CMAKE_ARGS" "$ohos_build_targets"
+    build_panda "$ohos_build_dir" "$target_cmake_args" "$ohos_build_targets"
     copy_into_sdk "$ohos_build_dir" "$taget_sdk_dir" "$SCRIPT_DIR"/ohos_arm64.txt
 
     echo "> Copying headers into SDK..."
@@ -145,7 +145,7 @@ ohos() {
     cp -r "$ohos_build_dir"/plugins/ets/etsstdlib.abc "$PANDA_SDK_PATH"/ets
 }
 
-ts_linter() {
+function ts_linter() {
     echo "> Building tslinter..."
     local linter_root="$ARK_ROOT/tools/es2panda/linter"
     (cd "$linter_root" && npm install)
@@ -165,7 +165,7 @@ ts_linter() {
     rm -rf "$linter_root"/node_modules
 }
 
-ets_std_lib() {
+function ets_std_lib() {
     echo "> Copying ets std lib into SDK..."
     mkdir -p "$PANDA_SDK_PATH"/ets
     cp -r "$ARK_ROOT"/plugins/ets/stdlib "$PANDA_SDK_PATH"/ets

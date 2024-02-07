@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,8 +14,7 @@
 
 set -e
 
-for ARGUMENT in "$@"
-do
+for ARGUMENT in "$@"; do
 case "$ARGUMENT" in
     --binary-dir=*)
     PANDA_BINARY_ROOT="${ARGUMENT#*=}"
@@ -65,8 +64,7 @@ function find_test() {
     if $(grep "TEST_F(IrBuilderTest, $1)" $IR_BUILDER_TESTS 1>/dev/null); then
         coverage=1
         $UNIT_TESTS --gtest_filter=IrBuilderTest.$1 1>/dev/null
-        if [ $? != 0 ]
-        then
+        if [ $? != 0 ]; then
             inst_status=0
         fi
     elif $(grep "TEST_F(IrBuilderTest, DISABLED_$1)" $IR_BUILDER_TESTS 1>/dev/null); then
@@ -75,12 +73,11 @@ function find_test() {
 }
 
 function calculate_ir_builder_coverage() {
-    for inst_name in $pbc_instructions
-    do
+    for inst_name in $pbc_instructions; do
         get_test_name
         find_test ${test_name}
         find_test ${test_name}Int
-        find_test ${test_name}Real        
+        find_test ${test_name}Real
 
         indent=$(($all_tests % 5))
         if [ $indent -eq 0 ] ; then

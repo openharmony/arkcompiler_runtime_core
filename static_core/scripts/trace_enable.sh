@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,32 +18,32 @@ TRACKING_PATH=/sys/kernel/debug/tracing
 
 OUTPUT=$1
 
-print_usage() {
+function print_usage() {
     echo "Usage: $0 <trace_output> <tracing_time> <trace_buffer_size_kb>"
 }
 
 # Set write permission for all users on trace_marker
-setup_permissions() {
+function setup_permissions() {
     chmod +rx $(dirname $TRACKING_PATH)
     chmod +rx $TRACKING_PATH
     chmod o+w $TRACKING_PATH/trace_marker
 }
 
-clear_trace() {
+function clear_trace() {
     echo > $TRACKING_PATH/trace
 }
 
-category_enable() {
+function category_enable() {
     echo 1 > $TRACKING_PATH/events/sched/sched_switch/enable
     echo 1 > $TRACKING_PATH/events/sched/sched_wakeup/enable
 }
 
-category_disable() {
+function category_disable() {
     echo 0 > $TRACKING_PATH/events/sched/sched_switch/enable
     echo 0 > $TRACKING_PATH/events/sched/sched_wakeup/enable
 }
 
-start_trace() {
+function start_trace() {
     echo "Warning: If the PandaVM aborted while writting trace, try to enlarge the trace buffer size here."
     echo $BUFF_SIZE > $TRACKING_PATH/buffer_size_kb
     echo 'global' > $TRACKING_PATH/trace_clock
@@ -55,20 +55,20 @@ start_trace() {
     echo 1 > $TRACKING_PATH/tracing_on
 }
 
-dump_trace() {
+function dump_trace() {
     cat $TRACKING_PATH/trace > $OUTPUT
     chmod o+w $OUTPUT
     clear_trace
 }
 
-stop_trace() {
+function stop_trace() {
     echo 0 > $TRACKING_PATH/tracing_on
     category_disable
     dump_trace
     echo 4 > $TRACKING_PATH/buffer_size_kb
 }
 
-sigint_handler() {
+function sigint_handler() {
     stop_trace
     echo
     echo "Stopped"

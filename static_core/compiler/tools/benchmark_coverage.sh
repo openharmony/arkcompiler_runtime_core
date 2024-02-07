@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,8 +14,7 @@
 
 set -e
 
-for ARGUMENT in "$@"
-do
+for ARGUMENT in "$@"; do
 case "$ARGUMENT" in
     --binary-dir=*)
     PANDA_BINARY_ROOT="${ARGUMENT#*=}"
@@ -101,13 +100,13 @@ function check_critical_failure() {
     while IFS= read -r line; do
         # Check if methods were specified:
         if (! echo "$line" | grep -q "FUNCS") || (echo "$line" | grep -q "$name"); then
-        # Check architecture ignore compound:
-        if (! echo "$line" | grep -q "ARM64\|ARM32\|X86_64") || (echo "$line" | grep -q "$TARGET_NAME"); then
-        # Check compilation mode compound:
-        if (! echo "$line" | grep -q "OSR\|JIT") || (echo "$line" | grep -q "$PAOC_MODE_NAME"); then
-            return
-        fi
-        fi
+            # Check architecture ignore compound:
+            if (! echo "$line" | grep -q "ARM64\|ARM32\|X86_64") || (echo "$line" | grep -q "$TARGET_NAME"); then
+                # Check compilation mode compound:
+                if (! echo "$line" | grep -q "OSR\|JIT") || (echo "$line" | grep -q "$PAOC_MODE_NAME"); then
+                    return
+                fi
+            fi
         fi
     done <<< "$filtered_ignore_list"
     critical_compiler_failures+=( "$1:$name" )
@@ -131,20 +130,18 @@ function calculate_benchmark_coverage() {
 
     echo "<header><h1>Benchmark coverage statistic</h1></header>" >> $HTML
 
-    for benchmark in $(find $BENCHMARKS/*\.pa -maxdepth 0 -exec basename -s .pa {} \;)
-    do
+    for benchmark in $(find $BENCHMARKS/*\.pa -maxdepth 0 -exec basename -s .pa {} \;); do
         # Сhecking that benchmark has compiled
         if $PANDASM $BENCHMARKS/$benchmark.pa $benchmark.abc
         then
-            local method_names=`grep "^[.]function" $BENCHMARKS/$benchmark.pa \
-                | grep -v "<[^>]*external[^>]*>" | cut -f3 -d' ' | cut -f1 -d'('`
+            local method_names=$(grep "^[.]function" $BENCHMARKS/$benchmark.pa \
+                | grep -v "<[^>]*external[^>]*>" | cut -f3 -d' ' | cut -f1 -d'(')
             local functions=0
             local compiled=0
             local assert=0
             local func_status=()
 
-            for name in $method_names
-            do
+            for name in $method_names; do
                 let "functions+=1"
                 # Get class and method names
                 separate_method_name $name
@@ -152,22 +149,19 @@ function calculate_benchmark_coverage() {
                 rm -f $tmp_file
                 local compiler_status=0
                 $PAOC --paoc-panda-files="$benchmark.abc" --compiler-regex="$class_name::$method_name" \
-                       --compiler-ignore-failures=false --paoc-mode=$PAOC_MODE \
-                       --boot-panda-files="$ARKSTDLIB" --load-runtimes="core" \
-                       --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE \
-                       --compiler-cross-arch=$TARGET_ARCH --log-level=debug --log-components=compiler > $tmp_file 2>&1 || \
-                compiler_status=$?
-                if [ "$compiler_status" -eq 0 ]
-                then
+                        --compiler-ignore-failures=false --paoc-mode=$PAOC_MODE \
+                        --boot-panda-files="$ARKSTDLIB" --load-runtimes="core" \
+                        --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE \
+                        --compiler-cross-arch=$TARGET_ARCH --log-level=debug --log-components=compiler > $tmp_file 2>&1 || \
+                    compiler_status=$?
+                if [ "$compiler_status" -eq 0 ]; then
                     let "compiled+=1"
                     func_status+=( "compiled" )
                 else
-                    if grep -q "RunOptimizations failed!" "$tmp_file"
-                    then
+                    if grep -q "RunOptimizations failed!" "$tmp_file" ; then
                         func_status+=( "optimizations" )
 
-                    elif grep -q "IrBuilder failed!" "$tmp_file"
-                    then
+                    elif grep -q "IrBuilder failed!" "$tmp_file" ; then
                         func_status+=( "ir_builder" )
                     else
                         let "assert+=1"
@@ -195,11 +189,9 @@ function calculate_benchmark_coverage() {
             rm -f $benchmark.abc
 
             # Benchmark status
-            if [ $assert -ne 0 ] || [ $compiled -eq 0 ]
-            then
+            if [ $assert -ne 0 ] || [ $compiled -eq 0 ]; then
                 local background="#FF250D"
-            elif [ $compiled -ne $functions ]
-            then
+            elif [ $compiled -ne $functions ] ; then
                 local background="yellow"
             else
                 local background="lime"
@@ -215,24 +207,19 @@ function calculate_benchmark_coverage() {
             # Names benchmark functions
             echo "<table cellpadding=\"5\"><tr>
                 <th align=\"center\">functions</th>" >> $HTML
-            for name in $method_names
-            do
+            for name in $method_names; do
                 echo "<td align=\"center\">$name</td>" >> $HTML
             done
 
             # Statuses of benchmark functions
             echo "<tr><th align=\"center\">status</th>" >> $HTML
-            for status in "${func_status[@]}"
-            do
+            for status in "${func_status[@]}"; do
                 echo "<td align=\"center\" bgcolor=" >> $HTML
-                if [ "$status" == "compiled" ]
-                then
+                if [ "$status" == "compiled" ]; then
                     echo "\"#d7e7a9\">compiled" >> $HTML
-                elif [ "$status" == "ir_builder" ]
-                then
+                elif [ "$status" == "ir_builder" ]; then
                     echo "\"salmon\">ir_builder" >> $HTML
-                elif [ "$status" == "optimizations" ]
-                then
+                elif [ "$status" == "optimizations" ]; then
                     echo "\"salmon\">optimizations" >> $HTML
                 else
                     echo "\"#F5001D\">assert" >> $HTML
@@ -262,20 +249,17 @@ function calculate_assembly_tests_coverage() {
     echo "<header><h1>CTS-ASSEMBLY TESTS</h1></header>
         <table cellpadding=\"5\">" >> $HTML
 
-    for test in $(ls $SMALL_TESTS | cut -f1 -d'.')
-    do
+    for test in $(ls $SMALL_TESTS | cut -f1 -d'.'); do
         # Сhecking that tests has compiled
-        if $PANDASM $SMALL_TESTS/$test.pa $test.abc
-        then
+        if $PANDASM $SMALL_TESTS/$test.pa $test.abc; then
             local method_names=$(grep "^[.]function" $SMALL_TESTS/$test.pa | grep -v "<[^>]*external[^>]*>\|<[^>]*noimpl[^>]*>" | cut -f3 -d' ' | cut -f1 -d'(')
             local functions=0
             local compiled=0
             local assert=0
 
-            for name in $method_names
-            do
+            for name in $method_names;  do
                 let "functions+=1"
-                
+
                 local is_cctor=1
                 local is_ctor=1
                 grep -q "${name}()\s*<.*cctor.*>" $SMALL_TESTS/$test.pa || local is_cctor=$(($?^1))
@@ -283,11 +267,9 @@ function calculate_assembly_tests_coverage() {
                 # Get class and method names
                 separate_method_name $name
                 local method_name=$method_name
-                if [ "$is_cctor" -eq 1 ]
-                then
+                if [ "$is_cctor" -eq 1 ]; then
                     local method_name=".cctor"
-                elif [ "$is_ctor" -eq 1 ]
-                then
+                elif [ "$is_ctor" -eq 1 ]; then
                     local method_name=".ctor"
                 fi
                 local load_runtimes="core"
@@ -297,21 +279,18 @@ function calculate_assembly_tests_coverage() {
                 rm -f $tmp_file
                 local compiler_status=0
                 $PAOC --paoc-panda-files=$test.abc --compiler-regex="$class_name::$method_name" \
-                                   --compiler-ignore-failures=false --paoc-mode=$PAOC_MODE \
-                                   --boot-panda-files="$boot_panda_files" \
-                                   --load-runtimes="$load_runtimes" \
-                                   --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE \
-                                   --compiler-cross-arch=$TARGET_ARCH --log-level=debug --log-components=compiler > $tmp_file 2>&1 || \
+                                    --compiler-ignore-failures=false --paoc-mode=$PAOC_MODE \
+                                    --boot-panda-files="$boot_panda_files" \
+                                    --load-runtimes="$load_runtimes" \
+                                    --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE \
+                                    --compiler-cross-arch=$TARGET_ARCH --log-level=debug --log-components=compiler > $tmp_file 2>&1 || \
                 compiler_status=$?
-                if [ "$compiler_status" -eq 0 ]
-                then
+                if [ "$compiler_status" -eq 0 ]; then
                     let "compiled+=1"
                 else
-                    if grep -q "RunOptimizations failed!" "$tmp_file"
-                    then
+                    if grep -q "RunOptimizations failed!" "$tmp_file"; then
                         local test_status="optimizations"
-                    elif grep -q "IrBuilder failed!" "$tmp_file"
-                    then
+                    elif grep -q "IrBuilder failed!" "$tmp_file"; then
                         local test_status="ir_builder"
                     else
                         let "assert+=1"
@@ -340,17 +319,14 @@ function calculate_assembly_tests_coverage() {
             rm -f $test.abc
 
             local indent=$(($all_tests % 10))
-            if [ $indent -eq 0 ]
-            then
+            if [ $indent -eq 0 ]; then
                 echo "<tr>" >> $HTML
             fi
 
             # Test status
-            if [ $assert -ne 0 ] || [ $compiled -eq 0 ]
-            then
+            if [ $assert -ne 0 ] || [ $compiled -eq 0 ]; then
                 local background="red"
-            elif [ $compiled -ne $functions ]
-            then
+            elif [ $compiled -ne $functions ]; then
                 local background="yellow"
             else
                 local background="#d7e7a9"
@@ -384,11 +360,9 @@ calculate_assembly_tests_coverage
 
 rm -r "$TEMP_DIR"
 
-if [ ${#critical_compiler_failures[@]} -ne 0 ]
-then
+if [ ${#critical_compiler_failures[@]} -ne 0 ]; then
     echo "The following functions must be compiled:"
-    for failure in ${critical_compiler_failures[@]}
-    do
+    for failure in ${critical_compiler_failures[@]}; do
         echo "    $failure"
     done
     echo "If you are sure that your actions are correct:
@@ -399,8 +373,7 @@ then
 fi
 
 echo "<h3>Assembler failed to build the following benchmarks:</h3>" >> $HTML
-for benchmark in "${not_compiled_benchmarks[@]}"
-do
+for benchmark in "${not_compiled_benchmarks[@]}"; do
     echo "<p>$benchmark</p>" >> $HTML
 done
 

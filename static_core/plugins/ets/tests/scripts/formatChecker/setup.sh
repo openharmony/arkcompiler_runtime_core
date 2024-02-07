@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,7 +24,9 @@ SCRIPT_DIR=$(dirname $SCRIPT)
 # by creating a virtualenv
 
 # Checking Python version
-function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+function version() {
+    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'
+}
 
 MIN_PYTHON_VERSION="3.8.0"
 CURRENT_PYTHON_VERSION=$(python3 -c "import platform; print(platform. python_version())")
@@ -39,7 +41,7 @@ sudo apt install python3-venv -yyy
 
 pushd $SCRIPT_DIR/../formatChecker
 
-python3 -m venv .venv 
+python3 -m venv .venv
 source .venv/bin/activate
 
 python3 -m ensurepip --upgrade

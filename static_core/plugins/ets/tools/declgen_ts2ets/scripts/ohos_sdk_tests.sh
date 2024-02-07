@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,32 +29,32 @@ readonly OHOS_SDK_API_DECL_PATH="${OUT_DIR}/decl"
 readonly EXT_TS="ts"
 readonly EXT_DECL_TS="d.ts"
 
-panic() {
+function panic() {
     local -r msg="${1-}"
     echo "${msg}"
     exit 1
 }
 
-assert_path() {
+function assert_path() {
     local -r path="${1?}"
     if [ ! -f "${path}" ] && [ ! -d "${path}" ]; then
         panic "no path ${path} in the filesystem"
     fi
 }
 
-clear_dir() {
+function clear_dir() {
     local -r dir="${1?}"
     rm -r -f "${dir}"
     mkdir -p "${dir}"
 }
 
-build_tool() {
+function build_tool() {
     cd "${WD}"
     npm i
     npm run compile
 }
 
-declgen_ohos_api() {
+function declgen_ohos_api() {
     local -r ohos_sdk_api="$(realpath "${1?}")"
     local -r out_base="${2?}"
     local -r tmp_ohos_sdk_path="/tmp/ohos_sdk"
@@ -65,32 +65,32 @@ declgen_ohos_api() {
 
     local -r count="$(find "${ohos_sdk_api}" -name "*.${EXT_DECL_TS}" | wc -l)"
 
-    local FNAME
-    local DIRNAME
-    local TMP_FILE
-    local OUT
+    local fname
+    local dir_name
+    local tmp_file
+    local out
     local i=-1
     while read -r FILE; do
         i=$((i + 1))
-        FNAME="$(basename "${FILE}")"
-        FNAME="${FNAME%."${EXT_DECL_TS}"}"
-        DIRNAME="$(dirname "${FILE}")"
-        DIRNAME="${DIRNAME##"${ohos_sdk_api}"}"
+        fname="$(basename "${FILE}")"
+        fname="${fname%."${EXT_DECL_TS}"}"
+        dir_name="$(dirname "${FILE}")"
+        dir_name="${dir_name##"${ohos_sdk_api}"}"
 
-        OUT="${out_base}/${DIRNAME}"
-        mkdir -p "${OUT}"
+        out="${out_base}/${dir_name}"
+        mkdir -p "${out}"
 
-        TMP_FILE="${tmp_ohos_sdk_path}/${FNAME}.${EXT_TS}"
-        cp "${FILE}" "${TMP_FILE}"
+        tmp_file="${tmp_ohos_sdk_path}/${fname}.${EXT_TS}"
+        cp "${FILE}" "${tmp_file}"
 
         echo "[${i}/${count}] processing ${FILE}"
-        if ! FNAME="${TMP_FILE}" OUT_PATH="${OUT}" npm run declgen >/dev/null; then
+        if ! fname="${tmp_file}" OUT_PATH="${out}" npm run declgen >/dev/null; then
             panic "declgen failed for file ${FILE}!"
         fi
     done < <(find "${ohos_sdk_api}" -name "*.${EXT_DECL_TS}")
 }
 
-gen_arktsconfig() {
+function gen_arktsconfig() {
     local -r arktsconfig="${1?}"
     local -r base_url="${2?}"
 
@@ -111,7 +111,7 @@ gen_arktsconfig() {
 EOL
 }
 
-run_es2panda() {
+function run_es2panda() {
     local -r arktsconfig="${1?}"
     local -r input="${2?}"
     local -r output="${3?}"
@@ -126,7 +126,7 @@ run_es2panda() {
     fi
 }
 
-try_get_sdk_from_url() {
+function try_get_sdk_from_url() {
     local -r url="${1?}"
     local -r ohos_sdk_dst="${2?}"
 
@@ -139,7 +139,7 @@ try_get_sdk_from_url() {
     fi
 }
 
-main() {
+function main() {
     local -r arktsconfig_path="${OUT_DIR}/arktsconfig.json"
     local -r main_ts="${WD}/tests/ohos_sdk/main.ets"
     local -r main_abc="${OUT_DIR}/main.abc"

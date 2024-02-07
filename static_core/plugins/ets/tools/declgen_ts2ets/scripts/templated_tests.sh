@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,26 +30,26 @@ readonly EXT_TS="ts"
 readonly EXT_DECL_ETS="d.sts"
 readonly EXT_DECL_TS="d.ts"
 
-panic() {
+function panic() {
     local msg="${1-}"
     echo "${msg}"
     exit 1
 }
 
-assert_path() {
-    local PATH="${1?}"
-    if [ ! -f "${PATH}" ] && [ ! -d "${PATH}" ]; then
-        panic "no path ${PATH} in the filesystem"
+function assert_path() {
+    local path="${1?}"
+    if [ ! -f "${path}" ] && [ ! -d "${path}" ]; then
+        panic "no path ${path} in the filesystem"
     fi
 }
 
-clear_dir() {
+function clear_dir() {
     local dir="${1?}"
     rm -r -f "${dir}"
     mkdir -p "${dir}"
 }
 
-gen_tests() {
+function gen_tests() {
     local jsvalue="JSValue"
 
     declare -A TS2ETS=(
@@ -123,14 +123,14 @@ gen_tests() {
 
 }
 
-build_tool() {
+function build_tool() {
     cd "${WD}"
 
     npm i
     npm run compile
 }
 
-run_tests() {
+function run_tests() {
     assert_path "${TESTS_SRC_DIR}"
 
     for TEST_FILE in "${TESTS_SRC_DIR}"/*"${EXT_TS}"; do
@@ -157,7 +157,7 @@ run_tests() {
     done
 }
 
-main() {
+function main() {
     build_tool
     gen_tests
     run_tests
