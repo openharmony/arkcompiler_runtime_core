@@ -74,9 +74,8 @@ inline std::optional<const std::array<uint8_t, File::VERSION_SIZE>> GetVersionBy
 {
     const auto iter = api_version_map.find(api);
     if (iter == api_version_map.end()) {
-        std::cerr << "There is no corresponding version for api " << static_cast<uint32_t>(api) << std::endl;
-        PrintSupportedApi();
-        return std::nullopt;
+        // if there is no corresponding api version, the default branch is current version.
+        return version;
     }
     return iter->second;
 }
