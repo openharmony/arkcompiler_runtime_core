@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,24 +14,17 @@ limitations under the License.
 ---*/
 
 /*---
-desc: null safety -> Not-null operator
-assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerException. 
+desc: The type of ensure-not-nullish expression is the non-nullish variant of the type of e.
 ---*/
 
-function foo(arg: Object) : int { 
-  return 1; 
-}
-
-function foo(arg: Object|null) : int { 
-  return 2; 
-
-}
-
 function main(): void {
-  let a: Object|null = new Object();
-  let b: Object|null = null;
-
-  assert foo(a) == 2;
-  assert foo(a!) == 1;
-  assert foo(b) == 2;
+  let i: Int|undefined = undefined;
+  try {
+    let ii = i!;
+    assert 0;
+  } catch(npe: NullPointerException) {
+    assert 1;
+  } catch(e) {
+    assert 0;
+  }
 }

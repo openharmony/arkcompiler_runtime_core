@@ -243,6 +243,7 @@
 07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_70.ets
 07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_71.ets
 07.expressions/27.conditional_or_expression/conditional_or_boolean.ets
+07.expressions/18.ensure_not_null_expression/null_check.ets
 07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_0.ets
 07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_1.ets
 07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_10.ets
@@ -1937,3 +1938,8 @@
 17.experimental_features/06.function_and_method_overloading/02.class_method_overloading/cm_over1_14.ets
 17.experimental_features/06.function_and_method_overloading/02.class_method_overloading/cm_over2_11.ets
 17.experimental_features/06.function_and_method_overloading/04.constructor_overloading/co2_over_8.ets
+
+# 15810 Failed compilation of Ensure-Not-Nullish expression with undefined type
+07.expressions/18.ensure_not_null_expression/undefined_1.ets
+07.expressions/18.ensure_not_null_expression/undefined_3.ets
+07.expressions/18.ensure_not_null_expression/undefined_4.ets

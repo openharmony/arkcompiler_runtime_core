@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,13 +15,14 @@ limitations under the License.
 
 /*---
 desc: null safety -> Not-null operator
-assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerException. 
+assert: A compile-time error occurs if e is not a nullable type.
+tags: [negative, compile-only]
 ---*/
 
 function main(): void {
-  let a: Int|null = 5;
-  let b: Int|null = 4;
-  let x: Int = a! + b!;
+  let a: Int = 5;
+  let b: Int = 4;
+  let x = a! + b;
 
   assert x == 9;
 }

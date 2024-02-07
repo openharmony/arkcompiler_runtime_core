@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,15 +14,18 @@ limitations under the License.
 ---*/
 
 /*---
-desc: null safety -> Not-null operator
-assert: A compile-time error occurs if e is not a nullable type.
-tags: [negative, compile-only]
+desc: If the result of the evaluation of e is equal to null or undefined, then NullPointerError is thrown.
 ---*/
 
 function main(): void {
-  let a: Int = 5;
-  let b: Int = 4;
-  let x = a! + b;
-
-  assert x == 9;
+  let i: Int|undefined|null = 5;
+  let ii: Int|undefined|null = null;
+  try {
+    (1 ? ii : i)!;
+    assert 0;
+  } catch(npe: NullPointerException) {
+    assert 1;
+  } catch(e) {
+    assert 0;
+  }
 }

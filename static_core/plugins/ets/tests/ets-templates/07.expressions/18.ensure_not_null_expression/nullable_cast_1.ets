@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,21 +14,18 @@ limitations under the License.
 ---*/
 
 /*---
-desc: null safety -> Not-null operator
-assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerException. 
+desc: nullable Cast T | null -> T with ensure not-null expression. null value
 ---*/
 
 function main(): void {
-  let res = 0;
-  let a: Int|null = null;
-  let b: Int = 4;
+  let a: Int | null = null;
+  let res: int = 0;
 
   try {
-    let x = a! + b;
+    let b: Int = a! as Int;
+    res = 0;
   } catch (e: NullPointerException) {
     res = 1;
-  } catch (e) {
-    res = 0;
   }
 
   assert res == 1;

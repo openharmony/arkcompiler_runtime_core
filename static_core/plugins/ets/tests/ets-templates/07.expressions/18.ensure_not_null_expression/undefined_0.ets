@@ -14,19 +14,10 @@ limitations under the License.
 ---*/
 
 /*---
-desc: nullable Cast T | null -> T with ensure not-null expression. null value
+desc: If the result of the evaluation of e is not equal to null or undefined, then the result of e! is the outcome of the evaluation of e.
 ---*/
 
 function main(): void {
-  let a: Int | null = null;
-  let res: int = 0;
-
-  try {
-    let b: Int = a!;
-    res = 0;
-  } catch (e: NullPointerException) {
-    res = 1;
-  }
-
-  assert res == 1;
+  let a: Int | undefined = 5;
+  assert a! == 5;
 }
