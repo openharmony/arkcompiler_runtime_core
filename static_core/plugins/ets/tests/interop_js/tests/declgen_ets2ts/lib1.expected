@@ -15,7 +15,7 @@
 
 declare const exports: any;
 
-import { Lib2Class, Lib2Class2, DoubleAlias } from ".//lib2";
+import { Lib2Class, Lib2Class2, DoubleAlias } from "./lib2";
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', '_$init$_');
