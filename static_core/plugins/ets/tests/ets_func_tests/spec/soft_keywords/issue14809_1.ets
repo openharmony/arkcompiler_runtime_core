@@ -30,7 +30,6 @@ class Clazz {
 
 function main(): void {
     callRef = 0;
-    let t = new Clazz();
-    t.is(); // Call static method with instance
+    Clazz.is() // Call static method
     assert callRef == 1;
 }

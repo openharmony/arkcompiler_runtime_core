@@ -128,7 +128,7 @@ export class Test {
         }
     }
 
-    static __noinline__test(n: int): void {
+    __noinline__test(n: int): void {
         let i: int;
         let u: double[] = new double[n];
         let v: double[] = new double[n];

@@ -60,7 +60,7 @@ class InterfaceNativeTest {
     class Inner {
     }
 
-    public static run(): void {
+    public run(): void {
         InterfaceNativeTest.callMethod();
         InterfaceNativeTest.testChar(InterfaceNativeTest.C);
 

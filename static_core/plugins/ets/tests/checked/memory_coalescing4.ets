@@ -47,7 +47,7 @@ export class Test {
         }
     }
 
-    static __noinline__test(n: int): void {
+    __noinline__test(n: int): void {
         let i: int;
         let u: int[] = new int[n];
         let a: A = new A();

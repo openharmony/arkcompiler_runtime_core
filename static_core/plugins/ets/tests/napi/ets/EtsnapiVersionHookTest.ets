@@ -20,7 +20,7 @@ class EtsnapiVersionHookTest {
 
     public native static hello(): String;
 
-    public static run(): void throws {
+    public run(): void throws {
         if (!("Hello" == EtsnapiVersionHookTest.hello())) {
             throw new Exception("ERROR: error return value from ETSNAPI");
         }

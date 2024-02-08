@@ -24,7 +24,7 @@ class EtsnapiNameTest {
 
     public native static methodOverloaded(obj: Object | null, str: String, arr: double[]): int;
 
-    public static run(): void throws {
+    public run(): void throws {
         if (EtsnapiNameTest.objectArg(null) != 0) {
             throw new Exception("ERROR: failed to call objectArg");
         }
