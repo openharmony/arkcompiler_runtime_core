@@ -779,3 +779,13 @@ spec/rest-params/Issue14187.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
 ### Issue 15751 end
+
+### Class constructor inheritance
+### Issue 14720
+spec/09.classes/constructor-inheritance/issue14720_0.ets
+spec/09.classes/constructor-inheritance/issue14720_1.ets
+spec/09.classes/constructor-inheritance/issue14720_2.ets
+spec/09.classes/constructor-inheritance/issue14720_4.ets
+spec/09.classes/constructor-inheritance/issue14720_5.ets
+spec/09.classes/constructor-inheritance/issue14720_6.ets
+### Issue 14720 end
