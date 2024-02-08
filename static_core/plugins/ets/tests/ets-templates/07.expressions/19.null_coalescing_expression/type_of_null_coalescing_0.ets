@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,13 +20,9 @@ assert: The type of null-coalescing expression is the least upper bound of the n
 
 class A {}
 
-function foo(p: A): int {
-  return 2;
-}
-
 function main(): void {
   let a : A = new A();
   let b : A = new A();
   let c = a ?? b;
-  assert(foo(c) == 2);
+  assert c instanceof A;
 }

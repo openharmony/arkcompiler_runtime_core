@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,18 +15,13 @@ limitations under the License.
 
 /*---
 desc: null safety -> Null-Coalescing Operator.
-assert: The type of null-coalescing expression is the least upper bound of the non-nullable variant of the type of the left-hand-side expression and the type of the right-hand-side expression.
+tags: [negative, compile-only]
 ---*/
 
-class A {}
-
-function foo(p: Object): int {
-  return 1;
-}
-
 function main(): void {
-  let a : A = new A();
-  let b : Int = 2;
-  let c = a ?? b;
-  assert(foo(c) == 1);
+  let a: int = 0;
+  let b: int = 0;
+  let c: Int = 0;
+  let d: Int = 0;
+  let res = ((a ?? b) ?? (c ?? d));
 }
