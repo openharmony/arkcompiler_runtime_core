@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,98 +25,15 @@ namespace ark::compiler::amd64 {
 const size_t MAX_SCALAR_PARAM_ID = 5;  // %rdi, %rsi, %rdx, %rcx, %r8, %r9
 const size_t MAX_VECTOR_PARAM_ID = 7;  // %xmm0-%xmm7
 
-static inline bool IsConditionSigned(Condition cc)
-{
-    switch (cc) {
-        case Condition::LT:
-        case Condition::LE:
-        case Condition::GT:
-        case Condition::GE:
-            return true;
-
-        default:
-            return false;
-    }
-}
-
-/// Converters
-static inline asmjit::x86::Condition::Code ArchCc(Condition cc, bool isFloat = false)
-{
-    switch (cc) {
-        case Condition::EQ:
-            return asmjit::x86::Condition::Code::kEqual;
-        case Condition::NE:
-            return asmjit::x86::Condition::Code::kNotEqual;
-        case Condition::LT:
-            return isFloat ? asmjit::x86::Condition::Code::kUnsignedLT : asmjit::x86::Condition::Code::kSignedLT;
-        case Condition::GT:
-            return isFloat ? asmjit::x86::Condition::Code::kUnsignedGT : asmjit::x86::Condition::Code::kSignedGT;
-        case Condition::LE:
-            return isFloat ? asmjit::x86::Condition::Code::kUnsignedLE : asmjit::x86::Condition::Code::kSignedLE;
-        case Condition::GE:
-            return isFloat ? asmjit::x86::Condition::Code::kUnsignedGE : asmjit::x86::Condition::Code::kSignedGE;
-        case Condition::LO:
-            return asmjit::x86::Condition::Code::kUnsignedLT;
-        case Condition::LS:
-            return asmjit::x86::Condition::Code::kUnsignedLE;
-        case Condition::HI:
-            return asmjit::x86::Condition::Code::kUnsignedGT;
-        case Condition::HS:
-            return asmjit::x86::Condition::Code::kUnsignedGE;
-        // NOTE(igorban) : Remove them
-        case Condition::MI:
-            return asmjit::x86::Condition::Code::kNegative;
-        case Condition::PL:
-            return asmjit::x86::Condition::Code::kPositive;
-        case Condition::VS:
-            return asmjit::x86::Condition::Code::kOverflow;
-        case Condition::VC:
-            return asmjit::x86::Condition::Code::kNotOverflow;
-        case Condition::AL:
-        case Condition::NV:
-        default:
-            UNREACHABLE();
-            return asmjit::x86::Condition::Code::kEqual;
-    }
-}
-
-static inline asmjit::x86::Condition::Code ArchCcTest(Condition cc)
-{
-    ASSERT(cc == Condition::TST_EQ || cc == Condition::TST_NE);
-    return cc == Condition::TST_EQ ? asmjit::x86::Condition::Code::kEqual : asmjit::x86::Condition::Code::kNotEqual;
-}
-
-static inline bool CcMatchesNan(Condition cc)
-{
-    switch (cc) {
-        case Condition::NE:
-        case Condition::LT:
-        case Condition::LE:
-        case Condition::HI:
-        case Condition::HS:
-            return true;
-
-        default:
-            return false;
-    }
-}
-
 class AsmJitErrorHandler : public asmjit::ErrorHandler {
 public:
-    explicit AsmJitErrorHandler(Encoder *encoder) : encoder_(encoder)
-    {
-        ASSERT(encoder != nullptr);
-    }
-
-    void handleError([[maybe_unused]] asmjit::Error err, [[maybe_unused]] const char *message,
-                     [[maybe_unused]] asmjit::BaseEmitter *origin) override
-    {
-        encoder_->SetFalseResult();
-    }
-
+    explicit AsmJitErrorHandler(Encoder *encoder);
     NO_MOVE_SEMANTIC(AsmJitErrorHandler);
     NO_COPY_SEMANTIC(AsmJitErrorHandler);
     ~AsmJitErrorHandler() override = default;
+
+    void handleError([[maybe_unused]] asmjit::Error err, [[maybe_unused]] const char *message,
+                     [[maybe_unused]] asmjit::BaseEmitter *origin) override;
 
 private:
     Encoder *encoder_ {nullptr};
@@ -193,145 +110,14 @@ private:
     size_t count_ {0};
 };
 
-/// Converters
-static inline asmjit::x86::Gp ArchReg(Reg reg, uint8_t size = 0)
-{
-    ASSERT(reg.IsValid());
-    if (reg.IsScalar()) {
-        size_t regSize = size == 0 ? reg.GetSize() : size;
-        auto archId = ConvertRegNumber(reg.GetId());
-
-        asmjit::x86::Gp archReg;
-        switch (regSize) {
-            case DOUBLE_WORD_SIZE:
-                archReg = asmjit::x86::Gp(asmjit::x86::Gpq::kSignature, archId);
-                break;
-            case WORD_SIZE:
-                archReg = asmjit::x86::Gp(asmjit::x86::Gpd::kSignature, archId);
-                break;
-            case HALF_SIZE:
-                archReg = asmjit::x86::Gp(asmjit::x86::Gpw::kSignature, archId);
-                break;
-            case BYTE_SIZE:
-                archReg = asmjit::x86::Gp(asmjit::x86::GpbLo::kSignature, archId);
-                break;
-
-            default:
-                UNREACHABLE();
-        }
-
-        ASSERT(archReg.isValid());
-        return archReg;
-    }
-    if (reg.GetId() == ConvertRegNumber(asmjit::x86::rsp.id())) {
-        return asmjit::x86::rsp;
-    }
-
-    // Invalid register type
-    UNREACHABLE();
-    return asmjit::x86::rax;
-}
-
-static inline asmjit::x86::Xmm ArchVReg(Reg reg)
-{
-    ASSERT(reg.IsValid() && reg.IsFloat());
-    auto archVreg = asmjit::x86::xmm(reg.GetId());
-    return archVreg;
-}
-
-static inline asmjit::Imm ArchImm(Imm imm)
-{
-    ASSERT(imm.GetType() == INT64_TYPE);
-    return asmjit::imm(imm.GetAsInt());
-}
-
-static inline uint64_t ImmToUnsignedInt(Imm imm)
-{
-    ASSERT(imm.GetType() == INT64_TYPE);
-    return uint64_t(imm.GetAsInt());
-}
-
-static inline bool ImmFitsSize(int64_t imm, uint8_t size)
-{
-    if (size == DOUBLE_WORD_SIZE) {
-        size = WORD_SIZE;
-    }
-
-    // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
-    int64_t max = (uint64_t(1) << (size - 1U)) - 1U;
-    int64_t min = ~uint64_t(max);
-    ASSERT(min < 0);
-    ASSERT(max > 0);
-
-    return imm >= min && imm <= max;
-}
-
 class ArchMem {
 public:
-    explicit ArchMem(MemRef mem)
-    {
-        bool base = mem.HasBase();
-        bool regoffset = mem.HasIndex();
-        bool shift = mem.HasScale();
-        bool offset = mem.HasDisp();
-
-        if (base && !regoffset && !shift) {
-            // Default memory - base + offset
-            mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), mem.GetDisp());
-        } else if (base && regoffset && !offset) {
-            auto baseSize = mem.GetBase().GetSize();
-            auto indexSize = mem.GetIndex().GetSize();
-
-            ASSERT(baseSize >= indexSize);
-            ASSERT(indexSize >= WORD_SIZE);
-
-            if (baseSize > indexSize) {
-                needExtendIndex_ = true;
-            }
-
-            if (mem.GetScale() == 0) {
-                mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize));
-            } else {
-                auto scale = mem.GetScale();
-                if (scale <= 3U) {
-                    mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize), scale);
-                } else {
-                    mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize));
-                    bigShift_ = scale;
-                }
-            }
-        } else {
-            // Wrong memRef
-            UNREACHABLE();
-        }
-    }
-
+    explicit ArchMem(MemRef mem);
     DEFAULT_MOVE_SEMANTIC(ArchMem);
     DEFAULT_COPY_SEMANTIC(ArchMem);
     ~ArchMem() = default;
 
-    asmjit::x86::Mem Prepare(asmjit::x86::Assembler *masm)
-    {
-        if (isPrepared_) {
-            return mem_;
-        }
-
-        if (bigShift_ != 0) {
-            ASSERT(!mem_.hasOffset() && mem_.hasIndex() && bigShift_ > 3U);
-            masm->shl(mem_.indexReg().as<asmjit::x86::Gp>(), asmjit::imm(bigShift_));
-        }
-
-        if (needExtendIndex_) {
-            ASSERT(mem_.hasIndex());
-            auto qIndex = mem_.indexReg().as<asmjit::x86::Gp>();
-            auto dIndex {qIndex};
-            dIndex.setSignature(asmjit::x86::Gpd::kSignature);
-            masm->movsxd(qIndex, dIndex);
-        }
-
-        isPrepared_ = true;
-        return mem_;
-    }
+    asmjit::x86::Mem Prepare(asmjit::x86::Assembler *masm);
 
 private:
     int64_t bigShift_ {0};
@@ -379,169 +165,38 @@ public:
     // Set used regs - change GetCallee
     void SetUsedRegs(const ArenaVector<Reg> &regs) override;
 
-    RegMask GetCallerSavedRegMask() const override
-    {
-        return RegMask(callerSaved_.GetMask());
-    }
-
-    VRegMask GetCallerSavedVRegMask() const override
-    {
-        return VRegMask(callerSavedv_.GetMask());
-    }
-
-    bool IsCalleeRegister(Reg reg) override
-    {
-        bool isFp = reg.IsFloat();
-        return reg.GetId() >= GetFirstCalleeReg(Arch::X86_64, isFp) &&
-               reg.GetId() <= GetLastCalleeReg(Arch::X86_64, isFp);
-    }
-
-    Reg GetZeroReg() const override
-    {
-        return INVALID_REGISTER;  // there is no one
-    }
-
-    bool IsZeroReg([[maybe_unused]] Reg reg) const override
-    {
-        return false;
-    }
-
-    Reg::RegIDType GetTempReg() override
-    {
-        return compiler::arch_info::x86_64::TEMP_REGS.GetMaxRegister();
-    }
-
-    Reg::RegIDType GetTempVReg() override
-    {
-        return compiler::arch_info::x86_64::TEMP_FP_REGS.GetMaxRegister();
-    }
-
-    RegMask GetDefaultRegMask() const override
-    {
-        static constexpr size_t HIGH_MASK {0xFFFF0000};
-
-        RegMask regMask(HIGH_MASK);
-        regMask |= compiler::arch_info::x86_64::TEMP_REGS;
-        regMask.set(ConvertRegNumber(asmjit::x86::rbp.id()));
-        regMask.set(ConvertRegNumber(asmjit::x86::rsp.id()));
-        regMask.set(GetThreadReg(Arch::X86_64));
-        return regMask;
-    }
-
-    VRegMask GetVRegMask() override
-    {
-        static constexpr size_t HIGH_MASK {0xFFFF0000};
-
-        VRegMask vregMask(HIGH_MASK);
-        vregMask |= compiler::arch_info::x86_64::TEMP_FP_REGS;
-        return vregMask;
-    }
+    RegMask GetCallerSavedRegMask() const override;
+    VRegMask GetCallerSavedVRegMask() const override;
+    bool IsCalleeRegister(Reg reg) override;
+    Reg GetZeroReg() const override;
+    bool IsZeroReg([[maybe_unused]] Reg reg) const override;
+    Reg::RegIDType GetTempReg() override;
+    Reg::RegIDType GetTempVReg() override;
+    RegMask GetDefaultRegMask() const override;
+    VRegMask GetVRegMask() override;
 
     // Check register mapping
-    bool SupportMapping(uint32_t type) override
-    {
-        // Current implementation does not support reg-reg mapping
-        if ((type & (RegMapping::VECTOR_VECTOR | RegMapping::FLOAT_FLOAT)) != 0U) {
-            return false;
-        }
-        // Scalar and float registers lay in different registers
-        if ((type & (RegMapping::SCALAR_VECTOR | RegMapping::SCALAR_FLOAT)) != 0U) {
-            return false;
-        }
-        return true;
-    };
-
-    bool IsValid() const override
-    {
-        return true;
-    }
-
+    bool SupportMapping(uint32_t type) override;
+    bool IsValid() const override;
     bool IsRegUsed(ArenaVector<Reg> vecReg, Reg reg) override;
 
 public:
     // Special implementation-specific getters
-    size_t GetCalleeSavedR()
-    {
-        return static_cast<size_t>(calleeSaved_);
-    }
-    size_t GetCalleeSavedV()
-    {
-        return static_cast<size_t>(calleeSavedv_);
-    }
-    size_t GetCallerSavedR()
-    {
-        return static_cast<size_t>(callerSaved_);
-    }
-    size_t GetCallerSavedV()
-    {
-        return static_cast<size_t>(callerSavedv_);
-    }
+    size_t GetCalleeSavedR();
+    size_t GetCalleeSavedV();
+    size_t GetCallerSavedR();
+    size_t GetCallerSavedV();
 
-    Reg AcquireScratchRegister(TypeInfo type)
-    {
-        if (type.IsFloat()) {
-            return Reg(scratchv_.Pop(), type);
-        }
-        return Reg(scratch_.Pop(), type);
-    }
-
-    void AcquireScratchRegister(Reg reg)
-    {
-        if (reg.GetType().IsFloat()) {
-            ASSERT(scratchv_.Has(reg.GetId()));
-            scratchv_.Remove(reg.GetId());
-        } else {
-            ASSERT(scratch_.Has(reg.GetId()));
-            scratch_.Remove(reg.GetId());
-        }
-    }
-
-    void ReleaseScratchRegister(Reg reg)
-    {
-        if (reg.IsFloat()) {
-            scratchv_.Add(reg.GetId());
-        } else {
-            scratch_.Add(reg.GetId());
-        }
-    }
-
-    bool IsScratchRegisterReleased(Reg reg)
-    {
-        if (reg.GetType().IsFloat()) {
-            return scratchv_.Has(reg.GetId());
-        }
-        return scratch_.Has(reg.GetId());
-    }
-
-    RegList GetScratchRegisters() const
-    {
-        return scratch_;
-    }
-
-    RegList GetScratchFPRegisters() const
-    {
-        return scratchv_;
-    }
-
-    size_t GetScratchRegistersCount() const
-    {
-        return scratch_.GetCount();
-    }
-
-    size_t GetScratchFPRegistersCount() const
-    {
-        return scratchv_.GetCount();
-    }
-
-    RegMask GetScratchRegistersMask() const
-    {
-        return RegMask(scratch_.GetMask());
-    }
-
-    RegMask GetScratchFpRegistersMask() const
-    {
-        return RegMask(scratchv_.GetMask());
-    }
+    Reg AcquireScratchRegister(TypeInfo type);
+    void AcquireScratchRegister(Reg reg);
+    void ReleaseScratchRegister(Reg reg);
+    bool IsScratchRegisterReleased(Reg reg);
+    RegList GetScratchRegisters() const;
+    RegList GetScratchFPRegisters() const;
+    size_t GetScratchRegistersCount() const;
+    size_t GetScratchFPRegistersCount() const;
+    RegMask GetScratchRegistersMask() const;
+    RegMask GetScratchFpRegistersMask() const;
 
 private:
     ArenaVector<Reg> usedRegs_;
@@ -568,26 +223,10 @@ public:
     ~Amd64LabelHolder() override = default;
 
     LabelId CreateLabel() override;
-
-    void CreateLabels(LabelId max) override
-    {
-        for (LabelId i = 0; i < max; ++i) {
-            CreateLabel();
-        }
-    };
-
+    void CreateLabels(LabelId max) override;
     void BindLabel(LabelId id) override;
-
-    LabelType *GetLabel(LabelId id)
-    {
-        ASSERT(labels_.size() > id);
-        return labels_[id];
-    }
-
-    LabelId Size() override
-    {
-        return labels_.size();
-    };
+    LabelType *GetLabel(LabelId id);
+    LabelId Size() override;
 
 private:
     ArenaVector<LabelType *> labels_;
@@ -599,41 +238,27 @@ class Amd64Encoder final : public Encoder {
 public:
     using Encoder::Encoder;
     explicit Amd64Encoder(ArenaAllocator *allocator);
-
-    LabelHolder *GetLabels() const override
-    {
-        ASSERT(labels_ != nullptr);
-        return labels_;
-    };
-
     ~Amd64Encoder() override;
-
     NO_COPY_SEMANTIC(Amd64Encoder);
     NO_MOVE_SEMANTIC(Amd64Encoder);
 
-    bool IsValid() const override
-    {
-        return true;
-    }
-
-    static constexpr auto GetTarget()
-    {
-        return ark::compiler::Target(Arch::X86_64);
-    }
+    LabelHolder *GetLabels() const override;
+    bool IsValid() const override;
+    static constexpr auto GetTarget();
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UnaryOperation(opc) void Encode##opc(Reg dst, Reg src0) override;
+#define UNARY_OPERATION(opc) void Encode##opc(Reg dst, Reg src0) override;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryOperation(opc)                                \
+#define BINARY_OPERATION(opc)                               \
     void Encode##opc(Reg dst, Reg src0, Reg src1) override; \
     void Encode##opc(Reg dst, Reg src0, Imm src1) override;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(OPCODE, TYPE) TYPE(OPCODE)
+#define INST_DEF(OPCODE, MACRO) MACRO(OPCODE)
 
     ENCODE_MATH_LIST(INST_DEF)
 
-#undef UnaryOperation
-#undef BinaryOperation
+#undef UNARY_OPERATION
+#undef BINARY_OPERATION
 #undef INST_DEF
 
     void EncodeNop() override;
@@ -671,17 +296,15 @@ public:
     void EncodeMemCopyz(MemRef memFrom, MemRef memTo, size_t size) override;
 
     void EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc) override;
-
     void EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
 
-    void EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc) override;
-    void EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc) override;
-    void EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc) override;
-    void EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc) override;
+    void EncodeSelect(ArgsSelect &&args) override;
+    void EncodeSelect(ArgsSelectImm &&args) override;
+    void EncodeSelectTest(ArgsSelect &&args) override;
+    void EncodeSelectTest(ArgsSelectImm &&args) override;
 
     void EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem) override;
-
     void EncodeStp(Reg src0, Reg src1, MemRef mem) override;
 
     /* builtins-related encoders */
@@ -707,97 +330,32 @@ public:
     bool CanEncodeScale(uint64_t imm, uint32_t size) override;
     bool CanEncodeBitCount() override;
 
-    void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval) override
-    {
-        EncodeCompareAndSwap(dst, obj, &offset, val, newval);
-    }
-
-    void EncodeCompareAndSwap(Reg dst, Reg addr, Reg val, Reg newval) override
-    {
-        EncodeCompareAndSwap(dst, addr, nullptr, val, newval);
-    }
-
+    void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval) override;
+    void EncodeCompareAndSwap(Reg dst, Reg addr, Reg val, Reg newval) override;
     void EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val) override;
     void EncodeUnsafeGetAndAdd(Reg dst, Reg obj, Reg offset, Reg val, Reg tmp) override;
     void EncodeMemoryBarrier(memory_order::Order order) override;
-
     void EncodeStackOverflowCheck(ssize_t offset) override;
 
-    size_t GetCursorOffset() const override
-    {
-        // NOLINTNEXTLINE(readability-identifier-naming)
-        return GetMasm()->offset();
-    }
+    size_t GetCursorOffset() const override;
+    void SetCursorOffset(size_t offset) override;
 
-    void SetCursorOffset(size_t offset) override
-    {
-        // NOLINTNEXTLINE(readability-identifier-naming)
-        GetMasm()->setOffset(offset);
-    }
-
-    Reg AcquireScratchRegister(TypeInfo type) override
-    {
-        return (static_cast<Amd64RegisterDescription *>(GetRegfile()))->AcquireScratchRegister(type);
-    }
-
-    void AcquireScratchRegister(Reg reg) override
-    {
-        (static_cast<Amd64RegisterDescription *>(GetRegfile()))->AcquireScratchRegister(reg);
-    }
-
-    void ReleaseScratchRegister(Reg reg) override
-    {
-        (static_cast<Amd64RegisterDescription *>(GetRegfile()))->ReleaseScratchRegister(reg);
-    }
-
-    bool IsScratchRegisterReleased(Reg reg) override
-    {
-        return (static_cast<Amd64RegisterDescription *>(GetRegfile()))->IsScratchRegisterReleased(reg);
-    }
-
-    RegMask GetScratchRegistersMask() const override
-    {
-        return (static_cast<const Amd64RegisterDescription *>(GetRegfile()))->GetScratchRegistersMask();
-    }
-
-    RegMask GetScratchFpRegistersMask() const override
-    {
-        return (static_cast<const Amd64RegisterDescription *>(GetRegfile()))->GetScratchFpRegistersMask();
-    }
-
-    RegMask GetAvailableScratchRegisters() const override
-    {
-        auto regfile = static_cast<const Amd64RegisterDescription *>(GetRegfile());
-        return RegMask(regfile->GetScratchRegisters().GetMask());
-    }
-
-    VRegMask GetAvailableScratchFpRegisters() const override
-    {
-        auto regfile = static_cast<const Amd64RegisterDescription *>(GetRegfile());
-        return VRegMask(regfile->GetScratchFPRegisters().GetMask());
-    }
-
-    TypeInfo GetRefType() override
-    {
-        return INT64_TYPE;
-    };
+    Reg AcquireScratchRegister(TypeInfo type) override;
+    void AcquireScratchRegister(Reg reg) override;
+    void ReleaseScratchRegister(Reg reg) override;
+    bool IsScratchRegisterReleased(Reg reg) override;
+    RegMask GetScratchRegistersMask() const override;
+    RegMask GetScratchFpRegistersMask() const override;
+    RegMask GetAvailableScratchRegisters() const override;
+    VRegMask GetAvailableScratchFpRegisters() const override;
+    TypeInfo GetRefType() override;
 
     size_t DisasmInstr(std::ostream &stream, size_t pc, ssize_t codeOffset) const override;
 
-    void *BufferData() const override
-    {
-        // NOLINTNEXTLINE(readability-identifier-naming)
-        return GetMasm()->bufferData();
-    };
-
-    size_t BufferSize() const override
-    {
-        // NOLINTNEXTLINE(readability-identifier-naming)
-        return GetMasm()->offset();
-    };
+    void *BufferData() const override;
+    size_t BufferSize() const override;
 
     bool InitMasm() override;
-
     void Finalize() override;
 
     void MakeCall(compiler::RelocationInfo *relocation) override;
@@ -805,7 +363,6 @@ public:
     void MakeCall(const void *entryPoint) override;
     void MakeCall(Reg reg) override;
     void MakeCall(MemRef entryPoint) override;
-
     void MakeCallAot(intptr_t offset) override;
     void MakeCallByOffset(intptr_t offset) override;
     void MakeLoadAotTable(intptr_t offset, Reg reg) override;
@@ -834,58 +391,25 @@ public:
     void EncodeJump(Reg dst) override;
 
     void EncodeJump(RelocationInfo *relocation) override;
-
     void EncodeBitTestAndBranch(LabelHolder::LabelId id, compiler::Reg reg, uint32_t bitPos, bool bitValue) override;
-
     void EncodeAbort() override;
-
     void EncodeReturn() override;
 
     void MakeLibCall(Reg dst, Reg src0, Reg src1, void *entryPoint);
 
-    void SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override
-    {
-        LoadStoreRegisters<true>(registers, slot, startReg, isFp);
-    }
-    void LoadRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override
-    {
-        LoadStoreRegisters<false>(registers, slot, startReg, isFp);
-    }
-    void SaveRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override
-    {
-        LoadStoreRegisters<true>(registers, isFp, slot, base, mask);
-    }
-    void LoadRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override
-    {
-        LoadStoreRegisters<false>(registers, isFp, slot, base, mask);
-    }
-
+    void SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override;
+    void LoadRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp) override;
+    void SaveRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override;
+    void LoadRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask) override;
     void PushRegisters(RegMask registers, bool isFp) override;
     void PopRegisters(RegMask registers, bool isFp) override;
 
     template <typename Func>
     void EncodeRelativePcMov(Reg reg, intptr_t offset, Func encodeInstruction);
 
-    asmjit::x86::Assembler *GetMasm() const
-    {
-        ASSERT(masm_ != nullptr);
-        return masm_;
-    }
-
-    size_t GetLabelAddress(LabelHolder::LabelId label) override
-    {
-        auto code = GetMasm()->code();
-        ASSERT(code->isLabelBound(label));
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return code->baseAddress() + code->labelOffset(label);
-    }
-
-    bool LabelHasLinks(LabelHolder::LabelId label) override
-    {
-        auto code = GetMasm()->code();
-        auto entry = code->labelEntry(label);
-        return entry->links() != nullptr;
-    }
+    asmjit::x86::Assembler *GetMasm() const;
+    size_t GetLabelAddress(LabelHolder::LabelId label) override;
+    bool LabelHasLinks(LabelHolder::LabelId label) override;
 
 private:
     template <bool IS_STORE>
@@ -948,26 +472,13 @@ public:
     NO_COPY_SEMANTIC(Amd64CallingConvention);
     ~Amd64CallingConvention() override = default;
 
-    static constexpr auto GetTarget()
-    {
-        return ark::compiler::Target(Arch::X86_64);
-    }
-
-    bool IsValid() const override
-    {
-        return true;
-    }
+    static constexpr auto GetTarget();
+    bool IsValid() const override;
 
     void GeneratePrologue(const FrameInfo &frameInfo) override;
     void GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
-    void GenerateNativePrologue(const FrameInfo &frameInfo) override
-    {
-        GeneratePrologue(frameInfo);
-    }
-    void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override
-    {
-        GenerateEpilogue(frameInfo, postJob);
-    }
+    void GenerateNativePrologue(const FrameInfo &frameInfo) override;
+    void GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob) override;
 
     void *GetCodeEntry() override;
     uint32_t GetCodeSize() override;
@@ -979,13 +490,7 @@ public:
 
     // Calculating information about parameters and save regs_offset registers for special needs
     ParameterInfo *GetParameterInfo(uint8_t regsOffset) override;
-
-    asmjit::x86::Assembler *GetMasm()
-    {
-        return (static_cast<Amd64Encoder *>(GetEncoder()))->GetMasm();
-    }
-
-private:
+    asmjit::x86::Assembler *GetMasm();
 };  // Amd64CallingConvention
 }  // namespace ark::compiler::amd64
 

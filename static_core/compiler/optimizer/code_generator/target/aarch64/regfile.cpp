@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,6 +119,106 @@ void Aarch64RegisterDescription::SetUsedRegs(const ArenaVector<Reg> &regs)
             allignmentVregCaller_ = i;
         }
     }
+}
+
+RegMask Aarch64RegisterDescription::GetCallerSavedRegMask() const
+{
+    return RegMask(callerSaved_.GetList());
+}
+
+VRegMask Aarch64RegisterDescription::GetCallerSavedVRegMask() const
+{
+    return VRegMask(callerSavedv_.GetList());
+}
+
+bool Aarch64RegisterDescription::IsCalleeRegister(Reg reg)
+{
+    bool isFp = reg.IsFloat();
+    return reg.GetId() >= GetFirstCalleeReg(Arch::AARCH64, isFp) &&
+           reg.GetId() <= GetLastCalleeReg(Arch::AARCH64, isFp);
+}
+
+Reg Aarch64RegisterDescription::GetZeroReg() const
+{
+    return Target(Arch::AARCH64).GetZeroReg();
+}
+
+bool Aarch64RegisterDescription::IsZeroReg(Reg reg) const
+{
+    return reg.IsValid() && reg.IsScalar() && reg.GetId() == GetZeroReg().GetId();
+}
+
+Reg::RegIDType Aarch64RegisterDescription::GetTempReg()
+{
+    return compiler::arch_info::arm64::TEMP_REGS.GetMaxRegister();
+}
+
+Reg::RegIDType Aarch64RegisterDescription::GetTempVReg()
+{
+    return compiler::arch_info::arm64::TEMP_FP_REGS.GetMaxRegister();
+}
+
+RegMask Aarch64RegisterDescription::GetDefaultRegMask() const
+{
+    RegMask regMask = compiler::arch_info::arm64::TEMP_REGS;
+    regMask.set(Target(Arch::AARCH64).GetZeroReg().GetId());
+    regMask.set(GetThreadReg(Arch::AARCH64));
+    regMask.set(vixl::aarch64::x29.GetCode());
+    regMask.set(vixl::aarch64::lr.GetCode());
+    return regMask;
+}
+
+VRegMask Aarch64RegisterDescription::GetVRegMask()
+{
+    return compiler::arch_info::arm64::TEMP_FP_REGS;
+}
+
+// Check register mapping
+bool Aarch64RegisterDescription::SupportMapping(uint32_t type)
+{
+    // Current implementation does not support reg-reg mapping
+    if ((type & (RegMapping::VECTOR_VECTOR | RegMapping::FLOAT_FLOAT)) != 0U) {
+        return false;
+    }
+    // Scalar and float registers lay in different registers
+    if ((type & (RegMapping::SCALAR_VECTOR | RegMapping::SCALAR_FLOAT)) != 0U) {
+        return false;
+    }
+    return true;
+}
+
+bool Aarch64RegisterDescription::IsValid() const
+{
+    return true;
+}
+
+vixl::aarch64::CPURegList Aarch64RegisterDescription::GetCalleeSavedR()
+{
+    return calleeSaved_;
+}
+
+vixl::aarch64::CPURegList Aarch64RegisterDescription::GetCalleeSavedV()
+{
+    return calleeSavedv_;
+}
+
+vixl::aarch64::CPURegList Aarch64RegisterDescription::GetCallerSavedR()
+{
+    return callerSaved_;
+}
+
+vixl::aarch64::CPURegList Aarch64RegisterDescription::GetCallerSavedV()
+{
+    return callerSavedv_;
+}
+
+uint8_t Aarch64RegisterDescription::GetAlignmentVreg(bool isCallee)
+{
+    auto allignmentVreg = isCallee ? allignmentVregCallee_ : allignmentVregCaller_;
+    // !NOTE Ishin Pavel fix if allignment_vreg == UNDEF_VREG
+    ASSERT(allignmentVreg != UNDEF_VREG);
+
+    return allignmentVreg;
 }
 
 }  // namespace ark::compiler::aarch64

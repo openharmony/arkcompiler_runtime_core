@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,11 @@
 Encoder (implementation of math and mem Low-level emitters)
 */
 
+#include <aarch64/macro-assembler-aarch64.h>
+#include <cstddef>
 #include "compiler/optimizer/code_generator/target/aarch64/target.h"
 #include "compiler/optimizer/code_generator/encode.h"
+#include "scoped_tmp_reg.h"
 #include "compiler/optimizer/code_generator/relocations.h"
 
 #if defined(USE_VIXL_ARM64) && !defined(PANDA_MINIMAL_VIXL)
@@ -36,7 +39,139 @@ namespace ark::compiler::aarch64 {
 using vixl::aarch64::CPURegister;
 using vixl::aarch64::MemOperand;
 
-static inline Reg Promote(Reg reg)
+/// Converters
+static vixl::aarch64::Condition Convert(const Condition cc)
+{
+    switch (cc) {
+        case Condition::EQ:
+            return vixl::aarch64::Condition::eq;
+        case Condition::NE:
+            return vixl::aarch64::Condition::ne;
+        case Condition::LT:
+            return vixl::aarch64::Condition::lt;
+        case Condition::GT:
+            return vixl::aarch64::Condition::gt;
+        case Condition::LE:
+            return vixl::aarch64::Condition::le;
+        case Condition::GE:
+            return vixl::aarch64::Condition::ge;
+        case Condition::LO:
+            return vixl::aarch64::Condition::lo;
+        case Condition::LS:
+            return vixl::aarch64::Condition::ls;
+        case Condition::HI:
+            return vixl::aarch64::Condition::hi;
+        case Condition::HS:
+            return vixl::aarch64::Condition::hs;
+        // NOTE(igorban) : Remove them
+        case Condition::MI:
+            return vixl::aarch64::Condition::mi;
+        case Condition::PL:
+            return vixl::aarch64::Condition::pl;
+        case Condition::VS:
+            return vixl::aarch64::Condition::vs;
+        case Condition::VC:
+            return vixl::aarch64::Condition::vc;
+        case Condition::AL:
+            return vixl::aarch64::Condition::al;
+        case Condition::NV:
+            return vixl::aarch64::Condition::nv;
+        default:
+            UNREACHABLE();
+            return vixl::aarch64::Condition::eq;
+    }
+}
+
+static vixl::aarch64::Condition ConvertTest(const Condition cc)
+{
+    ASSERT(cc == Condition::TST_EQ || cc == Condition::TST_NE);
+    return cc == Condition::TST_EQ ? vixl::aarch64::Condition::eq : vixl::aarch64::Condition::ne;
+}
+
+static vixl::aarch64::Shift Convert(const ShiftType type)
+{
+    switch (type) {
+        case ShiftType::LSL:
+            return vixl::aarch64::Shift::LSL;
+        case ShiftType::LSR:
+            return vixl::aarch64::Shift::LSR;
+        case ShiftType::ASR:
+            return vixl::aarch64::Shift::ASR;
+        case ShiftType::ROR:
+            return vixl::aarch64::Shift::ROR;
+        default:
+            UNREACHABLE();
+    }
+}
+
+static vixl::aarch64::VRegister VixlVReg(Reg reg)
+{
+    ASSERT(reg.IsValid());
+    auto vixlVreg = vixl::aarch64::VRegister(reg.GetId(), reg.GetSize());
+    ASSERT(vixlVreg.IsValid());
+    return vixlVreg;
+}
+
+static vixl::aarch64::Operand VixlShift(Shift shift)
+{
+    Reg reg = shift.GetBase();
+    ASSERT(reg.IsValid());
+    if (reg.IsScalar()) {
+        ASSERT(reg.IsScalar());
+        size_t regSize = reg.GetSize();
+        if (regSize < WORD_SIZE) {
+            regSize = WORD_SIZE;
+        }
+        auto vixlReg = vixl::aarch64::Register(reg.GetId(), regSize);
+        ASSERT(vixlReg.IsValid());
+
+        return vixl::aarch64::Operand(vixlReg, Convert(shift.GetType()), shift.GetScale());
+    }
+
+    // Invalid register type
+    UNREACHABLE();
+}
+
+static vixl::aarch64::MemOperand ConvertMem(MemRef mem)
+{
+    bool base = mem.HasBase() && (mem.GetBase().GetId() != vixl::aarch64::xzr.GetCode());
+    bool hasIndex = mem.HasIndex();
+    bool shift = mem.HasScale();
+    bool offset = mem.HasDisp();
+    auto baseReg = Reg(mem.GetBase().GetId(), INT64_TYPE);
+    if (base && !hasIndex && !shift) {
+        // Memory address = x_reg(base) + imm(offset)
+        if (mem.GetDisp() != 0) {
+            auto disp = mem.GetDisp();
+            return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlImm(disp));
+        }
+        // Memory address = x_reg(base)
+        return vixl::aarch64::MemOperand(VixlReg(mem.GetBase(), DOUBLE_WORD_SIZE));
+    }
+    if (base && hasIndex && !offset) {
+        auto scale = mem.GetScale();
+        auto indexReg = mem.GetIndex();
+        // Memory address = x_reg(base) + (SXTW(w_reg(index)) << scale)
+        if (indexReg.GetSize() == WORD_SIZE) {
+            // Sign-extend and shift w-register in offset-position (signed because index always has signed type)
+            return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlReg(indexReg), vixl::aarch64::Extend::SXTW, scale);
+        }
+        // Memory address = x_reg(base) + (x_reg(index) << scale)
+        if (scale != 0) {
+            ASSERT(indexReg.GetSize() == DOUBLE_WORD_SIZE);
+            return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlReg(indexReg), vixl::aarch64::LSL, scale);
+        }
+        // Memory address = x_reg(base) + x_reg(index)
+        return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlReg(indexReg));
+    }
+    // Wrong memRef
+    // Return invalid memory operand
+    auto tmp = vixl::aarch64::MemOperand();
+    ASSERT(!tmp.IsValid());
+    return tmp;
+}
+
+static Reg Promote(Reg reg)
 {
     if (reg.GetType() == INT8_TYPE) {
         return Reg(reg.GetId(), INT16_TYPE);
@@ -44,9 +179,37 @@ static inline Reg Promote(Reg reg)
     return reg;
 }
 
+Aarch64LabelHolder::LabelId Aarch64LabelHolder::CreateLabel()
+{
+    ++id_;
+    auto allocator = GetEncoder()->GetAllocator();
+    auto *label = allocator->New<LabelType>(allocator);
+    labels_.push_back(label);
+    ASSERT(labels_.size() == id_);
+    return id_ - 1;
+}
+
+void Aarch64LabelHolder::CreateLabels(LabelId size)
+{
+    for (LabelId i = 0; i <= size; ++i) {
+        CreateLabel();
+    }
+}
+
 void Aarch64LabelHolder::BindLabel(LabelId id)
 {
     static_cast<Aarch64Encoder *>(GetEncoder())->GetMasm()->Bind(labels_[id]);
+}
+
+Aarch64LabelHolder::LabelType *Aarch64LabelHolder::GetLabel(LabelId id) const
+{
+    ASSERT(labels_.size() > id);
+    return labels_[id];
+}
+
+Aarch64LabelHolder::LabelId Aarch64LabelHolder::Size()
+{
+    return labels_.size();
 }
 
 Aarch64Encoder::Aarch64Encoder(ArenaAllocator *allocator) : Encoder(allocator, Arch::AARCH64)
@@ -69,6 +232,27 @@ Aarch64Encoder::~Aarch64Encoder()
         masm_->~MacroAssembler();
         masm_ = nullptr;
     }
+}
+
+LabelHolder *Aarch64Encoder::GetLabels() const
+{
+    ASSERT(labels_ != nullptr);
+    return labels_;
+}
+
+bool Aarch64Encoder::IsValid() const
+{
+    return true;
+}
+
+constexpr auto Aarch64Encoder::GetTarget()
+{
+    return ark::compiler::Target(Arch::AARCH64);
+}
+
+void Aarch64Encoder::SetMaxAllocatedBytes(size_t size)
+{
+    GetMasm()->GetBuffer()->SetMmapMaxBytes(size);
 }
 
 bool Aarch64Encoder::InitMasm()
@@ -793,6 +977,61 @@ void Aarch64Encoder::EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg srcAddr,
     GetMasm()->St1(vixlVreg1, dst);
 }
 
+bool Aarch64Encoder::CanEncodeBitCount()
+{
+    return true;
+}
+
+bool Aarch64Encoder::CanEncodeCompressedStringCharAt()
+{
+    return true;
+}
+
+bool Aarch64Encoder::CanEncodeCompressedStringCharAtI()
+{
+    return true;
+}
+
+bool Aarch64Encoder::CanEncodeMAdd()
+{
+    return true;
+}
+
+bool Aarch64Encoder::CanEncodeMSub()
+{
+    return true;
+}
+
+bool Aarch64Encoder::CanEncodeMNeg()
+{
+    return true;
+}
+
+bool Aarch64Encoder::CanEncodeOrNot()
+{
+    return true;
+}
+
+bool Aarch64Encoder::CanEncodeAndNot()
+{
+    return true;
+}
+
+bool Aarch64Encoder::CanEncodeXorNot()
+{
+    return true;
+}
+
+size_t Aarch64Encoder::GetCursorOffset() const
+{
+    return GetMasm()->GetBuffer()->GetCursorOffset();
+}
+
+void Aarch64Encoder::SetCursorOffset(size_t offset)
+{
+    GetMasm()->GetBuffer()->Rewind(offset);
+}
+
 /* return the power of 2 for the size of the type */
 void Aarch64Encoder::EncodeGetTypeSize(Reg size, Reg type)
 {
@@ -831,9 +1070,9 @@ void Aarch64Encoder::EncodeReverseBits(Reg dst, Reg src)
     GetMasm()->Rbit(VixlReg(dst), VixlReg(src));
 }
 
-void Aarch64Encoder::EncodeCompressedStringCharAt(Reg dst, Reg str, Reg idx, Reg length, Reg tmp, size_t dataOffset,
-                                                  uint32_t shift)
+void Aarch64Encoder::EncodeCompressedStringCharAt(ArgsCompressedStringCharAt &&args)
 {
+    auto [dst, str, idx, length, tmp, dataOffset, shift] = args;
     ASSERT(dst.GetSize() == HALF_SIZE);
 
     auto labelNotCompressed = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
@@ -851,9 +1090,9 @@ void Aarch64Encoder::EncodeCompressedStringCharAt(Reg dst, Reg str, Reg idx, Reg
     GetMasm()->Bind(labelCharLoaded);
 }
 
-void Aarch64Encoder::EncodeCompressedStringCharAtI(Reg dst, Reg str, Reg length, size_t dataOffset, uint32_t index,
-                                                   uint32_t shift)
+void Aarch64Encoder::EncodeCompressedStringCharAtI(ArgsCompressedStringCharAtI &&args)
 {
+    auto [dst, str, length, dataOffset, index, shift] = args;
     ASSERT(dst.GetSize() == HALF_SIZE);
 
     auto labelNotCompressed = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
@@ -1681,7 +1920,6 @@ void Aarch64Encoder::EncodeMov(Reg dst, Imm src)
 void Aarch64Encoder::EncodeLdr(Reg dst, bool dstSigned, MemRef mem)
 {
     auto rzero = GetRegfile()->GetZeroReg().GetId();
-
     if (!ConvertMem(mem).IsValid() || (dst.GetId() == rzero && dst.IsScalar())) {
         // Try move zero reg to dst (for do not create temp-reg)
         // Check: dst not vector, dst not index, dst not rzero
@@ -2206,8 +2444,9 @@ void Aarch64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
     GetMasm()->Cneg(VixlReg(Promote(dst)), VixlReg(Promote(dst)), Convert(cc));
 }
 
-void Aarch64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc)
+void Aarch64Encoder::EncodeSelect(ArgsSelect &&args)
 {
+    auto [dst, src0, src1, src2, src3, cc] = args;
     if (src2.IsScalar()) {
         GetMasm()->Cmp(VixlReg(src2), VixlReg(src3));
     } else {
@@ -2220,8 +2459,9 @@ void Aarch64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Reg src
     }
 }
 
-void Aarch64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc)
+void Aarch64Encoder::EncodeSelect(ArgsSelectImm &&args)
 {
+    auto [dst, src0, src1, src2, imm, cc] = args;
     if (src2.IsScalar()) {
         GetMasm()->Cmp(VixlReg(src2), VixlImm(imm));
     } else {
@@ -2234,8 +2474,9 @@ void Aarch64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm
     }
 }
 
-void Aarch64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc)
+void Aarch64Encoder::EncodeSelectTest(ArgsSelect &&args)
 {
+    auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src2.IsFloat() && !src3.IsFloat());
     GetMasm()->Tst(VixlReg(src2), VixlReg(src3));
     if (dst.IsFloat()) {
@@ -2245,8 +2486,9 @@ void Aarch64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg
     }
 }
 
-void Aarch64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc)
+void Aarch64Encoder::EncodeSelectTest(ArgsSelectImm &&args)
 {
+    auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src2.IsFloat());
     ASSERT(CanEncodeImmLogical(imm.GetAsInt(), src2.GetSize() > WORD_SIZE ? DOUBLE_WORD_SIZE : WORD_SIZE));
     GetMasm()->Tst(VixlReg(src2), VixlImm(imm));
@@ -2556,6 +2798,41 @@ bool Aarch64Encoder::IsScratchRegisterReleased(Reg reg)
     return GetMasm()->GetScratchRegisterList()->IncludesAliasOf(VixlReg(reg));
 }
 
+RegMask Aarch64Encoder::GetScratchRegistersMask() const
+{
+    return RegMask(GetMasm()->GetScratchRegisterList()->GetList());
+}
+
+RegMask Aarch64Encoder::GetScratchFpRegistersMask() const
+{
+    return RegMask(GetMasm()->GetScratchVRegisterList()->GetList());
+}
+
+RegMask Aarch64Encoder::GetAvailableScratchRegisters() const
+{
+    return RegMask(GetMasm()->GetScratchRegisterList()->GetList());
+}
+
+VRegMask Aarch64Encoder::GetAvailableScratchFpRegisters() const
+{
+    return VRegMask(GetMasm()->GetScratchVRegisterList()->GetList());
+}
+
+TypeInfo Aarch64Encoder::GetRefType()
+{
+    return INT64_TYPE;
+}
+
+void *Aarch64Encoder::BufferData() const
+{
+    return GetMasm()->GetBuffer()->GetStartAddress<void *>();
+}
+
+size_t Aarch64Encoder::BufferSize() const
+{
+    return GetMasm()->GetBuffer()->GetSizeInBytes();
+}
+
 void Aarch64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, const void *entryPoint)
 {
     if (!dst.IsFloat()) {
@@ -2638,9 +2915,32 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
 }
 
 template <bool IS_STORE>
-void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask)
+static void LoadStorePair(vixl::aarch64::MacroAssembler *masm, CPURegister lastReg, CPURegister reg, Reg base,
+                          int32_t idx)
 {
     auto baseReg = VixlReg(base);
+    static constexpr int32_t OFFSET = 2;
+    if constexpr (IS_STORE) {  // NOLINT
+        masm->Stp(lastReg, reg, MemOperand(baseReg, (idx - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
+    } else {  // NOLINT
+        masm->Ldp(lastReg, reg, MemOperand(baseReg, (idx - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
+    }
+}
+
+template <bool IS_STORE>
+static void LoadStoreReg(vixl::aarch64::MacroAssembler *masm, CPURegister lastReg, Reg base, int32_t idx)
+{
+    auto baseReg = VixlReg(base);
+    if constexpr (IS_STORE) {  // NOLINT
+        masm->Str(lastReg, MemOperand(baseReg, (idx - 1) * DOUBLE_WORD_SIZE_BYTES));
+    } else {  // NOLINT
+        masm->Ldr(lastReg, MemOperand(baseReg, (idx - 1) * DOUBLE_WORD_SIZE_BYTES));
+    }
+}
+
+template <bool IS_STORE>
+void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask)
+{
     bool hasMask = mask.any();
     int32_t index = hasMask ? static_cast<int32_t>(mask.GetMinRegister()) : 0;
     int32_t lastIndex = -1;
@@ -2666,23 +2966,15 @@ void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool isFp, in
             continue;
         }
 
-        auto reg = CPURegister(id, vixl::aarch64::kXRegSize, isFp ? CPURegister::kVRegister : CPURegister::kRegister);
         auto lastReg =
             CPURegister(lastId, vixl::aarch64::kXRegSize, isFp ? CPURegister::kVRegister : CPURegister::kRegister);
         if (!hasMask || lastId + 1 == id) {
-            static constexpr ssize_t OFFSET = 2;
-            if constexpr (IS_STORE) {  // NOLINT
-                GetMasm()->Stp(lastReg, reg, MemOperand(baseReg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
-            } else {  // NOLINT
-                GetMasm()->Ldp(lastReg, reg, MemOperand(baseReg, (slot + index - OFFSET) * DOUBLE_WORD_SIZE_BYTES));
-            }
+            auto reg =
+                CPURegister(id, vixl::aarch64::kXRegSize, isFp ? CPURegister::kVRegister : CPURegister::kRegister);
+            LoadStorePair<IS_STORE>(GetMasm(), lastReg, reg, base, slot + index);
             lastId = -1;
         } else {
-            if constexpr (IS_STORE) {  // NOLINT
-                GetMasm()->Str(lastReg, MemOperand(baseReg, (slot + lastIndex - 1) * DOUBLE_WORD_SIZE_BYTES));
-            } else {  // NOLINT
-                GetMasm()->Ldr(lastReg, MemOperand(baseReg, (slot + lastIndex - 1) * DOUBLE_WORD_SIZE_BYTES));
-            }
+            LoadStoreReg<IS_STORE>(GetMasm(), lastReg, base, slot + lastIndex);
             lastId = id;
             lastIndex = index;
         }
@@ -2690,11 +2982,7 @@ void Aarch64Encoder::LoadStoreRegistersMainLoop(RegMask registers, bool isFp, in
     if (lastId != -1) {
         auto lastReg =
             CPURegister(lastId, vixl::aarch64::kXRegSize, isFp ? CPURegister::kVRegister : CPURegister::kRegister);
-        if constexpr (IS_STORE) {  // NOLINT
-            GetMasm()->Str(lastReg, MemOperand(baseReg, (slot + lastIndex - 1) * DOUBLE_WORD_SIZE_BYTES));
-        } else {  // NOLINT
-            GetMasm()->Ldr(lastReg, MemOperand(baseReg, (slot + lastIndex - 1) * DOUBLE_WORD_SIZE_BYTES));
-        }
+        LoadStoreReg<IS_STORE>(GetMasm(), lastReg, base, slot + lastIndex);
     }
 }
 
@@ -2768,6 +3056,26 @@ void Aarch64Encoder::LoadStoreRegistersLoop(RegMask registers, ssize_t slot, siz
     }
 }
 
+void Aarch64Encoder::SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp)
+{
+    LoadStoreRegisters<true>(registers, slot, startReg, isFp);
+}
+
+void Aarch64Encoder::LoadRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp)
+{
+    LoadStoreRegisters<false>(registers, slot, startReg, isFp);
+}
+
+void Aarch64Encoder::SaveRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask)
+{
+    LoadStoreRegisters<true>(registers, isFp, slot, base, mask);
+}
+
+void Aarch64Encoder::LoadRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask)
+{
+    LoadStoreRegisters<false>(registers, isFp, slot, base, mask);
+}
+
 void Aarch64Encoder::PushRegisters(RegMask registers, bool isFp)
 {
     static constexpr size_t PAIR_OFFSET = 2 * DOUBLE_WORD_SIZE_BYTES;
@@ -2835,6 +3143,25 @@ void Aarch64Encoder::PopRegisters(RegMask registers, bool isFp)
             lastReg = INVALID_REG;
         }
     }
+}
+
+vixl::aarch64::MacroAssembler *Aarch64Encoder::GetMasm() const
+{
+    ASSERT(masm_ != nullptr);
+    return masm_;
+}
+
+size_t Aarch64Encoder::GetLabelAddress(LabelHolder::LabelId label)
+{
+    auto plabel = labels_->GetLabel(label);
+    ASSERT(plabel->IsBound());
+    return GetMasm()->GetLabelAddress<size_t>(plabel);
+}
+
+bool Aarch64Encoder::LabelHasLinks(LabelHolder::LabelId label)
+{
+    auto plabel = labels_->GetLabel(label);
+    return plabel->IsLinked();
 }
 
 #ifndef PANDA_MINIMAL_VIXL

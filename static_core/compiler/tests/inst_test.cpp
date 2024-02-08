@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -408,7 +408,7 @@ TEST_F(InstTest, Call)
         PARAMETER(4U, 8U).s64();
         BASIC_BLOCK(2U, -1L)
         {
-            using namespace DataType;  // NOLINT(google-build-using-namespace)
+            using namespace DataType;  // NOLINT(*-build-using-namespace)
             INST(8U, Opcode::SaveState).NoVregs();
             INST(5U, Opcode::CallVirtual).s32().InputsAutoType(0U, 2U, 4U, 8U);
             INST(6U, Opcode::CallStatic).b().InputsAutoType(1U, 3U, 4U, 5U, 8U);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,21 @@ Aarch64CallingConvention::Aarch64CallingConvention(ArenaAllocator *allocator, En
                                                    CallConvMode mode)
     : CallingConvention(allocator, enc, descr, mode)
 {
+}
+
+constexpr auto Aarch64CallingConvention::GetTarget()
+{
+    return ark::compiler::Target(Arch::AARCH64);
+}
+
+bool Aarch64CallingConvention::IsValid() const
+{
+    return true;
+}
+
+vixl::aarch64::MacroAssembler *Aarch64CallingConvention::GetMasm()
+{
+    return (static_cast<Aarch64Encoder *>(GetEncoder()))->GetMasm();
 }
 
 ParameterInfo *Aarch64CallingConvention::GetParameterInfo(uint8_t regsOffset)
@@ -127,12 +142,33 @@ Reg Aarch64CallingConvention::InitFlagsReg(bool hasFloatRegs)
 
 using vixl::aarch64::CPURegList, vixl::aarch64::CPURegister, vixl::aarch64::MemOperand;
 
+void Aarch64CallingConvention::SaveCalleeSavedRegs(const FrameInfo &frameInfo, const CFrameLayout &fl,
+                                                   size_t spToRegsSlots, bool isNative)
+{
+    RegMask calleeRegsMask;
+    VRegMask calleeVregsMask;
+    auto regdescr = static_cast<Aarch64RegisterDescription *>(GetRegfile());
+    bool irtocOptimized = isNative ? GetMode().IsOptIrtoc() : false;
+
+    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs(),
+                                           irtocOptimized);
+    SET_CFI_CALLEE_REGS(calleeRegsMask);
+    SET_CFI_CALLEE_VREGS(calleeVregsMask);
+    auto lastCalleeReg = spToRegsSlots + calleeRegsMask.Count();
+    auto lastCalleeVreg = spToRegsSlots + fl.GetCalleeRegistersCount(false) + calleeVregsMask.Count();
+    auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
+    auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
+    auto sp = GetTarget().GetStackReg();
+    GetMasm()->StoreCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
+    GetMasm()->StoreCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
+    SET_CFI_OFFSET(pushCallees, GetEncoder()->GetCursorOffset());
+}
+
 void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frameInfo)
 {
     static_assert((CFrameLayout::GetLocalsCount() & 1U) == 0);
     auto encoder = GetEncoder();
     const CFrameLayout &fl = encoder->GetFrameLayout();
-    auto regdescr = static_cast<Aarch64RegisterDescription *>(GetRegfile());
     auto sp = GetTarget().GetStackReg();
     auto fp = GetTarget().GetFrameReg();
     auto lr = GetTarget().GetLinkReg();
@@ -188,18 +224,7 @@ void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frameInfo)
         spToRegsSlots -= SLOTS_COUNT;
     }
 
-    RegMask calleeRegsMask;
-    VRegMask calleeVregsMask;
-    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs());
-    SET_CFI_CALLEE_REGS(calleeRegsMask);
-    SET_CFI_CALLEE_VREGS(calleeVregsMask);
-    auto lastCalleeReg = spToRegsSlots + calleeRegsMask.Count();
-    auto lastCalleeVreg = spToRegsSlots + fl.GetCalleeRegistersCount(false) + calleeVregsMask.Count();
-    auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
-    auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
-    GetMasm()->StoreCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
-    GetMasm()->StoreCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
-    SET_CFI_OFFSET(pushCallees, encoder->GetCursorOffset());
+    SaveCalleeSavedRegs(frameInfo, fl, spToRegsSlots, false);
 
     // Adjust SP
     if (frameInfo.GetAdjustSpReg()) {
@@ -277,7 +302,6 @@ void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo
     static_assert((CFrameLayout::GetLocalsCount() & 1U) == 0);
     auto encoder = GetEncoder();
     const CFrameLayout &fl = encoder->GetFrameLayout();
-    auto regdescr = static_cast<Aarch64RegisterDescription *>(GetRegfile());
     auto sp = GetTarget().GetStackReg();
     auto fp = GetTarget().GetFrameReg();
     auto lr = GetTarget().GetLinkReg();
@@ -318,19 +342,7 @@ void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo
     }
 
     // Save callee-saved registers
-    RegMask calleeRegsMask;
-    VRegMask calleeVregsMask;
-    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs(),
-                                           GetMode().IsOptIrtoc());
-    SET_CFI_CALLEE_REGS(calleeRegsMask);
-    SET_CFI_CALLEE_VREGS(calleeVregsMask);
-    auto lastCalleeReg = spToRegsSlots + calleeRegsMask.Count();
-    auto lastCalleeVreg = spToRegsSlots + fl.GetCalleeRegistersCount(false) + calleeVregsMask.Count();
-    auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
-    auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
-    GetMasm()->StoreCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
-    GetMasm()->StoreCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
-    SET_CFI_OFFSET(pushCallees, encoder->GetCursorOffset());
+    SaveCalleeSavedRegs(frameInfo, fl, spToRegsSlots, true);
 
     // Adjust SP
     if (frameInfo.GetAdjustSpReg()) {

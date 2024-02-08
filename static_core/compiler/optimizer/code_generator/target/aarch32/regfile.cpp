@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,53 @@ bool Aarch32RegisterDescription::IsTmp(Reg reg)
     return false;
 }
 
+// Reg Mask
+// r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15
+// -dwr0,-dwr1,-dwr2,-dwr3,-dwr4,---dwr8,---dwr6,---dwr7 <- double word
+// r0,r1,r2,r3,r4,r5,r6,r7,r8,r9, fp+tmp,  sp+ip, lr+pc
+// |----------------------------| <- available for regalloc
+// r0,   r2,   r4,   r6    r8    - market to be available
+RegMask Aarch32RegisterDescription::GetDefaultRegMask() const
+{
+    // Set all to 1
+    RegMask regMask;
+    regMask.set();
+    for (size_t i = 0; i < AVAILABLE_DOUBLE_WORD_REGISTERS; ++i) {
+        regMask.reset(i * 2U);
+    }
+    regMask.set(GetThreadReg(Arch::AARCH32));
+    return regMask;
+}
+
+VRegMask Aarch32RegisterDescription::GetVRegMask()
+{
+    VRegMask vregMask;
+    for (auto vregCode : AARCH32_TMP_VREG) {
+        vregMask.set(vregCode);
+    }
+    // Only d0-d15 available for alloc
+    // They mapped on s0-s31 same, like scalar:
+    for (size_t i = 0; i < vregMask.size() / 2U; ++i) {
+        vregMask.set(i * 2U + 1);
+    }
+    return vregMask;
+}
+
+bool Aarch32RegisterDescription::SupportMapping(uint32_t type)
+{
+    // Current implementation does not support vreg-vreg mapping
+    if ((type & (RegMapping::VECTOR_VECTOR | RegMapping::FLOAT_FLOAT)) != 0U) {
+        return false;
+    }
+    // Scalar and float registers lay in different registers
+    if ((type & (RegMapping::SCALAR_VECTOR | RegMapping::SCALAR_FLOAT)) != 0U) {
+        return false;
+    }
+    // Supported mapping for upper half register-parts:
+    // (type & RegMapping::SCALAR_SCALAR != 0)
+    return true;
+}
+
 ArenaVector<Reg> Aarch32RegisterDescription::GetCalleeSaved()
 {
     ArenaVector<Reg> out(GetAllocator()->Adapter());
@@ -140,6 +187,67 @@ void Aarch32RegisterDescription::SetUsedRegs(const ArenaVector<Reg> &regs)
 
     calleeSaved_.reset(vixl::aarch32::pc.GetCode());
     callerSaved_.reset(vixl::aarch32::pc.GetCode());
+}
+
+RegMask Aarch32RegisterDescription::GetCallerSavedRegMask() const
+{
+    return callerSaved_;
+}
+
+VRegMask Aarch32RegisterDescription::GetCallerSavedVRegMask() const
+{
+    return callerSavedv_;
+}
+
+bool Aarch32RegisterDescription::IsCalleeRegister(Reg reg)
+{
+    bool isFp = reg.IsFloat();
+    return reg.GetId() >= GetFirstCalleeReg(Arch::AARCH32, isFp) &&
+           reg.GetId() <= GetLastCalleeReg(Arch::AARCH32, isFp);
+}
+
+Reg Aarch32RegisterDescription::GetZeroReg() const
+{
+    return INVALID_REGISTER;
+}
+
+bool Aarch32RegisterDescription::IsZeroReg([[maybe_unused]] Reg reg) const
+{
+    return false;
+}
+
+Reg::RegIDType Aarch32RegisterDescription::GetTempReg()
+{
+    return INVALID_REG_ID;
+}
+
+Reg::RegIDType Aarch32RegisterDescription::GetTempVReg()
+{
+    return INVALID_REG_ID;
+}
+
+RegMask Aarch32RegisterDescription::GetCalleeSavedR()
+{
+    return calleeSaved_;
+}
+VRegMask Aarch32RegisterDescription::GetCalleeSavedV()
+{
+    return calleeSavedv_;
+}
+RegMask Aarch32RegisterDescription::GetCallerSavedR()
+{
+    return callerSaved_;
+}
+VRegMask Aarch32RegisterDescription::GetCallerSavedV()
+{
+    return callerSavedv_;
+}
+
+uint8_t Aarch32RegisterDescription::GetAligmentReg(bool isCallee)
+{
+    auto allignmentReg = isCallee ? allignmentRegCallee_ : allignmentRegCaller_;
+    ASSERT(allignmentReg != UNDEF_REG);
+    return allignmentReg;
 }
 
 }  // namespace ark::compiler::aarch32

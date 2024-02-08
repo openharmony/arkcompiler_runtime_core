@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ const uint64_t ITERATION = 20;
 const uint64_t ITERATION = 4000;
 #endif
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
-static inline auto g_randomGen = std::mt19937_64(SEED);
+static auto g_randomGen = std::mt19937_64(SEED);
 
 // Encoder header
 #include "optimizer/code_generator/operands.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,10 +35,7 @@ MethodProperties::MethodProperties(const Graph *graph)
                 lastReturn_ = inst;
             }
             if (!GetHasParamsOnStack() && inst->GetOpcode() == Opcode::Parameter) {
-                auto sf = static_cast<const ParameterInst *>(inst)->GetLocationData();
-                if (sf.DstValue() != INVALID_REG && sf.SrcType() == LocationType::STACK_PARAMETER) {
-                    SetHasParamsOnStack(true);
-                }
+                CheckAndSetStackParams(inst);
             }
             if (inst->GetOpcode() == Opcode::SafePoint) {
                 SetHasSafepoints(true);
@@ -77,5 +74,13 @@ MethodProperties::MethodProperties(const Graph *graph)
                               g_options.IsCompilerCompactPrologue());
 
     SetRequireFrameSetup(!IsLeaf() || graph->IsOsrMode());
+}
+
+void MethodProperties::CheckAndSetStackParams(Inst *inst)
+{
+    auto sf = static_cast<const ParameterInst *>(inst)->GetLocationData();
+    if (sf.DstValue() != INVALID_REG && sf.SrcType() == LocationType::STACK_PARAMETER) {
+        SetHasParamsOnStack(true);
+    }
 }
 }  // namespace ark::compiler

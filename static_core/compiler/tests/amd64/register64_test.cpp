@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,7 @@
 #include "macros.h"
 #include "mem/pool_manager.h"
 #include "target/amd64/target.h"
-
-const uint64_t SEED = 0x1234;
-#ifndef PANDA_NIGHTLY_TEST_ON
-const uint64_t ITERATION = 20;
-#else
-const uint64_t ITERATION = 0xffffff;
-#endif
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
-static inline auto g_randomGen = std::mt19937_64(SEED);
+#include "scoped_tmp_reg.h"
 
 namespace ark::compiler {
 class Register64Test : public ::testing::Test {

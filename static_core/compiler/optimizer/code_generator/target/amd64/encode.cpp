@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@ Encoder (implementation of math and mem Low-level emitters)
 #include "libpandabase/utils/utils.h"
 #include "compiler/optimizer/code_generator/relocations.h"
 #include "operands.h"
+#include "scoped_tmp_reg.h"
 #include "target/amd64/target.h"
 
 #include "lib_helpers.inl"
@@ -32,6 +33,185 @@ Encoder (implementation of math and mem Low-level emitters)
 #endif  // PANDA_TARGET_MACOS
 
 namespace ark::compiler::amd64 {
+
+static auto ArchCcInt(Condition cc)
+{
+    switch (cc) {
+        case Condition::EQ:
+            return asmjit::x86::Condition::Code::kEqual;
+        case Condition::NE:
+            return asmjit::x86::Condition::Code::kNotEqual;
+        case Condition::LT:
+            return asmjit::x86::Condition::Code::kSignedLT;
+        case Condition::GT:
+            return asmjit::x86::Condition::Code::kSignedGT;
+        case Condition::LE:
+            return asmjit::x86::Condition::Code::kSignedLE;
+        case Condition::GE:
+            return asmjit::x86::Condition::Code::kSignedGE;
+        case Condition::LO:
+            return asmjit::x86::Condition::Code::kUnsignedLT;
+        case Condition::LS:
+            return asmjit::x86::Condition::Code::kUnsignedLE;
+        case Condition::HI:
+            return asmjit::x86::Condition::Code::kUnsignedGT;
+        case Condition::HS:
+            return asmjit::x86::Condition::Code::kUnsignedGE;
+        // NOTE(igorban) : Remove them
+        case Condition::MI:
+            return asmjit::x86::Condition::Code::kNegative;
+        case Condition::PL:
+            return asmjit::x86::Condition::Code::kPositive;
+        case Condition::VS:
+            return asmjit::x86::Condition::Code::kOverflow;
+        case Condition::VC:
+            return asmjit::x86::Condition::Code::kNotOverflow;
+        case Condition::AL:
+        case Condition::NV:
+        default:
+            UNREACHABLE();
+            return asmjit::x86::Condition::Code::kEqual;
+    }
+}
+static auto ArchCcFloat(Condition cc)
+{
+    switch (cc) {
+        case Condition::EQ:
+            return asmjit::x86::Condition::Code::kEqual;
+        case Condition::NE:
+            return asmjit::x86::Condition::Code::kNotEqual;
+        case Condition::LT:
+            return asmjit::x86::Condition::Code::kUnsignedLT;
+        case Condition::GT:
+            return asmjit::x86::Condition::Code::kUnsignedGT;
+        case Condition::LE:
+            return asmjit::x86::Condition::Code::kUnsignedLE;
+        case Condition::GE:
+            return asmjit::x86::Condition::Code::kUnsignedGE;
+        case Condition::LO:
+            return asmjit::x86::Condition::Code::kUnsignedLT;
+        case Condition::LS:
+            return asmjit::x86::Condition::Code::kUnsignedLE;
+        case Condition::HI:
+            return asmjit::x86::Condition::Code::kUnsignedGT;
+        case Condition::HS:
+            return asmjit::x86::Condition::Code::kUnsignedGE;
+        // NOTE(igorban) : Remove them
+        case Condition::MI:
+            return asmjit::x86::Condition::Code::kNegative;
+        case Condition::PL:
+            return asmjit::x86::Condition::Code::kPositive;
+        case Condition::VS:
+            return asmjit::x86::Condition::Code::kOverflow;
+        case Condition::VC:
+            return asmjit::x86::Condition::Code::kNotOverflow;
+        case Condition::AL:
+        case Condition::NV:
+        default:
+            UNREACHABLE();
+            return asmjit::x86::Condition::Code::kEqual;
+    }
+}
+/// Converters
+static asmjit::x86::Condition::Code ArchCc(Condition cc, bool isFloat = false)
+{
+    return isFloat ? ArchCcFloat(cc) : ArchCcInt(cc);
+}
+
+static asmjit::x86::Condition::Code ArchCcTest(Condition cc)
+{
+    ASSERT(cc == Condition::TST_EQ || cc == Condition::TST_NE);
+    return cc == Condition::TST_EQ ? asmjit::x86::Condition::Code::kEqual : asmjit::x86::Condition::Code::kNotEqual;
+}
+
+static bool CcMatchesNan(Condition cc)
+{
+    switch (cc) {
+        case Condition::NE:
+        case Condition::LT:
+        case Condition::LE:
+        case Condition::HI:
+        case Condition::HS:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/// Converters
+static asmjit::x86::Gp ArchReg(Reg reg, uint8_t size = 0)
+{
+    ASSERT(reg.IsValid());
+    if (reg.IsScalar()) {
+        size_t regSize = size == 0 ? reg.GetSize() : size;
+        auto archId = ConvertRegNumber(reg.GetId());
+
+        asmjit::x86::Gp archReg;
+        switch (regSize) {
+            case DOUBLE_WORD_SIZE:
+                archReg = asmjit::x86::Gp(asmjit::x86::Gpq::kSignature, archId);
+                break;
+            case WORD_SIZE:
+                archReg = asmjit::x86::Gp(asmjit::x86::Gpd::kSignature, archId);
+                break;
+            case HALF_SIZE:
+                archReg = asmjit::x86::Gp(asmjit::x86::Gpw::kSignature, archId);
+                break;
+            case BYTE_SIZE:
+                archReg = asmjit::x86::Gp(asmjit::x86::GpbLo::kSignature, archId);
+                break;
+
+            default:
+                UNREACHABLE();
+        }
+
+        ASSERT(archReg.isValid());
+        return archReg;
+    }
+    if (reg.GetId() == ConvertRegNumber(asmjit::x86::rsp.id())) {
+        return asmjit::x86::rsp;
+    }
+
+    // Invalid register type
+    UNREACHABLE();
+    return asmjit::x86::rax;
+}
+
+static asmjit::x86::Xmm ArchVReg(Reg reg)
+{
+    ASSERT(reg.IsValid() && reg.IsFloat());
+    auto archVreg = asmjit::x86::xmm(reg.GetId());
+    return archVreg;
+}
+
+static asmjit::Imm ArchImm(Imm imm)
+{
+    ASSERT(imm.GetType() == INT64_TYPE);
+    return asmjit::imm(imm.GetAsInt());
+}
+
+static uint64_t ImmToUnsignedInt(Imm imm)
+{
+    ASSERT(imm.GetType() == INT64_TYPE);
+    return uint64_t(imm.GetAsInt());
+}
+
+static bool ImmFitsSize(int64_t imm, uint8_t size)
+{
+    if (size == DOUBLE_WORD_SIZE) {
+        size = WORD_SIZE;
+    }
+
+    // NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult)
+    int64_t max = (uint64_t(1) << (size - 1U)) - 1U;
+    int64_t min = ~uint64_t(max);
+    ASSERT(min < 0);
+    ASSERT(max > 0);
+
+    return imm >= min && imm <= max;
+}
+
 LabelHolder::LabelId Amd64LabelHolder::CreateLabel()
 {
     ++id_;
@@ -43,6 +223,96 @@ LabelHolder::LabelId Amd64LabelHolder::CreateLabel()
     labels_.push_back(allocator->New<LabelType>(std::move(label)));
     ASSERT(labels_.size() == id_);
     return id_ - 1;
+}
+
+ArchMem::ArchMem(MemRef mem)
+{
+    bool base = mem.HasBase();
+    bool regoffset = mem.HasIndex();
+    bool shift = mem.HasScale();
+    bool offset = mem.HasDisp();
+
+    if (base && !regoffset && !shift) {
+        // Default memory - base + offset
+        mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), mem.GetDisp());
+    } else if (base && regoffset && !offset) {
+        auto baseSize = mem.GetBase().GetSize();
+        auto indexSize = mem.GetIndex().GetSize();
+
+        ASSERT(baseSize >= indexSize);
+        ASSERT(indexSize >= WORD_SIZE);
+
+        if (baseSize > indexSize) {
+            needExtendIndex_ = true;
+        }
+
+        if (mem.GetScale() == 0) {
+            mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize));
+        } else {
+            auto scale = mem.GetScale();
+            if (scale <= 3U) {
+                mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize), scale);
+            } else {
+                mem_ = asmjit::x86::ptr(ArchReg(mem.GetBase()), ArchReg(mem.GetIndex(), baseSize));
+                bigShift_ = scale;
+            }
+        }
+    } else {
+        // Wrong memRef
+        UNREACHABLE();
+    }
+}
+
+asmjit::x86::Mem ArchMem::Prepare(asmjit::x86::Assembler *masm)
+{
+    if (isPrepared_) {
+        return mem_;
+    }
+
+    if (bigShift_ != 0) {
+        ASSERT(!mem_.hasOffset() && mem_.hasIndex() && bigShift_ > 3U);
+        masm->shl(mem_.indexReg().as<asmjit::x86::Gp>(), asmjit::imm(bigShift_));
+    }
+
+    if (needExtendIndex_) {
+        ASSERT(mem_.hasIndex());
+        auto qIndex = mem_.indexReg().as<asmjit::x86::Gp>();
+        auto dIndex {qIndex};
+        dIndex.setSignature(asmjit::x86::Gpd::kSignature);
+        masm->movsxd(qIndex, dIndex);
+    }
+
+    isPrepared_ = true;
+    return mem_;
+}
+
+AsmJitErrorHandler::AsmJitErrorHandler(Encoder *encoder) : encoder_(encoder)
+{
+    ASSERT(encoder != nullptr);
+}
+
+void AsmJitErrorHandler::handleError([[maybe_unused]] asmjit::Error err, [[maybe_unused]] const char *message,
+                                     [[maybe_unused]] asmjit::BaseEmitter *origin)
+{
+    encoder_->SetFalseResult();
+}
+
+void Amd64LabelHolder::CreateLabels(LabelId max)
+{
+    for (LabelId i = 0; i < max; ++i) {
+        CreateLabel();
+    }
+}
+
+Amd64LabelHolder::LabelType *Amd64LabelHolder::GetLabel(LabelId id)
+{
+    ASSERT(labels_.size() > id);
+    return labels_[id];
+}
+
+Amd64LabelHolder::LabelId Amd64LabelHolder::Size()
+{
+    return labels_.size();
 }
 
 void Amd64LabelHolder::BindLabel(LabelId id)
@@ -73,6 +343,22 @@ Amd64Encoder::~Amd64Encoder()
         labels_->~Amd64LabelHolder();
         labels_ = nullptr;
     }
+}
+
+LabelHolder *Amd64Encoder::GetLabels() const
+{
+    ASSERT(labels_ != nullptr);
+    return labels_;
+}
+
+bool Amd64Encoder::IsValid() const
+{
+    return true;
+}
+
+constexpr auto Amd64Encoder::GetTarget()
+{
+    return ark::compiler::Target(Arch::X86_64);
 }
 
 bool Amd64Encoder::InitMasm()
@@ -1120,6 +1406,28 @@ void Amd64Encoder::EncodeDivFloat(Reg dst, Reg src0, Reg src1)
     }
 }
 
+static void EncodeDivSpillDst(asmjit::x86::Assembler *masm, Reg dst)
+{
+    if (dst.GetId() != ConvertRegNumber(asmjit::x86::rdx.id())) {
+        masm->push(asmjit::x86::rdx);
+    }
+    if (dst.GetId() != ConvertRegNumber(asmjit::x86::rax.id())) {
+        masm->push(asmjit::x86::rax);
+    }
+}
+
+static void EncodeDivFillDst(asmjit::x86::Assembler *masm, Reg dst)
+{
+    if (dst.GetId() != ConvertRegNumber(asmjit::x86::rax.id())) {
+        masm->mov(ArchReg(dst, DOUBLE_WORD_SIZE), asmjit::x86::rax);
+        masm->pop(asmjit::x86::rax);
+    }
+
+    if (dst.GetId() != ConvertRegNumber(asmjit::x86::rdx.id())) {
+        masm->pop(asmjit::x86::rdx);
+    }
+}
+
 void Amd64Encoder::EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsFloat()) {
@@ -1135,12 +1443,7 @@ void Amd64Encoder::EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1)
         GetMasm()->je(negPath);
     }
 
-    if (dst.GetId() != ConvertRegNumber(asmjit::x86::rdx.id())) {
-        GetMasm()->push(asmjit::x86::rdx);
-    }
-    if (dst.GetId() != ConvertRegNumber(asmjit::x86::rax.id())) {
-        GetMasm()->push(asmjit::x86::rax);
-    }
+    EncodeDivSpillDst(GetMasm(), dst);
 
     ScopedTmpReg tmpReg(this, dst.GetType());
     Reg op1 {src1};
@@ -1153,7 +1456,6 @@ void Amd64Encoder::EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1)
     if (src0.GetId() != ConvertRegNumber(asmjit::x86::rax.id())) {
         GetMasm()->mov(asmjit::x86::rax, ArchReg(src0, DOUBLE_WORD_SIZE));
     }
-
     if (dstSigned) {
         if (dst.GetSize() <= WORD_SIZE) {
             GetMasm()->cdq();
@@ -1166,14 +1468,8 @@ void Amd64Encoder::EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1)
         GetMasm()->div(ArchReg(op1));
     }
 
-    if (dst.GetId() != ConvertRegNumber(asmjit::x86::rax.id())) {
-        GetMasm()->mov(ArchReg(dst, DOUBLE_WORD_SIZE), asmjit::x86::rax);
-        GetMasm()->pop(asmjit::x86::rax);
-    }
+    EncodeDivFillDst(GetMasm(), dst);
 
-    if (dst.GetId() != ConvertRegNumber(asmjit::x86::rdx.id())) {
-        GetMasm()->pop(asmjit::x86::rdx);
-    }
     GetMasm()->jmp(crossroad);
 
     GetMasm()->bind(negPath);
@@ -1818,8 +2114,9 @@ void Amd64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
     GetMasm()->bind(end);
 }
 
-void Amd64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc)
+void Amd64Encoder::EncodeSelect(ArgsSelect &&args)
 {
+    auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat());
     if (src2.IsScalar()) {
         GetMasm()->cmp(ArchReg(src2), ArchReg(src3));
@@ -1854,8 +2151,9 @@ void Amd64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3,
     }
 }
 
-void Amd64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc)
+void Amd64Encoder::EncodeSelect(ArgsSelectImm &&args)
 {
+    auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
 
     auto immVal = imm.GetAsInt();
@@ -1879,8 +2177,9 @@ void Amd64Encoder::EncodeSelect(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, 
     }
 }
 
-void Amd64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg src3, Condition cc)
+void Amd64Encoder::EncodeSelectTest(ArgsSelect &&args)
 {
+    auto [dst, src0, src1, src2, src3, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
 
     GetMasm()->test(ArchReg(src2), ArchReg(src3));
@@ -1897,8 +2196,9 @@ void Amd64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Reg s
     }
 }
 
-void Amd64Encoder::EncodeSelectTest(Reg dst, Reg src0, Reg src1, Reg src2, Imm imm, Condition cc)
+void Amd64Encoder::EncodeSelectTest(ArgsSelectImm &&args)
 {
+    auto [dst, src0, src1, src2, imm, cc] = args;
     ASSERT(!src0.IsFloat() && !src1.IsFloat() && !src2.IsFloat());
 
     auto immVal = imm.GetAsInt();
@@ -2476,6 +2776,16 @@ void Amd64Encoder::EncodeCompareAndSwap(Reg dst, Reg obj, const Reg *offset, Reg
     }
 }
 
+void Amd64Encoder::EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval)
+{
+    EncodeCompareAndSwap(dst, obj, &offset, val, newval);
+}
+
+void Amd64Encoder::EncodeCompareAndSwap(Reg dst, Reg addr, Reg val, Reg newval)
+{
+    EncodeCompareAndSwap(dst, addr, nullptr, val, newval);
+}
+
 void Amd64Encoder::EncodeUnsafeGetAndSet(Reg dst, Reg obj, Reg offset, Reg val)
 {
     ScopedTmpRegU64 tmp(this);
@@ -2509,6 +2819,77 @@ void Amd64Encoder::EncodeStackOverflowCheck(ssize_t offset)
     MemRef mem(GetTarget().GetStackReg(), offset);
     auto m = ArchMem(mem).Prepare(GetMasm());
     GetMasm()->test(m, ArchReg(GetTarget().GetParamReg(0)));
+}
+
+size_t Amd64Encoder::GetCursorOffset() const
+{
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    return GetMasm()->offset();
+}
+
+void Amd64Encoder::SetCursorOffset(size_t offset)
+{
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    GetMasm()->setOffset(offset);
+}
+
+Reg Amd64Encoder::AcquireScratchRegister(TypeInfo type)
+{
+    return (static_cast<Amd64RegisterDescription *>(GetRegfile()))->AcquireScratchRegister(type);
+}
+
+void Amd64Encoder::AcquireScratchRegister(Reg reg)
+{
+    (static_cast<Amd64RegisterDescription *>(GetRegfile()))->AcquireScratchRegister(reg);
+}
+
+void Amd64Encoder::ReleaseScratchRegister(Reg reg)
+{
+    (static_cast<Amd64RegisterDescription *>(GetRegfile()))->ReleaseScratchRegister(reg);
+}
+
+bool Amd64Encoder::IsScratchRegisterReleased(Reg reg)
+{
+    return (static_cast<Amd64RegisterDescription *>(GetRegfile()))->IsScratchRegisterReleased(reg);
+}
+
+RegMask Amd64Encoder::GetScratchRegistersMask() const
+{
+    return (static_cast<const Amd64RegisterDescription *>(GetRegfile()))->GetScratchRegistersMask();
+}
+
+RegMask Amd64Encoder::GetScratchFpRegistersMask() const
+{
+    return (static_cast<const Amd64RegisterDescription *>(GetRegfile()))->GetScratchFpRegistersMask();
+}
+
+RegMask Amd64Encoder::GetAvailableScratchRegisters() const
+{
+    auto regfile = static_cast<const Amd64RegisterDescription *>(GetRegfile());
+    return RegMask(regfile->GetScratchRegisters().GetMask());
+}
+
+VRegMask Amd64Encoder::GetAvailableScratchFpRegisters() const
+{
+    auto regfile = static_cast<const Amd64RegisterDescription *>(GetRegfile());
+    return VRegMask(regfile->GetScratchFPRegisters().GetMask());
+}
+
+TypeInfo Amd64Encoder::GetRefType()
+{
+    return INT64_TYPE;
+}
+
+void *Amd64Encoder::BufferData() const
+{
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    return GetMasm()->bufferData();
+}
+
+size_t Amd64Encoder::BufferSize() const
+{
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    return GetMasm()->offset();
 }
 
 void Amd64Encoder::MakeLibCall(Reg dst, Reg src0, Reg src1, void *entryPoint)
@@ -2626,6 +3007,26 @@ void Amd64Encoder::LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot
     }
 }
 
+void Amd64Encoder::SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp)
+{
+    LoadStoreRegisters<true>(registers, slot, startReg, isFp);
+}
+
+void Amd64Encoder::LoadRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp)
+{
+    LoadStoreRegisters<false>(registers, slot, startReg, isFp);
+}
+
+void Amd64Encoder::SaveRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask)
+{
+    LoadStoreRegisters<true>(registers, isFp, slot, base, mask);
+}
+
+void Amd64Encoder::LoadRegisters(RegMask registers, bool isFp, ssize_t slot, Reg base, RegMask mask)
+{
+    LoadStoreRegisters<false>(registers, isFp, slot, base, mask);
+}
+
 void Amd64Encoder::PushRegisters(RegMask registers, bool isFp)
 {
     for (size_t i = 0; i < registers.size(); i++) {
@@ -2652,6 +3053,27 @@ void Amd64Encoder::PopRegisters(RegMask registers, bool isFp)
             }
         }
     }
+}
+
+asmjit::x86::Assembler *Amd64Encoder::GetMasm() const
+{
+    ASSERT(masm_ != nullptr);
+    return masm_;
+}
+
+size_t Amd64Encoder::GetLabelAddress(LabelHolder::LabelId label)
+{
+    auto code = GetMasm()->code();
+    ASSERT(code->isLabelBound(label));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    return code->baseAddress() + code->labelOffset(label);
+}
+
+bool Amd64Encoder::LabelHasLinks(LabelHolder::LabelId label)
+{
+    auto code = GetMasm()->code();
+    auto entry = code->labelEntry(label);
+    return entry->links() != nullptr;
 }
 
 template <typename T, size_t N>

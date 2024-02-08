@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4877,7 +4877,7 @@ TEST_F(IrBuilderTest, CallShort)
 
         BASIC_BLOCK(2U, -1L)
         {
-            using namespace DataType;  // NOLINT(google-build-using-namespace)
+            using namespace DataType;  // NOLINT(*-build-using-namespace)
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
             INST(2U, Opcode::CallStatic).s32().Inputs({{INT64, 0U}, {NO_TYPE, 1U}});
             INST(3U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
@@ -4915,7 +4915,7 @@ TEST_F(IrBuilderTest, Call)
 
         BASIC_BLOCK(2U, -1L)
         {
-            using namespace DataType;  // NOLINT(google-build-using-namespace)
+            using namespace DataType;  // NOLINT(*-build-using-namespace)
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
             INST(2U, Opcode::CallStatic).s64().Inputs({{INT32, 0U}, {NO_TYPE, 1U}});
             INST(3U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
@@ -6458,7 +6458,7 @@ TEST_F(IrBuilderTest, CallVirtShort)
     {
         BASIC_BLOCK(2U, -1L)
         {
-            using namespace compiler::DataType;  // NOLINT(google-build-using-namespace)
+            using namespace compiler::DataType;  // NOLINT(*-build-using-namespace)
             INST(1U, Opcode::SaveState).Inputs().SrcVregs({});
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
             INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
@@ -6495,7 +6495,7 @@ TEST_F(IrBuilderTest, CallVirt)
     {
         BASIC_BLOCK(2U, -1L)
         {
-            using namespace compiler::DataType;  // NOLINT(google-build-using-namespace)
+            using namespace compiler::DataType;  // NOLINT(*-build-using-namespace)
             INST(1U, Opcode::SaveState).Inputs().SrcVregs({});
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
             INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
@@ -6532,7 +6532,7 @@ TEST_F(IrBuilderTest, CallVirtRange)
     {
         BASIC_BLOCK(2U, -1L)
         {
-            using namespace compiler::DataType;  // NOLINT(google-build-using-namespace)
+            using namespace compiler::DataType;  // NOLINT(*-build-using-namespace)
             INST(1U, Opcode::SaveState).Inputs().SrcVregs({});
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
             INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);

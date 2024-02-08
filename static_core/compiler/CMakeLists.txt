@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -232,6 +232,7 @@ set(COMPILER_SOURCES
         optimizer/optimizations/regalloc/spill_fills_resolver.cpp
         optimizer/optimizations/regalloc/split_resolver.cpp
         optimizer/optimizations/regalloc/reg_alloc_resolver.cpp
+        optimizer/code_generator/encode.cpp
         ${OPTIMIZER_SOURCES}
         ${INST_BUILDER_GEN}
         ${IRTOC_IR_INLINE_GEN}
@@ -398,7 +399,8 @@ if (PANDA_TARGET_ARM32 AND PANDA_COMPILER_TARGET_AARCH32)
     # Append to PANDA_COMPILER_TESTS_SOURCES modified version of inst_generator_test
     list(APPEND ENCODER_TESTS_SOURCES
         tests/aarch32/callconv32_test.cpp
-        tests/aarch32/encoder32_test.cpp
+        tests/aarch32/encoder32_test_1.cpp
+        tests/aarch32/encoder32_test_2.cpp
         tests/aarch32/register32_test.cpp
         )
 endif (PANDA_TARGET_ARM32 AND PANDA_COMPILER_TARGET_AARCH32)
@@ -406,7 +408,8 @@ endif (PANDA_TARGET_ARM32 AND PANDA_COMPILER_TARGET_AARCH32)
 if (PANDA_TARGET_ARM64)
     list(APPEND ENCODER_TESTS_SOURCES
         tests/aarch64/callconv64_test.cpp
-        tests/aarch64/encoder64_test.cpp
+        tests/aarch64/encoder64_test_1.cpp
+        tests/aarch64/encoder64_test_2.cpp
         tests/aarch64/register64_test.cpp
         )
 endif (PANDA_TARGET_ARM64)
@@ -422,7 +425,8 @@ if (PANDA_TARGET_AMD64)
     list(APPEND ENCODER_TESTS_SOURCES
         tests/amd64/asmjit_test.cpp
         tests/amd64/callconv64_test.cpp
-        tests/amd64/encoder64_test.cpp
+        tests/amd64/encoder64_test_1.cpp
+        tests/amd64/encoder64_test_2.cpp
         tests/amd64/register64_test.cpp
         )
     if (PANDA_COMPILER_TARGET_AARCH64)
@@ -463,10 +467,10 @@ if(NOT PANDA_MINIMAL_VIXL AND PANDA_TARGET_AMD64 AND PANDA_WITH_TESTS)
         )
     if(PANDA_COMPILER_TARGET_AARCH64)
         list(APPEND PANDA_CODEGEN_TESTS_SOURCES
-            tests/codegen_test.cpp
+            tests/codegen/codegen_test_1.cpp
+            tests/codegen/codegen_test_2.cpp
         )
     endif()
-    set_source_files_properties(tests/codegen_test.cpp PROPERTIES COMPILE_FLAGS "-Wno-shadow -Wno-deprecated-declarations")
     panda_add_gtest(
         CONTAINS_MAIN
         NAME compiler_codegen_tests

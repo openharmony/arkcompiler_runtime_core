@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,7 @@
 
 #include "mem/pool_manager.h"
 #include "target/aarch32/target.h"
-
-const uint64_t SEED = 0x1234;
-#ifndef PANDA_NIGHTLY_TEST_ON
-const uint64_t ITERATION = 20;
-#else
-const uint64_t ITERATION = 0xffffff;
-#endif
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
-static inline auto RANDOM_GEN = std::mt19937_64(SEED);
+#include "scoped_tmp_reg.h"
 
 namespace ark::compiler {
 class Register32Test : public ::testing::Test {
@@ -61,56 +53,56 @@ TEST_F(Register32Test, TmpReg)
     aarch32::Aarch32Encoder encoder(GetAllocator());
     encoder.InitMasm();
 
-    auto float_type = FLOAT32_TYPE;
+    auto floatType = FLOAT32_TYPE;
 
     if (encoder.GetScratchFPRegistersCount() == 0) {
         encoder.GetMasm()->GetScratchVRegisterList()->Combine(vixl::aarch32::SRegister(1));
     }
 
-    auto initial_count = encoder.GetScratchRegistersCount();
-    auto initial_fp_count = encoder.GetScratchFPRegistersCount();
-    ASSERT_NE(initial_count, 0);
-    ASSERT_NE(initial_fp_count, 0);
+    auto initialCount = encoder.GetScratchRegistersCount();
+    auto initialFpCount = encoder.GetScratchFPRegistersCount();
+    ASSERT_NE(initialCount, 0);
+    ASSERT_NE(initialFpCount, 0);
 
     std::vector<Reg> regs;
-    for (size_t i = 0; i < initial_count; i++) {
+    for (size_t i = 0; i < initialCount; i++) {
         regs.push_back(encoder.AcquireScratchRegister(INT64_TYPE));
     }
     ASSERT_EQ(encoder.GetScratchRegistersCount(), 0);
-    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
     for (auto reg : regs) {
         encoder.ReleaseScratchRegister(reg);
     }
-    ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count);
+    ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount);
 
     regs.clear();
-    for (size_t i = 0; i < initial_fp_count; i++) {
-        regs.push_back(encoder.AcquireScratchRegister(float_type));
+    for (size_t i = 0; i < initialFpCount; i++) {
+        regs.push_back(encoder.AcquireScratchRegister(floatType));
     }
 
-    ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count);
+    ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount);
     ASSERT_EQ(encoder.GetScratchFPRegistersCount(), 0);
     for (auto reg : regs) {
         encoder.ReleaseScratchRegister(reg);
     }
-    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
 
     {
         ScopedTmpRegRef reg(&encoder);
-        ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count - 1);
-        ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+        ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount - 1);
+        ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
         if (encoder.GetScratchRegistersCount() != 0) {
             ScopedTmpRegU32 reg2(&encoder);
-            ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count - 2U);
+            ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount - 2U);
         }
         {
-            ScopedTmpReg reg2(&encoder, float_type);
-            ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count - 1);
-            ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count - 1);
+            ScopedTmpReg reg2(&encoder, floatType);
+            ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount - 1);
+            ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount - 1);
         }
-        ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+        ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
     }
-    ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count);
-    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
+    ASSERT_EQ(encoder.GetScratchRegistersCount(), initialCount);
+    ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initialFpCount);
 }
 }  // namespace ark::compiler

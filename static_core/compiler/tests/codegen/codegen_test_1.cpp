@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,90 +13,23 @@
  * limitations under the License.
  */
 
-#include <random>
-
-#include "optimizer/code_generator/codegen.h"
-#include "optimizer/ir/basicblock.h"
+#include "codegen_test.h"
+#include "optimizer/ir/datatype.h"
+#include "optimizer/ir/graph.h"
 #include "optimizer/ir/inst.h"
-#include "optimizer/optimizations/if_conversion.h"
-#include "optimizer/optimizations/lowering.h"
-#include "optimizer/optimizations/regalloc/reg_alloc.h"
-#include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
-#include "optimizer_run.h"
-#include "compiler/inplace_task_runner.h"
-#include "compiler/compiler_task_runner.h"
-
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/utils.h"
-#include "gtest/gtest.h"
-#include "unit_test.h"
-#include "utils/bit_utils.h"
-#include "vixl_exec_module.h"
-
-const uint64_t SEED = 0x1234;
-#ifndef PANDA_NIGHTLY_TEST_ON
-const uint64_t ITERATION = 40;
-#else
-const uint64_t ITERATION = 20000;
-#endif
-// NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
-static inline auto g_randomGenerator = std::mt19937_64(SEED);
+#include "optimizer/ir/ir_constructor.h"
+#include "tests/unit_test.h"
 
 namespace ark::compiler {
 
-class CodegenTest : public GraphTest {
-public:
-    CodegenTest() : execModule_(GetAllocator(), GetGraph()->GetRuntime())
-    {
-#ifndef NDEBUG
-        // GraphChecker hack: LowLevel instructions may appear only after Lowering pass:
-        GetGraph()->SetLowLevelInstructionsEnabled();
+constexpr uint64_t SEED = 0x1234;
+#ifndef PANDA_NIGHTLY_TEST_ON
+constexpr uint64_t ITERATION = 40;
+#else
+constexpr uint64_t ITERATION = 20000;
 #endif
-    }
-    ~CodegenTest() override = default;
-
-    NO_COPY_SEMANTIC(CodegenTest);
-    NO_MOVE_SEMANTIC(CodegenTest);
-
-    VixlExecModule &GetExecModule()
-    {
-        return execModule_;
-    }
-
-    template <typename T>
-    void CheckStoreArray();
-
-    template <typename T>
-    void CheckLoadArray();
-
-    template <typename T>
-    void CheckStoreArrayPair(bool imm);
-
-    template <typename T>
-    void CheckLoadArrayPair(bool imm);
-
-    template <typename T>
-    void CheckCmp(bool isFcmpg = false);
-
-    template <typename T>
-    void CheckReturnValue(Graph *graph, T expectedValue);
-
-    template <typename T>
-    void CheckBounds(uint64_t count);
-
-    void TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t l, uint32_t r, ShiftType shiftType,
-                                               uint32_t shift, uint32_t erv);
-
-    void CreateGraphForOverflowTest(Graph *graph, Opcode overflowOpcode);
-
-private:
-    VixlExecModule execModule_;
-};
-
-bool RunCodegen(Graph *graph)
-{
-    return graph->RunPass<Codegen>();
-}
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
+static auto g_randomGenerator = std::mt19937_64(SEED);
 
 // NOLINTBEGIN(readability-magic-numbers,modernize-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
 TEST_F(CodegenTest, SimpleProgramm)
@@ -175,6 +108,33 @@ TEST_F(CodegenTest, SimpleProgramm)
     }
 }
 
+SRC_GRAPH(CheckStoreArray, Graph *graph, DataType::Type type)
+{
+    auto entry = graph->CreateStartBlock();
+    auto exit = graph->CreateEndBlock();
+    auto block = graph->CreateEmptyBlock();
+    entry->AddSucc(block);
+    block->AddSucc(exit);
+
+    auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
+    auto index = graph->AddNewParameter(1U, DataType::INT32);
+    auto storeValue = graph->AddNewParameter(2U, type);
+
+    graph->ResetParameterInfo();
+    array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
+    index->SetLocationData(graph->GetDataForNativeParam(DataType::INT32));
+    storeValue->SetLocationData(graph->GetDataForNativeParam(type));
+
+    auto stArr = graph->CreateInst(Opcode::StoreArray);
+    block->AppendInst(stArr);
+    stArr->SetType(type);
+    stArr->SetInput(0U, array);
+    stArr->SetInput(1U, index);
+    stArr->SetInput(2U, storeValue);
+    auto ret = graph->CreateInst(Opcode::ReturnVoid);
+    block->AppendInst(ret);
+}
+
 template <typename T>
 void CodegenTest::CheckStoreArray()
 {
@@ -184,31 +144,7 @@ void CodegenTest::CheckStoreArray()
     auto graph = CreateEmptyGraph();
     RuntimeInterfaceMock runtime;
     graph->SetRuntime(&runtime);
-
-    auto entry = graph->CreateStartBlock();
-    auto exit = graph->CreateEndBlock();
-    auto block = graph->CreateEmptyBlock();
-    entry->AddSucc(block);
-    block->AddSucc(exit);
-
-    auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
-    auto index = graph->AddNewParameter(1U, DataType::INT32);
-    auto storeValue = graph->AddNewParameter(2U, TYPE);
-
-    graph->ResetParameterInfo();
-    array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
-    index->SetLocationData(graph->GetDataForNativeParam(DataType::INT32));
-    storeValue->SetLocationData(graph->GetDataForNativeParam(TYPE));
-
-    auto stArr = graph->CreateInst(Opcode::StoreArray);
-    block->AppendInst(stArr);
-    stArr->SetType(TYPE);
-    stArr->SetInput(0U, array);
-    stArr->SetInput(1U, index);
-    stArr->SetInput(2U, storeValue);
-    auto ret = graph->CreateInst(Opcode::ReturnVoid);
-    block->AppendInst(ret);
-
+    src_graph::CheckStoreArray::CREATE(graph, TYPE);
     SetNumVirtRegs(0U);
     SetNumArgs(3U);
 
@@ -249,16 +185,8 @@ void CodegenTest::CheckStoreArray()
     GetExecModule().FreeArray(param1);
 }
 
-template <typename T>
-void CodegenTest::CheckLoadArray()
+SRC_GRAPH(CheckLoadArray, Graph *graph, DataType::Type type)
 {
-    constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
-
-    // Create graph
-    auto graph = CreateEmptyGraph();
-    RuntimeInterfaceMock runtime;
-    graph->SetRuntime(&runtime);
-
     auto entry = graph->CreateStartBlock();
     auto exit = graph->CreateEndBlock();
     auto block = graph->CreateEmptyBlock();
@@ -274,13 +202,25 @@ void CodegenTest::CheckLoadArray()
 
     auto ldArr = graph->CreateInst(Opcode::LoadArray);
     block->AppendInst(ldArr);
-    ldArr->SetType(TYPE);
+    ldArr->SetType(type);
     ldArr->SetInput(0U, array);
     ldArr->SetInput(1U, index);
     auto ret = graph->CreateInst(Opcode::Return);
-    ret->SetType(TYPE);
+    ret->SetType(type);
     ret->SetInput(0U, ldArr);
     block->AppendInst(ret);
+}
+
+template <typename T>
+void CodegenTest::CheckLoadArray()
+{
+    constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
+    // Create graph
+    auto graph = CreateEmptyGraph();
+    RuntimeInterfaceMock runtime;
+    graph->SetRuntime(&runtime);
+
+    src_graph::CheckLoadArray::CREATE(graph, TYPE);
 
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
@@ -314,6 +254,40 @@ void CodegenTest::CheckLoadArray()
     EXPECT_EQ(retData, CutValue<T>(-2L, TYPE));
 }
 
+SRC_GRAPH(CheckStoreArrayPair, Graph *graph, DataType::Type type, bool imm)
+{
+    auto entry = graph->CreateStartBlock();
+    auto exit = graph->CreateEndBlock();
+    auto block = graph->CreateEmptyBlock();
+    entry->AddSucc(block);
+    block->AddSucc(exit);
+
+    auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
+    [[maybe_unused]] auto index = graph->AddNewParameter(1U, DataType::INT32);
+    auto val0 = graph->AddNewParameter(2U, type);
+    auto val1 = graph->AddNewParameter(3U, type);
+
+    graph->ResetParameterInfo();
+    array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
+    index->SetLocationData(graph->GetDataForNativeParam(DataType::INT32));
+    val0->SetLocationData(graph->GetDataForNativeParam(type));
+    val1->SetLocationData(graph->GetDataForNativeParam(type));
+
+    Inst *stpArr = nullptr;
+    if (imm) {
+        stpArr = graph->CreateInstStoreArrayPairI(type, INVALID_PC, array, val0, val1, 2U);
+        block->AppendInst(stpArr);
+    } else {
+        stpArr = graph->CreateInstStoreArrayPair(type, INVALID_PC, array, index, val0, val1);
+        block->AppendInst(stpArr);
+    }
+
+    auto ret = graph->CreateInst(Opcode::ReturnVoid);
+    block->AppendInst(ret);
+
+    GraphChecker(graph).Check();
+}
+
 template <typename T>
 void CodegenTest::CheckStoreArrayPair(bool imm)
 {
@@ -328,36 +302,7 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
     graph->SetLowLevelInstructionsEnabled();
 #endif
 
-    auto entry = graph->CreateStartBlock();
-    auto exit = graph->CreateEndBlock();
-    auto block = graph->CreateEmptyBlock();
-    entry->AddSucc(block);
-    block->AddSucc(exit);
-
-    auto array = graph->AddNewParameter(0U, DataType::REFERENCE);
-    [[maybe_unused]] auto index = graph->AddNewParameter(1U, DataType::INT32);
-    auto val0 = graph->AddNewParameter(2U, TYPE);
-    auto val1 = graph->AddNewParameter(3U, TYPE);
-
-    graph->ResetParameterInfo();
-    array->SetLocationData(graph->GetDataForNativeParam(DataType::REFERENCE));
-    index->SetLocationData(graph->GetDataForNativeParam(DataType::INT32));
-    val0->SetLocationData(graph->GetDataForNativeParam(TYPE));
-    val1->SetLocationData(graph->GetDataForNativeParam(TYPE));
-
-    Inst *stpArr = nullptr;
-    if (imm) {
-        stpArr = graph->CreateInstStoreArrayPairI(TYPE, INVALID_PC, array, val0, val1, 2U);
-        block->AppendInst(stpArr);
-    } else {
-        stpArr = graph->CreateInstStoreArrayPair(TYPE, INVALID_PC, array, index, val0, val1);
-        block->AppendInst(stpArr);
-    }
-
-    auto ret = graph->CreateInst(Opcode::ReturnVoid);
-    block->AppendInst(ret);
-
-    GraphChecker(graph).Check();
+    src_graph::CheckStoreArrayPair::CREATE(graph, TYPE, imm);
 
     SetNumVirtRegs(0U);
     SetNumArgs(4U);
@@ -393,20 +338,8 @@ void CodegenTest::CheckStoreArrayPair(bool imm)
     }
 }
 
-template <typename T>
-void CodegenTest::CheckLoadArrayPair(bool imm)
+SRC_GRAPH(CheckLoadArrayPair, Graph *graph, DataType::Type type, bool imm)
 {
-    constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
-
-    // Create graph
-    auto graph = CreateEmptyGraph();
-    RuntimeInterfaceMock runtime;
-    graph->SetRuntime(&runtime);
-#ifndef NDEBUG
-    // GraphChecker hack: LowLevel instructions may appear only after Lowering pass:
-    graph->SetLowLevelInstructionsEnabled();
-#endif
-
     auto entry = graph->CreateStartBlock();
     auto exit = graph->CreateEndBlock();
     auto block = graph->CreateEmptyBlock();
@@ -422,31 +355,48 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
 
     Inst *ldpArr = nullptr;
     if (imm) {
-        ldpArr = graph->CreateInstLoadArrayPairI(TYPE, INVALID_PC, array, 2U);
+        ldpArr = graph->CreateInstLoadArrayPairI(type, INVALID_PC, array, 2U);
         block->AppendInst(ldpArr);
     } else {
-        ldpArr = graph->CreateInstLoadArrayPair(TYPE, INVALID_PC, array, index);
+        ldpArr = graph->CreateInstLoadArrayPair(type, INVALID_PC, array, index);
         block->AppendInst(ldpArr);
     }
 
-    auto loadHigh = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldpArr, 0U);
+    auto loadHigh = graph->CreateInstLoadPairPart(type, INVALID_PC, ldpArr, 0U);
     block->AppendInst(loadHigh);
 
-    auto loadLow = graph->CreateInstLoadPairPart(TYPE, INVALID_PC, ldpArr, 1U);
+    auto loadLow = graph->CreateInstLoadPairPart(type, INVALID_PC, ldpArr, 1U);
     block->AppendInst(loadLow);
 
     auto sum = graph->CreateInst(Opcode::Add);
     block->AppendInst(sum);
-    sum->SetType(TYPE);
+    sum->SetType(type);
     sum->SetInput(0U, loadHigh);
     sum->SetInput(1U, loadLow);
 
     auto ret = graph->CreateInst(Opcode::Return);
-    ret->SetType(TYPE);
+    ret->SetType(type);
     ret->SetInput(0U, sum);
     block->AppendInst(ret);
 
     GraphChecker(graph).Check();
+}
+
+template <typename T>
+void CodegenTest::CheckLoadArrayPair(bool imm)
+{
+    constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
+
+    // Create graph
+    auto graph = CreateEmptyGraph();
+    RuntimeInterfaceMock runtime;
+    graph->SetRuntime(&runtime);
+#ifndef NDEBUG
+    // GraphChecker hack: LowLevel instructions may appear only after Lowering pass:
+    graph->SetLowLevelInstructionsEnabled();
+#endif
+
+    src_graph::CheckLoadArrayPair::CREATE(graph, TYPE, imm);
 
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
@@ -478,30 +428,23 @@ void CodegenTest::CheckLoadArrayPair(bool imm)
     EXPECT_EQ(retData, CutValue<T>(7U, TYPE));
 }
 
-template <typename T>
-void CodegenTest::CheckBounds(uint64_t count)
+SRC_GRAPH(CheckBounds, Graph *graph, DataType::Type type, uint64_t count)
 {
-    constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
-    // Create graph
-    auto graph = CreateEmptyGraph();
-    RuntimeInterfaceMock runtime;
-    graph->SetRuntime(&runtime);
-
     auto entry = graph->CreateStartBlock();
     auto exit = graph->CreateEndBlock();
     auto block = graph->CreateEmptyBlock();
     entry->AddSucc(block);
     block->AddSucc(exit);
 
-    auto param = graph->AddNewParameter(0U, TYPE);
+    auto param = graph->AddNewParameter(0U, type);
 
     graph->ResetParameterInfo();
-    param->SetLocationData(graph->GetDataForNativeParam(TYPE));
+    param->SetLocationData(graph->GetDataForNativeParam(type));
 
     BinaryImmOperation *lastInst = nullptr;
     // instruction_count + parameter + return
     for (uint64_t i = count - 1U; i > 1U; --i) {
-        auto addInst = graph->CreateInstAddI(TYPE, 0U, 1U);
+        auto addInst = graph->CreateInstAddI(type, 0U, 1U);
         block->AppendInst(addInst);
         if (lastInst == nullptr) {
             addInst->SetInput(0U, param);
@@ -511,7 +454,7 @@ void CodegenTest::CheckBounds(uint64_t count)
         lastInst = addInst;
     }
     auto ret = graph->CreateInst(Opcode::Return);
-    ret->SetType(TYPE);
+    ret->SetType(type);
     ret->SetInput(0U, lastInst);
     block->AppendInst(ret);
 
@@ -520,6 +463,18 @@ void CodegenTest::CheckBounds(uint64_t count)
     graph->SetLowLevelInstructionsEnabled();
 #endif
     GraphChecker(graph).Check();
+}
+
+template <typename T>
+void CodegenTest::CheckBounds(uint64_t count)
+{
+    constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
+    // Create graph
+    auto graph = CreateEmptyGraph();
+    RuntimeInterfaceMock runtime;
+    graph->SetRuntime(&runtime);
+
+    src_graph::CheckBounds::CREATE(graph, TYPE, count);
 
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
@@ -539,8 +494,8 @@ void CodegenTest::CheckBounds(uint64_t count)
 
         GetExecModule().SetDump(false);
 
-        T param = 0;
-        GetExecModule().SetParameter(0U, param);
+        T zeroParam = 0;
+        GetExecModule().SetParameter(0U, zeroParam);
         GetExecModule().Execute();
 
         auto retData = GetExecModule().GetRetValue<T>();
@@ -548,43 +503,47 @@ void CodegenTest::CheckBounds(uint64_t count)
     }
 }
 
-template <typename T>
-void CodegenTest::CheckCmp(bool isFcmpg)
+SRC_GRAPH(CheckCmp, Graph *graph, DataType::Type type, bool isFcmpg)
 {
-    constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
-    bool isFloat = DataType::IsFloatType(TYPE);
-
-    // Create graph
-    auto graph = CreateEmptyGraph();
-    RuntimeInterfaceMock runtime;
-    graph->SetRuntime(&runtime);
-
     auto entry = graph->CreateStartBlock();
     auto exit = graph->CreateEndBlock();
     auto block = graph->CreateEmptyBlock();
     entry->AddSucc(block);
     block->AddSucc(exit);
 
-    auto param1 = graph->AddNewParameter(0U, TYPE);
-    auto param2 = graph->AddNewParameter(1U, TYPE);
+    auto param1 = graph->AddNewParameter(0U, type);
+    auto param2 = graph->AddNewParameter(1U, type);
 
     graph->ResetParameterInfo();
-    param1->SetLocationData(graph->GetDataForNativeParam(TYPE));
-    param2->SetLocationData(graph->GetDataForNativeParam(TYPE));
+    param1->SetLocationData(graph->GetDataForNativeParam(type));
+    param2->SetLocationData(graph->GetDataForNativeParam(type));
 
     auto fcmp = graph->CreateInst(Opcode::Cmp);
     block->AppendInst(fcmp);
     fcmp->SetType(DataType::INT32);
     fcmp->SetInput(0U, param1);
     fcmp->SetInput(1U, param2);
-    static_cast<CmpInst *>(fcmp)->SetOperandsType(TYPE);
-    if (isFloat) {
+    static_cast<CmpInst *>(fcmp)->SetOperandsType(type);
+    if (DataType::IsFloatType(type)) {
         static_cast<CmpInst *>(fcmp)->SetFcmpg(isFcmpg);
     }
     auto ret = graph->CreateInst(Opcode::Return);
     ret->SetType(DataType::INT32);
     ret->SetInput(0U, fcmp);
     block->AppendInst(ret);
+}
+
+template <typename T>
+void CodegenTest::CheckCmp(bool isFcmpg)
+{
+    constexpr DataType::Type TYPE = VixlExecModule::GetType<T>();
+
+    // Create graph
+    auto graph = CreateEmptyGraph();
+    RuntimeInterfaceMock runtime;
+    graph->SetRuntime(&runtime);
+
+    src_graph::CheckCmp::CREATE(graph, TYPE, isFcmpg);
 
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
@@ -608,21 +567,21 @@ void CodegenTest::CheckCmp(bool isFcmpg)
         paramData[2U] = std::numeric_limits<T>::min();
     }
     paramData[1U] = CutValue<T>(2U, TYPE);
-    if (isFloat) {
+    if (DataType::IsFloatType(TYPE)) {
         paramData[2U] = -paramData[1U];
     }
 
     for (size_t i = 0; i < 3U; i++) {
         for (size_t j = 0; j < 3U; j++) {
-            auto param1 = paramData[i];
-            auto param2 = paramData[j];
-            GetExecModule().SetParameter(0U, param1);
-            GetExecModule().SetParameter(1U, param2);
+            auto paramData1 = paramData[i];
+            auto paramData2 = paramData[j];
+            GetExecModule().SetParameter(0U, paramData1);
+            GetExecModule().SetParameter(1U, paramData2);
 
             GetExecModule().Execute();
 
             auto retData = GetExecModule().GetRetValue<int32_t>();
-            if ((i == 0U || j == 0U) && isFloat) {
+            if ((i == 0U || j == 0U) && DataType::IsFloatType(TYPE)) {
                 EXPECT_EQ(retData, isFcmpg ? 1U : -1L);
             } else if (i == j) {
                 EXPECT_EQ(retData, 0U);
@@ -631,66 +590,6 @@ void CodegenTest::CheckCmp(bool isFcmpg)
             } else {
                 EXPECT_EQ(retData, 1U);
             }
-        }
-    }
-}
-
-template <typename T>
-void CodegenTest::CheckReturnValue(Graph *graph, [[maybe_unused]] T expectedValue)
-{
-    SetNumVirtRegs(0U);
-    RegAlloc(graph);
-    EXPECT_TRUE(RunCodegen(graph));
-
-    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto codeExit = codeEntry + graph->GetCode().Size();
-
-    ASSERT(codeEntry != nullptr && codeExit != nullptr);
-
-    GetExecModule().SetInstructions(codeEntry, codeExit);
-    GetExecModule().SetDump(false);
-
-    GetExecModule().Execute();
-    auto rv = GetExecModule().GetRetValue<T>();
-    EXPECT_EQ(rv, expectedValue);
-}
-
-void CodegenTest::TestBinaryOperationWithShiftedOperand(Opcode opcode, uint32_t l, uint32_t r, ShiftType shiftType,
-                                                        uint32_t shift, uint32_t erv)
-{
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, l);
-        CONSTANT(1U, r);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, opcode).Shift(shiftType, shift).u32().Inputs(0U, 1U);
-            INST(3U, Opcode::Return).u32().Inputs(2U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), erv);
-}
-
-void CodegenTest::CreateGraphForOverflowTest(Graph *graph, Opcode overflowOpcode)
-{
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).i32();
-        PARAMETER(1U, 1U).i32();
-        CONSTANT(2U, 0U);
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(4U, overflowOpcode).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(5U, Opcode::Return).b().Inputs(2U);
-        }
-        BASIC_BLOCK(4U, -1L)
-        {
-            INST(6U, Opcode::Return).b().Inputs(4U);
         }
     }
 }
@@ -711,6 +610,21 @@ TEST_F(CodegenTest, Cmp)
     CheckCmp<int64_t>();
 }
 
+SRC_GRAPH(StoreArray, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).u32();  // index
+        PARAMETER(2U, 2U).u32();  // store value
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(3U, Opcode::StoreArray).u32().Inputs(0U, 1U, 2U);
+            INST(4U, Opcode::ReturnVoid);
+        }
+    }
+}
+
 TEST_F(CodegenTest, StoreArray)
 {
     CheckStoreArray<bool>();
@@ -725,17 +639,8 @@ TEST_F(CodegenTest, StoreArray)
     CheckStoreArray<float>();
     CheckStoreArray<double>();
 
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).ref();  // array
-        PARAMETER(1U, 1U).u32();  // index
-        PARAMETER(2U, 2U).u32();  // store value
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(3U, Opcode::StoreArray).u32().Inputs(0U, 1U, 2U);
-            INST(4U, Opcode::ReturnVoid);
-        }
-    }
+    src_graph::StoreArray::CREATE(GetGraph());
+
     auto graph = GetGraph();
     SetNumVirtRegs(0U);
     SetNumArgs(3U);
@@ -784,6 +689,30 @@ TEST_F(CodegenTest, StoreArrayPair)
     CheckStoreArrayPair<double>(false);
 }
 
+SRC_GRAPH(Compare, Graph *graph, ConditionCode cc, bool inverse)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0U);
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0U).Inputs(4U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(6U, Opcode::Return).b().Inputs(3U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(7U, Opcode::Return).b().Inputs(2U);
+        }
+    }
+}
+
 TEST_F(CodegenTest, Compare)
 {
     for (int ccint = ConditionCode::CC_FIRST; ccint != ConditionCode::CC_LAST; ccint++) {
@@ -792,30 +721,10 @@ TEST_F(CodegenTest, Compare)
             auto graph = CreateGraphStartEndBlocks();
             RuntimeInterfaceMock runtime;
             graph->SetRuntime(&runtime);
+            src_graph::Compare::CREATE(graph, cc, inverse);
 
-            GRAPH(graph)
-            {
-                PARAMETER(0U, 0U).u64();
-                PARAMETER(1U, 1U).u64();
-                CONSTANT(2U, 0U);
-                CONSTANT(3U, 1U);
-                BASIC_BLOCK(2U, 3U, 4U)
-                {
-                    INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
-                    INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(inverse ? CC_EQ : CC_NE).Imm(0U).Inputs(4U);
-                }
-                BASIC_BLOCK(3U, -1L)
-                {
-                    INST(6U, Opcode::Return).b().Inputs(3U);
-                }
-                BASIC_BLOCK(4U, -1L)
-                {
-                    INST(7U, Opcode::Return).b().Inputs(2U);
-                }
-            }
             SetNumVirtRegs(0U);
             SetNumArgs(2U);
-
             RegAlloc(graph);
 
             EXPECT_TRUE(RunCodegen(graph));
@@ -826,14 +735,13 @@ TEST_F(CodegenTest, Compare)
 
             GetExecModule().SetDump(false);
 
-            bool result;
             auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
             auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
             GetExecModule().SetParameter(0U, param1);
             GetExecModule().SetParameter(1U, param2);
 
-            result = (cc == CC_NE || cc == CC_GT || cc == CC_GE || cc == CC_B || cc == CC_BE);
+            bool result = (cc == CC_NE || cc == CC_GT || cc == CC_GE || cc == CC_B || cc == CC_BE);
             if (inverse) {
                 result = !result;
             }
@@ -845,7 +753,6 @@ TEST_F(CodegenTest, Compare)
 
             GetExecModule().SetParameter(0U, param2);
             GetExecModule().SetParameter(1U, param1);
-
             GetExecModule().Execute();
 
             result = (cc == CC_NE || cc == CC_LT || cc == CC_LE || cc == CC_A || cc == CC_AE);
@@ -872,6 +779,30 @@ TEST_F(CodegenTest, Compare)
     }
 }
 
+SRC_GRAPH(GenIf, Graph *graph, ConditionCode cc)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0U);
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(6U, Opcode::Return).b().Inputs(3U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(7U, Opcode::Return).b().Inputs(2U);
+        }
+    }
+}
+
 TEST_F(CodegenTest, GenIf)
 {
     for (int ccint = ConditionCode::CC_FIRST; ccint != ConditionCode::CC_LAST; ccint++) {
@@ -880,26 +811,8 @@ TEST_F(CodegenTest, GenIf)
         RuntimeInterfaceMock runtime;
         graph->SetRuntime(&runtime);
 
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).u64();
-            PARAMETER(1U, 1U).u64();
-            CONSTANT(2U, 0U);
-            CONSTANT(3U, 1U);
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
-                INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
-            }
-            BASIC_BLOCK(3U, -1L)
-            {
-                INST(6U, Opcode::Return).b().Inputs(3U);
-            }
-            BASIC_BLOCK(4U, -1L)
-            {
-                INST(7U, Opcode::Return).b().Inputs(2U);
-            }
-        }
+        src_graph::GenIf::CREATE(graph, cc);
+
         SetNumVirtRegs(0U);
         SetNumArgs(2U);
 #ifndef NDEBUG
@@ -918,13 +831,12 @@ TEST_F(CodegenTest, GenIf)
 
         GetExecModule().SetDump(false);
 
-        bool result;
         auto param1 = CutValue<uint64_t>(1U, DataType::UINT64);
         auto param2 = CutValue<uint64_t>(-1L, DataType::UINT64);
 
         GetExecModule().SetParameter(0U, param1);
         GetExecModule().SetParameter(1U, param2);
-        result = Compare(cc, param1, param2);
+        bool result = Compare(cc, param1, param2);
         GetExecModule().Execute();
         auto retData = GetExecModule().GetRetValue();
         EXPECT_EQ(retData, result);
@@ -945,6 +857,27 @@ TEST_F(CodegenTest, GenIf)
     }
 }
 
+SRC_GRAPH(GenIfImm, Graph *graph, ConditionCode cc, int32_t value)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::IfImm).SrcType(DataType::INT32).CC(cc).Imm(value).Inputs(0U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(4U, Opcode::Return).b().Inputs(2U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::Return).b().Inputs(1U);
+        }
+    }
+}
 TEST_F(CodegenTest, GenIfImm)
 {
     int32_t values[3U] = {-1L, 0U, 1U};
@@ -957,25 +890,8 @@ TEST_F(CodegenTest, GenIfImm)
             if ((cc == CC_TST_EQ || cc == CC_TST_NE) && !graph->GetEncoder()->CanEncodeImmLogical(value, WORD_SIZE)) {
                 continue;
             }
+            src_graph::GenIfImm::CREATE(graph, cc, value);
 
-            GRAPH(graph)
-            {
-                PARAMETER(0U, 0U).s32();
-                CONSTANT(1U, 0U);
-                CONSTANT(2U, 1U);
-                BASIC_BLOCK(2U, 3U, 4U)
-                {
-                    INST(3U, Opcode::IfImm).SrcType(DataType::INT32).CC(cc).Imm(value).Inputs(0U);
-                }
-                BASIC_BLOCK(3U, -1L)
-                {
-                    INST(4U, Opcode::Return).b().Inputs(2U);
-                }
-                BASIC_BLOCK(4U, -1L)
-                {
-                    INST(5U, Opcode::Return).b().Inputs(1U);
-                }
-            }
             SetNumVirtRegs(0U);
             SetNumArgs(2U);
 
@@ -1015,6 +931,28 @@ TEST_F(CodegenTest, GenIfImm)
     }
 }
 
+SRC_GRAPH(If, Graph *graph, ConditionCode cc)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0U);
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(4U, Opcode::If).SrcType(DataType::UINT64).CC(cc).Inputs(0U, 1U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(5U, Opcode::Return).b().Inputs(3U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Return).b().Inputs(2U);
+        }
+    }
+}
 TEST_F(CodegenTest, If)
 {
     for (int ccint = ConditionCode::CC_FIRST; ccint != ConditionCode::CC_LAST; ccint++) {
@@ -1023,25 +961,8 @@ TEST_F(CodegenTest, If)
         RuntimeInterfaceMock runtime;
         graph->SetRuntime(&runtime);
 
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).u64();
-            PARAMETER(1U, 1U).u64();
-            CONSTANT(2U, 0U);
-            CONSTANT(3U, 1U);
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(4U, Opcode::If).SrcType(DataType::UINT64).CC(cc).Inputs(0U, 1U);
-            }
-            BASIC_BLOCK(3U, -1L)
-            {
-                INST(5U, Opcode::Return).b().Inputs(3U);
-            }
-            BASIC_BLOCK(4U, -1L)
-            {
-                INST(6U, Opcode::Return).b().Inputs(2U);
-            }
-        }
+        src_graph::If::CREATE(graph, cc);
+
         SetNumVirtRegs(0U);
         SetNumArgs(2U);
 
@@ -1082,13 +1003,35 @@ TEST_F(CodegenTest, If)
     }
 }
 
+SRC_GRAPH(Overflow, Graph *graph, Opcode overflowOpcode)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).i32();
+        PARAMETER(1U, 1U).i32();
+        CONSTANT(2U, 0U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(4U, overflowOpcode).i32().SrcType(DataType::INT32).CC(CC_EQ).Inputs(0U, 1U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(5U, Opcode::Return).b().Inputs(2U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Return).b().Inputs(4U);
+        }
+    }
+}
+
 TEST_F(CodegenTest, AddOverflow)
 {
     auto graph = CreateGraphStartEndBlocks();
     RuntimeInterfaceMock runtime;
     graph->SetRuntime(&runtime);
 
-    CreateGraphForOverflowTest(graph, Opcode::AddOverflow);
+    src_graph::Overflow::CREATE(graph, Opcode::AddOverflow);
 
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
@@ -1139,7 +1082,7 @@ TEST_F(CodegenTest, SubOverflow)
     RuntimeInterfaceMock runtime;
     graph->SetRuntime(&runtime);
 
-    CreateGraphForOverflowTest(graph, Opcode::SubOverflow);
+    src_graph::Overflow::CREATE(graph, Opcode::SubOverflow);
 
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
@@ -1184,6 +1127,27 @@ TEST_F(CodegenTest, SubOverflow)
     }
 }
 
+SRC_GRAPH(GenSelect, Graph *graph, ConditionCode cc)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s64();
+        PARAMETER(1U, 1U).s64();
+        CONSTANT(2U, 0U);
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(4U, Opcode::If).SrcType(DataType::INT64).CC(cc).Inputs(0U, 1U);
+        }
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(5U, Opcode::Phi).b().Inputs({{3U, 3U}, {2U, 2U}});
+            INST(6U, Opcode::Return).b().Inputs(5U);
+        }
+    }
+}
+
 TEST_F(CodegenTest, GenSelect)
 {
     for (int ccint = ConditionCode::CC_FIRST; ccint != ConditionCode::CC_LAST; ccint++) {
@@ -1192,23 +1156,8 @@ TEST_F(CodegenTest, GenSelect)
         RuntimeInterfaceMock runtime;
         graph->SetRuntime(&runtime);
 
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).s64();
-            PARAMETER(1U, 1U).s64();
-            CONSTANT(2U, 0U);
-            CONSTANT(3U, 1U);
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(4U, Opcode::If).SrcType(DataType::INT64).CC(cc).Inputs(0U, 1U);
-            }
-            BASIC_BLOCK(3U, 4U) {}
-            BASIC_BLOCK(4U, -1L)
-            {
-                INST(5U, Opcode::Phi).b().Inputs({{3U, 3U}, {2U, 2U}});
-                INST(6U, Opcode::Return).b().Inputs(5U);
-            }
-        }
+        src_graph::GenSelect::CREATE(graph, cc);
+
         SetNumVirtRegs(0U);
         SetNumArgs(2U);
 
@@ -1252,6 +1201,22 @@ TEST_F(CodegenTest, GenSelect)
     }
 }
 
+SRC_GRAPH(BoolSelectImm, Graph *graph, ConditionCode cc)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0U);
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
+            INST(5U, Opcode::SelectImm).b().SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U, 2U, 4U);
+            INST(6U, Opcode::Return).b().Inputs(5U);
+        }
+    }
+}
 TEST_F(CodegenTest, BoolSelectImm)
 {
     for (int ccint = ConditionCode::CC_FIRST; ccint != ConditionCode::CC_LAST; ccint++) {
@@ -1260,19 +1225,8 @@ TEST_F(CodegenTest, BoolSelectImm)
         RuntimeInterfaceMock runtime;
         graph->SetRuntime(&runtime);
 
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).u64();
-            PARAMETER(1U, 1U).u64();
-            CONSTANT(2U, 0U);
-            CONSTANT(3U, 1U);
-            BASIC_BLOCK(2U, -1L)
-            {
-                INST(4U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
-                INST(5U, Opcode::SelectImm).b().SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U, 2U, 4U);
-                INST(6U, Opcode::Return).b().Inputs(5U);
-            }
-        }
+        src_graph::BoolSelectImm::CREATE(graph, cc);
+
         SetNumVirtRegs(0U);
         SetNumArgs(2U);
 
@@ -1311,6 +1265,21 @@ TEST_F(CodegenTest, BoolSelectImm)
     }
 }
 
+SRC_GRAPH(Select, Graph *graph, ConditionCode cc)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        CONSTANT(2U, 0U);
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(5U, Opcode::Select).u64().SrcType(DataType::UINT64).CC(cc).Inputs(3U, 2U, 0U, 1U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
+        }
+    }
+}
 TEST_F(CodegenTest, Select)
 {
     for (int ccint = ConditionCode::CC_FIRST; ccint != ConditionCode::CC_LAST; ccint++) {
@@ -1319,18 +1288,8 @@ TEST_F(CodegenTest, Select)
         RuntimeInterfaceMock runtime;
         graph->SetRuntime(&runtime);
 
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).u64();
-            PARAMETER(1U, 1U).u64();
-            CONSTANT(2U, 0U);
-            CONSTANT(3U, 1U);
-            BASIC_BLOCK(2U, -1L)
-            {
-                INST(5U, Opcode::Select).u64().SrcType(DataType::UINT64).CC(cc).Inputs(3U, 2U, 0U, 1U);
-                INST(6U, Opcode::Return).u64().Inputs(5U);
-            }
-        }
+        src_graph::Select::CREATE(graph, cc);
+
         SetNumVirtRegs(0U);
         SetNumArgs(2U);
 
@@ -1369,11 +1328,8 @@ TEST_F(CodegenTest, Select)
     }
 }
 
-TEST_F(CodegenTest, CompareObj)
+SRC_GRAPH(CompareObj, Graph *graph)
 {
-    auto graph = CreateGraphStartEndBlocks();
-    RuntimeInterfaceMock runtime;
-    graph->SetRuntime(&runtime);
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
@@ -1385,6 +1341,15 @@ TEST_F(CodegenTest, CompareObj)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
+}
+
+TEST_F(CodegenTest, CompareObj)
+{
+    auto graph = CreateGraphStartEndBlocks();
+    RuntimeInterfaceMock runtime;
+    graph->SetRuntime(&runtime);
+
+    src_graph::CompareObj::CREATE(graph);
     SetNumVirtRegs(0U);
     SetNumArgs(1U);
 
@@ -1416,6 +1381,20 @@ TEST_F(CodegenTest, CompareObj)
     EXPECT_EQ(retData, 0U);
 }
 
+SRC_GRAPH(LoadArray, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();  // array
+        PARAMETER(1U, 1U).u32();  // index
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, Opcode::LoadArray).u32().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).u32().Inputs(2U);
+        }
+    }
+}
+
 TEST_F(CodegenTest, LoadArray)
 {
     CheckLoadArray<bool>();
@@ -1430,16 +1409,7 @@ TEST_F(CodegenTest, LoadArray)
     CheckLoadArray<float>();
     CheckLoadArray<double>();
 
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).ref();  // array
-        PARAMETER(1U, 1U).u32();  // index
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::LoadArray).u32().Inputs(0U, 1U);
-            INST(3U, Opcode::Return).u32().Inputs(2U);
-        }
-    }
+    src_graph::LoadArray::CREATE(GetGraph());
     auto graph = GetGraph();
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
@@ -1577,9 +1547,9 @@ TEST_F(CodegenTest, Parameter)
     }
 }
 
-TEST_F(CodegenTest, RegallocTwoFreeRegs)
+SRC_GRAPH(RegallocTwoFreeRegs, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 1U);   // const a = 1
         CONSTANT(1U, 10U);  // const b = 10
@@ -1605,6 +1575,11 @@ TEST_F(CodegenTest, RegallocTwoFreeRegs)
             INST(11U, Opcode::Return).u64().Inputs(10U);  // return a'
         }
     }
+}
+
+TEST_F(CodegenTest, RegallocTwoFreeRegs)
+{
+    src_graph::RegallocTwoFreeRegs::CREATE(GetGraph());
     // Create reg_mask with 5 available general registers,
     // 3 of them will be reserved by Reg Alloc.
     {
@@ -1639,10 +1614,9 @@ TEST_F(CodegenTest, RegallocTwoFreeRegs)
     }
 }
 
-// NOTE (igorban): Update FillSaveStates() with filling SaveState from SpillFill
-TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
+SRC_GRAPH(TwoFreeRegsAdditionSaveState, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(11U, 0U).f64();
@@ -1668,6 +1642,12 @@ TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
                 .SrcVregs({0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U});
         }
     }
+}
+
+// NOTE (igorban): Update FillSaveStates() with filling SaveState from SpillFill
+TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
+{
+    src_graph::TwoFreeRegsAdditionSaveState::CREATE(GetGraph());
     // NO RETURN value - will droped down to SaveState block!
 
     SetNumVirtRegs(0U);
@@ -1708,9 +1688,9 @@ TEST_F(CodegenTest, DISABLED_TwoFreeRegsAdditionSaveState)
     }
 }
 
-TEST_F(CodegenTest, SaveState)
+SRC_GRAPH(SaveState, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();  // array
         PARAMETER(1U, 1U).u64();  // index
@@ -1730,7 +1710,11 @@ TEST_F(CodegenTest, SaveState)
             INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
+}
 
+TEST_F(CodegenTest, SaveState)
+{
+    src_graph::SaveState::CREATE(GetGraph());
     SetNumVirtRegs(0U);
     SetNumArgs(2U);
 
@@ -1801,157 +1785,85 @@ TEST_F(CodegenTest, DeoptimizeIf)
     // param == true [INTERPRET]
 }
 
-TEST_F(CodegenTest, ZeroCheck)
+static ArenaVector<std::pair<uint8_t, uint8_t>> ResoveParameterSequence(
+    ArenaVector<std::pair<uint8_t, uint8_t>> *movedRegisters, uint8_t tmp, ArenaAllocator *allocator)
 {
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s64();
-        PARAMETER(1U, 1U).s64();
-        BASIC_BLOCK(2U, 3U)
-        {
-            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
-            INST(3U, Opcode::ZeroCheck).s64().Inputs(0U, 2U);
-            INST(4U, Opcode::Div).s64().Inputs(1U, 3U);
-            INST(5U, Opcode::Mod).s64().Inputs(1U, 3U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(6U, Opcode::Add).s64().Inputs(0U, 1U);  // Some return value
-            INST(7U, Opcode::Return).s64().Inputs(6U);
-        }
-    }
-    RegAlloc(GetGraph());
+    constexpr uint8_t INVALID_FIRST = -1;
+    constexpr uint8_t INVALID_SECOND = -2;
 
-    SetNumVirtRegs(GetGraph()->GetVRegsCount());
-
-    EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
-    ASSERT(codeEntry != nullptr && codeExit != nullptr);
-    GetExecModule().SetInstructions(codeEntry, codeExit);
-
-    // param1 < 0 [OK]
-    auto param1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::min(), DataType::INT64);
-    auto param2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    GetExecModule().SetParameter(0U, param1);
-    GetExecModule().SetParameter(1U, param2);
-    GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), param1 + param2);
-
-    // param1 > 0 [OK]
-    param1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    param2 = CutValue<uint64_t>(0U, DataType::INT64);
-    GetExecModule().SetParameter(0U, param1);
-    GetExecModule().SetParameter(1U, param2);
-    GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), param1 + param2);
-
-    // param1 == 0 [THROW]
-}
-
-TEST_F(CodegenTest, NegativeCheck)
-{
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s64();
-        PARAMETER(1U, 1U).s64();
-        BASIC_BLOCK(2U, 3U)
-        {
-            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
-            INST(3U, Opcode::NegativeCheck).s64().Inputs(0U, 2U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(6U, Opcode::Add).s64().Inputs(0U, 1U);  // Some return value
-            INST(7U, Opcode::Return).s64().Inputs(6U);
-        }
-    }
-    RegAlloc(GetGraph());
-
-    SetNumVirtRegs(GetGraph()->GetVRegsCount());
-
-    EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
-    ASSERT(codeEntry != nullptr && codeExit != nullptr);
-    GetExecModule().SetInstructions(codeEntry, codeExit);
-
-    // param1 > 0 [OK]
-    auto param1 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    auto param2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::min(), DataType::INT64);
-    GetExecModule().SetParameter(0U, param1);
-    GetExecModule().SetParameter(1U, param2);
-    GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), param1 + param2);
-
-    // param1 == 0 [OK]
-    param1 = CutValue<uint64_t>(0U, DataType::INT64);
-    param2 = CutValue<uint64_t>(std::numeric_limits<int64_t>::max(), DataType::INT64);
-    GetExecModule().SetParameter(0U, param1);
-    GetExecModule().SetParameter(1U, param2);
-    GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), param1 + param2);
-
-    // param1 < 0 [THROW]
-}
-
-TEST_F(CodegenTest, NullCheckBoundsCheck)
-{
-    static const unsigned ARRAY_LEN = 10;
-
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).ref();  // array
-        PARAMETER(1U, 1U).u64();  // index
-        BASIC_BLOCK(2U, 3U)
-        {
-            INST(2U, Opcode::SaveState).Inputs(0U, 1U).SrcVregs({0U, 1U});
-            INST(3U, Opcode::NullCheck).ref().Inputs(0U, 2U);
-            INST(4U, Opcode::LenArray).s32().Inputs(3U);
-            INST(5U, Opcode::BoundsCheck).s32().Inputs(4U, 1U, 2U);
-            INST(6U, Opcode::LoadArray).u64().Inputs(3U, 5U);
-            INST(7U, Opcode::Add).u64().Inputs(6U, 6U);
-            INST(8U, Opcode::StoreArray).u64().Inputs(3U, 5U, 7U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(10U, Opcode::Add).u64().Inputs(7U, 7U);  // Some return value
-            INST(11U, Opcode::Return).u64().Inputs(10U);
-        }
-    }
-    SetNumVirtRegs(0U);
-    SetNumArgs(2U);
-    RegAlloc(GetGraph());
-
-    EXPECT_TRUE(RunCodegen(GetGraph()));
-    auto codeEntry = reinterpret_cast<char *>(GetGraph()->GetCode().Data());
-    auto codeExit = codeEntry + GetGraph()->GetCode().Size();
-    ASSERT(codeEntry != nullptr && codeExit != nullptr);
-    GetExecModule().SetInstructions(codeEntry, codeExit);
-
-    // NOTE (igorban) : fill Frame array == nullptr [THROW]
-
-    uint64_t array[ARRAY_LEN];
-    for (auto i = 0U; i < ARRAY_LEN; i++) {
-        array[i] = i + 0x20U;
-    }
-    auto param1 = GetExecModule().CreateArray(array, ARRAY_LEN, GetObjectAllocator());
-    GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param1));
-
-    // 0 <= index < ARRAY_LEN [OK]
-    auto index = CutValue<uint64_t>(1U, DataType::UINT64);
-    GetExecModule().SetParameter(1U, index);
-    GetExecModule().Execute();
-    EXPECT_EQ(GetExecModule().GetRetValue(), array[index] * 4U);
-
+    movedRegisters->emplace_back(std::pair<uint8_t, uint8_t>(INVALID_FIRST, INVALID_SECOND));
     /*
-    NOTE (igorban) : fill Frame
-    // index < 0 [THROW]
+        Example:
+        1. mov x0 <- x3
+        2. mov x1 <- x0
+        3. mov x2 <- x3
+        4. mov x3 <- x2
+        Agreement - dst-s can't hold same registers multiple times (double move to one register)
+                  - src for movs can hold same register multiply times
+
+        Algorithm:
+            1. Find handing edges (x1 - just in dst)
+                emit "2. mov x1 <- x0"
+                goto 1.
+                emit "1. mov x0 <- x3"
+            2. Assert all registers used just one time (loop from registers sequence)
+               All multiply-definitions must be resolved on previous step
+                emit ".. mov xtmp <- x2" (strore xtmp == x3)
+                emit "3. mov x2 <- x3"
+                emit "4. mov x3 <- xtmp" (ASSERT(4->GetReg == x3) - there is no other possible situations here)
     */
-    GetExecModule().FreeArray(param1);
+    // Calculate weigth
+    ArenaVector<std::pair<uint8_t, uint8_t>> result(allocator->Adapter());
+    // --moved_registers->end() - for remove marker-element
+    for (auto pair = movedRegisters->begin(); pair != --movedRegisters->end();) {
+        auto conflict = std::find_if(movedRegisters->begin(), movedRegisters->end(), [pair](auto inPair) {
+            return (inPair.second == pair->first && (inPair != *pair));
+        });
+        if (conflict == movedRegisters->end()) {
+            // emit immediate - there are no another possible combinations
+            result.emplace_back(*pair);
+            movedRegisters->erase(pair);
+            pair = movedRegisters->begin();
+        } else {
+            ++pair;
+        }
+    }
+    // Here just loops
+    auto currPair = movedRegisters->begin();
+    while (!(currPair->first == INVALID_FIRST && currPair->second == INVALID_SECOND)) {
+        /* Need support single mov x1 <- x1:
+           ASSERT(moved_registers->size() != 1);
+        */
+
+        auto savedReg = currPair->first;
+        result.emplace_back(std::pair<uint8_t, uint8_t>(tmp, currPair->first));
+        result.emplace_back(*currPair);  // we already save dst_register
+
+        // Remove current instruction
+        auto currReg = currPair->second;
+        movedRegisters->erase(currPair);
+
+        while (currPair != movedRegisters->end()) {
+            currPair = std::find_if(movedRegisters->begin(), movedRegisters->end(),
+                                    [currReg](auto inPair) { return inPair.first == currReg; });
+            ASSERT(currPair != movedRegisters->end());
+            if (currPair->second == savedReg) {
+                result.emplace_back(std::pair<uint8_t, uint8_t>(currPair->first, tmp));
+                movedRegisters->erase(currPair);
+                break;
+            };
+            result.emplace_back(*currPair);
+            currReg = currPair->second;
+            movedRegisters->erase(currPair);
+        }
+        currPair = movedRegisters->begin();
+    }
+    movedRegisters->erase(currPair);
+
+    return result;
 }
 
-TEST_F(CodegenTest, ResolveParamSequence)
+TEST_F(CodegenTest, ResolveParamSequence1)
 {
     ArenaVector<std::pair<uint8_t, uint8_t>> someSequence(GetAllocator()->Adapter());
     someSequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 3U));
@@ -1969,531 +1881,89 @@ TEST_F(CodegenTest, ResolveParamSequence)
     resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 13U));
 
     EXPECT_EQ(result, resultSequence);
+}
+TEST_F(CodegenTest, ResolveParamSequence2)
+{
+    // Special loop-only case
+    ArenaVector<std::pair<uint8_t, uint8_t>> someSequenceLoop(GetAllocator()->Adapter());
+    someSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+    someSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(1U, 2U));
+    someSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
+    someSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
+    someSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
 
-    {
-        // Special loop-only case
-        ArenaVector<std::pair<uint8_t, uint8_t>> someSequence(GetAllocator()->Adapter());
-        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
-        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 2U));
-        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
-        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
-        someSequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
+    auto resultLoop = ResoveParameterSequence(&someSequenceLoop, 13U, GetAllocator());
+    EXPECT_TRUE(someSequenceLoop.empty());
+    ArenaVector<std::pair<uint8_t, uint8_t>> resultSequenceLoop(GetAllocator()->Adapter());
+    resultSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(13U, 2U));
+    resultSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
+    resultSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
+    resultSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
+    resultSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
+    resultSequenceLoop.emplace_back(std::pair<uint8_t, uint8_t>(1U, 13U));
 
-        auto result = ResoveParameterSequence(&someSequence, 13U, GetAllocator());
-        EXPECT_TRUE(someSequence.empty());
-        ArenaVector<std::pair<uint8_t, uint8_t>> resultSequence(GetAllocator()->Adapter());
-        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(13U, 2U));
-        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(2U, 3U));
-        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(3U, 0U));
-        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(0U, 4U));
-        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(4U, 1U));
-        resultSequence.emplace_back(std::pair<uint8_t, uint8_t>(1U, 13U));
+    EXPECT_EQ(resultLoop, resultSequenceLoop);
+}
 
-        EXPECT_EQ(result, resultSequence);
+template <uint8_t REG_SIZE, uint8_t TMP_REG, typename T>
+void CheckParamSequence(uint8_t j, const T &resultVect, const T &origVector)
+{
+    auto dst = resultVect[j].first;
+
+    for (uint8_t k = j + 1U; k < REG_SIZE; ++k) {
+        if (resultVect[k].second == dst && resultVect[k].second != TMP_REG) {
+            std::cerr << " first = " << resultVect[k].first << " tmp = " << TMP_REG << "\n";
+            std::cerr << " Before:\n";
+            for (const auto &it : origVector) {
+                std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";
+            }
+            std::cerr << " After:\n";
+            for (const auto &it : resultVect) {
+                std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";
+            }
+            std::cerr << "Fault on " << (size_t)j << " and " << (size_t)k << "\n";
+            EXPECT_NE(resultVect[k].second, dst);
+        }
     }
-    const uint32_t regSize = 30;
-    const uint8_t tmpReg = regSize + 5U;
+}
+
+TEST_F(CodegenTest, ResolveParamSequence3)
+{
+    ArenaVector<std::pair<uint8_t, uint8_t>> someSequence(GetAllocator()->Adapter());
+    ArenaVector<std::pair<uint8_t, uint8_t>> resultSequence(GetAllocator()->Adapter());
+    constexpr uint8_t REG_SIZE = 30;
+    constexpr uint8_t TMP_REG = REG_SIZE + 5U;
     for (uint64_t i = 0; i < ITERATION; ++i) {
         EXPECT_TRUE(someSequence.empty());
 
         std::vector<uint8_t> iters;
-        for (uint8_t j = 0; j < regSize; ++j) {
+        for (uint8_t j = 0; j < REG_SIZE; ++j) {
             iters.push_back(j);
         }
         std::shuffle(iters.begin(), iters.end(), g_randomGenerator);
         std::vector<std::pair<uint8_t, uint8_t>> origVector;
-        for (uint8_t j = 0; j < regSize; ++j) {
+        for (uint8_t j = 0; j < REG_SIZE; ++j) {
             auto gen {g_randomGenerator()};
-            auto randomValue = gen % regSize;
+            auto randomValue = gen % REG_SIZE;
             origVector.emplace_back(std::pair<uint8_t, uint8_t>(iters[j], randomValue));
         }
         for (auto &pair : origVector) {
             someSequence.emplace_back(pair);
         }
-        resultSequence = ResoveParameterSequence(&someSequence, tmpReg, GetAllocator());
-        std::vector<std::pair<uint8_t, uint8_t>> result;
+        resultSequence = ResoveParameterSequence(&someSequence, TMP_REG, GetAllocator());
+        std::vector<std::pair<uint8_t, uint8_t>> resultVect;
         for (auto &pair : resultSequence) {
-            result.emplace_back(pair);
+            resultVect.emplace_back(pair);
         }
 
         // First analysis - there are no dst before src
-        for (uint8_t j = 0; j < regSize; ++j) {
-            auto dst = result[j].first;
-            for (uint8_t k = j + 1U; k < regSize; ++k) {
-                if (result[k].second == dst && result[k].second != tmpReg) {
-                    std::cerr << " first = " << result[k].first << " tmp = " << (regSize + 5U) << "\n";
-                    std::cerr << " Before:\n";
-                    for (auto &it : origVector) {
-                        std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";
-                    }
-                    std::cerr << " After:\n";
-                    for (auto &it : result) {
-                        std::cerr << " " << (size_t)it.first << "<-" << (size_t)it.second << "\n";
-                    }
-                    std::cerr << "Fault on " << (size_t)j << " and " << (size_t)k << "\n";
-                    EXPECT_NE(result[k].second, dst);
-                }
-            }
+        for (uint8_t j = 0; j < REG_SIZE; ++j) {
+            CheckParamSequence<REG_SIZE, TMP_REG>(j, resultVect, origVector);
         }
 
         // Second analysis - if remove all same moves - there will be
         // only " move tmp <- reg " & " mov reg <- tmp"
     }
-}
-
-TEST_F(CodegenTest, BoundsCheckI)
-{
-    uint64_t arrayData[4098U];
-    for (unsigned i = 0; i < 4098U; i++) {
-        arrayData[i] = i;
-    }
-
-    for (unsigned index = 4095U; index <= 4097U; index++) {
-        auto graph = CreateEmptyGraph();
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).ref();  // array
-            BASIC_BLOCK(2U, -1L)
-            {
-                INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-                INST(2U, Opcode::NullCheck).ref().Inputs(0U, 1U);
-                INST(3U, Opcode::LenArray).s32().Inputs(2U);
-                INST(4U, Opcode::BoundsCheckI).s32().Inputs(3U, 1U).Imm(index);
-                INST(5U, Opcode::LoadArrayI).u64().Inputs(2U).Imm(index);
-                INST(6U, Opcode::Return).u64().Inputs(5U);
-            }
-        }
-
-        SetNumVirtRegs(0U);
-        SetNumArgs(1U);
-
-        RegAlloc(graph);
-
-        // Run codegen
-        EXPECT_TRUE(RunCodegen(graph));
-        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
-        auto codeExit = codeEntry + graph->GetCode().Size();
-        ASSERT(codeEntry != nullptr && codeExit != nullptr);
-        GetExecModule().SetInstructions(codeEntry, codeExit);
-
-        // Enable dumping
-        GetExecModule().SetDump(false);
-
-        auto param = GetExecModule().CreateArray(arrayData, index + 1U, GetObjectAllocator());
-        GetExecModule().SetParameter(0U, reinterpret_cast<uint64_t>(param));
-
-        GetExecModule().Execute();
-        GetExecModule().SetDump(false);
-        // End dump
-
-        auto retData = GetExecModule().GetRetValue();
-        EXPECT_EQ(retData, index);
-
-        GetExecModule().FreeArray(param);
-    }
-}
-
-TEST_F(CodegenTest, MultiplyAddInteger)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-add instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 10U);
-        CONSTANT(1U, 42U);
-        CONSTANT(2U, 13U);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(3U, Opcode::MAdd).s64().Inputs(0U, 1U, 2U);
-            INST(4U, Opcode::Return).s64().Inputs(3U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), 433U);
-}
-
-TEST_F(CodegenTest, MultiplyAddFloat)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-add instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 10.0_D);
-        CONSTANT(1U, 42.0_D);
-        CONSTANT(2U, 13.0_D);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(3U, Opcode::MAdd).f64().Inputs(0U, 1U, 2U);
-            INST(4U, Opcode::Return).f64().Inputs(3U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), 433.0_D);
-}
-
-TEST_F(CodegenTest, MultiplySubtractInteger)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-subtract instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 10U);
-        CONSTANT(1U, 42U);
-        CONSTANT(2U, 13U);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(3U, Opcode::MSub).s64().Inputs(0U, 1U, 2U);
-            INST(4U, Opcode::Return).s64().Inputs(3U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), -407L);
-}
-
-TEST_F(CodegenTest, MultiplySubtractFloat)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-subtract instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 10.0_D);
-        CONSTANT(1U, 42.0_D);
-        CONSTANT(2U, 13.0_D);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(3U, Opcode::MSub).f64().Inputs(0U, 1U, 2U);
-            INST(4U, Opcode::Return).f64().Inputs(3U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), -407.0_D);
-}
-
-TEST_F(CodegenTest, MultiplyNegateInteger)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-negate instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 5U);
-        CONSTANT(1U, 5U);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::MNeg).s64().Inputs(0U, 1U);
-            INST(3U, Opcode::Return).s64().Inputs(2U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), -25L);
-}
-
-TEST_F(CodegenTest, MultiplyNegateFloat)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-negate instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 5.0_D);
-        CONSTANT(1U, 5.0_D);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::MNeg).f64().Inputs(0U, 1U);
-            INST(3U, Opcode::Return).f64().Inputs(2U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), -25.0_D);
-}
-
-TEST_F(CodegenTest, OrNot)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-negate instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 0x0000beefU);
-        CONSTANT(1U, 0x2152ffffU);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::OrNot).u32().Inputs(0U, 1U);
-            INST(3U, Opcode::Return).u32().Inputs(2U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), 0xdeadbeefU);
-}
-
-TEST_F(CodegenTest, AndNot)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-negate instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 0xf0000003U);
-        CONSTANT(1U, 0x1U);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::AndNot).u32().Inputs(0U, 1U);
-            INST(3U, Opcode::Return).u32().Inputs(2U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), 0xf0000002U);
-}
-
-TEST_F(CodegenTest, XorNot)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "multiply-negate instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 0xf0f1ffd0U);
-        CONSTANT(1U, 0xcf0fc0f1U);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::XorNot).u32().Inputs(0U, 1U);
-            INST(3U, Opcode::Return).u32().Inputs(2U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), 0xc001c0deU);
-}
-
-TEST_F(CodegenTest, AddSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "AddSR instruction is only supported on Aarch64";
-    }
-
-    TestBinaryOperationWithShiftedOperand(Opcode::AddSR, 10U, 2U, ShiftType::LSL, 1U, 14U);
-}
-
-TEST_F(CodegenTest, SubSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "SubSR instruction is only supported on Aarch64";
-    }
-
-    TestBinaryOperationWithShiftedOperand(Opcode::SubSR, 10U, 4U, ShiftType::LSR, 2U, 9U);
-}
-
-TEST_F(CodegenTest, AndSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "AndSR instruction is only supported on Aarch64";
-    }
-
-    TestBinaryOperationWithShiftedOperand(Opcode::AndSR, 1U, 1U, ShiftType::LSL, 1U, 0U);
-}
-
-TEST_F(CodegenTest, OrSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "OrSR instruction is only supported on Aarch64";
-    }
-
-    TestBinaryOperationWithShiftedOperand(Opcode::OrSR, 1U, 1U, ShiftType::LSL, 1U, 3U);
-}
-
-TEST_F(CodegenTest, XorSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "XorSR instruction is only supported on Aarch64";
-    }
-
-    TestBinaryOperationWithShiftedOperand(Opcode::XorSR, 3U, 1U, ShiftType::LSL, 1U, 1U);
-}
-
-TEST_F(CodegenTest, AndNotSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "AndNotSR instruction is only supported on Aarch64";
-    }
-
-    TestBinaryOperationWithShiftedOperand(Opcode::AndNotSR, 6U, 12U, ShiftType::LSR, 2U, 4U);
-}
-
-TEST_F(CodegenTest, OrNotSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "OrNotSR instruction is only supported on Aarch64";
-    }
-
-    TestBinaryOperationWithShiftedOperand(Opcode::OrNotSR, 1U, 12U, ShiftType::LSR, 2U, 0xfffffffdU);
-}
-
-TEST_F(CodegenTest, XorNotSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "XorNotSR instruction is only supported on Aarch64";
-    }
-
-    TestBinaryOperationWithShiftedOperand(Opcode::XorNotSR, -1L, 12U, ShiftType::LSR, 2U, 3U);
-}
-
-TEST_F(CodegenTest, NegSR)
-{
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        GTEST_SKIP() << "NegSR instruction is only supported on Aarch64";
-    }
-
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 0x80000000U);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(1U, Opcode::NegSR).Shift(ShiftType::ASR, 1U).u32().Inputs(0U);
-            INST(2U, Opcode::Return).u32().Inputs(1U);
-        }
-    }
-
-    CheckReturnValue(GetGraph(), 0x40000000U);
-}
-
-TEST_F(CodegenTest, LoadArrayPairLivenessInfo)
-{
-    auto graph = GetGraph();
-
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).ref();
-        PARAMETER(1U, 1U).s32();
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::LoadArrayPair).s32().Inputs(0U, 1U);
-            INST(4U, Opcode::LoadPairPart).s32().Inputs(2U).Imm(0U);
-            INST(5U, Opcode::LoadPairPart).s32().Inputs(2U).Imm(1U);
-            INST(12U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(10U, Opcode::LoadClass)
-                .ref()
-                .Inputs(12U)
-                .TypeId(42U)
-                .Class(reinterpret_cast<RuntimeInterface::ClassPtr>(1U));
-            INST(3U, Opcode::IsInstance).b().Inputs(0U, 10U, 12U).TypeId(42U);
-            INST(6U, Opcode::Cast).s32().SrcType(DataType::BOOL).Inputs(3U);
-            INST(7U, Opcode::Add).s32().Inputs(4U, 5U);
-            INST(8U, Opcode::Add).s32().Inputs(7U, 6U);
-            INST(9U, Opcode::Return).s32().Inputs(8U);
-        }
-    }
-
-    SetNumVirtRegs(0U);
-    SetNumArgs(2U);
-    RegAlloc(graph);
-    EXPECT_TRUE(RunCodegen(graph));
-
-    RegMask ldpRegs {};
-
-    auto cg = Codegen(graph);
-    for (auto &bb : graph->GetBlocksLinearOrder()) {
-        for (auto inst : bb->AllInsts()) {
-            if (inst->GetOpcode() == Opcode::LoadArrayPair) {
-                ldpRegs.set(inst->GetDstReg(0U));
-                ldpRegs.set(inst->GetDstReg(1U));
-            } else if (inst->GetOpcode() == Opcode::IsInstance) {
-                auto liveRegs = cg.GetLiveRegisters(inst).first;
-                // Both dst registers should be alive during IsInstance call
-                ASSERT_EQ(ldpRegs & liveRegs, ldpRegs);
-            }
-        }
-    }
-}
-
-TEST_F(CodegenTest, CompareAnyTypeInst)
-{
-    auto graph = GetGraph();
-    graph->SetDynamicMethod();
-    graph->SetDynamicStub();
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U);
-        INS(0U).SetType(DataType::Type::ANY);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::CompareAnyType).b().AnyType(AnyBaseType::UNDEFINED_TYPE).Inputs(0U);
-            INST(3U, Opcode::Return).b().Inputs(2U);
-        }
-    }
-
-    SetNumVirtRegs(0U);
-    ASSERT_TRUE(RegAlloc(graph));
-    ASSERT_TRUE(RunCodegen(graph));
-
-    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto codeExit = codeEntry + graph->GetCode().Size();
-
-    ASSERT(codeEntry != nullptr && codeExit != nullptr);
-
-    GetExecModule().SetInstructions(codeEntry, codeExit);
-    GetExecModule().SetDump(false);
-
-    GetExecModule().Execute();
-    auto rv = GetExecModule().GetRetValue<bool>();
-    EXPECT_EQ(rv, true);
-}
-
-TEST_F(CodegenTest, CastAnyTypeValueInst)
-{
-    auto graph = GetGraph();
-    graph->SetDynamicMethod();
-    graph->SetDynamicStub();
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U);
-        INS(0U).SetType(DataType::Type::ANY);
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(2U, Opcode::CastAnyTypeValue).b().AnyType(AnyBaseType::UNDEFINED_TYPE).Inputs(0U);
-            INST(3U, Opcode::Return).b().Inputs(2U);
-        }
-    }
-
-    SetNumVirtRegs(0U);
-    ASSERT_TRUE(RegAlloc(graph));
-    ASSERT_TRUE(RunCodegen(graph));
-
-    auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
-    auto codeExit = codeEntry + graph->GetCode().Size();
-
-    ASSERT(codeEntry != nullptr && codeExit != nullptr);
-
-    GetExecModule().SetInstructions(codeEntry, codeExit);
-    GetExecModule().SetDump(false);
-
-    GetExecModule().Execute();
-    auto rv = GetExecModule().GetRetValue<uint32_t>();
-    EXPECT_EQ(rv, 0U);
 }
 // NOLINTEND(readability-magic-numbers,modernize-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
 

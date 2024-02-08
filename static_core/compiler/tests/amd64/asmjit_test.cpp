@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "mem/pool_manager.h"
 
 namespace ark::compiler {
-using namespace asmjit;  // NOLINT(google-build-using-namespace)
+using namespace asmjit;  // NOLINT(*-build-using-namespace)
 
 class AsmJitTest : public ::testing::Test {
 public:
@@ -115,8 +115,8 @@ TEST_F(AsmJitTest, Add)
     Error err = rt.add(&fn, &code);
     ASSERT_FALSE(err);
 
-    size_t result {fn(size_t(2), size_t(3))};
-    ASSERT_EQ(size_t(5), result);
+    size_t result {fn(size_t(2U), size_t(3U))};
+    ASSERT_EQ(size_t(5U), result);
 }
 
 TEST_F(AsmJitTest, Add2)
@@ -140,8 +140,8 @@ TEST_F(AsmJitTest, Add2)
     Error err = rt.add(&fn, &code);
     ASSERT_FALSE(err);
 
-    size_t result {fn(size_t(2), size_t(3))};
-    ASSERT_EQ(size_t(5), result);
+    size_t result {fn(size_t(2U), size_t(3U))};
+    ASSERT_EQ(size_t(5U), result);
 }
 
 TEST_F(AsmJitTest, AddDouble)
@@ -164,8 +164,8 @@ TEST_F(AsmJitTest, AddDouble)
     Error err = rt.add(&fn, &code);
     ASSERT_FALSE(err);
 
-    double result {fn(2.0, 3.0)};  // NOLINT(readability-magic-numbers)
-    ASSERT_EQ(5.0, result);
+    double result {fn(2.0F, 3.0F)};  // NOLINT(readability-magic-numbers)
+    ASSERT_EQ(5.0F, result);
 }
 
 TEST_F(AsmJitTest, AddExplicit)
@@ -218,8 +218,8 @@ TEST_F(AsmJitTest, AddExplicit)
     using Func = size_t (*)(size_t lhs, size_t rhs);
     Func fn = reinterpret_cast<Func>(roPtr);
 
-    size_t result {fn(size_t(2), size_t(3))};
-    ASSERT_EQ(size_t(5), result);
+    size_t result {fn(size_t(2U), size_t(3U))};
+    ASSERT_EQ(size_t(5U), result);
 
     err = allocator.release(roPtr);
     ASSERT_FALSE(err);
