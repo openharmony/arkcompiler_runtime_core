@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,18 @@
 #include "compiler/code_info/code_info.h"
 #include "events/events.h"
 #include "optimizer/ir/graph.h"
+#include "optimizer/ir/graph_checker.h"
 #include "optimizer/ir_builder/ir_builder.h"
+#include "optimizer/optimizations/branch_elimination.h"
 #include "optimizer/optimizations/checks_elimination.h"
+#include "optimizer/optimizations/if_merging.h"
 #include "optimizer/optimizations/inlining.h"
 #include "optimizer/optimizations/memory_barriers.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
+#include "optimizer/optimizations/peepholes.h"
+#include "optimizer/optimizations/simplify_string_builder.h"
+#include "optimizer/optimizations/try_catch_resolving.h"
+#include "optimizer/optimizations/vn.h"
 #include "optimizer/analysis/monitor_analysis.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "runtime/include/method.h"
@@ -190,6 +197,34 @@ bool LLVMAotCompiler::AddGraph(compiler::Graph *graph)
     return result;
 }
 
+void LLVMAotCompiler::RunArkPasses(ark::compiler::Graph *graph)
+{
+    graph->RunPass<compiler::Cleanup>(false);
+    // ==== Partial Ark Compiler Pipeline =======
+    graph->RunPass<compiler::Peepholes>();
+    graph->RunPass<compiler::BranchElimination>();
+    graph->RunPass<compiler::SimplifyStringBuilder>();
+    graph->RunPass<compiler::Cleanup>();
+    graph->RunPass<compiler::CatchInputs>();
+    graph->RunPass<compiler::TryCatchResolving>();
+    graph->RunPass<compiler::Peepholes>();
+    graph->RunPass<compiler::BranchElimination>();
+    graph->RunPass<compiler::ValNum>();
+    graph->RunPass<compiler::IfMerging>();
+    graph->RunPass<compiler::Cleanup>(false);
+    graph->RunPass<compiler::Peepholes>();
+    // ==========================================
+    graph->RunPass<compiler::ChecksElimination>();
+    graph->RunPass<compiler::Inlining>(true);
+    graph->RunPass<compiler::Cleanup>(false);
+    graph->RunPass<compiler::OptimizeMemoryBarriers>();
+#ifndef NDEBUG
+    if (ark::compiler::g_options.IsCompilerCheckGraph() && ark::compiler::g_options.IsCompilerCheckFinal()) {
+        ark::compiler::GraphChecker(graph, "LLVM").Check();
+    }
+#endif
+}
+
 bool LLVMAotCompiler::AddGraphToModule(ark::compiler::Graph *graph, WrappedModule &module, AddGraphMode addGraphMode)
 {
     auto method = graph->GetMethod();
@@ -199,12 +234,7 @@ bool LLVMAotCompiler::AddGraphToModule(ark::compiler::Graph *graph, WrappedModul
         return true;
     }
     LLVM_LOG(DEBUG, INFRA) << "Adding graph for method = '" << runtime_->GetMethodFullName(graph->GetMethod()) << "'";
-    graph->RunPass<compiler::Cleanup>(false);
-    graph->RunPass<compiler::ChecksElimination>();
-    graph->RunPass<compiler::Inlining>(true);
-    graph->RunPass<compiler::Cleanup>(false);
-    graph->RunPass<compiler::OptimizeMemoryBarriers>();
-
+    RunArkPasses(graph);
     LLVMIrConstructor ctor(graph, module.GetModule().get(), module.GetLLVMContext().get(),
                            module.GetLLVMArkInterface().get(), module.GetDebugData());
     auto llvmFunction = ctor.GetFunc();

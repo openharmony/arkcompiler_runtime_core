@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -201,24 +201,6 @@ static inline bool IsSignedInteger(const DataType::Type &type)
 static inline bool IsUnsignedInteger(DataType::Type type)
 {
     return IsInteger(type) && !DataType::IsTypeSigned(type);
-}
-
-static bool IsAlwaysThrowMethod(Graph *graph)
-{
-    if (!g_options.IsCompilerInliningSkipAlwaysThrowMethods()) {
-        return false;
-    }
-    // Erased end block if it wasn't connected, should be infinite loop in the graph
-    if (graph->GetEndBlock() == nullptr) {
-        return true;
-    }
-    // check that end block could be reached only through throw-blocks
-    for (auto pred : graph->GetEndBlock()->GetPredsBlocks()) {
-        if (pred->GetLastInst() == nullptr || pred->GetLastInst()->GetOpcode() != Opcode::Throw) {
-            return false;
-        }
-    }
-    return true;
 }
 
 static inline bool IsAlwaysThrowBasicBlock(Inst *inst)
@@ -1449,6 +1431,12 @@ llvm::Value *LLVMIrConstructor::CreateBinaryOp(Inst *inst, llvm::Instruction::Bi
         }
         UNREACHABLE();
     }
+    if (IsTypeNumeric(inst->GetType())) {
+        // Peephole can remove casts and instead put a constant with the wrong type
+        // so we need to create them here.
+        x = CoerceValue(x, inst->GetInputType(0), inst->GetType());
+        y = CoerceValue(y, inst->GetInputType(1), inst->GetType());
+    }
     return builder_.CreateBinOp(opcode, x, y);
 }
 
@@ -2012,6 +2000,9 @@ ArenaVector<llvm::OperandBundleDef> LLVMIrConstructor::CreateSaveStateBundle(Ins
         if (!value->getType()->isPointerTy()) {
             ASSERT(value->getType()->getScalarSizeInBits() <= 64U);
             auto intVal = builder_.CreateBitCast(value, builder_.getIntNTy(value->getType()->getScalarSizeInBits()));
+            if (metatype == VRegInfo::Type::INT32) {
+                intVal = CoerceValue(intVal, ss->GetInputType(i), DataType::INT32);
+            }
             vals.push_back(builder_.CreateZExt(intVal, builder_.getInt64Ty()));
         } else {
             vals.push_back(value);
@@ -2675,7 +2666,7 @@ void LLVMIrConstructor::FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, l
 
 void LLVMIrConstructor::InitializeEntryBlock(bool noInline)
 {
-    if (noInline || IsAlwaysThrowMethod(GetGraph())) {
+    if (noInline) {
         ASSERT(!arkInterface_->IsIrtocMode() && GetGraph()->SupportManagedCode());
         func_->addFnAttr(llvm::Attribute::NoInline);
         // This type of linkage prevents return value propagation.
@@ -4573,22 +4564,21 @@ bool LLVMIrConstructor::BuildIr(bool preventInlining)
 
     // First step - create blocks, leaving LLVM EntryBlock untouched
     BuildBasicBlocks(normal);
-    InitializeEntryBlock(preventInlining || !graph_->GetTryBeginBlocks().empty());
+    InitializeEntryBlock(preventInlining);
+
     // Second step - visit all instructions, including StartBlock, but not filling PHI inputs
     BuildInstructions(normal);
-    // Third step is to fill the PHIs inputs
 
+    // Third step - fill the PHIs inputs
     for (auto block : graph_->GetBlocksRPO()) {
         FillPhiInputs(block, normal);
     }
 
     debugData_->EndSubprogram(func_);
-
 #ifndef NDEBUG
     // Only for tests
     BreakIrIfNecessary();
 #endif
-
     if (!arkInterface_->IsIrtocMode()) {
         func_->addFnAttr("frame-pointer", "all");
     }

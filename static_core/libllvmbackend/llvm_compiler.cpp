@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
 #include "compiler_options.h"
 
@@ -75,7 +76,35 @@ bool LLVMCompiler::IsInliningDisabled()
 bool LLVMCompiler::IsInliningDisabled(compiler::Graph *graph)
 {
     ASSERT(graph != nullptr);
-    return IsInliningDisabled(graph->GetRuntime(), graph->GetMethod());
+
+    // Erased end block means infinite loop in the 'Graph', such method should not be inlined.
+    if (graph->GetEndBlock() == nullptr) {
+        return true;
+    }
+
+    // Since we do not generate code for 'Catch' blocks, LLVM can not inline function with
+    // 'Try' blocks. Otherwise, if the inlined code throws, execution is on another frame and
+    // it is impossible to find the 'Catch' block. The approach here is same with Ark Compiler.
+    // Also, we can not just check 'graph->GetTryBeginBlocks().empty()', because 'TryCatchResolving'
+    // pass may remove 'TryBegin' blocks, but keep some 'Try' blocks.
+    for (auto block : graph->GetBlocksRPO()) {
+        if (block->IsTry()) {
+            return true;
+        }
+    }
+
+    // NB! LLVM does not follow '--compiler-inlining-skip-always-throw-methods=false' option,
+    // as it may lead to incorrect 'NoReturn' attribute propagation.
+    // Loop below checks if the function exits only using 'Throw' or 'Deoptimize' opcode
+    bool alwaysThrowOrDeopt = true;
+    for (auto pred : graph->GetEndBlock()->GetPredsBlocks()) {
+        if (pred->GetLastInst() == nullptr || !(pred->GetLastInst()->GetOpcode() == compiler::Opcode::Throw ||
+                                                pred->GetLastInst()->GetOpcode() == compiler::Opcode::Deoptimize)) {
+            alwaysThrowOrDeopt = false;
+            break;
+        }
+    }
+    return alwaysThrowOrDeopt || IsInliningDisabled(graph->GetRuntime(), graph->GetMethod());
 }
 
 bool LLVMCompiler::IsInliningDisabled(compiler::RuntimeInterface *runtime, compiler::RuntimeInterface::MethodPtr method)
