@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
 {
@@ -58,4 +58,4 @@ EtsObject *JSRefConvertFunction::UnwrapImpl([[maybe_unused]] InteropCtx *ctx, [[
     UNREACHABLE();
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

@@ -355,7 +355,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathCbrt
+    impl: ark::ets::intrinsics::StdMathCbrt
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathTan
@@ -366,7 +366,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathTan
+    impl: ark::ets::intrinsics::StdMathTan
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
 
@@ -378,7 +378,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathTanh
+    impl: ark::ets::intrinsics::StdMathTanh
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathExp
@@ -389,7 +389,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathExp
+    impl: ark::ets::intrinsics::StdMathExp
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathLog10
@@ -400,7 +400,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathLog10
+    impl: ark::ets::intrinsics::StdMathLog10
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathExpm1
@@ -411,7 +411,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathExpm1
+    impl: ark::ets::intrinsics::StdMathExpm1
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathCeil
@@ -496,7 +496,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathClz32Double
+    impl: ark::ets::intrinsics::StdMathClz32Double
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathSignbit
@@ -2134,7 +2134,7 @@ intrinsics:
     signature:
       ret: std.core.ClassCastException
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
+    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]
 
 ##########################

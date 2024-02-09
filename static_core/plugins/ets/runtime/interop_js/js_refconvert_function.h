@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/js_value_call.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 class JSRefConvertFunction : public JSRefConvert {
 public:
@@ -33,6 +33,6 @@ private:
     EtsClass *klass_;
 };
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif
