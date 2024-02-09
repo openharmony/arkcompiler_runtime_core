@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,6 +178,16 @@ void Context::MergeField(const panda_file::FileReader *reader, panda_file::Class
     auto ni = clz->AddField(StringFromOld(oi->GetNameItem()), TypeFromOld(oi->GetTypeItem()), oi->GetAccessFlags());
     knownItems_[oi] = ni;
     cameFrom_.emplace(ni, reader);
+
+    if (oi->GetValue() != nullptr) {
+        auto newVal = ValueFromOld(oi->GetValue());
+        if (std::holds_alternative<ErrorDetail>(newVal)) {
+            Error("can not parse field value",
+                  {std::get<ErrorDetail>(newVal), ErrorDetail {"field", oi}, {"value", oi->GetValue()}});
+        } else {
+            ni->SetValue(std::get<panda_file::ValueItem *>(newVal));
+        }
+    }
 
     TransferAnnotations(reader, ni, oi);
 }
@@ -616,6 +626,51 @@ void Context::TransferAnnotations(const panda_file::FileReader *reader, T *ni, T
         [](T *self, panda_file::AnnotationItem *an) { self->AddTypeAnnotation(an); });
 }
 
+std::variant<panda_file::ValueItem *, Context::ErrorDetail> Context::ArrayValueFromOld(panda_file::ValueItem *oi)
+{
+    auto old = oi->GetAsArray();
+    auto its = old->GetItems();
+    for (auto &i : its) {
+        if (i.HasValue<panda_file::BaseItem *>()) {
+            auto vl = ScalarValueIdFromOld(i.GetIdItem());
+            if (std::holds_alternative<ErrorDetail>(vl)) {
+                return std::move(std::get<ErrorDetail>(vl));
+            }
+            i = panda_file::ScalarValueItem(std::get<panda_file::BaseItem *>(vl));
+        }
+    }
+    return cont_.CreateItem<panda_file::ArrayValueItem>(old->GetComponentType(), std::move(its));
+}
+
+std::variant<panda_file::ValueItem *, Context::ErrorDetail> Context::ValueFromOld(panda_file::ValueItem *oi)
+{
+    using ValueType = panda_file::ValueItem::Type;
+    switch (oi->GetType()) {
+        case ValueType::INTEGER:
+            return cont_.GetOrCreateIntegerValueItem(oi->GetAsScalar()->GetValue<uint32_t>());
+        case ValueType::LONG:
+            return cont_.GetOrCreateLongValueItem(oi->GetAsScalar()->GetValue<uint64_t>());
+        case ValueType::FLOAT:
+            return cont_.GetOrCreateFloatValueItem(oi->GetAsScalar()->GetValue<float>());
+        case ValueType::DOUBLE:
+            return cont_.GetOrCreateDoubleValueItem(oi->GetAsScalar()->GetValue<double>());
+        case ValueType::ID: {
+            auto oldItem = oi->GetAsScalar()->GetIdItem();
+            ASSERT(oldItem != nullptr);
+            auto newItem = ScalarValueIdFromOld(oldItem);
+            if (std::holds_alternative<ErrorDetail>(newItem)) {
+                return std::move(std::get<ErrorDetail>(newItem));
+            }
+            return cont_.GetOrCreateIdValueItem(std::get<panda_file::BaseItem *>(newItem));
+        }
+        case ValueType::ARRAY: {
+            return ArrayValueFromOld(oi);
+        }
+        default:
+            UNREACHABLE();
+    }
+}
+
 std::variant<panda_file::AnnotationItem *, Context::ErrorDetail> Context::AnnotFromOld(panda_file::AnnotationItem *oa)
 {
     if (auto iter = knownItems_.find(oa); iter != knownItems_.end()) {
@@ -629,54 +684,12 @@ std::variant<panda_file::AnnotationItem *, Context::ErrorDetail> Context::AnnotF
     newElems.reserve(oldElems.size());
     for (const auto &oe : oldElems) {
         auto name = StringFromOld(oe.GetName());
-        auto *oldVal = oe.GetValue();
-        panda_file::ValueItem *newVal {};
-
-        using ValueType = panda_file::ValueItem::Type;
-        switch (oldVal->GetType()) {
-            case ValueType::INTEGER:
-                newVal = cont_.GetOrCreateIntegerValueItem(oldVal->GetAsScalar()->GetValue<uint32_t>());
-                break;
-            case ValueType::LONG:
-                newVal = cont_.GetOrCreateLongValueItem(oldVal->GetAsScalar()->GetValue<uint64_t>());
-                break;
-            case ValueType::FLOAT:
-                newVal = cont_.GetOrCreateFloatValueItem(oldVal->GetAsScalar()->GetValue<float>());
-                break;
-            case ValueType::DOUBLE:
-                newVal = cont_.GetOrCreateDoubleValueItem(oldVal->GetAsScalar()->GetValue<double>());
-                break;
-            case ValueType::ID: {
-                auto oldItem = oldVal->GetAsScalar()->GetIdItem();
-                ASSERT(oldItem != nullptr);
-                auto newItem = ScalarValueIdFromOld(oldItem);
-                if (std::holds_alternative<ErrorDetail>(newItem)) {
-                    return std::move(std::get<ErrorDetail>(newItem));
-                }
-                newVal = cont_.GetOrCreateIdValueItem(std::get<panda_file::BaseItem *>(newItem));
-                break;
-            }
-            case ValueType::ARRAY: {
-                auto old = oldVal->GetAsArray();
-                auto its = old->GetItems();
-                for (auto &i : its) {
-                    if (i.HasValue<panda_file::BaseItem *>()) {
-                        auto vl = ScalarValueIdFromOld(i.GetIdItem());
-                        if (std::holds_alternative<ErrorDetail>(vl)) {
-                            return std::move(std::get<ErrorDetail>(vl));
-                        }
-                        i = panda_file::ScalarValueItem(std::get<panda_file::BaseItem *>(vl));
-                    }
-                }
-                newVal = cont_.CreateItem<panda_file::ArrayValueItem>(old->GetComponentType(), std::move(its));
-                break;
-            }
-            default:
-                UNREACHABLE();
+        auto newVal = ValueFromOld(oe.GetValue());
+        if (std::holds_alternative<ErrorDetail>(newVal)) {
+            return std::move(std::get<ErrorDetail>(newVal));
         }
 
-        ASSERT(newVal != nullptr);
-        newElems.emplace_back(name, newVal);
+        newElems.emplace_back(name, std::get<panda_file::ValueItem *>(newVal));
     }
 
     auto clzIt = knownItems_.find(oa->GetClassItem());
