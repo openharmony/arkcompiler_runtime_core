@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,10 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
 
 from functools import cached_property
 from os import path
@@ -59,6 +55,8 @@ class GeneralOptions:
             "run_gc_in_place": self.run_gc_in_place,
             "heap-verifier": self.heap_verifier,
             "report-format": self.report_format.value.upper(),
+            "detailed-report": self.detailed_report,
+            "detailed-report-file": self.detailed_report_file,
             "verbose": self.verbose.value.upper(),
             "verbose-filter": self.verbose_filter.value.upper(),
             "coverage": self.coverage.to_dict(),
@@ -148,6 +146,24 @@ class GeneralOptions:
     )
     def report_format(self) -> ReportFormat:
         return GeneralOptions.__DEFAULT_REPORT_FORMAT
+
+    @cached_property
+    @value(
+        yaml_path="general.detailed-report",
+        cli_name="detailed_report",
+        cast_to_type=_to_bool
+    )
+    def detailed_report(self) -> bool:
+        return False
+
+    @cached_property
+    @value(
+        yaml_path="general.detailed-report-file",
+        cli_name="detailed_report_file",
+        cast_to_type=_to_path
+    )
+    def detailed_report_file(self) -> Optional[str]:
+        return None
 
     @cached_property
     @value(

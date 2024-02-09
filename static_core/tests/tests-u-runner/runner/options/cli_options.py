@@ -13,10 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
 
 import argparse
 from os import path, makedirs
@@ -219,6 +215,16 @@ def add_general_other_args(parser: argparse.ArgumentParser) -> None:
         help='formats of report files. Supported values: log, md and html. '
              'Several values can be set - in such case formats of all specified values are generated. '
              'Default value: log')
+    parser.add_argument(
+        '--detailed-report', action='store_true', dest='detailed_report', default=None,
+        help='creates additional detailed report with counting tests for each folder. '
+             'By default the report is $WorkDir/report/<suite name>_detailed-report.md '
+             'where $WorkDir is the folder specified by the option --work-dir')
+    parser.add_argument(
+        '--detailed-report-file', action='store', dest='detailed_report_file', default=None,
+        help='specifies custom file name for the detailed report. '
+             'By default the report is $WorkDir/report/<suite name>_detailed-report.md '
+             'where $WorkDir is the folder specified by the option --work-dir')
 
     parser.add_argument(
         '--show-progress', action='store_true', dest='progress', default=None,

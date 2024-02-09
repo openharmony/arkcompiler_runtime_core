@@ -13,10 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
 
 import logging
 import re
@@ -37,6 +33,7 @@ from runner.enum_types.qemu import QemuKind
 from runner.logger import Log
 from runner.options.config import Config
 from runner.reports.report_format import ReportFormat
+from runner.reports.detailed_report import DetailedReport
 from runner.runner_base import Runner
 from runner.test_base import Test
 from runner.test_file_based import TestFileBased
@@ -247,6 +244,7 @@ class RunnerFileBased(Runner):
             execution_time = round((datetime.now() - self.start_time).total_seconds(), 3)
             xml_view.create_xml_report(results, execution_time)
             xml_view.create_ignore_list(set(results))
+            self.__generate_detailed_report(results)
 
         if ReportFormat.HTML in self.test_env.report_formats:
             html_view = HtmlView(self.work_dir.report, self.config, summary)
@@ -263,6 +261,15 @@ class RunnerFileBased(Runner):
         standard_view.create_time_report(results, self.config.time_report)
 
         return self.failed
+
+    def __generate_detailed_report(self, results: List[Test]) -> None:
+        if self.config.general.detailed_report:
+            detailed_report = DetailedReport(
+                results,
+                self.name,
+                self.work_dir.report,
+                self.config.general.detailed_report_file)
+            detailed_report.populate_report()
 
     def _process_failed(self, test_result: TestFileBased, ignored_still_failed: List[Test],
                         excluded_still_failed: List[Test], fail_lists: Dict[FailKind, List[Test]]) -> None:
