@@ -20,7 +20,7 @@
 
 #include <iomanip>
 
-namespace panda {
+namespace ark {
 
 template <typename Base>
 void BitMemoryRegion<Base>::DumpVal(std::ostream &os, size_t val, bool &isZero, int width) const
@@ -67,6 +67,6 @@ inline std::ostream &operator<<(std::ostream &os, const BitMemoryRegion<T> &regi
     return os;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_LIBPANDABASE_UTILS_BIT_MEMORY_REGION_INL_H

@@ -19,7 +19,7 @@
 #include "abs_int_inl_compat_checks.h"
 #include "verification/plugins.h"
 
-namespace panda::verifier::plugin {
+namespace ark::verifier::plugin {
 
 class DefaultPlugin final : public Plugin {
 public:
@@ -56,6 +56,6 @@ public:
     Type NormalizeType(Type type, TypeSystem *types) const override;
 };
 
-}  // namespace panda::verifier::plugin
+}  // namespace ark::verifier::plugin
 
 #endif

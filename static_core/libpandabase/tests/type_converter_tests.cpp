@@ -25,7 +25,7 @@ constexpr size_t ITERATION = 64;
 constexpr size_t ITERATION = 1024;
 #endif
 
-namespace panda::helpers::test {
+namespace ark::helpers::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -97,4 +97,4 @@ TEST(MemoryTest, RoundMemoryConverterTest)
     ASSERT_EQ(MemoryConverter(11'121'092), ValueUnit(10.606, "MB"));
 }
 
-}  // namespace panda::helpers::test
+}  // namespace ark::helpers::test

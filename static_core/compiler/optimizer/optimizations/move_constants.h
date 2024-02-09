@@ -20,7 +20,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class MoveConstants : public Optimization {
 public:
@@ -52,6 +52,6 @@ private:
     const ArenaVector<BasicBlock *> *GetDominators(const User &user);
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_MOVE_CONSTANTS_H

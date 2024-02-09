@@ -19,7 +19,7 @@
 #include "libpandabase/macros.h"
 #include "runtime/include/managed_thread.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class PtThread {
 public:
     explicit PtThread(ManagedThread *managedThread) : managedThread_(managedThread) {}
@@ -63,6 +63,6 @@ public:
 private:
     ManagedThread *managedThread_ {nullptr};
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_THREAD_H

@@ -15,7 +15,7 @@
 
 #include "llvm_aot_builder.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 std::unordered_map<std::string, size_t> LLVMAotBuilder::GetSectionsAddresses(const std::string &cmdline,
                                                                              const std::string &fileName)
@@ -69,4 +69,4 @@ std::unordered_map<std::string, size_t> LLVMAotBuilder::GetSectionsAddressesImpl
     return sectionAddresses;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

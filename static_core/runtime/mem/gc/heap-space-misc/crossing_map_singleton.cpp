@@ -20,7 +20,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 CrossingMap *CrossingMapSingleton ::instance_ = nullptr;
 os::memory::Mutex CrossingMapSingleton::mutex_;  // NOLINT(fuchsia-statically-constructed-objects)
@@ -111,4 +111,4 @@ void CrossingMapSingleton::MarkCardsAsYoung(const MemRange &memRange)
     cardTable->MarkCardsAsYoung(memRange);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

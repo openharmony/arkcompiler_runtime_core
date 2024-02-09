@@ -21,7 +21,7 @@
 #include "runtime/mem/region_allocator-inl.h"
 #include "runtime/mem/gc/g1/g1-allocator_constants.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class ObjectAllocConfigWithCrossingMap;
 class ObjectAllocConfig;
 class TLAB;
@@ -49,10 +49,10 @@ public:
 
     ~ObjectAllocatorG1() final = default;
 
-    void *Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
+    void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                    ObjMemInitPolicy objInit) final;
 
-    void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
+    void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                              ObjMemInitPolicy objInit) final;
 
     void PinObject(ObjectHeader *object) final;
@@ -143,7 +143,7 @@ public:
             regions);
     }
 
-    TLAB *CreateNewTLAB(panda::ManagedThread *thread) final;
+    TLAB *CreateNewTLAB(ark::ManagedThread *thread) final;
 
     size_t GetTLABMaxAllocSize() final;
 
@@ -165,7 +165,7 @@ public:
     }
 
     [[nodiscard]] void *AllocateLocal([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
-                                      [[maybe_unused]] panda::ManagedThread *thread) final
+                                      [[maybe_unused]] ark::ManagedThread *thread) final
     {
         LOG(FATAL, ALLOC) << "ObjectAllocatorGen: AllocateLocal not supported";
         return nullptr;
@@ -246,6 +246,6 @@ private:
     friend class AllocTypeConfigG1;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_GC_G1_G1_ALLOCATOR_H

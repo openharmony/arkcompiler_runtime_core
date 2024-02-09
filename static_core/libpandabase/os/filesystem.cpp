@@ -22,7 +22,7 @@
 #include <fileapi.h>
 #endif
 
-namespace panda::os {
+namespace ark::os {
 
 void CreateDirectories(const std::string &folderName)
 {
@@ -141,4 +141,4 @@ std::string NormalizePath(const std::string &path)
     return ss.str();
 }
 
-}  // namespace panda::os
+}  // namespace ark::os

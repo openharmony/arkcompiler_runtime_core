@@ -14,32 +14,32 @@
  */
 
 // NOLINTNEXTLINE(readability-function-size)
-llvm::FunctionType *GetIntrinsicDeclaration(llvm::LLVMContext &ctx, panda::compiler::RuntimeInterface::IntrinsicId id)
+llvm::FunctionType *GetIntrinsicDeclaration(llvm::LLVMContext &ctx, ark::compiler::RuntimeInterface::IntrinsicId id)
 {
-    constexpr auto GC_SPACE = panda::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE;
+    constexpr auto GC_SPACE = ark::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE;
     switch (id) {
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMOD:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMOD:
             return llvm::FunctionType::get(llvm::Type::getDoubleTy(ctx), {llvm::Type::getDoubleTy(ctx), llvm::Type::getDoubleTy(ctx)}, false);
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMODF:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMODF:
             return llvm::FunctionType::get(llvm::Type::getFloatTy(ctx), {llvm::Type::getFloatTy(ctx), llvm::Type::getFloatTy(ctx)}, false);
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXP:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXP:
             return llvm::FunctionType::get(llvm::Type::getDoubleTy(ctx), {llvm::Type::getDoubleTy(ctx), llvm::Type::getInt32Ty(ctx)}, false);
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXPF:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXPF:
             return llvm::FunctionType::get(llvm::Type::getFloatTy(ctx), {llvm::Type::getFloatTy(ctx), llvm::Type::getInt32Ty(ctx)}, false);
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2:
             return llvm::FunctionType::get(llvm::Type::getDoubleTy(ctx), {llvm::Type::getDoubleTy(ctx)}, false);
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2F:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2F:
             return llvm::FunctionType::get(llvm::Type::getFloatTy(ctx), {llvm::Type::getFloatTy(ctx)}, false);
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY:
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE:
             return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
                 {llvm::PointerType::get(ctx, 0), llvm::PointerType::get(ctx, 0), llvm::Type::getInt64Ty(ctx)}, false);
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_SET:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_SET:
             return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
                 {llvm::PointerType::get(ctx, 0), llvm::Type::getInt8Ty(ctx), llvm::Type::getInt64Ty(ctx)}, false);
 % Runtime::intrinsics.each do |intrinsic|
 %   next unless intrinsic.respond_to?(:impl)
-        case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:
+        case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:
             return llvm::FunctionType::get(<%= llvm_type_getter(intrinsic.impl_signature.ret, 'GC_SPACE') %>,
                        {<%= intrinsic.impl_signature.args.map { |t| llvm_type_getter(t, 'GC_SPACE') }.join(', ') %>}, false);
 % end

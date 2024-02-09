@@ -23,7 +23,7 @@
 #include "linker.h"
 #include "linker_context.h"
 
-namespace panda::static_linker {
+namespace ark::static_linker {
 
 namespace {
 
@@ -313,4 +313,4 @@ void Context::Error(const std::string &msg, const std::vector<ErrorDetail> &deta
     result_.errors.emplace_back(o.str());
 }
 
-}  // namespace panda::static_linker
+}  // namespace ark::static_linker

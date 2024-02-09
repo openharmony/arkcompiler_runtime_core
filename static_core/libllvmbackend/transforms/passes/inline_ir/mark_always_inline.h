@@ -18,11 +18,11 @@
 
 #include <llvm/IR/PassManager.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 /**
  * Set AlwaysInline attribute to calls in root functions
@@ -31,7 +31,7 @@ namespace panda::llvmbackend::passes {
  */
 class MarkAlwaysInline : public llvm::PassInfoMixin<MarkAlwaysInline> {
 public:
-    static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
+    static bool ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysis_manager);
@@ -43,6 +43,6 @@ public:
     static constexpr llvm::StringRef ARG_NAME = "mark-always-inline";
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_INLINE_IR_MARK_ALWAYS_INLINE_H

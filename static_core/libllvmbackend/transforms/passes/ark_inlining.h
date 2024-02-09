@@ -20,21 +20,21 @@
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/IR/PassManager.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 class LLVMArkInterface;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 class IrtocInlineChecker : public llvm::PassInfoMixin<IrtocInlineChecker> {
 public:
     static constexpr llvm::StringRef ARG_NAME = "irtoc-inline-check";
 
-    static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
+    static bool ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options);
     void CheckShouldInline(llvm::CallBase *callBase);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
@@ -49,13 +49,13 @@ public:
     static constexpr llvm::StringRef ARG_NAME = "inline-prepare";
 
     explicit InlinePrepare(llvm::InlineParams inlineParams) : inlineParams_ {inlineParams} {}
-    static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
-    static InlinePrepare Create(LLVMArkInterface *arkInterface, const panda::llvmbackend::LLVMCompilerOptions *options);
+    static bool ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options);
+    static InlinePrepare Create(LLVMArkInterface *arkInterface, const ark::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &moduleAm);
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_ARK_INLINING_H

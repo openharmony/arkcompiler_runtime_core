@@ -42,7 +42,7 @@ Logger::Level Logger::LevelFromString(std::string_view s)
 {
 % LoggerData.levels.each do |l|
     if (s == "<%= l.name %>") {
-        return panda::Logger::Level::<%= l.enum %>;
+        return ark::Logger::Level::<%= l.enum %>;
     }
 % end
 
@@ -54,12 +54,12 @@ Logger::ComponentMask Logger::ComponentMaskFromString(std::string_view s)
 {
 % LoggerData.components.each do |c|
     if (s == "<%= c.name %>") {
-        return panda::Logger::ComponentMask().set(Logger::Component::<%= c.enum %>);
+        return ark::Logger::ComponentMask().set(Logger::Component::<%= c.enum %>);
     }
 % end
 
     if (s == "all") {
-        return panda::LOGGER_COMPONENT_MASK_ALL;
+        return ark::LOGGER_COMPONENT_MASK_ALL;
     }
 
     UNREACHABLE();

@@ -27,23 +27,23 @@
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/thread.h"
 
-namespace panda {
+namespace ark {
 
 class CompilerTask;
 class Thread;
 class Method;
 class PandaVM;
 
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class Graph;
 
 class BackgroundCompilerContext {
 public:
-    using CompilerTask = std::unique_ptr<panda::CompilerTask, std::function<void(panda::CompilerTask *)>>;
-    using CompilerThread = std::unique_ptr<panda::Thread, std::function<void(panda::Thread *)>>;
+    using CompilerTask = std::unique_ptr<ark::CompilerTask, std::function<void(ark::CompilerTask *)>>;
+    using CompilerThread = std::unique_ptr<ark::Thread, std::function<void(ark::Thread *)>>;
 
     void SetCompilerTask(CompilerTask compilerTask)
     {
@@ -191,7 +191,7 @@ FakeCopyable<T> MakeFakeCopyable(T &&t)
 
 }  // namespace copy_hooks
 
-class BackgroundCompilerTaskRunner : public panda::TaskRunner<BackgroundCompilerTaskRunner, BackgroundCompilerContext> {
+class BackgroundCompilerTaskRunner : public ark::TaskRunner<BackgroundCompilerTaskRunner, BackgroundCompilerContext> {
 public:
     static constexpr taskmanager::TaskProperties TASK_PROPERTIES = {
         taskmanager::TaskType::JIT, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::BACKGROUND};
@@ -233,6 +233,6 @@ private:
     BackgroundCompilerContext taskCtx_;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_COMPILER_BACKGROUND_TASK_RUNNER_H

@@ -18,7 +18,7 @@
 
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <const int SHIFT, typename T, template <typename...> class VECTOR = PandaVector>
 class ShiftedVector : public VECTOR<T> {
@@ -68,6 +68,6 @@ public:
     }
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_UTIL_SHIFTED_VECTOR_H__

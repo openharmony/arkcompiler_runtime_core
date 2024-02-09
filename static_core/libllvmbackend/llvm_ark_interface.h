@@ -36,21 +36,21 @@ class Instruction;
 class Module;
 }  // namespace llvm
 
-namespace panda {
+namespace ark {
 class Method;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 class AotBuilder;
 class RuntimeInterface;
 class Graph;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 class File;
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class LLVMArkInterface {
 public:
@@ -62,8 +62,8 @@ public:
     using RegMasks = std::tuple<uint32_t, uint32_t>;
     enum class RuntimeCallType { INTRINSIC, ENTRYPOINT };
 
-    explicit LLVMArkInterface(panda::compiler::RuntimeInterface *runtime, llvm::Triple triple,
-                              panda::compiler::AotBuilder *aotBuilder);
+    explicit LLVMArkInterface(ark::compiler::RuntimeInterface *runtime, llvm::Triple triple,
+                              ark::compiler::AotBuilder *aotBuilder);
 
     RuntimeCallee GetEntrypointCallee(EntrypointId id) const;
 
@@ -143,7 +143,7 @@ public:
     static constexpr std::string_view FUNCTION_MD_INLINE_MODULE = "inline_module";
     static constexpr std::string_view PATCH_STACK_ADJUSTMENT_COMMENT = " ${:comment} patch-stack-adjustment";
 
-    panda::compiler::RuntimeInterface *GetRuntime()
+    ark::compiler::RuntimeInterface *GetRuntime()
     {
         return runtime_;
     }
@@ -162,7 +162,7 @@ private:
 private:
     static constexpr auto NO_INTRINSIC_ID_CONTINUE = static_cast<IntrinsicId>(-2);
 
-    panda::compiler::RuntimeInterface *runtime_;
+    ark::compiler::RuntimeInterface *runtime_;
     llvm::Triple triple_;
     llvm::StringMap<llvm::FunctionType *> runtimeFunctionTypes_;
     llvm::ValueMap<const llvm::Function *, const panda_file::File *> functionOrigins_;
@@ -171,8 +171,8 @@ private:
     llvm::DenseMap<llvm::Function *, uint8_t> sourceLanguages_;
     llvm::StringMap<uint64_t> llvmStackSizes_;
     llvm::DenseMap<const llvm::Function *, RegMasks> calleeSavedRegisters_;
-    panda::compiler::AotBuilder *aotBuilder_;
+    ark::compiler::AotBuilder *aotBuilder_;
     std::vector<llvm::StringRef> irtocReturnHandlers_;
 };
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_ARK_INTERFACE_H

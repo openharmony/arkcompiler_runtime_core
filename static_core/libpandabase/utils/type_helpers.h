@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace panda::helpers {
+namespace ark::helpers {
 
 template <class T>
 constexpr auto ToSigned(T v)
@@ -64,7 +64,7 @@ struct RemoveAllPointers {
     using type = typename std::conditional_t<std::is_pointer_v<T>, RemoveAllPointers<std::remove_pointer_t<T>>,
                                              TypeIdentity<T>>::type;
 };
-}  // namespace panda::helpers
+}  // namespace ark::helpers
 
 #ifdef __SIZEOF_INT128__
 __extension__ using Int128 = __int128;

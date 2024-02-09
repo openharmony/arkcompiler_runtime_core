@@ -60,7 +60,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class PromiseListener {
 public:
@@ -387,6 +387,6 @@ private:
     friend class mem::Allocator;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_H_

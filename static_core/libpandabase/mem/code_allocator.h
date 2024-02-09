@@ -20,7 +20,7 @@
 #include "os/mem.h"
 #include "os/mutex.h"
 
-namespace panda {
+namespace ark {
 
 class BaseMemStats;
 
@@ -69,6 +69,6 @@ private:
     void *codeRangeEnd_ {nullptr};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_CODEALLOCATOR_H

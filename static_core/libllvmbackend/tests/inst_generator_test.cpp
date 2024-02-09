@@ -20,12 +20,12 @@
 
 #include "aot/aot_builder/llvm_aot_builder.h"
 
-using panda::compiler::Opcode;
+using ark::compiler::Opcode;
 
-namespace panda::llvmbackend {
-class LLVMCodegenTest : public panda::compiler::GraphTest {};
+namespace ark::llvmbackend {
+class LLVMCodegenTest : public ark::compiler::GraphTest {};
 
-class LLVMCodegenStatisticGenerator : public panda::compiler::StatisticGenerator {
+class LLVMCodegenStatisticGenerator : public ark::compiler::StatisticGenerator {
 public:
     using StatisticGenerator::StatisticGenerator;
 
@@ -43,7 +43,7 @@ public:
         FullInstStat fullInstStat = tmplt_;
         for (auto &i : it) {
             auto graph = graphCreator_.GenerateGraph(i);
-            panda::compiler::LLVMAotBuilder aotBuilder;
+            ark::compiler::LLVMAotBuilder aotBuilder;
             graph->SetRuntime(graphCreator_.GetRuntime());
             aotBuilder.SetArch(graph->GetArch());
             aotBuilder.SetRuntime(graph->GetRuntime());
@@ -87,7 +87,7 @@ public:
 
         auto intrinsicsId = (i)->CastToIntrinsic()->GetIntrinsicId();
         auto graph = graphCreator_.GenerateGraph(i);
-        panda::compiler::LLVMAotBuilder aotBuilder;
+        ark::compiler::LLVMAotBuilder aotBuilder;
         aotBuilder.SetArch(graph->GetArch());
         graph->SetRuntime(graphCreator_.GetRuntime());
         aotBuilder.SetRuntime(graph->GetRuntime());
@@ -153,11 +153,11 @@ public:
 TEST_F(LLVMCodegenTest, AllInstTest)
 {
     ArenaAllocator instAlloc {SpaceType::SPACE_TYPE_COMPILER};
-    panda::compiler::InstGenerator instGen(instAlloc);
+    ark::compiler::InstGenerator instGen(instAlloc);
 
     ArenaAllocator localAlloc {SpaceType::SPACE_TYPE_COMPILER};
     ArenaAllocator graphAlloc {SpaceType::SPACE_TYPE_COMPILER};
-    panda::compiler::GraphCreator graphCreator {graphAlloc, localAlloc};
+    ark::compiler::GraphCreator graphCreator {graphAlloc, localAlloc};
 
     // ARM64
     LLVMCodegenStatisticGenerator statGenArm64(instGen, graphCreator);
@@ -171,4 +171,4 @@ TEST_F(LLVMCodegenTest, AllInstTest)
     statGenAmd64.GenerateHTMLPage("LLVMCodegenStatisticAMD64.html");
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

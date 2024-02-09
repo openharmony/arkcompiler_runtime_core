@@ -19,7 +19,7 @@
 #include <chrono>
 #include <sys/time.h>
 
-namespace panda::os::time {
+namespace ark::os::time {
 
 template <class T>
 static uint64_t GetClockTime([[maybe_unused]] clockid_t clock)
@@ -32,6 +32,6 @@ static uint64_t GetClockTime([[maybe_unused]] clockid_t clock)
     return 0;
 }
 
-}  // namespace panda::os::time
+}  // namespace ark::os::time
 
 #endif  // PANDA_LIBPANDABASE_OS_WINDOWS_TIME_H

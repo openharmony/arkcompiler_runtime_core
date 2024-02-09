@@ -26,7 +26,7 @@
 #include "os/mutex.h"
 #include "utils/span.h"
 
-namespace panda {
+namespace ark {
 
 class AllocTracker {
 public:
@@ -208,6 +208,6 @@ private:
     os::memory::Mutex mutex_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MEM_ALLOC_TRACKER_H

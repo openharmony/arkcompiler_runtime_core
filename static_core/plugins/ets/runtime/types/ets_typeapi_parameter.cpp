@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 EtsTypeAPIParameter *EtsTypeAPIParameter::Create(EtsCoroutine *etsCoroutine)
 {
@@ -26,4 +26,4 @@ EtsTypeAPIParameter *EtsTypeAPIParameter::Create(EtsCoroutine *etsCoroutine)
     return reinterpret_cast<EtsTypeAPIParameter *>(etsObject);
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

@@ -23,7 +23,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/optimizations/code_sink.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Code sinking optimization attempts to sink operations that is needed only in
  * a particular execution path but are performed on paths that do not need
@@ -225,4 +225,4 @@ bool CodeSink::IsAcceptableTarget(Inst *inst, BasicBlock *candidate)
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

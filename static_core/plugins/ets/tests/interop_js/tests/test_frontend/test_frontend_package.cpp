@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropJsTestFrontend : public EtsInteropTest {
 public:
@@ -44,4 +44,4 @@ TEST_F(EtsInteropJsTestFrontend, test_dyncall_by_value)
     ASSERT_EQ(ret, 43U);
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

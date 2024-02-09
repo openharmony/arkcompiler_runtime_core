@@ -26,7 +26,7 @@
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
-namespace panda::llvmbackend::gc_barriers {
+namespace ark::llvmbackend::gc_barriers {
 
 void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool isVolatileMem, llvm::BasicBlock *outBb,
                 LLVMArkInterface *arkInterface, llvm::Value *threadRegValue)
@@ -37,7 +37,7 @@ void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool isVolatileMem
     auto initialBb = builder->GetInsertBlock();
 
     auto createUniqBasicBlockName = [&initialBb](const std::string &suffix) {
-        return panda::llvmbackend::LLVMArkInterface::GetUniqueBasicBlockName(initialBb->getName().str(), suffix);
+        return ark::llvmbackend::LLVMArkInterface::GetUniqueBasicBlockName(initialBb->getName().str(), suffix);
     };
     auto createBasicBlock = [&ctx, &initialBb, &createUniqBasicBlockName](const std::string &suffix) {
         auto name = createUniqBasicBlockName(suffix);
@@ -115,4 +115,4 @@ void EmitPostWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, llvm::Value *offs
     call->setCallingConv(llvm::CallingConv::ArkFast3);
 }
 
-}  // namespace panda::llvmbackend::gc_barriers
+}  // namespace ark::llvmbackend::gc_barriers

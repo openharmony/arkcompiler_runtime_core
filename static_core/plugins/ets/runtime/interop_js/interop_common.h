@@ -22,7 +22,7 @@
 
 #include <node_api.h>
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -232,6 +232,6 @@ inline napi_status NapiWrap(napi_env env, napi_value jsObject, void *nativeObjec
 #endif
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H_

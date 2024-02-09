@@ -64,11 +64,11 @@ DEFINE_VALUE(FOO_BAR_BAZ_OFFSET, offsetof(foo::Bar, baz_))
 // platform_dependent_code.cpp
 #include "cross_values.h"
 ...
-    size_t size_x86_64 = panda::cross_values::GetFooBarBazSize(Arch::X86_64);
-    size_t offs_x86_64 = panda::cross_values::GetFooBarBazOffset(Arch::X86_64);
+    size_t size_x86_64 = ark::cross_values::GetFooBarBazSize(Arch::X86_64);
+    size_t offs_x86_64 = ark::cross_values::GetFooBarBazOffset(Arch::X86_64);
 
-    size_t size_aarch64 = panda::cross_values::GetFooBarBazSize(Arch::AARCH64);
-    size_t offs_aarch64 = panda::cross_values::GetFooBarBazOffset(Arch::AARCH64);
+    size_t size_aarch64 = ark::cross_values::GetFooBarBazSize(Arch::AARCH64);
+    size_t offs_aarch64 = ark::cross_values::GetFooBarBazOffset(Arch::AARCH64);
 ...
 ```
 
@@ -76,29 +76,29 @@ DEFINE_VALUE(FOO_BAR_BAZ_OFFSET, offsetof(foo::Bar, baz_))
 ## Example of generated cross-values
 ```cpp
 // X86_64_values_gen.h:
-namespace panda::cross_values::X86_64 {
+namespace ark::cross_values::X86_64 {
     static constexpr ptrdiff_t FOO_BAR_BAZ_SIZE_VAL = 8;
     static constexpr ptrdiff_t FOO_BAR_BAZ_OFFSET_VAL = 0;
-}  // namespace panda::cross_values::X86_64
+}  // namespace ark::cross_values::X86_64
 ```
 ```cpp
 // AARCH64_values_gen.h:
-namespace panda::cross_values::AARCH64 {
+namespace ark::cross_values::AARCH64 {
     static constexpr ptrdiff_t FOO_BAR_BAZ_SIZE_VAL = 8;
     static constexpr ptrdiff_t FOO_BAR_BAZ_OFFSET_VAL = 0;
-}  // namespace panda::cross_values::AARCH64
+}  // namespace ark::cross_values::AARCH64
 ```
 ```cpp
 // AARCH32_values_gen.h:
-namespace panda::cross_values::AARCH32 {
+namespace ark::cross_values::AARCH32 {
     static constexpr ptrdiff_t FOO_BAR_BAZ_SIZE_VAL = 4;
     static constexpr ptrdiff_t FOO_BAR_BAZ_OFFSET_VAL = 0;
-}  // namespace panda::cross_values::AARCH32
+}  // namespace ark::cross_values::AARCH32
 ```
 
 ```cpp
 // cross_values.h:
-namespace panda::cross_values {
+namespace ark::cross_values {
 ...
 [[maybe_unused]] static constexpr ptrdiff_t GetFooBarBazSize(Arch arch)
 {
@@ -115,7 +115,7 @@ namespace panda::cross_values {
     }
 }
 ...
-}  // namespace panda::cross_values
+}  // namespace ark::cross_values
 ```
 
 ## Principal mechanism

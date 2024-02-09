@@ -20,7 +20,7 @@
 #include "optimizer/optimizations/vn.h"
 #include "profiling/profiling.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 const ObjectTypeInfo ObjectTypeInfo::INVALID {};
 const ObjectTypeInfo ObjectTypeInfo::UNKNOWN {1};
@@ -781,4 +781,4 @@ void HclassCheckInst::ExtendFlags(Inst *inst)
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

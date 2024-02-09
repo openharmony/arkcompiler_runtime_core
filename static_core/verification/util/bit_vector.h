@@ -31,7 +31,7 @@
 #include <tuple>
 #include <iostream>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 #ifdef PANDA_TARGET_64
 using Word = uint64_t;
@@ -101,7 +101,7 @@ class BitVector {
     {
         return size_ - 1;
     }
-    static constexpr size_t POS_SHIFT = panda::Ctz(BITS_IN_WORD);
+    static constexpr size_t POS_SHIFT = ark::Ctz(BITS_IN_WORD);
     static constexpr size_t POS_MASK = BITS_IN_WORD - 1;
     static constexpr Word MAX_WORD = std::numeric_limits<Word>::max();
 
@@ -481,7 +481,7 @@ public:
             val = VAL ? val : ~val;
             size_t idx = pos << POS_SHIFT;
             while (val) {
-                auto i = static_cast<size_t>(panda::Ctz(val));
+                auto i = static_cast<size_t>(ark::Ctz(val));
                 idx += i;
                 if (idx >= Size()) {
                     return true;
@@ -512,7 +512,7 @@ public:
                     return {};
                 }
                 if (val) {
-                    auto i = static_cast<size_t>(panda::Ctz(val));
+                    auto i = static_cast<size_t>(ark::Ctz(val));
                     idx += i;
                     if (idx > to) {
                         return {};
@@ -541,12 +541,12 @@ public:
         bool lastWordPartiallyFilled = (Size() & POS_MASK) != 0;
         if (SizeInWords() > 0) {
             for (; pos < (SizeInWords() - (lastWordPartiallyFilled ? 1 : 0)); ++pos) {
-                result += static_cast<size_t>(panda::Popcount(data_[pos]));
+                result += static_cast<size_t>(ark::Popcount(data_[pos]));
             }
         }
         if (lastWordPartiallyFilled) {
             const Word mask = MaskUpToIndex(Size() & POS_MASK);
-            result += static_cast<size_t>(panda::Popcount(data_[pos] & mask));
+            result += static_cast<size_t>(ark::Popcount(data_[pos] & mask));
         }
         return result;
     }
@@ -570,12 +570,12 @@ public:
         if (sz > 0) {
             for (; pos < (sz - (lastWordPartiallyFilled ? 1 : 0)); ++pos) {
                 auto val = getProcessedWord(pos);
-                result += static_cast<size_t>(panda::Popcount(val));
+                result += static_cast<size_t>(ark::Popcount(val));
             }
         }
         if (lastWordPartiallyFilled) {
             const Word mask = MaskUpToIndex(size & POS_MASK);
-            result += static_cast<size_t>(panda::Popcount(getProcessedWord(pos) & mask));
+            result += static_cast<size_t>(ark::Popcount(getProcessedWord(pos) & mask));
         }
         return result;
     }
@@ -647,7 +647,7 @@ public:
     static auto LazyOpThenFoldThenIndicesOf(Op op, BinOp binop, const Args &...args)
     {
         // NOLINTNEXTLINE(google-build-using-namespace)
-        using namespace panda::verifier;
+        using namespace ark::verifier;
         size_t sz = NAry {[](size_t a, size_t b) { return std::min(a, b); }}(args.SizeInWords()...);
         size_t size = NAry {[](size_t a, size_t b) { return std::min(a, b); }}(args.Size()...);
         size_t numArgs = sizeof...(Args);
@@ -666,7 +666,7 @@ public:
                     return {};
                 }
                 if (val) {
-                    auto i = static_cast<size_t>(panda::Ctz(val));
+                    auto i = static_cast<size_t>(ark::Ctz(val));
                     idx += i;
                     if (idx >= size) {
                         return {};
@@ -742,6 +742,6 @@ private:
     }
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_BIT_VECTOR_HPP_

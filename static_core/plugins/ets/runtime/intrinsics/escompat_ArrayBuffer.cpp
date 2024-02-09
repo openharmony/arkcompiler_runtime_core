@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 extern "C" ObjectHeader *EtsArrayBufferFrom(EtsObject *obj)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
@@ -53,4 +53,4 @@ extern "C" ObjectHeader *EtsArrayBufferFrom(EtsObject *obj)
     memcpy(buf->GetData()->GetData<EtsByte>(), array->GetData<EtsByte>(), byteLength);
     return buf.GetPtr();
 }
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

@@ -13,11 +13,11 @@
 
 module:
   name: arkbase
-  # It is better to name this namespace simply "panda::base", but there is already namespace "ecmascript::base", which
+  # It is better to name this namespace simply "ark::base", but there is already namespace "ecmascript::base", which
   # is used just as "base", hence it conflicts with this namespace. I fixed it by renaming base->ecmascript::base in
   # this repository, but there is the external repository ark_js_runtime, which uses us as an external library and has
   # the same problem with "ecmascript::base". So, I've gave up and renamed it to "base_options".
-  namespace: panda::base_options
+  namespace: ark::base_options
 
 options:
 - name: log-level

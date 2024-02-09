@@ -22,7 +22,7 @@
 #error "arch/global_reg.h must not be included as it can broke ABI"
 #endif
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh)
 {
@@ -30,12 +30,12 @@ void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpTo
     RESTORE_GLOBAL_REGS();
 }
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
-namespace panda {
+namespace ark {
 ALWAYS_INLINE inline const uint8_t *Frame::GetInstrOffset()
 {
     return (method_->GetInstructions());
 }
 
-}  // namespace panda
+}  // namespace ark

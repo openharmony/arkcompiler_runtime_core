@@ -17,7 +17,7 @@
 #include "runtime/include/runtime.h"
 #include "libpandabase/os/filesystem.h"
 
-namespace panda {
+namespace ark {
 
 bool FileManager::LoadAbcFile(std::string_view location, panda_file::File::OpenMode openMode)
 {
@@ -60,7 +60,7 @@ Expected<bool, std::string> FileManager::LoadAnFile(std::string_view anLocation,
     PandaRuntimeInterface runtimeIface;
     auto runtime = Runtime::GetCurrent();
     auto gcType = Runtime::GetGCType(Runtime::GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
-    ASSERT(gcType != panda::mem::GCType::INVALID_GC);
+    ASSERT(gcType != ark::mem::GCType::INVALID_GC);
     auto realAnFilePath = os::GetAbsolutePath(anLocation);
     return runtime->GetClassLinker()->GetAotManager()->AddFile(realAnFilePath, &runtimeIface,
                                                                static_cast<uint32_t>(gcType), force);
@@ -90,4 +90,4 @@ PandaString FileManager::ResolveAnFilePath(std::string_view abcPath)
     return "";
 }
 
-}  // namespace panda
+}  // namespace ark

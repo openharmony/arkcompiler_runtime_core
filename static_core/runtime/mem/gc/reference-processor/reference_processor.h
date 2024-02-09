@@ -22,7 +22,7 @@
 #include "runtime/mem/gc/gc_root.h"
 #include "runtime/mem/gc/gc.h"
 
-namespace panda {
+namespace ark {
 class ObjectHeader;
 class BaseClass;
 namespace mem {
@@ -30,9 +30,9 @@ enum class GCPhase;
 class GC;
 class Reference;
 }  // namespace mem
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// General language-independent interface for ReferenceProcessing.
 class ReferenceProcessor {
@@ -68,16 +68,16 @@ public:
                                    const mem::GC::ReferenceClearPredicateT &pred) = 0;
 
     /// Collect all processed references. They were cleared on the previous phase - we only collect them.
-    virtual panda::mem::Reference *CollectClearedReferences() = 0;
+    virtual ark::mem::Reference *CollectClearedReferences() = 0;
 
     virtual void ScheduleForEnqueue(Reference *clearedReferences) = 0;
 
     /// Enqueue cleared references to corresponding queue, if necessary.
-    virtual void Enqueue(panda::mem::Reference *clearedReferences) = 0;
+    virtual void Enqueue(ark::mem::Reference *clearedReferences) = 0;
 
     /// Return size of the queue of references.
     virtual size_t GetReferenceQueueSize() const = 0;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_MEM_GC_REFERENCE_PROCESSOR_REFERENCE_PROCESSOR_H

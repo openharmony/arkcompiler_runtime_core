@@ -21,7 +21,7 @@
 #include "compiler/optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "reg_encoder.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -387,4 +387,4 @@ TEST_F(CommonTest, RegEncoderSameArgsInst)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

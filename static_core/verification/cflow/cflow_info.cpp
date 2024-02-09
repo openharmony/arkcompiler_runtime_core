@@ -37,7 +37,7 @@
 
 #include "verifier_messages.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 VerificationStatus CflowMethodInfo::FillCodeMaps(Method const *method)
 {
@@ -148,4 +148,4 @@ PandaUniquePtr<CflowMethodInfo> GetCflowMethodInfo(Method const *method)
     return cflowInfo;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

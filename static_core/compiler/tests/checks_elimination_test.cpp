@@ -19,7 +19,7 @@
 #include "optimizer/ir/runtime_interface.h"
 #include "optimizer/ir/graph_cloner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class ChecksEliminationTest : public CommonTest {
 public:
     ChecksEliminationTest() : graph_(CreateGraphStartEndBlocks()) {}
@@ -5245,4 +5245,4 @@ TEST_F(ChecksEliminationTest, OsrMode)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

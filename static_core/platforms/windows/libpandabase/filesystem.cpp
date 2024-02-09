@@ -17,7 +17,7 @@
 #include <windows.h>
 #include <cstdlib>
 
-namespace panda::os {
+namespace ark::os {
 
 std::string GetAbsolutePath(std::string_view path)
 {
@@ -27,4 +27,4 @@ std::string GetAbsolutePath(std::string_view path)
     return fullPath;
 }
 
-}  // namespace panda::os
+}  // namespace ark::os

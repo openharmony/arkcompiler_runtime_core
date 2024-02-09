@@ -19,7 +19,7 @@
 #include "utils/logger.h"
 #include "runtime/plugins.h"
 
-namespace panda {
+namespace ark {
 /// @brief Verification mode
 enum class VerificationMode {
     DISABLED,       // No verification
@@ -216,7 +216,7 @@ private:
         bool intrSet = WasSetBootIntrinsicSpaces();
         std::vector<std::string> spaces = GetBootIntrinsicSpaces();
         for (auto it = spaces.begin(); it != spaces.end();) {
-            if (panda::plugins::HasRuntime(*it)) {
+            if (ark::plugins::HasRuntime(*it)) {
                 ++it;
                 continue;
             }
@@ -239,6 +239,6 @@ private:
     VerificationMode verificationMode_ {VerificationMode::DISABLED};
     bool verifyRuntimeLibraries_ {false};
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_OPTIONS_H_

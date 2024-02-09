@@ -21,7 +21,7 @@
 #include "optimizer/pass.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BalanceExpressions : public Optimization {
 public:
     // For current realization, any binary commutative and associative operator suits;
@@ -171,6 +171,6 @@ inline std::ostream &operator<<(std::ostream &os, const BalanceExpressions &expr
     expr.Dump(&os);
     return os;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_BALANCE_EXPRESSIONS_H

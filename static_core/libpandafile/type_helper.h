@@ -19,9 +19,9 @@
 
 #include "libpandabase/utils/span.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
-inline panda::panda_file::Type GetEffectiveType(const panda_file::Type &type)
+inline ark::panda_file::Type GetEffectiveType(const panda_file::Type &type)
 {
     return type;
 }
@@ -41,6 +41,6 @@ inline bool IsDummyClassName(const std::string &name)
 {
     return name == GetDummyClassName();
 }
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_TYPE_HELPER_H_

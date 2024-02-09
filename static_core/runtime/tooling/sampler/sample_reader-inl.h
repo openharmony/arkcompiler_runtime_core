@@ -25,7 +25,7 @@
 #include "runtime/tooling/sampler/sample_reader.h"
 #include "runtime/tooling/sampler/sample_writer.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 // -------------------------------------------------
 // ------------- Format reader ---------------------
@@ -143,6 +143,6 @@ inline bool SampleReader::GetNextModule(FileInfo *moduleOut)
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_INL_H

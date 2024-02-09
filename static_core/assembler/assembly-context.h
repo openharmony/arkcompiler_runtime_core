@@ -26,7 +26,7 @@
 #include "error.h"
 #include "lexer.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 /*
@@ -42,20 +42,20 @@ namespace panda::pandasm {
  * similarly --context and context--
  */
 struct Context {
-    std::string_view token;                    /* current token */
-    std::vector<panda::pandasm::Token> tokens; /* token list */
-    size_t number = 0;                         /* line number */
-    bool end = false;                          /* end of line flag */
-    Token::Type id = Token::Type::ID_BAD;      /* current token type */
-    Token::Type signop = Token::Type::ID_BAD;  /* current token operand type (if it is an operation) */
-    panda::pandasm::Error err;                 /* current error */
+    std::string_view token;                   /* current token */
+    std::vector<ark::pandasm::Token> tokens;  /* token list */
+    size_t number = 0;                        /* line number */
+    bool end = false;                         /* end of line flag */
+    Token::Type id = Token::Type::ID_BAD;     /* current token type */
+    Token::Type signop = Token::Type::ID_BAD; /* current token operand type (if it is an operation) */
+    ark::pandasm::Error err;                  /* current error */
     int64_t *maxValueOfReg = nullptr;
     size_t insNumber = 0;
     Type currFuncReturnType;
     std::vector<std::pair<size_t, size_t>> *functionArgumentsList = nullptr;
     std::unordered_map<std::string, std::vector<std::pair<size_t, size_t>>> functionArgumentsLists;
 
-    void Make(const std::vector<panda::pandasm::Token> &t);
+    void Make(const std::vector<ark::pandasm::Token> &t);
     void UpSignOperation();
     bool ValidateRegisterName(char c, size_t n = 0) const;
     bool ValidateParameterName(size_t numberOfParamsAlreadyIs) const;
@@ -75,6 +75,6 @@ struct Context {
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_CONTEXT_H

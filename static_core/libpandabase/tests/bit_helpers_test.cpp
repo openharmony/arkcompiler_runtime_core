@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::helpers::test {
+namespace ark::helpers::test {
 
 TEST(BitHelpers, UnsignedTypeHelper)
 {
@@ -69,4 +69,4 @@ TEST(BitHelpers, TypeHelper)
     EXPECT_TRUE((std::is_same_v<TypeHelperT<64U, true>, int64_t>));
 }
 
-}  // namespace panda::helpers::test
+}  // namespace ark::helpers::test

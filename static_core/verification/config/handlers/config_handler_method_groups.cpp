@@ -36,10 +36,10 @@
 
 #include <type_traits>
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
-using panda::parser::Parser;
-using panda::verifier::config::Section;
+using ark::parser::Parser;
+using ark::verifier::config::Section;
 
 void RegisterConfigHandlerMethodGroups(Config *dcfg)
 {
@@ -94,4 +94,4 @@ void RegisterConfigHandlerMethodGroups(Config *dcfg)
                                   CONFIG_DEBUG_METHOD_GROUPS_VERIFIER_OPTIONS);
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug

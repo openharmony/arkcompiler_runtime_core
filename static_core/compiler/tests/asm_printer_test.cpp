@@ -34,7 +34,7 @@ static std::string g_outputDir = "asm_output";
 #define STDOUT_PRINT
 #endif  // ENABLE_DEBUG_STDOUT_PRINT
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 template <Arch ARCH>
 class PrinterTest : public ::testing::Test {
@@ -42,7 +42,7 @@ public:
     PrinterTest()
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
+        ark::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
 #ifdef STDOUT_PRINT
         curr_stream_ = &std::cout;
 #else
@@ -88,7 +88,7 @@ public:
         memStats_ = new BaseMemStats();
         codeAlloc_ = new (std::nothrow) CodeAllocator(memStats_);
         // Create dir if it is not exist
-        auto execPath = panda::os::file::File::GetExecutablePath();
+        auto execPath = ark::os::file::File::GetExecutablePath();
         ASSERT(execPath);
         execPath_ = execPath.Value();
         os::CreateDirectories(execPath_ + "/" + g_outputDir);
@@ -102,7 +102,7 @@ public:
         delete codeAlloc_;
         delete memStats_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
         delete currStream_;
     }
 
@@ -385,4 +385,4 @@ ONE_TEST_BODY(PrinterAmd64Test, TestOr, or, X86_64)
 ONE_TEST_BODY(PrinterAmd64Test, TestXor, xor, X86_64)
 #endif
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

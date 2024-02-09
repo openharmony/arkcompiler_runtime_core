@@ -19,7 +19,7 @@
 #include "ets_primitives.h"
 #include "ets_array.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsObject;
 namespace detail {
@@ -162,6 +162,6 @@ auto EtsPrimitiveTypeEnumToComptimeConstant(EtsType type, F &&func)
     }
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_COMPTIME_TRAITS_H

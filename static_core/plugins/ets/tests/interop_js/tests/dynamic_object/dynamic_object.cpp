@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropJsJSValue : public EtsInteropTest {};
 
@@ -129,4 +129,4 @@ TEST_F(EtsInteropJsJSValue, set_property_to_jsvalue)
     ASSERT_EQ(val, TEST_VALUE);
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

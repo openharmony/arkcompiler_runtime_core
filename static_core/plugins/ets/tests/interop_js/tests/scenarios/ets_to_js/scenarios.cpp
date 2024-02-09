@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropScenariosEtsToJs : public EtsInteropTest {};
 
@@ -96,4 +96,4 @@ TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_callable_call
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_callable_call.js"));
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

@@ -19,7 +19,7 @@
 #include <sstream>
 #include "plugins/ets/runtime/types/ets_string.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 constexpr const int32_t MINS_IN_HOUR = 60;
 constexpr const int32_t MS_IN_SECOND = 1000;
@@ -69,4 +69,4 @@ extern "C" EtsString *EscompatDateGetLocaleString(EtsString *format, EtsString *
     return EtsString::CreateFromMUtf8(ss.str().c_str());
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

@@ -45,7 +45,7 @@
 
 #include <atomic>
 
-namespace panda {
+namespace ark {
 
 using DfxOptionHandler = os::dfx_option::DfxOptionHandler;
 
@@ -96,6 +96,6 @@ private:
     NO_MOVE_SEMANTIC(DfxController);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_LIBPANDABASE_UTILS_DFX_H

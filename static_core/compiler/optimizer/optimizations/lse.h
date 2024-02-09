@@ -21,7 +21,7 @@
 #include "optimizer/pass.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class LseVisitor;
 
@@ -144,6 +144,6 @@ private:
     ArenaUnorderedSet<Inst *> beAlive_;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  //  COMPILER_OPTIMIZER_OPTIMIZATIONS_LSE_H

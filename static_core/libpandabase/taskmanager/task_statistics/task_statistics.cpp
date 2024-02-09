@@ -15,7 +15,7 @@
 
 #include "taskmanager/task_statistics/task_statistics.h"
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 TaskStatistics::TaskStatistics()
 {
@@ -60,4 +60,4 @@ TaskStatisticsImplType TaskStatisticsImplTypeFromString(std::string_view string)
     UNREACHABLE();
 }
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

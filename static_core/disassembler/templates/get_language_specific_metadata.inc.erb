@@ -15,7 +15,7 @@
 
 #include "disassembler.h"
 
-namespace panda::disasm {
+namespace ark::disasm {
 
 void Disassembler::GetLanguageSpecificMetadata() {
     LOG(DEBUG, DISASSEMBLER) << "\n[getting language-specific annotations]\n";
@@ -24,4 +24,4 @@ void Disassembler::GetLanguageSpecificMetadata() {
     Get<%= plugin_opts["directive_name"] %>Metadata();
 % end
 }
-} // namespace panda::disasm
+} // namespace ark::disasm

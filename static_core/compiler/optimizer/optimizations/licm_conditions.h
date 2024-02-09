@@ -21,7 +21,7 @@
 #include "condition_chain_cache.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class ConditionChainContext {
 public:
@@ -129,6 +129,6 @@ private:
     ConditionChainManager conditionChainManager_;
     bool isApplied_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LICM_CONDITIONS_H

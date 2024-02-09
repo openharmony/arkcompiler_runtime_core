@@ -47,7 +47,7 @@
 
 #define ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS()
 
-namespace panda {
+namespace ark {
 
 template <class TYPE>
 class HandleStorage;
@@ -418,7 +418,7 @@ private:
     ThreadT *thread_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #ifdef PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS
 #include "platforms/mobile/runtime/thread-inl.cpp"

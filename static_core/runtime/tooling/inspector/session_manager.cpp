@@ -15,7 +15,7 @@
 
 #include "session_manager.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 const std::string &SessionManager::AddSession(PtThread thread)
 {
     ASSERT(thread.GetManagedThread());
@@ -63,4 +63,4 @@ void SessionManager::EnumerateSessions(const std::function<void(const std::strin
         handler(id, thread);
     }
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

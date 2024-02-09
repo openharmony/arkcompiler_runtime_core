@@ -19,7 +19,7 @@
 #include "compiler/optimizer/analysis/liveness_analyzer.h"
 #include "compiler/optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class SplitResolver {
 public:
     explicit SplitResolver(Graph *graph) : SplitResolver(graph, &graph->GetAnalysis<LivenessAnalyzer>()) {}
@@ -56,5 +56,5 @@ private:
     Graph *graph_;
     LivenessAnalyzer *liveness_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SPLIT_RESOLVER_H

@@ -20,7 +20,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/ir/graph_cloner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class VNTest : public AsmTest {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     VNTest() : graph_(CreateGraphWithDefaultRuntime()) {}
@@ -1815,4 +1815,4 @@ TEST_F(VNTest, AddressArithmetic)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

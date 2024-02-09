@@ -17,7 +17,7 @@
 
 #include "runtime/mem/runslots_allocator.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // Adapter for use of RunSlotsAllocator in STL containers.
 template <typename T, typename AllocConfigT, typename LockConfigT>
@@ -191,6 +191,6 @@ inline RunSlotsAllocatorAdapter<void, AllocConfigT, LockConfigT> RunSlotsAllocat
     return RunSlotsAllocatorAdapter<void, AllocConfigT, LockConfigT>(this);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_RUNSLOTS_STL_ADAPTER_H

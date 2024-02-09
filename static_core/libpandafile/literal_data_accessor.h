@@ -22,7 +22,7 @@
 
 #include "utils/span.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 using StringData = File::StringData;
 
 /* LiteralTag could be extended by different language
@@ -121,6 +121,6 @@ private:
     Span<const uint8_t> literalDataSp_ {nullptr, nullptr};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_Literal_DATA_ACCESSOR_H_

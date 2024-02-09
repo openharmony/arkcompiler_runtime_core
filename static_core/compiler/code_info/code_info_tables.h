@@ -21,7 +21,7 @@
 #include "utils/arch.h"
 #include "vreg_info.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class StackMap : public BitTableRow<8U, StackMap> {
 public:
@@ -210,6 +210,6 @@ public:
     ~ConstantTable() = default;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_CODE_INFO_TABLES_H

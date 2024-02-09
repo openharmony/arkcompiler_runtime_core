@@ -26,7 +26,7 @@
 #include <limits>
 #include <optional>
 
-namespace panda::panda_file::helpers {
+namespace ark::panda_file::helpers {
 
 constexpr size_t UINT_BYTE2_SHIFT = 8U;
 constexpr size_t UINT_BYTE3_SHIFT = 16U;
@@ -37,7 +37,7 @@ inline auto Read(Span<const uint8_t> *sp)
 {
     constexpr size_t BYTE_WIDTH = std::numeric_limits<uint8_t>::digits;
     constexpr size_t BITWIDTH = BYTE_WIDTH * WIDTH;
-    using UnsignedType = panda::helpers::TypeHelperT<BITWIDTH, false>;
+    using UnsignedType = ark::helpers::TypeHelperT<BITWIDTH, false>;
 
     UnsignedType result = 0;
     for (size_t i = 0; i < WIDTH; i++) {
@@ -186,6 +186,6 @@ inline bool EnumerateTaggedValuesWithEarlyStop(Span<const uint8_t> sp, E tag, Ca
     return false;
 }
 
-}  // namespace panda::panda_file::helpers
+}  // namespace ark::panda_file::helpers
 
 #endif  // LIBPANDAFILE_HELPERS_H_

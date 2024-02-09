@@ -23,7 +23,7 @@
 
 namespace {
 
-int PrintHelp(const panda::PandArgParser &paParser)
+int PrintHelp(const ark::PandArgParser &paParser)
 {
     const auto a = paParser.GetErrorString();
     if (!a.empty()) {
@@ -48,8 +48,8 @@ std::string MangleClass(std::string s)
 
 int main(int argc, const char *argv[])
 {
-    panda::PandArgParser paParser;
-    panda::static_linker::Options options {*argv};
+    ark::PandArgParser paParser;
+    ark::static_linker::Options options {*argv};
     options.AddOptions(&paParser);
     paParser.EnableRemainder();
 
@@ -57,10 +57,9 @@ int main(int argc, const char *argv[])
         return PrintHelp(paParser);
     }
 
-    panda::Logger::InitializeStdLogging(panda::Logger::LevelFromString(options.GetLogLevel()),
-                                        panda::Logger::ComponentMask()
-                                            .set(panda::Logger::Component::STATIC_LINKER)
-                                            .set(panda::Logger::Component::PANDAFILE));
+    ark::Logger::InitializeStdLogging(
+        ark::Logger::LevelFromString(options.GetLogLevel()),
+        ark::Logger::ComponentMask().set(ark::Logger::Component::STATIC_LINKER).set(ark::Logger::Component::PANDAFILE));
 
     const auto files = paParser.GetRemainder();
 
@@ -74,7 +73,7 @@ int main(int argc, const char *argv[])
         options.SetOutput(fn.substr(0, fn.find_last_of('.')) + ".linked.abc");
     }
 
-    auto conf = panda::static_linker::DefaultConfig();
+    auto conf = ark::static_linker::DefaultConfig();
 
     conf.stripDebugInfo = options.IsStripDebugInfo();
 
@@ -86,7 +85,7 @@ int main(int argc, const char *argv[])
     classesVecToSet(options.GetParitalClasses(), conf.partial);
     classesVecToSet(options.GetRemainsPartialClasses(), conf.remainsPartial);
 
-    auto res = panda::static_linker::Link(conf, options.GetOutput(), files);
+    auto res = ark::static_linker::Link(conf, options.GetOutput(), files);
 
     size_t i = 0;
     for (const auto &s : res.errors) {

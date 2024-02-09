@@ -21,7 +21,7 @@
 
 #include "websocketpp/server.hpp"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 template <typename Config>
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ServerEndpoint : public Endpoint<websocketpp::server<Config>>, public Server {
@@ -56,6 +56,6 @@ private:
     std::function<void()> onOpen_ = []() {};
     std::function<void()> onFail_ = []() {};
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_SERVER_ENDPOINT_H

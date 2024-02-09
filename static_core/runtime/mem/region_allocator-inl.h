@@ -27,7 +27,7 @@
 #include "runtime/mem/alloc_config.h"
 #include "runtime/arch/memory_helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <typename LockConfigT>
 RegionAllocatorBase<LockConfigT>::RegionAllocatorBase(MemStatsType *memStats, GenerationalSpaces *spaces,
@@ -713,6 +713,6 @@ using RegionRunslotsAllocator = RegionNonmovableAllocator<AllocConfigT, LockConf
 template <typename AllocConfigT, typename LockConfigT>
 using RegionFreeListAllocator = RegionNonmovableAllocator<AllocConfigT, LockConfigT, FreeListAllocator<AllocConfigT>>;
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_REGION_ALLOCATOR_INL_H

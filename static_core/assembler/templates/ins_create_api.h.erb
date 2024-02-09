@@ -18,7 +18,7 @@
 #include <initializer_list>
 #include "assembly-ins.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
 % insn = group.first 
@@ -59,4 +59,4 @@ inline Ins Create_<%= insn.asm_token %>(<%= signature_str %>)
 
 % end
 
-} // namespace panda::pandasm
+} // namespace ark::pandasm

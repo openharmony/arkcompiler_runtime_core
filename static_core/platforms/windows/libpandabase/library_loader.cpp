@@ -17,7 +17,7 @@
 
 #include <windows.h>
 
-namespace panda::os::library_loader {
+namespace ark::os::library_loader {
 Expected<LibraryHandle, Error> Load(std::string_view filename)
 {
     HMODULE module = LoadLibrary(filename.data());
@@ -46,4 +46,4 @@ void CloseHandle(void *handle)
         FreeLibrary(reinterpret_cast<HMODULE>(handle));
     }
 }
-}  // namespace panda::os::library_loader
+}  // namespace ark::os::library_loader

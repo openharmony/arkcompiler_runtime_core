@@ -21,7 +21,7 @@
 #include "optimizer/ir/inst.h"
 #include "compiler/compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 namespace {
 constexpr ZeroInst *ZERO_INST {nullptr};
 }  // namespace
@@ -1797,4 +1797,4 @@ void ScalarReplacement::PatchSaveState(SaveStateInst *saveState, ArenaUnorderedS
         saveState->AppendBridge(inst);
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-static panda::compiler::CallInst *CastToCallLaunch(panda::compiler::Inst *inst)
+static ark::compiler::CallInst *CastToCallLaunch(ark::compiler::Inst *inst)
 {
     switch (inst->GetOpcode()) {
         case compiler::Opcode::CallLaunchStatic:
@@ -25,7 +25,7 @@ static panda::compiler::CallInst *CastToCallLaunch(panda::compiler::Inst *inst)
     }
 }
 
-static panda::pandasm::Opcode ChooseCallLaunchOpcode(panda::compiler::Opcode op, size_t nargs)
+static ark::pandasm::Opcode ChooseCallLaunchOpcode(ark::compiler::Opcode op, size_t nargs)
 {
     ASSERT(op == compiler::Opcode::CallLaunchStatic || op == compiler::Opcode::CallLaunchVirtual);
     if (nargs > MAX_NUM_NON_RANGE_ARGS) {
@@ -57,10 +57,10 @@ static panda::pandasm::Opcode ChooseCallLaunchOpcode(panda::compiler::Opcode op,
     }
 }
 
-static void CallLaunchHandler(panda::compiler::GraphVisitor *visitor, panda::compiler::Inst *inst)
+static void CallLaunchHandler(ark::compiler::GraphVisitor *visitor, ark::compiler::Inst *inst)
 {
     auto op = inst->GetOpcode();
-    ASSERT(op == panda::compiler::Opcode::CallLaunchStatic || op == panda::compiler::Opcode::CallLaunchVirtual);
+    ASSERT(op == ark::compiler::Opcode::CallLaunchStatic || op == ark::compiler::Opcode::CallLaunchVirtual);
     auto *enc = static_cast<BytecodeGen *>(visitor);
     auto callInst = CastToCallLaunch(inst);
     auto sfCount = inst->GetInputsCount() - (inst->RequireState() ? 1 : 0);
@@ -97,7 +97,7 @@ static void CallLaunchHandler(panda::compiler::GraphVisitor *visitor, panda::com
     }
 }
 
-static void VisitCallLaunchStatic(panda::compiler::GraphVisitor *visitor, panda::compiler::Inst *inst)
+static void VisitCallLaunchStatic(ark::compiler::GraphVisitor *visitor, ark::compiler::Inst *inst)
 {
     CallLaunchHandler(visitor, inst);
 }

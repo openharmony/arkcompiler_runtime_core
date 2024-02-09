@@ -33,22 +33,22 @@
 
 namespace {
 
-bool ProcessConfigFile(panda::verifier::Config *cfg, const char *text)
+bool ProcessConfigFile(ark::verifier::Config *cfg, const char *text)
 {
-    panda::verifier::debug::RegisterConfigHandlerBreakpoints(cfg);
-    panda::verifier::debug::RegisterConfigHandlerWhitelist(cfg);
-    panda::verifier::debug::RegisterConfigHandlerOptions(cfg);
-    panda::verifier::debug::RegisterConfigHandlerMethodOptions(cfg);
-    panda::verifier::debug::RegisterConfigHandlerMethodGroups(cfg);
+    ark::verifier::debug::RegisterConfigHandlerBreakpoints(cfg);
+    ark::verifier::debug::RegisterConfigHandlerWhitelist(cfg);
+    ark::verifier::debug::RegisterConfigHandlerOptions(cfg);
+    ark::verifier::debug::RegisterConfigHandlerMethodOptions(cfg);
+    ark::verifier::debug::RegisterConfigHandlerMethodGroups(cfg);
 
-    panda::verifier::config::Section section;
+    ark::verifier::config::Section section;
 
     bool result =
-        panda::verifier::config::ParseConfig(text, section) && panda::verifier::config::ProcessConfig(cfg, section);
+        ark::verifier::config::ParseConfig(text, section) && ark::verifier::config::ProcessConfig(cfg, section);
 
     if (result) {
         LOG(DEBUG, VERIFIER) << "Verifier debug configuration: \n" << section.Image();
-        panda::verifier::debug::SetDefaultMethodOptions(cfg);
+        ark::verifier::debug::SetDefaultMethodOptions(cfg);
     }
 
     return result;
@@ -56,12 +56,12 @@ bool ProcessConfigFile(panda::verifier::Config *cfg, const char *text)
 
 }  // namespace
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 
 bool LoadConfig(Config *cfg, std::string_view filename)
 {
-    using panda::os::file::Mode;
-    using panda::os::file::Open;
+    using ark::os::file::Mode;
+    using ark::os::file::Open;
 
     bool result = false;
 
@@ -99,6 +99,6 @@ bool LoadConfig(Config *cfg, std::string_view filename)
     return result;
 }
 
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config
 
 #endif  // PANDA_VERIF_CONFIG_LOAD_H_

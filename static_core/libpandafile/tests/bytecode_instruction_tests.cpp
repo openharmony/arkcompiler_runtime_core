@@ -22,7 +22,7 @@
 
 #include "bytecode_instruction-inl.h"
 
-namespace panda::test {
+namespace ark::test {
 
 // NOLINTBEGIN(modernize-avoid-c-arrays)
 
@@ -726,4 +726,4 @@ TEST(BytecodeInstructionSafe, JumpTo)
 
 // NOLINTEND(modernize-avoid-c-arrays)
 
-}  // namespace panda::test
+}  // namespace ark::test

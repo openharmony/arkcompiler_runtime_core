@@ -18,7 +18,7 @@
 
 #include "tooling/pt_thread.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class SessionManager {
 public:
     SessionManager() = default;
@@ -39,6 +39,6 @@ private:
     mutable os::memory::Mutex mutex_;
     std::map<std::string, PtThread> sessions_ GUARDED_BY(mutex_);
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_SESSION_MANAGER_H

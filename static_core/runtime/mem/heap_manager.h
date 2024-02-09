@@ -30,14 +30,14 @@
 #include "runtime/mem/tlab.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map_singleton.h"
 
-namespace panda {
+namespace ark {
 // Forward declaration
 class Runtime;
 class PandaVM;
 class RuntimeNotificationManager;
-}  //  namespace panda
+}  //  namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 // Forward declaration
 class MemoryManager;
@@ -262,11 +262,11 @@ private:
     /// StackFrameAllocator is per thread
     StackFrameAllocator *GetCurrentStackFrameAllocator();
 
-    friend class ::panda::Runtime;
+    friend class ::ark::Runtime;
 
     // Needed to extract object allocator created during HeapManager initialization
     // to pass it to GC creation method;
-    friend class ::panda::mem::MemoryManager;
+    friend class ::ark::mem::MemoryManager;
 
     /**
      * NOTE : Target ideal heap utilization ratio.
@@ -283,6 +283,6 @@ private:
     RuntimeNotificationManager *notificationManager_ = nullptr;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_HEAP_MANAGER_H

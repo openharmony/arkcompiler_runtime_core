@@ -19,7 +19,7 @@
 #include "runtime/compiler_queue_aged_counter_priority.h"
 #include "compiler/inplace_task_runner.h"
 
-namespace panda {
+namespace ark {
 
 CompilerThreadPoolWorker::CompilerThreadPoolWorker(mem::InternalAllocatorPtr internalAllocator, Compiler *compiler,
                                                    bool &noAsyncJit, const RuntimeOptions &options)
@@ -85,4 +85,4 @@ void CompilerProcessor::InPlaceCompileMethod(CompilerTask &&ctx)
     }
 }
 
-}  // namespace panda
+}  // namespace ark

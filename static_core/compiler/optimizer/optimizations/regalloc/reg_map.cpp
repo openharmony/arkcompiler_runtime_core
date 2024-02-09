@@ -16,7 +16,7 @@
 #include "reg_map.h"
 #include <algorithm>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void RegisterMap::SetMask(const LocationMask &regMask, size_t priorityReg)
 {
@@ -120,4 +120,4 @@ void RegisterMap::Dump(std::ostream *out) const
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

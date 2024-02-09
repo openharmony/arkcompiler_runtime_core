@@ -28,7 +28,7 @@
 #include "runtime/mem/mem_stats.h"
 #include "runtime/mem/mem_stats_additional_info.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class MemStatsAdditionalInfoTest : public testing::Test {
 public:
@@ -39,7 +39,7 @@ public:
         options.SetShouldInitializeIntrinsics(false);
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -54,7 +54,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 TEST_F(MemStatsAdditionalInfoTest, HeapAllocatedMaxAndTotal)
@@ -102,4 +102,4 @@ TEST_F(MemStatsAdditionalInfoTest, AdditionalStatistic)
 #endif
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

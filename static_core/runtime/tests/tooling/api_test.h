@@ -19,7 +19,7 @@
 #include <utility>
 #include "runtime/include/tooling/debug_interface.h"
 
-namespace panda::tooling::test {
+namespace ark::tooling::test {
 using BreakpointCallback = std::function<bool(PtThread, Method *, const PtLocation &)>;
 using LoadModuleCallback = std::function<bool(std::string_view)>;
 using PausedCallback = std::function<bool(PauseReason)>;
@@ -134,6 +134,6 @@ struct ApiTest {
 
     virtual std::pair<const char *, const char *> GetEntryPoint() = 0;
 };
-}  // namespace panda::tooling::test
+}  // namespace ark::tooling::test
 
 #endif  // PANDA_RUNTIME_TESTS_TOOLING_API_TEST_H

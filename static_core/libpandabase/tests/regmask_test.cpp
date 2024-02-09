@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <bitset>
 
-namespace panda::test {
+namespace ark::test {
 
 using BitsetType = std::bitset<RegMask::Size()>;
 
@@ -88,4 +88,4 @@ TEST(RegMask, Base)
     // NOLINTEND(readability-magic-numbers)
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

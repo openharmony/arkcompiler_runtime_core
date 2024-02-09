@@ -21,7 +21,7 @@
 #include <securec.h>
 #include <cstring>
 
-namespace panda {
+namespace ark {
 
 const Alignment CodeAllocator::PAGE_LOG_ALIGN = GetLogAlignment(os::mem::GetPageSize());
 
@@ -91,4 +91,4 @@ void CodeAllocator::CodeRangeUpdate(void *ptr, size_t size)
     }
 }
 
-}  // namespace panda
+}  // namespace ark

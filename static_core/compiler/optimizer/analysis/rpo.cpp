@@ -17,7 +17,7 @@
 #include "optimizer/ir/graph.h"
 #include "rpo.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 Rpo::Rpo(Graph *graph) : Analysis(graph), rpoVector_(graph->GetAllocator()->Adapter()) {}
 
 /**
@@ -63,4 +63,4 @@ bool Rpo::RunImpl()
     GetGraph()->EraseMarker(marker_);
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

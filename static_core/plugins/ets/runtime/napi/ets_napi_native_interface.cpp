@@ -37,18 +37,18 @@
 
 #define ETS_NAPI_DEBUG_TRACE(env)
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define CHECK_ENV(env)                                                                                      \
-    do {                                                                                                    \
-        ets_env *e = env;                                                                                   \
-        ETS_NAPI_RETURN_IF_EQ(::panda::ets::PandaEtsNapiEnv::ToPandaEtsEnv(e)->HasPendingException(), true, \
-                              ETS_PENDING_EXCEPTION);                                                       \
-        ETS_NAPI_RETURN_IF_EQ(e, nullptr, ETS_INVALID_ARG);                                                 \
+#define CHECK_ENV(env)                                                                                    \
+    do {                                                                                                  \
+        ets_env *e = env;                                                                                 \
+        ETS_NAPI_RETURN_IF_EQ(::ark::ets::PandaEtsNapiEnv::ToPandaEtsEnv(e)->HasPendingException(), true, \
+                              ETS_PENDING_EXCEPTION);                                                     \
+        ETS_NAPI_RETURN_IF_EQ(e, nullptr, ETS_INVALID_ARG);                                               \
     } while (false)
 
 #define CHECK_ARG(env, arg) ETS_NAPI_RETURN_IF_EQ(arg, nullptr, ETS_INVALID_ARG)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-namespace panda::ets::napi {
+namespace ark::ets::napi {
 template <typename T>
 using ArgVector = PandaSmallVector<T>;
 
@@ -2615,13 +2615,13 @@ NO_UB_SANITIZE static ets_objectRefType GetObjectRefType(EtsEnv *env, ets_object
         return ETS_INVALID_REF_TYPE;
     }
 
-    switch (mem::ReferenceStorage::GetObjectType(reinterpret_cast<panda::mem::Reference *>(obj))) {
-        case panda::mem::Reference::ObjectType::GLOBAL:
+    switch (mem::ReferenceStorage::GetObjectType(reinterpret_cast<ark::mem::Reference *>(obj))) {
+        case ark::mem::Reference::ObjectType::GLOBAL:
             return ETS_GLOBAL_REF_TYPE;
-        case panda::mem::Reference::ObjectType::WEAK:
+        case ark::mem::Reference::ObjectType::WEAK:
             return ETS_WEAK_GLOBAL_REF_TYPE;
-        case panda::mem::Reference::ObjectType::LOCAL:
-        case panda::mem::Reference::ObjectType::STACK:
+        case ark::mem::Reference::ObjectType::LOCAL:
+        case ark::mem::Reference::ObjectType::STACK:
             return ETS_LOCAL_REF_TYPE;
         default:
             UNREACHABLE();
@@ -2944,6 +2944,6 @@ const ETS_NativeInterface *GetNativeInterface()
 {
     return &NATIVE_INTERFACE;
 }
-}  // namespace panda::ets::napi
+}  // namespace ark::ets::napi
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg)

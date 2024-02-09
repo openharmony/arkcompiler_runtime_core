@@ -17,12 +17,12 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST(VerifierTest_FlagsForEnum, simple)
 {
     enum class Enum { E1, E2, E3 };
-    using F = panda::verifier::FlagsForEnum<size_t, Enum, Enum::E1, Enum::E2, Enum::E3>;
+    using F = ark::verifier::FlagsForEnum<size_t, Enum, Enum::E1, Enum::E2, Enum::E3>;
     F flags;
 
     flags[Enum::E2] = true;
@@ -45,4 +45,4 @@ TEST(VerifierTest_FlagsForEnum, simple)
     EXPECT_FALSE(flags[Enum::E3]);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

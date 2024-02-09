@@ -20,7 +20,7 @@
 #include "runtime/mark_word.h"
 #include "runtime/monitor.h"
 
-namespace panda {
+namespace ark {
 
 Monitor *MonitorPool::CreateMonitor(ObjectHeader *obj)
 {
@@ -101,4 +101,4 @@ PandaSet<Monitor::MonitorId> MonitorPool::GetEnteredMonitorsIds(MTManagedThread 
     return enteredMonitorsIds;
 }
 
-}  // namespace panda
+}  // namespace ark

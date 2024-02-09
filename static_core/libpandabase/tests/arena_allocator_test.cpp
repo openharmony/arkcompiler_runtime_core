@@ -31,7 +31,7 @@
 #include <cstdint>
 #include <ctime>
 
-namespace panda {
+namespace ark {
 
 constexpr const int64_t DEFAULT_SEED = 123456;
 
@@ -70,7 +70,7 @@ protected:
     void SetUp() override
     {
         static constexpr size_t INTERNAL_SIZE = 128_MB;
-        panda::mem::MemConfig::Initialize(0U, INTERNAL_SIZE, 0U, 0U, 0U, 0U);
+        ark::mem::MemConfig::Initialize(0U, INTERNAL_SIZE, 0U, 0U, 0U, 0U);
         PoolManager::Initialize();
     }
 
@@ -140,7 +140,7 @@ protected:
     void TearDown() override
     {
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     unsigned int GetSeed()
@@ -591,4 +591,4 @@ TEST_F(ArenaAllocatorTest, ResizeWrapperTest)
     ASSERT_EQ(oldSize, aa.GetAllocatedSize());
 }
 
-}  // namespace panda
+}  // namespace ark

@@ -18,14 +18,14 @@
 
 #include <cstdint>
 
-namespace panda::ets {
+namespace ark::ets {
 class EtsObject;
 class EtsString;
 class EtsObject;
 class EtsClass;
-}  // namespace panda::ets
+}  // namespace ark::ets
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 class JSValue;
 
@@ -96,6 +96,6 @@ struct IntrinsicsAPI {
     // NOLINTEND(readability-identifier-naming)
 };
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTRINSICS_API_H_

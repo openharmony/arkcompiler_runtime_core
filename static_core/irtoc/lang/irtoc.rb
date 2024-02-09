@@ -42,16 +42,16 @@ FILE_BEGIN = %{
 
 #ifndef __clang_analyzer__
 
-using namespace panda::compiler;
+using namespace ark::compiler;
 
-namespace panda::irtoc \{
+namespace ark::irtoc \{
 // NOLINTBEGIN(readability-identifier-naming)
 
 }
 
 FILE_END = %{
 // NOLINTEND(readability-identifier-naming)
-\} // namespace panda::irtoc
+\} // namespace ark::irtoc
 
 #endif  // __clang_analyzer__
 }
@@ -238,22 +238,22 @@ def main
     Output.println('#include "optimizer/ir/basicblock.h"')
     Output.println('#include "optimizer/ir/inst.h"')
     Output.println('#include "asm_defines.h"')
-    Output.println('namespace panda::compiler {')
+    Output.println('namespace ark::compiler {')
     Output.println('// NOLINTBEGIN(readability-identifier-naming)')
     builder_functions.each(&:generate_builder)
     Output.println('// NOLINTEND(readability-identifier-naming)')
-    Output.println('} // namespace panda::compiler')
+    Output.println('} // namespace ark::compiler')
   elsif Options.ir_api == 'ir-inline'
     Output.setup Options.output_files[0]
     Output << '#include "optimizer/ir/graph.h"'
     Output << '#include "optimizer/ir/basicblock.h"'
     Output << '#include "optimizer/ir/inst.h"'
     Output << "#include \"asm_defines.h\"\n"
-    Output << "namespace panda::compiler {\n"
+    Output << "namespace ark::compiler {\n"
     Output << "// NOLINTBEGIN(readability-identifier-naming)\n"
     cpp_functions.each { |func| func.generate_ir(GeneratorIrInline.new) }
     Output << "// NOLINTEND(readability-identifier-naming)\n"
-    Output << '}  // namespace panda::compiler'
+    Output << '}  // namespace ark::compiler'
   else
     abort 'Should be unreachable: Unknown IR API'
   end

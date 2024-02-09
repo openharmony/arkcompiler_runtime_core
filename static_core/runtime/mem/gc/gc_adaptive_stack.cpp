@@ -17,7 +17,7 @@
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 GCAdaptiveStack::GCAdaptiveStack(GC *gc, size_t stackSizeLimit, size_t newTaskStackSizeLimit, GCWorkersTaskTypes task,
                                  uint64_t timeLimitForNewTaskCreation, PandaDeque<ObjectHeader *> *stackSrc)
@@ -114,11 +114,11 @@ void GCAdaptiveStack::PushToStack(ObjectHeader *element)
 bool GCAdaptiveStack::IsHighTaskCreationRate()
 {
     if (createdTasks_ == 0) {
-        startTime_ = panda::os::time::GetClockTimeInThreadCpuTime();
+        startTime_ = ark::os::time::GetClockTimeInThreadCpuTime();
     }
     createdTasks_++;
     if (tasksForTimeCheck_ == createdTasks_) {
-        uint64_t curTime = panda::os::time::GetClockTimeInThreadCpuTime();
+        uint64_t curTime = ark::os::time::GetClockTimeInThreadCpuTime();
         ASSERT(curTime >= startTime_);
         uint64_t totalTimeConsumed = curTime - startTime_;
         uint64_t oneTaskConsumed = totalTimeConsumed / createdTasks_;
@@ -196,4 +196,4 @@ void GCAdaptiveStack::Clear()
     *stackDst_ = PandaDeque<ObjectHeader *>();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

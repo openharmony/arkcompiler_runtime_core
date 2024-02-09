@@ -31,7 +31,7 @@
 
 #include <functional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 using CallIntoRuntimeHandler = callable<void(callable<void()>)>;
 
 class VerificationContext {
@@ -135,6 +135,6 @@ private:
     ExecContext execCtx_;
     plugin::Plugin const *plugin_;
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP_

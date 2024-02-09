@@ -18,7 +18,7 @@
 
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 
-namespace panda::mem::ets {
+namespace ark::mem::ets {
 
 class EtsReferenceProcessor final : public ReferenceProcessor {
 public:
@@ -36,7 +36,7 @@ public:
     void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                            const mem::GC::ReferenceClearPredicateT &pred) final;
 
-    panda::mem::Reference *CollectClearedReferences() final
+    ark::mem::Reference *CollectClearedReferences() final
     {
         return nullptr;
     }
@@ -46,7 +46,7 @@ public:
         UNREACHABLE();
     }
 
-    void Enqueue([[maybe_unused]] panda::mem::Reference *clearedReferences) final
+    void Enqueue([[maybe_unused]] ark::mem::Reference *clearedReferences) final
     {
         UNREACHABLE();
     }
@@ -60,6 +60,6 @@ private:
     GC *gc_;
 };
 
-}  // namespace panda::mem::ets
+}  // namespace ark::mem::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_MEM_ETS_REFERENCE_PROCESSOR_H

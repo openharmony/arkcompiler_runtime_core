@@ -20,7 +20,7 @@
 #include "libpandabase/mem/pool_manager.h"
 #include "runtime/mem/heap_space.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class HeapSpaceTest : public testing::Test {
 public:
@@ -277,4 +277,4 @@ TEST_F(HeapSpaceTest, ClampNewMaxSizeTest)
     heapSpace_->FreePool(pool3.GetMem(), pool3.GetSize());
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

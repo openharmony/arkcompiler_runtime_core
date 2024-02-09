@@ -17,7 +17,7 @@
 #include "panda_runner.h"
 #include "runtime/jit/profiling_data.h"
 
-namespace panda::test {
+namespace ark::test {
 class ProfilingRunnerTest : public testing::Test {};
 
 static constexpr auto SOURCE = R"(
@@ -87,4 +87,4 @@ TEST_F(ProfilingRunnerTest, BranchStatistics)
     Runtime::Destroy();
 }
 #endif
-}  // namespace panda::test
+}  // namespace ark::test

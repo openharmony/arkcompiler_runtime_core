@@ -21,7 +21,7 @@
 
 #include "runtime/include/vtable_builder-inl.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 struct EtsVTableSearchBySignature {
     bool operator()(const MethodInfo &info1, const MethodInfo &info2) const
@@ -78,6 +78,6 @@ struct EtsVTableOverridePred {
 
 using EtsVTableBuilder = VTableBuilderImpl<EtsVTableSearchBySignature, EtsVTableOverridePred>;
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_ITABLE_BUILDER_H_

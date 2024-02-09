@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 constexpr const std::string_view MANGLE_BEGIN = ":";
 constexpr const std::string_view MANGLE_SEPARATOR = ";";
 
@@ -88,6 +88,6 @@ inline bool IsSignatureOrMangled(const std::string &str)
     return str.find(SIGNATURE_BEGIN) != std::string::npos;
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_MANGLING_H

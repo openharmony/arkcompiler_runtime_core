@@ -24,7 +24,7 @@
 #include "runtime/mem/mem_stats_default.h"
 #include "libpandabase/utils/tsan_interface.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /**
  * We want to record stats about allocations and free events. Allocators don't care about the type of allocated memory.
@@ -347,5 +347,5 @@ public:
     static void OnInitYoungRegion([[maybe_unused]] const MemRange &memRange) {}
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_ALLOC_CONFIG_H

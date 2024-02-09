@@ -19,7 +19,7 @@
 #include "runtime/include/exceptions.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 static Method *FindMethodInVTable(Class *klass, Method *method)
 {
@@ -166,4 +166,4 @@ void EtsITableBuilder::DumpITable([[maybe_unused]] Class *klass)
 #endif  // NDEBUG
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

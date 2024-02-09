@@ -35,7 +35,7 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda {
+namespace ark {
 
 constexpr size_t DEFAULT_ARENA_SIZE = PANDA_DEFAULT_ARENA_SIZE;
 constexpr Alignment DEFAULT_ARENA_ALIGNMENT = LOG_ALIGN_3;
@@ -239,7 +239,7 @@ T *ArenaAllocatorT<USE_OOM_HANDLER>::AllocArray(size_t arrLength)
     return static_cast<T *>(Alloc(sizeof(T) * arrLength));
 }
 
-}  // namespace panda
+}  // namespace ark
 
 WEAK_FOR_LTO_END
 

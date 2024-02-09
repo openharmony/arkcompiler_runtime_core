@@ -26,7 +26,7 @@
 <%= Common::include_plugin_files "Verification", "header" %>
 
 // NOLINTBEGIN(fuchsia-statically-constructed-objects)
-namespace panda::verifier::plugin {
+namespace ark::verifier::plugin {
 
 % Common::each_plugin_suboption("Verification", "plugin_class") do |plugin_class, plugin_lang|
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -52,4 +52,4 @@ Plugin const *GetLanguagePlugin(panda_file::SourceLang lang)
     return &g_dflt;
 }
 
-} // namespace panda::verifier::plugin
+} // namespace ark::verifier::plugin

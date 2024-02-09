@@ -20,7 +20,7 @@
 #include "runtime/tooling/sampler/sample_info.h"
 #include "runtime/tooling/sampler/sample_writer.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 void StreamWriter::WriteSample(const SampleInfo &sample) const
 {
@@ -63,4 +63,4 @@ void StreamWriter::WriteModule(const FileInfo &moduleInfo)
     writtenModules_.insert(moduleInfo);
 }
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler

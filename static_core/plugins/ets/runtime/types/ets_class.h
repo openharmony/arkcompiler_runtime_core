@@ -29,7 +29,7 @@
 #include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 enum class AccessLevel { PUBLIC, PROTECTED, DEFAULT, PRIVATE };
 
@@ -51,7 +51,7 @@ public:
     // otherwise it may cause data race while visiting object's class concurrently in gc.
     void InitClass(const uint8_t *descriptor, uint32_t vtableSize, uint32_t imtSize, uint32_t klassSize)
     {
-        new (&klass_) panda::Class(descriptor, panda_file::SourceLang::ETS, vtableSize, imtSize, klassSize);
+        new (&klass_) ark::Class(descriptor, panda_file::SourceLang::ETS, vtableSize, imtSize, klassSize);
     }
 
     const char *GetDescriptor() const
@@ -444,7 +444,7 @@ private:
     /// Class override Object.finalize() or any of his ancestors, and implementation is not trivial.
     constexpr static uint32_t IS_CLASS_FINALIZABLE = 1U << 22U;
 
-    panda::ObjectHeader header_;  // EtsObject
+    ark::ObjectHeader header_;  // EtsObject
 
     // ets.Class fields BEGIN
     FIELD_UNUSED ObjectPointer<EtsArray> ifTable_;     // Class[]
@@ -454,15 +454,15 @@ private:
     FIELD_UNUSED uint32_t flags_;
     // ets.Class fields END
 
-    panda::Class klass_;
+    ark::Class klass_;
 };
 
 // Object header field must be first
 static_assert(EtsClass::GetHeaderOffset() == 0);
 
 // Klass field has variable size so it must be last
-static_assert(EtsClass::GetRuntimeClassOffset() + sizeof(panda::Class) == sizeof(EtsClass));
+static_assert(EtsClass::GetRuntimeClassOffset() + sizeof(ark::Class) == sizeof(EtsClass));
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H_

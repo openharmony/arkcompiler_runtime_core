@@ -19,7 +19,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/handle_base-inl.h"
 
-namespace panda::concurrency::test {
+namespace ark::concurrency::test {
 
 class MonitorTest : public testing::Test {
 public:
@@ -37,7 +37,7 @@ public:
         options_.SetShouldLoadBootPandaFiles(false);
         options_.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options_);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -53,7 +53,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
 
 private:
     unsigned seed_ {};
@@ -275,4 +275,4 @@ TEST_F(MonitorTest, MonitorTestLightLockOverflow)
     ASSERT_FALSE(Monitor::HoldsLock(header));
 }
 
-}  // namespace panda::concurrency::test
+}  // namespace ark::concurrency::test

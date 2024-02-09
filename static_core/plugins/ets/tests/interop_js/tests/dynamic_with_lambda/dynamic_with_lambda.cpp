@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropJsDynamicWithLambda : public EtsInteropTest {};
 
@@ -66,4 +66,4 @@ TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestLambdaJSValueCastCallAsArgume
     ASSERT_EQ(ret, 25U);
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

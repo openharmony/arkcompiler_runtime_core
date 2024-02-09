@@ -23,7 +23,7 @@
 // NOLINTBEGIN(readability-magic-numbers)
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 class EtsStringBuilderTest : public testing::Test {
 public:
     EtsStringBuilderTest()
@@ -77,7 +77,7 @@ TEST_F(EtsStringBuilderTest, CharToString)
     ASSERT_TRUE(charToString->GetDataUtf16()[0] == etsCh);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-magic-numbers)
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)

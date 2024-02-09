@@ -15,7 +15,7 @@
 
 #include "runtime/tooling/inspector/debuggable_thread.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 DebuggableThread::DebuggableThread(
     ManagedThread *thread,
     std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&preSuspend,
@@ -251,4 +251,4 @@ void DebuggableThread::Resume()
 
     postResume_();
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

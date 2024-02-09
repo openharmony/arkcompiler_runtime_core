@@ -20,7 +20,7 @@
 
 #include "libpandabase/mem/mem.h"
 
-namespace panda {
+namespace ark {
 
 using ArraySizeT = uint32_t;
 using ArraySsizeT = int32_t;
@@ -71,6 +71,6 @@ public:
     static constexpr bool IS_HASH_IN_OBJ_HEADER = true;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_OBJECT_HEADER_CONFIG_H_

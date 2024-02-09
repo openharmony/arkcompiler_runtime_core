@@ -26,7 +26,7 @@
 #include "runtime/include/method-inl.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class MethodTest : public testing::Test {
 public:
@@ -39,7 +39,7 @@ public:
         options.SetShouldInitializeIntrinsics(false);
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -109,13 +109,13 @@ public:
     }
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 template <bool IS_DYNAMIC = false>
 static Frame *CreateFrame(size_t nregs, Method *method, Frame *prev)
 {
-    return panda::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
+    return ark::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
 }
 
 TEST_F(MethodTest, SetIntrinsic)
@@ -599,4 +599,4 @@ TEST_F(MethodTest, GetFullName)
     ASSERT_EQ(PandaStringToStd(method3->GetFullName(true)), "Foo R::multiple_args(R, i32, Foo, [J, [LFoo;)");
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

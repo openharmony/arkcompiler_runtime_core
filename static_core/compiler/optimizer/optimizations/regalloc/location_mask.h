@@ -18,7 +18,7 @@
 #include "mem/arena_allocator.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /// Helper-class to hold information about registers and stack slots usage.
 class LocationMask {
 public:
@@ -132,5 +132,5 @@ private:
     ArenaVector<bool> usage_;
     std::optional<size_t> reservedBit_ {std::nullopt};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOCATION_MASK_H

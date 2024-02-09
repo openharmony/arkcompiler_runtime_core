@@ -17,7 +17,7 @@
 
 #include "libpandabase/macros.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class PtProperty {
 public:
     explicit PtProperty(void *data = nullptr) : data_(data) {}
@@ -35,6 +35,6 @@ public:
 private:
     void *data_;
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_PROPERTY_H

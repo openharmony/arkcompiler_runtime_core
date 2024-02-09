@@ -27,13 +27,13 @@ const uint64_t ITERATION = 0xffffff;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
 static inline auto RANDOM_GEN = std::mt19937_64(SEED);
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Register32Test : public ::testing::Test {
 public:
     Register32Test()
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
+        ark::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
     }
@@ -41,7 +41,7 @@ public:
     {
         delete allocator_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_COPY_SEMANTIC(Register32Test);
@@ -113,4 +113,4 @@ TEST_F(Register32Test, TmpReg)
     ASSERT_EQ(encoder.GetScratchRegistersCount(), initial_count);
     ASSERT_EQ(encoder.GetScratchFPRegistersCount(), initial_fp_count);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

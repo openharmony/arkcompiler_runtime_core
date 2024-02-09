@@ -20,10 +20,10 @@
 #include "runtime/profiling/generated/profiling_includes.h"
 #include "runtime/include/profiling_gen.h"
 
-namespace panda::profiling {
+namespace ark::profiling {
 
 inline void ClearProfile([[maybe_unused]] const BytecodeInstruction &inst, [[maybe_unused]] Method *method,
-                         [[maybe_unused]] PandaVM *vm, [[maybe_unused]] panda::panda_file::SourceLang lang)
+                         [[maybe_unused]] PandaVM *vm, [[maybe_unused]] ark::panda_file::SourceLang lang)
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {
@@ -33,6 +33,6 @@ inline void ClearProfile([[maybe_unused]] const BytecodeInstruction &inst, [[may
     }
 }
 
-}  // namespace panda::profiling
+}  // namespace ark::profiling
 
 #endif  // PANDA_PROFILING_INL_H

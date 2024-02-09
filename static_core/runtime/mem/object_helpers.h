@@ -23,20 +23,20 @@
 #include "runtime/mem/gc/gc_root_type.h"
 #include "runtime/include/object_header.h"
 
-namespace panda {
+namespace ark {
 class Class;
 class HClass;
 class Field;
 class ManagedThread;
 class PandaVM;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 class DynClass;
 class Array;
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_DEBUG_OBJ_HELPERS LOG(DEBUG, GC) << vm->GetGC()->GetLogPrefix()
@@ -207,6 +207,6 @@ public:
 template <LangTypeT LANG_TYPE>
 using ObjectHelpers = typename GCObjectHelpers<LANG_TYPE>::Value;
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_OBJECT_HELPERS_H

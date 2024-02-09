@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/interop_js/pending_promise_listener.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 PendingPromiseListener::~PendingPromiseListener()
 {
     if (!completed_) {
@@ -77,4 +77,4 @@ void PendingPromiseListener::OnPromiseStateChangedImpl(EtsHandle<EtsPromise> &pr
     }
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

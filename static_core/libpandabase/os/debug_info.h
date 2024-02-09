@@ -24,7 +24,7 @@
 #include "macros.h"
 #include "utils/span.h"
 
-namespace panda {
+namespace ark {
 
 class DebugInfo {
 public:
@@ -180,5 +180,5 @@ private:
     std::set<Range> ranges_;
 };
 
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_DEBUG_INFO_H_

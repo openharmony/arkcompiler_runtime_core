@@ -31,7 +31,7 @@
 #include "mem/arena_allocator.h"
 #include "mem/arena_allocator_stl_adapter.h"
 
-namespace panda {
+namespace ark {
 
 template <class T, bool USE_OOM_HANDLER = false>
 using ArenaVector = std::vector<T, ArenaAllocatorAdapter<T, USE_OOM_HANDLER>>;
@@ -67,6 +67,6 @@ template <bool USE_OOM_HANDLER = false>
 using ArenaStringT = std::basic_string<char, std::char_traits<char>, ArenaAllocatorAdapter<char, USE_OOM_HANDLER>>;
 using ArenaString = ArenaStringT<false>;
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_UTILS_ARENA_CONTAINERS_H_

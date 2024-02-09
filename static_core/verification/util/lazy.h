@@ -24,7 +24,7 @@
 
 #include <type_traits>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename Value>
 struct IsLazyStreamValue {
@@ -370,6 +370,6 @@ auto JoinStreams(LHS lhs, MHS mhs, RHS rhs)
         return std::make_tuple(*lv, *mv, *rv);
     };
 }
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !_PANDA_LAZY_HPP

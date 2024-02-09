@@ -17,7 +17,7 @@
 
 #include <atomic>
 
-namespace panda::mem {
+namespace ark::mem {
 
 void Bitmap::CopyTo(Bitmap *dest) const
 {
@@ -92,4 +92,4 @@ bool Bitmap::AtomicTestBit(size_t bitOffset)
     return (word & mask) != 0;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

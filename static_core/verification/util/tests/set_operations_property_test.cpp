@@ -25,9 +25,9 @@
 #include <string>
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda::verifier;
+using namespace ark::verifier;
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 namespace {
 
@@ -155,4 +155,4 @@ RC_GTEST_PROP(OperationsOverSets2, Difference, (Set && set1, Set &&set2, Set &&s
     }
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

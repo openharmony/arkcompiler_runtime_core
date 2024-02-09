@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-namespace panda {
+namespace ark {
 
 static constexpr uint32_t ACC_PUBLIC = 0x0001;        // field, method, class
 static constexpr uint32_t ACC_PRIVATE = 0x0002;       // field, method, class
@@ -74,6 +74,6 @@ static constexpr uint32_t VERIFICATION_STATUS_MASK = ((1U << VERIFICATION_STATUS
 static constexpr uint32_t ACC_COMPILATION_STATUS = 0x02000000;  // method (runtime)
 static constexpr uint32_t COMPILATION_STATUS_SHIFT = MinimumBitsToStore(ACC_COMPILATION_STATUS);
 static constexpr uint32_t COMPILATION_STATUS_MASK = static_cast<uint32_t>(0x7) << COMPILATION_STATUS_SHIFT;
-}  // namespace panda
+}  // namespace ark
 
 #endif

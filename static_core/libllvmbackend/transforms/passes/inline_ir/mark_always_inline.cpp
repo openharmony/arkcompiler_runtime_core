@@ -36,9 +36,9 @@ using llvm::dyn_cast;
 using llvm::Function;
 using llvm::StringRef;
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
-bool MarkAlwaysInline::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
+bool MarkAlwaysInline::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return options->doIrtocInline;
 }
@@ -95,4 +95,4 @@ bool MarkAlwaysInline::InlineCallTree(Function *function, int32_t level, int32_t
     }
     return changed;
 }
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

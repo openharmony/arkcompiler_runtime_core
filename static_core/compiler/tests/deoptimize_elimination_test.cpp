@@ -20,7 +20,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/ir/runtime_interface.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class DeoptimizeEliminationTest : public CommonTest {
 public:
     DeoptimizeEliminationTest()
@@ -1114,4 +1114,4 @@ TEST_F(DeoptimizeEliminationTest, RemoveObjectInputsSafePointRequireRegMap)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

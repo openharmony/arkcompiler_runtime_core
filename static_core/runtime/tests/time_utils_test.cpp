@@ -30,7 +30,7 @@ constexpr size_t ITERATION = 64;
 constexpr size_t ITERATION = 1024;
 #endif
 
-namespace panda::time::test {
+namespace ark::time::test {
 
 class TimeTest : public testing::Test {
 public:
@@ -40,7 +40,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -54,7 +54,7 @@ public:
     NO_MOVE_SEMANTIC(TimeTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 TEST_F(TimeTest, TimerTest)
@@ -97,4 +97,4 @@ TEST_F(TimeTest, CurrentTimeStringTest)
     }
 }
 
-}  // namespace panda::time::test
+}  // namespace ark::time::test

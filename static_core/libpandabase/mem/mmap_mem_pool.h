@@ -26,7 +26,7 @@
 #include <tuple>
 #include <utility>
 
-namespace panda {
+namespace ark {
 
 class MMapMemPoolTest;
 namespace mem::test {
@@ -335,6 +335,6 @@ private:
     friend class mem::test::InternalAllocatorTest;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_MEM_MMAP_MEM_POOL_H

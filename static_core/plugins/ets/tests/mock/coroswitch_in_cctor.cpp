@@ -17,7 +17,7 @@
 
 #include "runtime/include/runtime.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class CoroInCctorTest : public testing::Test {
 protected:
@@ -62,4 +62,4 @@ TEST_F(CoroInCctorDeathTest, FatalOnCoroSwitchInCctor)
                 testing::KilledBySignal(SIGABRT), ".*");
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

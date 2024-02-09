@@ -18,7 +18,7 @@
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
 
-namespace panda {
+namespace ark {
 
 StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager,
                                                  ScheduleLoopType type, PandaString name)
@@ -362,4 +362,4 @@ void StackfulCoroutineWorker::EnsureCoroutineSwitchEnabled()
     }
 }
 
-}  // namespace panda
+}  // namespace ark

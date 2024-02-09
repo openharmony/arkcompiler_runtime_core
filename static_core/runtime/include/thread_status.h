@@ -16,7 +16,7 @@
 #ifndef PANDA_RUNTIME_THREAD_STATUS_H_
 #define PANDA_RUNTIME_THREAD_STATUS_H_
 
-namespace panda {
+namespace ark {
 
 enum class ThreadStatus : uint16_t {
     CREATED,
@@ -34,6 +34,6 @@ enum class ThreadStatus : uint16_t {
     FINISHED,
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_THREAD_H_

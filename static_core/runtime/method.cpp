@@ -46,7 +46,7 @@
 #include "verification/public.h"
 #include "verification/util/is_system.h"
 
-namespace panda {
+namespace ark {
 
 Method::Proto::Proto(const panda_file::File &pf, panda_file::File::EntityId protoId)
 {
@@ -511,7 +511,7 @@ void Method::StartProfiling()
     // Object handles can be created during class initialization, so check lock state only after GC is started.
     ASSERT(!ManagedThread::GetCurrent()->GetVM()->GetGC()->IsGCRunning() ||
            PandaVM::GetCurrent()->GetMutatorLock()->HasLock() ||
-           ManagedThread::GetCurrent()->GetThreadLang() == panda::panda_file::SourceLang::ECMASCRIPT);
+           ManagedThread::GetCurrent()->GetThreadLang() == ark::panda_file::SourceLang::ECMASCRIPT);
 #else
     ASSERT(!ManagedThread::GetCurrent()->GetVM()->GetGC()->IsGCRunning() ||
            PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
@@ -617,4 +617,4 @@ void Method::ResetHotnessCounter()
     stor16Pair_.hotnessCounter = GetInitialHotnessCounter();
 }
 
-}  // namespace panda
+}  // namespace ark

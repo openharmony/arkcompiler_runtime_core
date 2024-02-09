@@ -18,7 +18,7 @@
 
 #include "utils/leb128.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 FieldDataAccessor::FieldDataAccessor(const File &pandaFile, File::EntityId fieldId)
     : pandaFile_(pandaFile), fieldId_(fieldId)
@@ -86,4 +86,4 @@ std::optional<FieldDataAccessor::FieldValue> FieldDataAccessor::GetValueInternal
     return {};
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

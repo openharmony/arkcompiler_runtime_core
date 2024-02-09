@@ -19,7 +19,7 @@
 #include "runtime/handle_base.h"
 #include "runtime/include/coretypes/tagged_value.h"
 
-namespace panda {
+namespace ark {
 /*
  * Handles are only valid within a HandleScope. When a handle is created for an object a cell is allocated in the
  * current HandleScope.
@@ -86,5 +86,5 @@ private:
     bool alreadyEscape_ = false;
     HandleBase escapeHandle_;
 };
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_HANDLE_SCOPE_H

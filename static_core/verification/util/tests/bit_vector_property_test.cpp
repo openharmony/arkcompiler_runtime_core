@@ -28,7 +28,7 @@
 #include <set>
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda::verifier;
+using namespace ark::verifier;
 
 using StdSet = std::set<size_t>;
 
@@ -88,12 +88,12 @@ struct Arbitrary<Range<size_t>> {
 
 }  // namespace rc
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace rc;
 
-using Interval = panda::verifier::Range<size_t>;
+using Interval = ark::verifier::Range<size_t>;
 using Intervals = std::initializer_list<Interval>;
 
 void ClassifySize(const std::string &name, size_t size, const Intervals &intervals)
@@ -526,4 +526,4 @@ RC_GTEST_PROP(TestBitvector, LazyIteratorsOverFoldedBitsetsNot0, (BSet && bset1,
     RC_ASSERT(result == setResult);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

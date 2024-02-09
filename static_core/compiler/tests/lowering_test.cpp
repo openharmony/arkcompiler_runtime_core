@@ -21,7 +21,7 @@
 #include "optimizer/optimizations/lowering.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LoweringTest : public GraphTest {
 public:
     LoweringTest()  // NOLINT(modernize-use-equals-default)
@@ -2544,4 +2544,4 @@ TEST_F(LoweringTest, CompareBoolConstZero)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

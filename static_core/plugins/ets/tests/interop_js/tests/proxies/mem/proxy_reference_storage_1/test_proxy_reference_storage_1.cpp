@@ -18,7 +18,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
 // NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-pro-type-cstyle-cast)
-namespace panda::ets::interop::js::ets_proxy::testing {
+namespace ark::ets::interop::js::ets_proxy::testing {
 
 class SharedReferenceStorage1GTest : public js::testing::EtsInteropTest {
 public:
@@ -156,5 +156,5 @@ TEST_F(SharedReferenceStorage1GTest, test_2)
     ASSERT_EQ(CheckAlive((void *)ref4), false);
 }
 
-}  // namespace panda::ets::interop::js::ets_proxy::testing
+}  // namespace ark::ets::interop::js::ets_proxy::testing
 // NOLINTEND(readability-magic-numbers,cppcoreguidelines-pro-type-cstyle-cast)

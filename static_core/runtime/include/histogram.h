@@ -21,7 +21,7 @@
 #include "mem/panda_containers.h"
 #include "mem/panda_string.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief Class for providing distribution statistics
@@ -151,6 +151,6 @@ private:
     static constexpr size_t DEFAULT_TOP_SIZE = 10;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_HISTOGRAM_H_

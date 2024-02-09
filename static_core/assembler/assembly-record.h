@@ -25,13 +25,13 @@
 #include "extensions/extensions.h"
 #include "ide_helpers.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Record {
     std::string name;
     bool conflict = false; /* Name is conflict with panda primitive types. Need special handle. */
-    panda::panda_file::SourceLang language;
+    ark::panda_file::SourceLang language;
     std::unique_ptr<RecordMetadata> metadata;
     std::vector<Field> fieldList; /* class fields list */
     size_t paramsNum = 0;
@@ -40,7 +40,7 @@ struct Record {
     std::string sourceFile; /* The file in which the record is defined or empty */
     std::optional<FileLocation> fileLocation;
 
-    Record(std::string s, panda::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
+    Record(std::string s, ark::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
         : name(std::move(s)),
           language(lang),
           metadata(extensions::MetadataExtension::CreateRecordMetadata(lang)),
@@ -48,7 +48,7 @@ struct Record {
     {
     }
 
-    Record(std::string s, panda::panda_file::SourceLang lang)
+    Record(std::string s, ark::panda_file::SourceLang lang)
         : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateRecordMetadata(lang))
     {
     }
@@ -60,6 +60,6 @@ struct Record {
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_RECORD_H

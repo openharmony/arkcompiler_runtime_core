@@ -15,7 +15,7 @@
 
 #include "default_debugger_agent.h"
 
-namespace panda {
+namespace ark {
 DefaultDebuggerAgent::DefaultDebuggerAgent(os::memory::Mutex &mutex)
     : LibraryAgent(mutex, PandaString(Runtime::GetOptions().GetDebuggerLibraryPath()), "StartDebugger", "StopDebugger")
 {
@@ -74,4 +74,4 @@ bool DefaultDebuggerAgent::CallUnloadCallback(void *resolvedFunction)
 
     return true;
 }
-}  // namespace panda
+}  // namespace ark

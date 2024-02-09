@@ -25,7 +25,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/ir/graph_cloner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 inline bool operator==(const SpillFillData &lhs, const SpillFillData &rhs)
 {
     return std::forward_as_tuple(lhs.SrcType(), lhs.DstType(), lhs.GetType(), lhs.SrcValue(), lhs.DstValue()) ==
@@ -1680,4 +1680,4 @@ TEST_F(RegAllocLinearScanTest, ParameterWithUnavailableRegister)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

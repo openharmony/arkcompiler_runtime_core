@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_ARCH_ARM_MEMORY_HELPERS_H_
 #define PANDA_RUNTIME_ARCH_ARM_MEMORY_HELPERS_H_
 
-namespace panda::arch_specific {
+namespace ark::arch_specific {
 
 #if (__ARM_ARCH >= 7)
 inline void FullMemoryBarrier()
@@ -26,6 +26,6 @@ inline void FullMemoryBarrier()
 #error "Unsupported target"
 #endif
 
-}  // namespace panda::arch_specific
+}  // namespace ark::arch_specific
 
 #endif  // PANDA_RUNTIME_ARCH_ARM_MEMORY_HELPERS_H_

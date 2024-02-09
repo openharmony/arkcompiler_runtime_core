@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <iostream>
 
-namespace panda::quick {
+namespace ark::quick {
 
 panda_file::DebugInfoItem *Quickener::CreateDebugInfoItem(panda_file::File::EntityId debug_info_id)
 {
@@ -243,7 +243,7 @@ panda_file::CodeItem *Quickener::GetQuickenedCode(panda_file::CodeItem *code, co
     std::unordered_map<size_t, size_t> offset_map;
     std::vector<BranchInfo> branches;
     std::vector<uint8_t> new_instructions;
-    std::vector<panda::panda_file::CodeItem::TryBlock> new_try_blocks;
+    std::vector<ark::panda_file::CodeItem::TryBlock> new_try_blocks;
 
     size_t offset = 0;
     offset_map.emplace(offset, 0);
@@ -274,13 +274,13 @@ panda_file::CodeItem *Quickener::GetQuickenedCode(panda_file::CodeItem *code, co
     }
 
     for (auto &block : code->GetTryBlocks()) {
-        std::vector<panda::panda_file::CodeItem::CatchBlock> new_catch_blocks;
+        std::vector<ark::panda_file::CodeItem::CatchBlock> new_catch_blocks;
         for (auto &catch_block : block.GetCatchBlocks())
             {
                 auto size = offset_map[catch_block.GetHandlerPc() + catch_block.GetCodeSize()] -
                             offset_map[catch_block.GetHandlerPc()];
 
-                new_catch_blocks.emplace_back(panda::panda_file::CodeItem::CatchBlock(
+                new_catch_blocks.emplace_back(ark::panda_file::CodeItem::CatchBlock(
                     catch_block.GetMethod(), catch_block.GetType(), offset_map[catch_block.GetHandlerPc()], size));
                 catch_block.SetNeedsEmit(false);
             }
@@ -290,7 +290,7 @@ panda_file::CodeItem *Quickener::GetQuickenedCode(panda_file::CodeItem *code, co
         block.SetNeedsEmit(false);
 
         new_try_blocks.emplace_back(
-            panda::panda_file::CodeItem::TryBlock(offset_map[block.GetStartPc()], length, new_catch_blocks));
+            ark::panda_file::CodeItem::TryBlock(offset_map[block.GetStartPc()], length, new_catch_blocks));
     }
 
     for (auto &branch : branches) {
@@ -336,4 +336,4 @@ panda_file::CodeItem *Quickener::GetQuickenedCode(panda_file::CodeItem *code, co
     return new_code;
 }
 
-}  // namespace panda::quick
+}  // namespace ark::quick

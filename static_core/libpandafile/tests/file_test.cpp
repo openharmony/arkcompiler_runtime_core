@@ -33,7 +33,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::panda_file::test {
+namespace ark::panda_file::test {
 
 static std::unique_ptr<const File> GetPandaFile(std::vector<uint8_t> *data)
 {
@@ -266,4 +266,4 @@ TEST(File, LineNumberProgramDeduplication)
     ASSERT_EQ(lnpCnt, 1);
 }
 
-}  // namespace panda::panda_file::test
+}  // namespace ark::panda_file::test

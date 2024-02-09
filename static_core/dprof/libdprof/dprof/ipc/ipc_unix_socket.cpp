@@ -25,7 +25,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-namespace panda::dprof::ipc {
+namespace ark::dprof::ipc {
 constexpr char SOCKET_NAME[] = "\0dprof.socket";  // NOLINT(modernize-avoid-c-arrays)
 static_assert(sizeof(SOCKET_NAME) <= sizeof(static_cast<sockaddr_un *>(nullptr)->sun_path), "Socket name too large");
 
@@ -156,4 +156,4 @@ int RecvTimeout(int fd, void *buf, int len, int timeoutMs)
 
     return len;
 }
-}  // namespace panda::dprof::ipc
+}  // namespace ark::dprof::ipc

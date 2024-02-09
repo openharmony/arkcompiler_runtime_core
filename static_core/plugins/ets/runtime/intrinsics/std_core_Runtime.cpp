@@ -18,7 +18,7 @@
 #include "libpandabase/utils/logger.h"
 #include "runtime/handle_scope-inl.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 uint8_t StdCoreRuntimeIsSameReference([[maybe_unused]] ObjectHeader *header, EtsObject *source, EtsObject *target)
 {
@@ -36,4 +36,4 @@ EtsInt StdCoreRuntimeGetHashCode([[maybe_unused]] ObjectHeader *header, EtsObjec
     return bit_cast<EtsInt>(hash);
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

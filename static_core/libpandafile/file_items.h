@@ -36,7 +36,7 @@
 #include <list>
 #include <set>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 enum class ClassTag : uint8_t {
     NOTHING = 0x00,
@@ -73,12 +73,12 @@ enum class FieldTag : uint8_t {
     TYPE_ANNOTATION = 0x06
 };
 
-bool IsDynamicLanguage(panda::panda_file::SourceLang lang);
-std::optional<panda::panda_file::SourceLang> LanguageFromString(std::string_view lang);
-const char *LanguageToString(panda::panda_file::SourceLang lang);
-const char *GetCtorName(panda::panda_file::SourceLang lang);
-const char *GetCctorName(panda::panda_file::SourceLang lang);
-const char *GetStringClassDescriptor(panda::panda_file::SourceLang lang);
+bool IsDynamicLanguage(ark::panda_file::SourceLang lang);
+std::optional<ark::panda_file::SourceLang> LanguageFromString(std::string_view lang);
+const char *LanguageToString(ark::panda_file::SourceLang lang);
+const char *GetCtorName(ark::panda_file::SourceLang lang);
+const char *GetCctorName(ark::panda_file::SourceLang lang);
+const char *GetStringClassDescriptor(ark::panda_file::SourceLang lang);
 
 static constexpr size_t ID_SIZE = File::EntityId::GetSize();
 static constexpr size_t IDX_SIZE = sizeof(uint16_t);
@@ -1987,6 +1987,6 @@ enum class ArgumentType : uint8_t {
     METHOD_TYPE = 0x07
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_FILE_ITEMS_H_

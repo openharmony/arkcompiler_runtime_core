@@ -19,12 +19,12 @@
 #include "runtime/include/class.h"
 #include "runtime/include/method.h"
 
-namespace panda::ets {
+namespace ark::ets {
 class EtsClass;
 class EtsObject;
-}  // namespace panda::ets
+}  // namespace ark::ets
 
-namespace panda::ets::interop::js::js_proxy {
+namespace ark::ets::interop::js::js_proxy {
 
 class JSProxy {
 public:
@@ -57,6 +57,6 @@ private:
     // NOTE(vpukhov): must ensure compat-class methods except accessors do not access its private state
 };
 
-}  // namespace panda::ets::interop::js::js_proxy
+}  // namespace ark::ets::interop::js::js_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_PROXY_JS_PROXY_H_

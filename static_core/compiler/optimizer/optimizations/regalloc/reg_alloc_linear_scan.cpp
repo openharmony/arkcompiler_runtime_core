@@ -19,7 +19,7 @@
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 static constexpr auto MAX_LIFE_NUMBER = std::numeric_limits<LifeNumber>::max();
 
@@ -649,4 +649,4 @@ void RegAllocLinearScan::BeforeConstantIntervalSpill(LifeIntervals *interval, Li
     interval->PrependUsePosition(interval->GetBegin());
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

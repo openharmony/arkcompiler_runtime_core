@@ -18,7 +18,7 @@
 #include "runtime/mem/gc/gc_root.h"
 #include "runtime/mem/heap_verifier.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_HEAP_VERIFIER LOG(ERROR, GC) << "HEAP_VERIFIER: "
@@ -356,4 +356,4 @@ size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&ali
 TEMPLATE_CLASS_LANGUAGE_CONFIG(HeapVerifier);
 TEMPLATE_CLASS_LANGUAGE_CONFIG(FastHeapVerifier);
 TEMPLATE_CLASS_LANGUAGE_CONFIG(HeapVerifierIntoGC);
-}  // namespace panda::mem
+}  // namespace ark::mem

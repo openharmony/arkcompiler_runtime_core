@@ -19,7 +19,7 @@
 #include "inst_builder.h"
 #include "optimizer/code_generator/encode.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(misc-definitions-in-headers,readability-function-size)
 template <Opcode OPCODE>
 void InstBuilder::BuildCall(const BytecodeInstruction *bcInst, bool isRange, bool accRead, Inst *additionalInput)
@@ -1597,6 +1597,6 @@ bool InstBuilder::TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcIns
     return true;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_INST_BUILDER_INL_H

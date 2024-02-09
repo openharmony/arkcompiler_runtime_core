@@ -19,7 +19,7 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *g_testBinFileName = "AccessingObjectsFieldsTest.abc";
 
@@ -554,6 +554,6 @@ TEST_F(AccessingObjectsFieldsTest, DISABLED_SetStaticFieldBase)
     EXPECT_EQ(env_->GetIntField(setAObj, aMemberId), static_cast<ets_int>(5_I));
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(cppcoreguidelines-pro-type-vararg, readability-magic-numbers)

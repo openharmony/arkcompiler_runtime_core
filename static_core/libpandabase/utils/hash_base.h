@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <macros.h>
 
-namespace panda {
+namespace ark {
 
 // Superclass for all hash classes. Defines interfaces for hash methods.
 template <typename HashImpl>
@@ -68,6 +68,6 @@ public:
     }
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_UTILS_HASH_BASE_H_

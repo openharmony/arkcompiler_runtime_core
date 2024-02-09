@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 
-namespace panda::ets {
+namespace ark::ets {
 template <typename T>
 EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
 {
@@ -46,6 +46,6 @@ EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
     instance->SetValue(value);
     return instance;
 }
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_BOX_PRIMITIVE_INL_H

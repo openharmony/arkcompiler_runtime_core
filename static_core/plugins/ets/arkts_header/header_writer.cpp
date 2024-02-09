@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/napi/ets_mangle.h"
 #include <typeinfo>
 
-namespace panda::ets::header_writer {
+namespace ark::ets::header_writer {
 
 std::string ConvertEtsReferenceToString(const std::string &name)
 {
@@ -154,4 +154,4 @@ void HeaderWriter::PrintPrototype(const std::string &className, panda_file::Meth
                 << ");\n\n";
 }
 
-}  // namespace panda::ets::header_writer
+}  // namespace ark::ets::header_writer

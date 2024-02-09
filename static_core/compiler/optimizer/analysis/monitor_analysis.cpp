@@ -18,7 +18,7 @@
 #include "optimizer/ir/graph.h"
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 void MonitorAnalysis::MarkedMonitorRec(BasicBlock *bb, int32_t numMonitors)
 {
     ASSERT(numMonitors >= 0);
@@ -109,4 +109,4 @@ bool MonitorAnalysis::RunImpl()
     GetGraph()->EraseMarker(marker_);
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

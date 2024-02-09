@@ -20,7 +20,7 @@
 #include <llvm/Object/ObjectFile.h>
 #include <llvm/Support/SmallVectorMemoryBuffer.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 void InsertingPassManager::add(llvm::Pass *p)
 {
@@ -58,4 +58,4 @@ llvm::Expected<std::unique_ptr<CreatedObjectFile>> MIRCompiler::CompileModule(ll
     return CreatedObjectFile::CopyOf(memBuffer->getMemBufferRef());
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

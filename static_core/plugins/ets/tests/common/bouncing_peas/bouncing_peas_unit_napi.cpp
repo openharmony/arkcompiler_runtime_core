@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 // NOLINTBEGIN(google-runtime-int)
 extern "C" ets_long SkoalaCreateRedrawerPeer([[maybe_unused]] EtsEnv *env, [[maybe_unused]] ets_class klass,
@@ -487,4 +487,4 @@ TEST_F(EtsVMConfingNapi, PeasLLVMAOT)
 }
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

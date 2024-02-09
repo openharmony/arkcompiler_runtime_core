@@ -32,7 +32,7 @@
 #include "types/ets_typeapi.h"
 #include "types/ets_typeapi_field.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 EtsVoid *ValueAPISetFieldObject(EtsObject *obj, EtsLong i, EtsObject *val)
 {
@@ -469,4 +469,4 @@ EtsDouble ValueAPIGetElementDouble(EtsObject *obj, EtsLong i)
     return GetElement<EtsDoubleArray>(obj, i);
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

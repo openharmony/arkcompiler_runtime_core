@@ -19,7 +19,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "libpandabase/os/library_loader.h"
 
-namespace panda::ets {
+namespace ark::ets {
 class EtsNativeLibrary {
 public:
     static Expected<EtsNativeLibrary, os::Error> Load(const PandaString &name);
@@ -49,6 +49,6 @@ private:
     PandaString name_;
     os::library_loader::LibraryHandle handle_;
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_H_

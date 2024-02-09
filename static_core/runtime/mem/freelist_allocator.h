@@ -24,7 +24,7 @@
 #include "runtime/mem/runslots.h"
 #include "runtime/mem/lock_config_helper.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOTE(aemelenko): Move this constants to compile options
 // Minimal size of this allocator is a max size of RunSlots allocator.
@@ -180,8 +180,8 @@ public:
     }
 
 private:
-    using MemoryBlockHeader = panda::mem::freelist::MemoryBlockHeader;
-    using FreeListHeader = panda::mem::freelist::FreeListHeader;
+    using MemoryBlockHeader = ark::mem::freelist::MemoryBlockHeader;
+    using FreeListHeader = ark::mem::freelist::FreeListHeader;
 
     class alignas(sizeof(MemoryBlockHeader)) MemoryPoolHeader {
     public:
@@ -336,6 +336,6 @@ private:
     friend class InternalAllocator;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_FREELIST_ALLOCATOR_H

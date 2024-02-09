@@ -17,7 +17,7 @@
 
 #include "plugins/ets/runtime/types/ets_object.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 /// @class EtsWeakReference represent std.core.WeakRef class
 class EtsWeakReference : public EtsObject {
@@ -42,6 +42,6 @@ private:
     ObjectPointer<EtsObject> referent_;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_WEAK_REFERENCE_H

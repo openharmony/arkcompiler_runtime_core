@@ -44,7 +44,7 @@
 #include "types/ets_typeapi_method.h"
 #include "types/ets_typeapi_parameter.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 // General
 EtsString *TypeAPIGetTypeDescriptor(EtsObject *object)
@@ -58,21 +58,21 @@ EtsString *TypeAPIGetTypeDescriptor(EtsObject *object)
 static EtsByte GetRefTypeKind(const PandaString &td, const EtsClass *refType)
 {
     auto result = static_cast<EtsByte>(EtsTypeAPIKind::NONE);
-    if (td == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
+    if (td == ark::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::BOOLEAN);
-    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_BYTE) {
+    } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_BYTE) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::BYTE);
-    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_CHAR) {
+    } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_CHAR) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::CHAR);
-    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_SHORT) {
+    } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_SHORT) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::SHORT);
-    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_INT) {
+    } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_INT) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::INT);
-    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_LONG) {
+    } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_LONG) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::LONG);
-    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
+    } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::FLOAT);
-    } else if (td == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
+    } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::DOUBLE);
     } else if (refType->IsInterface()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::INTERFACE);
@@ -88,7 +88,7 @@ static EtsByte GetRefTypeKind(const PandaString &td, const EtsClass *refType)
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
     } else if (refType->IsUndefined()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNDEFINED);
-    } else if (td == panda::ets::panda_file_items::class_descriptors::VOID) {
+    } else if (td == ark::ets::panda_file_items::class_descriptors::VOID) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::VOID);
     } else {
         result = static_cast<EtsByte>(EtsTypeAPIKind::CLASS);
@@ -563,7 +563,7 @@ EtsObject *TypeAPIMakeArrayInstance(EtsString *td, EtsLong len)
     auto typeDesc = tdHandle->GetMutf8();
     auto typeClass = classLinker->GetClass(typeDesc.c_str());
 
-    auto valType = panda::panda_file::Type::GetTypeIdBySignature(typeDesc[0]);
+    auto valType = ark::panda_file::Type::GetTypeIdBySignature(typeDesc[0]);
     switch (valType.GetId()) {
         case panda_file::Type::TypeId::U1:
             return EtsBooleanArray::Create(len)->AsObject();
@@ -605,4 +605,4 @@ EtsString *TypeAPIGetBaseType(EtsString *td)
     return EtsString::CreateFromMUtf8(baseClass->GetDescriptor());
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

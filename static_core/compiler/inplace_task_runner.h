@@ -21,13 +21,13 @@
 #include "libpandabase/task_runner.h"
 #include "libpandabase/mem/arena_allocator.h"
 
-namespace panda {
+namespace ark {
 
 class Method;
 class PandaVM;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class Pipeline;
 class Graph;
@@ -137,7 +137,7 @@ private:
     bool compilationStatus_ {false};
 };
 
-class InPlaceCompilerTaskRunner : public panda::TaskRunner<InPlaceCompilerTaskRunner, InPlaceCompilerContext> {
+class InPlaceCompilerTaskRunner : public ark::TaskRunner<InPlaceCompilerTaskRunner, InPlaceCompilerContext> {
 public:
     InPlaceCompilerContext &GetContext() override
     {
@@ -159,6 +159,6 @@ private:
     InPlaceCompilerContext taskCtx_;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_COMPILER_INPLACE_TASK_RUNNER_H

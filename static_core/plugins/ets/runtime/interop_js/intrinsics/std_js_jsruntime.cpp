@@ -18,7 +18,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_void.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 namespace notimpl {
 
@@ -335,4 +335,4 @@ void CompilerDestroyLocalScopeIntrinsic()
 }
 
 }  // namespace intrinsics
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

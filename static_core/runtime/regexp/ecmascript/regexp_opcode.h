@@ -20,7 +20,7 @@
 
 #include "runtime/regexp/ecmascript/mem/dyn_chunk.h"
 
-namespace panda {
+namespace ark {
 class RegExpOpCode {
 public:
     enum : uint8_t {
@@ -445,5 +445,5 @@ public:
     uint32_t DumpOpCode(std::ostream &out, const DynChunk &buf, uint32_t offset) const override;
     uint32_t InsertOpCode(DynChunk *buf, const RangeSet &rangeSet) const;
 };
-}  // namespace panda
+}  // namespace ark
 #endif

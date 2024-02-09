@@ -18,7 +18,7 @@
 
 #include "llvm_options_gen.h"
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 extern Options g_options;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_OPTIONS_H

@@ -22,7 +22,7 @@
 
 // NOLINTBEGIN
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 class SessionManagerTest : public testing::Test {
 protected:
     void SetUp()
@@ -104,6 +104,6 @@ TEST_F(SessionManagerTest, Test)
     thread2.join();
 }
 
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
 // NOLINTEND

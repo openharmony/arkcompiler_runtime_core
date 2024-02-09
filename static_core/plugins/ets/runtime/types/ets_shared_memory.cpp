@@ -28,7 +28,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 bool EtsSharedMemory::Waiter::Wait(std::optional<uint64_t> timeout)
 {
@@ -250,4 +250,4 @@ int32_t EtsSharedMemory::NotifyI32(uint32_t byteOffset, std::optional<uint32_t> 
     return static_cast<int32_t>(notifiedCount);
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

@@ -28,12 +28,12 @@
 
 #include <string>
 
-namespace panda::os::file {
+namespace ark::os::file {
 
 #if defined(PANDA_TARGET_UNIX)
-using File = panda::os::unix::file::File;
+using File = ark::os::unix::file::File;
 #elif defined(PANDA_TARGET_WINDOWS)
-using File = panda::os::windows::file::File;
+using File = ark::os::windows::file::File;
 #endif
 
 class FileHolder {
@@ -56,6 +56,6 @@ enum class Mode : uint32_t { READONLY, WRITEONLY, READWRITE, READWRITECREATE };
 
 PANDA_PUBLIC_API File Open(std::string_view filename, Mode mode);
 
-}  // namespace panda::os::file
+}  // namespace ark::os::file
 
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_FILE_H_

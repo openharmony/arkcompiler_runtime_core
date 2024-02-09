@@ -52,11 +52,11 @@ public:
 
     // Should be used only in monitor. Intended to be used with just created mutexes which aren't in use yet
     // Registers `thread` as mutex's owner and locks it
-    PANDA_PUBLIC_API void LockForOther(panda::os::thread::ThreadId thread);
+    PANDA_PUBLIC_API void LockForOther(ark::os::thread::ThreadId thread);
 
     // Should be used only in monitor. Intended to be used with just created mutexes which aren't in use yet
     // Unegisters `thread` as mutex's owner and unlocks it
-    PANDA_PUBLIC_API void UnlockForOther(panda::os::thread::ThreadId thread);
+    PANDA_PUBLIC_API void UnlockForOther(ark::os::thread::ThreadId thread);
 
     static bool DoNotCheckOnTerminationLoop()
     {
@@ -93,7 +93,7 @@ private:
         return futex::GetWaiters(&mutex_);
     }
 
-    bool IsHeld(panda::os::thread::ThreadId thread)
+    bool IsHeld(ark::os::thread::ThreadId thread)
     {
         return futex::IsHeld(&mutex_, thread);
     }
@@ -108,7 +108,7 @@ private:
         mutex_.recursiveCount = count;
     }
 
-    static_assert(std::atomic<panda::os::thread::ThreadId>::is_always_lock_free);
+    static_assert(std::atomic<ark::os::thread::ThreadId>::is_always_lock_free);
 
     NO_COPY_SEMANTIC(Mutex);
     NO_MOVE_SEMANTIC(Mutex);
@@ -219,15 +219,15 @@ private:
     }
 
     // Exclusive owner.
-    alignas(alignof(uint32_t)) std::atomic<panda::os::thread::ThreadId> exclusiveOwner_ {0};
-    static_assert(std::atomic<panda::os::thread::ThreadId>::is_always_lock_free);
+    alignas(alignof(uint32_t)) std::atomic<ark::os::thread::ThreadId> exclusiveOwner_ {0};
+    static_assert(std::atomic<ark::os::thread::ThreadId>::is_always_lock_free);
 
     bool HasExclusiveHolder()
     {
         // Atomic with relaxed order reason: mutex synchronization
         return exclusiveOwner_.load(std::memory_order_relaxed) != 0;
     }
-    bool IsExclusiveHeld(panda::os::thread::ThreadId thread)
+    bool IsExclusiveHeld(ark::os::thread::ThreadId thread)
     {
         // Atomic with relaxed order reason: mutex synchronization
         return exclusiveOwner_.load(std::memory_order_relaxed) == thread;

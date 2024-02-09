@@ -18,7 +18,7 @@
 #include "runtime/mem/object_helpers-inl.h"
 #include "runtime/mem/rem_set-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 ObjectHeader *BaseRefUpdater<LanguageConfig>::UpdateRefToMovedObject(ObjectHeader *object, ObjectHeader *ref,
@@ -40,4 +40,4 @@ TEMPLATE_CLASS_LANGUAGE_CONFIG(BaseRefUpdater);
 TEMPLATE_CLASS_LANGUAGE_CONFIG_AND_ARGS(UpdateRemsetRefUpdater, true);
 TEMPLATE_CLASS_LANGUAGE_CONFIG_AND_ARGS(UpdateRemsetRefUpdater, false);
 
-}  // namespace panda::mem
+}  // namespace ark::mem

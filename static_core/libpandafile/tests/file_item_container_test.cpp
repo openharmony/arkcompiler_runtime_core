@@ -41,7 +41,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-namespace panda::panda_file::test {
+namespace ark::panda_file::test {
 
 TEST(ItemContainer, DeduplicationTest)
 {
@@ -74,8 +74,8 @@ TEST(ItemContainer, DeduplicationTest)
 
 TEST(ItemContainer, TestFileOpen)
 {
-    using panda::os::file::Mode;
-    using panda::os::file::Open;
+    using ark::os::file::Mode;
+    using ark::os::file::Open;
 
     // Write panda file to disk
     ItemContainer container;
@@ -672,8 +672,8 @@ TEST(ItemContainer, ForeignItems)
 
 TEST(ItemContainer, EmptyContainerChecksum)
 {
-    using panda::os::file::Mode;
-    using panda::os::file::Open;
+    using ark::os::file::Mode;
+    using ark::os::file::Open;
 
     // Write panda file to disk
     ItemContainer container;
@@ -702,8 +702,8 @@ TEST(ItemContainer, EmptyContainerChecksum)
 
 TEST(ItemContainer, ContainerChecksum)
 {
-    using panda::os::file::Mode;
-    using panda::os::file::Open;
+    using ark::os::file::Mode;
+    using ark::os::file::Open;
 
     uint32_t emptyChecksum = 0;
     {
@@ -806,39 +806,39 @@ TEST(ItemContainer, TestProfileGuidedRelayout)
     const auto &items = container.GetItems();
     auto item = items.begin();
     EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
     item++;
     EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "AA");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "AA");
     item++;
     EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "BB");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "BB");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo1");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo1");
     item++;
     EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
     item++;
     EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo2");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo2");
     item++;
     EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
     item++;
     EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo4");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo4");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "test_field");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "test_field");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "source_file");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "source_file");
     item++;
     EXPECT_EQ((*item)->GetName(), END_ITEM);
     item++;
@@ -871,38 +871,38 @@ TEST(ItemContainer, TestProfileGuidedRelayout)
     testFile.close();
 
     // Run PGO
-    panda::panda_file::pgo::ProfileOptimizer profileOpt;
+    ark::panda_file::pgo::ProfileOptimizer profileOpt;
     profileOpt.SetProfilePath(profilePath);
     container.ReorderItems(&profileOpt);
 
     // Items after PGO
     item = items.begin();
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "test_field");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "test_field");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo1");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo1");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo2");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo2");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo4");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo4");
     item++;
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "source_file");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "source_file");
     item++;
     EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "BB");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "BB");
     item++;
     EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
     item++;
     EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "AA");
+    EXPECT_EQ(ark::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "AA");
     item++;
     EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
     item++;
@@ -1118,4 +1118,4 @@ TEST(ItemContainer, AnnotationDeduplicationReading)
     reader.GetContainerPtr()->DeduplicateItems(true);
 }
 
-}  // namespace panda::panda_file::test
+}  // namespace ark::panda_file::test

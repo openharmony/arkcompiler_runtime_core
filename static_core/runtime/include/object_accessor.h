@@ -19,7 +19,7 @@
 
 #include "runtime/mem/gc/gc_barrier_set.h"
 
-namespace panda {
+namespace ark {
 
 class ObjectHeader;
 class Field;
@@ -182,6 +182,6 @@ private:
     PANDA_PUBLIC_API static mem::BarrierType GetPostBarrierType(const ManagedThread *thread);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_H_

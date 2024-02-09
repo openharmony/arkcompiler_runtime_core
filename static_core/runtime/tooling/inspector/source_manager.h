@@ -28,7 +28,7 @@
 #include <unordered_set>
 #include <utility>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class SourceManager final {
 public:
     SourceManager() = default;
@@ -48,6 +48,6 @@ private:
     std::unordered_map<ScriptId, std::string_view> idToFileName_ GUARDED_BY(mutex_);
     std::map<PtThread, std::unordered_set<ScriptId>> knownSources_ GUARDED_BY(mutex_);
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_SOURCE_MANAGER_H

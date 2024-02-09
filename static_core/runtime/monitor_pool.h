@@ -23,7 +23,7 @@
 #include "runtime/mem/internal_allocator.h"
 #include "runtime/monitor.h"
 
-namespace panda {
+namespace ark {
 
 class MonitorPool {
 public:
@@ -108,6 +108,6 @@ private:
     PandaUnorderedMap<Monitor::MonitorId, Monitor *> monitors_ GUARDED_BY(poolLock_);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MONITOR_POOL_H_

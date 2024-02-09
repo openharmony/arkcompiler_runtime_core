@@ -36,7 +36,7 @@
 #include <optional>
 #include <type_traits>
 
-namespace panda::os::mem {
+namespace ark::os::mem {
 
 static constexpr uint64_t HIGH_BOUND_32BIT_ADDRESS = 4_GB;
 
@@ -433,6 +433,6 @@ static constexpr size_t DEFAULT_NATIVE_BYTES_FROM_MALLINFO = 100000;
 
 PANDA_PUBLIC_API size_t GetNativeBytesFromMallinfo();
 
-}  // namespace panda::os::mem
+}  // namespace ark::os::mem
 
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_MEM_H_

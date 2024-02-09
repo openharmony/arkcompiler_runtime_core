@@ -22,7 +22,7 @@
 
 #include "file.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 constexpr std::array<uint8_t, File::VERSION_SIZE> VERSION {<%= Panda::version.split('.').join(', ') %>};
 constexpr std::array<uint8_t, File::VERSION_SIZE> MIN_VERSION {<%= Panda::min_version.split('.').join(', ') %>};
 
@@ -38,6 +38,6 @@ inline void PrintBytecodeVersion()
     std::cout << ss.str() << std::endl;
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif

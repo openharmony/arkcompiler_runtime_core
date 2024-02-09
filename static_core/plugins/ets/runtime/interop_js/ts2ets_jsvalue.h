@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
 
 // This entire namespace is used for compatibility, use interop_context.h for new code instead
-namespace panda::ets::ts2ets {
+namespace ark::ets::ts2ets {
 
 inline void InitJSValueExports()
 {
@@ -37,6 +37,6 @@ void Init();
 
 }  // namespace GlobalCtx
 
-}  // namespace panda::ets::ts2ets
+}  // namespace ark::ets::ts2ets
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_JSVALUE_H_

@@ -16,12 +16,12 @@
 #include "unit_test.h"
 #include "optimizer/optimizations/if_conversion.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class IfConversionTest : public GraphTest {
 public:
     IfConversionTest()
     {
-        SetGraphArch(panda::RUNTIME_ARCH);
+        SetGraphArch(ark::RUNTIME_ARCH);
 #ifndef NDEBUG
         // GraphChecker hack: LowLevel instructions may appear only after Lowering pass:
         GetGraph()->SetLowLevelInstructionsEnabled();
@@ -1160,4 +1160,4 @@ TEST_F(IfConversionTest, NonLoopInvariantNotPreventConversion)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

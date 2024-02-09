@@ -24,11 +24,11 @@
 #include "compiler/optimizer/ir/inst.h"
 #include "compiler/optimizer/optimizations/const_folding.h"
 
-namespace panda::bytecodeopt {
-using panda::compiler::Inst;
-using panda::compiler::Opcode;
+namespace ark::bytecodeopt {
+using ark::compiler::Inst;
+using ark::compiler::Opcode;
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda::compiler::DataType;
+using namespace ark::compiler::DataType;
 class ConstArrayResolver : public compiler::Optimization {
 public:
     explicit ConstArrayResolver(compiler::Graph *graph, BytecodeOptIrInterface *iface)
@@ -70,6 +70,6 @@ private:
     ArenaMap<Inst *, std::vector<Inst *>>
         constArraysFill_;  // const_arrays_[new_array_inst] = {store_array_inst_1, ... , store_array_inst_n}
 };
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_CONST_ARRAY_RESOLVER_H

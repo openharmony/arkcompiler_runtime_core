@@ -15,7 +15,7 @@
 
 #include "dfx_option.h"
 
-namespace panda::os::dfx_option {
+namespace ark::os::dfx_option {
 
 /* static */
 bool DfxOptionHandler::IsInOptionList(const std::string &s)
@@ -56,4 +56,4 @@ std::string DfxOptionHandler::StringFromDfxOption(DfxOptionHandler::DfxOption df
     UNREACHABLE();
 }
 
-}  // namespace panda::os::dfx_option
+}  // namespace ark::os::dfx_option

@@ -19,9 +19,9 @@
 #include "<%= lang_context_header_path %>"
 % end
 
-namespace panda::plugins {
+namespace ark::plugins {
 
-LanguageContextBase* GetLanguageContextBase([[maybe_unused]] panda::panda_file::SourceLang lang)
+LanguageContextBase* GetLanguageContextBase([[maybe_unused]] ark::panda_file::SourceLang lang)
 {
 % Common::each_plugin_option "lang_context_class" do |lang_context_class, _, plugin_opts|
 if (lang == <%= plugin_opts["lang_enum"] %>)
@@ -48,7 +48,7 @@ panda_file::SourceLang RuntimeTypeToLang(const std::string &runtimeType) {
 
     LOG(FATAL, RUNTIME) << "Incorrect runtime_type: " << runtimeType;
     UNREACHABLE();
-    return panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+    return ark::panda_file::SourceLang::PANDA_ASSEMBLY;
 }
 
 std::string_view LangToRuntimeType(panda_file::SourceLang lang) {
@@ -81,4 +81,4 @@ bool HasRuntime(const std::string &runtimeType) {
     return false;
 }
 
-}  // namespace panda::plugins
+}  // namespace ark::plugins

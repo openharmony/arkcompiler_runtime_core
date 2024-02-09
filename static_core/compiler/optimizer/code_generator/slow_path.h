@@ -19,7 +19,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/code_generator/encode.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Codegen;
 
 class SlowPathBase {
@@ -333,6 +333,6 @@ private:
     Reg srcReg_ {INVALID_REGISTER};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_SLOW_PATH_H

@@ -18,14 +18,14 @@
 
 #include <string>
 
-namespace panda::ets {
+namespace ark::ets {
 class EtsClass;
-}  // namespace panda::ets
+}  // namespace ark::ets
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 EtsClass *GetTestClass(const char *source, const char *className, const std::string &sourceFilename = "");
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 #endif  // !PANDA_PLUGINS_ETS_TESTS_RUNTIME_TYPES_GET_TEST_CLASS_H_

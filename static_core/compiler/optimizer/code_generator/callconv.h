@@ -31,7 +31,7 @@
 #include "compiler/optimizer/code_generator/frame_info.h"
 #include <functional>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class ParameterInfo {
 public:
     using SlotID = uint8_t;
@@ -330,6 +330,6 @@ private:
     CallConvDynInfo dynInfo_ {};
     CallConvMode mode_ {0};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_CALLCONV_H

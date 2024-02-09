@@ -19,7 +19,7 @@
 #include "runtime/include/exceptions.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda {
+namespace ark {
 
 using SourceLang = panda_file::SourceLang;
 using Type = panda_file::Type;
@@ -346,4 +346,4 @@ CoreClassLinkerExtension::~CoreClassLinkerExtension()
     FreeLoadedClasses();
 }
 
-}  // namespace panda
+}  // namespace ark

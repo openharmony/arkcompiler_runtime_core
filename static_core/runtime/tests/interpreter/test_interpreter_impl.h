@@ -19,10 +19,10 @@
 #include "runtime/include/thread.h"
 #include "runtime/interpreter/frame.h"
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
 void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame);
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test
 
 #endif  // PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_IMPL_H_

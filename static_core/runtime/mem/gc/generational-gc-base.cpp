@@ -18,7 +18,7 @@
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 bool GenerationalGC<LanguageConfig>::ShouldRunTenuredGC(const GCTask &task)
@@ -109,4 +109,4 @@ bool GenerationalGC<LanguageConfig>::Trigger(PandaUniquePtr<GCTask> task)
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(GenerationalGC);
-}  // namespace panda::mem
+}  // namespace ark::mem

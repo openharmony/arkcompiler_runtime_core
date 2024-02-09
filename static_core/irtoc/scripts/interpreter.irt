@@ -142,7 +142,7 @@ end
 
 # to be redefined in plugins
 macro(:i32toany) do |arg|
-  OrI(i32toi64(arg)).Imm("panda::coretypes::TaggedValue::TAG_INT").i64
+  OrI(i32toi64(arg)).Imm("ark::coretypes::TaggedValue::TAG_INT").i64
 end
 
 macro(:f64toany) do |arg|
@@ -675,7 +675,7 @@ macro(:initobj_call) do |id, size, callee, nargs, copy_lambda, op_format, first_
   }
 
   class_flags := LoadI(klass).Imm(Constants::BASE_CLASS_FLAGS_OFFSET).u32
-  If(AndI(class_flags).Imm("panda::Class::STRING_CLASS").u32, 0).NE.Unlikely {
+  If(AndI(class_flags).Imm("ark::Class::STRING_CLASS").u32, 0).NE.Unlikely {
     ctor_arg := vreg_value(first_vreg).ref
     str := call_runtime("VmCreateString", %tr, callee_, ctor_arg).ptr
     If(str, 0).EQ.Unlikely {
@@ -866,7 +866,7 @@ macro(:handle_lda_type_id16) do |id|
   If(type, 0).EQ.Unlikely {
     move_to_exception
   }
-  type_obj := LoadI(type).Imm("panda::Class::GetManagedObjectOffset()").ptr
+  type_obj := LoadI(type).Imm("ark::Class::GetManagedObjectOffset()").ptr
   set_acc_object(type_obj)
 end
 
@@ -1902,7 +1902,7 @@ macro(:get_callee) do |id, is_virt, is_initobj, v, imm = nil|
   end
   if !is_initobj
     method_flags := LoadI(callee).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).Volatile(true).u32
-    If(AndI(method_flags).Imm("panda::ACC_STATIC").u32, 0).EQ.Unlikely {
+    If(AndI(method_flags).Imm("ark::ACC_STATIC").u32, 0).EQ.Unlikely {
       receiver = get_receiver(v, imm)
       receiver_word := Bitcast(receiver).SrcType("DataType::POINTER").word
       receiver_ref = Cast(receiver_word).SrcType(Options.arch_64_bits? ? "DataType::UINT64" : "DataType::UINT32").ref_uint

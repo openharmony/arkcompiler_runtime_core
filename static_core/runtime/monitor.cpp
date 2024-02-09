@@ -31,7 +31,7 @@
 #include <string>
 #include <sched.h>
 
-namespace panda {
+namespace ark {
 template <typename T>
 template <typename Predicate>
 bool ThreadList<T>::RemoveIf(Predicate pred)
@@ -399,7 +399,7 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
                     thread->GetWaitingMutex()->Unlock();
                     // Calling Safepoing to let GC start if needed
                     // in the else branch GC can start during Wait
-                    panda::interpreter::RuntimeInterface::Safepoint();
+                    ark::interpreter::RuntimeInterface::Safepoint();
                 } else {
                     TraceMonitorLock(objHandle.GetPtr(), true);
                     isTimeout = DoWaitInternal(thread, status, timeout, nanos);
@@ -416,7 +416,7 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
                 monitor->recursiveCounter_ = counter;
 
                 if (thread->IsInterrupted()) {
-                    // NOTE(dtrubenkov): call panda::ThrowException when it will be imlemented
+                    // NOTE(dtrubenkov): call ark::ThrowException when it will be imlemented
                     resultState = State::INTERRUPTED;
                 }
 
@@ -480,7 +480,7 @@ Monitor::State Monitor::Notify(ObjectHeader *obj)
 
             // Move one thread from waiters to wake_up
             if (!monitor->waiters_.Empty()) {
-                // With current panda::List implementation this reference is valid.
+                // With current ark::List implementation this reference is valid.
                 // This can be broken with future changes.
                 auto &waiter = monitor->waiters_.Front();
                 monitor->waiters_.PopFront();
@@ -917,7 +917,7 @@ Monitor *Monitor::GetMonitorFromObject(ObjectHeader *obj)
 
 inline void Monitor::TraceMonitorLock(ObjectHeader *obj, bool isWait)
 {
-    if (UNLIKELY(panda::trace::IsEnabled())) {
+    if (UNLIKELY(ark::trace::IsEnabled())) {
         // Use stack memory to avoid "Too many allocations" error.
         constexpr int BUF_SIZE = 32;
         std::array<char, BUF_SIZE> buf = {};
@@ -933,7 +933,7 @@ inline void Monitor::TraceMonitorLock(ObjectHeader *obj, bool isWait)
 
 inline void Monitor::TraceMonitorUnLock()
 {
-    if (UNLIKELY(panda::trace::IsEnabled())) {
+    if (UNLIKELY(ark::trace::IsEnabled())) {
         trace::EndTracePoint();
     }
 }
@@ -968,4 +968,4 @@ void Monitor::SetHashCode(uint32_t hash)
         LOG(FATAL, RUNTIME) << "Attempt to rewrite hash in monitor";
     }
 }
-}  // namespace panda
+}  // namespace ark

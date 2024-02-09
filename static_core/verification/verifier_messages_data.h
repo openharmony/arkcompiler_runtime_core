@@ -19,10 +19,10 @@
 #include "verification/config/options/method_options.h"
 #include "verifier_messages.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 MethodOption::MsgClass GetDefaultClassForMessage(VerifierMessage msg);
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFICATION_VERIFIER_MESSAGES_DATA_H_

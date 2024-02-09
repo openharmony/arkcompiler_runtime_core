@@ -23,7 +23,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/basicblock.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 bool Cleanup::CanBeMerged(BasicBlock *bb)
 {
@@ -755,4 +755,4 @@ void Cleanup::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

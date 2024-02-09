@@ -16,7 +16,7 @@
 #include "unit_test.h"
 #include "optimizer/analysis/catch_inputs.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CatchInputsTest : public GraphTest {};
 
 TEST_F(CatchInputsTest, MarkCatchInputs)
@@ -136,4 +136,4 @@ TEST_F(CatchInputsTest, HandlePhi)
     ASSERT_TRUE(INS(PHI_ID).GetFlag(inst_flags::Flags::CATCH_INPUT));
     ASSERT_TRUE(INS(LOAD_ID).GetFlag(inst_flags::Flags::CATCH_INPUT));
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

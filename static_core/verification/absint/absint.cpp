@@ -45,13 +45,13 @@
 #include <tuple>
 #include <functional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 #include "abs_int_inl_gen.h"
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 using TryBlock = panda_file::CodeDataAccessor::TryBlock;
 using CatchBlock = panda_file::CodeDataAccessor::CatchBlock;
@@ -295,4 +295,4 @@ VerificationStatus VerifyMethod(VerificationContext &verifCtx)
     return worstSoFar;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

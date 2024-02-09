@@ -19,7 +19,7 @@
 #include "bytecode_instruction.h"
 #include "macros.h"
 
-namespace panda {
+namespace ark {
 
 template <const BytecodeInstMode MODE>
 template <class R, class S>
@@ -90,6 +90,6 @@ inline size_t BytecodeInst<MODE>::GetSize() const
 
 #include <bytecode_instruction-inl_gen.h>
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_

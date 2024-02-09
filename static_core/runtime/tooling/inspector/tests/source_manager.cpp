@@ -21,7 +21,7 @@
 
 // NOLINTBEGIN
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 class SourceManagerTest : public testing::Test {
 protected:
     void SetUp()
@@ -97,6 +97,6 @@ TEST_F(SourceManagerTest, General)
     mthread1.join();
 }
 
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
 // NOLINTEND

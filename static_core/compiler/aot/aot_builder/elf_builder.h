@@ -29,7 +29,7 @@
 
 #include "include/class.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class ElfSectionDataProvider {
 public:
@@ -1338,6 +1338,6 @@ void ElfWriter::FillDebugInfo(CfiInfo cfiInfo, const compiler::MethodHeader &met
 }
 #endif
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_AOT_AOT_BULDER_ELF_BUILDER_H

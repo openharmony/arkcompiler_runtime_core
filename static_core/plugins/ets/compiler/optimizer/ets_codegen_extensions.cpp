@@ -15,7 +15,7 @@
 
 #include "compiler/optimizer/code_generator/codegen.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 bool Codegen::LaunchCallCodegen(CallInst *callInst)
 {
@@ -82,4 +82,4 @@ bool Codegen::LaunchCallCodegen(CallInst *callInst)
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

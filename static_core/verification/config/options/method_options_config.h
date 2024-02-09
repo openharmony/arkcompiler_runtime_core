@@ -20,7 +20,7 @@
 
 #include <regex>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 class MethodOptionsConfig {
 public:
@@ -64,6 +64,6 @@ private:
     PandaVector<std::pair<std::regex, const MethodOptions &>> methodGroups_;
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_DEBUG_OPTIONS_METHOD_OPTIONS_CONFIG_H_

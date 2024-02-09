@@ -30,11 +30,11 @@
 #include <functional>
 #include <algorithm>
 
-namespace panda::verifier::plugin {
+namespace ark::verifier::plugin {
 class Plugin;
-}  // namespace panda::verifier::plugin
+}  // namespace ark::verifier::plugin
 
-namespace panda::verifier {
+namespace ark::verifier {
 class VerifierService;
 
 /*
@@ -148,6 +148,6 @@ private:
     void DisplaySubtyping(std::function<void(PandaString const &, PandaString const &)> const &handler);
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !_PANDA_TYPE_SYSTEM_HPP

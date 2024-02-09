@@ -20,7 +20,7 @@
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/bounds_analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Replaces
  *      let s = new StringBuilder(str).toString();
@@ -187,4 +187,4 @@ void SimplifyStringBuilder::VisitBlock(BasicBlock *block)
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -30,7 +30,7 @@
 #include "plugins/ets/runtime/types/ets_void.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 extern "C" EtsSharedMemory *SharedMemoryCreate(int32_t byteLength)
 {
@@ -181,4 +181,4 @@ extern "C" int32_t SharedMemoryBoundedNotify(EtsSharedMemory *mem, int32_t byteO
     return mem->NotifyI32(byteOffset, std::optional(count));
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

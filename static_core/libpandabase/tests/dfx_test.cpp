@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::test {
+namespace ark::test {
 
 void MapDfxOption(std::map<DfxOptionHandler::DfxOption, uint8_t> &optionMap, DfxOptionHandler::DfxOption option)
 {
@@ -109,7 +109,7 @@ TEST(DfxController, TestPrintDfxOptionValues)
     }
     EXPECT_FALSE(DfxController::IsInitialized());
 
-    Logger::InitializeStdLogging(Logger::Level::INFO, panda::LOGGER_COMPONENT_MASK_ALL);
+    Logger::InitializeStdLogging(Logger::Level::INFO, ark::LOGGER_COMPONENT_MASK_ALL);
     EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::DFX));
 
     DfxController::Initialize();
@@ -147,4 +147,4 @@ TEST(DfxController, TestPrintDfxOptionValues)
     EXPECT_FALSE(DfxController::IsInitialized());
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

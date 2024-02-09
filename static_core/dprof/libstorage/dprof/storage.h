@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace panda::dprof {
+namespace ark::dprof {
 class AppData {
 public:
     using FeaturesMap = std::unordered_map<std::string, std::vector<uint8_t>>;
@@ -93,6 +93,6 @@ private:
 
     std::string storageDir_;
 };
-}  // namespace panda::dprof
+}  // namespace ark::dprof
 
 #endif  // DPROF_LIBSTORAGE_DPROF_STORAGE_H

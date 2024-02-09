@@ -20,12 +20,12 @@
 
 #include "runtime/mem/region_space.h"
 
-namespace panda {
+namespace ark {
 class ManagedThread;
 struct GCTask;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 class RegionAllocatorLockConfig {
 public:
@@ -516,7 +516,7 @@ private:
     os::memory::Mutex oldQueueLock_;
     PandaVector<Region *> oldRegionQueue_;
     // To store partially used Regions that can be reused later.
-    panda::PandaMultiMap<size_t, Region *, std::greater<size_t>> retainedTlabs_;
+    ark::PandaMultiMap<size_t, Region *, std::greater<size_t>> retainedTlabs_;
     friend class test::RegionAllocatorTest;
 };
 
@@ -666,6 +666,6 @@ private:
     friend class test::RegionAllocatorTest;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_REGION_ALLOCATOR_H

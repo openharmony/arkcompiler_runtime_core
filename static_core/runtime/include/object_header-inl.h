@@ -20,7 +20,7 @@
 #include "runtime/include/object_accessor-inl.h"
 #include "runtime/include/object_header.h"
 
-namespace panda {
+namespace ark {
 
 template <MTModeT MT_MODE>
 uint32_t ObjectHeader::GetHashCode()
@@ -205,6 +205,6 @@ inline T ObjectHeader::GetAndBitwiseXorFieldPrimitive(size_t offset, T value, st
     return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, offset, value, memoryOrder);
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_OBJECT_HEADER_INL_H_

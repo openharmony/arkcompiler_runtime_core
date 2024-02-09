@@ -21,7 +21,7 @@
 #include "literal_data_accessor.h"
 #include "utils/utf.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 inline size_t LiteralDataAccessor::GetLiteralValsNum(size_t index)
 {
@@ -113,6 +113,6 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const C
     }
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_LITERAL_DATA_ACCESSOR_INL_H_

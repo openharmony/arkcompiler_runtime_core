@@ -26,7 +26,7 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class LLVMIrConstructor : public GraphVisitor {
     using RuntimeCallId = std::variant<RuntimeInterface::EntrypointId, RuntimeInterface::IntrinsicId>;
@@ -408,6 +408,6 @@ private:
     ArenaVector<llvm::Value *> ccValues_;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // LIBLLVMBACKEND_LOWERING_LLVM_IR_CONSTRUCTOR_H

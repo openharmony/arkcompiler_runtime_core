@@ -19,7 +19,7 @@
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/logger.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 CardTable::CardTable(InternalAllocatorPtr internalAllocator, uintptr_t minAddress, size_t size)
     : minAddress_(minAddress),
@@ -184,4 +184,4 @@ void CardTable::MarkCardsAsYoung(const MemRange &memRange)
     }
     (*curCard)->SetYoung();
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

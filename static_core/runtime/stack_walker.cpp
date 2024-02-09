@@ -24,7 +24,7 @@
 
 #include <iomanip>
 
-namespace panda {
+namespace ark {
 
 StackWalker StackWalker::Create(const ManagedThread *thread, UnwindPolicy policy)
 {
@@ -205,8 +205,8 @@ StackWalker::CFrameType StackWalker::CreateCFrame(SlotType *ptr, uintptr_t npc, 
  */
 void StackWalker::InitCalleeBuffer(SlotType *calleeSlots, CalleeStorage *prevCallees)
 {
-    constexpr RegMask ARCH_INT_REGS_MASK(panda::GetCalleeRegsMask(RUNTIME_ARCH, false));
-    constexpr RegMask ARCH_FP_REGS_MASK(panda::GetCalleeRegsMask(RUNTIME_ARCH, true));
+    constexpr RegMask ARCH_INT_REGS_MASK(ark::GetCalleeRegsMask(RUNTIME_ARCH, false));
+    constexpr RegMask ARCH_FP_REGS_MASK(ark::GetCalleeRegsMask(RUNTIME_ARCH, true));
 
     bool prevIsNative = IsCFrame() ? GetCFrame().IsNative() : false;
     if (calleeSlots != nullptr || prevCallees != nullptr) {
@@ -630,7 +630,7 @@ bool StackWalker::IsDynamicMethod() const
 {
     // Dynamic method may have no class
     return GetMethod()->GetClass() == nullptr ||
-           panda::panda_file::IsDynamicLanguage(Runtime::GetCurrent()->GetLanguageContext(*GetMethod()).GetLanguage());
+           ark::panda_file::IsDynamicLanguage(Runtime::GetCurrent()->GetLanguageContext(*GetMethod()).GetLanguage());
 }
 
 void StackWalker::Verify()
@@ -793,4 +793,4 @@ void StackWalker::DumpFrame(std::ostream &os)
     }
 }
 
-}  // namespace panda
+}  // namespace ark

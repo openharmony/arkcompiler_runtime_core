@@ -18,7 +18,7 @@
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::test {
+namespace ark::test {
 
 // Runtime::GetCurrent() can not be used in .h files
 bool ClassLinkerTestExtension::InitializeImpl([[maybe_unused]] bool compressedStringEnabled)
@@ -42,4 +42,4 @@ bool ClassLinkerTestExtension::InitializeImpl([[maybe_unused]] bool compressedSt
     return true;
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

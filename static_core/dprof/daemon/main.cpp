@@ -29,7 +29,7 @@
 
 #include "generated/daemon_options.h"
 
-namespace panda::dprof {
+namespace ark::dprof {
 bool CheckVersion(const os::unique_fd::UniqueFd &sock)
 {
     // Get version
@@ -164,7 +164,7 @@ private:
 
 class ArgsParser {
 public:
-    bool Parse(panda::Span<const char *> args)
+    bool Parse(ark::Span<const char *> args)
     {
         options_.AddOptions(&parser_);
         if (!parser_.Parse(args.Size(), args.Data())) {
@@ -222,7 +222,7 @@ static void SetupSignals()
     PLOG_IF(::sigaction(SIGTERM, &sa, nullptr) == -1, FATAL, DPROF) << "sigaction(SIGTERM) failed";
 }
 
-static int Main(panda::Span<const char *> args)
+static int Main(ark::Span<const char *> args)
 {
     const int maxPendingConnectionsQueue = 32;
 
@@ -233,7 +233,7 @@ static int Main(panda::Span<const char *> args)
     }
     const Options &options = parser.GetOptionos();
 
-    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), panda::LOGGER_COMPONENT_MASK_ALL);
+    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), ark::LOGGER_COMPONENT_MASK_ALL);
 
     SetupSignals();
 
@@ -271,10 +271,10 @@ static int Main(panda::Span<const char *> args)
     LOG(INFO, DPROF) << "Daemon is stopped";
     return 0;
 }
-}  // namespace panda::dprof
+}  // namespace ark::dprof
 
 int main(int argc, const char *argv[])
 {
-    panda::Span<const char *> args(argv, argc);
-    return panda::dprof::Main(args);
+    ark::Span<const char *> args(argv, argc);
+    return ark::dprof::Main(args);
 }

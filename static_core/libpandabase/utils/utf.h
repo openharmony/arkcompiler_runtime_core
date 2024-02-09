@@ -22,7 +22,7 @@
 #include "utils/hash.h"
 #include "utils/span.h"
 
-namespace panda::utf {
+namespace ark::utf {
 
 /*
  * https://en.wikipedia.org/wiki/UTF-8
@@ -197,6 +197,6 @@ static inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
     return {pair >> P2_SHIFT, pair & P1_MASK};
 }
 
-}  // namespace panda::utf
+}  // namespace ark::utf
 
 #endif  // PANDA_LIBPANDABASE_UTILS_UTF_H_

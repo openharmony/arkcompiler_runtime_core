@@ -22,7 +22,7 @@
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <typename T>
 void MemStats<T>::RecordAllocateObject(size_t size, SpaceType typeMem)
@@ -185,4 +185,4 @@ template <typename T>
 
 template class MemStats<MemStatsDefault>;
 template class MemStats<MemStatsAdditionalInfo>;
-}  // namespace panda::mem
+}  // namespace ark::mem

@@ -19,7 +19,7 @@
 #include "bytecode_instruction.h"
 #include "bytecode_instruction-inl.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 struct BytecodeIterator {
     explicit BytecodeIterator(BytecodeInstruction inst) : inst_(inst) {}
     explicit BytecodeIterator(const uint8_t *data) : inst_(data) {}
@@ -70,6 +70,6 @@ private:
     const uint8_t *data_;
     size_t size_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_PBC_ITERATOR_H

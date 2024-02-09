@@ -27,7 +27,7 @@
 #include "runtime/include/thread_status.h"
 #include "runtime/include/locks.h"
 
-namespace panda {
+namespace ark {
 
 // This interval is required for waiting for threads to stop.
 static const int WAIT_INTERVAL = 10;
@@ -97,7 +97,7 @@ protected:
             target = t->IsAttached();
             if ((mask & static_cast<unsigned int>(EnumerationFlag::NON_CORE_THREAD)) != 0) {
                 // Due to hyerarhical structure, we need to conjunct types
-                bool nonCoreThread = t->GetThreadLang() != panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+                bool nonCoreThread = t->GetThreadLang() != ark::panda_file::SourceLang::PANDA_ASSEMBLY;
                 target = target && nonCoreThread;
             }
         }
@@ -166,14 +166,14 @@ public:
         }
         if (self != nullptr) {
             os::memory::LockHolder lock(threadLock_);
-            int64_t start = panda::os::time::GetClockTimeInThreadCpuTime();
+            int64_t start = ark::os::time::GetClockTimeInThreadCpuTime();
             int64_t end;
             int64_t lastTime = start;
             cb(self, os);
             for (const auto &thread : threads_) {
                 if (thread != self) {
                     cb(thread, os);
-                    end = panda::os::time::GetClockTimeInThreadCpuTime();
+                    end = ark::os::time::GetClockTimeInThreadCpuTime();
                     if ((end - lastTime) > K_MAX_SINGLE_DUMP_TIME_NS) {
                         LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump thread : " << thread->GetId()
                                             << "timeout : " << (end - lastTime);
@@ -322,6 +322,6 @@ private:
     int pendingThreads_ GUARDED_BY(threadLock_);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_THREAD_MANAGER_H_

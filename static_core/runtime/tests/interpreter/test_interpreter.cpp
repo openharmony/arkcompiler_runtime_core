@@ -18,7 +18,7 @@
 #include "runtime/interpreter/arch/macros.h"
 #include "runtime/tests/interpreter/test_interpreter_impl.h"
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
 void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame)
 {
@@ -26,4 +26,4 @@ void Execute(ManagedThread *thread, const uint8_t *pc, Frame *frame)
     RESTORE_GLOBAL_REGS();
 }
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test

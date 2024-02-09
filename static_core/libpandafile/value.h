@@ -21,7 +21,7 @@
 #include "file.h"
 #include "helpers.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class ScalarValue {
 public:
@@ -119,6 +119,6 @@ private:
     Span<const uint8_t> data_ {nullptr, nullptr};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_VALUE_H_

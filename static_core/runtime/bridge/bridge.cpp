@@ -23,7 +23,7 @@
 #include "bytecode_instruction.h"
 #include "bytecode_instruction-inl.h"
 
-namespace panda {
+namespace ark {
 
 const void *GetCompiledCodeToInterpreterBridge(const Method *method)
 {
@@ -33,7 +33,7 @@ const void *GetCompiledCodeToInterpreterBridge(const Method *method)
     if (method->GetClass() == nullptr) {
         bridge = reinterpret_cast<const void *>(CompiledCodeToInterpreterBridgeDyn);
     } else {
-        if (panda::panda_file::IsDynamicLanguage(method->GetClass()->GetSourceLang())) {
+        if (ark::panda_file::IsDynamicLanguage(method->GetClass()->GetSourceLang())) {
             bridge = reinterpret_cast<const void *>(CompiledCodeToInterpreterBridgeDyn);
         } else {
             bridge = reinterpret_cast<const void *>(CompiledCodeToInterpreterBridge);
@@ -133,4 +133,4 @@ const void *GetDefaultConflictMethodStub()
 {
     return reinterpret_cast<const void *>(DefaultConflictMethodStub);
 }
-}  // namespace panda
+}  // namespace ark

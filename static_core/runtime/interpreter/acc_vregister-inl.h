@@ -24,7 +24,7 @@
 #include "arch/global_regs.h"
 #endif
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 #ifdef PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
 
 class AccVRegisterT : public VRegisterIface<AccVRegisterT> {
@@ -205,6 +205,6 @@ public:
 using AccVRegisterT = AccVRegister;
 
 #endif  // PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_ACC_VREGISTER_INL_H_

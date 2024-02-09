@@ -20,7 +20,7 @@
 #include "runtime/mem/freelist_allocator.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_FREELIST_ALLOCATOR(level) LOG(level, ALLOC) << "FreeListAllocator: "
@@ -773,6 +773,6 @@ bool FreeListAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader *ob
 
 #undef LOG_FREELIST_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_FREELIST_ALLOCATOR_INL_H

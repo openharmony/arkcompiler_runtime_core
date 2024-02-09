@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace panda::verifier {
+namespace ark::verifier {
 enum class OriginType { START, INSTRUCTION };
 
 using OriginTypeTag = TagForEnum<OriginType, OriginType::START, OriginType::INSTRUCTION>;
@@ -65,6 +65,6 @@ public:
     Origin &operator=(const Origin &) = default;
     Origin &operator=(Origin &&) = default;
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFIER_VALUE_ORIGIN_H__

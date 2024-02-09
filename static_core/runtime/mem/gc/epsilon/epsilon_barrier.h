@@ -15,7 +15,7 @@
 #ifndef PANDA_EPSILON_BARRIER_H
 #define PANDA_EPSILON_BARRIER_H
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <typename Compiler>
 class EpsilonBarrier {
@@ -26,6 +26,6 @@ public:
 // Temporary make it c style - it is easier to the JIT to call this
 extern "C" void CallEpsilonBarrier();
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_EPSILON_BARRIER_H

@@ -22,7 +22,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
 
-namespace panda {
+namespace ark {
 
 ClassLinkerExtension::~ClassLinkerExtension()
 {
@@ -189,7 +189,7 @@ static void WrapClassNotFoundExceptionIfNeeded(ClassLinker *classLinker, const u
     auto *cause = thread->GetException();
     if (cause->IsInstanceOf(classNotFoundExceptionClass)) {
         auto name = ClassHelper::GetName(descriptor);
-        panda::ThrowException(ctx, thread, ctx.GetNoClassDefFoundErrorDescriptor(), utf::CStringAsMutf8(name.c_str()));
+        ark::ThrowException(ctx, thread, ctx.GetNoClassDefFoundErrorDescriptor(), utf::CStringAsMutf8(name.c_str()));
     }
 }
 
@@ -333,12 +333,12 @@ void ClassLinkerExtension::OnClassPrepared(Class *klass)
 
 Class *ClassLinkerExtension::FromClassObject(ObjectHeader *obj)
 {
-    return (obj != nullptr) ? ((reinterpret_cast<panda::coretypes::Class *>(obj))->GetRuntimeClass()) : nullptr;
+    return (obj != nullptr) ? ((reinterpret_cast<ark::coretypes::Class *>(obj))->GetRuntimeClass()) : nullptr;
 }
 
 size_t ClassLinkerExtension::GetClassObjectSizeFromClassSize(uint32_t size)
 {
-    return panda::coretypes::Class::GetSize(size);
+    return ark::coretypes::Class::GetSize(size);
 }
 
 void ClassLinkerExtension::FreeObsoleteData()
@@ -359,4 +359,4 @@ void ClassLinkerExtension::AddObsoleteClass(const PandaVector<Class *> &classes)
     obsoleteClasses_.insert(obsoleteClasses_.end(), classes.begin(), classes.end());
 }
 
-}  // namespace panda
+}  // namespace ark

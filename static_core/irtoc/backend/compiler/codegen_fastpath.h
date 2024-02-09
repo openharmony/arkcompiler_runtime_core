@@ -18,7 +18,7 @@
 
 #include "compiler/optimizer/code_generator/codegen.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 /**
  * Code generation for fast paths
@@ -64,6 +64,6 @@ private:
     VRegMask savedFpRegisters_ {};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_CODEGEN_ENTRYPOINT_H

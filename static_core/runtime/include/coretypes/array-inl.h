@@ -23,7 +23,7 @@
 #include "runtime/handle_scope.h"
 #include "runtime/mem/vm_handle.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 
 template <class T, bool IS_VOLATILE /* = false */>
 inline T Array::GetPrimitive(size_t offset) const
@@ -235,12 +235,12 @@ inline T Array::Get([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx
 
 /* static */
 template <class DimIterator>
-Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *klass, uint32_t nargs,
+Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, ark::Class *klass, uint32_t nargs,
                                           const DimIterator &iter, size_t dimIdx)
 {
     auto arrSize = iter.Get(dimIdx);
     if (arrSize < 0) {
-        panda::ThrowNegativeArraySizeException(arrSize);
+        ark::ThrowNegativeArraySizeException(arrSize);
         return nullptr;
     }
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -268,6 +268,6 @@ Array *Array::CreateMultiDimensionalArray(ManagedThread *thread, panda::Class *k
 
     return handle.GetPtr();
 }
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_CORETYPES_ARRAY_INL_H_

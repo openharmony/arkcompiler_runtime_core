@@ -102,7 +102,7 @@ module Common
     data.plugins.each do |plugin|
       h_plugin = plugin.to_h
       h_plugin_lang = h_plugin.keys.first.to_s
-      lang_enum = "panda::SourceLanguage::" + h_plugin_lang
+      lang_enum = "ark::SourceLanguage::" + h_plugin_lang
       @plugins[h_plugin_lang] = Hash.new()
       @plugins[h_plugin_lang]["lang_enum"] = lang_enum
       assign_data_level(@plugins, h_plugin_lang, h_plugin.values.first)

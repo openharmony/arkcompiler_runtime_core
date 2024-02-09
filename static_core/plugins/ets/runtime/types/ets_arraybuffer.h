@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 namespace test {
 class EtsArrayBufferMembers;
@@ -86,6 +86,6 @@ private:
     friend class test::EtsArrayBufferMembers;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_ARRAYBUFFER_H_

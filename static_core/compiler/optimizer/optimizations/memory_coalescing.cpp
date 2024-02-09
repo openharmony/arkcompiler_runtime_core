@@ -24,7 +24,7 @@
 #include "optimizer/ir/runtime_interface.h"
 #include "optimizer/optimizations/memory_coalescing.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Basic analysis for variables used in loops. It works as follows:
  * 1) Identify variables that are derived from another variables and their difference (AddI, SubI supported).
@@ -909,4 +909,4 @@ bool MemoryCoalescing::RunImpl()
     COMPILER_LOG(DEBUG, MEMORY_COALESCING) << "Memory Coalescing completed";
     return !collector.GetPairs().empty();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

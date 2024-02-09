@@ -21,7 +21,7 @@
 #include "redundant_loop_elimination.h"
 
 #include "optimizer/ir/basicblock.h"
-namespace panda::compiler {
+namespace ark::compiler {
 bool RedundantLoopElimination::RunImpl()
 {
     COMPILER_LOG(DEBUG, RLE_OPT) << "Run " << GetPassName();
@@ -111,4 +111,4 @@ void RedundantLoopElimination::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
     InvalidateBlocksOrderAnalyzes(GetGraph());
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

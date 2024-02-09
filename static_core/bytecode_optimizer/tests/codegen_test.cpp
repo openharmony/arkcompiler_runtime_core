@@ -30,7 +30,7 @@
 #include "optimize_bytecode.h"
 #include "reg_acc_alloc.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -107,7 +107,7 @@ TEST_F(CommonTest, CodeGenBinaryImms)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -168,7 +168,7 @@ TEST_F(CommonTest, CodeGenIfImm)
     EXPECT_TRUE(GraphComparator().Compare(graph, expected));
 
     EXPECT_TRUE(expected->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(expected->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -200,7 +200,7 @@ TEST_F(CommonTest, CodegenIf)
         }
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -235,7 +235,7 @@ TEST_F(CommonTest, CodegenIfDynamic)
         graph->SetDynamicMethod();
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -268,7 +268,7 @@ TEST_F(CommonTest, CodegenIfINT64)
         }
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -303,7 +303,7 @@ TEST_F(CommonTest, CodegenIfINT64Dynamic)
         graph->SetDynamicMethod();
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -336,7 +336,7 @@ TEST_F(CommonTest, CodegenIfUINT64)
         }
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -371,7 +371,7 @@ TEST_F(CommonTest, CodegenIfUINT64Dynamic)
         graph->SetDynamicMethod();
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -403,7 +403,7 @@ TEST_F(CommonTest, CodegenIfREFERENCE)
         }
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -439,7 +439,7 @@ TEST_F(CommonTest, CodegenIfImmZero)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -476,7 +476,7 @@ TEST_F(CommonTest, CodegenIfImmZeroDynamic)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -512,7 +512,7 @@ TEST_F(CommonTest, CodegenIfImmZeroINT64)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -549,7 +549,7 @@ TEST_F(CommonTest, CodegenIfImmZeroINT64Dynamic)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -585,7 +585,7 @@ TEST_F(CommonTest, CodegenIfImmZeroUINT64)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -622,7 +622,7 @@ TEST_F(CommonTest, CodegenIfImmZeroUINT64Dynamic)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -657,7 +657,7 @@ TEST_F(CommonTest, CodegenIfImmZeroREFERENCE)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -693,7 +693,7 @@ TEST_F(CommonTest, CodegenIfImmZeroREFERENCEDynamic)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -729,7 +729,7 @@ TEST_F(CommonTest, CodegenIfImmNonZero)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -765,7 +765,7 @@ TEST_F(CommonTest, CodegenIfImmNonZero32)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -802,7 +802,7 @@ TEST_F(CommonTest, CodegenIfImmNonZero32Dynamic)
 #endif
 
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
     }
 }
@@ -823,7 +823,7 @@ TEST_F(CommonTest, CodegenConstantINT64Dynamic)
     graph->SetDynamicMethod();
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -841,7 +841,7 @@ TEST_F(CommonTest, CodegenConstantFLOAT64)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -861,7 +861,7 @@ TEST_F(CommonTest, CodegenConstantFLOAT64Dynamic)
     graph->SetDynamicMethod();
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -881,7 +881,7 @@ TEST_F(CommonTest, CodegenConstantINT32Dynamic)
     graph->SetDynamicMethod();
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -900,7 +900,7 @@ TEST_F(CommonTest, CodegenCastInt2F64)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -919,7 +919,7 @@ TEST_F(CommonTest, CodegenCastInt2Uint)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -938,7 +938,7 @@ TEST_F(CommonTest, CodegenCastInt2Int16)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -957,7 +957,7 @@ TEST_F(CommonTest, CodegenCastInt2Uint16)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -976,7 +976,7 @@ TEST_F(CommonTest, CodegenCastInt2Int8)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -995,7 +995,7 @@ TEST_F(CommonTest, CodegenCastInt2Uint8)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1014,7 +1014,7 @@ TEST_F(CommonTest, CodegenCastInt64ToInt32)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1033,7 +1033,7 @@ TEST_F(CommonTest, CodegenCastInt64ToUint32)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1052,7 +1052,7 @@ TEST_F(CommonTest, CodegenCastInt64ToF64)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1071,7 +1071,7 @@ TEST_F(CommonTest, CodegenCastInt64ToInt16)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1090,7 +1090,7 @@ TEST_F(CommonTest, CodegenCastInt64ToUint16)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1109,7 +1109,7 @@ TEST_F(CommonTest, CodegenCastInt64ToInt8)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1128,7 +1128,7 @@ TEST_F(CommonTest, CodegenCastInt64ToUint8)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1147,7 +1147,7 @@ TEST_F(CommonTest, CodegenCastFloat64ToInt64)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1166,7 +1166,7 @@ TEST_F(CommonTest, CodegenCastFloat64ToInt32)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1185,7 +1185,7 @@ TEST_F(CommonTest, CodegenCastFloat64ToUint32)
     }
 
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
@@ -1212,7 +1212,7 @@ TEST_F(AsmTest, CodegenLoadString)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 
     graph->SetDynamicMethod();
@@ -1248,7 +1248,7 @@ TEST_F(CommonTest, CodegenStoreObject64)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1281,7 +1281,7 @@ TEST_F(CommonTest, CodegenStoreObjectReference)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1303,7 +1303,7 @@ TEST_F(CommonTest, CodegenLoadObjectInt)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1325,7 +1325,7 @@ TEST_F(CommonTest, CodegenLoadObjectInt64)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1347,7 +1347,7 @@ TEST_F(CommonTest, CodegenLoadObjectReference)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1371,7 +1371,7 @@ TEST_F(CommonTest, CodegenInitObject)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1404,7 +1404,7 @@ TEST_F(CommonTest, CodegenEncodeSta64)
     RuntimeInterfaceMock runtime(1U);
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<RegEncoder>());
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
@@ -1455,7 +1455,7 @@ TEST_F(CommonTest, CodegenBlockNeedsJump)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1476,7 +1476,7 @@ TEST_F(CommonTest, CodegenNotProduceUnsupportedCast)
         }
     }
     IrInterfaceTest interface(nullptr);
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_FALSE(graph->RunPass<compiler::Peepholes>());
 }
 
@@ -1495,7 +1495,7 @@ TEST_F(CommonTest, CodegenFloat32Constant)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1532,7 +1532,7 @@ TEST_F(AsmTest, CatchPhi)
     }
     )";
 
-    panda::pandasm::Parser parser;
+    ark::pandasm::Parser parser;
     auto res = parser.Parse(source);
     ASSERT_TRUE(parser.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
     auto &prog = res.Value();
@@ -1540,7 +1540,7 @@ TEST_F(AsmTest, CatchPhi)
 
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(GetGraph()->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, &interface));
 }
 
@@ -1560,14 +1560,14 @@ TEST_F(AsmTest, Float32Regression1)
         return
     }
     )";
-    panda::pandasm::Parser parser;
+    ark::pandasm::Parser parser;
     auto res = parser.Parse(source);
     EXPECT_TRUE(res);
     auto &prog = res.Value();
     ParseToGraph(&prog, "bar");
     IrInterfaceTest interface(nullptr);
     EXPECT_TRUE(GetGraph()->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, &interface));
     EXPECT_TRUE(std::none_of(function.ins.begin(), function.ins.end(),
                              [](const auto &inst) { return inst.opcode == pandasm::Opcode::STA_64; }));
@@ -1592,7 +1592,7 @@ TEST_F(AsmTest, Float32Regression2)
         return
     }
     )";
-    panda::pandasm::Parser parser;
+    ark::pandasm::Parser parser;
     auto res = parser.Parse(source);
     EXPECT_TRUE(res);
     auto &prog = res.Value();
@@ -1605,7 +1605,7 @@ TEST_F(AsmTest, Float32Regression2)
     graph->RunPass<compiler::Lowering>();
     graph->RunPass<compiler::Cleanup>();
     EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-    auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, &interface));
     EXPECT_TRUE(std::none_of(function.ins.begin(), function.ins.end(),
                              [](const auto &inst) { return inst.opcode == pandasm::Opcode::MOV_64; }));
@@ -1636,7 +1636,7 @@ TEST_F(CommonTest, CodegenLdai)
         INS(3U).SetType(types[i]);
         graph->RunPass<bytecodeopt::RegAccAlloc>();
         EXPECT_TRUE(graph->RunPass<compiler::RegAllocLinearScan>(compiler::EmptyRegMask()));
-        auto function = pandasm::Function(std::string(), panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+        auto function = pandasm::Function(std::string(), ark::panda_file::SourceLang::PANDA_ASSEMBLY);
         IrInterfaceTest interface(nullptr);
         EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, &interface));
         EXPECT_TRUE(FuncHasInst(&function, opcodes[i]));
@@ -1651,7 +1651,7 @@ TEST(TotalTest, OptimizeBytecode)
         return
     }
     )";
-    panda::pandasm::Parser parser;
+    ark::pandasm::Parser parser;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     const char fileName[] = "opt_bc.bin";
     auto res = parser.Parse(source, fileName);
@@ -1678,4 +1678,4 @@ TEST(TotalTest, OptimizeBytecode)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

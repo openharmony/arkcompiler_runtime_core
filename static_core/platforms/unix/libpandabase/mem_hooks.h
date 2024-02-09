@@ -18,7 +18,7 @@
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/macros.h"
 
-namespace panda::os::unix::mem_hooks {
+namespace ark::os::unix::mem_hooks {
 
 class PandaHooks {
 public:
@@ -75,11 +75,11 @@ private:
     static bool isActive_;
 };
 
-}  // namespace panda::os::unix::mem_hooks
+}  // namespace ark::os::unix::mem_hooks
 
-namespace panda::os::mem_hooks {
-using PandaHooks = panda::os::unix::mem_hooks::PandaHooks;
-}  // namespace panda::os::mem_hooks
+namespace ark::os::mem_hooks {
+using PandaHooks = ark::os::unix::mem_hooks::PandaHooks;
+}  // namespace ark::os::mem_hooks
 
 // Don't use for musl and mobile
 // Sanitizers hook malloc functions, so we don't use memory hooks

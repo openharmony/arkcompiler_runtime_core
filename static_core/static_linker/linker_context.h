@@ -27,7 +27,7 @@
 #include "linker.h"
 #include "macros.h"
 
-namespace panda::static_linker {
+namespace ark::static_linker {
 
 class Context;
 
@@ -212,7 +212,7 @@ private:
 
     std::pair<panda_file::ProtoItem *, std::vector<panda_file::MethodParamItem>> GetProto(panda_file::ProtoItem *p);
 
-    bool IsSameType(panda::panda_file::TypeItem *nevv, panda::panda_file::TypeItem *old);
+    bool IsSameType(ark::panda_file::TypeItem *nevv, ark::panda_file::TypeItem *old);
 
     void ProcessCodeData(CodePatcher &p, CodeData *data);
 
@@ -289,6 +289,6 @@ private:
 
 std::ostream &operator<<(std::ostream &o, const static_linker::Context::ErrorToStringWrapper &self);
 
-}  // namespace panda::static_linker
+}  // namespace ark::static_linker
 
 #endif

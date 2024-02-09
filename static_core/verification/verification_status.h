@@ -16,8 +16,8 @@
 #ifndef PANDA_VERIFIER_VERIFICATION_STATUS_HPP_
 #define PANDA_VERIFIER_VERIFICATION_STATUS_HPP_
 
-namespace panda::verifier {
+namespace ark::verifier {
 enum class VerificationStatus { OK, WARNING, ERROR };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_VERIFICATION_STATUS_HPP_

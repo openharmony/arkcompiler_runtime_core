@@ -29,19 +29,19 @@ static void LogPrint([[maybe_unused]] int id, int level, const char *component, 
     constexpr static auto TAG = "ArkEtsVm";
     constexpr static OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, ARK_DOMAIN, TAG};
     switch (level) {
-        case panda::Logger::PandaLog2MobileLog::DEBUG:
+        case ark::Logger::PandaLog2MobileLog::DEBUG:
             OHOS::HiviewDFX::HiLog::Debug(LABEL, "%{public}s", msg);
             break;
-        case panda::Logger::PandaLog2MobileLog::INFO:
+        case ark::Logger::PandaLog2MobileLog::INFO:
             OHOS::HiviewDFX::HiLog::Info(LABEL, "%{public}s", msg);
             break;
-        case panda::Logger::PandaLog2MobileLog::ERROR:
+        case ark::Logger::PandaLog2MobileLog::ERROR:
             OHOS::HiviewDFX::HiLog::Error(LABEL, "%{public}s", msg);
             break;
-        case panda::Logger::PandaLog2MobileLog::FATAL:
+        case ark::Logger::PandaLog2MobileLog::FATAL:
             OHOS::HiviewDFX::HiLog::Fatal(LABEL, "%{public}s", msg);
             break;
-        case panda::Logger::PandaLog2MobileLog::WARN:
+        case ark::Logger::PandaLog2MobileLog::WARN:
             OHOS::HiviewDFX::HiLog::Warn(LABEL, "%{public}s", msg);
             break;
         default:
@@ -49,19 +49,19 @@ static void LogPrint([[maybe_unused]] int id, int level, const char *component, 
     }
 #else
     switch (level) {
-        case panda::Logger::PandaLog2MobileLog::DEBUG:
+        case ark::Logger::PandaLog2MobileLog::DEBUG:
             OH_LOG_Print(LOG_APP, LOG_DEBUG, 0xFF00, "ArkEtsVm", "%s: %s", component, msg);
             break;
-        case panda::Logger::PandaLog2MobileLog::INFO:
+        case ark::Logger::PandaLog2MobileLog::INFO:
             OH_LOG_Print(LOG_APP, LOG_INFO, 0xFF00, "ArkEtsVm", "%s: %s", component, msg);
             break;
-        case panda::Logger::PandaLog2MobileLog::ERROR:
+        case ark::Logger::PandaLog2MobileLog::ERROR:
             OH_LOG_Print(LOG_APP, LOG_ERROR, 0xFF00, "ArkEtsVm", "%s: %s", component, msg);
             break;
-        case panda::Logger::PandaLog2MobileLog::FATAL:
+        case ark::Logger::PandaLog2MobileLog::FATAL:
             OH_LOG_Print(LOG_APP, LOG_FATAL, 0xFF00, "ArkEtsVm", "%s: %s", component, msg);
             break;
-        case panda::Logger::PandaLog2MobileLog::WARN:
+        case ark::Logger::PandaLog2MobileLog::WARN:
             OH_LOG_Print(LOG_APP, LOG_WARN, 0xFF00, "ArkEtsVm", "%s: %s", component, msg);
             break;
         default:
@@ -77,27 +77,27 @@ static void LogPrint([[maybe_unused]] int id, [[maybe_unused]] int level, [[mayb
 }
 #endif  // PANDA_TARGET_OHOS
 
-namespace panda::ets {
+namespace ark::ets {
 
 bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)> const &addOptions)
 {
-    auto runtimeOptions = panda::RuntimeOptions("app");
+    auto runtimeOptions = ark::RuntimeOptions("app");
     runtimeOptions.SetLoadRuntimes({"ets"});
 #ifdef PANDA_TARGET_OHOS
     runtimeOptions.SetMobileLog(reinterpret_cast<void *>(LogPrint));
 #endif
 
-    panda::base_options::Options baseOptions("app");
+    ark::base_options::Options baseOptions("app");
 
     if (!addOptions(&baseOptions, &runtimeOptions)) {
         return false;
     }
 
-    panda::Logger::Initialize(baseOptions);
+    ark::Logger::Initialize(baseOptions);
 
     LOG(DEBUG, RUNTIME) << "CreateRuntime";
 
-    if (!panda::Runtime::Create(runtimeOptions)) {
+    if (!ark::Runtime::Create(runtimeOptions)) {
         LOG(ERROR, RUNTIME) << "CreateRuntime: cannot create ets runtime";
         return false;
     }
@@ -107,7 +107,7 @@ bool CreateRuntime(std::function<bool(base_options::Options *, RuntimeOptions *)
 bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, const bool useJit, const bool useAot)
 {
     auto addOpts = [&stdlibAbc, &pathAbc, useJit, useAot](base_options::Options *baseOptions,
-                                                          panda::RuntimeOptions *runtimeOptions) {
+                                                          ark::RuntimeOptions *runtimeOptions) {
         baseOptions->SetLogLevel("info");
         runtimeOptions->SetBootPandaFiles({stdlibAbc, pathAbc});
         runtimeOptions->SetPandaFiles({pathAbc});
@@ -124,38 +124,38 @@ bool CreateRuntime(const std::string &stdlibAbc, const std::string &pathAbc, con
 bool DestroyRuntime()
 {
     LOG(DEBUG, RUNTIME) << "DestroyEtsRuntime: enter";
-    auto res = panda::Runtime::Destroy();
+    auto res = ark::Runtime::Destroy();
     LOG(DEBUG, RUNTIME) << "DestroyEtsRuntime: result = " << res;
     return res;
 }
 
 std::pair<bool, int> ExecuteMain()
 {
-    auto runtime = panda::Runtime::GetCurrent();
+    auto runtime = ark::Runtime::GetCurrent();
     auto pfPath = runtime->GetPandaFiles()[0];
     LOG(INFO, RUNTIME) << "ExecuteEtsMain: '" << pfPath << "'";
-    auto res = panda::Runtime::GetCurrent()->ExecutePandaFile(pfPath, "ETSGLOBAL::main", {});
+    auto res = ark::Runtime::GetCurrent()->ExecutePandaFile(pfPath, "ETSGLOBAL::main", {});
     LOG(INFO, RUNTIME) << "ExecuteEtsMain: result = " << (res ? std::to_string(res.Value()) : "failed");
     return res ? std::make_pair(true, res.Value()) : std::make_pair(false, 1);
 }
 
 bool BindNative(const char *classDescriptor, const char *methodName, void *impl)
 {
-    auto *runtime = panda::Runtime::GetCurrent();
+    auto *runtime = ark::Runtime::GetCurrent();
     auto *classLinker = runtime->GetClassLinker();
-    auto *ext = classLinker->GetExtension(panda::SourceLanguage::ETS);
-    auto *klass = ext->GetClass(panda::utf::CStringAsMutf8(classDescriptor));
+    auto *ext = classLinker->GetExtension(ark::SourceLanguage::ETS);
+    auto *klass = ext->GetClass(ark::utf::CStringAsMutf8(classDescriptor));
 
     if (klass == nullptr) {
-        panda::ManagedThread::GetCurrent()->ClearException();
+        ark::ManagedThread::GetCurrent()->ClearException();
         LOG(DEBUG, RUNTIME) << "BindNative: Cannot find class '" << classDescriptor << "'";
         return false;
     }
 
-    auto *method = klass->GetDirectMethod(panda::utf::CStringAsMutf8(methodName));
+    auto *method = klass->GetDirectMethod(ark::utf::CStringAsMutf8(methodName));
 
     if (method == nullptr) {
-        panda::ManagedThread::GetCurrent()->ClearException();
+        ark::ManagedThread::GetCurrent()->ClearException();
         LOG(DEBUG, RUNTIME) << "BindNative: Cannot find method '" << classDescriptor << "." << methodName << "'`";
         return false;
     }
@@ -166,7 +166,7 @@ bool BindNative(const char *classDescriptor, const char *methodName, void *impl)
 
 void LogError(const std::string &msg)
 {
-    LogPrint(0, panda::Logger::PandaLog2MobileLog::ERROR, nullptr, nullptr, msg.c_str());
+    LogPrint(0, ark::Logger::PandaLog2MobileLog::ERROR, nullptr, nullptr, msg.c_str());
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

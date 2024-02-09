@@ -45,7 +45,7 @@
 #include "elfio/elfio.hpp"
 #include "irtoc_runtime.h"
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 
 using compiler::Graph;
 
@@ -351,4 +351,4 @@ static bool RunIrtocOptimizations(Graph *graph)
     return true;
 }
 
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc

@@ -15,7 +15,7 @@
 
 #include "unit_test.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CallInputTypesTest : public AsmTest {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     const auto *GetCallInstruction(Graph *graph) const
@@ -99,4 +99,4 @@ TEST_F(CallInputTypesTest, CallVirt)
     ASSERT_EQ(callInst->GetInputType(2U), DataType::NO_TYPE);  // SaveState instruction
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

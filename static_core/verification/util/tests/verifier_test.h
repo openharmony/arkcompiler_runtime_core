@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 class VerifierTest : public testing::Test {
 public:
     VerifierTest()
@@ -31,7 +31,7 @@ public:
         options.SetShouldInitializeIntrinsics(false);
         options.SetHeapSizeLimit(64_MB);  // NOLINT(readability-magic-numbers)
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
     }
 
     ~VerifierTest() override
@@ -44,8 +44,8 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test
 
 #endif  // PANDA_VERIFICATION_UTIL_TESTS_VERIFIER_TEST_H

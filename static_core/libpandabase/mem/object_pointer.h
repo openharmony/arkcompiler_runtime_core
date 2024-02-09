@@ -18,7 +18,7 @@
 
 #include "mem.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @class ObjectPointer<class Object>
@@ -134,6 +134,6 @@ private:
 // size of ObjectPointer<T> must be equal size of ObjectPointerType
 static_assert(sizeof(ObjectPointer<bool>) == sizeof(ObjectPointerType));
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_LIBPANDABASE_MEM_OBJECT_POINTER_H

@@ -15,7 +15,7 @@
 #include "codegen.h"
 #include "runtime/include/coretypes/tagged_value.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 void DoLdaObj(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
@@ -470,7 +470,7 @@ static pandasm::Opcode ChooseCallAccOpcode(pandasm::Opcode op)
     }
 }
 
-static panda::compiler::CallInst *CastToCall(panda::compiler::Inst *inst)
+static ark::compiler::CallInst *CastToCall(ark::compiler::Inst *inst)
 {
     switch (inst->GetOpcode()) {
         case compiler::Opcode::CallStatic:
@@ -1722,4 +1722,4 @@ void BytecodeGen::VisitCatchPhi(GraphVisitor *v, Inst *inst)
 
 #include "generated/codegen_intrinsics.cpp"
 #include "generated/insn_selection.cpp"
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

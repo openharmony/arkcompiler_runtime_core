@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 static int64_t GetCoroId()
 {
     return reinterpret_cast<int64_t>(EtsCoroutine::GetCurrent());
@@ -74,4 +74,4 @@ TEST_F(JsModeLaunchTest, Call)
     auto res = Runtime::GetCurrent()->ExecutePandaFile(abcFile_.c_str(), mainFunc.c_str(), {});
     ASSERT_EQ(0, res.Value());
 }
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

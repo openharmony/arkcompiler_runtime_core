@@ -40,7 +40,7 @@
 #include "runtime/include/tooling/debug_inf.h"
 #include "trace/trace.h"
 
-namespace panda {
+namespace ark {
 
 using Type = panda_file::Type;
 using SourceLang = panda_file::SourceLang;
@@ -127,13 +127,13 @@ ClassLinker::ClassLinker(mem::InternalAllocatorPtr allocator,
     : allocator_(allocator), aotManager_(MakePandaUnique<AotManager>()), copiedNames_(allocator->Adapter())
 {
     for (auto &ext : extensions) {
-        extensions_[panda::panda_file::GetLangArrIndex(ext->GetLanguage())] = std::move(ext);
+        extensions_[ark::panda_file::GetLangArrIndex(ext->GetLanguage())] = std::move(ext);
     }
 }
 
 void ClassLinker::ResetExtension(panda_file::SourceLang lang)
 {
-    extensions_[panda::panda_file::GetLangArrIndex(lang)] =
+    extensions_[ark::panda_file::GetLangArrIndex(lang)] =
         Runtime::GetCurrent()->GetLanguageContext(lang).CreateClassLinkerExtension();
 }
 
@@ -696,7 +696,7 @@ bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool isStatic,
     }
 
     size_t size =
-        panda::LayoutFields(klass, &taggedFields, &fields64, &fields32, &fields16, &fields8, &refFields, isStatic);
+        ark::LayoutFields(klass, &taggedFields, &fields64, &fields32, &fields16, &fields8, &refFields, isStatic);
 
     if (!isStatic && !klass->IsVariableSize()) {
         klass->SetObjectSize(size);
@@ -1534,4 +1534,4 @@ void ClassLinker::RemoveCreatedClassInExtension(Class *klass)
     }
 }
 
-}  // namespace panda
+}  // namespace ark

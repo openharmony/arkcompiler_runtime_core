@@ -20,7 +20,7 @@
 
 #include "linker_context.h"
 
-namespace panda::static_linker {
+namespace ark::static_linker {
 
 namespace {
 
@@ -184,7 +184,7 @@ void CodePatcher::Patch(const std::pair<size_t, size_t> range)
 
 void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
 {
-    using Flags = panda::BytecodeInst<panda::BytecodeInstMode::FAST>::Flags;
+    using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
     using EntityId = panda_file::File::EntityId;
 
     const auto myId = EntityId(data->omi->GetOffset());
@@ -259,4 +259,4 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
     }
 }
 
-}  // namespace panda::static_linker
+}  // namespace ark::static_linker

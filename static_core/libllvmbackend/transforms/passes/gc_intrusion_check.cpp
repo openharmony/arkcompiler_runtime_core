@@ -46,10 +46,10 @@ using llvm::LoadInst;
 using llvm::PHINode;
 using llvm::ZExtInst;
 // Gc utils
-using panda::llvmbackend::gc_utils::HasBeenGcRef;
-using panda::llvmbackend::gc_utils::IsAllowedEscapedUser;
-using panda::llvmbackend::gc_utils::IsDerived;
-using panda::llvmbackend::gc_utils::IsGcRefType;
+using ark::llvmbackend::gc_utils::HasBeenGcRef;
+using ark::llvmbackend::gc_utils::IsAllowedEscapedUser;
+using ark::llvmbackend::gc_utils::IsDerived;
+using ark::llvmbackend::gc_utils::IsGcRefType;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static llvm::cl::opt<bool> g_checkAnyEscaped("gcic-any-escaped", llvm::cl::Hidden, llvm::cl::init(true));
@@ -63,7 +63,7 @@ static llvm::cl::opt<bool> g_checkDerived("gcic-no-derived", llvm::cl::Hidden, l
 static llvm::cl::opt<bool> g_checkUnreachableRelocates("gcic-no-unreachable-relocate", llvm::cl::Hidden,
                                                        llvm::cl::init(false));
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 void GcIntrusionCheck::CheckStatepoint(const Function &function, const GCStatepointInst &statepoint)
 {
@@ -225,11 +225,11 @@ ArrayRef<Use> GcIntrusionCheck::GetBundle(const GCStatepointInst &call, uint32_t
     return bundle->Inputs;
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
-bool GcIntrusionCheck::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
+bool GcIntrusionCheck::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return options->gcIntrusionChecks;
 }
@@ -253,4 +253,4 @@ llvm::PreservedAnalyses GcIntrusionCheck::run(Function &function, FunctionAnalys
     return llvm::PreservedAnalyses::all();
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

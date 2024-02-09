@@ -18,7 +18,7 @@
 #include "optimize_bytecode.h"
 #include "mangling.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 TEST_F(AsmTest, BitopsBitwiseAnd)
 {
@@ -124,4 +124,4 @@ TEST_F(AsmTest, BitopsBitwiseAnd)
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeGen>(&function, GetIrInterface()));
 }
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

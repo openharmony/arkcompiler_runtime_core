@@ -31,7 +31,7 @@
 #include <string>
 #include <utility>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 InspectorServer::InspectorServer(Server &server) : server_(server)
 {
     server_.OnCall("Debugger.enable", [](auto, auto &result, auto &) { result.AddProperty("debuggerId", "debugger"); });
@@ -599,4 +599,4 @@ void InspectorServer::AddBreakpointByUrlLocations(JsonArrayBuilder &locations,
         });
     }
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

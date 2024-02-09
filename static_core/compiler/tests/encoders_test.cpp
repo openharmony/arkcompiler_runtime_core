@@ -21,14 +21,14 @@
 
 #include "vixl_exec_module.h"
 
-namespace panda::compiler::tests {
+namespace ark::compiler::tests {
 
 class EncoderArm64VixlTest : public ::testing::Test {
 public:
     EncoderArm64VixlTest()
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
+        ark::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
         encoder_ = static_cast<aarch64::Aarch64Encoder *>(Encoder::Create(allocator_, Arch::AARCH64, false));
@@ -45,7 +45,7 @@ public:
         encoder_->~Aarch64Encoder();
         delete allocator_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_COPY_SEMANTIC(EncoderArm64VixlTest);
@@ -226,4 +226,4 @@ TEST_F(EncoderArm64VixlTest, LoadPcRelative)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler::tests
+}  // namespace ark::compiler::tests

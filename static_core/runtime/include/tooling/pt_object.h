@@ -18,7 +18,7 @@
 #include "runtime/include/tooling/pt_reference.h"
 #include "libpandabase/macros.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 class PtObject {
 public:
     explicit PtObject(PtReference *ref = nullptr) : ref_(ref) {}
@@ -36,6 +36,6 @@ public:
 private:
     PtReference *ref_;
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_OBJECT_H

@@ -19,7 +19,7 @@
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief Stackful ("fiber"-based) coroutine manager implementation.
@@ -164,6 +164,6 @@ private:
     mutable os::memory::Mutex coroPoolLock_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif /* PANDA_RUNTIME_COROUTINES_STACKFUL_COROUTINE_MANAGER_H */

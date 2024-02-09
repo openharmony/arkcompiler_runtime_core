@@ -13,7 +13,7 @@
 
 module:
   name: compiler
-  namespace: panda::compiler
+  namespace: ark::compiler
 
 options:
 - name: compiler-non-optimizing

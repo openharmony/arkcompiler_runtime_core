@@ -20,21 +20,21 @@
 #include "mem/arena_allocator.h"
 #include "utils/arch.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class AotBuilder;
 class LLVMAotBuilder;
 class Graph;
 class RuntimeInterface;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
-std::unique_ptr<CompilerInterface> CreateLLVMAotCompiler(panda::compiler::RuntimeInterface *runtime,
-                                                         panda::ArenaAllocator *allocator,
-                                                         panda::compiler::LLVMAotBuilder *aotBuilder,
+std::unique_ptr<CompilerInterface> CreateLLVMAotCompiler(ark::compiler::RuntimeInterface *runtime,
+                                                         ark::ArenaAllocator *allocator,
+                                                         ark::compiler::LLVMAotBuilder *aotBuilder,
                                                          const std::string &cmdline, const std::string &filename);
 
-std::unique_ptr<IrtocCompilerInterface> CreateLLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime,
-                                                                panda::ArenaAllocator *allocator, panda::Arch arch);
-}  // namespace panda::llvmbackend
+std::unique_ptr<IrtocCompilerInterface> CreateLLVMIrtocCompiler(ark::compiler::RuntimeInterface *runtime,
+                                                                ark::ArenaAllocator *allocator, ark::Arch arch);
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_COMPILER_CREATOR_H

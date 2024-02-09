@@ -21,7 +21,7 @@
 #include "compiler_options.h"
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Licm : public Optimization {
 public:
     explicit Licm(Graph *graph, uint32_t hoistLimit = std::numeric_limits<uint32_t>::max());
@@ -64,6 +64,6 @@ private:
     SaveStateBridgesBuilder ssb_;
     InstVector hoistableInstructions_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LICM_H

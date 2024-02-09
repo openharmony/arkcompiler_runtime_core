@@ -34,7 +34,7 @@
 #include "types/ets_void.h"
 #include "runtime/include/value-inl.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 namespace {
 // NOTE: requires parent handle scope
@@ -122,4 +122,4 @@ EtsObject *TypeAPIMethodInvokeConstructor(EtsString *desc, EtsArray *args)
 }
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

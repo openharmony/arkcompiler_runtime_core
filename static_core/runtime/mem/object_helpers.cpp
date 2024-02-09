@@ -25,7 +25,7 @@
 #include "runtime/mem/free_object.h"
 #include "runtime/mem/gc/dynamic/gc_dynamic_data.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 using DynClass = coretypes::DynClass;
 using TaggedValue = coretypes::TaggedValue;
@@ -69,7 +69,7 @@ void DumpObject(ObjectHeader *objectHeader, std::basic_ostream<char, std::char_t
         while (cls != nullptr) {
             Span<Field> fields = cls->GetInstanceFields();
             if (cls->IsStringClass()) {
-                auto *strObject = static_cast<panda::coretypes::String *>(objectHeader);
+                auto *strObject = static_cast<ark::coretypes::String *>(objectHeader);
                 if (strObject->GetLength() > 0 && !strObject->IsUtf16()) {
                     *oStream << "length = " << std::dec << strObject->GetLength() << std::endl;
                     constexpr size_t BUFF_SIZE = 256;
@@ -355,4 +355,4 @@ ObjectHeader *GCDynamicObjectHelpers::UpdateRefToMovedObject(ObjectHeader *objec
     return forwardedObject;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

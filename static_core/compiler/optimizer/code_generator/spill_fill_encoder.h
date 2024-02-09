@@ -19,7 +19,7 @@
 #include "optimizer/ir/graph_visitor.h"
 #include "utils/cframe_layout.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class Graph;
 class Codegen;
@@ -69,5 +69,5 @@ private:
     CFrameLayout fl_;
     Reg spReg_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H

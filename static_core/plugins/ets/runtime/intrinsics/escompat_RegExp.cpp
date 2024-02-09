@@ -30,11 +30,11 @@
 #include "types/ets_object.h"
 #include "types/ets_primitives.h"
 
-namespace panda::ets::intrinsics {
-using RegExpParser = panda::RegExpParser;
-using RegExpExecutor = panda::ets::RegExpExecutor;
-using RegExpMatchResult = panda::RegExpMatchResult<PandaString>;
-using Array = panda::coretypes::Array;
+namespace ark::ets::intrinsics {
+using RegExpParser = ark::RegExpParser;
+using RegExpExecutor = ark::ets::RegExpExecutor;
+using RegExpMatchResult = ark::RegExpMatchResult<PandaString>;
+using Array = ark::coretypes::Array;
 
 namespace {
 
@@ -101,8 +101,8 @@ uint32_t CastToBitMask(EtsString *checkStr)
                 auto *thread = ManagedThread::GetCurrent();
                 auto ctx = PandaEtsVM::GetCurrent()->GetLanguageContext();
                 std::string message = "invalid regular expression flags";
-                panda::ThrowException(ctx, thread, utf::CStringAsMutf8("Lstd/core/IllegalArgumentException;"),
-                                      utf::CStringAsMutf8(message.c_str()));
+                ark::ThrowException(ctx, thread, utf::CStringAsMutf8("Lstd/core/IllegalArgumentException;"),
+                                    utf::CStringAsMutf8(message.c_str()));
                 return 0;
             }
         }
@@ -110,8 +110,8 @@ uint32_t CastToBitMask(EtsString *checkStr)
             auto *thread = ManagedThread::GetCurrent();
             auto ctx = PandaEtsVM::GetCurrent()->GetLanguageContext();
             std::string message = "invalid regular expression flags";
-            panda::ThrowException(ctx, thread, utf::CStringAsMutf8("Lstd/core/IllegalArgumentException;"),
-                                  utf::CStringAsMutf8(message.c_str()));
+            ark::ThrowException(ctx, thread, utf::CStringAsMutf8("Lstd/core/IllegalArgumentException;"),
+                                utf::CStringAsMutf8(message.c_str()));
             return 0;
         }
         flagsBits |= flagsBitsTemp;
@@ -427,4 +427,4 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *str)
     SetIndicesField(regexpExecArrayObject.GetPtr(), execResult.indices, hasIndices);
     return regexpExecArrayObject.GetPtr();
 }
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

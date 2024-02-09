@@ -21,11 +21,11 @@
 
 #include "utils/expected.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 struct CompiledCode {
     const uint8_t *code;
@@ -36,8 +36,8 @@ struct CompilerInterface {
     CompilerInterface() = default;
     virtual ~CompilerInterface() = default;
 
-    virtual Expected<bool, std::string> CanCompile(panda::compiler::Graph *graph) = 0;
-    virtual bool AddGraph(panda::compiler::Graph *graph) = 0;
+    virtual Expected<bool, std::string> CanCompile(ark::compiler::Graph *graph) = 0;
+    virtual bool AddGraph(ark::compiler::Graph *graph) = 0;
     virtual void CompileAll() = 0;
     virtual bool HasCompiledCode() = 0;
     virtual bool IsIrFailed() = 0;
@@ -63,6 +63,6 @@ struct IrtocCompilerInterface : public CompilerInterface {
     IrtocCompilerInterface &operator=(IrtocCompilerInterface &&) = delete;
 };
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  // LIBLLVMBACKEND_COMPILER_INTERFACE_H

@@ -19,7 +19,7 @@
 
 #include <securec.h>
 
-namespace panda {
+namespace ark {
 
 constexpr size_t ZIP_MAGIC_MASK = 0xff;
 constexpr size_t ZIP_MAGIC_OFFSET = 8U;
@@ -184,4 +184,4 @@ int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void
     }
     return success;
 }
-}  // namespace panda
+}  // namespace ark

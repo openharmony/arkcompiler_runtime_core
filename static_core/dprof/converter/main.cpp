@@ -25,10 +25,10 @@
 
 #include "generated/converter_options.h"
 
-namespace panda::dprof {
+namespace ark::dprof {
 class ArgsParser {
 public:
-    bool Parse(panda::Span<const char *> args)
+    bool Parse(ark::Span<const char *> args)
     {
         options_.AddOptions(&parser_);
         if (!parser_.Parse(args.Size(), args.Data())) {
@@ -65,7 +65,7 @@ private:
     Options options_ {""};
 };
 
-int Main(panda::Span<const char *> args)
+int Main(ark::Span<const char *> args)
 {
     ArgsParser parser;
     if (!parser.Parse(args)) {
@@ -74,7 +74,7 @@ int Main(panda::Span<const char *> args)
     }
     const Options &options = parser.GetOptionos();
 
-    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), panda::LOGGER_COMPONENT_MASK_ALL);
+    Logger::InitializeStdLogging(Logger::LevelFromString(options.GetLogLevel()), ark::LOGGER_COMPONENT_MASK_ALL);
 
     auto storage = AppDataStorage::Create(options.GetStorageDir());
     if (!storage) {
@@ -96,10 +96,10 @@ int Main(panda::Span<const char *> args)
     }
     return 0;
 }
-}  // namespace panda::dprof
+}  // namespace ark::dprof
 
 int main(int argc, const char *argv[])
 {
-    panda::Span<const char *> args(argv, argc);
-    return panda::dprof::Main(args);
+    ark::Span<const char *> args(argv, argc);
+    return ark::dprof::Main(args);
 }

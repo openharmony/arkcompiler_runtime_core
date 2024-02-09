@@ -14,30 +14,30 @@
  */
 
 // NOLINTNEXTLINE(readability-function-size)
-const char *GetIntrinsicInternalName(panda::compiler::RuntimeInterface::IntrinsicId id)
+const char *GetIntrinsicInternalName(ark::compiler::RuntimeInterface::IntrinsicId id)
 {
 #ifndef NDEBUG
     switch (id) {
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMOD:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMOD:
             return "__panda_intrinsic_LibCallFmod";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMODF:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMODF:
             return "__panda_intrinsic_LibCallFmodF";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXP:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXP:
             return "__panda_intrinsic_LibCallLdExp";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXPF:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXPF:
             return "__panda_intrinsic_LibCallLdExpF";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2:
             return "__panda_intrinsic_LibCallExp2";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2F:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2F:
             return "__panda_intrinsic_LibCallExp2F";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY:
             return "__panda_intrinsic_LibCallMemCopy";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE:
             return "__panda_intrinsic_LibCallMemMove";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_SET:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_SET:
             return "__panda_intrinsic_LibCallMemSet";
 % Runtime::intrinsics.each do |intrinsic|
-        case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:
+        case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:
             return "<%= intrinsic.llvm_internal_name %>";
 % end
         default:
@@ -47,26 +47,26 @@ const char *GetIntrinsicInternalName(panda::compiler::RuntimeInterface::Intrinsi
     }
 #else
     switch (id) {
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMOD:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMOD:
             return "<%= 'lc_' + 1.to_s(16)  %>";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMODF:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_FMODF:
             return "<%= 'lc_' + 2.to_s(16)  %>";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXP:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXP:
             return "<%= 'lc_' + 3.to_s(16)  %>";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXPF:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_LDEXPF:
             return "<%= 'lc_' + 4.to_s(16)  %>";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2:
             return "<%= 'lc_' + 5.to_s(16)  %>";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2F:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_EXP2F:
             return "<%= 'lc_' + 6.to_s(16)  %>";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY:
             return "<%= 'lc_' + 7.to_s(16)  %>";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE:
             return "<%= 'lc_' + 8.to_s(16)  %>";
-        case panda::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_SET:
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_SET:
             return "<%= 'lc_' + 9.to_s(16)  %>";
 % Runtime::intrinsics.each_with_index do |intrinsic, index|
-        case panda::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:
+        case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:
             return "<%= 'i_' + index.to_s(16) %>";
 % end
         default:

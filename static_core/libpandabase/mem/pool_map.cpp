@@ -15,7 +15,7 @@
 
 #include "pool_map.h"
 
-namespace panda {
+namespace ark {
 
 void PoolMap::AddPoolToMap(const void *poolAddr, size_t poolSize, SpaceType spaceType, AllocatorType allocatorType,
                            const void *allocatorAddr)
@@ -81,4 +81,4 @@ bool PoolMap::IsEmpty() const
     return true;
 }
 
-}  // namespace panda
+}  // namespace ark

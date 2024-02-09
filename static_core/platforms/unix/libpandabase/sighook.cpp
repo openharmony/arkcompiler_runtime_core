@@ -34,7 +34,7 @@
 #include <securec.h>
 #include <ucontext.h>
 
-namespace panda {
+namespace ark {
 
 static decltype(&sigaction) g_realSigaction;
 static decltype(&sigprocmask) g_realSigProcMask;
@@ -235,15 +235,15 @@ bool SignalHook::SetHandlingSignal(int signo, siginfo_t *siginfo, void *ucontext
 
         bool oldHandleKey = GetHandlingSignal();
         if (!handlerNoreturn) {
-            ::panda::SetHandlingSignal(true);
+            ::ark::SetHandlingSignal(true);
         }
         if (handler.scSigaction(signo, siginfo, ucontextRaw)) {
-            ::panda::SetHandlingSignal(oldHandleKey);
+            ::ark::SetHandlingSignal(oldHandleKey);
             return false;
         }
 
         g_realSigProcMask(SIG_SETMASK, &previousMask, nullptr);
-        ::panda::SetHandlingSignal(oldHandleKey);
+        ::ark::SetHandlingSignal(oldHandleKey);
     }
 
     return true;
@@ -493,4 +493,4 @@ void ClearSignalHooksHandlersArray()
     }
 }
 
-}  // namespace panda
+}  // namespace ark

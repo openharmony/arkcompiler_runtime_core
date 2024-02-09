@@ -29,7 +29,7 @@
 #include "utils/arena_containers.h"
 #include "utils/small_vector.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LifeIntervals;
 
 constexpr size_t CALLEE_THRESHOLD = 2;
@@ -408,6 +408,6 @@ private:
     SmallVector<Bias, DEFAULT_BIAS_SIZE> biases_;
     uint8_t useSpillWeight_ : 1;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_COLOR_GRAPH_H

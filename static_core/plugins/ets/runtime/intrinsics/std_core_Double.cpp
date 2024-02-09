@@ -25,7 +25,7 @@
 #include "unicode/unistr.h"
 #include "utils/utf.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 EtsString *StdCoreDoubleToString(double number, int radix)
 {
@@ -237,4 +237,4 @@ extern "C" EtsBoolean StdCoreDoubleIsSafeInteger(double v)
     return ToEtsBoolean(IsInteger(v) && (std::fabs(v) <= helpers::MaxSafeInteger<double>()));
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

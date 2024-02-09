@@ -28,7 +28,7 @@ static constexpr uint32_t U16_SURROGATE_OFFSET = (0xd800 << 10UL) + 0xdc00 - 0x1
 #define U16_GET_SUPPLEMENTARY(lead, trail) \
     ((static_cast<uint32_t>(lead) << 10UL) + static_cast<uint32_t>(trail) - U16_SURROGATE_OFFSET)
 
-namespace panda::utf {
+namespace ark::utf {
 
 /*
  * MUtf-8
@@ -635,4 +635,4 @@ void UInt64ToUtf16Array(uint64_t v, uint16_t *outUtf16Buf, uint32_t nDigits, boo
     }
 }
 
-}  // namespace panda::utf
+}  // namespace ark::utf

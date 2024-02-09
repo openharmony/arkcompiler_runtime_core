@@ -20,7 +20,7 @@
 
 #include "runtime/tooling/sampler/sample_info.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 // Reader of .aspt format
 class SampleReader final {
@@ -54,6 +54,6 @@ private:
     size_t moduleRowCounter_ {0};
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_H

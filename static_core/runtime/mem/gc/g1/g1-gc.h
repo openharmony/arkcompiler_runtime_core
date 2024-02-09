@@ -29,10 +29,10 @@
 #include "runtime/mem/gc/g1/g1_analytics.h"
 #include "runtime/mem/gc/g1/update_remset_worker.h"
 
-namespace panda {
+namespace ark {
 class ManagedThread;
-}  // namespace panda
-namespace panda::mem {
+}  // namespace ark
+namespace ark::mem {
 
 /// @brief Class for reference informantion collecting for rem-sets in G1 GC
 class RefInfo {
@@ -86,9 +86,9 @@ public:
     NO_MOVE_SEMANTIC(G1GC);
     NO_COPY_SEMANTIC(G1GC);
 
-    void InitGCBits(panda::ObjectHeader *objHeader) override;
+    void InitGCBits(ark::ObjectHeader *objHeader) override;
 
-    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *object) override;
+    void InitGCBitsForAllocationInTLAB(ark::ObjectHeader *object) override;
 
     bool IsPinningSupported() const final
     {
@@ -193,26 +193,26 @@ private:
 
     void InitializeImpl() override;
 
-    bool NeedFullGC(const panda::GCTask &task);
+    bool NeedFullGC(const ark::GCTask &task);
 
-    bool NeedToRunGC(const panda::GCTask &task);
+    bool NeedToRunGC(const ark::GCTask &task);
 
     void RunPhasesImpl(GCTask &task) override;
 
-    void RunFullGC(panda::GCTask &task);
-    void TryRunMixedGC(panda::GCTask &task);
+    void RunFullGC(ark::GCTask &task);
+    void TryRunMixedGC(ark::GCTask &task);
     void CollectAndMoveTenuredRegions(const CollectionSet &collectionSet);
     void CollectAndMoveYoungRegions(const CollectionSet &collectionSet);
 
-    void RunMixedGC(panda::GCTask &task, const CollectionSet &collectionSet);
+    void RunMixedGC(ark::GCTask &task, const CollectionSet &collectionSet);
 
     /// Determine whether GC need to run concurrent mark or mixed GC
-    bool ScheduleMixedGCAndConcurrentMark(panda::GCTask &task);
+    bool ScheduleMixedGCAndConcurrentMark(ark::GCTask &task);
 
     /// Start concurrent mark
-    void RunConcurrentMark(panda::GCTask &task);
+    void RunConcurrentMark(ark::GCTask &task);
 
-    void RunPhasesForRegions([[maybe_unused]] panda::GCTask &task, const CollectionSet &collectibleRegions);
+    void RunPhasesForRegions([[maybe_unused]] ark::GCTask &task, const CollectionSet &collectibleRegions);
 
     void PreStartupImp() override;
 
@@ -305,7 +305,7 @@ private:
     bool IsMarked(const ObjectHeader *object) const override;
 
     /// Start process of on pause marking
-    void FullMarking(panda::GCTask &task);
+    void FullMarking(ark::GCTask &task);
 
     /**
      * Marking all objects on pause
@@ -316,7 +316,7 @@ private:
     void OnPauseMark(GCTask &task, GCMarkingStackType *objectsStack, bool useGcWorkers);
 
     /// Start process of concurrent marking
-    void ConcurrentMarking(panda::GCTask &task);
+    void ConcurrentMarking(ark::GCTask &task);
 
     /// Iterate over roots and mark them concurrently
     NO_THREAD_SAFETY_ANALYSIS void ConcurentMarkImpl(GCMarkingStackType *objectsStack);
@@ -331,7 +331,7 @@ private:
     void ConcurrentMark(GCMarkingStackType *objectsStack);
 
     /// ReMarks objects after Concurrent marking and actualize information about live bytes
-    void Remark(panda::GCTask const &task);
+    void Remark(ark::GCTask const &task);
 
     /// Sweep VM refs for non-regular (humongous + nonmovable) objects
     void SweepNonRegularVmRefs();
@@ -339,7 +339,7 @@ private:
     void SweepRegularVmRefs();
 
     /// Return collectible regions
-    CollectionSet GetCollectibleRegions(panda::GCTask const &task, bool isMixed);
+    CollectionSet GetCollectibleRegions(ark::GCTask const &task, bool isMixed);
     void AddOldRegionsMaxAllowed(CollectionSet &collectionSet);
     void AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet);
     uint64_t AddMoreOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet,
@@ -492,6 +492,6 @@ public:
     using CodeAllocatorType = CodeAllocator;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_G1_G1_GC_H

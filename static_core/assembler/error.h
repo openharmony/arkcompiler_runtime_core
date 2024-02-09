@@ -18,7 +18,7 @@
 
 #include <string>
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Error {
@@ -131,6 +131,6 @@ struct Error {
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 using ErrorList = std::vector<Error>;
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ERROR_H

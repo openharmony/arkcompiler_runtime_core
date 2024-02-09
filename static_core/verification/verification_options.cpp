@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <string>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 void VerificationOptions::Initialize()
 {
@@ -41,4 +41,4 @@ void VerificationOptions::Destroy()
     debug.methodOptions = nullptr;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

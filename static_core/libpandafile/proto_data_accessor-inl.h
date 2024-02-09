@@ -21,7 +21,7 @@
 #include "file_items.h"
 #include "proto_data_accessor.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 constexpr size_t SHORTY_ELEM_SIZE = sizeof(uint16_t);
 constexpr size_t SHORTY_ELEM_WIDTH = 4;
@@ -152,6 +152,6 @@ inline Type ProtoDataAccessor::GetArgType(size_t idx) const
     return GetType(idx + 1);
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_PROTO_DATA_ACCESSOR_INL_H_

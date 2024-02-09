@@ -25,7 +25,7 @@
 #include "runtime/mem/gc/gc_root.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda {
+namespace ark {
 
 class ClassLinker;
 class ClassLinkerErrorHandler;
@@ -132,7 +132,7 @@ public:
     {
         for (auto &root : roots_) {
             if (root->IsForwarded()) {
-                root = ::panda::mem::GetForwardAddress(root);
+                root = ::ark::mem::GetForwardAddress(root);
             }
         }
     }
@@ -169,6 +169,6 @@ private:
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CLASS_LINKER_CONTEXT_H_

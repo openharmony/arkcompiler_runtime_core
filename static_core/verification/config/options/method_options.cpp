@@ -16,7 +16,7 @@
 #include "method_options.h"
 #include "verification/verifier_messages_data.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 MethodOption::MsgClass MethodOptions::MsgClassFor(VerifierMessage msgNum) const
 {
@@ -31,4 +31,4 @@ MethodOption::MsgClass MethodOptions::MsgClassFor(VerifierMessage msgNum) const
     return GetDefaultClassForMessage(msgNum);
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

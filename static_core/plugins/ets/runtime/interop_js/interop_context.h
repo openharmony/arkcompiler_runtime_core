@@ -31,7 +31,7 @@
 #include <node_api.h>
 #include <unordered_map>
 
-namespace panda {
+namespace ark {
 
 class Class;
 class ClassLinkerContext;
@@ -41,9 +41,9 @@ class GlobalObjectStorage;
 class Reference;
 }  // namespace mem
 
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 class JSValue;
 
@@ -497,6 +497,6 @@ inline mem::GlobalObjectStorage *RefstorFromInteropCtx(InteropCtx *ctx)
     return ctx->Refstor();
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_

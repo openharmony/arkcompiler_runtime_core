@@ -20,7 +20,7 @@
 #include "runtime/mem/region_space.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Represent a set of regions grouped by type.
 class CollectionSet {
@@ -142,6 +142,6 @@ private:
     size_t humongousBegin_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_G1_COLLECTION_SET_H

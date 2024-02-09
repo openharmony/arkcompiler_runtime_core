@@ -26,7 +26,7 @@
 #include <iostream>
 #include <string_view>
 
-namespace panda {
+namespace ark {
 
 Logger *Logger::logger_ = nullptr;
 thread_local int Logger::nesting_ = 0;
@@ -35,7 +35,7 @@ thread_local int Logger::nesting_ = 0;
 
 void Logger::Initialize(const base_options::Options &options)
 {
-    panda::Logger::ComponentMask componentMask;
+    ark::Logger::ComponentMask componentMask;
     auto loadComponents = [&componentMask](auto components) {
         for (const auto &s : components) {
             componentMask |= Logger::ComponentMaskFromString(s);
@@ -128,7 +128,7 @@ Logger::Message::~Message()
 
     Logger::Log(level_, component_, stream_.str());
 #ifndef NDEBUG
-    panda::Logger::LogNestingDec();
+    ark::Logger::LogNestingDec();
 #endif
 
     if (level_ == Level::FATAL) {
@@ -328,4 +328,4 @@ void FastFileLogger::SyncOutputResource()
     stream_ << std::flush;
 }
 
-}  // namespace panda
+}  // namespace ark

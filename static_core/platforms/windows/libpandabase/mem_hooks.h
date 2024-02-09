@@ -20,7 +20,7 @@
 #include <iostream>
 #include "libpandabase/macros.h"
 
-namespace panda::os::windows::mem_hooks {
+namespace ark::os::windows::mem_hooks {
 
 class PandaHooks {
 public:
@@ -41,10 +41,10 @@ private:
     static _CrtMemState begin, end, out;
 };
 
-}  // namespace panda::os::windows::mem_hooks
+}  // namespace ark::os::windows::mem_hooks
 
-namespace panda::os::mem_hooks {
-using PandaHooks = panda::os::windows::mem_hooks::PandaHooks;
-}  // namespace panda::os::mem_hooks
+namespace ark::os::mem_hooks {
+using PandaHooks = ark::os::windows::mem_hooks::PandaHooks;
+}  // namespace ark::os::mem_hooks
 
 #endif  // PANDA_LIBPANDABASE_OS_WINDOWS_MEM_HOOKS_H_

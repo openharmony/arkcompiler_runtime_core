@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 
-namespace panda::taskmanager::internal {
+namespace ark::taskmanager::internal {
 
 class TaskTest : public testing::Test {
 public:
@@ -278,4 +278,4 @@ TEST_F(TaskTest, PopTaskWithExecutionMode)
     TaskQueue<>::Destroy(queue);
 }
 
-}  // namespace panda::taskmanager::internal
+}  // namespace ark::taskmanager::internal

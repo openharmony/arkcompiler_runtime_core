@@ -18,9 +18,9 @@
 
 /// @see https://llvm.org/docs/BranchWeightMetadata.html
 // NOLINTNEXTLINE(readability-identifier-naming)
-namespace panda::llvmbackend::Metadata::BranchWeights {
+namespace ark::llvmbackend::Metadata::BranchWeights {
 auto constexpr LIKELY_BRANCH_WEIGHT = 2000;
 auto constexpr UNLIKELY_BRANCH_WEIGHT = 1;
-}  // namespace panda::llvmbackend::Metadata::BranchWeights
+}  // namespace ark::llvmbackend::Metadata::BranchWeights
 
 #endif  //  LIBLLVMBACKEND_LOWERING_METADATA_H

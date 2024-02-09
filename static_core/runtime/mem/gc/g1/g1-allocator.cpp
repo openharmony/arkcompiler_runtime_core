@@ -21,7 +21,7 @@
 #include "runtime/mem/rem_set-inl.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <MTModeT MT_MODE>
 ObjectAllocatorG1<MT_MODE>::ObjectAllocatorG1(MemStatsType *memStats, [[maybe_unused]] bool createPygoteSpaceAllocator)
@@ -88,7 +88,7 @@ std::vector<MarkBitmap *> &ObjectAllocatorG1<MT_MODE>::GetYoungSpaceBitmaps()
 }
 
 template <MTModeT MT_MODE>
-TLAB *ObjectAllocatorG1<MT_MODE>::CreateNewTLAB([[maybe_unused]] panda::ManagedThread *thread)
+TLAB *ObjectAllocatorG1<MT_MODE>::CreateNewTLAB([[maybe_unused]] ark::ManagedThread *thread)
 {
     TLAB *newTlab = nullptr;
     if constexpr (MT_MODE == MT_MODE_SINGLE) {
@@ -187,7 +187,7 @@ bool ObjectAllocatorG1<MT_MODE>::IsLive(const ObjectHeader *obj)
 }
 
 template <MTModeT MT_MODE>
-void *ObjectAllocatorG1<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
+void *ObjectAllocatorG1<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                                            ObjMemInitPolicy objInit)
 {
     void *mem = nullptr;
@@ -207,7 +207,7 @@ void *ObjectAllocatorG1<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe
 
 template <MTModeT MT_MODE>
 void *ObjectAllocatorG1<MT_MODE>::AllocateNonMovable(size_t size, Alignment align,
-                                                     [[maybe_unused]] panda::ManagedThread *thread,
+                                                     [[maybe_unused]] ark::ManagedThread *thread,
                                                      ObjMemInitPolicy objInit)
 {
     void *mem = nullptr;
@@ -465,4 +465,4 @@ template class ObjectAllocatorG1<MT_MODE_SINGLE>;
 template class ObjectAllocatorG1<MT_MODE_MULTI>;
 template class ObjectAllocatorG1<MT_MODE_TASK>;
 
-}  // namespace panda::mem
+}  // namespace ark::mem

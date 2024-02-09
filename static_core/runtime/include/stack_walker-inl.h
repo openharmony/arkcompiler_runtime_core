@@ -20,7 +20,7 @@
 #include "runtime/include/cframe_iterators.h"
 #include "compiler/code_info/code_info.h"
 
-namespace panda {
+namespace ark {
 
 template <bool OBJECTS, bool WITH_REG_INFO, class VRegRef, typename Func>
 // NOLINTNEXTLINE(google-runtime-references)
@@ -179,6 +179,6 @@ bool StackWalker::IterateRegs(Func func)
     return IterateRegsForIFrame<OBJECTS, WITH_REG_INFO>(func);
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_STACK_WALKER_INL_H

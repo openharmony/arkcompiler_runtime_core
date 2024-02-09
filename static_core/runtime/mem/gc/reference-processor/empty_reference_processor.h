@@ -17,9 +17,9 @@
 
 #include "reference_processor.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
-class EmptyReferenceProcessor : public panda::mem::ReferenceProcessor {
+class EmptyReferenceProcessor : public ark::mem::ReferenceProcessor {
 public:
     EmptyReferenceProcessor() = default;
     ~EmptyReferenceProcessor() override = default;
@@ -42,14 +42,14 @@ public:
     {
     }
 
-    panda::mem::Reference *CollectClearedReferences() override
+    ark::mem::Reference *CollectClearedReferences() override
     {
         return nullptr;
     }
 
     void ScheduleForEnqueue([[maybe_unused]] Reference *clearedReferences) override {}
 
-    void Enqueue([[maybe_unused]] panda::mem::Reference *clearedReferences) override {}
+    void Enqueue([[maybe_unused]] ark::mem::Reference *clearedReferences) override {}
 
     size_t GetReferenceQueueSize() const override
     {
@@ -61,5 +61,5 @@ private:
     NO_MOVE_SEMANTIC(EmptyReferenceProcessor);
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_MEM_GC_REFERENCE_PROCESSOR_EMPTY_REFERENCE_PROCESSOR_H

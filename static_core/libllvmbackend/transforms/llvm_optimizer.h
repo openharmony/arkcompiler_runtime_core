@@ -25,28 +25,28 @@ class Module;
 class TargetMachine;
 }  // namespace llvm
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 class LLVMArkInterface;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 class LLVMOptimizer {
 public:
     void OptimizeModule(llvm::Module *module) const;
     void ProcessInlineModule(llvm::Module *inlineModule) const;
 
-    explicit LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *arkInterface,
+    explicit LLVMOptimizer(ark::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *arkInterface,
                            std::shared_ptr<llvm::TargetMachine> targetMachine);
 
 private:
     void DoOptimizeModule(llvm::Module *module) const;
 
 private:
-    panda::llvmbackend::LLVMCompilerOptions options_;
-    panda::llvmbackend::LLVMArkInterface *arkInterface_;
+    ark::llvmbackend::LLVMCompilerOptions options_;
+    ark::llvmbackend::LLVMArkInterface *arkInterface_;
     std::shared_ptr<llvm::TargetMachine> targetMachine_;
 };
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_LLVM_OPTIMIZER_H

@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class LambdaUtils {
 public:
@@ -33,6 +33,6 @@ private:
     LambdaUtils() = default;
     ~LambdaUtils() = default;
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_LAMBDA_UTILS_H_

@@ -21,7 +21,7 @@
 #include "libpandabase/mem/mem_range.h"
 #include "libpandabase/os/mutex.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class CrossingMap;
 /// Singleton for CrossingMap class.
@@ -60,5 +60,5 @@ private:
     static os::memory::Mutex mutex_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_MEM_GC_CROSSING_MAP_SINGLETON_H

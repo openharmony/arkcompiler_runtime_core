@@ -40,16 +40,16 @@
 #include "source_lang_enum.h"
 
 namespace {
-using Config = panda::static_linker::Config;
-using Result = panda::static_linker::Result;
-using panda::static_linker::DefaultConfig;
-using panda::static_linker::Link;
+using Config = ark::static_linker::Config;
+using Result = ark::static_linker::Result;
+using ark::static_linker::DefaultConfig;
+using ark::static_linker::Link;
 
 constexpr size_t TEST_REPEAT_COUNT = 10;
 
 std::pair<int, std::string> ExecPanda(const std::string &file)
 {
-    auto opts = panda::RuntimeOptions {};
+    auto opts = ark::RuntimeOptions {};
     auto boot = opts.GetBootPandaFiles();
     for (auto &a : boot) {
         a.insert(0, "../");
@@ -59,11 +59,11 @@ std::pair<int, std::string> ExecPanda(const std::string &file)
     opts.SetLoadRuntimes({"core"});
 
     opts.SetPandaFiles({file});
-    if (!panda::Runtime::Create(opts)) {
+    if (!ark::Runtime::Create(opts)) {
         return {1, "can't create runtime"};
     }
 
-    auto *runtime = panda::Runtime::GetCurrent();
+    auto *runtime = ark::Runtime::GetCurrent();
 
     std::stringstream strBuf;
     auto old = std::cout.rdbuf(strBuf.rdbuf());
@@ -78,7 +78,7 @@ std::pair<int, std::string> ExecPanda(const std::string &file)
         ret = {0, strBuf.str()};
     }
 
-    if (!panda::Runtime::Destroy()) {
+    if (!ark::Runtime::Destroy()) {
         return {1, "can't destroy runtime"};
     }
 
@@ -131,9 +131,9 @@ std::optional<std::string> Build(const std::string &path)
     if (!ReadFile<false>(path + ".pa", prog)) {
         return "can't read file " + path + ".pa";
     }
-    panda::pandasm::Parser p;
+    ark::pandasm::Parser p;
     auto res = p.Parse(prog, path + ".pa");
-    if (p.ShowError().err != panda::pandasm::Error::ErrorType::ERR_NONE) {
+    if (p.ShowError().err != ark::pandasm::Error::ErrorType::ERR_NONE) {
         return p.ShowError().message + "\n" + p.ShowError().wholeLine;
     }
 
@@ -141,15 +141,15 @@ std::optional<std::string> Build(const std::string &path)
         return "no parsed value";
     }
 
-    auto writer = panda::panda_file::FileWriter(path + ".abc");
-    if (!panda::pandasm::AsmEmitter::Emit(&writer, res.Value())) {
+    auto writer = ark::panda_file::FileWriter(path + ".abc");
+    if (!ark::pandasm::AsmEmitter::Emit(&writer, res.Value())) {
         return "can't emit";
     }
 
     return std::nullopt;
 }
 
-void TestSingle(const std::string &path, bool isGood = true, const Config &conf = panda::static_linker::DefaultConfig(),
+void TestSingle(const std::string &path, bool isGood = true, const Config &conf = ark::static_linker::DefaultConfig(),
                 bool *succeded = nullptr, Result *saveResult = nullptr)
 {
     const auto pathPrefix = "data/single/";
@@ -180,7 +180,7 @@ void TestSingle(const std::string &path, bool isGood = true, const Config &conf 
 }
 
 void TestMultiple(const std::string &path, std::vector<std::string> perms, bool isGood = true,
-                  const Config &conf = panda::static_linker::DefaultConfig(), Result *expected = nullptr)
+                  const Config &conf = ark::static_linker::DefaultConfig(), Result *expected = nullptr)
 {
     std::sort(perms.begin(), perms.end());
 
@@ -330,7 +330,7 @@ TEST(linkertests, UnresolvedInGlobal)
 {
     TestSingle("unresolved_global", false);
     auto conf = DefaultConfig();
-    conf.remainsPartial = {std::string(panda::panda_file::ItemContainer::GetGlobalClassName())};
+    conf.remainsPartial = {std::string(ark::panda_file::ItemContainer::GetGlobalClassName())};
     TestSingle("unresolved_global", true, conf);
 }
 
@@ -364,49 +364,49 @@ TEST(linkertests, FieldOverload)
 TEST(linkertests, ForeignBase)
 {
 #ifdef PANDA_WITH_ETS
-    constexpr auto LANG = panda::panda_file::SourceLang::ETS;
-    auto makeRecord = [](panda::pandasm::Program &prog, const std::string &name) {
-        return &prog.recordTable.emplace(name, panda::pandasm::Record(name, LANG)).first->second;
+    constexpr auto LANG = ark::panda_file::SourceLang::ETS;
+    auto makeRecord = [](ark::pandasm::Program &prog, const std::string &name) {
+        return &prog.recordTable.emplace(name, ark::pandasm::Record(name, LANG)).first->second;
     };
 
     const std::string basePath = "data/multi/ForeignBase.1.abc";
     const std::string dervPath = "data/multi/ForeignBase.2.abc";
 
     {
-        panda::pandasm::Program progBase;
+        ark::pandasm::Program progBase;
         auto base = makeRecord(progBase, "Base");
-        auto fld = panda::pandasm::Field(LANG);
+        auto fld = ark::pandasm::Field(LANG);
         fld.name = "fld";
-        fld.type = panda::pandasm::Type("i32", 0);
+        fld.type = ark::pandasm::Type("i32", 0);
         base->fieldList.push_back(std::move(fld));
 
-        ASSERT_TRUE(panda::pandasm::AsmEmitter::Emit(basePath, progBase));
+        ASSERT_TRUE(ark::pandasm::AsmEmitter::Emit(basePath, progBase));
     }
 
     {
-        panda::pandasm::Program progDer;
+        ark::pandasm::Program progDer;
         auto base = makeRecord(progDer, "Base");
         base->metadata->SetAttribute("external");
 
         auto derv = makeRecord(progDer, "Derv");
         ASSERT_EQ(derv->metadata->SetAttributeValue("ets.extends", "Base"), std::nullopt);
         std::ignore = derv;
-        auto fld = panda::pandasm::Field(LANG);
+        auto fld = ark::pandasm::Field(LANG);
         fld.name = "fld";
-        fld.type = panda::pandasm::Type("i32", 0);
+        fld.type = ark::pandasm::Type("i32", 0);
         fld.metadata->SetAttribute("external");
         derv->fieldList.push_back(std::move(fld));
 
-        auto func = panda::pandasm::Function("main", LANG);
+        auto func = ark::pandasm::Function("main", LANG);
         func.regsNum = 1;
-        func.returnType = panda::pandasm::Type("void", 0);
-        func.AddInstruction(panda::pandasm::Create_NEWOBJ(0, "Derv"));
-        func.AddInstruction(panda::pandasm::Create_LDOBJ(0, "Derv.fld"));
-        func.AddInstruction(panda::pandasm::Create_RETURN_VOID());
+        func.returnType = ark::pandasm::Type("void", 0);
+        func.AddInstruction(ark::pandasm::Create_NEWOBJ(0, "Derv"));
+        func.AddInstruction(ark::pandasm::Create_LDOBJ(0, "Derv.fld"));
+        func.AddInstruction(ark::pandasm::Create_RETURN_VOID());
 
         progDer.functionTable.emplace(func.name, std::move(func));
 
-        ASSERT_TRUE(panda::pandasm::AsmEmitter::Emit(dervPath, progDer));
+        ASSERT_TRUE(ark::pandasm::AsmEmitter::Emit(dervPath, progDer));
     }
 
     auto res = Link(DefaultConfig(), "data/multi/ForeignBase.linked.abc", {basePath, dervPath});

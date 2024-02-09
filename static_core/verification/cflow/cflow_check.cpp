@@ -25,7 +25,7 @@
 #include <iomanip>
 #include <optional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 static VerificationStatus CheckCode(Method const *method, CflowMethodInfo const *cflowInfo)
 {
@@ -101,4 +101,4 @@ PandaUniquePtr<CflowMethodInfo> CheckCflow(Method const *method)
     return cflowInfo;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

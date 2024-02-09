@@ -36,7 +36,7 @@ entrypoints:
   properties: [no_return]
   signature:
   - void
-  - panda::Method*
+  - ark::Method*
 
 - name: AnnotateSanitizers
   entrypoint: AnnotateSanitizersEntrypoint
@@ -62,8 +62,8 @@ entrypoints:
   properties: []
   signature:
   - void
-  - const panda::ObjectHeader*
-  - panda::Class *
+  - const ark::ObjectHeader*
+  - ark::Class *
 
 - name: CheckCastInterface
   entrypoint: CheckCastInterfaceEntrypoint
@@ -71,8 +71,8 @@ entrypoints:
   properties: [irtoc]
   signature:
   - void
-  - const panda::ObjectHeader*
-  - panda::Class *
+  - const ark::ObjectHeader*
+  - ark::Class *
 
 - name: CheckStoreArrayReference
   entrypoint: CheckStoreArrayReferenceEntrypoint
@@ -80,8 +80,8 @@ entrypoints:
   properties: []
   signature:
   - void
-  - panda::coretypes::Array*
-  - panda::ObjectHeader*
+  - ark::coretypes::Array*
+  - ark::ObjectHeader*
 
 - name: ArithmeticException
   entrypoint: ArithmeticExceptionEntrypoint
@@ -114,8 +114,8 @@ entrypoints:
   properties: [no_return]
   signature:
   - void
-  - panda::Class*
-  - panda::ObjectHeader*
+  - ark::Class*
+  - ark::ObjectHeader*
 
 - name: NegativeArraySizeException
   entrypoint: NegativeArraySizeExceptionEntrypoint
@@ -145,38 +145,38 @@ entrypoints:
   properties: [no_return]
   signature:
   - void
-  - panda::ObjectHeader*
+  - ark::ObjectHeader*
 
 - name: CreateEmptyString
   entrypoint: CreateEmptyStringEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::coretypes::String*
+  - ark::coretypes::String*
 
 - name: CreateStringFromChars
   entrypoint: CreateStringFromCharsEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::coretypes::String*
-  - panda::ObjectHeader*
+  - ark::coretypes::String*
+  - ark::ObjectHeader*
 
 - name: CreateStringFromString
   entrypoint: CreateStringFromStringEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::coretypes::String*
-  - panda::ObjectHeader*
+  - ark::coretypes::String*
+  - ark::ObjectHeader*
 
 - name: CreateMultiArray
   entrypoint: CreateMultiArrayEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::coretypes::Array*
-  - panda::Class*
+  - ark::coretypes::Array*
+  - ark::Class*
   - uint32_t
   - size_t*
 
@@ -185,8 +185,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-  - panda::coretypes::Array*
-  - const panda::Method*
+  - ark::coretypes::Array*
+  - const ark::Method*
   - uint32_t
 
 - name: CreateObjectByClass
@@ -194,24 +194,24 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-  - panda::ObjectHeader*
-  - panda::Class*
+  - ark::ObjectHeader*
+  - ark::Class*
 
 - name: CloneObject
   entrypoint: CloneObjectEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::ObjectHeader*
-  - panda::ObjectHeader*
+  - ark::ObjectHeader*
+  - ark::ObjectHeader*
 
 - name: PostBarrierWrite
   entrypoint: PostBarrierWriteEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::ObjectHeader*
-  - panda::ObjectHeader*
+  - ark::ObjectHeader*
+  - ark::ObjectHeader*
   - size_t
 
 - name: Safepoint
@@ -226,8 +226,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-  - panda::Method*
-  - const panda::Method*
+  - ark::Method*
+  - const ark::Method*
   - size_t
 
 - name: GetCalleeMethodDirect
@@ -235,8 +235,8 @@ entrypoints:
   bridge: none
   properties: []
   signature:
-  - panda::Method*
-  - const panda::Method*
+  - ark::Method*
+  - const ark::Method*
   - size_t
 
 - name: GetUnknownCalleeMethod
@@ -244,8 +244,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-  - panda::Method*
-  - const panda::Method*
+  - ark::Method*
+  - const ark::Method*
   - size_t
   - size_t*
 
@@ -255,7 +255,7 @@ entrypoints:
   properties: []
   signature:
   - size_t
-  - panda::Method*
+  - ark::Method*
   - uint32_t
 
 - name: GetStaticFieldAddress
@@ -264,7 +264,7 @@ entrypoints:
   properties: []
   signature:
   - uintptr_t
-  - panda::Method*
+  - ark::Method*
   - uint32_t
 
 - name: UnresolvedStoreStaticBarriered
@@ -273,9 +273,9 @@ entrypoints:
   properties: []
   signature:
   - void
-  - panda::Method*
+  - ark::Method*
   - uint32_t
-  - panda::ObjectHeader*
+  - ark::ObjectHeader*
 
 - name: GetUnknownStaticFieldMemoryAddress
   entrypoint: GetUnknownStaticFieldMemoryAddressEntrypoint
@@ -283,7 +283,7 @@ entrypoints:
   properties: []
   signature:
   - uintptr_t
-  - panda::Method*
+  - ark::Method*
   - uint32_t
   - size_t*
 
@@ -293,25 +293,25 @@ entrypoints:
   properties: []
   signature:
   - void
-  - panda::Class*
+  - ark::Class*
 
 - name: InitializeClassById
   entrypoint: InitializeClassByIdEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::Class*
-  - const panda::Method*
-  - panda::FileEntityId
+  - ark::Class*
+  - const ark::Method*
+  - ark::FileEntityId
 
 - name: InitializeClassByIdDirect
   entrypoint: InitializeClassByIdEntrypoint
   bridge: none
   properties: []
   signature:
-  - panda::Class*
-  - const panda::Method*
-  - panda::FileEntityId
+  - ark::Class*
+  - const ark::Method*
+  - ark::FileEntityId
 
 - name: IsInstance
   entrypoint: IsInstanceEntrypoint
@@ -319,8 +319,8 @@ entrypoints:
   properties: []
   signature:
   - uint8_t
-  - panda::ObjectHeader*
-  - panda::Class*
+  - ark::ObjectHeader*
+  - ark::Class*
 
 - name: PostWrbUpdateCardFuncNoBridge
   entrypoint: PostWrbUpdateCardFuncEntrypoint
@@ -337,8 +337,8 @@ entrypoints:
   properties: []
   signature:
   - void*
-  - const panda::Method*
-  - panda::FileEntityId
+  - const ark::Method*
+  - ark::FileEntityId
 
 - name: ResolveClassDirect
   entrypoint: ResolveClassEntrypoint
@@ -346,36 +346,36 @@ entrypoints:
   properties: []
   signature:
   - void*
-  - const panda::Method*
-  - panda::FileEntityId
+  - const ark::Method*
+  - ark::FileEntityId
 
 - name: ResolveClassObject
   entrypoint: ResolveClassObjectEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::ObjectHeader*
-  - const panda::Method*
-  - panda::FileEntityId
+  - ark::ObjectHeader*
+  - const ark::Method*
+  - ark::FileEntityId
 
 - name: ResolveString
   entrypoint: ResolveStringEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::coretypes::String*
-  - const panda::Method*
-  - panda::FileEntityId
+  - ark::coretypes::String*
+  - const ark::Method*
+  - ark::FileEntityId
 
 - name: ResolveStringAot
   entrypoint: ResolveStringAotEntrypoint
   bridge: entrypoint
   properties: []
   signature:
-  - panda::coretypes::String*
-  - const panda::Method*
-  - panda::FileEntityId
-  - panda::ObjectHeader**
+  - ark::coretypes::String*
+  - const ark::Method*
+  - ark::FileEntityId
+  - ark::ObjectHeader**
 
 - name: ResolveUnknownVirtualCall
   entrypoint: ResolveUnknownVirtualCallEntrypoint
@@ -383,8 +383,8 @@ entrypoints:
   properties: []
   signature:
   - uintptr_t
-  - const panda::Method*
-  - panda::ObjectHeader*
+  - const ark::Method*
+  - ark::ObjectHeader*
   - size_t
   - size_t*
 
@@ -394,8 +394,8 @@ entrypoints:
   properties: []
   signature:
   - uintptr_t
-  - const panda::Method*
-  - panda::ObjectHeader*
+  - const ark::Method*
+  - ark::ObjectHeader*
   - size_t
   - uintptr_t
 
@@ -405,8 +405,8 @@ entrypoints:
   properties: []
   signature:
   - uintptr_t
-  - const panda::Method*
-  - panda::ObjectHeader*
+  - const ark::Method*
+  - ark::ObjectHeader*
 
 - name: Trace
   entrypoint: TraceEntrypoint
@@ -441,7 +441,7 @@ entrypoints:
   properties: []
   signature:
   - void
-  - panda::ObjectHeader*
+  - ark::ObjectHeader*
 
 - name: UnlockObject
   entrypoint: UnlockObjectEntrypoint
@@ -449,7 +449,7 @@ entrypoints:
   properties: []
   signature:
   - void
-  - panda::ObjectHeader*
+  - ark::ObjectHeader*
 
 - name: IncompatibleClassChangeErrorForMethodConflict
   entrypoint: IncompatibleClassChangeErrorForMethodConflictEntrypoint
@@ -457,15 +457,15 @@ entrypoints:
   properties: [no_return]
   signature:
   - void
-  - panda::Method*
+  - ark::Method*
 
 - name: AllocateObjectTlab
   entrypoint: AllocateObjectTlab
   bridge: none
   properties: [irtoc]
   signature:
-  - panda::ObjectHeader*
-  - panda::Class*
+  - ark::ObjectHeader*
+  - ark::Class*
   - size_t
 
 - name: CreateObjectByClassSlowPath
@@ -473,16 +473,16 @@ entrypoints:
   bridge: slow_path
   properties: []
   signature:
-  - panda::ObjectHeader*
-  - panda::Class*
+  - ark::ObjectHeader*
+  - ark::Class*
 
 - name: AllocateArrayTlab8
   entrypoint: AllocateArrayTlab8
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::Array*
-    - panda::Class*
+    - ark::coretypes::Array*
+    - ark::Class*
     - size_t
 
 - name: AllocateArrayTlab16
@@ -490,8 +490,8 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::Array*
-    - panda::Class*
+    - ark::coretypes::Array*
+    - ark::Class*
     - size_t
 
 - name: AllocateArrayTlab32
@@ -499,8 +499,8 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::Array*
-    - panda::Class*
+    - ark::coretypes::Array*
+    - ark::Class*
     - size_t
 
 - name: AllocateArrayTlab64
@@ -508,8 +508,8 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::Array*
-    - panda::Class*
+    - ark::coretypes::Array*
+    - ark::Class*
     - size_t
 
 - name: CreateArray
@@ -517,8 +517,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-    - panda::coretypes::Array*
-    - panda::Class*
+    - ark::coretypes::Array*
+    - ark::Class*
     - size_t
 
 - name: CreateArraySlowPath
@@ -526,8 +526,8 @@ entrypoints:
   bridge: slow_path
   properties: []
   signature:
-    - panda::coretypes::Array*
-    - panda::Class*
+    - ark::coretypes::Array*
+    - ark::Class*
     - size_t
 
 - name: ClassResolver
@@ -558,9 +558,9 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::Method*
-    - const panda::Method*
-    - panda::ObjectHeader*
+    - ark::Method*
+    - const ark::Method*
+    - ark::ObjectHeader*
     - size_t
     - void*
 
@@ -570,7 +570,7 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: MonitorExitFastPath
   entrypoint: MonitorExitFastPath
@@ -578,7 +578,7 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: EmptyPostWriteBarrier
   entrypoint: EmptyPostWriteBarrier
@@ -593,7 +593,7 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: PostInterGenerationalBarrier1
   entrypoint: PostInterGenerationalBarrier1
@@ -601,9 +601,9 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
     - size_t
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: PostInterGenerationalBarrier2
   entrypoint: PostInterGenerationalBarrier2
@@ -611,10 +611,10 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
     - size_t
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: PostInterRegionBarrierMarkSingleFast
   entrypoint: PostInterRegionBarrierMarkSingleFast
@@ -622,9 +622,9 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
     - size_t
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: PostInterRegionBarrierMarkPairFast
   entrypoint: PostInterRegionBarrierMarkPairFast
@@ -632,10 +632,10 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
     - size_t
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: PostInterRegionBarrierSlow
   entrypoint: PostInterRegionBarrierSlow
@@ -643,7 +643,7 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: PostInterRegionBarrierTwoCardsSlow
   entrypoint: PostInterRegionBarrierTwoCardsSlow
@@ -651,7 +651,7 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: MonitorEnterOddSaved
   entrypoint: LockObjectSlowPathEntrypoint
@@ -659,7 +659,7 @@ entrypoints:
   properties: []
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: MonitorExitOddSaved
   entrypoint: UnlockObjectSlowPathEntrypoint
@@ -667,7 +667,7 @@ entrypoints:
   properties: []
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: MonitorEnterSlowPath
   entrypoint: LockObjectSlowPathEntrypoint
@@ -675,7 +675,7 @@ entrypoints:
   properties: []
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: MonitorExitSlowPath
   entrypoint: UnlockObjectSlowPathEntrypoint
@@ -683,7 +683,7 @@ entrypoints:
   properties: []
   signature:
     - void
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
 
 - name: JsCastDoubleToInt32NoBridge
   entrypoint: JsCastDoubleToInt32
@@ -707,7 +707,7 @@ entrypoints:
   properties: []
   signature:
     - void
-    - panda::Method*
+    - ark::Method*
     - uint32_t
     - uint32_t
 
@@ -717,8 +717,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint8_t
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
 - name: StringEqualsCompressed
   entrypoint: StringEqualsCompressed
@@ -726,8 +726,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint8_t
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
 - name: StringEqualsUnroll
   entrypoint: StringEqualsUnroll
@@ -735,8 +735,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint8_t
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
 - name: StringEqualsUnrollCompressed
   entrypoint: StringEqualsUnrollCompressed
@@ -744,16 +744,16 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint8_t
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
 - name: StringBuilderBool
   entrypoint: StringBuilderBool
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
     - uint8_t
 
 - name: StringBuilderChar
@@ -761,8 +761,8 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
     - uint16_t
 
 - name: StringBuilderString
@@ -770,26 +770,26 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
 - name: StringBuilderStringCompressed
   entrypoint: StringBuilderStringCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*
-    - panda::coretypes::String*
-    - panda::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
 - name: StringBuilderStringSlowPath
   entrypoint: CoreStringBuilderString
   bridge: slow_path
   properties: []
   signature:
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - void*
 
 - name: StringBuilderStringUsualBridge
@@ -797,8 +797,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - void*
 
 - name: StringBuilderCharSlowPath
@@ -806,8 +806,8 @@ entrypoints:
   bridge: slow_path
   properties: []
   signature:
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - uint16_t
 
 - name: StringBuilderCharUsualBridge
@@ -815,8 +815,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - uint16_t
 
 - name: StringBuilderBoolSlowPath
@@ -824,8 +824,8 @@ entrypoints:
   bridge: slow_path
   properties: []
   signature:
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - uint8_t
 
 - name: StringBuilderBoolUsualBridge
@@ -833,8 +833,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - uint8_t
 
 - name: CoreStringBuilderInt
@@ -842,8 +842,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - int32_t
 
 - name: CoreStringBuilderLong
@@ -851,8 +851,8 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - int64_t
 
 - name: StringHashCode
@@ -861,7 +861,7 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint32_t                   # resulting hashcode
-    - panda::coretypes::String*  # src string
+    - ark::coretypes::String*  # src string
 
 - name: StringHashCodeCompressed
   entrypoint: StringHashCodeCompressed
@@ -869,49 +869,49 @@ entrypoints:
   properties: [irtoc]
   signature:
     - uint32_t                   # resulting hashcode
-    - panda::coretypes::String*  # src string
+    - ark::coretypes::String*  # src string
 
 - name: CreateStringFromStringTlab
   entrypoint: CreateStringFromStringTlab
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::coretypes::String*  # src string
+    - ark::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # src string
 
 - name: CreateStringFromStringTlabCompressed
   entrypoint: CreateStringFromStringTlabCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::coretypes::String*  # src string
+    - ark::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # src string
 
 - name: CreateStringFromStringSlowPath
   entrypoint: CreateStringFromStringEntrypoint
   bridge: slow_path
   properties: []
   signature:
-    - panda::ObjectHeader*  # resulting string
-    - panda::ObjectHeader*  # src string
+    - ark::ObjectHeader*  # resulting string
+    - ark::ObjectHeader*  # src string
 
 - name: CreateStringFromStringOddSaved
   entrypoint: CreateStringFromStringEntrypoint
   bridge: odd_saved
   properties: []
   signature:
-    - panda::ObjectHeader*  # resulting string
-    - panda::ObjectHeader*  # src string
+    - ark::ObjectHeader*  # resulting string
+    - ark::ObjectHeader*  # src string
 
 - name: CreateStringFromCharArrayTlab
   entrypoint: CreateStringFromCharArrayTlab
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # resulting string
     - uint32_t                   # offset
     - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
+    - ark::ObjectHeader*       # u16 array
     - void*                      # string class pointer
 
 - name: CreateStringFromCharArrayTlabCompressed
@@ -919,10 +919,10 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # resulting string
     - uint32_t                   # offset
     - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
+    - ark::ObjectHeader*       # u16 array
     - void*                      # string class pointer
 
 - name: CreateStringFromCharArraySlowPath
@@ -930,31 +930,31 @@ entrypoints:
   bridge: slow_path
   properties: []
   signature:
-    - panda::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # resulting string
     - uint32_t                   # offset
     - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
-    - panda::ObjectHeader*       # string class pointer
+    - ark::ObjectHeader*       # u16 array
+    - ark::ObjectHeader*       # string class pointer
 
 - name: CreateStringFromCharArrayOddSaved
   entrypoint: CreateStringFromCharsWithOffsetEntrypoint
   bridge: odd_saved
   properties: []
   signature:
-    - panda::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # resulting string
     - uint32_t                   # offset
     - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
-    - panda::ObjectHeader*       # string class pointer
+    - ark::ObjectHeader*       # u16 array
+    - ark::ObjectHeader*       # string class pointer
 
 - name: CreateStringFromZeroBasedCharArrayTlab
   entrypoint: CreateStringFromZeroBasedCharArrayTlab
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # resulting string
     - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
+    - ark::ObjectHeader*       # u16 array
     - void*                      # string class pointer
 
 - name: CreateStringFromZeroBasedCharArrayTlabCompressed
@@ -962,9 +962,9 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*   # resulting string
+    - ark::coretypes::String*   # resulting string
     - uint32_t                    # length
-    - panda::ObjectHeader*        # u16 array
+    - ark::ObjectHeader*        # u16 array
     - void*                       # string class pointer
 
 - name: CreateStringFromZeroBasedCharArraySlowPath
@@ -972,28 +972,28 @@ entrypoints:
   bridge: slow_path
   properties: []
   signature:
-    - panda::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # resulting string
     - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
-    - panda::ObjectHeader*       # string class pointer
+    - ark::ObjectHeader*       # u16 array
+    - ark::ObjectHeader*       # string class pointer
 
 - name: CreateStringFromZeroBasedCharArrayOddSaved
   entrypoint: CreateStringFromCharsZeroOffsetEntrypoint
   bridge: odd_saved
   properties: []
   signature:
-    - panda::coretypes::String*  # resulting string
+    - ark::coretypes::String*  # resulting string
     - uint32_t                   # length
-    - panda::ObjectHeader*       # u16 array
-    - panda::ObjectHeader*       # string class pointer
+    - ark::ObjectHeader*       # u16 array
+    - ark::ObjectHeader*       # string class pointer
 
 - name: SubStringFromStringTlab
   entrypoint: SubStringFromStringTlab
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::ObjectHeader*       # src string
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
     - int32_t                    # begin index
     - int32_t                    # end index
 
@@ -1002,8 +1002,8 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::ObjectHeader*       # src string
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
     - int32_t                    # begin index
     - int32_t                    # end index
 
@@ -1012,8 +1012,8 @@ entrypoints:
   bridge: slow_path
   properties: []
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::ObjectHeader*       # src string
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
     - int32_t                    # begin index
     - int32_t                    # end index
 
@@ -1022,8 +1022,8 @@ entrypoints:
   bridge: odd_saved
   properties: []
   signature:
-    - panda::coretypes::String*  # resulting string
-    - panda::ObjectHeader*       # src string
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # src string
     - int32_t                    # begin index
     - int32_t                    # end index
 
@@ -1032,8 +1032,8 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::Array*   # resulting array of utf16 chars
-    - panda::ObjectHeader*       # src string
+    - ark::coretypes::Array*   # resulting array of utf16 chars
+    - ark::ObjectHeader*       # src string
     - int32_t                    # begin index
     - int32_t                    # end index
     - void*                      # Array u16 class pointer
@@ -1043,8 +1043,8 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - panda::coretypes::Array*   # resulting array of utf16 chars
-    - panda::ObjectHeader*       # src string
+    - ark::coretypes::Array*   # resulting array of utf16 chars
+    - ark::ObjectHeader*       # src string
     - int32_t                    # begin index
     - int32_t                    # end index
     - void*                      # Array u16 class pointer
@@ -1054,22 +1054,22 @@ entrypoints:
   bridge: slow_path
   properties: []
   signature:
-    - panda::coretypes::Array*   # resulting array of utf16 chars
-    - panda::ObjectHeader*       # src string
+    - ark::coretypes::Array*   # resulting array of utf16 chars
+    - ark::ObjectHeader*       # src string
     - int32_t                    # begin index
     - int32_t                    # end index
-    - panda::ObjectHeader*       # Array u16 class pointer
+    - ark::ObjectHeader*       # Array u16 class pointer
 
 - name: StringGetCharsOddSaved
   entrypoint: StringGetCharsEntrypoint
   bridge: odd_saved
   properties: []
   signature:
-    - panda::coretypes::Array*   # resulting array of utf16 chars
-    - panda::ObjectHeader*       # src string
+    - ark::coretypes::Array*   # resulting array of utf16 chars
+    - ark::ObjectHeader*       # src string
     - int32_t                    # begin index
     - int32_t                    # end index
-    - panda::ObjectHeader*       # Array u16 class pointer
+    - ark::ObjectHeader*       # Array u16 class pointer
 
 - name: MemmoveInterposer        # "bridge" to avoid generating the excessive prologue
   entrypoint: MemmoveInterposer
@@ -1089,8 +1089,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - int32_t
     - int32_t
     - int32_t
@@ -1101,8 +1101,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - int32_t
     - int32_t
     - int32_t
@@ -1113,8 +1113,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - int32_t
     - int32_t
     - int32_t
@@ -1125,8 +1125,8 @@ entrypoints:
   properties: [irtoc]
   signature:
     - void
-    - panda::ObjectHeader*
-    - panda::ObjectHeader*
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
     - int32_t
     - int32_t
     - int32_t

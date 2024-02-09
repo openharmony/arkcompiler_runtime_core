@@ -26,7 +26,7 @@
 #include "utils/arena_containers.h"
 #include "utils/small_vector.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RegAllocGraphColoring : public RegAllocBase {
 public:
     explicit RegAllocGraphColoring(Graph *graph);
@@ -69,6 +69,6 @@ private:
     void SparseIG(InterferenceGraph *ig, unsigned regsCount, WorkingRanges *ranges, WorkingRanges *stackRanges);
     void SpillInterval(LifeIntervals *interval, WorkingRanges *ranges, WorkingRanges *stackRanges);
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_GRAPH_COLORING_H

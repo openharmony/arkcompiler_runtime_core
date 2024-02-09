@@ -34,7 +34,7 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
 
 TEST(TestDebugInfo, TestDebugInfo)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record A {
     u1 fld
 }
@@ -61,10 +61,10 @@ TEST(TestDebugInfo, TestDebugInfo)
 }
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -88,7 +88,7 @@ TEST(TestDebugInfo, TestDebugInfo)
     std::ptrdiff_t const instructionCount(std::distance(
         std::sregex_iterator(instructions.begin(), instructions.end(), instRegex), std::sregex_iterator()));
 
-    const panda::disasm::ProgInfo &progInfo = d.GetProgInfo();
+    const ark::disasm::ProgInfo &progInfo = d.GetProgInfo();
     auto gIt = progInfo.methodsInfo.find("g:()");
     ASSERT_NE(gIt, progInfo.methodsInfo.end());
     // In case of pandasm the table should contain entry on each instruction

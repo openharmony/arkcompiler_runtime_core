@@ -21,7 +21,7 @@
 #include "lowering.h"
 #include "optimizer/code_generator/encode.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void Lowering::VisitAdd([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
@@ -1325,4 +1325,4 @@ bool Lowering::RunImpl()
     VisitGraph();
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

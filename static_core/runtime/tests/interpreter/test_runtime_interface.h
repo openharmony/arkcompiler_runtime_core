@@ -30,22 +30,22 @@
 #include "runtime/interpreter/frame.h"
 #include "runtime/mem/gc/gc.h"
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
-class DummyGC : public panda::mem::GC {
+class DummyGC : public ark::mem::GC {
 public:
     NO_COPY_SEMANTIC(DummyGC);
     NO_MOVE_SEMANTIC(DummyGC);
 
-    explicit DummyGC(panda::mem::ObjectAllocatorBase *objectAllocator, const panda::mem::GCSettings &settings);
+    explicit DummyGC(ark::mem::ObjectAllocatorBase *objectAllocator, const ark::mem::GCSettings &settings);
     ~DummyGC() override = default;
     // NOLINTNEXTLINE(misc-unused-parameters)
     bool WaitForGC([[maybe_unused]] GCTask task) override
     {
         return false;
     }
-    void InitGCBits([[maybe_unused]] panda::ObjectHeader *objHeader) override {}
-    void InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *objHeader) override {}
+    void InitGCBits([[maybe_unused]] ark::ObjectHeader *objHeader) override {}
+    void InitGCBitsForAllocationInTLAB([[maybe_unused]] ark::ObjectHeader *objHeader) override {}
     bool Trigger([[maybe_unused]] PandaUniquePtr<GCTask> task) override
     {
         return false;
@@ -80,7 +80,7 @@ private:
         return false;
     }
     void MarkReferences([[maybe_unused]] mem::GCMarkingStackType *references,
-                        [[maybe_unused]] panda::mem::GCPhase gcPhase) override
+                        [[maybe_unused]] ark::mem::GCPhase gcPhase) override
     {
     }
     void VisitRoots([[maybe_unused]] const GCRootVisitor &gcRootVisitor,
@@ -401,10 +401,9 @@ public:
     {
         uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
         auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
-        void *mem =
-            allocator->Allocate(panda::Frame::GetAllocSize(panda::Frame::GetActualSize<IS_DYNAMIC>(nregs), extSz),
-                                GetLogAlignment(8), ManagedThread::GetCurrent());
-        return new (Frame::FromExt(mem, extSz)) panda::Frame(mem, method, prev, nregs);
+        void *mem = allocator->Allocate(ark::Frame::GetAllocSize(ark::Frame::GetActualSize<IS_DYNAMIC>(nregs), extSz),
+                                        GetLogAlignment(8), ManagedThread::GetCurrent());
+        return new (Frame::FromExt(mem, extSz)) ark::Frame(mem, method, prev, nregs);
     }
 
     static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
@@ -412,12 +411,12 @@ public:
     {
         uint32_t extSz = EMPTY_EXT_FRAME_DATA_SIZE;
         auto allocator = Thread::GetCurrent()->GetVM()->GetHeapManager()->GetInternalAllocator();
-        void *mem = allocator->Allocate(panda::Frame::GetAllocSize(size, extSz), GetLogAlignment(8),
-                                        ManagedThread::GetCurrent());
+        void *mem =
+            allocator->Allocate(ark::Frame::GetAllocSize(size, extSz), GetLogAlignment(8), ManagedThread::GetCurrent());
         if (UNLIKELY(mem == nullptr)) {
             return nullptr;
         }
-        return new (Frame::FromExt(mem, extSz)) panda::Frame(mem, method, prev, nregs, numActualArgs);
+        return new (Frame::FromExt(mem, extSz)) ark::Frame(mem, method, prev, nregs, numActualArgs);
     }
 
     static void FreeFrame(ManagedThread *thread, Frame *frame)
@@ -428,7 +427,7 @@ public:
 
     static mem::GC *GetGC()
     {
-        return &panda::interpreter::test::RuntimeInterface::dummyGc_;
+        return &ark::interpreter::test::RuntimeInterface::dummyGc_;
     }
 
     static const uint8_t *GetMethodName([[maybe_unused]] Method *caller, [[maybe_unused]] BytecodeId methodId)
@@ -494,9 +493,9 @@ private:
 
     static uint32_t jitThreshold_;
 
-    static panda::interpreter::test::DummyGC dummyGc_;
+    static ark::interpreter::test::DummyGC dummyGc_;
 };
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test
 
 #endif  // PANDA_RUNTIME_TESTS_INTERPRETER_TEST_RUNTIME_INTERFACE_H_

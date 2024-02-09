@@ -21,7 +21,7 @@
 
 #include "macros.h"
 
-namespace panda {
+namespace ark {
 
 template <class E>
 class Unexpected final {
@@ -171,6 +171,6 @@ private:
     std::variant<T, E> v_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_LIBPANDABASE_UTILS_EXPECTED_H_

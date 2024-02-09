@@ -17,7 +17,7 @@
 #include "libpandabase/utils/utils.h"
 #include "optimizer/ir_builder/inst_builder-inl.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class InstTest : public GraphTest {};
 
@@ -583,4 +583,4 @@ TEST_F(InstTest, IntrinsicFlags)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

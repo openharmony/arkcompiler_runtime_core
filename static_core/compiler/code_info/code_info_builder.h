@@ -20,7 +20,7 @@
 #include "utils/arena_containers.h"
 #include "utils/bit_vector.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class CodeInfoBuilder {
 public:
@@ -153,6 +153,6 @@ private:
     static constexpr size_t MAX_VREG_LIVE_DISTANCE = 32;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_CODE_INFO_BUILDER_H

@@ -20,7 +20,7 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class TryCatchResolving : public Optimization {
 public:
     explicit TryCatchResolving(Graph *graph);
@@ -64,6 +64,6 @@ private:
     ArenaMap<CatchPhiInst *, PhiInst *> cphi2phi_;
     ArenaMap<BasicBlock *, BasicBlock *> catch2cphis_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H

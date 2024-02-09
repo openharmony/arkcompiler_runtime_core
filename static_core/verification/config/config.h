@@ -25,7 +25,7 @@
 #include <cstring>
 #include <stdexcept>
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 struct Section {
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     PandaString name;
@@ -59,6 +59,6 @@ struct Section {
         UNREACHABLE();
     }
 };
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config
 
 #endif  // PANDA_VERIF_CONFIG_H_

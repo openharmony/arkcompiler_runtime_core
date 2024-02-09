@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/ets_native_library.h"
 
-namespace panda::ets {
+namespace ark::ets {
 Expected<EtsNativeLibrary, os::Error> EtsNativeLibrary::Load(const PandaString &name)
 {
     auto handle = os::library_loader::Load(name);
@@ -30,4 +30,4 @@ EtsNativeLibrary::EtsNativeLibrary(PandaString name, os::library_loader::Library
     : name_(std::move(name)), handle_(std::move(handle))
 {
 }
-}  // namespace panda::ets
+}  // namespace ark::ets

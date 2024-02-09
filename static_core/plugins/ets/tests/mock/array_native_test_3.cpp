@@ -22,7 +22,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsNativeInterfaceArrayTest : public MockEtsNapiTestBaseClass {};
 class EtsNativeInterfaceArrayTestDeath : public MockEtsNapiTestBaseClass {};
@@ -185,6 +185,6 @@ TEST_F(EtsNativeInterfaceArrayTestDeath, PinAndUnpinNullPrimitiveTypeArrayDeathT
     ASSERT_DEATH(env_->UnpinDoubleArray(nullptr), "");
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-magic-numbers)

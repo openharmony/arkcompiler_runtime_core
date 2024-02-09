@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::scheduler {
+namespace ark::scheduler {
 
 // NOTE(xuliang): task id
 Task::Task(PandaVM *vm, ObjectHeader *obj)
@@ -78,4 +78,4 @@ void Task::EndCurrent()
     wt->SetTask(nullptr);
 }
 
-}  // namespace panda::scheduler
+}  // namespace ark::scheduler

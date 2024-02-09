@@ -20,7 +20,7 @@
 #include "libpandafile/file-inl.h"
 #include "runtime/include/runtime.h"
 
-namespace panda {
+namespace ark {
 
 panda_file::File::StringData Field::GetName() const
 {
@@ -76,4 +76,4 @@ const panda_file::File *Field::GetPandaFile() const
     return GetClass()->GetPandaFile();
 }
 
-}  // namespace panda
+}  // namespace ark

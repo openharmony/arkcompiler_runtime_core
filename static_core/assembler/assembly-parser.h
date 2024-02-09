@@ -37,7 +37,7 @@
 #include "meta.h"
 #include "utils/expected.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 using Instructions = std::pair<std::vector<Ins>, Error>;
 
@@ -85,20 +85,20 @@ public:
     }
 
 private:
-    panda::pandasm::Program program_;
-    std::unordered_map<std::string, panda::pandasm::Label> *labelTable_ = nullptr;
+    ark::pandasm::Program program_;
+    std::unordered_map<std::string, ark::pandasm::Label> *labelTable_ = nullptr;
     Metadata *metadata_ = nullptr;
     Context context_; /* token iterator */
-    panda::pandasm::Record *currRecord_ = nullptr;
-    panda::pandasm::LiteralArray *currArray_ = nullptr;
+    ark::pandasm::Record *currRecord_ = nullptr;
+    ark::pandasm::LiteralArray *currArray_ = nullptr;
     bool isConstArray_ = false;
-    panda::pandasm::LiteralArray::Literal *currArrayElem_ = nullptr;
-    panda::pandasm::Function *currFunc_ = nullptr;
-    panda::pandasm::Ins *currIns_ = nullptr;
-    panda::pandasm::Field *currFld_ = nullptr;
+    ark::pandasm::LiteralArray::Literal *currArrayElem_ = nullptr;
+    ark::pandasm::Function *currFunc_ = nullptr;
+    ark::pandasm::Ins *currIns_ = nullptr;
+    ark::pandasm::Field *currFld_ = nullptr;
     size_t lineStric_ = 0;
-    panda::pandasm::Error err_;
-    panda::pandasm::ErrorList war_;
+    ark::pandasm::Error err_;
+    ark::pandasm::ErrorList war_;
     bool open_ = false; /* flag of being in a code section */
     bool recordDef_ = false;
     bool arrayDef_ = false;
@@ -265,7 +265,7 @@ private:
 };
 
 template <>
-inline auto Parser::TryEmplaceInTable(bool flag, std::unordered_map<std::string, panda::pandasm::Label> &item,
+inline auto Parser::TryEmplaceInTable(bool flag, std::unordered_map<std::string, ark::pandasm::Label> &item,
                                       [[maybe_unused]] const std::string &cid)
 {
     return item.try_emplace(std::string(context_.GiveToken().data(), context_.GiveToken().length()),
@@ -275,6 +275,6 @@ inline auto Parser::TryEmplaceInTable(bool flag, std::unordered_map<std::string,
                             context_.tokens[context_.number - 1].wholeLine, flag, lineStric_);
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_PARSER_H

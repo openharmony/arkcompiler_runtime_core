@@ -20,7 +20,7 @@
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/compiler_interface.h"
 
-namespace panda {
+namespace ark {
 
 class Compiler;
 
@@ -75,6 +75,6 @@ protected:
     Compiler *compiler_;                           // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COMPILER_WORKER_H

@@ -25,7 +25,7 @@
 #include "optimizer/ir/inst.h"
 #include "optimizer/optimizations/phi_type_resolving.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 PhiTypeResolving::PhiTypeResolving(Graph *graph) : Optimization(graph), phis_ {graph->GetLocalAllocator()->Adapter()} {}
 
 void PhiTypeResolving::InvalidateAnalyses()
@@ -154,4 +154,4 @@ void PhiTypeResolving::PropagateTypeToPhi()
         castToAnyInst->SetInput(0, phi);
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

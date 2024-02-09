@@ -20,7 +20,7 @@
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/asan_interface.h"
 
-namespace panda::mem {
+namespace ark::mem {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_STACK_LIKE_ALLOCATOR(level) LOG(level, ALLOC) << "StackLikeAllocator: "
 
@@ -38,8 +38,8 @@ inline StackLikeAllocator<ALIGNMENT, MAX_SIZE>::StackLikeAllocator(bool usePoolM
                         .GetMem();
         // clang-format on
     } else {
-        startAddr_ = panda::os::mem::MapRWAnonymousWithAlignmentRaw(
-            MAX_SIZE, std::max(GetAlignmentInBytes(ALIGNMENT), static_cast<size_t>(panda::os::mem::GetPageSize())));
+        startAddr_ = ark::os::mem::MapRWAnonymousWithAlignmentRaw(
+            MAX_SIZE, std::max(GetAlignmentInBytes(ALIGNMENT), static_cast<size_t>(ark::os::mem::GetPageSize())));
     }
     if (startAddr_ == nullptr) {
         LOG_STACK_LIKE_ALLOCATOR(FATAL) << "Can't get initial memory";
@@ -58,7 +58,7 @@ inline StackLikeAllocator<ALIGNMENT, MAX_SIZE>::~StackLikeAllocator()
     if (usePoolManager_) {
         PoolManager::GetMmapMemPool()->FreePool(startAddr_, MAX_SIZE);
     } else {
-        panda::os::mem::UnmapRaw(startAddr_, MAX_SIZE);
+        ark::os::mem::UnmapRaw(startAddr_, MAX_SIZE);
     }
     LOG_STACK_LIKE_ALLOCATOR(DEBUG) << "Destroying of StackLikeAllocator finished";
 }
@@ -116,6 +116,6 @@ inline bool StackLikeAllocator<ALIGNMENT, MAX_SIZE>::Contains(void *mem)
 }
 
 #undef LOG_STACK_LIKE_ALLOCATOR
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_LIBPANDABASE_MEM_STACK_LIKE_ALLOCATOR_INL_H

@@ -19,7 +19,7 @@
 #include <utils/bit_utils.h>
 #include <utils/span.h>
 
-namespace panda {
+namespace ark {
 
 using Opcode = BytecodeInstruction::Opcode;
 using Format = BytecodeInstruction::Format;
@@ -287,4 +287,4 @@ BytecodeEmitter::ErrorCode BytecodeEmitter::CheckLabels()
 
 #include <bytecode_emitter_gen.h>
 
-}  // namespace panda
+}  // namespace ark

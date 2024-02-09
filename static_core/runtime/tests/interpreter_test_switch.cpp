@@ -25,7 +25,7 @@
 #include "runtime/include/runtime_notification.h"
 #include "runtime/interpreter/runtime_interface.h"
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
 class InterpreterTestSwitch : public testing::Test {
 public:
@@ -149,4 +149,4 @@ TEST_F(InterpreterTestSwitch, SwitchToDebug)
     EXPECT_EQ(event.bcOffset, BytecodeInstruction::Size(BytecodeInstruction::Format::V4_V4_ID16));
 }
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test

@@ -19,7 +19,7 @@
 #include "file.h"
 #include "file_items.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class ProtoDataAccessor {
@@ -88,6 +88,6 @@ private:
     size_t size_ {0};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_PROTO_DATA_ACCESSOR_H_

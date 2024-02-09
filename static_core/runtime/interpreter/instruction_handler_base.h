@@ -20,7 +20,7 @@
 #include "runtime/include/method.h"
 #include "runtime/interpreter/instruction_handler_state.h"
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_INST()                                                                           \
@@ -371,6 +371,6 @@ private:
     InstructionHandlerState *state_;
 };
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_INSTRUCTION_HANDLER_BASE_H_

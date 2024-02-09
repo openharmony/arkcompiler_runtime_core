@@ -54,10 +54,10 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/coretypes/native_pointer.h"
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
-using DynClass = panda::coretypes::DynClass;
-using DynObject = panda::coretypes::DynObject;
+using DynClass = ark::coretypes::DynClass;
+using DynObject = ark::coretypes::DynObject;
 
 class InterpreterTestResolveField : public testing::Test {
 public:
@@ -70,7 +70,7 @@ public:
         options.SetVerifyCallStack(false);
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -84,12 +84,12 @@ public:
     NO_MOVE_SEMANTIC(InterpreterTestResolveField);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 TEST_F(InterpreterTestResolveField, ResolveField)
 {
-    auto pf = panda::panda_file::File::Open("../bin-gtests/pre-build/interpreter_test_resolve_field.abc");
+    auto pf = ark::panda_file::File::Open("../bin-gtests/pre-build/interpreter_test_resolve_field.abc");
     ASSERT_NE(pf, nullptr);
 
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
@@ -129,4 +129,4 @@ TEST_F(InterpreterTestResolveField, ResolveField)
     }
 }
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test

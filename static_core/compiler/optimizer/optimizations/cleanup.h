@@ -19,7 +19,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Cleanup final : public Optimization {
 public:
     explicit Cleanup(Graph *graph, bool lightMode = true)
@@ -197,6 +197,6 @@ private:
     Inst *Eval(Inst *inst);
     void Init(size_t count);
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CLEANUP_H

@@ -18,7 +18,7 @@
 #ifndef LIBPANDABASE_TEMPLATES_SOURCE_LANGUAGE_H
 #define LIBPANDABASE_TEMPLATES_SOURCE_LANGUAGE_H
 
-namespace panda {
+namespace ark {
 
 enum class SourceLanguage : uint8_t {
 % Common::plugins.each do |plugin_lang, plugin_opts|
@@ -45,7 +45,7 @@ inline std::ostream &operator<<(std::ostream &stream, SourceLanguage lang)
             stream << "<%= name %>";
             break;
 % end
-        case panda::SourceLanguage::PANDA_ASSEMBLY:
+        case ark::SourceLanguage::PANDA_ASSEMBLY:
             stream << "Panda Assembly";
             break;
         default:
@@ -59,13 +59,13 @@ inline bool IsValidSourceLang(SourceLanguage lang) {
 % Common::plugins.each do |plugin_lang, plugin_opts|
         case <%= plugin_opts["lang_enum"] %>:
 % end
-        case panda::SourceLanguage::PANDA_ASSEMBLY:
+        case ark::SourceLanguage::PANDA_ASSEMBLY:
             return true;
         default:
             return false;
     }
 }
 
-} //  namespace panda
+} //  namespace ark
 
 #endif  // LIBPANDABASE_TEMPLATES_SOURCE_LANGUAGE_H

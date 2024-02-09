@@ -23,7 +23,7 @@
 #include "reg_map.h"
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 class LifeIntervals;
@@ -195,6 +195,6 @@ private:
     bool rematConstants_;
     bool success_ {true};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_LINEAR_SCAN_H

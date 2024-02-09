@@ -31,8 +31,8 @@ decltype(QueryAllMethodSymsExt) *PandaFileWrapper::pQueryAllMethodSymsExt = null
 using OnceCallback = void();
 static void CallOnce(bool *onceFlag, OnceCallback callBack)
 {
-    static panda::os::memory::Mutex onceLock;
-    panda::os::memory::LockHolder lock(onceLock);
+    static ark::os::memory::Mutex onceLock;
+    ark::os::memory::LockHolder lock(onceLock);
     if (!(*onceFlag)) {
         callBack();
         *onceFlag = true;

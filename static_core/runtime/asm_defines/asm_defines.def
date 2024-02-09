@@ -18,7 +18,7 @@ DEFINE_VALUE(SLOT_SIZE, PointerSize(RUNTIME_ARCH))
 DEFINE_VALUE(POINTER_LOG_SIZE, helpers::math::GetIntLog2(sizeof(void *)))
 
 // File offsets
-DEFINE_VALUE(FILE_BASE_OFFSET, panda::panda_file::File::GetFileBaseOffset())
+DEFINE_VALUE(FILE_BASE_OFFSET, ark::panda_file::File::GetFileBaseOffset())
 
 // Method offsets
 DEFINE_VALUE(METHOD_ACCESS_FLAGS_OFFSET, Method::GetAccessFlagsOffset())
@@ -51,7 +51,7 @@ DEFINE_VALUE(FRAME_VREGISTER_SIZE, sizeof(interpreter::VRegister))
 DEFINE_VALUE(FRAME_VREGISTER_VALUE_OFFSET, interpreter::VRegister::GetValueOffset())
 DEFINE_VALUE(FRAME_VREGISTER_PRIMITIVE_TAG, 0)  // TODO(runtime): find a way to get primitive tag from vreg
 DEFINE_VALUE(FRAME_VREGISTER_OBJECT_TAG, 1)     // TODO(runtime): find a way to get object tag from vreg
-DEFINE_VALUE(FRAME_SLOT_OFFSET, panda::Frame::GetVregsOffset() + interpreter::VRegister::GetValueOffset())
+DEFINE_VALUE(FRAME_SLOT_OFFSET, ark::Frame::GetVregsOffset() + interpreter::VRegister::GetValueOffset())
 
 DEFINE_VALUE(CFRAME_LR_SLOT, CFrameReturnAddr::Start())
 DEFINE_VALUE(CFRAME_STACK_START_SLOT, CFrameSlots::Start())
@@ -94,7 +94,7 @@ DEFINE_VALUE(MT_MANAGED_THREAD_LOCKED_OBJECT_CAPACITY_OFFSET, MTManagedThread::G
 DEFINE_VALUE(MT_MANAGED_THREAD_LOCKED_OBJECT_SIZE_OFFSET, MTManagedThread::GetLockedObjectSizeOffset())
 DEFINE_VALUE(MT_MANAGED_THREAD_LOCKED_OBJECT_DATA_OFFSET, MTManagedThread::GetLockedObjectDataOffset())
 
-DEFINE_VALUE(THREAD_VM_OFFSET, panda::Thread::GetVmOffset())
+DEFINE_VALUE(THREAD_VM_OFFSET, ark::Thread::GetVmOffset())
 
 DEFINE_VALUE(LOCKED_OBJECT_INFO_SIZE, sizeof(LockedObjectInfo))
 DEFINE_VALUE(LOCKED_OBJECT_INFO_MONITOR_OFFSET, LockedObjectInfo::GetMonitorOffset())
@@ -103,7 +103,7 @@ DEFINE_VALUE(LOCKED_OBJECT_INFO_STACK_OFFSET, LockedObjectInfo::GetStackOffset()
 // Array offsets
 DEFINE_VALUE(CORETYPES_ARRAY_DATA_OFFSET, coretypes::Array::GetDataOffset())
 DEFINE_VALUE(CORETYPES_ARRAY_LENGTH_OFFSET, coretypes::Array::GetLengthOffset())
-DEFINE_VALUE(CORETYPES_ARRAY_CLASS_SIZE, sizeof(panda::coretypes::Array))
+DEFINE_VALUE(CORETYPES_ARRAY_CLASS_SIZE, sizeof(ark::coretypes::Array))
 
 // String offsets
 DEFINE_VALUE(CORETYPES_STRING_DATA_OFFSET, coretypes::String::GetDataOffset())
@@ -118,27 +118,27 @@ DEFINE_VALUE(TLAB_MEMORY_END_ADDR_OFFSET, mem::TLAB::TLABEndAddrOffset())
 DEFINE_VALUE(TLAB_ALIGNMENT, DEFAULT_ALIGNMENT_IN_BYTES)
 
 // ObjectHeader offsets
-DEFINE_VALUE(OBJECT_HEADER_CLASS_POINTER_OFFSET, panda::ObjectHeader::GetClassOffset())
-DEFINE_VALUE(OBJECT_HEADER_MARK_WORD_OFFSET, panda::ObjectHeader::GetMarkWordOffset())
+DEFINE_VALUE(OBJECT_HEADER_CLASS_POINTER_OFFSET, ark::ObjectHeader::GetClassOffset())
+DEFINE_VALUE(OBJECT_HEADER_MARK_WORD_OFFSET, ark::ObjectHeader::GetMarkWordOffset())
 
 // Class offsets
 DEFINE_VALUE(BASE_CLASS_MANAGED_OBJECT_OFFSET, BaseClass::GetManagedObjectOffset())
 DEFINE_VALUE(BASE_CLASS_FLAGS_OFFSET, BaseClass::GetFlagsOffset())
-DEFINE_VALUE(CLASS_VTABLE_OFFSET, panda::Class::GetVTableOffset())
-DEFINE_VALUE(CLASS_BASE_OFFSET, panda::Class::GetBaseOffset())
-DEFINE_VALUE(CLASS_METHODS_OFFSET, panda::Class::GetMethodsOffset())
-DEFINE_VALUE(CLASS_COMPONENT_TYPE_OFFSET, panda::Class::GetComponentTypeOffset())
-DEFINE_VALUE(CLASS_TYPE_OFFSET, panda::Class::GetTypeOffset())
-DEFINE_VALUE(CLASS_STATE_OFFSET, panda::Class::GetStateOffset())
+DEFINE_VALUE(CLASS_VTABLE_OFFSET, ark::Class::GetVTableOffset())
+DEFINE_VALUE(CLASS_BASE_OFFSET, ark::Class::GetBaseOffset())
+DEFINE_VALUE(CLASS_METHODS_OFFSET, ark::Class::GetMethodsOffset())
+DEFINE_VALUE(CLASS_COMPONENT_TYPE_OFFSET, ark::Class::GetComponentTypeOffset())
+DEFINE_VALUE(CLASS_TYPE_OFFSET, ark::Class::GetTypeOffset())
+DEFINE_VALUE(CLASS_STATE_OFFSET, ark::Class::GetStateOffset())
 
-DEFINE_VALUE(CLASS_IS_CLONEABLE, panda::Class::IS_CLONEABLE)
-DEFINE_VALUE(CLASS_ISARRAY_OFFSET, panda::Class::GetComponentTypeOffset())
-DEFINE_VALUE(CLASS_ARRAY_ELEMENT_TYPE_OFFSET, panda::Class::GetTypeOffset())
-DEFINE_VALUE(CLASS_ITABLE_OFFSET, panda::Class::GetITableOffset())
-DEFINE_VALUE(CLASS_ITABLE_ENTRY_SIZE, panda::ITable::GetEntrySize())
-DEFINE_VALUE(CLASS_ITABLE_ENTRIES_DATA_OFFSET, panda::ITable::GetEntriesDataOffset())
-DEFINE_VALUE(CLASS_ITABLE_ENTRIES_SIZE_OFFSET, panda::ITable::GetEntriesSizeOffset())
-DEFINE_VALUE(CLASS_ITABLE_ENTRY_INTERFACE_OFFSET, panda::ITable::Entry::GetInterfaceOffset())
+DEFINE_VALUE(CLASS_IS_CLONEABLE, ark::Class::IS_CLONEABLE)
+DEFINE_VALUE(CLASS_ISARRAY_OFFSET, ark::Class::GetComponentTypeOffset())
+DEFINE_VALUE(CLASS_ARRAY_ELEMENT_TYPE_OFFSET, ark::Class::GetTypeOffset())
+DEFINE_VALUE(CLASS_ITABLE_OFFSET, ark::Class::GetITableOffset())
+DEFINE_VALUE(CLASS_ITABLE_ENTRY_SIZE, ark::ITable::GetEntrySize())
+DEFINE_VALUE(CLASS_ITABLE_ENTRIES_DATA_OFFSET, ark::ITable::GetEntriesDataOffset())
+DEFINE_VALUE(CLASS_ITABLE_ENTRIES_SIZE_OFFSET, ark::ITable::GetEntriesSizeOffset())
+DEFINE_VALUE(CLASS_ITABLE_ENTRY_INTERFACE_OFFSET, ark::ITable::Entry::GetInterfaceOffset())
 
 // Field offsets
 DEFINE_VALUE(FIELD_CLASS_OFFSET, Field::GetClassOffset())
@@ -181,20 +181,20 @@ DEFINE_VALUE(COMP_FP_OFFSET, BoundaryFrame<FrameKind::COMPILER>::FP_OFFSET)
 DEFINE_VALUE(COMP_RETURN_OFFSET, BoundaryFrame<FrameKind::COMPILER>::RETURN_OFFSET)
 DEFINE_VALUE(COMP_CALLEES_OFFSET, BoundaryFrame<FrameKind::COMPILER>::CALLEES_OFFSET)
 
-DEFINE_VALUE(CLASS_STATE_INITIALIZED, static_cast<std::underlying_type_t<panda::Class::State>>(panda::Class::State::INITIALIZED))
+DEFINE_VALUE(CLASS_STATE_INITIALIZED, static_cast<std::underlying_type_t<ark::Class::State>>(ark::Class::State::INITIALIZED))
 
-DEFINE_VALUE(ELEMENT_TYPE_U1, (int)panda::panda_file::Type::TypeId::U1)
-DEFINE_VALUE(ELEMENT_TYPE_I8, (int)panda::panda_file::Type::TypeId::I8)
-DEFINE_VALUE(ELEMENT_TYPE_U8, (int)panda::panda_file::Type::TypeId::U8)
-DEFINE_VALUE(ELEMENT_TYPE_I16, (int)panda::panda_file::Type::TypeId::I16)
-DEFINE_VALUE(ELEMENT_TYPE_U16, (int)panda::panda_file::Type::TypeId::U16)
-DEFINE_VALUE(ELEMENT_TYPE_I32, (int)panda::panda_file::Type::TypeId::I32)
-DEFINE_VALUE(ELEMENT_TYPE_U32, (int)panda::panda_file::Type::TypeId::U32)
-DEFINE_VALUE(ELEMENT_TYPE_F32, (int)panda::panda_file::Type::TypeId::F32)
-DEFINE_VALUE(ELEMENT_TYPE_F64, (int)panda::panda_file::Type::TypeId::F64)
-DEFINE_VALUE(ELEMENT_TYPE_I64, (int)panda::panda_file::Type::TypeId::I64)
-DEFINE_VALUE(ELEMENT_TYPE_U64, (int)panda::panda_file::Type::TypeId::U64)
-DEFINE_VALUE(ELEMENT_TYPE_REFERENCE, (int)panda::panda_file::Type::TypeId::REFERENCE)
+DEFINE_VALUE(ELEMENT_TYPE_U1, (int)ark::panda_file::Type::TypeId::U1)
+DEFINE_VALUE(ELEMENT_TYPE_I8, (int)ark::panda_file::Type::TypeId::I8)
+DEFINE_VALUE(ELEMENT_TYPE_U8, (int)ark::panda_file::Type::TypeId::U8)
+DEFINE_VALUE(ELEMENT_TYPE_I16, (int)ark::panda_file::Type::TypeId::I16)
+DEFINE_VALUE(ELEMENT_TYPE_U16, (int)ark::panda_file::Type::TypeId::U16)
+DEFINE_VALUE(ELEMENT_TYPE_I32, (int)ark::panda_file::Type::TypeId::I32)
+DEFINE_VALUE(ELEMENT_TYPE_U32, (int)ark::panda_file::Type::TypeId::U32)
+DEFINE_VALUE(ELEMENT_TYPE_F32, (int)ark::panda_file::Type::TypeId::F32)
+DEFINE_VALUE(ELEMENT_TYPE_F64, (int)ark::panda_file::Type::TypeId::F64)
+DEFINE_VALUE(ELEMENT_TYPE_I64, (int)ark::panda_file::Type::TypeId::I64)
+DEFINE_VALUE(ELEMENT_TYPE_U64, (int)ark::panda_file::Type::TypeId::U64)
+DEFINE_VALUE(ELEMENT_TYPE_REFERENCE, (int)ark::panda_file::Type::TypeId::REFERENCE)
 
 // G1 GC Structures
 DEFINE_VALUE(G1_LOCK_BUFFER_DATA_OFFSET, mem::GCG1BarrierSet::G1PostBarrierRingBufferType::GetBufferOffset())

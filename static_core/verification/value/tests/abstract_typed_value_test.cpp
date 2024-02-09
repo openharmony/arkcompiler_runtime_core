@@ -24,7 +24,7 @@
 
 #include <functional>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, AbstractTypedValue)
 {
@@ -73,4 +73,4 @@ TEST_F(VerifierTest, AbstractTypedValue)
     DestroyConfig(config);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

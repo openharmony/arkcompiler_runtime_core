@@ -17,7 +17,7 @@
 
 #include "runtime/mem/gc/gc.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // GCLang class is an interlayer between language-agnostic GC class and different implementations of GC.
 // It contains language-specific methods that are used in several types of GC (such as StwGC, GenGC, etc.)
@@ -102,6 +102,6 @@ private:
     friend class RootManager<LanguageConfig>;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_LANG_GC_LANG_H

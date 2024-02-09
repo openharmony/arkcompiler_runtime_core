@@ -22,7 +22,7 @@
 
 #define DEBUG_TYPE "created-object-file"
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 CreatedObjectFile::CreatedObjectFile(std::unique_ptr<llvm::MemoryBuffer> objectFileBuffer,
                                      std::unique_ptr<llvm::object::ObjectFile> objectFile)
@@ -143,4 +143,4 @@ size_t CreatedObjectFile::Size() const
     return objectFile_->getData().size();
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

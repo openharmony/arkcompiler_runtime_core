@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/try_catch_resolving.h"
 #include "optimizer/optimizations/cleanup.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class TryCatchResolvingTest : public AsmTest {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     TryCatchResolvingTest() : defaultCompilerNonOptimizing_(g_options.IsCompilerNonOptimizing())
@@ -207,4 +207,4 @@ TEST_F(TryCatchResolvingTest, EmptyTryCatches)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

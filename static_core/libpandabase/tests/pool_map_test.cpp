@@ -21,7 +21,7 @@
 #include <ctime>
 #include <algorithm>
 
-namespace panda {
+namespace ark {
 
 class PoolMapTest : public testing::Test {
 public:
@@ -192,4 +192,4 @@ TEST_F(PoolMapTest, AddRemoveDifferentPoolsTest)
     ResetPoolMap();
 }
 
-}  // namespace panda
+}  // namespace ark

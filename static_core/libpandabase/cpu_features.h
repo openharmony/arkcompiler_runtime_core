@@ -18,18 +18,18 @@
 #include <cstddef>
 #include "macros.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 PANDA_PUBLIC_API bool CpuFeaturesHasCrc32();
 PANDA_PUBLIC_API bool CpuFeaturesHasJscvt();
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda {
+namespace ark {
 #if defined(PANDA_TARGET_AMD64) || defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_ARM32)
 static constexpr size_t CACHE_LINE_SIZE = 64;
 #else
 static constexpr size_t CACHE_LINE_SIZE = 0;
 static_assert(CACHE_LINE_SIZE, "Undefined cacheline size");
 #endif
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_CPU_FEATURES_H

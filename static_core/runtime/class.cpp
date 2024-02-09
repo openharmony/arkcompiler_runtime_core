@@ -22,7 +22,7 @@
 #include "runtime/include/class-inl.h"
 #include "runtime/include/runtime.h"
 
-namespace panda {
+namespace ark {
 
 std::ostream &operator<<(std::ostream &os, const Class::State &state)
 {
@@ -164,4 +164,4 @@ size_t Class::GetClassObjectSizeFromClass(Class *cls, panda_file::SourceLang lan
     return Runtime::GetCurrent()->GetClassLinker()->GetClassObjectSize(cls, lang);
 }
 
-}  // namespace panda
+}  // namespace ark

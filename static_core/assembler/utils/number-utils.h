@@ -16,7 +16,7 @@
 #ifndef PANDA_ASSEMBLER_UTILS_NUMBERS_UTILS_H
 #define PANDA_ASSEMBLER_UTILS_NUMBERS_UTILS_H
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 constexpr size_t HEX_BASE = 16;
 
@@ -193,6 +193,6 @@ inline size_t ToNumber(std::string_view p)
     return sum;
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_UTILS_NUMBERS_UTILS_H

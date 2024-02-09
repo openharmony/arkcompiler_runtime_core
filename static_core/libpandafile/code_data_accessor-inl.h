@@ -18,7 +18,7 @@
 
 #include "code_data_accessor.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 template <class Callback>
 inline void CodeDataAccessor::TryBlock::EnumerateCatchBlocks(const Callback &cb)
@@ -97,6 +97,6 @@ inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::En
     return sp.SubSpan(4U).data();
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_

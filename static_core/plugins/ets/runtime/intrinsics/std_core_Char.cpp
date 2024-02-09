@@ -15,7 +15,7 @@
 
 #include "intrinsics.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 const char LOWER_TO_UPPER_OFFSET = 'a' - 'A';
 
@@ -36,4 +36,4 @@ extern "C" EtsChar StdCoreCharToLowerCase(EtsChar value)
     return (value >= 'A' && value <= 'Z') ? value + LOWER_TO_UPPER_OFFSET : value;
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

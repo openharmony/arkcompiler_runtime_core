@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropJsBouncingPandasTest : public EtsInteropTest {};
 
@@ -27,4 +27,4 @@ TEST_F(EtsInteropJsBouncingPandasTest, BouncingPandasTest)
     ASSERT_TRUE(ret.has_value() && ret.value() == 0);
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

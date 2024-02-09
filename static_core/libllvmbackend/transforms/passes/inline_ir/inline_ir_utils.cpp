@@ -25,7 +25,7 @@ using llvm::GlobalValue;
 using llvm::Module;
 using llvm::SmallVector;
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 /**
  * Remove dangling alias from the module
@@ -52,4 +52,4 @@ bool RemoveDanglingAliases(Module &module)
     return !aliases.empty();
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

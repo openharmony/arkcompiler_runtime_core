@@ -25,7 +25,7 @@
 #include <vector>
 #include <optional>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class FieldDataAccessor {
 public:
@@ -190,6 +190,6 @@ private:
     size_t size_;
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_FIELD_DATA_ACCESSOR_H_

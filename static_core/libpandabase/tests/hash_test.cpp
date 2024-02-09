@@ -22,7 +22,7 @@
 #include "os/mem.h"
 #include "utils/asan_interface.h"
 
-namespace panda {
+namespace ark {
 
 class HashTest : public testing::Test {
 public:
@@ -124,9 +124,9 @@ void HashTest::EndOfPageStringHashTest()
     constexpr const int64_t IMM_TWO = 2;
     size_t stringSize = 3;
     constexpr size_t ALLOC_SIZE = PAGE_SIZE * 2U;
-    void *mem = panda::os::mem::MapRWAnonymousRaw(ALLOC_SIZE);
+    void *mem = ark::os::mem::MapRWAnonymousRaw(ALLOC_SIZE);
     ASAN_UNPOISON_MEMORY_REGION(mem, ALLOC_SIZE);
-    panda::os::mem::MakeMemProtected(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE), PAGE_SIZE);
+    ark::os::mem::MakeMemProtected(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE), PAGE_SIZE);
     auto string = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(mem) + PAGE_SIZE) - sizeof(char) * stringSize);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     string[0U] = 'O';
@@ -138,7 +138,7 @@ void HashTest::EndOfPageStringHashTest()
     uint32_t secondHash = T::GetHash32(mutf8String, stringSize - 1L);
     uint32_t firstHash = T::GetHash32String(mutf8String);
     ASSERT_EQ(firstHash, secondHash);
-    auto res = panda::os::mem::UnmapRaw(mem, ALLOC_SIZE);
+    auto res = ark::os::mem::UnmapRaw(mem, ALLOC_SIZE);
     ASSERT_FALSE(res);
 }
 
@@ -169,4 +169,4 @@ TEST_F(HashTest, EndOfPageStringHashTest)
     HashTest::EndOfPageStringHashTest<MurmurHash32<DEFAULT_SEED>>();
 }
 
-}  // namespace panda
+}  // namespace ark

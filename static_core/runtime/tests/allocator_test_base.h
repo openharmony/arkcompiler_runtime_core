@@ -33,7 +33,7 @@
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/include/object_header.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class Allocator>
 class AllocatorTest : public testing::Test {
@@ -1407,6 +1407,6 @@ inline void AllocatorTest<Allocator>::MtAllocCollectTest(size_t minElementsCount
     delete memStats;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H_

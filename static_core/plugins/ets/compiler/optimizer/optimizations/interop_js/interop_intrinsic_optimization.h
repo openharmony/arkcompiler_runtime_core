@@ -23,7 +23,7 @@
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class InteropIntrinsicOptimization : public Optimization, public GraphVisitor {
     using Optimization::Optimization;
@@ -181,6 +181,6 @@ private:
     ArenaVector<BasicBlock *> blocksToProcess_;
     SaveStateBridgesBuilder ssb_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PLUGINS_ETS_COMPILER_OPTIMIZER_INTEROP_JS_INTEROP_INTRINSIC_OPTIMIZATION_H_

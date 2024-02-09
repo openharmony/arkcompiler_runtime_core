@@ -22,7 +22,7 @@
 #include "runtime/include/runtime.h"
 #include "trace/trace.h"
 
-namespace panda {
+namespace ark {
 
 ProfileSaver *ProfileSaver::instance_ = nullptr;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
@@ -327,4 +327,4 @@ void ProfileSaver::MergeAndDumpProfileData()
     }
 }
 
-}  // namespace panda
+}  // namespace ark

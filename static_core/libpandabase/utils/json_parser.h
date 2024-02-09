@@ -27,7 +27,7 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda {
+namespace ark {
 
 class JsonObject {
 public:
@@ -190,7 +190,7 @@ private:
     std::vector<Key> keys_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 WEAK_FOR_LTO_END
 

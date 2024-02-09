@@ -19,7 +19,7 @@
 
 #include "gtest/gtest.h"
 
-namespace panda {
+namespace ark {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -27,14 +27,14 @@ class BaseMemStatsTest : public testing::Test {
 protected:
     void SetUp() override
     {
-        panda::mem::MemConfig::Initialize(128_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
+        ark::mem::MemConfig::Initialize(128_MB, 64_MB, 64_MB, 32_MB, 0U, 0U);
         PoolManager::Initialize();
     }
 
     void TearDown() override
     {
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 };
 
@@ -84,4 +84,4 @@ TEST_F(BaseMemStatsTest, AllocationsOverAllocator)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda
+}  // namespace ark

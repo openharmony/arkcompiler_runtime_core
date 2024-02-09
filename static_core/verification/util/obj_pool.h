@@ -22,7 +22,7 @@
 #include <optional>
 #include <utility>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename T, template <typename...> class Vector, typename InitializerType = void (*)(T &, std::size_t),
           typename CleanerType = void (*)(T &)>
@@ -251,6 +251,6 @@ private:
     Vector<Accessor *> accessors_;
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_UTIL_OBJ_POOL_HPP_

@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/types/ets_void.h"
 #include "runtime/include/class_linker-inl.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 static void JSRuntimeFinalizationQueueCallback(EtsObject *cbarg)
 {
@@ -751,4 +751,4 @@ const IntrinsicsAPI *GetIntrinsicsAPI()
     return &G_INTRINSICS_API;
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

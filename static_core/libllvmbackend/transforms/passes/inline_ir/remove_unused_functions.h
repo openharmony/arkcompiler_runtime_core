@@ -19,9 +19,9 @@
 #include <llvm/ADT/DenseSet.h>
 #include <llvm/IR/PassManager.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 namespace llvm {
 class Function;
@@ -29,7 +29,7 @@ class Module;
 class Value;
 }  // namespace llvm
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 /**
  * Remove unused functions from the module.
@@ -39,7 +39,7 @@ namespace panda::llvmbackend::passes {
  */
 class RemoveUnusedFunctions : public llvm::PassInfoMixin<RemoveUnusedFunctions> {
 public:
-    static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
+    static bool ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &analysis_manager);
@@ -52,6 +52,6 @@ public:
     static constexpr llvm::StringRef ARG_NAME = "remove-unused-functions";
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_INLINE_IR_REMOVE_UNUSED_FUNCTIONS_H

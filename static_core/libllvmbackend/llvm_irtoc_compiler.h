@@ -27,22 +27,22 @@
 
 #include <llvm/Support/Error.h>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CompiledMethod;
 class Graph;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LLVMIrtocCompiler final : public LLVMCompiler, public IrtocCompilerInterface {
 public:
-    Expected<bool, std::string> CanCompile(panda::compiler::Graph *graph) override;
+    Expected<bool, std::string> CanCompile(ark::compiler::Graph *graph) override;
 
-    explicit LLVMIrtocCompiler(panda::compiler::RuntimeInterface *runtime, panda::ArenaAllocator *allocator,
-                               panda::Arch arch, std::string filename);
+    explicit LLVMIrtocCompiler(ark::compiler::RuntimeInterface *runtime, ark::ArenaAllocator *allocator, ark::Arch arch,
+                               std::string filename);
 
-    bool AddGraph(panda::compiler::Graph *graph) override;
+    bool AddGraph(ark::compiler::Graph *graph) override;
 
     void CompileAll() override;
 
@@ -78,16 +78,16 @@ private:
 private:
     llvm::ExitOnError exitOnErr_;
 
-    ArenaVector<panda::Method *> methods_;
+    ArenaVector<ark::Method *> methods_;
     std::unique_ptr<llvm::Module> module_;
     std::unique_ptr<DebugDataBuilder> debugData_;
-    std::unique_ptr<panda::llvmbackend::CreatedObjectFile> objectFile_ {nullptr};
+    std::unique_ptr<ark::llvmbackend::CreatedObjectFile> objectFile_ {nullptr};
     std::string filename_;
 
     LLVMArkInterface arkInterface_;
     bool irFailed_ {false};
-    std::unique_ptr<panda::llvmbackend::MIRCompiler> mirCompiler_;
-    std::unique_ptr<panda::llvmbackend::LLVMOptimizer> optimizer_;
+    std::unique_ptr<ark::llvmbackend::MIRCompiler> mirCompiler_;
+    std::unique_ptr<ark::llvmbackend::LLVMOptimizer> optimizer_;
 };
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_IRTOC_COMPILER_H

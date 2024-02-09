@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
-namespace panda::ets::napi {
+namespace ark::ets::napi {
 static ets_int DestroyEtsVM(EtsVM *vm)
 {
     if (vm == nullptr) {
@@ -117,31 +117,31 @@ static void EtsMobileLogPrint(int id, int level, const char *component, const ch
 {
     int etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_UNKNOWN;
     switch (level) {
-        case panda::Logger::PandaLog2MobileLog::UNKNOWN:
+        case ark::Logger::PandaLog2MobileLog::UNKNOWN:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_UNKNOWN;
             break;
-        case panda::Logger::PandaLog2MobileLog::DEFAULT:
+        case ark::Logger::PandaLog2MobileLog::DEFAULT:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_DEFAULT;
             break;
-        case panda::Logger::PandaLog2MobileLog::VERBOSE:
+        case ark::Logger::PandaLog2MobileLog::VERBOSE:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_VERBOSE;
             break;
-        case panda::Logger::PandaLog2MobileLog::DEBUG:
+        case ark::Logger::PandaLog2MobileLog::DEBUG:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_DEBUG;
             break;
-        case panda::Logger::PandaLog2MobileLog::INFO:
+        case ark::Logger::PandaLog2MobileLog::INFO:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_INFO;
             break;
-        case panda::Logger::PandaLog2MobileLog::WARN:
+        case ark::Logger::PandaLog2MobileLog::WARN:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_WARN;
             break;
-        case panda::Logger::PandaLog2MobileLog::ERROR:
+        case ark::Logger::PandaLog2MobileLog::ERROR:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_ERROR;
             break;
-        case panda::Logger::PandaLog2MobileLog::FATAL:
+        case ark::Logger::PandaLog2MobileLog::FATAL:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_FATAL;
             break;
-        case panda::Logger::PandaLog2MobileLog::SILENT:
+        case ark::Logger::PandaLog2MobileLog::SILENT:
             etsLevel = EtsMobileLogggerLevel::ETS_MOBILE_LOG_LEVEL_SILENT;
             break;
         default:
@@ -276,4 +276,4 @@ extern "C" ETS_EXPORT ets_int _internal_ETS_GetCreatedVMs(EtsVM **vmBuf, ets_siz
     __attribute__((alias("ETS_GetCreatedVMs")));
 extern "C" ETS_EXPORT ets_int _internal_ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArgs)
     __attribute__((alias("ETS_CreateVM")));
-}  // namespace panda::ets::napi
+}  // namespace ark::ets::napi

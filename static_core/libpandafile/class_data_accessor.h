@@ -21,7 +21,7 @@
 #include "field_data_accessor.h"
 #include "method_data_accessor.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class ClassDataAccessor {
@@ -231,6 +231,6 @@ private:
     size_t size_ {0};
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_CLASS_DATA_ACCESSOR_H_

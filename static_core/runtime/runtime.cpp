@@ -74,7 +74,7 @@
 #include "trace/trace.h"
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 
-namespace panda {
+namespace ark {
 
 using std::unique_ptr;
 
@@ -402,10 +402,10 @@ bool Runtime::DestroyUnderLockHolder()
      */
 
     DfxController::Destroy();
-    panda::Logger::Sync();
+    ark::Logger::Sync();
     delete instance_;
     instance_ = nullptr;
-    panda::mem::MemConfig::Finalize();
+    ark::mem::MemConfig::Finalize();
 
     return true;
 }
@@ -482,7 +482,7 @@ void Runtime::InitializeVerifierRuntime()
     auto mode = options_.GetVerificationMode();
     if (IsEnabled(mode)) {
         std::string const &cacheFile = options_.GetVerificationCacheFile();
-        verifierService_ = panda::verifier::CreateService(verifierConfig_, internalAllocator_, classLinker_, cacheFile);
+        verifierService_ = ark::verifier::CreateService(verifierConfig_, internalAllocator_, classLinker_, cacheFile);
     }
 }
 
@@ -540,8 +540,8 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
 #endif
 
     if (IsEnableMemoryHooks()) {
-        panda::os::mem_hooks::PandaHooks::Initialize();
-        panda::os::mem_hooks::PandaHooks::Enable();
+        ark::os::mem_hooks::PandaHooks::Initialize();
+        ark::os::mem_hooks::PandaHooks::Enable();
     }
 
     saveProfilingInfo_ = options_.IsCompilerEnableJit() && options_.IsProfilesaverEnabled();
@@ -553,7 +553,7 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
     isJitEnabled_ = false;
 #endif
 
-    verifierConfig_ = panda::verifier::NewConfig();
+    verifierConfig_ = ark::verifier::NewConfig();
     InitializeVerifierRuntime();
 
     isZygote_ = options_.IsStartAsZygote();
@@ -568,10 +568,10 @@ Runtime::Runtime(const RuntimeOptions &options, mem::InternalAllocatorPtr intern
 
 Runtime::~Runtime()
 {
-    panda::verifier::DestroyConfig(verifierConfig_);
+    ark::verifier::DestroyConfig(verifierConfig_);
 
     if (IsEnableMemoryHooks()) {
-        panda::os::mem_hooks::PandaHooks::Disable();
+        ark::os::mem_hooks::PandaHooks::Disable();
     }
     trace::ScopedTrace scopedTrace("Delete state");
 
@@ -684,12 +684,12 @@ void Runtime::SetDaemonThreadsCount(uint32_t daemonThreadsCnt)
 
 mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
-    auto gcType = panda::mem::GCTypeFromString(options.GetGcType(plugins::LangToRuntimeType(lang)));
+    auto gcType = ark::mem::GCTypeFromString(options.GetGcType(plugins::LangToRuntimeType(lang)));
     if (options.IsNoAsyncJit()) {
         // With no-async-jit we can force compilation inside of c2i bridge (we have DecrementHotnessCounter there)
         // and it can trigger GC which can move objects which are arguments for the method
         // because StackWalker ignores c2i frame
-        return (gcType != panda::mem::GCType::EPSILON_GC) ? (panda::mem::GCType::STW_GC) : gcType;
+        return (gcType != ark::mem::GCType::EPSILON_GC) ? (ark::mem::GCType::STW_GC) : gcType;
     }
     return gcType;
 }
@@ -808,7 +808,7 @@ void Runtime::HandleJitOptions()
     }
 #endif
 
-    bool enableNpHandler = options_.IsCompilerEnableJit() && panda::compiler::g_options.IsCompilerImplicitNullCheck();
+    bool enableNpHandler = options_.IsCompilerEnableJit() && ark::compiler::g_options.IsCompilerImplicitNullCheck();
     if (GetClassLinker()->GetAotManager()->HasAotFiles()) {
         ASSERT(GetPandaVM()->GetCompiler()->IsNoAsyncJit() == options_.IsNoAsyncJit());
         if (GetPandaVM()->GetCompiler()->IsNoAsyncJit()) {
@@ -1405,7 +1405,7 @@ void Runtime::CreateDfxController(const RuntimeOptions &options)
 
     auto compilerNullcheckFlag = DfxController::GetOptionValue(DfxOptionHandler::COMPILER_NULLCHECK);
     if (compilerNullcheckFlag == 0) {
-        panda::compiler::g_options.SetCompilerImplicitNullCheck(false);
+        ark::compiler::g_options.SetCompilerImplicitNullCheck(false);
     }
 }
 
@@ -1504,8 +1504,8 @@ void Runtime::CheckOptionsFromOs() const
 #if !defined(PANDA_QEMU_BUILD) && !defined(PANDA_TARGET_MOBILE)
     // for qemu-aarch64 we will get 32 from GetCacheLineSize()
     // for native arm and qemu-arm we will get 0 from GetCacheLineSize()
-    ASSERT(panda::CACHE_LINE_SIZE == os::mem::GetCacheLineSize());
+    ASSERT(ark::CACHE_LINE_SIZE == os::mem::GetCacheLineSize());
 #endif
 }
 
-}  // namespace panda
+}  // namespace ark

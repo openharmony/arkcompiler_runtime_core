@@ -23,7 +23,7 @@
 
 #include "utils/logger.h"
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 
 using BreakpointConfigT = PandaVector<std::pair<PandaString, Offsets>>;
 
@@ -75,6 +75,6 @@ bool ManagedBreakpointPresent(DebugContext const *ctx, Method::UniqId id)
     return ctx->breakpoint->count(id) > 0;
 }
 
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug
 
 #endif

@@ -26,7 +26,7 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda {
+namespace ark {
 
 class BaseMemStats {
 public:
@@ -62,7 +62,7 @@ private:
     std::array<std::atomic_uint64_t, SPACE_TYPE_SIZE> freed_ {0};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 WEAK_FOR_LTO_END
 

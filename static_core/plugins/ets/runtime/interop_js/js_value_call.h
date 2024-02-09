@@ -19,21 +19,21 @@
 #include <node_api.h>
 #include "utils/span.h"
 #include "libpandabase/mem/mem.h"
-namespace panda {
+namespace ark {
 class Method;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 class Reference;
-}  // namespace panda::mem
+}  // namespace ark::mem
 
-namespace panda::ets {
+namespace ark::ets {
 class EtsObject;
 class EtsString;
 class EtsCoroutine;
-}  // namespace panda::ets
+}  // namespace ark::ets
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 class InteropCtx;
 
 napi_value CallEtsFunctionImpl(napi_env env, Span<napi_value> jsargv);
@@ -75,6 +75,6 @@ static bool WalkQualifiedName(std::string_view name, F const &f)
     return true;
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H_

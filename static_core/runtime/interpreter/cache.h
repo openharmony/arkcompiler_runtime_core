@@ -19,7 +19,7 @@
 #include "libpandabase/utils/math_helpers.h"
 #include "runtime/include/method.h"
 
-namespace panda {
+namespace ark {
 
 class InterpreterCache {
 public:
@@ -60,13 +60,13 @@ public:
 private:
     static size_t GetIndex(const void *pc)
     {
-        return panda::helpers::math::PowerOfTwoTableSlot(reinterpret_cast<size_t>(pc), N, 2U);
+        return ark::helpers::math::PowerOfTwoTableSlot(reinterpret_cast<size_t>(pc), N, 2U);
     }
 
-    static_assert(panda::helpers::math::IsPowerOfTwo(N));
+    static_assert(ark::helpers::math::IsPowerOfTwo(N));
     std::array<Entry, N> data_ {};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_INTERPRETER_CACHE_H_

@@ -16,7 +16,7 @@
 
 #include "runtime/mem/gc/gc.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 GCScopedPhase::GCScopedPhase(GC *gc, GCPhase newPhase)
 {
@@ -53,4 +53,4 @@ PandaString GCScopedPhase::GetGCName()
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

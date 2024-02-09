@@ -18,7 +18,7 @@
 
 #include "disassembler.h"
 
-namespace panda::disasm {
+namespace ark::disasm {
 class PANDA_PUBLIC_API DisasmBackedDebugInfoExtractor : public panda_file::DebugInfoExtractor {
 public:
     explicit DisasmBackedDebugInfoExtractor(
@@ -51,6 +51,6 @@ private:
     mutable std::unordered_map<panda_file::File::EntityId, std::optional<std::string>> sourceNames_ GUARDED_BY(mutex_);
     mutable std::unordered_map<panda_file::File::EntityId, Disassembly> disassemblies_ GUARDED_BY(mutex_);
 };
-}  // namespace panda::disasm
+}  // namespace ark::disasm
 
 #endif  // PANDA_DISASM_BACKED_DEBUG_INFO_EXTRACTOR_H

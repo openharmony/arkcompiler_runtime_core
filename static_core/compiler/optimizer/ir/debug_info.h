@@ -19,7 +19,7 @@
 #include <string>
 #include <limits>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class InstDebugInfo {
 public:
@@ -64,6 +64,6 @@ private:
     size_t offset_ {0};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_DEBUG_INFO_H

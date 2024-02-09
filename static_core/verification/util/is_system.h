@@ -18,7 +18,7 @@
 
 #include "runtime/include/runtime.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 inline bool IsSystemFile(const panda_file::File &file)
 {
@@ -49,5 +49,5 @@ inline bool IsSystemOrSyntheticClass(Class const *klass)
     return IsSystemClass<true>(klass);
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 #endif  // PANDA_VERIFICATION_UTIL_IS_SYSTEM_H

@@ -16,11 +16,11 @@
 #ifndef PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H_
 #define PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H_
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 extern const char VERIFIER_DEBUG_DEFAULT_CONFIG[];
 
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config
 
 #endif  // PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H_

@@ -18,9 +18,15 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-#define ETS_NAPI_ABORT_HOOK()                      \
-    do {                                           \
-        panda::ets::PandaEtsVM::Abort("ETS_NAPI"); \
+#define ETS_NAPI_ABORT_HOOK()                    \
+    do {                                         \
+        std::string msg("ETS_NAPI Abort: ");     \
+        msg += __func__;                         \
+        msg += ",";                              \
+        msg += __FILE__;                         \
+        msg += ":";                              \
+        msg += std::to_string(__LINE__);         \
+        ark::ets::PandaEtsVM::Abort(msg.data()); \
     } while (false)
 
 #define ETS_NAPI_ABORT_IF(pred)    \

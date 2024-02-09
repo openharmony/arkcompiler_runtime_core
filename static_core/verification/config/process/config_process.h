@@ -25,10 +25,10 @@
 
 #include <string>
 
-namespace panda::verifier::config {
+namespace ark::verifier::config {
 bool ProcessConfig(Config *cfg, const Section &section);
 
 void RegisterConfigHandler(Config *cfg, const PandaString &path, callable<bool(Config *, const Section &)> handler);
-}  // namespace panda::verifier::config
+}  // namespace ark::verifier::config
 
 #endif  // PANDA_VERIF_CONFIG_PROCESS_H_

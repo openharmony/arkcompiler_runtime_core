@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 class TaskStatisticsTest : public testing::TestWithParam<TaskStatisticsImplType> {
 public:
@@ -89,4 +89,4 @@ INSTANTIATE_TEST_SUITE_P(TaskStatisticsImplSet, TaskStatisticsTest,
                          testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED,
                                          TaskStatisticsImplType::LOCK_FREE));
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

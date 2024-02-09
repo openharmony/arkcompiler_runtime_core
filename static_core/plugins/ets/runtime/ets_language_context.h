@@ -43,7 +43,7 @@
 #include "ets_class_linker_extension.h"
 #include "ets_vm.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsLanguageContext : public LanguageContextBase {
 public:
@@ -331,6 +331,6 @@ public:
     }
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H_

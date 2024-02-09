@@ -19,12 +19,12 @@
 #include "extensions/extensions.h"
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda::pandasm;
+using namespace ark::pandasm;
 
 TEST(ManglingTests, MangleFunctionName)
 {
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"type1", 0}, language);
     params.emplace_back(Type {"type2", 0}, language);
     params.emplace_back(Type {"type3", 0}, language);
@@ -44,7 +44,7 @@ TEST(ManglingTests, DeMangleFunctionName)
 TEST(ManglingTests, GetFunctionSignatureFromName)
 {
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"type1", 0}, language);
     params.emplace_back(Type {"type2", 0}, language);
     params.emplace_back(Type {"type3", 0}, language);

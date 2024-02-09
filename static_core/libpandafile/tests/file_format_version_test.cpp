@@ -17,7 +17,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::panda_file::test {
+namespace ark::panda_file::test {
 TEST(File, TestGetVersion)
 {
     std::string versionstr;
@@ -44,4 +44,4 @@ TEST(File, GetMinVersion)
     EXPECT_EQ(GetVersion(MIN_VERSION), versionstr);
 }
 
-}  // namespace panda::panda_file::test
+}  // namespace ark::panda_file::test

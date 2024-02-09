@@ -16,7 +16,7 @@
 #include "annotation_data_accessor.h"
 #include "file_items.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 AnnotationDataAccessor::AnnotationDataAccessor(const File &pandaFile, File::EntityId annotationId)
     : pandaFile_(pandaFile), annotationId_(annotationId)
@@ -48,4 +48,4 @@ AnnotationDataAccessor::Tag AnnotationDataAccessor::GetTag(size_t i) const
     return AnnotationDataAccessor::Tag(item);
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

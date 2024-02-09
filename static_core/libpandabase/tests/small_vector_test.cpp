@@ -18,7 +18,7 @@
 #include "utils/small_vector.h"
 #include <gtest/gtest.h>
 
-namespace panda::test {
+namespace ark::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -29,7 +29,7 @@ public:
 
     SmallVectorTest()
     {
-        panda::mem::MemConfig::Initialize(0U, 64_MB, 256_MB, 32_MB, 0U, 0U);
+        ark::mem::MemConfig::Initialize(0U, 64_MB, 256_MB, 32_MB, 0U, 0U);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
     }
@@ -38,7 +38,7 @@ public:
     {
         delete allocator_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     ArenaAllocator *GetAllocator()
@@ -442,4 +442,4 @@ TEST_F(SmallVectorTest, Constructing)
     }
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

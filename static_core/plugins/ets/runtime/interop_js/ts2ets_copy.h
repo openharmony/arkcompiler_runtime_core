@@ -18,10 +18,10 @@
 
 #include <node_api.h>
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool doClscheck);
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_COPY_H_

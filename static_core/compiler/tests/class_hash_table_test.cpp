@@ -21,7 +21,7 @@
 #include "os/filesystem.h"
 #include "runtime/include/file_manager.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class ClassHashTableTest : public AsmTest {
 public:
     ClassHashTableTest()
@@ -370,4 +370,4 @@ TEST_F(ClassHashTableTest, GetClassIdFromClassHashTable)
     ASSERT_EQ(classId1E, classId2E);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

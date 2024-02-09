@@ -32,19 +32,19 @@
 #include "runtime/mem/pygote_space_allocator.h"
 #include "runtime/mem/heap_space.h"
 
-namespace panda {
+namespace ark {
 class ObjectHeader;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda {
+namespace ark {
 class ManagedThread;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda {
+namespace ark {
 class BaseClass;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 class ObjectAllocConfigWithCrossingMap;
 class ObjectAllocConfig;
@@ -117,11 +117,10 @@ public:
         return AllocateLocal(size, align, nullptr);
     }
 
-    [[nodiscard]] virtual void *Allocate(size_t size, Alignment align,
-                                         [[maybe_unused]] panda::ManagedThread *thread) = 0;
+    [[nodiscard]] virtual void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread) = 0;
 
     [[nodiscard]] virtual void *AllocateLocal(size_t size, Alignment align,
-                                              [[maybe_unused]] panda::ManagedThread *thread) = 0;
+                                              [[maybe_unused]] ark::ManagedThread *thread) = 0;
 
     template <class T>
     [[nodiscard]] T *AllocArray(size_t size)
@@ -337,16 +336,16 @@ public:
 
     ~ObjectAllocatorBase() override;
     void *Allocate([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
-                   [[maybe_unused]] panda::ManagedThread *thread) final
+                   [[maybe_unused]] ark::ManagedThread *thread) final
     {
         LOG(FATAL, ALLOC)
             << "Don't use common Allocate method for object allocation without object initialization argument";
         return nullptr;
     }
 
-    [[nodiscard]] virtual void *Allocate(size_t size, Alignment align, panda::ManagedThread *thread,
+    [[nodiscard]] virtual void *Allocate(size_t size, Alignment align, ark::ManagedThread *thread,
                                          ObjMemInitPolicy objInit) = 0;
-    [[nodiscard]] virtual void *AllocateNonMovable(size_t size, Alignment align, panda::ManagedThread *thread,
+    [[nodiscard]] virtual void *AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
                                                    ObjMemInitPolicy objInit) = 0;
 
     /**
@@ -415,7 +414,7 @@ public:
 
     virtual void ResetYoungAllocator() = 0;
 
-    virtual TLAB *CreateNewTLAB(panda::ManagedThread *thread) = 0;
+    virtual TLAB *CreateNewTLAB(ark::ManagedThread *thread) = 0;
 
     virtual size_t GetTLABMaxAllocSize() = 0;
 
@@ -492,12 +491,12 @@ public:
     NO_COPY_SEMANTIC(AllocatorSingleT);
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(AllocatorSingleT);
 
-    [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread) final
+    [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread) final
     {
         return allocator_.Alloc(size, align);
     }
 
-    [[nodiscard]] void *AllocateLocal(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread) final
+    [[nodiscard]] void *AllocateLocal(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread) final
     {
         return allocator_.AllocLocal(size, align);
     }
@@ -607,7 +606,7 @@ public:
     ObjectAllocatorBase *AsObjectAllocator()
     {
         ASSERT(ALLOCATOR_PURPOSE == AllocatorPurpose::ALLOCATOR_PURPOSE_OBJECT);
-        return this->operator panda::mem::ObjectAllocatorBase *();
+        return this->operator ark::mem::ObjectAllocatorBase *();
     }
 
     ~AllocatorPtr() = default;
@@ -640,10 +639,10 @@ public:
 
     ~ObjectAllocatorNoGen() final;
 
-    [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
+    [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                                  ObjMemInitPolicy objInit) final;
 
-    [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, panda::ManagedThread *thread,
+    [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
                                            ObjMemInitPolicy objInit) final;
 
     void VisitAndRemoveAllPools(const MemVisitor &memVisitor) final;
@@ -708,7 +707,7 @@ public:
         LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: ResetYoungAllocator not applicable";
     }
 
-    TLAB *CreateNewTLAB(panda::ManagedThread *thread) final;
+    TLAB *CreateNewTLAB(ark::ManagedThread *thread) final;
 
     size_t GetTLABMaxAllocSize() final;
 
@@ -735,8 +734,7 @@ public:
         return failCount;
     }
 
-    [[nodiscard]] void *AllocateLocal(size_t /* size */, Alignment /* align */,
-                                      panda::ManagedThread * /* thread */) final
+    [[nodiscard]] void *AllocateLocal(size_t /* size */, Alignment /* align */, ark::ManagedThread * /* thread */) final
     {
         LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: AllocateLocal not supported";
         return nullptr;
@@ -822,10 +820,10 @@ public:
 
     ~ObjectAllocatorGen() final;
 
-    [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
+    [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                                  ObjMemInitPolicy objInit) final;
 
-    [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] panda::ManagedThread *thread,
+    [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                                            ObjMemInitPolicy objInit) final;
 
     void *AllocateTenured(size_t size) final
@@ -886,7 +884,7 @@ public:
 
     void ResetYoungAllocator() final;
 
-    TLAB *CreateNewTLAB([[maybe_unused]] panda::ManagedThread *thread) final;
+    TLAB *CreateNewTLAB([[maybe_unused]] ark::ManagedThread *thread) final;
 
     size_t GetTLABMaxAllocSize() final;
 
@@ -909,8 +907,7 @@ public:
         return failCount;
     }
 
-    [[nodiscard]] void *AllocateLocal(size_t /* size */, Alignment /* align */,
-                                      panda::ManagedThread * /* thread */) final
+    [[nodiscard]] void *AllocateLocal(size_t /* size */, Alignment /* align */, ark::ManagedThread * /* thread */) final
     {
         LOG(FATAL, ALLOC) << "ObjectAllocatorGen: AllocateLocal not supported";
         return nullptr;
@@ -943,6 +940,6 @@ template <GCType GC_TYPE, MTModeT MT_MODE = MT_MODE_MULTI>
 class AllocConfig {
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_ALLOCATOR_H

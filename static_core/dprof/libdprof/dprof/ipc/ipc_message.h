@@ -21,7 +21,7 @@
 #include <cstdint>
 #include "macros.h"
 
-namespace panda::dprof::ipc {
+namespace ark::dprof::ipc {
 class Message {
 public:
     static const uint32_t MAX_DATA_SIZE = 1024 * 1024;  // 1MB
@@ -67,6 +67,6 @@ private:
 
 bool SendMessage(int fd, const Message &message);
 int RecvMessage(int fd, Message &message);
-}  // namespace panda::dprof::ipc
+}  // namespace ark::dprof::ipc
 
 #endif  // DPROF_LIBDPROF_DPROF_IPC_IPC_MESSAGE_H

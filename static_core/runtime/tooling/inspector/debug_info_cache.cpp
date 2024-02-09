@@ -19,7 +19,7 @@
 #include "optimizer/ir_builder/inst_builder.h"
 #include "tooling/pt_location.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 void DebugInfoCache::AddPandaFile(const panda_file::File &file)
 {
     os::memory::LockHolder lock(debugInfosMutex_);
@@ -351,4 +351,4 @@ const panda_file::DebugInfoExtractor &DebugInfoCache::GetDebugInfo(const panda_f
     ASSERT(it != debugInfos_.end());
     return it->second;
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

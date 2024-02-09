@@ -25,7 +25,7 @@
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
 
-namespace panda::debugger::test {
+namespace ark::debugger::test {
 
 class DebuggerTest : public testing::Test {
 public:
@@ -37,7 +37,7 @@ public:
         // this test doesn't check GC logic - just to make test easier without any handles
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -51,7 +51,7 @@ public:
     NO_MOVE_SEMANTIC(DebuggerTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 static ObjectHeader *ToPtr(uint64_t v)
@@ -118,7 +118,7 @@ TEST_F(DebuggerTest, Frame)
     constexpr size_t BYTECODE_OFFSET = 0xeeff;
 
     Method method(nullptr, filePtr.get(), methodId, codeId, 0, nargs, nullptr);
-    panda::Frame *frame = test::CreateFrame(nregs + nargs, &method, nullptr);
+    ark::Frame *frame = test::CreateFrame(nregs + nargs, &method, nullptr);
     frame->SetBytecodeOffset(BYTECODE_OFFSET);
 
     struct VRegValue {
@@ -128,9 +128,9 @@ TEST_F(DebuggerTest, Frame)
 
     // NOLINTBEGIN(readability-magic-numbers)
     std::vector<VRegValue> regs {{0x1111111122222222, false},
-                                 {FromPtr(panda::mem::AllocateNullifiedPayloadString(1)), true},
+                                 {FromPtr(ark::mem::AllocateNullifiedPayloadString(1)), true},
                                  {0x3333333344444444, false},
-                                 {FromPtr(panda::mem::AllocateNullifiedPayloadString(1)), true}};
+                                 {FromPtr(ark::mem::AllocateNullifiedPayloadString(1)), true}};
     // NOLINTEND(readability-magic-numbers)
     auto frameHandler = StaticFrameHandler(frame);
     for (size_t i = 0; i < regs.size(); i++) {
@@ -168,7 +168,7 @@ TEST_F(DebuggerTest, Frame)
     }
 
     {
-        VRegValue acc {FromPtr(panda::mem::AllocateNullifiedPayloadString(1)), true};
+        VRegValue acc {FromPtr(ark::mem::AllocateNullifiedPayloadString(1)), true};
         frame->GetAccAsVReg().SetReference(ToPtr(acc.value));
         tooling::PtDebugFrame debugFrame(frame->GetMethod(), frame);
 
@@ -195,4 +195,4 @@ TEST_F(DebuggerTest, Frame)
     test::FreeFrame(frame);
 }
 
-}  // namespace panda::debugger::test
+}  // namespace ark::debugger::test

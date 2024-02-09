@@ -19,7 +19,7 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/DIBuilder.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 using llvm::DIBuilder;
 using llvm::DICompileUnit;
@@ -71,4 +71,4 @@ DebugDataBuilder::~DebugDataBuilder()
     delete builder_;
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

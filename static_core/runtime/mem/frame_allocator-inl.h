@@ -23,7 +23,7 @@
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/mem/stack_like_allocator-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 using StackFrameAllocator = StackLikeAllocator<>;
 
@@ -208,7 +208,7 @@ FrameAllocator<ALIGNMENT, USE_MEMSET>::AllocateArenaImpl(size_t size)
         ASSERT(memPoolAlloc_ != nullptr);
         newArena = memPoolAlloc_->AllocArena<FramesArena>(size, spaceType_, AllocatorType::FRAME_ALLOCATOR, this);
     } else {
-        auto mem = panda::os::mem::AlignedAlloc(GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT), size);
+        auto mem = ark::os::mem::AlignedAlloc(GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT), size);
         if (mem != nullptr) {
             auto arenaBuffOffs = AlignUp(sizeof(FramesArena), GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT));
             newArena = new (mem) FramesArena(size - arenaBuffOffs, ToVoidPtr(ToUintPtr(mem) + arenaBuffOffs));
@@ -246,5 +246,5 @@ inline bool FrameAllocator<ALIGNMENT, USE_MEMSET>::Contains(void *mem)
 
 #undef LOG_FRAME_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_FRAME_ALLOCATOR_INL_H

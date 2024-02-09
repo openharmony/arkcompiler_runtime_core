@@ -21,7 +21,7 @@
 #include "utils/regmask.h"
 #include "concepts.h"
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ARCH_LIST(D) \
@@ -339,6 +339,6 @@ std::enable_if_t<is_stringable_v<String>, String> GetStringFromArch(const Arch &
     return "none";
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_ARCH_H

@@ -23,11 +23,11 @@
 
 #include <node_api.h>
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 class InteropCtx;
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 class EtsMethodWrapper;
 class EtsClassWrapper;
@@ -94,6 +94,6 @@ private:
     napi_ref jsRef_ {};                // only for functions (ETSGLOBAL::)
 };
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_METHOD_WRAPPER_H_

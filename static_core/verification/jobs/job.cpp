@@ -21,7 +21,7 @@
 #include "verification/jobs/job.h"
 #include "verification/public_internal.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 bool Job::UpdateTypes(TypeSystem *types) const
 {
     bool result = true;
@@ -102,4 +102,4 @@ void Job::ErrorHandler::OnError([[maybe_unused]] ClassLinker::Error error, Panda
     LOG(ERROR, VERIFIER) << "Class linker error: " << message;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

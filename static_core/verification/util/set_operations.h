@@ -19,7 +19,7 @@
 #include <cstddef>
 #include "function_traits.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 using std::size_t;
 
 template <size_t N, class... Args>
@@ -114,6 +114,6 @@ S ToSet(const C &c)
     result.insert(c.cbegin(), c.cend());
     return result;
 }
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_UTIL_SET_OPERATIONS__

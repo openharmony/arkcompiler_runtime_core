@@ -18,11 +18,11 @@
 
 #include "tools/sampler/panda_gen_options/generated/aspt_converter_options.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 class ArgsParser {
 public:
-    bool Parse(panda::Span<const char *> args)
+    bool Parse(ark::Span<const char *> args)
     {
         options_.AddOptions(&parser_);
 
@@ -47,7 +47,7 @@ public:
             return false;
         }
 
-        if (!panda::os::IsFileExists(options_.GetInput())) {
+        if (!ark::os::IsFileExists(options_.GetInput())) {
             std::cerr << "[Error] File \"" << options_.GetInput() << "\" not found." << std::endl;
             return false;
         }
@@ -76,6 +76,6 @@ private:
     Options options_ {""};
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_TOOLS_SAMPLER_ARGS_PARSER_H

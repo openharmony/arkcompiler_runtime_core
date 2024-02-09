@@ -18,7 +18,7 @@
 
 #include "aot_builder.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class LLVMAotBuilder : public AotBuilder {
 public:
@@ -76,5 +76,5 @@ private:
     std::unordered_map<std::string, size_t> GetSectionsAddressesImpl(const std::string &cmdline,
                                                                      const std::string &fileName);
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_AOT_AOT_BUILDER_LLVM_AOT_BUILDER_H

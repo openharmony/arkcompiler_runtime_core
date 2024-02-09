@@ -22,7 +22,7 @@
 
 #include <cstddef>
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// class for global memory parameters
 class MemConfig {
@@ -116,6 +116,6 @@ private:
                                                                   // thread creation) allocated native stacks
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_MEM_CONFIG_H

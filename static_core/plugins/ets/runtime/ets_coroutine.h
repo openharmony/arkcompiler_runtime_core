@@ -20,7 +20,7 @@
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
 
-namespace panda::ets {
+namespace ark::ets {
 class PandaEtsVM;
 
 /// @brief The eTS coroutine. It is aware of the native interface and reference storage existance.
@@ -57,7 +57,7 @@ public:
     static EtsCoroutine *GetCurrent()
     {
         Coroutine *co = Coroutine::GetCurrent();
-        if ((co != nullptr) && co->GetThreadLang() == panda::panda_file::SourceLang::ETS) {
+        if ((co != nullptr) && co->GetThreadLang() == ark::panda_file::SourceLang::ETS) {
             return CastFromThread(co);
         }
         return nullptr;
@@ -118,6 +118,6 @@ private:
     // Allocator calls our protected ctor
     friend class mem::Allocator;
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_COROUTINE_H

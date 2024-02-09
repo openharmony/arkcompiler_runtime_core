@@ -15,7 +15,7 @@
 
 #include "unit_test.h"
 #include "optimizer/ir/graph_cloner.h"
-namespace panda::compiler {
+namespace ark::compiler {
 class GraphClonerTest : public CommonTest {
 public:
     GraphClonerTest() : graph_(CreateGraphStartEndBlocks()) {}
@@ -408,4 +408,4 @@ TEST_F(GraphClonerTest, LoopCopingWithoutIndexResolver)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

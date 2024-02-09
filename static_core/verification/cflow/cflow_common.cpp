@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 PandaString OffsetAsHexStr(const void *base, const void *ptr)
 {
@@ -29,4 +29,4 @@ PandaString OffsetAsHexStr(const void *base, const void *ptr)
     return result;
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

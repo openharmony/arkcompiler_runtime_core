@@ -23,7 +23,7 @@
 
 #include "runtime/compiler.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class OsrCodeTest : public testing::Test {
 public:
@@ -34,7 +34,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
     Method *GetMethod(Class *klass, size_t num);
@@ -51,7 +51,7 @@ public:
     NO_MOVE_SEMANTIC(OsrCodeTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 Method *OsrCodeTest::GetMethod(Class *klass, size_t num)
@@ -113,4 +113,4 @@ TEST_F(OsrCodeTest, GetOsrCode)
     CompileMethods();
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

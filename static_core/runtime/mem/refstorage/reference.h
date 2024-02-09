@@ -18,15 +18,15 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/mem.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class ReferenceStorage;
 class RefBlock;
 namespace test {
 class ReferenceStorageTest;
 }  // namespace test
-}  // namespace panda::mem
+}  // namespace ark::mem
 
-namespace panda::mem {
+namespace ark::mem {
 
 class GlobalObjectStorage;
 
@@ -130,10 +130,10 @@ private:
         return reinterpret_cast<Reference *>(addr & MASK_WITHOUT_TYPE);
     }
 
-    friend class panda::mem::ReferenceStorage;
-    friend class panda::mem::GlobalObjectStorage;
-    friend class panda::mem::RefBlock;
-    friend class panda::mem::test::ReferenceStorageTest;
+    friend class ark::mem::ReferenceStorage;
+    friend class ark::mem::GlobalObjectStorage;
+    friend class ark::mem::RefBlock;
+    friend class ark::mem::test::ReferenceStorageTest;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_REFERENCE_H

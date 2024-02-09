@@ -19,11 +19,11 @@
 #include <string_view>
 #include <node_api.h>
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 napi_value GetETSFunction(napi_env env, std::string_view classDescriptor, std::string_view methodName);
 napi_value GetETSClass(napi_env env, std::string_view classDescriptor);
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_PROXY_ETS_PROXY_H_

@@ -17,7 +17,7 @@
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/code_generator/method_properties.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class MethodPropertiesTest : public GraphTest {
 public:
     void CheckCall(Opcode opcode)
@@ -150,4 +150,4 @@ TEST_F(MethodPropertiesTest, SaveState)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

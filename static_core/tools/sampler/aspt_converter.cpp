@@ -15,7 +15,7 @@
 
 #include "tools/sampler/aspt_converter.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 size_t AsptConverter::CollectTracesStats()
 {
@@ -66,7 +66,7 @@ bool AsptConverter::BuildModulesMap()
             SubstituteDirectories(&filepath);
         }
 
-        if (!panda::os::IsFileExists(filepath)) {
+        if (!ark::os::IsFileExists(filepath)) {
             LOG(ERROR, PROFILER) << "Module not found, path: " << filepath;
         }
 
@@ -255,4 +255,4 @@ bool AsptConverter::RunWithOptions(const Options &cliOptions)
     return RunDumpTracesInCsvMode(outname);
 }
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler

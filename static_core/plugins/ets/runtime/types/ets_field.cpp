@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 EtsClass *EtsField::GetDeclaringClass() const
 {
@@ -48,4 +48,4 @@ bool EtsField::IsDeclaredIn(const EtsClass *klass) const
     return this->GetDeclaringClass() == klass;
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

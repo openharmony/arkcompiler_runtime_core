@@ -28,7 +28,7 @@ def llvm_type_getter(type, gc_space)
     'uint64_t' => 'Int64',
     'float' => 'Float',
     'double' => 'Double',
-    'panda::FileEntityId' => 'Int32',
+    'ark::FileEntityId' => 'Int32',
   }
   if ['size_t', 'ssize_t', 'uintptr_t', 'size_t pid'].include? type
     # Predefined variable. Type of 'size_t' is implementation defined

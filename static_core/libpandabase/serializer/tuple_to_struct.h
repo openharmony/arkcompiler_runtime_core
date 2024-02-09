@@ -18,7 +18,7 @@
 
 #include <tuple>
 
-namespace panda::serializer::internal {
+namespace ark::serializer::internal {
 
 template <typename Struct, size_t... IS, typename Tuple>
 Struct TupleToStructImpl([[maybe_unused]] std::index_sequence<IS...> is, Tuple &&tup)
@@ -35,6 +35,6 @@ Struct TupleToStruct(Tuple &&tup)
     return TupleToStructImpl<Struct>(sequence, std::forward<Tuple>(tup));
 }
 
-}  // namespace panda::serializer::internal
+}  // namespace ark::serializer::internal
 
 #endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_TUPLE_TO_STRUCT_H_

@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 EtsString *StdCoreFloatToString(float number, int radix)
 {
@@ -66,4 +66,4 @@ extern "C" EtsBoolean StdCoreFloatIsSafeInteger(float v)
     return ToEtsBoolean(IsInteger(v) && (std::fabs(v) <= helpers::MaxSafeInteger<float>()));
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

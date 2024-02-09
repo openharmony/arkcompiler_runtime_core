@@ -17,7 +17,7 @@
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/optimizations/adjust_arefs.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class AdjustRefsTest : public GraphTest {
 public:
     AdjustRefsTest() = default;
@@ -457,4 +457,4 @@ TEST_F(AdjustRefsTest, TriangleBrokenChain)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

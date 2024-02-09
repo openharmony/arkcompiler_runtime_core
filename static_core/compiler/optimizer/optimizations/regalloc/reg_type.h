@@ -18,7 +18,7 @@
 
 #include "compiler/optimizer/ir/graph.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
 {
@@ -43,5 +43,5 @@ inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
     return DataType::Type::UINT64;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_TYPE_H

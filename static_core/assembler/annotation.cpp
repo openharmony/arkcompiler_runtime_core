@@ -15,7 +15,7 @@
 
 #include "annotation.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 std::unique_ptr<ScalarValue> InitScalarValue(const ScalarValue &scVal)
 {
@@ -239,4 +239,4 @@ std::string AnnotationElement::TypeToString(Value::Type type)
     }
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm

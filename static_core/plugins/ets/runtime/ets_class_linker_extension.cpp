@@ -32,7 +32,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/heap_manager.h"
 
-namespace panda::ets {
+namespace ark::ets {
 namespace {
 enum class EtsNapiType {
     GENERIC,  // - Switches the coroutine to native mode (GC is allowed)
@@ -552,7 +552,7 @@ const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) cons
     UNREACHABLE();
 }
 
-Class *EtsClassLinkerExtension::FromClassObject(panda::ObjectHeader *obj)
+Class *EtsClassLinkerExtension::FromClassObject(ark::ObjectHeader *obj)
 {
     return obj != nullptr ? reinterpret_cast<EtsClass *>(obj)->GetRuntimeClass() : nullptr;
 }
@@ -562,4 +562,4 @@ size_t EtsClassLinkerExtension::GetClassObjectSizeFromClassSize(uint32_t size)
     return EtsClass::GetSize(size);
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

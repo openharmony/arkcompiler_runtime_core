@@ -19,7 +19,7 @@
 #include "runtime/include/runtime_options.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsNativePromiseTest : public EtsNapiTestBaseClass {};
 
@@ -55,4 +55,4 @@ TEST_F(EtsNativePromiseTest, PromiseReject)
     ASSERT_EQ(result, true);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

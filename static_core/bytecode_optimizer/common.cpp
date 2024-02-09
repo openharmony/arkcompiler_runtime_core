@@ -17,7 +17,7 @@
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/graph.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 uint8_t AccReadIndex(const compiler::Inst *inst)
 {
@@ -92,4 +92,4 @@ bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
     return imm >= min && imm <= max;
 }
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

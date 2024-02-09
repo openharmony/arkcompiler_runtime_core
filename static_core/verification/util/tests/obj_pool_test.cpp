@@ -19,7 +19,7 @@
 
 #include <vector>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 namespace {
 
@@ -214,4 +214,4 @@ TEST(VerifierTest_ObjPool, Basic)
     EXPECT_EQ(result, 0);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

@@ -20,7 +20,7 @@
 
 #include <atomic>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class EventLoop {
 public:
     // Notify the running event loop to stop.
@@ -51,6 +51,6 @@ private:
     std::atomic<bool> running_ {false};
     os::memory::RWLock taskExecution_;
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_EVENT_LOOP_H

@@ -23,7 +23,7 @@
 #include "runtime/include/class.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda {
+namespace ark {
 
 class ClassLinker;
 class ClassLinkerErrorHandler;
@@ -221,7 +221,7 @@ public:
     void OnClassPrepared(Class *klass);
 
     // Saving obsolete data after hotreload to enable it to be executed
-    void AddObsoleteClass(const PandaVector<panda::Class *> &classes);
+    void AddObsoleteClass(const PandaVector<ark::Class *> &classes);
     void FreeObsoleteData();
 
     virtual Class *FromClassObject(ObjectHeader *obj);
@@ -353,6 +353,6 @@ private:
     bool canInitializeClasses_ {false};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_

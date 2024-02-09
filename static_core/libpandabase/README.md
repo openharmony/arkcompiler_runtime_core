@@ -31,7 +31,7 @@ To create an argument, it's template constructor should be called. Here is an in
 
 ```c++
                               // argument name | default value | argument description
-    panda::PandArg<bool>   pab("bool",           false,        "Sample boolean argument");
+    ark::PandArg<bool>   pab("bool",           false,        "Sample boolean argument");
                               // argument name | argument description     | sub-arguments
     PandArgCompound        arg("compound",      "Sample boolean argument", {&sub_bool_arg, &sub_int_arg, &sub_double_arg, &sub_string_arg});
 ```
@@ -115,7 +115,7 @@ Tail argument is a sequence of positinal arguments values. Function ```PushBackT
 
 Sample parser usage:
 ```c++
-    panda::PandArgParser pa_parser;
+    ark::PandArgParser pa_parser;
     pa_parser.EnableTail();
     pa_parser.Add(&pab);
     if (!pa_parser.Add(&pab)) {
@@ -163,7 +163,7 @@ In the remainder arguments example, all literals coming after `--` will go to re
 
 How to add tail arguments:
 ```c++
-    panda::PandArgParser pa_parser;
+    ark::PandArgParser pa_parser;
     pa_parser.EnableTail();
     // now pab will be processed as a positional argument
     if (!pa_parser.PushBackTail(&pab)) {

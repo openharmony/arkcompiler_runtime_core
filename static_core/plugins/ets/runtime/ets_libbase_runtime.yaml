@@ -16,33 +16,33 @@ coretypes:
   mirror_class: coretypes::String
 
 - managed_class: std.core.Object
-  mirror_class: panda::ets::EtsObject
+  mirror_class: ark::ets::EtsObject
 
 - managed_class: std.core.void
-  mirror_class: panda::ets::EtsVoid
+  mirror_class: ark::ets::EtsVoid
 
 - managed_class: std.core.String
-  mirror_class: panda::ets::EtsString
+  mirror_class: ark::ets::EtsString
 
 - managed_class: std.core.Promise
-  mirror_class: panda::ets::EtsPromise
+  mirror_class: ark::ets::EtsPromise
 
 - managed_class: Array
-  mirror_class: panda::ets::EtsCharArray
+  mirror_class: ark::ets::EtsCharArray
 
 - managed_class: std.core.Field
-  mirror_class: panda::ets::EtsTypeAPIField
+  mirror_class: ark::ets::EtsTypeAPIField
 
 - managed_class: std.core.Method
-  mirror_class: panda::ets::EtsTypeAPIMethod
+  mirror_class: ark::ets::EtsTypeAPIMethod
 
 - managed_class: std.core.Parameter
-  mirror_class: panda::ets::EtsTypeAPIParameter
+  mirror_class: ark::ets::EtsTypeAPIParameter
 
 - managed_class: escompat.SharedMemory
-  mirror_class: panda::ets::EtsSharedMemory
+  mirror_class: ark::ets::EtsSharedMemory
 
-intrinsics_namespace: panda::ets::intrinsics
+intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
   - name: StdMathSin
@@ -53,7 +53,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::intrinsics::SinF64
+    impl: ark::intrinsics::SinF64
     llvm_impl: sin
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -65,7 +65,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::intrinsics::CosF64
+    impl: ark::intrinsics::CosF64
     llvm_impl: cos
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -77,7 +77,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64, f64 ]
-    impl: panda::intrinsics::PowF64
+    impl: ark::intrinsics::PowF64
     llvm_impl: pow
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -89,7 +89,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::intrinsics::SqrtF64
+    impl: ark::intrinsics::SqrtF64
     llvm_impl: sqrt
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -101,7 +101,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::intrinsics::AbsF64
+    impl: ark::intrinsics::AbsF64
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMaxI32
@@ -112,7 +112,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: panda::intrinsics::MaxI32
+    impl: ark::intrinsics::MaxI32
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMaxI64
@@ -123,7 +123,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ i64, i64 ]
-    impl: panda::intrinsics::MaxI64
+    impl: ark::intrinsics::MaxI64
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMaxF32
@@ -134,7 +134,7 @@ intrinsics:
     signature:
       ret: f32
       args: [ f32, f32 ]
-    impl: panda::intrinsics::MaxF32
+    impl: ark::intrinsics::MaxF32
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMaxF64
@@ -145,7 +145,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64, f64 ]
-    impl: panda::intrinsics::MaxF64
+    impl: ark::intrinsics::MaxF64
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMinI32
@@ -156,7 +156,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: panda::intrinsics::MinI32
+    impl: ark::intrinsics::MinI32
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMinI64
@@ -167,7 +167,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ i64, i64 ]
-    impl: panda::intrinsics::MinI64
+    impl: ark::intrinsics::MinI64
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMinF32
@@ -178,7 +178,7 @@ intrinsics:
     signature:
       ret: f32
       args: [ f32, f32 ]
-    impl: panda::intrinsics::MinF32
+    impl: ark::intrinsics::MinF32
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMinF64
@@ -189,7 +189,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64, f64 ]
-    impl: panda::intrinsics::MinF64
+    impl: ark::intrinsics::MinF64
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathRandom
@@ -200,7 +200,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ ]
-    impl: panda::ets::intrinsics::StdMathRandom
+    impl: ark::ets::intrinsics::StdMathRandom
     clear_flags: [ ]
 
   - name: StdMathAcos
@@ -211,7 +211,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathAcos
+    impl: ark::ets::intrinsics::StdMathAcos
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathAcosh
@@ -222,7 +222,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathAcosh
+    impl: ark::ets::intrinsics::StdMathAcosh
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathAsin
@@ -233,7 +233,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathAsin
+    impl: ark::ets::intrinsics::StdMathAsin
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathAsinh
@@ -244,7 +244,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathAsinh
+    impl: ark::ets::intrinsics::StdMathAsinh
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathAtan2
@@ -255,7 +255,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64, f64 ]
-    impl: panda::ets::intrinsics::StdMathAtan2
+    impl: ark::ets::intrinsics::StdMathAtan2
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathAtanh
@@ -266,7 +266,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathAtanh
+    impl: ark::ets::intrinsics::StdMathAtanh
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathAtan
@@ -277,7 +277,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathAtan
+    impl: ark::ets::intrinsics::StdMathAtan
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathSinh
@@ -288,7 +288,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathSinh
+    impl: ark::ets::intrinsics::StdMathSinh
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathCosh
@@ -299,7 +299,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathCosh
+    impl: ark::ets::intrinsics::StdMathCosh
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathFloor
@@ -310,7 +310,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathFloor
+    impl: ark::ets::intrinsics::StdMathFloor
     llvm_impl: floor
     codegen_func: CreateMathFloor
     can_encode_func: CheckSSE42
@@ -324,7 +324,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathRound
+    impl: ark::ets::intrinsics::StdMathRound
     llvm_impl: round
     codegen_func: CreateMathRoundAway
     can_encode_func: CheckSSE42
@@ -338,7 +338,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathTrunc
+    impl: ark::ets::intrinsics::StdMathTrunc
     llvm_impl: trunc
     codegen_func: CreateMathTrunc
     can_encode_func: CheckSSE42
@@ -352,7 +352,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathCeil
+    impl: ark::ets::intrinsics::StdMathCeil
     codegen_func: CreateMathCeil
     can_encode_func: CheckSSE42
     llvm_impl: ceil
@@ -366,7 +366,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathLog
+    impl: ark::ets::intrinsics::StdMathLog
     llvm_impl: log
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -378,7 +378,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64, f64 ]
-    impl: panda::ets::intrinsics::StdMathRem
+    impl: ark::ets::intrinsics::StdMathRem
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathMod
@@ -389,7 +389,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64, f64 ]
-    impl: panda::ets::intrinsics::StdMathMod
+    impl: ark::ets::intrinsics::StdMathMod
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathClz64
@@ -400,7 +400,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdMathClz64
+    impl: ark::ets::intrinsics::StdMathClz64
     codegen_func: CreateCountLeadingZeroBits
     llvm_codegen_func: EmitCtlz
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -413,7 +413,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32 ]
-    impl: panda::ets::intrinsics::StdMathClz32
+    impl: ark::ets::intrinsics::StdMathClz32
     codegen_func: CreateCountLeadingZeroBits
     llvm_codegen_func: EmitCtlz
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -426,7 +426,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathSignbit
+    impl: ark::ets::intrinsics::StdMathSignbit
     llvm_codegen_func: EmitSignbit
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -438,7 +438,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ f32, f32 ]
-    impl: panda::ets::intrinsics::StdMathImul
+    impl: ark::ets::intrinsics::StdMathImul
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdMathFround
@@ -449,7 +449,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ f64 ]
-    impl: panda::ets::intrinsics::StdMathFround
+    impl: ark::ets::intrinsics::StdMathFround
     llvm_codegen_func: EmitFround
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -464,7 +464,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::StdConsolePrintString
+    impl: ark::ets::intrinsics::StdConsolePrintString
     clear_flags: [ ]
 
   - name: StdConsolePrintU1
@@ -475,7 +475,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ u1 ]
-    impl: panda::ets::intrinsics::StdConsolePrintBool
+    impl: ark::ets::intrinsics::StdConsolePrintBool
     clear_flags: [ ]
 
   - name: StdConsolePrintI8
@@ -486,7 +486,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i8 ]
-    impl: panda::ets::intrinsics::StdConsolePrintI8
+    impl: ark::ets::intrinsics::StdConsolePrintI8
     clear_flags: [ ]
 
   - name: StdConsolePrintI16
@@ -497,7 +497,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i16 ]
-    impl: panda::ets::intrinsics::StdConsolePrintI16
+    impl: ark::ets::intrinsics::StdConsolePrintI16
     clear_flags: [ ]
 
   - name: StdConsolePrintU16
@@ -508,7 +508,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ u16 ]
-    impl: panda::ets::intrinsics::StdConsolePrintChar
+    impl: ark::ets::intrinsics::StdConsolePrintChar
     clear_flags: [ ]
 
   - name: StdConsolePrintI32
@@ -519,7 +519,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i32 ]
-    impl: panda::ets::intrinsics::StdConsolePrintI32
+    impl: ark::ets::intrinsics::StdConsolePrintI32
     clear_flags: [ ]
 
   - name: StdConsolePrintI64
@@ -530,7 +530,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdConsolePrintI64
+    impl: ark::ets::intrinsics::StdConsolePrintI64
     clear_flags: [ ]
 
   - name: StdConsolePrintln
@@ -541,7 +541,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: []
-    impl: panda::ets::intrinsics::StdConsolePrintln
+    impl: ark::ets::intrinsics::StdConsolePrintln
     clear_flags: [ ]
 
   - name: StdCoreLoadLibrary
@@ -552,7 +552,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::LoadLibrary
+    impl: ark::ets::intrinsics::LoadLibrary
     clear_flags: [ ]
 
 ###################
@@ -568,7 +568,7 @@ intrinsics:
       args:
         - i32
         - i32
-    impl: panda::ets::intrinsics::StdCoreStringGetChars
+    impl: ark::ets::intrinsics::StdCoreStringGetChars
     codegen_func: CreateStringGetCharsTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringGetCharsTlab
@@ -583,7 +583,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringGetLength
+    impl: ark::ets::intrinsics::StdCoreStringGetLength
     clear_flags: [ ]
 
   - name: StdCoreStringIsEmpty
@@ -594,7 +594,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringIsEmpty
+    impl: ark::ets::intrinsics::StdCoreStringIsEmpty
     clear_flags: [ ]
 
   - name: StdCoreStringCharAt
@@ -605,7 +605,7 @@ intrinsics:
     signature:
       ret: u16
       args: [ i32 ]
-    impl: panda::ets::intrinsics::StdCoreStringCharAt
+    impl: ark::ets::intrinsics::StdCoreStringCharAt
     set_flags: [ can_throw ]
 
   - name: StdCoreStringEquals
@@ -616,7 +616,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::StdCoreStringEquals
+    impl: ark::ets::intrinsics::StdCoreStringEquals
     codegen_func: CreateStringEquals
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringEquals
@@ -632,7 +632,7 @@ intrinsics:
     signature:
       ret: i16
       args: [ std.core.String, std.core.String ]
-    impl: panda::ets::intrinsics::StdCoreStringLocaleCmp
+    impl: ark::ets::intrinsics::StdCoreStringLocaleCmp
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -644,7 +644,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringNormalizeNFC
+    impl: ark::ets::intrinsics::StdCoreStringNormalizeNFC
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -656,7 +656,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringNormalizeNFD
+    impl: ark::ets::intrinsics::StdCoreStringNormalizeNFD
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -668,7 +668,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringNormalizeNFKC
+    impl: ark::ets::intrinsics::StdCoreStringNormalizeNFKC
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -680,7 +680,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringNormalizeNFKD
+    impl: ark::ets::intrinsics::StdCoreStringNormalizeNFKD
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -692,7 +692,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringToLowerCase
+    impl: ark::ets::intrinsics::StdCoreStringToLowerCase
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -704,7 +704,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringToUpperCase
+    impl: ark::ets::intrinsics::StdCoreStringToUpperCase
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -716,7 +716,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::StdCoreStringToLocaleLowerCase
+    impl: ark::ets::intrinsics::StdCoreStringToLocaleLowerCase
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -728,7 +728,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::StdCoreStringToLocaleUpperCase
+    impl: ark::ets::intrinsics::StdCoreStringToLocaleUpperCase
     clear_flags: [ ]
     set_flags: [can_throw]
 
@@ -740,7 +740,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringIsWellFormed
+    impl: ark::ets::intrinsics::StdCoreStringIsWellFormed
     clear_flags: [ ]
 
   - name: StdCoreStringIndexOf
@@ -751,7 +751,7 @@ intrinsics:
     signature:
       ret: i32
       args: [u16]
-    impl: panda::ets::intrinsics::StdCoreStringIndexOf
+    impl: ark::ets::intrinsics::StdCoreStringIndexOf
     clear_flags: [require_state, runtime_call]
 
   - name: StdCoreStringIndexOfAfter
@@ -762,7 +762,7 @@ intrinsics:
     signature:
       ret: i32
       args: [u16, i32]
-    impl: panda::ets::intrinsics::StdCoreStringIndexOfAfter
+    impl: ark::ets::intrinsics::StdCoreStringIndexOfAfter
     clear_flags: [require_state, runtime_call]
 
   - name: StdCoreStringIndexOfString
@@ -773,7 +773,7 @@ intrinsics:
     signature:
       ret: i32
       args: [std.core.String, i32]
-    impl: panda::ets::intrinsics::StdCoreStringIndexOfString
+    impl: ark::ets::intrinsics::StdCoreStringIndexOfString
     clear_flags: [require_state, runtime_call]
 
   - name: StdCoreStringLastIndexOfString
@@ -784,7 +784,7 @@ intrinsics:
     signature:
       ret: i32
       args: [std.core.String, i32]
-    impl: panda::ets::intrinsics::StdCoreStringLastIndexOfString
+    impl: ark::ets::intrinsics::StdCoreStringLastIndexOfString
     clear_flags: [require_state, runtime_call]
 
   - name: StdCoreStringSubstring
@@ -795,7 +795,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ i32, i32 ]
-    impl: panda::ets::intrinsics::StdCoreStringSubstring
+    impl: ark::ets::intrinsics::StdCoreStringSubstring
     codegen_func: CreateStringSubstringTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStdStringSubstring
@@ -810,7 +810,7 @@ intrinsics:
     signature:
       ret: u16
       args: [ i32 ]
-    impl: panda::ets::intrinsics::StdCoreStringCodePointToChar
+    impl: ark::ets::intrinsics::StdCoreStringCodePointToChar
     clear_flags: [ ]
 
   - name: StdCoreStringHashCode
@@ -821,7 +821,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringHashCode
+    impl: ark::ets::intrinsics::StdCoreStringHashCode
     codegen_func: CreateStringHashCode
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringHashCode
@@ -835,7 +835,7 @@ intrinsics:
     signature:
         ret: u1
         args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringIsCompressed
+    impl: ark::ets::intrinsics::StdCoreStringIsCompressed
     clear_flags: [ ]
 
 ##########################
@@ -849,7 +849,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String, std.core.String ]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderConcatStrings
+    impl: ark::ets::intrinsics::StdCoreStringBuilderConcatStrings
     clear_flags: [ ]
 
   - name: StdCoreToStringBoolean
@@ -860,7 +860,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ u1 ]
-    impl: panda::ets::intrinsics::StdCoreToStringBoolean
+    impl: ark::ets::intrinsics::StdCoreToStringBoolean
     clear_flags: [ ]
 
   - name: StdCoreToStringByte
@@ -871,7 +871,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ i8 ]
-    impl: panda::ets::intrinsics::StdCoreToStringByte
+    impl: ark::ets::intrinsics::StdCoreToStringByte
     clear_flags: [ ]
 
   - name: StdCoreToStringChar
@@ -882,7 +882,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ u16 ]
-    impl: panda::ets::intrinsics::StdCoreToStringChar
+    impl: ark::ets::intrinsics::StdCoreToStringChar
     clear_flags: [ ]
 
   - name: StdCoreToStringShort
@@ -893,7 +893,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ i16 ]
-    impl: panda::ets::intrinsics::StdCoreToStringShort
+    impl: ark::ets::intrinsics::StdCoreToStringShort
     clear_flags: [ ]
 
   - name: StdCoreToStringInt
@@ -904,7 +904,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ i32 ]
-    impl: panda::ets::intrinsics::StdCoreToStringInt
+    impl: ark::ets::intrinsics::StdCoreToStringInt
     clear_flags: [ ]
 
   - name: StdCoreToStringLong
@@ -915,7 +915,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdCoreToStringLong
+    impl: ark::ets::intrinsics::StdCoreToStringLong
     clear_flags: [ ]
 
   - name: StdCoreSbAppendLong
@@ -927,7 +927,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [i64]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendLong
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendLong
 
   - name: StdCoreSbAppendInt
     space: ets
@@ -938,7 +938,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [i32]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendInt
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendInt
 
   - name: StdCoreSbAppendByte
     space: ets
@@ -949,7 +949,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [i8]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendByte
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendByte
 
   - name: StdCoreSbAppendShort
     space: ets
@@ -960,7 +960,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [i16]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendShort
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendShort
 
   - name: StdCoreSbAppendChar
     space: ets
@@ -971,7 +971,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [u16]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendChar
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendChar
 
   - name: StdCoreSbAppendBool
     space: ets
@@ -982,7 +982,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [u1]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendBool
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendBool
 
   - name: StdCoreSbAppendString
     space: ets
@@ -993,7 +993,7 @@ intrinsics:
     signature:
       ret: std.core.StringBuilder
       args: [std.core.String]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderAppendString
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendString
 
   - name: StdCoreSbToString
     space: ets
@@ -1004,7 +1004,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ ]
-    impl: panda::ets::intrinsics::StdCoreStringBuilderToString
+    impl: ark::ets::intrinsics::StdCoreStringBuilderToString
     clear_flags: [ ]
 
 #################
@@ -1018,7 +1018,7 @@ intrinsics:
     signature:
       ret: f64
       args: []
-    impl: panda::ets::intrinsics::EscompatDateNow
+    impl: ark::ets::intrinsics::EscompatDateNow
     clear_flags: [ ]
 
   - name: EscompatDateGetLocalTimezoneOffset
@@ -1029,7 +1029,7 @@ intrinsics:
     signature:
       ret: i64
       args: []
-    impl: panda::ets::intrinsics::EscompatDateGetLocalTimezoneOffset
+    impl: ark::ets::intrinsics::EscompatDateGetLocalTimezoneOffset
     clear_flags: [ ]
 
   - name: EscompatDateGetTimezoneName
@@ -1040,7 +1040,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: []
-    impl: panda::ets::intrinsics::EscompatDateGetTimezoneName
+    impl: ark::ets::intrinsics::EscompatDateGetTimezoneName
     clear_flags: [ ]
 
   - name: EscompatDateGetLocaleString
@@ -1051,7 +1051,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String, std.core.String, i64, u1 ]
-    impl: panda::ets::intrinsics::EscompatDateGetLocaleString
+    impl: ark::ets::intrinsics::EscompatDateGetLocaleString
     clear_flags: [ ]
 
 ########################
@@ -1065,7 +1065,7 @@ intrinsics:
     signature:
       ret: escompat.ArrayBuffer
       args: [std.core.Object]
-    impl: panda::ets::intrinsics::EtsArrayBufferFrom
+    impl: ark::ets::intrinsics::EtsArrayBufferFrom
 
 ###################
 # std.time.Chrono #
@@ -1079,7 +1079,7 @@ intrinsics:
     signature:
       ret: i64
       args: []
-    impl: panda::intrinsics::NanoTime
+    impl: ark::intrinsics::NanoTime
     clear_flags: [ require_state, runtime_call ]
 
 ##################
@@ -1093,7 +1093,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [f32, i32]
-    impl: panda::ets::intrinsics::StdCoreFloatToString
+    impl: ark::ets::intrinsics::StdCoreFloatToString
 
   - name: StdFloatIsNan
     space: ets
@@ -1103,7 +1103,7 @@ intrinsics:
     signature:
       ret: u1
       args: [f32]
-    impl: panda::ets::intrinsics::StdCoreFloatIsNan
+    impl: ark::ets::intrinsics::StdCoreFloatIsNan
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdFloatIsFinite
@@ -1114,7 +1114,7 @@ intrinsics:
     signature:
       ret: u1
       args: [f32]
-    impl: panda::ets::intrinsics::StdCoreFloatIsFinite
+    impl: ark::ets::intrinsics::StdCoreFloatIsFinite
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdFloatBitCastFromInt
@@ -1125,7 +1125,7 @@ intrinsics:
     signature:
       ret: f32
       args: [i32]
-    impl: panda::ets::intrinsics::StdCoreFloatBitCastFromInt
+    impl: ark::ets::intrinsics::StdCoreFloatBitCastFromInt
     llvm_codegen_func: EmitRawBitcastFromInt
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -1137,7 +1137,7 @@ intrinsics:
     signature:
       ret: i32
       args: [f32]
-    impl: panda::ets::intrinsics::StdCoreFloatBitCastToInt
+    impl: ark::ets::intrinsics::StdCoreFloatBitCastToInt
     llvm_codegen_func: EmitRawBitcastToInt
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -1149,7 +1149,7 @@ intrinsics:
     signature:
       ret: u1
       args: [f32]
-    impl: panda::ets::intrinsics::StdCoreFloatIsInteger
+    impl: ark::ets::intrinsics::StdCoreFloatIsInteger
     codegen_func: CreateFloatIsInteger
     llvm_codegen_func: EmitIsInteger
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -1162,7 +1162,7 @@ intrinsics:
     signature:
       ret: u1
       args: [f32]
-    impl: panda::ets::intrinsics::StdCoreFloatIsSafeInteger
+    impl: ark::ets::intrinsics::StdCoreFloatIsSafeInteger
     codegen_func: CreateFloatIsSafeInteger
     llvm_codegen_func: EmitIsSafeInteger
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -1178,7 +1178,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ f64, i32 ]
-    impl: panda::ets::intrinsics::StdCoreDoubleToString
+    impl: ark::ets::intrinsics::StdCoreDoubleToString
 
   - name: StdCoreDoubleToLocaleString
     space: ets
@@ -1188,7 +1188,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::StdCoreDoubleToLocaleString
+    impl: ark::ets::intrinsics::StdCoreDoubleToLocaleString
 
   - name: StdCoreDoubleParseFloat
     space: ets
@@ -1198,7 +1198,7 @@ intrinsics:
     signature:
       ret: f64
       args: [std.core.String]
-    impl: panda::ets::intrinsics::StdCoreDoubleParseFloat
+    impl: ark::ets::intrinsics::StdCoreDoubleParseFloat
 
   - name: StdCoreDoubleParseInt
     space: ets
@@ -1208,7 +1208,7 @@ intrinsics:
     signature:
       ret: f64
       args: [std.core.String, i32]
-    impl: panda::ets::intrinsics::StdCoreDoubleParseInt
+    impl: ark::ets::intrinsics::StdCoreDoubleParseInt
 
   - name: StdCoreDoubleToExponential
     space: ets
@@ -1218,7 +1218,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [f64]
-    impl: panda::ets::intrinsics::StdCoreDoubleToExponential
+    impl: ark::ets::intrinsics::StdCoreDoubleToExponential
 
   - name: StdCoreDoubleToPrecision
     space: ets
@@ -1228,7 +1228,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [f64]
-    impl: panda::ets::intrinsics::StdCoreDoubleToPrecision
+    impl: ark::ets::intrinsics::StdCoreDoubleToPrecision
 
   - name: StdCoreDoubleToFixed
     space: ets
@@ -1238,7 +1238,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [f64]
-    impl: panda::ets::intrinsics::StdCoreDoubleToFixed
+    impl: ark::ets::intrinsics::StdCoreDoubleToFixed
 
   - name: StdDoubleIsNan
     space: ets
@@ -1248,7 +1248,7 @@ intrinsics:
     signature:
       ret: u1
       args: [f64]
-    impl: panda::ets::intrinsics::StdCoreDoubleIsNan
+    impl: ark::ets::intrinsics::StdCoreDoubleIsNan
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdDoubleIsFinite
@@ -1259,7 +1259,7 @@ intrinsics:
     signature:
       ret: u1
       args: [f64]
-    impl: panda::ets::intrinsics::StdCoreDoubleIsFinite
+    impl: ark::ets::intrinsics::StdCoreDoubleIsFinite
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
   - name: StdDoubleBitCastFromLong
@@ -1270,7 +1270,7 @@ intrinsics:
     signature:
       ret: f64
       args: [i64]
-    impl: panda::ets::intrinsics::StdCoreDoubleBitCastFromLong
+    impl: ark::ets::intrinsics::StdCoreDoubleBitCastFromLong
     llvm_codegen_func: EmitRawBitcastFromLong
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -1282,7 +1282,7 @@ intrinsics:
     signature:
       ret: i64
       args: [f64]
-    impl: panda::ets::intrinsics::StdCoreDoubleBitCastToLong
+    impl: ark::ets::intrinsics::StdCoreDoubleBitCastToLong
     llvm_codegen_func: EmitRawBitcastToLong
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
 
@@ -1294,7 +1294,7 @@ intrinsics:
     signature:
       ret: u1
       args: [f64]
-    impl: panda::ets::intrinsics::StdCoreDoubleIsInteger
+    impl: ark::ets::intrinsics::StdCoreDoubleIsInteger
     codegen_func: CreateFloatIsInteger
     llvm_codegen_func: EmitIsInteger
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -1307,7 +1307,7 @@ intrinsics:
     signature:
       ret: u1
       args: [f64]
-    impl: panda::ets::intrinsics::StdCoreDoubleIsSafeInteger
+    impl: ark::ets::intrinsics::StdCoreDoubleIsSafeInteger
     codegen_func: CreateFloatIsSafeInteger
     llvm_codegen_func: EmitIsSafeInteger
     clear_flags: [ no_dce, no_hoist, no_cse, barrier, require_state, runtime_call ]
@@ -1328,7 +1328,7 @@ intrinsics:
          - i32
          - i32
          - i32
-    impl: panda::ets::intrinsics::StdCoreBoolCopyTo
+    impl: ark::ets::intrinsics::StdCoreBoolCopyTo
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
@@ -1347,7 +1347,7 @@ intrinsics:
          - i32
          - i32
          - i32
-    impl: panda::ets::intrinsics::StdCoreCharCopyTo
+    impl: ark::ets::intrinsics::StdCoreCharCopyTo
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
@@ -1366,7 +1366,7 @@ intrinsics:
          - i32
          - i32
          - i32
-    impl: panda::ets::intrinsics::StdCoreByteCopyTo
+    impl: ark::ets::intrinsics::StdCoreByteCopyTo
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
@@ -1385,7 +1385,7 @@ intrinsics:
          - i32
          - i32
          - i32
-    impl: panda::ets::intrinsics::StdCoreShortCopyTo
+    impl: ark::ets::intrinsics::StdCoreShortCopyTo
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
@@ -1404,7 +1404,7 @@ intrinsics:
          - i32
          - i32
          - i32
-    impl: panda::ets::intrinsics::StdCoreIntCopyTo
+    impl: ark::ets::intrinsics::StdCoreIntCopyTo
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
@@ -1423,7 +1423,7 @@ intrinsics:
          - i32
          - i32
          - i32
-    impl: panda::ets::intrinsics::StdCoreLongCopyTo
+    impl: ark::ets::intrinsics::StdCoreLongCopyTo
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
@@ -1442,7 +1442,7 @@ intrinsics:
          - i32
          - i32
          - i32
-    impl: panda::ets::intrinsics::StdCoreFloatCopyTo
+    impl: ark::ets::intrinsics::StdCoreFloatCopyTo
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
@@ -1461,7 +1461,7 @@ intrinsics:
          - i32
          - i32
          - i32
-    impl: panda::ets::intrinsics::StdCoreDoubleCopyTo
+    impl: ark::ets::intrinsics::StdCoreDoubleCopyTo
     set_flags: [can_throw, heap_inv]
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
@@ -1478,7 +1478,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: []
-    impl: panda::ets::intrinsics::StdCorePrintStackTrace
+    impl: ark::ets::intrinsics::StdCorePrintStackTrace
 
   - name: StdCoreStackTraceLines
     space: ets
@@ -1488,7 +1488,7 @@ intrinsics:
     signature:
       ret: std.core.String[]
       args: []
-    impl: panda::ets::intrinsics::StdCoreStackTraceLines
+    impl: ark::ets::intrinsics::StdCoreStackTraceLines
     clear_flags: [ no_dce ]
 
   - name: StdCoreExit
@@ -1499,7 +1499,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [i32]
-    impl: panda::intrinsics::SystemExit
+    impl: ark::intrinsics::SystemExit
     clear_flags: [require_state, runtime_call]
 
 ######################
@@ -1513,7 +1513,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ i32, std.core.Object ]
-    impl: panda::ets::intrinsics::StdGCStartGC
+    impl: ark::ets::intrinsics::StdGCStartGC
 
   - name: StdGCWaitForFinishGC
     space: ets
@@ -1523,7 +1523,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCWaitForFinishGC
+    impl: ark::ets::intrinsics::StdGCWaitForFinishGC
 
   - name: StdGCScheduleGCAfterNthAlloc
     space: ets
@@ -1533,7 +1533,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i32, i32 ]
-    impl: panda::ets::intrinsics::StdGCScheduleGCAfterNthAlloc
+    impl: ark::ets::intrinsics::StdGCScheduleGCAfterNthAlloc
 
   - name: StdGCIsScheduledGCTriggered
     space: ets
@@ -1543,7 +1543,7 @@ intrinsics:
     signature:
       ret: u1
       args: []
-    impl: panda::ets::intrinsics::StdGCIsScheduledGCTriggered
+    impl: ark::ets::intrinsics::StdGCIsScheduledGCTriggered
 
   - name: StdGCPostponeGCStart
     space: ets
@@ -1553,7 +1553,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: []
-    impl: panda::ets::intrinsics::StdGCPostponeGCStart
+    impl: ark::ets::intrinsics::StdGCPostponeGCStart
 
   - name: StdGCPostponeGCEnd
     space: ets
@@ -1563,7 +1563,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: []
-    impl: panda::ets::intrinsics::StdGCPostponeGCEnd
+    impl: ark::ets::intrinsics::StdGCPostponeGCEnd
 
   - name: StdGCAllocatePinnedBooleanArray
     space: ets
@@ -1573,7 +1573,7 @@ intrinsics:
     signature:
       ret: u1[]
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCAllocatePinnedBooleanArray
+    impl: ark::ets::intrinsics::StdGCAllocatePinnedBooleanArray
 
   - name: StdGCAllocatePinnedByteArray
     space: ets
@@ -1583,7 +1583,7 @@ intrinsics:
     signature:
       ret: i8[]
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCAllocatePinnedByteArray
+    impl: ark::ets::intrinsics::StdGCAllocatePinnedByteArray
 
   - name: StdGCAllocatePinnedCharArray
     space: ets
@@ -1593,7 +1593,7 @@ intrinsics:
     signature:
       ret: u16[]
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCAllocatePinnedCharArray
+    impl: ark::ets::intrinsics::StdGCAllocatePinnedCharArray
 
   - name: StdGCAllocatePinnedShortArray
     space: ets
@@ -1603,7 +1603,7 @@ intrinsics:
     signature:
       ret: i16[]
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCAllocatePinnedShortArray
+    impl: ark::ets::intrinsics::StdGCAllocatePinnedShortArray
 
   - name: StdGCAllocatePinnedIntArray
     space: ets
@@ -1613,7 +1613,7 @@ intrinsics:
     signature:
       ret: i32[]
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCAllocatePinnedIntArray
+    impl: ark::ets::intrinsics::StdGCAllocatePinnedIntArray
 
   - name: StdGCAllocatePinnedLongArray
     space: ets
@@ -1623,7 +1623,7 @@ intrinsics:
     signature:
       ret: i64[]
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCAllocatePinnedLongArray
+    impl: ark::ets::intrinsics::StdGCAllocatePinnedLongArray
 
   - name: StdGCAllocatePinnedFloatArray
     space: ets
@@ -1633,7 +1633,7 @@ intrinsics:
     signature:
       ret: f32[]
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCAllocatePinnedFloatArray
+    impl: ark::ets::intrinsics::StdGCAllocatePinnedFloatArray
 
   - name: StdGCAllocatePinnedDoubleArray
     space: ets
@@ -1643,7 +1643,7 @@ intrinsics:
     signature:
       ret: f64[]
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCAllocatePinnedDoubleArray
+    impl: ark::ets::intrinsics::StdGCAllocatePinnedDoubleArray
 
   - name: StdGCGetObjectSpaceType
     space: ets
@@ -1653,7 +1653,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::StdGCGetObjectSpaceType
+    impl: ark::ets::intrinsics::StdGCGetObjectSpaceType
 
   - name: StdGCGetObjectAddress
     space: ets
@@ -1663,7 +1663,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::StdGCGetObjectAddress
+    impl: ark::ets::intrinsics::StdGCGetObjectAddress
 
   - name: StdGCPinObject
     space: ets
@@ -1673,7 +1673,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::StdGCPinObject
+    impl: ark::ets::intrinsics::StdGCPinObject
 
   - name: StdGCUnpinObject
     space: ets
@@ -1683,7 +1683,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::StdGCUnpinObject
+    impl: ark::ets::intrinsics::StdGCUnpinObject
 
   - name: StdGetFreeHeapSize
     space: ets
@@ -1693,7 +1693,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ ]
-    impl: panda::ets::intrinsics::StdGetFreeHeapSize
+    impl: ark::ets::intrinsics::StdGetFreeHeapSize
 
   - name: StdGetUsedHeapSize
     space: ets
@@ -1703,7 +1703,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ ]
-    impl: panda::ets::intrinsics::StdGetUsedHeapSize
+    impl: ark::ets::intrinsics::StdGetUsedHeapSize
 
   - name: StdGetReservedHeapSize
     space: ets
@@ -1713,7 +1713,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ ]
-    impl: panda::ets::intrinsics::StdGetReservedHeapSize
+    impl: ark::ets::intrinsics::StdGetReservedHeapSize
 
   - name: StdGCRegisterNativeAllocation
     space: ets
@@ -1723,7 +1723,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCRegisterNativeAllocation
+    impl: ark::ets::intrinsics::StdGCRegisterNativeAllocation
 
   - name: StdGCRegisterNativeFree
     space: ets
@@ -1733,7 +1733,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i64 ]
-    impl: panda::ets::intrinsics::StdGCRegisterNativeFree
+    impl: ark::ets::intrinsics::StdGCRegisterNativeFree
 
 ##############################
 # std.core.FinalizationQueue #
@@ -1746,7 +1746,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::StdFinalizationQueueRegisterInstance
+    impl: ark::ets::intrinsics::StdFinalizationQueueRegisterInstance
 
 ######################
 # std.core.Promise #
@@ -1759,7 +1759,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [std.core.Object]
-    impl: panda::ets::intrinsics::EtsPromiseResolve
+    impl: ark::ets::intrinsics::EtsPromiseResolve
 
   - name: StdPromiseReject
     space: ets
@@ -1769,7 +1769,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [std.core.Object]
-    impl: panda::ets::intrinsics::EtsPromiseReject
+    impl: ark::ets::intrinsics::EtsPromiseReject
 
   - name: StdPromiseAddToJobQueue
     space: ets
@@ -1779,7 +1779,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [std.core.Object]
-    impl: panda::ets::intrinsics::EtsPromiseAddToJobQueue
+    impl: ark::ets::intrinsics::EtsPromiseAddToJobQueue
 
   - name: StdPromiseAwait
     space: ets
@@ -1789,7 +1789,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args: []
-    impl: panda::ets::intrinsics::EtsAwaitPromise
+    impl: ark::ets::intrinsics::EtsAwaitPromise
 
 ######################
 # std.core.Coroutine #
@@ -1802,7 +1802,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: []
-    impl: panda::ets::intrinsics::StdSystemScheduleCoroutine
+    impl: ark::ets::intrinsics::StdSystemScheduleCoroutine
     set_flags: [heap_inv]
 
 ############################
@@ -1817,7 +1817,7 @@ intrinsics:
     signature:
       ret: escompat.SharedMemory
       args: [ i32 ]
-    impl: panda::ets::intrinsics::SharedMemoryCreate
+    impl: ark::ets::intrinsics::SharedMemoryCreate
 
   - name: SharedMemoryAddI8
     space: ets
@@ -1827,7 +1827,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: panda::ets::intrinsics::SharedMemoryAddI8
+    impl: ark::ets::intrinsics::SharedMemoryAddI8
 
   - name: SharedMemoryAndI8
     space: ets
@@ -1837,7 +1837,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: panda::ets::intrinsics::SharedMemoryAndI8
+    impl: ark::ets::intrinsics::SharedMemoryAndI8
 
   - name: SharedMemoryCompareExchangeI8
     space: ets
@@ -1847,7 +1847,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32, i8, i8 ]
-    impl: panda::ets::intrinsics::SharedMemoryCompareExchangeI8
+    impl: ark::ets::intrinsics::SharedMemoryCompareExchangeI8
 
   - name: SharedMemoryExchangeI8
     space: ets
@@ -1857,7 +1857,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: panda::ets::intrinsics::SharedMemoryExchangeI8
+    impl: ark::ets::intrinsics::SharedMemoryExchangeI8
 
   - name: SharedMemoryLoadI8
     space: ets
@@ -1867,7 +1867,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32 ]
-    impl: panda::ets::intrinsics::SharedMemoryLoadI8
+    impl: ark::ets::intrinsics::SharedMemoryLoadI8
 
   - name: SharedMemoryOrI8
     space: ets
@@ -1877,7 +1877,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: panda::ets::intrinsics::SharedMemoryOrI8
+    impl: ark::ets::intrinsics::SharedMemoryOrI8
 
   - name: SharedMemoryStoreI8
     space: ets
@@ -1887,7 +1887,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: panda::ets::intrinsics::SharedMemoryStoreI8
+    impl: ark::ets::intrinsics::SharedMemoryStoreI8
 
   - name: SharedMemorySubI8
     space: ets
@@ -1897,7 +1897,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: panda::ets::intrinsics::SharedMemorySubI8
+    impl: ark::ets::intrinsics::SharedMemorySubI8
 
   - name: SharedMemoryXorI8
     space: ets
@@ -1907,7 +1907,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ i32, i8 ]
-    impl: panda::ets::intrinsics::SharedMemoryXorI8
+    impl: ark::ets::intrinsics::SharedMemoryXorI8
 
   - name: SharedMemoryWaitI32
     space: ets
@@ -1917,7 +1917,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: panda::ets::intrinsics::SharedMemoryWaitI32
+    impl: ark::ets::intrinsics::SharedMemoryWaitI32
 
   - name: SharedMemoryWaitI64
     space: ets
@@ -1927,7 +1927,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32, i64 ]
-    impl: panda::ets::intrinsics::SharedMemoryWaitI64
+    impl: ark::ets::intrinsics::SharedMemoryWaitI64
 
   - name: SharedMemoryTimedWaitI32
     space: ets
@@ -1937,7 +1937,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32, i32, i64 ]
-    impl: panda::ets::intrinsics::SharedMemoryTimedWaitI32
+    impl: ark::ets::intrinsics::SharedMemoryTimedWaitI32
 
   - name: SharedMemoryTimedWaitI64
     space: ets
@@ -1947,7 +1947,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32, i64, i64 ]
-    impl: panda::ets::intrinsics::SharedMemoryTimedWaitI64
+    impl: ark::ets::intrinsics::SharedMemoryTimedWaitI64
 
   - name: SharedMemoryNotify
     space: ets
@@ -1957,7 +1957,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32 ]
-    impl: panda::ets::intrinsics::SharedMemoryNotify
+    impl: ark::ets::intrinsics::SharedMemoryNotify
 
   - name: SharedMemoryBoundedNotify
     space: ets
@@ -1967,7 +1967,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ i32, i32 ]
-    impl: panda::ets::intrinsics::SharedMemoryBoundedNotify
+    impl: ark::ets::intrinsics::SharedMemoryBoundedNotify
 
   - name: StdCoroutineGetWorkerId
     space: ets
@@ -1977,7 +1977,7 @@ intrinsics:
     signature:
       ret: i32
       args: []
-    impl: panda::intrinsics::SystemCoroutineGetWorkerId
+    impl: ark::intrinsics::SystemCoroutineGetWorkerId
 
 ####################
 # std.core.Runtime #
@@ -1991,7 +1991,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.core.Object, std.core.Object ]
-    impl: panda::ets::intrinsics::StdCoreRuntimeIsSameReference
+    impl: ark::ets::intrinsics::StdCoreRuntimeIsSameReference
     clear_flags: [ ]
 
   - name: StdRuntimeGetHashCode
@@ -2002,7 +2002,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::StdCoreRuntimeGetHashCode
+    impl: ark::ets::intrinsics::StdCoreRuntimeGetHashCode
     clear_flags: [ ]
 
 ##########################
@@ -2017,7 +2017,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [std.core.Object]
-    impl: panda::ets::intrinsics::EscompatJSONStringifyObj
+    impl: ark::ets::intrinsics::EscompatJSONStringifyObj
     clear_flags: [ ]
 
 ###################
@@ -2031,7 +2031,7 @@ intrinsics:
     signature:
       ret: escompat.RegExp
       args: []
-    impl: panda::ets::intrinsics::EscompatRegExpCompile
+    impl: ark::ets::intrinsics::EscompatRegExpCompile
     set_flags: [heap_inv]
 
 
@@ -2043,7 +2043,7 @@ intrinsics:
     signature:
       ret: escompat.RegExpExecArray
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::EscompatRegExpExec
+    impl: ark::ets::intrinsics::EscompatRegExpExec
     set_flags: [heap_inv]
 
 ###################
@@ -2057,7 +2057,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::TypeAPIGetTypeDescriptor
+    impl: ark::ets::intrinsics::TypeAPIGetTypeDescriptor
     clear_flags: [ ]
 
   - name: TypeAPIGetTypeKind
@@ -2068,7 +2068,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetTypeKind
+    impl: ark::ets::intrinsics::TypeAPIGetTypeKind
     clear_flags: [ ]
 
   - name: TypeAPIIsValueType
@@ -2079,7 +2079,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIIsValueType
+    impl: ark::ets::intrinsics::TypeAPIIsValueType
     clear_flags: [ ]
 
   - name: TypeAPIGetTypeName
@@ -2090,7 +2090,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetTypeName
+    impl: ark::ets::intrinsics::TypeAPIGetTypeName
     clear_flags: [ ]
 
   - name: TypeAPIGetClassAttributes
@@ -2101,7 +2101,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetClassAttributes
+    impl: ark::ets::intrinsics::TypeAPIGetClassAttributes
     clear_flags: [ ]
 
   - name: TypeAPIGetFieldsNum
@@ -2112,7 +2112,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetFieldsNum
+    impl: ark::ets::intrinsics::TypeAPIGetFieldsNum
     clear_flags: [ ]
 
   - name: TypeAPIGetOwnFieldsNum
@@ -2123,7 +2123,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetOwnFieldsNum
+    impl: ark::ets::intrinsics::TypeAPIGetOwnFieldsNum
     clear_flags: [ ]
 
   - name: TypeAPIGetField
@@ -2134,7 +2134,7 @@ intrinsics:
     signature:
       ret: std.core.Field
       args: [ std.core.String, i64 ]
-    impl: panda::ets::intrinsics::TypeAPIGetField
+    impl: ark::ets::intrinsics::TypeAPIGetField
     clear_flags: [ ]
 
   - name: TypeAPIGetOwnField
@@ -2145,7 +2145,7 @@ intrinsics:
     signature:
       ret: std.core.Field
       args: [ std.core.String, i64 ]
-    impl: panda::ets::intrinsics::TypeAPIGetOwnField
+    impl: ark::ets::intrinsics::TypeAPIGetOwnField
     clear_flags: [ ]
 
   - name: TypeAPIGetFieldByName
@@ -2156,7 +2156,7 @@ intrinsics:
     signature:
       ret: std.core.Field
       args: [ std.core.String, std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetFieldByName
+    impl: ark::ets::intrinsics::TypeAPIGetFieldByName
     clear_flags: [ ]
 
   - name: TypeAPIGetStaticFieldValue
@@ -2167,7 +2167,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args: [ std.core.String, std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetStaticFieldValue
+    impl: ark::ets::intrinsics::TypeAPIGetStaticFieldValue
     clear_flags: [ ]
 
   - name: TypeAPIGetMethodsNum
@@ -2178,7 +2178,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetMethodsNum
+    impl: ark::ets::intrinsics::TypeAPIGetMethodsNum
     clear_flags: [ ]
 
   - name: TypeAPIGetMethod
@@ -2189,7 +2189,7 @@ intrinsics:
     signature:
       ret: std.core.Method
       args: [ std.core.String, i64 ]
-    impl: panda::ets::intrinsics::TypeAPIGetMethod
+    impl: ark::ets::intrinsics::TypeAPIGetMethod
     clear_flags: [ ]
 
   - name: TypeAPIGetConstructorsNum
@@ -2200,7 +2200,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetConstructorsNum
+    impl: ark::ets::intrinsics::TypeAPIGetConstructorsNum
     clear_flags: [ ]
 
   - name: TypeAPIGetConstructor
@@ -2211,7 +2211,7 @@ intrinsics:
     signature:
       ret: std.core.Method
       args: [ std.core.String, i64 ]
-    impl: panda::ets::intrinsics::TypeAPIGetConstructor
+    impl: ark::ets::intrinsics::TypeAPIGetConstructor
     clear_flags: [ ]
 
   - name: TypeAPIGetParametersNum
@@ -2222,7 +2222,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetParametersNum
+    impl: ark::ets::intrinsics::TypeAPIGetParametersNum
     clear_flags: [ ]
 
   - name: TypeAPIGetParameter
@@ -2233,7 +2233,7 @@ intrinsics:
     signature:
       ret: std.core.Parameter
       args: [ std.core.String, i64 ]
-    impl: panda::ets::intrinsics::TypeAPIGetParameter
+    impl: ark::ets::intrinsics::TypeAPIGetParameter
     clear_flags: [ ]
 
   - name: TypeAPIGetTypeId
@@ -2244,7 +2244,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetTypeId
+    impl: ark::ets::intrinsics::TypeAPIGetTypeId
     clear_flags: [ ]
 
   - name: TypeAPIGetArrayElementType
@@ -2255,7 +2255,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetArrayElementType
+    impl: ark::ets::intrinsics::TypeAPIGetArrayElementType
     clear_flags: [ ]
 
   - name: TypeAPIMakeArrayInstance
@@ -2266,7 +2266,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args: [ std.core.String, i64 ]
-    impl: panda::ets::intrinsics::TypeAPIMakeArrayInstance
+    impl: ark::ets::intrinsics::TypeAPIMakeArrayInstance
     clear_flags: [ ]
 
   - name: TypeAPIGetBaseType
@@ -2277,7 +2277,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetBaseType
+    impl: ark::ets::intrinsics::TypeAPIGetBaseType
     clear_flags: [ ]
 
   - name: TypeAPIGetInterfacesNum
@@ -2288,7 +2288,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetInterfacesNum
+    impl: ark::ets::intrinsics::TypeAPIGetInterfacesNum
     clear_flags: [ ]
 
   - name: TypeAPIGetInterface
@@ -2299,7 +2299,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String, i64 ]
-    impl: panda::ets::intrinsics::TypeAPIGetInterface
+    impl: ark::ets::intrinsics::TypeAPIGetInterface
     clear_flags: [ ]
 
   - name: TypeAPISetStaticFieldValue
@@ -2310,7 +2310,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.String, std.core.String, std.core.Object ]
-    impl: panda::ets::intrinsics::TypeAPISetStaticFieldValue
+    impl: ark::ets::intrinsics::TypeAPISetStaticFieldValue
     clear_flags: [ ]
 
   - name: TypeAPIGetFunctionAttributes
@@ -2321,7 +2321,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetFunctionAttributes
+    impl: ark::ets::intrinsics::TypeAPIGetFunctionAttributes
     clear_flags: [ ]
 
   - name: TypeAPIGetResultType
@@ -2332,7 +2332,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetResultType
+    impl: ark::ets::intrinsics::TypeAPIGetResultType
     clear_flags: [ ]
 
   - name: StdMethodInvoke
@@ -2346,7 +2346,7 @@ intrinsics:
         - std.core.String
         - std.core.Object
         - std.core.Object[]
-    impl: panda::ets::intrinsics::TypeAPIMethodInvoke
+    impl: ark::ets::intrinsics::TypeAPIMethodInvoke
     clear_flags: [ ]
 
   - name: StdMethodInvokeConstructor
@@ -2359,7 +2359,7 @@ intrinsics:
       args:
         - std.core.String
         - std.core.Object[]
-    impl: panda::ets::intrinsics::TypeAPIMethodInvokeConstructor
+    impl: ark::ets::intrinsics::TypeAPIMethodInvokeConstructor
 
   - name: TypeAPIGetReceiverType
     space: ets
@@ -2369,7 +2369,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args: [ std.core.String ]
-    impl: panda::ets::intrinsics::TypeAPIGetReceiverType
+    impl: ark::ets::intrinsics::TypeAPIGetReceiverType
     clear_flags: [ ]
 
 #################
@@ -2383,7 +2383,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ u16 ]
-    impl: panda::ets::intrinsics::StdCoreCharIsUpperCase
+    impl: ark::ets::intrinsics::StdCoreCharIsUpperCase
     clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
   - name: StdCoreCharToUpperCase
@@ -2394,7 +2394,7 @@ intrinsics:
     signature:
       ret: u16
       args: [ u16 ]
-    impl: panda::ets::intrinsics::StdCoreCharToUpperCase
+    impl: ark::ets::intrinsics::StdCoreCharToUpperCase
     clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
   - name: StdCoreCharIsLowerCase
@@ -2405,7 +2405,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ u16 ]
-    impl: panda::ets::intrinsics::StdCoreCharIsLowerCase
+    impl: ark::ets::intrinsics::StdCoreCharIsLowerCase
     clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
   - name: StdCoreCharToLowerCase
@@ -2416,7 +2416,7 @@ intrinsics:
     signature:
       ret: u16
       args: [ u16 ]
-    impl: panda::ets::intrinsics::StdCoreCharToLowerCase
+    impl: ark::ets::intrinsics::StdCoreCharToLowerCase
     clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
 
 ###################
@@ -2431,7 +2431,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldObject
+    impl: ark::ets::intrinsics::ValueAPIGetFieldObject
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldBoolean
@@ -2442,7 +2442,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldBoolean
+    impl: ark::ets::intrinsics::ValueAPIGetFieldBoolean
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByte
@@ -2453,7 +2453,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByte
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByte
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldChar
@@ -2464,7 +2464,7 @@ intrinsics:
     signature:
       ret: u16
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldChar
+    impl: ark::ets::intrinsics::ValueAPIGetFieldChar
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldShort
@@ -2475,7 +2475,7 @@ intrinsics:
     signature:
       ret: i16
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldShort
+    impl: ark::ets::intrinsics::ValueAPIGetFieldShort
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldInt
@@ -2486,7 +2486,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldInt
+    impl: ark::ets::intrinsics::ValueAPIGetFieldInt
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldLong
@@ -2497,7 +2497,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldLong
+    impl: ark::ets::intrinsics::ValueAPIGetFieldLong
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldFloat
@@ -2508,7 +2508,7 @@ intrinsics:
     signature:
       ret: f32
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldFloat
+    impl: ark::ets::intrinsics::ValueAPIGetFieldFloat
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldDouble
@@ -2519,7 +2519,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldDouble
+    impl: ark::ets::intrinsics::ValueAPIGetFieldDouble
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameObject
@@ -2530,7 +2530,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameObject
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameObject
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameBoolean
@@ -2541,7 +2541,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameBoolean
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameBoolean
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameByte
@@ -2552,7 +2552,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameByte
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameByte
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameChar
@@ -2563,7 +2563,7 @@ intrinsics:
     signature:
       ret: u16
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameChar
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameChar
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameShort
@@ -2574,7 +2574,7 @@ intrinsics:
     signature:
       ret: i16
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameShort
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameShort
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameInt
@@ -2585,7 +2585,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameInt
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameInt
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameLong
@@ -2596,7 +2596,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameLong
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameLong
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameFloat
@@ -2607,7 +2607,7 @@ intrinsics:
     signature:
       ret: f32
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameFloat
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameFloat
     clear_flags: [ ]
 
   - name: ValueAPIGetFieldByNameDouble
@@ -2618,7 +2618,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ std.core.Object, std.core.String ]
-    impl: panda::ets::intrinsics::ValueAPIGetFieldByNameDouble
+    impl: ark::ets::intrinsics::ValueAPIGetFieldByNameDouble
     clear_flags: [ ]
 
   - name: ValueAPISetFieldObject
@@ -2629,7 +2629,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, std.core.Object ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldObject
+    impl: ark::ets::intrinsics::ValueAPISetFieldObject
     flags: [heap_inv]
 
   - name: ValueAPISetFieldBoolean
@@ -2640,7 +2640,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, u1 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldBoolean
+    impl: ark::ets::intrinsics::ValueAPISetFieldBoolean
     flags: [heap_inv]
 
   - name: ValueAPISetFieldByte
@@ -2651,7 +2651,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, i8 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByte
+    impl: ark::ets::intrinsics::ValueAPISetFieldByte
     flags: [heap_inv]
 
   - name: ValueAPISetFieldChar
@@ -2662,7 +2662,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, u16 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldChar
+    impl: ark::ets::intrinsics::ValueAPISetFieldChar
     flags: [heap_inv]
 
   - name: ValueAPISetFieldShort
@@ -2673,7 +2673,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, i16 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldShort
+    impl: ark::ets::intrinsics::ValueAPISetFieldShort
     flags: [heap_inv]
 
   - name: ValueAPISetFieldInt
@@ -2684,7 +2684,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, i32 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldInt
+    impl: ark::ets::intrinsics::ValueAPISetFieldInt
     flags: [heap_inv]
 
   - name: ValueAPISetFieldLong
@@ -2695,7 +2695,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, i64 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldLong
+    impl: ark::ets::intrinsics::ValueAPISetFieldLong
     flags: [heap_inv]
 
   - name: ValueAPISetFieldFloat
@@ -2706,7 +2706,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, f32 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldFloat
+    impl: ark::ets::intrinsics::ValueAPISetFieldFloat
     flags: [heap_inv]
 
   - name: ValueAPISetFieldDouble
@@ -2717,7 +2717,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, f64 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldDouble
+    impl: ark::ets::intrinsics::ValueAPISetFieldDouble
     flags: [heap_inv]
 
 
@@ -2730,7 +2730,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, std.core.Object ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameObject
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameObject
     flags: [heap_inv]
 
 
@@ -2742,7 +2742,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, u1 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameBoolean
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameBoolean
     flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameByte
@@ -2753,7 +2753,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i8 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameByte
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameByte
     flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameChar
@@ -2764,7 +2764,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, u16 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameChar
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameChar
     flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameShort
@@ -2775,7 +2775,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i16 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameShort
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameShort
     flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameInt
@@ -2786,7 +2786,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i32 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameInt
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameInt
     flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameLong
@@ -2797,7 +2797,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, i64 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameLong
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameLong
     flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameFloat
@@ -2808,7 +2808,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, f32 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameFloat
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameFloat
     flags: [heap_inv]
 
   - name: ValueAPISetFieldByNameDouble
@@ -2819,7 +2819,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, std.core.String, f64 ]
-    impl: panda::ets::intrinsics::ValueAPISetFieldByNameDouble
+    impl: ark::ets::intrinsics::ValueAPISetFieldByNameDouble
     flags: [heap_inv]
 
 
@@ -2832,7 +2832,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.Object ]
-    impl: panda::ets::intrinsics::ValueAPIGetArrayLength
+    impl: ark::ets::intrinsics::ValueAPIGetArrayLength
     clear_flags: [ ]
 
   - name: ValueAPISetElementObject
@@ -2843,7 +2843,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, std.core.Object ]
-    impl: panda::ets::intrinsics::ValueAPISetElementObject
+    impl: ark::ets::intrinsics::ValueAPISetElementObject
     flags: [heap_inv]
 
   - name: ValueAPISetElementBoolean
@@ -2854,7 +2854,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, u1 ]
-    impl: panda::ets::intrinsics::ValueAPISetElementBoolean
+    impl: ark::ets::intrinsics::ValueAPISetElementBoolean
     flags: [heap_inv]
 
   - name: ValueAPISetElementByte
@@ -2865,7 +2865,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, i8 ]
-    impl: panda::ets::intrinsics::ValueAPISetElementByte
+    impl: ark::ets::intrinsics::ValueAPISetElementByte
     flags: [heap_inv]
 
   - name: ValueAPISetElementChar
@@ -2876,7 +2876,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, u16 ]
-    impl: panda::ets::intrinsics::ValueAPISetElementChar
+    impl: ark::ets::intrinsics::ValueAPISetElementChar
     flags: [heap_inv]
 
   - name: ValueAPISetElementShort
@@ -2887,7 +2887,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, i16 ]
-    impl: panda::ets::intrinsics::ValueAPISetElementShort
+    impl: ark::ets::intrinsics::ValueAPISetElementShort
     flags: [heap_inv]
 
   - name: ValueAPISetElementInt
@@ -2898,7 +2898,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, i32 ]
-    impl: panda::ets::intrinsics::ValueAPISetElementInt
+    impl: ark::ets::intrinsics::ValueAPISetElementInt
     flags: [heap_inv]
 
   - name: ValueAPISetElementLong
@@ -2909,7 +2909,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, i64 ]
-    impl: panda::ets::intrinsics::ValueAPISetElementLong
+    impl: ark::ets::intrinsics::ValueAPISetElementLong
     flags: [heap_inv]
 
   - name: ValueAPISetElementFloat
@@ -2920,7 +2920,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, f32 ]
-    impl: panda::ets::intrinsics::ValueAPISetElementFloat
+    impl: ark::ets::intrinsics::ValueAPISetElementFloat
     flags: [heap_inv]
 
   - name: ValueAPISetElementDouble
@@ -2931,7 +2931,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ std.core.Object, i64, f64 ]
-    impl: panda::ets::intrinsics::ValueAPISetElementDouble
+    impl: ark::ets::intrinsics::ValueAPISetElementDouble
     flags: [heap_inv]
 
 
@@ -2943,7 +2943,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementObject
+    impl: ark::ets::intrinsics::ValueAPIGetElementObject
     clear_flags: [ ]
 
   - name: ValueAPIGetElementBoolean
@@ -2954,7 +2954,7 @@ intrinsics:
     signature:
       ret: u1
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementBoolean
+    impl: ark::ets::intrinsics::ValueAPIGetElementBoolean
     clear_flags: [ ]
 
   - name: ValueAPIGetElementByte
@@ -2965,7 +2965,7 @@ intrinsics:
     signature:
       ret: i8
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementByte
+    impl: ark::ets::intrinsics::ValueAPIGetElementByte
     clear_flags: [ ]
 
   - name: ValueAPIGetElementChar
@@ -2976,7 +2976,7 @@ intrinsics:
     signature:
       ret: u16
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementChar
+    impl: ark::ets::intrinsics::ValueAPIGetElementChar
     clear_flags: [ ]
 
   - name: ValueAPIGetElementShort
@@ -2987,7 +2987,7 @@ intrinsics:
     signature:
       ret: i16
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementShort
+    impl: ark::ets::intrinsics::ValueAPIGetElementShort
     clear_flags: [ ]
 
   - name: ValueAPIGetElementInt
@@ -2998,7 +2998,7 @@ intrinsics:
     signature:
       ret: i32
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementInt
+    impl: ark::ets::intrinsics::ValueAPIGetElementInt
     clear_flags: [ ]
 
   - name: ValueAPIGetElementLong
@@ -3009,7 +3009,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementLong
+    impl: ark::ets::intrinsics::ValueAPIGetElementLong
     clear_flags: [ ]
 
   - name: ValueAPIGetElementFloat
@@ -3020,7 +3020,7 @@ intrinsics:
     signature:
       ret: f32
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementFloat
+    impl: ark::ets::intrinsics::ValueAPIGetElementFloat
     clear_flags: [ ]
 
   - name: ValueAPIGetElementDouble
@@ -3031,7 +3031,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ std.core.Object, i64 ]
-    impl: panda::ets::intrinsics::ValueAPIGetElementDouble
+    impl: ark::ets::intrinsics::ValueAPIGetElementDouble
     clear_flags: [ ]
 
 ###############################
@@ -3046,7 +3046,7 @@ intrinsics:
     signature:
       ret: i64
       args: []
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxCreate
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxCreate
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxDestroy
@@ -3057,7 +3057,7 @@ intrinsics:
     signature:
       ret: std.core.void
       args: [ i64 ]
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxDestroy
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxDestroy
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxCommit
@@ -3070,7 +3070,7 @@ intrinsics:
       args:
         - i64
         - std.core.Object[]
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxCommit
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxCommit
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxGetError
@@ -3082,7 +3082,7 @@ intrinsics:
       ret: std.core.String
       args:
         - i64
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxGetError
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxGetError
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxGetObjectsArrayForCCtor
@@ -3094,7 +3094,7 @@ intrinsics:
       ret: std.core.Object[]
       args:
         - i64
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxGetObjectsArrayForCCtor
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxGetObjectsArrayForCCtor
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxGetTypeDescFromPointer
@@ -3106,7 +3106,7 @@ intrinsics:
       ret: std.core.String
       args:
         - i64
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxGetTypeDescFromPointer
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxGetTypeDescFromPointer
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxClassCreate
@@ -3120,7 +3120,7 @@ intrinsics:
         - i64
         - std.core.String
         - i32
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassCreate
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxClassCreate
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxClassSetBase
@@ -3133,7 +3133,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassSetBase
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxClassSetBase
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxClassAddIface
@@ -3146,7 +3146,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassAddIface
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxClassAddIface
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxClassAddField
@@ -3162,7 +3162,7 @@ intrinsics:
         - std.core.String
         - i32
         - i32
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxClassAddField
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxClassAddField
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxInterfaceCreate
@@ -3175,7 +3175,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxInterfaceCreate
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxInterfaceCreate
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxInterfaceAddBase
@@ -3188,7 +3188,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxInterfaceAddBase
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxInterfaceAddBase
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodCreate
@@ -3202,7 +3202,7 @@ intrinsics:
         - i64
         - std.core.String
         - i32
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodCreate
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodCreate
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddAccessMod
@@ -3215,7 +3215,7 @@ intrinsics:
       args:
         - i64
         - i32
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddAccessMod
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddAccessMod
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddParam
@@ -3230,7 +3230,7 @@ intrinsics:
         - std.core.String
         - std.core.String
         - i32
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddParam
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddParam
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromMethod
@@ -3243,7 +3243,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromMethod
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromMethod
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromLambda
@@ -3257,7 +3257,7 @@ intrinsics:
         - i64
         - i32
         - std.core.String
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromLambda
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromLambda
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda
@@ -3270,7 +3270,7 @@ intrinsics:
       args:
         - i64
         - i32
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyFromErasedLambda
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddBodyDefault
@@ -3282,7 +3282,7 @@ intrinsics:
       ret: std.core.String
       args:
         - i64
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyDefault
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddBodyDefault
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAddResult
@@ -3295,7 +3295,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddResult
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAddResult
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxMethodAdd
@@ -3307,7 +3307,7 @@ intrinsics:
       ret: std.core.String
       args:
         - i64
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxMethodAdd
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxMethodAdd
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxLambdaTypeCreate
@@ -3320,7 +3320,7 @@ intrinsics:
       args:
         - i64
         - i32
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeCreate
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeCreate
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxLambdaTypeAddParam
@@ -3334,7 +3334,7 @@ intrinsics:
         - i64
         - std.core.String
         - i32
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddParam
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddParam
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxLambdaTypeAddResult
@@ -3347,7 +3347,7 @@ intrinsics:
       args:
         - i64
         - std.core.String
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddResult
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAddResult
     clear_flags: [ ]
 
   - name: TypeAPITypeCreatorCtxLambdaTypeAdd
@@ -3359,5 +3359,5 @@ intrinsics:
       ret: std.core.String
       args:
         - i64
-    impl: panda::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAdd
+    impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAdd
     clear_flags: [ ]

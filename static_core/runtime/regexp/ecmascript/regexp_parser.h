@@ -28,7 +28,7 @@
 #include "unicode/utypes.h"
 #include "unicode/udata.h"
 
-namespace panda {
+namespace ark {
 class RegExpParser {
 public:
     static constexpr auto FLAG_GLOBAL = (1U << 0U);
@@ -236,5 +236,5 @@ private:
     DynChunk groupNames_ {};
     PandaVector<PandaString> newGroupNames_ {};
 };
-}  // namespace panda
+}  // namespace ark
 #endif  // CORE_REGEXP_PARSER_H

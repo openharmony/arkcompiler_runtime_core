@@ -15,13 +15,13 @@
 
 #include "disassembler.h"
 
-namespace panda::disasm {
+namespace ark::disasm {
 void Disassembler::GeteTSMetadata()
 {
     LOG(DEBUG, DISASSEMBLER) << "\n[getting ETS-specific metadata]\n";
 
     for (auto &pair : prog_.recordTable) {
-        if (pair.second.language == panda::panda_file::SourceLang::ETS) {
+        if (pair.second.language == ark::panda_file::SourceLang::ETS) {
             const auto recordId = recordNameToId_[pair.first];
 
             if (file_->IsExternal(recordId)) {
@@ -40,7 +40,7 @@ void Disassembler::GeteTSMetadata()
     }
 
     for (auto &pair : prog_.functionTable) {
-        if (pair.second.language == panda::panda_file::SourceLang::ETS) {
+        if (pair.second.language == ark::panda_file::SourceLang::ETS) {
             const auto methodId = methodNameToId_[pair.first];
 
             GetETSMetadata(&pair.second, methodId);
@@ -280,4 +280,4 @@ AnnotationList Disassembler::GetETSAnnotation(const panda_file::File::EntityId &
     return annList;
 }
 
-}  // namespace panda::disasm
+}  // namespace ark::disasm

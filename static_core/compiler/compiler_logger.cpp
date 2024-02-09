@@ -15,7 +15,7 @@
 
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 std::bitset<CompilerLoggerComponents::LOG_COMPONENTS_NUM> CompilerLogger::components_(0);
 
 // clang-format off
@@ -45,4 +45,4 @@ void CompilerLogger::SetComponents(const std::vector<std::string>& args)
     }
 }
 // clang-format on
-}  // namespace panda::compiler
+}  // namespace ark::compiler

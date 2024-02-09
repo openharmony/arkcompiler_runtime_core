@@ -15,9 +15,9 @@
 
 #include "runtime/verify_app_install.h"
 
-namespace panda {
+namespace ark {
 bool IsVerifySuccInAppInstall([[maybe_unused]] const panda_file::File *file)
 {
     return true;
 }
-}  // namespace panda
+}  // namespace ark

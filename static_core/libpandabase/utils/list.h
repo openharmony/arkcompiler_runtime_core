@@ -18,7 +18,7 @@
 
 #include "macros.h"
 
-namespace panda {
+namespace ark {
 
 template <typename T>
 class List;
@@ -604,6 +604,6 @@ private:
     size_t size_ = 0;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_UTILS_LIST_H_

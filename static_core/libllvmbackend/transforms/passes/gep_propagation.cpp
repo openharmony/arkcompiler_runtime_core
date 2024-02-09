@@ -42,18 +42,18 @@ using llvm::Instruction;
 using llvm::PHINode;
 using llvm::SelectInst;
 // Gc utils
-using panda::llvmbackend::gc_utils::HasBeenGcRef;
-using panda::llvmbackend::gc_utils::IsDerived;
-using panda::llvmbackend::gc_utils::IsGcFunction;
-using panda::llvmbackend::gc_utils::IsGcRefType;
+using ark::llvmbackend::gc_utils::HasBeenGcRef;
+using ark::llvmbackend::gc_utils::IsDerived;
+using ark::llvmbackend::gc_utils::IsGcFunction;
+using ark::llvmbackend::gc_utils::IsGcRefType;
 // Utils
-using panda::llvmbackend::gc_utils::IsFunctionSupplemental;
+using ark::llvmbackend::gc_utils::IsFunctionSupplemental;
 
 /// Optimize no-op PHINodes and Selects in place.
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static llvm::cl::opt<bool> g_optimizeNoop("gprop-optimize", llvm::cl::Hidden, llvm::cl::init(true));
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 llvm::PreservedAnalyses GepPropagation::run(llvm::Function &function, llvm::FunctionAnalysisManager & /*AM*/)
 {
@@ -122,7 +122,7 @@ void GepPropagation::Propagate(Function *function)
 static std::pair<Instruction *, Instruction *> FindSplitGep(Function *function, Instruction *inst, Instruction **ipoint)
 {
     auto &ctx = function->getContext();
-    auto bptrTy = llvm::PointerType::get(ctx, panda::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE);
+    auto bptrTy = llvm::PointerType::get(ctx, ark::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE);
     auto undefBase = llvm::UndefValue::get(bptrTy);
     auto undefOffset = llvm::UndefValue::get(Type::getInt32Ty(ctx));
     auto phi = llvm::dyn_cast<PHINode>(inst);
@@ -495,4 +495,4 @@ Instruction *GepPropagation::CloneSequence(llvm::IRBuilder<> *builder, SmallVect
     return prev;
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

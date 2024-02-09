@@ -17,8 +17,8 @@
 
 #include "generated/bytecodeopt_options_gen.h"
 
-namespace panda::bytecodeopt {
-PANDA_PUBLIC_API extern panda::bytecodeopt::Options g_options;
-}  // namespace panda::bytecodeopt
+namespace ark::bytecodeopt {
+PANDA_PUBLIC_API extern ark::bytecodeopt::Options g_options;
+}  // namespace ark::bytecodeopt
 
 #endif  // BYTECODEOPT_OPTIONS_H

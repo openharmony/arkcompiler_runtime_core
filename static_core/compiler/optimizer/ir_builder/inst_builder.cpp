@@ -21,7 +21,7 @@
 #include "callconv.h"
 #endif
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 /* static */
 DataType::Type InstBuilder::ConvertPbcType(panda_file::Type type)
@@ -490,4 +490,4 @@ void InstBuilder::SyncWithGraph()
     currentDefs_ = &defs_[currentBb_->GetId()];
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

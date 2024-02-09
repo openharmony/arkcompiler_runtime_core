@@ -27,7 +27,7 @@
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/method.h"
 
-namespace panda {
+namespace ark {
 
 bool IsMaxSpecificMethod(const Class *iface, const Method &method, size_t startindex, const ITable &itable);
 
@@ -340,6 +340,6 @@ private:
     PandaVector<CopiedMethod> copiedMethods_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_VTABLE_BUILDER_H_

@@ -21,13 +21,13 @@
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/itable.h"
 
-namespace panda {
+namespace ark {
 
 class ClassLinker;
 
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsITableBuilder : public ITableBuilder {
 public:
@@ -48,6 +48,6 @@ private:
     ITable itable_;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_ITABLE_BUILDER_H_

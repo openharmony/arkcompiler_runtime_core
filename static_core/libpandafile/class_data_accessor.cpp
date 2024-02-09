@@ -19,7 +19,7 @@
 #include "utils/leb128.h"
 #include "utils/utf.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 ClassDataAccessor::ClassDataAccessor(const File &pandaFile, File::EntityId classId)
     : pandaFile_(pandaFile), classId_(classId)
@@ -60,4 +60,4 @@ ClassDataAccessor::ClassDataAccessor(const File &pandaFile, File::EntityId class
     }
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

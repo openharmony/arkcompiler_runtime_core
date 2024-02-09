@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-namespace panda::test::span {
+namespace ark::test::span {
 
 template <class T>
 std::string ToString(Span<T> s)
@@ -125,4 +125,4 @@ TEST(Span, AsBytes)
 }
 
 // NOLINTEND(readability-magic-numbers,modernize-avoid-c-arrays)
-}  // namespace panda::test::span
+}  // namespace ark::test::span

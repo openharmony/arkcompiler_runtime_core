@@ -19,7 +19,7 @@
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/rpo.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool LoopAnalyzer::RunImpl()
 {
     GetGraph()->RunPass<DominatorsTree>();
@@ -433,4 +433,4 @@ bool IsLoopSingleBackEdgeExitPoint(Loop *loop)
     }
     return true;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

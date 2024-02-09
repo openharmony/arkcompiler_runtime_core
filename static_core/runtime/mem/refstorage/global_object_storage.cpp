@@ -26,7 +26,7 @@
 #include "reference.h"
 #include "utils/logger.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 GlobalObjectStorage::GlobalObjectStorage(mem::InternalAllocatorPtr allocator, size_t maxSize, bool enableSizeCheck)
     : allocator_(allocator)
@@ -146,4 +146,4 @@ void GlobalObjectStorage::Dump()
 {
     globalStorage_->DumpWithLock();
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

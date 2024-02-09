@@ -31,7 +31,7 @@
 extern "C" void StackOverflowExceptionEntrypointTrampoline();
 #endif
 
-namespace panda {
+namespace ark {
 
 static bool IsValidStack([[maybe_unused]] const ManagedThread *thread)
 {
@@ -74,7 +74,7 @@ static bool CallSignalActionHandler(int sig, siginfo_t *info, void *context)
 
 bool SignalManager::SignalActionHandler(int sig, siginfo_t *info, void *context)
 {
-    panda::Logger::Sync();
+    ark::Logger::Sync();
     if (InOatCode(info, context, true)) {
         for (const auto &handler : oatCodeHandler_) {
             if (handler->Action(sig, info, context)) {
@@ -234,7 +234,7 @@ static uintptr_t FindCompilerEntrypoint(const uintptr_t *fp)
     // +----------------+ <- Frame pointer
     // | Frame pointer  |
     // +----------------+
-    // | panda::Method* |
+    // | ark::Method* |
     // +----------------+
     const int compiledFrameMethodOffset = BoundaryFrame<FrameKind::COMPILER>::METHOD_OFFSET;
 
@@ -451,7 +451,7 @@ bool NullPointerHandler::Action(int sig, siginfo_t *siginfo, void *context)
     LOG(DEBUG, RUNTIME) << "NullPointerHandler happen,Throw NullPointerHandler Exception, signal:" << sig;
     /* NullPointer has been check in aot or here now,then return to interpreter, so exception not build here
      * issue #1437
-     * panda::ThrowNullPointerException();
+     * ark::ThrowNullPointerException();
      */
     return true;
 }
@@ -494,4 +494,4 @@ bool StackOverflowHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginfo, 
 
     return true;
 }
-}  // namespace panda
+}  // namespace ark

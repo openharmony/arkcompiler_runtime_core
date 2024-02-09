@@ -110,13 +110,13 @@ Summary:
     },
     "HttpDate.class": {
         "error": "c2p: /panda/bytecode_optimizer/inst_builder.cpp:128:
-        void panda::bytecodeopt::InstBuilder::AddCatchPhi():
+        void ark::bytecodeopt::InstBuilder::AddCatchPhi():
         Assertion `catch_begin->IsCatchBegin()' failed.\n"
     },
     "SSLContextSpi.class": {
         "error": "Unsupported instruction in alias analysis: 7.ref CatchPhi v10, v12, v12 -> (v19, v19, v18, v17, v17, v17)
         c2p: /panda/compiler/optimizer/analysis/alias_analysis.cpp:395:
-        virtual void panda::compiler::AliasVisitor::VisitDefault(panda::compiler::Inst*):
+        virtual void ark::compiler::AliasVisitor::VisitDefault(ark::compiler::Inst*):
         Assertion inst->GetType() != DataType::REFERENCE && cond_val' failed."
     }
 }

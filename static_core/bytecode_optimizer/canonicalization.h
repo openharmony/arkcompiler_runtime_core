@@ -21,11 +21,11 @@
 #include "compiler/optimizer/pass.h"
 #include "compiler/optimizer/ir/graph_visitor.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
-using panda::compiler::BasicBlock;
-using panda::compiler::Inst;
-using panda::compiler::Opcode;
+using ark::compiler::BasicBlock;
+using ark::compiler::Inst;
+using ark::compiler::Opcode;
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class Canonicalization : public compiler::Optimization, public compiler::GraphVisitor {
@@ -64,6 +64,6 @@ public:
 private:
     bool result_ {false};
 };
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPT_CANONICALIZATION_H

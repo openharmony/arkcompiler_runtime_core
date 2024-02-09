@@ -18,19 +18,19 @@
 
 #include <llvm/IR/PassManager.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 namespace llvm {
 class GlobalObject;
 }  // namespace llvm
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 class MarkInlineModule : public llvm::PassInfoMixin<MarkInlineModule> {
 public:
-    static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
+    static bool ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &analysis_manager);
@@ -42,6 +42,6 @@ public:
     static constexpr llvm::StringRef ARG_NAME = "mark-inline-module";
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_INLINE_IR_MARK_INLINE_MODULE_H

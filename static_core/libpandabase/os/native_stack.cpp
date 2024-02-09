@@ -15,7 +15,7 @@
 
 #include "native_stack.h"
 
-namespace panda::os::native_stack {
+namespace ark::os::native_stack {
 #if !defined(PANDA_TARGET_UNIX)
 void DumpUnattachedThread::AddTid([[maybe_unused]] pid_t tidThread) {}
 
@@ -54,4 +54,4 @@ std::string ChangeJaveStackFormat([[maybe_unused]] const char *descriptor)
 }
 #endif  // PANDA_TARGET_UNIX
 
-}  // namespace panda::os::native_stack
+}  // namespace ark::os::native_stack

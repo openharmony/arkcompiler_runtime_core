@@ -20,7 +20,7 @@
 #include "compiler_logger.h"
 #include "events/events.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class InliningTest : public AsmTest {
 public:
     InliningTest()
@@ -716,4 +716,4 @@ TEST_F(InliningTest, PolymorphicInlineWithThrow)
     g_options.SetCompilerInliningSkipAlwaysThrowMethods(skipThrowMethods);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

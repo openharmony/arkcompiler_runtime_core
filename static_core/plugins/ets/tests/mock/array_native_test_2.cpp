@@ -22,7 +22,7 @@
 
 // NOLINTBEGIN(modernize-avoid-c-arrays, readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsNativeInterfaceArrayTest : public MockEtsNapiTestBaseClass {};
 
@@ -552,6 +552,6 @@ TEST_F(EtsNativeInterfaceArrayTest, SetObjectArrayElementErrorTests2)
     }
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(modernize-avoid-c-arrays, readability-magic-numbers)

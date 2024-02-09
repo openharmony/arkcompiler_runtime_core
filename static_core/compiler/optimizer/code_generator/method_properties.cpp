@@ -18,7 +18,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 MethodProperties::MethodProperties(const Graph *graph)
 {
@@ -78,4 +78,4 @@ MethodProperties::MethodProperties(const Graph *graph)
 
     SetRequireFrameSetup(!IsLeaf() || graph->IsOsrMode());
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

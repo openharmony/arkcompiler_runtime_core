@@ -16,7 +16,7 @@
 #include "codegen_native.h"
 #include "optimizer/code_generator/method_properties.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void CodegenNative::CreateFrameInfo()
 {
@@ -94,4 +94,4 @@ void CodegenNative::GenerateEpilogue()
     GetCallingConvention()->GenerateNativeEpilogue(*GetFrameInfo(), []() {});
 #endif
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

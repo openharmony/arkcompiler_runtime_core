@@ -18,7 +18,7 @@
 
 #include <sstream>
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct SourcePosition {
@@ -83,6 +83,6 @@ std::string JsonSerializeProgramItems(const T &itemTable)
     ss << " ]";
     return ss.str();
 }
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_IDE_HELPERS_H

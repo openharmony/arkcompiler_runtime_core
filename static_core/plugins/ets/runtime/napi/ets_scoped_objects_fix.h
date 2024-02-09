@@ -27,7 +27,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 
-namespace panda::ets::napi {
+namespace ark::ets::napi {
 enum class EtsNapiException {
     ARRAY_INDEX_OUT_OF_BOUNDS,
     ARRAY_STORE,
@@ -343,6 +343,6 @@ public:
     NO_COPY_SEMANTIC(ScopedManagedCodeFastNative);
     NO_MOVE_SEMANTIC(ScopedManagedCodeFastNative);
 };
-}  // namespace panda::ets::napi
+}  // namespace ark::ets::napi
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_SCOPED_OBJECTS_FIX_H

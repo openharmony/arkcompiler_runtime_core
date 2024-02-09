@@ -20,7 +20,7 @@
 #include "runtime/thread_pool.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 
-namespace panda::mem {
+namespace ark::mem {
 // Forward declaration for GCWorkersProcessor
 class GCWorkersThreadPool;
 
@@ -162,6 +162,6 @@ private:
     friend class GCWorkersProcessor;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_WORKERS_THREAD_POOL_H

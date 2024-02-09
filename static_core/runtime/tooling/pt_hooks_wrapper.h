@@ -23,7 +23,7 @@
 #include "pt_thread_info.h"
 #include "pt_hook_type_info.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class PtHooksWrapper : public PtHooks {
@@ -470,6 +470,6 @@ private:
     std::atomic_bool vmdeathDidNotHappen_ {true};
 #endif
 };
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_PT_HOOKS_WRAPPER_H

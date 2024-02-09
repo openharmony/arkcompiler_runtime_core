@@ -16,7 +16,7 @@
 #include "assembly-ins.h"
 #include "mangling.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(readability-container-size-empty)
 
@@ -27,7 +27,7 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
     const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
     const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
     const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays,
-    const std::unordered_map<std::string_view, panda::Label>& labels) const {
+    const std::unordered_map<std::string_view, ark::Label>& labels) const {
     if (!IsValidToEmit()) {
         std::cerr << "Invalid instruction: " << ToString() << std::endl;
         LOG(FATAL, ASSEMBLER);
@@ -183,4 +183,4 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 
 // NOLINTEND(readability-container-size-empty)
 
-} // namespace panda::pandasm
+} // namespace ark::pandasm

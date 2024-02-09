@@ -18,9 +18,9 @@
 #include "libziparchive/zip_archive.h"
 
 namespace OHOS {
-void CloseAndRemoveZipFile(panda::ZipArchiveHandle &handle, FILE *fp, const char *filename)
+void CloseAndRemoveZipFile(ark::ZipArchiveHandle &handle, FILE *fp, const char *filename)
 {
-    panda::CloseArchiveFile(handle);
+    ark::CloseArchiveFile(handle);
     (void)fclose(fp);
     (void)remove(filename);
 }
@@ -29,8 +29,8 @@ void OpenUncompressedArchiveFuzzTest(const uint8_t *data, size_t size)
 {
     // Create zip file
     const char *zip_filename = "__OpenUncompressedArchiveFuzzTest.zip";
-    const char *filename = panda::panda_file::ARCHIVE_FILENAME;
-    int ret = panda::CreateOrAddFileIntoZip(zip_filename, filename, data, size, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
+    const char *filename = ark::panda_file::ARCHIVE_FILENAME;
+    int ret = ark::CreateOrAddFileIntoZip(zip_filename, filename, data, size, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
     if (ret != 0) {
         (void)remove(zip_filename);
         return;
@@ -47,33 +47,33 @@ void OpenUncompressedArchiveFuzzTest(const uint8_t *data, size_t size)
         (void)remove(zip_filename);
         return;
     }
-    panda::ZipArchiveHandle zipfile = nullptr;
-    if (panda::OpenArchiveFile(zipfile, fp) != panda::ZIPARCHIVE_OK) {
+    ark::ZipArchiveHandle zipfile = nullptr;
+    if (ark::OpenArchiveFile(zipfile, fp) != ark::ZIPARCHIVE_OK) {
         (void)fclose(fp);
         (void)remove(zip_filename);
         return;
     }
-    if (panda::LocateFile(zipfile, filename) != panda::ZIPARCHIVE_OK) {
+    if (ark::LocateFile(zipfile, filename) != ark::ZIPARCHIVE_OK) {
         CloseAndRemoveZipFile(zipfile, fp, zip_filename);
         return;
     }
-    panda::EntryFileStat entry;
-    if (panda::GetCurrentFileInfo(zipfile, &entry) != panda::ZIPARCHIVE_OK) {
+    ark::EntryFileStat entry;
+    if (ark::GetCurrentFileInfo(zipfile, &entry) != ark::ZIPARCHIVE_OK) {
         CloseAndRemoveZipFile(zipfile, fp, zip_filename);
         return;
     }
-    if (panda::OpenCurrentFile(zipfile) != panda::ZIPARCHIVE_OK) {
-        panda::CloseCurrentFile(zipfile);
+    if (ark::OpenCurrentFile(zipfile) != ark::ZIPARCHIVE_OK) {
+        ark::CloseCurrentFile(zipfile);
         CloseAndRemoveZipFile(zipfile, fp, zip_filename);
         return;
     }
-    panda::GetCurrentFileOffset(zipfile, &entry);
+    ark::GetCurrentFileOffset(zipfile, &entry);
     // Call OpenUncompressedArchive
     {
-        panda::panda_file::File::OpenUncompressedArchive(fileno(fp), zip_filename, entry.GetUncompressedSize(),
-                                                         entry.GetOffset());
+        ark::panda_file::File::OpenUncompressedArchive(fileno(fp), zip_filename, entry.GetUncompressedSize(),
+                                                       entry.GetOffset());
     }
-    panda::CloseCurrentFile(zipfile);
+    ark::CloseCurrentFile(zipfile);
     CloseAndRemoveZipFile(zipfile, fp, zip_filename);
 }
 }  // namespace OHOS

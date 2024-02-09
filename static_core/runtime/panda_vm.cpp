@@ -26,7 +26,7 @@
 
 #include "libpandafile/file.h"
 
-namespace panda {
+namespace ark {
 /* static */
 PandaVM *PandaVM::Create(Runtime *runtime, const RuntimeOptions &options, std::string_view runtimeType)
 {
@@ -48,7 +48,7 @@ void PandaVM::UpdateVmRefs()
     // NOLINTNEXTLINE(modernize-loop-convert)
     for (auto it = markQueue_.begin(); it != markQueue_.end(); ++it) {
         if ((*it)->IsForwarded()) {
-            *it = panda::mem::GetForwardAddress(*it);
+            *it = ark::mem::GetForwardAddress(*it);
         }
     }
 }
@@ -77,8 +77,7 @@ Expected<int, Runtime::Error> PandaVM::InvokeEntrypoint(Method *entrypoint, cons
 
 void PandaVM::HandleLdaStr(Frame *frame, BytecodeId stringId)
 {
-    coretypes::String *str =
-        panda::Runtime::GetCurrent()->ResolveString(this, *frame->GetMethod(), stringId.AsFileId());
+    coretypes::String *str = ark::Runtime::GetCurrent()->ResolveString(this, *frame->GetMethod(), stringId.AsFileId());
     frame->GetAccAsVReg().SetReference(str);
 }
 
@@ -166,4 +165,4 @@ PandaString PandaVM::GetClassesFootprint() const
     return statistic.str();
 }
 
-}  // namespace panda
+}  // namespace ark

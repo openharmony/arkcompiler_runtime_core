@@ -22,7 +22,7 @@
 #include <cmath>
 #include <map>
 
-namespace panda::compiler {
+namespace ark::compiler {
 template <class T>
 uint64_t ConvertIntToInt(T value, DataType::Type targetType)
 {
@@ -534,11 +534,11 @@ bool ConstFoldingMin(Inst *inst)
                 break;
             case DataType::FLOAT32:
                 newCnst = graph->FindOrCreateConstant(
-                    panda::helpers::math::Min(cnst0->GetFloatValue(), cnst1->GetFloatValue()));
+                    ark::helpers::math::Min(cnst0->GetFloatValue(), cnst1->GetFloatValue()));
                 break;
             case DataType::FLOAT64:
                 newCnst = graph->FindOrCreateConstant(
-                    panda::helpers::math::Min(cnst0->GetDoubleValue(), cnst1->GetDoubleValue()));
+                    ark::helpers::math::Min(cnst0->GetDoubleValue(), cnst1->GetDoubleValue()));
                 break;
             default:
                 UNREACHABLE();
@@ -582,11 +582,11 @@ bool ConstFoldingMax(Inst *inst)
                 break;
             case DataType::FLOAT32:
                 newCnst = graph->FindOrCreateConstant(
-                    panda::helpers::math::Max(cnst0->GetFloatValue(), cnst1->GetFloatValue()));
+                    ark::helpers::math::Max(cnst0->GetFloatValue(), cnst1->GetFloatValue()));
                 break;
             case DataType::FLOAT64:
                 newCnst = graph->FindOrCreateConstant(
-                    panda::helpers::math::Max(cnst0->GetDoubleValue(), cnst1->GetDoubleValue()));
+                    ark::helpers::math::Max(cnst0->GetDoubleValue(), cnst1->GetDoubleValue()));
                 break;
             default:
                 UNREACHABLE();
@@ -1052,4 +1052,4 @@ bool ConstFoldingSqrt(Inst *inst)
     return false;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

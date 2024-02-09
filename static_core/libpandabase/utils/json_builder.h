@@ -29,7 +29,7 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda {
+namespace ark {
 class JsonArrayBuilder;
 class JsonObjectBuilder;
 PANDA_PUBLIC_API void JsonEscape(std::ostream & /* os */, std::string_view /* string */);
@@ -165,7 +165,7 @@ void JsonBuilderBase<START_DELIMITER, END_DELIMITER>::Stringify(T &&object)
     std::invoke(std::forward<T>(object), builder);
     ss_ << std::move(builder).Build();
 }
-}  // namespace panda
+}  // namespace ark
 
 WEAK_FOR_LTO_END
 

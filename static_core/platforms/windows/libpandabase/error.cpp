@@ -16,7 +16,7 @@
 #include "os/error.h"
 #include <string.h>
 
-namespace panda::os {
+namespace ark::os {
 
 std::string Error::ToString() const
 {
@@ -35,4 +35,4 @@ std::string Error::ToString() const
     return std::string(res);
 }
 
-}  // namespace panda::os
+}  // namespace ark::os

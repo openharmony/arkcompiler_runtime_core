@@ -15,7 +15,7 @@
 
 #include "asm_printer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 #ifdef PANDA_COMPILER_TARGET_AARCH32
 template <>
 void PrinterLabelHolder<AssemblyPrinter<aarch32::Aarch32Encoder>>::BindLabel(LabelId id)
@@ -82,4 +82,4 @@ void AssemblyPrinter<amd64::Amd64Encoder>::MakeCall(const void *entryPoint)
     *str_ << "callq " << std::hex << entryPoint << "@plt\n";
 }
 #endif
-}  // namespace panda::compiler
+}  // namespace ark::compiler

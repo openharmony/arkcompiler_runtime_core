@@ -18,7 +18,7 @@
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/workers/gc_worker.h"
 
-namespace panda::mem {
+namespace ark::mem {
 GCWorker::GCWorker(GC *gc) : gc_(gc)
 {
     auto internalAllocator = gc_->GetInternalAllocator();
@@ -179,4 +179,4 @@ void GCWorker::RunGC(PandaUniquePtr<GCTask> task)
     task->Run(*gc_);
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

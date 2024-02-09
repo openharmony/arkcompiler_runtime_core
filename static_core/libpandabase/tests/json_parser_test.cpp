@@ -18,7 +18,7 @@
 #include "utils/json_parser.h"
 #include <gtest/gtest.h>
 
-namespace panda::json_parser::test {
+namespace ark::json_parser::test {
 TEST(JsonParser, ParsePrimitive)
 {
     auto str = R"(
@@ -227,4 +227,4 @@ TEST(JsonParser, InvalidJson)
     ASSERT_FALSE(obj.IsValid());
 }
 
-}  // namespace panda::json_parser::test
+}  // namespace ark::json_parser::test

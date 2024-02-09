@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/const_folding.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void Peepholes::InvalidateAnalyses()
 {
@@ -2932,4 +2932,4 @@ bool Peepholes::TrySimplifyNegationPattern(Inst *inst)
     return false;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

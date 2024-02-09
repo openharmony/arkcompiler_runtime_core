@@ -19,7 +19,7 @@
 #include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/threaded_coroutine.h"
 
-namespace panda {
+namespace ark {
 
 os::thread::NativeHandleType ThreadedCoroutineContext::GetCoroutineNativeHandle()
 {
@@ -175,4 +175,4 @@ void ThreadedCoroutineContext::EnterAwaitLoop()
     SetStatus(Coroutine::Status::AWAIT_LOOP);
 }
 
-}  // namespace panda
+}  // namespace ark

@@ -29,7 +29,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class ItemDeduper;
 
@@ -187,7 +187,7 @@ public:
         return end_;
     }
 
-    void ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profileOpt);
+    void ReorderItems(ark::panda_file::pgo::ProfileOptimizer *profileOpt);
 
     void DeduplicateItems(bool computeLayout = true);
 
@@ -585,6 +585,6 @@ private:
     bool isQuickened_ = false;
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_FILE_ITEM_CONTAINER_H_

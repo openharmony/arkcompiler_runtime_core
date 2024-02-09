@@ -16,7 +16,7 @@
 #include "runtime/scheduler/worker_thread.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::scheduler {
+namespace ark::scheduler {
 
 WorkerThread::WorkerThread(PandaVM *vm) : Thread(vm, Thread::ThreadType::THREAD_TYPE_WORKER_THREAD) {}
 
@@ -55,4 +55,4 @@ void WorkerThread::Destroy()
     Thread::SetCurrent(nullptr);
 }
 
-}  // namespace panda::scheduler
+}  // namespace ark::scheduler

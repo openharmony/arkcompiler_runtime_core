@@ -19,7 +19,7 @@
 #include "runtime/include/stack_walker.h"
 #include "utils/regmask.h"
 
-namespace panda {
+namespace ark {
 
 bool CFrame::IsNativeMethod() const
 {
@@ -244,8 +244,8 @@ void CFrame::Dump(std::ostream &os, uint32_t maxSlot)
 void CFrame::DumpCalleeRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot)
 {
     os << " [Callee saved registers]\n";
-    for (auto i = panda::helpers::ToSigned(GetLastCalleeReg(ARCH, false));
-         i >= panda::helpers::ToSigned(GetFirstCalleeReg(ARCH, false)); i--, (*slot)++) {
+    for (auto i = ark::helpers::ToSigned(GetLastCalleeReg(ARCH, false));
+         i >= ark::helpers::ToSigned(GetFirstCalleeReg(ARCH, false)); i--, (*slot)++) {
         *dscr = "x" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
@@ -255,8 +255,8 @@ void CFrame::DumpCalleeRegs(std::ostream &os, MemPrinter printMem, PandaString *
 void CFrame::DumpCalleeFPRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot)
 {
     os << " [Callee saved FP registers]\n";
-    for (auto i = panda::helpers::ToSigned(GetLastCalleeReg(ARCH, true));
-         i >= panda::helpers::ToSigned(GetFirstCalleeReg(ARCH, true)); i--, (*slot)++) {
+    for (auto i = ark::helpers::ToSigned(GetLastCalleeReg(ARCH, true));
+         i >= ark::helpers::ToSigned(GetFirstCalleeReg(ARCH, true)); i--, (*slot)++) {
         *dscr = "d" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
@@ -267,8 +267,8 @@ void CFrame::DumpCallerRegs(std::ostream &os, MemPrinter printMem, PandaString *
 {
     os << " [Caller saved registers] " << GetLastCallerReg(ARCH, false) << " " << GetFirstCallerReg(ARCH, false)
        << "\n";
-    for (auto i = panda::helpers::ToSigned(GetLastCallerReg(ARCH, false));
-         i >= panda::helpers::ToSigned(GetFirstCallerReg(ARCH, false)); i--, (*slot)++) {
+    for (auto i = ark::helpers::ToSigned(GetLastCallerReg(ARCH, false));
+         i >= ark::helpers::ToSigned(GetFirstCallerReg(ARCH, false)); i--, (*slot)++) {
         *dscr = "x" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
@@ -278,8 +278,8 @@ void CFrame::DumpCallerRegs(std::ostream &os, MemPrinter printMem, PandaString *
 void CFrame::DumpCallerFPRegs(std::ostream &os, MemPrinter printMem, PandaString *dscr, size_t *slot)
 {
     os << " [Caller saved FP registers]\n";
-    for (auto i = panda::helpers::ToSigned(GetLastCallerReg(ARCH, true));
-         i >= panda::helpers::ToSigned(GetFirstCallerReg(ARCH, true)); i--, (*slot)++) {
+    for (auto i = ark::helpers::ToSigned(GetLastCallerReg(ARCH, true));
+         i >= ark::helpers::ToSigned(GetFirstCallerReg(ARCH, true)); i--, (*slot)++) {
         *dscr = "d" + ToPandaString(i) + ":" + ToPandaString(*slot);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         printMem(os, fp_ - CFrameLayout::STACK_START_SLOT - *slot, *dscr, GetValueFromSlot(*slot));
@@ -296,4 +296,4 @@ void CFrame::DumpLocals(std::ostream &os, MemPrinter printMem, PandaString *dscr
     }
 }
 
-}  // namespace panda
+}  // namespace ark

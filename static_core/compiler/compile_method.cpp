@@ -31,7 +31,7 @@
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/code_generator/codegen.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
 static Span<uint8_t> EmitElf(Graph *graph, CodeAllocator *codeAllocator, ArenaAllocator *gdbDebugInfoAllocator,
@@ -261,7 +261,7 @@ void JITCompileMethod(RuntimeInterface *runtime, CodeAllocator *codeAllocator, A
     });
 
     auto arch = ChooseArch(Arch::NONE);
-    bool isDynamic = panda::panda_file::IsDynamicLanguage(taskMethod->GetClass()->GetSourceLang());
+    bool isDynamic = ark::panda_file::IsDynamicLanguage(taskMethod->GetClass()->GetSourceLang());
 
     taskRunner.AddCallbackOnSuccess([runtime, codeAllocator, gdbDebugInfoAllocator, jitStats, isDynamic,
                                      arch](CompilerContext<RUNNER_MODE> &compilerCtx) {
@@ -335,7 +335,7 @@ template bool CheckCompilation<BACKGROUND_MODE>(RuntimeInterface *, CodeAllocato
 template bool CheckCompilation<INPLACE_MODE>(RuntimeInterface *, CodeAllocator *, ArenaAllocator *, JITStats *, bool,
                                              Arch, CompilerContext<INPLACE_MODE> &);
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
 
@@ -358,7 +358,7 @@ void NO_INLINE __jit_debug_register_code(void)
 jit_descriptor __jit_debug_descriptor = {1, JIT_NOACTION, NULL, NULL};
 }  // extern "C"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static os::memory::Mutex g_jitDebugLock;
@@ -453,5 +453,5 @@ static Span<uint8_t> EmitElf(Graph *graph, CodeAllocator *codeAllocator, ArenaAl
     return jitWriter.GetCode();
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif

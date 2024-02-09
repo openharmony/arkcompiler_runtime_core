@@ -34,10 +34,10 @@
 #include "runtime/tests/interpreter/test_runtime_interface.h"
 #include "invokation_helper.h"
 
-using TypeId = panda::panda_file::Type::TypeId;
-using BytecodeEmitter = panda::BytecodeEmitter;
+using TypeId = ark::panda_file::Type::TypeId;
+using BytecodeEmitter = ark::BytecodeEmitter;
 
-namespace panda::test {
+namespace ark::test {
 
 int32_t CmpDynImpl(Method * /*unused*/, coretypes::TaggedValue v1, coretypes::TaggedValue v2)
 {
@@ -102,7 +102,7 @@ public:
         classLinker->AddPandaFile(std::move(pf));
 
         auto descriptor = std::make_unique<PandaString>();
-        std::optional<panda::panda_file::SourceLang> langLocal = panda_file::LanguageFromString(language);
+        std::optional<ark::panda_file::SourceLang> langLocal = panda_file::LanguageFromString(language);
         if (!langLocal) {
             UNREACHABLE();
         }
@@ -432,4 +432,4 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, Invoke8Int9Double)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::test
+}  // namespace ark::test

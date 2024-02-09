@@ -25,7 +25,7 @@
 #include "optimizer/ir/locations.h"
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 class Inst;
@@ -722,6 +722,6 @@ private:
 };
 
 float CalcSpillWeight(const LivenessAnalyzer &la, LifeIntervals *interval);
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_LIVENESS_ANALIZER_H

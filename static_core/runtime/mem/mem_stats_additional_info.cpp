@@ -17,11 +17,11 @@
 
 #include "runtime/include/panda_vm.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 PandaString MemStatsAdditionalInfo::GetAdditionalStatistics()
 {
     return Runtime::GetCurrent()->GetPandaVM()->GetClassesFootprint();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

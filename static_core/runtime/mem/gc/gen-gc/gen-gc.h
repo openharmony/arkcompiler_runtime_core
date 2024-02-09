@@ -21,10 +21,10 @@
 #include "runtime/mem/gc/generational-gc-base.h"
 #include "runtime/mem/heap_verifier.h"
 
-namespace panda {
+namespace ark {
 class ManagedThread;
-}  // namespace panda
-namespace panda::mem {
+}  // namespace ark
+namespace ark::mem {
 
 template <MTModeT MT_MODE>
 class AllocConfig<GCType::GEN_GC, MT_MODE> {
@@ -45,9 +45,9 @@ public:
     NO_MOVE_SEMANTIC(GenGC);
     ~GenGC() override = default;
 
-    void InitGCBits(panda::ObjectHeader *objHeader) override;
+    void InitGCBits(ark::ObjectHeader *objHeader) override;
 
-    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader) override;
+    void InitGCBitsForAllocationInTLAB(ark::ObjectHeader *objHeader) override;
 
     bool IsPinningSupported() const final
     {
@@ -183,6 +183,6 @@ private:
     bool isExplicitConcurrentGcEnabled_ {false};
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GEN_GC_GEN_GC_H

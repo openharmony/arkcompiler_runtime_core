@@ -16,7 +16,7 @@
 #include "code_info.h"
 #include "utils/bit_memory_region-inl.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void CodeInfo::Dump(std::ostream &stream) const
 {
@@ -62,4 +62,4 @@ void CodeInfo::DumpInlineInfo(std::ostream &stream, const StackMap &stackMap, in
            << ", vregs_num: " << ii.GetVRegsCount();
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

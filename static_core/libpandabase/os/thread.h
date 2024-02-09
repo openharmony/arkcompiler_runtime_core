@@ -31,7 +31,7 @@
 #error "Unsupported platform"
 #endif
 
-namespace panda::os::thread {
+namespace ark::os::thread {
 
 using ThreadId = uint32_t;
 using NativeHandleType = std::thread::native_handle_type;
@@ -156,6 +156,6 @@ inline bool IsSetPriorityError(int res)
     return res == 0;
 #endif
 }
-}  // namespace panda::os::thread
+}  // namespace ark::os::thread
 
 #endif  // PANDA_LIBPANDABASE_OS_THREAD_H_

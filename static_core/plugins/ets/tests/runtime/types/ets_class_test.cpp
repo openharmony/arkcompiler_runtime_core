@@ -23,7 +23,7 @@
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsClassTest : public testing::Test {
 public:
@@ -905,6 +905,6 @@ TEST_F(EtsClassTest, EnumerateInterfaces)
     }
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-magic-numbers)

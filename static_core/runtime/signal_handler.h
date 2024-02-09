@@ -24,7 +24,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "libpandabase/os/sighook.h"
 
-namespace panda {
+namespace ark {
 
 class Method;
 class SignalHandler;
@@ -177,6 +177,6 @@ public:
     bool Action(int sig, siginfo_t *siginfo, void *context) override;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_SIGNAL_HANDLER_H

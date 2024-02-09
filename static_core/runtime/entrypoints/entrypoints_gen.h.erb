@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace panda {
+namespace ark {
 
 class Frame;
 class Method;
@@ -37,7 +37,7 @@ class String;
 
 using FileEntityId = uint32_t;
 
-}  // namespace panda
+}  // namespace ark
 
 % require 'set'
 % entrypoints_map = Set.new
@@ -66,7 +66,7 @@ extern <%= prefix %> <%= entrypoint.signature[0] %> <%= entrypoint.entrypoint %>
 %   end
 % end
 
-namespace panda {
+namespace ark {
 
 enum class EntrypointId : uint8_t {
 % Compiler::entrypoints.each_with_index do |entrypoint, index|
@@ -90,6 +90,6 @@ struct EntrypointsTable {
 };
 // NOLINTEND(readability-identifier-naming)
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // ENTRYPOINTS_GEN_H_

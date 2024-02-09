@@ -22,7 +22,7 @@
 #include "runtime/mem/rendezvous.h"
 #include "runtime/deoptimization.h"
 
-namespace panda {
+namespace ark {
 
 using os::memory::LockHolder;  // NOLINT(misc-unused-using-decls)
 
@@ -144,4 +144,4 @@ void ClassHierarchyAnalysis::AddDependency(Method *callee, Method *caller)
     dependencyMap_[callee].insert(caller);
 }
 
-}  // namespace panda
+}  // namespace ark

@@ -19,7 +19,7 @@
 #include "charset.h"
 #include "util/callable.h"
 
-namespace panda::parser {
+namespace ark::parser {
 
 template <typename...>
 struct type_sum;
@@ -391,6 +391,6 @@ struct initial;
 template <typename Context, typename Char, typename Iter>
 using Parser = BaseParser<Context, initial, Char, Iter>;
 
-}  // namespace panda::parser
+}  // namespace ark::parser
 
 #endif  // PANDA_VERIF_PARSER_H_

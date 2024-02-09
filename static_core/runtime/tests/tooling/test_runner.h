@@ -19,7 +19,7 @@
 
 #include "runtime/include/runtime.h"
 
-namespace panda::tooling::test {
+namespace ark::tooling::test {
 class TestRunner : public PtHooks {
 public:
     explicit TestRunner(const char *testName)
@@ -270,6 +270,6 @@ private:
     const char *testName_;
     ApiTest *test_;
 };
-}  // namespace panda::tooling::test
+}  // namespace ark::tooling::test
 
 #endif  // PANDA_RUNTIME_TESTS_TOOLING_TEST_RUNNER_H

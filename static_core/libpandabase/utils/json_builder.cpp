@@ -19,9 +19,9 @@
 
 #include <algorithm>
 
-using panda::helpers::string::Format;
+using ark::helpers::string::Format;
 
-namespace panda {
+namespace ark {
 void JsonEscape(std::ostream &os, std::string_view string)
 {
     os << '"';
@@ -68,4 +68,4 @@ void JsonEscape(std::ostream &os, std::string_view string)
 
     os << '"';
 }
-}  // namespace panda
+}  // namespace ark

@@ -23,7 +23,7 @@
 
 #include "runtime/compiler.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class CompilationStatusTest : public testing::Test {
 public:
@@ -34,7 +34,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -51,7 +51,7 @@ public:
     NO_MOVE_SEMANTIC(CompilationStatusTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 Method *CompilationStatusTest::GetMethod(Class *klass, size_t num)
@@ -113,4 +113,4 @@ TEST_F(CompilationStatusTest, Status)
     ASSERT_EQ(status, Method::FAILED);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

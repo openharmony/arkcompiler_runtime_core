@@ -42,7 +42,7 @@ const uint64_t ITERATION = 20000;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
 static inline auto g_randomGenerator = std::mt19937_64(SEED);
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class CodegenTest : public GraphTest {
 public:
@@ -1770,7 +1770,7 @@ TEST_F(CodegenTest, SaveState)
         GetGraph()->RemoveConstFromList(current);
     }
     GetExecModule().FreeArray(param1);
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 TEST_F(CodegenTest, DeoptimizeIf)
 {
@@ -2497,4 +2497,4 @@ TEST_F(CodegenTest, CastAnyTypeValueInst)
 }
 // NOLINTEND(readability-magic-numbers,modernize-avoid-c-arrays,cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

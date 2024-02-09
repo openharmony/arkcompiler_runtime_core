@@ -21,7 +21,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class IfMerging : public Optimization {
 public:
     explicit IfMerging(Graph *graph);
@@ -69,6 +69,6 @@ private:
     bool isApplied_ {false};
     Marker trueBranchMarker_ {};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_IF_MERGING_H

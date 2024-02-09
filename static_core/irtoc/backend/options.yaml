@@ -13,7 +13,7 @@
 
 module:
   name: irtoc
-  namespace: panda::irtoc
+  namespace: ark::irtoc
 
 options:
   - name: irtoc-output

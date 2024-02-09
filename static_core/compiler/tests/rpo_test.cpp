@@ -17,7 +17,7 @@
 #include <vector>
 #include "optimizer/analysis/rpo.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RpoTest : public GraphTest {
 public:
     void CheckSubsequence(const std::vector<BasicBlock *> &&subsequence)
@@ -267,4 +267,4 @@ TEST_F(RpoTest, GraphWithCycles)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

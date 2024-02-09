@@ -24,9 +24,9 @@ extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
 #else
 #include "utils/logger.h"
 #include "utils/type_helpers.h"
-#define LOG_MESSAGE(l, m) LOG(l, COMMON) << (m)               // NOLINT(cppcoreguidelines-macro-usage)
-#define FAIL_WITH_MESSAGE(m) LOG_MESSAGE(FATAL, m)            // NOLINT(cppcoreguidelines-macro-usage)
-#define HELPERS_TO_UNSIGNED(m) panda::helpers::ToUnsigned(m)  // NOLINT(cppcoreguidelines-macro-usage)
+#define LOG_MESSAGE(l, m) LOG(l, COMMON) << (m)             // NOLINT(cppcoreguidelines-macro-usage)
+#define FAIL_WITH_MESSAGE(m) LOG_MESSAGE(FATAL, m)          // NOLINT(cppcoreguidelines-macro-usage)
+#define HELPERS_TO_UNSIGNED(m) ark::helpers::ToUnsigned(m)  // NOLINT(cppcoreguidelines-macro-usage)
 namespace ark::os::unix::memory::futex {
 #endif
 
@@ -112,7 +112,7 @@ static void BackOff(uint32_t i)
         }
     } else {
 #ifndef MC_ON
-        panda::os::thread::Yield();
+        ark::os::thread::Yield();
 #endif
     }
 }

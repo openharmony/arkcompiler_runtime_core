@@ -17,7 +17,7 @@
 #include "spill_fills_resolver.h"
 #include "reg_alloc_base.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 SpillFillsResolver::SpillFillsResolver(Graph *graph)
     : SpillFillsResolver(graph, INVALID_REG, MAX_NUM_REGS, MAX_NUM_VREGS)
 {
@@ -337,4 +337,4 @@ SpillFillsResolver::LocationIndex SpillFillsResolver::GetResolver(DataType::Type
     return resolverReg;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

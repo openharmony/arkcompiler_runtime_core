@@ -32,7 +32,7 @@
 
 using namespace std::placeholders;  // NOLINT(google-build-using-namespace)
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart)
     : breakOnStart_(breakOnStart), inspectorServer_(server), debugger_(debugger)
 {
@@ -377,4 +377,4 @@ void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &o
                 }));
         });
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

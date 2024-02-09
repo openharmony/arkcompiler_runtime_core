@@ -20,7 +20,7 @@
 #include "arch_info_gen.h"
 #include <string>
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // There is a problem with callee/caller register numbers with amd64.
 // For example, take a look at
@@ -505,6 +505,6 @@ VERIFY_GETTER(GetSpAlignment)
 static_assert(Target(Arch::X86_64).GetParamReg(0) == Target(Arch::X86_64).GetParamReg(0));
 static_assert(Target(Arch::AARCH64).GetParamReg(0) == Target(Arch::AARCH64).GetParamReg(0));
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_TARGET_H

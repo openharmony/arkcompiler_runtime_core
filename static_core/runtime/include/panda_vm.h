@@ -26,7 +26,7 @@
 
 #include "libpandabase/utils/expected.h"
 
-namespace panda {
+namespace ark {
 
 class ManagedThread;
 class StringTable;
@@ -145,7 +145,7 @@ public:
     virtual LanguageContext GetLanguageContext() const = 0;
     virtual CompilerInterface *GetCompiler() const = 0;
 
-    virtual panda::mem::ReferenceProcessor *GetReferenceProcessor() const = 0;
+    virtual ark::mem::ReferenceProcessor *GetReferenceProcessor() const = 0;
 
     virtual ObjectHeader *GetOOMErrorObject() = 0;
 
@@ -254,6 +254,6 @@ private:
     os::memory::Mutex markQueueLock_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_PANDA_VM_H_

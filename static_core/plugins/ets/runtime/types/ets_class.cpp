@@ -28,7 +28,7 @@
 #include "plugins/ets/runtime/types/ets_value.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 uint32_t EtsClass::GetFieldsNumber()
 {
@@ -529,7 +529,7 @@ void EtsClass::SetComponentType(EtsClass *componentType)
 
 EtsClass *EtsClass::GetComponentType() const
 {
-    panda::Class *componentType = GetRuntimeClass()->GetComponentType();
+    ark::Class *componentType = GetRuntimeClass()->GetComponentType();
     if (componentType == nullptr) {
         return nullptr;
     }
@@ -571,7 +571,7 @@ uint32_t EtsClass::GetFieldIndexByName(const char *name)
 {
     auto u8name = reinterpret_cast<const uint8_t *>(name);
     auto fields = GetRuntimeClass()->GetFields();
-    panda_file::File::StringData sd = {static_cast<uint32_t>(panda::utf::MUtf8ToUtf16Size(u8name)), u8name};
+    panda_file::File::StringData sd = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(u8name)), u8name};
     for (uint32_t i = 0; i < GetFieldsNumber(); i++) {
         if (fields[i].GetName() == sd) {
             return i;
@@ -596,7 +596,7 @@ EtsField *EtsClass::GetStaticFieldIDByName(const char *name, const char *sig)
 
 EtsField *EtsClass::GetDeclaredFieldIDByName(const char *name)
 {
-    return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindDeclaredField([name](const panda::Field &field) -> bool {
+    return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindDeclaredField([name](const ark::Field &field) -> bool {
         auto *jfield = EtsField::FromRuntimeField(&field);
         return ::strcmp(jfield->GetName(), name) == 0;
     }));
@@ -604,13 +604,13 @@ EtsField *EtsClass::GetDeclaredFieldIDByName(const char *name)
 
 EtsField *EtsClass::GetFieldIDByOffset(uint32_t fieldOffset)
 {
-    auto pred = [fieldOffset](const panda::Field &f) { return f.GetOffset() == fieldOffset; };
+    auto pred = [fieldOffset](const ark::Field &f) { return f.GetOffset() == fieldOffset; };
     return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindInstanceField(pred));
 }
 
 EtsField *EtsClass::GetStaticFieldIDByOffset(uint32_t fieldOffset)
 {
-    auto pred = [fieldOffset](const panda::Field &f) { return f.GetOffset() == fieldOffset; };
+    auto pred = [fieldOffset](const ark::Field &f) { return f.GetOffset() == fieldOffset; };
     return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindStaticField(pred));
 }
 
@@ -677,14 +677,14 @@ bool EtsClass::IsTupleClass() const
 bool EtsClass::IsBoxedClass() const
 {
     auto typeDesc = GetDescriptor();
-    return (typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BOOLEAN ||
-            typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_BYTE ||
-            typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_CHAR ||
-            typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_SHORT ||
-            typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_INT ||
-            typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_LONG ||
-            typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_FLOAT ||
-            typeDesc == panda::ets::panda_file_items::class_descriptors::BOX_DOUBLE);
+    return (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BOOLEAN ||
+            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BYTE ||
+            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_CHAR ||
+            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_SHORT ||
+            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_INT ||
+            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_LONG ||
+            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_FLOAT ||
+            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_DOUBLE);
 }
 
 void EtsClass::GetInterfaces(PandaUnorderedSet<EtsClass *> &ifaces, EtsClass *iface)
@@ -724,4 +724,4 @@ void EtsClass::SetStaticFieldObject(int32_t fieldOffset, bool isVolatile, EtsObj
     GetRuntimeClass()->SetFieldObject<false>(fieldOffset, reinterpret_cast<ObjectHeader *>(value));
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

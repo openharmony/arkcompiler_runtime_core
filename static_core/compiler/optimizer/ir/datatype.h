@@ -21,7 +21,7 @@
 #include "mem/mem.h"
 
 // NOLINTNEXTLINE(modernize-concat-nested-namespaces)
-namespace panda::compiler {
+namespace ark::compiler {
 /*
  * Type of the param/instruction
  */
@@ -172,11 +172,11 @@ inline Type GetIntTypeForReference([[maybe_unused]] Arch arch)
         return UINT32;
     }
 
-    if constexpr (panda::OBJECT_POINTER_SIZE == sizeof(uint64_t)) {
+    if constexpr (ark::OBJECT_POINTER_SIZE == sizeof(uint64_t)) {
         return UINT64;
-    } else if constexpr (panda::OBJECT_POINTER_SIZE == sizeof(uint32_t)) {
+    } else if constexpr (ark::OBJECT_POINTER_SIZE == sizeof(uint32_t)) {
         return UINT32;
-    } else if constexpr (panda::OBJECT_POINTER_SIZE == sizeof(uint16_t)) {
+    } else if constexpr (ark::OBJECT_POINTER_SIZE == sizeof(uint16_t)) {
         UNREACHABLE_CONSTEXPR();
         return UINT16;
     } else {
@@ -303,6 +303,6 @@ inline uint8_t GetTypeByteSize(Type type, Arch arch)
 }
 
 }  // namespace DataType
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_DATATYPE_H

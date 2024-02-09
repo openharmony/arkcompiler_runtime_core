@@ -15,7 +15,7 @@
 #ifndef INTRUSIVE_CLEAR_INTERRUPTED_THREAD_TEST_H
 #define INTRUSIVE_CLEAR_INTERRUPTED_THREAD_TEST_H
 
-namespace panda::test {
+namespace ark::test {
 
 class IntrusiveClearInterruptedThreadTestAPI {
 public:
@@ -23,6 +23,6 @@ public:
     static void NotifyAboutThreadInterruption(void);
 };
 
-}  // namespace panda::test
+}  // namespace ark::test
 
 #endif  // INTRUSIVE_CLEAR_INTERRUPTED_THREAD_TEST_H

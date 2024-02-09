@@ -19,7 +19,7 @@
 
 #include "util/parser/charset.h"
 
-namespace panda::parser::test {
+namespace ark::parser::test {
 TEST(VerifierParserTest, Charset)
 {
     std::vector<unsigned char> str {'s', 't', 'r', '1', '\0', '\0'};
@@ -55,4 +55,4 @@ TEST(VerifierParserTest, Charset)
     EXPECT_FALSE(cs5('1'));
     EXPECT_TRUE(cs5(255));
 }
-}  // namespace panda::parser::test
+}  // namespace ark::parser::test

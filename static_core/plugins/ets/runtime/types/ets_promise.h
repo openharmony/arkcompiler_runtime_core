@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "runtime/coroutines/coroutine_events.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsCoroutine;
 
@@ -242,6 +242,6 @@ private:
     friend class test::EtsPromiseMembers;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_PROMISE_H_

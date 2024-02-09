@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/refstorage/reference.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief The base class for coroutine events. Cannot be instantiated directly.
@@ -134,6 +134,6 @@ private:
     mem::Reference *promise_ = nullptr;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif /* PANDA_RUNTIME_COROUTINES_COROUTINE_EVENTS_H */

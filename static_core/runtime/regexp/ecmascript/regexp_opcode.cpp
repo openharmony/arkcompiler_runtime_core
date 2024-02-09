@@ -16,7 +16,7 @@
 #include "runtime/regexp/ecmascript/regexp_opcode.h"
 #include "runtime/regexp/ecmascript/regexp_executor.h"
 
-namespace panda {
+namespace ark {
 using CaptureState = RegExpExecutor::CaptureState;
 
 static SaveStartOpCode g_gSaveStartOpcode = SaveStartOpCode();     // NOLINT(fuchsia-statically-constructed-objects)
@@ -659,4 +659,4 @@ void RangeSet::Compress()
         }
     }
 }
-}  // namespace panda
+}  // namespace ark

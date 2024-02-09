@@ -18,22 +18,22 @@
 
 #include <llvm/IR/PassManager.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 namespace llvm {
 class GCRelocateInst;
 class GCStatepointInst;
 }  // namespace llvm
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 class GcIntrusionCheck : public llvm::PassInfoMixin<GcIntrusionCheck> {
 public:
     static constexpr llvm::StringRef ARG_NAME = "gc-intrusion-check";
 
-    static bool ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options);
+    static bool ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysisManager);
@@ -55,6 +55,6 @@ private:
     llvm::ArrayRef<llvm::Use> GetBundle(const llvm::GCStatepointInst &call, uint32_t id);
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  //  LIBLLVMBACKEND_TRANSFORMS_PASSES_GC_INTRUSION_CHECK_H

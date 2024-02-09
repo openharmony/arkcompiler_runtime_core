@@ -24,7 +24,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/rendezvous.h"
 
-namespace panda::hotreload {
+namespace ark::hotreload {
 
 struct ClassContainment {
     const panda_file::File *pf;
@@ -118,6 +118,6 @@ protected:
     PandaUnorderedSet<Class *> reloadedClasses_;             // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-}  // namespace panda::hotreload
+}  // namespace ark::hotreload
 
 #endif  // PANDA_RUNTIME_HOTRELOAD_HOTRELOAD_H_

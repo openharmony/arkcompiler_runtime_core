@@ -22,7 +22,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 IfMerging::IfMerging(Graph *graph) : Optimization(graph) {}
 
 bool IfMerging::RunImpl()
@@ -392,4 +392,4 @@ void IfMerging::CheckDomTreeValid()
     }
 }
 #endif
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -18,7 +18,7 @@
 
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Mark all instructions that are used within catch blocks (i.e. catch block inputs)
  * with CATCH_INPUT flag.
@@ -43,6 +43,6 @@ public:
         return "Catch Inputs";
     }
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_CATCH_INPUT_H

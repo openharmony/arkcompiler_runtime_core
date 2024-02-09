@@ -22,7 +22,7 @@
 #include "libpandabase/taskmanager/task_queue.h"
 #include "libpandabase/taskmanager/task_scheduler.h"
 
-namespace panda {
+namespace ark {
 
 /// @brief Compiler worker task pool based on common TaskManager (TaskQueue)
 class CompilerTaskManagerWorker : public CompilerWorker {
@@ -71,6 +71,6 @@ private:
     std::atomic<bool> compilerWorkerJoined_ {true};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // RUTNIME_COMPILER_TASK_MANAGER_WORKER_H

@@ -18,12 +18,12 @@
 
 #include "libpandabase/utils/sequence.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class G1Predictor {
 public:
     explicit G1Predictor(double confidenceFactor) : confidenceFactor_(confidenceFactor) {}
 
-    double Predict(const panda::Sequence &seq) const
+    double Predict(const ark::Sequence &seq) const
     {
         if (seq.IsEmpty()) {
             return 0;
@@ -34,5 +34,5 @@ public:
 private:
     double confidenceFactor_;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif

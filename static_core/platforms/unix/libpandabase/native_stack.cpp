@@ -20,7 +20,7 @@
 #include <dirent.h>
 #include <mem/mem.h>
 
-namespace panda::os::unix::native_stack {
+namespace ark::os::unix::native_stack {
 
 static constexpr int MOVE_2 = 2;      // delete kernel stack's prefix
 static constexpr int STACK_TYPE = 2;  // for calling Application Not Responding stack type
@@ -144,8 +144,8 @@ void DumpUnattachedThread::Dump(std::ostream &os, bool dumpNativeCrash, FuncUnwi
 
 bool ReadOsFile(const std::string &fileName, std::string *result)
 {
-    panda::os::unix::file::File cmdfile = panda::os::file::Open(fileName, panda::os::file::Mode::READONLY);
-    panda::os::file::FileHolder fholder(cmdfile);
+    ark::os::unix::file::File cmdfile = ark::os::file::Open(fileName, ark::os::file::Mode::READONLY);
+    ark::os::file::FileHolder fholder(cmdfile);
     constexpr size_t BUFF_SIZE = 8_KB;
     std::vector<char> buffer(BUFF_SIZE);
     auto res = cmdfile.Read(&buffer[0], buffer.size());
@@ -158,8 +158,8 @@ bool ReadOsFile(const std::string &fileName, std::string *result)
 
 bool WriterOsFile(const void *buffer, size_t count, int fd)
 {
-    panda::os::unix::file::File myfile(fd);
-    panda::os::file::FileHolder fholder(myfile);
+    ark::os::unix::file::File myfile(fd);
+    ark::os::file::FileHolder fholder(myfile);
     return myfile.WriteAll(buffer, count);
 }
 
@@ -224,4 +224,4 @@ std::string ChangeJaveStackFormat(const char *descriptor)
     return primitiveName;
 }
 
-}  // namespace panda::os::unix::native_stack
+}  // namespace ark::os::unix::native_stack

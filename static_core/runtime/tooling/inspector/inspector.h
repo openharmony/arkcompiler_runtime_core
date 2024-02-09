@@ -38,7 +38,7 @@
 #include <thread>
 #include <vector>
 
-namespace panda::tooling {
+namespace ark::tooling {
 class DebugInterface;
 
 namespace inspector {
@@ -109,6 +109,6 @@ private:
     std::thread serverThread_;
 };
 }  // namespace inspector
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_TOOLING_INSPECTOR_INSPECTOR_H

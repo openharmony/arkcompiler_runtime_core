@@ -26,11 +26,11 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda {
+namespace ark {
 class ObjectHeader;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 // An uint64_t value is used for storing the tags of values. This kind of tags is compatible with static and dynamic
 // languages, and the tag is encoded as below.
 // tag bits | [63-7] |     [6-4]     |      [3-1]      |      [0]        |
@@ -570,6 +570,6 @@ public:
     DEFAULT_MOVE_CTOR(DynamicVRegisterRef);
 };
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_VREGISTER_H_

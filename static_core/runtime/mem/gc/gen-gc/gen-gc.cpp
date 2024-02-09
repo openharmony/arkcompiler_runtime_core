@@ -24,7 +24,7 @@
 #include "runtime/mem/gc/dynamic/gc_marker_dynamic-inl.h"
 #include "runtime/mem/gc/generational-gc-base-inl.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 GenGC<LanguageConfig>::GenGC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
@@ -124,7 +124,7 @@ void GenGC<LanguageConfig>::PreStartupImp()
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::InitGCBits(panda::ObjectHeader *objHeader)
+void GenGC<LanguageConfig>::InitGCBits(ark::ObjectHeader *objHeader)
 {
     if (UNLIKELY(this->GetGCPhase() == GCPhase::GC_PHASE_SWEEP) &&
         (!this->GetObjectAllocator()->IsObjectInYoungSpace(objHeader))) {
@@ -141,7 +141,7 @@ void GenGC<LanguageConfig>::InitGCBits(panda::ObjectHeader *objHeader)
 }
 
 template <class LanguageConfig>
-void GenGC<LanguageConfig>::InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader)
+void GenGC<LanguageConfig>::InitGCBitsForAllocationInTLAB(ark::ObjectHeader *objHeader)
 {
     // Compiler will allocate objects in TLABs only in young space
     // Therefore, set unmarked for GC here.
@@ -707,4 +707,4 @@ bool GenGC<LanguageConfig>::HaveEnoughSpaceToMove() const
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(GenGC);
 
-}  // namespace panda::mem
+}  // namespace ark::mem

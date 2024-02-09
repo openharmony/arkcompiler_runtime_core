@@ -29,7 +29,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 using TypeIndexT = uint8_t;
 
@@ -81,6 +81,6 @@ private:
     PandaUnorderedMap<Key, void *> storage_;
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !_PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H__

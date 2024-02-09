@@ -19,7 +19,7 @@
 
 #include "runtime/include/object_header.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_RUNSLOTS(level) LOG(level, ALLOC) << "RunSlots: "
@@ -194,4 +194,4 @@ bool RunSlots<LockTypeT>::IsLive(const ObjectHeader *obj) const
 
 template class RunSlots<RunSlotsLockConfig::CommonLock>;
 template class RunSlots<RunSlotsLockConfig::DummyLock>;
-}  // namespace panda::mem
+}  // namespace ark::mem

@@ -22,7 +22,7 @@
 #include <ostream>
 #include <array>
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 /*
  * TaskType - represents all types of components that can use TaskManager.
@@ -133,6 +133,6 @@ PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, VMType type);
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, TaskExecutionMode mode);
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, TaskProperties prop);
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_H

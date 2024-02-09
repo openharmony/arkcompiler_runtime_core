@@ -23,7 +23,7 @@
 #include "hash_base.h"
 #include "logger.h"
 
-namespace panda {
+namespace ark {
 
 // In general murmur hash looks like that:
 // key = |....|....|....|.|.|.|
@@ -196,6 +196,6 @@ private:
     }
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_UTILS_MURMUR3_HASH_H_

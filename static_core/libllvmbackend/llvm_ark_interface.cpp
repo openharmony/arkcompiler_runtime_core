@@ -28,9 +28,9 @@
 
 #include "aot/aot_builder/aot_builder.h"
 
-using panda::compiler::AotBuilder;
-using panda::compiler::AotData;
-using panda::compiler::RuntimeInterface;
+using ark::compiler::AotBuilder;
+using ark::compiler::AotData;
+using ark::compiler::RuntimeInterface;
 
 static constexpr auto MEMCPY_BIG_SIZE_FOR_X86_64_SSE = 128;
 static constexpr auto MEMCPY_BIG_SIZE_FOR_X86_64_NO_SSE = 64;
@@ -51,20 +51,20 @@ static constexpr auto X86_THREAD_REG = 15;
 static constexpr auto AARCH64_THREAD_REG = 28U;
 
 namespace {
-constexpr panda::Arch LLVMArchToArkArch(llvm::Triple::ArchType arch)
+constexpr ark::Arch LLVMArchToArkArch(llvm::Triple::ArchType arch)
 {
     switch (arch) {
         case llvm::Triple::ArchType::aarch64:
-            return panda::Arch::AARCH64;
+            return ark::Arch::AARCH64;
         case llvm::Triple::ArchType::x86_64:
-            return panda::Arch::X86_64;
+            return ark::Arch::X86_64;
         case llvm::Triple::ArchType::x86:
-            return panda::Arch::X86;
+            return ark::Arch::X86;
         case llvm::Triple::ArchType::arm:
-            return panda::Arch::AARCH32;
+            return ark::Arch::AARCH32;
         default:
             UNREACHABLE();
-            return panda::Arch::NONE;
+            return ark::Arch::NONE;
     }
 }
 #include <entrypoints_gen.inl>
@@ -73,22 +73,22 @@ constexpr panda::Arch LLVMArchToArkArch(llvm::Triple::ArchType arch)
 #include <entrypoints_llvm_ark_interface_gen.inl>
 }  // namespace
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 bool LLVMArkInterface::DeoptsEnabled()
 {
     return g_options.IsLlvmDeopts();
 }
 
-AotData GetAotDataFromBuilder(const class panda::panda_file::File *file, AotBuilder *aotBuilder)
+AotData GetAotDataFromBuilder(const class ark::panda_file::File *file, AotBuilder *aotBuilder)
 {
     return AotData(file, nullptr, 0, aotBuilder->GetIntfInlineCacheIndex(), aotBuilder->GetGotPlt(),
                    aotBuilder->GetGotVirtIndexes(), aotBuilder->GetGotClass(), aotBuilder->GetGotString(),
                    aotBuilder->GetGotIntfInlineCache(), aotBuilder->GetGotCommon(), nullptr);
 }
 
-panda::llvmbackend::LLVMArkInterface::LLVMArkInterface(RuntimeInterface *runtime, llvm::Triple triple,
-                                                       AotBuilder *aotBuilder)
+ark::llvmbackend::LLVMArkInterface::LLVMArkInterface(RuntimeInterface *runtime, llvm::Triple triple,
+                                                     AotBuilder *aotBuilder)
     : runtime_(runtime), triple_(std::move(triple)), aotBuilder_(aotBuilder)
 {
     ASSERT(runtime != nullptr);
@@ -168,7 +168,7 @@ LLVMArkInterface::RegMasks LLVMArkInterface::GetCalleeSavedRegistersMask(const l
 uintptr_t LLVMArkInterface::GetEntrypointTlsOffset(EntrypointId id) const
 {
     Arch arkArch = LLVMArchToArkArch(triple_.getArch());
-    using PandaEntrypointId = panda::compiler::RuntimeInterface::EntrypointId;
+    using PandaEntrypointId = ark::compiler::RuntimeInterface::EntrypointId;
     return runtime_->GetEntrypointTlsOffset(arkArch, static_cast<PandaEntrypointId>(id));
 }
 
@@ -225,7 +225,7 @@ static bool MustLowerMemSet(const llvm::IntrinsicInst *inst, llvm::Triple::ArchT
         smallSize = MEMSET_SMALL_SIZE_FOR_AARCH64;
     } else {
         ASSERT(arch == llvm::Triple::ArchType::x86_64);
-        bool sse42 = panda::compiler::g_options.IsCpuFeatureEnabled(panda::compiler::SSE42);
+        bool sse42 = ark::compiler::g_options.IsCpuFeatureEnabled(ark::compiler::SSE42);
         smallSize = sse42 ? MEMSET_SMALL_SIZE_FOR_X86_64_SSE : MEMSET_SMALL_SIZE_FOR_X86_64_NO_SSE;
     }
     return arraySize > smallSize;
@@ -243,7 +243,7 @@ static bool MustLowerMemCpy(const llvm::IntrinsicInst *inst, llvm::Triple::ArchT
 
     auto arraySize = llvm::cast<llvm::ConstantInt>(sizeArg)->getZExtValue();
     if (arch == llvm::Triple::ArchType::x86_64) {
-        bool sse42 = panda::compiler::g_options.IsCpuFeatureEnabled(panda::compiler::SSE42);
+        bool sse42 = ark::compiler::g_options.IsCpuFeatureEnabled(ark::compiler::SSE42);
         if (sse42) {
             return arraySize > MEMCPY_BIG_SIZE_FOR_X86_64_SSE;
         }
@@ -275,7 +275,7 @@ static bool MustLowerMemMove(const llvm::IntrinsicInst *inst, llvm::Triple::Arch
         maxPopcount = 3U;
     } else {
         ASSERT(arch == llvm::Triple::ArchType::x86_64);
-        if (panda::compiler::g_options.IsCpuFeatureEnabled(panda::compiler::SSE42)) {
+        if (ark::compiler::g_options.IsCpuFeatureEnabled(ark::compiler::SSE42)) {
             smallSize = MEMMOVE_SMALL_SIZE_FOR_X86_64_SSE;
             bigSize = MEMMOVE_BIG_SIZE_FOR_X86_64_SSE;
         } else {
@@ -316,7 +316,7 @@ llvm::Intrinsic::ID LLVMArkInterface::GetLLVMIntrinsicId(const llvm::Instruction
 [[maybe_unused]] static bool X86NoSSE(llvm::Triple::ArchType arch)
 {
     return arch == llvm::Triple::ArchType::x86_64 &&
-           !panda::compiler::g_options.IsCpuFeatureEnabled(panda::compiler::SSE42);
+           !ark::compiler::g_options.IsCpuFeatureEnabled(ark::compiler::SSE42);
 }
 
 #include "get_intrinsic_id_llvm_ark_interface_gen.inl"
@@ -399,7 +399,7 @@ LLVMArkInterface::IntrinsicId LLVMArkInterface::GetIntrinsicIdMemory(const llvm:
     switch (llvmId) {
         case llvm::Intrinsic::memcpy:
         case llvm::Intrinsic::memcpy_inline:
-            if (!panda::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemCpy(inst, arch)) {
+            if (!ark::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemCpy(inst, arch)) {
                 ASSERT(llvmId != llvm::Intrinsic::memcpy);
                 EVENT_PAOC("Skip lowering for @llvm.memcpy");
                 return NO_INTRINSIC_ID;
@@ -407,7 +407,7 @@ LLVMArkInterface::IntrinsicId LLVMArkInterface::GetIntrinsicIdMemory(const llvm:
             EVENT_PAOC("Lowering @llvm.memcpy");
             return static_cast<IntrinsicId>(RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY);
         case llvm::Intrinsic::memmove:
-            if (!panda::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemMove(inst, arch)) {
+            if (!ark::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemMove(inst, arch)) {
                 EVENT_PAOC("Skip lowering for @llvm.memmove, size is: " + GetValueAsString(inst->getArgOperand(2U)));
                 return NO_INTRINSIC_ID;
             }
@@ -415,7 +415,7 @@ LLVMArkInterface::IntrinsicId LLVMArkInterface::GetIntrinsicIdMemory(const llvm:
             return static_cast<IntrinsicId>(RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE);
         case llvm::Intrinsic::memset:
         case llvm::Intrinsic::memset_inline:
-            if (!panda::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemSet(inst, arch)) {
+            if (!ark::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemSet(inst, arch)) {
                 ASSERT(llvmId != llvm::Intrinsic::memset);
                 EVENT_PAOC("Skip lowering for @llvm.memset");
                 return NO_INTRINSIC_ID;
@@ -583,8 +583,8 @@ void LLVMArkInterface::RememberFunctionCall(const llvm::Function *caller, const 
     methodIds_.insert({{callee, pandaFile}, methodId});
 }
 
-bool panda::llvmbackend::LLVMArkInterface::IsRememberedCall(const llvm::Function *caller,
-                                                            const llvm::Function *callee) const
+bool ark::llvmbackend::LLVMArkInterface::IsRememberedCall(const llvm::Function *caller,
+                                                          const llvm::Function *callee) const
 {
     ASSERT(caller != nullptr);
     ASSERT(callee != nullptr);
@@ -627,7 +627,7 @@ int32_t LLVMArkInterface::GetClassIndexInAotGot(const llvm::Function *caller, ui
 
 LLVMArkInterface::RuntimeCallee LLVMArkInterface::GetEntrypointCallee(EntrypointId id) const
 {
-    using PandaEntrypointId = panda::compiler::RuntimeInterface::EntrypointId;
+    using PandaEntrypointId = ark::compiler::RuntimeInterface::EntrypointId;
     auto eid = static_cast<PandaEntrypointId>(id);
     auto functionName = GetEntrypointInternalName(eid);
     auto functionProto = GetRuntimeFunctionType(functionName);
@@ -738,7 +738,7 @@ uint32_t LLVMArkInterface::GetVirtualRegistersCount(LLVMArkInterface::MethodPtr 
 
 uint32_t LLVMArkInterface::GetCFrameHasFloatRegsFlagMask() const
 {
-    return 1U << panda::CFrameLayout::HasFloatRegsFlag::START_BIT;
+    return 1U << ark::CFrameLayout::HasFloatRegsFlag::START_BIT;
 }
 
 bool LLVMArkInterface::IsIrtocMode() const
@@ -757,4 +757,4 @@ bool LLVMArkInterface::IsIrtocReturnHandler(const llvm::Function &function) cons
            irtocReturnHandlers_.cend();
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

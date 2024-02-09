@@ -23,23 +23,22 @@
 #include "libpandafile/file_items.h"
 #include "libpandabase/macros.h"
 
-namespace panda::pandasm::extensions {
+namespace ark::pandasm::extensions {
 
 // Workaround for ts2abc. Should be removed by our colleagues.
-using Language = panda::panda_file::SourceLang;
+using Language = ark::panda_file::SourceLang;
 
 class MetadataExtension {
 public:
-    static PANDA_PUBLIC_API std::unique_ptr<RecordMetadata> CreateRecordMetadata(panda::panda_file::SourceLang lang);
+    static PANDA_PUBLIC_API std::unique_ptr<RecordMetadata> CreateRecordMetadata(ark::panda_file::SourceLang lang);
 
-    static PANDA_PUBLIC_API std::unique_ptr<FieldMetadata> CreateFieldMetadata(panda::panda_file::SourceLang lang);
+    static PANDA_PUBLIC_API std::unique_ptr<FieldMetadata> CreateFieldMetadata(ark::panda_file::SourceLang lang);
 
-    static PANDA_PUBLIC_API std::unique_ptr<FunctionMetadata> CreateFunctionMetadata(
-        panda::panda_file::SourceLang lang);
+    static PANDA_PUBLIC_API std::unique_ptr<FunctionMetadata> CreateFunctionMetadata(ark::panda_file::SourceLang lang);
 
-    static PANDA_PUBLIC_API std::unique_ptr<ParamMetadata> CreateParamMetadata(panda::panda_file::SourceLang lang);
+    static PANDA_PUBLIC_API std::unique_ptr<ParamMetadata> CreateParamMetadata(ark::panda_file::SourceLang lang);
 };
 
-}  // namespace panda::pandasm::extensions
+}  // namespace ark::pandasm::extensions
 
 #endif  // PANDA_ASSEMBLER_EXTENSIONS_H

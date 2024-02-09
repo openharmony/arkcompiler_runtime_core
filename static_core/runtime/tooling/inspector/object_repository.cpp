@@ -18,7 +18,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/tooling/inspector_extension.h"
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 ObjectRepository::ObjectRepository()
     : extension_(ManagedThread::GetCurrent()->GetLanguageContext().CreateInspectorExtension()),
       scope_(ManagedThread::GetCurrent())
@@ -200,4 +200,4 @@ std::vector<PropertyDescriptor> ObjectRepository::GetProperties(RemoteObjectId i
 
     return properties;
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

@@ -23,7 +23,7 @@
 #include <string_view>
 #include <iostream>
 
-namespace panda::profiling {
+namespace ark::profiling {
 enum class CallKind { UNKNOWN = 0, MONOMORPHIC, POLYMORPHIC, MEGAMORPHIC, COUNT };
 
 inline const char *CallKindToString(CallKind callKind)
@@ -51,6 +51,6 @@ using ProfileType = void *;
 static constexpr ProfileType INVALID_PROFILE = nullptr;
 static constexpr uint8_t MAX_FUNC_NUMBER = 4U;
 
-}  // namespace panda::profiling
+}  // namespace ark::profiling
 
 #endif  // PANDA_PROFILING_H

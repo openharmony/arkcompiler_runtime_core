@@ -21,7 +21,7 @@
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/taskmanager/task_statistics/task_statistics.h"
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 /// This version of TaskStatistics uses a separate lock for each type of task.
 class FineGrainedTaskStatisticsImpl : public TaskStatistics {
@@ -102,6 +102,6 @@ private:
     std::unordered_map<TaskStatus, TaskPropertiesGuardedCounter> taskPropertiesCounterMap_;
 };
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager
 
 #endif  // PANDA_LIBPANDABASE_TASKMANAGER_TASK_STATISTICS_FINE_GRAINED_TASK_STATISTICS_IMPL_H

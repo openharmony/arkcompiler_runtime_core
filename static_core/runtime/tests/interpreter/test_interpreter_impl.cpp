@@ -19,11 +19,11 @@
 #include "runtime/tests/interpreter/test_runtime_interface.h"
 #include "interpreter-inl_gen.h"
 
-namespace panda::interpreter::test {
+namespace ark::interpreter::test {
 
 void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame)
 {
-    panda::interpreter::ExecuteImpl<RuntimeInterface, false>(thread, pc, frame, false);
+    ark::interpreter::ExecuteImpl<RuntimeInterface, false>(thread, pc, frame, false);
 }
 
-}  // namespace panda::interpreter::test
+}  // namespace ark::interpreter::test

@@ -19,7 +19,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
 
-namespace panda {
+namespace ark {
 
 class CoroutineContext;
 class CompletionEvent;
@@ -247,7 +247,7 @@ public:
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
     explicit Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
-                       panda::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
+                       ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
                        std::optional<EntrypointInfo> &&epInfo);
 
     void SetCoroutineStatus(Status newStatus);
@@ -306,6 +306,6 @@ private:
 
 std::ostream &operator<<(std::ostream &os, Coroutine::Status status);
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COROUTINES_COROUTINE_H

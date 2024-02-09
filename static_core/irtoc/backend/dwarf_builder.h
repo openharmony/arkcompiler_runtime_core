@@ -28,7 +28,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 class Function;
 
 class DwarfBuilder {
@@ -84,6 +84,6 @@ private:
     uint32_t codeSize_ {0};
     Arch arch_;
 };
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc
 
 #endif  // PANDA_DWARF_BUILDER_H

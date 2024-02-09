@@ -19,7 +19,7 @@
 #include "runtime/regexp/ecmascript/regexp_parser.h"
 #include "runtime/regexp/ecmascript/regexp_executor.h"
 
-namespace panda::test {
+namespace ark::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -31,7 +31,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -96,7 +96,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 TEST_F(RegExpTest, ParseError1)
@@ -764,6 +764,6 @@ TEST_F(RegExpTest, RangeSet10)
     rangeResult.Invert(false);
     EXPECT_EQ(rangeResult, rangeExpected);
 }
-}  // namespace panda::test
+}  // namespace ark::test
 
 // NOLINTEND(readability-magic-numbers)

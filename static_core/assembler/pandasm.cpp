@@ -36,9 +36,9 @@
 #include "utils/logger.h"
 #include "utils/pandargs.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
-void PrintError(const panda::pandasm::Error &e, const std::string &msg)
+void PrintError(const ark::pandasm::Error &e, const std::string &msg)
 {
     std::stringstream sos;
     std::cerr << msg << ": " << e.message << std::endl;
@@ -47,14 +47,14 @@ void PrintError(const panda::pandasm::Error &e, const std::string &msg)
     std::cerr << std::setw(static_cast<int>(e.pos + sos.str().size()) + 1) << "^" << std::endl;
 }
 
-void PrintErrors(const panda::pandasm::ErrorList &warnings, const std::string &msg)
+void PrintErrors(const ark::pandasm::ErrorList &warnings, const std::string &msg)
 {
     for (const auto &iter : warnings) {
         PrintError(iter, msg);
     }
 }
 
-void PrintHelp(const panda::PandArgParser &paParser)
+void PrintHelp(const ark::PandArgParser &paParser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "pandasm [OPTIONS] INPUT_FILE OUTPUT_FILE" << std::endl << std::endl;
@@ -62,10 +62,10 @@ void PrintHelp(const panda::PandArgParser &paParser)
     std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-bool PrepareArgs(panda::PandArgParser &paParser, const panda::PandArg<std::string> &inputFile,
-                 const panda::PandArg<std::string> &outputFile, const panda::PandArg<std::string> &logFile,
-                 const panda::PandArg<bool> &help, const panda::PandArg<bool> &verbose,
-                 const panda::PandArg<bool> &version, std::ifstream &inputfile, int argc, const char **argv)
+bool PrepareArgs(ark::PandArgParser &paParser, const ark::PandArg<std::string> &inputFile,
+                 const ark::PandArg<std::string> &outputFile, const ark::PandArg<std::string> &logFile,
+                 const ark::PandArg<bool> &help, const ark::PandArg<bool> &verbose, const ark::PandArg<bool> &version,
+                 std::ifstream &inputfile, int argc, const char **argv)
 {
     if (!paParser.Parse(argc, argv)) {
         PrintHelp(paParser);
@@ -73,7 +73,7 @@ bool PrepareArgs(panda::PandArgParser &paParser, const panda::PandArg<std::strin
     }
 
     if (version.GetValue()) {
-        panda::PrintPandaVersion();
+        ark::PrintPandaVersion();
         panda_file::PrintBytecodeVersion();
         return false;
     }
@@ -85,15 +85,15 @@ bool PrepareArgs(panda::PandArgParser &paParser, const panda::PandArg<std::strin
 
     if (verbose.GetValue()) {
         if (logFile.GetValue().empty()) {
-            panda::Logger::ComponentMask componentMask;
-            componentMask.set(panda::Logger::Component::ASSEMBLER);
-            componentMask.set(panda::Logger::Component::BYTECODE_OPTIMIZER);
-            panda::Logger::InitializeStdLogging(panda::Logger::Level::DEBUG, componentMask);
+            ark::Logger::ComponentMask componentMask;
+            componentMask.set(ark::Logger::Component::ASSEMBLER);
+            componentMask.set(ark::Logger::Component::BYTECODE_OPTIMIZER);
+            ark::Logger::InitializeStdLogging(ark::Logger::Level::DEBUG, componentMask);
         } else {
-            panda::Logger::ComponentMask componentMask;
-            componentMask.set(panda::Logger::Component::ASSEMBLER);
-            componentMask.set(panda::Logger::Component::BYTECODE_OPTIMIZER);
-            panda::Logger::InitializeFileLogging(logFile.GetValue(), panda::Logger::Level::DEBUG, componentMask);
+            ark::Logger::ComponentMask componentMask;
+            componentMask.set(ark::Logger::Component::ASSEMBLER);
+            componentMask.set(ark::Logger::Component::BYTECODE_OPTIMIZER);
+            ark::Logger::InitializeFileLogging(logFile.GetValue(), ark::Logger::Level::DEBUG, componentMask);
         }
     }
 
@@ -107,17 +107,17 @@ bool PrepareArgs(panda::PandArgParser &paParser, const panda::PandArg<std::strin
     return true;
 }
 
-bool Tokenize(panda::pandasm::Lexer &lexer, std::vector<std::vector<panda::pandasm::Token>> &tokens,
+bool Tokenize(ark::pandasm::Lexer &lexer, std::vector<std::vector<ark::pandasm::Token>> &tokens,
               std::ifstream &inputfile)
 {
     std::string s;
 
     while (getline(inputfile, s)) {
-        panda::pandasm::Tokens q = lexer.TokenizeString(s);
+        ark::pandasm::Tokens q = lexer.TokenizeString(s);
 
         auto e = q.second;
 
-        if (e.err != panda::pandasm::Error::ErrorType::ERR_NONE) {
+        if (e.err != ark::pandasm::Error::ErrorType::ERR_NONE) {
             e.lineNumber = tokens.size() + 1;
             PrintError(e, "ERROR");
             return false;
@@ -129,9 +129,9 @@ bool Tokenize(panda::pandasm::Lexer &lexer, std::vector<std::vector<panda::panda
     return true;
 }
 
-bool ParseProgram(panda::pandasm::Parser &parser, std::vector<std::vector<panda::pandasm::Token>> &tokens,
-                  const panda::PandArg<std::string> &inputFile,
-                  panda::Expected<panda::pandasm::Program, panda::pandasm::Error> &res)
+bool ParseProgram(ark::pandasm::Parser &parser, std::vector<std::vector<ark::pandasm::Token>> &tokens,
+                  const ark::PandArg<std::string> &inputFile,
+                  ark::Expected<ark::pandasm::Program, ark::pandasm::Error> &res)
 {
     res = parser.Parse(tokens, inputFile.GetValue());
     if (!res) {
@@ -142,7 +142,7 @@ bool ParseProgram(panda::pandasm::Parser &parser, std::vector<std::vector<panda:
     return true;
 }
 
-bool DumpProgramInJson(panda::pandasm::Program &program, const panda::PandArg<std::string> &scopesFile)
+bool DumpProgramInJson(ark::pandasm::Program &program, const ark::PandArg<std::string> &scopesFile)
 {
     if (!scopesFile.GetValue().empty()) {
         std::ofstream dumpFile;
@@ -158,26 +158,26 @@ bool DumpProgramInJson(panda::pandasm::Program &program, const panda::PandArg<st
     return true;
 }
 
-bool EmitProgramInBinary(panda::pandasm::Program &program, panda::PandArgParser &paParser,
-                         const panda::PandArg<std::string> &outputFile, panda::PandArg<bool> &optimize,
-                         panda::PandArg<bool> &sizeStat)
+bool EmitProgramInBinary(ark::pandasm::Program &program, ark::PandArgParser &paParser,
+                         const ark::PandArg<std::string> &outputFile, ark::PandArg<bool> &optimize,
+                         ark::PandArg<bool> &sizeStat)
 {
     auto emitDebugInfo = !optimize.GetValue();
     std::map<std::string, size_t> stat;
     std::map<std::string, size_t> *statp = sizeStat.GetValue() ? &stat : nullptr;
-    panda::pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps {};
-    panda::pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp = optimize.GetValue() ? &maps : nullptr;
+    ark::pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps {};
+    ark::pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp = optimize.GetValue() ? &maps : nullptr;
 
-    if (!panda::pandasm::AsmEmitter::Emit(outputFile.GetValue(), program, statp, mapsp, emitDebugInfo)) {
-        std::cerr << "Failed to emit binary data: " << panda::pandasm::AsmEmitter::GetLastError() << std::endl;
+    if (!ark::pandasm::AsmEmitter::Emit(outputFile.GetValue(), program, statp, mapsp, emitDebugInfo)) {
+        std::cerr << "Failed to emit binary data: " << ark::pandasm::AsmEmitter::GetLastError() << std::endl;
         return false;
     }
 
 #ifdef PANDA_WITH_BYTECODE_OPTIMIZER
     if (optimize.GetValue()) {
-        bool isOptimized = panda::bytecodeopt::OptimizeBytecode(&program, mapsp, outputFile.GetValue());
-        if (!panda::pandasm::AsmEmitter::Emit(outputFile.GetValue(), program, statp, mapsp, emitDebugInfo)) {
-            std::cerr << "Failed to emit binary data: " << panda::pandasm::AsmEmitter::GetLastError() << std::endl;
+        bool isOptimized = ark::bytecodeopt::OptimizeBytecode(&program, mapsp, outputFile.GetValue());
+        if (!ark::pandasm::AsmEmitter::Emit(outputFile.GetValue(), program, statp, mapsp, emitDebugInfo)) {
+            std::cerr << "Failed to emit binary data: " << ark::pandasm::AsmEmitter::GetLastError() << std::endl;
             return false;
         }
         if (!isOptimized) {
@@ -204,9 +204,9 @@ bool EmitProgramInBinary(panda::pandasm::Program &program, panda::PandArgParser 
     return true;
 }
 
-bool BuildFiles(panda::pandasm::Program &program, panda::PandArgParser &paParser,
-                const panda::PandArg<std::string> &outputFile, panda::PandArg<bool> &optimize,
-                panda::PandArg<bool> &sizeStat, panda::PandArg<std::string> &scopesFile)
+bool BuildFiles(ark::pandasm::Program &program, ark::PandArgParser &paParser,
+                const ark::PandArg<std::string> &outputFile, ark::PandArg<bool> &optimize, ark::PandArg<bool> &sizeStat,
+                ark::PandArg<std::string> &scopesFile)
 {
     if (!DumpProgramInJson(program, scopesFile)) {
         return false;
@@ -219,22 +219,22 @@ bool BuildFiles(panda::pandasm::Program &program, panda::PandArgParser &paParser
     return true;
 }
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 int main(int argc, const char *argv[])
 {
-    panda::PandArg<bool> verbose("verbose", false, "Enable verbose output (will be printed to standard output)");
-    panda::PandArg<std::string> logFile("log-file", "", "(--log-file FILENAME) Set log file name");
-    panda::PandArg<std::string> scopesFile("dump-scopes", "", "(--dump-scopes FILENAME) Enable dump of scopes to file");
-    panda::PandArg<bool> help("help", false, "Print this message and exit");
-    panda::PandArg<bool> sizeStat("size-stat", false, "Print panda file size statistic");
-    panda::PandArg<bool> optimize("optimize", false, "Run the bytecode optimization");
-    panda::PandArg<bool> version {"version", false,
-                                  "Ark version, file format version and minimum supported file format version"};
+    ark::PandArg<bool> verbose("verbose", false, "Enable verbose output (will be printed to standard output)");
+    ark::PandArg<std::string> logFile("log-file", "", "(--log-file FILENAME) Set log file name");
+    ark::PandArg<std::string> scopesFile("dump-scopes", "", "(--dump-scopes FILENAME) Enable dump of scopes to file");
+    ark::PandArg<bool> help("help", false, "Print this message and exit");
+    ark::PandArg<bool> sizeStat("size-stat", false, "Print panda file size statistic");
+    ark::PandArg<bool> optimize("optimize", false, "Run the bytecode optimization");
+    ark::PandArg<bool> version {"version", false,
+                                "Ark version, file format version and minimum supported file format version"};
     // tail arguments
-    panda::PandArg<std::string> inputFile("INPUT_FILE", "", "Path to the source assembly code");
-    panda::PandArg<std::string> outputFile("OUTPUT_FILE", "", "Path to the generated binary code");
-    panda::PandArgParser paParser;
+    ark::PandArg<std::string> inputFile("INPUT_FILE", "", "Path to the source assembly code");
+    ark::PandArg<std::string> outputFile("OUTPUT_FILE", "", "Path to the generated binary code");
+    ark::PandArgParser paParser;
     paParser.Add(&verbose);
     paParser.Add(&help);
     paParser.Add(&logFile);
@@ -248,16 +248,16 @@ int main(int argc, const char *argv[])
 
     std::ifstream inputfile;
 
-    if (!panda::pandasm::PrepareArgs(paParser, inputFile, outputFile, logFile, help, verbose, version, inputfile, argc,
-                                     argv)) {
+    if (!ark::pandasm::PrepareArgs(paParser, inputFile, outputFile, logFile, help, verbose, version, inputfile, argc,
+                                   argv)) {
         return 1;
     }
 
     LOG(DEBUG, ASSEMBLER) << "Lexical analysis:";
 
-    panda::pandasm::Lexer lexer;
+    ark::pandasm::Lexer lexer;
 
-    std::vector<std::vector<panda::pandasm::Token>> tokens;
+    std::vector<std::vector<ark::pandasm::Token>> tokens;
 
     if (!Tokenize(lexer, tokens, inputfile)) {
         return 1;
@@ -265,10 +265,10 @@ int main(int argc, const char *argv[])
 
     LOG(DEBUG, ASSEMBLER) << "parsing:";
 
-    panda::pandasm::Parser parser;
+    ark::pandasm::Parser parser;
 
-    panda::Expected<panda::pandasm::Program, panda::pandasm::Error> res;
-    if (!panda::pandasm::ParseProgram(parser, tokens, inputFile, res)) {
+    ark::Expected<ark::pandasm::Program, ark::pandasm::Error> res;
+    if (!ark::pandasm::ParseProgram(parser, tokens, inputFile, res)) {
         return 1;
     }
 
@@ -276,10 +276,10 @@ int main(int argc, const char *argv[])
 
     auto w = parser.ShowWarnings();
     if (!w.empty()) {
-        panda::pandasm::PrintErrors(w, "WARNING");
+        ark::pandasm::PrintErrors(w, "WARNING");
     }
 
-    if (!panda::pandasm::BuildFiles(program, paParser, outputFile, optimize, sizeStat, scopesFile)) {
+    if (!ark::pandasm::BuildFiles(program, paParser, outputFile, optimize, sizeStat, scopesFile)) {
         return 1;
     }
 

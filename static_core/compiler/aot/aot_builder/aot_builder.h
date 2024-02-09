@@ -27,11 +27,11 @@
 #include <vector>
 #include "mem/gc/gc_types.h"
 
-namespace panda {
+namespace ark {
 class Class;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 template <Arch ARCH, bool IS_JIT_MODE>
 class ElfBuilder;
@@ -179,6 +179,6 @@ private:
     friend class JitCodeDataProvider;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_AOT_AOT_BULDER_AOT_FILE_BUILDER_H

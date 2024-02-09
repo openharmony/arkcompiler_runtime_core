@@ -28,11 +28,11 @@
 #include <string>
 #include <string_view>
 
-namespace panda {
+namespace ark {
 struct EntryFileStat;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class PandaCache;
 
@@ -350,7 +350,7 @@ public:
         return MEMBER_OFFSET(File, base_);
     }
 
-    Span<const panda::panda_file::EntityPairHeader> GetClassHashTable() const
+    Span<const ark::panda_file::EntityPairHeader> GetClassHashTable() const
     {
         return classHashTable_;
     }
@@ -375,7 +375,7 @@ public:
     static std::unique_ptr<const File> OpenUncompressedArchive(int fd, const std::string_view &filename, size_t size,
                                                                uint32_t offset, OpenMode openMode = READ_ONLY);
 
-    void SetClassHashTable(panda::Span<const panda::panda_file::EntityPairHeader> classHashTable) const
+    void SetClassHashTable(ark::Span<const ark::panda_file::EntityPairHeader> classHashTable) const
     {
         classHashTable_ = classHashTable;
     }
@@ -394,7 +394,7 @@ private:
     const std::string fullFilename_;
     std::unique_ptr<PandaCache> pandaCache_;
     const uint32_t uniqId_;
-    mutable panda::Span<const panda::panda_file::EntityPairHeader> classHashTable_;
+    mutable ark::Span<const ark::panda_file::EntityPairHeader> classHashTable_;
 };
 
 static_assert(File::GetFileBaseOffset() == 0);
@@ -446,12 +446,12 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern const char *ARCHIVE_FILENAME;
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 namespace std {
 template <>
-struct hash<panda::panda_file::File::EntityId> {
-    std::size_t operator()(panda::panda_file::File::EntityId id) const
+struct hash<ark::panda_file::File::EntityId> {
+    std::size_t operator()(ark::panda_file::File::EntityId id) const
     {
         return std::hash<uint32_t> {}(id.GetOffset());
     }

@@ -18,10 +18,10 @@
 
 #include "runtime/include/mem/panda_string.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 PandaString OffsetAsHexStr(const void *base, const void *ptr);
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // ! _PANDA_VERIFICATION_CFLOW_CFLOW_COMMON_H__

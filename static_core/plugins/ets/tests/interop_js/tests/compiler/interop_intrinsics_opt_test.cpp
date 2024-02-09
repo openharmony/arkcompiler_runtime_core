@@ -28,7 +28,7 @@
     INSTANTIATE_TEST_SUITE_P(CLASS_NAME, TEST_NAME, __VA_ARGS__); \
     TEST_P(TEST_NAME, test)
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 enum BlockPos : uint8_t { PRED = 1U << 0U, LEFT = 1U << 1U, RIGHT = 1U << 2U, NEXT = 1U << 3U, NONE = 0U };
 
@@ -757,4 +757,4 @@ TEST_F(InteropIntrnsicsOptTest, WrapUnwrapReturnValueNotApplied)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

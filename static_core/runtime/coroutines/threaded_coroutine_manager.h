@@ -20,7 +20,7 @@
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/include/value.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief Thread-based coroutine manager implementation.
@@ -122,6 +122,6 @@ private:
     std::atomic_uint32_t coroutineCount_ = 0;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif /* PANDA_RUNTIME_COROUTINES_THREADED_COROUTINE_MANAGER_H */

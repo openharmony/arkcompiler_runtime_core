@@ -19,7 +19,7 @@
 #include "utils/json_builder.h"
 #include "utils/json_parser.h"
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 template <typename T>
 inline JsonObject ToJson(const T &object)
 {
@@ -35,6 +35,6 @@ inline JsonObject ToObject(std::function<void(JsonObjectBuilder &)> &&params)
     return JsonObject(std::move(jsonBuilder).Build());
 }
 
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
 #endif  // PANDA_TOOLING_INSPECTOR_TEST_JSON_OBJECT_MATCHER_H

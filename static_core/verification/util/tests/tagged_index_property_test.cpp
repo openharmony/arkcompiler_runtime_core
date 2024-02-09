@@ -144,7 +144,7 @@ struct Arbitrary<IntTag> {
 
 }  // namespace rc
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace rc;
@@ -178,4 +178,4 @@ RC_GTEST_PROP(TestCase, ThreeTagtypes, (TAGS2 tag2, TAGS3 tag3, IntTag value_tag
     RC_ASSERT_FALSE(ind.GetIndex().IsValid());
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

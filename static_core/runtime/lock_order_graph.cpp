@@ -17,7 +17,7 @@
 
 #include "runtime/lock_order_graph.h"
 
-namespace panda {
+namespace ark {
 void UpdateMonitorsForThread(PandaMap<ManagedThread::ThreadId, Monitor::MonitorId> &enteringMonitors,
                              PandaMap<Monitor::MonitorId, PandaSet<ManagedThread::ThreadId>> &enteredMonitors,
                              MTManagedThread *thread)
@@ -140,4 +140,4 @@ bool LockOrderGraph::CheckForTerminationLoops() const
     }
     return nodesInDeadlocks.size() == nodes_.size();
 }
-}  // namespace panda
+}  // namespace ark

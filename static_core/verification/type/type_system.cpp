@@ -22,7 +22,7 @@
 #include "verification/plugins.h"
 #include "verifier_messages.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 static PandaString ClassNameToDescriptorString(char const *name)
 {
@@ -38,7 +38,7 @@ static PandaString ClassNameToDescriptorString(char const *name)
 TypeSystem::TypeSystem(VerifierService *service, panda_file::SourceLang lang)
     : service_ {service},
       plugin_ {plugin::GetLanguagePlugin(lang)},
-      langCtx_ {panda::plugins::GetLanguageContextBase(lang)},
+      langCtx_ {ark::plugins::GetLanguageContextBase(lang)},
       linkerCtx_ {service->GetClassLinker()->GetExtension(LanguageContext {langCtx_})->GetBootContext()}
 {
     ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
@@ -205,4 +205,4 @@ void TypeSystem::DisplaySubtyping(std::function<void(PandaString const &, PandaS
     }
 }
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier

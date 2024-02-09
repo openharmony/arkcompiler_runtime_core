@@ -47,7 +47,7 @@
 #include "reg_encoder.h"
 #include "runtime_adapter.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 using compiler::BasicBlock;
 using compiler::Graph;
@@ -126,7 +126,7 @@ public:
         builder_ = new compiler::IrConstructor();
 
         Logger::InitializeStdLogging(Logger::Level::ERROR,
-                                     panda::Logger::ComponentMask().set(Logger::Component::BYTECODE_OPTIMIZER));
+                                     ark::Logger::ComponentMask().set(Logger::Component::BYTECODE_OPTIMIZER));
     }
     ~CommonTest() override
     {
@@ -192,7 +192,7 @@ class AsmTest : public CommonTest {
 public:
     bool ParseToGraph(const std::string &source, const std::string &funcName, const char *fileName = "test.pb")
     {
-        panda::pandasm::Parser parser;
+        ark::pandasm::Parser parser;
         auto res = parser.Parse(source, fileName);
         if (parser.ShowError().err != pandasm::Error::ErrorType::ERR_NONE) {
             std::cerr << "Parse failed: " << parser.ShowError().message << std::endl
@@ -726,7 +726,7 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
-    void CheckOtherPasses(panda::pandasm::Program *prog, const std::string &funName)
+    void CheckOtherPasses(ark::pandasm::Program *prog, const std::string &funName)
     {
         GetGraph()->RunPass<compiler::Cleanup>();
         GetGraph()->RunPass<Canonicalization>();
@@ -747,7 +747,7 @@ public:
         ASSERT_NE(pf, nullptr);
     }
 
-    void CheckConstArrayFilling(panda::pandasm::Program *prog, [[maybe_unused]] const std::string &className,
+    void CheckConstArrayFilling(ark::pandasm::Program *prog, [[maybe_unused]] const std::string &className,
                                 const std::string &funcName)
     {
         if (prog->literalarrayTable.size() == 1) {
@@ -780,39 +780,47 @@ public:
 
     enum CheckConstArrayTypes { ACCESS, SKIP_MULTIDIM_ARRAYS };
 
-    void CheckConstArray(panda::pandasm::Program *prog, const char *className, const std::string &funcName,
+    static compiler::Inst *CheckAllInsts(const BasicBlock *bb, CheckConstArrayTypes type,
+                                         compiler::Inst *constArrayDefInst)
+    {
+        for (auto inst : bb->AllInsts()) {
+            switch (type) {
+                case CheckConstArrayTypes::ACCESS: {
+                    if (inst->GetOpcode() == Opcode::LoadConstArray) {
+                        constArrayDefInst = inst;
+                        continue;
+                    }
+                    if (inst->GetOpcode() == Opcode::LoadArray) {
+                        EXPECT_TRUE(constArrayDefInst != nullptr);
+                        EXPECT_TRUE(inst->CastToLoadArray()->GetArray() == constArrayDefInst);
+                    }
+                    continue;
+                }
+                case CheckConstArrayTypes::SKIP_MULTIDIM_ARRAYS: {
+                    EXPECT_TRUE(inst->GetOpcode() != Opcode::LoadConstArray);
+                    continue;
+                }
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        return constArrayDefInst;
+    }
+
+    void CheckConstArray(ark::pandasm::Program *prog, const char *className, const std::string &funcName,
                          CheckConstArrayTypes type)
     {
         g_options.SetConstArrayResolver(true);
 
-        panda::pandasm::AsmEmitter::Emit(std::string(className) + ".panda", *prog, nullptr, nullptr, false);
+        ark::pandasm::AsmEmitter::Emit(std::string(className) + ".panda", *prog, nullptr, nullptr, false);
         auto tempName = funcName.substr(funcName.find('.') + 1);
         EXPECT_TRUE(ParseToGraph(prog, tempName.substr(0, tempName.find(':'))));
         EXPECT_TRUE(RunOptimizations(GetGraph(), GetIrInterface()));
 
         compiler::Inst *constArrayDefInst {nullptr};
         for (auto bb : GetGraph()->GetBlocksRPO()) {
-            for (auto inst : bb->AllInsts()) {
-                switch (type) {
-                    case CheckConstArrayTypes::ACCESS: {
-                        if (inst->GetOpcode() == Opcode::LoadConstArray) {
-                            constArrayDefInst = inst;
-                            continue;
-                        }
-                        if (inst->GetOpcode() == Opcode::LoadArray) {
-                            EXPECT_TRUE(constArrayDefInst != nullptr);
-                            EXPECT_TRUE(inst->CastToLoadArray()->GetArray() == constArrayDefInst);
-                        }
-                        continue;
-                    }
-                    case CheckConstArrayTypes::SKIP_MULTIDIM_ARRAYS: {
-                        EXPECT_TRUE(inst->GetOpcode() != Opcode::LoadConstArray);
-                        continue;
-                    }
-                    default:
-                        UNREACHABLE();
-                }
-            }
+            constArrayDefInst = CheckAllInsts(bb, type, constArrayDefInst);
         }
 
         EXPECT_TRUE(GetGraph()->RunPass<RegEncoder>());
@@ -823,6 +831,6 @@ public:
     }
 };
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // BYTECODE_OPTIMIZER_TESTS_COMMON_H

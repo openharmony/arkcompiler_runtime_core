@@ -23,7 +23,7 @@
 #include "line_number_program.h"
 #include "libpandabase/utils/span.h"
 
-namespace panda::panda_file::debug_helpers {
+namespace ark::panda_file::debug_helpers {
 
 class BytecodeOffsetResolver {
 public:
@@ -137,27 +137,9 @@ private:
     uint32_t line_ {0};
 };
 
-inline size_t GetLineNumber(panda::panda_file::MethodDataAccessor mda, uint32_t bcOffset,
-                            const panda::panda_file::File *pandaDebugFile)
-{
-    auto debugInfoId = mda.GetDebugInfoId();
-    if (!debugInfoId) {
-        return -1;
-    }
+size_t GetLineNumber(ark::panda_file::MethodDataAccessor mda, uint32_t bcOffset,
+                     const ark::panda_file::File *pandaDebugFile);
 
-    panda::panda_file::DebugInfoDataAccessor dda(*pandaDebugFile, debugInfoId.value());
-    const uint8_t *program = dda.GetLineNumberProgram();
-
-    panda::panda_file::LineProgramState state(*pandaDebugFile, panda::panda_file::File::EntityId(0), dda.GetLineStart(),
-                                              dda.GetConstantPool());
-
-    BytecodeOffsetResolver resolver(&state, bcOffset);
-    panda::panda_file::LineNumberProgramProcessor<BytecodeOffsetResolver> programProcessor(program, &resolver);
-    programProcessor.Process();
-
-    return resolver.GetLine();
-}
-
-}  // namespace panda::panda_file::debug_helpers
+}  // namespace ark::panda_file::debug_helpers
 
 #endif  // PANDA_FILE_DEBUG_HELPERS_

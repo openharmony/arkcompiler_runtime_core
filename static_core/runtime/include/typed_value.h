@@ -24,7 +24,7 @@
 #include "libpandafile/file_items.h"
 #include "runtime/include/coretypes/tagged_value.h"
 
-namespace panda {
+namespace ark {
 class ObjectHeader;
 
 class TypedValue {
@@ -275,6 +275,6 @@ private:
 
     Value value_;
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_TYPED_VALUE_H

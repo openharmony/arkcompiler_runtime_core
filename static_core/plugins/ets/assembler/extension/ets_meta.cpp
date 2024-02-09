@@ -15,8 +15,8 @@
 
 #include "ets_meta.h"
 
-namespace panda::pandasm::extensions::ets {
+namespace ark::pandasm::extensions::ets {
 
 #include <ets_meta_gen.h>
 
-}  // namespace panda::pandasm::extensions::ets
+}  // namespace ark::pandasm::extensions::ets

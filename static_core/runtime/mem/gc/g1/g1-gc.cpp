@@ -37,7 +37,7 @@
 #include "runtime/mem/gc/g1/ref_updater.h"
 #include "runtime/mem/region_space.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 #ifndef NDEBUG
 static bool IsCardTableClear(CardTable *cardTable)
@@ -84,9 +84,9 @@ G1GC<LanguageConfig>::G1GC(ObjectAllocatorBase *objectAllocator, const GCSetting
       g1PromotionRegionAliveRate_(settings.G1PromotionRegionAliveRate()),
       g1TrackFreedObjects_(settings.G1TrackFreedObjects()),
       isExplicitConcurrentGcEnabled_(settings.IsExplicitConcurrentGcEnabled()),
-      regionSizeBits_(panda::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize())),
+      regionSizeBits_(ark::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize())),
       g1PauseTracker_(settings.GetG1GcPauseIntervalInMillis(), settings.GetG1MaxGcPauseInMillis()),
-      analytics_(panda::time::GetCurrentTimeInNanos())
+      analytics_(ark::time::GetCurrentTimeInNanos())
 {
     InternalAllocatorPtr allocator = this->GetInternalAllocator();
     this->SetType(GCType::G1_GC);
@@ -115,7 +115,7 @@ G1GC<LanguageConfig>::~G1GC()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::InitGCBits(panda::ObjectHeader *objHeader)
+void G1GC<LanguageConfig>::InitGCBits(ark::ObjectHeader *objHeader)
 {
     // The mutator may create a new object during concurrent marking phase.
     // In this case GC may don't mark it (for example only vregs may contain reference to the new object)
@@ -213,14 +213,14 @@ private:
         } else {
             log << 'T';
         }
-        DumpRegionRange(log, *region) << " A " << panda::helpers::MemoryConverter(region->GetAllocatedBytes()) << " L ";
+        DumpRegionRange(log, *region) << " A " << ark::helpers::MemoryConverter(region->GetAllocatedBytes()) << " L ";
         if (regionInfo.isYoung_) {
             log << '-';
         } else {
-            log << panda::helpers::MemoryConverter(region->GetLiveBytes());
+            log << ark::helpers::MemoryConverter(region->GetLiveBytes());
         }
-        log << " RS " << region->GetRemSetSize() << " M " << panda::helpers::MemoryConverter(regionInfo.movedSize_)
-            << " D " << panda::helpers::TimeConverter(time::GetCurrentTimeInNanos() - regionInfo.startTimeNs_);
+        log << " RS " << region->GetRemSetSize() << " M " << ark::helpers::MemoryConverter(regionInfo.movedSize_)
+            << " D " << ark::helpers::TimeConverter(time::GetCurrentTimeInNanos() - regionInfo.startTimeNs_);
         return log;
     }
 };
@@ -619,7 +619,7 @@ void G1GC<LanguageConfig>::UpdateCollectionSet(const CollectionSet &collectibleR
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunPhasesForRegions(panda::GCTask &task, const CollectionSet &collectibleRegions)
+void G1GC<LanguageConfig>::RunPhasesForRegions(ark::GCTask &task, const CollectionSet &collectibleRegions)
 {
     if (collectibleRegions.empty()) {
         LOG_DEBUG_GC << "No regions specified for collection " << task.reason;
@@ -631,7 +631,7 @@ void G1GC<LanguageConfig>::RunPhasesForRegions(panda::GCTask &task, const Collec
 }
 
 template <class LanguageConfig>
-bool G1GC<LanguageConfig>::NeedToRunGC(const panda::GCTask &task)
+bool G1GC<LanguageConfig>::NeedToRunGC(const ark::GCTask &task)
 {
     return (task.reason == GCTaskCause::YOUNG_GC_CAUSE) || (task.reason == GCTaskCause::OOM_CAUSE) ||
            (task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) ||
@@ -640,13 +640,13 @@ bool G1GC<LanguageConfig>::NeedToRunGC(const panda::GCTask &task)
 }
 
 template <class LanguageConfig>
-bool G1GC<LanguageConfig>::NeedFullGC(const panda::GCTask &task)
+bool G1GC<LanguageConfig>::NeedFullGC(const ark::GCTask &task)
 {
     return this->IsExplicitFull(task) || (task.reason == GCTaskCause::OOM_CAUSE);
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
+void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
 {
     SuspendUpdateRemsetWorkerScope stopUpdateRemsetWorkerScope(updateRemsetWorker_);
     interruptConcurrentFlag_ = false;
@@ -659,7 +659,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
         ScopedTiming t("G1 GC", *this->GetTiming());
         uint64_t startCollectionTime = 0;
         if (this->GetSettings()->G1EnablePauseTimeGoal()) {
-            startCollectionTime = panda::time::GetCurrentTimeInNanos();
+            startCollectionTime = ark::time::GetCurrentTimeInNanos();
             analytics_.ReportCollectionStart(startCollectionTime);
         }
         {
@@ -679,7 +679,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
         }
 
         if (this->GetSettings()->G1EnablePauseTimeGoal()) {
-            auto endCollectionTime = panda::time::GetCurrentTimeInNanos();
+            auto endCollectionTime = ark::time::GetCurrentTimeInNanos();
             g1PauseTracker_.AddPauseInNanos(startCollectionTime, endCollectionTime);
             analytics_.ReportCollectionEnd(task.reason, endCollectionTime, collectionSet_, true);
         }
@@ -703,7 +703,7 @@ void G1GC<LanguageConfig>::RunPhasesImpl(panda::GCTask &task)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
+void G1GC<LanguageConfig>::RunFullGC(ark::GCTask &task)
 {
     ScopedTiming t("Run Full GC", *this->GetTiming());
     GetG1ObjectAllocator()->template ReleaseEmptyRegions<RegionFlag::IS_OLD, OSPagesPolicy::NO_RETURN>();
@@ -726,7 +726,7 @@ void G1GC<LanguageConfig>::RunFullGC(panda::GCTask &task)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::TryRunMixedGC(panda::GCTask &task)
+void G1GC<LanguageConfig>::TryRunMixedGC(ark::GCTask &task)
 {
     bool isMixed = false;
     if (task.reason == GCTaskCause::MIXED && !interruptConcurrentFlag_) {
@@ -820,18 +820,18 @@ void G1GC<LanguageConfig>::ReleasePagesInFreePools()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunMixedGC(panda::GCTask &task, const CollectionSet &collectionSet)
+void G1GC<LanguageConfig>::RunMixedGC(ark::GCTask &task, const CollectionSet &collectionSet)
 {
-    auto startTime = panda::time::GetCurrentTimeInNanos();
+    auto startTime = ark::time::GetCurrentTimeInNanos();
     LOG_DEBUG_GC << "Collect regions size:" << collectionSet.size();
     UpdateCollectionSet(collectionSet);
     RunPhasesForRegions(task, collectionSet);
-    auto endTime = panda::time::GetCurrentTimeInNanos();
+    auto endTime = ark::time::GetCurrentTimeInNanos();
     this->GetStats()->AddTimeValue(endTime - startTime, TimeTypeStats::YOUNG_TOTAL_TIME);
 }
 
 template <class LanguageConfig>
-bool G1GC<LanguageConfig>::ScheduleMixedGCAndConcurrentMark(panda::GCTask &task)
+bool G1GC<LanguageConfig>::ScheduleMixedGCAndConcurrentMark(ark::GCTask &task)
 {
     // Atomic with acquire order reason: to see changes made by GC thread (which do concurrent marking and than set
     // isMixedGcRequired_) in mutator thread which waits for the end of concurrent marking.
@@ -854,7 +854,7 @@ void G1GC<LanguageConfig>::UpdatePreWrbEntrypointInThreads()
 {
     ObjRefProcessFunc entrypointFunc = nullptr;
     if constexpr (ENABLE_BARRIER) {
-        auto addr = this->GetBarrierSet()->GetBarrierOperand(panda::mem::BarrierPosition::BARRIER_POSITION_PRE,
+        auto addr = this->GetBarrierSet()->GetBarrierOperand(ark::mem::BarrierPosition::BARRIER_POSITION_PRE,
                                                              "STORE_IN_BUFF_TO_MARK_FUNC");
         entrypointFunc = std::get<ObjRefProcessFunc>(addr.GetValue());
     }
@@ -879,7 +879,7 @@ void G1GC<LanguageConfig>::EnsurePreWrbDisabledInThreads()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::RunConcurrentMark(panda::GCTask &task)
+void G1GC<LanguageConfig>::RunConcurrentMark(ark::GCTask &task)
 {
     ASSERT(collectionSet_.empty());
     // Init concurrent marking
@@ -969,7 +969,7 @@ void G1GC<LanguageConfig>::InitializeImpl()
 
     auto barrierSet =
         allocator->New<GCG1BarrierSet>(allocator, &PreWrbFuncEntrypoint, &PostWrbUpdateCardFuncEntrypoint,
-                                       panda::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
+                                       ark::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
                                        this->GetCardTable(), updatedRefsQueue_, &queueLock_);
     ASSERT(barrierSet != nullptr);
     this->SetGCBarrierSet(barrierSet);
@@ -996,13 +996,13 @@ bool G1GC<LanguageConfig>::MarkObjectIfNotMarked(ObjectHeader *object)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] panda::ObjectHeader *object)
+void G1GC<LanguageConfig>::InitGCBitsForAllocationInTLAB([[maybe_unused]] ark::ObjectHeader *object)
 {
     LOG(FATAL, GC) << "Not implemented";
 }
 
 template <class LanguageConfig>
-bool G1GC<LanguageConfig>::IsMarked(panda::ObjectHeader const *object) const
+bool G1GC<LanguageConfig>::IsMarked(ark::ObjectHeader const *object) const
 {
     return G1GCPauseMarker<LanguageConfig>::IsMarked(object);
 }
@@ -1126,7 +1126,7 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
         return builder.AllCrossRegionRefsProcessed();
     };
 
-    analytics_.ReportMarkingStart(panda::time::GetCurrentTimeInNanos());
+    analytics_.ReportMarkingStart(ark::time::GetCurrentTimeInNanos());
     MemRange dirtyCardsRange = CacheRefsFromRemsets(refsChecker);
 
     auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
@@ -1171,7 +1171,7 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
     auto refClearPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
     this->GetPandaVm()->HandleReferences(task, refClearPred);
 
-    analytics_.ReportMarkingEnd(panda::time::GetCurrentTimeInNanos(), GetUniqueRemsetRefsCount());
+    analytics_.ReportMarkingEnd(ark::time::GetCurrentTimeInNanos(), GetUniqueRemsetRefsCount());
 
     // HandleReferences could write a new barriers - so we need to handle them before moving
     ProcessDirtyCards();
@@ -1233,7 +1233,7 @@ bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collectionSet)
     HeapVerifierIntoGC<LanguageConfig> collectVerifier = this->CollectVerificationInfo(collectionSet);
     {
         GCScope<TRACE_TIMING> compactRegions("CompactRegions", this);
-        analytics_.ReportEvacuationStart(panda::time::GetCurrentTimeInNanos());
+        analytics_.ReportEvacuationStart(ark::time::GetCurrentTimeInNanos());
         if constexpr (FULL_GC) {
             if (!useGcWorkers) {
                 auto vector = internalAllocator->template New<PandaVector<ObjectHeader *>>();
@@ -1251,7 +1251,7 @@ bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collectionSet)
             this->GetWorkersTaskPool()->WaitUntilTasksEnd();
         }
 
-        analytics_.ReportEvacuationEnd(panda::time::GetCurrentTimeInNanos());
+        analytics_.ReportEvacuationEnd(ark::time::GetCurrentTimeInNanos());
     }
 
     MovedObjectsContainer<FULL_GC> *movedObjectsContainer = nullptr;
@@ -1263,13 +1263,13 @@ bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collectionSet)
 
     {
         os::memory::LockHolder lock(queueLock_);
-        analytics_.ReportUpdateRefsStart(panda::time::GetCurrentTimeInNanos());
+        analytics_.ReportUpdateRefsStart(ark::time::GetCurrentTimeInNanos());
         if (this->GetSettings()->ParallelRefUpdatingEnabled()) {
             UpdateRefsToMovedObjects<FULL_GC, true>(movedObjectsContainer);
         } else {
             UpdateRefsToMovedObjects<FULL_GC, false>(movedObjectsContainer);
         }
-        analytics_.ReportUpdateRefsEnd(panda::time::GetCurrentTimeInNanos());
+        analytics_.ReportUpdateRefsEnd(ark::time::GetCurrentTimeInNanos());
         ActualizeRemSets();
     }
 
@@ -1421,7 +1421,7 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::OnPauseMark(GCTask &task, G
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::FullMarking(panda::GCTask &task)
+void G1GC<LanguageConfig>::FullMarking(ark::GCTask &task)
 {
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
     auto *objectAllocator = GetG1ObjectAllocator();
@@ -1452,7 +1452,7 @@ void G1GC<LanguageConfig>::FullMarking(panda::GCTask &task)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::ConcurrentMarking(panda::GCTask &task)
+void G1GC<LanguageConfig>::ConcurrentMarking(ark::GCTask &task)
 {
     {
         PauseTimeGoalDelay();
@@ -1502,18 +1502,18 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::PauseTimeGoalDelay()
 {
     if (this->GetSettings()->G1EnablePauseTimeGoal() && !interruptConcurrentFlag_) {
-        auto start = panda::time::GetCurrentTimeInMicros();
+        auto start = ark::time::GetCurrentTimeInMicros();
         // Instead of max pause it should be estimated to calculate delay
-        auto remained = g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros());
+        auto remained = g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(ark::time::GetCurrentTimeInMicros());
         if (remained > 0) {
             ConcurrentScope concurrentScope(this);
             os::memory::LockHolder lh(concurrentMarkMutex_);
             while (!interruptConcurrentFlag_ && remained > 0) {
-                auto ms = static_cast<uint64_t>(remained) / panda::os::time::MILLIS_TO_MICRO;
-                auto ns = (static_cast<uint64_t>(remained) - ms * panda::os::time::MILLIS_TO_MICRO) *
-                          panda::os::time::MICRO_TO_NANO;
+                auto ms = static_cast<uint64_t>(remained) / ark::os::time::MILLIS_TO_MICRO;
+                auto ns = (static_cast<uint64_t>(remained) - ms * ark::os::time::MILLIS_TO_MICRO) *
+                          ark::os::time::MICRO_TO_NANO;
                 concurrentMarkCondVar_.TimedWait(&concurrentMarkMutex_, ms, ns);
-                auto d = static_cast<int64_t>(panda::time::GetCurrentTimeInMicros() - start);
+                auto d = static_cast<int64_t>(ark::time::GetCurrentTimeInMicros() - start);
                 remained -= d;
             }
         }
@@ -1568,7 +1568,7 @@ void G1GC<LanguageConfig>::ConcurrentMark(GCMarkingStackType *objectsStack)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::Remark(panda::GCTask const &task)
+void G1GC<LanguageConfig>::Remark(ark::GCTask const &task)
 {
     /**
      * Make remark on pause to have all marked objects in tenured space, it gives possibility to check objects in
@@ -1651,7 +1651,7 @@ void G1GC<LanguageConfig>::SweepRegularVmRefs()
 }
 
 template <class LanguageConfig>
-CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(panda::GCTask const &task, bool isMixed)
+CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(ark::GCTask const &task, bool isMixed)
 {
     ASSERT(!this->IsFullGC());
     ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
@@ -1698,7 +1698,7 @@ void G1GC<LanguageConfig>::AddOldRegionsMaxAllowed(CollectionSet &collectionSet)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet)
 {
-    auto gcPauseTimeBudget = this->GetSettings()->GetG1MaxGcPauseInMillis() * panda::os::time::MILLIS_TO_MICRO;
+    auto gcPauseTimeBudget = this->GetSettings()->GetG1MaxGcPauseInMillis() * ark::os::time::MILLIS_TO_MICRO;
     auto candidates = this->GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
     // add at least one old region to guarantee a progress in mixed collection
     auto *topRegion = candidates.top().second;
@@ -2052,9 +2052,9 @@ MemRange G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &r
 
     if (!this->IsFullGC()) {
         auto dirtyCardsCount = dirtyCards_.size();
-        analytics_.ReportScanDirtyCardsStart(panda::time::GetCurrentTimeInNanos());
+        analytics_.ReportScanDirtyCardsStart(ark::time::GetCurrentTimeInNanos());
         CacheRefsFromDirtyCards(visitor);
-        analytics_.ReportScanDirtyCardsEnd(panda::time::GetCurrentTimeInNanos(), dirtyCardsCount);
+        analytics_.ReportScanDirtyCardsEnd(ark::time::GetCurrentTimeInNanos(), dirtyCardsCount);
 #ifndef NDEBUG
         uniqueCardsInitialized_ = true;
 #endif  // NDEBUG
@@ -2079,7 +2079,7 @@ void G1GC<LanguageConfig>::CacheRefsFromDirtyCards(Visitor visitor)
         ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(ToVoidPtr(addr))),
                   std::cerr << "Invalid space type for the " << addr << std::endl);
         auto endAddr = range.GetEndAddress();
-        auto region = panda::mem::AddrToRegion(ToVoidPtr(addr));
+        auto region = ark::mem::AddrToRegion(ToVoidPtr(addr));
         if (!RemsetRegionPredicate(region)) {
             it = dirtyCards_.erase(it);
             continue;
@@ -2235,7 +2235,7 @@ void G1GC<LanguageConfig>::BuildCrossYoungRemSets(const Container &young)
     ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
     ASSERT(this->IsFullGC());
     auto allocator = this->GetG1ObjectAllocator();
-    size_t regionSizeBits = panda::helpers::math::GetIntLog2(allocator->GetRegionSize());
+    size_t regionSizeBits = ark::helpers::math::GetIntLog2(allocator->GetRegionSize());
     auto updateRemsets = [regionSizeBits](ObjectHeader *object, ObjectHeader *ref, size_t offset,
                                           [[maybe_unused]] bool isVolatile) {
         if (!IsSameRegion(object, ref, regionSizeBits) && !ObjectToRegion(ref)->IsYoung()) {
@@ -2280,7 +2280,7 @@ void G1GC<LanguageConfig>::ComputeNewSize()
 template <class LanguageConfig>
 size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDelay()
 {
-    auto delayBeforePause = g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros());
+    auto delayBeforePause = g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(ark::time::GetCurrentTimeInMicros());
     return static_cast<size_t>(ceil(analytics_.PredictAllocationRate() * delayBeforePause));
 }
 
@@ -2303,7 +2303,7 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
         maxEdenLength -= oldCandidates;
     }
 
-    auto maxPause = this->GetSettings()->GetG1MaxGcPauseInMillis() * panda::os::time::MILLIS_TO_MICRO;
+    auto maxPause = this->GetSettings()->GetG1MaxGcPauseInMillis() * ark::os::time::MILLIS_TO_MICRO;
     auto edenLengthPredicate = [this, maxPause](size_t edenLength) {
         if (!HaveEnoughRegionsToMove(edenLength)) {
             return false;
@@ -2378,7 +2378,7 @@ template <class LanguageConfig>
 bool G1GC<LanguageConfig>::Trigger(PandaUniquePtr<GCTask> task)
 {
     if (this->GetSettings()->G1EnablePauseTimeGoal() &&
-        g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(panda::time::GetCurrentTimeInMicros()) > 0) {
+        g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(ark::time::GetCurrentTimeInMicros()) > 0) {
         return false;
     }
     return GenerationalGC<LanguageConfig>::Trigger(std::move(task));
@@ -2399,4 +2399,4 @@ TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GCConcurrentMarker);
 TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GCMixedMarker);
 TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GCPauseMarker);
 
-}  // namespace panda::mem
+}  // namespace ark::mem

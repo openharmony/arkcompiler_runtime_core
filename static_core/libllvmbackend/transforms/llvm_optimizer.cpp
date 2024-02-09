@@ -127,9 +127,9 @@ std::string GetOptimizationPipeline(const std::string &filename, bool isIrtoc)
 
 #include <llvm_passes.inl>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
-LLVMOptimizer::LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *arkInterface,
+LLVMOptimizer::LLVMOptimizer(ark::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *arkInterface,
                              std::shared_ptr<llvm::TargetMachine> targetMachine)
     : options_(std::move(options)), arkInterface_(arkInterface), targetMachine_(std::move(targetMachine))
 {
@@ -137,7 +137,7 @@ LLVMOptimizer::LLVMOptimizer(panda::llvmbackend::LLVMCompilerOptions options, LL
 
 void LLVMOptimizer::ProcessInlineModule(llvm::Module *inlineModule) const
 {
-    namespace pass = panda::llvmbackend::passes;
+    namespace pass = ark::llvmbackend::passes;
     llvm::ModulePassManager modulePm;
     llvm::LoopAnalysisManager loopAm;
     llvm::FunctionAnalysisManager functionAm;
@@ -194,7 +194,7 @@ void LLVMOptimizer::DoOptimizeModule(llvm::Module *module) const
     llvm::StandardInstrumentations instrumentation(false);
     llvm::PassInstrumentationCallbacks passInstrumentation;
     instrumentation.registerCallbacks(passInstrumentation);
-    panda::libllvmbackend::RegisterPasses(passInstrumentation);
+    ark::libllvmbackend::RegisterPasses(passInstrumentation);
 
     llvm::PassBuilder passBuilder(targetMachine_.get(), llvm::PipelineTuningOptions(), llvm::None,
                                   &passInstrumentation);
@@ -213,14 +213,14 @@ void LLVMOptimizer::DoOptimizeModule(llvm::Module *module) const
 
     auto isIrtocMode = arkInterface_->IsIrtocMode();
 
-    panda::libllvmbackend::PassParser passParser(arkInterface_);
+    ark::libllvmbackend::PassParser passParser(arkInterface_);
     passParser.RegisterParserCallbacks(passBuilder, options_);
 
     llvm::ModulePassManager modulePm;
     if (options_.optimize) {
         cantFail(passBuilder.parsePassPipeline(modulePm, GetOptimizationPipeline(options_.pipelineFile, isIrtocMode)));
     } else {
-        namespace pass = panda::llvmbackend::passes;
+        namespace pass = ark::llvmbackend::passes;
         llvm::FunctionPassManager functionPm;
         if (!isIrtocMode) {
             AddPassIf(functionPm, pass::PruneDeopt());
@@ -238,4 +238,4 @@ void LLVMOptimizer::DoOptimizeModule(llvm::Module *module) const
     modulePm.run(*module, moduleAm);
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

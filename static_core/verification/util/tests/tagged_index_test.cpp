@@ -23,7 +23,7 @@
 
 #include <unordered_set>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, Tagged_index)
 {
@@ -87,4 +87,4 @@ TEST_F(VerifierTest, Tagged_index_in_container)
     EXPECT_EQ(iSet.count(tagind1), 0);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

@@ -23,7 +23,7 @@
 
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <typename PtrType>
 class CardPtrIterator {
@@ -231,6 +231,6 @@ private:
 
 using CardVisitor = std::function<void(CardTable::CardPtr)>;
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // ACCOUNTING_CARD_TABLE_H

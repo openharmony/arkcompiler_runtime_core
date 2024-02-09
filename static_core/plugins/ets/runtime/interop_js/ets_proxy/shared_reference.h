@@ -21,17 +21,17 @@
 
 #include <node_api.h>
 
-namespace panda::mem {
+namespace ark::mem {
 class Reference;
-}  // namespace panda::mem
+}  // namespace ark::mem
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 class InteropCtx;
 // Forward declarations to avoid cyclic deps.
 inline mem::GlobalObjectStorage *RefstorFromInteropCtx(InteropCtx *ctx);
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 class SharedReference {
 private:
@@ -125,6 +125,6 @@ private:
     FlagsType flags_ {};
 };
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_PROXY_SHARED_REFERENCE_H_

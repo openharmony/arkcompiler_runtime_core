@@ -24,7 +24,7 @@
 
 #include <utility>
 
-namespace panda::verifier {
+namespace ark::verifier {
 template <class C, class Friend1 = C, class Friend2 = C>
 class Synchronized {
     struct ConstProxy {
@@ -146,8 +146,8 @@ public:
     }
 
 private:
-    mutable panda::os::memory::RWLock rwLock_;
+    mutable ark::os::memory::RWLock rwLock_;
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_SYNCHRONIZED_HPP_

@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-passes_namespace: panda::llvmbackend::passes
+passes_namespace: ark::llvmbackend::passes
 
 pass_types:
   module: 'Pass runs on the whole llvm IR module'

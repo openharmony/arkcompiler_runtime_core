@@ -19,7 +19,7 @@
 #include "runtime/include/thread.h"
 #include "runtime/handle_scope-inl.h"
 
-namespace panda {
+namespace ark {
 ObjectLock::ObjectLock(ObjectHeader *obj)
     : scope_(HandleScope<ObjectHeader *>(ManagedThread::GetCurrent())),
       objHandler_(VMHandle<ObjectHeader>(ManagedThread::GetCurrent(), obj))
@@ -59,4 +59,4 @@ ObjectLock::~ObjectLock()
     [[maybe_unused]] auto res = Monitor::MonitorExit(objHandler_.GetPtr());
     ASSERT(res == Monitor::State::OK);
 }
-}  // namespace panda
+}  // namespace ark

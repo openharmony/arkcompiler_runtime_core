@@ -23,7 +23,7 @@
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Instructions.h>
 
-namespace panda::llvmbackend::gc_utils {
+namespace ark::llvmbackend::gc_utils {
 
 enum class DerivedStatus { UNKNOWN, DERIVED, NOT_DERIVED };
 bool IsDerived(llvm::Value *val);
@@ -33,12 +33,12 @@ bool HasBeenGcRef(const llvm::Value *val, bool any = true);
 
 inline bool IsGcRefType(llvm::Type *type)
 {
-    return type->isPointerTy() && type->getPointerAddressSpace() == panda::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE;
+    return type->isPointerTy() && type->getPointerAddressSpace() == ark::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE;
 }
 
 inline bool IsGcFunction(const llvm::Function &function)
 {
-    return function.hasGC() && function.getGC() == panda::llvmbackend::LLVMArkInterface::GC_STRATEGY;
+    return function.hasGC() && function.getGC() == ark::llvmbackend::LLVMArkInterface::GC_STRATEGY;
 }
 
 inline bool IsFunctionSupplemental(const llvm::Function &function)
@@ -46,7 +46,7 @@ inline bool IsFunctionSupplemental(const llvm::Function &function)
     if (function.isDeclaration()) {
         return true;
     }
-    if (function.getName().equals(panda::llvmbackend::LLVMArkInterface::GC_SAFEPOINT_POLL_NAME)) {
+    if (function.getName().equals(ark::llvmbackend::LLVMArkInterface::GC_SAFEPOINT_POLL_NAME)) {
         return true;
     }
     return false;
@@ -71,6 +71,6 @@ inline bool IsAllowedEscapedUser(const llvm::Value *val)
     return llvm::isa<llvm::CastInst>(val) || IsNullCmp(val);
 }
 
-}  // namespace panda::llvmbackend::gc_utils
+}  // namespace ark::llvmbackend::gc_utils
 
 #endif  //  LIBLLVMBACKEND_TRANSFORMS_PASSES_GC_UTILS_H

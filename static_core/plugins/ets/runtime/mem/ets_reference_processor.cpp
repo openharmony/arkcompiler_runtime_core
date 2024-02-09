@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
 
-namespace panda::mem::ets {
+namespace ark::mem::ets {
 
 EtsReferenceProcessor::EtsReferenceProcessor(GC *gc) : gc_(gc) {}
 
@@ -32,10 +32,10 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
     ASSERT(ref != nullptr);
     ASSERT(baseCls->GetSourceLang() == panda_file::SourceLang::ETS);
 
-    const auto *objEtsClass = panda::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(baseCls));
+    const auto *objEtsClass = ark::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(baseCls));
 
     if (objEtsClass->IsWeakReference()) {
-        const auto *etsRef = reinterpret_cast<const panda::ets::EtsWeakReference *>(ref);
+        const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
 
         auto *referent = etsRef->GetReferent();
         if (referent == nullptr) {
@@ -76,8 +76,8 @@ void EtsReferenceProcessor::ProcessReferences([[maybe_unused]] bool concurrent,
     os::memory::LockHolder lock(weakRefLock_);
     while (!weakReferences_.empty()) {
         auto *weakRefObj = weakReferences_.extract(weakReferences_.begin()).value();
-        ASSERT(panda::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
-        auto *weakRef = static_cast<panda::ets::EtsWeakReference *>(panda::ets::EtsObject::FromCoreType(weakRefObj));
+        ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
+        auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
         auto *referent = weakRef->GetReferent();
         if (referent == nullptr) {
             LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
@@ -106,4 +106,4 @@ size_t EtsReferenceProcessor::GetReferenceQueueSize() const
     return weakReferences_.size();
 }
 
-}  // namespace panda::mem::ets
+}  // namespace ark::mem::ets

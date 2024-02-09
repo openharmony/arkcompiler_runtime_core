@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/region_allocator.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 class BaseRefUpdater {
@@ -43,7 +43,7 @@ protected:
 
     bool IsSameRegion(ObjectHeader *o1, ObjectHeader *o2) const
     {
-        return panda::mem::IsSameRegion(o1, o2, regionSizeBits_);
+        return ark::mem::IsSameRegion(o1, o2, regionSizeBits_);
     }
 
 private:
@@ -86,6 +86,6 @@ private:
     CardTable *cardTable_;
     GCG1BarrierSet::ThreadLocalCardQueues *updatedRefsQueue_;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif

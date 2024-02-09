@@ -19,7 +19,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, IntTag)
 {
@@ -39,4 +39,4 @@ TEST_F(VerifierTest, IntTag)
     EXPECT_EQ(IntTag2::GetValueFor(0UL), 5UL);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

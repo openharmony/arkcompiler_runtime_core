@@ -20,7 +20,7 @@
 #include "runtime/mem/gc/gc_scoped_phase.h"
 #include "runtime/timing.h"
 
-namespace panda::mem {
+namespace ark::mem {
 // Forward declaration
 class GC;
 
@@ -71,6 +71,6 @@ public:
     NO_MOVE_SEMANTIC(GCScope);
     ~GCScope() = default;
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_SCOPED_FUNC_H

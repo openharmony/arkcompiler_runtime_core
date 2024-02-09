@@ -19,7 +19,7 @@
 
 #include "utils/logger.h"
 
-namespace panda {
+namespace ark {
 
 constexpr uint64_t NS_PER_SECOND = 1000000000;
 constexpr uint64_t NS_PER_MILLISECOND = 1000000;
@@ -94,4 +94,4 @@ PandaString Timing::Dump()
     return ss.str();
 }
 
-}  // namespace panda
+}  // namespace ark

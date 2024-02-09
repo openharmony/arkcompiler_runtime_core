@@ -15,7 +15,7 @@
 #include "operands.h"
 #include "codegen.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void Codegen::CreateMathTrunc([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
@@ -67,4 +67,4 @@ void Codegen::CreateArrayCopyTo(IntrinsicInst *inst, [[maybe_unused]] Reg dst, S
     CallFastPath(inst, entrypointId, INVALID_REGISTER, RegMask::GetZeroMask(), srcObj, dstObj, dstStart, srcStart,
                  srcEnd);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

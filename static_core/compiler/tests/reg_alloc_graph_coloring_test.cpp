@@ -22,7 +22,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/ir/graph_cloner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RegAllocGraphColoringTest : public GraphTest {
 public:
     SpillFillData GetParameterSpillFilll(Inst *param)
@@ -255,4 +255,4 @@ TEST_F(RegAllocGraphColoringTest, HighPressure)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

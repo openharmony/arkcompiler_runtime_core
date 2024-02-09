@@ -18,7 +18,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/analysis/loop_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 AdjustRefs::AdjustRefs(Graph *graph)
     : Optimization {graph},
       defs_ {graph->GetLocalAllocator()->Adapter()},
@@ -273,4 +273,4 @@ void AdjustRefs::ProcessIndex(Inst *mem)
     added_ = true;
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

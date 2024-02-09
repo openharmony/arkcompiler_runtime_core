@@ -26,7 +26,7 @@
 #include <string>
 #include <type_traits>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 using BreakpointId = size_t;
 using FrameId = uint32_t;
 using RemoteObjectId = size_t;
@@ -48,6 +48,6 @@ Expected<T, std::string> ParseNumericId(const JsonObject &object, const char *pr
 
     return static_cast<T>(value);
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_TYPES_NUMERIC_ID_H

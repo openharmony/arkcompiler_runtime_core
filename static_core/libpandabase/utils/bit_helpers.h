@@ -24,7 +24,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace panda::helpers {
+namespace ark::helpers {
 
 template <size_t WIDTH>
 struct UnsignedTypeHelper {
@@ -50,6 +50,6 @@ struct TypeHelper {
 template <size_t WIDTH, bool IS_SIGNED>
 using TypeHelperT = typename TypeHelper<WIDTH, IS_SIGNED>::type;
 
-}  // namespace panda::helpers
+}  // namespace ark::helpers
 
 #endif  // PANDA_LIBPANDABASE_UTILS_BIT_HELPERS_H_

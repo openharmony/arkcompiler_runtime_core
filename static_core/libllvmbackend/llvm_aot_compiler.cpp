@@ -54,33 +54,33 @@ static constexpr unsigned LIMIT_MULTIPLIER = 2U;
 
 static constexpr int32_t MAX_DEPTH = 32;
 
-using panda::compiler::LLVMIrConstructor;
+using ark::compiler::LLVMIrConstructor;
 
 namespace {
 void MarkAsInlineObject(llvm::GlobalObject *globalObject)
 {
-    globalObject->addMetadata(panda::llvmbackend::LLVMArkInterface::FUNCTION_MD_INLINE_MODULE,
+    globalObject->addMetadata(ark::llvmbackend::LLVMArkInterface::FUNCTION_MD_INLINE_MODULE,
                               *llvm::MDNode::get(globalObject->getContext(), {}));
 }
 
 void UnmarkAsInlineObject(llvm::GlobalObject *globalObject)
 {
-    ASSERT_PRINT(globalObject->hasMetadata(panda::llvmbackend::LLVMArkInterface::FUNCTION_MD_INLINE_MODULE),
+    ASSERT_PRINT(globalObject->hasMetadata(ark::llvmbackend::LLVMArkInterface::FUNCTION_MD_INLINE_MODULE),
                  "Must be marked to unmark");
 
-    globalObject->setMetadata(panda::llvmbackend::LLVMArkInterface::FUNCTION_MD_INLINE_MODULE, nullptr);
+    globalObject->setMetadata(ark::llvmbackend::LLVMArkInterface::FUNCTION_MD_INLINE_MODULE, nullptr);
 }
 
-constexpr unsigned GetFrameSlotSize(panda::Arch arch)
+constexpr unsigned GetFrameSlotSize(ark::Arch arch)
 {
     constexpr size_t SPILLS = 0;
-    panda::CFrameLayout layout {arch, SPILLS};
+    ark::CFrameLayout layout {arch, SPILLS};
     return layout.GetSlotSize();
 }
 
 }  // namespace
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class FixedCountSpreader : public Spreader {
 public:
@@ -190,7 +190,7 @@ bool LLVMAotCompiler::AddGraph(compiler::Graph *graph)
     return result;
 }
 
-bool LLVMAotCompiler::AddGraphToModule(panda::compiler::Graph *graph, WrappedModule &module, AddGraphMode addGraphMode)
+bool LLVMAotCompiler::AddGraphToModule(ark::compiler::Graph *graph, WrappedModule &module, AddGraphMode addGraphMode)
 {
     auto method = graph->GetMethod();
     if (module.HasFunctionDefinition(method) && addGraphMode == AddGraphMode::PRIMARY_FUNCTION) {
@@ -263,21 +263,23 @@ WrappedModule LLVMAotCompiler::CreateModule(uint32_t moduleId)
     return wrappedModule;
 }
 
-Expected<bool, std::string> LLVMAotCompiler::CanCompile(panda::compiler::Graph *graph)
+Expected<bool, std::string> LLVMAotCompiler::CanCompile(ark::compiler::Graph *graph)
 {
     LLVM_LOG(DEBUG, INFRA) << "LLVM AOT checking graph for method " << runtime_->GetMethodFullName(graph->GetMethod());
     return LLVMIrConstructor::CanCompile(graph);
 }
 
-std::unique_ptr<panda::llvmbackend::CompilerInterface> CreateLLVMAotCompiler(
-    panda::compiler::RuntimeInterface *runtime, panda::ArenaAllocator *allocator,
-    panda::compiler::LLVMAotBuilder *aotBuilder, const std::string &cmdline, const std::string &filename)
+std::unique_ptr<ark::llvmbackend::CompilerInterface> CreateLLVMAotCompiler(ark::compiler::RuntimeInterface *runtime,
+                                                                           ark::ArenaAllocator *allocator,
+                                                                           ark::compiler::LLVMAotBuilder *aotBuilder,
+                                                                           const std::string &cmdline,
+                                                                           const std::string &filename)
 {
     return std::make_unique<LLVMAotCompiler>(runtime, allocator, aotBuilder, cmdline, filename);
 }
 
-LLVMAotCompiler::LLVMAotCompiler(panda::compiler::RuntimeInterface *runtime, panda::ArenaAllocator *allocator,
-                                 panda::compiler::LLVMAotBuilder *aotBuilder, std::string cmdline, std::string filename)
+LLVMAotCompiler::LLVMAotCompiler(ark::compiler::RuntimeInterface *runtime, ark::ArenaAllocator *allocator,
+                                 ark::compiler::LLVMAotBuilder *aotBuilder, std::string cmdline, std::string filename)
     : LLVMCompiler(aotBuilder->GetArch()),
       methods_(allocator->Adapter()),
       aotBuilder_(aotBuilder),
@@ -293,12 +295,12 @@ LLVMAotCompiler::LLVMAotCompiler(panda::compiler::RuntimeInterface *runtime, pan
     SetLLVMOption("spp-no-entry", true);
     SetLLVMOption("spp-no-call", true);
     // Set limit to skip Safepoints on entry for small functions
-    SetLLVMOption("isp-on-entry-limit", panda::compiler::g_options.GetCompilerSafepointEliminationLimit());
+    SetLLVMOption("isp-on-entry-limit", ark::compiler::g_options.GetCompilerSafepointEliminationLimit());
     if (arch == Arch::AARCH64) {
         SetLLVMOption("aarch64-enable-ptr32", true);
     }
     // clang-format off
-    targetMachine_ = cantFail(panda::llvmbackend::TargetMachineBuilder {}
+    targetMachine_ = cantFail(ark::llvmbackend::TargetMachineBuilder {}
                             .SetCPU(GetCPUForArch(arch))
                             .SetOptLevel(static_cast<llvm::CodeGenOpt::Level>(llvmCompilerOptions.optlevel))
                             .SetFeatures(GetFeaturesForArch(GetArch()))
@@ -318,15 +320,15 @@ std::vector<std::string> LLVMAotCompiler::GetFeaturesForArch(Arch arch)
     features.reserve(2U);
     switch (arch) {
         case Arch::AARCH64: {
-            features.emplace_back(std::string("+reserve-x") + std::to_string(panda::GetThreadReg(arch)));
-            if (panda::compiler::g_options.IsCpuFeatureEnabled(compiler::CRC32)) {
+            features.emplace_back(std::string("+reserve-x") + std::to_string(ark::GetThreadReg(arch)));
+            if (ark::compiler::g_options.IsCpuFeatureEnabled(compiler::CRC32)) {
                 features.emplace_back(std::string("+crc"));
             }
             return features;
         }
         case Arch::X86_64:
-            features.emplace_back(std::string("+fixed-r") + std::to_string(panda::GetThreadReg(arch)));
-            if (panda::compiler::g_options.IsCpuFeatureEnabled(compiler::SSE42)) {
+            features.emplace_back(std::string("+fixed-r") + std::to_string(ark::GetThreadReg(arch)));
+            if (ark::compiler::g_options.IsCpuFeatureEnabled(compiler::SSE42)) {
                 features.emplace_back("+sse4.2");
             }
             return features;
@@ -338,7 +340,7 @@ std::vector<std::string> LLVMAotCompiler::GetFeaturesForArch(Arch arch)
 AotBuilderOffsets LLVMAotCompiler::CollectAotBuilderOffsets(
     const std::unordered_set<std::shared_ptr<WrappedModule>> &modules)
 {
-    using StackMapSymbol = panda::llvmbackend::CreatedObjectFile::StackMapSymbol;
+    using StackMapSymbol = ark::llvmbackend::CreatedObjectFile::StackMapSymbol;
 
     const auto &methodPtrs = aotBuilder_->GetMethods();
     const auto &headers = aotBuilder_->GetMethodHeaders();
@@ -360,11 +362,11 @@ AotBuilderOffsets LLVMAotCompiler::CollectAotBuilderOffsets(
     }
     ASSERT(methodsIt == std::end(methods_));
 
-    std::vector<panda::compiler::RoData> roDatas;
+    std::vector<ark::compiler::RoData> roDatas;
     for (auto &module : modules) {
         auto roDataSections = module->GetObjectFile()->GetRoDataSections();
         for (auto &item : roDataSections) {
-            roDatas.push_back(panda::compiler::RoData {
+            roDatas.push_back(ark::compiler::RoData {
                 item.ContentToVector(), item.GetName() + std::to_string(module->GetModuleId()), item.GetAlignment()});
         }
     }
@@ -390,7 +392,7 @@ AotBuilderOffsets LLVMAotCompiler::CollectAotBuilderOffsets(
     return AotBuilderOffsets {std::move(sectionAddresses), std::move(methodOffsets)};
 }
 
-panda::compiler::CompiledMethod LLVMAotCompiler::AdaptCode(panda::Method *method, Span<const uint8_t> machineCode)
+ark::compiler::CompiledMethod LLVMAotCompiler::AdaptCode(ark::Method *method, Span<const uint8_t> machineCode)
 {
     ASSERT(method != nullptr);
     ASSERT(!machineCode.empty());
@@ -400,10 +402,10 @@ panda::compiler::CompiledMethod LLVMAotCompiler::AdaptCode(panda::Method *method
     ArenaVector<uint8_t> code(allocator.Adapter());
     code.insert(code.begin(), machineCode.cbegin(), machineCode.cend());
 
-    auto compiledMethod = panda::compiler::CompiledMethod(GetArch(), method, 0);
+    auto compiledMethod = ark::compiler::CompiledMethod(GetArch(), method, 0);
     compiledMethod.SetCode(Span<const uint8_t>(code));
 
-    panda::compiler::CodeInfoBuilder codeInfoBuilder(GetArch(), &allocator);
+    ark::compiler::CodeInfoBuilder codeInfoBuilder(GetArch(), &allocator);
     spreader_->GetModuleForMethod(method)->GetCodeInfoProducer()->Produce(method, &codeInfoBuilder);
 
     ArenaVector<uint8_t> codeInfo(allocator.Adapter());
@@ -426,7 +428,7 @@ void LLVMAotCompiler::CompileAll()
 
     auto offsets = CollectAotBuilderOffsets(modules);
 
-    std::vector<panda::compiler::RoData> roDatas;
+    std::vector<ark::compiler::RoData> roDatas;
     for (auto &wrappedModule : modules) {
         auto mid = wrappedModule->GetModuleId();
         size_t functionHeaderSize = compiler::CodeInfo::GetCodeOffset(GetArch());
@@ -460,8 +462,8 @@ void LLVMAotCompiler::CompileAll()
         }
         auto newRodatas = linker.GetLinkedRoDataSections();
         for (auto &item : newRodatas) {
-            roDatas.push_back(panda::compiler::RoData {item.ContentToVector(), item.GetName() + std::to_string(mid),
-                                                       item.GetAlignment()});
+            roDatas.push_back(ark::compiler::RoData {item.ContentToVector(), item.GetName() + std::to_string(mid),
+                                                     item.GetAlignment()});
         }
     }
 
@@ -473,7 +475,7 @@ void LLVMAotCompiler::CompileAll()
     aotBuilder_->SetRoDataSections(std::move(roDatas));
 }
 
-void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, panda::compiler::Graph *caller,
+void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, ark::compiler::Graph *caller,
                                              compiler::RuntimeInterface::MethodPtr method, int32_t depth)
 {
     if (!runtime_->IsMethodCanBeInlined(method) || IsInliningDisabled(runtime_, method) ||
@@ -492,7 +494,7 @@ void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, panda::compi
     ArenaAllocator allocator {SpaceType::SPACE_TYPE_COMPILER};
     ArenaAllocator localAllocator {SpaceType::SPACE_TYPE_COMPILER};
 
-    auto graph = CreateGraph(allocator, localAllocator, *static_cast<panda::Method *>(method));
+    auto graph = CreateGraph(allocator, localAllocator, *static_cast<ark::Method *>(method));
     if (!graph) {
         [[maybe_unused]] auto message = llvm::toString(graph.takeError());
         LLVM_LOG(WARNING, INFRA) << "Could not add inline function = '" << runtime_->GetMethodFullName(method)
@@ -514,7 +516,7 @@ void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, panda::compi
     AddInlineFunctionsByDepth(module, callee, depth + 1);
 }
 
-void LLVMAotCompiler::AddInlineFunctionsByDepth(WrappedModule &module, panda::compiler::Graph *caller, int32_t depth)
+void LLVMAotCompiler::AddInlineFunctionsByDepth(WrappedModule &module, ark::compiler::Graph *caller, int32_t depth)
 {
     ASSERT(depth >= 0);
     LLVM_LOG(DEBUG, INFRA) << "Adding inline functions, depth = " << depth << ", caller = '"
@@ -540,15 +542,15 @@ void LLVMAotCompiler::AddInlineFunctionsByDepth(WrappedModule &module, panda::co
     }
 }
 
-llvm::Expected<panda::compiler::Graph *> LLVMAotCompiler::CreateGraph(ArenaAllocator &allocator,
-                                                                      ArenaAllocator &localAllocator, Method &method)
+llvm::Expected<ark::compiler::Graph *> LLVMAotCompiler::CreateGraph(ArenaAllocator &allocator,
+                                                                    ArenaAllocator &localAllocator, Method &method)
 {
     // Part of Paoc::CompileAot
     auto sourceLang = method.GetClass()->GetSourceLang();
-    bool isDynamic = panda::panda_file::IsDynamicLanguage(sourceLang);
+    bool isDynamic = ark::panda_file::IsDynamicLanguage(sourceLang);
 
-    auto graph = allocator.New<panda::compiler::Graph>(&allocator, &localAllocator, aotBuilder_->GetArch(), &method,
-                                                       runtime_, false, nullptr, isDynamic);
+    auto graph = allocator.New<ark::compiler::Graph>(&allocator, &localAllocator, aotBuilder_->GetArch(), &method,
+                                                     runtime_, false, nullptr, isDynamic);
     if (graph == nullptr) {
         return llvm::createStringError(llvm::inconvertibleErrorCode(), "Couldn't create graph");
     }
@@ -563,13 +565,13 @@ llvm::Expected<panda::compiler::Graph *> LLVMAotCompiler::CreateGraph(ArenaAlloc
     aotData->SetUseCha(true);
     graph->SetAotData(aotData);
 
-    if (!graph->RunPass<panda::compiler::IrBuilder>()) {
+    if (!graph->RunPass<ark::compiler::IrBuilder>()) {
         return llvm::createStringError(llvm::inconvertibleErrorCode(), "IrBuilder failed");
     }
-    graph->GetAnalysis<panda::compiler::MonitorAnalysis>().SetCheckNonCatchOnly(true);
-    bool monitorsCorrect = graph->RunPass<panda::compiler::MonitorAnalysis>();
-    graph->InvalidateAnalysis<panda::compiler::MonitorAnalysis>();
-    graph->GetAnalysis<panda::compiler::MonitorAnalysis>().SetCheckNonCatchOnly(false);
+    graph->GetAnalysis<ark::compiler::MonitorAnalysis>().SetCheckNonCatchOnly(true);
+    bool monitorsCorrect = graph->RunPass<ark::compiler::MonitorAnalysis>();
+    graph->InvalidateAnalysis<ark::compiler::MonitorAnalysis>();
+    graph->GetAnalysis<ark::compiler::MonitorAnalysis>().SetCheckNonCatchOnly(false);
     if (!monitorsCorrect) {
         return llvm::createStringError(llvm::inconvertibleErrorCode(), "Monitors incorrect");
     }
@@ -633,4 +635,4 @@ void LLVMAotCompiler::DumpCodeInfo(compiler::CompiledMethod &method) const
     LLVM_LOG(DEBUG, INFRA) << ss.str();
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

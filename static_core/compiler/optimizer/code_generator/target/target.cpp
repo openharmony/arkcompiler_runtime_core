@@ -41,7 +41,7 @@ Define arch-specific interfaces
 
 #include "frame_info.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool BackendSupport(Arch arch)
 {
     switch (arch) {
@@ -176,4 +176,4 @@ CallingConvention *CallingConvention::Create([[maybe_unused]] ArenaAllocator *ar
             return nullptr;
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

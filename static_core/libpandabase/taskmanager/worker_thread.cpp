@@ -16,7 +16,7 @@
 #include "libpandabase/taskmanager/task_scheduler.h"
 #include "libpandabase/os/thread.h"
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 WorkerThread::WorkerThread(FinishedTasksCallback callback, size_t tasksCount)
     : finishedTasksCallback_(std::move(callback))
@@ -87,4 +87,4 @@ WorkerThread::~WorkerThread()
     delete thread_;
 }
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

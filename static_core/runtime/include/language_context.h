@@ -32,7 +32,7 @@
 #include "runtime/include/tooling/pt_lang_extension.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/mem/gc/gc_types.h"
-namespace panda {
+namespace ark {
 class Thread;
 class Trace;
 class Runtime;
@@ -65,7 +65,7 @@ public:
 
     virtual const uint8_t *GetStringClassDescriptor() const
     {
-        return utf::CStringAsMutf8(panda::panda_file::GetStringClassDescriptor(GetLanguage()));
+        return utf::CStringAsMutf8(ark::panda_file::GetStringClassDescriptor(GetLanguage()));
     }
 
     virtual LangTypeT GetLanguageType() const = 0;
@@ -80,12 +80,12 @@ public:
 
     virtual const uint8_t *GetCtorName() const
     {
-        return utf::CStringAsMutf8(panda::panda_file::GetCtorName(GetLanguage()));
+        return utf::CStringAsMutf8(ark::panda_file::GetCtorName(GetLanguage()));
     }
 
     virtual const uint8_t *GetCctorName() const
     {
-        return utf::CStringAsMutf8(panda::panda_file::GetCctorName(GetLanguage()));
+        return utf::CStringAsMutf8(ark::panda_file::GetCctorName(GetLanguage()));
     }
 
     virtual const uint8_t *GetNullPointerExceptionClassDescriptor() const = 0;
@@ -228,13 +228,13 @@ public:
         return stringObject->ObjectSize();
     }
 
-    virtual Trace *CreateTrace([[maybe_unused]] PandaUniquePtr<panda::os::file::File> traceFile,
+    virtual Trace *CreateTrace([[maybe_unused]] PandaUniquePtr<ark::os::file::File> traceFile,
                                [[maybe_unused]] size_t bufferSize) const
     {
         UNREACHABLE();
     }
 
-    virtual panda::panda_file::File::OpenMode GetBootPandaFilesOpenMode() const
+    virtual ark::panda_file::File::OpenMode GetBootPandaFilesOpenMode() const
     {
         return panda_file::File::READ_ONLY;
     }
@@ -543,7 +543,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &stream, const LanguageContext &ctx)
     {
-        return stream << panda::panda_file::LanguageToString(ctx.base_->GetLanguage());
+        return stream << ark::panda_file::LanguageToString(ctx.base_->GetLanguage());
     }
 
     bool IsCallableObject([[maybe_unused]] ObjectHeader *obj)
@@ -591,7 +591,7 @@ public:
         return base_->InitializeClass(classLinker, thread, klass);
     }
 
-    Trace *CreateTrace(PandaUniquePtr<panda::os::file::File> traceFile, size_t bufferSize) const
+    Trace *CreateTrace(PandaUniquePtr<ark::os::file::File> traceFile, size_t bufferSize) const
     {
         return base_->CreateTrace(std::move(traceFile), bufferSize);
     }
@@ -621,7 +621,7 @@ public:
         return base_->GetVerificationTypeThrowable();
     }
 
-    panda::panda_file::File::OpenMode GetBootPandaFilesOpenMode() const
+    ark::panda_file::File::OpenMode GetBootPandaFilesOpenMode() const
     {
         return base_->GetBootPandaFilesOpenMode();
     }
@@ -655,6 +655,6 @@ private:
     const LanguageContextBase *base_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_LANGUAGE_CONTEXT_H_

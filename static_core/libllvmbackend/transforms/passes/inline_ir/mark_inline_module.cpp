@@ -24,9 +24,9 @@
 
 using llvm::GlobalObject;
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
-bool MarkInlineModule::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
+bool MarkInlineModule::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return options->doIrtocInline;
 }
@@ -44,4 +44,4 @@ void MarkInlineModule::Mark(GlobalObject &object)
     object.addMetadata(LLVMArkInterface::FUNCTION_MD_INLINE_MODULE, *llvm::MDNode::get(object.getContext(), {}));
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

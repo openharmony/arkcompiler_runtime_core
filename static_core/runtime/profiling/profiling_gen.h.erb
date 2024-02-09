@@ -19,7 +19,7 @@
 #include "libpandafile/bytecode_instruction-inl.h"
 #include <array>
 
-namespace panda::profiling {
+namespace ark::profiling {
 
 % require 'set'
 % require_relative '../../templates/common.rb'
@@ -75,6 +75,6 @@ inline ProfilingKind GetProfileKind(BytecodeInstruction::Opcode opcode)
     }
 }
 
-}  // namespace panda::profiling
+}  // namespace ark::profiling
 
 #endif  // PANDA_PROFILING_GEN_H

@@ -18,7 +18,7 @@
 
 #include "runtime/mem/lock_config_helper.h"
 
-namespace panda {
+namespace ark {
 
 class PandaAssemblyLanguageConfig {
 public:
@@ -30,6 +30,6 @@ public:
 
 #include "language_config_gen.inc"
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_LANGUAGE_CONFIG_H_

@@ -19,7 +19,7 @@
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 
 // Use for the requirement of ACE that wants to associated a registered C++ resource with a JSObject.
 class NativePointer : public ObjectHeader {
@@ -50,6 +50,6 @@ private:
     void *externalPointer_ {nullptr};
 };
 
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H_

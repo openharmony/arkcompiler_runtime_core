@@ -26,7 +26,7 @@
 
 #include <ostream>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Inst;
 
 // NOLINTNEXTLINE:e(cppcoreguidelines-macro-usage)
@@ -264,6 +264,6 @@ private:
     Location dstLocation_;
     Location tmpLocation_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_LOCATIONS_H

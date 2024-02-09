@@ -22,7 +22,7 @@
 #include "optimizer/optimizations/lowering.h"
 #include "optimizer/optimizations/cleanup.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class PeepholesTest : public CommonTest {
 public:
     PeepholesTest()
@@ -6621,4 +6621,4 @@ TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

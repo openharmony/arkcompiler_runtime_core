@@ -18,7 +18,7 @@
 #include "runtime/mem/gc/gc_settings.h"
 #include "libpandabase/globals.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 GCSettings::GCSettings(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
@@ -277,4 +277,4 @@ uint32_t GCSettings::GetG1GcPauseIntervalInMillis() const
     return g1GcPauseIntervalMs_;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

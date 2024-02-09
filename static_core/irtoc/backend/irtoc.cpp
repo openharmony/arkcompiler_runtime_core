@@ -17,18 +17,18 @@
 #include "irtoc_options.h"
 #include "generated/base_options.h"
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 
 int Run(int argc, const char **argv)
 {
-    panda::PandArgParser paParser;
+    ark::PandArgParser paParser;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    panda::irtoc::g_options.AddOptions(&paParser);
+    ark::irtoc::g_options.AddOptions(&paParser);
     base_options::Options baseOptions("");
     baseOptions.AddOptions(&paParser);
-    panda::compiler::g_options.AddOptions(&paParser);
+    ark::compiler::g_options.AddOptions(&paParser);
 #ifdef PANDA_LLVM_IRTOC
-    panda::llvmbackend::g_options.AddOptions(&paParser);
+    ark::llvmbackend::g_options.AddOptions(&paParser);
 #endif
     if (!paParser.Parse(argc, argv)) {
         std::cerr << "Error: " << paParser.GetErrorString() << "\n";
@@ -37,7 +37,7 @@ int Run(int argc, const char **argv)
 
     Logger::Initialize(baseOptions);
 
-    panda::compiler::CompilerLogger::SetComponents(panda::compiler::g_options.GetCompilerLog());
+    ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
 
     if (std::getenv("IRTOC_VERBOSE") != nullptr) {
         Logger::SetLevel(Logger::Level::DEBUG);
@@ -53,9 +53,9 @@ int Run(int argc, const char **argv)
     return 0;
 }
 
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc
 
 int main(int argc, const char **argv)
 {
-    return panda::irtoc::Run(argc, argv);
+    return ark::irtoc::Run(argc, argv);
 }

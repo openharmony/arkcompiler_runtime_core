@@ -23,7 +23,7 @@
 #include "runtime/include/class.h"
 #include "runtime/include/object_header.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 
 class Class : public ObjectHeader {
 public:
@@ -36,15 +36,15 @@ public:
     // otherwise it may cause data race while visiting object's class concurrently in gc.
     void InitClass(const uint8_t *descriptor, uint32_t vtableSize, uint32_t imtSize, uint32_t klassSize)
     {
-        new (&klass_) panda::Class(descriptor, panda_file::SourceLang::PANDA_ASSEMBLY, vtableSize, imtSize, klassSize);
+        new (&klass_) ark::Class(descriptor, panda_file::SourceLang::PANDA_ASSEMBLY, vtableSize, imtSize, klassSize);
     }
 
-    panda::Class *GetRuntimeClass()
+    ark::Class *GetRuntimeClass()
     {
         return &klass_;
     }
 
-    const panda::Class *GetRuntimeClass() const
+    const ark::Class *GetRuntimeClass() const
     {
         return &klass_;
     }
@@ -83,18 +83,18 @@ public:
         return MEMBER_OFFSET(Class, klass_);
     }
 
-    static Class *FromRuntimeClass(panda::Class *klass)
+    static Class *FromRuntimeClass(ark::Class *klass)
     {
         return reinterpret_cast<Class *>(reinterpret_cast<uintptr_t>(klass) - GetRuntimeClassOffset());
     }
 
 private:
-    panda::Class klass_;
+    ark::Class klass_;
 };
 
 // Klass field has variable size so it must be last
-static_assert(Class::GetRuntimeClassOffset() + sizeof(panda::Class) == sizeof(Class));
+static_assert(Class::GetRuntimeClassOffset() + sizeof(ark::Class) == sizeof(Class));
 
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_CORETYPES_CLASS_H_

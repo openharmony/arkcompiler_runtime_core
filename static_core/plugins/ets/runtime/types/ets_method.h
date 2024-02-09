@@ -29,11 +29,11 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_value.h"
 
-namespace panda {
+namespace ark {
 class Value;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::ets {
+namespace ark::ets {
 namespace napi {
 class ScopedManagedCodeFix;
 }  // namespace napi
@@ -306,6 +306,6 @@ public:
     NO_MOVE_SEMANTIC(EtsMethod);
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_METHOD_H_

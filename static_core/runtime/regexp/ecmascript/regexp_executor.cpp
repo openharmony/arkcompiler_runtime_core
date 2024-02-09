@@ -19,7 +19,7 @@
 #include "utils/logger.h"
 #include "securec.h"
 
-namespace panda {
+namespace ark {
 using RegExpState = RegExpExecutor::RegExpState;
 bool RegExpExecutor::Execute(const uint8_t *input, uint32_t lastIndex, uint32_t length, uint8_t *buf, bool isWideChar)
 {
@@ -545,4 +545,4 @@ bool RegExpExecutor::HandleOpBackReference(const DynChunk &byteCode, uint8_t opC
     return HandleOpBackwardBackReferenceMatch(captureStart, captureEnd, opCode);
 }
 
-}  // namespace panda
+}  // namespace ark

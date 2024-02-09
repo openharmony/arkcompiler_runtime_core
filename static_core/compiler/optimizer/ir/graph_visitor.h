@@ -19,7 +19,7 @@
 #include "opcodes.h"
 #include "basicblock.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 /*
  * Base visitor class.
@@ -102,6 +102,6 @@ protected:
      * - VisitFunc table_ - list of methods for all opcodes.
      */
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_VISITOR_H

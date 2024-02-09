@@ -18,8 +18,8 @@
 
 #include "libpandafile/file.h"
 
-namespace panda {
+namespace ark {
 bool IsVerifySuccInAppInstall(const panda_file::File *file);
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_PLATFORM_PLATFORM_H

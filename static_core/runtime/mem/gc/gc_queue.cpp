@@ -18,7 +18,7 @@
 #include "libpandabase/utils/time.h"
 #include "runtime/mem/gc/gc.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 constexpr int64_t NANOSECONDS_PER_MILLISEC = 1000000;
 
@@ -74,4 +74,4 @@ bool GCQueueWithTime::AddTask(PandaUniquePtr<GCTask> task)
     return true;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

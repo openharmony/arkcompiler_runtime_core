@@ -23,7 +23,7 @@
 #include "utils/arena_containers.h"
 #include "pass_manager_statistics.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 class Pass;
 class Analysis;
@@ -174,6 +174,6 @@ private:
 
     bool firstExecution_ {true};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_PASS_MANAGER_H

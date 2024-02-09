@@ -20,7 +20,7 @@
 #include "types/ets_class.h"
 #include "types/ets_promise.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsPromiseTest : public testing::Test {
 public:
@@ -84,7 +84,7 @@ TEST_F(EtsPromiseTest, MemoryLayout)
     std::vector<Member> members = EtsPromiseMembers::GetMembers();
     ASSERT_EQ(members.size(), promiseClass->GetInstanceFieldsNumber());
 
-    // Check both EtsPromise and panda::Class<Promise> has the same number of fields
+    // Check both EtsPromise and ark::Class<Promise> has the same number of fields
     // and at the same offsets
     for (const Member &memb : members) {
         EtsField *field = promiseClass->GetFieldIDByName(memb.name);
@@ -92,4 +92,4 @@ TEST_F(EtsPromiseTest, MemoryLayout)
         ASSERT_EQ(memb.offset, field->GetOffset()) << "Offsets of the field '" << memb.name << "' are different";
     }
 }
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

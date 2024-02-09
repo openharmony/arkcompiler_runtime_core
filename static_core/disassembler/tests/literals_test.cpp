@@ -33,17 +33,17 @@ static inline std::string ExtractArrayBody(const std::string &text, const std::s
 
 TEST(LiteralsTest, LiteralsTestNames)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .array array0 i32 3 { 2 3 4}
 .array array1 i32 3 { 2 3 4}
 .array array2 i32 3 { 2 3 4}
 .array array3 i32 3 { 2 3 4}
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -58,7 +58,7 @@ TEST(LiteralsTest, LiteralsTestNames)
 
 TEST(LiteralsTest, LiteralsTestValues)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record panda.String <external>
 
 .array array0 panda.String 3 { "a" "ab" "abc"}
@@ -69,10 +69,10 @@ TEST(LiteralsTest, LiteralsTestValues)
 .array array5 f32 3 { 5.1 6.2 -122.345 }
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -90,7 +90,7 @@ TEST(LiteralsTest, LiteralsTestValues)
 
 TEST(LiteralsTest, LiteralsTestDynamicValues)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record panda.String <external>
 
 .array array {
@@ -109,10 +109,10 @@ TEST(LiteralsTest, LiteralsTestDynamicValues)
 }
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -150,7 +150,7 @@ TEST(LiteralsTest, LiteralsTestDynamicValues)
 
 TEST(LiteralsTest, LiteralsTestEscapeValue)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
 .record panda.String <external>
 
 .array array0 panda.String 3 { "\t\t" "\n\f\n" "\\\n\v" }
@@ -159,10 +159,10 @@ TEST(LiteralsTest, LiteralsTestEscapeValue)
     )");
 
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);

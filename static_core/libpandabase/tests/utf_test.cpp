@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::utf::test {
+namespace ark::utf::test {
 
 static uint16_t U16Lead(uint32_t codepoint)
 {
@@ -401,4 +401,4 @@ TEST(Utf, CompareUtf8ToUtf8)
     }
 }
 
-}  // namespace panda::utf::test
+}  // namespace ark::utf::test

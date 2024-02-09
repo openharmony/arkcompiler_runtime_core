@@ -54,7 +54,7 @@
 #include "runtime/include/loadable_agent.h"
 #include "runtime/tooling/tools.h"
 
-namespace panda {
+namespace ark {
 
 class DProfiler;
 class CompilerInterface;
@@ -338,17 +338,17 @@ public:
         return cha_;
     }
 
-    panda::verifier::Config const *GetVerificationConfig() const
+    ark::verifier::Config const *GetVerificationConfig() const
     {
         return verifierConfig_;
     }
 
-    panda::verifier::Config *GetVerificationConfig()
+    ark::verifier::Config *GetVerificationConfig()
     {
         return verifierConfig_;
     }
 
-    panda::verifier::Service *GetVerifierService()
+    ark::verifier::Service *GetVerifierService()
     {
         return verifierService_;
     }
@@ -543,8 +543,8 @@ private:
     PandaString fingerPrint_ = "unknown";
 
     // Verification
-    panda::verifier::Config *verifierConfig_ = nullptr;
-    panda::verifier::Service *verifierService_ = nullptr;
+    ark::verifier::Config *verifierConfig_ = nullptr;
+    ark::verifier::Service *verifierService_ = nullptr;
 
     struct AppContext {
         ClassLinkerContext *ctx {nullptr};
@@ -569,6 +569,6 @@ inline mem::AllocatorAdapter<void> GetInternalAllocatorAdapter(const Runtime *ru
 
 void InitSignals();
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_RUNTIME_H_

@@ -33,7 +33,7 @@
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class G1GCFullGCTest : public testing::Test {
 public:
@@ -97,10 +97,10 @@ public:
         [[maybe_unused]] bool success = Runtime::Create(options);
         ASSERT(success);
 
-        thread = panda::MTManagedThread::GetCurrent();
+        thread = ark::MTManagedThread::GetCurrent();
         gcType = Runtime::GetGCType(options, plugins::RuntimeTypeToLang(Runtime::GetRuntimeType()));
         [[maybe_unused]] auto gcLocal = thread->GetVM()->GetGC();
-        ASSERT(gcLocal->GetType() == panda::mem::GCTypeFromString(gcTypeParam));
+        ASSERT(gcLocal->GetType() == ark::mem::GCTypeFromString(gcTypeParam));
         ASSERT(gcLocal->IsGenerational());
         thread->ManagedCodeBegin();
     }
@@ -133,7 +133,7 @@ public:
     void TearDown() override {}
 
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread {};
+    ark::MTManagedThread *thread {};
     GCType gcType {};
 
     LanguageContext ctx {nullptr};
@@ -285,7 +285,7 @@ void G1GCFullGCTest::DeleteHandles()
 template <class LanguageConfig>
 void G1GCFullGCTest::PrepareTest()
 {
-    if constexpr (std::is_same<LanguageConfig, panda::PandaAssemblyLanguageConfig>::value) {
+    if constexpr (std::is_same<LanguageConfig, ark::PandaAssemblyLanguageConfig>::value) {
         DeleteHandles();
         ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         objectAllocator = thread->GetVM()->GetGC()->GetObjectAllocator();
@@ -327,7 +327,7 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
     SetupRuntime(gctype);
     {
         HandleScope<ObjectHeader *> scope(thread);
-        PrepareTest<panda::PandaAssemblyLanguageConfig>();
+        PrepareTest<ark::PandaAssemblyLanguageConfig>();
         [[maybe_unused]] size_t bytes {};
         [[maybe_unused]] size_t rawObjectsSize {};
 
@@ -402,7 +402,7 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
     SetupRuntime(gctype);
     {
         HandleScope<ObjectHeader *> scope(thread);
-        PrepareTest<panda::PandaAssemblyLanguageConfig>();
+        PrepareTest<ark::PandaAssemblyLanguageConfig>();
         [[maybe_unused]] size_t bytes;
         [[maybe_unused]] size_t rawObjectsSize;
 
@@ -464,7 +464,7 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
     SetupRuntime(gctype);
     {
         HandleScope<ObjectHeader *> scope(thread);
-        PrepareTest<panda::PandaAssemblyLanguageConfig>();
+        PrepareTest<ark::PandaAssemblyLanguageConfig>();
         [[maybe_unused]] size_t bytes;
         [[maybe_unused]] size_t rawObjectsSize;
 
@@ -518,4 +518,4 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
     }
     ResetRuntime();
 }
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

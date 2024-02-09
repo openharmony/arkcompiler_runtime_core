@@ -21,11 +21,11 @@
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include <memory>
 
-namespace panda::mem {
+namespace ark::mem {
 class Reference;
-}  // namespace panda::mem
+}  // namespace ark::mem
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 class EtsObjectReferenceDeleter {
 public:
@@ -43,6 +43,6 @@ public:
 
 using UniqueEtsObjectReference = std::unique_ptr<mem::Reference, EtsObjectReferenceDeleter>;
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H_

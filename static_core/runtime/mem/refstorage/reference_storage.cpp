@@ -24,7 +24,7 @@
 #include "runtime/include/stack_walker-inl.h"
 #include "libpandabase/utils/bit_utils.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOTE(alovkov): remove check for null, create managed thread in test instead of std::thread
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -118,7 +118,7 @@ Reference *ReferenceStorage::NewRef(const ObjectHeader *object, Reference::Objec
             if (curBlock == nullptr) {
                 // NOTE(alovkov): make free-list of holes in all blocks. O(n) operations, but it will be done only once
                 LOG(ERROR, GC) << "Can't allocate local ref for object: " << object
-                               << ", cls: " << object->ClassAddr<panda::Class>()->GetName()
+                               << ", cls: " << object->ClassAddr<ark::Class>()->GetName()
                                << " with type: " << static_cast<int>(type);
                 DumpLocalRef();
                 return nullptr;
@@ -348,7 +348,7 @@ void ReferenceStorage::DumpLocalRefClasses()
         auto refs = lastBlock->GetAllReferencesInFrame();
         for (const auto &ref : refs) {
             ObjectHeader *obj = FindLocalObject(ref);
-            PandaString clsName = ConvertToString(obj->ClassAddr<panda::Class>()->GetName());
+            PandaString clsName = ConvertToString(obj->ClassAddr<ark::Class>()->GetName());
             classesInfo[clsName]++;
         }
     }
@@ -378,7 +378,7 @@ void ReferenceStorage::DumpLocalRef()
         auto refs = frame->GetAllReferencesInFrame();
         for (const auto &ref : refs) {
             ObjectHeader *res = FindLocalObject(ref);
-            PandaString clsName = ConvertToString(res->ClassAddr<panda::Class>()->GetName());
+            PandaString clsName = ConvertToString(res->ClassAddr<ark::Class>()->GetName());
             LOG(ERROR, GC) << "\t local reference: " << ref << ", object: " << res << ", cls: " << clsName;
             nDump++;
             if (nDump == MAX_DUMP_LOCAL_NUMS) {
@@ -465,7 +465,7 @@ bool ReferenceStorage::StackReferenceCheck(const Reference *stackRefInput)
         bool res = false;
         pframe.IterateObjectsWithInfo([&cframe, &stackRefInput, &res](auto &regInfo, [[maybe_unused]] auto &vreg) {
             auto slotTypeRef = cframe.GetValuePtrFromSlot(regInfo.GetValue());
-            auto objectHeader = bit_cast<ObjectHeader **, const panda::CFrame::SlotType *>(slotTypeRef);
+            auto objectHeader = bit_cast<ObjectHeader **, const ark::CFrame::SlotType *>(slotTypeRef);
             auto stackRef = NewStackRef(objectHeader);
             if (stackRef == stackRefInput) {
                 res = true;
@@ -481,4 +481,4 @@ bool ReferenceStorage::StackReferenceCheck(const Reference *stackRefInput)
     return false;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

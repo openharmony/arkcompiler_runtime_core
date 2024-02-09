@@ -25,9 +25,9 @@
 #include "libpandabase/mem/space.h"
 #include "libpandabase/os/mutex.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
-using panda::Alignment;
+using ark::Alignment;
 class EmptyMemoryConfig;
 
 /// @brief Class-proxy to the malloc, do some logging.
@@ -62,6 +62,6 @@ private:
     os::memory::Mutex lock_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_MALLOC_PROXY_ALLOCATOR_H

@@ -16,7 +16,7 @@
 #include "code_info_builder.h"
 #include "utils/bit_memory_region-inl.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void CodeInfoBuilder::BeginMethod(uint32_t frameSize, uint32_t vregsCount)
 {
@@ -229,4 +229,4 @@ void CodeInfoBuilder::Encode(ArenaVector<uint8_t> *stream, size_t offset)
     stream->resize(RoundUp(stream->size(), CodeInfo::SIZE_ALIGNMENT));
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

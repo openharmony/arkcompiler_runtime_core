@@ -21,10 +21,7 @@ host_unittest_action("ArkplatformTest") {
 
   sources = [ "jsnapi_test.cpp" ]
 
-  include_dirs = [
-    "$ark_root/arkplatform/include",
-    "$ark_root/static_core/",
-  ]
+  include_dirs = [ "$ark_root/arkplatform/include" ]
 
   configs = [ "$ark_root/arkplatform:arkplatform_public_config" ]
 

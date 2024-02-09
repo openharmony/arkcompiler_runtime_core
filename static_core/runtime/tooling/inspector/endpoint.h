@@ -32,11 +32,11 @@
 #include <unordered_map>
 #include <utility>
 
-namespace panda {
+namespace ark {
 class JsonObject;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class EndpointBase {
 public:
     using Id = double;
@@ -139,6 +139,6 @@ private:
 
     typename WsEndpoint::connection_ptr connection_;
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_ENDPOINT_H

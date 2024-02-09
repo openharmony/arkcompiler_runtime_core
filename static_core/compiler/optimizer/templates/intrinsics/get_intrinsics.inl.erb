@@ -96,27 +96,27 @@ uintptr_t PandaRuntimeInterface::GetIntrinsicAddress(bool runtimeCall, [[maybe_u
     }
     case IntrinsicId::LIB_CALL_MEMSET_8: {
         using Fp = void (*)(ObjectHeader *, uint8_t, uint32_t, uint32_t);
-        return reinterpret_cast<uintptr_t>(static_cast<Fp>(panda::intrinsics::Memset8));
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(ark::intrinsics::Memset8));
     }
     case IntrinsicId::LIB_CALL_MEMSET_16: {
         using Fp = void (*)(ObjectHeader *, uint16_t, uint32_t, uint32_t);
-        return reinterpret_cast<uintptr_t>(static_cast<Fp>(panda::intrinsics::Memset16));
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(ark::intrinsics::Memset16));
     }
     case IntrinsicId::LIB_CALL_MEMSET_32: {
         using Fp = void (*)(ObjectHeader *, uint32_t, uint32_t, uint32_t);
-        return reinterpret_cast<uintptr_t>(static_cast<Fp>(panda::intrinsics::Memset32));
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(ark::intrinsics::Memset32));
     }
     case IntrinsicId::LIB_CALL_MEMSET_64: {
         using Fp = void (*)(ObjectHeader *, uint64_t, uint32_t, uint32_t);
-        return reinterpret_cast<uintptr_t>(static_cast<Fp>(panda::intrinsics::Memset64));
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(ark::intrinsics::Memset64));
     }
     case IntrinsicId::LIB_CALL_MEMSET_F32: {
         using Fp = void (*)(ObjectHeader *, float, uint32_t, uint32_t);
-        return reinterpret_cast<uintptr_t>(static_cast<Fp>(panda::intrinsics::Memsetf32));
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(ark::intrinsics::Memsetf32));
     }
     case IntrinsicId::LIB_CALL_MEMSET_F64: {
         using Fp = void (*)(ObjectHeader *, double, uint32_t, uint32_t);
-        return reinterpret_cast<uintptr_t>(static_cast<Fp>(panda::intrinsics::Memsetf64));
+        return reinterpret_cast<uintptr_t>(static_cast<Fp>(ark::intrinsics::Memsetf64));
     }
     case IntrinsicId::LIB_CALL_MEM_MOVE: {
         using Fp = void *(*)(void *, const void *, size_t);

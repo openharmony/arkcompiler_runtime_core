@@ -18,7 +18,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/analysis/liveness_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class EscapeAnalysisTest : public GraphTest {
 public:
     static const RuntimeInterface::FieldPtr OBJ_FIELD;
@@ -2272,4 +2272,4 @@ TEST_F(EscapeAnalysisTest, FixPhiInputTypes)
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

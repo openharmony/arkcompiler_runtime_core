@@ -26,7 +26,7 @@
 #include <dlfcn.h>
 #include "debug_info.h"
 
-namespace panda {
+namespace ark {
 
 struct VmaEntry {
     enum DebugInfoStatus { NOT_READ, VALID, BAD };
@@ -324,4 +324,4 @@ std::ostream &PrintStack(const std::vector<uintptr_t> &stacktrace, std::ostream 
     return StackPrinter::GetInstance().Print(stacktrace, out);
 }
 
-}  // namespace panda
+}  // namespace ark

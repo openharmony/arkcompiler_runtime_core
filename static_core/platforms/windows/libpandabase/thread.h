@@ -16,12 +16,12 @@
 #ifndef PANDA_LIBPANDABASE_OS_WINDOWS_THREAD_H_
 #define PANDA_LIBPANDABASE_OS_WINDOWS_THREAD_H_
 
-namespace panda::os::thread {
+namespace ark::os::thread {
 constexpr int LOWEST_PRIORITY = -2;
 using DWORD = unsigned long;
 
 int GetPriority(DWORD threadId);
 int SetPriority(DWORD threadId, int prio);
-}  // namespace panda::os::thread
+}  // namespace ark::os::thread
 
 #endif  // PANDA_LIBPANDABASE_OS_WINDOWS_THREAD_H_

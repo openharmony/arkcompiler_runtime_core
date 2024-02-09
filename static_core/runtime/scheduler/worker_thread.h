@@ -18,12 +18,12 @@
 
 #include "runtime/include/thread.h"
 
-namespace panda::scheduler {
+namespace ark::scheduler {
 
 class Task;
 
 // Worker thread is a physical OS thread.
-class WorkerThread : public panda::Thread {
+class WorkerThread : public ark::Thread {
 public:
     explicit WorkerThread(PandaVM *vm);
     // We need to override this to call appropriate destructor in thread manager
@@ -65,6 +65,6 @@ private:
     NO_MOVE_SEMANTIC(WorkerThread);
 };
 
-}  // namespace panda::scheduler
+}  // namespace ark::scheduler
 
 #endif  // PANDA_RUNTIME_SCHEDULER_WORKER_THREAD_H_

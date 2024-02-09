@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi_native_interface.h"
 
-namespace panda::ets {
+namespace ark::ets {
 Expected<std::unique_ptr<PandaEtsNapiEnv>, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *coroutine,
                                                                                  mem::InternalAllocatorPtr allocator)
 {
@@ -81,4 +81,4 @@ void PandaEtsNapiEnv::ClearException()
     coroutine_->ClearException();
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

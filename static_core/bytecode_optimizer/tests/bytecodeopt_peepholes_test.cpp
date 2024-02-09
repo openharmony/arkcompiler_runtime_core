@@ -17,7 +17,7 @@
 #include "common.h"
 #include "compiler/optimizer/optimizations/cleanup.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -237,4 +237,4 @@ TEST_F(CommonTest, CallConstructorOtherClass)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

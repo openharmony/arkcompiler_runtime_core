@@ -40,7 +40,7 @@
 #include "runtime_interface.h"
 #include "spill_fill_data.h"
 #include "compiler/code_info/vreg_info.h"
-namespace panda::compiler {
+namespace ark::compiler {
 class Inst;
 class BasicBlock;
 class Graph;
@@ -7658,6 +7658,6 @@ OPCODE_LIST(INST_DEF)
     }
 OPCODE_LIST(INST_DEF)
 #undef INST_DEF
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_INST_H

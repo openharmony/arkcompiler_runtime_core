@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/peepholes.h"
 #include "utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BoundsAnalysisTest : public CommonTest {
 public:
     BoundsAnalysisTest() : graph_(CreateGraphStartEndBlocks()) {}
@@ -675,4 +675,4 @@ TEST_F(BoundsAnalysisTest, Different_types)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

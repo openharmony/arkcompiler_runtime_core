@@ -19,7 +19,7 @@
 #include "macros.h"
 #include "unit_test.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class GraphCreator {
 public:
     GraphCreator() = delete;
@@ -318,6 +318,6 @@ protected:
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_TESTS_INST_GENERATOR_H

@@ -20,7 +20,7 @@
 #include "libpandabase/concepts.h"
 #include "runtime/include/mem/allocator.h"
 
-namespace panda {
+namespace ark {
 
 template <class T>
 struct DefaultPandaDelete {
@@ -104,6 +104,6 @@ inline PandaSharedPtrIf<T, is_unbounded_array_v<T>> MakePandaShared(size_t size)
 
 template <class T, class... Args>
 inline PandaSharedPtrIf<T, is_bounded_array_v<T>> MakePandaShared(Args &&...args) = delete;
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MEM_PANDA_SMART_POINTERS_H

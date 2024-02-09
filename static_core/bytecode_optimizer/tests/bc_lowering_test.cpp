@@ -19,7 +19,7 @@
 #include "compiler/optimizer/optimizations/cleanup.h"
 #include "compiler/optimizer/optimizations/lowering.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 class LoweringTest : public CommonTest {};
 
@@ -380,4 +380,4 @@ TEST_F(LoweringTest, Shift)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

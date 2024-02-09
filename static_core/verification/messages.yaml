@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-namespace: panda::verifier
+namespace: ark::verifier
 component: verifier
 enum_name: VerifierMessage
 default_level: error

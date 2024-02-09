@@ -21,11 +21,11 @@
 #include "runtime/include/runtime_options.h"
 #include <functional>
 #include <string_view>
-namespace panda {
+namespace ark {
 class ClassLinker;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 using Config = struct Config;  // NOLINT(bugprone-forward-declaration-namespace)
 
@@ -38,7 +38,7 @@ bool IsOnlyVerify(Config const *config);
 
 using Service = struct Service;
 
-Service *CreateService(Config const *config, panda::mem::InternalAllocatorPtr allocator, ClassLinker *linker,
+Service *CreateService(Config const *config, ark::mem::InternalAllocatorPtr allocator, ClassLinker *linker,
                        std::string const &cacheFileName);
 void DestroyService(Service *service, bool updateCacheFile);
 
@@ -46,8 +46,8 @@ Config const *GetServiceConfig(Service const *service);
 
 enum class Status { OK, FAILED, UNKNOWN };
 
-PANDA_PUBLIC_API Status Verify(Service *service, panda::Method *method, VerificationMode mode);
+PANDA_PUBLIC_API Status Verify(Service *service, ark::Method *method, VerificationMode mode);
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFICATION_PUBLIC_H_

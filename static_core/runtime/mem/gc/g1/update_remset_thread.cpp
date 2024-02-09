@@ -20,7 +20,7 @@
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/g1/update_remset_worker.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <class LanguageConfig>
 UpdateRemsetThread<LanguageConfig>::UpdateRemsetThread(G1GC<LanguageConfig> *gc,
@@ -108,4 +108,4 @@ void UpdateRemsetThread<LanguageConfig>::ContinueProcessCards()
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(UpdateRemsetThread);
-}  // namespace panda::mem
+}  // namespace ark::mem

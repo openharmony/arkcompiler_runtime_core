@@ -16,5 +16,5 @@
 #include "runtime/tests/intrusive-tests/intrusive_test.h"
 #include <cstdint>
 
-std::atomic<uint32_t> panda::IntrusiveTest::id_;
+std::atomic<uint32_t> ark::IntrusiveTest::id_;
 #endif

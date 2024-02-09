@@ -17,10 +17,10 @@
 #include "libpandabase/utils/time.h"
 #include "runtime/mem/gc/g1/g1_pause_tracker.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class G1PauseTrackerTest : public testing::Test {
 public:
-    G1PauseTrackerTest() : nowUs_(panda::time::GetCurrentTimeInMillis()) {}
+    G1PauseTrackerTest() : nowUs_(ark::time::GetCurrentTimeInMillis()) {}
 
     int64_t Now()
     {
@@ -109,4 +109,4 @@ TEST_F(G1PauseTrackerTest, NotExceedMaxGcTime)
     ASSERT_TRUE(AddPauseTime(pauseTracker, 1));
 }
 // NOLINTEND(readability-magic-numbers)
-}  // namespace panda::mem
+}  // namespace ark::mem

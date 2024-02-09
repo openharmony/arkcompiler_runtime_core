@@ -19,7 +19,7 @@
 #include <csetjmp>
 #include "libpandabase/macros.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 class ThreadSamplingInfo {
 public:
@@ -52,6 +52,6 @@ private:
     jmp_buf sigsegvJmpEnv_ {};
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_RUNTIME_TOOLING_THREAD_SAMPLING_INFO_H

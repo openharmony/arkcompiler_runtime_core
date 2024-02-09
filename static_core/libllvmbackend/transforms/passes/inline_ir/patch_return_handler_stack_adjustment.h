@@ -20,12 +20,12 @@ namespace llvm {
 class MachineFunctionPass;
 }  // namespace llvm
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class LLVMArkInterface;
 
 llvm::MachineFunctionPass *CreatePatchReturnHandlerStackAdjustmentPass(LLVMArkInterface *arkInterface);
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_INLINE_IR_PATCH_RETURN_HANDLER_STACK_ADJUSTMENT_H

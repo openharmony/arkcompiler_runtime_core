@@ -16,7 +16,7 @@
 #include "macros.h"
 #include "unit_test.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LoopAnalyzerTest : public CommonTest {
 public:
     LoopAnalyzerTest() : graph_(CreateGraphStartEndBlocks()) {}
@@ -780,4 +780,4 @@ TEST_F(LoopAnalyzerTest, LoopDepth)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

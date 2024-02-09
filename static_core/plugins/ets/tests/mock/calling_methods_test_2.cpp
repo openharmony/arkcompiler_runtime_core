@@ -18,7 +18,7 @@
 #include "libpandabase/utils/utils.h"
 #include "plugins/ets/tests/mock/calling_methods_test_helper.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 // NOLINTBEGIN(modernize-avoid-c-arrays, cppcoreguidelines-pro-type-vararg, readability-magic-numbers)
 
@@ -373,4 +373,4 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath4)
 
 // NOLINTEND(modernize-avoid-c-arrays, cppcoreguidelines-pro-type-vararg, readability-magic-numbers)
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

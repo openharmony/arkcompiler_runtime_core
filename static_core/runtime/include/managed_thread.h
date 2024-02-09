@@ -18,11 +18,11 @@
 #include "thread.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_MANAGED_CODE() ASSERT(::panda::ManagedThread::GetCurrent()->IsManagedCode())
+#define ASSERT_MANAGED_CODE() ASSERT(::ark::ManagedThread::GetCurrent()->IsManagedCode())
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ASSERT_NATIVE_CODE() ASSERT(::panda::ManagedThread::GetCurrent()->IsInNativeCode())
+#define ASSERT_NATIVE_CODE() ASSERT(::ark::ManagedThread::GetCurrent()->IsInNativeCode())
 
-namespace panda {
+namespace ark {
 class MTThreadManager;
 /**
  * @brief Class represents managed thread
@@ -208,12 +208,12 @@ public:
 
     static PandaString ThreadStatusAsString(enum ThreadStatus status);
 
-    panda::mem::StackFrameAllocator *GetStackFrameAllocator() const
+    ark::mem::StackFrameAllocator *GetStackFrameAllocator() const
     {
         return stackFrameAllocator_;
     }
 
-    panda::mem::InternalAllocator<>::LocalSmallObjectAllocator *GetLocalInternalAllocator() const
+    ark::mem::InternalAllocator<>::LocalSmallObjectAllocator *GetLocalInternalAllocator() const
     {
         return internalLocalAllocator_;
     }
@@ -245,13 +245,12 @@ public:
     }
 #endif
 
-    static ManagedThread *Create(
-        Runtime *runtime, PandaVM *vm,
-        panda::panda_file::SourceLang threadLang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+    static ManagedThread *Create(Runtime *runtime, PandaVM *vm,
+                                 ark::panda_file::SourceLang threadLang = ark::panda_file::SourceLang::PANDA_ASSEMBLY);
     ~ManagedThread() override;
 
     explicit ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, Thread::ThreadType threadType,
-                           panda::panda_file::SourceLang threadLang = panda::panda_file::SourceLang::PANDA_ASSEMBLY);
+                           ark::panda_file::SourceLang threadLang = ark::panda_file::SourceLang::PANDA_ASSEMBLY);
 
     // Here methods which are just proxy or cache for runtime interface
 
@@ -311,7 +310,7 @@ public:
         return MEMBER_OFFSET(ManagedThread, g1PostBarrierRingBuffer_);
     }
 
-    panda::panda_file::SourceLang GetThreadLang() const
+    ark::panda_file::SourceLang GetThreadLang() const
     {
         return threadLang_;
     }
@@ -903,7 +902,7 @@ private:
     size_t throwingOomCount_ {0};
     bool usePreallocObj_ {false};
 
-    panda::panda_file::SourceLang threadLang_ = panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+    ark::panda_file::SourceLang threadLang_ = ark::panda_file::SourceLang::PANDA_ASSEMBLY;
 
     PandaUniquePtr<tooling::PtThreadInfo> ptThreadInfo_;
 
@@ -952,8 +951,8 @@ private:
     // Boolean which is safe to access after runtime is destroyed
     bool isManagedScope_ {false};
 
-    friend class panda::test::ThreadTest;
-    friend class panda::MTThreadManager;
+    friend class ark::test::ThreadTest;
+    friend class ark::MTThreadManager;
 
     // Used in mathod events
     uint32_t callDepth_ {0};
@@ -966,6 +965,6 @@ private:
     NO_COPY_SEMANTIC(ManagedThread);
     NO_MOVE_SEMANTIC(ManagedThread);
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MANAGED_THREAD_H

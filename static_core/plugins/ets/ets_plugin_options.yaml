@@ -17,7 +17,7 @@
         codegen_visitors_inc: plugins/ets/bytecode_optimizer/visitors/codegen_visitors.inc
         reg_encoder_visitors_inc: plugins/ets/bytecode_optimizer/visitors/reg_encoder_visitors.inc
       lang_enum_id: 5
-      lang_context_class: panda::ets::EtsLanguageContext
+      lang_context_class: ark::ets::EtsLanguageContext
       lang_context_header_path: plugins/ets/runtime/ets_language_context.h
       additional_interpter_inl: plugins/ets/runtime/interpreter/interpreter-inl.h
       language_config:
@@ -48,7 +48,7 @@
 
       Verification:
         header: plugins/ets/verification/ets_plugin.h
-        plugin_class: panda::verifier::plugin::EtsPlugin
+        plugin_class: ark::verifier::plugin::EtsPlugin
 
       irtoc_files:
         - plugins_interpreter_handlers: plugins/ets/irtoc_scripts/interpreter_handlers.irt
@@ -56,16 +56,16 @@
 
       Metadatas:
         - RecordMetadata:
-            new_class_name: panda::pandasm::extensions::ets::RecordMetadata
+            new_class_name: ark::pandasm::extensions::ets::RecordMetadata
             header_path: plugins/ets/assembler/extension/ets_meta.h
         - FieldMetadata:
-            new_class_name: panda::pandasm::extensions::ets::FieldMetadata
+            new_class_name: ark::pandasm::extensions::ets::FieldMetadata
             header_path: plugins/ets/assembler/extension/ets_meta.h
         - FunctionMetadata:
-            new_class_name: panda::pandasm::extensions::ets::FunctionMetadata
+            new_class_name: ark::pandasm::extensions::ets::FunctionMetadata
             header_path: plugins/ets/assembler/extension/ets_meta.h
         - ParamMetadata:
-            new_class_name: panda::pandasm::extensions::ets::ParamMetadata
+            new_class_name: ark::pandasm::extensions::ets::ParamMetadata
             header_path: plugins/ets/assembler/extension/ets_meta.h
       compiler_extensions:
         header_path_compiler_inst_builder_extension: plugins/ets/compiler/optimizer/ir_builder/ets_inst_builder.h

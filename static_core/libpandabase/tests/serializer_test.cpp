@@ -17,7 +17,7 @@
 #include "libpandabase/utils/utils.h"
 #include <gtest/gtest.h>
 
-namespace panda {
+namespace ark {
 
 class SerializatorTest : public testing::Test {
 protected:
@@ -191,4 +191,4 @@ TEST_F(SerializatorTest, TestStruct)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda
+}  // namespace ark

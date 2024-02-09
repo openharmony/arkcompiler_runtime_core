@@ -29,7 +29,7 @@
 #include "tooling/pt_thread_info.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 
-namespace panda {
+namespace ark {
 using TaggedValue = coretypes::TaggedValue;
 using TaggedType = coretypes::TaggedType;
 
@@ -100,19 +100,19 @@ void Thread::InitCardTableData(mem::GCBarrierSet *barrier)
 {
     auto postBarrierType = barrier->GetPostType();
     switch (postBarrierType) {
-        case panda::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:
+        case ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:
             cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
             cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
             postWrbOneObject_ = reinterpret_cast<void *>(PostInterGenerationalBarrier1);
             postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterGenerationalBarrier2);
             break;
-        case panda::mem::BarrierType::POST_INTERREGION_BARRIER:
+        case ark::mem::BarrierType::POST_INTERREGION_BARRIER:
             cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
             cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
             postWrbOneObject_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkSingleFast);
             postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkPairFast);
             break;
-        case panda::mem::BarrierType::POST_WRB_NONE:
+        case ark::mem::BarrierType::POST_WRB_NONE:
             postWrbOneObject_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
             postWrbTwoObjects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
             break;
@@ -131,7 +131,7 @@ void Thread::InitPreBuff()
     auto allocator = GetInternalAllocator(this);
     mem::GC *gc = GetVM()->GetGC();
     auto barrier = gc->GetBarrierSet();
-    if (barrier->GetPreType() != panda::mem::BarrierType::PRE_WRB_NONE) {
+    if (barrier->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
         preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
     }
 }
@@ -179,7 +179,7 @@ void MTManagedThread::Yield()
 }
 
 /* static - creation of the initial Managed thread */
-ManagedThread *ManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::panda_file::SourceLang threadLang)
+ManagedThread *ManagedThread::Create(Runtime *runtime, PandaVM *vm, ark::panda_file::SourceLang threadLang)
 {
     trace::ScopedTrace scopedTrace("ManagedThread::Create");
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
@@ -190,7 +190,7 @@ ManagedThread *ManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::panda
 }
 
 /* static - creation of the initial MT Managed thread */
-MTManagedThread *MTManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::panda_file::SourceLang threadLang)
+MTManagedThread *MTManagedThread::Create(Runtime *runtime, PandaVM *vm, ark::panda_file::SourceLang threadLang)
 {
     trace::ScopedTrace scopedTrace("MTManagedThread::Create");
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
@@ -205,7 +205,7 @@ MTManagedThread *MTManagedThread::Create(Runtime *runtime, PandaVM *vm, panda::p
 }
 
 ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *pandaVm,
-                             Thread::ThreadType threadType, panda::panda_file::SourceLang threadLang)
+                             Thread::ThreadType threadType, ark::panda_file::SourceLang threadLang)
     : Thread(pandaVm, threadType),
       id_(id),
       threadLang_(threadLang),
@@ -221,7 +221,7 @@ ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, P
         preBarrierType_ = gc->GetBarrierSet()->GetPreType();
         postBarrierType_ = gc->GetBarrierSet()->GetPostType();
         auto barrierSet = gc->GetBarrierSet();
-        if (barrierSet->GetPreType() != panda::mem::BarrierType::PRE_WRB_NONE) {
+        if (barrierSet->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
             preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
             // need to initialize in constructor because we have barriers between constructor and InitBuffers in
             // InitializedClasses
@@ -267,7 +267,7 @@ void ManagedThread::InitBuffers()
     auto allocator = GetInternalAllocator(this);
     mem::GC *gc = GetVM()->GetGC();
     auto barrier = gc->GetBarrierSet();
-    if (barrier->GetPreType() != panda::mem::BarrierType::PRE_WRB_NONE) {
+    if (barrier->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
         // we need to recreate buffers if it was detach (we removed all structures) and attach again
         // skip initializing in first attach after constructor
         if (preBuff_ == nullptr) {
@@ -321,8 +321,8 @@ void ManagedThread::InitForStackOverflowCheck(size_t nativeStackReservedSize, si
     if (!RetrieveStackInfo(stackBase, stackSize, guardSize)) {
         return;
     }
-    if (guardSize < panda::os::mem::GetPageSize()) {
-        guardSize = panda::os::mem::GetPageSize();
+    if (guardSize < ark::os::mem::GetPageSize()) {
+        guardSize = ark::os::mem::GetPageSize();
     }
     if (stackSize <= nativeStackReservedSize + nativeStackProtectedSize + guardSize) {
         LOG(ERROR, RUNTIME) << "InitForStackOverflowCheck: stack size not enough, stack_base = " << stackBase
@@ -354,12 +354,12 @@ void ManagedThread::ProtectNativeStack()
     }
 
     // Try to mprotect directly
-    if (!panda::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
+    if (!ark::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
         return;
     }
 
     // If fail to mprotect, try to load stack page and then retry to mprotect
-    uintptr_t nativeStackTop = AlignDown(GetStackTop(), panda::os::mem::GetPageSize());
+    uintptr_t nativeStackTop = AlignDown(GetStackTop(), ark::os::mem::GetPageSize());
     LOG(DEBUG, RUNTIME) << "ProtectNativeStack: try to load pages, mprotect error = " << strerror(errno)
                         << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
                         << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_;
@@ -372,13 +372,13 @@ void ManagedThread::ProtectNativeStack()
         return;
     }
     LoadStackPages(nativeStackBegin_);
-    if (panda::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
+    if (ark::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_)) {
         LOG(ERROR, RUNTIME) << "ProtectNativeStack: fail to protect pages, error = " << strerror(errno)
                             << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
                             << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_;
     }
-    size_t releaseSize = nativeStackTop - nativeStackBegin_ - panda::os::mem::GetPageSize();
-    if (panda::os::mem::ReleasePages(nativeStackBegin_, nativeStackBegin_ + releaseSize) != 0) {
+    size_t releaseSize = nativeStackTop - nativeStackBegin_ - ark::os::mem::GetPageSize();
+    if (ark::os::mem::ReleasePages(nativeStackBegin_, nativeStackBegin_ + releaseSize) != 0) {
         LOG(ERROR, RUNTIME) << "ProtectNativeStack: fail to release pages, error = " << strerror(errno)
                             << ", stack_begin = " << nativeStackBegin_ << ", stack_top = " << nativeStackTop
                             << ", stack_size = " << nativeStackSize_ << ", guard_size = " << nativeStackGuardSize_
@@ -391,7 +391,7 @@ void ManagedThread::DisableStackOverflowCheck()
     nativeStackEnd_ = nativeStackBegin_;
     iframeStackSize_ = std::numeric_limits<size_t>::max();
     if (nativeStackProtectedSize_ > 0) {
-        panda::os::mem::MakeMemReadWrite(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_);
+        ark::os::mem::MakeMemReadWrite(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_);
     }
 }
 
@@ -400,7 +400,7 @@ void ManagedThread::EnableStackOverflowCheck()
     nativeStackEnd_ = nativeStackBegin_ + nativeStackProtectedSize_ + nativeStackReservedSize_;
     iframeStackSize_ = nativeStackSize_ * 4U;
     if (nativeStackProtectedSize_ > 0) {
-        panda::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_);
+        ark::os::mem::MakeMemProtected(ToVoidPtr(nativeStackBegin_), nativeStackProtectedSize_);
     }
 }
 
@@ -458,7 +458,7 @@ void ManagedThread::SafepointPoll()
 {
     if (this->TestAllFlags()) {
         trace::ScopedTrace scopedTrace("RunSafepoint");
-        panda::interpreter::RuntimeInterface::Safepoint();
+        ark::interpreter::RuntimeInterface::Safepoint();
     }
 }
 
@@ -596,7 +596,7 @@ PandaString ManagedThread::LogThreadStack(ThreadState newState) const
 }
 
 MTManagedThread::MTManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *pandaVm,
-                                 panda::panda_file::SourceLang threadLang)
+                                 ark::panda_file::SourceLang threadLang)
     : ManagedThread(id, allocator, pandaVm, Thread::ThreadType::THREAD_TYPE_MT_MANAGED, threadLang),
       enteringMonitor_(nullptr)
 {
@@ -699,11 +699,11 @@ void MTManagedThread::ProcessCreatedThread()
 void ManagedThread::UpdateGCRoots()
 {
     if ((exception_ != nullptr) && (exception_->IsForwarded())) {
-        exception_ = ::panda::mem::GetForwardAddress(exception_);
+        exception_ = ::ark::mem::GetForwardAddress(exception_);
     }
     for (auto &&it : localObjects_) {
         if ((*it)->IsForwarded()) {
-            (*it) = ::panda::mem::GetForwardAddress(*it);
+            (*it) = ::ark::mem::GetForwardAddress(*it);
         }
     }
 
@@ -751,13 +751,13 @@ void MTManagedThread::UpdateGCRoots()
     ManagedThread::UpdateGCRoots();
     for (auto &it : localObjectsLocked_.Data()) {
         if (it.GetObject()->IsForwarded()) {
-            it.SetObject(panda::mem::GetForwardAddress(it.GetObject()));
+            it.SetObject(ark::mem::GetForwardAddress(it.GetObject()));
         }
     }
 
     // Update enter_monitor_object_
     if (enterMonitorObject_ != nullptr && enterMonitorObject_->IsForwarded()) {
-        enterMonitorObject_ = panda::mem::GetForwardAddress(enterMonitorObject_);
+        enterMonitorObject_ = ark::mem::GetForwardAddress(enterMonitorObject_);
     }
 
     ptReferenceStorage_->UpdateMovedRefs();
@@ -974,4 +974,4 @@ void ManagedThread::CleanUp()
     // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }
 
-}  // namespace panda
+}  // namespace ark

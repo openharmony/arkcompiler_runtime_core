@@ -18,7 +18,7 @@
 
 #include "runtime/include/coretypes/tagged_value.h"
 
-namespace panda {
+namespace ark {
 template <typename T>
 class EscapeHandleScope;
 class ManagedThread;
@@ -87,5 +87,5 @@ protected:
     template <typename T>
     friend class EscapeHandleScope;
 };
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_HANDLEBASE_H

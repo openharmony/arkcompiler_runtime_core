@@ -24,7 +24,7 @@
 #include "runtime/mem/humongous_obj_allocator-inl.h"
 #include "runtime/tests/allocator_test_base.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 using NonObjectHumongousObjAllocator = HumongousObjAllocator<EmptyAllocConfigWithCrossingMap>;
 
@@ -37,7 +37,7 @@ public:
     {
         // Logger::InitializeStdLogging(Logger::Level::DEBUG, Logger::Component::ALL);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        panda::mem::MemConfig::Initialize(0, 1024_MB, 0, 0, 0, 0);
+        ark::mem::MemConfig::Initialize(0, 1024_MB, 0, 0, 0, 0);
         PoolManager::Initialize();
     }
 
@@ -45,7 +45,7 @@ public:
     {
         ClearPoolManager();
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
         // Logger::Destroy();
     }
 
@@ -273,4 +273,4 @@ TEST_F(HumongousObjAllocatorTest, MTAllocCollectTest)
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

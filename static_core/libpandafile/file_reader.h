@@ -44,7 +44,7 @@
 #include <limits>
 #include <vector>
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class FileReader {
 public:
@@ -183,6 +183,6 @@ private:
     std::map<File::EntityId, BaseItem *> itemsDone_;
 };
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_FILE_READER_H_

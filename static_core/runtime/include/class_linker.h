@@ -40,7 +40,7 @@
 #include "runtime/include/method.h"
 #include "runtime/include/vtable_builder.h"
 
-namespace panda {
+namespace ark {
 
 using compiler::AotManager;
 
@@ -211,26 +211,26 @@ public:
 
     bool HasExtension(const LanguageContext &ctx)
     {
-        return extensions_[panda::panda_file::GetLangArrIndex(ctx.GetLanguage())].get() != nullptr;
+        return extensions_[ark::panda_file::GetLangArrIndex(ctx.GetLanguage())].get() != nullptr;
     }
 
     bool HasExtension(panda_file::SourceLang lang)
     {
-        return extensions_[panda::panda_file::GetLangArrIndex(lang)].get() != nullptr;
+        return extensions_[ark::panda_file::GetLangArrIndex(lang)].get() != nullptr;
     }
 
     void ResetExtension(panda_file::SourceLang lang);
 
     ClassLinkerExtension *GetExtension(const LanguageContext &ctx)
     {
-        ClassLinkerExtension *extension = extensions_[panda::panda_file::GetLangArrIndex(ctx.GetLanguage())].get();
+        ClassLinkerExtension *extension = extensions_[ark::panda_file::GetLangArrIndex(ctx.GetLanguage())].get();
         ASSERT(extension != nullptr);
         return extension;
     };
 
     ClassLinkerExtension *GetExtension(panda_file::SourceLang lang)
     {
-        ClassLinkerExtension *extension = extensions_[panda::panda_file::GetLangArrIndex(lang)].get();
+        ClassLinkerExtension *extension = extensions_[ark::panda_file::GetLangArrIndex(lang)].get();
         ASSERT(extension != nullptr);
         return extension;
     };
@@ -238,14 +238,14 @@ public:
     Class *ObjectToClass(const ObjectHeader *object)
     {
         ASSERT(object->ClassAddr<Class>()->IsClassClass());
-        return extensions_[panda::panda_file::GetLangArrIndex(object->ClassAddr<BaseClass>()->GetSourceLang())]
+        return extensions_[ark::panda_file::GetLangArrIndex(object->ClassAddr<BaseClass>()->GetSourceLang())]
             ->FromClassObject(const_cast<ObjectHeader *>(object));
     }
 
     size_t GetClassObjectSize(Class *cls, panda_file::SourceLang lang)
     {
         // We can't get SourceLang from cls, because it may not be initialized yet (see #12894)
-        return extensions_[panda::panda_file::GetLangArrIndex(lang)]->GetClassObjectSizeFromClassSize(
+        return extensions_[ark::panda_file::GetLangArrIndex(lang)]->GetClassObjectSizeFromClassSize(
             cls->GetClassSize());
     }
 
@@ -383,7 +383,7 @@ private:
     os::memory::Mutex copiedNamesLock_;
     PandaList<const uint8_t *> copiedNames_ GUARDED_BY(copiedNamesLock_);
 
-    std::array<std::unique_ptr<ClassLinkerExtension>, panda::panda_file::LANG_COUNT> extensions_;
+    std::array<std::unique_ptr<ClassLinkerExtension>, ark::panda_file::LANG_COUNT> extensions_;
 
     bool isInitialized_ {false};
 
@@ -403,6 +403,6 @@ public:
     NO_COPY_SEMANTIC(ClassLinkerErrorHandler);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CLASS_LINKER_H_

@@ -26,15 +26,15 @@
 
 #include <vector>
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
-bool InlinePrepare::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
+bool InlinePrepare::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return options->inlining;
 }
 
 InlinePrepare InlinePrepare::Create([[maybe_unused]] LLVMArkInterface *arkInterface,
-                                    const panda::llvmbackend::LLVMCompilerOptions *options)
+                                    const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     static constexpr int INLINING_THRESHOLD = 500;
     auto inlineParams = llvm::getInlineParams(INLINING_THRESHOLD);
@@ -53,7 +53,7 @@ llvm::PreservedAnalyses InlinePrepare::run(llvm::Module &module, llvm::ModuleAna
     return llvm::PreservedAnalyses::all();
 }
 
-bool IrtocInlineChecker::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
+bool IrtocInlineChecker::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return options->doIrtocInline;
 }
@@ -82,8 +82,8 @@ void IrtocInlineChecker::CheckShouldInline(llvm::CallBase *callBase)
     // The functions from EXCLUSIONS are come from panda runtime (array-inl.h and class.h)
     // These function are recursive (Thay are optimized by tail recursive in normal way
     // but not if PANDA_ENABLE_THREAD_SANITIZER)
-    static constexpr std::array EXCLUSIONS = {StringRef("panda::coretypes::Array::CreateMultiDimensionalArray"),
-                                              StringRef("panda::Class::IsAssignableFrom(panda::Class const*)")};
+    static constexpr std::array EXCLUSIONS = {StringRef("ark::coretypes::Array::CreateMultiDimensionalArray"),
+                                              StringRef("ark::Class::IsAssignableFrom(ark::Class const*)")};
     if (std::find_if(EXCLUSIONS.cbegin(), EXCLUSIONS.cend(), [demCalleeName](StringRef pat) {
             return demCalleeName.find(pat) != std::string::npos;
         }) == EXCLUSIONS.cend()) {
@@ -122,4 +122,4 @@ llvm::PreservedAnalyses IrtocInlineChecker::run(llvm::LazyCallGraph::SCC &compon
     return llvm::PreservedAnalyses::all();
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

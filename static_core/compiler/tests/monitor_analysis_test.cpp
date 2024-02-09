@@ -16,7 +16,7 @@
 #include "unit_test.h"
 #include "optimizer/analysis/monitor_analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class MonitorAnalysisTest : public GraphTest {};
 
 TEST_F(MonitorAnalysisTest, OneMonitorForOneBlock)
@@ -384,4 +384,4 @@ TEST_F(MonitorAnalysisTest, MonitorAndThrow)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -18,7 +18,7 @@
 #include "runtime/include/class-inl.h"
 #include "runtime/include/language_config.h"
 
-namespace panda {
+namespace ark {
 
 class ClassLinker;
 
@@ -40,6 +40,6 @@ private:
     static bool VerifyClass(Class *klass);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CLASS_INITIALIZER_H_

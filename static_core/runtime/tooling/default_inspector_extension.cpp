@@ -21,7 +21,7 @@
 #include "runtime/mem/object_helpers-inl.h"
 #include "runtime/tooling/default_inspector_extension.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 
 static TypedValue GetArrayElementValueStatic(const coretypes::Array &array, size_t offset, panda_file::Type type)
 {
@@ -141,7 +141,7 @@ void StaticDefaultInspectorExtension::EnumerateProperties(
             handler(std::to_string(index), GetArrayElementValueStatic(array, offset, type), true, false, false);
         }
     } else if (cls->IsClassClass()) {
-        auto runtimeCls = panda::Class::FromClassObject(object);
+        auto runtimeCls = ark::Class::FromClassObject(object);
         for (auto &field : runtimeCls->GetStaticFields()) {
             handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(runtimeCls, field), false,
                     field.IsFinal(), false);
@@ -229,4 +229,4 @@ void DynamicDefaultInspectorExtension::EnumerateProperties(
         }
     }
 }
-}  // namespace panda::tooling
+}  // namespace ark::tooling

@@ -21,7 +21,7 @@
 #include <set>
 #include "libpandabase/macros.h"
 
-namespace panda::os::unix::native_stack {
+namespace ark::os::unix::native_stack {
 using FuncUnwindstack = bool (*)(pid_t, std::ostream &, int);
 
 PANDA_PUBLIC_API void DumpKernelStack(std::ostream &os, pid_t tid, const char *tag, bool count);
@@ -43,6 +43,6 @@ PANDA_PUBLIC_API bool ReadOsFile(const std::string &fileName, std::string *resul
 PANDA_PUBLIC_API bool WriterOsFile(const void *buffer, size_t count, int fd);
 PANDA_PUBLIC_API std::string ChangeJaveStackFormat(const char *descriptor);
 
-}  // namespace panda::os::unix::native_stack
+}  // namespace ark::os::unix::native_stack
 
 #endif  // PANDA_PLATFORMS_UNIX_LIBPANDABASE_NATIVE_STACK_H

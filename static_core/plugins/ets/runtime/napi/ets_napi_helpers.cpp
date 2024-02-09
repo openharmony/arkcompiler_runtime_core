@@ -34,7 +34,7 @@
 
 #include <cstdint>
 
-namespace panda::ets::napi {
+namespace ark::ets::napi {
 namespace {
 using Type = panda_file::Type;
 using TypeId = panda_file::Type::TypeId;
@@ -443,4 +443,4 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
 #elif defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
-}  // namespace panda::ets::napi
+}  // namespace ark::ets::napi

@@ -19,7 +19,7 @@
 #include "optimizer/optimizations/scheduler.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class MemoryCoalescingTest : public GraphTest {
 #ifndef NDEBUG
 public:
@@ -1621,4 +1621,4 @@ TEST_F(MemoryCoalescingTest, OverSaveStateWithDeoptimizeUser)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  //  namespace panda::compiler
+}  //  namespace ark::compiler

@@ -47,7 +47,7 @@
 #include "os/filesystem.h"
 #endif  // ENABLE_IR_DUMP
 
-namespace panda::compiler {
+namespace ark::compiler {
 PassManager::PassManager(Graph *graph, PassManager *parentPm)
     : graph_(graph),
       optimizations_(graph->GetAllocator()->Adapter()),
@@ -238,4 +238,4 @@ void PassManager::Finalize() const
         stats_->DumpStatisticsCsv();
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

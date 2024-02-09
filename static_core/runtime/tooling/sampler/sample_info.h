@@ -24,7 +24,7 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/os/thread.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 // Saving one sample info
 struct SampleInfo {
@@ -156,17 +156,17 @@ inline bool operator!=(const SampleInfo &lhs, const SampleInfo &rhs)
     return !(lhs == rhs);
 }
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 // Definind std::hash for SampleInfo to use it as an unordered_map key
 namespace std {
 
 template <>
-struct hash<panda::tooling::sampler::SampleInfo> {
-    std::size_t operator()(const panda::tooling::sampler::SampleInfo &s) const
+struct hash<ark::tooling::sampler::SampleInfo> {
+    std::size_t operator()(const ark::tooling::sampler::SampleInfo &s) const
     {
         auto stackInfo = s.stackInfo;
-        ASSERT(stackInfo.managedStackSize <= panda::tooling::sampler::SampleInfo::StackInfo::MAX_STACK_DEPTH);
+        ASSERT(stackInfo.managedStackSize <= ark::tooling::sampler::SampleInfo::StackInfo::MAX_STACK_DEPTH);
         size_t summ = 0;
         for (size_t i = 0; i < stackInfo.managedStackSize; ++i) {
             summ += stackInfo.managedStack[i].pandaFilePtr ^ stackInfo.managedStack[i].fileId;
@@ -180,8 +180,8 @@ struct hash<panda::tooling::sampler::SampleInfo> {
 
 // Definind std::hash for FileInfo to use it as an unordered_set key
 template <>
-struct hash<panda::tooling::sampler::FileInfo> {
-    size_t operator()(const panda::tooling::sampler::FileInfo &m) const
+struct hash<ark::tooling::sampler::FileInfo> {
+    size_t operator()(const ark::tooling::sampler::FileInfo &m) const
     {
         size_t h1 = std::hash<uintptr_t> {}(m.ptr);
         size_t h2 = std::hash<uint32_t> {}(m.checksum);

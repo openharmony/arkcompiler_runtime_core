@@ -22,7 +22,7 @@
 #include <array>
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Inst;
 class VnObject;
 class Graph;
@@ -131,6 +131,6 @@ private:
     uint32_t currVn_ {0};
     bool cseIsApplied_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_VN_H

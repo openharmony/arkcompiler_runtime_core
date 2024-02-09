@@ -21,11 +21,11 @@
 #include "bitmap_test_base.h"
 #include "runtime/mem/gc/bitmap.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 TEST_F(BitmapTest, VisitorObjectAlignment)
 {
     RunTestCount<DEFAULT_ALIGNMENT_IN_BYTES>();
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

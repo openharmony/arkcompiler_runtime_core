@@ -16,7 +16,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 [[noreturn]] void InteropFatal(const char *message)
 {
@@ -41,13 +41,13 @@ void InteropTrace(const char *func, const char *file, int line)
     INTEROP_LOG(DEBUG) << "trace: " << func << ":" << file << ":" << line;
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
-namespace panda::ets::ts2ets::GlobalCtx {  // NOLINT(readability-identifier-naming)
+namespace ark::ets::ts2ets::GlobalCtx {  // NOLINT(readability-identifier-naming)
 
 void Init()
 {
     interop::js::InteropCtx::Init(EtsCoroutine::GetCurrent(), nullptr);
 }
 
-}  // namespace panda::ets::ts2ets::GlobalCtx
+}  // namespace ark::ets::ts2ets::GlobalCtx

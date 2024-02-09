@@ -18,11 +18,11 @@
 
 #include <llvm/IR/PassManager.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 class ExpandAtomics : public llvm::PassInfoMixin<ExpandAtomics> {
 public:
@@ -30,7 +30,7 @@ public:
 
     explicit ExpandAtomics();
 
-    static bool ShouldInsert([[maybe_unused]] const panda::llvmbackend::LLVMCompilerOptions *options)
+    static bool ShouldInsert([[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
     {
         return true;
     }
@@ -42,6 +42,6 @@ private:
     bool InsertAddrSpaceCast(llvm::Instruction *atomicInstruction);
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_EXPAND_ATOMICS_H

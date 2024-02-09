@@ -18,13 +18,13 @@
 
 #include <fcntl.h>
 
-namespace panda::os::unique_fd {
+namespace ark::os::unique_fd {
 
 inline int DupCloexec(int fd)
 {
     return fcntl(fd, F_DUPFD_CLOEXEC, 0);
 }
 
-}  // namespace panda::os::unique_fd
+}  // namespace ark::os::unique_fd
 
 #endif  // PANDA_LIBPANDABASE_OS_UNIX_UNIQUE_FD_H_

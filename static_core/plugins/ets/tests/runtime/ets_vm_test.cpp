@@ -29,7 +29,7 @@
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsVMTest : public testing::Test {
 public:
@@ -51,7 +51,7 @@ public:
         }
         options.SetBootPandaFiles({stdlib});
 
-        panda::Runtime::Create(options);
+        ark::Runtime::Create(options);
     }
     ~EtsVMTest() override
     {
@@ -213,4 +213,4 @@ TEST_F(EtsVMTest, InitTest)
     ASSERT_NE(vm->GetCompilerRuntimeInterface(), nullptr);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

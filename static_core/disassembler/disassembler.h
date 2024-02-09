@@ -48,7 +48,7 @@
 
 #include "accumulators.h"
 
-namespace panda::disasm {
+namespace ark::disasm {
 class Disassembler {
 public:
     NO_COPY_SEMANTIC(Disassembler);
@@ -230,13 +230,13 @@ private:
 
     std::string IDToString(BytecodeInstruction bcIns, panda_file::File::EntityId methodId) const;
 
-    panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId classId) const;
+    ark::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId classId) const;
 
     std::unique_ptr<const panda_file::File> fileHolder_ {nullptr};
     const panda_file::File *file_ {};
     pandasm::Program prog_ {};
 
-    panda::panda_file::SourceLang fileLanguage_ = panda::panda_file::SourceLang::PANDA_ASSEMBLY;
+    ark::panda_file::SourceLang fileLanguage_ = ark::panda_file::SourceLang::PANDA_ASSEMBLY;
 
     std::map<std::string, panda_file::File::EntityId> recordNameToId_ {};
     std::map<std::string, panda_file::File::EntityId> methodNameToId_ {};
@@ -256,6 +256,6 @@ private:
 
 #include "disasm_plugins.inc"
 };
-}  // namespace panda::disasm
+}  // namespace ark::disasm
 
 #endif

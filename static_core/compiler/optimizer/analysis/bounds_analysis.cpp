@@ -22,7 +22,7 @@
 #include "compiler/optimizer/ir/analysis.h"
 #include "optimizer/analysis/loop_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 BoundsRange::BoundsRange(int64_t val, DataType::Type type) : BoundsRange(val, val, nullptr, type) {}
 
 static bool IsStringLength(const Inst *inst)
@@ -1269,4 +1269,4 @@ void BoundsAnalysis::CalcNewBoundsRangeBinary(GraphVisitor *v, const Inst *inst)
     bri->SetBoundsRange(inst->GetBasicBlock(), inst, range.FitInType(inst->GetType()));
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -26,7 +26,7 @@
 #include "server_endpoint-inl.h"
 #undef CONFIG
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 bool AsioServer::Initialize()
 {
     if (initialized_) {
@@ -89,4 +89,4 @@ bool AsioServer::Stop()
     endpoint_.stop_listening(ec);
     return !ec;
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

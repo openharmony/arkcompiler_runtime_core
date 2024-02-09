@@ -26,7 +26,7 @@
 
 #include "runtime/tooling/sampler/sample_info.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 namespace test {
 class SamplerTest;
@@ -69,6 +69,6 @@ private:
     friend class test::SamplerTest;
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_RUNTIME_TOOLING_SAMPLER_THREAD_COMMUNICATOR_H

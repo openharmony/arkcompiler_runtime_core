@@ -16,7 +16,7 @@
 #include "slow_path.h"
 #include "codegen.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void SlowPathBase::Generate(Codegen *codegen)
 {
@@ -307,4 +307,4 @@ void SlowPathStringHashCode::GenerateImpl(Codegen *codegen)
     codegen->CallFastPath(GetInst(), GetEntrypoint(), dstReg_, RegMask::GetZeroMask(), srcReg_);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

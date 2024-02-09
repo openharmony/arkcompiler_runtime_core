@@ -30,7 +30,7 @@
 #include "assembly-parser.h"
 #include "assembly-emitter.h"
 
-namespace panda::test {
+namespace ark::test {
 
 inline std::string Separator()
 {
@@ -128,7 +128,7 @@ public:
     {
         RuntimeOptions options;
         options.SetLoadRuntimes({"core"});
-        auto execPath = panda::os::file::File::GetExecutablePath();
+        auto execPath = ark::os::file::File::GetExecutablePath();
         std::string pandaStdLib =
             execPath.Value() + Separator() + ".." + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
         options.SetBootPandaFiles({pandaStdLib});
@@ -215,4 +215,4 @@ TEST_F(SignalHandlerTest, CallTest)
     ASSERT_NE(g_counter, 0);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

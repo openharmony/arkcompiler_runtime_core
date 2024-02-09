@@ -72,7 +72,7 @@ void RemoveInstsIf(llvm::MachineBasicBlock &mblock, const std::function<bool(llv
     }
 }
 
-std::tuple<uint32_t, uint32_t> GetCalleeSavedRegMasks(FrameInfo::RegMasks masks, panda::Arch arch)
+std::tuple<uint32_t, uint32_t> GetCalleeSavedRegMasks(FrameInfo::RegMasks masks, ark::Arch arch)
 {
     auto xregsMask = std::get<0>(masks);
     auto vregsMask = std::get<1>(masks);
@@ -81,7 +81,7 @@ std::tuple<uint32_t, uint32_t> GetCalleeSavedRegMasks(FrameInfo::RegMasks masks,
     return {xregsMask, vregsMask};
 }
 
-bool IsStackUsed(FrameInfo::RegMasks masks, panda::Arch arch)
+bool IsStackUsed(FrameInfo::RegMasks masks, ark::Arch arch)
 {
     auto spIndex = GetDwarfSP(arch);
     auto fpIndex = GetDwarfFP(arch);
@@ -117,8 +117,8 @@ bool AMD64FrameBuilder::RemoveEpilogue(llvm::MachineBasicBlock &mblock)
 
 void AMD64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
 {
-    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, panda::Arch::X86_64);
-    bool useStack = IsStackUsed(frameInfo_.regMasks, panda::Arch::X86_64);
+    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, ark::Arch::X86_64);
+    bool useStack = IsStackUsed(frameInfo_.regMasks, ark::Arch::X86_64);
     if (!frameInfo_.hasCalls && !useStack && xregsMask == 0 && vregsMask == 0) {
         // Dont generate any code
         return;
@@ -126,14 +126,14 @@ void AMD64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
 
     InlineAsmBuilder builder(&mblock, mblock.begin());
 
-    constexpr panda::CFrameLayout FL(panda::Arch::X86_64, 0);
-    constexpr auto SP_ORIGIN = panda::CFrameLayout::OffsetOrigin::SP;
-    constexpr auto BYTES_UNITS = panda::CFrameLayout::OffsetUnit::BYTES;
+    constexpr ark::CFrameLayout FL(ark::Arch::X86_64, 0);
+    constexpr auto SP_ORIGIN = ark::CFrameLayout::OffsetOrigin::SP;
+    constexpr auto BYTES_UNITS = ark::CFrameLayout::OffsetUnit::BYTES;
 
-    constexpr ssize_t SLOT_SIZE = panda::PointerSize(panda::Arch::X86_64);
+    constexpr ssize_t SLOT_SIZE = ark::PointerSize(ark::Arch::X86_64);
     constexpr ssize_t FRAME_SIZE = FL.GetFrameSize<BYTES_UNITS>();
-    constexpr ssize_t METHOD_OFFSET = FL.GetOffset<SP_ORIGIN, BYTES_UNITS>(panda::CFrameLayout::MethodSlot::Start());
-    constexpr ssize_t FLAGS_OFFSET = FL.GetOffset<SP_ORIGIN, BYTES_UNITS>(panda::CFrameLayout::FlagsSlot::Start());
+    constexpr ssize_t METHOD_OFFSET = FL.GetOffset<SP_ORIGIN, BYTES_UNITS>(ark::CFrameLayout::MethodSlot::Start());
+    constexpr ssize_t FLAGS_OFFSET = FL.GetOffset<SP_ORIGIN, BYTES_UNITS>(ark::CFrameLayout::FlagsSlot::Start());
     constexpr ssize_t CALLEE_OFFSET = FL.GetOffset<SP_ORIGIN, BYTES_UNITS>(FL.GetCalleeRegsStartSlot());
 
     auto frameFlags = constantPool_(FrameConstantDescriptor::FRAME_FLAGS);
@@ -164,8 +164,8 @@ void AMD64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
 
 void AMD64FrameBuilder::InsertEpilogue(llvm::MachineBasicBlock &mblock)
 {
-    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, panda::Arch::X86_64);
-    bool useStack = IsStackUsed(frameInfo_.regMasks, panda::Arch::X86_64);
+    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, ark::Arch::X86_64);
+    bool useStack = IsStackUsed(frameInfo_.regMasks, ark::Arch::X86_64);
     if (!frameInfo_.hasCalls && !useStack && xregsMask == 0 && vregsMask == 0) {
         // Dont generate any code
         return;
@@ -173,12 +173,12 @@ void AMD64FrameBuilder::InsertEpilogue(llvm::MachineBasicBlock &mblock)
 
     InlineAsmBuilder builder(&mblock, mblock.getFirstTerminator());
 
-    constexpr panda::CFrameLayout FL(panda::Arch::X86_64, 0);
+    constexpr ark::CFrameLayout FL(ark::Arch::X86_64, 0);
 
-    constexpr auto SP_ORIGIN = panda::CFrameLayout::OffsetOrigin::SP;
-    constexpr auto BYTES_UNITS = panda::CFrameLayout::OffsetUnit::BYTES;
+    constexpr auto SP_ORIGIN = ark::CFrameLayout::OffsetOrigin::SP;
+    constexpr auto BYTES_UNITS = ark::CFrameLayout::OffsetUnit::BYTES;
 
-    constexpr ssize_t SLOT_SIZE = panda::PointerSize(panda::Arch::X86_64);
+    constexpr ssize_t SLOT_SIZE = ark::PointerSize(ark::Arch::X86_64);
     constexpr ssize_t FRAME_SIZE = FL.GetFrameSize<BYTES_UNITS>();
     constexpr ssize_t CALLEE_OFFSET = FL.GetOffset<SP_ORIGIN, BYTES_UNITS>(FL.GetCalleeRegsStartSlot());
 
@@ -221,12 +221,12 @@ bool ARM64FrameBuilder::RemoveEpilogue(llvm::MachineBasicBlock &mblock)
 
 namespace {
 namespace arm_frame_helpers {
-constexpr panda::CFrameLayout FL(panda::Arch::AARCH64, 0);
-constexpr ssize_t SLOT_SIZE = panda::PointerSize(panda::Arch::AARCH64);
+constexpr ark::CFrameLayout FL(ark::Arch::AARCH64, 0);
+constexpr ssize_t SLOT_SIZE = ark::PointerSize(ark::Arch::AARCH64);
 constexpr ssize_t DSLOT_SIZE = SLOT_SIZE * 2U;
-constexpr auto FP_ORIGIN = panda::CFrameLayout::OffsetOrigin::FP;
-constexpr auto BYTES_UNITS = panda::CFrameLayout::OffsetUnit::BYTES;
-constexpr ssize_t FLAGS_OFFSET = FL.GetOffset<FP_ORIGIN, BYTES_UNITS>(panda::CFrameLayout::FlagsSlot::Start());
+constexpr auto FP_ORIGIN = ark::CFrameLayout::OffsetOrigin::FP;
+constexpr auto BYTES_UNITS = ark::CFrameLayout::OffsetUnit::BYTES;
+constexpr ssize_t FLAGS_OFFSET = FL.GetOffset<FP_ORIGIN, BYTES_UNITS>(ark::CFrameLayout::FlagsSlot::Start());
 constexpr ssize_t X_CALLEE_OFFSET = FL.GetOffset<FP_ORIGIN, BYTES_UNITS>(FL.GetCalleeRegsStartSlot()) - SLOT_SIZE;
 constexpr ssize_t V_CALLEE_OFFSET = FL.GetOffset<FP_ORIGIN, BYTES_UNITS>(FL.GetCalleeFpRegsStartSlot()) - SLOT_SIZE;
 constexpr auto INVALID_REGISTER = 255;
@@ -240,8 +240,8 @@ void ARM64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
 {
     InlineAsmBuilder builder(&mblock, mblock.begin());
 
-    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, panda::Arch::AARCH64);
-    bool useStack = IsStackUsed(frameInfo_.regMasks, panda::Arch::AARCH64);
+    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, ark::Arch::AARCH64);
+    bool useStack = IsStackUsed(frameInfo_.regMasks, ark::Arch::AARCH64);
     bool useVregs = std::get<1>(frameInfo_.regMasks) != 0;
 
     // Dont generate any code
@@ -287,8 +287,8 @@ void ARM64FrameBuilder::InsertEpilogue(llvm::MachineBasicBlock &mblock)
 {
     InlineAsmBuilder builder(&mblock, mblock.getFirstTerminator());
 
-    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, panda::Arch::AARCH64);
-    bool useStack = IsStackUsed(frameInfo_.regMasks, panda::Arch::AARCH64);
+    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, ark::Arch::AARCH64);
+    bool useStack = IsStackUsed(frameInfo_.regMasks, ark::Arch::AARCH64);
     if (!frameInfo_.hasCalls && !useStack && xregsMask == 0 && vregsMask == 0) {
         // Dont generate any code
         return;

@@ -22,7 +22,7 @@
 
 #include "intrinsics.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 extern "C" EtsVoid *StdConsolePrintln(ObjectHeader *header [[maybe_unused]])
 {
@@ -49,32 +49,32 @@ extern "C" EtsVoid *StdConsolePrintChar([[maybe_unused]] ObjectHeader *header, u
 
 extern "C" EtsVoid *StdConsolePrintString([[maybe_unused]] ObjectHeader *header, EtsString *str)
 {
-    panda::intrinsics::PrintString(str->GetCoreType());
+    ark::intrinsics::PrintString(str->GetCoreType());
     return EtsVoid::GetInstance();
 }
 
 extern "C" EtsVoid *StdConsolePrintI32([[maybe_unused]] ObjectHeader *header, int32_t v)
 {
-    panda::intrinsics::PrintI32(v);
+    ark::intrinsics::PrintI32(v);
     return EtsVoid::GetInstance();
 }
 
 extern "C" EtsVoid *StdConsolePrintI16([[maybe_unused]] ObjectHeader *header, int16_t v)
 {
-    panda::intrinsics::PrintI32(v);
+    ark::intrinsics::PrintI32(v);
     return EtsVoid::GetInstance();
 }
 
 extern "C" EtsVoid *StdConsolePrintI8([[maybe_unused]] ObjectHeader *header, int8_t v)
 {
-    panda::intrinsics::PrintI32(v);
+    ark::intrinsics::PrintI32(v);
     return EtsVoid::GetInstance();
 }
 
 extern "C" EtsVoid *StdConsolePrintI64([[maybe_unused]] ObjectHeader *header, int64_t v)
 {
-    panda::intrinsics::PrintI64(v);
+    ark::intrinsics::PrintI64(v);
     return EtsVoid::GetInstance();
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

@@ -19,7 +19,7 @@
 #include "runtime/handle_storage.h"
 #include "runtime/mem/object_helpers.h"
 
-namespace panda {
+namespace ark {
 template <typename T>
 inline uintptr_t HandleStorage<T>::GetNodeAddress(uint32_t index) const
 {
@@ -95,7 +95,7 @@ inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject()
         for (uint32_t j = 0; j < count; ++j) {
             coretypes::TaggedValue obj(node->at(j));
             if (obj.IsHeapObject() && obj.GetHeapObject()->IsForwarded()) {
-                (*node)[j] = coretypes::TaggedValue(panda::mem::GetForwardAddress(obj.GetHeapObject())).GetRawData();
+                (*node)[j] = coretypes::TaggedValue(ark::mem::GetForwardAddress(obj.GetHeapObject())).GetRawData();
             }
         }
     }
@@ -143,7 +143,7 @@ inline void HandleStorage<ObjectHeader *>::UpdateHeapObject()
         for (uint32_t j = 0; j < count; ++j) {
             auto *obj = reinterpret_cast<ObjectHeader *>(node->at(j));
             if (obj->IsForwarded()) {
-                (*node)[j] = ::panda::mem::GetForwardAddress(obj);
+                (*node)[j] = ::ark::mem::GetForwardAddress(obj);
             }
         }
     }
@@ -168,6 +168,6 @@ inline void HandleStorage<ObjectHeader *>::VisitGCRoots([[maybe_unused]] const O
 }
 
 template class HandleStorage<coretypes::TaggedType>;
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_HANDLE_STORAGE_INL_H

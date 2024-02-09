@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "types/ets_type.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsObject;
 
@@ -189,4 +189,4 @@ PandaString EtsMethod::GetDescriptor() const
     return {actualTd.data()};
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

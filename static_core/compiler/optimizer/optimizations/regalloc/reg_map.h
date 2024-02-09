@@ -21,7 +21,7 @@
 #include "optimizer/ir/constants.h"
 #include "utils/arch.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 /**
  * Since the set of available codegen's registers can be sparse, we create local regalloc registers vector with size
@@ -62,6 +62,6 @@ private:
     Register border_ {0};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_MAP_H

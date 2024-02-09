@@ -19,167 +19,167 @@
 #include "runtime/ets_vm_api.h"
 #include <map>
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 // NOLINTBEGIN(google-runtime-int)
-[[maybe_unused]] static long SkoalaCreateRedrawerPeer([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static long SkoalaCreateRedrawerPeer([[maybe_unused]] ark::Method *m,
                                                       [[maybe_unused]] void *object /*any*/)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaGetFrame([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static long SkoalaGetFrame([[maybe_unused]] ark::Method *m,
                                             [[maybe_unused]] long peer /*KNativePointer*/, [[maybe_unused]] int a,
                                             [[maybe_unused]] int b)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaInitRedrawer([[maybe_unused]] panda::Method *m, [[maybe_unused]] int width,
+[[maybe_unused]] static long SkoalaInitRedrawer([[maybe_unused]] ark::Method *m, [[maybe_unused]] int width,
                                                 [[maybe_unused]] int height, [[maybe_unused]] float scale,
                                                 [[maybe_unused]] long peer /*KNativePointer*/,
                                                 [[maybe_unused]] long frame /*KNativePointer*/)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaPaint1nMake([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaPaint1nMake([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
 [[maybe_unused]] static long SkoalaPictureRecorder1nBeginRecording(
-    [[maybe_unused]] panda::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/, [[maybe_unused]] float left,
+    [[maybe_unused]] ark::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/, [[maybe_unused]] float left,
     [[maybe_unused]] float top, [[maybe_unused]] float right, [[maybe_unused]] float bottom)
 {
     return 1;
 }
 [[maybe_unused]] static long SkoalaPictureRecorder1nFinishRecordingAsDrawable(
-    [[maybe_unused]] panda::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/)
+    [[maybe_unused]] ark::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/)
 {
     return 1;
 }
 [[maybe_unused]] static long SkoalaPictureRecorder1nFinishRecordingAsPictureWithCull(
-    [[maybe_unused]] panda::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/, [[maybe_unused]] float left,
+    [[maybe_unused]] ark::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/, [[maybe_unused]] float left,
     [[maybe_unused]] float top, [[maybe_unused]] float right, [[maybe_unused]] float bottom)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaPictureRecorder1nMake([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaPictureRecorder1nMake([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
 [[maybe_unused]] static long SkoalaParagraphParagraphBuilder1nMake(
-    [[maybe_unused]] panda::Method *m, [[maybe_unused]] long paragraphStylePtr /*KNativePointer*/,
+    [[maybe_unused]] ark::Method *m, [[maybe_unused]] long paragraphStylePtr /*KNativePointer*/,
     [[maybe_unused]] long fontCollectionPtr /*KNativePointer*/)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaParagraphParagraphBuilder1nGetFinalizer([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaParagraphParagraphBuilder1nGetFinalizer([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaParagraphParagraphBuilder1nBuild([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static long SkoalaParagraphParagraphBuilder1nBuild([[maybe_unused]] ark::Method *m,
                                                                     [[maybe_unused]] long ptr /*KNativePointer*/)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaParagraphFontCollection1nMake([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaParagraphFontCollection1nMake([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaFontMgr1nDefault([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaFontMgr1nDefault([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaParagraphParagraphStyle1nMake([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaParagraphParagraphStyle1nMake([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaParagraphTextStyle1nMake([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaParagraphTextStyle1nMake([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaManagedString1nMake([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static long SkoalaManagedString1nMake([[maybe_unused]] ark::Method *m,
                                                        [[maybe_unused]] char *textStr /*KStringPtr*/)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaPaint1nGetFinalizer([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaPaint1nGetFinalizer([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaImplRefCntGetFinalizer([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaImplRefCntGetFinalizer([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaParagraphParagraphStyle1nGetFinalizer([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaParagraphParagraphStyle1nGetFinalizer([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaParagraphTextStyle1nGetFinalizer([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaParagraphTextStyle1nGetFinalizer([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaParagraphParagraph1nGetFinalizer([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaParagraphParagraph1nGetFinalizer([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long SkoalaManagedString1nGetFinalizer([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long SkoalaManagedString1nGetFinalizer([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long GetPeerFactory([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long GetPeerFactory([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static long GetEngine([[maybe_unused]] panda::Method *m)
+[[maybe_unused]] static long GetEngine([[maybe_unused]] ark::Method *m)
 {
     return 1;
 }
-[[maybe_unused]] static int SkoalaGetFrameWidth([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static int SkoalaGetFrameWidth([[maybe_unused]] ark::Method *m,
                                                 [[maybe_unused]] long peer /*KNativePointer*/,
                                                 [[maybe_unused]] long frame /*KNativePointer*/)
 {
     return 1;
 }
-[[maybe_unused]] static int SkoalaGetFrameHeight([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static int SkoalaGetFrameHeight([[maybe_unused]] ark::Method *m,
                                                  [[maybe_unused]] long peer /*KNativePointer*/,
                                                  [[maybe_unused]] long frame /*KNativePointer*/)
 {
     return 1;
 }
-[[maybe_unused]] static int SkoalaCanvas1nSave([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static int SkoalaCanvas1nSave([[maybe_unused]] ark::Method *m,
                                                [[maybe_unused]] long ptr /*KNativePointer*/)
 {
     return 1;
 }
-[[maybe_unused]] static void SkoalaDrawPicture([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaDrawPicture([[maybe_unused]] ark::Method *m,
                                                [[maybe_unused]] long picture /*KNativePointer*/,
                                                [[maybe_unused]] long data /*KNativePointer*/,
                                                [[maybe_unused]] void *cb /*any*/, [[maybe_unused]] bool sync)
 {
 }
-[[maybe_unused]] static void SkoalaProvidePeerFactory([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaProvidePeerFactory([[maybe_unused]] ark::Method *m,
                                                       [[maybe_unused]] long func /*KNativePointer*/,
                                                       [[maybe_unused]] long arg /*KNativePointer*/)
 {
 }
-[[maybe_unused]] static void SkoalaSetPlatformApi([[maybe_unused]] panda::Method *m, [[maybe_unused]] void *api /*any*/)
+[[maybe_unused]] static void SkoalaSetPlatformApi([[maybe_unused]] ark::Method *m, [[maybe_unused]] void *api /*any*/)
 {
 }
-[[maybe_unused]] static void SkoalaCanvas1nDrawDrawable([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaCanvas1nDrawDrawable([[maybe_unused]] ark::Method *m,
                                                         [[maybe_unused]] long ptr /*KNativePointer*/,
                                                         [[maybe_unused]] long drawablePtr /*KNativePointer*/,
                                                         [[maybe_unused]] long matrixArr /*KFloatPtr*/)
 {
 }
-[[maybe_unused]] static void SkoalaCanvas1nRestore([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaCanvas1nRestore([[maybe_unused]] ark::Method *m,
                                                    [[maybe_unused]] long ptr /*KNativePointer*/)
 {
 }
-[[maybe_unused]] static void SkoalaPaint1nSetColor([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaPaint1nSetColor([[maybe_unused]] ark::Method *m,
                                                    [[maybe_unused]] long ptr /*KNativePointer*/,
                                                    [[maybe_unused]] int color)
 {
 }
-[[maybe_unused]] static void SkoalaCanvas1nDrawOval([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaCanvas1nDrawOval([[maybe_unused]] ark::Method *m,
                                                     [[maybe_unused]] long canvasPtr /*KNativePointer*/,
                                                     [[maybe_unused]] float left, [[maybe_unused]] float top,
                                                     [[maybe_unused]] float right, [[maybe_unused]] float bottom,
@@ -187,47 +187,47 @@ namespace panda::ets::test {
 {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraphBuilder1nPushStyle(
-    [[maybe_unused]] panda::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/,
+    [[maybe_unused]] ark::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/,
     [[maybe_unused]] long textStylePtr /*KNativePointer*/)
 {
 }
-[[maybe_unused]] static void SkoalaParagraphParagraphBuilder1nAddText([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaParagraphParagraphBuilder1nAddText([[maybe_unused]] ark::Method *m,
                                                                       [[maybe_unused]] long ptr /*KNativePointer*/,
                                                                       [[maybe_unused]] long textString /*KStringPtr*/)
 {
 }
 [[maybe_unused]] static void SkoalaParagraphFontCollection1nSetDefaultFontManager(
-    [[maybe_unused]] panda::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/,
+    [[maybe_unused]] ark::Method *m, [[maybe_unused]] long ptr /*KNativePointer*/,
     [[maybe_unused]] long fontManagerPtr /*KNativePointer*/, [[maybe_unused]] long defaultFamilyNameStr /*KStringPtr*/)
 {
 }
-[[maybe_unused]] static void SkoalaParagraphParagraph1nLayout([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaParagraphParagraph1nLayout([[maybe_unused]] ark::Method *m,
                                                               [[maybe_unused]] long ptr /*KNativePointer*/,
                                                               [[maybe_unused]] float width)
 {
 }
-[[maybe_unused]] static void SkoalaParagraphParagraph1nPaint([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaParagraphParagraph1nPaint([[maybe_unused]] ark::Method *m,
                                                              [[maybe_unused]] long ptr /*KNativePointer*/,
                                                              [[maybe_unused]] long canvasPtr /*KNativePointer*/,
                                                              [[maybe_unused]] float x, [[maybe_unused]] float y)
 {
 }
-[[maybe_unused]] static void SkoalaParagraphTextStyle1nSetColor([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaParagraphTextStyle1nSetColor([[maybe_unused]] ark::Method *m,
                                                                 [[maybe_unused]] long ptr /*KNativePointer*/,
                                                                 [[maybe_unused]] int color)
 {
 }
-[[maybe_unused]] static void SkoalaParagraphTextStyle1nSetFontSize([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaParagraphTextStyle1nSetFontSize([[maybe_unused]] ark::Method *m,
                                                                    [[maybe_unused]] long ptr /*KNativePointer*/,
                                                                    [[maybe_unused]] float size)
 {
 }
-[[maybe_unused]] static void SkoalaImplManagedInvokeFinalizer([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaImplManagedInvokeFinalizer([[maybe_unused]] ark::Method *m,
                                                               [[maybe_unused]] long finalizer /*KNativePointer*/,
                                                               [[maybe_unused]] long obj /*KNativePointer*/)
 {
 }
-[[maybe_unused]] static void SkoalaEnqueueRun([[maybe_unused]] panda::Method *m,
+[[maybe_unused]] static void SkoalaEnqueueRun([[maybe_unused]] ark::Method *m,
                                               [[maybe_unused]] long redrawerPeerPtr /*KNativePointer*/)
 {
 }
@@ -290,11 +290,11 @@ static bool InitExports()
         {"_getEngine", reinterpret_cast<void *>(GetEngine)},
         {"_skoala_enqueue_run", reinterpret_cast<void *>(SkoalaEnqueueRun)}};
 
-    auto *thread = panda::ManagedThread::GetCurrent();
-    panda::ScopedManagedCodeThread sj(thread);
+    auto *thread = ark::ManagedThread::GetCurrent();
+    ark::ScopedManagedCodeThread sj(thread);
 
     for (const auto &[name, impl] : impls) {
-        if (!panda::ets::BindNative("LETSGLOBAL;", name.data(), impl)) {
+        if (!ark::ets::BindNative("LETSGLOBAL;", name.data(), impl)) {
             return false;
         }
     }
@@ -320,12 +320,12 @@ TEST(EtsVMConfing, PeasINT)
     ASSERT_FALSE(stdlibAbc.empty());
     ASSERT_FALSE(pathAbc.empty());
 
-    ASSERT_TRUE(panda::ets::CreateRuntime(stdlibAbc, pathAbc, false, false));
+    ASSERT_TRUE(ark::ets::CreateRuntime(stdlibAbc, pathAbc, false, false));
     EXPECT_TRUE(InitExports());
-    auto res = panda::ets::ExecuteMain();
+    auto res = ark::ets::ExecuteMain();
     EXPECT_TRUE(res.first == true);
     EXPECT_TRUE(res.second == 0);
-    ASSERT_TRUE(panda::ets::DestroyRuntime());
+    ASSERT_TRUE(ark::ets::DestroyRuntime());
 }
 
 TEST(EtsVMConfing, PeasJIT)
@@ -345,12 +345,12 @@ TEST(EtsVMConfing, PeasJIT)
     ASSERT_FALSE(stdlibAbc.empty());
     ASSERT_FALSE(pathAbc.empty());
 
-    ASSERT_TRUE(panda::ets::CreateRuntime(stdlibAbc, pathAbc, true, false));
+    ASSERT_TRUE(ark::ets::CreateRuntime(stdlibAbc, pathAbc, true, false));
     EXPECT_TRUE(InitExports());
-    auto res = panda::ets::ExecuteMain();
+    auto res = ark::ets::ExecuteMain();
     EXPECT_TRUE(res.first == true);
     EXPECT_TRUE(res.second == 0);
-    ASSERT_TRUE(panda::ets::DestroyRuntime());
+    ASSERT_TRUE(ark::ets::DestroyRuntime());
 }
 
 TEST(EtsVMConfing, PeasAOT)
@@ -377,12 +377,12 @@ TEST(EtsVMConfing, PeasAOT)
     ASSERT_FALSE(pathAbc.empty());
     ASSERT_FALSE(pathAn.empty());
 
-    ASSERT_TRUE(panda::ets::CreateRuntime(stdlibAbc, pathAbc, false, true));
+    ASSERT_TRUE(ark::ets::CreateRuntime(stdlibAbc, pathAbc, false, true));
     EXPECT_TRUE(InitExports());
-    auto res = panda::ets::ExecuteMain();
+    auto res = ark::ets::ExecuteMain();
     EXPECT_TRUE(res.first == true);
     EXPECT_TRUE(res.second == 0);
-    ASSERT_TRUE(panda::ets::DestroyRuntime());
+    ASSERT_TRUE(ark::ets::DestroyRuntime());
 }
 
 TEST(EtsVMConfing, PeasLLVMAOT)
@@ -413,13 +413,13 @@ TEST(EtsVMConfing, PeasLLVMAOT)
     ASSERT_FALSE(pathAbc.empty());
     ASSERT_FALSE(pathAn.empty());
 
-    ASSERT_TRUE(panda::ets::CreateRuntime(stdlibAbc, pathAbc, false, true));
+    ASSERT_TRUE(ark::ets::CreateRuntime(stdlibAbc, pathAbc, false, true));
     EXPECT_TRUE(InitExports());
-    auto res = panda::ets::ExecuteMain();
+    auto res = ark::ets::ExecuteMain();
     EXPECT_TRUE(res.first == true);
     EXPECT_TRUE(res.second == 0);
-    ASSERT_TRUE(panda::ets::DestroyRuntime());
+    ASSERT_TRUE(ark::ets::DestroyRuntime());
 }
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

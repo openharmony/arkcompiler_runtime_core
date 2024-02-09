@@ -17,7 +17,7 @@
 #include <vector>
 #include "optimizer/analysis/dominators_tree.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class DomTreeTest : public GraphTest {
 public:
     void CheckImmediateDominators(BasicBlock *dominator, const std::set<BasicBlock *> &&expected)
@@ -318,4 +318,4 @@ TEST_F(DomTreeTest, GraphWithCycles)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

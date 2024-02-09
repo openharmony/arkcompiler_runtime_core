@@ -26,7 +26,7 @@
 #include "websocketpp/transport/asio/endpoint.hpp"
 #pragma GCC diagnostic pop
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 // NOLINTBEGIN(readability-identifier-naming)
 struct AsioConfig : websocketpp::config::asio {
     static const websocketpp::log::level alog_level = websocketpp::log::alevel::access_core;
@@ -42,6 +42,6 @@ struct AsioConfig : websocketpp::config::asio {
     using transport_type = websocketpp::transport::asio::endpoint<transport_config>;
 };
 // NOLINTEND(readability-identifier-naming)
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_ASIO_CONFIG_H

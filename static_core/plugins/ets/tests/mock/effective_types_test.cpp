@@ -21,7 +21,7 @@
 
 // NOLINTBEGIN(readability-identifier-naming, readability-named-parameter, readability-magic-numbers)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *TEST_BIN_FILE_NAME = "EffectiveTypesTest.abc";
 
@@ -113,6 +113,6 @@ TEST_F(EffectiveTypeTest, TestGetStaticMethod)
     }
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-identifier-naming, readability-named-parameter, readability-magic-numbers)

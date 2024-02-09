@@ -45,8 +45,8 @@
 #include <sys/syscall.h>
 #include <linux/futex.h>
 namespace ark::os::unix::memory::futex {
-#define THREAD_ID panda::os::thread::ThreadId                              // NOLINT(cppcoreguidelines-macro-usage)
-#define GET_CURRENT_THREAD panda::os::thread::GetCurrentThreadId()         // NOLINT(cppcoreguidelines-macro-usage)
+#define THREAD_ID ark::os::thread::ThreadId                                // NOLINT(cppcoreguidelines-macro-usage)
+#define GET_CURRENT_THREAD ark::os::thread::GetCurrentThreadId()           // NOLINT(cppcoreguidelines-macro-usage)
 #define ATOMIC(type) std::atomic<type>                                     // NOLINT(cppcoreguidelines-macro-usage)
 #define ATOMIC_INT ATOMIC(int)                                             // NOLINT(cppcoreguidelines-macro-usage)
 #define ATOMIC_STORE(addr, val, mem) (addr)->store(val, std::mem)          // NOLINT(cppcoreguidelines-macro-usage)

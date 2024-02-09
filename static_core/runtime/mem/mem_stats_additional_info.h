@@ -20,7 +20,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/mem/mem_stats.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Implementation of MemStats with additional info about memory.
 class MemStatsAdditionalInfo : public MemStats<MemStatsAdditionalInfo> {
@@ -40,5 +40,5 @@ private:
 };
 
 extern template class MemStats<MemStatsAdditionalInfo>;
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_MEM_STATS_ADDITIONAL_INFO_H

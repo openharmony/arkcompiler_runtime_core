@@ -32,7 +32,7 @@
 #include "runtime/tests/test_utils.h"
 #include "compiler/tests/panda_runner.h"
 
-namespace panda::test {
+namespace ark::test {
 
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace compiler;
@@ -342,7 +342,7 @@ void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
         if (firstRun) {
             auto storage = Runtime::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage();
             StackWalkerTest::globalObj_ =
-                storage->Add(panda::mem::AllocateNullifiedPayloadString(1), mem::Reference::ObjectType::GLOBAL);
+                storage->Add(ark::mem::AllocateNullifiedPayloadString(1), mem::Reference::ObjectType::GLOBAL);
         }
         auto obj = Runtime::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage()->Get(StackWalkerTest::globalObj_);
         if (firstRun) {
@@ -554,4 +554,4 @@ TEST_F(StackWalkerTest, CatchInCompiledCode)
     runner.Run(source, nullptr);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

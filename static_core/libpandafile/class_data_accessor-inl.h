@@ -22,7 +22,7 @@
 
 #include "helpers.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 inline void ClassDataAccessor::SkipSourceLang()
 {
@@ -219,6 +219,6 @@ inline uint32_t ClassDataAccessor::GetRuntimeAnnotationsNumber()
     return n;
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file
 
 #endif  // LIBPANDAFILE_CLASS_DATA_ACCESSOR_INL_H_

@@ -20,7 +20,7 @@
 #include "utils/bit_utils.h"
 #include "runtime/include/coretypes/string.h"
 
-namespace panda::intrinsics {
+namespace ark::intrinsics {
 
 #if !defined(PANDA_TARGET_ARM64) && !defined(PANDA_TARGET_ARM32) && !defined(PANDA_TARGET_AMD64) && \
     !defined(PANDA_TARGET_X86)
@@ -186,7 +186,7 @@ inline ALWAYS_INLINE int32_t Utf16StringIndexOfChar(uint16_t *data, size_t offse
 
 inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
 {
-    auto string = reinterpret_cast<panda::coretypes::String *>(str);
+    auto string = reinterpret_cast<ark::coretypes::String *>(str);
     ASSERT(string != nullptr);
     bool isUtf8 = string->IsMUtf8();
     auto length = string->GetLength();
@@ -208,6 +208,6 @@ inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
     return impl::Utf16StringIndexOfChar(string->GetDataUtf16(), offset, length, character);
 }
 
-}  // namespace panda::intrinsics
+}  // namespace ark::intrinsics
 
 #endif

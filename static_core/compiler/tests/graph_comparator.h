@@ -19,7 +19,7 @@
 #include "optimizer/ir/ir_constructor.h"
 #include "optimizer/analysis/rpo.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class GraphComparator {
 public:
@@ -333,6 +333,6 @@ private:
     std::unordered_map<Inst *, Inst *> instCompareMap_;
     std::unordered_map<BasicBlock *, BasicBlock *> bbMap_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_TESTS_GRAPH_COMPARATOR_H

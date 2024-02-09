@@ -16,7 +16,7 @@
 #include "libpandabase/macros.h"
 #include "runtime/mem/gc/gc_root_type.h"
 
-namespace panda::mem {
+namespace ark::mem {
 std::ostream &operator<<(std::ostream &os, RootType rootType)
 {
     switch (rootType) {
@@ -67,4 +67,4 @@ std::ostream &operator<<(std::ostream &os, RootType rootType)
     }
     return os;
 }
-}  // namespace panda::mem
+}  // namespace ark::mem

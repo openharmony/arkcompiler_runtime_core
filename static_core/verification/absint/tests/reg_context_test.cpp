@@ -26,7 +26,7 @@
 
 #include <functional>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 TEST_F(VerifierTest, AbsIntRegContext)
 {
@@ -74,4 +74,4 @@ TEST_F(VerifierTest, AbsIntRegContext)
     DestroyConfig(config);
 }
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

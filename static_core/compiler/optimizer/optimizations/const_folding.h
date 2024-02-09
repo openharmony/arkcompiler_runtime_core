@@ -16,7 +16,7 @@
 #ifndef CONST_FOLDING_H
 #define CONST_FOLDING_H
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 bool ConstFoldingCast(Inst *inst);
 bool ConstFoldingNeg(Inst *inst);
@@ -45,5 +45,5 @@ bool ConstFoldingSqrt(Inst *inst);
 ConstantInst *ConstFoldingCastConst(Inst *inst, Inst *input, bool isLiteralData = false);
 
 ConstantInst *ConstFoldingCreateIntConst(Inst *inst, uint64_t value, bool isLiteralData = false);
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // CONST_FOLDING_H

@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_field.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsCoroutine;
 
@@ -205,7 +205,7 @@ public:
     inline void SetInteropHash(uint32_t hash)
     {
         MarkWord oldMark = AtomicGetMark();
-        ASSERT(oldMark.GetState() == panda::MarkWord::STATE_UNLOCKED);
+        ASSERT(oldMark.GetState() == ark::MarkWord::STATE_UNLOCKED);
         MarkWord newMark = oldMark.DecodeFromHash(hash);
         ASSERT(newMark.GetState() == MarkWord::STATE_HASHED);
         [[maybe_unused]] bool res = AtomicSetMark(oldMark, newMark);
@@ -227,7 +227,7 @@ public:
 
 protected:
     // Use type alias to allow using into derived classes
-    using ObjectHeader = ::panda::ObjectHeader;
+    using ObjectHeader = ::ark::ObjectHeader;
 
 private:
     NO_COPY_SEMANTIC(EtsObject);
@@ -237,6 +237,6 @@ private:
 // Size of EtsObject must be equal size of ObjectHeader
 static_assert(sizeof(EtsObject) == sizeof(ObjectHeader));
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H_

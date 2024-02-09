@@ -26,7 +26,7 @@
 
 #include <unordered_set>
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 /*
  * =======================================================
@@ -102,6 +102,6 @@ private:
     std::unordered_set<FileInfo> writtenModules_;
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_WRITER_H

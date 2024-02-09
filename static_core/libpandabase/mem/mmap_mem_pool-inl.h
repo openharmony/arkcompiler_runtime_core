@@ -29,7 +29,7 @@
 #include "mem/mem_config.h"
 #include "utils/asan_interface.h"
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_MMAP_MEM_POOL(level) LOG(level, MEMORYPOOL) << "MmapMemPool: "
@@ -163,15 +163,14 @@ inline MmapMemPool::MmapMemPool() : MemPool("MmapMemPool"), nonObjectSpacesCurre
     }
     ASSERT(objectSpaceSize <= PANDA_MAX_HEAP_SIZE);
 #if defined(PANDA_USE_32_BIT_POINTER) && !defined(PANDA_TARGET_WINDOWS)
-    void *mem =
-        panda::os::mem::MapRWAnonymousInFirst4GB(ToVoidPtr(PANDA_32BITS_HEAP_START_ADDRESS), objectSpaceSize,
-                                                 // Object space must be aligned to PANDA_POOL_ALIGNMENT_IN_BYTES
-                                                 PANDA_POOL_ALIGNMENT_IN_BYTES);
+    void *mem = ark::os::mem::MapRWAnonymousInFirst4GB(ToVoidPtr(PANDA_32BITS_HEAP_START_ADDRESS), objectSpaceSize,
+                                                       // Object space must be aligned to PANDA_POOL_ALIGNMENT_IN_BYTES
+                                                       PANDA_POOL_ALIGNMENT_IN_BYTES);
     ASSERT((ToUintPtr(mem) < PANDA_32BITS_HEAP_END_OBJECTS_ADDRESS) || (objectSpaceSize == 0));
     ASSERT(ToUintPtr(mem) + objectSpaceSize <= PANDA_32BITS_HEAP_END_OBJECTS_ADDRESS);
 #else
     // We should get aligned to PANDA_POOL_ALIGNMENT_IN_BYTES size
-    void *mem = panda::os::mem::MapRWAnonymousWithAlignmentRaw(objectSpaceSize, PANDA_POOL_ALIGNMENT_IN_BYTES);
+    void *mem = ark::os::mem::MapRWAnonymousWithAlignmentRaw(objectSpaceSize, PANDA_POOL_ALIGNMENT_IN_BYTES);
 #endif
     LOG_IF(((mem == nullptr) && (objectSpaceSize != 0)), FATAL, MEMORYPOOL)
         << "MmapMemPool: couldn't mmap " << objectSpaceSize << " bytes of memory for the system";
@@ -219,7 +218,7 @@ inline MmapMemPool::~MmapMemPool()
     ASSERT(poolMap_.IsEmpty());
 
     // NOTE(dtrubenkov): consider madvise(mem, total_size_, MADV_DONTNEED); when possible
-    if (auto unmapRes = panda::os::mem::UnmapRaw(mmapedMemAddr, mmapedObjectMemorySize_)) {
+    if (auto unmapRes = ark::os::mem::UnmapRaw(mmapedMemAddr, mmapedObjectMemorySize_)) {
         LOG_MMAP_MEM_POOL(FATAL) << "Destructor unnmap  error: " << unmapRes->ToString();
     }
 }
@@ -253,7 +252,7 @@ inline void MmapMemPool::FreeArenaImpl(ArenaT *arena)
 {
     os::memory::LockHolder lk(lock_);
     size_t size = arena->GetSize() + (ToUintPtr(arena->GetMem()) - ToUintPtr(arena));
-    ASSERT(size == AlignUp(size, panda::os::mem::GetPageSize()));
+    ASSERT(size == AlignUp(size, ark::os::mem::GetPageSize()));
     LOG_MMAP_MEM_POOL(DEBUG) << "Try to free arena with size " << std::dec << size << " at addr = " << std::hex
                              << arena;
     FreePoolUnsafe<OS_PAGES_POLICY>(arena, size);
@@ -266,7 +265,7 @@ inline void *MmapMemPool::AllocRawMemNonObjectImpl(size_t size, SpaceType spaceT
     void *mem = nullptr;
     if (LIKELY(nonObjectSpacesMaxSize_[SpaceTypeToIndex(spaceType)] >=
                nonObjectSpacesCurrentSize_[SpaceTypeToIndex(spaceType)] + size)) {
-        mem = panda::os::mem::MapRWAnonymousWithAlignmentRaw(size, PANDA_POOL_ALIGNMENT_IN_BYTES);
+        mem = ark::os::mem::MapRWAnonymousWithAlignmentRaw(size, PANDA_POOL_ALIGNMENT_IN_BYTES);
         if (mem != nullptr) {
             nonObjectSpacesCurrentSize_[SpaceTypeToIndex(spaceType)] += size;
         }
@@ -290,7 +289,7 @@ template <OSPagesAllocPolicy OS_ALLOC_POLICY>
 inline void *MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
 {
     os::memory::LockHolder lk(lock_);
-    ASSERT(size % panda::os::mem::GetPageSize() == 0);
+    ASSERT(size % ark::os::mem::GetPageSize() == 0);
     // NOTE: We need this check because we use this memory for Pools too
     // which require PANDA_POOL_ALIGNMENT_IN_BYTES alignment
     ASSERT(size == AlignUp(size, PANDA_POOL_ALIGNMENT_IN_BYTES));
@@ -328,7 +327,7 @@ inline void *MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
 /* static */
 inline void MmapMemPool::FreeRawMemImpl(void *mem, size_t size)
 {
-    if (auto unmapRes = panda::os::mem::UnmapRaw(mem, size)) {
+    if (auto unmapRes = ark::os::mem::UnmapRaw(mem, size)) {
         LOG_MMAP_MEM_POOL(FATAL) << "Destructor unnmap  error: " << unmapRes->ToString();
     }
     LOG_MMAP_MEM_POOL(DEBUG) << "Deallocated raw memory with size " << size << " at addr = " << mem;
@@ -338,7 +337,7 @@ template <OSPagesAllocPolicy OS_ALLOC_POLICY>
 inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType spaceType, AllocatorType allocatorType,
                                          const void *allocatorAddr)
 {
-    ASSERT(size == AlignUp(size, panda::os::mem::GetPageSize()));
+    ASSERT(size == AlignUp(size, ark::os::mem::GetPageSize()));
     ASSERT(size == AlignUp(size, PANDA_POOL_ALIGNMENT_IN_BYTES));
     Pool pool = NULLPOOL;
     bool addToPoolMap = false;
@@ -399,7 +398,7 @@ inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType spaceType, Alloc
 template <OSPagesPolicy OS_PAGES_POLICY>
 inline void MmapMemPool::FreePoolUnsafe(void *mem, size_t size)
 {
-    ASSERT(size == AlignUp(size, panda::os::mem::GetPageSize()));
+    ASSERT(size == AlignUp(size, ark::os::mem::GetPageSize()));
     ASAN_POISON_MEMORY_REGION(mem, size);
     SpaceType poolSpaceType = GetSpaceTypeForAddrImpl(mem);
     switch (poolSpaceType) {
@@ -585,6 +584,6 @@ inline void MmapMemPool::ReleasePagesInFreePools()
 
 #undef LOG_MMAP_MEM_POOL
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // LIBPANDABASE_MEM_MMAP_MEM_POOL_INLINE_H

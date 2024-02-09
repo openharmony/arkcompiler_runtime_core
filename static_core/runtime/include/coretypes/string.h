@@ -25,7 +25,7 @@
 #include "runtime/include/object_header.h"
 #include "runtime/mem/vm_handle.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 
 class Array;
 class String : public ObjectHeader {
@@ -123,7 +123,7 @@ public:
         if (!IsUtf16()) {
             return GetLength() + 1;  // add place for zero at the end
         }
-        return panda::utf::Utf16ToMUtf8Size(dataUtf16_, GetLength());
+        return ark::utf::Utf16ToMUtf8Size(dataUtf16_, GetLength());
     }
 
     size_t GetUtf16Length()
@@ -163,7 +163,7 @@ public:
             }
             return length;
         }
-        return panda::utf::ConvertRegionUtf16ToMUtf8(GetDataUtf16(), buf, length, maxLength - 1, start);
+        return ark::utf::ConvertRegionUtf16ToMUtf8(GetDataUtf16(), buf, length, maxLength - 1, start);
     }
 
     inline uint32_t CopyDataUtf16(uint16_t *buf, uint32_t maxLength)
@@ -370,12 +370,12 @@ private:
 };
 
 constexpr uint32_t STRING_LENGTH_OFFSET = 8U;
-static_assert(STRING_LENGTH_OFFSET == panda::coretypes::String::GetLengthOffset());
+static_assert(STRING_LENGTH_OFFSET == ark::coretypes::String::GetLengthOffset());
 constexpr uint32_t STRING_HASHCODE_OFFSET = 12U;
-static_assert(STRING_HASHCODE_OFFSET == panda::coretypes::String::GetHashcodeOffset());
+static_assert(STRING_HASHCODE_OFFSET == ark::coretypes::String::GetHashcodeOffset());
 constexpr uint32_t STRING_DATA_OFFSET = 16U;
-static_assert(STRING_DATA_OFFSET == panda::coretypes::String::GetDataOffset());
+static_assert(STRING_DATA_OFFSET == ark::coretypes::String::GetDataOffset());
 
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_CORETYPES_STRING_H_

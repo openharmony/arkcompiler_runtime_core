@@ -25,7 +25,7 @@
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
 #include "types/ets_object.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 // JSRefConvert adapter for builtin reference types
 template <typename Conv>
@@ -435,4 +435,4 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     RegisterCompatConvertors(ctx);
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

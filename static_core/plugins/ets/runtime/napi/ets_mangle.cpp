@@ -20,14 +20,14 @@
 #include "libpandabase/utils/utf.h"
 #include "plugins/ets/runtime/napi/ets_mangle.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 std::string MangleString(const std::string &name)
 {
     std::stringstream res;
-    const uint8_t *utf8 = panda::utf::CStringAsMutf8(name.c_str());
+    const uint8_t *utf8 = ark::utf::CStringAsMutf8(name.c_str());
     while (*utf8 != '\0') {
-        auto [ch, len] = panda::utf::ConvertMUtf8ToUtf16Pair(utf8);
+        auto [ch, len] = ark::utf::ConvertMUtf8ToUtf16Pair(utf8);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         utf8 += len;
         if (ch == '.' || ch == '/') {
@@ -44,7 +44,7 @@ std::string MangleString(const std::string &name)
             // append _0xxxx, where xxxx - unicode of symbol
             constexpr int BUF_LEN = 16;
             std::array<char, BUF_LEN> buf = {0};
-            auto [p_hi, p_lo] = panda::utf::SplitUtf16Pair(ch);
+            auto [p_hi, p_lo] = ark::utf::SplitUtf16Pair(ch);
             if (p_hi == 0) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
                 snprintf_s(buf.data(), BUF_LEN, BUF_LEN - 1, "_0%04x", p_lo);
@@ -78,4 +78,4 @@ std::string MangleMethodNameWithSignature(const std::string &mangledName, const 
     return res.str();
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

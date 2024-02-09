@@ -20,7 +20,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/analysis/object_type_propagation.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool ObjectTypeCheckElimination::RunImpl()
 {
     GetGraph()->RunPass<LoopAnalyzer>();
@@ -212,4 +212,4 @@ void ObjectTypeCheckElimination::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -29,7 +29,7 @@
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 #ifndef PANDA_NIGHTLY_TEST_ON
 constexpr uint64_t ITERATION = 256;
@@ -52,7 +52,7 @@ public:
         options.SetGcType("stw");  // NOTE(dtrubenk): fix for gen-gc
         options.SetRunGcInPlace(true);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -67,7 +67,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
 };
 
 using MallocProxyNonObjectAllocator = MallocProxyAllocator<RawMemoryConfig>;
@@ -433,4 +433,4 @@ TEST_F(MemStatsTest, TestThreadSafety)
     }
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

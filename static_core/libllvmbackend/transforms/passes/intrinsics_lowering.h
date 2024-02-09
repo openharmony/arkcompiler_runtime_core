@@ -23,28 +23,28 @@
 #include <llvm/IR/Intrinsics.h>
 #include <llvm/IR/PassManager.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 namespace llvm {
 class CallInst;
 class Instruction;
 }  // namespace llvm
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 class IntrinsicsLowering : public llvm::PassInfoMixin<IntrinsicsLowering> {
 public:
     explicit IntrinsicsLowering(LLVMArkInterface *arkInterface = nullptr);
 
-    static bool ShouldInsert([[maybe_unused]] const panda::llvmbackend::LLVMCompilerOptions *options)
+    static bool ShouldInsert([[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
     {
         return true;
     }
 
     static IntrinsicsLowering Create(LLVMArkInterface *arkInterface,
-                                     const panda::llvmbackend::LLVMCompilerOptions *options);
+                                     const ark::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysisManager);
@@ -67,6 +67,6 @@ public:
     static constexpr llvm::StringRef ARG_NAME = "intrinsics-lowering";
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_INTRINSICS_LOWERING_H

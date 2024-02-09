@@ -30,7 +30,7 @@
     if (__after_resolve)           \
     (OP)
 
-namespace panda::compiler {
+namespace ark::compiler {
 class SplitResolverTest : public GraphTest {
 public:
     LivenessAnalyzer *RunLivenessAnalysis(Graph *graph)
@@ -1298,4 +1298,4 @@ TEST_F(SplitResolverTest, SwapCallInputs)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

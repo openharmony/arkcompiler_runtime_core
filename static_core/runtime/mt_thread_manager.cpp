@@ -25,7 +25,7 @@
 #include "runtime/lock_order_graph.h"
 #include "runtime/thread_manager.h"
 
-namespace panda {
+namespace ark {
 MTThreadManager::MTThreadManager(mem::InternalAllocatorPtr allocator) : threads_(allocator->Adapter())
 {
     lastId_ = 0;
@@ -376,4 +376,4 @@ MTManagedThread *MTThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_
     UNREACHABLE();
 }
 
-}  // namespace panda
+}  // namespace ark

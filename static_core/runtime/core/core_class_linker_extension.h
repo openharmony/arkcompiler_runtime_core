@@ -18,7 +18,7 @@
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/class_linker_extension.h"
 
-namespace panda {
+namespace ark {
 
 class CoreClassLinkerExtension : public ClassLinkerExtension {
 public:
@@ -80,6 +80,6 @@ private:
     ErrorHandler errorHandler_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CORE_CORE_CLASS_LINKER_EXTENSION_H_

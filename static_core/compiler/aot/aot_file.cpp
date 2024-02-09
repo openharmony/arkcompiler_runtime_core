@@ -28,11 +28,11 @@
 extern "C" void CallStaticPltResolver([[maybe_unused]] void *slot) __attribute__((weak));
 extern "C" void CallStaticPltResolver([[maybe_unused]] void *slot) {}
 
-namespace panda::compiler {
-static inline Expected<const uint8_t *, std::string> LoadSymbol(const panda::os::library_loader::LibraryHandle &handle,
+namespace ark::compiler {
+static inline Expected<const uint8_t *, std::string> LoadSymbol(const ark::os::library_loader::LibraryHandle &handle,
                                                                 const char *name)
 {
-    auto sym = panda::os::library_loader::ResolveSymbol(handle, name);
+    auto sym = ark::os::library_loader::ResolveSymbol(handle, name);
     if (!sym) {
         return Unexpected(sym.Error().ToString());
     }
@@ -50,7 +50,7 @@ Expected<std::unique_ptr<AotFile>, std::string> AotFile::Open(const std::string 
                                                               bool forDump)
 {
     trace::ScopedTrace scopedTrace("Open aot file " + fileName);
-    auto handleLoad = panda::os::library_loader::Load(fileName);
+    auto handleLoad = ark::os::library_loader::Load(fileName);
     if (!handleLoad) {
         return Unexpected("AOT elf library open failed: " + handleLoad.Error().ToString());
     }
@@ -195,4 +195,4 @@ BitVectorSpan AotClass::GetBitmap() const
     return BitVectorSpan(bitmapBase + header_->methodsBitmapOffset, header_->methodsBitmapSize);
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

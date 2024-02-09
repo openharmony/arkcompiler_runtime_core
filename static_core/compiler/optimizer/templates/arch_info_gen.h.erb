@@ -18,15 +18,15 @@
 
 #include "utils/regmask.h"
 
-namespace panda::compiler::arch_info {
+namespace ark::compiler::arch_info {
 % IR::arch_info.each do | data |
 // NOLINTNEXTLINE(readability-identifier-naming)
 struct <%= data['name'] %> {
-    static constexpr RegMask TEMP_REGS = ::panda::MakeMask(<%= data['temp_regs'].join(', ') %>);
-    static constexpr RegMask TEMP_FP_REGS = ::panda::MakeMask(<%= data['fp_temp_regs'].join(', ') %>);
+    static constexpr RegMask TEMP_REGS = ::ark::MakeMask(<%= data['temp_regs'].join(', ') %>);
+    static constexpr RegMask TEMP_FP_REGS = ::ark::MakeMask(<%= data['fp_temp_regs'].join(', ') %>);
 };
 % end
 
-}  // namespace panda::compiler::arch_info
+}  // namespace ark::compiler::arch_info
 
 #endif  // REGISTERS_INFO_GEN_H

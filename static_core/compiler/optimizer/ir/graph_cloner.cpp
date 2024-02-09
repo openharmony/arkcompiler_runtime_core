@@ -20,7 +20,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_cloner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 GraphCloner::GraphCloner(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator)
     : graph_(graph),
       allocator_(allocator),
@@ -1040,4 +1040,4 @@ bool GraphCloner::IsLoopClonable(Loop *loop, size_t instLimit)
     }
     return (instCount <= instLimit);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

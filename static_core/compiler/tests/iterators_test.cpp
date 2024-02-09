@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class IteratorsTest : public GraphTest {
 public:
     static constexpr size_t INST_COUNT = 10;
@@ -284,4 +284,4 @@ TEST_F(IteratorsTest, BlockAllInstructions)
     }
     Check(instructions);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

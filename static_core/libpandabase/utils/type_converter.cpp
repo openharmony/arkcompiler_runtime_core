@@ -21,7 +21,7 @@
 #include <iomanip>
 #include <string_view>
 
-namespace panda::helpers {
+namespace ark::helpers {
 
 ValueUnit::ValueUnit(uint64_t value, std::string_view literal) : value_(value), literal_(literal) {}
 
@@ -133,4 +133,4 @@ ValueUnit ValueConverter(uint64_t value, ValueType type)
     }
 }
 
-}  // namespace panda::helpers
+}  // namespace ark::helpers

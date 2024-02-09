@@ -22,7 +22,7 @@
 #include "libpandabase/os/mutex.h"
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 constexpr bool REMSET_THREAD_USE_STATS = false;
 
@@ -108,5 +108,5 @@ private:
     RemsetThreadStats stats_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_RUNTIME_MEM_GC_G1_UPDATE_REMSET_THREAD_H

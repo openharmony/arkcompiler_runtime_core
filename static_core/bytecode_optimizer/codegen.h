@@ -27,7 +27,7 @@
 #include "utils/logger.h"
 #include "common.h"
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 
 using compiler::BasicBlock;
 using compiler::Inst;
@@ -166,6 +166,6 @@ private:
     std::vector<pandasm::Ins> result_;
 };
 
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPT_CODEGEN_H

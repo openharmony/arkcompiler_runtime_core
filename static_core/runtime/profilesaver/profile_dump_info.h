@@ -45,7 +45,7 @@
 // LineN:
 //      ...
 
-namespace panda {
+namespace ark {
 
 /*
  * Any newly added information, we have to change the following info naturally, especially
@@ -282,6 +282,6 @@ private:
     PandaMap<const PandaString, ProfileLineData> dumpInfo_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif

@@ -20,7 +20,7 @@
 #include "types/ets_class.h"
 #include "types/ets_arraybuffer.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 class EtsArrayBufferTest : public testing::Test {
 public:
@@ -78,7 +78,7 @@ TEST_F(EtsArrayBufferTest, MemoryLayout)
     std::vector<Member> members = EtsArrayBufferMembers::GetMembers();
     ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
 
-    // Check both EtsPromise and panda::Class<Promise> has the same number of fields
+    // Check both EtsPromise and ark::Class<Promise> has the same number of fields
     // and at the same offsets
     for (const Member &memb : members) {
         EtsField *field = klass->GetFieldIDByName(memb.name);
@@ -86,4 +86,4 @@ TEST_F(EtsArrayBufferTest, MemoryLayout)
         ASSERT_EQ(memb.offset, field->GetOffset()) << "Offsets of the field '" << memb.name << "' are different";
     }
 }
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

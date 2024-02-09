@@ -39,7 +39,7 @@ Codegen interface for compiler
 #include "optimizer/pass_manager.h"
 #include "utils/cframe_layout.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // Maximum size in bytes
 constexpr size_t INST_IN_SLOW_PATH = 64;
 
@@ -1261,6 +1261,6 @@ void Codegen::FillPostWrbCallParams(MemRef mem, Args &&...params)
     }
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_CODEGEN_H

@@ -20,11 +20,11 @@
 #include <string>
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda::pandasm;
+using namespace ark::pandasm;
 
 TEST(parsertests, test1)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -41,7 +41,7 @@ TEST(parsertests, test1)
 
 TEST(parsertests, test2)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -58,7 +58,7 @@ TEST(parsertests, test2)
 
 TEST(parsertests, test3)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -69,7 +69,7 @@ TEST(parsertests, test3)
 
 TEST(parsertests, test4)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -80,7 +80,7 @@ TEST(parsertests, test4)
 
 TEST(parsertests, test5)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -96,7 +96,7 @@ TEST(parsertests, test5)
 
 TEST(parsertests, test6)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -112,7 +112,7 @@ TEST(parsertests, test6)
 
 TEST(parsertests, test7)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -123,7 +123,7 @@ TEST(parsertests, test7)
 
 TEST(parsertests, test8)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -134,7 +134,7 @@ TEST(parsertests, test8)
 
 TEST(parsertests, test9)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -154,7 +154,7 @@ TEST(parsertests, test9)
 
 TEST(parsertests, test10)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 main(){").first);
@@ -174,7 +174,7 @@ TEST(parsertests, test10)
 
 TEST(parsertests, test11)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -189,7 +189,7 @@ TEST(parsertests, test11)
 
 TEST(parsertests, test12)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -200,7 +200,7 @@ TEST(parsertests, test12)
 
 TEST(parsertests, test13)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -216,7 +216,7 @@ TEST(parsertests, test13)
 
 TEST(parsertests, test14)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -227,7 +227,7 @@ TEST(parsertests, test14)
 
 TEST(parsertests, test15)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -238,7 +238,7 @@ TEST(parsertests, test15)
 
 TEST(parsertests, test17)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -254,7 +254,7 @@ TEST(parsertests, test17)
 
 TEST(parsertests, test18)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -269,7 +269,7 @@ TEST(parsertests, test18)
 
 TEST(parsertests, test19)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -280,7 +280,7 @@ TEST(parsertests, test19)
 
 TEST(parsertests, test20)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -291,7 +291,7 @@ TEST(parsertests, test20)
 
 TEST(parsertests, test21)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -302,7 +302,7 @@ TEST(parsertests, test21)
 
 TEST(parsertests, test22)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -318,7 +318,7 @@ TEST(parsertests, test22)
 
 TEST(parsertests, test23)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -339,7 +339,7 @@ TEST(parsertests, test23)
 
     const auto sigMain = GetFunctionSignatureFromName("main", {});
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
     params.emplace_back(Type {"f32", 0}, language);
     const auto sigM123 = GetFunctionSignatureFromName("m123", params);
@@ -348,10 +348,10 @@ TEST(parsertests, test23)
     ASSERT_EQ(item.Value().functionTable.at(sigM123).name, sigM123);
     ASSERT_EQ(item.Value().functionTable.at(sigMain).GetParamsNum(), 0U);
     ASSERT_EQ(item.Value().functionTable.at(sigM123).GetParamsNum(), 2U);
-    ASSERT_EQ(item.Value().functionTable.at(sigM123).params[0].type.GetId(), panda::panda_file::Type::TypeId::U1);
-    ASSERT_EQ(item.Value().functionTable.at(sigM123).params[1].type.GetId(), panda::panda_file::Type::TypeId::F32);
-    ASSERT_EQ(item.Value().functionTable.at(sigMain).returnType.GetId(), panda::panda_file::Type::TypeId::U8);
-    ASSERT_EQ(item.Value().functionTable.at(sigM123).returnType.GetId(), panda::panda_file::Type::TypeId::F64);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).params[0].type.GetId(), ark::panda_file::Type::TypeId::U1);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).params[1].type.GetId(), ark::panda_file::Type::TypeId::F32);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).returnType.GetId(), ark::panda_file::Type::TypeId::U8);
+    ASSERT_EQ(item.Value().functionTable.at(sigM123).returnType.GetId(), ark::panda_file::Type::TypeId::F64);
     ASSERT_EQ(item.Value().functionTable.at(sigMain).labelTable.at("label1").fileLocation->lineNumber, 2U);
     ASSERT_EQ(item.Value().functionTable.at(sigMain).labelTable.at("label1").fileLocation->isDefined, true);
     ASSERT_EQ(item.Value().functionTable.at(sigMain).labelTable.at("label2").fileLocation->lineNumber, 3U);
@@ -393,7 +393,7 @@ TEST(parsertests, test23)
 
 TEST(parsertests, test24_functions)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function void main()").first);
@@ -420,7 +420,7 @@ TEST(parsertests, test24_functions)
     const auto sigMain = GetFunctionSignatureFromName("main", {});
     const auto sigNiam = GetFunctionSignatureFromName("niam", {});
 
-    ASSERT_EQ(item.Value().functionTable.at(sigMain).returnType.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).returnType.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(256))) << "256 expected";
     ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[1].imms[0], Ins::IType(int64_t(4294967295)))
         << "4294967295 expected";
@@ -438,7 +438,7 @@ TEST(parsertests, test24_functions)
 
 TEST(parsertests, test25_record_alone)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".record Asm {").first);
@@ -449,16 +449,16 @@ TEST(parsertests, test25_record_alone)
     auto item = p.Parse(v);
     ASSERT_EQ(item.Value().recordTable.at("Asm").name, "Asm");
     ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
     ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[1].name, "asm2");
-    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[2].name, "asm3");
-    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
 }
 
 TEST(parsertests, test26_records)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -485,34 +485,34 @@ TEST(parsertests, test26_records)
 
     ASSERT_EQ(item.Value().recordTable.at("Asm1").name, "Asm1");
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].name, "asm2");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].name, "asm3");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
     ASSERT_EQ(item.Value().recordTable.at("Asm2").name, "Asm2");
     ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
     ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].name, "asm2");
-    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].name, "asm3");
-    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
     ASSERT_EQ(item.Value().recordTable.at("Asm3").name, "Asm3");
     ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
     ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].name, "asm2");
-    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].name, "asm3");
-    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
     ASSERT_EQ(item.Value().recordTable.at("Asm4").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm4").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm4").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I32);
     ASSERT_EQ(item.Value().recordTable.at("Asm5").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm5").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm5").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I32);
 }
 
 TEST(parsertests, test27_record_and_function)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -531,17 +531,17 @@ TEST(parsertests, test27_record_and_function)
 
     ASSERT_EQ(item.Value().recordTable.at("Asm1").name, "Asm1");
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].name, "asm2");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].name, "asm3");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
     ASSERT_EQ(item.Value().functionTable.at(sigNiam).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 }
 
 TEST(parsertests, test28_records_and_functions)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -583,38 +583,38 @@ TEST(parsertests, test28_records_and_functions)
 
     ASSERT_EQ(item.Value().recordTable.at("Asm1").name, "Asm1");
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].name, "asm2");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].name, "asm3");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
 
     ASSERT_EQ(item.Value().functionTable.at(sigNiam1).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 
     ASSERT_EQ(item.Value().recordTable.at("Asm2").name, "Asm2");
     ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
     ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].name, "asm2");
-    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].name, "asm3");
-    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
 
     ASSERT_EQ(item.Value().functionTable.at(sigNiam2).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 
     ASSERT_EQ(item.Value().recordTable.at("Asm3").name, "Asm3");
     ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].name, "asm1");
-    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
     ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].name, "asm2");
-    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].name, "asm3");
-    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm3").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
 
     ASSERT_EQ(item.Value().functionTable.at(sigNiam3).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 }
 
 TEST(parsertests, test29_instructions_def_lines)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -653,7 +653,7 @@ TEST(parsertests, test29_instructions_def_lines)
 
 TEST(parsertests, test30_fields_def_lines)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -701,7 +701,7 @@ TEST(parsertests, test30_fields_def_lines)
 
 TEST(parsertests, test31_own_types)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -724,8 +724,8 @@ TEST(parsertests, test31_own_types)
     auto item = p.Parse(v);
 
     ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[0].type.GetName(), "Asm");
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), panda::panda_file::Type::TypeId::VOID);
-    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), panda::panda_file::Type::TypeId::I32);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[1].type.GetId(), ark::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().recordTable.at("Asm1").fieldList[2].type.GetId(), ark::panda_file::Type::TypeId::I32);
 
     ASSERT_EQ(item.Value().recordTable.at("Asm2").fieldList[0].type.GetName(), "Asm1");
 
@@ -745,7 +745,7 @@ TEST(parsertests, test32_names)
 
 TEST(parsertests, test33_params_number)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -761,7 +761,7 @@ TEST(parsertests, test33_params_number)
 
     const auto sigNiam1 = GetFunctionSignatureFromName("niam1", {});
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
     params.emplace_back(Type {"i64", 0}, language);
     params.emplace_back(Type {"i32", 0}, language);
@@ -776,7 +776,7 @@ TEST(parsertests, test33_params_number)
 
 TEST(parsertests, test34_vregs_number)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -792,7 +792,7 @@ TEST(parsertests, test34_vregs_number)
 
     const auto sigNiam1 = GetFunctionSignatureFromName("niam1", {});
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
     params.emplace_back(Type {"i64", 0}, language);
     params.emplace_back(Type {"i32", 0}, language);
@@ -805,7 +805,7 @@ TEST(parsertests, test34_vregs_number)
 
 TEST(parsertests, test35_functions_bracket)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 nain1(i64 a0) <> {").first);
@@ -851,7 +851,7 @@ TEST(parsertests, test35_functions_bracket)
     auto item = p.Parse(v);
 
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"i64", 0}, language);
     const auto sigNain1 = GetFunctionSignatureFromName("nain1", params);
     const auto sigNain2 = GetFunctionSignatureFromName("nain2", params);
@@ -895,7 +895,7 @@ TEST(parsertests, test35_functions_bracket)
 
 TEST(parsertests, test36_records_bracket)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".record rec1 <> {").first);
@@ -924,18 +924,18 @@ TEST(parsertests, test36_records_bracket)
 
     auto item = p.Parse(v);
 
-    ASSERT_EQ(item.Value().recordTable.at("rec1").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().recordTable.at("rec2").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().recordTable.at("rec3").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().recordTable.at("rec4").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().recordTable.at("rec5").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().recordTable.at("rec6").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
-    ASSERT_EQ(item.Value().recordTable.at("rec7").fieldList[0].type.GetId(), panda::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec1").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec2").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec3").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec4").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec5").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec6").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
+    ASSERT_EQ(item.Value().recordTable.at("rec7").fieldList[0].type.GetId(), ark::panda_file::Type::TypeId::I64);
 }
 
 TEST(parsertests, test37_operand_type_print)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 nain1(i64 a0) <> {").first);
@@ -950,7 +950,7 @@ TEST(parsertests, test37_operand_type_print)
     auto item = p.Parse(v);
 
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"i64", 0}, language);
     const auto sigNain1 = GetFunctionSignatureFromName("nain1", params);
 
@@ -965,7 +965,7 @@ TEST(parsertests, test37_operand_type_print)
 TEST(parsertests, test38_record_invalid_field)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -986,7 +986,7 @@ TEST(parsertests, test38_record_invalid_field)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1010,7 +1010,7 @@ TEST(parsertests, test38_record_invalid_field)
 TEST(parsertests, test39_parse_operand_string)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1031,7 +1031,7 @@ TEST(parsertests, test39_parse_operand_string)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1052,7 +1052,7 @@ TEST(parsertests, test39_parse_operand_string)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1074,7 +1074,7 @@ TEST(parsertests, test39_parse_operand_string)
 TEST(parsertests, test40_parse_operand_string_escape_seq)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1095,7 +1095,7 @@ TEST(parsertests, test40_parse_operand_string_escape_seq)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1120,7 +1120,7 @@ TEST(parsertests, test40_parse_operand_string_escape_seq)
 TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1141,7 +1141,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1162,7 +1162,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1183,7 +1183,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1204,7 +1204,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1226,7 +1226,7 @@ TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
 
 TEST(parsertests, test42_parse_operand_string_octal_escape_seq)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
 
@@ -1248,7 +1248,7 @@ TEST(parsertests, test42_parse_operand_string_octal_escape_seq)
 TEST(parsertests, test43_call_short)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1268,7 +1268,7 @@ TEST(parsertests, test43_call_short)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1288,7 +1288,7 @@ TEST(parsertests, test43_call_short)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1308,7 +1308,7 @@ TEST(parsertests, test43_call_short)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1323,7 +1323,7 @@ TEST(parsertests, test43_call_short)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1341,7 +1341,7 @@ TEST(parsertests, test43_call_short)
 TEST(parsertests, test44_call)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1361,7 +1361,7 @@ TEST(parsertests, test44_call)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1381,7 +1381,7 @@ TEST(parsertests, test44_call)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1401,7 +1401,7 @@ TEST(parsertests, test44_call)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1421,7 +1421,7 @@ TEST(parsertests, test44_call)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1441,7 +1441,7 @@ TEST(parsertests, test44_call)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1456,7 +1456,7 @@ TEST(parsertests, test44_call)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1474,7 +1474,7 @@ TEST(parsertests, test44_call)
 TEST(parsertests, function_argument_mismatch)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -1486,7 +1486,7 @@ TEST(parsertests, function_argument_mismatch)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -1498,7 +1498,7 @@ TEST(parsertests, function_argument_mismatch)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -1510,7 +1510,7 @@ TEST(parsertests, function_argument_mismatch)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -1525,7 +1525,7 @@ TEST(parsertests, function_argument_mismatch)
 
 TEST(parsertests, test45_argument_width_mov)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1539,7 +1539,7 @@ TEST(parsertests, test45_argument_width_mov)
 
 TEST(parsertests, test45_argument_width_call)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1553,7 +1553,7 @@ TEST(parsertests, test45_argument_width_call)
 
 TEST(parsertests, test_argument_width_call_param)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function void g(u1 a0, u1 a1) {").first);
@@ -1572,7 +1572,7 @@ TEST(parsertests, test_argument_width_call_param)
 
 TEST(parsertests, Naming_function_function)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 nain(i64 a0) <> {").first);
@@ -1588,7 +1588,7 @@ TEST(parsertests, Naming_function_function)
 
 TEST(parsertests, Naming_label_label)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 nain(i64 a0) <> {").first);
@@ -1602,7 +1602,7 @@ TEST(parsertests, Naming_label_label)
 
 TEST(parsertests, Naming_function_label)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 nain(i64 a0) <> {").first);
@@ -1615,7 +1615,7 @@ TEST(parsertests, Naming_function_label)
 
 TEST(parsertests, Naming_function_operation)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 mov(i64 a0) <> {").first);
@@ -1628,7 +1628,7 @@ TEST(parsertests, Naming_function_operation)
 
 TEST(parsertests, Naming_label_operation)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 nain(i64 a0) <> {").first);
@@ -1641,7 +1641,7 @@ TEST(parsertests, Naming_label_operation)
 
 TEST(parsertests, Naming_function_label_operation)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 mov(i64 a0) <> {").first);
@@ -1654,7 +1654,7 @@ TEST(parsertests, Naming_function_label_operation)
 
 TEST(parsertests, Naming_jump_label)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 mov(i64 a0) <> {").first);
@@ -1669,7 +1669,7 @@ TEST(parsertests, Naming_jump_label)
 
 TEST(parsertests, Naming_call_function)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".function u1 mov(i64 a0) <> {").first);
@@ -1683,7 +1683,7 @@ TEST(parsertests, Naming_call_function)
 TEST(parsertests, register_naming_incorr)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1693,7 +1693,7 @@ TEST(parsertests, register_naming_incorr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_NAME_REG);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1703,7 +1703,7 @@ TEST(parsertests, register_naming_incorr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_NAME_REG);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f(i32 a0) {").first);
@@ -1713,7 +1713,7 @@ TEST(parsertests, register_naming_incorr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_NAME_REG);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1723,7 +1723,7 @@ TEST(parsertests, register_naming_incorr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_NAME_REG);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1733,7 +1733,7 @@ TEST(parsertests, register_naming_incorr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_NAME_REG);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1743,7 +1743,7 @@ TEST(parsertests, register_naming_incorr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_NAME_REG);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1756,7 +1756,7 @@ TEST(parsertests, register_naming_incorr)
 TEST(parsertests, register_naming_corr)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1766,7 +1766,7 @@ TEST(parsertests, register_naming_corr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f() {").first);
@@ -1776,7 +1776,7 @@ TEST(parsertests, register_naming_corr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f(i32 a0) {").first);
@@ -1786,7 +1786,7 @@ TEST(parsertests, register_naming_corr)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f(i32 a0) {").first);
@@ -1800,7 +1800,7 @@ TEST(parsertests, register_naming_corr)
 TEST(parsertests, array_type)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -1817,7 +1817,7 @@ TEST(parsertests, array_type)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
         std::vector<Function::Parameter> params;
-        panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+        ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
         params.emplace_back(Type {"i8", 1}, language);
         const auto sigF = GetFunctionSignatureFromName("f", params);
 
@@ -1848,7 +1848,7 @@ TEST(parsertests, array_type)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f(i32 a0) {").first);
@@ -1861,7 +1861,7 @@ TEST(parsertests, array_type)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function f64[ f(i32 a0) {").first);
@@ -1874,7 +1874,7 @@ TEST(parsertests, array_type)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void f(i32[][][ a0) {").first);
@@ -1887,7 +1887,7 @@ TEST(parsertests, array_type)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".record R {").first);
@@ -1903,7 +1903,7 @@ TEST(parsertests, array_type)
 TEST(parsertests, undefined_type)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void main() <> {").first);
@@ -1916,7 +1916,7 @@ TEST(parsertests, undefined_type)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_ID_RECORD);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".record panda.String <external>").first);
@@ -1930,7 +1930,7 @@ TEST(parsertests, undefined_type)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function void main() <> {").first);
@@ -2163,7 +2163,7 @@ TEST(parsertests, parse_undefined_record_field)
 TEST(parsertests, Vreg_width)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u1 nain(i64 a0) <> {").first);
@@ -2179,7 +2179,7 @@ TEST(parsertests, Vreg_width)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u1 nain(i64 a0) <> {").first);
@@ -2217,7 +2217,7 @@ TEST(parsertests, Num_vregs)
         auto &program = res.Value();
 
         std::vector<Function::Parameter> params;
-        panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+        ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
         params.emplace_back(Type {"u1", 0}, language);
         const auto sigMain = GetFunctionSignatureFromName("main", params);
 
@@ -2247,7 +2247,7 @@ TEST(parsertests, Num_vregs)
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
 
         std::vector<Function::Parameter> params;
-        panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+        ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
         params.emplace_back(Type {"u1", 0}, language);
         const auto sigMain = GetFunctionSignatureFromName("main", params);
 
@@ -2320,7 +2320,7 @@ TEST(parsertests, Num_vregs)
 TEST(parsertests, Bad_imm_value)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u n(){movi v0,.").first);
@@ -2328,7 +2328,7 @@ TEST(parsertests, Bad_imm_value)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_INTEGER_NAME);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u n(){movi v0,%").first);
@@ -2336,7 +2336,7 @@ TEST(parsertests, Bad_imm_value)
         ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_INTEGER_NAME);
     }
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u n(){movi v0,;").first);
@@ -2348,7 +2348,7 @@ TEST(parsertests, Bad_imm_value)
 TEST(parsertests, parse_catch_directive)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -2370,7 +2370,7 @@ TEST(parsertests, parse_catch_directive)
             ".catch R, t1,", ".catch R, t1, t2", ".catch R, t1, t2,", ".catch R, t1, t2, c,"};
 
         for (const auto &s : directives) {
-            std::vector<std::vector<panda::pandasm::Token>> v;
+            std::vector<std::vector<ark::pandasm::Token>> v;
             Lexer l;
             Parser p;
 
@@ -2393,7 +2393,7 @@ TEST(parsertests, parse_catch_directive)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -2414,7 +2414,7 @@ TEST(parsertests, parse_catch_directive)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -2435,7 +2435,7 @@ TEST(parsertests, parse_catch_directive)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -2469,7 +2469,7 @@ TEST(parsertests, parse_catch_directive)
                     directive += labels[j];
                 }
 
-                std::vector<std::vector<panda::pandasm::Token>> v;
+                std::vector<std::vector<ark::pandasm::Token>> v;
                 Lexer l;
                 Parser p;
 
@@ -2491,7 +2491,7 @@ TEST(parsertests, parse_catch_directive)
                 std::stringstream ss;
                 ss << "Test " << labels[i] << " does not exists";
 
-                std::vector<std::vector<panda::pandasm::Token>> v;
+                std::vector<std::vector<ark::pandasm::Token>> v;
                 Lexer l;
                 Parser p;
 
@@ -2519,7 +2519,7 @@ TEST(parsertests, parse_catch_directive)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -2553,7 +2553,7 @@ TEST(parsertests, parse_catch_directive)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -2591,7 +2591,7 @@ TEST(parsertests, parse_catch_directive)
 TEST(parsertests, parse_catchall_directive)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -2611,7 +2611,7 @@ TEST(parsertests, parse_catchall_directive)
                                              ".catchall t1, t2", ".catchall t1, t2,", ".catchall t1, t2, c,"};
 
         for (const auto &s : directives) {
-            std::vector<std::vector<panda::pandasm::Token>> v;
+            std::vector<std::vector<ark::pandasm::Token>> v;
             Lexer l;
             Parser p;
 
@@ -2648,7 +2648,7 @@ TEST(parsertests, parse_catchall_directive)
                     directive += labels[j];
                 }
 
-                std::vector<std::vector<panda::pandasm::Token>> v;
+                std::vector<std::vector<ark::pandasm::Token>> v;
                 Lexer l;
                 Parser p;
 
@@ -2675,7 +2675,7 @@ TEST(parsertests, parse_catchall_directive)
                     directive += i == j ? "$Exception" : labels[j];
                 }
 
-                std::vector<std::vector<panda::pandasm::Token>> v;
+                std::vector<std::vector<ark::pandasm::Token>> v;
                 Lexer l;
                 Parser p;
 
@@ -2703,7 +2703,7 @@ TEST(parsertests, parse_catchall_directive)
                     directive += i == j ? "1Exception" : labels[j];
                 }
 
-                std::vector<std::vector<panda::pandasm::Token>> v;
+                std::vector<std::vector<ark::pandasm::Token>> v;
                 Lexer l;
                 Parser p;
 
@@ -2725,7 +2725,7 @@ TEST(parsertests, parse_catchall_directive)
                 std::stringstream ss;
                 ss << "Test " << labels[i] << " does not exists";
 
-                std::vector<std::vector<panda::pandasm::Token>> v;
+                std::vector<std::vector<ark::pandasm::Token>> v;
                 Lexer l;
                 Parser p;
 
@@ -2752,7 +2752,7 @@ TEST(parsertests, parse_catchall_directive)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -2789,7 +2789,7 @@ TEST(parsertests, parse_numbers)
     const auto sigMain = GetFunctionSignatureFromName("main", {});
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2801,7 +2801,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2813,7 +2813,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2825,7 +2825,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2837,7 +2837,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2849,7 +2849,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2861,7 +2861,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2873,7 +2873,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2885,7 +2885,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2896,7 +2896,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2907,7 +2907,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2918,7 +2918,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2929,7 +2929,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2940,7 +2940,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2951,7 +2951,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2962,7 +2962,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2973,7 +2973,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2984,7 +2984,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -2995,7 +2995,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3006,7 +3006,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3017,7 +3017,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3028,7 +3028,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3039,7 +3039,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3050,7 +3050,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3061,7 +3061,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3072,7 +3072,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3083,7 +3083,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3094,7 +3094,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3105,7 +3105,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3116,7 +3116,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3127,7 +3127,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3138,7 +3138,7 @@ TEST(parsertests, parse_numbers)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
         v.push_back(l.TokenizeString(".function u8 main(){").first);
@@ -3152,7 +3152,7 @@ TEST(parsertests, parse_numbers)
 TEST(parsertests, field_value)
 {
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -3173,7 +3173,7 @@ TEST(parsertests, field_value)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -3200,7 +3200,7 @@ TEST(parsertests, field_value)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -3227,7 +3227,7 @@ TEST(parsertests, field_value)
     }
 
     {
-        std::vector<std::vector<panda::pandasm::Token>> v;
+        std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
@@ -3591,7 +3591,7 @@ TEST(parsertests, test_fields_same_name)
 
 TEST(parsertests, test_array_integer_def)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".array array {").first);
@@ -3608,73 +3608,64 @@ TEST(parsertests, test_array_integer_def)
     auto item = p.Parse(v);
 
     auto counter = 0;
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::BOOL));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BOOL);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::BOOL));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::BOOL);
     ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[counter++].value), true);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::INTEGER));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value), 2);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::INTEGER));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value)),
         -30);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::INTEGER));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value), 400);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::INTEGER));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value)),
         -5000);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::INTEGER));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value), 60000);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::INTEGER));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[counter++].value)),
         -700000);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::BIGINT));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BIGINT);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::BIGINT));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::BIGINT);
     ASSERT_EQ(std::get<uint64_t>(item.Value().literalarrayTable.at("array").literals[counter++].value), 8000000);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::BIGINT));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::BIGINT);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::BIGINT));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::BIGINT);
     ASSERT_EQ(
         static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarrayTable.at("array").literals[counter++].value)),
         -90000000);
@@ -3682,7 +3673,7 @@ TEST(parsertests, test_array_integer_def)
 
 TEST(parsertests, test_array_float_def)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".array array {").first);
@@ -3692,24 +3683,22 @@ TEST(parsertests, test_array_float_def)
     auto item = p.Parse(v);
 
     int counter = 0;
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::FLOAT));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::FLOAT);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::FLOAT));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::FLOAT);
     ASSERT_NEAR(std::get<float>(item.Value().literalarrayTable.at("array").literals[counter++].value), -123.4, 0.01F);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::DOUBLE));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::DOUBLE);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::DOUBLE));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::DOUBLE);
     ASSERT_NEAR(std::get<double>(item.Value().literalarrayTable.at("array").literals[counter++].value), -1234.5, 0.01F);
 }
 
 TEST(parsertests, test_array_string_def)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".array array {").first);
@@ -3721,72 +3710,67 @@ TEST(parsertests, test_array_string_def)
     auto item = p.Parse(v);
 
     auto counter = 0;
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::STRING));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::STRING));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[counter++].value), "a");
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::STRING));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::STRING));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[counter++].value), "ab");
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[counter++].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::STRING));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, panda::panda_file::LiteralTag::STRING);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::STRING));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[counter].tag, ark::panda_file::LiteralTag::STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[counter++].value), "abc");
 
     // string intro literals
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_static").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_STRING));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[1].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_STRING));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_static").literals[1].value), 3);
 
     // string array elements
     ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_STRING);
+              ark::panda_file::LiteralTag::ARRAY_STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array_static").literals[2].value), "a");
     ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_STRING);
+              ark::panda_file::LiteralTag::ARRAY_STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array_static").literals[3].value), "ab");
     ASSERT_EQ(item.Value().literalarrayTable.at("array_static").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_STRING);
+              ark::panda_file::LiteralTag::ARRAY_STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array_static").literals[4].value), "abc");
 }
 
 TEST(parsertests, test_array_static_bool_def)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".array array u1 3 { 1 0 1 }").first);
     auto item = p.Parse(v);
 
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U1));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_U1));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[1].value), 3);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_U1);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[2].tag, ark::panda_file::LiteralTag::ARRAY_U1);
     ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[2].value), true);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_U1);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[3].tag, ark::panda_file::LiteralTag::ARRAY_U1);
     ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[3].value), false);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_U1);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[4].tag, ark::panda_file::LiteralTag::ARRAY_U1);
     ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[4].value), true);
 }
 
 TEST(parsertests, test_array_static_integer_def)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".array array_unsigned_byte u8 3 { 1 2 3 }").first);
@@ -3801,168 +3785,161 @@ TEST(parsertests, test_array_static_integer_def)
 
     // unsigned byte intro literals
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+              ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U8));
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_U8));
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[1].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+              ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[1].value), 3);
 
     // unsigned byte array elements
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_U8);
+              ark::panda_file::LiteralTag::ARRAY_U8);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[2].value), 1);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_U8);
+              ark::panda_file::LiteralTag::ARRAY_U8);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[3].value), 2);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_byte").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_U8);
+              ark::panda_file::LiteralTag::ARRAY_U8);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_byte").literals[4].value), 3);
 
     // byte intro literals
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_byte").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I8));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_I8));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_byte").literals[1].value), 3);
 
     // byte array elements
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_I8);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[2].tag, ark::panda_file::LiteralTag::ARRAY_I8);
     ASSERT_EQ(static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarrayTable.at("array_byte").literals[2].value)),
               -1);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_I8);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[3].tag, ark::panda_file::LiteralTag::ARRAY_I8);
     ASSERT_EQ(static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarrayTable.at("array_byte").literals[3].value)),
               2);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_I8);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_byte").literals[4].tag, ark::panda_file::LiteralTag::ARRAY_I8);
     ASSERT_EQ(static_cast<int8_t>(std::get<uint8_t>(item.Value().literalarrayTable.at("array_byte").literals[4].value)),
               -3);
 
     // unsigned short intro literals
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+              ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U16));
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_U16));
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[1].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+              ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[1].value), 3);
 
     // unsigned short array elements
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_U16);
+              ark::panda_file::LiteralTag::ARRAY_U16);
     ASSERT_EQ(std::get<uint16_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[2].value), 100);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_U16);
+              ark::panda_file::LiteralTag::ARRAY_U16);
     ASSERT_EQ(std::get<uint16_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[3].value), 200);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_short").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_U16);
+              ark::panda_file::LiteralTag::ARRAY_U16);
     ASSERT_EQ(std::get<uint16_t>(item.Value().literalarrayTable.at("array_unsigned_short").literals[4].value), 300);
 
     // short intro literals
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_short").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I16));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_I16));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_short").literals[1].value), 3);
 
     // short array elements
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_I16);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[2].tag, ark::panda_file::LiteralTag::ARRAY_I16);
     ASSERT_EQ(
         static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarrayTable.at("array_short").literals[2].value)),
         100);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_I16);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[3].tag, ark::panda_file::LiteralTag::ARRAY_I16);
     ASSERT_EQ(
         static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarrayTable.at("array_short").literals[3].value)),
         -200);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_I16);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_short").literals[4].tag, ark::panda_file::LiteralTag::ARRAY_I16);
     ASSERT_EQ(
         static_cast<int16_t>(std::get<uint16_t>(item.Value().literalarrayTable.at("array_short").literals[4].value)),
         300);
 
     // unsigned int intro literals
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+              ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U32));
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_U32));
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[1].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+              ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[1].value), 3);
 
     // unsigned int array elements
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_U32);
+              ark::panda_file::LiteralTag::ARRAY_U32);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[2].value), 1000);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_U32);
+              ark::panda_file::LiteralTag::ARRAY_U32);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[3].value), 2000);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_int").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_U32);
+              ark::panda_file::LiteralTag::ARRAY_U32);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_int").literals[4].value), 3000);
 
     // int intro literals
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_int").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I32));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_I32));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_int").literals[1].value), 3);
 
     // int array elements
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_I32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[2].tag, ark::panda_file::LiteralTag::ARRAY_I32);
     ASSERT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array_int").literals[2].value)),
         -1000);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_I32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[3].tag, ark::panda_file::LiteralTag::ARRAY_I32);
     ASSERT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array_int").literals[3].value)),
         2000);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_I32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_int").literals[4].tag, ark::panda_file::LiteralTag::ARRAY_I32);
     ASSERT_EQ(
         static_cast<int32_t>(std::get<uint32_t>(item.Value().literalarrayTable.at("array_int").literals[4].value)),
         -3000);
 
     // unsigned long intro literals
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+              ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U64));
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_U64));
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[1].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+              ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[1].value), 3);
 
     // unsigned long array elements
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_U64);
+              ark::panda_file::LiteralTag::ARRAY_U64);
     ASSERT_EQ(std::get<uint64_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[2].value), 10000);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_U64);
+              ark::panda_file::LiteralTag::ARRAY_U64);
     ASSERT_EQ(std::get<uint64_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[3].value), 20000);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_unsigned_long").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_U64);
+              ark::panda_file::LiteralTag::ARRAY_U64);
     ASSERT_EQ(std::get<uint64_t>(item.Value().literalarrayTable.at("array_unsigned_long").literals[4].value), 30000);
 
     // long intro literals
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_long").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_I64));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_I64));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_long").literals[1].value), 3);
 
     // long array elements
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_I64);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[2].tag, ark::panda_file::LiteralTag::ARRAY_I64);
     ASSERT_EQ(
         static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarrayTable.at("array_long").literals[2].value)),
         10000);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_I64);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[3].tag, ark::panda_file::LiteralTag::ARRAY_I64);
     ASSERT_EQ(
         static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarrayTable.at("array_long").literals[3].value)),
         -20000);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_I64);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_long").literals[4].tag, ark::panda_file::LiteralTag::ARRAY_I64);
     ASSERT_EQ(
         static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarrayTable.at("array_long").literals[4].value)),
         30000);
@@ -3970,7 +3947,7 @@ TEST(parsertests, test_array_static_integer_def)
 
 TEST(parsertests, test_array_static_float_def)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".array array_float f32 3 { 12.3 -12.34 12.345 }").first);
@@ -3978,73 +3955,67 @@ TEST(parsertests, test_array_static_float_def)
     auto item = p.Parse(v);
 
     // float intro literals
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_float").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_F32));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_F32));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_float").literals[1].value), 3);
 
     // float array elements
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_F32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[2].tag, ark::panda_file::LiteralTag::ARRAY_F32);
     ASSERT_NEAR(std::get<float>(item.Value().literalarrayTable.at("array_float").literals[2].value), 12.3, 0.01F);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_F32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[3].tag, ark::panda_file::LiteralTag::ARRAY_F32);
     ASSERT_NEAR(std::get<float>(item.Value().literalarrayTable.at("array_float").literals[3].value), -12.34, 0.001F);
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_F32);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_float").literals[4].tag, ark::panda_file::LiteralTag::ARRAY_F32);
     ASSERT_NEAR(std::get<float>(item.Value().literalarrayTable.at("array_float").literals[4].value), 12.345, 0.0001F);
 
     // double intro literals
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[0].tag,
-              panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array_double").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_F64));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[1].tag,
-              panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_F64));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array_double").literals[1].value), 3);
 
     // double array elements
     ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[2].tag,
-              panda::panda_file::LiteralTag::ARRAY_F64);
+              ark::panda_file::LiteralTag::ARRAY_F64);
     ASSERT_NEAR(std::get<double>(item.Value().literalarrayTable.at("array_double").literals[2].value), -120.3, 0.01F);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[3].tag,
-              panda::panda_file::LiteralTag::ARRAY_F64);
+              ark::panda_file::LiteralTag::ARRAY_F64);
     ASSERT_NEAR(std::get<double>(item.Value().literalarrayTable.at("array_double").literals[3].value), 120.34, 0.001F);
     ASSERT_EQ(item.Value().literalarrayTable.at("array_double").literals[4].tag,
-              panda::panda_file::LiteralTag::ARRAY_F64);
+              ark::panda_file::LiteralTag::ARRAY_F64);
     ASSERT_NEAR(std::get<double>(item.Value().literalarrayTable.at("array_double").literals[4].value), -120.345,
                 0.0001F);
 }
 
 TEST(parsertests, test_array_static_string_def)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(R"(.array array panda.String 3 { "a" "ab" "abc" })").first);
     auto item = p.Parse(v);
 
     // string intro literals
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[0].tag, panda::panda_file::LiteralTag::TAGVALUE);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[0].tag, ark::panda_file::LiteralTag::TAGVALUE);
     ASSERT_EQ(std::get<uint8_t>(item.Value().literalarrayTable.at("array").literals[0].value),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_STRING));
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[1].tag, panda::panda_file::LiteralTag::INTEGER);
+              static_cast<uint8_t>(ark::panda_file::LiteralTag::ARRAY_STRING));
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[1].tag, ark::panda_file::LiteralTag::INTEGER);
     ASSERT_EQ(std::get<uint32_t>(item.Value().literalarrayTable.at("array").literals[1].value), 3);
 
     // string array elements
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[2].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[2].tag, ark::panda_file::LiteralTag::ARRAY_STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[2].value), "a");
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[3].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[3].tag, ark::panda_file::LiteralTag::ARRAY_STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[3].value), "ab");
-    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[4].tag, panda::panda_file::LiteralTag::ARRAY_STRING);
+    ASSERT_EQ(item.Value().literalarrayTable.at("array").literals[4].tag, ark::panda_file::LiteralTag::ARRAY_STRING);
     ASSERT_EQ(std::get<std::string>(item.Value().literalarrayTable.at("array").literals[4].value), "abc");
 }
 
 TEST(parsertests, test_array_string_use)
 {
-    std::vector<std::vector<panda::pandasm::Token>> v;
+    std::vector<std::vector<ark::pandasm::Token>> v;
     Lexer l;
     Parser p;
     v.push_back(l.TokenizeString(".record Asm1 {").first);
@@ -4089,7 +4060,7 @@ TEST(parsertests, test_function_overloading_1)
     auto &program = res.Value();
 
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"i8", 0}, language);
     const auto sigF = GetFunctionSignatureFromName("f", {});
     const auto sigFi8 = GetFunctionSignatureFromName("f", params);
@@ -4163,7 +4134,7 @@ TEST(parsertests, test_function_overloading_5)
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 
     std::vector<Function::Parameter> params;
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     params.emplace_back(Type {"u1", 0}, language);
     const auto sigF = GetFunctionSignatureFromName("f", {});
     const auto sigMain = GetFunctionSignatureFromName("main", params);
@@ -4240,7 +4211,7 @@ TEST(parsertests, test_function_overloading_9)
 
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     std::vector<Function::Parameter> paramsMain;
     paramsMain.emplace_back(Type {"u1", 0}, language);
     std::vector<Function::Parameter> paramsF;
@@ -4332,7 +4303,7 @@ TEST(parsertests, test_function_overloading_13)
 
     auto &program = res.Value();
 
-    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    ark::panda_file::SourceLang language {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
     std::vector<Function::Parameter> paramsMain;
     paramsMain.emplace_back(Type {"u1", 0}, language);
     std::vector<Function::Parameter> paramsFi8;

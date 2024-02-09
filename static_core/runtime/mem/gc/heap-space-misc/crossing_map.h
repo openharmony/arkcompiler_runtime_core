@@ -23,7 +23,7 @@
 #include "runtime/include/mem/allocator.h"
 #include "runtime/mem/runslots.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 static constexpr uint64_t PANDA_CROSSING_MAP_COVERAGE = PANDA_MAX_HEAP_SIZE;
 // If enabled - we will manage elements, which cross map borders.
@@ -304,6 +304,6 @@ private:
     friend class CrossingMapTest;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_GC_CROSSING_MAP_H

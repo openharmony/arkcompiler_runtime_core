@@ -16,7 +16,7 @@
 #include "unit_test.h"
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class AnalysisTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -245,4 +245,4 @@ TEST_F(AnalysisTest, FixBridgesInOptimizedGraph)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

@@ -24,7 +24,7 @@
 #include "arch/global_regs.h"
 #endif
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 template <class T>
 class StateIface {
@@ -245,6 +245,6 @@ private:
 
 #endif  // PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_VREGISTER_H_

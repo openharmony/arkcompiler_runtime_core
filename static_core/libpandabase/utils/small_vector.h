@@ -21,7 +21,7 @@
 #include <array>
 #include <vector>
 
-namespace panda {
+namespace ark {
 
 /// Helper class that provides main Panda's allocator interface: AdapterType, Adapter(), GetInstance().
 class StdAllocatorStub {
@@ -641,6 +641,6 @@ private:
     Allocator *allocator_ {AddStaticFlag(nullptr)};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_SMALL_VECTOR_H

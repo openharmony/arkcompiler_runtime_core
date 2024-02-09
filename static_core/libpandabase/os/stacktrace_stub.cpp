@@ -15,7 +15,7 @@
 
 #include "stacktrace.h"
 
-namespace panda {
+namespace ark {
 
 std::vector<uintptr_t> GetStacktrace()
 {
@@ -27,4 +27,4 @@ std::ostream &PrintStack([[maybe_unused]] const std::vector<uintptr_t> &stacktra
     return out;
 }
 
-}  // namespace panda
+}  // namespace ark

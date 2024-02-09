@@ -19,7 +19,7 @@
 #include "bytecode_instruction.h"
 #include "bytecode_instruction-inl.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 template <RuntimeInterface::IntrinsicId ID, DataType::Type RET_TYPE, DataType::Type... PARAM_TYPES>
 struct IntrinsicBuilder {
@@ -204,4 +204,4 @@ bool InstBuilder::TryBuildInteropCall(const BytecodeInstruction *bcInst, bool is
     }
     return false;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

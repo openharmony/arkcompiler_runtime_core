@@ -18,7 +18,7 @@
 #include "runtime/include/runtime_options.h"
 #include "runtime/tests/intrusive-tests/intrusive_test.h"
 
-namespace panda {
+namespace ark {
 class IntrusiveTestOption {
 public:
     static void SetTestId([[maybe_unused]] const RuntimeOptions &options)
@@ -28,6 +28,6 @@ public:
 #endif
     }
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_INTRUSIVE_TEST_OPTION_H

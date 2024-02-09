@@ -29,7 +29,7 @@ constexpr size_t NAME_MAX = 255;
 #include <experimental/filesystem>
 #endif
 
-namespace panda::os {
+namespace ark::os {
 
 PANDA_PUBLIC_API std::string GetAbsolutePath(std::string_view path);
 
@@ -45,6 +45,6 @@ PANDA_PUBLIC_API std::string RemoveExtension(const std::string &filepath);
 
 PANDA_PUBLIC_API std::string NormalizePath(const std::string &filepath);
 
-}  // namespace panda::os
+}  // namespace ark::os
 
 #endif  // PANDA_FILESYSTEM_H

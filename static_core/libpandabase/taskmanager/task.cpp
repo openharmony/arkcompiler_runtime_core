@@ -15,7 +15,7 @@
 
 #include "libpandabase/taskmanager/task.h"
 
-namespace panda::taskmanager {
+namespace ark::taskmanager {
 
 Task::Task(TaskProperties properties, RunnerCallback runner) : properties_(properties), runner_(std::move(runner)) {}
 
@@ -90,4 +90,4 @@ std::ostream &operator<<(std::ostream &os, TaskProperties prop)
     return os;
 }
 
-}  // namespace panda::taskmanager
+}  // namespace ark::taskmanager

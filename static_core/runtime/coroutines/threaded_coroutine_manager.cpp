@@ -23,7 +23,7 @@
 #include "runtime/coroutines/threaded_coroutine.h"
 #include "runtime/coroutines/threaded_coroutine_manager.h"
 
-namespace panda {
+namespace ark {
 
 void ThreadedCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
 {
@@ -377,4 +377,4 @@ void ThreadedCoroutineManager::MainCoroutineCompleted()
 
 void ThreadedCoroutineManager::Finalize() {}
 
-}  // namespace panda
+}  // namespace ark

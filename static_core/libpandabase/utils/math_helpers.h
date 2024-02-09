@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <cmath>
 
-namespace panda::helpers::math {
+namespace ark::helpers::math {
 
 /**
  * @brief returns log2 for argument
@@ -140,6 +140,6 @@ inline T PowerOfTwoTableSlot(T key, T tableSize, uint32_t skippedLowestBits = 0)
     return (key >> skippedLowestBits) & (tableSize - 1);
 }
 
-}  // namespace panda::helpers::math
+}  // namespace ark::helpers::math
 
 #endif  // PANDA_LIBBASE_UTILS_MATH_HELPERS_H_

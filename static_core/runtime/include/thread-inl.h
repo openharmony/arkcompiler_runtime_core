@@ -22,7 +22,7 @@
 #include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda {
+namespace ark {
 
 template <>
 inline void ManagedThread::PushHandleScope<coretypes::TaggedType>(HandleScope<coretypes::TaggedType> *handleScope)
@@ -94,7 +94,7 @@ ALWAYS_INLINE inline bool ManagedThread::StackOverflowCheck()
     if (!StackOverflowCheckResult<CHECK_NATIVE_STACK, CHECK_IFRAME_STACK>()) {
         // we're going to throw exception that will use the reserved stack space, so disable check
         DisableStackOverflowCheck();
-        panda::ThrowStackOverflowException(this);
+        ark::ThrowStackOverflowException(this);
         // after finish throw exception, restore overflow check
         EnableStackOverflowCheck();
         return false;
@@ -138,6 +138,6 @@ ALWAYS_INLINE inline void MTManagedThread::ReleaseMonitors()
     ASSERT(GetMonitorCount() == 0);
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_THREAD_INL_H_

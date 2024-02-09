@@ -21,7 +21,7 @@
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/loop_analyzer.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool IfConversion::RunImpl()
 {
     COMPILER_LOG(DEBUG, IFCONVERSION) << "Run " << GetPassName();
@@ -288,4 +288,4 @@ void IfConversion::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
     GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

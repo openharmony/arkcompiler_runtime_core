@@ -24,7 +24,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class ThreadState final {
 public:
     ThreadState() = default;
@@ -102,6 +102,6 @@ private:
 
     bool paused_ {false};
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_THREAD_STATE_H

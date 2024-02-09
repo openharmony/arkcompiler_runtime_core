@@ -20,7 +20,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief Native context of a coroutine. "Fiber"-based implementation.
@@ -168,6 +168,6 @@ private:
     StackfulCoroutineWorker *worker_ = nullptr;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COROUTINES_STACKFUL_COROUTINE_H

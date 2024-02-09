@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "ets_interop_js_gtest.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class ESCompatTest : public EtsInteropTest {};
 
@@ -195,4 +195,4 @@ TEST_F(ESCompatTest, DISABLED_compat_error)
     ASSERT_EQ(true, RunJsTestSuite("compat_error.js"));
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

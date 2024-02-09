@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 extern "C" double StdMathRandom()
 {
@@ -148,4 +148,4 @@ extern "C" double StdMathFround(double val)
     return static_cast<float>(val);
 }
 
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

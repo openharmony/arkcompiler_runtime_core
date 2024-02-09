@@ -21,7 +21,7 @@
 #include "background_task_runner.h"
 #include "compiler_task_runner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 
 template <TaskRunnerMode RUNNER_MODE>
@@ -37,5 +37,5 @@ inline void RunOptimizations(CompilerTaskRunner<RUNNER_MODE> taskRunner)
     Pipeline::Run<RUNNER_MODE>(std::move(taskRunner));
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_COMPILER_RUN_H

@@ -35,7 +35,7 @@
 
 #include "test_utils.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 class G1GCTest : public testing::Test {
 public:
@@ -1577,7 +1577,7 @@ TEST_F(G1FullGCOOMTest, AllocateBy1Region)
 {
     constexpr size_t OBJECT_SIZE = AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.8F), DEFAULT_ALIGNMENT_IN_BYTES);
     {
-        [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread_);
+        [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
         auto *g1Allocator =
             static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
         // Fill tenured space by garbage
@@ -1609,7 +1609,7 @@ TEST_F(G1FullGCOOMTest, PinUnpinObject)
     auto *g1Allocator =
         static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
     {
-        [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread_);
+        [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
         // Fill tenured space by garbage
         do {
             VMHandle<ObjectHeader> handle(thread_, ObjectAllocator::AllocString(OBJECT_SIZE));
@@ -1658,7 +1658,7 @@ static void PinUnpinTest(SpaceType requestedSpaceType, size_t objectSize = 1_KB)
     auto *g1Allocator =
         static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
     {
-        [[maybe_unused]] HandleScope<panda::ObjectHeader *> scope(thread);
+        [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread);
         constexpr size_t OBJ_ELEMENT_SIZE = 64;
         auto *addressBeforeGc =
             ObjectAllocator::AllocArray(objectSize / OBJ_ELEMENT_SIZE, ClassRoot::ARRAY_I64,
@@ -1696,4 +1696,4 @@ TEST(G1GCPinnigTest, PinUnpinNonMovableObjectTest)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::mem
+}  // namespace ark::mem

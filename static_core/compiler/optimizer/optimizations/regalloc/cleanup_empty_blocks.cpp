@@ -22,7 +22,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/basicblock.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // Check around for special triangle case
 static bool CheckSpecialTriangle(BasicBlock *bb)
 {
@@ -83,4 +83,4 @@ bool CleanupEmptyBlocks(Graph *graph)
     }
     return modified;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

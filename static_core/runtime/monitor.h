@@ -22,7 +22,7 @@
 #include "libpandabase/utils/logger.h"
 #include "runtime/include/thread_status.h"
 
-namespace panda {
+namespace ark {
 
 class MTManagedThread;
 class ObjectHeader;
@@ -217,6 +217,6 @@ private:
     friend class MonitorPool;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MONITOR_H_

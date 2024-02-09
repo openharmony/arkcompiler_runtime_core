@@ -22,7 +22,7 @@
 #include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/asan_interface.h"
 
-namespace panda::mem::freelist {
+namespace ark::mem::freelist {
 
 class MemoryBlockHeader {
 public:
@@ -432,6 +432,6 @@ private:
     FreeListHeader *prevFree_ {nullptr};
 };
 
-}  // namespace panda::mem::freelist
+}  // namespace ark::mem::freelist
 
 #endif  // PANDA_MEM_FREELIST_H

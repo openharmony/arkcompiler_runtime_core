@@ -26,11 +26,11 @@
 #include "runtime/mem/tlab.h"
 #include "runtime/mem/lock_config_helper.h"
 
-namespace panda {
+namespace ark {
 class ObjectHeader;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::mem {
+namespace ark::mem {
 
 class BumpPointerAllocatorLockConfig {
 public:
@@ -78,7 +78,7 @@ public:
     explicit BumpPointerAllocator(Pool pool, SpaceType typeAllocation, MemStatsType *memStats,
                                   size_t tlabsMaxCount = 0);
 
-    [[nodiscard]] void *Alloc(size_t size, Alignment alignment = panda::DEFAULT_ALIGNMENT);
+    [[nodiscard]] void *Alloc(size_t size, Alignment alignment = ark::DEFAULT_ALIGNMENT);
 
     void VisitAndRemoveAllPools(const MemVisitor &memVisitor);
 
@@ -195,6 +195,6 @@ private:
     MemStatsType *memStats_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_PANDA_BUMP_ALLOCATOR_H

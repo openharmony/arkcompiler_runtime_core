@@ -21,7 +21,7 @@
 #include "runtime/mem/runslots_allocator_stl_adapter.h"
 #include "runtime/tests/allocator_test_base.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 using NonObjectAllocator = RunSlotsAllocator<EmptyAllocConfigWithCrossingMap>;
 using RunSlotsType = RunSlots<>;
@@ -40,7 +40,7 @@ public:
     ~RunSlotsAllocatorTest() override
     {
         for (auto i : allocatedMemMmap_) {
-            panda::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
+            ark::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
         }
         // Logger::Destroy();
     }
@@ -53,7 +53,7 @@ protected:
     void AddMemoryPoolToAllocator(NonObjectAllocator &alloc) override
     {
         os::memory::LockHolder lock(poolLock_);
-        void *mem = panda::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC);
+        void *mem = ark::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC);
         std::pair<void *, size_t> newPair {mem, DEFAULT_POOL_SIZE_FOR_ALLOC};
         allocatedMemMmap_.push_back(newPair);
         if (!alloc.AddMemoryPool(mem, DEFAULT_POOL_SIZE_FOR_ALLOC)) {
@@ -64,7 +64,7 @@ protected:
     void AddMemoryPoolToAllocatorProtected(NonObjectAllocator &alloc) override
     {
         os::memory::LockHolder lock(poolLock_);
-        void *mem = panda::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE);
+        void *mem = ark::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE);
         mprotect(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + DEFAULT_POOL_SIZE_FOR_ALLOC), PAGE_SIZE,
                  PROT_NONE);
         std::pair<void *, size_t> newPair {mem, DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE};
@@ -388,4 +388,4 @@ TEST_F(RunSlotsAllocatorTest, MTAllocCollectTest)
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

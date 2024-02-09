@@ -16,7 +16,7 @@
 #include "runtime/tooling/sampler/sample_info.h"
 #include "runtime/tooling/sampler/thread_communicator.h"
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 bool ThreadCommunicator::IsPipeEmpty() const
 {
@@ -54,4 +54,4 @@ bool ThreadCommunicator::ReadSample(SampleInfo *sample) const
     return true;
 }
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler

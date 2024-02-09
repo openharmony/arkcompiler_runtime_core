@@ -18,7 +18,7 @@
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 % # If it is GN Build with disabled asmjit and irtoc is disabled
 #if defined(PANDA_TARGET_AMD64) && !defined(PANDA_COMPILER_TARGET_X86_64)
@@ -101,7 +101,7 @@ inline void* SetupLLVMDispatchTableImpl()
     return (void *)dispatch_table.data();
 }
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 // NOLINTEND(readability-identifier-naming)
 

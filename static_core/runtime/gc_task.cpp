@@ -17,7 +17,7 @@
 
 #include "runtime/mem/gc/gc.h"
 
-namespace panda {
+namespace ark {
 
 std::atomic<uint32_t> GCTask::nextId_ = 1;
 
@@ -103,4 +103,4 @@ std::ostream &operator<<(std::ostream &os, const GCCollectionType &collectionTyp
     return os;
 }
 
-}  // namespace panda
+}  // namespace ark

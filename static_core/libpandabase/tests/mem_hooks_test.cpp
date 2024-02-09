@@ -18,7 +18,7 @@
 
 #include "libpandabase/os/mem_hooks.h"
 
-namespace panda {
+namespace ark {
 
 void MallocFunc()
 {
@@ -42,4 +42,4 @@ TEST(MemHooksTest, SimpleDeathTest)
 #endif  // PANDA_USE_MEMORY_HOOKS
 }
 
-}  // namespace panda
+}  // namespace ark

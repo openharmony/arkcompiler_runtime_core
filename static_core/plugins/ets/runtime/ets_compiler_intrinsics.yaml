@@ -13,12 +13,12 @@
 
 coretypes:
 - managed_class: std.core.Object
-  mirror_class: panda::ets::EtsObject
+  mirror_class: ark::ets::EtsObject
 
 - managed_class: std.core.String
-  mirror_class: panda::ets::EtsString
+  mirror_class: ark::ets::EtsString
 
-intrinsics_namespace: panda::ets::intrinsics
+intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
 
@@ -29,7 +29,7 @@ intrinsics:
     signature:
       ret: ref
       args: [ method, i32, u32, ref ]
-    impl: panda::ets::intrinsics::CompilerEtsLdObjByNameObj
+    impl: ark::ets::intrinsics::CompilerEtsLdObjByNameObj
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
@@ -41,7 +41,7 @@ intrinsics:
     signature:
       ret: i32 
       args: [ method, i32, u32, ref ]
-    impl: panda::ets::intrinsics::CompilerEtsLdObjByNameI32
+    impl: ark::ets::intrinsics::CompilerEtsLdObjByNameI32
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
@@ -53,7 +53,7 @@ intrinsics:
     signature:
       ret: i64
       args: [ method, i32, u32, ref ]
-    impl: panda::ets::intrinsics::CompilerEtsLdObjByNameI64
+    impl: ark::ets::intrinsics::CompilerEtsLdObjByNameI64
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
@@ -65,7 +65,7 @@ intrinsics:
     signature:
       ret: f32
       args: [ method, i32, u32, ref ]
-    impl: panda::ets::intrinsics::CompilerEtsLdObjByNameF32
+    impl: ark::ets::intrinsics::CompilerEtsLdObjByNameF32
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
@@ -77,7 +77,7 @@ intrinsics:
     signature:
       ret: f64
       args: [ method, i32, u32, ref ]
-    impl: panda::ets::intrinsics::CompilerEtsLdObjByNameF64
+    impl: ark::ets::intrinsics::CompilerEtsLdObjByNameF64
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
@@ -89,7 +89,7 @@ intrinsics:
     signature:
       ret: void
       args: [ method, i32, u32, ref, ref ]
-    impl: panda::ets::intrinsics::CompilerEtsStObjByNameObj
+    impl: ark::ets::intrinsics::CompilerEtsStObjByNameObj
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
@@ -101,7 +101,7 @@ intrinsics:
     signature:
       ret: void
       args: [ method, i32, u32, ref, i32 ]
-    impl: panda::ets::intrinsics::CompilerEtsStObjByNameI32
+    impl: ark::ets::intrinsics::CompilerEtsStObjByNameI32
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
@@ -113,7 +113,7 @@ intrinsics:
     signature:
       ret: void
       args: [ method, i32, u32, ref, i64 ]
-    impl: panda::ets::intrinsics::CompilerEtsStObjByNameI64
+    impl: ark::ets::intrinsics::CompilerEtsStObjByNameI64
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
@@ -125,7 +125,7 @@ intrinsics:
     signature:
       ret: void
       args: [ method, i32, u32, ref, f32 ]
-    impl: panda::ets::intrinsics::CompilerEtsStObjByNameF32
+    impl: ark::ets::intrinsics::CompilerEtsStObjByNameF32
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
@@ -137,7 +137,7 @@ intrinsics:
     signature:
       ret: void
       args: [ method, i32, u32, ref, f64 ]
-    impl: panda::ets::intrinsics::CompilerEtsStObjByNameF64
+    impl: ark::ets::intrinsics::CompilerEtsStObjByNameF64
     clear_flags: [  ]
     set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName

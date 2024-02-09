@@ -21,7 +21,7 @@
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *TEST_BIN_FILE_NAME = "FinalFieldNativeTest.abc";
 
@@ -107,6 +107,6 @@ TEST_F(FinalFieldNativeTest, FinalFieldTest)
     env->ReleaseStringUTFChars(str, bytes);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-identifier-naming)

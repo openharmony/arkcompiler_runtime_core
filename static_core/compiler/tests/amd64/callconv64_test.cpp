@@ -31,13 +31,13 @@ const uint64_t ITERATION = 0xffffff;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects,cert-msc51-cpp)
 static inline auto g_randomGen = std::mt19937_64(SEED);
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Callconv64Test : public ::testing::Test {
 public:
     Callconv64Test()
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
+        ark::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
         encoder_ = Encoder::Create(allocator_, Arch::X86_64, false);
@@ -55,7 +55,7 @@ public:
         delete codeAlloc_;
         delete memStats_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_COPY_SEMANTIC(Callconv64Test);
@@ -180,4 +180,4 @@ TEST_F(Callconv64Test, NativeParams)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

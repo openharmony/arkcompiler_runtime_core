@@ -17,7 +17,7 @@
 
 #include "plugins/ets/tests/mock/accessing_objects_fields_test_helper.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 static const char *g_testBinFileName = "AccessingObjectsFieldsTest.abc";
 
@@ -102,4 +102,4 @@ TEST_F(AccessingObjectsFieldsTestDeath, GetTypeFieldDeathTest2)
     EXPECT_DEATH(env_->GetDoubleField(obj, nullptr), "");
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

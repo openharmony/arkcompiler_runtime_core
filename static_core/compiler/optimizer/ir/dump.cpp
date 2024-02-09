@@ -27,7 +27,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/code_generator/target_info.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 // indent constants for dump instructions
 static const int INDENT_ID = 6;
@@ -1281,4 +1281,4 @@ void Graph::Dump(std::ostream *out) const
         }
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

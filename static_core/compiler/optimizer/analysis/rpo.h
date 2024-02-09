@@ -21,7 +21,7 @@
 #include "optimizer/pass.h"
 #include <algorithm>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 
@@ -89,6 +89,6 @@ private:
     Marker marker_ {UNDEF_MARKER};
     ArenaVector<BasicBlock *> rpoVector_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_RPO_H

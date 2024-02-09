@@ -28,7 +28,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace panda::helpers::string {
+namespace ark::helpers::string {
 
 inline std::string Vformat(const char *fmt, va_list args)
 {
@@ -107,6 +107,6 @@ bool ParseInt(const std::string &str, T *num, T min = std::numeric_limits<T>::mi
     return ParseInt(str.c_str(), num, min, max);
 }
 
-}  // namespace panda::helpers::string
+}  // namespace ark::helpers::string
 
 #endif  // PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H_

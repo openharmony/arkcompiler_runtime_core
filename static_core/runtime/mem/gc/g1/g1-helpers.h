@@ -16,10 +16,10 @@
 #ifndef PANDA_RUNTIME_MEM_GC_G1_G1_HELPERS_H
 #define PANDA_RUNTIME_MEM_GC_G1_G1_HELPERS_H
 
-namespace panda::mem {
+namespace ark::mem {
 
 extern "C" void PreWrbFuncEntrypoint(void *oldval);
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_G1_G1_HELPERS_H

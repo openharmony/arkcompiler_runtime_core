@@ -19,7 +19,7 @@
 #include "runtime/include/runtime_options.h"
 #include "plugins/ets/runtime/types/ets_method_signature.h"
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 
 // NOTE(a.urakov): move initialization to a common internal objects testing base class
 class EtsMethodSignatureTest : public testing::Test {
@@ -152,4 +152,4 @@ TEST_F(EtsMethodSignatureTest, InvalidMethodSignature)
     EXPECT_FALSE(invalid10.IsValid());
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test

@@ -24,7 +24,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 static EtsClass *GetExceptionClass(EtsCoroutine *coroutine, const char *classDescriptor)
 {
@@ -104,4 +104,4 @@ void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, con
     }
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

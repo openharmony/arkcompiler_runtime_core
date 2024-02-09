@@ -18,7 +18,7 @@
 #include <iostream>
 #include <iomanip>
 
-namespace panda::os::windows::mem_hooks {
+namespace ark::os::windows::mem_hooks {
 
 volatile bool enable = false;
 static bool first = true;
@@ -116,4 +116,4 @@ void PandaHooks::Disable()
     }
 }
 
-}  // namespace panda::os::windows::mem_hooks
+}  // namespace ark::os::windows::mem_hooks

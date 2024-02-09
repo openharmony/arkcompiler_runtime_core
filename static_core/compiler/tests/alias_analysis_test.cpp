@@ -17,7 +17,7 @@
 #include "optimizer/optimizations/vn.h"
 #include "optimizer/analysis/alias_analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class AliasAnalysisTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -1529,4 +1529,4 @@ TEST_F(AliasAnalysisTest, DynamicMethods)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  //  namespace panda::compiler
+}  //  namespace ark::compiler

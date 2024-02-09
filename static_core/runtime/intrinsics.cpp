@@ -38,7 +38,7 @@
 #include "utils/math_helpers.h"
 #include "intrinsics.h"
 
-namespace panda::intrinsics {
+namespace ark::intrinsics {
 
 uint8_t IsInfF64(double v)
 {
@@ -122,12 +122,12 @@ int64_t MinI64(int64_t a, int64_t b)
 
 float MinF32(float a, float b)
 {
-    return panda::helpers::math::Min(a, b);
+    return ark::helpers::math::Min(a, b);
 }
 
 double MinF64(double a, double b)
 {
-    return panda::helpers::math::Min(a, b);
+    return ark::helpers::math::Min(a, b);
 }
 
 int32_t MaxI32(int32_t a, int32_t b)
@@ -142,12 +142,12 @@ int64_t MaxI64(int64_t a, int64_t b)
 
 float MaxF32(float a, float b)
 {
-    return panda::helpers::math::Max(a, b);
+    return ark::helpers::math::Max(a, b);
 }
 
 double MaxF64(double a, double b)
 {
-    return panda::helpers::math::Max(a, b);
+    return ark::helpers::math::Max(a, b);
 }
 
 template <bool IS_ERR, class T>
@@ -255,7 +255,7 @@ void CheckTag(int64_t reg, int64_t expected)
         std::cerr << "Error: "
                   << "Tag = " << tag << std::endl;
         std::cerr << "Expected = " << expected << std::endl;
-        panda::PrintStack(std::cerr);
+        ark::PrintStack(std::cerr);
         Runtime::Abort();
     }
 }
@@ -263,7 +263,7 @@ void CheckTag(int64_t reg, int64_t expected)
 #ifndef PANDA_PRODUCT_BUILD
 uint8_t CompileMethod(coretypes::String *fullMethodName)
 {
-    return panda::CompileMethodImpl(fullMethodName, panda_file::SourceLang::PANDA_ASSEMBLY);
+    return ark::CompileMethodImpl(fullMethodName, panda_file::SourceLang::PANDA_ASSEMBLY);
 }
 
 double CalculateDouble(uint32_t n, double s)
@@ -342,7 +342,7 @@ ObjectHeader *ObjectCreateNonMovable(coretypes::Class *cls)
 void ObjectMonitorEnter(ObjectHeader *header)
 {
     if (header == nullptr) {
-        panda::ThrowNullPointerException();
+        ark::ThrowNullPointerException();
         return;
     }
     auto res = Monitor::MonitorEnter(header);
@@ -359,7 +359,7 @@ void ObjectMonitorEnter(ObjectHeader *header)
 void ObjectMonitorExit(ObjectHeader *header)
 {
     if (header == nullptr) {
-        panda::ThrowNullPointerException();
+        ark::ThrowNullPointerException();
         return;
     }
     auto res = Monitor::MonitorExit(header);
@@ -368,7 +368,7 @@ void ObjectMonitorExit(ObjectHeader *header)
     if (res == Monitor::State::ILLEGAL) {
         PandaStringStream ss;
         ss << "MonitorExit for object " << std::hex << header << " returned Illegal state";
-        panda::ThrowIllegalMonitorStateException(ss.str());
+        ark::ThrowIllegalMonitorStateException(ss.str());
     }
 }
 
@@ -404,44 +404,44 @@ void ObjectNotifyAll(ObjectHeader *header)
 
 void Memset8(ObjectHeader *array, uint8_t value, uint32_t initialIndex, uint32_t maxIndex)
 {
-    auto data = reinterpret_cast<uint8_t *>(panda::coretypes::Array::Cast(array)->GetData());
+    auto data = reinterpret_cast<uint8_t *>(ark::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::fill(data + initialIndex, data + maxIndex, value);
 }
 
 void Memset16(ObjectHeader *array, uint16_t value, uint32_t initialIndex, uint32_t maxIndex)
 {
-    auto data = reinterpret_cast<uint16_t *>(panda::coretypes::Array::Cast(array)->GetData());
+    auto data = reinterpret_cast<uint16_t *>(ark::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::fill(data + initialIndex, data + maxIndex, value);
 }
 
 void Memset32(ObjectHeader *array, uint32_t value, uint32_t initialIndex, uint32_t maxIndex)
 {
-    auto data = reinterpret_cast<uint32_t *>(panda::coretypes::Array::Cast(array)->GetData());
+    auto data = reinterpret_cast<uint32_t *>(ark::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::fill(data + initialIndex, data + maxIndex, value);
 }
 
 void Memset64(ObjectHeader *array, uint64_t value, uint32_t initialIndex, uint32_t maxIndex)
 {
-    auto data = reinterpret_cast<uint64_t *>(panda::coretypes::Array::Cast(array)->GetData());
+    auto data = reinterpret_cast<uint64_t *>(ark::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::fill(data + initialIndex, data + maxIndex, value);
 }
 void Memsetf32(ObjectHeader *array, float value, uint32_t initialIndex, uint32_t maxIndex)
 {
-    auto data = reinterpret_cast<float *>(panda::coretypes::Array::Cast(array)->GetData());
+    auto data = reinterpret_cast<float *>(ark::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::fill(data + initialIndex, data + maxIndex, value);
 }
 
 void Memsetf64(ObjectHeader *array, double value, uint32_t initialIndex, uint32_t maxIndex)
 {
-    auto data = reinterpret_cast<double *>(panda::coretypes::Array::Cast(array)->GetData());
+    auto data = reinterpret_cast<double *>(ark::coretypes::Array::Cast(array)->GetData());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::fill(data + initialIndex, data + maxIndex, value);
 }
-}  // namespace panda::intrinsics
+}  // namespace ark::intrinsics
 
 #include <intrinsics_gen.h>

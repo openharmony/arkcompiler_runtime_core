@@ -41,7 +41,7 @@
 #include <ctime>
 #include <csignal>
 
-namespace panda {
+namespace ark {
 const panda_file::File *GetPandaFile(const ClassLinker &classLinker, std::string_view fileName)
 {
     const panda_file::File *res = nullptr;
@@ -55,7 +55,7 @@ const panda_file::File *GetPandaFile(const ClassLinker &classLinker, std::string
     return res;
 }
 
-void PrintHelp(const panda::PandArgParser &paParser)
+void PrintHelp(const ark::PandArgParser &paParser)
 {
     std::cerr << paParser.GetErrorString() << std::endl;
     std::cerr << "Usage: "
@@ -66,9 +66,9 @@ void PrintHelp(const panda::PandArgParser &paParser)
     std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-bool PrepareArguments(panda::PandArgParser *paParser, const RuntimeOptions &runtimeOptions,
-                      const panda::PandArg<std::string> &file, const panda::PandArg<std::string> &entrypoint,
-                      const panda::PandArg<bool> &help, int argc, const char **argv)
+bool PrepareArguments(ark::PandArgParser *paParser, const RuntimeOptions &runtimeOptions,
+                      const ark::PandArg<std::string> &file, const ark::PandArg<std::string> &entrypoint,
+                      const ark::PandArg<bool> &help, int argc, const char **argv)
 {
     auto startTime =
         std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
@@ -114,13 +114,13 @@ int Main(int argc, const char **argv)
     Span<const char *> sp(argv, argc);
     RuntimeOptions runtimeOptions(sp[0]);
     base_options::Options baseOptions(sp[0]);
-    panda::PandArgParser paParser;
+    ark::PandArgParser paParser;
 
-    panda::PandArg<bool> help("help", false, "Print this message and exit");
-    panda::PandArg<bool> options("options", false, "Print compiler and runtime options");
+    ark::PandArg<bool> help("help", false, "Print this message and exit");
+    ark::PandArg<bool> options("options", false, "Print compiler and runtime options");
     // tail arguments
-    panda::PandArg<std::string> file("file", "", "path to pandafile");
-    panda::PandArg<std::string> entrypoint("entrypoint", "", "full name of entrypoint function or method");
+    ark::PandArg<std::string> file("file", "", "path to pandafile");
+    ark::PandArg<std::string> entrypoint("entrypoint", "", "full name of entrypoint function or method");
 
     runtimeOptions.AddOptions(&paParser);
     baseOptions.AddOptions(&paParser);
@@ -133,7 +133,7 @@ int Main(int argc, const char **argv)
     paParser.EnableTail();
     paParser.EnableRemainder();
 
-    if (!panda::PrepareArguments(&paParser, runtimeOptions, file, entrypoint, help, argc, argv)) {
+    if (!ark::PrepareArguments(&paParser, runtimeOptions, file, entrypoint, help, argc, argv)) {
         return 1;
     }
 
@@ -151,9 +151,9 @@ int Main(int argc, const char **argv)
 
     arg_list_t arguments = paParser.GetRemainder();
 
-    panda::compiler::CompilerLogger::SetComponents(panda::compiler::g_options.GetCompilerLog());
+    ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
     if (compiler::g_options.IsCompilerEnableEvents()) {
-        panda::compiler::EventWriter::Init(panda::compiler::g_options.GetCompilerEventsPath());
+        ark::compiler::EventWriter::Init(ark::compiler::g_options.GetCompilerEventsPath());
     }
 
     auto bootPandaFiles = runtimeOptions.GetBootPandaFiles();
@@ -209,9 +209,9 @@ int Main(int argc, const char **argv)
     paParser.DisableTail();
     return ret;
 }
-}  // namespace panda
+}  // namespace ark
 
 int main(int argc, const char **argv)
 {
-    return panda::Main(argc, argv);
+    return ark::Main(argc, argv);
 }

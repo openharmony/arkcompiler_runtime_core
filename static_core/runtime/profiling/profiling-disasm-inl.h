@@ -20,10 +20,10 @@
 #include "runtime/profiling/generated/profiling_includes_disasm.h"
 #include "runtime/include/profiling_gen.h"
 
-namespace panda::profiling {
+namespace ark::profiling {
 
 inline Expected<ProfileContainer, const char *> ReadProfile([[maybe_unused]] std::istream &stm,
-                                                            [[maybe_unused]] panda::panda_file::SourceLang lang)
+                                                            [[maybe_unused]] ark::panda_file::SourceLang lang)
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {
@@ -34,8 +34,7 @@ inline Expected<ProfileContainer, const char *> ReadProfile([[maybe_unused]] std
     return Unexpected("ReadProfile: No plugin found for the given language");
 }
 
-inline void DestroyProfile([[maybe_unused]] ProfileContainer profile,
-                           [[maybe_unused]] panda::panda_file::SourceLang lang)
+inline void DestroyProfile([[maybe_unused]] ProfileContainer profile, [[maybe_unused]] ark::panda_file::SourceLang lang)
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (lang) {
@@ -46,7 +45,7 @@ inline void DestroyProfile([[maybe_unused]] ProfileContainer profile,
 }
 
 inline ProfileType FindMethodInProfile([[maybe_unused]] ProfileContainer profile,
-                                       [[maybe_unused]] panda::panda_file::SourceLang lang,
+                                       [[maybe_unused]] ark::panda_file::SourceLang lang,
                                        [[maybe_unused]] const std::string &methodName)
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
@@ -58,7 +57,7 @@ inline ProfileType FindMethodInProfile([[maybe_unused]] ProfileContainer profile
     return INVALID_PROFILE;
 }
 
-inline void DumpProfile([[maybe_unused]] ProfileType profile, [[maybe_unused]] panda::panda_file::SourceLang lang,
+inline void DumpProfile([[maybe_unused]] ProfileType profile, [[maybe_unused]] ark::panda_file::SourceLang lang,
                         [[maybe_unused]] BytecodeInstruction *inst, [[maybe_unused]] std::ostream &stm)
 {
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
@@ -68,6 +67,6 @@ inline void DumpProfile([[maybe_unused]] ProfileType profile, [[maybe_unused]] p
             break;
     }
 }
-}  // namespace panda::profiling
+}  // namespace ark::profiling
 
 #endif  // PANDA_PROFILING_INL_H

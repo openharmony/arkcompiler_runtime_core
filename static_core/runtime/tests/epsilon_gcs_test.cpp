@@ -21,7 +21,7 @@
 
 #include "test_utils.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTBEGIN(readability-magic-numbers)
 class EpsilonGCTest : public testing::Test {
@@ -303,4 +303,4 @@ TEST_F(EpsilonG1GCTest, TestGCTriggering)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::mem
+}  // namespace ark::mem

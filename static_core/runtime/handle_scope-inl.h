@@ -20,7 +20,7 @@
 #include "runtime/handle_scope.h"
 #include "runtime/include/thread-inl.h"
 
-namespace panda {
+namespace ark {
 template <typename T>
 inline HandleScope<T>::HandleScope(ManagedThread *thread) : thread_(thread)
 {
@@ -69,5 +69,5 @@ inline EscapeHandleScope<T>::EscapeHandleScope(ManagedThread *thread)
       escapeHandle_(thread->GetHandleStorage<T>()->GetNodeAddress(thread->GetTopScope<T>()->GetBeginIndex() - 1))
 {
 }
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_HANDLE_SCOPE_INL_H

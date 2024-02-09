@@ -18,7 +18,7 @@
 #include <list>
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda;
+using namespace ark;
 
 // NOLINTBEGIN(readability-magic-numbers)
 

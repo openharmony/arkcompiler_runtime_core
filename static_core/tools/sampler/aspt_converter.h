@@ -26,7 +26,7 @@
 
 #include <optional>
 
-namespace panda::tooling::sampler {
+namespace ark::tooling::sampler {
 
 struct SubstituteModules {
     std::vector<std::string> source;
@@ -82,6 +82,6 @@ private:
     std::optional<SubstituteModules> substituteDirectories_;
 };
 
-}  // namespace panda::tooling::sampler
+}  // namespace ark::tooling::sampler
 
 #endif  // PANDA_TOOLS_SAMPLER_CONVERTER_IMPL_H

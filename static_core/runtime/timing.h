@@ -25,7 +25,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 
-namespace panda {
+namespace ark {
 class Timing {
 public:
     Timing() = default;
@@ -88,13 +88,13 @@ public:
 
     void NewSection(std::string_view tag)
     {
-        labels_.push_back(TimeLabel(tag, time::GetCurrentTimeInNanos(), panda::os::time::GetClockTimeInThreadCpuTime(),
+        labels_.push_back(TimeLabel(tag, time::GetCurrentTimeInNanos(), ark::os::time::GetClockTimeInThreadCpuTime(),
                                     TimeLabelType::BEGIN));
     }
 
     void EndSection()
     {
-        labels_.push_back(TimeLabel("", time::GetCurrentTimeInNanos(), panda::os::time::GetClockTimeInThreadCpuTime(),
+        labels_.push_back(TimeLabel("", time::GetCurrentTimeInNanos(), ark::os::time::GetClockTimeInThreadCpuTime(),
                                     TimeLabelType::END));
     }
 
@@ -135,5 +135,5 @@ private:
     Timing &timing_;
 };
 
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_TIMING_H

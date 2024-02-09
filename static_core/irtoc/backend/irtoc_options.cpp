@@ -15,7 +15,7 @@
 
 #include "irtoc_options.h"
 
-namespace panda::irtoc {
+namespace ark::irtoc {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 Options g_options("");
-}  // namespace panda::irtoc
+}  // namespace ark::irtoc

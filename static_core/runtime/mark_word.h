@@ -89,7 +89,7 @@
 #include "runtime/monitor.h"
 #include "runtime/object_header_config.h"
 
-namespace panda {
+namespace ark {
 
 // Small helper
 template <class Config>
@@ -381,6 +381,6 @@ private:
     }
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MARK_WORD_H_

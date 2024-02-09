@@ -18,7 +18,7 @@
 
 #include "libpandabase/macros.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 
 namespace sampler {
 class Sampler;
@@ -41,6 +41,6 @@ private:
     sampler::Sampler *sampler_ {nullptr};
 };
 
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // PANDA_RUNTIME_TOOLING_TOOLS_H

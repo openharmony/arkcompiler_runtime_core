@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <array>
 
-namespace panda::test {
+namespace ark::test {
 
 static void CompareData(const uint8_t *data, size_t offset, size_t length, uint32_t value, uint8_t fillValue)
 {
@@ -165,4 +165,4 @@ TEST(BitMemoryRegion, Dumping)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::test
+}  // namespace ark::test

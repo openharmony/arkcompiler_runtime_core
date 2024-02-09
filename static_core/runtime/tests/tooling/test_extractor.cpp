@@ -27,7 +27,7 @@
 #include "libpandafile/method_data_accessor-inl.h"
 #include "libpandafile/proto_data_accessor-inl.h"
 
-namespace panda::tooling::test {
+namespace ark::tooling::test {
 
 TestExtractor::TestExtractor(const panda_file::File *pf)
 {
@@ -145,4 +145,4 @@ SourceLocation TestExtractor::GetSourceLocation(EntityId methodId, uint32_t byte
 
     return SourceLocation {langExtractor_->GetSourceFile(methodId), line.value()};
 }
-}  // namespace  panda::tooling::test
+}  // namespace  ark::tooling::test

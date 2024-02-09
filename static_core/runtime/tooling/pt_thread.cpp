@@ -15,7 +15,7 @@
 
 #include "runtime/include/tooling/pt_thread.h"
 
-namespace panda::tooling {
+namespace ark::tooling {
 /* static */
 const PtThread PtThread::NONE = PtThread(nullptr);  // NOLINT(fuchsia-statically-constructed-objects)
-}  // namespace panda::tooling
+}  // namespace ark::tooling

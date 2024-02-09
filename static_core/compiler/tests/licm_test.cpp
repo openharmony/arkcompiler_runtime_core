@@ -17,7 +17,7 @@
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/optimizations/licm.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LicmTest : public GraphTest {
 public:
     static constexpr uint32_t HOST_LIMIT = 8;
@@ -953,4 +953,4 @@ TEST_F(LicmTest, LoadFromConstantPool)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

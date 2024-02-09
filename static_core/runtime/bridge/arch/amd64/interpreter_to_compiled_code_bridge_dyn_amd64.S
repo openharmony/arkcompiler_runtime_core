@@ -179,7 +179,7 @@ InvokeCompiledCodeWithArgArrayDyn:
     // rax <- pointer to current arg to copy
     movq %rdi, %rax
 
-    // ABI arg reg 0 (rdi) <- panda::Method*
+    // ABI arg reg 0 (rdi) <- ark::Method*
     // ABI arg reg 1 (rsi) <- num_args (already on the relevant reg, no moves required)
     movq %rcx, %rdi
 

@@ -35,8 +35,8 @@ using llvm::CallInst;
 using llvm::Function;
 using llvm::Instruction;
 
-using panda::llvmbackend::gc_utils::IsFunctionSupplemental;
-using panda::llvmbackend::gc_utils::IsGcFunction;
+using ark::llvmbackend::gc_utils::IsFunctionSupplemental;
+using ark::llvmbackend::gc_utils::IsGcFunction;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static llvm::cl::opt<uint32_t> g_safepointOnEntryLimit("isp-on-entry-limit", llvm::cl::Hidden, llvm::cl::init(0));
@@ -109,9 +109,9 @@ static bool RunLegacyInserter(Function &func)
     return changed;
 }
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
-bool InsertSafepoints::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
+bool InsertSafepoints::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return options->useSafepoint;
 }
@@ -123,7 +123,7 @@ llvm::PreservedAnalyses InsertSafepoints::run(llvm::Function &function,
         return llvm::PreservedAnalyses::all();
     }
 
-    auto poll = function.getParent()->getFunction(panda::llvmbackend::LLVMArkInterface::GC_SAFEPOINT_POLL_NAME);
+    auto poll = function.getParent()->getFunction(ark::llvmbackend::LLVMArkInterface::GC_SAFEPOINT_POLL_NAME);
 
     auto changed = InsertSafepointOnEntry(function, poll);
     // It is a rare case when we need extra safe points. So optimize it by this way.
@@ -134,4 +134,4 @@ llvm::PreservedAnalyses InsertSafepoints::run(llvm::Function &function,
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

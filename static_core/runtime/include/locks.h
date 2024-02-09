@@ -19,7 +19,7 @@
 
 #include <memory>
 
-namespace panda {
+namespace ark {
 
 class PANDA_PUBLIC_API MutatorLock : public os::memory::RWLock {
 #ifndef NDEBUG
@@ -58,6 +58,6 @@ public:
     static os::memory::Mutex *userSuspensionLock_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_LOCKS_H_

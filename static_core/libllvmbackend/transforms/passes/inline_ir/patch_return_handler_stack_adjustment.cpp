@@ -26,12 +26,12 @@
 
 #include "transforms/transform_utils.h"
 
+using ark::llvmbackend::LLVMArkInterface;
 using llvm::MachineFunction;
 using llvm::MachineFunctionPass;
 using llvm::RegisterPass;
 using llvm::report_fatal_error;
 using llvm::StringRef;
-using panda::llvmbackend::LLVMArkInterface;
 
 #define DEBUG_TYPE "patch-return-handler-stack-adjustment"
 
@@ -125,14 +125,14 @@ private:
 
 }  // namespace
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 MachineFunctionPass *CreatePatchReturnHandlerStackAdjustmentPass(LLVMArkInterface *arkInterface)
 {
     return new PatchReturnHandlerStackAdjustment(arkInterface);
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static RegisterPass<PatchReturnHandlerStackAdjustment> g_p1(PatchReturnHandlerStackAdjustment::ARG_NAME,

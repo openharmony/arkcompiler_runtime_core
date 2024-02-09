@@ -21,11 +21,11 @@
 #include <optional>
 #include <string>
 
-namespace panda {
+namespace ark {
 class JsonObjectBuilder;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class Scope {
 public:
     enum class Type { GLOBAL, LOCAL };
@@ -39,6 +39,6 @@ private:
     RemoteObject object_;
     std::optional<std::string> name_;
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_TYPES_SCOPE_H

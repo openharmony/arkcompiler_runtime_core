@@ -18,7 +18,7 @@
 
 #include "libpandabase/macros.h"
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 template <typename U, typename R>
 struct TypedPointer {
@@ -88,6 +88,6 @@ private:
     uintptr_t ptr_ {};
 };
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TYPED_POINTER_H_

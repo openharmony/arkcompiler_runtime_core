@@ -24,7 +24,7 @@
 #include "runtime/include/object_header.h"
 #include "runtime/mem/vm_handle.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 // Class for objects in dynamic languages like JavaScript
 class DynClass : public ObjectHeader {
 public:
@@ -70,6 +70,6 @@ public:
     }
 };
 
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 
 #endif  // PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H_

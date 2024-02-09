@@ -22,7 +22,7 @@
 #include "deoptimize_elimination.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ObjectTypeCheckElimination : public Optimization, public GraphVisitor {
     using GraphVisitor::GraphVisitor;
@@ -91,6 +91,6 @@ private:
     bool isApplied_ {false};
     InstVector checksMustThrow_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_OBJECT_TYPE_CHECK_ELIMINATION_H

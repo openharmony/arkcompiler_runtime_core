@@ -17,7 +17,7 @@
 #include "condition_chain_cache.h"
 #include "condition_chain.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 ConditionChainCache::ConditionChainCache(ArenaAllocator *allocator) : cache_(allocator->Adapter()) {}
 
 void ConditionChainCache::Insert(ConditionChain *chain, Inst *phiInst)
@@ -62,4 +62,4 @@ void ConditionChainCache::Clear()
 {
     cache_.clear();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

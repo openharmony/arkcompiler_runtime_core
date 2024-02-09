@@ -25,7 +25,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 struct VerificationOptions {
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
@@ -85,6 +85,6 @@ struct VerificationOptions {
     }
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFICATION_OPTIONS_H__

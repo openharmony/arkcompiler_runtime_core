@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/thread_pool.h"
 
-namespace panda::test {
+namespace ark::test {
 
 class MockThreadPoolTest : public testing::Test {
 public:
@@ -29,7 +29,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -43,7 +43,7 @@ public:
     NO_MOVE_SEMANTIC(MockThreadPoolTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 class MockTask : public TaskInterface {
@@ -353,4 +353,4 @@ TEST_F(MockThreadPoolTest, ControllersForceShutdown)
     TestThreadPoolWithControllers(NUMBER_OF_THREADS_INITIAL, NUMBER_OF_THREADS_SCALED, IS_SHUTDOWN, IS_FORCE_SHUTDOWN);
 }
 
-}  // namespace panda::test
+}  // namespace ark::test

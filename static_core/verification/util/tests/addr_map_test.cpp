@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::verifier::test {
+namespace ark::verifier::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -59,4 +59,4 @@ TEST_F(VerifierTest, AddrMap)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::verifier::test
+}  // namespace ark::verifier::test

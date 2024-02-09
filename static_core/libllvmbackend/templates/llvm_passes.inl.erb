@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-namespace panda::libllvmbackend {
+namespace ark::libllvmbackend {
 
 void RegisterPasses(llvm::PassInstrumentationCallbacks &passInstrumentation)
 {
@@ -27,13 +27,13 @@ void RegisterPasses(llvm::PassInstrumentationCallbacks &passInstrumentation)
 }
 
 using StringRef = llvm::StringRef;
-using LLVMCompilerOptions = panda::llvmbackend::LLVMCompilerOptions;
+using LLVMCompilerOptions = ark::llvmbackend::LLVMCompilerOptions;
 using PipelineElements = llvm::ArrayRef<llvm::PassBuilder::PipelineElement>;
 
 struct PassParser
 {
 public:
-    explicit PassParser(panda::llvmbackend::LLVMArkInterface *arkInterface) : arkInterface_{arkInterface}
+    explicit PassParser(ark::llvmbackend::LLVMArkInterface *arkInterface) : arkInterface_{arkInterface}
     {
     }
 
@@ -41,7 +41,7 @@ public:
     bool ParseFunctionPasses(StringRef name, llvm::FunctionPassManager &functionPm, const LLVMCompilerOptions &options);
     bool ParseSCCPasses(StringRef name, llvm::CGSCCPassManager &sccPm, const LLVMCompilerOptions &options);
 
-    void RegisterParserCallbacks(llvm::PassBuilder &builder, const panda::llvmbackend::LLVMCompilerOptions &options)
+    void RegisterParserCallbacks(llvm::PassBuilder &builder, const ark::llvmbackend::LLVMCompilerOptions &options)
     {
         builder.registerPipelineParsingCallback(
         [&](StringRef name, llvm::ModulePassManager &modulePm, PipelineElements /*unused*/) -> bool {
@@ -57,7 +57,7 @@ public:
         });
     }
 private:
-    panda::llvmbackend::LLVMArkInterface *arkInterface_;
+    ark::llvmbackend::LLVMArkInterface *arkInterface_;
 };
 
 bool PassParser::ParseModulePasses(StringRef name, llvm::ModulePassManager &modulePm, const LLVMCompilerOptions &options)
@@ -129,4 +129,4 @@ bool PassParser::ParseSCCPasses(StringRef name, llvm::CGSCCPassManager &sccPm, c
     return false;
 }
 
-}  // namespace panda::libllvmbackend
+}  // namespace ark::libllvmbackend

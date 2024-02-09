@@ -24,7 +24,7 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda {
+namespace ark {
 
 enum class AllocatorType : uint16_t {
     UNDEFINED,
@@ -175,7 +175,7 @@ private:
     friend class PoolMapTest;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 WEAK_FOR_LTO_END
 

@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-namespace panda::os {
+namespace ark::os {
 using CpuSetType = unsigned long;
-}  // namespace panda::os
+}  // namespace ark::os

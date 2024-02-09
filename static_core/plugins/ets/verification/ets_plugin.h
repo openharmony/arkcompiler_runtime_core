@@ -19,7 +19,7 @@
 #include "abs_int_inl_compat_checks.h"
 #include "verification/plugins.h"
 
-namespace panda::verifier::plugin {
+namespace ark::verifier::plugin {
 
 class EtsPlugin final : public Plugin {
 public:
@@ -59,6 +59,6 @@ private:
     mutable os::memory::Mutex mutex_;
 };
 
-}  // namespace panda::verifier::plugin
+}  // namespace ark::verifier::plugin
 
 #endif

@@ -29,7 +29,7 @@
 #error "Wrong build type, please add VIXL in build"
 #endif  // USE_VIXL_ARM64
 
-namespace panda::compiler::aarch64 {
+namespace ark::compiler::aarch64 {
 // Ensure that vixl has same callee regs as our arch util
 static constexpr auto CALLEE_REG_LIST =
     vixl::aarch64::CPURegList(vixl::aarch64::CPURegister::kRegister, vixl::aarch64::kXRegSize,
@@ -446,7 +446,7 @@ public:
 
     static constexpr auto GetTarget()
     {
-        return panda::compiler::Target(Arch::AARCH64);
+        return ark::compiler::Target(Arch::AARCH64);
     }
 
     void LoadPcRelative(Reg reg, intptr_t offset, Reg regAddr = INVALID_REGISTER);
@@ -830,7 +830,7 @@ public:
 
     static constexpr auto GetTarget()
     {
-        return panda::compiler::Target(Arch::AARCH64);
+        return ark::compiler::Target(Arch::AARCH64);
     }
 
     bool IsValid() const override
@@ -861,5 +861,5 @@ public:
         return (static_cast<Aarch64Encoder *>(GetEncoder()))->GetMasm();
     }
 };  // Aarch64CallingConvention
-}  // namespace panda::compiler::aarch64
+}  // namespace ark::compiler::aarch64
 #endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H

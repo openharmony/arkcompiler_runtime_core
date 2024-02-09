@@ -16,12 +16,12 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTRINSICS_STD_JS_JSRUNTIME_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTRINSICS_STD_JS_JSRUNTIME_H_
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 struct IntrinsicsAPI;
 
 void JSRuntimeIntrinsicsSetIntrinsicsAPI(const IntrinsicsAPI *intrinsicsApi);
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTRINSICS_STD_JS_JSRUNTIME_H_

@@ -26,12 +26,12 @@
 #include <algorithm>
 #include <optional>
 
-namespace panda {
+namespace ark {
 class Method;
 class CodeAllocator;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BasicBlock;
 class Graph;
 class RuntimeInfo;
@@ -1378,5 +1378,5 @@ void MarkLoopExits(const Graph *graph, Marker marker);
 void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rmPred);
 std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr method);
 size_t GetObjectOffset(const Graph *graph, ObjectType objType, RuntimeInterface::FieldPtr field, uint32_t typeId);
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_IR_GRAPH_H

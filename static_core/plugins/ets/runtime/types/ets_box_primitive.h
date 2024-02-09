@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 template <typename T>
 class EtsBoxPrimitive : public EtsObject {
@@ -51,6 +51,6 @@ public:
 private:
     T value_;
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_

@@ -33,7 +33,7 @@
 
 #include "utils/utf.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 void PandaRuntimeTest::Initialize([[maybe_unused]] int argc, char **argv)
 {
     ASSERT(argc > 0);
@@ -54,17 +54,17 @@ PandaRuntimeTest::PandaRuntimeTest()
     std::string execName = "compiler_unit_tests";
     std::string pandastdlibPath = "../pandastdlib/arkstdlib.abc";
 #endif
-    panda::RuntimeOptions runtimeOptions(execName);
+    ark::RuntimeOptions runtimeOptions(execName);
     runtimeOptions.SetBootPandaFiles({pandastdlibPath});
     runtimeOptions.SetLoadRuntimes({"core"});
     runtimeOptions.SetHeapSizeLimit(50_MB);  // NOLINT(readability-magic-numbers)
     runtimeOptions.SetEnableAn(true);
     runtimeOptions.SetGcType("epsilon");
     Logger::InitializeDummyLogging();
-    EXPECT_TRUE(panda::Runtime::Create(runtimeOptions));
+    EXPECT_TRUE(ark::Runtime::Create(runtimeOptions));
 
-    allocator_ = new ArenaAllocator(panda::SpaceType::SPACE_TYPE_INTERNAL);
-    localAllocator_ = new ArenaAllocator(panda::SpaceType::SPACE_TYPE_INTERNAL);
+    allocator_ = new ArenaAllocator(ark::SpaceType::SPACE_TYPE_INTERNAL);
+    localAllocator_ = new ArenaAllocator(ark::SpaceType::SPACE_TYPE_INTERNAL);
     builder_ = new IrConstructor();
 
     graph_ = CreateGraph();
@@ -75,7 +75,7 @@ PandaRuntimeTest::~PandaRuntimeTest()
     delete builder_;
     delete allocator_;
     delete localAllocator_;
-    panda::Runtime::Destroy();
+    ark::Runtime::Destroy();
 }
 
 RuntimeInterface *PandaRuntimeTest::GetDefaultRuntime()
@@ -85,7 +85,7 @@ RuntimeInterface *PandaRuntimeTest::GetDefaultRuntime()
 
 std::unique_ptr<const panda_file::File> AsmTest::ParseToFile(const char *source, const char *fileName)
 {
-    panda::pandasm::Parser parser;
+    ark::pandasm::Parser parser;
     auto res = parser.Parse(source, fileName);
     if (parser.ShowError().err != pandasm::Error::ErrorType::ERR_NONE) {
         std::cerr << "Parse failed: " << parser.ShowError().message << std::endl
@@ -152,15 +152,15 @@ CommonTest::~CommonTest()
     delete localAllocator_;
     PoolManager::Finalize();
 
-    panda::mem::MemConfig::Finalize();
+    ark::mem::MemConfig::Finalize();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
 
-    panda::compiler::PandaRuntimeTest::Initialize(argc, argv);
-    panda::compiler::g_options.SetCompilerUseSafepoint(false);
+    ark::compiler::PandaRuntimeTest::Initialize(argc, argv);
+    ark::compiler::g_options.SetCompilerUseSafepoint(false);
     return RUN_ALL_TESTS();
 }

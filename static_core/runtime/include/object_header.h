@@ -37,7 +37,7 @@
 #include "runtime/include/class_helper.h"
 #include "runtime/mark_word.h"
 
-namespace panda {
+namespace ark {
 
 namespace object_header_traits {
 
@@ -330,8 +330,8 @@ private:
 };
 
 constexpr uint32_t OBJECT_HEADER_CLASS_OFFSET = 4U;
-static_assert(OBJECT_HEADER_CLASS_OFFSET == panda::ObjectHeader::GetClassOffset());
+static_assert(OBJECT_HEADER_CLASS_OFFSET == ark::ObjectHeader::GetClassOffset());
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_OBJECT_HEADER_H_

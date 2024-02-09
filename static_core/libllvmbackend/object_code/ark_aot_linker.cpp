@@ -28,7 +28,7 @@
 
 // NB: Do not include anything panda's. It may lead to macro collisions.
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 bool PandaSectionMemoryManager::allowStubAllocation() const
 {
@@ -201,4 +201,4 @@ ArkAotLinker::ArkAotLinker(size_t functionHeaderSize) : functionHeaderSize_(func
     runtimeDyLd_.setProcessAllSections(true);
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

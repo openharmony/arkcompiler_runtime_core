@@ -21,7 +21,7 @@
 #include <iostream>
 #include <iomanip>
 
-namespace panda::debug {
+namespace ark::debug {
 
 [[noreturn]] void AssertionFail(const char *expr, const char *file, unsigned line, const char *function)
 {
@@ -34,10 +34,10 @@ namespace panda::debug {
     std::cerr << "Backtrace [tid=" << os::thread::GetCurrentThreadId() << "]:\n";
     PrintStack(std::cerr);
 #ifdef FUZZING_EXIT_ON_FAILED_ASSERT
-    panda::terminate::Terminate(file);
+    ark::terminate::Terminate(file);
 #else
     std::abort();
 #endif
 }
 
-}  // namespace panda::debug
+}  // namespace ark::debug

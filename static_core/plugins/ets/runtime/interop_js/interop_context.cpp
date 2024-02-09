@@ -25,7 +25,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
 {
@@ -338,4 +338,4 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     std::abort();
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

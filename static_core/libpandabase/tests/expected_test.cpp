@@ -19,7 +19,7 @@
 
 #include <type_traits>
 
-namespace panda::test::expected {
+namespace ark::test::expected {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -127,4 +127,4 @@ TEST(Expected, ValueOr)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::test::expected
+}  // namespace ark::test::expected

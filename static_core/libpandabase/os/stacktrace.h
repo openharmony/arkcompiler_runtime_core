@@ -19,7 +19,7 @@
 #include <vector>
 #include <iostream>
 
-namespace panda {
+namespace ark {
 
 class StackPrinterImpl;
 
@@ -50,5 +50,5 @@ inline std::ostream &PrintStack(std::ostream &out)
     return PrintStack(GetStacktrace(), out);
 }
 
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_STACKTRACE_H

@@ -18,7 +18,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 uint32_t Region::GetAllocatedBytes() const
 {
@@ -401,4 +401,4 @@ Region *RegionSpace::GetRegionFromEmptyList(DList &regionList)
     return region;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

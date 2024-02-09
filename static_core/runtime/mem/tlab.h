@@ -20,7 +20,7 @@
 #include "libpandabase/mem/pool_map.h"
 #include "libpandabase/mem/mem_range.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_TLAB_ALLOCATOR(level) LOG(level, ALLOC) << "TLAB: "
@@ -299,6 +299,6 @@ private:
 
 #undef LOG_TLAB_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_TLAB_H

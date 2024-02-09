@@ -17,7 +17,7 @@
 #include "runtime/include/imtable_builder.h"
 #include "runtime/include/class_linker.h"
 
-namespace panda {
+namespace ark {
 void IMTableBuilder::Build(const panda_file::ClassDataAccessor *cda, ITable itable)
 {
     if (cda->IsInterface() || itable.Size() == 0U) {
@@ -96,7 +96,7 @@ void IMTableBuilder::UpdateClass(Class *klass)
 #endif  // NDEBUG
 }
 
-bool IMTableBuilder::AddMethod(panda::Span<panda::Method *> imtable, [[maybe_unused]] uint32_t imtableSize, uint32_t id,
+bool IMTableBuilder::AddMethod(ark::Span<ark::Method *> imtable, [[maybe_unused]] uint32_t imtableSize, uint32_t id,
                                Method *method)
 {
     bool result = false;
@@ -126,4 +126,4 @@ void IMTableBuilder::DumpIMTable(Class *klass)
     }
 }
 
-}  // namespace panda
+}  // namespace ark

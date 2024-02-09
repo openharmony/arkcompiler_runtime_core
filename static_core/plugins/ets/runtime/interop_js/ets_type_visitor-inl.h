@@ -20,7 +20,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/heap_manager.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define TYPEVIS_PRIM_TYPES_LIST(V) \
@@ -71,13 +71,13 @@ public:
     TYPEVIS_PRIM_TYPES_LIST(DEF_VIS)
 #undef DEF_VIS
 
-    virtual void VisitPrimitive(const panda::panda_file::Type type)
+    virtual void VisitPrimitive(const ark::panda_file::Type type)
     {
         switch (type.GetId()) {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DELEGATE(name)                            \
-    case panda::panda_file::Type::TypeId::name: { \
-        return Visit##name();                     \
+#define DELEGATE(name)                          \
+    case ark::panda_file::Type::TypeId::name: { \
+        return Visit##name();                   \
     }
             TYPEVIS_PRIM_TYPES_LIST(DELEGATE)
 #undef DELEGATE
@@ -87,13 +87,13 @@ public:
         }
     }
 
-    virtual void VisitString(panda::Class *klass) = 0;
-    virtual void VisitArray(panda::Class *klass) = 0;
+    virtual void VisitString(ark::Class *klass) = 0;
+    virtual void VisitArray(ark::Class *klass) = 0;
 
-    virtual void VisitFieldPrimitive(panda::Field const *field, panda::panda_file::Type type) = 0;
-    virtual void VisitFieldReference(panda::Field const *field, panda::Class *klass) = 0;
+    virtual void VisitFieldPrimitive(ark::Field const *field, ark::panda_file::Type type) = 0;
+    virtual void VisitFieldReference(ark::Field const *field, ark::Class *klass) = 0;
 
-    virtual void VisitField(panda::Field const *field)
+    virtual void VisitField(ark::Field const *field)
     {
         auto type = field->GetType();
         if (type.IsPrimitive()) {
@@ -102,7 +102,7 @@ public:
         return VisitFieldReference(field, field->ResolveTypeClass());
     }
 
-    virtual void VisitObject(panda::Class *klass)
+    virtual void VisitObject(ark::Class *klass)
     {
         auto fields = klass->GetInstanceFields();
         for (auto const &f : fields) {
@@ -117,7 +117,7 @@ public:
         TYPEVIS_ABRUPT_ON_ERROR();
     }
 
-    virtual void VisitReference(panda::Class *klass)
+    virtual void VisitReference(ark::Class *klass)
     {
         if (klass->IsStringClass()) {
             return VisitString(klass);
@@ -128,7 +128,7 @@ public:
         return VisitObject(klass);
     }
 
-    virtual void VisitClass(panda::Class *klass)
+    virtual void VisitClass(ark::Class *klass)
     {
         if (klass->IsPrimitive()) {
             return VisitPrimitive(klass->GetType());
@@ -153,7 +153,7 @@ private:
 
 class EtsMethodVisitor {
 public:
-    explicit EtsMethodVisitor(panda::Method *method) : method_(method) {}
+    explicit EtsMethodVisitor(ark::Method *method) : method_(method) {}
 
     virtual void VisitMethod()
     {
@@ -199,10 +199,10 @@ public:
     }
 
 protected:
-    virtual void VisitReturn(panda::panda_file::Type type) = 0;
-    virtual void VisitReturn(panda::Class *klass) = 0;
-    virtual void VisitArgument(uint32_t idx, panda::panda_file::Type type) = 0;
-    virtual void VisitArgument(uint32_t idx, panda::Class *klass) = 0;
+    virtual void VisitReturn(ark::panda_file::Type type) = 0;
+    virtual void VisitReturn(ark::Class *klass) = 0;
+    virtual void VisitArgument(uint32_t idx, ark::panda_file::Type type) = 0;
+    virtual void VisitArgument(uint32_t idx, ark::Class *klass) = 0;
 
 private:
     void VisitReturnImpl()
@@ -224,12 +224,12 @@ private:
         return VisitArgument(argIdx, ResolveRefClass());
     }
 
-    panda::Class *ResolveRefClass()
+    ark::Class *ResolveRefClass()
     {
         auto pf = method_->GetPandaFile();
         panda_file::MethodDataAccessor mda(*pf, method_->GetFileId());
         panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
-        auto classLinker = panda::Runtime::GetCurrent()->GetClassLinker();
+        auto classLinker = ark::Runtime::GetCurrent()->GetClassLinker();
         auto ctx = method_->GetClass()->GetLoadContext();
 
         auto klassId = pda.GetReferenceType(refArgIdx_++);
@@ -237,15 +237,15 @@ private:
         return klass;
     }
 
-    panda::Method *method_ {};
+    ark::Method *method_ {};
     uint32_t refArgIdx_ {};
     std::optional<std::string> error_;
 };
 
 class EtsConvertorRef {
 public:
-    using ObjRoot = panda::ObjectHeader **;
-    using ValVariant = std::variant<panda::Value, ObjRoot>;
+    using ObjRoot = ark::ObjectHeader **;
+    using ValVariant = std::variant<ark::Value, ObjRoot>;
 
     EtsConvertorRef() = default;
     explicit EtsConvertorRef(ValVariant *dataPtr)
@@ -265,10 +265,10 @@ public:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             return (*u_.field.obj)->GetFieldPrimitive<T>(u_.field.offs);
         }
-        return std::get<panda::Value>(*u_.dataPtr).GetAs<T>();  // NOLINT(cppcoreguidelines-pro-type-union-access)
+        return std::get<ark::Value>(*u_.dataPtr).GetAs<T>();  // NOLINT(cppcoreguidelines-pro-type-union-access)
     }
 
-    panda::ObjectHeader *LoadReference() const
+    ark::ObjectHeader *LoadReference() const
     {
         if (isField_) {
             return (*u_.field.obj)->GetFieldObject(u_.field.offs);  // NOLINT(cppcoreguidelines-pro-type-union-access)
@@ -283,7 +283,7 @@ public:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             (*u_.field.obj)->SetFieldPrimitive<T>(u_.field.offs, val);
         } else {
-            *u_.dataPtr = panda::Value(val);  // NOLINT(cppcoreguidelines-pro-type-union-access)
+            *u_.dataPtr = ark::Value(val);  // NOLINT(cppcoreguidelines-pro-type-union-access)
         }
     }
 
@@ -313,6 +313,6 @@ private:
     bool isField_ = false;
 };
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_ETS_TYPE_VISITOR_H_

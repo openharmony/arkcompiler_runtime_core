@@ -25,7 +25,7 @@
 #include "runtime/mem/runslots.h"
 #include "runtime/mem/lock_config_helper.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_HUMONGOUS_OBJ_ALLOCATOR(level) LOG(level, ALLOC) << "HumongousObjAllocator: "
@@ -312,10 +312,10 @@ private:
     friend class HumongousObjAllocatorTest;
     template <InternalAllocatorConfig CONFIG>
     friend class InternalAllocator;
-};  // namespace panda::mem
+};  // namespace ark::mem
 
 #undef LOG_HUMONGOUS_OBJ_ALLOCATOR
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_HUMONGOUS_OBJ_ALLOCATOR_H

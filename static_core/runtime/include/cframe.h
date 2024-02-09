@@ -21,7 +21,7 @@
 #include "libpandabase/utils/cframe_layout.h"
 #include "runtime/interpreter/frame.h"
 #include "libpandabase/macros.h"
-namespace panda {
+namespace ark {
 
 namespace compiler {
 class CodeInfo;
@@ -336,6 +336,6 @@ private:
     SlotType *fp_ {nullptr};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_CFRAME_H

@@ -20,7 +20,7 @@
 #include "file_format_version.h"
 #include "pgo.h"
 
-namespace panda::panda_file {
+namespace ark::panda_file {
 
 class ItemDeduper {
 public:
@@ -545,7 +545,7 @@ void ItemContainer::UpdateLiteralIndexes()
     }
 }
 
-void ItemContainer::ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profileOpt)
+void ItemContainer::ReorderItems(ark::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
     profileOpt->ProfileGuidedRelayout(items_);
 }
@@ -1008,11 +1008,11 @@ ItemContainer::ProtoKey::ProtoKey(TypeItem *retType, const std::vector<MethodPar
     size_t shortyHash = std::hash<std::string>()(shorty_);
     size_t retTypeHash = std::hash<TypeItem *>()(retType);
     // combine hashes of shorty and ref_types
-    hash_ = panda::MergeHashes(shortyHash, retTypeHash);
+    hash_ = ark::MergeHashes(shortyHash, retTypeHash);
     // combine hashes of all param types
     for (const auto &item : params) {
         size_t paramTypeHash = std::hash<TypeItem *>()(item.GetType());
-        hash_ = panda::MergeHashes(hash_, paramTypeHash);
+        hash_ = ark::MergeHashes(hash_, paramTypeHash);
     }
 }
 
@@ -1025,4 +1025,4 @@ void ItemContainer::ProtoKey::Add(TypeItem *item)
     }
 }
 
-}  // namespace panda::panda_file
+}  // namespace ark::panda_file

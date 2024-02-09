@@ -18,7 +18,7 @@
 #include "compiler_logger.h"
 #include "loop_unswitcher.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 LoopUnswitcher::LoopUnswitcher(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator)
     : GraphCloner(graph, allocator, localAllocator), conditions_(allocator->Adapter())
 {
@@ -318,4 +318,4 @@ void LoopUnswitcher::EstimateInstructionsCount(const Loop *loop, const Inst *uns
         EstimateUnswitchInstructionsCount(loop->GetHeader(), backEdge, unswitchInst, false, falseMarker));
     graph->EraseMarker(falseMarker);
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

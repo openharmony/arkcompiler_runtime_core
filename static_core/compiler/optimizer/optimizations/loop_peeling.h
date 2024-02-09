@@ -20,7 +20,7 @@
 #include "compiler_options.h"
 #include "optimizer/ir/analysis.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class LoopPeeling : public LoopTransform<LoopExitPoint::LOOP_EXIT_HEADER> {
 public:
     explicit LoopPeeling(Graph *graph) : LoopTransform(graph) {}
@@ -50,6 +50,6 @@ private:
     bool isAppied_ {false};
     SaveStateBridgesBuilder ssb_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_LOOP_PEELING_H

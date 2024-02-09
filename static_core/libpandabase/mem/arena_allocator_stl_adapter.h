@@ -18,7 +18,7 @@
 
 #include "arena_allocator.h"
 
-namespace panda {
+namespace ark {
 
 // Adapter for use of ArenaAllocator in STL containers.
 template <typename T, bool USE_OOM_HANDLER>
@@ -173,6 +173,6 @@ inline ArenaAllocatorAdapter<void, USE_OOM_HANDLER> ArenaAllocatorT<USE_OOM_HAND
     return ArenaAllocatorAdapter<void, USE_OOM_HANDLER>(this);
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MEM_STL_ADAPTER_H

@@ -30,7 +30,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/profilesaver/profile_dump_info.h"
 
-namespace panda {
+namespace ark {
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects, readability-identifier-naming)
 static os::memory::Mutex profile_saver_lock_;
@@ -162,6 +162,6 @@ private:
     NO_MOVE_SEMANTIC(ProfileSaver);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif

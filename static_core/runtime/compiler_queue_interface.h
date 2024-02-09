@@ -19,7 +19,7 @@
 #include "runtime/include/method-inl.h"
 #include "runtime/thread_pool_queue.h"
 
-namespace panda {
+namespace ark {
 
 class Method;
 
@@ -37,6 +37,6 @@ protected:
     }
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COMPILER_QUEUE_H_

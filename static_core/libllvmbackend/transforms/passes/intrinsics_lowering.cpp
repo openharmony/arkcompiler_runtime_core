@@ -27,14 +27,14 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
+using ark::llvmbackend::runtime_calls::GetPandaRuntimeFunctionCallee;
 using llvm::Function;
 using llvm::FunctionAnalysisManager;
-using panda::llvmbackend::runtime_calls::GetPandaRuntimeFunctionCallee;
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 IntrinsicsLowering IntrinsicsLowering::Create(LLVMArkInterface *arkInterface,
-                                              [[maybe_unused]] const panda::llvmbackend::LLVMCompilerOptions *options)
+                                              [[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return IntrinsicsLowering(arkInterface);
 }
@@ -199,4 +199,4 @@ bool IntrinsicsLowering::HandleFRem(llvm::Instruction *inst, LLVMArkInterface::I
     return true;
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

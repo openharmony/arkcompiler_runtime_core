@@ -15,7 +15,7 @@
 
 #include "cpu_features.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 #if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_OHOS || defined PANDA_TARGET_LINUX || defined PANDA_TARGET_UNIX
 #include <asm/hwcap.h>
 #include <sys/auxv.h>
@@ -46,4 +46,4 @@ bool CpuFeaturesHasJscvt()
 #else
 #error "Unsupported target"
 #endif
-}  // namespace panda::compiler
+}  // namespace ark::compiler

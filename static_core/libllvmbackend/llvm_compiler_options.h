@@ -18,7 +18,7 @@
 
 #include <string>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions {
     // Options obtained using llvmbackend.yaml
     bool optimize;
@@ -34,5 +34,5 @@ struct LLVMCompilerOptions {
     // Internal options
     bool doIrtocInline;
 };
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_COMPILER_OPTIONS_H

@@ -16,12 +16,12 @@
 #ifndef PANDA_GC_REASON_H
 #define PANDA_GC_REASON_H
 
-namespace panda::mem {
+namespace ark::mem {
 
 enum class GCReason {
     GC_REASON_OOM,
     GC_REASON_HEAP_OCCUPANCY_THRESHOLD,
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_GC_REASON_H

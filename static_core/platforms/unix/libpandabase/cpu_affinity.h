@@ -18,8 +18,8 @@
 
 #include <sched.h>
 
-namespace panda::os {
+namespace ark::os {
 using CpuSetType = cpu_set_t;
-}  // namespace panda::os
+}  // namespace ark::os
 
 #endif  // PANDA_PLATFORMS_UNIX_LIBPANDABASE_CPU_AFFINITY_H

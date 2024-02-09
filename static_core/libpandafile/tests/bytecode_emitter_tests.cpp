@@ -23,7 +23,7 @@
 #include <vector>
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda;
+using namespace ark;
 using Opcode = BytecodeInstruction::Opcode;
 
 using Tuple16 = std::tuple<uint8_t, uint8_t>;

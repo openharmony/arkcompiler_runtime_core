@@ -20,7 +20,7 @@
 #include "optimizer/pass.h"
 #include "compiler_options.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CodeSink : public Optimization {
     using Optimization::Optimization;
 
@@ -52,6 +52,6 @@ private:
 private:
     bool isApplied_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  //  COMPILER_OPTIMIZER_OPTIMIZATIONS_CODE_SINK_H

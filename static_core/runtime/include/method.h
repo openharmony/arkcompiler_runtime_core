@@ -36,7 +36,7 @@
 #include "runtime/interpreter/frame.h"
 #include "value.h"
 
-namespace panda {
+namespace ark {
 
 class Class;
 class ManagedThread;
@@ -244,7 +244,7 @@ public:
      * Number of arguments may vary, all arguments must be of type coretypes::TaggedValue.
      * args - array of arguments. The first value must be the callee function object
      * num_args - length of args array
-     * data - panda::ExtFrame language-related extension data
+     * data - ark::ExtFrame language-related extension data
      */
     coretypes::TaggedValue InvokeDyn(ManagedThread *thread, uint32_t numArgs, coretypes::TaggedValue *args);
 
@@ -260,7 +260,7 @@ public:
      * acc - accumulator of context
      * nregs - number of registers in context
      * regs - registers of context
-     * data - panda::ExtFrame language-related extension data
+     * data - ark::ExtFrame language-related extension data
      */
     coretypes::TaggedValue InvokeContext(ManagedThread *thread, const uint8_t *pc, coretypes::TaggedValue *acc,
                                          uint32_t nregs, coretypes::TaggedValue *regs);
@@ -275,7 +275,7 @@ public:
      * args - array of arguments. The first value must be the callee function object
      * num_vregs - number of registers in frame
      * num_args - length of args array
-     * data - panda::ExtFrame language-related extension data
+     * data - ark::ExtFrame language-related extension data
      */
     template <class InvokeHelper, class ValueT>
     Frame *EnterNativeMethodFrame(ManagedThread *thread, uint32_t numVregs, uint32_t numArgs, ValueT *args);
@@ -920,6 +920,6 @@ private:
 
 static_assert(!std::is_polymorphic_v<Method>);
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_METHOD_H_

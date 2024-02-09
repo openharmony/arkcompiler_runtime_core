@@ -20,7 +20,7 @@
 #include "optimizer/code_generator/target_info.h"
 #include "locations.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 using LocationType = Location::Kind;
 
@@ -104,5 +104,5 @@ inline auto ToString(const SpillFillData &sf, Arch arch)
 }
 }  // namespace sf_data
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_IR_SPILL_FILL_DATA_H

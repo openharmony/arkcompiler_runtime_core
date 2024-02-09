@@ -22,10 +22,10 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 
-static Array *AllocateArray(panda::BaseClass *arrayClass, size_t elemSize, ArraySizeT length,
-                            panda::SpaceType spaceType, const PandaVM *vm = Thread::GetCurrent()->GetVM())
+static Array *AllocateArray(ark::BaseClass *arrayClass, size_t elemSize, ArraySizeT length, ark::SpaceType spaceType,
+                            const PandaVM *vm = Thread::GetCurrent()->GetVM())
 {
     size_t size = Array::ComputeSize(elemSize, length);
 
@@ -34,11 +34,11 @@ static Array *AllocateArray(panda::BaseClass *arrayClass, size_t elemSize, Array
         ThrowOutOfMemoryError("OOM when allocating array");
         return nullptr;
     }
-    if (LIKELY(spaceType == panda::SpaceType::SPACE_TYPE_OBJECT)) {
+    if (LIKELY(spaceType == ark::SpaceType::SPACE_TYPE_OBJECT)) {
         return static_cast<coretypes::Array *>(
             vm->GetHeapManager()->AllocateObject(arrayClass, size, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent()));
     }
-    if (spaceType == panda::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT) {
+    if (spaceType == ark::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT) {
         return static_cast<coretypes::Array *>(vm->GetHeapManager()->AllocateNonMovableObject(
             arrayClass, size, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent()));
     }
@@ -46,7 +46,7 @@ static Array *AllocateArray(panda::BaseClass *arrayClass, size_t elemSize, Array
 }
 
 /* static */
-Array *Array::Create(panda::Class *arrayClass, const uint8_t *data, ArraySizeT length, panda::SpaceType spaceType)
+Array *Array::Create(ark::Class *arrayClass, const uint8_t *data, ArraySizeT length, ark::SpaceType spaceType)
 {
     size_t elemSize = arrayClass->GetComponentSize();
     auto *array = AllocateArray(arrayClass, elemSize, length, spaceType);
@@ -67,7 +67,7 @@ Array *Array::Create(panda::Class *arrayClass, const uint8_t *data, ArraySizeT l
 }
 
 /* static */
-Array *Array::Create(panda::Class *arrayClass, ArraySizeT length, panda::SpaceType spaceType)
+Array *Array::Create(ark::Class *arrayClass, ArraySizeT length, ark::SpaceType spaceType)
 {
     size_t elemSize = arrayClass->GetComponentSize();
     auto *array = AllocateArray(arrayClass, elemSize, length, spaceType);
@@ -85,7 +85,7 @@ Array *Array::Create(panda::Class *arrayClass, ArraySizeT length, panda::SpaceTy
 }
 
 /* static */
-Array *Array::Create(DynClass *dynarrayclass, ArraySizeT length, panda::SpaceType spaceType)
+Array *Array::Create(DynClass *dynarrayclass, ArraySizeT length, ark::SpaceType spaceType)
 {
     size_t elemSize = coretypes::TaggedValue::TaggedTypeSize();
     HClass *arrayClass = dynarrayclass->GetHClass();
@@ -104,8 +104,8 @@ Array *Array::Create(DynClass *dynarrayclass, ArraySizeT length, panda::SpaceTyp
 }
 
 /* static */
-Array *Array::CreateTagged(const PandaVM *vm, panda::BaseClass *arrayClass, ArraySizeT length,
-                           panda::SpaceType spaceType, TaggedValue initValue)
+Array *Array::CreateTagged(const PandaVM *vm, ark::BaseClass *arrayClass, ArraySizeT length, ark::SpaceType spaceType,
+                           TaggedValue initValue)
 {
     size_t elemSize = coretypes::TaggedValue::TaggedTypeSize();
     auto *array = AllocateArray(arrayClass, elemSize, length, spaceType, vm);
@@ -126,4 +126,4 @@ Array *Array::CreateTagged(const PandaVM *vm, panda::BaseClass *arrayClass, Arra
     return array;
 }
 
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes

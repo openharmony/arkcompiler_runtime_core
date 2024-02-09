@@ -17,7 +17,7 @@
 
 #include "value.h"
 
-namespace panda {
+namespace ark {
 
 template <>
 inline ObjectHeader *Value::GetAs() const
@@ -45,6 +45,6 @@ inline int64_t Value::GetAsLong() const
     return reinterpret_cast<int64_t>(GetAs<ObjectHeader *>());
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_VALUE_INL_H_

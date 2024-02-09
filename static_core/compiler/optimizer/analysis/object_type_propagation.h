@@ -20,7 +20,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_visitor.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ObjectTypePropagation final : public Analysis, public GraphVisitor {
 public:
@@ -65,6 +65,6 @@ private:
     InstVector visitedPhis_;
     Marker visited_ {UNDEF_MARKER};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_OBJECT_TYPE_PROPAGATION_H

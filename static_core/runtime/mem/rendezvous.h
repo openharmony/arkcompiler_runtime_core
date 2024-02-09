@@ -22,7 +22,7 @@
 #include "runtime/include/thread.h"
 #include "include/locks.h"
 
-namespace panda {
+namespace ark {
 
 class PandaVM;
 
@@ -88,6 +88,6 @@ private:
     Rendezvous *rendezvous_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_MEM_RENDEZVOUS_H

@@ -25,13 +25,13 @@
 %   end
 % end
 
-namespace panda::pandasm::extensions {
+namespace ark::pandasm::extensions {
 
 // NOLINTBEGIN(misc-definitions-in-headers)
 
 %["RecordMetadata", "FieldMetadata", "FunctionMetadata", "ParamMetadata"].each do |metadata|
 /* static */
-std::unique_ptr<<%= metadata %>> MetadataExtension::Create<%= metadata %>([[maybe_unused]] panda::panda_file::SourceLang lang)
+std::unique_ptr<<%= metadata %>> MetadataExtension::Create<%= metadata %>([[maybe_unused]] ark::panda_file::SourceLang lang)
 {
 %   Common::each_plugin_suboption("Metadatas", metadata) do |new_class_opts, _, plugin_opts|
     if (lang == <%= plugin_opts["lang_enum"] %>) {
@@ -46,6 +46,6 @@ std::unique_ptr<<%= metadata %>> MetadataExtension::Create<%= metadata %>([[mayb
 
 // NOLINTEND(misc-definitions-in-headers)
 
-}  // namespace panda::pandasm::extensions
+}  // namespace ark::pandasm::extensions
 
 #endif  // PANDA_ASSEMBLER_EXTENSIONS_REGISTER_EXTENSIONS_H

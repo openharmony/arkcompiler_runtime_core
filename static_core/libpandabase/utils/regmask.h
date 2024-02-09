@@ -20,7 +20,7 @@
 #include "utils/type_helpers.h"
 #include <array>
 
-namespace panda {
+namespace ark {
 
 template <typename T, size_t N>
 static constexpr size_t MakeMask(const std::array<T, N> &indexes)
@@ -162,13 +162,13 @@ public:
     constexpr uint32_t GetMinRegister() const
     {
         ASSERT(Any());
-        return panda::Ctz(GetValue());
+        return ark::Ctz(GetValue());
     }
 
     constexpr uint32_t GetMaxRegister() const
     {
         ASSERT(Any());
-        return (sizeof(decltype(GetValue())) * BITS_PER_BYTE) - 1 - panda::Clz(GetValue());
+        return (sizeof(decltype(GetValue())) * BITS_PER_BYTE) - 1 - ark::Clz(GetValue());
     }
 
     constexpr static auto GetZeroMask()
@@ -306,6 +306,6 @@ inline std::ostream &operator<<(std::ostream &stream, const RegMask &mask)
     return stream;
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_REGMASK_H

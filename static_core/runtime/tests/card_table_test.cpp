@@ -27,7 +27,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 class CardTableTest : public testing::Test {
 private:
@@ -38,7 +38,7 @@ private:
 protected:
     //    static constexpr size_t kHeapSize = 0xffffffff;
     static constexpr size_t K_ALLOC_COUNT = 1000;
-    //    static constexpr size_t maxCardIndex = kHeapSize / ::panda::mem::CardTable::GetCardSize();
+    //    static constexpr size_t maxCardIndex = kHeapSize / ::ark::mem::CardTable::GetCardSize();
 
     // NOLINTNEXTLINE(cert-msc51-cpp)
     CardTableTest()
@@ -56,7 +56,7 @@ protected:
         options.SetShouldInitializeIntrinsics(false);
         options.SetGcType("epsilon");
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
 
         internalAllocator_ = thread_->GetVM()->GetHeapManager()->GetInternalAllocator();
@@ -123,7 +123,7 @@ protected:
 private:
     InternalAllocatorPtr internalAllocator_;
     unsigned int seed_ {};
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
 };
 
 TEST_F(CardTableTest, MarkTest)
@@ -267,4 +267,4 @@ TEST_F(CardTableTest, VisitMarked)
     }
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

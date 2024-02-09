@@ -19,7 +19,7 @@
 #include <string_view>
 #include "libpandabase/macros.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsCoroutine;
 
@@ -35,6 +35,6 @@ inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view classDes
     ThrowEtsException(coroutine, classDescriptor.data(), msg.data());
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H_

@@ -28,9 +28,9 @@
 
 #include <regex>
 
-using panda::panda_file::File;
+using ark::panda_file::File;
 
-namespace panda::compiler {
+namespace ark::compiler {
 class AotTest : public AsmTest {
 public:
     AotTest()
@@ -827,4 +827,4 @@ TEST_F(AotTest, PandaFiles)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

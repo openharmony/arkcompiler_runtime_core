@@ -21,7 +21,7 @@
 #include "runtime/thread_pool_queue.h"
 #include "libpandabase/utils/range.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 enum class GCWorkersTaskTypes : uint32_t {
     TASK_EMPTY,
@@ -162,6 +162,6 @@ public:
     }
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_WORKERS_TASKS_H

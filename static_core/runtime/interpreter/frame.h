@@ -26,13 +26,13 @@
 #include "runtime/mem/frame_allocator-inl.h"
 #include "libpandafile/bytecode_instruction-inl.h"
 
-namespace panda {
+namespace ark {
 
 // ========== Compatible Frame Layout ==========
 // Now we have a variable vregisters list, it's compatible with static language(Java etc.) and dynamic language(JS etc.)
 // Frame layout - Static Languages
 // +---------------------------------+
-// |          panda::Frame           |
+// |          ark::Frame           |
 // +---------------------------------+ <-------- payload
 // |           vregs[0]: v_          |
 // +---------------------------------+
@@ -49,7 +49,7 @@ namespace panda {
 //
 // Frame layout - Dynamic Languages
 // +---------------------------------+
-// |          panda::Frame           |
+// |          ark::Frame           |
 // +---------------------------------+ <-------- payload
 // |           vregs[0]: v_          |
 // +---------------------------------+
@@ -680,8 +680,8 @@ ALWAYS_INLINE inline typename std::enable_if<!IS_DYNAMIC, StaticFrameHandler>::t
     return StaticFrameHandler(frame);
 }
 
-// ExtFrame<ExtData> is an extended panda::Frame. It's used to hold any
-// language-specific data, which is required to be associated with panda::Frame.
+// ExtFrame<ExtData> is an extended ark::Frame. It's used to hold any
+// language-specific data, which is required to be associated with ark::Frame.
 //
 //                      Allocated ExtFrame looks like that:
 //
@@ -696,8 +696,8 @@ ALWAYS_INLINE inline typename std::enable_if<!IS_DYNAMIC, StaticFrameHandler>::t
 //                           |  |      ....      |
 //                           |--|  vreg[nregs-1] |
 //
-// Generic panda interpreter operates panda::Frames, while any language extension
-// may access its LangSpecData via panda::Frame *base_frame
+// Generic panda interpreter operates ark::Frames, while any language extension
+// may access its LangSpecData via ark::Frame *base_frame
 //     ExtFrame<LangSpecData>::FromFrame(base_frame)->GetExtData()
 // if it's known that this frame was properly allocated.
 template <class ExtData>
@@ -784,6 +784,6 @@ ALWAYS_INLINE inline void DestroyFrame(mem::StackFrameAllocator *stackFrameAlloc
     stackFrameAllocator->Free(frame->GetExt());
 }
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_INTERPRETER_FRAME_H_

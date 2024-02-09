@@ -22,7 +22,7 @@
 #include "macros.h"
 #include <iterator>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 class Loop;
 
@@ -1078,5 +1078,5 @@ private:
  */
 bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *targetBlock,
                          const BasicBlock *excludeBlock = nullptr);
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_IR_BASICBLOCK_H

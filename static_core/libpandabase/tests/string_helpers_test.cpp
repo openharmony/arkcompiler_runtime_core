@@ -22,7 +22,7 @@
 
 #include <gtest/gtest.h>
 
-namespace panda::helpers::string::test {
+namespace ark::helpers::string::test {
 
 TEST(StringHelpers, Format)
 {
@@ -110,4 +110,4 @@ TEST(StringHelpers, ParseInt)
     ASSERT_EQ(123U, i);
 }
 
-}  // namespace panda::helpers::string::test
+}  // namespace ark::helpers::string::test

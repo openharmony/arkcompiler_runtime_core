@@ -17,7 +17,7 @@
 
 #include "runtime/mem/gc/gc_marker.h"
 
-namespace panda::mem {
+namespace ark::mem {
 template <class LanguageConfig>
 class G1GCPauseMarker : public GCMarker<G1GCPauseMarker<LanguageConfig>, LanguageConfig::LANG_TYPE> {
 public:
@@ -112,6 +112,6 @@ public:
     }
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_G1_G1_MARKER_H

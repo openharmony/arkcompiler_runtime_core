@@ -20,7 +20,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 EtsString *StringBuilderToString(ObjectHeader *sb);
 ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str);
@@ -28,6 +28,6 @@ ObjectHeader *StringBuilderAppendBool(ObjectHeader *sb, EtsBoolean v);
 ObjectHeader *StringBuilderAppendChar(ObjectHeader *sb, EtsChar v);
 ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v);
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_ETS_STRING_BUILDER_H

@@ -21,7 +21,7 @@
 #include "utils/arena_containers.h"
 #include "location_mask.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void ConnectIntervals(SpillFillInst *spillFill, const LifeIntervals *src, const LifeIntervals *dst);
 bool TryToSpillConstant(LifeIntervals *interval, Graph *graph);
@@ -141,6 +141,6 @@ private:
     ArenaVector<LifeNumber> stackUseLastPositions_;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_BASE_H

@@ -25,7 +25,7 @@
 #include <string>
 #include <utility>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class PropertyDescriptor {
 public:
     PropertyDescriptor(std::string name, RemoteObject value, bool isEntry = false)
@@ -140,6 +140,6 @@ private:
     bool enumerable_ {true};
     bool writable_ {true};
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_DESCRIPTOR_H

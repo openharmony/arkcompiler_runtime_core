@@ -16,7 +16,7 @@
 #include "unit_test.h"
 #include "optimizer/optimizations/balance_expressions.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BalanceExpressionsTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -285,4 +285,4 @@ TEST_F(BalanceExpressionsTest, OddSources)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

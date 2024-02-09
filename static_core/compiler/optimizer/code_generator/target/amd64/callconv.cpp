@@ -17,7 +17,7 @@ Low-level calling convention
 */
 #include "target/amd64/target.h"
 
-namespace panda::compiler::amd64 {
+namespace ark::compiler::amd64 {
 
 Amd64CallingConvention::Amd64CallingConvention(ArenaAllocator *allocator, Encoder *enc, RegistersDescription *descr,
                                                CallConvMode mode)
@@ -211,4 +211,4 @@ void Amd64CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo &
     SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
     GetMasm()->ret();
 }
-}  // namespace panda::compiler::amd64
+}  // namespace ark::compiler::amd64

@@ -16,7 +16,7 @@
 #include "global_object_lock.h"
 #include "runtime/include/thread_scopes.h"
 
-namespace panda {
+namespace ark {
 // Use some global lock as fast solution.
 static os::memory::RecursiveMutex g_mtx;    // NOLINT(fuchsia-statically-constructed-objects)
 static os::memory::ConditionVariable g_cv;  // NOLINT(fuchsia-statically-constructed-objects)
@@ -55,4 +55,4 @@ GlobalObjectLock::~GlobalObjectLock()
 {
     g_mtx.Unlock();
 }
-}  // namespace panda
+}  // namespace ark

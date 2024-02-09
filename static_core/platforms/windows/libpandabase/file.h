@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-namespace panda::os::windows::file {
+namespace ark::os::windows::file {
 
 class File {
 public:
@@ -191,5 +191,5 @@ private:
     }
 };
 
-}  // namespace panda::os::windows::file
+}  // namespace ark::os::windows::file
 #endif

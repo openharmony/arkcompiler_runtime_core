@@ -140,7 +140,7 @@ InvokeCompiledCodeWithArgArrayDyn:
     // sp should be 16 byte aligned.
 
     // setup regs as follow
-    // x0       <- panda::Method*
+    // x0       <- ark::Method*
     // x1       <- num_args (already on the relevant reg, no moves required)
     // x2..x7   <- user's code arguments, in boxed form
     // x9, w10  <- temps for moving user's args to ABI regs

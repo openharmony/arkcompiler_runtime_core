@@ -21,9 +21,9 @@
 
 #define DEBUG_TYPE "fixup-poisons"
 
-using panda::llvmbackend::gc_utils::IsGcRefType;
+using ark::llvmbackend::gc_utils::IsGcRefType;
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 FixupPoisons::FixupPoisons() = default;
 
@@ -62,4 +62,4 @@ llvm::PreservedAnalyses FixupPoisons::run(llvm::Function &function,
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

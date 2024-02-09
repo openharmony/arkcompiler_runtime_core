@@ -22,7 +22,7 @@
 #include "utils/span.h"
 #include "utils/type_helpers.h"
 
-namespace panda {
+namespace ark {
 
 template <typename Base = uint8_t>
 class BitMemoryRegion {
@@ -252,9 +252,9 @@ public:
         size_t res = 0;
         size_t i = 0;
         for (; (i + BITS_PER_UINT32) < length; i += BITS_PER_UINT32) {
-            res += panda::Popcount(Read(first + i, BITS_PER_UINT32));
+            res += ark::Popcount(Read(first + i, BITS_PER_UINT32));
         }
-        return res + panda::Popcount(Read(first + i, length - i));
+        return res + ark::Popcount(Read(first + i, length - i));
     }
 
     size_t Popcount() const
@@ -284,6 +284,6 @@ private:
     size_t size_ {0};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_BIT_MEMORY_REGION_H

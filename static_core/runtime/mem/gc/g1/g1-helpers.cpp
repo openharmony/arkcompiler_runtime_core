@@ -17,7 +17,7 @@
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/gc/g1/g1-helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 static inline GCG1BarrierSet *GetG1BarrierSet()
 {
@@ -71,4 +71,4 @@ extern "C" void PostWrbUpdateCardFuncEntrypoint(const void *from, const void *to
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

@@ -20,7 +20,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class SimplifyStringBuilder : public Optimization {
 public:
     explicit SimplifyStringBuilder(Graph *graph);
@@ -53,6 +53,6 @@ private:
     bool isApplied_ {false};
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_SIMPLIFY_STRING_BUILDER_H_

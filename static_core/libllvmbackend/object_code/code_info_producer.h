@@ -23,15 +23,15 @@
 
 #include <llvm/Object/StackMapParser.h>
 
-namespace panda {
+namespace ark {
 class Method;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CodeInfoBuilder;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 class LLVMArkInterface;
 
@@ -52,8 +52,8 @@ public:
     using Function = LLVMStackMap::FunctionAccessor;
     using Record = LLVMStackMap::RecordAccessor;
     using Location = LLVMStackMap::LocationAccessor;
-    using StackMapSymbol = panda::llvmbackend::CreatedObjectFile::StackMapSymbol;
-    using CodeInfoBuilder = panda::compiler::CodeInfoBuilder;
+    using StackMapSymbol = ark::llvmbackend::CreatedObjectFile::StackMapSymbol;
+    using CodeInfoBuilder = ark::compiler::CodeInfoBuilder;
 
     explicit CodeInfoProducer(Arch arch, LLVMArkInterface *compilation);
 
@@ -61,7 +61,7 @@ public:
 
     void AddSymbol(Method *method, StackMapSymbol symbol);
 
-    void Produce(Method *method, panda::compiler::CodeInfoBuilder *builder) const;
+    void Produce(Method *method, ark::compiler::CodeInfoBuilder *builder) const;
 
 private:
     static void DumpStackMap(const std::unique_ptr<const LLVMStackMap> &stackmap, std::ostream &stream);
@@ -88,5 +88,5 @@ private:
     std::unique_ptr<const LLVMStackMap> stackmap_;
     std::unordered_map<Method *, StackMapSymbol> symbols_;
 };
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_OBJECT_CODE_CODE_INFO_PRODUCER_H

@@ -93,9 +93,9 @@ static T RandomGen()
 
             case (3U): {
                 if constexpr (std::is_same_v<T, float>) {
-                    return panda::bit_cast<float, uint32_t>(gen & MASK_DENORMAL_FLOAT);
+                    return ark::bit_cast<float, uint32_t>(gen & MASK_DENORMAL_FLOAT);
                 } else {
-                    return panda::bit_cast<double, uint64_t>(gen & MASK_DENORMAL_DOUBLE);
+                    return ark::bit_cast<double, uint64_t>(gen & MASK_DENORMAL_DOUBLE);
                 }
             }
             default:
@@ -125,18 +125,18 @@ T RandomMaskGen()
     static constexpr std::array<uint64_t, MASKS_COUNT> MASKS = {0x8888888888888888ULL, 0xCCCCCCCCCCCCCCCCULL,
                                                                 0xAAAAAAAAAAAAAAAAULL, 0xEEEEEEEEEEEEEEEEULL};
     auto mask = MASKS[RANDOM_GENERATOR() % MASKS_COUNT];
-    auto type_size = panda::compiler::TypeInfo(T(0)).GetSize();
+    auto type_size = ark::compiler::TypeInfo(T(0)).GetSize();
     auto rot = RANDOM_GENERATOR() % type_size;
     auto rotated_mask = (mask << rot) | (mask >> (type_size - rot));
     return static_cast<T>(rotated_mask);
 }
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Encoder64Test : public ::testing::Test {
 public:
     Encoder64Test()
     {
-        panda::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
+        ark::mem::MemConfig::Initialize(64_MB, 64_MB, 64_MB, 32_MB, 0, 0);
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
         encoder_ = Encoder::Create(allocator_, Arch::AARCH64, false, CpuFeaturesHasJscvt());
@@ -156,7 +156,7 @@ public:
         delete code_alloc_;
         delete mem_stats_;
         PoolManager::Finalize();
-        panda::mem::MemConfig::Finalize();
+        ark::mem::MemConfig::Finalize();
     }
 
     NO_COPY_SEMANTIC(Encoder64Test);
@@ -3766,4 +3766,4 @@ TEST_F(Encoder64Test, Registers)
         ASSERT_NE(tmp1.GetReg(), target.GetLinkReg());
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

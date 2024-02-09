@@ -20,7 +20,7 @@
 #include "libpandabase/os/mem.h"
 #include "runtime/mem/tlab.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 constexpr size_t TLAB_TEST_SIZE = 4_MB;
 
@@ -40,7 +40,7 @@ public:
     ~TLABTest() override
     {
         for (auto i : allocatedMemMmap_) {
-            panda::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
+            ark::os::mem::UnmapRaw(std::get<0>(i), std::get<1>(i));
         }
     }
 
@@ -50,7 +50,7 @@ public:
 protected:
     TLAB *CreateNewTLAB()
     {
-        void *mem = panda::os::mem::MapRWAnonymousRaw(TLAB_TEST_SIZE);
+        void *mem = ark::os::mem::MapRWAnonymousRaw(TLAB_TEST_SIZE);
         ASAN_UNPOISON_MEMORY_REGION(mem, TLAB_TEST_SIZE);
         std::pair<void *, size_t> newPair {mem, TLAB_TEST_SIZE};
         allocatedMemMmap_.push_back(newPair);
@@ -121,4 +121,4 @@ TEST_F(TLABTest, AlignedAlloc)
     ASSERT_EQ(ptr, nullptr) << "Here Alloc with allocation size = " << TLAB_TEST_SIZE << " bytes should return nullptr";
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

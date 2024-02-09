@@ -19,7 +19,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "types/ets_array.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 std::pair<uint32_t, uint32_t> RegExpExecutor::GetIndices(CaptureState *captureState) const
 {
@@ -89,4 +89,4 @@ RegExpMatchResult<PandaString> RegExpExecutor::GetResult(bool isSuccess, bool ha
 
     return result;
 }
-}  // namespace panda::ets
+}  // namespace ark::ets

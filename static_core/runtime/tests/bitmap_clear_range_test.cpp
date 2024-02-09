@@ -21,7 +21,7 @@
 #include "bitmap_test_base.h"
 #include "runtime/mem/gc/bitmap.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 TEST_F(BitmapTest, ClearRange)
 {
@@ -60,4 +60,4 @@ TEST_F(BitmapTest, ClearRange)
     }
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

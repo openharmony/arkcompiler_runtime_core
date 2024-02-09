@@ -17,7 +17,7 @@
 
 #include "runtime/mem/gc/g1/g1-gc.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <MTModeT MT_MODE>
 class AllocConfig<GCType::EPSILON_G1_GC, MT_MODE> {
@@ -40,7 +40,7 @@ public:
 
     void RunPhases(GCTask &task);
     bool WaitForGC(GCTask task) override;
-    void InitGCBits(panda::ObjectHeader *objHeader) override;
+    void InitGCBits(ark::ObjectHeader *objHeader) override;
     bool Trigger(PandaUniquePtr<GCTask> task) override;
     void OnThreadTerminate(ManagedThread *thread, mem::BuffersKeepingFlag keepBuffers) override;
 
@@ -50,6 +50,6 @@ private:
     void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) override;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_EPSILON_G1_EPSILON_G1_H

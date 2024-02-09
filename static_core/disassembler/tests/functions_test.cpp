@@ -33,14 +33,14 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
 
 TEST(FunctionsTest, EmptyFunction)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
         .function void A(i32 a0) {}
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -59,7 +59,7 @@ TEST(FunctionsTest, EmptyFunction)
 
 TEST(FunctionsTest, OverloadingTest)
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
         .function void f() {}
 
         .function void f(u1 a0) {}
@@ -73,10 +73,10 @@ TEST(FunctionsTest, OverloadingTest)
         }
     )");
     ASSERT(program);
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     std::stringstream ss {};
 
     d.Disassemble(pf);
@@ -98,9 +98,9 @@ TEST(FunctionsTest, OverloadingTest)
     EXPECT_TRUE(ss.str().find(".function void f(u1 a0, i8 a1) <static> {") != std::string::npos);
 }
 
-static std::pair<std::unique_ptr<const panda::panda_file::File>, panda::panda_file::File::EntityId> BuildPandaMethod()
+static std::pair<std::unique_ptr<const ark::panda_file::File>, ark::panda_file::File::EntityId> BuildPandaMethod()
 {
-    auto program = panda::pandasm::Parser().Parse(R"(
+    auto program = ark::pandasm::Parser().Parse(R"(
         .function void func() {
 
             nop
@@ -117,10 +117,10 @@ static std::pair<std::unique_ptr<const panda::panda_file::File>, panda::panda_fi
     )");
     ASSERT(program);
 
-    auto pf = panda::pandasm::AsmEmitter::Emit(program.Value());
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);
 
-    panda::panda_file::DebugInfoExtractor debugInfo(pf.get());
+    ark::panda_file::DebugInfoExtractor debugInfo(pf.get());
     auto methodIds = debugInfo.GetMethodIdList();
     ASSERT(methodIds.size() == 1);
 
@@ -131,10 +131,10 @@ TEST(FunctionsTest, SerializeText)
 {
     auto [pf, method_id] = BuildPandaMethod();
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     d.SetFile(*pf);
 
-    panda::pandasm::Function method("", panda::SourceLanguage::PANDA_ASSEMBLY);
+    ark::pandasm::Function method("", ark::SourceLanguage::PANDA_ASSEMBLY);
     d.GetMethod(&method, method_id);
 
     std::stringstream ss {};
@@ -161,14 +161,14 @@ TEST(FunctionsTest, SerializeLineTable)
 {
     auto [pf, method_id] = BuildPandaMethod();
 
-    panda::disasm::Disassembler d {};
+    ark::disasm::Disassembler d {};
     d.SetFile(*pf);
 
-    panda::pandasm::Function method("", panda::SourceLanguage::PANDA_ASSEMBLY);
+    ark::pandasm::Function method("", ark::SourceLanguage::PANDA_ASSEMBLY);
     d.GetMethod(&method, method_id);
 
     std::stringstream ss {};
-    panda::panda_file::LineNumberTable lineTable;
+    ark::panda_file::LineNumberTable lineTable;
     d.Serialize(method, ss, false, &lineTable);
 
     ASSERT_EQ(lineTable.size(), 4);

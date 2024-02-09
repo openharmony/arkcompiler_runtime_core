@@ -179,7 +179,7 @@ private:
 };
 }  // namespace
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 /**
  * Remove functions and variables unsuitable for inlining from module.
@@ -443,7 +443,7 @@ private:
     InlineFailurePath inlineFailurePath_;
 };
 
-bool CleanupInlineModule::ShouldInsert(const panda::llvmbackend::LLVMCompilerOptions *options)
+bool CleanupInlineModule::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options)
 {
     return options->doIrtocInline;
 }
@@ -462,4 +462,4 @@ llvm::PreservedAnalyses CleanupInlineModule::run(llvm::Module &module, llvm::Mod
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

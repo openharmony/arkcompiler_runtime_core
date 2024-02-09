@@ -24,7 +24,7 @@
 #include "os/stacktrace.h"
 #include "mem/alloc_tracker.h"
 
-namespace panda {
+namespace ark {
 
 static constexpr size_t NUM_SKIP_FRAMES = 1;
 static constexpr size_t ARENA_SIZE = 4096;
@@ -261,4 +261,4 @@ uint32_t DetailAllocTracker::WriteStacks(std::ostream &out, std::map<uint32_t, u
     return deduplicatedId;
 }
 
-}  // namespace panda
+}  // namespace ark

@@ -25,7 +25,7 @@
 #include "runtime/mem/gc/gc_phase.h"
 #include "runtime/mem/refstorage/reference.h"
 
-namespace panda {
+namespace ark {
 
 class Method;
 class Runtime;
@@ -113,7 +113,7 @@ public:
         return mm_->GetGlobalObjectStorage();
     }
 
-    panda::mem::ReferenceProcessor *GetReferenceProcessor() const override
+    ark::mem::ReferenceProcessor *GetReferenceProcessor() const override
     {
         ASSERT(referenceProcessor_ != nullptr);
         return referenceProcessor_;
@@ -182,7 +182,7 @@ private:
     StringTable *stringTable_ {nullptr};
     MonitorPool *monitorPool_ {nullptr};
     MTThreadManager *threadManager_ {nullptr};
-    panda::mem::Reference *oomObjRef_ {nullptr};
+    ark::mem::Reference *oomObjRef_ {nullptr};
     compiler::RuntimeInterface *runtimeIface_ {nullptr};
 
     NO_MOVE_SEMANTIC(PandaCoreVM);
@@ -192,6 +192,6 @@ private:
 };
 
 }  // namespace core
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_VM_CORE_CORE_VM_H_

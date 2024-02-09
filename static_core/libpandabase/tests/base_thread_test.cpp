@@ -17,7 +17,7 @@
 #include "os/thread.h"
 #include "os/mutex.h"
 
-namespace panda::os::thread {
+namespace ark::os::thread {
 class ThreadTest : public testing::Test {};
 
 uint32_t g_curThreadId = 0;
@@ -107,4 +107,4 @@ TEST_F(ThreadTest, SetOtherThreadPriorityTest)
     ASSERT(childPrioAfter <= childPrioBefore);
 #endif
 }
-}  // namespace panda::os::thread
+}  // namespace ark::os::thread

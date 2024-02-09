@@ -33,7 +33,7 @@
 #include "events/events.h"
 #include "runtime/handle_base-inl.h"
 
-namespace panda {
+namespace ark {
 
 void ThrowException(const LanguageContext &ctx, ManagedThread *thread, const uint8_t *mutf8Name,
                     const uint8_t *mutf8Msg)
@@ -461,4 +461,4 @@ void HandlePendingException(UnwindPolicy policy)
     FindCatchBlockInCFrames(thread, &stack, nullptr);
 }
 
-}  // namespace panda
+}  // namespace ark

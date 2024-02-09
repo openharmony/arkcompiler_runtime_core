@@ -19,22 +19,22 @@
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/ir/inst.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class BinaryImmOperation;
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 constexpr compiler::Register MIN_REGISTER_NUMBER = 0;
 constexpr compiler::Register MAX_NUM_SHORT_CALL_ARGS = 2;
 constexpr compiler::Register MAX_NUM_NON_RANGE_ARGS = 4;
 constexpr compiler::Register MAX_NUM_INPUTS = MAX_NUM_NON_RANGE_ARGS;
-constexpr panda::compiler::Register NUM_COMPACTLY_ENCODED_REGS = 16;
+constexpr ark::compiler::Register NUM_COMPACTLY_ENCODED_REGS = 16;
 [[maybe_unused]] constexpr compiler::Register MAX_8_BIT_REG = 255 - 1U;  // exclude INVALID_REG
 
 // Get the position where accumulator read happens.
 uint8_t AccReadIndex(const compiler::Inst *inst);
 
 bool CanConvertToIncI(const compiler::BinaryImmOperation *binop);
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPTIMIZER_COMMON_H

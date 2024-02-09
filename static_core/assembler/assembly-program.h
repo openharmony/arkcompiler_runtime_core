@@ -27,18 +27,18 @@
 #include "extensions/extensions.h"
 #include "macros.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 struct Program {
     using StringT = std::set<std::string>;
 
-    panda::panda_file::SourceLang lang {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
-    std::map<std::string, panda::pandasm::Record> recordTable;
-    std::map<std::string, panda::pandasm::Function> functionTable;
+    ark::panda_file::SourceLang lang {ark::panda_file::SourceLang::PANDA_ASSEMBLY};
+    std::map<std::string, ark::pandasm::Record> recordTable;
+    std::map<std::string, ark::pandasm::Function> functionTable;
     std::unordered_map<std::string, std::vector<std::string>>
         functionSynonyms;  // we might keep unordered, since we don't iterate over it
-    std::map<std::string, panda::pandasm::LiteralArray> literalarrayTable;
+    std::map<std::string, ark::pandasm::LiteralArray> literalarrayTable;
     StringT strings;
     std::set<Type> arrayTypes;
 
@@ -49,6 +49,6 @@ struct Program {
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_PROGRAM_H

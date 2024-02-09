@@ -22,7 +22,7 @@
 
 #include "macros.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <size_t I_NUM, typename Enum, Enum... ITEMS>
 class TagForEnumNumerated {
@@ -73,7 +73,7 @@ public:
     using Type = Enum;
 
     static constexpr size_t SIZE = Base::SIZE;
-    static constexpr size_t BITS = sizeof(size_t) * 8ULL - panda::Clz(SIZE);
+    static constexpr size_t BITS = sizeof(size_t) * 8ULL - ark::Clz(SIZE);
 
     static size_t GetIndexFor(Enum e)
     {
@@ -86,6 +86,6 @@ public:
     }
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_UTIL_TAG_FOR_ENUM__

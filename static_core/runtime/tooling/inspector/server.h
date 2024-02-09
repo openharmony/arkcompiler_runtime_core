@@ -20,12 +20,12 @@
 
 #include <functional>
 
-namespace panda {
+namespace ark {
 class JsonObject;
 class JsonObjectBuilder;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 class Server : public virtual EventLoop {  // NOLINT(fuchsia-virtual-inheritance)
 public:
     virtual void OnValidate(std::function<void()> &&handler) = 0;
@@ -53,6 +53,6 @@ public:
     virtual void OnCall(const char *method, std::function<void(const std::string &sessionId, JsonObjectBuilder &result,
                                                                const JsonObject &params)> &&handler) = 0;
 };
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_SERVER_H

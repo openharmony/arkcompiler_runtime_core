@@ -18,7 +18,7 @@
 #include "optimizer/analysis/reg_alloc_verifier.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 #include "optimizer/optimizations/regalloc/spill_fills_resolver.h"
-namespace panda::compiler {
+namespace ark::compiler {
 class RegAllocVerifierTest : public GraphTest {
 public:
     RegAllocVerifierTest() : defaultVerifyOption_(g_options.IsCompilerVerifyRegalloc())
@@ -442,4 +442,4 @@ TEST_F(RegAllocVerifierTest, VerifyEmptyStartBlock)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

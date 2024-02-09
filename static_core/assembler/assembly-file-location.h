@@ -16,7 +16,7 @@
 #ifndef PANDA_ASSEMBLER_ASSEMBLY_FILE_LOCATION_H
 #define PANDA_ASSEMBLER_ASSEMBLY_FILE_LOCATION_H
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 class FileLocation {
@@ -40,6 +40,6 @@ public:
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_FILE_LOCATION_H

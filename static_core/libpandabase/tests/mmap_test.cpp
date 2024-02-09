@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace panda::os::mem::test {
+namespace ark::os::mem::test {
 
 class MmapTest : public ::testing::Test {
 public:
@@ -124,14 +124,14 @@ TEST_F(MMapFixedTest, MMapAsanTsanTest)
 {
     static constexpr size_t OFFSET = 4_KB;
     static constexpr size_t MMAP_ALLOC_SIZE = OFFSET * 2U;
-    size_t pageSize = panda::os::mem::GetPageSize();
-    static_assert(OFFSET < panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS);
+    size_t pageSize = ark::os::mem::GetPageSize();
+    static_assert(OFFSET < ark::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS);
     static_assert(MMAP_ALLOC_SIZE > OFFSET);
     ASSERT_TRUE((MMAP_ALLOC_SIZE % pageSize) == 0U);
-    uintptr_t curAddr = panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS - OFFSET;
+    uintptr_t curAddr = ark::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS - OFFSET;
     curAddr = AlignUp(curAddr, pageSize);
     ASSERT_TRUE((curAddr % pageSize) == 0U);
-    uintptr_t endAddr = panda::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS;
+    uintptr_t endAddr = ark::os::mem::MMAP_FIXED_MAGIC_ADDR_FOR_SANITIZERS;
     endAddr = AlignUp(endAddr, sizeof(uint64_t));
     void *result =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
         mmap(ToVoidPtr(curAddr), MMAP_ALLOC_SIZE, MMAP_PROT_READ | MMAP_PROT_WRITE,
@@ -160,4 +160,4 @@ TEST_F(MMapFixedTest, MMapAsanTsanTest)
     munmap(result, MMAP_ALLOC_SIZE);
 }
 
-}  // namespace panda::os::mem::test
+}  // namespace ark::os::mem::test

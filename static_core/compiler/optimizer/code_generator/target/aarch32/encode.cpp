@@ -29,7 +29,7 @@ Encoder (implementation of math and mem Low-level emitters)
 
 #include <iomanip>
 
-namespace panda::compiler::aarch32 {
+namespace ark::compiler::aarch32 {
 void Aarch32LabelHolder::BindLabel(LabelId id)
 {
     static_cast<Aarch32Encoder *>(GetEncoder())->GetMasm()->Bind(labels_[id]);
@@ -2942,4 +2942,4 @@ size_t Aarch32Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t code
     }
     return pc + vixl::aarch32::k32BitT32InstructionSizeInBytes;
 }
-}  // namespace panda::compiler::aarch32
+}  // namespace ark::compiler::aarch32

@@ -18,7 +18,7 @@
 
 #include "plugins/ets/runtime/types/ets_object.h"
 
-namespace panda::ets::interop::js::js_proxy {
+namespace ark::ets::interop::js::js_proxy {
 
 extern "C" void JSProxyCallBridge(Method *method, ...);
 
@@ -84,4 +84,4 @@ std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> prox
     return jsProxy;
 }
 
-}  // namespace panda::ets::interop::js::js_proxy
+}  // namespace ark::ets::interop::js::js_proxy

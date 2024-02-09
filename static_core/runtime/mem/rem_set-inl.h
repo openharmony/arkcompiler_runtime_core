@@ -20,7 +20,7 @@
 #include "runtime/mem/region_space-inl.h"
 #include "runtime/mem/region_allocator.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <typename LockConfigT>
 RemSet<LockConfigT>::~RemSet()
@@ -194,6 +194,6 @@ void RemSet<LockConfigT>::Dump(std::ostream &out)
     out << std::dec;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_MEM_GC_G1_REM_SET_INL_H

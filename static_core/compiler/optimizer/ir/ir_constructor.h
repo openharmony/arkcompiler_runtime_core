@@ -27,7 +27,7 @@
 #include "mark_word.h"
 #include "optimizer/ir_builder/inst_builder.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * This class aims to simplify IR construction.
  *
@@ -1505,6 +1505,6 @@ private:
 #define INS(INDEX) builder_->GetInst(INDEX)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BB(INDEX) builder_->GetBlock(INDEX)
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_IR_CONSTRUCTOR_H

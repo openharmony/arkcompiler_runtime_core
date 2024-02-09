@@ -25,7 +25,7 @@
 
 #include "runtime/include/mem/panda_containers.h"
 
-namespace panda {
+namespace ark {
 
 class Class;
 
@@ -341,6 +341,6 @@ private:
     Span<ThrowData> throwData_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_PROFILING_DATA_H

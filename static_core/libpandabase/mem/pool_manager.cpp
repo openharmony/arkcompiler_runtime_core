@@ -19,7 +19,7 @@
 #include "pool_manager.h"
 #include "utils/logger.h"
 
-namespace panda {
+namespace ark {
 
 // default is mmap_mem_pool_
 PoolType PoolManager::poolType_ = PoolType::MMAP;
@@ -85,4 +85,4 @@ void PoolManager::Finalize()
     }
 }
 
-}  // namespace panda
+}  // namespace ark

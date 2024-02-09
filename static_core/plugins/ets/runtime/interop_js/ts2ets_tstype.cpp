@@ -18,7 +18,7 @@
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "runtime/include/class_linker-inl.h"
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 
 template <bool IS_STATIC>
 ALWAYS_INLINE inline uint64_t TSTypeCall(Method *method, uint8_t *args, uint8_t *inStackArgs);
@@ -79,8 +79,8 @@ struct TSTypeNamespace {
     static constexpr const char *TSTYPE_PREFIX_GETTER = "_get_";
     static constexpr const char *TSTYPE_PREFIX_SETTER = "_set_";
 
-    static TSTypeNamespace *Create(panda::Class *klass, napi_ref toplevel);
-    static TSTypeNamespace *Create(panda::Class *klass, TSTypeNamespace *upper);
+    static TSTypeNamespace *Create(ark::Class *klass, napi_ref toplevel);
+    static TSTypeNamespace *Create(ark::Class *klass, TSTypeNamespace *upper);
 
     static inline TSTypeNamespace *FromBoundMethod(Method *method)
     {
@@ -92,14 +92,14 @@ struct TSTypeNamespace {
     napi_value ResolveValue(napi_env env);
 
 private:
-    TSTypeNamespace(panda::Class *klass, napi_ref toplevel, std::vector<const char *> &&resolv)
+    TSTypeNamespace(ark::Class *klass, napi_ref toplevel, std::vector<const char *> &&resolv)
         : klass_(klass), toplevel_(toplevel), resolv_(resolv)
     {
     }
 
     void BindMethods();
 
-    panda::Class *klass_ {};
+    ark::Class *klass_ {};
     napi_ref toplevel_ {};
     std::vector<const char *> resolv_;
 };
@@ -114,14 +114,14 @@ TSTypeNamespace *TSTypeNamespace::FromClass(Class *klass)
     return data;
 }
 
-TSTypeNamespace *TSTypeNamespace::Create(panda::Class *klass, napi_ref toplevel)
+TSTypeNamespace *TSTypeNamespace::Create(ark::Class *klass, napi_ref toplevel)
 {
     auto ns = new TSTypeNamespace {klass, toplevel, {}};
     ns->BindMethods();
     return ns;
 }
 
-TSTypeNamespace *TSTypeNamespace::Create(panda::Class *klass, TSTypeNamespace *upper)
+TSTypeNamespace *TSTypeNamespace::Create(ark::Class *klass, TSTypeNamespace *upper)
 {
     std::vector<const char *> resolv;
     resolv.reserve(upper->resolv_.size() + 1);
@@ -219,7 +219,7 @@ ALWAYS_INLINE inline uint64_t TSTypeCall(Method *method, uint8_t *args, uint8_t 
     napi_env env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
-    panda::HandleScope<panda::ObjectHeader *> etsHandleScope(coro);
+    ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
 
     Span<uint8_t> inGprArgs(args, arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
     Span<uint8_t> inFprArgs(inGprArgs.end(), arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
@@ -264,17 +264,17 @@ ALWAYS_INLINE inline uint64_t TSTypeCall(Method *method, uint8_t *args, uint8_t 
         panda_file::Type type = *it;
         napi_value jsVal {};
         switch (type.GetId()) {
-            case panda::panda_file::Type::TypeId::F64: {
+            case ark::panda_file::Type::TypeId::F64: {
                 auto value = argReader.Read<double>();
                 jsVal = JSConvertF64::Wrap(env, value);
                 break;
             }
-            case panda::panda_file::Type::TypeId::U1: {
+            case ark::panda_file::Type::TypeId::U1: {
                 auto value = argReader.Read<bool>();
                 jsVal = JSConvertU1::Wrap(env, value);
                 break;
             }
-            case panda::panda_file::Type::TypeId::REFERENCE: {
+            case ark::panda_file::Type::TypeId::REFERENCE: {
                 auto value = argReader.Read<ObjectHeader *>();
                 auto klass = resolveRefCls(refArgIdx++);
                 if (klass->IsStringClass()) {
@@ -303,29 +303,29 @@ ALWAYS_INLINE inline uint64_t TSTypeCall(Method *method, uint8_t *args, uint8_t 
         NAPI_CHECK_FATAL(napi_call_function(env, jsThis, jsFn, jsargs->size(), jsargs->data(), &jsRet));
     }
 
-    panda::Value etsRet;
+    ark::Value etsRet;
     panda_file::Type type = method->GetReturnType();
     switch (type.GetId()) {
-        case panda::panda_file::Type::TypeId::VOID: {
-            etsRet = panda::Value(uint64_t(0));
+        case ark::panda_file::Type::TypeId::VOID: {
+            etsRet = ark::Value(uint64_t(0));
             break;
         }
-        case panda::panda_file::Type::TypeId::F64: {
+        case ark::panda_file::Type::TypeId::F64: {
             auto res = JSConvertF64::Unwrap(ctx, env, jsRet);
             if (UNLIKELY(!res.has_value())) {
                 InteropCtx::Fatal("unwrap failed");
             }
-            etsRet = panda::Value(res.value());
+            etsRet = ark::Value(res.value());
             break;
         }
-        case panda::panda_file::Type::TypeId::REFERENCE: {
+        case ark::panda_file::Type::TypeId::REFERENCE: {
             auto klass = resolveRefCls(0);
             if (klass->IsStringClass()) {
                 auto res = JSConvertString::Unwrap(ctx, env, jsRet);
                 if (UNLIKELY(!res.has_value())) {
                     InteropCtx::Fatal("unwrap failed");
                 }
-                etsRet = panda::Value(res.value()->GetCoreType());
+                etsRet = ark::Value(res.value()->GetCoreType());
                 break;
             }
             if (klass == ctx->GetJSValueClass() || klass->GetBase() == ctx->GetJSValueClass()) {
@@ -333,7 +333,7 @@ ALWAYS_INLINE inline uint64_t TSTypeCall(Method *method, uint8_t *args, uint8_t 
                     classLinker->InitializeClass(coro, klass);
                 }
                 JSValue *value = JSValue::CreateTSTypeDerived(klass, env, jsRet);
-                etsRet = panda::Value(value->GetCoreType());
+                etsRet = ark::Value(value->GetCoreType());
                 break;
             }
             InteropCtx::Fatal("unsupported reftype");
@@ -348,7 +348,7 @@ ALWAYS_INLINE inline uint64_t TSTypeCall(Method *method, uint8_t *args, uint8_t 
 }
 
 template <typename T>
-static typename T::cpptype TSTypeGetter([[maybe_unused]] panda::Method *method, JSValue *jsvalue)
+static typename T::cpptype TSTypeGetter([[maybe_unused]] ark::Method *method, JSValue *jsvalue)
 {
     auto ctx = InteropCtx::Current();
     constexpr auto METHOD_PREFIX_LEN = std::string_view(TSTypeNamespace::TSTYPE_PREFIX_GETTER).length();
@@ -366,13 +366,13 @@ static void *GetTSTypeGetterBridge(Method *method)
 
     panda_file::Type type = method->GetReturnType();
     switch (type.GetId()) {
-        case panda::panda_file::Type::TypeId::VOID: {
+        case ark::panda_file::Type::TypeId::VOID: {
             InteropCtx::Fatal("void getter");
         }
-        case panda::panda_file::Type::TypeId::F64: {
+        case ark::panda_file::Type::TypeId::F64: {
             return reinterpret_cast<void *>(TSTypeGetter<JSConvertF64>);
         }
-        case panda::panda_file::Type::TypeId::REFERENCE: {
+        case ark::panda_file::Type::TypeId::REFERENCE: {
             auto pf = method->GetPandaFile();
             panda_file::MethodDataAccessor mda(*pf, method->GetFileId());
             panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
@@ -397,7 +397,7 @@ static void *GetTSTypeGetterBridge(Method *method)
 
 void InitTSTypeExports()
 {
-    panda::ets::BindNative("LETSGLOBAL;", "__tstype_cctor", reinterpret_cast<void *>(TSTypeCCtor));
+    ark::ets::BindNative("LETSGLOBAL;", "__tstype_cctor", reinterpret_cast<void *>(TSTypeCCtor));
 }
 
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js

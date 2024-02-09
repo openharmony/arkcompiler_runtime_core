@@ -23,7 +23,7 @@
 #include "runtime/profiling/profiling-inl.h"
 #include "runtime/mem/rendezvous.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief Deoptimize CFrame that lies after another CFrame.
@@ -223,4 +223,4 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha)
     UNREACHABLE();
 }
 
-}  // namespace panda
+}  // namespace ark

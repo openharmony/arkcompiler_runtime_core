@@ -17,7 +17,7 @@
 #include "bytecode_optimizer/reg_acc_alloc.h"
 #include "bytecode_optimizer/optimize_bytecode.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -1067,13 +1067,13 @@ TEST_F(RegAccAllocTest, Ldai_Exist)
     auto pfile = pandasm::AsmEmitter::Emit(fileName, program, nullptr, &maps);
     ASSERT_NE(pfile, false);
 
-    auto oldOptions = panda::bytecodeopt::g_options;
-    panda::bytecodeopt::g_options = panda::bytecodeopt::Options("--opt-level=2");
+    auto oldOptions = ark::bytecodeopt::g_options;
+    ark::bytecodeopt::g_options = ark::bytecodeopt::Options("--opt-level=2");
     EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
-    panda::bytecodeopt::g_options = oldOptions;
+    ark::bytecodeopt::g_options = oldOptions;
     bool fldaiExists = false;
     for (const auto &inst : program.functionTable.find("main:()")->second.ins) {
-        if (inst.opcode == panda::pandasm::Opcode::FLDAI) {
+        if (inst.opcode == ark::pandasm::Opcode::FLDAI) {
             fldaiExists = true;
             break;
         }
@@ -1107,13 +1107,13 @@ TEST_F(RegAccAllocTest, Lda_Extra1)
     auto pfile = pandasm::AsmEmitter::Emit(fileName, program, nullptr, &maps);
     ASSERT_NE(pfile, false);
 
-    auto oldOptions = panda::bytecodeopt::g_options;
-    panda::bytecodeopt::g_options = panda::bytecodeopt::Options("--opt-level=2");
+    auto oldOptions = ark::bytecodeopt::g_options;
+    ark::bytecodeopt::g_options = ark::bytecodeopt::Options("--opt-level=2");
     EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
-    panda::bytecodeopt::g_options = oldOptions;
+    ark::bytecodeopt::g_options = oldOptions;
     bool ldaExists = false;
     for (const auto &inst : program.functionTable.find("main:()")->second.ins) {
-        if (inst.opcode == panda::pandasm::Opcode::LDA) {
+        if (inst.opcode == ark::pandasm::Opcode::LDA) {
             ldaExists = true;
             break;
         }
@@ -1158,13 +1158,13 @@ TEST_F(RegAccAllocTest, Lda_Extra2)
     auto pfile = pandasm::AsmEmitter::Emit(fileName, program, nullptr, &maps);
     ASSERT_NE(pfile, false);
 
-    auto oldOptions = panda::bytecodeopt::g_options;
-    panda::bytecodeopt::g_options = panda::bytecodeopt::Options("--opt-level=2");
+    auto oldOptions = ark::bytecodeopt::g_options;
+    ark::bytecodeopt::g_options = ark::bytecodeopt::Options("--opt-level=2");
     EXPECT_TRUE(OptimizeBytecode(&program, &maps, fileName, false, true));
-    panda::bytecodeopt::g_options = oldOptions;
+    ark::bytecodeopt::g_options = oldOptions;
     int ldaAmount = 0;
     for (const auto &inst : program.functionTable.find("main:(i32)")->second.ins) {
-        if (inst.opcode == panda::pandasm::Opcode::LDA) {
+        if (inst.opcode == ark::pandasm::Opcode::LDA) {
             ldaAmount += 1;
         }
     }
@@ -1206,4 +1206,4 @@ TEST_F(RegAccAllocTest, Const_Phi)
 
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

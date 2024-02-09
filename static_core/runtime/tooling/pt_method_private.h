@@ -19,15 +19,15 @@
 #include "runtime/include/tooling/debug_interface.h"
 
 // NOTE(maksenov): remove this file after refactoring js_runtime
-namespace panda {
+namespace ark {
 class Method;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::tooling {
+namespace ark::tooling {
 inline PtMethod MethodToPtMethod([[maybe_unused]] Method *method)
 {
     return PtMethod();
 }
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 #endif  // RUNTIME_TOOLING_PT_METHOD_PRIVATE_H

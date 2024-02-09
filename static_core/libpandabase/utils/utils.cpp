@@ -16,7 +16,7 @@
 #include <cstdint>
 #include "libpandabase/utils/utils.h"
 
-namespace panda {
+namespace ark {
 
 uint32_t CountDigits(uint64_t v)
 {
@@ -41,4 +41,4 @@ uint32_t CountDigits(uint64_t v)
     return count;
 }
 
-}  // namespace panda
+}  // namespace ark

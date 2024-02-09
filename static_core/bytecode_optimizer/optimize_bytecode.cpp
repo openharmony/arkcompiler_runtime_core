@@ -51,9 +51,9 @@
 
 #include <regex>
 
-namespace panda::bytecodeopt {
+namespace ark::bytecodeopt {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-panda::bytecodeopt::Options g_options("");
+ark::bytecodeopt::Options g_options("");
 
 template <typename T>
 constexpr void RunOpts(compiler::Graph *graph, [[maybe_unused]] BytecodeOptIrInterface *iface)
@@ -87,7 +87,7 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     constexpr int OPT_LEVEL_1 = 1;
     constexpr int OPT_LEVEL_2 = 2;
 
-    if (panda::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_0) {
+    if (ark::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_0) {
         return false;
     }
 
@@ -99,9 +99,9 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     // Lowering can't work without Canonicalization pass.
     if (graph->IsDynamicMethod()) {
         RunOpts<compiler::ValNum, compiler::Lowering, compiler::MoveConstants>(graph);
-    } else if (panda::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_1) {
+    } else if (ark::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_1) {
         RunOpts<Canonicalization, compiler::Lowering>(graph);
-    } else if (panda::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_2) {
+    } else if (ark::bytecodeopt::g_options.GetOptLevel() == OPT_LEVEL_2) {
         // ConstArrayResolver Pass is disabled as it requires fixes for stability
         RunOpts<ConstArrayResolver, compiler::BranchElimination, compiler::ValNum, compiler::IfMerging, compiler::Cse,
                 compiler::Peepholes, compiler::Licm, compiler::Lse, compiler::ValNum, compiler::Cse,
@@ -217,15 +217,15 @@ static void DebugInfoPropagate(pandasm::Function &function, const compiler::Grap
 
 static bool SkipFunction(const pandasm::Function &function, const std::string &funcName)
 {
-    if (panda::bytecodeopt::g_options.WasSetMethodRegex()) {
-        static std::regex rgx(panda::bytecodeopt::g_options.GetMethodRegex());
+    if (ark::bytecodeopt::g_options.WasSetMethodRegex()) {
+        static std::regex rgx(ark::bytecodeopt::g_options.GetMethodRegex());
         if (!std::regex_match(funcName, rgx)) {
             LOG(INFO, BYTECODE_OPTIMIZER) << "Skip Function " << funcName << ":Function's name doesn't match regex";
             return true;
         }
     }
 
-    if (panda::bytecodeopt::g_options.IsSkipMethodsWithEh() && !function.catchBlocks.empty()) {
+    if (ark::bytecodeopt::g_options.IsSkipMethodsWithEh() && !function.catchBlocks.empty()) {
         LOG(INFO, BYTECODE_OPTIMIZER) << "Was not optimized " << funcName << ":Function has catch blocks";
         return true;
     }
@@ -246,7 +246,7 @@ static void SetCompilerOptions(bool isDynamic)
         compiler::g_options.SetCompilerMaxBytecodeSize(~0U);
     }
     if (isDynamic) {
-        panda::bytecodeopt::g_options.SetSkipMethodsWithEh(true);
+        ark::bytecodeopt::g_options.SetSkipMethodsWithEh(true);
     }
 }
 
@@ -270,12 +270,12 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     }
     auto methodPtr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
 
-    panda::BytecodeOptimizerRuntimeAdapter adapter(mda.GetPandaFile());
+    ark::BytecodeOptimizerRuntimeAdapter adapter(mda.GetPandaFile());
     auto graph = allocator.New<compiler::Graph>(&allocator, &localAllocator, Arch::NONE, methodPtr, &adapter, false,
                                                 nullptr, isDynamic, true);
     graph->SetLanguage(lang);
 
-    panda::pandasm::Function &function = it->second;
+    ark::pandasm::Function &function = it->second;
 
     if (SkipFunction(function, funcName)) {
         return false;
@@ -284,7 +284,7 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     // build map from pc to pandasm::ins (to re-build line-number info in BytecodeGen)
     BuildMapFromPcToIns(function, irInterface, graph, methodPtr);
 
-    if ((graph == nullptr) || !graph->RunPass<panda::compiler::IrBuilder>()) {
+    if ((graph == nullptr) || !graph->RunPass<ark::compiler::IrBuilder>()) {
         LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": IR builder failed!";
         return false;
     }
@@ -366,4 +366,4 @@ bool OptimizeBytecode(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
 
     return res;
 }
-}  // namespace panda::bytecodeopt
+}  // namespace ark::bytecodeopt

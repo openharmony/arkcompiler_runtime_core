@@ -30,7 +30,7 @@
 
 using namespace std::placeholders;
 
-namespace panda::tooling::inspector::test {
+namespace ark::tooling::inspector::test {
 
 class TestServer : public Server {
 public:
@@ -657,6 +657,6 @@ TEST_F(ServerTest, OnCallRuntimeRunIfWaitingForDebugger)
     });
 }
 
-}  // namespace panda::tooling::inspector::test
+}  // namespace ark::tooling::inspector::test
 
 // NOLINTEND

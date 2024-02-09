@@ -16,13 +16,13 @@
 #include "wrapped_module.h"
 #include "transforms/gc_utils.h"
 
-using panda::llvmbackend::gc_utils::IsFunctionSupplemental;
+using ark::llvmbackend::gc_utils::IsFunctionSupplemental;
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 
 WrappedModule::WrappedModule(std::unique_ptr<llvm::LLVMContext> llvmContext, std::unique_ptr<llvm::Module> module,
-                             std::unique_ptr<panda::llvmbackend::LLVMArkInterface> arkInterface,
-                             std::unique_ptr<panda::llvmbackend::DebugDataBuilder> debugData, uint32_t moduleId)
+                             std::unique_ptr<ark::llvmbackend::LLVMArkInterface> arkInterface,
+                             std::unique_ptr<ark::llvmbackend::DebugDataBuilder> debugData, uint32_t moduleId)
     : llvmContext_(std::move(llvmContext)),
       module_(std::move(module)),
       arkInterface_(std::move(arkInterface)),
@@ -38,12 +38,12 @@ WrappedModule::WrappedModule(std::unique_ptr<llvm::LLVMContext> llvmContext, std
     ASSERT(codeInfoProducer_ != nullptr);
 }
 
-void WrappedModule::AddMethod(panda::compiler::RuntimeInterface::MethodPtr method)
+void WrappedModule::AddMethod(ark::compiler::RuntimeInterface::MethodPtr method)
 {
     methods_.push_back(method);
 }
 
-void WrappedModule::SetCompiled(std::unique_ptr<panda::llvmbackend::CreatedObjectFile> objectFile)
+void WrappedModule::SetCompiled(std::unique_ptr<ark::llvmbackend::CreatedObjectFile> objectFile)
 {
     objectFile_ = std::move(objectFile);
     module_ = nullptr;
@@ -56,13 +56,13 @@ bool WrappedModule::IsCompiled()
     return objectFile_ != nullptr;
 }
 
-bool WrappedModule::HasFunctionDefinition(panda::compiler::RuntimeInterface::MethodPtr method)
+bool WrappedModule::HasFunctionDefinition(ark::compiler::RuntimeInterface::MethodPtr method)
 {
     llvm::Function *function = GetFunctionByMethodPtr(method);
     return function != nullptr && !function->isDeclarationForLinker();
 }
 
-llvm::Function *WrappedModule::GetFunctionByMethodPtr(panda::compiler::RuntimeInterface::MethodPtr method)
+llvm::Function *WrappedModule::GetFunctionByMethodPtr(ark::compiler::RuntimeInterface::MethodPtr method)
 {
     return module_->getFunction(arkInterface_->GetUniqMethodName(method));
 }
@@ -77,27 +77,27 @@ const std::unique_ptr<llvm::Module> &WrappedModule::GetModule()
     return module_;
 }
 
-const std::unique_ptr<panda::llvmbackend::LLVMArkInterface> &WrappedModule::GetLLVMArkInterface()
+const std::unique_ptr<ark::llvmbackend::LLVMArkInterface> &WrappedModule::GetLLVMArkInterface()
 {
     return arkInterface_;
 }
 
-const std::unique_ptr<panda::llvmbackend::DebugDataBuilder> &WrappedModule::GetDebugData()
+const std::unique_ptr<ark::llvmbackend::DebugDataBuilder> &WrappedModule::GetDebugData()
 {
     return debugData_;
 }
 
-const std::unique_ptr<panda::llvmbackend::CodeInfoProducer> &WrappedModule::GetCodeInfoProducer()
+const std::unique_ptr<ark::llvmbackend::CodeInfoProducer> &WrappedModule::GetCodeInfoProducer()
 {
     return codeInfoProducer_;
 }
 
-const std::vector<panda::compiler::RuntimeInterface::MethodPtr> &WrappedModule::GetMethods()
+const std::vector<ark::compiler::RuntimeInterface::MethodPtr> &WrappedModule::GetMethods()
 {
     return methods_;
 }
 
-const std::unique_ptr<panda::llvmbackend::CreatedObjectFile> &WrappedModule::GetObjectFile()
+const std::unique_ptr<ark::llvmbackend::CreatedObjectFile> &WrappedModule::GetObjectFile()
 {
     return objectFile_;
 }
@@ -107,7 +107,7 @@ uint32_t WrappedModule::GetModuleId()
     return moduleId_;
 }
 
-std::unique_ptr<panda::llvmbackend::CreatedObjectFile> WrappedModule::TakeObjectFile()
+std::unique_ptr<ark::llvmbackend::CreatedObjectFile> WrappedModule::TakeObjectFile()
 {
     return std::move(objectFile_);
 }
@@ -137,4 +137,4 @@ void WrappedModule::Dump(llvm::raw_ostream *stream)
     *stream << "\tTotal: functions = " << functions << ", inlineFunctions = " << inlineFunctions << "\n";
 }
 
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend

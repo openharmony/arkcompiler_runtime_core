@@ -17,7 +17,7 @@
 
 #include "file_items.h"
 
-namespace panda {
+namespace ark {
 enum LangTypeT : bool { LANG_TYPE_STATIC, LANG_TYPE_DYNAMIC };
 enum MTModeT { MT_MODE_SINGLE, MT_MODE_MULTI, MT_MODE_TASK };
 
@@ -39,6 +39,6 @@ public:
     using Value = typename LockConfigT::DummyLock;
 };
 }  // namespace mem
-}  // namespace panda
+}  // namespace ark
 
 #endif  // RUNTIME_MEM_LOCK_CONFIG_HELPER_H

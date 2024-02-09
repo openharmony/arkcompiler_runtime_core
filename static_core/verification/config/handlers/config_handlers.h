@@ -18,13 +18,13 @@
 
 #include "verification/public.h"
 
-namespace panda::verifier::debug {
+namespace ark::verifier::debug {
 void RegisterConfigHandlerBreakpoints(Config *dcfg);
 void RegisterConfigHandlerWhitelist(Config *dcfg);
 void RegisterConfigHandlerOptions(Config *dcfg);
 void RegisterConfigHandlerMethodOptions(Config *dcfg);
 void SetDefaultMethodOptions(Config *dcfg);
 void RegisterConfigHandlerMethodGroups(Config *dcfg);
-}  // namespace panda::verifier::debug
+}  // namespace ark::verifier::debug
 
 #endif  // PANDA_VERIFIER_DEBUG_HANDLERS_H_

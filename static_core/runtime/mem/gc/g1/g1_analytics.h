@@ -21,7 +21,7 @@
 #include "runtime/mem/gc/g1/g1_predictions.h"
 #include "runtime/mem/gc/g1/collection_set.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class G1Analytics {
 public:
     explicit G1Analytics(uint64_t now);
@@ -63,7 +63,7 @@ private:
     uint64_t PredictCopyingTimeInMicros(size_t copiedBytes) const;
     size_t PredictRemsetRefsCount(size_t remsetSize) const;
 
-    uint64_t PredictTime(size_t volume, panda::Sequence rateSeq) const
+    uint64_t PredictTime(size_t volume, ark::Sequence rateSeq) const
     {
         auto ratePrediction = predictor_.Predict(rateSeq);
         return ratePrediction == 0 ? 0 : volume / ratePrediction;
@@ -88,23 +88,23 @@ private:
     uint64_t scanDirtyCardsStart_ {0};
     uint64_t scanDirtyCardsEnd_ {0};
     uint64_t predictedMixedPause_ {0};
-    panda::Sequence allocationRateSeq_;
-    panda::Sequence copiedBytesSeq_;
-    panda::Sequence copyingBytesRateSeq_;
-    panda::Sequence remsetRefsSeq_;
-    panda::Sequence remsetRefsPerChunkSeq_;
-    panda::Sequence liveObjecstSeq_;
-    panda::Sequence markingRateSeq_;
-    panda::Sequence updateRefsRateSeq_;
-    panda::Sequence promotionSeq_;
-    panda::Sequence otherSeq_;
-    panda::Sequence liveObjectsSeq_;
-    panda::Sequence scanDirtyCardsRateSeq_;
+    ark::Sequence allocationRateSeq_;
+    ark::Sequence copiedBytesSeq_;
+    ark::Sequence copyingBytesRateSeq_;
+    ark::Sequence remsetRefsSeq_;
+    ark::Sequence remsetRefsPerChunkSeq_;
+    ark::Sequence liveObjecstSeq_;
+    ark::Sequence markingRateSeq_;
+    ark::Sequence updateRefsRateSeq_;
+    ark::Sequence promotionSeq_;
+    ark::Sequence otherSeq_;
+    ark::Sequence liveObjectsSeq_;
+    ark::Sequence scanDirtyCardsRateSeq_;
     static constexpr double DEFAULT_CONFIDENCE_FACTOR = 0.5;
     G1Predictor predictor_ {DEFAULT_CONFIDENCE_FACTOR};
     std::atomic<size_t> copiedBytes_ {0};
     std::atomic<size_t> promotedRegions_ {0};
     std::atomic<size_t> liveObjects_ {0};
 };
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif

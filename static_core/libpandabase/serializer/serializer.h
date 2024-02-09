@@ -28,7 +28,7 @@
 #include <unordered_map>
 #include <cstring>
 
-namespace panda::serializer {
+namespace ark::serializer {
 
 inline uintptr_t ToUintPtr(const uint8_t *p)
 {
@@ -320,6 +320,6 @@ bool BufferToStruct(const std::vector<uint8_t> &buffer, Struct &out)
     return BufferToStruct<N>(buffer.data(), buffer.size(), out);
 }
 
-}  // namespace panda::serializer
+}  // namespace ark::serializer
 
 #endif  // PANDA_LIBPANDABASE_UTILS_SERIALIZER_SERIALIZER_H_

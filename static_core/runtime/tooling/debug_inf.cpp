@@ -18,7 +18,7 @@
 // Debuge interface for native tools(perf, libunwind).
 //
 
-namespace panda::tooling {
+namespace ark::tooling {
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -69,13 +69,13 @@ PCodeMetaInfo g_dexDebugDescriptor;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 std::map<const std::string, PCodeItem *> DebugInf::aexItemMap_;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-panda::os::memory::Mutex DebugInf::jitItemLock_;
+ark::os::memory::Mutex DebugInf::jitItemLock_;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-panda::os::memory::Mutex DebugInf::aexItemLock_;
+ark::os::memory::Mutex DebugInf::aexItemLock_;
 
 void DebugInf::AddCodeMetaInfo(const panda_file::File *file)
 {
-    panda::os::memory::LockHolder lock(aexItemLock_);
+    ark::os::memory::LockHolder lock(aexItemLock_);
     ASSERT(file != nullptr);
     auto it = aexItemMap_.find(file->GetFilename());
     if (it != aexItemMap_.end()) {
@@ -88,7 +88,7 @@ void DebugInf::AddCodeMetaInfo(const panda_file::File *file)
 
 void DebugInf::DelCodeMetaInfo(const panda_file::File *file)
 {
-    panda::os::memory::LockHolder lock(aexItemLock_);
+    ark::os::memory::LockHolder lock(aexItemLock_);
     ASSERT(file != nullptr);
     auto it = aexItemMap_.find(file->GetFilename());
     if (it == aexItemMap_.end()) {
@@ -116,7 +116,7 @@ void DebugInf::UnLock(PCodeMetaInfo *mi)
 
 PCodeItem *DebugInf::AddCodeMetaInfoImpl(PCodeMetaInfo *metaInfo, [[maybe_unused]] Span<const uint8_t> inss)
 {
-    uint64_t timestamp = std::max(metaInfo->timestamp + 1, panda::time::GetCurrentTimeInNanos());
+    uint64_t timestamp = std::max(metaInfo->timestamp + 1, ark::time::GetCurrentTimeInNanos());
 
     // Atomic with relaxed order reason: data race with metaInfo with no synchronization or ordering constraints imposed
     // on other reads or writes
@@ -153,7 +153,7 @@ void DebugInf::DelCodeMetaInfoImpl(PCodeMetaInfo *metaInfo, const panda_file::Fi
 {
     PCodeItem *codeItem = aexItemMap_[file->GetFilename()];
     ASSERT(codeItem != nullptr);
-    uint64_t timestamp = std::max(metaInfo->timestamp + 1, panda::time::GetCurrentTimeInNanos());
+    uint64_t timestamp = std::max(metaInfo->timestamp + 1, ark::time::GetCurrentTimeInNanos());
     // lock
     Lock(metaInfo);
 
@@ -181,4 +181,4 @@ void DebugInf::DelCodeMetaInfoImpl(PCodeMetaInfo *metaInfo, const panda_file::Fi
     // unlock
     UnLock(metaInfo);
 }
-}  // namespace panda::tooling
+}  // namespace ark::tooling

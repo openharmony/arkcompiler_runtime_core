@@ -18,7 +18,7 @@
 
 #include "runtime/include/object_header.h"
 
-namespace panda {
+namespace ark {
 class GlobalObjectLock {
 public:
     explicit GlobalObjectLock(const ObjectHeader *obj);
@@ -36,6 +36,6 @@ public:
     NO_COPY_SEMANTIC(GlobalObjectLock);
     NO_MOVE_SEMANTIC(GlobalObjectLock);
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_GLOBAL_OBJECT_LOCK_H_

@@ -25,7 +25,7 @@ def get_object_type(type)
   return '%s *' % t.mirror_class if t
   d = Runtime::coretypes.find { |d| d.managed_class == "Default" }
   return '%s *' % d.mirror_class if d
-  'panda::ObjectHeader *'
+  'ark::ObjectHeader *'
 end
 
 def get_type(type)
@@ -45,7 +45,7 @@ def get_type(type)
     'any' => ['uint64_t'],
     'ptr' => ['void *'],
     'acc' => ['uint64_t'],
-    'method' => ['panda::Method *'],
+    'method' => ['ark::Method *'],
     'string_id' => ['uint32_t'],
     'method_id' => ['uint32_t'],
   }

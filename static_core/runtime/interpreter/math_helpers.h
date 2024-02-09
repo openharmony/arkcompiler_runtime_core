@@ -22,7 +22,7 @@
 
 #include "libpandabase/macros.h"
 
-namespace panda::interpreter::math_helpers {
+namespace ark::interpreter::math_helpers {
 
 template <typename T>
 struct bit_shl {  // NOLINT(readability-identifier-naming)
@@ -210,6 +210,6 @@ struct dec {  // NOLINT(readability-identifier-naming)
     }
 };
 
-}  // namespace panda::interpreter::math_helpers
+}  // namespace ark::interpreter::math_helpers
 
 #endif  // PANDA_INTERPRETER_FRAME_H_

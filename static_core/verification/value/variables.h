@@ -26,7 +26,7 @@
 
 #include <memory>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 class Variables {
     struct Wrapper {
@@ -101,6 +101,6 @@ private:
     PoolType varPool_ {Wrapper::Init};
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !_PANDA_VERIFIER_VARIABLES_HPP

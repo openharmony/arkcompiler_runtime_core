@@ -23,7 +23,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/method-inl.h"
 
-namespace panda {
+namespace ark {
 
 class CompilationQueueElement {
 public:
@@ -199,6 +199,6 @@ private:
     const char *queueName_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COMPILER_QUEUE_COUNTER_PRIORITY_H_

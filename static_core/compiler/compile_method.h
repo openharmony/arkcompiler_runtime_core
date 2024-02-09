@@ -23,7 +23,7 @@
 #include "utils/arch.h"
 #include "compiler_task_runner.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 class RuntimeInterface;
 
@@ -71,6 +71,6 @@ template <TaskRunnerMode RUNNER_MODE>
 void CompileInGraph(RuntimeInterface *runtime, bool isDynamic, Arch arch, CompilerTaskRunner<RUNNER_MODE> taskRunner,
                     JITStats *jitStats = nullptr);
 bool CheckMethodInLists(const std::string &methodName);
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_COMPILE_METHOD_H

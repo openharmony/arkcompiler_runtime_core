@@ -38,7 +38,7 @@ using llvm::CallInst;
 using llvm::ConstantInt;
 using llvm::Instruction;
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 llvm::PreservedAnalyses PruneDeopt::run(Function &function, FunctionAnalysisManager & /*analysisManager*/)
 {
@@ -197,4 +197,4 @@ void PruneDeopt::MakeUnreachableAfter(BasicBlock *block, Instruction *after) con
     llvm::IRBuilder<> builder(block);
     builder.CreateUnreachable();
 }
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes

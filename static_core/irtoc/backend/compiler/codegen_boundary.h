@@ -18,7 +18,7 @@
 
 #include "compiler/optimizer/code_generator/codegen.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 /// Code generation for code living within Boundary Frame
 class CodegenBoundary : public Codegen {
@@ -36,6 +36,6 @@ private:
     void RemoveBoundaryFrame(const BasicBlock *bb) const;
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // PANDA_CODEGEN_BOUNDARY_H

@@ -18,7 +18,7 @@
 #include "libpandabase/macros.h"
 #include "runtime/include/managed_thread.h"
 
-namespace panda {
+namespace ark {
 
 template <typename T>
 class LocalObjectHandle {
@@ -68,6 +68,6 @@ private:
     ManagedThread *thread_ {};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // RUNTIME_MEM_OBJECT_LOCAL_OBJECT_HANDLE_H_

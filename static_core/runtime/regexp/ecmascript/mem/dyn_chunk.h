@@ -19,7 +19,7 @@
 #include <cstring>
 #include "libpandabase/macros.h"
 #include "runtime/include/runtime.h"
-namespace panda {
+namespace ark {
 
 template <typename T>
 inline T UnalignedLoad(T const *p)
@@ -162,6 +162,6 @@ private:
     size_t allocatedSize_ {0};
     bool error_ {false};
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif

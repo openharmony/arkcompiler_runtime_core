@@ -21,7 +21,7 @@
 
 #include "macros.h"
 
-namespace panda {
+namespace ark {
 template <class T, size_t N>
 class RingBuffer;
 
@@ -416,6 +416,6 @@ private:
     size_type tail_ = N;
     size_type currentSize_ = 0U;
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_LIBPANDABASE_UTILS_RING_BUFFER_H

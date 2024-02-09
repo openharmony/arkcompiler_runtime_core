@@ -20,7 +20,7 @@
 #include <bitset>
 #include <vector>
 
-namespace panda::compiler {
+namespace ark::compiler {
 #include "compiler_logger_components.inc"
 
 enum CompilerLoggerComponents : uint8_t {
@@ -70,6 +70,6 @@ private:
 #define COMPILER_LOG_IF(cond, level, comp)                                                              \
     CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::comp) && LOG_IF(cond, level, COMPILER) \
                                                                               << "[" #comp "] "
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_COMPILER_LOGGER_H

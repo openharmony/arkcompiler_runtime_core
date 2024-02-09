@@ -18,7 +18,7 @@
 
 #include "libpandabase/utils/arena_containers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class ConditionChain;
 class Inst;
 
@@ -32,6 +32,6 @@ public:
 private:
     ArenaMap<ConditionChain *, Inst *> cache_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_CONDITION_CHAIN_CACHE_H

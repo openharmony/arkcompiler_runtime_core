@@ -16,7 +16,7 @@
 #include "locations.h"
 #include "inst.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 LocationsInfo::LocationsInfo(ArenaAllocator *allocator, Inst *inst)
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     : locations_(allocator->New<Location[]>(inst->GetInputsCount()), inst->GetInputsCount())
@@ -58,4 +58,4 @@ std::string Location::ToString(Arch arch)
     Dump(ss, arch);
     return ss.str();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

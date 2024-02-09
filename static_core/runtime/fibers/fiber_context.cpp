@@ -17,7 +17,7 @@
 #include "libpandabase/macros.h"
 #include "runtime/fibers/fiber_context.h"
 
-namespace panda::fibers {
+namespace ark::fibers {
 
 void CopyContext(FiberContext *dst, const FiberContext *src)
 {
@@ -26,4 +26,4 @@ void CopyContext(FiberContext *dst, const FiberContext *src)
     memcpy_s(dst, sizeof(FiberContext), src, sizeof(FiberContext));
 }
 
-}  // namespace panda::fibers
+}  // namespace ark::fibers

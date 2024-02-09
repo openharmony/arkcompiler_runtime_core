@@ -20,7 +20,7 @@
 
 #include <optional>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 void EndpointBase::OnCall(const char *method, EndpointBase::MethodHandler &&handler)
 {
     os::memory::LockHolder lock(methodHandlersMutex_);
@@ -69,4 +69,4 @@ void EndpointBase::HandleMessage(const std::string &message)
         LOG(INFO, DEBUGGER) << "Expected either 'method' or 'result' parameter";
     }
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

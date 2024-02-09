@@ -30,7 +30,7 @@
 #include "file_item_container.h"
 #include "pgo.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 class AsmEmitter {
 public:
@@ -52,17 +52,17 @@ public:
 
     PANDA_PUBLIC_API static bool Emit(panda_file::ItemContainer *items, const Program &program,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool emitDebugInfo = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
+                                      ark::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
     PANDA_PUBLIC_API static bool Emit(panda_file::Writer *writer, const Program &program,
                                       std::map<std::string, size_t> *stat = nullptr,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debugInfo = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
+                                      ark::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
     PANDA_PUBLIC_API static bool Emit(const std::string &filename, const Program &program,
                                       std::map<std::string, size_t> *stat = nullptr,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debugInfo = true,
-                                      panda::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
+                                      ark::panda_file::pgo::ProfileOptimizer *profileOpt = nullptr);
 
     PANDA_PUBLIC_API static std::unique_ptr<const panda_file::File> Emit(const Program &program,
                                                                          PandaFileToPandaAsmMaps *maps = nullptr);
@@ -247,6 +247,6 @@ private:
 std::string GetOwnerName(std::string name);
 std::string GetItemName(std::string name);
 
-}  // namespace panda::pandasm
+}  // namespace ark::pandasm
 
 #endif  // PANDA_ASSEMBLER_ASSEMBLY_EMITTER_H

@@ -29,7 +29,7 @@
 
 #include <unistd.h>
 
-namespace panda::os::unique_fd {
+namespace ark::os::unique_fd {
 
 class UniqueFd {
 public:
@@ -92,6 +92,6 @@ private:
     int fd_ = -1;
 };
 
-}  // namespace panda::os::unique_fd
+}  // namespace ark::os::unique_fd
 
 #endif  // PANDA_LIBPANDABASE_OS_UNIQUE_FD_H_

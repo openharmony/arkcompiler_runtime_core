@@ -18,7 +18,7 @@
 #include "optimizer/optimizations/balance_expressions.h"
 #include "compiler_logger.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 bool BalanceExpressions::RunImpl()
 {
     processedInstMrk_ = GetGraph()->NewMarker();
@@ -275,4 +275,4 @@ void BalanceExpressions::Dump(std::ostream *out) const
 
 template size_t BalanceExpressions::GetBitFloor<size_t>(size_t val);
 template size_t BalanceExpressions::GetBitCeil<size_t>(size_t val);
-}  // namespace panda::compiler
+}  // namespace ark::compiler

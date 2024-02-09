@@ -17,7 +17,7 @@ Low-level calling convention
 */
 #include "target/aarch64/target.h"
 
-namespace panda::compiler::aarch64 {
+namespace ark::compiler::aarch64 {
 
 constexpr int32_t IMM_2 = 2;
 
@@ -403,4 +403,4 @@ void Aarch64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo
 
     GetMasm()->Ret();
 }
-}  // namespace panda::compiler::aarch64
+}  // namespace ark::compiler::aarch64

@@ -23,7 +23,7 @@
 
 #include "runtime/mem/vm_handle-inl.h"
 
-namespace panda::ets::interop::js::ets_proxy {
+namespace ark::ets::interop::js::ets_proxy {
 
 /*static*/
 std::unique_ptr<EtsMethodWrapper> EtsMethodWrapper::CreateMethod(EtsMethod *etsMethod, EtsClassWrapper *owner)
@@ -157,4 +157,4 @@ template napi_value EtsMethodWrapper::EtsMethodCallHandler<false, true>(napi_env
 template napi_value EtsMethodWrapper::EtsMethodCallHandler<true, false>(napi_env, napi_callback_info);
 template napi_value EtsMethodWrapper::EtsMethodCallHandler<true, true>(napi_env, napi_callback_info);
 
-}  // namespace panda::ets::interop::js::ets_proxy
+}  // namespace ark::ets::interop::js::ets_proxy

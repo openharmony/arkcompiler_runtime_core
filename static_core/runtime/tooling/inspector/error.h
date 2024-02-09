@@ -20,8 +20,8 @@
 
 #include <optional>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 bool HandleError(std::optional<Error> &&error);
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_ERROR_H

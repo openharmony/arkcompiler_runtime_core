@@ -21,7 +21,7 @@
 #include "libpandabase/macros.h"
 #include <node_api.h>
 
-namespace panda::ets::interop::js {
+namespace ark::ets::interop::js {
 class PendingPromiseListener final : public PromiseListener {
 public:
     explicit PendingPromiseListener(napi_deferred deferred) : deferred_(deferred) {}
@@ -39,6 +39,6 @@ private:
     napi_deferred deferred_;
     bool completed_ = false;
 };
-}  // namespace panda::ets::interop::js
+}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_PENDING_PROMISE_LISTENER_H_

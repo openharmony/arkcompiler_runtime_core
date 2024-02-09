@@ -19,7 +19,7 @@
 #include "runtime/include/managed_thread.h"
 #include "runtime/mark_word.cpp"
 
-namespace panda {
+namespace ark {
 
 class MarkWordTest : public testing::Test {
 public:
@@ -537,4 +537,4 @@ TEST_F(MarkWordTest, ReadBarrierSetWithMaxValues)
     CheckReadBarrierSet<MaxTestValuesGetter>();
 }
 
-}  //  namespace panda
+}  //  namespace ark

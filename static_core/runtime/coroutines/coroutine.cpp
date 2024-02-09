@@ -19,21 +19,21 @@
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/panda_vm.h"
 
-namespace panda {
+namespace ark {
 
 Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
                              std::optional<EntrypointInfo> &&epInfo)
 {
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
     auto *co = allocator->New<Coroutine>(os::thread::GetCurrentThreadId(), allocator, vm,
-                                         panda::panda_file::SourceLang::PANDA_ASSEMBLY, std::move(name), context,
+                                         ark::panda_file::SourceLang::PANDA_ASSEMBLY, std::move(name), context,
                                          std::move(epInfo));
     co->Initialize();
     return co;
 }
 
 Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
-                     panda::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
+                     ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
                      std::optional<EntrypointInfo> &&epInfo)
     : ManagedThread(id, allocator, vm, Thread::ThreadType::THREAD_TYPE_TASK, threadLang),
       name_(std::move(name)),
@@ -177,4 +177,4 @@ std::ostream &operator<<(std::ostream &os, Coroutine::Status status)
     return os;
 }
 
-}  // namespace panda
+}  // namespace ark

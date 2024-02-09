@@ -21,20 +21,20 @@
 namespace OHOS {
 void MethodDataAccessorFuzzTest(const uint8_t *data, size_t size)
 {
-    auto pf = panda::panda_file::OpenPandaFileFromMemory(data, size);
+    auto pf = ark::panda_file::OpenPandaFileFromMemory(data, size);
     if (pf == nullptr) {
         return;
     }
     auto classes = pf->GetClasses();
     const auto &panda_file = *pf;
     for (size_t i = 0; i < classes.Size(); i++) {
-        panda::panda_file::File::EntityId id(classes[i]);
+        ark::panda_file::File::EntityId id(classes[i]);
         if (panda_file.IsExternal(id)) {
             continue;
         }
 
-        panda::panda_file::ClassDataAccessor cda(panda_file, id);
-        cda.EnumerateMethods([&](const panda::panda_file::MethodDataAccessor &mda) {});
+        ark::panda_file::ClassDataAccessor cda(panda_file, id);
+        cda.EnumerateMethods([&](const ark::panda_file::MethodDataAccessor &mda) {});
     }
 }
 }  // namespace OHOS

@@ -19,7 +19,7 @@
 #include "runtime/mem/gc/gc_marker.h"
 #include "runtime/mem/gc/gc_root.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 template <MTModeT MT_MODE>
 class AllocConfig<GCType::STW_GC, MT_MODE> {
@@ -88,9 +88,9 @@ public:
     NO_MOVE_SEMANTIC(StwGC);
     ~StwGC() override = default;
 
-    void InitGCBits(panda::ObjectHeader *object) override;
+    void InitGCBits(ark::ObjectHeader *object) override;
 
-    void InitGCBitsForAllocationInTLAB(panda::ObjectHeader *objHeader) override;
+    void InitGCBitsForAllocationInTLAB(ark::ObjectHeader *objHeader) override;
 
     bool IsPinningSupported() const final
     {
@@ -125,6 +125,6 @@ private:
     StwGCMarker<LanguageConfig> marker_;
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_STW_GC_STW_GC_H

@@ -20,12 +20,12 @@
 
 WEAK_FOR_LTO_START
 
-namespace panda::os::thread {
+namespace ark::os::thread {
 constexpr int LOWEST_PRIORITY = 19;
 
 PANDA_PUBLIC_API int GetPriority(int threadId);
 PANDA_PUBLIC_API int SetPriority(int threadId, int prio);
-}  // namespace panda::os::thread
+}  // namespace ark::os::thread
 
 WEAK_FOR_LTO_END
 

@@ -24,7 +24,7 @@
 
 #include "runtime/hotreload/hotreload.h"
 
-namespace panda::hotreload {
+namespace ark::hotreload {
 
 static Error GetHotreloadErrorByFlag(uint32_t flag)
 {
@@ -581,7 +581,7 @@ void ArkHotreloadBase::ReloadClassNormal(const ClassContainment *hCls)
     // Locking class
     HandleScope<ObjectHeader *> scope(thread_);
     VMHandle<ObjectHeader> managedClassObjHandle(thread_, runtimeClass->GetManagedObject());
-    ::panda::ObjectLock lock(managedClassObjHandle.GetPtr());
+    ::ark::ObjectLock lock(managedClassObjHandle.GetPtr());
     const panda_file::File *newPf = hCls->pf;
     const panda_file::File *oldPf = runtimeClass->GetPandaFile();
 
@@ -653,4 +653,4 @@ void ArkHotreloadBase::AddObsoleteClassesToRuntime(ClassLinker *classLinker)
     classes_.clear();
 }
 
-}  // namespace panda::hotreload
+}  // namespace ark::hotreload

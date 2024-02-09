@@ -20,9 +20,9 @@
 
 struct ETS_InvokeInterface;
 
-namespace panda::ets::napi {
+namespace ark::ets::napi {
 const ETS_InvokeInterface *GetInvokeInterface();
 bool CheckVersionEtsNapi(ets_int version);
-}  // namespace panda::ets::napi
+}  // namespace ark::ets::napi
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_INVOKE_INTERFACE_H

@@ -25,7 +25,7 @@
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
 
-namespace panda {
+namespace ark {
 
 class Class;
 class Method;
@@ -47,7 +47,7 @@ public:
     ~DProfiler() = default;
 
     /**
-     * @brief Add a panda::Class for the dump.
+     * @brief Add a ark::Class for the dump.
      * @param klass
      */
     void AddClass(const Class *klass);
@@ -65,6 +65,6 @@ private:
     NO_MOVE_SEMANTIC(DProfiler);
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_DPROFILER_DPROFILER_H_

@@ -15,8 +15,8 @@
 
 #include "reference_processor.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 ReferenceProcessor::~ReferenceProcessor() = default;
 
-}  // namespace panda::mem
+}  // namespace ark::mem

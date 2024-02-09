@@ -18,7 +18,7 @@
 
 #include "optimizer/code_generator/codegen.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /// CodegenNative provides support for 'Native' calling convention.
 class CodegenNative : public Codegen {
 public:
@@ -38,6 +38,6 @@ protected:
     void GeneratePrologue() override;
     void GenerateEpilogue() override;
 };  // CodegenNative
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_CODEGEN_NATIVE_H

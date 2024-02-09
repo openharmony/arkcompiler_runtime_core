@@ -17,7 +17,7 @@
 #include "optimizer/ir/basicblock.h"
 #include "memory_barriers.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 void OptimizeMemoryBarriers::MergeBarriers()
 {
@@ -293,4 +293,4 @@ bool OptimizeMemoryBarriers::RunImpl()
     return IsApplied();
 }
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

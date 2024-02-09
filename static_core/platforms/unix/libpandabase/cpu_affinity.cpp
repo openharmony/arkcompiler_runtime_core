@@ -21,7 +21,7 @@
 #include <fstream>
 #include <thread>
 
-namespace panda::os {
+namespace ark::os {
 
 CpuSet::CpuSet()  // NOLINT(cppcoreguidelines-pro-type-member-init)
 {
@@ -282,4 +282,4 @@ bool CpuAffinityManager::SetAffinityForCurrentThread(const CpuSet &cpuset)
     return SetAffinityForThread(0, cpuset);
 }
 
-}  // namespace panda::os
+}  // namespace ark::os

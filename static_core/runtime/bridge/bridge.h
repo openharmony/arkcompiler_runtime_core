@@ -19,7 +19,7 @@
 #include <cstdint>
 #include "libpandabase/macros.h"
 
-namespace panda {
+namespace ark {
 
 class Method;
 class Frame;
@@ -47,6 +47,6 @@ PANDA_PUBLIC_API const void *GetCompiledCodeToInterpreterBridgeDyn();
 PANDA_PUBLIC_API const void *GetAbstractMethodStub();
 
 PANDA_PUBLIC_API const void *GetDefaultConflictMethodStub();
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_BRIDGE_BRIDGE_H_

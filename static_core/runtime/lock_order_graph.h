@@ -22,11 +22,11 @@
 #include "runtime/include/thread.h"
 #include "runtime/include/thread_status.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 class LockOrderGraphTest;
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test
 
-namespace panda {
+namespace ark {
 // This class is required to find a loop in lock order graph to detect termination loops.
 class LockOrderGraph {
 public:
@@ -58,8 +58,8 @@ private:
     PandaMap<ThreadId, bool> nodes_;
     PandaMap<ThreadId, ThreadId> edges_;
 
-    friend class panda::mem::test::LockOrderGraphTest;
+    friend class ark::mem::test::LockOrderGraphTest;
 };
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_THREAD_MANAGER_H_

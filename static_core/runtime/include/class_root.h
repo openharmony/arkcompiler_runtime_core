@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_CLASS_ROOT_H_
 #define PANDA_RUNTIME_CLASS_ROOT_H_
 
-namespace panda {
+namespace ark {
 
 enum class ClassRoot {
     V = 0,
@@ -51,6 +51,6 @@ enum class ClassRoot {
     LAST_CLASS_ROOT_ENTRY = ARRAY_STRING  // Must be the last in this enum
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_CLASS_ROOT_H_

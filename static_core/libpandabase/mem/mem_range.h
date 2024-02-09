@@ -18,7 +18,7 @@
 
 #include <ostream>
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Represents range of bytes [start_address, end_address]
 class MemRange final {
@@ -75,6 +75,6 @@ private:
     uintptr_t endAddress_;    ///< Address of the last byte in memory range
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // PANDA_LIBPANDABASE_MEM_MEM_RANGE_H

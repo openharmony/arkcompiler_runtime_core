@@ -18,7 +18,7 @@
 
 #include <type_traits>
 
-namespace panda::compiler {
+namespace ark::compiler {
 class InPlaceCompilerContext;
 class BackgroundCompilerContext;
 class InPlaceCompilerTaskRunner;
@@ -34,6 +34,6 @@ template <TaskRunnerMode RUNNER_MODE>
 using CompilerTaskRunner =
     std::conditional_t<RUNNER_MODE == BACKGROUND_MODE, BackgroundCompilerTaskRunner, InPlaceCompilerTaskRunner>;
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_COMPILER_TASK_RUNNER_H

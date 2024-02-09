@@ -1,24 +1,24 @@
 # Runtime class
 
-Panda runtime uses `panda::Class` to store all necessary language independent information about class. Virtual table and region for static fields are embedded to the `panda::Class` object so it has variable size. To get fast access to them `Class Word` field of the object header points to the instance of this class. `ClassLinker::GetClass` also return an instance of the `panda::Class`.
+Panda runtime uses `ark::Class` to store all necessary language independent information about class. Virtual table and region for static fields are embedded to the `ark::Class` object so it has variable size. To get fast access to them `Class Word` field of the object header points to the instance of this class. `ClassLinker::GetClass` also return an instance of the `ark::Class`.
 
-Pointer to the managed class object (instance of `panda.Class` or other in case of plugin-related code) can be obtained using `panda::Class::GetManagedObject` method:
+Pointer to the managed class object (instance of `panda.Class` or other in case of plugin-related code) can be obtained using `ark::Class::GetManagedObject` method:
 
 ```cpp
-panda::Class *cls = obj->ClassAddr()->GetManagedObject();
+ark::Class *cls = obj->ClassAddr()->GetManagedObject();
 ```
 
-We store common runtime information separately from managed object to give more flexebility for its layout. Disadvantage of this approach is that we need additional dereference to get `panda::Class` from mirror class and vice versa. But we can use composition to reduce number of additional dereferencies. For example:
+We store common runtime information separately from managed object to give more flexebility for its layout. Disadvantage of this approach is that we need additional dereference to get `ark::Class` from mirror class and vice versa. But we can use composition to reduce number of additional dereferencies. For example:
 
 ```cpp
-namespace panda::coretypes {
+namespace ark::coretypes {
 class Class : public ObjectHeader {
 
     ... // Mirror fields
 
-    panda::Class klass_;
+    ark::Class klass_;
 };
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 ```
 
 In this case layout of the `coretypes::Class` will be following:
@@ -29,15 +29,15 @@ In this case layout of the `coretypes::Class` will be following:
                                                 |    `Class Word`  |-----+
                                                 +------------------+   | |
                                                 |   Mirror fields  |   | |
-        panda class (`panda::Class`) ---------> +------------------+ <-|-+
+        panda class (`ark::Class`) ---------> +------------------+ <-|-+
                                                 |      ...         |   |
                                                 | `Managed Object` |---+
                                                 |      ...         |
                                                 +------------------+
 
-Note: as `panda::Class` object has variable size it must be last in the mirror class.
+Note: as `ark::Class` object has variable size it must be last in the mirror class.
 
-Such layout allows to get pointer to the `panda::Class` object from the `coretypes::Class` one and vice versa without dereferencies if we know language context and it's constant (some language specific code):
+Such layout allows to get pointer to the `ark::Class` object from the `coretypes::Class` one and vice versa without dereferencies if we know language context and it's constant (some language specific code):
 
 ```cpp
 auto *managed_class_obj = coretypes::Class::FromRuntimeClass(klass);
@@ -49,11 +49,11 @@ Where `coretypes::Class::FromRuntimeClass` and `coretypes::Class::GetRuntimeClas
 
 
 ```cpp
-namespace panda::coretypes {
+namespace ark::coretypes {
 class Class : public ObjectHeader {
     ...
 
-    panda::Class *GetRuntimeClass() {
+    ark::Class *GetRuntimeClass() {
         return &klass_;
     }
 
@@ -61,16 +61,16 @@ class Class : public ObjectHeader {
         return MEMBER_OFFSET(Class, klass_);
     }
 
-    static Class *FromRuntimeClass(panda::Class *klass) {
+    static Class *FromRuntimeClass(ark::Class *klass) {
         return reinterpret_cast<Class *>(reinterpret_cast<uintptr_t>(klass) - GetRuntimeClassOffset());
     }
 
     ...
 };
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 ```
 
-In common places where language context can be different we can use `panda::Class::GetManagedObject`. For example:
+In common places where language context can be different we can use `ark::Class::GetManagedObject`. For example:
 
 ```cpp
 auto *managed_class_obj = klass->GetManagedObject();

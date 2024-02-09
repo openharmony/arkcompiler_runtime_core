@@ -19,7 +19,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/method-inl.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * The aged counter priority queue works mostly as counter priority queue (see description),
@@ -62,6 +62,6 @@ private:
     uint64_t epochDuration_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_COMPILER_QUEUE_AGED_COUNTER_PRIORITY_H_

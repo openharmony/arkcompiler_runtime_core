@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "runtime/include/thread_scopes.h"
 
-namespace panda::ets::interop::js::testing {
+namespace ark::ets::interop::js::testing {
 
 class EtsInteropJsClassLinkerTest : public EtsInteropTest {};
 
@@ -60,4 +60,4 @@ TEST_F(EtsInteropJsClassLinkerTest, Filed_std_interop_js_JSValue)
     CheckOffsetOfFields("Lstd/interop/js/JSValue;", JSValueOffsets::GetMembersInfo());
 }
 
-}  // namespace panda::ets::interop::js::testing
+}  // namespace ark::ets::interop::js::testing

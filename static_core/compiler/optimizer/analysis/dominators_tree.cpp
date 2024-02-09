@@ -18,7 +18,7 @@
 #include "optimizer/analysis/rpo.h"
 #include "dominators_tree.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 DominatorsTree::DominatorsTree(Graph *graph) : Analysis(graph) {}
 
 bool DominatorsTree::RunImpl()
@@ -223,4 +223,4 @@ inline uint32_t DominatorsTree::GetBlockId(BasicBlock *block)
 {
     return block->GetId();
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

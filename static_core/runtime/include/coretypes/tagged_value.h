@@ -23,11 +23,11 @@
 #include "libpandabase/utils/type_helpers.h"
 #include "utils/bit_utils.h"
 
-namespace panda {
+namespace ark {
 class ObjectHeader;
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::coretypes {
+namespace ark::coretypes {
 
 // Helper defines for double
 static constexpr int DOUBLE_MAX_PRECISION = 17;
@@ -118,9 +118,7 @@ public:
 
     constexpr explicit TaggedValue(TaggedType v) : value_(v) {}
 
-    constexpr explicit TaggedValue(int v) : value_((static_cast<TaggedType>(panda::helpers::ToUnsigned(v))) | TAG_INT)
-    {
-    }
+    constexpr explicit TaggedValue(int v) : value_((static_cast<TaggedType>(ark::helpers::ToUnsigned(v))) | TAG_INT) {}
 
     explicit TaggedValue(unsigned int v)
     {
@@ -419,5 +417,5 @@ inline int32_t JsCastDoubleToInt(double d, size_t bits)
     return ret;
 }
 
-}  // namespace panda::coretypes
+}  // namespace ark::coretypes
 #endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H_

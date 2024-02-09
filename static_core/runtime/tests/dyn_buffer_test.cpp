@@ -18,10 +18,10 @@
 #include "runtime/include/runtime.h"
 #include "runtime/regexp/ecmascript/mem/dyn_chunk.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 // NOLINTNEXTLINE(google-build-using-namespace)
-using namespace panda::coretypes;
+using namespace ark::coretypes;
 
 class DynBufferTest : public testing::Test {
 public:
@@ -31,7 +31,7 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -45,7 +45,7 @@ public:
     NO_MOVE_SEMANTIC(DynBufferTest);
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
 };
 
 TEST_F(DynBufferTest, EmitAndGet)
@@ -100,4 +100,4 @@ TEST_F(DynBufferTest, EmitStrAndGet)
     ASSERT_EQ(val3, 99U);
     ASSERT_EQ(val4, 0);
 }
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

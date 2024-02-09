@@ -19,7 +19,7 @@
 #include "libpandabase/mem/mmap_mem_pool-inl.h"
 #include "libpandabase/mem/mem_pool.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 void HeapSpace::Initialize(size_t initialSize, size_t maxSize, uint32_t minFreePercentage, uint32_t maxFreePercentage)
 {
@@ -502,4 +502,4 @@ void GenerationalSpaces::ReduceTenuredOccupiedInSharedPool(size_t chunkSize)
     tenuredSizeInSharedPools_ -= chunkSize;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

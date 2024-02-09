@@ -15,7 +15,7 @@
 
 #include "assert_gc_scope.h"
 
-namespace panda {
+namespace ark {
 
 std::atomic<int> AssertGCScopeT<true>::gcFlag_ = 0;
 
@@ -26,4 +26,4 @@ bool AssertGCScopeT<true>::IsAllowed()
     // on other reads or writes
     return AssertGCScopeT::gcFlag_.load(std::memory_order_relaxed) == 0;
 }
-}  // namespace panda
+}  // namespace ark

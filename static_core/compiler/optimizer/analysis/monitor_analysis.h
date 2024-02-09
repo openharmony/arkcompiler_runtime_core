@@ -19,7 +19,7 @@
 #include "optimizer/ir/marker.h"
 #include "optimizer/pass.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /*
  * The analysis checks MonitorEntry and MonitorExit in the Graph and set properties for blocks:
  *     1. BlockMonitorEntry for blocks with MonitorEntry
@@ -63,5 +63,5 @@ private:
     ArenaVector<uint32_t> *enteredMonitorsCount_ {nullptr};
     bool checkNonCatchOnly_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_ANALYSIS_MONITOR_ANALYSIS_H

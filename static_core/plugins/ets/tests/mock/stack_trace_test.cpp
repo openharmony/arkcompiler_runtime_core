@@ -19,7 +19,7 @@
 
 // NOLINTBEGIN(readability-identifier-naming, cppcoreguidelines-pro-type-vararg)
 
-namespace panda::ets::test {
+namespace ark::ets::test {
 static const char *TEST_BIN_FILE_NAME = "StackTraceTest.abc";
 
 class StackTraceTest : public testing::Test {
@@ -121,6 +121,6 @@ TEST_F(StackTraceTest, ErrorDescribe)
     ASSERT_NE(pos, std::string::npos);
 }
 
-}  // namespace panda::ets::test
+}  // namespace ark::ets::test
 
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-pro-type-vararg)

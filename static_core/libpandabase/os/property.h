@@ -22,17 +22,17 @@
 
 #include <string>
 
-namespace panda::os::property {
+namespace ark::os::property {
 
 #if defined(PANDA_TARGET_UNIX)
-const auto ARK_DFX_PROP = panda::os::unix::property::ARK_DFX_PROP;
-const auto ARK_TRACE_PROP = panda::os::unix::property::ARK_TRACE_PROP;
+const auto ARK_DFX_PROP = ark::os::unix::property::ARK_DFX_PROP;
+const auto ARK_TRACE_PROP = ark::os::unix::property::ARK_TRACE_PROP;
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-const auto GetPropertyBuffer = panda::os::unix::property::GetPropertyBuffer;
+const auto GetPropertyBuffer = ark::os::unix::property::GetPropertyBuffer;
 #else
 bool GetPropertyBuffer(const char *ark_prop, std::string &out);
 #endif  // PANDA_TARGET_UNIX
-}  // namespace panda::os::property
+}  // namespace ark::os::property
 
 #endif  // PANDA_LIBPANDABASE_PBASE_OS_PROP_H_

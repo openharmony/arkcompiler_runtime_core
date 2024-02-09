@@ -22,7 +22,7 @@ Reserve registers.
 #include "target/aarch32/target.h"
 #include "regfile.h"
 
-namespace panda::compiler::aarch32 {
+namespace ark::compiler::aarch32 {
 /**
  * Default aarch32 calling convention registers
  * Callee
@@ -142,4 +142,4 @@ void Aarch32RegisterDescription::SetUsedRegs(const ArenaVector<Reg> &regs)
     callerSaved_.reset(vixl::aarch32::pc.GetCode());
 }
 
-}  // namespace panda::compiler::aarch32
+}  // namespace ark::compiler::aarch32

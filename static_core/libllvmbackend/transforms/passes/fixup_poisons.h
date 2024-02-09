@@ -19,11 +19,11 @@
 #include <llvm/IR/PassManager.h>
 #include <llvm/IR/Instruction.h>
 
-namespace panda::llvmbackend {
+namespace ark::llvmbackend {
 struct LLVMCompilerOptions;
-}  // namespace panda::llvmbackend
+}  // namespace ark::llvmbackend
 
-namespace panda::llvmbackend::passes {
+namespace ark::llvmbackend::passes {
 
 class FixupPoisons : public llvm::PassInfoMixin<FixupPoisons> {
 public:
@@ -31,7 +31,7 @@ public:
 
     explicit FixupPoisons();
 
-    static bool ShouldInsert([[maybe_unused]] const panda::llvmbackend::LLVMCompilerOptions *options)
+    static bool ShouldInsert([[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
     {
         return true;
     }
@@ -43,6 +43,6 @@ private:
     bool FixupInstructionOperands(llvm::Instruction &instruction);
 };
 
-}  // namespace panda::llvmbackend::passes
+}  // namespace ark::llvmbackend::passes
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_PASSES_FIXUP_POISONS_H

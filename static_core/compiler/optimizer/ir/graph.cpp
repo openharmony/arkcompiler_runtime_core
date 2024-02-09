@@ -31,7 +31,7 @@
 #include "optimizer/code_generator/registers_description.h"
 #endif
 
-namespace panda::compiler {
+namespace ark::compiler {
 static void MarkBlocksRec(Marker mrk, BasicBlock *block)
 {
     if (block->SetMarker(mrk)) {
@@ -880,4 +880,4 @@ size_t GetObjectOffset(const Graph *graph, ObjectType objType, RuntimeInterface:
             return graph->GetRuntime()->GetFieldOffset(field);
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

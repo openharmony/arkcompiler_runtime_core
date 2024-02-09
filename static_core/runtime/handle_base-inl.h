@@ -20,11 +20,11 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/thread-inl.h"
 
-namespace panda {
+namespace ark {
 template <typename T>
 HandleBase::HandleBase(ManagedThread *thread, T value)
 {
     address_ = thread->GetTopScope<T>()->NewHandle(value);
 }
-}  // namespace panda
+}  // namespace ark
 #endif  // PANDA_RUNTIME_HANDLE_BASE_INL_H

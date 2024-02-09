@@ -20,7 +20,7 @@
 #include "libpandafile/line_number_program.h"
 #include "runtime/include/tooling/debug_interface.h"
 
-namespace panda::tooling::test {
+namespace ark::tooling::test {
 using EntityId = panda_file::File::EntityId;
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
@@ -80,6 +80,6 @@ public:
     NO_COPY_SEMANTIC(TestExtractorFactory);
     NO_MOVE_SEMANTIC(TestExtractorFactory);
 };
-}  // namespace panda::tooling::test
+}  // namespace ark::tooling::test
 
 #endif  // PANDA_RUNTIME_TESTS_TOOLING_TEST_EXTRACTOR_H

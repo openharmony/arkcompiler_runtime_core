@@ -19,7 +19,7 @@
 #include <string>
 #include "utils/bit_field.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Graph;
 
 class Pass {
@@ -120,5 +120,5 @@ public:
         return false;
     }
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_OPTIMIZER_H

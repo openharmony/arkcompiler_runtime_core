@@ -31,7 +31,7 @@ Encoder (implementation of math and mem Low-level emitters)
 #include "elf.h"
 #endif  // PANDA_TARGET_MACOS
 
-namespace panda::compiler::amd64 {
+namespace ark::compiler::amd64 {
 LabelHolder::LabelId Amd64LabelHolder::CreateLabel()
 {
     ++id_;
@@ -2737,4 +2737,4 @@ size_t Amd64Encoder::DisasmInstr(std::ostream &stream, size_t pc, ssize_t codeOf
 
     return pc + instruction.length;
 }
-}  // namespace panda::compiler::amd64
+}  // namespace ark::compiler::amd64

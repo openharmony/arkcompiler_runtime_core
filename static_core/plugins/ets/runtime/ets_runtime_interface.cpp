@@ -18,7 +18,7 @@
 #include "ets_runtime_interface.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 
-namespace panda::ets {
+namespace ark::ets {
 compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr method, IdType id) const
 {
     if (id == RuntimeInterface::MEM_PROMISE_CLASS_ID) {
@@ -128,7 +128,7 @@ char *EtsRuntimeInterface::GetFuncPropName(MethodPtr methodPtr, uint32_t strId) 
 {
     auto method = MethodCast(methodPtr);
     auto pf = method->GetPandaFile();
-    auto str = reinterpret_cast<const char *>(pf->GetStringData(panda::panda_file::File::EntityId(strId)).data);
+    auto str = reinterpret_cast<const char *>(pf->GetStringData(ark::panda_file::File::EntityId(strId)).data);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     return const_cast<char *>(std::strrchr(str, '.') + 1);
 }
@@ -157,4 +157,4 @@ bool EtsRuntimeInterface::IsIntrinsicStringBuilderToString(IntrinsicId id) const
     return id == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_TO_STRING;
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

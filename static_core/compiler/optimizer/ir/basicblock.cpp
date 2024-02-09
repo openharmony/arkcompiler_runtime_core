@@ -19,7 +19,7 @@
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/analysis/dominators_tree.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Inst;
 BasicBlock::BasicBlock(Graph *graph, uint32_t guestPc)
     : graph_(graph),
@@ -1046,4 +1046,4 @@ bool BlocksPathDfsSearch(Marker marker, BasicBlock *block, const BasicBlock *tar
     }
     return false;
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

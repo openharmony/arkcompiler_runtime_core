@@ -21,15 +21,15 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "utils/logger.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
-class RegExpExecutor : public panda::RegExpExecutor {
+class RegExpExecutor : public ark::RegExpExecutor {
 public:
     RegExpMatchResult<PandaString> GetResult(bool isSuccess, bool hasIndices) const;
 
 private:
     std::pair<uint32_t, uint32_t> GetIndices(CaptureState *captureState) const;
 };
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // ets_REGEXP_REGEXP_EXECUTOR_H

@@ -28,7 +28,7 @@
 #include "libpandabase/utils/math_helpers.h"
 #include "libpandabase/utils/span.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 /// Abstract base class. Constructor/destructor are protected. No virtual function to avoid dynamic polymorphism.
 class Bitmap {
@@ -54,8 +54,8 @@ public:
 
     static const size_t BITSPERBYTE = 8;
     static const size_t BITSPERWORD = BITSPERBYTE * sizeof(BitmapWordType);
-    static constexpr size_t LOG_BITSPERBYTE = panda::helpers::math::GetIntLog2(static_cast<uint64_t>(BITSPERBYTE));
-    static constexpr size_t LOG_BITSPERWORD = panda::helpers::math::GetIntLog2(static_cast<uint64_t>(BITSPERWORD));
+    static constexpr size_t LOG_BITSPERBYTE = ark::helpers::math::GetIntLog2(static_cast<uint64_t>(BITSPERBYTE));
+    static constexpr size_t LOG_BITSPERWORD = ark::helpers::math::GetIntLog2(static_cast<uint64_t>(BITSPERWORD));
 
 protected:
     /**
@@ -676,5 +676,5 @@ private:
 
 using MarkBitmap = MemBitmap<DEFAULT_ALIGNMENT_IN_BYTES>;
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 #endif  // PANDA_MEM_GC_BITMAP_H

@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace panda::ets {
+namespace ark::ets {
 // Primitive types association got from runtime/class_linker.cpp:InitializeFields()
 using EtsBoolean = uint8_t;
 using EtsByte = int8_t;
@@ -34,6 +34,6 @@ constexpr EtsBoolean ToEtsBoolean(bool b)
     return static_cast<EtsBoolean>(b);
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // PANDA_RUNTIME_ETS_TYPES_ETS_PRIMITIVES_H_

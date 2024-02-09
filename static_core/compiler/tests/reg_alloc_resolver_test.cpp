@@ -18,7 +18,7 @@
 #include "optimizer/analysis/liveness_analyzer.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_resolver.h"
 #include "optimizer/optimizations/regalloc/reg_type.h"
-namespace panda::compiler {
+namespace ark::compiler {
 inline bool operator==(const SpillFillData &lhs, const SpillFillData &rhs)
 {
     return std::forward_as_tuple(lhs.SrcType(), lhs.DstType(), lhs.GetType(), lhs.SrcValue(), lhs.DstValue()) ==
@@ -137,4 +137,4 @@ TEST_F(RegAllocResolverTest, ResolveFixedInputs)
     }
 }
 // NOLINTEND(readability-magic-numbers)
-}  // namespace panda::compiler
+}  // namespace ark::compiler

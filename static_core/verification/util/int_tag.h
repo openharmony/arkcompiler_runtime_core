@@ -22,13 +22,13 @@
 
 #include "macros.h"
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 template <typename Int, const Int MIN_INT, const Int MAX_INT>
 class TagForInt {
 public:
     static constexpr size_t SIZE = MAX_INT - MIN_INT + 1;
-    static constexpr size_t BITS = sizeof(size_t) * 8ULL - panda::Clz(SIZE);
+    static constexpr size_t BITS = sizeof(size_t) * 8ULL - ark::Clz(SIZE);
 
     using Type = Int;
 
@@ -45,6 +45,6 @@ public:
     }
 };
 
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFIER_UTIL_TAG_FOR_INT__

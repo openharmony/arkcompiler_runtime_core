@@ -18,7 +18,7 @@
 #include "optimizer/optimizations/regalloc/reg_alloc_graph_coloring.h"
 #include "optimizer/optimizations/cleanup.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class CleanupEmptyBlocksTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -105,4 +105,4 @@ TEST_F(CleanupEmptyBlocksTest, RemoveEmptyBlockAfterRegAlloc)
 }
 // NOLINTEND(readability-magic-numbers)
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler

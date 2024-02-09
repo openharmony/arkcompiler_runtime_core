@@ -17,7 +17,7 @@
 #define RUNTIME_INCLUDE_MEM_ALLOCATOR_INL_H
 
 #include "runtime/include/mem/allocator.h"
-namespace panda::mem {
+namespace ark::mem {
 
 template <typename AllocT, bool NEED_LOCK>
 inline void *ObjectAllocatorBase::AllocateSafe(size_t size, Alignment align, AllocT *objectAllocator, size_t poolSize,
@@ -77,6 +77,6 @@ void *ObjectAllocatorGen<MT_MODE>::AllocateTenuredImpl(size_t size)
     return mem;
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_INCLUDE_MEM_ALLOCATOR_INL_H

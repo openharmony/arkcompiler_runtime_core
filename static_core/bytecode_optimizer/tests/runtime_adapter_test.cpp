@@ -23,11 +23,11 @@
 #include "runtime_adapter.h"
 #include "utils/utf.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 std::unique_ptr<const panda_file::File> ParseAndEmit(const std::string &source)
 {
-    panda::pandasm::Parser parser;
+    ark::pandasm::Parser parser;
     auto res = parser.Parse(source);
     if (parser.ShowError().err != pandasm::Error::ErrorType::ERR_NONE) {
         std::cerr << "Parse failed: " << parser.ShowError().message << std::endl
@@ -244,4 +244,4 @@ TEST(RuntimeAdapter, Fields)
     EXPECT_EQ(adapter.IsFieldVolatile(fieldPtr), false);
 }
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

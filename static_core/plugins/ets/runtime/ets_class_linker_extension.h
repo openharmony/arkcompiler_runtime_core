@@ -27,15 +27,15 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 
-namespace panda {
+namespace ark {
 
 class Class;
 class Method;
 class ObjectHeader;
 
-}  // namespace panda
+}  // namespace ark
 
-namespace panda::ets {
+namespace ark::ets {
 
 class EtsClassLinkerExtension : public ClassLinkerExtension {
 public:
@@ -77,7 +77,7 @@ public:
         return &errorHandler_;
     };
 
-    Class *FromClassObject(panda::ObjectHeader *obj) override;
+    Class *FromClassObject(ark::ObjectHeader *obj) override;
     size_t GetClassObjectSizeFromClassSize(uint32_t size) override;
 
     Class *GetObjectClass()
@@ -220,6 +220,6 @@ private:
     Class *sharedMemoryClass_ = nullptr;
 };
 
-}  // namespace panda::ets
+}  // namespace ark::ets
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_EXTENSION_H_

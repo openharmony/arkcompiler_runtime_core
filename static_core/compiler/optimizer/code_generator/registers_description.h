@@ -22,7 +22,7 @@
 /*
 Register file wrapper  used for get major data and for Regalloc
 */
-namespace panda::compiler {
+namespace ark::compiler {
 #ifdef PANDA_COMPILER_TARGET_X86_64
 namespace amd64 {
 static constexpr size_t RENAMING_MASK_3_5_OR_9_11 {0xE38};
@@ -117,8 +117,8 @@ public:
                                       bool irtocOptimized = false)
     {
         if (setAllCalleeRegisters) {
-            *calleeRegs = RegMask(panda::GetCalleeRegsMask(arch_, false, irtocOptimized));
-            *calleeVregs = VRegMask(panda::GetCalleeRegsMask(arch_, true, irtocOptimized));
+            *calleeRegs = RegMask(ark::GetCalleeRegsMask(arch_, false, irtocOptimized));
+            *calleeVregs = VRegMask(ark::GetCalleeRegsMask(arch_, true, irtocOptimized));
         } else {
             ASSERT(!irtocOptimized);
             *calleeRegs = GetUsedRegsMask<RegMask, false>(GetCalleeSaved());
@@ -149,6 +149,6 @@ private:
         return mask;
     }
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_REGFILE_H

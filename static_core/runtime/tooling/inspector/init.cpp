@@ -19,18 +19,18 @@
 #include <cstdint>
 #include <optional>
 
-namespace panda::tooling {
+namespace ark::tooling {
 class DebugInterface;
-}  // namespace panda::tooling
+}  // namespace ark::tooling
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static panda::Runtime::DebugSessionHandle g_debugSession;
+static ark::Runtime::DebugSessionHandle g_debugSession;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static panda::tooling::inspector::AsioServer g_server;
+static ark::tooling::inspector::AsioServer g_server;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static std::optional<panda::tooling::inspector::Inspector> g_inspector;
+static std::optional<ark::tooling::inspector::Inspector> g_inspector;
 
 extern "C" int StartDebugger(uint32_t port, bool breakOnStart)
 {
@@ -43,7 +43,7 @@ extern "C" int StartDebugger(uint32_t port, bool breakOnStart)
         return 1;
     }
 
-    g_debugSession = panda::Runtime::GetCurrent()->StartDebugSession();
+    g_debugSession = ark::Runtime::GetCurrent()->StartDebugSession();
     g_inspector.emplace(g_server, g_debugSession->GetDebugger(), breakOnStart);
     return 0;
 }

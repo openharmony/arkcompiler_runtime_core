@@ -30,7 +30,7 @@
 #include "runtime/mem/region_space.h"
 #include "runtime/mem/gc/gc.h"
 
-namespace panda::mem::test {
+namespace ark::mem::test {
 
 using NonObjectRegionAllocator = RegionAllocator<EmptyAllocConfigWithCrossingMap>;
 using RemSetWithCommonLock = RemSet<RemSetLockConfig::CommonLock>;
@@ -49,7 +49,7 @@ public:
         // NOLINTNEXTLINE(readability-magic-numbers)
         spaces_.InitializePercentages(0, 100);
         spaces_.isInitialized_ = true;
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
         Init();
     }
@@ -75,7 +75,7 @@ public:
     }
 
 private:
-    panda::MTManagedThread *thread_ {};
+    ark::MTManagedThread *thread_ {};
     RuntimeOptions options_;
     PandaUniquePtr<CardTable> cardTable_ {nullptr};
 
@@ -90,7 +90,7 @@ TEST_F(RemSetTest, AddRefTest)
 {
     auto *memStats = new mem::MemStatsType();
     NonObjectRegionAllocator allocator(memStats, &spaces_);
-    auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+    auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(ark::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
 
     auto obj1 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
@@ -124,7 +124,7 @@ TEST_F(RemSetTest, AddRefWithAddrTest)
 {
     auto *memStats = new mem::MemStatsType();
     NonObjectRegionAllocator allocator(memStats, &spaces_);
-    auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+    auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(ark::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
 
     auto obj1 = static_cast<ObjectHeader *>(allocator.Alloc(allocator.GetMaxRegularObjectSize()));
@@ -156,7 +156,7 @@ TEST_F(RemSetTest, TravelObjectToAddRefTest)
 {
     auto *memStats = new mem::MemStatsType();
     NonObjectRegionAllocator allocator(memStats, &spaces_);
-    auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(panda::Class));
+    auto cls = ext_->CreateClass(nullptr, 0, 0, sizeof(ark::Class));
     cls->SetObjectSize(allocator.GetMaxRegularObjectSize());
     cls->SetRefFieldsNum(1, false);
     auto offset = ObjectHeader::ObjectHeaderSize();
@@ -193,4 +193,4 @@ TEST_F(RemSetTest, TravelObjectToAddRefTest)
     delete memStats;
 }
 
-}  // namespace panda::mem::test
+}  // namespace ark::mem::test

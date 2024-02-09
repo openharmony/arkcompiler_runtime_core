@@ -23,9 +23,9 @@
 
 #include <optional>
 
-namespace panda::verifier {
+namespace ark::verifier {
 
 PandaUniquePtr<CflowMethodInfo> CheckCflow(Method const *method);
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // !PANDA_VERIFICATION_CFLOW_CHECK_HPP_

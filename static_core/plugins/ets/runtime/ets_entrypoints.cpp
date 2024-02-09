@@ -25,7 +25,7 @@
 #include "runtime/arch/helpers.h"
 #include "runtime/interpreter/vregister_iterator.h"
 
-namespace panda::ets {
+namespace ark::ets {
 
 using TypeId = panda_file::Type::TypeId;
 
@@ -136,4 +136,4 @@ extern "C" ObjectHeader *LaunchFromInterpreterRange(Method *method, Frame *frame
     return LaunchFromInterpreterImpl<BytecodeInstruction::Format::PREF_V8_ID16>(method, frame, pc);
 }
 
-}  // namespace panda::ets
+}  // namespace ark::ets

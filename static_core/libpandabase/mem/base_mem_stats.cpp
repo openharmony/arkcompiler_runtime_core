@@ -19,7 +19,7 @@
 #include "utils/type_helpers.h"
 
 #include <numeric>
-namespace panda {
+namespace ark {
 
 void BaseMemStats::RecordAllocateRaw(size_t size, SpaceType typeMem)
 {
@@ -131,4 +131,4 @@ uint64_t BaseMemStats::GetTotalFootprint() const
     return std::accumulate(begin(allocated_), end(allocated_), 0UL) - std::accumulate(begin(freed_), end(freed_), 0UL);
 }
 
-}  // namespace panda
+}  // namespace ark

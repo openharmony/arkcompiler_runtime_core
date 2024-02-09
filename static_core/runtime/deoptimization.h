@@ -18,7 +18,7 @@
 #include "runtime/include/exceptions.h"
 #include "runtime/include/stack_walker.h"
 
-namespace panda {
+namespace ark {
 
 /**
  * @brief Deoptimize compiled frame
@@ -37,6 +37,6 @@ namespace panda {
 
 void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha);
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_DEOPTIMIZATION_H

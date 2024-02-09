@@ -12,8 +12,8 @@
 # limitations under the License.
 
 module:
-  name: aoutdump
-  namespace: panda::aoutdump
+  name: aotdump
+  namespace: ark::aotdump
 
 options:
   - name: output-file

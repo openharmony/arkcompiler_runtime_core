@@ -16,10 +16,10 @@
 #include <iostream>
 #include "assembly-ins.h"
 
-namespace panda::pandasm {
+namespace ark::pandasm {
 
 // NOLINTNEXTLINE(readability-function-size)
-std::string panda::pandasm::Ins::ToString(const std::string &endline, bool printArgs /* = false */,
+std::string ark::pandasm::Ins::ToString(const std::string &endline, bool printArgs /* = false */,
                                           size_t firstArgIdx /* = 0*/) const {
     std::string fullOperation {};
     std::string regCase {};
@@ -34,7 +34,7 @@ std::string panda::pandasm::Ins::ToString(const std::string &endline, bool print
 %  sig_split = insn["sig"].split(' ')
 %  operands = insn.operands
 %  properties = insn.properties
-        case panda::pandasm::Opcode::<%= insn.asm_token%>: {
+        case ark::pandasm::Opcode::<%= insn.asm_token%>: {
             fullOperation += "<%= insn.mnemonic%>";
 % idx_imm = 0
 % idx_reg = 0
@@ -62,16 +62,16 @@ std::string panda::pandasm::Ins::ToString(const std::string &endline, bool print
         } break;
 % end
 % Panda::pseudo_instructions.each do |insn|
-        case panda::pandasm::Opcode::<%= insn.opcode %>: {
+        case ark::pandasm::Opcode::<%= insn.opcode %>: {
             fullOperation += "<%= insn.opcode %>";
             fullOperation += this->OperandsToString(printArgs, firstArgIdx);
         } break;
 % end
-        case panda::pandasm::Opcode::INVALID: {
+        case ark::pandasm::Opcode::INVALID: {
             fullOperation += "";
         } break;
     }
     return fullOperation + endline;
 }
 
-} // namespace panda::pandasm
+} // namespace ark::pandasm

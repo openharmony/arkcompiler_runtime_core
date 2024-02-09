@@ -23,7 +23,7 @@
 #include <unordered_map>
 #include <functional>
 
-namespace panda::dprof {
+namespace ark::dprof {
 class FeaturesManager {
 public:
     struct Functor {
@@ -76,6 +76,6 @@ public:
 private:
     std::unordered_map<std::string, Functor &> map_;
 };
-}  // namespace panda::dprof
+}  // namespace ark::dprof
 
 #endif  // DPROF_CONVERTER_FEATURES_MANAGER_H

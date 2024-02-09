@@ -19,7 +19,7 @@
 #include <string>
 #include <string_view>
 
-namespace panda::tooling::inspector {
+namespace ark::tooling::inspector {
 std::pair<ScriptId, bool> SourceManager::GetScriptId(PtThread thread, std::string_view fileName)
 {
     os::memory::LockHolder lock(mutex_);
@@ -56,4 +56,4 @@ void SourceManager::RemoveThread(PtThread thread)
     os::memory::LockHolder lock(mutex_);
     knownSources_.erase(thread);
 }
-}  // namespace panda::tooling::inspector
+}  // namespace ark::tooling::inspector

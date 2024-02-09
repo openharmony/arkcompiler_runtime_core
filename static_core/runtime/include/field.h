@@ -27,7 +27,7 @@
 #include "runtime/include/value-inl.h"
 #include "libpandabase/macros.h"
 
-namespace panda {
+namespace ark {
 
 class Class;
 
@@ -160,6 +160,6 @@ private:
     uint32_t offset_ {0};
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_RUNTIME_FIELD_H_

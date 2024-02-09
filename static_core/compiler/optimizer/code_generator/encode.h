@@ -33,7 +33,7 @@
 #include "utils/cframe_layout.h"
 #include "target_info.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class Encoder;
 class CompilerOptions;
 class RelocationInfo;
@@ -1303,6 +1303,6 @@ public:
     NO_MOVE_SEMANTIC(ScopedLiveTmpReg);
 };
 
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_ENCODE_H

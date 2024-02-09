@@ -22,7 +22,7 @@
 #include "runtime/include/runtime.h"
 #include "mangling.h"
 
-namespace panda::bytecodeopt::test {
+namespace ark::bytecodeopt::test {
 
 class BytecodeOptPeepholes : public testing::Test {
 public:
@@ -36,7 +36,7 @@ public:
         Logger::InitializeDummyLogging();
 
         Runtime::Create(options);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -51,7 +51,7 @@ public:
 
 protected:
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
 };
 
 TEST_F(BytecodeOptPeepholes, TryBlock)
@@ -124,4 +124,4 @@ TEST_F(BytecodeOptPeepholes, TryBlock)
     EXPECT_EQ(v.GetAsLong(), 0x2U);
 }
 
-}  // namespace panda::bytecodeopt::test
+}  // namespace ark::bytecodeopt::test

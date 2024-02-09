@@ -20,7 +20,7 @@
 
 static std::atomic<bool> g_isThreadInterrupted = false;
 
-void panda::test::IntrusiveClearInterruptedThreadTestAPI::WaitForThreadInterruption(void)
+void ark::test::IntrusiveClearInterruptedThreadTestAPI::WaitForThreadInterruption(void)
 {
     LOG(INFO, RUNTIME) << "Point 1: Waiting for thread interruption";
     while (!g_isThreadInterrupted) {
@@ -28,7 +28,7 @@ void panda::test::IntrusiveClearInterruptedThreadTestAPI::WaitForThreadInterrupt
     LOG(INFO, RUNTIME) << "Point 3: Thread has been interrupted";
 }
 
-void panda::test::IntrusiveClearInterruptedThreadTestAPI::NotifyAboutThreadInterruption(void)
+void ark::test::IntrusiveClearInterruptedThreadTestAPI::NotifyAboutThreadInterruption(void)
 {
     LOG(INFO, RUNTIME) << "Point 2: Interrupting thread";
     g_isThreadInterrupted = true;

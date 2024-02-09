@@ -24,7 +24,7 @@
 #include <iomanip>
 #include "securec.h"
 
-namespace panda {
+namespace ark {
 
 class VarintPack {
 public:
@@ -714,6 +714,6 @@ private:
     ArenaUnorderedMultiMap<uint32_t, uint32_t> dedupMap_;
 };
 
-}  // namespace panda
+}  // namespace ark
 
 #endif  // PANDA_BITTABLE_H

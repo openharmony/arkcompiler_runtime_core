@@ -30,7 +30,7 @@
 #include <cstring>
 #include <cstdlib>
 
-namespace panda::compiler {
+namespace ark::compiler {
 using namespace vixl::aarch64;  // NOLINT(google-build-using-namespace)
 
 template <class T>
@@ -71,7 +71,7 @@ T CutValue(uint64_t data, DataType::Type type)
 // Class for emulate generated arm64 code
 class VixlExecModule {
 public:
-    VixlExecModule(panda::ArenaAllocator *allocator, RuntimeInterface *runtimeInfo)
+    VixlExecModule(ark::ArenaAllocator *allocator, RuntimeInterface *runtimeInfo)
         : decoder_(allocator),
           simulator_(allocator, &decoder_, SimStack().Allocate()),
           runtimeInfo_(runtimeInfo),
@@ -289,9 +289,9 @@ private:
     RuntimeInterface *runtimeInfo_;
 
     // Dummy allocated data for parameters:
-    panda::ArenaAllocator *allocator_;
+    ark::ArenaAllocator *allocator_;
 
     Params params_;
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 #endif  // COMPILER_TESTS_VIXL_TEST_H

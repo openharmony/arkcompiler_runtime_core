@@ -19,7 +19,7 @@
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::coretypes::test {
+namespace ark::coretypes::test {
 
 class ArrayTest : public testing::Test {
 public:
@@ -30,7 +30,7 @@ public:
         options_.SetShouldLoadBootPandaFiles(false);
         options_.SetShouldInitializeIntrinsics(false);
         Runtime::Create(options_);
-        thread_ = panda::MTManagedThread::GetCurrent();
+        thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
     }
 
@@ -45,11 +45,11 @@ public:
     NO_MOVE_SEMANTIC(ArrayTest);
 
 private:
-    panda::MTManagedThread *thread_;
+    ark::MTManagedThread *thread_;
     RuntimeOptions options_;
 };
 
-static size_t GetArrayObjectSize(panda::Class *klass, size_t n)
+static size_t GetArrayObjectSize(ark::Class *klass, size_t n)
 {
     return sizeof(Array) + klass->GetComponentSize() * n;
 }
@@ -85,4 +85,4 @@ TEST_F(ArrayTest, ObjectSize)
     // NOLINTEND(readability-magic-numbers)
 }
 
-}  // namespace panda::coretypes::test
+}  // namespace ark::coretypes::test

@@ -21,7 +21,7 @@
 #include "optimizer/ir/graph_cloner.h"
 #include "optimizer/optimizations/loop_peeling.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 /**
  * Loop-peeling optimization works with a loops with the following requirements:
  * - loop is not irreducible;
@@ -208,4 +208,4 @@ void LoopPeeling::UpdateClonedInstInputs(Inst *inst, BasicBlock *header, BasicBl
         }
     }
 }
-}  // namespace panda::compiler
+}  // namespace ark::compiler

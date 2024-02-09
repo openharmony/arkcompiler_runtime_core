@@ -30,7 +30,7 @@
 #include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/gc.h"
 
-namespace panda::interpreter {
+namespace ark::interpreter {
 
 class RuntimeInterface {
 public:
@@ -165,93 +165,93 @@ public:
 
     static void ThrowNullPointerException()
     {
-        return panda::ThrowNullPointerException();
+        return ark::ThrowNullPointerException();
     }
 
     static void ThrowArrayIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::ArraySizeT length)
     {
-        panda::ThrowArrayIndexOutOfBoundsException(idx, length);
+        ark::ThrowArrayIndexOutOfBoundsException(idx, length);
     }
 
     static void ThrowNegativeArraySizeException(coretypes::ArraySsizeT size)
     {
-        panda::ThrowNegativeArraySizeException(size);
+        ark::ThrowNegativeArraySizeException(size);
     }
 
     static void ThrowArithmeticException()
     {
-        panda::ThrowArithmeticException();
+        ark::ThrowArithmeticException();
     }
 
     static void ThrowClassCastException(Class *dstType, Class *srcType)
     {
-        panda::ThrowClassCastException(dstType, srcType);
+        ark::ThrowClassCastException(dstType, srcType);
     }
 
     static void ThrowAbstractMethodError(Method *method)
     {
-        panda::ThrowAbstractMethodError(method);
+        ark::ThrowAbstractMethodError(method);
     }
 
     static void ThrowIncompatibleClassChangeErrorForMethodConflict(Method *method)
     {
-        panda::ThrowIncompatibleClassChangeErrorForMethodConflict(method);
+        ark::ThrowIncompatibleClassChangeErrorForMethodConflict(method);
     }
 
     static void ThrowOutOfMemoryError(const PandaString &msg)
     {
-        panda::ThrowOutOfMemoryError(msg);
+        ark::ThrowOutOfMemoryError(msg);
     }
 
     static void ThrowArrayStoreException(Class *arrayClass, Class *elemClass)
     {
-        panda::ThrowArrayStoreException(arrayClass, elemClass);
+        ark::ThrowArrayStoreException(arrayClass, elemClass);
     }
 
     static void ThrowIllegalAccessException(const PandaString &msg)
     {
-        panda::ThrowIllegalAccessException(msg);
+        ark::ThrowIllegalAccessException(msg);
     }
 
     static void ThrowVerificationException(const PandaString &msg)
     {
-        return panda::ThrowVerificationException(msg);
+        return ark::ThrowVerificationException(msg);
     }
 
     static void ThrowTypedErrorDyn(const std::string &msg)
     {
-        panda::ThrowTypedErrorDyn(msg);
+        ark::ThrowTypedErrorDyn(msg);
     }
 
     static void ThrowReferenceErrorDyn(const std::string &msg)
     {
-        panda::ThrowReferenceErrorDyn(msg);
+        ark::ThrowReferenceErrorDyn(msg);
     }
 
     template <bool IS_DYNAMIC = false>
     static Frame *CreateFrame(uint32_t nregs, Method *method, Frame *prev)
     {
-        return panda::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
+        return ark::CreateFrameWithSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, method, prev);
     }
 
     template <bool IS_DYNAMIC = false>
     static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev)
     {
-        return panda::CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, numActualArgs,
-                                                       method, prev);
+        return ark::CreateFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs, numActualArgs,
+                                                     method, prev);
     }
 
     ALWAYS_INLINE static Frame *CreateFrameWithActualArgsAndSize(uint32_t size, uint32_t nregs, uint32_t numActualArgs,
                                                                  Method *method, Frame *prev)
     {
-        return panda::CreateFrameWithActualArgsAndSize(size, nregs, numActualArgs, method, prev);
+        return ark::CreateFrameWithActualArgsAndSize(size, nregs, numActualArgs, method, prev);
     }
 
     template <bool IS_DYNAMIC = false>
     static Frame *CreateNativeFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, Method *method, Frame *prev)
     {
-        return panda::CreateNativeFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs,
-                                                             numActualArgs, method, prev);
+        return ark::CreateNativeFrameWithActualArgsAndSize(Frame::GetActualSize<IS_DYNAMIC>(nregs), nregs,
+                                                           numActualArgs, method, prev);
     }
 
     ALWAYS_INLINE static void FreeFrame(ManagedThread *thread, Frame *frame)
@@ -309,6 +309,6 @@ public:
     }
 };
 
-}  // namespace panda::interpreter
+}  // namespace ark::interpreter
 
 #endif  // PANDA_INTERPRETER_RUNTIME_INTERFACE_H_

@@ -18,7 +18,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 
-namespace panda::mem {
+namespace ark::mem {
 template <class LanguageConfig>
 EpsilonG1GC<LanguageConfig>::EpsilonG1GC(ObjectAllocatorBase *objectAllocator, const GCSettings &settings)
     : G1GC<LanguageConfig>(objectAllocator, settings)
@@ -50,7 +50,7 @@ void EpsilonG1GC<LanguageConfig>::InitializeImpl()
 
     auto barrierSet =
         allocator->New<GCG1BarrierSet>(allocator, &PreWrbFuncEntrypoint, &PostWrbUpdateCardFuncEntrypoint,
-                                       panda::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
+                                       ark::helpers::math::GetIntLog2(this->GetG1ObjectAllocator()->GetRegionSize()),
                                        this->GetCardTable(), this->updatedRefsQueue_, &this->queueLock_);
     ASSERT(barrierSet != nullptr);
     this->SetGCBarrierSet(barrierSet);
@@ -89,7 +89,7 @@ bool EpsilonG1GC<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 }
 
 template <class LanguageConfig>
-void EpsilonG1GC<LanguageConfig>::InitGCBits([[maybe_unused]] panda::ObjectHeader *objHeader)
+void EpsilonG1GC<LanguageConfig>::InitGCBits([[maybe_unused]] ark::ObjectHeader *objHeader)
 {
 }
 
@@ -107,4 +107,4 @@ void EpsilonG1GC<LanguageConfig>::MarkReferences([[maybe_unused]] GCMarkingStack
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(EpsilonG1GC);
 
-}  // namespace panda::mem
+}  // namespace ark::mem

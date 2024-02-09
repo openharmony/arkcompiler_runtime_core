@@ -26,7 +26,7 @@
 #include "runtime/handle_scope.h"
 #include "plugins/ets/runtime/job_queue.h"
 
-namespace panda::ets::intrinsics {
+namespace ark::ets::intrinsics {
 
 // length parameter represents the current size of the queue as opposed to its length field which represents its
 // capacity
@@ -223,4 +223,4 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
 
     return nullptr;
 }
-}  // namespace panda::ets::intrinsics
+}  // namespace ark::ets::intrinsics

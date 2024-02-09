@@ -29,7 +29,7 @@
 #include "include/runtime.h"
 #include "libpandafile/file_item_container.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 struct RuntimeInterfaceMock : public compiler::RuntimeInterface {
     // Only one exact CALLEE may exist in fake runtime
     MethodPtr GetMethodById(MethodPtr /* unused */, MethodId id) const override
@@ -117,9 +117,9 @@ public:
     {
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
         // We have issue with QEMU - so reduce memory heap
-        panda::mem::MemConfig::Initialize(32_MB, 64_MB, 200_MB, 32_MB, 0, 0);  // NOLINT(readability-magic-numbers)
+        ark::mem::MemConfig::Initialize(32_MB, 64_MB, 200_MB, 32_MB, 0, 0);  // NOLINT(readability-magic-numbers)
 #else
-        panda::mem::MemConfig::Initialize(32_MB, 64_MB, 256_MB, 32_MB, 0, 0);  // NOLINT(readability-magic-numbers)
+        ark::mem::MemConfig::Initialize(32_MB, 64_MB, 256_MB, 32_MB, 0, 0);  // NOLINT(readability-magic-numbers)
 #endif
         PoolManager::Initialize();
         allocator_ = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
@@ -384,7 +384,7 @@ public:
 
     auto GetClassLinker()
     {
-        return panda::Runtime::GetCurrent()->GetClassLinker();
+        return ark::Runtime::GetCurrent()->GetClassLinker();
     }
 
     void EnableLogs(Logger::Level level = Logger::Level::DEBUG)
@@ -462,6 +462,6 @@ struct TmpFile {
 private:
     const char *fileName_ {nullptr};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_TESTS_UNIT_TEST_H

@@ -34,7 +34,7 @@
 
 #include "runtime/mem/object_helpers.h"
 
-namespace panda::mem {
+namespace ark::mem {
 class GCTestLog : public testing::TestWithParam<const char *> {
 public:
     NO_MOVE_SEMANTIC(GCTestLog);
@@ -53,7 +53,7 @@ public:
     void SetupRuntime(const std::string &gcType, bool smallHeapAndYoungSpaces = false,
                       size_t promotionRegionAliveRate = 100) const
     {
-        panda::Logger::ComponentMask componentMask;
+        ark::Logger::ComponentMask componentMask;
         componentMask.set(Logger::Component::GC);
 
         Logger::InitializeStdLogging(Logger::Level::INFO, componentMask);
@@ -268,4 +268,4 @@ TEST_P(GCTestLog, CounterLogTest)
 }
 
 INSTANTIATE_TEST_SUITE_P(GCTestLogOnDiffGCs, GCTestLog, ::testing::ValuesIn(TESTED_GC));
-}  // namespace panda::mem
+}  // namespace ark::mem

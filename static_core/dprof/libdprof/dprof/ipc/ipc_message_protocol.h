@@ -19,7 +19,7 @@
 #include <vector>
 #include <string>
 
-namespace panda::dprof::ipc::protocol {
+namespace ark::dprof::ipc::protocol {
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 const char VERSION[] = "v1";
 
@@ -40,6 +40,6 @@ struct FeatureData {
     std::vector<uint8_t> data;
 };
 const size_t FEATURE_DATA_FCOUNT = 2;
-}  // namespace panda::dprof::ipc::protocol
+}  // namespace ark::dprof::ipc::protocol
 
 #endif  // DPROF_IPC_MESSAGE_PROTOCOL_H

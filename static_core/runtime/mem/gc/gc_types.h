@@ -18,7 +18,7 @@
 #include <array>
 #include <string_view>
 
-namespace panda::mem {
+namespace ark::mem {
 
 enum class GCExecutionMode {
     GC_STW_NO_MT,  // Stop-the-world, single thread
@@ -128,6 +128,6 @@ enum GCCollectMode : uint8_t {
     GC_ALL = GC_MINOR | GC_MAJOR | GC_FULL,  // Can collect objects at any phase
 };
 
-}  // namespace panda::mem
+}  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_GC_GC_TYPES_H

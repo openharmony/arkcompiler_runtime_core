@@ -22,7 +22,7 @@
 #include "bitmap_test_base.h"
 #include "runtime/mem/gc/bitmap.h"
 
-namespace panda::mem {
+namespace ark::mem {
 
 TEST_F(BitmapTest, Init)
 {
@@ -117,4 +117,4 @@ TEST_F(BitmapTest, TSANMultithreadingTest)
 #endif
 }
 
-}  // namespace panda::mem
+}  // namespace ark::mem

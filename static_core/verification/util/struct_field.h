@@ -19,7 +19,7 @@
 #ifndef PANDA_VERIFICATION_UTIL_STRUCT_FIELD_H
 #define PANDA_VERIFICATION_UTIL_STRUCT_FIELD_H
 
-namespace panda::verifier {
+namespace ark::verifier {
 template <typename S, typename T>
 struct StructField {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
@@ -30,6 +30,6 @@ struct StructField {
         return *reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(&s) + offset);
     }
 };
-}  // namespace panda::verifier
+}  // namespace ark::verifier
 
 #endif  // PANDA_VERIFICATION_UTIL_STRUCT_FIELD_H

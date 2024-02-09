@@ -21,7 +21,7 @@
 #include "target/aarch64/target.h"
 #include "target/aarch32/target.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 
 class IntrinsicCodegenTest : public GraphTest {
 public:
@@ -92,4 +92,4 @@ TEST_F(IntrinsicCodegenTest, EncodingARM32)
 #include "intrinsic_codegen_test.inl"
 }
 #endif
-}  // namespace panda::compiler
+}  // namespace ark::compiler

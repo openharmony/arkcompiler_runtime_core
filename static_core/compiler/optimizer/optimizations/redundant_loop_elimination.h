@@ -19,7 +19,7 @@
 #include "optimizer/pass.h"
 #include "optimizer/optimizations/loop_transform.h"
 
-namespace panda::compiler {
+namespace ark::compiler {
 class RedundantLoopElimination : public LoopTransform<LoopExitPoint::ALL_LOOP> {
 public:
     explicit RedundantLoopElimination(Graph *graph) : LoopTransform(graph) {}
@@ -50,6 +50,6 @@ private:
     BasicBlock *loopExit_ {nullptr};
     bool isApplied_ {false};
 };
-}  // namespace panda::compiler
+}  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REDUNDANTLOOPELIMINATIONS_H
