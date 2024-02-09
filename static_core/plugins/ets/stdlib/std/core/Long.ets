@@ -352,6 +352,6 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<I
                 return Long.valueOf(num as long)
             }
         }
-        throw new JSONTypeError("Cannot create Long from JSON", json)
+        throw new JSONTypeError("Cannot create Long from JSON", new ErrorOptions(json as Object))
     }
 }

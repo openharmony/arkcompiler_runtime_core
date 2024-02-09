@@ -127,31 +127,33 @@ private:
     void RegisterExceptions()
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS {
+            {utf::CStringAsMutf8("<ctor>"), "Lstd/core/Object;Lstd/core/Object;:V"}};
+        static const ets_proxy::EtsClassWrapper::OverloadsMap W_EXCEPTION_OVERLOADS {
             {utf::CStringAsMutf8("<ctor>"), "Lstd/core/String;:V"}};
         wError_ = RegisterClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
-        RegisterClass(descriptors::EXCEPTION, nullptr, &W_ERROR_OVERLOADS);
+        RegisterClass(descriptors::EXCEPTION, nullptr, &W_EXCEPTION_OVERLOADS);
 
         static const std::array STD_EXCEPTIONS_LIST = {
             // Errors
             std::make_tuple("Lstd/core/AssertionError;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/DivideByZeroError;", NO_MIRROR, NO_OVERLOADS),
-            std::make_tuple("Lstd/core/NullPointerError;", NO_MIRROR, NO_OVERLOADS),
-            std::make_tuple("Lstd/core/UncatchedExceptionError;", NO_MIRROR, NO_OVERLOADS),
+            std::make_tuple("Lstd/core/DivideByZeroError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/NullPointerError;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/UncatchedExceptionError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             std::make_tuple("Lstd/core/RangeError;", NO_MIRROR, &W_ERROR_OVERLOADS),
             // Exceptions
-            std::make_tuple("Lstd/core/NullPointerException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/NoDataException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/ArgumentOutOfRangeException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/IndexOutOfBoundsException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/IllegalStateException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/ArithmeticException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/ClassCastException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/ClassNotFoundException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/UnsupportedOperationException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/ArrayStoreException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/NegativeArraySizeException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/IllegalMonitorStateException;", NO_MIRROR, &W_ERROR_OVERLOADS),
-            std::make_tuple("Lstd/core/IllegalArgumentException;", NO_MIRROR, &W_ERROR_OVERLOADS),
+            std::make_tuple("Lstd/core/NullPointerException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/NoDataException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/ArgumentOutOfRangeException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/IndexOutOfBoundsException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalStateException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/ArithmeticException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/ClassCastException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/ClassNotFoundException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/UnsupportedOperationException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/ArrayStoreException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/NegativeArraySizeException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalMonitorStateException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
+            std::make_tuple("Lstd/core/IllegalArgumentException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
             std::make_tuple("Lstd/core/InvalidDate;", NO_MIRROR, NO_OVERLOADS),
         };
         for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {

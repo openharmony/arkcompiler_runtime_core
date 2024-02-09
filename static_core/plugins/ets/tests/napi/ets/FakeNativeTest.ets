@@ -28,10 +28,10 @@ class FakeNativeTest {
 
         try {
             FakeNativeTest.nativeFake();
-        } catch (e: Error) {
+        } catch (e: Exception) {
             isNativeFakeCalled = false;
         }
-    
+
         if (isNativeFakeCalled) {
             throw new Error("ERROR: nativeFake method was successfully called, but does not have a definition");
         }

@@ -572,6 +572,6 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
                 return Char.valueOf(str.charAt(0))
             }
         }
-        throw new JSONTypeError("Cannot create Char from JSON", json)
+        throw new JSONTypeError("Cannot create Char from JSON", new ErrorOptions(json as Object))
     }
 }

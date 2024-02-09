@@ -15,15 +15,31 @@
 
 package std.core;
 
+// synchronize with mirror class in runtime
 export class StackTraceElement {
-  // ...
+    private className: String
+    private methodName: String
+    private sourceFileName: String
+    private lineNumber: int
+
+    private constructor () {}
+
+    /**
+    * Packs data to single string and
+    *
+    * @returns data in formatted string
+    */
+    public override toString(): String {
+        return "\tat " + this.className + "." + this.methodName +
+             " (" + this.sourceFileName + ":" + this.lineNumber + ")"
+    }
 }
 
 export class StackTrace {
-  /**
-   * Method provides stack of methods at the place of a call
-   *
-   * @returns stack trace
-   */
-  static native provisionStackTrace(): StackTraceElement[];
+    /**
+    * Method provides stack of methods at the place of a call
+    *
+    * @returns stack trace
+    */
+    static native provisionStackTrace(): StackTraceElement[]
 }

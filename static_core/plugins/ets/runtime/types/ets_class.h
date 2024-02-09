@@ -38,6 +38,7 @@ class EtsObject;
 class EtsString;
 class EtsArray;
 class EtsPromise;
+class EtsErrorOptions;
 class EtsTypeAPIField;
 class EtsTypeAPIMethod;
 class EtsTypeAPIParameter;

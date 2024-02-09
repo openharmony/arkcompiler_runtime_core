@@ -471,6 +471,6 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
                 return Float.valueOf((json as JSONNumber).value as float)
             }
         }
-        throw new JSONTypeError("Cannot create Double from JSON", json)
+        throw new JSONTypeError("Cannot create Double from JSON", new ErrorOptions(json as Object))
     }
 }

@@ -17,27 +17,27 @@
 .record std.core.StringBuilder
 .record std.core.Object
 .record std.core.__internal_undefined
-.record escompat.StackOverflowError
+.record std.core.StackOverflowError
 
-.record escompat.OutOfMemoryError {
+.record std.core.OutOfMemoryError {
     std.core.String message
     std.core.Object cause
 }
 
-.function void escompat.OutOfMemoryError.ctor(escompat.OutOfMemoryError a0, std.core.String a1, std.core.Object a2) <ctor> {
+.function void std.core.OutOfMemoryError.ctor(std.core.OutOfMemoryError a0, std.core.String a1, std.core.Object a2) <ctor> {
     lda.obj a1
-    stobj.obj a0, escompat.OutOfMemoryError.message
+    stobj.obj a0, std.core.OutOfMemoryError.message
     lda.obj a2
-    stobj.obj a0, escompat.OutOfMemoryError.cause
+    stobj.obj a0, std.core.OutOfMemoryError.cause
     return.void
 }
 
-.function std.core.String escompat.OutOfMemoryError.getMessage(escompat.OutOfMemoryError a0) {
-    ldobj.obj a0, escompat.OutOfMemoryError.message
+.function std.core.String std.core.OutOfMemoryError.getMessage(std.core.OutOfMemoryError a0) {
+    ldobj.obj a0, std.core.OutOfMemoryError.message
     return.obj
 }
 
-.function std.core.Object escompat.OutOfMemoryError.getCause(escompat.OutOfMemoryError a0) {
-    ldobj.obj a0, escompat.OutOfMemoryError.cause
+.function std.core.Object std.core.OutOfMemoryError.getCause(std.core.OutOfMemoryError a0) {
+    ldobj.obj a0, std.core.OutOfMemoryError.cause
     return.obj
 }

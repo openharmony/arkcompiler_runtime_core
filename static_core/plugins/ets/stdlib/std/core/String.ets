@@ -1915,7 +1915,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         if (json instanceof JSONString) {
             return (json as JSONString).value
         }
-        throw new JSONTypeError("Cannot create String from JSON", json)
+        throw new JSONTypeError("Cannot create String from JSON", new ErrorOptions(json as Object))
     }
 
     /**

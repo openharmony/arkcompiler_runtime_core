@@ -42,6 +42,13 @@ coretypes:
 - managed_class: std.debug.concurrency.AtomicFlag
   mirror_class: ark::ets::EtsAtomicFlag
 
+- managed_class: std.core.StackTraceElement
+  mirror_class: ark::ets::EtsStackTraceElement
+
+- managed_class: std.core.ErrorOptions
+  mirror_class: ark::ets::EtsErrorOptions
+
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -1578,6 +1585,18 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdCoreStackTraceLines
     clear_flags: [ no_dce ]
+
+  - name: StdCoreStackTraceProvisionStackTrace
+    space: ets
+    class_name: std.core.StackTrace
+    method_name: provisionStackTrace
+    static: true
+    signature:
+      ret: std.core.StackTraceElement[]
+      args: []
+    impl: ark::ets::intrinsics::StdCoreStackTraceProvisionStackTrace
+    clear_flags: [ no_dce ]
+
 
   - name: StdCoreExit
     space: ets

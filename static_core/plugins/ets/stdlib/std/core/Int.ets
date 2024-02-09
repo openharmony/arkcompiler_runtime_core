@@ -325,6 +325,6 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
                 return Int.valueOf(num as int)
             }
         }
-        throw new JSONTypeError("Cannot create Int from JSON", json)
+        throw new JSONTypeError("Cannot create Int from JSON", new ErrorOptions(json as Object))
     }
 }

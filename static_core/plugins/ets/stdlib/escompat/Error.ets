@@ -15,109 +15,108 @@
 
 package escompat;
 
+export class ErrorOptions {
+    cause: Object | undefined = undefined
+
+    constructor(cause: Object | undefined) {
+        this.cause = cause
+    }
+}
+
 /**
  * Strores information about stacktrace and cause in case of an error.
  * Serves as a base class for all error classes.
  */
 export class Error {
-  public stack: String[];
-  public cause: Object;
-  public message: String;
-  public name: String;
+    cause: Object | undefined
+    message: String
+    name: String
+    private stackLines: StackTraceElement[] = []
+    private stack_: String | undefined = undefined
 
-  public fileName: String;
-  public lineNumber: int;
-  public columnNumber: int;
+    /**
+    * Constructs a new error instance with provided message and cause
+    *
+    * @param message message of the error
+    *
+    * @param options options of the error
+    */
+    constructor(message?: String, options?: ErrorOptions) {
+        this("Error", message, options)
+    }
 
-  private provisionStackTrace(): void {
-    this.stack = stackTraceLines();
-  }
 
-  /**
-   * Constructs a new empty error instance
-   */
-  constructor () {
-    this.message = "";
-    this.cause = this;
-    this.name = "Error";
-    this.fileName = "";
-    this.lineNumber = 0;
-    this.columnNumber = 0;
-    this.provisionStackTrace();
-  }
+    /**
+    * Constructs a new error instance with provided message, options and name
+    *
+    * @param name name of the error
+    *
+    * @param message message of the error
+    *
+    * @param options options of the error
+    */
+    constructor(name: String, message: String | undefined, options: ErrorOptions | undefined) {
+        this.message = (message == undefined) ? "" : message!
+        this.cause = (options == undefined) ? undefined : options!.cause
+        this.name = name
+        this.stackLines = StackTrace.provisionStackTrace()
+    }
 
-  /**
-   * Constructs a new error instance with provided message
-   *
-   * @param msg message of the error
-   */
-  constructor(msg: String) {
-    this.message = msg;
-    this.cause = this;
-    this.name = "Error";
-    this.provisionStackTrace()
-  }
-
-  /**
-   * Constructs a new error instance with provided message and cause
-   *
-   * @param msg message of the error
-   *
-   * @param cause cause of the error
-   */
-  constructor(msg: String, cause: Object) {
-    this.message = msg;
-    this.cause = cause;
-    this.name = "Error";
-    this.provisionStackTrace();
-  }
-
-  /**
+    /**
     * Converts this error to a string
     * Result includes error message and the stacktrace
     *
     * @returns result of the conversion
     */
-  override toString(): String {
-    let s: String = "";
-
-    if (this.message != "") {
-      s += this.name + ": " + this.message + "\n";
+    override toString(): String {
+        if (this.message != "") {
+            return this.name + ": " + this.message + "\n";
+        }
+        return this.name;
     }
 
-    for (let i: int = (this.stack.length > 2 ? 2 : 0); i < this.stack.length; i++) {
-      s += this.stack[i];
-      if (i != this.stack.length - 1) {
-        s += "\n";
-      }
+    /**
+    * Forms stack and returns it
+    */
+    get stack(): String | undefined {
+        this.formStack()
+        return this.stack_
     }
 
-    return s;
-  }
+    /**
+    * Cleans up stack lines
+    */
+    set stack(newStack: String | undefined) {
+        this.stack_ = newStack
+        this.stackLines = []
+    }
 
-  // TODO(nsizov): Uncomment and rewrite when proper getters and setters will be implemented
+    /**
+    * Forms stack from this.stackLines and stores it in this.stack_
+    */
+    private formStack() {
+        if (this.stack_ != undefined) {
+            return
+        }
+        if (this.stackLines.length == 0) {
+            return
+        }
+        let builder = new StringBuilder("")
 
-  /**
-   * Returns the cause of this error
-   *
-   * @returns the cause
-   */
-  // public getCause(): Object | null {
-  //   if (this.cause == this) {
-  //     return null;
-  //   } else {
-  //     return this.cause;
-  //   }
-  // }
+        if (this.message != "") {
+            let val = this.name + ": " + this.message + "\n"
+            builder.append(val)
+        }
 
-  // TODO(nsizov): Uncomment and rewrite when proper getters and setters will be implemented
+        // NOTE(kparshukov): find a better way to erase Error's ctors lines
+        const provisionStackTraceLevel = 2
+        const realStackStart = (this.stackLines.length > provisionStackTraceLevel ? provisionStackTraceLevel : 0)
+        for (let i: int = realStackStart; i < this.stackLines.length; i++) {
+            builder.append(this.stackLines[i].toString() + '\n')
+        }
 
-  /**
-   * Returns the message of this error
-   *
-   * @returns String - the message
-   */
-  // public getMessage(): String {
-  //   return this.msg;
-  // }
+        this.stack_ = builder.toString()
+        this.stackLines = []
+    }
 }
+

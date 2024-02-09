@@ -16,6 +16,142 @@
 package std.core;
 
 /**
+ * @class Represents an error that occurs when memory allocation fails
+ */
+export class OutOfMemoryError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * @class Represents an error that occurs when no such method is found in the class
+ */
+export class NoSuchMethodError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * @class Represents an error that occurs when the available memory is not sufficient to create the activation frame
+ */
+export class StackOverflowError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * @class Represents an error that occurs when attempting to instantiate abstract class or an interface
+ */
+export class InstantiationError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * @class Represents an error that occurs when an internal error occured
+ */
+export class InternalError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * @class Represents an error that occurs when no class definition has been found
+ */
+export class NoClassDefFoundError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * @class Represents an error that occurs when no such field is found in the class
+ */
+export class NoSuchFieldError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * The AbstractMethodError object represents an error that occures when abstract method get called.
+ */
+export class AbstractMethodError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
  * Represents exception that is thrown in case of null pointer dereference
  */
 export final class NullPointerException extends Exception {
@@ -272,6 +408,21 @@ export final class IllegalArgumentException extends Exception {
         super(s, cause);
     }
 }
+
+export class ExceptionInInitializerError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
 
 /**
  * Represents exception that is thrown when Date is malformed

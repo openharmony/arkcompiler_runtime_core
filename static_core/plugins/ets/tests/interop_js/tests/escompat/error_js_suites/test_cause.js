@@ -31,5 +31,5 @@ const TestJSWithCause = etsMod.getFunction('Error_TestJSWithCause');
 
   ASSERT_EQ(String(v.cause), 'cause');
 
-  ASSERT_TRUE(String(v.stack).includes('CreateEtsSampleWithCause'));
+  ASSERT_TRUE(String(v["<get>stack"]()).includes('CreateEtsSampleWithCause'));
 }

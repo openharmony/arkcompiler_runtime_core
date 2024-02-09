@@ -66,7 +66,7 @@ const IdentityError = getTestFunction("IdentityError");
 }
 
 {   // Simple compat proxy
-    let ets_err = new ets.Error("fooo");
+    let ets_err = new ets.Error("fooo", undefined);
     ASSERT_TRUE(ets_err instanceof Error);
     ASSERT_EQ(ets_err.message, "fooo");
     ASSERT_EQ(IdentityError(ets_err), ets_err);

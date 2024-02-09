@@ -39,6 +39,9 @@ static constexpr std::string_view FIELD                                = "Lstd/c
 static constexpr std::string_view METHOD                               = "Lstd/core/Method;";
 static constexpr std::string_view PARAMETER                            = "Lstd/core/Parameter;";
 
+// Runtime classes
+static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
+
 // Box classes
 static constexpr std::string_view BOX_BOOLEAN                          = "Lstd/core/Boolean;";
 static constexpr std::string_view BOX_BYTE                             = "Lstd/core/Byte;";
@@ -93,17 +96,21 @@ static constexpr std::string_view RUNTIME_EXCEPTION                    = "Lstd/c
 static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION = "Lstd/core/StringIndexOutOfBoundsException;";
 static constexpr std::string_view UNSUPPORTED_OPERATION_EXCEPTION      = "Lstd/core/UnsupportedOperationException;";
 
-// Error classes
-static constexpr std::string_view ABSTRACT_METHOD_ERROR                = "Lescompat/AbstractMethodError;";
-static constexpr std::string_view CLASS_CIRCULARITY_ERROR              = "Lescompat/ClassCircularityError;";
+// Exceptions classes
+// Due to dependecy of runtime architecture, have confusing name
+static constexpr std::string_view ABSTRACT_METHOD_ERROR                = "Lstd/core/AbstractMethodError;";
+static constexpr std::string_view CLASS_CIRCULARITY_ERROR              = "Lstd/core/ClassCircularityError;";
 static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lstd/core/ExceptionInInitializerError;";
-static constexpr std::string_view INCOMPATIBLE_CLASS_CHANGE_ERROR      = "Lescompat/IncompatibleClassChangeError;";
-static constexpr std::string_view INSTANTIATION_ERROR                  = "Lescompat/InstantiationError;";
-static constexpr std::string_view NO_CLASS_DEF_FOUND_ERROR             = "Lescompat/NoClassDefFoundError;";
-static constexpr std::string_view NO_SUCH_FIELD_ERROR                  = "Lescompat/NoSuchFieldError;";
-static constexpr std::string_view NO_SUCH_METHOD_ERROR                 = "Lescompat/NoSuchMethodError;";
-static constexpr std::string_view OUT_OF_MEMORY_ERROR                  = "Lescompat/OutOfMemoryError;";
-static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lescompat/StackOverflowError;";
+static constexpr std::string_view INCOMPATIBLE_CLASS_CHANGE_ERROR      = "Lstd/core/IncompatibleClassChangeError;";
+static constexpr std::string_view INSTANTIATION_ERROR                  = "Lstd/core/InstantiationError;";
+static constexpr std::string_view NO_CLASS_DEF_FOUND_ERROR             = "Lstd/core/NoClassDefFoundError;";
+static constexpr std::string_view NO_SUCH_FIELD_ERROR                  = "Lstd/core/NoSuchFieldError;";
+static constexpr std::string_view NO_SUCH_METHOD_ERROR                 = "Lstd/core/NoSuchMethodError;";
+static constexpr std::string_view OUT_OF_MEMORY_ERROR                  = "Lstd/core/OutOfMemoryError;";
+static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";
+
+// Error classes
+static constexpr std::string_view ERROR_OPTIONS                        = "Lescompat/ErrorOptions;";
 static constexpr std::string_view RANGE_ERROR                          = "Lescompat/RangeError;";
 static constexpr std::string_view VERIFY_ERROR                         = "Lescompat/VerifyError;";
 

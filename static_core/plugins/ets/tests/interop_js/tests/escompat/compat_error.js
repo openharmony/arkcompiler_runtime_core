@@ -29,7 +29,7 @@ const TestJSSample = etsMod.getFunction('Error_TestJSSample');
 
   ASSERT_EQ(String(v.message), 'bar');
 
-  ASSERT_EQ(v.cause, v);
+  ASSERT_EQ(v.cause, undefined);
 
-  ASSERT_TRUE(String(v.stack).includes('CreateEtsSample'));
+  ASSERT_TRUE(String(v["<get>stack"]()).includes('CreateEtsSample'));
 }

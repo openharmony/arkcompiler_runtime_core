@@ -51,7 +51,7 @@ function check_incorrect_ets_object() {
 
 // TODO(v.cherkashin): Enable when implemented
 // Check js/ets errors
-check_error_message(new ets.Error("ets Error message"), "ets Error message");
+check_error_message(new ets.Error("ets Error message", undefined), "ets Error message");
 // check_error_message(new Error("js Error message"), "js Error message");
 // check_error_message(new ets.TypeError("ets TypeError message"), "ets TypeError message");
 // check_error_message(new TypeError("js TypeError message"), "js TypeError message");

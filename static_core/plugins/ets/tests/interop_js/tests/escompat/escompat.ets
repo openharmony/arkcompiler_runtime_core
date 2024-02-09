@@ -339,7 +339,7 @@ function Error_CreateEtsSample(): Error {
 }
 
 function Error_CreateEtsSampleWithCause(): Error {
-    return new Error("message", "cause");
+    return new Error("message", new ErrorOptions("cause"));
 }
 
 function ArrayBuffer_TestJSLength(arr: ArrayBuffer): void {

@@ -719,7 +719,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
         if (json instanceof JSONNumber) {
             return Double.valueOf((json as JSONNumber).value)
         }
-        throw new JSONTypeError("Cannot create Double from JSON", json)
+        throw new JSONTypeError("Cannot create Double from JSON", new ErrorOptions(json as Object))
     }
 
 
