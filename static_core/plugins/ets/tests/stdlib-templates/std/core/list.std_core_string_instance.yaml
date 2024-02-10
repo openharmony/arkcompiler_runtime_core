@@ -1934,7 +1934,7 @@
     param_types: {w1: RegExp, w2: String},
     param_nature: {w1: object, w2: primitive},
     param_init_data_types: {w1: "String[]", w2: "String[]"},
-    param_list: {w1: ["/dog/", "/чаю/", "/pattern/"], w2: ["cat", "кофе", "unreachable"]},
+    param_list: {w1: ["dog", "чаю", "pattern"], w2: ["cat", "кофе", "unreachable"]},
 
 
     method_return_type: String,
@@ -1952,9 +1952,9 @@
     init_object_data: '["It\u0027s a Mad Mad Mad Mad World", "Этот безумный, безумный, безумный, безумный мир"]',
 
     param_types: {w1: RegExp, w2: String},
-    param_nature: {w1: object, w2: primitive},
+    param_nature: {w1: regexp, w2: primitive},
     param_init_data_types: {w1: "String[]", w2: "String[]"},
-    param_list: {w1: ["/Mad/","/безумный/"], w2: ["Fun", "сумасшедший"]},
+    param_list: {w1: ["Mad","безумный"], w2: ["Fun", "сумасшедший"]},
 
 
     method_return_type: String,
@@ -1974,14 +1974,34 @@
     param_init_data_types: {str: "String[]"},
     param_nature: {str: primitive},
     param_types: {str: String},
-    param_list: {str: '["/to/", "/to/", "/[A-Z]/"]'},
+    param_list: {str: '["to", ".*", "[A-Z]"]'},
 
-    method_return_type: "String[]",
-    result_nature: array,
+    method_return_type: "RegExpMatchArray | null",
+    result_nature: RegExpMatchArray,
     expected_test_data_item_type: "String[]",
     expected_data_type: "String[][]",
-    expected_test_data: '[["to"], [], ["T", "C"]]',
-    verify_test_result_function: comparePrimitiveArray
+    expected_test_data: '[["to"], ["subject search"], ["T", "C"]]',
+    verify_test_result_function: compareRegExpMatchArray
+  }
+
+- {
+    method_name: match,
+    object_type: String,
+    init_object_data_type: "String[]",
+    init_object_type: String,
+    init_object_data: '["subject search"]',
+
+    param_init_data_types: {str: "String[]"},
+    param_nature: {str: primitive},
+    param_types: {str: String},
+    param_list: {str: '["to"]'},
+
+    method_return_type: "RegExpMatchArray | null",
+    result_nature: primitive,
+    expected_test_data_item_type: "RegExpMatchArray | null",
+    expected_data_type: "(RegExpMatchArray | null)[]",
+    expected_test_data: '[null]',
+    verify_test_result_function: comparePrimitiveValue
   }
 
 - {
@@ -1994,14 +2014,14 @@
     param_init_data_types: {str: "String[]"},
     param_nature: {str: object},
     param_types: {str: RegExp},
-    param_list: {str: '["/to/", "/to/", "/[A-Z]/"]'},
+    param_list: {str: '["to", ".*", "[A-Z]"]'},
 
-    method_return_type: "String[]",
-    result_nature: array,
+    method_return_type: "RegExpMatchArray | null",
+    result_nature: RegExpMatchArray,
     expected_test_data_item_type: "String[]",
     expected_data_type: "String[][]",
-    expected_test_data: '[["to"], [], ["T", "C"]]',
-    verify_test_result_function: comparePrimitiveArray
+    expected_test_data: '[["to"], ["subject search"], ["T", "C"]]',
+    verify_test_result_function: compareRegExpMatchArray
   }
 
 - {
@@ -2080,7 +2100,7 @@
     result_nature: "array",
     expected_test_data_item_type: "String[]",
     expected_data_type: "String[][]",
-    expected_test_data: '[["e", "m", "p", "t", "y"], [""], ["e"]]',
+    expected_test_data: '[["e", "m", "p", "t", "y"], [], ["e"]]',
     verify_test_result_function: comparePrimitiveArray
   }
 
@@ -2091,16 +2111,16 @@
     init_object_data_type: "String[]",
     init_object_data: '["empty", "empty", "empty"]',
 
-    param_types: {pattern: RegExp, limit: number},
+    param_types: {pattern: RegExp, limit: Number},
     param_nature: {pattern: object, limit: primitive},
-    param_init_data_types: {pattern: "String[]", limit: "number[]"},
+    param_init_data_types: {pattern: "String[]", limit: "Number[]"},
     param_list: {pattern: ["", "", ""], limit: [-1, 0, 1]},
 
     method_return_type: "String[]",
     result_nature: "array",
     expected_test_data_item_type: "String[]",
     expected_data_type: "String[][]",
-    expected_test_data: '[["e", "m", "p", "t", "y"], [""], ["e"]]',
+    expected_test_data: '[["e", "m", "p", "t", "y"], [], ["e"]]',
     verify_test_result_function: comparePrimitiveArray
   }
 
@@ -2205,12 +2225,12 @@
     param_init_data_types: {str: "String[]"},
     param_nature: {str: primitive},
     param_types: {str: String},
-    param_list: {str: '["/to/", "/[A-Z]/"]'},
+    param_list: {str: '["to", "[A-Z]"]'},
 
-    method_return_type: int,
-    expected_test_data_item_type: 'int',
-    expected_data_type: 'int[]',
-    expected_test_data: '[7, -1]',
+    method_return_type: number,
+    expected_test_data_item_type: 'number',
+    expected_data_type: 'number[]',
+    expected_test_data: '[8, -1]',
     verify_test_result_function: comparePrimitiveValue
   }
 
@@ -2225,12 +2245,12 @@
     param_init_data_types: {str: "String[]"},
     param_nature: {str: object},
     param_types: {str: RegExp},
-    param_list: {str: ["/to/", "/[A-Z]/"]},
+    param_list: {str: ["to", "[A-Z]"]},
 
-    method_return_type: int,
-    expected_test_data_item_type: 'int',
-    expected_data_type: 'int[]',
-    expected_test_data: '[7, -1]',
+    method_return_type: number,
+    expected_test_data_item_type: 'number',
+    expected_data_type: 'number[]',
+    expected_test_data: '[8, -1]',
     verify_test_result_function: comparePrimitiveValue
   }
 
