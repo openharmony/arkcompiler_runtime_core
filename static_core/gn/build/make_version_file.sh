@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,23 +16,21 @@ set -e
 
 # arg1 - path to panda_root
 function git_hash() {
-  if git --version &> /dev/null
-  then
-      if git -C $1 rev-parse &> /dev/null
-      then
-          echo $(git -C $1 rev-parse HEAD)
-      else 
-          echo ""
-      fi
-  else 
-      echo ""
-  fi
+    if git --version &> /dev/null ; then
+        if git -C $1 rev-parse &> /dev/null ; then
+            echo $(git -C $1 rev-parse HEAD)
+        else
+            echo ""
+        fi
+    else
+        echo ""
+    fi
 }
 
 if [ $# -ne 3 ]; then
-	echo "Unvalid arguments"
-	echo "Usage: make_version_file.sh <git root dir> <input file> <output file>"
-	exit 1
+    echo "Unvalid arguments"
+    echo "Usage: make_version_file.sh <git root dir> <input file> <output file>"
+    exit 1
 fi
 
 ROOT_DIR=$1

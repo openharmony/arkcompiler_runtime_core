@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,17 +23,17 @@ BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo $BRANCH
 
 function repeats() {
-  local command=$1
-  for ((i=1; i < 6; i++)); do
-    echo "attempt $i to execute the command \"$command\""
-    $command && return 0
-  done
-  # checkout to current branch
-  if [[ "${BRANCH}" != "master" ]]; then
-    git checkout $BRANCH
-    echo "the command \"$command\" failed, checkout to the source branch \"$BRANCH\""
-  fi
-  return 1
+    local command=$1
+    for ((i=1; i < 6; i++)); do
+        echo "attempt $i to execute the command \"$command\""
+        $command && return 0
+    done
+    # checkout to current branch
+    if [[ "${BRANCH}" != "master" ]]; then
+        git checkout $BRANCH
+        echo "the command \"$command\" failed, checkout to the source branch \"$BRANCH\""
+    fi
+    return 1
 }
 
 git checkout master
@@ -42,7 +42,7 @@ git checkout master
 repeats "git fetch upstream"
 
 echo "git fetch upstream succeeded"
-git merge upstream/master 
+git merge upstream/master
 echo "git merge upstream/master succeeded"
 
 repeats "git push origin master"
@@ -51,11 +51,11 @@ echo "git push origin master succeeded"
 
 # rebase current branch
 if [[ "${BRANCH}" = "master" ]]; then
-  echo "current branch is master"
+    echo "current branch is master"
 else
-  git checkout $BRANCH
-  echo "git checkout $BRANCH succeeded"
-    
-  git rebase master
-  echo "git rebase master succeeded"
+    git checkout $BRANCH
+    echo "git checkout $BRANCH succeeded"
+
+    git rebase master
+    echo "git rebase master succeeded"
 fi

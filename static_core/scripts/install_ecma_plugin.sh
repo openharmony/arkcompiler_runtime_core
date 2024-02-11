@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,8 +24,8 @@ GITEE_USER=${1:-"openharmony-sig"}
 
 # Check args
 if [[ "$GITEE_USER" == "-h" || "$GITEE_USER" == "--help" ]]; then
-  echo "Usage: $0 [gitee_user (openharmony-sig by default)]"
-  exit 1
+    echo "Usage: $0 [gitee_user (openharmony-sig by default)]"
+    exit 1
 fi
 
 # Get links to repos
@@ -42,15 +42,15 @@ git clone $ETS_RUNTIME_URL ecmascript
 cd ecmascript
 
 if [[ "${GITEE_USER}" != "openharmony-sig" ]]; then
-  git remote add upstream git@gitee.com:openharmony-sig/arkcompiler_ets_runtime.git
-  echo "set upstream for arkcompiler_ets_runtime to git@gitee.com:openharmony-sig/arkcompiler_ets_runtime.git"
+    git remote add upstream git@gitee.com:openharmony-sig/arkcompiler_ets_runtime.git
+    echo "set upstream for arkcompiler_ets_runtime to git@gitee.com:openharmony-sig/arkcompiler_ets_runtime.git"
 fi
 
 echo "Clone: $ETS_FRONTEND_URL"
 git clone $ETS_FRONTEND_URL es2panda
 
 if [[ "${GITEE_USER}" != "openharmony-sig" ]]; then
-  cd es2panda
-  git remote add upstream git@gitee.com:openharmony-sig/arkcompiler_ets_frontend.git
-  echo "set upstream for arkcompiler_ets_frontend to git@gitee.com:openharmony-sigarkcompiler_ets_frontend.git"
+    cd es2panda
+    git remote add upstream git@gitee.com:openharmony-sig/arkcompiler_ets_frontend.git
+    echo "set upstream for arkcompiler_ets_frontend to git@gitee.com:openharmony-sigarkcompiler_ets_frontend.git"
 fi

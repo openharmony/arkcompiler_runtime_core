@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,8 +23,8 @@ GITEE_USER=${2:-"openharmony-sig"}
 
 # Check args
 if [[ -z "$REPO_DIR" || -z "$GITEE_USER" ]]; then
-  echo "Usage: $0 repo_dir [gitee_user (openharmony-sig by default)]"
-  exit 1
+    echo "Usage: $0 repo_dir [gitee_user (openharmony-sig by default)]"
+    exit 1
 fi
 
 mkdir -p $REPO_DIR
@@ -49,8 +49,8 @@ echo 'Script path: ' $SCRIPT_DIR
 # install ecmascript plugin
 cd arkcompiler_runtime_core
 if [[ "${GITEE_USER}" != "openharmony-sig" ]]; then
-  git remote add upstream git@gitee.com:openharmony-sig/arkcompiler_runtime_core.git
-  echo "set upstream for arkcompiler_runtime_core to git@gitee.com:openharmony-sig/arkcompiler_runtime_core.git"
+    git remote add upstream git@gitee.com:openharmony-sig/arkcompiler_runtime_core.git
+    echo "set upstream for arkcompiler_runtime_core to git@gitee.com:openharmony-sig/arkcompiler_runtime_core.git"
 fi
 
 $SCRIPT_DIR/install_ecma_plugin.sh $GITEE_USER

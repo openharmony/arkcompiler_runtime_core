@@ -39,3 +39,6 @@ libdwarf-dev=20210528-*                      # For printing function names and l
 zlib1g-dev=1:1.2.11*
 
 libncurses5                                  # For manually-build LLVM 15 from Ubuntu 18.04
+
+# shell linters
+shellcheck=0.8.0-*

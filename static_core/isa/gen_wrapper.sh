@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,10 +25,12 @@ ISA_REQUIRE=${TOP}/panda/isa/isapi.rb
 # -R: require files
 # -I: use ISA_DATA, ISA_REQUIRE as default
 
-if [ $? != 0  ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+if [ $? != 0  ] ; then
+    echo "Terminating..." >&2
+    exit 1
+fi
 
-while getopts "O:D:R:I" arg
-do
+while getopts "O:D:R:I" arg; do
     case "$arg" in
         O)
             OUTPUT=${OPTARG}
@@ -55,8 +57,7 @@ if [ "${HAS_ISA}" ];then
     REQUIRE=${ISA_REQUIRE},${REQUIRE}
 fi
 
-for TEMPLATE_ARG in "$@"
-do
+for TEMPLATE_ARG in "$@"; do
     TARGET_FILE=$(basename $TEMPLATE_ARG .erb)
     ${CMD} --template ${TEMPLATE_ARG} --data ${DATA} --output ${OUTPUT}/${TARGET_FILE} --require ${REQUIRE}
 done

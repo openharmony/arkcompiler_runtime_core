@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 set -e
 
 if [[ -z $1 ]]; then
-    echo "Usage: linter.sh <panda source>"
-    echo "    <panda source> path where the panda source are located"
+    echo "Usage: linter.sh <sources>"
+    echo "    <sources> path where the top-project sources are located"
     exit 1
 fi
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,8 +15,7 @@
 set -eo pipefail
 
 PAOC_OUTPUT="etsstdlib.an"
-for ARGUMENT in "$@"
-do
+for ARGUMENT in "$@"; do
 case "$ARGUMENT" in
     --binary-dir=*)
     PANDA_BINARY_ROOT="${ARGUMENT#*=}"
@@ -46,5 +45,5 @@ fi
 
 ${PANDA_BINARY_ROOT}/bin/ark_aot --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc \
                     --paoc-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc  \
-                    --compiler-ignore-failures=false $PAOC_MODE --load-runtimes="ets" \
+                    --compiler-ignore-failures=false $PAOC_MODE $PAOC_REGEX --load-runtimes="ets" \
                     $TARGET_ARCH ${OPTIONS}  --paoc-output=${PAOC_OUTPUT}

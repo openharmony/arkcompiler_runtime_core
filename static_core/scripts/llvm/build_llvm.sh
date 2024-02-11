@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -59,11 +59,11 @@ if [[ "x${BUILD_AARCH64_DEBUG}" == "xtrue" || "x${BUILD_AARCH64_RELEASE}" == "xt
 
     if [[ -z "${LLVM_TABLEGEN}" ]]; then
         qemu=$(which update-binfmts &> /dev/null && \
-               (update-binfmts --display || true) | grep -q "qemu-aarch64" && \
-               echo "true" || echo "false")
+                (update-binfmts --display || true) | grep -q "qemu-aarch64" && \
+                echo "true" || echo "false")
 
         if [[ "x${qemu}" == "xfalse" && "x${BUILD_X86_DEBUG}" == "xfalse" && \
-              "x${BUILD_X86_RELEASE}" == "xfalse" ]]; then
+                "x${BUILD_X86_RELEASE}" == "xfalse" ]]; then
             echo "Cannot launch AArch64 builds without host llvm-tblgen."
             echo "Please do something from listed below:"
             echo "1) set LLVM_TABLEGEN variable to installed llvm-tblgen"

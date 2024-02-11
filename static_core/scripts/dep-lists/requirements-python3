@@ -14,3 +14,4 @@
 dataclasses==0.6
 python-dotenv==0.20.0
 matplotlib==3.6.2
+bashate-mod-ds>=0.0.1.dev206

@@ -51,12 +51,10 @@ mkdir -p "$GENPATH"
 filename="$GENPATH/Array.ets"
 cat header.ets.j2 > "$filename"
 
-for atype in "${TYPES[@]}"
-do
+for atype in "${TYPES[@]}"; do
     echo "Generating $atype..."
 
-    for template in "${TEMPLATES[@]}"
-    do
+    for template in "${TEMPLATES[@]}"; do
         jinja2 "-DT=$atype" "$template" >> "$filename"
         echo "" >> "$filename"
     done
