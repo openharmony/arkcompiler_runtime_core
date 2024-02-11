@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-type P = (Promise<String> | null)
 
 function return_value(i: int): String {
     return "value " + i;
 }
 
 function n_cor_launch(n_cor: int): int {
-    let p: P[] = new P[n_cor];
+    let p: NullablePromise<String>[] = new NullablePromise<String>[n_cor];
     for (let i = 0; i < n_cor; ++i) {
         p[i] = launch return_value(i);
     }
@@ -37,10 +36,8 @@ function throw_exception(): Object {
     throw new Error();
 }
 
-type Q = (Promise<Object> | null)
-
 function n_cor_exection_launch(n_cor: int): int { 
-    let p: Q[] = new Q[n_cor];
+    let p: NullablePromise<Object>[] = new NullablePromise<Object>[n_cor];
     for (let i = 0; i < n_cor; ++i) {
         p[i] = launch throw_exception();
     }

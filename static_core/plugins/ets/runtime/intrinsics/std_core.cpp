@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_atomic_flag.h"
 #include "runtime/include/thread_scopes.h"
 
 #include "runtime/include/stack_walker.h"
@@ -125,6 +126,30 @@ extern "C" EtsVoid *StdSystemScheduleCoroutine()
     auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
     cm->Schedule();
     return ets::EtsVoid::GetInstance();
+}
+
+extern "C" EtsVoid *StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
+{
+    constexpr auto POLICIES_MAPPING =
+        std::array {CoroutineSchedulingPolicy::DEFAULT, CoroutineSchedulingPolicy::NON_MAIN_WORKER};
+    ASSERT((policy >= 0) && (static_cast<size_t>(policy) < POLICIES_MAPPING.size()));
+    CoroutineSchedulingPolicy newPolicy = POLICIES_MAPPING[policy];
+
+    auto *cm = static_cast<CoroutineManager *>(Coroutine::GetCurrent()->GetVM()->GetThreadManager());
+    cm->SetSchedulingPolicy(newPolicy);
+
+    return ets::EtsVoid::GetInstance();
+}
+
+extern "C" EtsVoid *StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)
+{
+    instance->SetValue(v);
+    return ets::EtsVoid::GetInstance();
+}
+
+extern "C" EtsBoolean StdSystemAtomicFlagGet(EtsAtomicFlag *instance)
+{
+    return instance->GetValue();
 }
 
 }  // namespace ark::ets::intrinsics

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
+#include "runtime/coroutines/stackful_common.h"
 
 namespace ark {
 
@@ -42,7 +43,7 @@ public:
      * @param type defines the schedule loop type for this worker: a separate thread or a coroutine ("FIBER")
      */
     StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, StackfulCoroutineManager *coroManager, ScheduleLoopType type,
-                            PandaString name);
+                            PandaString name, size_t id);
     ~StackfulCoroutineWorker() = default;
 
     /// @return false if the worker is stopped and does not schedule anything, otherwise true
@@ -74,6 +75,11 @@ public:
     void SetName(PandaString name)
     {
         name_ = std::move(name);
+    }
+
+    size_t GetId() const
+    {
+        return id_;
     }
 
     /**
@@ -174,7 +180,7 @@ private:
     StackfulCoroutineManager *coroManager_;
     Coroutine *scheduleLoopCtx_ = nullptr;
     bool active_ GUARDED_BY(runnablesLock_) = true;
-    os::thread::ThreadId id_;
+    os::thread::ThreadId threadId_;
 
     // runnable coroutines-related members
     mutable os::memory::RecursiveMutex runnablesLock_;
@@ -196,6 +202,7 @@ private:
     uint32_t disableCoroSwitchCounter_ = 0;
 
     PandaString name_;
+    stackful_coroutines::WorkerId id_ = stackful_coroutines::INVALID_WORKER_ID;
 };
 
 }  // namespace ark

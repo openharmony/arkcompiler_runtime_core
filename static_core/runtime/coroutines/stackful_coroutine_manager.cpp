@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,18 +39,23 @@ void StackfulCoroutineManager::FreeCoroutineStack(uint8_t *stack)
     }
 }
 
-void StackfulCoroutineManager::CreateWorkers(uint32_t howMany, Runtime *runtime, PandaVM *vm)
+void StackfulCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
 {
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
 
-    auto *wMain = allocator->New<StackfulCoroutineWorker>(
-        runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::FIBER, "[main] worker 0");
+    auto *wMain =
+        allocator->New<StackfulCoroutineWorker>(runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::FIBER,
+                                                "[main] worker 0", stackful_coroutines::MAIN_WORKER_ID);
     workers_.push_back(wMain);
+    ASSERT(workers_[stackful_coroutines::MAIN_WORKER_ID] == wMain);
+    ASSERT(wMain->GetId() == stackful_coroutines::MAIN_WORKER_ID);
 
     for (uint32_t i = 1; i < howMany; ++i) {
         auto *w = allocator->New<StackfulCoroutineWorker>(
-            runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker " + ToPandaString(i));
+            runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker " + ToPandaString(i), i);
         workers_.push_back(w);
+        ASSERT(workers_[i] == w);
+        ASSERT(w->GetId() == i);
     }
 
     auto *mainCo = CreateMainCoroutine(runtime, vm);
@@ -112,12 +117,14 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     jsMode_ = config.emulateJs;
 
     // create and activate workers
-    uint32_t targetNumberOfWorkers = (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
-                                         ? std::thread::hardware_concurrency()
-                                         : static_cast<uint32_t>(config.workersCount);
+    size_t numberOfAvailableCores = std::max(std::thread::hardware_concurrency() / 4ULL, 2ULL);
+    size_t targetNumberOfWorkers =
+        (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO)
+            ? std::min(numberOfAvailableCores, stackful_coroutines::MAX_WORKERS_COUNT)
+            : std::min(static_cast<size_t>(config.workersCount), stackful_coroutines::MAX_WORKERS_COUNT);
     if (config.workersCount == CoroutineManagerConfig::WORKERS_COUNT_AUTO) {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): AUTO mode selected, will set number of coroutine "
-                                  "workers to number of CPUs = "
+                                  "workers to number of CPUs / 4, but not less than 2 = "
                                << targetNumberOfWorkers;
     }
     os::memory::LockHolder lock(workersLock_);
@@ -240,11 +247,11 @@ size_t StackfulCoroutineManager::GetCoroutineCountLimit()
 }
 
 Coroutine *StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
-                                            PandaVector<Value> &&arguments, CoroutineAffinity affinity)
+                                            PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
 {
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Launch started";
 
-    auto *result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), affinity);
+    auto *result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), mode);
     if (result == nullptr) {
         ThrowOutOfMemoryError("Launch failed");
     }
@@ -351,27 +358,73 @@ Coroutine *StackfulCoroutineManager::TryGetCoroutineFromPool()
     return co;
 }
 
-StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForCoroutine(CoroutineAffinity affinity)
+StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerForCoroutine(Coroutine *co)
 {
-    switch (affinity) {
-        case CoroutineAffinity::SAME_WORKER: {
-            return GetCurrentWorker();
+    ASSERT(co != nullptr);
+    // currently this function does only the initial worker appointment
+    // but eventually it will support coroutine migration too
+
+    auto maskValue = co->GetContext<StackfulCoroutineContext>()->GetAffinityMask();
+    std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> affinityBits(maskValue);
+    LOG(DEBUG, COROUTINES) << "Choosing worker for coro " << co->GetName() << " with affinity mask = " << affinityBits;
+
+    // choosing the least loaded worker from the allowed worker set
+    auto preferFirstOverSecond = [&affinityBits](const StackfulCoroutineWorker *first,
+                                                 const StackfulCoroutineWorker *second) {
+        if (!affinityBits.test(first->GetId())) {
+            return false;
         }
-        case CoroutineAffinity::NONE:
-        default: {
-            // choosing the least loaded worker
-            os::memory::LockHolder lkWorkers(workersLock_);
-            auto w = std::min_element(workers_.begin(), workers_.end(),
-                                      [](const StackfulCoroutineWorker *a, const StackfulCoroutineWorker *b) {
-                                          return a->GetLoadFactor() < b->GetLoadFactor();
-                                      });
-            return *w;
+        if (!affinityBits.test(second->GetId())) {
+            return true;
         }
+        return first->GetLoadFactor() < second->GetLoadFactor();
+    };
+
+    os::memory::LockHolder lkWorkers(workersLock_);
+#ifndef NDEBUG
+    LOG(DEBUG, COROUTINES) << "Evaluating load factors:";
+    for (auto w : workers_) {
+        LOG(DEBUG, COROUTINES) << w->GetName() << ": LF = " << w->GetLoadFactor();
     }
+#endif
+    auto wIt = std::min_element(workers_.begin(), workers_.end(), preferFirstOverSecond);
+    LOG(DEBUG, COROUTINES) << "Chose worker: " << (*wIt)->GetName();
+    return *wIt;
+}
+
+stackful_coroutines::AffinityMask StackfulCoroutineManager::CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode)
+{
+    /**
+     * launch mode \ policy      DEFAULT                         NON_MAIN
+     *   DEFAULT                ->least busy, allow migration   ->least busy, allow migration, disallow <main>
+     *   SAME_WORKER            ->same, forbid migration        ->same, forbid migration
+     *   EXCLUSIVE              ->least busy, forbid migration  ->least busy, forbid migration, disallow <main>
+     */
+
+    if (mode == CoroutineLaunchMode::SAME_WORKER) {
+        std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> mask(stackful_coroutines::AFFINITY_MASK_NONE);
+        mask.set(GetCurrentWorker()->GetId());
+        return mask.to_ullong();
+    }
+
+    // CoroutineLaunchMode::EXCLUSIVE is not supported yet (but will be)
+    ASSERT(mode == CoroutineLaunchMode::DEFAULT);
+
+    std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> mask(stackful_coroutines::AFFINITY_MASK_FULL);
+    switch (GetSchedulingPolicy()) {
+        case CoroutineSchedulingPolicy::NON_MAIN_WORKER: {
+            mask.reset(stackful_coroutines::MAIN_WORKER_ID);
+            break;
+        }
+        default:
+        case CoroutineSchedulingPolicy::DEFAULT:
+            break;
+    }
+    return mask.to_ullong();
 }
 
 Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint,
-                                                PandaVector<Value> &&arguments, CoroutineAffinity affinity)
+                                                PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
 {
 #ifndef NDEBUG
     GetCurrentWorker()->PrintRunnables("LaunchImpl begin");
@@ -393,7 +446,9 @@ Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent
     }
     Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(co);
 
-    auto *w = ChooseWorkerForCoroutine(affinity);
+    auto affinityMask = CalcAffinityMaskFromLaunchMode(mode);
+    co->GetContext<StackfulCoroutineContext>()->SetAffinityMask(affinityMask);
+    auto *w = ChooseWorkerForCoroutine(co);
     w->AddRunnableCoroutine(co, IsJsMode());
 
 #ifndef NDEBUG

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "runtime/fibers/fiber_context.h"
 #include "runtime/coroutines/coroutine_context.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
 
 namespace ark {
@@ -107,6 +108,17 @@ public:
         return worker_;
     }
 
+    /// @return current coroutine's affinity bits
+    stackful_coroutines::AffinityMask GetAffinityMask() const
+    {
+        return affinityMask_;
+    }
+
+    void SetAffinityMask(stackful_coroutines::AffinityMask mask)
+    {
+        affinityMask_ = mask;
+    }
+
 protected:
     void SetStatus(Coroutine::Status newStatus) override;
 
@@ -166,6 +178,7 @@ private:
     fibers::FiberContext context_;
     Coroutine::Status status_ {Coroutine::Status::CREATED};
     StackfulCoroutineWorker *worker_ = nullptr;
+    stackful_coroutines::AffinityMask affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
 };
 
 }  // namespace ark

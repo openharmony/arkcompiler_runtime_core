@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,15 +33,25 @@ struct CoroutineManagerConfig {
     uint32_t workersCount = WORKERS_COUNT_AUTO;
 };
 
-/**
- * @brief defines the scheduling policy for a coroutine. Maybe in future we would like to add more types (MAIN_WORKER,
- * EXACT_WORKER, etc.)
- */
-enum class CoroutineAffinity {
-    /// no affinity
-    NONE,
+/// @brief defines the requested launch mode for a coroutine
+enum class CoroutineLaunchMode {
+    /// no specific requests
+    DEFAULT,
     /// schedule to the parent's worker only
     SAME_WORKER,
+    /// schedule exclusively, moving other coros off the target worker
+    EXCLUSIVE
+};
+
+/// @brief defines the scheduling policy for a coroutine. Maybe in future we would like to add more types.
+enum class CoroutineSchedulingPolicy {
+    /// choose the least busy worker
+    DEFAULT,
+    /**
+     * same as default but exclude the main worker from available hosts on launch and
+     * disallow non_main -> main transitions on migration
+     */
+    NON_MAIN_WORKER
 };
 
 /**
@@ -105,13 +115,13 @@ public:
     /**
      * @brief The public coroutine creation interface.
      *
-     * @param completion_event the event used for notification when coroutine completes (also used to pass the return
+     * @param completionEvent the event used for notification when coroutine completes (also used to pass the return
      * value to the language-level entities)
      * @param entrypoint the coroutine entrypoint method
      * @param arguments array of coroutine's entrypoint arguments
      */
     virtual Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                              CoroutineAffinity affinity) = 0;
+                              CoroutineLaunchMode mode) = 0;
     /// Suspend the current coroutine and schedule the next ready one for execution
     virtual void Schedule() = 0;
     /**
@@ -154,6 +164,9 @@ public:
     virtual uint32_t AllocateCoroutineId();
     /// mark the specified @param id as free
     virtual void FreeCoroutineId(uint32_t id);
+
+    void SetSchedulingPolicy(CoroutineSchedulingPolicy policy);
+    CoroutineSchedulingPolicy GetSchedulingPolicy() const;
 
     /* debugging tools */
     /**
@@ -199,6 +212,8 @@ protected:
 
 private:
     CoroutineFactory coFactory_ = nullptr;
+
+    CoroutineSchedulingPolicy schedulingPolicy_ = CoroutineSchedulingPolicy::DEFAULT;
 
     // coroutine id management
     os::memory::Mutex idsLock_;

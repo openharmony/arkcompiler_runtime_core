@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@ package std.core;
 /**
  * Class represents a result of an asynchronous operation in the future.
  */
-export final class Promise<T> {
+export final class Promise<out T> {
     private constructor() {
     }
 
@@ -367,3 +367,5 @@ class PromiseConcurrency {
     private resolve: (value: Object) => void;
     private reject: (error: Object|null) => void;
 }
+
+export type NullablePromise<out T> = Promise<T> | null;

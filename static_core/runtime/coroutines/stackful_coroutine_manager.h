@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #define PANDA_RUNTIME_COROUTINES_STACKFUL_COROUTINE_MANAGER_H
 
 #include "runtime/coroutines/coroutine_manager.h"
+#include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
 
@@ -42,7 +43,7 @@ public:
     void RegisterCoroutine(Coroutine *co) override;
     bool TerminateCoroutine(Coroutine *co) override;
     Coroutine *Launch(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                      CoroutineAffinity affinity) override;
+                      CoroutineLaunchMode mode) override;
     void Schedule() override;
     void Await(CoroutineEvent *awaitee) RELEASE(awaitee) override;
     void UnblockWaiters(CoroutineEvent *blocker) override;
@@ -102,10 +103,11 @@ protected:
 
 private:
     StackfulCoroutineContext *CreateCoroutineContextImpl(bool needStack);
-    StackfulCoroutineWorker *ChooseWorkerForCoroutine(CoroutineAffinity affinity);
+    StackfulCoroutineWorker *ChooseWorkerForCoroutine(Coroutine *co);
+    stackful_coroutines::AffinityMask CalcAffinityMaskFromLaunchMode(CoroutineLaunchMode mode);
 
     Coroutine *LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
-                          CoroutineAffinity affinity);
+                          CoroutineLaunchMode mode);
     /**
      * Tries to extract a coroutine instance from the pool for further reuse, returns nullptr in case when it is not
      * possible.
@@ -117,7 +119,7 @@ private:
      * @brief create the arbitrary number of worker threads
      * @param how_many total number of worker threads, including MAIN
      */
-    void CreateWorkers(uint32_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
+    void CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm) REQUIRES(workersLock_);
 
     /* coroutine registry management */
     void AddToRegistry(Coroutine *co);

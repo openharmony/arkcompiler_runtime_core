@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,26 @@
  * limitations under the License.
  */
 
-let counter = 0;
+package std.debug;
 
-function add(a: int): String {
-    counter += a;
-    return "Some dummy string"
-}
+export final class Logger {
+    private static LOG_ENABLED: boolean = false;
 
-export function main(): int {
-    launch add(5);
-    Coroutine.Schedule();
-    if (counter != 5) {
-        console.println("Invalid counter: expected 5 but was " + counter);
-        return 1;
+    public static enableLogging(): void {
+        Logger.LOG_ENABLED = true;
     }
-    return 0;
+
+    public static disableLogging(): void {
+        Logger.LOG_ENABLED = false;
+    }
+
+    public static log(m: String): void {
+        if (Logger.LOG_ENABLED) {
+            console.println(m);
+        }
+    }
+
+    public static logError(m: String): void {
+        console.println("ERROR: " + m);
+    }
 }

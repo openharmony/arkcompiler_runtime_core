@@ -42,6 +42,9 @@ coretypes:
 - managed_class: escompat.SharedMemory
   mirror_class: ark::ets::EtsSharedMemory
 
+- managed_class: std.debug.concurrency.AtomicFlag
+  mirror_class: ark::ets::EtsAtomicFlag
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -1971,14 +1974,43 @@ intrinsics:
 
   - name: StdCoroutineGetWorkerId
     space: ets
-    class_name: std.core.CoroutineExtras
-    method_name: GetWorkerId
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getWorkerId
     static: true
     signature:
       ret: i32
       args: []
     impl: ark::intrinsics::SystemCoroutineGetWorkerId
 
+  - name: StdCoroutineSetSchedulingPolicy
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setSchedulingPolicy
+    static: true
+    signature:
+      ret: std.core.void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetCoroutineSchedulingPolicy
+
+  - name: StdAtomicFlagSet
+    space: ets
+    class_name: std.debug.concurrency.AtomicFlag
+    method_name: set
+    static: false
+    signature:
+      ret: std.core.void
+      args: [u1]
+    impl: ark::ets::intrinsics::StdSystemAtomicFlagSet
+
+  - name: StdAtomicFlagGet
+    space: ets
+    class_name: std.debug.concurrency.AtomicFlag
+    method_name: get
+    static: false
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::StdSystemAtomicFlagGet
 ####################
 # std.core.Runtime #
 ####################
