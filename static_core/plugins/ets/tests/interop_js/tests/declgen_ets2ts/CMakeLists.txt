@@ -54,7 +54,7 @@ add_custom_command(
     COMMAND $<TARGET_FILE:ark_link> --output ${LIB_LINKED_ABC} -- ${LIB_1_ABC} ${LIB_2_ABC}
     COMMAND cp ${MAIN_TS_INPUT} ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${PANDA_THIRD_PARTY_SOURCES_DIR}/typescript/bin/tsc --strict --outDir ${CMAKE_CURRENT_BINARY_DIR} ${MAIN_TS}
-    DEPENDS es2panda ark_link ${LIB_1_ETS_INPUT} ${LIB_2_ETS_INPUT} ${MAIN_TS_INPUT} ${ARKTSCONFIG}
+    DEPENDS es2panda ark_link compile_typescript ${LIB_1_ETS_INPUT} ${LIB_2_ETS_INPUT} ${MAIN_TS_INPUT} ${ARKTSCONFIG}
 )
 add_custom_target(compile_declgen_ets2ts_project
     DEPENDS ${MAIN_TS} ${MAIN_JS} ${LIB_1_ABC} ${LIB_2_ABC} ${LIB_LINKED_ABC} ${LIB_1_DECL_TS} ${LIB_2_DECL_TS}

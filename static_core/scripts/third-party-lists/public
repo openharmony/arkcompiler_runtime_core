@@ -48,4 +48,4 @@ websocketpp,https://github.com/zaphoyd/websocketpp,tag,0.8.2,no_patches,no_submo
 
 # ARK plugins:
 icu,https://gitee.com/openharmony/third_party_icu,branch,OpenHarmony-3.2-Beta3,no_patches,no_submodules
-typescript,https://gitee.com/openharmony/third_party_typescript,branch,OpenHarmony-4.0-Beta1,no_patches,no_submodules
+typescript,https://gitee.com/openharmony/third_party_typescript,branch,OpenHarmony-4.1-Release,no_patches,no_submodules
