@@ -169,7 +169,7 @@ export class BaseGeneric<T, U> {
     constructor(c: T, d: U) {}
 }
 
-// NOTE(ivagin): enable when supported by interop
+// NOTE(ivagin): enable when supported by tsc compiler & runtime
 // export class DerivedGeneric<T, U, V> extends BaseGeneric<T, U> implements IGeneric0<U>, IGeneric1<IGeneric0<V>> {
 //    I0Method(a: U): U { return a; };
 //    I1Method(a: IGeneric0<V>): IGeneric0<V> { return a; };
