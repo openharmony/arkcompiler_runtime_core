@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,20 +43,27 @@ public:
 
         interopJsTestPath_ = std::getenv("ARK_ETS_INTEROP_JS_GTEST_SOURCES");
         // This object is used to save global js names
-        if (!RunJsScript("var gtest_env = {};\n")) {
+        if (!SetGtestEnv()) {
             std::abort();
         }
+    }
+
+    bool SetGtestEnv()
+    {
+        napi_value jsGlobalObject = GetGlobalObject(jsEnv_);
+
+        napi_value jsObject;
+        [[maybe_unused]] napi_status status = napi_create_object(jsEnv_, &jsObject);
+        ASSERT(status == napi_ok);
+
+        status = napi_set_named_property(jsEnv_, jsGlobalObject, "gtest_env", jsObject);
+
+        return status == napi_ok;
     }
 
     [[nodiscard]] static bool RunJsScript(const std::string &script)
     {
         return DoRunJsScript(jsEnv_, script);
-    }
-
-    template <typename R>
-    [[nodiscard]] std::optional<R> RunJsScriptByPath(const std::string &path)
-    {
-        return DoRunJsScriptByPath<R>(jsEnv_, path);
     }
 
     [[nodiscard]] bool RunJsTestSuite(const std::string &path)
@@ -77,8 +84,7 @@ public:
 
     void LoadModuleAs(const std::string &moduleName, const std::string &modulePath)
     {
-        auto res =
-            RunJsScript("gtest_env." + moduleName + " = require(\"" + interopJsTestPath_ + "/" + modulePath + "\");\n");
+        auto res = LoadModule(moduleName, modulePath);
         if (!res) {
             std::cerr << "Failed to load module: " << modulePath << std::endl;
             std::abort();
@@ -86,6 +92,35 @@ public:
     }
 
 private:
+    bool LoadModule(const std::string &moduleName, const std::string &modulePath)
+    {
+        [[maybe_unused]] napi_status status;
+
+        napi_value jsUndefined;
+        status = napi_get_undefined(jsEnv_, &jsUndefined);
+        ASSERT(status == napi_ok);
+
+        napi_value jsGlobalObject = GetGlobalObject(jsEnv_);
+
+        napi_value jsRequire;
+        status = napi_get_named_property(jsEnv_, jsGlobalObject, "require", &jsRequire);
+        ASSERT(status == napi_ok);
+
+        napi_value jsPath;
+        auto pathToModule = interopJsTestPath_ + "/" + modulePath;
+        status = napi_create_string_utf8(jsEnv_, pathToModule.data(), pathToModule.length(), &jsPath);
+
+        napi_value jsGtestEnvObject = GetJsGtestEnvObject(jsEnv_);
+
+        napi_value jsModule;
+        status = napi_call_function(jsEnv_, jsUndefined, jsRequire, 1, &jsPath, &jsModule);
+        ASSERT(status == napi_ok);
+
+        status = napi_set_named_property(jsEnv_, jsGtestEnvObject, moduleName.c_str(), jsModule);
+
+        return status == napi_ok;
+    }
+
     [[nodiscard]] bool DoRunJsTestSuite(napi_env env, const std::string &path)
     {
         std::string fullPath = interopJsTestPath_ + "/" + path;
@@ -130,24 +165,6 @@ private:
         std::ostringstream stringStream;
         stringStream << jsSourceFile.rdbuf();
         return stringStream.str();
-    }
-
-    template <typename T>
-    [[nodiscard]] std::optional<T> DoRunJsScriptByPath(napi_env env, const std::string &path)
-    {
-        std::string fullPath = interopJsTestPath_ + "/" + path;
-
-        if (!DoRunJsScript(env, ReadFile(fullPath))) {
-            return std::nullopt;
-        }
-
-        [[maybe_unused]] napi_status status;
-        napi_value jsRetValue {};
-        status = napi_get_named_property(env, GetJsGtestObject(env), "ret", &jsRetValue);
-        ASSERT(status == napi_ok);
-
-        // Get globalThis.gtest.ret
-        return GetRetValue<T>(env, jsRetValue);
     }
 
     static std::string GetString(napi_env env, napi_value jsStr)
@@ -248,6 +265,18 @@ private:
         return arg;
     }
 
+    static napi_value GetGlobalObject(napi_env env)
+    {
+        [[maybe_unused]] napi_status status;
+
+        // Get globalThis
+        napi_value jsGlobalObject;
+        status = napi_get_global(env, &jsGlobalObject);
+        ASSERT(status == napi_ok);
+
+        return jsGlobalObject;
+    }
+
     static napi_value GetJsGtestObject(napi_env env)
     {
         [[maybe_unused]] napi_status status;
@@ -263,6 +292,53 @@ private:
         ASSERT(status == napi_ok);
 
         return jsGtestObject;
+    }
+
+    static napi_value GetJsGtestEnvObject(napi_env env)
+    {
+        [[maybe_unused]] napi_status status;
+
+        napi_value jsGlobalObject = GetGlobalObject(jsEnv_);
+
+        // Get globalThis.gtest_env
+        napi_value jsObject;
+        status = napi_get_named_property(env, jsGlobalObject, "gtest_env", &jsObject);
+        ASSERT(status == napi_ok);
+
+        return jsObject;
+    }
+
+    [[nodiscard]] static bool CallEtsMethodViaJs(napi_env env, napi_value jsFunctionName,
+                                                 const std::initializer_list<napi_value> &napiArgs)
+    {
+        napi_value jsGtestObject = GetJsGtestObject(env);
+
+        napi_value jsUndefined;
+        [[maybe_unused]] napi_status status = napi_get_undefined(env, &jsUndefined);
+        ASSERT(status == napi_ok);
+
+        napi_value jsEtsVm;
+        status = napi_get_named_property(env, jsGtestObject, "etsVm", &jsEtsVm);
+        ASSERT(status == napi_ok);
+
+        napi_value jsEtsVmCall;
+        status = napi_get_named_property(env, jsEtsVm, "call", &jsEtsVmCall);
+        ASSERT(status == napi_ok);
+
+        auto argc = napiArgs.size() + 1;
+        std::vector<napi_value> argv;
+        argv.reserve(argc);
+        argv.push_back(jsFunctionName);
+        argv.insert(argv.end(), napiArgs.begin(), napiArgs.end());
+
+        napi_value jsResult;
+        status = napi_call_function(env, jsUndefined, jsEtsVmCall, argc, argv.data(), &jsResult);
+        if (status != napi_ok) {
+            return false;
+        }
+
+        status = napi_set_named_property(env, jsGtestObject, "ret", jsResult);
+        return status == napi_ok;
     }
 
     template <typename R, typename... Args>
@@ -293,10 +369,7 @@ private:
         status = napi_set_named_property(env, jsGtestObject, "args", jsArgs);
         ASSERT(status == napi_ok);
 
-        // Call ETS method via JS
-        auto res = RunJsScript(R"(
-            gtest.ret = gtest.etsVm.call(gtest.functionName, ...gtest.args);
-        )");
+        auto res = CallEtsMethodViaJs(env, jsFunctionName, napiArgs);
         if (!res) {
             return std::nullopt;
         }

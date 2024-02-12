@@ -40,6 +40,7 @@ file(WRITE ${ETS_CONFIG}
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_enum/dynamic_enum.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/perf/code.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_object/dynamic_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/bouncing_pandas/bouncing_pandas.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"convert.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
     "    }\n"
     "  }\n"
@@ -76,7 +77,9 @@ panda_ets_interop_js_gtest(ets_interop_js_test__map_mirror_classes
 
 panda_ets_interop_js_gtest(ets_interop_js_test_bouncing_pandas
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/bouncing_pandas/bouncing_pandas.cpp
-    ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/common/bouncing_pandas/bouncing_pandas.ets
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/bouncing_pandas/bouncing_pandas_test.ets
+                ${PANDA_ETS_PLUGIN_SOURCE}/tests/common/bouncing_pandas/bouncing_pandas.ets
+    ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test_intrins
